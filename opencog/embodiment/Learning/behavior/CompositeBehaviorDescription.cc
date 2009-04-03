@@ -31,24 +31,29 @@
 
 using namespace behavior;
 
-CompositeBehaviorDescription::~CompositeBehaviorDescription() {
+CompositeBehaviorDescription::~CompositeBehaviorDescription()
+{
 }
 
-CompositeBehaviorDescription::CompositeBehaviorDescription() {
+CompositeBehaviorDescription::CompositeBehaviorDescription()
+{
     timelineRepresentationIsValid = false;
     hashCodeComputed = false;
     hashCodeWarning = false;
 }
 
-bool CompositeBehaviorDescription::empty() const {
-  return entries.empty();
+bool CompositeBehaviorDescription::empty() const
+{
+    return entries.empty();
 }
 
-unsigned int CompositeBehaviorDescription::size() const {
-  return entries.size();
+unsigned int CompositeBehaviorDescription::size() const
+{
+    return entries.size();
 }
 
-void CompositeBehaviorDescription::clear() {
+void CompositeBehaviorDescription::clear()
+{
 
     if (entries.size() == 0) {
         return;
@@ -63,7 +68,8 @@ void CompositeBehaviorDescription::clear() {
     hashCodeWarning = false;
 }
 
-void CompositeBehaviorDescription::addPredicate(const ElementaryBehaviorDescription& ebd) {
+void CompositeBehaviorDescription::addPredicate(const ElementaryBehaviorDescription& ebd)
+{
     entries.push_back(ebd);
     timelineRepresentationIsValid = false;
     if (hashCodeComputed) {
@@ -71,7 +77,8 @@ void CompositeBehaviorDescription::addPredicate(const ElementaryBehaviorDescript
     }
 }
 
-void CompositeBehaviorDescription::addPredicate(Handle handle, const Temporal &interval) {
+void CompositeBehaviorDescription::addPredicate(Handle handle, const Temporal &interval)
+{
     ElementaryBehaviorDescription newEntry(handle, interval);
     entries.push_back(newEntry);
     timelineRepresentationIsValid = false;
@@ -81,15 +88,17 @@ void CompositeBehaviorDescription::addPredicate(Handle handle, const Temporal &i
 }
 
 void CompositeBehaviorDescription::addPredicate(Handle handle,
-                                       unsigned long start_time,
-                                       unsigned long end_time) {
+        unsigned long start_time,
+        unsigned long end_time)
+{
 
     addPredicate(handle, Temporal(start_time, end_time));
 }
 
 
 
-const std::vector<PredicateHandleSet> &CompositeBehaviorDescription::getTimelineSets() const {
+const std::vector<PredicateHandleSet> &CompositeBehaviorDescription::getTimelineSets() const
+{
 
     if (! timelineRepresentationIsValid) {
         buildTimelineRepresentation();
@@ -98,20 +107,22 @@ const std::vector<PredicateHandleSet> &CompositeBehaviorDescription::getTimeline
     return timelineSets;
 }
 
-unsigned long CompositeBehaviorDescription::getIndexStartTime(unsigned index) const {
-  if (! timelineRepresentationIsValid) {
-    buildTimelineRepresentation();
-  }
-  unsigned long t = getStartTime();
-  unsigned i = 0;
-  for(std::vector<long>::const_iterator tli = timelineIntervals.begin();
-      tli != timelineIntervals.end() && i < index; ++tli, i++) {
-    t += (unsigned long) *tli;
-  }
-  return t;
+unsigned long CompositeBehaviorDescription::getIndexStartTime(unsigned index) const
+{
+    if (! timelineRepresentationIsValid) {
+        buildTimelineRepresentation();
+    }
+    unsigned long t = getStartTime();
+    unsigned i = 0;
+    for (std::vector<long>::const_iterator tli = timelineIntervals.begin();
+            tli != timelineIntervals.end() && i < index; ++tli, i++) {
+        t += (unsigned long) * tli;
+    }
+    return t;
 }
 
-const std::vector<long> &CompositeBehaviorDescription::getTimelineIntervals() const {
+const std::vector<long> &CompositeBehaviorDescription::getTimelineIntervals() const
+{
 
     if (! timelineRepresentationIsValid) {
         buildTimelineRepresentation();
@@ -120,56 +131,61 @@ const std::vector<long> &CompositeBehaviorDescription::getTimelineIntervals() co
     return timelineIntervals;
 }
 
-unsigned long CompositeBehaviorDescription::getStartTime() const {
-  if(entries.empty())
-    return 0;
-  else {
-    unsigned long minT;
-    std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
-    minT = ei->temporal.getLowerBound();
-    ++ei;
-    for(; ei != entries.end(); ++ei)
-      minT = std::min(minT,  ei->temporal.getLowerBound());
-    return minT;
-  }
-}
-
-unsigned long CompositeBehaviorDescription::getEndTime() const {
-  if(entries.empty())
-    return 0;
-  else {
-    unsigned long maxT;
-    std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
-    maxT = ei->temporal.getUpperBound();
-    ++ei;
-    for(; ei != entries.end(); ++ei)
-      maxT = std::max(maxT,  ei->temporal.getUpperBound());
-    return maxT;
-  }
-}
-
-Temporal CompositeBehaviorDescription::getTimeInterval() const {
-  if(entries.empty())
-    return Temporal(0,0);
-  else {
-    unsigned long minT, maxT;
-    std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
-    minT = ei->temporal.getLowerBound();
-    maxT = ei->temporal.getUpperBound();
-    ++ei;
-    for(; ei != entries.end(); ++ei) {
-      minT = std::min(minT,  ei->temporal.getLowerBound());
-      maxT = std::max(maxT,  ei->temporal.getUpperBound());
+unsigned long CompositeBehaviorDescription::getStartTime() const
+{
+    if (entries.empty())
+        return 0;
+    else {
+        unsigned long minT;
+        std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
+        minT = ei->temporal.getLowerBound();
+        ++ei;
+        for (; ei != entries.end(); ++ei)
+            minT = std::min(minT,  ei->temporal.getLowerBound());
+        return minT;
     }
-    return Temporal(minT, maxT);
-  }
 }
 
-const std::vector<ElementaryBehaviorDescription> &CompositeBehaviorDescription::getEntries() const {
+unsigned long CompositeBehaviorDescription::getEndTime() const
+{
+    if (entries.empty())
+        return 0;
+    else {
+        unsigned long maxT;
+        std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
+        maxT = ei->temporal.getUpperBound();
+        ++ei;
+        for (; ei != entries.end(); ++ei)
+            maxT = std::max(maxT,  ei->temporal.getUpperBound());
+        return maxT;
+    }
+}
+
+Temporal CompositeBehaviorDescription::getTimeInterval() const
+{
+    if (entries.empty())
+        return Temporal(0, 0);
+    else {
+        unsigned long minT, maxT;
+        std::vector<ElementaryBehaviorDescription>::iterator ei = entries.begin();
+        minT = ei->temporal.getLowerBound();
+        maxT = ei->temporal.getUpperBound();
+        ++ei;
+        for (; ei != entries.end(); ++ei) {
+            minT = std::min(minT,  ei->temporal.getLowerBound());
+            maxT = std::max(maxT,  ei->temporal.getUpperBound());
+        }
+        return Temporal(minT, maxT);
+    }
+}
+
+const std::vector<ElementaryBehaviorDescription> &CompositeBehaviorDescription::getEntries() const
+{
     return entries;
 }
 
-int CompositeBehaviorDescription::hashCode() {
+int CompositeBehaviorDescription::hashCode()
+{
 
     if (hashCodeWarning) {
         fprintf(stderr, "Warning: contents of CompositeBehaviorDescription has changed between two calls of hashCode(). previous hashCode may be misuses by hashtables.\n");
@@ -191,11 +207,13 @@ int CompositeBehaviorDescription::hashCode() {
 
 // Static to avoid linking conflicts with possible homonimous functions from
 // anywhere else
-static bool pairComparator(ElementaryBehaviorDescription a, ElementaryBehaviorDescription b) {
-   return a.temporal.getLowerBound() < b.temporal.getLowerBound();
+static bool pairComparator(ElementaryBehaviorDescription a, ElementaryBehaviorDescription b)
+{
+    return a.temporal.getLowerBound() < b.temporal.getLowerBound();
 }
 
-std::vector<unsigned long> *CompositeBehaviorDescription::buildSeparatorsVector(const std::vector<ElementaryBehaviorDescription> &entries) {
+std::vector<unsigned long> *CompositeBehaviorDescription::buildSeparatorsVector(const std::vector<ElementaryBehaviorDescription> &entries)
+{
 
     std::vector<unsigned long> v(2 * entries.size());
     for (unsigned int i = 0; i < entries.size(); i++) {
@@ -221,11 +239,13 @@ std::vector<unsigned long> *CompositeBehaviorDescription::buildSeparatorsVector(
     return answer;
 }
 
-void CompositeBehaviorDescription::buildTimelineRepresentation() const {
+void CompositeBehaviorDescription::buildTimelineRepresentation() const
+{
     buildTimelineRepresentation(timelineSets, timelineIntervals, entries);
 }
 
-void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<PredicateHandleSet> &timelineSets, std::vector<long> &timelineIntervals, std::vector<ElementaryBehaviorDescription> &entries) const {
+void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<PredicateHandleSet> &timelineSets, std::vector<long> &timelineIntervals, std::vector<ElementaryBehaviorDescription> &entries) const
+{
 
     if (entries.size() == 0) {
         timelineRepresentationIsValid = true;
@@ -256,8 +276,8 @@ void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<Predi
             unsigned long upper = entries[j].temporal.getUpperBound();
             Handle handle = entries[j].handle;
             if (((upper > intervalStart) && (lower < intervalEnd)) ||
-                ((upper == lower) && (upper == intervalStart)) ||
-                ((upper == lower) && (upper == intervalEnd))) {
+                    ((upper == lower) && (upper == intervalStart)) ||
+                    ((upper == lower) && (upper == intervalEnd))) {
                 currentSet.insert(handle);
             }
         }
@@ -270,7 +290,8 @@ void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<Predi
     timelineRepresentationIsValid = true;
 }
 
-std::string CompositeBehaviorDescription::toString() const {
+std::string CompositeBehaviorDescription::toString() const
+{
     //this is actually not fundamently required but forces to print
     //the CBD in chronological order
     if (! timelineRepresentationIsValid) {
@@ -298,7 +319,8 @@ std::string CompositeBehaviorDescription::toString() const {
 
 
 
-bool CompositeBehaviorDescription::equals(const CompositeBehaviorDescription &other) const {
+bool CompositeBehaviorDescription::equals(const CompositeBehaviorDescription &other) const
+{
     if (entries.size() != other.entries.size()) {
         return false;
     }
@@ -318,7 +340,8 @@ bool CompositeBehaviorDescription::equals(const CompositeBehaviorDescription &ot
     return true;
 }
 
-std::string CompositeBehaviorDescription::toStringHandles() {
+std::string CompositeBehaviorDescription::toStringHandles()
+{
 
     std::string answer = "{";
     for (unsigned int i = 0; i < entries.size(); i++) {
@@ -337,7 +360,8 @@ std::string CompositeBehaviorDescription::toStringHandles() {
     return answer;
 }
 
-std::string CompositeBehaviorDescription::toStringTimeline() {
+std::string CompositeBehaviorDescription::toStringTimeline()
+{
     if (! timelineRepresentationIsValid) {
         buildTimelineRepresentation();
     }
@@ -345,7 +369,8 @@ std::string CompositeBehaviorDescription::toStringTimeline() {
     return toStringTimeline(timelineSets, timelineIntervals);
 }
 
-std::string CompositeBehaviorDescription::toStringTimeline(std::vector<PredicateHandleSet> &timelineSets, std::vector<long> &timelineIntervals) {
+std::string CompositeBehaviorDescription::toStringTimeline(std::vector<PredicateHandleSet> &timelineSets, std::vector<long> &timelineIntervals)
+{
 
     //TODO: contigous equals sets should be merged
     std::string answer = "{";
@@ -354,8 +379,8 @@ std::string CompositeBehaviorDescription::toStringTimeline(std::vector<Predicate
         answer.append("{");
         std::vector<std::string> names;
         for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); it++) {
- 	    //the assert below is here to insure that the atom is a node
-	    opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(*it)));
+            //the assert below is here to insure that the atom is a node
+            opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(*it)));
             names.push_back(((Node *) TLB::getAtom(*it))->getName());
         }
         std::sort(names.begin(), names.end());

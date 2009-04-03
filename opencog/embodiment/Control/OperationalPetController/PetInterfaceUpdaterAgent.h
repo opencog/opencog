@@ -26,37 +26,41 @@
 #include <opencog/server/Agent.h>
 #include <string>
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-class OPC; 
+class OPC;
 
-class PetInterfaceUpdaterAgent : public opencog::Agent {
+class PetInterfaceUpdaterAgent : public opencog::Agent
+{
 
-    private:
+private:
 
-        int interfacePortNumber;
-        void sendLine(const std::string &line);
+    int interfacePortNumber;
+    void sendLine(const std::string &line);
 
-    public:
+public:
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~PetInterfaceUpdaterAgent();
-        PetInterfaceUpdaterAgent();
+    ~PetInterfaceUpdaterAgent();
+    PetInterfaceUpdaterAgent();
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("OperationalPetController::PetInterfaceUpdaterAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::PetInterfaceUpdaterAgent");
+        return _ci;
+    }
 
-        void run(opencog::CogServer *server);
-        void updateLocalMap(OPC *opc);
-        void updateFeelings(OPC *opc);
-        void updateLastSelectedAction(OPC *opc);
+    void run(opencog::CogServer *server);
+    void updateLocalMap(OPC *opc);
+    void updateFeelings(OPC *opc);
+    void updateLastSelectedAction(OPC *opc);
 
-        static void startGUI();
+    static void startGUI();
 
 }; // class
 }  // namespace

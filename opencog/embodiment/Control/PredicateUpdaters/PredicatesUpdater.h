@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** 
+/**
  * Update all is_X predicates once a XML message has been processed by the
  * PAI component.
  */
@@ -31,44 +31,46 @@
 #include "PetInterface.h"
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <vector>  
+#include <vector>
 
 using namespace opencog;
 
-namespace OperationalPetController{
+namespace OperationalPetController
+{
 
-  class PredicatesUpdater {
-	
-  private:
-		
+class PredicatesUpdater
+{
+
+private:
+
     /**
      * holds all predicate updaters to be called when the update action
      * takes place
-     */		
+     */
     std::vector<BasicPredicateUpdater *> updaters;
     BasicPredicateUpdater* petPsychePredicatesUpdater;
-		
+
     AtomSpace &atomSpace;
     std::string petId;
 
-  public:
-		
+public:
+
     PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId);
 
     ~PredicatesUpdater();
-		
+
     /**
      * Update the predicates based on the objects that were
-     * created or changed via a PVPMessage processed by the 
+     * created or changed via a PVPMessage processed by the
      * PAI component.
-     * 
+     *
      * @param objects A std::vector containing the handles of
-     * 		  all SL_OBJECT_NODES that were updated 
+     *     all SL_OBJECT_NODES that were updated
      * @param timestamp The current timestamp in the virtual world.
      */
-    void update(std::vector<Handle> objects, unsigned long timestamp); 
-	
-  };// class	
+    void update(std::vector<Handle> objects, unsigned long timestamp);
+
+};// class
 } // namespace
 
 #endif /*PREDICATEUPDATER_H_*/

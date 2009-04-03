@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 /**
- * Predavese definitions that should be included only in Predavese source (*.cc) files, not in other headers. 
+ * Predavese definitions that should be included only in Predavese source (*.cc) files, not in other headers.
  */
 
 // 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79,

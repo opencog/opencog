@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
+
 #ifndef _WORLD_VOCABULARY_H
 #define _WORLD_VOCABULARY_H
 
@@ -31,20 +31,20 @@ extern "C"
 #endif
 
 #define WROOT "world"
-	#define WOBJ "object"
-		#define WNAME "name"
-		#define WARG "property"
+#define WOBJ "object"
+#define WNAME "name"
+#define WARG "property"
 
-			#define WSOUND "sound"
-				#define WFREQ "quality"
-				#define WINTENSITY "intensity"
-				#define WDURATION "duration"
-			#define WSMELL "smell"
-				#define WQUALITY "quality"
-			#define WTASTE "taste"
-	
-			#define WDENSITY "density"
-			#define WENERGY "energy"
+#define WSOUND "sound"
+#define WFREQ "quality"
+#define WINTENSITY "intensity"
+#define WDURATION "duration"
+#define WSMELL "smell"
+#define WQUALITY "quality"
+#define WTASTE "taste"
+
+#define WDENSITY "density"
+#define WENERGY "energy"
 
 #ifdef __cplusplus
 }
@@ -61,7 +61,7 @@ extern "C"
 #define CUSTOM_SENSATION_OBJECT_WITHOUT_ENERGY_CANNOT_BE_EAT 103
 #define CUSTOM_SENSATION_ENERGY_GAIN 100
 #define CUSTOM_SENSATION_ENERGY_LOSS 101
-#ifdef USE_ACTUATOR_BASED_EVENTS 
+#ifdef USE_ACTUATOR_BASED_EVENTS
 // Actuator-related events
 #define CUSTOM_SENSATION_LEG_ACTUATOR 500
 #define CUSTOM_SENSATION_LEG_ACTION_STARTED 501
@@ -75,7 +75,7 @@ extern "C"
 #define CUSTOM_SENSATION_HEAD_ACTION_STARTED 701
 #define CUSTOM_SENSATION_HEAD_ACTION_DONE 702
 #define CUSTOM_SENSATION_HEAD_ACTION_FAILED 703
-#else 
+#else
 // Animation-type-related events
 #define CUSTOM_SENSATION_MOVE_ANIMATION 500
 #define CUSTOM_SENSATION_MOVE_ANIMATION_STARTED 501

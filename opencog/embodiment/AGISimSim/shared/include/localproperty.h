@@ -27,16 +27,19 @@
 #include <property.h>
 
 //---------------------------------------------------------------------------------------
-class LocalProperty : public Property {
-	
+class LocalProperty : public Property
+{
+
 public:
     LocalProperty();
 
-    virtual void write(int start, const std::string& newdata)
-        { write( start, newdata); }
+    virtual void write(int start, const std::string& newdata) {
+        write( start, newdata);
+    }
 
-    virtual void replace(const std::string& newdata, const std::string& newtype = "?")
-        { replace(0, newdata, newtype); }
+    virtual void replace(const std::string& newdata, const std::string& newtype = "?") {
+        replace(0, newdata, newtype);
+    }
 };
 
 #endif

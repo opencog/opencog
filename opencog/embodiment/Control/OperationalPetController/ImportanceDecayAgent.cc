@@ -25,30 +25,35 @@
 
 using namespace OperationalPetController;
 
-ImportanceDecayAgent::~ImportanceDecayAgent() {
+ImportanceDecayAgent::~ImportanceDecayAgent()
+{
 }
 
-ImportanceDecayAgent::ImportanceDecayAgent() {
+ImportanceDecayAgent::ImportanceDecayAgent()
+{
     lastTickTime = 0;
     mergedAtomConnection.disconnect();
 }
 
-void ImportanceDecayAgent::connectSignals(AtomSpace& as) {
+void ImportanceDecayAgent::connectSignals(AtomSpace& as)
+{
     mergedAtomConnection = as.mergeAtomSignal().connect(std::tr1::bind(&ImportanceDecayAgent::atomMerged, this, std::tr1::placeholders::_1));
 }
 
-void ImportanceDecayAgent::run(opencog::CogServer *server) {
+void ImportanceDecayAgent::run(opencog::CogServer *server)
+{
 
-    logger().log(opencog::Logger::FINE, 
-                    "ImportanceDecayTask - Executing decayShortTermImportance().");
+    logger().log(opencog::Logger::FINE,
+                 "ImportanceDecayTask - Executing decayShortTermImportance().");
     ((OPC *) server)->decayShortTermImportance();
 
 }
 
-void ImportanceDecayAgent::atomMerged(Handle h) {
+void ImportanceDecayAgent::atomMerged(Handle h)
+{
     logger().log(opencog::Logger::DEBUG, "ImportanceDecayAgent::atomMerged(%lu)", h.value());
     AtomSpace* atomSpace = server().getAtomSpace();
-    // Restore the default STI value if it has decayed 
+    // Restore the default STI value if it has decayed
     // TODO: Remove this code when the merge of atoms consider the STI values this way as well.
     if (atomSpace->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
         atomSpace->setSTI(h, AttentionValue::DEFAULTATOMSTI);

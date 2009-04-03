@@ -28,14 +28,15 @@
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------
-class PerformativeHandler {
-  public:
+class PerformativeHandler
+{
+public:
     PerformativeHandler(); //(RemoteAgent* ra);
-    
-	// Action may be redundant, since sensation handles most reponses to actions
-    virtual int action 		(std::string action, std::string parameters) = 0;	
-	virtual int sensation   (std::string type, std::string parameters) = 0;
-    virtual int mate		() = 0;    
+
+    // Action may be redundant, since sensation handles most reponses to actions
+    virtual int action   (std::string action, std::string parameters) = 0;
+    virtual int sensation   (std::string type, std::string parameters) = 0;
+    virtual int mate  () = 0;
     virtual int addAgent    (std::string name, std::string nick) = 0;
     virtual int removeAgent (std::string name) = 0;
 };

@@ -35,7 +35,7 @@ LoggerFactory::LoggerFactory()
 #define USER_FLAG "$USER"
 
 opencog::Logger LoggerFactory::getLogger(const SystemParameters &parameters,
-                                         const std::string &id)
+        const std::string &id)
 {
 
     std::string logFile;
@@ -59,7 +59,7 @@ opencog::Logger LoggerFactory::getLogger(const SystemParameters &parameters,
                           "LoggerFactory:getLogger(): log dir: %s\n",
                           logFile.c_str());
 
-    opencog::config().set("BACK_TRACE_LOG_LEVEL", parameters.get("BACK_TRACE_LOG_LEVEL")); 
+    opencog::config().set("BACK_TRACE_LOG_LEVEL", parameters.get("BACK_TRACE_LOG_LEVEL"));
 
     if (id == parameters.get("SPAWNER_ID")) {
         level = atoi(parameters.get("SPAWNER_LOG_LEVEL").c_str());

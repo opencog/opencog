@@ -24,8 +24,9 @@
 
 #include "comboreduct/reduct/reduct.h"
 
-namespace reduct {
-  const rule& hillclimbing_action_reduction();
+namespace reduct
+{
+const rule& hillclimbing_action_reduction();
 }
 
 #endif

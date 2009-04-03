@@ -25,7 +25,7 @@
  * Define the contants used in the PVP xml messages.
  */
 
-// xml elements 
+// xml elements
 #define FROM_PROXY_ROOT_ELEMENT  "petaverse-msg"
 #define ENTITY_ELEMENT           "entity"
 #define POSITION_ELEMENT         "position"
@@ -34,7 +34,7 @@
 #define PARAMETER_ELEMENT        "param"
 #define VECTOR_ELEMENT           "vector"
 #define ACTION_PLAN_ELEMENT      "pet:action-plan"
-#define ACTION_ELEMENT           "action"      
+#define ACTION_ELEMENT           "action"
 #define MAP_INFO_ELEMENT         "map-info"
 #define BLIP_ELEMENT             "blip"
 #define PET_SIGNAL_ELEMENT       "pet-signal"
@@ -91,7 +91,7 @@
 #define GLOBAL_POS_Y_ATTRIBUTE   "global-position-y"
 #define GLOBAL_POS_OFFSET_ATTRIBUTE   "global-position-offset"
 
-// xml object types 
+// xml object types
 #define PET_OBJECT_TYPE          "pet"
 #define HUMANOID_OBJECT_TYPE     "humanoid"
 #define STRUCTURE_OBJECT_TYPE    "structure"
@@ -102,9 +102,9 @@
 
 // known parameter names
 #define POSITION_PARAMETER_NAME  "position"
-#define ROTATE_PARAMETER_NAME    "rotate" 
+#define ROTATE_PARAMETER_NAME    "rotate"
 
-// xml action status (values for <pet-signal>'s status attribute)  
+// xml action status (values for <pet-signal>'s status attribute)
 #define DONE_ACTION_STATUS       "done"
 #define ERROR_ACTION_STATUS      "error"
 

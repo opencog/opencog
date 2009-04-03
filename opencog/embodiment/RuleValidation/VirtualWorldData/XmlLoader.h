@@ -30,51 +30,53 @@
 #include <xercesc/parsers/XercesDOMParser.hpp>
 
 
-namespace VirtualWorldData {
+namespace VirtualWorldData
+{
 
-class XmlLoader {
+class XmlLoader
+{
 
-    private: 
-        
-        XERCES_CPP_NAMESPACE::XercesDOMParser * parser;
-    	VirtualWorldData::XmlErrorHandler errorHandler;
+private:
 
-        // Initializes the xerces-c XML Platform
-        void initializeXMLPlatform();
-    
-        // Teminate the xerces-c XML Platform
-        void terminateXMLPlatform();
+    XERCES_CPP_NAMESPACE::XercesDOMParser * parser;
+    VirtualWorldData::XmlErrorHandler errorHandler;
 
-        // Process the World State XML document
-        void processWorldStateDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc,  
-                                       VirtualWorldState & worldState);
-        
-        //
-        void processEntityInfo(XERCES_CPP_NAMESPACE::DOMElement * element, 
-                               VirtualWorldState & worldState);
+    // Initializes the xerces-c XML Platform
+    void initializeXMLPlatform();
 
-        //
-        void processEntityElement(XERCES_CPP_NAMESPACE::DOMElement * element, 
-                                  VirtualWorldData::VirtualEntity & entity);
+    // Teminate the xerces-c XML Platform
+    void terminateXMLPlatform();
 
-        //
-        void processAgentElement(XERCES_CPP_NAMESPACE::DOMElement * element, 
-                                 VirtualWorldData::VirtualAgent & agent);
+    // Process the World State XML document
+    void processWorldStateDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc,
+                                   VirtualWorldState & worldState);
 
-        //
-        void processIndefiniteObjectInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
-                                         VirtualWorldState & worldState );
-        
-        //
-        void processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element, 
-                                   VirtualWorldState & worldState );
+    //
+    void processEntityInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
+                           VirtualWorldState & worldState);
 
-    public: 
-        
-        XmlLoader();
-        ~XmlLoader();
+    //
+    void processEntityElement(XERCES_CPP_NAMESPACE::DOMElement * element,
+                              VirtualWorldData::VirtualEntity & entity);
 
-        bool fromFile(const std::string & filename, VirtualWorldState & worldState);
+    //
+    void processAgentElement(XERCES_CPP_NAMESPACE::DOMElement * element,
+                             VirtualWorldData::VirtualAgent & agent);
+
+    //
+    void processIndefiniteObjectInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
+                                     VirtualWorldState & worldState );
+
+    //
+    void processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
+                               VirtualWorldState & worldState );
+
+public:
+
+    XmlLoader();
+    ~XmlLoader();
+
+    bool fromFile(const std::string & filename, VirtualWorldState & worldState);
 
 };
 } // namespace

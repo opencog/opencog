@@ -7,21 +7,22 @@
 
 using namespace PerceptionActionInterface;
 
-class ActionParamTypeUTest :  public CxxTest::TestSuite{
+class ActionParamTypeUTest :  public CxxTest::TestSuite
+{
 public:
-	ActionParamTypeUTest(){
-	}
-	
-	~ActionParamTypeUTest(){
+    ActionParamTypeUTest() {
     }
-	
-    void setUp(){
+
+    ~ActionParamTypeUTest() {
     }
-	
-    void tearDown(){
+
+    void setUp() {
     }
-	
-	void testActionParamType(){
+
+    void tearDown() {
+    }
+
+    void testActionParamType() {
         //cout << "testActionParamType" << endl;
         int typeCode = STRING_CODE;
         for (; typeCode < NUMBER_OF_ACTION_PARAM_TYPES; typeCode++) {
@@ -41,5 +42,5 @@ public:
             }
         }
     }
-   
+
 };

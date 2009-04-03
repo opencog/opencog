@@ -7,15 +7,16 @@
 using namespace Procedure;
 using namespace PerceptionActionInterface;
 
-BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai) {
-	
+BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
+{
+
     // Schemata for each single Pet Action
-    // TODO: The lines commented out bellow corresponds to the pet actions that have 
-    // Vector or Rotation as type of one of their arguments. These arg types has no corresponding 
+    // TODO: The lines commented out bellow corresponds to the pet actions that have
+    // Vector or Rotation as type of one of their arguments. These arg types has no corresponding
     // combo type for now. See TODO marks in PetActionSchema.cc file.
-    add(new PetActionSchema(pai, ActionType::BARK()));    
+    add(new PetActionSchema(pai, ActionType::BARK()));
     add(new PetActionSchema(pai, ActionType::TRICK_FOR_FOOD()));
-    add(new PetActionSchema(pai, ActionType::EAT())); 
+    add(new PetActionSchema(pai, ActionType::EAT()));
     //add(new PetActionSchema(pai, ActionType::WALK()));
     add(new PetActionSchema(pai, ActionType::GRAB()));
     add(new PetActionSchema(pai, ActionType::DROP()));
@@ -52,35 +53,39 @@ BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai) {
 
     add(new PetActionSchema(pai, ActionType::PAY_ATTENTION()));
     //add(new PetActionSchema(pai, ActionType::WAG_TAIL()));
-    //add(new PetActionSchema(pai, ActionType::MOVE_TAIL()));    
+    //add(new PetActionSchema(pai, ActionType::MOVE_TAIL()));
 
     // TODO: Create and add all other builtIn procedures here
 }
 
-BuiltInProcedureRepository::~BuiltInProcedureRepository() {
+BuiltInProcedureRepository::~BuiltInProcedureRepository()
+{
     for (Name2ProcedureMap::iterator itr = _map.begin(); itr != _map.end(); itr++) {
-//		std::cout << itr->second->getName() << "\n";
+//  std::cout << itr->second->getName() << "\n";
         delete itr->second;
     }
 }
 
-void BuiltInProcedureRepository::add(BuiltInProcedure* proc) {
-    opencog::cassert(TRACE_INFO, !contains(proc->getName()), 
-            "BuitInProcedureRepository - Repository already contains procedure %s.",
-            proc->getName().c_str());
-    _map[proc->getName()] = proc; 
+void BuiltInProcedureRepository::add(BuiltInProcedure* proc)
+{
+    opencog::cassert(TRACE_INFO, !contains(proc->getName()),
+                     "BuitInProcedureRepository - Repository already contains procedure %s.",
+                     proc->getName().c_str());
+    _map[proc->getName()] = proc;
 }
 
-bool BuiltInProcedureRepository::contains(const std::string& name) const {
-    return _map.find(name)!=_map.end(); 
+bool BuiltInProcedureRepository::contains(const std::string& name) const
+{
+    return _map.find(name) != _map.end();
 }
 
-const BuiltInProcedure& BuiltInProcedureRepository::get(const std::string& name) const {
-    return *(_map.find(name)->second); 
+const BuiltInProcedure& BuiltInProcedureRepository::get(const std::string& name) const
+{
+    return *(_map.find(name)->second);
 }
 
 bool BuiltInProcedureRepository::update(AtomSpace& atomspace)
 {
-  
-  return true;
+
+    return true;
 }

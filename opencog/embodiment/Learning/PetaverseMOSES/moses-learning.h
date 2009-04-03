@@ -37,38 +37,40 @@
 #define INIT_FITNESS 0.0 //supposed to be the average, neither good nor bad
 
 
-namespace moses {
+namespace moses
+{
 
-  typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
-  typedef FitnessEstimator::DistortedComboSizeOrder Comp;
+typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
+typedef FitnessEstimator::DistortedComboSizeOrder Comp;
 
-  typedef opencog::hash_set<combo_tree,boost::hash<combo_tree> > combo_tree_hash_set;
-  typedef combo_tree_hash_set::iterator combo_tree_hash_set_it;
+typedef opencog::hash_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
+typedef combo_tree_hash_set::iterator combo_tree_hash_set_it;
 
-  typedef enum {
-      HC_INIT,
-      HC_REWARD,
-      HC_START_ITERATION,
-      HC_FINISH_ITERATION,
-      HC_BUILD_CANDIDATES,
-      HC_ESTIMATE_CANDIDATES,
-      HC_FINISH_CANDIDATES,
-      HC_IDLE
-    } HCState;
+typedef enum {
+    HC_INIT,
+    HC_REWARD,
+    HC_START_ITERATION,
+    HC_FINISH_ITERATION,
+    HC_BUILD_CANDIDATES,
+    HC_ESTIMATE_CANDIDATES,
+    HC_FINISH_CANDIDATES,
+    HC_IDLE
+} HCState;
 
 
-  class moses_learning : public PetaverseImitationLearningBase {
- 
-  public:
+class moses_learning : public PetaverseImitationLearningBase
+{
+
+public:
 
     //constructor, generate/filter conditions and actions
     moses_learning(int nepc,
- 		   const FE& fitness_estimator,
-		   const definite_object_set& dos,
-		   const operator_set& eo,
-		   const combo_tree_ns_set& perceptions,
-		   const combo_tree_ns_set& actions,
-		   opencog::RandGen& rng);
+                   const FE& fitness_estimator,
+                   const definite_object_set& dos,
+                   const operator_set& eo,
+                   const combo_tree_ns_set& perceptions,
+                   const combo_tree_ns_set& actions,
+                   opencog::RandGen& rng);
 
     ~moses_learning();
 
@@ -78,8 +80,8 @@ namespace moses {
     const combo_tree& current_program();
     void set_current_fitness(fitness_t f);
     void reset_estimator();
-    
-  private:
+
+private:
     struct petaverse_score  *score;
     struct petaverse_bscore *bscore;
     const FE& _fitness_estimator;
@@ -109,70 +111,70 @@ namespace moses {
     ordered_programs _ordered_best_estimates; //_ordered_neighborhood;
     int _number_of_calls;
 
-    const tree_score max_score;    
-    
-    metapopulation<petaverse_score,petaverse_bscore,sliced_iterative_hillclimbing> *metapop;
+    const tree_score max_score;
 
-  };
+    metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> *metapop;
+
+};
 
 
 
 
 struct petaverse_score {
-  petaverse_score(const FE& fitnessEstimator)
-   : _fitnessEstimator(fitnessEstimator) {
-    _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-						   _fitnessEstimator);
-  }
+    petaverse_score(const FE& fitnessEstimator)
+            : _fitnessEstimator(fitnessEstimator) {
+        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
+                _fitnessEstimator);
+    }
 
-  petaverse_score(const petaverse_score& ps) 
-   : _fitnessEstimator(ps._fitnessEstimator) {
-    _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-						   ps._fitnessEstimator);
-  }
+    petaverse_score(const petaverse_score& ps)
+            : _fitnessEstimator(ps._fitnessEstimator) {
+        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
+                ps._fitnessEstimator);
+    }
 
-  int operator()(const combo_tree& tr) const { 
-   int score = -1000+(int)(1000*(*_estimator_cache)(tr));
-   std::cout << "scoring " << tr << " score: " << score << endl;
-   return score; 
-  }
+    int operator()(const combo_tree& tr) const {
+        int score = -1000 + (int)(1000 * (*_estimator_cache)(tr));
+        std::cout << "scoring " << tr << " score: " << score << endl;
+        return score;
+    }
 
-  ~petaverse_score() {
-    delete _estimator_cache;
-  }
- 
-  private:
+    ~petaverse_score() {
+        delete _estimator_cache;
+    }
+
+private:
     opencog::lru_cache<FE>* _estimator_cache;
     const FE& _fitnessEstimator;
 };
 
-    
+
 
 struct petaverse_bscore {
-  petaverse_bscore(const FE& fitnessEstimator)
-   : _fitnessEstimator(fitnessEstimator) {
-    _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-						   _fitnessEstimator);
-  }
+    petaverse_bscore(const FE& fitnessEstimator)
+            : _fitnessEstimator(fitnessEstimator) {
+        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
+                _fitnessEstimator);
+    }
 
-  petaverse_bscore(const petaverse_bscore& ps) 
-   : _fitnessEstimator(ps._fitnessEstimator) {
-    _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-						   ps._fitnessEstimator);
-  }
+    petaverse_bscore(const petaverse_bscore& ps)
+            : _fitnessEstimator(ps._fitnessEstimator) {
+        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
+                ps._fitnessEstimator);
+    }
 
-  behavioral_score operator()(const combo_tree& tr) const { 
-    behavioral_score bs(2);
-    bs[0]=1000-(int)(1000*(*_estimator_cache)(tr));
-    bs[1]= tr.size();
-    return bs;
-  }
+    behavioral_score operator()(const combo_tree& tr) const {
+        behavioral_score bs(2);
+        bs[0] = 1000 - (int)(1000 * (*_estimator_cache)(tr));
+        bs[1] = tr.size();
+        return bs;
+    }
 
-  ~petaverse_bscore() {
-    delete _estimator_cache;
-  }
- 
-  private:
+    ~petaverse_bscore() {
+        delete _estimator_cache;
+    }
+
+private:
     opencog::lru_cache<FE>* _estimator_cache;
     const FE& _fitnessEstimator;
 };

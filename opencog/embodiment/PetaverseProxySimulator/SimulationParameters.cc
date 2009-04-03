@@ -25,7 +25,8 @@
 
 using namespace PetaverseProxySimulator;
 
-SimulationParameters::SimulationParameters() {
+SimulationParameters::SimulationParameters()
+{
     simulationStart = 0;
     simulationTicks = 0;
 
@@ -42,18 +43,22 @@ SimulationParameters::SimulationParameters() {
     table["GOLD_STANDARD_FILENAME"] = "PVPSimGoldStandard.txt";
 }
 
-SimulationParameters::~SimulationParameters() {
+SimulationParameters::~SimulationParameters()
+{
 }
 
-int SimulationParameters::getCurrentSimulationSeconds() {
+int SimulationParameters::getCurrentSimulationSeconds()
+{
     //return simulationStart + (int) (simulationTicks * atof(get("DEFAULT_SIMULATION_MINUTES_PER_TICK").c_str()) * 60);
     return (int) (simulationTicks * atof(get("DEFAULT_SIMULATION_MINUTES_PER_TICK").c_str()) * 60);
 }
 
-void SimulationParameters::timeTick() {
+void SimulationParameters::timeTick()
+{
     simulationTicks++;
 }
 
-void SimulationParameters::startSimulation() {
+void SimulationParameters::startSimulation()
+{
     simulationStart = time(NULL);
 }

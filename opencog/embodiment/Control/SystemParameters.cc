@@ -31,14 +31,16 @@
 
 using namespace Control;
 
-SystemParameters::~SystemParameters() {
+SystemParameters::~SystemParameters()
+{
 }
 
-SystemParameters::SystemParameters() {
+SystemParameters::SystemParameters()
+{
     emptyString.assign("");
-    
-    table["CONFIG_FILE"] = "config.cfg"; 
-    table["AUTOMATED_SYSTEM_TESTS"] = "0"; 
+
+    table["CONFIG_FILE"] = "config.cfg";
+    table["AUTOMATED_SYSTEM_TESTS"] = "0";
 
     // Ids and network settings
     table["ROUTER_ID"] = "ROUTER";
@@ -64,7 +66,7 @@ SystemParameters::SystemParameters() {
 
     // IP and Port are informed by Proxy when it sends a LOGIN message to router.
     // Anyway, fyi, the mockyProxy uses port 16315 and the real Proxy 8211
-    table["PROXY_ID"] = "PROXY"; 
+    table["PROXY_ID"] = "PROXY";
 
     // OPC settings
     table["UNKNOWN_PET_OWNER"] = "no_owner_id";
@@ -83,7 +85,7 @@ SystemParameters::SystemParameters() {
     sprintf(info, "%d", opencog::Logger::INFO);
     sprintf(warning, "%d", opencog::Logger::WARN);
     sprintf(error, "%d", opencog::Logger::ERROR);
-    
+
     // component log levels
     table["PROXY_LOG_LEVEL"] = fine;
     table["LS_LOG_LEVEL"] = fine;
@@ -95,8 +97,8 @@ SystemParameters::SystemParameters() {
     // TODO: Convert all log level parameters above in string, which is more
     // readable (see opencog/util/Config.h and Logger::getLevelFromString), just
     // like bellow:
-    table["BACK_TRACE_LOG_LEVEL"] = "error"; 
-    
+    table["BACK_TRACE_LOG_LEVEL"] = "error";
+
     // paths
     table["LOG_DIR"] = "/tmp/$USER/Petaverse/Logs";
     table["MESSAGE_DIR"] = "/tmp/$USER/Petaverse/queue";
@@ -118,20 +120,20 @@ SystemParameters::SystemParameters() {
     // Rule Engine parameters
     table["RE_CYCLE_PERIOD"] = "2"; //counted in term multiple idle cycles
     table["RE_DEFAULT_MEAN"] = "0.5";
-    table["RE_DEFAULT_COUNT"] = "18"; 				 // set to make confidence = 0.9 (see #define KKK 
-    												 // in SimpleTruthValue.cc and 
-    											     // SimpleTruthvalue::getConfidence()
+    table["RE_DEFAULT_COUNT"] = "18";      // set to make confidence = 0.9 (see #define KKK
+    // in SimpleTruthValue.cc and
+    // SimpleTruthvalue::getConfidence()
     table["RE_CYCLES_DURING_NOVELTY"] = "5";
-    table["RE_FEELINGS_DECREASE_FACTOR"] = "0.01";   
+    table["RE_FEELINGS_DECREASE_FACTOR"] = "0.01";
     table["RE_CYCLES_FOR_REQUESTED_SCHEMA"] = "7";
     table["RE_CYCLES_DURING_AGENT_LAST_ACTION"] = "3";
 
     // rule engine configurations
-    table["RE_CORE_FILE"] = "rules_core.lua";    
+    table["RE_CORE_FILE"] = "rules_core.lua";
     table["RE_DEFAULT_PET_TRAITS"] = "maxie";
     table["RE_DEFAULT_HUMANOID_TRAITS"] = "maria";
     table["RE_RULES_FILENAME_MASK"]  = "%s_rules.lua";
-    table["RE_TRAITS_FILENAME_MASK"] = "%s_traits_%s.lua";	
+    table["RE_TRAITS_FILENAME_MASK"] = "%s_traits_%s.lua";
     table["RE_PET_DEFINITIONS_FILE"] = "petDefinitions.lua";
 
     //about the randomization of schema rule selection
@@ -144,31 +146,31 @@ SystemParameters::SystemParameters() {
     table["RE_WILD_CARD_RANDOM_SELECTION"] = "0";
 
     // rule validation configurations
-    table["RV_CORE_FILE"] = "validation_core.lua";    
-       
+    table["RV_CORE_FILE"] = "validation_core.lua";
+
     // Reinforcement learning parameters
     table["RL_REWARD"] = "0.05";                     // max reward to be applied to a rule implication link
-    table["RL_PUNISH"] = "0.05";                     // max punish to be applied to a rule implication link  
-    table["RL_TIME_WINDOW"] = "5.0";                 // in secs 
+    table["RL_PUNISH"] = "0.05";                     // max punish to be applied to a rule implication link
+    table["RL_TIME_WINDOW"] = "5.0";                 // in secs
     table["RL_GAUSSIAN_MEAN"] = "2.5";               // in secs
     table["RL_GAUSSIAN_STD_DEVIATION"] = "0.5";
 
     table["MAX_RULE_STRENGTH"] = "0.95";             // the maximum strength allowd to a rule via
-                                                     // reinforcement learning
-   
+    // reinforcement learning
+
     // pet commands
     table["STOP_LEARNING_CMD"] = "stop learning";
     table["TRY_SCHEMA_CMD"] = "try";
-    
+
     // reward values
     table["POSITIVE_REWARD"] =  "1.0";
     table["NEGATIVE_REWARD"] = "-1.0";
 
     // Parameter to control the maximal time spent by a procedure to be executed by Procedure Interpreter (in seconds)
-    table["PROCEDURE_EXECUTION_TIMEOUT"] = "90"; 
+    table["PROCEDURE_EXECUTION_TIMEOUT"] = "90";
 
-    // Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed. 
-    table["ALLOW_WALKING_CANCELATION"] = "false"; 
+    // Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed.
+    table["ALLOW_WALKING_CANCELATION"] = "false";
 
     //LearningServer parameters
     //number of fitness estimations computed per cycle
@@ -179,7 +181,7 @@ SystemParameters::SystemParameters() {
     // SpaceMap grid dimensions. X and Y directions
     table["MAP_XDIM"] = "1024";
     table["MAP_YDIM"] = "1024";
-    
+
     table["IMPORTANCE_DECAY_ENABLED"]      = "1";
     table["ACTION_SELECTION_ENABLED"]      = "1";
     table["COMBO_INTERPRETER_ENABLED"]     = "1";
@@ -200,8 +202,8 @@ SystemParameters::SystemParameters() {
     // NetworkElement's message reading parameters
     table["UNREAD_MESSAGES_CHECK_INTERVAL"] = "10";
     table["UNREAD_MESSAGES_RETRIEVAL_LIMIT"] = "1"; // -1 for unlimited number of retrieved messages
-    table["NO_ACK_MESSAGES"] = "0"; 
-    table["WAIT_LISTENER_READY_TIMEOUT"] = "60";  // time (in seconds) to wait for socket Listener to be ready 
+    table["NO_ACK_MESSAGES"] = "0";
+    table["WAIT_LISTENER_READY_TIMEOUT"] = "60";  // time (in seconds) to wait for socket Listener to be ready
 
     //------------------
     //for LearningServer
@@ -223,7 +225,7 @@ SystemParameters::SystemParameters() {
     //evanescence delay of has_said perception in time unit
     table["HAS_SAID_DELAY"] = "200";
 
-	//lower bound (high age) of atoms in atomTable
+    //lower bound (high age) of atoms in atomTable
     table["ATOM_TABLE_LOWER_STI_VALUE"] = "-400";
 
     //0 with no random operator optimization for NoSpaceLife
@@ -258,7 +260,7 @@ SystemParameters::SystemParameters() {
     //Defines the distance (in percentage of the diagonal of the SpaceMap)
     //under which an avatar is considered approaching something
     table["DIST_PERCENTAGE_THRESHOLD_WALK_TO_GOTO"] = "1.0";
-    
+
     // print logs message in standard io
     table["PRINT_LOG_TO_STDOUT"] = "0";
 
@@ -269,52 +271,54 @@ SystemParameters::SystemParameters() {
     table["MANUAL_OPC_LAUNCH"] = "0";
 }
 
-void SystemParameters::loadFromFile(const std::string &fileName) {
-	
-	char line[256];
+void SystemParameters::loadFromFile(const std::string &fileName)
+{
+
+    char line[256];
     std::ifstream fin(fileName.c_str());
 
     std::string pName;
     std::string pValue;
-    
-	while (!fin.eof()){
-    	fin.getline(line, 256);
-        
+
+    while (!fin.eof()) {
+        fin.getline(line, 256);
+
         // not a comentary or an empty line
-        if(line[0] != '#' && line[0] != 0x00){
-        	std::istringstream in ((std::string)line);
-            
+        if (line[0] != '#' && line[0] != 0x00) {
+            std::istringstream in ((std::string)line);
+
             in >> pName;
             in >> pValue;
-           	
-            std::map<std::string,std::string>::iterator iter1 = table.find(pName);
-        	if (iter1 == table.end()) {
-            	printf("Unknown parameter name <%s>. Discarding it.\n", pName.c_str());
-        	} else {
-            	table[pName] = pValue;
-        	}           
+
+            std::map<std::string, std::string>::iterator iter1 = table.find(pName);
+            if (iter1 == table.end()) {
+                printf("Unknown parameter name <%s>. Discarding it.\n", pName.c_str());
+            } else {
+                table[pName] = pValue;
+            }
         }
     }
 
-    fin.close();    
-/*    
-    while (fin >> pname) {
-        //printf("pname = <%s>\n", pname.c_str());
-        fin >> pvalue;
-        //printf("pvalue = <%s>\n", pvalue.c_str());
-        std::map<std::string,std::string>::iterator iter1 = table.find(pname);
-        if (iter1 == table.end()) {
-            printf("Unknown parameter name <%s>. Discarding it.\n", pname.c_str());
-        } else {
-            table[pname] = pvalue;
+    fin.close();
+    /*
+        while (fin >> pname) {
+            //printf("pname = <%s>\n", pname.c_str());
+            fin >> pvalue;
+            //printf("pvalue = <%s>\n", pvalue.c_str());
+            std::map<std::string,std::string>::iterator iter1 = table.find(pname);
+            if (iter1 == table.end()) {
+                printf("Unknown parameter name <%s>. Discarding it.\n", pname.c_str());
+            } else {
+                table[pname] = pvalue;
+            }
         }
-    }
-*/    
+    */
 }
 
-const std::string &SystemParameters::get(const std::string &paramName) const {
+const std::string &SystemParameters::get(const std::string &paramName) const
+{
 
-    std::map<std::string,std::string>::const_iterator iter1 = table.find(paramName);
+    std::map<std::string, std::string>::const_iterator iter1 = table.find(paramName);
     if (iter1 == table.end()) {
         return emptyString;
     } else {

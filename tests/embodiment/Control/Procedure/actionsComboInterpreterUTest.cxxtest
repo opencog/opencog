@@ -14,7 +14,8 @@ using namespace PetCombo;
 using namespace std;
 
 
-class actionsComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTest {
+class actionsComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTest
+{
 
 private:
     opencog::RandGen* rng;
@@ -30,7 +31,7 @@ public :
     ~actionsComboInterpreterUTest() {
         delete rng;
     }
-	 
+
     opencog::RandGen& getRandGen() {
         return *rng;
     }
@@ -141,7 +142,7 @@ public :
         runProcedureInCombo(str, id::action_success);
     }
 
-    
+
 
     void testGrab() {
         std::string str("grab(nearest_pickupable)");

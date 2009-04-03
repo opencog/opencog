@@ -31,16 +31,16 @@ class iGUIProvider;
 //------------------------------------------------------------------------------------------------------------
 class WXPHandler : public PerformativeHandler
 {
-	iGUIProvider* gui;
+    iGUIProvider* gui;
 public:
     WXPHandler(iGUIProvider* _gui);
-    
+
     virtual int action     (std::string action, std::string parameters);
     virtual int sensation  (std::string type, std::string parameters);
-    virtual int mate	   ();
+    virtual int mate    ();
 
-    virtual int addAgent   (std::string name,std::string nick);
-    virtual int removeAgent(std::string name);    
+    virtual int addAgent   (std::string name, std::string nick);
+    virtual int removeAgent(std::string name);
 };
 
 

@@ -29,58 +29,65 @@
 
 using namespace PerceptionActionInterface;
 
-ActionParameter::ActionParameter() : type(ActionParamType::STRING()) {
+ActionParameter::ActionParameter() : type(ActionParamType::STRING())
+{
     PAIUtils::initializeXMLPlatform();
 }
 
-ActionParameter::ActionParameter(const string& _name, const ActionParamType& _type, const ParamValue& _value) : 
-    name(_name), type(_type), value(_value) { 
+ActionParameter::ActionParameter(const string& _name, const ActionParamType& _type, const ParamValue& _value) :
+        name(_name), type(_type), value(_value)
+{
     PAIUtils::initializeXMLPlatform();
     // validates the value according to the type:
     switch (type.getCode()) {
-        case BOOLEAN_CODE: 
-        case INT_CODE: 
-        case FLOAT_CODE: 
-        case STRING_CODE:
-            opencog::cassert(TRACE_INFO, isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
-            break;
-        case VECTOR_CODE:
-            opencog::cassert(TRACE_INFO, isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
-            break;
-        case ROTATION_CODE:
-            opencog::cassert(TRACE_INFO, isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
-            break;
-        case ENTITY_CODE:
-            opencog::cassert(TRACE_INFO, isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
-            break;
-        default:  
-            opencog::cassert(TRACE_INFO, false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
-            break;            
+    case BOOLEAN_CODE:
+    case INT_CODE:
+    case FLOAT_CODE:
+    case STRING_CODE:
+        opencog::cassert(TRACE_INFO, isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
+    case VECTOR_CODE:
+        opencog::cassert(TRACE_INFO, isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
+    case ROTATION_CODE:
+        opencog::cassert(TRACE_INFO, isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
+    case ENTITY_CODE:
+        opencog::cassert(TRACE_INFO, isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        break;
+    default:
+        opencog::cassert(TRACE_INFO, false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
+        break;
     }
 }
 
-ActionParameter::~ActionParameter() {
+ActionParameter::~ActionParameter()
+{
 }
 
 
-const string& ActionParameter::getName() const {
+const string& ActionParameter::getName() const
+{
     return name;
 }
 
-const ActionParamType& ActionParameter::getType() const {
+const ActionParamType& ActionParameter::getType() const
+{
     return type;
 }
 
-const ParamValue& ActionParameter::getValue() const {
+const ParamValue& ActionParameter::getValue() const
+{
     return value;
 }
 
-XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc, 
-                                                                       XERCES_CPP_NAMESPACE::DOMElement* parent) const {
+XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
+        XERCES_CPP_NAMESPACE::DOMElement* parent) const
+{
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMElement *param = doc->createElement(tag);
-    
+
     XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     XMLCh* nameStr = XERCES_CPP_NAMESPACE::XMLString::transcode(name.c_str());
     param->setAttribute(tag, nameStr);
@@ -90,7 +97,7 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
     XMLCh* typeStr = XERCES_CPP_NAMESPACE::XMLString::transcode(type.getName().c_str());
     param->setAttribute(tag, typeStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&typeStr);
-    
+
     /// value attribute depends on its type
     if (isStringValue()) {
         XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -98,7 +105,7 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
         param->setAttribute(tag, valueStr);
         XERCES_CPP_NAMESPACE::XMLString::release(&valueStr);
     } else if (isRotationValue()) {
-        const Rotation& r = getRotationValue(); 
+        const Rotation& r = getRotationValue();
         XERCES_CPP_NAMESPACE::XMLString::transcode(ROTATION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMElement *rotate = doc->createElement(tag);
 
@@ -119,7 +126,7 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
 
         param->appendChild(rotate);
     } else if (isVectorValue()) {
-        const Vector& c = getVectorValue(); 
+        const Vector& c = getVectorValue();
         XERCES_CPP_NAMESPACE::XMLString::transcode(VECTOR_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMElement *position = doc->createElement(tag);
 
@@ -140,7 +147,7 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
 
         param->appendChild(position);
     } else if (isEntityValue()) {
-        const Entity& e = getEntityValue(); 
+        const Entity& e = getEntityValue();
         XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMElement *entity = doc->createElement(tag);
 
@@ -161,93 +168,103 @@ XERCES_CPP_NAMESPACE::DOMElement* ActionParameter::createPVPXmlElement(XERCES_CP
     return param;
 }
 
-bool ActionParameter::isStringValue() const {
-  return boost::get<string>(&value);
+bool ActionParameter::isStringValue() const
+{
+    return boost::get<string>(&value);
 }
 
-bool ActionParameter::isRotationValue() const {
-  return boost::get<Rotation>(&value);
+bool ActionParameter::isRotationValue() const
+{
+    return boost::get<Rotation>(&value);
 }
 
-bool ActionParameter::isVectorValue() const {
-  return boost::get<Vector>(&value);
+bool ActionParameter::isVectorValue() const
+{
+    return boost::get<Vector>(&value);
 }
 
-bool ActionParameter::isEntityValue() const {
-  return boost::get<Entity>(&value);
+bool ActionParameter::isEntityValue() const
+{
+    return boost::get<Entity>(&value);
 }
 
-const string& ActionParameter::getStringValue() const {
+const string& ActionParameter::getStringValue() const
+{
     return get<string>(value);
 }
-    
-const Rotation& ActionParameter::getRotationValue() const {
+
+const Rotation& ActionParameter::getRotationValue() const
+{
     return get<Rotation>(value);
 }
 
-const Vector& ActionParameter::getVectorValue() const {
+const Vector& ActionParameter::getVectorValue() const
+{
     return get<Vector>(value);
 }
 
-const Entity& ActionParameter::getEntityValue() const {
+const Entity& ActionParameter::getEntityValue() const
+{
     return get<Entity>(value);
 }
 
-bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2) {
+bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2)
+{
     bool result = boost::apply_visitor(same_type_visitor(), v1, v2);
     return result;
 }
 
-std::string ActionParameter::stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception) {
+std::string ActionParameter::stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception)
+{
 
     std::string answer;
 
     ActionParamTypeCode typeCode = type.getCode();
-    switch(typeCode) {
-        case BOOLEAN_CODE: {
-            answer = (atoi((boost::get<std::string>(value)).c_str()) ? "true" : "false");
-            break;
-        }
-        // int and float are stored as string as well
-        case INT_CODE:
-        case FLOAT_CODE:
-        case STRING_CODE: {
-            answer = boost::get<std::string>(value);
-            break;
-        }
-        case VECTOR_CODE: {
-            answer = "(";
-            answer.append(opencog::toString(boost::get<Vector>(value).x));
-            answer.append(",");
-            answer.append(opencog::toString(boost::get<Vector>(value).y));
-            answer.append(",");
-            answer.append(opencog::toString(boost::get<Vector>(value).z));
-            answer.append(")");
-            break;
-        }
-        case ROTATION_CODE: {
-            answer = "(";
-            answer.append(opencog::toString(boost::get<Rotation>(value).pitch));
-            answer.append(",");
-            answer.append(opencog::toString(boost::get<Rotation>(value).roll));
-            answer.append(",");
-            answer.append(opencog::toString(boost::get<Rotation>(value).yaw));
-            answer.append(")");
-            break;
-        }
-        case ENTITY_CODE: {
-            answer = "(";
-            answer.append(opencog::toString(boost::get<Entity>(value).id));
-            answer.append(",");
-            answer.append(opencog::toString(boost::get<Entity>(value).type));
-            answer.append(")");
-            break;
-        }
-        default: {
-            throw opencog::RuntimeException(TRACE_INFO, 
-                    "ActionParameter - Invalid param type: %d", typeCode);
-            break;
-        }
+    switch (typeCode) {
+    case BOOLEAN_CODE: {
+        answer = (atoi((boost::get<std::string>(value)).c_str()) ? "true" : "false");
+        break;
+    }
+    // int and float are stored as string as well
+    case INT_CODE:
+    case FLOAT_CODE:
+    case STRING_CODE: {
+        answer = boost::get<std::string>(value);
+        break;
+    }
+    case VECTOR_CODE: {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Vector>(value).x));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Vector>(value).y));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Vector>(value).z));
+        answer.append(")");
+        break;
+    }
+    case ROTATION_CODE: {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Rotation>(value).pitch));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Rotation>(value).roll));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Rotation>(value).yaw));
+        answer.append(")");
+        break;
+    }
+    case ENTITY_CODE: {
+        answer = "(";
+        answer.append(opencog::toString(boost::get<Entity>(value).id));
+        answer.append(",");
+        answer.append(opencog::toString(boost::get<Entity>(value).type));
+        answer.append(")");
+        break;
+    }
+    default: {
+        throw opencog::RuntimeException(TRACE_INFO,
+                                        "ActionParameter - Invalid param type: %d", typeCode);
+        break;
+    }
     }
 
     return answer;

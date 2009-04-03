@@ -26,10 +26,10 @@
 
 class WorldProvider
 {
- public:
-  virtual unsigned long getLatestSimWorldTimestamp() const=0;
-  virtual opencog::AtomSpace& getAtomSpace() const = 0;
-  virtual ~WorldProvider() { }
+public:
+    virtual unsigned long getLatestSimWorldTimestamp() const = 0;
+    virtual opencog::AtomSpace& getAtomSpace() const = 0;
+    virtual ~WorldProvider() { }
 };
 
 #endif // _WORLD_PROVIDER_H_

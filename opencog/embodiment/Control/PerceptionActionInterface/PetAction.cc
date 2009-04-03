@@ -31,106 +31,118 @@
 using namespace PerceptionActionInterface;
 using namespace opencog;
 
-PetAction::PetAction(){
+PetAction::PetAction()
+{
     PAIUtils::initializeXMLPlatform();
     type = ActionType::BARK().getCode(); // default action. Just to be valid.
     sequence = 0;
-} 
+}
 
-PetAction::PetAction(const ActionType& type){
+PetAction::PetAction(const ActionType& type)
+{
     PAIUtils::initializeXMLPlatform();
     this->type = type.getCode();
-    this->sequence = 0; 
+    this->sequence = 0;
 }
 
-PetAction::~PetAction(){
+PetAction::~PetAction()
+{
 }
 
-void PetAction::setType(const ActionType& actionType) throw (opencog::InvalidParamException, std::bad_exception) {
+void PetAction::setType(const ActionType& actionType) throw (opencog::InvalidParamException, std::bad_exception)
+{
     std::string errorMessage = validateParameters(actionType, parameters);
     if (!errorMessage.empty()) {
         throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Invalid parameter: '%s'. %s.",
-                                    actionType.getName().c_str(), errorMessage.c_str());
+                                             actionType.getName().c_str(), errorMessage.c_str());
     }
-	this->type = actionType.getCode();
+    this->type = actionType.getCode();
 }
 
-const ActionType& PetAction::getType() const{
-	return ActionType::getFromCode(type);
+const ActionType& PetAction::getType() const
+{
+    return ActionType::getFromCode(type);
 }
 
-const string& PetAction::getName() const{
-	return ActionType::getFromCode(type).getName(); 
+const string& PetAction::getName() const
+{
+    return ActionType::getFromCode(type).getName();
 }
 
-void PetAction::setSequence(unsigned int sequence){
-	this->sequence = sequence; 
+void PetAction::setSequence(unsigned int sequence)
+{
+    this->sequence = sequence;
 }
 
-unsigned int PetAction::getSequence() const{
-	return this->sequence; 
+unsigned int PetAction::getSequence() const
+{
+    return this->sequence;
 }
 
-void PetAction::addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception) {
-    
+void PetAction::addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception)
+{
+
     const ActionType::ParamTypes& mandatoryParamTypes = ActionType::getFromCode(type).getMandatoryParamTypes();
     if (parameters.size() < mandatoryParamTypes.size()) {
         if (param.getType() != mandatoryParamTypes[parameters.size()]) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                    "PetAction - Param '%s', type '%s' with wrong type for parameter '%u' (mandatory: '%s').", param.getName().c_str(), param.getType().getName().c_str(), parameters.size()+1, mandatoryParamTypes[parameters.size()].getName().c_str());
+                                                 "PetAction - Param '%s', type '%s' with wrong type for parameter '%u' (mandatory: '%s').", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, mandatoryParamTypes[parameters.size()].getName().c_str());
         }
     } else {
         const ActionType::ParamTypes& optionalParamTypes =  ActionType::getFromCode(type).getOptionalParamTypes();
-        unsigned int numberOfOptionalParams = parameters.size() - mandatoryParamTypes.size(); 
+        unsigned int numberOfOptionalParams = parameters.size() - mandatoryParamTypes.size();
         if (numberOfOptionalParams >= optionalParamTypes.size()) {
             throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Param '%s', type '%s': maximum number of parameters already reached", param.getName().c_str(), param.getType().getName().c_str());
         }
         if (param.getType() != optionalParamTypes[numberOfOptionalParams]) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                    "PetAction - Param '%s', type '%s': wrong type for parameter %u (optional: %s)", param.getName().c_str(), param.getType().getName().c_str(), parameters.size()+1, optionalParamTypes[numberOfOptionalParams].getName().c_str());
+                                                 "PetAction - Param '%s', type '%s': wrong type for parameter %u (optional: %s)", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, optionalParamTypes[numberOfOptionalParams].getName().c_str());
         }
     }
     parameters.push_back(param);
 }
-    
-const list<ActionParameter>& PetAction::getParameters() const {
+
+const list<ActionParameter>& PetAction::getParameters() const
+{
     return parameters;
 }
 
-bool PetAction::containsValidParameters() const {
+bool PetAction::containsValidParameters() const
+{
     std::string errorMessage = validateParameters(ActionType::getFromCode(type), parameters);
     if (errorMessage.size() > 0) {
         logger().log(opencog::Logger::WARN, "PetAction - " + errorMessage);
         return false;
-    } 
+    }
     return true;
 }
 
-std::string PetAction::validateParameters(const ActionType& actionType, const list<ActionParameter>& params) {
+std::string PetAction::validateParameters(const ActionType& actionType, const list<ActionParameter>& params)
+{
     char buffer[1<<16];
-    
-    // Check arity: 
+
+    // Check arity:
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
-    // Check lower bound  
-    if (params.size() < mandatoryParamTypes.size()) { 
-        sprintf(buffer, "PetAction's parameter validation: Insuficient number of parameters (%u) for action '%s'", params.size(), actionType.getName().c_str()); 
+    // Check lower bound
+    if (params.size() < mandatoryParamTypes.size()) {
+        sprintf(buffer, "PetAction's parameter validation: Insuficient number of parameters (%u) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
     const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
-    // Check upper bound  
-    if (params.size() > (mandatoryParamTypes.size() + optionalParamTypes.size())) {  
-        sprintf(buffer, "PetAction::containsValidParameters(): Exceeded number of parameters (%u) for action '%s'", params.size(), actionType.getName().c_str());  
+    // Check upper bound
+    if (params.size() > (mandatoryParamTypes.size() + optionalParamTypes.size())) {
+        sprintf(buffer, "PetAction::containsValidParameters(): Exceeded number of parameters (%u) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
-      
-    // Check param types      
+
+    // Check param types
     list<ActionParameter>::const_iterator paramItr = params.begin();
-    
+
     // Mandatory parameters
     ActionType::ParamTypes::const_iterator paramTypeItr = mandatoryParamTypes.begin();
     while (paramTypeItr != mandatoryParamTypes.end()) {
         if (paramItr->getType() != *paramTypeItr) {
-            sprintf(buffer, "PetAction::containsValidParameters(): Mandatory parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());  
+            sprintf(buffer, "PetAction::containsValidParameters(): Mandatory parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
         paramTypeItr++;
@@ -141,22 +153,23 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     paramTypeItr = optionalParamTypes.begin();
     while (paramItr != params.end()) {
         if (paramItr->getType() != *paramTypeItr) {
-            sprintf(buffer, "PetAction::containsValidParameters(): Optional parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());  
+            sprintf(buffer, "PetAction::containsValidParameters(): Optional parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
         paramTypeItr++;
         paramItr++;
     }
-         
+
     return "";
 }
 
-XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc, 
-                                                                 XERCES_CPP_NAMESPACE::DOMElement* parent) const {
+XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
+        XERCES_CPP_NAMESPACE::DOMElement* parent) const
+{
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::DOMElement *actionElement = doc->createElement(tag);  
+    XERCES_CPP_NAMESPACE::DOMElement *actionElement = doc->createElement(tag);
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     XMLCh* nameStr = XERCES_CPP_NAMESPACE::XMLString::transcode(ActionType::getFromCode(type).getName().c_str());
@@ -167,16 +180,17 @@ XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAME
     XMLCh* sequenceStr = XERCES_CPP_NAMESPACE::XMLString::transcode(opencog::toString(sequence).c_str());
     actionElement->setAttribute(tag, sequenceStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&sequenceStr);
-                         
+
 
     parent->appendChild(actionElement);
-    for (list<ActionParameter>::const_iterator itr = parameters.begin(); itr != parameters.end(); itr++){
+    for (list<ActionParameter>::const_iterator itr = parameters.begin(); itr != parameters.end(); itr++) {
         itr->createPVPXmlElement(doc, actionElement);
     }
     return actionElement;
-}                                                                    
+}
 
-char *PetAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const char *attributeName) {
+char *PetAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const char *attributeName)
+{
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH + 1];
     XERCES_CPP_NAMESPACE::XMLString::transcode(attributeName, tag, PAIUtils::MAX_TAG_LENGTH);
     // TODO: not sure this is a memory leak. The method transcode() below returns a char *
@@ -186,13 +200,15 @@ char *PetAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const c
     return XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
 }
 
-XERCES_CPP_NAMESPACE::DOMNodeList *PetAction::getChildren(XERCES_CPP_NAMESPACE::DOMElement *element, const char *tagName) {
+XERCES_CPP_NAMESPACE::DOMNodeList *PetAction::getChildren(XERCES_CPP_NAMESPACE::DOMElement *element, const char *tagName)
+{
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH + 1];
     XERCES_CPP_NAMESPACE::XMLString::transcode(tagName, tag, PAIUtils::MAX_TAG_LENGTH);
     return element->getElementsByTagName(tag);
 }
 
-PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (opencog::InvalidParamException, std::bad_exception) {
+PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (opencog::InvalidParamException, std::bad_exception)
+{
 
     std::string actionName = getAttribute(actionDOMElement, NAME_ATTRIBUTE);
     ActionType actionType = ActionType::getFromName(actionName);
@@ -207,48 +223,48 @@ PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement
         ActionParamType parameterType = ActionParamType::getFromName(getAttribute(parameterDOMElement, TYPE_ATTRIBUTE));
         ActionParamTypeCode typeCode = parameterType.getCode();
         ParamValue parameterValue;
-        switch(typeCode) {
+        switch (typeCode) {
             // boolean, int and float are used as strings
-            case BOOLEAN_CODE:
-            case INT_CODE:
-            case FLOAT_CODE:
-            case STRING_CODE: {
-                std::string stringValue = getAttribute(parameterDOMElement, VALUE_ATTRIBUTE);
-                parameterValue = stringValue;
-                break;
-            }
-            case VECTOR_CODE: {
-                XERCES_CPP_NAMESPACE::DOMElement *vectorDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, VECTOR_ELEMENT)->item(0);
-                double x = atof(getAttribute(vectorDOMElement, X_ATTRIBUTE));
-                double y = atof(getAttribute(vectorDOMElement, Y_ATTRIBUTE));
-                double z = atof(getAttribute(vectorDOMElement, Z_ATTRIBUTE));
-                Vector vectorValue(x, y, z);
-                parameterValue = vectorValue;
-                break;
-            }
-            case ROTATION_CODE: {
-                XERCES_CPP_NAMESPACE::DOMElement *rotationDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, ROTATION_ELEMENT)->item(0);
-                double pitch = atof(getAttribute(rotationDOMElement, PITCH_ATTRIBUTE));
-                double roll = atof(getAttribute(rotationDOMElement, ROLL_ATTRIBUTE));
-                double yaw = atof(getAttribute(rotationDOMElement, YAW_ATTRIBUTE));
-                Rotation rotationValue(pitch, roll, yaw);
-                parameterValue = rotationValue;
-                break;
-            }
-            case ENTITY_CODE: {
-                XERCES_CPP_NAMESPACE::DOMElement *entityDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, ENTITY_ELEMENT)->item(0);
+        case BOOLEAN_CODE:
+        case INT_CODE:
+        case FLOAT_CODE:
+        case STRING_CODE: {
+            std::string stringValue = getAttribute(parameterDOMElement, VALUE_ATTRIBUTE);
+            parameterValue = stringValue;
+            break;
+        }
+        case VECTOR_CODE: {
+            XERCES_CPP_NAMESPACE::DOMElement *vectorDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, VECTOR_ELEMENT)->item(0);
+            double x = atof(getAttribute(vectorDOMElement, X_ATTRIBUTE));
+            double y = atof(getAttribute(vectorDOMElement, Y_ATTRIBUTE));
+            double z = atof(getAttribute(vectorDOMElement, Z_ATTRIBUTE));
+            Vector vectorValue(x, y, z);
+            parameterValue = vectorValue;
+            break;
+        }
+        case ROTATION_CODE: {
+            XERCES_CPP_NAMESPACE::DOMElement *rotationDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, ROTATION_ELEMENT)->item(0);
+            double pitch = atof(getAttribute(rotationDOMElement, PITCH_ATTRIBUTE));
+            double roll = atof(getAttribute(rotationDOMElement, ROLL_ATTRIBUTE));
+            double yaw = atof(getAttribute(rotationDOMElement, YAW_ATTRIBUTE));
+            Rotation rotationValue(pitch, roll, yaw);
+            parameterValue = rotationValue;
+            break;
+        }
+        case ENTITY_CODE: {
+            XERCES_CPP_NAMESPACE::DOMElement *entityDOMElement = (XERCES_CPP_NAMESPACE::DOMElement *) getChildren(parameterDOMElement, ENTITY_ELEMENT)->item(0);
 //                std::string id = PAIUtils::getInternalId(getAttribute(entityDOMElement, ID_ATTRIBUTE));
-                std::string id = getAttribute(entityDOMElement, ID_ATTRIBUTE);
-                std::string type = getAttribute(entityDOMElement, TYPE_ATTRIBUTE);
-                Entity entityValue(id, type);
-                parameterValue = entityValue;
-                break;
-            }
-            default: {
-                throw opencog::InvalidParamException(TRACE_INFO,
-                        "PetAction - Invalid param type code: %d", typeCode);
-                break;
-            }
+            std::string id = getAttribute(entityDOMElement, ID_ATTRIBUTE);
+            std::string type = getAttribute(entityDOMElement, TYPE_ATTRIBUTE);
+            Entity entityValue(id, type);
+            parameterValue = entityValue;
+            break;
+        }
+        default: {
+            throw opencog::InvalidParamException(TRACE_INFO,
+                                                 "PetAction - Invalid param type code: %d", typeCode);
+            break;
+        }
         }
         ActionParameter actionParameter(parameterName, parameterType, parameterValue);
         petAction->addParameter(actionParameter);
@@ -257,7 +273,8 @@ PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement
     return petAction;
 }
 
-std::string PetAction::stringRepresentation() const {
+std::string PetAction::stringRepresentation() const
+{
 
     char s[16];
     sprintf(s, "%d:", getSequence());
@@ -266,13 +283,13 @@ std::string PetAction::stringRepresentation() const {
     answer.append("(");
     unsigned int count = 1;
     for (list<ActionParameter>::const_iterator it = parameters.begin(); it != parameters.end(); it++) {
-        try{
+        try {
             answer.append(it->stringRepresentation());
             if (count != parameters.size()) {
                 answer.append(",");
             }
             count++;
-        } catch (opencog::RuntimeException& e){
+        } catch (opencog::RuntimeException& e) {
             // just ignore the string representation of the ActionParameter that
             // caused the exception
         }

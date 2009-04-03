@@ -57,134 +57,131 @@ using namespace std;
 
 namespace predavese
 {
-    pat make_pat1(c _c);
-    pat make_pat2(c c1, c c2);
-    pat make_pat3(c c1, c c2, c c3);
-    pat make_pat4(c c1, c c2, c c3, c c4);
-    pat make_pat5(c c1, c c2, c c3, c c4, c c5);
-    pat make_pat6(c c1, c c2, c c3, c c4, c c5, c c6);
-    pat add_pat(c c1, c c2, PatIDT id, PatMap& patmap);
-    pat add_pat(c c1, c c2, c c3, PatIDT id, PatMap& patmap);
-    pat add_pat(c c1, c c2, c c3, c c4, PatIDT id, PatMap& patmap);
+pat make_pat1(c _c);
+pat make_pat2(c c1, c c2);
+pat make_pat3(c c1, c c2, c c3);
+pat make_pat4(c c1, c c2, c c3, c c4);
+pat make_pat5(c c1, c c2, c c3, c c4, c c5);
+pat make_pat6(c c1, c c2, c c3, c c4, c c5, c c6);
+pat add_pat(c c1, c c2, PatIDT id, PatMap& patmap);
+pat add_pat(c c1, c c2, c c3, PatIDT id, PatMap& patmap);
+pat add_pat(c c1, c c2, c c3, c c4, PatIDT id, PatMap& patmap);
 //    pAtom add_terminal(const pat& p, PatMap& patmap);
-    bool add_pat(const pat& p, PatIDT id, PatMap& patmap);
-    bool add_pat(string s, PatIDT id, PatMap& patmap);   
+bool add_pat(const pat& p, PatIDT id, PatMap& patmap);
+bool add_pat(string s, PatIDT id, PatMap& patmap);
 
-/*	string make_upper(string s)
-	{
-		string ret;
-		foreach(char _c, s)
-			ret.push_back((_c>'Z' && isalpha(_c))
-				? (_c-('z'-'Z') )
-				: _c);
+/* string make_upper(string s)
+ {
+  string ret;
+  foreach(char _c, s)
+   ret.push_back((_c>'Z' && isalpha(_c))
+    ? (_c-('z'-'Z') )
+    : _c);
 
-		return ret;
-	}
+  return ret;
+ }
 */
 
-    const bool AddUnknownWordsAsElems = true;
+const bool AddUnknownWordsAsElems = true;
 
-vector<c> make_pat1(c _c) {
+vector<c> make_pat1(c _c)
+{
     vector<c> ret;
     ret.push_back(_c);
     return ret;
 }
 
-    string Atom::toString() const
-    {
-		string ret("["+ PredaveseParser::id2str[id] + (out.empty()?"]":("] ( ")));
+string Atom::toString() const
+{
+    string ret("[" + PredaveseParser::id2str[id] + (out.empty() ? "]" : ("] ( ")));
 
-        BOOST_FOREACH(c _c, out)
-        {
-            string* s = get<string>(&_c);
-            pAtom* a = get<pAtom>(&_c);
-            if (s)
-                ret += *s + " ";
-            else
-                ret += (*a)->toString() + " ";
-        }
-        return ret + (out.empty()?"":" )");
+    BOOST_FOREACH(c _c, out) {
+        string* s = get<string>(&_c);
+        pAtom* a = get<pAtom>(&_c);
+        if (s)
+            ret += *s + " ";
+        else
+            ret += (*a)->toString() + " ";
     }
+    return ret + (out.empty() ? "" : " )");
+}
 
-    string Atom::toPrettyString() const
-    {
-		string ret;
-		bool istop=true;
+string Atom::toPrettyString() const
+{
+    string ret;
+    bool istop = true;
 
-		if (out.empty())
-		{
-			ret += (!PredaveseParser::id2str[id].empty() ? (":" + PredaveseParser::id2str[id] + " ") : string(":[untyped] "));
-			return ret;
-		}
-
-        BOOST_FOREACH(c _c, out)
-			if (istop)
-			{
-				istop = false;
-
-				string* s = get<string>(&_c);
-				pAtom* a = get<pAtom>(&_c);
-				if (s)
-					ret += *s;
-				else
-					ret += (*a)->toPrettyString() + (!PredaveseParser::id2str[(*a)->id].empty() ? (":" + PredaveseParser::id2str[(*a)->id] + " ") : string(":[untyped] "));
-			}
-			else
-			{
-				string* s = get<string>(&_c);
-				pAtom* a = get<pAtom>(&_c);
-				if (s)
-					ret += "\n\t" + *s ;
-				else
-					ret += "\n\t" + (*a)->toPrettyString() + (!PredaveseParser::id2str[(*a)->id].empty() ? (":" + PredaveseParser::id2str[(*a)->id] + " ") : string(":[untyped] "));
-			}
-
-	if (PredaveseParser::id2str[id].empty())
-	{
-		puts("");
-	}
-
-		return ret;
-    }
-
-    string Atom::toIndentString(int indentLevel) const
-    {
-        string ret;
-        for (int i = 0; i < indentLevel; i++) ret += " ";
-        ret += "[" + (PredaveseParser::id2str[id].empty()? "untyped":PredaveseParser::id2str[id])  + "]";
-
-        BOOST_FOREACH(c _c, out)
-        {
-            string* s = get<string>(&_c);
-            pAtom* a = get<pAtom>(&_c);
-            if (s)
-                ret += " (" + *s + ")";
-            else
-                ret += "\n" + (*a)->toIndentString(indentLevel+1);
-        }
-        if (out.empty()) ret += "\n";
+    if (out.empty()) {
+        ret += (!PredaveseParser::id2str[id].empty() ? (":" + PredaveseParser::id2str[id] + " ") : string(":[untyped] "));
         return ret;
     }
 
-    void Atom::print() const {
-        printf("%s\n", toString().c_str());
+    BOOST_FOREACH(c _c, out)
+    if (istop) {
+        istop = false;
+
+        string* s = get<string>(&_c);
+        pAtom* a = get<pAtom>(&_c);
+        if (s)
+            ret += *s;
+        else
+            ret += (*a)->toPrettyString() + (!PredaveseParser::id2str[(*a)->id].empty() ? (":" + PredaveseParser::id2str[(*a)->id] + " ") : string(":[untyped] "));
+    } else {
+        string* s = get<string>(&_c);
+        pAtom* a = get<pAtom>(&_c);
+        if (s)
+            ret += "\n\t" + *s ;
+        else
+            ret += "\n\t" + (*a)->toPrettyString() + (!PredaveseParser::id2str[(*a)->id].empty() ? (":" + PredaveseParser::id2str[(*a)->id] + " ") : string(":[untyped] "));
     }
 
-    void Atom::prettyprint() const {
-        printf("%s\n", toPrettyString().c_str());
+    if (PredaveseParser::id2str[id].empty()) {
+        puts("");
     }
 
-    void Atom::indentprint() const {
-        printf("%s\n", toIndentString(0).c_str());
+    return ret;
+}
+
+string Atom::toIndentString(int indentLevel) const
+{
+    string ret;
+    for (int i = 0; i < indentLevel; i++) ret += " ";
+    ret += "[" + (PredaveseParser::id2str[id].empty() ? "untyped" : PredaveseParser::id2str[id])  + "]";
+
+    BOOST_FOREACH(c _c, out) {
+        string* s = get<string>(&_c);
+        pAtom* a = get<pAtom>(&_c);
+        if (s)
+            ret += " (" + *s + ")";
+        else
+            ret += "\n" + (*a)->toIndentString(indentLevel + 1);
     }
+    if (out.empty()) ret += "\n";
+    return ret;
+}
+
+void Atom::print() const
+{
+    printf("%s\n", toString().c_str());
+}
+
+void Atom::prettyprint() const
+{
+    printf("%s\n", toPrettyString().c_str());
+}
+
+void Atom::indentprint() const
+{
+    printf("%s\n", toIndentString(0).c_str());
+}
 
 #if 0
 
-	/// This inheritance system based on primes can be taken into use later, to maximize speed.
+/// This inheritance system based on primes can be taken into use later, to maximize speed.
 
 inline bool inherits(PatIDT sub, PatIDT super)
 {
-    return ! (sub%super);
+    return ! (sub % super);
 }
 /*
 template<typename IterT>
@@ -202,8 +199,7 @@ void types_of(const vector<c>& s, IterT outIt)
 
 void print(pat p)
 {
-    foreach(c _c, p)
-    {
+    foreach(c _c, p) {
         string* s = get<string>(&_c);
         pAtom* a = get<pAtom>(&_c);
         if (s)
@@ -217,7 +213,7 @@ bool add_pat(string s, PatIDT id, PatMap& patmap)
 {
     pat tpat;
     tpat.push_back(s);
-    
+
     if (STLhas(patmap, tpat))
         return false;
 
@@ -232,17 +228,19 @@ pat str2pat(string s, const PatMap& patmap)
     //opencog::tokenize(s, std::back_inserter(strs), " "); // English only
     opencog::tokenize(s, std::back_inserter(strs), " (),"); //English + Predavese
 //#ifdef _DEBUG
-//	print(strs);
+// print(strs);
 //#endif
     return strs;
 }
 
-string clean(string s) { return s; }
+string clean(string s)
+{
+    return s;
+}
 
 bool add_pat(const pat& p, PatIDT id, PatMap& patmap)
 {
-    if (STLhas(patmap, p))
-    {
+    if (STLhas(patmap, p)) {
 //        puts("Warning! Double-declaration of a pattern has occurred!");
         return false;
     }
@@ -257,7 +255,7 @@ pat make_pat2(c c1, c c2)
     pat tpat;
     tpat.push_back(c1);
     tpat.push_back(c2);
-    
+
     return tpat;
 }
 
@@ -267,7 +265,7 @@ pat make_pat3(c c1, c c2, c c3)
     tpat.push_back(c1);
     tpat.push_back(c2);
     tpat.push_back(c3);
-    
+
     return tpat;
 }
 
@@ -279,7 +277,7 @@ pat make_pat4(c c1, c c2, c c3, c c4)
     tpat.push_back(c2);
     tpat.push_back(c3);
     tpat.push_back(c4);
-    
+
     return tpat;
 }
 
@@ -291,7 +289,7 @@ pat make_pat5(c c1, c c2, c c3, c c4, c c5)
     tpat.push_back(c3);
     tpat.push_back(c4);
     tpat.push_back(c5);
-    
+
     return tpat;
 }
 
@@ -304,7 +302,7 @@ pat make_pat6(c c1, c c2, c c3, c c4, c c5, c c6)
     tpat.push_back(c4);
     tpat.push_back(c5);
     tpat.push_back(c6);
-    
+
     return tpat;
 }
 
@@ -313,7 +311,7 @@ pat add_pat(c c1, c c2, PatIDT id, PatMap& patmap)
     pat tpat;
     tpat.push_back(c1);
     tpat.push_back(c2);
-    
+
     if (add_pat(tpat, id, patmap))
         return tpat;
     else
@@ -326,7 +324,7 @@ pat add_pat(c c1, c c2, c c3, PatIDT id, PatMap& patmap)
     tpat.push_back(c1);
     tpat.push_back(c2);
     tpat.push_back(c3);
-    
+
     if (add_pat(tpat, id, patmap))
         return tpat;
     else
@@ -340,7 +338,7 @@ pat add_pat(c c1, c c2, c c3, c c4, PatIDT id, PatMap& patmap)
     tpat.push_back(c2);
     tpat.push_back(c3);
     tpat.push_back(c4);
-    
+
     if (add_pat(tpat, id, patmap))
         return tpat;
     else

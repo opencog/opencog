@@ -31,23 +31,24 @@ class ServerSocket;
 
 //------------------------------------------------------------------------------------------------------------
 /** @class CollisionSystem
-	\brief The collision detection and correction system. */
+ \brief The collision detection and correction system. */
 //------------------------------------------------------------------------------------------------------------
-class CollisionSystem {
+class CollisionSystem
+{
 protected:
-	map<iMeshWrapper*, csColliderWrapper*>  colliders;
-	map<ServerSocket*, set<string> > 		poslisteners;
-	CollisionSystem (){}
-	void ClosestColliders (csCollisionPair *pairs, int N, csCollisionPair& closest);
+    map<iMeshWrapper*, csColliderWrapper*>  colliders;
+    map<ServerSocket*, set<string> >   poslisteners;
+    CollisionSystem () {}
+    void ClosestColliders (csCollisionPair *pairs, int N, csCollisionPair& closest);
 public:
-	virtual ~CollisionSystem();
-	bool CreateColliders ();
-	bool CheckCollisions (iMeshWrapper* inert, const set<string>& non_bouncable, set<string>& bounce_archive);
-	bool InitCollider    (iMeshWrapper* mesh);
+    virtual ~CollisionSystem();
+    bool CreateColliders ();
+    bool CheckCollisions (iMeshWrapper* inert, const set<string>& non_bouncable, set<string>& bounce_archive);
+    bool InitCollider    (iMeshWrapper* mesh);
 
-	void ListenObjectPosition(ServerSocket* listener,string objname);
+    void ListenObjectPosition(ServerSocket* listener, string objname);
 
-	friend class PosListener;	
+    friend class PosListener;
 };
 
 #endif

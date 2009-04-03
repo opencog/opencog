@@ -24,33 +24,35 @@
 
 #include "OPC.h"
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-  class RuleEngineLearnedTricksHandler {
-  public:
+class RuleEngineLearnedTricksHandler
+{
+public:
     static const std::string LEARNED_TRICK_NODE_NAME;
     static const int REWARD_VALUE;
     static const int PUNISHMENT_VALUE;
     static const int NOT_SELECTED_VALUE;
 
     RuleEngineLearnedTricksHandler( OPC* opc );
-    
+
     ~RuleEngineLearnedTricksHandler( );
 
     void addLearnedSchema( const std::string& schemaName );
 
     void selectLearnedTrick( std::string& schemaName, std::set<std::string>& arguments ) throw (opencog::NotFoundException);
-    
+
     void rewardSchema( std::string& schemaName );
-    
+
     void punishSchema( std::string& schemaName );
 
     bool hasLearnedTricks( void );
-    
+
     void update( void );
-    
-  private:
-    
+
+private:
+
     void addToSTIValue( Handle link, short value );
 
     OPC* opc;
@@ -60,7 +62,7 @@ namespace OperationalPetController {
     std::string latestSelectedTrick;
     int numberOfLearnedTricks;
     opencog::RandGen* randGen;
-  };
+};
 
 }; // OperationalPetController
 

@@ -35,32 +35,37 @@
 #include <opencog/server/CogServer.h>
 #include "NetworkElement.h"
 
-namespace Procedure {
+namespace Procedure
+{
 
-  typedef std::map<RunningProcedureId,RunningComboProcedure> Map;
-  typedef std::vector<Map::iterator> Vec;
+typedef std::map<RunningProcedureId, RunningComboProcedure> Map;
+typedef std::vector<Map::iterator> Vec;
 
-  // 
-  class DonePred : public unary_function<Vec::iterator, bool> {
-      private:
-        std::set<RunningProcedureId> _set;
-    
-      public:
-        
-        explicit DonePred(const std::set<RunningProcedureId>& s) : _set(s) {}
+//
+class DonePred : public unary_function<Vec::iterator, bool>
+{
+private:
+    std::set<RunningProcedureId> _set;
 
-        // return true if the element is not in the set and false otherwise.
-        // This will be used to split the predicates that are not finished yet
-        // from the ones that already finished and must be removed from the
-        // running procedure list   
-        bool operator()(Map::iterator& elem)  { return _set.find((*elem).first) == _set.end(); }
+public:
 
-  }; // DoneSet
+    explicit DonePred(const std::set<RunningProcedureId>& s) : _set(s) {}
 
-  // 
-  class ComboInterpreter : public boost::noncopyable {
-    
-   public: 
+    // return true if the element is not in the set and false otherwise.
+    // This will be used to split the predicates that are not finished yet
+    // from the ones that already finished and must be removed from the
+    // running procedure list
+    bool operator()(Map::iterator& elem)  {
+        return _set.find((*elem).first) == _set.end();
+    }
+
+}; // DoneSet
+
+//
+class ComboInterpreter : public boost::noncopyable
+{
+
+public:
     ComboInterpreter(PerceptionActionInterface::PAI& p, opencog::RandGen& rng);
     ComboInterpreter(VirtualWorldData::VirtualWorldState& v, opencog::RandGen& rng);
     virtual ~ComboInterpreter();
@@ -72,12 +77,12 @@ namespace Procedure {
     RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments);
 
     //add a procedure to be run by the interpreter with variable unifier
-    RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments, 
-    									 combo::variable_unifier& vu);    
-    
+    RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments,
+                                    combo::variable_unifier& vu);
+
     bool isFinished(RunningProcedureId id);
 
-    // Note: this will return false if the stopProcedure() method was previously called for this same procedure id, 
+    // Note: this will return false if the stopProcedure() method was previously called for this same procedure id,
     // even if the procedure execution has failed before
     bool isFailed(RunningProcedureId id);
 
@@ -85,7 +90,7 @@ namespace Procedure {
     // Can be called only if the following conditions are true:
     // - procedure execution is finished (checked by isFinished() method)
     // - procedure execution has not failed (checked by isFailed() method)
-    // - procedure execution was not stopped (by calling stopProcedure() method) 
+    // - procedure execution was not stopped (by calling stopProcedure() method)
     combo::vertex getResult(RunningProcedureId id);
 
     // Get the result of the variable unification carried within the procedure
@@ -93,16 +98,16 @@ namespace Procedure {
     // Can be called only if the following conditions are true:
     // - procedure execution is finished (checked by isFinished() method)
     // - procedure execution has not failed (checked by isFailed() method)
-    // - procedure execution was not stopped (by calling stopProcedure() method)    
+    // - procedure execution was not stopped (by calling stopProcedure() method)
     combo::variable_unifier& getUnifierResult(RunningProcedureId id);
-    
+
     // makes the procedure with the given id to stop and remove it from the interpreter
     void stopProcedure(RunningProcedureId id);
-    
-   protected:
+
+protected:
     typedef std::set<RunningProcedureId> Set;
-    typedef std::map<RunningProcedureId,combo::vertex> ResultMap;
-    typedef std::map<RunningProcedureId,combo::variable_unifier> UnifierResultMap;
+    typedef std::map<RunningProcedureId, combo::vertex> ResultMap;
+    typedef std::map<RunningProcedureId, combo::variable_unifier> UnifierResultMap;
 
     opencog::RandGen& rng;
 //    WorldWrapper::PAIWorldWrapper _ww;
@@ -115,7 +120,7 @@ namespace Procedure {
 
     unsigned long _next;
 
-  }; // ComboInterpreter
+}; // ComboInterpreter
 
 
 } //~namespace Procedure

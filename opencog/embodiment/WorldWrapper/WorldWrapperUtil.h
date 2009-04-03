@@ -64,15 +64,15 @@ private:
     // a one-element vector while wild_card will result in a multi-valued
     // vector.
     static std::vector<combo::definite_object>
-        getDefiniteObjects(opencog::RandGen& rng,
-                           Handle smh,
-                           unsigned long time,
-                           const AtomSpace& atomSpace,
-                           const string& self_id,
-                           const string& owner_id,
-                           combo::vertex& v,
-                           bool isInThePast = false,
-                           combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+    getDefiniteObjects(opencog::RandGen& rng,
+                       Handle smh,
+                       unsigned long time,
+                       const AtomSpace& atomSpace,
+                       const string& self_id,
+                       const string& owner_id,
+                       combo::vertex& v,
+                       bool isInThePast = false,
+                       combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
     /**
      * Change precondition predicate name before evaluating it via rec_lookup function.
@@ -162,8 +162,8 @@ public:
      * self_id is considered first
      */
     static string definite_object_to_atom_name(const string& atom_name,
-                                               const string& self_id,
-                                               const string& owner_id);
+            const string& self_id,
+            const string& owner_id);
 
     /**
      * test whether 2 definite objects are equal
@@ -186,7 +186,7 @@ public:
      * (e.g. food_bowl)
      */
     static std::string lookupInheritanceLink(opencog::RandGen& rng,
-                                             const AtomSpace& as, Handle);
+            const AtomSpace& as, Handle);
 
     /**
      * atom-table querying for execution links of nullary predicates
@@ -206,13 +206,13 @@ public:
      * representation
      */
     static combo::combo_tree::iterator maketree_vertex(const combo::vertex& v,
-                                                  std::string h);
+            std::string h);
 
     /**
      * like above but with perception instead of vertex
      */
     static combo::combo_tree::iterator maketree_percept(combo::perception p,
-                                                   std::string h);
+            std::string h);
 
     /**
      * atom table lookup of a nested link-and-node struct represented
@@ -260,28 +260,28 @@ public:
      * @param vu      variable_unifier object used to resolve wild_card symbol _*_
      */
     static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
-                                              Handle smh,
-                                              unsigned long time,
-                                              const AtomSpace& atomSpace,
-                                              const string& self_id,
-                                              const string& owner_id,
-                                              combo::indefinite_object io,
-                                              bool isInThePast = false,
-                                              combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
+            Handle smh,
+            unsigned long time,
+            const AtomSpace& atomSpace,
+            const string& self_id,
+            const string& owner_id,
+            combo::indefinite_object io,
+            bool isInThePast = false,
+            combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
     throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
 
     //like above but uses directly pet_indefinite_object_enum
     static combo::vertex evalIndefiniteObject(opencog::RandGen& rng,
-                                              Handle smh,
-                                              unsigned long time,
-                                              const AtomSpace& atomSpace,
-                                              const string& self_id,
-                                              const string& owner_id,
-                                              combo::pet_indefinite_object_enum ioe,
-                                              bool isInThePast = false,
-                                              combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
-        throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
-    
+            Handle smh,
+            unsigned long time,
+            const AtomSpace& atomSpace,
+            const string& self_id,
+            const string& owner_id,
+            combo::pet_indefinite_object_enum ioe,
+            bool isInThePast = false,
+            combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
+    throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
+
     /**
      * evalPerception
      * eval perception with a given spaceMap and a given AtomSpace
@@ -315,20 +315,20 @@ public:
      * lookup location in the current localspacemap
      */
     static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::SpaceMap& sm,
-                                                  const AtomSpace& as,
-                                                  Handle h);
+            const AtomSpace& as,
+            Handle h);
 
     static SpaceServer::SpaceMapPoint getLocation(const SpaceServer::SpaceMap& sm,
-                                                  const AtomSpace& as,
-                                                  const std::string& handleName)
+            const AtomSpace& as,
+            const std::string& handleName)
     throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exception);
 
     static double getOrientation(const SpaceServer::SpaceMap& sm,
                                  const AtomSpace& as,
                                  Handle h)
-        throw (opencog::InvalidParamException,
-               opencog::AssertionException,
-               std::bad_exception);
+    throw (opencog::InvalidParamException,
+           opencog::AssertionException,
+           std::bad_exception);
 
     //get a indefinite object of type nearest_X or random_X and return
     //the associated perception is_X

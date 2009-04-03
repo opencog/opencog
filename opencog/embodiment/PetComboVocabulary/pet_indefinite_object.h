@@ -27,143 +27,145 @@
 #include "comboreduct/combo/indefinite_object.h"
 #include "pet_operator.h"
 
-namespace combo {
+namespace combo
+{
 
-  namespace id {
-    enum pet_indefinite_object_enum {
-      nearest_object,
-      nearest_edible,
-      nearest_movable,
-      nearest_pickupable,
-      nearest_drinkable,
-      nearest_avatar,
-      nearest_pet,
-      nearest_small,
-      nearest_moving,
-      nearest_noisy,
-      nearest_poo_place,
-      nearest_pee_place,
+namespace id {
+enum pet_indefinite_object_enum {
+    nearest_object,
+    nearest_edible,
+    nearest_movable,
+    nearest_pickupable,
+    nearest_drinkable,
+    nearest_avatar,
+    nearest_pet,
+    nearest_small,
+    nearest_moving,
+    nearest_noisy,
+    nearest_poo_place,
+    nearest_pee_place,
 
-      random_object,
-      random_edible,
-      random_movable,
-      random_pickupable,
-      random_drinkable,
-      random_avatar,
-      random_pet,
-      random_small,
-      random_moving,
-      random_noisy,
-      random_poo_place,
-      random_pee_place,
+    random_object,
+    random_edible,
+    random_movable,
+    random_pickupable,
+    random_drinkable,
+    random_avatar,
+    random_pet,
+    random_small,
+    random_moving,
+    random_noisy,
+    random_poo_place,
+    random_pee_place,
 
-      pet_bowl,
-      food_bowl,
-      water_bowl,
-      
-      pet_home,
-      last_food_place,
+    pet_bowl,
+    food_bowl,
+    water_bowl,
 
-      exemplar_avatar,
+    pet_home,
+    last_food_place,
 
-      pet_indefinite_object_count
-    };
-  }
+    exemplar_avatar,
 
-  typedef id::pet_indefinite_object_enum pet_indefinite_object_enum;
+    pet_indefinite_object_count
+};
+}
 
-  /*********************************************************************
-   *   Arrays containing indefinite_object name type and properties    *
-   *                 to be edited by the developer                     *
-   *********************************************************************/
+typedef id::pet_indefinite_object_enum pet_indefinite_object_enum;
 
-  namespace pet_indefinite_object_properties {
+/*********************************************************************
+ *   Arrays containing indefinite_object name type and properties    *
+ *                 to be edited by the developer                     *
+ *********************************************************************/
 
-    //struct for description of name and type
-    typedef combo::pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>::basic_description indefinite_object_basic_description;
+namespace pet_indefinite_object_properties {
 
-    //struct for property description
-    struct indefinite_object_property_description {
-      pet_indefinite_object_enum indefinite_object;
-      bool random;
-    };
+//struct for description of name and type
+typedef combo::pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>::basic_description indefinite_object_basic_description;
 
-    static const indefinite_object_basic_description iobd[] = {
-      //indefinite_object        name                   type
-      { id::nearest_object,      "nearest_object",      "indefinite_object" },
-      { id::nearest_edible,      "nearest_edible",      "indefinite_object" },
-      { id::nearest_movable,     "nearest_movable",     "indefinite_object" },
-      { id::nearest_pickupable,  "nearest_pickupable",  "indefinite_object" }, 
-      { id::nearest_drinkable,   "nearest_drinkable",   "indefinite_object" },
-      { id::nearest_avatar,      "nearest_avatar",      "indefinite_object" },
-      { id::nearest_pet,         "nearest_pet",         "indefinite_object" },
-      { id::nearest_small,       "nearest_small",       "indefinite_object" },
-      { id::nearest_moving,      "nearest_moving",      "indefinite_object" },
-      { id::nearest_noisy,       "nearest_noisy",       "indefinite_object" },
-      { id::nearest_poo_place,   "nearest_poo_place",   "indefinite_object" },
-      { id::nearest_pee_place,   "nearest_pee_place",   "indefinite_object" },
-      { id::random_object,       "random_object",       "indefinite_object" },
-      { id::random_edible,       "random_edible",       "indefinite_object" },
-      { id::random_movable,      "random_movable",      "indefinite_object" },
-      { id::random_pickupable,   "random_pickupable",   "indefinite_object" },
-      { id::random_drinkable,    "random_drinkable",    "indefinite_object" },
-      { id::random_avatar,       "random_avatar",       "indefinite_object" },
-      { id::random_pet,          "random_pet",          "indefinite_object" },
-      { id::random_small,        "random_small",        "indefinite_object" },
-      { id::random_moving,       "random_moving",       "indefinite_object" },
-      { id::random_noisy,        "random_noisy",        "indefinite_object" },
-      { id::random_poo_place,    "random_poo_place",    "indefinite_object" },
-      { id::random_pee_place,    "random_pee_place",    "indefinite_object" },
-      { id::pet_bowl,            "pet_bowl",            "indefinite_object" },
-      { id::food_bowl,           "food_bowl",           "indefinite_object" },
-      { id::water_bowl,          "water_bowl",          "indefinite_object" },
-      { id::pet_home,            "pet_home",            "indefinite_object" },
-      { id::last_food_place,     "last_food_place",     "indefinite_object" },
-      { id::exemplar_avatar,     "exemplar_avatar",     "indefinite_object" }
+//struct for property description
+struct indefinite_object_property_description {
+    pet_indefinite_object_enum indefinite_object;
+    bool random;
+};
 
-    };
+static const indefinite_object_basic_description iobd[] = {
+    //indefinite_object        name                   type
+    { id::nearest_object,      "nearest_object",      "indefinite_object" },
+    { id::nearest_edible,      "nearest_edible",      "indefinite_object" },
+    { id::nearest_movable,     "nearest_movable",     "indefinite_object" },
+    { id::nearest_pickupable,  "nearest_pickupable",  "indefinite_object" },
+    { id::nearest_drinkable,   "nearest_drinkable",   "indefinite_object" },
+    { id::nearest_avatar,      "nearest_avatar",      "indefinite_object" },
+    { id::nearest_pet,         "nearest_pet",         "indefinite_object" },
+    { id::nearest_small,       "nearest_small",       "indefinite_object" },
+    { id::nearest_moving,      "nearest_moving",      "indefinite_object" },
+    { id::nearest_noisy,       "nearest_noisy",       "indefinite_object" },
+    { id::nearest_poo_place,   "nearest_poo_place",   "indefinite_object" },
+    { id::nearest_pee_place,   "nearest_pee_place",   "indefinite_object" },
+    { id::random_object,       "random_object",       "indefinite_object" },
+    { id::random_edible,       "random_edible",       "indefinite_object" },
+    { id::random_movable,      "random_movable",      "indefinite_object" },
+    { id::random_pickupable,   "random_pickupable",   "indefinite_object" },
+    { id::random_drinkable,    "random_drinkable",    "indefinite_object" },
+    { id::random_avatar,       "random_avatar",       "indefinite_object" },
+    { id::random_pet,          "random_pet",          "indefinite_object" },
+    { id::random_small,        "random_small",        "indefinite_object" },
+    { id::random_moving,       "random_moving",       "indefinite_object" },
+    { id::random_noisy,        "random_noisy",        "indefinite_object" },
+    { id::random_poo_place,    "random_poo_place",    "indefinite_object" },
+    { id::random_pee_place,    "random_pee_place",    "indefinite_object" },
+    { id::pet_bowl,            "pet_bowl",            "indefinite_object" },
+    { id::food_bowl,           "food_bowl",           "indefinite_object" },
+    { id::water_bowl,          "water_bowl",          "indefinite_object" },
+    { id::pet_home,            "pet_home",            "indefinite_object" },
+    { id::last_food_place,     "last_food_place",     "indefinite_object" },
+    { id::exemplar_avatar,     "exemplar_avatar",     "indefinite_object" }
 
-    static const indefinite_object_property_description iopd[] = {
-      //indefinite_object       random
-      { id::nearest_object,     false },
-      { id::nearest_edible,     false },
-      { id::nearest_movable,    false },
-      { id::nearest_pickupable, false },
-      { id::nearest_drinkable,  false },
-      { id::nearest_avatar,     false },
-      { id::nearest_pet,        false },
-      { id::nearest_small,      false },
-      { id::nearest_moving,     false },
-      { id::nearest_noisy,      false },
-      { id::nearest_poo_place,  false },
-      { id::nearest_pee_place,  false },
-      { id::random_object,      true },
-      { id::random_edible,      true },
-      { id::random_movable,     true },
-      { id::random_pickupable,  true },
-      { id::random_drinkable,   true },
-      { id::random_avatar,      true },
-      { id::random_pet,         true },
-      { id::random_small,       true },
-      { id::random_moving,      true },
-      { id::random_noisy,       true },
-      { id::random_poo_place,   true },
-      { id::random_pee_place,   true },
-      { id::pet_bowl,           false },
-      { id::food_bowl,          false },
-      { id::water_bowl,         false },
-      { id::pet_home,           false },
-      { id::last_food_place,    false },
-      { id::exemplar_avatar,    false }
-    };
+};
 
-  }//~namespace pet_perception_properties
+static const indefinite_object_property_description iopd[] = {
+    //indefinite_object       random
+    { id::nearest_object,     false },
+    { id::nearest_edible,     false },
+    { id::nearest_movable,    false },
+    { id::nearest_pickupable, false },
+    { id::nearest_drinkable,  false },
+    { id::nearest_avatar,     false },
+    { id::nearest_pet,        false },
+    { id::nearest_small,      false },
+    { id::nearest_moving,     false },
+    { id::nearest_noisy,      false },
+    { id::nearest_poo_place,  false },
+    { id::nearest_pee_place,  false },
+    { id::random_object,      true },
+    { id::random_edible,      true },
+    { id::random_movable,     true },
+    { id::random_pickupable,  true },
+    { id::random_drinkable,   true },
+    { id::random_avatar,      true },
+    { id::random_pet,         true },
+    { id::random_small,       true },
+    { id::random_moving,      true },
+    { id::random_noisy,       true },
+    { id::random_poo_place,   true },
+    { id::random_pee_place,   true },
+    { id::pet_bowl,           false },
+    { id::food_bowl,          false },
+    { id::water_bowl,         false },
+    { id::pet_home,           false },
+    { id::last_food_place,    false },
+    { id::exemplar_avatar,    false }
+};
 
-  //pet_indefinite_object both derive
-  //from indefinite_object_base and pet_operator
-  class pet_indefinite_object : public pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>, public indefinite_object_base {
+}//~namespace pet_perception_properties
 
-  private:
+//pet_indefinite_object both derive
+//from indefinite_object_base and pet_operator
+class pet_indefinite_object : public pet_operator<pet_indefinite_object_enum, id::pet_indefinite_object_count>, public indefinite_object_base
+{
+
+private:
 
     //private attribute
     bool _random; //indicate whether the indefinite object is random
@@ -179,7 +181,7 @@ namespace combo {
     static const pet_indefinite_object* init_indefinite_object();
     void set_indefinite_object(pet_indefinite_object_enum);
 
-  public:
+public:
     //name
     const std::string& get_name() const;
 
@@ -209,7 +211,7 @@ namespace combo {
     //is_random, property used by PetBrain
     bool is_random() const;
 
-  };
+};
 }//~namespace combo
 
 #endif

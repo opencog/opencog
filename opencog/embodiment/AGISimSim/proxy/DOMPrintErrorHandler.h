@@ -34,12 +34,12 @@ class DOMPrintErrorHandler : public DOMErrorHandler
 {
 public:
 
-    DOMPrintErrorHandler(){};
-    ~DOMPrintErrorHandler(){};
+    DOMPrintErrorHandler() {};
+    ~DOMPrintErrorHandler() {};
 
     /** @name The error handler interface */
     bool handleError(const DOMError& domError);
-    void resetErrors(){};
+    void resetErrors() {};
 
 private :
     /* Unimplemented constructors and operators */

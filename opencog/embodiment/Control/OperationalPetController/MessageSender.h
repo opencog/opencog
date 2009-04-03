@@ -27,46 +27,48 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalPetController{
+namespace OperationalPetController
+{
 
 using namespace opencog;
 
-class MessageSender{
-	
-	public:
-		virtual ~MessageSender() {}
-	
-		/**
-		 *  
-		 * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
-		 */ 	
-		virtual bool sendReward(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &triedSchema, const double reward) = 0;
-		
-		/**
-		 * 
-		 */
-		virtual bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, AtomSpace& atomSpace) = 0;
-	
-		/**
-		 * 
-		 */
-		virtual bool sendCommand(const std::string &command, const std::string &schema) = 0;
+class MessageSender
+{
 
-        /**
-         *
-         */ 
-        virtual bool sendFeedback(const std::string &ownerId, const std::string &feedback) = 0;
+public:
+    virtual ~MessageSender() {}
 
-        /**
-         *  
-         */
-        virtual bool sendTrySchema(const std::string &schemaName, const std::vector<std::string> & schemaArgs) = 0;
-	
-        /**
-         *  
-         */
-        virtual bool sendStopLearning(const std::string &schemaName, const std::vector<std::string> & schemaArgs) = 0;
+    /**
+     *
+     * @return a boolean value that indicates the success (true) or failure (false) of this sending operation.
+     */
+    virtual bool sendReward(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &triedSchema, const double reward) = 0;
+
+    /**
+     *
+     */
+    virtual bool sendExemplar(const std::string &schema, const std::vector<std::string> & schemaArguments, const std::string &ownerId, const std::string &avatarId, AtomSpace& atomSpace) = 0;
+
+    /**
+     *
+     */
+    virtual bool sendCommand(const std::string &command, const std::string &schema) = 0;
+
+    /**
+     *
+     */
+    virtual bool sendFeedback(const std::string &ownerId, const std::string &feedback) = 0;
+
+    /**
+     *
+     */
+    virtual bool sendTrySchema(const std::string &schemaName, const std::vector<std::string> & schemaArgs) = 0;
+
+    /**
+     *
+     */
+    virtual bool sendStopLearning(const std::string &schemaName, const std::vector<std::string> & schemaArgs) = 0;
 
 }; // class
 }  // namespace
-#endif 
+#endif

@@ -29,34 +29,38 @@
 #include <time.h>
 #include "SimulationParameters.h"
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
 using namespace opencog;
 
-class TickerAgent : public Agent {
+class TickerAgent : public Agent
+{
 
-    private:
+private:
 
-        time_t lastTickTime;
-        SimulationParameters* simParameters;
-        int realTimeSecondsInOneTick;
+    time_t lastTickTime;
+    SimulationParameters* simParameters;
+    int realTimeSecondsInOneTick;
 
-    public:
+public:
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("PetaverseProxySimulator::TickerAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("PetaverseProxySimulator::TickerAgent");
+        return _ci;
+    }
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~TickerAgent();
-        TickerAgent();
-        void init(SimulationParameters&);
+    ~TickerAgent();
+    TickerAgent();
+    void init(SimulationParameters&);
 
-        void run(CogServer *server);
+    void run(CogServer *server);
 
 }; // class
 }  // namespace

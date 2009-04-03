@@ -12,11 +12,12 @@
 
 using namespace behavior;
 
-class BehaviorCategoryUTest : public CxxTest::TestSuite {
+class BehaviorCategoryUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     BehaviorCategoryUTest() {
 

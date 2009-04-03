@@ -23,25 +23,27 @@
 #define NEARPREDICATEUPDATER_H_
 
 /**
- * This class is used to update the near predicates whenever an object 
- * changes its position in the latest SpaceMap. 
+ * This class is used to update the near predicates whenever an object
+ * changes its position in the latest SpaceMap.
  */
 #include "BasicPredicateUpdater.h"
 #include <opencog/atomspace/AtomSpace.h>
 
-namespace OperationalPetController{
+namespace OperationalPetController
+{
 
-class NearPredicateUpdater : public OperationalPetController::BasicPredicateUpdater {
+class NearPredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+{
 
-    public:
+public:
 
-        NearPredicateUpdater(AtomSpace& _atomSpace);
-        ~NearPredicateUpdater();
+    NearPredicateUpdater(AtomSpace& _atomSpace);
+    ~NearPredicateUpdater();
 
-        void update(Handle object, Handle pet, unsigned long timestamp );
+    void update(Handle object, Handle pet, unsigned long timestamp );
 
 }; // class
 }  // namespace
 
-#endif 
+#endif
 

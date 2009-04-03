@@ -30,8 +30,8 @@
 
 using namespace OperationalPetController;
 
-RuleEngineUtil::RuleEngineUtil( RuleEngine* ruleEngine ) 
-    : ruleEngine( ruleEngine )
+RuleEngineUtil::RuleEngineUtil( RuleEngine* ruleEngine )
+        : ruleEngine( ruleEngine )
 {
     this->cyclesDuringNovelty = atoi((this->ruleEngine->parameters.get("RE_CYCLES_DURING_NOVELTY")).c_str());
 }
@@ -52,16 +52,16 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelObjectHandleSet( void )
     const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->objects.begin( );
-          it != this->ruleEngine->objects.end( ); ++it ) {
+            it != this->ruleEngine->objects.end( ); ++it ) {
         //check that the object has not been seen or not for long
         if ( it->second.getFirstSeenCycle( )
-             >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
+                >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
             //insert if so
             res.insert(AtomSpaceUtil::getObjectHandle(as, it->first));
         } // if
     } // for
     return res;
-}    
+}
 
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelAgentHandleSet( void )
 {
@@ -69,16 +69,16 @@ RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelAgentHandleSet( void )
     const AtomSpace& as = *(ruleEngine->opc->getAtomSpace());
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->avatars.begin( );
-          it != this->ruleEngine->avatars.end( ); ++it ) {
+            it != this->ruleEngine->avatars.end( ); ++it ) {
         //check that the object has not been seen or not for long
         if ( it->second.getFirstSeenCycle( )
-             >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
+                >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
             //insert if so
             res.insert(AtomSpaceUtil::getAgentHandle(as, it->first));
         } // if
     } // for
     return res;
-}    
+}
 
 bool RuleEngineUtil::isNovelty( void )
 {
@@ -89,9 +89,9 @@ bool RuleEngineUtil::isAvatarNovelty( void )
 {
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->avatars.begin( );
-          it != this->ruleEngine->avatars.end( ); ++it ) {
+            it != this->ruleEngine->avatars.end( ); ++it ) {
         if ( it->second.getFirstSeenCycle( )
-             >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
+                >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
             return true;
         } // if
     } // for
@@ -103,9 +103,9 @@ bool RuleEngineUtil::isObjectNovelty( void )
 
     RuleEngine::Id_EntityPerception_Map_Const_It it;
     for ( it = this->ruleEngine->objects.begin( );
-          it != this->ruleEngine->objects.end( ); ++it ) {
+            it != this->ruleEngine->objects.end( ); ++it ) {
         if ( it->second.getFirstSeenCycle( )
-             >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
+                >= (this->ruleEngine->cycle - cyclesDuringNovelty) ) {
             return true;
         } // if
     } // for

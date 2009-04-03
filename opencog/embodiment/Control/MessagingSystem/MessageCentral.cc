@@ -28,27 +28,32 @@
 
 #include <LoggerFactory.h>
 
-namespace MessagingSystem {
+namespace MessagingSystem
+{
 
-MessageCentral::~MessageCentral() {
-	pthread_mutex_destroy(&messageQueueLock);
+MessageCentral::~MessageCentral()
+{
+    pthread_mutex_destroy(&messageQueueLock);
 }
 
 //MessageCentral::MessageCentral(const Control::SystemParameters &params) : parameters(params) {
-MessageCentral::MessageCentral() {
+MessageCentral::MessageCentral()
+{
 
     pthread_mutex_init(&messageQueueLock, NULL);
 
 //    Util::Logger::initMainLogger(Control::LoggerFactory::getLogger(this->parameters, this->parameters.get("ROUTER_ID")));
 }
 
-void MessageCentral::lockQueue(){
+void MessageCentral::lockQueue()
+{
     pthread_mutex_lock(&messageQueueLock);
 }
 
-void MessageCentral::unlockQueue(){
+void MessageCentral::unlockQueue()
+{
     pthread_mutex_unlock(&messageQueueLock);
 }
-  
+
 
 }

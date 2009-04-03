@@ -41,12 +41,10 @@ public:
     //  Constructors and Destructor
     // -----------------------------------------------------------------------
     DOMTreeErrorReporter() :
-       fSawErrors(false)
-    {
+            fSawErrors(false) {
     }
 
-    ~DOMTreeErrorReporter()
-    {
+    ~DOMTreeErrorReporter() {
     }
 
 
@@ -89,14 +87,12 @@ public :
     // -----------------------------------------------------------------------
     //  Constructors and Destructor
     // -----------------------------------------------------------------------
-    StrX(const XMLCh* const toTranscode)
-    {
+    StrX(const XMLCh* const toTranscode) {
         // Call the private transcoding method
         fLocalForm = XMLString::transcode(toTranscode);
     }
 
-    ~StrX()
-    {
+    ~StrX() {
         XMLString::release(&fLocalForm);
     }
 
@@ -104,8 +100,7 @@ public :
     // -----------------------------------------------------------------------
     //  Getter methods
     // -----------------------------------------------------------------------
-    const char* localForm() const
-    {
+    const char* localForm() const {
         return fLocalForm;
     }
 

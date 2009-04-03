@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "PAI.h" 
+#include "PAI.h"
 #include "PredicatesUpdater.h"
 #include "NearPredicateUpdater.h"
 #include "IsSmallPredicateUpdater.h"
@@ -37,7 +37,8 @@ static const unsigned long timeWindow = 600;
 using namespace OperationalPetController;
 
 PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId) :
-									atomSpace(_atomSpace), petId(_petId){
+        atomSpace(_atomSpace), petId(_petId)
+{
     logger().log(opencog::Logger::DEBUG, "%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
     // perceptual predicates
@@ -53,31 +54,33 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }
 
-PredicatesUpdater::~PredicatesUpdater(){
-  foreach(BasicPredicateUpdater* updater, updaters) {
-    delete updater;
-  }
-  updaters.clear();
-  delete this->petPsychePredicatesUpdater;
-}		
-
-void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp){
-	
-  Handle petHandle = atomSpace.getHandle(SL_PET_NODE, petId);
-  if ( petHandle == Handle::UNDEFINED ) {
-    petHandle = atomSpace.getHandle(SL_HUMANOID_NODE, petId);
-  } // if
-  
-  for(unsigned int i = 0; i < objects.size(); i++){
-    
-    // updating all predicates ...
-    for(unsigned int j = 0; j < updaters.size(); j++){
-      updaters[j]->update(objects[i], petHandle, timestamp );
+PredicatesUpdater::~PredicatesUpdater()
+{
+    foreach(BasicPredicateUpdater* updater, updaters) {
+        delete updater;
     }
-    
-  } // for
+    updaters.clear();
+    delete this->petPsychePredicatesUpdater;
+}
 
-  if (objects.size() > 0) {
-      petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
-  }
+void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp)
+{
+
+    Handle petHandle = atomSpace.getHandle(SL_PET_NODE, petId);
+    if ( petHandle == Handle::UNDEFINED ) {
+        petHandle = atomSpace.getHandle(SL_HUMANOID_NODE, petId);
+    } // if
+
+    for (unsigned int i = 0; i < objects.size(); i++) {
+
+        // updating all predicates ...
+        for (unsigned int j = 0; j < updaters.size(); j++) {
+            updaters[j]->update(objects[i], petHandle, timestamp );
+        }
+
+    } // for
+
+    if (objects.size() > 0) {
+        petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
+    }
 }

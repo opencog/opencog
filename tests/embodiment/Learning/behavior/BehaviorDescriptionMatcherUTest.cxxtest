@@ -13,11 +13,12 @@
 
 using namespace behavior;
 
-class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
+class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     BehaviorDescriptionMatcherUTest() {
 
@@ -51,7 +52,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
 
         Temporal t41(4, 7);
         Temporal t42(6, 8);
-        
+
         CompositeBehaviorDescription bd1;
         CompositeBehaviorDescription bd2;
         CompositeBehaviorDescription bd3;
@@ -72,7 +73,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
-        
+
         //printf("\n%s\n", category.toString().c_str());
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
@@ -103,7 +104,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
 
         Temporal t41(4, 7);
         Temporal t42(6, 8);
-        
+
         CompositeBehaviorDescription bd1;
         CompositeBehaviorDescription bd2;
         CompositeBehaviorDescription bd3;
@@ -124,7 +125,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
-        
+
         //printf("\n%s\n", category.toString().c_str());
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
@@ -174,7 +175,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
 
         Temporal t41(4, 7);
         Temporal t42(6, 8);
-        
+
         CompositeBehaviorDescription bd1;
         CompositeBehaviorDescription bd2;
         CompositeBehaviorDescription bd3;
@@ -196,7 +197,7 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
         category.addCompositeBehaviorDescription(bd1);
         category.addCompositeBehaviorDescription(bd2);
         category.addCompositeBehaviorDescription(bd3);
-        
+
         //printf("\n%s\n", category.toString().c_str());
         //printf("\n%s\n", category.toStringTimeline().c_str());
 
@@ -371,10 +372,10 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
 
         BehaviorDescriptionMatcher matcher;
 
-        Temporal t11(1,2);
-        Temporal t12(2,3);
-        Temporal t13(3,4);
-        Temporal t14(4,5);
+        Temporal t11(1, 2);
+        Temporal t12(2, 3);
+        Temporal t13(3, 4);
+        Temporal t14(4, 5);
         CompositeBehaviorDescription bdTest1;
         bdTest1.addPredicate(h1, t11);
         bdTest1.addPredicate(h1, t12);
@@ -385,9 +386,9 @@ class BehaviorDescriptionMatcherUTest : public CxxTest::TestSuite {
         //printf("\n%s", matcher.toStringTestCase(category, bdTest1).c_str());
         TS_ASSERT(matcher.toStringTestCase(category, bdTest1) == "w1 = 1.000000\nw2 = 1.000000\nw3 = 1.000000\nf1 = 1.000000\nf2 = 1.000000\nf3 = 0.500000\nfitness = 0.833333\n");
 
-        Temporal t21(1,6);
-        Temporal t22(6,9);
-        Temporal t23(8,10);
+        Temporal t21(1, 6);
+        Temporal t22(6, 9);
+        Temporal t23(8, 10);
         CompositeBehaviorDescription bdTest2;
         bdTest2.addPredicate(h3, t21);
         bdTest2.addPredicate(h2, t22);

@@ -11,11 +11,12 @@
 
 using namespace OperationalPetController;
 
-class FeelingsManipulatorUTest : public CxxTest::TestSuite {
+class FeelingsManipulatorUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     FeelingsManipulatorUTest() {
 

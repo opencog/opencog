@@ -25,19 +25,21 @@
 #include <xercesc/sax/ErrorHandler.hpp>
 #include <xercesc/sax/SAXParseException.hpp>
 
-namespace VirtualWorldData {
+namespace VirtualWorldData
+{
 
-class XmlErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler  {
-    private:
-        void resetErrors();
+class XmlErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler
+{
+private:
+    void resetErrors();
 
-        void warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
+    void warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
 
-        void error(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
-        void fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
+    void error(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
+    void fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
 
-    public: 
-        XmlErrorHandler() { }
+public:
+    XmlErrorHandler() { }
 
 }; // class
 }  // namespace

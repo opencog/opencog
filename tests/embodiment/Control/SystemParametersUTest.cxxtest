@@ -11,11 +11,12 @@
 
 using namespace Control;
 
-class SystemParametersUTest : public CxxTest::TestSuite {
+class SystemParametersUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     SystemParametersUTest() {
 

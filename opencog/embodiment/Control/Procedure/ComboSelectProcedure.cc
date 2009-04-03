@@ -23,7 +23,8 @@
 
 using namespace Procedure;
 
-ComboSelectProcedure::ComboSelectProcedure(){
+ComboSelectProcedure::ComboSelectProcedure()
+{
     this->name = "";
     this->firstScriptName = "";
     this->secondScriptName = "";
@@ -34,44 +35,53 @@ ComboSelectProcedure::ComboSelectProcedure(){
 //}
 
 ComboSelectProcedure::ComboSelectProcedure(const std::string& _n,
-                                           const ComboProcedure& _f,
-                                           const ComboProcedure& _s)
-    : name(_n), firstScript(_f), secondScript(_s){
+        const ComboProcedure& _f,
+        const ComboProcedure& _s)
+        : name(_n), firstScript(_f), secondScript(_s)
+{
 
-    this->firstScriptName = firstScript.getName();       
-    this->secondScriptName = secondScript.getName();       
+    this->firstScriptName = firstScript.getName();
+    this->secondScriptName = secondScript.getName();
 }
 
-ComboSelectProcedure::~ComboSelectProcedure(){
+ComboSelectProcedure::~ComboSelectProcedure()
+{
 }
 
 
-ProcedureType ComboSelectProcedure::getType() const {
+ProcedureType ComboSelectProcedure::getType() const
+{
     return Procedure::COMBO_SELECT;
 }
 
-unsigned int ComboSelectProcedure::getArity() const {
+unsigned int ComboSelectProcedure::getArity() const
+{
     // for now only ComboSelectProcedure without parameters
     return 0;
 }
 
-const std::string& ComboSelectProcedure::getName() const{
+const std::string& ComboSelectProcedure::getName() const
+{
     return this->name;
 }
 
-const ComboProcedure& ComboSelectProcedure::getFirstScript() const {
+const ComboProcedure& ComboSelectProcedure::getFirstScript() const
+{
     return this->firstScript;
 }
 
-const ComboProcedure& ComboSelectProcedure::getSecondScript() const {
+const ComboProcedure& ComboSelectProcedure::getSecondScript() const
+{
     return this->secondScript;
 }
 
-const std::string& ComboSelectProcedure::getFirstScriptName() const{
+const std::string& ComboSelectProcedure::getFirstScriptName() const
+{
     return this->firstScriptName;
 }
 
-const std::string& ComboSelectProcedure::getSecondScriptName() const{
+const std::string& ComboSelectProcedure::getSecondScriptName() const
+{
     return this->secondScriptName;
 }
 

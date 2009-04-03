@@ -22,8 +22,8 @@
 #ifndef _ACTION_PARAM_TYPE_H_
 #define _ACTION_PARAM_TYPE_H_
 /**
- * ActionParamType.h: 
- * 
+ * ActionParamType.h:
+ *
  * Defines the types of action paramters, according with XSD, as follows:
  * <xsd:enumeration value="boolean"/>
  * <xsd:enumeration value="int"/>
@@ -35,7 +35,7 @@
  * <xsd:enumeration value="entity"/>
  * <xsd:enumeration value="nil"/> => not used in PB side
  */
- 
+
 #include <string>
 #include <map>
 #include <sstream>
@@ -44,81 +44,83 @@
 
 #include "util/exceptions.h"
 
-namespace PerceptionActionInterface {
-    
+namespace PerceptionActionInterface
+{
+
 /**
- * Numeric codes for each action parameter type: 
+ * Numeric codes for each action parameter type:
  */
 enum ActionParamTypeCode {
     BOOLEAN_CODE,
     INT_CODE,
-    FLOAT_CODE,    
-    STRING_CODE,    
-    VECTOR_CODE,    
-    ROTATION_CODE,    
-    ENTITY_CODE,    
-    
-    NUMBER_OF_ACTION_PARAM_TYPES // This must be at the end of the enumeration in order to count the number of action types.   
+    FLOAT_CODE,
+    STRING_CODE,
+    VECTOR_CODE,
+    ROTATION_CODE,
+    ENTITY_CODE,
+
+    NUMBER_OF_ACTION_PARAM_TYPES // This must be at the end of the enumeration in order to count the number of action types.
 };
 
 
 /**
  * ActionParamType class. Wrappers both primitive's code and name in an object
  */
-class ActionParamType {
-    
-    public:
-        // Object methods
-        const std::string& getName() const;
-        ActionParamTypeCode getCode() const;
+class ActionParamType
+{
 
-        bool operator==(const ActionParamType& other) const;
-        bool operator!=(const ActionParamType& other) const;
+public:
+    // Object methods
+    const std::string& getName() const;
+    ActionParamTypeCode getCode() const;
 
-        // Class methods
-        static void init();
-        
-        /**
-         * @throws InvalidParamException if an invalid Action parameter type string is given
-         */
-        static const ActionParamType& getFromName(const std::string& name) throw (opencog::InvalidParamException, std::bad_exception);
-        /**
-         * @throws InvalidParamException if an invalid Action parameter type code is given
-         */
-        static const ActionParamType& getFromCode(ActionParamTypeCode code) throw (opencog::InvalidParamException, std::bad_exception);
+    bool operator==(const ActionParamType& other) const;
+    bool operator!=(const ActionParamType& other) const;
 
-        static const ActionParamType& BOOLEAN();
-        static const ActionParamType& INT();
-        static const ActionParamType& FLOAT();
-        static const ActionParamType& STRING();
-        static const ActionParamType& VECTOR();
-        static const ActionParamType& ROTATION();
-        static const ActionParamType& ENTITY();
-        
-    private:
-        // Attributes
-        ActionParamTypeCode code;
-        std::string name;
-        
-        /**
-         * Empty constructor
-         */
-        ActionParamType();
+    // Class methods
+    static void init();
 
-        /**
-         * Constructor
-         */
-        ActionParamType(ActionParamTypeCode _code, const std::string& _name);
-        
-        // Static data structure
-        typedef std::map<std::string, ActionParamType*> Name2ActionParamTypeMap;
-        typedef std::map<ActionParamTypeCode, ActionParamType*> Code2ActionParamTypeMap;
-        static Name2ActionParamTypeMap nameMap;
-        static Code2ActionParamTypeMap codeMap;
+    /**
+     * @throws InvalidParamException if an invalid Action parameter type string is given
+     */
+    static const ActionParamType& getFromName(const std::string& name) throw (opencog::InvalidParamException, std::bad_exception);
+    /**
+     * @throws InvalidParamException if an invalid Action parameter type code is given
+     */
+    static const ActionParamType& getFromCode(ActionParamTypeCode code) throw (opencog::InvalidParamException, std::bad_exception);
 
-        // private static methods        
-        static bool existName(const std::string& name);
-        static bool existCode(ActionParamTypeCode code);
+    static const ActionParamType& BOOLEAN();
+    static const ActionParamType& INT();
+    static const ActionParamType& FLOAT();
+    static const ActionParamType& STRING();
+    static const ActionParamType& VECTOR();
+    static const ActionParamType& ROTATION();
+    static const ActionParamType& ENTITY();
+
+private:
+    // Attributes
+    ActionParamTypeCode code;
+    std::string name;
+
+    /**
+     * Empty constructor
+     */
+    ActionParamType();
+
+    /**
+     * Constructor
+     */
+    ActionParamType(ActionParamTypeCode _code, const std::string& _name);
+
+    // Static data structure
+    typedef std::map<std::string, ActionParamType*> Name2ActionParamTypeMap;
+    typedef std::map<ActionParamTypeCode, ActionParamType*> Code2ActionParamTypeMap;
+    static Name2ActionParamTypeMap nameMap;
+    static Code2ActionParamTypeMap codeMap;
+
+    // private static methods
+    static bool existName(const std::string& name);
+    static bool existCode(ActionParamTypeCode code);
 };
 
 };

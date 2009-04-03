@@ -25,26 +25,30 @@
 
 #include <opencog/server/Agent.h>
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
 using namespace opencog;
 
-class SleepAgent : public Agent {
+class SleepAgent : public Agent
+{
 
-    private:
+private:
 
-    public:
+public:
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("OperationalPetController::SleepAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::SleepAgent");
+        return _ci;
+    }
 
-        ~SleepAgent();
-        SleepAgent();
+    ~SleepAgent();
+    SleepAgent();
 
-        void run(CogServer *opc);
+    void run(CogServer *opc);
 
 }; // class
 }  // namespace

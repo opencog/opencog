@@ -46,36 +46,37 @@
 #include "util/exceptions.h"
 #include "WorldWrapper.h"
 
-namespace Procedure {
+namespace Procedure
+{
 
-  using namespace WorldWrapper;
+using namespace WorldWrapper;
 
-  struct RunningComboProcedure : public combo::Evaluator {
+struct RunningComboProcedure : public combo::Evaluator {
 
     //the exception that
     //TODO
-    struct ActionPlanSendingFailure { 
-      ActionPlanSendingFailure(PerceptionActionInterface::ActionPlanID _id) : id(_id) { }
-      PerceptionActionInterface::ActionPlanID id;
+    struct ActionPlanSendingFailure {
+        ActionPlanSendingFailure(PerceptionActionInterface::ActionPlanID _id) : id(_id) { }
+        PerceptionActionInterface::ActionPlanID id;
     };
 
     //these implement the callback interface combo::Evaluator used by the
     //regular combo interpreter when called by us
     combo::vertex eval_action(combo::combo_tree::iterator,
-			      combo::variable_unifier&);
+                              combo::variable_unifier&);
     combo::vertex eval_procedure(combo::combo_tree::iterator,
-				 combo::variable_unifier&);
+                                 combo::variable_unifier&);
     combo::vertex eval_percept(combo::combo_tree::iterator,
-			       combo::variable_unifier&);
+                               combo::variable_unifier&);
     combo::vertex eval_indefinite_object(combo::indefinite_object,
-					 combo::variable_unifier&);
+                                         combo::variable_unifier&);
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
-			  opencog::RandGen& rng,
-			  const std::vector<combo::vertex>& arguments,
-			  bool doesSendDefinitePlan = true,
-			  combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+                          opencog::RandGen& rng,
+                          const std::vector<combo::vertex>& arguments,
+                          bool doesSendDefinitePlan = true,
+                          combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
     //copy ctor - fatal runtime error if the rhs has already begun running
     RunningComboProcedure(const RunningComboProcedure&);
@@ -87,84 +88,87 @@ namespace Procedure {
 
     //terminate - prevent future plans from being evaluated,
     //sets result to null_vertex - note that this is not the same as failure
-    void stop() { 
-      _tr=combo::combo_tree(combo::id::null_vertex);
-      _it=_tr.end();
+    void stop() {
+        _tr = combo::combo_tree(combo::id::null_vertex);
+        _it = _tr.end();
     }
 
     //is the rp ready to run an action plan?
-    bool isReady() const { 
-      return (_tr.is_valid(_it) && (!_hasBegun || _ww.isPlanFinished()));
+    bool isReady() const {
+        return (_tr.is_valid(_it) && (!_hasBegun || _ww.isPlanFinished()));
     }
     //is the rp done running?
     bool isFinished() {
-        if(!finished){
+        if (!finished) {
             finished = (!_tr.is_valid(_it) && (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
         }
         return finished;
 
-/*      stringstream ss;
-      ss << _tr;
-      logger().log(opencog::Logger::DEBUG, 
-      "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'", 
-      ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
+        /*      stringstream ss;
+              ss << _tr;
+              logger().log(opencog::Logger::DEBUG,
+              "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'",
+              ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
 
-      return (!_tr.is_valid(_it) &&
-	      (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
-  */  }
-    //did the last action plan executed by the procedure fail?
-    bool isFailed() const { 
-      return
-	(_failed ? true : 
-	 (!_failed ? false : 
-	  (_hasBegun && _ww.isPlanFailed())));
+              return (!_tr.is_valid(_it) &&
+               (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
+          */
     }
-    
+    //did the last action plan executed by the procedure fail?
+    bool isFailed() const {
+        return
+            (_failed ? true :
+             (!_failed ? false :
+              (_hasBegun && _ww.isPlanFailed())));
+    }
+
     // Get the result of the procedure
     // Can be called only if the following conditions are true:
     // - procedure execution is finished (checked by isFinished() method)
     // returns null_procedure if execution was stopped in the middle
     combo::vertex getResult() {
-      opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
-      if (_hasBegun)
-          return isFailed()?combo::id::action_failure:combo::id::action_success;
-      if (_tr.size()==1)
-          return *_tr.begin();
-      return combo::id::action_success;
+        opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+        if (_hasBegun)
+            return isFailed() ? combo::id::action_failure : combo::id::action_success;
+        if (_tr.size() == 1)
+            return *_tr.begin();
+        return combo::id::action_success;
     }
-    
-    combo::variable_unifier& getUnifierResult(){
-    	opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
-    	return _vu;
+
+    combo::variable_unifier& getUnifierResult() {
+        opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+        return _vu;
     }
-    
-  protected:
+
+protected:
     typedef combo::combo_tree::sibling_iterator sib_it;
 
     WorldWrapperBase& _ww;
 
     combo::combo_tree _tr;
     sib_it _it; //_it is kept pointing at the tree node to be executed next; an
-		//invalid iterator indicates nothing more to execute. for an
-		//action_action_if conditional, pointing at the root of the
-		//first child indicates that the condition branch has been
-		//fully evaluated but not acted on yet (whereas pointing at the
-		//conditional node itself indicates that the condition branch
-		//has not yet been evaluated
+    //invalid iterator indicates nothing more to execute. for an
+    //action_action_if conditional, pointing at the root of the
+    //first child indicates that the condition branch has been
+    //fully evaluated but not acted on yet (whereas pointing at the
+    //conditional node itself indicates that the condition branch
+    //has not yet been evaluated
 
-    opencog::RandGen& _rng; 
+    opencog::RandGen& _rng;
 
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
     boost::tribool _failed; //set to true if failed, false if not failed,
-			    //unknown to decide by query
+    //unknown to decide by query
     //a stack is needed to handle nested loops correctly
-    std::stack<std::pair<combo::combo_tree::sibling_iterator,combo::vertex> > _stack;
+    std::stack<std::pair<combo::combo_tree::sibling_iterator, combo::vertex> > _stack;
     bool _inCompound; //used for handling builtin compound functions (e.g. follow)
 
     //used for sending action plans
-    bool exec(sib_it x, combo::variable_unifier& vu) { return execSeq(x,++sib_it(x), vu); }
-    bool execSeq(sib_it,sib_it,combo::variable_unifier& vu);
+    bool exec(sib_it x, combo::variable_unifier& vu) {
+        return execSeq(x, ++sib_it(x), vu);
+    }
+    bool execSeq(sib_it, sib_it, combo::variable_unifier& vu);
 
     //returns true iff an action plan gets executed
     bool beginCompound();
@@ -178,29 +182,29 @@ namespace Procedure {
     void expand_procedure_call(combo::combo_tree::iterator) throw (opencog::ComboException, opencog::AssertionException, std::bad_exception);
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
-  private:
+private:
     ///initialization - only called from ctors
     void init(const std::vector<combo::vertex>&);
-    
+
     bool _doesSendDefinitePlan; //true if the combo interpreter
-                                //evaluate the indefinite aguments
-                                //of a plan during interpretation
-                                //(that is the plan once sent contains only
-                                //definite objects)
-                                //false if the combo interpreter
-                                //sends directly unevaluated indefinite objects
-                                //in the plan
-                                //this is escentially used by NoSpaceLife
-                                //in order to deal with the random operators
-                                //optimization, to avoid Monte Carlos
-                                //simulations
-    
-    // unifier that holds options to be tested when a wild card character "_*_" is 
+    //evaluate the indefinite aguments
+    //of a plan during interpretation
+    //(that is the plan once sent contains only
+    //definite objects)
+    //false if the combo interpreter
+    //sends directly unevaluated indefinite objects
+    //in the plan
+    //this is escentially used by NoSpaceLife
+    //in order to deal with the random operators
+    //optimization, to avoid Monte Carlos
+    //simulations
+
+    // unifier that holds options to be tested when a wild card character "_*_" is
     // used in a combo script
     combo::variable_unifier _vu;
 
     bool finished;
-  };
+};
 
 } //~namespace Procedure
 

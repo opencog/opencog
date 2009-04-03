@@ -24,14 +24,17 @@
 using namespace LearningServer;
 using namespace opencog;
 
-SleepAgent::~SleepAgent() {
+SleepAgent::~SleepAgent()
+{
 }
 
-SleepAgent::SleepAgent() {
+SleepAgent::SleepAgent()
+{
 }
 
-void SleepAgent::run(CogServer *ls) {
+void SleepAgent::run(CogServer *ls)
+{
     logger().log(opencog::Logger::FINE,
                  "SleepAgent - Executing SleepAgent.");
-  sleep(2);
+    sleep(2);
 }

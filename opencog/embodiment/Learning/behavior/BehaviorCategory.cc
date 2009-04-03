@@ -24,17 +24,21 @@
 
 using namespace behavior;
 
-BehaviorCategory::~BehaviorCategory() {
+BehaviorCategory::~BehaviorCategory()
+{
 }
 
-BehaviorCategory::BehaviorCategory() {
+BehaviorCategory::BehaviorCategory()
+{
 }
 
-void BehaviorCategory::addCompositeBehaviorDescription(const CompositeBehaviorDescription &bd) {
+void BehaviorCategory::addCompositeBehaviorDescription(const CompositeBehaviorDescription &bd)
+{
     entries.push_back(bd);
 }
 
-std::string BehaviorCategory::toString() {
+std::string BehaviorCategory::toString()
+{
 
     std::string answer = "";
 
@@ -48,7 +52,8 @@ std::string BehaviorCategory::toString() {
     return answer;
 }
 
-std::string BehaviorCategory::toStringHandles() {
+std::string BehaviorCategory::toStringHandles()
+{
 
     std::string answer = "";
 
@@ -62,7 +67,8 @@ std::string BehaviorCategory::toStringHandles() {
     return answer;
 }
 
-std::string BehaviorCategory::toStringTimeline() {
+std::string BehaviorCategory::toStringTimeline()
+{
 
     std::string answer = "";
 
@@ -76,20 +82,24 @@ std::string BehaviorCategory::toStringTimeline() {
     return answer;
 }
 
-int BehaviorCategory::getSize() const {
+int BehaviorCategory::getSize() const
+{
     return entries.size();
-}   
+}
 
-const std::vector<CompositeBehaviorDescription> &BehaviorCategory::getEntries() const {
+const std::vector<CompositeBehaviorDescription> &BehaviorCategory::getEntries() const
+{
     return entries;
 }
 
-bool BehaviorCategory::empty() {
-  return entries.empty();
+bool BehaviorCategory::empty()
+{
+    return entries.empty();
 }
 
-void BehaviorCategory::clear() {
-  entries.clear();
+void BehaviorCategory::clear()
+{
+    entries.clear();
 }
 
 // ********************************************************************************

@@ -28,24 +28,25 @@
 #include "CSops.h"
 #include "CSagent.h"
 #if CRYSTAL
- #include "CSanimation.h"
+#include "CSanimation.h"
 #endif
 //------------------------------------------------------------------------------------------------------------
 /** @class CSserver
-	\brief CSbox implementation on the server-side. */
+ \brief CSbox implementation on the server-side. */
 //------------------------------------------------------------------------------------------------------------
-class CSserver : public CSbox {
+class CSserver : public CSbox
+{
 protected:
-	static csRef<iCollideSystem> cd_sys; //A plugin
-	bool   LoadCollisionDetector ();
+    static csRef<iCollideSystem> cd_sys; //A plugin
+    bool   LoadCollisionDetector ();
 public:
-	static csRef<iCollideSystem> GetColliderSystem();
+    static csRef<iCollideSystem> GetColliderSystem();
 
-	void DrawViews();
-	bool   InitcsPlugins  (iGUIProvider* _GUIprovider );
-	bool   SetupFrame     ();
-	bool   ConnectToWorld (const char* worldURL);
-	bool   DisconnectFromWorld ();
+    void DrawViews();
+    bool   InitcsPlugins  (iGUIProvider* _GUIprovider );
+    bool   SetupFrame     ();
+    bool   ConnectToWorld (const char* worldURL);
+    bool   DisconnectFromWorld ();
 };
 
 #endif

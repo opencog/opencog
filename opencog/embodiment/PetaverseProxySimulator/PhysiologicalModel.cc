@@ -45,10 +45,12 @@ const double PhysiologicalModel::INITIAL_FITNESS = 51; // arbitrary value; shoul
 const double PhysiologicalModel::ENERGY_MAX = 100;
 const double PhysiologicalModel::INITIAL_ENERGY = 100; // set according to PetBehaviorAspects.doc
 
-PhysiologicalModel::~PhysiologicalModel() {
+PhysiologicalModel::~PhysiologicalModel()
+{
 }
 
-PhysiologicalModel::PhysiologicalModel(SimulationParameters& _simParameters) : simParameters(_simParameters) {
+PhysiologicalModel::PhysiologicalModel(SimulationParameters& _simParameters) : simParameters(_simParameters)
+{
 
     minutesPerTick = atof(simParameters.get("DEFAULT_SIMULATION_MINUTES_PER_TICK").c_str());
 
@@ -68,7 +70,8 @@ PhysiologicalModel::PhysiologicalModel(SimulationParameters& _simParameters) : s
     reset();
 }
 
-void PhysiologicalModel::timeTick() {
+void PhysiologicalModel::timeTick()
+{
 
     time[petMode]++;
 
@@ -82,12 +85,14 @@ void PhysiologicalModel::timeTick() {
     petMode = IDLE;
 }
 
-double PhysiologicalModel::ticksToMinutes(int ticks) {
+double PhysiologicalModel::ticksToMinutes(int ticks)
+{
     return (ticks * minutesPerTick);
 }
 
 
-void PhysiologicalModel::computeHunger() {
+void PhysiologicalModel::computeHunger()
+{
     /*
       double LAMBDA = ((double) 1 / 550); // set according to PetBehaviorAspects.doc
       // I didn't made LAMBDA global because in the document it may assume
@@ -97,7 +102,8 @@ void PhysiologicalModel::computeHunger() {
     hunger = zeroOneCut(hunger + (minutesPerTick / (2 * ((24 * 60) / EAT_STOPS_PER_DAY))));
 }
 
-void PhysiologicalModel::computeThirst() {
+void PhysiologicalModel::computeThirst()
+{
     /*
       double LAMBDA = ((double) 1 / 170); // set according to PetBehaviorAspects.doc
       // I didn't made LAMBDA global because in the document it may assume
@@ -107,7 +113,8 @@ void PhysiologicalModel::computeThirst() {
     thirst = zeroOneCut(thirst + (minutesPerTick / (2 * ((24 * 60) / DRINK_STOPS_PER_DAY))));
 }
 
-void PhysiologicalModel::computePeeUrgency() {
+void PhysiologicalModel::computePeeUrgency()
+{
     peeUrgency = zeroOneCut(peeUrgency + (minutesPerTick / (2 * ((24 * 60) / PEE_STOPS_PER_DAY))));
     /*
       ticksSinceLastPee++;
@@ -117,7 +124,8 @@ void PhysiologicalModel::computePeeUrgency() {
     */
 }
 
-void PhysiologicalModel::computePooUrgency() {
+void PhysiologicalModel::computePooUrgency()
+{
     pooUrgency = zeroOneCut(pooUrgency + (minutesPerTick / (2 * ((24 * 60) / POO_STOPS_PER_DAY))));
     /*
       ticksSinceLastPoo++;
@@ -127,12 +135,14 @@ void PhysiologicalModel::computePooUrgency() {
     */
 }
 
-void PhysiologicalModel::computeFitness() {
+void PhysiologicalModel::computeFitness()
+{
     // TODO: implement proper formula
     // fitness is constant
 }
 
-void PhysiologicalModel::computeEnergy() {
+void PhysiologicalModel::computeEnergy()
+{
 
     double minutes = ticksToMinutes(1);
 
@@ -159,7 +169,8 @@ void PhysiologicalModel::computeEnergy() {
 
 using namespace PerceptionActionInterface;
 
-void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetAction &petAction) {
+void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetAction &petAction)
+{
 
     double cost = (1.5 - (fitness / FITNESS_MAX)) * actionCost(petAction);
     energy -= cost;
@@ -207,7 +218,7 @@ void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetActi
     case EARS_TWITCH_CODE:
     case MOVE_HEAD_CODE:
     case WAG_CODE:
-    case TAIL_FLEX_CODE:    
+    case TAIL_FLEX_CODE:
     case CHEW_CODE:
     case DREAM_CODE:
     case TURN_CODE:
@@ -223,7 +234,7 @@ void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetActi
     case FEARFUL_POSTURE_CODE:
     case CLEAN_CODE:
     case BELCH_CODE:
-    case WAKE_CODE: 
+    case WAKE_CODE:
     case GREET_CODE:
     case DANCE1_CODE:
     case LOOK_RIGHT_CODE:
@@ -242,15 +253,14 @@ void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetActi
     case CLOSE_EYES_CODE:
     case BITE_CODE:
     case PET_CODE:
-	case KICK_CODE:
-	case GROUP_COMMAND_CODE:
-	case RECEIVE_LATEST_GROUP_COMMANDS_CODE:
-    case LOOK_AT_CODE:
-        {
-            // any command can wake up the pet
-            petMode = ACTIVE;
-            break;
-        }
+    case KICK_CODE:
+    case GROUP_COMMAND_CODE:
+    case RECEIVE_LATEST_GROUP_COMMANDS_CODE:
+    case LOOK_AT_CODE: {
+        // any command can wake up the pet
+        petMode = ACTIVE;
+        break;
+    }
     case SLEEP_CODE: {
         petMode = SLEEP;
         break;
@@ -306,7 +316,8 @@ void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetActi
 }
 
 
-double PhysiologicalModel::actionCost(const PerceptionActionInterface::PetAction &petAction) {
+double PhysiologicalModel::actionCost(const PerceptionActionInterface::PetAction &petAction)
+{
 
     ActionTypeCode actionCode = petAction.getType().getCode();
 
@@ -393,8 +404,8 @@ double PhysiologicalModel::actionCost(const PerceptionActionInterface::PetAction
     case PET_CODE:                         return 1.0;
     case KICK_CODE:                        return 2.0;
     case GROUP_COMMAND_CODE:               return 0.5;
-    case RECEIVE_LATEST_GROUP_COMMANDS_CODE: 
-                                           return 0.5;
+    case RECEIVE_LATEST_GROUP_COMMANDS_CODE:
+        return 0.5;
     case LOOK_AT_CODE:                     return 0.5;
     case NUMBER_OF_ACTION_TYPES:           return 0;
     }
@@ -402,7 +413,8 @@ double PhysiologicalModel::actionCost(const PerceptionActionInterface::PetAction
     return 0; // not reached
 }
 
-double PhysiologicalModel::zeroOneCut(double f) {
+double PhysiologicalModel::zeroOneCut(double f)
+{
     if (f > 1) {
         return 1;
     } else if (f < 0) {
@@ -412,45 +424,55 @@ double PhysiologicalModel::zeroOneCut(double f) {
     }
 }
 
-double PhysiologicalModel::getHunger() {
+double PhysiologicalModel::getHunger()
+{
     return hunger;
 }
 
-double PhysiologicalModel::getThirst() {
+double PhysiologicalModel::getThirst()
+{
     return thirst;
 }
 
-double PhysiologicalModel::getPeeUrgency() {
+double PhysiologicalModel::getPeeUrgency()
+{
     return peeUrgency;
 }
 
-double PhysiologicalModel::getPooUrgency() {
+double PhysiologicalModel::getPooUrgency()
+{
     return pooUrgency;
 }
 
-double PhysiologicalModel::getFitness() {
+double PhysiologicalModel::getFitness()
+{
     return fitness;
 }
 
-double PhysiologicalModel::getEnergy() {
+double PhysiologicalModel::getEnergy()
+{
     return energy;
 }
 
-double PhysiologicalModel::getScaledEnergy() {
+double PhysiologicalModel::getScaledEnergy()
+{
     return zeroOneCut(energy / ENERGY_MAX);
 }
 
-double PhysiologicalModel::getScaledFitness() {
+double PhysiologicalModel::getScaledFitness()
+{
     return zeroOneCut(fitness / FITNESS_MAX);
 }
 
-void PhysiologicalModel::setMinutesPerTick(double f) {
+void PhysiologicalModel::setMinutesPerTick(double f)
+{
     minutesPerTick = f;
 }
 
-void PhysiologicalModel::reset() {
-    hunger = 0;       
-    thirst = 0;       
+void PhysiologicalModel::reset()
+{
+    hunger = 0;
+    thirst = 0;
     peeUrgency = 0;
     pooUrgency = 0;
     fitness = INITIAL_FITNESS;

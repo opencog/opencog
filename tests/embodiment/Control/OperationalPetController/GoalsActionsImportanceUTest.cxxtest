@@ -11,11 +11,12 @@
 
 using namespace OperationalPetController;
 
-class GoalsActionsImportanceUTest : public CxxTest::TestSuite {
+class GoalsActionsImportanceUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     GoalsActionsImportanceUTest() {
 

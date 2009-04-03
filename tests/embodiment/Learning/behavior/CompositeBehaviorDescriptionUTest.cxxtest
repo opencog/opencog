@@ -13,11 +13,12 @@
 
 using namespace behavior;
 
-class CompositeBehaviorDescriptionUTest : public CxxTest::TestSuite {
+class CompositeBehaviorDescriptionUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     CompositeBehaviorDescriptionUTest() {
 

@@ -41,7 +41,7 @@ extern long getusec();
 //Parse result values
 typedef enum {
     PARSE_OK,
-    PARSE_FAILED, 
+    PARSE_FAILED,
     PARSE_NOT_PROCESSED
 } ParseResult;
 
@@ -50,23 +50,28 @@ typedef enum {
 /** @class ReportProvider
  *  \brief The provider of reporting services for a command object's feedback. */
 //------------------------------------------------------------------------------------------------------------
-class ReportProvider {
+class ReportProvider
+{
 protected:
-	std::string    name;
-	ServerSocket*  socket;
+    std::string    name;
+    ServerSocket*  socket;
 
 public:
-	ReportProvider()						:socket(NULL)    {}
-	ReportProvider(ServerSocket* _socket)	:socket(_socket) {}	
+    ReportProvider()      : socket(NULL)    {}
+    ReportProvider(ServerSocket* _socket) : socket(_socket) {}
 
-	virtual ~ReportProvider() {}
-		
-	virtual void SendMsg   (string msg) = 0;
-	virtual void SendError (string msg) = 0;
-		
-	/** Set the name of the source of the reports, eg. the command name. */
-	void SetName(std::string _name)   {name = _name;}
-	ServerSocket*  GetSocket() const  {return socket;}
+    virtual ~ReportProvider() {}
+
+    virtual void SendMsg   (string msg) = 0;
+    virtual void SendError (string msg) = 0;
+
+    /** Set the name of the source of the reports, eg. the command name. */
+    void SetName(std::string _name)   {
+        name = _name;
+    }
+    ServerSocket*  GetSocket() const  {
+        return socket;
+    }
 };
 
 //----------------------------------------------------------------------------------------------------------------
@@ -74,66 +79,66 @@ public:
 class SocketReportProvider : public ReportProvider
 {
 public:
-	SocketReportProvider( ServerSocket*  _socket ) 
-		                : ReportProvider(_socket) {
-	}
+    SocketReportProvider( ServerSocket*  _socket )
+            : ReportProvider(_socket) {
+    }
 
-	virtual void  SendMsg( string msg )  {
-		TheSocketManager.SendMsg ( socket, msg );
+    virtual void  SendMsg( string msg )  {
+        TheSocketManager.SendMsg ( socket, msg );
         TheSocketManager.FlushAll();
-		 LOG( name, 3, msg );
-	}
+        LOG( name, 3, msg );
+    }
 
-	virtual void  SendError( string msg )
-	{
-		TheSocketManager.SendError(socket, msg);
+    virtual void  SendError( string msg ) {
+        TheSocketManager.SendError(socket, msg);
         TheSocketManager.FlushAll ();
-		 LOG( name, 2, msg );
-	}
+        LOG( name, 2, msg );
+    }
 };
 
 
 //------------------------------------------------------------------------------------------------------------
 /** @class Command
  *  \brief The encapsulator of ASCII commands sent to the server.
- *	Most commands can currently be used from both script and sockets. */
+ * Most commands can currently be used from both script and sockets. */
 //------------------------------------------------------------------------------------------------------------
-class Command {
+class Command
+{
 protected:
-	ReportProvider* reporter;
-	std::string 	arguments;
-	std::string 	name;
+    ReportProvider* reporter;
+    std::string  arguments;
+    std::string  name;
 
-	/** Performance monitoring */
-	long begin_us;
-	long end_us;
+    /** Performance monitoring */
+    long begin_us;
+    long end_us;
 
-public:	
-	Command (std::string _name, ReportProvider* _reporter);
-	virtual ~Command();
-	
-	/** You can first add the arguments and parse() them later. */
-	void addArguments (std::string _arguments);
-	
-	/** Parse the stored arguments, calling parse(arguments) */
-	ParseResult parse() const;
-	
-	/** Parse the list of arguments. You must override this in your command implementations */
-	virtual ParseResult parse(std::string arguments) const = 0;
-	
-	friend class ServerSocket;
+public:
+    Command (std::string _name, ReportProvider* _reporter);
+    virtual ~Command();
+
+    /** You can first add the arguments and parse() them later. */
+    void addArguments (std::string _arguments);
+
+    /** Parse the stored arguments, calling parse(arguments) */
+    ParseResult parse() const;
+
+    /** Parse the list of arguments. You must override this in your command implementations */
+    virtual ParseResult parse(std::string arguments) const = 0;
+
+    friend class ServerSocket;
 };
 
 //-----------------------------------------------//
 class CommandNew : public Command
 {
     ServerSocket*  socket;
-public: 
+public:
     CommandNew( ReportProvider*  s, ServerSocket*  _socket = NULL)
-              : Command( "CommandNew", s ), socket( _socket ) { }
-    
+            : Command( "CommandNew", s ), socket( _socket ) { }
+
     virtual ~CommandNew() {}
-    
+
     ParseResult parse( std::string  arguments ) const;
 
 };
@@ -141,14 +146,14 @@ public:
 //-----------------------------------------------//
 class CommandUpdate : public Command
 {
-public: 
+public:
     CommandUpdate( ReportProvider*  s )
-                 : Command( "CommandUpdate", s )  { 
+            : Command( "CommandUpdate", s )  {
     }
-    
+
     virtual ~CommandUpdate() {
     }
-    
+
     ParseResult parse( std::string  arguments ) const;
 
 };
@@ -158,14 +163,13 @@ class CommandRotate : public Command
 {
     ServerSocket* socket;
 
-public: 
+public:
     CommandRotate( ReportProvider*  s, ServerSocket*  _socket = NULL)
-                 : Command( "CommandRotate", s ), socket(_socket) 
-    { 
+            : Command( "CommandRotate", s ), socket(_socket) {
     }
-    
+
     virtual ~CommandRotate() {}
-    
+
     ParseResult parse( std::string  arguments ) const;
 };
 
@@ -173,10 +177,10 @@ public:
 class CommandLight : public Command
 {
     ServerSocket* socket;
-public: 
+public:
     CommandLight(ReportProvider* s, ServerSocket* _socket = NULL)
-    : Command("CommandLight", s), socket(_socket) { }
-    
+            : Command("CommandLight", s), socket(_socket) { }
+
     virtual ~CommandLight() {}
     ParseResult parse(std::string arguments) const;
 };
@@ -184,10 +188,10 @@ public:
 class CommandLift : public Command
 {
     ServerSocket* socket;
-public: 
+public:
     CommandLift(ReportProvider* s, ServerSocket* _socket = NULL)
-    : Command("CommandLift", s), socket(_socket) { }
-    
+            : Command("CommandLift", s), socket(_socket) { }
+
     virtual ~CommandLift() {}
     ParseResult parse(std::string arguments) const;
 };
@@ -195,10 +199,10 @@ public:
 class CommandDrop : public Command
 {
     ServerSocket* socket;
-public: 
+public:
     CommandDrop(ReportProvider* s, ServerSocket* _socket = NULL)
-    : Command("CommandDrop", s), socket(_socket) { }
-    
+            : Command("CommandDrop", s), socket(_socket) { }
+
     virtual ~CommandDrop() {}
     ParseResult parse(std::string arguments) const;
 };
@@ -206,10 +210,10 @@ public:
 class CommandRelight : public Command
 {
     ServerSocket* socket;
-public: 
+public:
     CommandRelight(ReportProvider* s, ServerSocket* _socket = NULL)
-    : Command("CommandRelight", s), socket(_socket) { }
-    
+            : Command("CommandRelight", s), socket(_socket) { }
+
     virtual ~CommandRelight() {}
     ParseResult parse(std::string arguments) const;
 };
@@ -218,23 +222,23 @@ public:
 class CommandDump : public Command
 {
     ServerSocket* socket;
-public: 
+public:
     CommandDump(ReportProvider* s, ServerSocket* _socket = NULL)
-    : Command("CommandDump", s), socket(_socket) { }
-    
+            : Command("CommandDump", s), socket(_socket) { }
+
     virtual ~CommandDump() {}
-    
+
     ParseResult parse(std::string arguments) const;
 };
 
 //-----------------------------------------------//
 class CommandDelete : public Command
 {
-public: 
+public:
     CommandDelete( ReportProvider*  s )
-                 : Command( "CommandDelete",s) { 
+            : Command( "CommandDelete", s) {
     }
-    
+
     virtual ~CommandDelete() {}
     ParseResult parse( std::string  arguments ) const;
 };
@@ -243,12 +247,11 @@ class CommandMoveArm : public Command
 {
     ServerSocket* socket;
 
-public: 
+public:
     CommandMoveArm( ReportProvider*  s, ServerSocket*  _socket = NULL)
-                 : Command( "CommandMoveArm", s ), socket(_socket) 
-    { 
+            : Command( "CommandMoveArm", s ), socket(_socket) {
     }
-    
+
     virtual ~CommandMoveArm() {}
     ParseResult parse( std::string  arguments ) const;
 };
@@ -257,35 +260,34 @@ class CommandMoveLeg : public Command
 {
     ServerSocket* socket;
 
-public: 
+public:
     CommandMoveLeg( ReportProvider*  s, ServerSocket*  _socket = NULL)
-                 : Command( "CommandMoveLeg", s ), socket(_socket) 
-    { 
+            : Command( "CommandMoveLeg", s ), socket(_socket) {
     }
-    
+
     virtual ~CommandMoveLeg() {}
     ParseResult parse( std::string  arguments ) const;
 };
 //-----------------------------------------------//
 class CommandMark : public Command
 {
-public: 
+public:
     CommandMark( ReportProvider*  s )
-               : Command( "CommandMark", s ) { 
+            : Command( "CommandMark", s ) {
     }
-    
+
     virtual ~CommandMark() {}
-    
+
     ParseResult parse( std::string arguments ) const;
 };
 //-----------------------------------------------//
 class CommandPaint : public Command
 {
-public: 
+public:
     CommandPaint( ReportProvider*  s )
-                : Command( "CommandPaint", s ) { 
+            : Command( "CommandPaint", s ) {
     }
-    
+
     virtual ~CommandPaint() {
     }
     ParseResult parse( std::string arguments ) const;
@@ -293,10 +295,10 @@ public:
 //-----------------------------------------------//
 class CommandConfig : public Command
 {
-public: 
+public:
     CommandConfig( ReportProvider*  s )
-                 : Command( "CommandConfig",s ) { }
-    
+            : Command( "CommandConfig", s ) { }
+
     virtual ~CommandConfig() {
     }
     ParseResult parse( std::string arguments ) const;
@@ -304,11 +306,11 @@ public:
 //-----------------------------------------------//
 class CommandGetPos : public Command
 {
-public: 
+public:
     CommandGetPos( ReportProvider*  s )
-                 : Command( "CommandGetPos", s )  { 
+            : Command( "CommandGetPos", s )  {
     }
-    
+
     virtual ~CommandGetPos() {
     }
     ParseResult parse( std::string  arguments ) const;
@@ -316,22 +318,22 @@ public:
 //-----------------------------------------------//
 class CommandSetPos : public Command
 {
-public: 
+public:
     CommandSetPos(ReportProvider* s)
-    : Command("CommandSetPos",s) { }
-    
+            : Command("CommandSetPos", s) { }
+
     virtual ~CommandSetPos() {}
-    
+
     ParseResult parse(std::string arguments) const;
 };
 //-----------------------------------------------//
 class CommandGetRot : public Command
 {
-public: 
+public:
     CommandGetRot( ReportProvider*  s )
-                 : Command( "CommandGetRot", s )  { 
+            : Command( "CommandGetRot", s )  {
     }
-    
+
     virtual ~CommandGetRot() {
     }
     ParseResult parse( std::string  arguments ) const;
@@ -339,22 +341,22 @@ public:
 //-----------------------------------------------//
 class CommandSetRot : public Command
 {
-public: 
+public:
     CommandSetRot(ReportProvider* s)
-    : Command("CommandSetRot",s) { }
-    
+            : Command("CommandSetRot", s) { }
+
     virtual ~CommandSetRot() {}
-    
+
     ParseResult parse(std::string arguments) const;
 };
 //-----------------------------------------------//
 class CommandGetSize : public Command
 {
-public: 
+public:
     CommandGetSize( ReportProvider*  s )
-                 : Command( "CommandGetSize", s )  { 
+            : Command( "CommandGetSize", s )  {
     }
-    
+
     virtual ~CommandGetSize() {
     }
     ParseResult parse( std::string  arguments ) const;
@@ -362,11 +364,11 @@ public:
 //-----------------------------------------------//
 class CommandExplain : public Command
 {
-public: 
+public:
     CommandExplain( ReportProvider*  s )
-                   : Command( "CommandExplain", s ) { 
+            : Command( "CommandExplain", s ) {
     }
-    
+
     virtual ~CommandExplain() {
     }
     ParseResult parse( std::string  arguments ) const;
@@ -374,11 +376,11 @@ public:
 //-----------------------------------------------//
 class CommandSense : public Command
 {
-public: 
+public:
     CommandSense( ReportProvider*  s )
-                : Command( "CommandSense",s ) { 
+            : Command( "CommandSense", s ) {
     }
-    
+
     virtual ~CommandSense() {
     }
     ParseResult parse( std::string arguments ) const;
@@ -386,11 +388,11 @@ public:
 //-----------------------------------------------//
 class CommandReset : public CommandNew
 {
-public: 
+public:
     CommandReset( ReportProvider*  s )
-                : CommandNew( s ) { 
+            : CommandNew( s ) {
     }
-    
+
     virtual ~CommandReset() {}
     ParseResult parse( std::string  arguments ) const;
 };
@@ -405,7 +407,7 @@ public:
 
 //  CommandQuit() { }
     virtual ~CommandQuit() {}
-    
+
     ParseResult parse(std::string arguments);
 };*/
 //-----------------------------------------------//
@@ -414,7 +416,7 @@ class CommandListen : public Command
     ServerSocket* socket;
 public:
     CommandListen( ReportProvider*  _reporter, ServerSocket*  _socket = NULL )
-                 : Command( "CommandListen",_reporter ), socket( _socket ) { 
+            : Command( "CommandListen", _reporter ), socket( _socket ) {
     }
 
     virtual ~CommandListen() {
@@ -427,12 +429,12 @@ class CommandGraphDump : public Command
     ServerSocket* socket;
 public:
     CommandGraphDump( ReportProvider*  _reporter, ServerSocket*  _socket = NULL )
-                 : Command( "CommandGraphDump",_reporter ), socket( _socket ) { 
+            : Command( "CommandGraphDump", _reporter ), socket( _socket ) {
     }
 
     virtual ~CommandGraphDump() {
     }
-    
+
     //------------------------------------------------------------------------------------------------------------
     ParseResult parse( std::string  arguments ) const;
 };
@@ -442,12 +444,12 @@ class CommandBroadcast : public Command
     ServerSocket*  socket;
 public:
     CommandBroadcast( ReportProvider*  _reporter, ServerSocket*  _socket = NULL )
-                    : Command( "CommandBroadcast",_reporter), socket(_socket)   { 
+            : Command( "CommandBroadcast", _reporter), socket(_socket)   {
     }
 
     virtual ~CommandBroadcast() {
     }
-    
+
     ParseResult parse( std::string  arguments ) const;
 };
 //-----------------------------------------------//
@@ -455,24 +457,24 @@ class CommandAction : public Command
 {
     bool  validCommand( std::string  objectname ) const;
     bool  validMove( int  dx ) const;
-    
-public: 
+
+public:
     CommandAction( ReportProvider*  s )
-                 : Command( "CommandAction", s )  {
+            : Command( "CommandAction", s )  {
     }
-    
+
     virtual ~CommandAction() {
     }
-	ParseResult parse( std::string  arguments ) const;
+    ParseResult parse( std::string  arguments ) const;
 };
 //-----------------------------------------------//
 class CommandMeshes : public Command
 {
     ServerSocket*  socket;
-public: 
-    
+public:
+
     CommandMeshes( ReportProvider*  s, ServerSocket*  _socket = NULL )
-                 : Command( "CommandMeshes", s ), socket( _socket ) { 
+            : Command( "CommandMeshes", s ), socket( _socket ) {
     }
 
     virtual ~CommandMeshes() {
@@ -484,10 +486,10 @@ public:
 class CommandTest : public Command
 {
     ServerSocket*  socket;
-public: 
-    
+public:
+
     CommandTest( ReportProvider*  s, ServerSocket*  _socket = NULL )
-               : Command( "CommandTest", s ), socket( _socket )  {
+            : Command( "CommandTest", s ), socket( _socket )  {
     }
 
     virtual ~CommandTest()  {

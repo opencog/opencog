@@ -26,21 +26,23 @@
 #include <time.h>
 #include "SystemParameters.h"
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-class SimulationParameters : public Control::SystemParameters {
+class SimulationParameters : public Control::SystemParameters
+{
 
-    public:
+public:
 
-        SimulationParameters();
-        ~SimulationParameters();
+    SimulationParameters();
+    ~SimulationParameters();
 
-        time_t simulationStart;
-        time_t simulationTicks;
+    time_t simulationStart;
+    time_t simulationTicks;
 
-        void startSimulation();
-        int getCurrentSimulationSeconds();
-        void timeTick();
+    void startSimulation();
+    int getCurrentSimulationSeconds();
+    void timeTick();
 
 }; // class
 }  // namespace

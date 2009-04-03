@@ -28,23 +28,25 @@
 #include <vector>
 #include <sstream>
 
-namespace Control {
+namespace Control
+{
 
-  /**
-   * Interface responsible for handle all the specific tasks of an agent action mode
-   */
-  class AgentModeHandler {
-  public:
-    
+/**
+ * Interface responsible for handle all the specific tasks of an agent action mode
+ */
+class AgentModeHandler
+{
+public:
+
     virtual inline ~AgentModeHandler( void ) { }
-    
+
     /**
      * It must be implemented by contrete classes
      * This method shall handle the commands given by the owner or other parts of the Brain code
      *
      * @param name the name of the command
      * @param arguments the list of command' arguments
-     */  
+     */
     virtual void handleCommand( const std::string& name, const std::vector<std::string>& arguments ) = 0;
 
     /**
@@ -63,7 +65,7 @@ namespace Control {
      * @param value Property value
      */
     inline void setProperty( const std::string& name, const std::string& value ) {
-      this->properties[name] = value; 
+        this->properties[name] = value;
     }
 
     /**
@@ -73,12 +75,12 @@ namespace Control {
      * @return the Property value
      */
     inline std::string getPropertyValue( const std::string& name ) {
-      std::map<std::string, std::string>::iterator it = this->properties.find( name );
-      if ( it != this->properties.end( ) ) {
-	return it->second;
-      } else {
-	return "";
-      } // else
+        std::map<std::string, std::string>::iterator it = this->properties.find( name );
+        if ( it != this->properties.end( ) ) {
+            return it->second;
+        } else {
+            return "";
+        } // else
     }
 
     /**
@@ -87,14 +89,14 @@ namespace Control {
      * @param name Property name
      */
     void removeProperty( const std::string& name ) {
-      std::map<std::string, std::string>::iterator it = this->properties.find( name );
-      this->properties.erase( it );
+        std::map<std::string, std::string>::iterator it = this->properties.find( name );
+        this->properties.erase( it );
     }
 
-  protected:
+protected:
     std::map<std::string, std::string> properties;
-  };
-  
+};
+
 }; // Control
 
 #endif // AGENT_MODE_HANDLER_H

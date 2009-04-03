@@ -54,32 +54,34 @@
 //in time unit
 #define IS_LAST_AGENT_ACTION_DELAY 50
 
-namespace Filter {
+namespace Filter
+{
 
-  using namespace PerceptionActionInterface;
-  using namespace WorldWrapper;
-  using namespace PetCombo;
-  using namespace boost::assign;
+using namespace PerceptionActionInterface;
+using namespace WorldWrapper;
+using namespace PetCombo;
+using namespace boost::assign;
 
-  //constructor, desctructor
-  EntropyFilter::EntropyFilter(const std::string& self_id,
-			       const std::string& owner_id,
-			       AtomSpace& atomSpace,
-			       const perception_set& ep,
-			       const indefinite_object_set& idos,
-			       const definite_object_set& dos,
-			       const message_set& ms,
-			       const agent_to_actions& atas,
-			       const argument_type_list& input_arg_types,
-			       opencog::RandGen& rng)
-    : _self_id(self_id), _owner_id(owner_id),
-      _atomSpace(atomSpace), _elementary_perceptions(ep),
-      _idos(idos), _dos(dos), _ms(ms), _atas(atas),
-      _input_arg_types(input_arg_types),
-      _total_time(0),
-      _is_moving_str(IS_MOVING_STR),
-      _indefToDef(id::pet_indefinite_object_count, ""),
-      _rng(rng) {
+//constructor, desctructor
+EntropyFilter::EntropyFilter(const std::string& self_id,
+                             const std::string& owner_id,
+                             AtomSpace& atomSpace,
+                             const perception_set& ep,
+                             const indefinite_object_set& idos,
+                             const definite_object_set& dos,
+                             const message_set& ms,
+                             const agent_to_actions& atas,
+                             const argument_type_list& input_arg_types,
+                             opencog::RandGen& rng)
+        : _self_id(self_id), _owner_id(owner_id),
+        _atomSpace(atomSpace), _elementary_perceptions(ep),
+        _idos(idos), _dos(dos), _ms(ms), _atas(atas),
+        _input_arg_types(input_arg_types),
+        _total_time(0),
+        _is_moving_str(IS_MOVING_STR),
+        _indefToDef(id::pet_indefinite_object_count, ""),
+        _rng(rng)
+{
 
     _arity = _input_arg_types.size();
 
@@ -93,469 +95,474 @@ namespace Filter {
 
     //build perceptToTime
     //(or perceptToBoolTime depending on whether optimization is enabled)
-    for(perception_set_const_it psi = _elementary_perceptions.begin();
-	psi != _elementary_perceptions.end(); ++psi) {
-      build_and_insert_atomic_perceptions(*psi);
+    for (perception_set_const_it psi = _elementary_perceptions.begin();
+            psi != _elementary_perceptions.end(); ++psi) {
+        build_and_insert_atomic_perceptions(*psi);
     }
 
     //init spaceMapNode
 
     _spaceMapNode = _atomSpace.getHandle(CONCEPT_NODE,
-					 SpaceServer::SPACE_MAP_NODE_NAME);
+                                         SpaceServer::SPACE_MAP_NODE_NAME);
     opencog::cassert(TRACE_INFO, _spaceMapNode != Handle::UNDEFINED,
-	    "There must a be a map node in the atomSpace");
-  }
+                     "There must a be a map node in the atomSpace");
+}
 
-  EntropyFilter::~EntropyFilter() {}
+EntropyFilter::~EntropyFilter() {}
 
-  void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-						  double threshold,
-						  const BehaviorCategory& BDCat,
-						  const std::vector<Temporal>& est,
-						  const argument_list_list& all) {
+void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
+        double threshold,
+        const BehaviorCategory& BDCat,
+        const std::vector<Temporal>& est,
+        const argument_list_list& all)
+{
     const std::vector<CompositeBehaviorDescription>& bdce = BDCat.getEntries();
     opencog::cassert(TRACE_INFO, !bdce.empty(), "Error : No exemplars");
-    opencog::cassert(TRACE_INFO, _arity==0 || all.size()==bdce.size(),
-		      "If the program to learn has a non-null arity then the number of argument lists must be equal to the number of behavior descriptions");
+    opencog::cassert(TRACE_INFO, _arity == 0 || all.size() == bdce.size(),
+                     "If the program to learn has a non-null arity then the number of argument lists must be equal to the number of behavior descriptions");
     argument_list_list_const_it alli = all.begin();
     std::vector<CompositeBehaviorDescription>::const_iterator bdi = bdce.begin();
     std::vector<Temporal>::const_iterator eti = est.begin();
-    for(; bdi != bdce.end(); ++bdi, ++alli, ++eti) {
-      opencog::cassert(TRACE_INFO, !bdi->empty(),
-			"Exemplar should not be empty for now, ask Nil to fix that");
-      updatePerceptToTime(*eti, *alli);
+    for (; bdi != bdce.end(); ++bdi, ++alli, ++eti) {
+        opencog::cassert(TRACE_INFO, !bdi->empty(),
+                         "Exemplar should not be empty for now, ask Nil to fix that");
+        updatePerceptToTime(*eti, *alli);
     }
     generateFilteredPerceptions(pred_set, threshold);
-  }
+}
 
-  void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-						  double threshold,
-						  const CompositeBehaviorDescription&
-						  cbd,
-						  const Temporal& et,
-						  const argument_list& al) {
+void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
+        double threshold,
+        const CompositeBehaviorDescription&
+        cbd,
+        const Temporal& et,
+        const argument_list& al)
+{
     rebuildPerceptToTime();
     updatePerceptToTime(et, al);
     generateFilteredPerceptions(pred_set, threshold);
-  }
+}
 
-  void EntropyFilter::updatePerceptToTime(const Temporal& temp,
-					  const argument_list& al) {
+void EntropyFilter::updatePerceptToTime(const Temporal& temp,
+                                        const argument_list& al)
+{
     unsigned long tl = temp.getLowerBound();
     unsigned long tu = temp.getUpperBound();
     long diff = (long)tu - (long)tl;
-    opencog::cassert(TRACE_INFO, diff>=0, "diff = %d is not positive or null", diff);
+    opencog::cassert(TRACE_INFO, diff >= 0, "diff = %d is not positive or null", diff);
     //get the list of spaceMap that occurs in that range
     std::vector<HandleTemporalPair> htps;
     //get the first map at tl or if not before tl
-    Temporal temp_right_after(tl+1, tu);
+    Temporal temp_right_after(tl + 1, tu);
     _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
-		   TemporalTable::PREVIOUS_BEFORE_START_OF);
+                           TemporalTable::PREVIOUS_BEFORE_START_OF);
     opencog::cassert(TRACE_INFO, !htps.empty(),
-	    "There must be a map that starts at %d or at least before %d",
-	    tl, tl);
+                     "There must be a map that starts at %d or at least before %d",
+                     tl, tl);
     //try to get the map
     // get temporal pairs that start within temp_right_after, to not get
     //twice the first map
     _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
-		   TemporalTable::STARTS_WITHIN);
+                           TemporalTable::STARTS_WITHIN);
 
     const SpaceServer::SpaceMap* pre_sm = NULL; //previous spaceMap
-                                                //used for isMoving
+    //used for isMoving
     //for each spaceMap update _perceptToTime
-    for(std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
-	htp_it != htps.end(); ++htp_it) {
-      //determine spaceMap
-      Handle smh = _atomSpace.getAtTimeLink(*htp_it);
-      opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
-			"There must be a spaceMap for that handle");
-      const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
-      //determine lower and upper boundary of that spaceMap
-      //if the space map started before the exemplar start time
-      //ltl is the exemplar start time instead
-      //and there is no next spaceMap then ltu is the exemplar stop time
-      Temporal ltemp = *htp_it->getTemporal();
-      unsigned long ltl = htp_it->getTemporal()->getLowerBound();
-      if(ltl<tl)
-	ltl = tl;
-      unsigned long ltu;
-      std::vector<HandleTemporalPair>::const_iterator htp_it_next = htp_it;
-      ++htp_it_next;
-      if(htp_it_next!=htps.end()) {
-	ltu = htp_it_next->getTemporal()->getLowerBound();
-	opencog::cassert(TRACE_INFO, ltu <= tu, "The start time of the last spaceMap must occur at or before the exemplar stop time");
-      }
-      else ltu = tu;
-      unsigned long ldiff = ltu - ltl;
+    for (std::vector<HandleTemporalPair>::const_iterator htp_it = htps.begin();
+            htp_it != htps.end(); ++htp_it) {
+        //determine spaceMap
+        Handle smh = _atomSpace.getAtTimeLink(*htp_it);
+        opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
+                         "There must be a spaceMap for that handle");
+        const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
+        //determine lower and upper boundary of that spaceMap
+        //if the space map started before the exemplar start time
+        //ltl is the exemplar start time instead
+        //and there is no next spaceMap then ltu is the exemplar stop time
+        Temporal ltemp = *htp_it->getTemporal();
+        unsigned long ltl = htp_it->getTemporal()->getLowerBound();
+        if (ltl < tl)
+            ltl = tl;
+        unsigned long ltu;
+        std::vector<HandleTemporalPair>::const_iterator htp_it_next = htp_it;
+        ++htp_it_next;
+        if (htp_it_next != htps.end()) {
+            ltu = htp_it_next->getTemporal()->getLowerBound();
+            opencog::cassert(TRACE_INFO, ltu <= tu, "The start time of the last spaceMap must occur at or before the exemplar stop time");
+        } else ltu = tu;
+        unsigned long ldiff = ltu - ltl;
 #ifdef ISMOVING_OPTIMIZE
-      //compute isMoving for all object, if the object does not belong
-      //to the hash_map yet it goes with true, because we don't have previous
-      //value of the predicate at this point
-      for(definite_object_set_const_it doi = _dos.begin(); doi != _dos.end(); ++doi)
-	setIsMoving(*doi, pre_sm, sm);
-      //eval each perception
-      for(combo_tree_bool_time_map_it vti = _perceptToBoolTime.begin();
-	  vti != _perceptToBoolTime.end(); ++vti)
+        //compute isMoving for all object, if the object does not belong
+        //to the hash_map yet it goes with true, because we don't have previous
+        //value of the predicate at this point
+        for (definite_object_set_const_it doi = _dos.begin(); doi != _dos.end(); ++doi)
+            setIsMoving(*doi, pre_sm, sm);
+        //eval each perception
+        for (combo_tree_bool_time_map_it vti = _perceptToBoolTime.begin();
+                vti != _perceptToBoolTime.end(); ++vti)
 #else
-      for(combo_tree_time_map_it vti = _perceptToTime.begin();
-	  vti != _perceptToTime.end(); ++vti)
+        for (combo_tree_time_map_it vti = _perceptToTime.begin();
+                vti != _perceptToTime.end(); ++vti)
 #endif
-      {
-	bool isMovOptPossible = false; //isMoving optimization
-	                               //is potentially possible
-	combo_tree tmp = vti->first; //a copy is performed because the argument
-	                        //might be changed
-	pre_it head_it = tmp.begin();
-	vertex head = *head_it;
-	//evaluate perception operand
-	for(sib_it opra = head_it.begin(); opra != head_it.end(); ++opra) {
-	  //evaluate perception operand if indefinite object
-	  if(is_indefinite_object(*opra)) {
-	    indefinite_object io = get_indefinite_object(*opra);
-	    pet_indefinite_object_enum ioe = get_enum(io);
-	    //check if the indefinite object is in _indefToDef cache
-	    if(_indefToDef[(unsigned int)ioe]=="") {
-	      *opra =
-		WorldWrapperUtil::evalIndefiniteObject(_rng, smh,
-						       ltl,
-						       _atomSpace,
-						       _self_id,
-						       _owner_id,
-						       io,
-						       true /*isInThePast*/);
-	      //only non random indefinite objects go in the cache
-	      if(!is_random(io)) {
-		opencog::cassert(TRACE_INFO, is_definite_object(*opra),
-			"opra must contain a definite_object");
-		_indefToDef[(unsigned int)ioe] = get_definite_object(*opra);
-	      } else { //is moving optimization cannot work with random object
-		isMovOptPossible = false;
-	      }
-	    }
-	    else *opra = vertex(_indefToDef[(unsigned int)ioe]);
-	  }
-	  //if operand is function argument
-	  else if(is_argument(*opra))
-	    *opra = al[get_argument(*opra).abs_idx_from_zero()];
-	}
+        {
+            bool isMovOptPossible = false; //isMoving optimization
+            //is potentially possible
+            combo_tree tmp = vti->first; //a copy is performed because the argument
+            //might be changed
+            pre_it head_it = tmp.begin();
+            vertex head = *head_it;
+            //evaluate perception operand
+            for (sib_it opra = head_it.begin(); opra != head_it.end(); ++opra) {
+                //evaluate perception operand if indefinite object
+                if (is_indefinite_object(*opra)) {
+                    indefinite_object io = get_indefinite_object(*opra);
+                    pet_indefinite_object_enum ioe = get_enum(io);
+                    //check if the indefinite object is in _indefToDef cache
+                    if (_indefToDef[(unsigned int)ioe] == "") {
+                        *opra =
+                            WorldWrapperUtil::evalIndefiniteObject(_rng, smh,
+                                                                   ltl,
+                                                                   _atomSpace,
+                                                                   _self_id,
+                                                                   _owner_id,
+                                                                   io,
+                                                                   true /*isInThePast*/);
+                        //only non random indefinite objects go in the cache
+                        if (!is_random(io)) {
+                            opencog::cassert(TRACE_INFO, is_definite_object(*opra),
+                                             "opra must contain a definite_object");
+                            _indefToDef[(unsigned int)ioe] = get_definite_object(*opra);
+                        } else { //is moving optimization cannot work with random object
+                            isMovOptPossible = false;
+                        }
+                    } else *opra = vertex(_indefToDef[(unsigned int)ioe]);
+                }
+                //if operand is function argument
+                else if (is_argument(*opra))
+                    *opra = al[get_argument(*opra).abs_idx_from_zero()];
+            }
 #ifdef ISMOVING_OPTIMIZE
-	//check if the perception is is_moving then look at _isMoving
-	if(head==instance(id::is_moving)) {
-	  opencog::cassert(TRACE_INFO, head_it.has_one_child(),
-		  "is_moving must have only one child");
-	  //eval the new perception
-	  std::pair<bool, unsigned long>& p = vti->second;
-	  //look into the isMoving cache
-	  opencog::cassert(TRACE_INFO, is_definite_object(*head_it.begin()),
-		  "the argument of is_moving must be a definite object");
-	  p.first = getIsMoving(get_definite_object(*head_it.begin()));
-	  if(p.first)
-	    p.second += ldiff;
-	}
-	//hasSaid is particular because we must cut the time in
-	//hasSaidDelay time intervals between the start and the end of
-	//the spaceMap
-	else if(head==instance(id::has_said)) {
-	  opencog::cassert(TRACE_INFO, _hasSaidDelay>0,
-		  "_hasSaidDelay cannot be null otherwise that may provoke an infinite loop");
-	  for(unsigned long i = ltu; i > ltl; i-=_hasSaidDelay) {
-	    if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-								      smh,
-								      i,
-								      _atomSpace,
-								      _self_id,
-								      _owner_id,
-								      head_it,
-								      true))) {
-	      unsigned long idiff;
-	      if(i-_hasSaidDelay>ltl)
-		idiff = _hasSaidDelay;
-	      else idiff = i-ltl;
-	      std::pair<bool, unsigned long>& p = vti->second;
-	      p.second += idiff;
-	    }
-	  }
-	}
-	//this code is very badly optimized it should be optimized later
-	else if(head==instance(id::is_last_agent_action)) {
+            //check if the perception is is_moving then look at _isMoving
+            if (head == instance(id::is_moving)) {
+                opencog::cassert(TRACE_INFO, head_it.has_one_child(),
+                                 "is_moving must have only one child");
+                //eval the new perception
+                std::pair<bool, unsigned long>& p = vti->second;
+                //look into the isMoving cache
+                opencog::cassert(TRACE_INFO, is_definite_object(*head_it.begin()),
+                                 "the argument of is_moving must be a definite object");
+                p.first = getIsMoving(get_definite_object(*head_it.begin()));
+                if (p.first)
+                    p.second += ldiff;
+            }
+            //hasSaid is particular because we must cut the time in
+            //hasSaidDelay time intervals between the start and the end of
+            //the spaceMap
+            else if (head == instance(id::has_said)) {
+                opencog::cassert(TRACE_INFO, _hasSaidDelay > 0,
+                                 "_hasSaidDelay cannot be null otherwise that may provoke an infinite loop");
+                for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
+                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                                              smh,
+                                              i,
+                                              _atomSpace,
+                                              _self_id,
+                                              _owner_id,
+                                              head_it,
+                                              true))) {
+                        unsigned long idiff;
+                        if (i - _hasSaidDelay > ltl)
+                            idiff = _hasSaidDelay;
+                        else idiff = i - ltl;
+                        std::pair<bool, unsigned long>& p = vti->second;
+                        p.second += idiff;
+                    }
+                }
+            }
+            //this code is very badly optimized it should be optimized later
+            else if (head == instance(id::is_last_agent_action)) {
 
-	  //debug print
-	  //std::cout << "PERCEPTION IS_LAST_AGENT_ACTION : " << combo_tree(head_it) << std::endl;
-	  //~debug print
+                //debug print
+                //std::cout << "PERCEPTION IS_LAST_AGENT_ACTION : " << combo_tree(head_it) << std::endl;
+                //~debug print
 
-	  unsigned int t = ltl;
+                unsigned int t = ltl;
 
-	  //retreive all actions of the agent involved in the perception
-	  //in time interval of the SpaceMap
-	  std::list<HandleTemporalPair> htp;
-	  _atomSpace.getTimeInfo(back_inserter(htp),
-			 Handle::UNDEFINED,
-			 Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
+                //retreive all actions of the agent involved in the perception
+                //in time interval of the SpaceMap
+                std::list<HandleTemporalPair> htp;
+                _atomSpace.getTimeInfo(back_inserter(htp),
+                                       Handle::UNDEFINED,
+                                       Temporal(ltl, ltu), TemporalTable::ENDS_WITHIN);
 
-	  pre_it head_child_it = head_it.begin();
-	  Handle action_done_h = _atomSpace.getHandle(PREDICATE_NODE,
-					      ACTION_DONE_PREDICATE_NAME);
-	  Handle agent_h =
-	    WorldWrapperUtil::toHandle(_atomSpace, get_definite_object(*head_child_it),
-				       _self_id, _owner_id);
-	  //define template to match
-	  atom_tree* no_arg_actionDone = makeVirtualAtom(EVALUATION_LINK, 
-			  makeVirtualAtom(action_done_h, NULL), 
-			  makeVirtualAtom(LIST_LINK, makeVirtualAtom(agent_h, NULL), NULL),
-			  NULL);
-	  does_fit_template dft(*no_arg_actionDone, &_atomSpace, false);
-	  for(std::list<HandleTemporalPair>::const_iterator i = htp.begin();
-	      i != htp.end(); ++i) {
-	    Handle evalLink_h = i->getHandle();
-	    //check if evalLink_h match the template
-	    if(dft(evalLink_h)) {
-	      unsigned long cur_tu = i->getTemporal()->getUpperBound();
-	      if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-									smh,
-									cur_tu,
-									_atomSpace,
-									_self_id,
-									_owner_id,
-									head_it,
-									true))) {
-		std::pair<bool, unsigned long>& p = vti->second;
-		p.second += cur_tu - t;
-	      }
-	      t = cur_tu+1;
-	    }
-	  }
-
-
-	      /*
-
-	      //get listLink
-	      Handle listLink_h = as.getOutgoing(evalLink_h, 1);
-	      //check all arguments of is_last_agent_action
-	      //exept the first argument which has already been checked
-	      bool does_match = true;
-	      unsigned arity = as.getArity(listLink_h);
-	      if(head_it.number_of_children()== arity && arity>=2) {
-		++head_child_it;
-		Handle action_h = as.getOutgoing(listLink_h, 1);
-		if(*head_child_it == get_action_definite_object(action_h)) {
-		  for(unsigned a = 2; a < arity && does_match;
-		      a++, ++head_child_it) {
-		    Handle arg_h = as.getOutgoing(listLink_h, a);
-		    const vertex& v = *head_child_it;
-		    does_match = is_definite_object(v) &&
-		      definite_object_equal(get_definite_object(v),
-					    defintie_object(as.getName(arg_h)));
-		    
-		  }
-		}
-	      }
-	      Handle action_h = as.getOutgoing(listLink_h, 1);
-	      definite_object action_name = 
-		get_action_definite_object(as.getName(action_h));
-	      
-	    }
-	  }
-	      
-
-	  unsigned int ilaad = IS_LAST_AGENT_ACTION_DELAY;
-	  for(unsigned long i = ltu; i > ltl; i-=ilaad) {
-	    if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-								      smh,
-								      i,
-								      _spaceServer,
-								      _self_id,
-								      _owner_id,
-								      head_it,
-								      true))) {
-	      unsigned long idiff;
-	      if(i-ilaad>ltl)
-		idiff = ilaad;
-	      else idiff = i-ltl;
-	      std::pair<bool, unsigned long>& p = vti->second;
-	      p.second += idiff;
-	    }
-	  }
-	      */
+                pre_it head_child_it = head_it.begin();
+                Handle action_done_h = _atomSpace.getHandle(PREDICATE_NODE,
+                                       ACTION_DONE_PREDICATE_NAME);
+                Handle agent_h =
+                    WorldWrapperUtil::toHandle(_atomSpace, get_definite_object(*head_child_it),
+                                               _self_id, _owner_id);
+                //define template to match
+                atom_tree* no_arg_actionDone = makeVirtualAtom(EVALUATION_LINK,
+                                               makeVirtualAtom(action_done_h, NULL),
+                                               makeVirtualAtom(LIST_LINK, makeVirtualAtom(agent_h, NULL), NULL),
+                                               NULL);
+                does_fit_template dft(*no_arg_actionDone, &_atomSpace, false);
+                for (std::list<HandleTemporalPair>::const_iterator i = htp.begin();
+                        i != htp.end(); ++i) {
+                    Handle evalLink_h = i->getHandle();
+                    //check if evalLink_h match the template
+                    if (dft(evalLink_h)) {
+                        unsigned long cur_tu = i->getTemporal()->getUpperBound();
+                        if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                                                  smh,
+                                                  cur_tu,
+                                                  _atomSpace,
+                                                  _self_id,
+                                                  _owner_id,
+                                                  head_it,
+                                                  true))) {
+                            std::pair<bool, unsigned long>& p = vti->second;
+                            p.second += cur_tu - t;
+                        }
+                        t = cur_tu + 1;
+                    }
+                }
 
 
-	}
-	//check if we can use the previous value rather than computing
-	//a new one
-	else {
-	  bool canUsePreviousValue;
-	  if(isMovOptPossible && doesInvolveMoving(head)) {
-	    canUsePreviousValue = true;
-	    for(sib_it opra = head_it.begin();
-		opra != head_it.end() && canUsePreviousValue; ++opra) {
-	      canUsePreviousValue = !getIsMoving(get_definite_object(*opra));
-	    }
-	  }
-	  else canUsePreviousValue = false;
-	  //eval the new perception
-	  std::pair<bool, unsigned long>& p = vti->second;
-	  if(!canUsePreviousValue) {
-	    p.first =
-	      combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng, smh,
-								     ltl,
-								     _atomSpace,
-								     _self_id,
-								     _owner_id,
-								     head_it,
-								     true));
-	  }
-	  if(p.first)
-	    p.second += ldiff;
-	}
+                /*
+
+                //get listLink
+                Handle listLink_h = as.getOutgoing(evalLink_h, 1);
+                //check all arguments of is_last_agent_action
+                //exept the first argument which has already been checked
+                bool does_match = true;
+                unsigned arity = as.getArity(listLink_h);
+                if(head_it.number_of_children()== arity && arity>=2) {
+                ++head_child_it;
+                Handle action_h = as.getOutgoing(listLink_h, 1);
+                if(*head_child_it == get_action_definite_object(action_h)) {
+                for(unsigned a = 2; a < arity && does_match;
+                 a++, ++head_child_it) {
+                Handle arg_h = as.getOutgoing(listLink_h, a);
+                const vertex& v = *head_child_it;
+                does_match = is_definite_object(v) &&
+                 definite_object_equal(get_definite_object(v),
+                  defintie_object(as.getName(arg_h)));
+
+                }
+                }
+                }
+                Handle action_h = as.getOutgoing(listLink_h, 1);
+                definite_object action_name =
+                get_action_definite_object(as.getName(action_h));
+
+                }
+                }
+
+
+                unsigned int ilaad = IS_LAST_AGENT_ACTION_DELAY;
+                for(unsigned long i = ltu; i > ltl; i-=ilaad) {
+                if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                       smh,
+                       i,
+                       _spaceServer,
+                       _self_id,
+                       _owner_id,
+                       head_it,
+                       true))) {
+                unsigned long idiff;
+                if(i-ilaad>ltl)
+                idiff = ilaad;
+                else idiff = i-ltl;
+                std::pair<bool, unsigned long>& p = vti->second;
+                p.second += idiff;
+                }
+                }
+                */
+
+
+            }
+            //check if we can use the previous value rather than computing
+            //a new one
+            else {
+                bool canUsePreviousValue;
+                if (isMovOptPossible && doesInvolveMoving(head)) {
+                    canUsePreviousValue = true;
+                    for (sib_it opra = head_it.begin();
+                            opra != head_it.end() && canUsePreviousValue; ++opra) {
+                        canUsePreviousValue = !getIsMoving(get_definite_object(*opra));
+                    }
+                } else canUsePreviousValue = false;
+                //eval the new perception
+                std::pair<bool, unsigned long>& p = vti->second;
+                if (!canUsePreviousValue) {
+                    p.first =
+                        combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng, smh,
+                                              ltl,
+                                              _atomSpace,
+                                              _self_id,
+                                              _owner_id,
+                                              head_it,
+                                              true));
+                }
+                if (p.first)
+                    p.second += ldiff;
+            }
 
 #else //~ISMOVING_OPTIMIZE
 
-	if(head==instance(id::has_said)) {
-	  for(unsigned long i = ltu; i > ltl; i-=_hasSaidDelay) {
-	    if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-								      smh,
-								      i,
-								      _atomSpace,
-								      _self_id,
-								      _owner_id,
-								      head_it,
-								      true))) {
-	      unsigned long idiff;
-	      if(i-_hasSaidDelay>ltl)
-		idiff = _hasSaidDelay;
-	      else idiff = i-ltl;
-	      vti->second += idiff;
-	    }
-	  }
-	}
-	else {
-	  if(combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
-								    smh,
-								    ltl,
-								    _atomSpace,
-								    _self_id,
-								    _owner_id,
-								    head_it,
-								    true)))
-	    vti->second += ldiff;
-	}
-	
+            if (head == instance(id::has_said)) {
+                for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
+                    if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                                              smh,
+                                              i,
+                                              _atomSpace,
+                                              _self_id,
+                                              _owner_id,
+                                              head_it,
+                                              true))) {
+                        unsigned long idiff;
+                        if (i - _hasSaidDelay > ltl)
+                            idiff = _hasSaidDelay;
+                        else idiff = i - ltl;
+                        vti->second += idiff;
+                    }
+                }
+            } else {
+                if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
+                                          smh,
+                                          ltl,
+                                          _atomSpace,
+                                          _self_id,
+                                          _owner_id,
+                                          head_it,
+                                          true)))
+                    vti->second += ldiff;
+            }
+
 #endif
-      }
-      //get the pointer of the previous spaceMap for the next iterator,
-      //for isMoving
-      pre_sm = &sm;
-      //reset _indefToDef
-      for(unsigned int i = 0; i < _indefToDef.size(); i++)
-	_indefToDef[i]="";
+        }
+        //get the pointer of the previous spaceMap for the next iterator,
+        //for isMoving
+        pre_sm = &sm;
+        //reset _indefToDef
+        for (unsigned int i = 0; i < _indefToDef.size(); i++)
+            _indefToDef[i] = "";
     }
     _total_time += diff;
-  }
-  
-  void EntropyFilter::updatePerceptToTime(unsigned long tl, unsigned long tu,
-					  const argument_list& al) {
-    updatePerceptToTime(Temporal(tl, tu), al);
-  }
+}
 
-  void EntropyFilter::rebuildPerceptToTime() {
+void EntropyFilter::updatePerceptToTime(unsigned long tl, unsigned long tu,
+                                        const argument_list& al)
+{
+    updatePerceptToTime(Temporal(tl, tu), al);
+}
+
+void EntropyFilter::rebuildPerceptToTime()
+{
     //rebuild argument set (insert new possible arguments)
     build_operand_set(); //no need to clear the set because all possible operands are kept anyway
 
     //add new atomic perceptions
-    for(perception_set_const_it psi = _elementary_perceptions.begin();
-	psi != _elementary_perceptions.end(); ++psi) {
-      build_and_insert_atomic_perceptions(*psi);      
+    for (perception_set_const_it psi = _elementary_perceptions.begin();
+            psi != _elementary_perceptions.end(); ++psi) {
+        build_and_insert_atomic_perceptions(*psi);
     }
-  }
+}
 
-  //fill pred_set with all predicates with entropy above threshold
-  void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-						  double threshold) {
+//fill pred_set with all predicates with entropy above threshold
+void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
+        double threshold)
+{
 #ifdef ISMOVING_OPTIMIZE
-    for(combo_tree_bool_time_map_it is = _perceptToBoolTime.begin();
-	is != _perceptToBoolTime.end(); ++is) {
-      std::pair<bool, unsigned long>& pa = is->second;
-      float p = (float)pa.second/(float)_total_time;
-      float entropy = opencog::binaryEntropy(p);
-      //print debug
-      //std::cout << "PERCEPTION TR : " << is->first << " P : " << p
-      //	<< " ENTROPY : " << entropy << std::endl;
-      //~print debug
-      if(entropy > threshold)
-	pred_set.insert(is->first);
+    for (combo_tree_bool_time_map_it is = _perceptToBoolTime.begin();
+            is != _perceptToBoolTime.end(); ++is) {
+        std::pair<bool, unsigned long>& pa = is->second;
+        float p = (float)pa.second / (float)_total_time;
+        float entropy = opencog::binaryEntropy(p);
+        //print debug
+        //std::cout << "PERCEPTION TR : " << is->first << " P : " << p
+        // << " ENTROPY : " << entropy << std::endl;
+        //~print debug
+        if (entropy > threshold)
+            pred_set.insert(is->first);
     }
 #else
-    for(combo_tree_time_map_it is = _perceptToTime.begin();
-	is != _perceptToTime.end(); ++is) {
-      float p = (float)is->second/(float)_total_time;
-      float entropy = opencog::binaryEntropy(p);
-      if(entropy > threshold)
-	pred_set.insert(is->first);
+    for (combo_tree_time_map_it is = _perceptToTime.begin();
+            is != _perceptToTime.end(); ++is) {
+        float p = (float)is->second / (float)_total_time;
+        float entropy = opencog::binaryEntropy(p);
+        if (entropy > threshold)
+            pred_set.insert(is->first);
     }
 #endif
-  }
+}
 
-  inline bool EntropyFilter::doesInvolveMoving(vertex v) {
-    return (v==instance(id::near) || v==instance(id::below)
-	    || v==instance(id::above) || v==instance(id::inside));
-  }
+inline bool EntropyFilter::doesInvolveMoving(vertex v)
+{
+    return (v == instance(id::near) || v == instance(id::below)
+            || v == instance(id::above) || v == instance(id::inside));
+}
 
-  inline void EntropyFilter::setIsMoving(const definite_object& obj,
-					 const SpaceServer::SpaceMap* pre_sm,
-					 const SpaceServer::SpaceMap& sm) {
+inline void EntropyFilter::setIsMoving(const definite_object& obj,
+                                       const SpaceServer::SpaceMap* pre_sm,
+                                       const SpaceServer::SpaceMap& sm)
+{
 #ifdef ISMOVING_SET
-    if(pre_sm==NULL)
-      _isMoving.insert(obj);
+    if (pre_sm == NULL)
+        _isMoving.insert(obj);
     else {
-      Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
-						obj,
-						_self_id,
-						_owner_id);
-      definite_object_hash_set_const_it obj_it = _isMoving.find(obj);
-      if(AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,*pre_sm,sm,obj_h)) {
-	if(obj_it==_isMoving.end())
-	  _isMoving.insert(obj);
-      }
-      else {
-	if(obj_it!=_isMoving.end())
-	  _isMoving.erase(obj_it);
-      }
+        Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
+                       obj,
+                       _self_id,
+                       _owner_id);
+        definite_object_hash_set_const_it obj_it = _isMoving.find(obj);
+        if (AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace, *pre_sm, sm, obj_h)) {
+            if (obj_it == _isMoving.end())
+                _isMoving.insert(obj);
+        } else {
+            if (obj_it != _isMoving.end())
+                _isMoving.erase(obj_it);
+        }
     }
 #else
-    if(pre_sm==NULL)
-      _isMoving[obj] = true;
+    if (pre_sm == NULL)
+        _isMoving[obj] = true;
     else {
-      Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
-						obj,
-						_self_id,
-						_owner_id);
-      _isMoving[obj] = AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
-							  obj,
-							  sm,
-							  obj_h);
-    }	
-#endif    
-  }
+        Handle obj_h = WorldWrapperUtil::toHandle(_atomSpace,
+                       obj,
+                       _self_id,
+                       _owner_id);
+        _isMoving[obj] = AtomSpaceUtil::isMovingBtwSpaceMap(_atomSpace,
+                         obj,
+                         sm,
+                         obj_h);
+    }
+#endif
+}
 
-  inline bool EntropyFilter::getIsMoving(const definite_object& obj) {
+inline bool EntropyFilter::getIsMoving(const definite_object& obj)
+{
 #ifdef ISMOVING_SET
-    return _isMoving.end()!=_isMoving.find(obj);
+    return _isMoving.end() != _isMoving.find(obj);
 #else
     return _isMoving[obj];
 #endif
-  }
+}
 
-  void EntropyFilter::build_operand_set() {
-    for(definite_object_set_const_it do_it = _dos.begin();
-	do_it != _dos.end(); ++do_it) {
-      _operands.insert(*do_it);
+void EntropyFilter::build_operand_set()
+{
+    for (definite_object_set_const_it do_it = _dos.begin();
+            do_it != _dos.end(); ++do_it) {
+        _operands.insert(*do_it);
     }
-    for(indefinite_object_set_const_it io_it = _idos.begin();
-	io_it != _idos.end(); ++io_it) {
-      _operands.insert(*io_it);
+    for (indefinite_object_set_const_it io_it = _idos.begin();
+            io_it != _idos.end(); ++io_it) {
+        _operands.insert(*io_it);
     }
-    for(message_set_const_it ms_it = _ms.begin();
-	ms_it != _ms.end(); ++ms_it) {
-      _operands.insert(*ms_it);
+    for (message_set_const_it ms_it = _ms.begin();
+            ms_it != _ms.end(); ++ms_it) {
+        _operands.insert(*ms_it);
     }
     //for(agent_to_actions_const_it atas_it = _atas.begin();
     //atas_it != _atas.end(); ++atas_it) {
@@ -564,64 +571,65 @@ namespace Filter {
     //_operands.insert(*ados_it);
     //}
     //}
-    for(arity_t i=1; i<=_arity; i++) {
-      argument arg(i);
-      _operands.insert(arg);
+    for (arity_t i = 1; i <= _arity; i++) {
+        argument arg(i);
+        _operands.insert(arg);
     }
-  }
+}
 
-  void EntropyFilter::build_and_insert_atomic_perceptions(perception p) {
+void EntropyFilter::build_and_insert_atomic_perceptions(perception p)
+{
     arity_t p_arity = p->arity();
     combo_tree p_tr(p);
-    if(p_arity<0) {
-      p_arity = -p_arity;
-      for(arity_t a = p_arity-1; a < p_arity+MAX_OPTIONAL_ARGUMENTS; a++)
-	build_and_insert_atomic_perceptions(p_tr, a);
-    }
-    else build_and_insert_atomic_perceptions(p_tr, p_arity);
-  }
-  
-  void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
-							  arity_t arity) {
-    opencog::cassert(TRACE_INFO, arity>=0,
-		      "arity is necessarily positive or null");
+    if (p_arity < 0) {
+        p_arity = -p_arity;
+        for (arity_t a = p_arity - 1; a < p_arity + MAX_OPTIONAL_ARGUMENTS; a++)
+            build_and_insert_atomic_perceptions(p_tr, a);
+    } else build_and_insert_atomic_perceptions(p_tr, p_arity);
+}
+
+void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
+        arity_t arity)
+{
+    opencog::cassert(TRACE_INFO, arity >= 0,
+                     "arity is necessarily positive or null");
     opencog::cassert(TRACE_INFO, !tr.empty(), "tr cannot be empty");
     pre_it head = tr.begin();
 
     //debug print
-    //std::cout << "BUILD_AND_INSER TR : " << tr 
+    //std::cout << "BUILD_AND_INSER TR : " << tr
     //      << " ARITY : " << (int)arity << std::endl;
     //~debug print
 
     //---------
     //base case
     //---------
-    if(arity==0) {
-      combo_tree tmp = tr;
-      reduct::hillclimbing_perception_reduce(tmp);
-      pre_it tmp_head = tmp.begin();
-      if(*tmp_head!=id::logical_true && *tmp_head!=id::logical_false) {
+    if (arity == 0) {
+        combo_tree tmp = tr;
+        reduct::hillclimbing_perception_reduce(tmp);
+        pre_it tmp_head = tmp.begin();
+        if (*tmp_head != id::logical_true && *tmp_head != id::logical_false) {
 #ifdef ISMOVING_OPTIMIZE
-      //if the perception is new then add it
-      //this conditional is used because
-      //it might not be the first time the set of atomic perception
-      //is being built (when other new BD exemplars comes for instance)
-      if(_perceptToBoolTime.find(tmp)==_perceptToBoolTime.end()) {
-	std::pair<bool, unsigned long> p(false, 0);
-	_perceptToBoolTime[tmp]=p;
-	//print debug
-	//std::cout << "ADD PERCEPT TO TIME : " << tmp << std::endl;
-	//~print debug
-      }
+            //if the perception is new then add it
+            //this conditional is used because
+            //it might not be the first time the set of atomic perception
+            //is being built (when other new BD exemplars comes for instance)
+            if (_perceptToBoolTime.find(tmp) == _perceptToBoolTime.end()) {
+                std::pair<bool, unsigned long> p(false, 0);
+                _perceptToBoolTime[tmp] = p;
+                //print debug
+                //std::cout << "ADD PERCEPT TO TIME : " << tmp << std::endl;
+                //~print debug
+            }
 #else
-      //if the perception is new then add it
-      //this conditional is used because
-      //it might not be the first time the set of atomic perception
-      //is being built (when other new BD exemplars comes for instance)
-      if(_perceptToTime.find(tmp)==_perceptToTime.end())
-	_perceptToTime[tmp]=0;
+            //if the perception is new then add it
+            //this conditional is used because
+            //it might not be the first time the set of atomic perception
+            //is being built (when other new BD exemplars comes for instance)
+            if (_perceptToTime.find(tmp) == _perceptToTime.end())
+                _perceptToTime[tmp] = 0;
 #endif
-      }
+        }
     }
     //--------------
     //recursive case
@@ -629,57 +637,55 @@ namespace Filter {
     //is_last_agent_action is a special case because it uses
     //_atas (containing a map of agents corresponding to there
     //actions and arguments) instead of _operands
-    else if(*head==instance(id::is_last_agent_action)) {
-      
-      //debug print
-      //std::cout << "TR HEAD : " << combo_tree(head) 
-      //    << " VERTEX : " << *v_it
-      //    << std::endl;
-      //~debug print
-	
-      for(agent_to_actions_const_it aaci = _atas.begin();
-	  aaci != _atas.end(); ++aaci) {
-	for(definite_object_vec_set_const_it dci = aaci->second.begin();
-	    dci != aaci->second.end(); ++dci) {
-	  combo_tree tmp = tr;
-	  pre_it tmp_head = tmp.begin();
-	  opencog::cassert(TRACE_INFO, tmp_head.is_childless(),
-			    "to work well there must be no child");
-	  tmp.append_child(tmp_head, aaci->first);
-	  for(definite_object_vec_const_it dvci = dci->begin();
-	      dvci != dci->end(); ++dvci) {
-	    tmp.append_child(tmp_head, *dvci);
-	  }
-	  build_and_insert_atomic_perceptions(tmp, 0);
-	}  
-      }
-    }
-    else {
-      //get the type tree of the next argument
-      arity_t noc = head.number_of_children();
-      type_tree tt = get_input_type_tree(*head, noc);
-      
-      //iterate over all possible operands and include
-      //only those that inherit
-      //from the next argument type tree tt
-      for(vertex_set_const_it v_it = _operands.begin();
-	  v_it != _operands.end(); ++v_it) {
-	type_tree v_tt;
-	if(is_argument(*v_it)) {//return the type corresponding to argument
-	  const argument arg = get_argument(*v_it);
-	  v_tt = _input_arg_types[arg.abs_idx_from_zero()];
-	}
-	else v_tt = get_type_tree(*v_it);
+    else if (*head == instance(id::is_last_agent_action)) {
 
-	//if inherits then create a new combo_tree with the new argument
-	//and call recursively with arity-1
-	if(inherit_type_tree(v_tt, tt)) {
-	  combo_tree tr_copy = tr;
-	  pre_it head_copy = tr_copy.begin();
-	  tr_copy.append_child(head_copy, *v_it);
-	  build_and_insert_atomic_perceptions(tr_copy, arity-1);
-	}
-      }
+        //debug print
+        //std::cout << "TR HEAD : " << combo_tree(head)
+        //    << " VERTEX : " << *v_it
+        //    << std::endl;
+        //~debug print
+
+        for (agent_to_actions_const_it aaci = _atas.begin();
+                aaci != _atas.end(); ++aaci) {
+            for (definite_object_vec_set_const_it dci = aaci->second.begin();
+                    dci != aaci->second.end(); ++dci) {
+                combo_tree tmp = tr;
+                pre_it tmp_head = tmp.begin();
+                opencog::cassert(TRACE_INFO, tmp_head.is_childless(),
+                                 "to work well there must be no child");
+                tmp.append_child(tmp_head, aaci->first);
+                for (definite_object_vec_const_it dvci = dci->begin();
+                        dvci != dci->end(); ++dvci) {
+                    tmp.append_child(tmp_head, *dvci);
+                }
+                build_and_insert_atomic_perceptions(tmp, 0);
+            }
+        }
+    } else {
+        //get the type tree of the next argument
+        arity_t noc = head.number_of_children();
+        type_tree tt = get_input_type_tree(*head, noc);
+
+        //iterate over all possible operands and include
+        //only those that inherit
+        //from the next argument type tree tt
+        for (vertex_set_const_it v_it = _operands.begin();
+                v_it != _operands.end(); ++v_it) {
+            type_tree v_tt;
+            if (is_argument(*v_it)) {//return the type corresponding to argument
+                const argument arg = get_argument(*v_it);
+                v_tt = _input_arg_types[arg.abs_idx_from_zero()];
+            } else v_tt = get_type_tree(*v_it);
+
+            //if inherits then create a new combo_tree with the new argument
+            //and call recursively with arity-1
+            if (inherit_type_tree(v_tt, tt)) {
+                combo_tree tr_copy = tr;
+                pre_it head_copy = tr_copy.begin();
+                tr_copy.append_child(head_copy, *v_it);
+                build_and_insert_atomic_perceptions(tr_copy, arity - 1);
+            }
+        }
     }
-  }
+}
 }

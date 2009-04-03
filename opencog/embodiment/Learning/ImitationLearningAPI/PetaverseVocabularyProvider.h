@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** 
+/**
  * Abstract class to be inherited to use a learning algo in the context
  * of petaverse imitation learning, the inherited class will be used by
  * ImitationLearningTask and provides the methods needed by the EntropyFilter
@@ -35,31 +35,32 @@
 #include "comboreduct/combo/vertex.h"
 #include "PetComboVocabulary.h"
 
-class PetaverseVocabularyProviderBase {
+class PetaverseVocabularyProviderBase
+{
 
 public:
 
-  typedef std::set<combo::vertex> operator_set;
-  typedef std::set<combo::indefinite_object> indefinite_object_set;
+    typedef std::set<combo::vertex> operator_set;
+    typedef std::set<combo::indefinite_object> indefinite_object_set;
 
-  //ctor, dtor
+    //ctor, dtor
 
-  PetaverseVocabularyProviderBase() {}
-  virtual ~PetaverseVocabularyProviderBase() {}
+    PetaverseVocabularyProviderBase() {}
+    virtual ~PetaverseVocabularyProviderBase() {}
 
-  //access methods
+    //access methods
 
-  //return a reference of the set of operators
-  virtual const operator_set& get_elementary_operators() const = 0;
+    //return a reference of the set of operators
+    virtual const operator_set& get_elementary_operators() const = 0;
 
-  //return a reference of the set of actions
-  virtual const combo::builtin_action_set& get_elementary_actions() const = 0;
+    //return a reference of the set of actions
+    virtual const combo::builtin_action_set& get_elementary_actions() const = 0;
 
-  //return a reference of the set of perceptions
-  virtual const combo::perception_set& get_elementary_perceptions() const = 0;
+    //return a reference of the set of perceptions
+    virtual const combo::perception_set& get_elementary_perceptions() const = 0;
 
-  //return a reference of the set of indefinite objects
-  virtual const indefinite_object_set& get_indefinite_objects() const = 0;
+    //return a reference of the set of indefinite objects
+    virtual const indefinite_object_set& get_indefinite_objects() const = 0;
 };
 
 #endif

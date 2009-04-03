@@ -22,49 +22,50 @@ static const std::string ration = "ration";
 static const std::string drink  = "water";
 static const std::string milk   = "milk";
 
-class PopulateAtomSpace {
+class PopulateAtomSpace
+{
 
-    private:
+private:
 
-		AtomSpace atomSpace;
-        Control::SystemParameters parameters;
-        PAI * pai;
-		PetInterfaceMock * pet;
-		PredicatesUpdater * updater;
-	    FailureActionPlanSender *ap;
+    AtomSpace atomSpace;
+    Control::SystemParameters parameters;
+    PAI * pai;
+    PetInterfaceMock * pet;
+    PredicatesUpdater * updater;
+    FailureActionPlanSender *ap;
 
-        HandleSeq handles;
+    HandleSeq handles;
 
-        /**
-         * add owns predicate between pet and avatar
-         */
-        void addOnwerInfo();
+    /**
+     * add owns predicate between pet and avatar
+     */
+    void addOnwerInfo();
 
-        /**
-         * add size predicate for the given obj.
-         */
-		void addSizeInfo(Handle obj, double length, double width);
+    /**
+     * add size predicate for the given obj.
+     */
+    void addSizeInfo(Handle obj, double length, double width);
 
-	public:
+public:
 
-		PopulateAtomSpace();
-		~PopulateAtomSpace();
+    PopulateAtomSpace();
+    ~PopulateAtomSpace();
 
-        /**
-         * add space info for the objs in the map, based on the x, y coords
-         * passed.
-         */
-        void addSpaceInfoMock(int baseX, int baseY);
+    /**
+     * add space info for the objs in the map, based on the x, y coords
+     * passed.
+     */
+    void addSpaceInfoMock(int baseX, int baseY);
 
-        /**
-         * call predicates updater
-         */
-        void callUpdater();
+    /**
+     * call predicates updater
+     */
+    void callUpdater();
 
-        /**
-         * returnt the PAI component
-         */
-        PAI& getPAI();
+    /**
+     * returnt the PAI component
+     */
+    PAI& getPAI();
 };
 
 #endif

@@ -46,7 +46,7 @@
 
 #ifdef WIN32
 #include <boost/foreach.hpp>
-#else 
+#else
 //#include "foreach.hpp"
 #include "util/foreach.h"
 #endif

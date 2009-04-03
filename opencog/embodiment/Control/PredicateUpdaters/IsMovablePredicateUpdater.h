@@ -24,16 +24,18 @@
 
 #include "BasicPredicateUpdater.h"
 
-namespace OperationalPetController{
+namespace OperationalPetController
+{
 
-class IsMovablePredicateUpdater : public OperationalPetController::BasicPredicateUpdater {
-	
-	public:
-		IsMovablePredicateUpdater(AtomSpace &atomSpace);
-		~IsMovablePredicateUpdater();
-		
-		void update(Handle object, Handle pet, unsigned long timestamp );
-	
+class IsMovablePredicateUpdater : public OperationalPetController::BasicPredicateUpdater
+{
+
+public:
+    IsMovablePredicateUpdater(AtomSpace &atomSpace);
+    ~IsMovablePredicateUpdater();
+
+    void update(Handle object, Handle pet, unsigned long timestamp );
+
 }; // class
 }  // namespace
 

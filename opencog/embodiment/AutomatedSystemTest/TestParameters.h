@@ -27,14 +27,16 @@
 
 #include "SystemParameters.h"
 
-namespace AutomatedSystemTest {
+namespace AutomatedSystemTest
+{
 
-class TestParameters : public Control::SystemParameters {
+class TestParameters : public Control::SystemParameters
+{
 
-    public:
+public:
 
-        TestParameters();
-        ~TestParameters();
+    TestParameters();
+    ~TestParameters();
 
 }; // class
 }  // namespace

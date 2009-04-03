@@ -26,13 +26,16 @@
 
 using namespace behavior;
 
-EvaluationLinkSimilarityEvaluator::~EvaluationLinkSimilarityEvaluator() {
+EvaluationLinkSimilarityEvaluator::~EvaluationLinkSimilarityEvaluator()
+{
 }
 
-EvaluationLinkSimilarityEvaluator::EvaluationLinkSimilarityEvaluator() {
+EvaluationLinkSimilarityEvaluator::EvaluationLinkSimilarityEvaluator()
+{
 }
 
-float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace *atomSpace, Handle evalLinkHandle1, Handle evalLinkHandle2) {
+float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace *atomSpace, Handle evalLinkHandle1, Handle evalLinkHandle2)
+{
 
     // EvalLink("behaved", ListLink(subject, action, action_arg1, action_arg2, ...))
 
@@ -42,8 +45,8 @@ float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace *atomSpace, Handle
         return 0;
     }
 
-    Handle listLink1 = atomSpace->getOutgoing(evalLinkHandle1,1);
-    Handle listLink2 = atomSpace->getOutgoing(evalLinkHandle2,1);
+    Handle listLink1 = atomSpace->getOutgoing(evalLinkHandle1, 1);
+    Handle listLink2 = atomSpace->getOutgoing(evalLinkHandle2, 1);
 
     //printf("llarity1 = %d\n", listLink1->getArity());
     //printf("llarity2 = %d\n", listLink1->getArity());
@@ -54,9 +57,9 @@ float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace *atomSpace, Handle
     // i > 0 is correct. The first element in the ListLink (subject) is
     // not supposed to be considered
     float answer = 1;
-    for (int i = atomSpace->getArity(listLink1) -1; i > 0; i--) {
-        Handle h1 = atomSpace->getOutgoing(listLink1,i);
-        Handle h2 = atomSpace->getOutgoing(listLink2,i);
+    for (int i = atomSpace->getArity(listLink1) - 1; i > 0; i--) {
+        Handle h1 = atomSpace->getOutgoing(listLink1, i);
+        Handle h2 = atomSpace->getOutgoing(listLink2, i);
         float sim = computeHandleSimilarity(h1, h2);
         answer *= sim;
     }
@@ -64,7 +67,8 @@ float EvaluationLinkSimilarityEvaluator::similarity(AtomSpace *atomSpace, Handle
     return answer;
 }
 
-float EvaluationLinkSimilarityEvaluator::computeHandleSimilarity(Handle h1, Handle h2) {
+float EvaluationLinkSimilarityEvaluator::computeHandleSimilarity(Handle h1, Handle h2)
+{
 
     //printf("h1 = %s\n", TLB::getAtom(h1)->toString().c_str());
     //printf("h2 = %s\n", TLB::getAtom(h2)->toString().c_str());

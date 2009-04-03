@@ -28,47 +28,49 @@
 #include <string>
 #include <map>
 
-namespace Control {
-  namespace ImitationLearningAlgo {
-    static const char MOSES[] = "MOSES";
-    static const char HillClimbing[] = "HillClimbing";
-  }
-    
-class SystemParameters {
+namespace Control
+{
+namespace ImitationLearningAlgo {
+static const char MOSES[] = "MOSES";
+static const char HillClimbing[] = "HillClimbing";
+}
 
-    protected:
+class SystemParameters
+{
 
-        std::string emptyString;
-        std::map<std::string, std::string> table;
+protected:
 
-    public:
+    std::string emptyString;
+    std::map<std::string, std::string> table;
 
-        // ***********************************************/
-        // Constructors/destructors
+public:
 
-        virtual ~SystemParameters();
-        SystemParameters();
-          
-        // ***********************************************/
-        // Public API
+    // ***********************************************/
+    // Constructors/destructors
 
-        /**
-         * Load passed file and redefines values for parameters.
-         *
-         * Parameters which are not mentioned in the file will keep
-         * their default value. 
-         * 
-         * Parameters which do not have default values are
-         * discarded.
-         */
-        void loadFromFile(const std::string &fileName);
+    virtual ~SystemParameters();
+    SystemParameters();
 
-        /**
-         * Return current value of a given parameter.
-         *
-         * @return Current value of a given parameter.
-         */
-        const std::string &get(const std::string &paramName) const;
+    // ***********************************************/
+    // Public API
+
+    /**
+     * Load passed file and redefines values for parameters.
+     *
+     * Parameters which are not mentioned in the file will keep
+     * their default value.
+     *
+     * Parameters which do not have default values are
+     * discarded.
+     */
+    void loadFromFile(const std::string &fileName);
+
+    /**
+     * Return current value of a given parameter.
+     *
+     * @return Current value of a given parameter.
+     */
+    const std::string &get(const std::string &paramName) const;
 
 }; // class
 }  // namespace

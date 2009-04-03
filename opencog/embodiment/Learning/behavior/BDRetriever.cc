@@ -49,8 +49,8 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
 {
     std::list<HandleTemporalPair> retP;
     wp.getAtomSpace().getTimeInfo(std::back_inserter(retP),
-            trickConceptNode, temp,
-            TemporalTable::EXACT);
+                                  trickConceptNode, temp,
+                                  TemporalTable::EXACT);
     if (!retP.empty()) {
         opencog::cassert(TRACE_INFO, retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
@@ -66,7 +66,7 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
         types[1] = AT_TIME_LINK;
 
         wp.getAtomSpace().getHandleSet(back_inserter(result), outputs,
-                types, NULL, 2, MEMBER_LINK, false);
+                                       types, NULL, 2, MEMBER_LINK, false);
         for (std::list<Handle>::iterator ih = result.begin(); ih != result.end(); ++ih) {
 
             opencog::cassert(TRACE_INFO, (*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,
@@ -94,8 +94,8 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
-                Temporal(wp.getLatestSimWorldTimestamp()),
-                TemporalTable::PREVIOUS_BEFORE_START_OF);
+                                      Temporal(wp.getLatestSimWorldTimestamp()),
+                                      TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
             opencog::cassert(TRACE_INFO, retP.size() == 1,
                              "retP std::list should have exactly one 'HandleTemporal Pair'.");
@@ -133,8 +133,8 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
     if (h != Handle::UNDEFINED) {
         std::list<HandleTemporalPair> retP;
         wp.getAtomSpace().getTimeInfo(std::back_inserter(retP), h,
-                Temporal(wp.getLatestSimWorldTimestamp()),
-                TemporalTable::STARTS_BEFORE);
+                                      Temporal(wp.getLatestSimWorldTimestamp()),
+                                      TemporalTable::STARTS_BEFORE);
         for (std::list<HandleTemporalPair>::iterator ip = retP.begin(); ip != retP.end(); ++ip) {
             CompositeBehaviorDescription bd;
             Temporal temp = *(ip->getTemporal());

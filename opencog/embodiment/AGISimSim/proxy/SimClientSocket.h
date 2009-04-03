@@ -36,27 +36,27 @@ class TcpSocket;
 class SimClientSocket : public TcpSocket
 {
 public:
-	SimClientSocket(ISocketHandler&, AsynchronousMessageReceiver* receiver, bool echoing = false);
-	~SimClientSocket();
+    SimClientSocket(ISocketHandler&, AsynchronousMessageReceiver* receiver, bool echoing = false);
+    ~SimClientSocket();
 
-	// Overiden methods
-	void OnConnect();
-	void OnConnectFailed();
-	void OnLine(const std::string&);
-	void Send(const std::string &str);
+    // Overiden methods
+    void OnConnect();
+    void OnConnectFailed();
+    void OnLine(const std::string&);
+    void Send(const std::string &str);
     void markWaitingForResponse();
 
     // Specific methods
-	bool isWaitingForResponse();
+    bool isWaitingForResponse();
     void cancelWaitingForResponse();
-	std::string getResponse();
+    std::string getResponse();
     bool ConnectionFailed();
 
 private:
     bool m_bEchoing;
-	bool m_bWaitingForResponse;
-	bool m_bConnectionFailed;
-	std::string m_sResponse;
+    bool m_bWaitingForResponse;
+    bool m_bConnectionFailed;
+    std::string m_sResponse;
     AsynchronousMessageReceiver* receiver;
 };
 

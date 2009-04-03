@@ -27,22 +27,24 @@
 
 using namespace opencog;
 
-namespace behavior {
+namespace behavior
+{
 
-class EvaluationLinkSimilarityEvaluator {
+class EvaluationLinkSimilarityEvaluator
+{
 
-    private:
+private:
 
-    public:
+public:
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~EvaluationLinkSimilarityEvaluator();
-        EvaluationLinkSimilarityEvaluator();
+    ~EvaluationLinkSimilarityEvaluator();
+    EvaluationLinkSimilarityEvaluator();
 
-        static float computeHandleSimilarity(Handle h1, Handle h2);
-        static float similarity(AtomSpace *atomSpace, Handle h1, Handle h2);
+    static float computeHandleSimilarity(Handle h1, Handle h2);
+    static float similarity(AtomSpace *atomSpace, Handle h1, Handle h2);
 
 }; // class
 }  // namespace

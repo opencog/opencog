@@ -215,8 +215,8 @@ public:
             combo::UnifierIt local_it;
 
             for (it = vu_result.begin(), local_it = vu_result_local.begin();
-                 it != vu_result.end() && local_it != vu_result_local.end();
-                 it++, local_it++) {
+                    it != vu_result.end() && local_it != vu_result_local.end();
+                    it++, local_it++) {
                 printf("expectd %s - got %s\n", it->first.c_str(),
                        local_it->first.c_str());
                 printf("expectd %s - got %s\n", (it->second ? "true" : "false"), ((*local_it).second ? "true" : "false"));

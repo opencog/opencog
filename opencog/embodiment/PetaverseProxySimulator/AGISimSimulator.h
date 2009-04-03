@@ -25,50 +25,52 @@
 #include "WorldSimulator.h"
 #include "SimProxy.h"
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-class AGISimSimulator : public WorldSimulator {
+class AGISimSimulator : public WorldSimulator
+{
 
-    private:
-        typedef std::map<std::string, SimProxy*> AgentToSimProxyMap;
-        AgentToSimProxyMap simProxyMap;
+private:
+    typedef std::map<std::string, SimProxy*> AgentToSimProxyMap;
+    AgentToSimProxyMap simProxyMap;
 
-	std::string host;
-        int nextPort;
-        AsynchronousPerceptionAndStatusHandler* petPerceptionHandler; 
-        SimProxy* petSimProxy;
+    std::string host;
+    int nextPort;
+    AsynchronousPerceptionAndStatusHandler* petPerceptionHandler;
+    SimProxy* petSimProxy;
 
-        SimProxy* getConnectedSimProxy(const std::string& agentName);
+    SimProxy* getConnectedSimProxy(const std::string& agentName);
 
-    public:
+public:
 
-        /**
-         * Constructor
-         * @param host The name of the host where AGISimSim server is running
-         * @param port The socket port where AGISimSim server listen for connections 
-         * @param handler The object that implements the AsynchronousPerceptionAndStatusHandler interface for the pet 
-         */
-        AGISimSimulator(const char* host, AsynchronousPerceptionAndStatusHandler* petPerceptionHandler); 
+    /**
+     * Constructor
+     * @param host The name of the host where AGISimSim server is running
+     * @param port The socket port where AGISimSim server listen for connections
+     * @param handler The object that implements the AsynchronousPerceptionAndStatusHandler interface for the pet
+     */
+    AGISimSimulator(const char* host, AsynchronousPerceptionAndStatusHandler* petPerceptionHandler);
 
-        /**
-         * Destructor
-         */
-        ~AGISimSimulator();
+    /**
+     * Destructor
+     */
+    ~AGISimSimulator();
 
-        /**
-         * Overrides the default implementation 
-         */
-	std::string createAgent(const std::string& name, const std::string& type, float x, float y, bool echoing);
+    /**
+     * Overrides the default implementation
+     */
+    std::string createAgent(const std::string& name, const std::string& type, float x, float y, bool echoing);
 
-        /**
-         * Overrides the default implementation 
-         */
-        void timeTick();
+    /**
+     * Overrides the default implementation
+     */
+    void timeTick();
 
-        /**
-         * Overrides the default implementation
-         */
-        unsigned long executeAction(const std::string& agentName, const PerceptionActionInterface::PetAction &petAction);
+    /**
+     * Overrides the default implementation
+     */
+    unsigned long executeAction(const std::string& agentName, const PerceptionActionInterface::PetAction &petAction);
 
 }; // class
 }  // namespace

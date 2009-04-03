@@ -29,10 +29,11 @@
 
 // TODO: Update to work without VOS.
 class Agent;
-	
+
 //------------------------------------------------------------------------------------------------------------
-template <class Agent> 
-class SAIPHandler {
+template <class Agent>
+class SAIPHandler
+{
 //protected:
     //int (*show)(std::string mimetype, std::string data );
     //int (*tell) (std::string data);
@@ -43,8 +44,8 @@ class SAIPHandler {
 public:
     SAIPHandler ();
     ~SAIPHandler();
-    
-    Agent* owner;    
+
+    Agent* owner;
     void   setOwner (Agent* o);
 
     virtual void handleShow   (VOS::Message* m);
@@ -59,8 +60,8 @@ public:
     void setAsk    (int (Agent::*a) (std::string question));
     void setAction (int (Agent::*a) (std::string action, std::string parameters));
     void setMate   (int (Agent::*m) ());
-    
-	//!!! Was ist das ???
+
+    //!!! Was ist das ???
     typedef int (Agent::* showCallback)(std::string mimetype, std::string data);
     showCallback show;
     typedef int (Agent::* tellCallback)(std::string data);
@@ -70,7 +71,7 @@ public:
     typedef int (Agent::* actionCallback)(std::string action, std::string parameters);
     actionCallback action;
     typedef int (Agent::* mateCallback)();
-    mateCallback mate;    
+    mateCallback mate;
 };
 
 #endif

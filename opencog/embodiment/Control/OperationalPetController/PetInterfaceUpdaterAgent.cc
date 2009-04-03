@@ -38,14 +38,15 @@
 using namespace OperationalPetController;
 using namespace Spatial;
 
-class InterfaceUpdaterClientSocket : public TcpSocket {
+class InterfaceUpdaterClientSocket : public TcpSocket
+{
 
 public:
 
     std::string text;
 
-    InterfaceUpdaterClientSocket(ISocketHandler& h,const std::string& cmd) : 
-                                 TcpSocket(h) ,text(cmd) {
+    InterfaceUpdaterClientSocket(ISocketHandler& h, const std::string& cmd) :
+            TcpSocket(h) , text(cmd) {
         SetLineProtocol();
     }
 
@@ -57,8 +58,8 @@ public:
     }
 
     void OnLine(const std::string& line) {
-        logger().log(opencog::Logger::DEBUG, 
-                        "PetInterfaceUpdaterAgent - onLine(%s)", line.c_str());
+        logger().log(opencog::Logger::DEBUG,
+                     "PetInterfaceUpdaterAgent - onLine(%s)", line.c_str());
         if (! line.size()) {
             SetCloseAndDelete();
         }
@@ -66,20 +67,24 @@ public:
 
 };
 
-PetInterfaceUpdaterAgent::~PetInterfaceUpdaterAgent() {
+PetInterfaceUpdaterAgent::~PetInterfaceUpdaterAgent()
+{
 }
 
-PetInterfaceUpdaterAgent::PetInterfaceUpdaterAgent() {
-    interfacePortNumber = 11354; // Remember to change PetInterface.tcl if you 
-                                 // change this port number
+PetInterfaceUpdaterAgent::PetInterfaceUpdaterAgent()
+{
+    interfacePortNumber = 11354; // Remember to change PetInterface.tcl if you
+    // change this port number
 }
 
-void PetInterfaceUpdaterAgent::startGUI() {
+void PetInterfaceUpdaterAgent::startGUI()
+{
     system("wish -f ./PetInterface.tcl &");
 }
 
-void PetInterfaceUpdaterAgent::run(opencog::CogServer *server) {
-    
+void PetInterfaceUpdaterAgent::run(opencog::CogServer *server)
+{
+
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - run()");
 
     OPC *opc = (OPC *) server;
@@ -88,21 +93,23 @@ void PetInterfaceUpdaterAgent::run(opencog::CogServer *server) {
     updateLastSelectedAction(opc);
 }
 
-void PetInterfaceUpdaterAgent::sendLine(const std::string &line) {
+void PetInterfaceUpdaterAgent::sendLine(const std::string &line)
+{
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - sendLine()");
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - line = %s", line.c_str());
     SocketHandler h;
     InterfaceUpdaterClientSocket cc(h, line);
     cc.Open("127.0.0.1", interfacePortNumber);
     h.Add(&cc);
-    h.Select(1,0);
+    h.Select(1, 0);
     while (h.GetCount()) {
-        h.Select(1,0);
+        h.Select(1, 0);
     }
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - sendLine() finished");
 }
 
-void PetInterfaceUpdaterAgent::updateLastSelectedAction(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateLastSelectedAction(OPC *opc)
+{
 
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateLastSelectedAction()");
 
@@ -111,7 +118,7 @@ void PetInterfaceUpdaterAgent::updateLastSelectedAction(OPC *opc) {
     sendLine(line);
 
     line = "LASTSELECTEDSCHEMA ";
-    std::string lastSelectedSchema = opc->getRuleEngine().getCurrentAction(); 
+    std::string lastSelectedSchema = opc->getRuleEngine().getCurrentAction();
     if (lastSelectedSchema.empty()) {
         line.append("none");
     } else {
@@ -123,14 +130,15 @@ void PetInterfaceUpdaterAgent::updateLastSelectedAction(OPC *opc) {
 
 
 
-void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc)
+{
 
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateFeelings()");
 
     std::vector<std::string> allFeelingNames;
     Handle petHandle = opc->getAtomSpace()->getHandle(SL_PET_NODE, opc->getPet().getName());
     if ( petHandle == Handle::UNDEFINED ) {
-      petHandle = opc->getAtomSpace()->getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
+        petHandle = opc->getAtomSpace()->getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
     } // if
 
     std::string hunger = opencog::toString(AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()), "hunger", petHandle));
@@ -153,7 +161,8 @@ void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc) {
     }
 }
 
-void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
+void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc)
+{
 
     if (! opc->getAtomSpace()->getSpaceServer().isLatestMapValid()) {
         return;
@@ -171,14 +180,14 @@ void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
         line.append(" ");
 
         try {
-	  const std::vector<Spatial::GridPoint>& perimeter = 
-	    latestMap.getObjectPoints(objectIds[i]);
+            const std::vector<Spatial::GridPoint>& perimeter =
+                latestMap.getObjectPoints(objectIds[i]);
 
             for (unsigned int j = 0; j < perimeter.size(); j++) {
-	      Spatial::Point realPoint = latestMap.unsnap( perimeter[j] );
+                Spatial::Point realPoint = latestMap.unsnap( perimeter[j] );
 
-	      logger().log(opencog::Logger::FINE, "(%f,%f)", 
-			      realPoint.first, realPoint.second);
+                logger().log(opencog::Logger::FINE, "(%f,%f)",
+                             realPoint.first, realPoint.second);
                 char s[128];
                 sprintf(s, "%f", realPoint.first);
                 line.append(s);
@@ -189,9 +198,9 @@ void PetInterfaceUpdaterAgent::updateLocalMap(OPC *opc) {
                     line.append(" ");
                 }
             }
-        } catch (opencog::AssertionException& e){
-            logger().log(opencog::Logger::ERROR, "Object '%s' has no points.", 
-                            objectIds[i].c_str());
+        } catch (opencog::AssertionException& e) {
+            logger().log(opencog::Logger::ERROR, "Object '%s' has no points.",
+                         objectIds[i].c_str());
         }
 
         if (i != (objectIds.size() - 1)) {

@@ -25,15 +25,18 @@
 
 using namespace OperationalPetController;
 
-ActionSelectionAgent::~ActionSelectionAgent() {
+ActionSelectionAgent::~ActionSelectionAgent()
+{
 }
 
-ActionSelectionAgent::ActionSelectionAgent() {
+ActionSelectionAgent::ActionSelectionAgent()
+{
     lastTickTime = 0;
 }
 
-void ActionSelectionAgent::run(opencog::CogServer *server) {
-    
+void ActionSelectionAgent::run(opencog::CogServer *server)
+{
+
     logger().log(opencog::Logger::DEBUG, "ActionSelectionAgent - Executing schemaSelection().");
     ((OPC *) server)->schemaSelection();
 }

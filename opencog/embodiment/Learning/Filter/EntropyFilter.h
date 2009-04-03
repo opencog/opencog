@@ -51,15 +51,17 @@
 //that string is used by the predicate evaluator
 #define IS_MOVING_STR "is_moving"
 
-namespace Filter {
+namespace Filter
+{
 
-  using namespace combo;
-  using namespace behavior;
+using namespace combo;
+using namespace behavior;
 
-  typedef combo_tree::iterator pre_it;
-  typedef combo_tree::sibling_iterator sib_it;
+typedef combo_tree::iterator pre_it;
+typedef combo_tree::sibling_iterator sib_it;
 
-  class EntropyFilter {
+class EntropyFilter
+{
     typedef opencog::size_tree_order<vertex> combo_tree_order;
 
     typedef std::set<combo_tree, combo_tree_order> combo_tree_ns_set;
@@ -72,7 +74,7 @@ namespace Filter {
 
     typedef std::pair<bool, unsigned long> bool_time_pair;
     typedef std::map<const combo_tree, bool_time_pair, combo_tree_order>
-      combo_tree_bool_time_map;
+    combo_tree_bool_time_map;
     typedef combo_tree_bool_time_map::iterator combo_tree_bool_time_map_it;
     typedef combo_tree_bool_time_map::const_iterator combo_tree_bool_time_map_const_it;
 
@@ -82,20 +84,20 @@ namespace Filter {
 
     //typedef std::map<std::string, bool> definite_object_bool_map;
     typedef opencog::hash_map<std::string, bool, boost::hash<std::string> >
-      definite_object_bool_map;
+    definite_object_bool_map;
     typedef definite_object_bool_map::iterator definite_object_bool_map_it;
     typedef definite_object_bool_map::const_iterator
-      definite_object_bool_map_const_it;
+    definite_object_bool_map_const_it;
 
     typedef opencog::hash_set<std::string, boost::hash<std::string> >
-      definite_object_hash_set;
+    definite_object_hash_set;
     typedef definite_object_hash_set::iterator definite_object_hash_set_it;
     typedef definite_object_hash_set::const_iterator
-      definite_object_hash_set_const_it;
+    definite_object_hash_set_const_it;
 
-    typedef boost::function<bool (const combo_tree)> EvalFunct;
+    typedef boost::function < bool (const combo_tree) > EvalFunct;
 
-  public:
+public:
     //constructor, destructor
     //input_arg_types corresponds the list of types of each input arguments
     //of the combo program to learn
@@ -106,25 +108,25 @@ namespace Filter {
     //dos contains the set of definite_objects
     //while ados contains the set of agents' actions definite_objects
     EntropyFilter(const std::string& self_id,
-		  const std::string& owner_id,
-		  AtomSpace& atomSpace,
-		  const perception_set& elementary_perceptions,
-		  const indefinite_object_set& idos,
-		  const definite_object_set& dos,
-		  const message_set& ms,
-		  const agent_to_actions& atas,
-		  const argument_type_list& input_arg_types,
-		  opencog::RandGen& _rng);
+                  const std::string& owner_id,
+                  AtomSpace& atomSpace,
+                  const perception_set& elementary_perceptions,
+                  const indefinite_object_set& idos,
+                  const definite_object_set& dos,
+                  const message_set& ms,
+                  const agent_to_actions& atas,
+                  const argument_type_list& input_arg_types,
+                  opencog::RandGen& _rng);
     ~EntropyFilter();
 
     //update the map _perceptToTim and _total_time by evaluating all
     //perceptions in the interval temp
     void updatePerceptToTime(const Temporal& temp,
-			     const argument_list& al);
+                             const argument_list& al);
 
     //like above but using lowerBound and upperBound, provided for convenience
     void updatePerceptToTime(unsigned long lb, unsigned long up,
-			     const argument_list& al);
+                             const argument_list& al);
 
     //when the set of definite object changes the set of possible
     //perception must be rebuild accordingly
@@ -133,27 +135,27 @@ namespace Filter {
 
     //fill pred_set with all predicates with entropy above threshold
     void generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-				     double threshold);
+                                     double threshold);
 
     //update _perceptToTime and _total_time
     //according to the intervals of the BehaviorCategory
     //then fill pred_set with perceptions with entropy > threshold
     void generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-				     double threshold,
-				     const BehaviorCategory& BDCat,
-				     const std::vector<Temporal>& est,
-				     const argument_list_list& all);
+                                     double threshold,
+                                     const BehaviorCategory& BDCat,
+                                     const std::vector<Temporal>& est,
+                                     const argument_list_list& all);
 
     //rebuild the object set and add new perceptions
     //then update _perceptToTime and _total_time
     //according to the interval of cbd
     //then fill pred_set with perception with entropy > threshold
     void generateFilteredPerceptions(combo_tree_ns_set& pred_set,
-				     double threshold,
-				     const CompositeBehaviorDescription& cbd,
-				     const Temporal& et,
-				     const argument_list& al);
-  private:
+                                     double threshold,
+                                     const CompositeBehaviorDescription& cbd,
+                                     const Temporal& et,
+                                     const argument_list& al);
+private:
     //attributes
     const std::string& _self_id;
     const std::string& _owner_id;
@@ -164,22 +166,22 @@ namespace Filter {
     const message_set& _ms;
     const agent_to_actions& _atas;
     const argument_type_list& _input_arg_types; //input arguments of the
-                                                //combo program to learn
+    //combo program to learn
     arity_t _arity;//size of _input_arg_types
 
     unsigned int _hasSaidDelay;
 
     vertex_set _operands; //set of all objects definite and indefinite
-                          //messages and arguments, in children of
-                          //perception
+    //messages and arguments, in children of
+    //perception
 
 #ifdef ISMOVING_OPTIMIZE
     combo_tree_bool_time_map _perceptToBoolTime; //associate a perception to its
-                                            //last truth value
-                                            //expectation time
+    //last truth value
+    //expectation time
 #else
     combo_tree_time_map _perceptToTime; //associate a perception to its
-                                   //expectation time (of being true)
+    //expectation time (of being true)
 #endif
 
     unsigned int _percept_count; //number of perceptions used by the lru_cache
@@ -197,11 +199,11 @@ namespace Filter {
 #endif
 
     std::vector<definite_object> _indefToDef; //map an indefinite object
-                                              //to a definite object
-                                              //this in order to avoid
-                                              //reevaluating nearest_X
-                                              //several time during the same
-                                              //spaceMap.
+    //to a definite object
+    //this in order to avoid
+    //reevaluating nearest_X
+    //several time during the same
+    //spaceMap.
 
     opencog::RandGen& _rng;
 
@@ -209,8 +211,8 @@ namespace Filter {
 
     //set up obj in the cache isMoving
     inline void setIsMoving(const definite_object& obj,
-			    const SpaceServer::SpaceMap* pre_sm,
-			    const SpaceServer::SpaceMap& sm);
+                            const SpaceServer::SpaceMap* pre_sm,
+                            const SpaceServer::SpaceMap& sm);
 
     //look up the cache isMoving if obj is moving
     inline bool getIsMoving(const definite_object& obj);
@@ -232,7 +234,7 @@ namespace Filter {
     //that remains to insert on the combo_tree
     void build_and_insert_atomic_perceptions(const combo_tree& tr, arity_t arity_rest);
 
-  };
+};
 
 }//~namespace Filter
 

@@ -27,38 +27,42 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <time.h>
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-class ImportanceDecayAgent : public opencog::Agent {
+class ImportanceDecayAgent : public opencog::Agent
+{
 
-    private:
+private:
 
-        time_t lastTickTime;
-        /**
-         * signal connections used to keep track of atom merge in the AtomSpace
-         */
-        boost::signals::connection mergedAtomConnection; 
+    time_t lastTickTime;
+    /**
+     * signal connections used to keep track of atom merge in the AtomSpace
+     */
+    boost::signals::connection mergedAtomConnection;
 
-    public:
+public:
 
-        ImportanceDecayAgent();
-        virtual ~ImportanceDecayAgent();
+    ImportanceDecayAgent();
+    virtual ~ImportanceDecayAgent();
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("OperationalPetController::ImportanceDecayAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::ImportanceDecayAgent");
+        return _ci;
+    }
 
-        void run(opencog::CogServer *server);
+    void run(opencog::CogServer *server);
 
-        // connects to the signals from AtomSpace it needs to know
-        void connectSignals(AtomSpace& as);
+    // connects to the signals from AtomSpace it needs to know
+    void connectSignals(AtomSpace& as);
 
-        /**
-         * Method to receive atom merge signals from AtomTable
-         */
-        void atomMerged(Handle h);
+    /**
+     * Method to receive atom merge signals from AtomTable
+     */
+    void atomMerged(Handle h);
 
 }; // class
 }  // namespace

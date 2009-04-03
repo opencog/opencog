@@ -32,7 +32,7 @@ typedef combo_tree::iterator pre_it;
 
 //add a drop action in front of a grab action
 void post_learning_drop_before_grab::operator()(combo_tree& tr,
-                                                combo_tree::iterator it) const
+        combo_tree::iterator it) const
 {
     if (*it == id::sequential_exec || *it == id::sequential_or
             || *it == id::sequential_and) {
@@ -50,7 +50,7 @@ void post_learning_drop_before_grab::operator()(combo_tree& tr,
 
 //add action_success at child of any empty and_seq
 void post_learning_empty_and_seq::operator()(combo_tree& tr,
-                                             combo_tree::iterator it) const
+        combo_tree::iterator it) const
 {
     if (*it == id::sequential_and && it.is_childless()) {
         tr.append_child(it, id::action_success);

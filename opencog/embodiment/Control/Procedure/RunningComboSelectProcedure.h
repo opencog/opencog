@@ -29,45 +29,47 @@
 #include "comboreduct/combo/variable_unifier.h"
 
 
-namespace Procedure {
+namespace Procedure
+{
 
-class RunningComboSelectProcedure {
+class RunningComboSelectProcedure
+{
 
-    public:
+public:
 
-        RunningComboSelectProcedure(ComboInterpreter& interpreter, 
-                                    const ComboProcedure& f, 
-                                    const ComboProcedure& s, 
-                                    const std::vector<combo::vertex> args,
-                                    combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
-        
-        void cycle();
+    RunningComboSelectProcedure(ComboInterpreter& interpreter,
+                                const ComboProcedure& f,
+                                const ComboProcedure& s,
+                                const std::vector<combo::vertex> args,
+                                combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
-        bool isFinished() const;
+    void cycle();
 
-        bool isFailed() const;
+    bool isFinished() const;
 
-        combo::vertex getResult();
+    bool isFailed() const;
 
-        combo::variable_unifier& getUnifierResult();
+    combo::vertex getResult();
 
-    private:
-        ComboInterpreter& interpreter;
+    combo::variable_unifier& getUnifierResult();
 
-        ComboProcedure firstScript;
-        ComboProcedure secondScript;
+private:
+    ComboInterpreter& interpreter;
 
-        std::vector<combo::vertex> arguments;
+    ComboProcedure firstScript;
+    ComboProcedure secondScript;
 
-        // the results of 
-        combo::variable_unifier unifier;
-        combo::vertex result;
+    std::vector<combo::vertex> arguments;
 
-        bool firstScriptFinished; 
-        bool firstScriptFailed;
+    // the results of
+    combo::variable_unifier unifier;
+    combo::vertex result;
 
-        bool secondScriptFinished; 
-        bool secondScriptFailed;
+    bool firstScriptFinished;
+    bool firstScriptFailed;
+
+    bool secondScriptFinished;
+    bool secondScriptFailed;
 
 }; // class
 }  // namespace

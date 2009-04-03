@@ -29,14 +29,14 @@
 //WorldProvider implementation, used for UTest for instance
 class BasicWorldProvider : public WorldProvider
 {
-  opencog::AtomSpace& _atomSpace;
-  unsigned long _latestSimWorldTimestamp;
+    opencog::AtomSpace& _atomSpace;
+    unsigned long _latestSimWorldTimestamp;
 public:
-  BasicWorldProvider(opencog::AtomSpace& atomSpace,
-			   unsigned long latestSimWorldTimestamp = 0);
-  unsigned long getLatestSimWorldTimestamp() const;
-  void setLatestSimWorldTimestamp(unsigned long t);
-  opencog::AtomSpace& getAtomSpace() const;
+    BasicWorldProvider(opencog::AtomSpace& atomSpace,
+                       unsigned long latestSimWorldTimestamp = 0);
+    unsigned long getLatestSimWorldTimestamp() const;
+    void setLatestSimWorldTimestamp(unsigned long t);
+    opencog::AtomSpace& getAtomSpace() const;
 };
 
 #endif

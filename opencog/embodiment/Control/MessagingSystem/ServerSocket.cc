@@ -21,18 +21,20 @@
  */
 
 #include "ServerSocket.h"
-#include <string.h> 
+#include <string.h>
 
 using namespace MessagingSystem;
 using namespace opencog;
 
 NetworkElement *ServerSocket::master = NULL;
 
-ServerSocket::~ServerSocket() {
+ServerSocket::~ServerSocket()
+{
     logger().log(opencog::Logger::DEBUG, "ServerSocket - Connection closed.");
 }
 
-ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler) {
+ServerSocket::ServerSocket(ISocketHandler &handler): TcpSocket(handler)
+{
 
     logger().log(opencog::Logger::DEBUG, "ServerSocket - Serving connection.");
     // Enables "line-based" protocol, which will cause onLine() be called
@@ -44,14 +46,16 @@ ServerSocket::ServerSocket(ISocketHandler &handler):TcpSocket(handler) {
     currentMessage.assign("");
 }
 
-void ServerSocket::setMaster(NetworkElement *ne) {
+void ServerSocket::setMaster(NetworkElement *ne)
+{
     master = ne;
 }
 
-void ServerSocket::OnLine(const std::string& line) {
-    
+void ServerSocket::OnLine(const std::string& line)
+{
+
 //    logger().log(opencog::Logger::FINE, "ServerSocket - Received line: <%s>", line.c_str());
-    char selector = line[0]; 
+    char selector = line[0];
     std::string contents = line.substr(1);
     std::string command;
 
@@ -67,7 +71,7 @@ void ServerSocket::OnLine(const std::string& line) {
         }
 
 //        logger().log(opencog::Logger::DEBUG, "ServerSocket - Parsed command: <%s>",
- //                       command.c_str());
+//                       command.c_str());
 
         if (command == "NOTIFY_NEW_MESSAGE") {
             //logger().log(opencog::Logger::DEBUG, "ServerSocket - Full line: <%s>", contents.c_str());
@@ -75,48 +79,48 @@ void ServerSocket::OnLine(const std::string& line) {
             int numMessages = atoi(tmpStr.c_str());
             logger().log(opencog::Logger::DEBUG, "ServerSocket - Received notification of %u new message(s) from router", numMessages);
             master->newMessageInRouter(numMessages);
-	    if (!master->noAckMessages) {
+            if (!master->noAckMessages) {
                 //logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
-	    }
+            }
 
         } else if (command == "UNAVAILABLE_ELEMENT") {
-            logger().log(opencog::Logger::DEBUG, 
-                            "ServerSocket - Received UNAVAILABLE_ELEMENT message.");
-            
+            logger().log(opencog::Logger::DEBUG,
+                         "ServerSocket - Received UNAVAILABLE_ELEMENT message.");
+
             unsigned int pos2 = contents.find(' ', pos1 + 1);
             if (pos2 != contents.npos) {
-                logger().log(opencog::Logger::WARN, 
-                    "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", 
-                    line.c_str());
+                logger().log(opencog::Logger::WARN,
+                             "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s",
+                             line.c_str());
             }
 
             std::string id = contents.substr(pos1 + 1, pos2 - pos1 - 1);
             master->unavailableElement(id);
 
-	    if (!master->noAckMessages) {
+            if (!master->noAckMessages) {
                 logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
-	    }
+            }
 
         } else if (command == "AVAILABLE_ELEMENT") {
-            logger().log(opencog::Logger::DEBUG, 
-                            "ServerSocket - Received AVAILABLE_ELEMENT message.");
-            
+            logger().log(opencog::Logger::DEBUG,
+                         "ServerSocket - Received AVAILABLE_ELEMENT message.");
+
             unsigned int pos2 = contents.find(' ', pos1 + 1);
             if (pos2 != contents.npos) {
-                logger().log(opencog::Logger::WARN, 
-                    "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s", 
-                    line.c_str());
+                logger().log(opencog::Logger::WARN,
+                             "ServerSocket - Unknown command args. Discarding the entire line:\n\t%s",
+                             line.c_str());
             }
 
             std::string id = contents.substr(pos1 + 1, pos2 - pos1 - 1);
             master->availableElement(id);
 
-	    if (!master->noAckMessages) {
+            if (!master->noAckMessages) {
                 logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
                 Send("OK\n");
-	    }
+            }
 
         } else if (command == "START_MESSAGE") {
             if (currentState == READING_MESSAGES) {
@@ -146,7 +150,7 @@ void ServerSocket::OnLine(const std::string& line) {
             //currentMessageTo.assign(contents.substr(pos2 + 1, pos3 - pos2 - 1));
             currentMessageTo = contents.substr(pos2 + 1, pos3 - pos2 - 1);
             //currentMessageType = atoi(contents.substr(pos3 + 1).c_str());
-	        std::string tmpStr = contents.substr(pos3 + 1);
+            std::string tmpStr = contents.substr(pos3 + 1);
             currentMessageType = atoi(tmpStr.c_str());
             lineCount = 0;
 
@@ -165,10 +169,10 @@ void ServerSocket::OnLine(const std::string& line) {
             }
             // Currently, router does not manage error during a message delivery. That's why we are sending
             // an OK even if above error occurs.
-	    if (!master->noAckMessages) {
+            if (!master->noAckMessages) {
                 //logger().log(opencog::Logger::DEBUG, "ServerSocket - Answering OK");
-                Send("OK\n"); 
-	    }
+                Send("OK\n");
+            }
 
         } else {
             logger().log(opencog::Logger::WARN, "ServerSocket - Unknown command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());

@@ -29,16 +29,20 @@
 #include <xercesc/sax/SAXParseException.hpp>
 #include "PAIUtils.h"
 
-namespace PerceptionActionInterface {
+namespace PerceptionActionInterface
+{
 
-class PetaverseErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler  {
+class PetaverseErrorHandler : public XERCES_CPP_NAMESPACE::ErrorHandler
+{
     void warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
     void error(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
     void fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& exc);
     void resetErrors();
 
-public: 
-    PetaverseErrorHandler() { PAIUtils::initializeXMLPlatform(); }
+public:
+    PetaverseErrorHandler() {
+        PAIUtils::initializeXMLPlatform();
+    }
 
 };
 

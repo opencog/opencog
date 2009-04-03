@@ -25,7 +25,8 @@
 #include <string>
 #include <vector>
 
-namespace VirtualWorldData {
+namespace VirtualWorldData
+{
 
 struct AgentAction {
     std::string agent;
@@ -33,7 +34,7 @@ struct AgentAction {
     std::vector<std::string> params;
 
     AgentAction();
-    AgentAction(const std::string & agent, const std::string & action, 
+    AgentAction(const std::string & agent, const std::string & action,
                 const std::vector<std::string> & params);
 
     AgentAction & operator=(const AgentAction & agentAction);
@@ -46,10 +47,10 @@ struct PetSchema {
     std::vector<std::string> params;
 
     PetSchema();
-    PetSchema(const std::string & schema, const std::string & result, 
+    PetSchema(const std::string & schema, const std::string & result,
               const std::vector<std::string> & params);
 
-    PetSchema & operator=(const PetSchema & petSchema); 
+    PetSchema & operator=(const PetSchema & petSchema);
 };
 
 }

@@ -27,50 +27,52 @@
 #include <string>
 #include <vector>
 
-namespace behavior {
+namespace behavior
+{
 
-class BehaviorCategory {
+class BehaviorCategory
+{
 
-    private:
+private:
 
-        std::vector<CompositeBehaviorDescription> entries;
-	//Note from Nil : apparently timelineSets and timelineIntervals
-	//are not used so I commented them
-        //std::vector<std::vector<Handle> > timelineSets;
-        //std::vector<long> timelineIntervals;
+    std::vector<CompositeBehaviorDescription> entries;
+    //Note from Nil : apparently timelineSets and timelineIntervals
+    //are not used so I commented them
+    //std::vector<std::vector<Handle> > timelineSets;
+    //std::vector<long> timelineIntervals;
 
-    public:
+public:
 
-        // ***********************************************/
-        // Constructors/destructors
+    // ***********************************************/
+    // Constructors/destructors
 
-        ~BehaviorCategory();
-        BehaviorCategory();
-          
-        // ***********************************************/
-        // Building API
+    ~BehaviorCategory();
+    BehaviorCategory();
 
-        void addCompositeBehaviorDescription(const CompositeBehaviorDescription &bd);
+    // ***********************************************/
+    // Building API
 
-        // ***********************************************/
-        // Manipulation API
+    void addCompositeBehaviorDescription(const CompositeBehaviorDescription &bd);
 
-        /**
-         * @return the number of exemplars in BehaviorCategory
-         */
-        int getSize() const;
+    // ***********************************************/
+    // Manipulation API
 
-        const std::vector<CompositeBehaviorDescription> &getEntries() const;
+    /**
+     * @return the number of exemplars in BehaviorCategory
+     */
+    int getSize() const;
 
-	bool empty(); //check if empty
-	void clear(); //clear the behavior category
+    const std::vector<CompositeBehaviorDescription> &getEntries() const;
 
-        // ***********************************************/
-        // Test/debug
-        
-        std::string toString();
-        std::string toStringHandles();
-        std::string toStringTimeline();
+    bool empty(); //check if empty
+    void clear(); //clear the behavior category
+
+    // ***********************************************/
+    // Test/debug
+
+    std::string toString();
+    std::string toStringHandles();
+    std::string toStringTimeline();
 
 }; // class
 }  // namespace

@@ -11,11 +11,12 @@
 
 using namespace OperationalPetController;
 
-class GAIUpdateTaskUTest : public CxxTest::TestSuite {
+class GAIUpdateTaskUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     GAIUpdateTaskUTest() {
 

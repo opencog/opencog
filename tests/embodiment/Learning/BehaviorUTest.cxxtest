@@ -17,18 +17,17 @@ typedef unsigned long ulong;
 
 namespace behavior
 {
-    extern bool behlog;
+extern bool behlog;
 }
 
 using namespace behavior;
 
 int countEvLinks(AtomSpace* as, string s)
 {
-    int ret=0;
+    int ret = 0;
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), EVALUATION_LINK, true);
-    foreach(Handle ha, es)
-    {
+    foreach(Handle ha, es) {
         string name = as->getName(as->getOutgoing(ha, 0));
         if (name == s) {
             printf("countEvLinks got a matching link:\n%s\n", TLB::getAtom(ha)->toString().c_str());
@@ -47,7 +46,7 @@ void printLinks(AtomSpace* as, Type linkType)
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), linkType, true);
     foreach(Handle ha, es)
-        printf("%s\n", ha->toString().c_str());
+    printf("%s\n", ha->toString().c_str());
 }
 
 void printEvLinks(AtomSpace* as)
@@ -57,14 +56,13 @@ void printEvLinks(AtomSpace* as)
 
     vector<Handle> es;
     as->getHandleSet(back_inserter(es), EVALUATION_LINK, true);
-    foreach(Handle ha, es)
-    {
+    foreach(Handle ha, es) {
         vector<HandleTemporalPair> hhh;
         as->getTimeInfo(back_inserter(hhh), ha);
 
         //    printf("%s \n", ha->toString().c_str());
         foreach(HandleTemporalPair htp, hhh)
-            printf("%s \n", htp.toString().c_str());
+        printf("%s \n", htp.toString().c_str());
     }
     //NMPrinter(NMP_ALL)(ha);
 }
@@ -99,43 +97,43 @@ Handle addAction(AtomSpace& atomspace)
 void addBasicBDTrackers(AtomSpace& atomspace, BehaviorEncoder& repo )
 {
     atom_tree *footemplate = mva(EVALUATION_LINK,
-			      mva(atomspace.addNode(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME), NULL),
-			      mva(LIST_LINK, mva(CONCEPT_NODE, NULL), NULL), NULL);
+                                 mva(atomspace.addNode(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME), NULL),
+                                 mva(LIST_LINK, mva(CONCEPT_NODE, NULL), NULL), NULL);
 
     repo.addBETracker(*footemplate,
-            new MovementBDTracker(&atomspace));
+                      new MovementBDTracker(&atomspace));
 
     atom_tree *action_template = mva(EVALUATION_LINK,
-				  mva(atomspace.addNode(PREDICATE_NODE, "actionDone"), NULL),
-				  mva(LIST_LINK, mva(CONCEPT_NODE, NULL), NULL), NULL);
+                                     mva(atomspace.addNode(PREDICATE_NODE, "actionDone"), NULL),
+                                     mva(LIST_LINK, mva(CONCEPT_NODE, NULL), NULL), NULL);
 
     repo.addBETracker(action_template,
-            new ActionBDTracker(&atomspace));
+                      new ActionBDTracker(&atomspace));
 }
 
 void BEtest(bool continuous)
 {
     AtomSpace atomspace;
     Handle trickNode = atomspace.addNode(CONCEPT_NODE, "testTrick");
-    Temporal exemplarInterval(0,10);
-    Handle trickExemplarAtTimeLink = atomspace.addTimeInfo(trickNode, exemplarInterval); 
+    Temporal exemplarInterval(0, 10);
+    Handle trickExemplarAtTimeLink = atomspace.addTimeInfo(trickNode, exemplarInterval);
 
     // Initialize the BE with the following 3 rows:
     const int UPDATE_INTERVAL = 1;
     BehaviorEncoder repo(new RealTimeWorldProvider(&atomspace), trickExemplarAtTimeLink, UPDATE_INTERVAL);
     addBasicBDTrackers(atomspace, repo);
 
-    //	printf("now = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    // printf("now = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
     rup;
 
     Handle a = addAction(atomspace);
 
-    //	printf("now2 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp()); 
+    // printf("now2 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
     atomspace.addTimeInfo(a, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
-    //	atomspace.addTimeInfo(a, 3281934);
+    // atomspace.addTimeInfo(a, 3281934);
     HandleSeq hs1;
     hs1.push_back(atomspace.addNode(CONCEPT_NODE, "obj223"));
 
@@ -150,10 +148,10 @@ void BEtest(bool continuous)
     hs2.push_back(h0);
     Handle h =  atomspace.addLink(EVALUATION_LINK, hs2);
 
-    //	getc(stdin);
+    // getc(stdin);
     atomspace.addTimeInfo(h,  PerceptionActionInterface::PAITestUtil::getCurrentTimestamp()); // toString().c_str());
 
-    //	printf("now3 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+    // printf("now3 = %lu\n", PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
     printEvLinks(&atomspace);
 
@@ -177,7 +175,7 @@ void BEtest(bool continuous)
     atomspace.addTimeInfo(a, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
     rup;
-    //	if (!continuous)
+    // if (!continuous)
     //{ rup; }
 
     printEvLinks(&atomspace);
@@ -190,8 +188,9 @@ void BEtest(bool continuous)
 
     rup;
 
-    if (!continuous)
-    { sleep(1); rup; sleep(1); rup; }
+    if (!continuous) {
+        sleep(1); rup; sleep(1); rup;
+    }
 
     HandleSeq hs1c;
     hs1c.push_back(atomspace.addNode(CONCEPT_NODE, "obj223"));
@@ -207,21 +206,20 @@ void BEtest(bool continuous)
 
     atomspace.addTimeInfo(h3, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
 
-    sleep(1); 
+    sleep(1);
     rup;
     //behlog=true;
-    //	printEvLinks(&atomspace);
+    // printEvLinks(&atomspace);
     //behlog=false;
-    //	printf("--- %d %d\n", countEvLinks(&atomspace, "goto"),
-    //	      countEvLinks(&atomspace, "behaved"));
+    // printf("--- %d %d\n", countEvLinks(&atomspace, "goto"),
+    //       countEvLinks(&atomspace, "behaved"));
 
     if (continuous) {
         //TS_ASSERT_EQUALS(countEvLinks(&atomspace, "goto"),    1);
         //TS_ASSERT_EQUALS(countEvLinks(&atomspace, "behaved"), 1);
         TS_ASSERT_EQUALS(countEvLinks(&atomspace, "behaved"), 2);
         // TODO: Check each behaved contents
-    }
-    else {
+    } else {
         //TS_ASSERT_EQUALS(countEvLinks(&atomspace, "goto"),    2);
         //TS_ASSERT_EQUALS(countEvLinks(&atomspace, "behaved"), 1);
         TS_ASSERT_EQUALS(countEvLinks(&atomspace, "behaved"), 3);
@@ -251,14 +249,15 @@ void BEtest(bool continuous)
    }
  */
 
-class BehaviorUTest : public CxxTest::TestSuite {
-    public:
+class BehaviorUTest : public CxxTest::TestSuite
+{
+public:
 
-        void test_continuous() { 
-            BEtest(true);
-        }
+    void test_continuous() {
+        BEtest(true);
+    }
 
-        void test_non_continuous() {
-            BEtest(false);
-        }
+    void test_non_continuous() {
+        BEtest(false);
+    }
 };

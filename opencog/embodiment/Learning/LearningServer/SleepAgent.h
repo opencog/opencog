@@ -26,26 +26,30 @@
 #include <opencog/server/Factory.h>
 #include <opencog/server/Agent.h>
 
-namespace LearningServer {
+namespace LearningServer
+{
 
 using namespace opencog;
 
-class SleepAgent : public opencog::Agent {
+class SleepAgent : public opencog::Agent
+{
 
-    private:
+private:
 
-    public:
+public:
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("LearningServer::SleepAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("LearningServer::SleepAgent");
+        return _ci;
+    }
 
-        ~SleepAgent();
-        SleepAgent();
+    ~SleepAgent();
+    SleepAgent();
 
-        void run(opencog::CogServer *opc);
+    void run(opencog::CogServer *opc);
 
 }; // class
 }  // namespace

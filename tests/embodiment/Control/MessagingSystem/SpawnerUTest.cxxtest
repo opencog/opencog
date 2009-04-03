@@ -11,11 +11,12 @@
 
 using namespace MessagingSystem;
 
-class SpawnerUTest : public CxxTest::TestSuite {
+class SpawnerUTest : public CxxTest::TestSuite
+{
 
-    private:
+private:
 
-    public:
+public:
 
     SpawnerUTest() {
 

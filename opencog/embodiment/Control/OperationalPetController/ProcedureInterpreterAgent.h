@@ -26,27 +26,31 @@
 #include <opencog/server/Agent.h>
 #include "ProcedureInterpreter.h"
 
-namespace OperationalPetController {
+namespace OperationalPetController
+{
 
-class ProcedureInterpreterAgent : public opencog::Agent {
+class ProcedureInterpreterAgent : public opencog::Agent
+{
 
-    private:
+private:
 
-        Procedure::ProcedureInterpreter* interpreter;
+    Procedure::ProcedureInterpreter* interpreter;
 
-    public:
+public:
 
-        ProcedureInterpreterAgent();
-        virtual ~ProcedureInterpreterAgent();
-        void setInterpreter(Procedure::ProcedureInterpreter*);
+    ProcedureInterpreterAgent();
+    virtual ~ProcedureInterpreterAgent();
+    void setInterpreter(Procedure::ProcedureInterpreter*);
 
-        virtual const ClassInfo& classinfo() const { return info(); }
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("OperationalPetController::ProcedureInterpreterAgent");
-            return _ci;
-        }
+    virtual const ClassInfo& classinfo() const {
+        return info();
+    }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("OperationalPetController::ProcedureInterpreterAgent");
+        return _ci;
+    }
 
-        void run(opencog::CogServer *server);
+    void run(opencog::CogServer *server);
 
 }; // class
 }  // namespace

@@ -40,14 +40,16 @@ EmbodimentCogServer::~EmbodimentCogServer()
     logger().info("[EmbodimentCogServer] destructor");
 }
 
-void EmbodimentCogServer::setNetworkElement(NetworkElement* _ne) {
+void EmbodimentCogServer::setNetworkElement(NetworkElement* _ne)
+{
     ne = _ne;
     externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
-    unreadMessagesCheckInterval = atoi(ne->parameters.get("UNREAD_MESSAGES_CHECK_INTERVAL").c_str()); 
-    unreadMessagesRetrievalLimit = atoi(ne->parameters.get("UNREAD_MESSAGES_RETRIEVAL_LIMIT").c_str()); 
+    unreadMessagesCheckInterval = atoi(ne->parameters.get("UNREAD_MESSAGES_CHECK_INTERVAL").c_str());
+    unreadMessagesRetrievalLimit = atoi(ne->parameters.get("UNREAD_MESSAGES_RETRIEVAL_LIMIT").c_str());
 }
 
-NetworkElement& EmbodimentCogServer::getNetworkElement(void) {
+NetworkElement& EmbodimentCogServer::getNetworkElement(void)
+{
     return *ne;
 }
 
@@ -55,8 +57,8 @@ bool EmbodimentCogServer::customLoopRun(void)
 {
     unsigned int msgQueueSize = ne->getIncomingQueueSize();
     if (msgQueueSize > 0) {
-        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d", 
-                ne->getID().c_str(), msgQueueSize);
+        logger().debug("EmbodimentCogServer(%s) - messageCentral size: %d",
+                       ne->getID().c_str(), msgQueueSize);
     }
 
 
@@ -67,12 +69,12 @@ bool EmbodimentCogServer::customLoopRun(void)
         }
 
         // Process all messages in queue
-        std::vector<Message*> messages; 
+        std::vector<Message*> messages;
         while (!ne->isIncomingQueueEmpty() ) {
             Message *message = ne->popIncomingQueue();
             messages.push_back(message);
         }
-        for(unsigned int i = 0; i < messages.size(); i++) {
+        for (unsigned int i = 0; i < messages.size(); i++) {
             Message *message = messages[i];
             if (message->getType() != Message::TICK) {
                 running = !processNextMessage(message);
@@ -87,19 +89,19 @@ bool EmbodimentCogServer::customLoopRun(void)
         ne->retrieveMessages(unreadMessagesRetrievalLimit);
 
         // Get all messages in the incoming queue (or until a TICK message is received)
-        std::vector<Message*> messages; 
+        std::vector<Message*> messages;
         while (!ne->isIncomingQueueEmpty()) {
             Message *message = ne->popIncomingQueue();
             messages.push_back(message);
-            if (message->getType() == Message::TICK) break; 
+            if (message->getType() == Message::TICK) break;
         }
-        for(unsigned int i = 0; i < messages.size(); i++) {
+        for (unsigned int i = 0; i < messages.size(); i++) {
             Message *message = messages[i];
             //check type of message
             if (message->getType() == Message::TICK) {
                 logger().log(opencog::Logger::DEBUG, "EmbodimentCogServer - got a tick");
                 delete(message);
-                return true; 
+                return true;
             } else {
                 running = !processNextMessage(message);
                 delete(message);
@@ -107,37 +109,44 @@ bool EmbodimentCogServer::customLoopRun(void)
             }
         }
     }
-    
-    //sleep a bit to not keep cpu busy and do not keep requesting for unread messages 
+
+    //sleep a bit to not keep cpu busy and do not keep requesting for unread messages
     usleep(50000);
 
     return false;
 }
 
-bool EmbodimentCogServer::sendMessage(Message &msg) {
+bool EmbodimentCogServer::sendMessage(Message &msg)
+{
     return ne->sendMessage(msg);
 }
 
-bool EmbodimentCogServer::sendCommandToRouter(const std::string &cmd) {
+bool EmbodimentCogServer::sendCommandToRouter(const std::string &cmd)
+{
     return ne->sendCommandToRouter(cmd);
 }
 
-Control::SystemParameters& EmbodimentCogServer::getParameters() {
+Control::SystemParameters& EmbodimentCogServer::getParameters()
+{
     return ne->parameters;
 }
 
-const std::string& EmbodimentCogServer::getID() {
+const std::string& EmbodimentCogServer::getID()
+{
     return ne->getID();
 }
 
-int EmbodimentCogServer::getPortNumber() {
+int EmbodimentCogServer::getPortNumber()
+{
     return ne->getPortNumber();
 }
 
-bool EmbodimentCogServer::isElementAvailable(const std::string& id) {
+bool EmbodimentCogServer::isElementAvailable(const std::string& id)
+{
     return ne->isElementAvailable(id);
 }
 
-void EmbodimentCogServer::logoutFromRouter() {
+void EmbodimentCogServer::logoutFromRouter()
+{
     return ne->logoutFromRouter();
 }

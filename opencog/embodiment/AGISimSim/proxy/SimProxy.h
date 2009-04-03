@@ -341,7 +341,8 @@ or
 // Aditional events
 #define CUSTOM_SENSATION_HOLDING_OBJECT 900
 
-class DefaultPerceptionAndStatusHandler : public AsynchronousPerceptionAndStatusHandler {
+class DefaultPerceptionAndStatusHandler : public AsynchronousPerceptionAndStatusHandler
+{
     virtual ~DefaultPerceptionAndStatusHandler();
     void mapInfo(std::vector<ObjMapInfo>& objects);
     void actionStatus(unsigned long actionTicket, bool success);
@@ -352,381 +353,382 @@ class DefaultPerceptionAndStatusHandler : public AsynchronousPerceptionAndStatus
 class SocketHandler;
 class SimClientSocket;
 
-class SimProxy : public AsynchronousMessageReceiver {
-    private:
-        pthread_t checkAsynchronousMessagesThread;
-	bool checkingAsynchronousMessages;
+class SimProxy : public AsynchronousMessageReceiver
+{
+private:
+    pthread_t checkAsynchronousMessagesThread;
+    bool checkingAsynchronousMessages;
 
-    public:
-        SimProxy(const std::string &host, unsigned short port, AsynchronousPerceptionAndStatusHandler* handler, bool echoing = false);
-        ~SimProxy();
+public:
+    SimProxy(const std::string &host, unsigned short port, AsynchronousPerceptionAndStatusHandler* handler, bool echoing = false);
+    ~SimProxy();
 
-        static void* ThreadCheckAsynchronousMessages(void* args);
+    static void* ThreadCheckAsynchronousMessages(void* args);
 
-        // Implementation of abstract methods from superclass
-        void receiveAsynchronousMessage(const std::string&);
+    // Implementation of abstract methods from superclass
+    void receiveAsynchronousMessage(const std::string&);
 
-        // CONNECTION COMMANDS
+    // CONNECTION COMMANDS
 
-        /**
-         * Connects to an AGI-Sim server using the server address arguments received in the constructor.
-         */
-        bool connect();
-        /**
-         * Check if this SimProxy is connected to an AGI-Sim server
-         */
-        bool IsConnected();
+    /**
+     * Connects to an AGI-Sim server using the server address arguments received in the constructor.
+     */
+    bool connect();
+    /**
+     * Check if this SimProxy is connected to an AGI-Sim server
+     */
+    bool IsConnected();
 
-        bool hasPendingActions();
+    bool hasPendingActions();
 
-        /**
-         * This method checks for assynchronous messages comming from the connected AGI-Sim server.
-         * If there is any incomming message, it calls the receiveAsynchronousMessage to handle it,
-         * which may eventually call the receiveAsynchronousPerceptionAndStatus() method of the  AsynchronousPerceptionAndStatusHandler
-         * object passed as argument in the constructor.
-         * This method must be called periodically by the SimProxy user so that it receives all
-         * sensations or admin responses from AGI-Sim server.
-         */
-        void checkAsynchronousMessages();
+    /**
+     * This method checks for assynchronous messages comming from the connected AGI-Sim server.
+     * If there is any incomming message, it calls the receiveAsynchronousMessage to handle it,
+     * which may eventually call the receiveAsynchronousPerceptionAndStatus() method of the  AsynchronousPerceptionAndStatusHandler
+     * object passed as argument in the constructor.
+     * This method must be called periodically by the SimProxy user so that it receives all
+     * sensations or admin responses from AGI-Sim server.
+     */
+    void checkAsynchronousMessages();
 
-        // AGISIM ADMIN COMMANDS (if successfull, returns an empty string. Otherwise return an error message)
+    // AGISIM ADMIN COMMANDS (if successfull, returns an empty string. Otherwise return an error message)
 
-        /**
-         * Creates a new agent in the connected AGI-Sim world/server.
-	 * @param x,y,z Agent's position coordinates
-	 * @param objectType one of the following element in the set ("avatar", "pet", "accessory", "object", "structure", "unknown")
-	 * @param meshType one of the following types ("ball", "box"). NOTE: for now, just use "ball"
-	 * @param radius the radius of the agent's body
-	 * @param agentBaseName	the base name of the agent to be created (if it already exists, this name is suffixed with a seq number)
-         * If successfully, returns the name of the just created Agent. Otherwise, returns an empty string.
-         */
-        std::string newAgent(float x, float y, float z,  const char* objectType , const char*  meshType, float radius, const char* agentBaseName = AGISIM_AGENT);
-        /**
-         * Gets the name of the current Agent created with newAgent() method.
-         * If no Agent is created yet, return an empty string.
-         */
-        std::string getAgentName();
-        /**
-         * Resets the AGI-Sim world in a soft way (same as "reset soft" command), setting
-         * all world objects to their initial positions and the Agent's attributes to their
-         * initial values as well.
-         */
-        std::string resetCurrentWorld();
-        //std::string reconfigWorld(std::string &simScriptFilename);
-        /**
-         * Sets the AGI-Sim UpdateFrameDelay config variable to a very high value, so that
-         * AGI-Sim server do not increase its clock spontaneously.
-         */
-        std::string disableAgiSimClock();
+    /**
+     * Creates a new agent in the connected AGI-Sim world/server.
+    * @param x,y,z Agent's position coordinates
+    * @param objectType one of the following element in the set ("avatar", "pet", "accessory", "object", "structure", "unknown")
+    * @param meshType one of the following types ("ball", "box"). NOTE: for now, just use "ball"
+    * @param radius the radius of the agent's body
+    * @param agentBaseName the base name of the agent to be created (if it already exists, this name is suffixed with a seq number)
+     * If successfully, returns the name of the just created Agent. Otherwise, returns an empty string.
+     */
+    std::string newAgent(float x, float y, float z,  const char* objectType , const char*  meshType, float radius, const char* agentBaseName = AGISIM_AGENT);
+    /**
+     * Gets the name of the current Agent created with newAgent() method.
+     * If no Agent is created yet, return an empty string.
+     */
+    std::string getAgentName();
+    /**
+     * Resets the AGI-Sim world in a soft way (same as "reset soft" command), setting
+     * all world objects to their initial positions and the Agent's attributes to their
+     * initial values as well.
+     */
+    std::string resetCurrentWorld();
+    //std::string reconfigWorld(std::string &simScriptFilename);
+    /**
+     * Sets the AGI-Sim UpdateFrameDelay config variable to a very high value, so that
+     * AGI-Sim server do not increase its clock spontaneously.
+     */
+    std::string disableAgiSimClock();
 
-        /**
-         * This is like an action command with no action, just to force current agent sensation
-         * update. This also forces a clock tick in the connected AGI-Sim world.
-	 * @return true if the command was successfully sent
-         */
-        bool getCurrentSense();
+    /**
+     * This is like an action command with no action, just to force current agent sensation
+     * update. This also forces a clock tick in the connected AGI-Sim world.
+    * @return true if the command was successfully sent
+     */
+    bool getCurrentSense();
 
-	/**
-	 * Gost to the object with the given name
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-	 */
-        unsigned long moveGoto(std::string objName);
+    /**
+     * Gost to the object with the given name
+     * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+            *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long moveGoto(std::string objName);
 
-        // Special "admin" commands
+    // Special "admin" commands
 
-        /**
-         * Gets the position of the object with the given name
-         * Returns the next raw response after sending this command:
-         * Example of expected answer:
-         *    <agisim> <msg> Position of Teacher1: ( -500,5,0 ) </msg> </agisim>
-         * However, depending on timing, a different response may come from agisim server.
-         * So, caller must check for the right result format and, if not as expected,
-         * call the right method to process a possible sensation message.
-         */
-        std::string getPos(std::string objName);
-        /**
-         * Sets the position of the object with the given name to the given coordinates.
-         * Returns the next raw response after sending this command:
-         * Example of expected answer:
-         *    <agisim> <msg> ok </msg> </agisim>
-         * However, depending on timing, a different response may come from agisim server.
-         * So, caller must check for the right result format and, if not as expected,
-         * call the right method to process a possible sensation message.
-         */
-        std::string setPos(std::string objName, float x, float y, float z);
-        /**
-         * Gets the rotation of the object with the given name
-         * Returns the next raw response after sending this command:
-         * Example of expected answer:
-         *    <agisim> <msg> Rotation of Teacher1: 0.5 </msg> </agisim>
-         * However, depending on timing, a different response may come from agisim server.
-         * So, caller must check for the right result format and, if not as expected,
-         * call the right method to process a possible sensation message.
-         */
-        std::string getRot(std::string objName);
-        /**
-         * Sets the rotation of the object with the given name to the given coordinates.
-         * Returns the next raw response after sending this command:
-         * Example of expected answer:
-         *    <agisim> <msg> ok </msg> </agisim>
-         * However, depending on timing, a different response may come from agisim server.
-         * So, caller must check for the right result format and, if not as expected,
-         * call the right method to process a possible sensation message.
-         */
-        std::string setRot(std::string objName, float x, float y, float z);
+    /**
+     * Gets the position of the object with the given name
+     * Returns the next raw response after sending this command:
+     * Example of expected answer:
+     *    <agisim> <msg> Position of Teacher1: ( -500,5,0 ) </msg> </agisim>
+     * However, depending on timing, a different response may come from agisim server.
+     * So, caller must check for the right result format and, if not as expected,
+     * call the right method to process a possible sensation message.
+     */
+    std::string getPos(std::string objName);
+    /**
+     * Sets the position of the object with the given name to the given coordinates.
+     * Returns the next raw response after sending this command:
+     * Example of expected answer:
+     *    <agisim> <msg> ok </msg> </agisim>
+     * However, depending on timing, a different response may come from agisim server.
+     * So, caller must check for the right result format and, if not as expected,
+     * call the right method to process a possible sensation message.
+     */
+    std::string setPos(std::string objName, float x, float y, float z);
+    /**
+     * Gets the rotation of the object with the given name
+     * Returns the next raw response after sending this command:
+     * Example of expected answer:
+     *    <agisim> <msg> Rotation of Teacher1: 0.5 </msg> </agisim>
+     * However, depending on timing, a different response may come from agisim server.
+     * So, caller must check for the right result format and, if not as expected,
+     * call the right method to process a possible sensation message.
+     */
+    std::string getRot(std::string objName);
+    /**
+     * Sets the rotation of the object with the given name to the given coordinates.
+     * Returns the next raw response after sending this command:
+     * Example of expected answer:
+     *    <agisim> <msg> ok </msg> </agisim>
+     * However, depending on timing, a different response may come from agisim server.
+     * So, caller must check for the right result format and, if not as expected,
+     * call the right method to process a possible sensation message.
+     */
+    std::string setRot(std::string objName, float x, float y, float z);
 
-        // AGISIM AGENT COMMANDS (all of them return a NM-XML string if successfull. Otherwise return an error message not in XML format)
+    // AGISIM AGENT COMMANDS (all of them return a NM-XML string if successfull. Otherwise return an error message not in XML format)
 
-        // Agent body movements
+    // Agent body movements
 
-        /**
-         * Turns the agent to the left by the given angle in radians.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long turnLeft(float value);
-        /**
-         * Turns the agent to the right by the given angle in radians.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long turnRight(float value);
-        /**
-         * Moves the agent forward by the given distance.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long moveForward(float value);
-        /**
-         * Moves the agent backward by the given distance.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long moveBackward(float value);
-        /**
-         * Moves the agent left by the given distance.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long strafeLeft(float value);
-        /**
-         * Moves the agent right by the given distance.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long strafeRight(float value);
-        /**
-         * Makes the agent walks toward to the object with the given name.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long walkTowards(std::string objName);
-        /**
-         * Makes the agent walks toward to given coordinates.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long walkTowards(float x, float z, float max_distance = -1.0f);
-        /**
-         * Makes the agent nudge the object with the given name to the given destination.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long nudgeTo(std::string objName, float x, float z);
-        /**
-         * Makes the agent turns to the object with the given name.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long turnTo(std::string objName);
+    /**
+     * Turns the agent to the left by the given angle in radians.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long turnLeft(float value);
+    /**
+     * Turns the agent to the right by the given angle in radians.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long turnRight(float value);
+    /**
+     * Moves the agent forward by the given distance.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long moveForward(float value);
+    /**
+     * Moves the agent backward by the given distance.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long moveBackward(float value);
+    /**
+     * Moves the agent left by the given distance.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long strafeLeft(float value);
+    /**
+     * Moves the agent right by the given distance.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long strafeRight(float value);
+    /**
+     * Makes the agent walks toward to the object with the given name.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long walkTowards(std::string objName);
+    /**
+     * Makes the agent walks toward to given coordinates.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long walkTowards(float x, float z, float max_distance = -1.0f);
+    /**
+     * Makes the agent nudge the object with the given name to the given destination.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long nudgeTo(std::string objName, float x, float z);
+    /**
+     * Makes the agent turns to the object with the given name.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long turnTo(std::string objName);
 
-        // Agent eye movements
+    // Agent eye movements
 
-        /**
-         * Moves the agent's eyes up by the given angle in radians.
-         * @return true if the command message was sent successfully. False, otherwise.
-         */
-        bool eyeUp(float value);
-        /**
-         * Moves the agent's eyes down by the given angle in radians.
-         * @return true if the command message was sent successfully. False, otherwise.
-         */
-        bool eyeDown(float value);
-        /**
-         * Moves the agent's eyes left by the given angle in radians.
-         * @return true if the command message was sent successfully. False, otherwise.
-         */
-        bool eyeLeft(float value);
-        /**
-         * Moves the agent's eyes right by the given angle in radians.
-         * @return true if the command message was sent successfully. False, otherwise.
-         */
-        bool eyeRight(float value);
+    /**
+     * Moves the agent's eyes up by the given angle in radians.
+     * @return true if the command message was sent successfully. False, otherwise.
+     */
+    bool eyeUp(float value);
+    /**
+     * Moves the agent's eyes down by the given angle in radians.
+     * @return true if the command message was sent successfully. False, otherwise.
+     */
+    bool eyeDown(float value);
+    /**
+     * Moves the agent's eyes left by the given angle in radians.
+     * @return true if the command message was sent successfully. False, otherwise.
+     */
+    bool eyeLeft(float value);
+    /**
+     * Moves the agent's eyes right by the given angle in radians.
+     * @return true if the command message was sent successfully. False, otherwise.
+     */
+    bool eyeRight(float value);
 
-        // Agent misc
+    // Agent misc
 
-        /**
-         * Makes the agent tries to eat the object with the given name that is near the agent.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long eat(std::string objName, float quantity = -1);
+    /**
+     * Makes the agent tries to eat the object with the given name that is near the agent.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long eat(std::string objName, float quantity = -1);
 
-        /**
-         * Makes the agent tries to drink the object with the given name that is near the agent.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long drink(std::string objName, float quantity = -1);
+    /**
+     * Makes the agent tries to drink the object with the given name that is near the agent.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long drink(std::string objName, float quantity = -1);
 
-        /**
-         * Makes the agent tries to lift the object with the given name.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long lift(std::string objName);
-        /**
-         * Makes the agent tries to drop the lifted object .
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long drop();
-        /**
-         * Makes the agent tries to throw the lifted object.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long throws(float distance);
-        /**
-         * Makes the agent tries to throw the lifted object to the given coordinate.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long throwsAt(float x, float z);
-        /**
-         * Makes the agent kick low.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long kickLow();
-        /**
-         * Makes the agent kick high.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long kickHigh();
-        /**
-         * Makes the agent kick high.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long smile();
-        /**
-         * Makes the agent kick high.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long frown();
+    /**
+     * Makes the agent tries to lift the object with the given name.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long lift(std::string objName);
+    /**
+     * Makes the agent tries to drop the lifted object .
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long drop();
+    /**
+     * Makes the agent tries to throw the lifted object.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long throws(float distance);
+    /**
+     * Makes the agent tries to throw the lifted object to the given coordinate.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long throwsAt(float x, float z);
+    /**
+     * Makes the agent kick low.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long kickLow();
+    /**
+     * Makes the agent kick high.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long kickHigh();
+    /**
+     * Makes the agent kick high.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long smile();
+    /**
+     * Makes the agent kick high.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long frown();
 
-        // Agent communications
+    // Agent communications
 
-        /**
-         * Sends a noise.make action command.
-         */
-        bool noiseMake();
-        /**
-         * Sends a broadcast message to the connected Agisim's world.
-         */
-        unsigned long message(const char* msg);
+    /**
+     * Sends a noise.make action command.
+     */
+    bool noiseMake();
+    /**
+     * Sends a broadcast message to the connected Agisim's world.
+     */
+    unsigned long message(const char* msg);
 
-        // specific goto commands -- consider using walkTorwards() method instead
+    // specific goto commands -- consider using walkTorwards() method instead
 
-        /**
-         * Goes to the given target object using the navigation algorithm to avoid/contourn
-         * obstacles.
-	 * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
-         *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
-         */
-        unsigned long gotoTarget(const char* target);
+    /**
+     * Goes to the given target object using the navigation algorithm to avoid/contourn
+     * obstacles.
+    * @return an actionTicket so that SimProxy's user can receive notification about the status of this action
+     *         If it fails to send the command to the server, returns ULONG_MAX as a flag for indicating this failure.
+     */
+    unsigned long gotoTarget(const char* target);
 
-        // generic send method -- used for test purposes only. Do not use it in normal usage.
-        std::string send(const std::string &str, bool isAdminCommand, bool waitResponse = true);
+    // generic send method -- used for test purposes only. Do not use it in normal usage.
+    std::string send(const std::string &str, bool isAdminCommand, bool waitResponse = true);
 
-        // This method was made public for testing purposes (see SimProxyUTest.cxxtest)
-	std::string processAgiSimMessage(const std::string& agiSimMessage, bool isAdminCommand);
+    // This method was made public for testing purposes (see SimProxyUTest.cxxtest)
+    std::string processAgiSimMessage(const std::string& agiSimMessage, bool isAdminCommand);
 
-    private:
-        static bool using_single_component_mode;
-        static unsigned long numberOfInstances;
+private:
+    static bool using_single_component_mode;
+    static unsigned long numberOfInstances;
 
-        struct eqstr {
-            bool operator()(char *s1, char *s2) const;
-        };
-        typedef std::map<int,std::deque<unsigned long> > EventId2AtomRepMap;
+    struct eqstr {
+        bool operator()(char *s1, char *s2) const;
+    };
+    typedef std::map<int, std::deque<unsigned long> > EventId2AtomRepMap;
 
-        std::string host;
-        unsigned short port;
-        SocketHandler *sh;
-        SimClientSocket *cc;
-        bool echoing;
-        AsynchronousPerceptionAndStatusHandler* perceptionAndStatusHandler;
-        std::string agentName;
-        unsigned int numberOfPendingActions;
+    std::string host;
+    unsigned short port;
+    SocketHandler *sh;
+    SimClientSocket *cc;
+    bool echoing;
+    AsynchronousPerceptionAndStatusHandler* perceptionAndStatusHandler;
+    std::string agentName;
+    unsigned int numberOfPendingActions;
 
-        // Next action ticket to be used when the user calls one of the action methods.
-        unsigned long nextActionTicket;
+    // Next action ticket to be used when the user calls one of the action methods.
+    unsigned long nextActionTicket;
 
-        static XERCES_CPP_NAMESPACE::DOMImplementation* domImplementation;
-        void InitXMLPlatform();
-        void TerminateXMLPlatform();
+    static XERCES_CPP_NAMESPACE::DOMImplementation* domImplementation;
+    void InitXMLPlatform();
+    void TerminateXMLPlatform();
 
-        EventId2AtomRepMap* eventMap;
+    EventId2AtomRepMap* eventMap;
 
-        bool timeout(timeval beginTime, timeval currentTime, long waitTimeout);
-        bool sendActionCommand(const char* cmdName, float value);
-        bool sendActionCommand(const char* cmdName, float value1, float value2);
-        bool sendActionCommand(const char* cmdName, float value1, float value2, float value3);
-        bool sendActionCommand(const char* cmdName);
-        bool sendActionCommand(const char* cmdName, const char* str);
-        bool sendActionCommand(const char* cmdName, const char* str, float value);
-        bool sendActionCommand(const char* cmdName, const char* str, float value1, float value2);
-        XERCES_CPP_NAMESPACE::DOMDocument* parseXML(const std::string&);
-        void processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument*);
-        bool isAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* rawResponseDoc);
-        bool processAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* rawResponseDoc, std::string& message);
-        std::string getString(XERCES_CPP_NAMESPACE::DOMDocument*);
-        static std::string convert(const XMLCh * xString);
-        void splitValues(char*text, std::vector<char*>& values);
-        void addAtomType(std::vector<char*>& atomTypes, const char* newAtomType);
+    bool timeout(timeval beginTime, timeval currentTime, long waitTimeout);
+    bool sendActionCommand(const char* cmdName, float value);
+    bool sendActionCommand(const char* cmdName, float value1, float value2);
+    bool sendActionCommand(const char* cmdName, float value1, float value2, float value3);
+    bool sendActionCommand(const char* cmdName);
+    bool sendActionCommand(const char* cmdName, const char* str);
+    bool sendActionCommand(const char* cmdName, const char* str, float value);
+    bool sendActionCommand(const char* cmdName, const char* str, float value1, float value2);
+    XERCES_CPP_NAMESPACE::DOMDocument* parseXML(const std::string&);
+    void processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument*);
+    bool isAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* rawResponseDoc);
+    bool processAdminResponse(XERCES_CPP_NAMESPACE::DOMDocument* rawResponseDoc, std::string& message);
+    std::string getString(XERCES_CPP_NAMESPACE::DOMDocument*);
+    static std::string convert(const XMLCh * xString);
+    void splitValues(char*text, std::vector<char*>& values);
+    void addAtomType(std::vector<char*>& atomTypes, const char* newAtomType);
 
-	/**
-	 * Enqueue an action as InProgress and returns a ticket to be sent to the SimProxy's user so that it can identify the action
-	 * when a status notification about that action is given
-	 */
-        unsigned long enqueueActionInProgress(int actionType);
+    /**
+     * Enqueue an action as InProgress and returns a ticket to be sent to the SimProxy's user so that it can identify the action
+     * when a status notification about that action is given
+     */
+    unsigned long enqueueActionInProgress(int actionType);
 
-        /**
-         * Gets and removes the ticket for the first in progress action for the given actionType.
-	 * Return the ticket of the pending/in progress action, or 0, if there is no pending action associated to the given action type.
-         */
-        unsigned long dequeueActionInProgress(int actionType);
+    /**
+     * Gets and removes the ticket for the first in progress action for the given actionType.
+    * Return the ticket of the pending/in progress action, or 0, if there is no pending action associated to the given action type.
+     */
+    unsigned long dequeueActionInProgress(int actionType);
 
-        /**
-         * Get the ticket for the first in progress action for the given actionType
-	 * Return the ticket of the pending/in progress action, or 0, if there is no pending action associated to the given action type.
-         */
-        unsigned long getActionInProgress(int actionType);
+    /**
+     * Get the ticket for the first in progress action for the given actionType
+    * Return the ticket of the pending/in progress action, or 0, if there is no pending action associated to the given action type.
+     */
+    unsigned long getActionInProgress(int actionType);
 
-	/**
-	 * Process a SelfData sensation message
-	 */
-        void processSelfDataElements(XERCES_CPP_NAMESPACE::DOMElement* sensationElem);
+    /**
+     * Process a SelfData sensation message
+     */
+    void processSelfDataElements(XERCES_CPP_NAMESPACE::DOMElement* sensationElem);
 
-	/**
-	 * Process a MapInfo sensation message
-	 */
-        void processMapInfoElements(XERCES_CPP_NAMESPACE::DOMElement* sensationElem);
+    /**
+     * Process a MapInfo sensation message
+     */
+    void processMapInfoElements(XERCES_CPP_NAMESPACE::DOMElement* sensationElem);
 };
 
 #endif //__SIM_PROXY_H__

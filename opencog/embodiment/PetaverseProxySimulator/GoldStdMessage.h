@@ -26,21 +26,23 @@
 
 using namespace MessagingSystem;
 
-namespace PetaverseProxySimulator {
+namespace PetaverseProxySimulator
+{
 
-class GoldStdMessage {
+class GoldStdMessage
+{
 
     unsigned long timestamp;
     Message* message;
 
-    public: 
-        GoldStdMessage(unsigned long _timestamp, Message* _message);
-        ~GoldStdMessage();
-        unsigned long getTimestamp();
-        Message* getMessage();
+public:
+    GoldStdMessage(unsigned long _timestamp, Message* _message);
+    ~GoldStdMessage();
+    unsigned long getTimestamp();
+    Message* getMessage();
 };
 
 }
-    
+
 
 #endif //_GOLD_STD_MESSAGE_H_

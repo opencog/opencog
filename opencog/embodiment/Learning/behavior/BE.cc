@@ -193,15 +193,15 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                 //create BD
                 opencog::cassert(TRACE_INFO, as.getType(h) == EVALUATION_LINK,
-                                  "Handle h should be an 'EVALUATION_LINK'.");
+                                 "Handle h should be an 'EVALUATION_LINK'.");
                 opencog::cassert(TRACE_INFO, as.getArity(h) == 2,
-                                  "Handle h should have arity 2.");
+                                 "Handle h should have arity 2.");
 
                 Handle behaved_h = as.addNode(PREDICATE_NODE, BEHAVED_PREDICATE_NAME);
 
                 Handle arg_list_h = as.getOutgoing(h, 1);
                 opencog::cassert(TRACE_INFO, as.getType(arg_list_h) == LIST_LINK,
-                                  "Handle h outgoingAtom[1] should be a 'LIST_LINK'.");
+                                 "Handle h outgoingAtom[1] should be a 'LIST_LINK'.");
 
                 //determine the subject
                 Handle subject_h = as.getOutgoing(arg_list_h, 0);
@@ -211,7 +211,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 //per_h is in fact the action of the subject observed
                 Handle per_h = as.getOutgoing(arg_list_h, 1);
                 opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(per_h)),
-                                  "Handle per_h should be a 'Node'.");
+                                 "Handle per_h should be a 'Node'.");
 
                 bool is_walk = as.getName(per_h) == WALK_PERCEPT_NAME;
 
@@ -239,27 +239,27 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //check if the walk destination is close to an object
 
                     opencog::cassert(TRACE_INFO, as.getArity(arg_list_h) > 2,
-                                      "arg_list_h should have more than 2 outgoings" );
+                                     "arg_list_h should have more than 2 outgoings" );
 
                     Handle actionParametersList_h = as.getOutgoing(arg_list_h, 2);
 
                     //get the position of the walk destination
                     opencog::cassert(TRACE_INFO, as.getArity(actionParametersList_h) > 0,
-                                      "ListLink arg_list should have arity greater than 0 (walk perception).");
+                                     "ListLink arg_list should have arity greater than 0 (walk perception).");
 
                     Handle pos_list_h = as.getOutgoing(actionParametersList_h, 0);
                     opencog::cassert(TRACE_INFO, as.getType(pos_list_h) == LIST_LINK,
-                                      "Handle pos_list should be a 'LIST_LINK' (walk perception)");
+                                     "Handle pos_list should be a 'LIST_LINK' (walk perception)");
                     opencog::cassert(TRACE_INFO, as.getArity(pos_list_h) == 3,
-                                      "ListLink pos_list should have arity 3 (walk perception)." );
+                                     "ListLink pos_list should have arity 3 (walk perception)." );
 
                     Handle x_h = as.getOutgoing(pos_list_h, 0);
                     opencog::cassert(TRACE_INFO, as.getType(x_h) == NUMBER_NODE,
-                                      "Handle x_h should be a 'NUMBER_NODE'.");
+                                     "Handle x_h should be a 'NUMBER_NODE'.");
                     float x = atof(as.getName(x_h).c_str());
                     Handle y_h = as.getOutgoing(pos_list_h, 1);
                     opencog::cassert(TRACE_INFO, as.getType(y_h) == NUMBER_NODE,
-                                      "Handle y_h should be a 'NUMBER_NODE'.");
+                                     "Handle y_h should be a 'NUMBER_NODE'.");
                     float y = atof(as.getName(y_h).c_str());
                     SpaceServer::SpaceMapPoint p_walk_dest(x, y);
 
@@ -293,7 +293,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //COULD BE OPTIMIZED
                     Handle sms_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tl);
                     opencog::cassert(TRACE_INFO, sms_h != Handle::UNDEFINED,
-                                      "Handle sms_h should not be an 'Handle::UNDEFINED'.");
+                                     "Handle sms_h should not be an 'Handle::UNDEFINED'.");
                     const SpaceServer::SpaceMap& sms = wp->getAtomSpace().getSpaceServer().getMap(sms_h);
                     //sas stands for Subject At Start
                     const Spatial::EntityPtr& sasEntity = sms.getEntity(subject_id);
@@ -324,7 +324,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //which is different of the object at the start if there is
                     Handle sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tu);
                     opencog::cassert(TRACE_INFO, sm_h != Handle::UNDEFINED,
-                                      "Handle sm_h should not be an 'Handle::UNDEFINED'.");
+                                     "Handle sm_h should not be an 'Handle::UNDEFINED'.");
                     const SpaceServer::SpaceMap& sm = wp->getAtomSpace().getSpaceServer().getMap(sm_h);
                     std::string obj_id = sm.findNearestFiltered(p_walk_dest, pred);
 
@@ -411,7 +411,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         as.getHandleSet(std::back_inserter(ret), SL_OBJECT_NODE,
                                         obj_id, true);
                         opencog::cassert(TRACE_INFO, ret.size() == 1,
-                                          "HandleSet should contain exactly one object.");
+                                         "HandleSet should contain exactly one object.");
                         Handle obj_h = *ret.begin();
                         Handle speed_h = as.addNode(NUMBER_NODE,
                                                     boost::lexical_cast<string>(GOTO_OBJ_SPEED));
@@ -422,16 +422,16 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                 } //~if(walk)
                 else {//not a walk command
-                      //we just need to flatten the action arguments
+                    //we just need to flatten the action arguments
                     HandleSeq arg_seq;
                     arg_seq.push_back(subject_h);
                     arg_seq.push_back(per_h);
                     if (as.getArity(arg_list_h) > 2) {
-                                          
+
                         Handle action_arg_list_h = as.getOutgoing(arg_list_h, 2);
                         opencog::cassert(TRACE_INFO,
-                                          as.getType(action_arg_list_h) == LIST_LINK,
-                                          "It is assumed that the arguments of the subject's action are wrapped in a listLink");
+                                         as.getType(action_arg_list_h) == LIST_LINK,
+                                         "It is assumed that the arguments of the subject's action are wrapped in a listLink");
 
                         HandleSeq action_arg_seq = as.getOutgoing(action_arg_list_h);
                         arg_seq.insert(arg_seq.end(),
@@ -470,8 +470,8 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 as.addLink(MEMBER_LINK, memberLinkHS);
 
                 logger().log(opencog::Logger::DEBUG,
-                                "BE - New elementary behavior description created: %s",
-                                TLB::getAtom(bd_t_h)->toString().c_str());
+                             "BE - New elementary behavior description created: %s",
+                             TLB::getAtom(bd_t_h)->toString().c_str());
 
 
                 //this in order to tell the converter walk to goto that we are not in
@@ -512,9 +512,9 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         //insert into new_temps all pairs (handle,temporal)
         //that have their starting time within t_grab_range
         wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
-                Handle::UNDEFINED,
-                *ti,
-                TemporalTable::STARTS_WITHIN);
+                                       Handle::UNDEFINED,
+                                       *ti,
+                                       TemporalTable::STARTS_WITHIN);
 
         foreach(HandleTemporalPair htp, new_temps) {
             new_perceptions.insert(htp.getHandle());
@@ -523,9 +523,9 @@ void BehaviorEncoder::updateRec(Temporal exemplarInterval)
         foreach(const VFpair& vf, factories) {
             set<Handle> f_perceptions;
             opencog::copy_if(new_perceptions.begin(),
-                              new_perceptions.end(),
-                              inserter(f_perceptions, f_perceptions.begin()),
-                              does_fit_template(vf.first, &wp->getAtomSpace()));
+                             new_perceptions.end(),
+                             inserter(f_perceptions, f_perceptions.begin()),
+                             does_fit_template(vf.first, &wp->getAtomSpace()));
 
             vf.second->update(trickExemplarAtTime,
                               *ti,
@@ -560,9 +560,9 @@ bool BehaviorEncoder::update(Temporal start_moment)
     //insert into new_temps all pairs (handle,temporal)
     //that have their starting time within t_grab_range
     wp->getAtomSpace().getTimeInfo(inserter(new_temps, new_temps.begin()),
-            Handle::UNDEFINED,
-            t_grab_range,
-            TemporalTable::STARTS_WITHIN);
+                                   Handle::UNDEFINED,
+                                   t_grab_range,
+                                   TemporalTable::STARTS_WITHIN);
 
     foreach(HandleTemporalPair htp, new_temps) {
         //printf("new perc %s\n", htp.toString().c_str());
@@ -574,9 +574,9 @@ bool BehaviorEncoder::update(Temporal start_moment)
     foreach(const VFpair& vf, factories) {
         set<Handle> f_perceptions;
         opencog::copy_if(new_perceptions.begin(),
-                          new_perceptions.end(),
-                          inserter(f_perceptions, f_perceptions.begin()),
-                          does_fit_template(vf.first, &wp->getAtomSpace()));
+                         new_perceptions.end(),
+                         inserter(f_perceptions, f_perceptions.begin()),
+                         does_fit_template(vf.first, &wp->getAtomSpace()));
 
         bprintf("Found %d valid perceptions\n", f_perceptions.size());
 

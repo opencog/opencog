@@ -21,112 +21,144 @@
  */
 #include "PetComboVocabulary.h"
 
-namespace PetCombo {
-  
-    builtin_action instance(pet_builtin_action_enum e) {
-        return pet_builtin_action::instance(e);
-    }
-    perception instance(pet_perception_enum e) {
-        return pet_perception::instance(e);
-    }
-    action_symbol instance(pet_action_symbol_enum e) {
-        return pet_action_symbol::instance(e);
-    }
-    indefinite_object instance(pet_indefinite_object_enum e) {
-        return pet_indefinite_object::instance(e);
-    }
-    
-    pet_builtin_action_enum get_enum(builtin_action ba) {
-        return dynamic_cast<const pet_builtin_action*>(ba)->get_enum();
-    }
-    pet_perception_enum get_enum(perception p) {
-        return dynamic_cast<const pet_perception*>(p)->get_enum();
-    }
-    pet_action_symbol_enum get_enum(action_symbol p) {
-        return dynamic_cast<const pet_action_symbol*>(p)->get_enum();
-    }
-    pet_indefinite_object_enum get_enum(indefinite_object o) {
-        return dynamic_cast<const pet_indefinite_object*>(o)->get_enum();
-    }
-    
-    bool is_random(indefinite_object o) {
-        return dynamic_cast<const pet_indefinite_object*>(o)->is_random();
-    }
-    bool is_random(pet_indefinite_object_enum oe) {
-        return dynamic_cast<const pet_indefinite_object*>(instance(oe))->is_random();
-    }
-    
-    std::ostream& operator<<(std::ostream& out, pet_builtin_action_enum e) {
-        out << instance(e)->get_name();
-        return out;
-    }
-    std::ostream& operator>>(std::ostream& out, pet_perception_enum e) {
-        out << instance(e)->get_name();
-        return out;
-    }
-    std::ostream& operator>>(std::ostream& out, pet_action_symbol_enum e) {
-        out << instance(e)->get_name();
-        return out;
-    }
-    
-    std::istream& operator>>(std::istream& in, vertex& v) {
-        return stream_to_vertex<pet_builtin_action, pet_perception, pet_action_symbol, pet_indefinite_object>(in, v);
-    }
-    
-    std::istream& operator>>(std::istream& in, combo_tree& tr) {
-        return stream_to_combo_tree<pet_builtin_action, pet_perception, pet_action_symbol, pet_indefinite_object>(in, tr);
-    }
-    
+namespace PetCombo
+{
+
+builtin_action instance(pet_builtin_action_enum e)
+{
+    return pet_builtin_action::instance(e);
+}
+perception instance(pet_perception_enum e)
+{
+    return pet_perception::instance(e);
+}
+action_symbol instance(pet_action_symbol_enum e)
+{
+    return pet_action_symbol::instance(e);
+}
+indefinite_object instance(pet_indefinite_object_enum e)
+{
+    return pet_indefinite_object::instance(e);
+}
+
+pet_builtin_action_enum get_enum(builtin_action ba)
+{
+    return dynamic_cast<const pet_builtin_action*>(ba)->get_enum();
+}
+pet_perception_enum get_enum(perception p)
+{
+    return dynamic_cast<const pet_perception*>(p)->get_enum();
+}
+pet_action_symbol_enum get_enum(action_symbol p)
+{
+    return dynamic_cast<const pet_action_symbol*>(p)->get_enum();
+}
+pet_indefinite_object_enum get_enum(indefinite_object o)
+{
+    return dynamic_cast<const pet_indefinite_object*>(o)->get_enum();
+}
+
+bool is_random(indefinite_object o)
+{
+    return dynamic_cast<const pet_indefinite_object*>(o)->is_random();
+}
+bool is_random(pet_indefinite_object_enum oe)
+{
+    return dynamic_cast<const pet_indefinite_object*>(instance(oe))->is_random();
+}
+
+std::ostream& operator<<(std::ostream& out, pet_builtin_action_enum e)
+{
+    out << instance(e)->get_name();
+    return out;
+}
+std::ostream& operator>>(std::ostream& out, pet_perception_enum e)
+{
+    out << instance(e)->get_name();
+    return out;
+}
+std::ostream& operator>>(std::ostream& out, pet_action_symbol_enum e)
+{
+    out << instance(e)->get_name();
+    return out;
+}
+
+std::istream& operator>>(std::istream& in, vertex& v)
+{
+    return stream_to_vertex<pet_builtin_action, pet_perception, pet_action_symbol, pet_indefinite_object>(in, v);
+}
+
+std::istream& operator>>(std::istream& in, combo_tree& tr)
+{
+    return stream_to_combo_tree<pet_builtin_action, pet_perception, pet_action_symbol, pet_indefinite_object>(in, tr);
+}
+
 }//~namespace PetCombo
 
 using namespace PetCombo;
 
-bool operator==(builtin_action b, pet_builtin_action_enum e) {
-  return instance(e)==b;
+bool operator==(builtin_action b, pet_builtin_action_enum e)
+{
+    return instance(e) == b;
 }
-bool operator==(pet_builtin_action_enum e, builtin_action b) {
-  return instance(e)==b;
+bool operator==(pet_builtin_action_enum e, builtin_action b)
+{
+    return instance(e) == b;
 }
-bool operator!=(builtin_action b, pet_builtin_action_enum e) {
-  return instance(e)==b;
+bool operator!=(builtin_action b, pet_builtin_action_enum e)
+{
+    return instance(e) == b;
 }
-bool operator!=(pet_builtin_action_enum e, builtin_action b) {
-  return instance(e)==b;
+bool operator!=(pet_builtin_action_enum e, builtin_action b)
+{
+    return instance(e) == b;
 }
-bool operator==(perception p, pet_perception_enum e) {
-  return instance(e)==p;
+bool operator==(perception p, pet_perception_enum e)
+{
+    return instance(e) == p;
 }
-bool operator==(pet_perception_enum e, perception p) {
-  return instance(e)==p;
+bool operator==(pet_perception_enum e, perception p)
+{
+    return instance(e) == p;
 }
-bool operator!=(perception p, pet_perception_enum e) {
-  return instance(e)==p;
+bool operator!=(perception p, pet_perception_enum e)
+{
+    return instance(e) == p;
 }
-bool operator!=(pet_perception_enum e, perception p) {
-  return instance(e)==p;
+bool operator!=(pet_perception_enum e, perception p)
+{
+    return instance(e) == p;
 }
-bool operator==(action_symbol a, pet_action_symbol_enum e) {
-  return instance(e)==a;
+bool operator==(action_symbol a, pet_action_symbol_enum e)
+{
+    return instance(e) == a;
 }
-bool operator==(pet_action_symbol_enum e, action_symbol a) {
-  return instance(e)==a;
+bool operator==(pet_action_symbol_enum e, action_symbol a)
+{
+    return instance(e) == a;
 }
-bool operator!=(action_symbol a, pet_action_symbol_enum e) {
-  return instance(e)==a;
+bool operator!=(action_symbol a, pet_action_symbol_enum e)
+{
+    return instance(e) == a;
 }
-bool operator!=(pet_action_symbol_enum e, action_symbol a) {
-  return instance(e)==a;
+bool operator!=(pet_action_symbol_enum e, action_symbol a)
+{
+    return instance(e) == a;
 }
-bool operator==(indefinite_object i, pet_indefinite_object_enum e) {
-  return instance(e)==i;
+bool operator==(indefinite_object i, pet_indefinite_object_enum e)
+{
+    return instance(e) == i;
 }
-bool operator==(pet_indefinite_object_enum e, indefinite_object i) {
-  return instance(e)==i;
+bool operator==(pet_indefinite_object_enum e, indefinite_object i)
+{
+    return instance(e) == i;
 }
-bool operator!=(indefinite_object i, pet_indefinite_object_enum e) {
-  return instance(e)==i;
+bool operator!=(indefinite_object i, pet_indefinite_object_enum e)
+{
+    return instance(e) == i;
 }
-bool operator!=(pet_indefinite_object_enum e, indefinite_object i) {
-  return instance(e)==i;
+bool operator!=(pet_indefinite_object_enum e, indefinite_object i)
+{
+    return instance(e) == i;
 }
 

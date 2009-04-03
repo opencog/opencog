@@ -34,40 +34,44 @@
 #include "TestParameters.h"
 #include "GoldStdGen.h"
 
-namespace AutomatedSystemTest {
+namespace AutomatedSystemTest
+{
 
-    class PBTester : public MessagingSystem::EmbodimentCogServer {
+class PBTester : public MessagingSystem::EmbodimentCogServer
+{
 
-        private:
+private:
 
-            TestParameters* testParams;
-            bool failed;
-            unsigned long numberOfReceivedMessages;
+    TestParameters* testParams;
+    bool failed;
+    unsigned long numberOfReceivedMessages;
 
-            void initialize();
+    void initialize();
 
-            std::vector<MessagingSystem::Message*> expectedMessages;
-            std::vector<unsigned long> receivedTimeMessages;
+    std::vector<MessagingSystem::Message*> expectedMessages;
+    std::vector<unsigned long> receivedTimeMessages;
 
-            PetaverseProxySimulator::GoldStdGen* goldStdGen;
+    PetaverseProxySimulator::GoldStdGen* goldStdGen;
 
-        public:
+public:
 
-            static opencog::BaseServer* createInstance();
+    static opencog::BaseServer* createInstance();
 
-            PBTester();
-            void init(TestParameters&);
-            void init(const Control::SystemParameters &params, TestParameters& testParams, const std::string &myId, const std::string &ip, int portNumber);
-            ~PBTester();
+    PBTester();
+    void init(TestParameters&);
+    void init(const Control::SystemParameters &params, TestParameters& testParams, const std::string &myId, const std::string &ip, int portNumber);
+    ~PBTester();
 
-            bool processNextMessage(MessagingSystem::Message *message);
-            void addExpectedMessage(MessagingSystem::Message* message, unsigned long time);
-            bool hasExpectedMessages();
-            void notifyEndOfGoldStdFile();
-            PetaverseProxySimulator::GoldStdGen* getGoldStdGen();
-            unsigned long getReceivedTimeOfCurrentExpectedMessage(){ return receivedTimeMessages.back();}
+    bool processNextMessage(MessagingSystem::Message *message);
+    void addExpectedMessage(MessagingSystem::Message* message, unsigned long time);
+    bool hasExpectedMessages();
+    void notifyEndOfGoldStdFile();
+    PetaverseProxySimulator::GoldStdGen* getGoldStdGen();
+    unsigned long getReceivedTimeOfCurrentExpectedMessage() {
+        return receivedTimeMessages.back();
+    }
 
-    }; // class
+}; // class
 }  // namespace
 
 #endif
