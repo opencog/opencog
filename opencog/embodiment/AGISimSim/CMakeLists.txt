@@ -1,0 +1,5 @@
+SET(CMAKE_BUILD_TYPE Debug)
+add_subdirectory(shared)
+add_subdirectory(server)
+add_subdirectory(proxy)
+add_subdirectory(client)

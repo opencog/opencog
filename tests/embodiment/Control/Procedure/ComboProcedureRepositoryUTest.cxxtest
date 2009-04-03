@@ -1,0 +1,118 @@
+/**
+ * ComboProcedureRepositoryUTest.cxxtest
+ *
+ * Author: Welter Luigi
+ * Copyright(c), 2007
+ */
+
+#include <opencog/atomspace/HandleMap.h>
+
+#include "ComboProcedureRepository.h"
+#include <sstream>
+#include "PetComboVocabulary.h"
+
+using namespace Procedure;
+using namespace PetCombo;
+using namespace std;
+
+#define NUMBER_OF_COMBO_TREES 2
+const char* names[NUMBER_OF_COMBO_TREES] = {"andSeq", "orSeq"};
+const char* bodies[NUMBER_OF_COMBO_TREES] = {"and_seq(#1 #2 and_seq(#3 or_seq(#4 #5 or_seq(#6 #7))))",
+        "or_seq(#1 #2 or_seq(#3 or_seq(#4 #5 or_seq(#6 #7))))"
+                                            };
+
+
+class ComboProcedureRepositoryUTest :  public CxxTest::TestSuite
+{
+
+private:
+    combo_tree trees[NUMBER_OF_COMBO_TREES];
+
+public:
+    ComboProcedureRepositoryUTest() {
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            stringstream ss(bodies[i]);
+            ss >> trees[i];
+            //cout << "trees[" << i << "] = " << trees[i] << endl;
+        }
+    }
+
+    ~ComboProcedureRepositoryUTest() {
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testSetGetContains() {
+        ComboProcedureRepository rep;
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            for (int j = 0; j < NUMBER_OF_COMBO_TREES; j++) {
+                TS_ASSERT((j < i) ? rep.contains(names[j]) : !rep.contains(names[j]));
+            }
+            string name(names[i]);
+            rep.add(ComboProcedure(name, 7, trees[i]));
+            TS_ASSERT(rep.contains(names[i]));
+            for (int j = 0; j <= i; j++) {
+                combo_tree tr = rep.get(names[j]).getComboTree();
+                //cout << "tr = '" << tr << "', trees[" << j << "] = '" << trees[j] << "'" << endl;
+                TS_ASSERT(tr == trees[j]);
+            }
+        }
+    }
+
+    void testGetId() {
+        ComboProcedureRepository rep;
+        TS_ASSERT(!strcmp(rep.getId(), "ComboProcedureRepository"));
+    }
+
+    void testClear() {
+        ComboProcedureRepository rep;
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            string name(names[i]);
+            rep.add(ComboProcedure(name, 7, trees[i]));
+            TS_ASSERT(rep.contains(names[i]));
+        }
+        rep.clear();
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            TS_ASSERT(!rep.contains(names[i]));
+        }
+    }
+
+#define DUMP_FILE_NAME "_combo_repo_temp.dump_"
+
+    void testSaveLoadRepository() {
+        ComboProcedureRepository rep1;
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            string name(names[i]);
+            rep1.add(ComboProcedure(name, 7, trees[i]));
+        }
+        FILE* file = fopen(DUMP_FILE_NAME, "wb");
+        TS_ASSERT(file);
+        rep1.saveRepository(file);
+        fclose(file);
+
+        HandleMap<Atom *> handles;
+        ComboProcedureRepository rep2;
+        file = fopen(DUMP_FILE_NAME, "rb");
+        TS_ASSERT(file);
+        rep2.loadRepository(file, &handles);
+        for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
+            TS_ASSERT(rep2.contains(names[i]));
+            combo_tree tr = rep2.get(names[i]).getComboTree();
+            //cout << "tr = '" << tr << "', trees[" << i << "] = '" << trees[i] << "'" << endl;
+            TS_ASSERT(tr == trees[i]);
+        }
+        // Check if the file reaches the end
+        char c;
+        size_t read = fread(&c, sizeof(char), 1, file);
+        TS_ASSERT(read == 0);
+        TS_ASSERT(feof(file));
+        fclose(file);
+        TS_ASSERT(remove(DUMP_FILE_NAME) == 0);
+
+    }
+
+};

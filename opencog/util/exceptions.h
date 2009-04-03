@@ -56,8 +56,8 @@ protected:
      * Parse error message substituting scape characters like (%s, %d, etc)
      * with their corresponding values.
      */
-    void parseErrorMessage(const char* fmt, va_list ap);
-    void parseErrorMessage(const char * trace, const char* fmt, va_list ap);
+    void parseErrorMessage(const char* fmt, va_list ap, bool logError=true);
+    void parseErrorMessage(const char * trace, const char* fmt, va_list ap, bool logError=true);
 
 public:
 
@@ -191,6 +191,9 @@ public:
 /**
  * Exception to be thrown when an invalid parameter is used within a function or
  * an object initalization.
+ *
+ * This exception will not log an error when throwed, because the error must be
+ * handled inside the code
  */
 class InvalidParamException : public RuntimeException
 {
@@ -250,6 +253,9 @@ public:
 
 /**
  * Exception to be called when the searched item was not found
+ *
+ * This exception will not log an error when throwed, because the error must be
+ * handled inside the code
  */
 class NotFoundException : public StandardException {
 public:

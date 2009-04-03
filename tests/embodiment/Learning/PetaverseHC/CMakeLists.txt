@@ -1,0 +1,21 @@
+INCLUDE_DIRECTORIES(
+    ${OPENCOG_SOURCE_DIR}/opencog
+    ${OPENCOG_SOURCE_DIR}/opencog/comboreduct
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
+    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/RewritingRules
+    ${OPENCOG_SOURCE_DIR}/opencog/learning/hillclimbing/
+)
+LINK_DIRECTORIES(
+    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
+    ${OPENCOG_BINARY_DIR}/opencog/learning/hillclimbing
+    ${OPENCOG_BINARY_DIR}/opencog/util
+    ${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/RewritingRules
+)
+
+ADD_CXXTEST(NeighborhoodGeneratorUTest)
+TARGET_LINK_LIBRARIES(NeighborhoodGeneratorUTest
+    RewritingRules
+    hillclimbing
+    comboreduct
+    util
+)

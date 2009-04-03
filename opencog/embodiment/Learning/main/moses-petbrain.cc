@@ -1,0 +1,82 @@
+/*
+ * opencog/embodiment/Learning/main/moses-petbrain.cc
+ *
+ * Copyright (C) 2007-2008 Predrag Janicic
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include "moses/moses/moses.h"
+#include "moses/moses/optimization.h"
+#include "moses/moses/scoring_functions.h"
+#include <boost/lexical_cast.hpp>
+#include <comboreduct/reduct/reduct.h>
+#include <iostream>
+#include "util/mt19937ar.h"
+#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+
+using namespace moses;
+using namespace reduct;
+using namespace boost;
+using namespace std;
+using namespace ant_combo;
+
+int main(int argc, char** argv)
+{
+    int max_evals, rand_seed;
+    try {
+        if (argc != 3)
+            throw "foo";
+        rand_seed = lexical_cast<int>(argv[1]);
+        max_evals = lexical_cast<int>(argv[2]);
+    } catch (...) {
+        cerr << "usage: " << argv[0] << " seed maxevals" << endl;
+        exit(1);
+    }
+
+    opencog::MT19937RandGen rng(rand_seed);
+
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(), id::action_result_type, 1);
+
+    interactive_score scorer;
+    interactive_bscore bscorer;
+
+    metapopulation<interactive_score, interactive_bscore, iterative_hillclimbing>
+    metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
+            scorer,
+            bscorer,
+            iterative_hillclimbing(rng));
+
+    cout << "build metapop" << endl;
+
+
+
+    operator_set os;
+    combo_tree_ns_set perceptions;
+    combo_tree_ns_set actions;
+
+    actions.insert(combo_tree(instance(id::turn_left)));
+    actions.insert(combo_tree(instance(id::turn_right)));
+    actions.insert(combo_tree(instance(id::move_forward)));
+
+    perceptions.insert(combo_tree(instance(id::is_food_ahead)));
+
+    ordered_programs op;
+
+    //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
+    moses::moses(metapop, max_evals, 0, &os, &perceptions, &actions, op);
+}

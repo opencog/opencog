@@ -1,0 +1,112 @@
+#!/usr/bin/tclsh
+
+# Usage:
+# makeDistribution.tcl [<bin dir> [<tag name>] [<type of distribution = "dev" or "user">]]
+# <bin dir> is the directory where the script will try to find the compiled executables, 
+#           relative to petaverse base dir. Default is "bin", Ie, it will try to find binaries
+#           under {petaverse base dir}/bin
+# 
+# <tag name> is a tag it will use to name the distribution. Default is <svn revision number>.
+# <type of distribution> select the type of config file will be copy. .
+# 
+# This script will copy all the relevant files into {petaverse base dir}/dist/<tag name>
+
+#pdh stands for Project Directory From Here
+set pdh "../../"
+
+set binDir "bin" 
+set tag ""
+
+# typedist = dev | user
+set type_dist "dev"
+
+if {[llength $argv] > 0} {
+    set binDir [lindex $argv 0] 
+    if {[llength $argv] > 1} {
+        set tag [lindex $argv 1]
+    }
+    if {[llength $argv] > 2} {
+        set type_dist [lindex $argv 2]
+    }
+} 
+
+set binDirH $pdh$binDir
+
+set flist [list  \
+$binDirH/opencog/embodiment/Control/MessagingSystem/router \
+$binDirH/opencog/embodiment/Control/MessagingSystem/spawner \
+$binDirH/opencog/embodiment/Control/OperationalPetController/opc \
+$binDirH/opencog/embodiment/Control/Procedure/combo_shell \
+$binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
+$binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
+$binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
+$binDirH/opencog/embodiment/PetaverseProxySimulator/pvpSimulator \
+$binDirH/opencog/embodiment/AGISimSim/server/AGISimSimServer \
+$pdh/opencog/embodiment/AGISimSim/server/simconfig.def \
+./killpb.csh \
+./cleanup.csh \
+./pb.csh \
+./pvpInterface.csh \
+./stdlib.combo \
+./rules_preconditions.combo \
+./rules_preconditions.combo-select \
+./rules_action_schemata.combo \
+$pdh/opencog/embodiment/rules_core.lua \
+$pdh/opencog/embodiment/humanoid_rules.lua \
+$pdh/opencog/embodiment/humanoid_traits_maria.lua \
+$pdh/opencog/embodiment/pet_rules.lua \
+$pdh/opencog/embodiment/pet_traits_bob.lua \
+$pdh/opencog/embodiment/pet_traits_diablo.lua \
+$pdh/opencog/embodiment/pet_traits_maxie.lua \
+$pdh/opencog/embodiment/pet_traits_princess.lua \
+$pdh/opencog/embodiment/pet_traits_sleepy.lua \
+$pdh/opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorld.xsd \
+$pdh/opencog/embodiment/RuleValidation/Processor/validation_core.lua \
+$pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.cfg \
+$pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
+$pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
+./SPCTools.py \
+]
+
+set flistAGI [list \
+$pdh/opencog/embodiment/AGISimSim/server/data/simworld.def \
+$pdh/opencog/embodiment/AGISimSim/server/data/sl_script_case01.def \
+$pdh/opencog/embodiment/AGISimSim/server/data/sl_script.def \
+]
+
+if {$type_dist == "dev"} {
+    set flistconfig [list \
+    $pdh/opencog/embodiment/dev_config/config.cfg \
+    $pdh/tests/embodiment/AutomatedSystemTest/test.cfg \
+    $binDirH/tests/embodiment/AutomatedSystemTest/pbTester \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
+    $pdh/tests/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_2.txt \
+    run_system_test.sh \
+    ]
+} elseif {$type_dist == "user"} {
+    set flistconfig [list \
+    $pdh/opencog/embodiment/config.cfg \
+    ]
+}
+
+if {$tag == ""} {
+    set tag [lindex [split [exec svn update] " ."] end-1]
+}
+set distDir [format "../dist/%s" $tag]
+puts "Putting distribution files into $distDir"
+
+exec mkdir -p $distDir
+exec mkdir -p $distDir/data
+
+foreach file $flist {
+    exec cp -r $file $distDir
+}
+
+foreach file $flistAGI {
+    exec cp -r $file $distDir/data
+}
+
+foreach file $flistconfig {
+    exec cp -r $file $distDir
+}

@@ -48,7 +48,7 @@ Agent::Agent(const unsigned int f) : _frequency(f)
     totalStimulus = 0;
 
     conn = server().getAtomSpace()->removeAtomSignal().connect(
-            std::tr1::bind(&Agent::atomRemoved, this, _1));
+            std::tr1::bind(&Agent::atomRemoved, this, std::tr1::placeholders::_1));
 }
 
 Agent::~Agent()

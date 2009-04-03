@@ -1,0 +1,30 @@
+/**
+ * RouterServerSocketUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Fri Jun 22 15:20:43 BRT 2007
+ */
+
+#include <RouterServerSocket.h>
+
+using namespace MessagingSystem;
+
+class RouterServerSocketUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    RouterServerSocketUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

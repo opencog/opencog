@@ -42,8 +42,16 @@ iodbc       -- Generic SQL Database client access libraries
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev
 libgsl      -- The GNU Scientific Library
-               Debaian/Ubuntu package libgsl0-dev
+               Debian/Ubuntu package libgsl0-dev
 
+xercesc     -- Apache Xerces-C++ XML Parser
+               Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
+
+Lua         -- Lua programming language
+               http://www.lua.org/ (version 5.1) 
+
+Luabind     -- Binding between C++ and Lua
+               http://www.rasterbar.com/products/luabind.html (version 0.8.1 or later)
 
 To build opencog:
 -----------------

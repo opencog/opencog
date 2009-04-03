@@ -113,7 +113,7 @@ public:
 
 	void testRun() {
         logger().debug("Running agent without noise");
-	    cogserver.unitTestServerLoop(20);
+	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
     
         AtomSpace* as = cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
@@ -126,7 +126,7 @@ public:
 	void testNoise() {
 	    logger().debug("Running agent with noise");
 	    agent->setNoiseFlag(true);
-	    cogserver.unitTestServerLoop(20);
+	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
 
         AtomSpace* as = cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
@@ -139,11 +139,11 @@ public:
 	void testNoLinks() {
 	    logger().debug("Running agent excluding links");
 	    agent->setUpdateLinksFlag(false);
-	    cogserver.unitTestServerLoop(10);
+	    for(int i=0; i < 10; i++) cogserver.runLoopStep();
 
 	    logger().debug("Running agent excluding links, with noise");
 	    agent->setNoiseFlag(true);
-	    cogserver.unitTestServerLoop(20);
+	    for(int i=0; i < 20; i++) cogserver.runLoopStep();
 
         AtomSpace* as = cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds

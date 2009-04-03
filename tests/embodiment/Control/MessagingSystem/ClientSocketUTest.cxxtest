@@ -1,0 +1,30 @@
+/**
+ * ClientSocketUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Thu Jun 21 14:46:03 BRT 2007
+ */
+
+#include <ClientSocket.h>
+
+using namespace MessagingSystem;
+
+class ClientSocketUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    ClientSocketUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

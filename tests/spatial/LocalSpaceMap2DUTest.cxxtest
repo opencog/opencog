@@ -1,0 +1,618 @@
+#include <cxxtest/TestSuite.h>
+#include <string>
+#include <sstream>
+#include <iostream>
+
+#include <opencog/atomspace/types.h>
+
+#include "util/mt19937ar.h"
+#include "util/numeric.h"
+
+#include <opencog/spatial/LocalSpaceMap2D.h>
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
+#include <opencog/spatial/TB_ASSERT.h>
+#include <opencog/spatial/StaticEntity.h>
+
+using namespace Spatial;
+using namespace opencog;
+using namespace std;
+
+class MockObject
+{
+public:
+    MockObject( const std::string& name, double centerX, double centerY, double length, double width, double height, double yaw, bool isObstacle ) : name( name ), isObstacle( isObstacle ) {
+        metadata.centerX = centerX;
+        metadata.centerY = centerY;
+        metadata.length = length;
+        metadata.width = width;
+        metadata.height = height;
+        metadata.yaw = yaw;
+    }
+
+    std::string name;
+    ObjectMetaData metadata;
+    bool isObstacle;
+};
+
+
+
+// Attention. If you change the mock objects, probably you will need to setup new
+// targetPoints on testFindNextFreePoint method
+MockObject mockyObjects[] = {
+    MockObject( "id_26325", -94185.0, -213453.0, 500.0, 250.0, 250.0, 4.965551, false ),
+    MockObject( "id_26313", -109466.0, -175968.0, 300.0, 300.0, 300.0, 0.0, true ),
+    MockObject( "id_433", -91281.0, -212702.0, 250.0, 250.0, 1800.0, 1.823958, true ),
+    MockObject( "id_26312", -108964.0, -205111.0, 1000.0, 50.0, 50.0, 0.0, false ),
+    MockObject( "id_26304", -69829.0, -225023.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26308", -81856.0, -210180.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26305", -85675.0, -232839.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26306", -106396.0, -223562.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26315", -95944.0, -209464.0, 250.0, 250.0, 1800.0, 0.0, true ),
+    MockObject( "id_26311", -85317.0, -225213.0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
+//  MockObject( "id_26311", -85317.0, -225213.0, 11785.0, 12025.0, 9000.0, 0.785, true ),
+    MockObject( "id_26301", -140499.0, -189222.0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
+    MockObject( "id_26307", -82048.0, -205749.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26316", -92945.0, -209464.0, 250.0, 250.0, 1800.0, 0.0, true ),
+    MockObject( "id_26310", -81594.0, -218727.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26303", -111829.0, -204420.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26302", -135840.500000, -227315.500000, 15009.0, 10145.0, 12000.0, 0.0, true ),
+    //MockObject( "id_26302", -135840.500000, -227315.500000, 15009.0, 10145.0, 12000.0, 0.785, true ),
+    MockObject( "id_26314", -132150.0, -241469.0, 300.0, 100.0, 100.0, 0.0, false ),
+    MockObject( "id_26309", -81695.0, -214680.0, 529.800000, 4537.600000, 2178.700000, 0.0, true )
+};
+
+unsigned int numberOfObjects = sizeof( mockyObjects ) / sizeof( MockObject );
+
+float xMin = -165000.0;
+float xMax = -37000.0;
+float yMin = -270000.0;
+float yMax = -142000.0;
+int xDim = 512;
+int yDim = 512;
+float petRadius = 279.508;
+
+static opencog::MT19937RandGen rng(0);
+
+class LocalSpaceMap2DUTest : public CxxTest::TestSuite
+{
+public:
+    typedef LocalSpaceMap2D Map;
+    typedef Spatial::Point Point;
+    typedef Spatial::GridPoint GridPoint;
+
+    LocalSpaceMap2D* createMockupMap( void ) {
+        logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2DUTest - start creating map..." );
+        LocalSpaceMap2D* map = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
+        unsigned int i;
+
+        for ( i = 0; i < numberOfObjects; ++i ) {
+            map->addObject( mockyObjects[ i ].name,
+                            mockyObjects[ i ].metadata,
+                            mockyObjects[ i ].isObstacle );
+        } // for
+        logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2DUTest - end creating map..." );
+
+        static bool firstMapSaved = false;
+        if ( !firstMapSaved ) {
+            FILE * fp = fopen( "firstMap.bin", "wb+");
+            assert(fp != 0);
+            map->save(fp);
+            fflush(fp);
+            fclose(fp);
+
+            firstMapSaved = true;
+        } // if
+
+
+        return map;
+    }
+
+    void test_addAndRemoveObject() {
+        Map* foo = createMockupMap( );
+
+        for (unsigned int i = 0;i < numberOfObjects;++i) {
+            TS_ASSERT( foo->containsObject( mockyObjects[i].name ) );
+        }
+        for (unsigned int i = 0;i < numberOfObjects;++i) {
+            foo->removeObject( mockyObjects[i].name );
+        }
+        for (unsigned int i = 0;i < numberOfObjects;++i) {
+            TS_ASSERT(!foo->containsObject( mockyObjects[i].name ) );
+        }
+        for (int x = 0; x < xDim; ++x ) {
+            for (int y = 0; y < yDim; ++y ) {
+                TS_ASSERT( !foo->gridOccupied(x, y) );
+            }
+        }
+
+        delete foo;
+    }
+
+
+    void test_equality() {
+        Map* foo = createMockupMap( );
+        Map* foo2 = createMockupMap( );
+
+        TS_ASSERT(*foo == *foo);
+        // test operator== with the default copy constructor:
+        TS_ASSERT(Map(*foo) == *foo);
+        TS_ASSERT(*foo2 == *foo);
+        // same parameters as foo, but without obstacles added:
+        Map bar(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+        TS_ASSERT(!(*foo == bar));
+        Map bar1(xMin - 1, xMax, xDim, yMin, yMax, yDim, petRadius);
+        Map bar2(xMin, xMax + 1, xDim, yMin, yMax, yDim, petRadius);
+        Map bar3(xMin, xMax, xDim + 1, yMin, yMax, yDim, petRadius);
+        Map bar4(xMin, xMax, xDim, yMin - 1, yMax + 1, yDim, petRadius);
+        Map bar5(xMin, xMax, xDim, yMin, yMax, yDim + 1, petRadius);
+        Map bar6(xMin, xMax, xDim, yMin, yMax, yDim, 0.02);
+        TS_ASSERT(!(bar == bar1));
+        TS_ASSERT(!(bar == bar2));
+        TS_ASSERT(!(bar == bar3));
+        TS_ASSERT(!(bar == bar4));
+        TS_ASSERT(!(bar == bar5));
+        TS_ASSERT(!(bar == bar6));
+        delete foo;
+        delete foo2;
+    }
+
+
+    void test_clone() {
+        Map* foo = createMockupMap( );
+
+        Map *foo2 = foo->clone();
+        TS_ASSERT(*foo == *foo2);
+
+
+        const EntityPtr& e1 = foo2->getEntity( "id_26313" );
+        TS_ASSERT( e1->getBooleanProperty( Entity::OBSTACLE ) );
+        const EntityPtr& e2 = foo2->getEntity( "id_26325" );
+        TS_ASSERT( !e2->getBooleanProperty( Entity::OBSTACLE ) );
+
+        delete foo;
+        delete foo2;
+    }
+
+
+    void test_saveLoad() {
+        Map* foo = createMockupMap( );
+
+        const char * filename = "LSM_save_load.dump";
+        FILE * fp = fopen(filename, "wb+");
+        assert(fp != 0);
+
+        // save:
+        foo->save(fp);
+        fflush(fp);
+        fclose(fp);
+
+        // new map with the same parameters:
+        Map foo2(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+
+        // load:
+        fp = fopen(filename, "r");
+        foo2.load(fp);
+        fclose(fp);
+
+        //TS_ASSERT_EQUALS(foo, foo2);
+        TS_ASSERT(*foo == foo2);
+        delete foo;
+    }
+
+    void test_findEntities() {
+        Map* foo = createMockupMap( );
+
+        Point pt((xMin + xMax) / 2, (yMin + yMax) / 2);
+
+        Spatial::ObjectIDSet all_objects;
+        foo->findAllEntities(opencog::inserter(all_objects));
+        TS_ASSERT(! all_objects.empty());
+
+        Spatial::ObjectIDSet objects;
+        foo->findEntities(foo->snap(pt), 300,
+                          opencog::inserter(objects));
+        TS_ASSERT_EQUALS(all_objects, objects);
+
+        delete foo;
+
+    }
+
+    void test_copyobjects() {
+        Map* foo = createMockupMap( );
+
+        Map bar(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+        bar.copyObjects(*foo);
+
+        const EntityPtr& e1 = bar.getEntity( "id_26313" );
+        TS_ASSERT( e1->getBooleanProperty( Entity::OBSTACLE ) );
+        const EntityPtr& e2 = bar.getEntity( "id_26325" );
+        TS_ASSERT( !e2->getBooleanProperty( Entity::OBSTACLE ) );
+
+        TS_ASSERT_EQUALS(*foo, bar);
+
+        delete foo;
+    }
+
+
+    void test_updateobject() {
+        Map* foo = createMockupMap( );
+        Map* foo2 = createMockupMap( );
+
+        for (unsigned int i = 0;i < numberOfObjects;++i) {
+            try {
+                foo->updateObject(mockyObjects[i].name, mockyObjects[i].metadata, mockyObjects[i].isObstacle );
+            } catch ( opencog::InvalidParamException& ex ) { } // ignore
+            const EntityPtr& e1 = foo->getEntity( mockyObjects[i].name );
+            TS_ASSERT( e1->getBooleanProperty( Entity::OBSTACLE ) == mockyObjects[i].isObstacle );
+            TS_ASSERT( foo->isObstacle(mockyObjects[i].name) ==  mockyObjects[i].isObstacle );
+        }
+
+        TS_ASSERT_EQUALS( *foo, *foo2);
+
+        delete foo2;
+        delete foo;
+    }
+
+    void test_findEnts() {
+        Map* foo = createMockupMap( );
+
+        std::vector<std::string> tmp;
+        foo->findEntities(GridPoint(xDim / 2, yDim / 2), 300 , back_inserter(tmp));
+
+        TS_ASSERT_EQUALS(tmp.size(), (unsigned int)18);
+
+        TS_ASSERT_EQUALS(tmp.front(), "id_26301" );
+
+        tmp.clear();
+        foo->findEntities(GridPoint(xDim / 2, yDim / 2), 25, back_inserter(tmp));
+        TS_ASSERT_EQUALS(tmp.size(), (unsigned int)4);
+
+        TS_ASSERT_EQUALS(tmp.front(), "id_26312");
+        TS_ASSERT_EQUALS(tmp.back(), "id_26325");
+
+        tmp.clear();
+        foo->findEntities(GridPoint(xDim / 2, yDim / 2 ), 5, back_inserter(tmp));
+        TS_ASSERT_EQUALS(tmp.size(), (unsigned int)0);
+
+
+        delete foo;
+    }
+
+
+    void test_allPts() {
+        Map* foo = createMockupMap( );
+
+        std::vector<Point> tmp;
+        foo->allPoints("id_26301", back_inserter(tmp));
+
+        TS_ASSERT_EQUALS(tmp.size(), (unsigned int)2600);
+        TS_ASSERT_EQUALS(tmp.front(), Point(-146875,  -195375) );
+//    std::cout << tmp.front().first << " " << tmp.front().second << std::endl;
+
+        tmp.clear();
+        foo->allPoints("id_26325", back_inserter(tmp));
+
+        TS_ASSERT_EQUALS(tmp.size(), (unsigned int)21);
+        TS_ASSERT_EQUALS(tmp.front(), Point(-94625, -213375) );
+//    std::cout << tmp.front().first << " " << tmp.front().second << std::endl;
+
+        delete foo;
+    }
+
+    void testFindNextFreePoint( ) {
+        LocalSpaceMap2D* map = createMockupMap( );
+
+        Spatial::Point position( -90759.000000, -210804.000000 );
+        // Attention: generate numbers with at least 8 decimal digits to avoid errors on == operation
+        Spatial::Point targetPoints[] = {
+            Spatial::Point( -94599.00000000, -210804.00000000 ),
+            Spatial::Point( -94522.45312500, -211566.89062500 ),
+            Spatial::Point( -94295.87500000, -212299.35937500 ),
+            Spatial::Point( -93928.28906250, -212972.23437500 ),
+            Spatial::Point( -93434.35156250, -213558.64062500 ),
+            Spatial::Point( -90271.35156250, -214612.90625000 ),
+            Spatial::Point( -90174.51562500, -214599.25000000 ),
+            Spatial::Point( -90410.03125000, -214628.10937500 ),
+            Spatial::Point( -90312.76562500, -214617.98437500 ),
+            Spatial::Point( -89886.53906250, -214543.57812500 ),
+            Spatial::Point( -89160.99218750, -214295.70312500 ),
+            Spatial::Point( -88499.15625000, -213908.62500000 ),
+            Spatial::Point( -87927.40625000, -213397.78125000 ),
+            Spatial::Point( -87468.54687500, -212783.53125000 ),
+            Spatial::Point( -87140.86718750, -212090.35937500 ),
+            Spatial::Point( -86957.42968750, -211345.90625000 ),
+            Spatial::Point( -86925.54687500, -210579.84375000 ),
+            Spatial::Point( -87046.49218750, -209822.71875000 ),
+            Spatial::Point( -87315.44531250, -209104.71875000 ),
+            Spatial::Point( -87721.68750000, -208454.46875000 ),
+            Spatial::Point( -88249.00781250, -207897.87500000 ),
+            Spatial::Point( -88876.39843750, -207457.15625000 ),
+            Spatial::Point( -89578.84375000, -207149.84375000 ),
+            Spatial::Point( -90328.33593750, -206988.21875000 ),
+            Spatial::Point( -91095.00000000, -206978.73437500 ),
+            Spatial::Point( -91848.26562500, -207121.73437500 ),
+            Spatial::Point( -92558.10937500, -207411.53125000 ),
+            Spatial::Point( -93196.21875000, -207836.57812500 ),
+            Spatial::Point( -94482.59375000, -209865.68750000 ),
+            Spatial::Point( -94505.28125000, -209960.81250000 ),
+            Spatial::Point( -94525.53906250, -210056.48437500 ),
+            Spatial::Point( -94585.71875000, -210484.93750000 ),
+        };
+
+        float distance = 3840;
+        Spatial::Point direction( 1, 0 );
+        float angle;
+        int pointCounter = 0;
+        for ( angle = -M_PI; angle <= M_PI; angle += 0.2 ) {
+
+            direction.first = std::cos(angle);
+            direction.second = std::sin(angle);
+
+            Spatial::Point nearPoint =
+                map->getNearFreePointAtDistance( position, distance, direction );
+
+            // TODO: Check these values more carefully (by ploting the found values over the mocky map and check them visually,
+            // for example). Also, add more cases (with obstacles at different positions near the target point)
+            // For now, just added a new assertion to ensure it always find a free position at the given distance,
+            // but I'm not sure the position it found is the better one for each case.
+            float deltaX = nearPoint.first - position.first;
+            float deltaY = nearPoint.second - position.second;
+            float found_distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+            //printf( "%0.8f, %0.8f\n   => distance = %f\n", nearPoint.first, nearPoint.second, found_distance );
+            TS_ASSERT_EQUALS( targetPoints[pointCounter], nearPoint );
+            TS_ASSERT_DELTA( distance, found_distance, distance * 0.1); // 10% of tolerance, since the current code stop searching for point candidates if it finds a point with at least 90% of the given distance.
+            ++pointCounter;
+
+        } // for
+
+        delete map;
+    }
+
+    void test_behind_and_nearby() {
+        LocalSpaceMap2D* map = createMockupMap( );
+
+        Point p;
+
+        for (int i = 0;i < 10;++i) {
+            p = Point(rng.randdouble(), rng.randdouble());
+
+            std::string objectId = mockyObjects[rng.randint( )%numberOfObjects].name;
+            Point x = map->behindPoint(p, objectId );
+
+            GridPoint gx = map->snap(x);
+            TS_ASSERT(!map->gridIllegal(map->snap(x)));
+            TS_ASSERT(map->coordinatesAreOnGrid(map->snap(x).first,
+                                                map->snap(x).second));
+
+            Point y = map->nearbyPoint( p, objectId );
+            TS_ASSERT(!map->gridIllegal( map->snap(y) ) );
+            TS_ASSERT( map->coordinatesAreOnGrid( map->snap(y).first,
+                                                  map->snap(y).second));
+
+            //nearby should be closer than behind
+            TS_ASSERT_LESS_THAN(Map::eucDist(p, y), Map::eucDist(p, x));
+
+        } // for
+
+        delete map;
+    }
+
+    void testGetNearestFreePoint() {
+        LocalSpaceMap2D* map = createMockupMap( );
+
+        Spatial::Point pointInsideObstacle( -85317.0, -225213.0 );
+        Spatial::Point freePoint( -164000.0, -36000 );
+        Spatial::Point pointOutsideMap( 0, 0 );
+
+        TS_ASSERT( map->gridIllegal( map->snap( pointInsideObstacle ) ) );
+        TS_ASSERT( !map->gridIllegal( map->snap( freePoint ) ) );
+        TS_ASSERT( map->illegal( pointOutsideMap ) );
+
+        TS_ASSERT( !map->gridIllegal( map->snap( map->getNearestFreePoint( pointInsideObstacle ) ) ) );
+        TS_ASSERT( !map->gridIllegal( map->snap( map->getNearestFreePoint( freePoint ) ) ) );
+        TS_ASSERT( !map->gridIllegal( map->snap( map->getNearestFreePoint( pointOutsideMap ) ) ) );
+
+        delete map;
+    }
+
+    void testRayTrace( void ) {
+        LocalSpaceMap2D* map = createMockupMap( );
+
+        Spatial::GridPoint startPoint( 5, 5 );
+        std::vector<Spatial::GridPoint> points;
+
+        Spatial::GridPoint endPoint( 250, 500 );
+        Spatial::GridPoint collisionPoint;
+
+        bool collided = false;
+        rayTrace( startPoint, endPoint, CollisionDetector( map, collisionPoint, collided ) );
+
+//    std::cout << collided << " " << collisionPoint.first << " " << collisionPoint.second << std::endl;
+        TS_ASSERT_EQUALS( Spatial::GridPoint( 84, 165 ), collisionPoint );
+        TS_ASSERT( collided );
+
+
+        rayTrace( startPoint, endPoint, GridPointCollector( points ) );
+
+        TS_ASSERT_EQUALS( points.size( ), (unsigned int)496 );
+
+        delete map;
+    }
+
+    void testTriangleCollision( ) {
+        Math::Triangle triangles[] = {
+            Math::Triangle( Math::Vector3( -1.0, 0 ), Math::Vector3( 1.0, 0 ), Math::Vector3( 0, 1.0 ) ),
+            Math::Triangle( Math::Vector3( -3.0, -2.0 ), Math::Vector3( 1.0, 5 ), Math::Vector3( -1.0, 7.0 ) )
+        };
+
+        Math::Vector3 points[] = {
+            Math::Vector3( 0, 0 ),
+            Math::Vector3( 0, 0.5 ),
+            Math::Vector3( 0.2, 0.5 ),
+            Math::Vector3( 2.0, 1.5 )
+        };
+
+        bool expectedResponse[] = {
+            false, true,
+            true, false,
+            false, false,
+            false, false
+        };
+
+        unsigned int numberOfTriangles = sizeof(triangles) / sizeof(Math::Triangle);
+        unsigned int numberOfPoints = sizeof(points) / sizeof(Math::Vector3);
+
+        unsigned int i, j, k;
+        k = 0;
+        for ( i = 0; i < numberOfTriangles; ++i ) {
+            for ( j = 0; j < numberOfPoints; ++j ) {
+                TS_ASSERT_EQUALS(  triangles[i].isInside( points[j] ), expectedResponse[k++] );
+            } // for
+        } // for
+
+    }
+
+    void testLineIntersection( ) {
+        Math::LineSegment line1( Math::Vector3( -1, 0 ), Math::Vector3( 1, 0 ) );
+        Math::LineSegment line2( Math::Vector3( 0, -1 ), Math::Vector3( 0, 1 ) );
+        Math::LineSegment line3( Math::Vector3( -1, -1 ), Math::Vector3( -1, 1 ) );
+        Math::LineSegment line4( Math::Vector3( -1, -1 ), Math::Vector3( 1, 1 ) );
+
+        Math::Vector3 intersectionPoint;
+
+        TS_ASSERT( line1.intersects( line2, &intersectionPoint ) )
+        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( 0, 0 ) )
+
+        TS_ASSERT( line1.intersects( line3, &intersectionPoint ) )
+        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( -1, 0 ) )
+
+        TS_ASSERT( line1.intersects( line4, &intersectionPoint ) );
+        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( 0, 0 ) );
+
+    }
+
+    void testDistanceBetweenSegments( ) {
+
+        Math::LineSegment segment1( Math::Vector3( -1, 0 ), Math::Vector3( 1, 0 ) );
+        Math::LineSegment segment2( Math::Vector3( 0, -1 ), Math::Vector3( 0, 1 ) );
+        Math::LineSegment segment3( Math::Vector3( -1, -1 ), Math::Vector3( -1, 1 ) );
+        Math::LineSegment segment4( Math::Vector3( -1, -1 ), Math::Vector3( 1, 1 ) );
+        Math::LineSegment segment5( Math::Vector3( 1, 1 ), Math::Vector3( 1, -1 ) );
+        Math::LineSegment segment6( Math::Vector3( 2, 2 ), Math::Vector3( 7, 4 ) );
+        Math::LineSegment segment7( Math::Vector3( -2, -2 ), Math::Vector3( -7, -4 ) );
+
+        TS_ASSERT_EQUALS( segment1.distanceTo( segment2 ), 0 );
+        TS_ASSERT_EQUALS( segment3.distanceTo( segment5 ), 2 );
+        TS_ASSERT_EQUALS( segment4.distanceTo( segment1 ), 0 );
+        TS_ASSERT_EQUALS( segment4.distanceTo( segment6 ), segment4.distanceTo( segment7 ) );
+    }
+
+    void testDistanceBetweenObstacles( ) {
+
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(), Math::Dimension3(4, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e2( new StaticEntity( 2, "e2", Math::Vector3(), Math::Dimension3(2, 1, 8 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(1, 0, 0), Math::Dimension3(4, 1, 8 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(5, 0, 0), Math::Dimension3(3, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+
+        /*
+        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -99260.804688, -212415.20312 ), Math::Vector3( -99260.804688, -212688.796875) ) );
+        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -99260.804688, -212688.796875 ), Math::Vector3( -98837.195312, -212688.796875 ) ) );
+        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -98837.195312, -212688.796875 ), Math::Vector3( -98837.195312, -212415.203125 ) ) );
+        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -98837.195312, -212415.203125 ), Math::Vector3(  -99260.804688, -212415.20312 ) ) );
+
+        Object object6;
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95306.703125, -213242.468750 ), Math::Vector3( -95672.531250, -212941.671875 ) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95672.531250, -212941.671875 ), Math::Vector3( -95973.296875, -213307.531250 ) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95973.296875, -213307.531250 ), Math::Vector3( -95607.468750, -213608.328125) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95607.468750, -213608.328125 ), Math::Vector3( -95306.703125, -213242.468750 ) ) );
+        */
+        TS_ASSERT_EQUALS( e1->distanceTo(e2), 0.0f );
+        TS_ASSERT_EQUALS( e1->distanceTo(e3), 0.0f );
+        TS_ASSERT_EQUALS( e1->distanceTo(e4), 0.0f );
+    }
+
+    void testPointInsideObstacle( ) {
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(), Math::Dimension3(4, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+
+        /*
+        Object object6;
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95306.703125, -213242.468750 ), Math::Vector3( -95672.531250, -212941.671875 ) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95672.531250, -212941.671875 ), Math::Vector3( -95973.296875, -213307.531250 ) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95973.296875, -213307.531250 ), Math::Vector3( -95607.468750, -213608.328125) ) );
+        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95607.468750, -213608.328125 ), Math::Vector3( -95306.703125, -213242.468750 ) ) );
+
+        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ).toString( ) << std::endl;
+        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ).toString( ) << std::endl;
+        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ).toString( ) << std::endl;
+        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ).toString( ) << std::endl;
+        */
+
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) - Math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) - Math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) - Math::Vector3( -5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) - Math::Vector3( -5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+
+        TS_ASSERT( e1->getBoundingBox( ).isInside( Math::Vector3( 0, 0 ) ) )
+        TS_ASSERT( !e1->getBoundingBox( ).isInside( Math::Vector3( 0, -2.1 ) ) )
+
+        /*
+        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -99260.804688, -212415.20312 ), object6 ) );
+        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -99260.804688, -212688.796875 ), object6 ) );
+        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -98837.195312, -212688.796875 ), object6 ) );
+        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -98837.195312, -212415.203125 ), object6 ) );
+        */
+    }
+
+
+    void testGridOccupancy( void ) {
+        LocalSpaceMap2D* map1 = createMockupMap( );
+        LocalSpaceMap2D* map2 = createMockupMap( );
+        LocalSpaceMap2D* map3 = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
+        unsigned int numberOfObjects = sizeof( mockyObjects ) / sizeof( MockObject );
+        unsigned int i;
+        for ( i = 0; i < numberOfObjects; ++i ) {
+
+            ObjectMetaData metaData2 = mockyObjects[ i ].metadata;
+            metaData2.centerX += 2000;
+            metaData2.centerY += 3000;
+            map2->updateObject( mockyObjects[ i ].name, metaData2, mockyObjects[ i ].isObstacle );
+            map3->addObject( mockyObjects[ i ].name, metaData2, mockyObjects[ i ].isObstacle );
+        } // for
+
+        int row;
+        int col;
+        std::stringstream mapString1;
+        std::stringstream mapString2;
+        std::stringstream mapString3;
+
+        for ( row = 0; row < yDim; ++row ) {
+            for ( col = 0; col < xDim; ++col ) {
+                mapString1 << map1->gridIllegal( col, row );
+                mapString2 << map2->gridIllegal( col, row );
+                mapString3 << map3->gridIllegal( col, row );
+            } // for
+        } // for
+
+        TS_ASSERT_EQUALS( mapString2.str(), mapString3.str() )
+        TS_ASSERT_DIFFERS( mapString1.str(), mapString2.str() )
+
+        std::vector<std::string> entities2;
+        std::vector<std::string> entities3;
+        map2->findAllEntities( back_inserter(entities2));
+        map3->findAllEntities( back_inserter(entities3));
+
+        for ( i = 0; i < entities2.size( ); ++i ) {
+            std::vector<Spatial::Point> points2;
+            std::vector<Spatial::Point> points3;
+
+            map2->allPoints( entities2[i], back_inserter( points2 ) );
+            map3->allPoints( entities2[i], back_inserter( points3 ) );
+            TS_ASSERT_EQUALS( points2, points3 )
+        } // for
+
+        delete map1;
+        delete map2;
+        delete map3;
+    }
+
+}; // class

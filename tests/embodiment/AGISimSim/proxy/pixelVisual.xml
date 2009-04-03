@@ -1,0 +1,17 @@
+<sensation>
+  <visual>
+    <pixel>
+      <color>
+        <r> 80 </r>
+        <g> 164 </g>
+        <b> 188 </b>
+      </color>
+      <fovpos>
+        <x> 20 </x>
+        <y> 0 </y>
+        <dist> 9066 </dist>
+      </fovpos>
+    </pixel>
+  </visual>
+</sensation>
+

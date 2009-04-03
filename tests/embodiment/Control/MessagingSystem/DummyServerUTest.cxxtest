@@ -1,0 +1,30 @@
+/**
+ * DummyServerUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Sun Jun 24 16:34:54 BRT 2007
+ */
+
+#include <DummyServer.h>
+
+using namespace MessagingSystem;
+
+class DummyServerUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    DummyServerUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

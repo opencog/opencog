@@ -55,7 +55,7 @@ void SystemActivityTable::init(CogServer *cogServer)
     logger().debug("[SystemActivityTable] init");
     this->cogServer = cogServer;
     conn = cogServer->getAtomSpace()->removeAtomSignal().connect(
-            std::tr1::bind(&SystemActivityTable::atomRemoved, this, _1));
+            std::tr1::bind(&SystemActivityTable::atomRemoved, this, std::tr1::placeholders::_1));
 }
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)

@@ -400,11 +400,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // differently from invalid elements found in its begining.
 
     while (set != NULL &&
-           (!noName && ClassServer::isLink(set->getAtom()->getType()) ||
-            noName && ClassServer::isNode(set->getAtom()->getType()) &&
-              ((Node*) set->getAtom())->getName() != "" ||
-            !noName && 
-              strcmp(((Node*) set->getAtom())->getName().c_str(), name))) {
+           ((!noName && ClassServer::isLink(set->getAtom()->getType())) ||
+            (noName && ClassServer::isNode(set->getAtom()->getType()) &&
+              ((Node*) set->getAtom())->getName() != "") ||
+            (!noName && 
+              strcmp(((Node*) set->getAtom())->getName().c_str(), name)))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -416,11 +416,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     HandleEntry* head = set;
     while (set->next != NULL) {
         Atom *itAtom = set->next->getAtom();
-        if (!noName && ClassServer::isLink(itAtom->getType()) ||
-            noName && ClassServer::isNode(itAtom->getType()) &&
-              ((Node*) itAtom)->getName() != "" ||
-            !noName && 
-              strcmp(((Node*) itAtom)->getName().c_str(), name)) {
+        if ((!noName && ClassServer::isLink(itAtom->getType())) ||
+            (noName && ClassServer::isNode(itAtom->getType()) &&
+              ((Node*) itAtom)->getName() != "") ||
+            (!noName && 
+              strcmp(((Node*) itAtom)->getName().c_str(), name))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -682,11 +682,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
-             !noName && ClassServer::isLink(itAtom->getType()) ||
-             noName && ClassServer::isNode(itAtom->getType()) &&
-               ((Node*) itAtom)->getName() != "" ||
-             !noName &&
-               strcmp(name, ((Node*) itAtom)->getName().c_str())) {
+             (!noName && ClassServer::isLink(itAtom->getType())) ||
+             (noName && ClassServer::isNode(itAtom->getType()) &&
+               ((Node*) itAtom)->getName() != "") ||
+             (!noName &&
+               strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -706,11 +706,11 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
-             !noName && ClassServer::isLink(itAtom->getType()) ||
-             noName && ClassServer::isNode(itAtom->getType()) &&
-               ((Node*) itAtom)->getName() != "" ||
-             !noName &&
-               strcmp(name, ((Node*) itAtom)->getName().c_str())) {
+             (!noName && ClassServer::isLink(itAtom->getType())) ||
+             (noName && ClassServer::isNode(itAtom->getType()) &&
+               ((Node*) itAtom)->getName() != "") ||
+             (!noName &&
+               strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;

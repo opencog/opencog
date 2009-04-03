@@ -43,16 +43,17 @@ protected:
             "SERVER_PORT",           "17001",
             "LOG_FILE",              "opencog_server.log",
             "LOG_LEVEL",             "info",
+            "BACK_TRACE_LOG_LEVEL",  "warn",
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
-            "IDLE_CYCLES_PER_TICK",  "3",
+            "EXTERNAL_TICK_MODE",    "false",
             "STARTING_STI_FUNDS",    "10000",
             "STARTING_LTI_FUNDS",    "10000",
             "STI_FUNDS_BUFFER",      "10000",
             "LTI_FUNDS_BUFFER",      "10000",
             "MIN_STI",               "-400",
             "PROMPT",                "opencog> ",
-            "MODULES",                "libbuiltinreqs.so",
+            "MODULES",               "libbuiltinreqs.so",
             "",                      ""
         };
         return defaultConfig;

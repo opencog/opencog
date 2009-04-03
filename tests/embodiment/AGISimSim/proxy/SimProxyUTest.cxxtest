@@ -1,0 +1,40 @@
+/**
+ * SimProxyUTest.cxxtest
+ *
+ * Author: Welter
+ */
+
+#include "SimProxy.h"
+#include "utils.h"
+
+#define NUM_SENSATION_FILES 7
+const char* sensationFiles[] = {"audioData.xml", "pixelVisual.xml", "selfData.xml", "smellData.xml", "tasteData.xml", "objectVisual.xml", "mapInfo.xml"};
+
+class SimProxyUTest :  public CxxTest::TestSuite
+{
+
+public:
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+
+    void testGetNMXml() {
+        SimProxy* proxy1 = new SimProxy("", 0, new DefaultPerceptionAndStatusHandler());
+        SimProxy* proxy2 = new SimProxy("", 0, new DefaultPerceptionAndStatusHandler());
+
+        for (int i = 0; i < NUM_SENSATION_FILES; i++) {
+            std::string agiSimMessage;
+            std::string fullXmlPath = XML_FILES_PATH "/";
+            fullXmlPath += sensationFiles[i];
+            if (LoadTextFile(fullXmlPath, agiSimMessage))
+                std::cout << "agiSimMessage:" << std::endl << agiSimMessage << std::endl;
+
+            proxy1->processAgiSimMessage(agiSimMessage, false);
+            proxy2->processAgiSimMessage(agiSimMessage, false);
+        }
+        delete proxy1;
+        delete proxy2;
+    }
+};

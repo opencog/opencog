@@ -1,0 +1,30 @@
+/**
+ * SchemaManipulatorUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Mon Jul 16 17:18:52 BRT 2007
+ */
+
+#include <SchemaManipulator.h>
+
+using namespace OperationalPetController;
+
+class SchemaManipulatorUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    SchemaManipulatorUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

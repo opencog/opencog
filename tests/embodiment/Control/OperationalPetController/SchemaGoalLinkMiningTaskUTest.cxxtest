@@ -1,0 +1,30 @@
+/**
+ * SchemaGoalLinkMiningTaskUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Fri Jul 20 11:16:29 BRT 2007
+ */
+
+#include <SchemaGoalLinkMiningTask.h>
+
+using namespace OperationalPetController;
+
+class SchemaGoalLinkMiningTaskUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    SchemaGoalLinkMiningTaskUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class

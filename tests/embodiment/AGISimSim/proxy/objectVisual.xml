@@ -1,0 +1,13 @@
+<sensation>
+  <objectvisual>
+    <object>
+      <fovpos>
+        <x> 600 </x>
+        <y> 300 </y>
+        <dist> 2589 </dist>
+      </fovpos>
+      <name> HeavyBall1/null </name>
+      <brightness> 0 </brightness>
+    </object>
+  </objectvisual>
+</sensation>

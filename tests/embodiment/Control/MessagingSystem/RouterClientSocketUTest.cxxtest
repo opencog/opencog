@@ -1,0 +1,30 @@
+/**
+ * RouterClientSocketUTest
+ *
+ * $Header$
+ *
+ * Author: Andre Senna
+ * Creation: Sat Jun 23 12:23:21 BRT 2007
+ */
+
+#include <RouterClientSocket.h>
+
+using namespace MessagingSystem;
+
+class RouterClientSocketUTest : public CxxTest::TestSuite
+{
+
+private:
+
+public:
+
+    RouterClientSocketUTest() {
+
+    }
+
+    void setUp() {
+    }
+
+    void tearDown() {
+    }
+}; // class
