@@ -51,12 +51,10 @@ ADD_LIBRARY (atomspace SHARED
 	VersionHandle.cc
 	md5.c
 	types.cc
-        SpaceServer.cc
 )
 
 TARGET_LINK_LIBRARIES(atomspace
 	util
-        SpaceMap
 	${GSL_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )

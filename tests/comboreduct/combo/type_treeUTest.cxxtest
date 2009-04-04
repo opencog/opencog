@@ -454,33 +454,6 @@ public:
         TS_ASSERT_EQUALS(a, -2);
     }
 
-    void test_infer_arity2() {
-        stringstream ss("and_seq(move_forward boolean_while(is_food_ahead and_seq(boolean_while(is_food_ahead and_seq) turn_left)))");
-        combo_tree tr;
-        ss >> tr;
-        arity_t a = infer_arity(tr);
-
-        TS_ASSERT_EQUALS(a, -1);
-    }
-
-    void test_infer_arity3() {
-        stringstream ss("and_seq(move_forward boolean_while(is_food_ahead and_seq) turn_left turn_right boolean_while(is_food_ahead and_seq(boolean_while(is_food_ahead and_seq) move_forward)))");
-        combo_tree tr;
-        ss >> tr;
-        arity_t a = infer_arity(tr);
-
-        TS_ASSERT_EQUALS(a, -1);
-    }
-
-    void test_infer_arity4() {
-        stringstream ss("and_seq(move_forward turn_left turn_right boolean_while(is_food_ahead and_seq) boolean_while(is_food_ahead and_seq(boolean_while(is_food_ahead and_seq) move_forward)))");
-        combo_tree tr;
-        ss >> tr;
-        arity_t a = infer_arity(tr);
-
-        TS_ASSERT_EQUALS(a, -1);
-    }
-
     void test_explicit_arity1() {
         stringstream ss("+(1 #5 #1)");
         combo_tree tr;

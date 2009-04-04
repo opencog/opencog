@@ -39,17 +39,15 @@
 #include <string>
 #include <stdlib.h>  /* for malloc, free */
 
-namespace opencog
-{
+namespace opencog {
 
-class PorterStemmer
-{
+class PorterStemmer {
 
 private:
-    struct stemmer {
+    struct stemmer{
         char *b;
         int k;
-        int j;
+        int j; 
     };
 
     /* cons(z, i) is TRUE <=> b[i] is a consonant. ('b' means 'z->b', but here
@@ -151,9 +149,9 @@ private:
     static void step5(struct stemmer * z);
 
 public:
-    static std::string getStem( std::string word );
+    static std::string getStem( std::string word ); 
 
 };  // class
 }   // namespace
 
-#endif /* OPENCOG_PORTERSTEMMER_H_ */
+#endif /* OPENCOG_PORTERSTEMMER_H_ */ 

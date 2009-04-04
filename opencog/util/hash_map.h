@@ -32,7 +32,7 @@
 
 namespace opencog {
     using __gnu_cxx::hash_map;
-    //    using __gnu_cxx::hash;
+    using __gnu_cxx::hash;
 }
 
 namespace __gnu_cxx

@@ -829,7 +829,7 @@ void TemporalTable::updateIndexTable(int numEntries)
     indexTableCount = i;
     //printf("indexTableCount = i => %d\n", indexTableCount);
     if (i != numEntries) {
-        logger().warn("WARN: Inconsistent sizes (sortedTemporalList => %d, numEntries => %d)\n", i, numEntries);
+        logger().warn("WARNING: Inconsistent sizes (sortedTemporalList => %d, numEntries => %d)\n", i, numEntries);
     }
     pendingUpdateCount = 0;
 //    logger().debug("TemporalTable::updateIndex - end.");

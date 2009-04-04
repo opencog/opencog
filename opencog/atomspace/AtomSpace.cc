@@ -54,7 +54,7 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpace::AtomSpace(void) : spaceServer(new SpaceServer(*this))
+AtomSpace::AtomSpace(void)
 {
     _handle_iterator = NULL;
     emptyName = "";
@@ -65,23 +65,17 @@ AtomSpace::AtomSpace(void) : spaceServer(new SpaceServer(*this))
     attentionalFocusBoundary = 1;
 
     //connect signals
-    addedAtomConnection = addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, std::tr1::placeholders::_1));
-    removedAtomConnection = removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, std::tr1::placeholders::_1));
-
+    atomTable.addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, _1));
+    atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, _1));
 }
 
 AtomSpace::~AtomSpace()
 {
-    //disconnect signals
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
-
     // Check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
         delete (_handle_iterator);
     }
     //delete (_handle_entry);
-    delete (spaceServer);
 }
 
 // ====================================================================
@@ -125,13 +119,7 @@ void AtomSpace::atomRemoved(Handle h)
         cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
         Handle timedAtom = getOutgoing(h, 1);
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
-        // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-        if( getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
-           spaceServer->removeMap(h);
-        } // if
-    } else if ( inheritsType(type, SL_OBJECT_NODE) ) {
-        spaceServer->removeObject(getName(h));
-    } // else if
+    }
 }
 
 // ====================================================================
@@ -149,14 +137,6 @@ const TimeServer& AtomSpace::getTimeServer() const
     //fflush(stdout);
 
     return timeServer;
-}
-
-SpaceServer& AtomSpace::getSpaceServer() const
-{
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
-
-    return *spaceServer;
 }
 
 
@@ -263,111 +243,6 @@ Handle AtomSpace::getAtTimeLink(const HandleTemporalPair& htp) const
     }
     return result;
 }
-
-Handle AtomSpace::getSpaceMapNode() 
-{
-    Handle result = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-    if (result == Handle::UNDEFINED) 
-    {
-        result = addNode(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-        setLTI(result, 1);
-    } 
-    else 
-    {
-        if (getLTI(result) < 1) 
-        {
-            setLTI(result, 1);
-        }
-    }
-    return result;
-}
-
-bool AtomSpace::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle) {
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    bool result =  spaceServer->add( keepPreviousMap, spaceMapAtTimeLink, getName(objectNode),
-                        objX, objY, objLength, objWidth, objHeight, objYaw, isObstacle);
-
-    return result;
-}
-
-Handle AtomSpace::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap){
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    spaceServer->add(spaceMapAtTimeLink, spaceMap);
-
-    return spaceMapAtTimeLink;
-}
-
-Handle AtomSpace::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp) {
-
-    logger().log(opencog::Logger::DEBUG, "%s(%s)\n", __FUNCTION__, getName(objectNode).c_str());
-
-    Handle spaceMapNode = getSpaceMapNode();
-    Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
-    spaceServer->remove(keepPreviousMap, spaceMapAtTimeLink, getName(objectNode));
-
-    return spaceMapAtTimeLink;
-}
-
-void AtomSpace::cleanupSpaceServer(){
-
-    // sanity checks
-    if (spaceServer->getSpaceMapsSize() < 1) {
-        logger().log(opencog::Logger::DEBUG,
-                       "AtomSpace - No need to clean SpaceServer. It has no space map yet.");
-        return;
-    }
-
-    // sanity tests passed, cleaning SpaceServer
-    Handle spaceMapNode = getSpaceMapNode();
-
-    // get all HandleTemporalPairs associated with the SpaceMap concept node.
-    std::vector<HandleTemporalPair> pairs;
-    getTimeInfo(back_inserter(pairs), spaceMapNode);
-
-    int j = 0;
-    // remember to leave at least one map in SpaceServer, the newer one.
-    for(unsigned int i = 0; i < pairs.size() - 1; i++){
-
-        // get SpaceMap handles
-        Handle mapHandle = getAtTimeLink(pairs[i]);
-
-        // mapHandle not among the ones that should be preserved
-        if (!spaceServer->containsMap(mapHandle) || !spaceServer->isMapPersistent(mapHandle)){
-            j++;
-            logger().log(opencog::Logger::DEBUG, "AtomSpace - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
-            // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
-            removeAtom(mapHandle, true);
-        }
-    }
-    logger().log(opencog::Logger::DEBUG, "AtomSpace - Number of deleted maps: %d.", j);
-}
-
-void AtomSpace::mapRemoved(Handle mapId)
-{
-    // Remove this atom from AtomSpace since its map does not exist anymore 
-    removeAtom(mapId);
-}
-
-void AtomSpace::mapPersisted(Handle mapId)
-{
-    // set LTI to a value that prevents the corresponding atom to be removed
-    // from AtomSpace
-    setLTI(mapId, 1);
-}
-
-std::string AtomSpace::getMapIdString(Handle mapHandle)
-{
-    // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
-    // So, just get the name of the TimeNode as its string representation
-    return getName(getOutgoing(mapHandle, 0));
-}    
 
 const TruthValue& AtomSpace::getDefaultTV()
 {

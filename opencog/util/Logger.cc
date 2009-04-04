@@ -25,7 +25,6 @@
  */
 
 #include "Logger.h"
-#include "Config.h"
 
 #include <execinfo.h>
 #include <stdlib.h>
@@ -57,7 +56,6 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 {
     this->fileName.assign(fileName);
     this->currentLevel = level;
-    this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]); 
     this->timestampEnabled = timestampEnabled;
     this->printToStdout = false;
 
@@ -65,19 +63,6 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
     this->f = NULL;
 
     pthread_mutex_init(&lock, NULL);
-}
-
-Logger::Logger(const Logger& log) {
-    this->fileName.assign(log.fileName);
-    this->currentLevel = log.currentLevel;
-    this->backTraceLevel = log.backTraceLevel;
-    this->timestampEnabled = log.timestampEnabled;
-    this->printToStdout = log.printToStdout;
-
-    this->logEnabled = log.logEnabled;
-    this->f = log.f;
-
-    this->lock = log.lock; //Nil: I'm not sure about that    
 }
 
 // ***********************************************/
@@ -91,16 +76,6 @@ void Logger::setLevel(Logger::Level newLevel)
 Logger::Level Logger::getLevel() const
 {
     return currentLevel;
-}
-
-void Logger::setBackTraceLevel(Logger::Level newLevel)
-{
-    backTraceLevel = newLevel;
-}
-
-Logger::Level Logger::getBackTraceLevel() const
-{
-    return backTraceLevel;
 }
 
 void Logger::setFilename(const std::string& s)
@@ -193,7 +168,8 @@ void Logger::log(Logger::Level level, const std::string &txt)
         if (printToStdout) fprintf(stdout, "[%s] %s\n", getLevelString(level), txt.c_str());
         fflush(f);
 
-        if (level <= backTraceLevel)
+        // Print a backtrace for warnings and errors.
+        if (level <= WARN)
         {
             prt_backtrace(f);
         }

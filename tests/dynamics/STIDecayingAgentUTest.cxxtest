@@ -69,7 +69,7 @@ public:
         TS_ASSERT(TLB::getAtom(h)->getAttentionValue().getSTI() == (min_sti + 5));
 
         cogserver.createAgent(STIDecayingAgent::info().id, true);
-        for(int i=0; i < 5; i++) cogserver.runLoopStep();
+        cogserver.unitTestServerLoop(5);
 
         // we're on the verge of removing the node; check if its sti equals
         // min_sti
@@ -81,7 +81,7 @@ public:
         // save name and type first...
         std::string name = node->getName();
         Type t = node->getType();
-        cogserver.runLoopStep();
+        cogserver.unitTestServerLoop(1);
 
         h = as->getHandle(t, name);
         TS_ASSERT(TLB::isInvalidHandle(h));

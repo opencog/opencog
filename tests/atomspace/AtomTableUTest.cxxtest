@@ -455,17 +455,17 @@ public:
 
         // connect signals
         boost::signals::connection add1 =
-            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, std::tr1::placeholders::_1));
+            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded1, this, _1));
         boost::signals::connection add2 =
-            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, std::tr1::placeholders::_1));
+            atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded2, this, _1));
         boost::signals::connection merge1 =
-            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged1, this, std::tr1::placeholders::_1));
+            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged1, this, _1));
         boost::signals::connection merge2 =
-            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged2, this, std::tr1::placeholders::_1));
+            atomTable.mergeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomMerged2, this, _1));
         boost::signals::connection remove1 =
-            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, std::tr1::placeholders::_1));
+            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved1, this, _1));
         boost::signals::connection remove2 =
-            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, std::tr1::placeholders::_1));
+            atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved2, this, _1));
 
         /* add and remove a simple node */
         __testSignalsCounter = 0;
@@ -544,8 +544,8 @@ public:
         AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
 
         // connect signals and reset counter
-        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded3, this, std::tr1::placeholders::_1));
-        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved3, this, std::tr1::placeholders::_1));
+        atomTable.addAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomAdded3, this, _1));
+        atomTable.removeAtomSignal().connect(std::tr1::bind(&AtomTableUTest::atomRemoved3, this, _1));
         __testSignalsCounter = 0;
 
         /* add a simple tree of links & nodes */

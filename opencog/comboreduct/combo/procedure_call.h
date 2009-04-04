@@ -1,26 +1,3 @@
-/*
- * opencog/comboreduct/combo/procedure_call.h
- *
- * Copyright (C) 2002-2008 Novamente LLC
- * All Rights Reserved
- *
- * Written by Nil Geisweiller
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License v3 as
- * published by the Free Software Foundation and including the exceptions
- * at http://opencog.org/wiki/Licenses
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
 #ifndef _COMBO_PROCEDURE_CALL_H
 #define _COMBO_PROCEDURE_CALL_H
 
@@ -162,17 +139,14 @@ combo::procedure_call load_procedure_call(std::istream& in,
     }
 
     string name = str.substr(0, lparen);
-    int arity;
+    unsigned int arity;
     string arity_str = str.substr(lparen + 1, rparen - lparen - 1);
     try {
-        arity = boost::lexical_cast<int>(arity_str);
+        arity = boost::lexical_cast<unsigned int>(arity_str);
     } catch (...) {
         opencog::logger().log(opencog::Logger::ERROR, 
-                              "procedure_call - Lexical error: '%s'"
-                              " supposed to be an arity in procedure"
-                              " definition '%s' does not correspond to"
-                              " a number",
-                              arity_str.c_str(), str.c_str());
+                        "procedure_call - Lexical error: '%s' supposed to be an arity in procedure definition '%s' does not correspond to a number",
+                        arity_str.c_str(), str.c_str());
         return NULL;
     }
 
@@ -188,11 +162,8 @@ combo::procedure_call load_procedure_call(std::istream& in,
                 stringstream arg_ss;
                 arg_ss << arg;
                 opencog::logger().log(opencog::Logger::ERROR, 
-                                      "procedure_call - Semantic error:"
-                                      " the procedure '%s' has arity '%d'"
-                                      " but contains variable argument '%s'"
-                                      " out of range",
-                                      str.c_str(), arity, arg_ss.str().c_str());
+                                "procedure_call - Semantic error: the procedure '%s' has arity '%d' but contains variable argument '%s' out of range",
+                                str.c_str(), arity, arg_ss.str().c_str());
                 return NULL;
             }
         }

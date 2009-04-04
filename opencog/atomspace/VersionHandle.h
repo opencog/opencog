@@ -40,14 +40,12 @@ struct VersionHandle {
     // Default constructor, gets a NULL_VERSION_HANDLE.
     VersionHandle();
     VersionHandle(IndicatorType ind, Handle subs);
-    VersionHandle( const VersionHandle& other );
 
     // Needed for comparison within vtree
     bool operator<(const VersionHandle &other) const;
     bool operator>(const VersionHandle &other) const;
     bool operator==(const VersionHandle &other) const;
     bool operator!=(const VersionHandle &other) const;
-    VersionHandle& operator=( const VersionHandle& other );
 
     static const char* indicatorToStr(IndicatorType) throw (InvalidParamException);
     static IndicatorType strToIndicator(const char*) throw (InvalidParamException);

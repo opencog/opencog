@@ -48,13 +48,10 @@ ENDIF (WIN32)
 
 FIND_PACKAGE(CSockets REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(XercesC REQUIRED)
-FIND_PACKAGE(Lua51 REQUIRED)
-FIND_PACKAGE(Luabind REQUIRED)
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time thread REQUIRED)
+FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals REQUIRED)
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
@@ -276,5 +273,5 @@ ELSE (DOXYGEN_FOUND)
 ENDIF (DOXYGEN_FOUND)
 
 #compiling mode, Debug or Release
-SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)

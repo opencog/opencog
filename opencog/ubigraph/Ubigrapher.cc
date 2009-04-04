@@ -72,9 +72,9 @@ void Ubigrapher::watchSignals()
 {
     if (!listening) {
         c_add = space->addAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleAddSignal, this, std::tr1::placeholders::_1));
+                std::tr1::bind(&Ubigrapher::handleAddSignal, this, _1));
         c_remove = space->removeAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this, std::tr1::placeholders::_1));
+                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this, _1));
         assert(c_add.connected() && c_remove.connected());
         listening = true;
     } else {

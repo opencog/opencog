@@ -1954,10 +1954,10 @@ int BITNode::tlog(int debugLevel, const char *format, ...) const
         va_start(ap, format);
         int answer = vsprintf(buf, format, ap);
         
-        printf("%s", buf);
+        printf(buf);
         
         if (test::logfile)
-            fprintf(test::logfile, "%s", buf);
+            fprintf(test::logfile, buf);
         
         fflush(stdout);
         va_end(ap);

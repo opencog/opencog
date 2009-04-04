@@ -36,10 +36,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-
 using namespace std;
 using namespace opencog;
 
@@ -325,7 +321,6 @@ public:
 
     void testSavingLoading()
     {
-        
         AtomSpace *atomSpace1 = new AtomSpace();
         runSaving(*atomSpace1);
         delete atomSpace1;
@@ -344,42 +339,6 @@ public:
 
         if (!CxxTest::TestTracker::tracker().testFailed())
             std::remove(DUMP_FILENAME);
-
-        // embodiment atomtable extensions specific tests
-        SavingLoading savingLoading;
-        opencog::atom_types_init::init();
-
-        AtomSpace *atomSpace5 = new AtomSpace();      
-        
-        HandleSeq execLinkOutgoing;
-        execLinkOutgoing.push_back( atomSpace5->addNode( GROUNDED_SCHEMA_NODE, "bark") );
-        execLinkOutgoing.push_back( atomSpace5->addLink( LIST_LINK, HandleSeq() ) );
-        
-        HandleSeq externalLinkOutgoing;
-        externalLinkOutgoing.push_back( atomSpace5->addLink( EXECUTION_LINK, execLinkOutgoing ) );
-
-        atomSpace5->addLink( LIST_LINK, externalLinkOutgoing );
-
-        HandleSeq frequeLink;
-        frequeLink.push_back( atomSpace5->addNode( CONCEPT_NODE, "currentActionRepetition" ) );
-        frequeLink.push_back( atomSpace5->addNode( NUMBER_NODE, "0" ) );
-        
-
-        Handle oldLink = atomSpace5->addLink( FREQUENCY_LINK, frequeLink );
-        TS_ASSERT( atomSpace5->removeAtom(oldLink) )
-
-        atomSpace5->addLink( FREQUENCY_LINK, frequeLink );
-
-        savingLoading.save( DUMP_FILENAME, *atomSpace5 );
-        delete atomSpace5;
-
-        AtomSpace* atomSpace6 = new AtomSpace( );
-        savingLoading.load( DUMP_FILENAME, *atomSpace6 );
-        delete atomSpace6;
-        
-        if (!CxxTest::TestTracker::tracker().testFailed())
-            std::remove(DUMP_FILENAME);
-
     }
 
 };

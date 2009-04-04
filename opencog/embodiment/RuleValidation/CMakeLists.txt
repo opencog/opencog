@@ -1,3 +1,0 @@
-ADD_SUBDIRECTORY (VirtualWorldData)
-ADD_SUBDIRECTORY (Processor)
-

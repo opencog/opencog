@@ -28,7 +28,7 @@
 namespace opencog
 {
 using __gnu_cxx::hash_set;
-//using __gnu_cxx::hash;
+using __gnu_cxx::hash;
 }
 
 #endif // _OPENCOG_HASH_SET_H

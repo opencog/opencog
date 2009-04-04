@@ -40,7 +40,6 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/TimeServer.h>
-#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
@@ -53,7 +52,7 @@ namespace opencog
 
 typedef std::vector<HandleSet*> HandleSetSeq;
 
-class AtomSpace : public SpaceServerContainer
+class AtomSpace
 {
     friend class SavingLoading;
 
@@ -66,6 +65,8 @@ class AtomSpace : public SpaceServerContainer
 public:
     // USED TO SEEK MEMORY LEAK
     //std::set<std::string> uniqueTimestamp;
+
+    static const char* SPACE_MAP_NODE_NAME;
 
     AtomSpace(void);
     ~AtomSpace();
@@ -92,11 +93,6 @@ public:
      * @return a const reference to the TimeServer object of this AtomSpace
      */
     const TimeServer& getTimeServer() const;
-
-    /**
-     * @return a reference to the SpaceServer object of this AtomSpace
-     */
-    SpaceServer& getSpaceServer() const;
 
     /**
      * Return the number of atoms contained in the space.
@@ -269,78 +265,6 @@ public:
     {
         return timeServer.get(outIt, h, t, criterion);
     }
-
-    /**
-     * Adds space information about an object represented by a Node.
-     * @param objectNode the Handle of the node that represents the object to be associated to the space info
-     * @param timestamp The timestamp to be associated to this operation.
-     * @param the remaining arguments are related to object's spatial information
-     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
-     */
-    bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY,
-                              double objLength, double objWidth, double objHeight,
-                              double objYaw, bool isObstacle = true);
-    /**
-     * Add a whole space map into the SpaceServer.
-     * NOTE: This is just used when a whole space map is received
-     * from a remote SpaceServer (in LearningServer, for instance).
-     */
-    Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
-
-    /**
-     * Removes space information about an object from the latest map (object is no longer at map's range)
-     * @param objectNode the Handle of the node that represents the object to be removed from space map
-     * @param timestamp The timestamp to be associated to this operation.
-     * @return handle of the atom that represents the SpaceMap (at the given timestamp) where the object was removed
-     */
-    Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
-
-     /**
-     * Gets all SpaceMap handles that would be needed inside the given interval.
-     * For getting the SpaceMap of each handle returned,
-     * use the spaceServer.getMap(Handle spaceMapHandle) method.
-     * @param out  the output iterator where the resulting handles will be added.
-     * @param startMoment the start of the time interval for searching the maps
-     * @param endMoment the end of the time interval for searching the maps
-     *
-     * Example of usage:
-     *     HandleSeq result;
-     *     spaceServer.getMapHandles(back_inserter(result),start,end);
-     *     foreach(Handle h, result) {
-     *         const SpaceMap& map = spaceServer().getMap(h);
-     *         ...
-     *     }
-     */
-
-    template<typename OutputIterator>
-    OutputIterator getMapHandles(   OutputIterator outIt,
-                                    unsigned long startMoment, unsigned long endMoment) const {
-        Temporal t(startMoment, endMoment);
-        vector<HandleTemporalPair> pairs;
-        Handle spaceMapNode = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-	    if (spaceMapNode != Handle::UNDEFINED) {
-            // Gets the first map before the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
-            // Gets all maps inside the given interval, if any
-            getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::STARTS_WITHIN);
-            for(unsigned int i = 0; i < pairs.size(); i++) {
-                HandleTemporalPair pair = pairs[i];
-                *(outIt++) = getAtTimeLink(pair);
-            }
-        }
-        return outIt;
-    }
-
-    /**
-     * Remove old maps from SpaceServer in order to save memory. SpaceMaps
-     * associated with exemplar sections, i.e., marked as persistent and the
-     * latest (newest) space map are preserved.
-     *
-     * IMPORTANT: This function cannot be called while any trick exemplar is in progress.
-     */
-    void cleanupSpaceServer();
-
 
     /** Add a new node to the Atom Table,
     if the atom already exists then the old and the new truth value is merged
@@ -1348,13 +1272,6 @@ private:
     TimeServer timeServer;
     AtomTable atomTable;
     string emptyName;
-    SpaceServer* spaceServer;
-
-    /**
-     * signal connections used to keep track of atom removal in the AtomTable
-     */
-    boost::signals::connection removedAtomConnection; 
-    boost::signals::connection addedAtomConnection; 
 
     /* Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
@@ -1398,12 +1315,6 @@ private:
     Handle addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv = TruthValue::NULL_TV());
 
     /**
-     * Creates the space map node, if not created yet.
-     * returns the handle of the node.
-     */
-    Handle getSpaceMapNode(void);
-
-    /**
      * Handler of the 'atom removed' signal from AtomTable
      */
     void atomRemoved(Handle h);
@@ -1421,12 +1332,6 @@ public:
         { return atomTable.removeAtomSignal(); }
     boost::signal<void (Handle)>& mergeAtomSignal()
         { return atomTable.mergeAtomSignal(); }
-
-    // SpaceServerContainer virtual methods:
-    void mapRemoved(Handle mapId);
-    void mapPersisted(Handle mapId);
-    std::string getMapIdString(Handle mapId);
-
 };
 
 } // namespace opencog
