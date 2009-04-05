@@ -92,3 +92,9 @@ TARGET_LINK_LIBRARIES (gen-contin-table
         comboreduct
         util
 )
+ADD_EXECUTABLE (gen-truth-table gen-truth-table)
+TARGET_LINK_LIBRARIES (gen-truth-table
+	moses
+        comboreduct
+        util
+)
