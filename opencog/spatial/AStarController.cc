@@ -26,126 +26,130 @@
 using namespace Spatial;
 
 AStarController::AStarController():
-    astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)) {}
+        astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)) {}
 
-AStarController::~AStarController() {
-	  delete astarsearch;
+AStarController::~AStarController()
+{
+    delete astarsearch;
 }
 
-void AStarController::setMap(Map *map) {
-	MapSearchNode::setMap(map);
+void AStarController::setMap(Map *map)
+{
+    MapSearchNode::setMap(map);
 }
 
-void AStarController::setStartAndGoalStates(MapSearchNode &nodeStart, MapSearchNode &nodeEnd) {
-	astarsearch->SetStartAndGoalStates(nodeStart,nodeEnd);
+void AStarController::setStartAndGoalStates(MapSearchNode &nodeStart, MapSearchNode &nodeEnd)
+{
+    astarsearch->SetStartAndGoalStates(nodeStart, nodeEnd);
 }
 
 
 /**
  * Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
  */
-void AStarController::resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode) {
+void AStarController::resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode)
+{
     delete astarsearch;
 
     astarsearch = new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES);
-    astarsearch->SetStartAndGoalStates(startNode,goalNode);
+    astarsearch->SetStartAndGoalStates(startNode, goalNode);
 }
 
-//TODO: check for no map or no start/goal set conditions, 
-//		check for illegal start/goal (possibly from astarsearch searchstate code)
-unsigned int AStarController::findPath() {
-		unsigned int SearchState;
-		unsigned int SearchSteps = 0;
+//TODO: check for no map or no start/goal set conditions,
+//  check for illegal start/goal (possibly from astarsearch searchstate code)
+unsigned int AStarController::findPath()
+{
+    unsigned int SearchState;
+    unsigned int SearchSteps = 0;
 
-		do {
-			SearchState = astarsearch->SearchStep();
-			SearchSteps++;
+    do {
+        SearchState = astarsearch->SearchStep();
+        SearchSteps++;
 
 #if DEBUG_LISTS  //TODO make this a class method
-      debugLists(SearchSteps);
+        debugLists(SearchSteps);
 #endif  //DEBUG_LISTS
 
-		}
-		while( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
+    } while ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING );
 
-	if( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED ) {
-			cout << "Search found goal state\n";
+    if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED ) {
+        cout << "Search found goal state\n";
 
-      int steps = 0;
+        int steps = 0;
 
-      MapSearchNode *node = astarsearch->GetSolutionStart();
-      #if DISPLAY_SOLUTION
-      cout << "Displaying solution\n";
-      node->PrintNodeInfo();
-      #endif
-
-      while (true) {
-        node = astarsearch->GetSolutionNext();
-        if (!node) {
-          break;
-        }
-        steps ++;
-        #if DISPLAY_SOLUTION
+        MapSearchNode *node = astarsearch->GetSolutionStart();
+#if DISPLAY_SOLUTION
+        cout << "Displaying solution\n";
         node->PrintNodeInfo();
-        #endif
-      };
-      cout << "Solution steps " << steps << endl;
-      #if PRINT_MAP
-      addSolutionToMap();
-      #endif
+#endif
 
-      // Once you're done with the solution you can free the nodes up
-      astarsearch->FreeSolutionNodes();
-	}
-	
-	else if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) {
-		cout << "Search terminated. Did not find goal state\n";
-	}
+        while (true) {
+            node = astarsearch->GetSolutionNext();
+            if (!node) {
+                break;
+            }
+            steps ++;
+#if DISPLAY_SOLUTION
+            node->PrintNodeInfo();
+#endif
+        };
+        cout << "Solution steps " << steps << endl;
+#if PRINT_MAP
+        addSolutionToMap();
+#endif
 
-	// Display the number of loops the search went through
-	cout << "SearchSteps : " << SearchSteps << "\n";
+        // Once you're done with the solution you can free the nodes up
+        astarsearch->FreeSolutionNodes();
+    }
+
+    else if ( SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_FAILED ) {
+        cout << "Search terminated. Did not find goal state\n";
+    }
+
+    // Display the number of loops the search went through
+    cout << "SearchSteps : " << SearchSteps << "\n";
 
     astarsearch->EnsureMemoryFreed();
 
     return SearchState;
-  } //function findPath()
+} //function findPath()
 
 
-void AStarController::debugLists(unsigned int SearchSteps) {
-  cout << "Steps:" << SearchSteps << "\n";
+void AStarController::debugLists(unsigned int SearchSteps)
+{
+    cout << "Steps:" << SearchSteps << "\n";
 
-  int len = 0;
-  cout << "Open:\n";
-  MapSearchNode *p = astarsearch->GetOpenListStart();
-  while( p )
-  {
-    len++;
+    int len = 0;
+    cout << "Open:\n";
+    MapSearchNode *p = astarsearch->GetOpenListStart();
+    while ( p ) {
+        len++;
 #if !DEBUG_LIST_LENGTHS_ONLY
-    ((MapSearchNode *)p)->PrintNodeInfo();
+        ((MapSearchNode *)p)->PrintNodeInfo();
 #endif
-    p = astarsearch->GetOpenListNext();
-  }
+        p = astarsearch->GetOpenListNext();
+    }
 
-  cout << "Open list has " << len << " nodes\n";
+    cout << "Open list has " << len << " nodes\n";
 
-  len = 0;
-  cout << "Closed:\n";
-  p = astarsearch->GetClosedListStart();
-  while( p )
-  {
-    len++;
+    len = 0;
+    cout << "Closed:\n";
+    p = astarsearch->GetClosedListStart();
+    while ( p ) {
+        len++;
 #if !DEBUG_LIST_LENGTHS_ONLY
-    p->PrintNodeInfo();
+        p->PrintNodeInfo();
 #endif
-    p = astarsearch->GetClosedListNext();
-  }
+        p = astarsearch->GetClosedListNext();
+    }
 
-  cout << "Closed list has " << len << " nodes\n";
+    cout << "Closed list has " << len << " nodes\n";
 
 }
 
 
-vector<Spatial::GridPoint> AStarController::getSolutionGridPoints() {
+vector<Spatial::GridPoint> AStarController::getSolutionGridPoints()
+{
     vector<Spatial::GridPoint> solution_points;
     Spatial::GridPoint gp;
     MapSearchNode *node = astarsearch->GetSolutionStart();
@@ -155,21 +159,22 @@ vector<Spatial::GridPoint> AStarController::getSolutionGridPoints() {
     solution_points.push_back(gp);
 
     while (true) {
-      node = astarsearch->GetSolutionNext();
-      if(!node) {
-          break;
-      }
-      
-      gp.first = node->x;
-      gp.second = node->y;
-      solution_points.push_back(gp);
+        node = astarsearch->GetSolutionNext();
+        if (!node) {
+            break;
+        }
+
+        gp.first = node->x;
+        gp.second = node->y;
+        solution_points.push_back(gp);
     };
 
-    return solution_points;	
+    return solution_points;
 }
 
 
-vector<Spatial::Point> AStarController::getSolutionPoints() {
+vector<Spatial::Point> AStarController::getSolutionPoints()
+{
     vector<Spatial::Point> solution_points;
     Spatial::GridPoint gp;
     MapSearchNode *node = astarsearch->GetSolutionStart();
@@ -180,39 +185,38 @@ vector<Spatial::Point> AStarController::getSolutionPoints() {
     solution_points.push_back(map->unsnap(gp));
 
     while (true) {
-      node = astarsearch->GetSolutionNext();
-      if(!node) {
-          break;
-      }
+        node = astarsearch->GetSolutionNext();
+        if (!node) {
+            break;
+        }
 
-      gp.first = node->x;
-      gp.second = node->y;
-      solution_points.push_back(map->unsnap(gp));
+        gp.first = node->x;
+        gp.second = node->y;
+        solution_points.push_back(map->unsnap(gp));
     };
 
     return solution_points;
 }
 
-vector<Spatial::Point> AStarController::getShortestCalculatedPath(){
+vector<Spatial::Point> AStarController::getShortestCalculatedPath()
+{
 
     vector<Spatial::Point>  calculatedPath = getSolutionPoints();
     vector<Spatial::Point>  shortestCalculatedPath;
-    
+
     opencog::logger().log(opencog::Logger::INFO, "AStar - Shortening action plan. It has %d elem.",
-        calculatedPath.size());
-   
+                          calculatedPath.size());
+
     if (calculatedPath.size() < 2 )
         return calculatedPath;
- 
-    vector<Spatial::Point>::iterator it_point= calculatedPath.begin();
+
+    vector<Spatial::Point>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
-    double alpha = (it_point->second - (it_point+1)->second)/(it_point->first - (it_point+1)->first); 
+    double alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
     it_point++;
-    while( (it_point+1) != calculatedPath.end() )
-    {
-        double new_alpha = (it_point->second - (it_point+1)->second)/(it_point->first - (it_point+1)->first); 
-        if ( abs(new_alpha-alpha) > 0.002 )
-        {
+    while ( (it_point + 1) != calculatedPath.end() ) {
+        double new_alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
+        if ( abs(new_alpha - alpha) > 0.002 ) {
             shortestCalculatedPath.push_back( *it_point );
             alpha = new_alpha;
         }
@@ -220,8 +224,8 @@ vector<Spatial::Point> AStarController::getShortestCalculatedPath(){
     }
     shortestCalculatedPath.push_back( *it_point );
 
-    opencog::logger().log(opencog::Logger::INFO," AStar - Shortening action plan complete. It has %d elem.", 
-        shortestCalculatedPath.size());
+    opencog::logger().log(opencog::Logger::INFO, " AStar - Shortening action plan complete. It has %d elem.",
+                          shortestCalculatedPath.size());
     return shortestCalculatedPath;
 }
 

@@ -27,7 +27,8 @@
 using namespace Spatial;
 using namespace opencog;
 
-SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException) {  
+SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException)
+{
     boost::shared_ptr<SubEntity> subEntity1( createSubEntity(entity1) );
     boost::shared_ptr<SubEntity> subEntity2( createSubEntity(entity2) );
 
@@ -42,81 +43,83 @@ SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) t
     } // if
 }
 
-SuperEntity::~SuperEntity( void ) {  
+SuperEntity::~SuperEntity( void )
+{
 }
 
-bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr& subEntity2 ) {
+bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr& subEntity2 )
+{
 
     bool intersects = false;
-                        
+
     // check if there are edges of each entities that overlaps
     unsigned int i;
     unsigned int j;
-    for( i = 0; i < 4; ++i ) {
+    for ( i = 0; i < 4; ++i ) {
         std::list<Math::LineSegment>& edges1 = subEntity1->splitEdges[i];
-        std::list<Math::LineSegment>::iterator it1 = edges1.begin( );       
+        std::list<Math::LineSegment>::iterator it1 = edges1.begin( );
 
-        while( it1 != edges1.end( ) ) {
+        while ( it1 != edges1.end( ) ) {
             bool edgeSplit = false;
 
-            for( j = 0; j < 4; ++j ) {
-                std::list<Math::LineSegment>& edges2 = subEntity2->splitEdges[j];                
+            for ( j = 0; j < 4; ++j ) {
+                std::list<Math::LineSegment>& edges2 = subEntity2->splitEdges[j];
                 std::list<Math::LineSegment>::iterator it2 = edges2.begin( );
-                while( it2 != edges2.end( ) ) {
-                    
+                while ( it2 != edges2.end( ) ) {
+
                     Math::Vector3 pointInA;
                     Math::Vector3 pointInB;
-                    double distance = it1->distanceTo( *it2, &pointInA, &pointInB);                
-                    
+                    double distance = it1->distanceTo( *it2, &pointInA, &pointInB);
+
                     if ( distance <= Math::LineSegment::TOLERANCE_DISTANCE ) {
                         // distance lesser than treshold, so two edges intersects each other
 
                         // check if the intersection is just the begin or end points intersection
                         bool needSplitEdge1 = !it1->sharePoint( pointInA );
-                        bool needSplitEdge2 = !it2->sharePoint( pointInB );                 
+                        bool needSplitEdge2 = !it2->sharePoint( pointInB );
 
                         if ( needSplitEdge1 ) {
                             // remove the original edge and insert the two fragments into the edges list
                             std::list<Math::LineSegment>::iterator it3 = it1; ++it3;
-                            
+
                             Math::LineSegment segA( it1->pointA, pointInA );
                             Math::LineSegment segB( pointInA, it1->pointB );
-                            
-                            edges1.erase( it1 ); it1 = it3;                        
+
+                            edges1.erase( it1 ); it1 = it3;
 
                             if ( !subEntity2->rectangle.isInside( segB.getMidPoint( ) ) ) {
                                 it1 = edges1.insert( it1, segB );
                             } // if
-                            
+
                             if ( !subEntity2->rectangle.isInside( segA.getMidPoint( ) ) ) {
                                 it1 = edges1.insert( it1, segA );
                             } // if
-                            
+
                             intersects = true;
-                            edgeSplit = true;             
+                            edgeSplit = true;
                         } // if
-                        
+
                         if ( needSplitEdge2 ) {
                             // remove the original edge and insert the two fragments into the edges list
                             std::list<Math::LineSegment>::iterator it3 = it2; ++it3;
-                            
+
                             Math::LineSegment segA( it2->pointA, pointInB );
                             Math::LineSegment segB( pointInB, it2->pointB );
-                            
+
                             edges2.erase( it2 ); it2 = it3;
-                            
+
                             if ( !subEntity1->rectangle.isInside( segB.getMidPoint( ) ) ) {
                                 it3 = edges2.insert( it3, segB );
                             } // if
-                            
+
                             if ( !subEntity1->rectangle.isInside( segA.getMidPoint( ) ) ) {
                                 it3 = edges2.insert( it3, segA );
                             } // if
-                            
+
                             intersects = true;
                             continue;
                         } // if
-                        
+
                     } else if ( subEntity1->rectangle.isInside( it2->getMidPoint( ) ) ) {
                         // if the edge of the second entity is inside of the first entity remove it from the list
                         std::list<Math::LineSegment>::iterator it3 = it2; ++it3;
@@ -124,8 +127,8 @@ bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr
                         it2 = it3;
                         intersects = true;
                         continue;
-                    } // if            
-                    
+                    } // if
+
                     ++it2;
                 } // while
             } // for
@@ -140,32 +143,33 @@ bool SuperEntity::splitEdges( const SubEntityPtr& subEntity1, const SubEntityPtr
                 intersects = true;
                 continue;
             } // if
-            
+
             ++it1;
         } // while
     } // for
     return intersects;
 }
 
-bool SuperEntity::rebuild( void ) {
-    
+bool SuperEntity::rebuild( void )
+{
+
     // remove all the computed segments
     this->segments.clear( );
-    
+
     LongSubEntityPtrHashMap::iterator it1;
     LongSubEntityPtrHashMap::iterator it2;
 
     std::map<long, bool> intersectionMap;
 
     // reseting split edges from all sub entities
-    for( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
+    for ( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
         it1->second->reset( );
         intersectionMap[it1->first] = false;
     } // for
 
     // compute the intersection between each of the entities of this superentity
-    for( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
-        for( it2 = it1, ++it2; it2 != subEntities.end( ); ++it2 ) {
+    for ( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
+        for ( it2 = it1, ++it2; it2 != subEntities.end( ); ++it2 ) {
             if ( splitEdges( it1->second, it2->second ) ) {
                 // the entities have their edges split
                 intersectionMap[ it1->first ] = true;
@@ -176,8 +180,8 @@ bool SuperEntity::rebuild( void ) {
 
                 bool firstInsideSecond = true;
                 bool secondInsideFirst = true;
-                
-                for( it3 = it2->second->edges.begin( ); it3 != it2->second->edges.end( ); ++it3 ) {
+
+                for ( it3 = it2->second->edges.begin( ); it3 != it2->second->edges.end( ); ++it3 ) {
                     if ( !it1->second->rectangle.isInside( it3->pointA ) ) {
                         secondInsideFirst = false;
                         break;
@@ -187,14 +191,14 @@ bool SuperEntity::rebuild( void ) {
                 if ( secondInsideFirst ) {
                     // ok, second entity is completely inside the first
                     unsigned int i;
-                    for( i = 0; i < 4; ++i ) {
+                    for ( i = 0; i < 4; ++i ) {
                         it2->second->splitEdges[i].clear( );
                     } // for
                     intersectionMap[ it1->first ] = true;
                     intersectionMap[ it2->first ] = true;
                 } else {
                     // no, the second entity is'n inside the first, so check the opposite
-                    for( it3 = it1->second->edges.begin( ); it3 != it1->second->edges.end( ); ++it3 ) {
+                    for ( it3 = it1->second->edges.begin( ); it3 != it1->second->edges.end( ); ++it3 ) {
                         if ( !it2->second->rectangle.isInside( it3->pointA ) ) {
                             firstInsideSecond = false;
                             break;
@@ -204,7 +208,7 @@ bool SuperEntity::rebuild( void ) {
                     if ( firstInsideSecond ) {
                         // ok, first entity is completely inside the second
                         unsigned int i;
-                        for( i = 0; i < 4; ++i ) {
+                        for ( i = 0; i < 4; ++i ) {
                             it1->second->splitEdges[i].clear( );
                         } // for
                         intersectionMap[ it1->first ] = true;
@@ -213,27 +217,27 @@ bool SuperEntity::rebuild( void ) {
                         // no, the first entity is'n inside the second, so check whether at least one corner
                         // overlaps
                         std::list<Math::LineSegment>::iterator it4;
-                        
+
                         int overlapCorners = 0;
                         // corner overlap counter
-                        for( it3 = it2->second->edges.begin( ); it3 != it2->second->edges.end( ); ++it3 ) {
-                            for( it4 = it1->second->edges.begin( ); it4 != it1->second->edges.end( ); ++it4 ) {
+                        for ( it3 = it2->second->edges.begin( ); it3 != it2->second->edges.end( ); ++it3 ) {
+                            for ( it4 = it1->second->edges.begin( ); it4 != it1->second->edges.end( ); ++it4 ) {
                                 if ( it3->pointA == it4->pointA ) {
                                     ++overlapCorners;
                                 } // if
                             } // for
                         } // for
-                        
+
                         if ( overlapCorners == 4 ) { // they completely overlap
                             unsigned int i;
-                            for( i = 0; i < 4; ++i ) {
+                            for ( i = 0; i < 4; ++i ) {
                                 it1->second->splitEdges[i].clear( );
                             } // for
                             intersectionMap[ it1->first ] = true;
                             intersectionMap[ it2->first ] = true;
                         } else if ( overlapCorners == 1 ) { // just one corner overlap
                             intersectionMap[ it1->first ] = true;
-                            intersectionMap[ it2->first ] = true;                            
+                            intersectionMap[ it2->first ] = true;
                         } // else if
 
                     } // else
@@ -243,16 +247,16 @@ bool SuperEntity::rebuild( void ) {
 
         } // for
     } // for
-    
+
     // copying all edges to the main segment list
     std::back_insert_iterator<std::list<Math::LineSegment> > ii( this->segments );
-    for( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
+    for ( it1 = subEntities.begin( ); it1 != subEntities.end( ); ++it1 ) {
         std::list<Math::LineSegment> splitEdges = it1->second->getSplitEdges( );
         std::copy( splitEdges.begin( ), splitEdges.end( ), ii );
     } // for
-   
+
     std::map<long, bool>::iterator it;
-    for( it = intersectionMap.begin( ); it != intersectionMap.end( ); ++it ) {
+    for ( it = intersectionMap.begin( ); it != intersectionMap.end( ); ++it ) {
         if ( !it->second ) {
             return false;
         } // if
@@ -261,7 +265,8 @@ bool SuperEntity::rebuild( void ) {
 
 } // rebuild
 
-std::list<Math::Vector3> SuperEntity::getCorners( void ) const {
+std::list<Math::Vector3> SuperEntity::getCorners( void ) const
+{
     std::list<Math::Vector3> points;
     std::list<Math::LineSegment> edges = this->segments;
     std::list<Math::LineSegment>::iterator it = edges.begin( );
@@ -271,7 +276,7 @@ std::list<Math::Vector3> SuperEntity::getCorners( void ) const {
 
     Math::Vector3 current = points.back( );
 
-    while( it != edges.end( ) ) {
+    while ( it != edges.end( ) ) {
         if ( ( current - it->pointA ).length( ) <= Math::LineSegment::TOLERANCE_DISTANCE ) {
             points.push_back( it->pointB );
             current = points.back( );
@@ -289,8 +294,9 @@ std::list<Math::Vector3> SuperEntity::getCorners( void ) const {
     return points;
 }
 
-bool SuperEntity::merge( const EntityPtr& entity ) {
-    if ( containsEntity( entity->getId( ) ) ) {     
+bool SuperEntity::merge( const EntityPtr& entity )
+{
+    if ( containsEntity( entity->getId( ) ) ) {
         return true;
     } // if
 
@@ -303,24 +309,27 @@ bool SuperEntity::merge( const EntityPtr& entity ) {
     return result;
 }
 
-bool SuperEntity::merge( const SuperEntityPtr& entity ) {
+bool SuperEntity::merge( const SuperEntityPtr& entity )
+{
     LongSubEntityPtrHashMap::const_iterator it;
-    for( it = entity->subEntities.begin( ); it != entity->subEntities.end( ); ++it ) {
+    for ( it = entity->subEntities.begin( ); it != entity->subEntities.end( ); ++it ) {
         if ( !containsEntity( it->first ) ) {
             subEntities[it->first] = it->second;
         } // if
     } // for
-  
+
     return rebuild( );
 }
 
-bool SuperEntity::containsEntity( long id ) const {  
+bool SuperEntity::containsEntity( long id ) const
+{
     return ( this->subEntities.find( id ) != this->subEntities.end( ) );
 }
 
-void SuperEntity::removeEntity( long id ) throw (opencog::InvalidParamException) {
+void SuperEntity::removeEntity( long id ) throw (opencog::InvalidParamException)
+{
     LongSubEntityPtrHashMap::iterator it = this->subEntities.find( id );
-    if ( it != this->subEntities.end( ) ) {    
+    if ( it != this->subEntities.end( ) ) {
         if ( this->subEntities.size( ) == 2 ) {
             throw opencog::InvalidParamException( TRACE_INFO, "SuperEntity::removeEntity - Cannot remove a subEntity from a superEntity containing just two entities" );
         } // if
@@ -333,32 +342,35 @@ void SuperEntity::removeEntity( long id ) throw (opencog::InvalidParamException)
     } // if
 }
 
-SuperEntityPtr SuperEntity::clone( void ) const {
+SuperEntityPtr SuperEntity::clone( void ) const
+{
     SuperEntityPtr clone( new SuperEntity( ) );
     clone->segments = this->segments;
     LongSubEntityPtrHashMap::const_iterator it;
-    for( it = this->subEntities.begin( ); it != this->subEntities.end( ); ++it ) {
+    for ( it = this->subEntities.begin( ); it != this->subEntities.end( ); ++it ) {
         clone->subEntities.insert( LongSubEntityPtrHashMap::value_type( it->first, SubEntityPtr( it->second ) ) );
     } // for
     return clone;
 }
 
-SuperEntity::SubEntityPtr SuperEntity::createSubEntity( const EntityPtr& entity ) {
+SuperEntity::SubEntityPtr SuperEntity::createSubEntity( const EntityPtr& entity )
+{
     // compute the edges of the entities bases
     const Math::Vector3& p11 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM );
     const Math::Vector3& p12 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM );
     const Math::Vector3& p13 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM );
     const Math::Vector3& p14 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM );
-  
+
     std::list<Math::LineSegment> edges1;
-    edges1.push_back( Math::LineSegment(p11, p12) );		
+    edges1.push_back( Math::LineSegment(p11, p12) );
     edges1.push_back( Math::LineSegment(p12, p13) );
     edges1.push_back( Math::LineSegment(p13, p14) );
-    edges1.push_back( Math::LineSegment(p14, p11) );	
+    edges1.push_back( Math::LineSegment(p14, p11) );
     return SubEntityPtr( new SubEntity( entity->getId(), Math::Rectangle( p11, p12, p13 ), edges1 ) );
 }
 
-bool SuperEntity::isInside( const Math::Vector3& point ) const {
+bool SuperEntity::isInside( const Math::Vector3& point ) const
+{
     LongSubEntityPtrHashMap::const_iterator it;
     for ( it = this->subEntities.begin(); it != this->subEntities.end( ); ++it ) {
         if ( it->second->rectangle.isInside(point)) {
@@ -367,8 +379,9 @@ bool SuperEntity::isInside( const Math::Vector3& point ) const {
     } // for
     return false;
 }
-	
-std::vector<long> SuperEntity::getSubEntitiesIds( void ) const {
+
+std::vector<long> SuperEntity::getSubEntitiesIds( void ) const
+{
     std::vector<long> ids;
     LongSubEntityPtrHashMap::const_iterator it;
     for ( it = this->subEntities.begin(); it != this->subEntities.end( ); ++it ) {

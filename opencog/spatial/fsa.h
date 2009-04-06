@@ -48,7 +48,8 @@ given where due.
 #include <string.h>
 #include <stdio.h>
 
-namespace Spatial {
+namespace Spatial
+{
 
 template <class USER_TYPE> class FixedSizeAllocator
 {

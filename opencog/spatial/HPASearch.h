@@ -31,154 +31,159 @@
 #include "Math/Vector2.h"
 #include <vector>
 
-namespace Spatial {
+namespace Spatial
+{
 
 
-  /** 
-   * class HPASearch
-   * This is an implementation of the HPA* algorithm. HPA* builds an abstract graph by doing
-   * a grid partitioning that results on a set of clusters of original grid cells.
-   * Each two sibbling clusters may or may not has entrances. An entrance is the way
-   * to cross from on cluster to another. The pathfinding is the execution of the A* on
-   * the abstract graph.
-   */
-  class HPASearch {
-  public:
+/**
+ * class HPASearch
+ * This is an implementation of the HPA* algorithm. HPA* builds an abstract graph by doing
+ * a grid partitioning that results on a set of clusters of original grid cells.
+ * Each two sibbling clusters may or may not has entrances. An entrance is the way
+ * to cross from on cluster to another. The pathfinding is the execution of the A* on
+ * the abstract graph.
+ */
+class HPASearch
+{
+public:
 
     // typedefs of the boost graph datatype
-    struct VertexPosition { 
-      typedef boost::vertex_property_tag kind;
+    struct VertexPosition {
+        typedef boost::vertex_property_tag kind;
     };
 
     typedef boost::property< VertexPosition, Math::Vector2> VertexProperty;
 
     typedef boost::property< boost::edge_weight_t, float > EdgeProperty;
-	
+
     //typedef std::pair< LocalSpaceMap::Cell*, LocalSpaceMap::Cell* > Edge;
     typedef std::pair< GridPoint, GridPoint > Edge;
 
-    typedef boost::adjacency_list< boost::vecS, boost::vecS, 
-      boost::undirectedS, VertexProperty, EdgeProperty> Graph;
-	
+    typedef boost::adjacency_list < boost::vecS, boost::vecS,
+    boost::undirectedS, VertexProperty, EdgeProperty > Graph;
+
     typedef boost::graph_traits < Graph >::vertex_descriptor VertexDescriptor;
     typedef boost::graph_traits < Graph >::edge_descriptor EdgeDescriptor;
     typedef boost::graph_traits < Graph >::vertex_iterator VertexIterator;
-    typedef std::pair<boost::graph_traits < Graph >::edge_iterator, 
-      boost::graph_traits < Graph >::edge_iterator > EdgeIterator;
+    typedef std::pair < boost::graph_traits < Graph >::edge_iterator,
+    boost::graph_traits < Graph >::edge_iterator > EdgeIterator;
 
     /**
      * class FoundGoal
      * Exception throwed when a path was found
-     */    
-    class FoundGoal { }; 
+     */
+    class FoundGoal { };
 
     /**
      * class AStarGoalVisitor
      * Visitor that terminates the algorithm's excetution when we find the goal
      */
-    class AStarGoalVisitor : public boost::default_astar_visitor {
-      public:
-	AStarGoalVisitor( unsigned int vertexGoalId ) : 
-	  vertexGoalId( vertexGoalId ) { }
+    class AStarGoalVisitor : public boost::default_astar_visitor
+    {
+    public:
+        AStarGoalVisitor( unsigned int vertexGoalId ) :
+                vertexGoalId( vertexGoalId ) { }
 
-	// visitor method
-	template <class Graph> void examine_vertex( VertexDescriptor u, Graph& graph ) {
-//	  Math::Vector2 vertexPosition = boost::get( HPASearch::VertexPosition( ), graph, u );
-//	  std::cout << vertexPosition.toString( ) << " >>> " << u << vertexGoalId << std::endl;
-	  if ( u == vertexGoalId ) {
-	    throw FoundGoal( );
-	  } // if
-	}
+        // visitor method
+        template <class Graph> void examine_vertex( VertexDescriptor u, Graph& graph ) {
+//   Math::Vector2 vertexPosition = boost::get( HPASearch::VertexPosition( ), graph, u );
+//   std::cout << vertexPosition.toString( ) << " >>> " << u << vertexGoalId << std::endl;
+            if ( u == vertexGoalId ) {
+                throw FoundGoal( );
+            } // if
+        }
     private:
-	unsigned int vertexGoalId;
+        unsigned int vertexGoalId;
     };
-    
-    
+
+
     /**
      * class AStarDistanceHeuristic
      * Heuristic used by AStar. (Euclidean distance)
      */
-    class AStarDistanceHeuristic : public boost::astar_heuristic< Graph, float > {
+    class AStarDistanceHeuristic : public boost::astar_heuristic< Graph, float >
+    {
     public:
 
-      AStarDistanceHeuristic( const Math::Vector2& goalPosition, const Graph& graph )
-	: goalPosition( goalPosition ), graph( graph ) { }
+        AStarDistanceHeuristic( const Math::Vector2& goalPosition, const Graph& graph )
+                : goalPosition( goalPosition ), graph( graph ) { }
 
-      float operator( )( VertexDescriptor u ) {	
-//	Math::Vector2 uPos = boost::get( HPASearch::VertexPosition( ), graph, u );
-//	std::cout << "H: " << uPos.toString( ) << std::endl;
-	return ( goalPosition - boost::get( HPASearch::VertexPosition( ), graph, u ) ).length( );
-      }
+        float operator( )( VertexDescriptor u ) {
+// Math::Vector2 uPos = boost::get( HPASearch::VertexPosition( ), graph, u );
+// std::cout << "H: " << uPos.toString( ) << std::endl;
+            return ( goalPosition - boost::get( HPASearch::VertexPosition( ), graph, u ) ).length( );
+        }
 
     private:
-      Math::Vector2 goalPosition;
-      Graph graph;
+        Math::Vector2 goalPosition;
+        Graph graph;
     };
-       
+
     /**
      * class Level
-     * HPA* can handle multiple levels in a hierarchical way,  
+     * HPA* can handle multiple levels in a hierarchical way,
      * Each level has n clusters. More clusters means that such level is more detailed
      */
-    class Level {
+    class Level
+    {
     public:
 
-      Level( LocalSpaceMap2D* map, unsigned int level, unsigned int maximumClusters );
+        Level( LocalSpaceMap2D* map, unsigned int level, unsigned int maximumClusters );
 
-      virtual ~Level( );
+        virtual ~Level( );
 
-      const Graph& getAbstractGraph( void );
+        const Graph& getAbstractGraph( void );
 
-      bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint ) throw( opencog::RuntimeException );
-      
-      const std::vector<Math::Vector2>& getProcessedPath( void ) const;
+        bool processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint ) throw( opencog::RuntimeException );
 
-      float getClusterWidth( void );
+        const std::vector<Math::Vector2>& getProcessedPath( void ) const;
 
-      float getClusterHeight( void );
+        float getClusterWidth( void );
 
-      unsigned int getLevel( void );
+        float getClusterHeight( void );
 
-      unsigned int getClusterId( const GridPoint& gridPoint ) const;
+        unsigned int getLevel( void );
+
+        unsigned int getClusterId( const GridPoint& gridPoint ) const;
 
     protected:
 
-      void buildClusters( void );
-      
-      void buildEntrance( unsigned int row, unsigned int col, bool horizontal );
-      GridPoint getNearestEntrance( unsigned int clusterId, const Math::Vector2& position );
+        void buildClusters( void );
 
-      GridPoint getNearestVertex( unsigned int clusterId, const Math::Vector2& position );
+        void buildEntrance( unsigned int row, unsigned int col, bool horizontal );
+        GridPoint getNearestEntrance( unsigned int clusterId, const Math::Vector2& position );
 
-      void setupVertex( const GridPoint& gridPoint );
+        GridPoint getNearestVertex( unsigned int clusterId, const Math::Vector2& position );
 
-      void smoothPath( void );
+        void setupVertex( const GridPoint& gridPoint );
 
-      // try to reduce path nodes doing triangulations using raytrace
-      void smoothTriangulate( void );
-      
-      std::vector<Math::Vector2> processedPath;                  
+        void smoothPath( void );
 
-      LocalSpaceMap2D* map;
-      std::vector< std::pair<GridPoint, GridPoint> > entrances;
-      std::map< unsigned int, std::vector< GridPoint > > clusterEntrances;
-      std::map< GridPoint, unsigned int > graphVertices;
-      std::map< unsigned int, std::pair< unsigned int, unsigned int> > clustersVertexRange;
-      Math::Dimension2 clusterDimension;
-      Graph* abstractGraph;
-      unsigned int level;
+        // try to reduce path nodes doing triangulations using raytrace
+        void smoothTriangulate( void );
 
-      unsigned int vertexCounter;
+        std::vector<Math::Vector2> processedPath;
 
-      unsigned int numberOfCols;
-      unsigned int numberOfRows;
+        LocalSpaceMap2D* map;
+        std::vector< std::pair<GridPoint, GridPoint> > entrances;
+        std::map< unsigned int, std::vector< GridPoint > > clusterEntrances;
+        std::map< GridPoint, unsigned int > graphVertices;
+        std::map< unsigned int, std::pair< unsigned int, unsigned int> > clustersVertexRange;
+        Math::Dimension2 clusterDimension;
+        Graph* abstractGraph;
+        unsigned int level;
 
-      bool needsUpdate;
+        unsigned int vertexCounter;
 
-      friend class Cluster;
-      friend class QuadTree;
+        unsigned int numberOfCols;
+        unsigned int numberOfRows;
+
+        bool needsUpdate;
+
+        friend class Cluster;
+        friend class QuadTree;
     };
-    
+
     HPASearch( LocalSpaceMap2D* map, unsigned int numberOfLevels = 1, unsigned int maximumClusters = 16 );
 
     // process a path from informed start and end positions
@@ -197,7 +202,7 @@ namespace Spatial {
 
     std::vector<Level*> levels;
 
-  };
+};
 
 } // Spatial
 

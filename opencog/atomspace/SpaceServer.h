@@ -46,9 +46,11 @@
 #include <map>
 
 
-namespace opencog {
+namespace opencog
+{
 
-class SpaceServer : public SavableRepository {
+class SpaceServer : public SavableRepository
+{
 
 public:
 
@@ -106,8 +108,8 @@ public:
     Handle getPreviousMapHandle(Handle spaceMapHandle) const;
 
     /**
-     * Gets the Handle of the next map to the map associated to the given spaceMap handle. 
-     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, if such map does not exist or 
+     * Gets the Handle of the next map to the map associated to the given spaceMap handle.
+     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, if such map does not exist or
      * if the given spaceMap handle is not of a map inside this SpaceServer.
      */
     Handle getNextMapHandle(Handle spaceMapHandle) const;

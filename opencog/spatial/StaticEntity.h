@@ -23,14 +23,16 @@
 #define _SPATIAL_STATICENTITY_H_
 
 #include "Entity.h"
-namespace Spatial {
+namespace Spatial
+{
 
-  class StaticEntity;
+class StaticEntity;
 
-  typedef boost::shared_ptr<StaticEntity> StaticEntityPtr;
+typedef boost::shared_ptr<StaticEntity> StaticEntityPtr;
 
-  class StaticEntity : public Entity {
-  public:
+class StaticEntity : public Entity
+{
+public:
     /**
      * Custom constructor
      * @param entity
@@ -48,18 +50,18 @@ namespace Spatial {
      */
     StaticEntity(  long id, const std::string& name, const Math::Vector3& position, const Math::Dimension3& dimension, const Math::Quaternion& orientation, double radius = 0.0 ) : Entity( id, name, position, dimension, orientation, radius ) {
     }
-	
+
     ENTITY_TYPE getType(void ) const {
-      return Entity::STATIC;
+        return Entity::STATIC;
     }
 
     virtual inline EntityPtr clone( void ) const {
-      StaticEntityPtr clone( new StaticEntity( *this ) );
-      clone->properties = this->properties;
-      return clone;
+        StaticEntityPtr clone( new StaticEntity( *this ) );
+        clone->properties = this->properties;
+        return clone;
     }
 
-  }; // StaticEntity
+}; // StaticEntity
 
 } // Spatial
 

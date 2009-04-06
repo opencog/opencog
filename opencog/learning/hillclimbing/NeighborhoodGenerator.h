@@ -90,9 +90,9 @@ public:
                           const rule& full_reduction,
                           arity_t arg_count = 0,
                           bool abibb = false)
-    : _operators(operators), _perceptions(perceptions), _actions(actions),
-    _action_reduction(action_reduction), _full_reduction(full_reduction),
-    _arg_count(arg_count), _action_boolean_if_both_branches(abibb) {
+            : _operators(operators), _perceptions(perceptions), _actions(actions),
+            _action_reduction(action_reduction), _full_reduction(full_reduction),
+            _arg_count(arg_count), _action_boolean_if_both_branches(abibb) {
         opencog::cassert(TRACE_INFO, arg_count >= 0);
     }
 
@@ -175,7 +175,7 @@ public:
                                           id::action_success);
 #endif
                         add_composite_action(tmp1);
-                                          
+
                         //add the second branche if _conditional_both_branch_extension
                         if (_action_boolean_if_both_branches) {
                             for (combo_tree_ns_set_const_it act2 = _actions.begin();
@@ -467,7 +467,7 @@ public:
                  *it == id::action_success || *it == id::action_failure) {
             //substitute the action by any composite actions
             for (combo_tree_ns_set_const_it compact = _composite_actions.begin();
-                 compact != _composite_actions.end(); ++compact) {
+                    compact != _composite_actions.end(); ++compact) {
                 opencog::cassert(TRACE_INFO, !compact->empty(),
                                  "composite action cannot be empty");
                 pre_it compact_head = compact->begin();
@@ -482,13 +482,13 @@ public:
             //move it under other sequential_and at each possible position
             {
                 pre_it it_parent = tr.parent(it);
-                if(tr.is_valid(it_parent) && *it_parent == id::sequential_and) {
+                if (tr.is_valid(it_parent) && *it_parent == id::sequential_and) {
                     combo_tree tmp = tr;
                     pre_it tmp_it = get_same_position(tr, tmp, it);
                     combo_tree act_tr(tmp_it);
                     tmp.erase(tmp_it);
                     for (pre_it pos_it = tmp.begin();
-                         pos_it != tmp.end(); ++pos_it) {
+                            pos_it != tmp.end(); ++pos_it) {
                         if (*pos_it == id::sequential_and) {
                             //prepend child act_tr
                             {
@@ -502,7 +502,7 @@ public:
                             }
                             //insert after each child
                             for (sib_it sib = pos_it.begin();
-                                 sib != pos_it.end(); ++sib) {
+                                    sib != pos_it.end(); ++sib) {
                                 combo_tree ins_tmp = tmp;
                                 pre_it ins_tmp_it = get_same_position(tmp,
                                                                       ins_tmp,
