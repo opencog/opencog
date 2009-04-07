@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 
 #include "util/exceptions.h"
@@ -38,13 +38,14 @@ int main(int argc, char *argv[])
 {
 
     Spawner *spawner = NULL;
-    Control::SystemParameters parameters;
+    
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     // setting unexpected handler in case a different exception from the
@@ -60,10 +61,9 @@ int main(int argc, char *argv[])
 
         server(Spawner::createInstance);
         spawner = &(static_cast<Spawner&>(server()));
-        spawner->init(parameters,
-                      parameters.get("SPAWNER_ID"),
-                      parameters.get("SPAWNER_IP"),
-                      atoi(parameters.get("SPAWNER_PORT").c_str()));
+        spawner->init(config().get("SPAWNER_ID"),
+                      config().get("SPAWNER_IP"),
+                      config().get_int("SPAWNER_PORT"));
         spawner->serverLoop();
 
     } catch (opencog::InvalidParamException& ipe) {

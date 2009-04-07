@@ -37,8 +37,10 @@
 #include <unistd.h>
 #include "util/files.h"
 #include "GoldStdReaderAgent.h"
+#include "TestConfig.h"
 
 using namespace AutomatedSystemTest;
+using namespace opencog;
 
 int main(int argc, char *argv[])
 {
@@ -49,36 +51,36 @@ int main(int argc, char *argv[])
     }
     const char* filename = argv[1];
 
-    Control::SystemParameters parameters;
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    config(TestConfig::testCreateInstance, true);
+
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
-    TestParameters testParameters;
-    if (fileExists(testParameters.get("CONFIG_FILE").c_str())) {
-        testParameters.loadFromFile(testParameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     server(PBTester::createInstance);
     PBTester& pbTester = static_cast<PBTester&>(server());
-    pbTester.init(parameters, testParameters, parameters.get("PROXY_ID"), testParameters.get("PROXY_IP"), atoi(testParameters.get("PROXY_PORT").c_str()));
+    pbTester.init(config().get("PROXY_ID"), config().get("PROXY_IP"), config().get_int("PROXY_PORT"));
 
     Factory<GoldStdReaderAgent, Agent> goldStdReaderAgentFactory;
 
     pbTester.registerAgent(GoldStdReaderAgent::info().id, &goldStdReaderAgentFactory);
     GoldStdReaderAgent* goldStdReaderAgent = static_cast<GoldStdReaderAgent*>(
                 pbTester.createAgent(GoldStdReaderAgent::info().id, false));
-    goldStdReaderAgent->init(testParameters, filename);
+    goldStdReaderAgent->init(filename);
     pbTester.startAgent(goldStdReaderAgent);
 
     try {
         pbTester.serverLoop();
     } catch (std::bad_alloc) {
-        opencog::logger().log(opencog::Logger::ERROR, "PBTesterExec - PBTester raised a bad_alloc exception.");
+        logger().log(Logger::ERROR, "PBTesterExec - PBTester raised a bad_alloc exception.");
 
     } catch (...) {
-        opencog::logger().log(opencog::Logger::ERROR,
-                              "PBTesterExec - An exceptional situation occured. Check log for information.");
+        logger().log(Logger::ERROR,
+                     "PBTesterExec - An exceptional situation occured. Check log for information.");
     }
 
     return 0;

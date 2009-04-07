@@ -52,11 +52,11 @@ int DistortedComboSize::vertex_size(const vertex& v,
 {
 
     static const int while_operator_size =
-        atoi(NetworkElement::parameters.get("WHILE_OPERATOR_SIZE").c_str());
-    static const int conditional_size =
-        atoi(NetworkElement::parameters.get("CONDITIONAL_SIZE").c_str());
+        opencog::config().get_int("WHILE_OPERATOR_SIZE");
+    static const int conditional_size = 
+        opencog::config().get_int("CONDITIONAL_SIZE");
     static const int contin_size =
-        atoi(NetworkElement::parameters.get("CONTIN_SIZE").c_str());
+        opencog::config().get_int("CONTIN_SIZE");
 
     //random operators
     if (v == instance(id::random_object))

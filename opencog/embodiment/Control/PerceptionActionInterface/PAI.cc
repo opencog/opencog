@@ -62,11 +62,11 @@ using namespace opencog;
 #define REGEX_OUTPUT_SIZE 8
 
 
-PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _petInterface, SystemParameters& _systemParameters, unsigned long nextPlanID) :
-        atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), systemParameters(_systemParameters), nextActionPlanId(nextPlanID)
+PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _petInterface, unsigned long nextPlanID) :
+        atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
-    predaveseParser = new PredaveseParser(petInterface, systemParameters);
+    predaveseParser = new PredaveseParser(petInterface);
     predaveseParser->Create();
     xMin = -1;
     yMin = -1;
@@ -105,7 +105,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
     }
 #endif
 
-    logPVPMessage = (atoi(systemParameters.get(std::string("DISABLE_LOG_OF_PVP_MESSAGES")).c_str()) == 0);
+    logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
 }
 
 PAI::~PAI()
@@ -1448,8 +1448,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     logger().log(opencog::Logger::FINE, "PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", globalPosYStr, yMin, yMax);
 
     // getting grid map dimensions from system parameters
-    unsigned int xDim = atoi(systemParameters.get(std::string("MAP_XDIM")).c_str());
-    unsigned int yDim = atoi(systemParameters.get(std::string("MAP_YDIM")).c_str());
+    unsigned int xDim = opencog::config().get_int("MAP_XDIM");
+    unsigned int yDim = opencog::config().get_int("MAP_YDIM");
 
     SpaceServer& spaceServer = atomSpace.getSpaceServer();
     spaceServer.setMapBoundaries(xMin, xMax, yMin, yMax, xDim, yDim);

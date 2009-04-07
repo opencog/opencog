@@ -45,7 +45,7 @@ Router::~Router()
     }
 }
 
-Router::Router(const Control::SystemParameters &params) : parameters(params)
+Router::Router()
 {
 
     running = true;
@@ -56,13 +56,12 @@ Router::Router(const Control::SystemParameters &params) : parameters(params)
     //exception = false;
 
     RouterServerSocket::setMaster(this);
-    this->routerId = this->parameters.get("ROUTER_ID");
-    this->routerPort = atoi(this->parameters.get("ROUTER_PORT").c_str());
-    this->routerAvailableNotificationInterval = atoi(parameters.get("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL").c_str());
-    this->noAckMessages = atoi(this->parameters.get("NO_ACK_MESSAGES").c_str()) == 1;
+    this->routerId = opencog::config().get("ROUTER_ID");
+    this->routerPort = opencog::config().get_int("ROUTER_PORT");
+    this->routerAvailableNotificationInterval = opencog::config().get_int("ROUTER_AVAILABLE_NOTIFICATION_INTERVAL");
+    this->noAckMessages = config().get_bool("NO_ACK_MESSAGES");
 
-    opencog::logger() = Control::LoggerFactory::getLogger(this->parameters,
-                        routerId);
+    opencog::logger() = Control::LoggerFactory::getLogger(routerId);
 
     pthread_mutex_init(&unavailableIdsLock, NULL);
     stopListenerThreadFlag = false;
@@ -121,11 +120,6 @@ void Router::stopListenerThread()
     pthread_join(socketListenerThread, NULL);
 }
 
-const Control::SystemParameters& Router::getParameters() const
-{
-    return parameters;
-}
-
 void Router::run()
 {
 
@@ -134,10 +128,10 @@ void Router::run()
      * than check if such file exists in filesystem. If so, start recovery
      * process.
      */
-    std::string recoveryFile = this->parameters.get("ROUTER_DATABASE_DIR");
+    std::string recoveryFile = opencog::config().get("ROUTER_DATABASE_DIR");
     expandPath(recoveryFile);
     recoveryFile.append("/");
-    recoveryFile.append(this->parameters.get("ROUTER_DATA_FILE"));
+    recoveryFile.append(opencog::config().get("ROUTER_DATA_FILE"));
 
     if (fileExists(recoveryFile.c_str())) {
         recoveryFromPersistedData(recoveryFile);
@@ -323,8 +317,8 @@ int Router::addNetworkElement(const std::string &strId, const std::string &strIp
     } catch (opencog::IOException& e) { }
 
     // erease all messages from queue if have any
-    if (id == parameters.get("LS_ID") ||
-            id == parameters.get("SPAWNER_ID")) {
+    if (id == opencog::config().get("LS_ID") ||
+        id == opencog::config().get("SPAWNER_ID")) {
 
         messageCentral->createQueue(id, true);
         errorCode = NO_ERROR;
@@ -407,7 +401,7 @@ void Router::persistState()
 {
 
     // TODO: add some timestamp info to filename
-    std::string path = parameters.get("ROUTER_DATABASE_DIR");
+    std::string path = opencog::config().get("ROUTER_DATABASE_DIR");
     expandPath(path);
 
     if (!createDirectory(path.c_str())) {
@@ -417,7 +411,7 @@ void Router::persistState()
     }
 
     // TODO: Insert timestamp information into routerInfo file
-    std::string filename = path + "/" + parameters.get("ROUTER_DATA_FILE");
+    std::string filename = path + "/" + opencog::config().get("ROUTER_DATA_FILE");
     remove(filename.c_str());
 
     std::ofstream routerFile(filename.c_str());
@@ -511,10 +505,10 @@ void Router::notifyElementAvailability(const std::string& id, bool available)
 
             // Filtering element availability messages to Proxy. Only OPCs and
             // Router notifications should be sent.
-            if ( toId == parameters.get("PROXY_ID") &&
-                    (id == parameters.get("SPAWNER_ID") ||
-                     id == parameters.get("LS_ID") ||
-                     id == parameters.get("COMBO_SHELL_ID"))
+            if ( toId == opencog::config().get("PROXY_ID") &&
+                    (id == opencog::config().get("SPAWNER_ID") ||
+                     id == opencog::config().get("LS_ID") ||
+                     id == opencog::config().get("COMBO_SHELL_ID"))
                ) {
                 logger().log(opencog::Logger::DEBUG, "Router - Discarding notification from internal network elements to Proxy");
                 continue;

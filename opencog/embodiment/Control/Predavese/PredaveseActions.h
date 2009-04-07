@@ -26,7 +26,7 @@
 #include "Predavese.h"
 #include "util/exceptions.h"
 #include "PetInterface.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "NominalReferenceResolver.h"
 
 /// This file contains all the action objects that are associated with
@@ -40,7 +40,6 @@ class action
 protected:
     NominalReferenceResolver *nameResolver;
     Control::PetInterface& petInterface;
-    Control::SystemParameters parameters; // TODO: Get the parameters dynamically (by passing its reference as constructor argument, for instance)
 
     void boostPayAttentionSchema() const;
 public:

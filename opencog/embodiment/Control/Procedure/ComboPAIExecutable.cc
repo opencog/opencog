@@ -21,25 +21,28 @@
  */
 #include "ComboShellServer.h"
 #include "util/files.h"
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
+
+using namespace opencog;
+using namespace MessagingSystem;
 
 int main(int argc, char** argv)
 {
-    using namespace MessagingSystem;
 
     // set up the system for talking to the router
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
-    // a systemParameter object.
+    // a EmbodimentConfig object.
 
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
-    opencog::server(ComboShellServer::createInstance);
-    ComboShellServer& css = static_cast<ComboShellServer&>(opencog::server());
-    css.init(parameters);
+    server(ComboShellServer::createInstance);
+    ComboShellServer& css = static_cast<ComboShellServer&>(server());
+    css.init();
     css.serverLoop();
     return 0;
 }

@@ -30,7 +30,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "PetComboVocabulary.h"
 #include "WorldWrapperUtilCache.h"
 #include "NetworkElement.h"
@@ -146,7 +146,7 @@ public:
     static const float meanTruthThreshold = 0.5;
 
     static unsigned long getHasSaidDelay() {
-        return atoi(MessagingSystem::NetworkElement::parameters.get("HAS_SAID_DELAY").c_str());
+        return opencog::config().get_int("HAS_SAID_DELAY");
     }
 
     /**

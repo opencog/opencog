@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/AutomatedSystemTest/TestParameters.h
+ * opencog/embodiment/AutomatedSystemTest/TestConfig.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -22,23 +22,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _TEST_PARAMETERS_H_
-#define _TEST_PARAMETERS_H_
+#include "TestConfig.h"
 
-#include "SystemParameters.h"
+using namespace AutomatedSystemTest;
+using namespace opencog;
 
-namespace AutomatedSystemTest
+TestConfig::TestConfig()
 {
 
-class TestParameters : public Control::SystemParameters
+    table["TEST_CONFIG_FILE"] = "test.conf";
+
+    // Flag to enable/disable the saving of messages (for using in automated tests).
+    table["SAVE_MESSAGES_TO_FILE"] = "1";
+    // Name of the file where the messages will be saved, if the previous parameter is enabled.
+    table["MESSAGES_FILENAME"] = "PBTesterMessages.txt";
+
+    table["PROXY_IP"] = "127.0.0.1";
+    table["PROXY_PORT"] = "16315";
+}
+
+TestConfig::~TestConfig()
 {
+}
 
-public:
-
-    TestParameters();
-    ~TestParameters();
-
-}; // class
-}  // namespace
-
-#endif
+Config* TestConfig::testCreateInstance()
+{
+    return new TestConfig();
+}

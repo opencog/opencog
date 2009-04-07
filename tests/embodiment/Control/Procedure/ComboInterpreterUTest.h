@@ -11,7 +11,7 @@
 #include "util/files.h"
 #include "PetInterfaceMock.h"
 #include "ComboProcedureRepository.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "LSMessageSenderMock.h"
 #include "PredicatesUpdater.h"
 #include "Pet.h"
@@ -26,6 +26,8 @@
 
 using namespace PerceptionActionInterface;
 using namespace combo;
+using namespace Control;
+using namespace opencog;
 
 class ComboInterpreterUTest
 {
@@ -33,7 +35,7 @@ class ComboInterpreterUTest
 protected:
 
     AtomSpace* atomSpace;
-    Control::SystemParameters parameters;
+
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     ResponsiveActionPlanSender *sender;
@@ -49,11 +51,13 @@ protected:
 public:
 
     ComboInterpreterUTest() {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
         init(string("pvpMsg1.xml"), PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"));
 //      init(string("pvpMsg1.xml"), string("Fido"));
     }
 
     ComboInterpreterUTest(std::string _xmlFileName, std::string petName) {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
         init(_xmlFileName, petName);
     }
 
@@ -68,7 +72,7 @@ public:
 
         sender = new ResponsiveActionPlanSender();
         petInterface = new PetInterfaceMock(petName, PAIUtils::getInternalId("Wynx"), string(""));
-        ppai = new PAI(*atomSpace, *sender, *petInterface, parameters);
+        ppai = new PAI(*atomSpace, *sender, *petInterface);
         petInterface->setPAI(ppai);
 
         sender->setPai(ppai);

@@ -1,10 +1,8 @@
 /*
- * opencog/embodiment/AutomatedSystemTest/TestParameters.cc
+ * opencog/embodiment/PetaverseProxySimulator/SimulationParameters.h
  *
- * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2007-2008 Andre Senna
  * All Rights Reserved
- *
- * Written by Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,25 +20,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TestParameters.h"
+#ifndef SIMULATIONPARAMETERS_H
+#define SIMULATIONPARAMETERS_H
 
-using namespace AutomatedSystemTest;
+#include <time.h>
+#include "EmbodimentConfig.h"
 
-TestParameters::TestParameters()
+namespace PetaverseProxySimulator
 {
 
-    table["CONFIG_FILE"] = "test.cfg";
-
-    // Flag to enable/disable the saving of messages (for using in automated tests).
-    table["SAVE_MESSAGES_TO_FILE"] = "1";
-    // Name of the file where the messages will be saved, if the previous parameter is enabled.
-    table["MESSAGES_FILENAME"] = "PBTesterMessages.txt";
-
-    table["PROXY_IP"] = "127.0.0.1";
-    table["PROXY_PORT"] = "16315";
-}
-
-TestParameters::~TestParameters()
+class SimulationConfig : public Control::EmbodimentConfig
 {
-}
 
+public:
+
+    SimulationConfig();
+    ~SimulationConfig();
+
+    // Returns a new EmbodimentConfig instance
+    static Config* simulationCreateInstance(void);
+
+    time_t simulationStart;
+    time_t simulationTicks;
+
+    void startSimulation();
+    int getCurrentSimulationSeconds();
+    void timeTick();
+
+}; // class
+}  // namespace
+
+#endif

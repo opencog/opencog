@@ -27,7 +27,7 @@
 #include "util/Logger.h"
 
 #include "WorldProvider.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
 #include "LSCmdMessage.h"
 #include "LearnMessage.h"
@@ -53,13 +53,11 @@ public:
     /**
      * Constructor and Destructor
      */
-    LS(const std::string &myId, const std::string &ip, int portNumber,
-       Control::SystemParameters & parameters);
+    LS(const std::string &myId, const std::string &ip, int portNumber);
     LS();
     ~LS();
 
-    void init(const std::string &myId, const std::string &ip, int portNumber,
-              Control::SystemParameters & parameters);
+    void init(const std::string &myId, const std::string &ip, int portNumber);
 
     /**
      * Method inherited from network element

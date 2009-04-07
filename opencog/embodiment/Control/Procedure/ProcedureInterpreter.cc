@@ -76,7 +76,7 @@ ProcedureInterpreter::ProcedureInterpreter(PerceptionActionInterface::PAI& p) : 
 {
     //initialize the random generator
     unsigned long rand_seed;
-    if (MessagingSystem::NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") == "1") {
+    if (opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);

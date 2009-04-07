@@ -8,16 +8,19 @@
 #include "ActionPlanSenderMock.h"
 #include "PetInterfaceMock.h"
 #include "PetActionSchema.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;
+using namespace Control;
+using namespace opencog;
 
 class RunningBuiltInProcedureUTest :  public CxxTest::TestSuite
 {
 
 public:
     RunningBuiltInProcedureUTest() {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
     }
 
     ~RunningBuiltInProcedureUTest() {
@@ -32,11 +35,10 @@ public:
     void testOk() {
         AtomSpace as;
 
-        Control::SystemParameters sp;
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
         PetInterfaceMock pi;
-        PAI pai(as, ap, pi, sp);
+        PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
         PetActionSchema p(pai, ActionType::BARK());
@@ -59,10 +61,9 @@ public:
     void testFailure() {
         AtomSpace as;
 
-        Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
-        PAI pai(as, ap, pi, sp);
+        PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema p(pai, ActionType::BARK());
         std::vector<combo::vertex> arguments;

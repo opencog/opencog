@@ -11,6 +11,6 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (Control
-    SystemParameters
+    EmbodimentConfig
     LoggerFactory
 )

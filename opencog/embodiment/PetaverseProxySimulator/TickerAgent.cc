@@ -22,7 +22,6 @@
 
 #include "TickerAgent.h"
 #include "PVPSimulator.h"
-#include "SimulationParameters.h"
 
 #include <time.h>
 
@@ -36,11 +35,10 @@ TickerAgent::TickerAgent()
 {
 }
 
-void TickerAgent::init(SimulationParameters& _simParameters)
+void TickerAgent::init()
 {
-    simParameters = &_simParameters;
     lastTickTime = 0;
-    realTimeSecondsInOneTick = atoi(simParameters->get("REAL_TIME_SECONDS_IN_ONE_TICK").c_str());
+    realTimeSecondsInOneTick = opencog::config().get_int("REAL_TIME_SECONDS_IN_ONE_TICK");
 }
 
 void TickerAgent::run(opencog::CogServer *server)

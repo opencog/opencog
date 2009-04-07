@@ -23,7 +23,7 @@
 #define COMBO_SHELL_SERVER_H
 
 #include <string>
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include "Message.h"
 #include "EmbodimentCogServer.h"
 
@@ -36,7 +36,7 @@ class ComboShellServer : public EmbodimentCogServer
 public:
     static BaseServer* createInstance();
     ComboShellServer();
-    void init(const Control::SystemParameters &params);
+    void init();
 
     // overrides
     bool customLoopRun();

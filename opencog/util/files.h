@@ -22,12 +22,15 @@
 
 #ifndef _OPENCOG_FILES_H_
 #define _OPENCOG_FILES_H_
+
 /**
  * Files.h
  *
  * Functions for manipulating files
  *
  */
+
+#include <string>
 
 /**
  * Check if a file exists in PetDatabase (currently a directory)

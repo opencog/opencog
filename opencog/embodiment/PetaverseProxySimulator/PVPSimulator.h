@@ -124,8 +124,6 @@ private:
 
     std::string PVP_ID;
 
-    SimulationParameters* simParams;
-
     void initialize();
 
     int tickCount;
@@ -151,8 +149,8 @@ public:
     static opencog::BaseServer* createInstance();
     ~PVPSimulator();
     PVPSimulator();
-    void init(SimulationParameters&);
-    void init(const Control::SystemParameters &params, SimulationParameters& simParams, const std::string &myId, const std::string &ip, int portNumber);
+    void init();
+    void init(const std::string &myId, const std::string &ip, int portNumber);
 
     // ***********************************************/
     // API

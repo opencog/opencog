@@ -1,8 +1,10 @@
 /*
- * opencog/embodiment/PetaverseProxySimulator/SimulationParameters.h
+ * opencog/embodiment/AutomatedSystemTest/TestConfig.h
  *
- * Copyright (C) 2007-2008 Andre Senna
+ * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
+ *
+ * Written by Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,29 +22,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef SIMULATIONPARAMETERS_H
-#define SIMULATIONPARAMETERS_H
+#ifndef _TEST_PARAMETERS_H_
+#define _TEST_PARAMETERS_H_
 
-#include <time.h>
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
-namespace PetaverseProxySimulator
+namespace AutomatedSystemTest
 {
 
-class SimulationParameters : public Control::SystemParameters
+class TestConfig : public Control::EmbodimentConfig
 {
 
 public:
 
-    SimulationParameters();
-    ~SimulationParameters();
+    TestConfig();
+    ~TestConfig();
 
-    time_t simulationStart;
-    time_t simulationTicks;
-
-    void startSimulation();
-    int getCurrentSimulationSeconds();
-    void timeTick();
+    // Returns a new TestConfig instance
+    static Config* testCreateInstance(void);
 
 }; // class
 }  // namespace

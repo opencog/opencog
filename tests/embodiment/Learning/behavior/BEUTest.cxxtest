@@ -3,8 +3,11 @@
 #include "atom_types_init.h"
 #include "PredefinedProcedureNames.h"
 #include "BDRetriever.h"
+#include "EmbodimentConfig.h"
 
 using namespace behavior;
+using namespace Control;
+using namespace opencog;
 
 class BEUTest : public CxxTest::TestSuite
 {
@@ -14,6 +17,7 @@ private:
 public:
 
     BEUTest () {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
         opencog::atom_types_init::init();
     }
 

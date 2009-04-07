@@ -27,7 +27,7 @@
 
 #include <opencog/server/Factory.h>
 #include <opencog/server/Agent.h>
-#include "TestParameters.h"
+#include "TestConfig.h"
 #include "GoldStdMessage.h"
 
 namespace AutomatedSystemTest
@@ -43,7 +43,6 @@ class GoldStdReaderAgent : public Agent
 
 private:
 
-    TestParameters* testParameters;
     FILE* goldStdFile;
     char line_buf[LINE_BUF_SIZE];
     PetaverseProxySimulator::GoldStdMessage* messageToSend;
@@ -62,7 +61,7 @@ public:
 
     ~GoldStdReaderAgent();
     GoldStdReaderAgent();
-    void init(TestParameters&, const char* goldStdFilename);
+    void init(const char* goldStdFilename);
 
     void run(CogServer *server);
 

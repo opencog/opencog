@@ -31,6 +31,10 @@
 namespace opencog
 {
 
+class Config;
+
+typedef Config* ConfigFactory(void);
+
 
 class Config
 {
@@ -67,8 +71,11 @@ public:
     ~Config();
     Config();
 
+    // Returns a new Config instance
+    static Config* createInstance(void);
+
     // reset configuration to default
-    void reset();
+    virtual void reset();
 
     // Load passed file and redefines values for parameters.
     void load(const char* config_file);
@@ -86,6 +93,9 @@ public:
     // Return current value of a given parameter as an integer
     int get_int(const std::string &parameter_name) const;
 
+    // Return current value of a given parameter as an long
+    long get_long(const std::string &parameter_name) const;
+
     // Return current value of a given parameter as a double
     double get_double(const std::string &parameter_name) const;
     //
@@ -97,7 +107,11 @@ public:
 };
 
 // singleton instance (following meyer's design pattern)
-Config& config();
+// Nil: if overwrite is true then the static variable instance
+//      is changed with the createInstance provided
+//      it is a temporary dirty hack 
+Config& config(ConfigFactory* = Config::createInstance,
+               bool overwrite = false);
 
 } // namespace opencog
 

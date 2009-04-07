@@ -33,7 +33,7 @@ using namespace OperationalPetController;
 RuleEngineUtil::RuleEngineUtil( RuleEngine* ruleEngine )
         : ruleEngine( ruleEngine )
 {
-    this->cyclesDuringNovelty = atoi((this->ruleEngine->parameters.get("RE_CYCLES_DURING_NOVELTY")).c_str());
+    this->cyclesDuringNovelty = config().get_int("RE_CYCLES_DURING_NOVELTY");
 }
 
 RuleEngineUtil::HandleContainer RuleEngineUtil::getNovelEntityHandleSet( void )
@@ -116,7 +116,7 @@ bool RuleEngineUtil::isThereARequestedSchema( void )
 {
 
     if ( this->ruleEngine->opc->getPet( ).isRequestedCommandNotReaded( ) ) {
-        this->ruleEngine->lastRequestedCommandCycles = atoi((this->ruleEngine->parameters.get("RE_CYCLES_FOR_REQUESTED_SCHEMA")).c_str());
+        this->ruleEngine->lastRequestedCommandCycles = config().get_int("RE_CYCLES_FOR_REQUESTED_SCHEMA");
         return true;
     } else if ( this->ruleEngine->lastRequestedCommandCycles > 0 ) {
         --this->ruleEngine->lastRequestedCommandCycles;

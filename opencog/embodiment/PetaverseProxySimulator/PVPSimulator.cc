@@ -34,7 +34,7 @@
 #include "PAIUtils.h"
 #include "PetaverseDOMParser.h"
 #include "PetaverseErrorHandler.h"
-#include "SimulationParameters.h"
+#include "SimulationConfig.h"
 #include <StringMessage.h>
 #include "AGISimSimulator.h"
 #include "PVPXmlConstants.h"
@@ -63,7 +63,7 @@ PVPSimulator::~PVPSimulator()
     petsPhysiologicalModel.clear();
 
     delete(this->worldSimulator);
-    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
+    if (opencog::config().get_bool("GENERATE_GOLD_STANDARD")) {
         delete goldStdGen;
     }
 }
@@ -72,18 +72,16 @@ PVPSimulator::PVPSimulator()
 {
 }
 
-void PVPSimulator::init(SimulationParameters& _simParams)
+void PVPSimulator::init()
 {
-    simParams = &_simParams;
     initialize();
     worldSimulator = new WorldSimulator();
 }
 
-void PVPSimulator::init(const Control::SystemParameters &params, SimulationParameters& _simParams, const std::string &myId, const std::string &ip, int portNumber)
+void PVPSimulator::init(const std::string &myId, const std::string &ip, int portNumber)
 {
-    setNetworkElement(new NetworkElement(params, myId, ip, portNumber));
+    setNetworkElement(new NetworkElement(myId, ip, portNumber));
     PVP_ID = "PVP";
-    simParams = &_simParams;
     initialize();
     worldSimulator = new AGISimSimulator("localhost", this);
     //worldSimulator = new AGISimSimulator("10.1.0.5", this);
@@ -99,8 +97,8 @@ void PVPSimulator::initialize()
     messagesToSend.createQueue(PVP_ID);
     pthread_mutex_init(&currentTimeLock, NULL);
 
-    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
-        goldStdGen = new GoldStdGen(simParams->get("GOLD_STANDARD_FILENAME").c_str());
+    if (opencog::config().get_bool("GENERATE_GOLD_STANDARD")) {
+        goldStdGen = new GoldStdGen(opencog::config().get("GOLD_STANDARD_FILENAME").c_str());
     }
 
     /**
@@ -108,9 +106,9 @@ void PVPSimulator::initialize()
      * than check if such file exists in filesystem. If so, start recovery
      * process.
      */
-    std::string recoveryFile = getParameters().get("PROXY_DATABASE_DIR");
+    std::string recoveryFile = opencog::config().get("PROXY_DATABASE_DIR");
     expandPath(recoveryFile);
-    recoveryFile.append("/" + getParameters().get("PROXY_DATA_FILE"));
+    recoveryFile.append("/" + opencog::config().get("PROXY_DATA_FILE"));
 
     if (fileExists(recoveryFile.c_str())) {
         recoveryFromPersistedData(recoveryFile);
@@ -120,7 +118,7 @@ void PVPSimulator::initialize()
 
 bool PVPSimulator::processNextMessage(MessagingSystem::Message *message)
 {
-    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
+    if (opencog::config().get_bool("GENERATE_GOLD_STANDARD")) {
         goldStdGen->writeMessage(*message, false);
     }
     if ( strcasestr( message->getPlainTextRepresentation(), "SUCCESS")) {
@@ -136,7 +134,7 @@ bool PVPSimulator::processNextMessage(MessagingSystem::Message *message)
 
         // used only to shutdown the simulator. Real PVP do not have something
         // like this
-        if (message->getFrom() == getParameters().get("SPAWNER_ID")) {
+        if (message->getFrom() == opencog::config().get("SPAWNER_ID")) {
             if (std::string(message->getPlainTextRepresentation()) == "SAVE_AND_EXIT") {
                 throw opencog::RuntimeException(TRACE_INFO, "PVPSim - Forcing a runtime exception.");
             }
@@ -149,7 +147,7 @@ bool PVPSimulator::processNextMessage(MessagingSystem::Message *message)
 
 bool PVPSimulator::sendMessage(Message &msg)
 {
-    if (simParams->get("GENERATE_GOLD_STANDARD") == "1") {
+    if (opencog::config().get_bool("GENERATE_GOLD_STANDARD")) {
         goldStdGen->writeMessage(msg, true);
     }
     return EmbodimentCogServer::sendMessage(msg);
@@ -160,7 +158,7 @@ void PVPSimulator::timeTick()
 
     logger().log(opencog::Logger::DEBUG, "PVPSimulator::timeTick()");
 
-    simParams->timeTick();
+    static_cast<SimulationConfig&>(opencog::config()).timeTick();
     worldSimulator->timeTick();
     for ( PetsPhysiologicalModelMap::iterator it = petsPhysiologicalModel.begin(); it != petsPhysiologicalModel.end(); it++ )
         it->second->timeTick();
@@ -185,7 +183,7 @@ void PVPSimulator::persistState() throw (opencog::IOException, std::bad_exceptio
 {
 
     // TODO: add some timestamp info to filename
-    std::string path = getParameters().get("PROXY_DATABASE_DIR");
+    std::string path = opencog::config().get("PROXY_DATABASE_DIR");
     expandPath(path);
 
     if (!createDirectory(path.c_str())) {
@@ -195,7 +193,7 @@ void PVPSimulator::persistState() throw (opencog::IOException, std::bad_exceptio
     }
 
     // TODO: Insert timestamp information into routerInfo file
-    std::string filename = path + "/" + getParameters().get("PROXY_DATA_FILE");
+    std::string filename = path + "/" + opencog::config().get("PROXY_DATA_FILE");
     remove(filename.c_str());
 
     std::ofstream pvpFile(filename.c_str());
@@ -255,7 +253,7 @@ void PVPSimulator::sendMessages()
         Message *msg = this->messagesToSend.pop(PVP_ID);
 
         // router available, send message. Otherwise just delete the message
-        if (isElementAvailable(getParameters().get("ROUTER_ID"))) {
+        if (isElementAvailable(opencog::config().get("ROUTER_ID"))) {
             sendMessage(*msg);
         }
 
@@ -267,7 +265,7 @@ std::string PVPSimulator::getCurrentTimestamp()
 {
     static boost::posix_time::ptime epoch_time( PAIUtils::getSystemEpoch( ) );
 
-    int seconds = simParams->getCurrentSimulationSeconds();
+    int seconds = static_cast<SimulationConfig&>(opencog::config()).getCurrentSimulationSeconds();
     boost::posix_time::ptime t = epoch_time + boost::posix_time::seconds(seconds);
     return to_iso_extended_string(t);
 }
@@ -471,7 +469,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId)
         return;
     }
 
-    if (!isElementAvailable(getParameters().get("ROUTER_ID"))) {
+    if (!isElementAvailable(opencog::config().get("ROUTER_ID"))) {
         printf("ROUTERUNAVAILABLE\n"); fflush(stdout);
         return;
     }
@@ -1179,7 +1177,7 @@ std::string PVPSimulator::createPet(const std::string& petId, const std::string&
     }
     petsId[createdPetId] = false;
     ownership[createdPetId] = ownerId;
-    petsPhysiologicalModel[createdPetId] = new PhysiologicalModel(*simParams);
+    petsPhysiologicalModel[createdPetId] = new PhysiologicalModel();
 
     printf("PETCREATED %s\n", createdPetId.c_str()); fflush(stdout);
     // recovey data. PVP went down but pet is still executing fine. No need to
@@ -1219,7 +1217,9 @@ bool PVPSimulator::loadPet(const std::string& petId)
 
     std::string msgCmd = "LOAD_PET ";
     msgCmd += petId;
-    MessagingSystem::StringMessage msg(getParameters().get("PROXY_ID"), getParameters().get("SPAWNER_ID"), msgCmd);
+    MessagingSystem::StringMessage msg(opencog::config().get("PROXY_ID"),
+                                       opencog::config().get("SPAWNER_ID"),
+                                       msgCmd);
     sendMessage(msg);
     return  true;
 }

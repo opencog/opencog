@@ -30,6 +30,7 @@
 #include "PetMessageSender.h"
 
 using namespace OperationalPetController;
+using namespace opencog;
 
 PetMessageSender::~PetMessageSender()
 {
@@ -45,7 +46,7 @@ bool PetMessageSender::sendReward(const std::string &schema, const std::vector<s
                                   const double reward)
 {
 
-    LearningServerMessages::RewardMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schema, schemaArguments, triedSchema, reward);
+    LearningServerMessages::RewardMessage msg(ne->getID(), config().get("LS_ID"), schema, schemaArguments, triedSchema, reward);
     return ne->sendMessage(msg);
 }
 
@@ -55,7 +56,7 @@ bool PetMessageSender::sendExemplar(const std::string &schema, const std::vector
                                     AtomSpace &atomSpace)
 {
 
-    LearningServerMessages::LearnMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schema, schemaArguments, ownerId, avatarId, atomSpace);
+    LearningServerMessages::LearnMessage msg(ne->getID(), config().get("LS_ID"), schema, schemaArguments, ownerId, avatarId, atomSpace);
     logger().log(opencog::Logger::DEBUG, "PetMessageSender - sending exemplar message for schema '%s'.", schema.c_str());
     return ne->sendMessage(msg);
 }
@@ -64,14 +65,14 @@ bool PetMessageSender::sendCommand(const std::string &command,
                                    const std::string &schema)
 {
 
-    LearningServerMessages::LSCmdMessage msg(ne->getID(), ne->parameters.get("LS_ID"), command, schema);
+    LearningServerMessages::LSCmdMessage msg(ne->getID(), config().get("LS_ID"), command, schema);
     return ne->sendMessage(msg);
 }
 
 bool PetMessageSender::sendFeedback(const std::string &petId, const std::string &feedback)
 {
 
-    MessagingSystem::FeedbackMessage msg(ne->getID(), ne->parameters.get("PROXY_ID"),
+    MessagingSystem::FeedbackMessage msg(ne->getID(), config().get("PROXY_ID"),
                                          PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()), feedback);
     return ne->sendMessage(msg);
 }
@@ -79,13 +80,13 @@ bool PetMessageSender::sendFeedback(const std::string &petId, const std::string 
 bool PetMessageSender::sendTrySchema(const std::string &schemaName, const std::vector<std::string> & schemaArgs)
 {
 
-    LearningServerMessages::TrySchemaMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schemaName, schemaArgs);
+    LearningServerMessages::TrySchemaMessage msg(ne->getID(), config().get("LS_ID"), schemaName, schemaArgs);
     return ne->sendMessage(msg);
 }
 
 bool PetMessageSender::sendStopLearning(const std::string &schemaName, const std::vector<std::string> & schemaArgs)
 {
 
-    LearningServerMessages::StopLearningMessage msg(ne->getID(), ne->parameters.get("LS_ID"), schemaName, schemaArgs);
+    LearningServerMessages::StopLearningMessage msg(ne->getID(), config().get("LS_ID"), schemaName, schemaArgs);
     return ne->sendMessage(msg);
 }

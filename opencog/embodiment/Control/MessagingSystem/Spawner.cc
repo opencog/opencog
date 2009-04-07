@@ -46,16 +46,15 @@ Spawner::Spawner()
 {
 }
 
-void Spawner::init(const Control::SystemParameters &params,
-                   const std::string &id,
+void Spawner::init(const std::string &id,
                    const std::string &ip,
                    int port) throw (opencog::InvalidParamException, std::bad_exception)
 {
 
-    setNetworkElement(new NetworkElement(params, id, ip, port));
+    setNetworkElement(new NetworkElement(id, ip, port));
 
-    minOpcPort = atoi(getParameters().get("MIN_OPC_PORT").c_str());
-    maxOpcPort = atoi(getParameters().get("MAX_OPC_PORT").c_str());
+    minOpcPort = opencog::config().get_int("MIN_OPC_PORT");
+    maxOpcPort = opencog::config().get_int("MAX_OPC_PORT");
     int maxNumberOfPets = maxOpcPort - minOpcPort;
 
     if (minOpcPort <= 0 || maxOpcPort <= 0 || maxNumberOfPets < 0) {
@@ -131,8 +130,8 @@ bool Spawner::processNextMessage(Message *message)
         }
         std::string cmdPrefix;
         std::string cmdSuffix;
-        if (atoi(getParameters().get("RUN_OPC_DEBUGGER").c_str()) != 0) {
-            cmdPrefix = getParameters().get("OPC_DEBUGGER_PATH");
+        if (opencog::config().get_bool("RUN_OPC_DEBUGGER")) {
+            cmdPrefix = opencog::config().get("OPC_DEBUGGER_PATH");
             cmdPrefix += " ";
             std::cout << "======= YOU MUST ENTER DEBUGGER PARAMETERS ======="
                       << std::endl;
@@ -141,16 +140,16 @@ bool Spawner::processNextMessage(Message *message)
             std::cout << agentID << " " << ownerID << " " << agentType << " " << agentTraits << " " << opcPort << std::endl;
             str << cmdPrefix << "./opc &";
         } else {
-            if (atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str()) != 0) {
-                cmdPrefix = getParameters().get("VALGRIND_PATH");
+            if (opencog::config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
+                cmdPrefix = opencog::config().get("VALGRIND_PATH");
                 cmdPrefix += " --leak-check=full ";
                 cmdSuffix += " > opc.valgrind.memcheck 2>&1";
-            } else if (atoi(getParameters().get("CHECK_OPC_MEMORY_USAGE").c_str()) != 0) {
-                cmdPrefix = getParameters().get("VALGRIND_PATH");
+            } else if (opencog::config().get_bool("CHECK_OPC_MEMORY_USAGE")) {
+                cmdPrefix = opencog::config().get("VALGRIND_PATH");
                 cmdPrefix += " --tool=massif --detailed-freq=";
-                cmdPrefix += getParameters().get("MASSIF_DETAILED_FREQ");
+                cmdPrefix += opencog::config().get("MASSIF_DETAILED_FREQ");
                 cmdPrefix += " --depth=";
-                cmdPrefix += getParameters().get("MASSIF_DEPTH");
+                cmdPrefix += opencog::config().get("MASSIF_DEPTH");
                 cmdPrefix += " ";
                 cmdSuffix += " > opc.valgrind.massif 2>&1";
             }
@@ -165,7 +164,7 @@ bool Spawner::processNextMessage(Message *message)
 
 #define USE_SYSTEM_FUNCTION
 #ifdef USE_SYSTEM_FUNCTION
-        if (atoi(getParameters().get("MANUAL_OPC_LAUNCH").c_str()) == 0) {
+        if (!opencog::config().get_bool("MANUAL_OPC_LAUNCH")) {
             system(str.str().c_str( ) );
         } else {
             printf("\nSpawner Command: %s\n", str.str().c_str());

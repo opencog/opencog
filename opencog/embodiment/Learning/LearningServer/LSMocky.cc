@@ -42,9 +42,9 @@ LSMocky::LSMocky()
 }
 
 void LSMocky::init(const std::string &myId, const std::string &ip,
-                   int portNumber, Control::SystemParameters & parameters)
+                   int portNumber)
 {
-    setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
+    setNetworkElement(new NetworkElement(myId, ip, portNumber));
     registerAgent(SleepAgent::info().id, &sleepAgentFactory);
     SleepAgent* sleepAgent = static_cast<SleepAgent*>(
                                  createAgent(SleepAgent::info().id, &sleepAgentFactory));

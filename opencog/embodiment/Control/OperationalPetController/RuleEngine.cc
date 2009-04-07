@@ -42,7 +42,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include "AtomSpaceUtil.h"
 #include "OPC.h"
 #include "PAIUtils.h"
@@ -51,17 +51,18 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/numeric/conversion/cast.hpp>  
 
 #define MORE_DEBUG_INFO 1
 
 #define WILD_CARD_STR "_*_"
 
 using namespace OperationalPetController;
+using namespace opencog;
 
-RuleEngine::RuleEngine( OPC* opc, const std::string& petName,
-                        Control::SystemParameters& parameters )
-throw( opencog::RuntimeException ) :
-        opc(opc), petName( petName ), parameters( parameters ), cycle(0),
+RuleEngine::RuleEngine( OPC* opc, const std::string& petName )
+throw( RuntimeException ) :
+        opc(opc), petName( petName ), cycle(0),
         lastPetActionDone("", std::vector<std::string>()),
         currentAction("", std::vector<std::string>()),
         candidateAction( "", std::vector<std::string>()),
@@ -72,31 +73,30 @@ throw( opencog::RuntimeException ) :
 
     this->petHandle = AtomSpaceUtil::getAgentHandle( *(opc->getAtomSpace()),
                       petName );
-    rng = new opencog::MT19937RandGen(0);
+    rng = new MT19937RandGen(0);
     if ( petHandle == Handle::UNDEFINED ) {
-        throw opencog::RuntimeException( TRACE_INFO,
-                                         ( "There is no pet named '"
-                                           + petName
-                                           + "' inside AtomTable" ).c_str() );
+        throw RuntimeException( TRACE_INFO,
+                                ( "There is no pet named '"
+                                  + petName
+                                  + "' inside AtomTable" ).c_str() );
     } // if
-
+    
     this->util = new RuleEngineUtil( this );
-    this->schemaRunner = new SchemaRunner( opc, parameters );
+    this->schemaRunner = new SchemaRunner( opc );
     this->learnedTricksHandler = new RuleEngineLearnedTricksHandler( opc );
-    this->cyclesDuringAgentLastAction = atoi(parameters.get("RE_CYCLES_DURING_AGENT_LAST_ACTION").c_str());
-
+    this->cyclesDuringAgentLastAction = config().get_int("RE_CYCLES_DURING_AGENT_LAST_ACTION");
+    
     this->longTermAttentionValue = AttentionValue::factory(AttentionValue::DEFAULTATOMSTI, 1);
-    this->defaultTruthValue = new SimpleTruthValue(atof(this->parameters.get("RE_DEFAULT_MEAN").c_str()),
-            atof(this->parameters.get("RE_DEFAULT_COUNT").c_str()));
+    this->defaultTruthValue = new SimpleTruthValue(config().get_double("RE_DEFAULT_MEAN"), config().get_double("RE_DEFAULT_COUNT"));
 
     this->currentActionRepetitions = 0;
     updateCurrentActionRepetitions();
 
     // precompute gaussian distribution used to reward/punish pet behavior
-    preCompGaussianDistributionVector(atof(parameters.get("RL_TIME_WINDOW").c_str()),
-                                      atof(parameters.get("RL_GAUSSIAN_MEAN").c_str()),
-                                      atof(parameters.get("RL_GAUSSIAN_STD_DEVIATION").c_str()));
-
+    preCompGaussianDistributionVector(config().get_double("RL_TIME_WINDOW"),
+                                      config().get_double("RL_GAUSSIAN_MEAN"),
+                                      config().get_double("RL_GAUSSIAN_STD_DEVIATION"));
+                                      
 
     // enabling lua language - load rules from file
     this->luaState = lua_open( );
@@ -138,17 +138,17 @@ throw( opencog::RuntimeException ) :
     luabind::globals( this->luaState )[ "ruleEngine" ] = this;
 
     // load core file
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  ( "RuleEngine - loading core file: "
-                   + parameters.get("RE_CORE_FILE") ).c_str( ) );
-    if (luaL_dofile(this->luaState, parameters.get("RE_CORE_FILE").c_str())) {
+                   + config().get("RE_CORE_FILE") ).c_str( ) );
+    if (luaL_dofile(this->luaState, config().get("RE_CORE_FILE").c_str())) {
         luaThrowException( this->luaState );
     } // if
 
-    std::string agentRules = (boost::format(parameters.get("RE_RULES_FILENAME_MASK")) % this->opc->getPet().getType()).str();
+    std::string agentRules = (boost::format(config().get("RE_RULES_FILENAME_MASK")) % this->opc->getPet().getType()).str();
 
     // load rules
-    logger().log(opencog::Logger::DEBUG, ( "RuleEngine - loading rules file: " + parameters.get("RULE_ENGINE_RULES_FILENAME_MASK") ).c_str( ) );
+    logger().log(Logger::DEBUG, ( "RuleEngine - loading rules file: " + config().get("RULE_ENGINE_RULES_FILENAME_MASK") ).c_str( ) );
     if ( luaL_dofile( this->luaState, agentRules.c_str() ) ) {
         luaThrowException( this->luaState );
     } // if
@@ -219,7 +219,7 @@ const std::string& RuleEngine::getNextAction( void )
  * lua functions
  * -----------------------------------------------------------------------
  */
-int RuleEngine::luaThrowException( lua_State* state ) throw(opencog::RuntimeException)
+int RuleEngine::luaThrowException( lua_State* state ) throw(RuntimeException)
 {
     lua_Debug debugger;
     lua_getfield( state, LUA_GLOBALSINDEX, "f");  /* get global 'f' */
@@ -236,7 +236,7 @@ int RuleEngine::luaThrowException( lua_State* state ) throw(opencog::RuntimeExce
     message << " [" << error << "]";
     std::cerr << message.str( ) << std::endl;
 
-    throw opencog::RuntimeException( TRACE_INFO, message.str( ).c_str( ) );
+    throw RuntimeException( TRACE_INFO, message.str( ).c_str( ) );
 }
 
 /* -----------------------------------------------------------------------
@@ -247,14 +247,14 @@ void RuleEngine::preCompGaussianDistributionVector(float window,
         float mean,
         float stdDeviation)
 {
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - window '%f' mean '%f' std '%f'.",
                  window, mean, stdDeviation);
 
     // a twenty standard deviation vector
     float slots = ceil( 20.0 * stdDeviation);
     float timePerSlot = window / slots;
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - Gaussian vector slots '%.3f'"
                  " timePerSlot '%.3f'.",
                  slots, timePerSlot);
@@ -280,7 +280,7 @@ void RuleEngine::addSchemaNode(const std::string& schemaName)
     opc->getAtomSpace()->setAV(result, *longTermAttentionValue);
     opc->getAtomSpace()->setTV(result, *defaultTruthValue);
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "addSchemaNode - Added GROUNDED_SCHEMA_NODE '%s'.",
                  schemaName.c_str());
 }
@@ -324,7 +324,7 @@ void RuleEngine::updateValidTargets(combo::variable_unifier& unifier)
         if (it->second) {
             this->varBindCandidates.push_back((*it).first);
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Unified entity '%s'.",
                          (it->first).c_str());
         }
@@ -342,7 +342,7 @@ void RuleEngine::updateKnownEntities()
     spaceMap.findAllEntities(back_inserter(entities));
 
     foreach(std::string entity, entities) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().log(Logger::DEBUG,
                      "RuleEngine - Inspecting entity '%s'",
                      entity.c_str());
 
@@ -351,7 +351,7 @@ void RuleEngine::updateKnownEntities()
                                           SL_NODE, entity, true);
 
         if (objectHandle.size() != 1) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - There is no entity '%s' registered"
                          " on atomspace (# of elements found: '%d')",
                          entity.c_str( ), objectHandle.size() );
@@ -367,7 +367,7 @@ void RuleEngine::updateKnownEntities()
                             "next",
                             entityHandle,
                             petHandle);
-        logger().log(opencog::Logger::DEBUG,
+        logger().log(Logger::DEBUG,
                      ("RuleEngine - is '" + entity + "' next '"
                       + this->petName + "': "
                       + ((isNextEntity) ? "true" : "false")).c_str());
@@ -529,7 +529,7 @@ void RuleEngine::suggestAction( const std::string& rule,
         std::copy( arguments.begin( ), arguments.end( ), finalParameters.begin( ) );
     } // else if
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - Rule '%s' action '%s'",
                  rule.c_str(), action.c_str());
 
@@ -570,14 +570,14 @@ void RuleEngine::addRelation(const Relation& relation)
 
     // found no handle - ERROR
     if ( objHandle.size( ) < 1 ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Found no Handle for SpaceMap object %s.",
                      relation.getTarget( ).c_str( ) );
         return;
 
         // found more than one handle - WARNING, return the first one
     } else if (objHandle.size() > 1) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Found more than one Handle for SpaceMap"
                      " object '%s'. Using the first one.",
                      relation.getTarget( ).c_str( ));
@@ -585,7 +585,7 @@ void RuleEngine::addRelation(const Relation& relation)
 
     Handle targetHandle = objHandle[0];
     if ( targetHandle == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - attempted to add a relation to"
                      " an avatar/object that not exists");
         return;
@@ -600,20 +600,20 @@ void RuleEngine::addRelation(const Relation& relation)
     // add that relation name in relationNameSet
     relationNameSet.insert(relation.getName());
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - Relation '%s' added to target '%s'"
                  " with intensity '%f'.",
                  relation.getName( ).c_str( ),
                  relation.getTarget( ).c_str( ), relation.getIntensity() );
 }
 
-void RuleEngine::logRelations(int l)
+void RuleEngine::logRelations(Logger::Level l)
 {
     // it looks at the existing relating in the atomSpace
     // log them at level l
     const AtomSpace& as = *(opc->getAtomSpace());
 
-    logger().log(static_cast<opencog::Logger::Level>(l),
+    logger().log(l,
                  "RuleEngine - TruthValue relations at RuleEngine cycle %d",
                  getCycle());
 
@@ -646,7 +646,7 @@ void RuleEngine::logRelations(int l)
             message_str += tv.toString();
 
             // log the message
-            logger().log(static_cast<opencog::Logger::Level>(l), message_str);
+            logger().log(l, message_str);
         }
     }
 }
@@ -658,7 +658,7 @@ void RuleEngine::removeRelation(const Relation& relation)
     Handle relationHandle = opc->getAtomSpace()->getHandle(PREDICATE_NODE,
                             relation.getName() );
     if ( relationHandle == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "RuleEngine - attempted to remove a relation"
                      " that not exists");
         return;
@@ -672,14 +672,14 @@ void RuleEngine::removeRelation(const Relation& relation)
 
     // found no handle - ERROR
     if ( objHandle.size( ) < 1 ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Found no Handle for SpaceMap object %s.",
                      relation.getTarget( ).c_str( ) );
         return;
 
         // found more than one handle - WARNING, return the first one
     } else if (objHandle.size() > 1) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Found more than one Handle for"
                      " SpaceMap object '%s'. Using the first one.",
                      relation.getTarget( ).c_str( ));
@@ -687,7 +687,7 @@ void RuleEngine::removeRelation(const Relation& relation)
 
     Handle targetHandle = objHandle[0];
     if ( targetHandle == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - attempted to add a relation to"
                      " an avatar/object that not exists");
         return;
@@ -699,7 +699,7 @@ void RuleEngine::removeRelation(const Relation& relation)
                                      truthValue, this->petHandle,
                                      targetHandle );
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - relation removed '%s' target '%s'",
                  relation.getName().c_str(), relation.getTarget( ).c_str());
 }
@@ -743,7 +743,7 @@ void RuleEngine::addRule(const std::string& rule, const int type,
     // all preconditions should be inserted in ProcedureRepository as combo scripts with
     // no parameters
     if (!this->opc->getProcedureRepository().contains(precondition)) {
-        throw opencog::InvalidParamException(TRACE_INFO, "RuleEngine - Precondition '%s' not found in system ProcedureRepository.", precondition.c_str());
+        throw InvalidParamException(TRACE_INFO, "RuleEngine - Precondition '%s' not found in system ProcedureRepository.", precondition.c_str());
     }
 
     this->ruleTypeMap[rule] = type;
@@ -756,7 +756,7 @@ void RuleEngine::addRule(const std::string& rule, const int type,
 
     case 1: // feeling rule
         if (effectParameters.size() != 2) {
-            throw opencog::InvalidParamException(TRACE_INFO, "RuleEngine - Feeling effect need two arguments. Got '%d'.", effectParameters.size());
+            throw InvalidParamException(TRACE_INFO, "RuleEngine - Feeling effect need two arguments. Got '%d'.", effectParameters.size());
         }
         this->ruleEffectMap[rule] = Feeling(effectParameters[0],
                                             atof(effectParameters[1].c_str()));
@@ -764,7 +764,7 @@ void RuleEngine::addRule(const std::string& rule, const int type,
 
     case 2: // relation rule
         if (effectParameters.size() != 3) {
-            throw opencog::InvalidParamException(TRACE_INFO, "RuleEngine - Relation effect need three arguments. Got '%d'.", effectParameters.size());
+            throw InvalidParamException(TRACE_INFO, "RuleEngine - Relation effect need three arguments. Got '%d'.", effectParameters.size());
         }
         this->ruleEffectMap[rule] = Relation(effectParameters[0],
                                              effectParameters[1],
@@ -833,7 +833,7 @@ void RuleEngine::addRuleToAtomSpace(const std::string& rule,
 Handle RuleEngine::addEffectExecLink(const std::string& effect,
                                      const std::vector<std::string> parameters,
                                      bool permanent)
-throw (opencog::RuntimeException)
+throw (RuntimeException)
 {
 
     AtomSpace& atomSpace = *(opc->getAtomSpace());
@@ -862,13 +862,13 @@ throw (opencog::RuntimeException)
             Handle ownerHandle = atomSpace.getHandle(SL_AVATAR_NODE,
                                  opc->getPet().getOwnerId());
             if (ownerHandle == Handle::UNDEFINED) {
-                throw opencog::RuntimeException(TRACE_INFO, "addSchemaExecLink - Found no SlAvatarNode for pet owner '%s'.",
+                throw RuntimeException(TRACE_INFO, "addSchemaExecLink - Found no SlAvatarNode for pet owner '%s'.",
                                                 opc->getPet().getOwnerId().c_str());
             }
 
             list.push_back(ownerHandle);
 
-        } else if (opencog::StringManipulator::isNumber(param)) {
+        } else if (StringManipulator::isNumber(param)) {
 
             Handle numberNode = AtomSpaceUtil::addNode(atomSpace,
                                 NUMBER_NODE,
@@ -887,7 +887,7 @@ throw (opencog::RuntimeException)
 
                 unsigned int closeParentesis = param.rfind(')');
                 if (closeParentesis == std::string::npos) {
-                    throw opencog::RuntimeException(TRACE_INFO, "addSchemaExecLink - Unmatch parentesis in effect '%s' parameter '%s'.",
+                    throw RuntimeException(TRACE_INFO, "addSchemaExecLink - Unmatch parentesis in effect '%s' parameter '%s'.",
                                                     effect.c_str(), param.c_str());
                 }
 
@@ -952,7 +952,7 @@ Handle RuleEngine::addPreconditionEvalLink(const std::string& precondition)
 {
     AtomSpace& atomSpace = *(opc->getAtomSpace());
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "addPreconditionEvalLink - preCond %s."
                  " GROUNDER_PREDICATE_NODE",
                  precondition.c_str());
@@ -1018,12 +1018,12 @@ void RuleEngine::updateCurrentActionRepetitions()
         }
     }
     if (oldHandle == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "RuleEngine - No FREQUECY_LINK for"
                      " \"currentActionRepetition\" found."
                      " Creating it for the first time...");
     } else if (!atomSpace.removeAtom(oldHandle)) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Unable to remove old FREQUECY_LINK: %s",
                      TLB::getAtom(oldHandle)->toString().c_str());
     }
@@ -1033,7 +1033,7 @@ void RuleEngine::updateCurrentActionRepetitions()
     freqLink.push_back(handle);
     freqLink.push_back(AtomSpaceUtil::addNode(atomSpace,
                        NUMBER_NODE,
-                       opencog::toString(this->currentActionRepetitions)));
+                       toString(this->currentActionRepetitions)));
 
     AtomSpaceUtil::addLink(atomSpace, FREQUENCY_LINK, freqLink, true);
 }
@@ -1069,7 +1069,7 @@ void RuleEngine::addSchemaDoneOrFailurePred(const std::string& schema,
             predicateNode);
 
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - Added '%s' pred for schema"
                  " '%s' at timestamp '%lu'.",
                  (result ? "schemaDone" : "schemaFailure"),
@@ -1115,7 +1115,7 @@ void RuleEngine::updateSchemaExecutionStatus()
         } else {
             stringstream unexpected_result;
             unexpected_result << result;
-            logger().log(opencog::Logger::WARN,
+            logger().log(Logger::WARN,
                          "RuleEngine - Procedure result should be"
                          " built-in or action result. Got '%s'.",
                          unexpected_result.str().c_str());
@@ -1160,7 +1160,7 @@ void RuleEngine::runSchemaForCurrentAction( void )
             argListStr.append(arg);
             argListStr.append(" ");
         }
-        logger().log(opencog::Logger::DEBUG,
+        logger().log(Logger::DEBUG,
                      "RuleEngine - cycle '%d', action sent to execution:"
                      " '%s' with %d parameters: '%s' - rule '%s'",
                      this->cycle, getCurrentAction().c_str(),
@@ -1192,7 +1192,7 @@ void RuleEngine::runSchemaForCurrentAction( void )
             if ( parameters[0] == "join_group" ) {
                 this->groupLeaderId = parameters[1];
                 this->groupingMode = true;
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Pet is in grouping mode."
                              " Leader: %s.",
                              parameters[1].c_str());
@@ -1200,7 +1200,7 @@ void RuleEngine::runSchemaForCurrentAction( void )
             } else if ( parameters[0] == "abandon_group" ) {
                 this->groupLeaderId = "";
                 this->groupingMode = false;
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Pet is not in grouping mode.");
             } // else if
         } // if
@@ -1221,8 +1221,8 @@ void RuleEngine::processRules( void )
     std::map<std::string, std::string>::iterator it;
 
     // debug log
-    if (opencog::Logger::FINE <= logger().getLevel()) {
-        logRelations(opencog::Logger::FINE);
+    if (Logger::FINE <= logger().getLevel()) {
+        logRelations(Logger::FINE);
     }
     // ~debug log
 
@@ -1263,7 +1263,7 @@ void RuleEngine::processRules( void )
             }
 
             if (comboInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Precondition '%s' exec failed,"
                              " continuing to next rule.",
                              precondition.c_str());
@@ -1285,7 +1285,7 @@ void RuleEngine::processRules( void )
             }
 
             if (comboSelectInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Precondition '%s' exec failed,"
                              " continuing to next rule.",
                              precondition.c_str());
@@ -1295,7 +1295,7 @@ void RuleEngine::processRules( void )
             result = comboSelectInterpreter.getResult(procedureId);
 
         } else {
-            throw opencog::RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
+            throw RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
         }
 
         if (result == combo::id::logical_true) {
@@ -1305,7 +1305,7 @@ void RuleEngine::processRules( void )
             } else if (procedureId.getType() == Procedure::COMBO_SELECT) {
                 updateValidTargets(comboSelectInterpreter.getUnifierResult(procedureId));
             } else {
-                throw opencog::RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
+                throw RuntimeException(TRACE_INFO, "processRules - Invalid procedure type. Accepted ones: COMBO and COMBO_SELECT.");
             }
 
             switch (this->ruleTypeMap[this->currentInspectedRuleName]) {
@@ -1315,7 +1315,7 @@ void RuleEngine::processRules( void )
                 suggestAction(this->currentInspectedRuleName,
                               action.getName(), action.getParameters());
 
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Precondition '%s' exec true."
                              " Suggesting action '%s'.",
                              precondition.c_str(),
@@ -1326,7 +1326,7 @@ void RuleEngine::processRules( void )
             case 1: { // feeling effect
                 Feeling feeling = boost::get<Feeling>(this->ruleEffectMap[this->currentInspectedRuleName]);
                 suggestFeeling(feeling.getName(), feeling.getIntensity());
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Precondition '%s' exec true."
                              " Suggesting feeling '%s'.",
                              precondition.c_str(),
@@ -1342,7 +1342,7 @@ void RuleEngine::processRules( void )
                                 relation.getIntensity());
 
                 // debug log
-                if (opencog::Logger::DEBUG <= logger().getLevel()) {
+                if (Logger::DEBUG <= logger().getLevel()) {
                     const std::vector<std::string> vt = getValidTargets();
                     //list_of_targets <- "'target1' and 'target2' and ..."
                     string list_of_targets;
@@ -1362,7 +1362,7 @@ void RuleEngine::processRules( void )
                                            + relation.getTarget()
                                            + string("'"));
                     }
-                    logger().log(opencog::Logger::DEBUG,
+                    logger().log(Logger::DEBUG,
                                  "RuleEngine - Precondition '%s' exec true."
                                  " Suggesting relation '%s' with %s.",
                                  precondition.c_str(),
@@ -1375,7 +1375,7 @@ void RuleEngine::processRules( void )
             break;
 
             default:
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Unknown type for rule '%s'."
                              " Got type '%d', continuing to next rule.",
                              this->currentInspectedRuleName.c_str(),
@@ -1384,7 +1384,7 @@ void RuleEngine::processRules( void )
             }
 
         } else {
-            logger().log(opencog::Logger::FINE,
+            logger().log(Logger::FINE,
                          "RuleEngine - Precondition '%s' exec returned"
                          " false, continuing to next rule.",
                          precondition.c_str());
@@ -1401,26 +1401,26 @@ void RuleEngine::processNextAction( void )
     // introduce a noise in the selection of the action
     // if bias is 1 then no selected is introduced
     // if is it 0 then maximal noise is introduced
-    float bias = 1 - boost::lexical_cast<float>(parameters.get("RE_SCHEMA_SELECTION_RANDOM_NOISE"));
+    float bias = 1 - config().get_double("RE_SCHEMA_SELECTION_RANDOM_NOISE");
 
     // if enable then the wild_card candidate is choosen randomly
     // with uniform distribution
-    bool enable_rand_wild_card = boost::lexical_cast<bool>(parameters.get("RE_WILD_CARD_RANDOM_SELECTION"));
+    bool enable_rand_wild_card = config().get_bool("RE_WILD_CARD_RANDOM_SELECTION");
 
     // Process next action only if there is map info data available...
     if ( this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "RuleEngine - There is no map info available yet!");
         return;
     }
     // ... and pet spatial info is already received
     if ( !this->opc->getAtomSpace()->getSpaceServer().getLatestMap().containsObject(petName) ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Pet was not inserted in the space map yet!" );
         return;
     }
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - start processing next action. Cycle '%d'.",
                  this->cycle );
 
@@ -1442,11 +1442,11 @@ void RuleEngine::processNextAction( void )
     // update last pet action done and current action repetitions predicates
     updateSchemaExecutionStatus();
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - processing all rules. Cycle '%d'.",
                  this->cycle );
     processRules();
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - all rules processed");
 
     std::map<Action, std::vector<float> > weightedActions;
@@ -1455,7 +1455,7 @@ void RuleEngine::processNextAction( void )
 
     {
         std:: string suggestedRules = "Cycle: ";
-        suggestedRules += opencog::toString(cycle);
+        suggestedRules += toString(cycle);
         suggestedRules += " - Suggested Rules {";
         std::multimap<Action, RuleEngine::RuleStrPair>::iterator it;
         for ( it = this->suggestedActions.begin( );
@@ -1464,11 +1464,11 @@ void RuleEngine::processNextAction( void )
             maxWeightedActions[it->first] = -1.0f;
             suggestedRules += (it->second).first ;
             suggestedRules += ("-"
-                               + opencog::toString((it->second).second)
+                               + toString((it->second).second)
                                + " ");
         } // for
         suggestedRules += "}";
-        logger().log(opencog::Logger::DEBUG, suggestedRules.c_str()) ;
+        logger().log(Logger::DEBUG, suggestedRules.c_str()) ;
 
         // grouping actions...
         for ( it = this->suggestedActions.begin( );
@@ -1532,7 +1532,7 @@ void RuleEngine::processNextAction( void )
                 if ( std::find( parameters.begin( ), parameters.end( ), WILD_CARD_STR ) != parameters.end( ) ) {
 
                     if ( this->varBindCandidates.size( ) == 0 ) {
-                        logger().log(opencog::Logger::ERROR,
+                        logger().log(Logger::ERROR,
                                      "No candidate found." );
 
                     } else {
@@ -1558,7 +1558,7 @@ void RuleEngine::processNextAction( void )
             } // if
         } // for
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().log(Logger::DEBUG,
                      "RuleEngine - Selected candidate rule '%s',"
                      " schema '%s' with weigth '%.3f'.",
                      this->candidateRule.c_str(),
@@ -1568,14 +1568,14 @@ void RuleEngine::processNextAction( void )
     } // end block
 
 
-//    logger().log(opencog::Logger::DEBUG, "RuleEngine - Last schema '%s' with '%d' parameters.",
+//    logger().log(Logger::DEBUG, "RuleEngine - Last schema '%s' with '%d' parameters.",
 //        this->lastPetActionDone.getName( ).c_str( ), this->lastPetActionDone.getParameters( ).size( ) );
 
     // update feelings
     std::map<std::string, std::vector<float> > weightedFeelings;
     { // calculating the mean of all suggested feelings
         std:: string suggestedFeelings = "Cycle: ";
-        suggestedFeelings += opencog::toString(cycle);
+        suggestedFeelings += toString(cycle);
         suggestedFeelings += " - Suggested Feelings {";
 
         std::set<Feeling>::iterator it;
@@ -1585,11 +1585,11 @@ void RuleEngine::processNextAction( void )
             weightedFeelings[(*it).getName()].push_back((*it).getIntensity());
             suggestedFeelings += ((*it).getName()
                                   + "-"
-                                  + opencog::toString((*it).getIntensity())
+                                  + toString((*it).getIntensity())
                                   + " ");
         } // for
         suggestedFeelings += "}";
-        logger().log(opencog::Logger::DEBUG, suggestedFeelings.c_str()) ;
+        logger().log(Logger::DEBUG, suggestedFeelings.c_str()) ;
 
     } // end block
 
@@ -1625,19 +1625,19 @@ void RuleEngine::processNextAction( void )
         opc->getPAI().sendEmotionalFeelings(this->petName, feelingsUpdatedMap);
     } // end block
 
-    logger().log(opencog::Logger::DEBUG, "RuleEngine - feelings updated");
+    logger().log(Logger::DEBUG, "RuleEngine - feelings updated");
 
     // update relations
     { // updating relations...
         std:: string suggestedRelations = "Cycle: ";
-        suggestedRelations += opencog::toString(cycle);
+        suggestedRelations += toString(cycle);
         suggestedRelations += " - Suggested Relations {";
 
         std::multiset<Relation>::iterator it;
         for ( it = this->suggestedRelations.begin();
                 it != this->suggestedRelations.end(); ++it ) {
             Relation r = (*it);
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Suggested relation '%s',"
                          " target '%s', intensity '%f'.",
                          r.getName( ).c_str( ),
@@ -1656,16 +1656,16 @@ void RuleEngine::processNextAction( void )
         } // for
 
         suggestedRelations += "}";
-        logger().log(opencog::Logger::DEBUG, suggestedRelations.c_str()) ;
+        logger().log(Logger::DEBUG, suggestedRelations.c_str()) ;
 
     } // end block
 
-    logger().log(opencog::Logger::DEBUG, "RuleEngine - relations updated");
+    logger().log(Logger::DEBUG, "RuleEngine - relations updated");
 
     { // decrease and log current feelings
         std::map<std::string, float> feelingsUpdatedMap;
         float feelingsDecreaseFactor =
-            atof(parameters.get("RE_FEELINGS_DECREASE_FACTOR").c_str());
+            config().get_double("RE_FEELINGS_DECREASE_FACTOR");
 
         foreach(std::string feeling, feelings) {
 
@@ -1700,7 +1700,7 @@ void RuleEngine::processNextAction( void )
             message << it->first << " ";
         } // for
         message << ")";
-        logger().log(opencog::Logger::DEBUG, message.str( ).c_str( ) );
+        logger().log(Logger::DEBUG, message.str( ).c_str( ) );
     } // end block
 
     // update the STI values of the learned tricks
@@ -1708,7 +1708,7 @@ void RuleEngine::processNextAction( void )
 
 
     // WARNING: this must be the last action of this method
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - preparing for next cycle...");
     prepareForNextCycle( );
     // WARNING: this must be the last action of this method
@@ -1757,8 +1757,8 @@ Procedure::RunningProcedureID RuleEngine::getExecutingSchemaID( void ) const
 void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 {
     unsigned long timeWindow =
-        (unsigned long)(atof(this->parameters.get("RL_TIME_WINDOW").c_str()) *
-                        PerceptionActionInterface::PAIUtils::getTimeFactor());
+        boost::numeric_cast<unsigned long>(config().get_double("RL_TIME_WINDOW") *
+                                           PerceptionActionInterface::PAIUtils::getTimeFactor());
     float petaverseTimePerSlot =
         (float)timeWindow / this->gaussianVector.size();
 
@@ -1775,7 +1775,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     // get all selected rules executed during within the time interval
     // (temporal)
     std::vector<HandleTemporalPair> pairs;
-    logger().log(opencog::Logger::DEBUG,
+    logger().log(Logger::DEBUG,
                  "RuleEngine - Getting EvalLinks.");
 
     AtomSpaceUtil::getAllEvaluationLinks(*(this->opc->getAtomSpace()), pairs,
@@ -1783,15 +1783,15 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
                                          temporal, TemporalTable::OVERLAPS,
                                          true);
 
-    logger().log(opencog::Logger::DEBUG, "RuleEngine - Got EvalLinks.");
+    logger().log(Logger::DEBUG, "RuleEngine - Got EvalLinks.");
 
     if (pairs.empty()) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "RuleEngine - Found mo EvaluationLink with"
                      " SelectedRule pred.");
 
     } else if (pairs.size() == 1) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "RuleEngine - Found only one EvaluationLink with"
                      " SelectedRule pred.");
 
@@ -1803,28 +1803,28 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
             if (opc->getAtomSpace()->getType(listLink) == LIST_LINK) {
 
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Apply reinfocement.");
                 applyReinforcement(type,
                                    opc->getAtomSpace()->getOutgoing(listLink, 0),
                                    1.0);
-                logger().log(opencog::Logger::DEBUG,
+                logger().log(Logger::DEBUG,
                              "RuleEngine - Applied reinfocement.");
 
             } else {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Handle informed do not represent"
                              " list link.");
             }
 
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "RuleEngine - Handle informed do not represent"
                          " an evaluation link.");
         }
 
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "RuleEngine - Found '%d' one EvaluationLink"
                      " with SelectedRule pred.", pairs.size());
 
@@ -1837,7 +1837,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
                 (int)floor((pair.getTemporal()->getUpperBound() - t)
                            / petaverseTimePerSlot);
             if (index > this->gaussianVector.size()) {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Calculated index '%d' greater"
                              " than GaussianVector size '%d'.",
                              index, this->gaussianVector.size());
@@ -1846,7 +1846,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 
             Handle evalLink = pair.getHandle();
             if (opc->getAtomSpace()->getType(evalLink) != EVALUATION_LINK) {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Handle informed do not"
                              " represent an evaluation link.");
                 continue;
@@ -1854,18 +1854,18 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
 
             Handle listLink = opc->getAtomSpace()->getOutgoing(evalLink, 1);
             if (opc->getAtomSpace()->getType(listLink) != LIST_LINK) {
-                logger().log(opencog::Logger::ERROR,
+                logger().log(Logger::ERROR,
                              "RuleEngine - Handle informed do not"
                              " represent list link.");
                 continue;
             }
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Apply reinfocement.");
             applyReinforcement(type,
                                opc->getAtomSpace()->getOutgoing(listLink, 0),
                                this->gaussianVector[index]);
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Applied reinfocement.");
 
         } // foreach
@@ -1874,7 +1874,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
     // check if there is an executing schema, and if it has started before the
     // reinforcement timestamp, apply the reward/punish accordingly
     if (schemaRunner->isExecutingSchema()) {
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "RuleEngine - Applying reinforce to executing schema.");
 
         unsigned long executingSchemaTimestamp =
@@ -1889,12 +1889,12 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             // maximum factor
         } else if (executingSchemaTimestamp < t) {
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Apply reinfocement.");
             applyReinforcement(type,
                                schemaRunner->getExecutingSchemaImplicationLink(),
                                1.0);
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "RuleEngine - Applied reinfocement.");
 
             // default, executing actions started within the time window
@@ -1905,7 +1905,7 @@ void RuleEngine::reinforceRule(ReinforcementType type, unsigned long timestamp)
             if (index <  this->gaussianVector.size()) {
                 applyReinforcement(type, schemaRunner->getExecutingSchemaImplicationLink(), this->gaussianVector[index]);
             } else {
-                logger().log(opencog::Logger::DEBUG, "RuleEngine - Calculated index '%d' greater than GaussianVector size '%d'.",
+                logger().log(Logger::DEBUG, "RuleEngine - Calculated index '%d' greater than GaussianVector size '%d'.",
                              index, this->gaussianVector.size());
             } // if
         } // if
@@ -1918,7 +1918,7 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
     AtomSpace& atomSpace = *(this->opc->getAtomSpace());
 
     if (atomSpace.getType(implicationLink) != IMPLICATION_LINK) {
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "RuleEngine - Handle isn't an ImplicationLink.");
         return;
     }
@@ -1927,17 +1927,17 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
     const TruthValue& tv = atomSpace.getTV(implicationLink);
     switch (type) {
     case REWARD: {
-        float reinforce = factor * atof(this->parameters.get("RL_REWARD").c_str());
+        float reinforce = factor * config().get_double("RL_REWARD");
         strength = tv.getMean() + reinforce;
 
-        if (strength > atof(this->parameters.get("MAX_RULE_STRENGTH").c_str())) {
-            strength = atof(this->parameters.get("MAX_RULE_STRENGTH").c_str());
+        if (strength > config().get_double("MAX_RULE_STRENGTH")) {
+            strength = config().get_double("MAX_RULE_STRENGTH");
         }
         break;
     }
 
     case PUNISH: {
-        float reinforceFactor = factor * atof(this->parameters.get("RL_PUNISH").c_str());
+        float reinforceFactor = factor * config().get_double("RL_PUNISH");
         strength = tv.getMean() - reinforceFactor;
         break;
     }
@@ -1952,12 +1952,12 @@ void RuleEngine::applyReinforcement(ReinforcementType type,
                            implicationLink, REFERENCE_LINK, false);
     if (seq.size() == 1) {
         Handle phraseNode = atomSpace.getOutgoing(seq[0], 0);
-        logger().log(opencog::Logger::DEBUG, "RuleEngine - Update ImplicationLink TV mean for rule '%s'. OldTV '%.3f', newTV '%.3f'.",
+        logger().log(Logger::DEBUG, "RuleEngine - Update ImplicationLink TV mean for rule '%s'. OldTV '%.3f', newTV '%.3f'.",
                      atomSpace.getName(phraseNode).c_str(), tv.getMean(), strength);
     }
 
 #else
-    logger().log(opencog::Logger::DEBUG, "RuleEngine - Updating ImplicationLink TV mean. OldTV '%.3f', newTV '%.3f'.",
+    logger().log(Logger::DEBUG, "RuleEngine - Updating ImplicationLink TV mean. OldTV '%.3f', newTV '%.3f'.",
                  tv.getMean(), strength);
 #endif
 

@@ -19,31 +19,30 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <cstdlib>
 #include "util/files.h"
 #include "LSMocky.h"
 
 using namespace LearningServer;
+using namespace opencog;
 
 int main(int argc, char *argv[])
 {
 
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     server(LSMocky::createInstance);
     LSMocky& ls = static_cast<LSMocky&>(server());
-    ls.init(parameters.get("LS_ID"),
-            parameters.get("LS_IP"),
-            std::atoi(parameters.get("LS_PORT").c_str()),
-            parameters);
+    ls.init(config().get("LS_ID"), config().get("LS_IP"),
+            config().get_int("LS_PORT"));
     ls.serverLoop();
     return 0;
 }

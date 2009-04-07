@@ -147,11 +147,10 @@ int replace(c* start, c* end, c* buf_end, int &reduction, const map<pat, pat, le
 
 int next_free_terminal_id = NEXT_FREE_TERMINAL_ID;
 
-PredaveseParser::PredaveseParser(Control::PetInterface& _petInterface,
-                                 Control::SystemParameters& _systemParameters) :
+PredaveseParser::PredaveseParser(Control::PetInterface& _petInterface) :
         petInterface(_petInterface)
 {
-    vocabularyFilename = _systemParameters.get(std::string("VOCABULARY_FILE"));
+    vocabularyFilename = opencog::config().get("VOCABULARY_FILE");
 }
 
 PredaveseParser::~PredaveseParser()

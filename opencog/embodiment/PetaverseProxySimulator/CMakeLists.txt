@@ -1,5 +1,5 @@
 ADD_LIBRARY (PVPSimulator
-    SimulationParameters
+    SimulationConfig
     WorldSimulator
     PhysiologicalModel
     TickerAgent

@@ -43,7 +43,7 @@ ComboProcedureRepository::ComboProcedureRepository()
 unsigned int ComboProcedureRepository::loadFromStream(istream& in)
 {
 
-    bool tc = static_cast<bool>(atoi(MessagingSystem::NetworkElement::parameters.get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
+    bool tc = opencog::config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
 
     unsigned int n = 0;
 
@@ -151,7 +151,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
     logger().log(opencog::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(dump));
     char buffer[1<<16];
 
-    bool tc = static_cast<bool>(atoi(MessagingSystem::NetworkElement::parameters.get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
+    bool tc = opencog::config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
 
 
     int size;

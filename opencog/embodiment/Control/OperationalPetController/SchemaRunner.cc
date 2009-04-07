@@ -25,14 +25,14 @@
 
 using namespace OperationalPetController;
 
-SchemaRunner::SchemaRunner( OPC* opc, Control::SystemParameters &parameters ) : opc( opc )
+SchemaRunner::SchemaRunner( OPC* opc ) : opc( opc )
 {
-    this->defaultMean = atof( parameters.get("RE_DEFAULT_MEAN").c_str());
-    this->defaultCount = atof( parameters.get("RE_DEFAULT_COUNT").c_str());
+    this->defaultMean = config().get_double("RE_DEFAULT_MEAN");
+    this->defaultCount = config().get_double("RE_DEFAULT_COUNT");
     this->defaultTruthValue = new SimpleTruthValue(defaultMean, defaultCount);
     this->defaultAttentionValue = AttentionValue::factory(AttentionValue::DEFAULTATOMSTI, 0);
-    this->procedureExecutionTimeout = atol( parameters.get("PROCEDURE_EXECUTION_TIMEOUT").c_str());
-    this->allowWalkingCancelation = atoi( parameters.get("ALLOW_WALKING_CANCELATION").c_str()) != 0;
+    this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
+    this->allowWalkingCancelation = config().get_bool("ALLOW_WALKING_CANCELATION");
     this->petIsMoving = false;
 
     this->currentWalkingProcedure = "";

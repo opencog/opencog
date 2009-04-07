@@ -19,24 +19,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <unistd.h>
 #include "util/files.h"
 #include "MockOpcHCTest.h"
 
 using namespace OperationalPetController;
+using namespace opencog;
 
 int main(int argc, char *argv[])
 {
 
-    opencog::cassert(TRACE_INFO, argc == 3);
-    Control::SystemParameters parameters;
+    cassert(TRACE_INFO, argc == 3);
+
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
 
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])
 
     server(MockOpcHCTest::createInstance);
     MockOpcHCTest& mOpcHcTest = static_cast<MockOpcHCTest&>(server());
-    mOpcHcTest.init(argv[1], "127.0.0.1", portNumber, argv[1], parameters);
+    mOpcHcTest.init(argv[1], "127.0.0.1", portNumber, argv[1]);
     mOpcHcTest.serverLoop();
     //delete mOpcHcTest;
     return 0;

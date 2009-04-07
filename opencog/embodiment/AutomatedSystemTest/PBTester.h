@@ -31,7 +31,7 @@
 
 #include <EmbodimentCogServer.h>
 #include <Message.h>
-#include "TestParameters.h"
+#include "TestConfig.h"
 #include "GoldStdGen.h"
 
 namespace AutomatedSystemTest
@@ -42,7 +42,6 @@ class PBTester : public MessagingSystem::EmbodimentCogServer
 
 private:
 
-    TestParameters* testParams;
     bool failed;
     unsigned long numberOfReceivedMessages;
 
@@ -58,8 +57,8 @@ public:
     static opencog::BaseServer* createInstance();
 
     PBTester();
-    void init(TestParameters&);
-    void init(const Control::SystemParameters &params, TestParameters& testParams, const std::string &myId, const std::string &ip, int portNumber);
+    void init();
+    void init(const std::string &myId, const std::string &ip, int portNumber);
     ~PBTester();
 
     bool processNextMessage(MessagingSystem::Message *message);

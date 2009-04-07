@@ -8,12 +8,15 @@
 #include <opencog/atomspace/HandleMap.h>
 
 #include "ComboProcedureRepository.h"
+#include "EmbodimentConfig.h"
 #include <sstream>
 #include "PetComboVocabulary.h"
 
 using namespace Procedure;
 using namespace PetCombo;
 using namespace std;
+using namespace Control;
+using namespace opencog;
 
 #define NUMBER_OF_COMBO_TREES 2
 const char* names[NUMBER_OF_COMBO_TREES] = {"andSeq", "orSeq"};
@@ -30,6 +33,8 @@ private:
 
 public:
     ComboProcedureRepositoryUTest() {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
+
         for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
             stringstream ss(bodies[i]);
             ss >> trees[i];

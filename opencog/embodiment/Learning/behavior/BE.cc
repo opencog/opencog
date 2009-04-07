@@ -170,7 +170,7 @@ void BehaviorEncoder::onBD(Handle bd, Handle timed_bd)
  */
 void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 {
-    double dist_ratio_threshold = atof(MessagingSystem::NetworkElement::parameters.get("DIST_PERCENTAGE_THRESHOLD_WALK_TO_GOTO").c_str()) / (double)100;
+    double dist_ratio_threshold = opencog::config().get_double("DIST_PERCENTAGE_THRESHOLD_WALK_TO_GOTO") / (double)100;
 
     AtomSpace& as = wp->getAtomSpace();
 

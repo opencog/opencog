@@ -23,7 +23,7 @@
 #ifndef SPAWNER_H
 #define SPAWNER_H
 
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 #include "util/Logger.h"
 
@@ -49,7 +49,7 @@ public:
     static BaseServer* createInstance();
     ~Spawner();
     Spawner();
-    void init(const Control::SystemParameters &params, const std::string &id,
+    void init(const std::string &id,
               const std::string &ip, int port) throw (opencog::InvalidParamException, std::bad_exception);
 
     // ***********************************************/

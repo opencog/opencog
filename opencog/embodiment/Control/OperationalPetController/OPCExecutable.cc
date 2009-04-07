@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 #include <unistd.h>
 
@@ -28,6 +28,7 @@
 #include "OPC.h"
 
 using namespace OperationalPetController;
+using namespace opencog;
 
 void opc_unexpected_handler()
 {
@@ -38,17 +39,17 @@ int main(int argc, char *argv[])
 {
 
     if (argc != 6) {
-        logger().log(opencog::Logger::ERROR, "OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
+        logger().log(Logger::ERROR, "OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
         return (1);
     }
 
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     // setting unexpected handler in case a different exception from the
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
     opc.init(argv[1], "127.0.0.1", portNumber,
              PerceptionActionInterface::PAIUtils::getInternalId(argv[1]),
              PerceptionActionInterface::PAIUtils::getInternalId(argv[2]),
-             argv[3], argv[4], parameters);
+             argv[3], argv[4]);
     try {
         opc.serverLoop();
     } catch (std::bad_alloc) {

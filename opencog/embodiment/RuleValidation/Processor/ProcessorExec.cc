@@ -22,7 +22,9 @@
 #include "RuleProcessor.h"
 #include "util/files.h"
 #include "util/exceptions.h"
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
+
+using namespace opencog;
 
 int main(int argc, char * argv[])
 {
@@ -32,10 +34,12 @@ int main(int argc, char * argv[])
         return (1);
     }
 
-    Control::SystemParameters parameters;
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
+
 
     if ((strcmp(argv[2], "pet") != 0) &&
             (strcmp(argv[2], "humanoid") != 0)) {
@@ -43,7 +47,11 @@ int main(int argc, char * argv[])
         return (1);
     }
 
-    Processor::RuleProcessor rp(parameters, std::string(argv[2]));
+    //Nil: very odd, when replacing the following 2 non-commented
+    //by the commented line just below, the compiler complains
+    //Processor::RuleProcessor rp(std::string(argv[2]));
+    std::string arg_2(argv[2]); 
+    Processor::RuleProcessor rp(arg_2);
 
     try {
         rp.evaluateRules(std::string(argv[1]));

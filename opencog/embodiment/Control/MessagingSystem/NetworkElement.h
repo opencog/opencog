@@ -28,7 +28,7 @@
 #include <pthread.h>
 #include <string>
 #include <vector>
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 
 #include <Sockets/ListenSocket.h>
@@ -171,8 +171,6 @@ private:
 
 public:
 
-    static Control::SystemParameters parameters;
-
     static const std::string OK_MESSAGE;
     static const std::string FAILED_MESSAGE;
     static const std::string FAILED_TO_CONNECT_MESSAGE;
@@ -194,7 +192,7 @@ public:
      * @param myId A string which will identify this NE. Other NEs may use to string to discover this NE's actual id.
      * @param portNumber The port number this NE will listen to
      */
-    NetworkElement(const Control::SystemParameters &params, const std::string &myId, const std::string &ip, int portNumber);
+    NetworkElement(const std::string &myId, const std::string &ip, int portNumber);
 
     /**
      * Empty constructor which does not initialize (ie, does not contact router for handshaking).
@@ -212,7 +210,7 @@ public:
      * @param myId A string which will identify this NE. Other NEs may use to string to discover this NE's actual id.
      * @param portNumber The port number this NE will listen to
      */
-    void initialize(const Control::SystemParameters &params, const std::string &myId, const std::string &ip, int portNumber);
+    void initialize(const std::string &myId, const std::string &ip, int portNumber);
 
     /**
      * Convenience method to be called when the network element is being

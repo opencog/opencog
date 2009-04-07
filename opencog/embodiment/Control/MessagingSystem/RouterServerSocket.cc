@@ -94,7 +94,7 @@ void RouterServerSocket::addNetworkElement(const std::string &id, const std::str
     // sending pending messages stored in component queue
     if (errorCode == Router::HAS_PENDING_MSGS) {
 
-        if (id == master->getParameters().get("PROXY_ID") &&
+        if (id == opencog::config().get("PROXY_ID") &&
                 master->getPortNumber(id) == 8211) {
             // TODO: this is a temporary hack so that we can use both proxy and mocky proxy
 
@@ -349,8 +349,8 @@ void RouterServerSocket::storeNewMessage()
         return;
     }
 
-    if (currentMessageTo == master->getParameters().get("PROXY_ID") &&
-            currentMessageFrom != master->getParameters().get("SPAWNER_ID") &&
+    if (currentMessageTo == opencog::config().get("PROXY_ID") &&
+            currentMessageFrom != opencog::config().get("SPAWNER_ID") &&
             master->getPortNumber(currentMessageTo) == 8211) { // TODO: this is a temporary hack so that we can use both proxy and mocky proxy
         // Send message as a http request
         addToMasterQueue = !sendHttpRequest(currentMessageFrom, currentMessageTo, currentMessageText);
@@ -443,7 +443,7 @@ void RouterServerSocket::OnLine(const std::string& line)
             std::string requestorId = args.front();
             args.pop();
 
-            if (requestorId != master->getParameters().get("SPAWNER_ID")) {
+            if (requestorId != opencog::config().get("SPAWNER_ID")) {
                 sendAnswer("FAILED - Requestor not SPAWNER.");
                 return;
             }

@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <PetAction.h>
-#include "SimulationParameters.h"
+#include "SimulationConfig.h"
 
 namespace PetaverseProxySimulator
 {
@@ -34,8 +34,6 @@ class PhysiologicalModel
 {
 
 private:
-
-    SimulationParameters& simParameters;
 
     typedef enum {SLEEP = 0, IDLE, ACTIVE} PetMode;
 
@@ -92,7 +90,7 @@ public:
     // Constructors/destructors
 
     ~PhysiologicalModel();
-    PhysiologicalModel(SimulationParameters&);
+    PhysiologicalModel();
 
     // ***********************************************/
     // API

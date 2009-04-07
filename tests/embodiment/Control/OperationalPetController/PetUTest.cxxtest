@@ -14,11 +14,13 @@
 #include "PAITestUtil.h"
 #include "ActionPlanSenderMock.h"
 #include "PAI.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include <atom_types_init.h>
 
 using namespace OperationalPetController;
 using namespace PerceptionActionInterface;
+using namespace opencog;
+using namespace Control;
 
 #include <iostream>
 using namespace std;
@@ -37,7 +39,6 @@ class PetUTest :  public CxxTest::TestSuite
 {
 
 private:
-    Control::SystemParameters *parameters;
     Pet * pet;
     AtomSpace * atomSpace;
     LSMessageSenderMock * sender;
@@ -49,8 +50,9 @@ private:
 public:
 
     PetUTest() {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
+
         opencog::atom_types_init::init();
-        parameters = new Control::SystemParameters();
         atomSpace = new AtomSpace();
         sender = new LSMessageSenderMock();
         timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
@@ -72,7 +74,7 @@ public:
     void TestExportToFile() {
         pet = new Pet(petId, petName, petType, petTraits, ownerId, atomSpace, sender);
         apSender = new FailureActionPlanSender();
-        pai = new PAI(*atomSpace, *apSender, *pet, *parameters);
+        pai = new PAI(*atomSpace, *apSender, *pet);
         pet->setPAI(pai);
 
         TS_ASSERT(pet != NULL);
@@ -90,7 +92,7 @@ public:
     void TestImportFromFile() {
         pet = Pet::importFromFile(file, petId, atomSpace, sender);
         apSender = new FailureActionPlanSender();
-        pai = new PAI(*atomSpace, *apSender, *pet, *parameters);
+        pai = new PAI(*atomSpace, *apSender, *pet);
         pet->setPAI(pai);
 
         TS_ASSERT(pet != NULL);

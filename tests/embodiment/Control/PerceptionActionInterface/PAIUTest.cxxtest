@@ -19,10 +19,12 @@
 #include <atom_types_init.h>
 
 #include "PAITestUtil.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
 using namespace PerceptionActionInterface;
 using namespace Control;
+using namespace Control;
+using namespace opencog;
 
 std::list<ActionPlan> sentActionPlans;
 
@@ -33,7 +35,7 @@ private:
 
 public:
     PAIUTest() {
-        opencog::atom_types_init::init();
+        atom_types_init::init();
     }
 
     ~PAIUTest() {
@@ -47,20 +49,21 @@ public:
     }
 
     void testConstructor() {
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai1(atomSpace, sender, petInterface, parameters);
+        PAI pai1(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai1);
         ActionPlanID planId = pai1.createActionPlan();
         TS_ASSERT(planId == "0");
-        PAI pai2(atomSpace, sender, petInterface, parameters, 10);
+        PAI pai2(atomSpace, sender, petInterface, 10);
         petInterface.setPAI(&pai2);
         planId = pai2.createActionPlan();
         TS_ASSERT(planId == "10");
@@ -68,16 +71,17 @@ public:
 
 #define NUM_PLANS 100
     void testCreateActionPlan() {
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
         ActionPlanID plans[NUM_PLANS];
         for (int i = 0; i < NUM_PLANS; i++) {
@@ -93,21 +97,22 @@ public:
     }
 
     void testSendActionPlan() {
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
 
-        TS_ASSERT_THROWS(pai.sendActionPlan("0"), opencog::RuntimeException&);
-        TS_ASSERT_THROWS(pai.sendActionPlan("1"), opencog::RuntimeException&);
-        TS_ASSERT_THROWS(pai.sendActionPlan("10"), opencog::RuntimeException&);
+        TS_ASSERT_THROWS(pai.sendActionPlan("0"), RuntimeException&);
+        TS_ASSERT_THROWS(pai.sendActionPlan("1"), RuntimeException&);
+        TS_ASSERT_THROWS(pai.sendActionPlan("10"), RuntimeException&);
 
         ActionPlanID plans[NUM_PLANS];
         for (int i = 0; i < NUM_PLANS; i++) {
@@ -120,24 +125,25 @@ public:
         }
 
         FailureActionPlanSender sender2;
-        PAI pai2(atomSpace, sender2, petInterface, parameters);
+        PAI pai2(atomSpace, sender2, petInterface);
 
-        TS_ASSERT_THROWS(pai2.sendActionPlan("0"), opencog::RuntimeException&);
-        TS_ASSERT_THROWS(pai2.sendActionPlan("1"), opencog::RuntimeException&);
-        TS_ASSERT_THROWS(pai2.sendActionPlan("10"), opencog::RuntimeException&);
+        TS_ASSERT_THROWS(pai2.sendActionPlan("0"), RuntimeException&);
+        TS_ASSERT_THROWS(pai2.sendActionPlan("1"), RuntimeException&);
+        TS_ASSERT_THROWS(pai2.sendActionPlan("10"), RuntimeException&);
         for (int i = 0; i < NUM_PLANS; i++) {
             plans[i] = pai2.createActionPlan();
         }
         for (int i = 0; i < NUM_PLANS; i++) {
-            TS_ASSERT_THROWS(pai2.sendActionPlan(plans[i]), opencog::RuntimeException&);
+            TS_ASSERT_THROWS(pai2.sendActionPlan(plans[i]), RuntimeException&);
         }
     }
 
     void testAddAction() {
         printf("testAddAction\n");
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
 
@@ -145,12 +151,12 @@ public:
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
         ActionPlanID plan2 = pai.createActionPlan();
         pai.addAction(plan1, PetAction(ActionType::TRICK_FOR_FOOD()));
-        TS_ASSERT_THROWS(pai.addAction(plan1, PetAction(ActionType::WALK())), opencog::InvalidParamException&); // invalid parameters
+        TS_ASSERT_THROWS(pai.addAction(plan1, PetAction(ActionType::WALK())), InvalidParamException&); // invalid parameters
         pai.sendActionPlan(plan1);
         TS_ASSERT(sentActionPlans.size() == 1);
         TS_ASSERT(sentActionPlans.front().getAction(1).getType() == ActionType::TRICK_FOR_FOOD());
@@ -167,7 +173,7 @@ public:
         flyAction.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
         flyAction.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
         pai.addAction(plan2, flyAction);
-        TS_ASSERT_THROWS(pai.addAction(plan2, PetAction(ActionType::JUMP_TOWARD())), opencog::InvalidParamException&); // invalid parameters
+        TS_ASSERT_THROWS(pai.addAction(plan2, PetAction(ActionType::JUMP_TOWARD())), InvalidParamException&); // invalid parameters
         pai.sendActionPlan(plan2);
         TS_ASSERT(sentActionPlans.size() == 2);
         TS_ASSERT(sentActionPlans.back().getAction(1).getType() == ActionType::WALK());
@@ -182,16 +188,17 @@ public:
     void testProcessPVPMessage() {
         printf("testProcessPVPMessage\n");
         HandleSeq toUpdateHandles;
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, parameters, 10);
+        PAI pai(atomSpace, sender, petInterface, 10);
         petInterface.setPAI(&pai);
 
         // Check Action Plan status before creating them, according with the passed "nextActionPlanId" argument to the constructor
@@ -213,7 +220,7 @@ public:
 
         PetAction action2(ActionType::WALK());
         action2.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(10.0, 15.0, 20.0)));
-        action2.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), opencog::toString(1.0)));
+        action2.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), toString(1.0)));
         action2.addParameter(ActionParameter("frameOfReference", ActionParamType::ROTATION(), Rotation(0.5, 0.0, -3.0)));
         ActionID actionId2 = pai.addAction(planId, action2);
 
@@ -1255,16 +1262,17 @@ public:
         TS_ASSERT(t2 <= t1 + 200); // 1 more second of tolerance
 #endif
 
-        SystemParameters parameters;
-        if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-            parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
         }
 
         AtomSpace atomSpace;
 
         OKActionPlanSender sender(sentActionPlans);
         PetInterfaceMock petInterface;
-        PAI pai(atomSpace, sender, petInterface, parameters);
+        PAI pai(atomSpace, sender, petInterface);
         petInterface.setPAI(&pai);
 
         /*

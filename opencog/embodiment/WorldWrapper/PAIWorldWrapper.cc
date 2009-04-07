@@ -591,7 +591,7 @@ Spatial::Point PAIWorldWrapper::getValidPosition( const Spatial::Point& location
 void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spatial::Point& endPoint, std::vector<Spatial::Point>& actions )
 {
     const std::string pathFindingAlgorithm =
-        MessagingSystem::NetworkElement::parameters.get("NAVIGATION_ALGORITHM");
+        opencog::config().get("NAVIGATION_ALGORITHM");
 
     const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
@@ -629,7 +629,7 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
         } else if ( pathFindingAlgorithm == "hpa" ) {
 
             SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
-            unsigned int maximumClusters = atoi( MessagingSystem::NetworkElement::parameters.get( "HPA_MAXIMUM_CLUSTERS").c_str( ) );
+            unsigned int maximumClusters = opencog::config().get_int("HPA_MAXIMUM_CLUSTERS");
             Spatial::HPASearch search( map, 1, maximumClusters );
 
             _hasPlanFailed = !search.processPath( Spatial::Math::Vector2( begin.first, begin.second ), Spatial::Math::Vector2( end.first, end.second ) );

@@ -49,28 +49,26 @@ PBTester::PBTester()
 
 PBTester::~PBTester()
 {
-    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
+    if (config().get_bool("SAVE_MESSAGES_TO_FILE")) {
         delete goldStdGen;
     }
 }
 
-void PBTester::init(TestParameters& _testParams)
+void PBTester::init()
 {
-    testParams = &_testParams;
     initialize();
 }
 
-void PBTester::init(const Control::SystemParameters &params, TestParameters& _testParams, const std::string &myId, const std::string &ip, int portNumber)
+void PBTester::init(const std::string &myId, const std::string &ip, int portNumber)
 {
-    setNetworkElement(new NetworkElement(params, myId, ip, portNumber));
-    testParams = &_testParams;
+    setNetworkElement(new NetworkElement(myId, ip, portNumber));
     initialize();
 }
 
 void PBTester::initialize()
 {
-    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
-        goldStdGen = new GoldStdGen(testParams->get("MESSAGES_FILENAME").c_str());
+    if (config().get_bool("SAVE_MESSAGES_TO_FILE")) {
+        goldStdGen = new GoldStdGen(config().get("MESSAGES_FILENAME").c_str());
     }
     failed = false;
     numberOfReceivedMessages = 0;
@@ -80,7 +78,7 @@ bool PBTester::processNextMessage(MessagingSystem::Message *message)
 {
     //logger().log(opencog::Logger::INFO, "RECEIVED MESSAGE:\n%s", message->getPlainTextRepresentation());
 
-    if (testParams->get("SAVE_MESSAGES_TO_FILE") == "1") {
+    if (config().get_bool("SAVE_MESSAGES_TO_FILE")) {
         goldStdGen->writeMessage(*message, false);
     }
     if (expectedMessages.empty()) {
@@ -135,7 +133,8 @@ void PBTester::notifyEndOfGoldStdFile()
     }
     std::string msgCmd = "UNLOAD_PET Fido";
 #if 0
-    MessagingSystem::StringMessage msg(NetworkElement::parameters.get("PROXY_ID"), NetworkElement::parameters.get("SPAWNER_ID"), msgCmd);
+    MessagingSystem::StringMessage msg(config().get("PROXY_ID"),
+                                       config().get("SPAWNER_ID"), msgCmd);
     sendMessage(msg);
 #endif
     if (failed) {
