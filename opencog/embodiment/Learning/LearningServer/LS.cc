@@ -61,8 +61,6 @@ void LS::init(const std::string &myId, const std::string &ip,
 
     // OpenCog-related initialization
     atom_types_init::init();
-    config().set("MIN_STI",
-                          config().get("ATOM_TABLE_LOWER_STI_VALUE"));
 
     this->busy = false;
 

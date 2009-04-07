@@ -211,7 +211,7 @@ void RuleEngineLearnedTricksHandler::update( void )
 
             logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - updated schema: %s | current sti: %d ",  this->atomSpace->getName(schemaHandle).c_str( ), this->atomSpace->getSTI( linkHandle ) );
         } // if
-        if ( this->atomSpace->getSTI( linkHandle ) > opencog::config().get_int("ATOM_TABLE_LOWER_STI_VALUE") ) {
+        if ( this->atomSpace->getSTI( linkHandle ) > opencog::config().get_int("MIN_STI") ) {
             ++this->numberOfLearnedTricks;
         } // if
     } // foreach

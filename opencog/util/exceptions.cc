@@ -182,20 +182,8 @@ InvalidParamException::InvalidParamException(const char * trace, const char * fm
 {
     va_list  ap;
     va_start(ap, fmt);
-    
-    char * concatMsg = new char[strlen(getMessage()) + strlen(trace) + 1];
-    *concatMsg = '\0'; // empty c-string
-    
-    strcat(concatMsg, getMessage());
-    strcat(concatMsg, trace);
-
-    char buf[MAX_MSG_LENGTH];
-    vsnprintf(buf, MAX_MSG_LENGTH, concatMsg, ap);
-    setMessage(buf);
-
+    parseErrorMessage(trace, fmt, ap);
     va_end(ap);
-
-    delete [] concatMsg;
 }
 
 /**

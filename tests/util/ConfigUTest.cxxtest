@@ -75,7 +75,8 @@ public:
         out << "PARAM6 = VALUE6  # end of line comments\n";
         out << "  PARAM7  =  248 # integer parameter\n";
         out << "PARAM8  =1.2584 # double parameter\n";
-        out << "PARAM9=   -29847.167015 $&@*a786A!$alk # double parameter and useless discarded extra characters\n";
+        //out << "PARAM9=   -29847.167015 $&@*a786A!$alk # double parameter and useless discarded extra characters\n";
+        out << "PARAM9=   -29847.167015 # double parameter\n";
         out << "STI_FUNDS_BUFFER = 200\n";
         out << "LTI_FUNDS_BUFFER = 10\n";
         out << "LOG_TO_STDOUT    = false\n";
@@ -117,6 +118,25 @@ public:
         config().set("STI_FUNDS_BUFFER", "200");
         TS_ASSERT(config().get("STI_FUNDS_BUFFER") == "200");
         TS_ASSERT(config().get_int("STI_FUNDS_BUFFER") == 200);
+    }
+
+    /**
+     * Check that setting a boolean parameter and getting an int
+     * raises an InvalidParamException
+     */
+    void testGetType() {
+        config().reset();
+
+        config().set("BOOL_PARAM1", "true");
+        config().set("BOOL_PARAM2", "false");
+        
+        TS_ASSERT_EQUALS(config().get_bool("BOOL_PARAM1"), true);
+        TS_ASSERT_THROWS(config().get_int("BOOL_PARAM2"),
+                         InvalidParamException&);
+        TS_ASSERT_THROWS(config().get_long("BOOL_PARAM2"),
+                         InvalidParamException&);
+        TS_ASSERT_THROWS(config().get_double("BOOL_PARAM2"),
+                         InvalidParamException&);
     }
 
 }; // class

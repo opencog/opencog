@@ -241,7 +241,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         opencog::cassert(TRACE_INFO, _atomic_perceptions.empty(),
                          "_atomic_perceptions must be empty because stopLearning would have clear it");
 
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_int("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop processing.");
 
@@ -409,7 +409,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, start update processing.");
 
         _atomic_perceptions.clear();
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_int("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop update processing.");
 

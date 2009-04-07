@@ -43,48 +43,52 @@ int main(int argc, char *argv[])
         return (1);
     }
 
-    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
-
-    // if exists load file with configuration parameters
-    // IMPORTANT: this file should be the same for all executables that create
-    // a systemParameter object.
-    if (fileExists(config().get("CONFIG_FILE").c_str())) {
-        config().load(config().get("CONFIG_FILE").c_str());
-    }
-
-    // setting unexpected handler in case a different exception from the
-    // especified ones is throw in the code
-    std::set_unexpected(opc_unexpected_handler);
-
-    //char petName[256];
-    //int petID = atoi(argv[1]);
-    //int portNumber = 5100 + petID;
-    int portNumber = atoi(argv[5]);
-
-    server(OPC::createInstance);
-    OPC& opc = static_cast<OPC&>(server());
-    opc.init(argv[1], "127.0.0.1", portNumber,
-             PerceptionActionInterface::PAIUtils::getInternalId(argv[1]),
-             PerceptionActionInterface::PAIUtils::getInternalId(argv[2]),
-             argv[3], argv[4]);
     try {
-        opc.serverLoop();
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        
+        // if exists load file with configuration parameters
+        // IMPORTANT: this file should be the same for all executables that create
+        // a systemParameter object.
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
+        }
+        
+        config().set("EXTERNAL_TICK_MODE", "true");
+
+        // setting unexpected handler in case a different exception from the
+        // especified ones is throw in the code
+        std::set_unexpected(opc_unexpected_handler);
+        
+        //char petName[256];
+        //int petID = atoi(argv[1]);
+        //int portNumber = 5100 + petID;
+        int portNumber = atoi(argv[5]);
+        
+        server(OPC::createInstance);
+        static_cast<OPC&>(server()).init(argv[1], "127.0.0.1", portNumber,
+                 PerceptionActionInterface::PAIUtils::getInternalId(argv[1]),
+                 PerceptionActionInterface::PAIUtils::getInternalId(argv[2]),
+                 argv[3], argv[4]);
+        
+        //main loop
+        static_cast<OPC&>(server()).serverLoop();
+
     } catch (std::bad_alloc) {
         logger().log(Logger::ERROR,
-                     "OPCExec - OPC raised a bad_alloc exception.");
-        opc.saveState();
+                     "OPCExecutable - OPC raised a bad_alloc exception.");
+        static_cast<OPC&>(server()).saveState();
     } catch (StandardException se) {
         logger().log(Logger::ERROR,
-                     "OPC executable - An exceptional situation occured"
+                     "OPCExecutable - An exceptional situation occured"
                      " with the following message '%s'"
                      ". Check log for more information.",
                      se.getMessage());
-        opc.saveState();
+        static_cast<OPC&>(server()).saveState();
     } catch (...) {
         logger().log(Logger::ERROR,
-                     "OPC executable - An exceptional situation occured"
+                     "OPCExecutable - An exceptional situation occured"
                      ". Check log for more information.");
-        opc.saveState();
+        static_cast<OPC&>(server()).saveState();
     }
 
     // TODO: how to delete opc now?
