@@ -41,6 +41,5 @@ using namespace opencog;
 unsigned long TLB::uuid = 1;
 
 std::map<Handle, const Atom*> TLB::handle_map;
-std::map<const Atom*, Handle> TLB::atom_map;
 
 #endif

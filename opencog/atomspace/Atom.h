@@ -59,6 +59,7 @@ class Atom : public AttentionValueHolder
     friend class AtomTable;
     friend class ImportanceIndex;
     friend class NMXmlParser;
+    friend class TLB;
 
 private:
 
@@ -87,6 +88,7 @@ private:
     AtomTable *getAtomTable() const;
 
 protected:
+    Handle handle;
     Type type;
 
     AtomTable *atomTable;

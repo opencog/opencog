@@ -508,7 +508,7 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
     }
 
     // Put it into the atom into the TLB with the correct value!
-    Handle existingHandle = TLB::holdsHandle(atom);
+    Handle existingHandle = atom->handle;
     if (TLB::isInvalidHandle(existingHandle)) TLB::addAtom(atom, atomHandle);
     else logger().warn(" Handle already exists in the TLB!!\n");
 

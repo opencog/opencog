@@ -56,7 +56,7 @@ void Atom::init(Type t, const std::vector<Handle>& outg, const TruthValue& tv)
 void Atom::init(Type t, const TruthValue& tv)
 #endif
 {
-    // resets all flags
+    handle = Handle::UNDEFINED;
     flags = 0;
     atomTable = NULL;
     incoming = NULL;
