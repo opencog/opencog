@@ -16,7 +16,7 @@ cmake       -- a build management tool
 
 cxxtest     -- a test framework
                http://cxxtest.sourceforge.net/
-               (Not available in Debian/Ubuntu, must be downloaded)
+               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~dhart/+archive/ppa)
 
 boost       -- a C++ utilities package -
                http://www.boost.org/
@@ -24,7 +24,7 @@ boost       -- a C++ utilities package -
 
 C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
                http://www.alhem.net/Sockets/
-               (Not available in Debian/Ubuntu, must be downloaded)
+               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~dhart/+archive/ppa)
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
@@ -46,6 +46,14 @@ libgsl      -- The GNU Scientific Library
 
 xercesc     -- Apache Xerces-C++ XML Parser
                Debian/Ubuntu packages libxerces-c28 and libxerces-c2-dev
+ 
+Lua         -- Lua programming language
+               http://www.lua.org/ (version 5.1)
+
+Luabind     -- Binding between C++ and Lua
+               http://www.rasterbar.com/products/luabind.html (version 0.8.1 or later)
+               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~arthur.loiret/+archive/ppa)
+
 
 
 To build opencog:
