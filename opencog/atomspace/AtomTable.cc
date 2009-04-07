@@ -460,7 +460,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // Its possible that the atom is already in the TLB -- 
     // e.g. if it was fetched from persistent storage; this
     // was done to preserve handle consistency.
-    Handle handle = TLB::holdsHandle(atom);
+    Handle handle = atom->handle;
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 
     nodeIndex.insertHandle(handle);

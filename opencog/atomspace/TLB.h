@@ -64,7 +64,6 @@ private:
 
 #ifdef USE_TLB_MAP
     static std::map<Handle, const Atom*> handle_map;
-    static std::map<const Atom *, Handle> atom_map;
 #endif
 
     /**
@@ -105,14 +104,11 @@ public:
      * @param Atom to be mapped.
      * @return Corresponding handle for the given atom.
      */
-    static inline Handle getHandle(const Atom* atom)
+    static inline const Handle& getHandle(const Atom* atom)
     {
 #ifdef USE_TLB_MAP
-        // Handle h(reinterpret_cast<unsigned long>(atom));
-        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
-
-        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
-        if (it != atom_map.end()) return it->second;
+        const Handle &h = atom->handle;
+        if (h != Handle::UNDEFINED) return h;
 #ifdef CHECK_MAP_CONSISTENCY
         throw InvalidParamException(TRACE_INFO,
             "Atom is not in the TLB!");
@@ -126,47 +122,17 @@ public:
     }
 
     /**
-     * Maps an atom to its corresponding handle. This method should
-     * only be used to check if the atom is already in the TLB; and
-     * this check should only be performed prior to adding to the TLB.
-     * For all other cases, use the getHandle call above.
-     *
-     * The difference between this and the TLB::getHandle() method 
-     * is that getHandle() will throw if the atom is not in the TLB,
-     * whereas this mathod simply returns Handle::UNDEFINED.
-     *
-     * @param Atom to be mapped.
-     * @return Corresponding handle for the given atom.
-     */
-    static inline Handle holdsHandle(const Atom* atom)
-    {
-#ifdef USE_TLB_MAP
-        // Handle h(reinterpret_cast<unsigned long>(atom));
-        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
-
-        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
-        if (it != atom_map.end()) return it->second;
-        return Handle::UNDEFINED;
-#else
-        return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
-#endif
-    }
-
-    /**
      * Adds a new atom to the TLB.
      *
      * @param Atom to be added.
      * @return Handle of the newly added atom.
      */
-    static inline Handle addAtom(const Atom* atom,
-                                 Handle handle = Handle::UNDEFINED)
+    static inline const Handle& addAtom(Atom* atom,
+                                 const Handle &handle = Handle::UNDEFINED)
     {
 #ifdef USE_TLB_MAP
-        // Handle h(reinterpret_cast<unsigned long>(atom));
-        // if (h.value() <= NOTYPE) return h; // check for "non-real" atoms
-
-        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
-        if (it != atom_map.end())
+        const Handle &h = atom->handle;
+        if (h != Handle::UNDEFINED)
         {
 #ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO,
@@ -174,19 +140,21 @@ public:
 #endif /* CHECK_MAP_CONSISTENCY */
             /* Hmm, I guess its okay to add an atom twice, assuming
              * that it is being added with the same handle. */
-            if (handle != it->second)
+            if (handle != h)
                 throw InvalidParamException(TRACE_INFO,
                 "Atom is already in the TLB with a different handle!");
-            return it->second;
+            return h;
         }
-        if (handle == Handle::UNDEFINED)
+
+        Handle ha = handle;
+        if (ha == Handle::UNDEFINED)
         {
-            handle = Handle(uuid);
+            ha = Handle(uuid);
             uuid++;
         }
-        handle_map[handle] = atom;
-        atom_map[atom] = handle;
-        return handle;
+        handle_map[ha] = atom;
+        atom->handle = ha;
+        return atom->handle;
 #else /* USE_TLB_MAP */
         return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
 #endif /* USE_TLB_MAP */
@@ -198,21 +166,19 @@ public:
      * @param Atom to be removed.
      * @return Removed atom.
      */
-    static inline const Atom* removeAtom(const Atom* atom) {
+    static inline const Atom* removeAtom(Atom* atom) {
 #ifdef USE_TLB_MAP
-        // Handle h(reinterpret_cast<unsigned long>(atom));
-        // if (h.value() <= NOTYPE) return atom; // check for "non-real" atoms
 
-        std::map<const Atom*, Handle>::iterator it = atom_map.find(atom);
-        if (it == atom_map.end()) {
+        const Handle &h = atom->handle;
+        if (h == Handle::UNDEFINED) {
 #ifdef CHECK_MAP_CONSISTENCY
             throw InvalidParamException(TRACE_INFO,
                 "Cannot remove: Atom is not in the TLB");
 #endif
             return atom;
         }
-        atom_map.erase(atom);
-        handle_map.erase(it->second);
+        handle_map.erase(h);
+        atom->handle = Handle::UNDEFINED;
 #endif
         return atom;
     }

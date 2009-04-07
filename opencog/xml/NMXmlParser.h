@@ -143,6 +143,8 @@ public:
       */
     static void setOutgoingSet(Link*, const std::vector<Handle>&);
 
+
+    static Handle holdsHandle(const Atom *a) { return a->handle; } 
 };
 
 } // namespace opencog
