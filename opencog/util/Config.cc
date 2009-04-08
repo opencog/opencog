@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
@@ -167,7 +168,8 @@ const string& Config::get(const string &name) const
     map<string, string>::const_iterator it = table.find(name);
     if (it == table.end())
        throw InvalidParamException(TRACE_INFO,
-               "[ERROR] parameter not found (%s)", name.c_str());
+                                   "[ERROR] parameter not found (%s)",
+                                   name.c_str());
     return it->second;
 }
 
@@ -178,36 +180,35 @@ const string& Config::operator[](const string &name) const
 
 int Config::get_int(const string &name) const
 {
-    int int_val;
-    errno = 0;
-    int_val = strtol(get(name).c_str(), NULL, 0);
-    if (errno != 0)
+    try {
+        return boost::lexical_cast<int>(get(name));
+    } catch(boost::bad_lexical_cast) {
         throw InvalidParamException(TRACE_INFO,
-               "[ERROR] invalid integer parameter (%s)", name.c_str());
-    return int_val;
+                                    "[ERROR] invalid integer parameter (%s)",
+                                    name.c_str());
+    }
 }
 
 long Config::get_long(const string &name) const
 {
-    long long_val;
-    errno = 0;
-    long_val = strtol(get(name).c_str(), NULL, 0);
-    if (errno != 0)
+    try {
+        return boost::lexical_cast<long>(get(name));
+    } catch(boost::bad_lexical_cast) {
         throw InvalidParamException(TRACE_INFO,
-               "[ERROR] invalid integer parameter (%s)", name.c_str());
-    return long_val;
+                                    "[ERROR] invalid long integer parameter (%s)",
+                                    name.c_str());
+    }
 }
 
 double Config::get_double(const string &name) const
 {
-    double int_val;
-    errno = 0;
-    int_val = strtod(get(name).c_str(), NULL);
-    if (errno != 0)
+    try {
+        return boost::lexical_cast<double>(get(name));
+    } catch(boost::bad_lexical_cast) {
         throw InvalidParamException(TRACE_INFO,
-                "[ERROR] invalid double parameter (%s: %s)",
-                 name.c_str(), get(name).c_str());
-    return int_val;
+                                    "[ERROR] invalid double parameter (%s)",
+                                    name.c_str());
+    }
 }
 
 bool Config::get_bool(const string &name) const
@@ -215,8 +216,8 @@ bool Config::get_bool(const string &name) const
     if (strcasecmp(get(name).c_str(), "true") == 0) return true;
     else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
     else throw InvalidParamException(TRACE_INFO,
-                 "[ERROR] invalid double parameter (%s: %s)",
-                 name.c_str(), get(name).c_str());
+                                     "[ERROR] invalid double parameter (%s: %s)",
+                                     name.c_str(), get(name).c_str());
 }
 
 std::string Config::to_string() const

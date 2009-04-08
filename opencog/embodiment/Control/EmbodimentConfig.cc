@@ -42,15 +42,15 @@ EmbodimentConfig::EmbodimentConfig() {
 }
 
 void EmbodimentConfig::reset() {
-    //note that C++ calls Config::Config(), that itself calls Config::reset()
+    //Note that C++ calls Config::Config(), that itself calls Config::reset()
     //so there is no need to call it here in order to
-    //inherit the default parameters
-
+    //inherit the default parameters.
+    //Also, EmbodimentConfig::reset() overwrites existing default paramters
+    //defined in Config::reset()
+    
     // load embodiment default configuration
     for (unsigned int i = 0; EMBODIMENT_DEFAULT()[i] != ""; i += 2) {
-        if (table.find(EMBODIMENT_DEFAULT()[i]) == table.end()) {
-            table[EMBODIMENT_DEFAULT()[i]] = EMBODIMENT_DEFAULT()[i + 1];
-        }
+        table[EMBODIMENT_DEFAULT()[i]] = EMBODIMENT_DEFAULT()[i + 1];
     }
 }
 

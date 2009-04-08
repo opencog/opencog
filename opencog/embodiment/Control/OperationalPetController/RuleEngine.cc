@@ -148,7 +148,8 @@ throw( RuntimeException ) :
     std::string agentRules = (boost::format(config().get("RE_RULES_FILENAME_MASK")) % this->opc->getPet().getType()).str();
 
     // load rules
-    logger().log(Logger::DEBUG, ( "RuleEngine - loading rules file: " + config().get("RULE_ENGINE_RULES_FILENAME_MASK") ).c_str( ) );
+    logger().log(Logger::DEBUG,
+                 ("RuleEngine - loading rules file: " + agentRules).c_str());
     if ( luaL_dofile( this->luaState, agentRules.c_str() ) ) {
         luaThrowException( this->luaState );
     } // if

@@ -48,6 +48,7 @@ protected:
     {
         static const std::string defaultConfig[] = {
             "CONFIG_FILE",                  "embodiment.conf",
+            
             "AUTOMATED_SYSTEM_TESTS",       "false",
 
             // Ids and network settings
@@ -242,7 +243,8 @@ protected:
             "HAS_SAID_DELAY",               "200",
             
             //lower bound (high age) of atoms in atomTable
-            "ATOM_TABLE_LOWER_STI_VALUE",   "-400",
+            //it overwrties MIN_STI default value defined in Config.h
+            "MIN_STI",                      "-400",
             
             //false with no random operator optimization for NoSpaceLife
             //true with optimization (to avoid Monte Carlos simulations)

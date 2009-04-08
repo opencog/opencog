@@ -62,8 +62,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     // OpenCog-related initialization
     atom_types_init::init();
-    config().set("MIN_STI",
-                          config().get("ATOM_TABLE_LOWER_STI_VALUE"));
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
                         agentType : config().get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
@@ -98,8 +96,8 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 
         logger().log(Logger::INFO, "OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
                      config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
-                     config().get("RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
-                     config().get("RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
+                     config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
+                     config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
 
         int cnt = 0;
         ifstream fin(config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str());
@@ -178,28 +176,28 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
                                    this->createAgent(PetInterfaceUpdaterAgent::info().id, false));
 
-    if (config().get_int("PROCEDURE_INTERPRETER_ENABLED")) {
+    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
 
-    if (config().get_int("ACTION_SELECTION_ENABLED")) {
+    if (config().get_bool("ACTION_SELECTION_ENABLED")) {
         actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
         this->startAgent(actionSelectionAgent);
     }
 
-    if (config().get_int("PROCEDURE_INTERPRETER_ENABLED")) {
+    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
         this->startAgent(procedureInterpreterAgent);
     }
 
-    if (config().get_int("IMPORTANCE_DECAY_ENABLED")) {
+    if (config().get_bool("IMPORTANCE_DECAY_ENABLED")) {
         // TODO: Create a config parameter to control this frequency
         importanceDecayAgent->setFrequency(15);
         this->startAgent(importanceDecayAgent);
     }
 
     // local map 2D interface
-    if (config().get_int("PET_INTERFACE_ENABLED")) {
+    if (config().get_bool("PET_INTERFACE_ENABLED")) {
 //        PetInterfaceUpdaterTask::startGUI();
 //        petInterfaceUpdaterAgent->setFrequency(config().get_int("PET_INTERFACE_UPDATE_PERIOD"));
 //        this->startAgent(petInterfaceUpdaterAgent);

@@ -72,10 +72,10 @@ namespace combo {
 	str_proc_map_const_it proc=_repo.find(*str);
 	if(proc==_repo.end()) {
 	  if(wodo) {
-	    opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository - Creating definite_object '%s'. Is this a typo?", str->c_str());
+	    opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository - Creating definite_object '%s'.", str->c_str());
 	  }
 	} else {
-	  opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository::instantiateProcedureCalls - Replacing procedure name by procedure object (%s)", str->c_str());
+	  opencog::logger().log(opencog::Logger::DEBUG, "ComboProcedureRepository - Replacing procedure name by procedure object '%s'", str->c_str());
 	  *it=proc->second;
 	}
       }
