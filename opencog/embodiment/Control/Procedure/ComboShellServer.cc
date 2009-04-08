@@ -45,12 +45,11 @@ ComboShellServer::ComboShellServer()
 {
 }
 
-void ComboShellServer::init(const Control::SystemParameters &params)
+void ComboShellServer::init()
 {
-    setNetworkElement(new NetworkElement(params,
-                                         params.get("COMBO_SHELL_ID"),
-                                         params.get("COMBO_SHELL_IP"),
-                                         lexical_cast<int>(params.get("COMBO_SHELL_PORT"))));
+    setNetworkElement(new NetworkElement(opencog::config().get("COMBO_SHELL_ID"),
+                                         opencog::config().get("COMBO_SHELL_IP"),
+                                         opencog::config().get_int("COMBO_SHELL_PORT")));
     _waiting = false;
 }
 
@@ -110,7 +109,7 @@ start:
     try {
         stringstream ss;
         ss << tr;
-        StringMessage msg(getParameters().get("COMBO_SHELL_ID"),
+        StringMessage msg(opencog::config().get("COMBO_SHELL_ID"),
                           "1", //to the OPC - this is a hack...
                           ss.str());
         cout << "sending schema " << ss.str() << "..." << endl;

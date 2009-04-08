@@ -31,6 +31,7 @@
 #define MAX_CYCLE 40000
 
 using namespace OperationalPetController;
+using namespace opencog;
 
 HCTestAgent::HCTestAgent()
 {
@@ -51,12 +52,12 @@ HCTestAgent::~HCTestAgent()
 }
 
 
-void HCTestAgent::run(opencog::CogServer* ne)
+void HCTestAgent::run(CogServer* ne)
 {
-    logger().log(opencog::Logger::FINE, "Executing HCTestAgent.");
+    logger().log(Logger::FINE, "Executing HCTestAgent.");
     cycle++;
     if (cycle > MAX_CYCLE) { //timeout in case the test takes too long
-        logger().log(opencog::Logger::ERROR, "Executing HCTestAgent.");
+        logger().log(Logger::ERROR, "Executing HCTestAgent.");
         exit(1);
     }
     // send the whole atomSpace to the LS
@@ -74,7 +75,7 @@ void HCTestAgent::run(opencog::CogServer* ne)
         std::cout << "OPC WAIT1" << std::endl;
         sleep(WAIT1_TIME);
         std::cout << "OPC WAIT1 DONE" << std::endl;
-        sender->sendCommand(NetworkElement::parameters.get("TRY_SCHEMA_CMD"),
+        sender->sendCommand(config().get("TRY_SCHEMA_CMD"),
                             schemaName);
         mode = HCT_IDLE;
         break;
@@ -91,7 +92,7 @@ void HCTestAgent::run(opencog::CogServer* ne)
         std::cout << "OPC WAIT3" << std::endl;
         sleep(WAIT3_TIME);
         std::cout << "OPC WAIT3 DONE" << std::endl;
-        sender->sendCommand(NetworkElement::parameters.get("TRY_SCHEMA_CMD"),
+        sender->sendCommand(config().get("TRY_SCHEMA_CMD"),
                             schemaName);
         mode = HCT_IDLE;
         break;
@@ -100,7 +101,7 @@ void HCTestAgent::run(opencog::CogServer* ne)
         std::cout << "OPC WAIT4" << std::endl;
         sleep(WAIT4_TIME);
         std::cout << "OPC WAIT4 DONE" << std::endl;
-        sender->sendCommand(NetworkElement::parameters.get("STOP_LEARNING_CMD"),
+        sender->sendCommand(config().get("STOP_LEARNING_CMD"),
                             schemaName);
         mode = HCT_IDLE;
         break;

@@ -19,11 +19,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 #include "util/exceptions.h"
 #include "PVPSimulator.h"
-#include "SimulationParameters.h"
+#include "SimulationConfig.h"
 #include "TickerAgent.h"
 #include "InterfaceListenerAgent.h"
 #include "MessageSenderAgent.h"
@@ -32,23 +32,27 @@
 #include <unistd.h>
 
 using namespace PetaverseProxySimulator;
+using namespace opencog;
+
 int main(int argc, char *argv[])
 {
 
-    Control::SystemParameters parameters;
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
-    }
+    config(SimulationConfig::simulationCreateInstance, true);
 
-    SimulationParameters simParameters;
-    if (fileExists(simParameters.get("CONFIG_FILE").c_str())) {
-        simParameters.loadFromFile(simParameters.get("CONFIG_FILE"));
+    string embodimentConfigFileName = config().get("CONFIG_FILE");
+    string simulationConfigFileName = config().get("PVPSIM_CONFIG_FILE");
+    
+    if (fileExists(embodimentConfigFileName.c_str())) {
+        config().load(embodimentConfigFileName.c_str());
+    }
+    if (fileExists(simulationConfigFileName.c_str())) {
+        config().load(simulationConfigFileName.c_str());
     }
     //PVPSimulator simulator(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 8211);
 
     server(PVPSimulator::createInstance);
     PVPSimulator& simulator = static_cast<PVPSimulator&>(server());
-    simulator.init(parameters, simParameters, parameters.get("PROXY_ID"), "127.0.0.1", 16315);
+    simulator.init(config().get("PROXY_ID"), "127.0.0.1", 16315);
 
     if (!simulator.connectToSimWorld()) {
         logger().log(opencog::Logger::ERROR, "Could not connect to the simulated World\n");
@@ -67,7 +71,7 @@ int main(int argc, char *argv[])
     simulator.registerAgent(MessageSenderAgent::info().id, &messageSenderAgentFactory);
     simulator.createAgent(MessageSenderAgent::info().id, true);
 
-    simParameters.startSimulation();
+    static_cast<SimulationConfig&>(config()).startSimulation();
 
     try {
         simulator.serverLoop();

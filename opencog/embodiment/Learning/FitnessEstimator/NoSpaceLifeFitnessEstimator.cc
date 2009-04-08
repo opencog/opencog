@@ -23,7 +23,7 @@
 #include "NoSpaceLifeWorldWrapper.h"
 #include "ComboInterpreter.h"
 #include "util/exceptions.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "NetworkElement.h"
 #include "PetComboVocabulary.h"
 
@@ -68,7 +68,7 @@ NoSpaceLifeFitnessEstimator::NoSpaceLifeFitnessEstimator
     opencog::cassert(TRACE_INFO, BDCat.getSize() == (int)all.size(),
                      "There must be as many behavior category as argument lists");
 
-    _randomOperatorOptimization = bool(atoi(MessagingSystem::NetworkElement::parameters.get("RANDOM_OPERATOR_OPTIMIZATION").c_str()));
+    _randomOperatorOptimization = opencog::config().get_bool("RANDOM_OPERATOR_OPTIMIZATION");
     //if the random operator optimization is activated then
     //a plan is sent without evaluating indefinite objects
     _sendDefinitePlan = !_randomOperatorOptimization;

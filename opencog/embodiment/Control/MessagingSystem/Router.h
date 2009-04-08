@@ -30,7 +30,7 @@
 #include <vector>
 #include <time.h>
 #include <exception>
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include "util/Logger.h"
 #include "util/exceptions.h"
 #include "MessageCentral.h"
@@ -219,7 +219,6 @@ private:
     std::string routerId;
     int routerPort;
     int routerAvailableNotificationInterval;
-    const Control::SystemParameters& parameters;
 
     /**
      * Load persisted information about the elements previously connected to
@@ -294,7 +293,7 @@ public:
     // Constructors/destructors
 
     ~Router();
-    Router(const Control::SystemParameters &params);
+    Router();
 
     // ***********************************************/
     // public interface
@@ -309,7 +308,6 @@ public:
     void removeNetworkElement(const std::string &strId);
     void clearNetworkElementMessageQueue(const std::string &strId);
     int  addNetworkElement(const std::string &strId, const std::string &strIp, int port);
-    const Control::SystemParameters& getParameters() const;
 
     MessageCentral* getMessageCentral();
 

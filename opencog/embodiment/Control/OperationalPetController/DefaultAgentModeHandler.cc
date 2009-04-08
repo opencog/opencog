@@ -127,7 +127,7 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
     } // if
 
     unsigned int numberOfTilesPerSide =
-        static_cast<unsigned int>( atoi( MessagingSystem::NetworkElement::parameters.get( "MAP_XDIM" ).c_str( ) ) ) / 4;
+        static_cast<unsigned int>(opencog::config().get_int( "MAP_XDIM" )) / 4;
 
     const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
     Spatial::Math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );

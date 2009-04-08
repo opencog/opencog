@@ -39,7 +39,7 @@ class SchemaRunner
 {
 public:
 
-    SchemaRunner( OPC* opc, Control::SystemParameters& parameters );
+    SchemaRunner( OPC* opc );
 
     virtual ~SchemaRunner( );
 

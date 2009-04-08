@@ -19,7 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <exception>
 
 #include "util/exceptions.h"
@@ -27,6 +27,7 @@
 #include "util/files.h"
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 void router_unexpected_handler()
 {
@@ -36,20 +37,20 @@ void router_unexpected_handler()
 int main(int argc, char *argv[])
 {
 
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     // setting unexpected handler in case a different exception from the
     // especified ones is throw in the code
     std::set_unexpected(router_unexpected_handler);
 
-    Router *router = new Router(parameters);
+    Router *router = new Router();
 
     try {
         router->run();

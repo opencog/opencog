@@ -25,7 +25,7 @@
 #include <unistd.h>
 #endif
 
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include "NetworkElement.h"
 #include "StringMessage.h"
 
@@ -50,7 +50,7 @@ private:
 
 public:
 
-    MyElement(const Control::SystemParameters &params, std::string myID, std::string peerID, int port, int sleep) : NetworkElement(params, myID, std::string("127.0.0.1"), port) {
+    MyElement(std::string myID, std::string peerID, int port, int sleep) : NetworkElement(myID, std::string("127.0.0.1"), port) {
         this->myID = myID;
         this->peerID = peerID;
         this->sleepBeforeSending = sleep;
@@ -80,10 +80,10 @@ public:
 int main(int argc, char *argv[])
 {
 
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     printf("Handshaking with router...\n");
-    MyElement *myElement = new MyElement(parameters, argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));
+    MyElement *myElement = new MyElement(argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));
     printf("OK. Sleeping for 10 seconds...\n");
     sleep(10);
     printf("Starting test\n");

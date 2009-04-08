@@ -55,7 +55,7 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
     std::set<RunningProcedureId> done;
 
     opencog::lazy_selector* sel;
-    if (NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") != "1") {
+    if (!opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         //loop in random order until we find a running procedure that's ready
         //along the way, get rid of done procedures
         sel = new opencog::lazy_random_selector(_vec.size(), rng);
@@ -94,7 +94,8 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
             logger().log(opencog::Logger::ERROR, "Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
             if (ne) {
                 StringMessage msg(ne->getID(),
-                                  NetworkElement::parameters.get("COMBO_SHELL_ID"), "action_failure");
+                                  opencog::config().get("COMBO_SHELL_ID"),
+                                  "action_failure");
                 ne->sendMessage(msg);
             }
 
@@ -113,7 +114,8 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
                 if (rp.isFailed()) {
                     _failed.insert((*it)->first);
                     StringMessage msg(ne->getID(),
-                                      NetworkElement::parameters.get("COMBO_SHELL_ID"), "action_failure");
+                                      opencog::config().get("COMBO_SHELL_ID"),
+                                      "action_failure");
                     ne->sendMessage(msg);
 
                 } else {
@@ -122,7 +124,8 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
                     stringstream ss;
                     ss << rp.getResult();
                     StringMessage msg(ne->getID(),
-                                      NetworkElement::parameters.get("COMBO_SHELL_ID"), ss.str());
+                                      opencog::config().get("COMBO_SHELL_ID"),
+                                      ss.str());
                     ne->sendMessage(msg);
                 }
             }

@@ -45,7 +45,7 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
 {
     //initialize the random generator
     unsigned long rand_seed;
-    if (NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") == "1") {
+    if (config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);
@@ -54,7 +54,7 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
     logger().log(opencog::Logger::INFO, "ImitationLearningAgent - Created random number generator (%p) for ImitationLearningAgent with seed %lu", _rng, rand_seed);
 
     //instanciate the learning vocabulary provider
-    const std::string ILALGO = MessagingSystem::NetworkElement::parameters.get("IMITATION_LEARNING_ALGORITHM");
+    const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
     if (ILALGO == Control::ImitationLearningAlgo::HillClimbing)
         _PVoc = new HCPetaverseVocabularyProvider();
     else if (ILALGO == Control::ImitationLearningAlgo::MOSES)
@@ -241,7 +241,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         opencog::cassert(TRACE_INFO, _atomic_perceptions.empty(),
                          "_atomic_perceptions must be empty because stopLearning would have clear it");
 
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, atoi(MessagingSystem::NetworkElement::parameters.get("ENTROPY_PERCEPTION_FILTER_THRESHOLD").c_str()), _BDCat, _exemplarTemporals, _all);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_int("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop processing.");
 
@@ -262,7 +262,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, start processing.");
 
         bool type_check_actions =
-            NetworkElement::parameters.get("TYPE_CHECK_GENERATED_COMBO") == "1";
+            config().get_bool("TYPE_CHECK_GENERATED_COMBO");
 
         Filter::ActionFilter af(_avatar_id, _owner_id, *wp, _definite_objects,
                                 io, ea, _arity, type_check_actions, *_rng);
@@ -270,7 +270,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         opencog::cassert(TRACE_INFO, _atomic_actions.empty(),
                          "_atomic_actions must be empty because stopLearning would have clear it");
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
-                               atoi(MessagingSystem::NetworkElement::parameters.get("ACTION_FILTER_SEQ_MAX").c_str()));
+                               config().get_int("ACTION_FILTER_SEQ_MAX"));
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, stop processing.");
 
@@ -323,10 +323,10 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //~debug log for SPCTools
 
         //instanciate the learning algo
-        const std::string ILALGO = MessagingSystem::NetworkElement::parameters.get("IMITATION_LEARNING_ALGORITHM");
+        const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
         if (ILALGO == Control::ImitationLearningAlgo::HillClimbing) {
-            bool abibb = MessagingSystem::NetworkElement::parameters.get("ACTION_BOOLEAN_IF_BOTH_BRANCHES_HC_EXPENSION") == "1";
-            bool neic = MessagingSystem::NetworkElement::parameters.get("HC_NEW_EXEMPLAR_INITIALIZES_CENTER") == "1";
+            bool abibb = config().get_bool("ACTION_BOOLEAN_IF_BOTH_BRANCHES_HC_EXPENSION");
+            bool neic = config().get_bool("HC_NEW_EXEMPLAR_INITIALIZES_CENTER");
             _PIL = new petaverse_hillclimber(nepc, *_fitnessEstimator,
                                              _definite_objects, eo,
                                              _atomic_perceptions,
@@ -409,7 +409,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, start update processing.");
 
         _atomic_perceptions.clear();
-        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, atoi(MessagingSystem::NetworkElement::parameters.get("ENTROPY_PERCEPTION_FILTER_THRESHOLD").c_str()), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
+        _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_int("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop update processing.");
 
@@ -429,7 +429,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, start processing.");
 
         bool type_check_actions =
-            NetworkElement::parameters.get("TYPE_CHECK_GENERATED_COMBO") == "1";
+            config().get_bool("TYPE_CHECK_GENERATED_COMBO");
 
         Filter::ActionFilter af(_avatar_id, _owner_id, *wp, _definite_objects,
                                 _PVoc->get_indefinite_objects(),
@@ -439,7 +439,7 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
 
         _atomic_actions.clear();
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
-                               atoi(MessagingSystem::NetworkElement::parameters.get("ACTION_FILTER_SEQ_MAX").c_str()));
+                               config().get_int("ACTION_FILTER_SEQ_MAX"));
 
         logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, stop processing.");
 

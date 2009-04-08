@@ -47,6 +47,7 @@
 using namespace behavior;
 using namespace OperationalPetController;
 using namespace WorldWrapper;
+using namespace opencog;
 
 const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
 
@@ -93,13 +94,13 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
 
     //initialize the random generator
     unsigned long rand_seed;
-    if (MessagingSystem::NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") == "1") {
+    if (config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         rand_seed = 0;
     } else {
         rand_seed = time(NULL);
     }
-    this->rng = new opencog::MT19937RandGen(rand_seed);
-    logger().log(opencog::Logger::INFO, "Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
+    this->rng = new MT19937RandGen(rand_seed);
+    logger().log(Logger::INFO, "Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
 
     this->modeHandler[ LEARNING ] = new LearningAgentModeHandler( this );
     this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
@@ -147,8 +148,8 @@ void Pet::initTraitsAndFeelings()
     char line[256];
     std::string trait;
 
-    std::string defaultDog = MessagingSystem::NetworkElement::parameters.get("RE_DEFAULT_PET_TRAITS");
-    std::string traitsFilenameMask = MessagingSystem::NetworkElement::parameters.get("RE_TRAITS_FILENAME_MASK");
+    std::string defaultDog = config().get("RE_DEFAULT_PET_TRAITS");
+    std::string traitsFilenameMask = config().get("RE_TRAITS_FILENAME_MASK");
 
     std::stringstream name(std::stringstream::out);
     name << boost::format( traitsFilenameMask ) % this->agentType % this->agentTraits;
@@ -157,14 +158,14 @@ void Pet::initTraitsAndFeelings()
     if (fileExists(name.str().c_str())) {
         fin.open(name.str().c_str(), std::ios_base::in);
     } else {
-        logger().log(opencog::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+        logger().log(Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
         name.str(std::string());
         name << boost::format( traitsFilenameMask ) % this->agentType % defaultDog;
 
         if (fileExists(name.str().c_str())) {
             fin.open(name.str().c_str(), std::ios_base::in);
         } else {
-            logger().log(opencog::Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+            logger().log(Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
         }
     }
 
@@ -179,7 +180,7 @@ void Pet::initTraitsAndFeelings()
                 in >> trait;
                 in >> value;
 
-                logger().log(opencog::Logger::DEBUG, "Pet - Loaded '%s' - trait '%s' with value '%.3f'.",
+                logger().log(Logger::DEBUG, "Pet - Loaded '%s' - trait '%s' with value '%.3f'.",
                              name.str().c_str(), trait.c_str(), value);
 
                 tv.setMean(value);
@@ -240,7 +241,7 @@ void Pet::setOwnerId(const std::string& ownerId)
     this->ownerId.assign(ownerId);
 }
 
-void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException)
+void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 {
 
     if (this->exemplarAvatarId != "") {
@@ -248,7 +249,7 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeEx
         atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), SL_NODE, this->exemplarAvatarId, true);
 
         if (exemplarAvatarSet.size() != 1) {
-            throw opencog::RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.",
+            throw RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.",
                                             exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
         }
 
@@ -284,7 +285,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     switch (this->mode) {
 
     case LEARNING: {
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "Pet - '%s' entering LEARNING mode. Trick: '%s', exemplar avatar: '%s'.",
                      this->petName.c_str(),
                      learningSchema.empty() ? "" : learningSchema.front().c_str(),
@@ -297,7 +298,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     break;
 
     case PLAYING: {
-        logger().log(opencog::Logger::INFO, "Pet - '%s' entering PLAYING mode.", this->petName.c_str());
+        logger().log(Logger::INFO, "Pet - '%s' entering PLAYING mode.", this->petName.c_str());
 
         // remove previous info realated to  exemplar avatar id,
         // learning schema and tried schema
@@ -320,7 +321,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     }
 
     // sending feedback
-    logger().log(opencog::Logger::INFO, "Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
+    logger().log(Logger::INFO, "Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
     sender->sendFeedback(petId, feedback);
 }
 
@@ -342,7 +343,7 @@ void Pet::setTriedSchema(const std::string & triedSchema)
 
 void Pet::schemaSelectedToExecute(const std::string & schemaName)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
+    logger().log(Logger::DEBUG, "Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
     if (this->triedSchema == schemaName) {
         this->candidateSchemaExecuted = true;
 
@@ -355,7 +356,7 @@ void Pet::schemaSelectedToExecute(const std::string & schemaName)
         sender->sendFeedback(petId, feedback);
 
     } else {
-        logger().log(opencog::Logger::DEBUG, "Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
+        logger().log(Logger::DEBUG, "Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
     }
 }
 
@@ -391,7 +392,7 @@ Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, 
         std::getline(petFile, ownerId);
         petFile >> petMode;
     } catch (std::ifstream::failure e) {
-        logger().log(opencog::Logger::ERROR, "Pet - Unable to load pet metadata.");
+        logger().log(Logger::ERROR, "Pet - Unable to load pet metadata.");
         return NULL;
     }
     petFile.close();
@@ -402,7 +403,7 @@ Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, 
     return pet;
 }
 
-void Pet::exportToFile(const std::string& filename, Pet & pet) throw (opencog::IOException, std::bad_exception)
+void Pet::exportToFile(const std::string& filename, Pet & pet) throw (IOException, std::bad_exception)
 {
     // remove previous saved dumps
     remove(filename.c_str());
@@ -417,7 +418,7 @@ void Pet::exportToFile(const std::string& filename, Pet & pet) throw (opencog::I
         petFile << pet.getMode()    << endl;
     } catch (std::ofstream::failure e) {
         petFile.close();
-        throw opencog::IOException(TRACE_INFO, "Pet - Unable to save pet metadata.");
+        throw IOException(TRACE_INFO, "Pet - Unable to save pet metadata.");
     }
 
     petFile.close();
@@ -435,7 +436,7 @@ AtomSpace& Pet::getAtomSpace()
 
 void Pet::stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
+    logger().log(Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
                  commandStatement.front().c_str(), timestamp);
     // TODO:
     //  Cancel a Pet command instruction that was given before:
@@ -450,10 +451,10 @@ bool Pet::isInLearningMode() const
 
 void Pet::startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
+    logger().log(Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
 
     if (isInLearningMode()) {
-        logger().log(opencog::Logger::WARN, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
+        logger().log(Logger::WARN, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
         std::string newExemplarAvatarId = exemplarAvatarId;
         stopLearning(learningSchema, timestamp);
         setExemplarAvatarId(newExemplarAvatarId);
@@ -472,7 +473,7 @@ void Pet::startLearning(const std::vector<std::string> &commandStatement, unsign
 
 void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Stop learning '%s' trick at %lu.",
+    logger().log(Logger::DEBUG, "Pet - Stop learning '%s' trick at %lu.",
                  commandStatement.front().c_str(), timestamp);
 
     // reset all exemplar timestamps to avoid storing more maps than necessary
@@ -481,7 +482,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
     // check if stop learning corresponds to currently learning schema
     if (learningSchema != commandStatement) {
-        logger().log(opencog::Logger::WARN, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
+        logger().log(Logger::WARN, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -499,7 +500,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
     inhLinkHS.push_back(learningConceptNode);
     atomSpace->addLink(INHERITANCE_LINK, inhLinkHS);
 
-    //sender->sendCommand(NetworkElement::parameters.get("STOP_LEARNING_CMD"), commandStatement.front());
+    //sender->sendCommand(config().get("STOP_LEARNING_CMD"), commandStatement.front());
     std::vector<std::string> args;
     std::vector<std::string>::iterator it = learningSchema.begin();
     it++;
@@ -526,16 +527,16 @@ bool Pet::isExemplarInProgress() const
 
 void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Exemplars for '%s' trick started at %lu with '%s'.",
+    logger().log(Logger::DEBUG, "Pet - Exemplars for '%s' trick started at %lu with '%s'.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp, getExemplarAvatarId().c_str());
 
     if (!isInLearningMode()) {
-        logger().log(opencog::Logger::WARN, "Pet - Unable to start exemplar. Not in LEARNING mode.");
+        logger().log(Logger::WARN, "Pet - Unable to start exemplar. Not in LEARNING mode.");
         return;
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(opencog::Logger::WARN, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
+        logger().log(Logger::WARN, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -546,17 +547,17 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
 
 void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Exemplars for '%s' trick ended at %lu.",
+    logger().log(Logger::DEBUG, "Pet - Exemplars for '%s' trick ended at %lu.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
 
     if (!isInLearningMode() || exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP) {
-        logger().log(opencog::Logger::WARN, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
+        logger().log(Logger::WARN, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(opencog::Logger::WARN, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
+        logger().log(Logger::WARN, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -578,7 +579,7 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
     }
 
     for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
-        logger().log(opencog::Logger::DEBUG, " args: %s", (*it).c_str());
+        logger().log(Logger::DEBUG, " args: %s", (*it).c_str());
     sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace);
 
     // after sending LearnMessage
@@ -660,16 +661,16 @@ void Pet::executeBehaviorEncoder()
 
 void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Try '%s' trick at %lu.",
+    logger().log(Logger::DEBUG, "Pet - Try '%s' trick at %lu.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(opencog::Logger::WARN, "Pet - Try schema, trick differs");
+        logger().log(Logger::WARN, "Pet - Try schema, trick differs");
         return;
     }
 
     if (this->candidateSchemaExecuted) {
-        //sender->sendCommand(NetworkElement::parameters.get("TRY_SCHEMA_CMD"), learningSchema.front().c_str());
+        //sender->sendCommand(config().get("TRY_SCHEMA_CMD"), learningSchema.front().c_str());
         std::vector<std::string> args;
 
         std::vector<std::string>::iterator it = learningSchema.begin();
@@ -682,7 +683,7 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 //    std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
         sender->sendTrySchema(learningSchema.front(),  args);
     } else {
-        logger().log(opencog::Logger::WARN, "Pet - Did not executed the last received candidate yet!");
+        logger().log(Logger::WARN, "Pet - Did not executed the last received candidate yet!");
         // Force a new attempt of executing the candidate schema.
         ruleEngine->tryExecuteSchema(learningSchema.front());
     }
@@ -690,12 +691,12 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 
 void Pet::reward(unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Reward at %lu.",  timestamp);
+    logger().log(Logger::DEBUG, "Pet - Reward at %lu.",  timestamp);
     this->latestRewardTimestamp = timestamp;
 
     if (isInLearningMode()) {
         if (learningSchema.empty() ||  learningSchema.front() == "" || triedSchema == "") {
-            logger().log(opencog::Logger::WARN, "Pet - Trying to reward a non-tried schema.");
+            logger().log(Logger::WARN, "Pet - Trying to reward a non-tried schema.");
             // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
             return;
         }
@@ -712,7 +713,7 @@ void Pet::reward(unsigned long timestamp)
 
 
 //      std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
-        sender->sendReward(learningSchema.front(), args, triedSchema, atof(NetworkElement::parameters.get("POSITIVE_REWARD").c_str()));
+        sender->sendReward(learningSchema.front(), args, triedSchema, config().get_double("POSITIVE_REWARD"));
 
     } else {
         // call rule engine to reward implication links for latest selected rules
@@ -722,12 +723,12 @@ void Pet::reward(unsigned long timestamp)
 
 void Pet::punish(unsigned long timestamp)
 {
-    logger().log(opencog::Logger::DEBUG, "Pet - Punishment at %lu.",  timestamp);
+    logger().log(Logger::DEBUG, "Pet - Punishment at %lu.",  timestamp);
     this->latestPunishmentTimestamp = timestamp;
 
     if (isInLearningMode()) {
         if (learningSchema.empty() || learningSchema.front() == "" || triedSchema == "") {
-            logger().log(opencog::Logger::WARN, "Pet - Trying to punish a non-tried schema.");
+            logger().log(Logger::WARN, "Pet - Trying to punish a non-tried schema.");
             // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
             return;
         }
@@ -743,7 +744,7 @@ void Pet::punish(unsigned long timestamp)
         }
 
 //      std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
-        sender->sendReward(learningSchema.front(), args, triedSchema, atof(NetworkElement::parameters.get("NEGATIVE_REWARD").c_str()));
+        sender->sendReward(learningSchema.front(), args, triedSchema, config().get_double("NEGATIVE_REWARD"));
 
     } else {
         // call rule engine to punish implication links for latest selected rules
@@ -758,7 +759,7 @@ Control::AgentModeHandler& Pet::getCurrentModeHandler( void )
 
 float Pet::computeWalkingSpeed() const
 {
-    float speed =  atof(NetworkElement::parameters.get("PET_WALKING_SPEED").c_str());
+    float speed =  config().get_double("PET_WALKING_SPEED");
     if (speed <= 0) {
         // get a random speed to be used (just for tests)
         speed = 0.5 + 3.0 * rng->randfloat();
@@ -785,7 +786,7 @@ unsigned long Pet::getLatestPunishmentTimestamp( void )
 void Pet::setGrabbedObj(const string& id)
 {
     if ( grabbedObjId == id ) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().log(Logger::DEBUG,
                      "Pet - Pet is already holding '%s', ignoring...", grabbedObjId.c_str() );
         return;
     } // if
@@ -804,20 +805,20 @@ bool Pet::hasGrabbedObj()
     return (!grabbedObjId.empty());
 }
 
-void Pet::updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad_exception)
+void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exception)
 {
 
     // sanity checks
     if (exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP ||
             exemplarEndTimestamp   == Pet::UNDEFINED_TIMESTAMP) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "Pet - Exemplar start/end should be set to update SppaceMapsToHold.");
         return;
     }
 
     // sanity checks
     if (exemplarStartTimestamp > exemplarEndTimestamp) {
-        logger().log(opencog::Logger::WARN,
+        logger().log(Logger::WARN,
                      "Pet - Exemplar start should be smaller than exemplar end.");
         return;
     }
@@ -832,20 +833,20 @@ void Pet::updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad
                            Temporal(exemplarStartTimestamp, exemplarEndTimestamp),
                            TemporalTable::STARTS_WITHIN);
 
-    logger().log(opencog::Logger::FINE,
+    logger().log(Logger::FINE,
                  "Pet - %d candidate maps to be checked.", pairs.size());
 
     foreach(HandleTemporalPair pair, pairs) {
         // mark any still existing spaceMap in this period as persistent
         Handle mapHandle = atomSpace->getAtTimeLink(pair);
         if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "Pet - Marking map (%s) as persistent.",
                          TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->getSpaceServer().markMapAsPersistent(mapHandle);
         } else {
             // TODO: This should not be needed here. Remove it when a solution for that is implemented.
-            logger().log(opencog::Logger::DEBUG,
+            logger().log(Logger::DEBUG,
                          "Pet - Removing map handle (%s) from AtomSpace. Map already removed from SpaceServer.",
                          TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->removeAtom(mapHandle, true);
@@ -884,7 +885,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
-            logger().log(opencog::Logger::ERROR,  "Could not find handle of object with id \"%s\".", entity.c_str() );
+            logger().log(Logger::ERROR,  "Could not find handle of object with id \"%s\".", entity.c_str() );
             petVicinity.clear();
             return false;
         }
@@ -908,10 +909,10 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 
 void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actionsDone)
 {
-    logger().log(opencog::Logger::DEBUG,  "Pet::getAllActionsDoneObservedAtTime");
+    logger().log(Logger::DEBUG,  "Pet::getAllActionsDoneObservedAtTime");
 
     std::vector<HandleTemporalPair> everyEventThatHappened;
-    atomSpace->getTimeInfo(back_inserter(everyEventThatHappened), Handle::UNDEFINED, time, opencog::TemporalTable::OVERLAPS);
+    atomSpace->getTimeInfo(back_inserter(everyEventThatHappened), Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
     foreach(HandleTemporalPair event, everyEventThatHappened) {
         Handle eventAtTime = atomSpace->getAtTimeLink(event);
         if (atomSpace->getArity(eventAtTime) >= 2) {
@@ -927,7 +928,7 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
 
 void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actionsDone)
 {
-    logger().log(opencog::Logger::DEBUG,  "Pet::getAllActionsDoneInATrickAtTime");
+    logger().log(Logger::DEBUG,  "Pet::getAllActionsDoneInATrickAtTime");
 
     HandleSeq patternToSearchLearningSession;
     Handle conceptNode = atomSpace->getHandle(CONCEPT_NODE, "learningSession");
@@ -941,13 +942,13 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
                 std::set<Handle> actionHandles;
                 std::vector<HandleTemporalPair> learningSessionIntervals;
                 // Get temporal info for all the Handles that pertain to this trick
-                atomSpace->getTimeInfo(back_inserter(learningSessionIntervals), learningSessionHandle, time, opencog::TemporalTable::OVERLAPS);
+                atomSpace->getTimeInfo(back_inserter(learningSessionIntervals), learningSessionHandle, time, TemporalTable::OVERLAPS);
                 // get all action that occurred during each interval
                 foreach(HandleTemporalPair learningSessionInterval, learningSessionIntervals) {
                     Temporal *learningSessionIntervalTemporal = learningSessionInterval.getTemporal();
                     std::vector<HandleTemporalPair> actionsInLearningSession;
                     Handle learningSessionIntervalHandle = atomSpace->getAtTimeLink(learningSessionInterval);
-                    atomSpace->getTimeInfo(back_inserter(actionsInLearningSession), learningSessionIntervalHandle, *learningSessionIntervalTemporal, opencog::TemporalTable::OVERLAPS);
+                    atomSpace->getTimeInfo(back_inserter(actionsInLearningSession), learningSessionIntervalHandle, *learningSessionIntervalTemporal, TemporalTable::OVERLAPS);
 
                     foreach(HandleTemporalPair action, actionsInLearningSession) {
                         Handle evaluationLink = atomSpace->getAtTimeLink(action);
@@ -962,17 +963,17 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
     }
 }
 
-void Pet::restartLearning() throw (opencog::RuntimeException, std::bad_exception)
+void Pet::restartLearning() throw (RuntimeException, std::bad_exception)
 {
 
     // sanity checks
     if (learningSchema.empty()) {
-        throw opencog::RuntimeException(TRACE_INFO, "Pet - No learning schema set when restarting learning..");
+        throw RuntimeException(TRACE_INFO, "Pet - No learning schema set when restarting learning..");
         return;
     }
 
     if (exemplarAvatarId == "") {
-        throw opencog::RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set when restarting learning..");
+        throw RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set when restarting learning..");
         return;
     }
 

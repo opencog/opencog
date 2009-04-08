@@ -24,6 +24,7 @@
 
 #include "Config.h"
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cstdio>
@@ -45,6 +46,12 @@ static string strip(string const& str, char const *strip_chars = blank_chars)
 {
     string::size_type const first = str.find_first_not_of(strip_chars);
     return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(strip_chars) - first + 1);
+}
+
+
+Config* Config::createInstance()
+{
+    return new Config();
 }
 
 Config::~Config()
@@ -180,6 +187,17 @@ int Config::get_int(const string &name) const
     return int_val;
 }
 
+long Config::get_long(const string &name) const
+{
+    long long_val;
+    errno = 0;
+    long_val = strtol(get(name).c_str(), NULL, 0);
+    if (errno != 0)
+        throw InvalidParamException(TRACE_INFO,
+               "[ERROR] invalid integer parameter (%s)", name.c_str());
+    return long_val;
+}
+
 double Config::get_double(const string &name) const
 {
     double int_val;
@@ -214,8 +232,11 @@ std::string Config::to_string() const
 }
 
 // create and return the single instance
-Config& opencog::config()
+Config& opencog::config(ConfigFactory* factoryFunction,
+                        bool overwrite)
 {
-    static Config instance;
-    return instance;
+    static std::auto_ptr<Config> instance((*factoryFunction)());
+    if(overwrite)
+        instance.reset((*factoryFunction)());
+    return *instance;
 }

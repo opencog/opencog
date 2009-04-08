@@ -1,6 +1,6 @@
 ADD_LIBRARY(PBTester
 	PBTester
-	TestParameters
+	TestConfig
 	GoldStdReaderAgent
 )
 

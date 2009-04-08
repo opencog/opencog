@@ -40,9 +40,8 @@ GoldStdReaderAgent::GoldStdReaderAgent()
 {
 }
 
-void GoldStdReaderAgent::init(TestParameters& _testParameters, const char* goldStdFilename)
+void GoldStdReaderAgent::init(const char* goldStdFilename)
 {
-    testParameters = &_testParameters;
     goldStdFile = fopen(goldStdFilename, "r");
     if (!goldStdFile) {
         logger().log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
@@ -78,7 +77,7 @@ void GoldStdReaderAgent::run(opencog::CogServer *server)
             if (elapsedTime >= messageToSend->getTimestamp()) {
                 logger().log(opencog::Logger::INFO, "Send last read message...");
                 pbTester->sendMessage(*(messageToSend->getMessage()));
-                if (testParameters->get("SAVE_MESSAGES_TO_FILE") == "1") {
+                if (opencog::config().get_bool("SAVE_MESSAGES_TO_FILE")) {
                     pbTester->getGoldStdGen()->writeMessage(*(messageToSend->getMessage()), true);
                 }
                 delete messageToSend;

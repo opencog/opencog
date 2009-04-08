@@ -19,11 +19,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <SystemParameters.h>
 #include <exception>
 #include <cstdlib>
 #include "util/files.h"
 #include "util/Logger.h"
+#include "EmbodimentConfig.h"
 #include "LS.h"
 
 using namespace LearningServer;
@@ -37,13 +37,14 @@ void ls_unexpected_handler()
 int main(int argc, char *argv[])
 {
 
-    Control::SystemParameters parameters;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     // if exists load file with configuration parameters
     // IMPORTANT: this file should be the same for all executables that create
     // a systemParameter object.
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     // setting unexpected handler in case a different exception from the
@@ -52,15 +53,9 @@ int main(int argc, char *argv[])
 
     server(LS::derivedCreateInstance);
 
-    //LS* ls = new LS(parameters.get("LS_ID"),
-    //              parameters.get("LS_IP"),
-    //              std::atoi(parameters.get("LS_PORT").c_str()),
-    //              parameters);
-
-    static_cast<LS&>(server()).init(parameters.get("LS_ID"),
-                                    parameters.get("LS_IP"),
-                                    std::atoi(parameters.get("LS_PORT").c_str()),
-                                    parameters);
+    static_cast<LS&>(server()).init(config().get("LS_ID"),
+                                    config().get("LS_IP"),
+                                    config().get_int("LS_PORT"));
 
     try  {
         static_cast<LS&>(server()).CogServer::serverLoop();
@@ -79,8 +74,6 @@ int main(int argc, char *argv[])
                      "LSExec - An exceptional situation occured."
                      " Check log for more information.");
     }
-
-    //delete ls;
 
     return (0);
 }

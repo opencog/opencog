@@ -67,7 +67,7 @@ unsigned sleep(unsigned seconds);
 // static definition
 bool NetworkElement::stopListenerThreadFlag = false;
 bool NetworkElement::socketListenerIsReady = false;
-Control::SystemParameters NetworkElement::parameters;
+
 
 // Public interface
 
@@ -101,30 +101,29 @@ NetworkElement::NetworkElement()
     pthread_mutex_init(&messageQueueLock, NULL);
 }
 
-NetworkElement::NetworkElement(const Control::SystemParameters &params, const std::string &myId, const std::string &ip, int portNumber)
+NetworkElement::NetworkElement(const std::string &myId, const std::string &ip, int portNumber)
 {
     this->sock = -1;
     this->subclass_initialized = false;
-    initialize(params, myId, ip, portNumber);
+    initialize(myId, ip, portNumber);
 }
 
-void NetworkElement::initialize(const Control::SystemParameters &params, const std::string &myId, const std::string &ip, int portNumber)
+void NetworkElement::initialize(const std::string &myId, const std::string &ip, int portNumber)
 {
 
 
     this->portNumber = portNumber;
     this->myId.assign(myId);
     this->ipAddress.assign(ip);
-    this->parameters = params;
 
     // Initializes the main logger (static logger for this process)
     // merely specify the file name of the logger
-    opencog::logger() = Control::LoggerFactory::getLogger(parameters, myId);
+    opencog::logger() = Control::LoggerFactory::getLogger(myId);
 
-    this->routerID.assign(this->parameters.get("ROUTER_ID"));
-    this->routerIP.assign(this->parameters.get("ROUTER_IP"));
-    this->routerPort = atoi(this->parameters.get("ROUTER_PORT").c_str());
-    this->noAckMessages = atoi(this->parameters.get("NO_ACK_MESSAGES").c_str()) == 1;
+    this->routerID.assign(opencog::config().get("ROUTER_ID"));
+    this->routerIP.assign(opencog::config().get("ROUTER_IP"));
+    this->routerPort = opencog::config().get_int("ROUTER_PORT");
+    this->noAckMessages = config().get_bool("NO_ACK_MESSAGES");
 
     logger().log(opencog::Logger::INFO, "NetworkElement - Router address %s:%d", routerIP.c_str(), routerPort);
 
@@ -331,7 +330,7 @@ bool NetworkElement::startListener()
         return false;
     } else {
         // Give time so that it starts listening server port before sending any message to ROUTER.
-        int count = atoi(parameters.get("WAIT_LISTENER_READY_TIMEOUT").c_str());
+        int count = config().get_int("WAIT_LISTENER_READY_TIMEOUT");
         do {
             logger().log(opencog::Logger::DEBUG, "NetworkElement - startListener(): waiting for listener to be ready.");
             sleep(1);

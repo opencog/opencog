@@ -63,6 +63,7 @@ std::vector<std::string> TRICK_ARGS;
 
 using namespace OperationalPetController;
 using namespace PetCombo;
+using namespace opencog;
 
 BaseServer* MockOpcHCTest::createInstance()
 {
@@ -75,14 +76,12 @@ MockOpcHCTest::MockOpcHCTest()
 
 void MockOpcHCTest::init(const std::string & myId,
                          const std::string & ip,
-                         int portNumber, const std::string& petId,
-                         Control::SystemParameters &parameters)
+                         int portNumber, const std::string& petId)
 {
 
-    setNetworkElement(new MessagingSystem::NetworkElement(parameters, myId, ip, portNumber));
-    opencog::atom_types_init::init();
+    setNetworkElement(new MessagingSystem::NetworkElement(myId, ip, portNumber));
+    atom_types_init::init();
 
-    this->getParameters() = parameters;
     this->atomSpace  = new AtomSpace();
     this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));
 
@@ -205,7 +204,7 @@ Pet & MockOpcHCTest::getPet()
 
 bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 {
-    logger().log(opencog::Logger::DEBUG, "DEBUG - OPC - Received msg");
+    logger().log(Logger::DEBUG, "DEBUG - OPC - Received msg");
 
     std::cout << "OPC RECEIVED MSG" << std::endl;
 
@@ -215,7 +214,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
     }
 
     // message from learning server
-    if (msg->getFrom() == getParameters().get("LS_ID")) {
+    if (msg->getFrom() == config().get("LS_ID")) {
         LearningServerMessages::SchemaMessage* sm
         = (LearningServerMessages::SchemaMessage *)msg;
 
@@ -278,7 +277,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
             break;
 
         default:
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
             break;
         }

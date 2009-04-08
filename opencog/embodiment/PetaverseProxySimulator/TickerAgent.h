@@ -27,7 +27,7 @@
 #include <opencog/server/Agent.h>
 #include <EmbodimentCogServer.h>
 #include <time.h>
-#include "SimulationParameters.h"
+#include "SimulationConfig.h"
 
 namespace PetaverseProxySimulator
 {
@@ -40,7 +40,6 @@ class TickerAgent : public Agent
 private:
 
     time_t lastTickTime;
-    SimulationParameters* simParameters;
     int realTimeSecondsInOneTick;
 
 public:
@@ -58,7 +57,7 @@ public:
 
     ~TickerAgent();
     TickerAgent();
-    void init(SimulationParameters&);
+    void init();
 
     void run(CogServer *server);
 

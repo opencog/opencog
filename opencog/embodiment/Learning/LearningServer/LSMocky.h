@@ -25,7 +25,7 @@
 #include "util/Logger.h"
 #include <opencog/atomspace/AtomSpace.h>
 #include <EmbodimentCogServer.h>
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include "SleepAgent.h"
 
 using namespace opencog;
@@ -43,8 +43,7 @@ public:
      */
     static BaseServer* createInstance();
     LSMocky();
-    void init(const std::string &myId, const std::string &ip, int portNumber,
-              Control::SystemParameters & parameters);
+    void init(const std::string &myId, const std::string &ip, int portNumber);
     ~LSMocky();
 
     bool processNextMessage(MessagingSystem::Message *msg);

@@ -30,7 +30,7 @@
 
 #include "Predavese.h"
 #include "PetInterface.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "PredaveseActions.h"
 
 namespace predavese
@@ -46,7 +46,7 @@ public:
     /// Run this before using the Parser!
     void Create();
 
-    PredaveseParser(Control::PetInterface&, Control::SystemParameters&);
+    PredaveseParser(Control::PetInterface&);
 
     virtual ~PredaveseParser( );
 

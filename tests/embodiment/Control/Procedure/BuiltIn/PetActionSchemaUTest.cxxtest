@@ -7,16 +7,19 @@
 #include "PetActionSchema.h"
 #include "ActionPlanSenderMock.h"
 #include "PetInterfaceMock.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;
+using namespace Control;
+using namespace opencog;
 
 class PetActionSchemaUTest :  public CxxTest::TestSuite
 {
 
 public:
     PetActionSchemaUTest() {
+        config(EmbodimentConfig::embodimentCreateInstance, true);
     }
 
     ~PetActionSchemaUTest() {
@@ -32,10 +35,9 @@ public:
     void testGetName() {
         AtomSpace as;
 
-        Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
-        PAI pai(as, ap, pi, sp);
+        PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         TS_ASSERT(!strcmp(bark.getName().c_str(), "BARK"));
@@ -44,11 +46,10 @@ public:
     void testExecuteOk() {
         AtomSpace as;
 
-        Control::SystemParameters sp;
         std::list<ActionPlan> plans;
         OKActionPlanSender ap(plans);
         PetInterfaceMock pi;
-        PAI pai(as, ap, pi, sp);
+        PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         std::vector<combo::vertex> args(1, "Wynx");
@@ -63,10 +64,9 @@ public:
     void testExecuteFailure() {
         AtomSpace as;
 
-        Control::SystemParameters sp;
         FailureActionPlanSender ap;
         PetInterfaceMock pi;
-        PAI pai(as, ap, pi, sp);
+        PAI pai(as, ap, pi);
         pi.setPAI(&pai);
         PetActionSchema bark(pai, ActionType::BARK());
         PetActionSchema eat(pai, ActionType::EAT());

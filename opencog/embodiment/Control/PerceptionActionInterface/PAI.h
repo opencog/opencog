@@ -42,7 +42,7 @@
 #include "ActionPlanSender.h"
 #include "PetInterface.h"
 #include "PredaveseParser.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 
 
 #include <map>
@@ -113,11 +113,6 @@ private:
      * A reference to a PredavePetInterface (acctualy a pet)
      */
     Control::PetInterface& petInterface;
-
-    /**
-     * A reference to a SystemaParameter object with all parametric values
-     */
-    Control::SystemParameters& systemParameters;
 
     /**
      * The ID for the next action plan to be created
@@ -225,7 +220,7 @@ public:
      *                         This argument may be useful to continue a previous sequence of action plan IDs (when restarting
      *                      OPC, for instance). If not provided, assumes 0 as default.
      */
-    PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender, Control::PetInterface& petInterface, Control::SystemParameters& systemParameters, unsigned long nextPlanID = 0);
+    PAI(AtomSpace& _atomSpace, ActionPlanSender& actionSender, Control::PetInterface& petInterface, unsigned long nextPlanID = 0);
 
     /**
      * Destructor

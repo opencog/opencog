@@ -44,8 +44,8 @@ void EmbodimentCogServer::setNetworkElement(NetworkElement* _ne)
 {
     ne = _ne;
     externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
-    unreadMessagesCheckInterval = atoi(ne->parameters.get("UNREAD_MESSAGES_CHECK_INTERVAL").c_str());
-    unreadMessagesRetrievalLimit = atoi(ne->parameters.get("UNREAD_MESSAGES_RETRIEVAL_LIMIT").c_str());
+    unreadMessagesCheckInterval = opencog::config().get_int("UNREAD_MESSAGES_CHECK_INTERVAL");
+    unreadMessagesRetrievalLimit = opencog::config().get_int("UNREAD_MESSAGES_RETRIEVAL_LIMIT");
 }
 
 NetworkElement& EmbodimentCogServer::getNetworkElement(void)
@@ -124,11 +124,6 @@ bool EmbodimentCogServer::sendMessage(Message &msg)
 bool EmbodimentCogServer::sendCommandToRouter(const std::string &cmd)
 {
     return ne->sendCommandToRouter(cmd);
-}
-
-Control::SystemParameters& EmbodimentCogServer::getParameters()
-{
-    return ne->parameters;
 }
 
 const std::string& EmbodimentCogServer::getID()

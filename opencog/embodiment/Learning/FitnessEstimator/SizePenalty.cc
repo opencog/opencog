@@ -24,7 +24,7 @@
 #include "util/exceptions.h"
 #include "DistortedComboSize.h"
 #include "util/Logger.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "NetworkElement.h"
 
 namespace FitnessEstimator
@@ -35,8 +35,8 @@ SizePenalty::SizePenalty(const std::set<combo::definite_object>& dos,
                          int predicate_count, int action_count)
         : _dos(dos)
 {
-    a = atof(MessagingSystem::NetworkElement::parameters.get("SIZE_PENALTY_COEF_A").c_str());
-    b = atof(MessagingSystem::NetworkElement::parameters.get("SIZE_PENALTY_COEF_B").c_str());
+    a = opencog::config().get_double("SIZE_PENALTY_COEF_A");
+    b = opencog::config().get_double("SIZE_PENALTY_COEF_B");
     setc(indefinite_object_count, operator_count,
          predicate_count, action_count);
 }

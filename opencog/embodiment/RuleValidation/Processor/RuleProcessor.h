@@ -23,7 +23,7 @@
 #define RULE_PROCESSOR_H
 
 #include "VirtualWorldState.h"
-#include "SystemParameters.h"
+#include "EmbodimentConfig.h"
 #include "ComboProcedureRepository.h"
 #include "ComboSelectProcedureRepository.h"
 
@@ -168,7 +168,7 @@ public:
     // rules effect definition
     typedef boost::variant<Action, Relation, Feeling> Effect;
 
-    RuleProcessor(Control::SystemParameters& parameters, const std::string & type);
+    RuleProcessor(const std::string & type);
     ~RuleProcessor();
 
 
@@ -246,9 +246,6 @@ private:
 
     //
     Procedure::ComboSelectProcedureRepository comboSelectRepository;
-
-    //
-    Control::SystemParameters parameters;
 
     //
     std::vector<std::string> validCandidates;

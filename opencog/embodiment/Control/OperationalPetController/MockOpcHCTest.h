@@ -1,8 +1,10 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/MockOpcHCTest.h
  *
- * Copyleft (C) 2007-2008 Nil Geisweiller
- * All Wrongs Reserved
+ * Copywrite (C) 2007-2008 Novamente LLC
+ * All Rights Reserved
+ *
+ * Authors : Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -18,12 +20,6 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-/**
- * MockOpcHCTest.h
- *
- * Author: Nil Geisweiller
- * creation : Thu Sep 13 2007
  */
 #ifndef MOCKOPCHCTEST_H
 #define MOCKOPCHCTEST_H
@@ -91,8 +87,7 @@ public:
 
     MockOpcHCTest();
     void init(const std::string &myId, const std::string & ip,
-              int portNumber, const std::string & petId,
-              Control::SystemParameters & parameters);
+              int portNumber, const std::string & petId);
     ~MockOpcHCTest();
 
     Factory<HCTestAgent, Agent> HCTestAgentFactory;

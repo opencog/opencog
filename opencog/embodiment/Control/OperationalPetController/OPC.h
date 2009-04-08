@@ -164,8 +164,7 @@ public:
 
     void init(const std::string &myId, const std::string &ip, int portNumber,
               const std::string& petId, const std::string& ownerId,
-              const std::string& agentType, const std::string& agentTraits,
-              Control::SystemParameters & parameters);
+              const std::string& agentType, const std::string& agentTraits);
 
     /**
      * Save the OCP state.

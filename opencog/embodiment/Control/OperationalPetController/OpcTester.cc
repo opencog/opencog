@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "OPC.h"
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <StringMessage.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,12 +30,13 @@
 #include "util/Logger.h"
 
 using namespace std;
-
+using namespace opencog;
 using namespace OperationalPetController;
 
 int main()
 {
-    Control::SystemParameters sp;
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
     MessagingSystem::StringMessage *msg = new MessagingSystem::StringMessage("", "", "");
     int length;
     char * buffer;
@@ -62,7 +63,7 @@ int main()
 
     server(OPC::createInstance);
     OPC& opc = static_cast<OPC&>(server());
-    opc.init("teste-opc", "127.0.0.1", 4000, "1", "2", "pet", "neutral", sp);
+    opc.init("teste-opc", "127.0.0.1", 4000, "1", "2", "pet", "neutral");
     msg->setMessage(xml);
     opc.processNextMessage(msg);
 

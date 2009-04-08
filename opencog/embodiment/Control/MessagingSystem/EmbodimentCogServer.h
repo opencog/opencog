@@ -71,7 +71,7 @@ public:
     // convenient medhods, which are delegated to NetworkElement
     virtual bool sendMessage(Message &msg);
     virtual bool sendCommandToRouter(const std::string &cmd);
-    Control::SystemParameters& getParameters();
+
     const std::string& getID(void);
     int getPortNumber(void);
     bool isElementAvailable(const std::string& id);

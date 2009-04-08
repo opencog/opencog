@@ -36,7 +36,7 @@
 #include "PredefinedProcedureNames.h"
 
 #include "PAIUtils.h"
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 #include <sstream>
 #include <ext/functional>
 #include <typeinfo>

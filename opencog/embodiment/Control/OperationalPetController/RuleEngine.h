@@ -32,7 +32,7 @@
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include <SystemParameters.h>
+#include <EmbodimentConfig.h>
 
 #include "util/exceptions.h"
 #include "comboreduct/combo/variable_unifier.h"
@@ -184,7 +184,7 @@ public:
 
     // print in the log all relations and their strength that has been
     // set so far at the level log l
-    void logRelations(int l);
+    void logRelations(opencog::Logger::Level l);
 
     /**
      * Feeling represents an emotional feeling and its intensity
@@ -213,8 +213,7 @@ public:
     typedef boost::variant<Action, Relation, Feeling> Effect;
 
     // methods
-    RuleEngine( OPC* opc, const std::string& petName,
-                Control::SystemParameters& parameters )
+    RuleEngine( OPC* opc, const std::string& petName )
     throw(opencog::RuntimeException);
 
     virtual ~RuleEngine( void );
@@ -274,9 +273,6 @@ private:
     // this pet name variables
     Handle petHandle;
     std::string petName;
-
-    // system parameters configs
-    Control::SystemParameters& parameters;
 
     RuleEngineUtil * util;
 

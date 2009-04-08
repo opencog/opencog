@@ -15,13 +15,14 @@
 #include "Pet.h"
 #include <fstream>
 #include <iostream>
-#include "SystemParameters.h"
-
+#include "EmbodimentConfig.h"
 #include "PetComboVocabulary.h"
 
 using namespace PerceptionActionInterface;
 using namespace Procedure;
 using namespace PetCombo;
+using namespace Control;
+using namespace opencog;
 using namespace std;
 
 #define NUMBER_OF_COMBO_TREES 2
@@ -45,20 +46,19 @@ private:
 
     ProcedureRepository *pr;
 
-    Control::SystemParameters sysPar;
-
 public:
     ProcedureRepositoryUTest() {
+        
+        config(EmbodimentConfig::embodimentCreateInstance, true);
 
         atomSpace = new AtomSpace();
 
         //set flag to print only cassert and other ERROR level logs on stdout
         logger().setPrintErrorLevelStdout();
 
-
         sender = new ResponsiveActionPlanSender();
         petInterface = new PetInterfaceMock(PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"), PAIUtils::getInternalId("Wynx"), string(""));
-        ppai = new PAI(*atomSpace, *sender, *petInterface, sysPar);
+        ppai = new PAI(*atomSpace, *sender, *petInterface);
         petInterface->setPAI(ppai);
 
         sender->setPai(ppai);

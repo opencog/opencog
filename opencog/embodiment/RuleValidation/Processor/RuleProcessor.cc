@@ -42,21 +42,22 @@
 #include "ComboSelectInterpreter.h"
 
 using namespace Processor;
+using namespace opencog;
 
 /* ----------------------------------------------------------------------------
  * Public functions
  * ----------------------------------------------------------------------------
  */
 
-RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & type) :
-        comboSelectRepository(comboRepository), parameters(p)
+RuleProcessor::RuleProcessor(const std::string & type) :
+        comboSelectRepository(comboRepository)
 {
 
     // filenames for stdlib combo, combo preconditions and combo selection
-    std::string comboLib = parameters.get("COMBO_STDLIB_REPOSITORY_FILE");
-    std::string comboPre = parameters.get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE");
-    std::string comboSel = parameters.get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE");
-    std::string comboAct = parameters.get("COMBO_RULES_ACTION_SCHEMATA__REPOSITORY_FILE");
+    std::string comboLib = config().get("COMBO_STDLIB_REPOSITORY_FILE");
+    std::string comboPre = config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE");
+    std::string comboSel = config().get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE");
+    std::string comboAct = config().get("COMBO_RULES_ACTION_SCHEMATA__REPOSITORY_FILE");
 
     // ... to load combo scritpts
     loadComboScripts(comboLib, comboPre, comboSel, comboAct);
@@ -103,11 +104,11 @@ RuleProcessor::RuleProcessor(Control::SystemParameters& p, const std::string & t
     luabind::globals( this->luaState )[ "ruleProcessor" ] = this;
 
     // load core file
-    if ( luaL_dofile( this->luaState, parameters.get("RV_CORE_FILE").c_str() ) ) {
+    if ( luaL_dofile( this->luaState, config().get("RV_CORE_FILE").c_str() ) ) {
         luaThrowException( this->luaState );
     }
 
-    std::string agentRules = (boost::format(parameters.get("RE_RULES_FILENAME_MASK")) % type).str();
+    std::string agentRules = (boost::format(config().get("RE_RULES_FILENAME_MASK")) % type).str();
 
     // load rules
     if ( luaL_dofile( this->luaState, agentRules.c_str() ) ) {

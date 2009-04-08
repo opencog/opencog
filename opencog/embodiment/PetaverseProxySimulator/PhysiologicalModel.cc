@@ -26,6 +26,7 @@
 #include <ActionType.h>
 
 using namespace PetaverseProxySimulator;
+using namespace opencog;
 
 // values set according to PetBehaviorAspects.doc in such a way
 // that the pet should eat 4 times a day and drink water 12 times a day
@@ -49,10 +50,10 @@ PhysiologicalModel::~PhysiologicalModel()
 {
 }
 
-PhysiologicalModel::PhysiologicalModel(SimulationParameters& _simParameters) : simParameters(_simParameters)
+PhysiologicalModel::PhysiologicalModel()
 {
 
-    minutesPerTick = atof(simParameters.get("DEFAULT_SIMULATION_MINUTES_PER_TICK").c_str());
+    minutesPerTick = config().get_double("DEFAULT_SIMULATION_MINUTES_PER_TICK");
 
     petMode = IDLE;
     time[SLEEP] = 0;

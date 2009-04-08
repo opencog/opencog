@@ -46,7 +46,7 @@ using namespace Procedure;
 using namespace PetCombo;
 using namespace opencog;
 
-opencog::BaseServer* OPC::createInstance()
+BaseServer* OPC::createInstance()
 {
     return new OPC;
 }
@@ -55,35 +55,33 @@ OPC::OPC() {}
 
 void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
                const std::string& petId, const std::string& ownerId,
-               const std::string& agentType, const std::string& agentTraits,
-               Control::SystemParameters & parameters)
+               const std::string& agentType, const std::string& agentTraits)
 {
 
-    setNetworkElement(new NetworkElement(parameters, myId, ip, portNumber));
+    setNetworkElement(new NetworkElement(myId, ip, portNumber));
 
     // OpenCog-related initialization
     atom_types_init::init();
-    opencog::config().set("MIN_STI",
-                          parameters.get("ATOM_TABLE_LOWER_STI_VALUE"));
+    config().set("MIN_STI",
+                          config().get("ATOM_TABLE_LOWER_STI_VALUE"));
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
-                        agentType : parameters.get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
+                        agentType : config().get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
 
 
     this->planSender = new PVPActionPlanSender(petId, &(getNetworkElement()));
     this->petMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     // load pet
-    if (fileExists(getPath(petId, parameters.get("PET_DUMP")).c_str())) {
+    if (fileExists(getPath(petId, config().get("PET_DUMP")).c_str())) {
         loadPet(petId);
     } else {
-        this->pet = new Pet(petId, parameters.get("UNKNOWN_PET_NAME"),
+        this->pet = new Pet(petId, config().get("UNKNOWN_PET_NAME"),
                             aType, agentTraits, ownerId,
                             atomSpace, petMessageSender);
     }
 
-    this->pai = new PerceptionActionInterface::PAI(*atomSpace, *planSender, *pet,
-            parameters);
+    this->pai = new PerceptionActionInterface::PAI(*atomSpace, *planSender, *pet);
 
     this->procedureRepository = new ProcedureRepository(*pai);
     this->procedureInterpreter = new ProcedureInterpreter(*pai);
@@ -93,65 +91,65 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     // adds all savable repositories for further calls to save/load methods.
     savingLoading.addSavableRepository(procedureRepository);
 
-    if (fileExists(getPath(petId, parameters.get("ATOM_SPACE_DUMP")).c_str())) {
+    if (fileExists(getPath(petId, config().get("ATOM_SPACE_DUMP")).c_str())) {
         loadAtomSpace(petId);
     } else {
         pet->initTraitsAndFeelings();
 
-        logger().log(opencog::Logger::INFO, "OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
-                     parameters.get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
-                     parameters.get("RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
-                     parameters.get("RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
+        logger().log(Logger::INFO, "OPC - Loading initial Combo stdlib file '%s', RulesPreconditions '%s' and ActionSchemataPreconditions '%s'.",
+                     config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str(),
+                     config().get("RULES_PRECONDITIONS_REPOSITORY_FILE").c_str(),
+                     config().get("RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
 
         int cnt = 0;
-        ifstream fin(parameters.get("COMBO_STDLIB_REPOSITORY_FILE").c_str());
+        ifstream fin(config().get("COMBO_STDLIB_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "OPC - Unable to load Combo stdlib.");
         }
         fin.close();
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "OPC - %d Combo functions loaded.", cnt);
 
-        fin.open(parameters.get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
+        fin.open(config().get("COMBO_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "OPC - Unable to load RulePreconditions combo.");
         }
         fin.close();
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "OPC - RulesPreconditions combo functions loaded.");
 
-        fin.open(parameters.get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
+        fin.open(config().get("COMBO_SELECT_RULES_PRECONDITIONS_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboSelectFromStream(fin);
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "OPC - Unable to load RulePreconditions combo select.");
         }
         fin.close();
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "OPC - RulesPreconditions combo select functions loaded.");
 
-        fin.open(parameters.get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
+        fin.open(config().get("COMBO_RULES_ACTION_SCHEMATA_REPOSITORY_FILE").c_str());
         if (fin.good()) {
             cnt = procedureRepository->loadComboFromStream(fin);
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "OPC - Unable to load RulesActionSchemata combo.");
         }
         fin.close();
-        logger().log(opencog::Logger::INFO,
+        logger().log(Logger::INFO,
                      "OPC - RulesActionSchemata combo functions loaded.");
     }
 
 
     // warning: it must be called after register the agent and it's owner nodes
-    this->ruleEngine = new RuleEngine( this, petId, parameters );
+    this->ruleEngine = new RuleEngine( this, petId );
     this->pet->setRuleEngine(ruleEngine);
 
     predicatesUpdater = new PredicatesUpdater(*atomSpace, pet->getPetId());
@@ -180,30 +178,30 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
                                    this->createAgent(PetInterfaceUpdaterAgent::info().id, false));
 
-    if (atoi(getParameters().get("PROCEDURE_INTERPRETER_ENABLED").c_str())) {
+    if (config().get_int("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
 
-    if (atoi(getParameters().get("ACTION_SELECTION_ENABLED").c_str())) {
-        actionSelectionAgent->setFrequency(atoi(getParameters().get("RE_CYCLE_PERIOD").c_str()));
+    if (config().get_int("ACTION_SELECTION_ENABLED")) {
+        actionSelectionAgent->setFrequency(config().get_int("RE_CYCLE_PERIOD"));
         this->startAgent(actionSelectionAgent);
     }
 
-    if (atoi(getParameters().get("PROCEDURE_INTERPRETER_ENABLED").c_str())) {
+    if (config().get_int("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
         this->startAgent(procedureInterpreterAgent);
     }
 
-    if (atoi(getParameters().get("IMPORTANCE_DECAY_ENABLED").c_str())) {
+    if (config().get_int("IMPORTANCE_DECAY_ENABLED")) {
         // TODO: Create a config parameter to control this frequency
         importanceDecayAgent->setFrequency(15);
         this->startAgent(importanceDecayAgent);
     }
 
     // local map 2D interface
-    if (atoi(getParameters().get("PET_INTERFACE_ENABLED").c_str())) {
+    if (config().get_int("PET_INTERFACE_ENABLED")) {
 //        PetInterfaceUpdaterTask::startGUI();
-//        petInterfaceUpdaterAgent->setFrequency(atoi(getParameters().get("PET_INTERFACE_UPDATE_PERIOD").c_str()));
+//        petInterfaceUpdaterAgent->setFrequency(config().get_int("PET_INTERFACE_UPDATE_PERIOD"));
 //        this->startAgent(petInterfaceUpdaterAgent);
     }
 
@@ -212,10 +210,10 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     // Send SUCCESS_LOAD to PROXY, so that it can start sending perception messages
     char str[100];
     sprintf(str, "SUCCESS LOAD %s %s", myId.c_str(), PerceptionActionInterface::PAIUtils::getExternalId(petId.c_str()).c_str());
-    StringMessage successLoad(myId, parameters.get("PROXY_ID"), str);
-    logger().log(opencog::Logger::INFO, "OPC spawned. Acking requestor");
+    StringMessage successLoad(myId, config().get("PROXY_ID"), str);
+    logger().log(Logger::INFO, "OPC spawned. Acking requestor");
     if (!sendMessage(successLoad)) {
-        logger().log(opencog::Logger::ERROR, "Could not send SUCCESS LOAD to PROXY!");
+        logger().log(Logger::ERROR, "Could not send SUCCESS LOAD to PROXY!");
         exit(-1);
     }
 
@@ -244,10 +242,10 @@ OPC::~OPC()
     // TODO: This is a hack to allow valgrind tests to work fine. When atomSpace
     // removal if fast enough remove this hack and make delete operation
     // permanent
-    if (atoi(getParameters().get("CHECK_OPC_MEMORY_LEAKS").c_str())) {
-        logger().log(opencog::Logger::DEBUG, "OPC - Starting AtomSpace removal.");
+    if (config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
+        logger().log(Logger::DEBUG, "OPC - Starting AtomSpace removal.");
         delete (atomSpace);
-        logger().log(opencog::Logger::DEBUG, "OPC - Finished AtomSpace removal.");
+        logger().log(Logger::DEBUG, "OPC - Finished AtomSpace removal.");
     }
 }
 
@@ -259,14 +257,14 @@ OPC::~OPC()
 void OPC::loadPet(const std::string& petId)
 {
     // load pet metadata
-    std::string file = getPath(petId, getParameters().get("PET_DUMP"));
+    std::string file = getPath(petId, config().get("PET_DUMP"));
     this->pet = Pet::importFromFile(file, petId, atomSpace, petMessageSender);
 }
 
 void OPC::loadAtomSpace(const std::string& petId)
 {
     // load atom space and other repositories
-    std::string file = getPath(petId, getParameters().get("ATOM_SPACE_DUMP"));
+    std::string file = getPath(petId, config().get("ATOM_SPACE_DUMP"));
     savingLoading.load(file.c_str(), *atomSpace);
 }
 
@@ -274,27 +272,27 @@ void OPC::saveState()
 {
 
     if (!createDirectory(getPath(pet->getPetId()).c_str())) {
-        logger().log(opencog::Logger::ERROR, "OPC - Cannot create directory '%s'.",
+        logger().log(Logger::ERROR, "OPC - Cannot create directory '%s'.",
                      getPath(pet->getPetId()).c_str());
         return;
     }
 
     // save atom space and othe repositories
-    std::string file = getPath(pet->getPetId(), getParameters().get("ATOM_SPACE_DUMP"));
+    std::string file = getPath(pet->getPetId(), config().get("ATOM_SPACE_DUMP"));
     remove(file.c_str());
     savingLoading.save(file.c_str(), *atomSpace);
 
     // save pet metadata
-    file = getPath(pet->getPetId(), getParameters().get("PET_DUMP"));
+    file = getPath(pet->getPetId(), config().get("PET_DUMP"));
     Pet::exportToFile(file, getPet());
 
     // Pet state saved, send success unload message to proxy
     char str[100];
     sprintf(str, "SUCCESS UNLOAD %s %s", getID().c_str(), PerceptionActionInterface::PAIUtils::getExternalId(pet->getPetId().c_str()).c_str());
-    StringMessage successUnload(getID(), getParameters().get("PROXY_ID"), str);
-    logger().log(opencog::Logger::INFO, "OPC - OPC despawned (state saved). Acking requestor");
+    StringMessage successUnload(getID(), config().get("PROXY_ID"), str);
+    logger().log(Logger::INFO, "OPC - OPC despawned (state saved). Acking requestor");
     if (!sendMessage(successUnload)) {
-        logger().log(opencog::Logger::ERROR, "Could not send SUCCESS UNLOAD to PROXY!");
+        logger().log(Logger::ERROR, "Could not send SUCCESS UNLOAD to PROXY!");
     }
 }
 
@@ -315,7 +313,7 @@ void OPC::adjustPetToBePersisted()
 
 bool OPC::processSpawnerMessage(const std::string & spawnerMessage)
 {
-    logger().log(opencog::Logger::INFO, "OPC::processSpawnerMessage: msg = %s", spawnerMessage.c_str());
+    logger().log(Logger::INFO, "OPC::processSpawnerMessage: msg = %s", spawnerMessage.c_str());
     if (spawnerMessage == "SAVE_AND_EXIT") {
         adjustPetToBePersisted();
         saveState();
@@ -364,49 +362,49 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
 {
     using namespace combo;
 
-    logger().log(opencog::Logger::FINE, "OPC - Processing next message.");
+    logger().log(Logger::FINE, "OPC - Processing next message.");
     bool result;
 
     // message not for the OPC
     if (msg->getTo() != getID()) {
-        logger().log(opencog::Logger::WARN, "OPC - Wrong destination. Message to: %s",
+        logger().log(Logger::WARN, "OPC - Wrong destination. Message to: %s",
                      msg->getTo().c_str());
         return false;
     }
 
     // message from petaverse proxy - send to PAI
-    if (msg->getFrom() == getParameters().get("PROXY_ID")) {
+    if (msg->getFrom() == config().get("PROXY_ID")) {
         HandleSeq toUpdateHandles;
         result = pai->processPVPMessage(msg->getPlainTextRepresentation(), toUpdateHandles);
 
         if (!result) {
-            logger().log(opencog::Logger::ERROR, "OPC - Unable to process XML message.");
+            logger().log(Logger::ERROR, "OPC - Unable to process XML message.");
         } else {
 
             // PVP message processed, update predicates for the
             // added/updated atoms
             predicatesUpdater->update(toUpdateHandles, pai->getLatestSimWorldTimestamp());
-            logger().log(opencog::Logger::DEBUG, "OPC - Message successfully  processed.");
+            logger().log(Logger::DEBUG, "OPC - Message successfully  processed.");
         }
         return false;
     }
 
     // message from spawner - probabily a SAVE_AND_EXIT
-    if (msg->getFrom() == getParameters().get("SPAWNER_ID")) {
+    if (msg->getFrom() == config().get("SPAWNER_ID")) {
         result = processSpawnerMessage((std::string)msg->getPlainTextRepresentation());
 
         // Message correctly processed, just exit
         if (result) {
             // TODO: Save status...
-            logger().log(opencog::Logger::INFO, "OPC - Exiting...");
+            logger().log(Logger::INFO, "OPC - Exiting...");
             return true;
         }
     }
 
     // message from the combo shell to execute a schema
-    if (msg->getFrom() == getParameters().get("COMBO_SHELL_ID")) {
+    if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().log(opencog::Logger::ERROR, "OPC - Got combo shell msg: '%s'", str.c_str());
+        logger().log(Logger::ERROR, "OPC - Got combo shell msg: '%s'", str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
@@ -417,20 +415,20 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
         ComboProcedure cp("", 0, tr);
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
-        logger().log(opencog::Logger::ERROR,
+        logger().log(Logger::ERROR,
                      "OPC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server
-    if (msg->getFrom() == getParameters().get("LS_ID")) {
+    if (msg->getFrom() == config().get("LS_ID")) {
         LearningServerMessages::SchemaMessage * sm = (LearningServerMessages::SchemaMessage *)msg;
-        logger().log(opencog::Logger::DEBUG, "OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
+        logger().log(Logger::DEBUG, "OPC - Got msg from LS: '%s'", msg->getPlainTextRepresentation());
 
         // sanity check to see if LS does not return an empty
         // ComboSchema
         if (sm->getComboSchema().empty()) {
 
-            logger().log(opencog::Logger::WARN,
+            logger().log(Logger::WARN,
                          "OPC - Received an empty ComboSchema fom LS. Discarding it.");
             return false;
 
@@ -447,7 +445,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
             //note that if the type is infered and checked
             //it doesn't matter what arity is specified (here 0)
             //because it is going to be overwrite with at the type check
-            bool tc = static_cast<bool>(atoi(getParameters().get("TYPE_CHECK_LOADING_PROCEDURES").c_str()));
+            bool tc = config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
             arity_t a = infer_arity(sm->getComboSchema());
             procedureRepository->add(ComboProcedure(sm->getSchemaName(),
                                                     a, sm->getComboSchema(),
@@ -483,7 +481,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
         break;
 
         default: {
-            logger().log(opencog::Logger::ERROR,
+            logger().log(Logger::ERROR,
                          "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
         }
         break;
@@ -494,7 +492,7 @@ bool OPC::processNextMessage(MessagingSystem::Message *msg)
 
 void OPC::schemaSelection()
 {
-    logger().log(opencog::Logger::FINE, "OPC - Executing selectSchemaToExecute().");
+    logger().log(Logger::FINE, "OPC - Executing selectSchemaToExecute().");
 
     this->pet->getCurrentModeHandler( ).update( );
     this->ruleEngine->processNextAction( );
@@ -514,7 +512,7 @@ void OPC::decayShortTermImportance()
 /* TODO: OPC does not extend NetworkElement anymore.
  * So, a better design must be created to figure out LS has just recovered from a failure:
 void OPC::markAsAvailableElement(const std::string& id){
-    logger().log(opencog::Logger::DEBUG, "OPC - markAsAvailableElement(%s).", id.c_str());
+    logger().log(Logger::DEBUG, "OPC - markAsAvailableElement(%s).", id.c_str());
 
     // remove element from unavailable list and handshake if router
     NetworkElement::markAsAvailableElement(id);
@@ -526,7 +524,7 @@ void OPC::markAsAvailableElement(const std::string& id){
             // Pet still in learning mode and LS has recovered from a crash. Restart
             // the learning process from the begining
      // TODO: Review this. Perhaps the best thing to do is exiting Learning mode and give feedback to the user (via Feedback messages)
-            if(id == getParameters().get("LS_ID")){
+            if(id == config().get("LS_ID")){
                 pet->restartLearning();
             }
         }
@@ -538,10 +536,10 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
 {
     std::string path;
 
-    std::string base = getParameters().get("PET_DATABASE");
+    std::string base = config().get("PET_DATABASE");
     expandPath(base);
 
-    logger().log(opencog::Logger::DEBUG, "OPC - Pet database directory: %s", base.c_str());
+    logger().log(Logger::DEBUG, "OPC - Pet database directory: %s", base.c_str());
     path.append(base);
     path.append("/pet_");
     path.append(petId);
@@ -552,7 +550,7 @@ const std::string OPC::getPath(const std::string& petId, const std::string& file
         path.append(filename);
     }
 
-    logger().log(opencog::Logger::DEBUG, "OPC - getPath: " + path);
+    logger().log(Logger::DEBUG, "OPC - getPath: " + path);
 
     return path;
 }

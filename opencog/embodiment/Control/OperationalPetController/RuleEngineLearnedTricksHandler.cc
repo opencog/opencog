@@ -36,7 +36,7 @@ RuleEngineLearnedTricksHandler::RuleEngineLearnedTricksHandler( OPC* opc ) : opc
 {
 
     unsigned long randSeed;
-    if (MessagingSystem::NetworkElement::parameters.get("AUTOMATED_SYSTEM_TESTS") == "1") {
+    if (opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         randSeed = 0;
     } else {
         randSeed = time(NULL);
@@ -211,7 +211,7 @@ void RuleEngineLearnedTricksHandler::update( void )
 
             logger().log(opencog::Logger::DEBUG, "RuleEngineLearnedTricksHandler - updated schema: %s | current sti: %d ",  this->atomSpace->getName(schemaHandle).c_str( ), this->atomSpace->getSTI( linkHandle ) );
         } // if
-        if ( this->atomSpace->getSTI( linkHandle ) > atoi( MessagingSystem::NetworkElement::parameters.get("ATOM_TABLE_LOWER_STI_VALUE").c_str( ) ) ) {
+        if ( this->atomSpace->getSTI( linkHandle ) > opencog::config().get_int("ATOM_TABLE_LOWER_STI_VALUE") ) {
             ++this->numberOfLearnedTricks;
         } // if
     } // foreach
