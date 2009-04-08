@@ -16,3 +16,11 @@ TARGET_LINK_LIBRARIES (main
         comboreduct
         util
 )
+
+ADD_CUSTOM_COMMAND(
+    TARGET main
+    POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy ${OPENCOG_SOURCE_DIR}/opencog/learning/pleasure/main/nodelist ${OPENCOG_BINARY_DIR}/opencog/learning/pleasure/main
+)
+
+
