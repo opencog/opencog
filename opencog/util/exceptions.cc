@@ -182,7 +182,7 @@ InvalidParamException::InvalidParamException(const char * trace, const char * fm
 {
     va_list  ap;
     va_start(ap, fmt);
-    parseErrorMessage(trace, fmt, ap);
+    parseErrorMessage(trace, fmt, ap, false);
     va_end(ap);
 }
 
