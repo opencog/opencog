@@ -69,7 +69,7 @@ moses_learning::moses_learning(int nepc,
     combo_tree t(id::sequential_and);
     _center = t;
 
-    std::cout << "MOSES LEARNING; ACTION POINTER : " << (int)&_actions
+    std::cout << "MOSES LEARNING; ACTION POINTER : " << (long)&_actions
               << std::endl;
 
     for (combo_tree_ns_set_it i = actions.begin(); i != actions.end(); ++i)

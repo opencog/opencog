@@ -191,7 +191,7 @@ void  ComboSelectProcedureRepository::saveRepository(FILE* dump) const
 {
     logger().log(opencog::Logger::DEBUG, "ComboSelectProcedureRepository - Saving %s (%ld)", getId(), ftell(dump));
 
-    fprintf(dump, "%d", procedureMap.size());
+    fprintf(dump, "%lu", procedureMap.size());
 
     Name2ProcedureMapIterator it;
     for (it = procedureMap.begin(); it != procedureMap.end(); it++) {

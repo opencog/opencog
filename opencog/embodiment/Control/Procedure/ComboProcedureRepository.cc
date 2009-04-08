@@ -130,7 +130,7 @@ const char* ComboProcedureRepository::getId() const
 void ComboProcedureRepository::saveRepository(FILE* dump) const
 {
     logger().log(opencog::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(dump));
-    fprintf(dump, "%d", _repo.size());
+    fprintf(dump, "%lu", _repo.size());
     for (str_proc_map_const_it itr = _repo.begin(); itr != _repo.end(); itr++) {
         const string &name = itr->first;
         int nameLength = name.length();

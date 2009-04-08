@@ -499,7 +499,7 @@ public:
         // test fetching all unnamed nodes
         HandleSeq allUnnamed;
         atomSpace->getHandleSet(back_inserter(allUnnamed), NODE, "", true);
-        printf("\nallUnnamed.size() == %d\n", allUnnamed.size());
+        printf("\nallUnnamed.size() == %lu\n", allUnnamed.size());
         TS_ASSERT(allUnnamed.size() == 2);
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h6) != allUnnamed.end());

@@ -169,8 +169,8 @@ void StatusHandler::List (TcpSocket *sendto) {
 				(int)((p -> Uptime() / 60) % 60),
 				(int)( p -> Uptime() % 60));
 		if (p3)	{
-			sprintf(buf, "    Bytes Read: %9llu\n", p3 -> GetBytesReceived());
-			sprintf(buf, "    Bytes Sent: %9llu\n", p3 -> GetBytesSent());
+			sprintf(buf, "    Bytes Read: %9lu\n", p3 -> GetBytesReceived());
+			sprintf(buf, "    Bytes Sent: %9lu\n", p3 -> GetBytesSent());
 		}
 	}
 	sprintf(buf, "\n");

@@ -280,10 +280,10 @@ char *PVPSimulator::getNextToken(char *cursor, char *target)
     sscanf(cursor, "%s", target);
 
     while ((cursor[0] != ' ') && (cursor[0] != '\0')) {
-        cursor = (char *) (((int) cursor) + 1);
+        cursor++;
     }
     if (cursor[0] != '\0') {
-        cursor = (char *) (((int) cursor) + 1);
+        cursor++;
     }
 
     return cursor;

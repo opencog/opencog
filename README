@@ -16,7 +16,7 @@ cmake       -- a build management tool
 
 cxxtest     -- a test framework
                http://cxxtest.sourceforge.net/
-               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~dhart/+archive/ppa)
+               (Not originally available in Debian/Ubuntu; get cxxtest from https://launchpad.net/~dhart/+archive/ppa)
 
 boost       -- a C++ utilities package -
                http://www.boost.org/
@@ -24,7 +24,7 @@ boost       -- a C++ utilities package -
 
 C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
                http://www.alhem.net/Sockets/
-               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~dhart/+archive/ppa)
+               (Not originally available in Debian/Ubuntu; get csockets-dev from https://launchpad.net/~dhart/+archive/ppa)
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
@@ -49,10 +49,11 @@ xercesc     -- Apache Xerces-C++ XML Parser
  
 Lua         -- Lua programming language
                http://www.lua.org/ (version 5.1)
+               Debian/Ubuntu package liblua5.1-dev
 
 Luabind     -- Binding between C++ and Lua
                http://www.rasterbar.com/products/luabind.html (version 0.8.1 or later)
-               (Not originally available in Debian/Ubuntu, see https://launchpad.net/~arthur.loiret/+archive/ppa)
+               (Not originally available in Debian/Ubuntu; get libluabind-dev from https://launchpad.net/~arthur.loiret/+archive/ppa)
 
 
 

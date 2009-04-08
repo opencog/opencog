@@ -359,8 +359,10 @@ public:
             float deltaY = nearPoint.second - position.second;
             float found_distance = sqrt(deltaX * deltaX + deltaY * deltaY);
             //printf( "%0.8f, %0.8f\n   => distance = %f\n", nearPoint.first, nearPoint.second, found_distance );
-            TS_ASSERT_EQUALS( targetPoints[pointCounter], nearPoint );
-            TS_ASSERT_DELTA( distance, found_distance, distance * 0.1); // 10% of tolerance, since the current code stop searching for point candidates if it finds a point with at least 90% of the given distance.
+            TS_ASSERT_DELTA( targetPoints[pointCounter].first, nearPoint.first, 0.1 );
+            TS_ASSERT_DELTA( targetPoints[pointCounter].second, nearPoint.second, 0.1 );
+            // 10% of tolerance, since the current code stop searching for point candidates if it finds a point with at least 90% of the given distance.
+            TS_ASSERT_DELTA( distance, found_distance, distance * 0.1); 
             ++pointCounter;
 
         } // for

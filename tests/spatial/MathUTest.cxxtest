@@ -93,7 +93,11 @@ public:
         unsigned int cornersCounter = 0;
         std::list<Math::LineSegment>::const_iterator it;
         for ( it = edges.begin( ); it != edges.end( ); ++it ) {
-            //std::cout << it->toString( ) << std::endl;
+            std::cout << it->toString( ) << std::endl;
+            std::cout << corners[cornersCounter].toString( ) << std::endl;
+            std::cout << corners[cornersCounter+1].toString( ) << std::endl;
+            std::cout << "length to pointA = " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
+            std::cout << "length to pointB = " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
             TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
             TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
         } // for
