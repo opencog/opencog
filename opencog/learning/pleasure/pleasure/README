@@ -1,0 +1,3 @@
+Simply make the project. All of the variables are currently coded in and not passed as parameters.
+
+Make sure to have the LADSUtil and ComboReduct libraries installed before making the project.

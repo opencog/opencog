@@ -1,0 +1,25 @@
+Some of the specifications made on the Pleasure Algorithm
+
+First of all, the storage of the generated programs is intended to be the MOSES deme manager. The program trees and the reduction library will also be taken from the
+MOSES Combo/Reduct lib.
+The first implementation of PLEASURE will contain a simple tree enumeration algorithm as a sub-algorithm. First of all, a table will be generated using the type checker
+engine in the Combo lib, which will contain all possible nodes with all possible combinations of its children. With this, the algorithm will simply run a number of times,
+and for each time the size is still below maximum, it will copy the tree (children at current level) * (possible combinations for each child) and add another level of the tree.
+Since the type-checker supports custom nodes, there will be no problem with sub-trees and category tokens.
+Using this algorithm, the tree reduction is clearly needed, because of the frequent repetitive trees. This is where we use the combo/reduct lib
+For the algorithm, the intention is to use the FREQT package for frequent subtree mining.
+First of all, it will be able to count the nodes used in the algorithm. Not quite certain if this is the best way, the other variable option is iterating through the
+program trees counting the nodes. This actually might be a better way, since there in no apparent way to limit the maximum size of the subtrees in FREQT.
+Secondly, depending on the size of the population, running the FREQT on the best and worst programs, mining out frequent subtrees using a minimum, maximum size
+specifications and minimum reinforcement. As Nil suggested, the possible way of selecting the useful subgraphs might rely on relative entrophy. Since FREQT is designed
+for this purpose, it is logical to use it at least in the initial implementation (other implementations may vary because of the license it uses (GPL)).
+Lastly, the third part of the algorithm, the SUE search, might be done by adding the templates of each node we are hoping to get for each rule and running the FREQT
+using the minimum reinforcement of 2 (possibly adding copies of templates and increasing the reinforcement to test the performance). Another way to do this would be
+iterating through the program trees using algorithms similar to the text search ones, starting to compare the subtree to the template and ending if a different node
+is found.
+One more thing, that in my opinion is worth mentioning is the SUE category and cluster specification. During the discussions with Ben and Nil, there were moments when
+things were not clear about this part, so I will write my view on it. When talking about properties, from my point of view, are basically the "siblings" of the node.
+As defined in the algorithm, we then create vectors to see to what extent each node of the language (or given sub-set) is true in the program trees for this property.
+After creating such vectors, we create clusters, or category tokens with the nodes of same node-type and signature (not too clear about the signature part, but this
+would highly decrease the difficulty of program tree generation.
+
