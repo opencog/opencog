@@ -38,15 +38,23 @@ public:
     void test_SuperEntity( ) {
 
 
-        Math::Vector3 corners[] = { Math::Vector3( 10, 10, 0), Math::Vector3( 10, 4.76837e-07, 0),
-                                    Math::Vector3(10, 4.76837e-07, 0), Math::Vector3( 5, 4.76837e-07, 0),
-                                    Math::Vector3(-2.98023e-07, 4.76837e-07, 0), Math::Vector3( 2.98023e-07, 10, 0),
-                                    Math::Vector3(2.98023e-07, 10, 0), Math::Vector3( 10, 10, 0),
-                                    Math::Vector3(5, 4.76837e-07, 0), Math::Vector3( 5, -5, 0),
-                                    Math::Vector3(5, -5, 0), Math::Vector3( -5, -5, 0),
-                                    Math::Vector3(-5, -5, 0), Math::Vector3( -5, 5, 0)
-                                  };
 
+        Math::Vector3 corners[] = { Math::Vector3(  5.0,  0.0, 0.0 ),
+                                    Math::Vector3( 10.0,  0.0, 0.0 ),
+                                    Math::Vector3( 10.0,  0.0, 0.0 ),
+                                    Math::Vector3( 10.0, 10.0, 0.0 ),
+                                    Math::Vector3( 10.0, 10.0, 0.0 ),
+                                    Math::Vector3(  0.0, 10.0, 0.0 ),
+                                    Math::Vector3(  0.0, 10.0, 0.0 ),
+                                    Math::Vector3( -0.0,  5.0, 0.0 ),
+                                    Math::Vector3( -5.0, -5.0, 0.0 ),
+                                    Math::Vector3(  5.0, -5.0, 0.0 ),
+                                    Math::Vector3(  5.0, -5.0, 0.0 ),
+                                    Math::Vector3(  5.0,  0.0, 0.0 ),
+                                    Math::Vector3(  0.0,  5.0, 0.0 ),
+                                    Math::Vector3( -5.0,  5.0, 0.0 ),
+                                    Math::Vector3( -5.0,  5.0, 0.0 ),
+                                    Math::Vector3( -5.0, -5.0, 0.0 ) };
 
         EntityPtr petAgent( new PetAgent( 1244094484, "Fido", Vector3(5, 5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
         EntityPtr humanoidAgent( new HumanoidAgent( 1244094484, "Paul", Vector3(3.5, 3.5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
@@ -81,7 +89,10 @@ public:
         SuperEntity spe8( s1, s4 );
 
         TS_ASSERT_THROWS_ANYTHING( SuperEntity spe0( petAgent, humanoidAgent ) )
-
+        
+//        std::cout << std::endl << s1->getBoundingBox().getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ).toString() << std::endl;
+//        std::cout << s1->getDimension().toString( ) << std::endl;
+//        std::cout << s1->getPosition().toString( ) << std::endl;
 
         SuperEntity spe( s1, s2 );
         spe.merge( s3 );
@@ -93,11 +104,12 @@ public:
         unsigned int cornersCounter = 0;
         std::list<Math::LineSegment>::const_iterator it;
         for ( it = edges.begin( ); it != edges.end( ); ++it ) {
-            std::cout << it->toString( ) << std::endl;
-            std::cout << corners[cornersCounter].toString( ) << std::endl;
-            std::cout << corners[cornersCounter+1].toString( ) << std::endl;
-            std::cout << "length to pointA = " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
-            std::cout << "length to pointB = " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
+            //std::cout << it->toString( ) << std::endl;
+//            std::printf( "%.20f %.20f %.20f\n%.20f %.20f %.20f\n", it->pointA.x, it->pointA.y, it->pointA.z, it->pointB.x, it->pointB.y, it->pointB.z );
+//            std::cout << corners[cornersCounter].toString( ) << std::endl;
+//            std::cout << corners[cornersCounter+1].toString( ) << std::endl;
+//            std::cout << "length to pointA = " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
+//            std::cout << "length to pointB = " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
             TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
             TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
         } // for

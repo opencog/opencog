@@ -62,23 +62,24 @@ double BoundingBox::distanceTo( const Vector3& point ) const
 
 const Vector3& BoundingBox::getCorner(CORNER cornerToGet) const
 {
+    
     switch (cornerToGet) {
     default:
-    case FAR_LEFT_BOTTOM:
-        return this->corners[0];
-    case FAR_RIGHT_BOTTOM:
-        return this->corners[1];
-    case NEAR_RIGHT_BOTTOM:
-        return this->corners[2];
     case NEAR_LEFT_BOTTOM:
+        return this->corners[0];
+    case FAR_LEFT_BOTTOM:
+        return this->corners[1];
+    case FAR_RIGHT_BOTTOM:
+        return this->corners[2];
+    case NEAR_RIGHT_BOTTOM:
         return this->corners[3];
-    case FAR_LEFT_TOP:
-        return this->corners[4];
-    case FAR_RIGHT_TOP:
-        return this->corners[5];
-    case NEAR_RIGHT_TOP:
-        return this->corners[6];
     case NEAR_LEFT_TOP:
+        return this->corners[4];
+    case FAR_LEFT_TOP:
+        return this->corners[5];
+    case FAR_RIGHT_TOP:
+        return this->corners[6];
+    case NEAR_RIGHT_TOP:
         return this->corners[7];
     }
 }
@@ -176,21 +177,22 @@ void BoundingBox::buildCorners( void )
     Vector3 side = Quaternion( Vector3::Z_UNIT, M_PI / 2.0 ).rotate(this->entity->getDirection()) *
                    (this->entity->getWidth() / 2 + radius);
 
-    // bottom left far
-    corners.push_back( position + front - up + side );
-    // bottom right far
-    corners.push_back( position + front - up + -side );
-    // bottom right near
-    corners.push_back( position + -front - up + -side );
+
     // bottom left near
+    corners.push_back( position + -front - up - side );
+    // bottom left far
+    corners.push_back( position + front - up - side );    
+    // bottom right far
+    corners.push_back( position + front - up + side );
+    // bottom right near
     corners.push_back( position + -front - up + side );
-    // top left far
-    corners.push_back( position + front + up + side );
-    // top right far
-    corners.push_back( position + front + up + -side );
-    // top right near
-    corners.push_back( position + -front + up + -side );
     // top left near
+    corners.push_back( position + -front + up - side );
+    // top left far
+    corners.push_back( position + front + up - side );
+    // top right far
+    corners.push_back( position + front + up + side );
+    // top right near
     corners.push_back( position + -front + up + side );
 }
 

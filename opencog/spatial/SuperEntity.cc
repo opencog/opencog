@@ -356,10 +356,11 @@ SuperEntityPtr SuperEntity::clone( void ) const
 SuperEntity::SubEntityPtr SuperEntity::createSubEntity( const EntityPtr& entity )
 {
     // compute the edges of the entities bases
-    const Math::Vector3& p11 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM );
-    const Math::Vector3& p12 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM );
-    const Math::Vector3& p13 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM );
-    const Math::Vector3& p14 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM );
+    const Math::Vector3& p11 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM );
+    const Math::Vector3& p12 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM );
+    const Math::Vector3& p13 = entity->getBoundingBox().getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM );
+    const Math::Vector3& p14 = entity->getBoundingBox().getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM );
+
 
     std::list<Math::LineSegment> edges1;
     edges1.push_back( Math::LineSegment(p11, p12) );

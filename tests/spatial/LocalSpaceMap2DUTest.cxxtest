@@ -542,17 +542,17 @@ public:
         object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95672.531250, -212941.671875 ), Math::Vector3( -95973.296875, -213307.531250 ) ) );
         object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95973.296875, -213307.531250 ), Math::Vector3( -95607.468750, -213608.328125) ) );
         object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95607.468750, -213608.328125 ), Math::Vector3( -95306.703125, -213242.468750 ) ) );
-
+        
         std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ).toString( ) << std::endl;
         std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ).toString( ) << std::endl;
         std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ).toString( ) << std::endl;
         std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ).toString( ) << std::endl;
         */
 
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) - Math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) - Math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) - Math::Vector3( -5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) - Math::Vector3( -5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) - Math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) - Math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) - Math::Vector3( -5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) - Math::Vector3( -5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
 
         TS_ASSERT( e1->getBoundingBox( ).isInside( Math::Vector3( 0, 0 ) ) )
         TS_ASSERT( !e1->getBoundingBox( ).isInside( Math::Vector3( 0, -2.1 ) ) )
