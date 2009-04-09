@@ -30,39 +30,22 @@ LINK_DIRECTORIES (
 	${OPENCOG_BINARY_DIR}/opencog/atomspace
 )
 
+LINK_LIBRARIES (
+	comboreduct
+	behavior
+        util
+	${OPENCOG_LIBRARIES}	
+)
+
 ADD_CXXTEST(BehaviorDescriptionMatcherUTest)
-TARGET_LINK_LIBRARIES(BehaviorDescriptionMatcherUTest
-   behavior
-   util
-   ${OPENCOG_LIBRARIES}
-)
-
-
 ADD_CXXTEST(CompositeBehaviorDescriptionUTest)
-TARGET_LINK_LIBRARIES(CompositeBehaviorDescriptionUTest
-	behavior
-        util
-	${OPENCOG_LIBRARIES}
-)
-
 ADD_CXXTEST(BehaviorCategoryUTest)
-TARGET_LINK_LIBRARIES(BehaviorCategoryUTest
-	behavior
-        util
-	${OPENCOG_LIBRARIES}
-)
-
 ADD_CXXTEST(BDRetrieverUTest)
-TARGET_LINK_LIBRARIES(BDRetrieverUTest
-	behavior
+
+LINK_LIBRARIES(
 	PetComboVocabulary
 	${XERCESC_LIBRARIES}
 	comboreduct
-	${OPENCOG_LIBRARIES}	
 )
 
 ADD_CXXTEST(BEUTest)
-TARGET_LINK_LIBRARIES(BEUTest
-        behavior
-	${OPENCOG_LIBRARIES}	
-)        
