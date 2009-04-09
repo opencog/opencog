@@ -31,31 +31,36 @@ ENDIF( LUABIND_INCLUDE_DIR AND LUABIND_LIBRARIES)
 
 # check luabind's version if we're using cmake >= 2.6
 IF(LUABIND_FOUND AND NOT CMAKE_MAJOR_VERSION LESS 2 AND NOT CMAKE_MINOR_VERSION LESS 6)
+    # check version, if required
+    IF (Luabind_FIND_VERSION_MAJOR) 
         # Extract the luabind version from the 'version.hpp' file
-        SET(LUABIND_VERSION 0)
-        FILE(READ "${LUABIND_INCLUDE_DIR}/luabind/version.hpp" _LUABIND_VERSION_H_CONTENTS)
+        IF (NOT EXISTS "${LUABIND_INCLUDE_DIR}/luabind/version.hpp")
+            SET(LUABIND_FOUND FALSE)
+        ELSE (NOT EXISTS "${LUABIND_INCLUDE_DIR}/luabind/version.hpp")
+            FILE(READ "${LUABIND_INCLUDE_DIR}/luabind/version.hpp" _LUABIND_VERSION_H_CONTENTS)
+            STRING(REGEX MATCH "# *define LUABIND_VERSION[   ]+([0-9]+)" _MATCH "${_LUABIND_VERSION_H_CONTENTS}")
+            SET(LUABIND_VERSION ${CMAKE_MATCH_1})
+            MESSAGE(STATUS "LUABIND_VERSION=${LUABIND_VERSION}") 
 
-        STRING(REGEX MATCH "# *define LUABIND_VERSION[   ]+([0-9]+)" _MATCH "${_LUABIND_VERSION_H_CONTENTS}")
-        SET(LUABIND_VERSION ${CMAKE_MATCH_1})
-        MESSAGE(STATUS "LUABIND_VERSION=${LUABIND_VERSION}") 
+            #Sets the required version
+            SET(LUABIND_FIND_VERSION ${Luabind_FIND_VERSION_MAJOR})
+            IF (Luabind_FIND_VERSION_MINOR) 
+                SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}${Luabind_FIND_VERSION_MINOR}")
+                IF (Luabind_FIND_VERSION_PATCH) 
+                    SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}${Luabind_FIND_VERSION_PATCH}")
+                ELSE (Luabind_FIND_VERSION_PATCH) 
+                    SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}0")
+                ENDIF (Luabind_FIND_VERSION_PATCH) 
+            ELSE (Luabind_FIND_VERSION_MINOR) 
+                SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}00")
+            ENDIF (Luabind_FIND_VERSION_MINOR) 
 
-        # check found version against required one
-        IF (Luabind_FIND_VERSION_MAJOR) 
-                SET(LUABIND_FIND_VERSION ${Luabind_FIND_VERSION_MAJOR})
-                IF (Luabind_FIND_VERSION_MINOR) 
-                        SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}${Luabind_FIND_VERSION_MINOR}")
-                        IF (Luabind_FIND_VERSION_PATCH) 
-                                SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}${Luabind_FIND_VERSION_PATCH}")
-                        ELSE (Luabind_FIND_VERSION_PATCH) 
-                                SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}0")
-                        ENDIF (Luabind_FIND_VERSION_PATCH) 
-                ELSE (Luabind_FIND_VERSION_MINOR) 
-                        SET(LUABIND_FIND_VERSION "${LUABIND_FIND_VERSION}00")
-                ENDIF (Luabind_FIND_VERSION_MINOR) 
-                IF (${LUABIND_VERSION} LESS LUABIND_FIND_VERSION)
-                        SET(LUABIND_FOUND FALSE )
-                ENDIF (${LUABIND_VERSION} LESS LUABIND_FIND_VERSION)
-        ENDIF (Luabind_FIND_VERSION_MAJOR) 
+           #Finally, check version agains required one
+           IF (${LUABIND_VERSION} LESS ${LUABIND_FIND_VERSION})
+               SET(LUABIND_FOUND FALSE)
+           ENDIF (${LUABIND_VERSION} LESS ${LUABIND_FIND_VERSION})
+        ENDIF (NOT EXISTS "${LUABIND_INCLUDE_DIR}/luabind/version.hpp")
+    ENDIF (Luabind_FIND_VERSION_MAJOR) 
 ENDIF(LUABIND_FOUND AND NOT CMAKE_MAJOR_VERSION LESS 2 AND NOT CMAKE_MINOR_VERSION LESS 6)
 
 # Report the results.
