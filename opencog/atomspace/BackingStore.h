@@ -38,16 +38,25 @@ namespace opencog
 class BackingStore
 {
 	public:
-        virtual ~BackingStore() {}
-		/** 
-		 * Return a handle to a link of the indicated type and outset,
-		 * if it exists; else return an undefined handle.  */
-		virtual Handle getHandle(Type, const std::vector<Handle>&) const = 0;
+		virtual ~BackingStore() {}
 
 		/** 
-		 * Return a handle to a node of the indicated type and name,
-		 * if it exists; else return an undefined handle.  */
-		virtual Handle getHandle(Type, const char *) const = 0;
+		 * Return a pointer to a link of the indicated type and outset,
+		 * if it exists; else return NULL.
+		 */
+		virtual Link * getLink(Type, const std::vector<Handle>&) const = 0;
+
+		/** 
+		 * Return a pointer to a node of the indicated type and name,
+		 * if it exists; else return NULL.
+		 */
+		virtual Node * getNode(Type, const char *) const = 0;
+
+		/** 
+		 * Return a pointer to an Atom associated with the given
+		 * handle, if it exists; else return NULL.
+		 */
+		virtual Atom * getAtom(Handle) const = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.

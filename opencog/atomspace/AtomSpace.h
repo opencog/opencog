@@ -78,10 +78,22 @@ public:
 
     /**
      * Recursively store the atom to the backing store.
+     * I.e. if the atom is a link, then store all of the atoms
+     * in its outgoing set as well, recursively.
      */
     void storeAtom(Handle h) {
         if (backing_store) backing_store->storeAtom(h);
     }
+
+    /**
+     * Return the atom with the indicated handle. This method will
+     * explicitly use the backing store to obtain an instance of the
+     * atom. If an atom corresponding to the handle cannot be found,
+     * then an undefined handle is returned. If the atom is found, 
+     * then the corresponding atom is gauranteed to have been
+     * instantiated in the atomspace.
+     */
+    Handle fetchAtom(Handle);
 
     /**
      * @return a const reference to the AtomTable object of this AtomSpace

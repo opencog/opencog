@@ -599,13 +599,14 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
-        result = backing_store->getHandle(t, name.c_str());
-        if (TLB::isValidHandle(result))
+        Node *n = backing_store->getNode(t, name.c_str());
+        if (n)
         {
+            result = TLB::getHandle(n);
             // TODO: Check if merge signal must be emitted here (AtomTable::merge
             // does that, but what to do with atoms that are not there?)
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-            return atomTable.add(TLB::getAtom(result));
+            return atomTable.add(n);
         }
     }
 
@@ -633,17 +634,33 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
-        result = backing_store->getHandle(t, outgoing);
-        if (TLB::isValidHandle(result))
+        Link *l = backing_store->getLink(t, outgoing);
+        if (l)
         {
+            result = TLB::getHandle(l);
             // TODO: Check if merge signal must be emitted here (AtomTable::merge
             // does that, but what to do with atoms that are not there?)
             if (!tvn.isNullTv()) do_merge_tv(result, tvn);
-            return atomTable.add(TLB::getAtom(result));
+            return atomTable.add(l);
         }
     }
 
     return atomTable.add(new Link(t, outgoing, tvn));
+}
+
+Handle AtomSpace::fetchAtom(Handle h)
+{
+    // No-op if we've already got this handle.
+    if (TLB::isValidHandle(h)) return h;
+
+    // Maybe the backing store knows about this atom.
+    if (backing_store)
+    {
+        Atom *a = backing_store->getAtom(h);
+        if (a) return atomTable.add(a);
+    }
+	
+    return Handle::UNDEFINED;
 }
 
 Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)

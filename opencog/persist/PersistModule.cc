@@ -40,8 +40,9 @@ class SQLBackingStore : public BackingStore
 		SQLBackingStore(void);
 		void set_store(AtomStorage *);
 
-		virtual Handle getHandle(Type, const char *) const;
-		virtual Handle getHandle(Type, const std::vector<Handle>&) const;
+		virtual Node * getNode(Type, const char *) const;
+		virtual Link * getLink(Type, const std::vector<Handle>&) const;
+		virtual Atom * getAtom(Handle) const;
 		virtual void storeAtom(Handle);
 };
 };
@@ -56,18 +57,19 @@ void SQLBackingStore::set_store(AtomStorage *as)
 	store = as;
 }
 
-Handle SQLBackingStore::getHandle(Type t, const char *name) const
+Node * SQLBackingStore::getNode(Type t, const char *name) const
 {
-	Node *n = store->getNode(t, name);
-	if (!n) return Handle::UNDEFINED;
-	return TLB::getHandle(n);
+	return store->getNode(t, name);
 }
 
-Handle SQLBackingStore::getHandle(Type t, const std::vector<Handle>& oset) const
+Link * SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 {
-	Link *l = store->getLink(t, oset);
-	if (!l) return Handle::UNDEFINED;
-	return TLB::getHandle(l);
+	return store->getLink(t, oset);
+}
+
+Atom * SQLBackingStore::getAtom(Handle h) const
+{
+	return store->getAtom(h);
 }
 
 void SQLBackingStore::storeAtom(Handle h)
