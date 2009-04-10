@@ -419,6 +419,8 @@ interface.
                                handle must be an ImplicationLink.
       store-atom handle     -- store indicated atom to SQL/persistent 
                                storage.
+      fetch-atom handle     -- fetch indicated atom from SQL/persistent 
+                               storage.
 
 
 == Example utilities ==

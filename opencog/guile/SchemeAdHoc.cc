@@ -62,6 +62,16 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		as->storeAtom(h);
 		return SCM_BOOL_T;
 	}
+
+	if (0 == cmdname.compare("fetch-atom"))
+	{
+		// XXX we should also allow opt-args to be a list of handles
+		Handle h = verify_handle(optargs, "cog-ad-hoc fetch-atom");
+
+		AtomSpace *as = &atomspace();
+		h = as->fetchAtom(h);
+		return handle_to_scm(h);
+	}
 	return SCM_BOOL_F;
 }
 
