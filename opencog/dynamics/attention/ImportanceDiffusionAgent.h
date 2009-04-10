@@ -89,7 +89,11 @@ public:
 
 /** Spreads short term importance along HebbianLinks using a diffusion approach.
  *
- * Currently spreads along Symmetric and Inverse HebbianLinks.
+ * Spreads along:
+ * \arg SymmetricHebbianLinks
+ * \arg InverseHebbianLinks
+ * \arg AsymmetricHebbianLink
+ * \arg SymmetricInverseHebbianLink
  *
  * @todo Optionally spread long term importance?
  */

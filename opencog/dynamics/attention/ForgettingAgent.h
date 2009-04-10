@@ -87,7 +87,7 @@ public:
         return _ci;
     }
 
-    //! Maximum LTI of a link that can be forgot.
+    //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
     //! Percentage of AtomSpace to forget.
     float forgetPercentage;
