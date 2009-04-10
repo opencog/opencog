@@ -74,7 +74,9 @@ SCM SchemeSmob::pln_bc (SCM satom)
 {
 	Handle h = verify_handle(satom, "pln-bc");
 
-    setTarget(h);
+//    setTarget(h);
+    int steps = 10000;
+    infer(h, steps);
 
     return SCM_BOOL_T;
 }
