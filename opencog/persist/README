@@ -233,6 +233,75 @@ The completion message will be on the server output, for example:
 
     Finished loading 973300 atoms in total 
 
+Individual-atom save and restore
+--------------------------------
+There is a (prototype) interface to save and restore individual atoms. 
+(It is a prototype, since the details are subject to change). It may be
+used as follows:
+
+Start the server:
+    $ opencog/server/cogserver -c ../lib/opencog.conf
+
+Load required scheme commands:
+    $ opencog/scm/load.sh
+
+Open a shell:
+    $ telnet localhost 17001
+    Trying 127.0.0.1...
+    opencog>  sql-open triples linas asdf
+    database opened
+    opencog> scm
+    Entering scheme shell; use ^D or a single . on a line by itself to exit.
+    guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
+    guile> (cog-ad-hoc "store-atom" x)
+    #t
+
+The above will have caused a single atom to be stored in the database.
+It's presence can be verified by examining the database directly:
+
+    $ psql triples
+    Welcome to psql 8.3.6, the PostgreSQL interactive terminal.
+    triples=# select * from atoms;
+     uuid | type | tv_type | stv_mean | stv_confidence | stv_count | height |   name   | outgoing 
+    ------+------+---------+----------+----------------+-----------+--------+----------+----------
+        2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf | 
+    (1 row)
+
+The backing-store mechanism can now automaitcally retreive this atom at
+a later time.  Thus, for example, shut down the server, restart it, 
+re-open the database, and enter the scheme shell again. Then,
+
+    guile> (define y (ConceptNode "asdfasdf"))
+    guile> y
+    (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
+
+Note that, this time, when the node was created, the database was
+searched for a ConceptNode with the same string name. If it was found
+in the database, then it is automatically loaded into the AtomSpace,
+with the appropriate truth value taken from the database.
+
+If the truth value is modified, the atom is *not* automatically saved
+to the database (not at this time; this may change someday).  The
+modified atom would need to be explicitly saved again.
+
+Once stored, the atom may be deleted from the AtomSpace; it will
+remain in storage, and can be recreated at will:
+
+    guile> (cog-delete y)
+    #t
+    guile> y
+    #<Invalid handle>
+    guile> (define y (ConceptNode "asdfasdf"))
+    guile> y
+    (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
+
+The UUID associated with the atom will not change between deletions
+and server restarts. This can be verified with the cog-handle command,
+which returns the UUID:
+
+    guile> (cog-handle y)
+    2
+
 
 Experimental Diary & Results
 ----------------------------
