@@ -30,6 +30,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
@@ -58,6 +59,18 @@ private:
 
 public:
     CompositeTruthValueUTest() {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
         means[0] = TV1_MEAN;
         means[1] = TV2_MEAN;
         means[2] = TV3_MEAN;
