@@ -119,9 +119,6 @@ public:
      *        the primary TV, its substantive component must be 
      *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
      *        In this case its indicator component does not matter.
-     * NOTE:  This object will take care of memory deallocation of the
-     *        TruthValue object passed as argument to this method. So,
-     *        caller should not delete it outside.
      */
     void setVersionedTV(const TruthValue&, VersionHandle);
 
