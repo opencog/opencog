@@ -41,7 +41,8 @@ VersionHandle::VersionHandle(IndicatorType ind, Handle subs)
     substantive = subs;
 }
 
-VersionHandle::VersionHandle( const VersionHandle& other ) {
+VersionHandle::VersionHandle( const VersionHandle& other )
+{
     this->indicator = other.indicator;
     this->substantive = other.substantive;
 }
@@ -63,7 +64,7 @@ const char* VersionHandle::indicatorToStr(IndicatorType indicator) throw (Invali
 
 IndicatorType VersionHandle::strToIndicator(const char* indicatorStr) throw (InvalidParamException)
 {
-    for (int i = 0; i <= UNKNOWN; i++) {
+    for (int i = HYPOTHETICAL; i <= UNKNOWN; i++) {
         IndicatorType indicator = (IndicatorType) i;
         if (!strcmp(indicatorToStr(indicator), indicatorStr)) {
             return indicator;
@@ -90,7 +91,7 @@ std::size_t opencog::hash_value(VersionHandle const& b)
 bool eqVersionHandle::operator()(VersionHandle vh1, VersionHandle vh2) const
 {
     return (vh1.indicator == vh2.indicator &&
-            !CoreUtils::compare(vh1.substantive, vh2.substantive));
+            vh1.substantive == vh2.substantive);
 }
 
 bool VersionHandle::operator==(const VersionHandle &other) const
@@ -105,17 +106,20 @@ bool VersionHandle::operator!=(const VersionHandle &other) const
     return !comp(*this, other);
 }
 
-bool VersionHandle::operator<(const VersionHandle &other) const {
+bool VersionHandle::operator<(const VersionHandle &other) const
+{
     // doesn't really matter
     return substantive < other.substantive;
 }
 
-bool VersionHandle::operator>(const VersionHandle &other) const {
+bool VersionHandle::operator>(const VersionHandle &other) const
+{
     // doesn't really matter
     return substantive > other.substantive;
 }
 
-VersionHandle& VersionHandle::operator=( const VersionHandle& other ) {
+VersionHandle& VersionHandle::operator=( const VersionHandle& other )
+{
     this->indicator = other.indicator;
     this->substantive = other.substantive;
     return *this;

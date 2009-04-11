@@ -31,9 +31,10 @@
 namespace opencog
 {
 
-enum IndicatorType {HYPOTHETICAL = 0, CONTEXTUAL, UNKNOWN};
+enum IndicatorType {HYPOTHETICAL = 1, CONTEXTUAL, UNKNOWN};
 
-struct VersionHandle {
+struct VersionHandle
+{
     IndicatorType indicator;
     Handle substantive;
 
@@ -55,13 +56,15 @@ struct VersionHandle {
 
 #define NULL_VERSION_HANDLE VersionHandle()
 
-struct hashVersionHandle {
+struct hashVersionHandle
+{
     int operator()(VersionHandle vh) const;
 };
 
 std::size_t hash_value(VersionHandle const& b);
 
-struct eqVersionHandle {
+struct eqVersionHandle
+{
     bool operator()(VersionHandle vh1, VersionHandle vh2) const;
 };
 
