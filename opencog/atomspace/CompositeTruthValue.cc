@@ -285,7 +285,7 @@ bool CompositeTruthValue::operator==(const TruthValue& rhs) const
     // Compare primary TV's
     if (primaryTV && !crhs.primaryTV) return false;
     if (!primaryTV && crhs.primaryTV) return false;
-    if (primaryTV != crhs.primaryTV) return false;
+    if (primaryTV && *primaryTV != *crhs.primaryTV) return false;
 
     // Compare the versions
     if (getNumberOfVersionedTVs() != crhs.getNumberOfVersionedTVs()) return false;
