@@ -33,27 +33,6 @@
 
 using namespace opencog;
 
-#ifndef HAVE_STRTOK_R
-#define HAVE_STRTOK_R 1
-char * __strtok_r(char *s1, const char *s2, char **lasts)
-{
-    char *ret;
-    if (s1 == NULL)
-        s1 = *lasts;
-    while (*s1 && strchr(s2, *s1))
-        ++s1;
-    if (*s1 == '\0')
-        return NULL;
-    ret = s1;
-    while (*s1 && !strchr(s2, *s1))
-        ++s1;
-    if (*s1)
-        *s1++ = '\0';
-    *lasts = s1;
-    return ret;
-}
-#endif /* HAVE_STRTOK_R */ 
-
 void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
 {
     primaryTV = NULL;
@@ -69,13 +48,11 @@ void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
 
 void CompositeTruthValue::clear()
 {
-    //printf("CompositeTruthValue::clear() of TV = %p\n", this);
 #ifdef USE_SHARED_DEFAULT_TV
     if (primaryTV != &(TruthValue::DEFAULT_TV())) {
         delete primaryTV;
     }
 #else
-    //printf("CompositeTruthValue::clear() => deleting primaryTV = %p\n", primaryTV);
     delete primaryTV;
 #endif
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
@@ -86,7 +63,6 @@ void CompositeTruthValue::clear()
             delete tv;
         }
 #else
-        //printf("CompositeTruthValue::clear() => deleting versioned tv  = %p\n", tv);
         delete tv;
 #endif
     }
@@ -95,12 +71,10 @@ void CompositeTruthValue::clear()
 
 void CompositeTruthValue::copy(CompositeTruthValue const& source)
 {
-    //printf("CompositeTruthValue::copy()\n");
 #ifdef USE_SHARED_DEFAULT_TV
     primaryTV = (source.primaryTV == &(TruthValue::DEFAULT_TV())) ? (TruthValue*) & (TruthValue::DEFAULT_TV()) : source.primaryTV->clone();
 #else
     primaryTV = source.primaryTV->clone();
-    //printf("CompositeTruthValue::copy() => created new primaryTV = %p\n", primaryTV);
 #endif
     for (VersionedTruthValueMap::const_iterator itr = source.versionedTVs.begin();
             itr != source.versionedTVs.end(); itr++) {
@@ -112,7 +86,6 @@ void CompositeTruthValue::copy(CompositeTruthValue const& source)
 //        versionedTVs[vh] = tv->clone();
         TruthValue* newTv = tv->clone();
         versionedTVs[vh] = newTv;
-        //printf("CompositeTruthValue::copy() => created new versioned tv = %p\n", newTv);
 #endif
     }
 }
@@ -158,7 +131,7 @@ confidence_t CompositeTruthValue::getConfidence()  const
     return primaryTV->getConfidence();
 }
 
-// Canonic methods
+// Canonical methods
 float CompositeTruthValue::toFloat() const
 {
     // TODO: review this to consider versioned TVs as well?
@@ -166,10 +139,12 @@ float CompositeTruthValue::toFloat() const
 }
 
 /*
- * The format of string representation of a Composite TV is as follows (primaryTv first, followed by the versionedTvs):
- * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}{0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
- * NOTE: string representation of tv types, VersionVandles and tv attributes cannot have '{', '}' or ';',
- * which are separators
+ * The format of string representation of a Composite TV is as follows:
+ * (primaryTv first, followed by the versionedTvs):
+ * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
+ * {0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
+ * NOTE: string representation of tv types, VersionVandles and tv
+ * attributes cannot have '{', '}' or ';', which are separators
  */
 std::string CompositeTruthValue::toString() const
 {
@@ -201,10 +176,12 @@ std::string CompositeTruthValue::toString() const
 }
 
 /*
- * The format of string representation of a Composite TV is as follows (primaryTv first, followed by the versionedTvs):
- * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}{0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
- * NOTE: string representation of tv types, VersionHandles and tv attributes cannot have '{', '}' or ';',
- * which are separators
+ * The format of string representation of a Composite TV is as follows
+ * (primaryTv first, followed by the versionedTvs):
+ * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
+ * {0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
+ * NOTE: string representation of tv types, VersionHandles and tv 
+ * attributes cannot have '{', '}' or ';', which are separators
  */
 
 CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (InvalidParamException)
@@ -215,7 +192,8 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     char* tvToken = __strtok_r(s, "{}", &buff);
     if (tvToken == NULL) {
         throw InvalidParamException(TRACE_INFO,
-                                    "Invalid string representation of a CompositeTruthValue object: missing primary TV!");
+            "Invalid string representation of a CompositeTruthValue object: "
+            "missing primary TV!");
     }
     // Creates the new instance.
     CompositeTruthValue* result = new CompositeTruthValue();
@@ -224,7 +202,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     char* primaryTvTypeStr = __strtok_r(tvToken, ";", &internalBuff);
     TruthValueType primaryTvType = TruthValue::strToType(primaryTvTypeStr);
     char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
-    //printf("tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
+    // printf("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
     result->primaryTV = TruthValue::factory(primaryTvType, primaryTvStr);
 #ifdef USE_SHARED_DEFAULT_TV
     DeleteAndSetDefaultTVIfPertinent(&(result->primaryTV));
@@ -234,15 +212,17 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
         char* substantiveStr = __strtok_r(tvToken, ";", &internalBuff);
         Handle substantive;
+        // XXX this cast of a handle is soo wrong its not funny....
         sscanf(substantiveStr, "%lu", (unsigned long *) &substantive);
-        // TODO: IF THIS IS USED BY SAVING & LOADING, THIS HANDLE MUST BE CONVERTED TO A NEW/COMMON HANDLE FORMAT.
+        // TODO: IF THIS IS USED BY SAVING & LOADING, THIS HANDLE
+        // MUST BE CONVERTED TO A NEW/COMMON HANDLE FORMAT.
         char* indicatorStr = __strtok_r(NULL, ";", &internalBuff);
         IndicatorType indicator = VersionHandle::strToIndicator(indicatorStr);
-        //printf("substantive = %p, indicator = %d\n", substantive, indicator);
+        // printf("substantive = %p, indicator = %d\n", substantive.value(), indicator);
         char* versionedTvTypeStr = __strtok_r(NULL, ";", &internalBuff);
         TruthValueType versionedTvType = TruthValue::strToType(versionedTvTypeStr);
         char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
-        //printf("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
+        // printf("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
         VersionHandle vh(indicator, substantive);
 #ifdef USE_SHARED_DEFAULT_TV
         TruthValue* tv = TruthValue::factory(versionedTvType, versionedTvStr);
@@ -295,6 +275,8 @@ CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue & 
 
 bool CompositeTruthValue::operator==(const TruthValue& rhs) const
 {
+    if (this == &rhs) return true;
+
     return false;  // XXX implement me !!
 }
 
@@ -308,8 +290,9 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
 {
     CompositeTruthValue* result = clone();
 #if 1
-    // TODO: Use the approach with dynamic cast bellow if we're going to have subclasses
-    // of CompositeTruthValue. For now, this approach using getType() is more efficient.
+    // TODO: Use the approach with dynamic cast below if we're going
+    // to have subclasses of CompositeTruthValue. For now, this approach
+    // using getType() is more efficient.
     if (other.getType() == COMPOSITE_TRUTH_VALUE) {
         const CompositeTruthValue* otherCTv = (CompositeTruthValue*) & other;
 #else
