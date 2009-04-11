@@ -71,7 +71,7 @@ of(capital, Germany)
 
 Input sentence: "The color of the sky is blue."
 of(color, sky)
-_predadj(blue, color)
+_predadj(color, blue)
 
 Input sentence: "Pottery is made from clay."
 _obj(make, pottery)
@@ -493,30 +493,30 @@ in Opencog is (false, unconfident), so it must be over-ridden
 to state (true, confident).
 
 Consider now: "Men are mortal."
-   _predadj(mortal, men)
+   _predadj(men, mortal)
 
 which suggests the rule:
 
- # IF _predadj($var1, $var2) THEN ^3_isa($var1, $var2)
+ # IF _predadj($var1, $var2) THEN ^3_isa($var2, $var1)
 
 However, prepositions again confound word order:
 Input sentence: "The color of the sky is blue."
    of(color, sky)
-   _predadj(blue, color)
+   _predadj(color, blue)
 
 By ignoring the preposition, the sentence becomes: "color is blue", 
 i.e. that 'colors' are a kind-of blue, which is inverted from the 
 intended sense. The next-most naive rule is then:
 
   # IF _predadj($var1, $var2) ^ 
-       ! $prep($var2,$var3)
-       THEN ^3_isa($var1, $var2)
+       ! $prep($var1,$var3)
+       THEN ^3_isa($var2, $var1)
 
 and also the inverted word-order case:
 
   # IF _predadj($var1, $var2) ^ 
-       $prep($var2,$var3)
-       THEN ^3_isa($var2, $var1)
+       $prep($var1,$var3)
+       THEN ^3_isa($var1, $var2)
 
 XXX However, this doesn't quite work because  $prep($var2,$var3) is
 so broad, that it can match to just about anything, including things
