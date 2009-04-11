@@ -275,9 +275,35 @@ CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue & 
 
 bool CompositeTruthValue::operator==(const TruthValue& rhs) const
 {
-    if (this == &rhs) return true;
+    if (rhs.getType() != COMPOSITE_TRUTH_VALUE) return false;
 
-    return false;  // XXX implement me !!
+    const CompositeTruthValue& crhs = 
+           static_cast<const CompositeTruthValue&>(rhs);
+
+    if (this == &crhs) return true;
+
+    // Compare primary TV's
+    if (primaryTV && !crhs.primaryTV) return false;
+    if (!primaryTV && crhs.primaryTV) return false;
+    if (primaryTV != crhs.primaryTV) return false;
+
+    // Compare the versions
+    if (getNumberOfVersionedTVs() != crhs.getNumberOfVersionedTVs()) return false;
+    VersionedTruthValueMap::const_iterator itr;
+    for (itr = versionedTVs.begin();
+         itr != versionedTVs.end(); itr++)
+    {
+        VersionHandle key = itr->first;
+        VersionedTruthValueMap::const_iterator oitr;
+        oitr = crhs.versionedTVs.find(key);
+        if (oitr == crhs.versionedTVs.end()) return false;
+        TruthValue* tv = itr->second;
+        TruthValue* otv = oitr->second;
+        if (*tv != *otv) return false;
+    }
+
+    // If we made it to here, the TV's must be identical.
+    return true;  
 }
 
 TruthValueType CompositeTruthValue::getType() const
