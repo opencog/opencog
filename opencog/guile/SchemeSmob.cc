@@ -125,8 +125,9 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));
 	
+	// ad-hoc commands
 	scm_c_define_gsubr("cog-ad-hoc",            1, 1, 0, C(ss_ad_hoc));
-	scm_c_define_gsubr("pln-bc",                1, 0, 0, C(pln_bc));
+	scm_c_define_gsubr("pln-bc",                2, 0, 0, C(pln_bc));
 }
 
 #endif

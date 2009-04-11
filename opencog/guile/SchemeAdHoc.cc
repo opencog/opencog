@@ -80,15 +80,24 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
  * Specify the target atom for PLN backward chaining inference.
  * Note: Use the cogserver commands to run the inference.
  */
-SCM SchemeSmob::pln_bc (SCM satom)
+SCM SchemeSmob::pln_bc (SCM starget, SCM ssteps)
 {
-	Handle h = verify_handle(satom, "pln-bc");
+	Handle h = verify_handle(starget, "pln-bc");
+	int steps = scm_to_int(ssteps);
 
-//    setTarget(h);
-    int steps = 10000;
-    infer(h, steps);
+	Atom *a = TLB::getAtom(h);
+	TruthValue *t = a->getTruthValue().clone();
 
-    return SCM_BOOL_T;
+//	setTarget(h);
+	infer(h, steps);
+
+	// Return true only if the truth value changed,
+	// else return false.
+	SCM rc = SCM_BOOL_T;
+	if (*t == a->getTruthValue()) rc = SCM_BOOL_F;
+	delete t;
+	
+	return rc;
 }
 
 #endif
