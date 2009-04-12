@@ -403,7 +403,7 @@ Several approaches are possible:
    its a reasonable starting point, perhaps.
 
 2) Verify consistency via first-order-logic and forward/backward
-   chaining. This has several dificulties. One is the problem of
+   chaining. This has several difficulties. One is the problem of
    performance, and bounding the search space. Another is that, if
    an inconsistency is detected, its still not clear what faulty
    assumption lead to it.  There is no algorithm for classifying 
@@ -426,6 +426,12 @@ Consider the following three sentences:
 Assume the first two sentences were previously determined to be true,
 with a high confidence value. How can we determine that the third 
 sentence is plausible, i.e. consistent with the first two sentences?
+
+Upon reading the third sentence, it could be turned into a hypothetical
+statement, and suggested as the target of the PLN backward chainer. If
+the chainer is able to deduce that it is true, then the confidence of
+all three statements can increase: they form a set of mutually
+self-supporting statements.
 
 
 IsA Sentences

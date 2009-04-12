@@ -156,7 +156,7 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 
 /* ============================================================== */
 /**
- * Create a new simple truth value, with indicated mean and confidence.
+ * Take over memory management of a truth value
  */
 SCM SchemeSmob::take_tv (TruthValue *tv)
 {

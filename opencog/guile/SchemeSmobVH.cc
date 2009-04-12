@@ -55,45 +55,43 @@ std::string SchemeSmob::vh_to_string(const VersionHandle *vh)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-	std::string ret = "(vh ";
+	std::string ret = "(vh \"";
 	ret += VersionHandle::indicatorToStr(vh->indicator);
-	snprintf(buff, BUFLEN, " %lu)", vh->substantive.value());
+	snprintf(buff, BUFLEN, "\" %lu)", vh->substantive.value());
 	ret += buff;
 	return ret;
 }
 
-#if 0
 /* ============================================================== */
 /**
- * Create a new simple truth value, with indicated mean and confidence.
+ * Take over memory management of a version handle.
  */
-SCM SchemeSmob::take_tv (TruthValue *tv)
+SCM SchemeSmob::take_vh (VersionHandle *vh)
 {
-	scm_gc_register_collectable_memory (tv,
-	                 sizeof(*tv), "opencog tv");
+	scm_gc_register_collectable_memory (vh,
+	                 sizeof(*vh), "opencog vh");
 
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, tv);
-	SCM_SET_SMOB_FLAGS(smob, COG_TV);
+	SCM_NEWSMOB (smob, cog_misc_tag, vh);
+	SCM_SET_SMOB_FLAGS(smob, COG_VH);
 	return smob;
 }
 
 /* ============================================================== */
 /**
- * Create a new simple truth value, with indicated mean and confidence.
+ * Create a new version handle
  */
-SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
+SCM SchemeSmob::ss_new_vh (SCM sind, SCM shandle)
 {
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-
-	float cnt = SimpleTruthValue::confidenceToCount(confidence);
-	TruthValue *tv = new SimpleTruthValue(mean, cnt);
-	return take_tv(tv);
+	Handle h = verify_handle(shandle, "cog-new-vh");
+	std::string ind_name = decode_string (sind, "cog-new-vh",
+		"indicator for the version handle");
+	IndicatorType ind = VersionHandle::strToIndicator(ind_name.c_str());
+	
+	VersionHandle *vh = new VersionHandle(ind, h);
+	return take_vh(vh);
 }
 
-
-#endif 
 /* ============================================================== */
 /**
  * Return true if the scm is a version handle

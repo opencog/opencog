@@ -91,6 +91,9 @@ SCM SchemeSmob::pln_bc (SCM starget, SCM ssteps)
 //	setTarget(h);
 	infer(h, steps);
 
+printf("duuude before %s \n", t->toString().c_str());
+printf("duuude after %s \n", a->getTruthValue().toString().c_str());
+
 	// Return true only if the truth value changed,
 	// else return false.
 	SCM rc = SCM_BOOL_T;

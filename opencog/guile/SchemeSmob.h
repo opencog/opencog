@@ -93,7 +93,9 @@ class SchemeSmob
 		static SCM ss_tv_get_value(SCM);
 
 		// Version handles
+		static SCM ss_new_vh(SCM, SCM);
 		static SCM ss_vh_p(SCM);
+		static SCM take_vh(VersionHandle *);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);

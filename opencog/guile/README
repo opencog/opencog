@@ -361,7 +361,7 @@ interface.
       Return #t if exp is a truth value, else return #f
 
       Example:
-         ; Define a node
+         ; Define a somple truth value
          guile> (define x (cog-new-stv 0.7 0.9))
          guile> (define y (+ 2 2))
          guile> (cog-tv? x)
@@ -390,6 +390,21 @@ interface.
          guile> (define x (cog-new-stv 0.7 0.9))
          guile> (cog-tv->alist x)
          ((mean . 0.699999988079071) (confidence . 0.899999976158142))
+
+=== cog-vh? exp ===
+      Return #t if exp is a version handle, else return #f
+
+      Example:
+         ; Define a node
+         guile> (define n (cog-new-node 'ConceptNode "abc"))
+         ; Define a version handle holding that node
+         guile> (define x (cog-new-vh "HYPOTHETICAL" n))
+         guile> (define y (+ 2 2))
+         guile> (cog-vh? x)
+         #t
+         guile> (cog-tv? y)
+         #f
+
 
 === cog-get-types ===
       Return a list of all of the atom types in the system.
