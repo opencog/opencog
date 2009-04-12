@@ -86,13 +86,11 @@ SCM SchemeSmob::pln_bc (SCM starget, SCM ssteps)
 	int steps = scm_to_int(ssteps);
 
 	Atom *a = TLB::getAtom(h);
+	// We need to make a copy. Wish I could do this on stack ... 
 	TruthValue *t = a->getTruthValue().clone();
 
 //	setTarget(h);
 	infer(h, steps);
-
-printf("duuude before %s \n", t->toString().c_str());
-printf("duuude after %s \n", a->getTruthValue().toString().c_str());
 
 	// Return true only if the truth value changed,
 	// else return false.
