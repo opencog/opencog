@@ -17,55 +17,6 @@
 
 using namespace opencog;
 
-SCM SchemeSmob::mark_misc(SCM misc_smob)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
-
-	switch (misctype)
-	{
-		case COG_TV: // Nothing to do here ...
-			return SCM_BOOL_F;
-		default:
-			fprintf(stderr, "Error: opencog-guile: "
-			        "don't know how to mark this type: %d\n",
-			        (int) misctype);
-			break;
-	}
-
-	return SCM_BOOL_F;
-}
-
-/**
- * Free the memory associated with an opencog guile object.
- * This routine is called by the guile garbage collector, from time to
- * time. For testing purposes, you can force the garbage collector to
- * run by saying (gc), while, for stats, try (gc-stats) and
- * (gc-live-object-stats). The later should show both "opencog-handle"
- * and "opencog-misc" stats.
- */
-size_t SchemeSmob::free_misc(SCM node)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
-
-	switch (misctype)
-	{
-		case COG_TV:
-			TruthValue *tv;
-			tv = (TruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (tv,
-			                  sizeof(*tv), "opencog tv");
-			delete tv;
-			return 0;
-
-		default:
-			fprintf(stderr, "Error: opencog-guile: "
-			        "don't know how to free this type: %d\n",
-			        (int) misctype);
-			break;
-	}
-	return 0;
-}
-
 /* ============================================================== */
 
 #ifdef USE_KEYWORD_LIST_NOT_USED
@@ -125,7 +76,7 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 
 	return NULL;
 }
-#endif
+#endif /* USE_KEYWORD_LIST_NOT_USED */
 
 /**
  * Search for a truth value in a list of values.
@@ -364,5 +315,5 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	return SCM_EOL;
 }
 
-#endif
+#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

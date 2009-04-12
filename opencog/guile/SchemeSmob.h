@@ -34,7 +34,8 @@ class SchemeSmob
 		enum
 		{
 			COG_HANDLE = 1,
-			COG_TV,
+			COG_TV,  // truth values
+			COG_VH,  // version handles
 		};
 
 		static bool is_inited;

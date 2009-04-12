@@ -3,6 +3,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
+	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 )
