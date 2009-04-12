@@ -230,73 +230,69 @@ SCM SchemeSmob::ss_tv_p (SCM s)
  */
 SCM SchemeSmob::ss_tv_get_value (SCM s)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
 	{
-		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-		switch (misctype)
+		return SCM_EOL;
+	}
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
+	if (misctype != COG_TV) return SCM_EOL;
+
+	// Return association list
+	TruthValue *tv;
+	tv = (TruthValue *) SCM_SMOB_DATA(s);
+	TruthValueType tvt = tv->getType();
+	switch(tvt)
+	{
+		case SIMPLE_TRUTH_VALUE:
 		{
-			// Return association list
-			case COG_TV:
-			{
-				TruthValue *tv;
-				tv = (TruthValue *) SCM_SMOB_DATA(s);
-				TruthValueType tvt = tv->getType();
-				switch(tvt)
-				{
-					case SIMPLE_TRUTH_VALUE:
-					{
-						SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
-						SCM mean = scm_from_double(stv->getMean());
-						SCM conf = scm_from_double(stv->getConfidence());
-						SCM smean = scm_from_locale_symbol("mean");
-						SCM sconf = scm_from_locale_symbol("confidence");
-				
-						return scm_cons2(
-							scm_cons(smean, mean),
-							scm_cons(sconf, conf), 
-							SCM_EOL);
-					}
-					case COUNT_TRUTH_VALUE:
-					{
-						CountTruthValue *ctv = static_cast<CountTruthValue *>(tv);
-						SCM mean = scm_from_double(ctv->getMean());
-						SCM conf = scm_from_double(ctv->getConfidence());
-						SCM cont = scm_from_double(ctv->getCount());
-						SCM smean = scm_from_locale_symbol("mean");
-						SCM sconf = scm_from_locale_symbol("confidence");
-						SCM scont = scm_from_locale_symbol("count");
-				
-						return scm_cons(
-							scm_cons(smean, mean),
-							scm_cons2(
-							scm_cons(sconf, conf), 
-							scm_cons(scont, cont), 
-							SCM_EOL));
-					}
-					case INDEFINITE_TRUTH_VALUE:
-					{
-						IndefiniteTruthValue *itv = static_cast<IndefiniteTruthValue *>(tv);
-						SCM lower = scm_from_double(itv->getL());
-						SCM upper = scm_from_double(itv->getU());
-						SCM conf = scm_from_double(itv->getConfidence());
-						SCM slower = scm_from_locale_symbol("lower");
-						SCM supper = scm_from_locale_symbol("upper");
-						SCM sconf = scm_from_locale_symbol("confidence");
-				
-						return scm_cons(
-							scm_cons(slower, lower),
-							scm_cons2(
-							scm_cons(supper, upper),
-							scm_cons(sconf, conf), 
-							SCM_EOL));
-					}
-					default:
-						return SCM_EOL;
-				}
-			}
-			default:
-				return SCM_EOL;
+			SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
+			SCM mean = scm_from_double(stv->getMean());
+			SCM conf = scm_from_double(stv->getConfidence());
+			SCM smean = scm_from_locale_symbol("mean");
+			SCM sconf = scm_from_locale_symbol("confidence");
+	
+			return scm_cons2(
+				scm_cons(smean, mean),
+				scm_cons(sconf, conf), 
+				SCM_EOL);
 		}
+		case COUNT_TRUTH_VALUE:
+		{
+			CountTruthValue *ctv = static_cast<CountTruthValue *>(tv);
+			SCM mean = scm_from_double(ctv->getMean());
+			SCM conf = scm_from_double(ctv->getConfidence());
+			SCM cont = scm_from_double(ctv->getCount());
+			SCM smean = scm_from_locale_symbol("mean");
+			SCM sconf = scm_from_locale_symbol("confidence");
+			SCM scont = scm_from_locale_symbol("count");
+	
+			return scm_cons(
+				scm_cons(smean, mean),
+				scm_cons2(
+				scm_cons(sconf, conf), 
+				scm_cons(scont, cont), 
+				SCM_EOL));
+		}
+		case INDEFINITE_TRUTH_VALUE:
+		{
+			IndefiniteTruthValue *itv = static_cast<IndefiniteTruthValue *>(tv);
+			SCM lower = scm_from_double(itv->getL());
+			SCM upper = scm_from_double(itv->getU());
+			SCM conf = scm_from_double(itv->getConfidence());
+			SCM slower = scm_from_locale_symbol("lower");
+			SCM supper = scm_from_locale_symbol("upper");
+			SCM sconf = scm_from_locale_symbol("confidence");
+	
+			return scm_cons(
+				scm_cons(slower, lower),
+				scm_cons2(
+				scm_cons(supper, upper),
+				scm_cons(sconf, conf), 
+				SCM_EOL));
+		}
+		default:
+			return SCM_EOL;
 	}
 	return SCM_EOL;
 }
