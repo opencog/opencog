@@ -91,6 +91,7 @@ INSTALL (FILES
 	IHasMimeType.h
 	IRPCSocket.h
 	ListRequest.h
+	load-file.h
 	LoadModuleRequest.h
 	LoadRequest.h
 	SaveRequest.h

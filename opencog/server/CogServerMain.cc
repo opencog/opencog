@@ -27,6 +27,7 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/server/CogServer.h>
+#include <opencog/server/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -40,6 +41,17 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     CONFDIR,
 #ifndef WIN32
     "/etc",
+#endif // !WIN32
+    NULL
+};
+
+static const char* DEFAULT_MODULE_PATHS[] = 
+{
+    "opencog",
+    "../opencog",
+#ifndef WIN32
+    "/usr/share/opencog",
+    "/usr/local/share/opencog",
 #endif // !WIN32
     NULL
 };
@@ -88,13 +100,46 @@ int main(int argc, char *argv[])
 
         CogServer& cogserver = static_cast<CogServer&>(server());
 
-        // load modules specified in the config file
+        // Load modules specified in the config file
         std::vector<std::string> modules;
         tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
         for (std::vector<std::string>::const_iterator it = modules.begin();
              it != modules.end(); ++it) {
             cogserver.loadModule(*it);
         }
+
+        // Load scheme modules specified in the config file
+        std::vector<std::string> scm_modules;
+        tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
+#ifdef HAVE_GUILE
+        for (std::vector<std::string>::const_iterator it = scm_modules.begin();
+             it != scm_modules.end(); ++it) {
+
+            int rc = 2;
+            const char * mod = "";
+            for (int i = 0; DEFAULT_MODULE_PATHS[i] != NULL; ++i) {
+                boost::filesystem::path modulePath(DEFAULT_MODULE_PATHS[i]);
+                modulePath /= *it;
+                if (boost::filesystem::exists(modulePath)) {
+                    mod = modulePath.string().c_str();
+                    rc = load_scm_file(mod);
+                    if (0 == rc) break;
+                }
+            }
+            if (rc)
+            {
+               logger().log(opencog::Logger::ERROR, "%d %s: %s", 
+                     rc, strerror(rc), mod);
+            }
+            else
+            {
+                logger().log(opencog::Logger::INFO, "Loaded %s", mod);
+            }
+        }
+#else /* HAVE_GUILE */
+        logger().log(opencog::Logger::WARN,
+            "Server compiled without SCM support");
+#endif /* HAVE_GUILE */
 
         // enable the network server and run the server's main loop
         cogserver.enableNetworkServer();
