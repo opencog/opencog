@@ -93,5 +93,14 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	return "";
 }
 
+int SchemeSmob::print_misc(SCM node, SCM port, scm_print_state * ps)
+{
+	std::string str = misc_to_string(node);
+	scm_puts (str.c_str(), port);
+	return 1; //non-zero means success
+}
+
+/* ============================================================== */
+
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */
