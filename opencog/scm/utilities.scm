@@ -1,4 +1,3 @@
-scm
 ;
 ; utilities.scm
 ;
@@ -342,7 +341,3 @@ scm
 	)
 )
 
-; -----------------------------------------------------------------------
-; exit scheme shell, exit opencog shell.
-.
-exit

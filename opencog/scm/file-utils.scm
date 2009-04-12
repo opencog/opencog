@@ -1,7 +1,8 @@
-scm
 ;
 ; file-utils.scm
+;
 ; Assorted file and directory utils.
+; Copyright (c) 2008 Linas Vepstas
 ;
 
 (use-modules (ice-9 rdelim))
@@ -107,6 +108,4 @@ scm
 	(exec-scm-from-cmd (string-join (list "cat \"" filename "\"" ) ""))
 )
 
-.
-exit
 

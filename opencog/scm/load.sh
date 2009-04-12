@@ -10,9 +10,9 @@ PORT=17001
 
 echo -e "scm\n(turn-on-debugging)\n.\nexit\n"  |netcat -q0 $HOST $PORT
 
-cat type_constructors.scm |netcat -q0 $HOST $PORT
-cat utilities.scm         |netcat -q0 $HOST $PORT
-cat file-utils.scm         |netcat -q0 $HOST $PORT
+echo "scm" | cat - type_constructors.scm  |netcat -q0 $HOST $PORT
+echo "scm" | cat - utilities.scm          |netcat -q0 $HOST $PORT
+echo "scm" | cat - file-utils.scm         |netcat -q0 $HOST $PORT
 
 # The cgw code is not being used at this time. 
 # cat cgw-wire.scm          |netcat -q0 $HOST $PORT
