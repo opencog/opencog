@@ -161,6 +161,9 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			{
 				VersionHandle vh = mtv->getVersionHandle(i);
 				ret += vh_to_string(&vh);
+				const TruthValue& vtv = mtv->getVersionedTV(vh);
+				ret += ".";
+				ret += tv_to_string(&vtv);
 			}
 			ret += ")";
 			return ret;
@@ -268,10 +271,10 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM smean = scm_from_locale_symbol("mean");
 			SCM sconf = scm_from_locale_symbol("confidence");
 	
-			return scm_cons2(
-				scm_cons(smean, mean),
-				scm_cons(sconf, conf), 
-				SCM_EOL);
+			SCM rc = SCM_EOL;
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(smean, mean, rc);
+			return rc;
 		}
 		case COUNT_TRUTH_VALUE:
 		{
@@ -283,12 +286,11 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM sconf = scm_from_locale_symbol("confidence");
 			SCM scont = scm_from_locale_symbol("count");
 	
-			return scm_cons(
-				scm_cons(smean, mean),
-				scm_cons2(
-				scm_cons(sconf, conf), 
-				scm_cons(scont, cont), 
-				SCM_EOL));
+			SCM rc = SCM_EOL;
+			rc = scm_acons(scont, cont, rc), 
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(smean, mean, rc);
+			return rc;
 		}
 		case INDEFINITE_TRUTH_VALUE:
 		{
@@ -300,12 +302,11 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM supper = scm_from_locale_symbol("upper");
 			SCM sconf = scm_from_locale_symbol("confidence");
 	
-			return scm_cons(
-				scm_cons(slower, lower),
-				scm_cons2(
-				scm_cons(supper, upper),
-				scm_cons(sconf, conf), 
-				SCM_EOL));
+			SCM rc = SCM_EOL;
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(supper, upper, rc), 
+			rc = scm_acons(slower, lower, rc);
+			return rc;
 		}
 		case COMPOSITE_TRUTH_VALUE:
 		{
@@ -316,10 +317,27 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 
 			SCM sprimary = scm_from_locale_symbol("primary");
 			SCM sversion = scm_from_locale_symbol("versions");
-			return scm_cons2(
-				scm_cons(sprimary, sptv),
-				scm_cons(sversion, SCM_EOL), 
-				SCM_EOL);
+
+			// Loop over all the version handles.
+			SCM vers = SCM_EOL;
+			int nvh = mtv->getNumberOfVersionedTVs();
+			for (int i=0; i<nvh; i++)
+			{
+				VersionHandle vh = mtv->getVersionHandle(i);
+				VersionHandle *nvh = new VersionHandle(vh);
+				SCM svh = take_vh(nvh);
+
+				const TruthValue& vtv = mtv->getVersionedTV(vh);
+				TruthValue *nvtv = vtv.clone();
+				SCM svtv = take_tv(nvtv);
+
+				vers = scm_acons(svh, svtv, vers);
+			}
+
+			SCM rc = SCM_EOL;
+			rc = scm_acons(sversion, vers, rc);
+			rc = scm_acons(sprimary, sptv, rc);
+			return rc;
 		}
 		default:
 			return SCM_EOL;

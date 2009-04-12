@@ -61,10 +61,10 @@ SCM SchemeSmob::ss_new_vh (SCM sind, SCM shandle)
 	}
 	catch (InvalidParamException e)
 	{
-		scm_wrong_type_arg_msg("cog-new-vh", 1, sind, 
+		scm_wrong_type_arg_msg("cog-new-vh", 1, sind,
 			"version handle indicator string name");
 	}
-	
+
 	VersionHandle *vh = new VersionHandle(ind, h);
 	return take_vh(vh);
 }
@@ -115,11 +115,11 @@ SCM SchemeSmob::ss_vh_get_value (SCM s)
 	SCM_NEWSMOB (h, cog_handle_tag, shandle);
 	SCM sind = scm_from_locale_symbol("indicator");
 	SCM satom = scm_from_locale_symbol("atom");
-			
-	return scm_cons2(
-		scm_cons(sind, ind),
-		scm_cons(satom, h), 
-		SCM_EOL);
+
+	SCM rc = SCM_EOL;
+	rc = scm_acons(satom, h, rc);
+	rc = scm_acons(sind, ind, rc);
+	return rc;
 }
 
 #endif /* HAVE_GUILE */
