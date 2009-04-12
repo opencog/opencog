@@ -6,6 +6,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
+	SchemeSmobVH.cc
 )
 
 TARGET_LINK_LIBRARIES(smob

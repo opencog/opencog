@@ -20,6 +20,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/VersionHandle.h>
 
 namespace opencog {
 
@@ -91,6 +92,9 @@ class SchemeSmob
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
 
+		// Version handles
+		static SCM ss_vh_p(SCM);
+
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
 		static SCM pln_bc(SCM, SCM);
@@ -101,7 +105,8 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
-		static std::string tv_to_string(const TruthValue *stv);
+		static std::string tv_to_string(const TruthValue *);
+		static std::string vh_to_string(const VersionHandle *);
 		static TruthValue *get_tv_from_list(SCM);
 
 		static Type validate_atom(SCM, const char *);

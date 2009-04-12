@@ -154,20 +154,6 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 	}
 }
 
-std::string SchemeSmob::misc_to_string(SCM node)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
-	switch (misctype)
-	{
-		case COG_TV:
-			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
-
-		default:
-			return "#<unknown opencog type>\n";
-	}
-	return "";
-}
-
 /* ============================================================== */
 /**
  * Create a new simple truth value, with indicated mean and confidence.

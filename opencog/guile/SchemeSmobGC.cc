@@ -74,5 +74,24 @@ size_t SchemeSmob::free_misc(SCM node)
 	return 0;
 }
 
+/* ============================================================== */
+
+std::string SchemeSmob::misc_to_string(SCM node)
+{
+	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
+	switch (misctype)
+	{
+		case COG_TV:
+			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
+
+		case COG_VH:
+			return vh_to_string((VersionHandle *) SCM_SMOB_DATA(node));
+
+		default:
+			return "#<unknown opencog type>\n";
+	}
+	return "";
+}
+
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */
