@@ -11,6 +11,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -147,6 +148,21 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += buff;
 			snprintf(buff, BUFLEN, "%.8g)", itv->getConfidenceLevel());
 			ret += buff;
+			return ret;
+		}
+		case COMPOSITE_TRUTH_VALUE:
+		{
+			const CompositeTruthValue *mtv = static_cast<const CompositeTruthValue *>(tv);
+			ret += "(mtv ";
+			ret += tv_to_string(&mtv->getVersionedTV(NULL_VERSION_HANDLE));
+
+			int nvh = mtv->getNumberOfVersionedTVs();
+			for (int i=0; i<nvh; i++)
+			{
+				VersionHandle vh = mtv->getVersionHandle(i);
+				ret += vh_to_string(&vh);
+			}
+			ret += ")";
 			return ret;
 		}
 		default:
