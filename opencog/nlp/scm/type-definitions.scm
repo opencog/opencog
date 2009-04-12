@@ -1,4 +1,3 @@
-scm
 ;
 ; type-definitions.scm
 ;
@@ -171,5 +170,3 @@ scm
 	(ConceptNode "DefinedLinguisticConcept-Tense")
 )
 
-.
-exit
