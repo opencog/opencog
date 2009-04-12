@@ -124,6 +124,7 @@ void SchemeSmob::register_procs(void)
 	// Version handles
 	scm_c_define_gsubr("cog-new-vh",            2, 0, 0, C(ss_new_vh));
 	scm_c_define_gsubr("cog-vh?",               1, 0, 0, C(ss_vh_p));
+	scm_c_define_gsubr("cog-vh->alist",         1, 0, 0, C(ss_vh_get_value));
 
 	// iterators
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));

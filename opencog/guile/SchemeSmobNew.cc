@@ -135,12 +135,17 @@ SCM SchemeSmob::ss_atom (SCM shandle)
 
 /* ============================================================== */
 /**
- * Return handle of atom (the handle is in integer)
+ * Return handle of atom (the handle is the UUID integer)
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
+
+	// XXX Now that Handle is a class and not a long int, we should
+	// not do this directly, but instead should get the handle first,
+	// then get the integer, then convert the integer to SCM.
+	// XXX FIXME
 	return SCM_SMOB_OBJECT(satom);
 }
 

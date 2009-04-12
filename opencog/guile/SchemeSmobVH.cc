@@ -86,7 +86,17 @@ SCM SchemeSmob::ss_new_vh (SCM sind, SCM shandle)
 	Handle h = verify_handle(shandle, "cog-new-vh");
 	std::string ind_name = decode_string (sind, "cog-new-vh",
 		"indicator for the version handle");
-	IndicatorType ind = VersionHandle::strToIndicator(ind_name.c_str());
+
+	IndicatorType ind;
+	try
+	{
+		ind = VersionHandle::strToIndicator(ind_name.c_str());
+	}
+	catch (InvalidParamException e)
+	{
+		scm_wrong_type_arg_msg("cog-new-vh", 1, sind, 
+			"version handle indicator string name");
+	}
 	
 	VersionHandle *vh = new VersionHandle(ind, h);
 	return take_vh(vh);
@@ -113,50 +123,37 @@ SCM SchemeSmob::ss_vh_p (SCM s)
 	return SCM_BOOL_F;
 }
 
-#if 0
 /* ============================================================== */
 /**
- * Return scheme-accessible numerical value of a truth value
+ * Return association list for the version handle.
  */
-SCM SchemeSmob::ss_tv_get_value (SCM s)
+SCM SchemeSmob::ss_vh_get_value (SCM s)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
 	{
-		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-		switch (misctype)
-		{
-			// Return association list
-			case COG_TV:
-			{
-				TruthValue *tv;
-				tv = (TruthValue *) SCM_SMOB_DATA(s);
-				TruthValueType tvt = tv->getType();
-				switch(tvt)
-				{
-					case SIMPLE_TRUTH_VALUE:
-					{
-						SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
-						SCM mean = scm_from_double(stv->getMean());
-						SCM conf = scm_from_double(stv->getConfidence());
-						SCM smean = scm_from_locale_symbol("mean");
-						SCM sconf = scm_from_locale_symbol("confidence");
-				
-						return scm_cons2(
-							scm_cons(smean, mean),
-							scm_cons(sconf, conf), 
-							SCM_EOL);
-					}
-					default:
-						return SCM_EOL;
-				}
-			}
-			default:
-				return SCM_EOL;
-		}
+		return SCM_EOL;
 	}
-	return SCM_EOL;
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
+	if (COG_VH != misctype) return SCM_EOL;
+
+	// Return association list
+	VersionHandle *vh;
+	vh = (VersionHandle *) SCM_SMOB_DATA(s);
+
+	const char * str = VersionHandle::indicatorToStr(vh->indicator);
+	SCM ind = scm_from_locale_string(str);
+	SCM shandle = scm_from_ulong(vh->substantive.value());
+	SCM h;
+	SCM_NEWSMOB (h, cog_handle_tag, shandle);
+	SCM sind = scm_from_locale_symbol("indicator");
+	SCM satom = scm_from_locale_symbol("atom");
+			
+	return scm_cons2(
+		scm_cons(sind, ind),
+		scm_cons(satom, h), 
+		SCM_EOL);
 }
-#endif
 
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

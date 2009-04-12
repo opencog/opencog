@@ -361,7 +361,7 @@ interface.
       Return #t if exp is a truth value, else return #f
 
       Example:
-         ; Define a somple truth value
+         ; Define a simple truth value
          guile> (define x (cog-new-stv 0.7 0.9))
          guile> (define y (+ 2 2))
          guile> (cog-tv? x)
@@ -391,6 +391,18 @@ interface.
          guile> (cog-tv->alist x)
          ((mean . 0.699999988079071) (confidence . 0.899999976158142))
 
+=== cog-new-vh indicator atom ===
+      Create a VersionHandle of the indicated type, refering to the 
+      indicated atom. Possible indicator types are: "HYPOTHETICAL",
+      "CONTEXTUAL" and "UNKNOWN".
+
+      Throws errors if the type or handle is invalid.
+      Example:
+         ; Define a node
+         guile> (define n (cog-new-node 'ConceptNode "abc"))
+         ; Define a version handle holding that node
+         guile> (cog-new-vh "HYPOTHETICAL" n)
+
 === cog-vh? exp ===
       Return #t if exp is a version handle, else return #f
 
@@ -405,6 +417,19 @@ interface.
          guile> (cog-tv? y)
          #f
 
+=== cog-vh->alist ===
+      Convert a version handle to an association list (alist).
+      This allows scheme code to access the two parts of the 
+      version handle by name, the two parts being the handle 
+      and the version indicator.
+
+      Example:
+         ; Define a node
+         guile> (define n (cog-new-node 'ConceptNode "abc"))
+         ; Define a version handle holding that node
+         guile> (define x (cog-new-vh "HYPOTHETICAL" n))
+         guile> (cog-vh->alist x)
+         ((indicator . HYPOTHETICAL) (atom . (ConceptNode "abc")))
 
 === cog-get-types ===
       Return a list of all of the atom types in the system.

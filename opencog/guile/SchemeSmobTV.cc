@@ -236,7 +236,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	}
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (misctype != COG_TV) return SCM_EOL;
+	if (COG_TV != misctype) return SCM_EOL;
 
 	// Return association list
 	TruthValue *tv;

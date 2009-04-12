@@ -96,6 +96,7 @@ class SchemeSmob
 		static SCM ss_new_vh(SCM, SCM);
 		static SCM ss_vh_p(SCM);
 		static SCM take_vh(VersionHandle *);
+		static SCM ss_vh_get_value(SCM);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
