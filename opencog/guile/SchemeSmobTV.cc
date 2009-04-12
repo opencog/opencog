@@ -307,6 +307,20 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 				scm_cons(sconf, conf), 
 				SCM_EOL));
 		}
+		case COMPOSITE_TRUTH_VALUE:
+		{
+			CompositeTruthValue *mtv = static_cast<CompositeTruthValue *>(tv);
+			const TruthValue &ptv = mtv->getVersionedTV(NULL_VERSION_HANDLE);
+			TruthValue *nptv = ptv.clone();
+			SCM sptv = take_tv(nptv);
+
+			SCM sprimary = scm_from_locale_symbol("primary");
+			SCM sversion = scm_from_locale_symbol("versions");
+			return scm_cons2(
+				scm_cons(sprimary, sptv),
+				scm_cons(sversion, SCM_EOL), 
+				SCM_EOL);
+		}
 		default:
 			return SCM_EOL;
 	}

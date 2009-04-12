@@ -17,7 +17,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/server/CogServer.h>
@@ -84,7 +84,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 {
 	const Atom *atom = verify_atom(satom, "cog-tv");
 	const TruthValue &tv = atom->getTruthValue();
-	TruthValue *stv = new SimpleTruthValue(tv);
+	TruthValue *stv = tv.clone();
 	return take_tv(stv);
 }
 
