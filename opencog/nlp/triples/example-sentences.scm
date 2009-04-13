@@ -26,7 +26,7 @@ scm
 ;
 ; January 2009
 ;
-; Version: link-grammar-4.4.3	relex-0.98.4
+; Version: link-grammar-4.5.1	relex-0.98.4
 ; SENTENCE: [The capital of Germany is Berlin.]
 (ReferenceLink (stv 1.0 1.0)
    (WordInstanceNode "the@e8f7f959-cd76-4093-ae15-8d91c3733c03")
@@ -3595,12 +3595,12 @@ scm
    (WordInstanceNode "sky@d30ab6dd-0785-4b14-8969-f23697d384a7")
    (DefinedLinguisticConceptNode "noun")
 )
-; _predadj (<<blue>>, <<color>>) 
+; _predadj (<<color>>, <<blue>>) 
 (EvaluationLink (stv 1.0 1.0)
    (DefinedLinguisticRelationshipNode "_predadj")
    (ListLink
-      (WordInstanceNode "blue@cf040834-cf7a-42ae-bd42-83a001d3c3e3")
       (WordInstanceNode "color@8947b41d-b6d8-44c5-95a0-a909220596d5")
+      (WordInstanceNode "blue@cf040834-cf7a-42ae-bd42-83a001d3c3e3")
    )
 )
 ; tense (blue, present)
@@ -4581,12 +4581,12 @@ scm
    (WordInstanceNode "men@c332e91f-5bc4-4e4b-bb1d-36457ef03734")
    (DefinedLinguisticConceptNode "noun")
 )
-; _predadj (<<mortal>>, <<men>>) 
+; _predadj (<<men>>, <<mortal>>) 
 (EvaluationLink (stv 1.0 1.0)
    (DefinedLinguisticRelationshipNode "_predadj")
    (ListLink
-      (WordInstanceNode "mortal@97acbc50-0e4d-4d0d-9cfc-b77939e4bfed")
       (WordInstanceNode "men@c332e91f-5bc4-4e4b-bb1d-36457ef03734")
+      (WordInstanceNode "mortal@97acbc50-0e4d-4d0d-9cfc-b77939e4bfed")
    )
 )
 ; tense (mortal, present)
