@@ -76,6 +76,8 @@
 ; var1=mortal var2=men
 ; Must reject prepositions, so that "the color (of the sky) is blue." 
 ; is rejected.
+; XXX This fails in 'real life', since $prep($var2,$var3) matches
+; to LinkGrammarRelationshipNode's which cause a reject to happen.
 # IF _predadj($var2, $var1) 
       ^ ! $prep($var2,$var3)
       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
