@@ -50,7 +50,7 @@ scm
 )
 
 (define o
-	(EvaluationLink
+	(EvaluationLink (stv 1.0 1.0)
 		(PredicateNode "_obj")
 		(ListLink
 			(ConceptNode "make")
@@ -59,7 +59,7 @@ scm
 	)
 )
 (define f
-	(EvaluationLink
+	(EvaluationLink  (stv 1.0 1.0)
 		(PredicateNode "from")
 		(ListLink
 			(ConceptNode "make")
