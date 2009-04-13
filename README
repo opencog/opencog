@@ -28,7 +28,8 @@ C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
-               Debian/Ubuntu package libxmltok1-dev (supplies expat v1.2)
+               Debian/Ubuntu package libexpat1-dev
+               Alternatively Debian/Ubuntu package libxmltok1-dev (supplies expat v1.2)
                Version 2 seems to work as well.  http://expat.sourceforge.net/
 
 guile       -- Embedded scheme interperter
