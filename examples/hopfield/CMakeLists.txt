@@ -30,7 +30,7 @@ IF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
         xmlrpc_xmlparse
         xmlrpc_xmltok
         )
-ENDIF (LIBUBIGRAPHCLIENT_FOUND)
+ENDIF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
 
 ADD_EXECUTABLE (hopfield
 	HopfieldDemo.cc
