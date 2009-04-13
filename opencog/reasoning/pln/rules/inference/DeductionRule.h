@@ -61,21 +61,13 @@ class DeductionRule : public GenericRule<DeductionFormula>
 		pHandleSeq nodesAB = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 		pHandleSeq nodesBC = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[1]));
 
-		//assert(equal(nodesAB[1], nodesBC[0]));
-
 		if (CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE && !equal(nodesAB[1], nodesBC[0]))
 		{
 			cprintf(0, "Invalid deduction arguments:\n");
-#if 0            
-			printTree(v2h(premiseArray[0]),0,0);
-			printTree(v2h(premiseArray[1]),0,0);
-#else 
             NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
             printer.print(_v2h(premiseArray[0]));
             printer.print(_v2h(premiseArray[1]));
-#endif             
-			getc(stdin);getc(stdin);
-			return NULL;
+            assert(equal(nodesAB[1], nodesBC[0]));
 		}
 
 		AtomSpaceWrapper *nm = GET_ATW;

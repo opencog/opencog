@@ -470,11 +470,11 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
             create();
         }
     } catch(string s) {
-      printf("EXCEPTION IN BITNode::BITNode! %s\n",s.c_str());
-      getc(stdin); getc(stdin); throw;
+      printf("Exception in BITNode::BITNode = %s\n",s.c_str());
+      throw;
     } catch(...)  {
-      printf("EXCEPTION IN BITNode::BITNode!\n");
-      getc(stdin); getc(stdin); throw;
+      printf("Unknown Exception in BITNode::BITNode!\n");
+      throw;
     }
     root->InferenceNodes++;
 }
@@ -734,8 +734,6 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
         {
 			cprintf(-1, "Dis-obeys pool policy:\n");
 			rawPrint(*_target, _target->begin(), -1);
-//          getc(stdin);
-
             return false;
         }
     }
@@ -772,7 +770,6 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
 /*    if (this->depth == haxx::maxDepth)
     {
         puts("haxx::maxDepth !!! "); //press enter");
-        //getc(stdin);
         return NULL;
     }*/
 
@@ -1075,17 +1072,12 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
         return aborted;
     }
         
-
-    if (currentDebugLevel >= 4)
-    {
+    if (currentDebugLevel >= 4) {
         puts("Finally proving:");
         NMPrinter(NMP_ALL)(*raw_target, 4);
-        getc(stdin);
     }
 
-    //printf("printf variableScoper... %d %d\n", resources, currentDebugLevel);
-    if (rule)
-        puts("non-null rule");
+    if (rule) puts("non-null rule");
     
     tlog(0, "variableScoper... %d\n", resources);
     tlog(0, "children %d\n", children.size());
@@ -1588,7 +1580,6 @@ void BITNode::expandFittest()
         total_weight, r);
         (*ei)->tlog(-4, ": %f / %d [%d]\n", (*ei)->fitness(), (*ei)->children.size(), (int)(*ei));
         */
-        //getc(stdin);
         (*ei)->expandNextLevel();
 
         return;
@@ -1711,15 +1702,11 @@ puts("PLAN END");
     }
 }
 
-static set<BITNode*> loop_t;
 void BITNode::loopCheck() const
 {
-    loop_t.insert((BITNode*)(long)this);
-//  printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%d / %d\n", loop_t.size(), root->InferenceNodes);
     printf("%d %ld:     %d\n", depth, (long)this,  totalChildren());
-    getc(stdin);
-    for (vector<set<ParametrizedBITNode> >::const_iterator i =  children.begin(); i!=children.end(); i++)
-    {
+    for (vector<set<ParametrizedBITNode> >::const_iterator i = children.begin();
+            i!=children.end(); i++) {
         foreach(const ParametrizedBITNode& pbit, *i)
             pbit.prover->loopCheck();
     }
@@ -1787,21 +1774,11 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
     if (UsedBITNodes == NULL)
         UsedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
 
-    //if (currentDebugLevel>=-12 && !((more_count++)%25))
-    //{
-    //  puts(" --- more ");
-    //  if (getc(stdin) == 'q')
-    //      return;
-    //}
-
-    #define prlog cprintf
-
-    if (rule)
-    {
+#define prlog cprintf /// @todo replace prlog with logger
+    if (rule) {
         if (compact)
 			prlog(loglevel, "%s%s\n", repeatc(' ', depth*3).c_str(), rule->name.c_str());
-        else
-        {
+        else {
             string cbuf("[ ");
             if (direct_results) {
                 foreach(const BoundVertex& bv, *direct_results)
@@ -1810,32 +1787,27 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
             prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
             prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
         }
-    }
-    else
+    } else
 		prlog(loglevel,"root\n");
     
     if (STLhas2(*UsedBITNodes, this))
 		prlog(loglevel,  "%s(loop)\n", repeatc(' ', (depth+1)*3).c_str());
-    else
-    {
+    else {
         UsedBITNodes->insert((BITNode*)this);
 
         int ccount=0;
-        for (vector<set<ParametrizedBITNode> >::const_iterator i =  children.begin(); i!=children.end(); i++)
-        {
+        for (vector<set<ParametrizedBITNode> >::const_iterator i =
+                children.begin(); i!=children.end(); i++) {
             if (compact)
 				prlog(loglevel,  "%s#%d\n", repeatc(' ', (depth+1)*3).c_str(), ccount++);
-            else
-            {
+            else {
 				prlog(loglevel, "%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
 				prlog(loglevel, "%s---\n", repeatc(' ', (depth+1)*3).c_str());
                 ccount++;
             }
-
             int n_children = i->size();
 
-            foreach(const ParametrizedBITNode& pbit, *i)
-            {
+            foreach(const ParametrizedBITNode& pbit, *i) {
                 //cprintf(loglevel,"::: %d\n", (int)pbit.prover);
                 if (!compact || STLhas(stats::Instance().ITN2atom, pbit.prover))
                     pbit.prover->print(loglevel, compact, UsedBITNodes);
@@ -1877,13 +1849,6 @@ void BITNodeRoot::printTrail(pHandle h, unsigned int level) const //, int decima
     }
     else
         cout << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
-#if 0 // "(more)"
-    if ((_trail_print_more_count++)%5 == 4)
-    {
-        cout << "(more)\n";
-        getc(stdin);
-    }
-#endif
 }
 
 void BITNode::printArgs() const
@@ -1899,25 +1864,17 @@ void BITNode::printArgs() const
 void BITNode::printFitnessPool()
 {
     tlog(0,"Fitness table: (%d)\n", root->exec_pool.size());
-    getc(stdin);getc(stdin);
 
-    if (!root->exec_pool.empty())
-    {
-        if (!root->exec_pool_sorted)
-        {
+    if (!root->exec_pool.empty()) {
+        if (!root->exec_pool_sorted) {
             root->exec_pool.sort(BITNode_fitness_comp());
             root->exec_pool_sorted = true;
         }
 
-        for (list<BITNode*>::iterator i = root->exec_pool.begin(); i != root->exec_pool.end(); i++)     
-        {
-            (*i)->tlog(0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(), (*i)->children.size(), (long)(*i), (*i)->parents.size());
-
-            if (currentDebugLevel>=2 && !((more_count++)%25))
-            {
-                puts(" --- more ");
-                getc(stdin);
-            }
+        for (list<BITNode*>::iterator i = root->exec_pool.begin();
+                i != root->exec_pool.end(); i++) {
+            (*i)->tlog( 0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(),
+                    (*i)->children.size(), (long)(*i), (*i)->parents.size() );
         }
     }
 }

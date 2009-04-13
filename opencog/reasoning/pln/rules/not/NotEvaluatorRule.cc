@@ -54,14 +54,14 @@ Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
     if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), NOT_LINK))
         return Rule::setOfMPs();
 
-    LOG(-10, "SHOULD NOT BE HERE!");
-    getc(stdin);getc(stdin);getc(stdin);
+    //! @todo why not?
+    LOG(-10, "SHOULD NOT BE HERE!"); assert(0);
     MPs ret;
 
     assert(outh->begin().number_of_children() == 1);
     ret.push_back(BBvtree(new BoundVTree(outh->begin(outh->begin())))); //1st child
 
-//      printAtomTree(*(*ret)[0],0,4);
+//  printAtomTree(*(*ret)[0],0,4);
 
     overrideInputFilter = true;
     return makeSingletonSet(ret);

@@ -231,14 +231,14 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    cprintf(5, "Empty checks...\n");
-
-    if (lhs_t.empty() && rhs_t.empty())
+    if (lhs_t.empty() && rhs_t.empty()) {
+        cprintf(4, "unify: Both sides empty!\n");
         return true;
-    if (lhs_t.empty() || rhs_t.empty())
+    }
+    if (lhs_t.empty() || rhs_t.empty()) {
+        cprintf(4, "unify: One side empty!\n");
         return false;
-
-    cprintf(5, "Empty checks ok\n");
+    }
 
     if (!((*rtop) == (*ltop))) {
         pHandle *ph_ltop = boost::get<pHandle>(&*ltop);
@@ -510,7 +510,8 @@ const float MIN_CONFIDENCE = 0.0000001f;
 
 /// index arg is not used
 
-void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const Type VarT, int index)
+void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
+        const Type VarT, int index)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -520,7 +521,6 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
     pHandle *h_ptr = boost::get<pHandle>(&*_MP.begin());
     if (!h_ptr || *h_ptr == PHANDLE_UNDEFINED ) {
         LOG(3, "No handle in vertex.");
-        //currentDebugLevel = previousDebugLevel;
         return;
     }
 
@@ -530,13 +530,10 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
     if (!atw->isType(*h_ptr) && T != VarT) {
         LOG(2, "TableGather:: Note: A real handle was asked for.\n");
         insert(Vertex(*h_ptr));
-        //currentDebugLevel = previousDebugLevel;
         return;
     }
     if (!atw->isType(*h_ptr) && T == VarT) {
         LOG(0, "Lookup for a VarT is NOT allowed!\n");
-        getc(stdin);getc(stdin);
-        //currentDebugLevel = previousDebugLevel;
         return;
     }
 
@@ -563,7 +560,6 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 
         if (tv.isNullTv()) {
             printf("NULL TV! %d\n", *i);
-            getc(stdin);
             continue;
         }
 
@@ -2272,16 +2268,14 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
     AtomSpaceWrapper* atw = GET_ATW;
 
 //cprintf(0,"U: %d %d\n",
-
-    cprintf(5, "Empty checks...\n");
-
-    if (lhs_t.empty() && rhs_t.empty())
+    if (lhs_t.empty() && rhs_t.empty()) {
+        cprintf(4, "unifiesTo: Both sides empty!\n");
         return true;
-    if (lhs_t.empty() || rhs_t.empty())
+    }
+    if (lhs_t.empty() || rhs_t.empty()) {
+        cprintf(4, "unifiesTo: One side empty!\n");
         return false;
-
-    cprintf(5, "Empty checks ok\n");
-
+    }
 // if (lhs_t.number_of_children(ltop) != rhs_t.number_of_children(rtop))
 //  return false;
 
@@ -2435,7 +2429,6 @@ cprintf(4,"FW_VAR");
     vtree rtop_as_tree(make_vtree(*ph_rtop));
 
 //rawPrint(rtop_as_tree,rtop_as_tree.begin(),0);
-//getc(stdin);
 
     return unifiesTo(lhs_t, rtop_as_tree,
      rtop, rtop_as_tree.begin(), Lbindings, Rbindings, VarType);

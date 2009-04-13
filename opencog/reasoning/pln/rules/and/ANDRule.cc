@@ -276,22 +276,20 @@ LOG(4, "44 ANDRule::compute");
                     RuleResultFreshness);   
     
 LOG(4, "55 ANDRule::compute");
-
     delete[] partialTVs;
     delete retTV;
     
-    for (set<TruthValue*>::iterator t= TVowner.begin(); t != TVowner.end(); t++)
+    for (set<TruthValue*>::iterator t= TVowner.begin();
+            t != TVowner.end(); t++)
         delete *t;
-    
 LOG(3, "ANDRule::compute ok.");		
     
         return Vertex(ret);
 
-  } catch(...) { LOG(-10, "Exception in ANDRule::compute!");
-        #ifdef NMDEBUG
-            getc(stdin);
-        #endif
-      return Vertex(PHANDLE_UNDEFINED); }
+    } catch(...) {
+        LOG(-10, "Exception in ANDRule::compute");
+        return Vertex(PHANDLE_UNDEFINED);
+    }
 }
 
 } // namespace reasoning

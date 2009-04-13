@@ -197,7 +197,6 @@ void InitPLNTests()
 bool satSetTest();
 
 #define RUN_FAILURE_TESTS 0
-#define WAIT_KEY_ON_FAILURE 1
 
 void RunPLNTestsOnce();
 
@@ -872,40 +871,40 @@ InitAxiomSet("smalldemo.xml");
         else
             puts("ERROR IN TEST SETTINGS");
 
-        if (passed)
-        {
-            printf("\n**********************************************\npassed: %s.\n**********************************************\n",
-            (etv?etv->toString().c_str():"(null TV)"));
+        if (passed) {
+            printf("\n**********************************************\n"
+                   "passed: %s.\n"
+                   "**********************************************\n",
+                (etv?etv->toString().c_str():"(null TV)"));
 
-        finish = clock();
+            finish = clock();
             duration = (double)(finish - start) / CLOCKS_PER_SEC;
             printf( "Test took %2.2f seconds TOTAL.\n", duration );
-
             printf( "Custom test time was %3.3f seconds.\n", test::custom_duration );
             printf( "Custom test time was %3.3f seconds.\n", test::custom_duration2 );
         }
-        else
-        {
-            printf("\n**********************************************\nFAILED: %s!\n**********************************************\n",
-            (etv?etv->toString().c_str():"(null TV)"));
+        else {
+            printf("\n**********************************************\n"
+                   "FAILED: %s!\n"
+                   "**********************************************\n",
+                (etv?etv->toString().c_str():"(null TV)"));
         }
 
-            printf("Test results: [");
-            foreach(VtreeProvider* bv, eres) // state->child_results[0])
-            {
-                const TruthValue& tv = atw->getTV(vt2h(*bv));
-                if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                    printf("%d ", (int)vt2h(*bv).value());
-            }
-            printf("]\n");
+        printf("Test results: [");
+        foreach(VtreeProvider* bv, eres) // state->child_results[0])
+        {
+            const TruthValue& tv = atw->getTV(vt2h(*bv));
+            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+                printf("%d ", (int)vt2h(*bv).value());
+        }
+        printf("]\n");
 
         if (passed)
         {
             AllTestsInferenceNodes += state->InferenceNodes;
-
             INstats.push_back(state->InferenceNodes);
 
-            //      printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
+            //printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
             printf("\n\n\nInferenceNodes: %ld / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
         }
         else
@@ -919,18 +918,8 @@ InitAxiomSet("smalldemo.xml");
 
         stats::Instance().print(stats::triviality_filterT());
 
-#if WAIT_KEY_ON_FAILURE
-        if (!passed)
-            getc(stdin);
-#endif
-
         if (etv != NULL) delete etv;
-        //atw->reset(NULL);
         
-/*puts("buf alloc test...");fflush(stdout);
-char *tbuf = new char[8174+2];  
-puts("buf allo ok");
-delete[] tbuf;*/
     }
 
 } //namespace reasoning

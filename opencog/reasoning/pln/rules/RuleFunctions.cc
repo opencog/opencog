@@ -685,15 +685,12 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
 {
     DeclareBtr(set<Btr<ModifiedBoundVTree> >, ret);
 
-    if (!ForAll_handles)
-    {
+    if (!ForAll_handles) {
         ForAll_handles = table->getHandleSet(FORALL_LINK, "");
-        puts("recreated ForAll_handles");
-        getc(stdin);
+        puts("Recreated ForAll_handles");
     }
 
-    foreach(pHandle h, *ForAll_handles)
-    {
+    foreach(pHandle h, *ForAll_handles) {
         Btr<ModifiedBoundVTree> BoundUniversal = FindMatchingUniversal(target, h, table);
         if (BoundUniversal)
             ret->insert(BoundUniversal);

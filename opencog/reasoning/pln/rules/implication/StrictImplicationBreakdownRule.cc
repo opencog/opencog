@@ -126,7 +126,6 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
         printer.print(vt1.begin(), -10);
         printer.print(vt2.begin(), -10);
 #endif
-        getc(stdin);getc(stdin);
         assert(0);
     }
 #endif

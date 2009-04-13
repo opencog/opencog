@@ -882,15 +882,12 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const Trut
     
     if (!haxx::AllowFW_VARIABLENODESinCore) {
         foreach(pHandle ch, hs) {
-
             assert(!isType(ch));
             if (getType(ch) == FW_VARIABLE_NODE) {
                 printTree(ret,0,-10);
                 cprintf(-10,"ATW: getType(ch) == FW_VARIABLE_NODE!");
-                getc(stdin);
+                assert(0);
             }
-            //throw string("a->getType(ch) == FW_VARIABLE_NODE") + i2str(ret);
-            //assert(a->getType(ch) != FW_VARIABLE_NODE);
         }
     }
         
