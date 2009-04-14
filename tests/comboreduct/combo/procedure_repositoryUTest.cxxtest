@@ -1,5 +1,5 @@
-#include "comboreduct/combo/procedure_repository.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/comboreduct/combo/procedure_repository.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace ant_combo;
 

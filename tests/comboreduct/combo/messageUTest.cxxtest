@@ -1,6 +1,6 @@
-#include "comboreduct/combo/vertex.h"
-#include "util/tree.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/util/tree.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace ant_combo;
 using namespace opencog;

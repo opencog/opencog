@@ -1,6 +1,6 @@
-#include "RunningComboProcedure.h"
-#include "PetComboVocabulary.h"
-#include "ActionPlanSender.h"
+#include <opencog/embodiment/Control/Procedure/RunningComboProcedure.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlanSender.h>
 #include <iostream>
 
 using namespace Procedure;

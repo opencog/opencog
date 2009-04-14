@@ -4,7 +4,7 @@
  Desc:  Unit test for WorldWrapperUtilCache
 \*******************************************************/
 
-#include <WorldWrapperUtilCache.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtilCache.h>
 
 static std::string pName1 = "near";
 static std::string pName2 = "next";

@@ -4,12 +4,6 @@ ADD_DEFINITIONS(-DXML_FILES_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}\\")
 INCLUDE_DIRECTORIES(
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AGISimSim/proxy
 	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AGISimSim/shared/include
-	${OPENCOG_SOURCE_DIR}/opencog/
-)
-
-LINK_DIRECTORIES(
-	${PETAVERSE_BINARY_DIR}/opencog/embodiment/AGISimSim/proxy
-	${PETAVERSE_BINARY_DIR}/opencog/util
 )
 
 ADD_CXXTEST(SimProxyUTest)

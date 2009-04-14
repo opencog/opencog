@@ -45,12 +45,10 @@ protected:
 private:
 
     pthread_mutex_t messageQueueLock; // lock used coordinate manipulation of the messageQueue (main thread and listener thread)
-//        const Control::SystemParameters& parameters;
 
 public:
 
     virtual ~MessageCentral();
-//        MessageCentral(const Control::SystemParameters &params);
     MessageCentral();
 
     /**

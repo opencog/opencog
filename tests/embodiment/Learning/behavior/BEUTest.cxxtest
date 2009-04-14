@@ -1,9 +1,9 @@
-#include "BE.h"
-#include "BasicWorldProvider.h"
-#include "atom_types_init.h"
-#include "PredefinedProcedureNames.h"
-#include "BDRetriever.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Learning/behavior/BE.h>
+#include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/Learning/behavior/BDRetriever.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace behavior;
 using namespace Control;

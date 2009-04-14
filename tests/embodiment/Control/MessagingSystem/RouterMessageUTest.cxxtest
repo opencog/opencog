@@ -6,7 +6,7 @@
  * Creation: Fri Feb 1 2008
  */
 
-#include <RouterMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/RouterMessage.h>
 #include <string>
 #include <string.h>
 

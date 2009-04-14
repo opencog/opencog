@@ -1,7 +1,7 @@
 #ifndef LSMESSAGESENDERMOCK_H_
 #define LSMESSAGESENDERMOCK_H_
 
-#include "MessageSender.h"
+#include <opencog/embodiment/Control/OperationalPetController/MessageSender.h>
 using namespace OperationalPetController;
 
 #include <stdio.h>

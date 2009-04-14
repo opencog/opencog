@@ -7,15 +7,15 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "PredicatesUpdater.h"
-#include "AtomSpaceUtil.h"
-#include "PAITestUtil.h"
+#include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PAITestUtil.h>
 
-#include "util/StringManipulator.h"
+#include <opencog/util/StringManipulator.h>
 
 #include <string>
 #include <stdio.h>
-#include <atom_types_init.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 static const std::string petId = "Fido";
 static const std::string owner = "Dudu";

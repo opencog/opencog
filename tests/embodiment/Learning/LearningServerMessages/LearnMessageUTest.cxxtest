@@ -11,9 +11,9 @@
 #include <stdlib.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "EntityRelevanceFilter.h"
-#include "LearnMessage.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #define OBJ_LENGTH 0.5
 #define OBJ_WIDTH 0.5

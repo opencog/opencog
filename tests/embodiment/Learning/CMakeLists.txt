@@ -5,26 +5,6 @@ ADD_SUBDIRECTORY (Filter)
 ADD_SUBDIRECTORY (NoSpaceLife)
 ADD_SUBDIRECTORY (PetaverseHC)
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/test/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/test/embodiment/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/OperationalPetController
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 #ADD_CXXTEST(EdaUTest)
 #TARGET_LINK_LIBRARIES(EdaUTest
 #	eda

@@ -1,24 +1,6 @@
 CMAKE_POLICY(SET CMP0005 OLD)
 ADD_DEFINITIONS (-DPVP_XML_FILE_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}\\")
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PredicateUpdaters
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/test/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/util
-	${OPENCOG_BINARY_DIR}/opencog/comboreduct
-	${OPENCOG_BINARY_DIR}
-)
-
 ADD_CXXTEST(PAIUTest)
 TARGET_LINK_LIBRARIES(PAIUTest PAI behavior)
 IF(WIN32)

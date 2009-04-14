@@ -7,13 +7,13 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
-#include "CompositeBehaviorDescription.h"
-#include "AtomSpaceWorldProvider.h"
-#include "PetComboVocabulary.h"
-#include "BDRetriever.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/Learning/behavior/BDRetriever.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 
 #define TIME_INTERVAL 100

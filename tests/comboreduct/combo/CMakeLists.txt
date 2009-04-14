@@ -1,12 +1,3 @@
-INCLUDE_DIRECTORIES(
-    ${OPENCOG_SOURCE_DIR}/opencog
-    ${OPENCOG_SOURCE_DIR}/opencog/comboreduct
-    ${OPENCOG_SOURCE_DIR}/opencog/comboreduct/ant_combo_vocabulary
-)
-LINK_DIRECTORIES(
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-)
-
 ADD_CXXTEST(vertexUTest)
 TARGET_LINK_LIBRARIES(vertexUTest
 	comboreduct

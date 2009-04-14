@@ -4,11 +4,11 @@
  * Author: Welter Luigi
  * Copyright(c), 2007
  */
-#include "RunningBuiltInProcedure.h"
-#include "ActionPlanSenderMock.h"
-#include "PetInterfaceMock.h"
-#include "PetActionSchema.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/Procedure/RunningBuiltInProcedure.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;

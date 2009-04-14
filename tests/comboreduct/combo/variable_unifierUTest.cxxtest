@@ -1,4 +1,4 @@
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/comboreduct/combo/variable_unifier.h>
 #include <stdio.h>
 
 static std::string v1 = "pet";

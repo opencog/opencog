@@ -3,24 +3,6 @@ ADD_DEFINITIONS(-D_REENTRANT -DTEST_CONFIG_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/c
 
 SET(CMAKE_BUILD_TYPE Debug)
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpace
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/opencog
-	${OPENCOG_SOURCE_DIR}/include
-	${OPENCOG_SOURCE_DIR}/include/filesystem
-)
-
-LINK_DIRECTORIES(
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Learning/LearningServerMessages
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 ADD_CXXTEST(RouterMessageUTest)
 TARGET_LINK_LIBRARIES(RouterMessageUTest MessagingSystem)
 

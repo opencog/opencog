@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/SystemParameters.h
+ * opencog/embodiment/Control/EmbodimentConfig.h
  *
  * Copyright (C) 2007-2008 Novamente LLC
  * All Rights Reserved

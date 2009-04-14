@@ -4,11 +4,11 @@
  * Author: Welter Luigi
  * Copyright(c), 2007
  */
-#include "ProcedureInterpreter.h"
-#include "ActionPlanSenderMock.h"
-#include "PetInterfaceMock.h"
-#include "PetActionSchema.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace Procedure;

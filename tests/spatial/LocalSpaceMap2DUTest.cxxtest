@@ -5,8 +5,8 @@
 
 #include <opencog/atomspace/types.h>
 
-#include "util/mt19937ar.h"
-#include "util/numeric.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
 
 #include <opencog/spatial/LocalSpaceMap2D.h>
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>

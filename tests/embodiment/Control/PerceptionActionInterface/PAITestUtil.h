@@ -1,7 +1,7 @@
 #ifndef _PAI_TEST_UTIL_H_
 #define _PAI_TEST_UTIL_H_
 
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace PerceptionActionInterface

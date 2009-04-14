@@ -1,13 +1,3 @@
-INCLUDE_DIRECTORIES(
-    ${OPENCOG_SOURCE_DIR}/opencog
-    ${OPENCOG_SOURCE_DIR}/opencog/comboreduct
-)
-
-LINK_DIRECTORIES(
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-)
-
-
 #ADD_CXXTEST(ActionReductUTest)
 #TARGET_LINK_LIBRARIES(ActionReductUTest
 #	comboreduct

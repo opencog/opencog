@@ -5,18 +5,18 @@
  * Copyright(c), 2007
  */
 
-#include "ComboInterpreter.h"
-#include "RunningProcedureId.h"
-#include "ActionPlanSenderMock.h"
-#include "util/files.h"
-#include "PetInterfaceMock.h"
-#include "ComboProcedureRepository.h"
-#include "EmbodimentConfig.h"
-#include "LSMessageSenderMock.h"
-#include "PredicatesUpdater.h"
-#include "Pet.h"
-#include "PetComboVocabulary.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Control/Procedure/ComboInterpreter.h>
+#include <opencog/embodiment/Control/Procedure/RunningProcedureId.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <opencog/util/files.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <tests/embodiment/Control/OperationalPetController/LSMessageSenderMock.h>
+#include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
+#include <opencog/embodiment/Control/OperationalPetController/Pet.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #ifndef COMBOINTERPRETERUTEST_H
 #define COMBOINTERPRETERUTEST_H

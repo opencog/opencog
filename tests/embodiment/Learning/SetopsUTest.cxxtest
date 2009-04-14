@@ -5,9 +5,9 @@
 #include <set>
 #include <functional>
 
-#include "util/tree.h"
-#include "util/algorithm.h"
-#include "util/numeric.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/numeric.h>
 
 #include <boost/bind.hpp>
 

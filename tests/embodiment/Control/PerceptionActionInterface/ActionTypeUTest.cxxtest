@@ -3,7 +3,7 @@
  *
  * Author: Welter
  */
-#include "ActionType.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 
 using namespace PerceptionActionInterface;
 

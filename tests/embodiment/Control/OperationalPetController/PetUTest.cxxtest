@@ -7,15 +7,15 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "Pet.h"
+#include <opencog/embodiment/Control/OperationalPetController/Pet.h>
 
 
 #include "LSMessageSenderMock.h"
-#include "PAITestUtil.h"
-#include "ActionPlanSenderMock.h"
-#include "PAI.h"
-#include "EmbodimentConfig.h"
-#include <atom_types_init.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PAITestUtil.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 using namespace OperationalPetController;
 using namespace PerceptionActionInterface;

@@ -5,21 +5,21 @@
  * Copyright(c), 2007
  */
 
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "PetInterfaceMock.h"
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "ActionPlanSenderMock.h"
-#include "PredefinedProcedureNames.h"
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
-#include "util/exceptions.h"
-#include "util/files.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <atom_types_init.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #include "PAITestUtil.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace PerceptionActionInterface;
 using namespace Control;

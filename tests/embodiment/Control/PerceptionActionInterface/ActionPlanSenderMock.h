@@ -1,5 +1,5 @@
-#include "ActionPlanSender.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlanSender.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 // Mock subclasses of ActionPlanSender
 class ResponsiveActionPlanSender : public PerceptionActionInterface::ActionPlanSender

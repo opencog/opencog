@@ -4,7 +4,7 @@
  * Author: Carlos Lopes
  * Copyright(c), 2007
  */
-#include <OPC.h>
+#include <opencog/embodiment/Control/OperationalPetController/OPC.h>
 #include <iostream>
 using namespace std;
 using namespace OperationalPetController;

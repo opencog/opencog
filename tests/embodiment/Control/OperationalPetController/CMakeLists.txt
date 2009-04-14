@@ -1,26 +1,3 @@
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
-        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PredicateUpdaters
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
-        ${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 ADD_CXXTEST(OPCUTest)
 TARGET_LINK_LIBRARIES(OPCUTest 
 	OpcLib 

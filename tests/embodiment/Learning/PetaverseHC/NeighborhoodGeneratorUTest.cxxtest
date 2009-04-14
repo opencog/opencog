@@ -5,10 +5,10 @@
  * Creation: Sun Jan 13 2008
  */
 
-#include "NeighborhoodGenerator.h"
-#include "PetComboVocabulary.h"
-#include "hillclimbing_action_reduction.h"
-#include "hillclimbing_full_reduction.h"
+#include <opencog/learning/hillclimbing/NeighborhoodGenerator.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/Learning/RewritingRules/hillclimbing_action_reduction.h>
+#include <opencog/embodiment/Learning/RewritingRules/hillclimbing_full_reduction.h>
 #include <iostream>
 
 using namespace hillclimbing;

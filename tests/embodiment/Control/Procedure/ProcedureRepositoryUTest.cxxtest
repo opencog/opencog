@@ -4,19 +4,19 @@
  * Author: Welter Luigi
  * Copyright(c), 2007
  */
-#include "ProcedureRepository.h"
-#include "ActionPlanSenderMock.h"
-#include "util/files.h"
-#include "PetInterfaceMock.h"
-#include "ComboProcedureRepository.h"
+#include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <opencog/util/files.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
+#include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "LSMessageSenderMock.h"
-#include "Pet.h"
+#include <tests/embodiment/Control/OperationalPetController/LSMessageSenderMock.h>
+#include <opencog/embodiment/Control/OperationalPetController/Pet.h>
 #include <fstream>
 #include <iostream>
-#include "EmbodimentConfig.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 using namespace PerceptionActionInterface;
 using namespace Procedure;

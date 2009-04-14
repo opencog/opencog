@@ -6,16 +6,16 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
-#include "util/RandGen.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/RandGen.h>
+#include <opencog/util/mt19937ar.h>
 
-#include "ActionFilter.h"
-#include "BDRetriever.h"
-#include "AtomSpaceWorldProvider.h"
-#include "PetComboVocabulary.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Learning/Filter/ActionFilter.h>
+#include <opencog/embodiment/Learning/behavior/BDRetriever.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 
 //using namespace behavior;

@@ -4,10 +4,10 @@
  * Author: Carlos Lopes
  * Copyright(c), 2007
  */
-#include <PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 using namespace PerceptionActionInterface;
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 class PetActionUTest :  public CxxTest::TestSuite
 {

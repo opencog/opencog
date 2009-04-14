@@ -7,10 +7,10 @@
 
 #include <opencog/atomspace/HandleMap.h>
 
-#include "ComboProcedureRepository.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <sstream>
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 using namespace Procedure;
 using namespace PetCombo;

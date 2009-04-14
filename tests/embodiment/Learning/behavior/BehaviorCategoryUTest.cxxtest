@@ -7,7 +7,7 @@
  * Creation: Wed Aug 22 12:57:33 BRT 2007
  */
 
-#include <BehaviorCategory.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace behavior;

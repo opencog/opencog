@@ -4,40 +4,6 @@ ADD_DEFINITIONS (-DSOURCE_DIR=\\"${PETAVERSE_SOURCE_DIR}\\")
 
 ADD_SUBDIRECTORY (BuiltIn)
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/WorldWrapper
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/OperationalPetController
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PredicateUpdaters
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/OperationalPetController
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Procedure/BuiltIn
-	${OPENCOG_SOURCE_DIR}/tests/embodiment/Control/Procedure
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/WorldWrapper
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/RuleValidation/VirtualWorldData
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
-	${OPENCOG_BINARY_DIR}/opencog/util
-	${OPENCOG_BINARY_DIR}/opencog/comboreduct
-	${OPENCOG_BINARY_DIR}
-)
-
 ADD_CXXTEST(RunningComboProcedureUTest)
 TARGET_LINK_LIBRARIES(RunningComboProcedureUTest Procedure)
 IF(WIN32)

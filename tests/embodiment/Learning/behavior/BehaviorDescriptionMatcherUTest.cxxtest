@@ -7,9 +7,9 @@
  * Creation: Tue Aug 21 16:07:14 BRT 2007
  */
 
-#include <BehaviorDescriptionMatcher.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
 #include <vector>
-#include <AtomSpace.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace behavior;
 

@@ -1,9 +1,9 @@
-#include "util/StringManipulator.h"
+#include <opencog/util/StringManipulator.h>
 
-#include "PredaveseStdafx.h"
-#include "PredaveseParser.h"
-#include "ActionPlanSenderMock.h"
-#include "PredaveseDefinitions.h"
+#include <opencog/embodiment/Control/Predavese/PredaveseStdafx.h>
+#include <opencog/embodiment/Control/Predavese/PredaveseParser.h>
+#include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
+#include <opencog/embodiment/Control/Predavese/PredaveseDefinitions.h>
 
 const static std::string avatar = "avatar";
 
@@ -272,7 +272,7 @@ void PredaveseParser::testEng()
 
 using namespace predavese;
 
-#include "PetInterfaceMock.h"
+#include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>
 
 #ifdef WIN32
 int _tmain(int argc, _TCHAR* argv[])
@@ -287,14 +287,13 @@ int main(int argc, char* argv[])
         initEng(patmap);
      testEng(patmap);*/
 
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
 
-    Control::SystemParameters parameters;
     PetInterfaceMock petInterface;
     FailureActionPlanSender sender;
-    PerceptionActionInterface::PAI pai(spaceServer, sender, petInterface, parameters);
+    PerceptionActionInterface::PAI pai(atomSpace, sender, petInterface);
     petInterface.setPAI(&pai);
     PredaveseParser *p;
     p = pai.getPredaveseParser();

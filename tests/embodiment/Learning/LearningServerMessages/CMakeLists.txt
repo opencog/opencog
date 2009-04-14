@@ -1,24 +1,3 @@
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/Filter
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetComboVocabulary
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/behavior
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/Filter
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/PetComboVocabulary
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 CMAKE_POLICY(SET CMP0005 OLD)
 
 ADD_DEFINITIONS(-DATOM_SPACE_DUMP_FILE=\\"${CMAKE_CURRENT_SOURCE_DIR}/atomSpace.xml\\")

@@ -8,10 +8,10 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include "ComboInterpreterUTest.h"
-#include "util/mt19937ar.h"
-#include "PAIUtils.h"
-#include "PetComboVocabulary.h"
-#include "AtomSpaceUtil.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <fstream>
 #include <iostream>
 

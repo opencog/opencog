@@ -6,8 +6,8 @@
  */
 
 #include "ComboInterpreterUTest.h"
-#include "util/mt19937ar.h"
-#include "PetComboVocabulary.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 using namespace PerceptionActionInterface;
 using namespace PetCombo;

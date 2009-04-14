@@ -5,13 +5,13 @@
  * Copyright(c), 2007
  */
 
-#include "ActionPlan.h"
-#include "PAIUtils.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
 using namespace PerceptionActionInterface;
 
-#include "util/exceptions.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/StringManipulator.h>
 
 
 class ActionPlanUTest :  public CxxTest::TestSuite

@@ -10,12 +10,12 @@
 
 /* #include "CompareAtomTreeTemplate.h" */
 #include <opencog/atomspace/AtomSpace.h>
-#include "EntityRelevanceFilter.h"
-#include "PredefinedProcedureNames.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include "AtomSpaceWorldProvider.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 using namespace PetCombo;
 

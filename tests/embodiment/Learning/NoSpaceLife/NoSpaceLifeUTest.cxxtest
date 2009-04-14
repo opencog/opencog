@@ -5,16 +5,16 @@
  * Creation: Mon Dec 10 2007
  */
 
-#include "util/numeric.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/numeric.h>
+#include <opencog/util/mt19937ar.h>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
-#include "NoSpaceLife.h"
-#include "BehaviorDescriptionMatcher.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Learning/NoSpaceLife/NoSpaceLife.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <atom_types_init.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 using namespace ImaginaryLife;
 using namespace behavior;

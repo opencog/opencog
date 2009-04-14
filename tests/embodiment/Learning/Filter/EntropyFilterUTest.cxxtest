@@ -6,19 +6,19 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "util/mt19937ar.h"
+#include <opencog/util/mt19937ar.h>
 
-#include "comboreduct/combo/message.h"
+#include <opencog/comboreduct/combo/message.h>
 
-#include "CompareAtomTreeTemplate.h"
+#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "EntropyFilter.h"
-#include "EntityRelevanceFilter.h"
-#include "PredefinedProcedureNames.h"
-#include "AtomSpaceWorldProvider.h"
-#include "PetComboVocabulary.h"
-#include <atom_types_init.h>
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Learning/Filter/EntropyFilter.h>
+#include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 //using namespace behavior;
 using namespace PetCombo;

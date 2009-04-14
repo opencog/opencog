@@ -3,8 +3,8 @@
 #include <sstream>
 #include <iostream>
 
-#include "util/numeric.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/numeric.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <opencog/atomspace/types.h>
 

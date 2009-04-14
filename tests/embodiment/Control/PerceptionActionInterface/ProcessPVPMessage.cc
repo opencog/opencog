@@ -1,11 +1,10 @@
-#include "PAI.h"
-#include "SystemParameters.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "ActionPlanSenderMock.h"
 #include "PetInterfaceMock.h"
-#include "PredicatesUpdater.h"
+#include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/atomspace/SpaceServer.h>
 
-#include "util/files.h"
+#include <opencog/util/files.h>
 #include <opencog/xml/NMXmlExporter.h>
 
 
@@ -18,21 +17,20 @@ int main(int argc, char* argv[])
         printf("Wrong number of arguments\nUsage: %s <pvp_msg_xml_file1> [<pvp_msg_xml_file2>... [<pvp_msg_xml_fileN>]]\n", argv[0]);
         exit(-1);
     }
-    Control::SystemParameters parameters;
-    if (fileExists(parameters.get("CONFIG_FILE").c_str())) {
-        parameters.loadFromFile(parameters.get("CONFIG_FILE"));
+    config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+    if (fileExists(config().get("CONFIG_FILE").c_str())) {
+        config().load(config().get("CONFIG_FILE").c_str());
     }
 
     AtomSpace atomSpace;
-    SpaceServer spaceServer(atomSpace);
 
     HandleSeq toUpdateHandles;
     std::list<ActionPlan> sentActionPlans;
     OKActionPlanSender sender(sentActionPlans);
     PetInterfaceMock petInterface;
-    PAI pai(spaceServer, sender, petInterface, parameters);
+    PAI pai(atomSpace, sender, petInterface);
     petInterface.setPAI(&pai);
-    PredicatesUpdater predicatesUpdater(spaceServer, petInterface.getPetId());
+    PredicatesUpdater predicatesUpdater(atomSpace, petInterface.getPetId());
     for (int i = 1; i < argc; i++) {
         const char* xmlFileName = argv[1];
         string pvpMsg;

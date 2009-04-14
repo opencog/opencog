@@ -2,13 +2,13 @@
 #define PET_INTERFACE_MOCK_H_
 
 #include "PetInterfaceMock.h"
-#include "behavior/BE.h"
-#include "behavior/BDTracker.h"
-#include "PredefinedProcedureNames.h"
-#include "behavior/PAIWorldProvider.h"
-#include "PetInterface.h"
-#include "PAIUtils.h"
-#include "AgentModeHandler.h"
+#include <opencog/embodiment/Learning/behavior/BE.h>
+#include <opencog/embodiment/Learning/behavior/BDTracker.h>
+#include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/Control/AgentModeHandler.h>
 
 #include <cassert>
 

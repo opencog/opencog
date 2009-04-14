@@ -4,7 +4,7 @@
  * Author: Carlos Lopes
  * Copyright(c), 2007
  */
-#include <RewardMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 #include <string.h>
 
 using namespace LearningServerMessages;
