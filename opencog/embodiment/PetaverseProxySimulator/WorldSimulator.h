@@ -24,7 +24,7 @@
 #define WORLDSIMULATOR_H
 
 #include <vector>
-#include <PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 
 namespace PetaverseProxySimulator
 {

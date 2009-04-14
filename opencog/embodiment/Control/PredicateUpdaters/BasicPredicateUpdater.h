@@ -22,9 +22,9 @@
 #ifndef BASICPREDICATEUPDATER_H_
 #define BASICPREDICATEUPDATER_H_
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "PredefinedProcedureNames.h"
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
 using namespace opencog;
 

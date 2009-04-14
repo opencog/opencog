@@ -15,8 +15,11 @@ LINK_DIRECTORIES(
 ADD_CXXTEST(SimProxyUTest)
 TARGET_LINK_LIBRARIES(SimProxyUTest
 	AGISimSimProxy 
-    AGISimSimShared
-    pthread
-    ${Boost_THREAD_LIBRARY}
-    ${CSOCKETS_LIBRARIES}
+	AGISimSimShared
+	util
+	${Boost_THREAD_LIBRARY}
+	${CSOCKETS_LIBRARIES}
+	${XERCESC_LIBRARIES}
+	ssl
+	pthread
 )

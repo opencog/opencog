@@ -21,12 +21,14 @@
  */
 #include "DefaultAgentModeHandler.h"
 #include "Pet.h"
-#include "util/Logger.h"
-#include "AtomSpaceUtil.h"
+
+#include <opencog/util/Logger.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
-#include "NetworkElement.h"
 
 using namespace OperationalPetController;
 

@@ -23,9 +23,9 @@
 #include "util/StringManipulator.h"
 
 #include "PredaveseActions.h"
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include "PredaveseStdafx.h"
-#include "PredefinedProcedureNames.h"
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 

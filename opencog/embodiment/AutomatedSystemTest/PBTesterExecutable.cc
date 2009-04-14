@@ -35,7 +35,7 @@
 #include "PBTester.h"
 #include <exception>
 #include <unistd.h>
-#include "util/files.h"
+#include <opencog/util/files.h>
 #include "GoldStdReaderAgent.h"
 #include "TestConfig.h"
 

@@ -23,8 +23,8 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include "PetPsychePredicatesUpdater.h"
-#include "AtomSpaceUtil.h"
-#include "PAIUtils.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>

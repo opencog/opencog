@@ -23,7 +23,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "IsMovablePredicateUpdater.h"
 
 using namespace opencog;

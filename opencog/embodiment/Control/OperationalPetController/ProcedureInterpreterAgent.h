@@ -24,7 +24,7 @@
 #define PROCEDUREINTERPRETERAGENT_H
 
 #include <opencog/server/Agent.h>
-#include "ProcedureInterpreter.h"
+#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
 namespace OperationalPetController
 {

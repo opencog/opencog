@@ -23,11 +23,10 @@
 #ifndef SPAWNER_H
 #define SPAWNER_H
 
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <exception>
-#include "util/Logger.h"
-
-#include "util/exceptions.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 #include "EmbodimentCogServer.h"
 
 namespace MessagingSystem

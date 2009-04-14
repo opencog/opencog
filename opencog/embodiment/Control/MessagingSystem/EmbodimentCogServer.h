@@ -26,6 +26,7 @@
 #define _EMBODIMENT_COG_SERVER_H
 
 #include <opencog/server/CogServer.h>
+#include "Message.h"
 #include "NetworkElement.h"
 
 namespace MessagingSystem

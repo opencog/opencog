@@ -24,22 +24,7 @@ ADD_LIBRARY (MessagingSystem
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Learning/LearningServerMessages
 	${OPENCOG_SOURCE_DIR}/opencog
-	${OPENCOG_SOURCE_DIR}/include
-	${OPENCOG_SOURCE_DIR}/include/filesystem
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Learning/LearningServerMessages
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/util
-	${OPENCOG_BINARY_DIR}/opencog/xml
 )
 
 IF(COMMAND cmake_policy)

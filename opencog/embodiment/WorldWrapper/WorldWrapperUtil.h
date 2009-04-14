@@ -30,10 +30,11 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "EmbodimentConfig.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+
 #include "WorldWrapperUtilCache.h"
-#include "NetworkElement.h"
 
 #include <exception>
 

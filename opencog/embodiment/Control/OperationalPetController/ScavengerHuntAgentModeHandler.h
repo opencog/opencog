@@ -22,10 +22,10 @@
 #ifndef SCAVENGER_HUNT_AGENT_MODE_HANDLER_H
 #define SCAVENGER_HUNT_AGENT_MODE_HANDLER_H
 
-#include "AgentModeHandler.h"
+#include <opencog/embodiment/Control/AgentModeHandler.h>
 #include <opencog/spatial/VisibilityMap.h>
 #include <sstream>
-#include <ProcedureInterpreter.h>
+#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
 namespace OperationalPetController
 {

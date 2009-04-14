@@ -46,7 +46,7 @@
 #include "ServerSocket.h"
 #include "Router.h"
 
-#include <LoggerFactory.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
 
 #include <iostream>
 #include <boost/regex.hpp>

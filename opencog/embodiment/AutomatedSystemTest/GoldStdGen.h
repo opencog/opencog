@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetaverseProxySimulator/GoldStdGen.h
+ * opencog/embodiment/AutomatedSystemTest/GoldStdGen.h
  *
  * Copyright (C) 2007-2008 Welter Luigi
  * All Rights Reserved
@@ -25,13 +25,13 @@
 
 #include <stdio.h>
 #include "GoldStdMessage.h"
-#include "PAI.h" // This should be here (not in cc file) since it defines DATETIME_DECIMAL_RESOLUTION
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h> // This should be here (not in cc file) since it defines DATETIME_DECIMAL_RESOLUTION
 
 #define SENT_MESSAGE_FLAG "SENT MESSAGE:\n"
 #define RECEIVED_MESSAGE_FLAG "RECEIVED MESSAGE:\n"
 #define MESSAGE_END_FLAG "MESSAGE END.\n"
 
-namespace PetaverseProxySimulator
+namespace AutomatedSystemTest
 {
 
 class GoldStdGen

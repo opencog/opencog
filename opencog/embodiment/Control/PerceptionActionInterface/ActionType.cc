@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ActionType.h"
-#include "util/exceptions.h"
-#include "util/Logger.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 #include <iostream>
 
 using namespace PerceptionActionInterface;

@@ -25,7 +25,7 @@
 
 #include <string>
 #include <exception>
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 #define END_TOKEN "***"
 #define sizeOfToken() strlen(END_TOKEN);

@@ -28,7 +28,6 @@
 
 using namespace AutomatedSystemTest;
 using namespace MessagingSystem;
-using namespace PetaverseProxySimulator;
 using namespace opencog;
 
 GoldStdReaderAgent::~GoldStdReaderAgent()

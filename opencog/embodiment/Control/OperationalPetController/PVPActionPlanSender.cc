@@ -25,7 +25,8 @@
  */
 
 #include "PVPActionPlanSender.h"
-#include "StringMessage.h"
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/util/Config.h>
 
 using namespace OperationalPetController;
 using namespace std;

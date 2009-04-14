@@ -21,7 +21,7 @@
  */
 #include "DistortedComboSize.h"
 #include "PetComboVocabulary.h"
-#include "NetworkElement.h"
+#include <opencog/util/Config.h>
 
 //the distortion of the size of the random instruction is number of
 //definite objects time below
@@ -34,7 +34,6 @@ namespace FitnessEstimator
 {
 
 using namespace PetCombo;
-using namespace MessagingSystem;
 
 bool DistortedComboSizeOrder::operator()(const combo_tree& tr1,
         const combo_tree& tr2) const

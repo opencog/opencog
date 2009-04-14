@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ComboProcedure.h"
-#include "util/foreach.h"
-#include "util/exceptions.h"
-#include "PetComboVocabulary.h"
+#include <opencog/util/foreach.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #include <sstream>
 #include <boost/lexical_cast.hpp>

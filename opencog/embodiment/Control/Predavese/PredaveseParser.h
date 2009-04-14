@@ -25,12 +25,12 @@
 #include <map>
 #include <set>
 
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "Predavese.h"
-#include "PetInterface.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "PredaveseActions.h"
 
 namespace predavese

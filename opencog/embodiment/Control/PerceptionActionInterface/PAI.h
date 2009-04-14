@@ -40,9 +40,9 @@
 #include "PetAction.h"
 #include "ActionPlan.h"
 #include "ActionPlanSender.h"
-#include "PetInterface.h"
-#include "PredaveseParser.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/Predavese/PredaveseParser.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 
 #include <map>

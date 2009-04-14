@@ -25,23 +25,24 @@
 #include <iostream>
 #include <fstream>
 
-#include "util/files.h"
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/util/files.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 
-#include "PetAction.h"
-#include "PAI.h"
-#include "PAIUtils.h"
-#include "PetaverseDOMParser.h"
-#include "PetaverseErrorHandler.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetaverseDOMParser.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetaverseErrorHandler.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include "SimulationConfig.h"
-#include <StringMessage.h>
 #include "AGISimSimulator.h"
-#include "PVPXmlConstants.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace PetaverseProxySimulator;
+using namespace AutomatedSystemTest;
 using namespace PerceptionActionInterface;
 using namespace MessagingSystem;
 

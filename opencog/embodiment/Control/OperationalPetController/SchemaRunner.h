@@ -24,7 +24,7 @@
 
 #include <string>
 #include <vector>
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/atomspace/Node.h>
 #include "OPC.h"
 

@@ -22,7 +22,7 @@
 #ifndef REWARDMESSAGE_H_
 #define REWARDMESSAGE_H_
 
-#include "Message.h"
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <vector>
 
 namespace LearningServerMessages

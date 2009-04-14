@@ -1,18 +1,3 @@
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/opencog
-	${XERCESC_INCLUDE_DIR}
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 CMAKE_POLICY(SET CMP0005 OLD)
 
 ADD_DEFINITIONS(-DPVP_XSD_FILE_PATH=\\"${CMAKE_CURRENT_SOURCE_DIR}/BrainProxyAxon.xsd\\")

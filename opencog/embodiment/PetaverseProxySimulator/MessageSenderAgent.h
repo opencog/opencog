@@ -24,7 +24,7 @@
 #define MESSAGE_SENDERAGENT_H
 
 #include <opencog/server/Agent.h>
-#include <EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
 namespace PetaverseProxySimulator
 {

@@ -19,14 +19,15 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/vertex.h"
 #include "ComboInterpreter.h"
 #include "ComboProcedureRepository.h"
-#include "ShellWorldWrapper.h"
+
+#include <opencog/embodiment/WorldWrapper/ShellWorldWrapper.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/util/mt19937ar.h>
 #include <fstream>
 #include <iostream>
-#include "util/mt19937ar.h"
-#include "PetComboVocabulary.h"
 
 
 int main(int argc, char** argv)

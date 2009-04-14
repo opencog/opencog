@@ -23,8 +23,8 @@
 #define _VIRTUAL_WORLD_WRAPPER_H
 
 #include "WorldWrapper.h"
-#include "VirtualWorldState.h"
-#include "util/exceptions.h"
+#include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
+#include <opencog/util/exceptions.h>
 
 namespace WorldWrapper
 {

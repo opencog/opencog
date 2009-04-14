@@ -28,7 +28,7 @@
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 
-#include "util/platform.h"
+#include <opencog/util/platform.h>
 #include "AsynchronousMessageReceiver.h"
 #include "AsynchronousPerceptionAndStatusHandler.h"
 

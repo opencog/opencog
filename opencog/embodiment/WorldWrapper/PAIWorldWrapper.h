@@ -23,8 +23,8 @@
 #define _PAIWORLDWRAPPER_H
 
 #include "WorldWrapper.h"
-#include "util/exceptions.h"
-#include "PAI.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include <exception>
 

@@ -19,14 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/mt19937ar.h"
-#include "util/exceptions.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/exceptions.h>
 
 #include "ProcedureInterpreter.h"
 #include "ComboProcedure.h"
 #include "ComboSelectProcedure.h"
 #include "RunningProcedureId.h"
-#include "NetworkElement.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 namespace Procedure
 {

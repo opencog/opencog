@@ -1,7 +1,7 @@
 #ifndef DEFAULT_AGENT_MODE_HANDLER
 #define DEFAULT_AGENT_MODE_HANDLER
 
-#include "AgentModeHandler.h"
+#include <opencog/embodiment/Control/AgentModeHandler.h>
 #include <opencog/spatial/VisibilityMap.h>
 
 namespace OperationalPetController

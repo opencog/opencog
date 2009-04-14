@@ -19,14 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/Logger.h"
-#include "util/exceptions.h"
-#include "util/lazy_random_selector.h"
-#include "util/lazy_normal_selector.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/lazy_normal_selector.h>
 
 #include "ComboInterpreter.h"
-#include "NetworkElement.h"
-#include "StringMessage.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <boost/lexical_cast.hpp>
 
 namespace Procedure

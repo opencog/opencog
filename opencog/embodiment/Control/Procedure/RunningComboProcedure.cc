@@ -25,12 +25,12 @@
 #include <sstream>
 #include <map>
 #include <opencog/atomspace/TLB.h>
-#include "util/functional.h"
-#include "NetworkElement.h"
-#include "pet_builtin_action.h"
-#include "WorldWrapperUtil.h"
+#include <opencog/util/functional.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/PetComboVocabulary/pet_builtin_action.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include "comboreduct/combo/eval.h"
+#include <opencog/comboreduct/combo/eval.h>
 
 namespace Procedure
 {

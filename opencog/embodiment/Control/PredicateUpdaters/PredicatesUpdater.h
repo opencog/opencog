@@ -28,7 +28,7 @@
 #define PREDICATESUPDATER_H_
 
 #include "BasicPredicateUpdater.h"
-#include "PetInterface.h"
+#include <opencog/embodiment/Control/PetInterface.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <vector>

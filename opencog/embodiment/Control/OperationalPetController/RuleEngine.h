@@ -32,12 +32,12 @@
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
-#include "util/exceptions.h"
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
 
-#include <ProcedureInterpreter.h>
+#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
 using namespace opencog;
 

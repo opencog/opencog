@@ -25,15 +25,16 @@
 #define MOCKOPCHCTEST_H
 
 #include <string>
+
 #include <opencog/atomspace/AtomSpace.h>
-#include <StringMessage.h>
-#include <EmbodimentCogServer.h>
+#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
 
 #include "Pet.h"
 #include "PetMessageSender.h"
-#include "LearnMessage.h"
 #include "HCTestAgent.h"
-#include <opencog/atomspace/SpaceServer.h>
 
 using namespace opencog;
 

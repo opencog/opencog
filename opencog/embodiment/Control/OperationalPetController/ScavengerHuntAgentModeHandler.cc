@@ -20,18 +20,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ScavengerHuntAgentModeHandler.h"
-#include "AtomSpaceUtil.h"
-#include "PetInterface.h"
 #include "RuleEngine.h"
 #include "Pet.h"
+
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Logger.h>
+
 #include <vector>
 #include <cstdlib>
 #include <sstream>
-#include "NetworkElement.h"
-
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include "util/Logger.h"
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 

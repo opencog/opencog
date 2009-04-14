@@ -30,9 +30,9 @@
 #include <vector>
 #include <time.h>
 #include <exception>
-#include <EmbodimentConfig.h>
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 #include "MessageCentral.h"
 #include "MemoryMessageCentral.h"
 #include "Message.h"

@@ -23,7 +23,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "IsSmallPredicateUpdater.h"
 
 using namespace OperationalPetController;

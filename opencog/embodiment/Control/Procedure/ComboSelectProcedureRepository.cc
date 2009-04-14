@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ComboSelectProcedureRepository.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #include <stdio.h>
-#include "comboreduct/combo/procedure_call.h"
+#include <opencog/comboreduct/combo/procedure_call.h>
 
 using namespace PetCombo;
 using namespace Procedure;

@@ -25,7 +25,7 @@
 #ifndef _TEST_PARAMETERS_H_
 #define _TEST_PARAMETERS_H_
 
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 namespace AutomatedSystemTest
 {

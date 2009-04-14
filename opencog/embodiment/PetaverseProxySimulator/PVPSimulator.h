@@ -37,21 +37,21 @@
 #include <string>
 #include <map>
 #include <set>
-
-#include <EmbodimentCogServer.h>
-#include <Message.h>
-#include <ActionParamType.h>
-#include <ActionType.h>
 #include <exception>
+
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 
 #include "WorldSimulator.h"
 #include "PhysiologicalModel.h"
 
-#include "AsynchronousPerceptionAndStatusHandler.h"
-#include "util/exceptions.h"
-#include "SimProxy.h"
+#include <opencog/embodiment/AGISimSim/proxy/AsynchronousPerceptionAndStatusHandler.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/AGISimSim/proxy/SimProxy.h>
 
-#include "GoldStdGen.h"
+#include <opencog/embodiment/AutomatedSystemTest/GoldStdGen.h>
 
 #define TEST_TICKET ULONG_MAX - 1
 
@@ -100,7 +100,7 @@ private:
 
     bool firstMessageFlag;
 
-    GoldStdGen* goldStdGen;
+    AutomatedSystemTest::GoldStdGen* goldStdGen;
 
     /**
      * Process all actions within an action plan. One or more of these

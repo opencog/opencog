@@ -33,18 +33,18 @@
     the document Petaverse Combo Dialect:
     https://extranet.vettalabs.com:8443/bin/view/Petaverse/PetaverseCombo
 ***/
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/combo/eval.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/combo/eval.h>
 
 #include <stack>
 #include <exception>
 #include <boost/logic/tribool.hpp>
 
-#include "util/exceptions.h"
-#include "WorldWrapper.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapper.h>
 
 namespace Procedure
 {

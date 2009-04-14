@@ -2,29 +2,19 @@ ADD_LIBRARY(PBTester
 	PBTester
 	TestConfig
 	GoldStdReaderAgent
+        GoldStdGen
+        GoldStdMessage
 )
-
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/PerceptionActionInterface
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Control/Predavese
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/PetaverseProxySimulator
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/AutomatedSystemTest
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control
-	${OPENCOG_BINARY_DIR}/opencog/embodiment/Control/MessagingSystem
-	${OPENCOG_BINARY_DIR}/opencog/util
-)
-
-
-TARGET_LINK_LIBRARIES (PBTester PVPSimulator)
 
 ADD_EXECUTABLE (pbTester PBTesterExecutable)
 
-TARGET_LINK_LIBRARIES (pbTester PBTester)
+TARGET_LINK_LIBRARIES (pbTester 
+        PBTester
+        PAI
+        MessagingSystem
+        Control
+        server
+        util
+        ${XERCESC_LIBRARIES}
+)
 

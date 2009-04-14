@@ -21,9 +21,9 @@
  */
 #include "PetAction.h"
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "PAIUtils.h"
 #include "PVPXmlConstants.h"

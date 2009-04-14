@@ -19,11 +19,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "PetActionSchema.h"
-#include "PVPXmlConstants.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;

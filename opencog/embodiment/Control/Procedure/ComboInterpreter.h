@@ -22,18 +22,18 @@
 #ifndef _COMBO_INTERPRETER_H
 #define _COMBO_INTERPRETER_H
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/variable_unifier.h"
-#include "PAI.h"
-#include "VirtualWorldState.h"
-#include "PAIWorldWrapper.h"
-#include "RuleValidationWorldWrapper.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
+#include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
+#include <opencog/embodiment/WorldWrapper/RuleValidationWorldWrapper.h>
 #include "RunningProcedureId.h"
 #include "RunningComboProcedure.h"
 #include <vector>
 #include <boost/noncopyable.hpp>
 #include <opencog/server/CogServer.h>
-#include "NetworkElement.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 namespace Procedure
 {

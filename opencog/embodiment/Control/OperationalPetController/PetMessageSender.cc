@@ -19,13 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "PAIUtils.h"
-#include "LearnMessage.h"
-#include "LSCmdMessage.h"
-#include "RewardMessage.h"
-#include "FeedbackMessage.h"
-#include "TrySchemaMessage.h"
-#include "StopLearningMessage.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
+#include <opencog/util/Config.h>
 
 #include "PetMessageSender.h"
 

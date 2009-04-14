@@ -45,7 +45,7 @@ private:
 
     FILE* goldStdFile;
     char line_buf[LINE_BUF_SIZE];
-    PetaverseProxySimulator::GoldStdMessage* messageToSend;
+    GoldStdMessage* messageToSend;
     unsigned long initialTime;
     bool endOfFile;
 

@@ -22,13 +22,14 @@
 #include "ComboProcedureRepository.h"
 #include <fstream>
 
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
+#include <opencog/util/Config.h>
 
 #include <opencog/atomspace/TLB.h>
 
-#include "PetComboVocabulary.h"
-#include "NetworkElement.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace PetCombo;
 using namespace Procedure;

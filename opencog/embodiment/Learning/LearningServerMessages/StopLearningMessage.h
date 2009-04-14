@@ -23,7 +23,7 @@
 #ifndef STOPLEARNINGMESSAGE_H_
 #define STOPLEARNINGMESSAGE_H_
 
-#include "Message.h"
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace LearningServerMessages

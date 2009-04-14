@@ -22,8 +22,8 @@
 
 #include "PhysiologicalModel.h"
 #include <math.h>
-#include "util/exceptions.h"
-#include <ActionType.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 
 using namespace PetaverseProxySimulator;
 using namespace opencog;

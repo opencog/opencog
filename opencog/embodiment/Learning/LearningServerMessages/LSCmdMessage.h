@@ -22,7 +22,7 @@
 #ifndef LSCMDMESSAGE_H_
 #define LSCMDMESSAGE_H_
 
-#include "Message.h"
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 
 namespace LearningServerMessages
 {

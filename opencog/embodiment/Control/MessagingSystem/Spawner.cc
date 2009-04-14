@@ -24,7 +24,7 @@
 #include <unistd.h>
 #endif
 
-#include <LoggerFactory.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
 #include "Spawner.h"
 #include "StringMessage.h"
 #include <iostream>

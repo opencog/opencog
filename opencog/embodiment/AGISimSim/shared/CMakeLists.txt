@@ -9,6 +9,5 @@ ADD_LIBRARY(AGISimSimShared
 
 INCLUDE_DIRECTORIES(
    ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AGISimSim/shared/include
-   ${OPENCOG_SOURCE_DIR}/include
 )
 

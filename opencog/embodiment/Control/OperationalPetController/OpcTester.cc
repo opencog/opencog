@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "OPC.h"
-#include <EmbodimentConfig.h>
-#include <StringMessage.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>

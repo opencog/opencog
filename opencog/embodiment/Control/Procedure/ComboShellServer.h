@@ -23,9 +23,8 @@
 #define COMBO_SHELL_SERVER_H
 
 #include <string>
-#include <EmbodimentConfig.h>
-#include "Message.h"
-#include "EmbodimentCogServer.h"
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
 namespace MessagingSystem
 {

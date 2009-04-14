@@ -34,7 +34,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include "AgentModeHandler.h"
 
 using namespace opencog;

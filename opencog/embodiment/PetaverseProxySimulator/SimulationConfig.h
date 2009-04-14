@@ -24,7 +24,7 @@
 #define SIMULATIONPARAMETERS_H
 
 #include <time.h>
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 namespace PetaverseProxySimulator
 {

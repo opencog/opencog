@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetaverseProxySimulator/GoldStdMessage.cc
+ * opencog/embodiment/AutomatedSystemTest/GoldStdMessage.h
  *
  * Copyright (C) 2007-2008 TO_COMPLETE
  * All Rights Reserved
@@ -19,26 +19,30 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "GoldStdMessage.h"
+#ifndef _GOLD_STD_MESSAGE_H_
+#define _GOLD_STD_MESSAGE_H_
 
-using namespace PetaverseProxySimulator;
+#include <opencog/embodiment/Control/MessagingSystem/Message.h> 
 
-GoldStdMessage::GoldStdMessage(unsigned long _timestamp, Message* _message) :
-        timestamp(_timestamp), message(_message)
+using namespace MessagingSystem;
+
+namespace AutomatedSystemTest
 {
+
+class GoldStdMessage
+{
+
+    unsigned long timestamp;
+    Message* message;
+
+public:
+    GoldStdMessage(unsigned long _timestamp, Message* _message);
+    ~GoldStdMessage();
+    unsigned long getTimestamp();
+    Message* getMessage();
+};
+
 }
 
-GoldStdMessage::~GoldStdMessage()
-{
-    delete message;
-}
 
-unsigned long GoldStdMessage::getTimestamp()
-{
-    return timestamp;
-}
-
-Message* GoldStdMessage::getMessage()
-{
-    return message;
-}
+#endif //_GOLD_STD_MESSAGE_H_

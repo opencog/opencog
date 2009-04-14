@@ -20,20 +20,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
-#include "OPC.h"
-#include "SchemaMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
-#include "util/files.h"
+#include <opencog/util/files.h>
+#include <opencog/util/Config.h>
 
 #include <fstream>
 #include <iostream>
 
-#include "PetComboVocabulary.h"
-#include <atom_types_init.h>
-#include <opencog/util/Config.h>
-
+#include "OPC.h"
 
 /**
  * Uncoment the following define in order to delete atomSpace content inside OPC

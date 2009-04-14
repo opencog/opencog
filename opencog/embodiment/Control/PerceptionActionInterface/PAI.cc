@@ -36,17 +36,19 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
-#include "util/files.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/files.h>
+#include <opencog/util/StringManipulator.h>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
 #include "PAI.h"
 #include "PAIUtils.h"
-#include "AtomSpaceUtil.h"
-#include "PredefinedProcedureNames.h"
 #include "PVPXmlConstants.h"
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include "PetaverseDOMParser.h"
 #include "PetaverseErrorHandler.h"
 
@@ -270,7 +272,7 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
     }
 }
 
-#include "util/files.h"
+#include <opencog/util/files.h>
 
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 {

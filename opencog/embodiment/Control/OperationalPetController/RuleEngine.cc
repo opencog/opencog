@@ -29,8 +29,8 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "util/numeric.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/numeric.h>
+#include <opencog/util/mt19937ar.h>
 
 #include "RuleEngine.h"
 #include "RuleEngineUtil.h"
@@ -42,10 +42,10 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 
-#include <EmbodimentConfig.h>
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "OPC.h"
-#include "PAIUtils.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 
 #include <boost/regex.hpp>
 #include <boost/format.hpp>

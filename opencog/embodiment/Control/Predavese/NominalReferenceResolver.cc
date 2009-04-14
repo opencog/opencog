@@ -19,12 +19,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
+
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
 #include "NominalReferenceResolver.h"
-#include "WorldWrapperUtil.h"
-#include "AtomSpaceUtil.h"
 #include "Predavese.h"
 
 using namespace opencog;

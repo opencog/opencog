@@ -24,7 +24,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "IsPickupablePredicateUpdater.h"
 
 using namespace OperationalPetController;

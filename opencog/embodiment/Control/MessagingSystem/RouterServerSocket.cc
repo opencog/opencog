@@ -23,17 +23,17 @@
 #include "Message.h"
 #include "RouterMessage.h"
 #include "RouterServerSocket.h"
+#include "RouterHttpPostSocket.h"
 #include "NetworkElement.h"
 
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <Sockets/SocketHandler.h>
 #include <Sockets/StdoutLog.h>
 
 #include <sstream>
 #include <string.h>
-#include <RouterHttpPostSocket.h>
 
 
 using namespace MessagingSystem;

@@ -23,7 +23,7 @@
 #define PETMESSAGESENDER_H_
 
 #include "MessageSender.h"
-#include "NetworkElement.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 namespace OperationalPetController
 {

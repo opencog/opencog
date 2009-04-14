@@ -23,7 +23,7 @@
 #ifndef TRYSCHEMAMESSAGE_H_
 #define TRYSCHEMAMESSAGE_H_
 
-#include "Message.h"
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace LearningServerMessages

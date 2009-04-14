@@ -26,7 +26,7 @@
 #include <map>
 
 #include "BuiltInProcedure.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 namespace Procedure
 {

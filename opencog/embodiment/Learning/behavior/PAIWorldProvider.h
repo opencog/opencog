@@ -23,7 +23,7 @@
 #define _PAIWORLDPROVIDER_H
 
 #include "WorldProvider.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 class PAIWorldProvider : public WorldProvider
 {

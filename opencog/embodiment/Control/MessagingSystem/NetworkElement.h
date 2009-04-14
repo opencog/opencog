@@ -28,7 +28,6 @@
 #include <pthread.h>
 #include <string>
 #include <vector>
-#include <EmbodimentConfig.h>
 #include <exception>
 
 #include <Sockets/ListenSocket.h>
@@ -38,8 +37,8 @@
 #include "MessageCentral.h"
 #include "MemoryMessageCentral.h"
 
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 
 namespace MessagingSystem
 {

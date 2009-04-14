@@ -24,17 +24,16 @@
 
 #include <string>
 #include <opencog/atomspace/SavingLoading.h>
-#include <StringMessage.h>
-#include <EmbodimentCogServer.h>
-
-#include "PAI.h"
-#include "Pet.h"
-//#include "TangetBug.h"
-#include "PetMessageSender.h"
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
+#include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
+
+#include "Pet.h"
+#include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
-#include "ProcedureRepository.h"
-#include "ProcedureInterpreter.h"
 #include "ProcedureInterpreterAgent.h"
 #include "ActionSelectionAgent.h"
 #include "ImportanceDecayAgent.h"

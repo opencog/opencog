@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/PetaverseProxySimulator/GoldStdGen.cc
+ * opencog/embodiment/AutomatedSystemTest/GoldStdGen.cc
  *
  * Copyright (C) 2007-2008 Welter Luigi
  * All Rights Reserved
@@ -21,11 +21,11 @@
  */
 
 #include "GoldStdGen.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace PetaverseProxySimulator;
 using namespace MessagingSystem;
+using namespace AutomatedSystemTest;
 
 GoldStdGen::GoldStdGen(const char* goldStdFilename)
 {

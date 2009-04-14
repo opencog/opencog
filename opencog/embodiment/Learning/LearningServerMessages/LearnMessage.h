@@ -23,8 +23,8 @@
 #define LEARNMESSAGE_H_
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "AtomSpaceUtil.h"
-#include "Message.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 
 using namespace opencog;
 

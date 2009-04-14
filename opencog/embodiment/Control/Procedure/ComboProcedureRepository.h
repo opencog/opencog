@@ -24,8 +24,8 @@
 
 #include "ComboProcedure.h"
 #include <opencog/atomspace/SavableRepository.h>
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/procedure_repository.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/procedure_repository.h>
 
 #include <string>
 #include <map>

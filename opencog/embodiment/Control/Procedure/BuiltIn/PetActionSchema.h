@@ -31,8 +31,8 @@
  * @author Welter Luigi
  */
 
-#include "BuiltInProcedure.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/Procedure/BuiltInProcedure.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include <exception>
 

@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "PetaverseErrorHandler.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace PerceptionActionInterface;
 

@@ -8,11 +8,3 @@ ADD_LIBRARY(AGISimSimProxy
     DOMPrintErrorHandler.cc
     DOMTreeErrorReporter.cc 
 )
-
-TARGET_LINK_LIBRARIES(AGISimSimProxy
-    util
-    ssl
-    crypto
-    dl
-    xerces-c
-)

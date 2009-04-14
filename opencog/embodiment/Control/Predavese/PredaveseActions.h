@@ -24,9 +24,9 @@
 
 //#include "PredaveseStdafx.h"
 #include "Predavese.h"
-#include "util/exceptions.h"
-#include "PetInterface.h"
-#include "EmbodimentConfig.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/PetInterface.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "NominalReferenceResolver.h"
 
 /// This file contains all the action objects that are associated with

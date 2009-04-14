@@ -28,12 +28,12 @@
 #include <Sockets/ISocketHandler.h>
 #include <Sockets/TcpSocket.h>
 
-#include "AtomSpaceUtil.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include "OPC.h"
 #include "PetInterfaceUpdaterAgent.h"
 #include <opencog/spatial/LocalSpaceMap2D.h>
 
-#include "util/StringManipulator.h"
+#include <opencog/util/StringManipulator.h>
 
 using namespace OperationalPetController;
 using namespace Spatial;

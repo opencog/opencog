@@ -25,7 +25,7 @@
 
 #include <opencog/server/Factory.h>
 #include <opencog/server/Agent.h>
-#include <EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <time.h>
 #include "SimulationConfig.h"
 

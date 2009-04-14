@@ -24,7 +24,7 @@
 #include <map>
 
 #include <opencog/atomspace/types.h>
-#include "PetInterface.h"
+#include <opencog/embodiment/Control/PetInterface.h>
 
 using namespace std;
 using namespace opencog;

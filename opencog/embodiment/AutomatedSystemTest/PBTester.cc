@@ -32,10 +32,10 @@
  */
 
 #include "PBTester.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 using namespace AutomatedSystemTest;
 using namespace MessagingSystem;
-using namespace PetaverseProxySimulator;
 using namespace opencog;
 
 opencog::BaseServer* PBTester::createInstance()

@@ -23,11 +23,11 @@
 #include <Sockets/SocketHandler.h>
 #include <Sockets/ListenSocket.h>
 
-#include <LoggerFactory.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
 #include <fstream>
 
-#include "util/files.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/files.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "Router.h"
 #include "RouterServerSocket.h"

@@ -27,7 +27,7 @@
 #include "BDTracker.h"
 #include "WorldProvider.h"
 #include "CompositeBehaviorDescription.h"
-#include "CompareAtomTreeTemplate.h"
+#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 
 #define BEHAVED_PREDICATE_NAME "behaved"
 

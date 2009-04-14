@@ -29,8 +29,8 @@
 #include <map>
 #include <set>
 
-#include <EmbodimentCogServer.h>
-#include <Message.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
 #include "TestConfig.h"
 #include "GoldStdGen.h"
 
@@ -50,7 +50,7 @@ private:
     std::vector<MessagingSystem::Message*> expectedMessages;
     std::vector<unsigned long> receivedTimeMessages;
 
-    PetaverseProxySimulator::GoldStdGen* goldStdGen;
+    GoldStdGen* goldStdGen;
 
 public:
 
@@ -65,7 +65,7 @@ public:
     void addExpectedMessage(MessagingSystem::Message* message, unsigned long time);
     bool hasExpectedMessages();
     void notifyEndOfGoldStdFile();
-    PetaverseProxySimulator::GoldStdGen* getGoldStdGen();
+    GoldStdGen* getGoldStdGen();
     unsigned long getReceivedTimeOfCurrentExpectedMessage() {
         return receivedTimeMessages.back();
     }

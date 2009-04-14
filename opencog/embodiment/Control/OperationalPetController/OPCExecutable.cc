@@ -19,12 +19,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <exception>
 #include <unistd.h>
 
-#include "util/exceptions.h"
-#include "util/files.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/files.h>
 #include "OPC.h"
 
 using namespace OperationalPetController;

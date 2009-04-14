@@ -23,7 +23,7 @@
 #define AGISIM_SIMULATOR_H
 
 #include "WorldSimulator.h"
-#include "SimProxy.h"
+#include <opencog/embodiment/AGISimSim/proxy/SimProxy.h>
 
 namespace PetaverseProxySimulator
 {

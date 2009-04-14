@@ -22,14 +22,14 @@
 #ifndef _COMBO_SELECT_INTERPRETER_H
 #define _COMBO_SELECT_INTERPRETER_H
 
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "ComboProcedure.h"
 #include "ComboInterpreter.h"
 #include "RunningProcedureId.h"
 #include "RunningComboSelectProcedure.h"
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
 
 namespace Procedure
 {

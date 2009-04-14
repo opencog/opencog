@@ -19,24 +19,25 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "NetworkElement.h"
-
 #include "Pet.h"
 #include "OPC.h"
-#include "util/files.h"
-#include "util/Logger.h"
-#include "behavior/BE.h"
-#include "behavior/BDTracker.h"
-#include "PredefinedProcedureNames.h"
-#include "behavior/PAIWorldProvider.h"
-#include "AtomSpaceUtil.h"
-#include "WorldWrapperUtil.h"
+
+#include <opencog/util/files.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/mt19937ar.h>
+
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+
+#include <opencog/embodiment/Learning/behavior/BE.h>
+#include <opencog/embodiment/Learning/behavior/BDTracker.h>
+#include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 #include "RuleEngine.h"
 #include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
 #include "LearningAgentModeHandler.h"
-
-#include "util/mt19937ar.h"
 
 #include <cstdlib>
 #include <fstream>

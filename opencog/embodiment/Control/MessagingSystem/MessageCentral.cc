@@ -24,9 +24,9 @@
 #include "MessageCentral.h"
 #include "MessagingSystemExceptions.h"
 #include "StringMessage.h"
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include <LoggerFactory.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
 
 namespace MessagingSystem
 {

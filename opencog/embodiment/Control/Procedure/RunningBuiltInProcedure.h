@@ -23,7 +23,7 @@
 #define _RUNNING_BUILTIN_PROCEDURE_H
 
 #include "BuiltInProcedure.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 namespace Procedure
 {

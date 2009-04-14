@@ -1,8 +1,9 @@
-#include "util/StringManipulator.h"
-#include "util/exceptions.h"
+#include <opencog/util/StringManipulator.h>
+#include <opencog/util/exceptions.h>
+
+#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
 
 #include "BuiltInProcedureRepository.h"
-#include "PetActionSchema.h"
 
 using namespace Procedure;
 using namespace PerceptionActionInterface;

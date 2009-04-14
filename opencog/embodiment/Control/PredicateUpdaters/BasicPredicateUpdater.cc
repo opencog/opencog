@@ -19,12 +19,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "PredefinedProcedureNames.h"
 #include "BasicPredicateUpdater.h"
-#include "AtomSpaceUtil.h"
+
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/TLB.h>
-#include <atom_types.h>
 
 using namespace OperationalPetController;
 using namespace opencog;

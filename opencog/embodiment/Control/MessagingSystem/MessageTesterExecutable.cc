@@ -25,7 +25,7 @@
 #include <unistd.h>
 #endif
 
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "NetworkElement.h"
 #include "StringMessage.h"
 

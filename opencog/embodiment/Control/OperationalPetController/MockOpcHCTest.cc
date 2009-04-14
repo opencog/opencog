@@ -21,10 +21,10 @@
  */
 
 #include "MockOpcHCTest.h"
-#include "SchemaMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include "HCTestAgent.h"
-#include "PetComboVocabulary.h"
-#include "atom_types_init.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 //#define LEARNING_SCHEMA "fnorb"
 #define TRICK_NAME "fnorb"

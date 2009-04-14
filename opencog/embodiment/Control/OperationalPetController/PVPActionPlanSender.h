@@ -26,9 +26,9 @@
  * Concrete subclass of ActionPlanSender that sends action plans to the PVP
  */
 
-#include "ActionPlanSender.h"
-#include "NetworkElement.h"
-#include "ActionPlan.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlanSender.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 
 namespace OperationalPetController
 {

@@ -29,10 +29,11 @@
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "PAI.h"
-#include "ActionPlan.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
+#include <opencog/embodiment/Control/PetInterface.h>
+
 #include "MessageSender.h"
-#include "PetInterface.h"
 
 using namespace opencog;
 

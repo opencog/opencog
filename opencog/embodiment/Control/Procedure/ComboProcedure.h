@@ -27,7 +27,7 @@
  *
  */
 #include "GeneralProcedure.h"
-#include "comboreduct/combo/procedure_call.h"
+#include <opencog/comboreduct/combo/procedure_call.h>
 
 #include <iostream>
 #include <exception>

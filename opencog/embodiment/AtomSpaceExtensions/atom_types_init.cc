@@ -21,10 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <atom_types_init.h>
-#include <atom_types.definitions>
+#include "atom_types_init.h"
+#include "atom_types.definitions"
 
 void opencog::atom_types_init::init()
 {
-#include <atom_types.inheritance>
+#include "atom_types.inheritance"
 }

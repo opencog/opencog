@@ -42,7 +42,7 @@
 #include <iostream>
 #include <exception>
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 namespace PerceptionActionInterface
 {

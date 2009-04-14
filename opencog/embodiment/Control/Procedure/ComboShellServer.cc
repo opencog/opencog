@@ -19,16 +19,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 #include <iostream>
 #include <sstream>
+#include <boost/lexical_cast.hpp>
 
 #include "ComboShellServer.h"
-#include <boost/lexical_cast.hpp>
 #include "ComboInterpreter.h"
 #include "ComboProcedureRepository.h"
-#include "StringMessage.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 using namespace Procedure;
 using namespace PetCombo;

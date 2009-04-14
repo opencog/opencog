@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ComboShellServer.h"
-#include "util/files.h"
-#include <EmbodimentConfig.h>
+#include <opencog/util/files.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace opencog;
 using namespace MessagingSystem;

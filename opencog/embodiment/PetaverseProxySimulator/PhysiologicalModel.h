@@ -24,7 +24,7 @@
 #define PHYSIOLOGICALMODEL_H
 
 #include <vector>
-#include <PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 #include "SimulationConfig.h"
 
 namespace PetaverseProxySimulator

@@ -25,14 +25,14 @@
 #include "MessagingSystemExceptions.h"
 #include "StringMessage.h"
 #include "RouterMessage.h"
-#include "RewardMessage.h"
-#include "TickMessage.h"
-#include "FeedbackMessage.h"
-#include "SchemaMessage.h"
-#include "LearnMessage.h"
-#include "LSCmdMessage.h"
-#include "TrySchemaMessage.h"
-#include "StopLearningMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/TickMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/FeedbackMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
 
 namespace MessagingSystem
 {
