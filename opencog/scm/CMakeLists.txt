@@ -7,6 +7,7 @@ INSTALL (FILES
 	example-dbi.scm
 	load.sh
 	test-wire-order.scm
+	type_constructors.scm
 	utilities.scm
 	DESTINATION "${DATADIR}/scm"
 )
