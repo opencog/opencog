@@ -107,6 +107,19 @@ _obj(be, city)
 
 Clearly, even simple assertions have many different forms.
 
+A prepositional modifier complicates things:
+Input sentence: A chair is used for sitting on.
+
+Modifiers can change the meaning:
+Copper is a good conductor of electricity.
+Glass is a bad conductor of electricity.
+
+Cows eat grass.
+A bird can fly.
+A dog can be a pet.
+A person wants love.
+Some leaves are green.
+
 
 A priori vs. Deduced Knowledge
 ------------------------------
@@ -433,6 +446,16 @@ the chainer is able to deduce that it is true, then the confidence of
 all three statements can increase: they form a set of mutually
 self-supporting statements.
 
+So, for example, the above generate:
+   capital_of(Germany,Berlin)
+   isa(city, capital)
+   isa(city, Berlin)
+
+The prepositional construction XXX_of(A,B) allows the deduction that
+isa(XXX,A) (a deduction which can be made directly from the raw sentence
+input, and does not need to be processed from the prepositional form.
+(Right??) Certainly this is true for kind_of and capital_of, is this
+true for all prepositional uses of "of"?
 
 IsA Sentences
 -------------
@@ -540,6 +563,20 @@ a type of locomotion, based on its use with regard to prepositions?
 Hmm. Time to write some rules, and experiment and see what happens.
 Not clear how unambiguous the copulas and preps will be.
 
+HOWTO
+-----
+How to run the current code:
+-- start cog-server
+-- run load.sh
+-- Enter the scheme shell
+-- run (cog-ad-hoc "do-implication" frame-rule-0) through
+   (cog-ad-hoc "do-implication" frame-rule-8) and observe results.
+
+Next step:
+-- Download the MIT ConceptNet corpus.
+-- This corpus is in N3 format; strip out sentences by 
+   running "conceptnet.pl"
+-- Parse the sentences using relex, generate opencog output.
 
 References:
 -----------
