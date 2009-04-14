@@ -134,6 +134,9 @@ VisibilityMap::NearestTileVisitor::NearestTileVisitor( const Spatial::Math::Vect
 
 bool VisibilityMap::NearestTileVisitor::operator( )( const VisibilityMap::TilePtr& tile )
 {
+
+    // it will always return false to let visitor test all tiles before 
+    // saying that there are one which are the nearest
     if ( tile->isVisible( ) != this->visibility ) {
         return false;
     } // if
@@ -141,14 +144,16 @@ bool VisibilityMap::NearestTileVisitor::operator( )( const VisibilityMap::TilePt
     if ( lastValidTile == NULL ) {
         this->lastValidTile = tile;
         this->currentDistance = ( this->lastValidTile->getCenter( ) - referencePosition ).length( );
-        return true;
+        //return true;
+        return false;
     } // if
 
     double candidateDistance = ( tile->getCenter( ) - referencePosition ).length( );
     if ( candidateDistance < this->currentDistance ) {
         this->currentDistance = candidateDistance;
         this->lastValidTile = tile;
-        return true;
+        //return true;
+        return false;
     } // if
     return false;
 }

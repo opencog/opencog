@@ -418,6 +418,7 @@ void ScavengerHuntAgentModeHandler::update( void )
         } // catch
     }
     break;
+    
 
     case 1317: {
 
@@ -507,6 +508,8 @@ void ScavengerHuntAgentModeHandler::update( void )
     break;
 
     case 1319: { // follow owner
+        updateStartPositionInCustomPath( );
+
         if ( getPropertyValue( "collectTreasures" ) == "yes" && treasureWasFound( ) ) {
             changeState( this->agentState, 1305 ); // go to after it
             logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - I'm following, collecting treasures and a treasure was found" );
@@ -532,6 +535,13 @@ void ScavengerHuntAgentModeHandler::update( void )
         } // else if
     }
     break;
+    
+    case 1313:
+    case 1307: {
+        updateStartPositionInCustomPath( );
+    } break;
+        
+
     case 1320: { // stay next target after following a target
         if ( getPropertyValue( "waiting" ) == "yes" ) {
             // ignore
@@ -1286,6 +1296,28 @@ bool ScavengerHuntAgentModeHandler::isTeamMember( const std::string& agentId, un
     } // if
 
     return ( std::find( members->second.begin( ), members->second.end( ), agentId ) != members->second.end( ) );
+}
+
+void ScavengerHuntAgentModeHandler::updateStartPositionInCustomPath( void )
+{
+    
+    try {
+        std::stringstream output;
+        const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
+        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+
+        output << agentEntity->getPosition( ).x << " " << agentEntity->getPosition( ).y << ";";
+
+        std::string customPath = getPropertyValue( "customPath" );
+        std::vector<std::string> path;
+        boost::algorithm::split( path, customPath, boost::algorithm::is_any_of(";") );
+
+        output << path[1];
+
+        setProperty( "customPath", output.str( ) );
+    } catch ( opencog::NotFoundException& ex ) {
+        logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler - There is no entity identifyed by[%s]", getPropertyValue( "customObject" ).c_str( ) );
+    } // catch
 }
 
 void ScavengerHuntAgentModeHandler::setFollowingPosition( void )

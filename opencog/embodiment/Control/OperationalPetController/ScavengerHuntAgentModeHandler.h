@@ -108,6 +108,15 @@ protected:
     bool isAgentNextTo( const std::string& targetId );
     bool isTeamMember( const std::string& agentId, unsigned int teamCode );
 
+    /**
+     * This method must be called each time update was called if the current state was using
+     * customPath property. It is necessary because the agent position can become older
+     * into the customPath string and when it will be executed strange behaviors can be noted.
+     * So, this method will update the property with the current agent's 
+     * position to avoid problems.
+     */
+    void updateStartPositionInCustomPath( void );
+
     // TODO Use gonear_obj instead after it was fixed
     void setFollowingPosition( void );
     void resetGame( void );
