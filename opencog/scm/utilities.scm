@@ -10,8 +10,8 @@
 (use-modules (srfi srfi-1))
 
 (define (stv mean conf) (cog-new-stv mean conf))
-(define (itv mean conf) (cog-new-itv mean conf))
-(define (ctv mean conf) (cog-new-ctv mean conf))
+(define (itv lower upper conf) (cog-new-itv lower upper conf))
+(define (ctv mean conf count) (cog-new-ctv mean conf count))
 
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
