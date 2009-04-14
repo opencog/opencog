@@ -777,6 +777,8 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             unsigned char endRGB2[3] = { 80, 100, 255 };
             ubi->updateColourOfType(INVERSE_HEBBIAN_LINK,
                     Ubigrapher::NONE, startRGB2, endRGB2);
+            ubi->updateColourOfType(SYMMETRIC_INVERSE_HEBBIAN_LINK,
+                    Ubigrapher::NONE, startRGB2, endRGB2);
             ubi->updateSizeOfType(HEBBIAN_LINK, Ubigrapher::TV_STRENGTH, 20.0,
                     0.1);
         }

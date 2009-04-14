@@ -60,12 +60,15 @@ int main(int argc, char *argv[])
     switch (o->verboseLevel) {
     case 1:
         logger().setLevel(Logger::INFO);
+        logger().setPrintToStdoutFlag(true);
         break;
     case 2:
         logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
         break;
     case 3:
         logger().setLevel(Logger::FINE);
+        logger().setPrintToStdoutFlag(true);
         break;
     default:
         logger().setLevel(Logger::WARN);
