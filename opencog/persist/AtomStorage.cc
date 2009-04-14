@@ -764,7 +764,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
  * contain a valid value.
  *
  * Given an SQL type sq, the loading_typemap[sq] will contain the 
- * opencog type t for the named type, or NOTYPE is this version of
+ * opencog type t for the named type, or NOTYPE if this version of
  * opencog does not have this kind of atom.
  *
  * The typemaps must be constructed before any saving or loading of
@@ -805,11 +805,12 @@ void AtomStorage::setup_typemap(void)
 			const char * tname = ClassServer::getTypeName(t).c_str();
 
 			// Let the sql id be the same as the current type number,
-			// unless this sql number is alrreay in use, in which case
-			// we need to find another, unused one.
+			// unless this sql number is already in use, in which case
+			// we need to find another, unused one.  Its in use if we
+			// have a string name associated to it.
 			sqid = t;
 
-			if ((loading_typemap[sqid] != NOTYPE) &&
+			if ((db_typename[sqid] != NULL) &&
 			    (loading_typemap[sqid] != t))
 			{
 				// Find some (any) unused type index to use in the
@@ -817,7 +818,7 @@ void AtomStorage::setup_typemap(void)
 				// can find.
 				for (sqid = 0; sqid<TYPEMAP_SZ; sqid++)
 				{
-					if (NOTYPE == loading_typemap[sqid]) break;
+					if (NULL == db_typename[sqid]) break;
 				}
 
 				if (TYPEMAP_SZ <= sqid)
