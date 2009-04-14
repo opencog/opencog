@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/mixed_rules.h"
-#include "comboreduct/combo/type_tree.h"
-#include "util/exceptions.h"
+#include "mixed_rules.h"
+#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/util/exceptions.h>
 #include <map>
 
 namespace reduct {

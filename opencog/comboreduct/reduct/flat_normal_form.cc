@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/flat_normal_form.h"
+#include "flat_normal_form.h"
 
 namespace reduct {
 

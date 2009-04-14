@@ -24,7 +24,7 @@
 #ifndef _MOSES_SCORING_FUNCTIONS_H
 #define _MOSES_SCORING_FUNCTIONS_H
 
-#include "moses/using.h"
+#include "using.h"
 
 using namespace std;
 using namespace boost;

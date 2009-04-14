@@ -21,10 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/complexity.h"
-#include "comboreduct/combo/using.h"
+#include "complexity.h"
+#include "using.h"
 
 namespace combo {
 

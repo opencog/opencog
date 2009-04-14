@@ -21,14 +21,14 @@
  */
 #include <iostream>
 
-#include "util/exceptions.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/mt19937ar.h>
 
-#include "ActionFilter.h"
-#include "LoggerFactory.h"
-#include "NetworkElement.h"
-#include "EntityRelevanceFilter.h"
-#include "moses-learning.h"
+#include <opencog/embodiment/Learning/Filter/ActionFilter.h>
+#include <opencog/embodiment/Control/LoggerFactory.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/Learning/Filter/EntityRelevanceFilter.h>
+#include <opencog/embodiment/Learning/PetaverseMOSES/moses-learning.h>
 
 #include "ImitationLearningAgent.h"
 

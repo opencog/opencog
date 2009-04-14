@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "LSMap2DSearchNode.h"
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 using namespace Spatial;
 

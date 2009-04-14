@@ -27,7 +27,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/TLB.h>
-#include "util/StringManipulator.h"
+#include <opencog/util/StringManipulator.h>
 
 using namespace opencog;
 

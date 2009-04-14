@@ -21,7 +21,7 @@
  */
 
 #include "ShellWorldWrapper.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 namespace WorldWrapper
 {

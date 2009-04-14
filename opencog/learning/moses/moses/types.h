@@ -24,11 +24,11 @@
 #ifndef _MOSES_TYPES_H
 #define _MOSES_TYPES_H
 
-#include "util/functional.h"
-#include "util/foreach.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/foreach.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/complexity.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/complexity.h>
 
 namespace moses {
   

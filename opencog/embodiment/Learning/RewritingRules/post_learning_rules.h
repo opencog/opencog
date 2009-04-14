@@ -22,7 +22,7 @@
 #ifndef _POST_LEARNING_RULES_H
 #define _POST_LEARNING_RULES_H
 
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/reduct/reduct.h>
 
 namespace reduct
 {

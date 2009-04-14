@@ -24,12 +24,12 @@
 #ifndef _EDA_REPLACE_H
 #define _EDA_REPLACE_H
 
-#include "util/exceptions.h"
-#include "util/lazy_random_selector.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/lazy_random_selector.h>
 
-#include "eda/using.h"
-#include "eda/field_set.h"
-#include "eda/scoring.h"
+#include "using.h"
+#include "field_set.h"
+#include "scoring.h"
 
 namespace eda {
 

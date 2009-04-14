@@ -24,7 +24,7 @@
 #include <list>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "util/mt19937ar.h"
+#include <opencog/util/mt19937ar.h>
 
 #ifdef TB_PRINT_NCURSES
 #include <ncurses.h>

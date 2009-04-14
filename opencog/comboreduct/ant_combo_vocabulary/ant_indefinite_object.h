@@ -24,10 +24,10 @@
 #ifndef _ANT_INDEFINITE_OBJECT_H
 #define _ANT_INDEFINITE_OBJECT_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/indefinite_object.h"
-#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
+#include <opencog/comboreduct/combo/indefinite_object.h>
+#include "ant_operator.h"
 
 namespace combo {
 

@@ -22,16 +22,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/lazy_random_selector.h"
+#include <opencog/util/lazy_random_selector.h>
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/reduct/meta_rules.h"
-#include "comboreduct/reduct/logical_rules.h"
-#include "comboreduct/reduct/general_rules.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <opencog/comboreduct/reduct/logical_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
 
-#include "moses/using.h"
-#include "moses/representation.h"
-#include "moses/build_knobs.h"
+#include "using.h"
+#include "representation.h"
+#include "build_knobs.h"
 
 namespace moses {
 

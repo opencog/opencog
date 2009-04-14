@@ -25,18 +25,18 @@
 #ifndef _COMBO_EVAL_H
 #define _COMBO_EVAL_H
 
-#include "util/tree.h"
-#include "util/numeric.h"
-#include "util/hash_map.h"
-#include "util/exceptions.h"
-#include "util/foreach.h"
-#include "util/RandGen.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/hash_map.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
+#include <opencog/util/RandGen.h>
 
-#include "comboreduct/crutil/exception.h"
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/combo/using.h"
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/comboreduct/crutil/exception.h>
+#include "vertex.h"
+#include "type_tree.h"
+#include "using.h"
+#include "variable_unifier.h"
 
 #include <exception>
 

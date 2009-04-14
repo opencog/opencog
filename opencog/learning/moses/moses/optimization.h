@@ -24,16 +24,16 @@
 #ifndef _MOSES_OPTIMIZE_H
 #define _MOSES_OPTIMIZE_H
 
-#include "moses/moses.h"
-#include "eda/termination.h"
-#include "eda/replacement.h"
-#include "eda/logging.h"
-#include "eda/local_structure.h"
-#include "eda/optimize.h"
-#include "eda/initialization.h"
-#include "util/selection.h"
-#include "util/dorepeat.h"
-#include "util/exceptions.h"
+#include "moses.h"
+#include <opencog/learning/moses/eda/termination.h>
+#include <opencog/learning/moses/eda/replacement.h>
+#include <opencog/learning/moses/eda/logging.h>
+#include <opencog/learning/moses/eda/local_structure.h>
+#include <opencog/learning/moses/eda/optimize.h>
+#include <opencog/learning/moses/eda/initialization.h>
+#include <opencog/util/selection.h>
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/exceptions.h>
 
 #define MAX_DISTANCE_FROM_EXEMPLAR 5
 #define FRACTION_OF_REMAINING     10 

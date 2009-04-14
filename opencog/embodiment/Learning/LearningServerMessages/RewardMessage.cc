@@ -21,8 +21,8 @@
  */
 
 #include "RewardMessage.h"
-#include "util/StringTokenizer.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/util/StringManipulator.h>
 #include "stdlib.h"
 
 using namespace LearningServerMessages;

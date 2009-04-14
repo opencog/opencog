@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BoundingBox.h"
-#include "Entity.h"
+#include <opencog/spatial/Entity.h>
 #include <limits>
 
 using namespace Spatial::Math;

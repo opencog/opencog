@@ -48,7 +48,7 @@
 #include <boost/foreach.hpp>
 #else
 //#include "foreach.hpp"
-#include "util/foreach.h"
+#include <opencog/util/foreach.h>
 #endif
 
 #ifdef WIN32

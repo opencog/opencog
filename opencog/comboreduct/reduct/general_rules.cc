@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/general_rules.h"
-#include "comboreduct/combo/eval.h"
-#include "comboreduct/combo/assumption.h"
+#include "general_rules.h"
+#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/combo/assumption.h>
 
 namespace reduct {
   typedef combo_tree::sibling_iterator sib_it;

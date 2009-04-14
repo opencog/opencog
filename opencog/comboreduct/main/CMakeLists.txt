@@ -1,12 +1,3 @@
-INCLUDE_DIRECTORIES(
-    ${OPENCOG_SOURCE_DIR}/opencog 
-)
-
-LINK_DIRECTORIES(
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-    ${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 ADD_EXECUTABLE (action-reductor action-reductor.cc)
 TARGET_LINK_LIBRARIES(action-reductor
 	comboreduct

@@ -22,9 +22,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/vertex.h"
+#include "vertex.h"
 #include <boost/lexical_cast.hpp>
-#include "comboreduct/combo/procedure_call.h"
+#include "procedure_call.h"
 
 std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
 {

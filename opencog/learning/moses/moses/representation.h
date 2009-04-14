@@ -25,11 +25,11 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/type_tree.h>
 
-#include "moses/using.h"
-#include "moses/knob_mapper.h"
+#include "using.h"
+#include "knob_mapper.h"
 #include <boost/utility.hpp>
 
 

@@ -23,12 +23,12 @@
  */
 #include <iostream>
 
-#include "util/selection.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/selection.h>
+#include <opencog/util/mt19937ar.h>
 
-#include "comboreduct/combo/tree_generation.h"
+#include <opencog/comboreduct/combo/tree_generation.h>
 #include <boost/lexical_cast.hpp>
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 int main(int argc,char** argv) {
   using namespace ant_combo;

@@ -19,14 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/reduct/reduct.h>
 
-#include "moses/optimization.h"
-#include "moses/scoring.h"
+#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/moses/scoring.h>
 
 #include "moses-learning.h"
 
-#include "RewritingRules/RewritingRules.h"
+#include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
 #include <ctime>
 

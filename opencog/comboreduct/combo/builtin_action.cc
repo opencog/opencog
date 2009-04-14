@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/builtin_action.h"
+#include "builtin_action.h"
 
 std::ostream& operator<<(std::ostream& out, combo::builtin_action a) {
   opencog::cassert(TRACE_INFO, a);

@@ -31,18 +31,18 @@
 
 #include <iostream>
 
-#include "util/tree.h"
-#include "util/numeric.h"
-#include "util/exceptions.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/action.h"
-#include "comboreduct/combo/builtin_action.h"
-#include "comboreduct/combo/action_symbol.h"
-#include "comboreduct/combo/perception.h"
-#include "comboreduct/combo/definite_object.h"
-#include "comboreduct/combo/indefinite_object.h"
-#include "comboreduct/combo/message.h"
-//#include "comboreduct/combo/procedure_call.h"
+#include "action.h"
+#include "builtin_action.h"
+#include "action_symbol.h"
+#include "perception.h"
+#include "definite_object.h"
+#include "indefinite_object.h"
+#include "message.h"
+//#include "procedure_call.h"
 
 namespace combo
 {

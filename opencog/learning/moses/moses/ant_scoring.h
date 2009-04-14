@@ -24,11 +24,11 @@
 #ifndef _ANT_SCORING_H
 #define _ANT_SCORING_H
 
-#include "util/numeric.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/numeric.h>
+#include <opencog/util/mt19937ar.h>
 
-#include <comboreduct/combo/vertex.h>
-#include <comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace combo;
 using namespace std;

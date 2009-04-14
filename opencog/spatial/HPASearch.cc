@@ -22,7 +22,7 @@
 #include "HPASearch.h"
 #include <cmath>
 #include <map>
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include "QuadTree.h"
 
 using namespace opencog;

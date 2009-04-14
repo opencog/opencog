@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "pet_perception.h"
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace combo;
 using namespace pet_perception_properties;

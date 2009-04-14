@@ -24,7 +24,7 @@
 #ifndef _COMBO_ASSUMPTION_H
 #define _COMBO_ASSUMPTION_H
 
-#include "comboreduct/combo/vertex.h"
+#include "vertex.h"
 
 namespace combo {
 

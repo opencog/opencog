@@ -32,11 +32,11 @@
 #include <sstream>
 #include <ext/functional>
 
-#include "AtomSpaceUtil.h"
-#include "PredefinedProcedureNames.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
-#include "PAIUtils.h"
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <sstream>
 #include <ext/functional>
 #include <typeinfo>

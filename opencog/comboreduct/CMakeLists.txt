@@ -53,14 +53,6 @@ ADD_LIBRARY(comboreduct SHARED
 
 )
 
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-)
-
 #install library
 #INSTALL(TARGETS 
 #        ${PROJECT_NAME}

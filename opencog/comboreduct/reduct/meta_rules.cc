@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/meta_rules.h"
-#include "util/foreach.h"
-#include "comboreduct/combo/assumption.h"
+#include "meta_rules.h"
+#include <opencog/util/foreach.h>
+#include <opencog/comboreduct/combo/assumption.h>
 
 namespace reduct {
 

@@ -24,9 +24,9 @@
 #ifndef _EDA_FIELD_SET_H
 #define _EDA_FIELD_SET_H
 
-#include "eda/eda.h"
+#include "eda.h"
 #include <map>
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
 namespace eda {
   

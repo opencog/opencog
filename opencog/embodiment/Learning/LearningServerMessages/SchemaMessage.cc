@@ -21,8 +21,8 @@
  */
 #include <sstream>
 #include "SchemaMessage.h"
-#include "util/StringTokenizer.h"
-#include "PetComboVocabulary.h"
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 using namespace LearningServerMessages;
 using namespace PetCombo;

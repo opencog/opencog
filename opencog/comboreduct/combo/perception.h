@@ -24,10 +24,10 @@
 #ifndef _COMBO_PERCEPTION_H
 #define _COMBO_PERCEPTION_H
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/type_tree_def.h"
-#include "comboreduct/combo/operator_base.h"
+#include "type_tree_def.h"
+#include "operator_base.h"
 
 //if the user wants to use the reduct engine it is recommended to
 //enable the following macro in order to allow the compiler to detect 

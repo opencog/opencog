@@ -6,15 +6,6 @@ ADD_LIBRARY(PetComboVocabulary
 	PetComboVocabulary
 )
 
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog
-)
-
-LINK_DIRECTORIES (
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-    ${OPENCOG_BINARY_DIR}/opencog/util
-)
-
 TARGET_LINK_LIBRARIES(PetComboVocabulary
 	comboreduct
 	util

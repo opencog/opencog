@@ -25,7 +25,7 @@
 #define _COMBOREDUCT_EXCEPTION_H
 
 #include <string>
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace combo {
 

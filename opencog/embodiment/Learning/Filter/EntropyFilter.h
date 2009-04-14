@@ -22,14 +22,14 @@
 #ifndef ENTROPYFILTER_H_
 #define ENTROPYFILTER_H_
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/types.h>
 
-#include "WorldProvider.h"
-#include "RewritingRules.h"
-#include "BehaviorCategory.h"
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
+#include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "EntityRelevanceFilter.h"
 

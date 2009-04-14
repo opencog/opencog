@@ -22,12 +22,12 @@
 #ifndef _WORLD_WRAPPER_UTIL_MOCK_H
 #define _WORLD_WRAPPER_UTIL_MOCK_H
 
-#include "util/exceptions.h"
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
 
-#include "VirtualWorldState.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 namespace WorldWrapper
 {

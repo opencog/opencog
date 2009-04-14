@@ -21,7 +21,7 @@
  */
 
 #include "WorldSimulator.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace PetaverseProxySimulator;
 using namespace opencog;

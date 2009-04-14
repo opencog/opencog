@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "post_learning_rules.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 namespace reduct
 {

@@ -26,7 +26,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "eda/field_set.h"
+#include "field_set.h"
 
 namespace eda {
 

@@ -24,14 +24,14 @@
 #ifndef _MOSES_SCORING_H
 #define _MOSES_SCORING_H
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/combo/eval.h"
-#include "comboreduct/reduct/meta_rules.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/reduct/meta_rules.h>
 
-#include "moses/using.h"
-#include "moses/representation.h"
-#include "moses/types.h"
-#include "moses/ant_scoring.h" 
+#include "using.h"
+#include "representation.h"
+#include "types.h"
+#include "ant_scoring.h" 
 
 #include <iostream>  
 #include <fstream>   

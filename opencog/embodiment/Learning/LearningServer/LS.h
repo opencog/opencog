@@ -22,21 +22,21 @@
 #ifndef LS_H
 #define LS_H
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
-#include "WorldProvider.h"
-#include "EmbodimentConfig.h"
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
-#include "LSCmdMessage.h"
-#include "LearnMessage.h"
-#include "RewardMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/TrySchemaMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/StopLearningMessage.h>
 #include "ImitationLearningAgent.h"
-#include "TrySchemaMessage.h"
-#include "StopLearningMessage.h"
 
-#include "EmbodimentCogServer.h"
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 
 namespace LearningServer
 {

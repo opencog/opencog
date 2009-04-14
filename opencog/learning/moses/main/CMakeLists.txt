@@ -1,15 +1,3 @@
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog/
-    ${OPENCOG_SOURCE_DIR}/opencog/learning/
-    ${OPENCOG_SOURCE_DIR}/opencog/learning/moses
-)
-
-LINK_DIRECTORIES(
-    ${OPENCOG_BINARY_DIR}/opencog/learning/moses
-    ${OPENCOG_BINARY_DIR}/opencog/util
-    ${OPENCOG_BINARY_DIR}/opencog/comboreduct
-)
-
 ADD_EXECUTABLE (moses-sregression moses-sregression)
 TARGET_LINK_LIBRARIES (moses-sregression
 	moses

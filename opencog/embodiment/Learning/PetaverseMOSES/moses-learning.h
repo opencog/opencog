@@ -22,13 +22,13 @@
 #ifndef _MOSES_LEARNING_H
 #define _MOSES_LEARNING_H
 
-#include "util/tree.h"
-#include "util/lru_cache.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/lru_cache.h>
 
-#include "moses/optimization.h"
+#include <opencog/learning/moses/moses/optimization.h>
 
-#include "DistortedComboSize.h"
-#include "ImitationLearningAPI/PetaverseImitationLearning.h"
+#include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
+#include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
 
 #define ESTIMATOR_CACHE_SIZE 500000

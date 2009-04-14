@@ -22,7 +22,7 @@
 #ifndef _HC_PETAVERSE_VOCABULARY_PROVIDER_H
 #define _HC_PETAVERSE_VOCABULARY_PROVIDER_H
 
-#include "PetaverseVocabularyProvider.h"
+#include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseVocabularyProvider.h>
 
 namespace hillclimbing
 {

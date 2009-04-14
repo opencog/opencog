@@ -22,9 +22,9 @@
 #ifndef _PET_ACTION_SYMBOL_H
 #define _PET_ACTION_SYMBOL_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/action_symbol.h"
+#include <opencog/comboreduct/combo/action_symbol.h>
 #include "pet_operator.h"
 
 namespace combo

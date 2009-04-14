@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/action_symbol.h"
+#include "action_symbol.h"
 
 std::ostream& operator<<(std::ostream& out, combo::action_symbol as) {
   opencog::cassert(TRACE_INFO, as);

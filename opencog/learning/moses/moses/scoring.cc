@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses/scoring.h"
-#include "util/numeric.h"
+#include "scoring.h"
+#include <opencog/util/numeric.h>
 #include <cmath>
 
 namespace moses {

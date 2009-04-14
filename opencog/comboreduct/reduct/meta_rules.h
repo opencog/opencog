@@ -24,8 +24,8 @@
 #ifndef _META_RULES_H
 #define _META_RULES_H
 
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/combo/type_tree.h>
+#include "reduct.h"
 
 namespace reduct {
 

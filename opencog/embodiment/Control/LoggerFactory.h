@@ -26,7 +26,7 @@
 #define LOGGERFACTORY_H
 
 #include <string>
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include "EmbodimentConfig.h"
 
 namespace Control

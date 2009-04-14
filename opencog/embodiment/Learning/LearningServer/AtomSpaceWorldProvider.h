@@ -22,7 +22,7 @@
 #ifndef _ATOMSPACE_WORLD_PROVIDER_H_
 #define _ATOMSPACE_WORLD_PROVIDER_H_
 
-#include "WorldProvider.h"
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 

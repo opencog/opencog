@@ -24,10 +24,10 @@
 #ifndef _COMBO_INDEFINITE_OBJECT_H
 #define _COMBO_INDEFINITE_OBJECT_H
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/type_tree_def.h"
-#include "comboreduct/combo/operator_base.h"
+#include "type_tree_def.h"
+#include "operator_base.h"
 
 namespace combo {
   

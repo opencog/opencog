@@ -29,8 +29,8 @@
 #ifndef _PETAVERSE_IMITATION_LEARNING_BASE_H
 #define _PETAVERSE_IMITATION_LEARNING_BASE_H
 
-#include "comboreduct/combo/vertex.h"
-#include "NoSpaceLifeFitnessEstimator.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
 
 class PetaverseImitationLearningBase
 {

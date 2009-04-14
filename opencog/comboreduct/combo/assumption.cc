@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/combo/assumption.h"
+#include "assumption.h"
 #include <iostream>
 #include <vector>
 

@@ -24,16 +24,16 @@
 #ifndef _COMBO_PROCEDURE_CALL_H
 #define _COMBO_PROCEDURE_CALL_H
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 
-#include "comboreduct/combo/type_tree_def.h"
-#include "comboreduct/combo/common_def.h"
+#include "type_tree_def.h"
+#include "common_def.h"
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include "comboreduct/combo/operator_base.h"
-#include "comboreduct/combo/vertex.h"
+#include "operator_base.h"
+#include "vertex.h"
 
 namespace combo
 {

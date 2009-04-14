@@ -26,18 +26,18 @@
 
 #include <exception>
 
-#include "util/tree.h"
-#include "util/numeric.h"
-#include "util/hash_map.h"
-#include "util/exceptions.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/hash_map.h>
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/crutil/exception.h"
-#include "comboreduct/combo/type_tree_def.h"
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/using.h"
-#include "comboreduct/combo/common_def.h"
-#include "comboreduct/combo/perception.h"
-#include "comboreduct/combo/procedure_call.h"
+#include <opencog/comboreduct/crutil/exception.h>
+#include "type_tree_def.h"
+#include "vertex.h"
+#include "using.h"
+#include "common_def.h"
+#include "perception.h"
+#include "procedure_call.h"
 
 namespace combo
 {

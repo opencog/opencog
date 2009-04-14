@@ -21,8 +21,8 @@
  */
 #include "ComboSelectInterpreter.h"
 
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 
 using namespace Procedure;
 

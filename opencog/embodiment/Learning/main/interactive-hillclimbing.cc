@@ -19,15 +19,15 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "interactive-hillclimber.h"
-#include "comboreduct/combo/vertex.h"
-#include "util/lru_cache.h"
+#include <opencog/embodiment/Learning/PetaverseHC/interactive-hillclimber.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/util/lru_cache.h>
 #include <set>
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include "util/mt19937ar.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace hillclimbing;
 using namespace ant_combo;

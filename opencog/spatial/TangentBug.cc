@@ -28,7 +28,7 @@
 #include <iostream>
 #include <algorithm>
 #include <boost/bind.hpp>
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
 using namespace Spatial;
 using namespace TangentBugBits;

@@ -24,7 +24,7 @@
 #include "StopLearningMessage.h"
 
 #include <opencog/atomspace/SpaceServer.h>
-#include "util/StringTokenizer.h"
+#include <opencog/util/StringTokenizer.h>
 
 #include <opencog/xml/NMXmlParser.h>
 #include <opencog/xml/NMXmlExporter.h>

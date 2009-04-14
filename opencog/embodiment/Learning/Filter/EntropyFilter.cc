@@ -19,19 +19,19 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/exceptions.h"
-#include "util/numeric.h"
-#include "util/lru_cache.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/lru_cache.h>
 
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
 #include "EntropyFilter.h"
-#include "PAI.h"
-#include "AtomSpaceUtil.h"
-#include "WorldWrapperUtil.h"
-#include "PetComboVocabulary.h"
-#include "CompareAtomTreeTemplate.h"
-#include "PredefinedProcedureNames.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 
 #include <boost/assign/list_of.hpp>
 

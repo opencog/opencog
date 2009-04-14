@@ -27,7 +27,7 @@
 #include "pet_action_symbol.h"
 #include "pet_indefinite_object.h"
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace combo
 {

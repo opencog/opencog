@@ -24,18 +24,18 @@
 #ifndef _MOSES_MOSES_H
 #define _MOSES_MOSES_H
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/reduct/meta_rules.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/reduct/meta_rules.h>
 
-#include "util/lru_cache.h"
-#include "util/selection.h"
-#include "util/exceptions.h"
-#include "util/hash_set.h"
+#include <opencog/util/lru_cache.h>
+#include <opencog/util/selection.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/hash_set.h>
 
-#include "eda/instance_set.h"
+#include <opencog/learning/moses/eda/instance_set.h>
 
-#include "moses/representation.h"
-#include "moses/scoring.h"
+#include "representation.h"
+#include "scoring.h"
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 

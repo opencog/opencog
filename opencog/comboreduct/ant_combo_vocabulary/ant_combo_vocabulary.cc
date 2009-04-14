@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "ant_combo_vocabulary.h"
 
 namespace ant_combo {
 

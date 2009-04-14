@@ -27,7 +27,7 @@
  *
  */
 #include "GeneralProcedure.h"
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 #include <list>
 
 namespace Procedure

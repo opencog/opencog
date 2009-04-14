@@ -25,13 +25,13 @@
 #define _MOSES_BUILD_KNOBS_H
 
 #include <boost/utility.hpp>
-#include "moses/knob_mapper.h"
-#include "moses/using.h"
-#include "eda/field_set.h"
+#include "knob_mapper.h"
+#include "using.h"
+#include <opencog/learning/moses/eda/field_set.h>
 
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/combo/action.h"
-#include "comboreduct/combo/perception.h"
+#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/combo/action.h>
+#include <opencog/comboreduct/combo/perception.h>
 
 using namespace combo;
 

@@ -28,9 +28,9 @@
 #include <xercesc/util/OutOfMemoryException.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 
-#include "util/files.h"
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/util/files.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 
 using namespace VirtualWorldData;
 using namespace opencog;

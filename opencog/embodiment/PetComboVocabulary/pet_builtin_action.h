@@ -22,9 +22,9 @@
 #ifndef _PET_BUILTIN_ACTION_H
 #define _PET_BUILTIN_ACTION_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/builtin_action.h"
+#include <opencog/comboreduct/combo/builtin_action.h>
 
 #include "pet_operator.h"
 

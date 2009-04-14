@@ -9,10 +9,6 @@ ADD_LIBRARY (PVPSimulator
     AGISimSimulator
 )
 
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog
-)
-
 SET(CMAKE_BUILD_TYPE Debug)
 
 TARGET_LINK_LIBRARIES (PVPSimulator 

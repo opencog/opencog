@@ -22,9 +22,9 @@
 #ifndef _HILLCLIMBING_PETAVERSE_HILLCLIMBER_H
 #define _HILLCLIMBING_PETAVERSE_HILLCLIMBER_H
 
-#include "hillclimber.h"
-#include "DistortedComboSize.h"
-#include "PetaverseImitationLearning.h"
+#include <opencog/learning/hillclimbing/hillclimber.h>
+#include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
+#include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
 namespace hillclimbing
 {

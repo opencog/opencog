@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "VisibilityMap.h"
-#include "Rectangle.h"
+#include "Math/Rectangle.h"
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include <iostream>
 #include <fstream>
 

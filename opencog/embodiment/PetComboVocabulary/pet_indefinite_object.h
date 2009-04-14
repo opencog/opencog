@@ -22,9 +22,9 @@
 #ifndef _PET_INDEFINITE_OBJECT_H
 #define _PET_INDEFINITE_OBJECT_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/indefinite_object.h"
+#include <opencog/comboreduct/combo/indefinite_object.h>
 #include "pet_operator.h"
 
 namespace combo

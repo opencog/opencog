@@ -24,12 +24,12 @@
 #ifndef _HILLCLIMBING_NEIGHBORHOODGENERATOR_H
 #define _HILLCLIMBING_NEIGHBORHOODGENERATOR_H
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 
 //apply reduction for all generated programs
 #define APPLY_FULL_REDUCTION

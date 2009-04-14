@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "petaverse-hillclimber.h"
-#include "RewritingRules.h"
+#include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
 namespace hillclimbing
 {

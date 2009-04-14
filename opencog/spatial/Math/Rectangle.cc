@@ -22,8 +22,8 @@
 #include "Rectangle.h"
 #include "LineSegment.h"
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 
 using namespace Spatial::Math;
 

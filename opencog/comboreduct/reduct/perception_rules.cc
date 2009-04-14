@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/perception_rules.h"
-#include "comboreduct/combo/assumption.h"
-#include "util/exceptions.h"
+#include "perception_rules.h"
+#include <opencog/comboreduct/combo/assumption.h>
+#include <opencog/util/exceptions.h>
 
 namespace reduct {
   typedef combo_tree::sibling_iterator sib_it;

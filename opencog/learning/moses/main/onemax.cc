@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "main/edaopt.h"
-#include "util/mt19937ar.h"
+#include "edaopt.h"
+#include <opencog/util/mt19937ar.h>
 
 int main(int argc,char** argv) { 
   optargs args(argc,argv);

@@ -22,13 +22,13 @@
 #ifndef _NOSPACELIFE_H
 #define _NOSPACELIFE_H
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "CompositeBehaviorDescription.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
 #define ACTION_DONE_TIME 200 //each action takes 2 seconds
 #define PAUSE_TIME 200

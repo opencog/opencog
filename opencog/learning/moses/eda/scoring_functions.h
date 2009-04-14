@@ -24,11 +24,11 @@
 #ifndef _EDA_SCORING_FUNCTIONS_H
 #define _EDA_SCORING_FUNCTIONS_H
 
-#include "util/exceptions.h"
-#include "util/numeric.h"
-#include "util/RandGen.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/RandGen.h>
 
-#include "eda/field_set.h"
+#include "field_set.h"
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 

@@ -37,8 +37,8 @@
 #include <algorithm>
 #include <utility>
 
-#include "util/functional.h"
-#include "util/numeric.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/numeric.h>
 
 /// anything that gets imported into the eda namespace with a using
 /// directive should go here

@@ -22,17 +22,17 @@
 #ifndef RULE_PROCESSOR_H
 #define RULE_PROCESSOR_H
 
-#include "VirtualWorldState.h"
-#include "EmbodimentConfig.h"
-#include "ComboProcedureRepository.h"
-#include "ComboSelectProcedureRepository.h"
+#include <opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorldState.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/Procedure/ComboProcedureRepository.h>
+#include <opencog/embodiment/Control/Procedure/ComboSelectProcedureRepository.h>
 
 #include <map>
 #include <set>
 #include <vector>
 #include <sstream>
 #include <boost/variant.hpp>
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/comboreduct/combo/variable_unifier.h>
 
 struct lua_State;
 

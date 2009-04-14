@@ -11,11 +11,6 @@ ADD_LIBRARY (PredicateUpdaters
 	PetPsychePredicatesUpdater.cc
 )
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
-
 SET(CMAKE_BUILD_TYPE Debug)
 
 TARGET_LINK_LIBRARIES (PredicateUpdaters

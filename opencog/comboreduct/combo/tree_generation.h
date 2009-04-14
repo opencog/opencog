@@ -24,11 +24,11 @@
 #ifndef TREE_GENERATION_H
 #define TREE_GENERATION_H
 
-#include "util/tree.h"
+#include <opencog/util/tree.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include "vertex.h"
+#include "type_tree.h"
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 namespace trees {
 

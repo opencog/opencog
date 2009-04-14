@@ -21,12 +21,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "eda/local_structure.h"
-#include "util/foreach.h"
-#include "util/numeric.h"
-#include "util/algorithm.h"
-#include "util/selection.h"
-#include "util/exceptions.h"
+#include "local_structure.h"
+#include <opencog/util/foreach.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/selection.h>
+#include <opencog/util/exceptions.h>
 
 namespace eda {
   //true if the range is uniform on the variable at index idx

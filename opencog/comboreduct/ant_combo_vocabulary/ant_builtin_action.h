@@ -24,10 +24,10 @@
 #ifndef _ANT_BUILTIN_ACTION_H
 #define _ANT_BUILTIN_ACTION_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/builtin_action.h"
-#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
+#include <opencog/comboreduct/combo/builtin_action.h>
+#include "ant_operator.h"
 
 namespace combo {
   

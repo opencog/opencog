@@ -27,7 +27,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <algorithm>
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 using namespace behavior;
 

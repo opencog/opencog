@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/ant_combo_vocabulary/ant_perception.h"
-#include "comboreduct/combo/type_tree.h"
+#include "ant_perception.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace combo;
 using namespace ant_perception_properties;

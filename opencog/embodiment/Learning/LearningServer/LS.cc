@@ -20,12 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "LS.h"
-#include "SchemaMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <sstream>
-#include "AtomSpaceWorldProvider.h"
-#include "PAIUtils.h"
-#include "WorldWrapperUtil.h"
-#include <atom_types_init.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 #include <opencog/util/Config.h>
 
 using namespace LearningServer;

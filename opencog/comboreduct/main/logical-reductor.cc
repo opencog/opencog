@@ -21,11 +21,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/combo/eval.h"
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/eval.h>
 #include <iostream>
-#include "util/mt19937ar.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace ant_combo;
 using namespace std;

@@ -21,7 +21,7 @@
  */
 #include "RuleProcessor.h"
 
-#include "XmlLoader.h"
+#include <opencog/embodiment/RuleValidation/VirtualWorldData/XmlLoader.h>
 
 #include <cstdio>
 #include <lua.hpp>
@@ -31,15 +31,15 @@
 #include <luabind/function.hpp>
 #include <luabind/operator.hpp>
 
-#include "util/Logger.h"
-#include "util/exceptions.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <boost/format.hpp>
 #include <fstream>
 
-#include "ComboInterpreter.h"
-#include "ComboSelectInterpreter.h"
+#include <opencog/embodiment/Control/Procedure/ComboInterpreter.h>
+#include <opencog/embodiment/Control/Procedure/ComboSelectInterpreter.h>
 
 using namespace Processor;
 using namespace opencog;

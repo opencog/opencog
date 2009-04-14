@@ -24,8 +24,8 @@
 #ifndef _EDA_OPTIMIZE_H
 #define _EDA_OPTIMIZE_H
 
-#include "eda/instance_set.h"
-#include "util/foreach.h"
+#include "instance_set.h"
+#include <opencog/util/foreach.h>
 
 namespace eda {
 

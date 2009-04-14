@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/ant-hillclimbing.cc
+ * opencog/learning/hillclimbing/main/ant-hillclimbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,13 +21,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "ant-hillclimber.h"
-#include "comboreduct/combo/vertex.h"
+#include <opencog/learning/hillclimbing/ant-hillclimber.h>
+#include <opencog/comboreduct/combo/vertex.h>
 #include <set>
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include "moses/ant_scoring.h"
+#include <opencog/learning/moses/moses/ant_scoring.h>
 
 using namespace hillclimbing;
 using namespace combo;

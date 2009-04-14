@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BDTracker.h"
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 #include <opencog/atomspace/TLB.h>
 
 

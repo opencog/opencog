@@ -24,13 +24,13 @@
 #ifndef _COMBO_ACTION_H
 #define _COMBO_ACTION_H
 
-#include "util/exceptions.h"
-#include "comboreduct/combo/type_tree_def.h"
+#include <opencog/util/exceptions.h>
+#include "type_tree_def.h"
 
 #include <iostream>
 #include <vector>
 //#include <cassert>
-#include "comboreduct/combo/common_def.h"
+#include "common_def.h"
 
 namespace combo
 {

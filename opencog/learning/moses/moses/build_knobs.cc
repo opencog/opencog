@@ -21,12 +21,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses/build_knobs.h"
-#include "comboreduct/reduct/meta_rules.h"
-#include "comboreduct/reduct/general_rules.h"
-#include "util/lazy_random_selector.h"
-#include "util/exceptions.h"
-#include "util/dorepeat.h"
+#include "build_knobs.h"
+#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
+#include <opencog/util/lazy_random_selector.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/dorepeat.h>
 
 
 // uncomment this line for debug information to be given during execution

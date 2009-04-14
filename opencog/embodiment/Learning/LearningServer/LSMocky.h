@@ -22,10 +22,10 @@
 #ifndef LSMOCKY_H
 #define LSMOCKY_H
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <EmbodimentCogServer.h>
-#include <EmbodimentConfig.h>
+#include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "SleepAgent.h"
 
 using namespace opencog;

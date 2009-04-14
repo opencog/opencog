@@ -24,7 +24,7 @@
 #ifndef _REDUCT_CONTIN_RULES_H
 #define _REDUCT_CONTIN_RULES_H
 
-#include "comboreduct/reduct/reduct.h"
+#include "reduct.h"
 
 namespace reduct {
 

@@ -23,8 +23,8 @@
 #include "BDRetriever.h"
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/TemporalTable.h>
-#include "util/exceptions.h"
-#include "PAI.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 namespace behavior
 {

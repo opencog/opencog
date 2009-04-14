@@ -22,17 +22,17 @@
 #ifndef ACTIONFILTER_H_
 #define ACTIONFILTER_H_
 
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
-#include "WorldProvider.h"
-#include "BDRetriever.h"
-#include "BehaviorCategory.h"
-#include "CompositeBehaviorDescription.h"
-#include "ElementaryBehaviorDescription.h"
-#include "WorldWrapperUtil.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
+#include <opencog/embodiment/Learning/behavior/BDRetriever.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
+#include <opencog/embodiment/Learning/behavior/CompositeBehaviorDescription.h>
+#include <opencog/embodiment/Learning/behavior/ElementaryBehaviorDescription.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 namespace Filter
 {

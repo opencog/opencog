@@ -24,11 +24,11 @@
 #ifndef _COMBO_PROCEDURE_REPOSITORY_H
 #define _COMBO_PROCEDURE_REPOSITORY_H
 
-#include "util/exceptions.h"
-#include "util/Logger.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 
-#include "comboreduct/combo/procedure_call.h"
-#include "comboreduct/combo/vertex.h"
+#include "procedure_call.h"
+#include "vertex.h"
 
 #include <set>
 #include <map>

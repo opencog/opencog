@@ -24,13 +24,13 @@
 
 #include <algorithm>
 
-#include "EntropyFilter.h"
-#include "AtomSpaceWorldProvider.h"
-#include "atomspace/AtomSpace.h"
-#include "PetaverseImitationLearning.h"
-#include "PetaverseVocabularyProvider.h"
-#include "petaverse-hillclimber.h"
-#include "HCPetaverseVocabularyProvider.h"
+#include <opencog/embodiment/Learning/Filter/EntropyFilter.h>
+#include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
+#include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseVocabularyProvider.h>
+#include <opencog/embodiment/Learning/PetaverseHC/petaverse-hillclimber.h>
+#include <opencog/embodiment/Learning/PetaverseHC/HCPetaverseVocabularyProvider.h>
 
 #include <opencog/server/Agent.h>
 

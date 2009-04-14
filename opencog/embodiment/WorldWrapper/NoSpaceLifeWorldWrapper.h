@@ -22,10 +22,10 @@
 #ifndef _NOSPACELIFEWORLDWRAPPER_H
 #define _NOSPACELIFEWORLDWRAPPER_H
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 #include "WorldWrapper.h"
-#include "NoSpaceLife.h"
+#include <opencog/embodiment/Learning/NoSpaceLife/NoSpaceLife.h>
 
 namespace WorldWrapper
 {

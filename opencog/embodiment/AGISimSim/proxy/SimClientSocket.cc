@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "SimClientSocket.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 SimClientSocket::SimClientSocket(ISocketHandler& h, AsynchronousMessageReceiver* _receiver, bool echoing)
         : TcpSocket(h)

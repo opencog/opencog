@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/reduct/meta_rules.h"
-#include "comboreduct/reduct/general_rules.h"
+#include "reduct.h"
+#include "meta_rules.h"
+#include "general_rules.h"
 
 namespace reduct {
   const rule& clean_reduction() {

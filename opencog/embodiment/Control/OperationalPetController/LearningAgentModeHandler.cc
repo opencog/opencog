@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "LearningAgentModeHandler.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 #include "Pet.h"
 
 using namespace OperationalPetController;

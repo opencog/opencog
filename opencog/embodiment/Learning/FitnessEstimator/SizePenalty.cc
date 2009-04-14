@@ -21,11 +21,11 @@
  */
 
 #include "SizePenalty.h"
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 #include "DistortedComboSize.h"
-#include "util/Logger.h"
-#include "EmbodimentConfig.h"
-#include "NetworkElement.h"
+#include <opencog/util/Logger.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 
 namespace FitnessEstimator
 {

@@ -24,8 +24,8 @@
 #ifndef _EDA_LOCAL_STRUCTURE_H
 #define _EDA_LOCAL_STRUCTURE_H
 
-#include "eda/field_set.h"
-#include "util/digraph.h"
+#include "field_set.h"
+#include <opencog/util/digraph.h>
 
 namespace eda {
 

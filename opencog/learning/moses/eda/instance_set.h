@@ -24,8 +24,8 @@
 #ifndef _EDA_INSTANCE_SET_H
 #define _EDA_INSTANCE_SET_H
 
-#include "eda/field_set.h"
-#include "eda/scoring.h"
+#include "field_set.h"
+#include "scoring.h"
 
 namespace eda {
 

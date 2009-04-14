@@ -22,7 +22,7 @@
 #include <map>
 
 #include "SuperEntity.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace Spatial;
 using namespace opencog;

@@ -24,10 +24,10 @@
 #ifndef _REDUCT_GENERAL_RULES_H
 #define _REDUCT_GENERAL_RULES_H
 
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/combo/eval.h"
+#include "reduct.h"
+#include <opencog/comboreduct/combo/eval.h>
 
 namespace reduct {
 

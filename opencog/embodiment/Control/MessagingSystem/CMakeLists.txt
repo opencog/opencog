@@ -23,10 +23,6 @@ ADD_LIBRARY (MessagingSystem
         EmbodimentCogServer
 )
 
-INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/opencog
-)
-
 IF(COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)

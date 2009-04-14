@@ -22,7 +22,7 @@
 #ifndef DISTORTEDCOMBOSIZE_H
 #define DISTORTEDCOMBOSIZE_H
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace FitnessEstimator
 {

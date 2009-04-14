@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/ant_combo_vocabulary/ant_indefinite_object.h"
-#include "comboreduct/combo/type_tree.h"
+#include "ant_indefinite_object.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
 using namespace combo;
 using namespace ant_indefinite_object_properties;

@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "DistortedComboSize.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 #include <opencog/util/Config.h>
 
 //the distortion of the size of the random instruction is number of

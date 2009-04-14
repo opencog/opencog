@@ -27,7 +27,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace std;
 using namespace opencog;

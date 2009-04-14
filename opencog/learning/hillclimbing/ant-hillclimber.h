@@ -25,8 +25,8 @@
 #define _HILLCLIMBING_PETAVERSE_HILLCLIMBER_H
 
 #include "hillclimber.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 
 namespace hillclimbing
 {

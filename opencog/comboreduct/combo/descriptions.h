@@ -24,10 +24,10 @@
 #ifndef _COMBO_DESCRIPTIONS_H
 #define _COMBO_DESCRIPTIONS_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/action.h"
-#include "comboreduct/combo/type_tree.h"
+#include "action.h"
+#include "type_tree.h"
 
 namespace builtin_properties {
   using namespace combo;

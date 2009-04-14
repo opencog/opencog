@@ -24,22 +24,22 @@ typedef unsigned long ulong;
 #include <map>
 #include <set>
 
-#include "util/functional.h"
-#include "util/exceptions.h"
-#include "util/misc.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 
-#include "atomspace/Node.h"
-#include "atomspace/AtomSpace.h"
-#include "atomspace/utils.h"
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/utils.h>
 
 #include "BE.h"
 #include "BDTracker.h"
-#include "PAI.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "WorldProvider.h"
-#include "AtomSpaceUtil.h"
-#include "CompareAtomTreeTemplate.h"
-#include "NetworkElement.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #define WALK_PERCEPT_NAME "walk"
 #define MIN_ACTION_DURATION 2

@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/eda.h
+ * opencog/modes/eda/eda.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -25,10 +25,10 @@
 #ifndef _EDA_EDA_H
 #define _EDA_EDA_H
 
-#include "eda/using.h"
+#include "using.h"
 
-#include "util/tree.h"
-#include "util/foreach.h"
+#include <opencog/util/tree.h>
+#include <opencog/util/foreach.h>
 
 #include <set>
 #include <climits>

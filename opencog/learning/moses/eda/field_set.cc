@@ -21,10 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "eda/field_set.h"
+#include "field_set.h"
 #include <sstream>
-#include "util/dorepeat.h"
-#include "util/exceptions.h"
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/exceptions.h>
 
 namespace eda {
   const disc_t field_set::contin_spec::Stop=0;

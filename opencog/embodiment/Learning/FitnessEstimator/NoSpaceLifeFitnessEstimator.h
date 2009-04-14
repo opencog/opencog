@@ -8,12 +8,12 @@
 #ifndef _NOSPACELIFEFITNESSESTIMATOR_H
 #define _NOSPACELIFEFITNESSESTIMATOR_H
 
-#include "util/lru_cache.h"
+#include <opencog/util/lru_cache.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "BehaviorCategory.h"
-#include "BehaviorDescriptionMatcher.h"
-#include "WorldProvider.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorCategory.h>
+#include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 #include "SizePenalty.h"
 
 //that paramter is here to determine to the maximum number of cycles the

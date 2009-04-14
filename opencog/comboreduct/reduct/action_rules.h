@@ -24,7 +24,7 @@
 #ifndef _REDUCT_ACTION_RULES_H
 #define _REDUCT_ACTION_RULES_H
 
-#include "comboreduct/reduct/reduct.h"
+#include "reduct.h"
 #include <boost/logic/tribool.hpp>
 
 namespace reduct

@@ -24,8 +24,8 @@
 #ifndef _EDA_SCORING_H
 #define _EDA_SCORING_H
 
-#include "eda/eda.h"
-#include "util/functional.h"
+#include "eda.h"
+#include <opencog/util/functional.h>
 
 namespace eda {
   

@@ -27,7 +27,7 @@
 //various routines dealing with computin the (algorithmic) complexity of
 //particular combo programs
 
-#include "comboreduct/combo/vertex.h"
+#include "vertex.h"
 
 namespace combo {
   typedef int complexity_t ;  //note: complexity is negative with zero being

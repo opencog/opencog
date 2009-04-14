@@ -35,7 +35,7 @@
 #include <functional>
 #include <vector>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 // uncomment this line for debug information to be given during execution
 //#define DEBUG_INFO 

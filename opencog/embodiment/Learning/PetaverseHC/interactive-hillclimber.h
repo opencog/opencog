@@ -22,10 +22,10 @@
 #ifndef _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 #define _HILLCLIMBING_INTERACTIVE_HILLCLIMBER_H
 
-#include "hillclimbing/hillclimber.h"
-#include "DistortedComboSize.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/learning/hillclimbing/hillclimber.h>
+#include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 
 namespace hillclimbing
 {

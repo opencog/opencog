@@ -21,12 +21,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/reduct/meta_rules.h"
-#include "comboreduct/reduct/general_rules.h"
-#include "comboreduct/reduct/logical_rules.h"
-#include "comboreduct/reduct/contin_rules.h"
-#include "comboreduct/reduct/mixed_rules.h"
+#include "reduct.h"
+#include "meta_rules.h"
+#include "general_rules.h"
+#include "logical_rules.h"
+#include "contin_rules.h"
+#include "mixed_rules.h"
 
 namespace reduct {
 

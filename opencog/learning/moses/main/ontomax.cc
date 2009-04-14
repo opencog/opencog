@@ -21,9 +21,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "main/edaopt.h"
-#include "eda/initialization.h"
-#include "util/mt19937ar.h"
+#include "edaopt.h"
+#include <opencog/learning/moses/eda//initialization.h>
+#include <opencog/util/mt19937ar.h>
 
 void recbuild(onto_tree& tr,onto_tree::iterator it,
 	      int b,int maxd,int d,int s) {

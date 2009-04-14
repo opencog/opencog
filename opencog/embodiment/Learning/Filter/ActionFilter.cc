@@ -23,10 +23,10 @@
 #include <opencog/atomspace/Node.h>
 
 #include "ActionFilter.h"
-#include "util/exceptions.h"
-#include "PAI.h"
-#include "AtomSpaceUtil.h"
-#include "WorldWrapperUtil.h"
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
 namespace Filter
 {

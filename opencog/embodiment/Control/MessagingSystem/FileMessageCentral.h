@@ -28,7 +28,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <SystemParameters.h>
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 #include "StringMessage.h"
 
 #include <fstream>

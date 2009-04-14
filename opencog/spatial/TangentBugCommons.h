@@ -22,10 +22,10 @@
 #ifndef _SPATIAL_TANGENT_BUG_COMMONS_H_
 #define _SPATIAL_TANGENT_BUG_COMMONS_H_
 
-#include "util/Logger.h"
-#include "util/numeric.h"
-#include "util/hash_set.h"
-#include "util/hash_map.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/hash_set.h>
+#include <opencog/util/hash_map.h>
 
 #include <set>
 #include <string>

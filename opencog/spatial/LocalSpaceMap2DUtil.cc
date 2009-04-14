@@ -21,12 +21,12 @@
  */
 #include "LocalSpaceMap2DUtil.h"
 #include "LocalSpaceMap2D.h"
-#include "util/functional.h"
-#include "util/Logger.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/StringManipulator.h>
 
-#include "Vector3.h"
-#include "LineSegment.h"
+#include "Math/Vector3.h"
+#include "Math/LineSegment.h"
 
 #include <limits>
 

@@ -21,9 +21,9 @@
  */
 #include <exception>
 #include <cstdlib>
-#include "util/files.h"
-#include "util/Logger.h"
-#include "EmbodimentConfig.h"
+#include <opencog/util/files.h>
+#include <opencog/util/Logger.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include "LS.h"
 
 using namespace LearningServer;

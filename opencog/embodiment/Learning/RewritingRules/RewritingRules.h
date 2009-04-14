@@ -22,7 +22,7 @@
 #ifndef _REWRITING_RULES_H
 #define _REWRITING_RULES_H
 
-#include <comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 #include "hillclimbing_action_reduction.h"
 #include "hillclimbing_perception_reduction.h"
 #include "hillclimbing_full_reduction.h"

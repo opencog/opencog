@@ -23,7 +23,7 @@
  */
 #include <SystemParameters.h>
 #include "DummyServer.h"
-#include "util/files.h"
+#include <opencog/util/files.h>
 
 using namespace MessagingSystem;
 

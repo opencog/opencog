@@ -23,15 +23,15 @@
 #include "PAIWorldWrapper.h"
 #include "WorldWrapperUtil.h"
 #include <opencog/spatial/TangentBug.h>
-#include "PVPXmlConstants.h"
+#include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <opencog/spatial/AStarController.h>
 #include <opencog/atomspace/Node.h>
 #include <boost/bind.hpp>
-#include "NetworkElement.h"
-#include "util/RandGen.h"
-#include "PredefinedProcedureNames.h"
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/spatial/HPASearch.h>
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/assign/list_of.hpp>

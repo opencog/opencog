@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/moses-ant-hillclimbing.cc
+ * opencog/learning/moses/main/moses-ant-hillclimbing.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -26,17 +26,17 @@
 #include <algorithm>
 #include <iostream>
 
-#include "util/mt19937ar.h"
-#include "util/numeric.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/comboreduct/reduct/reduct.h>
 
-#include "moses/moses.h"
-#include "moses/optimization.h"
-#include "moses/scoring_functions.h"
-#include "moses/ant_scoring.h"
+#include <opencog/learning/moses/moses/moses.h>
+#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/moses/scoring_functions.h>
+#include <opencog/learning/moses/moses/ant_scoring.h>
 
 #include <boost/lexical_cast.hpp>
 

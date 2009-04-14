@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/perception.h"
-#include "comboreduct/combo/descriptions.h"
+#include "perception.h"
+#include "descriptions.h"
 
 std::ostream& operator<<(std::ostream& out, combo::perception p) {
   opencog::cassert(TRACE_INFO, p);

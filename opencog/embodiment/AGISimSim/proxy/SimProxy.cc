@@ -49,9 +49,9 @@
 #include "DOMTreeErrorReporter.h"
 #include "DOMPrintErrorHandler.h"
 
-#include "util/foreach.h"
-#include "util/platform.h"
-#include "util/Logger.h"
+#include <opencog/util/foreach.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/Logger.h>
 
 #define WAIT_RESPONSE_TIMEOUT 10
 #define SEC_DELAY 0

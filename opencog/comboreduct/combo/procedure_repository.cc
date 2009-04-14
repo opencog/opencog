@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/procedure_repository.h"
-#include "comboreduct/combo/type_tree.h"
+#include "procedure_repository.h"
+#include "type_tree.h"
 
 #include <boost/graph/strong_components.hpp>
 #include <boost/graph/adjacency_list.hpp>

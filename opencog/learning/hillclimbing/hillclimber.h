@@ -24,14 +24,14 @@
 #ifndef _HILLCLIMBING_HILLCLIMBER_H
 #define _HILLCLIMBING_HILLCLIMBER_H
 
-#include "util/selection.h"
-#include "util/exceptions.h"
-#include "util/lru_cache.h"
-#include "util/numeric.h"
-#include "util/hash_set.h"
-#include "util/RandGen.h"
+#include <opencog/util/selection.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/lru_cache.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/hash_set.h>
+#include <opencog/util/RandGen.h>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 #include "NeighborhoodGenerator.h"
 #include <ctime>
 #include <vector>

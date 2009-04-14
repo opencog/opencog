@@ -25,8 +25,8 @@
 #include "ComboProcedure.h"
 #include "ComboInterpreter.h"
 
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/variable_unifier.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/variable_unifier.h>
 
 
 namespace Procedure

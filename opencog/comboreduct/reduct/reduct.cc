@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
+#include "reduct.h"
 
 namespace reduct {
   reduct::rule* new_clone(const reduct::rule& r) { return r.clone(); }

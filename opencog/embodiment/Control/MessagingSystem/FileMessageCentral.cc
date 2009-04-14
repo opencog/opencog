@@ -23,7 +23,7 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
 using namespace MessagingSystem;
 

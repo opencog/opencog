@@ -19,9 +19,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/functional.h"
-#include "util/foreach.h"
-#include "util/Logger.h"
+#include <opencog/util/functional.h>
+#include <opencog/util/foreach.h>
+#include <opencog/util/Logger.h>
 
 #include "WorldWrapperUtilMock.h"
 #include <math.h>

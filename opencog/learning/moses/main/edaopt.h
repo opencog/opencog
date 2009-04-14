@@ -21,14 +21,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "eda/scoring_functions.h"
-#include "eda/termination.h"
-#include "eda/local_structure.h"
-#include "eda/replacement.h"
-#include "eda/logging.h"
-#include "eda/optimize.h"
+#include <opencog/learning/moses/eda/scoring_functions.h>
+#include <opencog/learning/moses/eda/termination.h>
+#include <opencog/learning/moses/eda/local_structure.h>
+#include <opencog/learning/moses/eda/replacement.h>
+#include <opencog/learning/moses/eda/logging.h>
+#include <opencog/learning/moses/eda/optimize.h>
 
-#include "util/selection.h"
+#include <opencog/util/selection.h>
 
 #include <boost/lexical_cast.hpp>
 

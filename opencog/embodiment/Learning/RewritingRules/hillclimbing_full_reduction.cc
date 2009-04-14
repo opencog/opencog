@@ -19,13 +19,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/reduct/reduct.h>
 #include "hillclimbing_full_reduction.h"
-#include "comboreduct/reduct/meta_rules.h"
-#include "comboreduct/reduct/general_rules.h"
-#include "comboreduct/reduct/action_rules.h"
-#include "comboreduct/reduct/perception_rules.h"
-#include "comboreduct/reduct/logical_rules.h"
+#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
+#include <opencog/comboreduct/reduct/action_rules.h>
+#include <opencog/comboreduct/reduct/perception_rules.h>
+#include <opencog/comboreduct/reduct/logical_rules.h>
 
 namespace reduct
 {

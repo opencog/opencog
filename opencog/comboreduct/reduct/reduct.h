@@ -24,10 +24,10 @@
 #ifndef _REDUCT_RULE_H
 #define _REDUCT_RULE_H
 
-#include "util/RandGen.h"
+#include <opencog/util/RandGen.h>
 
-#include "comboreduct/reduct/using.h"
-#include "comboreduct/combo/vertex.h"
+#include "using.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace reduct {
 

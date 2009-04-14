@@ -21,7 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/message.h"
+#include "message.h"
 
 std::ostream& operator<<(std::ostream& out,const combo::message& m) {
   return out << combo::message::prefix() << '\"' << m.getContent() << '\"';

@@ -20,13 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <fstream>
-#include "util/files.h"
+#include <opencog/util/files.h>
 #include "PredaveseStdafx.h"
 #include "Predavese.h"
 #include "PredaveseParser.h"
 #include "PredaveseDefinitions.h"
-#include "util/StringTokenizer.h"
-#include "util/PorterStemmer.h"
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/util/PorterStemmer.h>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/case_conv.hpp>

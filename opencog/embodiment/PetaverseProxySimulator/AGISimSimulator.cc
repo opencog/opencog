@@ -21,8 +21,8 @@
  */
 
 #include "AGISimSimulator.h"
-#include "util/Logger.h"
-#include "util/numeric.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/numeric.h>
 
 using namespace PetaverseProxySimulator;
 using namespace PerceptionActionInterface;

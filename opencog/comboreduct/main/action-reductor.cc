@@ -21,12 +21,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/combo/eval.h"
-#include "comboreduct/combo/type_tree.h"
-#include "util/mt19937ar.h"
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/combo/type_tree.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include <iostream>
 

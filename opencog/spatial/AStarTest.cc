@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "util/mt19937ar.h"
-#include "util/StringManipulator.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "AStarController.h"
 #include "LocalSpaceMap2DUtil.h"

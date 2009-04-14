@@ -22,7 +22,7 @@
 #ifndef _SPATIAL_TBASSERT_H_
 #define _SPATIAL_TBASSERT_H_
 
-#include "util/exceptions.h"
+#include <opencog/util/exceptions.h>
 
 // DEPRECATED
 // TB_ASSERT - do not throw exceptions and have trace info

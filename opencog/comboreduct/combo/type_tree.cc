@@ -21,10 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "util/Logger.h"
+#include <opencog/util/Logger.h>
 
-#include "comboreduct/combo/type_tree.h"
-#include "comboreduct/combo/descriptions.h"
+#include "type_tree.h"
+#include "descriptions.h"
 
 namespace combo
 {

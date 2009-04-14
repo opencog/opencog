@@ -23,7 +23,7 @@
  */
 
 #include "FeedbackMessage.h"
-#include "util/StringTokenizer.h"
+#include <opencog/util/StringTokenizer.h>
 
 using namespace MessagingSystem;
 

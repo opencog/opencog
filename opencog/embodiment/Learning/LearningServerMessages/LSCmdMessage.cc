@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "LSCmdMessage.h"
-#include "util/StringTokenizer.h"
+#include <opencog/util/StringTokenizer.h>
 
 using namespace LearningServerMessages;
 

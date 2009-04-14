@@ -22,9 +22,9 @@
 #ifndef _PET_PERCEPTION_H
 #define _PET_PERCEPTION_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/perception.h"
+#include <opencog/comboreduct/combo/perception.h>
 #include "pet_operator.h"
 
 namespace combo

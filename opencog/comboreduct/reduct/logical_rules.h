@@ -25,12 +25,12 @@
 #define _REDUCT_LOGICAL_RULES_H
 
 
-#include "util/foreach.h"
-#include "util/exceptions.h"
+#include <opencog/util/foreach.h>
+#include <opencog/util/exceptions.h>
 
-#include "comboreduct/reduct/reduct.h"
-#include "comboreduct/reduct/flat_normal_form.h"
-#include "comboreduct/combo/type_tree.h"
+#include "reduct.h"
+#include "flat_normal_form.h"
+#include <opencog/comboreduct/combo/type_tree.h>
 
 namespace reduct {
   //ensure that all arguments and or nodes have an and node as their parent.

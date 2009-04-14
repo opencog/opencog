@@ -19,11 +19,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "comboreduct/combo/vertex.h"
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/type_tree.h>
 
-#include "RewritingRules/RewritingRules.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 #include <iostream>
 

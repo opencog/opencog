@@ -22,11 +22,11 @@
 #ifndef ENTITYRELEVANCEFILTER_H_
 #define ENTITYRELEVANCEFILTER_H_
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
-#include "WorldProvider.h"
+#include <opencog/embodiment/Learning/behavior/WorldProvider.h>
 
 #include <set>
 #include <vector>

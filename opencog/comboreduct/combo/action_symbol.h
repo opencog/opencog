@@ -24,8 +24,8 @@
 #ifndef _COMBO_ACTION_SYMBOL_H
 #define _COMBO_ACTION_SYMBOL_H
 
-#include "comboreduct/combo/operator_base.h"
-#include "comboreduct/combo/type_tree_def.h"
+#include "operator_base.h"
+#include "type_tree_def.h"
 
 namespace combo {
 

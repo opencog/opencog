@@ -21,13 +21,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses/moses.h"
-#include "moses/optimization.h"
-#include "moses/scoring_functions.h"
+#include <opencog/learning/moses/moses//moses.h>
+#include <opencog/learning/moses/moses//optimization.h>
+#include <opencog/learning/moses/moses//scoring_functions.h>
 #include <boost/lexical_cast.hpp>
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/reduct/reduct.h>
 #include <iostream>
-#include "util/mt19937ar.h"
+#include <opencog/util/mt19937ar.h>
 
 using namespace moses;
 using namespace reduct;

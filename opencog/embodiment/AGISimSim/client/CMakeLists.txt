@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES(
     ${OPENCOG_BINARY_DIR}/opencog/embodiment/AGISimSim/proxy
-    ${OPENCOG_BINARY_DIR}/opencog/util
 )
 
 IF(COMMAND cmake_policy)

@@ -22,10 +22,10 @@
 #include "LocalSpaceMap2D.h"
 
 #include "TB_ASSERT.h"
-#include "util/Logger.h"
-#include "util/exceptions.h"
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
 
-#include "Vector3.h"
+#include "Math/Vector3.h"
 #include "StaticEntity.h"
 
 #include <boost/lexical_cast.hpp>

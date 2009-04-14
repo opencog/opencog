@@ -25,14 +25,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "comboreduct/reduct/reduct.h"
+#include <opencog/comboreduct/reduct/reduct.h>
 
-#include "util/mt19937ar.h"
-#include "util/Logger.h"
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
 
-#include "moses/moses.h"
-#include "moses/optimization.h"
-#include "moses/scoring_functions.h"
+#include <opencog/learning/moses/moses/moses.h>
+#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/moses/scoring_functions.h>
 
 
 using namespace moses;

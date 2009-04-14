@@ -9,9 +9,6 @@ ADD_LIBRARY(Predavese
     NominalReferenceResolver.cc
 )
 
-INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/opencog)
-
 TARGET_LINK_LIBRARIES (Predavese
     util
     ${XERCESC_LIBRARIES}

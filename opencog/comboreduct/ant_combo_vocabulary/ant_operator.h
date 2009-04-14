@@ -24,8 +24,8 @@
 #ifndef _ANT_OPERATOR_H
 #define _ANT_OPERATOR_H
 
-#include "comboreduct/combo/operator_base.h"
-#include "comboreduct/combo/type_tree.h"
+#include <opencog/comboreduct/combo/operator_base.h>
+#include <opencog/comboreduct/combo/type_tree.h>
 
 namespace combo {
 

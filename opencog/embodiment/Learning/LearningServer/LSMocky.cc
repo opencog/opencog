@@ -21,9 +21,9 @@
  */
 #include "LSMocky.h"
 #include "SleepAgent.h"
-#include "LSCmdMessage.h"
-#include "LearnMessage.h"
-#include "RewardMessage.h"
+#include <opencog/embodiment/Learning/LearningServerMessages/LSCmdMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/LearnMessage.h>
+#include <opencog/embodiment/Learning/LearningServerMessages/RewardMessage.h>
 
 using namespace LearningServer;
 using namespace opencog;

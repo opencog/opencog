@@ -25,8 +25,8 @@
 #define _MOSES_KNOB_MAPPER_H
 
 #include <map>
-#include "eda/field_set.h"
-#include "moses/knobs.h"
+#include <opencog/learning/moses/eda/field_set.h>
+#include "knobs.h"
 
 namespace moses {
   struct knob_mapper {

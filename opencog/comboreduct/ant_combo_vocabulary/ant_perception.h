@@ -24,10 +24,10 @@
 #ifndef _ANT_PERCEPTION_H
 #define _ANT_PERCEPTION_H
 
-#include "util/numeric.h"
+#include <opencog/util/numeric.h>
 
-#include "comboreduct/combo/perception.h"
-#include "comboreduct/ant_combo_vocabulary/ant_operator.h"
+#include <opencog/comboreduct/combo/perception.h>
+#include "ant_operator.h"
 
 namespace combo {
   

@@ -31,7 +31,7 @@
 #else
 #include <sys/select.h>
 #include <sys/time.h>
-#include "util/foreach.h"
+#include <opencog/util/foreach.h>
 #endif
 
 using namespace opencog;

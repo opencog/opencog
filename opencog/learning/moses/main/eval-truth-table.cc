@@ -21,11 +21,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "moses/moses.h"
-#include "moses/scoring_functions.h"
+#include <opencog/learning/moses/moses/moses.h>
+#include <opencog/learning/moses/moses/scoring_functions.h>
 
 //ant_combo_vocabulary is used only for the boolean core vocabulary
-#include "comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h"
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace moses;
 using namespace ant_combo;

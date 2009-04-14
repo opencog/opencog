@@ -30,11 +30,11 @@
 #include <map>
 #include <boost/bind.hpp>
 
-#include "util/hash_map.h"
-#include "util/numeric.h"
-#include "util/tree.h"
+#include <opencog/util/hash_map.h>
+#include <opencog/util/numeric.h>
+#include <opencog/util/tree.h>
 
-#include "comboreduct/combo/vertex.h"
+#include <opencog/comboreduct/combo/vertex.h>
 
 namespace reduct {
   typedef std::set<int,opencog::absolute_value_order<int> > clause;

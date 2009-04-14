@@ -20,12 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "NoSpaceLifeFitnessEstimator.h"
-#include "NoSpaceLifeWorldWrapper.h"
-#include "ComboInterpreter.h"
-#include "util/exceptions.h"
-#include "EmbodimentConfig.h"
-#include "NetworkElement.h"
-#include "PetComboVocabulary.h"
+#include <opencog/embodiment/WorldWrapper/NoSpaceLifeWorldWrapper.h>
+#include <opencog/embodiment/Control/Procedure/ComboInterpreter.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
+#include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
 //true if the timing is taken into account in the similarity measure
 #define TIMING_PERTINANCE true
