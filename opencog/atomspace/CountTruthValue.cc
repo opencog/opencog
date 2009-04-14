@@ -151,3 +151,30 @@ CountTruthValue* CountTruthValue::fromString(const char* tvStr)
                                static_cast<confidence_t>(tconf),
                                static_cast<count_t>(tcount));
 }
+
+TruthValue* CountTruthValue::merge(const TruthValue& other) const
+{
+    const CountTruthValue *oc =
+        dynamic_cast<const CountTruthValue *>(&other);
+
+    // If other is a simple truth value, then perhaps we should 
+    // merge it in, as if it were a count truth value with a count 
+    // of 1?  In which case, we should add a merge routine to 
+    // SimpleTruthValue to do likewise... Anyway, for now, just
+    // ignore this possible complication to the semantics.
+    if (NULL == oc) return TruthValue::merge(other);
+    
+    // If both this and other are counts, then accumulate to get the
+    // total count, and average together the strengths, using the 
+    // count as the relative weight.
+    CountTruthValue *nc = clone();
+    nc->count += oc->count;
+    nc->mean = (this->mean * this->count +
+                   oc->mean * oc->count) / nc->count;
+    if (oc->confidence > nc->confidence)
+    {
+        nc->confidence = oc->confidence;
+    }
+    return nc;
+}
+

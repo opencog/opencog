@@ -51,13 +51,11 @@ public:
 
     CountTruthValue* clone() const;
     CountTruthValue& operator=(const TruthValue& rhs)
-    throw (RuntimeException);
+        throw (RuntimeException);
 
     virtual bool operator==(const TruthValue& rhs) const;
 
     static CountTruthValue* fromString(const char*);
-    static count_t confidenceToCount(confidence_t);
-    static confidence_t countToConfidence(count_t);
 
     float toFloat() const;
     std::string toString() const;
@@ -69,6 +67,8 @@ public:
     void setMean(strength_t);
     void setCount(count_t);
     void setConfidence(confidence_t);
+
+    virtual TruthValue* merge(const TruthValue&) const;
 };
 
 } // namespace opencog
