@@ -31,12 +31,6 @@
 #include <opencog/comboreduct/combo/type_tree.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 
-//apply reduction for all generated programs
-#define APPLY_FULL_REDUCTION
-
-//apply reduction for all action type elementary sub-programs
-#define APPLY_ACTION_REDUCTION
-
 //apply permutation neighborhood expansion,
 //that is and_seq(A1 A2 A3) is neighbor with
 //and_seq(A2 A1 A3), and_seq(A2 A3 A1), and_seq(A1 A3 A2), and_seq(A3 A1 A2)
@@ -89,10 +83,12 @@ public:
                           const rule& action_reduction,
                           const rule& full_reduction,
                           arity_t arg_count = 0,
-                          bool abibb = false)
-            : _operators(operators), _perceptions(perceptions), _actions(actions),
-            _action_reduction(action_reduction), _full_reduction(full_reduction),
-            _arg_count(arg_count), _action_boolean_if_both_branches(abibb) {
+                          bool abibb = false,
+                          bool reduct_enabled = true)
+    : _operators(operators), _perceptions(perceptions), _actions(actions),
+    _action_reduction(action_reduction), _full_reduction(full_reduction),
+    _arg_count(arg_count), _action_boolean_if_both_branches(abibb),
+    _reduct_enabled(reduct_enabled) {
         opencog::cassert(TRACE_INFO, arg_count >= 0);
     }
 
@@ -556,6 +552,8 @@ private:
     //consider filling 2 branches of a conditional in one step
     bool _action_boolean_if_both_branches;
 
+    bool _reduct_enabled; //whether to reduce or not the candidates
+
     combo_tree_ns_set _composite_perceptions;
     combo_tree_ns_set _composite_actions;
 
@@ -563,9 +561,9 @@ private:
 
     //add the combo_tree in the neighborhood
     void add_neighbor(neighborhood& nh, combo_tree& tr) {
-#ifdef APPLY_FULL_REDUCTION
-        _full_reduction(tr);
-#endif
+        if(_reduct_enabled)
+            _full_reduction(tr);
+
         //debug log
         std::stringstream ss_tr;
         ss_tr << tr;
@@ -583,21 +581,24 @@ private:
     //add composite action
     void add_composite_action(combo_tree& tr) {
         bool insert_action = true;
-#ifdef APPLY_ACTION_REDUCTION
-        _action_reduction(tr);
-        //check if the composite action is of the form and_seq(builtin_action)
-        //if it is then do not insert it since it would already have been
-        //inserted as atomic action
-        opencog::cassert(TRACE_INFO, !tr.empty(), "the composite action cannot be empty");
-        pre_it head = tr.begin();
-        insert_action = !(//single action wrapped with and and_seq
-                            (*head == id::sequential_and
-                             && head.has_one_child()
-                             && is_builtin_action(*head.begin()))
-                            || //anything starting with action_not is not allowed
-                            (*head == id::action_not)
-                        );
-#endif
+        if(_reduct_enabled) {
+            _action_reduction(tr);
+
+            //check if the composite action is of the form
+            //and_seq(builtin_action)
+            //if it is then do not insert it since it would already have been
+            //inserted as atomic action
+            opencog::cassert(TRACE_INFO, !tr.empty(),
+                             "the composite action cannot be empty");
+            pre_it head = tr.begin();
+            insert_action = !(//single action wrapped with and and_seq
+                              (*head == id::sequential_and
+                               && head.has_one_child()
+                               && is_builtin_action(*head.begin()))
+                              || //anything starting with action_not is not allowed
+                              (*head == id::action_not)
+                              );
+        }
         if (insert_action)
             _composite_actions.insert(tr);
     }
@@ -605,8 +606,10 @@ private:
     //Not sure if this procedure is already coded in tree.h but didn't find it
     //it take the tree tr with iterator it and return the iterator that
     //would have the same position in tmp
-    //NOTE : COULD BE NICE TO OPTIMZE IT IF POSSIBLE
-    pre_it get_same_position(const combo_tree& tr, const combo_tree& tmp, pre_it it) {
+    //NOTE : COULD BE NICE TO OPTIMIZE IT IF POSSIBLE
+    pre_it get_same_position(const combo_tree& tr,
+                             const combo_tree& tmp,
+                             pre_it it) {
         opencog::cassert(TRACE_INFO, !tr.empty());
         opencog::cassert(TRACE_INFO, !tmp.empty());
         opencog::cassert(TRACE_INFO, tr == tmp);

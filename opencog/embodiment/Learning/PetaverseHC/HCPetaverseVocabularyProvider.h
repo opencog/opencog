@@ -77,7 +77,9 @@ static const pet_builtin_action_enum _elementary_actions[] = {
     id::beg,
     id::heel,
     id::tap_dance,
-    id::lean_rock_dance
+    id::lean_rock_dance,
+    id::kick_left,
+    id::kick_right
 };
 
 static const unsigned int _elementary_actions_size =

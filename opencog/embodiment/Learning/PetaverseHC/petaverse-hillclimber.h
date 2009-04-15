@@ -50,6 +50,7 @@ public:
                           const combo_tree_ns_set& actions,
                           bool abibb,
                           bool neic,
+                          bool reduct_enabled,
                           opencog::RandGen& rng);
 
     ~petaverse_hillclimber();

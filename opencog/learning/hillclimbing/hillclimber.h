@@ -116,7 +116,8 @@ struct hillclimber {
                 const rule& action_reduction,
                 const rule& full_reduction,
                 bool abibb,
-                bool neic)
+                bool neic,
+                bool reduct_enabled = true)
             : _fitnessEstimator(fe),
             _fitnessEstimationPerCycle(fepc),
 #ifdef IS_HC_CACHE
@@ -128,11 +129,12 @@ struct hillclimber {
             _best_fitness_estimated(MIN_FITNESS),
             _neighborhoodGenerator(os, conditions, actions,
                                    action_reduction, full_reduction,
-                                   0, abibb),
+                                   0, abibb, reduct_enabled),
             _neighborhood(comp),
             _hcState(HC_INIT),
             _number_of_fitness(0),
-            _new_exemplar_initializes_center(neic) {
+            _new_exemplar_initializes_center(neic)
+    {
         //initialize neighborhood generator
         _neighborhoodGenerator.precomputeCompositePerceptions();
         _neighborhoodGenerator.precomputeCompositeActions();
@@ -367,6 +369,7 @@ private:
 #else
             std::pair<fitness_t, combo_tree> p(_fitnessEstimator(*tmp_it), *tmp_it);
 #endif
+
             _ordered_best_estimates.insert(p);
             _neighborhood.erase(tmp_it);
         }

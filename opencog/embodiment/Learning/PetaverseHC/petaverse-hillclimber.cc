@@ -34,6 +34,7 @@ petaverse_hillclimber::petaverse_hillclimber(int nepc,
         const combo_tree_ns_set& actions,
         bool abibb,
         bool neic,
+        bool reduct_enabled,
         opencog::RandGen& rng)
         : _comp(dos),
         _elementary_operators(eo), _conditions(conditions),
@@ -42,7 +43,7 @@ petaverse_hillclimber::petaverse_hillclimber(int nepc,
                      _conditions, _actions, _comp,
                      hillclimbing_action_reduction(),
                      hillclimbing_full_reduction(),
-                     abibb, neic)
+                     abibb, neic, reduct_enabled)
 {
 
     //right after run the operator once to have already a learned candidate

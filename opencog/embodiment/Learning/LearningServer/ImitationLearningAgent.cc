@@ -331,7 +331,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              _definite_objects, eo,
                                              _atomic_perceptions,
                                              _atomic_actions,
-                                             abibb, neic,
+                                             abibb, neic, true,
                                              *_rng);
         } else if (ILALGO == Control::ImitationLearningAlgo::MOSES) {
             _PIL = new moses::moses_learning(nepc, *_fitnessEstimator,
