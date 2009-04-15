@@ -108,6 +108,7 @@ class ImportanceUpdatingAgent : public Agent
 private:
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
+    opencog::recent_val<AttentionValue::sti_t> STITransitionalAtomRent; //!< Decaying rent
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
     
     AttentionValue::sti_t amnesty; //!< Amnesty is used in calculating rent.
@@ -219,8 +220,9 @@ private:
     /** Recalculate the STI Rent to charge atoms.
      *
      * @param a The AtomSpace the Agent is working on.
+     * @param gradual Change this rent gradually
      */
-    void updateSTIRent(AtomSpace* a);
+    void updateSTIRent(AtomSpace* a, bool gradual = false);
 
 	/** Recalculate the LTI Rent to charge atoms.
 	 *

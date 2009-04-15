@@ -50,6 +50,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
+    STITransitionalAtomRent = STIAtomRent;
     LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
@@ -64,6 +65,7 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     noiseUnit = 10;
 
     // set decay rates for dampened values
+    STITransitionalAtomRent.decay = 0.5f;
     totalStimulusSinceReset.decay = 0.5f;
     attentionalFocusSize.decay = 0.8f;
     attentionalFocusNodesSize.decay = 0.8f;
@@ -407,10 +409,11 @@ int ImportanceUpdatingAgent::getTaxAmount(double mean)
     return count;
 }
 
-void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
+void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a, bool gradual)
 {
     AttentionValue::sti_t oldSTIAtomRent;
     float focusSize = 0;
+    
     // STIAtomRent must be adapted based on attentional focus size, or else balance btw
     // lobe STI wealth and node/link STI wealth may not be maintained
 
@@ -418,8 +421,8 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 
     if (!updateLinks) {
         if (attentionalFocusNodesSize.recent > 0)
-            STIAtomRent = (AttentionValue::sti_t) ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
-                          / (float) attentionalFocusNodesSize.recent);
+            STITransitionalAtomRent.update((AttentionValue::sti_t) ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
+                          / (float) attentionalFocusNodesSize.recent));
         //else
         //    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
@@ -427,17 +430,22 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a)
 
     } else {
         if (attentionalFocusSize.recent > 0)
-            STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
-                          / (float) attentionalFocusSize.recent);
+            STITransitionalAtomRent.update((AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent \
+                          / (float) attentionalFocusSize.recent));
         //else
         //    STIAtomRent = (AttentionValue::sti_t)ceil((float) STIAtomWage * (float) totalStimulusSinceReset.recent);
 
         focusSize = attentionalFocusSize.recent;
     }
+    
+    if(gradual)
+        STIAtomRent = STITransitionalAtomRent.recent; 
+    else
+        STIAtomRent = STITransitionalAtomRent.val;
 
     log->fine("STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.", oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage, totalStimulusSinceReset.recent);
 
-    lobeSTIOutOfBounds = false;
+    lobeSTIOutOfBounds = inRange(a->getSTIFunds(), acceptableLobeSTIRange);
 }
 
 void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
