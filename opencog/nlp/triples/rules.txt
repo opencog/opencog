@@ -3,7 +3,7 @@
 ;
 ; An experimental set of copula/preposition-mangling rules. 
 ;
-; The format of this file is supposed to be simialr to, if not identical
+; The format of this file is supposed to be similar to, if not identical
 ; to the "mapping_rules.txt" file used in the Relex framing code.
 ;
 ; Sentence: "Lisbon is the capital of Portugaul"
@@ -14,7 +14,9 @@
       ^ $phrase($word1, $prep)          ; convert to phrase
       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
-      THEN ^3_$phrase($var2, $var0) 
+      ^ %LemmaLink($var0,$word0)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$phrase($word2, $word0) 
 
 ; Sentence: "The capital of Germany is Berlin"
 ; var0=capital, var1=Berlin var2=Germany
@@ -24,7 +26,9 @@
       ^ $phrase($word0, $prep)          ; convert to phrase
       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
-      THEN ^3_$phrase($var2, $var1) 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$phrase($word2, $word1) 
 
 ; Note that the above rule is "reversed", in that, if the prep was
 ; dropped, it loooks like a backwards IsA statement.
@@ -35,7 +39,9 @@
       ^ $prep($var1,$var2)              ; preposition 
       ^ %LemmaLink($var1,$word1)        ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
-      THEN ^3_$phrase($var2, $var0) 
+      ^ %LemmaLink($var0,$word0)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$phrase($word2, $word0) 
 
 ; Sentence: "Pottery is made from clay."
 ; var0=make  var1=pottery var2=clay  prep=from
@@ -43,13 +49,17 @@
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
-      THEN ^3_$phrase($var2, $var1) 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$phrase($word2, $word1) 
 
 ; Sentence: "Yarn is made of fibers."
 ; var1=yarn  var2=fibers  phinst=made_of
 # IF _obj($phinst,$var1) ^ _iobj($phinst,$var2)
       ^ %LemmaLink($phinst,$phrase)     ; word of word instance
-      THEN ^3_$phrase($var2, $var1) 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$phrase($word2, $word1) 
 
 
 ; Sentence: "The heart is in the chest." also, "The garage is behind the house"
@@ -58,7 +68,9 @@
       ^ $prep(_%copula, $phinst)
       ^ %LemmaLink($phinst, $prword)
       ^ %ListLink($prep,$prword)
-      THEN ^3_$prep($var2, $var1) 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_$prep($word2, $word1) 
 
 ; Sentence "Berlin is a city"
 ; var1=Berlin var2=city
@@ -70,7 +82,9 @@
       ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-      THEN ^3_isa($var2, $var1) 
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_isa($word2, $word1) 
 
 ; Sentence "Men are mortal"
 ; var1=mortal var2=men
@@ -82,7 +96,9 @@
       ^ ! $prep($var2,$var3)
       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-      THEN ^3_isa($var1, $var2)
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_isa($word1, $word2)
 
 ; Sentence "The color (of the sky) is blue."
 ; if the prep is present, then reverse the order.
@@ -91,7 +107,9 @@
       ^ $prep($var2,$var3)
       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-      THEN ^3_isa($var2, $var1)
+      ^ %LemmaLink($var1,$word1)        ; word of word instance
+      ^ %LemmaLink($var2,$word2)        ; word of word instance
+      THEN ^3_isa($word2, $word1)
 
 ; Sentence: "Berlin is in Germany", alternate parse
 ; (This becomes the dominant parse for "Berlin is a city in Germany").
