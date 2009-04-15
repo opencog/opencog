@@ -91,8 +91,12 @@ else:
     exit(1)
 
 if command=='e':
+
+    print 'before'
     
     dataList = data.split('\n')
+
+    print 'after'
 
     #initialize f, doc, ioc, eoc, apc and aac
     f={}
@@ -106,32 +110,47 @@ if command=='e':
         wl = l.split()
         #determine the parameters of the new estimator
         if l.rfind('SPCTools - New estimator') != -1:
+            print 'new estimator'
             if len(f)!=0:
                 printDict(f)
                 f={}
         elif l.rfind('SPCTools - definite object count') != -1:
-            assert(len(wl)==15)
-            doc = wl[14]
+            #print 'definite object count'
+            #print wl
+            assert(len(wl)==12)
+            doc = wl[11]
         elif l.rfind('SPCTools - indefinite object count') != -1:
-            assert(len(wl)==15)
-            ioc = wl[14]
+            #print 'indefinite object count'
+            #print wl
+            assert(len(wl)==12)
+            ioc = wl[11]
         elif l.rfind('SPCTools - elementary operator count') != -1:
-            assert(len(wl)==15)
-            eoc = wl[14]
+            #print 'elementary operator count'
+            #print wl
+            assert(len(wl)==12)
+            eoc = wl[11]
         elif l.rfind('SPCTools - atomic perception count') != -1:
-            assert(len(wl)==15)
-            apc = wl[14]
+            #print 'atomic perception count'
+            #print wl
+            assert(len(wl)==12)
+            apc = wl[11]
         elif l.rfind('SPCTools - atomic action count') != -1:
-            assert(len(wl)==15)
-            aac = wl[14]
+            #print 'atomic action count'
+            #print wl
+            assert(len(wl)==12)
+            aac = wl[11]
             print 'FUNCTION :', doc, ioc, eoc, apc, aac
         #determine the function maping
         elif l.rfind('SPCTools - Score') != -1:
-            assert(len(wl)==13)
-            score = float(wl[12])
+            #print 'score'
+            #print wl
+            assert(len(wl)==10)
+            score = float(wl[9])
         elif l.rfind('SPCTools - Combo size') != -1:
-            assert(len(wl)==14)
-            size = int(wl[13])
+            #print 'combo size'
+            #print wl
+            assert(len(wl)==11)
+            size = int(wl[10])
             if f.has_key(score):
                 f[score] = min(f[score], size)
             else:
