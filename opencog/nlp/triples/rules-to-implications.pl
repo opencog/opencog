@@ -365,7 +365,7 @@ print "scm\n\n";
 my $rule_cnt = 0;
 while(<>)
 {
-	# Ignore comments (actually, reproduce them for ease of debugging
+	# Ignore comments (actually, reproduce them for ease of debugging)
 	if(/^;/)
 	{
 		print "$_";

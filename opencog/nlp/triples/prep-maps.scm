@@ -37,18 +37,5 @@ scm
 )
 
 
-; ===============================
-(ListLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "behind")
-	(WordNode "behind")
-)
-(ListLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "inside")
-	(WordNode "inside")
-)
-(ListLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "in")
-	(WordNode "in")
-)
 .
 exit

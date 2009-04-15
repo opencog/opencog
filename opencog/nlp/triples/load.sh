@@ -5,6 +5,7 @@
 
 # Load the preposition dictionary
 cat prep-maps.scm | netcat -q1 localhost 17003 > /dev/null
+cat preps.txt | ./preplist-to-atoms.pl | netcat -q1 localhost 17003 > /dev/null
 
 # Load add rules
 cat rules.txt | ./rules-to-implications.pl | netcat -q1 localhost 17003 > /dev/null
