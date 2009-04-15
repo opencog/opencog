@@ -4,11 +4,11 @@
 #
 
 # Load the preposition dictionary
-cat prep-maps.scm | netcat -q0 localhost 17003
+cat prep-maps.scm | netcat -q1 localhost 17003 > /dev/null
 
 # Load add rules
-cat rules.txt | ./rules-to-implications.pl | netcat -q0 localhost 17003
+cat rules.txt | ./rules-to-implications.pl | netcat -q1 localhost 17003 > /dev/null
 
 # Load some previously parsed sentences.
-cat example-sentences.scm | netcat -q0 localhost 17003
+cat example-sentences.scm | netcat -q2 localhost 17003 > /dev/null
 
