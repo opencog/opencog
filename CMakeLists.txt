@@ -6,6 +6,10 @@ ENDIF (COMMAND CMAKE_POLICY)
 
 PROJECT(OPENCOG)
 
+#compiling mode, Debug or Release
+SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Release)
+
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
@@ -274,7 +278,3 @@ IF (DOXYGEN_FOUND)
 ELSE (DOXYGEN_FOUND)
 	MESSAGE(STATUS "WARNING: Doxygen not found, API documentation will not be generated")
 ENDIF (DOXYGEN_FOUND)
-
-#compiling mode, Debug or Release
-SET(CMAKE_BUILD_TYPE Debug)
-#SET(CMAKE_BUILD_TYPE Release)

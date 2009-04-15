@@ -80,6 +80,12 @@ TARGET_LINK_LIBRARIES (gen-contin-table
         comboreduct
         util
 )
+ADD_EXECUTABLE (gen-mixed-table gen-mixed-table)
+TARGET_LINK_LIBRARIES (gen-mixed-table
+	moses
+        comboreduct
+        util
+)
 ADD_EXECUTABLE (gen-truth-table gen-truth-table)
 TARGET_LINK_LIBRARIES (gen-truth-table
 	moses

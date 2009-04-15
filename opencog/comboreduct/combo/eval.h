@@ -696,6 +696,10 @@ public:
         return _vt;
     }
 
+    opencog::hash_map<int, int> & get_arg_idx_map()  {
+		return _arg_map;
+    }
+
     //equality operator
     bool operator==(const mixed_table& mt) const {
         std::vector<variant<bool, contin_t> >::const_iterator il = _vt.begin();

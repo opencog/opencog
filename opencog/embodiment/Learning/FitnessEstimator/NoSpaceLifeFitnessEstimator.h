@@ -19,7 +19,9 @@
 //that paramter is here to determine to the maximum number of cycles the
 //the process is going to run after the total number of cycles
 //has reached the size of the exemplar (its number of actions)
-//so total number of cycles is calculated MAX_ADDITIONAL_CYCLE_COEF*bd.size()
+//in case it has not finished before
+//so total number of cycles is calculated
+//(1+MAX_ADDITIONAL_CYCLE_COEF)*bd.size()
 //where bd.size() is the sie of the current composite behavior description
 #define MAX_ADDITIONAL_CYCLE_COEF 1.0
 
