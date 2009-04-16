@@ -52,8 +52,8 @@ def printHeader():
     print """loadmodule opencog/ubigraph/libubigraph.so
 ubigraph --compact
 loadmodule opencog/dynamics/attention/libattention.so
-stop-agent-loop
-start-agents opencog::ImportanceDiffusionAgent
+agents-stop-loop
+agents-start opencog::ImportanceDiffusionAgent
 """
     sys.stdout.flush()
     print "scm"
@@ -69,7 +69,7 @@ def printTail():
             print "ubigraph-random-sti 5"
             print "ubigraph-update-sti"
             
-        print """step-agents
+        print """agents-step
 ubigraph-update-sti
         """
         sys.stdout.flush()

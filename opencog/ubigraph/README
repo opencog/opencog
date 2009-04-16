@@ -2,21 +2,31 @@ Ubigraph module (by Jared Wigmore <jared.wigmore@gmail.com>)
 
 This module displays the atomspace via Ubigraph.
 
-The code for converting the atomspace to a graph was adapted from the DottyModule by Trent Waddington <trent.waddington@gmail.com>.
+Ubigraph is available from:
+http://ubietylab.net/ubigraph/
+
+The code for converting the atomspace to a graph was adapted from the
+DottyModule by Trent Waddington <trent.waddington@gmail.com>.
 
 == Dependencies ==
 
-This module depends on the ubigraph server, and also the C client interface.
+This module depends on the ubigraph server (an Ubigraph server has to running
+for the module to load succesfully), and also the C client interface that comes
+as an in the examples/C directory of the Ubigraph distribution.
 
-libubigraphclient.a
+libubigraphclient.a (Ubigraph C client interface)
+
+=== Other library dependencies ===
+
 XMLRPC
 libcurl
 libm
 
 == Running the module ==
 
-First start the ubigraph server. Then load the libubigraph.so module in cogserver, and run the "ubigraph" command.
-You should run the ubigraph command once, and then the display will update when atoms are added or removed.
+First start the ubigraph server. Then load the libubigraph.so module in
+cogserver, and run the "ubigraph" command.  You should run the ubigraph command
+once, and then the display will update when atoms are added or removed.
 
 == A note on screen captures ==
 
@@ -42,13 +52,17 @@ If you need to trim the borders, you can use the -j transcode option.
 
 == TODO ==
 
-* Better error handling, especially for if the ubigraph command is run (or an add/remove atom signal happens) while the ubigraph server is not running.
+* Better error handling, especially for if the ubigraph command is run (or an
+add/remove atom signal happens) while the ubigraph server is not
+running.
 
-* Possibly having a separate command to start the initial display vs to choose which things to show.
+* Possibly having a separate command to start the initial display vs to choose
+which things to show.
 
 * Being able to choose to display only some of the atoms.
 
-* "Themes" to display TruthValues and AttentionValues visually (e.g. as color or size).
+* "Themes" to display TruthValues and AttentionValues visually (e.g. as color or
+size).
 
 * Make FindXMLRPC work correctly re the XMLRPC_LIBRARIES CMake variable.
 
