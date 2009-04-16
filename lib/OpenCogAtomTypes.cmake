@@ -11,13 +11,22 @@ IF (NOT INHERITANCE_FILE)
 	SET (INHERITANCE_FILE "atom_types.inheritance")
 ENDIF (NOT INHERITANCE_FILE)
 
+# Check if this is for opencog/atomspace directory. If so, do not reference opencog::classserver() 
+# to avoid infinit recursivity in ClassServer constructor.
+STRING(REGEX MATCH ".*/opencog/atomspace" OPENCOG_ATOMSPACE_MATCHED "${CMAKE_CURRENT_SOURCE_DIR}")
+IF (OPENCOG_ATOMSPACE_MATCHED)
+    SET(CLASSSERVER_REFERENCE "")
+ELSE (OPENCOG_ATOMSPACE_MATCHED)
+    SET(CLASSSERVER_REFERENCE "opencog::classserver().")
+ENDIF (OPENCOG_ATOMSPACE_MATCHED)
+#MESSAGE(STATUS "CLASSSERVER_REFERENCE=${CLASSSERVER_REFERENCE}")
+
 FILE(WRITE "${HEADER_FILE}" "/* File automatically generated. Do not edit */\n")
 FILE(APPEND "${HEADER_FILE}"  "#include <opencog/atomspace/types.h>\nnamespace opencog\n{\n")
 FILE(WRITE "${DEFINITIONS_FILE}"  "/* File automatically generated. Do not edit */\n#include <opencog/atomspace/ClassServer.h>\n#include <opencog/atomspace/atom_types.h>\n#include <opencog/atomspace/types.h>\n#include \"atom_types.h\"\n")
 FILE(WRITE "${INHERITANCE_FILE}"  "/* File automatically generated. Do not edit */\n")
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
-    #STRING(REGEX MATCH "^[ 	]*([A-Z_]+)?[ 	]*(<-[	]*([A-Z_, 	]+))?[ 	]*(\"[A-Za-z]*\")?([ 	]*//.*)?[ 	]*$" MATCHED "${LINE}")
     # this regular expression is more complex than required due to cmake's
     # regex engine bugs
     STRING(REGEX MATCH "^[ 	]*([A-Z_]+)?([ 	]*<-[ 	]*([A-Z_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
@@ -82,12 +91,12 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
                 # skip inheritance of the special "notype" class; we could move
                 # this test up but it was left here for simplicity's sake
                 IF (NOT "${TYPE}" STREQUAL "NOTYPE")
-                    FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = opencog::classserver().addType(opencog::${PARENT_TYPE}, \"${TYPE_NAME}\");\n")
+                    FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = ${CLASSSERVER_REFERENCE}addType(opencog::${PARENT_TYPE}, \"${TYPE_NAME}\");\n")
                 ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
             ENDFOREACH (PARENT_TYPE)
         ELSE (PARENT_TYPES)
             IF (NOT "${TYPE}" STREQUAL "NOTYPE")
-                FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = opencog::classserver().addType(opencog::${TYPE}, \"${TYPE_NAME}\");\n")
+                FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = ${CLASSSERVER_REFERENCE}addType(opencog::${TYPE}, \"${TYPE_NAME}\");\n")
             ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
         ENDIF (PARENT_TYPES)
     ELSE (MATCHED AND CMAKE_MATCH_1)
