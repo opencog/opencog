@@ -112,7 +112,6 @@ namespace haxx
 //    extern Handle VarTypes[STD_VARS];
 //    extern multimap<Handle,Handle> childOf;
     extern bool AllowFW_VARIABLENODESinCore;
-    extern bool ArchiveTheorems;
 }
 
 namespace reasoning
@@ -801,7 +800,6 @@ void InitPLNTests()
 
     //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
     haxx::printRealAtoms = true;
-    haxx::ArchiveTheorems = true;
 
 /*  /// Test atom identity works
     Handle h1 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
@@ -1053,15 +1051,16 @@ bool satSetTest();
         AtomSpaceWrapper *atw = GET_ATW;
         atw->reset();
         
-        haxx::ArchiveTheorems = true;
         haxx::AllowFW_VARIABLENODESinCore = true;
 
         cprintf(-2,"loading...\n");     
         
+        atw->archiveTheorems = true;
         bool axioms_ok = atw->loadAxioms(premiseFile);
+        assert(axioms_ok);      
+        atw->archiveTheorems = false;
         
         cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
-        assert(axioms_ok);      
     }
 
     void RunPLNTest(Btr<PLNTest> t)
@@ -1078,10 +1077,8 @@ bool satSetTest();
         test::custom_duration = 0.0;
         start = clock();
         
-        haxx::ArchiveTheorems = false;
         haxx::AllowFW_VARIABLENODESinCore = true; //false;
         
-        cprintf(-1, "axioms loaded");
         fflush(stdout);
         currentDebugLevel=-4;
 
@@ -1116,13 +1113,18 @@ bool satSetTest();
                 eres = state->infer(expansions, 0.000001f, 0.01f);      
                 
                 if (expansions > 0)
-                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
                 else
-                    cprintf(2, "Failed for now... Saved $%d / $%d (from the beginning of the cycle).\n", expansions, expansions_per_run);
+                    cprintf(2, "Failed for now... Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
 
                 currentDebugLevel=-4;
 
-                eh = (eres.empty() ? PHANDLE_UNDEFINED : _v2h(*(*eres.rbegin())->getVtree().begin()));
+                eh = (eres.empty() ? PHANDLE_UNDEFINED :
+                        _v2h(*(*eres.rbegin())->getVtree().begin()));
 
                 if (eh != PHANDLE_UNDEFINED )
                     etv = atw->getTV(eh).clone();
@@ -1136,10 +1138,12 @@ bool satSetTest();
 
                 if (etv)
                 {
-                    printf("%f / %f\n", etv->getConfidence() , t->minTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean()          , t->minTV->getMean());
-                    printf("%f / %f\n", etv->getConfidence() , t->maxTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean()          , t->maxTV->getMean());
+                    printf("%f / %f\n", etv->getConfidence(),
+                            t->minTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean(), t->minTV->getMean());
+                    printf("%f / %f\n", etv->getConfidence(),
+                            t->maxTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean(), t->maxTV->getMean());
                 }
 
                 passed = (eh != PHANDLE_UNDEFINED && etv &&
@@ -1151,7 +1155,8 @@ bool satSetTest();
         
                 cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
             }
-            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT && !passed);
+            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
+                    && !passed);
         }
         else if (t->minExhaustiveEvals > 0)
         {
@@ -1178,19 +1183,25 @@ bool satSetTest();
 
         if (passed)
         {
-            printf("\n**********************************************\npassed: %s.\n**********************************************\n",
+            printf("\n**********************************************\n"
+                   "passed: %s.\n"
+                   "**********************************************\n",
             (etv?etv->toString().c_str():"(null TV)"));
 
         finish = clock();
             duration = (double)(finish - start) / CLOCKS_PER_SEC;
             printf( "Test took %2.2f seconds TOTAL.\n", duration );
 
-            printf( "Custom test time was %3.3f seconds.\n", test::custom_duration );
-            printf( "Custom test time was %3.3f seconds.\n", test::custom_duration2 );
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration );
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration2 );
         }
         else
         {
-            printf("\n**********************************************\nFAILED: %s!\n**********************************************\n",
+            printf("\n**********************************************\n"
+                   "FAILED: %s!\n"
+                   "**********************************************\n",
             (etv?etv->toString().c_str():"(null TV)"));
         }
 

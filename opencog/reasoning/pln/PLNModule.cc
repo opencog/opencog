@@ -62,7 +62,6 @@ extern int currentDebugLevel;
 namespace haxx
 {
     extern bool AllowFW_VARIABLENODESinCore;
-    extern bool ArchiveTheorems;
     extern bool printRealAtoms;
 //    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
@@ -128,7 +127,7 @@ void PLNModule::init()
     #endif
 
     haxx::printRealAtoms = true;
-    haxx::ArchiveTheorems = false;
+    ((AtomSpaceWrapper*)asw)->archiveTheorems = false;
 
     // no longer done at module load - it would be inappropriate
     // for contexts other than testing PLN
@@ -215,8 +214,6 @@ void initTestEnv()
         
 #if 0 //Loading Osama or set axioms here.
 
-        haxx::ArchiveTheorems = true;
-     
     //  bool axioms_ok = atw.loadAxioms("bigdemo.xml");
     //  bool axioms_ok = atw.loadAxioms("inverse_binding.xml");
     //  bool axioms_ok = atw.loadAxioms("fetch10.xml");
@@ -233,7 +230,6 @@ void initTestEnv()
     //  bool axioms_ok = atw.loadAxioms("woademo.xml");
         assert(axioms_ok);
 
-        haxx::ArchiveTheorems = false;
 #endif
         logger().debug("PTL Initialized.");
     }
@@ -282,7 +278,6 @@ void Init()
     #endif
 
     haxx::printRealAtoms = true;
-    haxx::ArchiveTheorems = false;
 }
 #endif
 
@@ -545,20 +540,21 @@ std::string RunCommand(std::list<std::string> args)
                 ss << "error: expected xml input filename\n";
                 return ss.str();
             }
-            haxx::ArchiveTheorems = true; 
             atw->reset();
+            atw->archiveTheorems = true;
             axioms_ok = atw->loadAxioms(temps);
-            haxx::ArchiveTheorems = false;
+            atw->archiveTheorems = false;
             ss << (axioms_ok ? "Input file was loaded."
                     : "Input file was corrupt.");
-            ss << (" Next you MUST (re)load a target atom with the pln target command! Otherwise things will break.\n");
+            ss << " Next you MUST (re)load a target atom with the pln target"
+                  " command! Otherwise things will break." << endl;
             // have to recreate the target vtrees to ensure that the
             // handles are correct after reloading axioms.
             initTests();
         }
         else if (c == "record-trails") {
             RECORD_TRAILS = !RECORD_TRAILS;
-            ss << "RECORD_TRAILS " << (RECORD_TRAILS?"ON":"OFF") << "\n";
+            ss << "RECORD_TRAILS " << (RECORD_TRAILS?"ON":"OFF") << endl;
         }
         else if (c == "-") {
             input(h, args); currentDebugLevel = -(int)h;

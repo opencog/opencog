@@ -84,7 +84,6 @@ namespace haxx
 
     //! ?
     map<string,pHandle> variableShadowMap;
-    bool ArchiveTheorems = true;
     
 #if USE_MIND_SHADOW
     vector<pHandle> mindShadow;
@@ -155,7 +154,9 @@ USize(800), USizeMode(CONST_SIZE)
 
     // TODO: Replace srand with opencog::RandGen
     srand(12345678);
+
     linkNotifications = true;
+    archiveTheorems = false;
 }
 
 void AtomSpaceWrapper::HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest) const
@@ -525,9 +526,6 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
     
     try {
         printf("Loading axioms from: %s \n", fname.c_str());        
-//        U = LoadXMLFile(this, fname);
-        cprintf(5, "thms clear...");
-    	CrispTheoremRule::thms.clear();
     	
         // Use the XML reader only if XML is available.
 #if HAVE_EXPAT
@@ -540,7 +538,7 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
 #endif /* HAVE_EXPAT */
 
         // re-generate CrispTheoremRule::thms
-        makeTheorems();
+        makeCrispTheorems();
         
         loadedFiles.insert(fname);
     } catch(string s) { 
@@ -849,30 +847,7 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const Trut
         haxx::childOf.insert(hpair(hs[1], hs[0]));*/
     }
 
-    // TODO should this still be here also?
-    // if we are archiving theorems, and trying to add a implication link
-    // composed of AND as a source, and the TruthValue is essentially true
-    if (haxx::ArchiveTheorems &&
-        T == IMPLICATION_LINK && getType(hs[0]) == AND_LINK &&
-        tvn.getConfidence() > PLN_TRUE_MEAN) {
-            pHandleSeq args = getOutgoing(hs[0]);
-            cprintf(-3,"THM for:");
-
-            vtree thm_target(make_vtree(hs[1]));
-
-            rawPrint(thm_target, thm_target.begin(), 3);
-            LOG(0,"Takes:");
-            
-            foreach(pHandle arg, args) {
-                vtree arg_tree(make_vtree(arg));
-                rawPrint(arg_tree, arg_tree.begin(), 0);
-                CrispTheoremRule::thms[thm_target].push_back(arg_tree);
-            }
-            
-            ret = addLinkDC( FALSE_LINK, hs, tvn, fresh, managed);
-    } else {
-        ret = addLinkDC( T, hs,  tvn, fresh, managed);
-    }
+    ret = addLinkDC( T, hs,  tvn, fresh, managed);
 
     if (inheritsType(T, LINK) && !arity && T != FORALL_LINK) {
         // Link with no connections?
@@ -909,38 +884,50 @@ LOG(3, "Add ok.");
     return ret;
 }
 
-void AtomSpaceWrapper::makeTheorems() {
-    // if we are archiving theorems
-    if (haxx::ArchiveTheorems) {    
-        // for each implication link composed of AND as a source, and whose
-        // TruthValue is essentially true
-        
-        // TODO this could use the index that involves complex atom structure predicates
+void AtomSpaceWrapper::makeCrispTheorems() {
+    LOG(4,"Rebuilding list of crisp theorems");
+    CrispTheoremRule::thms.clear();
+    LOG(4,"Cleared list of crisp theorems");
+    if (archiveTheorems) {    
         Btr<set<pHandle> > links = getHandleSet(IMPLICATION_LINK, "");
         foreach(pHandle h, *links)
         {
-            const pHandleSeq hs = getOutgoing(h);
-            const TruthValue& tvn = getTV(h);
-            
-            if(getType(hs[0]) == AND_LINK &&
-            tvn.getConfidence() > PLN_TRUE_MEAN) {
-                pHandleSeq args = getOutgoing(hs[0]);
-                cprintf(-3,"THM for:");
-
-                vtree thm_target(make_vtree(hs[1]));
-
-                rawPrint(thm_target, thm_target.begin(), 3);
-                LOG(0,"Takes:");
-                
-                foreach(pHandle arg, args) {
-                    vtree arg_tree(make_vtree(arg));
-                    rawPrint(arg_tree, arg_tree.begin(), 0);
-                    CrispTheoremRule::thms[thm_target].push_back(arg_tree);
-                }
-                // TODO doesn't convert the ImplicationLink into a FalseLink
-                // (is that necessary / appropriate?)
-            }
+            makeCrispTheorem(h);
         }
+    } else {
+        LOG(4,"We are not archiving theorems, no rules added to list of "
+            "crisp theorems");
+    }
+}
+
+void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
+{
+    // if implication link and composed of AND as a source, and whose
+    // TruthValue is essentially true
+    if (getType(h) != IMPLICATION_LINK)
+        return;
+    const pHandleSeq hs = getOutgoing(h);
+    const TruthValue& tvn = getTV(h);
+
+    // TODO this could use the index that involves complex atom structure predicates
+    if(getType(hs[0]) == AND_LINK &&
+    tvn.getConfidence() > PLN_TRUE_MEAN) {
+        pHandleSeq args = getOutgoing(hs[0]);
+        cprintf(-3,"THM for:");
+
+        vtree thm_target(make_vtree(hs[1]));
+
+        rawPrint(thm_target, thm_target.begin(), 3);
+        LOG(0,"Takes:");
+        
+        foreach(pHandle arg, args) {
+            vtree arg_tree(make_vtree(arg));
+            rawPrint(arg_tree, arg_tree.begin(), 0);
+            CrispTheoremRule::thms[thm_target].push_back(arg_tree);
+        }
+        // Used to convert ImplicationLink into a FalseLink,
+        // but this seems to be unnecessary. It was probably to ensure
+        // it wasn't picked up by the non crisp version of the rule.
     }
 }
 

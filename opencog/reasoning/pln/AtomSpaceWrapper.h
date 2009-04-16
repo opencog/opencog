@@ -369,8 +369,17 @@ public:
     pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
         bool fresh,bool managed);
 
-    // Generate CrispTheoremRules for all crisp theorems
-    void makeTheorems();
+    //! Whether to generate CrispTheoremRules for all crisp theorems
+    //! and add them to CrispTheoremRule::thms.
+    bool archiveTheorems;
+    //! Generate CrispTheoremRules for all crisp theorems in AtomSpace
+    //! and add to CrispTheoremRule::thms.
+    void makeCrispTheorems();
+    //! Generate a CrispTheoremRule for crisp theorem pointed to by
+    //! p then and add to CrispTheoremRule::thms.
+    //! A crisp theorem has the format:
+    //! ImplicationLink ( AND < tv 1.0 > (...), result )
+    void makeCrispTheorem(pHandle p);
 
     //! returns whether the type of h is T or inherits from T
     bool isSubType(pHandle h, Type T);
