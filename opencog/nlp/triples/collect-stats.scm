@@ -11,8 +11,18 @@
 ; Linas Vepstas April 2009
 ;
 
+; process-rule
+; Given an ImplicationLink, apply the implication on the atom space.
+; This may generate a list of atoms. Take that list, and manually
+; store it in the database.
+;
+(define (process-rule rule)
+	(define triple-list (cog-outgoing-set (cog-ad-hoc "do-implication" rule)))
+	(define (store-stats atom) (cog-ad-hoc "store-atom" atom))
 
-(define triple-list-link (cog-ad-hoc "do-implication" frame-rule-0))
-(define triple-list (cog-outgoing-set triple-list-link))
+	; Store each resultant atom.
+	(for-each store-stats triple-list)
+)
 
-
+; Apply the above proceedure to each ImplicationLink that we have.
+(for-each process-rule frame-rule-list)
