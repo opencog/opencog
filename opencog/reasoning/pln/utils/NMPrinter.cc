@@ -231,13 +231,13 @@ void NMPrinter::printHandle(ostream& out, pHandle h, int indentationLevel) const
                 if (printToFile) fprintf(logFile, ":");
             }
             if (printOptions & NMP_NODE_TYPE_NAME) {
-                const char* typeStr = ClassServer::getTypeName(type).c_str();
+                const char* typeStr = classserver().getTypeName(type).c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }
         } else {
             if (printOptions & NMP_TYPE_NAME) {
-                const char* typeStr = ClassServer::getTypeName(type).c_str();
+                const char* typeStr = classserver().getTypeName(type).c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }
@@ -327,7 +327,7 @@ void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLev
             if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
     
             if (printOptions & NMP_TYPE_NAME) {
-                const char* typeStr = ClassServer::getTypeName(type).c_str();
+                const char* typeStr = classserver().getTypeName(type).c_str();
                 out << typeStr;
                 if (printToFile) fprintf(logFile, "%s", typeStr);
             }

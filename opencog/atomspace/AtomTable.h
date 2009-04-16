@@ -121,9 +121,21 @@ private:
     pthread_mutex_t iteratorsLock;
 #endif
 
+    /** Provided signals */
     boost::signal<void (Handle)> _addAtomSignal;
     boost::signal<void (Handle)> _removeAtomSignal;
     boost::signal<void (Handle)> _mergeAtomSignal;
+
+    /**
+     * signal connection used to keep track of atom type addition in the
+     * ClassServer 
+     */
+    boost::signals::connection addedTypeConnection; 
+
+    /**
+     * Handler of the 'type added' signal from ClassServer
+     */
+    void typeAdded(Type);
 
     void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
 

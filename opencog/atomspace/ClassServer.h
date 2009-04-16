@@ -32,12 +32,18 @@
 
 #include <stdlib.h>
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/atom_types.h>
+#include <boost/signal.hpp>
+
+#include "types.h"
+#include "atom_types.h"
 #include <opencog/util/platform.h>
 
 namespace opencog
 {
+
+class ClassServer; 
+
+typedef ClassServer* ClassServerFactory(void);
 
 /**
  * This class keeps track of the complete atom class hierarchy.
@@ -48,29 +54,34 @@ class ClassServer
 {
 private:
 
-    /** Private default constructor for this class to make it abstract. */
-    ClassServer() {}
+    /** Private default constructor for this class to make it a singleton. */
+    ClassServer();
 
-    static Type nTypes;
-    static bool initialized;
+    Type nTypes;
 
-    static std::vector< std::vector<bool> >            inheritanceMap;
-    static std::tr1::unordered_map<std::string, Type>  name2CodeMap;
-    static std::tr1::unordered_map<Type, const std::string*> code2NameMap;
+    std::vector< std::vector<bool> > inheritanceMap;
+    std::tr1::unordered_map<std::string, Type> name2CodeMap;
+    std::tr1::unordered_map<Type, const std::string*> code2NameMap;
+    boost::signal<void (Type)> _addTypeSignal;
 
-    static void setParentRecursively(Type parent, Type type);
+    void setParentRecursively(Type parent, Type type);
 
 public:
+    /** Returns a new ClassServer instance */
+    static ClassServer* createInstance(void);
 
-    static Type addType(Type parent, const std::string& name);
-    static void init(void);
+    /** Adds a new atom type with the given name and parent type */
+    Type addType(Type parent, const std::string& name);
+
+    /** Gets the boost::signal for connecting to add type signals */
+    boost::signal<void (Type)>& addTypeSignal();
 
     /**
      * Stores the children types on the OutputIterator 'result'. Returns the
      * number of children types.
      */
     template<typename OutputIterator>
-    static unsigned int getChildren(Type type, OutputIterator result)
+    unsigned int getChildren(Type type, OutputIterator result)
     {
         unsigned int n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
@@ -87,7 +98,7 @@ public:
      *
      * @return The total number of classes in the system.
      */
-    static unsigned int getNumberOfClasses();
+    unsigned int getNumberOfClasses();
 
     /**
      * Returns whether a given class is assignable from another.
@@ -96,7 +107,7 @@ public:
      * @param Subclass.
      * @return Whether a given class is assignable from another.
      */
-    static bool isA(Type sub, Type super);
+    bool isA(Type sub, Type super);
 
     /**
      * Returns true if given class is a Link.
@@ -104,7 +115,7 @@ public:
      * @param class.
      * @return Whether a given class is Link.
      */
-    static bool isLink(Type t) { return isA(t, LINK); }
+    bool isLink(Type t) { return isA(t, LINK); }
 
     /**
      * Returns true if given class is a Node.
@@ -112,12 +123,12 @@ public:
      * @param class.
      * @return Whether a given class is Node.
      */
-    static bool isNode(Type t) { return isA(t, NODE); }
+    bool isNode(Type t) { return isA(t, NODE); }
 
     /**
      * Returns whether a class with name 'typeName' is defined.
      */
-    static bool isDefined(const string& typeName);
+    bool isDefined(const string& typeName);
 
     /**
      * Returns the type of a given class.
@@ -125,7 +136,7 @@ public:
      * @param Class type name.
      * @return The type of a givenn class.
      */
-    static Type getType(const string& typeName);
+    Type getType(const string& typeName);
 
     /**
      * Returns the string representation of a given atom type.
@@ -133,14 +144,17 @@ public:
      * @param Atom type code.
      * @return The string representation of a givenn class.
      */
-    static const std::string& getTypeName(Type type);
+    const std::string& getTypeName(Type type);
 
     /**
      * The typeDesignator of T is the Handle which describes the type T
      * (eg. a ConceptNode whose name is the corresponding type name.)
      */
-    static Handle typeDesignatorHandle(Type T);
+    Handle typeDesignatorHandle(Type T);
 };
+
+/** Gets the singleton instance (following meyer's design pattern) */
+ClassServer& classserver(ClassServerFactory* = ClassServer::createInstance);
 
 } // namespace opencog
 

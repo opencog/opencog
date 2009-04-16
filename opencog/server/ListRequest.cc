@@ -76,7 +76,7 @@ bool ListRequest::execute()
         } else if (*it == "-t") { // filter by type, excluding subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = ClassServer::getType((*it).c_str());
+            type = classserver().getType((*it).c_str());
             if (type == NOTYPE) {
                 _error << "invalid type" << std::endl;
                 sendError();
@@ -85,7 +85,7 @@ bool ListRequest::execute()
         } else if (*it == "-T") { // filter by type, including subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = ClassServer::getType((*it).c_str());
+            type = classserver().getType((*it).c_str());
             if (type == NOTYPE) {
                 _error << "invalid type" << std::endl;
                 sendError();

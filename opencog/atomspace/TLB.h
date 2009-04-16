@@ -86,9 +86,6 @@ public:
     static inline Atom* getAtom(const Handle& handle)
     {
 #ifdef USE_TLB_MAP
-        // if (handle.value() <= NOTYPE) // check for "non-real" atoms
-        //     return reinterpret_cast<Atom*>(handle.value());
-
         std::map<Handle, const Atom*>::iterator it = handle_map.find(handle);
         if (it == handle_map.end()) return NULL;
         else return const_cast<Atom*>(it->second);

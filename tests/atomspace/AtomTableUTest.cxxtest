@@ -641,4 +641,21 @@ public:
         TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getMean(), 0.3f, 0.000001);
         TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getCount(), 0.4f, 0.000001);
     }
+
+    void testSimpleWithCustomAtomTypes() {
+        AtomTable atomTable(false);
+        Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
+        Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
+        Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");
+        printf("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
+        Handle word = atomTable.add(new Node(MY_NUMBER_NODE, "1"));
+        Handle sense = atomTable.add(new Node(MY_CONCEPT_NODE, "28675194"));
+        std::vector<Handle> os;
+        os.push_back(word);
+        os.push_back(sense);
+        atomTable.add(new Link(MY_INHERITANCE_LINK, os));
+        TS_ASSERT(atomTable.getHandle("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandle("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+    }
 };

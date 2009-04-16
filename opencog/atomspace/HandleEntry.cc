@@ -400,8 +400,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     // differently from invalid elements found in its begining.
 
     while (set != NULL &&
-           ((!noName && ClassServer::isLink(set->getAtom()->getType())) ||
-            (noName && ClassServer::isNode(set->getAtom()->getType()) &&
+           ((!noName && classserver().isLink(set->getAtom()->getType())) ||
+            (noName && classserver().isNode(set->getAtom()->getType()) &&
               ((Node*) set->getAtom())->getName() != "") ||
             (!noName && 
               strcmp(((Node*) set->getAtom())->getName().c_str(), name)))) {
@@ -416,8 +416,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     HandleEntry* head = set;
     while (set->next != NULL) {
         Atom *itAtom = set->next->getAtom();
-        if ((!noName && ClassServer::isLink(itAtom->getType())) ||
-            (noName && ClassServer::isNode(itAtom->getType()) &&
+        if ((!noName && classserver().isLink(itAtom->getType())) ||
+            (noName && classserver().isNode(itAtom->getType()) &&
               ((Node*) itAtom)->getName() != "") ||
             (!noName && 
               strcmp(((Node*) itAtom)->getName().c_str(), name))) {
@@ -449,7 +449,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
 
     while ((set != NULL) &&
             ((!subclass && (type != set->getAtom()->getType())) ||
-             (subclass && !ClassServer::isA(set->getAtom()->getType(), type)))) {
+             (subclass && !classserver().isA(set->getAtom()->getType(), type)))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -461,7 +461,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass)
     HandleEntry* head = set;
     while (set->next != NULL) {
         if ((!subclass && (type != set->next->getAtom()->getType())) ||
-            (subclass && !ClassServer::isA(set->next->getAtom()->getType(), type))) {
+            (subclass && !classserver().isA(set->next->getAtom()->getType(), type))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -556,7 +556,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isA(target, type)))) {
+                         (subclass && classserver().isA(target, type)))) {
                     break;
                 }
             }
@@ -588,7 +588,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
             for (position = 0; position < arity; position++) {
                 if ((target = link->getOutgoingAtom(position)->getType()) &&
                         ((!subclass && (type == target)) ||
-                         (subclass && ClassServer::isA(target, type)))) {
+                         (subclass && classserver().isA(target, type)))) {
                     break;
                 }
             }
@@ -627,7 +627,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         if ((link->getArity() != arity) ||
              (target = link->getOutgoingAtom(position)->getType(),
               ((!subclass && (type != target)) ||
-               (subclass && !ClassServer::isA(target, type))))) {
+               (subclass && !classserver().isA(target, type))))) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -646,7 +646,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
         if (((link->getArity() != arity) ||
                 (target = link->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
-                  (subclass && !ClassServer::isA(target, type)))))) {
+                  (subclass && !classserver().isA(target, type)))))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -682,8 +682,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
-             (!noName && ClassServer::isLink(itAtom->getType())) ||
-             (noName && ClassServer::isNode(itAtom->getType()) &&
+             (!noName && classserver().isLink(itAtom->getType())) ||
+             (noName && classserver().isNode(itAtom->getType()) &&
                ((Node*) itAtom)->getName() != "") ||
              (!noName &&
                strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
@@ -706,8 +706,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
-             (!noName && ClassServer::isLink(itAtom->getType())) ||
-             (noName && ClassServer::isNode(itAtom->getType()) &&
+             (!noName && classserver().isLink(itAtom->getType())) ||
+             (noName && classserver().isNode(itAtom->getType()) &&
                ((Node*) itAtom)->getName() != "") ||
              (!noName &&
                strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
@@ -811,11 +811,11 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
     if (link) larry = link->getArity();
     for (int i = 0; i < larry && !result; i++) {
         const Atom* target = link->getOutgoingAtom(i);
-        //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+        //printf("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
             if (targetSubclasses) {
-                result = ClassServer::isA(target->getType(), targetType);
+                result = classserver().isA(target->getType(), targetType);
             } else {
                 result = targetType == target->getType();
             }
@@ -823,7 +823,7 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
     }
     //printf("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
     //atom->toString().c_str(),
-    //ClassServer::getTypeName(targetType),
+    //classserver().getTypeName(targetType),
     //targetSubclasses?"true":"false",
     //vh.substantive,
     //INDICATOR_TYPES[vh.indicator],
@@ -876,8 +876,8 @@ bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, 
     if (link) larry = link->getArity();
     for (int i = 0; i < larry && !result; i++) {
         const Atom* target = link->getOutgoingAtom(i);
-        //printf("Checking atom with TYPE = %s, TV = %s\n", ClassServer::getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-        //if (ClassServer::isAssignableFrom(NODE, target->getType())) {
+        //printf("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+        //if (classserver().isA(target->getType(), NODE)) {
         //printf("Node name = %s\n", ((Node*) target)->getName().c_str());
         //}
 
@@ -892,7 +892,7 @@ bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, 
     //printf("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
     //atom->toString().c_str(),
     //targetName,
-    //ClassServer::getTypeName(targetType),
+    //classserver().getTypeName(targetType),
     //vh.substantive,
     //INDICATOR_TYPES[vh.indicator],
     //result?"true":"false");
@@ -947,9 +947,9 @@ std::string HandleEntry::toString()
     for (HandleEntry* current = this; current != NULL; current = current->next) {
         Atom* atom = TLB::getAtom(current->handle);
         if (atom != NULL) {
-            if (ClassServer::isA(atom->getType(), NODE)) {
+            if (classserver().isA(atom->getType(), NODE)) {
                 answer += ((Node*) atom)->getName();
-            } else if (ClassServer::isA(atom->getType(), LINK)) {
+            } else if (classserver().isA(atom->getType(), LINK)) {
                 answer += ((Link*) atom)->toShortString();
             }
             //char buf[1024];

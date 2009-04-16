@@ -68,7 +68,7 @@ public:
         ost << h.value() << " [";
         if (!space->isNode(a->getType()))
             ost << "shape=\"diamond\" ";
-        ost << "label=\"[" << ClassServer::getTypeName(a->getType()) << "]";
+        ost << "label=\"[" << classserver().getTypeName(a->getType()) << "]";
         if (space->isNode(a->getType())) {
             Node *n = (Node*)a;
             ost << " " << n->getName();
@@ -97,7 +97,7 @@ public:
             if (compact && out.size() == 2 && l->getIncomingSet() == NULL)
             {
                 ost << out[0] << " -> " << out[1] << " [label=\""
-                    << ClassServer::getTypeName(a->getType()) << "\"];\n";
+                    << classserver().getTypeName(a->getType()) << "\"];\n";
                 answer += ost.str();
                 return false;
             }

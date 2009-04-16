@@ -218,7 +218,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         type = TLB::getAtom(*hi)->getType(); 
 
         targets = dynamic_cast<Link*>(TLB::getAtom(*hi))->getOutgoingSet();
-        if (ClassServer::isA(type,ORDERED_LINK)) {
+        if (classserver().isA(type,ORDERED_LINK)) {
             Handle sourceHandle;
 
             // Add only the source index

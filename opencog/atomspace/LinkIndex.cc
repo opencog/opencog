@@ -30,11 +30,12 @@ using namespace opencog;
 
 LinkIndex::LinkIndex(void)
 {
-	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
-	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
-	// typename is misspelled, because ClassServer::getType()
-	// returns NOTYPE in this case).
-	idx.resize(ClassServer::getNumberOfClasses() + 2);
+	resize();
+}
+
+void LinkIndex::resize()
+{
+	idx.resize(classserver().getNumberOfClasses());
 }
 
 void LinkIndex::insertHandle(Handle h)
@@ -63,6 +64,8 @@ void LinkIndex::removeHandle(Handle h)
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
+	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+            "Index out of bounds for atom type (t = %lu)", t);
 	const HandleSeqIndex &hsi = idx[t];
 	return hsi.get(seq);
 }
@@ -82,12 +85,14 @@ HandleEntry * LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subc
 	{
 		HandleEntry *he = NULL;
 		
-		int max = ClassServer::getNumberOfClasses();
+		int max = classserver().getNumberOfClasses();
 		for (Type s = 0; s < max; s++)
 		{
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
-			if (ClassServer::isA(s, type))
+			if (classserver().isA(s, type))
 			{
+				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+                        "Index out of bounds for atom type (s = %lu)", s);
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);
 				if (TLB::isValidHandle(h))

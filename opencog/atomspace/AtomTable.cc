@@ -57,10 +57,16 @@ AtomTable::AtomTable(bool dsa)
     pthread_mutex_init(&iteratorsLock, NULL);
 #endif
 
+    //connect signals
+    addedTypeConnection = classserver().addTypeSignal().connect(std::tr1::bind(&AtomTable::typeAdded, this, std::tr1::placeholders::_1));
+
 }
 
 AtomTable::~AtomTable()
 {
+    //disconnect signals
+    addedTypeConnection.disconnect();
+
     // remove all atoms from AtomTable
     AtomHashSet::iterator it = atomSet.begin();
 
@@ -186,7 +192,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
                                      bool subclass) const
 {
     // Check if it is the special case of looking for an specific atom
-    if (ClassServer::isA(type, LINK) && 
+    if (classserver().isA(type, LINK) && 
         (arity == 0 || !handles.empty()))
     {
         //printf("special case\n");
@@ -213,7 +219,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
     }
 
-    if (ClassServer::isA(type, LINK) && (arity == 0)) {
+    if (classserver().isA(type, LINK) && (arity == 0)) {
         HandleEntry* result = getHandleSet(type, subclass);
         result = HandleEntry::filterSet(result, arity);
         return result;
@@ -330,7 +336,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
                     // array types.
                     std::vector<Type> subTypes;
 
-                    ClassServer::getChildren(types[i], std::back_inserter(subTypes));
+                    classserver().getChildren(types[i], std::back_inserter(subTypes));
 
                     // for all subclasses found, a set is concatenated to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
@@ -502,7 +508,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
     AtomHashSet::const_iterator it;
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
+        bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
         if (matched) logger.debug("%d: %s", TLB::getHandle(atom).value(), atom->toString().c_str());
     }
 }
@@ -512,7 +518,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
     AtomHashSet::const_iterator it;
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
-        bool matched = (subclass && ClassServer::isA(atom->getType(), type)) || type == atom->getType();
+        bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
         if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
     }
 }
@@ -824,4 +830,13 @@ boost::signal<void (Handle)>& AtomTable::removeAtomSignal()
 boost::signal<void (Handle)>& AtomTable::mergeAtomSignal()
 {
     return _mergeAtomSignal;
+}
+
+void AtomTable::typeAdded(Type t)
+{
+    //resize all Type-based indexes
+    nodeIndex.resize();
+    linkIndex.resize();
+    typeIndex.resize();
+    targetTypeIndex.resize();
 }

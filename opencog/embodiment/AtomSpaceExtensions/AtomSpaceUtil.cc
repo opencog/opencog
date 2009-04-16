@@ -1635,8 +1635,8 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( const AtomSpace& atomSpace,
             logger().log(opencog::Logger::DEBUG,
                          "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%s], outgoing0[%s] predicateNode[%s]",
                          j,
-                         ClassServer::getTypeName( atomSpace.getType( incomingLinks[j] ) ).c_str( ),
-                         ClassServer::getTypeName( EVALUATION_LINK ).c_str( ),
+                         classserver().getTypeName( atomSpace.getType( incomingLinks[j] ) ).c_str( ),
+                         classserver().getTypeName( EVALUATION_LINK ).c_str( ),
                          atomSpace.getOutgoing( incomingLinks[j], 0 ).str( ).c_str( ),
                          predicateNodeHandle.str( ).c_str( ),
                          atomSpace.getOutgoing( incomingLinks[j], 1 ).str( ).c_str( ) );
@@ -1785,7 +1785,7 @@ Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,
     if (atomSpace.getType(implicationLink) != IMPLICATION_LINK) {
         logger().log(opencog::Logger::ERROR,
                      "AtomSpaceUtil - Outgoing atom index [1] should be an ImplicationLink. Got '%s'.",
-                     ClassServer::getTypeName(atomSpace.getType(implicationLink)).c_str());
+                     classserver().getTypeName(atomSpace.getType(implicationLink)).c_str());
         return Handle::UNDEFINED;
     }
 

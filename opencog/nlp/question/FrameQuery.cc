@@ -241,7 +241,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	}
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
-	        ClassServer::getTypeName(ntype).c_str());
+	        classserver().getTypeName(ntype).c_str());
 
 	std::string sa = aa->toString();
 	std::string sb = ab->toString();

@@ -193,7 +193,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
 #endif
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
-    if (ClassServer::isA(type, UNORDERED_LINK)) {
+    if (classserver().isA(type, UNORDERED_LINK)) {
         std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
     }
 }
@@ -310,7 +310,7 @@ HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, b
         Link *link = dynamic_cast<Link*>(TLB::getAtom(h->handle));
         Type linkType = link->getType();
         //printf("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
-        if ((linkType == desiredLinkType) || (subClasses && ClassServer::isA(linkType, desiredLinkType))) {
+        if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
             int linkArity = link->getArity();
             for (int i = 0; i < linkArity; i++) {
                 Handle handle = link->getOutgoingSet()[i];

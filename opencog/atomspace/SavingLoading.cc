@@ -115,14 +115,14 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
 void SavingLoading::saveClassServerInfo(FILE *f)
 {
     logger().fine("SavingLoading::saveClassServerInfo");
-    int numTypes = ClassServer::getNumberOfClasses();
+    int numTypes = classserver().getNumberOfClasses();
 
     fwrite(&numTypes, sizeof(int), 1, f);
 
     for (Type i = 0; i < numTypes; i++) {
-        int classNameLength = ClassServer::getTypeName(i).length();
+        int classNameLength = classserver().getTypeName(i).length();
         fwrite(&classNameLength, sizeof(int), 1, f);
-        fwrite(ClassServer::getTypeName(i).c_str(), sizeof(char), classNameLength, f);
+        fwrite(classserver().getTypeName(i).c_str(), sizeof(char), classNameLength, f);
         fwrite(&i, sizeof(Type), 1, f);
     }
 }
@@ -321,7 +321,7 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadClassServerInfo");
     char buffer[1 << 16];
-    int numTypes = ClassServer::getNumberOfClasses();
+    int numTypes = classserver().getNumberOfClasses();
 
     int numTypesDump;
     fread(&numTypesDump, sizeof(int), 1, f);
@@ -335,11 +335,11 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
         Type typeDump;
         fread(&typeDump, sizeof(Type), 1, f);
 
-        if (!ClassServer::isDefined(buffer)) {
+        if (!classserver().isDefined(buffer)) {
             dumpToCore[typeDump] = numTypes + 1;
             logger().warn("Warning: type inconsistence found (%d-%s)", typeDump, buffer);
         } else {
-            dumpToCore[typeDump] = ClassServer::getType(buffer);
+            dumpToCore[typeDump] = classserver().getType(buffer);
         }
     }
 
@@ -359,7 +359,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
         
         Type oldType;
         fread(&oldType, sizeof(Type), 1, f);        
-        if (dumpToCore[oldType] > ClassServer::getNumberOfClasses()) {
+        if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
                                          "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
@@ -394,7 +394,7 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
 
         Type oldType;
         fread(&oldType, sizeof(Type), 1, f);        
-        if (dumpToCore[oldType] > ClassServer::getNumberOfClasses()) {
+        if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
                                          "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
@@ -418,7 +418,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     } // if
     
     // updates handles for trail
-    if (ClassServer::isA(atom->type, LINK)) {
+    if (classserver().isA(atom->type, LINK)) {
         Trail *t = ((Link *)atom)->getTrail();
         if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");

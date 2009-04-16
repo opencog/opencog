@@ -1221,7 +1221,7 @@ void printAtomTree(const atom& a, int level, int LogLevel)
     } else {
         char buf[500];
         sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(),
-                ClassServer::getTypeName(a.T).c_str(), a.T, a.handle);
+                classserver().getTypeName(a.T).c_str(), a.T, a.handle);
         string subst_buf = make_subst_buf(a);
 
         LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
@@ -1766,7 +1766,7 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
                         found_unbound_variable = true;
                     }
                 } else {
-                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", ClassServer::getTypeName(from_T).c_str(), variable_index, i);
+                    throw new RuntimeException("Found more than one variable inside an unordered link (link type = %s,positions %d and %d)\n", classserver().getTypeName(from_T).c_str(), variable_index, i);
                 }
             }
         }
@@ -1863,7 +1863,7 @@ char unnamed_type[] = "unnamed-type";
 const char* Type2Name(Type t)
 {
 
-    return ClassServer::getTypeName(t).c_str();
+    return classserver().getTypeName(t).c_str();
     /*
      return  (STLhas(*ClassServer::class_name, t)
         ? (*ClassServer::class_name)[t]

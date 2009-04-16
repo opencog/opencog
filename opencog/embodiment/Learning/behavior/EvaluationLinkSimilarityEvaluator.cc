@@ -87,7 +87,7 @@ float EvaluationLinkSimilarityEvaluator::computeHandleSimilarity(Handle h1, Hand
         //printf("set.next\n");
         //printf("set.handle = %s\n", TLB::getAtom(set->handle)->toString().c_str());
         Atom* sim_link = TLB::getAtom(set->handle);
-        if (ClassServer::isA(sim_link->getType(), SIMILARITY_LINK)) {
+        if (classserver().isA(sim_link->getType(), SIMILARITY_LINK)) {
             std::vector<Handle> outgoing = static_cast<Link*>(sim_link)->getOutgoingSet();
             for (int i = (int) outgoing.size() - 1; i >= 0; i--) {
                 //printf("[%d]\n", i);

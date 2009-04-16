@@ -229,7 +229,6 @@ public:
 
     PLNUTest()
     {
-        ClassServer::init();
         // initial values for running tests multiple times
         seed = 11111;
         tempi=0;

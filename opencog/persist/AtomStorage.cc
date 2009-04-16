@@ -796,13 +796,13 @@ void AtomStorage::setup_typemap(void)
 	rp.rs->foreach_row(&Response::type_cb, &rp);
 	rp.rs->release();
 
-	for (Type t=0; t<ClassServer::getNumberOfClasses(); t++)
+	for (Type t=0; t<classserver().getNumberOfClasses(); t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
 		if (-1 == sqid)
 		{
-			const char * tname = ClassServer::getTypeName(t).c_str();
+			const char * tname = classserver().getTypeName(t).c_str();
 
 			// Let the sql id be the same as the current type number,
 			// unless this sql number is already in use, in which case
@@ -842,7 +842,7 @@ void AtomStorage::setup_typemap(void)
 
 void AtomStorage::set_typemap(int dbval, const char * tname)
 {
-	Type realtype = ClassServer::getType(tname);
+	Type realtype = classserver().getType(tname);
 	loading_typemap[dbval] = realtype;
 	storing_typemap[realtype] = dbval;
 	if (db_typename[dbval] != NULL) free (db_typename[dbval]);
@@ -1038,7 +1038,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		// A negative height is "unknown" and must be checked.
 		if ((0 == rp.height) || 
 		    ((-1 == rp.height) &&
-		      ClassServer::isA(realtype, NODE)))
+		      classserver().isA(realtype, NODE)))
 		{
 			atom = new Node(realtype, rp.name);
 		}

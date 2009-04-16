@@ -969,7 +969,7 @@ public:
      *
      * @param An output iterator.
      * @param An array of target types to match the types of the atoms in
-     * the outgoing set of searched atoms. This parameter (as well as any of
+     * the outgoing set of searched atoms. This parameter can be null (or any of
      * its elements can be NOTYPE), what means that the type doesnt matter.
      * Not that if this array is not null, it must contains "arity" elements.
      * @param An array of boolean values indicating whether each of the
@@ -1130,7 +1130,7 @@ public:
     inline bool foreach_handle_of_type(const char * atypename,
                                        bool (T::*cb)(Handle), T *data,
                                        bool subclass = false) {
-        Type atype = ClassServer::getType(atypename);
+        Type atype = classserver().getType(atypename);
         return foreach_handle_of_type(atype, cb, data, subclass);
     }
 

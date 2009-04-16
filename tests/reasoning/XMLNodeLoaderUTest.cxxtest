@@ -107,7 +107,7 @@ class XMLNodeLoaderUTest : public CxxTest::TestSuite{
         Atom* atom = TLB::getAtom(U);
         Type type = atom->getType();
         printf("Atom type = %s\n", TYPE_TO_STR(type));
-        TS_ASSERT(ClassServer::isAssignableFrom(LINK, type));
+        TS_ASSERT(classserver().isAssignableFrom(LINK, type));
         Link* link = (Link*) atom;
         TS_ASSERT(link->getType() == LIST_LINK);
         TS_ASSERT(link->getArity() == ARITY);

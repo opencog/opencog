@@ -25,9 +25,9 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/HandleSeqIndex.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
+#include "HandleSeqIndex.h"
+#include "Handle.h"
+#include "types.h"
 
 namespace opencog
 {
@@ -38,16 +38,17 @@ class HandleEntry;
  */
 class LinkIndex
 {
-	private:
-		std::vector<HandleSeqIndex> idx;
-	public:
-		LinkIndex(void);
-		void insertHandle(Handle);
-		void removeHandle(Handle);
-		void remove(bool (*)(Handle));
+    private:
+    public:
+        std::vector<HandleSeqIndex> idx;
+        LinkIndex(void);
+        void insertHandle(Handle);
+        void removeHandle(Handle);
+        void remove(bool (*)(Handle));
+        void resize();
 
-		Handle getHandle(Type type, const HandleSeq&) const;
-		HandleEntry* getHandleSet(Type type, const HandleSeq &, bool subclass) const;
+        Handle getHandle(Type type, const HandleSeq&) const;
+        HandleEntry* getHandleSet(Type type, const HandleSeq &, bool subclass) const;
 };
 
 } //namespace opencog

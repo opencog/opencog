@@ -42,7 +42,7 @@ void Node::init(Type type,
            const TruthValue& tv)
 throw (InvalidParamException, AssertionException)
 {
-    if (!ClassServer::isA(type, NODE)) {
+    if (!classserver().isA(type, NODE)) {
         throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
     }
     name = cname;
@@ -77,7 +77,7 @@ std::string Node::toShortString() const
     if (name == "")
         tmpname = "#" + TLB::getHandle(this).str();
     snprintf(buf, BUFSZ, "node[%s:%s%s]",
-             ClassServer::getTypeName(type).c_str(), tmpname.c_str(),
+             classserver().getTypeName(type).c_str(), tmpname.c_str(),
                     (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
     return buf;
 }
@@ -90,7 +90,7 @@ std::string Node::toString() const
         tmpname = "#" + TLB::getHandle(this).str();
     //activation here at 0: can be replace with LTI
     snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%f,%f)",
-             ClassServer::getTypeName(type).c_str(), tmpname.c_str(),
+             classserver().getTypeName(type).c_str(), tmpname.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().getMean(), getTruthValue().getConfidence());

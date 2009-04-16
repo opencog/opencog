@@ -84,7 +84,7 @@ public:
             HandleEntry *h = atomSpace->getAtomTable().getHandleSet(ATOM, true);
             HandleEntry *it = h;
             while (it != NULL) {
-                //if (ClassServer::isAssignableFrom(NODE, TLB::getAtom(it->handle)->getType())){
+                //if (classserver().isAssignableFrom(NODE, TLB::getAtom(it->handle)->getType())){
                 // printf("%p %s\n", it->handle, ((Node *)it->handle)->toString().c_str());
                 //}else{
                 // printf("%p %s\n", it->handle, ((Link *)it->handle)->toShortString());

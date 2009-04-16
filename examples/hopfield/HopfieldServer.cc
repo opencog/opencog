@@ -588,7 +588,7 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
     HandleSeq::iterator j;
     for(j = links.begin(); j != links.end(); j++) {
         Handle lh = *j;
-        if (!ClassServer::isA(getAtomSpace()->getType(lh),linkType))
+        if (!classserver().isA(getAtomSpace()->getType(lh),linkType))
             continue;
         Handle destH;
         HandleSeq lseq = getAtomSpace()->getOutgoing(lh);

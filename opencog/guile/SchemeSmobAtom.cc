@@ -61,7 +61,7 @@ SCM SchemeSmob::ss_type (SCM satom)
 {
 	const Atom *atom = verify_atom(satom, "cog-type");
 	Type t = atom->getType();
-	const std::string &tname = ClassServer::getTypeName(t);
+	const std::string &tname = classserver().getTypeName(t);
 	SCM str = scm_from_locale_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
 
@@ -178,11 +178,11 @@ SCM SchemeSmob::ss_get_types (void)
 {
 	SCM list = SCM_EOL;
 
-	Type t = ClassServer::getNumberOfClasses();
+	Type t = classserver().getNumberOfClasses();
 	while (1)
 	{
 		t--;
-		const std::string &tname = ClassServer::getTypeName(t);
+		const std::string &tname = classserver().getTypeName(t);
 		SCM str = scm_from_locale_string(tname.c_str());
 		SCM sym = scm_string_to_symbol(str);
 		list = scm_cons(sym, list);

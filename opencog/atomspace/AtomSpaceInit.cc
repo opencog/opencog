@@ -36,7 +36,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     System::setModuleHandle(hinstDLL);
     switch(fdwReason) {
         case DLL_PROCESS_ATTACH:
-            opencog::ClassServer::init();
+            opencog::classserver();
             break;
         case DLL_THREAD_ATTACH:
             break;
@@ -51,7 +51,7 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 #include <stdio.h>
 static __attribute__ ((constructor)) void _init(void)
 {
-    opencog::ClassServer::init();
+    opencog::classserver();
 }
 
 static __attribute__ ((constructor)) void _fini(void)

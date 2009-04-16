@@ -110,7 +110,7 @@ void AtomSpace::atomAdded(Handle h)
                 Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
                 Handle timed_h = getOutgoing(h, 1);
                 timeServer.add(timed_h, t);
-            } else logger().warn("AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", ClassServer::getTypeName(getType(timeNode)).c_str());
+            } else logger().warn("AtomSpace::addLink: Invalid atom type at the first element in an AtTimeLink's outgoing: %s\n", classserver().getTypeName(getType(timeNode)).c_str());
         } else logger().warn("AtomSpace::addLink: Invalid arity for an AtTimeLink: %d (expected: 2)\n", getArity(h));
     }
 }
@@ -393,7 +393,7 @@ Type AtomSpace::getAtomType(const string& str) const
     //fprintf(stdout,"Atom space address: %p\n", this);
     //fflush(stdout);
 
-    return ClassServer::getType(const_cast<char*>(str.c_str()));
+    return classserver().getType(const_cast<char*>(str.c_str()));
 }
 
 bool AtomSpace::inheritsType(Type t1, Type t2) const
@@ -402,7 +402,7 @@ bool AtomSpace::inheritsType(Type t1, Type t2) const
     // fflush(stdout);
 
     // printf("AtomSpace::inheritsType(t1=%d,t2=%d)\n", t1, t2);
-    bool result = ClassServer::isA(t1, t2);
+    bool result = classserver().isA(t1, t2);
     // printf("AtomSpace::inheritsType result = %d\n", result);
     return result;
 }
@@ -425,7 +425,7 @@ string AtomSpace::getName(Type t) const
         cassert(TRACE_INFO, false, "AtomSpace::getName(): Unknown atom type.");
     }
     */
-    return ClassServer::getTypeName(t);
+    return classserver().getTypeName(t);
 }
 
 #ifdef DEAD_CODE

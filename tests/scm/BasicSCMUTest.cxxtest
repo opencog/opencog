@@ -98,7 +98,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	eval.clear_pending();
 	TSM_ASSERT("Failed to create a node", !eval_err);
 
-	Type t = ClassServer::getType(tipo);
+	Type t = classserver().getType(tipo);
 	Handle h = as->getHandle(t, nodename);
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h));
 

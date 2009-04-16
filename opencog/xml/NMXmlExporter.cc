@@ -72,7 +72,7 @@ void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalL
         exportables->add(h);
 
         Atom *newAtom = TLB::getAtom(h);
-        if (ClassServer::isA(newAtom->getType(), LINK)) {
+        if (classserver().isA(newAtom->getType(), LINK)) {
             internalLinks->add(h);
         }
         findExportables(exportables, internalLinks, newAtom);
@@ -82,14 +82,14 @@ void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalL
 
 std::string NMXmlExporter::toXML(HandleSet *elements)
 {
-    bool typesUsed[ClassServer::getNumberOfClasses()];
+    bool typesUsed[classserver().getNumberOfClasses()];
     char aux[1<<16];
     std::string result;
 
     sprintf(aux, "<%s>\n", LIST_TOKEN);
     result += aux;
 
-    memset(typesUsed, 0, sizeof(bool) * ClassServer::getNumberOfClasses());
+    memset(typesUsed, 0, sizeof(bool) * classserver().getNumberOfClasses());
     HandleSetIterator *it = elements->keys();
     while (it->hasNext()) {
         exportAtom(it->next(), typesUsed, result);
@@ -97,9 +97,9 @@ std::string NMXmlExporter::toXML(HandleSet *elements)
     delete(it);
     sprintf(aux, "<%s>\n", TAG_DESCRIPTION_TOKEN);
     result += aux;
-    for (unsigned int i = 0 ; i < ClassServer::getNumberOfClasses(); i++) {
+    for (unsigned int i = 0 ; i < classserver().getNumberOfClasses(); i++) {
         if (typesUsed[i]) {
-            sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, ClassServer::getTypeName(i).c_str(), VALUE_TOKEN, ClassServer::getTypeName(i).c_str());
+            sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, classserver().getTypeName(i).c_str(), VALUE_TOKEN, classserver().getTypeName(i).c_str());
             result += aux;
         }
     }
@@ -120,12 +120,12 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
     Atom *atom = TLB::getAtom(atomHandle);
     char aux[1<<16];
     typesUsed[atom->getType()] = true;
-    if (ClassServer::isA(atom->getType(), NODE)) {
+    if (classserver().isA(atom->getType(), NODE)) {
         if (!isInternal) {
-            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+            sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", classserver().getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
             result += aux;
         } else {
-            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, ClassServer::getTypeName(atom->getType()).c_str());
+            sprintf(aux, "<%s %s=\"%s\" ", ELEMENT_TOKEN, CLASS_TOKEN, classserver().getTypeName(atom->getType()).c_str());
             result += aux;
         }
         std::string name = ((Node*)atom)->getName();
@@ -134,7 +134,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
         sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, name.c_str());
         result += aux;
     } else {
-        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", ClassServer::getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
+        sprintf(aux, "<%s %s=\"%f\" %s=\"%f\" ", classserver().getTypeName(atom->getType()).c_str(), STRENGTH_TOKEN, atom->getTruthValue().getMean(), CONFIDENCE_TOKEN, atom->getTruthValue().getConfidence());
         result += aux;
         sprintf(aux, ">\n");
         result += aux;
@@ -145,7 +145,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
                 exportAtom(link->getOutgoingSet()[i], typesUsed, result, true);
             }
         }
-        sprintf(aux, "</%s>\n", ClassServer::getTypeName(atom->getType()).c_str());
+        sprintf(aux, "</%s>\n", classserver().getTypeName(atom->getType()).c_str());
         result += aux;
     }
 

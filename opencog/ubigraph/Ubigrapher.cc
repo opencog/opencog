@@ -365,7 +365,7 @@ bool Ubigrapher::addVertex(Handle h)
 
     if (labelsOn) {
         std::ostringstream ost;
-        std::string type = ClassServer::getTypeName(a->getType());
+        std::string type = classserver().getTypeName(a->getType());
         if (compactLabels) {
             ost << initials(type);
         } else {
@@ -410,11 +410,11 @@ bool Ubigrapher::addEdges(Handle h)
                 logger().error("Status was %d", status);
             
             int style = compactLinkStyle;
-            if (ClassServer::isA(a->getType(), ORDERED_LINK))
+            if (classserver().isA(a->getType(), ORDERED_LINK))
                 style = compactLinkStyleDirected;
             ubigraph_change_edge_style(id, style);
             if (labelsOn) {
-                std::string type = ClassServer::getTypeName(a->getType());
+                std::string type = classserver().getTypeName(a->getType());
                 std::ostringstream ost;
                 if (compactLabels) {
                     ost << initials(type);
@@ -427,7 +427,7 @@ bool Ubigrapher::addEdges(Handle h)
             return false;
         } else {
             int style = outgoingStyle;
-            if (ClassServer::isA(a->getType(), ORDERED_LINK))
+            if (classserver().isA(a->getType(), ORDERED_LINK))
                 style = outgoingStyleDirected;
             for (size_t i = 0; i < out.size(); i++) {
                 int id = ubigraph_new_edge(h.value(),out[i].value());

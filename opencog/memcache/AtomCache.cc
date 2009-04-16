@@ -161,7 +161,7 @@ Atom * AtomCache::getAtom(Handle h)
 		int atype = atoi(val);
 		free(val);
 	
-		if (ClassServer::isAssignableFrom(NODE, atype))
+		if (classserver().isAssignableFrom(NODE, atype))
 		{
 			// Get the atom name
 			strcpy(p, "name");

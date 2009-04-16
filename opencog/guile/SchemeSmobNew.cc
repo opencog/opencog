@@ -59,7 +59,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
 	ret += "(";
-	ret += ClassServer::getTypeName(atom->getType());
+	ret += classserver().getTypeName(atom->getType());
 	if (node)
 	{
 		ret += " \"";
@@ -172,7 +172,7 @@ Type SchemeSmob::validate_atom (SCM stype, const char *subrname)
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
 	char * ct = scm_to_locale_string(stype);
-	Type t = ClassServer::getType(ct);
+	Type t = classserver().getType(ct);
 	free(ct);
 
 	// Make sure that the type is good
@@ -186,7 +186,7 @@ Type SchemeSmob::validate_node (SCM stype, const char *subrname)
 {
 	Type t = validate_atom(stype, subrname);
 
-	if (false == ClassServer::isA(t, NODE))
+	if (false == classserver().isA(t, NODE))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog node type");
 
 	return t;
@@ -257,14 +257,14 @@ static Type verify_link (SCM stype, const char * subrname)
 		stype = scm_symbol_to_string(stype);
 
 	char * ct = scm_to_locale_string(stype);
-	Type t = ClassServer::getType(ct);
+	Type t = classserver().getType(ct);
 	free(ct);
 
 	// Make sure that the type is good
 	if (NOTYPE == t)
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog atom type");
 
-	if (false == ClassServer::isA(t, LINK))
+	if (false == classserver().isA(t, LINK))
 		scm_wrong_type_arg_msg(subrname, 1, stype, "name of opencog link type");
 
 	return t;

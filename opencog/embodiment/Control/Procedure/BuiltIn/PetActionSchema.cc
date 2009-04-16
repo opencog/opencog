@@ -174,7 +174,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                     if (hs.size() > 1) {
                         std::string atomTypes;
                         foreach(Handle h, hs) {
-                            atomTypes += ClassServer::getTypeName(atomSpace.getType(h));
+                            atomTypes += classserver().getTypeName(atomSpace.getType(h));
                             atomTypes += " ";
                         }
                         logger().log(opencog::Logger::WARN, "WARNING: Got multiple SLObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());

@@ -16,4 +16,5 @@ ADD_LIBRARY (customatomtypes SHARED
 	CustomAtomTypesModule
 )
 
+ADD_DEPENDENCIES(customatomtypes opencog_atom_types)
 ADD_DEPENDENCIES(customatomtypes attention_atom_types)

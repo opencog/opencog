@@ -38,17 +38,16 @@ class FixedIntegerIndex:
 	public AtomIndex<int,Handle>
 {
 	protected:
-		std::vector<std::set<Handle> > idx;
+		void resize(size_t);
 
 	public:
+		std::vector<std::set<Handle> > idx;
         virtual ~FixedIntegerIndex() {}
 		virtual void insert(int, Handle);
 		virtual Handle get(int) const;
 		virtual void remove(int, Handle);
 		virtual size_t size(void) const;
 		virtual void remove(bool (*)(Handle));
-
-		void resize(size_t);
 };
 
 } //namespace opencog

@@ -149,7 +149,7 @@ void TulipWriter::writeNodeNames()
     }
     // give not nodes the name NOT
     foreach (Handle h, linkHandles) {
-        myfile << "(node " << h << " \"" << ClassServer::getTypeName(a->getType(h)) 
+        myfile << "(node " << h << " \"" << classserver().getTypeName(a->getType(h)) 
             << "\" )" << endl;
     }
     myfile << ")" << endl;

@@ -116,7 +116,7 @@ struct compare_link {
         Link *l = (Link*)a;
         Type at = a->getType();
 
-        if (!(at == t || subclass && ClassServer::isA(at, t)))
+        if (!(at == t || subclass && classserver().isA(at, t)))
             return false;
 
         if (position == (Arity)-1)
@@ -134,7 +134,7 @@ struct compare_link {
         if (!targetSubclass)
             return false;
 
-        return ClassServer::isA(tat, tt);
+        return classserver().isA(tat, tt);
     }
 };
 

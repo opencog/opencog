@@ -43,6 +43,7 @@ class TypeIndex:
 		TypeIndex(void);
 		void insertHandle(Handle);
 		void removeHandle(Handle);
+        void resize();
 
 		HandleEntry* getHandleSet(Type type, bool subclass) const;
 

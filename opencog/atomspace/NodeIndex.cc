@@ -29,11 +29,12 @@ using namespace opencog;
 
 NodeIndex::NodeIndex(void)
 {
-	// The typeIndex is NUMBER_OF_CLASSES+2 because NOTYPE is 
-	// NUMBER_OF_CLASSES+1 and typeIndex[NOTYPE] is asked for if a
-	// typename is misspelled, because ClassServer::getType()
-	// returns NOTYPE in this case).
-	idx.resize(ClassServer::getNumberOfClasses() + 2);
+	resize();
+}
+
+void NodeIndex::resize()
+{
+	this->idx.resize(classserver().getNumberOfClasses());
 }
 
 void NodeIndex::insertHandle(Handle h)
@@ -54,6 +55,8 @@ void NodeIndex::removeHandle(Handle h)
 
 Handle NodeIndex::getHandle(Type t, const char *name) const
 {
+	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+            "Index out of bounds for atom type (t = %lu)", t);
 	const NameIndex &ni = idx[t];
 	return ni.get(name);
 }
@@ -73,12 +76,14 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 	{
 		HandleEntry *he = NULL;
 		
-		int max = ClassServer::getNumberOfClasses();
+		int max = classserver().getNumberOfClasses();
 		for (Type s = 0; s < max; s++)
 		{
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
-			if (ClassServer::isA(s, type))
+			if (classserver().isA(s, type))
 			{
+				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+                        "Index out of bounds for atom type (s = %lu)", s);
 				const NameIndex &ni = idx[s];
 				Handle h = ni.get(name);
 				if (TLB::isValidHandle(h))

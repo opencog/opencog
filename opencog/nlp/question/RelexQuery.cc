@@ -454,7 +454,7 @@ bool RelexQuery::node_match(Node *npat, Node *nsoln)
 	}
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", soltype,
-	        ClassServer::getTypeName(soltype).c_str());
+	        classserver().getTypeName(soltype).c_str());
 
 	std::string sa = npat->toString();
 	std::string sb = nsoln->toString();
