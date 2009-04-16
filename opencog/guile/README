@@ -21,8 +21,9 @@ available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
-Nodes, Links and TruthValues, as well as ways to get properties (such
-as the names of Nodes, or the outgoing sets of Links).  Although the 
+Nodes, Links, TruthValues and VersionHandles, as well as ways to get 
+properties (such as the names of Nodes, or the outgoing sets of Links).  
+Although the 
 core interface is documented below, it is important to notice that
 scheme makes "syntactic sugar" very easy to use; thus the interface
 below can be simplified, and has been simplified (in the  file
@@ -471,13 +472,25 @@ loaded by the opencog/scm/load.sh shell script.
 
 === Load scheme data from a file ===
 
-To load scheme code from a file, simply make sure the first 3 characters
+There are two ways to load scheme from a file: automatically, at server
+startup, or manually.
+
+To load automatically, edit ''opencog.conf'', and append the 
+filename to the line ''SCM_PRELOAD'', for example:
+
+   SCM_PRELOAD = scm/type_constructors.scm, scm/utilities.scm
+
+The cogserver is then started with the -c flag: 
+
+   cogserver -c ../lib/opencog.conf
+
+To manually load scheme code, simply make sure the first 3 characters
 of the file are "scm" followed by a carraige return. Then, at the shell
 prompt, simply execute the command:
 
   cat filename | telnet localhost 17001
 
-This assuses the scheme code is in "filename", that the cogserver is
+This assumes the scheme code is in "filename", that the cogserver is
 running on "localhost", and is listening on port 17001 (which is the
 default port for the cogserver).
 
@@ -498,5 +511,5 @@ ToDo
 
 -- change cog-delete to also accept a list of atoms 
 -- change cog-delete to return null, not #t (?why?)
-
+-- add ability to create CompositeTruthValue
 
