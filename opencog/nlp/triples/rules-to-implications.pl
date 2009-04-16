@@ -414,5 +414,13 @@ if ($have_rule)
 	$have_rule = 0;
 }
 
+# Make a list of all the rules.
+print "(define frame-rule-list (list \n";
+for (my $i=0; $i<$rule_cnt; $i++)
+{
+	print "   frame-rule-$i\n";
+}
+print "))\n";
+
 print "; Processed $rule_cnt rules\n";
 print "\n.\nexit\n";
