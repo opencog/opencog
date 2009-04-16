@@ -1,8 +1,9 @@
 /*
  * opencog/spatial/TangentBugCommons.h
  *
- * Copyright (C) 2007-2008 Dan Zwell, Carlos Lopes
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ * Author(s): Dan Zwell, Carlos Lopes
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #ifndef _SPATIAL_TANGENT_BUG_COMMONS_H_
 #define _SPATIAL_TANGENT_BUG_COMMONS_H_
 

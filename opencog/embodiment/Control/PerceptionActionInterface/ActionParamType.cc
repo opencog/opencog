@@ -1,8 +1,9 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/ActionParamType.cc
+ * opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.cc
  *
- * Copyright (C) 2007-2008 TO_COMPLETE
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ * Author(s): Novamente team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "ActionParamType.h"
 #include <opencog/util/Logger.h>
 #include <iostream>

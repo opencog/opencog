@@ -1,8 +1,9 @@
 /*
  * opencog/embodiment/Learning/RewritingRules/hillclimbing_action_reduction.cc
  *
- * Copyright (C) 2007-2008 Nil Geisweiller
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ * Author(s): Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <opencog/comboreduct/reduct/reduct.h>
 #include "hillclimbing_action_reduction.h"
 #include <opencog/comboreduct/reduct/meta_rules.h>

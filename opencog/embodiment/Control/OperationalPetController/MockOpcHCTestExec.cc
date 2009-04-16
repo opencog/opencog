@@ -1,8 +1,9 @@
 /*
- * opencog/embodiment/Control/MessagingSystem/MockOpcHCTestExec.cc
+ * opencog/embodiment/Control/OperationalPetController/MockOpcHCTestExec.cc
  *
- * Copyleft (C) 2007-2008 Nil Geisweiller
- * All Wrongs Reserved
+ * Copyright (C) 2002-2009 Novamente LLC
+ * All Rights Reserved
+ * Author(s): Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <unistd.h>
 #include <opencog/util/files.h>

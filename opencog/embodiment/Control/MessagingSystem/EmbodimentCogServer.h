@@ -1,10 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h
  *
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Written by Welter Luigi <welter@vettalabs.com>
+ * Author(s): Welter Luigi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 
 #ifndef _EMBODIMENT_COG_SERVER_H
 #define _EMBODIMENT_COG_SERVER_H

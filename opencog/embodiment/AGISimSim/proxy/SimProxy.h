@@ -1,10 +1,9 @@
 /*
  * opencog/embodiment/AGISimSim/proxy/SimProxy.h
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Written by TO_COMPLETE
+ * Author(s): Novamente team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #ifndef __SIM_PROXY_H__
 #define __SIM_PROXY_H__
 

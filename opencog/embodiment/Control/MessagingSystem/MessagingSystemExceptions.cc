@@ -1,10 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/MessagingSystemExceptions.cc
  *
- * Copyright (C) 2001-2008 Thiago Maia, Andre Senna
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Written by Andre Senna
+ * Author(s): Thiago Maia, Andre Senna, Andre Senna
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 
 #include <stdarg.h>
 #include <stdio.h>

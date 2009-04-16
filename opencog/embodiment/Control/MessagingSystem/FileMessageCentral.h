@@ -1,8 +1,9 @@
 /*
  * opencog/embodiment/Control/MessagingSystem/FileMessageCentral.h
  *
- * Copyright (C) 2007-2008 Elvys Borges
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ * Author(s): Elvys Borges
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #ifndef FILEMESSAGECENTRAL_H_
 #define FILEMESSAGECENTRAL_H_
 

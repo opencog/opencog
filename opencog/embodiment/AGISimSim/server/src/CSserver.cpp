@@ -1,10 +1,9 @@
 /*
  * opencog/embodiment/AGISimSim/server/src/CSserver.cpp
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Written by Ari A. Heljakka
+ * Author(s): Ari A. Heljakka
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,7 +27,6 @@ Copyright Ari A. Heljakka / GenMind Ltd.
 Not part of AGI-Sim.
 Do not distribute.
 
-TO_COMPLETE
 
 */
 

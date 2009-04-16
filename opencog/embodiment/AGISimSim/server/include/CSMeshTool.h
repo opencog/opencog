@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 by Teemu Keinonen
+    Copyright (C) 2001 by Teemu Keinonen
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -15,6 +15,7 @@
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
 
 #ifndef CSMESHTOOL_H
 #define CSMESHTOOL_H

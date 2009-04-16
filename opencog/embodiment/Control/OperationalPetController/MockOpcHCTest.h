@@ -1,10 +1,9 @@
 /*
- * opencog/embodiment/Control/MessagingSystem/MockOpcHCTest.h
+ * opencog/embodiment/Control/OperationalPetController/MockOpcHCTest.h
  *
- * Copywrite (C) 2007-2008 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Authors : Nil Geisweiller
+ * Author(s): Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #ifndef MOCKOPCHCTEST_H
 #define MOCKOPCHCTEST_H
 

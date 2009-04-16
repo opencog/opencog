@@ -1,11 +1,9 @@
 /*
- * opencog/embodiment/CompareAtomTreeTemplate.h
+ * opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
- *
- * Written by Nil Geisweiller
- *            Ari A. Heljakka
+ * Author(s): Nil Geisweiller, Ari A. Heljakka
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,6 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+
 #ifndef COMPAREATOMTREETEMPLATE_H
 #define COMPAREATOMTREETEMPLATE_H
 
