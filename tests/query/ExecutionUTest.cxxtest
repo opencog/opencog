@@ -69,7 +69,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
-		void test_isa(void);
+		void test_exec(void);
 };
 
 /*
@@ -153,19 +153,19 @@ void ExecutionUTest::setUp(void)
 #define getarity(hand) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
 
-void ExecutionUTest::test_isa(void)
+void ExecutionUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
 	Handle result = pm.crisp_logic_imply(implication);
 
-#if 0
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 
 	// NOT definite link.
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
+#if 0
 	// Then, evaluationLink, as above.
 	Handle heval = getlink(result, 0);
 	Handle vis_a = getlink(heval, 0);

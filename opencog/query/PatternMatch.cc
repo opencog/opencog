@@ -25,8 +25,8 @@
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/guile/SchemeExec.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -174,7 +174,24 @@ class Instantiator
 Handle Instantiator::execution_link()
 {
 	// The oset contains the grounded schema.
- printf ("hello world\n");
+	if (2 != oset.size()) return Handle::UNDEFINED;
+	Handle gs = oset[0];
+	Node *gsn = dynamic_cast<Node *>(TLB::getAtom(gs));
+	if (NULL == gsn) return Handle::UNDEFINED;
+
+	// Get the schema name.
+	const std::string& schema = gsn->getName();
+	// printf ("Grounded schema name: %s\n", schema.c_str());
+
+	// At this point, we only run scheme schemas.
+	if (0 == schema.compare(0,4,"scm:", 4))
+	{
+#ifdef HAVE_GUILE
+		SchemeExec exec;
+		Handle h = exec.eval(schema.substr(4).c_str(), oset[1]);
+		return h;
+#endif /* HAVE_GUILE */
+	}
 	return Handle::UNDEFINED;
 }
 
@@ -212,6 +229,7 @@ bool Instantiator::walk_tree(Handle expr)
 	// Walk the subtree, substituting values for variables.
 	foreach_outgoing_handle(expr, &Instantiator::walk_tree, this);
 
+	// Fire execution links, if found.
 	if (t == EXECUTION_LINK)
 	{
 		Handle sh = execution_link();
