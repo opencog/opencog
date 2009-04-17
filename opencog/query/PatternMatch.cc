@@ -272,7 +272,9 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 		logger().warn("%s: outgoing set size %d is insane!",
 			__FUNCTION__, oset.size());
 	}
-	return oset[0];
+	if (oset.size() >= 1)
+		return oset[0];
+	return Handle::UNDEFINED;
 }
 
 /* ================================================================= */
