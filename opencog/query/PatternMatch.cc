@@ -164,11 +164,19 @@ class Instantiator
 
 		std::vector<Handle> oset;
 		bool walk_tree(Handle tree);
+		Handle execution_link(void);
 
 	public:
 		AtomSpace *as;
 		Handle instantiate(Handle expr, std::map<Handle, Handle> &vars);
 };
+
+Handle Instantiator::execution_link()
+{
+	// The oset contains the grounded schema.
+ printf ("hello world\n");
+	return Handle::UNDEFINED;
+}
 
 bool Instantiator::walk_tree(Handle expr)
 {
@@ -203,6 +211,17 @@ bool Instantiator::walk_tree(Handle expr)
 
 	// Walk the subtree, substituting values for variables.
 	foreach_outgoing_handle(expr, &Instantiator::walk_tree, this);
+
+	if (t == EXECUTION_LINK)
+	{
+		Handle sh = execution_link();
+		oset = save_oset;
+		if (Handle::UNDEFINED != sh)
+		{
+			oset.push_back(sh);
+		}
+		return false;
+	}
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by thier values.

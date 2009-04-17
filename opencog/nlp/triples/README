@@ -577,6 +577,7 @@ Next step:
 -- This corpus is in N3 format; strip out sentences by 
    running "conceptnet.pl"
 -- Parse the sentences using relex, generate opencog output.
+-- run "collect-stats.scm"
 
 References:
 -----------

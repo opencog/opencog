@@ -1,0 +1,182 @@
+/*
+ * tests/query/ExecutionUTest.cxxtest
+ *
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/PatternMatch.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ExecutionUTest :  public CxxTest::TestSuite
+{
+	private:
+		PatternMatch pm;
+		AtomSpace *as;
+
+		Handle implication;
+
+	public:
+
+		ExecutionUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~ExecutionUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+
+		void tearDown(void) { }
+
+		void test_isa(void);
+};
+
+/*
+ * This function sets up the following structures:
+ *  # IF _obj(be, $var1) ^ 
+ *       $prep($var1, $var2) 
+ *      THEN %ExecutionLink("make-it", $var1, $prep)
+ */
+#define an as->addNode
+#define al as->addLink
+void ExecutionUTest::setUp(void)
+{
+	CogServer& cogserver = static_cast<CogServer&>(server());
+	as = cogserver.getAtomSpace();
+	pm.set_atomspace(as);
+
+	// Create an implication link that will be tested.
+	implication = 
+	al(IMPLICATION_LINK,
+		al(AND_LINK,
+			al(EVALUATION_LINK,
+				an(PREDICATE_NODE, "_obj"),
+				al(LIST_LINK,
+					an(CONCEPT_NODE, "be"),
+					an(VARIABLE_NODE, "$var1")
+				)
+			),
+			al(EVALUATION_LINK,
+				an(VARIABLE_NODE, "$prep"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$var1"),
+					an(VARIABLE_NODE, "$var2")
+				)
+			)
+		),
+		al(EVALUATION_LINK,
+			al(EXECUTION_LINK,
+				an(GROUNDED_SCHEMA_NODE, "scm:hoo ha"),
+				al(LIST_LINK,
+					an(VARIABLE_NODE, "$var1"),
+					an(VARIABLE_NODE, "$var2")
+				)
+			)
+		)
+	);
+
+	// Create data on which the above pattern should match
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "_obj"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "be"),
+			an(CONCEPT_NODE, "capital")
+		),
+		TruthValue::TRUE_TV()
+	);
+
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "of"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "capital"),
+			an(CONCEPT_NODE, "Spain")
+		),
+		TruthValue::TRUE_TV()
+	);
+}
+
+/*
+ * preposition reasoning test.
+ *
+ * Expect to get the following result, given the above data:
+ *
+ *    EvaluationLink
+ *       DefinedLinguisticRelationshipNode "capital_of"
+ *       ListLink
+ *          WordNode "capital"
+ *          DefinedLinguisticRelationshipNode "of"
+ */
+#define getlink(hand,pos) \
+	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
+
+#define getarity(hand) \
+	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
+
+void ExecutionUTest::test_isa(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Result should be a ListLink
+	Handle result = pm.crisp_logic_imply(implication);
+
+#if 0
+	// There should be only one solution: the Berlin one.
+	// The Madrid graph should be rejected because of the 
+	// NOT definite link.
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	// Then, evaluationLink, as above.
+	Handle heval = getlink(result, 0);
+	Handle vis_a = getlink(heval, 0);
+	Handle hlist = getlink(heval, 1);
+	Handle vberlin = getlink(hlist, 0);
+	Handle vcity = getlink(hlist, 1);
+
+	TSM_ASSERT_EQUALS("incorrect is_a", his_a, vis_a);
+	TSM_ASSERT_EQUALS("incorrect berlin", hberlin, vberlin);
+	TSM_ASSERT_EQUALS("incorrect city", hcity, vcity);
+#endif
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
