@@ -1,23 +1,9 @@
-INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/opencog
-	${OPENCOG_SOURCE_DIR}/opencog/util
-	${OPENCOG_SOURCE_DIR}/opencog/atomspace
-	${OPENCOG_SOURCE_DIR}/opencog/xml
-        ${OPENCOG_SOURCE_DIR}/opencog/embodiment/AtomSpaceExtensions
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial
-	${OPENCOG_SOURCE_DIR}/opencog/embodiment/Spatial/Math
-)
-
-LINK_DIRECTORIES(
-	${OPENCOG_BINARY_DIR}/opencog/atomspace
-	${OPENCOG_BINARY_DIR}/opencog/xml
-        ${OPENCOG_BINARY_DIR}/opencog/embodiment/AtomSpaceExtensions
-)
+OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+ADD_CUSTOM_TARGET(test_custom_atom_types DEPENDS atom_types.h)
 
 LINK_LIBRARIES(
 	atomspace
 	${Boost_SIGNALS_LIBRARY}
-        AtomSpaceExtensions
 )
 
 # AtomTableUTest requires the XML libraries
@@ -44,3 +30,5 @@ ADD_CXXTEST(TemporalMapUTest)
 ADD_CXXTEST(TemporalTableUTest)
 ADD_CXXTEST(TimeServerUTest)
 ADD_CXXTEST(SavingLoadingUTest)
+ADD_DEPENDENCIES(SavingLoadingUTest test_custom_atom_types) 
+ADD_DEPENDENCIES(SavingLoadingUTest opencog_atom_types)

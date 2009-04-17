@@ -30,7 +30,6 @@
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 
 #define TIME_INTERVAL 100
@@ -44,7 +43,6 @@ class BDRetrieverUTest : public CxxTest::TestSuite
 {
 public:
     BDRetrieverUTest() {
-        opencog::atom_types_init::init();
     }
 
     void test_retrieveLastExemplarFromAtomSpace() {

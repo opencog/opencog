@@ -34,7 +34,6 @@
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 //using namespace behavior;
@@ -79,7 +78,6 @@ class EntropyFilterUTest : public CxxTest::TestSuite
 public:
     EntropyFilterUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
-        opencog::atom_types_init::init();
     }
 
     void test_computeEntropy() {

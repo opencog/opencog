@@ -27,7 +27,6 @@
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 #include <opencog/util/Config.h>
 
 using namespace LearningServer;
@@ -60,9 +59,6 @@ void LS::init(const std::string &myId, const std::string &ip,
               int portNumber)
 {
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
-
-    // OpenCog-related initialization
-    atom_types_init::init();
 
     this->busy = false;
 

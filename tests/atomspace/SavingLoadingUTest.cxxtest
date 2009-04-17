@@ -36,9 +36,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include "atom_types.definitions"
 
 using namespace std;
 using namespace opencog;
@@ -70,6 +68,7 @@ private:
 
 public:
     SavingLoadingUTest() {
+        #include "atom_types.inheritance"
         tvs[0] = new SimpleTruthValue(TV1_MEAN, TV1_COUNT);
         tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
         tvs[2] = new CompositeTruthValue(SimpleTruthValue(TV3_MEAN, TV3_COUNT), NULL_VERSION_HANDLE);
@@ -345,15 +344,14 @@ public:
         if (!CxxTest::TestTracker::tracker().testFailed())
             std::remove(DUMP_FILENAME);
 
-        // embodiment atomtable extensions specific tests
+        // specific tests for custom atom types
         SavingLoading savingLoading;
-        opencog::atom_types_init::init();
 
         AtomSpace *atomSpace5 = new AtomSpace();      
         
         HandleSeq execLinkOutgoing;
-        execLinkOutgoing.push_back( atomSpace5->addNode( GROUNDED_SCHEMA_NODE, "bark") );
-        execLinkOutgoing.push_back( atomSpace5->addLink( LIST_LINK, HandleSeq() ) );
+        execLinkOutgoing.push_back( atomSpace5->addNode( SAVING_LOADING_TEST_NODE, "test1") );
+        execLinkOutgoing.push_back( atomSpace5->addLink( SAVING_LOADING_TEST_LINK, HandleSeq() ) );
         
         HandleSeq externalLinkOutgoing;
         externalLinkOutgoing.push_back( atomSpace5->addLink( EXECUTION_LINK, execLinkOutgoing ) );
@@ -361,14 +359,14 @@ public:
         atomSpace5->addLink( LIST_LINK, externalLinkOutgoing );
 
         HandleSeq frequeLink;
-        frequeLink.push_back( atomSpace5->addNode( CONCEPT_NODE, "currentActionRepetition" ) );
+        frequeLink.push_back( atomSpace5->addNode( SAVING_LOADING_TEST_NODE, "currentActionRepetition" ) );
         frequeLink.push_back( atomSpace5->addNode( NUMBER_NODE, "0" ) );
         
 
-        Handle oldLink = atomSpace5->addLink( FREQUENCY_LINK, frequeLink );
+        Handle oldLink = atomSpace5->addLink( SAVING_LOADING_TEST_LINK, frequeLink );
         TS_ASSERT( atomSpace5->removeAtom(oldLink) )
 
-        atomSpace5->addLink( FREQUENCY_LINK, frequeLink );
+        atomSpace5->addLink( SAVING_LOADING_TEST_LINK, frequeLink );
 
         savingLoading.save( DUMP_FILENAME, *atomSpace5 );
         delete atomSpace5;

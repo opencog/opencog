@@ -33,7 +33,6 @@
 #include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #include "PAITestUtil.h"
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
@@ -52,7 +51,6 @@ private:
 
 public:
     PAIUTest() {
-        atom_types_init::init();
     }
 
     ~PAIUTest() {

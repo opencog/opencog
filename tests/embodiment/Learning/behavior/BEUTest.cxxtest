@@ -22,7 +22,6 @@
  */
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Learning/behavior/BDRetriever.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
@@ -40,7 +39,6 @@ public:
 
     BEUTest () {
         config(EmbodimentConfig::embodimentCreateInstance, true);
-        opencog::atom_types_init::init();
     }
 
     //thist test tests overlapping actions, when this happens

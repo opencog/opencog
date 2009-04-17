@@ -26,7 +26,6 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include "HCTestAgent.h"
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 //#define LEARNING_SCHEMA "fnorb"
 #define TRICK_NAME "fnorb"
@@ -82,7 +81,6 @@ void MockOpcHCTest::init(const std::string & myId,
 {
 
     setNetworkElement(new MessagingSystem::NetworkElement(myId, ip, portNumber));
-    atom_types_init::init();
 
     this->atomSpace  = new AtomSpace();
     this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));

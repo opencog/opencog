@@ -31,8 +31,6 @@
 #include <opencog/embodiment/Learning/behavior/BehaviorDescriptionMatcher.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
 
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
-
 using namespace ImaginaryLife;
 using namespace behavior;
 using namespace PetCombo;
@@ -49,7 +47,6 @@ class NoSpaceLifeUTest : public CxxTest::TestSuite
 {
 public:
     NoSpaceLifeUTest() {
-        opencog::atom_types_init::init();
     }
 
     void test_processSequence_and() {

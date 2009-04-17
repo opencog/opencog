@@ -32,7 +32,6 @@
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 using namespace OperationalPetController;
 using namespace PerceptionActionInterface;
@@ -69,7 +68,6 @@ public:
     PetUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
-        opencog::atom_types_init::init();
         atomSpace = new AtomSpace();
         sender = new LSMessageSenderMock();
         timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();

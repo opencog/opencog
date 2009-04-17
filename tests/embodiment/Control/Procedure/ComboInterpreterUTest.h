@@ -33,7 +33,6 @@
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/embodiment/Control/OperationalPetController/Pet.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #ifndef COMBOINTERPRETERUTEST_H
 #define COMBOINTERPRETERUTEST_H
@@ -82,7 +81,6 @@ public:
     virtual opencog::RandGen& getRandGen() = 0;
 
     void init(std::string _xmlFileName, std::string petName) {
-        opencog::atom_types_init::init();
         atomSpace = new AtomSpace();
 
         xmlFileName = _xmlFileName;

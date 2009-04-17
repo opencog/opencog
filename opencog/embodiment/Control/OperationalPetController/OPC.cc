@@ -26,7 +26,6 @@
 
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types_init.h>
 
 #include <opencog/util/files.h>
 #include <opencog/util/Config.h>
@@ -60,9 +59,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
 {
 
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
-
-    // OpenCog-related initialization
-    atom_types_init::init();
 
     std::string aType = (agentType == "pet" || agentType == "humanoid") ?
                         agentType : config().get( "RULE_ENGINE_DEFAULT_AGENT_TYPE" );
