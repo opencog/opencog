@@ -104,9 +104,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
 std::string SchemeSmob::handle_to_string(SCM node)
 {
-	SCM shandle = SCM_SMOB_OBJECT(node);
-	Handle h(scm_to_ulong(shandle));
-
+	Handle h = scm_to_handle(node);
 	return handle_to_string(h, 0) + "\n";
 }
 
@@ -124,7 +122,8 @@ SCM SchemeSmob::handle_to_scm (Handle h)
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-	unsigned long uuid = (unsigned long) SCM_SMOB_OBJECT(sh);
+	SCM suuid = SCM_SMOB_OBJECT(sh);
+	unsigned long uuid = scm_to_ulong(suuid);
 	return Handle(uuid);
 }
 
