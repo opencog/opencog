@@ -40,7 +40,7 @@ sub parse_clause
 
 	# Pull the three parts out of the clause.
 	# The pattern matches "blah(ding,dong)"
-	$clause =~ m/\s*([\$\!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
+	$clause =~ m/\s*([\$\!%\&\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -217,6 +217,46 @@ sub print_link
 
 
 # --------------------------------------------------------------------
+# print_exec  -- print a an execution link.
+# In some cases, the rules need to invoke proceedural code.
+# The key identifier here is the leading ampersand, which 
+# identifies such an execution link.
+sub print_exec
+{
+	my ($clause, $indent) = @_;
+
+	# Pull the three parts out of the clause.
+	$clause =~ s/\s*^\&//;
+	my ($link, $item1, $item2) = parse_clause($clause);
+
+	# Print a copy of the original clause for reference
+	print "$indent;; \&$clause\n";
+	print "$indent(ExecutionLink\n";
+	print "$indent   (GroundedSchemaNode \"$link\")\n";
+	print "$indent   (ListLink\n";
+	if ($item1 =~ /^\$/)
+	{
+		print "$indent      (VariableNode \"$item1\")\n";
+	}
+	else
+	{
+		print "$indent      (WordNode \"$item1\")\n";
+	}
+
+	if ($item2 =~ /^\$/)
+	{
+		print "$indent      (VariableNode \"$item2\")\n";
+	}
+	else
+	{
+		print "$indent      (WordNode \"$item2\")\n";
+	}
+	print "$indent   )\n";
+	print "$indent)\n";
+}
+
+
+# --------------------------------------------------------------------
 # print_lemma_link
 # Print a lemma link to connect a word instance to its word.
 # But print it only if the thing looks like a word instance,
@@ -338,7 +378,15 @@ sub parse_rule
 		my ($p, $i1, $i2, $implicand) = parse_clause($implicand);
 		my $clause = $p . "(" . $i1 . ", " . $i2 . ")";
 		$implicand = $4;
-		print_clause ($clause, 0, "   ");
+
+		if ($clause =~ /\&/)
+		{
+			print_exec ($clause, "   ");
+		}
+		else
+		{
+			print_clause ($clause, 0, "   ");
+		}
 
 		# If the rest of the line starts with ^N_, N a digit, then
 		# there's another clause waiting. Loop around again, else quit.
