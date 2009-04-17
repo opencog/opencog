@@ -122,6 +122,12 @@ SCM SchemeSmob::handle_to_scm (Handle h)
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
+Handle SchemeSmob::scm_to_handle (SCM sh)
+{
+	unsigned long uuid = (unsigned long) SCM_SMOB_OBJECT(sh);
+	return Handle(uuid);
+}
+
 /* ============================================================== */
 /**
  * Create a new scheme object, holding the atom handle
@@ -142,11 +148,10 @@ SCM SchemeSmob::ss_handle (SCM satom)
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
 
-	// XXX Now that Handle is a class and not a long int, we should
-	// not do this directly, but instead should get the handle first,
-	// then get the integer, then convert the integer to SCM.
-	// XXX FIXME
-	return SCM_SMOB_OBJECT(satom);
+	// Guhh. Handles are no longer unsigned ints, but are classes. :-(
+	// return SCM_SMOB_OBJECT(satom);
+	unsigned long uuid = (unsigned long) SCM_SMOB_OBJECT(satom);
+	return scm_from_ulong(uuid);
 }
 
 /* ============================================================== */

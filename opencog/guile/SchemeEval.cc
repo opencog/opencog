@@ -7,14 +7,13 @@
 
 #ifdef HAVE_GUILE
 
-#include "SchemeEval.h"
-
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
 #include <libguile/lang.h>
 #include <pthread.h>
 
+#include "SchemeEval.h"
 #include "SchemeSmob.h"
 
 using namespace opencog;
@@ -491,13 +490,14 @@ SCM SchemeEval::wrap_scm_eval(void *expr)
 	return scm_eval (sexpr, scm_interaction_environment());
 }
 
+/**
+ * do_scm_eval -- evaluate expression
+ * More or less the same as eval, except the expression is assumed
+ * to be an SCM already.  This method *must* be called in guile
+ * mode, in order for garbage collection, etc. to work correctly!
+ */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
-	per_thread_init();
-printf("hooooooooooooooooooooooooooooooooooooooo\n");
-std::string s = prt(sexpr);
-printf("duuude will eval %s\n", s.c_str());
-
 	caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
@@ -522,11 +522,9 @@ printf("duuude will eval %s\n", s.c_str());
 		return SCM_EOL;
 	}
 
-printf("wwwwooooooooooooooooooooooooooooooooooooooo\n");
-s = prt(rc);
-printf("duuude evaled to %s\n", s.c_str());
 	return rc;
 }
+
 /* ============================================================== */
 
 /**
