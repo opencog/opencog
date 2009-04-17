@@ -11,12 +11,14 @@
 
 #include <string>
 #include <opencog/atomspace/types.h>
+#include "SchemeEval.h"
 
 namespace opencog {
 
 class SchemeExec
 {
 	private:
+		SchemeEval evaluator;
 
 	public:
 		SchemeExec(void);

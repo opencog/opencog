@@ -34,6 +34,12 @@ class SchemeEval
 		std::string input_line;
 		bool pending_input;
 
+		// SCM eval
+		SCM do_scm_eval(SCM);
+		static void * c_wrap_scm_eval(void *);
+		SCM scm_args;
+		static SCM wrap_scm_eval(void *);
+
 		// Error handling stuff
 		SCM error_string_port;
 		SCM captured_stack;
@@ -44,7 +50,7 @@ class SchemeEval
 		bool caught_error;
 
 		// printing of basic types
-		std::string prt(SCM);
+		static std::string prt(SCM);
 
 		// output port
 		SCM outport;
@@ -53,6 +59,8 @@ class SchemeEval
 		SchemeEval(void);
 		~SchemeEval();
 		std::string eval(const std::string &);
+
+		SCM eval(SCM);
 
 		bool input_pending(void);
 		void clear_pending(void);

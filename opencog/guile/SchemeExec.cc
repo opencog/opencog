@@ -31,6 +31,10 @@ SchemeExec::~SchemeExec()
 Handle SchemeExec::eval(const char *func, Handle varargs)
 {
 printf("duuuude func = %s\n", func);
+evaluator.eval("(define (blah) (list \"you whooo\"))");
+SCM sfunc = scm_from_locale_symbol("blah");
+sfunc = scm_list_1(sfunc);
+	evaluator.eval(sfunc);
 	return Handle::UNDEFINED;
 }
 
