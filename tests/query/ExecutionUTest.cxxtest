@@ -107,7 +107,7 @@ void ExecutionUTest::setUp(void)
 		),
 		al(EVALUATION_LINK,
 			al(EXECUTION_LINK,
-				an(GROUNDED_SCHEMA_NODE, "scm:hoo ha"),
+				an(GROUNDED_SCHEMA_NODE, "scm:blah"),
 				al(LIST_LINK,
 					an(VARIABLE_NODE, "$var1"),
 					an(VARIABLE_NODE, "$var2")

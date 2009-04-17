@@ -15,7 +15,6 @@
 #include <libguile/lang.h>
 #include <pthread.h>
 
-#include <opencog/util/platform.h>
 #include "SchemeSmob.h"
 
 using namespace opencog;
@@ -557,17 +556,6 @@ void * SchemeEval::c_wrap_apply(void * p)
 	self->hargs = self->do_apply(*self->pexpr, self->hargs);
 	return self;
 }
-
-Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
-{
-printf("duuuude entery apply func = %s\n", func.c_str());
-do_eval("(define (blah) (list \"you whooo\"))");
-SCM sfunc = scm_from_locale_symbol("blah");
-sfunc = scm_list_1(sfunc);
-   do_scm_eval(sfunc);
-   return Handle::UNDEFINED;
-}
-
 
 #endif
 /* ===================== END OF FILE ============================ */
