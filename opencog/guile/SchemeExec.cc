@@ -16,11 +16,16 @@
 
 using namespace opencog;
 
+/**
+ * do_apply -- apply named function func to arguments in ListLink
+ * It is assumed that varargs is a ListLink, containing a list of
+ * atom handles. This list is unpacked, and then the fuction func 
+ * is applied to them. If the function returns an atom handle, then 
+ * this is returned, in turn.
+ */
 Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 {
 	per_thread_init();
-printf("duuuude entery apply func = %s\n", func.c_str());
-do_eval("(define (blah x y) (list \"you whooo\"))");
 	SCM sfunc = scm_from_locale_symbol(func.c_str());
 
 	Link *largs = dynamic_cast<Link *>(TLB::getAtom(varargs));
@@ -38,23 +43,15 @@ do_eval("(define (blah x y) (list \"you whooo\"))");
 	}
 	expr = scm_cons(sfunc, expr);
 	
-printf("hooooooooooooooooooooooooooooooooooooooo\n");
-std::string s = prt(expr);
-printf("duuude will eval %s\n", s.c_str());
+   SCM sresult = do_scm_eval(expr);
 
-   SCM sr = do_scm_eval(expr);
-printf("wwww hooooooooooooooooooooooooooooooooooooooo\n");
-s = prt(sr);
-printf("duuude result was %s\n", s.c_str());
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sr))
+	// If the result is a handle, return the handle.
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sresult))
 	{
-		fprintf(stderr, "Error: do_apply(): expecting handle for result!\n");
    	return Handle::UNDEFINED;
 	}
-
-	return SchemeSmob::scm_to_handle(sr);
+	return SchemeSmob::scm_to_handle(sresult);
 }
-
 
 #endif
 /* ===================== END OF FILE ============================ */
