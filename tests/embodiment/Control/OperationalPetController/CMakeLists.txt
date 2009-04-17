@@ -1,22 +1,3 @@
-ADD_CXXTEST(OPCUTest)
-TARGET_LINK_LIBRARIES(OPCUTest 
-	OpcLib 
-	Predavese 
-	MessagingSystem 
-	Control 
-        util
-	xerces-c 
-	pthread 
-	ssl 
-	crypto 
-	dl 
-	${OPENCOG_LIBRARIES}
-)
-
-IF(WIN32)
-    TARGET_LINK_LIBRARIES(OPCUTest winmm)
-ENDIF(WIN32)
-
 ADD_CXXTEST(PetUTest)
 TARGET_LINK_LIBRARIES(PetUTest 
 	OpcLib 
