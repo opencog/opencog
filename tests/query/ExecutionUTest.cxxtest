@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -35,8 +36,12 @@ class ExecutionUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
+#ifdef HAVE_GUILE
+		SchemeEval evaluator;
+#endif
 
 		Handle implication;
+		Handle hcapital, hprep;
 
 	public:
 
@@ -105,13 +110,11 @@ void ExecutionUTest::setUp(void)
 				)
 			)
 		),
-		al(EVALUATION_LINK,
-			al(EXECUTION_LINK,
-				an(GROUNDED_SCHEMA_NODE, "scm:blah"),
-				al(LIST_LINK,
-					an(VARIABLE_NODE, "$var1"),
-					an(VARIABLE_NODE, "$var2")
-				)
+		al(EXECUTION_LINK,
+			an(GROUNDED_SCHEMA_NODE, "scm:make-verb-prep"),
+			al(LIST_LINK,
+				an(VARIABLE_NODE, "$var1"),
+				an(VARIABLE_NODE, "$prep")
 			)
 		)
 	);
@@ -121,19 +124,35 @@ void ExecutionUTest::setUp(void)
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
-			an(CONCEPT_NODE, "capital")
+			hcapital = an(CONCEPT_NODE, "capital")
 		),
 		TruthValue::TRUE_TV()
 	);
 
 	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "of"),
+		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
 		),
 		TruthValue::TRUE_TV()
 	);
+
+#ifdef HAVE_GUILE
+	const char * str = 
+	"(define (make-verb-prep verb prep) \n"
+	"	(cog-new-link 'EvaluationLink \n"
+	"		(cog-new-node 'ConceptNode \n"
+	"			(string-append (cog-name verb) \"_\" (cog-name prep)) \n"
+	"		) \n"
+	"		(cog-new-link 'ListLink \n"
+	"			(cog-new-node 'ConceptNode (cog-name verb)) \n"
+	"			(cog-new-node 'PredicateNode (cog-name prep)) \n"
+	"		) \n"
+	"	) \n"
+	")";
+	evaluator.eval(str);
+#endif /* HAVE_GUILE */
 }
 
 /*
@@ -165,18 +184,15 @@ void ExecutionUTest::test_exec(void)
 	// NOT definite link.
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
-#if 0
 	// Then, evaluationLink, as above.
 	Handle heval = getlink(result, 0);
-	Handle vis_a = getlink(heval, 0);
+	Handle vcap_of = getlink(heval, 0);
 	Handle hlist = getlink(heval, 1);
-	Handle vberlin = getlink(hlist, 0);
-	Handle vcity = getlink(hlist, 1);
+	Handle vcapital = getlink(hlist, 0);
+	Handle vprep = getlink(hlist, 1);
 
-	TSM_ASSERT_EQUALS("incorrect is_a", his_a, vis_a);
-	TSM_ASSERT_EQUALS("incorrect berlin", hberlin, vberlin);
-	TSM_ASSERT_EQUALS("incorrect city", hcity, vcity);
-#endif
+	TSM_ASSERT_EQUALS("incorrect capital", hcapital, vcapital);
+	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
