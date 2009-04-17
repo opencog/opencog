@@ -1,7 +1,6 @@
 ADD_LIBRARY (smob SHARED
 	SchemeAdHoc.cc
 	SchemeEval.cc
-	SchemeExec.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
 	SchemeSmobGC.cc
@@ -23,7 +22,6 @@ INSTALL (TARGETS smob
 
 INSTALL (FILES
 	SchemeEval.h
-	SchemeExec.h
 	SchemeSmob.h
 	DESTINATION "include/opencog/guile"
 )

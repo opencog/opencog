@@ -456,84 +456,6 @@ std::string SchemeEval::do_eval(const std::string &expr)
 /* ============================================================== */
 
 /**
- * Evaluate the expression
- */
-SCM SchemeEval::eval(SCM expr)
-{
-	scm_args = expr;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_lock(&serialize_lock);
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
-	scm_with_guile(c_wrap_scm_eval, this);
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_unlock(&serialize_lock);
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
-	return scm_args;
-}
-
-void * SchemeEval::c_wrap_scm_eval(void * p)
-{
-	SchemeEval *self = (SchemeEval *) p;
-	self->scm_args = self->do_scm_eval(self->scm_args);
-	return self;
-}
-
-SCM SchemeEval::wrap_scm_eval(void *expr)
-{
-	SCM sexpr = (SCM)expr;
-printf("wooooooooooooooooooooooooooooooooooooooo\n");
-std::string s = prt(sexpr);
-printf("duuude will eval %s\n", s.c_str());
-	// SCM rv = scm_local_eval (sexpr, SCM_EOL);
-	// SCM rv = scm_local_eval (sexpr, scm_procedure_environment(scm_car(sexpr)));
-	SCM rv = scm_eval (sexpr, scm_interaction_environment());
-printf("booooooooooooooooooooooooooooooooooooooo\n");
-s = prt(rv);
-printf("duuude its %s\n", s.c_str());
-	return rv;
-}
-
-SCM SchemeEval::do_scm_eval(SCM sexpr)
-{
-	per_thread_init();
-printf ("duuuuuude ola\n");
-
-	caught_error = false;
-	captured_stack = SCM_BOOL_F;
-	SCM rc = scm_c_catch (SCM_BOOL_T,
-	            (scm_t_catch_body) wrap_scm_eval, (void *) sexpr,
-	            SchemeEval::catch_handler_wrapper, this,
-	            SchemeEval::preunwind_handler_wrapper, this);
-
-printf("wwwwooooooooooooooooooooooooooooooooooooooo\n");
-std::string s = prt(rc);
-printf("duuude its %s\n", s.c_str());
-	if (caught_error)
-	{
-		std::string rv;
-		rc = scm_get_output_string(error_string_port);
-		char * str = scm_to_locale_string(rc);
-		rv = str;
-		free(str);
-		scm_close_port(error_string_port);
-		error_string_port = SCM_EOL;
-		captured_stack = SCM_BOOL_F;
-
-		scm_truncate_file(outport, scm_from_uint16(0));
-
-		fprintf (stderr, "Error: do_scm_eval(): %s\n", rv.c_str());
-		return SCM_EOL;
-	}
-	return SCM_EOL;
-}
-
-/* ============================================================== */
-
-/**
  * Return true if the expression was incomplete, and more is expected
  * (for example, more closing parens are expected)
  */
@@ -559,6 +481,93 @@ void SchemeEval::clear_pending(void)
 	pending_input = false;
 	caught_error = false;
 }
+
+/* ============================================================== */
+
+SCM SchemeEval::wrap_scm_eval(void *expr)
+{
+	SCM sexpr = (SCM)expr;
+	// return scm_local_eval (sexpr, SCM_EOL);
+	// return scm_local_eval (sexpr, scm_procedure_environment(scm_car(sexpr)));
+	return scm_eval (sexpr, scm_interaction_environment());
+}
+
+SCM SchemeEval::do_scm_eval(SCM sexpr)
+{
+	per_thread_init();
+printf("hooooooooooooooooooooooooooooooooooooooo\n");
+std::string s = prt(sexpr);
+printf("duuude will eval %s\n", s.c_str());
+
+	caught_error = false;
+	captured_stack = SCM_BOOL_F;
+	SCM rc = scm_c_catch (SCM_BOOL_T,
+	            (scm_t_catch_body) wrap_scm_eval, (void *) sexpr,
+	            SchemeEval::catch_handler_wrapper, this,
+	            SchemeEval::preunwind_handler_wrapper, this);
+
+	if (caught_error)
+	{
+		std::string rv;
+		rc = scm_get_output_string(error_string_port);
+		char * str = scm_to_locale_string(rc);
+		rv = str;
+		free(str);
+		scm_close_port(error_string_port);
+		error_string_port = SCM_EOL;
+		captured_stack = SCM_BOOL_F;
+
+		scm_truncate_file(outport, scm_from_uint16(0));
+
+		fprintf (stderr, "Error: do_scm_eval(): %s\n", rv.c_str());
+		return SCM_EOL;
+	}
+
+printf("wwwwooooooooooooooooooooooooooooooooooooooo\n");
+s = prt(rc);
+printf("duuude evaled to %s\n", s.c_str());
+	return rc;
+}
+/* ============================================================== */
+
+/**
+ * Execute the schema specified in an ExecutionLink
+ */
+Handle SchemeEval::apply(const std::string &func, Handle varargs)
+{
+	pexpr = &func;
+	hargs = varargs;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_lock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	scm_with_guile(c_wrap_apply, this);
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	pthread_mutex_unlock(&serialize_lock);
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	return hargs;
+}
+
+void * SchemeEval::c_wrap_apply(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	self->hargs = self->do_apply(*self->pexpr, self->hargs);
+	return self;
+}
+
+Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
+{
+printf("duuuude entery apply func = %s\n", func.c_str());
+do_eval("(define (blah) (list \"you whooo\"))");
+SCM sfunc = scm_from_locale_symbol("blah");
+sfunc = scm_list_1(sfunc);
+   do_scm_eval(sfunc);
+   return Handle::UNDEFINED;
+}
+
 
 #endif
 /* ===================== END OF FILE ============================ */

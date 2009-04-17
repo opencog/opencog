@@ -26,7 +26,7 @@
 #include "CrispLogicPMCB.h"
 
 #include <opencog/atomspace/TLB.h>
-#include <opencog/guile/SchemeExec.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -187,8 +187,8 @@ Handle Instantiator::execution_link()
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
-		SchemeExec exec;
-		Handle h = exec.eval(schema.substr(4).c_str(), oset[1]);
+		SchemeEval applier;
+		Handle h = applier.apply(schema.substr(4), oset[1]);
 		return h;
 #endif /* HAVE_GUILE */
 	}
