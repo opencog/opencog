@@ -310,7 +310,10 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
-	result_list.push_back(h);
+	if (h != Handle::UNDEFINED)
+	{
+		result_list.push_back(h);
+	}
 	return false;
 }
 
