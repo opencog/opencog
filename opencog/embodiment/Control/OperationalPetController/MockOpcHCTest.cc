@@ -86,9 +86,9 @@ void MockOpcHCTest::init(const std::string & myId,
     this->lsMessageSender = new PetMessageSender(&(getNetworkElement()));
 
     //fill the atomSpace with the initial scene
-    owner_h = atomSpace->addNode(SL_AVATAR_NODE, OWNER_NAME);
-    pet_h = atomSpace->addNode(SL_PET_NODE, petId);
-    obj_h = atomSpace->addNode(SL_OBJECT_NODE, OBJ_NAME);
+    owner_h = atomSpace->addNode(AVATAR_NODE, OWNER_NAME);
+    pet_h = atomSpace->addNode(PET_NODE, petId);
+    obj_h = atomSpace->addNode(OBJECT_NODE, OBJ_NAME);
     speed_h = atomSpace->addNode(NUMBER_NODE,
                                  boost::lexical_cast<string>(2));
 

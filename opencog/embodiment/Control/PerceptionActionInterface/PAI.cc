@@ -515,13 +515,13 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
     Handle agentNode = Handle::UNDEFINED;
     if ( agentTypeStr == AVATAR_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, SL_AVATAR_NODE, internalAgentId.c_str());
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAgentId.c_str());
         logger().log(opencog::Logger::DEBUG, "PAI - agent is an avatar: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else if ( agentTypeStr == PET_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, SL_PET_NODE, internalAgentId.c_str());
+        agentNode = AtomSpaceUtil::addNode(atomSpace, PET_NODE, internalAgentId.c_str());
         logger().log(opencog::Logger::DEBUG, "PAI - agent is a pet: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else if ( agentTypeStr == HUMANOID_OBJECT_TYPE ) {
-        agentNode = AtomSpaceUtil::addNode(atomSpace, SL_HUMANOID_NODE, internalAgentId.c_str());
+        agentNode = AtomSpaceUtil::addNode(atomSpace, HUMANOID_NODE, internalAgentId.c_str());
         logger().log(opencog::Logger::DEBUG, "PAI - agent is an humanoid: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else {
         throw opencog::InvalidParamException(TRACE_INFO,
@@ -1009,7 +1009,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
 
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
     Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
-    Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, SL_AVATAR_NODE, internalAvatarId.c_str());
+    Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId.c_str());
 
     string sentence = "to:";
     sentence += internalPetId;
@@ -1127,7 +1127,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
     // Add the perceptions into AtomSpace
 
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
-    Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, SL_AVATAR_NODE, internalAvatarId.c_str());
+    Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId.c_str());
     Handle actionNode = AtomSpaceUtil::addNode(atomSpace, NODE, nameStr.c_str());
 
     HandleSeq predicateListLinkOutgoing;
@@ -1310,17 +1310,17 @@ Type PAI::getSLObjectNodeType(const char* objectType)
 {
     Type result;
     if (strcmp(objectType, AVATAR_OBJECT_TYPE) == 0) {
-        result = SL_AVATAR_NODE;
+        result = AVATAR_NODE;
     } else if (strcmp(objectType, PET_OBJECT_TYPE) == 0 ) {
-        result = SL_PET_NODE;
+        result = PET_NODE;
     } else if (strcmp(objectType, HUMANOID_OBJECT_TYPE) == 0) {
-        result = SL_HUMANOID_NODE;
+        result = HUMANOID_NODE;
     } else if (strcmp(objectType, STRUCTURE_OBJECT_TYPE) == 0) {
-        result = SL_STRUCTURE_NODE;
+        result = STRUCTURE_NODE;
     } else if (strcmp(objectType, ACCESSORY_OBJECT_TYPE) == 0) {
-        result = SL_ACCESSORY_NODE;
+        result = ACCESSORY_NODE;
     } else {
-        result = SL_OBJECT_NODE;
+        result = OBJECT_NODE;
     }
     return result;
 }
@@ -1349,7 +1349,7 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
 
-    Handle objectNode = AtomSpaceUtil::addNode(atomSpace, SL_OBJECT_NODE, internalObjectId.c_str());
+    Handle objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalObjectId.c_str());
 
     // Get param lists
     XERCES_CPP_NAMESPACE::XMLString::transcode(PARAMETER_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1560,7 +1560,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, inheritanceLinkOutgoing);
 
         } else {
-            objectNode = AtomSpaceUtil::addNode(atomSpace, SL_OBJECT_NODE, internalEntityId.c_str());
+            objectNode = AtomSpaceUtil::addNode(atomSpace, OBJECT_NODE, internalEntityId.c_str());
         }
         XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* objName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
@@ -1592,7 +1592,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             // TODO: we will assume that only Avatars can own something or someone
             // (pets). This can be changed if necessary.
             // Carlos Lopes - 24/10/2007
-            Handle ownerNode = AtomSpaceUtil::addNode(atomSpace, SL_AVATAR_NODE, internalOwnerId.c_str(), isPetObject);
+            Handle ownerNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalOwnerId.c_str(), isPetObject);
             addOwnershipRelation(ownerNode, objectNode, isPetObject);
         }
 

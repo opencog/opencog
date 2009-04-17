@@ -103,12 +103,12 @@ public:
         std::string test1 = "test1";
         std::string test2 = "test2";
 
-        pet_h   = atomSpace->addNode(SL_PET_NODE, "pet");
-        stick_h  = atomSpace->addNode(SL_OBJECT_NODE, "stick");
-        meat_h   = atomSpace->addNode(SL_OBJECT_NODE, "meat");
-        avatar_h  = atomSpace->addNode(SL_AVATAR_NODE, "avatar");
-        ball_h   = atomSpace->addNode(SL_OBJECT_NODE, "ball");
-        bone_h   = atomSpace->addNode(SL_OBJECT_NODE, "bone");
+        pet_h   = atomSpace->addNode(PET_NODE, "pet");
+        stick_h  = atomSpace->addNode(OBJECT_NODE, "stick");
+        meat_h   = atomSpace->addNode(OBJECT_NODE, "meat");
+        avatar_h  = atomSpace->addNode(AVATAR_NODE, "avatar");
+        ball_h   = atomSpace->addNode(OBJECT_NODE, "ball");
+        bone_h   = atomSpace->addNode(OBJECT_NODE, "bone");
 
         dummy_action = "dummy_action";
 
@@ -137,7 +137,7 @@ public:
         Handle say_h = atomSpace->addNode(GROUNDED_SCHEMA_NODE, saySchemaName);
         Handle actionDone_h = atomSpace->addNode(PREDICATE_NODE, actionDonePredicateName);
 
-        Handle avatar_h = atomSpace->addNode(SL_AVATAR_NODE, avatar);
+        Handle avatar_h = atomSpace->addNode(AVATAR_NODE, avatar);
 
         //add say sentence1
         tree<Vertex> *at1 =

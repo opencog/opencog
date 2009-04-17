@@ -1068,13 +1068,13 @@ void TangentBug::test_look_along_ray() const
 void TangentBug::place_pet(Spatial::Distance x, Spatial::Distance y)
 {
     _place_pet(lsm->snap(Spatial::Point(x, y)));
-    logger().log(opencog::Logger::DEBUG, "TangentBug - Pet SLCoord (%.2f, %.2f), MapCoord (%d, %d).", x, y, curr_pos.first, curr_pos.second);
+    logger().log(opencog::Logger::DEBUG, "TangentBug - Pet Coord (%.2f, %.2f), MapCoord (%d, %d).", x, y, curr_pos.first, curr_pos.second);
 }
 
 void TangentBug::place_goal(Spatial::Distance x, Spatial::Distance y)
 {
     _place_goal(lsm->snap(Spatial::Point(x, y)), true);
-    logger().log(opencog::Logger::DEBUG, "TangentBug - Goal SLCoord (%.2f, %.2f), MapCoord (%d, %d).", x, y, goal.first, goal.second);
+    logger().log(opencog::Logger::DEBUG, "TangentBug - Goal Coord (%.2f, %.2f), MapCoord (%d, %d).", x, y, goal.first, goal.second);
 }
 
 void TangentBug::trace_path2(const TangentBugBits::Point& pt1,

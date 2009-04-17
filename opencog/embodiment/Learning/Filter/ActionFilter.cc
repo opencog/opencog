@@ -241,7 +241,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                 Type arg_type = as.getType(arg_h);
                 const string& arg_name = as.getName(arg_h);
                 //check if the argument is an identifier
-                if (as.inheritsType(arg_type, SL_OBJECT_NODE)) {
+                if (as.inheritsType(arg_type, OBJECT_NODE)) {
                     vertex arg_v =
                         WorldWrapperUtil::atom_name_to_definite_object(arg_name,
                                 _self_id,

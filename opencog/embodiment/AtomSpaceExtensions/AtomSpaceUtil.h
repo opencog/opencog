@@ -425,7 +425,7 @@ public:
      *     EvaluationLink
      *       pred:PredicateNode
      *       ListLink
-     *    obj:SLObjectNode (or its descendents)
+     *    obj:ObjectNode (or its descendents)
      *
      * @param atomSpace The AtomSpace.
      * @param predicateName The name of the predicate. This name should be exactly
@@ -457,8 +457,8 @@ public:
      *     EvaluationLink
      *       pred:PredicateNode
      *       ListLink
-     *    A:SLObjectNode (or its descendents)
-     *    B:SLObjectNode (or its descendents)
+     *    A:ObjectNode (or its descendents)
+     *    B:ObjectNode (or its descendents)
      *
      * The first object is the reference one, i.e. A is near B (in this case
      * the relation is commutative), A is inside B, A is above B, and A is
@@ -498,15 +498,15 @@ public:
      *   EvaluationLink
      *      PredicateNode:"isHolding"
      *      ListLink
-     *        SLAvatarNode|SLPetNode:"$avatar-id" or "$pet-id"
-     *        SLObjectNode|SLAccessoryNode:"$object-id"
+     *        AvatarNode|PetNode:"$avatar-id" or "$pet-id"
+     *        ObjectNode|AccessoryNode:"$object-id"
      *
      * Besides, add/update the isHoldingSomething predicate (which is not timestamped), as follows:
      *
      *   EvaluationLink
      *      PredicateNode:"isHoldingSomething"
      *      ListLink
-     *        SLAvatarNode|SLPetNode:"$avatar-id" or "$pet-id"
+     *        AvatarNode|PetNode:"$avatar-id" or "$pet-id"
      *
      * @param atomSpace AtomSpace pointer
      * @param holderId Id of an avatar or a pet that is holding or dropping something

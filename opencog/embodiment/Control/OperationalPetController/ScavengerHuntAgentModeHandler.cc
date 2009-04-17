@@ -706,7 +706,7 @@ bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void
 
 
         HandleSeq objHandle;
-        this->agent->getAtomSpace().getHandleSet(back_inserter(objHandle), SL_OBJECT_NODE, entities[i] , true);
+        this->agent->getAtomSpace().getHandleSet(back_inserter(objHandle), OBJECT_NODE, entities[i] , true);
 
         if (objHandle.size() != 1) {
             logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - %d handles were found to entity[%s]", objHandle.size( ), entities[i].c_str( ) );
@@ -867,7 +867,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void )
         for ( it = entities.begin( ); it != entities.end( ); ++it ) {
 
             const Spatial::EntityPtr& entity = spaceMap.getEntity( *it );
-            Handle objectHandle = this->agent->getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, entity->getName( ) );
+            Handle objectHandle = this->agent->getAtomSpace( ).getHandle( ACCESSORY_NODE, entity->getName( ) );
             if ( objectHandle == Handle::UNDEFINED ) {
                 logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - %s is not an accessory", (*it).c_str());
                 continue;
@@ -929,7 +929,7 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void )
     } // if
 
     Handle agentHandle = AtomSpaceUtil::getAgentHandle( this->agent->getAtomSpace( ), this->agent->getPetId( ) );
-    Handle treasureHandle = this->agent->getAtomSpace( ).getHandle( SL_ACCESSORY_NODE, getPropertyValue( "treasure" ) );
+    Handle treasureHandle = this->agent->getAtomSpace( ).getHandle( ACCESSORY_NODE, getPropertyValue( "treasure" ) );
 
     if ( agentHandle == Handle::UNDEFINED || treasureHandle == Handle::UNDEFINED ) {
         logger().log(opencog::Logger::ERROR, "ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure handle was not found" );

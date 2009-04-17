@@ -50,7 +50,7 @@ protected:
     Handle getPredHandle(Handle object, std::string predicateName);
 
     /**
-     * Get the handle of the SL_OBJECT_NODE (or subtype) for the given name.
+     * Get the handle of the OBJECT_NODE (or subtype) for the given name.
      *
      * @return Handle::UNDEFINED if no handle is found, the exatcly handle if
      * just one handle is found or the first handle if more than on handle

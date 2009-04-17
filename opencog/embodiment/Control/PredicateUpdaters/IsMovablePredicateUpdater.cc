@@ -55,8 +55,8 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
 
 
     // 1. pets and structures are not movable
-    if (atomSpace.getType(object) == SL_PET_NODE ||
-            atomSpace.getType(object) == SL_STRUCTURE_NODE) {
+    if (atomSpace.getType(object) == PET_NODE ||
+            atomSpace.getType(object) == STRUCTURE_NODE) {
         return;
     }
 
@@ -66,7 +66,7 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
     SimpleTruthValue tv(0.0, 1.0);
 
     // 2. all avatars are movable - TV set to 1.0
-    if (atomSpace.getType(object) == SL_AVATAR_NODE) {
+    if (atomSpace.getType(object) == AVATAR_NODE) {
         tv.setMean(1.0);
         AtomSpaceUtil::addPropertyPredicate(atomSpace, "is_movable", object, tv, true);
         return;

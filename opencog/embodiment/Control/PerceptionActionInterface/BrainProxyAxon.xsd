@@ -21,9 +21,9 @@
         complexity of any SL requestContext in its entirety.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:element name="sl-request" type="pet:SLRequestType"/>
+    <xsd:element name="sl-request" type="pet:RequestType"/>
 
-    <xsd:complexType name="SLRequestType">
+    <xsd:complexType name="RequestType">
         <xsd:sequence>
             <xsd:element name="rez" type="pet:RezType" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="derez" type="pet:DerezType" minOccurs="0" maxOccurs="1"/>
@@ -285,7 +285,7 @@
     <xsd:complexType name="BlipType">
         
         <xsd:sequence>
-            <xsd:element name="entity" type="pet:SLEntityType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="entity" type="pet:EntityType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="position" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="rotation" type="common:RotationDataType" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="velocity" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
@@ -319,7 +319,7 @@
         but it could potentially be useful.
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="SLEntityType">
+    <xsd:complexType name="EntityType">
         <xsd:complexContent>
             <xsd:extension base="common:BaseEntityType">
                 <xsd:sequence>
@@ -386,7 +386,7 @@
                     <xsd:choice minOccurs="0" maxOccurs="1">
                         <xsd:element name="vector" type="common:VectorDataType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="rotation" type="common:RotationDataType" minOccurs="1" maxOccurs="1"/>
-                        <xsd:element name="entity" type="pet:SLEntityType" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="entity" type="pet:EntityType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="list" type="common:ListDataType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
                     </xsd:choice>

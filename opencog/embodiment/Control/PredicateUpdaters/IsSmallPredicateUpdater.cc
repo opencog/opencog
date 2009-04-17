@@ -46,7 +46,7 @@ IsSmallPredicateUpdater::~IsSmallPredicateUpdater()
  * EvalLink
  *   PredicateNode:"size"
  *   ListLink
- *      SLObjectNode:"<obj_id">
+ *      ObjectNode:"<obj_id">
  *      NumberNode:"<length>"
  *      NumberNode:"<width>"
  *      NumberNode:"<height>"
@@ -87,14 +87,14 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     // will guide the is_small predicate
 
     // 1. all avatars are considered bigger than any pet
-    if (atomSpace.getType(object) == SL_AVATAR_NODE) {
+    if (atomSpace.getType(object) == AVATAR_NODE) {
         tv.setMean(0.0);
         AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
         return;
     }
 
     // 2. all accessories are considered smaller than the pet
-    if (atomSpace.getType(object) == SL_ACCESSORY_NODE) {
+    if (atomSpace.getType(object) == ACCESSORY_NODE) {
         tv.setMean(1.0);
         AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
         return;

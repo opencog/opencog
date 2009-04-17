@@ -67,7 +67,7 @@ public:
      * PAI component.
      *
      * @param objects A std::vector containing the handles of
-     *     all SL_OBJECT_NODES that were updated
+     *     all OBJECT_NODES that were updated
      * @param timestamp The current timestamp in the virtual world.
      */
     void update(std::vector<Handle> objects, unsigned long timestamp);

@@ -69,8 +69,8 @@ public:
         //fill atomSpace with definite objects
         AtomSpace atomSpace;
 
-        Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
-        Handle owner_h = atomSpace.addNode(SL_AVATAR_NODE, owner_str);
+        Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
+        Handle owner_h = atomSpace.addNode(AVATAR_NODE, owner_str);
         //fill add these object into a SpaceMap
         atomSpace.addSpaceInfo(false, obj_h, T1, 20, 20, 1, 1, 1, 1);
         atomSpace.addSpaceInfo(false, owner_h, T1, 10, 10, 1, 1, 1, 1);
@@ -78,7 +78,7 @@ public:
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
         //fill atomSpace with pet atom
-        atomSpace.addNode(SL_PET_NODE, pet_str);
+        atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions beg, stretch and goto_obj(stick)
         stringstream ss_goto_obj;
         ss_goto_obj << instance(id::goto_obj);

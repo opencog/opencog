@@ -134,7 +134,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
     Handle h;
 
     //add the subject of the action to create
-    hs.push_back(_atomSpace.addNode(SL_PET_NODE, _pet_id));
+    hs.push_back(_atomSpace.addNode(PET_NODE, _pet_id));
 
     //add the action
     if (a == instance(id::random_step))

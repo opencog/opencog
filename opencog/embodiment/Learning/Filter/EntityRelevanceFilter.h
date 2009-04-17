@@ -72,7 +72,7 @@ public:
      * @param type The atom type
      * @return A vector containing all the entities names
      */
-    const combo::definite_object_set getEntities(Type type = SL_OBJECT_NODE) const;
+    const combo::definite_object_set getEntities(Type type = OBJECT_NODE) const;
 
     /**
        * Gets the entities (i.e. definite_object) of a given type (and its decendents) in all LocaSpaceMap2D related to a given trick.
@@ -89,7 +89,7 @@ public:
             const std::string& trick,
             const std::string& selfID,
             const std::string& ownerID,
-            Type type = SL_OBJECT_NODE) const;
+            Type type = OBJECT_NODE) const;
 
 
     /**

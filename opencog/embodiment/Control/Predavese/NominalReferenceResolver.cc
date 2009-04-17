@@ -201,7 +201,7 @@ void NominalReferenceResolver::scoreCandidates(const string& name, const string&
                     user = pet;
                 }
                 ha = as.getOutgoing(as.getOutgoing(ha[0], 1));
-            } else if (as.getType(ha[0]) == SL_AVATAR_NODE && as.getName(ha[0]) == speakerId ) {
+            } else if (as.getType(ha[0]) == AVATAR_NODE && as.getName(ha[0]) == speakerId ) {
                 user = speaker;
             } else user = someoneElse;
 

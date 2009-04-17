@@ -898,15 +898,15 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
 
     Handle objectHandle = Handle::UNDEFINED;
     if ( objectId != "" ) {
-        objectHandle = atomSpace.getHandle( SL_OBJECT_NODE, objectId );
+        objectHandle = atomSpace.getHandle( OBJECT_NODE, objectId );
         if ( objectHandle != Handle::UNDEFINED ) {
             logger().log( opencog::Logger::DEBUG,
-                          "AtomSpaceUtil - Object is a SL_OBJECT_NODE" );
+                          "AtomSpaceUtil - Object is a OBJECT_NODE" );
         } else {
-            objectHandle = atomSpace.getHandle( SL_ACCESSORY_NODE, objectId );
+            objectHandle = atomSpace.getHandle( ACCESSORY_NODE, objectId );
             if ( objectHandle != Handle::UNDEFINED ) {
                 logger().log( opencog::Logger::DEBUG,
-                              "AtomSpaceUtil - Object is a SL_ACCESSORY_NODE" );
+                              "AtomSpaceUtil - Object is a ACCESSORY_NODE" );
             } else {
                 logger().log( opencog::Logger::ERROR,
                               "AtomSpaceUtil - Object cannot be identified" );
@@ -1009,7 +1009,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
     atomSpace.getHandleSet( back_inserter(handles),
-                            SL_OBJECT_NODE,
+                            OBJECT_NODE,
                             objectId, true );
 
     if ( handles.size( ) != 1 ) {
@@ -1542,11 +1542,11 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( const AtomSpace& atomSpace,
             latestActionDoneLink = agentActionLink;
             previousTemporal = temporal;
 
-            if ( inspectedAgentTypeCode == SL_AVATAR_NODE ) {
+            if ( inspectedAgentTypeCode == AVATAR_NODE ) {
                 agentType = "an avatar";
-            } else if ( inspectedAgentTypeCode == SL_PET_NODE ) {
+            } else if ( inspectedAgentTypeCode == PET_NODE ) {
                 agentType = "a pet";
-            } else if ( inspectedAgentTypeCode == SL_HUMANOID_NODE ) {
+            } else if ( inspectedAgentTypeCode == HUMANOID_NODE ) {
                 agentType = "an humanoid";
             } else {
                 logger().log(opencog::Logger::ERROR,
@@ -1866,10 +1866,10 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
     } else { //Now let's deal with the default case
         HandleSeq tmp;
         atomSpace.getHandleSet(std::back_inserter(tmp),
-                               SL_ACCESSORY_NODE, objectId);
+                               ACCESSORY_NODE, objectId);
         if (tmp.empty()) { //it is not an accessory, let's try a structure
             atomSpace.getHandleSet(std::back_inserter(tmp),
-                                   SL_STRUCTURE_NODE, objectId);
+                                   STRUCTURE_NODE, objectId);
         }
 
         //assume that structure and accessories have distinct id
@@ -1882,17 +1882,17 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
 Handle AtomSpaceUtil::getAgentHandle( const AtomSpace& atomSpace,
                                       const std::string& agentId )
 {
-    Handle agentHandle = atomSpace.getHandle( SL_PET_NODE, agentId );
+    Handle agentHandle = atomSpace.getHandle( PET_NODE, agentId );
     if ( agentHandle != Handle::UNDEFINED ) {
         logger().log( opencog::Logger::DEBUG,
                       "AtomSpaceUtil - Agent is a pet" );
     } else {
-        agentHandle = atomSpace.getHandle( SL_AVATAR_NODE, agentId );
+        agentHandle = atomSpace.getHandle( AVATAR_NODE, agentId );
         if ( agentHandle != Handle::UNDEFINED ) {
             logger().log( opencog::Logger::DEBUG,
                           "AtomSpaceUtil - Agent is an avatar" );
         } else {
-            agentHandle = atomSpace.getHandle( SL_HUMANOID_NODE, agentId );
+            agentHandle = atomSpace.getHandle( HUMANOID_NODE, agentId );
             if ( agentHandle != Handle::UNDEFINED ) {
                 logger().log( opencog::Logger::DEBUG,
                               "AtomSpaceUtil - Agent is an humanoid" );

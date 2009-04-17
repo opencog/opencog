@@ -107,9 +107,9 @@ Handle WorldWrapperUtil::toHandle(const AtomSpace& as,
         h = AtomSpaceUtil::getAgentHandle(as, id);
     }
     if (h == Handle::UNDEFINED) {
-        //Nil: I add this case because apparently some object have type SL_NODE
+        //Nil: I add this case because apparently some object have type NODE
         HandleSeq tmp;
-        as.getHandleSet(std::back_inserter(tmp), SL_NODE, id);
+        as.getHandleSet(std::back_inserter(tmp), OBJECT_NODE, id);
         //unique id assumption
         opencog::cassert(TRACE_INFO, tmp.size() <= 1);
         return tmp.empty() ? Handle::UNDEFINED : tmp.front();
@@ -191,7 +191,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     definite_object obj = is_definite_object(*it) ?
                           get_definite_object(*it) : definite_object(ss.str());
 
-    //search first for an SL_NODE
+    //search first for an OBJECT_NODE
     if (it.is_childless()) {
         Handle h = toHandle(as, obj, self_id, owner_id);
         if (h != Handle::UNDEFINED) {
@@ -245,7 +245,7 @@ Handle WorldWrapperUtil::ownerHandle(const AtomSpace& as,
 Handle WorldWrapperUtil::getAvatarHandle(const AtomSpace& as,
         const string& avatar_id)
 {
-    return as.getHandle(SL_AVATAR_NODE, avatar_id);
+    return as.getHandle(AVATAR_NODE, avatar_id);
 }
 
 bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
@@ -987,7 +987,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                 def_obj,
                                                 self_id,
                                                 owner_id)),
-                                                SL_PET_NODE);
+                                                PET_NODE);
 
                 // cache miss, compute value and cache it
                 if (result) {
@@ -1045,7 +1045,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                      def_obj,
                                                      self_id,
                                                      owner_id)),
-                                                     SL_AVATAR_NODE);
+                                                     AVATAR_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {
@@ -1106,10 +1106,10 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     // are considered objects
                     result =
                         !atomSpace.inheritsType(atomSpace.getType(obj_handle),
-                                                SL_AVATAR_NODE)
+                                                AVATAR_NODE)
                         &&
                         !atomSpace.inheritsType(atomSpace.getType(obj_handle),
-                                                SL_STRUCTURE_NODE);
+                                                STRUCTURE_NODE);
 
                     // cache miss, compute value and cache it
                     if (result) {

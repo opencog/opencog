@@ -63,7 +63,7 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     //    they are not moveable
     if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) &&
             AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
-            atomSpace.getType(object) == SL_ACCESSORY_NODE &&
+            atomSpace.getType(object) == ACCESSORY_NODE &&
             !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
         tv.setMean(1.0);
     }

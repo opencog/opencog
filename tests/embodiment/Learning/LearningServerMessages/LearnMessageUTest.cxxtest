@@ -85,10 +85,10 @@ public:
         atomSpace = new AtomSpace();
 
         Handle n1 = atomSpace->addNode(NODE, nonSL);
-        Handle n2 = atomSpace->addNode(SL_PET_NODE, pet);
-        Handle n3 = atomSpace->addNode(SL_OBJECT_NODE, ball);
-        Handle n4 = atomSpace->addNode(SL_AVATAR_NODE, avatar);
-        Handle n5 = atomSpace->addNode(SL_AVATAR_NODE, owner);
+        Handle n2 = atomSpace->addNode(PET_NODE, pet);
+        Handle n3 = atomSpace->addNode(OBJECT_NODE, ball);
+        Handle n4 = atomSpace->addNode(AVATAR_NODE, avatar);
+        Handle n5 = atomSpace->addNode(AVATAR_NODE, owner);
 
         atomSpace->addSpaceInfo(true, n1, 1, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
         atomSpace->addSpaceInfo(true, n2, 1, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
@@ -124,16 +124,16 @@ public:
 
         lm->populateAtomSpace(*atomSpace);
 
-        Handle petHandle = atomSpace->getHandle(SL_PET_NODE, pet);
+        Handle petHandle = atomSpace->getHandle(PET_NODE, pet);
         TS_ASSERT(petHandle != Handle::UNDEFINED);
 
-        Handle avatarHandle = atomSpace->getHandle(SL_AVATAR_NODE, avatar);
+        Handle avatarHandle = atomSpace->getHandle(AVATAR_NODE, avatar);
         TS_ASSERT(avatarHandle != Handle::UNDEFINED);
 
-        Handle ownerHandle = atomSpace->getHandle(SL_AVATAR_NODE, owner);
+        Handle ownerHandle = atomSpace->getHandle(AVATAR_NODE, owner);
         TS_ASSERT(ownerHandle != Handle::UNDEFINED);
 
-        Handle ballHandle = atomSpace->getHandle(SL_OBJECT_NODE, ball);
+        Handle ballHandle = atomSpace->getHandle(OBJECT_NODE, ball);
         TS_ASSERT(ballHandle != Handle::UNDEFINED);
 
         EntityRelevanceFilter filter(atomSpace->getSpaceServer().getLatestMap(), pet, owner);

@@ -59,9 +59,9 @@ void IsNoisyPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     SimpleTruthValue tv(0.0, 1.0);
 
     // 1. agents (pet, humanoid or avatar) are noisy since they can produce sounds
-    if (atomSpace.getType(object) == SL_AVATAR_NODE ||
-            atomSpace.getType(object) == SL_PET_NODE ||
-            atomSpace.getType(object) == SL_HUMANOID_NODE) {
+    if (atomSpace.getType(object) == AVATAR_NODE ||
+            atomSpace.getType(object) == PET_NODE ||
+            atomSpace.getType(object) == HUMANOID_NODE) {
         tv.setMean(1.0);
     }
 

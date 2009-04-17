@@ -495,12 +495,12 @@ private:
 
     /**
      * Add an inheritance link between a concept node, whose name is given
-     * as a function parameter, and an SLObjectNode whose handle is also a
+     * as a function parameter, and an ObjectNode whose handle is also a
      * parameter.
      *
      * @param conceptNodeName The name of the concept node. This is the
      *        base node in the inheritance relation.
-     * @param subNodeHandle The handle of the SLObjectNode that inheritates
+     * @param subNodeHandle The handle of the ObjectNode that inheritates
      *        from the concept node.
      * @param inheritanceValue Boolean used to indicate if the inheritance
      *        relation is valid or not.

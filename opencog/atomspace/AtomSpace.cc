@@ -129,7 +129,7 @@ void AtomSpace::atomRemoved(Handle h)
         if( getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
            spaceServer->removeMap(h);
         } // if
-    } else if ( inheritsType(type, SL_OBJECT_NODE) ) {
+    } else if ( inheritsType(type, OBJECT_NODE) ) {
         spaceServer->removeObject(getName(h));
     } // else if
 }

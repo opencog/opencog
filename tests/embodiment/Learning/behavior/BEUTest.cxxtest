@@ -64,7 +64,7 @@ public:
 
         //fill atomSpace
 
-        Handle avatar_h = as.addNode(SL_AVATAR_NODE, avatar_str);
+        Handle avatar_h = as.addNode(AVATAR_NODE, avatar_str);
         Handle action1_h = as.addNode(GROUNDED_SCHEMA_NODE, action1_str);
         Handle action2_h = as.addNode(GROUNDED_SCHEMA_NODE, action2_str);
         Handle action3_h = as.addNode(GROUNDED_SCHEMA_NODE, action3_str);

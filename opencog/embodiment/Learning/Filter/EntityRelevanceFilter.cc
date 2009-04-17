@@ -169,7 +169,7 @@ const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
                                                makeVirtualAtom(EXECUTION_LINK,
                                                                makeVirtualAtom(say_h, NULL),
                                                                makeVirtualAtom(LIST_LINK,
-                                                                               makeVirtualAtom(SL_NODE, NULL),
+                                                                               makeVirtualAtom(OBJECT_NODE, NULL),
                                                                                makeVirtualAtom(SENTENCE_NODE, NULL),
                                                                                NULL
                                                                               ),
@@ -290,7 +290,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const AtomSpace& a
         makeVirtualAtom(EVALUATION_LINK,
                         makeVirtualAtom(action_done_h, NULL),
                         makeVirtualAtom(LIST_LINK,
-                                        makeVirtualAtom(SL_NODE, NULL),
+                                        makeVirtualAtom(OBJECT_NODE, NULL),
                                         NULL
                                        ),
                         NULL

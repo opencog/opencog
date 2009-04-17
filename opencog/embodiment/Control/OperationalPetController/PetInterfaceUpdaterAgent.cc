@@ -138,9 +138,9 @@ void PetInterfaceUpdaterAgent::updateFeelings(OPC *opc)
     logger().log(opencog::Logger::DEBUG, "PetInterfaceUpdaterAgent - updateFeelings()");
 
     std::vector<std::string> allFeelingNames;
-    Handle petHandle = opc->getAtomSpace()->getHandle(SL_PET_NODE, opc->getPet().getName());
+    Handle petHandle = opc->getAtomSpace()->getHandle(PET_NODE, opc->getPet().getName());
     if ( petHandle == Handle::UNDEFINED ) {
-        petHandle = opc->getAtomSpace()->getHandle(SL_HUMANOID_NODE, opc->getPet().getName());
+        petHandle = opc->getAtomSpace()->getHandle(HUMANOID_NODE, opc->getPet().getName());
     } // if
 
     std::string hunger = opencog::toString(AtomSpaceUtil::getPredicateValue(*(opc->getAtomSpace()), "hunger", petHandle));

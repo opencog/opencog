@@ -302,7 +302,7 @@ public:
             TS_ASSERT(CoreUtils::compare(predNode, Handle::UNDEFINED));
             Handle saySchemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME);
             TS_ASSERT(CoreUtils::compare(saySchemaNode, Handle::UNDEFINED));
-            Handle avatarNode = atomSpace.getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("2"));
+            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("2"));
             TS_ASSERT(CoreUtils::compare(avatarNode, Handle::UNDEFINED));
 
             const char* sentences[6] = { "Learn to fetch", "I fetch", "done fetch",
@@ -520,7 +520,7 @@ public:
             //Action parameters:
             //action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
             //action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
-            Handle avatarNode = atomSpace.getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
+            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx").c_str());
             TS_ASSERT(CoreUtils::compare(avatarNode, Handle::UNDEFINED));
             schemaListLinkOutgoing.push_back(avatarNode);
             Handle numberNode = atomSpace.getHandle(NUMBER_NODE, "1.0");
@@ -599,7 +599,7 @@ public:
             HandleSeq predicateListLinkOutgoing;
 
             // Avatar node
-            Handle avatarNode = atomSpace.getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
+            Handle avatarNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("1").c_str());
             TS_ASSERT(CoreUtils::compare(avatarNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(avatarNode);
 
@@ -672,7 +672,7 @@ public:
             HandleSeq predicateListLinkOutgoing;
 
             // Agent node
-            Handle agentNode = atomSpace.getHandle(SL_PET_NODE, PAIUtils::getInternalId("3").c_str());
+            Handle agentNode = atomSpace.getHandle(PET_NODE, PAIUtils::getInternalId("3").c_str());
             TS_ASSERT(CoreUtils::compare(agentNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(agentNode);
 
@@ -738,7 +738,7 @@ public:
             HandleSeq predicateListLinkOutgoing;
 
             // Agent node
-            Handle agentNode = atomSpace.getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("9").c_str());
+            Handle agentNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("9").c_str());
             TS_ASSERT(CoreUtils::compare(agentNode, Handle::UNDEFINED));
             predicateListLinkOutgoing.push_back(agentNode);
 
@@ -801,7 +801,7 @@ public:
         {
             cout << "checking object signals" << endl;
 
-            Handle objectNode = atomSpace.getHandle(SL_OBJECT_NODE, PAIUtils::getInternalId("Stick").c_str());
+            Handle objectNode = atomSpace.getHandle(OBJECT_NODE, PAIUtils::getInternalId("Stick").c_str());
             TS_ASSERT(CoreUtils::compare(objectNode, Handle::UNDEFINED));
             Handle actionNode = atomSpace.getHandle(WORD_NODE, "attached");
             TS_ASSERT(CoreUtils::compare(actionNode, Handle::UNDEFINED));
@@ -927,19 +927,19 @@ public:
             cout << "checking map info" << endl;
 
             // entities
-            Handle wynxNode = atomSpace.getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("2").c_str());
+            Handle wynxNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("2").c_str());
             TS_ASSERT(CoreUtils::compare(wynxNode, Handle::UNDEFINED));
-            Handle stickNode = atomSpace.getHandle(SL_ACCESSORY_NODE, PAIUtils::getInternalId("Stick"));
+            Handle stickNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("Stick"));
             TS_ASSERT(CoreUtils::compare(stickNode, Handle::UNDEFINED));
-            Handle whistleNode = atomSpace.getHandle(SL_ACCESSORY_NODE, PAIUtils::getInternalId("whistle").c_str());
+            Handle whistleNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("whistle").c_str());
             TS_ASSERT(CoreUtils::compare(whistleNode, Handle::UNDEFINED));
-            Handle fidoNode = atomSpace.getHandle(SL_PET_NODE, PAIUtils::getInternalId("1").c_str());
+            Handle fidoNode = atomSpace.getHandle(PET_NODE, PAIUtils::getInternalId("1").c_str());
             TS_ASSERT(CoreUtils::compare(fidoNode, Handle::UNDEFINED));
-            Handle homeNode = atomSpace.getHandle(SL_STRUCTURE_NODE, PAIUtils::getInternalId("house").c_str());
+            Handle homeNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("house").c_str());
             TS_ASSERT(CoreUtils::compare(homeNode, Handle::UNDEFINED));
-            Handle foodBowlNode = atomSpace.getHandle(SL_STRUCTURE_NODE, PAIUtils::getInternalId("bow").c_str());
+            Handle foodBowlNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("bow").c_str());
             TS_ASSERT(CoreUtils::compare(foodBowlNode, Handle::UNDEFINED));
-            Handle waterBowlNode = atomSpace.getHandle(SL_STRUCTURE_NODE, PAIUtils::getInternalId("Water bow").c_str());
+            Handle waterBowlNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("Water bow").c_str());
             TS_ASSERT(CoreUtils::compare(waterBowlNode, Handle::UNDEFINED));
 
 

@@ -351,7 +351,7 @@ void RuleEngine::updateKnownEntities()
 
         std::vector<Handle> objectHandle;
         opc->getAtomSpace()->getHandleSet(back_inserter(objectHandle),
-                                          SL_NODE, entity, true);
+                                          OBJECT_NODE, entity, true);
 
         if (objectHandle.size() != 1) {
             logger().log(Logger::DEBUG,
@@ -379,16 +379,16 @@ void RuleEngine::updateKnownEntities()
 
 
         if (isNextEntity) {
-            if (t == SL_AVATAR_NODE) {
+            if (t == AVATAR_NODE) {
                 if (avatars.find(entity) == avatars.end()) {
                     Id_EntityPerception_Pair
                     iep(entity, EntityPerception(cycle));
                     avatars.insert(iep);
                 } // if
                 avatars[entity].setLastSeenCycle(cycle);
-            } else if (t == SL_PET_NODE
-                       || t == SL_OBJECT_NODE
-                       || t == SL_ACCESSORY_NODE) { // SL_STRUCTURE_NODE
+            } else if (t == PET_NODE
+                       || t == OBJECT_NODE
+                       || t == ACCESSORY_NODE) { // STRUCTURE_NODE
                 if (objects.find(entity) == objects.end()) {
                     Id_EntityPerception_Pair
                     iep(entity, EntityPerception(cycle));
@@ -568,7 +568,7 @@ void RuleEngine::addRelation(const Relation& relation)
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
     this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
-                                            SL_OBJECT_NODE,
+                                            OBJECT_NODE,
                                             relation.getTarget(), true);
 
     // found no handle - ERROR
@@ -670,7 +670,7 @@ void RuleEngine::removeRelation(const Relation& relation)
     // verify if the target of relation is a valid object or avatar
     HandleSeq objHandle;
     this->opc->getAtomSpace()->getHandleSet(back_inserter(objHandle),
-                                            SL_OBJECT_NODE,
+                                            OBJECT_NODE,
                                             relation.getTarget(), true);
 
     // found no handle - ERROR
@@ -862,7 +862,7 @@ throw (RuntimeException)
 
         } else if (param == "owner") {
 
-            Handle ownerHandle = atomSpace.getHandle(SL_AVATAR_NODE,
+            Handle ownerHandle = atomSpace.getHandle(AVATAR_NODE,
                                  opc->getPet().getOwnerId());
             if (ownerHandle == Handle::UNDEFINED) {
                 throw RuntimeException(TRACE_INFO, "addSchemaExecLink - Found no SlAvatarNode for pet owner '%s'.",

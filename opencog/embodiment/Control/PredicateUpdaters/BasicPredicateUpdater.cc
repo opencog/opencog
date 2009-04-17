@@ -70,7 +70,7 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
 {
 
     HandleSeq objHandle;
-    atomSpace.getHandleSet(back_inserter(objHandle), SL_OBJECT_NODE, objName, true);
+    atomSpace.getHandleSet(back_inserter(objHandle), OBJECT_NODE, objName, true);
 
     // found no handle - ERROR
     if (objHandle.size() < 1) {
@@ -80,7 +80,7 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
     }
 
     // found more than one handle - WARNING, return the first one
-    // TODO: In this case, it could return the one with the more specific SLObject type.
+    // TODO: In this case, it could return the one with the more specific Object type.
     else if (objHandle.size() > 1) {
         logger().log(opencog::Logger::ERROR, "BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", objName.c_str());
         unsigned int i;

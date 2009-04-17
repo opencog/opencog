@@ -51,13 +51,13 @@ public:
         //fill atomSpace with dummy_object and dummy_avatar definite object
         AtomSpace atomSpace;
 
-        Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
-        Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
+        Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
+        Handle avatar_h = atomSpace.addNode(AVATAR_NODE, avatar_str);
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
         //fill atomSpace with pet atom
         string pet_str = "Fido";
-        Handle pet_h = atomSpace.addNode(SL_PET_NODE, pet_str);
+        Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions goto_obj grab drop and wag
         stringstream ss_goto_obj;
         ss_goto_obj << instance(id::goto_obj);
@@ -148,13 +148,13 @@ public:
         //fill atomSpace with dummy_object and dummy_avatar definite object
         AtomSpace atomSpace;
 
-        Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
-        Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
+        Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
+        Handle avatar_h = atomSpace.addNode(AVATAR_NODE, avatar_str);
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
         //fill atomSpace with pet atom
         string pet_str = "Fido";
-        Handle pet_h = atomSpace.addNode(SL_PET_NODE, pet_str);
+        Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
         //fill atomSpace with actions goto_obj grab drop and wag
         stringstream ss_goto_obj;
         ss_goto_obj << instance(id::goto_obj);

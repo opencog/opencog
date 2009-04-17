@@ -61,13 +61,13 @@ public :
     }
 
     void addRelations() {
-        Handle pet = atomSpace->getHandle(SL_PET_NODE, PAIUtils::getInternalId("Macku"));
+        Handle pet = atomSpace->getHandle(PET_NODE, PAIUtils::getInternalId("Macku"));
         if (pet == Handle::UNDEFINED) {
             std::cout << "Not able to find Macku" << std::endl;
             return;
         }
 
-        Handle wynx = atomSpace->getHandle(SL_AVATAR_NODE, PAIUtils::getInternalId("Wynx"));
+        Handle wynx = atomSpace->getHandle(AVATAR_NODE, PAIUtils::getInternalId("Wynx"));
         if (pet == Handle::UNDEFINED) {
             std::cout << "Not able to find Wynx" << std::endl;
             return;
@@ -87,7 +87,7 @@ public :
     }
 
     void addFeelingsAndTraits() {
-        Handle pet = atomSpace->getHandle(SL_PET_NODE, PAIUtils::getInternalId("Macku"));
+        Handle pet = atomSpace->getHandle(PET_NODE, PAIUtils::getInternalId("Macku"));
         if (pet == Handle::UNDEFINED) {
             std::cout << "Not able to find Macku" << std::endl;
             return;

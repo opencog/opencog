@@ -73,7 +73,7 @@ public:
         timestamp2 = PerceptionActionInterface::PAITestUtil::getCurrentTimestamp();
         timestamp = timestamp2 - 30;
         printf("PetUTest(): timestamp = %lu, timestamp2 = %lu\n", timestamp, timestamp2);
-        atomSpace->addNode(SL_PET_NODE, petId);
+        atomSpace->addNode(PET_NODE, petId);
     }
 
     ~PetUTest() {

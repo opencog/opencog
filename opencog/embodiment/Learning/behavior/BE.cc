@@ -410,7 +410,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                         //get the handle of the destination object
                         std::list<Handle> ret;
-                        as.getHandleSet(std::back_inserter(ret), SL_OBJECT_NODE,
+                        as.getHandleSet(std::back_inserter(ret), OBJECT_NODE,
                                         obj_id, true);
                         opencog::cassert(TRACE_INFO, ret.size() == 1,
                                          "HandleSet should contain exactly one object.");

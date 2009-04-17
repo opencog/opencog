@@ -67,9 +67,9 @@ PredicatesUpdater::~PredicatesUpdater()
 void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timestamp)
 {
 
-    Handle petHandle = atomSpace.getHandle(SL_PET_NODE, petId);
+    Handle petHandle = atomSpace.getHandle(PET_NODE, petId);
     if ( petHandle == Handle::UNDEFINED ) {
-        petHandle = atomSpace.getHandle(SL_HUMANOID_NODE, petId);
+        petHandle = atomSpace.getHandle(HUMANOID_NODE, petId);
     } // if
 
     for (unsigned int i = 0; i < objects.size(); i++) {

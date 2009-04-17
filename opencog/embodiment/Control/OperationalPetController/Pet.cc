@@ -126,11 +126,11 @@ void Pet::initTraitsAndFeelings()
 {
     //make sure there is a node for the pet and owner
     Handle petHandle;
-    AtomSpaceUtil::addNode(*atomSpace, SL_AVATAR_NODE, getOwnerId(), true);
+    AtomSpaceUtil::addNode(*atomSpace, AVATAR_NODE, getOwnerId(), true);
     if ( this->agentType == "pet" ) {
-        petHandle = AtomSpaceUtil::addNode(*atomSpace, SL_PET_NODE, getPetId(), true);
+        petHandle = AtomSpaceUtil::addNode(*atomSpace, PET_NODE, getPetId(), true);
     } else if ( this->agentType == "humanoid" ) {
-        petHandle = AtomSpaceUtil::addNode(*atomSpace, SL_HUMANOID_NODE, getPetId(), true);
+        petHandle = AtomSpaceUtil::addNode(*atomSpace, HUMANOID_NODE, getPetId(), true);
     }
 
     // feelings
@@ -249,7 +249,7 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 
     if (this->exemplarAvatarId != "") {
         std::vector<Handle> exemplarAvatarSet;
-        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), SL_NODE, this->exemplarAvatarId, true);
+        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), OBJECT_NODE, this->exemplarAvatarId, true);
 
         if (exemplarAvatarSet.size() != 1) {
             throw RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.",
@@ -629,7 +629,7 @@ void Pet::executeBehaviorEncoder()
           makeVirtualAtom(EVALUATION_LINK,
               makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE, AGISIM_POSITION_PREDICATE_NAME), NULL),
               makeVirtualAtom(LIST_LINK,
-                  makeVirtualAtom(SL_AVATAR_NODE, NULL),
+                  makeVirtualAtom(AVATAR_NODE, NULL),
                   NULL
               ),
               NULL
@@ -642,7 +642,7 @@ void Pet::executeBehaviorEncoder()
         makeVirtualAtom(EVALUATION_LINK,
                         makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME), NULL),
                         makeVirtualAtom(LIST_LINK,
-                                        makeVirtualAtom(atomSpace->addNode(SL_AVATAR_NODE, exemplarAvatarId), NULL),
+                                        makeVirtualAtom(atomSpace->addNode(AVATAR_NODE, exemplarAvatarId), NULL),
                                         NULL
                                        ),
                         NULL
@@ -863,9 +863,9 @@ bool Pet::isNear(const Handle& objectHandle)
 
 Handle Pet::getMyHandle() const
 {
-    Handle h = atomSpace->getHandle( SL_PET_NODE, petId );
+    Handle h = atomSpace->getHandle( PET_NODE, petId );
     if ( h == Handle::UNDEFINED ) {
-        h = atomSpace->getHandle( SL_HUMANOID_NODE, petId );
+        h = atomSpace->getHandle( HUMANOID_NODE, petId );
     } // if
     return h;
 }
@@ -884,7 +884,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     // get the handle for each entity
     foreach(string entity, entitiesInVicinity) {
         HandleSeq objHandle;
-        atomSpace->getHandleSet(back_inserter(objHandle), SL_OBJECT_NODE, entity, true);
+        atomSpace->getHandleSet(back_inserter(objHandle), OBJECT_NODE, entity, true);
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
@@ -898,7 +898,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
-    atomSpace->getHandleSet(back_inserter(highLTIObjects), SL_OBJECT_NODE, true);
+    atomSpace->getHandleSet(back_inserter(highLTIObjects), OBJECT_NODE, true);
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {

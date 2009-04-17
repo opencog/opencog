@@ -58,7 +58,7 @@ void IsPeePlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
     SimpleTruthValue tv(0.0, 1.0);
 
     // only structures are considered pee place
-    if (atomSpace.getType(object) == SL_STRUCTURE_NODE) {
+    if (atomSpace.getType(object) == STRUCTURE_NODE) {
         tv.setMean(1.0);
     }
     // all other objects are not pee places

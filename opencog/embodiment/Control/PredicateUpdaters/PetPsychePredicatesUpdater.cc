@@ -156,7 +156,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
     SpaceServer::SpaceMapPoint petCenter( agentEntity->getPosition( ).x, agentEntity->getPosition( ).y );
 
-    bool needsArtificialFOV = ( atomSpace.getType(pet) == SL_PET_NODE );
+    bool needsArtificialFOV = ( atomSpace.getType(pet) == PET_NODE );
 
     Spatial::Math::Triangle petFieldOfView;
     if ( needsArtificialFOV ) {
@@ -269,7 +269,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             AtomSpaceUtil::setPredicateValue( atomSpace, "is_moving_toward", SimpleTruthValue( 0.0f, 1.0f ), entityHandle, pet);
         }
 
-        if ( atomSpace.getType(entityHandle) == SL_AVATAR_NODE ) {
+        if ( atomSpace.getType(entityHandle) == AVATAR_NODE ) {
             logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - entity %s is an avatar", entity.c_str( ) );
 
             bool isOwner = AtomSpaceUtil::isPetOwner( atomSpace, entityHandle, pet );
@@ -287,7 +287,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
             logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - Entity %s properties: owner[%s] friend[%s] enemy[%s]", entity.c_str( ), ( isOwner ? "t" : "f" ), ( isFriend ? "t" : "f" ), ( isEnemy ? "t" : "f" ) );
 
-        } else if ( atomSpace.getType(entityHandle) == SL_OBJECT_NODE ) {
+        } else if ( atomSpace.getType(entityHandle) == OBJECT_NODE ) {
 
             logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - entity %s is an object", entity.c_str( ) );
 

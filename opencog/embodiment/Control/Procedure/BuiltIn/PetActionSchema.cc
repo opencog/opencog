@@ -169,7 +169,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                 // Builds the Entity param
                 AtomSpace& atomSpace = pai.getAtomSpace();
                 HandleSeq hs;
-                atomSpace.getHandleSet(back_inserter(hs), SL_OBJECT_NODE, objectId, true);
+                atomSpace.getHandleSet(back_inserter(hs), OBJECT_NODE, objectId, true);
                 if (!hs.empty()) {
                     if (hs.size() > 1) {
                         std::string atomTypes;
@@ -177,11 +177,11 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                             atomTypes += classserver().getTypeName(atomSpace.getType(h));
                             atomTypes += " ";
                         }
-                        logger().log(opencog::Logger::WARN, "WARNING: Got multiple SLObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());
+                        logger().log(opencog::Logger::WARN, "WARNING: Got multiple ObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());
                     }
                     Type atomType = atomSpace.getType(hs[0]);
                     // TODO: What about the other types of SL object? (accessory and structure)
-                    Entity entity(objectId, (atomType == SL_AVATAR_NODE) ? AVATAR_OBJECT_TYPE : (atomType == SL_PET_NODE) ? PET_OBJECT_TYPE : (atomType == SL_HUMANOID_NODE) ? HUMANOID_OBJECT_TYPE : UNKNOWN_OBJECT_TYPE);
+                    Entity entity(objectId, (atomType == AVATAR_NODE) ? AVATAR_OBJECT_TYPE : (atomType == PET_NODE) ? PET_OBJECT_TYPE : (atomType == HUMANOID_NODE) ? HUMANOID_OBJECT_TYPE : UNKNOWN_OBJECT_TYPE);
                     ActionParameter actionParam(actionType.getParamNames()[argIndex], paramType, entity);
                     action.addParameter(actionParam);
                     validArg = true;

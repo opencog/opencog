@@ -1015,9 +1015,9 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
         // retrieve all agents
         std::vector<Handle> agentsHandles;
-        as.getHandleSet( back_inserter(agentsHandles), SL_AVATAR_NODE, false );
-        as.getHandleSet( back_inserter(agentsHandles), SL_HUMANOID_NODE, false );
-        as.getHandleSet( back_inserter(agentsHandles), SL_PET_NODE, false );
+        as.getHandleSet( back_inserter(agentsHandles), AVATAR_NODE, false );
+        as.getHandleSet( back_inserter(agentsHandles), HUMANOID_NODE, false );
+        as.getHandleSet( back_inserter(agentsHandles), PET_NODE, false );
 
 
         Handle selfHandle = WorldWrapperUtil::selfHandle(  as, selfName( ) );
@@ -1430,12 +1430,12 @@ string PAIWorldWrapper::resolveType(combo::vertex v)
 string PAIWorldWrapper::resolveType(Handle h)
 {
     Type objType = TLB::getAtom(h)->getType();
-    return (objType == SL_AVATAR_NODE ? AVATAR_OBJECT_TYPE :
-            objType == SL_PET_NODE ? PET_OBJECT_TYPE :
-            objType == SL_HUMANOID_NODE ? HUMANOID_OBJECT_TYPE :
-            objType == SL_ACCESSORY_NODE ? ACCESSORY_OBJECT_TYPE :
-            objType == SL_STRUCTURE_NODE ? STRUCTURE_OBJECT_TYPE :
-            objType == SL_OBJECT_NODE ? ORDINARY_OBJECT_TYPE :
+    return (objType == AVATAR_NODE ? AVATAR_OBJECT_TYPE :
+            objType == PET_NODE ? PET_OBJECT_TYPE :
+            objType == HUMANOID_NODE ? HUMANOID_OBJECT_TYPE :
+            objType == ACCESSORY_NODE ? ACCESSORY_OBJECT_TYPE :
+            objType == STRUCTURE_NODE ? STRUCTURE_OBJECT_TYPE :
+            objType == OBJECT_NODE ? ORDINARY_OBJECT_TYPE :
             UNKNOWN_OBJECT_TYPE);
 }
 
@@ -1457,7 +1457,7 @@ string PAIWorldWrapper::ownerName()
    EvalLink
    PredicateNode "AGISIM_position"
    ListLink
-   SLObjectNode "$obj_id"
+   ObjectNode "$obj_id"
    NumberNode "$pitch"
    NumberNode "$roll"
    NumberNode "$yaw"
@@ -1514,7 +1514,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
 #endif
     //_pai.getAtomSpace().print();
     std::stringstream stream (std::stringstream::out);
-    stream << "Can't find angle that SLObject '" << as.getName(slobj)
+    stream << "Can't find angle that Object '" << as.getName(slobj)
     << "' is facing at" << std::endl;
     throw opencog::ComboException(TRACE_INFO, "PAIWorldWrapper - %s.",
                                   stream.str().c_str());

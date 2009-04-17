@@ -94,11 +94,11 @@ public:
         AtomSpace atomSpace;
 
         //fill atomSpace with dummy_object and dummy_avatar definite object
-        Handle obj_h = atomSpace.addNode(SL_OBJECT_NODE, obj_str);
-        Handle avatar_h = atomSpace.addNode(SL_AVATAR_NODE, avatar_str);
+        Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
+        Handle avatar_h = atomSpace.addNode(AVATAR_NODE, avatar_str);
 
         //fill atomSpace with pet atom
-        Handle pet_h = atomSpace.addNode(SL_PET_NODE, pet_str);
+        Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
 
         //fill atomSpace with number atom (for goto_obj speed)
         Handle speed_h = atomSpace.addNode(NUMBER_NODE, GOTO_OBJ_SPEED_STR);
