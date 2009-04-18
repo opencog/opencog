@@ -21,59 +21,32 @@ scm
 
 
 (define (make-verb-prep verb prep)
-	(if 
-		;; Make sure that the atom types are as expected, so that
-		;; we don't create garbage.
-		(and
-			(eq? (cog-type verb) 'WordNode)
-			(eq? (cog-type prep) 'DefinedLinguisticRelationshipNode)
+	(let* (
+			(verb-str (cog-name verb))
+			(prep-str (cog-name prep))
 		)
-		(EvaluationLink
-			(DefinedLinguisticRelationshipNode
-				(string-append (cog-name verb) "_" (cog-name prep))
+		(if 
+			;; Make sure that the atom types are as expected, and that
+			;; the prep doesn't start with a leading underscore, so that
+			;; we don't create garbage.
+			(and
+				(eq? (cog-type verb) 'WordNode)
+				(eq? (cog-type prep) 'DefinedLinguisticRelationshipNode)
+				(not (eq? #\_ (car (string->list prep-str 0 1))))
 			)
-			(ListLink
-				(WordNode (cog-name verb))
-				(DefinedLinguisticRelationshipNode (cog-name prep))
+			(EvaluationLink (stv 1.0 1.0)
+				(DefinedLinguisticRelationshipNode
+					(string-append verb-str "_" prep-str)
+				)
+				(ListLink
+					(WordNode (cog-name verb))
+					(DefinedLinguisticRelationshipNode (cog-name prep))
+				)
 			)
+			'()
 		)
-		'()
 	)
 )
-
-
-(EvaluationLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "capital_of")
-	(ListLink
-		(WordNode "capital")
-		(DefinedLinguisticRelationshipNode "of")
-	)
-)
-
-(EvaluationLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "color_of")
-	(ListLink
-		(WordNode "color")
-		(DefinedLinguisticRelationshipNode "of")
-	)
-)
-
-(EvaluationLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "make_from")
-	(ListLink
-		(WordNode "make")
-		(DefinedLinguisticRelationshipNode "from")
-	)
-)
-
-(EvaluationLink (stv 1.0 1.0)
-	(DefinedLinguisticRelationshipNode "spin_from")
-	(ListLink
-		(WordNode "spin")
-		(DefinedLinguisticRelationshipNode "from")
-	)
-)
-
 
 .
 exit
