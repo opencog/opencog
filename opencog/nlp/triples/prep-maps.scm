@@ -21,16 +21,26 @@ scm
 
 
 (define (make-verb-prep verb prep)
-	(EvaluationLink
-		(DefinedLinguisticRelationshipNode
-			(string-append (cog-name verb) "_" (cog-name prep))
+	(if 
+		;; Make sure that the atom types are as expected, so that
+		;; we don't create garbage.
+		(and
+			(eq? (cog-type verb) 'WordNode)
+			(eq? (cog-type prep) 'DefinedLinguisticRelationshipNode)
 		)
-		(ListLink
-			(WordNode (cog-name verb))
-			(DefinedLinguisticRelationshipNode (cog-name prep))
+		(EvaluationLink
+			(DefinedLinguisticRelationshipNode
+				(string-append (cog-name verb) "_" (cog-name prep))
+			)
+			(ListLink
+				(WordNode (cog-name verb))
+				(DefinedLinguisticRelationshipNode (cog-name prep))
+			)
 		)
+		'()
 	)
 )
+
 
 (EvaluationLink (stv 1.0 1.0)
 	(DefinedLinguisticRelationshipNode "capital_of")
