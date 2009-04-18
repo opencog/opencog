@@ -1,3 +1,4 @@
+scm
 ;
 ; collect-stats.scm
 ;
@@ -48,12 +49,17 @@
 (define (process-rule rule)
 	(define triple-list (cog-outgoing-set (cog-ad-hoc "do-implication" rule)))
 
-	; increment count by 1 on each result.
+	; Increment count by 1 on each result.
 	(for-each (lambda (atom) (cog-atom-incr atom 1)) triple-list)
 
 	; Store each resultant atom.
 	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
 )
 
+; --------------------------------------------------------------
+;
 ; Apply the above proceedure to each ImplicationLink that we have.
-(for-each process-rule frame-rule-list)
+(define (do-triples) (for-each process-rule frame-rule-list))
+
+.
+exit

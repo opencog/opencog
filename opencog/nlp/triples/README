@@ -349,15 +349,15 @@ Note the use of WordInstanceLink to force both words to belong to
 the same sentence.
 
 
-Running the current code
-------------------------
+Demonstration run
+-----------------
 The file "rules.txt" contains the current set of rules.  The perl script
 "rules-to-implications.pl" will convert rules into OpenCog 
 ImplicationLinks, as described above. 
 
-The shell script "load.sh" in this directory will load the assorted scheme
-bits and pieces.  In addition, text that was parsed by relex, and output
-in opencog format, must be loaded. 
+The shell script "load.sh" in this directory will load the assorted
+scheme bits and pieces.  In addition, text that was parsed by relex,
+and output in opencog format, must be loaded, using "load-examples.sh".
 
 Implications can be processed with the scheme interpreter, using the 
 ad-hoc command:
@@ -365,30 +365,32 @@ ad-hoc command:
   (cog-ad-hoc "do-implication" stmt)
 
 where the stmt is the implication to evaluate. So, for example, after
-loading rules.txt, one would try:
+loading rules.txt, (and starting at the 5th rule -- the first 4
+perform some setup) one would try:
 
-  (cog-ad-hoc "do-implication" frame-rule-0)
+  (cog-ad-hoc "do-implication" frame-rule-4)
 
 This will search the entire contents of the atomtable, looking for any
 hypergraphs that match the predicate of the implication.  The output is
 a list of all possible implicands: thus, for example:
 
-guile> (cog-ad-hoc "do-implication" frame-rule-0)
+guile> (cog-ad-hoc "do-implication" frame-rule-4)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Germany@3cdca1f8-adf4-4532-a2d6-622da3f43ce6")
        (WordInstanceNode "Berlin@a0d168f7-3735-48a1-b603-33dd0fc95228"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-1)
+guile> (cog-ad-hoc "do-implication" frame-rule-5)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Portugaul@36d41058-3dc8-4e6c-82b9-300a5f48e283")
        (WordInstanceNode "Lisbon@9d5031b1-5caf-48eb-ae7c-b3a89bb11381"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-2)
+guile> (cog-ad-hoc "do-implication" frame-rule-6)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "color_of")
     (ListLink (WordInstanceNode "sky@f3924dad-81a0-4967-81c8-900e31254f74")
        (WordInstanceNode "blue@df54a7e9-1fb2-4643-be97-ca6ee1e7a359"))))
 
-
+Note that the rule numbering is subject to change; more setup rules
+might be added.
 
 
 Promoting Words to Concepts
@@ -565,19 +567,29 @@ Not clear how unambiguous the copulas and preps will be.
 
 HOWTO
 -----
-How to run the current code:
+How to run the current code in example/demo/debug mode:
 -- start cog-server
 -- run load.sh
+-- run load-examples.sh  to load the example sentences.
 -- Enter the scheme shell
 -- run (cog-ad-hoc "do-implication" frame-rule-0) through
-   (cog-ad-hoc "do-implication" frame-rule-8) and observe results.
+   (cog-ad-hoc "do-implication" frame-rule-12) and observe results.
 
 Next step:
 -- Download the MIT ConceptNet corpus.
 -- This corpus is in N3 format; strip out sentences by 
    running "conceptnet.pl"
 -- Parse the sentences using relex, generate opencog output.
--- run "collect-stats.scm"
+-- Create a presistence repository for accumulating results.
+   (at this time, create a new SQL db)
+       createdb triples
+       cat opencog/persist/atom.sql | psql triples
+-- Run cogserver
+-- open the database created above
+-- run load.sh
+-- Enter the scheme shell
+-- Load previously parsed sentences.
+-- run command (do-triples)
 
 References:
 -----------

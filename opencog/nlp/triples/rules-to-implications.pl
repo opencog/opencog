@@ -106,7 +106,7 @@ sub print_triple_clause
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
-	print "$indent(EvaluationLink\n";
+	print "$indent(EvaluationLink (stv 1.0 1.0)\n";
 	if ($pred =~ /^\$/)
 	{
 		print "$indent   (VariableNode \"$pred\")\n";
@@ -145,7 +145,7 @@ sub print_double_clause
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
-	print "$indent(InheritanceLink\n";
+	print "$indent(InheritanceLink (stv 1.0 1.0)\n";
 	print_var_or_word_instance($item1, $cnt, $indent . "   ");
 	print "$indent   (DefinedLinguisticConceptNode \"$pred\")\n";
 	print "$indent)\n";
