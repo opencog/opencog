@@ -541,11 +541,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 
 	if (caught_error)
 	{
-		std::string rv;
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
-		rv = str;
-		free(str);
 		scm_close_port(error_string_port);
 		error_string_port = SCM_EOL;
 		captured_stack = SCM_BOOL_F;
@@ -557,10 +554,19 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// errors that are otherwise invisible to the user/developer.
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
-		logger().error("do_scm_eval(): %s\n", rv.c_str());
+		logger().error("do_scm_eval(): %s\n", str);
 		logger().setBackTraceLevel(save);
+
+		free(str);
 		return SCM_EOL;
 	}
+
+	// Get the contents of the output port, and log it
+	SCM out = scm_get_output_string(outport);
+	char * str = scm_to_locale_string(out);
+	logger().info("do_scm_eval(): %s\n", str);
+	scm_truncate_file(outport, scm_from_uint16(0));
+	free(str);
 
 	return rc;
 }
