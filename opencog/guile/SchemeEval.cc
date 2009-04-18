@@ -75,6 +75,7 @@ static void * do_bogus_scm(void *p)
  * means of a mutex lock.
  */
 static pthread_mutex_t serialize_lock;
+static pthread_key_t ser_key = NULL;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 static void first_time_only(void)
@@ -83,6 +84,8 @@ static void first_time_only(void)
 	pthread_setspecific(tid_key, (const void *) 0x42);
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	pthread_mutex_init(&serialize_lock, NULL);
+	pthread_key_create(&ser_key, NULL);
+	pthread_setspecific(ser_key, (const void *) 0x0);
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_with_guile(do_bogus_scm, NULL);
@@ -90,18 +93,47 @@ static void first_time_only(void)
 #endif /* WORK_AROUND_GUILE_185_BUG */
 }
 
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+
+/** 
+ * This lock primitive allow nested locks within one thread,
+ * but prevents concurrent threads from running.
+ */
+void SchemeEval::thread_lock(void)
+{
+	int cnt = (int) pthread_getspecific(ser_key);
+	if (0 >= cnt)
+	{
+		pthread_mutex_lock(&serialize_lock);
+	}
+	cnt ++;
+	pthread_setspecific(ser_key, (const void *) cnt);
+}
+
+void SchemeEval::thread_unlock(void)
+{
+	int cnt = (int) pthread_getspecific(ser_key);
+	cnt --;
+	pthread_setspecific(ser_key, (const void *) cnt);
+	if (0 >= cnt)
+	{
+		pthread_mutex_unlock(&serialize_lock);
+	}
+}
+#endif
+
 SchemeEval::SchemeEval(void)
 {
 	pthread_once(&eval_init_once, first_time_only);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_lock(&serialize_lock);
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	scm_with_guile(c_wrap_init, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_unlock(&serialize_lock);
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 }
@@ -358,13 +390,13 @@ std::string SchemeEval::eval(const std::string &expr)
 	pexpr = &expr;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_lock(&serialize_lock);
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	scm_with_guile(c_wrap_eval, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_unlock(&serialize_lock);
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	return answer;
@@ -536,13 +568,13 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 	hargs = varargs;
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_lock(&serialize_lock);
+	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	scm_with_guile(c_wrap_apply, this);
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_unlock(&serialize_lock);
+	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	return hargs;
