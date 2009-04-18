@@ -243,6 +243,34 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 	return SCM_BOOL_F;
 }
 
+/**
+ * Return true if the scm is a truth value
+ */
+inline SCM SchemeSmob::tv_p (SCM s, TruthValueType wanted)
+{
+	if (SCM_BOOL_F == ss_tv_p(s)) return SCM_BOOL_F;
+
+	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
+	TruthValueType tvt = tv->getType();
+	if (wanted == tvt) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
+SCM SchemeSmob::ss_stv_p (SCM s)
+{
+	return tv_p(s, SIMPLE_TRUTH_VALUE);
+}
+
+SCM SchemeSmob::ss_ctv_p (SCM s)
+{
+	return tv_p(s, COUNT_TRUTH_VALUE);
+}
+
+SCM SchemeSmob::ss_itv_p (SCM s)
+{
+	return tv_p(s, INDEFINITE_TRUTH_VALUE);
+}
+
 /* ============================================================== */
 
 TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname)

@@ -370,6 +370,14 @@ interface.
          guile> (cog-tv? y)
          #f
 
+=== cog-stv? exp ===
+      Return #t if exp is a SimpleTruthValue, else return #f
+
+=== cog-ctv? exp ===
+      Return #t if exp is a CountTruthValue, else return #f
+
+=== cog-itv? exp ===
+      Return #t if exp is a IndefiniteTruthValue, else return #f
 
 === cog-tv atom ===
       Return the truth-value of the atom. 
