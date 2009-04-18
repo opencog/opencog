@@ -147,10 +147,8 @@ SCM SchemeSmob::ss_handle (SCM satom)
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
 		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
 
-	// Guhh. Handles are no longer unsigned ints, but are classes. :-(
-	// return SCM_SMOB_OBJECT(satom);
-	unsigned long uuid = (unsigned long) SCM_SMOB_OBJECT(satom);
-	return scm_from_ulong(uuid);
+	// We store the uuid, so just return that.
+	return SCM_SMOB_OBJECT(satom);
 }
 
 /* ============================================================== */
