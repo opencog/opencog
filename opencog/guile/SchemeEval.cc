@@ -13,6 +13,8 @@
 #include <libguile/lang.h>
 #include <pthread.h>
 
+#include <opencog/util/Logger.h>
+
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
 
@@ -550,7 +552,13 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 
 		scm_truncate_file(outport, scm_from_uint16(0));
 
-		fprintf (stderr, "Error: do_scm_eval(): %s\n", rv.c_str());
+		// Unlike errors seen on the interpreter, log these to the logger.
+		// That's because these errors will be predominantly script
+		// errors that are otherwise invisible to the user/developer.
+		Logger::Level save = logger().getBackTraceLevel();
+		logger().setBackTraceLevel(Logger::NONE);
+		logger().error("do_scm_eval(): %s\n", rv.c_str());
+		logger().setBackTraceLevel(save);
 		return SCM_EOL;
 	}
 
