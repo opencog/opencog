@@ -10,7 +10,36 @@
 ;
 ; Linas Vepstas April 2009
 ;
+; --------------------------------------------------------------
+; cog-atom-incr
+; Increment count truth value on "atom" by "cnt"
+; If the current truth value on the atom is not a CountTruthValue,
+; then the truth value is replaced by a CountTruthValue, with the 
+; count set to "cnt".
+;
+; XXX this implementation is slow/wasteful, a native C++ would
+; be considerably faster.
+;
+(define (cog-atom-incr atom cnt) 
+	(let* (
+			(tv (cog-tv atom))
+			(atv (cog-tv->alist tv))
+			(mean (assoc-ref atv 'mean))
+			(conf (assoc-ref atv 'confidence))
+			(count (assoc-ref atv 'count))
 
+			; non-CountTV's will not have a 'count in the a-list
+			; so its enough to test for that.
+			(ntv (if count
+					(cog-new-ctv mean conf (+ count cnt))
+					(cog-new-ctv mean conf cnt))
+			)
+		)
+		(cog-set-tv! atom ntv)
+	)
+)
+
+; --------------------------------------------------------------
 ; process-rule
 ; Given an ImplicationLink, apply the implication on the atom space.
 ; This may generate a list of atoms. Take that list, and manually
@@ -18,10 +47,12 @@
 ;
 (define (process-rule rule)
 	(define triple-list (cog-outgoing-set (cog-ad-hoc "do-implication" rule)))
-	(define (store-stats atom) (cog-ad-hoc "store-atom" atom))
+
+	; increment count by 1 on each result.
+	(for-each (lambda (atom) (cog-atom-incr atom 1)) triple-list)
 
 	; Store each resultant atom.
-	(for-each store-stats triple-list)
+	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
 )
 
 ; Apply the above proceedure to each ImplicationLink that we have.
