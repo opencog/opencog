@@ -42,7 +42,7 @@ class Logger
 
 public:
 
-    enum Level { ERROR, WARN, INFO, DEBUG, FINE };
+    enum Level { NONE, ERROR, WARN, INFO, DEBUG, FINE };
 
     /** Convert from 'enum' (int) to 'string' and vice-versa */
     static const Level getLevelFromString(const std::string&);
