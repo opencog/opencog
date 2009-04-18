@@ -657,6 +657,19 @@ Handle AtomSpace::fetchAtom(Handle h)
     if (backing_store)
     {
         Atom *a = backing_store->getAtom(h);
+
+        // For links, must perform a recursive fetch, as otherwise
+        // the atomtable.add below will throw an error.
+        Link *l = dynamic_cast<Link *>(a);
+        if (l)
+        {
+           const std::vector<Handle>& ogs = l->getOutgoingSet();
+           size_t arity = ogs.size();
+           for (size_t i=0; i<arity; i++)
+           {
+              fetchAtom(ogs[i]);
+           }
+        }
         if (a) return atomTable.add(a);
     }
 	

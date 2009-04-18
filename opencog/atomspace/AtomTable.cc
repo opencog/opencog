@@ -455,7 +455,8 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     // Checks for null outgoing set members.
     if (lll) {
         const std::vector<Handle>& ogs = lll->getOutgoingSet();
-        for (int i = lll->getArity() - 1; i >= 0; i--) {
+        size_t arity = ogs.size();
+        for (int i = arity - 1; i >= 0; i--) {
             if (TLB::isInvalidHandle(ogs[i])) {
                 throw RuntimeException(TRACE_INFO,
                                        "AtomTable - Attempting to insert link with invalid (null) outgoing members");
