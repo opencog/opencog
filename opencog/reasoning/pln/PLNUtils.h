@@ -512,7 +512,8 @@ std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
 struct atom;
 
-void unifiesWithVariableChangeTo_TEST();
+// @todo Not defined anywhere, but probably should be implemented.
+//void unifiesWithVariableChangeTo_TEST();
 
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,

@@ -311,9 +311,7 @@ protected:
 	bool inferenceLoopWith(meta req);
 
 	/// helper
-	void ValidateRuleArgs(const vector<BoundVertex>& rule_args) const;
-
-	/// helper
+	// @todo Doesn't do anything
 	template<typename IterT>
 	void ValidateRuleArgs(IterT rule_args_begin, IterT rule_args_end) const
 	{

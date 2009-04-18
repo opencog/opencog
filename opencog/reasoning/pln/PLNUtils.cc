@@ -1438,7 +1438,7 @@ bool MPunifyHandle(pHandle lhs,
 
             LOG(4, "MPunifyHandle: Unify1 was success!");
             if (*restart) {
-                LOG(4, "MPunifyHandle: restart reqsted...");
+                LOG(4, "MPunifyHandle: restart requested...");
                 return true;
             }
         }

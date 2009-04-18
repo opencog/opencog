@@ -980,7 +980,8 @@ void RunPLNTestsOnce()
 //namespace reasoning
 //{
 
-bool satSetTest();
+// No longer exists!
+//bool satSetTest();
 
 //void RunPLNTestsOnce();
 
