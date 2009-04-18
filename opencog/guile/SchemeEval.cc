@@ -103,7 +103,7 @@ static void first_time_only(void)
  */
 void SchemeEval::thread_lock(void)
 {
-	int cnt = (int) pthread_getspecific(ser_key);
+	long cnt = (long) pthread_getspecific(ser_key);
 	if (0 >= cnt)
 	{
 		pthread_mutex_lock(&serialize_lock);
@@ -114,7 +114,7 @@ void SchemeEval::thread_lock(void)
 
 void SchemeEval::thread_unlock(void)
 {
-	int cnt = (int) pthread_getspecific(ser_key);
+	long cnt = (long) pthread_getspecific(ser_key);
 	cnt --;
 	pthread_setspecific(ser_key, (const void *) cnt);
 	if (0 >= cnt)
