@@ -38,7 +38,7 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 	return h;
 }
 
-const Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
+Atom * SchemeSmob::verify_atom (SCM satom, const char * subrname)
 {
 	return TLB::getAtom(verify_handle(satom, subrname));
 }
@@ -86,6 +86,15 @@ SCM SchemeSmob::ss_tv (SCM satom)
 	const TruthValue &tv = atom->getTruthValue();
 	TruthValue *stv = tv.clone();
 	return take_tv(stv);
+}
+
+SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
+{
+	Atom *atom = verify_atom(satom, "cog-set-tv!");
+	TruthValue *tv = verify_tv(stv, "cog-set-tv!");
+
+	atom->setTruthValue(*tv);
+	return satom;
 }
 
 /* ============================================================== */

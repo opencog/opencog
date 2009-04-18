@@ -244,22 +244,26 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 }
 
 /* ============================================================== */
+
+TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname)
+{
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, stv))
+		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(stv);
+	if (COG_TV != misctype)
+		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+
+	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(stv);
+	return tv;
+}
+
 /**
- * Return scheme-accessible numerical value of a truth value
+ * Return association list holding contents of a truth value
  */
 SCM SchemeSmob::ss_tv_get_value (SCM s)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
-	{
-		return SCM_EOL;
-	}
-
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_TV != misctype) return SCM_EOL;
-
-	// Return association list
-	TruthValue *tv;
-	tv = (TruthValue *) SCM_SMOB_DATA(s);
+	TruthValue *tv = verify_tv(s, "cog-tv->alist");
 	TruthValueType tvt = tv->getType();
 	switch(tvt)
 	{

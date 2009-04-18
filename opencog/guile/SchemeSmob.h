@@ -74,6 +74,9 @@ class SchemeSmob
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
 
+		// Set properties of atoms
+		static SCM ss_set_tv(SCM, SCM);
+
 		// Atom properties
 		static SCM ss_name(SCM);
 		static SCM ss_type(SCM);
@@ -116,8 +119,9 @@ class SchemeSmob
 
 		static Type validate_atom(SCM, const char *);
 		static Type validate_node(SCM, const char *);
-		static const Atom * verify_atom(SCM, const char *);
+		static Atom * verify_atom(SCM, const char *);
 		static Handle verify_handle(SCM, const char *);
+		static TruthValue * verify_tv(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:

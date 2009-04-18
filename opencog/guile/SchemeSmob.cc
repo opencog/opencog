@@ -107,6 +107,9 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-delete-recursive",  1, 0, 0, C(ss_delete_recursive));
 	scm_c_define_gsubr("cog-atom?",             1, 0, 1, C(ss_atom_p));
 
+	// property setters
+	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+
 	// property getters
 	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
 	scm_c_define_gsubr("cog-type",              1, 0, 0, C(ss_type));
