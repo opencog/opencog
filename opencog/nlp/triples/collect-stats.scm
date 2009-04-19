@@ -51,15 +51,28 @@ scm
 
 	; Increment count by 1 on each result.
 	(for-each (lambda (atom) (cog-atom-incr atom 1)) triple-list)
+	(display "Done running implication\n")
 
 	; Store each resultant atom.
 	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
+	(display "Done running store\n")
 )
 
 ; --------------------------------------------------------------
 ;
 ; Apply the above proceedure to each ImplicationLink that we have.
-(define (do-triples) (for-each process-rule frame-rule-list))
+(define (do-triples) 
+
+	; First, create all of the verb-preposition pairs that
+	; we'll need.
+	(for-each 
+		(lambda (rule) 
+			(cog-outgoing-set (cog-ad-hoc "do-implication" rule))
+		)
+		prep-rule-list
+	)
+	(for-each process-rule frame-rule-list)
+)
 
 .
 exit

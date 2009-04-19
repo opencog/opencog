@@ -407,11 +407,15 @@ sub parse_rule
 my $have_rule = 0;
 my $curr_rule = "";
 
+if ($#ARGV < 0) { die "Fatal Error: must specify unique name\n"; }
+
+my $rule_name = $ARGV[0];
+
 print "scm\n\n";
 # Read from standard input, until theres no more standard input.
 #
 my $rule_cnt = 0;
-while(<>)
+while(<STDIN>)
 {
 	# Ignore comments (actually, reproduce them for ease of debugging)
 	if(/^;/)
@@ -427,7 +431,7 @@ while(<>)
 		# If we have a rule, parse it.
 		if ($have_rule)
 		{
-			print "(define frame-rule-$rule_cnt\n";
+			print "(define $rule_name-$rule_cnt\n";
 			parse_rule($curr_rule);
 			print ")\n";
 			$rule_cnt ++;
@@ -454,7 +458,7 @@ while(<>)
 # No more input, parse the final line.
 if ($have_rule)
 {
-	print "(define frame-rule-$rule_cnt\n";
+	print "(define $rule_name-$rule_cnt\n";
 	parse_rule($curr_rule);
 	print ")\n";
 	$rule_cnt ++;
@@ -463,10 +467,10 @@ if ($have_rule)
 }
 
 # Make a list of all the rules.
-print "(define frame-rule-list (list \n";
+print "(define $rule_name-list (list \n";
 for (my $i=0; $i<$rule_cnt; $i++)
 {
-	print "   frame-rule-$i\n";
+	print "   $rule_name-$i\n";
 }
 print "))\n";
 
