@@ -968,15 +968,17 @@ Atom * AtomStorage::getAtom(Handle h)
 Node * AtomStorage::getNode(Type t, const char * str)
 {
 	setup_typemap();
-	char buff[4*BUFSZ];
+	char buff[40*BUFSZ];
 
 	// Use postgres $-quoting to make unicode strings easier to deal with. 
 	int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
 	    "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
-	if (4*BUFSZ-1 <= nc)
+	if (40*BUFSZ-1 <= nc)
 	{
 		fprintf(stderr, "Error: AtomStorage::getNode: buffer overflow!\n");
+		buff[40*BUFSZ-1] = 0x0;
+		fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, buff);
 		return NULL;
 	}
 
@@ -998,19 +1000,16 @@ Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 {
 	setup_typemap();
 
-	const std::string ostr = oset_to_string(oset, oset.size());
-	char buff[10*BUFSZ];
-	int nc = snprintf(buff, 10*BUFSZ, "SELECT * FROM Atoms WHERE "
-	    "type = %hu AND outgoing = %s;", 
-	    storing_typemap[t], ostr.c_str());
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, 
+	    "SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
+	    storing_typemap[t]);
 
-	if (10*BUFSZ-1 <= nc)
-	{
-		fprintf(stderr, "Error: AtomStoreage::getLink: buffer overflow!\n");
-		return NULL;
-	}
+	std::string ostr = buff;
+	ostr += oset_to_string(oset, oset.size());
+	ostr += ";";
 
-	Atom *atom = getAtom(buff, 1);
+	Atom *atom = getAtom(ostr.c_str(), 1);
 	return static_cast<Link *>(atom);
 }
 
