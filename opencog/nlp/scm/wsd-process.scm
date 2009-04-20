@@ -19,59 +19,6 @@ scm
 )
 
 ; ---------------------------------------------------------------------
-; Delete atoms that belong to particular sentence instances; we don't
-; want to log up the server with grunge text.
-;
-(define (delete-sentences)
-	(let ((n 0))
-	; (define (delit atom) (set! n (+ n 1)) #f)
-	; (define (delit atom) (cog-delete-recursive atom) #f)
-	(define (delit atom) (cog-delete-recursive atom) (set! n (+ n 1)) #f)
-
-	; (define (delone atom) (cog-delete atom) #f)
-	(define (delone atom) (cog-delete atom) (set! n (+ n 1)) #f)
-
-	; Can't delete InheritanceLink, its used to mark wsd completed... 
-	; (cog-map-type delone 'InheritanceLink)
-	; Can't delete EvaluationLink, these are used elsewhere.
-	; (cog-map-type delone 'EvaluationLink)
-	; Can't delete ListLink, these are used in EvaluationLinks.
-	; (cog-map-type delone 'ListLink)
-	
-	; Part of Speech links are used in the word-sense 
-	; database, so cannot delete these.
-	; (cog-map-type delone 'PartOfSpeechLink)
-	(cog-map-type delone 'LemmaLink)
-
-	(cog-map-type delone 'ParseLink)
-	(cog-map-type delone 'ReferenceLink)
-
-	(cog-map-type delone 'CosenseLink)
-
-	; Its sort of a shame to delete the SimilarityLinks, but these
-	; do make the server bloat after a while.
-	(cog-map-type delone 'SimilarityLink)
-
-	; We do delete all the test-processing nodes, recursively.
-	; This should make any links that contain these to go "poof",
-	; and so the above link deletions should not really be needed
-	; (except for the similarity links).
-	(cog-map-type delit 'DocumentNode)
-	(cog-map-type delit 'SentenceNode)
-	(cog-map-type delit 'ParseNode)
-	(cog-map-type delit 'WordInstanceNode)
-
-	; Pointless to delete these, since there should only be 
-	; a few hundred of these, total.
-	; (cog-map-type delit 'LinkGrammarRelationshipNode) 
-	; (cog-map-type delit 'DefinedLinguisticConceptNode) 
-	; (cog-map-type delit 'DefinedLinguisticRelationshipNode) 
-
-(system (string-join (list "echo deleted: " (number->string n) )))
-	)
-)
-
-; ---------------------------------------------------------------------
 ; Perform WSD-disjunct statistics processing.
 ;
 ; Process 'num-to-do' files in the input dir, and move them to done-dir
