@@ -64,7 +64,7 @@ scm
 ; 
 (define (fire-all-triple-rules) 
 
-	; First, create all of the verb-preposition pairs that
+	; First, create all of the preposition phrases that
 	; we'll need.
 	(for-each 
 		(lambda (rule) 
