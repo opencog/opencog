@@ -21,6 +21,8 @@
 
 use strict;
 
+my %word_map = ();
+
 # --------------------------------------------------------------------
 # parse_clause -- Split a clause into it's parts. 
 #
@@ -71,13 +73,30 @@ sub parse_clause
 }
 
 # --------------------------------------------------------------------
+sub get_word_id
+{
+	my ($item) = @_;
+	my $id = $word_map{$item};
+	if (!defined $id)
+	{
+		my $cnt = $word_map{"ccc-cnt-ccc"};
+		$cnt += 1;
+		$word_map{"ccc-cnt-ccc"} = $cnt;
+
+		$id = "\$word-instance-$cnt";
+		$word_map{$item} = $id;
+	}
+	$id;
+}
+
+# --------------------------------------------------------------------
 # print a variable or a word instance
 # The word-instance is printed as a variable; this is joined
 # to a particular word, later on, by a LemmaLink.
 #
 sub print_var_or_word_instance
 {
-	my ($item, $cnt, $indent) = @_;
+	my ($item, $indent) = @_;
 
 	if ($item =~ /^\$/)
 	{
@@ -87,7 +106,8 @@ sub print_var_or_word_instance
 	{
 		# Dang, not a word node, but some unknown word-instance node.
 		# print "$indent(WordNode \"$item1\")\n";
-		print "$indent(VariableNode \"\$word-instance-$cnt\")\n";
+		my $id = get_word_id ($item);
+		print "$indent(VariableNode \"$id\")\n";
 	}
 }
 
@@ -99,7 +119,7 @@ sub print_var_or_word_instance
 #
 sub print_triple_clause
 {
-	my ($clause, $cnt, $indent) = @_;
+	my ($clause, $indent) = @_;
 
 	# Pull the three parts out of the clause.
 	my ($pred, $item1, $item2) = parse_clause($clause);
@@ -118,9 +138,8 @@ sub print_triple_clause
 
 	print "$indent   (ListLink\n";
 
-	print_var_or_word_instance($item1, $cnt, $indent . "      ");
-	$cnt++;
-	print_var_or_word_instance($item2, $cnt, $indent . "      ");
+	print_var_or_word_instance($item1, $indent . "      ");
+	print_var_or_word_instance($item2, $indent . "      ");
 
 	print "$indent   )\n";
 	print "$indent)\n";
@@ -134,7 +153,7 @@ sub print_triple_clause
 #
 sub print_double_clause
 {
-	my ($clause, $cnt, $indent) = @_;
+	my ($clause, $indent) = @_;
 
 	# Pull the two parts out of the clause.
 	my ($pred, $item1) = parse_clause($clause);
@@ -146,7 +165,7 @@ sub print_double_clause
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
 	print "$indent(InheritanceLink (stv 1.0 1.0)\n";
-	print_var_or_word_instance($item1, $cnt, $indent . "   ");
+	print_var_or_word_instance($item1, $indent . "   ");
 	print "$indent   (DefinedLinguisticConceptNode \"$pred\")\n";
 	print "$indent)\n";
 }
@@ -158,7 +177,7 @@ sub print_double_clause
 #
 sub print_clause
 {
-	my ($clause, $cnt, $indent) = @_;
+	my ($clause, $indent) = @_;
 
 	# Pull out the parts of the clause.
 	my @parts = parse_clause($clause);
@@ -264,7 +283,7 @@ sub print_exec
 #
 sub print_lemma_link
 {
-	my ($clause, $item, $cnt, $indent) = @_;
+	my ($clause, $item, $indent) = @_;
 
 	if ($item eq "") { return; }
 
@@ -274,7 +293,8 @@ sub print_lemma_link
 		print "$indent(LemmaLink\n";
 		# Some unknow word instance, to be fixed by variable.
 		# print "$indent   (WordInstanceNode \"$item\")\n";
-		print "$indent   (VariableNode \"\$word-instance-$cnt\")\n";
+		my $id = get_word_id ($item);
+		print "$indent   (VariableNode \"$id\")\n";
 		if ($item =~ /^_%copula/)
 		{
 			print "$indent   (WordNode \"be\")\n";
@@ -296,15 +316,15 @@ sub print_lemma_link
 #
 sub print_word_instance
 {
-	my ($clause, $cnt, $indent) = @_;
+	my ($clause, $indent) = @_;
 
 	# Pull the three parts out of the clause.
 	$clause =~ s/\s*//g;
 	my ($link, $item1, $item2) = parse_clause($clause);
 
 	# Print a copy of the original clause for reference
-	print_lemma_link ($clause, $item1, $cnt, $indent);
-	print_lemma_link ($clause, $item2, $cnt+1, $indent);
+	print_lemma_link ($clause, $item1, $indent);
+	print_lemma_link ($clause, $item2, $indent);
 }
 
 # --------------------------------------------------------------------
@@ -326,9 +346,11 @@ sub parse_rule
 
 	my @clauses = split(/\^/, $predicate);
 
+	# Clear the word-to-word-instance map.
+	%word_map = ();
+
 	print "(ImplicationLink\n";
 	print "   (AndLink\n";
-	my $cnt = 0;
 	foreach (@clauses)
 	{
 		s/^\s*//g;
@@ -351,17 +373,14 @@ sub parse_rule
 		}
 		else
 		{
-			print_clause ($_, $cnt, $indent);
+			print_clause ($_, $indent);
 		}
 
 		if($inv) { print "      )  ;; NotLink\n"; } # closure to NotLink
-		$cnt += 2;
 	}
-	$cnt = 0;
 	foreach (@clauses)
 	{
-		print_word_instance ($_, $cnt, "      ");
-		$cnt += 2;
+		print_word_instance ($_, "      ");
 	}
 	print "   )  ;; AndLink\n";  # closing paren to AndLink
 
