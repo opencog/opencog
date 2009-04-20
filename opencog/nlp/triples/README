@@ -147,6 +147,22 @@ The hope is that, by encoding the relatively small number of
 prepositional relationships, the much larger set of "real-world"
 knowledge rules can be deduced (via backward or forward chaining).
 
+Definite vs. Indefinite
+-----------------------
+There is a subtle semantic difference between triples that describe
+definite properites, vs. triples that describe generic properites, 
+or semantic classes.  Thus, for example, "color_of(sky,blue)" seems 
+unambiguous: this is because we know that the sky can only ever have
+one color. Consider "form_of(clothing, skirt)": this asserts that
+a skirt is a form_of clothing, and not that clothing is always a
+skirt. The form_of indicates a semantic category.  Similarly, 
+"group_of(people, family)" asserts that a family is a group_of
+people, and not that groups of people are families.
+
+The distinction here seems to be whether or not the modifier was
+definite or indefinite: "THE color of ...." vs. "A form of.." or
+"A group of..."
+
 Learning Semantic Categories
 ----------------------------
 Consider the category of "types of motion". Currently, the RelEx frame
