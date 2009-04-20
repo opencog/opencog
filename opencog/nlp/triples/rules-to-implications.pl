@@ -274,27 +274,30 @@ sub print_exec
 	print "$indent)\n";
 }
 
-
 # --------------------------------------------------------------------
-# print_lemma_link
-# Print a lemma link to connect a word instance to its word.
-# But print it only if the thing looks like a word instance,
-# i.e. no printing for variables, which start with $.
+# print_word_instances -- print lemma links joining words to instances.
+# The core problem here is that the frame rules are written in
+# 'general', specifying fixed words if/when needed. However, the 
+# actual relex output has WordInstanceNodes, not WordNodes. So we 
+# need to somehow tie a specific word instance to a specific word.
 #
-sub print_lemma_link
+
+sub print_word_instances
 {
-	my ($clause, $item, $indent) = @_;
-
-	if ($item eq "") { return; }
-
-	if (!($item =~ /^\$/))
+	my ($indent) = @_;
+	foreach (keys %word_map)
 	{
-		print "$indent;; word-instance lemma of $clause\n";
+		if ($_ eq "ccc-cnt-ccc") { next; }
+
+		# Print a lemma link to connect a word instance to its word.
+		my $item = $_;
+
+		print "$indent;; word-instance lemma of \"$item\"\n";
 		print "$indent(LemmaLink\n";
 		# Some unknow word instance, to be fixed by variable.
 		# print "$indent   (WordInstanceNode \"$item\")\n";
-		my $id = get_word_id ($item);
-		print "$indent   (VariableNode \"$id\")\n";
+		my $eyed = $word_map{$item};
+		print "$indent   (VariableNode \"$eyed\")\n";
 		if ($item =~ /^_%copula/)
 		{
 			print "$indent   (WordNode \"be\")\n";
@@ -305,26 +308,6 @@ sub print_lemma_link
 		}
 		print "$indent)\n";
 	}
-}
-
-# --------------------------------------------------------------------
-# print_word_instance -- print lemma links joining words to instances.
-# The core problem here is that the frame rules are written in
-# 'general', specifying fixed words if/when needed. However, the 
-# actual relex output has WordInstanceNodes, not WordNodes. So we 
-# need to somehow tie a specific word instance to a specific word.
-#
-sub print_word_instance
-{
-	my ($clause, $indent) = @_;
-
-	# Pull the three parts out of the clause.
-	$clause =~ s/\s*//g;
-	my ($link, $item1, $item2) = parse_clause($clause);
-
-	# Print a copy of the original clause for reference
-	print_lemma_link ($clause, $item1, $indent);
-	print_lemma_link ($clause, $item2, $indent);
 }
 
 # --------------------------------------------------------------------
@@ -378,10 +361,7 @@ sub parse_rule
 
 		if($inv) { print "      )  ;; NotLink\n"; } # closure to NotLink
 	}
-	foreach (@clauses)
-	{
-		print_word_instance ($_, "      ");
-	}
+	print_word_instances("      ");
 	print "   )  ;; AndLink\n";  # closing paren to AndLink
 
 	# We are done with the and link. Move on to the implicand.
