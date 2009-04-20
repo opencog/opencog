@@ -11,6 +11,9 @@ scm
 ;
 ; Linas Vepstas April 2009
 ;
+; (use-modules (ice-9 rdelim))
+; (use-modules (ice-9 popen))
+
 ; --------------------------------------------------------------
 ; cog-atom-incr
 ; Increment count truth value on "atom" by "cnt"
@@ -51,11 +54,11 @@ scm
 
 	; Increment count by 1 on each result.
 	(for-each (lambda (atom) (cog-atom-incr atom 1)) triple-list)
-	(display "Done running implication\n")
+	; (system "date")
+	; (system "echo Done running one implication\n")
 
 	; Store each resultant atom.
 	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
-	(display "Done running store\n")
 )
 
 ; --------------------------------------------------------------
@@ -68,10 +71,14 @@ scm
 	; we'll need.
 	(for-each 
 		(lambda (rule) 
+			; (system "date")
+			; (system "echo Start working on a prep rule\n")
 			(cog-outgoing-set (cog-ad-hoc "do-implication" rule))
 		)
 		prep-rule-list
 	)
+	; (system "date")
+	; (system "echo Start working on a triple rules\n")
 	(for-each process-rule frame-rule-list)
 )
 
