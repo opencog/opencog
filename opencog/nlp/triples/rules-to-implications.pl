@@ -384,7 +384,7 @@ sub parse_rule
 		}
 		else
 		{
-			print_clause ($clause, 0, "   ");
+			print_clause ($clause, "   ");
 		}
 
 		# If the rest of the line starts with ^N_, N a digit, then
