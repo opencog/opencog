@@ -74,11 +74,5 @@ scm
 	(for-each process-rule frame-rule-list)
 )
 
-; --------------------------------------------------------------
-;
-(use-modules (ice-9 rdelim))
-(use-modules (ice-9 popen))
-
-
 .
 exit

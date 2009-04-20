@@ -29,6 +29,12 @@ loaded with the "load-nlp.sh" shell script.
 
  * disjunct.scm: Build lists of link-grammar disjuncts.
 
+ * wsd-process.scm: top-level script for driving WSD processing. 
+   It takes input files, loads them into opencog, performs the WSD,
+   stores the accumulated statistics, and then moves each input file
+   out of the way, to denote that its done with that file.  Explicit
+   paths to data files need to be provided.
+
 Stand-alone scripts
 -------------------
 The following scripts are meant to be run stand-alone, as they do not

@@ -34,12 +34,12 @@ complex databases.  It is summarized here:
    worth of parsed data. 
  * Run the scripts in the wordnet-import directory to load opencog
    with basic wordnet relationships.
- * Run "src/scm/load.sh" and "src/nlp/scm/load-nlp.sh" to load basic
-   scheme utilities. Be sure to modify the hard-coded paths to point
-   at the actual location of the parsed data.
- * Get to the scheme prompt, and run "(doit)". This will run the
-   current word-sense disambiguation code, and will populate the 
-   databases with statistical results.  Caution; this is extremely 
+ * Modify A.scm to change the hard-coded paths to point at the actual
+   location of the data.
+ * Run "nlp/scm/load-nlp.sh" to load NLP and WSD-related scheme utilities. 
+ * Get to the scheme prompt, and run "(do-wsd 20)". This will run the
+   current word-sense disambiguation code one 20 files, and will populate
+   the databases with statistical results.  Caution; this is extremely 
    CPU-intensive.
  * Read the README in wsd-post and triples for latest info & results.
 

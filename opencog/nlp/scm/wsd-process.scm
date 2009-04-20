@@ -1,8 +1,9 @@
 scm
 ;
-; file-process.scm
-; Work through a bunch of relex files that are in the compact-file-format,
-; and import these into opencog. Then run processing on each one, as needed.
+; wsd-process.scm
+; Work through a bunch of RelEx files that are in the compact-file-format,
+; and import these into opencog. Then WSD run processing on each one, as
+; needed.
 ;
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
@@ -28,7 +29,7 @@ scm
 ; disjunct processing manually. When this completes, the next file is
 ; processed ... 
 ;
-(define (process-data input-dir done-dir num-to-do)
+(define (wsd-process-data input-dir done-dir num-to-do)
 
 	(define (process-file filename)
 		(let ((fullname (string-join (list input-dir filename) "/"))
@@ -63,7 +64,7 @@ scm
 	)
 )
 
-(define (doit num-to-do) (process-data input-filedir done-filedir num-to-do))
+(define (do-wsd num-to-do) (wsd-process-data input-filedir done-filedir num-to-do))
 
 .
 exit
