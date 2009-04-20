@@ -61,7 +61,8 @@ scm
 ; --------------------------------------------------------------
 ;
 ; Apply the above proceedure to each ImplicationLink that we have.
-(define (do-triples) 
+; 
+(define (fire-all-triple-rules) 
 
 	; First, create all of the verb-preposition pairs that
 	; we'll need.
