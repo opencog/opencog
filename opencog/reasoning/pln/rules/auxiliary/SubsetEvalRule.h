@@ -24,36 +24,31 @@
 
 namespace reasoning
 {
-
-/** TODO: UPDATE TO Vertex<Handle> **/
-#if 0
+    /*
 class SubsetEvalRule
 {
-	Handle domain;
-	SubsetEvalFormula f;
+    Handle domain;
+    SubsetEvalFormula f;
 
-	protected:
+protected:
 
-		MPs inputFilter;
-		iAtomSpaceWrapper *destTable;
+    MPs inputFilter;
+    iAtomSpaceWrapper *destTable;
 public:
-	virtual ~SubsetEvalRule() {}
-	SubsetEvalRule(iAtomSpaceWrapper *_destTable);
+    virtual ~SubsetEvalRule() {}
+    SubsetEvalRule(iAtomSpaceWrapper *_destTable);
 
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		return setOfMPs(); //No support (yet)
-	}
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
+        return setOfMPs(); //No support (yet)
+    }
 
-	meta i2oType(const vector<Vertex>& h) const
-	{
-		assert(n==1);
-		return atomWithNewType(h[0], SUBSET_LINK);
-	}
-	
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+    meta i2oType(const vector<Vertex>& h) const {
+        assert(n == 1);
+        return atomWithNewType(h[0], SUBSET_LINK);
+    }
+
+    BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
 };
-#endif
-
+    */
 } // namespace reasoning
 #endif // SUBSETEVALRULE_H

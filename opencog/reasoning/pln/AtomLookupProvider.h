@@ -67,7 +67,7 @@ public:
       * NOTE! atoms with confidence < 0.0000001 are not returned!
       */
     virtual pHandle getHandle(Type t,const pHandleSeq& outgoing) =0;
-	virtual ~AtomLookupProvider() { };
+    virtual ~AtomLookupProvider() { };
 };
 } //~namespace reasoning
 

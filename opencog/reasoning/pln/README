@@ -154,7 +154,7 @@ may have changed. In particular the MPUnify methods need to be unified
 
 http://www.dreambroker.fi/w/6ac7926ef - High level overview of PLN files.
 http://www.dreambroker.fi/w/1786cbe13 - BackInferenceTreeNodes.
-http://www.dreambroker.fi/w/2e990eb8fa - MPUnify methods, substitute variable
+http://www.dreambroker.fi/w/2e990eb8f - MPUnify methods, substitute variable
 methods, TableGather::gather method.
 
 == How to use the PLN commands in CogServer

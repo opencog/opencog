@@ -119,7 +119,10 @@ extern int currentDebugLevel;
 // TODO: replace with OpenCog Logger system
 int cprintf(int debugLevel, const char *format, ...);
 
+// TODO: replace with OpenCog Logger system
 void ReasoningLog(int l, std::string m);
+
+// TODO: replace with OpenCog Logger system
 #define LOG(l, m) ReasoningLog(l,m)
 #define SET_LOG(s) _LOGPOS = s; _LOG_FIXED = true
 #define LET_LOG _LOG_FIXED = false;
@@ -665,6 +668,7 @@ void removeRecursionFromMap(T mbegin, T mend)
     cprintf(4, "removeRecursionFromMap OK!\n");
 }
 
+//probably deprecated
 #define NewNode(_T, _NAME) mva(atw->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
 #define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
 

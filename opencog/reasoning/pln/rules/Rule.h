@@ -101,6 +101,7 @@ public:
     /** Rule constructor
      * @param _destTable Pointer to the AtomTable interface.
      * @param _freeInputArity Are the number of arguments predetermined?
+     * @param _computable Whether the rule can be computed?
      * @param _name The name of the rule.
      */
     Rule(iAtomSpaceWrapper *_destTable,

@@ -26,29 +26,29 @@ namespace reasoning
 {
 
 /** @class ScholemFunctionProductionRule
-	
+
 */
 
 class ScholemFunctionProductionRule : public Rule
 {
 protected:
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		assert(0);
+    BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const {
+        assert(0);
 
-		return Vertex(PHANDLE_UNDEFINED);
-	}
+        return Vertex(PHANDLE_UNDEFINED);
+    }
 public:
-	ScholemFunctionProductionRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,false,false,"ScholemFunctionProductionRule")
-	{
-		//inputFilter.push_back(new atom(result));
-	}
-	bool validate2				(MPs& args) const { return true; }
+    ScholemFunctionProductionRule(iAtomSpaceWrapper *_destTable)
+            : Rule(_destTable, false, false, "ScholemFunctionProductionRule") {
+        //inputFilter.push_back(new atom(result));
+    }
+    bool validate2    (MPs& args) const {
+        return true;
+    }
 
-	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
+    Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 } // namespace reasoning

@@ -511,7 +511,7 @@ const float MIN_CONFIDENCE = 0.0000001f;
 /// index arg is not used
 
 void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
-        const Type VarT, int index)
+                         const Type VarT, int index)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
@@ -1290,36 +1290,39 @@ Handle satisfyingSet(Handle P)
 }
 */
 
-/* TODO: Update for tree<Vertex>
-HandleSeq constitutedSet(Handle CP, float min_membershipStrength, float min_membershipCount)
+/* TODO: Update for tree<Vertex>*/
+ /*HandleSeq constitutedSet(Handle CP,
+                         float min_membershipStrength,
+                         float min_membershipCount)
 {
- assert(atw->getType(CP) == CONCEPT_NODE);
+    AtomSpaceWrapper* atw = GET_ATW;
 
- map<Handle, float> members;
- HandleSeq ret;
+    assert(atw->getType(CP) == CONCEPT_NODE);
+    
+    map<Handle, float> members;
+    HandleSeq ret;
+    
+    // HandleEntry* evals = getHandleSet(MEMBER_LINK);
 
-// HandleEntry* evals = getHandleSet(MEMBER_LINK);
+    TableGather mems(atom(__INSTANCEOF_N, 1, new atom(MEMBER_LINK,0) ));
+    
+    for (int i = 0; i < mems.size(); i++) {
+        HandleSeq hs = getOutgoing(mems[i]);
+        
+        assert(hs.size() == 2);
+        
+        if (equal(hs[1], CP)) {
+            const TruthValue& tv = atw->getTV(hs[1]);
+            
+            if (min_membershipStrength >= tv.getMean()
+                && min_membershipCount >= tv.getCount())
+                ret.push_back(hs[0]);
+        }
+    }
 
- TableGather mems(atom(__INSTANCEOF_N, 1, new atom(MEMBER_LINK,0) ));
-
- for (int i = 0; i < mems.size(); i++)
- {
-  HandleSeq hs = getOutgoing(mems[i]);
-
-  assert(hs.size() == 2);
-
-  if (equal(hs[1], CP))
-  {
-   const TruthValue& tv = atw->getTV(hs[1]);
-
-   if (min_membershipStrength >= tv.getMean()
-    && min_membershipCount >= tv.getCount())
-    ret.push_back(hs[0]);
-  }
- }
-
- return ret;
-}*/
+    return ret;
+}
+ */
 
 }
 
@@ -1502,11 +1505,11 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
         (lhs_is_node && rhs.name != lhs_name) ||
         // If lhs is a real atom, check whether lhs and rhs cannot be unified
         (!atw->isType(lhs) && !MPunifyHandle(lhs, rhs, bindings,
-                                            forbiddenBindings, restart, VarT)) ||
+                                             forbiddenBindings, restart, VarT)) ||
         // If lhs isn't a real atom, check whether lhs and rhs cannot be unified
         // based on the atoms pointed to by rhs.
         (atw->isType(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
-                                             bindings, forbiddenBindings, restart, VarT))) {
+                                            bindings, forbiddenBindings, restart, VarT))) {
         LOG(4, "Difference found.");
 
         if (atw->inheritsType(lhs_T, VarT)) {
