@@ -607,15 +607,25 @@ Next step:
 -- Load previously parsed sentences.
 -- run command (do-triples)
 
-6:38 to load part 1
+
+Notes
+-----
+6:38 to load part 1 (3693 sentences)
 5:33 to load part 1
-6:51 to load
-0:30 to create prep maps
+6:51 to load part 1
+0:30 to create prep maps in bulk
 first threee take <1min each.
 4th took 18 mins
 rest took < 1min
-27:04 including the load time.
-finally 3841 rows.
+27:04 including the load time. to process 3693 sentences.
+This lead to 3841 rows.
+
+alt: sentence at a time: 13:18 total time.
+
+part 2: start at 17:02 end 17:53 elapsed time =51 minutes w/ 18 mins
+cpu time.
+
+part 3: start 10:25 end 10:58 elapsed=33 mins w/ 10:56 cpu time.
 
 
 References:
