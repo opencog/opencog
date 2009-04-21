@@ -505,13 +505,15 @@ TruthValue* AtomStorage::getTV(int tvid)
 
 /**
  * Return largest distance from this atom to any node under it.
+ * Nodes have a height of 0, by definition.  Links that contain only
+ * nodes in thier outgoing set have a height of 1, by definition. 
+ * The height of a link is, by definition, one more than the height
+ * of the tallest atom in its outgoing set.
  */
 int AtomStorage::get_height(const Atom *atom)
 {
 	const Link *l = dynamic_cast<const Link *>(atom);
 	if (NULL == l) return 0;
-
-	local_handle_map.clear();
 
 	int maxd = 0;
 	int arity = l->getArity();
@@ -521,7 +523,6 @@ int AtomStorage::get_height(const Atom *atom)
 	{
 		Handle h = out[i];
 		Atom *a = TLB::getAtom(h);
-		local_handle_map[h] = a;  // cache this for quicker lookup!
 		int d = get_height(a);
 		if (maxd < d) maxd = d;
 	}
@@ -558,45 +559,46 @@ void AtomStorage::storeAtom(const Atom *atom)
 {
 	get_ids();
 	Handle h = TLB::getHandle(atom);
-	int height = get_height(atom);
-	do_store_atom(atom, h, height);
+	do_store_atom(atom, h);
 }
 
 void AtomStorage::storeAtom(Handle h)
 {
 	get_ids();
 	const Atom *atom = TLB::getAtom(h);
-	int height = get_height(atom);
-	do_store_atom(atom, h, height);
+	do_store_atom(atom, h);
 }
 
-void AtomStorage::do_store_atom(const Atom *atom, Handle h, int height)
+/**
+ * Returns the height of the atom.
+ */
+int AtomStorage::do_store_atom(const Atom *atom, Handle h)
 {
 	const Link *l = dynamic_cast<const Link *>(atom);
 	if (NULL == l)
 	{
 		do_store_single_atom(atom, h, 0);
-		return;
+		return 0;
 	}
 
+	int lheight = 0;
 	int arity = l->getArity();
 	std::vector<Handle> out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
 	{
 		Handle ho = out[i];
-
-		// Try to lookup the atom from the local cache, which got built
-		// by the height function. This lookup should be faster than 
-		// the full TLB lookup, esp when TLB is large.
-		Atom *ao;
-		std::map<Handle, const Atom*>::iterator it = local_handle_map.find(ho);
-		if (it == local_handle_map.end()) ao = TLB::getAtom(ho);
-		else ao = const_cast<Atom*>(it->second);
+		Atom *ao = TLB::getAtom(ho);
 
 		// Recurse.
-		do_store_atom(ao, ho, height-1);
+		int heig = do_store_atom(ao, ho);
+		if (lheight < heig) lheight = heig;
 	}
-	do_store_single_atom(atom, h, 0);
+
+	// Height of this link is, by definition, one more than tallest
+	// atom in outgoing set.
+	lheight ++;
+	do_store_single_atom(atom, h, lheight);
+	return lheight;
 }
 
 /* ================================================================ */

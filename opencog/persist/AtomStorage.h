@@ -55,8 +55,7 @@ class AtomStorage
 		void setMaxHeight(void);
 		int getMaxHeight(void);
 
-		std::map<Handle, const Atom*> local_handle_map;
-		void do_store_atom(const Atom *, Handle, int);
+		int do_store_atom(const Atom *, Handle);
 		void do_store_single_atom(const Atom *, Handle, int);
 
 		std::string oset_to_string(const std::vector<Handle>&, int);
