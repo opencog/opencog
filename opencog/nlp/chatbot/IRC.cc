@@ -59,7 +59,8 @@ IRC::~IRC()
 		delete_irc_command_hook(hooks);
 }
 
-void IRC::insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*))
+void IRC::insert_irc_command_hook(irc_command_hook* hook, const char* cmd_name, 
+         int (*function_ptr)(const char*, irc_reply_data*, void*))
 {
 	if (hook->function)
 	{
@@ -80,7 +81,7 @@ void IRC::insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*
 	}
 }
 
-void IRC::hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*))
+void IRC::hook_irc_command(const char* cmd_name, int (*function_ptr)(const char*, irc_reply_data*, void*))
 {
 	if (!hooks)
 	{
@@ -105,7 +106,8 @@ void IRC::delete_irc_command_hook(irc_command_hook* cmd_hook)
 	delete cmd_hook;
 }
 
-int IRC::start(char* server, int port, char* nick, char* user, char* name, char* pass)
+int IRC::start(const char* server, int port, const char* nick, 
+               const char* user, const char* name, const char* pass)
 {
 	#ifdef WIN32
 	HOSTENT* resolv;
@@ -230,7 +232,7 @@ void IRC::split_to_replies(char* data)
 	}
 }
 
-int IRC::is_op(char* channel, char* nick)
+int IRC::is_op(const char* channel, const char* nick)
 {
 	channel_user* cup;
 
@@ -248,7 +250,7 @@ int IRC::is_op(char* channel, char* nick)
 	return 0;
 }
 
-int IRC::is_voice(char* channel, char* nick)
+int IRC::is_voice(const char* channel, const char* nick)
 {
 	channel_user* cup;
 
@@ -718,7 +720,7 @@ void IRC::parse_irc_reply(char* data)
 	}
 }
 
-void IRC::call_hook(char* irc_command, char* params, irc_reply_data* hostd)
+void IRC::call_hook(const char* irc_command, const char* params, irc_reply_data* hostd)
 {
 	irc_command_hook* p;
 
@@ -740,7 +742,7 @@ void IRC::call_hook(char* irc_command, char* params, irc_reply_data* hostd)
 	}
 }
 
-int IRC::notice(char* target, char* message)
+int IRC::notice(const char* target, const char* message)
 {
 	if (!connected)
 		return 1;
@@ -748,7 +750,7 @@ int IRC::notice(char* target, char* message)
 	return fflush(dataout);
 }
 
-int IRC::notice(char* fmt, ...)
+int IRC::notice(const char* fmt, ...)
 {
 	va_list argp;
 	
@@ -762,7 +764,7 @@ int IRC::notice(char* fmt, ...)
 	return fflush(dataout);
 }
 
-int IRC::privmsg(char* target, char* message)
+int IRC::privmsg(const char* target, const char* message)
 {
 	if (!connected)
 		return 1;
@@ -770,7 +772,7 @@ int IRC::privmsg(char* target, char* message)
 	return fflush(dataout);
 }
 
-int IRC::privmsg(char* fmt, ...)
+int IRC::privmsg(const char* fmt, ...)
 {
 	va_list argp;
 	
@@ -785,7 +787,7 @@ int IRC::privmsg(char* fmt, ...)
 }
 
 
-int IRC::join(char* channel)
+int IRC::join(const char* channel)
 {
 	if (!connected)
 		return 1;
@@ -793,7 +795,7 @@ int IRC::join(char* channel)
 	return fflush(dataout);
 }
 
-int IRC::part(char* channel)
+int IRC::part(const char* channel)
 {
 	if (!connected)
 		return 1;
@@ -801,7 +803,7 @@ int IRC::part(char* channel)
 	return fflush(dataout);
 }
 
-int IRC::kick(char* channel, char* nick)
+int IRC::kick(const char* channel, const char* nick)
 {
 	if (!connected)
 		return 1;
@@ -809,7 +811,7 @@ int IRC::kick(char* channel, char* nick)
 	return fflush(dataout);
 }
 
-int IRC::raw(char* data)
+int IRC::raw(const char* data)
 {
 	if (!connected)
 		return 1;
@@ -817,7 +819,7 @@ int IRC::raw(char* data)
 	return fflush(dataout);
 }
 
-int IRC::kick(char* channel, char* nick, char* message)
+int IRC::kick(const char* channel, const char* nick, const char* message)
 {
 	if (!connected)
 		return 1;
@@ -825,7 +827,7 @@ int IRC::kick(char* channel, char* nick, char* message)
 	return fflush(dataout);
 }
 
-int IRC::mode(char* channel, char* modes, char* targets)
+int IRC::mode(const char* channel, const char* modes, const char* targets)
 {
 	if (!connected)
 		return 1;
@@ -836,7 +838,7 @@ int IRC::mode(char* channel, char* modes, char* targets)
 	return fflush(dataout);
 }
 
-int IRC::mode(char* modes)
+int IRC::mode(const char* modes)
 {
 	if (!connected)
 		return 1;
@@ -844,7 +846,7 @@ int IRC::mode(char* modes)
 	return 0;
 }
 
-int IRC::nick(char* newnick)
+int IRC::nick(const char* newnick)
 {
 	if (!connected)
 		return 1;
@@ -852,7 +854,7 @@ int IRC::nick(char* newnick)
 	return fflush(dataout);
 }
 
-char* IRC::current_nick()
+const char* IRC::current_nick(void)
 {
 	return cur_nick;
 }

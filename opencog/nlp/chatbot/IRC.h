@@ -44,7 +44,7 @@ struct irc_reply_data
 struct irc_command_hook
 {
 	char* irc_command;
-	int (*function)(char*, irc_reply_data*, void*);
+	int (*function)(const char*, irc_reply_data*, void*);
 	irc_command_hook* next;
 };
 
@@ -61,32 +61,32 @@ class IRC
 public:
 	IRC();
 	~IRC();
-	int start(char* server, int port, char* nick, char* user, char* name, char* pass);
+	int start(const char* server, int port, const char* nick, const char* user, const char* name, const char* pass);
 	void disconnect();
-	int privmsg(char* target, char* message);
-	int privmsg(char* fmt, ...);
-	int notice(char* target, char* message);
-	int notice(char* fmt, ...);
-	int join(char* channel);
-	int part(char* channel);
-	int kick(char* channel, char* nick);
-	int kick(char* channel, char* nick, char* message);
-	int mode(char* modes);
-	int mode(char* channel, char* modes, char* targets);
-	int nick(char* newnick);
+	int privmsg(const char* target, const char* message);
+	int privmsg(const char* fmt, ...);
+	int notice(const char* target, const char* message);
+	int notice(const char* fmt, ...);
+	int join(const char* channel);
+	int part(const char* channel);
+	int kick(const char* channel, const char* nick);
+	int kick(const char* channel, const char* nick, const char* message);
+	int mode(const char* modes);
+	int mode(const char* channel, const char* modes, const char* targets);
+	int nick(const char* newnick);
 	int quit(const char* quit_message);
-	int raw(char* data);
-	void hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*));
+	int raw(const char* data);
+	void hook_irc_command(const char* cmd_name, int (*function_ptr)(const char*, irc_reply_data*, void*));
 	int message_loop();
-	int is_op(char* channel, char* nick);
-	int is_voice(char* channel, char* nick);
-	char* current_nick();
+	int is_op(const char* channel, const char* nick);
+	int is_voice(const char* channel, const char* nick);
+	const char* current_nick(void);
 private:
-	void call_hook(char* irc_command, char*params, irc_reply_data* hostd);
-	/*void call_the_hook(irc_command_hook* hook, char* irc_command, char*params, irc_host_data* hostd);*/
+	void call_hook(const char* irc_command, const char*params, irc_reply_data* hostd);
+	/*void call_the_hook(irc_command_hook* hook, const char* irc_command, const char*params, irc_host_data* hostd);*/
 	void parse_irc_reply(char* data);
 	void split_to_replies(char* data);
-	void insert_irc_command_hook(irc_command_hook* hook, char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*));
+	void insert_irc_command_hook(irc_command_hook* hook, const char* cmd_name, int (*function_ptr)(const char*, irc_reply_data*, void*));
 	void delete_irc_command_hook(irc_command_hook* cmd_hook);
 	int irc_socket;
 	bool connected;
