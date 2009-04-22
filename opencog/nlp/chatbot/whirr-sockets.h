@@ -1,6 +1,6 @@
 
 /* 
- * Socket I/O to the cyc-net reasoning engine
+ * Socket I/O to the opencog reasoning engine
  * Copied from "whirr.c". 
  * Linas October 2007 
  */

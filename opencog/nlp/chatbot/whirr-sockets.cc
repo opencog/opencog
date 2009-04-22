@@ -19,7 +19,7 @@
 #define SERVER_HOST "127.0.0.1"
 // #define SERVER_HOST "9.3.190.175"
 
-#define SERVER_PORT 1959
+#define SERVER_PORT 17004
 
 struct sockaddr_in global_server_addr;
 

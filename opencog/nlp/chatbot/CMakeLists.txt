@@ -1,16 +1,10 @@
 
-ADD_LIBRARY (chatbot SHARED
-	IRC.cc
-	go-irc.cc
-	whirr-sockets.cc
+#
+# Cogita is just a simple, staind-alone binary,
+# it translates between IRC protocol and the cog-server
+ADD_EXECUTABLE(cogita 
+	IRC
+	go-irc
+	whirr-sockets
 )
 
-INSTALL (TARGETS chatbot
-   LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	IRC.h
-	whirr-sockets.h
-	DESTINATION "include/opencog/nlp/chatbot"
-)

@@ -5,3 +5,11 @@
                           April 2009
 
 A quick-n-dirty hookup of the opencog internals to an IRC-based chatbot.
+
+Currently, the bot is simply a protocol translator from the IRC protocol,
+to opencog i/o. It is subject to change.
+
+Running:
+After compiling, start the bot by saying "opencog/nlp/chatbot/cogita"
+
+It will then join the #opencog channel on the IRC net freenode.net
