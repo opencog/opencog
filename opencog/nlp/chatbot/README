@@ -1,7 +1,7 @@
 
-                       Cheapo Chatbot
-                       --------------
+                       La Cogita Chatbot
+                       -----------------
                 Linas Vepstas <linasvepstas@gmail.com>
                           April 2009
 
-A quick-n-dirty hookup of the opencog internals to a chatbot.
+A quick-n-dirty hookup of the opencog internals to an IRC-based chatbot.

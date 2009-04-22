@@ -179,7 +179,7 @@ void IRC::disconnect()
 	}
 }
 
-int IRC::quit(char* quit_message)
+int IRC::quit(const char* quit_message)
 {
 	if (connected)
 	{

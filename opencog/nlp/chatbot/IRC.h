@@ -74,7 +74,7 @@ public:
 	int mode(char* modes);
 	int mode(char* channel, char* modes, char* targets);
 	int nick(char* newnick);
-	int quit(char* quit_message);
+	int quit(const char* quit_message);
 	int raw(char* data);
 	void hook_irc_command(char* cmd_name, int (*function_ptr)(char*, irc_reply_data*, void*));
 	int message_loop();

@@ -1,4 +1,5 @@
-/*   IRC interfaces for lillybot
+/*   
+ *   IRC interfaces for La Cogita IRC chatbot
  *   Copyright (C) 2007 Linas Vepstas <linas@linas.org>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -19,7 +20,6 @@
 /* 
  * Go onto IRC
  * badly hacked.
- * puts aiml on irc.
  * Linas October 2007 
  */
 
@@ -28,10 +28,9 @@
 #include <unistd.h>
 #include "IRC.h"
 
-#include "rebecca-handler.h"
 #include "whirr-sockets.h"
 
-char *channel = "#opencyc";
+char *channel = "#opencog-test";
 
 int end_of_motd(char* params, irc_reply_data* ird, void* data)
 {
