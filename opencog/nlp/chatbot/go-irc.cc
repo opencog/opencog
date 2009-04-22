@@ -54,6 +54,16 @@ int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 	return 0;
 }
 
+/* return true if not all whitespace */
+static bool is_nonblank(const char * str)
+{
+	size_t len = strlen(str);
+	if (0 == len) return false;
+	size_t blanks = strspn(str, " \n\r\t\v");
+	if (blanks == len) return false;
+	return true;
+}
+
 int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*)data; 
@@ -96,7 +106,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	char * cmdline = (char *) malloc(sizeof (char) * (len+1));
 
 	// Get into the opencog scheme shell, and run the command
-	strcpy (cmdline, "scm\n(say-id-english \"");
+	strcpy (cmdline, "scm hush\n(say-id-english \"");
 	strcat (cmdline, ird->nick);
 	strcat (cmdline, "\" \"");
 	size_t toff = strlen(cmdline);
@@ -122,14 +132,14 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		char *ep = strchr (p, '\n');
 		if (!ep)
 		{
-			if (0 < strlen(p))
+			if (is_nonblank(p))
 				conn->privmsg (msg_target, p);
 			break;
 		}
 		ep ++;
 		int save = *ep;
 		*ep = 0x0;
-		if (0 < strlen(p))
+		if (is_nonblank(p))
 			conn->privmsg (msg_target, p);
 		*ep = save;
 		p = ep;
