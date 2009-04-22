@@ -45,6 +45,7 @@ class SchemeShell : public GenericShell
 		std::string abort_prompt;
 		const std::string& get_prompt(void);
 		bool show_output;
+		bool show_prompt;
 
 		SocketHolder *holder;
 		std::string do_eval(const std::string &);
@@ -61,6 +62,7 @@ class SchemeShell : public GenericShell
 		virtual void socketClosed(void);
 
 		void hush_output(bool);
+		void hush_prompt(bool);
 };
 
 }

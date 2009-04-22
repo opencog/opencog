@@ -55,6 +55,16 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	SocketHolder *h = req->getSocketHolder();
 	sh->set_holder(h);
 
+	bool hush = false;
+	if (0 < args.size())
+	{
+		std::string &arg = args.front();
+		if (arg.compare("quiet") || arg.compare("hush")) hush = true;
+	}
+	sh->hush_prompt(hush);
+
+	if (hush) return "";
+
 	return "Entering scheme shell; use ^D or a single . on a "
 	       "line by itself to exit.";
 }

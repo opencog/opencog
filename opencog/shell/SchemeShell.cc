@@ -112,8 +112,16 @@ void SchemeShell::hush_output(bool hush)
 	show_output = !hush;
 }
 
+void SchemeShell::hush_prompt(bool hush)
+{
+	show_prompt = !hush;
+}
+
 const std::string& SchemeShell::get_prompt(void)
 {
+	static const std::string empty_prompt = "";
+	if (!show_prompt) return empty_prompt;
+
 	// Use different prompts, depending on whether there is pending
 	// input or not.
 	if (evaluator->input_pending())
@@ -214,7 +222,8 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		return "Exiting the scheme shell\n";
+		if (show_prompt) return "Exiting the scheme shell\n";
+		return "";
 	}
 
 	/* The #$%^& Alhem CSockets code cuts off the newline character.
@@ -233,7 +242,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 
 	if (evaluator->input_pending())
 	{
-		if (show_output)
+		if (show_output && show_prompt)
 			return pending_prompt;
 		else
 			return "";
@@ -241,7 +250,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 
 	if (show_output || evaluator->eval_error())
 	{
-		result += normal_prompt;
+		if (show_prompt) result += normal_prompt;
 		return result;
 	}
 	else
