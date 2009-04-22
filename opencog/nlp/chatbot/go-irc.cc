@@ -31,7 +31,8 @@
 
 #include "whirr-sockets.h"
 
-const char *channel = "#opencog-test";
+static const char *channel = "#opencog-test";
+static const char *vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1";
 
 int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
@@ -80,25 +81,35 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		const char * vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1";
 		printf ("VERSION: %s\n", vstring);
 		conn->privmsg (msg_target, vstring);
 		return 0;
 	}
 
 	// printf ("duude starting with 0x%x %s\n", start[0], start);
-	int len = strlen(start);
+	size_t textlen = strlen(start);
+	size_t len = textlen;
 	len += strlen ("(say-id-english )");
 	len += strlen (ird->nick);
-	len += 2;
+	len += 120;
 
 	char * cmdline = (char *) malloc(sizeof (char) * (len+1));
-	strcpy (cmdline, "(say-id-english ");
-	strcat (cmdline, ird->nick);
-	strcat (cmdline, ": ");
-	strcat (cmdline, start);
-	strcat (cmdline, ")");
 
+	// Get into the opencog scheme shell, and run the command
+	strcpy (cmdline, "scm\n(say-id-english \"");
+	strcat (cmdline, ird->nick);
+	strcat (cmdline, "\" \"");
+	size_t toff = strlen(cmdline);
+	strcat (cmdline, start);
+	strcat (cmdline, "\")\n");
+
+	// strip out quotation marks, replace with blanks, for now.
+	for (size_t i =0; i<textlen; i++)
+	{
+		if ('\"' == cmdline[toff+i]) cmdline[toff+i] = ' ';
+	}
+
+	// printf ("Sending to opencog: %s\n", cmdline);
 	char * reply = whirr_sock_io (cmdline);
 	printf ("opencog reply: %s\n", reply);
 
@@ -117,7 +128,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		ep ++;
 		int save = *ep;
 		*ep = 0x0;
-		conn->privmsg (msg_target, p);
+		if (0 < strlen(p))
+			conn->privmsg (msg_target, p);
 		*ep = save;
 		p = ep;
 		cnt ++;

@@ -61,7 +61,7 @@ char * whirr_sock_io (const char * msg)
 		fprintf (stderr, "Error: not everything was sent, len=%d sent len=%d\n", len, slen);
 	}
 	shutdown (sock, SHUT_WR);
-	
+
 #define BUFSZ 4050
 	char buff[BUFSZ];
 
