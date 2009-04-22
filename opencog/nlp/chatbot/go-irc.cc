@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "IRC.h"
 
@@ -62,6 +63,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	const char * start = NULL;
 	int priv = 0;
 	if (!strcmp (ird->target, "cogita-bot")) {priv = 1; start = params+1; }
+	else if (!strncmp (params, ":cogita-bot:", 12)) start = params+12;
 	else if (!strncmp (params, ":cog:", 5)) start = params+5;
 	else if (!strncmp (params, ":cogita:", 8)) start = params+8;
 
@@ -78,7 +80,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		const char * vstring = "La Cogita chatbot version 0.1";
+		const char * vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1";
 		printf ("VERSION: %s\n", vstring);
 		conn->privmsg (msg_target, vstring);
 		return 0;
@@ -136,7 +138,12 @@ int main (int argc, char * argv[])
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 
-	conn.start ("irc.freenode.net", 6667, "cogita-bot", "linas", "Linas opencog bot", "asdf");
+	const char *login = getlogin();
+
+	// The login-name, nick, etc. are there only to make it look 
+	// pretty on IRC ident.
+	conn.start ("irc.freenode.net", 6667, "cogita-bot", login,
+	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
 }

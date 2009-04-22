@@ -9,7 +9,24 @@ A quick-n-dirty hookup of the opencog internals to an IRC-based chatbot.
 Currently, the bot is simply a protocol translator from the IRC protocol,
 to opencog i/o. It is subject to change.
 
-Running:
-After compiling, start the bot by saying "opencog/nlp/chatbot/cogita"
+Configuring: 
+-----------
+There is an assortment of hard-coded configuration stuff in the source
+code.  See go-irc.c for setable values for the name of the chatbot, the
+irc channel and irc network to join, and the bot ID strings, etc.
 
-It will then join the #opencog channel on the IRC net freenode.net
+By default, it connects to the #opencog channel on freenode.net.
+
+The bot tries to connect to an opencog server at port 17004. This port 
+number is hard-coded in whirr-sockets.cc.
+
+Running:
+--------
+After modifying the hard-coded config as desired, start the bot by 
+saying "opencog/nlp/chatbot/cogita". It should then appear on the IRC
+channel. You can then talk to it by addressing it by name, i.e. 
+prefacing comments with cog:, cogita: or cogita-bot:
+
+To have it do something, you must have an opencog server running on
+port 17004, and have the opencog server appropriately loaded up with
+assorted databses, code, etc.
