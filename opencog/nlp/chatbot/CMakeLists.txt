@@ -1,0 +1,13 @@
+
+ADD_LIBRARY (irc SHARED
+	IRC.cc
+	go-irc.cc
+)
+
+INSTALL (TARGETS irc
+   LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	IRC.h
+)

@@ -1,7 +1,7 @@
 
-                                   Triples
-                                   -------
-                         Linas Vepstas January 2009
+                             Triples
+                             -------
+                    Linas Vepstas January 2009
 
 This directory contains some experimental code to extract conceptual 
 entities and semantic triples from English text.  An example of a 
@@ -12,7 +12,8 @@ topic of "Semantic Web RDF" technology discussions[WP-RDF].  An example
 of a "semantic triple" is "the sky is blue". Written in prefix notation,
 the triple is then "color_of(sky, blue)", with "color_of" being the
 property or predicate, while "sky" and "blue" are the subject and
-object, respectively.
+object, respectively. In the industry, this task is sometimes refered
+to as "WIE" or "Web Information Extraction". 
 
 One reason for creating semantic triples is that it simplifies certain
 types of deductions and inferences. For example, "author_of('Pride and 
