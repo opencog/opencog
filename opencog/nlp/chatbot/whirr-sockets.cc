@@ -1,8 +1,8 @@
 
 /* 
- * Socket I./O to the cyc-net reasoning engine
+ * Socket I/O to the opencog reasoning engine
  * Copied from "whirr.c". 
- * Linas October 2007 
+ * Linas October 2007 ported to opencog April 2009
  */
 
 #include <arpa/inet.h>  
@@ -51,7 +51,7 @@ char * whirr_sock_io (const char * msg)
 	if (0 > connect(sock, (struct sockaddr *) &global_server_addr, sizeof(global_server_addr)))
 	{
 		fprintf (stderr, "Error: can't connect to server\n");
-		return "Lillybot has crashed. Try again later.\n";
+		return strdup("La Cogita has crashed. Try again later.\n");
 	}
 
 	int len = strlen (msg);

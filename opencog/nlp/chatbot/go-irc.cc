@@ -30,9 +30,9 @@
 
 #include "whirr-sockets.h"
 
-char *channel = "#opencog-test";
+const char *channel = "#opencog-test";
 
-int end_of_motd(char* params, irc_reply_data* ird, void* data)
+int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*)data; 
 
@@ -52,18 +52,18 @@ int end_of_motd(char* params, irc_reply_data* ird, void* data)
 	return 0;
 }
 
-int got_privmsg(char* params, irc_reply_data* ird, void* data)
+int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*)data; 
 
 	printf("input=%s\n", params);
 	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
 
-	char * start = NULL;
+	const char * start = NULL;
 	int priv = 0;
-	if (!strcmp (ird->target, "lillybot")) {priv = 1; start = params+1; }
-	else if (!strncmp (params, ":lb:", 4)) start = params+4;
-	else if (!strncmp (params, ":lillybot:", 10)) start = params+10;
+	if (!strcmp (ird->target, "cogita-bot")) {priv = 1; start = params+1; }
+	else if (!strncmp (params, ":cog:", 5)) start = params+5;
+	else if (!strncmp (params, ":cogita:", 8)) start = params+8;
 
 	if (!start) return 0;
 	char * msg_target = NULL;
@@ -78,7 +78,7 @@ int got_privmsg(char* params, irc_reply_data* ird, void* data)
 
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		char * vstring = "Lillybot gCYC (OpenCYC ontology) AGI chatbot version 0.1";
+		const char * vstring = "La Cogita chatbot version 0.1";
 		printf ("VERSION: %s\n", vstring);
 		conn->privmsg (msg_target, vstring);
 		return 0;
@@ -98,14 +98,7 @@ int got_privmsg(char* params, irc_reply_data* ird, void* data)
 	strcat (cmdline, ")");
 
 	char * reply = whirr_sock_io (cmdline);
-
-	printf ("cyc reply: %s\n", reply);
-	if (!strcmp (reply, "**NIL**\n"))
-	{
-		free (reply);
-		reply = rebecca_handle_string(start);
-		printf ("rebecca reply: %s\n", reply);
-	}
+	printf ("opencog reply: %s\n", reply);
 
 	/* Each newline has to be on its own line */
 	/* Limit to 5 replies so we don't get kicked for flooding */
@@ -137,14 +130,13 @@ int got_privmsg(char* params, irc_reply_data* ird, void* data)
 int main (int argc, char * argv[])
 {
 	whirr_sock_setup();
-	rebecca_setup (argc, argv);
 
 	IRC conn;
 
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 
-	conn.start ("irc.freenode.net", 6667, "lillybot", "linas", "Linas CYC-NET bot", "l1l1a2");
+	conn.start ("irc.freenode.net", 6667, "cogita-bot", "linas", "Linas opencog bot", "asdf");
 
 	conn.message_loop();
 }
