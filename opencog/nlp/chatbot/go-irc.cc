@@ -122,7 +122,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		char *ep = strchr (p, '\n');
 		if (!ep)
 		{
-			conn->privmsg (msg_target, p);
+			if (0 < strlen(p))
+				conn->privmsg (msg_target, p);
 			break;
 		}
 		ep ++;
