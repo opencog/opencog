@@ -86,7 +86,9 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		if (rlx.is_query(h))
 		{
 			rlx.solve(as, h);
+			return SCM_BOOL_T;
 		}
+		return SCM_BOOL_F;
 #else
 		FrameQuery frq;
 		if (frq.is_query(h))

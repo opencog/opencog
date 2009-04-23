@@ -62,9 +62,13 @@
 	(display ", you said: ")
 	(display txt)
 	(newline)
-	(display "My answer is:\n")
 
 	; Parse the input, send it to the question processor
-	(cog-ad-hoc "question" (car (relex-parse txt)))
+	(let ((is-question (cog-ad-hoc "question" (car (relex-parse txt)))))
+		(if is-question 
+			"You asked a question"
+			"You made a statement"
+		)
+	)
 )
 

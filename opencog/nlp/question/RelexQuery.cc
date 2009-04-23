@@ -84,31 +84,8 @@ static void prt_pred (std::vector<Handle> pred,
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
  * XXX This algo is flawed, fragile, but simple.
- *
- * Current structure of a question is as follows:
- *
- * (ParseLink
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
- *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
- * )
- * (ReferenceLink (stv 1.0 1.0)
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
- *    (ListLink
- *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
- *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
- *       (WordInstanceNode "the@0d969b75-1f7b-4174-b7c6-40e3fbb87ed9")
- *       (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
- *       (WordInstanceNode "?@ea5f242b-1ca5-462a-83a3-e6d54da4b23b")
- *    )
- * )
- * ; QUERY-TYPE (_$qVar, who)
- * (InheritanceLink (stv 1.0 1.0)
- *    (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
- *    (DefinedLinguisticConceptNode "who")
- * )
- *
- * So, given a sentenceNode, we have to follow the parse link to get the
- * list of words, and then see if any of the words are a query.
+ * XXX It almost surely would be much better to implement this in 
+ * scheme instead of C++.
  */
 
 /**
@@ -160,6 +137,8 @@ bool RelexQuery::is_parse_a_query(Handle parse)
 
 /**
  * Return true if sentence has a parse which is a query.
+ * The input argument is a handle to a SentenceNode.
+ *
  * A simple check is made: does the sentence have
  * a _$qVar in it?
  *
@@ -167,6 +146,32 @@ bool RelexQuery::is_parse_a_query(Handle parse)
  * that contains (DefinedLinguisticConceptNode "_$qVar") will be assumed
  * to be a query.  Perhaps something more sophisticated may
  * be desired eventually.
+ *
+ * Current structure of a question is as follows:
+ *
+ * (ParseLink
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
+ *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
+ * )
+ * (ReferenceLink (stv 1.0 1.0)
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
+ *    (ListLink
+ *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *       (WordInstanceNode "the@0d969b75-1f7b-4174-b7c6-40e3fbb87ed9")
+ *       (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *       (WordInstanceNode "?@ea5f242b-1ca5-462a-83a3-e6d54da4b23b")
+ *    )
+ * )
+ * ; QUERY-TYPE (_$qVar, who)
+ * (InheritanceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *    (DefinedLinguisticConceptNode "who")
+ * )
+ *
+ * So, given a sentenceNode, we have to follow the parse link to get the
+ * list of words, and then see if any of the words correspond to the 
+ * DefinedLinguisticConceptNode's of who, what, where, why, when, etc.
  */
 bool RelexQuery::is_query(Handle h)
 {
@@ -340,16 +345,64 @@ bool RelexQuery::assemble_wrapper(Atom *atom)
 }
 
 /**
+ * The input argument is a handle to a SentenceNode.
+ *
  * Put predicate into "normal form".
  * In this case, a cheap hack: remove all relations that
  * are not "defined linguistic relations", e.g. all but
  * _subj(x,y) and _obj(z,w) relations.
+ *
+ * Current structure of a question is:
+ *
+ * (ParseLink
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
+ *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
+ * )
+ *
+ * (WordInstanceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
+ * )
+ *
+ * ; _subj (<<throw>>, <<_$qVar>>) 
+ * (EvaluationLink (stv 1.0 1.0)
+ *    (DefinedLinguisticRelationshipNode "_subj")
+ *    (ListLink
+ *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *    )
+ * )
+ * ; _obj (<<throw>>, <<ball>>) 
+ * (EvaluationLink (stv 1.0 1.0)
+ *    (DefinedLinguisticRelationshipNode "_obj")
+ *    (ListLink
+ *          (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *          (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    )
+ * )
+ *
+ * (ReferenceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    (WordNode "ball")
+ * )
+ *
+ * So the strategy is:
+ * 1) Find all parses that are a part of this sentence.
+ * 2) For each wordinstance in the parse, find all relations it 
+ *    participates in, add these to the predicate.
+ * 3) Avoid duplication in step 3)
+ * 4) Add predicates to match word nodes.
+ * 5) Find the query var.
+ * 6) perform pattern matching.
+ *
  */
 void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
 {
 	if (pme) delete pme;
 	pme = new PatternMatchEngine();
 	pme->set_atomspace(atom_space);
+
+printf("ola, enter question solver\n");
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
