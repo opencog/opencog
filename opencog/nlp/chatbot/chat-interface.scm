@@ -59,10 +59,14 @@
 (define (say-id-english nick txt)
 
 	; Define a super-dooper cheesy way of getting the answer to the question
+	; Right now, its looks for WordNode's attached, via ListLink, to 
+	; a concept node called "# QUERY SOLUTION". This is of course very wrong,
+	; and is just a placeholder for now.
 	(define (prt-soln)
 		(let* ((query-soln-anchor (ConceptNode "# QUERY SOLUTION"))
 				(soln-list (cog-chase-link 'ListLink 'WordNode query-soln-anchor))
 			)
+			;; display *all* items in the list.
 			(define (show-item wlist)
 				(if (not (null? wlist))
 					(let ()
@@ -72,8 +76,16 @@
 					)
 				)
 			)
-			(display "The answer to your question is: ")
-			(show-item soln-list)
+			(if (null? soln-list)
+				(display "No answer was found to your question.")
+				(let ()
+					(display "The answer to your question is: ")
+					(show-item soln-list)
+				)
+			)
+
+			; Delete  the list of solutions, so that we don't accidentally
+			; replay it when the next question is asked.
 			(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
 		)
 	)
