@@ -42,7 +42,6 @@ class RelexQuery :
 		bool is_parse_a_query(Handle);
 		bool is_wordlist_a_query(Handle);
 		bool is_word_a_query(Handle);
-		bool assemble_wrapper(Atom *);
 
 		// Convert query into a normal form.
 		bool is_ling_rel(Atom *);
@@ -54,6 +53,12 @@ class RelexQuery :
 
 		// Aid in equivalent node identification.
 		bool is_word_instance(Atom *, const char *);
+
+		bool parse_solve(Handle);
+		bool wordlist_solve(Handle);
+		bool word_solve(Handle);
+		bool word_up(Handle);
+		bool rel_up(Handle);
 
 	protected:
 		FollowLink fl;

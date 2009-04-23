@@ -338,10 +338,47 @@ bool RelexQuery::find_vars(Handle h)
 	return false;
 }
 
-/* non-virtual wrapper to call virtual function */
-bool RelexQuery::assemble_wrapper(Atom *atom)
+bool RelexQuery::rel_up(Handle hrelation)
 {
-	return assemble_predicate(atom);
+	Atom *a = TLB::getAtom(hrelation);
+	if (EVALUATION_LINK != a->getType()) return false;
+
+	bool keep = foreach_outgoing_atom(hrelation, &RelexQuery::is_ling_rel, this);
+	if (!keep) return false;
+
+	// Its a keeper, add this to our list of acceptable predicate terms.
+	add_to_predicate(hrelation);
+
+printf("duude got one!\n");
+	return false;
+}
+
+bool RelexQuery::word_up(Handle ll)
+{
+	Atom *a = TLB::getAtom(ll);
+	if (LIST_LINK != a->getType()) return false;
+
+	return foreach_incoming_handle(ll,
+		&RelexQuery::rel_up, this);
+}
+
+bool RelexQuery::word_solve(Handle word_inst)
+{
+printf("duuude looking at words\n");
+	return foreach_incoming_handle(word_inst,
+		&RelexQuery::word_up, this);
+}
+
+bool RelexQuery::wordlist_solve(Handle wordlist)
+{
+	return foreach_outgoing_handle(wordlist, 
+		&RelexQuery::word_solve, this);
+}
+
+bool RelexQuery::parse_solve(Handle parse_node)
+{
+	return foreach_binary_link(parse_node, REFERENCE_LINK, 
+		&RelexQuery::wordlist_solve, this);
 }
 
 /**
@@ -391,12 +428,11 @@ bool RelexQuery::assemble_wrapper(Atom *atom)
  * 2) For each wordinstance in the parse, find all relations it 
  *    participates in, add these to the predicate.
  * 3) Avoid duplication in step 3)
- * 4) Add predicates to match word nodes.
- * 5) Find the query var.
- * 6) perform pattern matching.
+ * 4) Find the query var.
+ * 5) perform pattern matching.
  *
  */
-void RelexQuery::solve(AtomSpace *atom_space, Handle graph)
+void RelexQuery::solve(AtomSpace *atom_space, Handle sentence_node)
 {
 	if (pme) delete pme;
 	pme = new PatternMatchEngine();
@@ -406,7 +442,9 @@ printf("ola, enter question solver\n");
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
-	foreach_outgoing_atom(graph, &RelexQuery::assemble_wrapper, this);
+	// foreach_outgoing_atom(graph, &RelexQuery::assemble_wrapper, this);
+	foreach_reverse_binary_link(sentence_node, PARSE_LINK, 
+		&RelexQuery::parse_solve, this);
 
 	// Find the variables, so that they can be bound.
 	std::vector<Handle>::const_iterator i;
