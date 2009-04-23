@@ -31,6 +31,12 @@ To have it do something, you must have an opencog server running on
 port 17004, and have the opencog server appropriately loaded up with
 assorted databses, code, etc.
 
+You also have to have the latest version of RelEx installed, and then
+run ./opencog-server.sh from the main RelEx directory. This will create
+a parse server on port 4444: it will read plain-text input, and generate
+parsed text in opencog format.  The chatbot needs this server to process
+text.
+
 This is most easiloy done by starting the cogserver using the 
 lib/opencog4.conf configuration file, which sets the correct port,
 silences the opencog prompt, and loads the needed scheme files.
