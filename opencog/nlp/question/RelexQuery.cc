@@ -41,6 +41,7 @@ using namespace opencog;
 
 RelexQuery::RelexQuery(void)
 {
+	atom_space = NULL;
 	pme = NULL;
 }
 
@@ -257,6 +258,9 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
  * DefinedLinguisticRelationship node in them,
  * and InheritanceLinks which have a
  * DefinedLinguisticConcept node in them.
+ *
+ * xxxxxxxxxxx this routine is dead, and no longer used ... 
+ * we need it for reference to complete the port.
  */
 bool RelexQuery::assemble_predicate(Atom *atom)
 {
@@ -321,18 +325,14 @@ void RelexQuery::add_to_vars(Handle ah)
 }
 
 /**
- * Check to see if atom is a bound variable.
- * Heuristics are used to determine this: the local atom should
- * be an instance of a concept, whose dictionary word is _$qVar,
- * i.e. one of the bound variable names.
+ * Look to see if word instance is a bound variable,
+ * if it is, then add it to the variables list.
  */
 bool RelexQuery::find_vars(Handle h)
 {
 	foreach_outgoing_handle(h, &RelexQuery::find_vars, this);
 
 	bool qvar = is_word_a_query(h);
-printf ("duuuude its a qvar=%d\n", qvar);
-
 	if (!qvar) return false;
 
 	add_to_vars(h);
@@ -431,13 +431,12 @@ bool RelexQuery::parse_solve(Handle parse_node)
  * 5) perform pattern matching.
  *
  */
-void RelexQuery::solve(AtomSpace *atom_space, Handle sentence_node)
+void RelexQuery::solve(AtomSpace *as, Handle sentence_node)
 {
+	atom_space = as;
 	if (pme) delete pme;
 	pme = new PatternMatchEngine();
 	pme->set_atomspace(atom_space);
-
-printf("ola, enter question solver\n");
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
@@ -467,12 +466,22 @@ printf("ola, enter question solver\n");
 /* runtime matching routines */
 
 /**
- * Are two atoms instances of the same concept?
+ * Do two word instances have the same word lemma (word root form)?
  * Return true if they are are NOT (that is, if they
  * are mismatched). This stops iteration in the standard
  * iterator.
+ *
+ * Current structure is:
+ * (LemmaLink (stv 1.0 1.0)
+ *    (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *    (WordNode "throw")
+ * )
+ * (ReferenceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *    (WordNode "threw")
+ * )
  */
-bool RelexQuery::concept_match(Atom *aa, Atom *ab)
+bool RelexQuery::word_instance_match(Atom *aa, Atom *ab)
 {
 	// printf ("concept comp "); prt(aa);
 	// printf ("          to "); prt(ab);
@@ -480,10 +489,10 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
 
-	// Look for incoming links that are InheritanceLinks.
-	// The "generalized concept" for this should be at the far end.
-	Atom *ca = fl.follow_binary_link(aa, INHERITANCE_LINK);
-	Atom *cb = fl.follow_binary_link(ab, INHERITANCE_LINK);
+	// Look for incoming links that are LemmaLinks.
+	// The word lemma should be at the far end.
+	Atom *ca = fl.follow_binary_link(aa, LEMMA_LINK);
+	Atom *cb = fl.follow_binary_link(ab, LEMMA_LINK);
 
 	// printf ("gen comp %d ", ca==cb); prt(ca);
 	// printf ("        to "); prt(cb);
@@ -493,8 +502,8 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
 }
 
 /**
- * Return true if the indicated atom is an instance of
- * the word.
+ * Return the word string associated with a word instance.
+ * xxxxxxxxx this routine is never called!
  *
  * XXX
  * The actual determination of whether some concept is
@@ -544,11 +553,11 @@ bool RelexQuery::node_match(Node *npat, Node *nsoln)
 	// so if we are here, there's already a mismatch.
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) return true;
 
-	// Concept nodes can match if they inherit from the same concept.
-	if (CONCEPT_NODE == soltype)
+	// Word instances match only if they have the same word lemma.
+	if (WORD_INSTANCE_NODE == soltype)
 	{
-		bool mismatch = concept_match(npat, nsoln);
-		// printf("tree_comp concept mismatch=%d\n", mismatch);
+		bool mismatch = word_instance_match(npat, nsoln);
+		// printf("tree_comp word instance mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 
@@ -560,6 +569,7 @@ bool RelexQuery::node_match(Node *npat, Node *nsoln)
 		 */
 		const char * sa = npat->getName().c_str();
 		const char * sb = nsoln->getName().c_str();
+printf("duude compare %s to %s\n", sa, sb);
 		const char * ua = strchr(sa, '_');
 		if (ua)
 		{
@@ -607,14 +617,20 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
 	{
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;
-		Atom *as = TLB::getAtom(soln);
+		// Atom *as = TLB::getAtom(soln);
 // xxxx
 		// bool reject_qvar = is_word_instance(as, "_$qVar");
 		// if (reject_qvar) return false;
 	}
 
-	printf ("duude have soln\n");
+	printf ("duude Found solution:\n");
 	PatternMatchEngine::print_solution(pred_soln, var_soln);
+
+	// And now for a cheesy hack to report the solution
+	Node n(CONCEPT_NODE, "# QUERY SOLUTION");
+	// atom_space->add(&n);
+	
+	std::vector<Handle> oset;
 	return false;
 }
 

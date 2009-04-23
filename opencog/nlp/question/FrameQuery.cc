@@ -232,6 +232,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	if (DEFINED_FRAME_NODE == ntype) return true;
 	if (DEFINED_FRAME_ELEMENT_NODE == ntype) return true;
 
+#if BORKEN_STUFF
 	// Concept nodes can match if they inherit from the same concept.
 	if (CONCEPT_NODE == ntype)
 	{
@@ -239,6 +240,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 		// printf("tree_comp concept mismatch=%d\n", mismatch);
 		return mismatch;
 	}
+#endif
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
 	        classserver().getTypeName(ntype).c_str());

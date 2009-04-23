@@ -61,10 +61,11 @@ class RelexQuery :
 		bool rel_up(Handle);
 
 	protected:
+		AtomSpace *atom_space;
 		FollowLink fl;
 
 		// Aid in equivalent node identification.
-		bool concept_match(Atom *, Atom *);
+		bool word_instance_match(Atom *, Atom *);
 
 		// create the predicate
 		virtual bool assemble_predicate(Atom *);
