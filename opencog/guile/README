@@ -38,9 +38,11 @@ which creates a link connnecting a concept node and a word node, having
 a simple truth value. Any valid node or link name can be used in this way.
 
 A number of utilities and handy functions can be found in the directory
-''src/scm''. The shell script ''src/scm/load.sh'' can be use to load the
-utilities.  Additional NLP-related utilities and MindAgents are located
-in ''src/nlp/scm''.
+''opencog/scm''. These should be automatically loaded during cog-server
+startup, as they are enumerated in lib/opencog.conf.  Additional
+NLP-related utilities and MindAgents are located in ''opencog/nlp/scm''; 
+not all of these are automatically loaded, but can be manually loaded by
+running ''opencog/nlp/scm/load-nlp.sh''.
 
 == Running ==
 --------------
