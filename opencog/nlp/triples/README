@@ -603,10 +603,15 @@ Next step:
        cat opencog/persist/atom.sql | psql triples
 -- Run cogserver
 -- open the database created above
+-- Edit file-process.scm and change file patch to parsed sentences.
 -- run load.sh
 -- Enter the scheme shell
--- Load previously parsed sentences.
--- run command (do-triples)
+-- run command (do-triples n) where n is the number of files
+   to process.
+
+Alternately, load data in some other way, and then
+issues the scheme expression (fire-all-triple-rules) to create
+the assorted triples.
 
 
 Notes
