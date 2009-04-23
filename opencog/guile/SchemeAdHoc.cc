@@ -12,7 +12,7 @@
 
 #include <opencog/server/CogServer.h>
 
-#include <opencog/nlp/question/QueryProcessor.h>
+#include <opencog/nlp/question/RelexQuery.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/pln/PLNModule.h>
@@ -79,9 +79,22 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 	{
 		Handle h = verify_handle(optargs, "cog-ad-hoc question");
 		AtomSpace *as = &atomspace();
-		QueryProcessor qp(as);
 
-		qp.process_sentence(h);
+#define USE_RELEX_QUERY 1
+#ifdef USE_RELEX_QUERY
+		RelexQuery rlx;
+		if (rlx.is_query(h))
+		{
+			rlx.solve(as, h);
+		}
+#else
+		FrameQuery frq;
+		if (frq.is_query(h))
+		{
+			frq.solve(as, h);
+		}
+#endif
+
 
 		return handle_to_scm(h);
 	}

@@ -12,7 +12,6 @@ LINK_LIBRARIES(
 
 ADD_LIBRARY(question SHARED
 	FrameQuery.cc
-	QueryProcessor.cc
 	RelexQuery.cc
 )
 
@@ -22,7 +21,6 @@ INSTALL (TARGETS question
 
 INSTALL (FILES
 	FrameQuery.h
-	QueryProcessor.h
 	RelexQuery.h
 	DESTINATION "include/opencog/nlp/question"
 )
