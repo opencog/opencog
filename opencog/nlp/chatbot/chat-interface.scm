@@ -9,7 +9,7 @@
 (use-modules (ice-9 rdelim))
 
 ; -----------------------------------------------------------------------
-; do-parse -- send text to parser, load the resulting opencog atoms
+; relex-parse -- send text to RelEx parser, load the resulting opencog atoms
 ;
 ; This routine takes plain-text input (in english), and sends it off 
 ; to a running instance of the RelEx parser, which should be listening 
@@ -18,7 +18,7 @@
 ; of atoms to a list of SentenceNode's that were generated as a result
 ; of the parse.
 ;
-(define (do-parse plain-txt)
+(define (relex-parse plain-txt)
 
 	; A little short routine that sends the plain-text to the
 	; RelEx parser, and then loads the resulting parse into the
@@ -63,6 +63,8 @@
 	(display txt)
 	(newline)
 	(display "My answer is:\n")
-	(do-parse txt)
+
+	; Parse the input, send it to the question processor
+	(cog-ad-hoc "question" (car (relex-parse txt)))
 )
 
