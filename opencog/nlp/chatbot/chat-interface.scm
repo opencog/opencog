@@ -40,6 +40,9 @@
 	(display nick)
 	(display ", you said: ")
 	(display txt)
+	(newline)
+	(display "My answer is:\n")
 	(do-parse txt)
+	(cog-map-type (lambda (h) (display h) #f) 'SentenceNode)
 )
 
