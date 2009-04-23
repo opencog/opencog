@@ -11,6 +11,8 @@
 #include <libguile.h>
 
 #include <opencog/server/CogServer.h>
+
+#include <opencog/nlp/question/QueryProcessor.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/pln/PLNModule.h>
@@ -70,6 +72,17 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 
 		AtomSpace *as = &atomspace();
 		h = as->fetchAtom(h);
+		return handle_to_scm(h);
+	}
+
+	if (0 == cmdname.compare("question"))
+	{
+		Handle h = verify_handle(optargs, "cog-ad-hoc question");
+		AtomSpace *as = &atomspace();
+		QueryProcessor qp(as);
+
+		qp.process_sentence(h);
+
 		return handle_to_scm(h);
 	}
 	return SCM_BOOL_F;

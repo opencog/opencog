@@ -4,8 +4,8 @@
  * Process user queries.
  *
  * XXX Currently, this is very crude scaffolding to interface
- * to the opencog server. It needs to be replaced/expanded as
- * appropriate.
+ * to the opencog server. It needs to be eliminated and replaced
+ * by scheme code.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -20,45 +20,20 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/nlp/question/FrameQuery.h>
 #include <opencog/nlp/question/RelexQuery.h>
-#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
-Factory<QueryProcessor, Agent> QueryProcessor::factory;
-
-// load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()
-{
-    return QueryProcessor::info().id.c_str();
-}
-
-extern "C" Module* opencog_module_load()
-{
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerAgent(QueryProcessor::info().id, &QueryProcessor::factory);
-    return static_cast<QueryProcessor*>(cogserver.createAgent(QueryProcessor::info().id, true));
-}
-
-extern "C" void opencog_module_unload(Module* module)
-{
-    QueryProcessor* agent = static_cast<QueryProcessor*>(module);
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    // the agent may have been stopped via the stop-agents command
-    if (cogserver.getModule(QueryProcessor::info().id) != NULL) {
-        cogserver.stopAgent(agent);
-        delete agent;
-    }
-}
-
-void QueryProcessor::init(void)
-{
-}
-
 // ----------------------------------------
-QueryProcessor::QueryProcessor(void)
+QueryProcessor::QueryProcessor(AtomSpace *as)
 {
+	atom_space = as;
 	cnt = 0;
+
+	// Obtain the handle which indicates that the processing of a
+ 	// sentence is complete. 
+	Node node(CONCEPT_NODE, "# Query processing completed");
+	completion_handle = atom_space->addRealAtom(node);
 }
 
 QueryProcessor::~QueryProcessor()
@@ -66,31 +41,13 @@ QueryProcessor::~QueryProcessor()
 	atom_space = NULL;
 }
 
-void QueryProcessor::run(CogServer *server)
-{
-	atom_space = server->getAtomSpace();
-	
-	// Look for recently asserted assertions.
-	atom_space->foreach_handle_of_type("SentenceNode", 
-	                       &QueryProcessor::do_assertion, this);
-
-	/* XXX HACK ALERT -- no scheduling, so just sleep */
-	// usleep(1000000);  // 1 second
-	usleep(10000);  // 10 millisecs == 100HZ
-}
-
 /**
  * Process a sentence fed into the system. This routine is called on
  * every sentence encountered in the system.
  * Currently, this ignores all assertions that are not queries.
  */
-bool QueryProcessor::do_assertion(Handle h)
+bool QueryProcessor::process_sentence(Handle h)
 {
-	// Obtain the handle which indicates that the processing of a
- 	// sentence is complete. 
-	Node node(CONCEPT_NODE, "#Query_processing_completed");
-	completion_handle = atom_space->addRealAtom(node);
-
 	// Look to see the the sentence is associated with the 
 	// completion indicator. 
 	bool rc = foreach_binary_link(h, INHERITANCE_LINK, &QueryProcessor::check_done, this);
