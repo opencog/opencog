@@ -240,8 +240,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
         }
     };
 
-    bool linkNotifications;
-
 public:
 
     //! Convert a specific VersionHandled TruthValue to a pln handle

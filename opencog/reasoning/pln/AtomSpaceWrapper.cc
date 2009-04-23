@@ -39,7 +39,8 @@
 
 // Mind Shadow is an atom cache system but no longer used
 #define USE_MIND_SHADOW 0
-#define ARCHIVE_THEOREMS 1
+// TODELETE not accessed anywhere
+//#define ARCHIVE_THEOREMS 1
 
 // MACRO for getting the AtomSpace
 // @todo: this should be replaced with initialising the ATW with a AtomSpace
@@ -155,7 +156,6 @@ USize(800), USizeMode(CONST_SIZE)
     // TODO: Replace srand with opencog::RandGen
     srand(12345678);
 
-    linkNotifications = true;
     archiveTheorems = false;
 }
 
