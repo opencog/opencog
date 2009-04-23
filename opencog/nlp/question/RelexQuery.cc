@@ -330,14 +330,14 @@ void RelexQuery::add_to_vars(Handle ah)
  * Look to see if word instance is a bound variable,
  * if it is, then add it to the variables list.
  */
-bool RelexQuery::find_vars(Handle h)
+bool RelexQuery::find_vars(Handle word_instance)
 {
-	foreach_outgoing_handle(h, &RelexQuery::find_vars, this);
+	foreach_outgoing_handle(word_instance, &RelexQuery::find_vars, this);
 
-	bool qvar = is_word_a_query(h);
+	bool qvar = is_word_a_query(word_instance);
 	if (!qvar) return false;
 
-	add_to_vars(h);
+	add_to_vars(word_instance);
 	return false;
 }
 
@@ -621,10 +621,10 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	{
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;
-		// Atom *as = TLB::getAtom(soln);
-// xxxx
-		// bool reject_qvar = is_word_instance(as, "_$qVar");
-		// if (reject_qvar) return false;
+
+		// Solution is a word instance; is it alos a query variable?
+		bool qvar = is_word_a_query(soln);
+		if (qvar) return false;
 	}
 
 	printf ("duude Found solution:\n");
