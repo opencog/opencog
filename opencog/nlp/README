@@ -56,6 +56,11 @@ number-crunching, and so are a short-cut to getting results more quickly.
 
 Subdirectories (in alphabetical order)
 ======================================
+chatbot
+-------
+The chatbot directory contains some crude code to tie opencog NLP
+processing to chat systems, and particularly, to IRC chat. 
+
 lexical_attraction
 ------------------
 The lexical-attraction directory contains a REAME file containing a

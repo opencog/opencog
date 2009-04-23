@@ -1,6 +1,10 @@
 
-/* 
- * Socket I/O to the opencog reasoning engine
+/**
+ * Simple blocking, stateless TCP socket I/O.
+ *
+ * Call whirr_sock_setup() to initialize.
+ * Call whirr_sock_io() to send message, and return reply.
+ *
  * Copied from "whirr.c". 
  * Linas October 2007 ported to opencog April 2009
  */
@@ -24,7 +28,7 @@
 struct sockaddr_in global_server_addr;
 
 /**
- * whirr_sock_setup -- initialze socket to the gCYC talk-net server
+ * whirr_sock_setup -- initialze socket to the OpenCog server
  */
 void whirr_sock_setup (void)
 {
@@ -36,7 +40,16 @@ void whirr_sock_setup (void)
 
 /**
  * whirr_sock_io -- send mesg to the server, receive reply.
- * Be sure to free the reeturned string when done.
+ *
+ * The i/o is stateless and blocking: each new message opens
+ * a new connection to the server. After the message is sent, 
+ * the send conection is closed, to indicate end-of-message.
+ * The call then blocks waiting for the reply; the reply is
+ * judged to be complete when the server closes the connection.
+ * This routine blocks and does not return until the server
+ * closes its connection.
+ *
+ * Users should be sure to free the returned string when done.
  */
 
 char * whirr_sock_io (const char * msg)

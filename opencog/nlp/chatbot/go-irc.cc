@@ -31,9 +31,18 @@
 
 #include "whirr-sockets.h"
 
-static const char *channel = "#opencog-test";
+/**
+ * Configuration paramters. These should be sucked from argv[]
+ * instead of being hard-coded.
+ */
+static const char *channel = "#opencog";
+static const char *network = "irc.freenode.net";
+static const int irc_port = 6667;
 static const char *vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1";
 
+/**
+ * Join channel shortly after logging into the irc server.
+ */
 int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*)data; 
@@ -64,6 +73,9 @@ static bool is_nonblank(const char * str)
 	return true;
 }
 
+/**
+ * Handle a message received from IRC.
+ */
 int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*)data; 
@@ -89,6 +101,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		msg_target = ird->target;
 	}
 
+	// Reply to request for chat client version
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
 		printf ("VERSION: %s\n", vstring);
@@ -165,7 +178,7 @@ int main (int argc, char * argv[])
 
 	// The login-name, nick, etc. are there only to make it look 
 	// pretty on IRC ident.
-	conn.start ("irc.freenode.net", 6667, "cogita-bot", login,
+	conn.start (network, irc_port, "cogita-bot", login,
 	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
