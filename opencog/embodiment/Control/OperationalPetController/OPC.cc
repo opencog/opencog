@@ -39,7 +39,7 @@
  * Uncoment the following define in order to delete atomSpace content inside OPC
  * destructor
  */
-//#define DELELTE_ATOMSPACE
+//#define DELETE_ATOMSPACE
 
 using namespace OperationalPetController;
 using namespace Procedure;
@@ -233,15 +233,23 @@ OPC::~OPC()
     delete (actionSelectionAgent);
     delete (petInterfaceUpdaterAgent);
 
-    // TODO: It takes too much time to delete atomspace
-    // TODO: This is a hack to allow valgrind tests to work fine. When atomSpace
-    // removal if fast enough remove this hack and make delete operation
-    // permanent
+#ifndef DELETE_ATOMSPACE 
+    // TODO: It takes too much time to delete atomspace. So, atomspace removal
+    // is currently disable. This is a hack to allow valgrind tests to work fine. 
+    // When atomSpace removal is fast enough, remove this hack and enable delete
+    // operation again.
     if (config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
-        logger().log(Logger::DEBUG, "OPC - Starting AtomSpace removal.");
-        delete (atomSpace);
-        logger().log(Logger::DEBUG, "OPC - Finished AtomSpace removal.");
+#endif
+    logger().log(Logger::DEBUG, "OPC - Starting AtomSpace removal.");
+    printf("OPC - Starting AtomSpace removal.\n");
+    int t1 = time(NULL);
+    delete (atomSpace);
+    int t2 = time(NULL);
+    logger().log(Logger::DEBUG, "OPC - Finished AtomSpace removal. t1 = %d, t2=%d, elapsed time =%d seconds", t1, t2, t2-t1);
+    printf("OPC - Finished AtomSpace removal. t1 = %d, t2=%d, diff=%d\n", t1, t2, t2-t1);
+#ifndef DELETE_ATOMSPACE 
     }
+#endif
 }
 
 /* --------------------------------------

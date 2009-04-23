@@ -67,13 +67,29 @@ int main(int argc, char *argv[])
         int portNumber = atoi(argv[5]);
         
         server(OPC::createInstance);
-        static_cast<OPC&>(server()).init(argv[1], "127.0.0.1", portNumber,
-                 PerceptionActionInterface::PAIUtils::getInternalId(argv[1]),
-                 PerceptionActionInterface::PAIUtils::getInternalId(argv[2]),
-                 argv[3], argv[4]);
+        OPC& opc = static_cast<OPC&>(server());
+        opc.init(argv[1], "127.0.0.1", portNumber, 
+                PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
+                PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
+                argv[3], argv[4]);
         
+        // TODO: Execute initialization that exists in CogServerMain's main method here
+        // so that we can use other features implemented for CogServer (like
+        // opencog shell). Alternatively OPC may be redesigned to become a loadable Module 
+        // (instead of a subclass of CogServer). This would imply reviewing the
+        // way Spawner calls OPC and mainly the way Embodiment servers use the
+        // configuration files (currently it uses a single configuration file
+        // for all servers)
+        // opc.enableNetworkServer(); // this does not work without other parts of CogServerMain intialization
+
+        // TODO: After making OPC a CogServerMain-compatible server, create a
+        // shell command to list all configuration parameters (like MIN_STI
+        // bellow). An perhaps a command to set a config parameter at runtime,
+        // which may be very useful.
+        logger().debug("MIN_STI = %s\n", config().get("MIN_STI").c_str());
+
         //main loop
-        static_cast<OPC&>(server()).serverLoop();
+        opc.serverLoop();
 
     } catch (std::bad_alloc) {
         logger().log(Logger::ERROR,
@@ -93,7 +109,5 @@ int main(int argc, char *argv[])
         static_cast<OPC&>(server()).saveState();
     }
 
-    // TODO: how to delete opc now?
-    //delete opc;
     return (0);
 }
