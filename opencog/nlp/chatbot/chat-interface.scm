@@ -57,6 +57,21 @@
 ; Right now, this just echoes the input.
 ;
 (define (say-id-english nick txt)
+
+	; Define a super-dooper cheesy way of getting the answer to the question
+	(define (prt-soln)
+		(let* ((query-soln-anchor (ConceptNode "# QUERY SOLUTION"))
+				(soln-word (cog-chase-link 'ListLink 'WordNode query-soln-anchor))
+			)
+			(display "The answer to your question is: ")
+			(if (not (null? soln-word))
+				(display (cog-name (car soln-word)))
+				(display "No answer found")
+			)
+			(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
+		)
+	)
+
 	(display "Hello ")
 	(display nick)
 	(display ", you said: ")
@@ -66,9 +81,10 @@
 	; Parse the input, send it to the question processor
 	(let ((is-question (cog-ad-hoc "question" (car (relex-parse txt)))))
 		(if is-question 
-			"You asked a question"
-			"You made a statement"
+			(prt-soln)
+			(display "You made a statement")
 		)
 	)
+	""
 )
 

@@ -245,6 +245,7 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
 	return false;
 }
 
+#ifdef DEAD_CODE_BUT_DONT_DELETE_JUST_YET
 /**
  * This method is called once for every top-level link
  * in the candidate query graph.  Out if this, it picks
@@ -297,6 +298,7 @@ bool RelexQuery::assemble_predicate(Atom *atom)
 
 	return false;
 }
+#endif /* DEAD_CODE_BUT_DONT_DELETE_JUST_YET */
 
 void RelexQuery::add_to_predicate(Handle ah)
 {
@@ -501,6 +503,7 @@ bool RelexQuery::word_instance_match(Atom *aa, Atom *ab)
 	return true;
 }
 
+#ifdef DEAD_CODE_BUT_DONT_DELETE_JUST_YET
 /**
  * Return the word string associated with a word instance.
  * xxxxxxxxx this routine is never called!
@@ -532,6 +535,7 @@ const char * RelexQuery::get_word_instance(Atom *atom)
 
 	return name.c_str();
 }
+#endif /* DEAD_CODE_BUT_DONT_DELETE_JUST_YET */
 
 /**
  * Are two nodes "equivalent", as far as the opencog representation
@@ -605,15 +609,15 @@ printf("duude compare %s to %s\n", sa, sb);
 
 /* ======================================================== */
 
-bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln)
+bool RelexQuery::solution(std::map<Handle, Handle> &pred_grounding,
+                          std::map<Handle, Handle> &var_grounding)
 {
 	// Reject any solution where a variable is solved
 	// by another variable (e.g. if there are multiple
 	// questions in the corpus, and we just happened to
 	// find one of them.)
 	std::map<Handle, Handle>::const_iterator j;
-	for (j=var_soln.begin(); j != var_soln.end(); j++)
+	for (j=var_grounding.begin(); j != var_grounding.end(); j++)
 	{
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;
@@ -624,13 +628,22 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
 	}
 
 	printf ("duude Found solution:\n");
-	PatternMatchEngine::print_solution(pred_soln, var_soln);
+	PatternMatchEngine::print_solution(pred_grounding, var_grounding);
 
 	// And now for a cheesy hack to report the solution
-	Node n(CONCEPT_NODE, "# QUERY SOLUTION");
-	// atom_space->add(&n);
+	Handle hq = atom_space->addNode(CONCEPT_NODE, "# QUERY SOLUTION");
+	Handle hv = bound_vars[0];
+	Handle ha = var_grounding[hv];
+
+	Atom *a = TLB::getAtom(ha);
+	Atom *wrd = fl.follow_binary_link(a, REFERENCE_LINK);
+	Node *n = dynamic_cast<Node *>(wrd);
+	if (!n) return false;
+	printf("duude answer=%s\n", n->getName().c_str());
+
+	Handle hw = TLB::getHandle(wrd);
+	atom_space->addLink(LIST_LINK, hq, hw);
 	
-	std::vector<Handle> oset;
 	return false;
 }
 

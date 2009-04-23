@@ -68,7 +68,7 @@ class RelexQuery :
 		bool word_instance_match(Atom *, Atom *);
 
 		// create the predicate
-		virtual bool assemble_predicate(Atom *);
+		// virtual bool assemble_predicate(Atom *);
 		virtual bool find_vars(Handle);
 
 		void add_to_predicate(Handle);
