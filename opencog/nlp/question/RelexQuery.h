@@ -38,8 +38,10 @@ class RelexQuery :
 {
 	private:
 		// Help determine if assertion is a query.
-		bool is_qVar(Atom *);
-		bool check_for_query(Handle);
+		bool is_qVar(Handle);
+		bool is_parse_a_query(Handle);
+		bool is_wordlist_a_query(Handle);
+		bool is_word_a_query(Handle);
 		bool assemble_wrapper(Atom *);
 
 		// Convert query into a normal form.

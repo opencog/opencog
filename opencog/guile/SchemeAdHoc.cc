@@ -95,7 +95,6 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		}
 #endif
 
-
 		return handle_to_scm(h);
 	}
 	return SCM_BOOL_F;

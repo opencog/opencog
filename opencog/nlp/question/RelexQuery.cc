@@ -34,8 +34,8 @@
 
 #include <stdio.h>
 
+#include <opencog/atomspace/ForeachChaseLink.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/util/platform.h>
 
 using namespace opencog;
 
@@ -84,22 +84,56 @@ static void prt_pred (std::vector<Handle> pred,
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
  * XXX This algo is flawed, fragile, but simple.
+ *
+ * Current structure of a question is as follows:
+ *
+ * (ParseLink
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
+ *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
+ * )
+ * (ReferenceLink (stv 1.0 1.0)
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
+ *    (ListLink
+ *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *       (WordInstanceNode "the@0d969b75-1f7b-4174-b7c6-40e3fbb87ed9")
+ *       (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *       (WordInstanceNode "?@ea5f242b-1ca5-462a-83a3-e6d54da4b23b")
+ *    )
+ * )
+ * ; QUERY-TYPE (_$qVar, who)
+ * (InheritanceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *    (DefinedLinguisticConceptNode "who")
+ * )
+ *
+ * So, given a sentenceNode, we have to follow the parse link to get the
+ * list of words, and then see if any of the words are a query.
  */
 
 /**
  * Return true, if atom is of type Node, and if the node
  * name is "match_name" (currently hard-coded as _$qVar)
  */
-bool RelexQuery::is_qVar(Atom *atom)
+bool RelexQuery::is_qVar(Handle word_prop)
 {
-	const char *match_name = "_$qVar";
-	Node *n = dynamic_cast<Node *>(atom);
-	if (n)
-	{
-		const std::string& name = n->getName();
-		if (0 == strcmp(name.c_str(), match_name))
-			return true;
-	}
+	Atom *atom = TLB::getAtom(word_prop);
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+
+	Node *n = static_cast<Node *>(atom);
+	const std::string& name = n->getName();
+	const char * str = name.c_str();
+	if (0 == strcmp(str, "who"))
+		return true;
+	if (0 == strcmp(str, "what"))
+		return true;
+	if (0 == strcmp(str, "when"))
+		return true;
+	if (0 == strcmp(str, "where"))
+		return true;
+	if (0 == strcmp(str, "why"))
+		return true;
+
 	return false;
 }
 
@@ -109,24 +143,34 @@ bool RelexQuery::is_qVar(Atom *atom)
  * to the structure of the relex-to-opencog conversion, and
  * is fragile, if that structure changes.
  */
-bool RelexQuery::check_for_query(Handle rel)
+bool RelexQuery::is_word_a_query(Handle word_inst)
 {
-	return foreach_outgoing_atom(rel, &RelexQuery::is_qVar, this);
+	return foreach_binary_link(word_inst, INHERITANCE_LINK, &RelexQuery::is_qVar, this);
+}
+
+bool RelexQuery::is_wordlist_a_query(Handle wordlist)
+{
+	return foreach_outgoing_handle(wordlist, &RelexQuery::is_word_a_query, this);
+}
+
+bool RelexQuery::is_parse_a_query(Handle parse)
+{
+	return foreach_binary_link(parse, REFERENCE_LINK, &RelexQuery::is_wordlist_a_query, this);
 }
 
 /**
- * Return true if assertion is a query.
- * A simple check is made: does the assertion have
+ * Return true if sentence has a parse which is a query.
+ * A simple check is made: does the sentence have
  * a _$qVar in it?
  *
- * The pattern check here is trivial, in that an assertion
- * that contains <WordNode name="_$qVar"/> will be assumed
+ * The pattern check here is trivial, in that a sentence
+ * that contains (DefinedLinguisticConceptNode "_$qVar") will be assumed
  * to be a query.  Perhaps something more sophisticated may
  * be desired eventually.
  */
 bool RelexQuery::is_query(Handle h)
 {
-	return foreach_outgoing_handle(h, &RelexQuery::check_for_query, this);
+	return foreach_reverse_binary_link(h, PARSE_LINK, &RelexQuery::is_parse_a_query, this);
 }
 
 /* ======================================================== */
