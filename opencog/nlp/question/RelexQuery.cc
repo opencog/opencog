@@ -330,9 +330,10 @@ bool RelexQuery::find_vars(Handle h)
 {
 	foreach_outgoing_handle(h, &RelexQuery::find_vars, this);
 
-	Atom *atom = TLB::getAtom(h);
+	bool qvar = is_word_a_query(h);
+printf ("duuuude its a qvar=%d\n", qvar);
 
-	if (!is_word_instance (atom, "_$qVar")) return false;
+	if (!qvar) return false;
 
 	add_to_vars(h);
 	return false;
@@ -349,7 +350,6 @@ bool RelexQuery::rel_up(Handle hrelation)
 	// Its a keeper, add this to our list of acceptable predicate terms.
 	add_to_predicate(hrelation);
 
-printf("duude got one!\n");
 	return false;
 }
 
@@ -364,7 +364,6 @@ bool RelexQuery::word_up(Handle ll)
 
 bool RelexQuery::word_solve(Handle word_inst)
 {
-printf("duuude looking at words\n");
 	return foreach_incoming_handle(word_inst,
 		&RelexQuery::word_up, this);
 }
@@ -504,30 +503,25 @@ bool RelexQuery::concept_match(Atom *aa, Atom *ab)
  * relex-to-opencog mapping. Until this is placed into
  * concrete, its inherently fragile.  This is subject
  * to change, if the relex-to-opencog mapping changes.
- * XXX
  *
  * Current mapping is:
  *   ReferenceLink
+ *      WordInstanceNode "bark@e798a7dc"
  *      WordNode "bark"
- *      ConceptNode "bark_169"
- *
- *  XXX should be "WordInstanceNode" now XXX
  *
  */
-bool RelexQuery::is_word_instance(Atom *atom, const char * word)
+const char * RelexQuery::get_word_instance(Atom *atom)
 {
 	// We want the word-node associated with this word instance.
-	Atom *wrd = fl.backtrack_binary_link(atom, REFERENCE_LINK);
-	if (!wrd) return false;
+	Atom *wrd = fl.follow_binary_link(atom, REFERENCE_LINK);
+	if (!wrd) return NULL;
 
-	Node *n = dynamic_cast<Node *>(wrd);
-	if(!n) return false;
+	if (WORD_NODE != wrd->getType()) return NULL;
 
-	// A simple string compare.
+	Node *n = static_cast<Node *>(wrd);
 	const std::string& name = n->getName();
-	if (strcmp(name.c_str(), word)) return false;
 
-	return true;
+	return name.c_str();
 }
 
 /**
@@ -614,8 +608,9 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_soln,
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;
 		Atom *as = TLB::getAtom(soln);
-		bool reject_qvar = is_word_instance(as, "_$qVar");
-		if (reject_qvar) return false;
+// xxxx
+		// bool reject_qvar = is_word_instance(as, "_$qVar");
+		// if (reject_qvar) return false;
 	}
 
 	printf ("duude have soln\n");

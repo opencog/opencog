@@ -52,7 +52,7 @@ class RelexQuery :
 		bool discard_extra_markup(Atom *);
 
 		// Aid in equivalent node identification.
-		bool is_word_instance(Atom *, const char *);
+		const char * get_word_instance(Atom *);
 
 		bool parse_solve(Handle);
 		bool wordlist_solve(Handle);
