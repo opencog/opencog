@@ -38,7 +38,7 @@
 
 	; Perform the actual processing
 	(do-sock-io plain-txt)
-	(let ((new-sent-anchor (ConceptNode "# New Parsed Sentence"))
+	(let* ((new-sent-anchor (ConceptNode "# New Parsed Sentence"))
 			(new-sent (cog-chase-link 'ListLink 'SentenceNode new-sent-anchor))
 		)
 
