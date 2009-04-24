@@ -22,7 +22,7 @@ scm
 
 (define (make-prep-phrase word prep)
 	(let* (
-			(word-str (cog-name verb))
+			(word-str (cog-name word))
 			(prep-str (cog-name prep))
 		)
 		(if 
