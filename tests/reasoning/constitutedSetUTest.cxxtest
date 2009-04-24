@@ -65,16 +65,14 @@ public:
         pHandle c_h = asw->addNode(CONCEPT_NODE, "c1", c_tv);
         
         //add element atoms
-        SimpleTruthValue e1_tv(0.8, 10);
-        pHandle e1_h = asw->addNode(CONCEPT_NODE, "e1", e1_tv);
-        pHandle e2_h = asw->addNode(CONCEPT_NODE, "e2", e1_tv);
-        pHandle e3_h = asw->addNode(CONCEPT_NODE, "e3", e1_tv);
-        pHandle e4_h = asw->addNode(CONCEPT_NODE, "e4", e1_tv);
-        pHandle e5_h = asw->addNode(CONCEPT_NODE, "e5", e1_tv);
-        SimpleTruthValue e2_tv(0.01, 10); //to check min element strength
-        pHandle e6_h = asw->addNode(CONCEPT_NODE, "e6", e2_tv);
-        SimpleTruthValue e3_tv(0.8, 1); //to check min element count
-        pHandle e7_h = asw->addNode(CONCEPT_NODE, "e7", e3_tv);
+        SimpleTruthValue e_tv(0.8, 10);
+        pHandle e1_h = asw->addNode(CONCEPT_NODE, "e1", e_tv);
+        pHandle e2_h = asw->addNode(CONCEPT_NODE, "e2", e_tv);
+        pHandle e3_h = asw->addNode(CONCEPT_NODE, "e3", e_tv);
+        pHandle e4_h = asw->addNode(CONCEPT_NODE, "e4", e_tv);
+        pHandle e5_h = asw->addNode(CONCEPT_NODE, "e5", e_tv);
+        pHandle e6_h = asw->addNode(CONCEPT_NODE, "e6", e_tv);
+        pHandle e7_h = asw->addNode(CONCEPT_NODE, "e7", e_tv);
 
         //add memberlinks
         SimpleTruthValue m1_tv(0.8, 10);
@@ -89,11 +87,9 @@ public:
         pHandleSeq m5_hs = list_of(e5_h)(c_h);
         pHandle m5_h = asw->addLink(MEMBER_LINK, m5_hs, m1_tv);
         SimpleTruthValue m2_tv(0.01, 10); //to check min member strength
-                                          //WARNING: not activated anyway
         pHandleSeq m6_hs = list_of(e6_h)(c_h);
         pHandle m6_h = asw->addLink(MEMBER_LINK, m6_hs, m2_tv);
         SimpleTruthValue m3_tv(0.8, 1); //to check min member count
-                                        //WARNING: not activated anyway
         pHandleSeq m7_hs = list_of(e7_h)(c_h);
         pHandle m7_h = asw->addLink(MEMBER_LINK, m7_hs, m3_tv);
 

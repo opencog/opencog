@@ -1314,7 +1314,7 @@ pHandleSet constitutedSet(pHandle CP,
         assert(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
-            const TruthValue& tv = atw->getTV(hs[0]);
+            const TruthValue& tv = atw->getTV(h);
             
             if (min_membershipStrength <= tv.getMean()
                 && min_membershipCount <= tv.getCount())
