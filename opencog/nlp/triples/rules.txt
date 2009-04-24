@@ -19,7 +19,8 @@
 ;
 ; All of these rules are structured so that a search is performed
 ; only over sentences That are tagged with a link to the node
-; "# APPLY TRIPLE RULES"
+; "# APPLY TRIPLE RULES". Since this rule is first, this prevents 
+; a search over the entire atomspace.
 ;
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
