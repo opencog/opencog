@@ -10,7 +10,7 @@
 #
 # To use, do the following:
 #
-#    cat some-rule-file.txt | ./rules-to-implications.pl 
+#    cat some-rule-file.txt | ./rules-to-implications.pl "my-rules"
 #
 # This perl script implements a very simple parser. Some day in the future,
 # it would proably make sense to re-write this in terms of lex & yacc. Maybe.
@@ -38,11 +38,12 @@ sub parse_clause
 	my ($clause) = @_;
 
 	# Ditch the white space, this'll make matching easier.
-	$clause =~ s/\s*//g;
+	# XXXX $clause =~ s/\s*//g;
+	# No it won't, since it'll trash quoted string literals.
 
 	# Pull the three parts out of the clause.
 	# The pattern matches "blah(ding,dong)"
-	$clause =~ m/\s*([\$\!%:\&\-\w]+)\s*\(\s*([\$%\w]+)\s*\,\s*([\$%\w]+)\s*\)(.*)/;
+	$clause =~ m/\s*([\$\!%:\&\-\w]+)\s*\(\s*([\$%#\"\w\s]+)\s*\,\s*([\$%#\"\w\s]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -218,6 +219,10 @@ sub print_link
 	{
 		print "$indent   (VariableNode \"$item1\")\n";
 	}
+	elsif ($item1 =~ /^\"/)
+	{
+		print "$indent   (ConceptNode $item1)\n";
+	}
 	else
 	{
 		print "$indent   (WordNode \"$item1\")\n";
@@ -226,6 +231,10 @@ sub print_link
 	if ($item2 =~ /^\$/)
 	{
 		print "$indent   (VariableNode \"$item2\")\n";
+	}
+	elsif ($item2 =~ /^\"/)
+	{
+		print "$indent   (ConceptNode $item2)\n";
 	}
 	else
 	{
@@ -406,7 +415,10 @@ sub parse_rule
 my $have_rule = 0;
 my $curr_rule = "";
 
-if ($#ARGV < 0) { die "Fatal Error: must specify unique name\n"; }
+if ($#ARGV < 0) 
+{
+	die "Usage: rules-to-implications.pl <prefix-string>\n"; 
+}
 
 my $rule_name = $ARGV[0];
 
