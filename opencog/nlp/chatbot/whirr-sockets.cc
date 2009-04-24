@@ -49,6 +49,12 @@ void whirr_sock_setup (void)
  * This routine blocks and does not return until the server
  * closes its connection.
  *
+ * If the server is allive but unresponsive, then this routine
+ * can block indefinitely. This could be a real problem, because
+ * it will make the chat server unresponsive. ... XXX this should
+ * be fixed in some way, to tell the chat user that the server is
+ * busy...
+ *
  * Users should be sure to free the returned string when done.
  */
 

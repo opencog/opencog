@@ -66,6 +66,12 @@ is as follows:
    go-irc.cc:  the main guts of the cogita server
    whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.  
 
+   Note that if the cog-server is busy, then whirr can block for an
+   indefinitely long time. The person who is chatting will start to 
+   wonder about the lack of response. This should be fixed -- best
+	fix is probably to multi-thread, while periodically telling the
+	user that the cog server is thinking ...  XXX FIXME
+
 2) Parsing of english text by RelEx. The very first thing that the 
    ''say-id-english'' routine does is to send the input text to RelEx
    for parsing.  This is done by sending the plain-text via a socket
