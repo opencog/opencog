@@ -169,6 +169,13 @@ private:
     // JUST FOR TESTS:
     bool isCleared() const;
 
+    /**
+     * Overrides and declares copy constructor and equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    AtomTable& operator=(const AtomTable&);
+    AtomTable(const AtomTable&);
+
 public:
 
     /**

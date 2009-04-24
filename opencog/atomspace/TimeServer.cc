@@ -100,3 +100,16 @@ unsigned long TimeServer::getLatestTimestamp() const
 {
     return latestTimestamp;
 }
+
+TimeServer& TimeServer::operator=(const TimeServer& other)
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "TimeServer - Cannot copy an object of this class");
+}
+
+TimeServer::TimeServer(const TimeServer& other) 
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "TimeServer - Cannot copy an object of this class");
+}
+

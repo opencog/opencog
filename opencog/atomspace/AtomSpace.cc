@@ -369,6 +369,18 @@ std::string AtomSpace::getMapIdString(Handle mapHandle)
     return getName(getOutgoing(mapHandle, 0));
 }    
 
+AtomSpace& AtomSpace::operator=(const AtomSpace& other)
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomSpace - Cannot copy an object of this class");
+}
+
+AtomSpace::AtomSpace(const AtomSpace& other) 
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomSpace - Cannot copy an object of this class");
+}
+
 const TruthValue& AtomSpace::getDefaultTV()
 {
     return TruthValue::DEFAULT_TV();

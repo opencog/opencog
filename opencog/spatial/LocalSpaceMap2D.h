@@ -130,6 +130,13 @@ private:
 
     bool outsideMap( const std::vector<Math::LineSegment>& segments );
 
+    /**
+     * Overrides and declares copy constructor and equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    LocalSpaceMap2D& operator=(const LocalSpaceMap2D&);
+    LocalSpaceMap2D(const LocalSpaceMap2D&);
+
 public:
 
     /**
@@ -138,8 +145,6 @@ public:
     LocalSpaceMap2D(Distance xMin, Distance xMax, unsigned int xDim,
                     Distance yMin, Distance yMax, unsigned int yDim,
                     Distance radius);
-
-    LocalSpaceMap2D( const LocalSpaceMap2D& map );
 
     LocalSpaceMap2D* clone() const;
     ~LocalSpaceMap2D();

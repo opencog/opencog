@@ -105,6 +105,18 @@ bool AtomTable::isCleared(void) const
     return true;
 }
 
+AtomTable& AtomTable::operator=(const AtomTable& other)
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomTable - Cannot copy an object of this class");
+}
+
+AtomTable::AtomTable(const AtomTable& other) 
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomTable - Cannot copy an object of this class");
+}
+
 void AtomTable::registerIterator(HandleIterator* iterator)
 {
     lockIterators();

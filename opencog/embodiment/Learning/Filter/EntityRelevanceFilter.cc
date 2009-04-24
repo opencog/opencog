@@ -90,7 +90,7 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
         HandleSeq resmh;
         wp.getAtomSpace().getMapHandles(back_inserter(resmh), temp.getLowerBound(), temp.getUpperBound());
         foreach(Handle h, resmh) {
-            SpaceServer::SpaceMap spacemap = wp.getAtomSpace().getSpaceServer().getMap(h);
+            const SpaceServer::SpaceMap& spacemap = wp.getAtomSpace().getSpaceServer().getMap(h);
             //then make union of the object of that map with the result
             EntityRelevanceFilter erf(spacemap, selfID, ownerID);
             definite_object_set ires = erf.getEntities();

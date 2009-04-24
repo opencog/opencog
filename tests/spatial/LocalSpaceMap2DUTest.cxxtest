@@ -156,8 +156,6 @@ public:
         Map* foo2 = createMockupMap( );
 
         TS_ASSERT(*foo == *foo);
-        // test operator== with the default copy constructor:
-        TS_ASSERT(Map(*foo) == *foo);
         TS_ASSERT(*foo2 == *foo);
         // same parameters as foo, but without obstacles added:
         Map bar(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
@@ -250,7 +248,7 @@ public:
         const EntityPtr& e2 = bar.getEntity( "id_26325" );
         TS_ASSERT( !e2->getBooleanProperty( Entity::OBSTACLE ) );
 
-        TS_ASSERT_EQUALS(*foo, bar);
+        TS_ASSERT(*foo == bar);
 
         delete foo;
     }
@@ -269,7 +267,7 @@ public:
             TS_ASSERT( foo->isObstacle(mockyObjects[i].name) ==  mockyObjects[i].isObstacle );
         }
 
-        TS_ASSERT_EQUALS( *foo, *foo2);
+        TS_ASSERT( *foo == *foo2);
 
         delete foo2;
         delete foo;
@@ -638,5 +636,17 @@ public:
         delete map2;
         delete map3;
     }
+
+    /* Invalid copy causes compiler errors. So, this cannot be an ordinary test.
+     * You may uncomment this method to ensure no invalid copy is allowed. 
+     * Only explict clone() method must be used so that unnecessary copy of big 
+     * data structure happens without any warning to the programmer. 
+    void InvalidCopyingCompilerTest(void) {
+        LocalSpaceMap2D map1(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+        LocalSpaceMap2D map2 = map1; 
+        LocalSpaceMap2D map3(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);
+        map3 = map1;
+    }
+    */
 
 }; // class

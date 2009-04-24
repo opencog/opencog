@@ -55,7 +55,6 @@ class SpaceServer : public SavableRepository
 public:
 
     static const char* SPACE_MAP_NODE_NAME;
-    Handle latestSpaceMap;
 
     typedef Spatial::Point SpaceMapPoint;
     typedef Spatial::LocalSpaceMap2D SpaceMap;
@@ -177,13 +176,6 @@ public:
      */
     static TimestampMap mapFromString(const std::string &stringMap);
 
-    /**
-     * Update the reference to the latest map in the SpaceServer.
-     */
-    // TODO: check if this is really needed
-    //void updateLatestSpaceMap(Handle atTimeLink);
-
-
 private:
 
     /**
@@ -240,6 +232,13 @@ private:
      *
      */
     std::string mapObjectsToString(const SpaceServer::SpaceMap& map) const;
+
+    /**
+     * Overrides and declares copy constructor and equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    SpaceServer& operator=(const SpaceServer&);
+    SpaceServer(const SpaceServer&);
 
 };
 } // namespace opencog

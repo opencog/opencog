@@ -148,6 +148,13 @@ private:
      */
     unsigned long latestTimestamp;
 
+    /**
+     * Overrides and declares copy constructor and equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    TimeServer& operator=(const TimeServer&);
+    TimeServer(const TimeServer&);
+
 };
 
 } // namespace opencog

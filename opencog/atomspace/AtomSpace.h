@@ -1439,6 +1439,13 @@ public:
     void mapPersisted(Handle mapId);
     std::string getMapIdString(Handle mapId);
 
+    /**
+     * Overrides and declares copy constructor and equals operator as private 
+     * for avoiding large object copying by mistake.
+     */
+    AtomSpace& operator=(const AtomSpace&);
+    AtomSpace(const AtomSpace&);
+
 };
 
 } // namespace opencog

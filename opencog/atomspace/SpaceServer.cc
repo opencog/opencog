@@ -50,8 +50,6 @@ SpaceServer::SpaceServer(SpaceServerContainer &_container): container(_container
     yMax = 256;
     xDim = 1024;
     yDim = 1024;
-
-    latestSpaceMap = Handle::UNDEFINED;
 }
 
 SpaceServer::~SpaceServer()
@@ -91,8 +89,6 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
         logger().log(opencog::Logger::INFO,
                      "SpaceServer - New map: xMin: %.3lf, xMax: %.3lf, yMin: %.3lf, yMax: %.3lf",
                      xMin, xMax, yMin, yMax);
-        // TODO: check if this is really needed
-        //    updateLatestSpaceMap(spaceMapHandle);
 
         if (!sortedMapHandles.empty()) {
             Handle latestMapHandle = sortedMapHandles.back();
@@ -485,7 +481,7 @@ std::string SpaceServer::mapToString(Handle mapHandle) const
 
     std::stringstream stringMap;
     stringMap.precision(16);
-    SpaceMap map = getMap(mapHandle);
+    const SpaceMap& map = getMap(mapHandle);
 
     stringMap << container.getMapIdString(mapHandle);
     stringMap << DELIMITER;
@@ -614,28 +610,21 @@ SpaceServer::TimestampMap SpaceServer::mapFromString(const std::string& stringMa
     return timestampMap;
 }
 
-/* TODO: Check if this is really needed
-void SpaceServer::updateLatestSpaceMap(Handle atTimeLink)
+SpaceServer& SpaceServer::operator=(const SpaceServer& other)
 {
-    if (latestSpaceMap != Handle::UNDEFINED)
-    {
-        atomSpace.removeAtom(latestSpaceMap);
-    }
-    HandleSeq hs;
-    hs.push_back(atTimeLink);
-    latestSpaceMap = atomSpace.getHandle(LATEST_LINK, hs);
-    if (latestSpaceMap == Handle::UNDEFINED)
-    {
-        latestSpaceMap = atomSpace.addLink(LATEST_LINK, hs);
-        atomSpace.setLTI(latestSpaceMap, 1);
-    }
-    else
-    {
-        if (atomSpace.getLTI(latestSpaceMap) < 1)
-        {
-            atomSpace.setLTI(latestSpaceMap, 1);
-        }
-    }
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "SpaceServer - Cannot copy an object of this class");
 }
-*/
+
+class FakeContainer: public SpaceServerContainer {
+    void mapRemoved(Handle mapId) {}
+    void mapPersisted(Handle mapId) {}
+    std::string getMapIdString(Handle mapId) {return "";}
+
+};
+SpaceServer::SpaceServer(const SpaceServer& other): container(*(new FakeContainer())) 
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "SpaceServer - Cannot copy an object of this class");
+}
 

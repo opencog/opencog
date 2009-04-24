@@ -150,6 +150,18 @@ bool LocalSpaceMap2D::outsideMap( const std::vector<Spatial::Math::LineSegment>&
 }
 
 
+LocalSpaceMap2D& LocalSpaceMap2D::operator=(const LocalSpaceMap2D& other)
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "LocalSpaceMap2D - Cannot copy an object of this class");
+}
+
+LocalSpaceMap2D::LocalSpaceMap2D(const LocalSpaceMap2D& other) 
+{
+    throw opencog::RuntimeException(TRACE_INFO, 
+            "LocalSpaceMap2D - Cannot copy an object of this class");
+}
+
 /** ---------------------------------------------------------------------------
  * Public Functions
  * ----------------------------------------------------------------------------
@@ -164,20 +176,6 @@ LocalSpaceMap2D::LocalSpaceMap2D(Spatial::Distance xMin, Spatial::Distance xMax,
     Distance xDelta = xMax - xMin;
     Distance yDelta = yMax - yMin;
     _diagonalSize = sqrt(xDelta * xDelta + yDelta * yDelta);
-}
-
-LocalSpaceMap2D::LocalSpaceMap2D( const LocalSpaceMap2D& map )
-{
-    this->_xMin = map._xMin;
-    this->_xMax = map._xMax;
-    this->_yMin = map._yMin;
-    this->_yMax = map._yMax;
-
-    this->_xDim = map._xDim;
-    this->_yDim = map._yDim;
-    this->_radius = map._radius;
-
-    copyObjects( map );
 }
 
 LocalSpaceMap2D::~LocalSpaceMap2D()
