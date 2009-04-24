@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -250,6 +250,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		soln_handle_stack.push(curr_soln_handle);
 		pred_solutn_stack.push(clause_grounding);
 		var_solutn_stack.push(var_grounding);
+		issued_stack.push(issued);
 		pmc->push();
 
 		curr_soln_handle = TLB::getHandle(as);
@@ -258,7 +259,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		prtmsg("ground:", curr_soln_handle);
 		dbgprt("\n");
 		
-		get_next_unsolved_clause();
+		get_next_untried_clause();
 
 		prtmsg("next clause is", curr_root);
 		dbgprt("This clause is %s\n", optionals.count(curr_root)? "optional" : "required");
@@ -304,7 +305,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 
 				// XXX Maybe should push n pop here? No, maybe not ... 
 				clause_grounding[curr_root] = invalid_grounding;
-				get_next_unsolved_clause();
+				get_next_untried_clause();
 				prtmsg("Next optional clause is", curr_root);
 				if (Handle::UNDEFINED == curr_root)
 				{
@@ -333,6 +334,9 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		// The grounding stacks are handled differently.
 		POPTOP(clause_grounding, pred_solutn_stack);
 		POPTOP(var_grounding, var_solutn_stack);
+
+		issued = issued_stack.top();
+		issued_stack.pop();
 
 		prtmsg("pop to joiner", curr_pred_handle);
 		prtmsg("pop to clause", curr_root);
@@ -376,7 +380,16 @@ bool PatternMatchEngine::pred_up(Handle h)
 	return found;
 }
 
-void PatternMatchEngine::get_next_unsolved_clause(void)
+/**
+ * Search for the next untried, (thus ungrounded, unsolved) clause.
+ *
+ * The "issued" set contains those clauses which are currently in play,
+ * i.e. those for which a grounding is currently being explored. Both
+ * grounded, and as-yet-ungrounded clauses may be in this set.  The
+ * sole reason of this set is to avoid infinite resursion, i.e. of 
+ * re-identifying the same clause over and over as unsolved. 
+ */
+void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -403,7 +416,8 @@ void PatternMatchEngine::get_next_unsolved_clause(void)
 			{
 				solved = true;
 			}
-			else if (0 == optionals.count(root))
+			else if ((issued.end() == issued.find(root)) &&
+			         (optionals.end() == optionals.find(root)))
 			{
 				unsolved_clause = root;
 				unsolved = true;
@@ -420,7 +434,11 @@ void PatternMatchEngine::get_next_unsolved_clause(void)
 	curr_root = unsolved_clause;
 	curr_pred_handle = pursue;
 
-	if (Handle::UNDEFINED != unsolved_clause) return;
+	if (Handle::UNDEFINED != unsolved_clause)
+	{
+		issued.insert(unsolved_clause);
+		return;
+	}
 
 	// Try again, this time, considering the optional clauses.
 	for (k=root_map.begin(); k != root_map.end(); k++)
@@ -440,7 +458,7 @@ void PatternMatchEngine::get_next_unsolved_clause(void)
 			{
 				solved = true;
 			}
-			else
+			else if (issued.end() == issued.find(root))
 			{
 				unsolved_clause = root;
 				unsolved = true;
@@ -456,6 +474,11 @@ void PatternMatchEngine::get_next_unsolved_clause(void)
 	// unsolved clause.
 	curr_root = unsolved_clause;
 	curr_pred_handle = pursue;
+
+	if (Handle::UNDEFINED != unsolved_clause)
+	{
+		issued.insert(unsolved_clause);
+	}
 }
 
 /* ======================================================== */
@@ -478,14 +501,17 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 	// Cleanup
 	var_grounding.clear();
 	clause_grounding.clear();
+	issued.clear();
 	while(!pred_handle_stack.empty()) pred_handle_stack.pop();
 	while(!soln_handle_stack.empty()) soln_handle_stack.pop();
 	while(!root_handle_stack.empty()) root_handle_stack.pop();
 	while(!pred_solutn_stack.empty()) pred_solutn_stack.pop();
 	while(!var_solutn_stack.empty()) var_solutn_stack.pop();
+	while(!issued_stack.empty()) issued_stack.pop();
 
 	// Match the required clauses.
 	curr_root = cnf_clauses[0];
+	issued.insert(curr_root);
 	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
 

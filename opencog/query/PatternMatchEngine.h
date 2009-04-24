@@ -76,7 +76,7 @@ class PatternMatchEngine
 		OutgoingTree ot;
 		Handle curr_soln_handle;
 		Handle curr_pred_handle;
-		void get_next_unsolved_clause(void);
+		void get_next_untried_clause(void);
 
 		// Stack used during recursive exploration
 		std::stack<Handle> pred_handle_stack;
@@ -87,6 +87,11 @@ class PatternMatchEngine
 		typedef std::map<Handle, Handle> SolnMap;
 		std::stack<SolnMap> pred_solutn_stack;
 		std::stack<SolnMap> var_solutn_stack;
+
+		// Set of clauses for which a grounding is currently being attempted.
+		typedef std::set<Handle> IssuedSet;
+		IssuedSet issued;
+		std::stack<IssuedSet> issued_stack;
 
 		// -------------------------------------------
 
