@@ -6,6 +6,11 @@
 ; The format of this file is supposed to be similar to, if not identical
 ; to the "mapping_rules.txt" file used in the Relex framing code.
 ;
+; Note that these rules generate triples holding word instances.
+; At a later stage, after we decide that we "like" a given triple,
+; if is "canonicalized" by replacing the word instances by the
+; generic words themselves. 
+;
 ; -----------------------------------------------------------
 ;
 ; Sentence: "Lisbon is the capital of Portugaul"
@@ -106,3 +111,20 @@
 ;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
 ;      THEN ^3_$prep($var2, $var1) 
 
+
+; Question: What are bats made of?
+; var0=bat $vrb=make $prep=of $qvar=what
+; XXX for some reason, this isn't working, not sure why ... 
+; this needs debugging.
+# IF _subj(be,$var0)
+		^ _obj($vrb,$var0)
+		^ _obj($prepinst,$qvarinst)
+      ^ $prep(be, $prepinst)            ; preposition 
+      ^ %LemmaLink($vrb,$word1)         ; word of word instance
+      ^ $phrase($word1, $prep)          ; convert to phrase
+      ^ %WordInstanceLink($var0,$sent)  ; $var0 and $vrb must be
+      ^ %WordInstanceLink($vrb,$sent)   ; in the same sentence
+      ^ %WordInstanceLink($qvarinst,$sent) ; in the same sentence
+      ^ %WordInstanceLink($prepinst,$sent) ; in the same sentence
+      ^ %LemmaLink($qvarintst,$qvar)    ; word of word instance
+      THEN ^3_$phrase($qvar, $var0) 

@@ -440,18 +440,49 @@ Triples matching
 ----------------
 The nlp/triples directory contains code that generates semantic triples
 from RelEx input.  So for example: "Bats are made of wood." results in
-"made_of(wood, bat)"
+the semantic triple "made_of(wood, bat)", which is derived from the
+raw relex dependencies:
 
- _obj (made_of, bat)
- _iobj (made_of, wood)
+    _obj (made_of, bat)
+    _iobj (made_of, wood)
 
+By contrast, consider the question: "What are bats made of?" It has a
+very different RelEx dependency structure:
 
-What are bats made of?
+    _subj (be, bat)
+    _obj (make, bat) 
+    _obj (of, _$qVar) 
+    of (be, of)
 
-_obj (<<of>>, <<_$qVar>>) 
-_obj (<<make>>, <<bat>>) 
-_subj (<<be>>, <<bat>>)
-of (<<be>>, <<of>>)
+Because if this, performing simple patern matchin on the dependency 
+structure will fail.
+
+Lets try another: "The color of the book is red."
+    _predadj (color, red)
+    of (color, book) 
+Which the semantic-triple rules convert to "color_of(book,red)"
+
+By contrast, "what is the color of the book?" becomes
+
+    _subj (be, _$qVar)
+    _obj (be, color)
+    of (color, book) 
+    QUERY-TYPE (_$qVar, what)
+    COPULA-QUESTION-FLAG (color, T)
+
+which does have a semantic triple form: "color_of(book,what)"
+Thus, for this case, question-answering by such normalized
+"semantic triples" should work just fine.
+
+By contrast, "what color is the book?" becomes
+
+    _obj (be, book)
+    _subj (be, color)
+    QUERY-TYPE (_$qVar, what)
+    QUERY-FLAG (color, T)
+
+and the manner in which this should be converted into a "color_of"
+question is unclear.
 
 
 References
