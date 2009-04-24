@@ -589,8 +589,11 @@ How to run the current code in example/demo/debug mode:
 -- run load.sh
 -- run load-examples.sh  to load the example sentences.
 -- Enter the scheme shell
+-- run (cog-ad-hoc "do-implication" prep-rule-0) through
+   (cog-ad-hoc "do-implication" prep-rule-3) 
+   These is a require step to perform some initial setup.
 -- run (cog-ad-hoc "do-implication" frame-rule-0) through
-   (cog-ad-hoc "do-implication" frame-rule-12) and observe results.
+   (cog-ad-hoc "do-implication" frame-rule-9) and observe results.
 
 Next step:
 -- Download the MIT ConceptNet corpus.
@@ -606,6 +609,10 @@ Next step:
 -- Edit file-process.scm and change file patch to parsed sentences.
 -- run load.sh
 -- Enter the scheme shell
+
+XXXXXXXXXXXXXX TEMPORARILY BROKEN, input sentences must be linked to
+ConceptNode "# APPLY TRIPLE RULES" via list link to apply.
+
 -- run command (do-triples n) where n is the number of files
    to process.
 
