@@ -214,7 +214,7 @@ sub print_link
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
-	print "$indent($link\n";
+	print "$indent($link (stv 1.0 1.0)\n";
 	if ($item1 =~ /^\$/)
 	{
 		print "$indent   (VariableNode \"$item1\")\n";
@@ -302,7 +302,7 @@ sub print_word_instances
 		my $item = $_;
 
 		print "$indent;; word-instance lemma of \"$item\"\n";
-		print "$indent(LemmaLink\n";
+		print "$indent(LemmaLink (stv 1.0 1.0)\n";
 		# Some unknow word instance, to be fixed by variable.
 		# print "$indent   (WordInstanceNode \"$item\")\n";
 		my $eyed = $word_map{$item};
