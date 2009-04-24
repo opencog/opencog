@@ -29,14 +29,16 @@ namespace reasoning
 
 struct iAtomSpaceWrapper : public reasoning::AtomLookupProvider
 {
-	virtual pHandle addAtom(tree<Vertex>&, const TruthValue& tvn,
-            bool fresh, bool managed = true)=0;
-	virtual pHandle addLink(Type T, const pHandleSeq& hs,
-            const TruthValue& tvn, bool fresh=false, bool managed = true)=0;
-	virtual pHandle addNode(Type T, const std::string& name,
-            const TruthValue& tvn, bool fresh=false, bool managed = true)=0;
+    virtual pHandle addAtom(tree<Vertex>&, const TruthValue& tvn,
+                            bool fresh, bool managed = true)=0;
+    virtual pHandle addLink(Type T, const pHandleSeq& hs,
+                            const TruthValue& tvn, bool fresh=false,
+                            bool managed = true)=0;
+    virtual pHandle addNode(Type T, const std::string& name,
+                            const TruthValue& tvn, bool fresh=false,
+                            bool managed = true)=0;
 
-	virtual unsigned int getUniverseSize() const=0;
+    virtual unsigned int getUniverseSize() const=0;
 };
 
 }

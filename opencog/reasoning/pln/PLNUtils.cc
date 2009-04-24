@@ -1247,7 +1247,13 @@ reasoning::atom* newAtomWithNewType(Handle h, Type T)
  reasoning::atom* ret = new reasoning::atom(h);
  ret->T = T;
  return ret;
-}*/
+ }*/
+
+bool equal(pHandle A, pHandle B) {
+    return A == B;
+}
+
+
 /*
 Handle satisfyingSet(Handle P)
 {
@@ -1280,9 +1286,7 @@ Handle satisfyingSet(Handle P)
    ps.push_back(ArgList[0]);
    ps.push_back(ret);
 
-   addLink(MEMBER_LINK, ps,
-    tv,
-    false);
+   addLink(MEMBER_LINK, ps, tv, false);
   }
  }
 
@@ -1290,41 +1294,39 @@ Handle satisfyingSet(Handle P)
 }
 */
 
-/* TODO: Update for tree<Vertex>*/
- /*HandleSeq constitutedSet(Handle CP,
-                         float min_membershipStrength,
-                         float min_membershipCount)
+pHandleSet constitutedSet(pHandle CP,
+                          strength_t min_membershipStrength,
+                          count_t min_membershipCount)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
-    assert(atw->getType(CP) == CONCEPT_NODE);
+    assert(atw->isSubType(CP, CONCEPT_NODE));
     
-    map<Handle, float> members;
-    HandleSeq ret;
+    map<pHandle, float> members;
+    pHandleSet ret;
     
-    // HandleEntry* evals = getHandleSet(MEMBER_LINK);
-
-    TableGather mems(atom(__INSTANCEOF_N, 1, new atom(MEMBER_LINK,0) ));
-    
-    for (int i = 0; i < mems.size(); i++) {
-        HandleSeq hs = getOutgoing(mems[i]);
+    tree<Vertex> tr(static_cast<pHandle>(MEMBER_LINK));
+    TableGather mems(tr);
+    for(TableGatherConstIt tgci = mems.begin(); tgci != mems.end(); ++tgci) {
+        pHandle h = boost::get<pHandle>(tgci->GetValue());
+        pHandleSeq hs = atw->getOutgoing(h);
         
         assert(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
-            const TruthValue& tv = atw->getTV(hs[1]);
+            const TruthValue& tv = atw->getTV(hs[0]);
             
-            if (min_membershipStrength >= tv.getMean()
-                && min_membershipCount >= tv.getCount())
-                ret.push_back(hs[0]);
+            if (min_membershipStrength <= tv.getMean()
+                && min_membershipCount <= tv.getCount())
+                ret.insert(hs[0]);
         }
     }
 
     return ret;
 }
- */
 
-}
+
+} //Nil: I have that feeling that closing braces disable the rest of the code?
 
 /*
 #include <boost/variant/static_visitor.hpp>

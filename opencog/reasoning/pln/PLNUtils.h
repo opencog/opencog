@@ -83,6 +83,8 @@ typedef Btr<vtree> meta;
 /// hpair is a pair of pHandles
 typedef pair<pHandle, pHandle> hpair;
 
+typedef std::set<pHandle> pHandleSet;
+
 /**
  * vector2 appears to provide an easy way to instantiate vectors with 1-4 items.
  */
@@ -466,8 +468,9 @@ struct weak_atom {
     /// Does not share ownership of bindings!!!
     weak_atom(const weak_atom& rhs, Btr<bindingsT> _bindings)
             : value(rhs.value) {
-        this->bindings = Btr<bindingsT>(
-                             rhs.bindings ? new bindingsT(*rhs.bindings) : new bindingsT);
+        this->bindings = Btr<bindingsT>(rhs.bindings ?
+                                        new bindingsT(*rhs.bindings)
+                                        : new bindingsT);
         insert_with_consistency_check(*this->bindings, _bindings->begin(), _bindings->end());
     }
 
@@ -483,10 +486,21 @@ typedef set<Vertex> BasicVertexSet;
 typedef std::vector<reasoning::BoundVertex> BV_Vector;
 typedef std::set<reasoning::BoundVertex> BV_Set;
 
+
+/**
+ * TableGather retrieves links given a template
+ * (_MP that stands for meta predicate)
+ * Warning: apparently it does not work with atom type
+ * as root of the meta predicate
+ * but it works well with a link type, see TableGatherUTest for an example
+ */
 struct TableGather : public std::set<weak_atom<Vertex> > {
     TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider = NULL, const Type VarT = FW_VARIABLE_NODE, int index = -1);
     void gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider = NULL, const Type VarT = FW_VARIABLE_NODE, int index = -1);
 };
+
+typedef TableGather::iterator TableGatherIt;
+typedef TableGather::const_iterator TableGatherConstIt;
 
 bool getLargestIntersection(const set<pHandle>& keyelem_set, const set<pHandle>& link_set, pHandle& result);
 
@@ -508,7 +522,23 @@ std::string GetRandomString(int size);
 bool equal(pHandle A, pHandle B);
 
 Handle satisfyingSet(Handle h);
-HandleSeq constitutedSet(Handle P, float min_membershipStrength, float min_membershipCount);
+
+/**
+ * Return the set of members of a given concept node (or inheriting concept)
+ * 
+ * @param P The pHandle of the concept node (or inheriting concept)
+ * @param min_membershipStrength The minimum strength of the element
+ *                                WARNING: element or membership? to be defined
+ *                               to be taken in consideration
+ * @param min_membershipCount The minimum count of the element to be taken
+ *                                WARNING: element or membership? to be defined
+ *                            in consideration
+ * @return The pHandleSet containing all elements that are member of P and
+ *         have their TV above the given threshold strength and count
+ */
+pHandleSet constitutedSet(pHandle P,
+                          strength_t min_membershipStrength,
+                          count_t min_membershipCount);
 
 template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);

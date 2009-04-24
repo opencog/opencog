@@ -1,0 +1,125 @@
+/*
+ * Copyright (C) 2008 by Novamente LLC
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+
+#include <boost/assign/list_of.hpp>
+
+using namespace opencog;
+using namespace reasoning;
+using namespace boost::assign;
+
+#define GET_ASW ((AtomSpaceWrapper*) ASW())
+
+class TableGatherUTest :  public CxxTest::TestSuite {
+private:
+
+    AtomSpaceWrapper* asw;
+
+public:
+
+    TableGatherUTest() {
+        puts("Initializing PLN test env...");
+
+        // This access is required to initialise CogServer.
+        CogServer& cogserver = static_cast<CogServer&>(server());
+
+        LOG(2, "Creating AtomSpaceWrappers...");
+        
+        // This is also necessary to make sure that the ASW is initialized
+        // at the right time.
+        asw = GET_ASW;
+    }
+
+    void test_TableGather() {
+        //add nodes of various types
+        SimpleTruthValue n_tv(0.8, 10);
+        pHandle n1_h = asw->addNode(CONCEPT_NODE, "c1", n_tv);
+        pHandle n2_h = asw->addNode(NODE, "n2", n_tv);
+        pHandle n3_h = asw->addNode(NUMBER_NODE, "3", n_tv);
+        pHandle n4_h = asw->addNode(PREDICATE_NODE, "p4", n_tv);
+        pHandle n5_h = asw->addNode(VARIABLE_NODE, "$n5", n_tv);
+        pHandle n6_h = asw->addNode(NODE, "n6", n_tv);
+        pHandle n7_h = asw->addNode(NODE, "n7", n_tv);
+        pHandle n8_h = asw->addNode(NODE, "n8", n_tv);
+
+        //add links of various types
+        SimpleTruthValue l_tv(0.8, 10);
+        pHandleSeq l1_hs = list_of(n2_h)(n1_h);
+        pHandle l1_h = asw->addLink(MEMBER_LINK, l1_hs, l_tv);
+        pHandleSeq l2_hs = list_of(n4_h)(n3_h);
+        pHandle l2_h = asw->addLink(EVALUATION_LINK, l2_hs, l_tv);
+        pHandleSeq l3_hs = list_of(n6_h)(n5_h);
+        pHandle l3_h = asw->addLink(LINK, l3_hs, l_tv);
+        pHandleSeq l4_hs = list_of(n8_h)(n7_h);
+        pHandle l4_h = asw->addLink(LINK, l4_hs, l_tv);
+
+        //test TableGather
+        tree<Vertex> mp1(static_cast<pHandle>(MEMBER_LINK));
+        TableGather table1(mp1);
+        tree<Vertex> mp2(static_cast<pHandle>(EVALUATION_LINK));
+        TableGather table2(mp2);
+        tree<Vertex> mp3(static_cast<pHandle>(LINK));
+        TableGather table3(mp3);
+
+        cout << "test table1: " << endl;
+        for(TableGatherConstIt i = table1.begin(); i != table1.end(); i++) {
+            cout << boost::get<pHandle>(i->GetValue()) << " ";
+        }
+        cout << endl;
+
+        cout << "test table2: " << endl;
+        for(TableGatherConstIt i = table2.begin(); i != table2.end(); i++) {
+            cout << boost::get<pHandle>(i->GetValue()) << " ";
+        }
+        cout << endl;
+
+        cout << "test table3: " << endl;
+        for(TableGatherConstIt i = table3.begin(); i != table3.end(); i++) {
+            cout << boost::get<pHandle>(i->GetValue()) << " ";
+        }
+        cout << endl;
+
+        //check table1
+        TS_ASSERT(table1.find(weak_atom<Vertex>(l1_h)) != table1.end());
+        TS_ASSERT(table1.find(weak_atom<Vertex>(l2_h)) == table1.end());
+        TS_ASSERT(table1.find(weak_atom<Vertex>(l3_h)) == table1.end());
+        TS_ASSERT(table1.find(weak_atom<Vertex>(l4_h)) == table1.end());
+
+        //check table2
+        TS_ASSERT(table2.find(weak_atom<Vertex>(l1_h)) == table2.end());
+        TS_ASSERT(table2.find(weak_atom<Vertex>(l2_h)) != table2.end());
+        TS_ASSERT(table2.find(weak_atom<Vertex>(l3_h)) == table2.end());
+        TS_ASSERT(table2.find(weak_atom<Vertex>(l4_h)) == table2.end());
+
+        //check table3
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l1_h)) == table3.end());
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l2_h)) == table3.end());
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l3_h)) != table3.end());
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l4_h)) != table3.end());
+
+        //TODO: perhaps add more test cases with variables...?
+    }
+};

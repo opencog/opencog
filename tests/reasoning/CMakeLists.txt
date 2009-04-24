@@ -54,6 +54,8 @@ LINK_LIBRARIES (
 ADD_CXXTEST(FormulaKitUTest)
 ADD_CXXTEST(IndefinitePLNFormulaUTest)
 ADD_CXXTEST(AtomSpaceWrapperUTest)
+ADD_CXXTEST(constitutedSetUTest)
+ADD_CXXTEST(TableGatherUTest)
 
 # At this point, PLNUTest requires libexpat, and will fail without it, since axioms 
 # are loaded from XML files. See AtomSpaceWrapper.cc for details.

@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+
+#include <boost/assign/list_of.hpp>
+
+using namespace opencog;
+using namespace reasoning;
+using namespace boost::assign;
+
+#define GET_ASW ((AtomSpaceWrapper*) ASW())
+
+//min membership strength
+#define MIN_MS 0.1
+//min membership count
+#define MIN_MC 2
+
+
+class constitutedSetUTest :  public CxxTest::TestSuite {
+private:
+
+    AtomSpaceWrapper* asw;
+
+public:
+
+    constitutedSetUTest() {
+        puts("Initializing PLN test env...");
+
+        // This access is required to initialise CogServer.
+        CogServer& cogserver = static_cast<CogServer&>(server());
+
+        LOG(2, "Creating AtomSpaceWrappers...");
+        
+        // This is also necessary to make sure that the ASW is initialized
+        // at the right time.
+        asw = GET_ASW;
+    }
+
+    void test_constitutedSet() {
+        //add concept atom
+        SimpleTruthValue c_tv(0.8, 10);
+        pHandle c_h = asw->addNode(CONCEPT_NODE, "c1", c_tv);
+        
+        //add element atoms
+        SimpleTruthValue e1_tv(0.8, 10);
+        pHandle e1_h = asw->addNode(CONCEPT_NODE, "e1", e1_tv);
+        pHandle e2_h = asw->addNode(CONCEPT_NODE, "e2", e1_tv);
+        pHandle e3_h = asw->addNode(CONCEPT_NODE, "e3", e1_tv);
+        pHandle e4_h = asw->addNode(CONCEPT_NODE, "e4", e1_tv);
+        pHandle e5_h = asw->addNode(CONCEPT_NODE, "e5", e1_tv);
+        SimpleTruthValue e2_tv(0.01, 10); //to check min element strength
+        pHandle e6_h = asw->addNode(CONCEPT_NODE, "e6", e2_tv);
+        SimpleTruthValue e3_tv(0.8, 1); //to check min element count
+        pHandle e7_h = asw->addNode(CONCEPT_NODE, "e7", e3_tv);
+
+        //add memberlinks
+        SimpleTruthValue m1_tv(0.8, 10);
+        pHandleSeq m1_hs = list_of(e1_h)(c_h);
+        pHandle m1_h = asw->addLink(MEMBER_LINK, m1_hs, m1_tv);
+        pHandleSeq m2_hs = list_of(e2_h)(c_h);
+        pHandle m2_h = asw->addLink(MEMBER_LINK, m2_hs, m1_tv);
+        pHandleSeq m3_hs = list_of(e3_h)(c_h);
+        pHandle m3_h = asw->addLink(MEMBER_LINK, m3_hs, m1_tv);
+        pHandleSeq m4_hs = list_of(e4_h)(c_h);
+        pHandle m4_h = asw->addLink(MEMBER_LINK, m4_hs, m1_tv);
+        pHandleSeq m5_hs = list_of(e5_h)(c_h);
+        pHandle m5_h = asw->addLink(MEMBER_LINK, m5_hs, m1_tv);
+        SimpleTruthValue m2_tv(0.01, 10); //to check min member strength
+                                          //WARNING: not activated anyway
+        pHandleSeq m6_hs = list_of(e6_h)(c_h);
+        pHandle m6_h = asw->addLink(MEMBER_LINK, m6_hs, m2_tv);
+        SimpleTruthValue m3_tv(0.8, 1); //to check min member count
+                                        //WARNING: not activated anyway
+        pHandleSeq m7_hs = list_of(e7_h)(c_h);
+        pHandle m7_h = asw->addLink(MEMBER_LINK, m7_hs, m3_tv);
+
+        //test constitutedSet
+        pHandleSet constituted_hs = constitutedSet(c_h, MIN_MS, MIN_MC);
+
+        cout << "test constitutedSet: " << endl;
+        foreach (pHandle i, constituted_hs) {
+            cout << i << " ";
+        }
+        cout << endl;
+
+        TS_ASSERT(constituted_hs.find(e1_h) != constituted_hs.end());
+        TS_ASSERT(constituted_hs.find(e2_h) != constituted_hs.end());
+        TS_ASSERT(constituted_hs.find(e3_h) != constituted_hs.end());
+        TS_ASSERT(constituted_hs.find(e4_h) != constituted_hs.end());
+        TS_ASSERT(constituted_hs.find(e5_h) != constituted_hs.end());
+        //e6_h and e7_h do not belong to constituted_hs
+        //because they do not pass the strength or count threshold
+        TS_ASSERT(constituted_hs.find(e6_h) == constituted_hs.end());
+        TS_ASSERT(constituted_hs.find(e7_h) == constituted_hs.end());
+    }
+};

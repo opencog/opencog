@@ -218,7 +218,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
     //! @param managed some kind of mechanism to manage memory
-    pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn, bool fresh, bool managed);
+    pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
+                    bool fresh, bool managed);
 
     //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
     //bool isSubcontextOf(const Handle sub, const Handle super);
@@ -311,10 +312,11 @@ public:
             bool managed=true);
     //! Add link
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-            bool fresh=false, bool managed=true)=0;
+                            bool fresh=false, bool managed=true)=0;
     //! Add node
     virtual pHandle addNode(Type T, const std::string& name,
-            const TruthValue& tvn, bool fresh=false, bool managed=true)=0;
+                            const TruthValue& tvn, bool fresh=false,
+                            bool managed=true)=0;
 
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
@@ -350,10 +352,10 @@ public:
     
     //! Add Link via dummy contexts method
     pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
-            bool fresh, bool managed);
+                      bool fresh, bool managed);
     //! Add Node via dummy contexts method
     pHandle addNodeDC(Type t, const string& name, const TruthValue& tvn,
-            bool fresh, bool managed);
+                      bool fresh, bool managed);
 
     /** Add concrete atom using dummy contexts if it already exists
      * 
@@ -435,9 +437,9 @@ public:
     virtual ~FIMATW() {}
 
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+                    bool fresh, bool managed=true);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+                    bool fresh, bool managed=true);
 // TODELETE:
 //  FIMATW(combo::NMCore* core) : AtomSpaceWrapper(core), next_free_pat_id(30001) {}
 };

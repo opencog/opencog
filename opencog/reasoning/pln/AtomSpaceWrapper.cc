@@ -1507,7 +1507,8 @@ NormalizingATW::NormalizingATW()
 
 //#define BL 2
 pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
-        const TruthValue& tvn,bool fresh,bool managed)
+                                const TruthValue& tvn,
+                                bool fresh, bool managed)
 {
     AtomSpace *a = AS_PTR;
     pHandle ret= PHANDLE_UNDEFINED;

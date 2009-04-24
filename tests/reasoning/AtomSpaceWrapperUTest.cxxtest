@@ -19,11 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "opencog/server/CogServer.h"
+#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "opencog/reasoning/pln/PLN.h"
-#include "opencog/reasoning/pln/AtomSpaceWrapper.h"
+#include <opencog/reasoning/pln/PLN.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
 
 using namespace opencog;
 using namespace reasoning;
@@ -127,6 +127,8 @@ public:
             cout << i << " ";
         }
         cout << endl;
+
+        //TODO: ADD TS_ASSERT
 
         asw->reset();
     }

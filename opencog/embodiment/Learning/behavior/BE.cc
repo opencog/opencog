@@ -36,12 +36,15 @@ typedef unsigned long ulong;
 
 #include "BE.h"
 #include "BDTracker.h"
-#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "WorldProvider.h"
+
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/CompareAtomTreeTemplate.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
 #include <opencog/embodiment/PetComboVocabulary/PetComboVocabulary.h>
+
+#include <boost/assign/list_of.hpp>
 
 #define WALK_PERCEPT_NAME "walk"
 #define MIN_ACTION_DURATION 2
@@ -60,6 +63,7 @@ namespace behavior
 
 using namespace PetCombo;
 using namespace opencog;
+using namespace boost::assign;
 
 const unsigned long BehaviorEncoder::MinActionTime = MIN_ACTION_DURATION;
 const unsigned long BehaviorEncoder::MinPauseTime = MIN_PAUSE_DURATION;
@@ -401,33 +405,34 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     } else {
                         logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is close enough and therefore is considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
 
+                        //====
                         //create the arg list of goto_obj
-                        HandleSeq arg_seq;
-                        arg_seq.push_back(subject_h);
+                        //====
+                        //get handle of goto_obj action
                         string goto_obj_name = instance(id::goto_obj)->get_name();
                         Handle goto_obj_h = as.addNode(NODE, goto_obj_name);
-                        arg_seq.push_back(goto_obj_h);
 
-                        //get the handle of the destination object
+                        //get handle of the destination object
                         std::list<Handle> ret;
                         as.getHandleSet(std::back_inserter(ret), OBJECT_NODE,
                                         obj_id, true);
                         opencog::cassert(TRACE_INFO, ret.size() == 1,
                                          "HandleSet should contain exactly one object.");
                         Handle obj_h = *ret.begin();
+                        //get handle of speed
                         Handle speed_h = as.addNode(NUMBER_NODE,
                                                     boost::lexical_cast<string>(GOTO_OBJ_SPEED));
-                        arg_seq.push_back(obj_h);
-                        arg_seq.push_back(speed_h);
+
+                        HandleSeq arg_seq =
+                            list_of(subject_h)(goto_obj_h)(obj_h)(speed_h);
+                            
                         new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
                     } //~else
 
                 } //~if(walk)
                 else {//not a walk command
                     //we just need to flatten the action arguments
-                    HandleSeq arg_seq;
-                    arg_seq.push_back(subject_h);
-                    arg_seq.push_back(per_h);
+                    HandleSeq arg_seq = list_of(subject_h)(per_h);
                     if (as.getArity(arg_list_h) > 2) {
 
                         Handle action_arg_list_h = as.getOutgoing(arg_list_h, 2);
@@ -437,7 +442,8 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                         HandleSeq action_arg_seq = as.getOutgoing(action_arg_list_h);
                         arg_seq.insert(arg_seq.end(),
-                                       action_arg_seq.begin(), action_arg_seq.end());
+                                       action_arg_seq.begin(),
+                                       action_arg_seq.end());
                     }
                     new_arg_list_h = as.addLink(LIST_LINK, arg_seq);
                 }
@@ -458,17 +464,13 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                             "Apparently the previous action overlaps too much the current one and it's not clear which one should be first.");
                 }
 
-                HandleSeq el_seq;
-                el_seq.push_back(behaved_h);
-                el_seq.push_back(new_arg_list_h);
+                HandleSeq el_seq = list_of(behaved_h)(new_arg_list_h);
                 Handle bd_h = as.addLink(EVALUATION_LINK, el_seq);
                 Temporal t(tl, tu);
                 Handle bd_t_h = as.addTimeInfo(bd_h, t);
 
                 //add member link
-                HandleSeq memberLinkHS;
-                memberLinkHS.push_back(bd_t_h);
-                memberLinkHS.push_back(trickExemplarAtTime);
+                HandleSeq memberLinkHS = list_of(bd_t_h)(trickExemplarAtTime);
                 as.addLink(MEMBER_LINK, memberLinkHS);
 
                 logger().log(opencog::Logger::DEBUG,
@@ -570,8 +572,8 @@ bool BehaviorEncoder::update(Temporal start_moment)
         //printf("new perc %s\n", htp.toString().c_str());
         new_perceptions.insert(htp.getHandle());
     }
-    bprintf("Found %lu TOTAL perceptions\n", new_perceptions.size());
-    bprintf("%lu factories\n", factories.size());
+    bprintf("Found %u TOTAL perceptions\n", new_perceptions.size());
+    bprintf("%u factories\n", factories.size());
 
     foreach(const VFpair& vf, factories) {
         set<Handle> f_perceptions;
@@ -580,7 +582,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
                          inserter(f_perceptions, f_perceptions.begin()),
                          does_fit_template(vf.first, &wp->getAtomSpace()));
 
-        bprintf("Found %lu valid perceptions\n", f_perceptions.size());
+        bprintf("Found %u valid perceptions\n", f_perceptions.size());
 
         vf.second->update(trickExemplarAtTime,
                           t_now,
