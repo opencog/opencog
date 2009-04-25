@@ -73,10 +73,26 @@
 ; The result-triples-anchor anchors the results of triples processing.
 (define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
 
+; copy-new-sent-to-triple-anchor -- 
+; This is slightly tricky, because the triples anchor is expecting
+; not SentenceNodes, but ParseNodes.  So for each sentence, we have
+; to get the parses, and attach those.
+;
 (define (copy-new-sent-to-triple-anchor)
-	(for-each (lambda (x) (ListLink ready-for-triples-anchor x))
-		(get-new-parsed-sentences)
+
+	;; Attach all parses of a sentence to the anchor.
+	(define (link-parses sent)
+		;; Get list of parses for the sentence.
+		(define (get-parses sent)
+			(cog-chase-link 'ParseLink 'ParseNode sent)
+		)
+		;; Attach all parses of the sentence to the anchor.
+		(for-each (lambda (x) (ListLink ready-for-triples-anchor x))
+			(get-parses sent)
+		)
 	)
+	;; Attach all parses of all sentences to the anchor.
+	(for-each link-parses (get-new-parsed-sentences))
 )
 
 (define (delete-triple-anchor-links)
@@ -145,9 +161,12 @@
 		)
 	)
 
+	(display "Hello ")
+	(display nick)
+	(display ", parsing ...\n")
+
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
-	(copy-new-sent-to-triple-anchor)
 
 	(let ((sents (get-new-parsed-sentences)))
 
@@ -156,7 +175,6 @@
 		; something, even if the input was non-sense.
 		(if (null? sents)
 			(let ()
-				(display "Hello ")
 				(display nick)
 				(display ", you said: \"")
 				(display txt)
@@ -166,7 +184,6 @@
 		(let ((is-question (cog-ad-hoc "question" (car sents))))
 			(if is-question 
 				(let ()
-					(display "Hello ")
 					(display nick)
 					(display ", you asked a question: ")
 					(display txt)
@@ -174,7 +191,6 @@
 					(prt-soln)
 				)
 				(let ()
-					(display "Hello ")
 					(display nick)
 					(display ", you made a statement: ")
 					(display txt)
@@ -184,6 +200,7 @@
 		)
 	)
 
+	(copy-new-sent-to-triple-anchor)
 	(create-triples)
 
 	; cleanup -- these sentences are not new any more
