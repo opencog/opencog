@@ -70,18 +70,42 @@
 ; this node will eventually have triples built from them.
 (define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
+; The result-triples-anchor anchors the results of triples processing.
+(define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
+
 (define (copy-new-sent-to-triple-anchor)
-	(for-each (lambda (x) (ListLink ready-for-triples-anchor x)) (get-new-parsed-sentences))
+	(for-each (lambda (x) (ListLink ready-for-triples-anchor x))
+		(get-new-parsed-sentences)
+	)
 )
 
 (define (delete-triple-anchor-links)
-	(for-each (lambda (x) (cog-delete x)) (cog-incoming-set ready-for-triples-anchor))
+	(for-each (lambda (x) (cog-delete x))
+		(cog-incoming-set ready-for-triples-anchor)
+	)
 )
+
+(define (create-triples)
+	; First, create all of the preposition phrases that we'll need.
+	(for-each
+		(lambda (rule)
+			(cog-ad-hoc "do-implication" rule)
+		)
+		prep-rule-list ; this list defined by the /triples/prep-rules.txt file
+	)
+	(for-each
+		(lambda (rule)
+			(display (cog-ad-hoc "do-implication" rule))
+		)
+		frame-rule-list ; this list defined by the /triples/rules.txt file
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
-(define (query-soln-anchor (AnchorNode "# QUERY SOLUTION")))
+(define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
 (define (say-id-english nick txt)
 
 	; Define a super-dooper cheesy way of getting the answer to the question
@@ -159,6 +183,8 @@
 			)
 		)
 	)
+
+	(create-triples)
 
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
