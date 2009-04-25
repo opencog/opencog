@@ -165,7 +165,8 @@
 
 	(display "Hello ")
 	(display nick)
-	(display ", parsing ...\n")
+	(display ", parsing ...")
+	(newline)  ; explicit flush
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
@@ -180,7 +181,8 @@
 				(display nick)
 				(display ", you said: \"")
 				(display txt)
-				(display "\" but I couldn't parse that\n")
+				(display "\" but I couldn't parse that.")
+				(newline)
 			)
 		)
 		(let ((is-question (cog-ad-hoc "question" (car sents))))

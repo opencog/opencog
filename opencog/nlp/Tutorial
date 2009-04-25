@@ -1,0 +1,31 @@
+
+                             OpenCog NLP Tutorial
+                             --------------------
+                                 April 2009
+                     Linas Vepstas <linasvepstas@gmail.com>
+
+
+Under construction.
+
+Outline:
+-- link-grammar
+-- relex
+-- chat
+-- pattern match
+-- triples
+-- common sense
+
+Simple relex query that involves preps that 
+works and does not require triple:
+
+of (<<capital>>, <<Lithuania>>)
+_subj (<<be>>, <<Vilnius>>)
+_obj (<<be>>, <<capital>>)
+
+
+of (<<capital>>, <<Lithuania>>)
+ COPULA-QUESTION-FLAG (capital, T)
+QUERY-TYPE (_$qVar, what)
+_subj (<<be>>, <<_$qVar>>) what
+_obj (<<be>>, <<capital>>)
+

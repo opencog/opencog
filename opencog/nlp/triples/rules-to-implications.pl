@@ -214,7 +214,7 @@ sub print_link
 
 	# Print a copy of the original clause for reference
 	print "$indent;; $clause\n";
-	print "$indent($link (stv 1.0 1.0)\n";
+	print "$indent($link (stv 1 1)\n";
 	if ($item1 =~ /^\$/)
 	{
 		print "$indent   (VariableNode \"$item1\")\n";
