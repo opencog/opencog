@@ -219,7 +219,11 @@ sub print_link
 	{
 		print "$indent   (VariableNode \"$item1\")\n";
 	}
-	elsif ($item1 =~ /^\"/)
+	elsif ($item1 =~ /^\"#/) # if string starts with hash  mark
+	{
+		print "$indent   (AnchorNode $item1)\n";
+	}
+	elsif ($item1 =~ /^\"/) # else a string in general
 	{
 		print "$indent   (ConceptNode $item1)\n";
 	}
@@ -232,7 +236,11 @@ sub print_link
 	{
 		print "$indent   (VariableNode \"$item2\")\n";
 	}
-	elsif ($item2 =~ /^\"/)
+	elsif ($item2 =~ /^\"#/) # if string starts with hash  mark
+	{
+		print "$indent   (AnchorNode $item2)\n";
+	}
+	elsif ($item2 =~ /^\"/) # else a string in general
 	{
 		print "$indent   (ConceptNode $item2)\n";
 	}

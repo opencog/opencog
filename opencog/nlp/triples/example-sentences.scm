@@ -8,7 +8,7 @@ scm
 ; prepositional relation extraction, PLN reasoning, and question-answering
 ; can be done.
 ;
-; Please note that (ConceptNode "# APPLY TRIPLE RULES") was manually
+; Please note that (AnchorNode "# APPLY TRIPLE RULES") was manually
 ; added at the end of the file.
 ;
 ; The current list of sentences are:

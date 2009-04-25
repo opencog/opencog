@@ -611,7 +611,7 @@ Next step:
 -- Enter the scheme shell
 
 XXXXXXXXXXXXXX TEMPORARILY BROKEN, input sentences must be linked to
-ConceptNode "# APPLY TRIPLE RULES" via list link to apply.
+AnchorNode "# APPLY TRIPLE RULES" via list link to apply.
 
 -- run command (do-triples n) where n is the number of files
    to process.
