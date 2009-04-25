@@ -123,11 +123,11 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 
 	// Atom aa is from the predicate, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (bound_vars.count(ha))
+	if (bound_vars.end() != bound_vars.find(ha))
 	{
 		// But... if atom b happens to also be a bound var,
 		// then its a mismatch.
-		if (bound_vars.count(hb)) return true;
+		if (bound_vars.end() != bound_vars.find(hb)) return true;
 
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
@@ -214,6 +214,8 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 
 bool PatternMatchEngine::soln_up(Handle hsoln)
 {
+	// Let's not look at our own navel
+	if (hsoln == curr_root) return false;
 	Atom *ap = TLB::getAtom(curr_pred_handle);
 	Atom *as = TLB::getAtom(hsoln);
 	depth = 1;
@@ -347,7 +349,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	// If we are here, then we are somewhere in the middle of a clause,
 	// and everything below us matches. So need to move up.
 	soln_handle_stack.push(curr_soln_handle);
-	curr_soln_handle = TLB::getHandle(as);
+	curr_soln_handle = hsoln;
 
 	// Move up the predicate, and hunt for a match, again.
 	prtmsg("node has grnd, move up:", as);
@@ -482,6 +484,29 @@ void PatternMatchEngine::get_next_untried_clause(void)
 }
 
 /* ======================================================== */
+
+Handle PatternMatchEngine::find_starter(Handle h)
+{
+	curr_pred_handle = h;
+	Atom *a = TLB::getAtom(h);
+	Link *l = dynamic_cast<Link *>(a);
+	if (NULL == l)
+	{
+		Type t = a->getType();
+		if (t != VARIABLE_NODE) return h;
+		return Handle::UNDEFINED;
+	}
+
+	const std::vector<Handle> &vh = l->getOutgoingSet();
+	for (size_t i = 0; i < vh.size(); i++) {
+		Handle hout = vh[i];
+		Handle s = find_starter(hout);
+		if (s != Handle::UNDEFINED) return s;
+	}
+
+	return Handle::UNDEFINED;
+}
+
 /**
  * do_candidate - examine candidates, looking for matches.
  *
@@ -491,13 +516,6 @@ void PatternMatchEngine::get_next_untried_clause(void)
  */
 bool PatternMatchEngine::do_candidate(Handle ah)
 {
-	// Don't stare at our navel.
-	std::vector<Handle>::iterator i;
-	for (i = cnf_clauses.begin(); i != cnf_clauses.end(); i++)
-	{
-		if (ah == *i) return false;
-	}
-
 	// Cleanup
 	var_grounding.clear();
 	clause_grounding.clear();
@@ -511,8 +529,8 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 
 	// Match the required clauses.
 	curr_root = cnf_clauses[0];
+	curr_pred_handle = starter_pred;
 	issued.insert(curr_root);
-	curr_pred_handle = curr_root;
 	bool found = soln_up(ah);
 
 	// If found is false, then there's no solution here.
@@ -641,15 +659,31 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	}
 #endif
 
-	// Get type of the first item in the predicate list.
+	// Ideally, we start our search at some node, any node, that is
+	// not a variable, that is in the first clause. If the first
+	// clause consists entirely of variable nodes, then we are 
+	// screwed, and must search over all links that have the same 
+	// type as the first clause.
 	Handle h = cnf_clauses[0];
-	Atom *a = TLB::getAtom(h);
-	Type ptype = a->getType();
+	curr_root = h;
+	starter_pred = find_starter(h);
+	if (Handle::UNDEFINED != starter_pred)
+	{
+		do_candidate(starter_pred);
+	}
+	else
+	{
+		starter_pred = curr_root;
 
-	// Plunge into the deep end - start looking at all viable
-	// candidates in the AtomSpace.
-	atom_space->foreach_handle_of_type(ptype,
-	      &PatternMatchEngine::do_candidate, this);
+		// Get type of the first item in the predicate list.
+		Atom *a = TLB::getAtom(h);
+		Type ptype = a->getType();
+
+		// Plunge into the deep end - start looking at all viable
+		// candidates in the AtomSpace.
+		atom_space->foreach_handle_of_type(ptype,
+		      &PatternMatchEngine::do_candidate, this);
+	}
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG

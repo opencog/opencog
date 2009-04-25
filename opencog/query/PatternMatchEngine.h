@@ -66,6 +66,9 @@ class PatternMatchEngine
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle);
 
+		Handle find_starter(Handle);
+		Handle starter_pred;
+
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
