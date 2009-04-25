@@ -6,7 +6,29 @@
 ; Linas Vepstas April 2009
 ;
 
-(use-modules (ice-9 rdelim))
+(use-modules (ice-9 rdelim))  ; for the system call
+
+; -----------------------------------------------------------------------
+; global vars:
+; new-sent anchor points at the node to which all new sentences are connected
+;
+(define new-parsed-sent-anchor (ConceptNode "# New Parsed Sentence"))
+
+; Return the list of SentenceNodes that are attached to the 
+; freshly-parsed anchor.  This list will be non-empty if relex-parse
+; has been recently run. This list can be emptied with the call
+; delete-new-parsed-sent-links below.
+;
+(define (get-new-parsed-sentences)
+	(cog-chase-link 'ListLink 'SentenceNode new-parsed-sent-anchor)
+)
+
+; delete-new-parsed-sent-links deletes the links that anchor sentences to 
+; to new-parsed-sent anchor.
+;
+(define (delete-new-parsed-sent-links)
+	(for-each (lambda (x) (cog-delete x)) (cog-incoming-set new-parsed-sent-anchor))
+)
 
 ; -----------------------------------------------------------------------
 ; relex-parse -- send text to RelEx parser, load the resulting opencog atoms
@@ -14,9 +36,9 @@
 ; This routine takes plain-text input (in english), and sends it off 
 ; to a running instance of the RelEx parser, which should be listening 
 ; on port 4444. The parser will return a set of atoms, and these are
-; then loaded into this opencog instance. This routine returns a list
-; of atoms to a list of SentenceNode's that were generated as a result
-; of the parse.
+; then loaded into this opencog instance. After import, these are attached
+; to the "new-parsed-sent-anchor" via a ListLink; the set of newly added
+; sentences can be fetched with the "get-new-parsed-sentences" call.
 ;
 (define (relex-parse plain-txt)
 
@@ -38,16 +60,6 @@
 
 	; Perform the actual processing
 	(do-sock-io plain-txt)
-	(let* ((new-sent-anchor (ConceptNode "# New Parsed Sentence"))
-			(new-sent (cog-chase-link 'ListLink 'SentenceNode new-sent-anchor))
-		)
-
-		; Delete the ListLink's that connect the anchor to the new sentences
-		(for-each (lambda (x) (cog-delete x)) (cog-incoming-set new-sent-anchor))
-
-		; return the list of newly parsed sentences
-		new-sent
-	)
 )
 
 ; -----------------------------------------------------------------------
@@ -97,12 +109,17 @@
 	(newline)
 
 	; Parse the input, send it to the question processor
-	(let ((is-question (cog-ad-hoc "question" (car (relex-parse txt)))))
+	(relex-parse txt)
+
+	(let ((is-question (cog-ad-hoc "question" (car (get-new-parsed-sentences)))))
 		(if is-question 
 			(prt-soln)
 			(display "You made a statement")
 		)
 	)
+
+	; cleanup -- these sentences are not new any more
+	(delete-new-parsed-sent-links)
 	""
 )
 

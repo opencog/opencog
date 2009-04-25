@@ -352,7 +352,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 	curr_soln_handle = hsoln;
 
 	// Move up the predicate, and hunt for a match, again.
-	prtmsg("node has grnd, move up:", as);
+	prtmsg("node has grnd, move up:", hsoln);
 	bool found = foreach_incoming_handle(curr_pred_handle,
 	                &PatternMatchEngine::pred_up, this);
 	dbgprt("after moving up the clause, found = %d\n", found);
