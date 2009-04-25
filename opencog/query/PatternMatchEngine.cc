@@ -245,6 +245,7 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		{
 			no_match = pmc->clause_match(lp, ls);
 		}
+		dbgprt("clause match callback no_match=%d\n", no_match);
 		if (no_match) return false;
 
 		root_handle_stack.push(curr_root);

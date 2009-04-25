@@ -87,7 +87,9 @@
 			(cog-chase-link 'ParseLink 'ParseNode sent)
 		)
 		;; Attach all parses of the sentence to the anchor.
-		(for-each (lambda (x) (ListLink ready-for-triples-anchor x))
+		;; This must have a true/confident TV so that the pattern
+		;; matcher will find and use this link.
+		(for-each (lambda (x) (ListLink ready-for-triples-anchor x (stv 1 1)))
 			(get-parses sent)
 		)
 	)
