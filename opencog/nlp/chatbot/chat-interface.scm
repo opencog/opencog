@@ -70,21 +70,32 @@
 ; this node will eventually have triples built from them.
 (define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
+(define (copy-new-sent-to-triple-anchor)
+	(for-each (lambda (x) (ListLink ready-for-triples-anchor x)) (get-new-parsed-sentences))
+)
+
+(define (delete-triple-anchor-links)
+	(for-each (lambda (x) (cog-delete x)) (cog-incoming-set ready-for-triples-anchor))
+)
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
-; Right now, this just echoes the input.
-;
+(define (query-soln-anchor (AnchorNode "# QUERY SOLUTION")))
 (define (say-id-english nick txt)
 
 	; Define a super-dooper cheesy way of getting the answer to the question
 	; Right now, its looks for WordNode's attached, via ListLink, to 
-	; a concept node called "# QUERY SOLUTION". This is of course very wrong,
+	; an AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
 	; and is just a placeholder for now.
+	(define (get-simple-answer)
+		(cog-chase-link 'ListLink 'WordNode query-soln-anchor)
+	)
+	(define (delete-simple-answer)
+		(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
+	)
 	(define (prt-soln)
-		(let* ((query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
-				(soln-list (cog-chase-link 'ListLink 'WordNode query-soln-anchor))
+		(let* ((soln-list (get-simple-answer))
 			)
 			;; display *all* items in the list.
 			(define (show-item wlist)
@@ -106,12 +117,13 @@
 
 			; Delete  the list of solutions, so that we don't accidentally
 			; replay it when the next question is asked.
-			(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
+			(delete-simple-answer)
 		)
 	)
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
+	(copy-new-sent-to-triple-anchor)
 
 	(let ((sents (get-new-parsed-sentences)))
 
