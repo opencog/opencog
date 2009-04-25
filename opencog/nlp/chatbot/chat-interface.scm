@@ -110,19 +110,41 @@
 		)
 	)
 
-	(display "Hello ")
-	(display nick)
-	(display ", you said: ")
-	(display txt)
-	(newline)
-
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
 
-	(let ((is-question (cog-ad-hoc "question" (car (get-new-parsed-sentences)))))
-		(if is-question 
-			(prt-soln)
-			(display "You made a statement")
+	(let ((sents (get-new-parsed-sentences)))
+
+		; Hmm. Seems like sents is never null, unless there's a 
+		; programmig error in Relex.  Otherwise, it always returns 
+		; something, even if the input was non-sense.
+		(if (null? sents)
+			(let ()
+				(display "Hello ")
+				(display nick)
+				(display ", you said: \"")
+				(display txt)
+				(display "\" but I couldn't parse that\n")
+			)
+		)
+		(let ((is-question (cog-ad-hoc "question" (car sents))))
+			(if is-question 
+				(let ()
+					(display "Hello ")
+					(display nick)
+					(display ", you asked a question: ")
+					(display txt)
+					(newline)
+					(prt-soln)
+				)
+				(let ()
+					(display "Hello ")
+					(display nick)
+					(display ", you made a statement: ")
+					(display txt)
+					(newline)
+				)
+			)
 		)
 	)
 
