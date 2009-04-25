@@ -487,7 +487,6 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 Handle PatternMatchEngine::find_starter(Handle h)
 {
-	curr_pred_handle = h;
 	Atom *a = TLB::getAtom(h);
 	Link *l = dynamic_cast<Link *>(a);
 	if (NULL == l)
@@ -497,6 +496,7 @@ Handle PatternMatchEngine::find_starter(Handle h)
 		return Handle::UNDEFINED;
 	}
 
+	curr_pred_handle = h;
 	const std::vector<Handle> &vh = l->getOutgoingSet();
 	for (size_t i = 0; i < vh.size(); i++) {
 		Handle hout = vh[i];
@@ -666,10 +666,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	// type as the first clause.
 	Handle h = cnf_clauses[0];
 	curr_root = h;
-	starter_pred = find_starter(h);
-	if (Handle::UNDEFINED != starter_pred)
+	Handle start = find_starter(h);
+	if (Handle::UNDEFINED != start)
 	{
-		do_candidate(starter_pred);
+		starter_pred = curr_pred_handle;
+		foreach_incoming_handle(start, &PatternMatchEngine::do_candidate, this);
 	}
 	else
 	{
