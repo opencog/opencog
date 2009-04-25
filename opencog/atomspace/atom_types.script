@@ -123,9 +123,13 @@ EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
-DISTINGUISHED_NODE <- NODE
+// Basically, hypergraphs may be attached to the anchor, with a 
+// ListLink, to indicate that they are either done, or awaiting
+// processing.
+ANCHOR_NODE <- NODE
 
 // Holder of statistical truth values. 
+// XXX not clear if this is used anywhere ... maybe should remove this.
 COUNT_LINK <- ORDERED_LINK
 
 WORD_NODE <- NODE

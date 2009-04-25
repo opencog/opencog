@@ -56,7 +56,7 @@ opencog::Type opencog::MIXED_IMPLICATION_LINK;
 opencog::Type opencog::EXTENSIONAL_IMPLICATION_LINK;
 opencog::Type opencog::EQUIVALENCE_LINK;
 opencog::Type opencog::EXTENSIONAL_EQUIVALENCE_LINK;
-opencog::Type opencog::DISTINGUISHED_NODE;
+opencog::Type opencog::ANCHOR_NODE;
 opencog::Type opencog::COUNT_LINK;
 opencog::Type opencog::WORD_NODE;
 opencog::Type opencog::REFERENCE_LINK;

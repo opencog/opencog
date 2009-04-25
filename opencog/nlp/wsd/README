@@ -383,9 +383,9 @@ that processing is complete, as so:
 
    InheritanceLink
       SentenceNode "sentence_22"
-      DistinguishedNode "wsd_completed"
+      AnchorNode "#WSD_completed"
 
-The DistinguishedNode is an ad-hoc node type, functioning essentially
+The AnchorNode is an ad-hoc node type, functioning essentially
 as a special-purpose tag with can be used to tag things like a
 SentenceNode.  
 

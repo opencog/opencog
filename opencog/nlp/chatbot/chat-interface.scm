@@ -12,7 +12,7 @@
 ; global vars:
 ; new-sent anchor points at the node to which all new sentences are connected
 ;
-(define new-parsed-sent-anchor (ConceptNode "# New Parsed Sentence"))
+(define new-parsed-sent-anchor (AnchorNode "# New Parsed Sentence" (stv 1 1)))
 
 ; Return the list of SentenceNodes that are attached to the 
 ; freshly-parsed anchor.  This list will be non-empty if relex-parse
@@ -63,6 +63,14 @@
 )
 
 ; -----------------------------------------------------------------------
+; global vars:
+;
+; The ready-for-triples-anchor is an anchor node at which sentences may
+; be queued up for triples processing.  Sentences that are linked to 
+; this node will eventually have triples built from them.
+(define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
+
+; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
@@ -75,7 +83,7 @@
 	; a concept node called "# QUERY SOLUTION". This is of course very wrong,
 	; and is just a placeholder for now.
 	(define (prt-soln)
-		(let* ((query-soln-anchor (ConceptNode "# QUERY SOLUTION"))
+		(let* ((query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
 				(soln-list (cog-chase-link 'ListLink 'WordNode query-soln-anchor))
 			)
 			;; display *all* items in the list.

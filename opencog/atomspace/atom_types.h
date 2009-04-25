@@ -62,7 +62,7 @@ extern opencog::Type MIXED_IMPLICATION_LINK;
 extern opencog::Type EXTENSIONAL_IMPLICATION_LINK;
 extern opencog::Type EQUIVALENCE_LINK;
 extern opencog::Type EXTENSIONAL_EQUIVALENCE_LINK;
-extern opencog::Type DISTINGUISHED_NODE;
+extern opencog::Type ANCHOR_NODE;
 extern opencog::Type COUNT_LINK;
 extern opencog::Type WORD_NODE;
 extern opencog::Type REFERENCE_LINK;

@@ -631,7 +631,7 @@ bool RelexQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	PatternMatchEngine::print_solution(pred_grounding, var_grounding);
 
 	// And now for a cheesy hack to report the solution
-	Handle hq = atom_space->addNode(CONCEPT_NODE, "# QUERY SOLUTION");
+	Handle hq = atom_space->addNode(ANCHOR_NODE, "# QUERY SOLUTION");
 	Handle hv = bound_vars[0];
 	Handle ha = var_grounding[hv];
 

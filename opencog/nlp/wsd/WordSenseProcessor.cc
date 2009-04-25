@@ -61,8 +61,7 @@ void * WordSenseProcessor::thread_start(void *data)
 
 void WordSenseProcessor::work_thread(void)
 {
-	Node node(DISTINGUISHED_NODE, "#WSD_completed");
-	completion_handle = atom_space->addRealAtom(node);
+	completion_handle = atom_space->addNode(ANCHOR_NODE, "#WSD_completed");
 
 	while (1)
 	{
@@ -119,8 +118,7 @@ bool WordSenseProcessor::do_document(Handle h)
 {
 	// Obtain the handle which indicates that the WSD processing of a
  	// document has started. 
-	Node node(DISTINGUISHED_NODE, "#WSD_started");
-	start_handle = atom_space->addRealAtom(node);
+	start_handle = atom_space->addNode(ANCHOR_NODE, "#WSD_started");
 
 	// Look to see if the document is associated with the
 	// start indicator.
