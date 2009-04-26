@@ -28,6 +28,10 @@ class SchemeEval
 		void thread_lock(void);
 		void thread_unlock(void);
 
+		// destructor stuff
+		void finish(void);
+		static void * c_wrap_finish(void *);
+
 		// Things related to evaluation
 		std::string do_eval(const std::string &);
 		static void * c_wrap_eval(void *);
@@ -60,6 +64,7 @@ class SchemeEval
 
 		// output port
 		SCM outport;
+		SCM saved_outport;
 
 	public:
 		SchemeEval(void);

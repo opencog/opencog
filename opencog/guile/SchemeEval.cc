@@ -20,12 +20,19 @@
 
 using namespace opencog;
 
+/**
+ * This init is called once for every time that this class
+ * is instantiated -- i.e. it is a per-instance initializer.
+ */
 void SchemeEval::init(void)
 {
 	SchemeSmob::init();
 
+	saved_outport = scm_current_output_port();
+	// scm_gc_protect_object(saved_outport);
+
 	outport = scm_open_output_string();
-	outport = scm_permanent_object(outport);
+	// outport = scm_gc_protect_object(outport);
 	scm_set_current_output_port(outport);
 
 	pending_input = false;
@@ -40,6 +47,26 @@ void * SchemeEval::c_wrap_init(void *p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	self->init();
+	return self;
+}
+
+void SchemeEval::finish(void)
+{
+	// Restore the previous outport.
+	// XXX This works only if the evaluator was run nested;
+	// it bombs, if run in parallel, because the saved port
+	// might have been closed.
+	scm_set_current_output_port(saved_outport);
+	// scm_gc_unprotect_object(saved_outport);
+
+	scm_close_port(outport);
+	// scm_gc_unprotect_object(outport);
+}
+
+void * SchemeEval::c_wrap_finish(void *p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	self->finish();
 	return self;
 }
 
@@ -158,6 +185,7 @@ void SchemeEval::per_thread_init(void)
 
 SchemeEval::~SchemeEval()
 {
+	scm_with_guile(c_wrap_finish, this);
 }
 
 /* ============================================================== */

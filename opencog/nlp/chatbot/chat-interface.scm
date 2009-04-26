@@ -8,6 +8,10 @@
 
 (use-modules (ice-9 rdelim))  ; for the system call
 
+;; Hack to flush IO except this hack doesn't work :-(
+;; doesn't work because of how the SchemEval.cc handles ports ... 
+(define (fflush) (force-output (car  (fdes->ports 1))))
+
 ; -----------------------------------------------------------------------
 ; global vars:
 ; new-sent anchor points at the node to which all new sentences are connected
@@ -123,6 +127,10 @@
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
+; XXX FIXME: use of display here is no good, since nothing is written till
+; processing is done.  We need to rep[lace this by something that 
+; force-flushes
+;
 (define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
 (define (say-id-english nick txt)
 
@@ -165,8 +173,8 @@
 
 	(display "Hello ")
 	(display nick)
-	(display ", parsing ...")
-	(newline)  ; explicit flush
+	(display ", parsing ...\n")
+	(fflush)
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
@@ -203,9 +211,11 @@
 			)
 		)
 	)
+	(fflush) ;; XXX this is not working ... 
 
 	(copy-new-sent-to-triple-anchor)
 	(create-triples)
+	(delete-triple-anchor-links)
 
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
