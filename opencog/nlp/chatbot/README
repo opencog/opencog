@@ -41,6 +41,9 @@ This is most easiloy done by starting the cogserver using the
 lib/opencog4.conf configuration file, which sets the correct port,
 silences the opencog prompt, and loads the needed scheme files.
 
+XXX for now, you must also run the shell script opencog/nlp/triples/load.sh
+(after editing it to get the right port number set up)
+
 Architecture:
 -------------
 The current architecture makes use of several servers interconnected
@@ -83,7 +86,7 @@ is as follows:
    I/O to parser is stateless: RelEx will close the socket after it has
    completed its parse and returned its results.
 
-3) Question-Answering (not yet hooked up)
+3) Question-Answering -- Recently hooked up.  Work ongoing daily.
 
 4) NLgen (not yet hooked up)
 
