@@ -85,7 +85,7 @@
 (define (copy-new-sent-to-triple-anchor)
 
 	;; Attach all parses of a sentence to the anchor.
-	(define (link-parses sent)
+	(define (attach-parses sent)
 		;; Get list of parses for the sentence.
 		(define (get-parses sent)
 			(cog-chase-link 'ParseLink 'ParseNode sent)
@@ -98,7 +98,7 @@
 		)
 	)
 	;; Attach all parses of all sentences to the anchor.
-	(for-each link-parses (get-new-parsed-sentences))
+	(for-each attach-parses (get-new-parsed-sentences))
 )
 
 (define (delete-triple-anchor-links)
@@ -108,6 +108,16 @@
 )
 
 (define (create-triples)
+
+	(define (attach-triples triple-list)
+		;; Attach all of the recently created triples to the anchor.
+		;; This must have a true/confident TV so that the pattern
+		;; matcher will find and use this link.
+		(for-each (lambda (x) (ListLink result-triples-anchor x (stv 1 1)))
+			(cog-outgoing-set triple-list) 
+		)
+	)
+
 	; First, create all of the preposition phrases that we'll need.
 	(for-each
 		(lambda (rule)
@@ -117,7 +127,7 @@
 	)
 	(for-each
 		(lambda (rule)
-			(display (cog-ad-hoc "do-implication" rule))
+			(attach-triples (cog-ad-hoc "do-implication" rule))
 		)
 		frame-rule-list ; this list defined by the /triples/rules.txt file
 	)
