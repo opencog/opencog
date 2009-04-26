@@ -459,6 +459,11 @@ void RelexQuery::solve(AtomSpace *as, Handle sentence_node)
 	prt_pred(normed_predicate, bound_vars);
 #endif
 
+	// Some bad relex parses fail to actually have query variables
+	// in them. If there are no variables, don't bother looking for
+	// a solution.
+	if (0 == bound_vars.size()) return;
+
 	// Solve...
 	std::vector<Handle> ign;
 	pme->match(this, bound_vars, normed_predicate, ign);

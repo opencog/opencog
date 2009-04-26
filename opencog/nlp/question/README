@@ -487,6 +487,15 @@ question is unclear.
 
 "you eat metal"  and " do you eat metal?"
 
+What colour is the car?
+ QUERY-FLAG (colour, T)
+_subj (<<be>>, <<colour>>) 
+_obj (<<be>>, <<car>>)
+QUERY-TYPE (_$qVar, what)
+
+note the borken parse -- missing connection to qVar.
+
+
 References
 ----------
 See:
