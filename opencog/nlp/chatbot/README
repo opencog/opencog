@@ -84,11 +84,51 @@ is as follows:
    ready for processing. 
 
    I/O to parser is stateless: RelEx will close the socket after it has
-   completed its parse and returned its results.
+   completed its parse and returned its results. 
 
-3) Question-Answering -- Recently hooked up.  Work ongoing daily.
+2a) Data flow.  Each newly parsed sentence is attached, via a ListLink, 
+   to an AnchorNode "# New Parsed Sentence".  Later processing stages 
+   use the same mechanism, of linking to AnchorNode's, to pass data to 
+   each other.
 
-4) NLgen (not yet hooked up)
+3) Question-Answering. The bot can recognize some simple questions and
+   answer them. This is doen by a very simple form of pattern-matching
+   on RelEx output. Thus, for example, the dependency parse of "John
+   threw the ball" results in "_subj(throw,John) _obj(throw,ball)".
+   The question "Who threw a ball?" results in "_subj(throw,who) 
+   _obj(throw,ball)". By taking "who" to mean "an unknown variable", 
+   it is straight-forward to pattern-match the statement to the question,
+   and determine that "who" corresponds to "John".
+
+   The set-up for RelEx-based matching is done in nlp/question/RelexQuery.cc.
+   The actual pattern-matching is done by generic hypergraph predicate
+   maching code in query/PatternMatchEngine.cc.
+
+4) Semantic triples. The scope of questions that can be answered can be
+   slightly broadened by converting them into a normalized form, here
+   refered to as a "semantic triple." An example would be the 
+   prepositional phrase "color_of(sky,blue)", a form that is shared by
+   both the statement and question "The color of the sky is blue" and
+   "What is the color of the sky?" even though the RelEx dependency 
+   parses of the statement and the question are quite different.
+   
+   Code for this is in nlp/triples. Work to hook this up is ongoing.
+   Its not yet fully operationl.
+
+5) Common sense (not yet hooked up). The triples format allows a 
+   repository of common-sense triples to be created, and questions 
+   to be answered from such previously-read input. The code is there
+   but not yet hooked up.
+
+6) Frames.  (Not hooked up) Additional context can be provided by 
+   frame-net-like frames. There's code in RelEx for this, its not
+   hooked up.
+    
+7) Reasoning (not implemented). In principle, reasoning could be done.
+   Right now, there is no infrastructure for this, aside from the core
+   reasoning engine, PLN itself.
+
+8) NLgen (not yet hooked up). Natural language output.
 
 
 
