@@ -45,6 +45,7 @@ void TripleQuery::clear(void)
 
 void TripleQuery::add_triple(Handle h)
 {
+	add_to_predicate(h);
 }
 
 void TripleQuery::solve(AtomSpace *as)
