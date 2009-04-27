@@ -39,9 +39,6 @@ class WordRelQuery :
 	private:
 		// Help determine if assertion is a query.
 		bool is_qVar(Handle);
-		bool is_parse_a_query(Handle);
-		bool is_wordlist_a_query(Handle);
-		bool is_word_a_query(Handle);
 
 		// Convert query into a normal form.
 		bool is_ling_cncpt(Atom *);
@@ -71,11 +68,10 @@ class WordRelQuery :
 		// solver
 		PatternMatchEngine *pme;
 
+		bool is_word_a_query(Handle);
 	public:
 		WordRelQuery(void);
 		virtual ~WordRelQuery();
-
-		virtual bool is_query(Handle);
 
 		/* Callbacks called from PatternMatch */
 		virtual bool node_match(Node *, Node *);

@@ -46,8 +46,14 @@ class SentenceQuery :
 		bool do_discard;
 		bool discard_extra_markup(Atom *);
 
+		// Help determine if assertion is a query.
+		bool is_parse_a_query(Handle);
+		bool is_wordlist_a_query(Handle);
+
 	public:
 		void solve(AtomSpace *, Handle);
+
+		bool is_query(Handle);
 };
 
 } // namespace opencog

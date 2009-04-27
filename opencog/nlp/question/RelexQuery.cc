@@ -99,59 +99,6 @@ bool WordRelQuery::is_word_a_query(Handle word_inst)
 	return foreach_binary_link(word_inst, INHERITANCE_LINK, &WordRelQuery::is_qVar, this);
 }
 
-bool WordRelQuery::is_wordlist_a_query(Handle wordlist)
-{
-	return foreach_outgoing_handle(wordlist, &WordRelQuery::is_word_a_query, this);
-}
-
-bool WordRelQuery::is_parse_a_query(Handle parse)
-{
-	return foreach_binary_link(parse, REFERENCE_LINK, &WordRelQuery::is_wordlist_a_query, this);
-}
-
-/**
- * Return true if sentence has a parse which is a query.
- * The input argument is a handle to a SentenceNode.
- *
- * A simple check is made: does the sentence have
- * a _$qVar in it?
- *
- * The pattern check here is trivial, in that a sentence
- * that contains (DefinedLinguisticConceptNode "_$qVar") will be assumed
- * to be a query.  Perhaps something more sophisticated may
- * be desired eventually.
- *
- * Current structure of a question is as follows:
- *
- * (ParseLink
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
- *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
- * )
- * (ReferenceLink (stv 1.0 1.0)
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
- *    (ListLink
- *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
- *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
- *       (WordInstanceNode "the@0d969b75-1f7b-4174-b7c6-40e3fbb87ed9")
- *       (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
- *       (WordInstanceNode "?@ea5f242b-1ca5-462a-83a3-e6d54da4b23b")
- *    )
- * )
- * ; QUERY-TYPE (_$qVar, who)
- * (InheritanceLink (stv 1.0 1.0)
- *    (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
- *    (DefinedLinguisticConceptNode "who")
- * )
- *
- * So, given a sentenceNode, we have to follow the parse link to get the
- * list of words, and then see if any of the words correspond to the 
- * DefinedLinguisticConceptNode's of who, what, where, why, when, etc.
- */
-bool WordRelQuery::is_query(Handle h)
-{
-	return foreach_reverse_binary_link(h, PARSE_LINK, &WordRelQuery::is_parse_a_query, this);
-}
-
 /* ======================================================== */
 /* Routines to help put the query into normal form. */
 
