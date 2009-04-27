@@ -169,32 +169,30 @@
 	(define (delete-simple-answer)
 		(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
 	)
-	(define (prt-soln)
-		(let* ((soln-list (get-simple-answer))
-			)
-			;; display *all* items in the list.
-			(define (show-item wlist)
-				(if (not (null? wlist))
-					(let ()
-						(display (cog-name (car wlist)))
-						(display " ")
-						(show-item (cdr wlist))
-					)
-				)
-			)
-			(if (null? soln-list)
-				(display "No answer was found to your question.")
+	(define (do-prt-soln soln-list)
+		;; display *all* items in the list.
+		(define (show-item wlist)
+			(if (not (null? wlist))
 				(let ()
-					(display "The answer to your question is: ")
-					(show-item soln-list)
+					(display (cog-name (car wlist)))
+					(display " ")
+					(show-item (cdr wlist))
 				)
 			)
+		)
+		(display "The answer to your question is: ")
+		(show-item soln-list)
+	)
 
-			; Delete  the list of solutions, so that we don't accidentally
-			; replay it when the next question is asked.
-			(delete-simple-answer)
+	(define (prt-soln soln-list)
+		(if (not (null? soln-list))
+			(do-prt-soln soln-list)
 		)
 	)
+
+	; Declare some state variables for the imperative style to follow
+	(define sents '())
+	(define is-question #f)
 
 	(display "Hello ")
 	(display nick)
@@ -204,43 +202,64 @@
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
 
-	(let ((sents (get-new-parsed-sentences)))
+	(set! sents (get-new-parsed-sentences))
 
-		; Hmm. Seems like sents is never null, unless there's a 
-		; programmig error in Relex.  Otherwise, it always returns 
-		; something, even if the input was non-sense.
-		(if (null? sents)
-			(let ()
-				(display nick)
-				(display ", you said: \"")
-				(display txt)
-				(display "\" but I couldn't parse that.")
-				(newline)
-			)
+	; Hmm. Seems like sents is never null, unless there's a 
+	; programmig error in Relex.  Otherwise, it always returns 
+	; something, even if the input was non-sense.
+	(if (null? sents)
+		(let ()
+			(display nick)
+			(display ", you said: \"")
+			(display txt)
+			(display "\" but I couldn't parse that.")
+			(newline)
 		)
-		(let ((is-question (cog-ad-hoc "question" (car sents))))
-			(if is-question 
-				(let ()
-					(display nick)
-					(display ", you asked a question: ")
-					(display txt)
-					(newline)
-					(prt-soln)
-				)
-				(let ()
-					(display nick)
-					(display ", you made a statement: ")
-					(display txt)
-					(newline)
-				)
-			)
+		(set! is-question (cog-ad-hoc "question" (car sents)))
+	)
+
+	;; was a question asked?
+	(if is-question 
+		(let ()
+			(display nick)
+			(display ", you asked a question: ")
+			(display txt)
+			(newline)
+			(prt-soln (get-simple-answer))
+		)
+		(let ()
+			(display nick)
+			(display ", you made a statement: ")
+			(display txt)
+			(newline)
 		)
 	)
-	(fflush) ;; XXX this is not working ... because duuh... 
 
+	; Run the triples processing.
 	(copy-new-sent-to-triple-anchor)
 	(create-triples)
 	(delete-triple-anchor-links)
+
+	; If a question was asked, and  the previous attempt to answer the
+	; question failed, try again with pattern matching on the triples.
+	(if (and is-question (null? (get-simple-answer)))
+		(let ()
+			(display "Duuuude simple answer was empty\n")
+
+			(cog-ad-hoc "triple-question" (car (get-new-triples)))
+			(if (not (null? (get-simple-answer)))
+				(prt-soln (get-simple-answer))
+				(display "No answer was found to your question.")
+			)
+		)
+	)
+
+	; Delete list of triples, so they don't interfere with the next question.
+	(delete-result-triple-links)
+
+	; Delete  the list of solutions, so that we don't accidentally
+	; replay it when the next question is asked.
+	(delete-simple-answer)
 
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
