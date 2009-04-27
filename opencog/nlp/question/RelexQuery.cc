@@ -201,100 +201,6 @@ bool WordRelQuery::is_cncpt(Atom *atom)
 	return false;
 }
 
-/**
- * Discard
- * QUERY-TYPE(_$qVar,what)
- * HYP(throw, T)
- * from pattern-matching consideration; only
- * questions will have these.
- *
- * Set "do_discard" to false to keep this one.
- */
-bool WordRelQuery::discard_extra_markup(Atom *atom)
-{
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
-
-	Node *n = dynamic_cast<Node *>(atom);
-	if(!n) return false;
-
-	/* Throw away #past_infinitive and similar forms,
-	 * because we haven't implemented tense matching properly,
-	 * and so don't do tense matching at all.
-	 *
-	 * Throw away #copula-question and QUERY-TYPE #what,
-	 * #which, etc. and also #truth-query, as these will
-	 * never be part of the structure of the answer.
-	 *
-	 * Keep gender matching, noun_number matching, and
-	 * definite-FLAG matching. Everything else is ignored
-	 * in the match.
-	 */
-	const char *name = n->getName().c_str();
-	if (!strcmp("#masculine", name)) do_discard = false;
-	else if (!strcmp("#feminine", name)) do_discard = false;
-	else if (!strcmp("#person", name)) do_discard = false;
-	else if (!strcmp("#definite", name)) do_discard = false;
-	else if (!strcmp("#singular", name)) do_discard = false;
-	else if (!strcmp("#uncountable", name)) do_discard = false;
-
-	return false;
-}
-
-#ifdef DEAD_CODE_BUT_DONT_DELETE_JUST_YET
-/**
- * This method is called once for every top-level link
- * in the candidate query graph.  Out if this, it picks
- * out those relationships that should form a part of a query.
- *
- * For relex-based queries, we try to match up the relex
- * parts of the graph; using the current variant of the
- * relex-to-opencog mapping.
- *
- * These are EvaluationLink's which have a
- * DefinedLinguisticRelationship node in them,
- * and InheritanceLinks which have a
- * DefinedLinguisticConcept node in them.
- *
- * xxxxxxxxxxx this routine is dead, and no longer used ... 
- * we need it for reference to complete the port.
- */
-bool WordRelQuery::assemble_predicate(Atom *atom)
-{
-	Handle ah = TLB::getHandle(atom);
-	Type atype = atom->getType();
-	if (EVALUATION_LINK == atype)
-	{
-		bool keep = foreach_outgoing_atom(ah, &WordRelQuery::is_ling_rel, this);
-		if (!keep) return false;
-	}
-	else if (INHERITANCE_LINK == atype)
-	{
-		/* Discard
-		 * QUERY-TYPE(_$qVar,what)
-		 * HYP(throw, T)
-		 * from pattern-matching consideration; only
-		 * questions will have these.
-		 */
-		do_discard = true;
-		foreach_outgoing_atom(ah, &WordRelQuery::discard_extra_markup, this);
-		if (do_discard) return false;
-
-		/* Keep things like "tense (throw, past)" but reject things like
-		 * "Temporal_colocation:Time(past,throw)"
-		 */
-	}
-	else
-	{
-		return false;
-	}
-
-	// Its a keeper, add this to our list of acceptable predicate terms.
-	add_to_predicate(ah);
-
-	return false;
-}
-#endif /* DEAD_CODE_BUT_DONT_DELETE_JUST_YET */
-
 void WordRelQuery::add_to_predicate(Handle ah)
 {
 	/* scan for duplicates, and don't add them */
@@ -522,6 +428,100 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 /* ======================================================== */
 /* ======================================================== */
 /* ======================================================== */
+
+#ifdef DEAD_CODE_BUT_DONT_DELETE_JUST_YET
+/**
+ * This method is called once for every top-level link
+ * in the candidate query graph.  Out if this, it picks
+ * out those relationships that should form a part of a query.
+ *
+ * For relex-based queries, we try to match up the relex
+ * parts of the graph; using the current variant of the
+ * relex-to-opencog mapping.
+ *
+ * These are EvaluationLink's which have a
+ * DefinedLinguisticRelationship node in them,
+ * and InheritanceLinks which have a
+ * DefinedLinguisticConcept node in them.
+ *
+ * xxxxxxxxxxx this routine is dead, and no longer used ... 
+ * we need it for reference to complete the port.
+ */
+bool SentenceQuery::assemble_predicate(Atom *atom)
+{
+	Handle ah = TLB::getHandle(atom);
+	Type atype = atom->getType();
+	if (EVALUATION_LINK == atype)
+	{
+		bool keep = foreach_outgoing_atom(ah, &WordRelQuery::is_ling_rel, this);
+		if (!keep) return false;
+	}
+	else if (INHERITANCE_LINK == atype)
+	{
+		/* Discard
+		 * QUERY-TYPE(_$qVar,what)
+		 * HYP(throw, T)
+		 * from pattern-matching consideration; only
+		 * questions will have these.
+		 */
+		do_discard = true;
+		foreach_outgoing_atom(ah, &WordRelQuery::discard_extra_markup, this);
+		if (do_discard) return false;
+
+		/* Keep things like "tense (throw, past)" but reject things like
+		 * "Temporal_colocation:Time(past,throw)"
+		 */
+	}
+	else
+	{
+		return false;
+	}
+
+	// Its a keeper, add this to our list of acceptable predicate terms.
+	add_to_predicate(ah);
+
+	return false;
+}
+#endif /* DEAD_CODE_BUT_DONT_DELETE_JUST_YET */
+
+/**
+ * Discard
+ * QUERY-TYPE(_$qVar,what)
+ * HYP(throw, T)
+ * from pattern-matching consideration; only
+ * questions will have these.
+ *
+ * Set "do_discard" to false to keep this one.
+ */
+bool SentenceQuery::discard_extra_markup(Atom *atom)
+{
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+
+	Node *n = dynamic_cast<Node *>(atom);
+	if(!n) return false;
+
+	/* Throw away #past_infinitive and similar forms,
+	 * because we haven't implemented tense matching properly,
+	 * and so don't do tense matching at all.
+	 *
+	 * Throw away #copula-question and QUERY-TYPE #what,
+	 * #which, etc. and also #truth-query, as these will
+	 * never be part of the structure of the answer.
+	 *
+	 * Keep gender matching, noun_number matching, and
+	 * definite-FLAG matching. Everything else is ignored
+	 * in the match.
+	 */
+	const char *name = n->getName().c_str();
+	if (!strcmp("#masculine", name)) do_discard = false;
+	else if (!strcmp("#feminine", name)) do_discard = false;
+	else if (!strcmp("#person", name)) do_discard = false;
+	else if (!strcmp("#definite", name)) do_discard = false;
+	else if (!strcmp("#singular", name)) do_discard = false;
+	else if (!strcmp("#uncountable", name)) do_discard = false;
+
+	return false;
+}
 
 /**
  * Return true, if the node is, for example, _subj or _obj

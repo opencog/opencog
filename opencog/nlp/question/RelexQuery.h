@@ -47,9 +47,6 @@ class WordRelQuery :
 		bool is_ling_cncpt(Atom *);
 		bool is_cncpt(Atom *);
 
-		bool do_discard;
-		bool discard_extra_markup(Atom *);
-
 		// Aid in equivalent node identification.
 		const char * get_word_instance(Atom *);
 
@@ -97,6 +94,10 @@ class SentenceQuery :
 		bool rel_up(Handle);
 
 		bool is_ling_rel(Atom *);
+
+		bool do_discard;
+		bool discard_extra_markup(Atom *);
+
 	public:
 		void solve(AtomSpace *, Handle);
 };
