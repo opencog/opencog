@@ -67,15 +67,12 @@
 )
 
 ; -----------------------------------------------------------------------
-; global vars:
+; Semantic triples processing code.
 ;
 ; The ready-for-triples-anchor is an anchor node at which sentences may
 ; be queued up for triples processing.  Sentences that are linked to 
 ; this node will eventually have triples built from them.
 (define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
-
-; The result-triples-anchor anchors the results of triples processing.
-(define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
 
 ; copy-new-sent-to-triple-anchor -- 
 ; This is slightly tricky, because the triples anchor is expecting
@@ -101,12 +98,18 @@
 	(for-each attach-parses (get-new-parsed-sentences))
 )
 
+; Delete sentences that were wating for triples processing
 (define (delete-triple-anchor-links)
 	(for-each (lambda (x) (cog-delete x))
 		(cog-incoming-set ready-for-triples-anchor)
 	)
 )
 
+; The result-triples-anchor anchors the results of triples processing.
+(define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
+
+; create-triples -- extract semantic triples from RelEx dependency
+; parses, using the code in the nlp/triples directory.
 (define (create-triples)
 
 	(define (attach-triples triple-list)
@@ -133,13 +136,25 @@
 	)
 )
 
+; get-new-triples -- Return a list of semantic triples that were created.
+(define (get-new-triples)
+	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
+)
+
+; delete-result-triple-links -- delete links to result triples anchor.
+(define (delete-result-triple-links)
+	(for-each (lambda (x) (cog-delete x))
+		(cog-incoming-set result-triples-anchor)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
 ; XXX FIXME: use of display here is no good, since nothing is written till
-; processing is done.  We need to rep[lace this by something that 
-; force-flushes
+; processing is done.  We need to replace this by incremenntal processing
+; and/or handle i/o on a distinct thread.
 ;
 (define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
 (define (say-id-english nick txt)
@@ -221,7 +236,7 @@
 			)
 		)
 	)
-	(fflush) ;; XXX this is not working ... 
+	(fflush) ;; XXX this is not working ... because duuh... 
 
 	(copy-new-sent-to-triple-anchor)
 	(create-triples)
