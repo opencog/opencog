@@ -1,16 +1,20 @@
 /**
  * RelexQuery.cc
  *
- * Implement pattern matching for RelEx queries.
- * The pattern matching is performed for the relex part
- * only, and not for the semantic frame part of a sentence
- * parse.
+ * Implement pattern matching for RelEx queries. 
+ * A "RelEx query" is a sentence such as "What did Bob eat?"
+ * RelEx generates a dependency graph for tthis sentence,  replacing 
+ * "What" by "$qVar". Pattern matching is used to find an identical
+ * dependency graph, for which $qVar would have a grounding; e.g.
+ * "Bob ate cake", so that $qVar is grounded as "cake", thus "solving"
+ * the query.
  *
- * The result of using RelEx-only matching means that
- * queries will be interpreted very literally; the
- * structure of a query sentence must closely resemble
- * the structure of a sentence in the corpus; otherwise,
- * no matching response will be found.
+ * The result of matching dependency graphs means that queries will be
+ * interpreted very literally; the structure of a query sentence must 
+ * closely resemble the structure of a sentence in the corpus; otherwise,
+ * no matching response will be found.  Some generality can be obtained
+ * by converting dependency graphs into semantic triples; the code below
+ * show work for that case as well.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  *
