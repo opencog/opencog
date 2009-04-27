@@ -13,6 +13,7 @@
 #include <opencog/server/CogServer.h>
 
 #include <opencog/nlp/question/SentenceQuery.h>
+#include <opencog/nlp/question/TripleQuery.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/pln/PLNModule.h>
@@ -94,6 +95,18 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 			frq.solve(as, h);
 		}
 #endif
+
+		return handle_to_scm(h);
+	}
+	if (0 == cmdname.compare("triple-question"))
+	{
+		Handle h = verify_handle(optargs, "cog-ad-hoc triple-question");
+		AtomSpace *as = &atomspace();
+
+		TripleQuery rlx;
+		rlx.clear();
+		rlx.add_triple(h);
+		rlx.solve(as);
 
 		return handle_to_scm(h);
 	}
