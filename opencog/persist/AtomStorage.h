@@ -52,7 +52,7 @@ class AtomStorage
 
 		int get_height(const Atom *);
 		int max_height;
-		void setMaxHeight(void);
+		void setMaxHeight(int);
 		int getMaxHeight(void);
 
 		int do_store_atom(const Atom *, Handle);
@@ -71,7 +71,8 @@ class AtomStorage
 		bool local_id_cache_is_inited;
 		std::set<Handle> local_id_cache;
 		void get_ids(void);
-		unsigned long getMaxObserved(void);
+		unsigned long getMaxObservedUUID(void);
+		int getMaxObservedHeight(void);
 		bool idExists(const char *);
 
 		unsigned long getMaxUUID(void);

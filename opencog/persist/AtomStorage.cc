@@ -344,7 +344,8 @@ AtomStorage::AtomStorage(const std::string& dbname,
 
 AtomStorage::~AtomStorage()
 {
-	setMaxUUID(TLB::getMaxUUID());
+	setMaxUUID(getMaxObservedUUID());
+	setMaxHeight(getMaxObservedHeight());
 	delete db_conn;
 	db_conn = NULL;
 
@@ -1220,12 +1221,12 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
 
-	setMaxHeight();
+	setMaxHeight(getMaxObservedHeight());
 	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
 
 	// Now that we're done storing, reserve a more conservative
 	// UUID value, based on what's actually in the database.
-	max_uuid = getMaxObserved();
+	max_uuid = getMaxObservedUUID();
 	setMaxUUID(max_uuid);
 	fprintf(stderr, "Set Max observed UUID to %lu\n", max_uuid);
 }
@@ -1325,12 +1326,11 @@ void AtomStorage::setMaxUUID(unsigned long uuid)
 	rp.rs->release();
 }
 
-void AtomStorage::setMaxHeight(void)
+void AtomStorage::setMaxHeight(int sqmax)
 {
-	int sqmax = getMaxHeight();
-
 	// Max height of db contents can only get larger! 
-	if (max_height <= sqmax) return;
+	if (sqmax <= max_height) return;
+	max_height = sqmax;
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
@@ -1349,7 +1349,7 @@ int AtomStorage::getMaxHeight(void)
 	return rp.intval;
 }
 
-unsigned long AtomStorage::getMaxObserved(void)
+unsigned long AtomStorage::getMaxObservedUUID(void)
 {
 	Response rp;
 	rp.intval = 0;
@@ -1359,9 +1359,19 @@ unsigned long AtomStorage::getMaxObserved(void)
 	return rp.intval;
 }
 
+int AtomStorage::getMaxObservedHeight(void)
+{
+	Response rp;
+	rp.intval = 0;
+	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	rp.rs->release();
+	return rp.intval;
+}
+
 void AtomStorage::reserve(void)
 {
-	unsigned long max_observed_id = getMaxObserved();
+	unsigned long max_observed_id = getMaxObservedUUID();
 	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
 	TLB::reserve_range(0, max_observed_id);
 }
