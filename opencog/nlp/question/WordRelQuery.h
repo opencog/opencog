@@ -45,7 +45,7 @@ class WordRelQuery :
 		bool is_cncpt(Atom *);
 
 		// Aid in equivalent node identification.
-		const char * get_word_instance(Atom *);
+		// const char * get_word_instance(Atom *);
 
 	protected:
 		AtomSpace *atom_space;

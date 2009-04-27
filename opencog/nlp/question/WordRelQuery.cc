@@ -316,7 +316,7 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 		std::pair<Handle, Handle> pv = *j;
 		Handle soln = pv.second;
 
-		// Solution is a word instance; is it alos a query variable?
+		// Solution is a word instance; is it also a query variable?
 		bool qvar = is_word_a_query(soln);
 		if (qvar) return false;
 	}
@@ -325,6 +325,8 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	PatternMatchEngine::print_solution(pred_grounding, var_grounding);
 
 	// And now for a cheesy hack to report the solution
+	// XXX this needs to be replaced in the end, for now its just a cheesy
+	// hack to pass data back to scheme.
 	Handle hq = atom_space->addNode(ANCHOR_NODE, "# QUERY SOLUTION");
 	Handle hv = bound_vars[0];
 	Handle ha = var_grounding[hv];

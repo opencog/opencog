@@ -307,9 +307,6 @@ bool SentenceQuery::parse_solve(Handle parse_node)
 void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 {
 	atom_space = as;
-	if (pme) delete pme;
-	pme = new PatternMatchEngine();
-	pme->set_atomspace(atom_space);
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
@@ -318,6 +315,7 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 		&SentenceQuery::parse_solve, this);
 
 	// Find the variables, so that they can be bound.
+	bound_vars.clear();
 	std::vector<Handle>::const_iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); i++)
@@ -337,6 +335,10 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 	if (0 == bound_vars.size()) return;
 
 	// Solve...
+	if (pme) delete pme;
+	pme = new PatternMatchEngine();
+	pme->set_atomspace(atom_space);
+
 	std::vector<Handle> ign;
 	pme->match(this, bound_vars, normed_predicate, ign);
 }
