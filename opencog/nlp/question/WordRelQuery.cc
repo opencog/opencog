@@ -370,7 +370,7 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	}
 
 	printf ("duude Found solution:\n");
-	PatternMatchEngine::print_solution(pred_grounding, var_grounding);
+	PatternMatchEngine::print_solution(var_grounding, pred_grounding);
 
 	// And now for a cheesy hack to report the solution
 	// XXX this needs to be replaced in the end, for now its just a cheesy
@@ -379,8 +379,11 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	Handle hv = bound_vars[0];
 	Handle ha = var_grounding[hv];
 
-	Atom *a = TLB::getAtom(ha);
-	Atom *wrd = fl.follow_binary_link(a, REFERENCE_LINK);
+	Atom *wrd = TLB::getAtom(ha);
+	if (WORD_INSTANCE_NODE == wrd->getType())
+	{
+		wrd = fl.follow_binary_link(wrd, REFERENCE_LINK);
+	}
 	Node *n = dynamic_cast<Node *>(wrd);
 	if (!n) return false;
 	printf("duude answer=%s\n", n->getName().c_str());
