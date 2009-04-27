@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_RELEX_QUERY_H
-#define _OPENCOG_RELEX_QUERY_H
+#ifndef _OPENCOG_WORD_REL_QUERY_H
+#define _OPENCOG_WORD_REL_QUERY_H
 
 #include <map>
 
@@ -81,4 +81,4 @@ class WordRelQuery :
 
 } // namespace opencog
 
-#endif // _OPENCOG_RELEX_QUERY_H
+#endif // _OPENCOG_WORD_REL_QUERY_H

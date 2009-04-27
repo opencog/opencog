@@ -108,7 +108,7 @@ Clearly, the RelEx pattern of the question can be matched to
 the RelEx pattern of the answer, to find that _$qVar == ball.
 (Some twiddling required to match tense correctly).
 This type of RelEx relation-level setup, query massaging 
-and node matching is implemented in RelexQuery.cc, RelexQuery.h
+and node matching is implemented in SentenceQuery.cc, SentenceQuery.h
 It seems to work, but hasn't undergone strenuous testing.
 
 Pattern matching at the RelEx level is not always possible, as shown

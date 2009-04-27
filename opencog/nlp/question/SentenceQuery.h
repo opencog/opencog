@@ -27,7 +27,7 @@
 #include <map>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/nlp/question/RelexQuery.h>
+#include <opencog/nlp/question/WordRelQuery.h>
 
 namespace opencog {
 
