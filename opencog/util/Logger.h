@@ -42,6 +42,8 @@ class Logger
 
 public:
 
+    //WARNING: if you change the levels don't forget to update
+    //levelStrings[] in Logger.cc
     enum Level { NONE, ERROR, WARN, INFO, DEBUG, FINE };
 
     /** Convert from 'enum' (int) to 'string' and vice-versa */

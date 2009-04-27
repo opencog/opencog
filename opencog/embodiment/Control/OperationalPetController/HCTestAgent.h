@@ -60,6 +60,10 @@ private:
     AtomSpace* atomSpace;
     MessageSender* sender;
 
+    unsigned int learning_time1;
+    unsigned int learning_time2;
+    unsigned long max_cycle;
+
 public:
 
     virtual const ClassInfo& classinfo() const {
@@ -71,7 +75,16 @@ public:
     }
 
     HCTestAgent();
-    void init(std::string sn, std::vector<std::string> schemaArgs, std::string b, std::string a, AtomSpace* as, MessageSender* s);
+
+    /**
+     * @param lt1 Time (in second) to wait for the first learning iteration
+     * @param lt2 Time (in second) to wait for the second learning iteration
+     * @param mc Maximum number of cycles to run
+     */
+    void init(std::string sn, std::vector<std::string> schemaArgs,
+              std::string b, std::string a, AtomSpace* as, MessageSender* s,
+              unsigned int lt1 = 10, unsigned int lt2 = 100,
+              unsigned long mc = 10000);
     ~HCTestAgent();
 
     void run(opencog::CogServer* ne);

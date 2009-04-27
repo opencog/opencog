@@ -87,8 +87,15 @@ public:
     static BaseServer* createInstance();
 
     MockOpcHCTest();
+    /**
+     * @param lt1 Time (in second) to wait for the first learning iteration
+     * @param lt2 Time (in second) to wait for the second learning iteration
+     * @param mc Maximum number of cycles to run
+     */
     void init(const std::string &myId, const std::string & ip,
-              int portNumber, const std::string & petId);
+              int portNumber, const std::string & petId,
+              unsigned int lt1 = 10, unsigned int lt2 = 100,
+              unsigned long mc = 10000);
     ~MockOpcHCTest();
 
     Factory<HCTestAgent, Agent> HCTestAgentFactory;

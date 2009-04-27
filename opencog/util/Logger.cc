@@ -46,7 +46,7 @@ using namespace opencog;
 
 // messages greater than this will be truncated
 #define MAX_PRINTF_STYLE_MESSAGE_SIZE (1<<15)
-const char* levelStrings[] = {"ERROR", "WARN", "INFO", "DEBUG", "FINE"};
+const char* levelStrings[] = {"NONE", "ERROR", "WARN", "INFO", "DEBUG", "FINE"};
 
 Logger::~Logger()
 {
@@ -167,7 +167,7 @@ void Logger::log(Logger::Level level, const std::string &txt)
     // this allows us to set the main logger's filename without creating
     // a useless log file with the default filename
     if (f == NULL) {
-        if ((f = fopen(fileName.c_str(), "a")) == NULL) {
+        if ((f = fopen64(fileName.c_str(), "a")) == NULL) {
             fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n", fileName.c_str());
             disable();
             return;

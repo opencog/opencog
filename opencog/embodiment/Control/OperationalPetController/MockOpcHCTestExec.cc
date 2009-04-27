@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/lexical_cast.hpp>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <unistd.h>
 #include <opencog/util/files.h>
@@ -28,11 +29,29 @@
 
 using namespace OperationalPetController;
 using namespace opencog;
+using namespace boost;
 
 int main(int argc, char *argv[])
 {
+    //learning time in second for iteration 1 and 2 respectively
+    unsigned int learning_time1 = 10, learning_time2 = 100;
+    //maximum number of cycle to run
+    unsigned long max_cycle = 10000;
 
-    cassert(TRACE_INFO, argc == 3);
+    if(argc < 3 || argc > 6) {
+        std::cout << "Usage: " << argv[0] << " " << "PetID " << "portNumber "
+                  << "[learning_time1 = 10] "
+                  << "[learning_time2 = 100] "
+                  << "[max_cycle = 10000]" << std::endl;
+        exit(1);
+    }
+    
+    if(argc >= 4)
+        learning_time1 = lexical_cast<unsigned int>(argv[3]);
+    if(argc >= 5)
+        learning_time2 = lexical_cast<unsigned int>(argv[4]);
+    if(argc == 6)
+        max_cycle = lexical_cast<unsigned long>(argv[5]);
 
     config(Control::EmbodimentConfig::embodimentCreateInstance, true);
 
@@ -44,16 +63,18 @@ int main(int argc, char *argv[])
         config().load(config().get("CONFIG_FILE").c_str());
     }
 
+    
 
     //char petName[256];
     //int petID = atoi(argv[1]);
     //int portNumber = 5100 + petID;
-    int portNumber = atoi(argv[2]);
+    int portNumber = lexical_cast<int>(argv[2]);
     //sprintf(petName, "%d", petID);
 
     server(MockOpcHCTest::createInstance);
     MockOpcHCTest& mOpcHcTest = static_cast<MockOpcHCTest&>(server());
-    mOpcHcTest.init(argv[1], "127.0.0.1", portNumber, argv[1]);
+    mOpcHcTest.init(argv[1], "127.0.0.1", portNumber, argv[1],
+                    learning_time1, learning_time2, max_cycle);
     mOpcHcTest.serverLoop();
     //delete mOpcHcTest;
     return 0;

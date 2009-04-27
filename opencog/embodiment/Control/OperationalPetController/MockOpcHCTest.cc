@@ -77,7 +77,9 @@ MockOpcHCTest::MockOpcHCTest()
 
 void MockOpcHCTest::init(const std::string & myId,
                          const std::string & ip,
-                         int portNumber, const std::string& petId)
+                         int portNumber, const std::string& petId,
+                         unsigned int lt1, unsigned int lt2,
+                         unsigned long mc)
 {
 
     setNetworkElement(new MessagingSystem::NetworkElement(myId, ip, portNumber));
@@ -175,7 +177,8 @@ void MockOpcHCTest::init(const std::string & myId,
                  createAgent(HCTestAgent::info().id, false));
     _HCTa->init(TRICK_NAME, TRICK_ARGS,
                 OWNER_NAME, OWNER_NAME,
-                atomSpace, lsMessageSender);
+                atomSpace, lsMessageSender,
+                lt1, lt2, mc);
     startAgent(_HCTa);
 }
 

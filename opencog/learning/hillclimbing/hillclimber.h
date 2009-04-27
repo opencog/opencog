@@ -65,18 +65,18 @@ using namespace opencog;
 typedef double fitness_t;
 
 //ns = normal size
-typedef std::set<combo_tree, opencog::size_tree_order<vertex> > combo_tree_ns_set;
+typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 
 typedef std::set<vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
 
-template < typename FE, typename Combo_TreeComp = opencog::size_tree_order<vertex> >
+template < typename FE, typename Combo_TreeComp = size_tree_order<vertex> >
 struct hillclimber {
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
 
-    typedef opencog::hash_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
+    typedef hash_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
     typedef combo_tree_hash_set::iterator combo_tree_hash_set_it;
     typedef combo_tree_hash_set::const_iterator combo_tree_hash_set_const_it;
 
@@ -173,8 +173,8 @@ struct hillclimber {
         }
         case HC_INIT:
             if (_current_program.empty()) {
-                opencog::cassert(TRACE_INFO, _center.empty(),
-                                 "_center must be empty, or maybe not?? Anyway fix that bug Nil!");
+                cassert(TRACE_INFO, _center.empty(),
+                        "_center must be empty, or maybe not?? Anyway fix that bug Nil!");
             }
             _hcState = HC_START_ITERATION;
             //no break
@@ -188,7 +188,7 @@ struct hillclimber {
             std::stringstream ss_center;
             ss_center << _center;
             std::string s_center = ss_center.str();
-            logger().log(opencog::Logger::DEBUG, "hillclimber - Build candidates from center : %s", s_center.c_str());
+            logger().log(Logger::DEBUG, "hillclimber - Build candidates from center: %s", s_center.c_str());
         }
         //~debug log
         populate_neighborhood_from_center();
@@ -204,8 +204,8 @@ struct hillclimber {
             estimate_fitness_at_most(_fitnessEstimationPerCycle);
             //update _best_fitness_estimated
             ordered_neighborhood_const_it oni = _ordered_best_estimates.begin();
-            opencog::cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
-                             "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
+            cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
+                    "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
             fitness_t fit = oni->first;
             if (fit >= _best_fitness_estimated) {
                 _best_fitness_estimated = fit;
@@ -221,7 +221,7 @@ struct hillclimber {
         }
         break;
         default:
-            opencog::cassert(TRACE_INFO, false, "Hillclimber operator unknown case");
+            cassert(TRACE_INFO, false, "Hillclimber operator unknown case");
             break;
         }
     }
@@ -358,7 +358,7 @@ private:
     //---------------------------------------------------------------------
 
     void estimate_fitness_at_most(int n) {
-        opencog::cassert(TRACE_INFO, n > 0);
+        cassert(TRACE_INFO, n > 0);
         for (int i = 0; i < n && !_neighborhood.empty(); i++) {
 #ifdef COUNT_NUMBER_OF_FITNESS
             _number_of_fitness++;
@@ -378,8 +378,8 @@ private:
         }
 #ifdef COUNT_NUMBER_OF_FITNESS
         //debug log
-        logger().log(opencog::Logger::DEBUG, "hillclimber - Total number of fitness estimations : %d", _number_of_fitness);
-        logger().log(opencog::Logger::DEBUG, "hillclimber - Total number of non-cached estimations : %d", _estimator_cache.get_number_of_evaluations());
+        logger().log(Logger::DEBUG, "hillclimber - Total number of fitness estimations : %d", _number_of_fitness);
+        logger().log(Logger::DEBUG, "hillclimber - Total number of non-cached estimations : %d", _estimator_cache.get_number_of_evaluations());
         //~debug log
 #endif
     }
@@ -412,7 +412,7 @@ private:
 
     //return the nth+1 the best (fitness, cadidate)
     ordered_neighborhood_it nth_best_candidate(int n) {
-        opencog::cassert(TRACE_INFO, n >= 0 && n < (int)_ordered_best_estimates.size());
+        cassert(TRACE_INFO, n >= 0 && n < (int)_ordered_best_estimates.size());
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
         for (int i_co = 0; i_co < n; i_co++)
             ++res;
@@ -440,8 +440,8 @@ private:
     //from ordered_neighborhood_it
     ordered_neighborhood_it random_best_candidate(RandGen& rng) {
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
-        opencog::cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
-                         "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
+        cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
+                "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
         fitness_t fit = res->first;
         //choose randomly among programs with the same fitness
         int plateau_size = _ordered_best_estimates.count(fit);
@@ -450,7 +450,7 @@ private:
             for (int i_co = 0; i_co < chosen_one; i_co++)
                 ++res;
         }
-        opencog::cassert(TRACE_INFO, fit == res->first);
+        cassert(TRACE_INFO, fit == res->first);
         return res;
     }
 
@@ -506,7 +506,7 @@ private:
 
             int i = (int)((double)_ordered_best_estimates.size() * y);
             i = i % _ordered_best_estimates.size();
-            opencog::cassert(TRACE_INFO, i >= 0 && i < (int)_ordered_best_estimates.size());
+            cassert(TRACE_INFO, i >= 0 && i < (int)_ordered_best_estimates.size());
             oni = nth_best_candidate(i);
         } while (has_been_used_as_center(oni->second)); //to not use a center
         //that has
