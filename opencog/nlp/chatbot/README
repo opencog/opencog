@@ -126,18 +126,28 @@ is as follows:
    triples are extracted for all new statements, in case they are
    needed for question-answering later.
 
-5) Common sense (not yet hooked up). The triples format allows a 
+5) Common sense database. The semantic-triple format allows a 
    repository of common-sense triples to be created, and questions 
-   to be answered from such previously-read input. The code is there
-   but not yet hooked up.
+   to be answered from such previously-read input. A dataset of
+   common-sense assertions, written in English, is available from the
+   MIT OpenMind/CommonSense project. It contains sentences such as 
+   "Baseball is a sport."  This dataset may be loaded into OpenCog by 
+   following the instructions in nlp/triples/README.  Alternately, an
+   SQL dump, suitable for immediate use, can be downloaded from 
+       http://XXXXXX (to-do)
 
+   If the database has been loaded into OpenCog, then the same code as
+   described in the previous step, above, will look for answers to 
+   questions there.
+   
 6) Frames.  (Not hooked up) Additional context can be provided by 
    frame-net-like frames. There's code in RelEx for this, its not
    hooked up.
     
 7) Reasoning (not implemented). In principle, reasoning could be done.
    Right now, there is no infrastructure for this, aside from the core
-   reasoning engine, PLN itself.
+   reasoning engine, PLN itself.  All details for how to go about doing
+   this are yet to be fleshed out.
 
 8) NLgen (not yet hooked up). Natural language output.
    Code at https://launchpad.net/nlgen 
