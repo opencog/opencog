@@ -1,5 +1,5 @@
 /**
- * RelexQuery.cc
+ * WordRelQuery.cc
  *
  * Implement pattern matching for RelEx queries. 
  * A "RelEx query" is a sentence such as "What did Bob eat?"
@@ -43,13 +43,13 @@
 
 using namespace opencog;
 
-RelexQuery::RelexQuery(void)
+WordRelQuery::WordRelQuery(void)
 {
 	atom_space = NULL;
 	pme = NULL;
 }
 
-RelexQuery::~RelexQuery()
+WordRelQuery::~WordRelQuery()
 {
 	if (pme) delete pme;
 	pme = NULL;
@@ -97,7 +97,7 @@ static void prt_pred (std::vector<Handle> pred,
  * Return true, if atom is of type Node, and if the node
  * name is "match_name" (currently hard-coded as _$qVar)
  */
-bool RelexQuery::is_qVar(Handle word_prop)
+bool WordRelQuery::is_qVar(Handle word_prop)
 {
 	Atom *atom = TLB::getAtom(word_prop);
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
@@ -125,19 +125,19 @@ bool RelexQuery::is_qVar(Handle word_prop)
  * to the structure of the relex-to-opencog conversion, and
  * is fragile, if that structure changes.
  */
-bool RelexQuery::is_word_a_query(Handle word_inst)
+bool WordRelQuery::is_word_a_query(Handle word_inst)
 {
-	return foreach_binary_link(word_inst, INHERITANCE_LINK, &RelexQuery::is_qVar, this);
+	return foreach_binary_link(word_inst, INHERITANCE_LINK, &WordRelQuery::is_qVar, this);
 }
 
-bool RelexQuery::is_wordlist_a_query(Handle wordlist)
+bool WordRelQuery::is_wordlist_a_query(Handle wordlist)
 {
-	return foreach_outgoing_handle(wordlist, &RelexQuery::is_word_a_query, this);
+	return foreach_outgoing_handle(wordlist, &WordRelQuery::is_word_a_query, this);
 }
 
-bool RelexQuery::is_parse_a_query(Handle parse)
+bool WordRelQuery::is_parse_a_query(Handle parse)
 {
-	return foreach_binary_link(parse, REFERENCE_LINK, &RelexQuery::is_wordlist_a_query, this);
+	return foreach_binary_link(parse, REFERENCE_LINK, &WordRelQuery::is_wordlist_a_query, this);
 }
 
 /**
@@ -178,9 +178,9 @@ bool RelexQuery::is_parse_a_query(Handle parse)
  * list of words, and then see if any of the words correspond to the 
  * DefinedLinguisticConceptNode's of who, what, where, why, when, etc.
  */
-bool RelexQuery::is_query(Handle h)
+bool WordRelQuery::is_query(Handle h)
 {
-	return foreach_reverse_binary_link(h, PARSE_LINK, &RelexQuery::is_parse_a_query, this);
+	return foreach_reverse_binary_link(h, PARSE_LINK, &WordRelQuery::is_parse_a_query, this);
 }
 
 /* ======================================================== */
@@ -189,7 +189,7 @@ bool RelexQuery::is_query(Handle h)
 /**
  * Return true, if the node is, for example, _subj or _obj
  */
-bool RelexQuery::is_ling_rel(Atom *atom)
+bool WordRelQuery::is_ling_rel(Atom *atom)
 {
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
 	return false;
@@ -198,13 +198,13 @@ bool RelexQuery::is_ling_rel(Atom *atom)
 /**
  * Return true, if the node is, for example, #singluar or #masculine.
  */
-bool RelexQuery::is_ling_cncpt(Atom *atom)
+bool WordRelQuery::is_ling_cncpt(Atom *atom)
 {
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType()) return true;
 	return false;
 }
 
-bool RelexQuery::is_cncpt(Atom *atom)
+bool WordRelQuery::is_cncpt(Atom *atom)
 {
 	if (CONCEPT_NODE == atom->getType()) return true;
 	return false;
@@ -219,7 +219,7 @@ bool RelexQuery::is_cncpt(Atom *atom)
  *
  * Set "do_discard" to false to keep this one.
  */
-bool RelexQuery::discard_extra_markup(Atom *atom)
+bool WordRelQuery::discard_extra_markup(Atom *atom)
 {
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
 
@@ -267,13 +267,13 @@ bool RelexQuery::discard_extra_markup(Atom *atom)
  * xxxxxxxxxxx this routine is dead, and no longer used ... 
  * we need it for reference to complete the port.
  */
-bool RelexQuery::assemble_predicate(Atom *atom)
+bool WordRelQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = TLB::getHandle(atom);
 	Type atype = atom->getType();
 	if (EVALUATION_LINK == atype)
 	{
-		bool keep = foreach_outgoing_atom(ah, &RelexQuery::is_ling_rel, this);
+		bool keep = foreach_outgoing_atom(ah, &WordRelQuery::is_ling_rel, this);
 		if (!keep) return false;
 	}
 	else if (INHERITANCE_LINK == atype)
@@ -285,7 +285,7 @@ bool RelexQuery::assemble_predicate(Atom *atom)
 		 * questions will have these.
 		 */
 		do_discard = true;
-		foreach_outgoing_atom(ah, &RelexQuery::discard_extra_markup, this);
+		foreach_outgoing_atom(ah, &WordRelQuery::discard_extra_markup, this);
 		if (do_discard) return false;
 
 		/* Keep things like "tense (throw, past)" but reject things like
@@ -304,7 +304,7 @@ bool RelexQuery::assemble_predicate(Atom *atom)
 }
 #endif /* DEAD_CODE_BUT_DONT_DELETE_JUST_YET */
 
-void RelexQuery::add_to_predicate(Handle ah)
+void WordRelQuery::add_to_predicate(Handle ah)
 {
 	/* scan for duplicates, and don't add them */
 	std::vector<Handle>::const_iterator i;
@@ -317,7 +317,7 @@ void RelexQuery::add_to_predicate(Handle ah)
 	normed_predicate.push_back(ah);
 }
 
-void RelexQuery::add_to_vars(Handle ah)
+void WordRelQuery::add_to_vars(Handle ah)
 {
 	/* scan for duplicates, and don't add them */
 	std::vector<Handle>::const_iterator i;
@@ -334,9 +334,9 @@ void RelexQuery::add_to_vars(Handle ah)
  * Look to see if word instance is a bound variable,
  * if it is, then add it to the variables list.
  */
-bool RelexQuery::find_vars(Handle word_instance)
+bool WordRelQuery::find_vars(Handle word_instance)
 {
-	foreach_outgoing_handle(word_instance, &RelexQuery::find_vars, this);
+	foreach_outgoing_handle(word_instance, &WordRelQuery::find_vars, this);
 
 	bool qvar = is_word_a_query(word_instance);
 	if (!qvar) return false;
@@ -345,12 +345,12 @@ bool RelexQuery::find_vars(Handle word_instance)
 	return false;
 }
 
-bool RelexQuery::rel_up(Handle hrelation)
+bool WordRelQuery::rel_up(Handle hrelation)
 {
 	Atom *a = TLB::getAtom(hrelation);
 	if (EVALUATION_LINK != a->getType()) return false;
 
-	bool keep = foreach_outgoing_atom(hrelation, &RelexQuery::is_ling_rel, this);
+	bool keep = foreach_outgoing_atom(hrelation, &WordRelQuery::is_ling_rel, this);
 	if (!keep) return false;
 
 	// Its a keeper, add this to our list of acceptable predicate terms.
@@ -359,31 +359,31 @@ bool RelexQuery::rel_up(Handle hrelation)
 	return false;
 }
 
-bool RelexQuery::word_up(Handle ll)
+bool WordRelQuery::word_up(Handle ll)
 {
 	Atom *a = TLB::getAtom(ll);
 	if (LIST_LINK != a->getType()) return false;
 
 	return foreach_incoming_handle(ll,
-		&RelexQuery::rel_up, this);
+		&WordRelQuery::rel_up, this);
 }
 
-bool RelexQuery::word_solve(Handle word_inst)
+bool WordRelQuery::word_solve(Handle word_inst)
 {
 	return foreach_incoming_handle(word_inst,
-		&RelexQuery::word_up, this);
+		&WordRelQuery::word_up, this);
 }
 
-bool RelexQuery::wordlist_solve(Handle wordlist)
+bool WordRelQuery::wordlist_solve(Handle wordlist)
 {
 	return foreach_outgoing_handle(wordlist, 
-		&RelexQuery::word_solve, this);
+		&WordRelQuery::word_solve, this);
 }
 
-bool RelexQuery::parse_solve(Handle parse_node)
+bool WordRelQuery::parse_solve(Handle parse_node)
 {
 	return foreach_binary_link(parse_node, REFERENCE_LINK, 
-		&RelexQuery::wordlist_solve, this);
+		&WordRelQuery::wordlist_solve, this);
 }
 
 /**
@@ -437,7 +437,7 @@ bool RelexQuery::parse_solve(Handle parse_node)
  * 5) perform pattern matching.
  *
  */
-void RelexQuery::solve(AtomSpace *as, Handle sentence_node)
+void WordRelQuery::solve(AtomSpace *as, Handle sentence_node)
 {
 	atom_space = as;
 	if (pme) delete pme;
@@ -446,9 +446,9 @@ void RelexQuery::solve(AtomSpace *as, Handle sentence_node)
 
 	// Setup "normed" predicates.
 	normed_predicate.clear();
-	// foreach_outgoing_atom(graph, &RelexQuery::assemble_wrapper, this);
+	// foreach_outgoing_atom(graph, &WordRelQuery::assemble_wrapper, this);
 	foreach_reverse_binary_link(sentence_node, PARSE_LINK, 
-		&RelexQuery::parse_solve, this);
+		&WordRelQuery::parse_solve, this);
 
 	// Find the variables, so that they can be bound.
 	std::vector<Handle>::const_iterator i;
@@ -492,7 +492,7 @@ void RelexQuery::solve(AtomSpace *as, Handle sentence_node)
  *    (WordNode "threw")
  * )
  */
-bool RelexQuery::word_instance_match(Atom *aa, Atom *ab)
+bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 {
 	// printf ("concept comp "); prt(aa);
 	// printf ("          to "); prt(ab);
@@ -531,7 +531,7 @@ bool RelexQuery::word_instance_match(Atom *aa, Atom *ab)
  *      WordNode "bark"
  *
  */
-const char * RelexQuery::get_word_instance(Atom *atom)
+const char * WordRelQuery::get_word_instance(Atom *atom)
 {
 	// We want the word-node associated with this word instance.
 	Atom *wrd = fl.follow_binary_link(atom, REFERENCE_LINK);
@@ -553,7 +553,7 @@ const char * RelexQuery::get_word_instance(Atom *atom)
  * Return true to signify a mismatch,
  * Return false to signify equivalence.
  */
-bool RelexQuery::node_match(Node *npat, Node *nsoln)
+bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 {
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
@@ -618,7 +618,7 @@ printf("duude compare %s to %s\n", sa, sb);
 
 /* ======================================================== */
 
-bool RelexQuery::solution(std::map<Handle, Handle> &pred_grounding,
+bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
                           std::map<Handle, Handle> &var_grounding)
 {
 	// Reject any solution where a variable is solved

@@ -16,7 +16,7 @@
 
 namespace opencog {
 
-class FrameQuery : public RelexQuery
+class FrameQuery : public WordRelQuery
 {
 	private:
 		bool is_frame_elt(Atom *);

@@ -80,16 +80,14 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		Handle h = verify_handle(optargs, "cog-ad-hoc question");
 		AtomSpace *as = &atomspace();
 
-#define USE_RELEX_QUERY 1
-#ifdef USE_RELEX_QUERY
-		RelexQuery rlx;
+		WordRelQuery rlx;
 		if (rlx.is_query(h))
 		{
 			rlx.solve(as, h);
 			return SCM_BOOL_T;
 		}
 		return SCM_BOOL_F;
-#else
+#if EXAMPLE_FRAME_QUERY_API
 		FrameQuery frq;
 		if (frq.is_query(h))
 		{

@@ -1,5 +1,5 @@
 /**
- * RelexQuery.h
+ * WordRelQuery.h
  *
  * Impelement query processing for relex based queries.
  *
@@ -33,7 +33,7 @@
 
 namespace opencog {
 
-class RelexQuery : 
+class WordRelQuery : 
 	public DefaultPatternMatchCB
 {
 	private:
@@ -82,8 +82,8 @@ class RelexQuery :
 		PatternMatchEngine *pme;
 
 	public:
-		RelexQuery(void);
-		virtual ~RelexQuery();
+		WordRelQuery(void);
+		virtual ~WordRelQuery();
 
 		virtual bool is_query(Handle);
 		virtual void solve(AtomSpace *, Handle);
@@ -92,6 +92,11 @@ class RelexQuery :
 		virtual bool node_match(Node *, Node *);
 		virtual bool solution(std::map<Handle, Handle> &pred_soln,
 		                      std::map<Handle, Handle> &var_soln);
+};
+
+class SentenceQuery : 
+	public WordRelQuery
+{
 };
 
 } // namespace opencog
