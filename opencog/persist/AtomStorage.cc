@@ -1306,6 +1306,12 @@ void AtomStorage::kill_data(void)
 }
 
 /* ================================================================ */
+/*
+ * XXX the table Global is a cache of values that can be obtained more
+ * directly from the "observed" getters. I suspect that this table is 
+ * not really needed; it just adds complexity to the code, and should
+ * probably be eliminated.
+ */
 
 unsigned long AtomStorage::getMaxUUID(void)
 {
