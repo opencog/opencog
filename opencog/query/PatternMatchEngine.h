@@ -45,7 +45,7 @@ class PatternMatchEngine
 		AtomSpace *atom_space;
 
 	private:
-		bool prt(Atom *);
+		static bool prt(Atom *);
 
 		static void prtmsg(const char *, Atom *);
 		static void prtmsg(const char *, Handle);
@@ -120,6 +120,8 @@ class PatternMatchEngine
 		static void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
 
+		static void print_predicate(const std::vector<Handle> &vars,
+		                            const std::vector<Handle> &clauses);
 };
 
 } // namespace opencog

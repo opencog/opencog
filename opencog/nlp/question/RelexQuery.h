@@ -83,25 +83,6 @@ class WordRelQuery :
 		                      std::map<Handle, Handle> &var_soln);
 };
 
-class SentenceQuery : 
-	public WordRelQuery
-{
-	private:
-		bool parse_solve(Handle);
-		bool wordlist_solve(Handle);
-		bool word_solve(Handle);
-		bool word_up(Handle);
-		bool rel_up(Handle);
-
-		bool is_ling_rel(Atom *);
-
-		bool do_discard;
-		bool discard_extra_markup(Atom *);
-
-	public:
-		void solve(AtomSpace *, Handle);
-};
-
 } // namespace opencog
 
 #endif // _OPENCOG_RELEX_QUERY_H

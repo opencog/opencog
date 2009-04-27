@@ -732,4 +732,28 @@ void PatternMatchEngine::print_solution(
 	printf ("\n");
 }
 
+/**
+ * For debug printing only
+ */
+void PatternMatchEngine::print_predicate(
+	const std::vector<Handle> &vars,
+   const std::vector<Handle> &clauses)
+{
+	printf("\nClauses:\n");
+	std::vector<Handle>::const_iterator i;
+	for (i = clauses.begin(); i != clauses.end(); i++)
+	{
+		Handle h = *i;
+		Atom *a = TLB::getAtom(h);
+		prt(a);
+	}
+	printf("\nVars:\n");
+	for (i = vars.begin(); i != vars.end(); i++)
+	{
+		Handle h = *i;
+		Atom *a = TLB::getAtom(h);
+		prt(a);
+	}
+}
+
 /* ===================== END OF FILE ===================== */
