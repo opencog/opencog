@@ -83,12 +83,18 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	printf("input=%s\n", params);
 	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
 
+	typedef enum {ENGLISH=1, SHELL_CMD, SCM_CMD} CmdType;
+	CmdType cmd = ENGLISH;
+
 	const char * start = NULL;
 	int priv = 0;
 	if (!strcmp (ird->target, "cogita-bot")) {priv = 1; start = params+1; }
-	else if (!strncmp (params, ":cogita-bot:", 12)) start = params+12;
+
+	if (!strncmp (params, ":cogita-bot:", 12)) start = params+12;
 	else if (!strncmp (params, ":cog:", 5)) start = params+5;
 	else if (!strncmp (params, ":cogita:", 8)) start = params+8;
+	else if (!strncmp (params, ":cog-sh:", 8)) { start = params+8; cmd = SHELL_CMD; }
+	else if (!strncmp (params, ":scm:", 5)) { start = params+5; cmd = SCM_CMD; }
 
 	if (!start) return 0;
 	char * msg_target = NULL;
@@ -118,20 +124,51 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	char * cmdline = (char *) malloc(sizeof (char) * (len+1));
 
-	// Get into the opencog scheme shell, and run the command
-	strcpy (cmdline, "scm hush\n(say-id-english \"");
-	strcat (cmdline, ird->nick);
-	strcat (cmdline, "\" \"");
-	size_t toff = strlen(cmdline);
-	strcat (cmdline, start);
-	strcat (cmdline, "\")\n");
-
-	// strip out quotation marks, replace with blanks, for now.
-	for (size_t i =0; i<textlen; i++)
+	if (ENGLISH == cmd)
 	{
-		if ('\"' == cmdline[toff+i]) cmdline[toff+i] = ' ';
+		// Get into the opencog scheme shell, and run the command
+		strcpy (cmdline, "scm hush\n(say-id-english \"");
+		strcat (cmdline, ird->nick);
+		strcat (cmdline, "\" \"");
+		size_t toff = strlen(cmdline);
+		strcat (cmdline, start);
+		strcat (cmdline, "\")\n");
+
+		// strip out quotation marks, replace with blanks, for now.
+		for (size_t i =0; i<textlen; i++)
+		{
+			if ('\"' == cmdline[toff+i]) cmdline[toff+i] = ' ';
+		}
 	}
 
+#define ENABLE_SHELL_ESCAPES 1
+#ifdef ENABLE_SHELL_ESCAPES
+	/*
+	 * XXX DANGER DANGER Extreme Caution Advised XXX
+	 * Shell escapes are a potential security hole, as they allow access
+	 * to the cog-server to total strangers. In particular, the scheme 
+	 * interface is a general programming API and can be used to root
+	 * the system.
+	 */
+	else if (SHELL_CMD == cmd)
+	{
+		strcpy (cmdline, start);
+		strcat (cmdline, "\n");
+	}
+	else if (SCM_CMD == cmd)
+	{
+		strcpy (cmdline, "scm hush\n");
+		strcat (cmdline, start);
+		strcat (cmdline, "\n");
+	}
+#else
+	else
+	{
+		conn->privmsg (msg_target, "Shell escapes disabled in this chatbot version\n");
+		return 0;
+	}
+#endif /* ENABLE_SHELL_ESCAPES */
+	
 	// printf ("Sending to opencog: %s\n", cmdline);
 	char * reply = whirr_sock_io (cmdline);
 	printf ("opencog reply: %s\n", reply);
@@ -157,6 +194,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		*ep = save;
 		p = ep;
 		cnt ++;
+
+		/* Sleep so that we don't get kicked for flooding */
 		if (4 < cnt) sleep(1);
 		if (8 < cnt) sleep(1);
 	}
