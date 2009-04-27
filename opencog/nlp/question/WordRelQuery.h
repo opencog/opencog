@@ -53,6 +53,7 @@ class WordRelQuery :
 
 		// Aid in equivalent node identification.
 		bool word_instance_match(Atom *, Atom *);
+		bool word_inst_to_word_match(Atom *, Atom *);
 
 		// create the predicate
 		// virtual bool assemble_predicate(Atom *);

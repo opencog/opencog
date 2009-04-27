@@ -55,6 +55,15 @@ WordRelQuery::~WordRelQuery()
 	pme = NULL;
 }
 
+// #define DEBUG
+#ifdef DEBUG
+static void prt(Atom *atom)
+{
+   std::string str = atom->toString();
+   printf ("%s\n", str.c_str());
+}
+#endif
+
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
  * XXX This algo is flawed, fragile, but simple.
@@ -164,10 +173,9 @@ bool WordRelQuery::find_vars(Handle word_instance)
 /**
  * Do two word instances have the same word lemma (word root form)?
  * Return true if they are are NOT (that is, if they
- * are mismatched). This stops iteration in the standard
- * iterator.
+ * are mismatched). 
  *
- * Current structure is:
+ * Current NLP structure relating word-instances to lemmas is:
  * (LemmaLink (stv 1.0 1.0)
  *    (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
  *    (WordNode "throw")
@@ -194,6 +202,31 @@ bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 	// printf ("        to "); prt(cb);
 
 	if (ca == cb) return false;
+	return true;
+}
+
+/**
+ * Does word instance aa have the word lemma (word root form) ab?
+ * Return true if it does NOT (that is, if its mis-matched).
+ * This routine is used to compare word instances of recently-read
+ * sentences to those that occur in a repository of 'facts'.
+ */
+bool WordRelQuery::word_inst_to_word_match(Atom *aa, Atom *ab)
+{
+	// printf ("concept comp "); prt(aa);
+	// printf ("          to "); prt(ab);
+
+	// If they're the same atom, then clearly they match.
+	if (aa == ab) return false;
+
+	// Look for incoming links that are LemmaLinks.
+	// The word lemma should be at the far end.
+	Atom *ca = fl.follow_binary_link(aa, LEMMA_LINK);
+
+	// printf ("gen comp %d ", ca==ab); prt(ca);
+	// printf ("        to "); prt(ab);
+
+	if (ca == ab) return false;
 	return true;
 }
 
@@ -245,7 +278,9 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	// node types.
 	Type pattype = npat->getType();
 	Type soltype = nsoln->getType();
-	if (pattype != soltype) return true;
+	if ((pattype != soltype) && 
+	    (WORD_NODE != soltype) && 
+	    (WORD_INSTANCE_NODE != soltype)) return true;
 
 	// DefinedLinguisticRelation nodes must match exactly;
 	// so if we are here, there's already a mismatch.
@@ -259,6 +294,19 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 		return mismatch;
 	}
 
+	// A word-instance in the pattern (question) might match a word-node
+	// (concept) in a general-knowledge DB.
+	if ((WORD_INSTANCE_NODE == pattype) &&
+	    (WORD_NODE == soltype))
+	{
+		bool mismatch = word_inst_to_word_match(npat, nsoln);
+		// printf("tree_comp word instance mismatch=%d\n", mismatch);
+		return mismatch;
+	}
+
+	// XXX This code is never reached, due to above if statment.
+	// This is a bit of dead code, which may need to be revived for more
+	// proper relex matching ... or maybe not ... 
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == soltype)
 	{
 		/* We force agreement for gender, etc.
