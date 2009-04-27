@@ -244,8 +244,7 @@
 	; question failed, try again with pattern matching on the triples.
 	(if (and is-question (null? (get-simple-answer)))
 		(let ()
-			(display "Duuuude simple answer was empty\n")
-
+			; (display "There was no simple answer; attempting triples\n")
 			(cog-ad-hoc "triple-question" (car (get-new-triples)))
 			(if (not (null? (get-simple-answer)))
 				(prt-soln (get-simple-answer))

@@ -41,8 +41,15 @@ This is most easiloy done by starting the cogserver using the
 lib/opencog4.conf configuration file, which sets the correct port,
 silences the opencog prompt, and loads the needed scheme files.
 
-XXX for now, you must also run the shell script opencog/nlp/triples/load.sh
-(after editing it to get the right port number set up)
+In addition, triples-processing, described in step 4 below, requires
+that the shell script opencog/nlp/triples/load4.sh be run.
+
+To enable the common-sense database (described in step 5), you must
+create and load up the common-sense database, as follows:
+
+cog-server> sql-open triples linas asdf
+cog-server> sql-load
+
 
 Architecture:
 -------------
@@ -112,8 +119,12 @@ is as follows:
    "What is the color of the sky?" even though the RelEx dependency 
    parses of the statement and the question are quite different.
    
-   Code for this is in nlp/triples. Work to hook this up is ongoing.
-   Its not yet fully operationl.
+   Code to extract and create such triples is in the nlp/triples 
+   directory. The pattern-matching for such triples is done by 
+   nlp/question/TripleQuery.cc.  This code is triggered and run
+   if the process in step-3 fails for find an answer (although
+   triples are extracted for all new statements, in case they are
+   needed for question-answering later.
 
 5) Common sense (not yet hooked up). The triples format allows a 
    repository of common-sense triples to be created, and questions 
@@ -129,6 +140,8 @@ is as follows:
    reasoning engine, PLN itself.
 
 8) NLgen (not yet hooked up). Natural language output.
+   Code at https://launchpad.net/nlgen 
+   Overview at http://www.opencog.org/wiki/SegSim
 
 
 
