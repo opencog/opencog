@@ -44,7 +44,6 @@ class WordRelQuery :
 		bool is_word_a_query(Handle);
 
 		// Convert query into a normal form.
-		bool is_ling_rel(Atom *);
 		bool is_ling_cncpt(Atom *);
 		bool is_cncpt(Atom *);
 
@@ -53,12 +52,6 @@ class WordRelQuery :
 
 		// Aid in equivalent node identification.
 		const char * get_word_instance(Atom *);
-
-		bool parse_solve(Handle);
-		bool wordlist_solve(Handle);
-		bool word_solve(Handle);
-		bool word_up(Handle);
-		bool rel_up(Handle);
 
 	protected:
 		AtomSpace *atom_space;
@@ -86,7 +79,6 @@ class WordRelQuery :
 		virtual ~WordRelQuery();
 
 		virtual bool is_query(Handle);
-		virtual void solve(AtomSpace *, Handle);
 
 		/* Callbacks called from PatternMatch */
 		virtual bool node_match(Node *, Node *);
@@ -97,6 +89,16 @@ class WordRelQuery :
 class SentenceQuery : 
 	public WordRelQuery
 {
+	private:
+		bool parse_solve(Handle);
+		bool wordlist_solve(Handle);
+		bool word_solve(Handle);
+		bool word_up(Handle);
+		bool rel_up(Handle);
+
+		bool is_ling_rel(Atom *);
+	public:
+		void solve(AtomSpace *, Handle);
 };
 
 } // namespace opencog

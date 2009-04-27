@@ -187,15 +187,6 @@ bool WordRelQuery::is_query(Handle h)
 /* Routines to help put the query into normal form. */
 
 /**
- * Return true, if the node is, for example, _subj or _obj
- */
-bool WordRelQuery::is_ling_rel(Atom *atom)
-{
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
-	return false;
-}
-
-/**
  * Return true, if the node is, for example, #singluar or #masculine.
  */
 bool WordRelQuery::is_ling_cncpt(Atom *atom)
@@ -343,134 +334,6 @@ bool WordRelQuery::find_vars(Handle word_instance)
 
 	add_to_vars(word_instance);
 	return false;
-}
-
-bool WordRelQuery::rel_up(Handle hrelation)
-{
-	Atom *a = TLB::getAtom(hrelation);
-	if (EVALUATION_LINK != a->getType()) return false;
-
-	bool keep = foreach_outgoing_atom(hrelation, &WordRelQuery::is_ling_rel, this);
-	if (!keep) return false;
-
-	// Its a keeper, add this to our list of acceptable predicate terms.
-	add_to_predicate(hrelation);
-
-	return false;
-}
-
-bool WordRelQuery::word_up(Handle ll)
-{
-	Atom *a = TLB::getAtom(ll);
-	if (LIST_LINK != a->getType()) return false;
-
-	return foreach_incoming_handle(ll,
-		&WordRelQuery::rel_up, this);
-}
-
-bool WordRelQuery::word_solve(Handle word_inst)
-{
-	return foreach_incoming_handle(word_inst,
-		&WordRelQuery::word_up, this);
-}
-
-bool WordRelQuery::wordlist_solve(Handle wordlist)
-{
-	return foreach_outgoing_handle(wordlist, 
-		&WordRelQuery::word_solve, this);
-}
-
-bool WordRelQuery::parse_solve(Handle parse_node)
-{
-	return foreach_binary_link(parse_node, REFERENCE_LINK, 
-		&WordRelQuery::wordlist_solve, this);
-}
-
-/**
- * The input argument is a handle to a SentenceNode.
- *
- * Put predicate into "normal form".
- * In this case, a cheap hack: remove all relations that
- * are not "defined linguistic relations", e.g. all but
- * _subj(x,y) and _obj(z,w) relations.
- *
- * Current structure of a question is:
- *
- * (ParseLink
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
- *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
- * )
- *
- * (WordInstanceLink (stv 1.0 1.0)
- *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
- *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
- * )
- *
- * ; _subj (<<throw>>, <<_$qVar>>) 
- * (EvaluationLink (stv 1.0 1.0)
- *    (DefinedLinguisticRelationshipNode "_subj")
- *    (ListLink
- *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
- *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
- *    )
- * )
- * ; _obj (<<throw>>, <<ball>>) 
- * (EvaluationLink (stv 1.0 1.0)
- *    (DefinedLinguisticRelationshipNode "_obj")
- *    (ListLink
- *          (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
- *          (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
- *    )
- * )
- *
- * (ReferenceLink (stv 1.0 1.0)
- *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
- *    (WordNode "ball")
- * )
- *
- * So the strategy is:
- * 1) Find all parses that are a part of this sentence.
- * 2) For each wordinstance in the parse, find all relations it 
- *    participates in, add these to the predicate.
- * 3) Avoid duplication in step 3)
- * 4) Find the query var.
- * 5) perform pattern matching.
- *
- */
-void WordRelQuery::solve(AtomSpace *as, Handle sentence_node)
-{
-	atom_space = as;
-	if (pme) delete pme;
-	pme = new PatternMatchEngine();
-	pme->set_atomspace(atom_space);
-
-	// Setup "normed" predicates.
-	normed_predicate.clear();
-	// foreach_outgoing_atom(graph, &WordRelQuery::assemble_wrapper, this);
-	foreach_reverse_binary_link(sentence_node, PARSE_LINK, 
-		&WordRelQuery::parse_solve, this);
-
-	// Find the variables, so that they can be bound.
-	std::vector<Handle>::const_iterator i;
-	for (i = normed_predicate.begin();
-	     i != normed_predicate.end(); i++)
-	{
-		Handle h = *i;
-		find_vars(h);
-	}
-
-#ifdef DEBUG
-	prt_pred(normed_predicate, bound_vars);
-#endif
-
-	// Some bad relex parses fail to actually have query variables
-	// in them. If there are no variables, don't bother looking for
-	// a solution.
-	if (0 == bound_vars.size()) return;
-
-	// Solve...
-	std::vector<Handle> ign;
-	pme->match(this, bound_vars, normed_predicate, ign);
 }
 
 /* ======================================================== */
@@ -654,6 +517,155 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	atom_space->addLink(LIST_LINK, hq, hw);
 	
 	return false;
+}
+
+/* ======================================================== */
+/* ======================================================== */
+/* ======================================================== */
+
+/**
+ * Return true, if the node is, for example, _subj or _obj
+ */
+bool SentenceQuery::is_ling_rel(Atom *atom)
+{
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
+	return false;
+}
+
+bool SentenceQuery::rel_up(Handle hrelation)
+{
+	Atom *a = TLB::getAtom(hrelation);
+	if (EVALUATION_LINK != a->getType()) return false;
+
+	bool keep = foreach_outgoing_atom(hrelation, &SentenceQuery::is_ling_rel, this);
+	if (!keep) return false;
+
+	// Its a keeper, add this to our list of acceptable predicate terms.
+	add_to_predicate(hrelation);
+
+	return false;
+}
+
+bool SentenceQuery::word_up(Handle ll)
+{
+	Atom *a = TLB::getAtom(ll);
+	if (LIST_LINK != a->getType()) return false;
+
+	return foreach_incoming_handle(ll,
+		&SentenceQuery::rel_up, this);
+}
+
+/**
+ * Find all EvaluationLink- DefinedLinguisticRelationshipNode structures
+ * that this word participates in, and add them to the list of predicates.
+ */
+bool SentenceQuery::word_solve(Handle word_inst)
+{
+	return foreach_incoming_handle(word_inst,
+		&SentenceQuery::word_up, this);
+}
+
+bool SentenceQuery::wordlist_solve(Handle wordlist)
+{
+	return foreach_outgoing_handle(wordlist, 
+		&SentenceQuery::word_solve, this);
+}
+
+/**
+ * Given a ParseNode, add all of the associated RelEx dependencies for
+ * that parse, to the predicate to be solved.
+ */
+bool SentenceQuery::parse_solve(Handle parse_node)
+{
+	return foreach_binary_link(parse_node, REFERENCE_LINK, 
+		&SentenceQuery::wordlist_solve, this);
+}
+
+/**
+ * The input argument is a handle to a SentenceNode.
+ *
+ * Put predicate into "normal form".
+ * In this case, a cheap hack: remove all relations that
+ * are not "defined linguistic relations", e.g. all but
+ * _subj(x,y) and _obj(z,w) relations.
+ *
+ * Current structure of a question is:
+ *
+ * (ParseLink
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0" (stv 1.0 0.9417))
+ *    (SentenceNode "sentence@4509207f-468f-45ec-b8c8-217279dba127")
+ * )
+ *
+ * (WordInstanceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    (ParseNode "sentence@4509207f-468f-45ec-b8c8-217279dba127_parse_0")
+ * )
+ *
+ * ; _subj (<<throw>>, <<_$qVar>>) 
+ * (EvaluationLink (stv 1.0 1.0)
+ *    (DefinedLinguisticRelationshipNode "_subj")
+ *    (ListLink
+ *       (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *       (WordInstanceNode "who@15e6eeff-7d2a-4d4c-a29b-9ac2aaa08f7c")
+ *    )
+ * )
+ * ; _obj (<<throw>>, <<ball>>) 
+ * (EvaluationLink (stv 1.0 1.0)
+ *    (DefinedLinguisticRelationshipNode "_obj")
+ *    (ListLink
+ *          (WordInstanceNode "threw@e5649eb8-eac5-48ae-adab-41e351e29e4e")
+ *          (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    )
+ * )
+ *
+ * (ReferenceLink (stv 1.0 1.0)
+ *    (WordInstanceNode "ball@e798a7dc-c8e4-4192-a386-29549c587a2f")
+ *    (WordNode "ball")
+ * )
+ *
+ * So the strategy is:
+ * 1) Find all parses that are a part of this sentence.
+ * 2) For each wordinstance in the parse, find all relations it 
+ *    participates in, add these to the predicate.
+ * 3) Avoid duplication in step 3)
+ * 4) Find the query var.
+ * 5) perform pattern matching.
+ *
+ */
+void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
+{
+	atom_space = as;
+	if (pme) delete pme;
+	pme = new PatternMatchEngine();
+	pme->set_atomspace(atom_space);
+
+	// Setup "normed" predicates.
+	normed_predicate.clear();
+	// foreach_outgoing_atom(graph, &WordRelQuery::assemble_wrapper, this);
+	foreach_reverse_binary_link(sentence_node, PARSE_LINK, 
+		&SentenceQuery::parse_solve, this);
+
+	// Find the variables, so that they can be bound.
+	std::vector<Handle>::const_iterator i;
+	for (i = normed_predicate.begin();
+	     i != normed_predicate.end(); i++)
+	{
+		Handle h = *i;
+		find_vars(h);
+	}
+
+#ifdef DEBUG
+	prt_pred(normed_predicate, bound_vars);
+#endif
+
+	// Some bad relex parses fail to actually have query variables
+	// in them. If there are no variables, don't bother looking for
+	// a solution.
+	if (0 == bound_vars.size()) return;
+
+	// Solve...
+	std::vector<Handle> ign;
+	pme->match(this, bound_vars, normed_predicate, ign);
 }
 
 /* ===================== END OF FILE ===================== */

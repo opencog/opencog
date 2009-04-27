@@ -80,7 +80,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		Handle h = verify_handle(optargs, "cog-ad-hoc question");
 		AtomSpace *as = &atomspace();
 
-		WordRelQuery rlx;
+		SentenceQuery rlx;
 		if (rlx.is_query(h))
 		{
 			rlx.solve(as, h);
