@@ -243,9 +243,11 @@
 	; If a question was asked, and  the previous attempt to answer the
 	; question failed, try again with pattern matching on the triples.
 	(if (and is-question (null? (get-simple-answer)))
-		(let ()
+		(let ((trips (get-new-triples)))
 			; (display "There was no simple answer; attempting triples\n")
-			(cog-ad-hoc "triple-question" (car (get-new-triples)))
+			(if (not (null? trips))
+				(cog-ad-hoc "triple-question" (car (get-new-triples)))
+			)
 			(if (not (null? (get-simple-answer)))
 				(prt-soln (get-simple-answer))
 				(display "No answer was found to your question.")
