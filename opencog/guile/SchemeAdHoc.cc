@@ -76,6 +76,16 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		return handle_to_scm(h);
 	}
 
+	if (0 == cmdname.compare("fetch-incoming-set"))
+	{
+		// XXX we should also allow opt-args to be a list of handles
+		Handle h = verify_handle(optargs, "cog-ad-hoc fetch-incoming-set");
+
+		AtomSpace *as = &atomspace();
+		h = as->fetchIncomingSet(h, true);
+		return handle_to_scm(h);
+	}
+
 	if (0 == cmdname.compare("question"))
 	{
 		Handle h = verify_handle(optargs, "cog-ad-hoc question");
