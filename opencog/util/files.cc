@@ -39,7 +39,7 @@
 
 #define USER_FLAG "$USER"
 
-bool fileExists(const char* filename)
+bool opencog::fileExists(const char* filename)
 {
     std::fstream dumpFile(filename, std::ios::in);
     dumpFile.close();
@@ -51,7 +51,7 @@ bool fileExists(const char* filename)
     return true;
 }
 
-void expandPath(std::string& path)
+void opencog::expandPath(std::string& path)
 {
 
     size_t user_index = path.find(USER_FLAG, 0);
@@ -67,7 +67,7 @@ void expandPath(std::string& path)
     return;
 }
 
-bool createDirectory(const char* directory)
+bool opencog::createDirectory(const char* directory)
 {
 
 #ifdef WIN32
@@ -80,7 +80,7 @@ bool createDirectory(const char* directory)
     return false;
 }
 
-bool appendFileContent(const char* filename, std::string &s) {
+bool opencog::appendFileContent(const char* filename, std::string &s) {
     std::ifstream in(filename);
     if (!in.is_open())
         return false;

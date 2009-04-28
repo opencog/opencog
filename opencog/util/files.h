@@ -32,6 +32,9 @@
 
 #include <string>
 
+namespace opencog
+{
+
 /**
  * Check if a file exists in PetDatabase (currently a directory)
  *
@@ -64,5 +67,7 @@ bool createDirectory(const char* filename);
  * @return true if the file was successfully read into the string
  */
 bool appendFileContent(const char* filename, std::string &s);
+
+} // namespace opencog
 
 #endif //_OPENCOG_FILES_H_
