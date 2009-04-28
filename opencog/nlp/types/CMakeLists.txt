@@ -18,6 +18,6 @@ INSTALL (TARGETS nlp-types
 
 INSTALL (FILES
 	atom_types.h
-	NLPTypes.h
+#	NLPTypes.h
 	DESTINATION "include/opencog/nlp/types"
 )
