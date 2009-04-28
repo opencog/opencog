@@ -295,11 +295,6 @@ void Atom::setAtomTable(AtomTable *tb)
     atomTable = tb;
 }
 
-AtomTable *Atom::getAtomTable() const
-{
-    return(atomTable);
-}
-
 HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, bool subClasses) const
 {
 

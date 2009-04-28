@@ -663,7 +663,29 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
 Handle AtomSpace::fetchAtom(Handle h)
 {
     // No-op if we've already got this handle.
-    if (TLB::isValidHandle(h)) return h;
+    // XXX But perhaps we want to update the truth value from the
+    // remote storage?? XXX the semantics of this is totally unclear.
+    if (atomTable.holds(h)) return h;
+
+    // If its in the TLB, but not in the atom table, insert it now.
+    if (TLB::isValidHandle(h))
+    {
+        Atom *a = TLB::getAtom(h);
+
+        // For links, must perform a recursive fetch, as otherwise
+        // the atomtable.add below will throw an error.
+        Link *l = dynamic_cast<Link *>(a);
+        if (l)
+        {
+           const std::vector<Handle>& ogs = l->getOutgoingSet();
+           size_t arity = ogs.size();
+           for (size_t i=0; i<arity; i++)
+           {
+              fetchAtom(ogs[i]);
+           }
+        }
+        return atomTable.add(a);
+    }
 
     // Maybe the backing store knows about this atom.
     if (backing_store)
@@ -693,6 +715,8 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
     Handle base = fetchAtom(h);
     if (Handle::UNDEFINED == base) return Handle::UNDEFINED;
 
+    Atom *a = TLB::getAtom(h);
+    atomTable.add(a);
     // Get everything from the backing store.
     if (backing_store)
     {
@@ -700,15 +724,17 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
         size_t isz = iset.size();
         for (size_t i=0; i<isz; i++)
         {
-           Handle hi = iset[i];
-           if (recursive)
-           {
-               fetchIncomingSet(hi, true);
-           }
-           else
-           {
-               fetchAtom(hi);
-           }
+            Handle hi = iset[i];
+            if (recursive)
+            {
+                fetchIncomingSet(hi, true);
+            }
+            else
+            {
+                fetchAtom(hi);
+            }
+            Atom *a = TLB::getAtom(hi);
+            atomTable.add(a);
         }
     }
     return base;

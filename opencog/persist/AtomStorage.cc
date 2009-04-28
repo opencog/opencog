@@ -140,7 +140,7 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			Atom *atom = store->makeAtom(*this, handle);
+			store->makeAtom(*this, handle);
 			hvec->push_back(handle);
 			return false;
 		}

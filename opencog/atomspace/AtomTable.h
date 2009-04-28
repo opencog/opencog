@@ -546,7 +546,10 @@ public:
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
-     * when necessary.
+     * when necessary. When an atom is added, the atom table takes over
+     * the memory management for that atom. In other words, no other
+     * code should ever attempt to delete the pointer that is passed 
+     * into this method.
      *
      * When adding atoms in bulk, it can be convenient to defer
      * the setup of incoming links until a later stage.
@@ -555,6 +558,16 @@ public:
      * @return The handle of the newly added atom.
      */
     Handle add(Atom*, bool dont_defer_incoming_links = true) throw (RuntimeException);
+
+    /**
+     * Return true if the atom table holds this handle, else return false.
+     */
+    bool holds(Handle h) {
+        Atom *a = TLB::getAtom(h);
+        if (NULL == a) return false;
+        if (this == a->getAtomTable()) return true;
+        return false;
+    }
 
     /**
      * Removes atom from the table.

@@ -85,7 +85,9 @@ private:
     /**
      * Returns the AtomTable in which this Atom is inserted.
      */
-    AtomTable *getAtomTable() const;
+    AtomTable *getAtomTable() const {
+        return atomTable;
+    }
 
 protected:
     Handle handle;
