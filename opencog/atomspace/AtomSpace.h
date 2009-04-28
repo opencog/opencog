@@ -682,8 +682,8 @@ public:
     /** Retrieve the outgoing set of a given link */
     const HandleSeq& getOutgoing(Handle h) const;
 
-    /** Retrieve the incoming set of a given link */
-    HandleSeq getIncoming(Handle) const;
+    /** Retrieve the incoming set of a given atom */
+    HandleSeq getIncoming(Handle);
 
     /** Retrieve the Count of a given Handle */
     float getCount(Handle) const;

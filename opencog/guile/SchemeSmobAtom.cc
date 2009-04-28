@@ -126,22 +126,20 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
-	const Atom *atom = verify_atom(satom, "cog-incoming-set");
+	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	HandleEntry *he = atom->getIncomingSet();
-	if (!he) return SCM_EOL;
+	AtomSpace *as = CogServer::getAtomSpace();
+	std::vector<Handle> iset = as->getIncoming(h);
+	size_t isz = iset.size();
+	if (0 == isz) return SCM_EOL;
 
-	SCM smob = handle_to_scm(he->handle);
-	SCM head = scm_cons (smob, SCM_EOL);
-	SCM tail = head;
-	he = he->next;
-	while (he)
+	// This reverses the order of the incoming set, but so what ... 
+	SCM head = SCM_EOL;
+	for (size_t i=0; i<isz; i++)
 	{
-		smob = handle_to_scm(he->handle);
-		SCM pair = scm_cons (smob, SCM_EOL);
-		scm_set_cdr_x(tail, pair);
-		tail = pair;
-		he = he->next;
+		Handle hi = iset[i];
+		SCM smob = handle_to_scm(hi);
+		head = scm_cons(smob, head);
 	}
 
 	return head;

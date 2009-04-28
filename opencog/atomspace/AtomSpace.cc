@@ -715,8 +715,6 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
     Handle base = fetchAtom(h);
     if (Handle::UNDEFINED == base) return Handle::UNDEFINED;
 
-    Atom *a = TLB::getAtom(h);
-    atomTable.add(a);
     // Get everything from the backing store.
     if (backing_store)
     {
@@ -733,8 +731,6 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
             {
                 fetchAtom(hi);
             }
-            Atom *a = TLB::getAtom(hi);
-            atomTable.add(a);
         }
     }
     return base;
@@ -775,9 +771,6 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 
 const string& AtomSpace::getName(Handle h) const
 {
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-
     Node * nnn = dynamic_cast<Node*>(TLB::getAtom(h));
     if (nnn)
         return nnn->getName();
@@ -787,8 +780,6 @@ const string& AtomSpace::getName(Handle h) const
 
 Handle AtomSpace::getOutgoing(Handle h, int idx) const
 {
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
     Atom * a = TLB::getAtom(h);
     Link * l = dynamic_cast<Link *>(a);
     if (NULL == l)
@@ -802,9 +793,6 @@ Handle AtomSpace::getOutgoing(Handle h, int idx) const
 
 int AtomSpace::getArity(Handle h) const
 {
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-
     Atom * a = TLB::getAtom(h);
     Link * l = dynamic_cast<Link *>(a);
     if (NULL == l)
@@ -814,18 +802,14 @@ int AtomSpace::getArity(Handle h) const
 
 void AtomSpace::setName(Handle h, const string& name)
 {
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-
     Node *nnn = dynamic_cast<Node*>(TLB::getAtom(h));
     cassert(TRACE_INFO, nnn != NULL, "AtomSpace::setName(): Handle h should be of 'Node' type.");
     nnn->setName(name);
 }
 
-HandleSeq AtomSpace::getIncoming(Handle h) const
+HandleSeq AtomSpace::getIncoming(Handle h)
 {
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
+    h = fetchIncomingSet(h, true);
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
     Handle *temp; int size;
