@@ -571,6 +571,12 @@ so broad, that it can match to just about anything, including things
 are not DefineLinguisticRelationship nodes. Thus, we need to force
 type matching in variables.
 
+Other problems: Consider the sentences:
+"A hospital is a place where you go when you are sick."
+
+One may deduce that "A hospital is a place", but one must be careful
+in making use of such knowledge....
+
 
 
 Deduction
@@ -600,6 +606,7 @@ Next step:
 -- This corpus is in N3 format; strip out sentences by 
    running "conceptnet.pl"
 -- Parse the sentences using relex, generate opencog output.
+   (There are about 252870 sentences in the June 2008 dump.)
 -- Create a presistence repository for accumulating results.
    (at this time, create a new SQL db)
        createdb triples

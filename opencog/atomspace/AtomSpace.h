@@ -96,6 +96,15 @@ public:
     Handle fetchAtom(Handle);
 
     /**
+     * Use the backing store to load the entire incoming set of the atom.
+     * If the flag is true, then the load is done recursively. 
+     * This method queries the backing store to obtain all atoms that 
+     * contain this one in thier outgoing sets. All of these atoms are
+     * then loaded into this atomtable/atomspace.
+     */
+    Handle fetchIncomingSet(Handle, bool);
+
+    /**
      * @return a const reference to the AtomTable object of this AtomSpace
      */
     const AtomTable& getAtomTable() const;

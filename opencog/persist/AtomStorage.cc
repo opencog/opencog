@@ -134,6 +134,18 @@ class AtomStorage::Response
 			return false;
 		}
 
+		std::vector<Handle> *hvec;
+		bool load_incoming_set_cb(void)
+		{
+			// printf ("---- New atom found ----\n");
+			rs->foreach_column(&Response::create_atom_column_cb, this);
+
+			Atom *atom = store->makeAtom(*this, handle);
+			Handle hi = TLB::getHandle(atom);
+			hvec->push_back(hi);
+			return false;
+		}
+
 		bool row_exists;
 		bool row_exists_cb(void)
 		{
@@ -959,6 +971,30 @@ Atom * AtomStorage::getAtom(Handle h)
 }
 
 /**
+ * Retreive the entire incoming set of the indicated atom.
+ */
+std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
+{
+	std::vector<Handle> iset;
+
+	setup_typemap();
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE outgoing @> ARRAY[%lu];", h.value());
+
+	// Note: "select * from atoms where outgoing@>array[556];" will return
+	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
+
+	Response rp;
+	rp.height = -1;
+	rp.hvec = &iset;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->foreach_row(&Response::load_incoming_set_cb, &rp);
+	rp.rs->release();
+
+	return iset;
+}
+
+/**
  * Fetch Node from database, with the indicated type and name.
  * If there is no such node, NULL is returned.
  * More properly speaking, the point of this routine is really
@@ -1146,10 +1182,11 @@ void AtomStorage::load(AtomTable &table)
 #else
 		// It appears that, when the select statment returns more than
 		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the odbc code, causing future mallocs
+		// corruption occurs in the iodbc code, causing future mallocs
 		// to fail. So limit the number of records processed in one go.
 		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in odbc??)
+		// the memory fragmentation (and/or there's a memory leak in iodbc??)
+		// XXX Not clear is UnixODBC suffers from this same problem.
 #define STEP 12003
 		unsigned long rec;
 		for (rec = 0; rec <= max_nrec; rec += STEP)

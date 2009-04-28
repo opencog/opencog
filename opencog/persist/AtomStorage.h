@@ -105,15 +105,19 @@ class AtomStorage
 		            const char * username,
 		            const char * authentication);
 		~AtomStorage();
-		bool connected(void);
+		bool connected(void); // connection to DB is alive
 
-		void kill_data(void);
+		void kill_data(void); // destroy DB contents
 
+		// Store atoms to DB
 		void storeSingleAtom(const Atom *);
 		void storeAtom(Handle);
 		void storeAtom(const Atom *);
+
+		// Fetch atoms from DB
 		bool atomExists(Handle);
 		Atom * getAtom(Handle);
+		std::vector<Handle> getIncomingSet(Handle);
 		Node * getNode(Type, const char *);
 		Node * getNode(const Node &n)
 		{
@@ -125,9 +129,9 @@ class AtomStorage
 			return getLink(l.getType(), l.getOutgoingSet());
 		}
 
-		void load(AtomTable &);
-		void store(const AtomTable &);
-		void reserve(void);
+		void load(AtomTable &); // Load entire contents of DB
+		void store(const AtomTable &); // Store entire contents of AtomTable
+		void reserve(void);     // reserve range of UUID's
 };
 
 } // namespace opencog

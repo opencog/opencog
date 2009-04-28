@@ -688,6 +688,32 @@ Handle AtomSpace::fetchAtom(Handle h)
     return Handle::UNDEFINED;
 }
 
+Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
+{
+    Handle base = fetchAtom(h);
+    if (Handle::UNDEFINED == base) return Handle::UNDEFINED;
+
+    // Get everything from the backing store.
+    if (backing_store)
+    {
+        std::vector<Handle> iset = backing_store->getIncomingSet(h);
+        size_t isz = iset.size();
+        for (size_t i=0; i<isz; i++)
+        {
+           Handle hi = iset[i];
+           if (recursive)
+           {
+               fetchIncomingSet(hi, true);
+           }
+           else
+           {
+               fetchAtom(hi);
+           }
+        }
+    }
+    return base;
+}
+
 Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
 {
     //printf("AtomSpace::addRealAtom\n");

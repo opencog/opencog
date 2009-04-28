@@ -59,6 +59,12 @@ class BackingStore
 		virtual Atom * getAtom(Handle) const = 0;
 
 		/**
+		 * Return a vector containing the handles of the entire incoming
+		 * set of the indicated handle. 
+		 */
+		virtual std::vector<Handle> getIncomingSet(Handle) const = 0;
+
+		/**
 		 * Recursively store the atom and anything in it's outgoing set.
 		 * If the atom is already in storage, this will update it's 
 		 * truth value, etc. 

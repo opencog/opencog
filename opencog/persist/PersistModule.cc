@@ -43,6 +43,7 @@ class SQLBackingStore : public BackingStore
 		virtual Node * getNode(Type, const char *) const;
 		virtual Link * getLink(Type, const std::vector<Handle>&) const;
 		virtual Atom * getAtom(Handle) const;
+		virtual std::vector<Handle> getIncomingSet(Handle) const;
 		virtual void storeAtom(Handle);
 };
 };
@@ -70,6 +71,11 @@ Link * SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 Atom * SQLBackingStore::getAtom(Handle h) const
 {
 	return store->getAtom(h);
+}
+
+std::vector<Handle> SQLBackingStore::getIncomingSet(Handle h) const
+{
+	return store->getIncomingSet(h);
 }
 
 void SQLBackingStore::storeAtom(Handle h)
