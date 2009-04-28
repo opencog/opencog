@@ -141,8 +141,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
-			Handle hi = TLB::getHandle(atom);
-			hvec->push_back(hi);
+			hvec->push_back(handle);
 			return false;
 		}
 
@@ -985,6 +984,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
 
 	Response rp;
+	rp.store = this;
 	rp.height = -1;
 	rp.hvec = &iset;
 	rp.rs = db_conn->exec(buff);
