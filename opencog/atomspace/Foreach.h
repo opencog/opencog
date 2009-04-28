@@ -10,6 +10,7 @@
 #define _OPENCOG_ATOMSPACE_FOREACH_H
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/TLB.h>
 
@@ -27,8 +28,9 @@ inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
     if (NULL == link) return false;
 
     const std::vector<Handle> &vh = link->getOutgoingSet();
+    size_t sz = vh.size();
 
-    for (size_t i = 0; i < vh.size(); i++) {
+    for (size_t i = 0; i < sz; i++) {
         Handle hout = vh[i];
         bool rc = (data->*cb)(hout);
         if (rc) return rc;
@@ -47,8 +49,9 @@ inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
     if (NULL == link) return false;
 
     const std::vector<Handle> &vh = link->getOutgoingSet();
+    size_t sz = vh.size();
 
-    for (size_t i = 0; i < vh.size(); i++) {
+    for (size_t i = 0; i < sz; i++) {
         Handle hout = vh[i];
         Atom *aout = TLB::getAtom(hout);
         bool rc = (data->*cb)(aout);
@@ -66,15 +69,15 @@ inline bool foreach_outgoing_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 template<class T>
 inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 {
-    Atom *atom = TLB::getAtom(h);
-    HandleEntry *he = atom->getIncomingSet();
+    AtomSpace *as = &atomspace();
+    const std::vector<Handle> &vh = as->getIncoming(h);
+    size_t sz = vh.size();
 
-    // Simple linked-list pointer chase
-    while (he) {
-        Atom *aout = TLB::getAtom(he->handle);
-        bool rc = (data->*cb)(aout);
+    for (size_t i = 0; i < sz; i++) {
+        Handle hin = vh[i];
+        Atom *ain = TLB::getAtom(hin);
+        bool rc = (data->*cb)(ain);
         if (rc) return rc;
-        he = he->next;
     }
     return false;
 }
@@ -82,14 +85,14 @@ inline bool foreach_incoming_atom(Handle h, bool (T::*cb)(Atom *), T *data)
 template<class T>
 inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
-    Atom *atom = TLB::getAtom(h);
-    HandleEntry *he = atom->getIncomingSet();
+    AtomSpace *as = &atomspace();
+    const std::vector<Handle> &vh = as->getIncoming(h);
+    size_t sz = vh.size();
 
-    // Simple linked-list pointer chase
-    while (he) {
-        bool rc = (data->*cb)(he->handle);
+    for (size_t i = 0; i < sz; i++) {
+        Handle hin = vh[i];
+        bool rc = (data->*cb)(hin);
         if (rc) return rc;
-        he = he->next;
     }
     return false;
 }
