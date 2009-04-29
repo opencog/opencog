@@ -153,11 +153,12 @@
 ; and get everything we know about them (by getting everything that has 
 ; that word-node in it's outgoing set.)
 (define (fetch-related-triples)
+
 	; Given a handle h to some EvaluationLink, walk it down and pull
 	; in any related WordNode expressions.
 	(define (fetch-word h)
-		(if (eq? 'WordNode (cog-type h))
-			(cog-ad-hoc "fetch-incoming-set" h)
+		(if (eq? 'WordInstanceNode (cog-type h))
+			(cog-ad-hoc "fetch-incoming-set" (word-inst-get-lemma h))
 		)
 		(for-each fetch-word (cog-outgoing-set h))
 	)
@@ -256,14 +257,14 @@
 	; Run the triples processing.
 	(copy-new-sent-to-triple-anchor)
 	(create-triples)
-	(fetch-related-triples)
 	(delete-triple-anchor-links)
 
 	; If a question was asked, and  the previous attempt to answer the
 	; question failed, try again with pattern matching on the triples.
 	(if (and is-question (null? (get-simple-answer)))
 		(let ((trips (get-new-triples)))
-			; (display "There was no simple answer; attempting triples\n")
+			(display "There was no simple answer; attempting triples search\n")
+			(fetch-related-triples)
 			(if (not (null? trips))
 				(cog-ad-hoc "triple-question" (car (get-new-triples)))
 			)
