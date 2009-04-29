@@ -813,7 +813,14 @@ void AtomSpace::setName(Handle h, const string& name)
 
 HandleSeq AtomSpace::getIncoming(Handle h)
 {
-    h = fetchIncomingSet(h, true);
+    // Ugh. It is possible that the incoming set that we currently 
+    // hold is much smaller than what is in storage. In this case,
+    // we would like to automatically pull all of those other atoms
+    // into here (using fetchIncomingSet(h,true) to do so). However,
+    // maybe the incoming set is up-to-date, in which case polling 
+    // storage over and over is a huge waste of time.  What to do? 
+    //
+    // h = fetchIncomingSet(h, true);
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
     Handle *temp; int size;
