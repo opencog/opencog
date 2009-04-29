@@ -1372,8 +1372,7 @@ void AtomStorage::setMaxUUID(unsigned long uuid)
 void AtomStorage::setMaxHeight(int sqmax)
 {
 	// Max height of db contents can only get larger! 
-	if (sqmax <= max_height) return;
-	max_height = sqmax;
+	if (max_height < sqmax) max_height = sqmax;
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
