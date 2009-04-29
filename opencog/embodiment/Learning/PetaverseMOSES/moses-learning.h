@@ -126,13 +126,13 @@ struct petaverse_score {
     petaverse_score(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {
         _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                _fitnessEstimator);
+                                                      _fitnessEstimator);
     }
 
     petaverse_score(const petaverse_score& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {
         _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                ps._fitnessEstimator);
+                                                      ps._fitnessEstimator);
     }
 
     int operator()(const combo_tree& tr) const {
@@ -156,13 +156,13 @@ struct petaverse_bscore {
     petaverse_bscore(const FE& fitnessEstimator)
             : _fitnessEstimator(fitnessEstimator) {
         _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                _fitnessEstimator);
+                                                      _fitnessEstimator);
     }
 
     petaverse_bscore(const petaverse_bscore& ps)
             : _fitnessEstimator(ps._fitnessEstimator) {
         _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                ps._fitnessEstimator);
+                                                      ps._fitnessEstimator);
     }
 
     behavioral_score operator()(const combo_tree& tr) const {

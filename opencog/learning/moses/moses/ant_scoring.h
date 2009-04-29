@@ -36,187 +36,189 @@ using namespace std;
 #define MIN_FITNESS -1.0e10
 
 
-static const int ANT_X=32;
-static const int ANT_Y=32;
+static const int ANT_X = 32;
+static const int ANT_Y = 32;
 static char trail[ANT_Y][ANT_X+1];
-static const char trail2[ANT_Y][ANT_X+1]={
-  " 888                            ",
-  "   8                            ",
-  "   8                     888    ",
-  "   8                    8    8  ",
-  "   8                    8    8  ",
-  "   8888 88888        88         ",
-  "            8                8  ",
-  "            8       8           ",
-  "            8       8           ",
-  "            8       8        8  ",
-  "                    8           ",
-  "            8                   ",
-  "            8                8  ",
-  "            8       8           ",
-  "            8       8     888   ",
-  "                 8     8        ",
-  "                                ",
-  "            8                   ",
-  "            8   8       8       ",
-  "            8   8          8    ",
-  "            8   8               ",
-  "            8   8               ",
-  "            8             8     ",
-  "            8          8        ",
-  "   88  88888    8               ",
-  " 8              8               ",
-  " 8              8               ",
-  " 8      8888888                 ",
-  " 8     8                        ",
-  "       8                        ",
-  "  8888                          ",
-  "                                "};
+static const char trail2[ANT_Y][ANT_X+1] = {
+    " 888                            ",
+    "   8                            ",
+    "   8                     888    ",
+    "   8                    8    8  ",
+    "   8                    8    8  ",
+    "   8888 88888        88         ",
+    "            8                8  ",
+    "            8       8           ",
+    "            8       8           ",
+    "            8       8        8  ",
+    "                    8           ",
+    "            8                   ",
+    "            8                8  ",
+    "            8       8           ",
+    "            8       8     888   ",
+    "                 8     8        ",
+    "                                ",
+    "            8                   ",
+    "            8   8       8       ",
+    "            8   8          8    ",
+    "            8   8               ",
+    "            8   8               ",
+    "            8             8     ",
+    "            8          8        ",
+    "   88  88888    8               ",
+    " 8              8               ",
+    " 8              8               ",
+    " 8      8888888                 ",
+    " 8     8                        ",
+    "       8                        ",
+    "  8888                          ",
+    "                                "
+};
 
 
 //struct AntFitnessFunction : unary_function<combo_tree, fitness_t> {
 struct AntFitnessFunction : unary_function<combo_tree, double> {
 
-  typedef combo_tree::iterator pre_it;
-  typedef combo_tree::sibling_iterator sib_it;  
+    typedef combo_tree::iterator pre_it;
+    typedef combo_tree::sibling_iterator sib_it;
 
-  enum Direction { north=0,east=1,south=2,west=3 };
-  static void turn_left(Direction& d) { d=(Direction)(((int)d+3)%4); }
-  static void turn_right(Direction& d) { d=(Direction)(((int)d+1)%4); }
-  static void reverse(Direction& d) { d=(Direction)(((int)d+2)%4); }
+    enum Direction { north = 0, east = 1, south = 2, west = 3 };
+    static void turn_left(Direction& d) {
+        d = (Direction)(((int)d + 3) % 4);
+    }
+    static void turn_right(Direction& d) {
+        d = (Direction)(((int)d + 1) % 4);
+    }
+    static void reverse(Direction& d) {
+        d = (Direction)(((int)d + 2) % 4);
+    }
 
-  AntFitnessFunction(int steps=600) : 
-    _steps(steps) { }
+    AntFitnessFunction(int steps = 600) :
+            _steps(steps) { }
 
-  result_type operator()(argument_type tr) const {
-    //cout << "zz" << endl;
-    copy(trail2[0],trail2[0]+sizeof(trail2),trail[0]); //nasty..
-    //cout << "top, " << t << endl;
-    if (tr.empty())
-      return MIN_FITNESS;
-    int x=0,y=0;
-    Direction facing=east;
-    int at_time=0;
-    int sc=0;
-    do {
-      int tmp=at_time;
-      sc += eval(tr.begin(), x, y, facing, at_time);
-      if(at_time==tmp)
-	break;
-    } while (at_time < _steps);
-    //cout << "bot, ok" << endl;
+    result_type operator()(argument_type tr) const {
+        //cout << "zz" << endl;
+        copy(trail2[0],trail2[0] + sizeof(trail2), trail[0]); //nasty..
+        //cout << "top, " << t << endl;
+        if (tr.empty())
+            return MIN_FITNESS;
+        int x = 0, y = 0;
+        Direction facing = east;
+        int at_time = 0;
+        int sc = 0;
+        do {
+            int tmp = at_time;
+            sc += eval(tr.begin(), x, y, facing, at_time);
+            if (at_time == tmp)
+                break;
+        } while (at_time < _steps);
+        //cout << "bot, ok" << endl;
 //    return (fitness_t)sc;
-    return (double)sc;
-  }
-
-  bool is_turn_left(builtin_action a) const{
-    return a==id::turn_left;
-  }
-  bool is_turn_right(builtin_action a) const {
-    return a==id::turn_right;
-  }
-  bool is_move_forward(builtin_action a) const {
-    return a==id::move_forward;
-  }
-
-  int eval(sib_it it,int& x,int& y,Direction& facing,int& at_time) const {
-
-   // std::cout << "ANT EVAL : " << combo_tree(it) << std::endl;
-
-   // cassert(TRACE_INFO, is_action(*it) || is_builtin_action(*it));
-
-    if (at_time>=_steps)
-      return 0;
-    if(*it==id::null_vertex) { 
-      return 0;
+        return (double)sc;
     }
-    if(*it==id::action_success) { 
-      return 0;
+
+    bool is_turn_left(builtin_action a) const {
+        return a == id::turn_left;
     }
-    if(*it==id::sequential_and) { //need to recurse
-      int res=0;
-      for (sib_it sib=it.begin();sib!=it.end();++sib)
-	res+=eval(sib,x,y,facing,at_time);
-      return res;
+    bool is_turn_right(builtin_action a) const {
+        return a == id::turn_right;
     }
-    else if(*it==id::action_if) {
-      
-      int xn=x,yn=y;
-      //if-food-ahead
-      switch(facing) {
-      case east: 
-	xn=(x+1)%ANT_X;
-	break;
-      case west: 
-	xn=(x-1+ANT_X)%ANT_X;
-	break;
-      case south:
-	yn=(y+1)%ANT_Y;
-	break;
-      case north:
-	yn=(y-1+ANT_Y)%ANT_Y;
-	break;
-      }
-      sib_it b1 = ++it.begin();
-      sib_it b2 = ++(++it.begin());
-      return eval(trail[yn][xn]!=' ' ? b1 : b2, x, y, facing, at_time);
+    bool is_move_forward(builtin_action a) const {
+        return a == id::move_forward;
     }
-    else {
-      opencog::cassert(TRACE_INFO, is_builtin_action(*it));
-      ++at_time;
-      builtin_action a = get_builtin_action(*it);
-      if(is_move_forward(a)) { //move forward
-	switch(facing) {
-	case east : 
-	  x=(x+1)%ANT_X;
-	  break;
-	case west : 
-	  x=(x-1+ANT_X)%ANT_X;
-	  break;
-	case south:
-	  y=(y+1)%ANT_Y;
-	  break;
-	case north:
-	    y=(y-1+ANT_Y)%ANT_Y;
-	    break;
-	}
-	if (trail[y][x]!=' ') {
-	  trail[y][x]=' ';
-	  return 1;
-	}
-      } 
-      else if (is_turn_left(a)) {  //rotate left
-	turn_left(facing);
-      } 
-      else if (is_turn_right(a)) { //rotate right
-	turn_right(facing);
-      }
-      else {
-	assert(false);
-	++at_time;
-	//assert(is_reversal(*it));
-	//reverse(facing);
-      }
-      return 0;
+
+    int eval(sib_it it, int& x, int& y, Direction& facing, int& at_time) const {
+
+        // std::cout << "ANT EVAL : " << combo_tree(it) << std::endl;
+
+        // cassert(TRACE_INFO, is_action(*it) || is_builtin_action(*it));
+
+        if (at_time >= _steps)
+            return 0;
+        if (*it == id::null_vertex) {
+            return 0;
+        }
+        if (*it == id::action_success) {
+            return 0;
+        }
+        if (*it == id::sequential_and) { //need to recurse
+            int res = 0;
+            for (sib_it sib = it.begin();sib != it.end();++sib)
+                res += eval(sib, x, y, facing, at_time);
+            return res;
+        } else if (*it == id::action_if) {
+
+            int xn = x, yn = y;
+            //if-food-ahead
+            switch (facing) {
+            case east:
+                xn = (x + 1) % ANT_X;
+                break;
+            case west:
+                xn = (x - 1 + ANT_X) % ANT_X;
+                break;
+            case south:
+                yn = (y + 1) % ANT_Y;
+                break;
+            case north:
+                yn = (y - 1 + ANT_Y) % ANT_Y;
+                break;
+            }
+            sib_it b1 = ++it.begin();
+            sib_it b2 = ++(++it.begin());
+            return eval(trail[yn][xn] != ' ' ? b1 : b2, x, y, facing, at_time);
+        } else {
+            opencog::cassert(TRACE_INFO, is_builtin_action(*it));
+            ++at_time;
+            builtin_action a = get_builtin_action(*it);
+            if (is_move_forward(a)) { //move forward
+                switch (facing) {
+                case east :
+                    x = (x + 1) % ANT_X;
+                    break;
+                case west :
+                    x = (x - 1 + ANT_X) % ANT_X;
+                    break;
+                case south:
+                    y = (y + 1) % ANT_Y;
+                    break;
+                case north:
+                    y = (y - 1 + ANT_Y) % ANT_Y;
+                    break;
+                }
+                if (trail[y][x] != ' ') {
+                    trail[y][x] = ' ';
+                    return 1;
+                }
+            } else if (is_turn_left(a)) { //rotate left
+                turn_left(facing);
+            } else if (is_turn_right(a)) { //rotate right
+                turn_right(facing);
+            } else {
+                assert(false);
+                ++at_time;
+                //assert(is_reversal(*it));
+                //reverse(facing);
+            }
+            return 0;
+        }
     }
-  }
-  
+
 private:
-  const int _steps;
+    const int _steps;
 
 };
 
 struct AntFitnessEstimator : public AntFitnessFunction {
-  AntFitnessEstimator(opencog::RandGen& _rng, int steps=600, int noise=0)
-    : AntFitnessFunction(steps), _noise(noise), rng(_rng) { }
-  result_type operator()(argument_type tr) const {
-    int error = rng.randint(_noise+1) - _noise/2;
-    return AntFitnessFunction::operator()(tr) + error;
-  }
+    AntFitnessEstimator(opencog::RandGen& _rng, int steps = 600, int noise = 0)
+            : AntFitnessFunction(steps), _noise(noise), rng(_rng) { }
+    result_type operator()(argument_type tr) const {
+        int error = rng.randint(_noise + 1) - _noise / 2;
+        return AntFitnessFunction::operator()(tr) + error;
+    }
 
 private:
-  const int _noise;
-  opencog::RandGen& rng;
+    const int _noise;
+    opencog::RandGen& rng;
 
 };
 
