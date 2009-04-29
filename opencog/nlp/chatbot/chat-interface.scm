@@ -148,6 +148,24 @@
 	)
 )
 
+; Fetch, from SQL storage, all knowledge related to the recently produced
+; triples. Specifically, hunt out the WordNode's tht occur in the triples,
+; and get everything we know about them (by getting everything that has 
+; that word-node in it's outgoing set.)
+(define (fetch-related-triples)
+	; Given a handle h to some EvaluationLink, walk it down and pull
+	; in any related WordNode expressions.
+	(define (fetch-word h)
+		(if (eq? 'WordNode (cog-type h))
+			(cog-ad-hoc "fetch-incoming-set" h)
+		)
+		(for-each fetch-word (cog-outgoing-set h))
+	)
+
+	; Pull in related stuff for every triple that was created.
+	(for-each fetch-word (get-new-triples))
+)
+
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
@@ -238,6 +256,7 @@
 	; Run the triples processing.
 	(copy-new-sent-to-triple-anchor)
 	(create-triples)
+	(fetch-related-triples)
 	(delete-triple-anchor-links)
 
 	; If a question was asked, and  the previous attempt to answer the
