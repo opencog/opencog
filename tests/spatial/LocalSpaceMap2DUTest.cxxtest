@@ -154,8 +154,16 @@ public:
     void test_equality() {
         Map* foo = createMockupMap( );
         Map* foo2 = createMockupMap( );
-
         TS_ASSERT(*foo == *foo);
+        TS_ASSERT(*foo2 == *foo);
+        // Updates just an object and check maps are different now.
+        ObjectMetaData newMetadata =  mockyObjects[ 0 ].metadata; 
+        newMetadata.length += 1;
+        foo2->updateObject( mockyObjects[ 0 ].name, newMetadata, mockyObjects[ 0 ].isObstacle );
+        TS_ASSERT(!(*foo2 == *foo));
+        // Revert the change and check maps are equals again.
+        newMetadata.length -= 1;
+        foo2->updateObject( mockyObjects[ 0 ].name, newMetadata, mockyObjects[ 0 ].isObstacle );
         TS_ASSERT(*foo2 == *foo);
         // same parameters as foo, but without obstacles added:
         Map bar(xMin, xMax, xDim, yMin, yMax, yDim, petRadius);

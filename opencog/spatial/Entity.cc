@@ -130,9 +130,37 @@ int Entity::getIntProperty( PROPERTY property ) const
 
 bool Entity::operator==( const EntityPtr& entity ) const
 {
-    return ( entity->getPosition() == getPosition() &&
-             entity->getOrientation() == getOrientation() &&
-             entity->dimension == getDimension( ) );
+    return (*this == *entity); 
+}
+
+bool Entity::operator!=( const EntityPtr& entity ) const
+{
+    return !(*this == entity);
+}
+
+#define DOUBLE_DIFF_TOLERANCE 0.0001
+bool Entity::operator==( const Entity& entity ) const
+{
+    // TODO: Review usage of Quaternion in opencog::Spatial classes because
+    // a comparison between 2 Quaternions generated from a same (pitch,roll,yaw)
+    // set may be different each other depending on which constructor is used
+    // (due to double values rounded off after conversions) 
+    // For now, comparing pitch, roll and yaw with a specific rounding error tolerance
+    const Math::Quaternion& q = getOrientation();
+    const Math::Quaternion& entity_q = entity.getOrientation();
+    double pitch_diff = fabs(entity_q.getPitch() - q.getPitch());
+    double roll_diff = fabs(entity_q.getRoll() - q.getRoll());
+    double yaw_diff = fabs(entity_q.getYaw() - q.getYaw());
+    return ( entity.getPosition() == getPosition() &&
+             pitch_diff <= DOUBLE_DIFF_TOLERANCE &&
+             roll_diff <= DOUBLE_DIFF_TOLERANCE &&
+             yaw_diff <= DOUBLE_DIFF_TOLERANCE &&
+             entity.dimension == getDimension() );
+}
+
+bool Entity::operator!=( const Entity& entity ) const
+{
+    return !(*this == entity);
 }
 
 bool Entity::intersects( const EntityPtr& other ) const

@@ -226,11 +226,15 @@ bool LocalSpaceMap2D::operator==(const LocalSpaceMap2D& other) const
 
     LongEntityPtrHashMap::const_iterator it;
     for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
-        if ( other.entities.find( it->first ) == other.entities.end( ) ) {
-            //std::cout << it->first << " WAS NOT FOUND ON SECOND MAP" << std::endl;
+        LongEntityPtrHashMap::const_iterator other_it = other.entities.find( it->first );
+        if ( other_it == other.entities.end( ) ) {
+            //std::cout << it->first << " WAS NOT FOUND IN SECOND MAP" << std::endl;
             return false;
-        } // if
-    } // if
+        } else if (*(other_it->second) != *(it->second)) { 
+            //std::cout << "ENTITY " << it->first << " IS DIFFERENT FROM WHAT IS IN THE SECOND MAP" << std::endl;
+            return false; 
+        }
+    } 
     return true;
 
 }

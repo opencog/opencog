@@ -254,10 +254,13 @@ public:
 
     virtual EntityPtr clone( void ) const = 0;
 
-    /*
-     *
+    /**
+     * Overloaded operators
      */
     bool operator==( const EntityPtr& entity ) const;
+    bool operator!=( const EntityPtr& entity ) const;
+    bool operator==( const Entity& entity ) const;
+    bool operator!=( const Entity& entity ) const;
 
     bool intersects( const EntityPtr& other ) const;
 
