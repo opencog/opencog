@@ -681,7 +681,9 @@ Handle AtomSpace::fetchAtom(Handle h)
            size_t arity = ogs.size();
            for (size_t i=0; i<arity; i++)
            {
-              fetchAtom(ogs[i]);
+              Handle oh = fetchAtom(ogs[i]);
+              if (oh != ogs[i]) throw new RuntimeException(TRACE_INFO,
+                    "Unexpected handle mismatch -A!\n");
            }
         }
         return atomTable.add(a);
@@ -701,7 +703,9 @@ Handle AtomSpace::fetchAtom(Handle h)
            size_t arity = ogs.size();
            for (size_t i=0; i<arity; i++)
            {
-              fetchAtom(ogs[i]);
+              Handle oh = fetchAtom(ogs[i]);
+              if (oh != ogs[i]) throw new RuntimeException(TRACE_INFO,
+                    "Unexpected handle mismatch -B!\n");
            }
         }
         if (a) return atomTable.add(a);
