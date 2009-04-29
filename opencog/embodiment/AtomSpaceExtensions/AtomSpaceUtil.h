@@ -660,7 +660,7 @@ public:
      * @param criterion Time comparation criterion used on TimeServer search
      * @return Link evaluation link
      */
-    static Handle getMostRecentAgentActionLink( const AtomSpace& atomSpace,
+    static Handle getMostRecentAgentActionLink( AtomSpace& atomSpace,
             const std::string& agentId,
             const std::string& actionName,
             const Temporal& temporal = UNDEFINED_TEMPORAL,

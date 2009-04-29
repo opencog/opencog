@@ -793,7 +793,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
 PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 {
     unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    const AtomSpace& as = _pai.getAtomSpace();
+    AtomSpace& as = _pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     static const std::map<pet_builtin_action_enum, ActionType> actions2types =
         boost::assign::map_list_of

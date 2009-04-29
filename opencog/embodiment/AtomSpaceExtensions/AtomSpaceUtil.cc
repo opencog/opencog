@@ -1455,7 +1455,7 @@ std::string AtomSpaceUtil::convertPetExecLinkParametersToString(const AtomSpace&
     return "";
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLink( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLink(const AtomSpace& atomSpace,
         const std::string& agentId,
         const Temporal& temporal,
         TemporalTable::TemporalRelationship criterion)
@@ -1567,7 +1567,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( const AtomSpace& atomSpace,
     return latestActionDoneLink;
 }
 
-Handle AtomSpaceUtil::getMostRecentAgentActionLink( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         const std::string& agentId,
         const std::string& actionName,
         const Temporal& temporal,
