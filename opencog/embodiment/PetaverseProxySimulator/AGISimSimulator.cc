@@ -46,43 +46,43 @@ AGISimSimulator::~AGISimSimulator()
 
 std::string AGISimSimulator::createAgent(const std::string& name, const std::string& type, float x, float y, bool echoing)
 {
-    logger().log(opencog::Logger::DEBUG, "AGISimSimulator:createAgent(%s, %s, %d)", name.c_str(), type.c_str(), echoing);
+    logger().debug("AGISimSimulator:createAgent(%s, %s, %d)", name.c_str(), type.c_str(), echoing);
     SimProxy* simProxy = new SimProxy(host, nextPort, type == "pet" ? petPerceptionHandler : new DefaultPerceptionAndStatusHandler(), echoing);
     std::string result;
     if (simProxy->connect()) {
-        logger().log(opencog::Logger::DEBUG, "AGISimSimulator: connected to the server at host %s, port %d", host.c_str(), nextPort);
+        logger().debug("AGISimSimulator: connected to the server at host %s, port %d", host.c_str(), nextPort);
         // Create the agent
         result = simProxy->newAgent(x, 0, y, type.c_str(), "ball", type == "pet" ? 0.25f : 0.30f, name.c_str());
         if (result.length()) {
             if (result != name) {
-                logger().log(opencog::Logger::WARN, "AGISimSimulator: expected to create an agent with name '%s', but got '%s'. This indicates there was already another object with the expected name in AGISimSim world!", name.c_str(),  result.c_str());
+                logger().warn("AGISimSimulator: expected to create an agent with name '%s', but got '%s'. This indicates there was already another object with the expected name in AGISimSim world!", name.c_str(),  result.c_str());
             } else {
-                logger().log(opencog::Logger::DEBUG, "AGISimSimulator: Created agent with name = '%s' in AGISimSim server", result.c_str());
+                logger().debug("AGISimSimulator: Created agent with name = '%s' in AGISimSim server", result.c_str());
             }
             simProxyMap[result] = simProxy;
             if (type == "pet") petSimProxy = simProxy;
             nextPort++;
         } else {
-            logger().log(opencog::Logger::ERROR, "AGISimSimulator: Failed to create agent in AGISimSim server");
+            logger().error("AGISimSimulator: Failed to create agent in AGISimSim server");
             delete simProxy;
         }
     } else {
-        logger().log(opencog::Logger::ERROR, "AGISimSimulator: Could not connect to AGISimSim server");
+        logger().error("AGISimSimulator: Could not connect to AGISimSim server");
     }
     return result;
 }
 
 SimProxy* AGISimSimulator::getConnectedSimProxy(const std::string& agentName)
 {
-    logger().log(opencog::Logger::DEBUG, "AGISimSimulator::getConnectedSimProxy(%s)", agentName.c_str());
+    logger().debug("AGISimSimulator::getConnectedSimProxy(%s)", agentName.c_str());
     SimProxy* result = NULL;
     AgentToSimProxyMap::iterator it = simProxyMap.find(agentName);
     if (it == simProxyMap.end()) {
-        logger().log(opencog::Logger::ERROR, "AGISimSimulator: Found no SimProxy for the given agent name");
+        logger().error("AGISimSimulator: Found no SimProxy for the given agent name");
     } else {
         SimProxy* simProxy = it->second;
         if (!simProxy->IsConnected()) {
-            logger().log(opencog::Logger::ERROR, "AGISimSimulator: SimProxy is not connected to AGISimSim server");
+            logger().error("AGISimSimulator: SimProxy is not connected to AGISimSim server");
         } else {
             result = simProxy;
         }
@@ -92,20 +92,20 @@ SimProxy* AGISimSimulator::getConnectedSimProxy(const std::string& agentName)
 
 void AGISimSimulator::timeTick()
 {
-    logger().log(opencog::Logger::DEBUG, "AGISimSimulator::timeTick()");
+    logger().debug("AGISimSimulator::timeTick()");
     if (petSimProxy) {
         if (!petSimProxy->getCurrentSense()) {
-            logger().log(opencog::Logger::ERROR, "AGISimSimulator: Failed to send 'sense' command to AGISimSim server");
+            logger().error("AGISimSimulator: Failed to send 'sense' command to AGISimSim server");
         }
     } else {
-        logger().log(opencog::Logger::WARN, "AGISimSimulator: 'sense' command not sent to AGISimSim server, since pet's SimProxy is not set yet");
+        logger().warn("AGISimSimulator: 'sense' command not sent to AGISimSim server, since pet's SimProxy is not set yet");
     }
 }
 
 unsigned long AGISimSimulator::executeAction(const std::string& agentName, const PetAction &petAction)
 {
     unsigned long result = ULONG_MAX; // error
-    logger().log(opencog::Logger::DEBUG, "AGISimSimulator:: executing action for agent '%s': %s",
+    logger().debug("AGISimSimulator:: executing action for agent '%s': %s",
                  agentName.c_str(), petAction.stringRepresentation().c_str());
 
     SimProxy* simProxy = getConnectedSimProxy(agentName);
@@ -260,11 +260,11 @@ unsigned long AGISimSimulator::executeAction(const std::string& agentName, const
         case HAPPY_EYES_CODE:
         case CLOSE_EYES_CODE:
         case BITE_CODE:
-            logger().log(opencog::Logger::DEBUG, "AGISimSimulator will not execute the action in the simulated world, since it does not affect any spatial info!");
+            logger().debug("AGISimSimulator will not execute the action in the simulated world, since it does not affect any spatial info!");
             result = 0;
             break;
         default:
-            logger().log(opencog::Logger::WARN, "AGISimSimulator does not know this action!");
+            logger().warn("AGISimSimulator does not know this action!");
             break;
         }
     }

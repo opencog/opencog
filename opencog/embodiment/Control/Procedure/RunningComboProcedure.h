@@ -108,7 +108,7 @@ struct RunningComboProcedure : public combo::Evaluator {
 
         /*      stringstream ss;
               ss << _tr;
-              logger().log(opencog::Logger::DEBUG,
+              logger().debug(
               "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'",
               ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
 

@@ -63,10 +63,10 @@ HCTestAgent::~HCTestAgent()
 
 void HCTestAgent::run(CogServer* ne)
 {
-    logger().log(Logger::FINE, "Executing HCTestAgent.");
+    logger().fine("Executing HCTestAgent.");
     cycle++;
     if (cycle > max_cycle) { //timeout in case the test takes too long
-        logger().log(Logger::ERROR, "Executing HCTestAgent.");
+        logger().error("Executing HCTestAgent.");
         exit(1);
     }
     // send the whole atomSpace to the LS

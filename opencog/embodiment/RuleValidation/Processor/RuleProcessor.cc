@@ -152,7 +152,7 @@ void RuleProcessor::evaluateRules(const std::string & filename)
             if (ruleIt != ruleStrengthMap.end()) {
                 strength = ruleIt->second[worldState.getPetMode()];
             } else {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "evaluateRules - Found not strength for rule precondition '%s'.",
                              it->second.c_str());
             }
@@ -233,7 +233,7 @@ void RuleProcessor::evaluatePreconditions()
             }
 
             if (comboInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "evaluatePreconditions - Combo precondition '%s' failed.",
                              precondition.c_str());
                 continue;
@@ -252,7 +252,7 @@ void RuleProcessor::evaluatePreconditions()
             }
 
             if (comboSelectInterpreter.isFailed(procedureId)) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "evaluatePreconditions - ComboSelect precondition '%s' failed.",
                              precondition.c_str());
                 continue;
@@ -266,7 +266,7 @@ void RuleProcessor::evaluatePreconditions()
         }
 
         if (is_builtin(result) && (get_builtin(result) == combo::id::logical_true)) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "RuleProcessor - Rule '%s' evaluated true.", ruleName.c_str());
 
             if (procedureId.getType() == Procedure::COMBO) {
@@ -345,7 +345,7 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "loadComboScripts - Unable to load '%s'.",
                      comboLib.c_str());
     }
@@ -355,7 +355,7 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "loadComboScripts - Unable to load '%s'.",
                      comboPre.c_str());
     }
@@ -365,7 +365,7 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboSelectRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "loadComboScripts - Unable to load '%s'.",
                      comboSel.c_str());
     }
@@ -375,7 +375,7 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
     if (fin.good()) {
         comboSelectRepository.loadFromStream(fin);
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "loadComboScripts - Unable to load '%s'.",
                      comboAct.c_str());
     }

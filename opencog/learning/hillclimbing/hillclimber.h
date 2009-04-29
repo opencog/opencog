@@ -188,7 +188,7 @@ struct hillclimber {
             std::stringstream ss_center;
             ss_center << _center;
             std::string s_center = ss_center.str();
-            logger().log(Logger::DEBUG, "hillclimber - Build candidates from center: %s", s_center.c_str());
+            logger().debug("hillclimber - Build candidates from center: %s", s_center.c_str());
         }
         //~debug log
         populate_neighborhood_from_center();
@@ -378,8 +378,8 @@ private:
         }
 #ifdef COUNT_NUMBER_OF_FITNESS
         //debug log
-        logger().log(Logger::DEBUG, "hillclimber - Total number of fitness estimations : %d", _number_of_fitness);
-        logger().log(Logger::DEBUG, "hillclimber - Total number of non-cached estimations : %d", _estimator_cache.get_number_of_evaluations());
+        logger().debug("hillclimber - Total number of fitness estimations : %d", _number_of_fitness);
+        logger().debug("hillclimber - Total number of non-cached estimations : %d", _estimator_cache.get_number_of_evaluations());
         //~debug log
 #endif
     }

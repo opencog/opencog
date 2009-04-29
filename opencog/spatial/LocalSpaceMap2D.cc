@@ -43,7 +43,7 @@ bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity )
     LongEntityPtrHashMap::iterator it2;
     SuperEntityPtr previousSuperEntity;
 
-    logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2D::addToSuperEntity Verifying entity[%s - %ld]", entity->getName( ).c_str( ), entity->getId( ) );
+    logger().debug("LocalSpaceMap2D::addToSuperEntity Verifying entity[%s - %ld]", entity->getName( ).c_str( ), entity->getId( ) );
 
     std::map< long, SuperEntityPtr > intersection;
 
@@ -354,7 +354,7 @@ Spatial::Distance LocalSpaceMap2D::radius() const
 bool LocalSpaceMap2D::illegal(const Spatial::Point& pt) const
 {
     if (pt.first < _xMin || pt.first > _xMax || pt.second < _yMin || pt.second > _yMax) {
-        logger().log(opencog::Logger::FINE, "LocalSpaceMap - illegal(pt = (%f, %f)): out of the map!", pt.first, pt.second);
+        logger().fine("LocalSpaceMap - illegal(pt = (%f, %f)): out of the map!", pt.first, pt.second);
         return true;
     }
     return gridIllegal(snap(pt));
@@ -452,9 +452,9 @@ bool LocalSpaceMap2D::gridIllegal(unsigned int i, unsigned int j) const
 {
     bool result;
     if ((result = gridOccupied(i, j))) {
-        logger().log(opencog::Logger::FINE, "LocalSpaceMap - gridIllegal(%u, %u): grid occupied by an object!", i, j);
+        logger().fine("LocalSpaceMap - gridIllegal(%u, %u): grid occupied by an object!", i, j);
     } else if ((result = !coordinatesAreOnGrid(i, j))) {
-        logger().log(opencog::Logger::FINE, "LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", i, j);
+        logger().fine("LocalSpaceMap - gridIllegal(%u, %u): coordinates not on grid!", i, j);
     }
     return result;
 }
@@ -573,14 +573,14 @@ void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
 
 void LocalSpaceMap2D::removeObject(const Spatial::ObjectID& id)
 {
-    logger().log(opencog::Logger::FINE, "LocalSpaceMap2D::removeObject(%s)", id.c_str());
+    logger().fine("LocalSpaceMap2D::removeObject(%s)", id.c_str());
 
     //ObjectHashMap::iterator it = this->objects.find( id );
     long idHash = boost::hash<std::string>()( id );
     //if ( it == this->objects.end( ) ) {
     LongEntityPtrHashMap::iterator it = this->entities.find( idHash );
     if ( it == this->entities.end( ) ) {
-        logger().log(opencog::Logger::FINE, "LocalSpaceMap2D - There is no object %s on this map", id.c_str( ) );
+        logger().fine("LocalSpaceMap2D - There is no object %s on this map", id.c_str( ) );
         return;
     } // if
 
@@ -651,7 +651,7 @@ Distance LocalSpaceMap2D::minDist(const Spatial::ObjectID& id, const Spatial::Po
     std::vector<Spatial::Point> all;
     allPoints(id, back_inserter(all));
     if (all.empty()) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "LocalSpaceMap2D::minDist(): No point associated to obj '%s'.",
                      id.c_str());
 
@@ -767,7 +767,7 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
         // try to find a valid position to start ray tracing
         Spatial::Point startPosition = findFree( position, Spatial::Point( rayDirection.x, rayDirection.y ) );
 
-        logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2D - rayDirection(%f,%f) target original position(%f, %f) target free position(%f, %f)", rayDirection.x, rayDirection.y, borderPoint.x, borderPoint.y, startPosition.first, startPosition.second );
+        logger().debug("LocalSpaceMap2D - rayDirection(%f,%f) target original position(%f, %f) target free position(%f, %f)", rayDirection.x, rayDirection.y, borderPoint.x, borderPoint.y, startPosition.first, startPosition.second );
 
         if ( eucDist( startPosition, position ) > distance ) {
             // there is no valid free point between start and goal positions
@@ -780,7 +780,7 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
         rayTrace( snap( startPosition ), snap( endPosition ), CollisionDetector( const_cast<LocalSpaceMap2D*>( this ), collisionGridPoint, collided ) );
 
         if ( !collided ) {
-            logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2D - no collision => found free point at end position (%f,%f)", endPosition.first, endPosition.second );
+            logger().debug("LocalSpaceMap2D - no collision => found free point at end position (%f,%f)", endPosition.first, endPosition.second );
             return endPosition;
         } // if
 
@@ -832,7 +832,7 @@ void LocalSpaceMap2D::saveASCIIMap(const std::string fileName) const
             fprintf(fp, "\n");
         }
         fclose(fp);
-    } else logger().log(opencog::Logger::ERROR, "Error to create the file '%s'", fileName.c_str());
+    } else logger().error("Error to create the file '%s'", fileName.c_str());
 }
 
 
@@ -843,7 +843,7 @@ void LocalSpaceMap2D::calculateSegmentGridPoints( std::vector<Spatial::GridPoint
     Spatial::GridPoint startPoint( snap( Spatial::Point( segment.pointA.x, segment.pointA.y ) ) );
     Spatial::GridPoint endPoint( snap( Spatial::Point( segment.pointB.x, segment.pointB.y ) ) );
 
-    logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Processing segment points grid points: start[%d %d] end[%d %d]", startPoint.first, startPoint.second, endPoint.first, endPoint.second );
+    logger().debug("LocalSpaceMap - Processing segment points grid points: start[%d %d] end[%d %d]", startPoint.first, startPoint.second, endPoint.first, endPoint.second );
 
     rayTrace( startPoint, endPoint, GridPointCollector( points ) );
 
@@ -853,7 +853,7 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<Spatial::GridPoint>& po
 {
 
     if ( segments.size( ) != 4 ) {
-        logger().log(opencog::Logger::ERROR, "LocalSpaceMap - Unsupported object geometry. Only objects with 4 sides are supported. Object sides: %d", segments.size( ) );
+        logger().error("LocalSpaceMap - Unsupported object geometry. Only objects with 4 sides are supported. Object sides: %d", segments.size( ) );
         return;
     } // if
 
@@ -930,7 +930,7 @@ void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::Obj
     this->entities.insert( LongEntityPtrHashMap::value_type( idHash, entity ) );
 
     const char* internalId = entity->getName( ).c_str( );
-    logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Adding internal points to grid..." );
+    logger().debug("LocalSpaceMap - Adding internal points to grid..." );
 
     const std::vector<GridPoint>& entityGridPoints = this->gridPoints[idHash];
 

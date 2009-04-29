@@ -752,7 +752,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             updateKeyNodeLinks(keyNodeHandle);
         }
         // avoid calculating energy if it won't be displayed
-        if (logger().getLevel() == Logger::FINE) {
+        if (logger().isFineEnabled()) {
             logger().fine("---Imprint:Energy %f.", totalEnergy());
         }
 

@@ -52,7 +52,7 @@ void  ComboSelectProcedureRepository::add(const ComboSelectProcedure& procedure)
     this->procedureMap[procedure.getName()] = procedure;
 
     if (!this->comboRepository.contains(procedure.getFirstScriptName())) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ComboSelectProcedureRepository - Adding script to comboRepo: '%s'.",
                      procedure.getFirstScriptName().c_str());
 
@@ -60,7 +60,7 @@ void  ComboSelectProcedureRepository::add(const ComboSelectProcedure& procedure)
     }
 
     if (!this->comboRepository.contains(procedure.getSecondScriptName())) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ComboSelectProcedureRepository - Adding script to comboRepo: '%s'.",
                      procedure.getSecondScriptName().c_str());
 
@@ -110,7 +110,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         } while (in.good() && nparen > 0);
 
         if (nparen != 0 || !in.good()) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "ComboSelectProcedureRepository - nparen error '%d' for '%s'.", nparen, str.c_str());
             return 0;
         }
@@ -119,7 +119,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         std::string::size_type lparen = str.find('(');
         std::string::size_type rparen = str.find(')');
         if (lparen == std::string::npos || rparen == std::string::npos || lparen > rparen) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "ComboSelectProcedureRepository - parentesis mismatch for '%s'.", str.c_str());
             return 0;
         }
@@ -129,7 +129,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         try {
             arity = boost::lexical_cast<unsigned int>(str.substr(lparen + 1, rparen - lparen - 1));
         } catch (...) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "ComboSelectProcedureRepository - Cannot get arity for '%s'.", str.c_str());
             return 0;
         }
@@ -137,7 +137,7 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
         //recognize {
         in >> tmp;
         if (tmp != "|=" || !in.good()) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "ComboSelectProcedureRepository - Found no '|=' symbol for '%s'.", str.c_str());
             return 0;
         }
@@ -166,14 +166,14 @@ unsigned int ComboSelectProcedureRepository::loadFromStream(std::istream& in)
                                      this->comboRepository.get(pc1->get_name()),
                                      this->comboRepository.get(pc2->get_name())));
 
-            logger().log(opencog::Logger::FINE,
+            logger().fine(
                          "ComboSelectProcedureRepository - Loaded combo scripts f: '%s' arity '%d' and s: '%s' arity '%d'.",
                          pc1->get_name().c_str(), pc1->arity(), pc2->get_name().c_str(), pc2->arity());
 
             n++;
 
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "ComboSelectProcedureRepository - Error parsing combo function.");
         }
         delete(pc1);
@@ -191,7 +191,7 @@ const char*  ComboSelectProcedureRepository::getId() const
 
 void  ComboSelectProcedureRepository::saveRepository(FILE* dump) const
 {
-    logger().log(opencog::Logger::DEBUG, "ComboSelectProcedureRepository - Saving %s (%ld)", getId(), ftell(dump));
+    logger().debug("ComboSelectProcedureRepository - Saving %s (%ld)", getId(), ftell(dump));
 
     fprintf(dump, "%lu", procedureMap.size());
 
@@ -218,7 +218,7 @@ void  ComboSelectProcedureRepository::saveRepository(FILE* dump) const
 void  ComboSelectProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* conv)
 {
 
-    logger().log(opencog::Logger::DEBUG, "ComboSelectProcedureRepository - Loading %s (%ld)", getId(), ftell(dump));
+    logger().debug("ComboSelectProcedureRepository - Loading %s (%ld)", getId(), ftell(dump));
 
     int size;
     char buffer[1<<16];

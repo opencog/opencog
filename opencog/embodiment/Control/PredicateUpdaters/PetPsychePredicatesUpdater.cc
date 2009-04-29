@@ -78,25 +78,25 @@ Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
 
     Spatial::Math::LineSegment leftLine( Spatial::Math::Vector3( 0, 0 ), leftPoint );
     if ( !limitLine.intersects( leftLine, &intersectionPoint ) ) {
-        logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) leftLine(%s)", limitLine.toString( ).c_str( ), leftLine.toString( ).c_str( ) );
+        logger().error("PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) leftLine(%s)", limitLine.toString( ).c_str( ), leftLine.toString( ).c_str( ) );
     } // if
     leftPoint = intersectionPoint;
 
     Spatial::Math::Line rightLine( Spatial::Math::Vector3( 0, 0 ), rightPoint );
     if ( !limitLine.intersects( rightLine, &intersectionPoint ) ) {
-        logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) rightLine(%s) fovDirection(%s) reach(%f) maxPoint(%s)", limitLine.toString( ).c_str( ), rightLine.toString( ).c_str( ), agentFovDirection.toString( ).c_str( ), agentFovReach, maximumPoint.toString( ).c_str( ) );
+        logger().error("PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) rightLine(%s) fovDirection(%s) reach(%f) maxPoint(%s)", limitLine.toString( ).c_str( ), rightLine.toString( ).c_str( ), agentFovDirection.toString( ).c_str( ), agentFovReach, maximumPoint.toString( ).c_str( ) );
     } // if
     rightPoint = intersectionPoint;
 
     /*
     if ( !Spatial::Math::lineIntersection( limitLine, Spatial::Math::LineSegment( Spatial::Math::Vector3( 0,0 ), leftPoint ), intersectionPoint ) ) {
-      logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, leftPoint.x, leftPoint.y );
+      logger().error("PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, leftPoint.x, leftPoint.y );
     } // if
 
 
     leftPoint = intersectionPoint;
     if ( !lineIntersection( limitLine, Spatial::Math::LineSegment( Spatial::Math::Vector3( 0,0 ), rightPoint ), intersectionPoint ) ) {
-      logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, rightPoint.x, rightPoint.y );
+      logger().error("PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, rightPoint.x, rightPoint.y );
     } // if
     rightPoint = intersectionPoint;
     */
@@ -114,17 +114,17 @@ Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
 
 void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-    logger().log(opencog::Logger::INFO, "PetPsychePredicatesUpdater - updating context predicates..." );
+    logger().info("PetPsychePredicatesUpdater - updating context predicates..." );
 
     if ( pet == Handle::UNDEFINED ) {
-        logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Got an undefined handle for the pet." );
+        logger().error("PetPsychePredicatesUpdater - Got an undefined handle for the pet." );
         return;
     } // if
 
     // there is no map, no update is possible
     Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::INFO, "PetPsychePredicatesUpdater - there is no space map defined at this moment..." );
+        logger().info("PetPsychePredicatesUpdater - there is no space map defined at this moment..." );
         return;
     } // if
 
@@ -132,7 +132,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
     const std::string& petName = atomSpace.getName(pet);
     if ( !spaceMap.containsObject(petName) ) {
-        logger().log(opencog::Logger::ERROR, "PetPsychePredicatesUpdater - Pet was not inserted in the map yet." );
+        logger().error("PetPsychePredicatesUpdater - Pet was not inserted in the map yet." );
         return;
     }
 
@@ -164,10 +164,10 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     } // if
 
     foreach( std::string entity, entities ) {
-        logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - inspecting entity %s", entity.c_str( ) );
+        logger().debug("PetPsychePredicatesUpdater - inspecting entity %s", entity.c_str( ) );
         Handle entityHandle = getHandle(entity);
         if ( entityHandle == Handle::UNDEFINED ) {
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - there is no entity %s defined at atomspace", entity.c_str( ) );
+            logger().debug("PetPsychePredicatesUpdater - there is no entity %s defined at atomspace", entity.c_str( ) );
             continue;
         } // if
 
@@ -185,7 +185,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             message << " deg: " << ( agentEntity->getOrientation( ).getRoll( ) * 180 / M_PI) << ")";
             message << "element pos(" << elementCenter.first << " " << elementCenter.second << ") ";
             message << "dist(" << SpaceServer::SpaceMap::eucDist( petCenter, elementCenter ) << ")";
-            logger().log(opencog::Logger::DEBUG, message.str( ).c_str( ) );
+            logger().debug(message.str( ).c_str( ) );
         } // end block
 
 
@@ -219,7 +219,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             } // if
 
             AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov", SimpleTruthValue( meanValue, 1.0f ), pet, entityHandle );
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - %s is inside pet fov? %s", entity.c_str( ), ( meanValue ? "y" : "n" ) );
+            logger().debug("PetPsychePredicatesUpdater - %s is inside pet fov? %s", entity.c_str( ), ( meanValue ? "y" : "n" ) );
         } // if
 
         bool isMovingToward = false;
@@ -270,7 +270,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
         }
 
         if ( atomSpace.getType(entityHandle) == AVATAR_NODE ) {
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - entity %s is an avatar", entity.c_str( ) );
+            logger().debug("PetPsychePredicatesUpdater - entity %s is an avatar", entity.c_str( ) );
 
             bool isOwner = AtomSpaceUtil::isPetOwner( atomSpace, entityHandle, pet );
             bool isFriend = AtomSpaceUtil::isPredicateTrue( atomSpace, "friend", entityHandle, pet );
@@ -285,11 +285,11 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                 nextOwner |= isOwner;
             } // if
 
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - Entity %s properties: owner[%s] friend[%s] enemy[%s]", entity.c_str( ), ( isOwner ? "t" : "f" ), ( isFriend ? "t" : "f" ), ( isEnemy ? "t" : "f" ) );
+            logger().debug("PetPsychePredicatesUpdater - Entity %s properties: owner[%s] friend[%s] enemy[%s]", entity.c_str( ), ( isOwner ? "t" : "f" ), ( isFriend ? "t" : "f" ), ( isEnemy ? "t" : "f" ) );
 
         } else if ( atomSpace.getType(entityHandle) == OBJECT_NODE ) {
 
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - entity %s is an object", entity.c_str( ) );
+            logger().debug("PetPsychePredicatesUpdater - entity %s is an object", entity.c_str( ) );
 
             bool isEdible = AtomSpaceUtil::isPredicateTrue( atomSpace, "is_edible", entityHandle );
             bool isDrinkable = AtomSpaceUtil::isPredicateTrue( atomSpace, "is_drinkable", entityHandle );
@@ -302,7 +302,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                 nearPeePlace |= isPeePlace;
             } // if
 
-            logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - Entity %s properties: edible[%s] drinkable[%s] pooPlace[%s] peePlace[%s]", entity.c_str( ), ( isEdible ? "t" : "f" ), ( isDrinkable ? "t" : "f" ), ( isPooPlace ? "t" : "f" ), ( isPeePlace ? "t" : "f" ) );
+            logger().debug("PetPsychePredicatesUpdater - Entity %s properties: edible[%s] drinkable[%s] pooPlace[%s] peePlace[%s]", entity.c_str( ), ( isEdible ? "t" : "f" ), ( isDrinkable ? "t" : "f" ), ( isPooPlace ? "t" : "f" ), ( isPeePlace ? "t" : "f" ) );
 
             Handle conceptNodeHandle = atomSpace.getHandle( CONCEPT_NODE, "pet_home" );
             if ( conceptNodeHandle == Handle::UNDEFINED ) {
@@ -330,7 +330,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     // night 19:00 -> 6:00
     atNight = ( timeInfo.tm_hour > 19 || timeInfo.tm_hour < 6 );
 
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - current time: day[%d] month[%d] year[%d] hour[%d] min[%d] sec[%d]", timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900, timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec );
+    logger().debug("PetPsychePredicatesUpdater - current time: day[%d] month[%d] year[%d] hour[%d] min[%d] sec[%d]", timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900, timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec );
 
     // setup predicates
 
@@ -367,21 +367,21 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     meanValue = atNight ? 1.0f : 0.0f;
     AtomSpaceUtil::setPredicateValue( atomSpace, "night", SimpleTruthValue( meanValue, 1.0f ), pet );
 
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is at home: %s", (atHome ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is outside home: %s", (!atHome ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near owner: %s", (nearOwner ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near friend: %s", (nearFriend ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near enemy: %s", (nearEnemy ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near food: %s", (nearFood ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near water: %s", (nearWater ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is at home: %s", (atHome ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is outside home: %s", (!atHome ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near owner: %s", (nearOwner ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near friend: %s", (nearFriend ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near enemy: %s", (nearEnemy ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near food: %s", (nearFood ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near water: %s", (nearWater ? "t" : "f" ) );
 
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near poo place: %s", (nearPooPlace ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is near pee place: %s", (nearPeePlace ? "t" : "f" ) );
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - pet is next to owner (Used on learning mode): %s", (nextOwner ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near poo place: %s", (nearPooPlace ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is near pee place: %s", (nearPeePlace ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - pet is next to owner (Used on learning mode): %s", (nextOwner ? "t" : "f" ) );
 
-    logger().log(opencog::Logger::DEBUG, "PetPsychePredicatesUpdater - is at night: %s", (atNight ? "t" : "f" ) );
+    logger().debug("PetPsychePredicatesUpdater - is at night: %s", (atNight ? "t" : "f" ) );
 
-    logger().log(opencog::Logger::INFO, "PetPsychePredicatesUpdater - context predicates updated." );
+    logger().info("PetPsychePredicatesUpdater - context predicates updated." );
 
     this->latestSimWorldTimestamp = timestamp;
 

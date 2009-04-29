@@ -176,7 +176,7 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     }
     
 #ifdef DEBUG
-    if (logger().getLevel() >= Logger::FINE) {
+    if (logger().isFineEnabled()) {
         logger().fine("Initial normalised STI values");
         printVector(stiVector);
     }
@@ -318,7 +318,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     
 #ifdef DEBUG
     logger().debug("Hebbian connection matrix");
-    if (logger().getLevel() >= Logger::FINE) {
+    if (logger().isFineEnabled()) {
         printMatrix(connections_);
     }
 #endif
@@ -369,7 +369,7 @@ void ImportanceDiffusionAgent::spreadImportance()
         logger().error("%s\n", gsl_strerror (errorNo)); // XXX
     }*/
 
-    if (logger().getLevel() >= Logger::FINE) {
+    if (logger().isFineEnabled()) {
         float normAF;
         normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
         logger().fine("Result (AF at %.3f)\n",normAF);

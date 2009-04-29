@@ -113,7 +113,7 @@ protected:
     pAtom add_terminal(const pat& p);
 
     template<typename OutIterT> void parse(string s, OutIterT ret) const {
-        //logger().log( opencog::Logger::DEBUG, "PredaveseParser - Parsing [%s]", s.c_str( ) );
+        //logger().debug("PredaveseParser - Parsing [%s]", s.c_str( ) );
         pat p = str2pat(s, patmap);
         return parse(p, ret, 0, 0);
     }
@@ -127,13 +127,13 @@ protected:
         // to find expressions that should be converted into I AM AMAZED
         PatMap::const_iterator ip = i_patmap.find(strs);
 
-        //logger().log( opencog::Logger::DEBUG, "PredaveseParser - Starting parse expression. Strings[%d]", strs.size( ) );
+        //logger().debug("PredaveseParser - Starting parse expression. Strings[%d]", strs.size( ) );
 
         // if is such an expression should be parsed here
         if (ip != i_patmap.end() && original_offset == 0 ) {
             const pat& newStrs = ip->second;
             parse(newStrs, ret, depth + 1, original_offset);
-            //logger().log( opencog::Logger::DEBUG, "PredaveseParser - newStrs size[%d] next depth[%d]", newStrs.size( ), depth+1 );
+            //logger().debug("PredaveseParser - newStrs size[%d] next depth[%d]", newStrs.size( ), depth+1 );
         } else { // no such expression, do further tests
             PatMap::const_iterator ep = elliptic_prefix_patmap.find(strs);
 
@@ -141,7 +141,7 @@ protected:
                 pat newp(ep->second);
                 transform(strs.begin(), strs.end(), back_inserter(newp), promote());
 
-                //logger().log( opencog::Logger::DEBUG, "PredaveseParser - newp size[%d] next depth[%d]", newp.size( ), depth+1 );
+                //logger().debug("PredaveseParser - newp size[%d] next depth[%d]", newp.size( ), depth+1 );
                 parse(newp, ret, depth + 1, original_offset);
             } else {
 
@@ -153,7 +153,7 @@ protected:
 
                         if (replace(&mod_strs[i], &mod_strs[i+len], &mod_strs[mod_strs.size()], reduction, patmap)) {
                             mod_strs.resize(mod_strs.size() - reduction);
-                            //logger().log( opencog::Logger::DEBUG, "PredaveseParser - mod_strs after reduction[%d] reduction[%d]", mod_strs.size( ), reduction );
+                            //logger().debug("PredaveseParser - mod_strs after reduction[%d] reduction[%d]", mod_strs.size( ), reduction );
                             parse(mod_strs, ret, depth + 1, i);
                         } // if
 

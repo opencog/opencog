@@ -617,7 +617,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                 else
                     message << arg_count << " arguments.";
 
-                opencog::logger().log(opencog::Logger::ERROR,
+                opencog::logger().error(
                                 message.str().c_str());
                 //~log message
 
@@ -692,7 +692,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                         << type_tree(output_it)
                                         << " which does not inherits from "
                                         << type_tree(input_arg_it);
-                                opencog::logger().log(opencog::Logger::ERROR,
+                                opencog::logger().error(
                                                 message.str().c_str());
                                 //~log message
 
@@ -725,7 +725,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
                                     << type_tree(arg_app)
                                     << " which does not inherits from "
                                     << type_tree(input_arg_it);
-                            opencog::logger().log(opencog::Logger::ERROR,
+                            opencog::logger().error(
                                             message.str().c_str());
                             //~log message
 
@@ -785,7 +785,7 @@ void reduce_type_tree(type_tree& tt, type_tree_pre_it it,
             message << "is not typed as a function (that is lambda)"
                     << " but is typed "
                     << type_tree(it_child);
-            opencog::logger().log(opencog::Logger::ERROR, message.str().c_str());
+            opencog::logger().error(message.str().c_str());
             //~log message
 
             *it = id::ill_formed_type;

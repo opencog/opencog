@@ -207,7 +207,7 @@ Pet & MockOpcHCTest::getPet()
 
 bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
 {
-    logger().log(Logger::DEBUG, "DEBUG - OPC - Received msg");
+    logger().debug("DEBUG - OPC - Received msg");
 
     std::cout << "OPC RECEIVED MSG" << std::endl;
 
@@ -280,7 +280,7 @@ bool MockOpcHCTest::processNextMessage(MessagingSystem::Message *msg)
             break;
 
         default:
-            logger().log(Logger::ERROR,
+            logger().error(
                          "Not a SCHEMA or CANDIDATE_SCHEMA message!!!");
             break;
         }

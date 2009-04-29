@@ -98,13 +98,13 @@ throw (opencog::InvalidParamException, std::bad_exception):
 #ifdef USE_MAP_HANDLE_SET
                     mapsToSend.insert(sm_h);
 #else
-                    logger().log(opencog::Logger::DEBUG,
+                    logger().debug(
                                  "LearnMessage - adding space map (%s) to the message.",
                                  TLB::getAtom(sm_h)->toString().c_str());
                     spaceMaps.push_back(spaceServer.mapToString(sm_h));
 #endif
                 } else {
-                    logger().log(opencog::Logger::ERROR,
+                    logger().error(
                                  "LearnMessage - SpaceServer has no space map (%s) to be added to the message!",
                                  TLB::getAtom(sm_h)->toString().c_str());
                     // TODO: is this really needed? If not, we can get a const
@@ -113,7 +113,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
                     atomSpace.removeAtom(sm_h, true);
                 }
             } catch (opencog::AssertionException& e) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "LearnMessage - Failed to add map (%s) into LearnMessage.",
                              TLB::getAtom(sm_h)->toString().c_str());
             }
@@ -122,7 +122,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
 
 #ifdef USE_MAP_HANDLE_SET
     foreach(Handle sm_h, mapsToSend) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "LearnMessage - adding space map (%s) to the message.",
                      TLB::getAtom(sm_h)->toString().c_str());
         spaceMaps.push_back(spaceServer.MapToString(sm_h));
@@ -130,7 +130,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
 #endif
 
     behaviorDescriptions.assign(exporter.toXML(atomSpace.getAtomTable().getHandleSet(ATOM, true)));
-    logger().log(opencog::Logger::DEBUG, "LearnMessage - finished creating message (behavior descriptors just added.");
+    logger().debug("LearnMessage - finished creating message (behavior descriptors just added.");
 }
 
 /**

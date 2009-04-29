@@ -64,7 +64,7 @@ const definite_object_set EntityRelevanceFilter::getEntities(Type type) const
     for (unsigned int i = 0; i < spaceMapIds.size(); i++)
         entities.insert(WorldWrapperUtil::atom_name_to_definite_object(spaceMapIds[i], _selfID, _ownerID));
 
-    logger().log(opencog::Logger::DEBUG, "EntityRelevanceFilter - Found %d entities (definite_objects).", entities.size());
+    logger().debug("EntityRelevanceFilter - Found %d entities (definite_objects).", entities.size());
     return entities;
 }
 

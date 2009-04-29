@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
 
     if (argc != 6) {
-        logger().log(Logger::ERROR, "OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
+        logger().error("OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
         return (1);
     }
 
@@ -92,18 +92,18 @@ int main(int argc, char *argv[])
         opc.serverLoop();
 
     } catch (std::bad_alloc) {
-        logger().log(Logger::ERROR,
+        logger().error(
                      "OPCExecutable - OPC raised a bad_alloc exception.");
         static_cast<OPC&>(server()).saveState();
     } catch (StandardException se) {
-        logger().log(Logger::ERROR,
+        logger().error(
                      "OPCExecutable - An exceptional situation occured"
                      " with the following message '%s'"
                      ". Check log for more information.",
                      se.getMessage());
         static_cast<OPC&>(server()).saveState();
     } catch (...) {
-        logger().log(Logger::ERROR,
+        logger().error(
                      "OPCExecutable - An exceptional situation occured"
                      ". Check log for more information.");
         static_cast<OPC&>(server()).saveState();

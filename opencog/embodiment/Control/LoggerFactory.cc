@@ -49,14 +49,14 @@ opencog::Logger LoggerFactory::getLogger(const std::string &id)
     if (user_index != std::string::npos) {
         //const char* username = getlogin();
         const char* username = getenv("LOGNAME");
-        logger().log(Logger::INFO, "LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
+        logger().info("LoggerFactory::getLogger: processing $USER flag => username = %s\n", username);
         if (username == NULL)
             username = "unknown_user";
         logFile = logFile.replace(user_index, strlen(USER_FLAG), username);
     }
     logFile.append(slash);
     logFile.append(id);
-    logger().log(Logger::INFO,
+    logger().info(
                  "LoggerFactory:getLogger(): log dir: %s\n",
                  logFile.c_str());
 

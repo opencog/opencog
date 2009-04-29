@@ -40,7 +40,7 @@ SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) t
     if ( !rebuild( ) ) {
         this->segments.clear( );
         this->subEntities.clear( );
-        logger().log( opencog::Logger::ERROR, "Entities doesn't intersect: Entity1(%s) Entity2(%s). An exception will be thrown", entity1->toString( ).c_str( ), entity2->toString( ).c_str( ) );
+        logger().error("Entities doesn't intersect: Entity1(%s) Entity2(%s). An exception will be thrown", entity1->toString( ).c_str( ), entity2->toString( ).c_str( ) );
         throw opencog::InvalidParamException( TRACE_INFO, "Given entities does not intersect" );
     } // if
 }

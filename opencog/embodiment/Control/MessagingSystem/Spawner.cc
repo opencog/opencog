@@ -102,7 +102,7 @@ bool Spawner::processNextMessage(Message *message)
     std::queue<std::string> args;
 
     NetworkElement::parseCommandLine(cmdLine, command, args);
-    logger().log(opencog::Logger::INFO, "Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
+    logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
 
     if (command == "LOAD_AGENT") {
         std::string agentID = args.front();
@@ -113,20 +113,20 @@ bool Spawner::processNextMessage(Message *message)
         args.pop( );
         std::string agentTraits = args.front();
 
-        logger().log(opencog::Logger::INFO, "Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).", agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ), agentTraits.c_str( ) );
+        logger().info("Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).", agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ), agentTraits.c_str( ) );
 
         // TODO: Find a way to figure out that OPC is already running.
         // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the
         // available ones:
         //if (isElementAvailable(petID)) {
-        //logger().log(opencog::Logger::WARN, "Trying to load an OPC that is already available: %s\n", petID.c_str());
+        //logger().warn("Trying to load an OPC that is already available: %s\n", petID.c_str());
         // TODO: send the LOAD SUCCESS message back
         //}
         std::stringstream str;
         //char str[512];
         int opcPort = allocateOpcPort(agentID);
         if (opcPort <= 0) {
-            logger().log(opencog::Logger::ERROR, "There is no available socket port to run opc %s\n", agentID.c_str());
+            logger().error("There is no available socket port to run opc %s\n", agentID.c_str());
             // TODO: notify PROXY about this problem
             return false;
         }
@@ -162,7 +162,7 @@ bool Spawner::processNextMessage(Message *message)
             << agentTraits << " "
             << opcPort << cmdSuffix << " &";
         }
-        logger().log(opencog::Logger::INFO, "Starting OPC for %s %s %s (%s) at port %d (command: %s)", agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), opcPort, str.str().c_str( ) );
+        logger().info("Starting OPC for %s %s %s (%s) at port %d (command: %s)", agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), opcPort, str.str().c_str( ) );
 
 #define USE_SYSTEM_FUNCTION
 #ifdef USE_SYSTEM_FUNCTION
@@ -174,13 +174,13 @@ bool Spawner::processNextMessage(Message *message)
 #else
         int pid = fork();
         if (pid < 0) {
-            logger().log(opencog::Logger::ERROR, "Could not fork the spawner process to run opc %s\n", agentID.c_str());
+            logger().error("Could not fork the spawner process to run opc %s\n", agentID.c_str());
             // TODO: What to do now? Send a NACK back to proxy ???
         } else {
             if (pid == 0) {
                 // child proccess
                 int execResult = execl("./opc", "opc", agentID.c_str(), ownerID.c_str(), agentType.c_str( ), agentTraits.c_str( ), opcPortStr.c_str(), NULL);
-                logger().log(opencog::Logger::DEBUG, "exec method returned %d\n", execResult);
+                logger().debug("exec method returned %d\n", execResult);
                 exit(0); // cannot continue spawner execution...
             }
         }
@@ -196,12 +196,12 @@ bool Spawner::processNextMessage(Message *message)
 
         // then, unload it
         StringMessage saveExit(getID(), agentID, "SAVE_AND_EXIT");
-        logger().log(opencog::Logger::INFO, "Sending SAVE_AND_EXIT message to %s", agentID.c_str());
+        logger().info("Sending SAVE_AND_EXIT message to %s", agentID.c_str());
         sendMessage(saveExit);
 
         releaseOpcPort(agentID);
     } else {
-        logger().log(opencog::Logger::WARN, "Unknown command <%s>. Discarding it", command.c_str());
+        logger().warn("Unknown command <%s>. Discarding it", command.c_str());
     }
     return false;
 }

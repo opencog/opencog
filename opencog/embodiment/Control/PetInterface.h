@@ -157,9 +157,9 @@ public:
      * Save a LocalSpaceMap2D copy on the current application directory
      */
     void saveSpaceMapFile() {
-        logger().log(opencog::Logger::DEBUG,  "PetInterface - saveSpaceMapFile().");
+        logger().debug("PetInterface - saveSpaceMapFile().");
         if (!getAtomSpace().getSpaceServer().isLatestMapValid()) {
-            logger().log(opencog::Logger::WARN,  "PetInterface - There is no space map yet.");
+            logger().warn("PetInterface - There is no space map yet.");
             return;
         }
         const SpaceServer::SpaceMap& sm = getAtomSpace().getSpaceServer().getLatestMap();

@@ -121,7 +121,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        opencog::logger().log(opencog::Logger::ERROR, 
+        opencog::logger().error(
                         "procedure_call - Mismatched parenthesis in the arity definition procedure '%s'",
                         str.c_str());
         return NULL;
@@ -131,7 +131,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
     //recognize :=
     in >> tmp;
     if (tmp != ":=" || !in.good()) {
-        opencog::logger().log(opencog::Logger::ERROR, 
+        opencog::logger().error(
                         "procedure_call - Wrong procedure definition operator '%s' in procedure definition '%s' should be ':=' instead",
                         tmp.c_str(), str.c_str());
         return NULL;
@@ -149,7 +149,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
         tmp.assign("");
     } while (in.good() && nparen > 0);
     if (nparen != 0) {
-        opencog::logger().log(opencog::Logger::ERROR, 
+        opencog::logger().error(
                         "procedure_call - Mismatched parenthesis in the body of procedure '%s'. The total of parenthesis, with '(' counting for 1 and ')' counting for -1, sums up to %d",
                         str.c_str(), nparen);
         return NULL;
@@ -167,7 +167,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
     try {
         arity = boost::lexical_cast<int>(arity_str);
     } catch (...) {
-        opencog::logger().log(opencog::Logger::ERROR, 
+        opencog::logger().error(
                               "procedure_call - Lexical error: '%s'"
                               " supposed to be an arity in procedure"
                               " definition '%s' does not correspond to"
@@ -187,7 +187,7 @@ combo::procedure_call load_procedure_call(std::istream& in,
             if(!arg.is_idx_valid(arity)) {
                 stringstream arg_ss;
                 arg_ss << arg;
-                opencog::logger().log(opencog::Logger::ERROR, 
+                opencog::logger().error(
                                       "procedure_call - Semantic error:"
                                       " the procedure '%s' has arity '%d'"
                                       " but contains variable argument '%s'"

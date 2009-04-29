@@ -103,7 +103,7 @@ public:
     typedef Spatial::GridPoint GridPoint;
 
     LocalSpaceMap2D* createMockupMap( void ) {
-        logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2DUTest - start creating map..." );
+        logger().debug("LocalSpaceMap2DUTest - start creating map..." );
         LocalSpaceMap2D* map = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
         unsigned int i;
 
@@ -112,7 +112,7 @@ public:
                             mockyObjects[ i ].metadata,
                             mockyObjects[ i ].isObstacle );
         } // for
-        logger().log(opencog::Logger::DEBUG, "LocalSpaceMap2DUTest - end creating map..." );
+        logger().debug("LocalSpaceMap2DUTest - end creating map..." );
 
         static bool firstMapSaved = false;
         if ( !firstMapSaved ) {

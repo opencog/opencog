@@ -42,6 +42,6 @@ void ProcedureInterpreterAgent::setInterpreter(Procedure::ProcedureInterpreter* 
 
 void ProcedureInterpreterAgent::run(opencog::CogServer *server)
 {
-    logger().log(opencog::Logger::FINE, "ProcedureInterpreterAgent::run()");
+    logger().fine("ProcedureInterpreterAgent::run()");
     interpreter->run(&(((OPC*)server)->getNetworkElement()));
 }

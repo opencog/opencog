@@ -28,7 +28,7 @@
 #include <SDL/SDL_gfxPrimitives.h>
 
 #include <vector>
-#include "Vector2.h"
+#include "Math/Vector2.h"
 #include "LocalSpaceMap2DUtil.h"
 
 namespace Spatial

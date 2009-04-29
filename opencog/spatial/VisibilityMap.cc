@@ -186,11 +186,11 @@ VisibilityMap::VisibilityMap( const Math::Vector3& minimumExtent, const Math::Ve
         tiles.push_back( rowTiles );
     } // for
 
-    logger().log(opencog::Logger::DEBUG, "VisibilityMap - Created tiles #: %d", tilesCounter );
+    logger().debug("VisibilityMap - Created tiles #: %d", tilesCounter );
 
-    logger().log(opencog::Logger::DEBUG, "VisibilityMap - Max extents: min[%s] max[%s]", minimumExtent.toString( ).c_str( ), maximumExtent.toString( ).c_str( ) );
-    logger().log(opencog::Logger::DEBUG, "VisibilityMap - Total rows created: %d", tiles.size( ) );
-    logger().log(opencog::Logger::DEBUG, "VisibilityMap - #number of tiles per side: %d, tile side size: %f", numberOfTiles, tileSideSize );
+    logger().debug("VisibilityMap - Max extents: min[%s] max[%s]", minimumExtent.toString( ).c_str( ), maximumExtent.toString( ).c_str( ) );
+    logger().debug("VisibilityMap - Total rows created: %d", tiles.size( ) );
+    logger().debug("VisibilityMap - #number of tiles per side: %d, tile side size: %f", numberOfTiles, tileSideSize );
 }
 
 const VisibilityMap::TilePtr& VisibilityMap::getTile( const Math::Vector3& position ) const throw( opencog::NotFoundException )

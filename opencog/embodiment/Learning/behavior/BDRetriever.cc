@@ -118,11 +118,11 @@ void BDRetriever::addLastExemplar(BehaviorCategory& bc,
     Temporal et(0);
     retrieveLastExemplar(bd, et, wp, tn);
     if (bd.empty()) { //if the exemplar is empty it is simply ignored
-        logger().log(opencog::Logger::INFO, "BDRetriever - The last exemplar is empty it will simply be ignored.");
+        logger().info("BDRetriever - The last exemplar is empty it will simply be ignored.");
     } else {
         bc.addCompositeBehaviorDescription(bd);
         est.push_back(et);
-        logger().log(opencog::Logger::INFO, "BDRetriever - The last exemplar %s has been retrieved successfully.", bd.toString().c_str());
+        logger().info("BDRetriever - The last exemplar %s has been retrieved successfully.", bd.toString().c_str());
     }
 }
 
@@ -142,11 +142,11 @@ void BDRetriever::retrieveAllExemplars(BehaviorCategory& bc,
             Temporal temp = *(ip->getTemporal());
             retrieveExemplar(bd, wp, h, temp);
             if (bd.empty()) {
-                logger().log(opencog::Logger::INFO, "BDRetriever - The exemplar of interval [%u, %u] is empty it will simply be ignored.", temp.getLowerBound(), temp.getUpperBound());
+                logger().info("BDRetriever - The exemplar of interval [%u, %u] is empty it will simply be ignored.", temp.getLowerBound(), temp.getUpperBound());
             } else {
                 bc.addCompositeBehaviorDescription(bd);
                 est.push_back(temp);
-                logger().log(opencog::Logger::INFO, "BDRetriever - The following exemplar %s has been retrieved successfully.", bd.toString().c_str());
+                logger().info("BDRetriever - The following exemplar %s has been retrieved successfully.", bd.toString().c_str());
             }
         }
     }

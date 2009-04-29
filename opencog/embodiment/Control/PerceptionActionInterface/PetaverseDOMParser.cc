@@ -42,7 +42,7 @@ void PetaverseDOMParser::error (const unsigned int    errCode,
     char* errorTextStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(errorText);
     char* systemIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(systemId);
     char* publicIdStr  = XERCES_CPP_NAMESPACE::XMLString::transcode(publicId);
-    logger().log(opencog::Logger::ERROR, "PetaverseDOMParser - XML Parser error:"
+    logger().error("PetaverseDOMParser - XML Parser error:"
                  "\n  code = %u"
                  "\n  domain = %s"
                  "\n  type = %d"

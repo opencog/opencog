@@ -147,17 +147,6 @@ inline std::ostream& operator<<(std::ostream& out, const Point& pt)
             return (random >= 0 ? (unsigned) random : 0);
         }*/
 
-inline void log(int status, std::string message)
-{
-#ifdef TB_PRINT_NCURSES
-    cerr << message << endl;
-#else
-    opencog::logger().log(static_cast<opencog::Logger::Level>(status),
-                          message);
-#endif
-}
-
-
 } // namespace TangentBugBits
 } // namespace Spatial
 

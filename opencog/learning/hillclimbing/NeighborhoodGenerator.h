@@ -568,7 +568,7 @@ private:
         std::stringstream ss_tr;
         ss_tr << tr;
         std::string s_tr = ss_tr.str();
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "NeighborhoodGenerator - Insert neighbor : %s",
                      s_tr.c_str());
         //~debug log

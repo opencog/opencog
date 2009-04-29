@@ -43,10 +43,10 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
 {
     if ( name == "visibilityMap" ) {
         if ( arguments.size( ) == 0 ) {
-            logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Invalid visibility map signal, string 0 signed" );
+            logger().debug("DefaultAgentModeHandler - Invalid visibility map signal, string 0 signed" );
             return;
         } // if
-        logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Parsing visibility map signal" );
+        logger().debug("DefaultAgentModeHandler - Parsing visibility map signal" );
 
         Spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
         if ( !visibilityMap ) {
@@ -55,7 +55,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
 
         std::vector<std::string> rows;
         boost::algorithm::split( rows, arguments[0], boost::algorithm::is_any_of(";") );
-        logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Parsed %d rows", rows.size( ) );
+        logger().debug("DefaultAgentModeHandler - Parsed %d rows", rows.size( ) );
 
         unsigned int i;
         for ( i = 0; i < rows.size( ); ++i ) {
@@ -64,7 +64,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
             parser >> row;
             int col = -1;
             std::vector<int> range;
-            logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Parsing row %d", row );
+            logger().debug("DefaultAgentModeHandler - Parsing row %d", row );
             while ( !parser.eof( ) ) {
                 parser >> col;
                 if ( col == -1 ) {
@@ -72,23 +72,23 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
                 } // if
                 range.push_back( col );
             } // while
-            logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Parsed %d columns for row %d", range.size( ), row );
+            logger().debug("DefaultAgentModeHandler - Parsed %d columns for row %d", range.size( ), row );
             if ( range.size( ) == 0 || ( range.size( ) % 2 ) != 0 ) {
-                logger().log( opencog::Logger::ERROR, "DefaultAgentModeHandler - The columns number of a visibility map signal must be pair and greater than 0. row: %d", row );
+                logger().error("DefaultAgentModeHandler - The columns number of a visibility map signal must be pair and greater than 0. row: %d", row );
                 return;
             } // if
 
             unsigned int j;
             int k;
             for ( j = 0; j < range.size( ); j += 2 ) {
-                logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Setting visibility for tiles range %d - %d", range[j], range[j+1] );
+                logger().debug("DefaultAgentModeHandler - Setting visibility for tiles range %d - %d", range[j], range[j+1] );
                 for ( k = range[j]; k <= range[j+1]; ++k ) {
                     try {
                         const Spatial::VisibilityMap::TilePtr& tile = visibilityMap->getTile( row, k );
-                        logger().log( opencog::Logger::DEBUG, "DefaultAgentModeHandler - Setting visibility for tile row: %d col: %d", row, k );
+                        logger().debug("DefaultAgentModeHandler - Setting visibility for tile row: %d col: %d", row, k );
                         tile->setVisibility( true );
                     } catch ( opencog::NotFoundException& ex ) {
-                        logger().log( opencog::Logger::ERROR, "DefaultAgentModeHandler - There was an attempt to access an invalid tile row: %d col: %d", row, k );
+                        logger().error("DefaultAgentModeHandler - There was an attempt to access an invalid tile row: %d col: %d", row, k );
                     } // catch
                 } // for
             } // for
@@ -114,7 +114,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
         } // else if
 
     } else {
-        logger().log(opencog::Logger::DEBUG, "DefaultAgentModeHandler - invalid command: %s", name.c_str() );
+        logger().debug("DefaultAgentModeHandler - invalid command: %s", name.c_str() );
     } // else
 }
 
@@ -126,7 +126,7 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
 
     Handle spaceMapHandle = this->agent->getAtomSpace().getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::DEBUG, "ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
+        logger().debug("ScavengerHuntAgentModeHandler - There is no space map loaded at this moment" );
         return 0;
     } // if
 

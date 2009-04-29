@@ -84,11 +84,11 @@ NoSpaceLifeFitnessEstimator::~NoSpaceLifeFitnessEstimator() {}
 fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) const
 {
     //debug log
-    if (opencog::Logger::DEBUG <= opencog::logger().getLevel()) {
+    if (logger().isDebugEnabled()) {
         stringstream ss_tr;
         ss_tr << tr;
         string s_tr = ss_tr.str();
-        opencog::logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Candidate being estimated : %s", s_tr.c_str());
+        opencog::logger().debug("NoSpaceLifeFitnessEstimator - Candidate being estimated : %s", s_tr.c_str());
     }
     //~debug log
 
@@ -100,7 +100,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
     opencog::cassert(TRACE_INFO, !bdce.empty(), "Error : No exemplars");
 
     //debug log
-    opencog::logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category starts");
+    opencog::logger().debug("NoSpaceLifeFitnessEstimator - Loop over Behavior Category starts");
     //~debug log
 
     //determine the number of times to run the schema
@@ -146,7 +146,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
                         i++) {
 
                     //debug log
-                    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Combo interpreter cycle : %d", i);
+                    logger().debug("NoSpaceLifeFitnessEstimator - Combo interpreter cycle : %d", i);
                     //~debug log
 
                     rp.cycle();
@@ -154,9 +154,9 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
                 CompositeBehaviorDescription& genBD =
                     nspww.getNoSpaceLife().getGeneratedBD();
                 //debug log
-                if (opencog::Logger::DEBUG <= logger().getLevel()) {
-                    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description to imitate : %s", cbd_it->toString().c_str());
-                    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Composite Behavior Description generated : %s", genBD.toString().c_str());
+                if (logger().isDebugEnabled()) {
+                    logger().debug("NoSpaceLifeFitnessEstimator - Composite Behavior Description to imitate : %s", cbd_it->toString().c_str());
+                    logger().debug("NoSpaceLifeFitnessEstimator - Composite Behavior Description generated : %s", genBD.toString().c_str());
                 }
                 //~debug log
 
@@ -167,7 +167,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
             bd_score /= trial_count;
 
             //debug log
-            logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Score against the current Composite Behavior Description : %f", bd_score);
+            logger().debug("NoSpaceLifeFitnessEstimator - Score against the current Composite Behavior Description : %f", bd_score);
             //~debug log
 
 #ifdef IS_FE_LRU_CACHE
@@ -182,7 +182,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
         score += bd_score; //non-normalized score
     }
     //debug log
-    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Loop over Behavior Category ends");
+    logger().debug("NoSpaceLifeFitnessEstimator - Loop over Behavior Category ends");
     //~debug log
 
 #ifdef IS_FE_LRU_CACHE
@@ -193,14 +193,14 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
     _total_fitness_call++;
 
     //debug log
-    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Total fitness call = %u, Cache success = %u", _total_fitness_call, _cache_success);
+    logger().debug("NoSpaceLifeFitnessEstimator - Total fitness call = %u, Cache success = %u", _total_fitness_call, _cache_success);
     //~debug log
 #endif
 
     //compute score
     score /= (float)(bdce.size()); //normalized score
     //debug log for SPCTools
-    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - SPCTools - Score : %f", score);
+    logger().debug("NoSpaceLifeFitnessEstimator - SPCTools - Score : %f", score);
     //~debug log for SPCTools
 
     //compute size penalty
@@ -209,8 +209,8 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
     double fit = score * sp;
 
     //debug log
-    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Size penalty : %f", sp);
-    logger().log(opencog::Logger::DEBUG, "NoSpaceLifeFitnessEstimator - Fitness : %f", fit);
+    logger().debug("NoSpaceLifeFitnessEstimator - Size penalty : %f", sp);
+    logger().debug("NoSpaceLifeFitnessEstimator - Fitness : %f", fit);
     //~debug log
 
     return fit;

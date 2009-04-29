@@ -71,11 +71,11 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
         RunningComboProcedure& rp = (*it)->second;
 
         if (rp.isReady()) {
-            logger().log(opencog::Logger::DEBUG, "Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());
+            logger().debug("Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());
             rp.cycle();
 
         } else if (rp.isFinished()) {
-            logger().log(opencog::Logger::DEBUG, "Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
+            logger().debug("Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
             done.insert((*it)->first);
         }
     }
@@ -93,7 +93,7 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
             // send it to combo shell, if any
             _failed.insert((*it)->first);
 
-            logger().log(opencog::Logger::ERROR, "Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
+            logger().error("Not finished '%d' - adding to failed list",  ((RunningProcedureId&) (*it)->first).getId());
             if (ne) {
                 StringMessage msg(ne->getID(),
                                   opencog::config().get("COMBO_SHELL_ID"),
@@ -168,7 +168,7 @@ bool ComboInterpreter::isFailed(RunningProcedureId id)
     }
     Map::iterator it = _map.find(id);
 
-//    logger().log(opencog::Logger::WARN, "_map!end '%s', finished '%s', failed '%s'.",
+//    logger().warn("_map!end '%s', finished '%s', failed '%s'.",
 //                    (it!=_map.end())?"true":"false", it->second.isFinished()?"true":"false", it->second.isFailed()?"true":"false");
     return (it != _map.end() && it->second.isFinished() && it->second.isFailed());
 }

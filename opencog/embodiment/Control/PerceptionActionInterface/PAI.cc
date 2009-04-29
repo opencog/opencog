@@ -103,7 +103,7 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
         schemaLocation += XSD_NAMESPACE " " PVP_XSD_FILE_PATH;
     }
     if (schemaLocation.size() > 0) {
-        logger().log(opencog::Logger::INFO, "PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
+        logger().info("PAI - Setting the schemaLocation to: %s\n", schemaLocation.c_str());
         // The line bellow replace the path for the XSD file so that it does not need to be in the current directory...
         parser->setExternalSchemaLocation(schemaLocation.c_str());
     }
@@ -254,7 +254,7 @@ ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (ope
         // Maps the planID + seqNumber to the actionID for further usage.
         planToActionIdsMaps[planId][seqNumber] = result;
     } else {
-        logger().log(opencog::Logger::WARN, "PAI - No action plan with id = %s in progress\n", planId.c_str());
+        logger().warn("PAI - No action plan with id = %s in progress\n", planId.c_str());
         // TODO: throw an Exception?
     }
     return result;
@@ -267,7 +267,7 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
     if (it != inProgressActionPlans.end()) {
         return it->second.empty();
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "PAI - No action plan with id = %s in progress\n",
                      planId.c_str());
         return false;
@@ -279,12 +279,12 @@ bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
 bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
 {
 
-    logger().log(opencog::Logger::DEBUG, "PAI - processPVPMessage.");
+    logger().debug("PAI - processPVPMessage.");
 
-    logger().log(opencog::Logger::DEBUG, "PAI - processPVPMessage atomTable.size=%d", atomSpace.getAtomTable().getSize() );
+    logger().debug("PAI - processPVPMessage atomTable.size=%d", atomSpace.getAtomTable().getSize() );
 
     if (logPVPMessage) {
-        logger().log(opencog::Logger::INFO, " PAI - Processing PVP message:\n%s\n", pvpMsg.c_str());
+        logger().info(" PAI - Processing PVP message:\n%s\n", pvpMsg.c_str());
     }
 
     static const char* bufID = "pvp message";
@@ -301,7 +301,7 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
         parser->parse(*memBufIS);
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
-        logger().log(opencog::Logger::ERROR, "PAI - XML Exception: %s\n", message);
+        logger().error("PAI - XML Exception: %s\n", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         delete memBufIS;
         //delete parser;
@@ -309,13 +309,13 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
     } catch (const XERCES_CPP_NAMESPACE::DOMException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.msg);
 //        XERCES_CPP_NAMESPACE::XMLString::release(&heightStr);
-        logger().log(opencog::Logger::ERROR, "PAI - DOM Exception: %s\n", message);
+        logger().error("PAI - DOM Exception: %s\n", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         delete memBufIS;
         //delete parser;
         return false;
     } catch (...) {
-        logger().log(opencog::Logger::ERROR, "PAI - Unexpected XML Parse Exception\n");
+        logger().error("PAI - Unexpected XML Parse Exception\n");
         delete memBufIS;
         //delete parser;
         return false;
@@ -324,11 +324,11 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
     XERCES_CPP_NAMESPACE::DOMDocument * document = NULL;
     if (parser->getErrorCount() == 0) {
         document = parser->adoptDocument();
-        logger().log(opencog::Logger::DEBUG, "PAI - DOMDocument retrieved");
+        logger().debug("PAI - DOMDocument retrieved");
 
         try {
             processPVPDocument(document, toUpdateHandles);
-            logger().log(opencog::Logger::DEBUG, "PAI - processPVPDocument done");
+            logger().debug("PAI - processPVPDocument done");
 
             // catch runtime exceptions and its specialization
         } catch (opencog::RuntimeException& e) {
@@ -337,7 +337,7 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
             return false;
 
         } catch (...) {
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "PAI - Got an unknown exception while processing from PVP XML message.");
             delete memBufIS;
             delete document;
@@ -347,7 +347,7 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
         // TODO: Are any of these errors really relevant/important enough
         // to make the DOM document invalid?
 
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "PAI - Got %d errors parsing the xml data.", parser->getErrorCount());
         delete memBufIS;
         delete document;
@@ -399,7 +399,7 @@ bool PAI::hasPlanFailed(ActionPlanID planId) const
 
 void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq &toUpdateHandles)
 {
-    logger().log(opencog::Logger::DEBUG, "PAI - processPVPDocument");
+    logger().debug("PAI - processPVPDocument");
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
     XERCES_CPP_NAMESPACE::DOMNodeList * list;
 
@@ -415,7 +415,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processMapInfo((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i), toUpdateHandles);
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing map-info done");
+    logger().debug("PAI - Processing map-info done");
 
     // getting <pet-signal> elements from the XML message
     XERCES_CPP_NAMESPACE::XMLString::transcode(PET_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -424,7 +424,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processPetSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing pet-signal done");
+    logger().debug("PAI - Processing pet-signal done");
 
     // getting <avatar-signal> elements from the XML message
     XERCES_CPP_NAMESPACE::XMLString::transcode(AVATAR_SIGNAL_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -433,7 +433,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAvatarSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing avatar-signal done");
+    logger().debug("PAI - Processing avatar-signal done");
 
 
 
@@ -444,7 +444,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing agent-signal done");
+    logger().debug("PAI - Processing agent-signal done");
 
 
     // getting <object-signal> elements from the XML message
@@ -454,7 +454,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processObjectSignal((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing object-signal done");
+    logger().debug("PAI - Processing object-signal done");
 
 
     // getting <instructions> elements from the XML message
@@ -464,7 +464,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processInstruction((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     }
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing instructions done");
+    logger().debug("PAI - Processing instructions done");
 
     // getting <agent-sensor-info> elements from the XML message
     XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_SENSOR_INFO_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -473,7 +473,7 @@ void PAI::processPVPDocument(XERCES_CPP_NAMESPACE::DOMDocument * doc, HandleSeq 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         processAgentSensorInfo((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
     } // for
-    logger().log(opencog::Logger::DEBUG, "PAI - Processing agent-sensor-info done");
+    logger().debug("PAI - Processing agent-sensor-info done");
 
 
 
@@ -488,7 +488,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in agent-signal => Message discarded!");
+        logger().error("PAI - Received old timestamp in agent-signal => Message discarded!");
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
         return;
     }
@@ -508,7 +508,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name)); //that's for the atomSpace name storage
 
-    logger().log(opencog::Logger::DEBUG, "PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %s\n", agentID, internalAgentId.c_str(), name, timestamp);
+    logger().debug("PAI - Got agent-signal: agentId = %s (%s), name = %s, timestamp = %s\n", agentID, internalAgentId.c_str(), name, timestamp);
 
     // Add the perceptions into AtomSpace
 
@@ -516,13 +516,13 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
     Handle agentNode = Handle::UNDEFINED;
     if ( agentTypeStr == AVATAR_OBJECT_TYPE ) {
         agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAgentId.c_str());
-        logger().log(opencog::Logger::DEBUG, "PAI - agent is an avatar: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
+        logger().debug("PAI - agent is an avatar: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else if ( agentTypeStr == PET_OBJECT_TYPE ) {
         agentNode = AtomSpaceUtil::addNode(atomSpace, PET_NODE, internalAgentId.c_str());
-        logger().log(opencog::Logger::DEBUG, "PAI - agent is a pet: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
+        logger().debug("PAI - agent is a pet: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else if ( agentTypeStr == HUMANOID_OBJECT_TYPE ) {
         agentNode = AtomSpaceUtil::addNode(atomSpace, HUMANOID_NODE, internalAgentId.c_str());
-        logger().log(opencog::Logger::DEBUG, "PAI - agent is an humanoid: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
+        logger().debug("PAI - agent is an humanoid: [%s] -> (%s)\n", agentID, internalAgentId.c_str() );
     } else {
         throw opencog::InvalidParamException(TRACE_INFO,
                                              "PAI - Invalid value for agent type: '%s'", agentTypeStr.c_str( ) );
@@ -553,7 +553,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
         XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
 
-        logger().log(opencog::Logger::DEBUG, "PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
+        logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
 
         // This function can throw an InvalidParamException
         const ActionParamType& actionParamType = ActionParamType::getFromName(paramType);
@@ -592,7 +592,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             char* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
             XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
+            logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
             HandleSeq rotationListLink;
 
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, xStr));
@@ -619,7 +619,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             char* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
             XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
+            logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
 
             HandleSeq rotationListLink;
 
@@ -652,7 +652,7 @@ void PAI::processAgentSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw (
             string internalEntityOwnerId = PAIUtils::getInternalId(entityOwnerId);
             XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* entityOwnerName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
+            logger().debug("PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
             //if action name is 'grab' then temporarly store
             //the argument to create isHolding predicate (see below)
             if (nameStr == "grab") {
@@ -721,10 +721,10 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
     /// getting timestamp atribute value
     XERCES_CPP_NAMESPACE::XMLString::transcode(TIMESTAMP_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
-    logger().log(opencog::Logger::FINE, "PAI:processPetSignal - timestamp: %s", timestamp);
+    logger().fine("PAI:processPetSignal - timestamp: %s", timestamp);
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in pet-signal => Message discarded!");
+        logger().error("PAI - Received old timestamp in pet-signal => Message discarded!");
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
         return;
     }
@@ -757,7 +757,7 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
         }
     }
 
-    logger().log(opencog::Logger::FINE, "PAI - pet-id %s (%s), name: %s, status: %s, statusCode: %d", petID, internalPetId.c_str(), name, status, statusCode);
+    logger().fine("PAI - pet-id %s (%s), name: %s, status: %s, statusCode: %d", petID, internalPetId.c_str(), name, status, statusCode);
 
     if (statusCode == PerceptionActionInterface::NONE) {
         // This is just a common pet physiological feeling (not a status for a previously sent action)
@@ -778,22 +778,22 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
             // TODO: Technically, the param type may be composed like vector, rotation or entity. If so, it would need to parse an additional element for getting the value.
             //        Should they be considered in this case?
 
-//            logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - before addPhysiologicalFeelingParam.");
+//            logger().debug("PAI - processPetSignal - before addPhysiologicalFeelingParam.");
             Handle paramListLink = addPhysiologicalFeelingParam(paramName, paramValue);
             feelingParams.push_back(paramListLink);
 
             XERCES_CPP_NAMESPACE::XMLString::release(&paramName);
             XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
-//            logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - after addPhysiologicalFeelingParam.");
+//            logger().debug("PAI - processPetSignal - after addPhysiologicalFeelingParam.");
         }
 
-//        logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - before addPhysiologicalFeeling.");
+//        logger().debug("PAI - processPetSignal - before addPhysiologicalFeeling.");
         addPhysiologicalFeeling(internalPetId.c_str(), name, tsValue, feelingParams);
-//        logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - after addPhysiologicalFeeling.");
+//        logger().debug("PAI - processPetSignal - after addPhysiologicalFeeling.");
 
     } else {
 
-//     logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - before send action plan.");
+//     logger().debug("PAI - processPetSignal - before send action plan.");
 
         // This is a feedback for a sent action plan
         XERCES_CPP_NAMESPACE::XMLString::transcode(SEQUENCE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -813,12 +813,12 @@ void PAI::processPetSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
             setActionPlanStatus(planId, sequence, statusCode, tsValue);
 
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "PAI - Got a pet-signal with action status (name = '%s'), but no action-plan-id attribute!", status);
         }
 
         XERCES_CPP_NAMESPACE::XMLString::release(&sequenceStr);
-//      logger().log(opencog::Logger::DEBUG, "PAI - processPetSignal - after send action plan.");
+//      logger().debug("PAI - processPetSignal - after send action plan.");
     }
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
@@ -836,10 +836,10 @@ unsigned long PAI::getLatestSimWorldTimestamp()
 bool PAI::setLatestSimWorldTimestamp(unsigned long timestamp)
 {
     if (timestamp > latestSimWorldTimestamp) {
-        logger().log(opencog::Logger::DEBUG, "PAI - setLatestSimWorldTimestamp(%lu).", timestamp, latestSimWorldTimestamp);
+        logger().debug("PAI - setLatestSimWorldTimestamp(%lu).", timestamp, latestSimWorldTimestamp);
         latestSimWorldTimestamp = timestamp;
     } else if (timestamp < latestSimWorldTimestamp) {
-        logger().log(opencog::Logger::ERROR, "PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp smaller than the latest received timestamp (%lu)!", timestamp, latestSimWorldTimestamp);
+        logger().error("PAI - setLatestSimWorldTimestamp(%lu): Got a timestamp smaller than the latest received timestamp (%lu)!", timestamp, latestSimWorldTimestamp);
         return false;
     }
     return true;
@@ -862,7 +862,7 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     //  TZD  = time zone designator (Z or +hh:mm or -hh:mm)
     //
 
-    logger().log(opencog::Logger::FINE, "PAI - getTimestampFromXsdDateTimeStr(%s)",
+    logger().fine("PAI - getTimestampFromXsdDateTimeStr(%s)",
                  xsdDateTimeStr);
 
     boost::cmatch matches;
@@ -888,7 +888,7 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     }
 
     if (matches.size() != REGEX_OUTPUT_SIZE) {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "PAI - RegEx result size (%d) differs from predifined one (%d).",
                      matches.size(), REGEX_OUTPUT_SIZE);
         // return what???
@@ -956,7 +956,7 @@ unsigned long PAI::getTimestampFromXsdDateTimeStr(const char* xsdDateTimeStr) th
     unsigned long result = elapsedSeconds * 100 + milliseconds / 10;
 #endif
 
-    //logger().log(opencog::Logger::DEBUG, "PAI - ulong timestamp = %lu, converted from %s", result, xsdDateTimeStr);
+    //logger().debug("PAI - ulong timestamp = %lu, converted from %s", result, xsdDateTimeStr);
     return result;
 }
 
@@ -970,7 +970,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in instruction => Message discarded!");
+        logger().error("PAI - Received old timestamp in instruction => Message discarded!");
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
         return;
     }
@@ -1015,7 +1015,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     sentence += internalPetId;
     sentence += ": ";
     sentence += instruction;
-    //logger().log(opencog::Logger::DEBUG, "sentence = '%s'\n", sentence.c_str());
+    //logger().debug("sentence = '%s'\n", sentence.c_str());
 
 
     Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
@@ -1049,7 +1049,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     // let predavese parser decide if or not an instruction must be processed
     predaveseParser->processInstruction(string(instruction), tsValue, internalAvatarId.c_str());
 //    } else {
-//        logger().log(opencog::Logger::DEBUG, "Instruction from a non-owner avatar (%s). So, predavese parser not called for it", internalAvatarId.c_str());
+//        logger().debug("Instruction from a non-owner avatar (%s). So, predavese parser not called for it", internalAvatarId.c_str());
 //    }
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
@@ -1066,7 +1066,7 @@ void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::transcode(PERCEPTION_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList *perceptionList = element->getElementsByTagName(tag);
 
-    logger().log(opencog::Logger::DEBUG, "PAI - Received an agent-sensor-info. %d perceptions", perceptionList->getLength() );
+    logger().debug("PAI - Received an agent-sensor-info. %d perceptions", perceptionList->getLength() );
 
     for (unsigned int i = 0; i < perceptionList->getLength(); i++) {
         XERCES_CPP_NAMESPACE::DOMElement* perceptionElement = (XERCES_CPP_NAMESPACE::DOMElement*) perceptionList->item(i);
@@ -1080,7 +1080,7 @@ void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
         XERCES_CPP_NAMESPACE::XMLString::transcode(SIGNAL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* signal = XERCES_CPP_NAMESPACE::XMLString::transcode(perceptionElement->getAttribute(tag));
 
-        logger().log(opencog::Logger::DEBUG, "PAI - Received a perception: %s, %s, %s", sensor, subject, signal );
+        logger().debug("PAI - Received a perception: %s, %s, %s", sensor, subject, signal );
 
 
         if ( !strcmp( sensor, "visibility" ) && !strcmp( subject, "map" ) ) {
@@ -1107,7 +1107,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
     char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in avatar-signal => Message discarded!");
+        logger().error("PAI - Received old timestamp in avatar-signal => Message discarded!");
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
         return;
     }
@@ -1122,7 +1122,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
     char* name = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string nameStr(camelCaseToUnderscore(name));
 
-    logger().log(opencog::Logger::DEBUG, "PAI - Got avatar-signal: avatarId = %s (%s), name = %s, timestamp = %s\n", avatarID, internalAvatarId.c_str(), name, timestamp);
+    logger().debug("PAI - Got avatar-signal: avatarId = %s (%s), name = %s, timestamp = %s\n", avatarID, internalAvatarId.c_str(), name, timestamp);
 
     // Add the perceptions into AtomSpace
 
@@ -1152,7 +1152,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
         XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* paramValue = XERCES_CPP_NAMESPACE::XMLString::transcode(paramElement->getAttribute(tag));
 
-        logger().log(opencog::Logger::DEBUG, "PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
+        logger().debug("PAI - Got param: name = %s, type = %s, value = %s", paramName, paramType, paramValue);
 
         // This function can throw an InvalidParamException
         const ActionParamType& actionParamType = ActionParamType::getFromName(paramType);
@@ -1191,7 +1191,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             char* yStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
             XERCES_CPP_NAMESPACE::XMLString::transcode(Z_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* zStr = XERCES_CPP_NAMESPACE::XMLString::transcode(vectorElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
+            logger().debug("PAI - Got vector: x = %s, y = %s, z = %s\n", xStr, yStr, zStr);
             HandleSeq rotationListLink;
             // TODO: check if string is a valid number?
             rotationListLink.push_back(AtomSpaceUtil::addNode(atomSpace, NUMBER_NODE, xStr));
@@ -1218,7 +1218,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             char* rollStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
             XERCES_CPP_NAMESPACE::XMLString::transcode(YAW_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* yawStr = XERCES_CPP_NAMESPACE::XMLString::transcode(rotationElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
+            logger().debug("PAI - Got rotaion: pitch = %s, roll = %s, yaw = %s\n", pitchStr, rollStr, yawStr);
 
             HandleSeq rotationListLink;
             // TODO: check if string is a valid number?
@@ -1251,7 +1251,7 @@ void PAI::processAvatarSignal(XERCES_CPP_NAMESPACE::DOMElement * element) throw 
             string internalEntityOwnerId = PAIUtils::getInternalId(entityOwnerId);
             XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
             char* entityOwnerName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
-            logger().log(opencog::Logger::DEBUG, "PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
+            logger().debug("PAI - Got Entity: id = %s (%s), type = %s, ownerId = %s (%s), ownerName = %s\n", entityId, internalEntityId.c_str(), entityType, entityOwnerId, internalEntityOwnerId.c_str(), entityOwnerName);
             //if action name is 'grab' then temporarly store
             //the argument to create isHolding predicate (see below)
             if (nameStr == "grab") {
@@ -1335,7 +1335,7 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
     char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
     if (!setLatestSimWorldTimestamp(tsValue)) {
-        logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in object-signal => Message discarded!");
+        logger().error("PAI - Received old timestamp in object-signal => Message discarded!");
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
         return;
     }
@@ -1400,7 +1400,7 @@ void PAI::processObjectSignal(XERCES_CPP_NAMESPACE::DOMElement * element)
                 Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
                 atomSpace.addTimeInfo(evalLink, tsValue); // NOTE: latest info not handled because this is not used at all.
             } else {
-                logger().log(opencog::Logger::WARN, "PAI - The object-signal param '%s' has no value!\n", paramName);
+                logger().warn("PAI - The object-signal param '%s' has no value!\n", paramName);
             }
 
             XERCES_CPP_NAMESPACE::XMLString::release(&paramValue);
@@ -1419,37 +1419,37 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
 
-    logger().log(opencog::Logger::DEBUG, "PAI - processMapInfo(): init.");
+    logger().debug("PAI - processMapInfo(): init.");
 
     // gets global position offset (to be added to global x and y positions to get map dimensions)
     XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_OFFSET_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* globalPosOffsetStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosOffsetStr)) {
-        logger().log(opencog::Logger::ERROR, "PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
+        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
     }
     double offset = atof(globalPosOffsetStr);
-    logger().log(opencog::Logger::FINE, "PAI - processMapInfo(): global position offset = %s => offset = %lf", globalPosOffsetStr, offset);
+    logger().fine("PAI - processMapInfo(): global position offset = %s => offset = %lf", globalPosOffsetStr, offset);
 
 
     // gets global position x
     XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_X_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* globalPosXStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosXStr)) {
-        logger().log(opencog::Logger::ERROR, "PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_X_ATTRIBUTE);
+        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_X_ATTRIBUTE);
     }
     xMin = atof(globalPosXStr);
     xMax = xMin + offset;
-    logger().log(opencog::Logger::FINE, "PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", globalPosXStr, xMin, xMax);
+    logger().fine("PAI - processMapInfo(): global position x = %s => xMin = %lf, xMax = %lf", globalPosXStr, xMin, xMax);
 
     // gets global position y
     XERCES_CPP_NAMESPACE::XMLString::transcode(GLOBAL_POS_Y_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* globalPosYStr = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     if (!strlen(globalPosYStr)) {
-        logger().log(opencog::Logger::ERROR, "PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
+        logger().error("PAI - processMapInfo(): got no %s attribute", GLOBAL_POS_Y_ATTRIBUTE);
     }
     yMin = atof(globalPosYStr);
     yMax = yMin + offset;
-    logger().log(opencog::Logger::FINE, "PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", globalPosYStr, yMin, yMax);
+    logger().fine("PAI - processMapInfo(): global position y = %s => yMin = %lf, yMax = %lf", globalPosYStr, yMin, yMax);
 
     // getting grid map dimensions from system parameters
     unsigned int xDim = opencog::config().get_int("MAP_XDIM");
@@ -1471,7 +1471,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         char* timestamp = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
         unsigned long tsValue = getTimestampFromXsdDateTimeStr(timestamp);
         if (!setLatestSimWorldTimestamp(tsValue)) {
-            logger().log(opencog::Logger::ERROR, "PAI - Received old timestamp in blip => Message discarded!");
+            logger().error("PAI - Received old timestamp in blip => Message discarded!");
             XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
             continue;
         }
@@ -1549,7 +1549,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* entityType = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
 
-//     logger().log(opencog::Logger::INFO, "PAI - processMapInfo(): entityType=%s", entityType);
+//     logger().info("PAI - processMapInfo(): entityType=%s", entityType);
         if (entityType && strlen(entityType)) {
             objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str());
             Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType);
@@ -1565,7 +1565,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* objName = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
 
-//     logger().log(opencog::Logger::INFO, "PAI - processMapInfo(): objName=%s", objName);
+//     logger().info("PAI - processMapInfo(): objName=%s", objName);
 
         if (objName && strlen(objName)) {
             if (isPetObject)  {
@@ -1663,7 +1663,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             addInheritanceLink(std::string("food_bowl"), objectNode, foodBowl);
             addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
 
-//      logger().log(opencog::Logger::INFO, "PAI - processMapInfo(): after addInheritanceLink");
+//      logger().info("PAI - processMapInfo(): after addInheritanceLink");
         }
 
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
@@ -1792,7 +1792,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) t
 Handle PAI::addActionPredicate(const char* predicateName, const PetAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
-    logger().log(opencog::Logger::DEBUG, "PAI - execLink = %s \n", TLB::getAtom(execLink)->toString().c_str());
+    logger().debug("PAI - execLink = %s \n", TLB::getAtom(execLink)->toString().c_str());
 
     HandleSeq predicateListLinkOutgoing;
     predicateListLinkOutgoing.push_back(execLink);
@@ -1907,7 +1907,7 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
         tv.setMean(1.0);
     }
 
-    logger().log(opencog::Logger::FINE, "PAI - Adding predName: %s, value: %d, obj: %s",
+    logger().fine("PAI - Adding predName: %s, value: %d, obj: %s",
                  predicateName.c_str(), (int)propertyValue,
                  atomSpace.getName(objectNode).c_str());
 
@@ -1918,7 +1918,7 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
 {
 
     if (inheritanceValue) {
-        logger().log(opencog::Logger::DEBUG, "PAI - Inheritance: %s => %s",
+        logger().debug("PAI - Inheritance: %s => %s",
                      atomSpace.getName(subNodeHandle).c_str(),
                      conceptNodeName.c_str());
 
@@ -1982,7 +1982,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     } else {
         // Get the length, width and height of the object
         // For now, assume any object's size does not change in time.
-        logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): No size information available in mapinfo.");
+        logger().warn("PAI - addSpacePredicates(): No size information available in mapinfo.");
 
         Handle predNode = atomSpace.getHandle( PREDICATE_NODE, SIZE_PREDICATE_NAME);
         if (predNode != Handle::UNDEFINED) {
@@ -2004,10 +2004,10 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
                     }
                 }
             }
-            logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): Got last size information available.");
+            logger().warn("PAI - addSpacePredicates(): Got last size information available.");
         }
         if (length <= 0 || width <= 0 || height <= 0) {
-            logger().log(opencog::Logger::WARN, "PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
+            logger().warn("PAI - addSpacePredicates(): No size information available for SL object: %s\n", atomSpace.getName(objectNode).c_str());
             if (length < 0) length = 0;
             if (width < 0) width = 0;
             if (height < 0) height = 0;
@@ -2026,7 +2026,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
     bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
     bool isObstacle = !isSelfObject && (isAgent || ((hasPetHeight ? (height > 0.3f * pet_height) : true) && !isPickupable));
 
-    logger().log(opencog::Logger::DEBUG, "PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
+    logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
 
     return atomSpace.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, length, width, height, rotation.yaw, isObstacle);
 }
@@ -2181,7 +2181,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
         }
 
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "PAI - No pending action plan with the given id '%s'.",
                      planId.c_str());
     }

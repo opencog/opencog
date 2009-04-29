@@ -185,7 +185,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     stringstream ss;
     ss << (*it);
 
-    //logger().log(opencog::Logger::ERROR, "rec_lookup <%s>",xx.str().c_str());
+    //logger().error("rec_lookup <%s>",xx.str().c_str());
     //assert(is_definite_object(*it));
 
     definite_object obj = is_definite_object(*it) ?
@@ -207,7 +207,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
 
     opencog::cassert(TRACE_INFO, tmp.size() <= 1); //need to assume that PredicateNode names are unique
     if (tmp.empty()) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - rec_lookup found no predicate node for '%s'.",
                      obj.c_str());
         return Handle::UNDEFINED;
@@ -331,7 +331,7 @@ throw (opencog::ComboException,
         }
         //if
         if ( objectId != "" ) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - isHolding (%s)",
                          objectId.c_str());
             res = sm.findNearestFiltered
@@ -344,7 +344,7 @@ throw (opencog::ComboException,
                                            _1,
                                            self_id) ) );
         } else {
-            logger().log( opencog::Logger::DEBUG,
+            logger().debug(
                           "WorldWrapperUtil - not holding any object" );
             res = sm.findNearestFiltered
                   (selfLoc,
@@ -357,7 +357,7 @@ throw (opencog::ComboException,
     case id::nearest_edible: {
         p = nearest_random_X_to_is_X(ioe);
 
-        logger().log( opencog::Logger::DEBUG,
+        logger().debug(
                       "WorldWrapperUtil - nearest edible.");
         res = sm.findNearestFiltered
               (selfLoc,
@@ -398,7 +398,7 @@ throw (opencog::ComboException,
         }
         p = nearest_random_X_to_is_X(ioe);
         if ( objectId != "" ) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - isHolding (%s)",
                          objectId.c_str());
             res = sm.findNearestFiltered(selfLoc,
@@ -415,11 +415,11 @@ throw (opencog::ComboException,
                                                                                          boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
                                                                                          isInThePast, vu))));
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - Nearest filtered (%s)",
                          res.c_str( ) );
         } else {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - not holding any object");
             res = sm.findNearestFiltered
                   (selfLoc,
@@ -589,7 +589,7 @@ throw (opencog::ComboException,
 
         p = nearest_random_X_to_is_X(ioe);
         if ( objectId != "" ) {
-            logger().log( opencog::Logger::DEBUG, "WorldWrapperUtil - isHolding (%s)", objectId.c_str( ) );
+            logger().debug("WorldWrapperUtil - isHolding (%s)", objectId.c_str( ) );
             res = sm.findRandomFiltered(boost::bind<bool>(std::logical_and<bool>(),
                                         boost::bind<bool>(std::logical_and<bool>(),
                                                           boost::bind( std::not_equal_to<std::string>(),
@@ -607,11 +607,11 @@ throw (opencog::ComboException,
                                                                boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
                                                                isInThePast, vu))), rng);
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - Random pickupable filtered (%s)",
                          res.c_str( ) );
         } else {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WorldWrapperUtil - Pet isn't holding an object");
             res = sm.findRandomFiltered
                   (bind(&combo::vertex_to_bool,
@@ -623,7 +623,7 @@ throw (opencog::ComboException,
                              boost::bind(&WorldWrapperUtil::maketree_percept, p, _1),
                              isInThePast, vu)), rng);
         } // if
-        logger().log( opencog::Logger::DEBUG,
+        logger().debug(
                       "WorldWrapperUtil - Selected random pickupable %s",
                       res.c_str( ) );
     }
@@ -788,7 +788,7 @@ throw (opencog::ComboException,
     //else if(res==owner_id)
     //  res = id::owner;
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().debug(
                  "WorldWrapperUtil - Analyzing '%s'. Result: '%s'.",
                  ss.str().c_str(), res.c_str());
 
@@ -1460,7 +1460,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         WorldWrapperUtil::cache.add(time, pred, feeling);
         }
 
-        logger().log(opencog::Logger::DEBUG, "WWUtil - '%d' hunger '%f'.", target.c_str(), feeling);
+        logger().debug("WWUtil - '%d' hunger '%f'.", target.c_str(), feeling);
         return vertex(feeling);
         */
     }
@@ -1500,7 +1500,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
 
-                  logger().log(opencog::Logger::DEBUG, "WWUtil - '%s' thirst '%f'.", target.c_str(), feeling);
+                  logger().debug("WWUtil - '%s' thirst '%f'.", target.c_str(), feeling);
                   return vertex(feeling);*/
         }
         break;
@@ -1539,7 +1539,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
 
-                  logger().log(opencog::Logger::DEBUG, "WWUtil - '%s' energy '%f'.", target.c_str(), feeling);
+                  logger().debug("WWUtil - '%s' energy '%f'.", target.c_str(), feeling);
                   return vertex(feeling);*/
         }
         break;
@@ -1578,7 +1578,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
 
-                     logger().log(opencog::Logger::DEBUG, "WWUtil - '%s' fitness '%f'.", target.c_str(), feeling);
+                     logger().debug("WWUtil - '%s' fitness '%f'.", target.c_str(), feeling);
                      return vertex(feeling);*/
         }
         break;
@@ -1616,7 +1616,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                             WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
 
-                     logger().log(opencog::Logger::DEBUG, "WWUtil - '%s' pee_urgency '%f'.", target.c_str(), feeling);
+                     logger().debug("WWUtil - '%s' pee_urgency '%f'.", target.c_str(), feeling);
                      return vertex(feeling);*/
         }
         break;
@@ -1654,7 +1654,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                          WorldWrapperUtil::cache.add(time, pred, feeling);
                         }
 
-                     logger().log(opencog::Logger::DEBUG, "WWUtil - '%s' poo_urgency '%f'.", target.c_str(), feeling);
+                     logger().debug("WWUtil - '%s' poo_urgency '%f'.", target.c_str(), feeling);
                      return vertex(feeling);*/
         }
         break;
@@ -1678,7 +1678,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                    handle, FREQUENCY_LINK, false);
 
             if (result.size() != 1) {
-                logger().log(opencog::Logger::WARN, "WWUtil - There should be only one FrequencyLink, got '%d'",
+                logger().warn("WWUtil - There should be only one FrequencyLink, got '%d'",
                              result.size());
                 repetition = 0.0f;
 
@@ -1686,7 +1686,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
                 handle = atomSpace.getOutgoing(result[0], 1);
                 if (atomSpace.getType(handle) != NUMBER_NODE) { // error
-                    logger().log(opencog::Logger::WARN,
+                    logger().warn(
                                  "WWUtil - Outgoing atom[1] should be a NumberNode.");
                     repetition = 0.0f;
 
@@ -1699,7 +1699,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             WorldWrapperUtil::cache.add(time, pred, repetition);
         }
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - Current action repetition '%f'.",
                      repetition);
         return vertex(repetition);
@@ -1745,7 +1745,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             WorldWrapperUtil::cache.add(time, pred, state);
         } // if
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - scavenger hunt truth value: '%f' for state %s .",
                      state,
                      stateNumber.c_str( ) );
@@ -2295,7 +2295,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 schemaSuccessful = true;
             }
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WWUtil - is_last_pet_schema desired '%s'.",
                          action_name.c_str());
 
@@ -2326,7 +2326,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             // mark wild card candidates false (if any) and return false
             if (execLink == Handle::UNDEFINED) {
 
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "WWUtil - Found no action executed by pet"
                              " in last 30s.");
                 if (has_wild_card) {
@@ -2346,7 +2346,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 // last executed action not the one we are looking for
                 if (atomSpace.getName(groundedPred) != action_name) {
 
-                    logger().log(opencog::Logger::DEBUG,
+                    logger().debug(
                                  "WWUtil - Last action found '%s',"
                                  " needed '%s'.",
                                  atomSpace.getName(groundedPred).c_str(),
@@ -2551,7 +2551,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                      ss.str().c_str());
 
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().debug(
                  "WWUtil - default - %s", ss.str().c_str());
 
     pre_it tmp_it = tmp.begin();
@@ -2570,7 +2570,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             wild_card_it.push_back(arg);
         }
     }
-    logger().log(opencog::Logger::DEBUG,
+    logger().debug(
                  "WWUtil - default - %s - eval all indefinite"
                  " objects or wild_card",
                  ss.str().c_str());
@@ -2601,20 +2601,20 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             arguments.push_back(get_definite_object(*arg));
         }
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - default - %s - pred created",
                      ss.str().c_str());
 
         WorldWrapper::predicate pred(name, arguments);
         float data = WorldWrapperUtil::cache.find(time, pred);
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - default - %s - cache consult done",
                      ss.str().c_str());
 
         if (data != CACHE_MISS) {
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WWUtil - default - %s - cache hit",
                          ss.str().c_str());
 
@@ -2622,7 +2622,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
         } else {
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "WWUtil - default - %s - cache miss",
                          ss.str().c_str());
 
@@ -2701,7 +2701,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 if (result) {
                     general_result = true;
                 }
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "WWUtil - default - %s - with _*_ = %s"
                              " - result '%s'",
                              ss.str().c_str(), def_obj.c_str(),
@@ -2934,7 +2934,7 @@ float WorldWrapperUtil::getPhysiologicalFeeling(const AtomSpace& atomSpace,
         WorldWrapperUtil::cache.add(time, pred, value);
     }
 
-    logger().log(opencog::Logger::DEBUG,
+    logger().debug(
                  "WWUtil - '%s' with '%s' '%f'.",
                  target.c_str(), feeling.c_str(), value);
     return value;
@@ -2961,7 +2961,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
                     get_indefinite_object(*arg),
                     isInThePast);
         }
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil - getEmotionalFeelingOrTrait - eval all"
                      " indefinite objects.");
     }
@@ -2992,7 +2992,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
     float data = WorldWrapperUtil::cache.find(time, pred);
 
     if (data != CACHE_MISS) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "WWUtil -  getEmotionalFeelingOrTrait - %s - cache hit"
                      " - value '%.2f'.",
                      ss.str().c_str(), data);
@@ -3008,7 +3008,7 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
         }
         WorldWrapperUtil::cache.add(time, pred, data);
 
-        logger().log(opencog::Logger::DEBUG, "WWUtil -  getEmotionalFeelingOrTrait - %s - cache miss - value '%.2f'.",
+        logger().debug("WWUtil -  getEmotionalFeelingOrTrait - %s - cache miss - value '%.2f'.",
                      ss.str().c_str(), data);
         return data;
     }

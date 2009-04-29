@@ -43,7 +43,7 @@ InterfaceListenerAgent::InterfaceListenerAgent()
 void InterfaceListenerAgent::run(opencog::CogServer *server)
 {
 
-    //logger().log(opencog::Logger::DEBUG, "InterfaceListenerAgent::run()");
+    //logger().debug("InterfaceListenerAgent::run()");
 
     fd_set rfds;
     struct timeval tv;
@@ -60,16 +60,16 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
 
     char *line = NULL;
     if (selectReturn < 0) {
-        //logger().log(opencog::Logger::DEBUG, "SELECT error");
+        //logger().debug("SELECT error");
     } else {
         if (selectReturn > 0) {
-            //logger().log(opencog::Logger::DEBUG, "SELECT reading");
+            //logger().debug("SELECT reading");
             size_t dummy;
             getline(&line, &dummy, stdin);
-            logger().log(opencog::Logger::DEBUG, "line = %s", line);
+            logger().debug("line = %s", line);
             line[strlen(line) - 1] = '\0'; // removes trailing \n
             if (strcasestr(line, "PREDAVESE") != NULL) {
-                logger().log(opencog::Logger::DEBUG, "predavese");
+                logger().debug("predavese");
                 char* buf;
                 std::string petId( __strtok_r( strchr(line, ' ') + 1, " ", &buf) );
                 std::string text;
@@ -81,11 +81,11 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
                 }
                 ((PVPSimulator *) server)->sendPredavese(text.c_str(), petId);
             } else if (strcasestr(line, "AVATARACTION") != NULL) {
-                logger().log(opencog::Logger::DEBUG, "DEBUG - InterfaceListenerAgent - line %s", line);
+                logger().debug("DEBUG - InterfaceListenerAgent - line %s", line);
 
                 if (strcasestr(line, "(OWNER)") != NULL) {
                     char *msg = NULL;
-                    logger().log(opencog::Logger::DEBUG, "DEBUG - InterfaceListenerAgent - Owner action");
+                    logger().debug("DEBUG - InterfaceListenerAgent - Owner action");
                     msg = strchr(line, ' ') + 1;
                     ((PVPSimulator *) server)->sendOwnerAction((char *) (strchr(msg, ' ') + 1));
                 } else {
@@ -93,7 +93,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
                     std::string avatarId( strLine.substr( 0, strLine.find_first_of(' ') ) );
                     std::string msgAction( strLine.substr( strLine.find_first_of(' ') + 1 ) );
 
-                    logger().log(opencog::Logger::DEBUG, "DEBUG - InterfaceListenerAgent - Sending action: %s to id: %s", msgAction.c_str(), avatarId.c_str());
+                    logger().debug("DEBUG - InterfaceListenerAgent - Sending action: %s to id: %s", msgAction.c_str(), avatarId.c_str());
                     ((PVPSimulator *) server)->sendAgentAction((char *) msgAction.c_str(), (char *)avatarId.c_str(), "avatar" );
                 }
             } else if (strcasestr(line, "CREATEAVATAR") != NULL) {
@@ -104,7 +104,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
                 x = atoi( __strtok_r( NULL, " ", &buf) );
                 y = atoi( __strtok_r( NULL, " ", &buf) );
 
-                logger().log(opencog::Logger::DEBUG, "DEBUG - InterfaceListenerAgent - Creating avatar with id: %s at (%d,%d)", newAvatarId.c_str(), x, y);
+                logger().debug("DEBUG - InterfaceListenerAgent - Creating avatar with id: %s at (%d,%d)", newAvatarId.c_str(), x, y);
                 ((PVPSimulator *) server)->createAvatar(newAvatarId, x, y);
             } else if (strcasestr(line, "CREATEPET") != NULL) {
                 int x, y;
@@ -115,7 +115,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
                 y = atoi( __strtok_r( NULL, " ", &buf) );
                 std::string ownerId( __strtok_r( NULL, " ", &buf));
 
-                logger().log(opencog::Logger::DEBUG, "DEBUG - InterfaceListenerAgent - Creating pet: %s at (%d,%d) with owner: %s", newPetId.c_str(), x, y, ownerId.c_str());
+                logger().debug("DEBUG - InterfaceListenerAgent - Creating pet: %s at (%d,%d) with owner: %s", newPetId.c_str(), x, y, ownerId.c_str());
                 ((PVPSimulator *) server)->createPet(newPetId, ownerId, x, y);
 
             } else if (strcasestr(line, "RESETPHYSIOLOGICALMODEL") != NULL) {
@@ -124,7 +124,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
 
             free(line);
         } else {
-            //logger().log(opencog::Logger::DEBUG, "SELECT nothing");
+            //logger().debug("SELECT nothing");
         }
     }
 }

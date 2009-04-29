@@ -68,7 +68,7 @@ bool LSMocky::processNextMessage(MessagingSystem::Message *msg)
 
     case MessagingSystem::Message::LS_CMD:
         cm = (LearningServerMessages::LSCmdMessage *)msg;
-        logger().log(opencog::Logger::INFO, "LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
+        logger().info("LSMocky - CMD - Command: %s, Pet: %s,  Schema: %s.",
                      cm->getCommand().c_str(),
                      cm->getFrom().c_str(),
                      cm->getSchema().c_str());
@@ -76,21 +76,21 @@ bool LSMocky::processNextMessage(MessagingSystem::Message *msg)
 
     case MessagingSystem::Message::LEARN:
         lm = (LearningServerMessages::LearnMessage *)msg;
-        logger().log(opencog::Logger::INFO, "LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
+        logger().info("LSMocky - LEARN - Pet: %s, Learning Schema: %s.",
                      lm->getFrom().c_str(),
                      lm->getSchema().c_str());
         break;
 
     case MessagingSystem::Message::REWARD:
         rm = (LearningServerMessages::RewardMessage *)msg;
-        logger().log(opencog::Logger::INFO, "LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
+        logger().info("LSMocky - REWARD - Pet: %s, Tried Schema: %s.",
                      rm->getFrom().c_str(),
                      rm->getCandidateSchema().c_str());
 
         break;
 
     default:
-        logger().log(opencog::Logger::ERROR, "LSMocky - Unknown message type.");
+        logger().error("LSMocky - Unknown message type.");
     }
     return false;
 }

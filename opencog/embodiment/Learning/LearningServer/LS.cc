@@ -110,7 +110,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
             learningPet = lm->getFrom();
             learningSchema = lm->getSchema();
 
-            logger().log(Logger::INFO, "LS - Starting new learning: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
+            logger().info("LS - Starting new learning: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
             initLearn(lm);
             break;
         }
@@ -121,7 +121,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         if (learningPet == lm->getFrom() &&
                 learningSchema == lm->getSchema()) {
 
-            logger().log(Logger::INFO, "LS - Adding example: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
+            logger().info("LS - Adding example: (%s, %s).", learningPet.c_str(), learningSchema.c_str());
 
             // TODO verify if commented change has some effect
             //wp = new AtomSpaceWorldProvider(new AtomSpace());
@@ -131,14 +131,14 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
 
         // currently the LS do not have a queue of tricks to learn or execute
         // more than one learning process (no concurrency) soh just return
-        logger().log(Logger::WARN, "LS - LS does not support concurent learning (LS busy right now).");
+        logger().warn("LS - LS does not support concurent learning (LS busy right now).");
         break;
 
     case MessagingSystem::Message::REWARD:
         rm = (LearningServerMessages::RewardMessage *)msg;
 
         if (!isBusy()) {
-            logger().log(Logger::WARN, "LS - LS should be learning when receive a reward message.");
+            logger().warn("LS - LS should be learning when receive a reward message.");
             return false;
         }
 
@@ -170,7 +170,7 @@ bool LS::processNextMessage(MessagingSystem::Message *msg)
         break;
 
     default:
-        logger().log(Logger::ERROR, "LS - Unknown message type.");
+        logger().error("LS - Unknown message type.");
     }
     return false;
 }
@@ -205,7 +205,7 @@ void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, st
 {
     stringstream ss;
     ss << schema;
-    logger().log(Logger::INFO, "LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
+    logger().info("LS - Sending schema: (%s, %s, %s).", learningPet.c_str(), schemaName.c_str(), ss.str().c_str());
     LearningServerMessages::SchemaMessage msg(this->getID(), learningPet, schema, schemaName, candidateName);
     sendMessage(msg);
 }
@@ -213,7 +213,7 @@ void LS::sendSchema(const combo::combo_tree & schema, std::string schemaName, st
 const std::string LS::getCandidateSchemaName()
 {
     if (learningSchema == "") {
-        logger().log(Logger::WARN, "LS - Trying to get a candidate name from a nameless schema.");
+        logger().warn("LS - Trying to get a candidate name from a nameless schema.");
         return ("");
     }
 
@@ -238,14 +238,14 @@ void LS::resetLearningServer()
 
 void LS::initLearn(LearningServerMessages::LearnMessage * msg)
 {
-    logger().log(Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
+    logger().debug("LS - Getting data from LearnMessage (populating atomSpace).");
 
     bool result = msg->populateAtomSpace(wp->getAtomSpace());
     if (!result) {
         // TODO: do something when fails
-        logger().log(Logger::WARN, "LS - initLearn():  failed to populate AtomSpace.");
+        logger().warn("LS - initLearn():  failed to populate AtomSpace.");
     }
-    logger().log(Logger::DEBUG, "LS - Data from LearnMessage gotten.");
+    logger().debug("LS - Data from LearnMessage gotten.");
 
 
     //debug print
@@ -256,7 +256,7 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
 
     // For now the Learning Server only uses hillclimbing - getting definite objects from all maps covering the exemplars
 
-    logger().log(Logger::DEBUG, "LS - Initiating Learning Process.");
+    logger().debug("LS - Initiating Learning Process.");
 
     combo::argument_list al;
     std::vector<std::string> stral = msg->getSchemaArguments();
@@ -282,26 +282,26 @@ void LS::initLearn(LearningServerMessages::LearnMessage * msg)
                               avatarID,
                               learningSchema);
     if (initLearningSucceeds)
-        logger().log(Logger::DEBUG, "LS - Initiating Learning Process - Done.");
+        logger().debug("LS - Initiating Learning Process - Done.");
     else {
         resetLearningServer();
-        logger().log(Logger::DEBUG, "LS - Initiating Learning Process - Failed.");
+        logger().debug("LS - Initiating Learning Process - Failed.");
     }
 }
 
 void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
 {
-    logger().log(Logger::DEBUG, "LS - Getting data from LearnMessage (populating atomSpace).");
+    logger().debug("LS - Getting data from LearnMessage (populating atomSpace).");
 
     // TODO: do something when resul equals false
     bool result = msg->populateAtomSpace(wp->getAtomSpace());
     if (!result) {
         // TODO: do something when fails
-        logger().log(Logger::WARN, "LS - addLearnExample(): failed to populate AtomSpace.");
+        logger().warn("LS - addLearnExample(): failed to populate AtomSpace.");
     }
-    logger().log(Logger::DEBUG, "LS - Data from LearnMessage gotten.");
+    logger().debug("LS - Data from LearnMessage gotten.");
 
-    logger().log(Logger::DEBUG, "LS - Adding exemplar to Learning Process.");
+    logger().debug("LS - Adding exemplar to Learning Process.");
     //get world map and atomSpace from message
     //and update learning algorithm environment
     combo::argument_list al;
@@ -319,12 +319,12 @@ void LS::addLearnExample(LearningServerMessages::LearnMessage * msg)
         al.push_back(cdo);
     }
     ILAgent->addLearningExample(wp, al);
-    logger().log(Logger::DEBUG, "LS - Adding exemplar to Learning Process - done.");
+    logger().debug("LS - Adding exemplar to Learning Process - done.");
 }
 
 void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg)
 {
-    logger().log(Logger::INFO, "LS - Receive Reward: %f.",
+    logger().info("LS - Receive Reward: %f.",
                  msg->getReward());
     // use RewardMessage data to adjust learning algorithm
     double f = msg->getReward();
@@ -333,7 +333,7 @@ void LS::rewardCandidateSchema(LearningServerMessages::RewardMessage * msg)
 
 void LS::stopLearn()
 {
-    logger().log(Logger::DEBUG, "LS - Stopping learn process.");
+    logger().debug("LS - Stopping learn process.");
     combo::combo_tree bestSchema;
 
     if (isBusy()) {
@@ -345,21 +345,21 @@ void LS::stopLearn()
         stringstream ss;
         ss << bestSchema;
         string s = ss.str();
-        logger().log(Logger::DEBUG,
+        logger().debug(
                      "LS - Send the final learned schema : %s", s.c_str());
         sendBestSchema(bestSchema);
 
         //delete wp
         delete(wp);
     } else {
-        logger().log(Logger::DEBUG,
+        logger().debug(
                      "LS - Send no schema because LS is not busy");
     }
 }
 
 void LS::trySchema()
 {
-    logger().log(Logger::DEBUG,
+    logger().debug(
                  "LS - Trying schema");
     combo::combo_tree bestSchema;
 
@@ -371,12 +371,12 @@ void LS::trySchema()
         stringstream ss;
         ss << bestSchema;
         string s = ss.str();
-        logger().log(Logger::DEBUG,
+        logger().debug(
                      "LS - Trying the following schema : %s", s.c_str());
         ILAgent->waitForReward();
         sendCandidateSchema(bestSchema);
     } else {
-        logger().log(Logger::DEBUG,
+        logger().debug(
                      "LS - Trying no schema because LS is not busy");
     }
 }

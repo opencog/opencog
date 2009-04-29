@@ -33,9 +33,9 @@ GoldStdGen::GoldStdGen(const char* goldStdFilename)
 {
     file = fopen(goldStdFilename, "w");
     if (file) {
-        logger().log(opencog::Logger::INFO, "Generating gold standard in file: %s", goldStdFilename);
+        logger().info("Generating gold standard in file: %s", goldStdFilename);
     } else {
-        logger().log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
+        logger().error("Could not open gold standard file: %s", goldStdFilename);
     }
     initial_time = getCurrentTimestamp();
 }
@@ -68,7 +68,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
 {
     // read timestamp
     if (fgets(line_buf, lineBufSize, file) == NULL) {
-        logger().log(opencog::Logger::ERROR, "Unexpected end of file while reading message's header");
+        logger().error("Unexpected end of file while reading message's header");
         return NULL;
     }
     unsigned long timestamp;
@@ -76,7 +76,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
 
     // read message header
     if (fgets(line_buf, lineBufSize, file) == NULL) {
-        logger().log(opencog::Logger::ERROR, "Unexpected end of file while reading message's header");
+        logger().error("Unexpected end of file while reading message's header");
         return NULL;
     }
     char from[64];
@@ -88,7 +88,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
     std::string message;
     while (true) {
         if (fgets(line_buf, lineBufSize, file) == NULL) {
-            logger().log(opencog::Logger::ERROR, "Unexpected end of file while reading message: %s", message.c_str());
+            logger().error("Unexpected end of file while reading message: %s", message.c_str());
             return NULL;
         }
         if (!strcmp(MESSAGE_END_FLAG, line_buf)) {
@@ -98,7 +98,7 @@ GoldStdMessage* GoldStdGen::readMessage(char* line_buf, size_t lineBufSize, FILE
     }
     // check and remove the '\n' added by writeMessage() method at the end of the message
     if (message.at(message.length() - 1) != '\n') {
-        logger().log(opencog::Logger::ERROR, "Failed reading message, which should terminate with <new line> character: %s", message.c_str());
+        logger().error("Failed reading message, which should terminate with <new line> character: %s", message.c_str());
         exit(-1);
     }
     message.erase(message.length() - 1);

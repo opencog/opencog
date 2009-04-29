@@ -113,7 +113,7 @@ bool PetAction::containsValidParameters() const
 {
     std::string errorMessage = validateParameters(ActionType::getFromCode(type), parameters);
     if (errorMessage.size() > 0) {
-        logger().log(opencog::Logger::WARN, "PetAction - " + errorMessage);
+        logger().warn("PetAction - " + errorMessage);
         return false;
     }
     return true;

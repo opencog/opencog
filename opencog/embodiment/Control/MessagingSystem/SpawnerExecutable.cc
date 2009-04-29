@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
         spawner->serverLoop();
 
     } catch (opencog::InvalidParamException& ipe) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "SpawnerExec - Error creating spawner object.");
     } catch (std::bad_alloc) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "SpawnerExec - Spawner raised a bad_alloc exception.");
     } catch (...) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "Spawner executable - An exceptional situation occured. Check log for more information.");
     }
 

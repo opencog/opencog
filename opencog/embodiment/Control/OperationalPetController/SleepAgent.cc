@@ -37,6 +37,6 @@ SleepAgent::SleepAgent()
 void SleepAgent::run(opencog::CogServer *server)
 {
 
-    logger().log(opencog::Logger::FINE, "SleepAgent - Sleeping for one second.");
+    logger().fine("SleepAgent - Sleeping for one second.");
     sleep(1);
 }

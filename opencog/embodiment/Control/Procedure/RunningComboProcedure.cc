@@ -158,7 +158,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         std::bad_exception)
 {
     //debug log
-    if (logger().getLevel() >= opencog::Logger::DEBUG) {
+    if (logger().isDebugEnabled()) {
         stringstream tr_ss;
         tr_ss << _tr;
         stringstream it_ss;
@@ -166,7 +166,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         string message("RunningComboProcedure::cycle() with _tr = ");
         message += tr_ss.str() + string("and _it = ") + it_ss.str();
         //std::cout << message << std::endl;
-        logger().log(opencog::Logger::DEBUG, message.c_str());
+        logger().debug(message.c_str());
     }
     //~debug log
 
@@ -192,10 +192,10 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         }
     }
 
-    //logger().log(opencog::Logger::ERROR, "pop");
+    //logger().error("pop");
     do {
         sib_it parent = _tr.parent(_it);
-        //logger().log(opencog::Logger::ERROR, "ptp");
+        //logger().error("ptp");
         if (*_it == id::action_while) {
             opencog::cassert(TRACE_INFO, _it.number_of_children() == 1);
             if (isFailed()) {
@@ -208,7 +208,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         } else if (_tr.is_valid(parent) && *parent == id::sequential_and &&
                    isFailed()) {
             //if the last plan failed and we need to abort a sequence
-            logger().log(opencog::Logger::WARN,
+            logger().warn(
                          "RunningComboProc - Previous plan failed..."
                          " aborting sequence.");
             _it = parent.last_child();
@@ -238,7 +238,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
             } catch (...) {
                 //some kind of runtime exception - halt execution and
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "RunningComboProc - action_boolean_if failure.");
                 _failed = true;
                 _it = _tr.end();
@@ -261,7 +261,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     }
                 } catch (...) {
                     //some kind of runtime exception - halt execution and
-                    logger().log(opencog::Logger::ERROR,
+                    logger().error(
                                  "RunningComboProc - boolean_while failure.");
                     _failed = true;
                     _it = _tr.end();
@@ -280,7 +280,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             _tr = combo::combo_tree(*_it);
             _it = _tr.begin();
 
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "RunningComboProc - Tree node to exec: action_failure.");
 
             _failed = true;
@@ -299,8 +299,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
                     //some kind of runtime exception - halt execution and
-                    logger().log(
-                        opencog::Logger::ERROR, "RunningComboProc - repeat_n failure.");
+                    logger().error("RunningComboProc - repeat_n failure.");
                     _failed = true;
                     _it = _tr.end();
                     return;
@@ -332,8 +331,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     //first evaluate the children
                     *sib = eval_throws(_rng, sib, this, _vu);
                     if (*sib == id::null_obj) { //just fail
-                        logger().log(
-                            opencog::Logger::ERROR, "RunningComboProc - Sibling is null_obj.");
+                        logger().error("RunningComboProc - Sibling is null_obj.");
 
                         _failed = true;
                         moveOn();
@@ -374,7 +372,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 continue;
 
             } catch (opencog::ComboException& e) {
-                logger().log(opencog::Logger::ERROR, "RunningComboProc - Exception catch when expanding procedure call.");
+                logger().error("RunningComboProc - Exception catch when expanding procedure call.");
                 // failed, cancel execution
                 _failed = true;
                 _it = _tr.end();
@@ -389,7 +387,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             if (_hasBegun) {
                 std::stringstream stream (std::stringstream::out);
                 stream << "Type error at '" << combo::combo_tree(_it) << "', failing" << std::endl;
-                logger().log(opencog::Logger::ERROR, "RunningComboProcedure - %s.",
+                logger().error("RunningComboProcedure - %s.",
                              stream.str().c_str());
 
                 _failed = true;
@@ -405,7 +403,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             }
         }
     } while (_tr.is_valid(_it));
-    //logger().log(opencog::Logger::ERROR, "popl");
+    //logger().error("popl");
 }
 
 bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unifier& vu)
@@ -479,7 +477,7 @@ bool RunningComboProcedure::beginCompound()
         // catch all exceptions here since the treatment will be the same for
         // them, i.e., action execution failed.
     } catch (opencog::RuntimeException& e) {
-        logger().log(opencog::Logger::ERROR, "RunningComboProc - Runtime exception catch when sendSequential_and.");
+        logger().error("RunningComboProc - Runtime exception catch when sendSequential_and.");
         _planSent = false;
         _failed = true;
     }

@@ -57,13 +57,13 @@ int main(int argc, char *argv[])
     try {
         router->run();
     } catch (std::bad_alloc) {
-        opencog::logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a bad_alloc exception.");
+        opencog::logger().error("RouterExec - Router raised a bad_alloc exception.");
         router->persistState();
     } catch (opencog::NetworkException& e) {
-        opencog::logger().log(opencog::Logger::ERROR, "RouterExec - Router raised a Runtime exception.");
+        opencog::logger().error("RouterExec - Router raised a Runtime exception.");
         router->persistState();
     } catch (...) {
-        opencog::logger().log(opencog::Logger::ERROR,
+        opencog::logger().error(
                               "RouterExec - An exceptional situation occured. Check log for more information.");
         router->persistState();
     }

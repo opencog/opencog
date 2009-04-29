@@ -84,7 +84,7 @@ ProcedureInterpreter::ProcedureInterpreter(PerceptionActionInterface::PAI& p) : 
         rand_seed = time(NULL);
     }
     rng = new opencog::MT19937RandGen(rand_seed);
-    logger().log(opencog::Logger::INFO, "Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
+    logger().info("Created random number generator (%p) for ComboInterpreter with seed %lu", rng, rand_seed);
     comboInterpreter = new ComboInterpreter(*_pai, *rng);
     comboSelectInterpreter = new ComboSelectInterpreter(*_pai, *rng);
     _next = 0;
@@ -100,16 +100,16 @@ ProcedureInterpreter::~ProcedureInterpreter()
 RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments)
 {
 
-    logger().log(opencog::Logger::INFO,
+    logger().info(
                  "ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
 
     if (p.getType() == COMBO) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(make_pair(++_next, rcpID));
     } else if (p.getType() == COMBO_SELECT) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ProcedureInterpreter - Running a combo select procedure.");
         const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
         RunningProcedureId rcpID =
@@ -119,7 +119,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         _map.insert(make_pair(++_next, rcpID));
 
     } else if (p.getType() == BUILT_IN) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ProcedureInterpreter - Running a builtin procedure.");
         RunningBuiltInProcedure rbp = RunningBuiltInProcedure(*_pai, (const BuiltInProcedure&) p, arguments);
         // For now, runs built-in procedure immediately, since they are atomic
@@ -134,17 +134,17 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
 
 RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p, const std::vector<combo::vertex>& arguments, combo::variable_unifier& vu)
 {
-    logger().log(opencog::Logger::INFO,
+    logger().info(
                  "ProcedureInterpreter - runProcedure(%s)", p.getName().c_str());
 
     if (p.getType() == COMBO) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments, vu);
         _map.insert(make_pair(++_next, rcpID));
 
     } else if (p.getType() == COMBO_SELECT) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ProcedureInterpreter - Running a combo select procedure.");
         const ComboSelectProcedure& procedure = ((const ComboSelectProcedure&) p);
         RunningProcedureId rcpID = comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
@@ -160,7 +160,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
 
 bool ProcedureInterpreter::isFinished(RunningProcedureID id) const
 {
-    logger().log(opencog::Logger::FINE, "ProcedureInterpreter - isFinished(%lu).", id);
+    logger().fine("ProcedureInterpreter - isFinished(%lu).", id);
     bool result = true;
     Map::const_iterator it = _map.find(id);
     if (it != _map.end()) {
@@ -177,14 +177,14 @@ bool ProcedureInterpreter::isFinished(RunningProcedureID id) const
             }
         }
     }
-    logger().log(opencog::Logger::DEBUG, "ProcedureInterpreter - isFinished(%lu)? Result: %d.",
+    logger().debug("ProcedureInterpreter - isFinished(%lu)? Result: %d.",
                  id, result);
     return result;
 }
 
 bool ProcedureInterpreter::isFailed(RunningProcedureID id) const
 {
-    logger().log(opencog::Logger::FINE, "ProcedureInterpreter - isFailed(%lu).", id);
+    logger().fine("ProcedureInterpreter - isFailed(%lu).", id);
     bool result = false;
     Map::const_iterator it = _map.find(id);
     if (it != _map.end()) {
@@ -203,14 +203,14 @@ bool ProcedureInterpreter::isFailed(RunningProcedureID id) const
     } else {
         result = (_failed.find(id) != _failed.end());
     }
-    logger().log(opencog::Logger::DEBUG, "ProcedureInterpreter - isFailed(%lu)? Result: %d.",
+    logger().debug("ProcedureInterpreter - isFailed(%lu)? Result: %d.",
                  id, result);
     return result;
 }
 
 combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
 {
-    logger().log(opencog::Logger::FINE, "ProcedureInterpreter - getResult(%lu).", id);
+    logger().fine("ProcedureInterpreter - getResult(%lu).", id);
     opencog::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
     opencog::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
 
@@ -254,7 +254,7 @@ combo::variable_unifier& ProcedureInterpreter::getUnifierResult(RunningProcedure
 
 void ProcedureInterpreter::stopProcedure(RunningProcedureID id)
 {
-    logger().log(opencog::Logger::FINE, "ProcedureInterpreter - stopProcedure(%lu).", id);
+    logger().fine("ProcedureInterpreter - stopProcedure(%lu).", id);
     Map::iterator it = _map.find(id);
     if (it != _map.end()) {
         RunningProcedureId* rpId = boost::get<RunningProcedureId>(&(it->second));

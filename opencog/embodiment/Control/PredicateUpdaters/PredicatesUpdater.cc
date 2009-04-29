@@ -40,7 +40,7 @@ using namespace OperationalPetController;
 PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_petId) :
         atomSpace(_atomSpace), petId(_petId)
 {
-    logger().log(opencog::Logger::DEBUG, "%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
+    logger().debug("%s - PetId: '%s'.", __FUNCTION__, _petId.c_str());
 
     // perceptual predicates
     updaters.push_back(new IsSmallPredicateUpdater(atomSpace));

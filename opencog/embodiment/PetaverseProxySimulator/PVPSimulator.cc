@@ -126,12 +126,12 @@ bool PVPSimulator::processNextMessage(MessagingSystem::Message *message)
     }
     if ( strcasestr( message->getPlainTextRepresentation(), "SUCCESS")) {
         string petId( message->getPlainTextRepresentation());
-        logger().log(opencog::Logger::DEBUG, "SUCCESS: %s", petId.c_str());
+        logger().debug("SUCCESS: %s", petId.c_str());
         petId = petId.substr(petId.find_last_of(" ") + 1, petId.size());
 
-        logger().log(opencog::Logger::INFO, "Pet \"%s\" was loaded with success.", petId.c_str());
+        logger().info("Pet \"%s\" was loaded with success.", petId.c_str());
         if (petsId.find(petId) == petsId.end())
-            logger().log(opencog::Logger::ERROR, "There is no pet \"%s\" in PetsId list.", petId.c_str());
+            logger().error("There is no pet \"%s\" in PetsId list.", petId.c_str());
         else  petsId[petId] = true;
     } else {
 
@@ -159,7 +159,7 @@ bool PVPSimulator::sendMessage(Message &msg)
 void PVPSimulator::timeTick()
 {
 
-    logger().log(opencog::Logger::DEBUG, "PVPSimulator::timeTick()");
+    logger().debug("PVPSimulator::timeTick()");
 
     static_cast<SimulationConfig&>(opencog::config()).timeTick();
     worldSimulator->timeTick();
@@ -176,7 +176,7 @@ void PVPSimulator::resetPhysiologicalModel(string petId)
 {
     PetsPhysiologicalModelMap::iterator pet = petsPhysiologicalModel.find(petId);
     if (pet == petsPhysiologicalModel.end()) {
-        logger().log(opencog::Logger::ERROR, "Could not reset physiological model of \"s\". Pet does not exist.", petId.c_str());
+        logger().error("Could not reset physiological model of \"s\". Pet does not exist.", petId.c_str());
         return;
     }
     pet->second->reset();
@@ -190,7 +190,7 @@ void PVPSimulator::persistState() throw (opencog::IOException, std::bad_exceptio
     expandPath(path);
 
     if (!createDirectory(path.c_str())) {
-        logger().log(opencog::Logger::ERROR, "PVPSimulator - Cannot create directory '%s'.",
+        logger().error("PVPSimulator - Cannot create directory '%s'.",
                      path.c_str());
         return;
     }
@@ -252,7 +252,7 @@ void PVPSimulator::recoveryFromPersistedData(const std::string& fileName)
 void PVPSimulator::sendMessages()
 {
     while (!messagesToSend.isQueueEmpty(PVP_ID) ) {
-        logger().log(opencog::Logger::DEBUG, "PVPSimulator - Sending messages.");
+        logger().debug("PVPSimulator - Sending messages.");
         Message *msg = this->messagesToSend.pop(PVP_ID);
 
         // router available, send message. Otherwise just delete the message
@@ -391,11 +391,11 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
     bool result = true;
 
     if ( avatarsId.find(agentId) == avatarsId.end() && petsId.find(agentId) == petsId.end( ) ) {
-        logger().log(opencog::Logger::ERROR, "ERROR - PVPSimulator - There is not agent with Id: %s", agentId);
+        logger().error("ERROR - PVPSimulator - There is not agent with Id: %s", agentId);
         return false;
     }
 
-    logger().log(opencog::Logger::INFO, "Sending agent action: %s to id: %s", txt, agentId);
+    logger().info("Sending agent action: %s to id: %s", txt, agentId);
     std::string xmlText;
 
     pthread_mutex_lock(&currentTimeLock);
@@ -425,9 +425,9 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
         std::vector<ActionParamType> requiredTypeList = actionType.getMandatoryParamTypes();
         std::vector<ActionParamType> optionalTypeList = actionType.getOptionalParamTypes();
 
-        logger().log(opencog::Logger::DEBUG, "parsing required parameters (cursor = %s)", cursor);
+        logger().debug("parsing required parameters (cursor = %s)", cursor);
         addActionParameters(action, xmlText, cursor, actionType, requiredTypeList, true, 0);
-        logger().log(opencog::Logger::DEBUG, "parsing optional parameters (cursor = %s)", cursor);
+        logger().debug("parsing optional parameters (cursor = %s)", cursor);
         addActionParameters(action, xmlText, cursor, actionType, optionalTypeList, false, requiredTypeList.size());
 
         xmlText.append("</agent-signal>\n");
@@ -435,7 +435,7 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
 
         worldSimulator->executeAction(agentId, action);
 
-        logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+        logger().fine("xmlText = \n%s\n", xmlText.c_str());
 
         // all pets are going to receive agent actions message of all agents
         for ( PetsIdMap::iterator itPet = petsId.begin(); itPet != petsId.end(); itPet++ ) {
@@ -449,7 +449,7 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
             messagesToSend.push(PVP_ID, message);
         }
     } catch (opencog::RuntimeException &e) {
-        logger().log(opencog::Logger::ERROR, "Could not create action message to send to agent '%s'. The exception '%s' occured.", agentId, e.getMessage() );
+        logger().error("Could not create action message to send to agent '%s'. The exception '%s' occured.", agentId, e.getMessage() );
         result = false;
     }
 
@@ -460,7 +460,7 @@ bool PVPSimulator::sendAgentAction( char *txt, const char *agentId, const char* 
 
 bool PVPSimulator::sendOwnerAction(char *txt)
 {
-    logger().log(opencog::Logger::DEBUG, "DEBUG - PVPSimulator - Action:  %s to Owner: %s", txt, DEFAULT_OWNER_ID);
+    logger().debug("DEBUG - PVPSimulator - Action:  %s to Owner: %s", txt, DEFAULT_OWNER_ID);
     return sendAgentAction(txt, DEFAULT_OWNER_ID, "avatar" );
 }
 
@@ -478,10 +478,10 @@ void PVPSimulator::sendPredavese(const char *txt, string petId)
     }
 
 
-    logger().log(opencog::Logger::INFO, "Sending predavese text: %s to %s)", txt, petId.c_str());
+    logger().info("Sending predavese text: %s to %s)", txt, petId.c_str());
 
     if ( petsId[petId] == false ) {
-        logger().log(opencog::Logger::ERROR, "The succes load message of pet: %s did not receive  yet", petId.c_str());
+        logger().error("The succes load message of pet: %s did not receive  yet", petId.c_str());
         return;
     }
     std::string xmlText;
@@ -506,7 +506,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId)
     xmlText.append("</instruction>\n");
     xmlText.append("</pet:petaverse-msg>");
 
-    logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+    logger().fine("xmlText = \n%s\n", xmlText.c_str());
     StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
     messagesToSend.push(PVP_ID, message);
@@ -517,7 +517,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId)
 void PVPSimulator::sendPetSignals()
 {
 
-    logger().log(opencog::Logger::INFO, "Sending pet signal (pet physiological states):");
+    logger().info("Sending pet signal (pet physiological states):");
 
     char hunger[16];
     char thirst[16];
@@ -532,12 +532,12 @@ void PVPSimulator::sendPetSignals()
 
         string petId = it->first;
         if ((petsId[petId] == false)) {
-            logger().log(opencog::Logger::WARN, "Pet \"%s\" did not loaded yet.\n", petId.c_str());
+            logger().warn("Pet \"%s\" did not loaded yet.\n", petId.c_str());
             continue;
         }
         // avoid creating messages if the destiny (petId) isn't available
         if  (!isElementAvailable(petId)) {
-            logger().log(opencog::Logger::WARN, "Unavailable element for Pet \"%s\".\n", petId.c_str());
+            logger().warn("Unavailable element for Pet \"%s\".\n", petId.c_str());
             continue;
         }
 
@@ -550,12 +550,12 @@ void PVPSimulator::sendPetSignals()
         sprintf(fitness, "%f", physiologicalModel->getScaledFitness());
         sprintf(energy, "%f", physiologicalModel->getScaledEnergy());
 
-        logger().log(opencog::Logger::INFO, "%s::hungerLevel = %s", petId.c_str(), hunger);
-        logger().log(opencog::Logger::INFO, "%s::thirstLevel = %s", petId.c_str(), thirst);
-        logger().log(opencog::Logger::INFO, "%s::peeUrgencyLevel = %s", petId.c_str(), peeUrgency);
-        logger().log(opencog::Logger::INFO, "%s::pooUrgencyLevel = %s", petId.c_str(), pooUrgency);
-        logger().log(opencog::Logger::INFO, "%s::fitnessLevel = %s", petId.c_str(), fitness);
-        logger().log(opencog::Logger::INFO, "%s::energyLevel = %s", petId.c_str(), energy);
+        logger().info("%s::hungerLevel = %s", petId.c_str(), hunger);
+        logger().info("%s::thirstLevel = %s", petId.c_str(), thirst);
+        logger().info("%s::peeUrgencyLevel = %s", petId.c_str(), peeUrgency);
+        logger().info("%s::pooUrgencyLevel = %s", petId.c_str(), pooUrgency);
+        logger().info("%s::fitnessLevel = %s", petId.c_str(), fitness);
+        logger().info("%s::energyLevel = %s", petId.c_str(), energy);
 
         printf("PETSTATUS %s hungerLevel %s\n", petId.c_str(), hunger); fflush(stdout);
         printf("PETSTATUS %s thirstLevel %s\n", petId.c_str(), thirst); fflush(stdout);
@@ -632,7 +632,7 @@ void PVPSimulator::sendPetSignals()
 
         xmlText.append("</pet:petaverse-msg>\n");
 
-        logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+        logger().fine("xmlText = \n%s\n", xmlText.c_str());
         StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
         messagesToSend.push(PVP_ID, message);
@@ -651,7 +651,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
     std::string xmlText;
 
     if ( petsId[petId] == false ) {
-        logger().log(opencog::Logger::WARN, "Pet \"%s\" did not loaded yet.\n", petId.c_str() );
+        logger().warn("Pet \"%s\" did not loaded yet.\n", petId.c_str() );
         return;
     }
 
@@ -678,7 +678,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
 
     xmlText.append("</pet:petaverse-msg>\n");
 
-    logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+    logger().fine("xmlText = \n%s\n", xmlText.c_str());
     StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
     messagesToSend.push(PVP_ID, message);
@@ -705,7 +705,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
     std::string xmlText;
 
     if ( petsId[petId] == false ) {
-        logger().log(opencog::Logger::WARN, "Pet \"%s\" did not loaded yet.\n", petId.c_str() );
+        logger().warn("Pet \"%s\" did not loaded yet.\n", petId.c_str() );
         return;
     }
 
@@ -728,7 +728,7 @@ void PVPSimulator::sendActionStatusPetSignal(const std::string& planId, const st
 
     xmlText.append("</pet:petaverse-msg>\n");
 
-    logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+    logger().fine("xmlText = \n%s\n", xmlText.c_str());
     StringMessage *message = new StringMessage(getID(), petId, xmlText);
 
     messagesToSend.push(PVP_ID, message);
@@ -866,13 +866,13 @@ void PVPSimulator::processPetActions(const std::string& petId)
 void PVPSimulator::parseDOMDocument(XERCES_CPP_NAMESPACE::DOMDocument *document)
 {
 
-    logger().log(opencog::Logger::DEBUG, "parseDOMDocument");
+    logger().debug("parseDOMDocument");
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH + 1];
     XERCES_CPP_NAMESPACE::DOMNodeList *list;
 
     XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_PLAN_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     list = document->getElementsByTagName(tag);
-    logger().log(opencog::Logger::DEBUG, "action plan count = %d", list->getLength());
+    logger().debug("action plan count = %d", list->getLength());
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         parseActionPlan((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i));
@@ -887,16 +887,16 @@ void PVPSimulator::publicParseXML(const std::string& xmlText)
 bool PVPSimulator::parseXML(const std::string& xmlText)
 {
 
-    logger().log(opencog::Logger::DEBUG, "PVPSimulator::parseXML()");
-    if (logger().getLevel() >= opencog::Logger::FINE)
-        logger().log(opencog::Logger::FINE, "Processing XML:\n%s", xmlText.c_str());
+    logger().debug("PVPSimulator::parseXML()");
+    if (logger().isFineEnabled())
+        logger().fine("Processing XML:\n%s", xmlText.c_str());
 
     static const char *bufID = strdup("xml message");
     const XMLByte *xmlBuf = reinterpret_cast<const XMLByte *>(xmlText.c_str());
-    logger().log(opencog::Logger::FINE, "PVPSimulator::parseXML() - building input buffer");
+    logger().fine("PVPSimulator::parseXML() - building input buffer");
     XERCES_CPP_NAMESPACE::MemBufInputSource *memBufIS = new XERCES_CPP_NAMESPACE::MemBufInputSource(xmlBuf, xmlText.size(), bufID);
 
-    logger().log(opencog::Logger::FINE, "PVPSimulator::parseXML() - building PetaverseDOMParser");
+    logger().fine("PVPSimulator::parseXML() - building PetaverseDOMParser");
     PetaverseDOMParser *parser = new PetaverseDOMParser();
     PetaverseErrorHandler errorHandler;
     parser->setErrorHandler(&errorHandler);
@@ -904,43 +904,43 @@ bool PVPSimulator::parseXML(const std::string& xmlText)
     bool success = true;
 
     try {
-        logger().log(opencog::Logger::DEBUG, "PVPSimulator::parseXML() - parsing");
+        logger().debug("PVPSimulator::parseXML() - parsing");
         parser->parse(*memBufIS);
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
-        logger().log(opencog::Logger::WARN, "XML Exception: %s\n", message);
+        logger().warn("XML Exception: %s\n", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         success = false;
     } catch (const XERCES_CPP_NAMESPACE::DOMException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.msg);
-        logger().log(opencog::Logger::ERROR, "DOM Exception: %s\n", message);
+        logger().error("DOM Exception: %s\n", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         success = false;
     } catch (...) {
-        logger().log(opencog::Logger::ERROR, "Unexpected XML Parse Exception\n");
+        logger().error("Unexpected XML Parse Exception\n");
         success = false;
     }
 
     if (success) {
-        logger().log(opencog::Logger::DEBUG, "Parsing suceed");
+        logger().debug("Parsing suceed");
     } else {
-        logger().log(opencog::Logger::DEBUG, "Parsing failed");
+        logger().debug("Parsing failed");
     }
 
     XERCES_CPP_NAMESPACE::DOMDocument *document = NULL;
     if (success) {
         if (parser->getErrorCount() == 0) {
-            logger().log(opencog::Logger::FINE, "Building DOMDocument");
+            logger().fine("Building DOMDocument");
             document = parser->adoptDocument();
             parseDOMDocument(document);
             //document->release();
         } else {
-            logger().log(opencog::Logger::ERROR, "Got %d errors buildiong DOM document\n", parser->getErrorCount());
+            logger().error("Got %d errors buildiong DOM document\n", parser->getErrorCount());
             success = false;
         }
     }
 
-    logger().log(opencog::Logger::FINE, "PVPSimulator::parseXML() - cleaning up memory");
+    logger().fine("PVPSimulator::parseXML() - cleaning up memory");
 
     delete memBufIS;
     delete parser;
@@ -966,7 +966,7 @@ void PVPSimulator::setPhysiologicalModel(PhysiologicalModel *physiologicalModel)
 void PVPSimulator::mapInfo(std::vector<ObjMapInfo>& objects)
 {
     pthread_mutex_lock(&currentTimeLock);
-    logger().log(opencog::Logger::INFO, "Building and sending map-info message:");
+    logger().info("Building and sending map-info message:");
 
     // Build a map-info message with a blip for that object and sends it to PB Router
     std::string xmlText;
@@ -1086,17 +1086,17 @@ void PVPSimulator::mapInfo(std::vector<ObjMapInfo>& objects)
     xmlText.append("</map-info>\n");
     xmlText.append("</pet:petaverse-msg>\n");
 
-    logger().log(opencog::Logger::FINE, "xmlText = \n%s\n", xmlText.c_str());
+    logger().fine("xmlText = \n%s\n", xmlText.c_str());
 
     for ( PetsIdMap::iterator itPetId = petsId.begin(); itPetId != petsId.end(); itPetId++ ) {
 
         if (!petsId[itPetId->first]) {
-            logger().log(opencog::Logger::WARN, "Pet \"%s\" did not loaded yet.\n", itPetId->first.c_str());
+            logger().warn("Pet \"%s\" did not loaded yet.\n", itPetId->first.c_str());
             continue;
         }
         // avoid creating map-info messages if the destiny isn't available
         if  (!isElementAvailable(itPetId->first)) {
-            logger().log(opencog::Logger::WARN, "Unavailable element for Pet \"%s\".\n", itPetId->first.c_str());
+            logger().warn("Unavailable element for Pet \"%s\".\n", itPetId->first.c_str());
             continue;
         }
 
@@ -1109,7 +1109,7 @@ void PVPSimulator::mapInfo(std::vector<ObjMapInfo>& objects)
 
 void PVPSimulator::actionStatus(unsigned long actionTicket, bool success)
 {
-    logger().log(opencog::Logger::INFO,
+    logger().info(
                  "Received action status for action with ticket = %lu success = %s",
                  actionTicket, success ? "true" : "false");
 
@@ -1119,7 +1119,7 @@ void PVPSimulator::actionStatus(unsigned long actionTicket, bool success)
         const string& planId = ticketToPlanIdMap[actionTicket];
         ActionTicketToPetIdMap::iterator itPetId = ticketToPetId.find(actionTicket);
         if ( itPetId == ticketToPetId.end() ) {
-            logger().log(opencog::Logger::DEBUG, "Not found pet id to ticket '%lu' (plan id '%s')", actionTicket, planId.c_str());
+            logger().debug("Not found pet id to ticket '%lu' (plan id '%s')", actionTicket, planId.c_str());
             return;
         }
         const string petId = itPetId->second;
@@ -1143,7 +1143,7 @@ void PVPSimulator::actionStatus(unsigned long actionTicket, bool success)
         processPetActions(petId);
 
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "Could not find any action associated with the ticket = %lu",
                      actionTicket);
     }
@@ -1151,7 +1151,7 @@ void PVPSimulator::actionStatus(unsigned long actionTicket, bool success)
 
 void PVPSimulator::errorNotification(const std::string& errorMsg)
 {
-    logger().log(opencog::Logger::ERROR, "WorldSimulator error: %s\n", errorMsg.c_str());
+    logger().error("WorldSimulator error: %s\n", errorMsg.c_str());
 }
 
 bool PVPSimulator::connectToSimWorld()
@@ -1159,7 +1159,7 @@ bool PVPSimulator::connectToSimWorld()
     string createdOwnerId = createAvatar(DEFAULT_OWNER_ID, 30, 50);
     string createdPetId = createPet(DEFAULT_PET_ID, createdOwnerId, 50, 45);
     if ( createdPetId == "" ) {
-        logger().log(opencog::Logger::ERROR, "Could not create Pet: '%s'", DEFAULT_PET_ID);
+        logger().error("Could not create Pet: '%s'", DEFAULT_PET_ID);
         return false;
     }
     return true;
@@ -1169,14 +1169,14 @@ bool PVPSimulator::connectToSimWorld()
 std::string PVPSimulator::createPet(const std::string& petId, const std::string& ownerId, float x, float y)
 {
     if (avatarsId.find(ownerId) == avatarsId.end()) {
-        logger().log(opencog::Logger::ERROR, "There is not avatar: '%s' created.",  ownerId.c_str());
+        logger().error("There is not avatar: '%s' created.",  ownerId.c_str());
         return "";
     }
 
     const std::string& createdPetId = worldSimulator->createAgent(petId, "pet", x, y, true);
-    logger().log(opencog::Logger::INFO, "Pet created with id = '%s'.", createdPetId.c_str());
+    logger().info("Pet created with id = '%s'.", createdPetId.c_str());
     if (createdPetId != petId) {
-        logger().log(opencog::Logger::WARN, "Could not create Pet with name = %s", petId.c_str());
+        logger().warn("Could not create Pet with name = %s", petId.c_str());
     }
     petsId[createdPetId] = false;
     ownership[createdPetId] = ownerId;
@@ -1200,9 +1200,9 @@ std::string PVPSimulator::createAvatar(const std::string& avatarId, float x, flo
 
     std::string createdAvatarId = worldSimulator->createAgent(avatarId, "avatar", x, y, true);
 
-    logger().log(opencog::Logger::INFO, "Avatar created with id = '%s'.", createdAvatarId.c_str());
+    logger().info("Avatar created with id = '%s'.", createdAvatarId.c_str());
     if (avatarId != createdAvatarId) {
-        logger().log(opencog::Logger::WARN, "Could not create avatar with id: '%s'.", avatarId.c_str());
+        logger().warn("Could not create avatar with id: '%s'.", avatarId.c_str());
     }
     avatarsId.insert(createdAvatarId);
 
@@ -1214,7 +1214,7 @@ std::string PVPSimulator::createAvatar(const std::string& avatarId, float x, flo
 bool PVPSimulator::loadPet(const std::string& petId)
 {
     if ( petsId.find(petId) == petsId.end() )  {
-        logger().log(opencog::Logger::ERROR, "Could not load pet: '%s'. It was not created.", petId.c_str());
+        logger().error("Could not load pet: '%s'. It was not created.", petId.c_str());
         return false;
     }
 

@@ -257,6 +257,37 @@ void Logger::fine (const char *fmt, ...)
     va_list args; va_start(args, fmt); logva(FINE,  fmt, args); va_end(args);
 }
 
+bool Logger::isEnabled(Level level) const
+{
+    return level <= currentLevel;
+}
+
+bool Logger::isErrorEnabled() const
+{
+    return ERROR <= currentLevel;
+}
+
+bool Logger::isWarnEnabled() const
+{
+    return WARN <= currentLevel;
+}
+
+bool Logger::isInfoEnabled() const
+{
+    return INFO <= currentLevel;
+}
+
+bool Logger::isDebugEnabled() const
+{
+    return DEBUG <= currentLevel;
+}
+
+bool Logger::isFineEnabled() const
+{
+    return FINE <= currentLevel;
+}
+
+
 const char* Logger::getLevelString(const Logger::Level level)
 {
     return levelStrings[level];

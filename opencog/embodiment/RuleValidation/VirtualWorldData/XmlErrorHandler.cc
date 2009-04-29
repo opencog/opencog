@@ -32,7 +32,7 @@ void XmlErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseException& exc
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::WARN, "XmlErrorHandler - Got a warning while parsing XML: %s\n"
+    logger().warn("XmlErrorHandler - Got a warning while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  "SystemId: %s\n"
@@ -51,7 +51,7 @@ void XmlErrorHandler::error(const XERCES_CPP_NAMESPACE::SAXParseException& exc)
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::ERROR, "XmlErrorHandler - Got an error while parsing XML: %s\n"
+    logger().error("XmlErrorHandler - Got an error while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  "SystemId: %s\n"
@@ -71,7 +71,7 @@ void XmlErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& 
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::ERROR, "XmlErrorHandler - Got a fatal error while parsing XML: %s\n"
+    logger().error("XmlErrorHandler - Got a fatal error while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  "SystemId: %s\n"
@@ -88,6 +88,6 @@ void XmlErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseException& 
 
 void XmlErrorHandler::resetErrors()
 {
-    logger().log(opencog::Logger::INFO, "XmlErrorHandler - resetErrors() called\n");
+    logger().info("XmlErrorHandler - resetErrors() called\n");
 }
 

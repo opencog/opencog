@@ -31,8 +31,8 @@
 
 #include <pthread.h>
 
-#undef ERROR
-#undef DEBUG
+//#undef ERROR
+//#undef DEBUG
 
 namespace opencog
 {
@@ -118,7 +118,6 @@ public:
      */
     void setPrintErrorLevelStdout();
 
-
     /**
      * Logs a message into log file (passed in constructor) if and only if passed level is
      * lower than or equals to the current log level of Logger.
@@ -134,7 +133,7 @@ public:
      * Logs a message (printf style) into log file (passed in constructor) if and only if passed level is
      * lower than or equals to the current log level of Logger.
      *
-     * You may use this method as any printf-style call, eg: log(FINE, "Count = %d", count)
+     * You may use these methods as any printf-style call, eg: fine("Count = %d", count)
      */
     void logva(Level level, const char *, va_list args);
     void log  (Level level, const char *, ...);
@@ -143,6 +142,18 @@ public:
     void info (const char *, ...);
     void debug(const char *, ...);
     void fine (const char *, ...);
+
+    /** 
+     * Methods to check if a given log level is enabled. This is useful for
+     * avoiding unnecessary code for logger. For example: 
+     * if (isDebugEnabled())  debug(...);
+     */
+    bool isEnabled(Level level) const;
+    bool isErrorEnabled() const;
+    bool isWarnEnabled() const;
+    bool isInfoEnabled() const;
+    bool isDebugEnabled() const;
+    bool isFineEnabled() const;
 
     /**
      * Enable logging messages.

@@ -149,7 +149,7 @@ SimProxy::~SimProxy()
 
 void* SimProxy::ThreadCheckAsynchronousMessages(void* args)
 {
-    logger().log(opencog::Logger::DEBUG, "SimProxy::ThreadCheckAsynchronousMessages called");
+    logger().debug("SimProxy::ThreadCheckAsynchronousMessages called");
     SimProxy* proxy = (SimProxy*) args;
     while (true) {
         //sleep(1); // 1s
@@ -238,7 +238,7 @@ bool SimProxy::hasPendingActions()
 
 void SimProxy::checkAsynchronousMessages()
 {
-    //logger().log(opencog::Logger::FINE, "SimProxy::checkAsynchronousMessages()");
+    //logger().fine("SimProxy::checkAsynchronousMessages()");
     if (IsConnected()) {
         while (sh->Select(SEC_DELAY, USEC_DELAY) > 0) {}; // to get any old/spontaneous responses
     }
@@ -523,16 +523,16 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem)
                     case CUSTOM_SENSATION_GENERIC_ANIMATION_STARTED:
                     case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_STARTED: {
                         //printf("SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
-                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
+                        logger().debug("SimProxy received ACTION STARTED EVENT: %s\n", strQualityValue);
                         unsigned long actionTicket = getActionInProgress(qualityValue - 1);
                         if (actionTicket) {
                             //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().debug("Dequeued action with ticket = %ld\n", actionTicket);
                             // TODO: If start event must be considered, the 2nd argument bellow must be an enum, not a boolean
                             //perceptionAndStatusHandler->actionStatus(actionTicket, ???);
                         } else {
                             //printf("WARN: Found no action in progress for this action type!\n");
-                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                            logger().warn("SimProxy: Found no action in progress for this action type!\n");
                         }
                     }
                     break;
@@ -543,15 +543,15 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem)
                     case CUSTOM_SENSATION_GENERIC_ANIMATION_DONE:
                     case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_DONE: {
                         //printf("SimProxy received ACTION END EVENT: %s\n", strQualityValue);
-                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION END EVENT: %s\n", strQualityValue);
+                        logger().debug("SimProxy received ACTION END EVENT: %s\n", strQualityValue);
                         unsigned long actionTicket = dequeueActionInProgress(qualityValue - 2);
                         if (actionTicket) {
                             //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().debug("Dequeued action with ticket = %ld\n", actionTicket);
                             perceptionAndStatusHandler->actionStatus(actionTicket, true);
                         } else {
                             //printf("WARN: Found no action in progress for this action type!\n");
-                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                            logger().warn("SimProxy: Found no action in progress for this action type!\n");
                         }
                     }
                     break;
@@ -561,22 +561,22 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem)
                     case CUSTOM_SENSATION_GENERIC_ANIMATION_FAILED:
                     case CUSTOM_SENSATION_SEMIPOSE_ANIMATION_FAILED: {
                         //printf("SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
-                        logger().log(opencog::Logger::DEBUG, "SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
+                        logger().debug("SimProxy received ACTION FAILED EVENT: %s\n", strQualityValue);
                         unsigned long actionTicket = dequeueActionInProgress(qualityValue - 3);
                         if (actionTicket) {
                             //printf("Dequeued action with ticket = %ld\n", actionTicket);
-                            logger().log(opencog::Logger::DEBUG, "Dequeued action with ticket = %ld\n", actionTicket);
+                            logger().debug("Dequeued action with ticket = %ld\n", actionTicket);
                             perceptionAndStatusHandler->actionStatus(actionTicket, false);
                         } else {
                             //printf("WARN: Found no action in progress for this action type!\n");
-                            logger().log(opencog::Logger::WARN, "SimProxy: Found no action in progress for this action type!\n");
+                            logger().warn("SimProxy: Found no action in progress for this action type!\n");
                         }
                     }
                     break;
                     case CUSTOM_SENSATION_HOLDING_OBJECT:
                         if (messageAttrElem) {
                             //printf("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
-                            logger().log(opencog::Logger::DEBUG, "SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
+                            logger().debug("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", XMLString::transcode(messageAttrElem->getTextContent()));
                             //createHoldingObjectElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, inc_stamp);
                         } else {
                             holdingObjectEvent = true;
@@ -586,8 +586,8 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem)
                         if (messageAttrElem) {
                             char* fullMessage = XMLString::transcode(messageAttrElem->getTextContent());
                             //printf("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
-                            if (logger().getLevel() >= opencog::Logger::FINE)
-                                logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
+                            if (logger().isFineEnabled())
+                                logger().fine("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
                             XMLString::release(&fullMessage);
                             //createSayingMessageElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
                         } else {
@@ -608,15 +608,15 @@ void SimProxy::processSelfDataElements(DOMElement* sensationElem)
                     if (holdingObjectEvent) {
                         char* objNameStr = XMLString::transcode(attrElem->getTextContent());
                         //printf("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", objNameStr);
-                        logger().log(opencog::Logger::DEBUG, "SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", objNameStr);
+                        logger().debug("SimProxy received HOLDING OBJECT EVENT: object name = '%s'\n", objNameStr);
                         //createHoldingObjectElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
                         XMLString::release(&objNameStr);
                     }
                     if (isBroadcastMessage) {
                         char* fullMessage = XMLString::transcode(attrElem->getTextContent());
                         //printf("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
-                        if (logger().getLevel() >= opencog::Logger::FINE)
-                            logger().log(opencog::Logger::FINE, "SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
+                        if (logger().isFineEnabled())
+                            logger().fine("SimProxy received CUSTOM_SENSATION_BROADCAST_MESSAGE: fullMessage = '%s'\n", fullMessage);
                         XMLString::release(&fullMessage);
                         //createSayingMessageElements(novamenteDoc, parentElem, messageAttrElem, atomTypes, declaredNodes, timestamp);
                     }
@@ -941,7 +941,7 @@ void SimProxy::createSayingMessageElements(XERCES_CPP_NAMESPACE::DOMDocument* no
 unsigned long SimProxy::enqueueActionInProgress(int actionType)
 {
     //printf("SimProxy::enqueueActionInProgress()\n");
-    logger().log(opencog::Logger::DEBUG, "SimProxy::enqueueActionInProgress()\n");
+    logger().debug("SimProxy::enqueueActionInProgress()\n");
 
     // Check if this action type is already associated with any in progress action
     EventId2AtomRepMap::iterator itr = eventMap->find(actionType);
@@ -959,7 +959,7 @@ unsigned long SimProxy::enqueueActionInProgress(int actionType)
     //printf("SimProxy::enqueueActionInProgress() OK!\n");
     //printf("Action list length = %d\n", actionList.size());
     //printf("Number of enqueued actions = %d\n", ++numberOfPendingActions);
-    logger().log(opencog::Logger::DEBUG, "Number of enqueued actions = %d\n", ++numberOfPendingActions);
+    logger().debug("Number of enqueued actions = %d\n", ++numberOfPendingActions);
     return result;
 }
 
@@ -981,10 +981,10 @@ unsigned long SimProxy::dequeueActionInProgress(int actionType)
         }
         //printf("Action list length = %d\n", actionList.size());
         //printf("Number of enqueued actions = %d\n", --numberOfPendingActions);
-        logger().log(opencog::Logger::DEBUG, "Number of enqueued actions = %d\n", --numberOfPendingActions);
+        logger().debug("Number of enqueued actions = %d\n", --numberOfPendingActions);
     } else {
         //printf("WARN: There is no associated list to this action type\n");
-        logger().log(opencog::Logger::WARN, "SimProxy: There is no associated list to this action type\n");
+        logger().warn("SimProxy: There is no associated list to this action type\n");
     }
     for (itr = eventMap->begin(); itr != eventMap->end(); itr++) {
         std::cout << (*itr).first << " => " << (*itr).second.size() << " entries."  << std::endl;
@@ -1003,7 +1003,7 @@ unsigned long SimProxy::getActionInProgress(int actionType)
         actionTicket = actionList.front();
     } else {
         //printf("WARNING: There is no associated list to this action type\n");
-        logger().log(opencog::Logger::WARN, "SimProxy: There is no associated list to this action type\n");
+        logger().warn("SimProxy: There is no associated list to this action type\n");
     }
     return actionTicket;
 }
@@ -1119,11 +1119,11 @@ void SimProxy::processPerceptionAndStatus(XERCES_CPP_NAMESPACE::DOMDocument* agi
                 //createPixelPerceptElements(novamenteDoc, outterAndLinkElem, (DOMElement*) child, atomTypes, declaredNodes, timestamp);
             } else if (strcmp(AGISIM_MAP_INFO_TAG, childNodeName) == 0) {
                 //printf("GOT map info data\n");
-                logger().log(opencog::Logger::DEBUG, "GOT map info data\n");
+                logger().debug("GOT map info data\n");
                 processMapInfoElements((DOMElement*) child);
             } else {
                 //printf("WARN: Unknown sensation data tag: %s\n", childNodeName);
-                logger().log(opencog::Logger::WARN, "SimProxy: Unknown sensation data tag: %s\n", childNodeName);
+                logger().warn("SimProxy: Unknown sensation data tag: %s\n", childNodeName);
             }
             XMLString::release(&childNodeName);
         }
@@ -1181,13 +1181,13 @@ std::string SimProxy::processAgiSimMessage(const std::string& agiSimMessage, boo
 {
     std::string result;
     //printf("SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
-    if (logger().getLevel() >= opencog::Logger::FINE)
-        logger().log(opencog::Logger::FINE, "SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
+    if (logger().isFineEnabled())
+        logger().fine("SimProxy::processAgiSimMessage():\n%s\n", agiSimMessage.c_str());
     XERCES_CPP_NAMESPACE::DOMDocument* agiSimMessageDoc = parseXML(agiSimMessage);
     if (agiSimMessageDoc != NULL) {
         if (isAdminResponse(agiSimMessageDoc)) {
             //printf("admin response!\n");
-            logger().log(opencog::Logger::DEBUG, "admin response!\n");
+            logger().debug("admin response!\n");
             std::string message;
             if (!processAdminResponse(agiSimMessageDoc, message)) {
                 perceptionAndStatusHandler->errorNotification(message);
@@ -1195,7 +1195,7 @@ std::string SimProxy::processAgiSimMessage(const std::string& agiSimMessage, boo
             result = message;
         } else {
             //printf("non-admin response!\n");
-            logger().log(opencog::Logger::DEBUG, "non-admin response!\n");
+            logger().debug("non-admin response!\n");
             processPerceptionAndStatus(agiSimMessageDoc);
         }
         agiSimMessageDoc->release();
@@ -1213,9 +1213,9 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
 {
     //printf("SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
     //printf("AgentName = %s\n", agentName.c_str());
-    if (logger().getLevel() >= opencog::Logger::FINE) {
-        logger().log(opencog::Logger::FINE, "SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
-        logger().log(opencog::Logger::DEBUG, "AgentName = %s\n", agentName.c_str());
+    if (logger().isFineEnabled()) {
+        logger().fine("SimProxy::send(\"%s\", %d, %d)\n", str.c_str(), isAdminCommand, waitResponse);
+        logger().debug("AgentName = %s\n", agentName.c_str());
     }
     std::string result;
 
@@ -1233,7 +1233,7 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
     //printf("SPENT TIME TO RECEIVE SPONTANEOUS MESSAGE = %ld\n", ((curTime.tv_sec-beginTime.tv_sec)*1000)+((curTime.tv_usec-beginTime.tv_usec)/1000));
     if (echoing) {
         //printf("Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec/1000, beginTime.tv_usec%1000, str.c_str());
-        logger().log(opencog::Logger::DEBUG, "SimProxy - Send - Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec / 1000, beginTime.tv_usec % 1000, str.c_str());
+        logger().debug("SimProxy - Send - Agisim Client (@%ld.%ld ms) << '%s'\n", beginTime.tv_usec / 1000, beginTime.tv_usec % 1000, str.c_str());
     }
     if (cc->IsConnected()) {
         if (str.size() > 0) {
@@ -1241,7 +1241,7 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
         }
         if (waitResponse) {
             //printf("Waiting response...\n");
-            logger().log(opencog::Logger::DEBUG, "Waiting response...\n");
+            logger().debug("Waiting response...\n");
             std::string agiSimMessage;
             cc->markWaitingForResponse();
             sh->Select(SEC_DELAY, USEC_DELAY);
@@ -1281,7 +1281,7 @@ std::string SimProxy::send(const std::string &str, bool isAdminCommand, bool wai
         result = "SimProxy is not connected to the server\n";
     }
     //printf("SimProxy::send() returning %s\n", result.c_str());
-    logger().log(opencog::Logger::DEBUG, "SimProxy::send() returning %s\n", result.c_str());
+    logger().debug("SimProxy::send() returning %s\n", result.c_str());
     return result;
 }
 
@@ -1610,15 +1610,15 @@ bool SimProxy::noiseMake()
 unsigned long SimProxy::message(const char* msg)
 {
 
-    logger().log(opencog::Logger::FINE, "SimProxy::message - init\n");
+    logger().fine("SimProxy::message - init\n");
     std::string cmd_str;
     cmd_str += AGISIM_MESSAGE;
     cmd_str += " ";
     cmd_str += msg;
     cmd_str += "\n";
     //printf("SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
-    if (logger().getLevel() >= opencog::Logger::FINE) {
-        logger().log(opencog::Logger::FINE, "SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
+    if (logger().isFineEnabled()) {
+        logger().fine("SimProxy::message(%s) => %s\n", msg, cmd_str.c_str());
     }
     std::string result = send(cmd_str, false, false);
     //printf("SimProxy::message() result = %s\n", result.c_str());
@@ -1681,7 +1681,7 @@ std::string SimProxy::newAgent(float x, float y, float z,  const char* objectTyp
     cmd_str += "\n";
     std::string answer = send(cmd_str, false);
     //printf("SimProxy::newAgent() got answer: '%s'\n", answer.c_str());
-    logger().log(opencog::Logger::DEBUG, "SimProxy::newAgent() got answer: '%s'\n", answer.c_str());
+    logger().debug("SimProxy::newAgent() got answer: '%s'\n", answer.c_str());
     // Gets the new agent's name. For doing this, answer must be in this format:
     //<agisim> <msg> answer </msg> </agisim>
     // where answer is the new agent's name
@@ -1789,8 +1789,8 @@ std::string SimProxy::setRot(std::string objName, float x, float y, float z)
 void SimProxy::receiveAsynchronousMessage(const std::string& agiSimMessage)
 {
 
-    if (logger().getLevel() >= opencog::Logger::FINE)
-        logger().log(opencog::Logger::FINE, "SimProxy::receiveAsynchronousMessage: %s", agiSimMessage.c_str());
+    if (logger().isFineEnabled())
+        logger().fine("SimProxy::receiveAsynchronousMessage: %s", agiSimMessage.c_str());
     processAgiSimMessage(agiSimMessage, false);
 }
 
@@ -1806,26 +1806,26 @@ DefaultPerceptionAndStatusHandler::~DefaultPerceptionAndStatusHandler()
 void DefaultPerceptionAndStatusHandler::mapInfo(std::vector<ObjMapInfo>& objects)
 {
 
-    if (logger().getLevel() >= opencog::Logger::FINE) {
+    if (logger().isFineEnabled()) {
         foreach(ObjMapInfo obj, objects) {
-            logger().log(opencog::Logger::FINE, "=========================================\n");
-            logger().log(opencog::Logger::FINE, "object: %s, type: %s%s\n", obj.name.c_str(), obj.type.c_str(), obj.removed ? " => REMOVED!" : "");
-            logger().log(opencog::Logger::FINE, "Position: posX = %lf, posY = %lf, posZ = %lf\n", obj.posX, obj.posY, obj.posZ);
-            logger().log(opencog::Logger::FINE, "Position: rotX = %lf, rotY = %lf, rotZ = %lf\n", obj.rotX, obj.rotY, obj.rotZ);
-            logger().log(opencog::Logger::FINE, "Size: length = %lf, width = %lf, height = %lf\n", obj.length, obj.width, obj.height);
-            logger().log(opencog::Logger::FINE, "Edible: %d, Drinkable: %d\n\n", obj.edible, obj.drinkable);
-            logger().log(opencog::Logger::FINE, "PetHome: %d, FoodBowl: %d, WaterBowl: %d\n\n", obj.petHome, obj.foodBowl, obj.waterBowl);
+            logger().fine("=========================================\n");
+            logger().fine("object: %s, type: %s%s\n", obj.name.c_str(), obj.type.c_str(), obj.removed ? " => REMOVED!" : "");
+            logger().fine("Position: posX = %lf, posY = %lf, posZ = %lf\n", obj.posX, obj.posY, obj.posZ);
+            logger().fine("Position: rotX = %lf, rotY = %lf, rotZ = %lf\n", obj.rotX, obj.rotY, obj.rotZ);
+            logger().fine("Size: length = %lf, width = %lf, height = %lf\n", obj.length, obj.width, obj.height);
+            logger().fine("Edible: %d, Drinkable: %d\n\n", obj.edible, obj.drinkable);
+            logger().fine("PetHome: %d, FoodBowl: %d, WaterBowl: %d\n\n", obj.petHome, obj.foodBowl, obj.waterBowl);
         }
     }
 }
 
 void DefaultPerceptionAndStatusHandler::actionStatus(unsigned long actionTicket, bool success)
 {
-    logger().log(opencog::Logger::DEBUG, "actionStatus: actionTicket = %ld, success = %d\n", actionTicket, success);
+    logger().debug("actionStatus: actionTicket = %ld, success = %d\n", actionTicket, success);
 }
 
 void DefaultPerceptionAndStatusHandler::errorNotification(const std::string& errorMsg)
 {
-    logger().log(opencog::Logger::DEBUG, "ERROR: errorMsg = %s\n", errorMsg.c_str());
+    logger().debug("ERROR: errorMsg = %s\n", errorMsg.c_str());
 }
 

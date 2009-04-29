@@ -427,7 +427,7 @@ void AtomTable::merge(Handle h, const TruthValue& tvn)
         }
         // emit "merge atom" signal
         _mergeAtomSignal(h);
-        if (logger().getLevel() >= Logger::DEBUG) 
+        if (logger().isDebugEnabled()) 
             logger().debug("Atom merged: %d => %s", h.value(), atom->toString().c_str());
     } 
 }
@@ -504,7 +504,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // emit add atom signal
     _addAtomSignal(handle);
-    if (logger().getLevel() >= Logger::DEBUG) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
+    if (logger().isDebugEnabled()) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
 
     logger().fine("[AtomTable] add: %p", handle.value());
 
@@ -625,7 +625,7 @@ void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
         _removeAtomSignal(*it);
 
         Atom* atom = TLB::getAtom(*it);
-        if (logger().getLevel() >= Logger::DEBUG) logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
+        if (logger().isDebugEnabled()) logger().debug("Atom removed: %d => %s", it->value(), atom->toString().c_str());
         TLB::removeAtom(atom);
         delete atom;
     }

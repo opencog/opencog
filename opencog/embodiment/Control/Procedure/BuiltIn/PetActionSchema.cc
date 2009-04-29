@@ -177,7 +177,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
                             atomTypes += classserver().getTypeName(atomSpace.getType(h));
                             atomTypes += " ";
                         }
-                        logger().log(opencog::Logger::WARN, "WARNING: Got multiple ObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());
+                        logger().warn("WARNING: Got multiple ObjectNode with a same name: %s (atom types: %s)\n", objectId.c_str(), atomTypes.c_str());
                     }
                     Type atomType = atomSpace.getType(hs[0]);
                     // TODO: What about the other types of SL object? (accessory and structure)

@@ -47,8 +47,8 @@
 // The percentage bellow is related to the diagonal of the SpaceMap
 #define STEP_SIZE_PERCENTAGE 2.0
 
-#define MAIN_LOGGER_ACTION_PLAN_FAILED logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - No action plan has been sent");
-#define MAIN_LOGGER_ACTION_PLAN_SUCCEEDED logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - The action plan has been successfully sent");
+#define MAIN_LOGGER_ACTION_PLAN_FAILED logger().debug("PAIWorldWrapper - No action plan has been sent");
+#define MAIN_LOGGER_ACTION_PLAN_SUCCEEDED logger().debug("PAIWorldWrapper - The action plan has been successfully sent");
 
 namespace WorldWrapper
 {
@@ -84,7 +84,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 {
 
     //DEBUG log
-    if (opencog::Logger::DEBUG <= logger().getLevel()) {
+    if (logger().isDebugEnabled()) {
         string actionPlanStr = "{";
         for (sib_it sib = from; sib != to;) {
             stringstream ss;
@@ -95,7 +95,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 actionPlanStr += ", ";
         }
         actionPlanStr += "}";
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "PAIWorldWrapper - Attempt to send the following sequence of actions: %s",
                      actionPlanStr.c_str());
     }
@@ -114,7 +114,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
         pet_builtin_action_enum bae = get_enum(ba);
         switch (bae) {
         case id::goto_obj: {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "PAIWorldWrapper - Handling goto_obj. # of parameters = %d", it.number_of_children() );
             opencog::cassert(TRACE_INFO, it.number_of_children() == 2);
             opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
@@ -123,7 +123,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
             std::string target = get_definite_object( *it.begin() );
             float walkSpeed = get_contin( *++it.begin() );
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "PAIWorldWrapper - goto_obj(%s, %f)", target.c_str( ), walkSpeed );
             if ( target == "custom_path" ) {
                 std::string customWaypoints =
@@ -160,9 +160,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
                 if ( _hasPlanFailed || !createWalkPlanAction( actionPlan, false, Handle::UNDEFINED, walkSpeed ) ) {
                     if (_hasPlanFailed) {
-                        logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Failed to create a goto plan to the goal.");
+                        logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
                     } else {
-                        logger().log(opencog::Logger::INFO,
+                        logger().info(
                                      "PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
                     } // else
                 } // if
@@ -180,9 +180,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
                     if (!build_goto_plan(targetHandle, false, Handle::UNDEFINED, Handle::UNDEFINED, walkSpeed )) {
                         if (_hasPlanFailed) {
-                            logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Failed to create a goto plan to the goal.");
+                            logger().error("PAIWorldWrapper - Failed to create a goto plan to the goal.");
                         } else {
-                            logger().log(opencog::Logger::INFO, "PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
+                            logger().info("PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
                             std::vector<std::string> arguments;
                             _pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "gotoDone", arguments );
 
@@ -192,7 +192,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                     } // if
 
                 } catch ( NotFoundException& ex ) {
-                    logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Goto: target not found.");
+                    logger().error("PAIWorldWrapper - Goto: target not found.");
                     _hasPlanFailed = true;
                     MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
                     return false;
@@ -232,14 +232,14 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                               Spatial::Point( direction.x, direction.y )
                                           );
 
-                logger().log( opencog::Logger::DEBUG, "PAIWorldWrapper - gonear_obj(%s) calculated position(%f, %f) target orientation(%s) target location(%s) distance from target(%f)", target.c_str( ), position.first, position.second, entity->getOrientation( ).toString( ).c_str( ), entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
+                logger().debug("PAIWorldWrapper - gonear_obj(%s) calculated position(%f, %f) target orientation(%s) target location(%s) distance from target(%f)", target.c_str( ), position.first, position.second, entity->getOrientation( ).toString( ).c_str( ), entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
 
                 if ( !buildGotoPlan( position, walkSpeed ) ) {
                     if ( _hasPlanFailed ) {
-                        logger().log(opencog::Logger::ERROR,
+                        logger().error(
                                      "PAIWorldWrapper - Failed to create a goto plan to the goal.");
                     } else {
-                        logger().log(opencog::Logger::INFO,
+                        logger().info(
                                      "PAIWorldWrapper - No goto plan needed since the goal was already near enough.");
 
                     } // else
@@ -248,8 +248,8 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // if
             } catch ( NotFoundException& ex ) {
                 // Pet will stay at it's current position until it's owner isn't at a valid position
-                logger().log(opencog::Logger::ERROR,
-                             "PAIWorldWrappe - Goto: target not found.");
+                logger().error(
+                             "PAIWorldWrapper - Goto: target not found.");
                 _hasPlanFailed = true;
                 MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
                 return false;
@@ -272,7 +272,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             } // if
 
             if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),  target ) ) { //can't find the target
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - gobehind_obj: target[%s] not found.",
                              target.c_str( ) );
                 _hasPlanFailed = true;
@@ -303,10 +303,10 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
             if ( !buildGotoPlan( goalPoint, walkSpeed ) ) {
                 if (_hasPlanFailed) {
-                    logger().log(opencog::Logger::ERROR,
+                    logger().error(
                                  "PAIWorldWrapper - Failed to create a gobehind_obj plan to the goal.");
                 } else {
-                    logger().log(opencog::Logger::INFO,
+                    logger().info(
                                  "PAIWorldWrapper - No gobehind_obj plan needed since the goal was already near enough.");
                 } // if
                 MAIN_LOGGER_ACTION_PLAN_FAILED; //macro see top of the file
@@ -322,7 +322,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             if (!WorldWrapperUtil::inSpaceMap(sm, as,
                                               selfName(), ownerName(),
                                               combo::vertex("owner"))) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - Heel: owner not found.");
 
                 _hasPlanFailed = true;
@@ -343,7 +343,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                               *it.begin()) ||
                     !WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                                   *++it.begin())) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - Nudge: obj or destination not found.");
 
                 _hasPlanFailed = true;
@@ -374,7 +374,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                                               *it.begin()) ||
                     !WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                                   *++it.begin())) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - Go behind: args not found.");
 
                 _hasPlanFailed = true;
@@ -401,7 +401,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 //first goto the obj to follow, if we can find it
                 if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                                   *it.begin())) {
-                    logger().log(opencog::Logger::ERROR,
+                    logger().error(
                                  "PAIWorldWrapper - Follow: obj not found.");
 
                     _hasPlanFailed = true;
@@ -457,7 +457,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 //log error
                 std::stringstream ss (stringstream::out);
                 ss << combo_tree(from);
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - Failed to build PetAction '%s'.",
                              ss.str().c_str());
                 //~log error
@@ -494,11 +494,11 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
                       it, false, vu);
 
     //DEBUG log
-    if (opencog::Logger::DEBUG <= logger().getLevel()) {
+    if (logger().isDebugEnabled()) {
         stringstream p_ss, r_ss;
         p_ss << combo_tree(it);
         r_ss << v;
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "PAIWorldWrapper - Perception %s has been evaluation to %s",
                      p_ss.str().c_str(), r_ss.str().c_str());
     }
@@ -521,11 +521,11 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
                       io, false, vu);
 
     //DEBUG log
-    if (opencog::Logger::DEBUG <= logger().getLevel()) {
+    if (logger().isDebugEnabled()) {
         stringstream io_ss, r_ss;
         io_ss << io;
         r_ss << v;
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "PAIWorldWrapper - Indefinition object %s has been evaluation to %s",
                      io_ss.str().c_str(), r_ss.str().c_str());
     }
@@ -576,13 +576,13 @@ Spatial::Point PAIWorldWrapper::getValidPosition( const Spatial::Point& location
     //make sure that the object location is valid
     Spatial::Point correctedLocation = location;
     if ( spaceMap.illegal( location ) ) {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "PAIWorldWrapper - Position (%.2f, %.2f) is invalid (off the grid, near/inside an obstacle).",
                      location.first, location.second);
 
         correctedLocation = spaceMap.getNearestFreePoint( location );
 
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "PAIWorldWrapper - Changed position to the nearest valid point (%.2f, %.2f).",
                      correctedLocation.first, correctedLocation.second);
     } // if
@@ -626,7 +626,7 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
             _hasPlanFailed = (AStar.findPath() != Spatial::AStarSearch<Spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
             actions = AStar.getShortestCalculatedPath( );
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "PAIWorldWrapper - AStar result %s.", !_hasPlanFailed ? "true" : "false");
         } else if ( pathFindingAlgorithm == "hpa" ) {
 
@@ -642,7 +642,7 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
                 } // foreach
             } // if
 
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "PAIWorldWrapper - HPASearch result %s.", !_hasPlanFailed ? "true" : "false");
 
         } else {
@@ -661,7 +661,7 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
                     actions.push_back( boost::get<0>( *it ) );
                 } // for
             } // if
-            logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - TangetBug result %s.",
+            logger().debug("PAIWorldWrapper - TangetBug result %s.",
                          !_hasPlanFailed ? "true" : "false");
         } // else
     } catch ( opencog::RuntimeException& e ) {
@@ -698,7 +698,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<Spatial::Point>& actions
 
     if ( actions.empty( ) ) {
         // we're done. No need to create any walk sequency
-        logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - Zero actions from AStar.");
+        logger().debug("PAIWorldWrapper - Zero actions from AStar.");
         return false;
     }
 
@@ -733,7 +733,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<Spatial::Point>& actions
                                                        0.0)));
 
             float speed = ( customSpeed != 0 ) ? customSpeed : _pai.getPetInterface().computeWalkingSpeed();
-            logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]", customSpeed, speed );
+            logger().debug("PAIWorldWrapper::createWalkPlanAction customSpeed[%f] finalSpeed[%f]", customSpeed, speed );
             action.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), lexical_cast<string>( speed) ) );
 
         } // else
@@ -769,18 +769,18 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
         } else {
             endPoint = spaceMap.nearbyPoint(startPoint, goalName);
             if (spaceMap.gridIllegal(spaceMap.snap(endPoint))) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "PAIWorldWrapper - nearby point selected and invalid point.");
             }
         } // else
     } catch ( opencog::AssertionException& e ) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "PAIWorldWrapper - Unable to get pet or goal location.");
         _hasPlanFailed = true;
         return false;
     } // catch
 
-    logger().log(opencog::Logger::FINE,
+    logger().fine(
                  "PAIWorldWrapper - Pet position: (%.2f, %.2f). Goal position: (%.2f, %.2f) - %s.",
                  startPoint.first, startPoint.second,  endPoint.first, endPoint.second, goalName.c_str());
     // register seeking object
@@ -882,7 +882,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     if (actions2types.find(bae) != actions2types.end()) {
         action = actions2types.find(bae)->second;
     } else {
-        logger().log(opencog::Logger::FINE,
+        logger().fine(
                      "PAIWorldWrapper - No action type was found to build pet action at actions2types" );
     } // else
 
@@ -937,7 +937,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
 
     case id::group_command: {    // group_command(string, string [, arg_list] )
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "PAIWorldWrapper - Building PetAction group_command. number_of_children: %d",
                      from.number_of_children( ) );
 
@@ -1008,7 +1008,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     case id::receive_latest_group_commands: {
         opencog::cassert(TRACE_INFO, from.number_of_children() == 0);
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "PAIWorldWrapper - receiving latest_group_commands from all agents" );
 
         //_pai.getPetInterface( ).getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandArguments );
@@ -1029,7 +1029,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                 continue;
             } // if
             std::string agentId = as.getName( agentsHandles[i] );
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "PAIWorldWrapper - verifying agent[%s]", agentId.c_str( ) );
 
             unsigned long delay_past = 10 * PerceptionActionInterface::PAIUtils::getTimeFactor();
@@ -1038,7 +1038,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             Handle agentActionLink = AtomSpaceUtil::getMostRecentAgentActionLink( as, agentId, "group_command", Temporal( t_past, current_time ), TemporalTable::OVERLAPS );
 
             if ( agentActionLink == Handle::UNDEFINED ) {
-                logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - agent[%s] did not sent group command during the last 30 seconds", agentId.c_str( ) );
+                logger().debug("PAIWorldWrapper - agent[%s] did not sent group command during the last 30 seconds", agentId.c_str( ) );
                 continue;
             } // if
 
@@ -1054,7 +1054,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                 boost::trim( commandParameters[k] );
             }
 
-            logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - number of parameters[%d], string[%s]", commandParameters.size( ), parametersString.c_str( ) );
+            logger().debug("PAIWorldWrapper - number of parameters[%d], string[%s]", commandParameters.size( ), parametersString.c_str( ) );
 
             if ( commandParameters.size( ) > 0 && ( commandParameters[0] == "all_agents" ||
                                                     commandParameters[0] == selfName( ) ) ) {
@@ -1109,7 +1109,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             part = "5";
             break;
         default:
-            logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", instance(ase)->get_name().c_str());
             opencog::cassert(TRACE_INFO, false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
@@ -1137,7 +1137,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             part = "2";
             break;
         default:
-            logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", instance(ase)->get_name().c_str());
             opencog::cassert(TRACE_INFO, false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
@@ -1169,7 +1169,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             action = ActionType::SCRATCH_SELF_LEFT_SHOULDER();
             break;
         default:
-            logger().log(opencog::Logger::ERROR, "PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", instance(ase)->get_name().c_str());
+            logger().error("PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", instance(ase)->get_name().c_str());
             opencog::cassert(TRACE_INFO, false);
         }
     }
@@ -1313,8 +1313,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         /*
           const string& slObjName = get_definite_object(*from.begin());
           double angleFacing = getAngleFacing(WorldWrapperUtil::selfHandle(as, selfName()));
-          logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper: angleFacing = %f", angleFacing);
-          logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper: slObjName = %s", slObjName.c_str());
+          logger().debug("PAIWorldWrapper: angleFacing = %f", angleFacing);
+          logger().debug("PAIWorldWrapper: slObjName = %s", slObjName.c_str());
           opencog::cassert(TRACE_INFO,  WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), selfName()));
           opencog::cassert(TRACE_INFO,  WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), slObjName));
           const SpaceServer::SpaceMapPoint& selfObjPoint = WorldWrapperUtil::getLocation(sm, as, toHandle(selfName()));
@@ -1324,7 +1324,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
           double angle = atan2f(deltaX,deltaY);
           double rotationAngle = angle - angleFacing;
 
-          logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - Final angle = %f. Angle to turn: %f", angle, rotationAngle);
+          logger().debug("PAIWorldWrapper - Final angle = %f. Angle to turn: %f", angle, rotationAngle);
         */
 
         std::string targetObjectName = get_definite_object(*from.begin());
@@ -1358,10 +1358,10 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
             rotationAngle = atan2f(targetDirection.y, targetDirection.x);
 
-            logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - Agent[pos: %s, ori: %s], Target[pos: %s], Turn Angle: %f", agentEntity->getPosition( ).toString( ).c_str( ),  agentEntity->getOrientation( ).toString( ).c_str( ), targetPosition.toString( ).c_str( ), rotationAngle );
+            logger().debug("PAIWorldWrapper - Agent[pos: %s, ori: %s], Target[pos: %s], Turn Angle: %f", agentEntity->getPosition( ).toString( ).c_str( ),  agentEntity->getOrientation( ).toString( ).c_str( ), targetPosition.toString( ).c_str( ), rotationAngle );
 
         } catch ( NotFoundException& ex ) {
-            logger().log(opencog::Logger::DEBUG, "PAIWorldWrapper - Cannot find an object inside localspacemap: %s", ex.getMessage( ) );
+            logger().debug("PAIWorldWrapper - Cannot find an object inside localspacemap: %s", ex.getMessage( ) );
         } // catch
 
         action.addParameter(ActionParameter("rotation", ActionParamType::ROTATION(),  Rotation(0, 0, rotationAngle)));
@@ -1475,7 +1475,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
     if (sm.containsObject(slObjName)) {
         //return the yaw
         double result = sm.getEntity(slObjName)->getOrientation( ).getRoll( );//sm.getMetaData(slObjName).yaw;
-        logger().log(opencog::Logger::DEBUG, "getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
+        logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
         return result;
     }
 #else
@@ -1505,7 +1505,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
                     //return the yaw
                     opencog::cassert(TRACE_INFO, TLB::getAtom(ll)->getOutgoingSet().size() == 4);
                     double result = lexical_cast<double>(as.getName(as.getOutgoing(ll, 3)));
-                    logger().log(opencog::Logger::DEBUG, "getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
+                    logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
                     return result;
                 }
             }

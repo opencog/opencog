@@ -384,10 +384,10 @@ bool HPASearch::Level::processPath( const Math::Vector2& startPoint, const Math:
 
     if ( invalidStartPoint || invalidEndPoint ) {
         if ( invalidStartPoint ) {
-            logger().log(opencog::Logger::DEBUG, ( "HPASearch - invalid start point [" + startPoint.toString( ) + "]" ).c_str( ) );
+            logger().debug(( "HPASearch - invalid start point [" + startPoint.toString( ) + "]" ).c_str( ) );
         } // if
         if ( invalidEndPoint ) {
-            logger().log(opencog::Logger::DEBUG, ( "HPASearch - invalid end point [" + endPoint.toString( ) + "]" ).c_str( ) );
+            logger().debug(( "HPASearch - invalid end point [" + endPoint.toString( ) + "]" ).c_str( ) );
         } // if
         return false;
     } // if
@@ -411,7 +411,7 @@ bool HPASearch::Level::processPath( const Math::Vector2& startPoint, const Math:
             // ignore start point this->processedPath.push_back( startPoint );
             this->processedPath.push_back( endPoint );
         } else {
-            logger().log(opencog::Logger::INFO, ( "HPASearch - start and end points are the same [" + startPoint.toString( ) + "]" ).c_str( ) );
+            logger().info(( "HPASearch - start and end points are the same [" + startPoint.toString( ) + "]" ).c_str( ) );
         } // else
 
         return true;
@@ -490,7 +490,7 @@ void HPASearch::Level::smoothPath( void )
 
     std::vector<Math::Vector2> smoothPath;
 
-    logger().log(opencog::Logger::INFO, "HPASearch - smoothing path. (%d) points.",
+    logger().info("HPASearch - smoothing path. (%d) points.",
                  this->processedPath.size( ) );
 
     std::vector<Math::Vector2>::iterator it = this->processedPath.begin( );
@@ -509,7 +509,7 @@ void HPASearch::Level::smoothPath( void )
     } // while
     smoothPath.push_back( *it );
 
-    logger().log(opencog::Logger::INFO, "HPASearch - smoothing path complete. (%d) points.",
+    logger().info("HPASearch - smoothing path complete. (%d) points.",
                  smoothPath.size( ) );
 
     this->processedPath = smoothPath;
@@ -552,7 +552,7 @@ void HPASearch::Level::smoothTriangulate( void )
     } // for
     smoothPath.push_back( this->processedPath.back( ) );
 
-    logger().log(opencog::Logger::INFO, "HPASearch - smoothing triangulation complete. (%d) points.", smoothPath.size( ) );
+    logger().info("HPASearch - smoothing triangulation complete. (%d) points.", smoothPath.size( ) );
 
     this->processedPath = smoothPath;
 
@@ -561,12 +561,12 @@ void HPASearch::Level::smoothTriangulate( void )
 //**************************************************************************//
 HPASearch::HPASearch( LocalSpaceMap2D* map, unsigned int numberOfLevels, unsigned int maximumClusters ) : map( map ), numberOfLevels( numberOfLevels )
 {
-    logger().log(opencog::Logger::DEBUG, "HPASearch - start building clusters");
+    logger().debug("HPASearch - start building clusters");
     unsigned int i;
     for ( i = 1; i <= numberOfLevels; ++i ) {
         this->levels.push_back( new Level( map, i, maximumClusters ) );
     } // for
-    logger().log(opencog::Logger::DEBUG, "HPASearch - end building clusters");
+    logger().debug("HPASearch - end building clusters");
 
 }
 
@@ -594,7 +594,7 @@ unsigned int HPASearch::getNumberOfLevels( void )
 bool HPASearch::processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint, unsigned int levelId ) throw( opencog::RuntimeException )
 {
     bool response = getLevel( levelId )->processPath( startPoint, endPoint );
-    logger().log(opencog::Logger::INFO, ( "HPASearch - from[" + startPoint.toString( ) + "] to[" + endPoint.toString( ) + "] Result (%d)" ).c_str( ), response ? 1 : 0 );
+    logger().info(( "HPASearch - from[" + startPoint.toString( ) + "] to[" + endPoint.toString( ) + "] Result (%d)" ).c_str( ), response ? 1 : 0 );
     return response;
 }
 

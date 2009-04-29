@@ -276,7 +276,7 @@ vertex WorldWrapperUtilMock::evalIndefiniteObject(combo::pet_indefinite_object_e
         res = id::null_obj;
     }
 
-//    MAIN_LOGGER.log(opencog::Logger::DEBUG,
+//    MAIN_LOGGER.debug(
 //            "RunningComboProc - Analyzing '%s'. Result: '%s'.",
 //            ss.str().c_str(), res.c_str());
 
@@ -391,7 +391,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
                         WorldWrapperUtilMock::entityPerception.find(pe);
 
                     if (e_it !=  WorldWrapperUtilMock::entityPerception.end()) {
-//                            MAIN_LOGGER.log(opencog::Logger::DEBUG,
+//                            MAIN_LOGGER.debug(
 //                                            "evalPerception - Found function pointer");
                         // pointer to member function
                         result = (entity->*(e_it->second))();

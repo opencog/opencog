@@ -50,7 +50,7 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
         return;
     }
 
-    logger().log(opencog::Logger::FINE, "IsMovable - Updating is_movable for obj %s.",
+    logger().fine("IsMovable - Updating is_movable for obj %s.",
                  atomSpace.getName(object).c_str());
 
 

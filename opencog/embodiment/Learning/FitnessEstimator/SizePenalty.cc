@@ -55,7 +55,7 @@ double SizePenalty::computeSizePenalty(const combo::combo_tree& tr) const
     int s = DistortedComboSize::size(tr, _dos);
 
     //debug log for SPCTools
-    opencog::logger().log(opencog::Logger::DEBUG, "SizePenalty - SPCTools - Combo size : %d", s);
+    opencog::logger().debug("SizePenalty - SPCTools - Combo size : %d", s);
     //~debug log for SPCTools
 
     return std::exp(-a*std::log(b*c + std::exp(1))*(double)s);

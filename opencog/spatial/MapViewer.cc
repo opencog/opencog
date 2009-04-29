@@ -38,7 +38,7 @@ int main( int argc, char* argv[] )
         std::cout << "yMin - Lesser map coord on axis Y" << std::endl;
         std::cout << "yMax - Greater map coord on axis Y" << std::endl;
         std::cout << "xDim - Number of grid columns" << std::endl;
-        std::cout << "yMax - Number of grid rows" << std::endl;
+        std::cout << "yDim - Number of grid rows" << std::endl;
         std::cout << "agentRadius - The radius of the agent" << std::endl;
         std::cout << "mapFileName - The name of the LocalSpaceMap binary file" << std::endl;
         std::cout << "fileName.bmp - The name of the image file which will be generated" << std::endl;

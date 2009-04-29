@@ -40,7 +40,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
     // testing if there is a predicate already
     Handle predicateHandle = atomSpace.getHandle(PREDICATE_NODE, predicateName);
     if (predicateHandle == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::FINE, "BasicPredUpdater - Predicate '%s' not found.",
+        logger().fine("BasicPredUpdater - Predicate '%s' not found.",
                      predicateName.c_str());
         return Handle::UNDEFINED;
     }
@@ -48,7 +48,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
     // testing if there is a list link already
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::FINE, "BasicPredUpdater - Obj %s has no ListLink.",
+        logger().fine("BasicPredUpdater - Obj %s has no ListLink.",
                      atomSpace.getName(object).c_str());
         return Handle::UNDEFINED;
     }
@@ -74,7 +74,7 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
 
     // found no handle - ERROR
     if (objHandle.size() < 1) {
-        logger().log(opencog::Logger::ERROR, "BasicPredUpdater - Found no Handle for SpaceMap object %s.",
+        logger().error("BasicPredUpdater - Found no Handle for SpaceMap object %s.",
                      objName.c_str());
         return Handle::UNDEFINED;
     }
@@ -82,10 +82,10 @@ Handle BasicPredicateUpdater::getHandle(std::string objName)
     // found more than one handle - WARNING, return the first one
     // TODO: In this case, it could return the one with the more specific Object type.
     else if (objHandle.size() > 1) {
-        logger().log(opencog::Logger::ERROR, "BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", objName.c_str());
+        logger().error("BasicPredUpdater - Found more than one Handle for SpaceMap object %s. Returning the first one.", objName.c_str());
         unsigned int i;
         for ( i = 0; i < objHandle.size( ); ++i ) {
-            logger().log( opencog::Logger::ERROR, "BasicPredUpdater - %s %i", atomSpace.getName(objHandle[i]).c_str( ), atomSpace.getType(objHandle[i]) );
+            logger().error("BasicPredUpdater - %s %i", atomSpace.getName(objHandle[i]).c_str( ), atomSpace.getType(objHandle[i]) );
         } // for
 
     }
@@ -106,5 +106,5 @@ bool BasicPredicateUpdater::isUpdated(Handle object, std::string predicateName)
 
 void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-    logger().log(opencog::Logger::WARN, "BasicPredUpdater - Virtual method. Subclasses should implement it.");
+    logger().warn("BasicPredUpdater - Virtual method. Subclasses should implement it.");
 }

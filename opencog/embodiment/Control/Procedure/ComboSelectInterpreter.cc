@@ -57,19 +57,19 @@ void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne)
     RunningComboSelectProcedure& rp = it->second;
 
     rp.cycle();
-    logger().log(opencog::Logger::DEBUG,
+    logger().debug(
                  "RunningComboSelect - Terminei o cycle.");
 
     if (!rp.isFinished()) {
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "RunningComboSelect - Procedure not finished. Marking it failed.");
 
         // failed -  should be finished
         failed.insert(it->first);
 
     } else if (rp.getResult() != combo::id::null_vertex) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "RunningComboSelect - Procedure finished.");
 
         if (rp.isFailed()) {
@@ -81,7 +81,7 @@ void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne)
     } else {
         stringstream ss;
         ss << rp.getResult();
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "Third else - '%s'", ss.str().c_str());
     }
     runningProc.erase(it);

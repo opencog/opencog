@@ -31,7 +31,7 @@ void PetaverseErrorHandler::warning(const XERCES_CPP_NAMESPACE::SAXParseExceptio
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::WARN, "PetaverseErrorHandling - Got a warning while parsing XML: %s\n"
+    logger().warn("PetaverseErrorHandling - Got a warning while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  //"PublicId: %s\n"
@@ -52,7 +52,7 @@ void PetaverseErrorHandler::error(const XERCES_CPP_NAMESPACE::SAXParseException&
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::ERROR, "PetaverseErrorHandling - Got an error while parsing XML: %s\n"
+    logger().error("PetaverseErrorHandling - Got an error while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  //"PublicId: %s\n"
@@ -74,7 +74,7 @@ void PetaverseErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseExcep
     char* errorMsg = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getMessage());
     char* publicIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getPublicId());
     char* systemIdStr = XERCES_CPP_NAMESPACE::XMLString::transcode(exc.getSystemId());
-    logger().log(opencog::Logger::ERROR, "PetaverseErrorHandling - Got a fatal error while parsing XML: %s\n"
+    logger().error("PetaverseErrorHandling - Got a fatal error while parsing XML: %s\n"
                  "Line: %d\n"
                  "Column: %d\n"
                  //"PublicId: %s\n"
@@ -93,6 +93,6 @@ void PetaverseErrorHandler::fatalError(const XERCES_CPP_NAMESPACE::SAXParseExcep
 
 void PetaverseErrorHandler::resetErrors()
 {
-    logger().log(opencog::Logger::INFO, "PetaverseErrorHandling - resetErrors() called\n");
+    logger().info("PetaverseErrorHandling - resetErrors() called\n");
 }
 

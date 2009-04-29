@@ -99,7 +99,7 @@ bool EmbodimentCogServer::customLoopRun(void)
             Message *message = messages[i];
             //check type of message
             if (message->getType() == Message::TICK) {
-                logger().log(opencog::Logger::DEBUG, "EmbodimentCogServer - got a tick");
+                logger().debug("EmbodimentCogServer - got a tick");
                 delete(message);
                 return true;
             } else {

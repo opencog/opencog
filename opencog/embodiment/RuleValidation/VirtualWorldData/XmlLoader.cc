@@ -124,14 +124,14 @@ void XmlLoader::processEntityInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
     // getting <entity-object> elements from the XML message
     XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_OBJ_ELEM, tag, XML_TAG_LENGTH);
     list = element->getElementsByTagName(tag);
-    logger().log(opencog::Logger::DEBUG, "XmlLoader - Number of entity founds '%d'.",
+    logger().debug("XmlLoader - Number of entity founds '%d'.",
                  list->getLength());
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
         VirtualEntity entity;
         processEntityElement((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i), entity);
 
-        logger().log(opencog::Logger::DEBUG, "XmlLoader - Entity to be added '%s'.",
+        logger().debug("XmlLoader - Entity to be added '%s'.",
                      entity.getName().c_str());
         worldState.addEntity(entity);
     }
@@ -139,7 +139,7 @@ void XmlLoader::processEntityInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
     // getting <agent-object> elements from the XML message
     XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_OBJ_ELEM, tag, XML_TAG_LENGTH);
     list = element->getElementsByTagName(tag);
-    logger().log(opencog::Logger::DEBUG, "XmlLoader - Number of agents found '%d'.",
+    logger().debug("XmlLoader - Number of agents found '%d'.",
                  list->getLength());
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
@@ -147,7 +147,7 @@ void XmlLoader::processEntityInfo(XERCES_CPP_NAMESPACE::DOMElement * element,
         processEntityElement((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i), agent);
         processAgentElement((XERCES_CPP_NAMESPACE::DOMElement *)list->item(i), agent);
 
-        logger().log(opencog::Logger::DEBUG, "XmlLoader - Agent to be added '%s'.",
+        logger().debug("XmlLoader - Agent to be added '%s'.",
                      agent.getName().c_str());
         worldState.addEntity(agent);
     }
@@ -836,42 +836,42 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
     XERCES_CPP_NAMESPACE::DOMNodeList * list = NULL;
     XERCES_CPP_NAMESPACE::DOMElement  * predicateElement = NULL;
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing pet-id.");
+//    logger().debug("XmlLoader - Processing pet-id.");
     // getting pet-id attribute
     XERCES_CPP_NAMESPACE::XMLString::transcode(PET_ID_ATTR, tag, XML_TAG_LENGTH);
     attribute = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     worldState.setPetId(std::string(attribute));
     XERCES_CPP_NAMESPACE::XMLString::release(&attribute);
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing owner-id.");
+//    logger().debug("XmlLoader - Processing owner-id.");
     // getting owner-id attribute
     XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTR, tag, XML_TAG_LENGTH);
     attribute = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     worldState.setPetOwnerId(std::string(attribute));
     XERCES_CPP_NAMESPACE::XMLString::release(&attribute);
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing pet-mode.");
+//    logger().debug("XmlLoader - Processing pet-mode.");
     // getting pet-mode attribute
     XERCES_CPP_NAMESPACE::XMLString::transcode(PET_MODE_ATTR, tag, XML_TAG_LENGTH);
     attribute = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     worldState.setPetMode(std::string(attribute));
     XERCES_CPP_NAMESPACE::XMLString::release(&attribute);
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing agent-state.");
+//    logger().debug("XmlLoader - Processing agent-state.");
     // getting agent-state attribute
     XERCES_CPP_NAMESPACE::XMLString::transcode(AGENT_STATE_ATTR, tag, XML_TAG_LENGTH);
     attribute = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     worldState.setAgentState(atoi(attribute));
     XERCES_CPP_NAMESPACE::XMLString::release(&attribute);
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing action-repetition.");
+//    logger().debug("XmlLoader - Processing action-repetition.");
     // getting action-repetition attribute
     XERCES_CPP_NAMESPACE::XMLString::transcode(ACTION_REPETITION_ATTR, tag, XML_TAG_LENGTH);
     attribute = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     worldState.setCurrentActionRepetition(atoi(attribute));
     XERCES_CPP_NAMESPACE::XMLString::release(&attribute);
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing near-info.");
+//    logger().debug("XmlLoader - Processing near-info.");
     // <near-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(NEAR_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -899,7 +899,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing next-info.");
+//    logger().debug("XmlLoader - Processing next-info.");
     // <next-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(NEXT_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -926,7 +926,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing owner-info.");
+//    logger().debug("XmlLoader - Processing owner-info.");
     // <owner-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -953,7 +953,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing moving-toward.");
+//    logger().debug("XmlLoader - Processing moving-toward.");
     // <moving_toward-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(MOVING_TOWARD_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -980,7 +980,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing inside-fov-info.");
+//    logger().debug("XmlLoader - Processing inside-fov-info.");
     // <inside_fov-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(INSIDE_FOV_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -1007,7 +1007,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing relations-info.");
+//    logger().debug("XmlLoader - Processing relations-info.");
     // <relations-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(RELATIONS_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -1038,7 +1038,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing has-said-info.");
+//    logger().debug("XmlLoader - Processing has-said-info.");
     // <has-said-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(HAS_SAID_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -1065,7 +1065,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing last-agent-action-info.");
+//    logger().debug("XmlLoader - Processing last-agent-action-info.");
     // <last-agent-action-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(LAST_AGENT_ACTION_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -1111,7 +1111,7 @@ void XmlLoader::processWorldStateInfo(XERCES_CPP_NAMESPACE::DOMElement * element
         }
     }
 
-//    logger().log(opencog::Logger::DEBUG, "XmlLoader - Processing last-pet-schema.");
+//    logger().debug("XmlLoader - Processing last-pet-schema.");
     // <last-pet-schema-info>
     XERCES_CPP_NAMESPACE::XMLString::transcode(LAST_PET_SCHEMA_INFO_ELEM, tag, XML_TAG_LENGTH);
     predicateElement = (XERCES_CPP_NAMESPACE::DOMElement *)element->getElementsByTagName(tag)->item(0);
@@ -1175,18 +1175,18 @@ bool XmlLoader::fromFile(const std::string & filename, VirtualWorldState & world
         parser->parse(*fileBufIS);
     } catch (const XERCES_CPP_NAMESPACE::XMLException& toCatch) {
         char * message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.getMessage());
-        logger().log(opencog::Logger::ERROR, "XmlLoader - XML Exception: %s", message);
+        logger().error("XmlLoader - XML Exception: %s", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         delete fileBufIS;
         return false;
     } catch (const XERCES_CPP_NAMESPACE::DOMException& toCatch) {
         char* message = XERCES_CPP_NAMESPACE::XMLString::transcode(toCatch.msg);
-        logger().log(opencog::Logger::ERROR, "XmlLoader - DOM Exception: %s", message);
+        logger().error("XmlLoader - DOM Exception: %s", message);
         XERCES_CPP_NAMESPACE::XMLString::release(&message);
         delete fileBufIS;
         return false;
     } catch (...) {
-        logger().log(opencog::Logger::ERROR, "XmlLoader - Unexpected XML Parse Exception");
+        logger().error("XmlLoader - Unexpected XML Parse Exception");
         delete fileBufIS;
         return false;
     }
@@ -1197,7 +1197,7 @@ bool XmlLoader::fromFile(const std::string & filename, VirtualWorldState & world
 
         try {
             processWorldStateDocument(document, worldState);
-//            logger().log(opencog::Logger::DEBUG, "XmlLoader - processPVPDocument done");
+//            logger().debug("XmlLoader - processPVPDocument done");
 
             // catch runtime exceptions and its specialization
         } catch (opencog::RuntimeException& e) {
@@ -1206,14 +1206,14 @@ bool XmlLoader::fromFile(const std::string & filename, VirtualWorldState & world
             return false;
 
         } catch (...) {
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "XmlLoader - Got an unknown exception while processing from XML file.");
             delete fileBufIS;
             delete document;
             return false;
         }
     } else {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "XmlLoader - Got %d errors parsing the xml data.", parser->getErrorCount());
         delete fileBufIS;
         delete document;

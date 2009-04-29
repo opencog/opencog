@@ -153,12 +153,12 @@ unsigned int load_procedure_repository(std::istream& in,
     if(pc) {
       pr.add(const_cast<combo::procedure_call_base*>(pc));
       ++n;
-      opencog::logger().log(opencog::Logger::FINE, 
+      opencog::logger().fine(
 		      "procedure_repository - Loaded '%s' with arity '%d'.", 
 		      pc->get_name().c_str(), pc->arity());
       
     } else {
-      opencog::logger().log(opencog::Logger::ERROR, 
+      opencog::logger().error(
 		      "procedure_repository - Error parsing combo function.");
     }
   }
@@ -168,7 +168,7 @@ unsigned int load_procedure_repository(std::istream& in,
   if(type_checking) {
     bool type_check_success = pr.infer_types_repo();
     if(!type_check_success) {
-      opencog::logger().log(opencog::Logger::ERROR, 
+      opencog::logger().error(
 		      "procedure_repository - Error type checking.");      
     }
   }

@@ -43,7 +43,7 @@ void GoldStdReaderAgent::init(const char* goldStdFilename)
 {
     goldStdFile = fopen(goldStdFilename, "r");
     if (!goldStdFile) {
-        logger().log(opencog::Logger::ERROR, "Could not open gold standard file: %s", goldStdFilename);
+        logger().error("Could not open gold standard file: %s", goldStdFilename);
         exit(-1);
     }
     messageToSend = NULL;
@@ -64,17 +64,17 @@ void GoldStdReaderAgent::run(opencog::CogServer *server)
     if (pbTester->hasExpectedMessages()) {
         unsigned long elapsedTime = GoldStdGen::getCurrentTimestamp() - pbTester->getReceivedTimeOfCurrentExpectedMessage();
         if (elapsedTime > timeout) {
-            logger().log(opencog::Logger::ERROR, "Timeout. elapsed time: %lu.", elapsedTime);
+            logger().error("Timeout. elapsed time: %lu.", elapsedTime);
             exit(-1);
         }
     }
 
     while (!pbTester->hasExpectedMessages() && !endOfFile) { // THIS WAY, IT SENDS ALL CONSECUTIVE MESSAGES AT ONCE
-        logger().log(opencog::Logger::INFO, "No expected messages");
+        logger().info("No expected messages");
         if (messageToSend) {
             unsigned long elapsedTime = GoldStdGen::getCurrentTimestamp() - initialTime;
             if (elapsedTime >= messageToSend->getTimestamp()) {
-                logger().log(opencog::Logger::INFO, "Send last read message...");
+                logger().info("Send last read message...");
                 pbTester->sendMessage(*(messageToSend->getMessage()));
                 if (opencog::config().get_bool("SAVE_MESSAGES_TO_FILE")) {
                     pbTester->getGoldStdGen()->writeMessage(*(messageToSend->getMessage()), true);
@@ -87,12 +87,12 @@ void GoldStdReaderAgent::run(opencog::CogServer *server)
 #else
                 unsigned long usec = (messageToSend->getTimestamp() - elapsedTime) * 10000;
 #endif
-                logger().log(opencog::Logger::INFO, "Sleeping for %lu micro seconds before sending next message...", usec);
+                logger().info("Sleeping for %lu micro seconds before sending next message...", usec);
                 usleep(usec);
             }
         }
         while (!messageToSend && !endOfFile) {
-            logger().log(opencog::Logger::INFO, "Resume reading of gold std file...");
+            logger().info("Resume reading of gold std file...");
             if (fgets(line_buf, LINE_BUF_SIZE, goldStdFile) == NULL) {
                 endOfFile = true;
                 break;
@@ -100,19 +100,19 @@ void GoldStdReaderAgent::run(opencog::CogServer *server)
                 //return;
             }
             if (!strcmp(RECEIVED_MESSAGE_FLAG, line_buf)) {
-                logger().log(opencog::Logger::INFO, "Reading expected message...");
+                logger().info("Reading expected message...");
                 GoldStdMessage* msg = GoldStdGen::readMessage(line_buf, LINE_BUF_SIZE, goldStdFile);
                 if (!msg) exit(-1);
 
                 pbTester->addExpectedMessage(msg->getMessage(), GoldStdGen::getCurrentTimestamp());
 
             } else if (!strcmp(SENT_MESSAGE_FLAG, line_buf)) {
-                logger().log(opencog::Logger::INFO, "Reading message to send...");
+                logger().info("Reading message to send...");
                 messageToSend = GoldStdGen::readMessage(line_buf, LINE_BUF_SIZE, goldStdFile);
-                logger().log(opencog::Logger::FINE, "Message to send: %s", messageToSend->getMessage()->getPlainTextRepresentation());
+                logger().fine("Message to send: %s", messageToSend->getMessage()->getPlainTextRepresentation());
                 if (!messageToSend) exit(-1);
             } else {
-                logger().log(opencog::Logger::ERROR, "Unexpected line: '%s' (expecting '%s' or '%s')", line_buf, RECEIVED_MESSAGE_FLAG, SENT_MESSAGE_FLAG);
+                logger().error("Unexpected line: '%s' (expecting '%s' or '%s')", line_buf, RECEIVED_MESSAGE_FLAG, SENT_MESSAGE_FLAG);
                 exit(-1);
             }
         }

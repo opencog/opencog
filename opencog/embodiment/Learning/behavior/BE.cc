@@ -195,7 +195,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
             does_fit_template does_match_template =
                 does_fit_template(vf.first, &as);
             if (does_match_template(h)) {
-                logger().log(opencog::Logger::DEBUG, "BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", TLB::getAtom(h)->toString().c_str());
+                logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", TLB::getAtom(h)->toString().c_str());
 
                 //create BD
                 opencog::cassert(TRACE_INFO, as.getType(h) == EVALUATION_LINK,
@@ -287,9 +287,9 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     //LOGGER DEBUG
                     if (held_object)
-                        logger().log(opencog::Logger::DEBUG, "BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding the object %s", tl, tu, subject_id.c_str(), held_object_id.c_str());
+                        logger().debug("BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding the object %s", tl, tu, subject_id.c_str(), held_object_id.c_str());
                     else
-                        logger().log(opencog::Logger::DEBUG, "BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding no object", tl, tu, subject_id.c_str());
+                        logger().debug("BE - Detected a walk command with the time interval (%u, %u), from the agent %s holding no object", tl, tu, subject_id.c_str());
                     //~LOGGER DEBUG
 
                     //and except the nearest object (if such) at the start of
@@ -319,11 +319,11 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                                      - nearestSasEntity->getPosition()).length();
 
                     if (dist_s <= dist_ratio_threshold*sms.diagonalSize()) {
-                        logger().log(opencog::Logger::DEBUG, "BE - the nearest object %s at the start of walk command is at distance %f from the agent which is too close to be in the list of potential objects of destination", obj_id_nearest_sas.c_str(), dist_s);
+                        logger().debug("BE - the nearest object %s at the start of walk command is at distance %f from the agent which is too close to be in the list of potential objects of destination", obj_id_nearest_sas.c_str(), dist_s);
 
                         pred.insert(obj_id_nearest_sas);
                     } else {
-                        logger().log(opencog::Logger::DEBUG, "BE - the nearest object %s at the start of walk command is at distance %f from the agent which is far enough to be in the list of potential objects of destination", obj_id_nearest_sas.c_str(), dist_s);
+                        logger().debug("BE - the nearest object %s at the start of walk command is at distance %f from the agent which is far enough to be in the list of potential objects of destination", obj_id_nearest_sas.c_str(), dist_s);
                     }
 
                     //find the nearest object to the subject at the end of the walk
@@ -399,11 +399,11 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //~debug print
 
                     if (dist_subject_end > dist_ratio_threshold*sm.diagonalSize()) {
-                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is too far to be considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
+                        logger().debug("BE - the agent %s is at distance %f from the closest valide destination %s which is too far to be considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
                         continue; //go directly to the next iteration
                         //and skip the creation of an elementary BD
                     } else {
-                        logger().log(opencog::Logger::DEBUG, "BE - the agent %s is at distance %f from the closest valide destination %s which is close enough and therefore is considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
+                        logger().debug("BE - the agent %s is at distance %f from the closest valide destination %s which is close enough and therefore is considered to have been reached", subject_id.c_str(), dist_subject_end, obj_id.c_str());
 
                         //====
                         //create the arg list of goto_obj
@@ -473,7 +473,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 HandleSeq memberLinkHS = list_of(bd_t_h)(trickExemplarAtTime);
                 as.addLink(MEMBER_LINK, memberLinkHS);
 
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "BE - New elementary behavior description created: %s",
                              TLB::getAtom(bd_t_h)->toString().c_str());
 

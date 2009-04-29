@@ -71,12 +71,12 @@ unsigned int ComboProcedureRepository::loadFromStream(istream& in)
             ComboProcedure* cp = new ComboProcedure(*pc);
             add(*cp);
             ++n;
-            logger().log(opencog::Logger::FINE,
+            logger().fine(
                          "ComboProcedureRepository - Loaded '%s' with arity '%d'.",
                          pc->get_name().c_str(), pc->arity());
 
         } else {
-            logger().log(opencog::Logger::ERROR,
+            logger().error(
                          "ComboProcedureRepository - Error parsing combo function.");
         }
         delete(pc);
@@ -132,7 +132,7 @@ const char* ComboProcedureRepository::getId() const
 
 void ComboProcedureRepository::saveRepository(FILE* dump) const
 {
-    logger().log(opencog::Logger::DEBUG, "Saving %s (%ld)\n", getId(), ftell(dump));
+    logger().debug("Saving %s (%ld)\n", getId(), ftell(dump));
     fprintf(dump, "%lu", _repo.size());
     for (str_proc_map_const_it itr = _repo.begin(); itr != _repo.end(); itr++) {
         const string &name = itr->first;
@@ -142,7 +142,7 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const
         int arity = itr->second->arity();
         fwrite(&arity, sizeof(int), 1, dump);
         string treeStr = opencog::toString(itr->second->get_body());
-        logger().log(opencog::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), treeStr.c_str());
+        logger().fine("name: %s\ntree: %s\n", name.c_str(), treeStr.c_str());
         int treeStrLength = treeStr.length();
         fwrite(&treeStrLength, sizeof(int), 1, dump);
         fwrite(treeStr.c_str(), sizeof(char), treeStrLength + 1, dump);
@@ -151,7 +151,7 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const
 
 void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* conv)
 {
-    logger().log(opencog::Logger::DEBUG, "Loading %s (%ld)\n", getId(), ftell(dump));
+    logger().debug("Loading %s (%ld)\n", getId(), ftell(dump));
     char buffer[1<<16];
 
     bool tc = opencog::config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
@@ -171,7 +171,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
         int treeStrLength;
         fread(&treeStrLength, sizeof(int), 1, dump);
         fread(buffer, sizeof(char), treeStrLength + 1, dump);
-        logger().log(opencog::Logger::FINE, "name: %s\ntree: %s\n", name.c_str(), buffer);
+        logger().fine("name: %s\ntree: %s\n", name.c_str(), buffer);
         std::stringstream ss(buffer);
         combo_tree tr;
         ss >> tr;

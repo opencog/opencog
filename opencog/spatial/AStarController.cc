@@ -206,7 +206,7 @@ vector<Spatial::Point> AStarController::getShortestCalculatedPath()
     vector<Spatial::Point>  calculatedPath = getSolutionPoints();
     vector<Spatial::Point>  shortestCalculatedPath;
 
-    opencog::logger().log(opencog::Logger::INFO, "AStar - Shortening action plan. It has %d elem.",
+    opencog::logger().info("AStar - Shortening action plan. It has %d elem.",
                           calculatedPath.size());
 
     if (calculatedPath.size() < 2 )
@@ -226,7 +226,7 @@ vector<Spatial::Point> AStarController::getShortestCalculatedPath()
     }
     shortestCalculatedPath.push_back( *it_point );
 
-    opencog::logger().log(opencog::Logger::INFO, " AStar - Shortening action plan complete. It has %d elem.",
+    opencog::logger().info(" AStar - Shortening action plan complete. It has %d elem.",
                           shortestCalculatedPath.size());
     return shortestCalculatedPath;
 }

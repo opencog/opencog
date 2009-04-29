@@ -275,7 +275,7 @@ bool PredaveseParser::saveVocabulary()
 bool PredaveseParser::loadVocabulary()
 {
     if (!fileExists(vocabularyFilename.c_str())) {
-        logger().log(opencog::Logger::INFO,
+        logger().info(
                      "PredaveseParser - file %s does not exist. It will be created at shutdown.",
                      vocabularyFilename.c_str());
         return false;
@@ -778,14 +778,14 @@ bool PredaveseParser::isStopWord(const std::string& word)
 
 std::string PredaveseParser::petaveseToPredavese(const std::string& petaveseInstruction)
 {
-    logger().log(opencog::Logger::INFO, "PredaveseParser - PetaveseToPredavese.");
+    logger().info("PredaveseParser - PetaveseToPredavese.");
 
     std::string predaveseInstruction("");
     std::string strToken("");
 
     opencog::StringTokenizer strTokenizer(petaveseInstruction, " ");
     while ( (strToken = strTokenizer.nextToken()) != "") {
-        logger().log(opencog::Logger::INFO, "PredaveseParser - PetaveseToPredavese - token: '%s'.", strToken.c_str());
+        logger().info("PredaveseParser - PetaveseToPredavese - token: '%s'.", strToken.c_str());
         opencog::StringTokenizer strTokenizerContraction(strToken, "'");
         std::string strTokenContraction("");
         while ( (strTokenContraction = strTokenizerContraction.nextToken()) != "") {
@@ -808,12 +808,12 @@ std::string PredaveseParser::petaveseToPredavese(const std::string& petaveseInst
 int PredaveseParser::processInstruction(const string& instruction, unsigned long timestamp, const string& avatarId)
 {
 
-    logger().log(opencog::Logger::INFO, "PredaveseParser - Parse '%s' instruction given by '%s'.",
+    logger().info("PredaveseParser - Parse '%s' instruction given by '%s'.",
                  instruction.c_str(), avatarId.c_str());
     patmap[__p( KeyVerb          )]    = __p(Elem);
 
     string clean_instruction = opencog::StringManipulator::clean(instruction);
-    logger().log(opencog::Logger::DEBUG, "PredaveseParser - clean_instruction '%s'.", clean_instruction.c_str());
+    logger().debug("PredaveseParser - clean_instruction '%s'.", clean_instruction.c_str());
 
 
     // TODO: maybe computing the distance to the speaker can be better to
@@ -837,20 +837,20 @@ int PredaveseParser::processInstruction(const string& instruction, unsigned long
     boost::regex avatarFrasesPattern( patternStr.str() );
 
     if ( avatarId != petInterface.getOwnerId( ) && !boost::regex_match( clean_instruction, avatarFrasesPattern ) ) {
-        logger().log(opencog::Logger::DEBUG, "PredaveseParser - Invalid instruction from non-owner. It can only say 'I RED TEAM' or 'I BLUE TEAM' but '%s' was said by '%s'",  instruction.c_str(), avatarId.c_str());
+        logger().debug("PredaveseParser - Invalid instruction from non-owner. It can only say 'I RED TEAM' or 'I BLUE TEAM' but '%s' was said by '%s'",  instruction.c_str(), avatarId.c_str());
         return 0;
     } // if
 
 
     string processedPetaveseInstruction = petaveseToPredavese(clean_instruction);
-    logger().log(opencog::Logger::DEBUG, "PredaveseParser - processedPetaveseInstruction '%s'.", processedPetaveseInstruction.c_str());
+    logger().debug("PredaveseParser - processedPetaveseInstruction '%s'.", processedPetaveseInstruction.c_str());
 
     set<pAtom, less_atom_by_structure> res;
     parse(processedPetaveseInstruction, inserter(res, res.begin()));
 
     foreach(pAtom a, res) {
         if (STLhas(pat2action, a)) {
-            logger().log(opencog::Logger::DEBUG, "PredaveseParser - Parse successfull. Taking actions.");
+            logger().debug("PredaveseParser - Parse successfull. Taking actions.");
 
             //printf("Calling () operator for action\n");
             if (!(*pat2action[a])(a, timestamp, avatarId )) {
@@ -877,7 +877,7 @@ int PredaveseParser::processInstruction(const string& instruction, unsigned long
 void PredaveseParser::Create()
 {
     if (!loadVocabulary()) {
-        logger().log(opencog::Logger::WARN, "PredaveseParser - Cannot load vocabulary.");
+        logger().warn("PredaveseParser - Cannot load vocabulary.");
     }
     initEng();
 }

@@ -128,16 +128,16 @@ int main(int argc, char *argv[])
             }
             if (rc)
             {
-               logger().log(opencog::Logger::ERROR, "%d %s: %s", 
+               logger().error("%d %s: %s", 
                      rc, strerror(rc), mod);
             }
             else
             {
-                logger().log(opencog::Logger::INFO, "Loaded %s", mod);
+                logger().info("Loaded %s", mod);
             }
         }
 #else /* HAVE_GUILE */
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
             "Server compiled without SCM support");
 #endif /* HAVE_GUILE */
 

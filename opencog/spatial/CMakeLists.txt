@@ -76,13 +76,12 @@ TARGET_LINK_LIBRARIES(astartest
 # installed on your system
 
 #ADD_EXECUTABLE(MapViewer
-#	MapViewer
-#	Renderer
+#    MapViewer
+#    Renderer
 #)
 #TARGET_LINK_LIBRARIES(MapViewer
-#    Control
 #    SpaceMap
-#    ${LADSUTIL_LIBRARY}
+#    util
 #    HPASearch
 #    SDL
 #    SDL_gfx

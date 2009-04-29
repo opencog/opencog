@@ -50,7 +50,7 @@ void IsPooPlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
         return;
     }
 
-    logger().log(opencog::Logger::FINE, "IsPooPlace - Updating is_poo_place for ob %s.",
+    logger().fine("IsPooPlace - Updating is_poo_place for ob %s.",
                  atomSpace.getName(object).c_str());
 
     // truth value - mean equals 0.0 --> not poo place

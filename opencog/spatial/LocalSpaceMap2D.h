@@ -272,7 +272,7 @@ public:
             tmp.erase(std::partition(tmp.begin(), tmp.end(), pred), tmp.end());
 
             if (d >= maxD && tmp.empty()) {
-                opencog::logger().log(opencog::Logger::DEBUG, "LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD);
+                opencog::logger().debug("LocalSpaceMap - Found no object that verifies the predicate. Distance %.2f, Max distance %.2f.", d, maxD);
                 //won't find anything
                 return ObjectID();
             }

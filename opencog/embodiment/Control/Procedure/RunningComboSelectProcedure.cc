@@ -120,7 +120,7 @@ void RunningComboSelectProcedure::cycle()
 
                 for (it = unifier.begin(); it != unifier.end(); it++) {
                     if (it->second) {
-                        logger().log(opencog::Logger::DEBUG,
+                        logger().debug(
                                      "RunningComboSelect - unfied var '%s'.",
                                      it->first.c_str());
 

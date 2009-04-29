@@ -103,7 +103,7 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
         rand_seed = time(NULL);
     }
     this->rng = new MT19937RandGen(rand_seed);
-    logger().log(Logger::INFO, "Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
+    logger().info("Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
 
     this->modeHandler[ LEARNING ] = new LearningAgentModeHandler( this );
     this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
@@ -161,14 +161,14 @@ void Pet::initTraitsAndFeelings()
     if (fileExists(name.str().c_str())) {
         fin.open(name.str().c_str(), std::ios_base::in);
     } else {
-        logger().log(Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+        logger().error("Pet - File does not exist '%s'.", name.str().c_str());
         name.str(std::string());
         name << boost::format( traitsFilenameMask ) % this->agentType % defaultDog;
 
         if (fileExists(name.str().c_str())) {
             fin.open(name.str().c_str(), std::ios_base::in);
         } else {
-            logger().log(Logger::ERROR, "Pet - File does not exist '%s'.", name.str().c_str());
+            logger().error("Pet - File does not exist '%s'.", name.str().c_str());
         }
     }
 
@@ -183,7 +183,7 @@ void Pet::initTraitsAndFeelings()
                 in >> trait;
                 in >> value;
 
-                logger().log(Logger::DEBUG, "Pet - Loaded '%s' - trait '%s' with value '%.3f'.",
+                logger().debug("Pet - Loaded '%s' - trait '%s' with value '%.3f'.",
                              name.str().c_str(), trait.c_str(), value);
 
                 tv.setMean(value);
@@ -288,7 +288,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     switch (this->mode) {
 
     case LEARNING: {
-        logger().log(Logger::INFO,
+        logger().info(
                      "Pet - '%s' entering LEARNING mode. Trick: '%s', exemplar avatar: '%s'.",
                      this->petName.c_str(),
                      learningSchema.empty() ? "" : learningSchema.front().c_str(),
@@ -301,7 +301,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     break;
 
     case PLAYING: {
-        logger().log(Logger::INFO, "Pet - '%s' entering PLAYING mode.", this->petName.c_str());
+        logger().info("Pet - '%s' entering PLAYING mode.", this->petName.c_str());
 
         // remove previous info realated to  exemplar avatar id,
         // learning schema and tried schema
@@ -324,7 +324,7 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     }
 
     // sending feedback
-    logger().log(Logger::INFO, "Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
+    logger().info("Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
     sender->sendFeedback(petId, feedback);
 }
 
@@ -346,7 +346,7 @@ void Pet::setTriedSchema(const std::string & triedSchema)
 
 void Pet::schemaSelectedToExecute(const std::string & schemaName)
 {
-    logger().log(Logger::DEBUG, "Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
+    logger().debug("Pet - schemaSelectedToExecute(%s)" , schemaName.c_str());
     if (this->triedSchema == schemaName) {
         this->candidateSchemaExecuted = true;
 
@@ -359,7 +359,7 @@ void Pet::schemaSelectedToExecute(const std::string & schemaName)
         sender->sendFeedback(petId, feedback);
 
     } else {
-        logger().log(Logger::DEBUG, "Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
+        logger().debug("Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
     }
 }
 
@@ -395,7 +395,7 @@ Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, 
         std::getline(petFile, ownerId);
         petFile >> petMode;
     } catch (std::ifstream::failure e) {
-        logger().log(Logger::ERROR, "Pet - Unable to load pet metadata.");
+        logger().error("Pet - Unable to load pet metadata.");
         return NULL;
     }
     petFile.close();
@@ -439,7 +439,7 @@ AtomSpace& Pet::getAtomSpace()
 
 void Pet::stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Stop executing '%s' at %lu.",
+    logger().debug("Pet - Stop executing '%s' at %lu.",
                  commandStatement.front().c_str(), timestamp);
     // TODO:
     //  Cancel a Pet command instruction that was given before:
@@ -454,10 +454,10 @@ bool Pet::isInLearningMode() const
 
 void Pet::startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
+    logger().debug("Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
 
     if (isInLearningMode()) {
-        logger().log(Logger::WARN, "Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
+        logger().warn("Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
         std::string newExemplarAvatarId = exemplarAvatarId;
         stopLearning(learningSchema, timestamp);
         setExemplarAvatarId(newExemplarAvatarId);
@@ -476,7 +476,7 @@ void Pet::startLearning(const std::vector<std::string> &commandStatement, unsign
 
 void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Stop learning '%s' trick at %lu.",
+    logger().debug("Pet - Stop learning '%s' trick at %lu.",
                  commandStatement.front().c_str(), timestamp);
 
     // reset all exemplar timestamps to avoid storing more maps than necessary
@@ -485,7 +485,7 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
     // check if stop learning corresponds to currently learning schema
     if (learningSchema != commandStatement) {
-        logger().log(Logger::WARN, "Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
+        logger().warn("Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -530,16 +530,16 @@ bool Pet::isExemplarInProgress() const
 
 void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Exemplars for '%s' trick started at %lu with '%s'.",
+    logger().debug("Pet - Exemplars for '%s' trick started at %lu with '%s'.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp, getExemplarAvatarId().c_str());
 
     if (!isInLearningMode()) {
-        logger().log(Logger::WARN, "Pet - Unable to start exemplar. Not in LEARNING mode.");
+        logger().warn("Pet - Unable to start exemplar. Not in LEARNING mode.");
         return;
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(Logger::WARN, "Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
+        logger().warn("Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -550,17 +550,17 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
 
 void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Exemplars for '%s' trick ended at %lu.",
+    logger().debug("Pet - Exemplars for '%s' trick ended at %lu.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
 
     if (!isInLearningMode() || exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP) {
-        logger().log(Logger::WARN, "Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
+        logger().warn("Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(Logger::WARN, "Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
+        logger().warn("Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
         // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
         return;
     }
@@ -582,7 +582,7 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
     }
 
     for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
-        logger().log(Logger::DEBUG, " args: %s", (*it).c_str());
+        logger().debug(" args: %s", (*it).c_str());
     sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace);
 
     // after sending LearnMessage
@@ -664,11 +664,11 @@ void Pet::executeBehaviorEncoder()
 
 void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Try '%s' trick at %lu.",
+    logger().debug("Pet - Try '%s' trick at %lu.",
                  (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().log(Logger::WARN, "Pet - Try schema, trick differs");
+        logger().warn("Pet - Try schema, trick differs");
         return;
     }
 
@@ -686,7 +686,7 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 //    std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
         sender->sendTrySchema(learningSchema.front(),  args);
     } else {
-        logger().log(Logger::WARN, "Pet - Did not executed the last received candidate yet!");
+        logger().warn("Pet - Did not executed the last received candidate yet!");
         // Force a new attempt of executing the candidate schema.
         ruleEngine->tryExecuteSchema(learningSchema.front());
     }
@@ -694,12 +694,12 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
 
 void Pet::reward(unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Reward at %lu.",  timestamp);
+    logger().debug("Pet - Reward at %lu.",  timestamp);
     this->latestRewardTimestamp = timestamp;
 
     if (isInLearningMode()) {
         if (learningSchema.empty() ||  learningSchema.front() == "" || triedSchema == "") {
-            logger().log(Logger::WARN, "Pet - Trying to reward a non-tried schema.");
+            logger().warn("Pet - Trying to reward a non-tried schema.");
             // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
             return;
         }
@@ -726,12 +726,12 @@ void Pet::reward(unsigned long timestamp)
 
 void Pet::punish(unsigned long timestamp)
 {
-    logger().log(Logger::DEBUG, "Pet - Punishment at %lu.",  timestamp);
+    logger().debug("Pet - Punishment at %lu.",  timestamp);
     this->latestPunishmentTimestamp = timestamp;
 
     if (isInLearningMode()) {
         if (learningSchema.empty() || learningSchema.front() == "" || triedSchema == "") {
-            logger().log(Logger::WARN, "Pet - Trying to punish a non-tried schema.");
+            logger().warn("Pet - Trying to punish a non-tried schema.");
             // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
             return;
         }
@@ -789,7 +789,7 @@ unsigned long Pet::getLatestPunishmentTimestamp( void )
 void Pet::setGrabbedObj(const string& id)
 {
     if ( grabbedObjId == id ) {
-        logger().log(Logger::DEBUG,
+        logger().debug(
                      "Pet - Pet is already holding '%s', ignoring...", grabbedObjId.c_str() );
         return;
     } // if
@@ -814,14 +814,14 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
     // sanity checks
     if (exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP ||
             exemplarEndTimestamp   == Pet::UNDEFINED_TIMESTAMP) {
-        logger().log(Logger::WARN,
+        logger().warn(
                      "Pet - Exemplar start/end should be set to update SppaceMapsToHold.");
         return;
     }
 
     // sanity checks
     if (exemplarStartTimestamp > exemplarEndTimestamp) {
-        logger().log(Logger::WARN,
+        logger().warn(
                      "Pet - Exemplar start should be smaller than exemplar end.");
         return;
     }
@@ -836,20 +836,20 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
                            Temporal(exemplarStartTimestamp, exemplarEndTimestamp),
                            TemporalTable::STARTS_WITHIN);
 
-    logger().log(Logger::FINE,
+    logger().fine(
                  "Pet - %d candidate maps to be checked.", pairs.size());
 
     foreach(HandleTemporalPair pair, pairs) {
         // mark any still existing spaceMap in this period as persistent
         Handle mapHandle = atomSpace->getAtTimeLink(pair);
         if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
-            logger().log(Logger::DEBUG,
+            logger().debug(
                          "Pet - Marking map (%s) as persistent.",
                          TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->getSpaceServer().markMapAsPersistent(mapHandle);
         } else {
             // TODO: This should not be needed here. Remove it when a solution for that is implemented.
-            logger().log(Logger::DEBUG,
+            logger().debug(
                          "Pet - Removing map handle (%s) from AtomSpace. Map already removed from SpaceServer.",
                          TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->removeAtom(mapHandle, true);
@@ -888,7 +888,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
-            logger().log(Logger::ERROR,  "Could not find handle of object with id \"%s\".", entity.c_str() );
+            logger().error("Could not find handle of object with id \"%s\".", entity.c_str() );
             petVicinity.clear();
             return false;
         }
@@ -912,7 +912,7 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 
 void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actionsDone)
 {
-    logger().log(Logger::DEBUG,  "Pet::getAllActionsDoneObservedAtTime");
+    logger().debug("Pet::getAllActionsDoneObservedAtTime");
 
     std::vector<HandleTemporalPair> everyEventThatHappened;
     atomSpace->getTimeInfo(back_inserter(everyEventThatHappened), Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
@@ -931,7 +931,7 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
 
 void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actionsDone)
 {
-    logger().log(Logger::DEBUG,  "Pet::getAllActionsDoneInATrickAtTime");
+    logger().debug("Pet::getAllActionsDoneInATrickAtTime");
 
     HandleSeq patternToSearchLearningSession;
     Handle conceptNode = atomSpace->getHandle(CONCEPT_NODE, "learningSession");

@@ -306,7 +306,7 @@ Handle AtomSpace::addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * s
 
 Handle AtomSpace::removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp) {
 
-    logger().log(opencog::Logger::DEBUG, "%s(%s)\n", __FUNCTION__, getName(objectNode).c_str());
+    logger().debug("%s(%s)\n", __FUNCTION__, getName(objectNode).c_str());
 
     Handle spaceMapNode = getSpaceMapNode();
     Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
@@ -319,7 +319,7 @@ void AtomSpace::cleanupSpaceServer(){
 
     // sanity checks
     if (spaceServer->getSpaceMapsSize() < 1) {
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                        "AtomSpace - No need to clean SpaceServer. It has no space map yet.");
         return;
     }
@@ -341,12 +341,12 @@ void AtomSpace::cleanupSpaceServer(){
         // mapHandle not among the ones that should be preserved
         if (!spaceServer->containsMap(mapHandle) || !spaceServer->isMapPersistent(mapHandle)){
             j++;
-            logger().log(opencog::Logger::DEBUG, "AtomSpace - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
+            logger().debug("AtomSpace - Removing map (%s)", TLB::getAtom(mapHandle)->toString().c_str());
             // remove map from SpaceServer, and timeInfo from TimeServer and AtomSpace
             removeAtom(mapHandle, true);
         }
     }
-    logger().log(opencog::Logger::DEBUG, "AtomSpace - Number of deleted maps: %d.", j);
+    logger().debug("AtomSpace - Number of deleted maps: %d.", j);
 }
 
 void AtomSpace::mapRemoved(Handle mapId)

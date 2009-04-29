@@ -55,11 +55,11 @@ SchemaRunner::~SchemaRunner( )
 
 Handle SchemaRunner::addLink( Type linkType, const HandleSeq& outgoing )
 {
-    logger().log(opencog::Logger::FINE, "SchemaRunner - addLink - init");
+    logger().fine("SchemaRunner - addLink - init");
     Handle result = AtomSpaceUtil::addLink(*(opc->getAtomSpace()), linkType, outgoing );
     opc->getAtomSpace()->setAV(result, *defaultAttentionValue);
     opc->getAtomSpace()->setTV(result, *defaultTruthValue);
-    logger().log(opencog::Logger::FINE, "SchemaRunner - addLink - end");
+    logger().fine("SchemaRunner - addLink - end");
     return result;
 }
 
@@ -68,7 +68,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                              const std::string& schemaName,
                              const std::vector<std::string>& arguments )
 {
-    logger().log(opencog::Logger::FINE,
+    logger().fine(
                  ("SchemaRunner - Executing runSchema: " + schemaName).c_str());
 
     const AtomSpace& atomSpace = *(this->opc->getAtomSpace( ));
@@ -76,7 +76,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     // Cannot select a schema to execute while
     // there is no map info data available...
     if (this->opc->getAtomSpace()->getSpaceServer().getLatestMapHandle() == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "SchemaRunner - Cannot select any schema to be executed"
                      " because there is no map info available yet!");
         return false;
@@ -111,7 +111,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             this->executingSchemaImplicationLink = Handle::UNDEFINED;
 
         } else {
-            logger().log(opencog::Logger::INFO,
+            logger().info(
                          "SchemaRunner - Previous schema still executing");
             // Check for timeout
             time_t now = time(NULL);
@@ -142,17 +142,17 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                             } // if
 
                             this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
-                            logger().log(opencog::Logger::INFO, "SchemaRunner - Replanning walk (new: %s, %s[%f,%f] old: %s, %s[%f,%f])...",  schemaName.c_str(), lastTargetObject.first.c_str(), targetCenterPosition.first, targetCenterPosition.second, currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str(), lastTargetObject.second.first, lastTargetObject.second.second );
+                            logger().info("SchemaRunner - Replanning walk (new: %s, %s[%f,%f] old: %s, %s[%f,%f])...",  schemaName.c_str(), lastTargetObject.first.c_str(), targetCenterPosition.first, targetCenterPosition.second, currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str(), lastTargetObject.second.first, lastTargetObject.second.second );
                         } catch ( opencog::NotFoundException& ex ) {
                             // it is impossible to determine if the replanning is needed
                             return false;
                         } // catch
                     } else if ( walkCommand && currentWalkingProcedure != schemaName ) {
-                        // logger().log(opencog::Logger::INFO, "SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
+                        // logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
                         // this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
 
                         if (this->opc->getPet().getMode() == OperationalPetController::SCAVENGER_HUNT) {
-                            logger().log(opencog::Logger::INFO, "SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
+                            logger().info("SchemaRunner - Replanning walk(new: %s args: %d old: %s, %s)...", schemaName.c_str(), arguments.size(), currentWalkingProcedure.c_str(), currentWalkingTargetId.c_str() );
 
                             this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
                         } else {
@@ -183,7 +183,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
                       this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID );
 
-                      logger().log(opencog::Logger::DEBUG, "SchemaRunner - Replanning %s to target %s.", currentWalkingProcedure.c_str( ), targetObject.first.c_str( ) );
+                      logger().debug("SchemaRunner - Replanning %s to target %s.", currentWalkingProcedure.c_str( ), targetObject.first.c_str( ) );
                       // replan walking to a new target position
                       std::vector<combo::vertex> schemaArguments;
                       schemaArguments.push_back( targetObject.first );
@@ -200,7 +200,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                     return false;
                 }
             } else {
-                logger().log(opencog::Logger::ERROR, "SchemaRunner - Previous schema execution timeout: now = %lu, executingSchemaRealTime = %lu (timeout = %lu)", now, executingSchemaRealTime, procedureExecutionTimeout);
+                logger().error("SchemaRunner - Previous schema execution timeout: now = %lu, executingSchemaRealTime = %lu (timeout = %lu)", now, executingSchemaRealTime, procedureExecutionTimeout);
                 this->opc->getProcedureInterpreter( ).stopProcedure(executingSchemaID);
                 this->executingSchema = false;
                 this->executingSchemaTimestamp = 0;
@@ -214,7 +214,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
     Handle schemaNode = atomSpace.getHandle(GROUNDED_SCHEMA_NODE, schemaName);
     if (schemaNode == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "SchemaRunner - invalid selected schema: %s",
                      schemaName.c_str());
 
@@ -229,7 +229,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
     Handle ruleImplicationLink = AtomSpaceUtil::getRuleImplicationLink(atomSpace,
                                  ruleName);
     if (ruleImplicationLink == Handle::UNDEFINED) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "SchemaRunner - Found no ImplicationLink for rule: %s",
                      ruleName.c_str( ) );
         return false;
@@ -250,7 +250,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         combo::arity_t abs_min_arity = combo::abs_min_arity(arity);
 
         foreach( std::string argument, arguments ) {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "SchemaRunner - Adding argument '%s' to Procedure '%s'.",
                          argument.c_str(), procedure.getName().c_str());
             if ( boost::regex_match(argument, isNumberPattern ) ) {
@@ -265,7 +265,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
         if (fixed_arity) {
             if (arity != (int)ap_input_args) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "SchemaRunner - Number of arguments %d for"
                              " Procedure '%s' does not match arity %d",
                              ap_input_args,
@@ -274,7 +274,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             }
         } else {
             if (abs_min_arity > (int)ap_input_args) {
-                logger().log(opencog::Logger::ERROR,
+                logger().error(
                              "SchemaRunner - Number of arguments %d for"
                              " Procedure '%s' is too few,"
                              " the minimum number expected is %d.",
@@ -286,7 +286,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         }
 
 
-        logger().log(opencog::Logger::INFO,
+        logger().info(
                      "SchemaRunner - Running Procedure %s, type %d.",
                      procedure.getName().c_str(), procedure.getType());
 
@@ -305,7 +305,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
         executingSchemaID = this->opc->getProcedureInterpreter( ).runProcedure( procedure, schemaArguments );
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "SchemaRunner - Procedure %s sent to execution.",
                      procedure.getName().c_str());
 
@@ -318,7 +318,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
         return true;
 
     } else {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "SchemaRunner - Cannot execute grounded schema '%s'."
                      " Schema not found in Procedure Repository.",
                      schemaName.c_str());

@@ -53,7 +53,7 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
         rand_seed = time(NULL);
     }
     _rng = new opencog::MT19937RandGen(rand_seed);
-    logger().log(opencog::Logger::INFO, "ImitationLearningAgent - Created random number generator (%p) for ImitationLearningAgent with seed %lu", _rng, rand_seed);
+    logger().info("ImitationLearningAgent - Created random number generator (%p) for ImitationLearningAgent with seed %lu", _rng, rand_seed);
 
     //instanciate the learning vocabulary provider
     const std::string ILALGO = config().get("IMITATION_LEARNING_ALGORITHM");
@@ -118,7 +118,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
     BDRetriever::addLastExemplar(_BDCat, _exemplarTemporals, *wp, trick_name);
 
     if (_BDCat.empty()) {
-        logger().log(opencog::Logger::INFO, "ImitationLearningAgent - All exemplars are empty, learning will not start.");
+        logger().info("ImitationLearningAgent - All exemplars are empty, learning will not start.");
         return false; //indicates that initLEarning has failed
     } else {
         _pet_id = pet_id;
@@ -141,7 +141,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //----------------------------------------
         //select the definite objects and messages
         //----------------------------------------
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - Getting definite objects from SpaceMap.");
+        logger().debug("ImitationLearningAgent - Getting definite objects from SpaceMap.");
         EntityRelevanceFilter filter;
         opencog::cassert(TRACE_INFO, _definite_objects.empty(),
                          "_definite_objects must be empty because it should have been cleared by stopLearning");
@@ -157,11 +157,11 @@ bool ImitationLearningAgent::initLearning(int nepc,
         _definite_objects.erase(_pet_id);
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of the definite objects used for learning");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of the definite objects used for learning");
             for (std::set<std::string>::iterator si = _definite_objects.begin();
                     si != _definite_objects.end(); ++si) {
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s", si->c_str());
             }
         }
@@ -171,11 +171,11 @@ bool ImitationLearningAgent::initLearning(int nepc,
         _messages = filter.getMessages(*wp, _trick_name);
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of the messages used for learning");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of the messages used for learning");
             for (message_set_const_it mi = _messages.begin();
                     mi != _messages.end(); ++mi) {
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s",
                              mi->getContent().c_str());
             }
@@ -191,11 +191,11 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                        exclude_set);
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of the agent and action definite objects used for learning");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of the agent and action definite objects used for learning");
             for (agent_to_actions_const_it atas_it = _atas.begin();
                     atas_it != _atas.end(); ++atas_it) {
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - Agent : %s",
                              atas_it->first.c_str());
                 const definite_object_vec_set& ados = atas_it->second;
@@ -205,7 +205,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                     for (definite_object_vec_const_it dci = ados_it->begin();
                             dci != ados_it->end(); ++dci)
                         s += *dci + std::string(" ");
-                    logger().log(opencog::Logger::DEBUG,
+                    logger().debug(
                                  "ImitationLearningAgent - Actions and arguments : %s",
                                  s.c_str());
                 }
@@ -228,7 +228,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //self_id is avatar_id because the pet must take the view point
         //of the avatar to imitate
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, start processing.");
+        logger().debug("ImitationLearningAgent - EntropyFilter, start processing.");
 
         //for now it is assumed that all arguments of the program to learn
         //are definite_object
@@ -245,23 +245,23 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop processing.");
+        logger().debug("ImitationLearningAgent - EntropyFilter, stop processing.");
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of perceptions filtered by EntropyFilter");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of perceptions filtered by EntropyFilter");
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
                 ss << *pi;
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
         //~debug log
 
         //compute and filter actions
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, start processing.");
+        logger().debug("ImitationLearningAgent - ActionFilter, start processing.");
 
         bool type_check_actions =
             config().get_bool("TYPE_CHECK_GENERATED_COMBO");
@@ -274,25 +274,25 @@ bool ImitationLearningAgent::initLearning(int nepc,
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
                                config().get_int("ACTION_FILTER_SEQ_MAX"));
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, stop processing.");
+        logger().debug("ImitationLearningAgent - ActionFilter, stop processing.");
 
         if (_atomic_actions.size() > 0) {
 
             //debug log
-            if (opencog::Logger::DEBUG <= logger().getLevel()) {
-                logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of actions filtered by ActionFilter");
+            if (logger().isDebugEnabled()) {
+                logger().debug("ImitationLearningAgent - List of actions filtered by ActionFilter");
                 for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                         ai != _atomic_actions.end(); ++ai) {
                     stringstream ss;
                     ss << *ai;
-                    logger().log(opencog::Logger::DEBUG,
+                    logger().debug(
                                  "ImitationLearningAgent - %s", ss.str().c_str());
                 }
             }
             //~debug log
 
         } else {
-            logger().log(opencog::Logger::DEBUG,
+            logger().debug(
                          "ImitationLearningAgent - No action filtered by ActionFilter, learning will not start");
             return false;
         }
@@ -315,13 +315,13 @@ bool ImitationLearningAgent::initLearning(int nepc,
                          "PIL must be NULL because it should have been deleted by stopLearning");
 
         //debug log for SPCTools
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ImitationLearningAgent - SPCTools - New estimator");
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - definite object count : %d", _definite_objects.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - indefinite object count : %d", io.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - elementary operator count : %d", eo.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - atomic perception count : %d", _atomic_perceptions.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - atomic action count : %d", _atomic_actions.size());
+        logger().debug("ImitationLearningAgent - SPCTools - definite object count : %d", _definite_objects.size());
+        logger().debug("ImitationLearningAgent - SPCTools - indefinite object count : %d", io.size());
+        logger().debug("ImitationLearningAgent - SPCTools - elementary operator count : %d", eo.size());
+        logger().debug("ImitationLearningAgent - SPCTools - atomic perception count : %d", _atomic_perceptions.size());
+        logger().debug("ImitationLearningAgent - SPCTools - atomic action count : %d", _atomic_actions.size());
         //~debug log for SPCTools
 
         //instanciate the learning algo
@@ -381,17 +381,17 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         _definite_objects.erase(_pet_id);
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of definite objects used for learning");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of definite objects used for learning");
             for (std::set<std::string>::const_iterator si =
                         _definite_objects.begin(); si != _definite_objects.end(); ++si) {
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s", si->c_str());
             }
         }
         //~debug log
 
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ImitationLearningAgent - Add Learning Example.");
 
         //get the set of messages
@@ -408,27 +408,27 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         //regenerate filtered perceptions and actions
         //-------------------------------------------
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, start update processing.");
+        logger().debug("ImitationLearningAgent - EntropyFilter, start update processing.");
 
         _atomic_perceptions.clear();
         _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat.getEntries().back(), _exemplarTemporals.back(), al);
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - EntropyFilter, stop update processing.");
+        logger().debug("ImitationLearningAgent - EntropyFilter, stop update processing.");
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of perceptions filtered by EntropyFilter");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of perceptions filtered by EntropyFilter");
             for (combo_tree_ns_set_const_it pi = _atomic_perceptions.begin();
                     pi != _atomic_perceptions.end(); ++pi) {
                 stringstream ss;
                 ss << *pi;
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
         //~debug log
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, start processing.");
+        logger().debug("ImitationLearningAgent - ActionFilter, start processing.");
 
         bool type_check_actions =
             config().get_bool("TYPE_CHECK_GENERATED_COMBO");
@@ -443,16 +443,16 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
                                config().get_int("ACTION_FILTER_SEQ_MAX"));
 
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - ActionFilter, stop processing.");
+        logger().debug("ImitationLearningAgent - ActionFilter, stop processing.");
 
         //debug log
-        if (opencog::Logger::DEBUG <= logger().getLevel()) {
-            logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - List of actions filtered by ActionFilter");
+        if (logger().isDebugEnabled()) {
+            logger().debug("ImitationLearningAgent - List of actions filtered by ActionFilter");
             for (combo_tree_ns_set_const_it ai = _atomic_actions.begin();
                     ai != _atomic_actions.end(); ++ai) {
                 stringstream ss;
                 ss << *ai;
-                logger().log(opencog::Logger::DEBUG,
+                logger().debug(
                              "ImitationLearningAgent - %s", ss.str().c_str());
             }
         }
@@ -463,13 +463,13 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         //-----------------------------------------
 
         //debug log for SPCTools
-        logger().log(opencog::Logger::DEBUG,
+        logger().debug(
                      "ImitationLearningAgent - SPCTools - New estimator");
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - definite object count : %d", _definite_objects.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - indefinite object count : %d", _PVoc->get_indefinite_objects().size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - elementary operator count : %d", _PVoc->get_elementary_operators().size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - atomic perception count : %d", _atomic_perceptions.size());
-        logger().log(opencog::Logger::DEBUG, "ImitationLearningAgent - SPCTools - atomic action count : %d", _atomic_actions.size());
+        logger().debug("ImitationLearningAgent - SPCTools - definite object count : %d", _definite_objects.size());
+        logger().debug("ImitationLearningAgent - SPCTools - indefinite object count : %d", _PVoc->get_indefinite_objects().size());
+        logger().debug("ImitationLearningAgent - SPCTools - elementary operator count : %d", _PVoc->get_elementary_operators().size());
+        logger().debug("ImitationLearningAgent - SPCTools - atomic perception count : %d", _atomic_perceptions.size());
+        logger().debug("ImitationLearningAgent - SPCTools - atomic action count : %d", _atomic_actions.size());
         //~debug log for SPCTools
 
         //this is needed because when new exemplars arrive the fitness estimation

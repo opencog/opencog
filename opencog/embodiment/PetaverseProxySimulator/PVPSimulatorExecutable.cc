@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     simulator.init(config().get("PROXY_ID"), "127.0.0.1", 16315);
 
     if (!simulator.connectToSimWorld()) {
-        logger().log(opencog::Logger::ERROR, "Could not connect to the simulated World\n");
+        logger().error("Could not connect to the simulated World\n");
         exit(0);
     }
 
@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
     try {
         simulator.serverLoop();
     } catch (std::bad_alloc) {
-        logger().log(opencog::Logger::ERROR, "PVPSimExec - PVPSim raised a bad_alloc exception.");
+        logger().error("PVPSimExec - PVPSim raised a bad_alloc exception.");
         simulator.persistState();
 
     } catch (...) {
-        logger().log(opencog::Logger::ERROR,
+        logger().error(
                      "PVPSimExec - An exceptional situation occured. Check log for information.");
         simulator.persistState();
     }

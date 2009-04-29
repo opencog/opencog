@@ -279,7 +279,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
             }
         }
     } else {
-        logger().log(opencog::Logger::WARN,
+        logger().warn(
                      "ActionFilter - builtin action '%s' is not in the list"
                      " _bas of action of interest and will be ignored",
                      action_name.c_str());

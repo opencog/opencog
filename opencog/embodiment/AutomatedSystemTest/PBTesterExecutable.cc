@@ -76,10 +76,10 @@ int main(int argc, char *argv[])
     try {
         pbTester.serverLoop();
     } catch (std::bad_alloc) {
-        logger().log(Logger::ERROR, "PBTesterExec - PBTester raised a bad_alloc exception.");
+        logger().error("PBTesterExec - PBTester raised a bad_alloc exception.");
 
     } catch (...) {
-        logger().log(Logger::ERROR,
+        logger().error(
                      "PBTesterExec - An exceptional situation occured. Check log for information.");
     }
 

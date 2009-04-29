@@ -88,10 +88,10 @@ void SimClientSocket::Send(const std::string& str)
 
 void SimClientSocket::OnLine(const std::string& line)
 {
-    opencog::logger().log(opencog::Logger::DEBUG, "SimClientSocket::OnLine: init");
+    opencog::logger().debug("SimClientSocket::OnLine: init");
 
-    if (opencog::logger().getLevel() >= opencog::Logger::FINE)
-        opencog::logger().log(opencog::Logger::FINE, "SimClientSocket::OnLine: %s", line.c_str());
+    if (opencog::logger().isFineEnabled())
+        opencog::logger().fine("SimClientSocket::OnLine: %s", line.c_str());
     // TODO: More than one response can arrive for a same command!
     //       How to handle this?
     //       a) Get only the first response

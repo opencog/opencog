@@ -76,20 +76,20 @@ void PBTester::initialize()
 
 bool PBTester::processNextMessage(MessagingSystem::Message *message)
 {
-    //logger().log(opencog::Logger::INFO, "RECEIVED MESSAGE:\n%s", message->getPlainTextRepresentation());
+    //logger().info("RECEIVED MESSAGE:\n%s", message->getPlainTextRepresentation());
 
     if (config().get_bool("SAVE_MESSAGES_TO_FILE")) {
         goldStdGen->writeMessage(*message, false);
     }
     if (expectedMessages.empty()) {
         // TODO: implement a timeout to wait for the message be read
-        logger().log(opencog::Logger::ERROR, "Received message when there is no expected message! Unexpected message: \n%s\n", message->getPlainTextRepresentation());
+        logger().error("Received message when there is no expected message! Unexpected message: \n%s\n", message->getPlainTextRepresentation());
         exit(-1);
     } else {
         Message* expectedMessage = expectedMessages[0];
         if (strcmp(expectedMessage->getPlainTextRepresentation(),
                    message->getPlainTextRepresentation())) {
-            logger().log(opencog::Logger::ERROR, "Received message does not match the expected one!\nReceived:\n'%s'\nExpected:\n'%s'\n", message->getPlainTextRepresentation(), expectedMessage->getPlainTextRepresentation());
+            logger().error("Received message does not match the expected one!\nReceived:\n'%s'\nExpected:\n'%s'\n", message->getPlainTextRepresentation(), expectedMessage->getPlainTextRepresentation());
             //   failed = true;
             expectedMessages.erase(expectedMessages.begin());
             receivedTimeMessages.erase(receivedTimeMessages.begin());
@@ -103,7 +103,7 @@ bool PBTester::processNextMessage(MessagingSystem::Message *message)
 
         delete expectedMessage;
     }
-    logger().log(opencog::Logger::INFO, "Number of expected messages: %d", expectedMessages.size());
+    logger().info("Number of expected messages: %d", expectedMessages.size());
     numberOfReceivedMessages++;
     return false;
 }
@@ -113,7 +113,7 @@ void PBTester::addExpectedMessage(Message* message, unsigned long time)
     expectedMessages.push_back(message);
     receivedTimeMessages.push_back(time);
 
-    logger().log(opencog::Logger::INFO, "Number of expected messages: %d", expectedMessages.size());
+    logger().info("Number of expected messages: %d", expectedMessages.size());
 }
 
 bool PBTester::hasExpectedMessages()
@@ -124,11 +124,11 @@ bool PBTester::hasExpectedMessages()
 void PBTester::notifyEndOfGoldStdFile()
 {
     if (!expectedMessages.empty()) {
-        logger().log(opencog::Logger::ERROR, "End of gold std file reached without receiving some expected messages.");
+        logger().error("End of gold std file reached without receiving some expected messages.");
         failed = true;
     }
     if (!numberOfReceivedMessages) {
-        logger().log(opencog::Logger::ERROR, "Did not received any message.");
+        logger().error("Did not received any message.");
         failed = true;
     }
     std::string msgCmd = "UNLOAD_PET Fido";
@@ -138,10 +138,10 @@ void PBTester::notifyEndOfGoldStdFile()
     sendMessage(msg);
 #endif
     if (failed) {
-        logger().log(opencog::Logger::ERROR, "Automated system test failed!");
+        logger().error("Automated system test failed!");
         exit(-1);
     }
-    logger().log(opencog::Logger::INFO, "Automated system test passed!");
+    logger().info("Automated system test passed!");
     exit(0);
 }
 
