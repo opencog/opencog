@@ -58,6 +58,22 @@ To update the stats in the db, run ./synset-renorm.pl then ./dj-probs.pl
 The log_cond_prob column in disjuncts table is computed by compute-mi.scm
 ------------------------------------------------
 
+Stand-alone scripts
+-------------------
+The following scripts are meant to be run stand-alone, as they do not
+access any OpenCog atoms directly.  That is, they can run within the 
+ordinary guile interpreter.
+
+ * compute-mi.scm: Compute the conditional probability and mutual
+   information for assorted link-grammar disjunct tables. This assumes
+   that the tables have already been populated with raw data, and thus,
+   the raw count fields have meaningful (and final) values. This 
+   script merely totals up the counts, and computes the various
+   probabilities.
+
+ * cluster.scm: Cheapo data clustering algo.
+------------------------------------------------
+
 Misc notes:
 
    select * from disjunctsenses order by count desc;

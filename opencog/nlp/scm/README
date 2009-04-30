@@ -14,7 +14,8 @@ OpenCog scripts
 ---------------
 The following scripts are meant to run within the OpenCog scheme
 interpreter (as they manipulate OpenCog atoms directly). They can be
-loaded with the "load-nlp.sh" shell script.
+manually loaded with the "load-nlp.sh" shell script, although they
+normally would be automatically loaded with the opencog.conf file.
 
  * nlp-utils: Some mini nlp-related utilities, mostly for pointer 
    chasing nlp-specific structures.
@@ -35,17 +36,3 @@ loaded with the "load-nlp.sh" shell script.
    out of the way, to denote that its done with that file.  Explicit
    paths to data files need to be provided.
 
-Stand-alone scripts
--------------------
-The following scripts are meant to be run stand-alone, as they do not
-access any OpenCog atoms directly.  That is, thhey can run within the 
-ordinary guile interpreter.
-
- * compute-mi.scm: Compute the conditional probability and mutual
-   information for assorted link-grammar disjunct tables. This assumes
-   that the tables have already been populated with raw data, and thus,
-   the raw count fields have meaningful (and final) values. This 
-   script merely totals up the counts, and computes the various
-   probabilities.
-
- * cluster.scm: Cheapo data clustering algo.
