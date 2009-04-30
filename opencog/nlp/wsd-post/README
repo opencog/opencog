@@ -103,9 +103,27 @@ instructions below explain how to creae these dictionaries.
 
    On a recent run: 
    djs contains 5353655 entries before cleanup, 
+     Deleted 603908 punctuated entries
+     Deleted 1685588 proper names
+     Deleted 259286 numeric entries
+     Deleted 2548782 entries total from the djs table, or 47.6%
+
+   djsenses contains 399980 entries before cleanup
+     Deleted 0 punctuated entries
+     Deleted 6951 proper names
+     Deleted 326 numeric entries
+     Deleted 7277 entries from djsenses table, or 1.85%
+
+   Took about 12 minutes to run.
 
 7) Export these tables using ...
+     pg_dump -D -O -t djsenses lexat | tail --lines=+16 |\
+        bzip2 > djsenses.sql.bz2
     
+     pg_dump -D -O -t djs lexat | tail --lines=+16 |\
+        bzip2 > disjuncts.sql.bz2
+    
+8) Load then into SQLite3 using ...
 
 ------------------------------------------------
 
@@ -123,6 +141,7 @@ ordinary guile interpreter.
    probabilities.
 
  * cluster.scm: Cheapo data clustering algo.
+
 ------------------------------------------------
 
 Misc notes:

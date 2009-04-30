@@ -79,7 +79,7 @@ sub delete_crud
 		if ($i%10000 == 1)
 		{
 			my $dt = $delcnt + $prdelcnt + $nrdelcnt;
-			my $pt = $dt / $i;
+			my $pt = 100 * $dt / $i;
 			print "$i punc=$punccnt delpunc=$delcnt prop=$prdelcnt nr=$nrdelcnt   deltot=$dt  percent=$pt\n";
 		}
 		my ($word) = $select->fetchrow_array();
@@ -139,8 +139,10 @@ sub delete_crud
 my $delcnt = 0;
 
 $delcnt = delete_crud($djsel, $djdel);
-print "Deleted $delcnt entries from the $disj_tbl table\n";
+print "Deleted $delcnt entries total from the $disj_tbl table\n";
 
-print "\n\n";
-$delcnt = delete_crud($selsense, $delsense);
-print "Deleted $delcnt entries from $sens_tbl table\n";
+# Don't do the djsenses table -- if it has WordNet entries, then
+# assume that they are good.
+# print "\n\n";
+# $delcnt = delete_crud($selsense, $delsense);
+# print "Deleted $delcnt entries total from $sens_tbl table\n";
