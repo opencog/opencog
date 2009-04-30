@@ -3,7 +3,7 @@
 ;
 ; compute-mi.scm
 ;
-; Compute the mutual information for the link-grammar disjuncts
+; Compute the mutual information for the link-grammar disjuncts.
 ;
 ; Compute the conditional probability for assorted link-grammar
 ; disjunct tables. This assumes that the tables have already been
@@ -11,7 +11,11 @@
 ; meaningful (and final) values. This script merely totals up the
 ; counts, and computes the various probabilities.
 ;
-; Currently takes aobt 100 minutes to run.
+; This script must be run in order to compute the Disjunct tables that
+; are used by the link-grammar "corpus" backend, which provides parse
+; ranking as well as parse-guiding for the SAT solver.
+;
+; Currently takes about 100 minutes to run.
 ;
 ; Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -235,8 +239,11 @@
 ;;
 ;; Compute the marginal probabilities
 (display "Start computing the marginal probabilities\n")
+(system "date")
 (marginal-set-probabilities)
 (display "Done computing the marginal probabilities\n")
+(system "date")
 ;
 (disjunct-cond-probabilities)
 (display "Done computing the conditional probabilities\n")
+(system "date")
