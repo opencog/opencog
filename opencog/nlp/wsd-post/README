@@ -65,23 +65,46 @@ instructions below explain how to creae these dictionaries.
    conditional probabilites in the Disjuncts table, setting the
    "log_cond_prob" column.
 
+   Recent run took 102 minutes. Looked at 902337 words, observed
+   an average of 24 times.
+
 3) Merge synsets by running the ./synset-renorm.pl script. One
    problem with the WSD code is that it does not (did not?) properly
    collapse synsets; thus, this needs to be done manually, as a post-
-   processng step.  This modifies the DisjunctSenses table only.
+   processing step.  This modifies the DisjunctSenses table only.
+
+   Takes about 5-10 minutes to run;
+   recently reported: "examined=447804 updated=68775 inserted=53702"
 
 4) Run the ./dj-probs.pl script. This updates the conditional 
    probabilities on the DisjunctSenses table, and stores entropies and 
    sense counts on the Disjuncts table.
 
-5) Remove unwanted columns, while making a copy:
-      SELECT word_sense, inflected_word, disjunct, log_cond_probability 
-        INTO  djsenses FROM DisjunctSenses;
+   Takes about 3-5 minutes to run, recently saw about 164215 disjuncts,
+   with average of 2.3 senses per disjunct.
+
+5) Remove unwanted columns, while making a copy. The final link-grammar
+   DB does not require he count column, or other columns, so remove these
+   to save space.
 
       SELECT inflected_word, disjunct, log_cond_probability 
          INTO djs FROM Disjuncts;
+		CREATE INDEX djs_iwxxx on djs(inflected_word);
 
-5) Export these tables using ...
+      SELECT word_sense, inflected_word, disjunct, log_cond_probability 
+        INTO  djsenses FROM DisjunctSenses;
+		CREATE INDEX djsns_iwxxx on djsenses(inflected_word);
+
+   The indexes are needed so that the cleanup, next stage, goes 
+   reasonably quickly.
+
+6) Cleanup by removing entries with punctuation, foreign words, numbers,
+   proper names. 
+
+   On a recent run: 
+   djs contains 5353655 entries before cleanup, 
+
+7) Export these tables using ...
     
 
 ------------------------------------------------

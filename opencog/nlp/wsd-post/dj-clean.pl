@@ -30,7 +30,7 @@ my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 my $disj_tbl = "djs";
 my $sens_tbl = "djsenses";
 
-my $punc = '\|\(\)\{\}\[\]<>\^\$\&）〈»«~!\?#+@†%=/~;:"…\*\+\.,„“”‘\-–';
+my $punc = '\|\(\)\{\}\[\]<>\^\$\&）〈»«~!\?#+@†%=/~;:"…\*\+,„“”‘\-–';
 my $quot = '\'’$';
 
 # $punc = decode_utf8($punc);
@@ -66,59 +66,71 @@ sub delete_crud
 	$select->execute()
 		or die "Couldn't execute statement: " . $select->errstr;
 
+	my $totcnt = $select->rows;
+	print "Will examined $totcnt entries\n";
+
 	# Loop over all rows, and delete rows containing crud.
 	my $delcnt = 0;
-	my $totcnt = 0;
+	my $prdelcnt = 0;
+	my $nrdelcnt = 0;
+	my $punccnt = 0;
 	for (my $i=0; $i<$select->rows; $i++)
 	{
+		if ($i%10000 == 1)
+		{
+			my $dt = $delcnt + $prdelcnt + $nrdelcnt;
+			my $pt = $dt / $i;
+			print "$i punc=$punccnt delpunc=$delcnt prop=$prdelcnt nr=$nrdelcnt   deltot=$dt  percent=$pt\n";
+		}
 		my ($word) = $select->fetchrow_array();
 
 		my $orig_word = $word;
 		$word = decode_utf8($word);
+
+		# Delete entries that start with capital letters
+		if ($word =~ /^[A-Z]/)
+		{
+			$prdelcnt ++;
+			# print "deleting entry $word\n";
+			$delete->execute($orig_word);
+			next;
+		}
+
+		if ($word =~ /[0-9]/)
+		{
+			$nrdelcnt ++;
+			# print "deleting entry $word\n";
+			$delete->execute($orig_word);
+			next;
+		}
+
 		if ($word =~ /[$punc$quot]/)
 		#if ($word =~ /\W/)
 		{
- print "yooo $word\n";
+			$punccnt ++;
+ # print "yooo $word\n";
 			# single punctuation is OK.
 			if ($word =~ /^[$punc]{1}$/) { next; }
 			if ($word =~ /^[$quot]{1}$/) { next; }
 
-			# Pure-numeric quantities are OK.
-			# if ($word =~ /^(AUD|AUD\$|USD|US\$|HK\$|~|=|\.)*[0-9+\-~][0-9+\-\/$punc]*(st|nd|rd|th|am|pm|ft|°C|°F|°)*$/) { next; }
-
-			# Latitude, longitude
-			# if ($word =~ /^\d[\d°']+(E|W|N|S)?$/) { next; }
-
-			# dates
-			# if ($word =~ /^'\d+$/) { next; }
-
 			# Pure alpha with hyphen or apostrophe is OK
-			if ($word =~ /^[\'’\w][\w\-\/\&–\'’]+$/) { next; }
-
-			# Ending with a dot is OK.
-			if ($word =~ /^\w\w\-–]+\.$/) { next; }
-
-			# Two, three, four-letter abbreviations
-			if ($word =~ /^\w\.[\w\-–]*$/) { next; }
-			if ($word =~ /^\w\.\w\.[\w\-–]*$/) { next; }
-			if ($word =~ /^\w\.\w\.\w\.[\w\-–]*$/) { next; }
-			if ($word =~ /^\w\.\w\.\w\.\w\.[\w\-–]*$/) { next; }
-			if ($word =~ /^A.F.L-C.I.O$/) { next; }
-			if ($word =~ /^A.F.L.-C.I.O$/) { next; }
+			if ($word =~ /^[\'’\w][\w\-\.\/\&–\'’]+$/) { next; }
 
 			# Delete it!
 			# $word = decode_utf8($word);
-			print "deleting entry $word\n";
-			# $delete->execute($orig_word);
+			# print "deleting entry $word\n";
+			$delete->execute($orig_word);
 			$delcnt ++;
 		}
-		$totcnt ++;
 	}
 
-	my $punccnt = $select->rows - $totcnt;
 	$totcnt = $select->rows;
 	print "Examined $totcnt entries; $punccnt had punctuation\n";
+	print " Deleted $delcnt punctuated entries\n";
+	print " Deleted $prdelcnt proper names\n";
+	print " Deleted $nrdelcnt numeric entries\n";
 
+	$delcnt += $prdelcnt + $nrdelcnt;
 	# return the deleted line count
 	$delcnt;
 }
@@ -127,8 +139,8 @@ sub delete_crud
 my $delcnt = 0;
 
 $delcnt = delete_crud($djsel, $djdel);
-print "Deleted $delcnt corrupted entries from the $disj_tbl table\n";
+print "Deleted $delcnt entries from the $disj_tbl table\n";
 
-# $delcnt = delete_crud($selsense, $delsense);
-# print "Deleted $delcnt corrupted entries from $sens_tbl table\n";
-#
+print "\n\n";
+$delcnt = delete_crud($selsense, $delsense);
+print "Deleted $delcnt entries from $sens_tbl table\n";
