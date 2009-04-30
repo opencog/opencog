@@ -1,5 +1,15 @@
 PARSE MODULE
 
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXX This code is obsolescent/mis-operational; at this time, it is 
+incompaible with the rest of the OpenCog NLP processing pipeline.
+Do not use this code. The correct way of hooking up NLP to OpenCog
+is detailed in the nlp/chatbot/README file, which demonstrates how 
+to get parsed sentences routed into OpenCog, so as to support a simple
+question-answering chatbot.  XXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 This is a parse module, it looks for SentenceNodes and parses them with
 link-grammar.  This creates one or more ParseNodes which are linked to the 
 SentenceNode by a ParseLink.  HolonymLinked to the ParseNode is a ListLink of
