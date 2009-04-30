@@ -4,10 +4,34 @@
                 Linas Vepstas <linasvepstas@gmail.com>
                           April 2009
 
-A quick-n-dirty hookup of the opencog internals to an IRC-based chatbot.
+A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
-Currently, the bot is simply a protocol translator from the IRC protocol,
-to opencog i/o. It is subject to change.
+At this time, the bot is a demo of the OpenCog natural-language 
+processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
+OpenCog reasoning, deduction, or anything like that.  The chatbot 
+is as dumb as a rock, as thick as a brick; it posseses no intelligence
+whatsoever.
+
+It can, however, answer simple English-language questions. It does so
+by comparing the syntactical structure of the question to previously
+entered sentences.  Thus, for example, if the chatbot is told that 
+"John threw a rock", and then asked "Who threw a rock?", direct 
+comparison allows it to equate "Who" -> "John".  The comparisons are
+done on the syntactic structure (dependency parse) of the sentence:
+that is, the parsed form of the sentences and questions are compared.
+This allows for some sophistication: the system can correctly answer
+"What did John throw?" for the above input, because dependency parsing
+will correctly identify "throw" as the head verb of the sentence.
+
+Since OpenCog can save its contents to a database, it can "remember" 
+a large number of assertions that have been previously enetered, and 
+answer questions about those.  Currently, a pre-parsed copy of the 
+MIT ConceptNet can be loaded into OpenCog.
+
+Please note: this is meant to be a DEMO of the NLP pipeline, and litle
+more. It is up to you to do something with it!  Also: it is subject to 
+change at any time, as I am likely to twiddle, tweak and change it about.
+(Adding reasoning is a difficult but important priority).
 
 Configuring: 
 -----------
@@ -45,10 +69,23 @@ In addition, triples-processing, described in step 4 below, requires
 that the shell script opencog/nlp/triples/load4.sh be run.
 
 To enable the common-sense database (described in step 5), you must
-create and load up the common-sense database, as follows:
+first create and populate the database. This can be done from scratch,
+or by using a database dump, obtained from 
 
-cog-server> sql-open triples linas asdf
-cog-server> sql-load
+       http://gnucash.org/linas/nlp/data/conceptnet/
+
+The database should be created and populated, as described in 
+opencog/nlp/triples/README.  Then, after starting opencog, but *before*
+running load4.sh, telnet to the cogserver, and open the database:
+
+     $ telnet localhost 17004
+     cog-server> sql-open <dbname> <userid> <passwd>
+
+For example:
+
+     cog-server> sql-open triples linas asdf
+
+The do the load4.sh. The system is now ready to do question-answering.
 
 
 Architecture:
@@ -132,15 +169,13 @@ is as follows:
    common-sense assertions, written in English, is available from the
    MIT ConceptNet project. It contains sentences such as 
    "Baseball is a sport."  This dataset may be loaded into OpenCog by 
-   following the instructions in nlp/triples/README.  Alternately, an
-   SQL dump, suitable for immediate use, can be downloaded from 
+   following the instructions in nlp/triples/README.  Alternately, 
+   SQL dumps, suitable for immediate use, can be downloaded from 
 
-http://gnucash/linas/nlp/xxxxxxxxxxxx
-       http://XXXXXX (to-do)
+       http://gnucash.org/linas/nlp/data/conceptnet/
 
-   If the database has been loaded into OpenCog, then the same code as
-   described in the previous step, above, will look for answers to 
-   questions there.
+   If the database has been opened, then the same code as described in 
+   the previous step, above, will look for answers to questions there.
    
 6) Frames.  (Not hooked up) Additional context can be provided by 
    frame-net-like frames. There's code in RelEx for this, its not
