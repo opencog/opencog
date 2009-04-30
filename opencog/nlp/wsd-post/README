@@ -74,6 +74,13 @@ instructions below explain how to creae these dictionaries.
    probabilities on the DisjunctSenses table, and stores entropies and 
    sense counts on the Disjuncts table.
 
+5) Remove unwanted columns, while making a copy:
+      SELECT word_sense, inflected_word, disjunct, log_cond_probability 
+        INTO  djsenses FROM DisjunctSenses;
+
+      SELECT inflected_word, disjunct, log_cond_probability 
+         INTO djs FROM Disjuncts;
+
 5) Export these tables using ...
     
 
