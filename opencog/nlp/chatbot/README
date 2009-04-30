@@ -9,7 +9,7 @@ A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 At this time, the bot is a demo of the OpenCog natural-language 
 processing (NLP) pipeline; it is NOT -- repeat NOT -- a demo of
 OpenCog reasoning, deduction, or anything like that.  The chatbot 
-is as dumb as a rock, as thick as a brick; it posseses no intelligence
+is as dumb as a rock, as thick as a brick; it possesses no intelligence
 whatsoever.
 
 It can, however, answer simple English-language questions. It does so
@@ -24,7 +24,7 @@ This allows for some sophistication: the system can correctly answer
 will correctly identify "throw" as the head verb of the sentence.
 
 Since OpenCog can save its contents to a database, it can "remember" 
-a large number of assertions that have been previously enetered, and 
+a large number of assertions that have been previously entered, and 
 answer questions about those.  Currently, a pre-parsed copy of the 
 MIT ConceptNet can be loaded into OpenCog.
 
