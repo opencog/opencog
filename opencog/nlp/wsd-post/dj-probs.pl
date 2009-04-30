@@ -79,17 +79,26 @@ sub compute_prob
 	my $ups = $dbh->prepare(
 		'UPDATE Disjuncts SET entropy = ?, senses_observed = ? WHERE inflected_word = ? AND disjunct = ?');
 	
+	my $djcnt = 0;
+	my $sncnt = 0;
+	my $encnt = 0;
 	foreach my $pair (keys %wdj_entropy)
 	{
 		my ($infword, $disjunct) = split(/%%%/, $pair);
 		my $entropy = $wdj_entropy{$pair};
 		my $sense_count = $wdj_count{$pair};
 
+		$djcnt ++;
+		$sncnt += $sense_count;
+		$encnt += $entropy;
 		$ups->execute($entropy, $sense_count, $infword, $disjunct)
 			or die "Couldn't execute statement: " . $update->errstr;
 	}
 
-	print "Done updating the entropy\n";
+	$sncnt /= $djcnt;
+	$encnt /= $djcnt;
+	print "Done updating the entropy of $djcnt disjuncts\n"
+	print "    Avg sense cnt=$sncnt  avg entropy=$encnt;\n";
 }
 
 

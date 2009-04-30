@@ -70,7 +70,12 @@ instructions below explain how to creae these dictionaries.
    collapse synsets; thus, this needs to be done manually, as a post-
    processng step.  This modifies the DisjunctSenses table only.
 
-4) Run ./dj-probs.pl
+4) Run the ./dj-probs.pl script. This updates the conditional 
+   probabilities on the DisjunctSenses table, and stores entropies and 
+   sense counts on the Disjuncts table.
+
+5) Export these tables using ...
+    
 
 ------------------------------------------------
 
