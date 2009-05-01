@@ -1114,19 +1114,18 @@ Handle AtomSpace::_getNextAtom()
 
 void AtomSpace::_getNextAtomPrepare_type(Type type)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
     _handle_entry = atomTable.getHandleSet(type, true);
 }
 
 Handle AtomSpace::_getNextAtom_type(Type type)
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
     if (_handle_entry == NULL)
         return Handle::UNDEFINED;
     Handle h = _handle_entry->handle;
-    _handle_entry = _handle_entry->next;
+    HandleEntry *nxt = _handle_entry->next;
+    _handle_entry->next = NULL;
+    delete _handle_entry;
+    _handle_entry = nxt;
     return h;
 }
 
