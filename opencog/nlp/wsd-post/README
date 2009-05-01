@@ -126,21 +126,26 @@ instructions below explain how to creae these dictionaries.
 8) Load then into SQLite3 using ...
 
    time  bzcat disjuncts.20090430.sql.bz2 | sqlite3 newdj.db
+   time  bzcat djsenses.20090430.sql.bz2  | sqlite3 newdj.db
+	Takes about 5 hours elapsed to load.
 
-CREATE TABLE Disjuncts (
-   inflected_word TEXT NOT NULL,
-   disjunct TEXT NOT NULL,
-   log_cond_probability FLOAT
-);
-CREATE INDEX ifwdj ON Disjuncts (inflected_word, disjunct);
+   The following tables are automatically created;
+   The indexes need to be manually created.
 
-CREATE TABLE DisjunctSenses (
-   word_sense TEXT NOT NULL,
-   inflected_word TEXT NOT NULL,
-   disjunct TEXT NOT NULL,
-   log_cond_probability FLOAT
-);
-CREATE INDEX siwdj ON DisjunctSenses (inflected_word, disjunct);
+   CREATE TABLE Disjuncts (
+      inflected_word TEXT NOT NULL,
+      disjunct TEXT NOT NULL,
+      log_cond_probability FLOAT
+   );
+   CREATE INDEX ifwdj ON Disjuncts (inflected_word, disjunct);
+   
+   CREATE TABLE DisjunctSenses (
+      word_sense TEXT NOT NULL,
+      inflected_word TEXT NOT NULL,
+      disjunct TEXT NOT NULL,
+      log_cond_probability FLOAT
+   );
+   CREATE INDEX siwdj ON DisjunctSenses (inflected_word, disjunct);
 
 
 ------------------------------------------------
