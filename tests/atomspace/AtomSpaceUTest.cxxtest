@@ -426,7 +426,8 @@ public:
         TS_ASSERT(links.size() == 2);
         delete tr;
 
-        tr = mva(TLB::addAtom(new Node(PREDICATE_NODE, "barkingAt")), NULL);
+        Node *n = new Node(PREDICATE_NODE, "barkingAt");
+        tr = mva(TLB::addAtom(n), NULL);
         Handle h1_ = atomSpace->addAtom(*tr, SimpleTruthValue(0.5f, 0.5f));
         TS_ASSERT(CoreUtils::compare(h1_, Handle::UNDEFINED));
         // In this case, the expected behavior is to perform a merge and return the
@@ -434,6 +435,7 @@ public:
         TS_ASSERT(!CoreUtils::compare(h1_, h1));
         Atom* atom = TLB::getAtom(h1_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        delete n;
         delete tr;
 
         tr = mva(evalLink, NULL);
@@ -444,6 +446,7 @@ public:
         TS_ASSERT(!CoreUtils::compare(evalLink_, evalLink));
         atom = TLB::getAtom(evalLink_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        delete tr;
     }
 
     /**
