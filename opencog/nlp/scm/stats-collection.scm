@@ -318,7 +318,7 @@ scm
 ;
 (define (ldj-process-document doco)
 	(for-each ldj-process-sentence (document-get-sentences doco))
-	(InheritanceLink doco (DistinguishedNode "#LDJ_completed"))
+	(InheritanceLink doco (AnchorNode "#LDJ_completed"))
 )
 
 ; ---------------------------------------------------------------------
@@ -339,7 +339,7 @@ scm
 		(not
 			(any gotit?
 				(cog-chase-link 'InheritanceLink 'DocumentNode 
-					(DistinguishedNode "#LDJ_completed")
+					(AnchorNode "#LDJ_completed")
 				)
 			)
 		)
@@ -347,7 +347,7 @@ scm
 	; Look for WSD_completed documents that are not marked LDJ_completed
 	(filter! ldj-not-done?
 		(cog-chase-link 'InheritanceLink 'DocumentNode
-			(DistinguishedNode "#WSD_completed")
+			(AnchorNode "#WSD_completed")
 		)
 	)
 )
