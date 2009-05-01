@@ -133,30 +133,18 @@ public:
      * Returns a vector of handles containing all data in the list that
      * starts in the handle entry cell.
      *
-     * @param Pointer passed by reference where the vector will be
-     * allocated.
-     * @param Length of the allocated vector passed by reference.
-     * @return Pointer passed by reference where the vector will be
-     * allocated. Same as the first parameter.
-     *
-     * The first two calls are deprecated; the first is prone to 
-     * memory leaks, and therefor its use is discouraged.
-     * The second call is pointless, since C++ is smart enough to 
-     * "do the right thing". Just use the third call!
+     * @return a vector of handles.
      */
-    Handle* toHandleVector(Handle*&, int&) throw (InconsistenceException); // XXX this call deprecated!
-    std::vector<Handle>& toHandleVector(std::vector<Handle>&);    // XXX This call deprecated !!
     std::vector<Handle> toHandleVector(void);
 
     /**
      * Returns a HandlEntry containing all data in the array passed
      * as a parameter.
      *
-     * @param Pointer where the vector is stored.
-     * @param Length of the allocated vector.
-     * @return A HandleEntry containing the element s of the vector.
+     * @param vector
+     * @return A HandleEntry containing the elements of the vector.
      */
-    static HandleEntry* fromHandleVector(Handle*, int);
+    static HandleEntry* fromHandleVector(const std::vector<Handle> &);
 
     /**
      * Removes a handle from the list.

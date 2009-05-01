@@ -204,7 +204,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     logger().fine("  +totaldifference %.2f, scaling %.2f", totalDifference,
             differenceScaling);
 
-    links->toHandleVector(linksVector);
+    linksVector = links->toHandleVector();
 
     for (linksVector_i = linksVector.begin();
             linksVector_i != linksVector.end(); linksVector_i++) {

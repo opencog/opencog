@@ -612,12 +612,12 @@ bool AtomTable::remove(Handle handle, bool recursive)
 
 void AtomTable::removeExtractedHandles(HandleEntry* extractedHandles)
 {
+    HandleSeq hs;
     if (extractedHandles == NULL) return;
 
     // We must to iterate from the end to the begining of the list of atoms so that 
     // link's target atoms are not removed before the link   
-    HandleSeq hs;
-    extractedHandles->toHandleVector(hs);
+    hs = extractedHandles->toHandleVector();
     delete extractedHandles;
 
     for (HandleSeq::reverse_iterator it = hs.rbegin(); it < hs.rend(); ++it) {

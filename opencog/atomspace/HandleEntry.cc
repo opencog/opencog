@@ -936,12 +936,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* targetName, Ty
     return head;
 }
 
-
-
-
-std::string HandleEntry::toString()
+std::string HandleEntry::toString(void)
 {
-
     std::string answer;
 
     for (HandleEntry* current = this; current != NULL; current = current->next) {
@@ -962,31 +958,6 @@ std::string HandleEntry::toString()
     return answer;
 }
 
-// This call is deprecated, and its use should be removed
-Handle* HandleEntry::toHandleVector(Handle*& vector, int& n) throw (InconsistenceException)
-{
-    n = getSize();
-    vector = new Handle[n];
-    int i = 0;
-    for (HandleEntry* current = this; current != NULL; current = current->next) {
-        vector[i++] = current->handle;
-    }
-    if (i != n) {
-        throw RuntimeException(TRACE_INFO, "consistency check failed for handle entry size");
-    }
-    return vector;
-}
-
-// This call is deprecated, and its use should be removed
-std::vector<Handle>& HandleEntry::toHandleVector(std::vector<Handle>& vector)
-{
-    vector.clear();
-    for (HandleEntry* current = this; current != NULL; current = current->next) {
-        vector.push_back(current->handle);
-    }
-    return vector;
-}
-
 std::vector<Handle> HandleEntry::toHandleVector(void)
 {
     std::vector<Handle> vector;
@@ -997,11 +968,12 @@ std::vector<Handle> HandleEntry::toHandleVector(void)
 }
 
 
-HandleEntry* HandleEntry::fromHandleVector(Handle* vector, int size)
+HandleEntry* HandleEntry::fromHandleVector(const std::vector<Handle> &v)
 {
     HandleEntry *ret = NULL;
-    for (int i = size - 1; i >= 0; i--) {
-        HandleEntry *temp = new HandleEntry(vector[i]);
+    size_t sz = v.size();
+    for (int i = sz - 1; i >= 0; i--) {
+        HandleEntry *temp = new HandleEntry(v[i]);
         ret = HandleEntry::concatenation(temp, ret);
     }
     return(ret);

@@ -94,7 +94,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
 
     atoms = a->getAtomTable().getHandleSet(ATOM, true);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
-    atoms->toHandleVector(atomsVector);
+    atomsVector = atoms->toHandleVector();
     std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort());
     delete atoms;
 

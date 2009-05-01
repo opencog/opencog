@@ -52,22 +52,6 @@
 using namespace std;
 using namespace opencog;
 
-// TODELETE Not used anywhere
-//#ifndef USE_PSEUDOCORE
-//void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
-//{ 
-//    int array_size=0;
-//    Handle *dest_array = new Handle[1000];
-//
-//    src.toHandleVector(dest_array, array_size);
-//    for (int i =0;i<array_size;i++)
-//    {
-//        dest.push_back(dest_array[i]);
-//    }
-//
-//    delete dest_array;
-//}
-//#endif
 namespace haxx
 {
 //    reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
@@ -163,7 +147,7 @@ void AtomSpaceWrapper::HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest
 {   
     std::vector<Handle> dest_array;
 
-    src.toHandleVector(dest_array);
+    dest_array = src.toHandleVector();
     for (unsigned int i =0;i<dest_array.size();i++)
     {
         dest.insert(dest_array[i]);

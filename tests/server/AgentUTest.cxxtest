@@ -282,7 +282,7 @@ public:
         AtomSpace *atomSpace = cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_list");
         stimValue = 100;
-        list = HandleEntry::fromHandleVector(&atoms[0], atoms.size());
+        list = HandleEntry::fromHandleVector(atoms);
 
         agent->stimulateAtom(list, stimValue);
         for (unsigned int i = 0; i < atoms.size(); i++) {
@@ -314,7 +314,7 @@ public:
         AtomSpace *atomSpace = cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_reset");
 
-        list = HandleEntry::fromHandleVector(&atoms[0], atoms.size());
+        list = HandleEntry::fromHandleVector(atoms);
         stimValue = 100;
 
         agent->stimulateAtom(list, stimValue);
@@ -326,6 +326,4 @@ public:
         delete list;
         logger().debug("END TEST: resetStimulus");
     }
-
-
 };

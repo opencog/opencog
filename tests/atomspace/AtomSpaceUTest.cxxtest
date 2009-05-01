@@ -57,15 +57,7 @@ using std::find;
 
 void HandleEntry2HandleSeq(HandleEntry& src, vector<Handle>& dest)
 {
-    int array_size = 0;
-    Handle *dest_array = new Handle[1000];
-
-    src.toHandleVector(dest_array, array_size);
-    for (int i = 0;i < array_size;i++) {
-        dest.push_back(dest_array[i]);
-    }
-
-    delete dest_array;
+    dest = src.toHandleVector();
 }
 
 vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
