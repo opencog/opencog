@@ -54,11 +54,13 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpace::AtomSpace(void) : spaceServer(new SpaceServer(*this))
+AtomSpace::AtomSpace(void) : 
+    type_itr(0,false)
 {
     _handle_iterator = NULL;
     emptyName = "";
     backing_store = NULL;
+    spaceServer = new SpaceServer(*this);
 
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
     fundsLTI = config().get_int("STARTING_LTI_FUNDS");
@@ -76,12 +78,14 @@ AtomSpace::~AtomSpace()
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
 
+
     // Check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
-        delete (_handle_iterator);
+        delete _handle_iterator;
+	     _handle_iterator = NULL;
     }
-    //delete (_handle_entry);
-    delete (spaceServer);
+    delete spaceServer;
+    spaceServer = NULL;
 }
 
 // ====================================================================
@@ -117,9 +121,9 @@ void AtomSpace::atomAdded(Handle h)
 
 void AtomSpace::atomRemoved(Handle h)
 {
-    //logger().debug("AtomSpace::atomAdded(%p): %s", h, TLB::getAtom(h)->toString().c_str());
     Type type = getType(h);
-    if (type == AT_TIME_LINK) {
+    if (type == AT_TIME_LINK)
+    {
         cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
         Handle timeNode = getOutgoing(h, 0);
         cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
@@ -375,7 +379,8 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
             "AtomSpace - Cannot copy an object of this class");
 }
 
-AtomSpace::AtomSpace(const AtomSpace& other) 
+AtomSpace::AtomSpace(const AtomSpace& other):
+    type_itr(0,false)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpace - Cannot copy an object of this class");
@@ -1095,9 +1100,6 @@ int AtomSpace::Links(VersionHandle vh) const
 
 void AtomSpace::_getNextAtomPrepare()
 {
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
-
     _handle_iterator = atomTable.getHandleIterator(ATOM, true);
 }
 
@@ -1114,18 +1116,13 @@ Handle AtomSpace::_getNextAtom()
 
 void AtomSpace::_getNextAtomPrepare_type(Type type)
 {
-    _handle_entry = atomTable.getHandleSet(type, true);
+    type_itr = atomTable.typeIndex.begin(type, true);
 }
 
 Handle AtomSpace::_getNextAtom_type(Type type)
 {
-    if (_handle_entry == NULL)
-        return Handle::UNDEFINED;
-    Handle h = _handle_entry->handle;
-    HandleEntry *nxt = _handle_entry->next;
-    _handle_entry->next = NULL;
-    delete _handle_entry;
-    _handle_entry = nxt;
+    Handle h = *type_itr;
+    type_itr ++;
     return h;
 }
 

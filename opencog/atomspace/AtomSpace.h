@@ -1357,7 +1357,7 @@ public:
 protected:
 
     HandleIterator* _handle_iterator;
-    HandleEntry* _handle_entry;
+    TypeIndex::iterator type_itr;
     // these methods are used by the filter_* templates
     void _getNextAtomPrepare();
     Handle _getNextAtom();
