@@ -89,11 +89,11 @@ instructions below explain how to creae these dictionaries.
 
       SELECT inflected_word, disjunct, log_cond_probability 
          INTO djs FROM Disjuncts;
-		CREATE INDEX djs_iwxxx on djs(inflected_word);
+      CREATE INDEX djs_iwxxx on djs(inflected_word);
 
       SELECT word_sense, inflected_word, disjunct, log_cond_probability 
         INTO  djsenses FROM DisjunctSenses;
-		CREATE INDEX djsns_iwxxx on djsenses(inflected_word);
+      CREATE INDEX djsns_iwxxx on djsenses(inflected_word);
 
    The indexes are needed so that the cleanup, next stage, goes 
    reasonably quickly.
@@ -127,7 +127,7 @@ instructions below explain how to creae these dictionaries.
 
    time  bzcat disjuncts.20090430.sql.bz2 | sqlite3 newdj.db
    time  bzcat djsenses.20090430.sql.bz2  | sqlite3 newdj.db
-	Takes about 5 hours elapsed to load.
+   Takes about 6 hours elapsed to load.
 
    The following tables are automatically created;
    The indexes need to be manually created.
@@ -137,7 +137,6 @@ instructions below explain how to creae these dictionaries.
       disjunct TEXT NOT NULL,
       log_cond_probability FLOAT
    );
-   CREATE INDEX ifwdj ON Disjuncts (inflected_word, disjunct);
    
    CREATE TABLE DisjunctSenses (
       word_sense TEXT NOT NULL,
@@ -145,8 +144,15 @@ instructions below explain how to creae these dictionaries.
       disjunct TEXT NOT NULL,
       log_cond_probability FLOAT
    );
+
+
+   ALTER TABLE djs RENAME TO Disjuncts;
+   ALTER TABLE djsenses RENAME TO DisjunctSenses;
+   CREATE INDEX ifwdj ON Disjuncts (inflected_word, disjunct);
    CREATE INDEX siwdj ON DisjunctSenses (inflected_word, disjunct);
 
+   Without the database indexes, the current size of the database 
+   is 150MB; with the indexes, it blows up to 281MB. Wow!
 
 ------------------------------------------------
 
