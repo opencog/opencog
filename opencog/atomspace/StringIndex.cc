@@ -33,8 +33,17 @@ using namespace opencog;
  */
 void StringIndex::insert(const char * str, Handle h)
 {
-    // don't add unnamed handles
-    if (str == NULL || *str == 0)
+    // Don't add unnamed handles
+    // if (str == NULL || *str == 0)
+    // Err, well, no ... Due to some sort of crazy-shit arguments
+    // with Trent Waddington, he insisted that this was possible and 
+    // required. So he added support, but incompletely. And then
+    // he didn't actually test his code to see if it worked. So of
+    // course it didn't. And it leaked memory. Whoops. Which I had 
+    // to debug. So now we allow atoms with null string names to
+    // be added to the atom space. WTF.  But now his tests fail.
+    // Go figure. I don't understand.
+    if (str == NULL)
         return;
 	idx.insert(std::pair<std::string,Handle>(str,h));
 }

@@ -604,7 +604,7 @@ Handle AtomSpace::addNode(Type t, const string& name, const TruthValue& tvn)
         // Just merges the TV
         // if (!tvn.isNullTv()) do_merge_tv(result, tvn);
         // Even if the node already exists, it must be merged properly 
-	    // for updating its truth and attention values. 
+        // for updating its truth and attention values. 
         atomTable.merge(result, tvn); 
         return result;
     }
