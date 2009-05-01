@@ -142,7 +142,7 @@ public:
         // should be 5 since SpaceMap does not have knowledge about the types
         // of the objects inside the map
         TS_ASSERT(definiteObjects.size() == 5);
-        printf("definiteObjects.size %lu\n", definiteObjects.size());
+        printf("definiteObjects.size %zu\n", definiteObjects.size());
         TS_ASSERT(definiteObjects.find(ball) != definiteObjects.end());
         TS_ASSERT(definiteObjects.find("owner") != definiteObjects.end());
         TS_ASSERT(definiteObjects.find("self") != definiteObjects.end());
