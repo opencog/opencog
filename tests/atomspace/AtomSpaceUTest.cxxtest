@@ -426,7 +426,7 @@ public:
         TS_ASSERT(links.size() == 2);
         delete tr;
 
-        tr = mva(TLB::addAtom(new Node(PREDICATE_NODE, strdup("barkingAt"))), NULL);
+        tr = mva(TLB::addAtom(new Node(PREDICATE_NODE, "barkingAt")), NULL);
         Handle h1_ = atomSpace->addAtom(*tr, SimpleTruthValue(0.5f, 0.5f));
         TS_ASSERT(CoreUtils::compare(h1_, Handle::UNDEFINED));
         // In this case, the expected behavior is to perform a merge and return the
@@ -499,7 +499,7 @@ public:
         // test fetching all unnamed nodes
         HandleSeq allUnnamed;
         atomSpace->getHandleSet(back_inserter(allUnnamed), NODE, "", true);
-        printf("\nallUnnamed.size() == %lu\n", allUnnamed.size());
+        printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
         TS_ASSERT(allUnnamed.size() == 2);
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h6) != allUnnamed.end());
@@ -906,6 +906,8 @@ public:
         atTimeLink = atomSpace.getAtTimeLink(HandleTemporalPair(h2, t2));
         TS_ASSERT(TLB::isValidHandle(atTimeLink));
 
+        delete t1;
+        delete t2;
     }
 
     void testTimeAtomsRemovalByDecay() {
