@@ -962,6 +962,7 @@ std::string HandleEntry::toString()
     return answer;
 }
 
+// This call is deprecated, and its use should be removed
 Handle* HandleEntry::toHandleVector(Handle*& vector, int& n) throw (InconsistenceException)
 {
     n = getSize();
@@ -976,9 +977,19 @@ Handle* HandleEntry::toHandleVector(Handle*& vector, int& n) throw (Inconsistenc
     return vector;
 }
 
+// This call is deprecated, and its use should be removed
 std::vector<Handle>& HandleEntry::toHandleVector(std::vector<Handle>& vector)
 {
     vector.clear();
+    for (HandleEntry* current = this; current != NULL; current = current->next) {
+        vector.push_back(current->handle);
+    }
+    return vector;
+}
+
+std::vector<Handle> HandleEntry::toHandleVector(void)
+{
+    std::vector<Handle> vector;
     for (HandleEntry* current = this; current != NULL; current = current->next) {
         vector.push_back(current->handle);
     }

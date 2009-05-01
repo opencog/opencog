@@ -823,12 +823,7 @@ HandleSeq AtomSpace::getIncoming(Handle h)
     // h = fetchIncomingSet(h, true);
 
     HandleEntry* he = TLB::getAtom(h)->getIncomingSet();
-    Handle *temp; int size;
-    he->toHandleVector(temp, size);
-    HandleSeq ret(size);
-    for (int i = 0; i < size; i++)
-        ret[i] = temp[i];
-    return ret;
+    return he->toHandleVector();
 }
 
 void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
