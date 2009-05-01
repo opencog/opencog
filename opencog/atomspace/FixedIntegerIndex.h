@@ -42,7 +42,7 @@ class FixedIntegerIndex:
 
 	public:
 		std::vector<std::set<Handle> > idx;
-        virtual ~FixedIntegerIndex() {}
+		virtual ~FixedIntegerIndex() {}
 		virtual void insert(int, Handle);
 		virtual Handle get(int) const;
 		virtual void remove(int, Handle);

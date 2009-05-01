@@ -28,12 +28,13 @@ using namespace opencog;
 
 TypeIndex::TypeIndex(void)
 {
-    resize();
+	resize();
 }
 
 void TypeIndex::resize(void)
 {
-    FixedIntegerIndex::resize(classserver().getNumberOfClasses()+1);
+	num_types = classserver().getNumberOfClasses();
+	FixedIntegerIndex::resize(num_types + 1);
 }
 
 void TypeIndex::insertHandle(Handle h)
@@ -93,12 +94,11 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 
 TypeIndex::iterator TypeIndex::end(void) const
 {
-    unsigned int numTypes = classserver().getNumberOfClasses();
-	iterator it(numTypes, false);
-	it.se = idx.at(numTypes).end();
+	iterator it(num_types, false);
+	it.se = idx.at(num_types).end();
 	it.s = idx.end();
 	it.send = idx.end();
-	it.currtype = numTypes;
+	it.currtype = num_types;
 	return it;
 }
 

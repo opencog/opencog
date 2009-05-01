@@ -39,11 +39,13 @@ class HandleEntry;
 class TypeIndex:
 	public FixedIntegerIndex
 {
+	private:
+		size_t num_types;
 	public:
 		TypeIndex(void);
 		void insertHandle(Handle);
 		void removeHandle(Handle);
-        void resize();
+		void resize(void);
 
 		HandleEntry* getHandleSet(Type type, bool subclass) const;
 

@@ -44,7 +44,7 @@ template <typename Key, typename Value>
 class AtomIndex
 {
 	public:
-        virtual ~AtomIndex() {}
+		virtual ~AtomIndex() {}
 		virtual void insert(Key, Value) = 0;
 		virtual Value get(Key) const = 0;
 		virtual void remove(Key, Value) = 0;
