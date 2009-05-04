@@ -136,6 +136,19 @@ instructions below explain how to creae these dictionaries.
    is 150MB; with the indexes, it blows up to 281MB. Wow!
 
 ------------------------------------------------
+Making backups:
+---------------
+Its worth backing up processed data to avoid data loss.  The following
+tables need to be saved: 
+
+InflectMarginal, Disjuncts, DisjunctSenses, WordSenseFreq.
+
+Postgress dumps can be created by:
+
+pg_dump -v -t InflectMarginal -t Disjuncts -t DisjunctSenses \
+-t WordSenseFreq lexat | bzip2 > disjunct-senses.20090503.dump.sql.bz2
+
+------------------------------------------------
 
 Stand-alone scripts
 -------------------
