@@ -85,11 +85,9 @@ the same concept.
 
 scm
 ---
-The scm directory contains some scheme scripts. This includes scripts
-for pulling out link-grammar disjuncts from parse data, and
-storing/updating disjunct frequency counts in an SQL database. These
-frequency counts are tied to word senses, obtained via the Mihalcea
-word-sense disambiguation algo.
+The scm directory contains miscellaneous scheme scripts of general 
+utility for NLP work. This includes scripts for pulling out link-grammar 
+disjuncts from parse data.
 
 semcor
 ------
@@ -139,12 +137,12 @@ highest scores are then the most likely meaning for a word.
 
 wsd-post
 --------
-The wsd-post directory contains miscellaneous post-processing and data
-analysis scripts for analyzing the results of WSD processing.  These 
-results are stored in various SQL tables, and contain wordnet and 
-link-grammar disjunct statistics. The wsd-post directory contains
-scripts to compute conditional probabilities, etc.  See the README
-there for research notes providing more info.
+The wsd-post directory contains code for generating datasets which may
+be used for extremely fast (but partial) word-sense disambiguation,
+based on gramatical (syntactical) usage. Generating the data-sets can
+take cpu-month to cpu-years; the table-lookup can be done in milli or
+microseconds.
+
 
 ======================================================================
 

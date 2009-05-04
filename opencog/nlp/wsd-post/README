@@ -5,10 +5,15 @@
               Miscellaneous scripts for post-processing 
                  word-sense disambiguation (wsd) data.
 
+This directory contains code for generating datasets which may be used
+for extremely fast (but partial) word-sense disambiguation, based on 
+grammatical (syntactical) usage. Generating these datasets can take
+CPU-months. Once generated, the can be used as a table lookup to obtain 
+WSD info.
 
-See the file "README-overview" for a motivational explanation of *why*
-this stuff is being done. See the README-example for an example of the
-WSD results in action.
+See the file "README-overview" for a more detailed motivational 
+explanation of *why* this stuff is being done. See the README-example 
+for an example of the WSD results in action.
 
 The nlp/wsd directory contains an implementation of the Rada Mihalcea
 word-sense disambiguation algorithm. The "stats-collection" directory 
