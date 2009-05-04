@@ -492,7 +492,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
-	return Handle::UNDEFINED;
+	curr_root = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
 }
 
 /* ======================================================== */
