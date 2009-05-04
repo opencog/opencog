@@ -528,7 +528,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     //std::map<Handle,Handle> mapDestToLink = getDestinationsFrom(keyHandle, HEBBIAN_LINK);
     HandleEntry* heNeighbours = TLB::getAtom(keyHandle)->getNeighbors(true, true, HEBBIAN_LINK);
     HandleSeq neighbours;
-    heNeighbours->toHandleVector(neighbours);
+    neighbours = heNeighbours->toHandleVector();
     
     // for each entry in hGrid
     for (uint i = 0; i < hGrid.size(); i++) {
@@ -545,7 +545,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     // randomly remove other links from other key nodes if # links > max
     HandleEntry* heLinks = atomSpace->getAtomTable().getHandleSet(HEBBIAN_LINK, true);
     HandleSeq links;
-    heLinks->toHandleVector(links);
+    links = heLinks->toHandleVector();
     delete heLinks;
     int amountToRemove = links.size() - this->links;
     if (amountToRemove > 0 && keyNodes.size() == 1) {
