@@ -11,12 +11,16 @@ this stuff is being done. See the README-example for an example of the
 WSD results in action.
 
 The nlp/wsd directory contains an implementation of the Rada Mihalcea
-word-sense disambiguation algorithm. The nlp/scm directory contains a set
-of scripts that attach word senses to link-grammar parse disjuncts,
-and then update the corresponding scripts in SQL tables. SQL is used
-because it can take months (or longer) to accumulate a sufficient amount
-of statistics to be meaningful.  This directory contains code that
-implements the next steps in this processing pipeline: scripts to
+word-sense disambiguation algorithm. The "stats-collection" directory 
+contains a set of scripts that attach word senses to link-grammar parse 
+disjuncts, and then update the corresponding scripts in SQL tables. 
+SQL was used because of two reasons: 1) it can take months (or longer) 
+to accumulate a sufficient amount of statistics to be meaningful.  
+2) When the work was begun, it wasn't possible (and it wasn't clear how)
+to store the accumulated data as a OpenCog hypergraph.
+
+This directory 
+contains code that implements the next steps in this processing pipeline: scripts to
 compute marginal probabilities, obtained from the raw counts stored
 in the SQL database.
 

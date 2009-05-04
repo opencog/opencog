@@ -28,7 +28,7 @@ normally would be automatically loaded with the opencog.conf file.
    on the mutual information contained in word pairs. (Not currently
    used)
 
- * disjunct.scm: Build lists of link-grammar disjuncts.
+ * disjunct-list.scm: Build lists of link-grammar disjuncts.
 
  * wsd-process.scm: top-level script for driving WSD processing. 
    It takes input files, loads them into opencog, performs the WSD,
