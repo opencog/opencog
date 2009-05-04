@@ -13,7 +13,8 @@ of a "semantic triple" is "the sky is blue". Written in prefix notation,
 the triple is then "color_of(sky, blue)", with "color_of" being the
 property or predicate, while "sky" and "blue" are the subject and
 object, respectively. In the industry, this task is sometimes refered
-to as "WIE" or "Web Information Extraction". 
+to as "WIE" or "Web Information Extraction"; it is also sometimes called
+"linguistic reification".
 
 One reason for creating semantic triples is that it simplifies certain
 types of deductions and inferences. For example, "author_of('Pride and 
@@ -37,6 +38,7 @@ The primary challenges here are three-fold:
    and to question answering. 
 
 ToDo: Reification of triples ... 
+Re-examin Markov Logic Networks ... 
 Phrasal verbs vs. prepositional phrases 
 
 Structures
@@ -376,6 +378,10 @@ The shell script "load.sh" in this directory will load the assorted
 scheme bits and pieces.  In addition, text that was parsed by relex,
 and output in opencog format, must be loaded, using "load-examples.sh".
 
+Sentences must be pre-processed by running the following:
+   (cog-ad-hoc "do-implication" prep-rule-0)
+and again for prep-rule 1,2,3 inclusive.
+
 Implications can be processed with the scheme interpreter, using the 
 ad-hoc command:
 
@@ -385,23 +391,23 @@ where the stmt is the implication to evaluate. So, for example, after
 loading rules.txt, (and starting at the 5th rule -- the first 4
 perform some setup) one would try:
 
-  (cog-ad-hoc "do-implication" frame-rule-4)
+  (cog-ad-hoc "do-implication" frame-rule-0)
 
 This will search the entire contents of the atomtable, looking for any
 hypergraphs that match the predicate of the implication.  The output is
 a list of all possible implicands: thus, for example:
 
-guile> (cog-ad-hoc "do-implication" frame-rule-4)
+guile> (cog-ad-hoc "do-implication" frame-rule-0)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Germany@3cdca1f8-adf4-4532-a2d6-622da3f43ce6")
        (WordInstanceNode "Berlin@a0d168f7-3735-48a1-b603-33dd0fc95228"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-5)
+guile> (cog-ad-hoc "do-implication" frame-rule-1)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Portugaul@36d41058-3dc8-4e6c-82b9-300a5f48e283")
        (WordInstanceNode "Lisbon@9d5031b1-5caf-48eb-ae7c-b3a89bb11381"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-6)
+guile> (cog-ad-hoc "do-implication" frame-rule-2)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "color_of")
     (ListLink (WordInstanceNode "sky@f3924dad-81a0-4967-81c8-900e31254f74")
        (WordInstanceNode "blue@df54a7e9-1fb2-4643-be97-ca6ee1e7a359"))))
@@ -426,45 +432,47 @@ input text is not intentionally lying, then, under what circumstances
 do a set of conflicting assertions require that the underlying word be
 recognized as embodying two different concepts?
 
-Several approaches are possible:
+One possible approach is to assign tentative WordNet-based word-senses 
+using either the Mihalcea algorithm, or table-lookup from syntax-tagged
+senses (see the wsd-post/README for details). One nice aspect of WordNet
+tagging is that the built-in WordNet ontology can be used to double-check,
+strengthen certain sense assignments: this, for example:
 
-1) Assign tentative WordNet-based word-senses using either the Mihalcea
-   algorithm, or table-lookup from syntax-tagged senses (see the 
-   wsd-post/README for details). One nice aspect of ordNet tagging is 
-   that the built-in WordNet ontology can be used to double-check, 
-   strengthen certain sense assignments: this, for example:
+    bark%1:20:00:: has part-holonym tree_trunk%1:20:00::
 
-       bark%1:20:00:: has part-holonym tree_trunk%1:20:00::
+while
 
-   while
+    bark%1:11:02:: has direct hypernym noise%1:11:00::
+    and inherited hypernym sound%1:11:00::
 
-       bark%1:11:02:: has direct hypernym noise%1:11:00::
-       and inherited hypernym sound%1:11:00::
+Thus, triples that have been read in, and tagged with WordNet senses,
+can be verified against the WordNet ontology for the correctness of
+sense assignments.  While this is a reasonable starting point, and
+gives an easy leg-up, it does not solve the more general problem of
+distinguishing and refining concepts.
 
-   Thus, triples that have been read in, and tagged with WordNet senses,
-   can be verified against the WordNet ontology for the correctness of
-   sense assignments.
+Two distinct processes are at play: 1) recognizing that two different
+word instances refer to the same concept, and 2) recognizing that a
+previously learned concept should be refined into two distinct concepts.
+(For example, having learned the properties of a "pencil", one must 
+recognize at some point that a "mechanical pencil" and a "wooden pencil"
+have many incompatbile properties, and thus the notion of a pencil must
+be split into these two new concepts).
 
-   While this is a reasonable starting point, and gives an easy leg-up,
-   it does not solve the more general problem of distinguishing and 
-   refining concepts.
-
-2) Verify consistency via first-order-logic and forward/backward
-   chaining. This has several difficulties. One is the problem of
-   performance, and bounding the search space. Another is that, if
-   an inconsistency is detected, its still not clear what faulty
-   assumption lead to it.  There is no algorithm for classifying 
-   a set of conflicting statements into two groups of self-consistent
-   statements.
-
-   (Possibly need to re-examin Markov Logic Networks?)
+The most direct route to either of these processes is by means of
+"consistency checking": using forward and backward chaining to determine
+whether two distinct statements are compatible with each other. When
+they are, then the two different word-instances can be assumed to refer
+to the same concept; relationships can then be merged.
 
 Consistency Checking
 --------------------
 Consider the following three sentences:
    Aristotle is a man.
    Men are mortal.
+   Aristotle is mortal.
 
+Or:
 
    Berlin is the capital of Germany.
    Capitals are cities.
@@ -555,6 +563,22 @@ is examined to compute the effect of !. The default truth value
 in Opencog is (false, unconfident), so it must be over-ridden
 to state (true, confident).
 
+Another case where we must be careful is with hypothetical statements
+or questions that superficially resemble statements. For example, the 
+question: "Is Berlin a capital?" parses out to:
+
+   _subj (be, Berlin) 
+   _obj (be, capital) 
+   TRUTH-QUERY-FLAG (capital, T)
+   TRUTH-QUERY-FLAG (be, T)
+   HYP (be, T)
+
+If the truth-query and hyp flags are ignored, then this parse can be
+mistaken for a statement, not a question.  This suggests that the rules
+should includee a !HYP term in them.
+
+
+
 Consider now: "Men are mortal."
    _predadj(men, mortal)
 
@@ -591,6 +615,19 @@ Other problems: Consider the sentences:
 
 One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
+
+
+Yes-No Questions
+----------------
+Question:
+    Is Berlin a capital?
+
+Parse:
+   _subj (be, Berlin) 
+   _obj (be, capital) 
+   TRUTH-QUERY-FLAG (capital, T)
+   TRUTH-QUERY-FLAG (be, T)
+   HYP (be, T)
 
 
 

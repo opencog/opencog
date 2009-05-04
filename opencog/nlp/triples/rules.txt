@@ -102,6 +102,7 @@
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
 		^ _subj(be, $var1) ^ _obj(be, $var2)
       ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
+      ^ !HYP(be,T)                      ; Disallow "Is Berlin a city?"
       THEN ^3_isa($var2, $var1) 
 
 ; Sentence "Men are mortal"
