@@ -401,6 +401,9 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	// the root is grounded.  If its not, start working on that.
 	Handle pursue = Handle::UNDEFINED;
 	Handle unsolved_clause = Handle::UNDEFINED;
+	bool unsolved = false;
+	bool solved = false;
+
 	RootMap::iterator k;
 	for (k=root_map.begin(); k != root_map.end(); k++)
 	{
@@ -408,8 +411,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		RootList *rl = vk.second;
 		pursue = vk.first;
 
-		bool unsolved = false;
-		bool solved = false;
+		unsolved = false;
+		solved = false;
 
 		std::vector<Handle>::iterator i;
 		for (i=rl->begin(); i != rl->end(); i++)
@@ -429,18 +432,21 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (solved && unsolved) break;
 	}
 
-	// Pursue is a pointer to a node that's shared between
-	// several clauses. One of the predicates has been
-	// solved, another has not.  We want to now traverse 
-	// upwards from this node, to find the top of the 
-	// unsolved clause.
-	curr_root = unsolved_clause;
-	curr_pred_handle = pursue;
-
-	if (Handle::UNDEFINED != unsolved_clause)
+	if (solved && unsolved)
 	{
-		issued.insert(unsolved_clause);
-		return;
+		// Pursue is a pointer to a node that's shared between
+		// several clauses. One of the predicates has been
+		// solved, another has not.  We want to now traverse 
+		// upwards from this node, to find the top of the 
+		// unsolved clause.
+		curr_root = unsolved_clause;
+		curr_pred_handle = pursue;
+
+		if (Handle::UNDEFINED != unsolved_clause)
+		{
+			issued.insert(unsolved_clause);
+			return;
+		}
 	}
 
 	// Try again, this time, considering the optional clauses.
@@ -450,8 +456,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		RootList *rl = vk.second;
 		pursue = vk.first;
 
-		bool unsolved = false;
-		bool solved = false;
+		unsolved = false;
+		solved = false;
 
 		std::vector<Handle>::iterator i;
 		for (i=rl->begin(); i != rl->end(); i++)
@@ -470,18 +476,23 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (solved && unsolved) break;
 	}
 
-	// Pursue is a pointer to a node that's shared between
-	// several clauses. One of the predicates has been
-	// solved, another has not.  We want to now traverse 
-	// upwards from this node, to find the top of the 
-	// unsolved clause.
-	curr_root = unsolved_clause;
-	curr_pred_handle = pursue;
-
-	if (Handle::UNDEFINED != unsolved_clause)
+	if (solved && unsolved)
 	{
-		issued.insert(unsolved_clause);
+		// Pursue is a pointer to a node that's shared between
+		// several clauses. One of the predicates has been
+		// solved, another has not.  We want to now traverse 
+		// upwards from this node, to find the top of the 
+		// unsolved clause.
+		curr_root = unsolved_clause;
+		curr_pred_handle = pursue;
+
+		if (Handle::UNDEFINED != unsolved_clause)
+		{
+			issued.insert(unsolved_clause);
+		}
 	}
+
+	return Handle::UNDEFINED;
 }
 
 /* ======================================================== */
@@ -541,7 +552,7 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 
 /**
  * Create an associative array that gives a list of all of the
- * predicatees that a given node participates in.
+ * predicates that a given node participates in.
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
