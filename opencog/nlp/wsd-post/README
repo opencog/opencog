@@ -19,10 +19,9 @@ to accumulate a sufficient amount of statistics to be meaningful.
 2) When the work was begun, it wasn't possible (and it wasn't clear how)
 to store the accumulated data as a OpenCog hypergraph.
 
-This directory 
-contains code that implements the next steps in this processing pipeline: scripts to
-compute marginal probabilities, obtained from the raw counts stored
-in the SQL database.
+The directory "renorm-stats" contains code that implements the next steps
+in this processing pipeline: scripts to compute marginal probabilities,
+obtained from the raw counts stored in the SQL database.
 
 The general analysis framework here is an outgrowth of the code that
 is found in the 'lexical attraction' package, which is a distinct
@@ -57,121 +56,15 @@ Preparing Link-Grammar Dictionaries
 -----------------------------------
 One of the primary applications of the WSD effort is to provide the Link 
 Grammar parser with a set of dictionaries theat provide parse-ranking,
-and provide parse-time syntactical word-sense disambiguation.  The 
-instructions below explain how to creae these dictionaries.
+and provide parse-time syntactical word-sense disambiguation.  See the 
+file renorm-stats/README for instructions on how to prepare these files.
 
-1) Populate the database, by starting the cog-server, loading 
-   nlp/scm/load-nlp.sh, and processing text with "(doit 300)"
-
-2) Compute mutual information scores using the "./compute-mi.scm"
-   script in this directory. This script updates the marginal
-   probabilities in the InflectMarginal table. It then updates the
-   conditional probabilites in the Disjuncts table, setting the
-   "log_cond_prob" column.
-
-   Recent run took 102 minutes. Looked at 902337 words, observed
-   an average of 24 times.
-
-3) Merge synsets by running the ./synset-renorm.pl script. One
-   problem with the WSD code is that it does not (did not?) properly
-   collapse synsets; thus, this needs to be done manually, as a post-
-   processing step.  This modifies the DisjunctSenses table only.
-
-   Takes about 5-10 minutes to run;
-   recently reported: "examined=447804 updated=68775 inserted=53702"
-
-4) Run the ./dj-probs.pl script. This updates the conditional 
-   probabilities on the DisjunctSenses table, and stores entropies and 
-   sense counts on the Disjuncts table.
-
-   Takes about 3-5 minutes to run, recently saw about 164215 disjuncts,
-   with average of 2.3 senses per disjunct.
-
-5) Remove unwanted columns, while making a copy. The final link-grammar
-   DB does not require he count column, or other columns, so remove these
-   to save space.
-
-      SELECT inflected_word, disjunct, log_cond_probability 
-         INTO djs FROM Disjuncts;
-      CREATE INDEX djs_iwxxx on djs(inflected_word);
-
-      SELECT word_sense, inflected_word, disjunct, log_cond_probability 
-        INTO  djsenses FROM DisjunctSenses;
-      CREATE INDEX djsns_iwxxx on djsenses(inflected_word);
-
-   The indexes are needed so that the cleanup, next stage, goes 
-   reasonably quickly.
-
-6) Cleanup by removing entries with punctuation, foreign words, numbers,
-   proper names. 
-
-   On a recent run: 
-   djs contains 5353655 entries before cleanup, 
-     Deleted 603908 punctuated entries
-     Deleted 1685588 proper names
-     Deleted 259286 numeric entries
-     Deleted 2548782 entries total from the djs table, or 47.6%
-
-   djsenses contains 399980 entries before cleanup
-     Deleted 0 punctuated entries
-     Deleted 6951 proper names
-     Deleted 326 numeric entries
-     Deleted 7277 entries from djsenses table, or 1.85%
-
-   Took about 12 minutes to run.
-
-7) Export these tables using ...
-     pg_dump -D -O -t djsenses lexat | tail --lines=+16 |\
-        bzip2 > djsenses.sql.bz2
-    
-     pg_dump -D -O -t djs lexat | tail --lines=+16 |\
-        bzip2 > disjuncts.sql.bz2
-    
-8) Load then into SQLite3 using ...
-
-   time  bzcat disjuncts.20090430.sql.bz2 | sqlite3 newdj.db
-   time  bzcat djsenses.20090430.sql.bz2  | sqlite3 newdj.db
-   Takes about 6 hours elapsed to load.
-
-   The following tables are automatically created;
-   The indexes need to be manually created.
-
-   CREATE TABLE Disjuncts (
-      inflected_word TEXT NOT NULL,
-      disjunct TEXT NOT NULL,
-      log_cond_probability FLOAT
-   );
-   
-   CREATE TABLE DisjunctSenses (
-      word_sense TEXT NOT NULL,
-      inflected_word TEXT NOT NULL,
-      disjunct TEXT NOT NULL,
-      log_cond_probability FLOAT
-   );
-
-
-   ALTER TABLE djs RENAME TO Disjuncts;
-   ALTER TABLE djsenses RENAME TO DisjunctSenses;
-   CREATE INDEX ifwdj ON Disjuncts (inflected_word, disjunct);
-   CREATE INDEX siwdj ON DisjunctSenses (inflected_word, disjunct);
-
-   Without the database indexes, the current size of the database 
-   is 150MB; with the indexes, it blows up to 281MB. Wow!
-
-------------------------------------------------
 
 Stand-alone scripts
 -------------------
 The following scripts are meant to be run stand-alone, as they do not
 access any OpenCog atoms directly.  That is, they can run within the 
 ordinary guile interpreter.
-
- * compute-mi.scm: Compute the conditional probability and mutual
-   information for assorted link-grammar disjunct tables. This assumes
-   that the tables have already been populated with raw data, and thus,
-   the raw count fields have meaningful (and final) values. This 
-   script merely totals up the counts, and computes the various
-   probabilities.
 
  * cluster.scm: Cheapo data clustering algo.
 
