@@ -193,7 +193,7 @@ excellent way to gain new knowledge. However, there are two snags:
 1) It presumes the existence of a teacher who already knows how to use
 the word "crawl", and 2) It is outside of the scope of what one person
 (i.e. me) can acheive in a limited amount of time.  A third possibility
-is statistical learning: to observe a large number os statements
+is statistical learning: to observe a large number of statements
 containing the word "crawl", and, based on these, deduce that it is a
 type of locomotion.
 
@@ -427,12 +427,27 @@ do a set of conflicting assertions require that the underlying word be
 recognized as embodying two different concepts?
 
 Several approaches are possible:
-1) Assign tentative word-senses via the Mihalcea algorithm.
-   Unfortunately, this algorithm is quite slow.  This can be partly
-   worked around using the syntax-tagged senses taken from a database.
-   This is extremely fast, however, its not terribly accurate; nor is
-   the Mihalcea algorithm all that accurate either.  None-the-less
-   its a reasonable starting point, perhaps.
+
+1) Assign tentative WordNet-based word-senses using either the Mihalcea
+   algorithm, or table-lookup from syntax-tagged senses (see the 
+   wsd-post/README for details). One nice aspect of ordNet tagging is 
+   that the built-in WordNet ontology can be used to double-check, 
+   strengthen certain sense assignments: this, for example:
+
+       bark%1:20:00:: has part-holonym tree_trunk%1:20:00::
+
+   while
+
+       bark%1:11:02:: has direct hypernym noise%1:11:00::
+       and inherited hypernym sound%1:11:00::
+
+   Thus, triples that have been read in, and tagged with WordNet senses,
+   can be verified against the WordNet ontology for the correctness of
+   sense assignments.
+
+   While this is a reasonable starting point, and gives an easy leg-up,
+   it does not solve the more general problem of distinguishing and 
+   refining concepts.
 
 2) Verify consistency via first-order-logic and forward/backward
    chaining. This has several difficulties. One is the problem of
