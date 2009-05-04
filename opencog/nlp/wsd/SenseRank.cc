@@ -14,7 +14,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/server/CogServer.h>
@@ -92,8 +92,8 @@ bool SenseRank::init_senses(Handle word_sense_h,
                             Handle sense_link_h)
 {
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	SimpleTruthValue stv(1.0f, 0.9f);
-	sense->setTruthValue(stv);
+	CountTruthValue ctv(1.0f, 0.0f, 1.0f);
+	sense->setTruthValue(ctv);
 	return false;
 }
 
@@ -225,7 +225,7 @@ void SenseRank::rank_sense(Handle sense_link_h)
 	rank_sum += 1.0-damping_factor;
 
 	Link *sense = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	double old_rank = sense->getTruthValue().getMean();
+	double old_rank = sense->getTruthValue().getCount();
 
 #ifdef DEBUG
 	std::vector<Handle> oset = sense->getOutgoingSet();
@@ -239,10 +239,9 @@ void SenseRank::rank_sense(Handle sense_link_h)
 	converge *= (1.0-convergence_damper);
 	converge += convergence_damper * fabs(rank_sum - old_rank);
 
-	// Update the probability of truth for this sense.
-	SimpleTruthValue stv((float) rank_sum, 1.0f);
-	stv.setConfidence(sense->getTruthValue().getConfidence());
-	sense->setTruthValue(stv);
+	// Update the count for this sense.
+	CountTruthValue ctv(1.0, 0.0, (float) rank_sum);
+	sense->setTruthValue(ctv);
 }
 
 /**
@@ -262,7 +261,7 @@ bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
 
 	// Get the word-sense probability
 	Link *bee = dynamic_cast<Link *>(TLB::getAtom(sense_b_h));
-	double p_b = bee->getTruthValue().getMean();
+	double p_b = bee->getTruthValue().getCount();
 	double weight = t_ab * p_b;
 
 	rank_sum += weight;

@@ -74,7 +74,7 @@ A WordSenseLink couples the tag that will stand for the word sense,
 to the word itself:
 
    WordSenseLink
-      WordNode "bark"
+      WordInstanceNode "bark"
       WordSenseNode "bark_sense_23"
 
 The tag value "bark_sense_23" has no particular meaning in itself,
@@ -512,6 +512,24 @@ will *not* total to one!
 
 An alternative to propagating on the graph might instead be to just link
 to lapack, and use on of the eigenvector routines. This might be faster.
+
+Edges connecting senses use SimpleTruthValues; the mean/strength holds
+holds the strength of the connection.
+
+SenseLinks (between word-instances and wordnet-senses) use 
+CountTruthValues.  The intital strength is set to 1.0 (true) and
+confidence to 0.0 (inconfident). The algo is run, manipulating the
+count. 
+
+
+XXXX-- the following para describes something that should be, but is 
+not currently done: XXX
+After the algo has been run, the results are "renormalized" with
+confidence value on the sense-link being changed to reflect the result.
+The resulting confidence can be undrstood to be a probability: by 
+summing over all possible sense assignments for a word-instance, the
+total confidence will sum to one.
+
 
 Preliminary Results
 -------------------

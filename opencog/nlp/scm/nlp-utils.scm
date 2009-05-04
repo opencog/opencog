@@ -139,11 +139,11 @@
 
 ; ---------------------------------------------------------------------
 ; Given a word-instance and a word-sense, return the numerical 
-; word-sense ranking score. The rank is stored as the "mean" part of the
-; simple truth value of the InheritanceLink connecting the two: i.e. in
+; word-sense ranking score. The rank is stored as the "count" part of the
+; count truth value of the InheritanceLink connecting the two: i.e. in
 ; the structure
 ;
-;     InheritanceLink (stv -0.006025 1.0)
+;     InheritanceLink (ctv 1.0 0.0 -0.006025)
 ;        WordInstanceNode "day@171506d8f3"
 ;        WordSenseNode "daylight%1:28:00::"
 ;
@@ -153,7 +153,7 @@
 	(let ((slink (cog-link 'InheritanceLink word-inst word-sense)))
 		(if (null? slink)
 			-999.0
-			(cdr (assoc 'mean (cog-tv->alist (cog-tv slink))))
+			(cdr (assoc 'count (cog-tv->alist (cog-tv slink))))
 		)
 	)
 ) 

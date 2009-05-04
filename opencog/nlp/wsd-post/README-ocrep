@@ -1,0 +1,23 @@
+
+
+                         Representing WordNet tags in OpenCog
+                         ------------------------------------
+
+WordNet sense tags carry ontology relationships (is-a, part-of); thus,
+tagging parsed sentences with WordNet sense tags is useful.  This README
+reviews tagging markup and, in particular, the interpretation of the 
+truth values.
+
+There are two ways of obtaining weighted markup of words; one is via
+the Mihalcea algo, the other is by lookup from syntax tables.  The 
+code in the nlp/wsd directory generates the following linkages:
+
+
+   
+   InheritanceLink strength=0.0 confidence=0.01
+      WordInstanceNode "bark_144"
+      WordSenseNode "bark_sense_23"
+
+then init to 1.0 0.9
+
+the  set truth values

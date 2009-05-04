@@ -163,8 +163,8 @@ static bool sense_compare(Handle ha, Handle hb)
 {
 	Link *la = dynamic_cast<Link *>(TLB::getAtom(ha));
 	Link *lb = dynamic_cast<Link *>(TLB::getAtom(hb));
-	double sa = la->getTruthValue().getMean();
-	double sb = lb->getTruthValue().getMean();
+	double sa = la->getTruthValue().getCount();
+	double sb = lb->getTruthValue().getCount();
 	if (sa > sb) return true;
 	return false;
 }
@@ -253,7 +253,7 @@ bool EdgeThin::thin_word(Handle word_h)
 		}
 #ifdef THIN_DEBUG
 		Link *la = dynamic_cast<Link *>(TLB::getAtom(sense_h));
-		double sa = la->getTruthValue().getMean();
+		double sa = la->getTruthValue().getCount();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
 		Node *ws = dynamic_cast<Node *>(TLB::getAtom(hws));
 		printf ("; delete %s with score %f (%d links)\n",

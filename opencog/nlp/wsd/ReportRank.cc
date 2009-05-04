@@ -12,7 +12,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/util/platform.h>
@@ -128,7 +128,7 @@ bool ReportRank::count_sense(Handle word_sense_h,
                              Handle sense_link_h)
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	normalization += l->getTruthValue().getMean();
+	normalization += l->getTruthValue().getCount();
 	sense_count += 1.0;
 	return false;
 }
@@ -137,7 +137,7 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
-	double score = l->getTruthValue().getMean();
+	double score = l->getTruthValue().getCount();
 
 	score *= normalization * sense_count;
 	score -= 1.0;
@@ -151,8 +151,7 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	// go negative, likely scores will go positive.  "Typical"
 	// distributions seem to go from -0.8 to +3.5 or there-abouts.
 	//
-	SimpleTruthValue stv((float) score, 1.0f);
-	stv.setConfidence(l->getTruthValue().getConfidence());
+	CountTruthValue stv(1.0f, 0.0f, (float) score);
 	l->setTruthValue(stv);
 
 #ifdef DEBUG

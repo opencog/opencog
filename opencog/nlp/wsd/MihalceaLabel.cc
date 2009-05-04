@@ -17,7 +17,7 @@
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
 // #define DEBUG
@@ -127,10 +127,9 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 	out.push_back(TLB::getHandle(word_instance));
 	out.push_back(TLB::getHandle(word_sense));
 
-	// Give it a false truth value, very low confidence.
-	SimpleTruthValue stv(0.0f, 1.0f);
-	stv.setConfidence(0.01f);
-	atom_space->addLink(INHERITANCE_LINK, out, stv);
+	// Give it a true truth value; but no confidence.
+	CountTruthValue ctv(1.0f, 0.0f, 1.0f);
+	atom_space->addLink(INHERITANCE_LINK, out, ctv);
 
 	return false;
 }
