@@ -489,6 +489,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		if (Handle::UNDEFINED != unsolved_clause)
 		{
 			issued.insert(unsolved_clause);
+			return;
 		}
 	}
 
