@@ -43,7 +43,7 @@ sub parse_clause
 
 	# Pull the three parts out of the clause.
 	# The pattern matches "blah(ding,dong)"
-	$clause =~ m/\s*([\$\!%:\&\-\w]+)\s*\(\s*([\$%#\"\w\s]+)\s*\,\s*([\$%#\"\w\s]+)\s*\)(.*)/;
+	$clause =~ m/\s*([\$\!%:\&\-\w]+)\s*\(\s*([\$%#\"\-\w\s]+)\s*\,\s*([\$%#\"\-\w\s]+)\s*\)(.*)/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -55,7 +55,7 @@ sub parse_clause
 	if ($pred eq "")
 	{
 		# The pattern matches "blah(ding)"
-		$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\w]+)\s*\)(.*)/;
+		$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\-\w]+)\s*\)(.*)/;
 		$pred = $1;
 		$item1 = $2;
 		$rest = $3;
