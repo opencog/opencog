@@ -61,4 +61,13 @@ bool HypQuery::is_word_a_query(Handle word_inst)
 	return foreach_binary_link(word_inst, INHERITANCE_LINK, &HypQuery::is_truth_query, this);
 }
 
+/**
+ * Strategy:
+ * 1) Determine if question is of truth-query type.
+ * 2) Assume its a hypothetical copula (i.e. Is X a Y?)
+ * 3) pattern-match the triple:
+ *    is-a(city, Madrid) to hyp-is-a(city, Madrid)
+ * 4) Accept only the above, return yes, no.
+ */
+
 /* ============================= END OF FILE ======================== */

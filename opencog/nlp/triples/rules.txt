@@ -112,6 +112,17 @@
       ^ !HYP-FLAG(be)                   ; Disallow "Is Berlin a city?"
       THEN ^3_isa($var2, $var1) 
 
+; 7
+; Truth-query question: "Is Berlin a city?"
+; var1=Berlin var2=city
+# IF %ListLink("# APPLY TRIPLE RULES", $sent)
+      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+      ^ %WordInstanceLink(be,$sent)     ; hyp-flag "be" in same sentence
+      ^ _subj(be, $var1) ^ _obj(be, $var2)
+      ^ HYP-FLAG(be)                    ; Hyp must be present.
+      THEN ^3_hypothetical_isa($var2, $var1) 
+
 ; Sentence "Men are mortal"
 ; var1=mortal var2=men
 ; Must reject prepositions, so that "the color (of the sky) is blue." 
