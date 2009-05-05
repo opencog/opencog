@@ -7,7 +7,6 @@
 
 OpenCog NLP tutorial, provides short overview of important NLP components.
 
-Under construction.
 
 Outline
 =======
@@ -18,7 +17,7 @@ Outline
 -- "La Cogita" chatbot
 -- Pattern matching
 -- Semantic normalization (triples)
--- common sense
+-- Common Sense Reasoning
 
 
 Link Grammar is a parser
@@ -92,7 +91,8 @@ http://opencog.org/wiki/RelEx
 -- Pattern matching fairly closely tied to linguistics
 -- Pattern matching is on graphs, not hypergraphs.
 
--- Other functions too: framing a la framenet, pronoun resolution.
+-- RelEx has other assorted other functions too ... 
+   (framenet, pronoun resolution, entity identification, ...)
 
 
 Parsed sentences as OpenCog hypergraphs
@@ -155,6 +155,8 @@ bzr: opencog/nlp/chatbot/README
 -- Can answer simple questions about what it was told, using hypergraph
    pattern matching.
 -- Single-word replies, since NL generation not hooked up yet.
+
+-- NO REASONING WHATSOEVER. Chatbot is as dumb as a rock!
 
 
 Pattern matching
@@ -234,10 +236,63 @@ Semantic normalization aka Semantic Triples
    because subject, object are reversed. 
    The semantic triple provides a (partial) solution for this.
    
+-- Implemented by means of pattern matching: e.g.
+
+   ; Sentence: "The capital of Germany is Berlin"
+   ; var0=capital, var1=Berlin var2=Germany
+   # IF %ListLink("# APPLY TRIPLE RULES", $sent)
+         ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+         ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+         ^ _subj(be,$var0) ^ _obj(be,$var1)   ; reversed subj, obj
+         ^ $prep($var0,$var2)              ; preposition
+         ^ %LemmaLink($var0,$word0)        ; word of word instance
+         ^ $phrase($word0, $prep)          ; convert to phrase
+         THEN ^3_$phrase($var2, $var1)
+
+   Above is actual rule: it is converted to an OpenCog 
+   ImplicationLink (quite verbose!) and run through pattern matcher.
+
+-- Noteworthy: Makes use of "processing anchors" i.e.
+   the sentence $sent MUST be connected, via ListLink to 
+
+       AnchorNode "# APPLY TRIPLE RULES"
+
+   i.e. this rule does *not* apply to all sentences ever read, but only
+   those sentences that are attached to this AnchorNode.
+   After processing, the anchor is released.
 
 
+Common-sense Reasoning
+======================
+-- Not implemented, under construction, wide open for experimentation!
+
+-- Starting point: Read in many sentences, e.g. from MIT ConceptNet,
+   which has 800K ++ "common-sense" assertions: "Ice cream is made from milk"
+   Parse them.  Extract semantic triples. Remember them. Answer questions.
+
+-- Use reasoning to answer: "Aristotle is a man. All men are mortal. 
+   Is Aristotle mortal?"
+
+-- Use reasoning for sense-disambiguation: "I heard a bark in the night": 
+   Can one hear "tree bark"? No. So "bark" is probably not "tree bark".
+
+-- Concept formation, refinement:  Today: "What is an instrument?"
+   Answer: "cymbal ukulele scale drum chronometer saxophone"
+   Oh you meant "musical instrument", not "scientific instrument".
+
+   Musical instruments make a sounds, scientific instruments usually
+   do not: "I heard a chronometer in the night".
 
 
+Important things this tutorial did not cover:
+=============================================
+-- Framenet-like markup in RelEx
+-- Pronoun resolution in RelEx
+-- Word-sense disambiguation in OpenCog.
+
+
+Fun queries:
+============
 what is a tunnel?
 what is an instrument?
 
