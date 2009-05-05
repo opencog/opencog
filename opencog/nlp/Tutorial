@@ -71,6 +71,27 @@ http://opencog.org/wiki/RelEx
    tense (throw, past)
    person-FLAG (John, T)
 
+-- RelEx "extracts" information from the parse-graph by means of 
+   "pattern matching" on subgraphs:
+
+   e.g. "if link-type is Ss then word on left is singular"
+   e.g. "if link-type is Os then word on right is singular"
+   e.g. "if link-type is Ss then word on right is verb"
+   e.g. "if link-type is Os then word on right is noun"
+
+   A sequence of "rules" are applied:
+
+   "if (predicate) then implication"
+   where "predicate" is a graph pattern to be matched,
+   and "implication" is a set of nodes/edges to be added, deleted.
+
+   Result of applying pattern-match rules results in a transformation 
+   of the graph.
+
+-- Pattern matching (and all of RelEx) implemented in Java.
+-- Pattern matching fairly closely tied to linguistics
+-- Pattern matching is on graphs, not hypergraphs.
+
 -- Other functions too: framing a la framenet, pronoun resolution.
 
 
@@ -140,6 +161,9 @@ Pattern matching
 ================
 bzr: opencog/query/README
 
+-- Similar in idea to RelEx pattern matching, but this time its
+   1) full general, 2) implemented within OpenCog.
+
 -- Given a hypergraph, containing VariableNodes, find a matching 
    hypegraph which "solves" or "grounds" the variables.
 
@@ -176,24 +200,42 @@ bzr: opencog/query/README
    matches that also contain certain subgraphs).
 
 
+Semantic normalization aka Semantic Triples
+===========================================
+-- "triples" are very fashionable:
+   "Semantic Web", OWL, RDF, N3, SPARQL, ISO Topic Maps, 
+   Semantic Nets, Upper Ontology, etc.
+
+-- Although a triple can be "any" list of three items
+   e.g. (_obj, throw, ball)
+
+   A "semantic triple" captures a "semantic" relation:
+
+   e.g. capital_of(Spain, Madrid)
+
+-- Often prepositional in nature ("kind_of", "inside_of", "next_to"...)
+   but can copular: "is-a", "has-a"
+
+-- Can provide (partial) solution to normalization problem:
+   e.g. "The capital of Spain is Madrid"
+
+   _subj (<<be>>, <<capital>>)
+   _obj (<<be>>, <<Madrid>>)
+   of (<<capital>>, <<Spain>>)
+
+   FAILS to pattern match the question: "What is the capital of Spain?":
+
+   _subj (<<be>>, <<_$qVar>>)
+   _obj (<<be>>, <<capital>>)
+   of (<<capital>>, <<Spain>>)
+   COPULA-QUESTION-FLAG (capital, T)
+   QUERY-TYPE (_$qVar, what)
+
+   because subject, object are reversed. 
+   The semantic triple provides a (partial) solution for this.
+   
 
 
-
-
-
-Simple relex query that involves preps that 
-works and does not require triple:
-
-of (<<capital>>, <<Lithuania>>)
-_subj (<<be>>, <<Vilnius>>)
-_obj (<<be>>, <<capital>>)
-
-
-of (<<capital>>, <<Lithuania>>)
- COPULA-QUESTION-FLAG (capital, T)
-QUERY-TYPE (_$qVar, what)
-_subj (<<be>>, <<_$qVar>>) what
-_obj (<<be>>, <<capital>>)
 
 
 what is a tunnel?
