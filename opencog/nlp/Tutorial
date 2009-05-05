@@ -7,13 +7,60 @@
 
 Under construction.
 
-Outline:
--- link-grammar
--- relex
--- chat
+Outline
+=======
+
+-- Link Grammar
+-- RelEx
+-- chatbot
 -- pattern match
 -- triples
 -- common sense
+
+Link Grammar is a parser
+========================
+http://www.abisource.com/projects/link-grammar/
+
+linkparser> John threw the ball
+Found 1 linkage (1 had no P.P. violations)
+	Unique linkage, cost vector = (CORP=6.0467 UNUSED=0 DIS=0 AND=0 LEN=5)
+
+          +-----Os----+
+   +--Ss--+     +--Ds-+
+   |      |     |     |
+John.m threw.v the ball.n 
+
+-- Links are Ss,Os,Ds
+-- Ss == Subject, singular
+-- Os == Object, singular
+-- Ds == Determiner, singular
+
+-- There are about 100 link types, and many more subtypes.
+-- Links are bidirectional; no head-word.
+-- Words have "disjuncts" which fit like puzzle pieces:
+   e.g. threw: S- & O+  means that verb "threw" must have
+   subject on left, object on right.
+-- Parser arranges puzzle pieces until all fit together.
+
+
+RelEx is a dependency relation extractor
+======================================== 
+http://opencog.org/wiki/RelEx
+
+ _subj (throw, John) 
+ _obj (throw, ball)
+
+ pos (ball, noun)
+ tense (throw, past)
+ pos (throw, verb)
+person-FLAG (John, T)
+ DEFINITE-FLAG (ball, T)
+
+
+
+
+
+
 
 Simple relex query that involves preps that 
 works and does not require triple:
