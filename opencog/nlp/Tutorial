@@ -5,6 +5,8 @@
                      Linas Vepstas <linasvepstas@gmail.com>
 
 
+OpenCog NLP tutorial, provides short overview of important NLP components.
+
 Under construction.
 
 Outline
@@ -12,23 +14,25 @@ Outline
 
 -- Link Grammar
 -- RelEx
--- chatbot
--- pattern match
--- triples
+-- OpenCog representation
+-- "La Cogita" chatbot
+-- Pattern matching
+-- Semantic normalization (triples)
 -- common sense
+
 
 Link Grammar is a parser
 ========================
 http://www.abisource.com/projects/link-grammar/
 
-linkparser> John threw the ball
-Found 1 linkage (1 had no P.P. violations)
-	Unique linkage, cost vector = (CORP=6.0467 UNUSED=0 DIS=0 AND=0 LEN=5)
-
-          +-----Os----+
-   +--Ss--+     +--Ds-+
-   |      |     |     |
-John.m threw.v the ball.n 
+   linkparser> John threw the ball
+   Found 1 linkage (1 had no P.P. violations)
+	   Unique linkage, cost vector = (CORP=6.0467 UNUSED=0 DIS=0 AND=0 LEN=5)
+   
+             +-----Os----+
+      +--Ss--+     +--Ds-+
+      |      |     |     |
+   John.m threw.v the ball.n 
 
 -- Links are Ss,Os,Ds
 -- Ss == Subject, singular
@@ -47,14 +51,129 @@ RelEx is a dependency relation extractor
 ======================================== 
 http://opencog.org/wiki/RelEx
 
- _subj (throw, John) 
- _obj (throw, ball)
+-- Uses link-grammar input to obtain relations:
+   _subj (<<throw>>, <<John>>) 
+   _obj (<<throw>>, <<ball>>)
 
- pos (ball, noun)
- tense (throw, past)
- pos (throw, verb)
-person-FLAG (John, T)
- DEFINITE-FLAG (ball, T)
+-- First word of the relation is the "head word",
+   the second word is the "dependent" word:
+   e.g. "John threw the red ball"
+
+    _amod (<<ball>>, <<red>>)
+
+-- Also performs feature tagging:
+   Features are part-of-speech, tense, noun-number, etc.
+
+   pos (ball, noun)
+   noun_number (ball, singular)
+   DEFINITE-FLAG (ball, T)
+   pos (throw, verb)
+   tense (throw, past)
+   person-FLAG (John, T)
+
+-- Other functions too: framing a la framenet, pronoun resolution.
+
+
+Parsed sentences as OpenCog hypergraphs
+=======================================
+-- Can be output directly from RelEx
+-- Can be quickly generated from a "compact parse format":
+   Allows parsed texts to be saved, input to opencog later.
+
+-- word instances are a special case of a word:
+   (ReferenceLink (stv 1.0 1.0)
+      (WordInstanceNode "John@df4398c5-7f03-45c9-bb30-85f715ba83c0")
+      (WordNode "John")
+   )
+
+-- word instances belong to a parse:
+   (WordInstanceLink (stv 1.0 1.0)
+      (WordInstanceNode "John@df4398c5-7f03-45c9-bb30-85f715ba83c0")
+      (ParseNode "sentence@235033cb-a934-4a57-8b0f-0307705ed931_parse_0")
+   )
+
+-- parses belong to a sentence; sentences belong to a document, etc.
+-- Link Grammar links:
+
+   (EvaluationLink (stv 1.0 1.0)
+      (LinkGrammarRelationshipNode "Os")
+      (ListLink
+         (WordInstanceNode "threw@e69139f2-6322-4836-9d8c-73ce8d1cf881")
+         (WordInstanceNode "ball@f6aa0e0a-fc4b-40f6-b5b9-2b441393bda5")
+      )
+   )
+
+-- Relex Relations:
+   ; _obj (<<throw>>, <<ball>>) 
+   (EvaluationLink (stv 1.0 1.0)
+      (DefinedLinguisticRelationshipNode "_obj")
+      (ListLink
+         (WordInstanceNode "threw@e69139f2-6322-4836-9d8c-73ce8d1cf881")
+         (WordInstanceNode "ball@f6aa0e0a-fc4b-40f6-b5b9-2b441393bda5")
+      )
+   )
+
+-- word features:
+   ; tense (throw, past)
+   (InheritanceLink (stv 1.0 1.0)
+      (WordInstanceNode "threw@e69139f2-6322-4836-9d8c-73ce8d1cf881")
+      (DefinedLinguisticConceptNode "past")
+   )
+
+-- Clearly very verbose; lots of information about the input sentences.
+
+
+"La Cogita" Chatbot
+===================
+bzr: opencog/nlp/chatbot/README
+
+-- A quick-n-dirty hookup of IRC to link-grammar/relex to OpenCog
+-- "remembers" what it was told.
+-- It was "told" about 5K simple assertions from the MIT ConceptNet
+   project: e.g. "Baseball is a sport".
+-- Can answer simple questions about what it was told, using hypergraph
+   pattern matching.
+-- Single-word replies, since NL generation not hooked up yet.
+
+
+Pattern matching
+================
+bzr: opencog/query/README
+
+-- Given a hypergraph, containing VariableNodes, find a matching 
+   hypegraph which "solves" or "grounds" the variables.
+
+-- Example: "Who threw a ball?"
+    _subj (<<throw>>, <<_$qVar>>)
+    _obj (<<throw>>, <<ball>>) 
+
+   is easily grounded by:
+   _subj (<<throw>>, <<John>>) 
+   _obj (<<throw>>, <<ball>>)
+
+   Answer to question: John.
+
+-- Example: "What did John throw?"
+
+    _subj (<<throw>>, <<John>>) 
+    _obj (<<throw>>, <<_$qVar>>) 
+
+    Answer to question: ball
+
+-- Pattern matcher is "completely general", works for any hypergraph,
+   not just NLP.
+
+-- Works vaguely like push-down automaton, maintains stack of partial
+   matches/groundings.  
+
+-- Final accept/reject of a potential match is determined by user callback,
+   and is thus configurable. 
+
+-- Solutions/groundings are reported via callback, too, so search can be
+   run to exhaustion, or terminated early.
+
+-- Can test for "optional" clauses, and/or absence of clauses (to reject
+   matches that also contain certain subgraphs).
 
 
 
