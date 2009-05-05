@@ -229,7 +229,7 @@ sub print_link
 	}
 	else
 	{
-		print "$indent   (WordNode \"$item1\")\n";
+		print_var_or_word_instance($item1, $indent . "   ");
 	}
 
 	if ($item2 =~ /^\$/)
@@ -246,7 +246,7 @@ sub print_link
 	}
 	else
 	{
-		print "$indent   (WordNode \"$item2\")\n";
+		print_var_or_word_instance($item2, $indent . "   ");
 	}
 	print "$indent)\n";
 }

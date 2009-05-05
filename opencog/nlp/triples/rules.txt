@@ -25,7 +25,7 @@
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; -----------------------------------------------------------
-;
+; 0
 ; Sentence: "Lisbon is the capital of Portugaul"
 ; var0=Lisbon, var1=capital var2=Portugaul
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
@@ -37,6 +37,7 @@
       ^ $phrase($word1, $prep)          ; convert to phrase
       THEN ^3_$phrase($var2, $var0) 
 
+; 1
 ; Sentence: "The capital of Germany is Berlin"
 ; var0=capital, var1=Berlin var2=Germany
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
@@ -51,6 +52,7 @@
 ; Note that the above rule is "reversed", in that, if the prep was
 ; dropped, it loooks like a backwards IsA statement.
 
+; 2
 ; Sentence: "The color of the sky is blue."
 ; var0=blue, var1=color, var2=sky  $prep=of
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
@@ -61,6 +63,7 @@
       ^ $phrase($word1, $prep)          ; convert to phrase
       THEN ^3_$phrase($var2, $var0) 
 
+; 3
 ; Sentence: "Pottery is made from clay."
 ; var0=make  var1=pottery var2=clay  prep=from
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
@@ -71,6 +74,7 @@
       ^ $phrase($word0, $prep)          ; convert to phrase
       THEN ^3_$phrase($var2, $var1) 
 
+; 4
 ; Sentence: "Yarn is made of fibers."
 ; var1=yarn  var2=fibers  phinst=made_of
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
@@ -80,6 +84,7 @@
       THEN ^3_$phrase($var2, $var1) 
 
 
+; 5
 ; Sentence: "The heart is in the chest." 
 ; also, "The garage is behind the house"
 ; var1=heart  var2=chest phinst=in
@@ -91,6 +96,7 @@
       ^ %ListLink($prep,$prword)
       THEN ^3_$prep($var2, $var1) 
 
+; 6
 ; Sentence "Berlin is a city"
 ; var1=Berlin var2=city
 ; Must be careful not to make the pattern too simple, as, for example,
@@ -100,9 +106,10 @@
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
-		^ _subj(be, $var1) ^ _obj(be, $var2)
+      ^ %WordInstanceLink(be,$sent)     ; hyp-flag "be" in same sentence
+      ^ _subj(be, $var1) ^ _obj(be, $var2)
       ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
-      ^ !HYP(be,T)                      ; Disallow "Is Berlin a city?"
+      ^ !HYP-FLAG(be)                   ; Disallow "Is Berlin a city?"
       THEN ^3_isa($var2, $var1) 
 
 ; Sentence "Men are mortal"
