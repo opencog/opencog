@@ -1,5 +1,5 @@
 /*
- * tests/query/BooleanUTest.cxxtest
+ * tests/query/Boolean2NotUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-class BooleanUTest :  public CxxTest::TestSuite
+class Boolean2NotUTest :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
@@ -40,7 +40,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 
 	public:
 
-		BooleanUTest(void)
+		Boolean2NotUTest(void)
 		{
 			try
 			{
@@ -58,7 +58,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~BooleanUTest()
+		~Boolean2NotUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -73,16 +73,18 @@ class BooleanUTest :  public CxxTest::TestSuite
 };
 
 /*
+ * Unlike the BooleanUTest, this test has two NOT statements in it.
  * This function sets up the following structures:
  *  # IF _subj(be, $var1) ^ 
  *       _obj(be, $var2) ^
- *        !DEFINITE-FLAG($var2)
+ *        !DEFINITE-FLAG($var2) ^
+ *        !HYP-FLAG(be)
  *      THEN ^3_isa($var1, $var2)
- * i.e. want to assure the *absence* of DEFINITE_FLAG
+ * i.e. want to assure the *absence* of DEFINITE_FLAG, and of HYP.
  */
 #define an as->addNode
 #define al as->addLink
-void BooleanUTest::setUp(void)
+void Boolean2NotUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
@@ -95,14 +97,14 @@ void BooleanUTest::setUp(void)
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_subj"),
 				al(LIST_LINK,
-					an(CONCEPT_NODE, "be"),
+					an(VARIABLE_NODE, "$winst"),
 					an(VARIABLE_NODE, "$var1")
 				)
 			),
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_obj"),
 				al(LIST_LINK,
-					an(CONCEPT_NODE, "be"),
+					an(VARIABLE_NODE, "$winst"),
 					an(VARIABLE_NODE, "$var2")
 				)
 			),
@@ -115,10 +117,24 @@ void BooleanUTest::setUp(void)
 				an(VARIABLE_NODE, "$var2"),
 				an(VARIABLE_NODE, "$sent")
 			),
+			al(MEMBER_LINK,
+				an(VARIABLE_NODE, "$winst"),
+				an(VARIABLE_NODE, "$sent")
+			),
+			al(CONTEXT_LINK,
+				an(VARIABLE_NODE, "$winst"),
+				an(CONCEPT_NODE, "be")
+			),
 			al(NOT_LINK,
 				al(INHERITANCE_LINK,
 					an(VARIABLE_NODE, "$var2"),
 					an(CONCEPT_NODE, "definite")
+				)
+			),
+			al(NOT_LINK,
+				al(INHERITANCE_LINK,
+					an(VARIABLE_NODE, "$winst"),
+					an(CONCEPT_NODE, "hyp")
 				)
 			)
 		),
@@ -140,7 +156,7 @@ void BooleanUTest::setUp(void)
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
-			an(CONCEPT_NODE, "be"),
+			an(CONCEPT_NODE, "be@1111"),
 			hberlin = an(CONCEPT_NODE, "Berlin")
 		),
 		TruthValue::TRUE_TV()
@@ -148,7 +164,7 @@ void BooleanUTest::setUp(void)
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
-			an(CONCEPT_NODE, "be"),
+			an(CONCEPT_NODE, "be@1111"),
 			hcity = an(CONCEPT_NODE, "city")
 		),
 		TruthValue::TRUE_TV()
@@ -163,44 +179,46 @@ void BooleanUTest::setUp(void)
 		an(CONCEPT_NODE, "sentence-AAA"),
 		TruthValue::TRUE_TV()
 	);
-
-	// Create data on which the above pattern should fail
-	al(INHERITANCE_LINK,
-		an(CONCEPT_NODE, "Spain"),
-		an(CONCEPT_NODE, "definite"),
+	al(MEMBER_LINK,
+		an(CONCEPT_NODE, "be@1111"),
+		an(CONCEPT_NODE, "sentence-AAA"),
 		TruthValue::TRUE_TV()
 	);
+	al(CONTEXT_LINK,
+		an(CONCEPT_NODE, "be@1111"),
+		an(CONCEPT_NODE, "be"),
+		TruthValue::TRUE_TV()
+	);
+
+	// Create data on which the above pattern should fail
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Madrid"),
 		an(CONCEPT_NODE, "definite"),
 		TruthValue::TRUE_TV()
 	);
 	al(INHERITANCE_LINK,
-		an(CONCEPT_NODE, "capital"),
-		an(CONCEPT_NODE, "definite"),
+		an(CONCEPT_NODE, "be@2222"),
+		an(CONCEPT_NODE, "hyp"),
+		TruthValue::TRUE_TV()
+	);
+	al(INHERITANCE_LINK,
+		an(CONCEPT_NODE, "be@2222"),
+		an(CONCEPT_NODE, "truth-query"),
 		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_subj"),
 		al(LIST_LINK,
-			an(CONCEPT_NODE, "be"),
-			an(CONCEPT_NODE, "capital")
+			an(CONCEPT_NODE, "be@2222"),
+			an(CONCEPT_NODE, "Madrid")
 		),
 		TruthValue::TRUE_TV()
 	);
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
-			an(CONCEPT_NODE, "be"),
-			an(CONCEPT_NODE, "Madrid")
-		),
-		TruthValue::TRUE_TV()
-	);
-	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "of"),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "capital"),
-			an(CONCEPT_NODE, "Spain")
+			an(CONCEPT_NODE, "be@2222"),
+			an(CONCEPT_NODE, "city")
 		),
 		TruthValue::TRUE_TV()
 	);
@@ -210,8 +228,18 @@ void BooleanUTest::setUp(void)
 		TruthValue::TRUE_TV()
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "capital"),
+		an(CONCEPT_NODE, "city"),
 		an(CONCEPT_NODE, "sentence-BBB"),
+		TruthValue::TRUE_TV()
+	);
+	al(MEMBER_LINK,
+		an(CONCEPT_NODE, "be@2222"),
+		an(CONCEPT_NODE, "sentence-BBB"),
+		TruthValue::TRUE_TV()
+	);
+	al(CONTEXT_LINK,
+		an(CONCEPT_NODE, "be@2222"),
+		an(CONCEPT_NODE, "be"),
 		TruthValue::TRUE_TV()
 	);
 }
@@ -233,7 +261,7 @@ void BooleanUTest::setUp(void)
 #define getarity(hand) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
 
-void BooleanUTest::test_isa(void)
+void Boolean2NotUTest::test_isa(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
