@@ -193,7 +193,7 @@ bzr: opencog/query/README
    matches/groundings.  
 
 -- Final accept/reject of a potential match is determined by user callback,
-   and is thus configurable. 
+   and is thus configurable.  NLP callbacks are in opencog/nlp/question/*.
 
 -- Solutions/groundings are reported via callback, too, so search can be
    run to exhaustion, or terminated early.
