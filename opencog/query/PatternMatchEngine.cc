@@ -281,7 +281,10 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 		}
 		else
 		{
-			// Else, start solving the next unsolved clause.
+			// Else, start solving the next unsolved clause. Note: this is
+			// a recursive call, and not a loop. Recursion is halted when
+			// the next unsolved calsue has no grounding.
+			//
 			// We continue our search at the atom that "joins" (is shared in common)
 			// between the previous (solved) clause, and this clause. If the "join"
 			// was a variable, look up its grounding; else the join is a 'real' atom.
@@ -296,9 +299,14 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 			// then report the failure of finding a solution now. If this was
 			// also the final optional clause, then in fact, we've got a 
 			// grounding for the whole thing ... report that!
-			if ((false == found) && 
-			    (false == clause_accepted) &&
-			    (optionals.count(curr_root)))
+			//
+			// Note that lack of a match halts recursion; thus, we can't
+			// depend on recursion to find additional unmatched optional 
+			// clauses; thus we have to explicitly loop over all optional
+			// clauses that don't have matches. 
+			while ((false == found) && 
+			       (false == clause_accepted) &&
+			       (optionals.count(curr_root)))
 			{
 				Atom *acl = TLB::getAtom(curr_pred_handle);
 				Link *lcl = dynamic_cast<Link *>(acl);
@@ -317,6 +325,15 @@ bool PatternMatchEngine::soln_up(Handle hsoln)
 					print_solution(var_grounding, clause_grounding);
 #endif
 					found = pmc->solution(clause_grounding, var_grounding);
+				}
+				else
+				{
+					// Now see if this optional clauses has any solutions,
+					// or not. If it does, we'll recurse. If it does not,
+					// we'll loop around back to here again.
+					clause_accepted = false;
+					curr_soln_handle = var_grounding[curr_pred_handle];
+					found = soln_up(curr_soln_handle);
 				}
 			}
 		}

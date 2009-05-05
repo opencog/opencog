@@ -148,6 +148,7 @@ void Boolean2NotUTest::setUp(void)
 	);
 
 	// Create data on which the above pattern should match
+	// This is an assertion "Berlin is a city"
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Berlin"),
 		an(CONCEPT_NODE, "definite"),
@@ -191,6 +192,9 @@ void Boolean2NotUTest::setUp(void)
 	);
 
 	// Create data on which the above pattern should fail
+	// This is a question: "Is Madrid a city?", and thus the copula "be"
+	// is labelled as "hyp". The pattern match should rehject the presence
+	// of this "hyp" clause.
 	al(INHERITANCE_LINK,
 		an(CONCEPT_NODE, "Madrid"),
 		an(CONCEPT_NODE, "definite"),
