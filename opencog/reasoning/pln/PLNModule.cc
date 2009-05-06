@@ -282,7 +282,7 @@ void Init()
 #endif
 
 template <typename T>
-T input(T& a, std::list<std::string> args)
+T input(T& a, std::list<std::string>& args)
 {
 //    T a;
     std::stringstream ss;
