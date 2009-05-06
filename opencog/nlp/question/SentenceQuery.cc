@@ -3,7 +3,7 @@
  *
  * Implement pattern matching for Sentence queries. 
  * A "Sentence query" is a sentence such as "What did Bob eat?"
- * RelEx generates a dependency graph for tthis sentence,  replacing 
+ * RelEx generates a dependency graph for this sentence,  replacing 
  * "What" by "$qVar". Pattern matching is used to find an identical
  * dependency graph, for which $qVar would have a grounding; e.g.
  * "Bob ate cake", so that $qVar is grounded as "cake", thus "solving"
@@ -16,7 +16,15 @@
  * by converting dependency graphs into semantic triples; the code below
  * show work for that case as well.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Strategy for truth-query questions:
+ * 1) Determine if question is of truth-query type.
+ * 2) Assume its a hypothetical copula (i.e. Is X a Y?)
+ * 3) pattern-match the triple:
+ *    is-a(city, Madrid) to hyp-is-a(city, Madrid)
+ * 4) Accept only the above, return yes, no.
+ *
+ *
+ * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -43,6 +51,8 @@
 
 using namespace opencog;
 
+/* ================================================================= */
+/* Determine if the sentence is an ordinary query (e.g. what is X?) */
 
 bool SentenceQuery::is_wordlist_a_query(Handle wordlist)
 {
@@ -52,20 +62,47 @@ bool SentenceQuery::is_wordlist_a_query(Handle wordlist)
 
 bool SentenceQuery::is_parse_a_query(Handle parse)
 {
-	return foreach_binary_link(parse, REFERENCE_LINK, &SentenceQuery::is_wordlist_a_query, this);
+	return foreach_binary_link(parse, REFERENCE_LINK, 
+                             &SentenceQuery::is_wordlist_a_query, this);
+}
+
+/**
+ * Return true if the atom is a DefinedLinguisticConceptNode
+ * whose name is "truth-query".
+ */
+bool SentenceQuery::is_tq(Handle prop)
+{
+	Atom *atom = TLB::getAtom(prop);
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+
+	Node *n = static_cast<Node *>(atom);
+	const std::string& name = n->getName();
+	const char * str = name.c_str();
+	if (0 == strcmp(str, "truth-query"))
+		return true;
+	return false;
+}
+
+/**
+ * Return true if the indicated parse has the "truth-query" flag set.
+ */
+bool SentenceQuery::is_parse_a_truth_query(Handle parse)
+{
+	return foreach_binary_link(parse, INHERITANCE_LINK, 
+	                           &SentenceQuery::is_tq, this);
 }
 
 /**
  * Return true if sentence has a parse which is a query.
  * The input argument is a handle to a SentenceNode.
  *
- * A simple check is made: does the sentence have
- * a _$qVar in it?
+ * Two checks are made: for sentences taht are simple queries,
+ * and for truth queries. Simple queries have the form "Who did X?"
+ * while truth queries ask for yes/no responses: "Is X a Y?"
  *
- * The pattern check here is trivial, in that a sentence
- * that contains (DefinedLinguisticConceptNode "_$qVar") will be assumed
- * to be a query.  Perhaps something more sophisticated may
- * be desired eventually.
+ * Simple queries have a _$qVar in them, specifically, a 
+ * DefinedLinguisticConceptNode "_$qVar"
+ * Truth queries are tagged by rules in the triples directory.
  *
  * Current structure of a question is as follows:
  *
@@ -95,7 +132,12 @@ bool SentenceQuery::is_parse_a_query(Handle parse)
  */
 bool SentenceQuery::is_query(Handle h)
 {
-	return foreach_reverse_binary_link(h, PARSE_LINK, &SentenceQuery::is_parse_a_query, this);
+	bool rc = foreach_reverse_binary_link(h, PARSE_LINK, 
+	                         &SentenceQuery::is_parse_a_query, this);
+
+	if (rc) return true;
+	return foreach_reverse_binary_link(h, PARSE_LINK,
+	                          &SentenceQuery::is_parse_a_truth_query, this);
 }
 
 /* ================================================================= */

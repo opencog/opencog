@@ -284,7 +284,12 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 
 	// DefinedLinguisticRelation nodes must match exactly;
 	// so if we are here, there's already a mismatch.
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) return true;
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype)
+	{
+printf ("duude comp deflin %s to %s\n", npat->getName().c_str(),
+nsoln->getName().c_str());
+		return true;
+	}
 
 	// Word instances match only if they have the same word lemma.
 	if (WORD_INSTANCE_NODE == soltype)
