@@ -66,7 +66,7 @@ lib/opencog4.conf configuration file, which sets the correct port,
 silences the opencog prompt, and loads the needed scheme files.
 
 In addition, triples-processing, described in step 4 below, requires
-that the shell script opencog/nlp/triples/load4.sh be run.
+that the shell script opencog/nlp/triples/load-chatbot.sh be run.
 
 To enable the common-sense database (described in step 5), you must
 first create and populate the database. This can be done from scratch,
@@ -76,7 +76,7 @@ or by using a database dump, obtained from
 
 The database should be created and populated, as described in 
 opencog/nlp/triples/README.  Then, after starting opencog, but *before*
-running load4.sh, telnet to the cogserver, and open the database:
+running load-chatbot.sh, telnet to the cogserver, and open the database:
 
      $ telnet localhost 17004
      cog-server> sql-open <dbname> <userid> <passwd>
@@ -85,7 +85,7 @@ For example:
 
      cog-server> sql-open triples linas asdf
 
-The do the load4.sh. The system is now ready to do question-answering.
+Then do the load-chatbot.sh. The system is now ready to do question-answering.
 
 
 Architecture:
