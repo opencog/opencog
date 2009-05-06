@@ -1,8 +1,19 @@
+;
+; question-tags.txt
+;
+; Add tags describing what kind of sentence this is ... in particular,
+; add tags to indicate if this sentence is a question, and what kind
+; of question.
+;
+; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+;
+; --------------------------------------------------------------------
 ; Sentence "Is Berlin a city?"
+; This is a "truth-query" type sentence, looking for a yes/no answer.
 ;
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
-      ^ %WordInstanceLink(be,$sent)     ; Find sentence
-      ^ HYP-FLAG(be)                    ; Loot for hypothetical copula
+      ^ %WordInstanceLink(be,$sent)     ; copula "be" must be in sentence
+      ^ HYP-FLAG(be)                    ; Look for hypothetical copula
       THEN ^3_truth-query($sent) 
 
 

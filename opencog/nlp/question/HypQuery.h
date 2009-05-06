@@ -33,12 +33,12 @@ class HypQuery
 	private:
 
 	protected:
-		bool is_word_a_query(Handle);
-		bool is_truth_query(Handle);
+		bool is_tq(Handle);
 		AtomSpace *atom_space;
 	public:
 		HypQuery(void);
 		virtual ~HypQuery();
+		bool is_truth_query(Handle);
 };
 
 } // namespace opencog

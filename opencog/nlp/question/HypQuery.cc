@@ -39,9 +39,13 @@ HypQuery::~HypQuery()
 {
 }
 
-bool HypQuery::is_truth_query(Handle word_prop)
+/**
+ * Return true if the atom is a DefinedLinguisticConceptNode
+ * whose name is "truth-query".
+ */
+bool HypQuery::is_tq(Handle prop)
 {
-	Atom *atom = TLB::getAtom(word_prop);
+	Atom *atom = TLB::getAtom(prop);
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
 
 	Node *n = static_cast<Node *>(atom);
@@ -53,12 +57,12 @@ bool HypQuery::is_truth_query(Handle word_prop)
 }
 
 /**
- * Return true if the indicated word-instance has the "truth-query" 
+ * Return true if the indicated parse has the "truth-query" 
  * flag set.
  */
-bool HypQuery::is_word_a_query(Handle word_inst)
+bool HypQuery::is_truth_query(Handle parse)
 {
-	return foreach_binary_link(word_inst, INHERITANCE_LINK, &HypQuery::is_truth_query, this);
+	return foreach_binary_link(parse, INHERITANCE_LINK, &HypQuery::is_tq, this);
 }
 
 /**
