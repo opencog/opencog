@@ -1,0 +1,8 @@
+; Sentence "Is Berlin a city?"
+;
+# IF %ListLink("# APPLY TRIPLE RULES", $sent)
+      ^ %WordInstanceLink(be,$sent)     ; Find sentence
+      ^ HYP-FLAG(be)                    ; Loot for hypothetical copula
+      THEN ^3_truth-query($sent) 
+
+

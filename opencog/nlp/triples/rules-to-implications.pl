@@ -43,7 +43,7 @@ sub parse_clause
 
 	# Pull the three parts out of the clause.
 	# The pattern matches "blah(ding,dong)"
-	$clause =~ m/\s*([\$\!%:\&\-\w]+)\s*\(\s*([\$%#\"\-\w\s]+)\s*\,\s*([\$%#\"\-\w\s]+)\s*\)(.*)/;
+	$clause =~ m/^\s*([\$\!%\:\&\-\w]+)\s*\(\s*([\$%#\"\-\w\s]+)\s*\,\s*([\$%#\"\-\w\s]+)\s*\)(.*)$/;
 	my $pred = $1;
 	my $item1 = $2;
 	my $item2 = $3;
@@ -51,11 +51,13 @@ sub parse_clause
 
 	my @parts = ();
 
-	# if above failed, then its a double.
-	if ($pred eq "")
+	# If the above pattern-match failed, then its a double.
+	# Note that, sometimes when the match fails, $1 contains garbage.
+	# This seems to be a perl bug. But $2 and $3 will still be empty
+	if ($pred eq "" || $item1 eq "" || $item2 eq "")
 	{
 		# The pattern matches "blah(ding)"
-		$clause =~ m/\s*([\$!%\-\w]+)\s*\(\s*([\$%\-\w]+)\s*\)(.*)/;
+		$clause =~ m/^\s*([\$!%\-\w]+)\s*\(\s*([\$%#\-\w]+)\s*\)(.*)$/;
 		$pred = $1;
 		$item1 = $2;
 		$rest = $3;
@@ -381,7 +383,7 @@ sub parse_rule
 	print_word_instances("      ");
 	print "   )  ;; AndLink\n";  # closing paren to AndLink
 
-	# We are done with the and link. Move on to the implicand.
+	# We are done with the AndLink. Move on to the implicand.
 	while (1)
 	{
 		# First, strip out the author tag.
@@ -391,9 +393,19 @@ sub parse_rule
 		# Now, separate multiple clauses. Unfortunately, the syntax
 		# only uses space separator between clauses, so we must
 		# parse them to find thier boundaries.
-		my ($p, $i1, $i2, $implicand) = parse_clause($implicand);
-		my $clause = $p . "(" . $i1 . ", " . $i2 . ")";
-		$implicand = $4;
+		my @parts = parse_clause($implicand);
+		$implicand = pop @parts;
+		my $clause;
+		if ($#parts == 1)
+		{
+			my ($p, $i1, $implicand) = @parts;
+			$clause = $p . "(" . $i1 . ")";
+		}
+		else
+		{
+			my ($p, $i1, $i2, $implicand) = @parts;
+			$clause = $p . "(" . $i1 . ", " . $i2 . ")";
+		}
 
 		if ($clause =~ /\&/)
 		{
