@@ -1,7 +1,7 @@
 
                              OpenCog NLP Tutorial
                              --------------------
-                                 April 2009
+                                 May 2009
                      Linas Vepstas <linasvepstas@gmail.com>
 
 
@@ -44,6 +44,7 @@ http://www.abisource.com/projects/link-grammar/
    e.g. threw: S- & O+  means that verb "threw" must have
    subject on left, object on right.
 -- Parser arranges puzzle pieces until all fit together.
+-- Disjuncts form context-free grammar.
 
 
 RelEx is a dependency relation extractor
@@ -153,10 +154,10 @@ bzr: opencog/nlp/chatbot/README
 -- It was "told" about 5K simple assertions from the MIT ConceptNet
    project: e.g. "Baseball is a sport".
 -- Can answer simple questions about what it was told, using hypergraph
-   pattern matching.
+   pattern matching. 
 -- Single-word replies, since NL generation not hooked up yet.
 
--- NO REASONING WHATSOEVER. Chatbot is as dumb as a rock!
+-- NO REASONING, INFERENCE WHATSOEVER. Chatbot is as dumb as a rock!
 
 
 Pattern matching
@@ -286,6 +287,7 @@ Common-sense Reasoning
 
 Important things this tutorial did not cover:
 =============================================
+-- Many link-grammar details, including post-grocessing, SAT solver
 -- Framenet-like markup in RelEx
 -- Pronoun resolution in RelEx
 -- Word-sense disambiguation in OpenCog.

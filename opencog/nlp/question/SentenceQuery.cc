@@ -56,8 +56,15 @@ using namespace opencog;
 
 bool SentenceQuery::is_wordlist_a_query(Handle wordlist)
 {
-	return foreach_outgoing_handle(wordlist, &SentenceQuery::is_word_a_query,
-		(WordRelQuery*) this);
+	bool rc = foreach_outgoing_handle(wordlist, 
+	              &SentenceQuery::is_word_a_query, (WordRelQuery*) this);
+	if (rc) return true;
+
+	rc = foreach_outgoing_handle(wordlist, 
+	              &SentenceQuery::is_parse_a_truth_query, this);
+
+	if (rc) its_tq = true;
+	return rc;
 }
 
 bool SentenceQuery::is_parse_a_query(Handle parse)
@@ -132,6 +139,7 @@ bool SentenceQuery::is_parse_a_truth_query(Handle parse)
  */
 bool SentenceQuery::is_query(Handle h)
 {
+	its_tq = false;
 	bool rc = foreach_reverse_binary_link(h, PARSE_LINK, 
 	                         &SentenceQuery::is_parse_a_query, this);
 

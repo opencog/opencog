@@ -5,6 +5,10 @@
 ; add tags to indicate if this sentence is a question, and what kind
 ; of question.
 ;
+; XXX this code is not currently used. Tagging during triples search 
+; is too late.  This code should probably be moved to the chatbot
+; dir, because only the chatbot needs this, just righht now. XXX
+;
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------

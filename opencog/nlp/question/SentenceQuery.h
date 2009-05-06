@@ -47,6 +47,7 @@ class SentenceQuery :
 		bool discard_extra_markup(Atom *);
 
 		// Help determine if assertion is a query.
+		bool its_tq;
 		bool is_tq(Handle);
 		bool is_parse_a_query(Handle);
 		bool is_parse_a_truth_query(Handle);
