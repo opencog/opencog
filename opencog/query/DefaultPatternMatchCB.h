@@ -16,7 +16,7 @@ namespace opencog {
 
 /**
  * Callback mixin class, used to provide a default node and link
- * matching behaviour. This class is stile a pure virtual class,
+ * matching behaviour. This class is still a pure virtual class,
  * since it does not implement the solution method.
  *
  * The *only* thing it provides is node and link matching; it does
@@ -75,6 +75,18 @@ class DefaultPatternMatchCB :
 			    (pattype != soltype)) return true;
 			return false;
 		}
+
+		virtual void perform_search(PatternMatchEngine *,
+		                            const std::vector<Handle> &vars,
+		                            const std::vector<Handle> &clauses,
+		                            const std::vector<Handle> &negations);
+
+	private:
+		Handle root;
+		Handle starter_pred;
+		Handle find_starter(Handle);
+		bool loop_candidate(Handle);
+		PatternMatchEngine *pme;
 };
 
 } // namespace opencog

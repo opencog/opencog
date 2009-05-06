@@ -67,8 +67,9 @@ void TripleQuery::solve(AtomSpace *as)
 
 	// Some bad relex parses fail to actually have query variables
 	// in them. If there are no variables, don't bother looking for
-	// a solution.
-	if (0 == bound_vars.size()) return;
+	// a solution.  XXX Except that this won't actually work, because
+	// yes/no questions will have no query variables, e.g. Did X do Y?
+	// if (0 == bound_vars.size()) return;
 
 	atom_space = as;
 	if (pme) delete pme;

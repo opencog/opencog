@@ -29,6 +29,7 @@
 #include <opencog/atomspace/Node.h>
 
 namespace opencog {
+class PatternMatchEngine;
 
 /**
  * Callback interface, used to implement specifics of hypergraph
@@ -119,6 +120,18 @@ class PatternMatchCallback
 		 * if needed.
 		 */
 		virtual void pop(void) {}
+
+		/**
+		 * Called to start search. Must iterate over the portion of the
+		 * atomspace in which the solution will be looked for.  This
+		 * callback can be used to limit how much ot the atomspace is
+		 * search, as well as controlling the initial starting points
+		 * for the search.
+		 */
+		virtual void perform_search(PatternMatchEngine *,
+		                            const std::vector<Handle> &vars,
+		                            const std::vector<Handle> &clauses,
+		                            const std::vector<Handle> &negations) = 0;
 };
 
 } // namespace opencog

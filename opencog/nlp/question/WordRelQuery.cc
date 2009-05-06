@@ -273,11 +273,14 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
  */
 bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 {
+printf ("duude node matchhhhhhhhhhh %s to %s\n", npat->getName().c_str(),
+nsoln->getName().c_str());
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
 	Type pattype = npat->getType();
 	Type soltype = nsoln->getType();
+printf ("duuuude node match!! %d %d\n", pattype, soltype);
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
 	    (WORD_INSTANCE_NODE != soltype)) return true;

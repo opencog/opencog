@@ -63,12 +63,6 @@ class PatternMatchEngine
 		bool note_root(Handle);
 		
 		// -------------------------------------------
-		// Examine each candidate for a match, in turn.
-		bool do_candidate(Handle);
-
-		Handle find_starter(Handle);
-		Handle starter_pred;
-
 		// Recurisve tree comparison algorithm.
 		bool tree_compare(Atom *, Atom *);
 		int depth;  // recursion depth for tree_compare.
@@ -111,6 +105,10 @@ class PatternMatchEngine
 	public:
 		PatternMatchEngine(void);
 		void set_atomspace(AtomSpace *);
+		AtomSpace * get_atomspace(void) { return atom_space; } 
+
+		// Examine each candidate for a match, in turn.
+		bool do_candidate(Handle, Handle, Handle);
 
 		void match(PatternMatchCallback *,
 		           const std::vector<Handle> &vars,

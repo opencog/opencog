@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_LIBRARY(query SHARED
+	DefaultPatternMatchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
 )

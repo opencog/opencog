@@ -23,7 +23,6 @@
 
 #include "PatternMatchEngine.h"
 
-#include <opencog/util/platform.h>
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/ForeachTwo.h>
 #include <opencog/atomspace/Link.h>
@@ -32,7 +31,7 @@
 
 using namespace opencog;
 
-// #define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #ifdef DEBUG
 	#define dbgprt printf
@@ -516,28 +515,6 @@ void PatternMatchEngine::get_next_untried_clause(void)
 
 /* ======================================================== */
 
-Handle PatternMatchEngine::find_starter(Handle h)
-{
-	Atom *a = TLB::getAtom(h);
-	Link *l = dynamic_cast<Link *>(a);
-	if (NULL == l)
-	{
-		Type t = a->getType();
-		if (t != VARIABLE_NODE) return h;
-		return Handle::UNDEFINED;
-	}
-
-	curr_pred_handle = h;
-	const std::vector<Handle> &vh = l->getOutgoingSet();
-	for (size_t i = 0; i < vh.size(); i++) {
-		Handle hout = vh[i];
-		Handle s = find_starter(hout);
-		if (s != Handle::UNDEFINED) return s;
-	}
-
-	return Handle::UNDEFINED;
-}
-
 /**
  * do_candidate - examine candidates, looking for matches.
  *
@@ -545,7 +522,7 @@ Handle PatternMatchEngine::find_starter(Handle h)
  * the atom space. That atom is assumed to anchor some part of
  * a graph that hopefully will match the predicate.
  */
-bool PatternMatchEngine::do_candidate(Handle ah)
+bool PatternMatchEngine::do_candidate(Handle do_clause, Handle starter, Handle ah)
 {
 	// Cleanup
 	var_grounding.clear();
@@ -559,8 +536,8 @@ bool PatternMatchEngine::do_candidate(Handle ah)
 	while(!issued_stack.empty()) issued_stack.pop();
 
 	// Match the required clauses.
-	curr_root = cnf_clauses[0];
-	curr_pred_handle = starter_pred;
+	curr_root = do_clause;
+	curr_pred_handle = starter;
 	issued.insert(curr_root);
 	bool found = soln_up(ah);
 
@@ -688,34 +665,16 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 			printf(" Bound var: "); prt(a);
 		}
 	}
+
+	if (0 == bound_vars.size())
+	{
+		printf("There are no bound vars in this pattern\n");
+	}
+	printf("\n");
 #endif
 
-	// Ideally, we start our search at some node, any node, that is
-	// not a variable, that is in the first clause. If the first
-	// clause consists entirely of variable nodes, then we are 
-	// screwed, and must search over all links that have the same 
-	// type as the first clause.
-	Handle h = cnf_clauses[0];
-	curr_root = h;
-	Handle start = find_starter(h);
-	if (Handle::UNDEFINED != start)
-	{
-		starter_pred = curr_pred_handle;
-		foreach_incoming_handle(start, &PatternMatchEngine::do_candidate, this);
-	}
-	else
-	{
-		starter_pred = curr_root;
-
-		// Get type of the first item in the predicate list.
-		Atom *a = TLB::getAtom(h);
-		Type ptype = a->getType();
-
-		// Plunge into the deep end - start looking at all viable
-		// candidates in the AtomSpace.
-		atom_space->foreach_handle_of_type(ptype,
-		      &PatternMatchEngine::do_candidate, this);
-	}
+	// Perform the actual search!
+	cb->perform_search(this, vars, clauses,negations); 
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG
