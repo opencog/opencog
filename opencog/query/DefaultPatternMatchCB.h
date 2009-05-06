@@ -76,6 +76,11 @@ class DefaultPatternMatchCB :
 			return false;
 		}
 
+		/**
+		 * Called to perform the actual search. This makes some default
+		 * assumptions about the kind of things that might be matched,
+		 * in order to drive a reasonably-fast search.
+		 */
 		virtual void perform_search(PatternMatchEngine *,
 		                            const std::vector<Handle> &vars,
 		                            const std::vector<Handle> &clauses,

@@ -60,6 +60,42 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
 }
 
 /**
+ * Search for solutions/groundings over all of the AtomSpace, using
+ * some "reasonable" assumptions for what might be searched for. Or,
+ * to put it bluntly, this search method *might* miss some possible 
+ * solutions, for certain "unusual" search types. The trade-off is
+ * that this search algo should really be quite fast for "normal"
+ * search types.
+ *
+ * This search algo makes the following (important) assumptions:
+ *
+ * 1) If there are no variables in the clasues, then this will search
+ *    over all links which have the same type as the first clause. 
+ *    Clearly, this kind of search can fail if link_match() callback
+ *    was prepared to accept other link types as well.
+ *
+ * 2) If there are variables, then the search will begin at the first
+ *    non-variable node in the first clause.  The search will proceed
+ *    by exploring the entire incoming-set for this node, but no farther.
+ *    If the node_match() callback is willing to accept a broader range
+ *    of node matches, esp for this initial node, then many possible
+ *    solutions will be missed.
+ *
+ * 3) If the clauses consist entirely of variables, the same search
+ *    as described in 1) will be performed.
+ *
+ * The above describes the limits to the "typical" search that this
+ * algo can do well. In particular, if the constraint of 2) can be met,
+ * then the search can be quite rapid, since incoming sets are often 
+ * quite small; and assumption 2) limits the search to "nearby", 
+ * connected atoms.
+ *
+ * When assumption 2) fails, you will scrtach your head, thinking
+ * "why did my search fail to find this obvious solution?" The answer
+ * will be for you to create a new search algo, in a new class, that
+ * overloads this one, and does what you want it to.  This class should
+ * probably *not* be modified, since it is quite efficient for the 
+ * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
                          const std::vector<Handle> &vars,
@@ -67,6 +103,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
                          const std::vector<Handle> &negations)
 {
 	pme = _pme;
+
 	// Ideally, we start our search at some node, any node, that is
 	// not a variable, that is in the first clause. If the first
 	// clause consists entirely of variable nodes, then we are 
