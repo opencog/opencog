@@ -273,25 +273,27 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
  */
 bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 {
-printf ("duude node matchhhhhhhhhhh %s to %s\n", npat->getName().c_str(),
-nsoln->getName().c_str());
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
 	Type pattype = npat->getType();
 	Type soltype = nsoln->getType();
-printf ("duuuude node match!! %d %d\n", pattype, soltype);
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
 	    (WORD_INSTANCE_NODE != soltype)) return true;
 
-	// DefinedLinguisticRelation nodes must match exactly;
-	// so if we are here, there's already a mismatch.
+	// DefinedLinguisticRelation nodes must usually match exactly;
+	// so if we are here, there's probably already a mismatch.
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype)
 	{
-printf ("duude comp deflin %s to %s\n", npat->getName().c_str(),
-nsoln->getName().c_str());
-		return true;
+		const char *spat = npat->getName().c_str();
+		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return true;
+		const char *ssol = npat->getName().c_str();
+		if (strcmp("isa", ssol) && strcmp("hypothetical_isa", ssol)) return true;
+
+		// If we got to here then we matched isa to isa or hypothetical_isa,
+		// and that's all good.  Err.. XXX bad if not a question, but whatever.
+		return false;
 	}
 
 	// Word instances match only if they have the same word lemma.
@@ -384,20 +386,30 @@ bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
 	// XXX this needs to be replaced in the end, for now its just a cheesy
 	// hack to pass data back to scheme.
 	Handle hq = atom_space->addNode(ANCHOR_NODE, "# QUERY SOLUTION");
-	Handle hv = bound_vars[0];
-	Handle ha = var_grounding[hv];
 
-	Atom *wrd = TLB::getAtom(ha);
-	if (WORD_INSTANCE_NODE == wrd->getType())
+	if (0 < bound_vars.size())
 	{
-		wrd = fl.follow_binary_link(wrd, REFERENCE_LINK);
-	}
-	Node *n = dynamic_cast<Node *>(wrd);
-	if (!n) return false;
-	printf("duude answer=%s\n", n->getName().c_str());
+		Handle hv = bound_vars[0];
+		Handle ha = var_grounding[hv];
+	
+		Atom *wrd = TLB::getAtom(ha);
+		if (WORD_INSTANCE_NODE == wrd->getType())
+		{
+			wrd = fl.follow_binary_link(wrd, REFERENCE_LINK);
+		}
+		Node *n = dynamic_cast<Node *>(wrd);
+		if (!n) return false;
+		printf("duude answer=%s\n", n->getName().c_str());
 
-	Handle hw = TLB::getHandle(wrd);
-	atom_space->addLink(LIST_LINK, hq, hw);
+		Handle hw = TLB::getHandle(wrd);
+		atom_space->addLink(LIST_LINK, hq, hw);
+	}
+	else
+	{
+		// Cheesy hack to report "yes" to yes/no questions.
+		Handle hw = atom_space->addNode(WORD_NODE, "yes");
+		atom_space->addLink(LIST_LINK, hq, hw);
+	}
 	
 	return false;
 }
