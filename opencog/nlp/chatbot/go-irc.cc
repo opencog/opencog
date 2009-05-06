@@ -141,7 +141,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		}
 	}
 
-#define ENABLE_SHELL_ESCAPES 1
+#define ENABLE_SHELL_ESCAPES 0
 #ifdef ENABLE_SHELL_ESCAPES
 	/*
 	 * XXX DANGER DANGER Extreme Caution Advised XXX
