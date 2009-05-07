@@ -47,8 +47,16 @@ namespace opencog
 
 class CogServer;
 
+/** SpreadDeciders determiner whether a particular atom will diffuse STI
+ */
 class SpreadDecider
 {
+    //! This is the function that subclasses implement to determine
+    //! the probility of whether an atom will spread importance based
+    //! on it's STI value.
+    //!
+    //! @param s The STI to base the decision on.
+    //! @return Probability of given STI value resulting in spread.
     virtual float function(AttentionValue::sti_t s) = 0;
 
 protected:
@@ -58,24 +66,65 @@ public:
     SpreadDecider() {}
     virtual ~SpreadDecider() {}
 
+    //! Set the focus boundary, which is used for centralising
+    //! the the spread decision function. Note that this is in relation to the
+    //! AtomSpace AttentionFocusBoundary as it's defined in terms of
+    //! normalised STI.
+    //!
+    //! @param b the -1..1 normalised boundary position. 0 = AtomSpace
+    //! AttentionalFocusBoundary.
     virtual void setFocusBoundary(float b = 0.0f) {};
+
+    //! Get the random number generator for the SpreadDecider
+    //!
+    //! @return pointer to the SpreadDecider RNG.
     RandGen* getRNG();
 
+    //! This is interface to determine whether a certain STI value should 
+    //! result in an atom spreading it's importance.
+    //!
+    //! @param s The STI to base the decision on.
+    //! @return Whether to spread this importance.
     bool spreadDecision(AttentionValue::sti_t s);
 };
 
+/** Hyperbolic spread decider.
+ * Uses the following function to return a probability of
+ * spread when spreadDecision is called:
+ * \f[
+ *    P(\mathrm{spread}) = \frac{\mathrm{tanh}(shape\frac{STI_{0..1}}{b_{0..1}})+1}{2}
+ * \f]
+ * where \f$shape\f$ is the shape of the decision function, \f$STI_{0..1}\f$
+ * and \f$b_{0..1}\f$ are the STI (for making a decision on) and the
+ * focusBoundary (both normalised to the range \f$[0..1]\f$).
+ */
 class HyperbolicDecider : SpreadDecider
 {
+    //! Implements the hyperbolic function for returning a probability of
+    //! spread.
+    //!
+    //! @param s The STI to base the decision on.
+    //! @return Probability of given STI value resulting in spread.
     float function(AttentionValue::sti_t s);
+
 public:
+    //! Used to determine the steepness of the hyperbolic decision function.
     float shape;
+
+    //! The decision focus boundary, or where the decision function is centred
+    //! around.
     float focusBoundary;
+
     HyperbolicDecider(float _s=10.0f):
         shape(_s), focusBoundary(0.0f) {}
+
     virtual ~HyperbolicDecider() {}
     void setFocusBoundary(float b = 0.0f);
 };
 
+/** A basic spread decider based on a step function.
+ * I.e. any value above focusBoundary will return \f$P(\mathrm{spread}) = 1\f$.
+ */
 class StepDecider : SpreadDecider
 {
     float function(AttentionValue::sti_t s);
