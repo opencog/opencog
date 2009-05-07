@@ -52,7 +52,7 @@ pipeline
  -- Input of English language sentences
  -- parsing by Link Grammar parser
  -- dependency relations built by RelEx
- -- framenet relations build by RelEx
+ -- framenet context built by RelEx
  -- import into OpenCog
  -- semantic triple extraction within opencog
  -- "question comprehension" within opencog
@@ -67,7 +67,7 @@ kinds of patterns that are searched for, and the sophistication of the
 pattens themselves.  These are:
 
  -- Pattern matching of RelEx dependency grammar expressions
- -- Pattern matching of FrameNet semantic frames
+ -- Pattern matching of FrameNet context frames
  -- Pattern matching on "semantic triples"
  -- "Question comprehension" by extracting question patterns
 
@@ -88,17 +88,56 @@ threw a ball"
     _obj(throw, ball)
 
 From this, one can immediately induce that _$qVar == ball and thus the
-answer is "ball".
+answer is "ball".  This level of pattern matching fails when the
+question has a different syntactic structure than the answer: for
+example: "What is the thing that John threw?"
+
+    _subj(throw, John)
+    _obj(throw, thing) 
+    _subj(be, _$qVar) 
+    _obj(be, thing)
+
+This question asserts that John threw a thing, and simultaneously asks
+what that thing is. The dependency-grammar graph of the question is
+completely different than the answer.  Thus, a more abstract 
+representation of both the question, and the answer, is needed.
+
+One attempt at this abstraction is to decorate the basic parse with
+FrameNet-style contextual markup.  Unfortunately, the markup that is
+provided by RelEx is not very accurate, and introduces a lot of "noise"
+into the overall structure. Properly matching in the presence of this
+noise appears to be difficult.  Thus, some kind of mechanism, outside
+of the scope of query processing, seems to be required to firm up the
+accuracy of the context frames.
+
+An alternate attempt at this abstraction is to convert dependency parses
+into "semantic triples", similar in structure to John Sowa's "conceptual
+nets", or the broader notion of the "semantic web".  This is 
+(superficially) promising because it can re-express direct statements
+into semantic or ontological relations; these can be operated on by 
+theorem provers, resoning systems, etc. So, for example, both "Berlin
+is the capital of Germany" and "The capital of Germany is Berlin" can
+be expressed as a triple "capital_of(Germany,Berlin)", even though the
+two dependency parses are quite different.  Furthermore, direct 
+assertions such as this can be directly compared to databases of 
+retained knowledge about capitals, countries and cities.  Simple
+pattern matching can work, becuase "What is the capital of Germany?"
+becomes "capital_of(Germany, _$qVar)"
+
+However, even this approach fails for more complex questions, and even
+questions as simple as yes/no questions: "Is Berlin the capital of 
+Germany?"  This is because there are no explicit, bound variables in
+the question (no "who/what/where/why/when") to resolve.  The truth-query
+question is a hypothetical statement, asking for the truth of the
+hypothesis. Forward progress here depends on "question comprehension":
+on recognizing the structure of the question, analyzing what it is
+asking for, and only then attempting to find an answer.
 
 
-Thus, a looser matching, based on deeper semantic understanding,
-is desirable.  This is afforded by using the semantic framing 
-matcher.
-
-
-RelEx pattern matching
-----------------------
-A detailed example of RelEx relationship matching follows.
+RelEx Dependency Parse Pattern Matching
+---------------------------------------
+A detailed example of using RelEx dependency parses to provide answers
+by relationship matching follows.
 
 "John threw a ball."
 
@@ -144,22 +183,6 @@ exact matches, and not merely similarities.  Thus, query processing
 will fail without exact matches. A mechanism will be needed for handling
 "similar" statements with similar meanings.
 
-Yes/No questions
-----------------
-"Did John throw a rock?"
-
- _subj(throw, John)
- _obj(throw, rock)
- HYP (throw, T)
- TRUTH-QUERY-FLAG (throw, T)
- TRUTH-QUERY-FLAG (rock, T)
-
-Suggests a pattern-based approach:
-  # IF _subj($vrb, $sb) ^
-       _obj ($vrb, $ob) ^
-       HYP($vrb)
-    THEN answer "yes" if match ... 
-
 Copula troubles:
 ----------------
 Intensional/extensional inheritance causes problems for 
@@ -174,9 +197,8 @@ noun_number(length, singular)
 noun_number(fiber, plural)
 noun_number(yarn, uncountable)
 
-
 Yarn is what?
-(fails to parse in link-grammar)
+(fails to parse in current link-grammar)
 
 What is yarn?
 
@@ -263,6 +285,9 @@ _subj(be, yarn)
 are valid forms for the question. The second one should be
 more common, but its not the one being generated. There 
 should probably be a frame rule to reverse this order.
+
+Alternately: perhaps triples processing (discussed below) should be
+done *before* frame annotation.
 
 ============
 Step back; look at frame matching in a simpler example.
@@ -533,6 +558,22 @@ _obj (<<be>>, <<car>>)
 QUERY-TYPE (_$qVar, what)
 
 note the borken parse -- missing connection to qVar.
+
+Yes/No questions
+----------------
+"Did John throw a rock?"
+
+ _subj(throw, John)
+ _obj(throw, rock)
+ HYP (throw, T)
+ TRUTH-QUERY-FLAG (throw, T)
+ TRUTH-QUERY-FLAG (rock, T)
+
+Suggests a pattern-based approach:
+  # IF _subj($vrb, $sb) ^
+       _obj ($vrb, $ob) ^
+       HYP($vrb)
+    THEN answer "yes" if match ... 
 
 
 References
