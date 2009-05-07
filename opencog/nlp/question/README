@@ -141,31 +141,31 @@ by relationship matching follows.
 
 "John threw a ball."
 
-_subj(throw, John)
-_obj(throw, ball)
-tense(throw, past)
-noun_number(ball, singular)
-DEFINITE-FLAG(John, T)
-noun_number(John, singular)
+    _subj(throw, John)
+    _obj(throw, ball)
+    tense(throw, past)
+    noun_number(ball, singular)
+    DEFINITE-FLAG(John, T)
+    noun_number(John, singular)
 
 "What did John throw?"
 
-_subj(throw, John)
-_obj(throw, _$qVar)
-tense(throw, past_infinitive)
-HYP(throw, T)
-QUERY-TYPE(_$qVar, what)
-DEFINITE-FLAG(John, T)
-noun_number(John, singular)
+    _subj(throw, John)
+    _obj(throw, _$qVar)
+    tense(throw, past_infinitive)
+    HYP(throw, T)
+    QUERY-TYPE(_$qVar, what)
+    DEFINITE-FLAG(John, T)
+    noun_number(John, singular)
 
 Eliminate the HYP and QUERY-TYPE from the question, since
 the answer will never contain these. One is left with:
 
-_subj(throw, John)
-_obj(throw, _$qVar)
-tense(throw, past_infinitive)
-DEFINITE-FLAG(John, T)
-noun_number(John, singular)
+    _subj(throw, John)
+    _obj(throw, _$qVar)
+    tense(throw, past_infinitive)
+    DEFINITE-FLAG(John, T)
+    noun_number(John, singular)
 
 Clearly, the RelEx pattern of the question can be matched to 
 the RelEx pattern of the answer, to find that _$qVar == ball.
@@ -189,26 +189,26 @@ Intensional/extensional inheritance causes problems for
 simple RelEx matching.
 
 Yarn is a length of fibers.
-_subj(be, yarn)
-_obj(be, length)
-tense(be, present)
-of(length, fiber)
-noun_number(length, singular)
-noun_number(fiber, plural)
-noun_number(yarn, uncountable)
+    _subj(be, yarn)
+    _obj(be, length)
+    tense(be, present)
+    of(length, fiber)
+    noun_number(length, singular)
+    noun_number(fiber, plural)
+    noun_number(yarn, uncountable)
 
 Yarn is what?
 (fails to parse in current link-grammar)
 
 What is yarn?
 
-_subj(be, _$qVar)
-_obj(be, yarn)
-tense(be, present)
-noun_number(yarn, uncountable)
-COPULA-QUESTION-FLAG(yarn, T)
-QUERY-TYPE(_$qVar, what)
-noun_number(_$qVar, uncountable)
+    _subj(be, _$qVar)
+    _obj(be, yarn)
+    tense(be, present)
+    noun_number(yarn, uncountable)
+    COPULA-QUESTION-FLAG(yarn, T)
+    QUERY-TYPE(_$qVar, what)
+    noun_number(_$qVar, uncountable)
 
 Note that the _subj and _obj are exchanged in the query, 
 preventing a direct match.
@@ -222,43 +222,43 @@ move to a more semantic interpretation.
 
 Yarn is a length of fibers.
 
-^1_Categorization:Category(be,length)
-^1_Existance:Entity(be,yarn)
-^2_Inheritence:Quality(of,length)
-^2_Inheritence:Inheritor(of,fiber)
-^2_Inheritence:Group(of,fiber)
-^2_Inheritence:Instance(of,length)
-^1_Partitive:Subset(of,length)
-^1_Partitive:Group(of,fiber)
-^1_Part_whole:Part(of,length)
-^1_Part_whole:Whole(of,fiber)
-^1_Physical_entity:Constituents(of,fiber)
-^1_Physical_entity:Entity(of,length)
-^1_Categorization:Item(be,yarn)
-^1_Temporal_colocation:Time(present,be)
-^1_Temporal_colocation:Event(present,be)
+    ^1_Categorization:Category(be,length)
+    ^1_Existance:Entity(be,yarn)
+    ^2_Inheritence:Quality(of,length)
+    ^2_Inheritence:Inheritor(of,fiber)
+    ^2_Inheritence:Group(of,fiber)
+    ^2_Inheritence:Instance(of,length)
+    ^1_Partitive:Subset(of,length)
+    ^1_Partitive:Group(of,fiber)
+    ^1_Part_whole:Part(of,length)
+    ^1_Part_whole:Whole(of,fiber)
+    ^1_Physical_entity:Constituents(of,fiber)
+    ^1_Physical_entity:Entity(of,length)
+    ^1_Categorization:Item(be,yarn)
+    ^1_Temporal_colocation:Time(present,be)
+    ^1_Temporal_colocation:Event(present,be)
 
 
 What is yarn?
 
-^1_Existance:Entity(be,_$qVar)
-^1_Categorization:Category(be,yarn)
-^1_Temporal_colocation:Time(present,be)
-^1_Temporal_colocation:Event(present,be)
-^1_Categorization:Item(be,_$qVar)
-^1_Entity:Entity(what,_$qVar)
-^1_Questioning:Message(what,_$qVar)
-^1_Attributes:Entity(what,_$qVar)
+    ^1_Existance:Entity(be,_$qVar)
+    ^1_Categorization:Category(be,yarn)
+    ^1_Temporal_colocation:Time(present,be)
+    ^1_Temporal_colocation:Event(present,be)
+    ^1_Categorization:Item(be,_$qVar)
+    ^1_Entity:Entity(what,_$qVar)
+    ^1_Questioning:Message(what,_$qVar)
+    ^1_Attributes:Entity(what,_$qVar)
 
 Trim the question to remove references to questioning (as the answer
 won't possess these). Remove the "what" part as well. The question
 becomes:
 
-^1_Categorization:Category(be,yarn)
-^1_Temporal_colocation:Time(present,be)
-^1_Temporal_colocation:Event(present,be)
-^1_Categorization:Item(be,_$qVar)
-^1_Existance:Entity(be,_$qVar)
+    ^1_Categorization:Category(be,yarn)
+    ^1_Temporal_colocation:Time(present,be)
+    ^1_Temporal_colocation:Event(present,be)
+    ^1_Categorization:Item(be,_$qVar)
+    ^1_Existance:Entity(be,_$qVar)
 
 The goal of pattern matching is to glue (i.e. pattern-match) 
 the above five clauses onto the original assertion that 
@@ -276,11 +276,13 @@ This asymmetry of the question and its answer has me blocked.
 
 The root problem seems to be that both
 
-_subj(be, _$qVar)
-_obj(be, yarn)
+    _subj(be, _$qVar)
+    _obj(be, yarn)
+
 and
-_obj(be, _$qVar)
-_subj(be, yarn)
+
+    _obj(be, _$qVar)
+    _subj(be, yarn)
 
 are valid forms for the question. The second one should be
 more common, but its not the one being generated. There 
@@ -293,42 +295,45 @@ done *before* frame annotation.
 Step back; look at frame matching in a simpler example.
 
 John threw a ball. 
-^1_Body_movement:Agent(throw,John)
-^1_Cause_motion:Theme(throw,ball)
-^1_Transitive_action:Agent(throw,John)
-^1_Temporal_colocation:Event(past,throw)
-^1_Temporal_colocation:Time(past,throw)
-^1_Body_movement:Body_part(throw,ball)
-^1_Cause_motion:Cause(throw,John)
-^1_Transitive_action:Object(throw,ball)
+    ^1_Body_movement:Agent(throw,John)
+    ^1_Cause_motion:Theme(throw,ball)
+    ^1_Transitive_action:Agent(throw,John)
+    ^1_Temporal_colocation:Event(past,throw)
+    ^1_Temporal_colocation:Time(past,throw)
+    ^1_Body_movement:Body_part(throw,ball)
+    ^1_Cause_motion:Cause(throw,John)
+    ^1_Transitive_action:Object(throw,ball)
 
 
 What did John throw?
 
-^1_Body_movement:Agent(throw,John)
-^1_Cause_motion:Theme(throw,_$qVar)
-^1_Transitive_action:Agent(throw,John)
-^1_Entity:Entity(what,_$qVar)
-^1_Questioning:Message(what,_$qVar)
-^1_Attributes:Entity(what,_$qVar)
-^1_Possibilites:Event(hyp,throw)
-^1_Body_movement:Body_part(throw,_$qVar)
-^1_Cause_motion:Cause(throw,John)
-^1_Transitive_action:Object(throw,_$qVar)
+    ^1_Body_movement:Agent(throw,John)
+    ^1_Cause_motion:Theme(throw,_$qVar)
+    ^1_Transitive_action:Agent(throw,John)
+    ^1_Entity:Entity(what,_$qVar)
+    ^1_Questioning:Message(what,_$qVar)
+    ^1_Attributes:Entity(what,_$qVar)
+    ^1_Possibilites:Event(hyp,throw)
+    ^1_Body_movement:Body_part(throw,_$qVar)
+    ^1_Cause_motion:Cause(throw,John)
+    ^1_Transitive_action:Object(throw,_$qVar)
 
 
 Remove "Questioning" and "what".
 
-^1_Body_movement:Agent(throw,John)          -- OK match
-^1_Cause_motion:Theme(throw,_$qVar)         -- OK _$qVar == ball.
-^1_Transitive_action:Agent(throw,John)      -- OK match
-^1_Body_movement:Body_part(throw,_$qVar)    -- OK _$qVar == ball
-^1_Cause_motion:Cause(throw,John)           -- OK match
-^1_Transitive_action:Object(throw,_$qVar)   -- OK _$qVar == bal
+    ^1_Body_movement:Agent(throw,John)          -- OK match
+    ^1_Cause_motion:Theme(throw,_$qVar)         -- OK _$qVar == ball
+    ^1_Transitive_action:Agent(throw,John)      -- OK match
+    ^1_Body_movement:Body_part(throw,_$qVar)    -- OK _$qVar == ball
+    ^1_Cause_motion:Cause(throw,John)           -- OK match
+    ^1_Transitive_action:Object(throw,_$qVar)   -- OK _$qVar == ball
 
 This type of RelEx frame-level setup, query massaging 
 and node matching is implemented in FrameQuery.cc, FrameQuery.h
 It seems to work, but hasn't undergone strenuous testing.
+
+Note, however, for this simpler case, frame-matching provides no 
+advantage over parse matching.
 
 Testing
 -------
@@ -347,7 +352,10 @@ _$qVar = ball, and _$qVar = screwdriver.
 The book is red. What color is the book?
 The color of the book is red. What color is the book?
 
-Both of these fail on the simple pattern match.
+Both of these fail on the simple pattern match. However, the triples
+processing (describe below) can answer "What is the color of the book?"
+It still fails on "What color is the book?" because of the missing 
+preopostion "of".
 
 ====
 Yarn is a length of fibers.
@@ -358,27 +366,27 @@ Fails, as discussed above
 Yarn is used to make cloth.
 What is yarn used for?
 
-_to-do(use, make)
-_obj(use, yarn)
-tense(use, present)
-_subj(make, yarn)
-_obj(make, cloth)
-tense(make, infinitive)
-HYP(make, T)
-noun_number(cloth, uncountable)
-noun_number(yarn, uncountable)
+    _to-do(use, make)
+    _obj(use, yarn)
+    tense(use, present)
+    _subj(make, yarn)
+    _obj(make, cloth)
+    tense(make, infinitive)
+    HYP(make, T)
+    noun_number(cloth, uncountable)
+    noun_number(yarn, uncountable)
 
 The assertion has a second parse, with "to" instead of "_to-do"
 
 The question has three parses. The first is:
 
-for(use, for)
-_obj(use, yarn)
-tense(use, present)
-_amod(for, use)
-_obj(for, _$qVar)
-tense(for, present)
-noun_number(yarn, uncountable)
+    for(use, for)
+    _obj(use, yarn)
+    tense(use, present)
+    _amod(for, use)
+    _obj(for, _$qVar)
+    tense(for, present)
+    noun_number(yarn, uncountable)
 
 All three parses contain _obj(use, yarn), and that's good.
 
@@ -389,33 +397,33 @@ All three contain either _amod(for, use) or _amod(for, be)
 and these _amod's cannot be matched to the original assertion.
 
 The frame situation is no better.  The assertion frame is:
-
-^1_Transitive_action:Agent(make,yarn)
-^1_Ingest_substance:Substance(use,yarn)
-^1_Intentionally_create:Creator(make,yarn)
-^1_Using:Instrument(use,yarn)
-^1_Building:Created_entity(make,cloth)
-^1_Causation:Affected(make,yarn)
-^1_Arriving:Theme(make,yarn)
-^1_Causation:Effect(make,cloth)
-^1_Ingest_substance:Purpose(use,make)
-^1_Cause_change:Cause(make,yarn)
-^1_Possibilites:Event(hyp,make)
-^1_Using:Purpose(use,make)
-^1_Arriving:Goal(make,cloth)
-^1_Temporal_colocation:Time(present,use)
-^1_Temporal_colocation:Event(present,use)
-^1_Transitive_action:Cause(verb,use)
-^1_Transitive_action:Event(verb,make)
-^1_Cooking_creation:Cook(make,yarn)
-^1_Building:Agent(make,yarn)
-^1_Cooking_creation:Produced_food(make,cloth)
-^1_Intentionally_create:(make,cloth)
-^1_Transitive_action:Object(make,cloth)
-^1_Transitive_action:Object(use,yarn)
-^1_Manufacturing:Product(make,cloth)
-^1_Manufacturing:Factory(make,yarn)
-^1_Cause_change:Entity(make,cloth)
+ 
+    ^1_Transitive_action:Agent(make,yarn)
+    ^1_Ingest_substance:Substance(use,yarn)
+    ^1_Intentionally_create:Creator(make,yarn)
+    ^1_Using:Instrument(use,yarn)
+    ^1_Building:Created_entity(make,cloth)
+    ^1_Causation:Affected(make,yarn)
+    ^1_Arriving:Theme(make,yarn)
+    ^1_Causation:Effect(make,cloth)
+    ^1_Ingest_substance:Purpose(use,make)
+    ^1_Cause_change:Cause(make,yarn)
+    ^1_Possibilites:Event(hyp,make)
+    ^1_Using:Purpose(use,make)
+    ^1_Arriving:Goal(make,cloth)
+    ^1_Temporal_colocation:Time(present,use)
+    ^1_Temporal_colocation:Event(present,use)
+    ^1_Transitive_action:Cause(verb,use)
+    ^1_Transitive_action:Event(verb,make)
+    ^1_Cooking_creation:Cook(make,yarn)
+    ^1_Building:Agent(make,yarn)
+    ^1_Cooking_creation:Produced_food(make,cloth)
+    ^1_Intentionally_create:(make,cloth)
+    ^1_Transitive_action:Object(make,cloth)
+    ^1_Transitive_action:Object(use,yarn)
+    ^1_Manufacturing:Product(make,cloth)
+    ^1_Manufacturing:Factory(make,yarn)
+    ^1_Cause_change:Entity(make,cloth)
 
 The appearance of "cooking" is unexpected.  "Building" is odd 
 Why not "manufacture" or "intentionally_create"?
@@ -430,18 +438,18 @@ I've marked up each according to whether the frames echoed the
 assertion:
 
 
-^1_Using:Purpose(use,for)                         -- no match
-^1_Ingest_substance:Substance(use,yarn)           == OK
-^1_Using:Instrument(use,yarn)                     == OK
-^1_Relative_time:Focal_occasion(for,for)          -- no match
-^1_Relative_time:Landmark_occasion(for,use)       -- no match
-^1_Temporal_colocation:Time(present,use)          == OK
-^1_Temporal_colocation:Event(present,use)         == OK
-^1_Temporal_colocation:Event(present_1,for)       -- no match
-^1_Temporal_colocation:Time(present_1,for)        -- no match
-^1_Ingest_substance:Purpose(use,for)              -- no match
-^1_Transitive_action:Object(for,_$qVar)           -- no match
-^1_Transitive_action:Object(use,yarn)             == OK
+    ^1_Using:Purpose(use,for)                         -- no match
+    ^1_Ingest_substance:Substance(use,yarn)           == OK
+    ^1_Using:Instrument(use,yarn)                     == OK
+    ^1_Relative_time:Focal_occasion(for,for)          -- no match
+    ^1_Relative_time:Landmark_occasion(for,use)       -- no match
+    ^1_Temporal_colocation:Time(present,use)          == OK
+    ^1_Temporal_colocation:Event(present,use)         == OK
+    ^1_Temporal_colocation:Event(present_1,for)       -- no match
+    ^1_Temporal_colocation:Time(present_1,for)        -- no match
+    ^1_Ingest_substance:Purpose(use,for)              -- no match
+    ^1_Transitive_action:Object(for,_$qVar)           -- no match
+    ^1_Transitive_action:Object(use,yarn)             == OK
 
 The word "for" seems to lie at the root of the problem.  
 Lets try a different assertion:
@@ -456,17 +464,17 @@ How similar are the two assertions? Lets compare RelEx output first;
 ignoring tense, noun_number, which are correct, we have:
 
   "Yarn is used for making cloth."
-_obj(use, yarn)
-_amod(for, use)
-_subj(make, for)
-_obj(make, cloth)
+    _obj(use, yarn)
+    _amod(for, use)
+    _subj(make, for)
+    _obj(make, cloth)
 
   "Yarn is used to make cloth."
-_to-do(use, make)
-_obj(use, yarn)
-_subj(make, yarn)
-_obj(make, cloth)
-HYP(make, T)
+    _to-do(use, make)
+    _obj(use, yarn)
+    _subj(make, yarn)
+    _obj(make, cloth)
+    HYP(make, T)
 
 The only agreement is that both correctly state _obj(make, cloth)
 and _obj(use, yarn)  However, _subj in both is confusing, and 
@@ -475,16 +483,16 @@ input to the thing being made.
 
   "Yarn is used in making cloth."
 
-_obj(use, yarn)
-_amod(in, use)
-_subj(make, in)
-_obj(make, cloth)
+    _obj(use, yarn)
+    _amod(in, use)
+    _subj(make, in)
+    _obj(make, cloth)
 
   "Yarn is used in the making of cloth."
 
-in(use, making)
-_obj(use, yarn)
-of(making, cloth)
+    in(use, making)
+    _obj(use, yarn)
+    of(making, cloth)
 
 The frame rules do not seem to introduce more commonality
 between these; rather, they seem to diverge even more. Thus,
@@ -548,32 +556,58 @@ By contrast, "what color is the book?" becomes
 and the manner in which this should be converted into a "color_of"
 question is unclear.
 
-
-"you eat metal"  and " do you eat metal?"
+"You eat metal"  and " do you eat metal?"
 
 What colour is the car?
- QUERY-FLAG (colour, T)
-_subj (<<be>>, <<colour>>) 
-_obj (<<be>>, <<car>>)
-QUERY-TYPE (_$qVar, what)
+    QUERY-FLAG(colour, T)
+    _subj(be, colour) 
+    _obj(be, car)
+    QUERY-TYPE(_$qVar, what)
 
 note the borken parse -- missing connection to qVar.
 
-Yes/No questions
-----------------
+
+Yes/No questions, Question Comprehension
+----------------------------------------
 "Did John throw a rock?"
 
- _subj(throw, John)
- _obj(throw, rock)
- HYP (throw, T)
- TRUTH-QUERY-FLAG (throw, T)
- TRUTH-QUERY-FLAG (rock, T)
+    _subj(throw, John)
+    _obj(throw, rock)
+    HYP (throw, T)
+    TRUTH-QUERY-FLAG (throw, T)
+    TRUTH-QUERY-FLAG (rock, T)
 
 Suggests a pattern-based approach:
   # IF _subj($vrb, $sb) ^
        _obj ($vrb, $ob) ^
        HYP($vrb)
     THEN answer "yes" if match ... 
+
+More generally, this suggests a program of "question comprehension",
+wherein a set of pattern-matching proedicates, such as the above,
+attempt to identify the type of question being asked, and determine
+what it is that the question is asking for. Only after "comprehending"
+the question, should a search for the answer be undertaken.
+
+Some extrememly preliminary work has been done. The file 
+"nlp/triples/question-tags.txt" contains a single rule that attempts
+to identify "hypotheitcal copula" questions: "Is X a Y?"
+
+Some other question forms needing identification:
+ "Does X verb Y?"       e.g. "Did John throw a rock?"
+ "Is X prep_phrase Y?"  e.g. "Is Berlin in Germany?"
+                             "Is Berlin the captial of Germany?"
+
+
+Also: "What color is the book?" needs to be recognized as being
+"What is the color of the book?" 
+
+
+Rhetorical Questions
+--------------------
+How to distinguish rhetorical questions from queries that should be
+answered?  A block of input text may contain rhetorical questions, 
+which should be ignored.
 
 
 References
@@ -585,34 +619,6 @@ Question Answering. Natural Language Engineering 7(4):343-360. [PDF][PS]
 
 See also:
 DIRT - Discovery of Inference Rules from Text, Dekang Lin and Patrick Pantel.
-
-
-Query processing architectural issues:
---------------------------------------
-Below are some architectural issues that have been given temporary
-solutions, but need a better long-term solution.
-
--- How to distinguish rhetorical questions from queries that should
-   be answered?  A block of input text may contain rhetorical questions,
-   which should be ignored.
-
--- How should query processing be triggered?  What channel should be
-   used for reply? Currently, all input to CogServer is via XML, which
-   is parsed. If the parse is successful, no further processing is done.
-
-   Query processing could be performed by a mind agent, but how should
-   its activity be triggered, and what communications channel should
-   it use to post a reply?
-
-
-Diary and Notes
----------------
-Use special token to trigger mind agent. Per Ben, "DialogManager",
-there are four such tokens:
--- query
--- statement
--- command
--- interjection
 
 
 
