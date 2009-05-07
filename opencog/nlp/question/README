@@ -120,6 +120,15 @@ exact matches, and not merely similarities.  Thus, query processing
 will fail without exact matches. A mechanism will be needed for handling
 "similar" statements with similar meanings.
 
+Yes/No questions
+----------------
+"Did John throw a rock?"
+
+ _subj(throw, John)
+ _obj(throw, rock)
+ HYP (throw, T)
+ TRUTH-QUERY-FLAG (throw, T)
+ TRUTH-QUERY-FLAG (rock, T)
 
 Copula troubles:
 ----------------
