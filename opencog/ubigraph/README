@@ -56,8 +56,8 @@ If you need to trim the borders, you can use the -j transcode option.
 add/remove atom signal happens) while the ubigraph server is not
 running.
 
-* Possibly having a separate command to start the initial display vs to choose
-which things to show.
+* A separate command to start the initial display and one to choose which things
+to show.
 
 * Being able to choose to display only some of the atoms.
 
@@ -66,4 +66,12 @@ size).
 
 * Make FindXMLRPC work correctly re the XMLRPC_LIBRARIES CMake variable.
 
+* Add callback for Ubigraph which displays atom info when a node or link is
+clicked. This needs OpenCog XML-RPC or JSON-RPC integration first however.
+
+* Allow separate visualisation servers, one for visualisation of PLN BIT trees,
+another for NLP processing and dialogue pipeline. Eventually these should all be
+merged into separate views in a generic AtomSpace/OpenCog visualisation tool.
+
 * [related] Make the UbiGraph client library easier to compile and install.
+

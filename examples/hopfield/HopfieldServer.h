@@ -141,9 +141,9 @@ public:
      * thus the energy is in terms of STI 
      *
      * @return total energy.
-     * @todo implement as an AtomSpace function or AtomTable statistic that
-     * handles HebbianLinks with arity != 2.
-     * @warning this isn't implemented properly!! Results are erroneous. Should
+     * @todo implement as an AtomSpace function or AtomTable statistic for total
+     * free energy based on STI and that handles HebbianLinks with arity != 2.
+     * @bug this isn't implemented properly!! Results are erroneous. Should
      * take into account diffusion/spread threshold of agents.
      */
     float totalEnergy();
