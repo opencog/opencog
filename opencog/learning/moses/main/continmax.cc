@@ -25,12 +25,20 @@
 #include <opencog/learning/moses/eda/initialization.h>
 #include <opencog/util/mt19937ar.h>
 
+#include <opencog/util/Logger.h>
+
+#include <boost/assign/list_of.hpp>
+
+using namespace boost::assign;
+
 int main(int argc, char** argv)
 {
-    //no need for that assert because optargs takes care of
-    //checking arg number and display usage
-    //cassert(TRACE_INFO, argc == 6);
-    optargs args(argc, argv);
+
+    //set flag to print only cassert and other ERROR level logs on stdout
+    opencog::logger().setPrintErrorLevelStdout();
+
+    vector<string> add_args = list_of("depth");
+    optargs args(argc, argv, add_args);
     int depth = lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;
 

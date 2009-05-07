@@ -22,8 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "edaopt.h"
+
 #include <opencog/learning/moses/eda/initialization.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
+
+#include <boost/assign/list_of.hpp> 
+
+using namespace boost::assign;
 
 void recbuild(onto_tree& tr,onto_tree::iterator it,
 	      int b,int maxd,int d,int s) {
@@ -37,8 +43,12 @@ void recbuild(onto_tree& tr,onto_tree::iterator it,
 }
 
 int main(int argc,char** argv) { 
-    opencog::cassert(TRACE_INFO, argc==7);
-    optargs args(argc,argv," depth branching");
+
+    //set flag to print only cassert and other ERROR level logs on stdout
+    opencog::logger().setPrintErrorLevelStdout();
+
+    vector<string> addition_args = list_of("depth")("branching");
+    optargs args(argc, argv, addition_args);
     int depth=lexical_cast<int>(argv[5]);
     int branching=lexical_cast<int>(argv[6]);
     cout_log_best_and_gen logger;

@@ -23,8 +23,13 @@
  */
 #include "edaopt.h"
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
 
 int main(int argc,char** argv) { 
+
+    //set flag to print only cassert and other ERROR level logs on stdout
+    opencog::logger().setPrintErrorLevelStdout();
+
     optargs args(argc,argv);
     cout_log_best_and_gen logger;
     field_set fs(field_set::disc_spec(2),args.length); //all boolean

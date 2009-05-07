@@ -23,16 +23,24 @@
  */
 #include "edaopt.h"
 #include <opencog/util/mt19937ar.h>
+#include <boost/assign/list_of.hpp>
+#include <opencog/util/Logger.h>
 
-int main(int argc,char** argv) { 
-    opencog::cassert(TRACE_INFO, argc==6);
-    optargs args(argc,argv);
+using namespace boost::assign;
+
+int main(int argc,char** argv) {
+
+    //set flag to print only cassert and other ERROR level logs on stdout
+    opencog::logger().setPrintErrorLevelStdout();
+ 
+    vector<string> add_args = list_of("n(whatever it is?)");
+    optargs args(argc, argv, add_args);
     int n=lexical_cast<int>(argv[5]);
     cout_log_best_and_gen logger;
     
     opencog::MT19937RandGen rng(args.rand_seed);
 
-    field_set fs(field_set::disc_spec(n),args.length); //all n-arry
+    field_set fs(field_set::disc_spec(n), args.length); //all n-arry
     instance_set<int> population(args.popsize,fs);
     foreach(instance& inst,population)
         generate(fs.begin_disc(inst), fs.end_disc(inst),

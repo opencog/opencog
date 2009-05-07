@@ -37,31 +37,48 @@ using namespace std;
 using namespace opencog;
 using namespace boost;
 
+
+//WARNING: the additional arguments must be handled by the caller,
+//but it is informed here for checking and usage printing
+//It is ugly but that was the fastest fix I could come up with (Nil)
 struct optargs {
-  optargs(int argc,char** argv,string usage="") { 
-    if (argc<5) {
-      cerr << "not enough args, usage: " << argv[0] 
-	   << " seed length popsize ngens " << usage << endl;
-      exit(1);
+    optargs(int argc, char** argv,
+            const vector<string>& additional_args = vector<string>()) { 
+        if (argc != (5 + static_cast<int>(additional_args.size()))) {
+            cerr << "not the right number of args, usage: " << argv[0] 
+                 << " seed length popsize ngens "
+                 << usage(additional_args) << endl;
+            exit(1);
+        }
+        try {
+            assert(argc>=5);
+            rand_seed=lexical_cast<int>(argv[1]);
+            length=lexical_cast<int>(argv[2]);
+            popsize=lexical_cast<int>(argv[3]);
+            n_select=popsize;
+            n_generate=popsize/2;
+            max_gens=lexical_cast<int>(argv[4]);
+        } catch (...) {
+            cerr << "invalid args, usage: " << argv[0]
+                 << " seed length popsize ngens "
+                 << usage(additional_args) << endl;
+            exit(1);
+        }
     }
-    try {
-      assert(argc>=5);
-      rand_seed=lexical_cast<int>(argv[1]);
-      length=lexical_cast<int>(argv[2]);
-      popsize=lexical_cast<int>(argv[3]);
-      n_select=popsize;
-      n_generate=popsize/2;
-      max_gens=lexical_cast<int>(argv[4]);
-    } catch (...) {
-      cerr << "invalid args, usage: " << argv[0]
-	   << " seed length popsize ngens " << usage << endl;
-      exit(1);
+    int rand_seed;
+    int length;
+    int popsize;
+    int n_select;
+    int n_generate;
+    int max_gens;
+
+private:
+    string usage(const vector<string>& args) {
+        string res;
+        for(vector<string>::const_iterator i = args.begin();
+            i != args.end(); i++) {
+            res += *i + string(" ");
+        }
+        return res;
     }
-  }
-  int rand_seed;
-  int length;
-  int popsize;
-  int n_select;
-  int n_generate;
-  int max_gens;
 };
