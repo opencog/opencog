@@ -105,6 +105,17 @@ class ImportanceUpdatingAgent : public Agent
 
     friend class ::ImportanceUpdatingAgentUTest;
 
+public:
+    
+    /** The different ways rent can be calculated 
+     * for atoms in the attentional focus.
+     */
+    enum rentType_t {
+        RENT_FLAT, //!< Use a flat rent 
+        RENT_EXP, //!< Use a exponential rent
+        RENT_LOG //!< Use a logarithmic rent
+    };
+
 private:
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
@@ -113,13 +124,14 @@ private:
     
     AttentionValue::sti_t amnesty; //!< Amnesty is used in calculating rent.
 
+    enum rentType_t rentType; //!< Current method for calculating rent.
+
     /** Calculate the rent to apply to an atom with sti \a c.
      *
      * @param a The AtomSpace to work on.
      * @param c The STI of the atom to calculate rent for.
      */
     AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
-
     
     AttentionValue::sti_t STIAtomWage; //!< Max atom STI wage per stimulus
     AttentionValue::lti_t LTIAtomWage; //!< Max atom LTI wage per stimulus
@@ -371,22 +383,22 @@ public:
      *
      * @return Whether links are updated or not.
      */
-    bool getUpdateLinksFlag();
+    bool getUpdateLinksFlag() const;
 
-    inline AttentionValue::sti_t getSTIAtomWage()
+    inline AttentionValue::sti_t getSTIAtomWage() const
         { return STIAtomWage; }
-    inline AttentionValue::lti_t getLTIAtomWage()
+    inline AttentionValue::lti_t getLTIAtomWage() const
         { return LTIAtomWage; }
 
-    /** The different ways rent can be calculated 
-     * for atoms in the attentional focus.
-     */
-    int rentType;
-    enum {
-        RENT_FLAT, //!< Use a flat rent 
-        RENT_EXP, //!< Use a exponential rent
-        RENT_LOG //!< Use a logarithmic rent
-    };
+    inline void setRentType(rentType_t t)
+        { rentType = t; };
+    inline rentType_t getRentType() const
+        { return rentType; }
+
+    inline void setAmnesty(AttentionValue::sti_t t)
+        { amnesty = t; };
+    inline AttentionValue::sti_t getAmnesty() const
+        { return amnesty; }
 
 }; // class
 

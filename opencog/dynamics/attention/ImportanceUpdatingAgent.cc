@@ -55,8 +55,8 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
-	rentType = config().get_int("ECAN_RENT_TYPE");
-	amnesty = config().get_int("ECAN_RENT_AMNESTY");
+	setRentType( (rentType_t) config().get_int("ECAN_RENT_TYPE") );
+	setAmnesty( (AttentionValue::sti_t) config().get_int("ECAN_RENT_AMNESTY") );
 
     updateLinks = true;
 
@@ -680,7 +680,7 @@ void ImportanceUpdatingAgent::setUpdateLinksFlag(bool f)
     updateLinks = f;
 }
 
-bool ImportanceUpdatingAgent::getUpdateLinksFlag()
+bool ImportanceUpdatingAgent::getUpdateLinksFlag() const
 {
     return updateLinks;
 }
