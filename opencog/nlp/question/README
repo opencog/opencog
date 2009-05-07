@@ -3,35 +3,42 @@
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
                         Revised on 13 May 2008
+                        Revised on 7 May 2009
 
 This directory contains code that implements natural language question
 answering via subgraph isomorphism. This README file describes the 
-operation and reports on experimental results. The experiments examined
+operation and reports on experimental results. The experiments start with
 a fairly simple question-answering technique, which, although functional,
 is not very robust. The basic idea is that NL parses of assertions, such
 as "John threw the ball", and questions, such as "Who threw the ball?"
 resemble each other quite closely. One need only recognize "who" as an
 implicit variable name, and then search over the entire atomspace to 
 find a matching pattern, at which point the word "John" can be used 
-as a grounding for the variable "who?".
+as a grounding for the variable "who?". Additonal experiments examine
+increasingly more complex strategies.
 
-Two sets of experiments are reported: pattern matching at the RelEx
-level, and pattern matching at the Frame level. The RelEx level 
-represents sentences as collections of subject, object relations, 
-together with noun number, verb tense, etc. markup.  The Frame 
-level decorates the basic RelEx relations with situational context
-infered from the sentences.
+Four sets of experiments are reported: pattern matching at the RelEx
+level, pattern matching at the framenet level, pattern matching at 
+the "semantic triples" level, and using predicate structures for 
+sophisticated question processing. The RelEx level represents sentences
+as collections of subject, object relations, together with noun number, 
+verb tense, etc. markup.  The Frame level decorates the basic RelEx 
+relations with situational context infered from the sentences. The
+"semantic triples" normalize syntactic relations into "semantic-web"
+style relational triples.  Finally, "question comprehension" recognizes
+the structure of questions themselves, and respond to that structure.
 
 XXX As of 13 May 2008, changes to the RelEx output have broken the 
 operation of the frame-query part of this code. As of 23 April 2009,
-th simpler RelEx query style has been resotred and now works again.
+th simpler RelEx query style has been resotred and now works again. XXX
 
-General conclusion: while question answering is possible, it could be
-made much more robust by implementing two ideas. One idea is to identify
-synonymous phrases, as described by Lin & Patel [Lin2001]. The other
-is to create more compact representations of concepts, along the lines
-of work described in nlp/triples/README.  Thus, work on question
-answering is suspended until the above objectives are reached.
+General conclusion: while superficial question answering is possible, 
+a robust system remains difficult.  Work continues (very slowly) along
+several directions, and/or should explore several ideas: (1) identify
+synonymous phrases, as described by Lin & Patel [Lin2001]. (2) Continue
+work on "semantic normalization", along the lines of the "semantic 
+triples" work described in nlp/triples/README. (3) Pursue use of PLN
+for answer-generation (4) Pursue work on "question comprehension".
 
 * [Lin2001] Dekang Lin and Patrick Pantel. 2001.  "Discovery of Inference
   Rules for Question Answering." ''Natural Language Engineering'' 
@@ -39,33 +46,50 @@ answering is suspended until the above objectives are reached.
 
 Question Answering Overview
 ---------------------------
-Query processing proceeds by taking English language sentences, 
-passing them through the link-grammar parser, then through RelEx,
-through the semantic framing, and then importing the result into
-OpenCog.
+Curreently, the question answering code dependings on a processing
+pipeline
 
-When a sentence is determined to be a query, the above-described
-pattern matching is performed on the contents of OpenCog, in an
-attempt to find a matching result.  Pattern matching can be done
-at several levels: at the RelEx level, or at the more abstract
-semantic framing level.  Query processing at the RelEx level should
-be used only when a very narrow, literal answer is desired. This
-is because pattern matching at the RelEx level introduces very
-little wiggle room.  Thus, for example, to answer the question
-"What did John throw?" at the RelEx level,
+ -- Input of English language sentences
+ -- parsing by Link Grammar parser
+ -- dependency relations built by RelEx
+ -- framenet relations build by RelEx
+ -- import into OpenCog
+ -- semantic triple extraction within opencog
+ -- "question comprehension" within opencog
+ -- NL generation, English output.
+
+The "chatbot" (nlp/chatbot/README) provides the overall systems 
+integration that allows this pipeline to function.
+
+Four approaches to question-answering are considered below. These all
+make use of pattern-matching in one way or another; they differ in the
+kinds of patterns that are searched for, and the sophistication of the 
+pattens themselves.  These are:
+
+ -- Pattern matching of RelEx dependency grammar expressions
+ -- Pattern matching of FrameNet semantic frames
+ -- Pattern matching on "semantic triples"
+ -- "Question comprehension" by extracting question patterns
+
+Query processing at the RelEx level provides only a very narrow, literal
+answer; there is very little "wiggle room" or ability to understand the
+nature of the question.  Thus, for example, the question "What did John
+throw?" is represented by the RelEx dependency-grammar as
 
     _subj(throw, John )
     _obj(throw, _$qVar)
 
-The OpenCog server must contain a sentence that had parsed into
-exactly the above form; so, for example: "John threw a ball"
+To answer this question, the OpenCog atomspace must contain a sentence
+that had parsed into exactly the above form. For this example, the 
+atomspace must contain the dependency parse for the sentence "John
+threw a ball"
 
     _subj(throw, John )
     _obj(throw, ball)
 
-would provide a matching solution, whereas ...
+From this, one can immediately induce that _$qVar == ball and thus the
+answer is "ball".
 
-(provide example)
 
 Thus, a looser matching, based on deeper semantic understanding,
 is desirable.  This is afforded by using the semantic framing 
