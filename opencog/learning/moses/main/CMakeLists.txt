@@ -68,6 +68,13 @@ TARGET_LINK_LIBRARIES (moses-truth-table
         util
 )
 
+ADD_EXECUTABLE (moses-contin-table moses-contin-table)
+TARGET_LINK_LIBRARIES (moses-contin-table
+	moses
+        comboreduct
+        util
+)
+
 ADD_EXECUTABLE (eval-truth-table eval-truth-table)
 TARGET_LINK_LIBRARIES (eval-truth-table
 	moses

@@ -85,12 +85,37 @@ struct contin_score : public unary_function<combo_tree, contin_t> {
     RndNumTable rands;
     opencog::RandGen& rng;
 };
+
+struct contin_score_sqr : public unary_function<combo_tree,contin_t> {
+    template<typename Scoring>
+    contin_score_sqr(const Scoring& score,
+                     const RndNumTable& r,
+                     opencog::RandGen& _rng)
+        : target(score,r),rands(r),rng(_rng) { }
+    
+    contin_score_sqr(const combo::contin_table& t,
+                     const RndNumTable& r,
+                     opencog::RandGen& _rng)
+        : target(t),rands(r),rng(_rng) { }
+    
+    contin_t operator()(const combo_tree& tr) const;
+    
+    combo::contin_table target;
+    RndNumTable rands;
+    opencog::RandGen& rng;
+};
+
 struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Scoring>
     contin_bscore(const Scoring& score,
                   const RndNumTable& r,
                   opencog::RandGen& _rng)
-            : target(score, r), rands(r), rng(_rng) { }
+        : target(score, r), rands(r), rng(_rng) { }
+
+    contin_bscore(const combo::contin_table& t,
+                  const RndNumTable& r,
+                  opencog::RandGen& _rng)
+        : target(t), rands(r), rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -169,7 +194,8 @@ struct count_based_scorer : public unary_function<eda::instance, tree_score> {
         // reduct::contin_reduce(tr,rng);
 
         tree_score ts = tree_score(score(tr),
-                                   -int(_rep->fields().count(inst)) + _base_count);
+                                   -int(_rep->fields().count(inst))
+                                   + _base_count);
 
 #ifdef DEBUG_INFO
         std::cout << "OKK " << tr << std::endl;
