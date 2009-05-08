@@ -184,6 +184,7 @@ public:
             new SimpleTruthValue(100,100)
         };
         TruthValue* t;
+#ifdef OLD_BORKEN_CODE
 //! @todo PTLFormulaeKit is from  old implementation
         for (int a=0; a < N; a++) {
             for (int b=0; b < N; b++) {
@@ -207,7 +208,7 @@ public:
                 if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
             }
         }
-*/
+#endif
     }
 
     void DISABLEtestDeductionSetWorld() {
@@ -266,9 +267,10 @@ public:
             for (int a=0; a < NUM_ATOMS; a++) {
                 if (a==b) continue;
                 if (inheritance[a][b]==NULL) continue;
+#ifdef OLD_BROKEN_CODE
 //! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::inversion(inheritance[b][a],atoms[a],atoms[b]);
-*/
+
                 TS_ASSERT(t!=NULL);
                 e = inheritance[a][b];
                 cout << inheritance[b][a]->toString() << "\t"
@@ -278,6 +280,7 @@ public:
                 cout << t->toString() << "\n";
                 totalStrError += Abs(e->getMean() - t->getMean());
                 totalCountError += Abs(e->getCount() - t->getCount());
+#endif
                 num++;
             }
         }
@@ -301,9 +304,11 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
+
+#ifdef OLD_BROKEN_CODE
 //! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::nodeTruthValue(inheritance[a][b],inheritance[b][a],atoms[b]);
-*/
+
                 TS_ASSERT(t!=NULL);
                 e = atoms[a];
                 cout << inheritance[a][b]->toString() << "\t"
@@ -313,6 +318,7 @@ public:
                      << t->toString() << "\n";
                 totalStrError += Abs(e->getMean() - t->getMean());
                 totalCountError += Abs(e->getCount() - t->getCount());
+#endif
                 num++;
             }
         }
@@ -337,8 +343,9 @@ public:
                 if (a==b) continue;
                 if (similarity[a][b]==NULL) continue;
 //! @todo PTLFormulaeKit is from  old implementation
+#ifdef OLD_BORKEN_CODE
                 t = PTLFormulaeKit::similarityToInheritance(similarity[a][b],atoms[a],atoms[b],false);
-*/
+
                 TS_ASSERT(t!=NULL);
                 e = inheritance[a][b];
                 cout << inheritance[a][b]->toString() << "\t"
@@ -348,6 +355,7 @@ public:
                      << t->toString() << "\n";
                 totalStrError += Abs(e->getMean() - t->getMean());
                 totalCountError += Abs(e->getCount() - t->getCount());
+#endif
                 num++;
             }
         }
@@ -372,11 +380,12 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
+#ifdef OLD_BORKEN_CODE
 //! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::inheritanceToSimilarity(inheritance[a][b],
                                                             inheritance[b][a],
                                                             atoms[a],atoms[b]);
-*/
+
                 TS_ASSERT(t!=NULL);
                 e = similarity[a][b];
                 cout << inheritance[a][b]->toString() << "\t"
@@ -387,6 +396,7 @@ public:
                      << t->toString() << "\n";
                 totalStrError += Abs(e->getMean() - t->getMean());
                 totalCountError += Abs(e->getCount() - t->getCount());
+#endif
                 num++;
             }
         }
@@ -414,12 +424,13 @@ public:
                         if ((i!=n)&&(j==m)) {
                             if ((inheritance[i][j]==NULL) || (inheritance[m][n]==NULL)) continue;
                             e = inheritance[i][n];
+#ifdef OLD_BORKEN_CODE
 //! @todo PTLFormulaeKit is from  old implementation
                             d = PTLFormulaeKit::deduction(inheritance[i][j], inheritance[m][n],
                                                           atoms[i], atoms[j], atoms[n]);
                             TS_ASSERT(d!=NULL);
                             t = PTLFormulaeKit::revision(e,d);
-*/
+
                             TS_ASSERT(t!=NULL);
                             cout << e->toString() << "\t"
                                  << d->toString() << "\t"
@@ -427,6 +438,7 @@ public:
                                  << t->toString() << "\n";
                             totalStrError += Abs(e->getMean() - t->getMean());
                             totalCountError += Abs(e->getCount() - t->getCount());
+#endif
                             num++;
                         }
                     }
