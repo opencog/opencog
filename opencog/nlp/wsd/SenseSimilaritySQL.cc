@@ -160,7 +160,7 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 	std::string first_pos = get_part_of_speech(first_sense);
 	std::string second_pos = get_part_of_speech(second_sense);
 
-	double sim;
+	double sim = 0.0;
 	if (0 == first_pos.compare(second_pos))
 	{
 		if (0 == first_pos.compare("noun"))
