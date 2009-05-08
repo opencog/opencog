@@ -95,6 +95,10 @@ The semcor directory contains some trite SemCor utilities. SemCor
 is a WSJ corpus marked up with word senses.  This directory is nearly
 empty and is not currently used.
 
+seme
+----
+Notes on concept formation from linguistic input.
+
 similarity
 ----------
 The similarity directory contains code related to similarity of word
