@@ -313,6 +313,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
         return makeSingletonSet(ret);
 }
 
+#if DISABLE_FOR_NOW
 //! @todo Update to BoundVTree
 boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapper *destTable,
                                         const meta& outh,
@@ -380,7 +381,8 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
         else
             return Vertex((Handle)NULL);
 
-}*/
+}
+#endif
 
 /*
   [IntInh A B].tv.s = [ExtInh Ass(B) Ass(A)].tv.s
@@ -388,6 +390,7 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
   Wrong ExtInh direction?
   */
 
+#ifdef DISABLED_FOR_NOW
 //! @todo Update to tree<Vertex> && new rule storage (not ATW)
 Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
 {
@@ -437,7 +440,8 @@ Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
     }
 
     return ass.attach(destTable);
-}*/
+}
+#endif
 
 void pr2(pair<pHandle, vtree> i);
 void pr(pair<pHandle, pHandle> i);
@@ -521,7 +525,8 @@ Btr<ModifiedVTree> convertToModifiedVTree(pHandle h, Btr<vtree> vt)
     return Btr<ModifiedVTree>(new ModifiedVTree(vt));
 }*/
 
-/*template<typename T2, typename T3>
+#if DISABLED_FOR_NOW
+template<typename T2, typename T3>
 struct mapper
 {
     const map<T2, T3>& m;
@@ -535,7 +540,8 @@ struct mapper
         else
             return i->second;
     }
-};*/
+};
+#endif
 
 template<typename T, typename T2>
 bool stlhasi(const T& c, const T2& k)
@@ -569,7 +575,8 @@ bool consistent_bindingsVTreeT(TM& b1, bindContainerIterT b2start, bindContainer
         {
             return false;
 
-/*          ///The same var bound different way. First virtualize them:
+#if DISABLED_FOR_NOW
+            ///The same var bound different way. First virtualize them:
 
             vtree binder1(make_vtree(v2h(b->second)));
             vtree binder2(make_vtree(v2h(bit->second)));
@@ -581,7 +588,8 @@ bool consistent_bindingsVTreeT(TM& b1, bindContainerIterT b2start, bindContainer
             Btr<vtree> binder2A(tree_transform(binder2,   mapper<T1, bindContainerIterT>(b1, b1start, b1end)));
             Btr<vtree> binder2B(tree_transform(*binder2A, mapper<T1, bindContainerIterT>(b2, b2start, b2end)));
 
-            return *binder2B == *binder1B; //Check if it's still inconsistent.*/
+            return *binder2B == *binder1B; //Check if it's still inconsistent.
+#endif
         }
     }
 
@@ -642,7 +650,8 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
 	cprintf(4,"\ncombined binds:");
     for_each(bindsCombined->begin(), bindsCombined->end(), pr2);
 
-    /**     /// Previously:
+#if PREVIOUS_IMPLEMENTATION
+    /// Previously:
     /// Combined bindings are applied to the candidate
     for(vtree::iterator v = BoundUniversal->begin();
     v!= BoundUniversal->end();)
@@ -655,19 +664,22 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
     }
     else
     ++v;
-    }*/
+    }
+#endif
 
     printer.print(BoundUniversal->begin(), 4);
 
+#if PREVIOUS_IMPLEMENTATION
     /// Previously:
     /// All recursion was removed from the combined binds, but only the binds pertaining
     /// to the variables that occurred in target are relevant and will hence be included.
 
-    /*          for (bindingsVTreeT::iterator it = bindsCombined->begin();
+    for (bindingsVTreeT::iterator it = bindsCombined->begin();
     it!= bindsCombined->end();
     it++)
     if (STLhas(*bindsInTarget, it->first))
-    (*BoundUniversal->bindings)[it->first] = it->second;*/
+    (*BoundUniversal->bindings)[it->first] = it->second;
+#endif
 
     /// Now:
     /// I changed the unifiesTo function so that lhs/rhs binding distinction was blurred.
@@ -780,7 +792,8 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
             cprintf(4,"\ncombined binds:");
             for_each(bindsCombined->begin(), bindsCombined->end(), pr2);
 
-/**     /// Previously:
+#if PREVIOUS_IMPLEMENTATION
+            /// Previously:
             /// Combined bindings are applied to the candidate
             for(vtree::iterator v = BoundUniversal->begin();
                                         v!= BoundUniversal->end();)
@@ -793,7 +806,8 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
                 }
                 else
                     ++v;
-            }*/
+            }
+#endif
 
 #if 0
             rawPrint(*BoundUniversal, BoundUniversal->begin(), 4);
@@ -801,15 +815,17 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
             printer.print(BoundUniversal->begin(), 4);
 #endif
 
+#if PREVIOUS_IMPLEMENTATION
             /// Previously:
             /// All recursion was removed from the combined binds, but only the binds pertaining
             /// to the variables that occurred in target are relevant and will hence be included.
 
-/*          for (bindingsVTreeT::iterator it = bindsCombined->begin();
+            for (bindingsVTreeT::iterator it = bindsCombined->begin();
                                                     it!= bindsCombined->end();
                                                     it++)
                 if (STLhas(*bindsInTarget, it->first))
-                    (*BoundUniversal->bindings)[it->first] = it->second;*/
+                    (*BoundUniversal->bindings)[it->first] = it->second;
+#endif
 
             /// Now:
             /// I changed the unifiesTo function so that lhs/rhs binding distinction was blurred.
