@@ -157,6 +157,12 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  *   ConceptNode "y" <0.8, 0.9> (Context dc_y <0.1, 0.5>)
  * \endcode
  *
+ * @todo short-term: intercept FW_VARIABLE_NODES and prevent them from being put in the
+ * AtomSpace
+ * @todo long-term: replace FW_VARIABLES_NODES with a string in the Vertex type.
+ * @todo Normalisation of AtomSpace: EquivalenceLink <-> 2 x ImplicationLinks
+ * @todo Explicit representation of ContextLinks (since AtomSpaceWrapper
+ * maps each context TV to a separate Handle) or function to get context atom.
  */
 class AtomSpaceWrapper : public iAtomSpaceWrapper
 {

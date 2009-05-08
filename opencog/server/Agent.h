@@ -39,7 +39,7 @@ typedef std::tr1::unordered_map<Handle, stim_t> AtomStimHashMap;
 
 class CogServer;
 
-/**
+/** The MindAgent Class
  * This class defines the base abstract class that should be extended by all
  * opencog agents.
  *
@@ -63,6 +63,7 @@ class CogServer;
  * A typical derived Agent declaration & initialization would thus look as
  * follows:
  *
+ * \code
  * // MyAgent.h
  * #include <opencog/server/Agent.h>
  * #include <opencog/server/Factory.h>
@@ -89,8 +90,13 @@ class CogServer;
  * CogServer& cogserver = static_cast<CogServer&>(server());
  * cogserver.registerAgent(MyAgent::info().id, &factory);
  * cogserver.createAgent(MyAgent::info().id, true);
+ * \endcode
+ *
+ * @todo create a run wrapper around the actual implementation of the run method.
+ * This would flip an "active" or "running" boolean property on or off. Any
+ * carry out other admin tasks before and after each cycle, without subclasses
+ * needing to carry these out themselves unless they had specific reason to.
  */
- 
 class Agent : public AttentionValueHolder
 {
 

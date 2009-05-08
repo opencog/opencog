@@ -83,8 +83,8 @@ public:
 	}
 };
 */
-/// Stores inference tree for B-1st inference and last-attempted-depth for D-1st
-
+/// Stores inference tree for Breadth-1st inference and last-attempted-depth for
+/// Depth-1st
 typedef boost::variant<InferenceNode2, int> InferenceSession;
 
 class SimplePLNEvaluator

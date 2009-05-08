@@ -45,6 +45,10 @@ namespace opencog
 
 /** BackChainingAgent runs PLN backward chaining inference.
  * 
+ * @todo Adapt MindAgent to check a RequestForService queue to see if
+ * any other OpenCog processes need a particular hypothetical atom. 
+ * @todo Allow backward chaining state to be saved between cycles (it will kind-of
+already) and allow the iterative expansion of multiple BITs to be in progress at once.
  */
 class BackChainingAgent : public Agent
 {

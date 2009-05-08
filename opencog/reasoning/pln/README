@@ -184,15 +184,10 @@ as other quite important tasks.
 
 === Important
 
+* Convert code so that Type and pHandle are represented separately in the
+Vertex boost::variant. At the same time, perhaps convert the code to use
+VersionHandles so that AtomSpaceWrapper doesn't need to convert to/from fake handles. 
 * Implement a different way of assessing rule application fitness.
-* Allow forward chaining using BIT... by accepting a wildcard target, and only
-accepting results with reasonable confidence.
-* Allow real hypothetical atoms # (those with confidence == 0) to be used as PLN
-targets.
-* related to the above, implement a dynamic normalisation of certain atoms
-types through the ASW.
-    * Normalise Equivalence -> 2 times ImplicationLinks
-    * Represent ContextLinks explicitly 
 * unify the unify methods: MPUnify1, MPUnifyVector, MPUnifyHandle -> MPUnify
 * fix memory leak in BITNode::EvaluateWith ... new RuleApp is not freed (but
 freeing causes a SegFault).
@@ -201,18 +196,14 @@ freeing causes a SegFault).
 
 === Moderate
 
-* Wrap PLN in a MindAgent. Check a Request For Service queue to see if any other
-OpenCog processes need a particular hypothetical atom.
-* Allow backward chaining state to be saved between cycles (it will kind-of
-already) and allow multiple BITs to be chained at once.
-* RevisionMindAgent - to merge the PLN dummy TVs?
 * remove all the temporary hacks in the haxx:: namespace
-* Split Rules in inheriting from a GeneratorRule or ComposerRule class.
+* Split Rules in inheriting from a GeneratorRule or ComposerRule class:
  Generators create atoms but don't require input atoms.
    This includes ForAll atoms in XML axiom sets are loaded into separate
    CrispuUnificationRule objects. They are Generators. Other generators include
    direct lookup, remote lookup, and hypothesis generation.
  Composers produce atoms from input.
    
-
 === Nice to have
+
+* Magical machine elves.

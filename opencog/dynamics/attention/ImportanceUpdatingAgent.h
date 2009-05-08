@@ -99,6 +99,13 @@ class CogServer;
  * has been charging too much tax... just like real life ;-) ). The agent then
  * recalculates the optimal rent based on decaying measures of the AtomSpace
  * size and number of atoms in the attentional focus.
+ *
+ * @todo Remove the conversion of stimulus to STI/LTI from
+ * ImportanceUpdatingAgent. Create a opencog::MindAgent function that converts stimulus
+ * into STI/LTI as well as resetting the stimulus map. This function should be
+ * called at the end of the MindAgent run method... but individual MindAgents
+ * may choose not to (if they were completely unsuccessful and don't want to
+ * give any funds to the atoms).
  */
 class ImportanceUpdatingAgent : public Agent
 {

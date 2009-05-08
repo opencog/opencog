@@ -61,5 +61,8 @@ ToDo/Bugs:
 
 * Need to document how module loading actually works.
 
+* Put together a list of all known MindAgents in default config file, so that
+  MindAgents can be loaded directly (and the CogServer will load the
+  appropriate module(s) first).
 
 

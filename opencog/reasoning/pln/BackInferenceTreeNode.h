@@ -179,10 +179,12 @@ public:
  * \endcode
  * 
  *
- * @todo investigate keeping FW_VARIABLE_NODEs out of the AtomSpace.
  *
- * @remarks BITNode supports pre-bindings extensively, but it's unclear whether they are
- * obsolete or not.
+ * @todo Allow forward chaining using BIT... by accepting a wildcard target, and
+ * only accepting results with reasonable confidence.
+ *
+ * @remarks BITNode supports pre-bindings extensively, but it's unclear whether
+ * they are obsolete or not.
  *
  */
 class BITNode
@@ -548,17 +550,26 @@ public:
 
 	BITNodeRoot(meta _target, RuleProvider* _rp);
 	
-/**
-	Basic usage: 
-	Btr<BITNodeRoot> state = reasoning::PLNEvaluator::BIT_evaluate(reasoning::InferenceTaskParameters(NULL,target));
-or you can create the BITNodeRoot directly.
-
-	state->infer(ProofResources, minConfidenceForAlternativeAction, minConfidenceForAction);
-
-	\param Resources = the max nr of inference steps. The method returns by ref the nr of actual steps taken.
-	\param minConfidenceForStorage = the conf. threshold for storing an inference result
-	\param minConfidenceForAbort = the conf. threshold for finishing the inference once "good enough" result found
-*/
+    /**
+     * Basic usage: 
+     *
+     * \code
+     * Btr<BITNodeRoot> state = reasoning::PLNEvaluator::
+     *     BIT_evaluate(reasoning::InferenceTaskParameters(NULL,target));
+     * // or you can create the BITNodeRoot directly...
+	 * state->infer(ProofResources, minConfidenceForStorage, minConfidenceForAbort);
+     * \endcode
+     * 
+     * @param Resources the max number of inference steps. The method returns
+     * by ref the nr of actual steps taken.
+     * @param minConfidenceForStorage the conf. threshold for storing an
+     * inference result
+     * @param minConfidenceForAbort the conf. threshold for finishing the
+     * inference once "good enough" result found
+     * @todo Use revision on the final result (probably have to do it through
+     * AtomSpaceWrapper, since within PLN doesn't know about PLN dummy
+     * contexts).
+     */
 	const set<VtreeProvider*>& infer(int& resources,
             float minConfidenceForStorage = 0.000001f,
             float minConfidenceForAbort = 1.00f);

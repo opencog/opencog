@@ -5,15 +5,15 @@ allocation among atoms within OpenCog.
 
 == TODO ==
 
-- Implement attention allocation among MindAgents.
-- Separate stimulus maps per MindAgent, and default reward function in MindAgent
-base class.
-- Split the ImportanceUpdatingAgent into a RentCollectionAgent and a WageAgent.
-The WageAgent needs to be called after every other MindAgent has completed it's
-cycle (assuming the MindAgent has distributed any stimulus or has STI to pay its
-atoms with.
 - Implement HebbianMiningAgent
-- Convert diffusion agent to use sparse matrices
+- Move all MindAgents and code to the opencog::ecan namespace.
+- Spread LTI
+  - Create ECANBank singleton, keep track of various stats, handles that need LTI spread.
+  - ImportanceDiffusionAgent flag to spread LTI (implement spread for ALL atoms,
+     just for STI > AF boundary, and just for handles in ECANBank that need
+     spread)
+  - run STI and LTI spread across all atoms in AF every N cycles, run LTI spread
+     across handles in ECANBank every M cycles. where N >> M.
 
 == Entities involved in attention allocation ==
 
