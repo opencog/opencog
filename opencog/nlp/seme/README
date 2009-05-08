@@ -26,89 +26,46 @@ ToDo: Reification of triples ...
 Re-examin Markov Logic Networks ...
 Phrasal verbs vs. prepositional phrases
 
+What is a Concept?
+------------------
+So far, almost all the processing described in nlp/triples/README 
+has been in terms of graph modifications performed on individual
+sentences, containing WordInstanceNodes, and links to WordNodes.
+In order to promote text input into concepts, and to reason with 
+concepts, we need to define what a concept is, and where its boundaries
+extend to.  At this point, the goal is not do define a super-abstract
+notion of a concept that passes all epistomological tests, but rather 
+a practical if flawed data structure that is adequate at representing
+data learned by reading, learned through linguistic corpus analysis. 
+The emphasis here is "flawed but practical": it should be just enough
+to take us to the next level of abstration.
 
-A priori vs. Deduced Knowledge
-------------------------------
-Consider the following:
+Naively, a concept would seem to have the followng parts:
+-- a SemeNode, to serve as an anchor (could be ConceptNode)
+-- a linguistic expression complex.
+-- a WordNet sense tag (optional)
+-- a DBPedia URI tag (optional)
+-- an OpenCyc tag ... etc. you get the idea.
+-- basic ontological links -- is-a, has-a, part-of, etc.
+-- prepositional relations (next-to, inside-of, etc)
 
-   capital_of(Germany, Berlin)
+What is a "linguistic expression complex"?  It deals with the idea that
+most concepts are not expressible as single words: for example, "Mary
+had a red baloon".  The head concept here is "baloon": it is an instance
+of the class of all baloons, and specifically, this instance is red. 
+Thus, a "linguistic expression complex" would consist of:
 
-This triple references a lot of a-priori knowledge.  We know that
-capitals are cities; thus there is a strong temptation to write a
-processing rule such as "IF ($var0,capital) THEN ($var0,city)".
-Similarly, one has a-priori knowledge that things which have capitals
-are political states, and so one is tempted to write a rule asserting
-this: "IF (capital_of($var0, $var1)) THEN political_state($var1)".
-
-A current working assumption of what follows is that the normalization
-rules will attempt to encode a minimum of a-priori "real-world" knowledge.
-Instead, the goal here is to encode linguistic knowledge, and
-specifically, linguistic knowledge pertaining to prepositions and
-copulas: the copula expresses "is-a" relations, while the preposition
-expresses relationships: "has-a", "next-to", "part-of", "made-of", etc.
-
-The hope is that, by encoding the relatively small number of
-prepositional relationships, the much larger set of "real-world"
-knowledge rules can be deduced (via backward or forward chaining).
-
-Definite vs. Indefinite
------------------------
-There is a subtle semantic difference between triples that describe
-definite properites, vs. triples that describe generic properites, 
-or semantic classes.  Thus, for example, "color_of(sky,blue)" seems 
-unambiguous: this is because we know that the sky can only ever have
-one color. Consider "form_of(clothing, skirt)": this asserts that
-a skirt is a form_of clothing, and not that clothing is always a
-skirt. The form_of indicates a semantic category.  Similarly, 
-"group_of(people, family)" asserts that a family is a group_of
-people, and not that groups of people are families.
-
-The distinction here seems to be whether or not the modifier was
-definite or indefinite: "THE color of ...." vs. "A form of.." or
-"A group of..."
-
-Learning Semantic Categories
-----------------------------
-Consider the category of "types of motion". Currently, the RelEx frame
-rules include an explicit list of category members:  
-
-$Self_motion
-amble
-bustle
-canter
-clamber
-climb
-clomp
-coast
-crawl
-creep
-
-This list clearly encodes a-priori knowledge about locomotion.  It would
-be better if the members of this category could be deduced by reading.
-There are three ways in which this might be done. One might someday
-read a sentence that asserts "Crawling is a type of locomotion".  This
-seems unlikely, as this is common-sense knowledge, and common-sense
-knowledge is not normally encoded in text. A second possibility is to
-learn the meaning of the word "crawl" the way that children learn it: 
-to have someone point at a centipede and say "gee, look at that thing
-crawl!"  Such experiential, cross-sensory learning would indeed be an
-excellent way to gain new knowledge. However, there are two snags: 
-1) It presumes the existence of a teacher who already knows how to use
-the word "crawl", and 2) It is outside of the scope of what one person
-(i.e. me) can acheive in a limited amount of time.  A third possibility
-is statistical learning: to observe a large number of statements
-containing the word "crawl", and, based on these, deduce that it is a
-type of locomotion.
-
-In the following, the third approach is presumed. This is because the
-author has in hand both the statistical and the linguistic tools that
-would allow such observation and deduction to be made.
-
+-- a head WordNode, to give single, leading name.
+   Possibly several WordNodes to give it multiple names?
+-- dependent modifier tags (e.g. "red")
+-- a part-of-speech tag, to provide a rough linguistic categorization
+-- a collection of disjunct tags, representing possible linguistic
+   use of the WordNode to represent this concept.
 
 Promoting Words to Concepts
 ---------------------------
-There is one more aspect to this, which is much deeper: the promotion
-of word-relations to concepts.  Consider the following relationships:
+Consider the task of promoting word-relations to concepts.  Consider the 
+following relationships:
 
    is_a(bark, sound)
    part_of(bark, tree)
@@ -166,6 +123,87 @@ whether two distinct statements are compatible with each other. When
 they are, then the two different word-instances can be assumed to refer
 to the same concept; relationships can then be merged.
 
+
+A priori vs. Deduced Knowledge
+------------------------------
+Consider the following:
+
+   capital_of(Germany, Berlin)
+
+This triple references a lot of a-priori knowledge.  We know that
+capitals are cities; thus there is a strong temptation to write a
+processing rule such as "IF ($var0,capital) THEN ($var0,city)".
+Similarly, one has a-priori knowledge that things which have capitals
+are political states, and so one is tempted to write a rule asserting
+this: "IF (capital_of($var0, $var1)) THEN political_state($var1)".
+
+A current working assumption of what follows is that the various rules
+will/should encode a minimum of a-priori "real-world" knowledge.
+Instead, the goal here is to create a system that can learn, deduce
+such "real-world" knowledge.
+
+
+Definite vs. Indefinite
+-----------------------
+There is a subtle semantic difference between triples that describe
+definite properities, vs. triples that describe generic properites, 
+or semantic classes.  Thus, for example, "color_of(sky,blue)" seems 
+unambiguous: this is because we know that the sky can only ever have
+one color (well, unless you are looking at a sunset). Consider 
+"form_of(clothing, skirt)": this asserts that a skirt is a form_of 
+clothing, and not that clothing is always a skirt. The form_of 
+indicates a semantic category.  Similarly, "group_of(people, family)"
+asserts that a family is a group_of people, and not that groups of
+people are families.
+
+The distinction here seems to be whether or not the modifier was
+definite or indefinite: "THE color of ...." vs. "A form of.." or
+"A group of..."
+
+XXX This is a real bug/hang-up in the triples processing code:
+being unaware of this distinction seems to cause some triples
+to come out "backwards" (i.e. that clothing is always a skirt).
+Caution to be used during seme formation!
+
+
+Learning Semantic Categories
+----------------------------
+Consider the category of "types of motion". Currently, the RelEx frame
+rules include an explicit list of category members:  
+
+$Self_motion
+amble
+bustle
+canter
+clamber
+climb
+clomp
+coast
+crawl
+creep
+
+This list clearly encodes a-priori knowledge about locomotion.  It would
+be better if the members of this category could be deduced by reading.
+There are three ways in which this might be done. One might someday
+read a sentence that asserts "Crawling is a type of locomotion".  This
+seems unlikely, as this is common-sense knowledge, and common-sense
+knowledge is not normally encoded in text. A second possibility is to
+learn the meaning of the word "crawl" the way that children learn it: 
+to have someone point at a centipede and say "gee, look at that thing
+crawl!"  Such experiential, cross-sensory learning would indeed be an
+excellent way to gain new knowledge. However, there are two snags: 
+1) It presumes the existence of a teacher who already knows how to use
+the word "crawl", and 2) It is outside of the scope of what one person
+(i.e. me) can acheive in a limited amount of time.  A third possibility
+is statistical learning: to observe a large number of statements
+containing the word "crawl", and, based on these, deduce that it is a
+type of locomotion.
+
+In the following, the third approach is presumed. This is because the
+author has in hand both the statistical and the linguistic tools that
+would allow such observation and deduction to be made.
+
+
 Consistency Checking
 --------------------
 Consider the following three sentences:
@@ -209,41 +247,6 @@ Other problems: Consider the sentences:
 
 One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
-
-What is a Concept?
-------------------
-So far, almost all the processing above has been in terms of graph 
-modifications performed on individual sentences, containing 
-WordInstanceNodes, and links to WordNodes.  However, in order to
-promote text inptu into concepts, and to reason with concepts, we need
-to define what a concept is, and where its boundaries extend to.
-At this point, the goal is not do define a super-abstract concept that
-passes all epistomological tests, but rather as a practical if flawed
-data structure that is adequate at representing data learned through
-linguistic, corpus analysis. The emphasis here is "flawed but practical":
-it is just enough to take use to the next level of abstration.
-
-Naively, a concept would seem to have the followng parts:
--- a SemeNode, to serve as an anchor (could be ConceptNode)
--- a linguistic expression complex.
--- a WordNet sense tag (optional)
--- a DBPedia URI tag (optional)
--- an OpenCyc tag ... etc. you get the idea.
--- basic ontological links -- is-a, has-a, part-of, etc.
--- prepositional relations (next-to, inside-of, etc)
-
-What is a "linguistic expression complex"?  It deals with the idea that
-most concepts are not expressible as single words: for example, "Mary
-had a red baloon".  The head concept here is "baloon": it is an instance
-of the class of all baloons, and specifically, this instance is red. 
-Thus, a "lignuistic expression complex" would consist of:
-
--- a head WordNode, to give single, leading name.
-   Possibly several WordNodes to give it multiple names?
--- dependent modifier tags (e.g. "red")
--- a part-of-speech tag, to provide a rough linguistic categorization
--- a collection of disjunct tags, representing possible linguistic
-   use of the WordNode to represent this concept.
 
 
 
