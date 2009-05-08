@@ -298,7 +298,7 @@ After more stats, the top four are now:
  give%2:40:00:: | gave.v         | Ss- Os+  |    1.24343275701667 |     4.20908590081861
  give%2:40:06:: | gave.v         | Ss- Os+  |   0.654998252433946 |     5.13385142910354
 
-Again, teh gap has widened!
+Again, the gap has widened!
 
 Can we disprove the above?
 
@@ -418,7 +418,7 @@ select * from disjuncts where disjunct='Ss- Ox+ Opn+ ' order by log_cond_probabi
  made.v         | Ss- Ox+ Opn+  |   3.21262238919736 |     7.73259168120915 | 
  wrote.v        | Ss- Ox+ Opn+  |  0.422241305932403 |     7.90307163730819 | 
 
-No visually obvius clustering.
+No visually obvious clustering.
 
 select * from disjuncts where disjunct='Ss- Ox+ ' and count > 1.0 order by log_cond_probability asc;
 
