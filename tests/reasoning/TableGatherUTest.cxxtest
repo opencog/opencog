@@ -120,6 +120,6 @@ public:
         TS_ASSERT(table3.find(weak_atom<Vertex>(l3_h)) != table3.end());
         TS_ASSERT(table3.find(weak_atom<Vertex>(l4_h)) != table3.end());
 
-        //TODO: perhaps add more test cases with variables...?
+        //! @todo perhaps add more test cases with variables...?
     }
 };

@@ -313,7 +313,7 @@ protected:
 	bool inferenceLoopWith(meta req);
 
 	/// helper
-	// @todo Doesn't do anything
+	//! @todo Doesn't do anything
 	template<typename IterT>
 	void ValidateRuleArgs(IterT rule_args_begin, IterT rule_args_end) const
 	{
@@ -645,13 +645,13 @@ protected:
 class ExplicitlyEvaluatedBITNode : public BITNode
 {
 public:
-	/// TODO: Complete implementation
+	//! @todo Complete implementation
 	BoundVertex evaluate1(int index);
 	
 	Btr<set<BoundVertex> > evaluate(set<const BITNode*>* chain = NULL) const;
 
 	/// Use for brute force checking of whether the tree can be evaluated (but do not really evaluate).
-	/// TODO: This may no longer be up-2-date with the real evaluate()
+	//! @todo This may no longer be up-2-date with the real evaluate()
 	Btr<set<BoundVertex> > pseudo_evaluate() const;
 };
 

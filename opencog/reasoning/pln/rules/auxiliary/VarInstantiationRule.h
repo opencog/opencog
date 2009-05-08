@@ -103,7 +103,7 @@ public:
 				retTV,
 				RuleResultFreshness);	
 
-	// TODO: Delete the resulting dummy 'eval1' node!
+	//! @todo Delete the resulting dummy 'eval1' node!
 
 	return ret;
   }

@@ -118,13 +118,13 @@ public:
 #define DEBUG           5
 extern int currentDebugLevel;
 // Cprintf for log level output
-// TODO: replace with OpenCog Logger system
+//! @todo replace with OpenCog Logger system
 int cprintf(int debugLevel, const char *format, ...);
 
-// TODO: replace with OpenCog Logger system
+//! @todo replace with OpenCog Logger system
 void ReasoningLog(int l, std::string m);
 
-// TODO: replace with OpenCog Logger system
+//! @todo replace with OpenCog Logger system
 #define LOG(l, m) ReasoningLog(l,m)
 #define SET_LOG(s) _LOGPOS = s; _LOG_FIXED = true
 #define LET_LOG _LOG_FIXED = false;
@@ -545,7 +545,7 @@ std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
 struct atom;
 
-// @todo Not defined anywhere, but probably should be implemented.
+//! @todo Not defined anywhere, but probably should be implemented.
 //void unifiesWithVariableChangeTo_TEST();
 
 bool MPunifyHandle(pHandle lhs,

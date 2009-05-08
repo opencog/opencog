@@ -198,7 +198,7 @@ Rule::setOfMPs Rule::o2iMeta(meta outh) const
     if (overrideInputFilter)
         return extraFilter;
     
-/*  TODO: Update this to the new types system
+/** @todo Update this to the new types system
     
     for (e = extraFilter->begin(); e!=extraFilter.end(); e++)
     {

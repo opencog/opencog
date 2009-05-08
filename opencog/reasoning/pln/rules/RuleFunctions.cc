@@ -101,7 +101,7 @@ BBvtree atomWithNewType(pHandle h, Type T)
 BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
     pHandle *ph = boost::get<pHandle>(&*v.begin());
-// TODO just call the overloaded Vertex version below
+//! @todo just call the overloaded Vertex version below
     AtomSpaceWrapper *nm = GET_ATW;
     if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
     {
@@ -313,7 +313,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
         return makeSingletonSet(ret);
 }
 
-/* TODO: Update to BoundVTree
+//! @todo Update to BoundVTree
 boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapper *destTable,
                                         const meta& outh,
                                         ArityFreeANDRule* rule)
@@ -388,7 +388,7 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
   Wrong ExtInh direction?
   */
 
-/** TODO: Update to tree<Vertex> && new rule storage (not ATW)
+//! @todo Update to tree<Vertex> && new rule storage (not ATW)
 Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
 {
     TableGather g(mva((Handle)INHERITANCE_LINK,
@@ -671,7 +671,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
 
     /// Now:
     /// I changed the unifiesTo function so that lhs/rhs binding distinction was blurred.
-    /// TODO: Verify that this is correct: now including bindings on both sides!
+    //! @todo Verify that this is correct: now including bindings on both sides!
 
     BoundUniversal->bindings = bindsCombined;
 
@@ -813,7 +813,7 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
 
             /// Now:
             /// I changed the unifiesTo function so that lhs/rhs binding distinction was blurred.
-            /// TODO: Verify that this is correct: now including bindings on both sides!
+            //! @todo Verify that this is correct: now including bindings on both sides!
 
             BoundUniversal->bindings = bindsCombined;
 

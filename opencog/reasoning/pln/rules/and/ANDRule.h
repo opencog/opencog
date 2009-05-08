@@ -38,7 +38,7 @@ public:
 
 	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
 	
-	/// Direct production was used here before. TODO: Check whether this should be resumed!
+	///! Direct production was used here before. @todo Check whether this should be resumed!
 	NO_DIRECT_PRODUCTION;
 };
 

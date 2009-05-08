@@ -128,7 +128,7 @@ public:
         }
         cout << endl;
 
-        //TODO: ADD TS_ASSERT
+        //! @todo ADD TS_ASSERT
 
         asw->reset();
     }

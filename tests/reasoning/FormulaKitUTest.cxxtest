@@ -184,7 +184,7 @@ public:
             new SimpleTruthValue(100,100)
         };
         TruthValue* t;
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
         for (int a=0; a < N; a++) {
             for (int b=0; b < N; b++) {
                 for (int c=0; c < N; c++) {
@@ -266,7 +266,7 @@ public:
             for (int a=0; a < NUM_ATOMS; a++) {
                 if (a==b) continue;
                 if (inheritance[a][b]==NULL) continue;
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::inversion(inheritance[b][a],atoms[a],atoms[b]);
 */
                 TS_ASSERT(t!=NULL);
@@ -301,7 +301,7 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::nodeTruthValue(inheritance[a][b],inheritance[b][a],atoms[b]);
 */
                 TS_ASSERT(t!=NULL);
@@ -336,7 +336,7 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if (similarity[a][b]==NULL) continue;
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::similarityToInheritance(similarity[a][b],atoms[a],atoms[b],false);
 */
                 TS_ASSERT(t!=NULL);
@@ -372,7 +372,7 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
                 t = PTLFormulaeKit::inheritanceToSimilarity(inheritance[a][b],
                                                             inheritance[b][a],
                                                             atoms[a],atoms[b]);
@@ -414,7 +414,7 @@ public:
                         if ((i!=n)&&(j==m)) {
                             if ((inheritance[i][j]==NULL) || (inheritance[m][n]==NULL)) continue;
                             e = inheritance[i][n];
-/* TODO: PTLFormulaeKit is from  old implementation
+//! @todo PTLFormulaeKit is from  old implementation
                             d = PTLFormulaeKit::deduction(inheritance[i][j], inheritance[m][n],
                                                           atoms[i], atoms[j], atoms[n]);
                             TS_ASSERT(d!=NULL);

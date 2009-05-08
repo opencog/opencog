@@ -43,7 +43,7 @@
 //#define ARCHIVE_THEOREMS 1
 
 // MACRO for getting the AtomSpace
-// @todo: this should be replaced with initialising the ATW with a AtomSpace
+//! @todo: this should be replaced with initialising the ATW with a AtomSpace
 // pointer/reference and using that. This should actually store an interface
 // that AtomSpace provides but OpenCog currently doesn't indicate what this
 // should be.
@@ -82,7 +82,7 @@ vtree reasoning::make_vtree(pHandle h)
     // Makes vtree for internal PLN use, so don't convert to real 
     // AtomSpace Handles
     
-    /// @todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
+    ///! @todo haxx:: Re-enable cache. It must simply be updated so that (pseudo)core reset takes it into account.
     /* map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
        if (i != h2vtree_cache.end())
           return i->second;*/
@@ -137,7 +137,7 @@ USize(800), USizeMode(CONST_SIZE)
     // Add dummy root NULL context node
     AS_PTR->addNode(CONCEPT_NODE, rootContext);
 
-    // TODO: Replace srand with opencog::RandGen
+    //! @todo Replace srand with opencog::RandGen
     srand(12345678);
 
     archiveTheorems = false;
@@ -494,7 +494,7 @@ static Handle U;
 
 bool AtomSpaceWrapper::loadAxioms(const string& path)
 {
-    // TODO: check exists works on WIN32
+    //! @todo check exists works on WIN32
     string fname(path);
     string fname2("../tests/reasoning/" + path);
 //    string fname2(PLN_TEST_DIR + path);
@@ -703,7 +703,7 @@ bool AtomSpaceWrapper::binaryTrue(pHandle h)
 bool AtomSpaceWrapper::symmetricLink(Type T)
 {
     /// Only used by obsolete code in NormalizingATW::addLink
-    // TODO: either remove or replace with a symmetric link super class...
+    //! @todo either remove or replace with a symmetric link super class...
     // or make sure it's equivalent.
     return inheritsType(T, AND_LINK) || inheritsType(T, LIST_LINK)
             || inheritsType(T, OR_LINK);
@@ -893,7 +893,7 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
     const pHandleSeq hs = getOutgoing(h);
     const TruthValue& tvn = getTV(h);
 
-    // TODO this could use the index that involves complex atom structure predicates
+    //! @todo this could use the index that involves complex atom structure predicates
     if(getType(hs[0]) == AND_LINK &&
     tvn.getConfidence() > PLN_TRUE_MEAN) {
         pHandleSeq args = getOutgoing(hs[0]);
@@ -1007,7 +1007,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
                             "implemented in AtomSpaceWrapper...");
                     char c;
                     cin >> c;
-                    /// @todo create link context if contexts are not all null
+                    ///! @todo create link context if contexts are not all null
                     /// but possibly not needed...
                     assert(0);
                     // create link context
@@ -1023,7 +1023,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
        /* // if this is a node with nothing in contexts
         if (contexts.size() == 0) {
             assert(nnn);
-            // @todo
+            //! @todo
             // find and create free context:
             // find last context in composite truth value, use as dest of new
             // context
@@ -1150,7 +1150,7 @@ bool AtomSpaceWrapper::removeAtom(pHandle h)
             if ( ir != vhmap_reverse.end() ) vhmap_reverse.erase(ir);
         }
     }
-    // @todo - also remove freed dummy contexts
+    //! @todo - also remove freed dummy contexts
     return true;
 }
 
@@ -1168,7 +1168,7 @@ pHandle AtomSpaceWrapper::getRandomHandle(Type T)
 
 pHandleSeq AtomSpaceWrapper::getImportantHandles(int number)
 {
-    // TODO: check all VersionHandles for the highest importance
+    //! @todo check all VersionHandles for the highest importance
     AtomSpace *a = AS_PTR;
     std::vector<Handle> hs;
 
@@ -2325,7 +2325,7 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, bo
             return existingHandle->second;
     }   
     Node node( T,  name,  tvn);
-    // TODO: add related context
+    //! @todo add related context
     pHandle ret = addAtomDC(node, fresh, managed);
     LOG(3, "Add ok.");
     

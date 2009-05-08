@@ -195,7 +195,7 @@ public:
 	    printf("\nResult:\nL: %.5f - U: %.5f\n",result2->getL(),result2->getU());
 	    printf("Mean: %.3f\n",result2->getMean());
 		
-        // TODO test on result2 as well
+        //! @todo test on result2 as well
 	}
   
   	void testSymmetricImplicationBreakdownFormula(){

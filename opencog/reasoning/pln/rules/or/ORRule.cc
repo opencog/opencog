@@ -96,7 +96,7 @@ cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
 // Welter's comment: this change is waiting for Ari's aproval 
                                 : TruthValue::TRIVIAL_TV());
 #else
-                                : SimpleTruthValue(0.0,0.0)); // TODO: Use a static variable...
+                                : SimpleTruthValue(0.0,0.0)); //! @todo Use a static variable...
 #endif
 #else
 #endif

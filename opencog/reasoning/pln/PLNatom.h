@@ -22,12 +22,12 @@
 #ifndef PTLATOM_H
 #define PTLATOM_H
 
-// TODO: remove need for the atom class in the unification methods.
+//! @todo remove need for the atom class in the unification methods.
 
-// TODO: remove extra definition
+//! @todo remove extra definition
 #define MetaPredicate atom
 
-// TODO: use class server and add these to it. search for each to
+//! @todo use class server and add these to it. search for each to
 // see if they should be a node or a link
 #define RESTRICTOR   158
 #define INSTANCEOF_R 159
@@ -141,7 +141,7 @@ public:
     void substitute(const atom& dest, const atom& src);
     void substitute(const atom& rhs, std::string varname);
     
-    /// TODO: Write proper visitor object!
+    //! @todo Write proper visitor object!
     tree< boost::shared_ptr<atom> > maketree() const; //tree<atom>& dest);
     
     tree<Vertex> makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);

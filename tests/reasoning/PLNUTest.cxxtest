@@ -369,7 +369,7 @@ public:
         exit(0);
     }
     
-    // TODO is this a macro ruletest or a macro-rule test?
+    //! @todo is this a macro ruletest or a macro-rule test?
     void DISABLEtestMacroRuleTest()
     {
         AtomSpaceWrapper *atw = GET_ATW;

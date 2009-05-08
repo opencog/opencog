@@ -272,7 +272,7 @@ public:
     void DumpCore(Type T);
 
     //! return the size of the universe
-    //! TODO: get the universe from the real AtomSpace if USizeMode == REAL_SIZE
+    //! @todo get the universe from the real AtomSpace if USizeMode == REAL_SIZE
     unsigned int getUniverseSize() const { return USize; }
 
     //! set the universe size (only if USizeMode == CONST_SIZE)

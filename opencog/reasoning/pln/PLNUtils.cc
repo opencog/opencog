@@ -63,7 +63,7 @@ bool printRealAtoms = false;
 pHandle VarTypes[STD_VARS];
 }
 
-/// Legacy log system from Novamente, TODO: replace
+///! Legacy log system from Novamente, @todo replace
 int currentDebugLevel = NORMAL;
 
 int cprintf(int debugLevel, const char *format, ...)
@@ -717,8 +717,8 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
                                         Temporal* tl = new Temporal(t1Long, t2Long);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries inside the following temporal: " << tl->toString() << endl;
-                                        //! @TODO: is STARTS_WITHIN correct?
-                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; // TODO: what about the version handle? 
+                                        //! @todo: is STARTS_WITHIN correct?
+                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; //! @todo what about the version handle? 
                                         atw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *tl, TemporalTable::STARTS_WITHIN);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition: " << timeEntries.front().toString() << endl;
@@ -1700,7 +1700,7 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
     int to_arity = atw->getArity(to);
 
     // These cases would complicate things... So, templates in the TO side is not allowed to match anything
-    // TODO: HOWEVER, there is at least the following case where we are not detecting here:
+    //! @todo HOWEVER, there is at least the following case where we are not detecting here:
     // FROM = ListLink with arity 0, TO = ListLink with arity 2, but with a FW_VARIABLE_NODE in its outgoing set => TO matches FROM!!!
     //assert(!atw->inheritsType(to_T, FW_VARIABLE_NODE)); COMMENTED OUT BECAUSE TEMPLATES ARE BEING INSERTED IN REAL ATOMTABLE
     if (isVariableAtom(to_name, to_T, to_arity)) {
@@ -1740,7 +1740,7 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
     vector<pHandle> to_hs = atw->getOutgoing(to);
 
 // Check if it matches with at least one combination of permutation of variable elements in outgoing set of FROM side.
-// TODO: FOR NOW, UNORDERED LINKS MAY HAVE ONLY ONE VARIABLE IN THE OUTGOING SET
+//! @todo FOR NOW, UNORDERED LINKS MAY HAVE ONLY ONE VARIABLE IN THE OUTGOING SET
     if (atw->inheritsType(from_T, UNORDERED_LINK)) {
 //        for (int i = 0; i < from_arity; i++) {
 //            printf("%d: from_hs=%p\nto_hs=%p\n", i, from_hs[i], to_hs[i]);
@@ -1949,7 +1949,7 @@ break_inner:
 */
 void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings)
 {
-    /// TODO: Simplify!
+    //! @todo Simplify!
     /// Currently the only automatic way to remove recursion by looking _inside_ that set is as follows:
 
     /// 1. Convert handle=>handle to handle=>vtree
@@ -2106,7 +2106,7 @@ meta ForceAllLinksVirtual(meta _target)
     /* for (vtree::sibling_iterator root = _target->begin(); root != _target->end() && root != root->end(); root = _target->begin(root))
       for (vtree::sibling_iterator vit = _target->begin(root); vit != _target->end(root);)*/
 
-    /// @todo Don't always just iterate the whole tree again from the beginning after every change,
+    ///! @todo Don't always just iterate the whole tree again from the beginning after every change,
     /// but instead continue from where you were, using something like the above embedded loop pair for that.
     for (vtree::pre_order_iterator vit = _target->begin(); vit != _target->end();)
         ForceVirtual(_target, vit);

@@ -55,7 +55,7 @@ struct Vector3D { float x1; float x2; float x3; };
 
 #define exec_assert(__t) if (!(__t)) { cprintf(3, "Wrong Nr of args.\n"); return NULL; }
 
-// TODO: Standardize this
+//! @todo Standardize this
 //const int MAX_COUNT = 100000;
 
 #ifdef USE_PSEUDOCORE

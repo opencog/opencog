@@ -30,7 +30,7 @@
 #include <CogServer.h>
 #include <SimpleTruthValue.h>
 #if USE_TIME_SERVER
-/// TODO: TimeServer has not yet been implemented for PseudoCore!!!
+//! @todo TimeServer has not yet been implemented for PseudoCore!!!
 #include <TimeServer.h>
 #endif
 //#include "StaticNovamenteHandleArgumentType.h"
@@ -224,7 +224,7 @@ sprintf(buff, "%d", N);
 //	return MindDBProxy::getInstance()->add(new Node(NUMBER_NODE, strdup(buff),
 //		TruthValue::TRIVIAL_TV()));
 
-// TODO: fresh bug
+//! @todo fresh bug
 return GET_ATW->addNode(NUMBER_NODE, strdup(buff),
     TruthValue::TRIVIAL_TV());//,false,true);
 }
@@ -391,7 +391,7 @@ args_end.push_back(intervalEnd(interval));
 if (!args_start[0] || !args_end[0])
     return NULL;
 
-// TODO: fresh bug
+//! @todo fresh bug
 Handle arglist1 = GET_ATW->addLink(LIST_LINK, args_start, TruthValue::NULL_TV()); //, false, true);
 Handle arglist2 = GET_ATW->addLink(LIST_LINK, args_end, TruthValue::NULL_TV()); //, false, true);
 
@@ -426,7 +426,7 @@ argsList.push_back(arg1); // (time->int)
 argsList.push_back(arg2); // [time]
 
 std::vector<Handle> argsEval;
-// TODO: fresh bug
+//! @todo fresh bug
 argsEval.push_back(GET_ATW->addNode(PREDICATE_NODE, predName, TruthValue::NULL_TV())); //, false,true));
 argsEval.push_back(GET_ATW->addLink(LIST_LINK, argsList, TruthValue::NULL_TV())); //, false,true));
 
@@ -454,7 +454,7 @@ if (!interval || !F)
 return timeDiff(F, interval, -1);
 }
 
-/// TODO: TimeServer has not yet been implemented for PseudoCore!!!
+//! @todo TimeServer has not yet been implemented for PseudoCore!!!
 #if USE_TIME_SERVER
 
 struct moment_equal : public binary_function<reasoning::BoundVertex, timeUnit, bool>
@@ -490,7 +490,7 @@ float pos(Handle pixel, Handle t)
 	
 	tree<Vertex> queryt(eval.makeHandletree(ASW()));
 
-	/// TODO: Take advantage of the fact that only 1 result needed.
+	//! @todo Take advantage of the fact that only 1 result needed.
 	
 	reasoning::TableGather all_res(queryt,ASW(),-1);
 	reasoning::TableGather::iterator res =
@@ -538,7 +538,7 @@ Handle SpaceTimeApparatus::observedDirectionBetween(Handle a, Handle b, Handle t
 
 //#define TIME_INTERVAL_NODE	1
 
-// WELTER TODO: StaticNovamenteHandleArgumentType is not defined in anywhere!!! SO ALL THE CODE BELLOW IS COMMENTED OUT 
+// WELTER @todo StaticNovamenteHandleArgumentType is not defined in anywhere!!! SO ALL THE CODE BELLOW IS COMMENTED OUT 
 //typedef StaticNovamenteHandleArgumentType<NUMBER_NODE,0> NumberNodeType;
 //typedef StaticNovamenteHandleArgumentType<TIME_INTERVAL_NODE,0> IntervalNodeType;
 //

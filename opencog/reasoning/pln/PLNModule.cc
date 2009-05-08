@@ -105,7 +105,7 @@ void PLNModule::init()
     logger().info("[PLNModule] init");
 //    CogServer& cogserver = static_cast<CogServer&>(server());
 
-// TODO this should be moved to a separate method so it can
+//! @todo this should be moved to a separate method so it can
 // also be accessed from PLNUTest
 //	initTestEnv();
     RECORD_TRAILS = true;
@@ -367,7 +367,7 @@ std::string RunCommand(std::list<std::string> args)
                 if (atw->getTV(ti).isNullTv())
                 {
                     puts("NULL TV !!!");
-                    // TODO
+                    //! @todo
                     assert(0);
                 }
                 printTree(ti,0,0);
@@ -395,7 +395,7 @@ std::string RunCommand(std::list<std::string> args)
             ((BackInferenceTreeRootT*)h)->printResults();
             cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->getParents().begin()->parent_arg_i);
          }
-        // TODO remove from documentation
+        //! @todo remove from documentation
 /*      else if (c == "direct-results") {
             input(h, args); cprintf(0, "Node has results & bindings:\n");
             foreach(const BoundVertex& bv, *((BackInferenceTreeRootT*)h)->direct_results)
@@ -410,7 +410,7 @@ std::string RunCommand(std::list<std::string> args)
                     }
             }
         }*/
-        // TODO deal with arguments to this thing
+        //! @todo deal with arguments to this thing
         else if (c == "find-bitnode") { 
             input(bT, args); input(b1, args); input(b2, args);
             input(a1T, args); input(a10, args); input(a11, args);

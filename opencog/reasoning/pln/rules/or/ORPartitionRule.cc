@@ -39,7 +39,7 @@ Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilte
             outh->begin().number_of_children() <= 2)
             return Rule::setOfMPs();
 
-** TODO: Update to BoundVTree. I no longer remember how this was supposed to work!
+** @todo Update to BoundVTree. I no longer remember how this was supposed to work!
         MPs ret;
 
         //vector<atom> hs;

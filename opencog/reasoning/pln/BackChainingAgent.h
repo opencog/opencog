@@ -37,7 +37,7 @@ namespace reasoning {
     class BITNodeRoot;
 }
 using namespace reasoning;
-// @todo this is also defined in PLNModule.cc
+//! @todo this is also defined in PLNModule.cc
 //#define BackInferenceTreeRootT reasoning::BITNodeRoot
 
 namespace opencog
@@ -72,7 +72,7 @@ private:
     //! The number of steps run on the current target
     int steps;
     
-    int maxSteps; // @todo these should be parameters
+    int maxSteps; //! @todo these should be parameters
     int stepsPerCycle; // but only after deciding on a good set of parameters
 
 public:

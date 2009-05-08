@@ -87,7 +87,7 @@ public:
 	DeductionRule(iAtomSpaceWrapper *_destTable, Type linkType)
 	: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule"), InclusionLink(linkType) 
 	{
-		/// TODO: should use real variable for the other input.
+		//! @todo should use real variable for the other input.
 		
 		GenericRule<DeductionFormula>::inputFilter.push_back(meta(
 				new tree<Vertex>(

@@ -62,7 +62,7 @@ int ForwardChainer::fillStack(int number, bool random)
 
 Handle ForwardChainer::fwdChainToTarget(Handle target, int maxRuleApps)
 {
-    // TODO: Do some intelligent stuff here until the target is reached.
+    //! @todo Do some intelligent stuff here until the target is reached.
     // although maybe not... isn't this just what backward chaining does?
     return Handle::UNDEFINED;
 }
@@ -184,13 +184,13 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
 
             argumentAttempts--;
             // Add sufficient links to meet rule arity.
-            // TODO: make link selection more efficient or exhaustive
-            // TODO: check rule for free input arity and then randomly
+            //! @todo make link selection more efficient or exhaustive
+            //! @todo check rule for free input arity and then randomly
             // select arity (exponentially biased to smaller sizes?)
             for (unsigned int i = 0; i < r->getInputFilter().size(); i++) {
                 if (i != rp.getSeedIndex()) {
                     // random selection
-                    // TODO: sort based on strength and exponential random select
+                    //! @todo sort based on strength and exponential random select
                     pHandle randArg;
                     if (choices.size() > 0) {
                         int index = (int) (getRNG()->randfloat() * choices.size() );

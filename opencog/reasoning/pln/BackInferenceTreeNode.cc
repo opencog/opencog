@@ -280,7 +280,7 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
         SetTarget(meta(new vtree(make_vtree(*ph))), Btr<bindingsT>(new bindingsT));
     }
 
-    /// TODO: There's some redundancy here that should be removed...
+    //! @todo There's some redundancy here that should be removed...
 
     bound_target = ForceAllLinksVirtual(bound_target);
     raw_target = ForceAllLinksVirtual(raw_target);
@@ -313,7 +313,7 @@ BITNode* BITNodeRoot::CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule:
 
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
-    //TODO: why is there an assert zero and below results commented out?
+    //! @todo why is there an assert zero and below results commented out?
     assert(0);
 
     Btr<set<BoundVertex> > results;
@@ -621,7 +621,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
         if (bv.bindings)
         {
             // Remove un-owned bindings; they are inconsequential.
-            /// @todo Possibly the CrispUnificationRule should be prevented from
+            ///! @todo Possibly the CrispUnificationRule should be prevented from
             /// producing them in the 1st place.
             bindingsT temp_binds(*bv.bindings);
             bv.bindings->clear();
@@ -787,7 +787,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
         {
             tlog(-1, "Binding INCONSISTENT. Child not created.\n");
 
-            /// @todo Check if coming here actually is allowed by
+            ///! @todo Check if coming here actually is allowed by
             /// the design, or whether it's a bug.
 
             return NULL;
@@ -899,7 +899,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
 }
 
 /// If any of the bound vars are owned, we'll spawn.
-/// @todo Actually Rules should probably not even need to inform us
+///! @todo Actually Rules should probably not even need to inform us
 /// about the bound vars if they are new, in which case this check would be redundant.
 bool BITNodeRoot::spawns(const bindingsT& bindings) const
 {
@@ -1031,7 +1031,7 @@ void BITNode::tryClone(hpair binding) const
             Rule::CloneArgs(this->args, new_args);
 
             // If validate2 fails... (which is only used by deduction)
-            /// @todo get rid of validate2.
+            ///! @todo get rid of validate2.
             if (p.link && p.link->rule && !p.link->rule->validate2(new_args))
                 continue;
 
@@ -1774,7 +1774,7 @@ void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes
     if (UsedBITNodes == NULL)
         UsedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
 
-#define prlog cprintf /// @todo replace prlog with logger
+#define prlog cprintf ///! @todo replace prlog with logger
     if (rule) {
         if (compact)
 			prlog(loglevel, "%s%s\n", repeatc(' ', depth*3).c_str(), rule->name.c_str());

@@ -782,7 +782,7 @@ void fw_beta (void) {
         fw.seedStack.push_back(l);
     }
 // Change prob of non seed stack selection to zero
-// TODO: make set method so it will normalise probabilities.
+//! @todo make set method so it will normalise probabilities.
   fw.probGlobal = 0.0f;
   fw.probStack = 1.0f;
 
