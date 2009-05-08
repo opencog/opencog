@@ -36,8 +36,11 @@ namespace opencog
 
 class CogServer;
 
-/** Agent that carries out simple Hebbian learning. Only updates
- * existing HebbianLinks.
+/** Agent that carries out simple Hebbian learning.
+ *
+ * @note Only updates existing HebbianLinks. Still need a HebbianMiningAgent...
+ * @todo Support SymmetricInverseHebbianLinks and AsymmetricHebbianLinks
+ * @todo Support Hebbian links with arity > 2
  */
 class HebbianUpdatingAgent : public Agent
 {
@@ -109,7 +112,11 @@ public:
     //! Maximum allowable LTI of a link to be converted.
     AttentionValue::lti_t conversionThreshold;
 
-	//! Update the TruthValues of the HebbianLinks in the AtomSpace.
+	/** Update the TruthValues of the HebbianLinks in the AtomSpace.
+     *
+     * @todo Make link strength decay parameter configurable. Currently
+     * hard-code, ugh.
+     */
     void hebbianUpdatingUpdate();
 
 }; // class
