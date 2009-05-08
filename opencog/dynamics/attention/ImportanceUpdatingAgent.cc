@@ -43,6 +43,8 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
         "ECAN_STARTING_ATOM_LTI_WAGE", "2",
         "ECAN_RENT_TYPE","2", // RENT_LOG
         "ECAN_RENT_AMNESTY","5",
+        "ECAN_RENT_EQUATION_PARAMETER_0","0.05",
+        "ECAN_RENT_EQUATION_PARAMETER_1","0.0",
         "", ""
     };
     setParameters(defaultConfig);
@@ -56,6 +58,16 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent()
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
 	setRentType( (rentType_t) config().get_int("ECAN_RENT_TYPE") );
+    // For RENT_LOG:
+    // percentAmnesty = rentFunctionParams[0];
+    // multiplier = rentFunctionParams[1];
+    // For RENT_EXP:
+    // y = rentFunctionParams[0];
+    // multiplier = rentFunctionParams[1];
+    // Parameters not used by RENT_FLAT
+    rentFunctionParams.push_back(config().get_double("ECAN_RENT_EQUATION_PARAMETER_0"));
+    rentFunctionParams.push_back(config().get_double("ECAN_RENT_EQUATION_PARAMETER_1"));
+
 	setAmnesty( (AttentionValue::sti_t) config().get_int("ECAN_RENT_AMNESTY") );
 
     updateLinks = true;
@@ -585,8 +597,8 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 		case RENT_EXP:
 			// ipython: plot(x, [max(0,i) for i in (exp(x)-(1-y))/(1+y)])
 			if (c > a->getAttentionalFocusBoundary() + amnesty) {
-				double y = 0.0;
-				double multiplier = 0.0;
+				double y = rentFunctionParams[0];
+				double multiplier = rentFunctionParams[1];
 				double x;
 				x = c - a->getAttentionalFocusBoundary();
 				x = x / (a->getMaxSTI() - a->getAttentionalFocusBoundary());
@@ -598,8 +610,8 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 			// max(0,i) where i = log((x-(amnesty%-0.05))*20)/2])
 			// ipython: plot(x, [max(0,i) for i in log((x)*20)/2])
 			if (c > a->getAttentionalFocusBoundary()) {
-				double percentAmnesty = 0.05;
-				double multiplier = 0.0;
+				double percentAmnesty = rentFunctionParams[0];
+				double multiplier = rentFunctionParams[1];
 				double x;
 				percentAmnesty = percentAmnesty-0.05;
 				x = c - a->getAttentionalFocusBoundary();

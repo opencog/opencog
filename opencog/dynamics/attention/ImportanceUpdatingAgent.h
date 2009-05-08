@@ -126,6 +126,9 @@ private:
 
     enum rentType_t rentType; //!< Current method for calculating rent.
 
+    //! Rent function parameters that tune rent equations.
+    std::vector<double> rentFunctionParams;
+
     /** Calculate the rent to apply to an atom with sti \a c.
      *
      * @param a The AtomSpace to work on.
@@ -391,14 +394,19 @@ public:
         { return LTIAtomWage; }
 
     inline void setRentType(rentType_t t)
-        { rentType = t; };
+        { rentType = t; }
     inline rentType_t getRentType() const
         { return rentType; }
 
     inline void setAmnesty(AttentionValue::sti_t t)
-        { amnesty = t; };
+        { amnesty = t; }
     inline AttentionValue::sti_t getAmnesty() const
         { return amnesty; }
+
+    inline void setRentFunctionParameters(std::vector<double> newParameters)
+        { rentFunctionParams = newParameters; }
+    inline std::vector<double> getRentFunctionParameters()
+        { return rentFunctionParams; }
 
 }; // class
 
