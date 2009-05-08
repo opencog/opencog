@@ -25,46 +25,54 @@
 #include <opencog/learning/moses/moses/optimization.h>
 #include <opencog/learning/moses/moses/scoring_functions.h>
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/util/mt19937ar.h>
 
 using namespace moses;
 using namespace reduct;
 using namespace boost;
 
-int main(int argc,char** argv) { 
-  int arity,max_evals,rand_seed;
-  try {
-    if (argc!=4)
-      throw "foo";
-    rand_seed=lexical_cast<int>(argv[1]);
-    max_evals=lexical_cast<int>(argv[2]);
-  } catch (...) {
-    cerr << "usage: " << argv[0] << " seed maxevals file_with_cases" << endl;
-    exit(1);
-  }
+int main(int argc, char** argv)
+{
+    //set flag to print only cassert and other ERROR level logs on stdout
+    opencog::logger().setPrintErrorLevelStdout();
 
-  opencog::MT19937RandGen rng(rand_seed);
+    int arity, max_evals, rand_seed;
+    try {
+        if (argc != 4)
+            throw "foo";
+        rand_seed = lexical_cast<int>(argv[1]);
+        max_evals = lexical_cast<int>(argv[2]);
+    } catch (...) {
+        cerr << "usage: " << argv[0] << " seed maxevals file_with_cases" << endl;
+        exit(1);
+    }
 
-  ifstream in(argv[3]);
-  CaseBasedBoolean bc(in);
-  arity=bc.arity();
+    opencog::MT19937RandGen rng(rand_seed);
 
-  type_tree tt(id::application_type);
-  tt.append_children(tt.begin(),id::boolean_type,arity+1);
+    ifstream in(argv[3]);
+    CaseBasedBoolean bc(in);
+    arity = bc.arity();
 
-  //even_parity scorer;
-  //disjunction scorer;
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(), id::boolean_type, arity + 1);
 
-  passenger_data_score  scorer(bc);
-  passenger_data_bscore bscorer(bc);
+    //even_parity scorer;
+    //disjunction scorer;
 
-  metapopulation<passenger_data_score,passenger_data_bscore,iterative_hillclimbing> 
-    metapop(rng, combo_tree(id::logical_and),tt,logical_reduction(),
-	    scorer,
-	    bscorer,
-	    iterative_hillclimbing(rng));
+    truth_table_data_score  scorer(bc);
+    truth_table_data_bscore bscorer(bc);
 
-  moses::moses(metapop,max_evals,0);
+    metapopulation<truth_table_data_score,
+                   truth_table_data_bscore,
+                   iterative_hillclimbing>
+    metapop(rng, combo_tree(id::logical_and), tt, logical_reduction(),
+            scorer,
+            bscorer,
+            iterative_hillclimbing(rng));
+
+    moses::moses(metapop, max_evals, 0);
 }
 
 

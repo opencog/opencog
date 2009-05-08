@@ -76,7 +76,7 @@ struct simple_symbolic_regression {
 
 
 
-// ///////////////////////// Scoring for Passenger-style data /////////////////////////
+// ///////////////////// Scoring for truth table data /////////////////////////
 
 
 template<typename State, typename iter>
@@ -236,8 +236,8 @@ protected:
     CaseSeq _cases;
 };
 
-struct passenger_data_score {
-    passenger_data_score(struct CaseBasedBoolean& bc) {
+struct truth_table_data_score {
+    truth_table_data_score(struct CaseBasedBoolean& bc) {
         c = &bc;
     }
 
@@ -251,8 +251,8 @@ private:
 
 
 
-struct passenger_data_bscore {
-    passenger_data_bscore(struct CaseBasedBoolean& bc) {
+struct truth_table_data_bscore {
+    truth_table_data_bscore(struct CaseBasedBoolean& bc) {
         c = &bc;
     }
 
