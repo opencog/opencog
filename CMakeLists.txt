@@ -8,7 +8,7 @@ PROJECT(OPENCOG)
 
 #compiling mode, Debug or Release
 SET(CMAKE_BUILD_TYPE Debug)
-#SET(CMAKE_BUILD_TYPE Release)
+# SET(CMAKE_BUILD_TYPE Release)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -24,7 +24,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
         SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
 	ELSE (APPLE)
         SET(CMAKE_C_FLAGS "-Wall -fPIC")
-        SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -fstack-protector")
+        # Linas: Change debug flags to -O2 since I think that 1) -O0 offers
+        # no debugging advantage that I'm aware of, and 2) -g does not hurt
+        # performance in any way that I'm aware of.
+        SET(CMAKE_C_FLAGS_DEBUG "-O2 -g -fstack-protector")
         SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
 	ENDIF (APPLE)
 
