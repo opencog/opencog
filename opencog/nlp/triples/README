@@ -1,20 +1,17 @@
 
-                             Triples
-                             -------
-                    Linas Vepstas January 2009
+                          Semantic Triples
+                          ----------------
+                      Linas Vepstas January 2009
 
-This directory contains some experimental code to extract conceptual 
-entities and semantic triples from English text.  An example of a 
-"conceptual entity" would be the "Great Southern Railroad": a business,
-a railway, that existed at a certain point in space and time. A semantic
-triple is a triple of subject-predicate-object, and is popularly the 
-topic of "Semantic Web RDF" technology discussions[WP-RDF].  An example 
-of a "semantic triple" is "the sky is blue". Written in prefix notation,
-the triple is then "color_of(sky, blue)", with "color_of" being the
-property or predicate, while "sky" and "blue" are the subject and
-object, respectively. In the industry, this task is sometimes refered
-to as "WIE" or "Web Information Extraction"; it is also sometimes called
-"linguistic reification".
+This directory contains some experimental code to extract "semantic
+triples" from English text.  A semantic triple is a triple of 
+subject-predicate-object, and is popularly the topic of "Semantic Web
+RDF" technology discussions[WP-RDF].  An example of a "semantic triple"
+is "the sky is blue". Written in prefix notation, the triple is then 
+"color_of(sky, blue)", with "color_of" being the property or predicate,
+while "sky" and "blue" are the subject and object, respectively. In the
+industry, this task is sometimes refered to as "WIE" or "Web Information
+Extraction"; it is also sometimes called "linguistic reification".
 
 One reason for creating semantic triples is that it simplifies certain
 types of deductions and inferences. For example, "author_of('Pride and 
@@ -24,22 +21,27 @@ complex structures (such as the output of RelEx, or of dependency
 parsers in general), make it considerably easier to automatically
 discover such synonymous expressions.
 
-The primary challenges here are three-fold:
-1) Dealing with the diversity of expression in the English language, 
-   where most sentences are NOT short, to-the-point assertions that
-   something is true. For short, simple sentences, ReLex seems to
-   provide enough normalization to extract at least some triples. But 
-   it is not clear how far this idea (of using triples) can be pushed.
-2) Learning new relations. It is simple to code up, by hand, "framing"
-   relationships, such as a list of colors, or a list properties that
-   an object can have. It is harder to determine, when encountering a 
-   new word, to determine that it is, for example, a color.
-3) Constructing a data representation that is ameanable to reasoning,
-   and to question answering. 
+The primary challenge here is of dealing with the diversity of
+expression in the English language, where most sentences are NOT short,
+to-the-point assertions that something is true. For short, simple
+sentences, ReLex seems to provide enough normalization to extract at
+least some triples. But it is not clear how far this idea (of using
+triples) can be pushed.
 
-ToDo: Reification of triples ... 
-Re-examin Markov Logic Networks ... 
-Phrasal verbs vs. prepositional phrases 
+For the most part, the above challenge is ignored here; it is pursued
+in greater detail in the nlp/seme/README. Instead, a more concrete set
+of tasks are set out and solved here: 
+
+1) How to represent semanctic triples within OpenCog.
+2) How to extract basic semantic triples from straightforward, 
+   unambiguous RelEx input.
+
+The result is the defintion of an IF..THEN.. syntax that can be converted
+to OpenCog ImplicationLinks, and then used (via the query system) to
+process RelEx input and generate triples output.  The IF..THEN.. syntax
+very closely resembles that used by the RelEx framing code, with the 
+intention that someday, it will be possible to use this code to port the
+RelEx frame processing to OpenCog.
 
 Structures
 ----------
@@ -166,42 +168,6 @@ The distinction here seems to be whether or not the modifier was
 definite or indefinite: "THE color of ...." vs. "A form of.." or
 "A group of..."
 
-Learning Semantic Categories
-----------------------------
-Consider the category of "types of motion". Currently, the RelEx frame
-rules include an explicit list of category members:  
-
-$Self_motion
-amble
-bustle
-canter
-clamber
-climb
-clomp
-coast
-crawl
-creep
-
-This list clearly encodes a-priori knowledge about locomotion.  It would
-be better if the members of this category could be deduced by reading.
-There are three ways in which this might be done. One might someday
-read a sentence that asserts "Crawling is a type of locomotion".  This
-seems unlikely, as this is common-sense knowledge, and common-sense
-knowledge is not normally encoded in text. A second possibility is to
-learn the meaning of the word "crawl" the way that children learn it: 
-to have someone point at a centipede and say "gee, look at that thing
-crawl!"  Such experiential, cross-sensory learning would indeed be an
-excellent way to gain new knowledge. However, there are two snags: 
-1) It presumes the existence of a teacher who already knows how to use
-the word "crawl", and 2) It is outside of the scope of what one person
-(i.e. me) can acheive in a limited amount of time.  A third possibility
-is statistical learning: to observe a large number of statements
-containing the word "crawl", and, based on these, deduce that it is a
-type of locomotion.
-
-In the following, the third approach is presumed. This is because the
-author has in hand both the statistical and the linguistic tools that
-would allow such observation and deduction to be made.
 
 Rules
 -----
@@ -416,101 +382,6 @@ Note that the rule numbering is subject to change; more setup rules
 might be added.
 
 
-Promoting Words to Concepts
----------------------------
-There is one more aspect to this, which is much deeper: the promotion
-of word-relations to concepts.  Consider the following relationships:
-
-   is_a(bark, sound)
-   part_of(bark, tree)
-
-We know that these two relations refer to different senses of the word
-"bark". Yet, if these two are deduced by reading, how should the system
-recognize that two different concepts are at play?  How should the
-self-consistency of a set of relations be assessed? Assuming that the
-input text is not intentionally lying, then, under what circumstances
-do a set of conflicting assertions require that the underlying word be
-recognized as embodying two different concepts?
-
-One possible approach is to assign tentative WordNet-based word-senses 
-using either the Mihalcea algorithm, or table-lookup from syntax-tagged
-senses (see the wsd-post/README for details). One nice aspect of WordNet
-tagging is that the built-in WordNet ontology can be used to double-check,
-strengthen certain sense assignments: this, for example:
-
-    bark%1:20:00:: has part-holonym tree_trunk%1:20:00::
-
-while
-
-    bark%1:11:02:: has direct hypernym noise%1:11:00::
-    and inherited hypernym sound%1:11:00::
-
-Thus, triples that have been read in, and tagged with WordNet senses,
-can be verified against the WordNet ontology for the correctness of
-sense assignments.  While this is a reasonable starting point, and
-gives an easy leg-up, it does not solve the more general problem of
-distinguishing and refining concepts.
-
-Another approach is to use part-of-speech tags, and disjunct tags, as
-stand-ins for word senses.  That is, the parser has already identified
-different word-instances according to thier part-of-speech, and so at
-least a rough word-sense classification is available from that.  That
-is, it is safe to assume that a noun and a verb never represent the 
-same concept (at a certain level...).  It has also been seen (see 
-wsd-post/README) that the disjunct used during parsing has a high 
-correlation with the word-sense; the disjunct used during parsing 
-can be considered to be a very fine-grained part-of-speech tag. Thus,
-instead of using Wordnet sense tags as concept "nucleation centers",
-the disjuncts could be used as such.
-
-Two distinct processes are at play: 1) recognizing that two different
-word instances refer to the same concept, and 2) recognizing that a
-previously learned concept should be refined into two distinct concepts.
-(For example, having learned the properties of a "pencil", one must 
-recognize at some point that a "mechanical pencil" and a "wooden pencil"
-have many incompatbile properties, and thus the notion of a pencil must
-be split into these two new concepts).
-
-The most direct route to either of these processes is by means of
-"consistency checking": using forward and backward chaining to determine
-whether two distinct statements are compatible with each other. When
-they are, then the two different word-instances can be assumed to refer
-to the same concept; relationships can then be merged.
-
-Consistency Checking
---------------------
-Consider the following three sentences:
-   Aristotle is a man.
-   Men are mortal.
-   Aristotle is mortal.
-
-Or:
-
-   Berlin is the capital of Germany.
-   Capitals are cities.
-   Berlin is a city.
-
-Assume the first two sentences were previously determined to be true,
-with a high confidence value. How can we determine that the third 
-sentence is plausible, i.e. consistent with the first two sentences?
-
-Upon reading the third sentence, it could be turned into a hypothetical
-statement, and suggested as the target of the PLN backward chainer. If
-the chainer is able to deduce that it is true, then the confidence of
-all three statements can increase: they form a set of mutually
-self-supporting statements.
-
-So, for example, the above generate:
-   capital_of(Germany,Berlin)
-   isa(city, capital)
-   isa(city, Berlin)
-
-The prepositional construction XXX_of(A,B) allows the deduction that
-isa(XXX,A) (a deduction which can be made directly from the raw sentence
-input, and does not need to be processed from the prepositional form.
-(Right??) Certainly this is true for kind_of and capital_of, is this
-true for all prepositional uses of "of"?
-
 IsA Sentences
 -------------
 Copulas, and "is-a" sentences in general, pose difficulties to naive
@@ -628,42 +499,6 @@ Other problems: Consider the sentences:
 One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
 
-What is a Concept?
-------------------
-So far, almost all the processing above has been in terms of graph 
-modifications performed on individual sentences, containing 
-WordInstanceNodes, and links to WordNodes.  However, in order to
-promote text inptu into concepts, and to reason with concepts, we need
-to define what a concept is, and where its boundaries extend to.
-At this point, the goal is not do define a super-abstract concept that
-passes all epistomological tests, but rather as a practical if flawed
-data structure that is adequate at representing data learned through
-linguistic, corpus analysis. The emphasis here is "flawed but practical":
-it is just enough to take use to the next level of abstration.
-
-Naively, a concept would seem to have the followng parts:
--- a SemeNode, to serve as an anchor (could be ConceptNode)
--- a linguistic expression complex.
--- a WordNet sense tag (optional)
--- a DBPedia URI tag (optional)
--- an OpenCyc tag ... etc. you get the idea.
--- basic ontological links -- is-a, has-a, part-of, etc.
--- prepositional relations (next-to, inside-of, etc)
-
-What is a "linguistic expression complex"?  It deals with the idea that
-most concepts are not expressible as single words: for example, "Mary
-had a red baloon".  The head concept here is "baloon": it is an instance
-of the class of all baloons, and specifically, this instance is red. 
-Thus, a "lignuistic expression complex" would consist of:
-
--- a head WordNode, to give single, leading name.
-   Possibly several WordNodes to give it multiple names?
--- dependent modifier tags (e.g. "red")
--- a part-of-speech tag, to provide a rough linguistic categorization
--- a collection of disjunct tags, representing possible linguistic
-   use of the WordNode to represent this concept.
-
-
 
 Yes-No Questions
 ----------------
@@ -677,16 +512,6 @@ Parse:
    TRUTH-QUERY-FLAG (be, T)
    HYP (be, T)
 
-
-
-Deduction
----------
-Suppose we have a set of (consistent) prepositional relationships. What
-can we do with them?  For example, can we deduce that a certain verb is
-a type of locomotion, based on its use with regard to prepositions?
-
-Hmm. Time to write some rules, and experiment and see what happens.
-Not clear how unambiguous the copulas and preps will be.
 
 HOWTO
 -----
