@@ -81,6 +81,7 @@ opencog::LEMMA_NODE = addType(opencog::CONCEPT_NODE, "LemmaNode");
 opencog::LEMMA_LINK = addType(opencog::ORDERED_LINK, "LemmaLink");
 opencog::HOLONYM_LINK = addType(opencog::INHERITANCE_LINK, "HolonymLink");
 opencog::COSENSE_LINK = addType(opencog::UNORDERED_LINK, "CosenseLink");
+opencog::SEME_NODE = addType(opencog::CONCEPT_NODE, "SemeNode");
 opencog::AGISIM_SOUND_NODE = addType(opencog::NODE , "AGISIMSoundNode");
 opencog::AGISIM_TASTE_NODE = addType(opencog::NODE , "AGISIMTasteNode");
 opencog::AGISIM_SMELL_NODE = addType(opencog::NODE , "AGISIMSmellNode");

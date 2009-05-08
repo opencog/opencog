@@ -124,6 +124,19 @@ they are, then the two different word-instances can be assumed to refer
 to the same concept; relationships can then be merged.
 
 
+Concrete Data Representation
+----------------------------
+Let's now look at how to represent some of these ideas concretely, in
+terms of OpenCog hypergraphs.
+
+First, a SemeNode wil be used as the main anchor point. A SemeNode is
+used, instead of a ConceptNode, so as to leave ConceptNode open for 
+other uses; the goal here is to minimize confusion/cross-talk between
+this and other parts of OpenCog.
+
+
+
+
 A priori vs. Deduced Knowledge
 ------------------------------
 Consider the following:

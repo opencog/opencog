@@ -89,6 +89,7 @@ extern opencog::Type LEMMA_NODE;
 extern opencog::Type LEMMA_LINK;
 extern opencog::Type HOLONYM_LINK;
 extern opencog::Type COSENSE_LINK;
+extern opencog::Type SEME_NODE;
 extern opencog::Type AGISIM_SOUND_NODE;
 extern opencog::Type AGISIM_TASTE_NODE;
 extern opencog::Type AGISIM_SMELL_NODE;
