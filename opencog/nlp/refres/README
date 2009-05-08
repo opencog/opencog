@@ -15,6 +15,12 @@ might be accomplished within the current OpenCog infrastructure. These
 notes may at times be incoherent or disconnnected; this is a
 work-in-progress.
 
+XXX The content here is out-of-date. Much of what used to be discussed
+below has been given a concrete resolution in nlp/triples/README. The 
+more abstract problem of reference resolution is dealt with in 
+nlp/seme/README. This directory is an empty placeholder, waiting for an
+implementation of the Hobbs algo.
+
 Overview
 ========
 The current plan is to perform reference resolution using a collection
@@ -44,7 +50,21 @@ program:
 4) Having a "perception" (or "cluster analysis" or "feature extraction")
    system that can spot the rules that have been useful, and further
    refine them, or spot weak rules, and reject them.
+   (See also nlp/seme/README)
 
+Steps 1) and 2) are largely (but incompletely, imperfectly) addressed
+by code described in the nlp/triples/README. Step 3) is largely sovled
+by code in the "persist" directory.  Step 4) is being addressed in
+nlp/seme/README.
+
+At this point, this directory should probably be just a place-holder
+for code that implements the Hobbs anaphora resolution algo within 
+OpenCog.  This code is yet to be written. Note that the Hobbs algo
+is currently implemented within RelEx.
+
+Thus, this directory is mostly just empty, for now.
+
+XXXX
 The fourth step seems to be the vaguest at this point. I hope to
 combine ideas making use of mutual information, Markov networks and
 Markov logic networks, and heirarchical feature selection to accomplish
@@ -60,263 +80,19 @@ The first three issues are significant, practical barrirers to further
 progress, and are thus tackled first.
 
 
-Representing IF...THEN constructs in OpenCog
-============================================
-The core idea is to find patterns in text, and then create new patterns
-as a result. As the simplest example, a "pattern" would be finding all
-instances of a noun in some block of text, assuming that all of these
-nouns refer to the same thing, and so creating a ConceptNode that
-encompases all of these noun instances.  This can be crudely represented
-as the pseudo-code:
-
-   IF (for-all parses of all sentences in same document)
-       AND (word-instance-1 == noun)
-       AND (word-of-word-instance-2 == word-of-word-instance-1)
-       AND ...
-       AND (word-of-word-instance-k == word-of-word-instance-1)
-   THEN (create concept-node encompassing word-instances 1 thru k)
-
-It would be "easiest" to code up above in C++ or Scheme (or Java or
-Python or ...) but this missses the point: The opencog system will
-need to be able to modify the above rule (or algorithm) based on
-learned, statistical experience, for example, by adding more
-AND-clauses to refine the action.
-
-Another example: The consistency of this reference assignment can be
-checked using the following pseudo-code:
-
-   IF (word-instance-1 is-grouped-wth word-instance-2 in same concept)
-      AND (word-instance-1 has property-A)
-      AND (word-instance-2 has property-B)
-      AND (property-A is inconnsistent with property-B)
-   THEN (word-instance-1 and word-instance-2 should be ungrouped,
-        and are probably distinct concepts)
-
-The above pseudocode would help resolve text such as "Jurate held a red
-balloon. Kastytis held a green balloon." The intitial reference
-resolution would assign both word instances to the same object-instance
-(i.e. assume that both words refer to just one balloon). The consistency
-checker would note that the the color property is inconsistent, and thus
-conclude that these are probably not refering to the same object. (And
-tus, the combined-concept should be assigned a truth value close to
-"false", and two new, distinct object-instance-concepts should be
-created.
-
-The core OpenCog nodes and links to be used to represent such rules are:
-   VariableNode  -- to indicate a variable
-   ImplicationLink -- to represent an if..then.. relationship.
-
-Below is an example of the use of the ImplicationLink.
-
-   "If the case is near the mouse and the cat is hungry, the cat will
-   eat the mouse".
-
-   ImplicationLink
-   ___ANDLink
-   ______ Inheritance $var0 cat
-   ______ Inheritance $var0 hungry
-   ______ EvaluationLink
-   ___________ Node near
-   ___________ ListLink
-   _______________VariableNode $var1
-   _______________VariableNode $var0
-   ______ InheritanceLink $var1 mouse
-   ___EvaluationLink
-   ______Node eat
-   ___________VariableNode $var0
-   ___________VariableNode $var1
-
-
-In practical terms, as the above shows, the encoding of rules will
-likely be quite verbose. For the next example, consider two word
-instances, using the current RelEx output format.
-
-In the following, we will use the word "axiom" for "rule".
-Each such rule has the structure of an implication, in Skolemized form,
-with a list of variables up front, an antecedent (the "if" clause),
-and a consequent (the "then" clause).  The antecedent is a list of
-clauses that must be satisfied, the consequent is a set of nodes to
-be created/modified.
-
-   (VariableScopeLink
-      ; A list of the variables in the "rule" or "axiom".
-      ; This list essentially acts as a type declaration for
-      ; the variables in this axiom.
-      (ListLink
-         ; Type declaration: $word-inst-0 is a word instance
-         (WordInstanceNode $word-inst-0)
-         (WordInstanceNode $word-inst-1)
-         (ParseNode $parse-0)
-         (ParseNode $parse-1)
-         (SentenceNode $sentence-0)
-         (SentenceNode $sentence-1)
-         (DocumentNode $document)
-         (ConceptNode $concept)
-
-         ; The variable $word *must* be a WordNode
-         (WordNode $word)
-      )
-
-      ; What follows is a conjunction of expressions
-      ; that must be satisfied for this "axiom" to hold.
-      (AndLink
-
-         ; The word-instance must be nouns.
-         (PartOfSpeechLink
-            (VariableNode $word-inst-0)
-            (DefinedLinguisticConceptNode "noun")
-         )
-         (PartOfSpeechLink
-            (VariableNode $word-inst-1)
-            (DefinedLinguisticConceptNode "noun")
-         )
-
-         ; The word-instances must refer to the same word.
-         (LemmaLink
-            (VariableNode $word-inst-0)
-            (VariableNode $word)
-         )
-         (LemmaLink
-            (VariableNode $word-inst-1)
-            (VariableNode $word)
-         )
-
-         ; The word-instances must belong to the same document.
-         ; This is done by making sure that they belong to parses,
-         ; which belong to sentences, which belong to documents.
-         ;
-         ; XXX to-do: the number of words in a sentence is variable.
-         ; Its not clear how to match this, given the structure below!
-         (ReferenceLink
-            (ParseNode $parse-0)
-            (ListLink
-               (VariableNode $word-inst-0)
-            )
-         )
-         (ParseLink
-            (ParseNode $parse-0)
-            (SentenceNode $sentence-0)
-         )
-         (ReferenceLink
-            (ParseNode $parse-1)
-            (ListLink
-               (VariableNode $word-inst-1)
-            )
-         )
-         (ParseLink
-            (ParseNode $parse-1)
-            (SentenceNode $sentence-1)
-         )
-         (ReferenceLink
-            (DocumentNode $document)
-            (ListLink
-               (SentenceNode $sentence-0)
-               (SentenceNode $sentence-1)
-            )
-         )
-      ) ; end of AndLink (the antecedent, or "if" clause)
-      ; Above is the conjunction of clauses that must hold
-
-      ; Next the consequent, or "then" clause.
-      ; Create a single concept, which encompases each of these word
-      ; instances, implying that they all refer the to same overall
-      ; concept.
-
-      ; XXX somehow generate a new UUID for this new concept!
-      ; use a combo tof the word, and the document, to help identify it.
-      (ConceptNode $concept)
-      (ExtensionalInheritanceLink
-         (ConceptNode $concept)
-         (WordInstanceNode $word-inst-0)
-      )
-      (ExtensionalInheritanceLink
-         (ConceptNode $concept)
-         (WordInstanceNode $word-inst-1)
-      )
-   )
-
-
-Evaluator, Application of Rules
-================================
-The above-described "rules" or "templates" perform transformations on
-hypergraphs. There needs to be an "apply" function to apply these rules
-to document hypergraphs. Here, "Apply" is meant to have the usual
-comp-sci overtones of function application, see, for example, the
-Wikipedia article, or SICP chapter 4.  There are several ways in which
-the "apply" function might  be implemented.
-  
-Possibilities:
-1) Make use of PLN forward or backward chainers to perform the
-   application.
-2) Adapt existing "src/query" code, which does general pattern matching,
-   (i.e. is capable of matching to VariableNodes) to be able to apply
-   above rules.
-
-At this time, the foreward & backwards chainers are designed for a
-slightly different purpose; they are not really meant to be a generic
-"Apply" function. They are also missing several syntactical constructs
-needed for "apply" to work:
-
-  a) Ability to declare the type of a variable (The core assumption here
-     is that OpenCog should be a strongly-typed langauge)
-  b) The inability to create new atoms and links, as needed.
-
-On the other side, the chainers do correctly propagate truth values;
-whereas the query code is truth-value agnostic.  Open question: XXX How
-should the Apply function handle truth values?
-
-XXX While we're at it: should define a lambda. This would make
-everything *sooo* much easier. Note that the chainers do not have
-support for lambda at this time.
-
 Statistical Information, Databases
 ==================================
-There are two aspects to collecting statistical information:
-1) The practical aspect, of how, and where to store this information
-2) The theoretical aspect: what information needs to be collected,
-   and how it should be correllated.
-Some introductory comments on each aspect.
-
-1) Practical aspects
---------------------
-In principle, the statistics could be stored insde of OpenCog truth
-values. In practice, with the current state-of-the-art in OpenCog, this
-is impractical, for many reasons:
--- The opencog server needs to be stopped and restarted for meany
-   reasons, e.g. code updates, new features, etc. Save and restore
-   of large hypergraphs is still not entirely satisfactory. 
--- After a running a long time, cruft accumulates in the hypergraph,
-   and there's no easy way of cleaning it out. For example, texts that 
-   have been read can probably be "forgotten", they probably don't need
-   to be saved.  The Forgetting Agent can help act as a garbage
-   collector, but its incompletely integrated at this time.
-   Without garbage collection, there is a risk of running out of RAM.
--- Its not always clear how to best represent statistical data with
-   truth values, i.e. with hypergraphs. There's danger of yet more
-   clutter. XXX Is this really a valid reason? XXX
-
-Thus, for the above reasons, it would be best to define explicit
-storage, presumably in SQL (because SQL, at least Posgres SQL,
-provides efficient disk-to-RAM-to-disk management and scheduling).
-However, a suitably general layout for the tables of hypegraphs,
-etc. needs to be defined.
-
-2) Theoretical Aspects
-----------------------
+What information needs to be collected, and how it should be correllated.
 
 Need to store:
--- mutual information ...  See ref [HCMI]
+-- mutual information ...  but how??  
+See ref [HCMI]
 
 
 
 References
 ==========
 Some background reading for various keywords used here:
-
-[APPL] Apply: See
-   http://en.wikipedia.org/wiki/Apply
-   Also, Abelson, Sussman, SICP, section 4.1 the Meta-circular evaluator
-   http://mitpress.mit.edu/sicp/full-text/book/book-Z-H-26.html
 
 [FEAT] Feature extraction. See
    http://en.wikipedia.org/wiki/Feature_extraction
@@ -326,10 +102,6 @@ Some background reading for various keywords used here:
    Alexander Kraskov, Harald Stögbauer, Ralph G. Andrzejak,
    Peter Grassberger, "Hierarchical Clustering Based on Mutual
    Information" (2003) http://arxiv.org/abs/q-bio/0311039
-
-[IMPL] Implication: See
-   http://en.wikipedia.org/wiki/Logical_implication
-
 
 Alexander Yates and Oren Etzioni.
 [http://www.cis.temple.edu/~yates/papers/resolver-jair09.pdf

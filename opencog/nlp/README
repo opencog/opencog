@@ -83,6 +83,9 @@ used in neighboring sentences, probably refers to the same concept.
 Alternately, anaphora (he, she, it, etc.) may also be used to refer to
 the same concept.
 
+This directory is currently empty, it is meant to someday hold an 
+implementation of teh Hobbs reference resolution algorithm.
+
 scm
 ---
 The scm directory contains miscellaneous scheme scripts of general 
@@ -114,8 +117,11 @@ Lisbon)".  Such "prepositional relations" extend the usual ontological
 concepts of "is_a", "has_a", "part_of" and "uses" to more general
 relations.
 
-The directory contains a script to convert RelEx Frame rules into 
-opencog ImplicationLinks.
+Importantly, this directory contains code to convert plan-text
+IF...THEN... relations into OpenCog ImplicationLinks. This is one
+of the primary acheivements of the code here.  Note that the IF...THEN..
+structure used is almost identical to the RelEx Frame rules, and so
+should be usable for porting RelEx frames to OpenCog.
 
 types
 -----

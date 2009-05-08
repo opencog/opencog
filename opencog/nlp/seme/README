@@ -6,7 +6,10 @@
 This directory contains some notes and experimental code for extracting
 conceptual entities or "semes" from English text.  An example of a 
 "conceptual entity" would be the "Great Southern Railroad": a business,
-a railway, that existed at a certain point in space and time. 
+a railway, that existed at a certain point in space and time. This task 
+encompasses what is commonly called "named entity extraction". This task
+is meant to be more general, encompassing what is called "reference 
+resolution" (including pronoun resolution) as well.
 
 The primary challanges of seme extraction are:
 1) Constructing a data representation that is ameanable to reasoning,
@@ -15,11 +18,9 @@ The primary challanges of seme extraction are:
    (so that they can be merged)
 3) Recognizing when one seme (incorrectly) refers to distinct concepts,
    and should be split apart.
-
-2) Learning new relations. It is simple to code up, by hand, "framing"
-   relationships, such as a list of colors, or a list properties that
-   an object can have. It is harder to determine, when encountering a
-   new word, to determine that it is, for example, a color.
+4) Learning new conceptual classifications and relations; so, for example,
+   when encountering a new word, to determine that it is, for example, a
+   color.
 
 ToDo: Reification of triples ...
 Re-examin Markov Logic Networks ...
@@ -258,6 +259,11 @@ Not clear how unambiguous the copulas and preps will be.
 
 References:
 -----------
+[FEAT] Feature extraction. See
+   http://en.wikipedia.org/wiki/Feature_extraction
+   http://en.wikipedia.org/wiki/Cluster_analysis
+
+
 Alexander Yates and Oren Etzioni.
 [http://www.cis.temple.edu/~yates/papers/resolver-jair09.pdf
 Unsupervised Methods for Determining Object and Relation Synonyms on
