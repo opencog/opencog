@@ -451,6 +451,18 @@ sense assignments.  While this is a reasonable starting point, and
 gives an easy leg-up, it does not solve the more general problem of
 distinguishing and refining concepts.
 
+Another approach is to use part-of-speech tags, and disjunct tags, as
+stand-ins for word senses.  That is, the parser has already identified
+different word-instances according to thier part-of-speech, and so at
+least a rough word-sense classification is available from that.  That
+is, it is safe to assume that a noun and a verb never represent the 
+same concept (at a certain level...).  It has also been seen (see 
+wsd-post/README) that the disjunct used during parsing has a high 
+correlation with the word-sense; the disjunct used during parsing 
+can be considered to be a very fine-grained part-of-speech tag. Thus,
+instead of using Wordnet sense tags as concept "nucleation centers",
+the disjuncts could be used as such.
+
 Two distinct processes are at play: 1) recognizing that two different
 word instances refer to the same concept, and 2) recognizing that a
 previously learned concept should be refined into two distinct concepts.
@@ -607,7 +619,7 @@ and also the inverted word-order case:
 
 XXX However, this doesn't quite work because  $prep($var2,$var3) is
 so broad, that it can match to just about anything, including things
-are not DefineLinguisticRelationship nodes. Thus, we need to force
+are not DefinedLinguisticRelationship nodes. Thus, we need to force
 type matching in variables.
 
 Other problems: Consider the sentences:
@@ -615,6 +627,42 @@ Other problems: Consider the sentences:
 
 One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
+
+What is a Concept?
+------------------
+So far, almost all the processing above has been in terms of graph 
+modifications performed on individual sentences, containing 
+WordInstanceNodes, and links to WordNodes.  However, in order to
+promote text inptu into concepts, and to reason with concepts, we need
+to define what a concept is, and where its boundaries extend to.
+At this point, the goal is not do define a super-abstract concept that
+passes all epistomological tests, but rather as a practical if flawed
+data structure that is adequate at representing data learned through
+linguistic, corpus analysis. The emphasis here is "flawed but practical":
+it is just enough to take use to the next level of abstration.
+
+Naively, a concept would seem to have the followng parts:
+-- a SemeNode, to serve as an anchor (could be ConceptNode)
+-- a linguistic expression complex.
+-- a WordNet sense tag (optional)
+-- a DBPedia URI tag (optional)
+-- an OpenCyc tag ... etc. you get the idea.
+-- basic ontological links -- is-a, has-a, part-of, etc.
+-- prepositional relations (next-to, inside-of, etc)
+
+What is a "linguistic expression complex"?  It deals with the idea that
+most concepts are not expressible as single words: for example, "Mary
+had a red baloon".  The head concept here is "baloon": it is an instance
+of the class of all baloons, and specifically, this instance is red. 
+Thus, a "lignuistic expression complex" would consist of:
+
+-- a head WordNode, to give single, leading name.
+   Possibly several WordNodes to give it multiple names?
+-- dependent modifier tags (e.g. "red")
+-- a part-of-speech tag, to provide a rough linguistic categorization
+-- a collection of disjunct tags, representing possible linguistic
+   use of the WordNode to represent this concept.
+
 
 
 Yes-No Questions
