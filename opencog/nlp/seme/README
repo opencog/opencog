@@ -318,6 +318,38 @@ assume that it is.
 
 Contextual representation
 -------------------------
+A given SemeNode can be relevent to one or more contexes. The 
+relationship is indicated with a link to a named context. Say, for 
+example that, during IRC chat, that JaredW stated that "The ball
+is red". We'd then have a 
+
+    ContextLink
+       ContextNode "# IRC:JaredW"
+       SemeNode "ball@634a32ebc"
+
+At this time, the creation/naming of ContextNodes would be ad-hoc, on
+a case-by-case basis. All input from the MIT ConceptNet project would
+be marked with with something like
+
+    ContextNode "# MIT ConceptNet dump 20080605"
+
+A SemeNode, once determined to be sufficiently general, might belong
+to several concepts. There might be a heirarchy of ConceptNode 
+inclusions: so, for example, concepts in "common-sense" contexts, such
+as ConceptNet, would be judged to be sufficiently universal to also hold
+in IRC contexts, Project Gutenberg contexts, Wikipedia contexts, etc.
+
+The only reason for using ContextLinks instead of
+
+     EvaluationLink
+         DefinedRelationshipNode "Context"
+         ListLink
+             ContextNode "# IRC:JaredW"
+             SemeNode "ball@634a32ebc"
+
+Is to save a bit of RAM storage; there will be at least one  ContextLink
+for every SemeNode.
+
 
 
 Boostraping
@@ -339,6 +371,13 @@ a type of locomotion, based on its use with regard to prepositions?
 
 Hmm. Time to write some rules, and experiment and see what happens.
 Not clear how unambiguous the copulas and preps will be.
+
+ToDo:
+-----
+Create the following nes atoms types:
+SemeNode
+ContextNode
+SemanticRelationshipNode
 
 
 References:

@@ -84,6 +84,8 @@ opencog::Type opencog::LEMMA_LINK;
 opencog::Type opencog::HOLONYM_LINK;
 opencog::Type opencog::COSENSE_LINK;
 opencog::Type opencog::SEME_NODE;
+opencog::Type opencog::SEMANTIC_RELATION_NODE;
+opencog::Type opencog::CONTEXT_NODE;
 opencog::Type opencog::AGISIM_SOUND_NODE;
 opencog::Type opencog::AGISIM_TASTE_NODE;
 opencog::Type opencog::AGISIM_SMELL_NODE;
