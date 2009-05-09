@@ -1,27 +1,31 @@
-                          Persist
-                          -------
-                Linas Vepstas, Feb-June 2008
+                                Persist
+                                -------
+                   Linas Vepstas <linasvepstas@gmail.com>
+                    Basic implementation Feb-June 2008
+                         Status update May 2009
 
 A simple-minded implementation of atom persistence into SQL.
 
 STATUS:
-Functional but incomplete prototype. Save and restore of atoms, 
-and simple truth values, works. Bulk save-and-restore of entire
-AtomTable contents works. 
+Functional but incomplete prototype. Save and restore of atoms, and 
+several kinds of truth values, works. Bulk save-and-restore of entire
+AtomTable contents works.  Incremental save/restore (i.e.  update the
+SQL contents as AtomTable changes) works, but is not fully automatic 
+(needs resolution of deeper AtomSpace issues.)
 
 Missing features/ToDo items: 
-Add incremental save/restore (i.e. update the SQL contents 
-    as AtomTable changes)
-Add full support for truth values other than SimpleTruthValue.
+Add full support for CompositeTruthValue.
 Add full support for attention values. (??)
 Add full support for Atom deletion.
 Add full support for 64-bit systems, including >4Gigs of atoms.
+Provide optimized table layout for EvaluationLinks.
 
 Performance status:
 AtomTable load time is more than 3x faster than loading from NMXml;
 Also, loading from SQL reduces cogServer memory usage by 3x.
-This strongly indicates that the NMXml loader fragments RAM in a 
-bad way.
+While this suggests that the NMXml loader fragments RAM in a bad way,
+it now seems that the true culprit is CSockets layer, which appears
+to leak memory under certain scenarios.
 
 
 Goals:
@@ -31,8 +35,8 @@ The goal of this implementation is to:
 1) Simplify Linas' day-to-day use of opencog. The problem is that
    loading data, by parsing English sentences, into opencog is slow.
    Every time opencog source is changed, the data needs to be reloaded.
-   This makes development tedious.  The hope is that data persistence
-   will alleviate data load time.
+   This makes development tedious.  Data persistence alleviates the 
+   tedium of data load time.
 
 2) Make sure that the opencog core design is amenable to incremental,
    just-in-time data persistence; that is, the fetching of data 
@@ -43,14 +47,19 @@ The goal of this implementation is to:
    infrastructure for locks, use counts, etc. that are typical
    of multi-threaded programming.  This prototype should lay the 
    foundations for more sophisticated schemes (non-SQL-based) 
-   to take its place.
+   to take its place.  This arhcitectural work is inherently difficult,
+   and is ongoing.
 
 3) Provide a baseline/reference implementation by which other 
-   persistence designs can be measured.
+   persistence designs can be measured. It is hoped that other systems
+   would be at least as fast and as scalable as this one is: this is
+   meant to provide a minimal function and performance level. The
+   strength of the current design is supposed to be simplcity, not
+   scalability or raw performance.
 
 Design:
 -------
-The core design will use a few very simple SQL tables, and some
+The core design defines only a few very simple SQL tables, and some
 simple readers and writers to save and restore atoms from an SQL 
 database.
 
@@ -63,28 +72,27 @@ cost of missing flexibility, seems more important.
 
 The current design can save/restore individual atoms, and it can
 bulk-save/bulk-restore the entire contents of an AtomTable.
-As such, if offers little or no advantage over flat-file storage.
-A so-far unrealized goal of the prototype is to implement 
-incremental save and restore -- that is, to fetch atoms in a 
-"just in time" fashion, and to save away atoms that are not 
-needed in RAM (e.g. atoms with low/non-existent attention values).
+A semi-realized goal of the prototype is to implement incremental save 
+and restore -- that is, to fetch atoms in a "just in time" fashion, and
+to save away atoms that are not needed in RAM (e.g. atoms with 
+low/non-existent attention values). The AtomSpace BackingStore provides
+the current, minimalistic, low-function API for this.
 
-However, the current AtomTable implementation makes it hard for
-the incremental approach to be pursued.  For example, the incoming
-set of an atom is expected to be fully populated; and the current
-manner in which this is done requires atoms to be fully instantiated.
-This makes it somewhat hard to have only a part of a graph in RAM.
-However, this is solvable with a bit of elbow grease.
+There are architectural issues that remain to be resolved before fully
+automatic incremental save/restore can be implemented.  For example,
+the current AtomSpace design assumes that the incoming set of an atom is
+fully populated; this makes it hard to leave some atoms on disk while
+others are in RAM.  These issues need to be resolved for *any* persistent
+back-end, and are not specific to this one.
 
 Caveats:
 --------
-Its not at all clear whether this is a good idea; there are several
+The wisdom of an SQL-based design is not at all clear; there are several
 major drawbacks to using SQL. These include:
 -- Large performance overhead, even if an embedded SQL server were to
-   be used.
--- If/when incremental save/restore is implemented, then there's
-   potentially large churn, if short-lived atoms are constantly 
-   created/destroyed.
+   be used. Other systems might have a lower overhead.
+-- Efficiency of incremental save/restore is unclear; there's potentially
+   large churn, if short-lived atoms are freuqently created/destroyed.
 
 
 Compiling
@@ -141,18 +149,18 @@ you plan to use! The name of the stanza, and of the database,
 can be whatever you wish.
 
 [opencog]
-Description    = My Favorite Database
-Driver      = PostgreSQL
-Trace    = No
-TraceFile      =
-Database    = opencog
-Servername     = localhost
-Port     = 5432
-Username    = linas
-Password    = asdf
-ReadOnly    = No
+Description       = My Favorite Database
+Driver            = PostgreSQL
+Trace             = No
+TraceFile         =
+Database          = opencog
+Servername        = localhost
+Port              = 5432
+Username          = linas
+Password          = asdf
+ReadOnly          = No
 RowVersioning     = No
-ShowSystemTables     = Yes
+ShowSystemTables  = Yes
 ShowOidColumn     = Yes
 FakeOidIndex      = Yes
 ConnSettings      =
@@ -219,10 +227,10 @@ issuing the commands:
     SQL data store thread started
 
 at this point, a progress indicator will be printed by the opencog 
-server, on the servers stdout. It  will say something like:
-Stored 236000 atoms.
+server, on the OpenCog server's stdout. It  will say something like:
+Stored 236000 atoms. When finished, its nice to say:
 
-opencog> sql-close
+    opencog> sql-close
 
 Next time, you can load the data with:
 
@@ -232,6 +240,7 @@ Next time, you can load the data with:
 The completion message will be on the server output, for example:
 
     Finished loading 973300 atoms in total 
+
 
 Individual-atom save and restore
 --------------------------------
@@ -267,7 +276,7 @@ It's presence can be verified by examining the database directly:
         2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf | 
     (1 row)
 
-The backing-store mechanism can now automaitcally retreive this atom at
+The backing-store mechanism can now automatically retreive this atom at
 a later time.  Thus, for example, shut down the server, restart it, 
 re-open the database, and enter the scheme shell again. Then,
 
@@ -447,15 +456,15 @@ were without *any* optimization. Now get
 
 Much much better!
 
-i10.78
+10.78
 23.15
 
 
-Evidence of sever memory fragmentation
---------------------------------------
+Evidence of severe memory fragmentation
+---------------------------------------
 loading 1536K Atoms from XML results in cogserver using 1210 MBytes ram.
 loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
-loading 1536K Atoms from SQL (with new record managemnt) results in 
+loading 1536K Atoms from SQL (with new record management) results in 
 cogserver using 442 MBytes ram.
 
 Almost one-third the ram !!
@@ -464,16 +473,23 @@ The fragmentation occurs when the XML is piped to cogserver much faster
 than the cogserver can process it; the fragmentation is between data
 buffered from the sockets, and the cogserver itself.  The fragementation
 does *not* occur when the data is piped in more slowly,i.e. at the same 
-rate that opencog processes it.
+rate that opencog processes it. Alternately, the problem may be a memory
+leak in CSockets; I think this is the true cluprit, but that's not yet
+clear.
 
 
 TODO
 ----
--- Store more complex truth value types
+-- Store more CompositeTruthValues
 
 -- Store attention values.
 
--- Loading from SQL uses half as much ram as loading from XML, which
-   suggests the XML loader has a memory leak!?  Need to run valgrind on
-   it.
+-- Run valgrind to track down the CSockets leak problem.
 
+-- Create custom table, tailored for EvaluationLink triples.
+   Since majority of nodes/links in the DB will be in the form of 
+   EvaluationLink triples, a significant performance gain can be gotten
+   by creating a custom table, and shunting queries to that.  This would
+   decrease the SQL table sizes significantly, and decrease server I/O 
+   by factors of 2x-3x.  Another table, designed just for simple pairs,
+   might help a lot, too.
