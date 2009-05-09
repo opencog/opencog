@@ -3,6 +3,7 @@
                       -------------------------
                        Linas Vepstas May 2009
 
+
 This directory contains some notes and experimental code for extracting
 conceptual entities or "semes" from English text.  An example of a 
 "conceptual entity" would be the "Great Southern Railroad": a business,
@@ -287,7 +288,16 @@ threw a red ball" leads to
 
     SemeNode "ball@634a32ebc"
 
-The idea that its red would then be:
+A basic name is needed for the concept, and so, in complete analogy
+betwen WordInstanceNodes and WordNodes, we create:
+
+   ReferenceLink
+       SemeNode "ball@634a32ebc"
+       WordNode "ball"
+
+although the lemmatized form should probably appear here (i.e. the
+LemmaLink would be used to obtain the source WordNode).  The idea that
+its red would then be:
 
     EvaluationLink
        DefinedLinguisticRelationNode "amod"
@@ -318,7 +328,7 @@ assume that it is.
 
 Contextual representation
 -------------------------
-A given SemeNode can be relevent to one or more contexes. The 
+A given SemeNode can be relevent to one or more contexts. The 
 relationship is indicated with a link to a named context. Say, for 
 example that, during IRC chat, that JaredW stated that "The ball
 is red". We'd then have a 
@@ -347,17 +357,41 @@ The only reason for using ContextLinks instead of
              ContextNode "# IRC:JaredW"
              SemeNode "ball@634a32ebc"
 
-Is to save a bit of RAM storage; there will be at least one  ContextLink
+Is to save a bit of RAM storage; there will be at least one ContextLink
 for every SemeNode.
+
+Pseudo-clustering
+-----------------
+A key step in concept formation is determining if/when two distinct
+instances are really the same concept. This is to be accomplished by 
+comparing two concepts, and returning a (simple) truth value indicating
+the likelyhood that they are the same.  Many algos are possible.  The
+simplest might be the following:
+
+Take a weighted average of link-comparisons, comparing:
+-- WordNode. A mismatch here means that it is highly unlikely that the
+   concepts are identical, unless the WordNode is a pronoun.
+-- ContextNode. A mismatch here means its highly unlike that the 
+   concepts are identical, unless the ContextNode is one of the base
+   "common-sense" contexts.
+-- Compare modifiers. A modifier present in one, but absent in the 
+   other, is "neutral". Conflicting modifiers suggest a conceptual
+   mis-match: If the current sentence calls a ball "green", while 
+   a previous one called it "red", then the two references are probably
+   to two different balls. Ditto for big, small, light, heavy, etc.
+-- Compare relations, e.g. capital_of, next_to, etc. Much like comparing
+   modifiers.
 
 
 
 Boostraping
 -----------
--- read sentence.
--- process for triples
--- create initial SemeNodes
--- scan for contextual references
+-- Read sentence from some source.
+-- Process sentence for triples
+-- Create initial SemeNodes that match key word instances.
+-- Add (temporary?) ContextLinks to indicate source.
+-- Scan existing SemeNodes for possible match.
+-- Merge SemeNodes if a plausible match is found. ("clustering")
 
 
 
