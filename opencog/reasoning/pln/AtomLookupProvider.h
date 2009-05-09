@@ -36,7 +36,8 @@
 
 using namespace opencog;
 
-namespace reasoning {
+namespace opencog {
+namespace pln {
 
 // PLN atom handle, which can also wrapper atom types. 
 typedef unsigned int pHandle;
@@ -69,6 +70,7 @@ public:
     virtual pHandle getHandle(Type t,const pHandleSeq& outgoing) =0;
     virtual ~AtomLookupProvider() { };
 };
-} //~namespace reasoning
+
+}} //~namespace opencog::pln
 
 #endif // _ATOMLOOKUPPROVIDER_H

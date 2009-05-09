@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
     /*
 SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
 {
@@ -104,4 +103,4 @@ Handle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     return ret;
 }
     */
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

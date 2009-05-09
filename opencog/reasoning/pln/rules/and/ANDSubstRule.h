@@ -22,8 +22,7 @@
 #ifndef ANDSUBSTRULE_H
 #define ANDSUBSTRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class ANDSubstRule : public Rule
 {
@@ -39,6 +38,6 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ANDSUBSTRULE_H
 

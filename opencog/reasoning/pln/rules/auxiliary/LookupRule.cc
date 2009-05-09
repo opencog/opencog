@@ -29,8 +29,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 unsigned long now_interval_len = 50000;
 bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
@@ -111,4 +110,4 @@ Rule::setOfMPs LookupRule:: o2iMetaExtra(meta outh, bool& overrideInputFilter) c
     return Rule::setOfMPs();
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

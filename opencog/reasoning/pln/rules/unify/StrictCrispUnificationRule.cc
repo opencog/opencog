@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /***
 
@@ -168,4 +167,4 @@ cprintf(3,"Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
     return ret;
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

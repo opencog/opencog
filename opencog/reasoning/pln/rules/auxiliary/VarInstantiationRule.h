@@ -22,10 +22,8 @@
 #ifndef VARINSTANTIATIONRULE_H
 #define VARINSTANTIATIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 template<typename DeductionRuleType, Type InheritanceLinkType>
 class VarInstantiationRule :	public Sim2InhRule<MEMBER_LINK>, //public Eval2MemRule,
 								public SubsetEvalRule<CONCEPT_NODE>,
@@ -108,7 +106,6 @@ public:
 	return ret;
   }
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // VARINSTANTIATIONRULE_H

@@ -22,8 +22,7 @@
 #ifndef CUSTOMCRISPUNIONRULE_H
 #define CUSTOMCRISPUNIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class CustomCrispUnificationRule : public Rule
 {
@@ -52,6 +51,5 @@ public:
 	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
-
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // CUSTOMCRISPUNIONRULE_H

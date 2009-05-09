@@ -50,7 +50,7 @@
 #endif
 
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 
 BackwardInferenceTask::BackwardInferenceTask(const InferenceTaskParameters& _pars)
@@ -82,6 +82,6 @@ void BackwardInferenceTask::finish()
 
 bool BackwardInferenceTask::ok() { return finished; }
 
-} //reasoning
+}} //opencog::pln
 
 #endif //#ifndef USE_PSEUDOCORE

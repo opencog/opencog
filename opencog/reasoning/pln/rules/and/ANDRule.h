@@ -22,8 +22,7 @@
 #ifndef ANDRULE_H
 #define ANDRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class ANDRule : public ArityFreeANDRule
 {
@@ -42,5 +41,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ANDRULE_H

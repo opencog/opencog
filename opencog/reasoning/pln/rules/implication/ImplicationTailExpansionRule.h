@@ -22,8 +22,7 @@
 #ifndef IMPTAILEXPANSIONRULE_H
 #define IMPTAILEXPANSIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class ImplicationTailExpansionRule : public Rule
 {
@@ -37,5 +36,5 @@ public:
 	bool validate2				(MPs& args) const { return true; }
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // IMPTAILEXPANSIONRULE_H

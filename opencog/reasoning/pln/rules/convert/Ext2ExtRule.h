@@ -22,10 +22,8 @@
 #ifndef EXT2EXTRULE_H
 #define EXT2EXTRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 template<Type IN_LINK_TYPE, Type OUT_LINK_TYPE>
 class Ext2ExtRule : public Rule
 {
@@ -81,7 +79,6 @@ public:
 typedef Ext2ExtRule<EXTENSIONAL_IMPLICATION_LINK, SUBSET_LINK> ExtImpl2SubsetRule;
 typedef Ext2ExtRule<EXTENSIONAL_EQUIVALENCE_LINK, EXTENSIONAL_SIMILARITY_LINK> ExtEqui2ExtSimRule;
 typedef Ext2ExtRule<EQUIVALENCE_LINK, SIMILARITY_LINK> Equi2SimRule;
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // EXT2EXTRULE_H

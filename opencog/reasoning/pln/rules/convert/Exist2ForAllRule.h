@@ -22,10 +22,8 @@
 #ifndef EXIST2FORALLRULE_H
 #define EXIST2FORALLRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class Exist2ForAllRule : public Rule
 {
 	Exist2ForAllRule(iAtomSpaceWrapper *_destTable)
@@ -59,7 +57,6 @@ class Exist2ForAllRule : public Rule
 		return Exist2ForAllLink(premiseArray[0]);
 	}
 }
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // EXIST2FORALLRULE_H

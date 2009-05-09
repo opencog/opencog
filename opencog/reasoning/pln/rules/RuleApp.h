@@ -71,8 +71,8 @@ one to $1). Etc.
 
 */
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
+
 class RuleApp;
 
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
@@ -271,6 +271,6 @@ out:
 	}
 };
 
-} //namespace reasoning
+}} //namespace opencog { namespace pln {
 
 #endif

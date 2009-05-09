@@ -22,9 +22,7 @@
 #ifndef AND2ORRULE_H
 #define AND2ORRULE_H
 
-namespace reasoning
-{
-#if 0
+namespace opencog { namespace pln {
 class AND2ORRule : public Rule
 {
 	AND2ORRule(iAtomSpaceWrapper *_destTable)
@@ -56,7 +54,6 @@ class AND2ORRule : public Rule
 		return AND2ORLink(premiseArray[0]);
 	}
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // AND2ORRULE_H

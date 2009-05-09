@@ -52,7 +52,7 @@
 
 namespace haxx
 {
-using namespace reasoning;
+using namespace opencog::pln;
 
 extern map<Type, vector<Handle> > mindShadowMap;
 

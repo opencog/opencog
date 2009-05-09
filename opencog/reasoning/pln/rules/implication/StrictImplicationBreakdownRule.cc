@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable,false,true,"ModusPonensRule")
@@ -160,4 +159,4 @@ BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premis
         return Vertex(ret);
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

@@ -23,8 +23,8 @@
 #include "../AtomSpaceWrapper.h"
 #include "RuleApp.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
+
 // Was:
 const vtree& RuleApp::getVtree() const
 {
@@ -157,4 +157,4 @@ set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
 
 
-}
+}}

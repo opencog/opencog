@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #if 0
 atom UnorderedLinkPermutationRule::i2oType(Handle* h) const
@@ -77,4 +76,4 @@ printAtomTree(outh,0,1);
     }
 #endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

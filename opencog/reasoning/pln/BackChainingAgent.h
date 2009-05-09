@@ -31,14 +31,15 @@
 #include "PLN.h"
 //#include "BackInferenceTreeNode.h"
 
-//using namespace reasoning;
+//using namespace opencog::pln;
 //class BITNodeRoot;
-namespace reasoning {
+namespace opencog {
+namespace pln {
     class BITNodeRoot;
-}
-using namespace reasoning;
+}}
+using namespace opencog::pln;
 //! @todo this is also defined in PLNModule.cc
-//#define BackInferenceTreeRootT reasoning::BITNodeRoot
+//#define BackInferenceTreeRootT opencog::pln::BITNodeRoot
 
 namespace opencog
 {

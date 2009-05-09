@@ -40,7 +40,7 @@
 #include "BackInferenceTreeNode.h"
 
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 
 BackChainingAgent::BackChainingAgent() : Bstate(), state(NULL), steps(0), maxSteps(500), stepsPerCycle(100)
 {

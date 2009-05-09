@@ -31,8 +31,8 @@
 
 #include <algorithm>
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 gsl_rng* rng_ = gsl_rng_alloc (gsl_rng_mt19937);
 
@@ -837,4 +837,4 @@ TruthValue* IndefiniteInh2MemFormula::simpleCompute(TruthValue** TV,
     return result;
 }
 
-} // namespace reasoning
+}} // namespace opencog::pln

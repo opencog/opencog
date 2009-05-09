@@ -22,7 +22,7 @@
 #ifndef _XMLNODELOADER_H_
 #define _XMLNODELOADER_H_
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 	
 	class XMLNode;
@@ -41,6 +41,6 @@ Handle LoadXMLFile(iAtomSpaceWrapper* table, std::string fname);
 #define FRESHNESS_BY_DEFAULT false
 
 
-} //namespace reasoning
+} //namespace opencog::pln
 
 #endif //_XMLNODELOADER_H_

@@ -23,8 +23,7 @@
 #define GENERICRULE_H
 
 using namespace opencog;
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 template<typename FormulaType>
 class GenericRule : public Rule
@@ -93,6 +92,6 @@ public:
     NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // GENERICRULE_H
 

@@ -22,8 +22,7 @@
 #ifndef LINK2LINKRULE_H
 #define LINK2LINKRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 extern std::map<int, string> type2name;
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
@@ -122,5 +121,5 @@ typedef  Link2LinkRule<Inh2ImpFormula> Inh2ImpRule;
 typedef  Link2LinkRule<Imp2InhFormula> Imp2InhRule;
 typedef  Link2LinkRule<Mem2EvalFormula> Mem2EvalRule;
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // LINK2LINKRULE_H

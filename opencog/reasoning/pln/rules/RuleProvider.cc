@@ -27,8 +27,7 @@
 
 #include <boost/foreach.hpp>
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 RuleProvider::RuleProvider(void)
 {
@@ -319,4 +318,4 @@ Rule* ForwardChainerRuleProvider::nextRule()
     return r;
 }
 
-}
+}}

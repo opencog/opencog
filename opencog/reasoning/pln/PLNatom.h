@@ -52,8 +52,8 @@
 #include "iAtomSpaceWrapper.h"
 #include <boost/smart_ptr.hpp>
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 struct atom;
 typedef pair<std::string, atom> subst;
@@ -265,7 +265,7 @@ bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
 
 atom* neBoundVertexWithNewType(Handle h, Type T);
 
-} //namespace
+}} //~namespace opencog::pln
 
 //#include "iAtomSpaceWrapper.h"
 

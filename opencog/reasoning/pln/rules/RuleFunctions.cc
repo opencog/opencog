@@ -50,8 +50,7 @@ namespace haxx
     }
 }
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #ifndef WIN32
   float max(float a, float b) { return ((a>b)?a:b); }
@@ -846,5 +845,5 @@ Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSp
 }
 #endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 

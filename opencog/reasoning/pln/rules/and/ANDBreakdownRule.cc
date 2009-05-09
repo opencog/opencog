@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /*setOfMPs ANDBreakdownRule::o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const
 {
@@ -38,4 +37,4 @@ namespace reasoning
     MPs->push_back(
 }*/
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

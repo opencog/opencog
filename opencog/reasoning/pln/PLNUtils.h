@@ -64,7 +64,7 @@
 
 using namespace std;
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 
 #undef STLhas
 #define STLhas(container, entity) ((container).find(entity) != (container).end())
@@ -137,8 +137,8 @@ void rawPrint(tree<Vertex>::iterator top, int _rloglevel);
 // Make a string with count # of the char c
 string repeatc(const char c, const int count);
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 pHandle _v2h(const Vertex& v);
 
@@ -483,8 +483,8 @@ struct weak_atom {
 
 typedef weak_atom<Vertex> BoundVertex;
 typedef set<Vertex> BasicVertexSet;
-typedef std::vector<reasoning::BoundVertex> BV_Vector;
-typedef std::set<reasoning::BoundVertex> BV_Set;
+typedef std::vector<opencog::pln::BoundVertex> BV_Vector;
+typedef std::set<opencog::pln::BoundVertex> BV_Set;
 
 
 /**
@@ -744,7 +744,7 @@ bool substitutableTo(pHandle from, pHandle to,
                      map<pHandle, pHandle>& bindings);
 
 bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b);
-} // namespace reasoning
+}} // namespace opencog::pln
 
 
 const int __LLEVEL = 4;
@@ -752,18 +752,18 @@ const int __LLEVEL = 4;
 template<typename VectorT>
 bool consistentBindings(const VectorT& argVectorCandidate)
 {
-    reasoning::bindingsT ok_set;
-    for (std::vector<reasoning::BoundVertex>::const_iterator av = argVectorCandidate.begin();
+    opencog::pln::bindingsT ok_set;
+    for (std::vector<opencog::pln::BoundVertex>::const_iterator av = argVectorCandidate.begin();
             av != argVectorCandidate.end();
             av++) {
         if (av->bindings) {
-            for (reasoning::bindingsT::const_iterator b = av->bindings->begin();
+            for (opencog::pln::bindingsT::const_iterator b = av->bindings->begin();
                     b != av->bindings->end();
                     b++) {
                 /*     LOG(__LLEVEL, "Next binding:");
                      printBinding(*b);
                 printTree(b->second,0,3);*/
-                reasoning::bindingsT::const_iterator b2;
+                opencog::pln::bindingsT::const_iterator b2;
 
                 if ((b2 = ok_set.find(b->first)) == ok_set.end()) { //if the var so far unbound
 //      LOG(__LLEVEL,"new consistent");
@@ -871,7 +871,7 @@ void createCombinations( const VectorT& head,
     }
 }
 
-void removeRecursion(std::vector<Btr<reasoning::BoundVertex> >& multi_input_vector);
+void removeRecursion(std::vector<Btr<opencog::pln::BoundVertex> >& multi_input_vector);
 
 
 template<typename VectorT, typename InputIterT, typename OutputIterT>
@@ -881,7 +881,7 @@ void expandVectorSet( InputIterT multi_input_vector_begin,
 {
 
     /*  for (uint k=0;k< multi_input_vector.size(); k++)
-       for (std::set<reasoning::BoundVertex>::iterator s=multi_input_vector[k]->begin();
+       for (std::set<opencog::pln::BoundVertex>::iterator s=multi_input_vector[k]->begin();
                    s!=multi_input_vector[k]->end();s++)
         if (s->bindings)*/
 

@@ -21,6 +21,9 @@
 
 #include "DeductionLookupTable.h"
 
+namespace opencog {
+namespace pln {
+
 bool DeductionLookupTable::instanceFlag = false;
 DeductionLookupTable* DeductionLookupTable::instance = NULL;
 bool DeductionLookupTable::CREATE_COMPACT_FILE = true;
@@ -212,3 +215,5 @@ void DeductionLookupTable::printEmptyValues()
 		}
 	}
 }
+
+}} // ~namespace opencog::pln

@@ -65,7 +65,7 @@ namespace haxx
 {
     extern bool AllowFW_VARIABLENODESinCore;
 //    extern uint maxDepth;
-    extern reasoning::BITNodeRoot* bitnoderoot;
+    extern opencog::pln::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
     map<pHandle,vector<pHandle> > inferred_from;
@@ -76,8 +76,8 @@ namespace haxx
 namespace design
 {
 /*  typedef boost::make_recursive_variant<
-        reasoning::BITNodeRoot*,
-        reasoning::ParametrizedBITNode,
+        opencog::pln::BITNodeRoot*,
+        opencog::pln::ParametrizedBITNode,
         set<tree<boost::recursive_variant_ > >
     >::type BITChild;
     tree<BITChild> newBITRoot;*/
@@ -88,25 +88,26 @@ namespace design
     };
 */
 /*  typedef boost::make_recursive_variant<
-        reasoning::BITNodeRoot*,
-        set<reasoning::pBITNode>,
+        opencog::pln::BITNodeRoot*,
+        set<opencog::pln::pBITNode>,
         tree<boost::recursive_variant_ >
     >::type BITChild; */
 
 /*    typedef boost::make_recursive_variant<
-        reasoning::BITNodeRoot*,
+        opencog::pln::BITNodeRoot*,
         //pBITNode,
-        reasoning::ParametrizedBITNode,
+        opencog::pln::ParametrizedBITNode,
         set<tree<boost::recursive_variant_> >
     > BITChild;
 
     tree<BITChild> newBITRoot; */
 
-//  boost::variant<reasoning::BITNodeRoot*, reasoning::set<ParametrizedBITNode>, BITChild> BITChild;
+//  boost::variant<opencog::pln::BITNodeRoot*, opencog::pln::set<ParametrizedBITNode>, BITChild> BITChild;
 }
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
+
 typedef pair<Rule*, vtree> directProductionArgs;
 
 FitnessEvalutorT FitnessEvaluator = DETERMINISTIC;
@@ -130,18 +131,18 @@ struct less_dpargs : public binary_function<directProductionArgs, directProducti
     }
 };
 
-}
+}}
 
 namespace haxx
 {
 
-using namespace reasoning;
+using namespace opencog::pln;
 static map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs> DirectProducerCache;
 
 }
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 const bool DIRECT_RESULTS_SPAWN = true;
 const bool USE_GENERATOR_CACHE = false; //true; /// This cache gives 30% speed-up
@@ -2140,7 +2141,7 @@ public:
 
 #endif
 
-} //namespace reasoning
+}} //namespace opencog::pln
 
 
 

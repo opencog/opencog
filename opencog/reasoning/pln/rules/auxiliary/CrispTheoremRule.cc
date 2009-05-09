@@ -28,14 +28,13 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-CrispTheoremRule::CrispTheoremRule(reasoning::iAtomSpaceWrapper *_destTable)
+CrispTheoremRule::CrispTheoremRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable, true, true, "RewritingRule")
 {
-    /// SHOULD NOT BE USED FOR FORWARD INFERENCE!
-    
+    // SHOULD NOT BE USED FOR FORWARD INFERENCE!
+    // ... but why not? (Joel)
     inputFilter.push_back(meta(
         new tree<Vertex>(mva(
             (pHandle)ATOM))));
@@ -44,47 +43,48 @@ CrispTheoremRule::CrispTheoremRule(reasoning::iAtomSpaceWrapper *_destTable)
 map<vtree, vector<vtree> ,less_vtree> CrispTheoremRule::thms;
 BBvtree bind_vtree(vtree &targ, map<pHandle, vtree>& binds)
 {
-                BBvtree thm_substed(new BoundVTree(targ));
-                
-                bool changes;
-                do
-                {               
-                    changes = false;
-                    
-					cprintf(4,"Next change...\n");
-                    
-                    for(vtree::pre_order_iterator vit = thm_substed->begin(); vit != thm_substed->end(); vit++)
-                    {
-						cprintf(4,"Next change check...\n");
-                        
-                        pHandle *ph = boost::get<pHandle>(&*vit);
-                        if (ph)
-                        {
-							cprintf(4,"(ph)");
-                            
-                            map<pHandle, vtree>::iterator it = binds.find(*ph);
-                            if (it != binds.end()) {
-                            
-                                cprintf(4,"replacing...[%u]\n", _v2h(*vit));
-                                cprintf(4,"with...\n");
-                                NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-                                printer.print(it->second.begin(),4);
-                                
-                                thm_substed->replace(vit, it->second.begin());
+    BBvtree thm_substed(new BoundVTree(targ));
 
-								cprintf(4,"replace ok\n");
+    bool changes;
+    do
+    {               
+        changes = false;
 
-                                changes = true;
-                                goto break_inner; //vit = thm_substed->end(); //break inner loop                            
-                            }
-                        }
-                        else
-							cprintf(4,"NOT (ph)");
-                    }
+        cprintf(4,"Next change...\n");
+
+        for(vtree::pre_order_iterator vit = thm_substed->begin(); vit != thm_substed->end(); vit++)
+        {
+            cprintf(4,"Next change check...\n");
+
+            pHandle *ph = boost::get<pHandle>(&*vit);
+            if (ph)
+            {
+                cprintf(4,"(ph)");
+
+                map<pHandle, vtree>::iterator it = binds.find(*ph);
+                if (it != binds.end()) {
+
+                    cprintf(4,"replacing...[%u]\n", _v2h(*vit));
+                    cprintf(4,"with...\n");
+                    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+                    printer.print(it->second.begin(),4);
+
+                    thm_substed->replace(vit, it->second.begin());
+
+                    cprintf(4,"replace ok\n");
+
+                    changes = true;
+                    goto break_inner;
+                    //vit = thm_substed->end(); //break inner loop                            
+                }
+            }
+            else
+                cprintf(4,"NOT (ph)");
+        }
 break_inner:                    
-					cprintf(4,"1 change run ok");
-                } while (changes);
-                
+        cprintf(4,"1 change run ok");
+    } while (changes);
+
     return thm_substed;             
 }
 
@@ -309,4 +309,4 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, pHandl
     return Vertex(ret_h);
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

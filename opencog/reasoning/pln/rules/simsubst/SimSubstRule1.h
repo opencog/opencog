@@ -22,11 +22,11 @@
 #ifndef SIMSUBS1RULE_H
 #define SIMSUBS1RULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
-/// Left side stays constant, RHS is substed
+/**
+ * Left side stays constant, RHS is substed
+ */
 class SimSubstRule1 : public GenericRule<InhSubstFormula>
 {
 public:
@@ -58,7 +58,5 @@ public:
 	virtual meta i2oType(const vector<Vertex>& h) const;
 };
 
-#endif
-
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // SIMSUBS1RULE_H

@@ -55,24 +55,24 @@
 #include "and/ANDRuleArityFree.h"
 #include "and/ANDRule.h"
 #include "and/ANDRuleSimple.h"
-#include "and/AND2ORRule.h"								/* Not Used */
+//#include "and/AND2ORRule.h"
 
 #include "or/ORRule.h"
 #include "or/ORPartitionRule.h"
-#include "or/OR2ANDRule.h"									/* Not Used */
+//#include "or/OR2ANDRule.h"
 
 #include "not/NotEvaluatorRule.h"
-#include "not/NotEliminationRule.h"						/* Not Used */
+//#include "not/NotEliminationRule.h"
 
-#include "convert/Equi2ImpRule.h"						/* Not Used */
-#include "convert/Eval2MemRule.h"						/* Not Used */
-#include "convert/Exist2ForAllRule.h"					/* Not Used */
-#include "convert/Ext2ExtRule.h"						/* Not Used */
-#include "convert/Inclusion2EvalRule.h"					/* Not Used */
-#include "convert/Inh2EvalRule.h"						/* Not Used */
-#include "convert/Inh2SimRule.h"						/* Not Used */
 #include "convert/Link2LinkRule.h"
-#include "convert/Sim2InhRule.h"						/* Not Used */
+//#include "convert/Equi2ImpRule.h"
+//#include "convert/Eval2MemRule.h"
+//#include "convert/Exist2ForAllRule.h"
+//#include "convert/Ext2ExtRule.h"
+//#include "convert/Inclusion2EvalRule.h"
+//#include "convert/Inh2EvalRule.h"
+//#include "convert/Inh2SimRule.h"
+//#include "convert/Sim2InhRule.h"
 
 #include "implication/ImplicationBreakdownRule.h"
 #include "implication/ImplicationRedundantExpansionRule.h"
@@ -81,13 +81,13 @@
 
 #include "auxiliary/CrispTheoremRule.h"
 #include "auxiliary/LookupRule.h"
-#include "auxiliary/PrintRule.h"							/* Not Used */
+//#include "auxiliary/PrintRule.h"
 #include "auxiliary/ScholemFunctionProductionRule.h"
-#include "auxiliary/SubsetEvalRule.h"						/* Not Used */
-#include "auxiliary/VarInstantiationRule.h"					/* Not Used */
+//#include "auxiliary/SubsetEvalRule.h"
+//#include "auxiliary/VarInstantiationRule.h"
 
-#include "simsubst/SimSubstRule1.h"						/* Not Used */
-#include "simsubst/SimSubstRule2.h"						/* Not Used */
+//#include "simsubst/SimSubstRule1.h"
+//#include "simsubst/SimSubstRule2.h"
 
 #include "unify/BaseCrispUnificationRule.h"
 #include "unify/CrispUnificationRule.h"
@@ -99,7 +99,7 @@
 #include "inference/HypothesisRule.h"
 #include "inference/InversionRule.h"
 #include "inference/QuantifierRule.h"
-#include "inference/RevisionRule.h"						/* Not Used */
+// #include "inference/RevisionRule.h"
 
 #define USE_ALL_AVAILABLE_INFORMATION_FOR_AND_RULE_COMPUTATION 1
 #define MAX_ARITY_FOR_PERMUTATION 5
@@ -107,12 +107,14 @@
 
 //const bool RuleResultFreshness = true;
 
-/*
-	The basic problem of an individual is distinguishing between _who he "really" is_
-	and the "identity" (mental image and related ingrained patterns of thought) that
-	society had imposed upon him. The most important fact about the distinction is,
-	however, that it is equally fictionary as her individual identity and collective identity.
-	In pragmatics, the relevant point is the utility of the distinction, which in this case is 		
-	significant, given the goal structure of any individualist.
-*/
+/** 
+ * The basic problem of an individual is distinguishing between <i>who he
+ * "really" is</i> and the "identity" (mental image and related ingrained
+ * patterns of thought) that society had imposed upon him. The most important
+ * fact about the distinction is, however, that it is equally fictionary as her
+ * individual identity and collective identity. In pragmatics, the relevant
+ * point is the utility of the distinction, which in this case is
+ * significant, given the goal structure of any individualist.
+ */
+
 #endif // RULES_H

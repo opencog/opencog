@@ -26,8 +26,8 @@
 #include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
+
 bool substitutableTo(atom& from, atom& to,
 						map<string,atom>& bindings,
 						const set<subst>& forbiddenBindings,
@@ -38,7 +38,7 @@ bool substitutableTo(atom& from, atom& to,
 namespace haxx
 {
 	static int localcount=0;
-	using namespace reasoning;
+	using namespace opencog { namespace pln {;
 
 	bool getHandleSet(Type T, const string& name, AtomLookupProvider* aprovider, vector<Handle>& res);
 	
@@ -194,7 +194,7 @@ localcount++;
 	}
 }
 
-namespace reasoning
+namespace opencog { namespace pln {
 {
 void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
 					 set<subst>* forbiddenBindings);
@@ -319,5 +319,5 @@ map<string,atom>* bindings = res.begin()->bindings;
 	for_each(res.begin(), res.end(), atom_print<4>());
 }
 
-} //namespace reasoning
+}} //namespace opencog { namespace pln {
 

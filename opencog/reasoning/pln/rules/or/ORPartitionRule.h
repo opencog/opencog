@@ -22,8 +22,7 @@
 #ifndef ORPARTITIONRULE_H
 #define ORPARTITIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /** @class ORPartitionRule
 	Partitions argument into, like, OR(A, OR(B, OR(C, D)))
@@ -47,5 +46,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ORPARTITIONRULE_H

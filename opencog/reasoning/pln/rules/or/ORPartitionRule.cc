@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
@@ -68,4 +67,4 @@ BoundVertex ORPartitionRule::compute(const vector<Vertex>& premiseArray, pHandle
     return ret;
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

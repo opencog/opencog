@@ -22,10 +22,8 @@
 #ifndef EQUI2IMPRULE_H
 #define EQUI2IMPRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class Equi2ImpRule : public Rule
 {
 	/// "A<=>B" => "AND(A=>B, B=>A)"
@@ -63,7 +61,6 @@ class Equi2ImpRule : public Rule
 
 	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // EQUI2IMPRULE_H

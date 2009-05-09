@@ -149,7 +149,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #pragma warning(disable : 4312)
 #endif // _MSC_VER
 
-using namespace reasoning;
+using namespace opencog::pln;
 using namespace opencog;
 
 //! debug level, @todo replaced by opencog log system
@@ -169,19 +169,19 @@ namespace haxx
     extern bool ArchiveTheorems;
     extern bool printRealAtoms;
     extern map<Handle,vector<Handle> >* inferred_from;
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+    extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
 //    uint maxDepth = 250;
 }
 
-namespace reasoning
+namespace opencog { namespace pln
 {
     extern bool RECORD_TRAILS;
 
 //    int varcount=0;
     int addlinks=0;
     int gethandles=0;   
-}
+}}
 
 namespace test
 {
@@ -232,7 +232,7 @@ void PLNShell_RunLoop(int argc, char** args)
 /*        if (RunPLNtest)
         {
             puts("Running PLNTests...");
-            reasoning::RunPLNTests();
+            opencog::pln::RunPLNTests();
             exit(0);
         }*/
 //      AgentTest();
@@ -673,7 +673,7 @@ printf("Insert tests init\n");
 void PLNShell::Init()
 {
     #if LOCAL_ATW
-    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+    haxx::defaultAtomSpaceWrapper = &opencog::pln::LocalATW::getInstance();
     ((LocalATW*)haxx::defaultAtomSpaceWrapper)->SetCapacity(10000);
     #endif  
     

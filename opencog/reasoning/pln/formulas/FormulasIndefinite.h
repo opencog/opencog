@@ -58,8 +58,8 @@ typedef vector<number_t> dvector;
 typedef vector<number_t*> pvector;
 typedef vector<vector<number_t> > dmatrix;
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
     
 const float
 IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor = 1.5f;
@@ -301,6 +301,6 @@ RuleGenerator<R, T>::CreateRule(T* const& a,
     return new R(a, b, c, d, e);
 }
 
-} // namespace reasoning
+}} // namespace opencog::pln
 
 #endif /*INDEFINITEPLNFORMULAS_H */

@@ -22,8 +22,7 @@
 #ifndef DEDUCTIONRULE_H
 #define DEDUCTIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #define CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE 0
 
@@ -131,5 +130,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // DEDUCTIONRULE_H

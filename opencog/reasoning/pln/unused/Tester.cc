@@ -40,7 +40,7 @@
 
 #include <opencog/adaptors/tulip/TulipWriter.h>
 
-using namespace reasoning;  
+using namespace opencog::pln;  
 
 #if 0
 #include <windows.h>
@@ -80,10 +80,12 @@ namespace test
 
 enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
 
-namespace reasoning {
+namespace opencog { namespace pln {
     void InitAxiomSet(string premiseFile);
     extern FitnessEvalutorT FitnessEvaluator;
-}
+    extern bool RECORD_TRAILS;
+    extern unsigned long now_interval_len   ;
+}}
 
 // These are now in PLNUtils.h
 //#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
@@ -100,7 +102,7 @@ float getCount(float c)
 
 namespace haxx
 {
-    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+    extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
     extern bool printRealAtoms;
     extern Handle VarTypes[STD_VARS];
     extern multimap<Handle,Handle> childOf;
@@ -109,19 +111,12 @@ namespace haxx
     extern bool printRealAtoms;
 }
 
-namespace reasoning
-{
-    extern bool RECORD_TRAILS;
-    extern unsigned long now_interval_len   ;
-}
-
 vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
 static int AllTestsInferenceNodes=0;
 
-
-namespace reasoning
+namespace opencog { namespace pln
 {
     void foo_pretest() {}
     void footest() {}
@@ -162,14 +157,14 @@ void finger_print_test(vtree& v)
 
 set<Btr<PLNTest> > PLNTests;
 
-} // namespace reasoning
+}} // namespace opencog::pln
 
 namespace goal
 {
     void WalkTest();
 }
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 
 bool foo42=false;
@@ -922,7 +917,7 @@ InitAxiomSet("smalldemo.xml");
         
     }
 
-} //namespace reasoning
+}} //namespace opencog::pln
 
 
 
@@ -947,7 +942,7 @@ InitAxiomSet("smalldemo.xml");
 #include "BackInferenceTree.h"
 #include "BackInferenceTreeNode.h"
 
-using namespace reasoning;
+using namespace opencog::pln;
 
 struct run1
 {
@@ -1132,8 +1127,8 @@ return;
             ), true, false, true);*/
 
 
-//  printf("\nUnprovable atoms: %d\n", reasoning::haxx::Unprovable().size());
-//  printf("\nProvable atoms: %d\n", reasoning::haxx::Provable().size());
+//  printf("\nUnprovable atoms: %d\n", opencog::pln::haxx::Unprovable().size());
+//  printf("\nProvable atoms: %d\n", opencog::pln::haxx::Provable().size());
 
         printf("\nReserved atoms: %d\n", atom_alloc_count);
         printf("\nReserved InferenceNodes: %d\n", inode_alloc_count);
@@ -1156,10 +1151,10 @@ void NewChainerTest();
 
 int __ptlc=0;
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 Handle Ass(iAtomSpaceWrapper *destTable, Handle h, std::vector<Handle>& ret);
-};
+}};
 
 void TestAssociatedSets()
 {
@@ -1328,7 +1323,7 @@ getc(stdin);*/
 
 void AgentTest2()
 {
-    using namespace reasoning;
+    using namespace opencog::pln;
     
     InitAxiomSet("fetch.xml");
 #if 1

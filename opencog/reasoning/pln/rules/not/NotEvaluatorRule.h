@@ -22,8 +22,7 @@
 #ifndef NOTEVALUATORRULE_H
 #define NOTEVALUATORRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class NotEvaluatorRule : public GenericRule<NotFormula>
 {
@@ -60,5 +59,5 @@ public:
     NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // NOTEVALUATORRULE_H

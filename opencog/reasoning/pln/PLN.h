@@ -74,7 +74,8 @@
 
 using namespace opencog;
 
-namespace reasoning {
+namespace opencog {
+namespace pln {
     typedef unsigned char byte;
     typedef unsigned short int word;
     typedef unsigned long int dword;
@@ -84,6 +85,6 @@ namespace reasoning {
     enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
     enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
 
-}
+}}
 
 #endif // _PLN_H

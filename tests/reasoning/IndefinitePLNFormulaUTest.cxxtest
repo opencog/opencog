@@ -32,7 +32,7 @@
 #include <math.h>
 #include <vector>
 
-using namespace reasoning;
+using namespace opencog::pln;
 
 float bvalues[6]={0.5, 0.6, 0.7, 0.8, 0.9, 0.95};
 float kvalues[9]={1.0f, 2.0f, 3.0f, 5.0f, 7.0f, 10.0f, 20.0f, 50.0f, 100.0f};
@@ -80,7 +80,7 @@ public:
 		
 		//TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
 //        TruthValue* TV[5] = {TVin1, TVin0, TVin2, TVin10,TVin20};
-//		reasoning::IndefiniteSymmetricAbductionFormula fAbduction;
+//		opencog::pln::IndefiniteSymmetricAbductionFormula fAbduction;
 //        IndefiniteTruthValue* TVin12=(IndefiniteTruthValue*)(fAbduction.compute(TV,5));//Inh inhib1 inhib2
                 
 		RuleGenerator<AbductionRule, IndefiniteTruthValue> myCreator;
@@ -94,7 +94,7 @@ public:
 		
 		IndefiniteTruthValue* TVin1A = createTV(0.95f,1.0f);
 		TruthValue* TV1[1] = {TVin1A};
-		reasoning::IndefiniteMem2InhFormula fMem2Inh;
+        opencog::pln::IndefiniteMem2InhFormula fMem2Inh;
 		TVin1A=(IndefiniteTruthValue*)(fMem2Inh.compute(TV1,1));
 		
 /*		RuleGenerator<Mem2InhRule, IndefiniteTruthValue> myCreator2;
@@ -105,7 +105,7 @@ public:
 		printf("\nTVin1A:\nL: %.5f - U: %.5f\n",TVin1A->getL(),TVin1A->getU());		
 		
 		TruthValue* TV2[3] = {TVin1, TVin2, TVin12};
-		reasoning::IndefiniteSymmetricBayesFormula fBayes;
+        opencog::pln::IndefiniteSymmetricBayesFormula fBayes;
 		IndefiniteTruthValue* TVin21=(IndefiniteTruthValue*)(fBayes.simpleCompute(TV2,3));//Inh inhib2 inhib1
 		
 //		RuleGenerator<BayesRule, IndefiniteTruthValue> myCreator3;
@@ -117,7 +117,7 @@ public:
 
 
 		TruthValue* TV3[5] = {TVin2, TVin1, TVA, TVin21,TVin1A};
-		reasoning::IndefiniteSymmetricDeductionFormula fDeduction;
+        opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
 		IndefiniteTruthValue* TVin2A=(IndefiniteTruthValue*)(fDeduction.compute(TV3,5));//Inh inhib2 A
 					
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(),TVin2A->getU());
@@ -129,7 +129,7 @@ public:
 //		TruthValue* TVBAmem2inh = createTV(0.46666f,0.6f);
 
 		TruthValue* TV4[1] = {TVin2A};
-		reasoning::IndefiniteInh2MemFormula fInh2Mem;
+        opencog::pln::IndefiniteInh2MemFormula fInh2Mem;
 		TVin2A=(IndefiniteTruthValue*)(fInh2Mem.compute(TV4,1));
 		
 		printf("\nTVin2A:\nL: %.5f - U: %.5f\n",TVin2A->getL(), TVin2A->getU());
@@ -138,7 +138,7 @@ public:
 		TruthValue* TVin0CausalEvent = createTV(0.95, 1.0f,0.9f);
 		
 		TruthValue* TV5[5] = {TVin2, TVin0, TVCausalEvent, TVin20,TVin0CausalEvent};
-//		reasoning::IndefiniteSymmetricDeductionFormula fDeduction;
+//		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
 		IndefiniteTruthValue* TVin2CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV5,5));//Inh inhib2 causal_event
 					
 		printf("\nTVin2CausalEvent:\nL: %.5f - U: %.5f\n",TVin2CausalEvent->getL(),TVin2CausalEvent->getU());
@@ -149,7 +149,7 @@ public:
 		TruthValue* TVPrevCausalEvent = createTV(0.95, 1.0f,0.9f);
 		
 		TruthValue* TV6[5] = {TVPrev1, TVPrev, TVCausalEvent, TVPrev1Prev, TVPrevCausalEvent};
-//		reasoning::IndefiniteSymmetricDeductionFormula fDeduction;
+//		opencog::pln::IndefiniteSymmetricDeductionFormula fDeduction;
 		IndefiniteTruthValue* TVPrev1CausalEvent=(IndefiniteTruthValue*)(fDeduction.compute(TV6,5));//Inh Prev1 causal_event
 					
 		printf("\nTVPrev1CausalEvent:\nL: %.5f - U: %.5f\n",TVPrev1CausalEvent->getL(),TVPrev1CausalEvent->getU());
@@ -363,8 +363,8 @@ public:
 		printf("** Deduction Formula **\n");
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2);
-//		reasoning::setSaveDeductionLookupTable(false);
-//		reasoning::setUseDeductionLookupTable(false);
+//		opencog::pln::setSaveDeductionLookupTable(false);
+//		opencog::pln::setUseDeductionLookupTable(false);
 		
 		//DeductionLookupTable::getInstance()->readTable();
 		
@@ -460,7 +460,7 @@ public:
 		TruthValue* TVA = createTV(LA,UA);
 		
 		TruthValue* TV[1] = {TVA};
-		reasoning::IndefiniteMem2InhFormula fMem2Inh;
+        opencog::pln::IndefiniteMem2InhFormula fMem2Inh;
 
 		IndefiniteTruthValue* result=(IndefiniteTruthValue*)(fMem2Inh.compute(TV,1));
 		
@@ -475,8 +475,8 @@ public:
 	void ReadLookupTable(){
 		IndefiniteTruthValue::setDefaultConfidenceLevel(0.9);
 		IndefiniteTruthValue::setDefaultK(2.0);
-		reasoning::setSaveDeductionLookupTable(false);
-		reasoning::setUseDeductionLookupTable(true);
+        opencog::pln::setSaveDeductionLookupTable(false);
+        opencog::pln::setUseDeductionLookupTable(true);
 		DeductionLookupTable::getInstance()->readTable();
 	}
 
@@ -519,8 +519,8 @@ public:
 
 		bool useTable=false;
 
-		reasoning::setSaveDeductionLookupTable(false);
-		reasoning::setUseDeductionLookupTable(useTable);
+        opencog::pln::setSaveDeductionLookupTable(false);
+        opencog::pln::setUseDeductionLookupTable(useTable);
 
 		if(useTable)
 			DeductionLookupTable::getInstance()->readTable();
@@ -565,12 +565,12 @@ public:
 		
 		float default_b=0.9f;
 		
-		reasoning::setSaveDeductionLookupTable(true);
-		reasoning::setUseDeductionLookupTable(false);
+        opencog::pln::setSaveDeductionLookupTable(true);
+        opencog::pln::setUseDeductionLookupTable(false);
 //		unsigned long time_start=getElapsedMillis();
 		//DeductionLookupTable::getInstance()->readTable();
 // Removed because that formula was removed (a new version of it is needed).
-/*		reasoning::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
+/*		opencog::pln::BuildLookuptTableIndefiniteSymmetricDeductionFormula fBuildLookupDeduction;
 		fBuildLookupDeduction.compute();*/
 //        unsigned long time_end=getElapsedMillis();
 	}

@@ -22,8 +22,7 @@
 #ifndef ANDPARTITIONRULE_H
 #define ANDPARTITIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /** @class ANDPartitionRule
 	Partitions argument into smaller ANDLinks
@@ -46,5 +45,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ANDPARTITIONRULE_H

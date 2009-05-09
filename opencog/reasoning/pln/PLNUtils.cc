@@ -58,7 +58,7 @@ extern FILE *logfile;
 
 namespace haxx
 {
-// extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+// extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 bool printRealAtoms = false;
 pHandle VarTypes[STD_VARS];
 }
@@ -117,13 +117,13 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
     }
 
     if (hptr && !atw->isType(*hptr)) {
-//puts("reasoning::printTree");
+//puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
             cprintf(_rloglevel, "[%u]\n", (*hptr));
             if (test::logfile && _rloglevel >= currentDebugLevel)
                 fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
-            reasoning::printTree(*hptr, level, _rloglevel);
+            opencog::pln::printTree(*hptr, level, _rloglevel);
 
         return;
     }
@@ -132,9 +132,9 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
     IntegerWrapper* iptr;
 
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
+        cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
+            fprintf(test::logfile, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
@@ -170,13 +170,13 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
     }
 
     if (hptr && !atw->isType(*hptr)) {
-//puts("reasoning::printTree");
+//puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
             cprintf(_rloglevel, "[%d]\n", (*hptr));
             if (test::logfile && _rloglevel >= currentDebugLevel)
                 fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
-            reasoning::printTree(*hptr, level, _rloglevel);
+            opencog::pln::printTree(*hptr, level, _rloglevel);
 
         return;
     }
@@ -185,9 +185,9 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
     IntegerWrapper* iptr;
 
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
+        cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", reasoning::Type2Name((Type)(*hptr)), top.number_of_children());
+            fprintf(test::logfile, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
         if (test::logfile && _rloglevel >= currentDebugLevel)
@@ -211,8 +211,8 @@ string repeatc(const char c, const int count)
     return ret.assign(count, c);
 }
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
                                  vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
                                  map<pHandle, pHandle>& bindings);
@@ -575,7 +575,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
         cprintf(4, "Call unifyvector...\n");
 
         if (_MP.size() <= 1
-                || (reasoning::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
+                || (opencog::pln::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
                                              *tentative_bindings, NULL, NULL, VarT))
            ) {
             LOG(3, "Was valid search result by unification.");
@@ -799,7 +799,7 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
     atom rhs(h);
     bool ok = false;
     do {
-        ok = reasoning::MPunify1(*value, value->begin(), rhs, *bindings, //bindings,
+        ok = opencog::pln::MPunify1(*value, value->begin(), rhs, *bindings, //bindings,
                                  &forbiddenBindings,
                                  &restart, FW_VARIABLE_NODE);
     } while (restart);
@@ -980,7 +980,7 @@ void printNode1(pHandle h, int level, int LogLevel)
     char buf[500];
 
     if (!tv.isNullTv())
-        sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(), h);
+        sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), opencog::pln::Type2Name(t), t, tv.getMean(), tv.getConfidence(), h);
     else
         sprintf(buf, "NULL TV!");
 
@@ -1013,7 +1013,7 @@ void printTree(pHandle h, int level, int LogLevel)
         char buf[500];
         Type t = (Type) h;
 
-        sprintf(buf, "Virtual %s (%d)\n", reasoning::Type2Name(t), t);
+        sprintf(buf, "Virtual %s (%d)\n", opencog::pln::Type2Name(t), t);
 
         if (test::logfile && LogLevel >= currentDebugLevel)
             fprintf(test::logfile, "%s", buf);
@@ -1033,7 +1033,7 @@ void printTree(pHandle h, int level, int LogLevel)
 
         if (!tv.isNullTv())
             sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(),
-                    reasoning::Type2Name(t), t, tv.getMean(), tv.getConfidence(),
+                    opencog::pln::Type2Name(t), t, tv.getMean(), tv.getConfidence(),
                     h);
         else
             sprintf(buf, "NULL TV!");
@@ -1061,16 +1061,12 @@ struct countAtom {
     }
 };
 
-namespace haxx {
-int run_index[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                  };
-}
-
-int _rcount = 0;
-
 string GetRandomString(int size)
 {
+    static int _rcount = 0;
+    static int run_index[] = 
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     char s[1000];
 
     _rcount++;
@@ -1084,17 +1080,17 @@ string GetRandomString(int size)
     assert(size < 30);
 
     for (int i = 0; i < size - 1; i++)
-        s[i] = 'A' + haxx::run_index[i];
+        s[i] = 'A' + run_index[i];
     s[size-1] = 0;
 
     int j = 0;
-    for (j = size - 2;j >= 0 && haxx::run_index[j] == ('Z' -'A'); j--);
+    for (j = size - 2;j >= 0 && run_index[j] == ('Z' -'A'); j--);
 
     if (j >= 0) {
-        haxx::run_index[j]++;
+        run_index[j]++;
 
         for (int k = j + 1; k < size - 1; k++)
-            haxx::run_index[k] = 0;
+            run_index[k] = 0;
     } else {
         printf("OUT OF RANDOM STRINGS FOR THE GIVEN SIZE %d!", size);
         throw string("OUT OF RANDOM STRINGS FOR THE GIVEN SIZE!");
@@ -1103,42 +1099,40 @@ string GetRandomString(int size)
     return s;
 }
 
-/** The implementation for REAL RandomStrings:
-namespace haxx
-{
- set<string> used_strings;
- int run_index = 0;
-};
-
+/** The implementation for REAL RandomStrings
+ */
+/*
 string GetRandomString(int size)
 {
- char s[1000];
+    static set<string> used_strings;
+    static int run_index = 0;
 
- for (int i = 0; i < size-1; i++)
- A
-  s[i] = 'A'+rand()%('Z'-'A'+1);
- s[size-1]=0;
+    char s[1000];
 
- string ss(s);
+    for (int i = 0; i < size-1; i++)
+        A
+            s[i] = 'A'+rand()%('Z'-'A'+1);
+    s[size-1]=0;
 
- if (STLhas(haxx::used_strings,ss))
- {
-  string next_attempt_ss = ss;
-  do
-  {
-   next_attempt_ss = ss + i2str(haxx::run_index++);
-  }
-  while (STLhas(haxx::used_strings,next_attempt_ss));
+    string ss(s);
 
-  return next_attempt_ss;
- }
- else
- {
-  haxx::used_strings.insert(ss);
-  return ss;
- }
-  //return GetRandomString(size);
-}*/
+    if (STLhas(haxx::used_strings,ss))
+    {
+        string next_attempt_ss = ss;
+        do
+        {
+            next_attempt_ss = ss + i2str(haxx::run_index++);
+        }
+        while (STLhas(haxx::used_strings,next_attempt_ss));
+
+        return next_attempt_ss;
+    }
+    else
+    {
+        haxx::used_strings.insert(ss);
+        return ss;
+    }
+} */
 
 /*string log_periodical_report()
 {
@@ -1147,8 +1141,7 @@ string GetRandomString(int size)
  return "U-SIZE: "+i2str(u);
 }*/
 
-/// Could be more inclusive...
-
+/** Could be more inclusive... */
 bool _in(set<subst>* forbid, string entry, atom a)
 {
     return STLhas(*forbid, subst(entry, a));
@@ -1182,13 +1175,13 @@ void getAtomTreeString(const atom& a, string& outbuf)
     char buf[5000];
 
     if (a.hs.size() == 0) {
-        sprintf(buf, "%s:%s (%d)", a.name.c_str(), reasoning::Type2Name(a.T), a.T);
+        sprintf(buf, "%s:%s (%d)", a.name.c_str(), opencog::pln::Type2Name(a.T), a.T);
 
         string subst_buf = make_subst_buf(a);
 
         outbuf += buf + string(" [   ") + subst_buf + string("]");
     } else {
-        sprintf(buf, "%s( ", reasoning::Type2Name(a.T));
+        sprintf(buf, "%s( ", opencog::pln::Type2Name(a.T));
         outbuf += buf;
 
         for (vector<Btr<atom> >::const_iterator hi = a.hs.begin(); hi != a.hs.end();) {
@@ -1206,7 +1199,7 @@ void printNode1(const atom& a, int level, int LogLevel)
 {
     char buf[500];
 
-    sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), reasoning::Type2Name(a.T), a.T,
+    sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), opencog::pln::Type2Name(a.T), a.T,
             a.handle);
 
     string subst_buf = make_subst_buf(a);
@@ -1236,15 +1229,15 @@ void printLeveledString(int level, string str)
     LOG(0, repeatc(' ', level*3) + str);
 }
 
-/*reasoning::atom atomWithNewType(Handle h, Type T)
+/*opencog::pln::atom atomWithNewType(Handle h, Type T)
 {
- reasoning::atom ret(h);
+ opencog::pln::atom ret(h);
  ret.T = T;
  return ret;
 }
-reasoning::atom* newAtomWithNewType(Handle h, Type T)
+opencog::pln::atom* newAtomWithNewType(Handle h, Type T)
 {
- reasoning::atom* ret = new reasoning::atom(h);
+ opencog::pln::atom* ret = new opencog::pln::atom(h);
  ret->T = T;
  return ret;
  }*/
@@ -1325,9 +1318,6 @@ pHandleSet constitutedSet(pHandle CP,
     return ret;
 }
 
-
-} //Nil: I have that feeling that closing braces disable the rest of the code?
-
 /*
 #include <boost/variant/static_visitor.hpp>
 template<int LOGLEVEL>
@@ -1346,8 +1336,6 @@ public:
 // bool operator()( &arg) { return NonHandleID; }
 };
 */
-namespace reasoning
-{
 
 pHandle _v2h(const Vertex& v) {
    return  boost::get<pHandle>(v);
@@ -1438,7 +1426,7 @@ bool MPunifyHandle(pHandle lhs,
 
         for (uint i = 0; i < lhs_arity; i++) {
             LOG(4, "MPunifyHandle: next arg...");
-            if (!reasoning::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, forbiddenBindings, restart, VarT))
+            if (!opencog::pln::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, forbiddenBindings, restart, VarT))
                 return false;
 
             LOG(4, "MPunifyHandle: Unify1 was success!");
@@ -1674,9 +1662,9 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
         return false;
 
     /*LOG(0, "-Source");
-     printAtomTree(reasoning::atom(from),0,0);
+     printAtomTree(opencog::pln::atom(from),0,0);
      LOG(0, "-SubstitutableTo:");
-     printAtomTree(reasoning::atom(to),0,0);
+     printAtomTree(opencog::pln::atom(to),0,0);
      LOG(0, "vee");*/
 
     string from_name(atw->getName(from));
@@ -2235,7 +2223,7 @@ Vertex transitive_produce( const containerT& chain,
     rule_args.push_back(_v2h(last_result) ? last_result : (*next_it++));
     rule_args.push_back(*next_it++);
 
-    Vertex my_result = reasoning::DeductionRule<DeductionSimpleFormula>(ASW(), TRANSITIVE_LINK_TYPE).compute(rule_args);
+    Vertex my_result = opencog::pln::DeductionRule<DeductionSimpleFormula>(ASW(), TRANSITIVE_LINK_TYPE).compute(rule_args);
 
     return (next_it != chain.end())
            ? transitive_produce<TRANSITIVE_LINK_TYPE>(chain, next_it, my_result)
@@ -2255,8 +2243,8 @@ bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
 
     /// \todo Speed-optimize!
 
-    vtree va(reasoning::make_vtree(a));
-    vtree vb(reasoning::make_vtree(b));
+    vtree va(opencog::pln::make_vtree(a));
+    vtree vb(opencog::pln::make_vtree(b));
 
     return va == vb &&
            (atw->getTV(b).getConfidence() - atw->getTV(a).getConfidence())
@@ -2296,7 +2284,7 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
             bool lhs_is_var  = lhs_is_node && ( atw->inheritsType(atw->getType(*ph_ltop), VarType) || atw->inheritsType(atw->getType(*ph_ltop), FW_VARIABLE_NODE));
 
             if (!atw->isType(*ph_ltop) && !lhs_is_node) {
-                vtree ltop_as_tree(reasoning::make_vtree(*ph_ltop));
+                vtree ltop_as_tree(opencog::pln::make_vtree(*ph_ltop));
 
                 return unifiesTo(ltop_as_tree, rhs_t,
                                  ltop_as_tree.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
@@ -2311,7 +2299,7 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                     bool rhs_is_var  = rhs_is_node && ( atw->inheritsType(atw->getType(*ph_rtop), VarType)  || atw->inheritsType(atw->getType(*ph_rtop), FW_VARIABLE_NODE));
 
                     if (!atw->isType(*ph_rtop) && !rhs_is_node) {
-                        vtree rtop_as_tree(reasoning::make_vtree(*ph_rtop));
+                        vtree rtop_as_tree(opencog::pln::make_vtree(*ph_rtop));
 
                         return unifiesTo(lhs_t, rtop_as_tree,
                                          rtop, rtop_as_tree.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
@@ -2487,4 +2475,4 @@ bool unifiesTo(const vtree& lhs, const vtree& rhs, map<pHandle, vtree>& Lbinding
     return unifiesTo(lhs, rhs, lhs.begin(), rhs.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
 }
 
-} //reasoning
+}} // ~namespace opencog::pln

@@ -30,8 +30,7 @@
 
 #define HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS false
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
 {
@@ -62,4 +61,4 @@ Rule::setOfMPs HypothesisRule:: o2iMetaExtra(meta outh, bool& overrideInputFilte
     return Rule::setOfMPs();
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

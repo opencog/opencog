@@ -31,8 +31,9 @@
 #define LOCAL_ATW 0
 enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
 
-namespace reasoning {
-typedef reasoning::BoundVertex atomT;
+namespace opencog {
+namespace pln {
+typedef opencog::pln::BoundVertex atomT;
 typedef std::set<atomT> atomSetT;
 typedef std::vector<atomT> atomVectorT;
 	
@@ -144,11 +145,11 @@ class PTLEvaluator
 
 } //namespace simple_evaluator
 
-} //namespace reasoning
+}} //namespace opencog::pln
 
 namespace haxx
 {
-	using namespace reasoning;
+	using namespace opencog::pln;
 Handle exec(Handle* hs, const int N);
 Handle exec(vector<Handle>& hs);
 Handle exec(const vector<BoundVertex>& hs);

@@ -52,9 +52,8 @@ inline bool isAllIndefiniteTruthValueType(TruthValue** TV, int N)
     return true;
 }
 
-namespace reasoning
-{
-
+namespace opencog {
+namespace pln {
 
 /*=============================================================================
   Macros of common body parts 
@@ -1000,4 +999,4 @@ template TruthValue* Formula<AND_MAX_ARITY>::compute(TruthValue** TV, int N, lon
 //template TruthValue* Formula<FORALL_MAX_ARITY>::compute(TruthValue** TV, int N, long U) const;
 
 
-} //namespace reasoning
+}} //namespace opencog::pln

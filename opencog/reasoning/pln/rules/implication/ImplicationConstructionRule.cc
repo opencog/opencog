@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #if 0
 Rule::setOfMPs ImplicationConstructionRule::o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const
@@ -58,4 +57,4 @@ atom ImplicationConstructionRule::i2oType(Handle* h, const int n) const
 }
 #endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

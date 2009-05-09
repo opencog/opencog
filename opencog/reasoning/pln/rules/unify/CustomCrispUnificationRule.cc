@@ -32,11 +32,10 @@ namespace haxx
 {
     /// \todo This data must persist even if the BITNodeRoot is deleted.
     extern map<pHandle,vector<pHandle> > inferred_from;
-    extern map<pHandle,reasoning::Rule*> inferred_with;
+    extern map<pHandle,opencog::pln::Rule*> inferred_with;
 }
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 bool UnificationRuleResultFreshness = true; //false;
 
@@ -99,5 +98,4 @@ cprintf(3,"FindMatchingUniversals OK!\n");
 
     return ret;
 }
-
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

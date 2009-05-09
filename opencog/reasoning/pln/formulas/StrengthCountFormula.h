@@ -24,7 +24,7 @@
 
 #include "StrengthFormula.h"
 
-namespace reasoning {
+namespace opencog { namespace pln {
 
 // abstract class to be inherited by formula involving TV strength
 class StrengthCountFormula : public StrengthFormula {
@@ -36,7 +36,5 @@ public:
     virtual count_t computeCount(const count_seq& cs) const = 0;
 };
 
-
-} // ~namespace reasoning
-
+}} // ~namespace opencog::pln
 #endif

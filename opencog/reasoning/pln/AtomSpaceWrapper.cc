@@ -54,7 +54,7 @@ using namespace opencog;
 
 namespace haxx
 {
-//    reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+//    opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 
     // TODELETE, not used
     // set<Handle> atomRemoveSet;
@@ -77,7 +77,7 @@ namespace haxx
 }
 
 //static map<Handle,vtree> h2vtree_cache;
-vtree reasoning::make_vtree(pHandle h)
+vtree opencog::pln::make_vtree(pHandle h)
 {
     // Makes vtree for internal PLN use, so don't convert to real 
     // AtomSpace Handles
@@ -87,10 +87,10 @@ vtree reasoning::make_vtree(pHandle h)
        if (i != h2vtree_cache.end())
           return i->second;*/
     vtree ret;
-    reasoning::makeHandletree(h, true, ret);
+    opencog::pln::makeHandletree(h, true, ret);
     // h2vtree_cache[h] = ret;
 
-    reasoning::printTree(h,0,0);
+    opencog::pln::printTree(h,0,0);
     rawPrint(ret, ret.begin(), 0);
 
     return ret;
@@ -105,7 +105,7 @@ float ContradictionLimit = 0.1f; //Below the limit, we just revise the differenc
 //  return AS_PTR->getTV(h);
 //}
 
-//namespace reasoning
+//namespace opencog::pln
 //{
 //shared_ptr<set<Handle> > AtomSpaceWrapper::getHandleSet(Type T, const string& name, bool subclass) const
 //{
@@ -124,12 +124,13 @@ float ContradictionLimit = 0.1f; //Below the limit, we just revise the differenc
 //  return AS_PTR->getHandle(t, outgoing);
 //}
 
-//}; //namespace reasoning
+//}; //namespace opencog::pln
 
 //#else
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
+
 AtomSpaceWrapper::AtomSpaceWrapper() :
 USize(800), USizeMode(CONST_SIZE)
 {
@@ -202,9 +203,9 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
     inLinks = AS_PTR->getIncoming(v.first);
     cout << "getIncoming for " << h << endl; 
     cout << "inLinks size " << inLinks.size() << endl;
-    foreach (Handle h2, inLinks) {
-        cout << "arity = " << AS_PTR->getArity(h2) << " h= " << h2 << endl;
-    }
+    //foreach (Handle h2, inLinks) {
+    //    cout << "arity = " << AS_PTR->getArity(h2) << " h= " << h2 << endl;
+   // }
 
     // For each link in incoming, check that the context of h is
     // in the right position of the outgoing set of the link
@@ -2340,5 +2341,5 @@ haxx::mindShadowMap[T].push_back(ret);
 #endif
 }
 
-} //~namespace
+}} //~namespace opencog::pln
 

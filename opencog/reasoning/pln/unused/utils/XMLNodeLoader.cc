@@ -36,7 +36,7 @@ using namespace opencog;
 
 void ct();
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 std::map<nocase_string, int> name2type;
 //std::map<int, string> type2name;
@@ -377,4 +377,4 @@ LOG(5,"XML:returnxx");
 	return ret;
 }
 
-}
+}} //~namespace opencog::pln

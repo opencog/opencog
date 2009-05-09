@@ -22,10 +22,8 @@
 #ifndef REVISIONRULE_H
 #define REVISIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class RevisionRule : public GenericRule<RevisionFormula>
 {
 public:
@@ -95,7 +93,6 @@ protected:
 		return GET_ATW->getOutgoing(premiseArray[0]);
 	}
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // REVISIONRULE_H

@@ -28,7 +28,8 @@
 #include <boost/variant.hpp>
 #include <time.h>
 
-namespace reasoning {
+namespace opencog {
+namespace pln {
 
 ForwardChainer::ForwardChainer()
 {
@@ -142,7 +143,7 @@ void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
         } else {
             cout << ", ";
         }
-        cout << boost::get<Handle>(v);
+        cout << boost::get<Handle>(v).value();
     }
     cout << " >";
 }
@@ -275,4 +276,4 @@ pHandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
 
 }
 
-} // namespace reasoning
+}} // namespace opencog::pln

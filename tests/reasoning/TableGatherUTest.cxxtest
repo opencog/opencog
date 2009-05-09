@@ -28,7 +28,7 @@
 #include <boost/assign/list_of.hpp>
 
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 using namespace boost::assign;
 
 #define GET_ASW ((AtomSpaceWrapper*) ASW())

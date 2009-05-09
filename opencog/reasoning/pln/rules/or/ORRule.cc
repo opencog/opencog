@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 ORRule::ORRule(iAtomSpaceWrapper *_destTable)
 : GenericRule<ORFormula>(_destTable, true, "OR Rule")
@@ -115,4 +114,4 @@ meta ORRule::i2oType(const vector<Vertex>& h) const
         return  ret;
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

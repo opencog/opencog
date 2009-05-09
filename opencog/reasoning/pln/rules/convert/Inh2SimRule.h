@@ -22,10 +22,8 @@
 #ifndef INH2SIMRULE_H
 #define INH2SIMRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 template<Type InclusionLink>
 class Inh2SimRule : public GenericRule<Inh2SimFormula>
 {
@@ -73,7 +71,6 @@ public:
 		return makeSingletonSet(ret);
 	}
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // INH2SIMRULE_H

@@ -22,12 +22,11 @@
 #ifndef LOOKUPRULE_H
 #define LOOKUPRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-/** @class LookupRule	
-*/
-
+/** 
+ * LookupRule
+ */
 class LookupRule : public Rule
 {
 protected:
@@ -47,5 +46,5 @@ public:
 	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // LOOKUPRULE_H

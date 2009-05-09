@@ -133,7 +133,8 @@ powerful.
 
 #include "Formula.h"
 
-namespace reasoning {
+namespace opencog {
+namespace pln {
 
 // Must keep this up to date:
 const int FORMULA_MAX_ARITY = 100;
@@ -494,6 +495,6 @@ public:
 };
 
 
-} // namespace reasoning
+}} // namespace opencog::pln
 
 #endif

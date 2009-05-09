@@ -22,8 +22,7 @@
 #ifndef IMPREDUNDANTEXPANSIONRULE_H
 #define IMPREDUNDANTEXPANSIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class ImplicationRedundantExpansionRule : public Rule
 {
@@ -39,5 +38,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // IMPREDUNDANTEXPANSIONRULE_H

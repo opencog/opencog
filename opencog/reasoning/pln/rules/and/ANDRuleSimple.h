@@ -23,8 +23,7 @@
 #define SIMPLEANDRULE_H
 
 using namespace opencog;
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 const bool RuleResultFreshness = true;
 pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable,
@@ -97,5 +96,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // SIMPLEANDRULE_H

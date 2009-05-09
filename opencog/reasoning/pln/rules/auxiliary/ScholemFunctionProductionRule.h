@@ -22,13 +22,11 @@
 #ifndef SCHOLEMPRODRULE_H
 #define SCHOLEMPRODRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-/** @class ScholemFunctionProductionRule
-
-*/
-
+/** ScholemFunctionProductionRule
+ *
+ */
 class ScholemFunctionProductionRule : public Rule
 {
 protected:
@@ -51,5 +49,5 @@ public:
     Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // SCHOLEMPRODRULE_H

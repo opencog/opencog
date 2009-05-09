@@ -25,12 +25,11 @@
 #include "Rule.h"
 //#pragma once
 
-namespace reasoning
-{
-/**
-	Takes ownership of the Rule objects given to it
-*/
+namespace opencog { namespace pln {
 
+/**
+ * Takes ownership of the Rule objects given to it
+ */
 class RuleProvider : public vector<Rule*> {
 protected:
 	void AddRule(Rule* r, float priority);
@@ -91,5 +90,5 @@ public:
     
 };
 
-} //namespace reasoning
+}} //namespace opencog { namespace pln {
 #endif

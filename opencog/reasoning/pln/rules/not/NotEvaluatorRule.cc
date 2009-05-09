@@ -28,11 +28,10 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-NotEvaluatorRule::NotEvaluatorRule(reasoning::iAtomSpaceWrapper *_destTable)
-    : GenericRule<reasoning::NotFormula>(_destTable, true, "NotEvaluatorRule")
+NotEvaluatorRule::NotEvaluatorRule( opencog::pln::iAtomSpaceWrapper *_destTable )
+: GenericRule<opencog::pln::NotFormula>(_destTable, true, "NotEvaluatorRule")
 {
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
                                                     mva((pHandle)ATOM)))
@@ -67,4 +66,4 @@ Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
     return makeSingletonSet(ret);
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

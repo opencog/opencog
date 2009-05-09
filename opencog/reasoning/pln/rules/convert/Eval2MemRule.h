@@ -22,10 +22,8 @@
 #ifndef EVAL2MEMRULE_H
 #define EVAL2MEMRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class Eval2MemRule : public GenericRule<TautologyFormula>
 {
 public:
@@ -86,7 +84,6 @@ protected:
 		//return destTable->getHandle(MEMBER_LINK, hs);
 	}
 };
-#endif 
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // EVAL2MEMRULE_H

@@ -24,8 +24,7 @@
 
 using namespace opencog;
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 template<int N>
@@ -127,6 +126,6 @@ public:
   }
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ANDBREAKDOWNRULE_H
 

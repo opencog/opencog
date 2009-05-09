@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #if 0
 Handle Equi2ImpRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
@@ -43,5 +42,4 @@ Handle Equi2ImpRule::compute(const vector<Vertex>& premiseArray, Handle CX) cons
 }
 #endif
 
-
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

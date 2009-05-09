@@ -24,7 +24,8 @@
 
 #include "TruthValue.h"
 
-namespace reasoning {
+namespace opencog {
+namespace pln {
 
 // abstract class to be inherited by formula involving TV strength
 class StrengthFormula {
@@ -40,7 +41,6 @@ public:
     virtual strength_t computeStrength(const strength_seq& ss) const = 0;
 };
 
-
-} // ~namespace reasoning
+}} // ~namespace opencog::pln
 
 #endif

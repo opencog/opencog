@@ -26,8 +26,7 @@ using namespace opencog;
 
 Handle child(Handle h, int i);
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #ifndef WIN32
   float max(float a, float b);
@@ -53,5 +52,5 @@ Handle Exist2ForAllLink(Handle& exL);
 pair<Handle,Handle> Equi2ImpLink(Handle&);
 #define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(GET_ATW->getType(__cLink), __cLinkType))
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // RULEFUNCTION_H

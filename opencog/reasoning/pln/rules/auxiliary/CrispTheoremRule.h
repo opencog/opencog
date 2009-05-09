@@ -22,8 +22,7 @@
 #ifndef CRISPTHEOREMRULE_H
 #define CRISPTHEOREMRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class CrispTheoremRule : public Rule
 {
@@ -38,5 +37,5 @@ public:
 	bool validate2				(MPs& args) const { return true; }
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // CRISPTHEOREMRULE_H

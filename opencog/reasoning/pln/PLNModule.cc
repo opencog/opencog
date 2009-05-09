@@ -48,7 +48,7 @@
 #include "TestTargets.h"
 
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 
 DECLARE_MODULE(PLNModule)
 
@@ -63,13 +63,14 @@ namespace haxx
 {
     extern bool AllowFW_VARIABLENODESinCore;
     extern bool printRealAtoms;
-//    extern reasoning::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
+//    extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
-namespace reasoning
+namespace opencog {
+namespace pln
 {
     extern bool RECORD_TRAILS;
-}
+}}
 
 namespace test
 {
@@ -117,7 +118,7 @@ void PLNModule::init()
 	
 //    Init();
     #if LOCAL_ATW
-//    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+//    haxx::defaultAtomSpaceWrapper = &opencog::pln::LocalATW::getInstance();
     ((LocalATW*)asw)->SetCapacity(10000);
     #endif  
     
@@ -161,7 +162,7 @@ void opencog::setTarget(Handle h) {
 //    vtree target* = new vtree(fakeHandle);
     Btr<vtree> target(new vtree(fakeHandle));
     
-//    reasoning::printTree(h,0,0);
+//    opencog::pln::printTree(h,0,0);
 //    rawPrint(ret, ret.begin(), 0);
 
     Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
@@ -268,7 +269,7 @@ void initTestEnv()
 void Init()
 {
     #if LOCAL_ATW
-//    haxx::defaultAtomSpaceWrapper = &reasoning::LocalATW::getInstance();
+//    haxx::defaultAtomSpaceWrapper = &opencog::pln::LocalATW::getInstance();
     ((LocalATW*)ASW())->SetCapacity(10000);
     #endif  
     

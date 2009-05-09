@@ -26,6 +26,8 @@
 
 using namespace opencog;
 
+namespace opencog { namespace pln {
+
 /**
  * This class is just an extension of Temporal class for indicating 
  * that its attribute values are actually related to a time stamp.
@@ -43,5 +45,7 @@ protected:
     TimeStamp(bool, unsigned long, unsigned long);
     
 };
+
+}} // ~namespace opencog::pln
 
 #endif //TIMESTAMP_H

@@ -22,7 +22,7 @@
 #ifndef UNORDEREDLINKPERMRULE_H
 #define UNORDEREDLINKPERMRULE_H
 
-namespace reasoning
+namespace opencog { namespace pln {
 {
 
 #if 0
@@ -39,5 +39,5 @@ public:
 };
 #endif
 
-} // namespace reasoning
+} // namespace opencog { namespace pln {
 #endif // UNORDEREDLINKPERMRULE_H

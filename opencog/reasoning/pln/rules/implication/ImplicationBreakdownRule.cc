@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 ImplicationBreakdownRule::ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable,false,true,"ImplicationBreakdown")
@@ -111,4 +110,4 @@ printer.print(ret, 1);
         return Vertex(ret);
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

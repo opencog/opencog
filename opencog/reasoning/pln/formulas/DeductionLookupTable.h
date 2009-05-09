@@ -45,6 +45,8 @@
 
 using std::string;
 
+namespace opencog {
+namespace pln {
 //the MAX_x must be the same as the "precision" of the table.
 //If each variable (A,B...) vary from 10 values, MAX_x must be 10
 const int MAX_A=10;
@@ -85,5 +87,7 @@ class DeductionLookupTable
         		
 		void printEmptyValues();
 };
+
+}}
 
 #endif /*DEDUCTIONLOOKUPTABLE_H_*/

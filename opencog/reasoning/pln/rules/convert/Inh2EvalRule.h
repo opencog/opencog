@@ -22,10 +22,8 @@
 #ifndef INH2EVALRULE_H
 #define INH2EVALRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class Inh2EvalRule : public GenericRule<TautologyFormula>
 {
 protected:
@@ -91,7 +89,6 @@ rawPrint(*ret, ret->begin(), 3);
 	}
 	NO_DIRECT_PRODUCTION;
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // INH2EVALRULE_H

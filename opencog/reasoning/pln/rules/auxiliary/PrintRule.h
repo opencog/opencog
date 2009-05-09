@@ -22,10 +22,8 @@
 #ifndef PRINTRULE_H
 #define PRINTRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class PrintRule : public Rule
 {
 public:
@@ -53,5 +51,5 @@ public:
 };
 #endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // PRINTRULE_H

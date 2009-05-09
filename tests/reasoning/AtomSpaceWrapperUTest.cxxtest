@@ -26,7 +26,7 @@
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
 
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 
 #define GET_ASW ((AtomSpaceWrapper*) ASW())
 

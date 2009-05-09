@@ -22,10 +22,8 @@
 #ifndef INC2EVALRULE_H
 #define INC2EVALRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 template<Type LinkType>
 class Inclusion2EvalRule : public GenericRule<TautologyFormula>
 {
@@ -102,7 +100,6 @@ protected:
 
 typedef Inclusion2EvalRule<MEMBER_LINK> Mem2EvalRule;
 typedef Inclusion2EvalRule<SUBSET_LINK> Inh2EvalRule;
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // INC2EVALRULE_H

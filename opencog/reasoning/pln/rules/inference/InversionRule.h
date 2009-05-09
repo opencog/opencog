@@ -22,8 +22,7 @@
 #ifndef INVERSIONRULE_H
 #define INVERSIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 //template<Type InclusionLink>
 class InversionRule : public GenericRule<InversionFormula>
@@ -96,5 +95,5 @@ public:
     NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // INVERSIONRULE_H

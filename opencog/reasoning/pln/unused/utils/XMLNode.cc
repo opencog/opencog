@@ -19,7 +19,7 @@
 #include <opencog/atomspace/utils.h>
 //#include "PTLutils.h"
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 
 void CleanSpace(string& s)
@@ -355,4 +355,4 @@ std::string StringXMLValue::Value2String() const
 	return value;
 }
 
-} //namespace PTL
+}} //namespace opencog::pln

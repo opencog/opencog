@@ -22,8 +22,7 @@
 #ifndef ORRULE_H
 #define ORRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class ORRule : public GenericRule<ORFormula>
 {
@@ -40,5 +39,5 @@ public:
 	virtual meta i2oType(const vector<Vertex>& h) const;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ORRULE_H

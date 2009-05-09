@@ -28,10 +28,9 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-ImplicationTailExpansionRule::ImplicationTailExpansionRule(reasoning::iAtomSpaceWrapper *_destTable)
+ImplicationTailExpansionRule::ImplicationTailExpansionRule(iAtomSpaceWrapper *_destTable)
 : Rule(_destTable, false, true, "ImplicationTailExpansionRule")
 {
     inputFilter.push_back(meta(
@@ -107,4 +106,4 @@ BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseA
     return Vertex(destTable->addAtom(res, GET_ATW->getTV(_v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

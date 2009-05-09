@@ -14,12 +14,13 @@ namespace test
 //    unsigned int maxDepth = 250;
 //}
 
-namespace reasoning
+namespace opencog {
+namespace pln
 {
     //! @todo This variable is modified but not used anywhere
     int varcount=0;
     
     //! @todo This doesn't seem to get initialised anywhere in PLN
     std::map<int, std::string> type2name;
-}
+}}
 

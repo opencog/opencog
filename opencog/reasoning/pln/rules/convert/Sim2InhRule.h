@@ -22,15 +22,12 @@
 #ifndef SIM2INHRULE_H
 #define SIM2INHRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /** OutputInheritanceLink:
-	InheritanceLink, IntensionalInheritanceLink, SubsetLink, ImplicationLink,
-	IntensionalImplictionLink, or ExtensionalImplicationLink
-*/
-
-#if 0
+ * InheritanceLink, IntensionalInheritanceLink, SubsetLink, ImplicationLink,
+ *IntensionalImplictionLink, or ExtensionalImplicationLink
+ */
 template<Type OutputInheritanceLink>
 class Sim2InhRule : public Rule
 {
@@ -102,7 +99,6 @@ public:
 	return ret;
   }
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // SIM2INHRULE_H

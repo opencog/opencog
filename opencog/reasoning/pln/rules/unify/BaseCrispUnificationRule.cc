@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
@@ -61,4 +60,4 @@ BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray
     return Vertex(ret);
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

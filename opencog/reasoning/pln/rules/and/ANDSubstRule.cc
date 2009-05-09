@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /*Rule::setOfMPs ANDSubstRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
@@ -52,4 +51,4 @@ BoundVertex ANDSubstRule::compute(const vector<Vertex>& premiseArray, Handle CX)
 {
 } */
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

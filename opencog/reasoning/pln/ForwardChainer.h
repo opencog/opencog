@@ -26,8 +26,8 @@
 
 #include <opencog/util/RandGen.h>
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 const static int FWD_CHAIN_MAX_APPS = 100;
 const static float FWD_CHAIN_MIN_CONFIDENCE = 0.4f;
@@ -90,5 +90,5 @@ public:
     void printVertexVectorHandles(std::vector< Vertex > hs);
 };
 
-} // namespace reasoning
+}} // namespace opencog::pln
 #endif // FORWARDCHAINER_H_

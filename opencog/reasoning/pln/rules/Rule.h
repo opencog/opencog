@@ -32,8 +32,7 @@ const TruthValue& getTV(pHandle);
 /** Reasoning namespace is being used instead of opencog while
  * tidying up the code.
  */
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /** Rule is a superclass for types of inference rules.
  *
@@ -285,6 +284,6 @@ enum RULE
 
 static const int NUMBER_OF_RULES (((int)Exist)+1); // Exist being the last rule!
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 
 #endif // _INFERENCE_RULE_H

@@ -64,7 +64,7 @@
 using namespace std;
 using namespace boost;
 using namespace opencog;
-using namespace reasoning;
+using namespace opencog::pln;
 
 typedef variant < pHandle, vtree, vtree::iterator_base > NMPrintable;
 

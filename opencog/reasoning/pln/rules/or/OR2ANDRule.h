@@ -22,10 +22,8 @@
 #ifndef OR2ANDRULE_H
 #define OR2ANDRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
 class OR2ANDRule : public Rule
 {
 	OR2ANDRule(iAtomSpaceWrapper *_destTable)
@@ -57,7 +55,6 @@ class OR2ANDRule : public Rule
 		return OR2ANDLink(premiseArray[0]);
 	}
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // OR2ANDRULE_H

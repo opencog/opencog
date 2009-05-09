@@ -22,8 +22,7 @@
 #ifndef STRICTCRISPUNIONRULE_H
 #define STRICTCRISPUNIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /// Requires that all subtrees are separately produced; hence requires HypothesisRule.
 class StrictCrispUnificationRule : public BaseCrispUnificationRule
@@ -35,5 +34,5 @@ public:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // STRICTCRISPUNIONRULE_H

@@ -27,6 +27,9 @@
 
 using namespace std;
 
+namespace opencog {
+namespace pln {
+
 template<class KeyType, class ComparatorType>
 class LookupTable 
 {
@@ -57,5 +60,7 @@ float LookupTable<KeyType, ComparatorType>::lookup(const KeyType &key)
   //return table[key];//inserts the key if it does not exists in table
   return table.find(key)->second;
 };
+
+}} // ~namespace opencog::pln
 
 #endif /*LOOKUPTABLE_*/

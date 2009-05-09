@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 #if 0
 Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
@@ -123,4 +122,4 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 }
 #endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

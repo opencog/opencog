@@ -4,7 +4,7 @@
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
  *
- * Written by XXX
+ * Original written by Ari A. Heljakka
  * Modified by Jared Wigmore <jared.wigmore@gmail.com> 2008
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,13 +94,13 @@ public:
 
     void testSimpleFormulas() {
         printf("testSimpleFormulas()\n");
-        TruthValue* resultTv = reasoning::OldANDFormula().compute(atoms, 2);
+        TruthValue* resultTv = opencog::pln::OldANDFormula().compute(atoms, 2);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::SymmetricANDFormula().compute(atoms, 4);
+        resultTv = opencog::pln::SymmetricANDFormula().compute(atoms, 4);
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::AsymmetricANDFormula().compute(atoms, 2);
+        resultTv = opencog::pln::AsymmetricANDFormula().compute(atoms, 2);
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }
@@ -108,12 +108,12 @@ public:
     void testMultiCompute() {
         printf("testMultiCompute()\n");
         TruthValue** multiResult;
-        multiResult = reasoning::OldANDFormula().multiCompute(atoms, 4);
+        multiResult = opencog::pln::OldANDFormula().multiCompute(atoms, 4);
         for (int i = 0; i < 2; i++) {
             TS_ASSERT(multiResult[i]);
             printf("multiResult[%d] = %s\n", i, multiResult[i]->toString().c_str());
         }
-        TruthValue* resultTv = reasoning::OldANDFormula().compute(multiResult, 2);
+        TruthValue* resultTv = opencog::pln::OldANDFormula().compute(multiResult, 2);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
     }
@@ -128,26 +128,26 @@ public:
         for (int i = 0; i < NUM_ATOMS; i++) {
             defaultTVs[i] = (TruthValue*) &(TruthValue::DEFAULT_TV());
         }
-        resultTv = reasoning::OldANDFormula().compute(defaultTVs, 2);
+        resultTv = opencog::pln::OldANDFormula().compute(defaultTVs, 2);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::SymmetricANDFormula().compute(defaultTVs, 4);
+        resultTv = opencog::pln::SymmetricANDFormula().compute(defaultTVs, 4);
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::AsymmetricANDFormula().compute(defaultTVs, 2);
+        resultTv = opencog::pln::AsymmetricANDFormula().compute(defaultTVs, 2);
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
 
         // run simplecompute with the same SimpleTruthValues. Must get same results...
         printf("======== PHASE 1: SimpleTVs ==========\n");
-        resultTv = reasoning::OldANDFormula().simpleCompute(atoms, 2);
+        resultTv = opencog::pln::OldANDFormula().simpleCompute(atoms, 2);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::SymmetricANDFormula().simpleCompute(atoms, 4);
+        resultTv = opencog::pln::SymmetricANDFormula().simpleCompute(atoms, 4);
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::AsymmetricANDFormula().simpleCompute(atoms, 2);
+        resultTv = opencog::pln::AsymmetricANDFormula().simpleCompute(atoms, 2);
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
         
@@ -158,13 +158,13 @@ public:
             compositeTVs[i] = new CompositeTruthValue(*(atoms[i]), VersionHandle(HYPOTHETICAL, Handle::UNDEFINED));
         }
         // run with the same SimpleTruthValues. Must get same results...
-        resultTv = reasoning::OldANDFormula().compute(compositeTVs, 2);
+        resultTv = opencog::pln::OldANDFormula().compute(compositeTVs, 2);
         TS_ASSERT(resultTv);
         printf("resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::SymmetricANDFormula().compute(compositeTVs, 4);
+        resultTv = opencog::pln::SymmetricANDFormula().compute(compositeTVs, 4);
         TS_ASSERT(resultTv);
         printf("symmetric resultTv = %s\n", resultTv->toString().c_str());
-        resultTv = reasoning::AsymmetricANDFormula().compute(compositeTVs, 2);
+        resultTv = opencog::pln::AsymmetricANDFormula().compute(compositeTVs, 2);
         TS_ASSERT(resultTv);
         printf("asymmetric resultTv = %s\n", resultTv->toString().c_str());
     }

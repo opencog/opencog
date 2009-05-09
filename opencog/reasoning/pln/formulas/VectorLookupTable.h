@@ -26,6 +26,9 @@
 
 using namespace std;
 
+namespace opencog {
+namespace pln {
+
 class VectorLookupTable
 {
 	public:
@@ -42,5 +45,7 @@ class VectorLookupTable
 		float* table;
 		int size;	
 };
+
+}} // ~namespace opencog::pln
 
 #endif /*VECTORLOOKUPTABLE_H_ */

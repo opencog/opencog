@@ -15,7 +15,7 @@
 #include <string>
 #include "../PLNUtils.h"
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 //#define nocase_string std::string //Uncomment if case-sensitivity wanted.
 
@@ -145,6 +145,6 @@ struct FloatXMLValue : XMLvalue<float>
 			if ((node).TagData().name == (nodename))
 
 
-} //namespace reasoning
+}} //namespace opencog::pln
 			
 #endif

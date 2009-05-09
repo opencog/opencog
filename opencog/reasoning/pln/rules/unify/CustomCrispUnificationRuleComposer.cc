@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
@@ -78,4 +77,4 @@ cprintf(3,"Crispu.o2i: OK! Solution vector size=%u\n", (uint) ret.size());
     return ret;
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

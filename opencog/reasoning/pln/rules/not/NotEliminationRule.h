@@ -22,19 +22,17 @@
 #ifndef NOTELIMINATIONRULE_H
 #define NOTELIMINATIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /**
-	@class NotEliminationRule
-	Removes NOTNOTs.
-*/
-#if 0
+ * @class NotEliminationRule
+ *
+ * Removes NOTNOTs.
+ */
 class NotEliminationRule : public Rule
 {
 	NotEliminationRule(iAtomSpaceWrapper *_destTable); 
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // NOTELIMINATIONRULE_H

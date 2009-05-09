@@ -33,8 +33,8 @@ namespace test
 	extern int attachs;
 }
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 int atom_alloc_count=0;
 int inode_alloc_count=0;
 	
@@ -807,5 +807,5 @@ bool atom::forbidLastSubstitution() const
 }
 
 
-} //~namespace reasoning
+}} //~namespace opencog::pln
 

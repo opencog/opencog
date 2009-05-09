@@ -22,11 +22,10 @@
 #ifndef SIMSUBS2RULE_H
 #define SIMSUBS2RULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-#if 0
-/// RHS stays constant, LHS is substed
+/** RHS stays constant, LHS is substed
+ */
 class SimSubstRule2 : public GenericRule<InhSubstFormula>
 {
 public:
@@ -78,7 +77,6 @@ public:
 		return ret;
 	}
 };
-#endif
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // SIMSUBS2RULE_H

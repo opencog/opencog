@@ -4,7 +4,7 @@
 #include <formulas/Formulas.h>
 #include <XMLNodeLoader.h>
 
-extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+extern opencog::pln::iAtomTableWrapper* defaultAtomTableWrapper;
 
 char* XML_DATA = 
 "<ListLink>"
@@ -88,7 +88,7 @@ char* types_1[] = {
     
 namespace haxx
 {
-    extern reasoning::iAtomTableWrapper* defaultAtomTableWrapper;
+    extern opencog::pln::iAtomTableWrapper* defaultAtomTableWrapper;
 }
 
 class XMLNodeLoaderUTest : public CxxTest::TestSuite{
@@ -99,7 +99,7 @@ class XMLNodeLoaderUTest : public CxxTest::TestSuite{
     }
 
     void testLoadXMLInput(){
-        using namespace reasoning;
+        using namespace opencog::pln;
         DirectATW::getInstance();
         haxx::defaultAtomTableWrapper = &NormalizingATW::getInstance();
         Handle U = LoadXMLInput(haxx::defaultAtomTableWrapper, XML_DATA);

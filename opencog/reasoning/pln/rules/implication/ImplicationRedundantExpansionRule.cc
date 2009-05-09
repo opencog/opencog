@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /*
 Rule::setOfMPs ImplicationRedundantExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
@@ -40,4 +39,4 @@ BoundVertex ImplicationRedundantExpansionRule::compute(const vector<Vertex>& pre
 }
 */
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

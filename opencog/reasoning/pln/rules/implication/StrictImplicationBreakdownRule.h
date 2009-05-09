@@ -22,8 +22,7 @@
 #ifndef STRICTIMPBREAKDOWNRULE_H
 #define STRICTIMPBREAKDOWNRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /// (x, x->A) => A.
 class StrictImplicationBreakdownRule : public Rule
@@ -38,5 +37,5 @@ public:
 
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // STRICTIMPBREAKDOWNRULE_H

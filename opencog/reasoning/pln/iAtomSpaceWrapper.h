@@ -24,10 +24,10 @@
 
 #include "AtomLookupProvider.h"
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
-struct iAtomSpaceWrapper : public reasoning::AtomLookupProvider
+struct iAtomSpaceWrapper : public opencog::pln::AtomLookupProvider
 {
     virtual pHandle addAtom(tree<Vertex>&, const TruthValue& tvn,
                             bool fresh, bool managed = true)=0;
@@ -41,6 +41,6 @@ struct iAtomSpaceWrapper : public reasoning::AtomLookupProvider
     virtual unsigned int getUniverseSize() const=0;
 };
 
-}
+}} // namespace opencog::pln
 
 #endif

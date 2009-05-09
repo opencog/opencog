@@ -22,8 +22,7 @@
 #ifndef QUANTIFIERRULE_H
 #define QUANTIFIERRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 template<typename FormulaType>
 class QuantifierRule : public Rule
@@ -81,5 +80,5 @@ typedef QuantifierRule<FORALLFormula> FORALLRule;
 typedef QuantifierRule<EXISTFormula> ExistRule;
 typedef QuantifierRule<PredicateTVFormula> PLNPredicateRule;
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // QUANTIFIERRULE_H

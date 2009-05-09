@@ -22,8 +22,7 @@
 #ifndef ANDRULEARITYFREERULE_H
 #define ANDRULEARITYFREERULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /**
 	@class ArityFreeANDRule
@@ -49,6 +48,6 @@ public:
 	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const=0;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // ANDRULEARITYFREERULE_H
 

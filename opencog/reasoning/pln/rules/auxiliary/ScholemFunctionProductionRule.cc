@@ -32,15 +32,14 @@ namespace haxx
 {
 map<string, map<Handle, Handle> > scholemFunctions;
 extern bool AllowFW_VARIABLENODESinCore;
-reasoning::BITNodeRoot* bitnoderoot;
+opencog::pln::BITNodeRoot* bitnoderoot;
 
 /// \todo This data must persist even if the BITNodeRoot is deleted.
 //extern map<Handle,vector<Handle> > inferred_from;
-//extern map<Handle,reasoning::Rule*> inferred_with;
+//extern map<Handle,opencog::pln::Rule*> inferred_with;
 }
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
@@ -134,4 +133,4 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
             haxx::scholemFunctions*/
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

@@ -22,8 +22,7 @@
 #ifndef BASECRISPUNIONRULE_H
 #define BASECRISPUNIONRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class BaseCrispUnificationRule : public Rule
 {
@@ -54,5 +53,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // BASECRISPUNIONRULE_H

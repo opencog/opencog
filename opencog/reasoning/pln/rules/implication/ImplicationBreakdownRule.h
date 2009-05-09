@@ -22,10 +22,9 @@
 #ifndef IMPBREAKDOWNRULE_H
 #define IMPBREAKDOWNRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
-/// (x->A) => A.
+/** (x->A) => A. */
 class ImplicationBreakdownRule : public Rule
 {
 public:
@@ -37,5 +36,5 @@ public:
 	bool validate2				(MPs& args) const { return true; }
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // IMPBREAKDOWNRULE_H

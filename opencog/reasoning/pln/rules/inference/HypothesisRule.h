@@ -22,8 +22,7 @@
 #ifndef HYPOTHESISRULE_H
 #define HYPOTHESISRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class HypothesisRule : public Rule
 {
@@ -44,5 +43,5 @@ public:
 	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // HYPOTHESISRULE_H

@@ -24,7 +24,7 @@
 
 #ifndef USE_PSEUDOCORE
 
-namespace reasoning
+namespace opencog { namespace pln
 {
 	
 class InferenceTaskParameters;
@@ -54,7 +54,7 @@ public:
 	bool ok();
 };
 
-}
+}}
 
 #endif //#ifndef USE_PSEUDOCORE
 

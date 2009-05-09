@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 /** ToDo: Update
 bool ArityFreeANDRule::asymmetric(Handle* A, Handle* B) const
@@ -145,4 +144,4 @@ void ArityFreeANDRule::DistinguishNodes(const vector<Vertex>& premiseArray, set<
             ).insert(_v2h(premiseArray[pi]));
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

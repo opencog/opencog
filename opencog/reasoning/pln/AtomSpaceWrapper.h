@@ -55,8 +55,9 @@
 //#define GET_ATW ((AtomSpaceWrapper*) ::haxx::defaultAtomSpaceWrapper)*/
 #define GET_ATW ((AtomSpaceWrapper*) ASW())
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
+
 //! Construct a vtree around Handle h
 vtree make_vtree(pHandle h);
 
@@ -535,6 +536,6 @@ public:
 }; */
 
 
-} //~namespace reasoning
+}} //~namespace opencog::pln
 
 #endif

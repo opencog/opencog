@@ -28,8 +28,7 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
@@ -292,4 +291,4 @@ LOG(3, "ANDRule::compute ok.");
     }
 }
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {

@@ -28,10 +28,11 @@
 #include "../BackInferenceTreeNode.h"
 
 using namespace std;
-namespace reasoning
-{ 
 
-Rule::Rule(reasoning::iAtomSpaceWrapper *_destTable,
+namespace opencog {
+namespace pln {
+
+Rule::Rule(opencog::pln::iAtomSpaceWrapper *_destTable,
             bool _FreeInputArity,
             bool _computable,
             std::string _name)
@@ -226,4 +227,5 @@ void Rule::CloneArgs(const Rule::MPs& src, Rule::MPs& dest)
         dest.push_back(Btr<BoundVTree>(bbvt->Clone()));
 }
 
-} //namespace reasoning
+} //namespace opencog { namespace pln {
+}

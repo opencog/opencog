@@ -22,9 +22,8 @@
 #ifndef SUBSETEVALRULE_H
 #define SUBSETEVALRULE_H
 
-namespace reasoning
-{
-    /*
+namespace opencog { namespace pln {
+
 class SubsetEvalRule
 {
     Handle domain;
@@ -49,6 +48,6 @@ public:
 
     BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
 };
-    */
-} // namespace reasoning
+
+}} // namespace opencog { namespace pln {
 #endif // SUBSETEVALRULE_H

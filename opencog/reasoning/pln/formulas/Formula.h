@@ -38,8 +38,8 @@
 
 using namespace opencog;
 
-namespace reasoning
-{
+namespace opencog {
+namespace pln {
 
 template<typename TVType, typename ResultType>
 class ArityFreeFormula
@@ -189,5 +189,5 @@ public:
 };
 
 
-} //~namespace
+}} //~namespace opencog::pln
 #endif

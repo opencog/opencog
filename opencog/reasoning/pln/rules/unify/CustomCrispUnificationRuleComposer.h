@@ -22,8 +22,7 @@
 #ifndef CUSTOMCRISPUNIONCOMPOSERRULE_H
 #define CUSTOMCRISPUNIONCOMPOSERRULE_H
 
-namespace reasoning
-{
+namespace opencog { namespace pln {
 
 class CustomCrispUnificationRuleComposer : public BaseCrispUnificationRule
 {
@@ -49,5 +48,5 @@ public:
 	NO_DIRECT_PRODUCTION;
 };
 
-} // namespace reasoning
+}} // namespace opencog { namespace pln {
 #endif // CUSTOMCRISPUNIONCOMPOSERRULE_H

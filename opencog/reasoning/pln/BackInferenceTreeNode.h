@@ -19,16 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file
+ *
+ * BackInferenceTree related code.
+ * Original prototype code by Ari A. Heljakka Sep/2006.
+ * Port by Joel Pitt 2008.
+ * 
+ * @author Ari A. Heljakka
+ * @author Joel Pitt
+ * @author Jared Wigmore
+ * @date 2006-2009
+ *
+ */
 #ifndef BACK_INFERENCE_TREE_NODE
 #define BACK_INFERENCE_TREE_NODE
 
 #define FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS 0
-
-/**
- * Original prototype code by Ari A. Heljakka Sep/2006.
- * Port by Joel Pitt 2008.
- *
- */
 
 #include <stack>
 #include <boost/bind.hpp>
@@ -37,13 +43,12 @@
 #include "rules/RuleApp.h"
 #include "utils/NMPrinter.h"
 
-namespace reasoning
-{
-class BITNode;
-class BITNodeRoot;  // Root of a BIT, controls inference
-class RuleProvider; // Provide rules when expanding the tree
+namespace opencog {
+namespace pln {
 
-enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };
+class BITNode;
+class BITNodeRoot;  //!< Root of a BIT, controls inference
+class RuleProvider; //!< Provide rules when expanding the tree
 
 struct BITNode_fitness_comp : public binary_function<BITNode*, BITNode*, bool>
 {
@@ -194,6 +199,9 @@ class BITNode
 	friend class BITNodeRoot;
 	friend class ExplicitlyEvaluatedBITNode;
 protected:
+    /** Whether to allow sibling spawning */
+    enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };
+
 	/// Contains the target of this inference state node
 	meta bound_target, raw_target;
 
@@ -554,8 +562,8 @@ public:
      * Basic usage: 
      *
      * \code
-     * Btr<BITNodeRoot> state = reasoning::PLNEvaluator::
-     *     BIT_evaluate(reasoning::InferenceTaskParameters(NULL,target));
+     * Btr<BITNodeRoot> state = opencog::pln::PLNEvaluator::
+     *     BIT_evaluate(opencog::pln::InferenceTaskParameters(NULL,target));
      * // or you can create the BITNodeRoot directly...
 	 * state->infer(ProofResources, minConfidenceForStorage, minConfidenceForAbort);
      * \endcode
@@ -729,6 +737,6 @@ public:
 		}
 	};
 
-}
+}}
 
 #endif
