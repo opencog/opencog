@@ -5,6 +5,8 @@ scm
 ; and import these into opencog. Then WSD run processing on each one, as
 ; needed.
 ;
+; Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+;
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
 
