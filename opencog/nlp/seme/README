@@ -48,6 +48,7 @@ Naively, a concept would seem to have the followng parts:
 -- an OpenCyc tag ... etc. you get the idea.
 -- basic ontological links -- is-a, has-a, part-of, etc.
 -- prepositional relations (next-to, inside-of, etc)
+-- Context tag(s). See section "Context" below.
 
 What is a "linguistic expression complex"?  It deals with the idea that
 most concepts are not expressible as single words: for example, "Mary
@@ -61,6 +62,7 @@ Thus, a "linguistic expression complex" would consist of:
 -- a part-of-speech tag, to provide a rough linguistic categorization
 -- a collection of disjunct tags, representing possible linguistic
    use of the WordNode to represent this concept.
+
 
 Promoting Words to Concepts
 ---------------------------
@@ -124,17 +126,24 @@ they are, then the two different word-instances can be assumed to refer
 to the same concept; relationships can then be merged.
 
 
-Concrete Data Representation
-----------------------------
-Let's now look at how to represent some of these ideas concretely, in
-terms of OpenCog hypergraphs.
+Context
+-------
+Almost all facts are contextual. You can't just say "John has a red
+ball" and promote that to a fact. You must presume a context of some
+sort: "Someone said during an IRC chat that John has a red ball", or,
+"While reading Emily Bronte, I learned that John had a red ball."  The
+context is needed for two reasons:
 
-First, a SemeNode wil be used as the main anchor point. A SemeNode is
-used, instead of a ConceptNode, so as to leave ConceptNode open for 
-other uses; the goal here is to minimize confusion/cross-talk between
-this and other parts of OpenCog.
+1) When obtaining additional info within the same context, it is 
+simpler/safer to deduce references, e.g. that the John in the second
+sentence is the same John as in the first sentence.
 
+2) When obtaining additional info within a different context, it is
+simpler/safer to assume that references are distinct: that, for example,
+"John" an an Emily Dickinson novel is not the same "John" in an Emily
+Bronte novel.
 
+Thus, it makes sense to tag recently formed SemeNodes with a context tag.
 
 
 A priori vs. Deduced Knowledge
@@ -260,6 +269,65 @@ Other problems: Consider the sentences:
 
 One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
+
+
+Concrete Data Representation
+----------------------------
+Let's now look at how to represent some of these ideas concretely, in
+terms of OpenCog hypergraphs.
+
+First, a SemeNode wil be used as the main anchor point. A SemeNode is
+used, instead of a ConceptNode, so as to leave ConceptNode open for 
+other uses; the goal here is to minimize confusion/cross-talk between
+this and other parts of OpenCog.
+
+Initially, when first creating a SemeNode, it should probably be given
+a name that is a copy of the WordInstanceNode that inspired it: "John 
+threw a red ball" leads to 
+
+    SemeNode "ball@634a32ebc"
+
+The idea that its red would then be:
+
+    EvaluationLink
+       DefinedLinguisticRelationNode "amod"
+       ListLink
+          SemeNode "ball@634a32ebc"
+          WordNode "red"
+
+At some point, we need to convert the above to:
+
+    EvaluationLink
+       SemanticRelationNode "color_of@6543"
+       ListLink
+          SemeNode "ball@634a32ebc"
+          SemeNode "red@a47343df"
+
+This would need to work by recognition that "amod" together with "red"
+implies that "red" is a color. Could probably be done with a rule. 
+
+   IF amod($X,$Y) ^ is-a($X, object) ^ is-a($Y, color)
+   THEN color_of($X,$Y) ^ &delete_link(amod($X,$Y))
+
+How do we bootstrap to there? Via upper-ontology-like statments:
+"Red is a color" and "A ball is an object".   At some later, more
+abstract stage, one must ask: "Is a ball the kind of object that
+can have a color?"; but at first, we shall start naively, and 
+assume that it is.
+
+
+Contextual representation
+-------------------------
+
+
+Boostraping
+-----------
+-- read sentence.
+-- process for triples
+-- create initial SemeNodes
+-- scan for contextual references
+
+
 
 
 
