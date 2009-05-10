@@ -13,7 +13,7 @@ is meant to be more general, encompassing what is called "reference
 resolution" (including pronoun resolution) as well.
 
 The primary challanges of seme extraction are:
-1) Constructing a data representation that is ameanable to reasoning,
+1) Constructing a data representation that is amenable to reasoning,
    and to question answering. 
 2) Recognising when two different semes refer to the same concept,
    (so that they can be merged)
@@ -23,9 +23,28 @@ The primary challanges of seme extraction are:
    when encountering a new word, to determine that it is, for example, a
    color.
 
-ToDo: Reification of triples ...
-Re-examin Markov Logic Networks ...
-Phrasal verbs vs. prepositional phrases
+Why semes?
+----------
+The notion of a seme is introduced here to solve a "simple" technical
+problem in knowledge representation.  The goal of using "semes" is to
+move away from using words and/or word-instances to represent "things".
+Thus, "Mary's shoes" and "Tom's shoes" would be two different semes 
+(although both are related to the word "shoe").  
+
+Similarly, "Mary had some shoes. The shoes were red."  has two distinct 
+word-instances: the word-instance "shoe" in the first sentence, and the
+word instance "shoe" in the second sentence.  By using semes, we can 
+collapse these two word-instances into one seme, without getting tangled
+with the fact that these two different word-instances of "shoe" are 
+involved in different syntactic relations in different sentences 
+(... sentences possibly uttered by different individuals at different
+times!)
+
+The "semes" are meant to be abstractions derived from words, but still
+fairly closely related to them.  Thus, for example, if there's a 
+RelEx2Frame structure that connects two words, then one could have exactly
+the same structure connecting two semes. 
+
 
 What is a Concept?
 ------------------
@@ -412,6 +431,11 @@ Create the following nes atoms types:
 SemeNode
 ContextNode
 SemanticRelationshipNode
+
+
+ToDo: Reification of triples ...
+Re-examin Markov Logic Networks ...
+Phrasal verbs vs. prepositional phrases
 
 
 References:
