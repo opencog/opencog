@@ -2,7 +2,8 @@
 #
 # load-wsd.sh
 #
-# Load code for collecting WSD satatistics,
+# Load code for collecting WSD statistics, via batch-processing of
+# files.
 #
 
 HOST=localhost

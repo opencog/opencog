@@ -3,7 +3,7 @@ scm
 ; wsd-process.scm
 ; Work through a bunch of RelEx files that are in the compact-file-format,
 ; and import these into opencog. Then WSD run processing on each one, as
-; needed.
+; needed. This is a batch-processing script.
 ;
 ; Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;

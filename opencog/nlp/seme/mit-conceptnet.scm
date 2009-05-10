@@ -2,8 +2,8 @@ scm
 ;
 ; mit-conceptnet.scm
 ;
-; Load and process declarative "commonsense" sentences from the MIT
-; ConceptNet project. 
+; Load and batch-process declarative "commonsense" sentences from 
+; the MIT ConceptNet project. 
 ;
 ; Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
