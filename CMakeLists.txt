@@ -29,7 +29,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     # no debugging advantage that I'm aware of, and 2) -g does not hurt
     # performance in any way that I'm aware of.
     SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
   ENDIF (APPLE)
   
   #Nil: added -Wno-deprecated to avoid multiple warnings
@@ -87,20 +87,22 @@ IF (UnixODBC_FOUND)
 	SET(ODBC_FOUND 1)
 	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
 	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
+	SET(ODBC_DIR_MESSAGE "UnixODBC was found.")
 ELSE (UnixODBC_FOUND)
 	SET(ODBC_FOUND 0)
 	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
-	MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 ENDIF (UnixODBC_FOUND)
+MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # Gnu Guile scheme interpreter
 FIND_PACKAGE(Guile 1.8.3)
 IF (GUILE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
+	SET(GUILE_DIR_MESSAGE "Guile was found.")
 ELSE (GUILE_FOUND)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
-	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND)
+MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
@@ -114,11 +116,13 @@ IF (EXPAT_FOUND)
 	ADD_DEFINITIONS(-DHAVE_EXPAT)
 ENDIF (EXPAT_FOUND)
 
-FIND_PACKAGE(LinkGrammar)
-IF (LINK_GRAMMAR_FOUND)
-	ADD_DEFINITIONS(-DHAVE_LINK_GRAMMAR)
-	ADD_DEFINITIONS(-DLINK_GRAMMAR_DATA_DIR=\\"${LINK_GRAMMAR_DATA_DIR}/\\")
-ENDIF (LINK_GRAMMAR_FOUND)
+# Not used at this time, its incompatible with the current code.
+#
+# FIND_PACKAGE(LinkGrammar)
+# IF (LINK_GRAMMAR_FOUND)
+# 	ADD_DEFINITIONS(-DHAVE_LINK_GRAMMAR)
+# 	ADD_DEFINITIONS(-DLINK_GRAMMAR_DATA_DIR=\\"${LINK_GRAMMAR_DATA_DIR}/\\")
+# ENDIF (LINK_GRAMMAR_FOUND)
 
 # XML-RPC and Ubigraph client library, used by the ubigraph module
 FIND_PACKAGE(LibUbiGraphClient)
