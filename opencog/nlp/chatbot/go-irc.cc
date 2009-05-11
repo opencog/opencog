@@ -38,7 +38,7 @@
 static const char *channel = "#opencog";
 static const char *network = "irc.freenode.net";
 static const int irc_port = 6667;
-static const char *vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1";
+static const char *vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1.1";
 static const char *bot_nick = "cogita-bot";
 static const char *bot_attn1 = "cogita-bot:";
 static const char *bot_attn2 = "cogita:";
@@ -214,6 +214,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 /** 
  * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
  * package libtclap-dev in Ubuntu.
+ * However, its probably more portable to use plain-old getopt,
+ * or maybe getopt_long, lets keep the dependency list minimal.
  * @todo use Config class to store defaults, and retrieve opencog.conf vars.
  */
 int main (int argc, char * argv[])
