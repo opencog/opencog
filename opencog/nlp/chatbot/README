@@ -61,8 +61,8 @@ a parse server on port 4444: it will read plain-text input, and generate
 parsed text in opencog format.  The chatbot needs this server to process
 text.
 
-This is most easiloy done by starting the cogserver using the 
-lib/opencog4.conf configuration file, which sets the correct port,
+This is most easily done by starting the cogserver using the 
+lib/opencog-chatbot.conf configuration file, which sets the correct port,
 silences the opencog prompt, and loads the needed scheme files.
 
 In addition, triples-processing, described in step 4 below, requires

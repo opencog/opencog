@@ -65,6 +65,12 @@ namespace opencog
 
 class HopfieldServer;
 
+/** HopfieldOptions parses and stores command line arguments
+ *
+ * @todo replace usage of getopt with tclap http://tclap.sourceforge.net/ -
+ * package libtclap-dev in Ubuntu.
+ * @todo get default values from Config/opencog.conf
+ */
 class HopfieldOptions
 {
 private:

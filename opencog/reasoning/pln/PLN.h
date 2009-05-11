@@ -19,8 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** General PLN header.
+/** @namespace opencog::pln
  *
+ * @todo Replace the numerous heap allocated TruthValue pointers throughout the
+ * Rules with references instead (Particular in the rules).
  * @defgroup PLN Probabilistic Logic Networks
  */
 

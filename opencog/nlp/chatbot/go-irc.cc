@@ -204,6 +204,11 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	return 0;
 }
 
+/** 
+ * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
+ * package libtclap-dev in Ubuntu.
+ * @todo use Config class to store defaults, and retrieve opencog.conf vars.
+ */
 int main (int argc, char * argv[])
 {
 	whirr_sock_setup();
@@ -217,7 +222,7 @@ int main (int argc, char * argv[])
 
 	// The login-name, nick, etc. are there only to make it look 
 	// pretty on IRC ident.
-	conn.start (network, irc_port, "cogita-bot", login,
+	conn.start (network, irc_port, "p-bot", login,
 	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
