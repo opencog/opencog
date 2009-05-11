@@ -105,11 +105,11 @@ is as follows:
    the user's IRC nick, and ''text'' is what the user entered.  The
    return value from this command is sent back to the IRC channel.
    Communications is stateless and blocking: cogita closes the socket
-   to indeicate end-of-messsage, and expects that the cog server will
-   to the same. Only after the cog-server closes its socket does cogita
+   to indicate end-of-messsage, and expects that the cog server will
+   do the same. Only after the cog-server closes its socket does cogita
    reply on the IRC channel.
 
-   IRC.cc,.h:  C++ cl;ass for generic IRC communications.
+   IRC.cc,.h:  C++ class for generic IRC communications.
    go-irc.cc:  the main guts of the cogita server
    whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.  
 

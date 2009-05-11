@@ -43,9 +43,9 @@ static const char *bot_nick = "cogita-bot";
 static const char *bot_attn1 = "cogita-bot:";
 static const char *bot_attn2 = "cogita:";
 static const char *bot_attn3 = "cog:";
-static size_t lattn1 = strlen(bot_attn1) + 1;
-static size_t lattn2 = strlen(bot_attn2) + 1;
-static size_t lattn3 = strlen(bot_attn3) + 1;
+static size_t lattn1 = strlen(bot_attn1);
+static size_t lattn2 = strlen(bot_attn2);
+static size_t lattn3 = strlen(bot_attn3);
 
 /**
  * Join channel shortly after logging into the irc server.
@@ -97,9 +97,9 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	int priv = 0;
 	if (!strcmp (ird->target, bot_nick)) {priv = 1; start = params+1; }
 
-	if (!strncmp (&params[1], bot_attn1, lattn1)) start = params + lattn1;
-	else if (!strncmp (&params[1], bot_attn2, lattn2)) start = params+lattn2;
-	else if (!strncmp (&params[1], bot_attn3, lattn3)) start = params+lattn3;
+	if (!strncmp (&params[1], bot_attn1, lattn1)) start = params+1 + lattn1;
+	else if (!strncmp (&params[1], bot_attn2, lattn2)) start = params+1+ lattn2;
+	else if (!strncmp (&params[1], bot_attn3, lattn3)) start = params+1+ lattn3;
 	else if (!strncmp (params, ":cog-sh:", 8)) { start = params+8; cmd = SHELL_CMD; }
 	else if (!strncmp (params, ":scm:", 5)) { start = params+5; cmd = SCM_CMD; }
 
