@@ -36,9 +36,9 @@ guile       -- Embedded scheme interperter
                http://www.gnu.org/software/guile/guile.html
                Debian/Ubuntu package guile-1.8-dev
 
-iodbc       -- Generic SQL Database client access libraries
-               http://www.iodbc.org/
-               Debian/Ubuntu packages iodbc-dev or unixodbc-dev
+unixODBC    -- Generic SQL Database client access libraries
+               http://www.unixodbc.org/
+               Debian/Ubuntu packages unixodbc-dev
 
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev

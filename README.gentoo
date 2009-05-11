@@ -23,6 +23,6 @@ the following commands:
 
 Opencog also _optionally_ depends on the following packages:
 
-  dev-db/libiodbc dev-scheme/guile sci-libs/gsl
+  dev-db/unixODBC dev-scheme/guile sci-libs/gsl
 
 ----------------------------------------------------------
