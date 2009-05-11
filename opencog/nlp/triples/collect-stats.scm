@@ -6,7 +6,7 @@ scm
 ;
 ; This will run the preposition-triple rules through the forward
 ; chainer, and then go through the results, updating the 
-; CountTruthValue assoiated with each, and then storing the 
+; CountTruthValue associated with each, and then storing the 
 ; updated count in the OpenCog persistence backend.
 ;
 ; Linas Vepstas April 2009

@@ -20,12 +20,14 @@
 ; this node will eventually have triples built from them.
 (define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
-; copy-new-sent-to-triple-anchor -- 
+; copy-sents-to-triple-anchor -- 
+; Copy a list of sentences to the input triple processing anchor
+; Here, sent-list should be a list of SentenceNodes
 ; This is slightly tricky, because the triples anchor is expecting
 ; not SentenceNodes, but ParseNodes.  So for each sentence, we have
 ; to get the parses, and attach those.
 ;
-(define (copy-new-sent-to-triple-anchor)
+(define (copy-sents-to-triple-anchor sent-list)
 
 	;; Attach all parses of a sentence to the anchor.
 	(define (attach-parses sent)
@@ -41,7 +43,7 @@
 		)
 	)
 	;; Attach all parses of all sentences to the anchor.
-	(for-each attach-parses (get-new-parsed-sentences))
+	(for-each attach-parses sent-list)
 )
 
 ; Delete sentences that were wating for triples processing
@@ -201,7 +203,7 @@
 	)
 
 	; Run the triples processing.
-	(copy-new-sent-to-triple-anchor)
+	(copy-sents-to-triple-anchor (get-new-parsed-sentences))
 	(create-triples)
 	(delete-triple-anchor-links)
 
