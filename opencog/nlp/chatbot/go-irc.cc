@@ -229,7 +229,7 @@ int main (int argc, char * argv[])
 
 	// The login-name, nick, etc. are there only to make it look 
 	// pretty on IRC ident.
-	conn.start (network, irc_port, "p-bot", login,
+	conn.start (network, irc_port, bot_nick, login,
 	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
