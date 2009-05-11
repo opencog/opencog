@@ -6,9 +6,10 @@ ENDIF (COMMAND CMAKE_POLICY)
 
 PROJECT(OPENCOG)
 
-#compiling mode, Debug or Release
-SET(CMAKE_BUILD_TYPE Debug)
-# SET(CMAKE_BUILD_TYPE Release)
+############################
+#Comment to be in debug mode
+############################
+SET(CMAKE_BUILD_TYPE Release)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -18,27 +19,28 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-    IF (APPLE) 
-		SET(CMAKE_C_FLAGS "-Wall")
-        SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-        SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-	ELSE (APPLE)
-        SET(CMAKE_C_FLAGS "-Wall -fPIC")
-        # Linas: Change debug flags to -O2 since I think that 1) -O0 offers
-        # no debugging advantage that I'm aware of, and 2) -g does not hurt
-        # performance in any way that I'm aware of.
-        SET(CMAKE_C_FLAGS_DEBUG "-O2 -g -fstack-protector")
-        SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-	ENDIF (APPLE)
+  IF (APPLE) 
+    SET(CMAKE_C_FLAGS "-Wall")
+    SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+  ELSE (APPLE)
+    SET(CMAKE_C_FLAGS "-Wall -fPIC")
+    # Linas: Change debug flags to -O2 since I think that 1) -O0 offers
+    # no debugging advantage that I'm aware of, and 2) -g does not hurt
+    # performance in any way that I'm aware of.
+    SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector")
+    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+  ENDIF (APPLE)
+  
+  #Nil: added -Wno-deprecated to avoid multiple warnings
+  #due to hash_map which is deprecated in gcc 4.3
+  #note that when replacing hash_map by unordered_map
+  #it results in other warnings explaining that C++0x support is still
+  #experimental, which is why I let hash_map for now
+  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated")
 
-        #Nil: added -Wno-deprecated to avoid multiple warnings
-        #due to hash_map which is deprecated in gcc 4.3
-        #note that when replacing hash_map by unordered_map
-        #it results in other warnings explaining that C++0x support is still
-        #experimental, which is why I let hash_map for now
-	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated")
-	SET(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
-	SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+  SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+  SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # check dependencies
