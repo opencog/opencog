@@ -564,10 +564,16 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
             }
         }
     }
-    if (atom->getIncomingSet()) {
-        logger().warn("AtomTable.extract(): attempting to extract atom with non-empty incoming set: %s\n", atom->toShortString().c_str());
-        for (HandleEntry* it = atom->getIncomingSet(); it != NULL; it = it->next) {
-            logger().warn("\t%s\n", TLB::getAtom(it->handle)->toShortString().c_str());
+    if (atom->getIncomingSet())
+    {
+        logger().warn("AtomTable.extract(): "
+           "attempting to extract atom with non-empty incoming set: %s\n",
+           atom->toShortString().c_str());
+        for (HandleEntry* it = atom->getIncomingSet(); 
+             it != NULL; it = it->next)
+        {
+            logger().warn("\tincoming: %s\n", 
+                 TLB::getAtom(it->handle)->toShortString().c_str());
         }
         atom->unsetRemovalFlag();
         return result;
