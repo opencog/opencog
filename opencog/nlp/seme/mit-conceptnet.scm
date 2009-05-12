@@ -48,6 +48,7 @@ scm
 			(system (string-join (list "echo done cff: \"" filename "\"")))
 			(system "date")
 			(system (string-join (list "mv \"" fullname "\" \"" donename "\"") ""))
+			(do-seme-processing)
 		)
 	)
 	
