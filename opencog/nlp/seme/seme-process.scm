@@ -17,6 +17,9 @@ scm
 		(get-new-parsed-sentences)
 	)
 
+	; (fire-all-triple-rules)
+	;(delete-sentences)
+
 )
 
 .

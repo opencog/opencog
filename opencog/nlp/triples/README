@@ -754,7 +754,8 @@ Next step:
        cat opencog/persist/atom.sql | psql triples
 -- Run cogserver
 -- open the database created above
--- Edit file-process.scm and change file patch to parsed sentences.
+-- Edit nlp/seme/config.scm and change file patch to parsed sentences.
+   xx xx move these docs to the seme directory
 -- run load.sh
 -- Enter the scheme shell
 

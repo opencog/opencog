@@ -51,9 +51,11 @@ scm
 			(do-seme-processing)
 		)
 	)
+
+	(define allfiles (list-files input-dir))
 	
-	(for-each process-file
-		(take (list-files input-dir) num-to-do)
+	(if (not (eq? allfiles '()))
+		(for-each process-file (take allfiles num-to-do))
 	)
 )
 

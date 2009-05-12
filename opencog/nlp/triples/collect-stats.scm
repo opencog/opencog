@@ -15,8 +15,9 @@ scm
 ; (use-modules (ice-9 popen))
 
 ; --------------------------------------------------------------
-; cog-atom-incr
-; Increment count truth value on "atom" by "cnt"
+;
+; cog-atom-incr --  Increment count truth value on "atom" by "cnt"
+;
 ; If the current truth value on the atom is not a CountTruthValue,
 ; then the truth value is replaced by a CountTruthValue, with the 
 ; count set to "cnt".
@@ -44,7 +45,9 @@ scm
 )
 
 ; --------------------------------------------------------------
-; process-rule
+;
+; process-rule -- apply an ImplicationLink
+;
 ; Given an ImplicationLink, apply the implication on the atom space.
 ; This may generate a list of atoms. Take that list, and manually
 ; store it in the database.
