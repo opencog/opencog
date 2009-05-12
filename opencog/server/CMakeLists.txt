@@ -53,9 +53,9 @@ ELSE (GUILE_FOUND)
 ENDIF (GUILE_FOUND)
 
 # to ease testing/debugging modules on the source tree
-IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+# IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty:${OPENCOG_BINARY_DIR}/opencog/ubigraph:${OPENCOG_BINARY_DIR}/opencog/dynamics/attention:${OPENCOG_BINARY_DIR}/opencog/guile:${OPENCOG_BINARY_DIR}/opencog/reasoning/pln:${OPENCOG_BINARY_DIR}/opencog/nlp/parse:${OPENCOG_BINARY_DIR}/opencog/nlp/wsd:${OPENCOG_BINARY_DIR}/opencog/persist:${OPENCOG_BINARY_DIR}/opencog/query:${OPENCOG_BINARY_DIR}/opencog/server:${OPENCOG_BINARY_DIR}/opencog/shell:${OPENCOG_BINARY_DIR}/opencog/util)
-ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+# ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 ADD_EXECUTABLE(cogserver
 	CogServerMain
