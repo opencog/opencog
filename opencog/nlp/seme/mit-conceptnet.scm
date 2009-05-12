@@ -12,17 +12,6 @@ scm
 (use-modules (ice-9 popen))
 
 ; ---------------------------------------------------------------------
-; Read in data from RelEx "compact file format" file, convert it to
-; opencog format (using the perl script "cff-to-opencog.pl"), and
-; then load it into opencog.
-;
-(define (load-cff-bz2-data filename)
-	(exec-scm-from-cmd 
-		(string-join (list "cat \"" filename "\" | bunzip2 | " cff-to-opencog-exe) "")
-	)
-)
-
-; ---------------------------------------------------------------------
 ; Perform MIT ConceptNet concept extraction processing.
 ;
 ; Process 'num-to-do' files in the input dir, and move them to done-dir
