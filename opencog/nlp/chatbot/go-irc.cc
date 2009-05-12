@@ -27,25 +27,23 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <getopt.h>
+
+#include <string>
+#include <vector>
+#include <set>
+
+#include <boost/foreach.hpp>
+#define foreach BOOST_FOREACH
+
 #include "IRC.h"
+#include "CogitaConfig.h"
 
 #include "whirr-sockets.h"
 
-/**
- * Configuration paramters. These should be sucked from argv[]
- * instead of being hard-coded.
- */
-static const char *channel = "#opencog";
-static const char *network = "irc.freenode.net";
-static const int irc_port = 6667;
-static const char *vstring = "La Cogita OpenCog (http://opencog.org) chatbot version 0.1.1";
-static const char *bot_nick = "cogita-bot";
-static const char *bot_attn1 = "cogita-bot:";
-static const char *bot_attn2 = "cogita:";
-static const char *bot_attn3 = "cog:";
-static size_t lattn1 = strlen(bot_attn1);
-static size_t lattn2 = strlen(bot_attn2);
-static size_t lattn3 = strlen(bot_attn3);
+using namespace opencog::chatbot;
+
+CogitaConfig cc;
 
 /**
  * Join channel shortly after logging into the irc server.
@@ -59,13 +57,13 @@ int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 		ird->nick, ird->ident, ird->host, ird->target);
 
 	sleep(1);
-	conn->join (channel);
+	conn->join (cc.ircChannels[0].c_str());
 	printf("duude done join\n");
 	sleep(2);
-	conn->notice (channel, "ola");
+	conn->notice (cc.ircChannels[0].c_str(), "ola");
 	printf("duude done notice\n");
 	sleep(2);
-	conn->privmsg (channel, "here we are");
+	conn->privmsg (cc.ircChannels[0].c_str(), "here we are");
 	printf("duude done priv\n");
 	return 0;
 }
@@ -95,13 +93,23 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	const char * start = NULL;
 	int priv = 0;
-	if (!strcmp (ird->target, bot_nick)) {priv = 1; start = params+1; }
+	if (!strcmp (ird->target, cc.nick.c_str())) {priv = 1; start = params+1; }
 
-	if (!strncmp (&params[1], bot_attn1, lattn1)) start = params+1 + lattn1;
-	else if (!strncmp (&params[1], bot_attn2, lattn2)) start = params+1+ lattn2;
-	else if (!strncmp (&params[1], bot_attn3, lattn3)) start = params+1+ lattn3;
-	else if (!strncmp (params, ":cog-sh:", 8)) { start = params+8; cmd = SHELL_CMD; }
-	else if (!strncmp (params, ":scm:", 5)) { start = params+5; cmd = SCM_CMD; }
+	if (!strncmp (&params[1], cc.nick.c_str(), cc.nick.size())) {
+        start = params+1 + cc.nick.size();
+    } else if (!strncmp (params, ":cog-sh:", 8)) {
+        start = params+8; cmd = SHELL_CMD;
+    } else if (!strncmp (params, ":scm:", 5)) {
+        start = params+5; cmd = SCM_CMD;
+    } else {   
+        // Check across all potential 
+        foreach (string it, cc.attn) {
+            if (! it.compare(0,it.size(),&params[1]) ) {
+                start = params + it.size();
+                break;
+            }
+        }
+    }
 
 	if (!start) return 0;
 	char * msg_target = NULL;
@@ -117,8 +125,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	// Reply to request for chat client version
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		printf ("VERSION: %s\n", vstring);
-		conn->privmsg (msg_target, vstring);
+		printf ("VERSION: %s\n", cc.vstring.c_str());
+		conn->privmsg (msg_target, cc.vstring.c_str());
 		return 0;
 	}
 
@@ -224,6 +232,9 @@ int main (int argc, char * argv[])
 
 	IRC conn;
 
+    if (cc.parseOptions(argc,argv))
+        return 0;
+
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 
@@ -231,8 +242,9 @@ int main (int argc, char * argv[])
 
 	// The login-name, nick, etc. are there only to make it look 
 	// pretty on IRC ident.
-	conn.start (network, irc_port, bot_nick, login,
+	conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
 	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
 }
+
