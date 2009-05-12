@@ -22,9 +22,9 @@ scm
 (define (do-seme-processing)
 
 	; Get the new input sentences, and run them through the triples processing code.
-	(attach-sents-for-triple-processing (get-new-parsed-sentences))
-	(create-triples)
-	(dettach-sents-from-triple-anchor)
+	; (attach-sents-for-triple-processing (get-new-parsed-sentences))
+	; (create-triples)
+	; (dettach-sents-from-triple-anchor)
 
 	(for-each (lambda (x) (display "duude got a trip\n") (display x))
 		(get-new-triples)
@@ -48,7 +48,7 @@ scm
 ; This may generate a list of atoms. Take that list, and manually
 ; store it in the database.
 ;
-(define (process-rule rule)
+(define (xxxprocess-rule rule)
 	(define triple-list (cog-outgoing-set (cog-ad-hoc "do-implication" rule)))
 
 	; Increment count by 1 on each result.

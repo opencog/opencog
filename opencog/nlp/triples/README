@@ -741,11 +741,13 @@ How to run the current code in example/demo/debug mode:
    These is a require step to perform some initial setup.
 -- run (cog-ad-hoc "do-implication" frame-rule-0) through
    (cog-ad-hoc "do-implication" frame-rule-9) and observe results.
+-- That's all. The results printed above are a "demo" of the
+   kinds of things that the rules can currently produce.
 
 Next step:
 -- Download the MIT ConceptNet corpus.
 -- This corpus is in N3 format; strip out sentences by 
-   running "conceptnet.pl"
+   running "nlp/seme/conceptnet.pl"
 -- Parse the sentences using relex, generate opencog output.
    (There are about 252870 sentences in the June 2008 dump.)
 -- Create a presistence repository for accumulating results.

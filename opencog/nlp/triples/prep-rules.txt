@@ -10,7 +10,7 @@
 ; -----------------------------------------------------------
 ; The following rules create word-preposition linkages; these must
 ; be created in advance, before the later rules run. These do not
-; need to be precise (its OK to generate some grabage, I think(??)
+; need to be precise (its OK to generate some garbage, I think(??)
 ; but its important that all prep phrases be considered
 ;
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
