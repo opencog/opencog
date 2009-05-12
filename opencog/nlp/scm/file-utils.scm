@@ -1,4 +1,3 @@
-scm
 ;
 ; file-utils.scm
 ;
@@ -28,7 +27,4 @@ scm
 		(string-join (list "cat \"" filename "\" | bunzip2 | " cff-to-opencog-exe) "")
 	)
 )
-
-.
-exit
 
