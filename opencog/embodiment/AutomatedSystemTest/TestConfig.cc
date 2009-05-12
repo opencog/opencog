@@ -33,12 +33,26 @@ TestConfig::TestConfig()
     table["TEST_CONFIG_FILE"] = "test.conf";
 
     // Flag to enable/disable the saving of messages (for using in automated tests).
-    table["SAVE_MESSAGES_TO_FILE"] = "1";
+    table["SAVE_MESSAGES_TO_FILE"] = "true";
     // Name of the file where the messages will be saved, if the previous parameter is enabled.
     table["MESSAGES_FILENAME"] = "PBTesterMessages.txt";
 
     table["PROXY_IP"] = "127.0.0.1";
     table["PROXY_PORT"] = "16315";
+}
+
+void TestConfig::reset() {
+    EmbodimentConfig::reset();
+    //Note that C++ calls Config::Config(), that itself calls Config::reset()
+    //so there is no need to call it here in order to
+    //inherit the default parameters.
+    //Also, EmbodimentConfig::reset() overwrites existing default paramters
+    //defined in Config::reset()
+    
+    // load embodiment default configuration
+    for (unsigned int i = 0; TEST_DEFAULT()[i] != ""; i += 2) {
+        table[TEST_DEFAULT()[i]] = TEST_DEFAULT()[i + 1];
+    }
 }
 
 TestConfig::~TestConfig()

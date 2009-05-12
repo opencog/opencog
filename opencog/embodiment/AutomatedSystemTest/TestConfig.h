@@ -33,6 +33,18 @@ namespace AutomatedSystemTest
 class TestConfig : public Control::EmbodimentConfig
 {
 
+protected: 
+
+    const std::string* TEST_DEFAULT()
+    {
+        static const std::string defaultConfig[] = {
+            "CONFIG_FILE",                  "test.conf",
+            //used as halting condition by reset
+            "",                             ""
+        };
+        return defaultConfig;
+    }
+
 public:
 
     TestConfig();
@@ -41,7 +53,11 @@ public:
     // Returns a new TestConfig instance
     static Config* testCreateInstance(void);
 
+    // reset configuration to default
+    virtual void reset();
+
 }; // class
 }  // namespace
 
 #endif
+

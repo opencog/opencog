@@ -216,7 +216,7 @@ bool Config::get_bool(const string &name) const
     if (strcasecmp(get(name).c_str(), "true") == 0) return true;
     else if (strcasecmp(get(name).c_str(), "false") == 0) return false;
     else throw InvalidParamException(TRACE_INFO,
-                                     "[ERROR] invalid double parameter (%s: %s)",
+                                     "[ERROR] invalid bool parameter (%s: %s)",
                                      name.c_str(), get(name).c_str());
 }
 

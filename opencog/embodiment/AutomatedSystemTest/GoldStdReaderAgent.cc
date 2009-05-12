@@ -75,7 +75,10 @@ void GoldStdReaderAgent::run(opencog::CogServer *server)
             unsigned long elapsedTime = GoldStdGen::getCurrentTimestamp() - initialTime;
             if (elapsedTime >= messageToSend->getTimestamp()) {
                 logger().info("Send last read message...");
-                pbTester->sendMessage(*(messageToSend->getMessage()));
+                if (!pbTester->sendMessage(*(messageToSend->getMessage()))) {
+                    logger().error("Error sending message to router! Aborting test...");
+                    exit(-1);
+                }
                 if (opencog::config().get_bool("SAVE_MESSAGES_TO_FILE")) {
                     pbTester->getGoldStdGen()->writeMessage(*(messageToSend->getMessage()), true);
                 }

@@ -57,10 +57,6 @@ int main(int argc, char *argv[])
         config().load(config().get("CONFIG_FILE").c_str());
     }
 
-    if (fileExists(config().get("CONFIG_FILE").c_str())) {
-        config().load(config().get("CONFIG_FILE").c_str());
-    }
-
     server(PBTester::createInstance);
     PBTester& pbTester = static_cast<PBTester&>(server());
     pbTester.init(config().get("PROXY_ID"), config().get("PROXY_IP"), config().get_int("PROXY_PORT"));

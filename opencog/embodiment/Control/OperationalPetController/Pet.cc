@@ -69,10 +69,10 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
     this->sender = sender;
     this->atomSpace = atomSpace;
 
-    setMode(PLAYING);
-
     this->petId.assign(petId);
     this->petName.assign(petName);
+
+    setMode(PLAYING);
 
     // lower case agent type soh that there is no problem with loading files
     this->agentType.assign(agentType);
@@ -323,9 +323,12 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
         break;
     }
 
-    // sending feedback
-    logger().info("Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
-    sender->sendFeedback(petId, feedback);
+    // sending feedback (only if petName is already known -- this prevents
+    // unnnecessary and bad feedback message at the startup)
+    if (petName != config().get("UNKNOWN_PET_NAME")) { 
+        logger().info("Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
+        sender->sendFeedback(petId, feedback);
+    }
 }
 
 const std::vector<std::string>& Pet::getLearningSchema()

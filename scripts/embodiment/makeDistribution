@@ -83,6 +83,7 @@ if {$type_dist == "dev"} {
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_2.txt \
+    $pdh/opencog/embodiment/AutomatedSystemTest/test.conf \
     run_system_test.sh \
     ]
 } elseif {$type_dist == "user"} {

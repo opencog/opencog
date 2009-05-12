@@ -1646,7 +1646,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                                positionElement, rotationElement,
                                length, width, height, edible, drinkable);
             if ( moving ) {
-                addVectorPredicate( objectNode, AGISIM_POSITION_PREDICATE_NAME, tsValue, velocityElement );
+                addVectorPredicate( objectNode, AGISIM_VELOCITY_PREDICATE_NAME, tsValue, velocityElement );
             } // if
 
             Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, petInterface.getPetId( ) );
