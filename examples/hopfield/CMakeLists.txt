@@ -2,10 +2,10 @@
 ADD_DEFINITIONS(-DNDEBUG)
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/src/atomspace
-	${OPENCOG_BINARY_DIR}/src/xml
-	${OPENCOG_BINARY_DIR}/src/server
-	${OPENCOG_BINARY_DIR}/src/dynamics/attention
+	${OPENCOG_BINARY_DIR}/opencog/atomspace
+	${OPENCOG_BINARY_DIR}/opencog/xml
+	${OPENCOG_BINARY_DIR}/opencog/server
+	${OPENCOG_BINARY_DIR}/opencog/dynamics/attention
 )
 
 INCLUDE_DIRECTORIES (
@@ -18,17 +18,14 @@ INCLUDE_DIRECTORIES (
 IF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
     SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
     SET (OPENCOG_UBI_LIB ubigraph
-        # TODO currently requires library called
-        # libcurl.so (linked to a specific version) 
-        # - find curl library using cmake
-        #        curl 
         ${UBIGRAPHCLIENT_LIBRARIES}
 #       {$XMLRPC_LIBRARIES}
-        xmlrpc_client
-        xmlrpc
-        xmlrpc_util
-        xmlrpc_xmlparse
-        xmlrpc_xmltok
+        ${XMLRPC_LIBRARIES}
+        #xmlrpc_client
+        #xmlrpc
+        #xmlrpc_util
+        #xmlrpc_xmlparse
+        #xmlrpc_xmltok
         )
 ENDIF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
 
