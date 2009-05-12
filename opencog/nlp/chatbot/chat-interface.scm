@@ -100,9 +100,9 @@
 	)
 
 	; Run the triples processing.
-	(copy-sents-to-triple-anchor (get-new-parsed-sentences))
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
 	(create-triples)
-	(delete-triple-anchor-links)
+	(dettach-sents-from-triple-anchor)
 
 	; If a question was asked, and  the previous attempt to answer the
 	; question failed, try again with pattern matching on the triples.

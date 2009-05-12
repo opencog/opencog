@@ -17,14 +17,16 @@
 ; this node will eventually have triples built from them.
 (define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
-; copy-sents-to-triple-anchor -- 
-; Copy a list of sentences to the input triple processing anchor
+; attach-sents-for-triple-processing -- 
+; Attach a list of sentences to the input triple processing anchor
 ; Here, sent-list should be a list of SentenceNodes
 ; This is slightly tricky, because the triples anchor is expecting
 ; not SentenceNodes, but ParseNodes.  So for each sentence, we have
 ; to get the parses, and attach those.
 ;
-(define (copy-sents-to-triple-anchor sent-list)
+; return value is undefined
+;
+(define (attach-sents-for-triple-processing sent-list)
 
 	;; Attach all parses of a sentence to the anchor.
 	(define (attach-parses sent)
@@ -43,13 +45,14 @@
 	(for-each attach-parses sent-list)
 )
 
-; Delete sentences that were wating for triples processing
-(define (delete-triple-anchor-links)
+; Dettach sentences that were waiting for triples processing
+(define (dettach-sents-from-triple-anchor)
 	(for-each (lambda (x) (cog-delete x))
 		(cog-incoming-set ready-for-triples-anchor)
 	)
 )
 
+; -----------------------------------------------------------------------
 ; The result-triples-anchor anchors the results of triples processing.
 (define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
 
@@ -73,6 +76,8 @@
 		)
 		prep-rule-list ; this list defined by the /triples/prep-rules.txt file
 	)
+
+	; Now, create the actual triples
 	(for-each
 		(lambda (rule)
 			(attach-triples (cog-ad-hoc "do-implication" rule))
@@ -81,12 +86,15 @@
 	)
 )
 
+; -----------------------------------------------------------------------
 ; get-new-triples -- Return a list of semantic triples that were created.
+;
 (define (get-new-triples)
 	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
 )
 
 ; delete-result-triple-links -- delete links to result triples anchor.
+;
 (define (delete-result-triple-links)
 	(for-each (lambda (x) (cog-delete x))
 		(cog-incoming-set result-triples-anchor)

@@ -17,6 +17,12 @@ scm
 		(get-new-parsed-sentences)
 	)
 
+	; (attach-sents-for-triple-processing sent-list)
+	; (create-triples)
+	; (dettach-sents-from-triple-anchor)
+	;  (get-new-triples)
+	;   (delete-result-triple-links)
+	;    (fetch-related-triples)
 	; (fire-all-triple-rules)
 	;(delete-sentences)
 
