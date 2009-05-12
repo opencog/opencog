@@ -22,4 +22,3 @@ cat rules.txt | ./rules-to-implications.pl frame-rule | netcat -q60 $HOST $PORT 
 cat question-tags.txt | ./rules-to-implications.pl frame-rule | netcat -q60 $HOST $PORT > /dev/null
 
 cat triples-pipeline.scm | netcat -q60 $HOST $PORT > /dev/null
-cat collect-stats.scm | netcat -q60 $HOST $PORT > /dev/null
