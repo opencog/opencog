@@ -132,58 +132,57 @@ void HopfieldOptions::printHelp()
 void HopfieldOptions::parseOptions (int argc, char *argv[])
 {
     int c;
+    bool vizSet = false;
+    static const char *optString =
+        "vw:h:n:l:d:s:u:t:z:f:p:g:c:r:y:mi:P:e:oq:F:a:k:CR?E";
+
+    static const struct option longOptions[] = {
+        {"verbose", 0, &verboseLevel, 1},
+        {"debug", 0, &verboseLevel, 3},
+        {"width", required_argument, 0, 'w'},
+        {"height", required_argument, 0, 'h'},
+        {"size", required_argument, 0, 'n'},
+        {"links", required_argument, 0, 'l'},
+        {"density", required_argument, 0, 'd'},
+        {"update-rule", required_argument, 0, 'u'},
+        {"stimulus", required_argument, 0, 's'},
+        {"spread-threshold", required_argument, 0, 't'},
+        {"viz-threshold", required_argument, 0, 'z'},
+        {"focus", required_argument, 0, 'f'},
+        {"patterns", required_argument, 0, 'p'},    // number of patterns to test
+        {"gen-density", required_argument, 0, 'g'},
+        {"imprint", required_argument, 0, 'c'}, // # of imprint _c_ycles
+        {"retrieve", required_argument, 0, 'r'},    // # of retrieve iterations
+        {"spread", required_argument, 0, 'y'},    // # of spread iterations
+        {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
+        {"interleave", optional_argument, 0, 'i'},  // interleave imprint of each pattern
+        {"palimpsest", optional_argument, 0, 'P'},  // set Palimpsest testing
+        // Palimpsest testing of neighbours
+        {"pneighbours", optional_argument, 0, '7'},
+        {"error", required_argument, 0, 'e'},   // cue error rate
+        {"total", 0, &totalFlag, 1},    // t_o_tal, reports mean, suitable for batch output
+        {"spread-multiplier", required_argument, 0, 'q'},   // multiplier for importance spread, if 0 then evenly spread across links
+        {"forget", required_argument, 0, 'F'},
+        {"key", required_argument, 0, 'k'},
+        {"log-performance", optional_argument, 0, 'a'},
+        {"train-file", required_argument, 0, '3'},
+        {"cue-file", required_argument, 0, '4'},
+        {"result-file", required_argument, 0, '5'},
+        {"show-config", 0, &showConfigFlag, 1},
+        {"reset", 0, &resetFlag, 1},
+        {"one-cue", 0, &cueGenerateOnce, 1},
+        {"visualize", 0, &visualize, 1},
+        {"vdelay", required_argument, 0, '6'},
+        {"vlabel", 0, &visLabel, 1},
+        {"diffuse-t", required_argument, 0, '8'},
+        {"diffuse-max", required_argument, 0, '9'},
+        {"diffuse-s", required_argument, 0, '2'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     while (1) {
-        static const char *optString =
-            "vw:h:n:l:d:s:u:t:z:f:p:g:c:r:y:mi:P:e:oq:F:a:k:CR?E";
-
-		static const struct option longOptions[] = {
-                {"verbose", 0, &verboseLevel, 1},
-                {"debug", 0, &verboseLevel, 3},
-                {"width", required_argument, 0, 'w'},
-                {"height", required_argument, 0, 'h'},
-                {"size", required_argument, 0, 'n'},
-                {"links", required_argument, 0, 'l'},
-                {"density", required_argument, 0, 'd'},
-                {"update-rule", required_argument, 0, 'u'},
-                {"stimulus", required_argument, 0, 's'},
-                {"spread-threshold", required_argument, 0, 't'},
-                {"viz-threshold", required_argument, 0, 'z'},
-                {"focus", required_argument, 0, 'f'},
-                {"patterns", required_argument, 0, 'p'},    // number of patterns to test
-                {"gen-density", required_argument, 0, 'g'},
-                {"imprint", required_argument, 0, 'c'}, // # of imprint _c_ycles
-                {"retrieve", required_argument, 0, 'r'},    // # of retrieve iterations
-                {"spread", required_argument, 0, 'y'},    // # of spread iterations
-                {"show-matrix", 0, &showMatrixFlag, 1}, // show pattern/cue/result
-                {"interleave", optional_argument, 0, 'i'},  // interleave imprint of each pattern
-                {"palimpsest", optional_argument, 0, 'P'},  // set Palimpsest testing
-                // Palimpsest testing of neighbours
-                {"pneighbours", optional_argument, 0, '7'},
-                {"error", required_argument, 0, 'e'},   // cue error rate
-                {"total", 0, &totalFlag, 1},    // t_o_tal, reports mean, suitable for batch output
-                {"spread-multiplier", required_argument, 0, 'q'},   // multiplier for importance spread, if 0 then evenly spread across links
-                {"forget", required_argument, 0, 'F'},
-                {"key", required_argument, 0, 'k'},
-                {"log-performance", optional_argument, 0, 'a'},
-                {"train-file", required_argument, 0, '3'},
-                {"cue-file", required_argument, 0, '4'},
-                {"result-file", required_argument, 0, '5'},
-                {"show-config", 0, &showConfigFlag, 1},
-                {"reset", 0, &resetFlag, 1},
-                {"one-cue", 0, &cueGenerateOnce, 1},
-                {"visualize", 0, &visualize, 1},
-                {"vdelay", required_argument, 0, '6'},
-                {"vlabel", 0, &visLabel, 1},
-                {"diffuse-t", required_argument, 0, '8'},
-                {"diffuse-max", required_argument, 0, '9'},
-                {"diffuse-s", required_argument, 0, '2'},
-                {"help", 0, 0, '?'},
-                {0, 0, 0, 0}
-            };
-
         int optionIndex = 0;
-		bool vizSet = false;
         c = getopt_long (argc, argv, optString, longOptions, &optionIndex);
 
         /* Detect end of options */
