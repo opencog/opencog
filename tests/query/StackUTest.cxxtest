@@ -36,6 +36,7 @@ class StackUTest :  public CxxTest::TestSuite
 		AtomSpace *as;
 		Handle svar, wvar;
 		Handle p1, p2;
+		Handle anch;
 
 	public:
 
@@ -65,19 +66,20 @@ class TestPMCB :
 	public:
 	int lcnt;
 	int scnt;
+	Handle anch;
 	TestPMCB(void) { lcnt = 0; scnt = 0; }
 
-	virtual bool link_match(Link *lpat, Link *lsoln)
+	virtual bool clause_match(Link *pattrn, Link *grnd)
 	{
 		lcnt ++;
-printf("duuude ola linkyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
-		return false;
+		// match the initial anchor clause, but reject the rest.
+		if (anch == TLB::getHandle(grnd)) return false;
+		return true;
 	}
 
 	virtual bool solution(std::map<Handle, Handle> &pred_soln,
 	                      std::map<Handle, Handle> &var_soln)
 	{
-printf ("duuude solnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\n");
 		scnt ++;
 		return false;
 	}
@@ -86,14 +88,17 @@ printf ("duuude solnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\n");
 /*
  * This function sets up the following structures:
  *
- * # IF %ListLink("# DOSTUFF", $sent)
- *     ^ %WordInstanceLink($var0,$sent)
- *     THEN ^3_blah($var0)
+ * OrderedLink
+ *     ConceptNode "# DOSTUFF"
+ *     VariableNode "$sent"
+ * ListLink
+ *     VariableNode "$sent"
+ *     VariableNode "$var"
  * 
- * This pattern should accept this input: 
- *    xxxx
- * and should call teh user callback three times!
- *
+ * The pattern matcher should be called seven times, once
+ * for the ordered link, and 6 more times for the 6 list links.
+ * One recent bug was triggered by the clause-matcher returning
+ * "true", which resulted in it being invoked only half the time.
  */
 #define an as->addNode
 #define al as->addLink
@@ -104,27 +109,43 @@ void StackUTest::setUp(void)
 	pme.set_atomspace(as);
 
 	// Create an implication link that will be tested.
-	p1 = al(LIST_LINK,
+	p1 = al(ORDERED_LINK,
 		an(CONCEPT_NODE, "# DOSTUFF"),
 		an(VARIABLE_NODE, "$sent")
 	);
 	p2 = al(LIST_LINK,
-		wvar = an(VARIABLE_NODE, "$var"),
-		svar = an(VARIABLE_NODE, "$sent")
+		svar = an(VARIABLE_NODE, "$sent"),
+		wvar = an(VARIABLE_NODE, "$var")
 	);
 
 	// Create data on which the above pattern should match
-	al(LIST_LINK,
+	anch = al(ORDERED_LINK,
 		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "my sentence")
+	);
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "my sentence"),
 		an(CONCEPT_NODE, "thing A")
 	);
 	al(LIST_LINK,
-		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "my sentence"),
 		an(CONCEPT_NODE, "thing B")
 	);
 	al(LIST_LINK,
-		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "my sentence"),
 		an(CONCEPT_NODE, "thing C")
+	);
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "my sentence"),
+		an(CONCEPT_NODE, "thing D")
+	);
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "my sentence"),
+		an(CONCEPT_NODE, "thing E")
+	);
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "my sentence"),
+		an(CONCEPT_NODE, "thing F")
 	);
 }
 
@@ -149,9 +170,11 @@ void StackUTest::test_stack(void)
 	std::vector<Handle> negs;
 
 	TestPMCB pmcb;
+	pmcb.anch = anch;
 	pme.match(&pmcb, vars, preds, negs);
 
-	// TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
+	TSM_ASSERT_EQUALS("bad link-test call count", 7, pmcb.lcnt);
+	TSM_ASSERT_EQUALS("bad solution call count", 0, pmcb.scnt);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
