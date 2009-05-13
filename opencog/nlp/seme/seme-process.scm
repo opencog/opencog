@@ -22,7 +22,7 @@ scm
 (define (do-seme-processing)
 
 	; Get the new input sentences, and run them through the triples processing code.
-	; (attach-sents-for-triple-processing (get-new-parsed-sentences))
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
 	; (create-triples)
 	; (dettach-sents-from-triple-anchor)
 

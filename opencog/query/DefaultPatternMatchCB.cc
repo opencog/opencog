@@ -56,6 +56,8 @@ Handle DefaultPatternMatchCB::find_starter(Handle h)
 
 bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
+	// printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+	// printf("Loop candidate: %s\n", TLB::getAtom(h)->toString().c_str());
 	return pme->do_candidate(root,starter_pred,h);
 }
 
@@ -115,7 +117,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	Handle start = find_starter(h);
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
-		// prtmsg("Search start node: ", start);
+		// printf("Search start node: %s\n", TLB::getAtom(start)->toString().c_str());
+		// printf("Start pred is: %s\n", TLB::getAtom(starter_pred)->toString().c_str());
 		foreach_incoming_handle(start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
