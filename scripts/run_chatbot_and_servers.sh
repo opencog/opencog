@@ -11,13 +11,17 @@
 # It also loads the CogServer with the appropriate
 # guff for it to function.
 # 
-# Note: must be run from build directory and path to relex
-# distribution updated (RelEx script opencog-server.sh must 
-# also be properly configured).
+# Note: path to src and build directory and path to relex distribution need to
+# be updated (RelEx script opencog-server.sh must also be properly configured).
+
+branch_dir=/home/joel/src/opencog/trunk
+build_dir=${branch_dir}/bin
 
 relex_path=/home/joel/src/relex
 bot_name=cogita-$RANDOM
 
+old_dir=`pwd`
+cd ${build_dir}
 gnome-terminal \
   --hide-menubar \
   --tab --title "CogServer" \ #--working-directory= \
@@ -30,8 +34,8 @@ gnome-terminal \
 
 sleep 2
 # load axioms for chatting into cogserver
-cd ../opencog/nlp/triples/
+cd ${build_dir}/opencog/nlp/triples/
 ./load-chatbot.sh
-cd -
+cd ${old_dir}
 
 
