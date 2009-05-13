@@ -32,9 +32,10 @@ using namespace opencog;
 class StackUTest :  public CxxTest::TestSuite
 {
 	private:
-		PatternMatch pm;
+		PatternMatchEngine pme;
 		AtomSpace *as;
-		Handle imake;
+		Handle svar, wvar;
+		Handle p1, p2;
 
 	public:
 
@@ -55,7 +56,31 @@ class StackUTest :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
-		void test_prep(void);
+		void test_stack(void);
+};
+
+class TestPMCB :
+	public virtual DefaultPatternMatchCB
+{
+	public:
+	int lcnt;
+	int scnt;
+	TestPMCB(void) { lcnt = 0; scnt = 0; }
+
+	virtual bool link_match(Link *lpat, Link *lsoln)
+	{
+		lcnt ++;
+printf("duuude ola linkyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
+		return false;
+	}
+
+	virtual bool solution(std::map<Handle, Handle> &pred_soln,
+	                      std::map<Handle, Handle> &var_soln)
+	{
+printf ("duuude solnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn\n");
+		scnt ++;
+		return false;
+	}
 };
 
 /*
@@ -76,25 +101,16 @@ void StackUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
-	pm.set_atomspace(as);
+	pme.set_atomspace(as);
 
 	// Create an implication link that will be tested.
-	imake = 
-	al(IMPLICATION_LINK,
-		al(AND_LINK,
-			al(LIST_LINK,
-				an(CONCEPT_NODE, "# DOSTUFF"),
-				an(VARIABLE_NODE, "$sent")
-			),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var"),
-				an(VARIABLE_NODE, "$sent")
-			)
-		),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "whoopee"),
-			an(VARIABLE_NODE, "$var")
-		)
+	p1 = al(LIST_LINK,
+		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(VARIABLE_NODE, "$sent")
+	);
+	p2 = al(LIST_LINK,
+		wvar = an(VARIABLE_NODE, "$var"),
+		svar = an(VARIABLE_NODE, "$sent")
 	);
 
 	// Create data on which the above pattern should match
@@ -118,12 +134,23 @@ void StackUTest::setUp(void)
  * i.e. it should be called three times.
  *
  */
-void StackUTest::test_prep(void)
+void StackUTest::test_stack(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Result should be a ListLink
-	Handle result = pm.imply(imake);
+	std::vector<Handle> vars;
+	vars.push_back(svar);
+	vars.push_back(wvar);
+
+	std::vector<Handle> preds;
+	preds.push_back(p1);
+	preds.push_back(p2);
+
+	std::vector<Handle> negs;
+
+	TestPMCB pmcb;
+	pme.match(&pmcb, vars, preds, negs);
+
 	// TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
