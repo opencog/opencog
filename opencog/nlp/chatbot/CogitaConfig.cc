@@ -42,7 +42,8 @@ CogitaConfig::CogitaConfig() :
         const char* defaultChannels[] = COGITA_DEFAULT_CHANNELS;
         for (int i = 0; defaultAttns[i]; i++) {
             for (int i = 0; defaultSuffixes[i]; i++) {
-                attn.push_back(string(defaultAttns[i])+string(defaultAttns[i]));
+                attn.push_back(string(defaultAttns[i]) +
+                        string(defaultSuffixes[i]));
             }
         }
         for (int i = 0; defaultChannels[i]; i++) {
