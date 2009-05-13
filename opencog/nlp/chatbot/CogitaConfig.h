@@ -41,6 +41,7 @@ namespace chatbot {
  * Configuration class for Cogita
  */
 class CogitaConfig {
+    void createAttnVector();
 public:
     string ircNetwork;
     vector<string> ircChannels;

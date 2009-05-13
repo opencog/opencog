@@ -97,6 +97,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         switch (c) {
         case 'n':
             nick = string(optarg);
+            createAttnVector();
             break;
         case 's':
             ircNetwork = string(optarg);
@@ -105,13 +106,14 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
             ircPort = atoi(optarg);
             break;
         case 'c':
+            ircChannels.clear();
             channelsTemp = optarg;
             st.setString(channelsTemp);
             st.setDelimiter(string(","));
             for (string channel = st.nextToken();
                     channel.size() > 0;
                     channel = st.nextToken()) {
-                ircChannels.push_back(channel);
+                ircChannels.push_back("#" + channel);
             }
             break;
         case 'v':
@@ -127,6 +129,16 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
     }
 
     return 0;
+}
+
+void CogitaConfig::createAttnVector()
+{
+    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
+    attn.clear();
+    for (int i = 0; defaultSuffixes[i]; i++) {
+        attn.push_back(nick + string(defaultSuffixes[i]));
+    }
+
 }
 
 }} // ~namespace opencog::chatbot
