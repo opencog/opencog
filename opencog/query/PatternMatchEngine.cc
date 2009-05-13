@@ -134,8 +134,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		Handle gnd = var_grounding[ha];
 		if (TLB::isValidHandle(gnd))
 		{
-			if (gnd != hb) return true;
-			return false;
+			return (gnd != hb);
 		}
 
 		// Else, we have a candidate grounding for this variable.
@@ -212,6 +211,22 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 /* ======================================================== */
 
 bool PatternMatchEngine::soln_up(Handle hsoln)
+{
+	var_solutn_stack.push(var_grounding);
+	bool found = do_soln_up(hsoln);
+	if (found)
+	{
+		var_solutn_stack.pop();  // pop entry created, but keep current.
+	}
+	else
+	{
+		POPTOP(var_grounding, var_solutn_stack);
+	}
+
+	return found;
+}
+
+bool PatternMatchEngine::do_soln_up(Handle hsoln)
 {
 	// Let's not look at our own navel
 	if (hsoln == curr_root) return false;

@@ -69,6 +69,7 @@ class PatternMatchEngine
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
+		bool do_soln_up(Handle);
 		bool clause_accepted;
 		OutgoingTree ot;
 		Handle curr_soln_handle;
