@@ -1,5 +1,5 @@
 /*
- * tests/query/BigPatternUTest.cxxtest
+ * tests/query/StackUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -29,23 +29,22 @@
 
 using namespace opencog;
 
-class BigPatternUTest :  public CxxTest::TestSuite
+class StackUTest :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-
-		Handle imake, hmake_from, hpottery, hclay;
+		Handle imake;
 
 	public:
 
-		BigPatternUTest(void)
+		StackUTest(void)
 		{
 			logger().setLevel(Logger::DEBUG);
 			logger().setPrintToStdoutFlag(true);
 		}
 
-		~BigPatternUTest()
+		~StackUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -62,23 +61,18 @@ class BigPatternUTest :  public CxxTest::TestSuite
 /*
  * This function sets up the following structures:
  *
- * ; Sentence: "Pottery is made from clay."
- * ; var0=make  var1=pottery var2=clay  prep=from
- * # IF _obj(make, $var1)
- *     ^ $prep(make,$var2)              ; preposition
- *     THEN ^3_make_from($var2, $var1)
+ * # IF %ListLink("# DOSTUFF", $sent)
+ *     ^ %WordInstanceLink($var0,$sent)
+ *     THEN ^3_blah($var0)
  * 
  * This pattern should accept this input: 
- *       _obj(make, pottery)
- *       from(make, clay)
+ *    xxxx
+ * and should call teh user callback three times!
  *
- * and it should produce as output: make_from(clay, pottery)
- * The above is a simplified example of a rule that deduces
- * a prepositional triple.
  */
 #define an as->addNode
 #define al as->addLink
-void BigPatternUTest::setUp(void)
+void StackUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
@@ -88,82 +82,49 @@ void BigPatternUTest::setUp(void)
 	imake = 
 	al(IMPLICATION_LINK,
 		al(AND_LINK,
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "_obj"),
-				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
-					an(VARIABLE_NODE, "$var1")
-				)
+			al(LIST_LINK,
+				an(CONCEPT_NODE, "# DOSTUFF"),
+				an(VARIABLE_NODE, "$sent")
 			),
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "from"),
-				al(LIST_LINK,
-					an(CONCEPT_NODE, "make"),
-					an(VARIABLE_NODE, "$var2")
-				)
+			al(LIST_LINK,
+				an(VARIABLE_NODE, "$var"),
+				an(VARIABLE_NODE, "$sent")
 			)
 		),
-		al(EVALUATION_LINK,
-			hmake_from = an(PREDICATE_NODE, "make_from"),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var1"),
-				an(VARIABLE_NODE, "$var2")
-			)
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "whoopee"),
+			an(VARIABLE_NODE, "$var")
 		)
 	);
 
 	// Create data on which the above pattern should match
-	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "_obj"),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "make"),
-			hpottery = an(CONCEPT_NODE, "pottery")
-		)
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "thing A")
 	);
-	al(EVALUATION_LINK,
-		an(PREDICATE_NODE, "from"),
-		al(LIST_LINK,
-			an(CONCEPT_NODE, "make"),
-			hclay = an(CONCEPT_NODE, "clay")
-		)
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "thing B")
+	);
+	al(LIST_LINK,
+		an(CONCEPT_NODE, "# DOSTUFF"),
+		an(CONCEPT_NODE, "thing C")
 	);
 }
 
 /*
- * preposition reasoning test.
+ * stack-usage/bound-variable test.
+ * Expect the user callback to be called for each match.
+ * i.e. it should be called three times.
  *
- * Expect to get the following result, given the above data:
- *
- *    EvaluationLink
- *       PredicateNode "make_from"
- *       ListLink
- *          ConceptNode "pottery"
- *          ConceptNode "clay"
  */
-#define getlink(hand,pos) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
-
-#define getarity(hand) \
-	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
-
-void BigPatternUTest::test_prep(void)
+void StackUTest::test_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
 	Handle result = pm.imply(imake);
-	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
-
-	// Then, evaluationLink, as above.
-	Handle heval = getlink(result, 0);
-	Handle vmake_from = getlink(heval, 0);
-	Handle hlist = getlink(heval, 1);
-	Handle vpottery = getlink(hlist, 0);
-	Handle vclay = getlink(hlist, 1);
-
-	TSM_ASSERT_EQUALS("incorrect make", hmake_from, vmake_from);
-	TSM_ASSERT_EQUALS("incorrect pottery", hpottery, vpottery);
-	TSM_ASSERT_EQUALS("incorrect clay", hclay, vclay);
+	// TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
