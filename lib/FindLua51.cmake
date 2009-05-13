@@ -1,42 +1,63 @@
-# Find the Lua 5.1 includes and library
+# Locate Lua library
+# This module defines
+#  LUA51_FOUND, if false, do not try to link to Lua 
+#  LUA_LIBRARIES
+#  LUA_INCLUDE_DIR, where to find lua.h 
 #
-# LUA51_INCLUDE_DIR - where to find lua.h
-# LUA51_LIBRARIES - List of fully qualified libraries to link against
-# LUA51_FOUND - Set to TRUE if found
+# Note that the expected include convention is
+#  #include "lua.h"
+# and not
+#  #include <lua/lua.h>
+# This is because, the lua location is not standardized and may exist
+# in locations other than lua/
 
-# Copyright (c) 2007, Pau Garcia i Quiles, <pgquiles@elpauer.org>
-#
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-IF(LUA51_INCLUDE_DIR AND LUA51_LIBRARIES)
-    SET(LUA51_FIND_QUIETLY TRUE)
-ENDIF(LUA51_INCLUDE_DIR AND LUA51_LIBRARIES)
-
-FIND_PATH(LUA51_INCLUDE_DIR lua.h 
-   PATH_SUFFIXES lua51 lua5.1
+FIND_PATH(LUA_INCLUDE_DIR lua.h
+  HINTS
+  $ENV{LUA_DIR}
+  PATH_SUFFIXES include/lua51 include/lua5.1 include/lua include
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw # Fink
+  /opt/local # DarwinPorts
+  /opt/csw # Blastwave
+  /opt
 )
 
-FIND_LIBRARY(LUA51_LIBRARIES NAMES lua5.1 )
+FIND_LIBRARY(LUA_LIBRARY 
+  NAMES lua51 lua5.1 lua-5.1 lua
+  HINTS
+  $ENV{LUA_DIR}
+  PATH_SUFFIXES lib64 lib
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /usr/local
+  /usr
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
+)
 
-IF(LUA51_INCLUDE_DIR AND LUA51_LIBRARIES)
-   SET(LUA51_FOUND TRUE)
-   INCLUDE(CheckLibraryExists)
-   CHECK_LIBRARY_EXISTS(${LUA51_LIBRARIES} lua_close "" LUA51_NEED_PREFIX)
-ELSE(LUA51_INCLUDE_DIR AND LUA51_LIBRARIES)
-   SET(LUA51_FOUND FALSE)
-   MESSAGE("D'oh")
-ENDIF (LUA51_INCLUDE_DIR AND LUA51_LIBRARIES)
+IF(LUA_LIBRARY)
+  # include the math library for Unix
+  IF(UNIX AND NOT APPLE)
+    FIND_LIBRARY(LUA_MATH_LIBRARY m)
+    SET( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
+  # For Windows and Mac, don't need to explicitly include the math library
+  ELSE(UNIX AND NOT APPLE)
+    SET( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
+  ENDIF(UNIX AND NOT APPLE)
+ENDIF(LUA_LIBRARY)
 
-IF(LUA51_FOUND)
-  IF (NOT LUA51_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Lua 5.1 library: ${LUA51_LIBRARIES}")
-    MESSAGE(STATUS "Found Lua 5.1 headers: ${LUA51_INCLUDE_DIR}")
-  ENDIF (NOT LUA51_FIND_QUIETLY)
-ELSE(LUA51_FOUND)
-  IF(LUA51_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could NOT find Lua 5.1")
-  ENDIF(LUA51_FIND_REQUIRED)
-ENDIF(LUA51_FOUND)
+INCLUDE(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
+# all listed variables are TRUE
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua51  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LUA51_INCLUDE_DIR LUA51_LIBRARIES)
+MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
+
