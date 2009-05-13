@@ -188,6 +188,11 @@ public:
  * @todo Allow forward chaining using BIT... by accepting a wildcard target, and
  * only accepting results with reasonable confidence.
  *
+ * @todo Tackle revision
+ * - first make sub-BITs shared between BIT grounded by a root.
+ * - at the end of infer() - revise the TVs within the BIT.
+ * - when a result is computed for a subtree, mark it as revised.
+ *
  * @remarks BITNode supports pre-bindings extensively, but it's unclear whether
  * they are obsolete or not.
  *
