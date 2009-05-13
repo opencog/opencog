@@ -9,7 +9,7 @@ PROJECT(OPENCOG)
 ############################
 #Comment to be in debug mode
 ############################
-SET(CMAKE_BUILD_TYPE Release)
+#SET(CMAKE_BUILD_TYPE Release)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
