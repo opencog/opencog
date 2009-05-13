@@ -67,7 +67,7 @@ const std::string & StringTokenizer::getDelimiter()
 
 void StringTokenizer::setDelimiter(const std::string &str)
 {
-    this->delimiter = delimiter;
+    this->delimiter = str;
 }
 
 void StringTokenizer::reset()

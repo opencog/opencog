@@ -60,6 +60,26 @@ public:
         TS_ASSERT(i == 5);
     }
 
+    void testSetStringAndDelimiter() {
+        StringTokenizer st;
+        st.setString(toTokenizer);
+        TS_ASSERT(st.getString() == toTokenizer);
+        st.setDelimiter(delimiter);
+        TS_ASSERT(st.getDelimiter() == delimiter);
+        std::string result = st.nextToken();
+        int i = 0;
+
+        while (result != "") {
+            printf("word: %s, result: %s\n", words[i].c_str(), result.c_str());
+            TS_ASSERT(words[i] == result);
+            result = st.nextToken();
+            i++;
+        }
+
+        printf("%d\n", i);
+        TS_ASSERT(i == 5);
+    }
+
     void testOutOfRangeCase() {
         // This test is for a specific case that was causing std::out_of_range when delimiter was present at the end of the string.
         const std::string failingText = "this is a common ";
