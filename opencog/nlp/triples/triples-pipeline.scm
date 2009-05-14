@@ -88,5 +88,20 @@ scm
 )
 
 ; -----------------------------------------------------------------------
+; get-new-triples -- Return a list of semantic triples that were created.
+;
+(define (get-new-triples)
+	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
+)
+
+; delete-result-triple-links -- delete links to result triples anchor.
+;
+(define (delete-result-triple-links)
+	(for-each (lambda (x) (cog-delete x))
+		(cog-incoming-set result-triples-anchor)
+	)
+)
+
+; -----------------------------------------------------------------------
 .
 exit
