@@ -109,7 +109,7 @@
 	(if (and is-question (null? (get-simple-answer)))
 		(let ((trips (get-new-triples)))
 			(display "There was no simple answer; attempting triples search\n")
-			(fetch-related-triples)
+			; (fetch-related-triples) XXX replace with seme processor
 			(if (not (null? trips))
 				(cog-ad-hoc "triple-question" (car (get-new-triples)))
 			)

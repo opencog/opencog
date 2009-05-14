@@ -88,39 +88,5 @@ scm
 )
 
 ; -----------------------------------------------------------------------
-; get-new-triples -- Return a list of semantic triples that were created.
-;
-(define (get-new-triples)
-	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
-)
-
-; delete-result-triple-links -- delete links to result triples anchor.
-;
-(define (delete-result-triple-links)
-	(for-each (lambda (x) (cog-delete x))
-		(cog-incoming-set result-triples-anchor)
-	)
-)
-
-; Fetch, from SQL storage, all knowledge related to the recently produced
-; triples. Specifically, hunt out the WordNode's that occur in the triples,
-; and get everything we know about them (by getting everything that has 
-; that word-node in it's outgoing set.)
-(define (fetch-related-triples)
-
-	; Given a handle h to some EvaluationLink, walk it down and pull
-	; in any related WordNode expressions.
-	(define (fetch-word h)
-		(if (eq? 'WordInstanceNode (cog-type h))
-			(cog-ad-hoc "fetch-incoming-set" (word-inst-get-lemma h))
-		)
-		(for-each fetch-word (cog-outgoing-set h))
-	)
-
-	; Pull in related stuff for every triple that was created.
-	(for-each fetch-word (get-new-triples))
-)
-
-; -----------------------------------------------------------------------
 .
 exit
