@@ -103,7 +103,7 @@ scm
 )
 
 ; Fetch, from SQL storage, all knowledge related to the recently produced
-; triples. Specifically, hunt out the WordNode's tht occur in the triples,
+; triples. Specifically, hunt out the WordNode's that occur in the triples,
 ; and get everything we know about them (by getting everything that has 
 ; that word-node in it's outgoing set.)
 (define (fetch-related-triples)

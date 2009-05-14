@@ -443,6 +443,12 @@ Notes
 Initially 51 secs to load 3K sentences
 8   27  16 secs per sentence ... 
 
+bugs: $prep maps to Ss, also to _subj ... 
+
+13 matches then dry spell at 9348
+============= Done Matching =======  at 9381
+
+
 References:
 -----------
 [FEAT] Feature extraction. See

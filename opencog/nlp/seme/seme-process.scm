@@ -7,6 +7,38 @@ scm
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------
+; Trivial promoter.
+; Given a word node, returns a corresponding seme node
+
+(define (trivial-promoter word-inst)
+	(display "ola promoting ")
+	(display word-inst)
+	(newline)
+	(SemeNode (cog-name word-inst) (stv 1 1))
+)
+
+; --------------------------------------------------------------------
+; Promote all WordNodes to SemeNodes
+
+(define (promote-to-seme promoter atom-list)
+	(define (promote atom)
+		(if (eq? 'WordInstanceNode (cog-type atom))
+			(promoter atom)
+			(if (cog-link? atom)
+				(cog-new-link 
+					(cog-type atom) 
+					(map promote (cog-outgoing-set atom))
+					(cog-tv atom)
+				)
+				atom
+			)
+		)
+	)
+
+	(map promote atom-list)
+)
+
+; --------------------------------------------------------------------
 ; 
 
 ; do-seme-processing -- ad-hoc routine under development.
@@ -35,6 +67,7 @@ scm
 			)
 	      (get-new-triples)
   		)
+		(promote-to-seme trivial-promoter (get-new-triples))
 	   (delete-result-triple-links)
 	)
 
