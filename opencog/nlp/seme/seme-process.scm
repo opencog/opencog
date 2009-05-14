@@ -31,7 +31,7 @@ scm
 		(dettach-sents-from-triple-anchor)
 		(for-each 
 			(lambda (x) 
-				(system (string-join (list "echo done triple: \"" (expr->string x) "\"")))
+				(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
 			)
 	      (get-new-triples)
   		)
