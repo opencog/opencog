@@ -7,7 +7,6 @@ scm
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------
-; 
 ; trivial-promoter -- promote WordInstanceNode to a SemeNode
 ;
 ; Given a word instance node, returns a corresponding seme node.
@@ -18,6 +17,41 @@ scm
 	(SemeNode (cog-name word-inst) (stv 1 1))
 )
 
+; --------------------------------------------------------------------
+; same-lemma-promoter -- promote to seme, based on the associated lemma.
+;
+; Given a word instance, compare the WordNode associated with the 
+; instance to the WordNode of a SemeNode. Return the first SemeNode
+; found; if not found, create a new SemeNode with this word.  So, for
+; example, given the existing link
+;     LemmaLink 
+;         SemeNode "house@a0a2"
+;         WordNode "house"
+;
+; and the input WordInstanceNode "house@45678", it will return the 
+; SemeNode "house@a0a2", since it has the same lemma.
+
+(define (same-lemma-promoter word-inst)
+
+	; Get the first seme with this lemma. If there are several, this
+	; fails (i.e. returns one of the semes "randomly").
+	(define (lemma-get-seme lemma)
+		 (car (cog-chase-link 'LemmaLink 'SemeNode lemma)))
+
+	(let* ((lemma (word-inst-get-lemma word-inst))
+			(seme (lemma-get-seme lemma))
+		)
+		(if (null? seme)
+			(let ((newseme (SemeNode (cog-name word-inst) (stv 1 1))))
+				(LemmaLink newseme lemma (stv 1 1))
+				newseme
+			)
+			seme
+		)
+	)
+)
+
+;
 ; --------------------------------------------------------------------
 ;
 ; promote-to-seme -- promote all WordInstanceNodes to SemeNodes
@@ -92,7 +126,7 @@ scm
 		(system "date")
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
-		(let ((seme-list (promote-to-seme trivial-promoter (get-new-triples))))
+		(let ((seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
 			(for-each 
 				(lambda (x) 
 					(system (string-join (list "echo done triple: \"" (object->string x) "\"")))

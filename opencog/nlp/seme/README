@@ -23,27 +23,39 @@ The primary challanges of seme extraction are:
    when encountering a new word, to determine that it is, for example, a
    color.
 
+
 Why semes?
 ----------
 The notion of a seme is introduced here to solve a "simple" technical
 problem in knowledge representation.  The goal of using "semes" is to
 move away from using words and/or word-instances to represent "things".
-Thus, "Mary's shoes" and "Tom's shoes" would be two different semes 
-(although both are related to the word "shoe").  
+Thus, "Mary's shoes" and "Tom's shoes" would be two different semes,
+because they are two different "things" (although both things are
+related to the word "shoe").  
 
-Similarly, "Mary had some shoes. The shoes were red."  has two distinct 
-word-instances: the word-instance "shoe" in the first sentence, and the
-word instance "shoe" in the second sentence.  By using semes, we can 
-collapse these two word-instances into one seme, without getting tangled
-with the fact that these two different word-instances of "shoe" are 
-involved in different syntactic relations in different sentences 
-(... sentences possibly uttered by different individuals at different
-times!)
+By contrast, "Mary had some shoes. The shoes were red."  has two
+distinct word-instances: the word-instance "shoe" in the first sentence,
+and the word instance "shoe" in the second sentence.  However, these
+two words stand for the same concept: "Mary's red shoes". The goal of
+using semes is to collapse these two word-instances into one seme,
+without getting tangled with the fact that these two different 
+word-instances of "shoe" are involved in different syntactic relations
+in different sentences (... sentences that were possibly uttered by 
+different individuals at different times, even!)
 
-The "semes" are meant to be abstractions derived from words, but still
-fairly closely related to them.  Thus, for example, if there's a 
-RelEx2Frame structure that connects two words, then one could have exactly
-the same structure connecting two semes. 
+Thus, "semes", as defined here, are meant to be an abstraction that 
+behaves much like "concepts" (whatever that may be).  Yet, they are
+also meant to be fairly closely related to "words": they are only 
+one small step towards the general goal of "conceptualization". In 
+particular, semes are meant to be sufficiently word-like that they
+can be used in most relations that words are used in.  so, for example,
+if there's a RelEx2Frame structure that connects two words, then one
+could have exactly the same structure connecting two semes. 
+
+Thus, "semes" are removed by only a small step from linguistic usage;
+they provide a needed abstraction on the road to true "concepts" and
+are just flexible enough to support basic tasks, such as (basic) entity 
+identification,  reference resolution, and (basic) reasoning.
 
 
 What is a Concept?
@@ -53,14 +65,14 @@ has been in terms of graph modifications performed on individual
 sentences, containing WordInstanceNodes, and links to WordNodes.
 In order to promote text input into concepts, and to reason with 
 concepts, we need to define what a concept is, and where its boundaries
-extend to.  At this point, the goal is not do define a super-abstract
+extend to.  At this point, the goal is not to define a super-abstract
 notion of a concept that passes all epistomological tests, but rather 
-a practical if flawed data structure that is adequate at representing
+a practical if flawed data structure that is adequate for representing
 data learned by reading, learned through linguistic corpus analysis. 
 The emphasis here is "flawed but practical": it should be just enough
-to take us to the next level of abstration.
+to take us to the next level of abstraction.
 
-Naively, a concept would seem to have the followng parts:
+Naively, a concept would seem to have the following parts:
 -- a SemeNode, to serve as an anchor (could be ConceptNode)
 -- a linguistic expression complex.
 -- a WordNet sense tag (optional)
@@ -413,7 +425,21 @@ Boostraping
 -- Merge SemeNodes if a plausible match is found. ("clustering")
 
 
+Current Implementation Status
+-----------------------------
+The current implementation does just about none of the whiz-bang stuff
+discussed above.  So far, just the most basic scaffolding has been set
+up.
 
+The promotion of word instances to semes is done by routines with the
+name "promoter" in them.  There are currently two such routines:
+
+-- trivial-promoter -- creates a new SemeNode for *every* input 
+                       WordInstanceNode
+-- same-lemma-promoter -- Creates a new SemeNode only if there isn't one
+                       already having the same lemma as the word instance.
+
+Both of these are nearly trivial.
 
 
 Deduction
