@@ -19,6 +19,14 @@ differ from that on another wire, and so devices which must merge
 data from two ports have a problem with figuring out how many data
 elements to swallow.  This could be fixed, I suppose ....
 
+See, however:
+The Art of the Propagator
+Alexey Radul; Gerald Jay Sussman
+local: MIT-CSAIL-TR-2009-002
+http://dspace.mit.edu/handle/1721.1/44215
+
+which perhaps offers a solution to the problem encountered here ... 
+
 
 MOTIVATION
 ==========

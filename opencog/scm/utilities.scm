@@ -45,6 +45,22 @@
 
 ; --------------------------------------------------------------
 ;
+; expr->string -- given a general expression, return a string for it.
+;
+; Given any general expression (including one that specifies cog atoms)
+; print it into a string, and rteturn the string.
+;
+(define (expr->string expr)
+	(define osp (open-output-string))
+	(display expr osp)
+	(let ((so (get-output-string osp)))
+		(close-port osp)
+		so
+	)
+)
+
+; --------------------------------------------------------------
+;
 ; cog-atom-incr --  Increment count truth value on "atom" by "cnt"
 ;
 ; If the current truth value on the atom is not a CountTruthValue,

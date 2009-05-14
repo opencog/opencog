@@ -22,18 +22,26 @@ scm
 (define (do-seme-processing)
 
 	; Get the new input sentences, and run them through the triples processing code.
-	(attach-sents-for-triple-processing (get-new-parsed-sentences))
-	; (create-triples)
-	; (dettach-sents-from-triple-anchor)
-
-	(for-each (lambda (x) (display "duude got a trip\n") (display x))
-		(get-new-triples)
+	; But do it one at a time.
+	(define (do-one-sentence sent)
+		(attach-sents-for-triple-processing (list sent))
+		(system "echo start work an a triple")
+		(system "date")
+		(create-triples)
+		(dettach-sents-from-triple-anchor)
+		(for-each 
+			(lambda (x) 
+				(system (string-join (list "echo done triple: \"" (expr->string x) "\"")))
+			)
+	      (get-new-triples)
+  		)
+	   (delete-result-triple-links)
 	)
 
+	(for-each do-one-sentence (get-new-parsed-sentences))
+
 	;  (get-new-triples)
-	;   (delete-result-triple-links)
 	;    (fetch-related-triples)
-	; (fire-all-triple-rules)
 	;(delete-sentences)
 
 )

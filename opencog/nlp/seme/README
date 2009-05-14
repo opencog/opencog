@@ -438,6 +438,11 @@ Re-examin Markov Logic Networks ...
 Phrasal verbs vs. prepositional phrases
 
 
+Notes
+-----
+Initially 51 secs to load 3K sentences
+8   27  16 secs per sentence ... 
+
 References:
 -----------
 [FEAT] Feature extraction. See
