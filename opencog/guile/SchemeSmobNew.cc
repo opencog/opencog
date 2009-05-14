@@ -314,7 +314,7 @@ std::vector<Handle>
 SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 {
 	// Verify that second arg is an actual list. Allow null list.
-	// (I think that there are legti null lists, right?)
+	// (I think that there are legit null lists, right?)
 	if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
 
@@ -333,6 +333,14 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 			SCM shandle = SCM_SMOB_OBJECT(satom);
 			Handle h(scm_to_ulong(shandle));
 			outgoing_set.push_back(h);
+		}
+		else if (scm_is_pair(satom) && !scm_is_null(satom_list))
+		{
+			// Allow lists to be specified: e.g. 
+			// (cog-new-link 'ListLink (list x y z))
+			// Do this via a recursive call, although we expect 
+			// the recursion to never be more than one deep.
+			outgoing_set = decode_handle_list(satom, subrname);
 		}
 		else
 		{
