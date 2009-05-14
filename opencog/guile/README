@@ -232,6 +232,32 @@ interface.
          #f
 
 
+=== cog-node? exp ===
+      Return #t if exp is an node, else return #f
+
+      Example:
+         ; Define a node and a link
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define y (cog-new-link 'ListLink x))
+         guile> (cog-node? x)
+         #t
+         guile> (cog-node? y)
+         #f
+
+
+=== cog-link? exp ===
+      Return #t if exp is an link, else return #f
+
+      Example:
+         ; Define a node and a link
+         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define y (cog-new-link 'ListLink x))
+         guile> (cog-link? x)
+         #f
+         guile> (cog-link? y)
+         #t
+
+
 === cog-name atom ===
       Return the name of the node. If the atom is not a node, 
       returns NIL.

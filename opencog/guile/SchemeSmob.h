@@ -69,6 +69,8 @@ class SchemeSmob
 		static SCM ss_delete(SCM);
 		static SCM ss_delete_recursive(SCM);
 		static SCM ss_atom_p(SCM);
+		static SCM ss_node_p(SCM);
+		static SCM ss_link_p(SCM);
 
 		// Atoms to ints, and back.
 		static SCM ss_atom(SCM);

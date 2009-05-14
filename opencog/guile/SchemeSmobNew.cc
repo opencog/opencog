@@ -1,5 +1,5 @@
 /*
- * SchemeSmobNew.c
+ * SchemeSmobNew.cc
  *
  * Scheme small objects (SMOBS) --creating new atoms -- for opencog.
  *
@@ -152,11 +152,46 @@ SCM SchemeSmob::ss_handle (SCM satom)
 }
 
 /* ============================================================== */
+/** Return true if s is an atom */
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
 	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, s))
 		return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/** Return true if s is a node */
+
+SCM SchemeSmob::ss_node_p (SCM s)
+{
+	if (! SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, s))
+		return SCM_BOOL_F;
+
+	SCM shandle = SCM_SMOB_OBJECT(s);
+   Handle h(scm_to_ulong(shandle));
+	Atom *a = TLB::getAtom(h);
+
+	if (dynamic_cast<Node *>(a)) return SCM_BOOL_T;
+
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/** Return true if s is a link */
+
+SCM SchemeSmob::ss_link_p (SCM s)
+{
+	if (! SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, s))
+		return SCM_BOOL_F;
+
+	SCM shandle = SCM_SMOB_OBJECT(s);
+   Handle h(scm_to_ulong(shandle));
+	Atom *a = TLB::getAtom(h);
+
+	if (dynamic_cast<Link *>(a)) return SCM_BOOL_T;
+
 	return SCM_BOOL_F;
 }
 
