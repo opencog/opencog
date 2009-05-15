@@ -55,7 +55,7 @@ WordRelQuery::~WordRelQuery()
 	pme = NULL;
 }
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
