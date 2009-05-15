@@ -36,8 +36,10 @@ scm
 			(load-cff-bz2-data fullname)
 			(system (string-join (list "echo done cff: \"" filename "\"")))
 			(system "date")
-			(system (string-join (list "mv \"" fullname "\" \"" donename "\"") ""))
 			(do-seme-processing)
+			(system (string-join (list "echo done seme processing: \"" filename "\"")))
+			(system (string-join (list "mv \"" fullname "\" \"" donename "\"") ""))
+			(system "date")
 		)
 	)
 
