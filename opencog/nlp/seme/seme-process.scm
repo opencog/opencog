@@ -106,7 +106,11 @@ scm
 	(if (not (null? atom))
 		; The cog-ad-hoc function for this is defined to perform
 		; a recursive fetch.
-		(cog-ad-hoc "fetch-incoming-set" atom)
+		; We do an extra recursion here, in case we were passed a list.
+		(if (pair? atom)
+			(for-each load-referers atom)
+			(cog-ad-hoc "fetch-incoming-set" atom)
+		)
 	)
 )
 
