@@ -90,6 +90,7 @@ scm
 			(if (null? iset)
 				(cog-ad-hoc "store-atom" atom)
 				(for-each do-store iset)
+			)
 		)
 	)
 	(do-store seme)
