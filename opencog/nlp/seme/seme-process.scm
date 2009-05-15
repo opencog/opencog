@@ -79,6 +79,23 @@ scm
 )
 
 ; --------------------------------------------------------------------
+; store-seme -- Save semes to SQL database
+;
+; This saves all hypergraphs that a given SemeNode participates in.
+; It does this by recursively exploring the incoming set of the seme.
+
+(define (store-seme seme)
+	(define (do-store atom)
+		(let ((iset (cog-incoming-set atom)))
+			(if (null? iset)
+				(cog-ad-hoc "store-atom" atom)
+				(for-each do-store iset)
+		)
+	)
+	(do-store seme)
+)
+
+; --------------------------------------------------------------------
 ;
 ; fetch-related-semes -- get semes from persistant storage.
 ;
@@ -126,6 +143,9 @@ scm
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
 		(let ((seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
+			(define (trip-seme trip)
+				(car (cog-outgoing-set (cadr (cog-outgoing-set trip))))
+			)
 
 			; Print resulting semes to track progress ,,, 
 			(for-each 
@@ -138,9 +158,10 @@ scm
 			; XXX we should fetch from SQL ... 
 			; (fetch-related-semes seme-list)
 			;
+
 			; Save the resulting semes to SQL storage.
 			(for-each 
-				(lambda (x) (cog-ad-hoc "store-atom" x))
+				(lambda (x) (store-seme (trip-seme x)))
 				seme-list
   			)
 		)

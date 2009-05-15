@@ -467,6 +467,10 @@ Phrasal verbs vs. prepositional phrases
 Notes
 -----
 Initially 51 secs to load 3K sentences
+However, if sqldb  is open, this explodes to 5 minutes!  (I guess 
+because an sql query is made for each new atom added to the atomspace).
+(err, well my system is 100% cpu even before running this...)
+
 8   27  16 secs per sentence ... 
 
 bugs: $prep maps to Ss, also to _subj ... 
