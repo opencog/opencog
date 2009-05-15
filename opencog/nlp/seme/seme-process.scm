@@ -125,7 +125,7 @@ scm
 ; 
 (define (fetch-related-semes triple-list)
 
-	; Given a triplie trip to some EvaluationLink, walk it down and pull
+	; Given a triple trip to some EvaluationLink, walk it down and pull
 	; out its word instances. Then pull out its word nodes. Load anything
 	; connected to these qord nodes from SQL. Then hunt down the 
 	; corresponding SemeNodes, and load those too.

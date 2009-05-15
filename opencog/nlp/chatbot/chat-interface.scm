@@ -24,11 +24,33 @@
 (define (say-id-english nick txt)
 
 	; Define a super-dooper cheesy way of getting the answer to the question
-	; Right now, its looks for WordNode's attached, via ListLink, to 
-	; an AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
+	; Right now, its looks for Nodes attached, via ListLink, to an 
+	; AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
 	; and is just a placeholder for now.
+	; Anyway, three different kinds of things can be found:
+	; WordNodes, almost always "yes", in answer to a yes/no question.
+	; WordInstanceNodes, in answer to simple pattern matching
+	; SemeNodes, in answer to triples matching.
+	; Handle each of these.
 	(define (get-simple-answer)
-		(cog-chase-link 'ListLink 'WordNode query-soln-anchor)
+		(define (do-one-answer answ)
+			(let* ((tipo (cog-type answ)))
+				(cond 
+					((eq? tipo 'WordNode) answ)
+					((eq? tipo 'WordInstanceNode) (word-inst-get-lemma answ))
+					((eq? tipo 'SemeNode) 
+						; the lemma-link for a seme might still be sitting on disk!
+						(load-referers answ)
+						(word-inst-get-lemma answ)
+					)
+					(else '())
+				)
+			)
+		)
+		(map 
+			(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
+			(cog-incoming-set query-soln-anchor)
+		)
 	)
 	(define (delete-simple-answer)
 		(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
