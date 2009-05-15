@@ -126,13 +126,23 @@ scm
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
 		(let ((seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
+
+			; Print resulting semes to track progress ,,, 
 			(for-each 
 				(lambda (x) 
 					(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
 				)
-	      	seme-list
+				seme-list
   			)
+
+			; XXX we should fetch from SQL ... 
 			; (fetch-related-semes seme-list)
+			;
+			; Save the resulting semes to SQL storage.
+			(for-each 
+				(lambda (x) (cog-ad-hoc "store-atom" x))
+				seme-list
+  			)
 		)
 	   (delete-result-triple-links)
 	)
