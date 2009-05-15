@@ -511,6 +511,8 @@ interface.
                                storage.
       fetch-atom handle     -- fetch indicated atom from SQL/persistent 
                                storage.
+      fetch-incoming-set    -- fetch the incoming set of the atom from 
+                               SQL storage. The fetch is recursive.
 
 
 == Example utilities ==

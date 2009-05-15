@@ -81,6 +81,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		// XXX we should also allow opt-args to be a list of handles
 		Handle h = verify_handle(optargs, "cog-ad-hoc fetch-incoming-set");
 
+		// The "true" flag here means "fetch resursive".
 		AtomSpace *as = &atomspace();
 		h = as->fetchIncomingSet(h, true);
 		return handle_to_scm(h);

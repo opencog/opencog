@@ -79,12 +79,12 @@ scm
 )
 
 ; --------------------------------------------------------------------
-; store-seme -- Save semes to SQL database
+; store-referers -- Store to SQL all hypergraphs that contain given atom
 ;
-; This saves all hypergraphs that a given SemeNode participates in.
-; It does this by recursively exploring the incoming set of the seme.
+; This stores all hypergraphs that the given atom participates in.
+; It does this by recursively exploring the incoming set of the atom.
 
-(define (store-seme seme)
+(define (store-referers atomo)
 	(define (do-store atom)
 		(let ((iset (cog-incoming-set atom)))
 			(if (null? iset)
@@ -93,7 +93,21 @@ scm
 			)
 		)
 	)
-	(do-store seme)
+	(do-store atomo)
+)
+
+; --------------------------------------------------------------------
+; load-referers -- Load from SQL all hypergraphs that contain given atom 
+;
+; This loads all hypergraphs that the given atom participates in.
+; It does this by recursively exploring the incoming set of the atom.
+
+(define (load-referers atom)
+	(if (not (null? atom))
+		; The cog-ad-hoc function for this is defined to perform
+		; a recursive fetch.
+		(cog-ad-hoc "fetch-incoming-set" atom)
+	)
 )
 
 ; --------------------------------------------------------------------
@@ -107,18 +121,25 @@ scm
 ; 
 (define (fetch-related-semes triple-list)
 
-	; Given a handle h to some EvaluationLink, walk it down and pull
-	; in any related SemeNode expressions.
-	; XXX I think this is broken since it doesn't recurse up the incoming set ...
-	(define (fetch-seme h)
-		(if (eq? 'SemeNode (cog-type h))
-			(cog-ad-hoc "fetch-incoming-set" h)
+	; Given a triplie trip to some EvaluationLink, walk it down and pull
+	; out its word instances. Then pull out its word nodes. Load anything
+	; connected to these qord nodes from SQL. Then hunt down the 
+	; corresponding SemeNodes, and load those too.
+	(define (fetch-seme trip)
+		(let* ((w-inst1 (car (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
+				(w-inst2 (cadr (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
+				(word1 (word-inst-get-lemma w-inst1))
+				(word2 (word-inst-get-lemma w-inst2))
+			)
+			(load-referers word1)
+			(load-referers word2)
+			(load-referers (cog-chase-link 'LemmaLink 'SemeNode word1))
+			(load-referers (cog-chase-link 'LemmaLink 'SemeNode word2))
 		)
-		(for-each fetch-seme (cog-outgoing-set h))
 	)
 
 	; Pull in related stuff for every triple that was created.
-	(for-each fetch-word triple-list)
+	(for-each fetch-seme triple-list)
 )
 
 ; --------------------------------------------------------------------
@@ -162,7 +183,7 @@ scm
 
 			; Save the resulting semes to SQL storage.
 			(for-each 
-				(lambda (x) (store-seme (trip-seme x)))
+				(lambda (x) (store-referers (trip-seme x)))
 				seme-list
   			)
 		)
