@@ -33,20 +33,19 @@ scm
 
 (define (same-lemma-promoter word-inst)
 
-	; Get the first seme with this lemma. If there are several, this
-	; fails (i.e. returns one of the semes "randomly").
-	(define (lemma-get-seme lemma)
-		 (car (cog-chase-link 'LemmaLink 'SemeNode lemma)))
+	; Get a list of semes with this lemma. 
+	(define (lemma-get-seme-list lemma)
+		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
 
 	(let* ((lemma (word-inst-get-lemma word-inst))
-			(seme (lemma-get-seme lemma))
+			(seme-list (lemma-get-seme-list lemma))
 		)
-		(if (null? seme)
+		(if (null? seme-list)
 			(let ((newseme (SemeNode (cog-name word-inst) (stv 1 1))))
 				(LemmaLink newseme lemma (stv 1 1))
 				newseme
 			)
-			seme
+			(car seme-list)
 		)
 	)
 )
