@@ -55,14 +55,22 @@ WordRelQuery::~WordRelQuery()
 	pme = NULL;
 }
 
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
    std::string str = atom->toString();
    printf ("%s\n", str.c_str());
 }
+#else
+static inline void prt(Atom *atom) {}
 #endif
+#ifdef DEBUG
+   #define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+   #define dbgprt(f, varargs...)
+#endif
+
 
 /* ======================================================== */
 /* Routines used to determine if an assertion is a query.
@@ -187,8 +195,8 @@ bool WordRelQuery::find_vars(Handle word_instance)
  */
 bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 {
-	// printf ("concept comp "); prt(aa);
-	// printf ("          to "); prt(ab);
+	dbgprt("comp patt inst "); prt(aa);
+	dbgprt("   to wrd inst "); prt(ab);
 
 	// If they're the same atom, then clearly they match.
 	if (aa == ab) return false;
@@ -198,35 +206,10 @@ bool WordRelQuery::word_instance_match(Atom *aa, Atom *ab)
 	Atom *ca = fl.follow_binary_link(aa, LEMMA_LINK);
 	Atom *cb = fl.follow_binary_link(ab, LEMMA_LINK);
 
-	// printf ("gen comp %d ", ca==cb); prt(ca);
-	// printf ("        to "); prt(cb);
+	dbgprt("gen comp %d ", ca==cb); prt(ca);
+	dbgprt("        to "); prt(cb);
 
 	if (ca == cb) return false;
-	return true;
-}
-
-/**
- * Does word instance aa have the word lemma (word root form) ab?
- * Return true if it does NOT (that is, if its mis-matched).
- * This routine is used to compare word instances of recently-read
- * sentences to those that occur in a repository of 'facts'.
- */
-bool WordRelQuery::word_inst_to_word_match(Atom *aa, Atom *ab)
-{
-	// printf ("concept comp "); prt(aa);
-	// printf ("          to "); prt(ab);
-
-	// If they're the same atom, then clearly they match.
-	if (aa == ab) return false;
-
-	// Look for incoming links that are LemmaLinks.
-	// The word lemma should be at the far end.
-	Atom *ca = fl.follow_binary_link(aa, LEMMA_LINK);
-
-	// printf ("gen comp %d ", ca==ab); prt(ca);
-	// printf ("        to "); prt(ab);
-
-	if (ca == ab) return false;
 	return true;
 }
 
@@ -280,6 +263,7 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	Type soltype = nsoln->getType();
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
+	    (SEME_NODE != soltype) && 
 	    (WORD_INSTANCE_NODE != soltype)) return true;
 
 	// DefinedLinguisticRelation nodes must usually match exactly;
@@ -297,20 +281,11 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	}
 
 	// Word instances match only if they have the same word lemma.
-	if (WORD_INSTANCE_NODE == soltype)
+	if ((WORD_INSTANCE_NODE == soltype) ||
+	    (SEME_NODE == soltype))
 	{
 		bool mismatch = word_instance_match(npat, nsoln);
-		// printf("tree_comp word instance mismatch=%d\n", mismatch);
-		return mismatch;
-	}
-
-	// A word-instance in the pattern (question) might match a word-node
-	// (concept) in a general-knowledge DB.
-	if ((WORD_INSTANCE_NODE == pattype) &&
-	    (WORD_NODE == soltype))
-	{
-		bool mismatch = word_inst_to_word_match(npat, nsoln);
-		// printf("tree_comp word instance mismatch=%d\n", mismatch);
+		dbgprt("word instance mismatch=%d\n", mismatch);
 		return mismatch;
 	}
 

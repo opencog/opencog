@@ -112,6 +112,9 @@
 
 			; First, pull in any semes that might be related...
 			(fetch-related-semes trips) 
+
+			; Grab just the first triple for now ... and try to 
+			; pattern-match it.
 			(if (not (null? trips))
 				(cog-ad-hoc "triple-question" (car (get-new-triples)))
 			)

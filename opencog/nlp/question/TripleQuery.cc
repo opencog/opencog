@@ -62,6 +62,7 @@ void TripleQuery::solve(AtomSpace *as)
 
 #define DEBUG
 #ifdef DEBUG
+	printf("\nPerforming triple query on the following:");
 	PatternMatchEngine::print_predicate(bound_vars, normed_predicate);
 #endif
 
