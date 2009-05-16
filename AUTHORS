@@ -1,25 +1,18 @@
-/* doxygen index page */
-/** 
-@mainpage OpenCog 
-@version unreleased
 @author Ben Goertzel
 @author Cassio Pennachin
 @author Murilo Saraiva de Queiroz
 @author Linas Vepstas 
 @author Nil Geisweiller
+@author Joel Pitt <joel@fruitionnz.com>
 @author Andre Senna <senna@vettalabs.com>
-@author Ari Heljakka <heljakka@gmail.com>
+@author Jared Wigmore <jared.wigmore@gmail.com>
 @author Carlos Lopes <dlopes@vettalabs.com>
 @author Fabricio Silva <fabricio@vettalabs.com>
-@author Gustavo Gama <gama@vettalabs.com>,
-@author Jared Wigmore <jared.wigmore@gmail.com>
-@author Joel Pitt <joel@fruitionnz.com>
+@author Gustavo Gama <gama@vettalabs.com>
 @author Moshe Looks <moshe@metacog.org>
+@author Ari Heljakka <heljakka@gmail.com>
 @author Rodrigo Barra
 @author Thiago Maia <thiago@vettatech.com>
 @author Tony Lofthouse <tony_lofthouse@btinternet.com>
 @author Trent Waddington <trent.waddington@gmail.com>
 @author Welter Silva <welter@vettalabs.com>
-@section DownloadSourceCode Download
-http://opencog.org/wiki/BuildingOpenCog
-*/

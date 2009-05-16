@@ -9,7 +9,7 @@
 
 */
 
-/** \mainpage tree.hh
+/** @file tree.hh
     \author   Kasper Peeters
     \version  2.3
     \date     29-Nov-2006
