@@ -85,7 +85,12 @@
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the lemma for of the word.
 (define (word-inst-get-lemma word-inst)
-	(car (cog-chase-link 'LemmaLink 'WordNode word-inst))
+	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
+		(if (null? wlist)
+			'()
+			(car wlist)
+		)
+	)
 )
 
 ; ---------------------------------------------------------------------
