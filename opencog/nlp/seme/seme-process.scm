@@ -159,12 +159,15 @@ scm
 ;
 
 (define (do-seme-processing)
+	(define cnt 0)
 
 	; Get the new input sentences, and run them through the triples processing code.
 	; But do it one at a time.
 	(define (do-one-sentence sent)
 		(attach-sents-for-triple-processing (list sent))
-		(system "echo start work an a triple")
+
+		(set! cnt (+ cnt 1))
+		(system (string-join (list "echo start work on sentence " (object->string cnt))))
 		(system "date")
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
@@ -173,15 +176,16 @@ scm
 				(car (cog-outgoing-set (cadr (cog-outgoing-set trip))))
 			)
 
-			; Print resulting semes to track progress ,,, 
-			(for-each 
-				(lambda (x) 
-					(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
-				)
-				seme-list
-  			)
+			; Print resulting semes to track progress ...
+			;;(for-each 
+			;;	(lambda (x) 
+			;;		(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
+			;;	)
+			;;	seme-list
+  			;;)
+			(system (string-join (list "echo found  " (object->string (length seme-list)) " triples")))
 
-			; XXX we should fetch from SQL ... 
+			; XXX we should fetch from SQL ... XXXX
 			; (fetch-related-semes seme-list)
 			;
 

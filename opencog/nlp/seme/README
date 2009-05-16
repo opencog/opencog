@@ -475,8 +475,7 @@ because an sql query is made for each new atom added to the atomspace).
 
 bugs: $prep maps to Ss, also to _subj ... 
 
-13 matches then dry spell at 9348
-============= Done Matching =======  at 9381
+Took 995 minutes to process 3870 sentences, used 466MBytes
 
 
 References:
