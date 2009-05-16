@@ -160,6 +160,7 @@ scm
 
 (define (do-seme-processing)
 	(define cnt 0)
+	(define seme-cnt 0)
 
 	; Get the new input sentences, and run them through the triples processing code.
 	; But do it one at a time.
@@ -183,7 +184,11 @@ scm
 			;;	)
 			;;	seme-list
   			;;)
-			(system (string-join (list "echo found  " (object->string (length seme-list)) " triples")))
+  			(set! seme-cnt (+ seme-cnt (length seme-list)))
+			(system (string-join (list "echo found  " 
+				(object->string (length seme-list)) " triples for a total of "
+				(object->string seme-cnt)))
+			)
 
 			; XXX we should fetch from SQL ... XXXX
 			; (fetch-related-semes seme-list)
