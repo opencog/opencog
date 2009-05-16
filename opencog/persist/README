@@ -311,6 +311,15 @@ which returns the UUID:
     guile> (cog-handle y)
     2
 
+Copying Databases
+-----------------
+Sooner or later you will want to make a copy of your datbase, for 
+backup purposes, or sharing. Here's the current 'best practices' for 
+that:
+
+   $ pg_dump triples
+
+That's all!
 
 Experimental Diary & Results
 ----------------------------
