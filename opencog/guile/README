@@ -180,8 +180,11 @@ interface.
 
 === cog-delete atom ===
       Delete the indicated atom, but only if it has no incoming links.
+
+      Returns #t if the atom was deleted, else returns #f if not deleted.
+
 === cog-delete-recursive atom ===
-      Delete the incoming atom, and all atoms that point at it.
+      Delete the indicated atom, and all atoms that point at it.
 
       Both functions return #t on success, else they return #f.
       If #f is returned, then the delete failed.

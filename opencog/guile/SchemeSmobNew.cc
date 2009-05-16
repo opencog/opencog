@@ -408,13 +408,16 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 /* ============================================================== */
 /**
- * delete the atom, but only if it has no incoming links.
+ * Delete the atom, but only if it has no incoming links.
+ * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
  */
 SCM SchemeSmob::ss_delete (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-delete");
 
 	AtomSpace *as = CogServer::getAtomSpace();
+	// AtomSpace::removeAtom() returns true if atom was deleted, 
+	// else returns false
 	bool rc = as->removeAtom(h, false);
 
 	if (rc) return SCM_BOOL_T;
