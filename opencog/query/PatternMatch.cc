@@ -253,6 +253,8 @@ bool Instantiator::walk_tree(Handle expr)
 }
 
 /**
+ * instantiate -- create a grounded expression from an ungrounded one.
+ *
  * Given a handle to an ungrounded expression, and a set of groundings,
  * this will create a grounded expression.
  *
@@ -265,13 +267,19 @@ bool Instantiator::walk_tree(Handle expr)
  */
 Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 {
+	if (Handle::UNDEFINED == expr)
+	{
+		logger().warn("%s: Asked to ground a null expression", __FUNCTION__);
+		return Handle::UNDEFINED;
+	}
 	vmap = &vars;
 	oset.clear();
 	walk_tree(expr);
 	if (oset.size() != 1)
 	{
-		logger().warn("%s: outgoing set size %d is insane!",
-			__FUNCTION__, oset.size());
+		logger().warn("%s: failure to ground expression (found %d groundings)\n"
+			"Ungrounded expr is %s\n",
+			__FUNCTION__, oset.size(), TLB::getAtom(expr)->toString().c_str());
 	}
 	if (oset.size() >= 1)
 		return oset[0];
