@@ -1,3 +1,4 @@
+scm
 ;
 ; chat-interface.scm
 ;
@@ -34,7 +35,7 @@
 	; Handle each of these.
 	(define (get-simple-answer)
 		(define (do-one-answer answ)
-			(let* ((tipo (cog-type answ)))
+			(let ((tipo (cog-type answ)))
 				(cond 
 					((eq? tipo 'WordNode) answ)
 					((eq? tipo 'WordInstanceNode) (word-inst-get-lemma answ))
@@ -59,8 +60,11 @@
 		;; display *all* items in the list.
 		(define (show-item wlist)
 			(if (not (null? wlist))
-				(let ()
-					(display (cog-name (car wlist)))
+				(let ((wrd (car wlist)))
+					(if (null? wrd)
+						(display "(null)")
+						(display (cog-name wrd))
+					)
 					(display " ")
 					(show-item (cdr wlist))
 				)
@@ -158,4 +162,5 @@
 	(delete-new-parsed-sent-links)
 	""
 )
-
+.
+exit
