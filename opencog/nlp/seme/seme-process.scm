@@ -135,6 +135,40 @@ scm
 )
 
 ; --------------------------------------------------------------------
+; delete-sentence -- delete all atoms associated with a sentence.
+;
+; Delete the parses and word-instances associated with the sentence,
+; including LemmaLink's, ReferenceLinks, RelEx relations, and 
+; link-grammar linkages.
+
+(define (delete-sentence sent)
+	(define (delete-word-instance wi)
+		(cog-delete-recursive wi)
+	)
+
+	(define (delete-parse parse)
+		(for-each 
+			(lambda (x) 
+				(if (eq? 'WordInstanceLink (cog-type x))
+					(delete-word-instance (car (cog-outgoing-set x)))
+				)
+			)
+			(cog-incoming-set parse)
+		)
+		(cog-delete-recursive parse)
+	)
+
+	(for-each 
+		(lambda (x) 
+			(if (eq? 'ParseLink (cog-type x))
+				(delete-parse (car (cog-outgoing-set x)))
+			)
+		)
+		(cog-incoming-set sent)
+	)
+)
+
+; --------------------------------------------------------------------
 ;
 ; fetch-related-semes -- get semes from persistant storage.
 ;
@@ -231,12 +265,13 @@ scm
 			(for-each delete-hypergraph trip-list)
 		)
 
-		; Delete the sentence XXXXXXXXXXXX
+		; Delete the sentence, its parses, and the word-instances
+		(delete-sentence sent)
 	)
 
-	(for-each do-one-sentence (get-new-parsed-sentences))
+; xxxxxxxxxx delete the document
 
-	;(delete-sentences)
+	(for-each do-one-sentence (get-new-parsed-sentences))
 )
 
 
