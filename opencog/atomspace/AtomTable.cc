@@ -566,6 +566,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
     }
     if (atom->getIncomingSet())
     {
+        Logger::Level save = logger().getBackTraceLevel();
+        logger().setBackTraceLevel(Logger::NONE);
         logger().warn("AtomTable.extract(): "
            "attempting to extract atom with non-empty incoming set: %s\n",
            atom->toShortString().c_str());
@@ -575,6 +577,8 @@ HandleEntry* AtomTable::extract(Handle handle, bool recursive)
             logger().warn("\tincoming: %s\n", 
                  TLB::getAtom(it->handle)->toShortString().c_str());
         }
+        logger().setBackTraceLevel(save);
+        logger().warn("AtomTable.extract(): stack trace for previous error follows");
         atom->unsetRemovalFlag();
         return result;
     }
