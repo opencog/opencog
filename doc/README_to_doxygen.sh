@@ -67,7 +67,7 @@ do
     # don't include doc dir (or maybe we should)
     #if [ `dirname $i | awk -F "/" '{print $2}'` != "doc" ]; then
         SUB_DEPTH=$(( ${DEPTH} + 1 ))
-        if [ `dirname $i | awk -F "/" '{ print NF }'` -ge ${SUB_DEPTH} ]
+        if [ `dirname $i | awk -F "/" '{ print NF }'` -eq ${SUB_DEPTH} ]
         then
             SUBPATH_UNDERSCORE=`dirname $i | sed -e 's/\//_/g'`
             # Remember to remove ._
