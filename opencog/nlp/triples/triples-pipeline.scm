@@ -47,10 +47,18 @@ scm
 )
 
 ; Dettach sentences that were waiting for triples processing
+; However, dettach only those that don't have a VariableNode,
+; since some of the ImplicationLinks will be looking for an
+; attachment.
 (define (dettach-sents-from-triple-anchor)
-	(for-each (lambda (x) (cog-delete x))
-		(cog-incoming-set ready-for-triples-anchor)
+	(define (remove-anch l)
+		(if (eq? 'VariableNode (cog-type (cadr (cog-outgoing-set l))))
+			#f
+			(cog-delete l)
+		)
 	)
+
+	(for-each remove-anch (cog-incoming-set ready-for-triples-anchor))
 )
 
 ; -----------------------------------------------------------------------
