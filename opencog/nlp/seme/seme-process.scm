@@ -115,6 +115,26 @@ scm
 )
 
 ; --------------------------------------------------------------------
+; delete-hypergraph -- delete a hypergraph and everything "under" it
+;
+; If the indicated atom has no incoming links, then delete it. Repeat
+; recursively downwards, following the *outgoing* set of any links 
+; encountered.
+
+(define (delete-hypergraph atom)
+	(if (cog-node? atom) 
+		(cog-delete atom)
+		(let* ((oset (cog-outgoing-set atom))
+				(flg (cog-delete atom))
+			)
+			(if flg ;; halt recursion if link was not delete-able
+				(for-each delete-hypergraph oset)
+			)
+		)
+	)
+)
+
+; --------------------------------------------------------------------
 ;
 ; fetch-related-semes -- get semes from persistant storage.
 ;
@@ -203,7 +223,15 @@ scm
 				trip-seme-list
   			)
 		)
-	   (delete-result-triple-links)
+
+		; Delete the links to the recently generated triples,
+		; and then delete the triples themselves.
+		(let ((trip-list (get-new-triples)))
+	   	(delete-result-triple-links)
+			(for-each delete-hypergraph trip-list)
+		)
+
+		; Delete the sentence XXXXXXXXXXXX
 	)
 
 	(for-each do-one-sentence (get-new-parsed-sentences))
