@@ -165,6 +165,7 @@ class Instantiator
 		std::vector<Handle> oset;
 		bool walk_tree(Handle tree);
 		Handle execution_link(void);
+		bool did_exec;
 
 	public:
 		AtomSpace *as;
@@ -230,8 +231,10 @@ bool Instantiator::walk_tree(Handle expr)
 	foreach_outgoing_handle(expr, &Instantiator::walk_tree, this);
 
 	// Fire execution links, if found.
+	did_exec = false;  // set flag on top-level only
 	if (t == EXECUTION_LINK)
 	{
+		did_exec = true;
 		Handle sh = execution_link();
 		oset = save_oset;
 		if (Handle::UNDEFINED != sh)
@@ -274,8 +277,9 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 	}
 	vmap = &vars;
 	oset.clear();
+	did_exec = false;
 	walk_tree(expr);
-	if (oset.size() != 1)
+	if ((false == did_exec) && (oset.size() != 1))
 	{
 		logger().warn("%s: failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
