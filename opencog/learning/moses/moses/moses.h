@@ -55,23 +55,38 @@ typedef std::multimap<fitness_t,
 typedef ordered_programs::iterator ordered_programs_it;
 
 
-//BScoring = behavioral scoring function (output behaviors)
+/**
+ * The metapopulation will store the experession(as scored tree) that were
+ * encountered during the learning process(which some of them,dominated by
+ * exsiting ones,might be skipped as non-promising)
+ * 
+ * The metapopulation is updated in iterations. In each iteration, one of its
+ * elements is selected as an exemplar. The exemplar is then used for building a
+ * new deme (that will, firther, extend the metapopulation)
+ * 
+ * NOTE:
+ *   BScoring = behavioral scoring function (output behaviors), we use std::greater
+ *   because we are maxumizing
+ *      
+ */
 template<typename Scoring, typename BScoring, typename Optimization>
-struct metapopulation : public set < behavioral_scored_combo_tree,
-                                     std::greater<behavioral_scored_combo_tree> > {
-    //greater because we are maximizing
 
+struct metapopulation : public set < behavioral_scored_tree,
+                                     std::greater<behavioral_scored_tree> > {
+    /**
+     * the parameter to decide how to select the deme from the population
+     */
     struct parameters {
         parameters() :
-            local_cache(false),      //are instance scores cached at the deme level?
-            global_cache(false),     //at the global (program) level across demes?
-            simplify_all(false),     //are all programs generated simplified?
+            local_cache(false),      // are instance scores cached at the deme level?
+            global_cache(false),     // at the global (program) level across demes?
+            simplify_all(false),     // are all programs generated simplified?
             
-            selection_max_range(11), //when doing selection of examplars according to
+            selection_max_range(11), // when doing selection of examplars according to
             //2^-n, where n is complexity, only examplars with
             //p>=2^-selection_max_range will be considered
 
-            scoring_epsilon(0.01)    //scores are considered equal when within epsilon
+           scoring_epsilon(0.01)    // scores are considered equal when within epsilon
         { }
 
         bool local_cache;
@@ -82,6 +97,18 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         double scoring_epsilon;
     };
 
+    /**
+     *  Constuctor for the class metapopulation
+     *  
+     * @param _rng the rand number 
+     * @param base the combo tree to be learned
+     * @param t the type of expression to be learned 
+     * @param si the reduct rule for reducting 
+     * @param sc the scoring function for scoring
+     * @param bsc the behavior scoring function
+     * @param opt the optimization should be providing for the learning
+     * @param pa the parameter for selecting the deme 
+     */
     metapopulation(opencog::RandGen& _rng, const combo_tree& base,
                    const combo::type_tree& t, const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
@@ -97,22 +124,37 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                (base, combo_tree_behavioral_score(behavioral_score(),
                                                   combo_tree_score(_best_score.first, 0))));
     }
-
+  
     ~metapopulation() {
         delete _rep;
         delete _deme;
     }
-
+    /**
+     * return the n_evals
+     */
     int n_evals() const {
         return _n_evals;
     }
+
+    /**
+     * return the best score
+     */
     const combo_tree_score& best_score() const {
         return _best_score;
     }
+
+    /**
+     * return the best tree
+     */
     const std::vector<combo_tree>& best_trees() const {
         return _best_trees;
     }
 
+    /**
+     * select the exemplar from the population
+     * 
+     *@return return the iterator
+     */
     const_iterator select_exemplar() const {
         OC_ASSERT(!empty(),
                          "Empty metapopulation in function select_exemplar().");
@@ -145,7 +187,20 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
 
-    //it returns true if expansion has succeeded, false otherwise
+    /**
+     * expand do representation-building and create a deme first, and then do some
+     * optimization according to the scoring function, and add all unique non-dominated
+     * trees in the final deme as potential exemplars for future demes.
+     *
+     *@param max_evals the max evals
+     *@param max_score the max score
+     *@param os the operator set
+     *@param perceptions a set of perceptions of an interactive agent
+     *@param actions a set of actions of an interactive agent
+     *
+     *@return return true if expansion has succeeded, false otherwise
+     *
+     */
     bool expand(int max_evals,
                 const combo_tree_score& max_score,
                 const operator_set* os = NULL,
@@ -253,7 +308,15 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         return !empty();
     }
 
-
+    /**
+     * Create the deme
+     *
+     * @param os the operator set
+     * @param perceptions a set of perceptions of an interactive agent
+     * @param actions a set of actions of an interactive agent
+     *
+     * @return  return true if it creates deme successfully,otherwise false.
+     */
 
     bool create_deme(const operator_set* os = NULL,
                      const combo_tree_ns_set* perceptions = NULL,
@@ -297,6 +360,16 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         return true;
     }
 
+    /**
+     * Do some optimization according to the scoring function
+     *
+     * @param max_evals the max evals
+     * @param max_for_slice the max for slice 
+     * @param max_score the max score 
+     * 
+     * @return return the number of evaluations actually performed,
+     *         return -1 if all available is evaluated.
+     */
 
     int optimize_deme(int max_evals, int max_for_slice,
                       const combo_tree_score& max_score) {
@@ -333,7 +406,11 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
 
-
+    /**
+     * close deme
+     *
+     * @param op  the ordered programs by the fitness
+     */
     void close_deme(ordered_programs& op) {
         if (_rep == NULL || _deme == NULL)
             return;
@@ -452,7 +529,13 @@ typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
 combo_tree_ns_set;
 
 
-
+/**
+ * the main function of MOSES
+ *
+ * @param mp the metapopulation 
+ * @param max_evals the max evaluations
+ * @param max_score the max score tree
+ */
 
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
@@ -480,7 +563,8 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 
     end = clock ();
 
-    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl << endl;
+    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC
+         << "seconds" << endl << endl;
 
 }
 
@@ -491,10 +575,21 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
     moses(mp, max_evals, combo_tree_score(max_score, worst_possible_score.second));
 }
 
-
-// Lists of relevant operators, perceptions, and actions may or may not be
-// provided. The initial design assumed fixed lists, this version
-// has a constructor including these parameters, specific for actions
+/**
+ * @brief The main function of moses
+ *
+ * Lists of relevant operators, perceptions, and actions may or may not be
+ * provided. The initial design assumed fixed lists, this version
+ * has a constructor including these parameters, specific for actions
+ * 
+ * @param mp the metapopulation
+ * @param max_evals the max evlautions
+ * @parma max_score the max score, the type is tree_score
+ * @param os the operator set
+ * @param perceptions the set of perceptions of the interactive agent
+ * @param actions the set of actions of the interactive agent
+ * @param op the ordered programs by the fitness
+ */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals,
@@ -527,7 +622,8 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
     }
 
     end = clock ();
-    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl << endl;
+    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC
+         << "seconds" << endl << endl;
 }
 
 template<typename Scoring, typename Domination, typename Optimization>
@@ -545,10 +641,21 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 
 
 
-
-// Lists of relevant operators, perceptions, and actions may or may not be
-// provided. The initial design assumed fixed lists, this version
-// has a constructor including these parameters, specific for actions
+/**
+ * @brief The sliced version of moses
+ *
+ * Lists of relevant operators, perceptions, and actions may or may not be
+ * provided. The initial design assumed fixed lists, this version
+ * has a constructor including these parameters, specific for actions
+ * 
+ * @param mp the metapopulation
+ * @param max_evals the max evlautions
+ * @parma max_score the max score, the type is score tree
+ * @param os the operator set
+ * @param perceptions the set of perceptions of the interactive agent
+ * @param actions the set of actions of the interactive agent
+ * @param op the ordered programs by the fitness
+ */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals,
@@ -591,6 +698,22 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
     cout << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl;
 }
 
+
+/**
+ * @brief The sliced version of moses
+ *
+ * Lists of relevant operators, perceptions, and actions may or may not be
+ * provided. The initial design assumed fixed lists, this version
+ * has a constructor including these parameters, specific for actions
+ * 
+ * @param mp the metapopulation
+ * @param max_evals the max evlautions
+ * @parma max_score the max score, the type is score_t
+ * @param os the operator set
+ * @param perceptions the set of perceptions of the interactive agent
+ * @param actions the set of actions of the interactive agent
+ * @param op the ordered programs by the fitness
+ */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals, score_t max_score,
