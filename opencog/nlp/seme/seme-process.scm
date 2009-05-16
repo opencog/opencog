@@ -172,32 +172,35 @@ scm
 		(system "date")
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
-		(let ((seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
-			(define (trip-seme trip)
-				(car (cog-outgoing-set (cadr (cog-outgoing-set trip))))
-			)
+		(let ((trip-seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
 
 			; Print resulting semes to track progress ...
 			;;(for-each 
 			;;	(lambda (x) 
 			;;		(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
 			;;	)
-			;;	seme-list
+			;;	trip-seme-list
   			;;)
-  			(set! seme-cnt (+ seme-cnt (length seme-list)))
+  			(set! seme-cnt (+ seme-cnt (length trip-seme-list)))
 			(system (string-join (list "echo found  " 
-				(object->string (length seme-list)) " triples for a total of "
+				(object->string (length trip-seme-list)) " triples for a total of "
 				(object->string seme-cnt)))
 			)
 
 			; XXX we should fetch from SQL ... XXXX
-			; (fetch-related-semes seme-list)
+			; (fetch-related-semes trip-seme-list)
 			;
 
 			; Save the resulting semes to SQL storage.
 			(for-each 
-				(lambda (x) (store-referers (trip-seme x)))
-				seme-list
+				(lambda (x) 
+					; There are *two* semes per triple that need storing.
+					(let ((seme-pair (cog-outgoing-set (cadr (cog-outgoing-set x)))))
+						(store-referers (car seme-pair))
+						(store-referers (cadr seme-pair))
+					)
+				)
+				trip-seme-list
   			)
 		)
 	   (delete-result-triple-links)
