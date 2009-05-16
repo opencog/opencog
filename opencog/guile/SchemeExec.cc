@@ -1,5 +1,5 @@
 /*
- * SchemeExec.c
+ * SchemeExec.cc
  *
  * Execute ExecutionLink's
  * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>

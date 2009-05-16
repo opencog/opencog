@@ -1,5 +1,5 @@
 /*
- * SchemeEval.c
+ * SchemeEval.cc
  *
  * Simple scheme evaluator
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -582,7 +582,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		// errors that are otherwise invisible to the user/developer.
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
-		logger().error("do_scm_eval(): %s\n", str);
+		logger().error("%s: guile error was: %s\nFailing expression was %s",
+			 __FUNCTION__, str, prt(sexpr).c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);
