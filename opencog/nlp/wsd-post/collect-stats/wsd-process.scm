@@ -21,6 +21,7 @@ scm
 ; processed ... 
 ;
 (define (wsd-process-data input-dir done-dir num-to-do)
+	(define cnt 0)
 
 	(define (process-file filename)
 		(let ((fullname (string-join (list input-dir filename) "/"))
@@ -32,7 +33,10 @@ scm
 			(system (string-join (list "echo \"" (string-join 
 				(map (lambda (x) (string-join (list (object->string x) "\n"))) 
 				(cog-report-counts))) "\"")))
-			(system (string-join (list "echo start article: \"" filename "\"")))
+			(system (string-join (list "echo start article "
+				(object->string cnt)
+				": \"" filename "\""))
+			)
 			(system "date")
 			(load-cff-data fullname)
 			(system (string-join (list "echo done cff: \"" filename "\"")))
@@ -47,6 +51,7 @@ scm
 			(delete-sentences)
 			(system (string-join (list "echo done delete: \"" filename "\"")))
 			(system "date")
+			(set! cnt (+ cnt 1))
 		)
 	)
 	
