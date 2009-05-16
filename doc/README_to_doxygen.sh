@@ -51,7 +51,7 @@ http://opencog.org/wiki/BuildingOpenCog
 else
     echo "//---- 
 /*! @page ${PATH_UNDERSCORE} ${LAST_DIR}
-From directory \\ref ${SOURCE_PATH#$ROOT_SRC_DIR/}
+From directory \\ref ./${SOURCE_PATH#$ROOT_SRC_DIR/}/
     "
 fi
 echo "@section submodules Components:"

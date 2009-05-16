@@ -1,0 +1,6 @@
+
+* embodiment directory has embodiment related scripts.
+
+* run_chatbot_and_servers.sh - run the cogserver, the RelEx server, and the
+cogita chat-bot in the tabs of a gnome-terminal.
+
