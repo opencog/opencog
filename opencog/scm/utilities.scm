@@ -279,7 +279,10 @@
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
 	; cog-filter-map returns the return value from proc, we pass it on
 	; in turn, so make sure this is last statement
-	(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+	(if (null? anchor)
+		'()
+		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+	)
 )
 
 ; -----------------------------------------------------------------------
