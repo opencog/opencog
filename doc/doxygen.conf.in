@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "OpenCog API Documentation"
+PROJECT_NAME           = "OpenCog Framework"
 PROJECT_NUMBER         = "Branch: @BZR_NICK@, revision @BZR_REVNO@"
 OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/doc
 CREATE_SUBDIRS         = YES
