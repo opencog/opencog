@@ -76,6 +76,12 @@ scm
 		(for-each (lambda (x) (ListLink result-triples-anchor x (stv 1 1)))
 			(cog-outgoing-set triple-list) 
 		)
+
+		;; Delete the ListLink that binds all of these together. This 
+		;; ListLink was created when the ImplicationLink was run, to
+		;; hold the results. But from now-on out, it will only get in
+		;; the way, so get rid of it.
+		(cog-delete triple-list)
 	)
 
 	; First, create all of the preposition phrases that we'll need.
