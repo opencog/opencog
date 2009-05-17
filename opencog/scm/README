@@ -1,14 +1,28 @@
 
-                      scm
-                      ---
+                                  scm
+                                  ---
 
-This repository contains misc scheme scripts.
+This repository contains assorted routines, written in scheme, for manipulating
+OpenCog atoms and systems, in various general ways. These utilities include:
 
-Before using the opencog sheme interpreter, you will want to run
-the shell file "load.sh" in order to load various basic opencog-related 
-definitions and modules.
+-- file-utils.scm
+   + list files in directory
+   + load scheme code from file
+   + execute scheme code from string orm port.
 
-The "wiring" or "cgw" subsystem is explained in "WIRING-README".
+-- utilities.scm
+   + increment a CountTruthValue
+   + get all atoms of a certain given type
+   + get all incoming/outgoing atoms of a given type
+   + apply filter to a list of atoms
+   + get "partner" atoms connected by links in various ways
+   
+
+The "wires" directory contains a currently abandoned, but interesting
+implementation of a "constraint propagation system", wherein OpenCog 
+hypergraphs are treated like electrical circuits, with interactions
+flowing between them. The idea may be worth resurrecting, although
+currently there's no strong motivation.
 
 Handy hints:
 (turn-on-debugging)
