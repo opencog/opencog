@@ -17,7 +17,9 @@ normally would be automatically loaded with the opencog.conf file.
  * nlp-utils: Some mini nlp-related utilities, mostly for pointer
    chasing nlp-specific structures, e.g. getting all the parses of
    a sentence, or getting all of the word instances in a parse, and
-   so on.
+   so on. Also:
+
+   + delete-sentence
 
  * processing-utils.scm: Utilities pertaining to NLP pipeline processing.
    Defines an anchor node where newly parsed sentences can be found.

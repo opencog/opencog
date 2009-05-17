@@ -79,44 +79,6 @@ scm
 )
 
 ; --------------------------------------------------------------------
-; delete-sentence -- delete all atoms associated with a sentence.
-;
-; Delete the parses and word-instances associated with the sentence,
-; including LemmaLink's, ReferenceLinks, RelEx relations, and 
-; link-grammar linkages.
-
-(define (delete-sentence sent)
-	(define (delete-word-instance wi)
-		(cog-delete-recursive wi)
-	)
-
-	(define (delete-parse parse)
-		(for-each 
-			(lambda (x) 
-				(if (eq? 'WordInstanceLink (cog-type x))
-					(delete-word-instance (car (cog-outgoing-set x)))
-				)
-			)
-			(cog-incoming-set parse)
-		)
-		(cog-delete-recursive parse)
-	)
-
-	(for-each 
-		(lambda (x) 
-			(if (eq? 'ParseLink (cog-type x))
-				(delete-parse (car (cog-outgoing-set x)))
-			)
-		)
-		(cog-incoming-set sent)
-	)
-
-	; This delete will fail if there are still incoming links ... 
-	; this is intentional. Its up to the caller to cleanup.
-	(cog-delete sent)
-)
-
-; --------------------------------------------------------------------
 ;
 ; fetch-related-semes -- get semes from persistant storage.
 ;
