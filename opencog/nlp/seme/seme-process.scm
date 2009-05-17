@@ -166,6 +166,10 @@ scm
 		)
 		(cog-incoming-set sent)
 	)
+
+	; This delete will fail if there are still incoming links ... 
+	; this is intentional. Its up to the caller to cleanup.
+	(cog-delete sent)
 )
 
 ; --------------------------------------------------------------------
@@ -267,9 +271,11 @@ scm
 
 		; Delete the sentence, its parses, and the word-instances
 		(delete-sentence sent)
-	)
 
-; xxxxxxxxxx delete the document
+		; Delete upwards ... this deletes the link to the document
+		; XXX but it leaves a DocumentNode with nothing pointing to it.
+		(cog-delete-recursive sent)
+	)
 
 	(for-each do-one-sentence (get-new-parsed-sentences))
 )
