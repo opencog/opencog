@@ -415,11 +415,16 @@ SCM SchemeSmob::ss_delete (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-delete");
 
+	// The remove will fail/log warning if the incoming set isn't null.
+	Atom *a = TLB::getAtom(h);
+	if (NULL != a->getIncomingSet()) return SCM_BOOL_F;
+
 	AtomSpace *as = CogServer::getAtomSpace();
 	// AtomSpace::removeAtom() returns true if atom was deleted, 
 	// else returns false
 	bool rc = as->removeAtom(h, false);
 
+	// rc should always be true at this point ...
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
