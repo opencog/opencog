@@ -76,6 +76,26 @@
 	)
 )
 
+; --------------------------------------------------------------------
+; delete-hypergraph -- delete a hypergraph and everything "under" it
+;
+; If the indicated atom has no incoming links, then delete it. Repeat
+; recursively downwards, following the *outgoing* set of any links 
+; encountered.
+
+(define (delete-hypergraph atom)
+	(if (cog-node? atom) 
+		(cog-delete atom)
+		(let* ((oset (cog-outgoing-set atom))
+				(flg (cog-delete atom))
+			)
+			(if flg ;; halt recursion if link was not delete-able
+				(for-each delete-hypergraph oset)
+			)
+		)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ;
 ; cog-get-atoms atom-type

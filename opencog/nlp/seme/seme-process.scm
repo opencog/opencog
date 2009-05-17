@@ -79,62 +79,6 @@ scm
 )
 
 ; --------------------------------------------------------------------
-; store-referers -- Store to SQL all hypergraphs that contain given atom
-;
-; This stores all hypergraphs that the given atom participates in.
-; It does this by recursively exploring the incoming set of the atom.
-
-(define (store-referers atomo)
-	(define (do-store atom)
-		(let ((iset (cog-incoming-set atom)))
-			(if (null? iset)
-				(cog-ad-hoc "store-atom" atom)
-				(for-each do-store iset)
-			)
-		)
-	)
-	(do-store atomo)
-)
-
-; --------------------------------------------------------------------
-; load-referers -- Load from SQL all hypergraphs that contain given atom 
-;
-; This loads all hypergraphs that the given atom participates in.
-; It does this by recursively exploring the incoming set of the atom.
-
-(define (load-referers atom)
-	(if (not (null? atom))
-		; The cog-ad-hoc function for this is defined to perform
-		; a recursive fetch.
-		; We do an extra recursion here, in case we were passed a list.
-		(if (pair? atom)
-			(for-each load-referers atom)
-			(cog-ad-hoc "fetch-incoming-set" atom)
-		)
-	)
-)
-
-; --------------------------------------------------------------------
-; delete-hypergraph -- delete a hypergraph and everything "under" it
-;
-; If the indicated atom has no incoming links, then delete it. Repeat
-; recursively downwards, following the *outgoing* set of any links 
-; encountered.
-
-(define (delete-hypergraph atom)
-	(if (cog-node? atom) 
-		(cog-delete atom)
-		(let* ((oset (cog-outgoing-set atom))
-				(flg (cog-delete atom))
-			)
-			(if flg ;; halt recursion if link was not delete-able
-				(for-each delete-hypergraph oset)
-			)
-		)
-	)
-)
-
-; --------------------------------------------------------------------
 ; delete-sentence -- delete all atoms associated with a sentence.
 ;
 ; Delete the parses and word-instances associated with the sentence,
