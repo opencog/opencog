@@ -475,7 +475,10 @@ because an sql query is made for each new atom added to the atomspace).
 
 bugs: $prep maps to Ss, also to _subj ... 
 
-Took 995 minutes to process 3870 sentences, used 466MBytes
+Took 995 minutes to process 3870 sentences, used 466 MBytes
+Took 288 minutes to process 3000 sentences, used 284 MBytes
+From 3000 sentences, got 6978 triples
+But only 1475 unique triples on 1475 semes
 
 
 References:

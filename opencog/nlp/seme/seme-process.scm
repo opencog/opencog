@@ -62,16 +62,18 @@ scm
 
 (define (promote-to-seme promoter atom-list)
 	(define (promote atom)
-		(if (eq? 'WordInstanceNode (cog-type atom))
-			(promoter atom)
-			(if (cog-link? atom)
+		(cond
+			((eq? 'WordInstanceNode (cog-type atom))
+				(promoter atom)
+			)
+			((cog-link? atom)
 				(cog-new-link 
 					(cog-type atom) 
 					(map promote (cog-outgoing-set atom))
 					(cog-tv atom)
 				)
-				atom
 			)
+			(else atom)
 		)
 	)
 
@@ -136,7 +138,8 @@ scm
 		(system "date")
 		(create-triples)
 		(dettach-sents-from-triple-anchor)
-		(let ((trip-seme-list (promote-to-seme same-lemma-promoter (get-new-triples))))
+		(let* ((trip-list (get-new-triples))
+			 	(trip-seme-list (promote-to-seme same-lemma-promoter trip-list)))
 
 			; Print resulting semes to track progress ...
 			;;(for-each 
@@ -166,19 +169,18 @@ scm
 				)
 				trip-seme-list
   			)
-		)
 
-		; Delete the links to the recently generated triples,
-		; and then delete the triples themselves.
-		(let ((trip-list (get-new-triples)))
-	   	(delete-result-triple-links)
+			; Delete the links to the recently generated triples,
+			; and then delete the triples themselves.
+			(delete-result-triple-links)
 			(for-each delete-hypergraph trip-list)
 		)
 
 		; Delete the sentence, its parses, and the word-instances
 		(delete-sentence sent)
 
-		; Delete upwards ... this deletes the link to the document
+		; Delete upwards ... this deletes the link to the document,
+		; and also the lonk to the new-parsed-sentences anchor.
 		; XXX but it leaves a DocumentNode with nothing pointing to it.
 		(cog-delete-recursive sent)
 	)
