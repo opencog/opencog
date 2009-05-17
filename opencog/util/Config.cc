@@ -96,12 +96,14 @@ static const char* DEFAULT_CONFIG_PATHS[] =
 
 
 // constructor
-void Config::load(const char* filename)
+void Config::load(const char* filename, bool resetFirst)
 {
     if (filename == NULL) filename = DEFAULT_CONFIG_FILENAME;
 
-    // Reset to default values
-    reset();
+    if (resetFirst) {
+        // Reset to default values
+        reset();
+    }
 
     // Search for the filename in a bunch of typical locations.
     ifstream fin;

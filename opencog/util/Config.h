@@ -78,7 +78,7 @@ public:
     virtual void reset();
 
     // Load passed file and redefines values for parameters.
-    void load(const char* config_file);
+    void load(const char* config_file, bool resetFirst = true);
 
     // Checks whether a parameter exists
     const bool has(const std::string &parameter_name) const;

@@ -24,7 +24,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <getopt.h>
+
 #include <boost/filesystem/operations.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
+
+#include <utility>
+#include <string>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/load-file.h>
@@ -34,6 +41,7 @@
 #include <opencog/util/misc.h>
 
 using namespace opencog;
+using namespace std;
 
 static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
@@ -56,96 +64,143 @@ static const char* DEFAULT_MODULE_PATHS[] =
     NULL
 };
 
-static void usage(char* progname)
+static void usage(const char* progname)
 {
-    std::cerr << "Usage: " << progname << " [-c <config-file>]\n\n";
+    std::cerr << "Usage: " << progname << " [[-c <config-file>]..] [[-DOPTION=\"VALUE\"]..]\n\n";
+    std::cerr << "Each config file is loaded sequentially, with the values in \n"
+        << " later files overwriting earlier. Then each singular option overrides \n" 
+        << " options in config files. ";
 }
 
 int main(int argc, char *argv[])
 {
-    // check command line
-    if ((argc == 1) || ((argc == 3) && (strcmp(argv[1], "-c") == 0))) {
-        // load the configuration from file if a filename was supplied on the command line
-        if (argc == 3) {
-            try {
-                config().load(argv[2]);
-            } catch (RuntimeException &e) {
-                std::cerr << e.getMessage() << std::endl;
-                return 1;
+    static const char *optString = "c:D:h";
+    int c = 0;
+    vector<string> configFiles;
+    vector< pair<string,string> > configPairs;
+    string progname = argv[0];
+    // parse command line
+    while (1) {
+        c = getopt (argc, argv, optString);
+        /* Detect end of options */
+        if (c == -1) {
+            break;
+        } else if (c == 'c') {
+            configFiles.push_back(optarg);
+        } else if (c == 'D') {
+            // override all previous options, e.g.
+            // -DLOG_TO_STDOUT=TRUE
+            string text = optarg; 
+            string value, optionName;
+            vector<std::string> strs;
+            boost::split(strs, text, boost::is_any_of("=:"));
+            optionName = strs[0];
+            if (strs.size() > 2) {
+                // merge end tokens if more than one separator found
+                for (uint i = 1; i < strs.size(); i++)
+                    value += strs[i];
+            } else if (strs.size() == 1) {
+                std::cerr << "No value given for option " << strs[0] << endl;
+            } else {
+                value = strs[1];
             }
+            configPairs.push_back( pair<string,string>(optionName, value) );
         } else {
-            // search for configuration file on default locations
-            for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
-                boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
-                configPath /= DEFAULT_CONFIG_FILENAME;
-                if (boost::filesystem::exists(configPath)) {
-                    try {
-                        config().load(configPath.string().c_str());
-                        fprintf(stderr, "loaded configuration from file \"%s\"\n", configPath.string().c_str());
-                        break;
-                    } catch (RuntimeException &e) {
-                        std::cerr << e.getMessage() << std::endl;
-                        return 1;
-                    }
-                }
-            }
-        }
-
-        // setup global logger
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-        //logger().setLevel(Logger::DEBUG);
-
-        CogServer& cogserver = static_cast<CogServer&>(server());
-
-        // Load modules specified in the config file
-        std::vector<std::string> modules;
-        tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
-        for (std::vector<std::string>::const_iterator it = modules.begin();
-             it != modules.end(); ++it) {
-            cogserver.loadModule(*it);
-        }
-
-        // Load scheme modules specified in the config file
-        std::vector<std::string> scm_modules;
-        tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
-#ifdef HAVE_GUILE
-        for (std::vector<std::string>::const_iterator it = scm_modules.begin();
-             it != scm_modules.end(); ++it) {
-
-            int rc = 2;
-            const char * mod = "";
-            for (int i = 0; DEFAULT_MODULE_PATHS[i] != NULL; ++i) {
-                boost::filesystem::path modulePath(DEFAULT_MODULE_PATHS[i]);
-                modulePath /= *it;
-                if (boost::filesystem::exists(modulePath)) {
-                    mod = modulePath.string().c_str();
-                    rc = load_scm_file(mod);
-                    if (0 == rc) break;
-                }
-            }
-            if (rc)
-            {
-               logger().error("%d %s: %s", 
-                     rc, strerror(rc), mod);
-            }
+            // unknown option (or help)
+            usage(progname.c_str());
+            if (c == 'h')
+                return 0;
             else
-            {
-                logger().info("Loaded %s", mod);
+                return 1;
+        }
+
+    }
+    if (configFiles.size() == 0) {
+        cerr << "Searching for config in default locations..." << endl;
+        // search for configuration file on default locations
+        for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
+            boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
+            configPath /= DEFAULT_CONFIG_FILENAME;
+            if (boost::filesystem::exists(configPath)) {
+                cerr << "Found " << configPath.string() << endl;
+                configFiles.push_back(configPath.string());
             }
         }
+    }
+    config().reset();
+    if (configFiles.size() == 0) {
+        cerr << "No config files could be found!" << endl;
+        return -1;
+    }
+    // Each config file sequentially overwrites the next
+    BOOST_FOREACH (string configFile, configFiles) {
+        try {
+            config().load(configFile.c_str(), false);
+            fprintf(stderr, "loaded configuration from file \"%s\"\n", configFile.c_str());
+            break;
+        } catch (RuntimeException &e) {
+            std::cerr << e.getMessage() << std::endl;
+            return 1;
+        }
+    }
+    // Each specific option
+    pair<string,string> optionPair;
+    BOOST_FOREACH (optionPair, configPairs) {
+        //cerr << optionPair.first << " = " << optionPair.second << endl;
+        config().set(optionPair.first, optionPair.second);
+    }
+
+    // setup global logger
+    logger().setFilename(config()["LOG_FILE"]);
+    logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+    logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
+    logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+    //logger().setLevel(Logger::DEBUG);
+    
+    CogServer& cogserver = static_cast<CogServer&>(server());
+
+    // Load modules specified in the config file
+    std::vector<std::string> modules;
+    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+    for (std::vector<std::string>::const_iterator it = modules.begin();
+         it != modules.end(); ++it) {
+        cogserver.loadModule(*it);
+    }
+
+    // Load scheme modules specified in the config file
+    std::vector<std::string> scm_modules;
+    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
+#ifdef HAVE_GUILE
+    for (std::vector<std::string>::const_iterator it = scm_modules.begin();
+         it != scm_modules.end(); ++it) {
+
+        int rc = 2;
+        const char * mod = "";
+        for (int i = 0; DEFAULT_MODULE_PATHS[i] != NULL; ++i) {
+            boost::filesystem::path modulePath(DEFAULT_MODULE_PATHS[i]);
+            modulePath /= *it;
+            if (boost::filesystem::exists(modulePath)) {
+                mod = modulePath.string().c_str();
+                rc = load_scm_file(mod);
+                if (0 == rc) break;
+            }
+        }
+        if (rc)
+        {
+           logger().error("%d %s: %s", 
+                 rc, strerror(rc), mod);
+        }
+        else
+        {
+            logger().info("Loaded %s", mod);
+        }
+    }
 #else /* HAVE_GUILE */
-        logger().warn(
-            "Server compiled without SCM support");
+    logger().warn(
+        "Server compiled without SCM support");
 #endif /* HAVE_GUILE */
 
-        // enable the network server and run the server's main loop
-        cogserver.enableNetworkServer();
-        cogserver.serverLoop();
-    } else {
-        usage(argv[0]);
-        return 1;
-    }
+    // enable the network server and run the server's main loop
+    cogserver.enableNetworkServer();
+    cogserver.serverLoop();
 }
