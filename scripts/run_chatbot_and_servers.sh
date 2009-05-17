@@ -25,7 +25,7 @@ cd ${build_dir}
 gnome-terminal \
   --hide-menubar \
   --tab --title "CogServer" \ #--working-directory= \
-  --command="./opencog/server/cogserver -c ../lib/opencog-chatbot.conf" \
+  --command="./opencog/server/cogserver -c ../lib/opencog-chatbot.conf -DLOG_TO_STDOUT=TRUE" \
   --tab --title "RelEx" \
   --working-directory=${relex_path} --command="./opencog-server.sh" \
   --active --tab --title "Cogita chatbot" \ #--working-directory=. \

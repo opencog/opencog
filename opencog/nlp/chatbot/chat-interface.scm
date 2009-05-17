@@ -1,4 +1,3 @@
-scm
 ;
 ; chat-interface.scm
 ;
@@ -164,5 +163,3 @@ scm
 	(delete-new-parsed-sent-links)
 	""
 )
-.
-exit
