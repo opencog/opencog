@@ -197,6 +197,7 @@
 		(cog-delete-recursive wi)
 	)
 
+	; Delete, recusively, all of the word-instances in the parse.
 	(define (delete-parse parse)
 		(for-each 
 			(lambda (x) 
@@ -209,6 +210,7 @@
 		(cog-delete-recursive parse)
 	)
 
+	; For each parse of the sentence, delete parse
 	(for-each 
 		(lambda (x) 
 			(if (eq? 'ParseLink (cog-type x))
