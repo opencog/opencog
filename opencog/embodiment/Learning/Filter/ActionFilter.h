@@ -71,23 +71,34 @@ public:
                  opencog::RandGen& rng);
     ~ActionFilter();
 
-    //insert all action sequences and subsequences of size <=n
-    //compatible with a given BehaviorCategory in actSeq_set.
-    //If max_size == -1, then all subsequences are returned.
-    //bc will not be modified by that method (const has been omitted because
-    //access methods of BehaviorCategory transparently modifies it)
+    /**
+     * insert all action sequences and subsequences of size <=n
+     * compatible with a given BehaviorCategory in actSeq_set.
+     *
+     * @param actSubseq_set Set where to insert the sub-sequences
+     * @param bc BehaviorCategory where to extract the action sequences
+     * @param all List of argument list, contains the mapping between
+     *            argument variable and argument input for each
+     *            composite behavior description
+     * @param max_size Maximum size of the action subsequences to insert
+     *                 if max_size is -1 then all subsequences are returned
+     * @param only_min_max then returns only the sequence of size 1 and max
+     */
     void insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                              const BehaviorCategory& bc,
                              const argument_list_list& all,
-                             int max_size = -1) const;
+                             int max_size = -1,
+                             bool only_min_max = false) const;
 
-    //like above but apply on a CompositeBehaviorDescription instead of
-    //BehaviorCategory
-    //If max_size == -1, then all subsequences are returned.
+    /**
+     * like above but apply on a CompositeBehaviorDescription instead of
+     * BehaviorCategory
+     */
     void insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                              const CompositeBehaviorDescription& cbd,
                              const argument_list& al,
-                             int max_size = -1) const;
+                             int max_size = -1,
+                             bool only_min_max = false) const;
 
 private:
     const std::string& _self_id;

@@ -60,7 +60,8 @@ ActionFilter::~ActionFilter() {}
 void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                                        const BehaviorCategory& bc,
                                        const argument_list_list& all,
-                                       int max_size) const
+                                       int max_size,
+                                       bool only_min_max) const
 {
     const std::vector<CompositeBehaviorDescription>& cbds = bc.getEntries();
     opencog::cassert(TRACE_INFO, all.size() == cbds.size(),
@@ -69,13 +70,15 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
     std::vector<CompositeBehaviorDescription>::const_iterator ie = cbds.begin();
     argument_list_list_const_it alci = all.begin();
     for (; ie != cbds.end(); ie++, alci++)
-        insertActionSubseqs(actSubseq_set, *ie, *alci, max_size);
+        insertActionSubseqs(actSubseq_set, *ie, *alci,
+                            max_size, only_min_max);
 }
 
 void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                                        const CompositeBehaviorDescription& cbd,
                                        const argument_list& al,
-                                       int max_size) const
+                                       int max_size,
+                                       bool only_min_max) const
 {
     //determine complete action sequence
     combo_tree_ns_set completeSeq_set;
@@ -93,6 +96,8 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
         else ms = std::min(max_size, ias->size());
 
         //loop over each size from 1 to ms
+        //Note: that if only_min_max is true then s jumps directly to ms
+        // (see the code at the end of the loop)
         for (unsigned s = 1; s <= ms; s++) {
             pre_it head = ias->begin();
             if (*head == id::sequential_and) {
@@ -125,6 +130,13 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                                  " single builtin_action");
                 if (s == 1) actSubseq_set.insert(*ias);
             }
+            
+            //if only_min_max is true then jump directly to the max case
+            //(the min case, that is s == 1, has just been taken care of)
+            std::cout << "BEFORE s: " << s << " ms: " << ms << std::endl;
+            if(only_min_max && s < ms)
+                s = ms-1;
+            std::cout << "AFTER  s: " << s << " ms: " << ms << std::endl;
         }
     }
 }
