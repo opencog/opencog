@@ -318,6 +318,7 @@ BITNode* BITNodeRoot::CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule:
 }
 
 int BITNodeRoot::getExecPoolSize() const { return exec_pool.size(); }
+BITNodeRoot& BITNode::getBITRoot() const { return *root; }
 
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
