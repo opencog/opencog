@@ -114,8 +114,7 @@ private:
 
     //generates the complete action sequence set of a given
     //CompositeBehaviorDescription
-    //WARNING :  to work properly it is assumed that actSeq_set is empty
-    void generateCompleteActionSeqs(combo_tree_ns_set& actSeq_set,
+    combo_tree_ns_set generateCompleteActionSeqs(
                                     const CompositeBehaviorDescription& cbd,
                                     const argument_list& al) const;
 

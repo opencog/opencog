@@ -272,7 +272,8 @@ bool ImitationLearningAgent::initLearning(int nepc,
         opencog::cassert(TRACE_INFO, _atomic_actions.empty(),
                          "_atomic_actions must be empty because stopLearning would have clear it");
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
-                               config().get_int("ACTION_FILTER_SEQ_MAX"));
+                               config().get_int("ACTION_FILTER_SEQ_MAX"),
+                               config().get_bool("ACTION_FILTER_ONLY_MIN_MAX"));
 
         logger().debug("ImitationLearningAgent - ActionFilter, stop processing.");
 
@@ -441,7 +442,8 @@ void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
 
         _atomic_actions.clear();
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
-                               config().get_int("ACTION_FILTER_SEQ_MAX"));
+                               config().get_int("ACTION_FILTER_SEQ_MAX"),
+                               config().get_bool("ACTION_FILTER_ONLY_MIN_MAX"));
 
         logger().debug("ImitationLearningAgent - ActionFilter, stop processing.");
 

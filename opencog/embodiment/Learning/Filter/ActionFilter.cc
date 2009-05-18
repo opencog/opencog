@@ -81,25 +81,37 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                                        bool only_min_max) const
 {
     //determine complete action sequence
-    combo_tree_ns_set completeSeq_set;
-    generateCompleteActionSeqs(completeSeq_set, cbd, al);
+    combo_tree_ns_set completeSeq_set = generateCompleteActionSeqs(cbd, al);
+
     //then select all sub sequences of size <=max_size
     opencog::cassert(TRACE_INFO, max_size > 0 || max_size == -1,
                      "You wanna select no action? Don't use an action"
                      " filter then!");
     for (combo_tree_ns_set_const_it ias = completeSeq_set.begin();
             ias != completeSeq_set.end(); ++ias) {
+
+        //sub_seq_size is the number of actions of *ias
+        unsigned sub_seq_size;
+        pre_it head = ias->begin();
+        if (*head == id::sequential_and)
+            sub_seq_size = head.number_of_children();
+        else sub_seq_size = 1;
+
         //determine max_size for ias, noted ms
         unsigned ms;
-        if (max_size == -1)
-            ms = ias->size();
-        else ms = std::min(max_size, ias->size());
+        if (max_size == -1) {
+            ms = sub_seq_size;
+        }
+        else {
+            cassert(TRACE_INFO, max_size >= 0);
+            ms = std::min((unsigned)max_size, sub_seq_size);
+        }
 
         //loop over each size from 1 to ms
         //Note: that if only_min_max is true then s jumps directly to ms
         // (see the code at the end of the loop)
         for (unsigned s = 1; s <= ms; s++) {
-            pre_it head = ias->begin();
+
             if (*head == id::sequential_and) {
                 if (ias->number_of_children(head) >= s) {
                     if (s == 1) {
@@ -133,21 +145,19 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
             
             //if only_min_max is true then jump directly to the max case
             //(the min case, that is s == 1, has just been taken care of)
-            std::cout << "BEFORE s: " << s << " ms: " << ms << std::endl;
             if(only_min_max && s < ms)
                 s = ms-1;
-            std::cout << "AFTER  s: " << s << " ms: " << ms << std::endl;
         }
     }
 }
 
-void ActionFilter::generateCompleteActionSeqs(combo_tree_ns_set& actSeq_set,
+ActionFilter::combo_tree_ns_set ActionFilter::generateCompleteActionSeqs(
         const CompositeBehaviorDescription& cbd,
         const argument_list& al) const
 {
-    opencog::cassert(TRACE_INFO, actSeq_set.empty(),
-                     "It is assumed that actSeq_set but must be empty");
-    completeActionPrefixes(actSeq_set, cbd, al, 0);
+    combo_tree_ns_set compActionSeq;
+    completeActionPrefixes(compActionSeq, cbd, al, 0);
+    return compActionSeq;
 }
 
 void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
@@ -168,7 +178,7 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
             unsigned long time = cbd.getIndexStartTime(index);
             Handle smh =
                 AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getAtomSpace(),
-                        time);
+                                                            time);
             opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
                              "There must be a SpaceMap, ask Nil for more.");
             generatePossibleActions(act_set, h, al, smh, time);
@@ -178,9 +188,11 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
                 actPrefix_set.insert(tmp);
             }
             //base case
-            //local copy in order to interate over the set of prefix
-            //without meesing up with additional prefixes in the course of the algo
+            //local copy in order to iterate over the set of prefix
+            //without meesing up with additional prefixes
+            //in the course of the algo
             combo_tree_ns_set ps_copy = actPrefix_set;
+            actPrefix_set.clear();
             for (combo_tree_ns_set_it vsi = ps_copy.begin();
                     vsi != ps_copy.end(); ++vsi) {
                 combo_tree prefix = *vsi;
