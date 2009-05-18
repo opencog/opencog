@@ -61,6 +61,53 @@ namespace haxx
     extern bool printRealAtoms;
 }
 
+const char* PLNModule::usageInfo = 
+        "Usage: pln <command>\n\n"
+        "Run the specified PLN command.\n"
+        "( NOTE THE DIFFERENCE BETWEEN ARG TYPES:\n"
+        "- some commands take PLN Handles, these are different from AtomSpace Handles!\n"
+        "- some take BITNode pointers. )\n"
+        "\n"
+        "---\n"
+        " log <[-4..4]> - Set log level (0 = normal log level).\n"
+        " record-trails - Switch the recording of inference trails ON/OFF (default: ON)\n"
+        " infer <s>     - Infer until result found with conf > 0.01 OR 's' inference steps\n"
+        "                 have been taken.\n"
+        " atom <h>      - print the atom with PLN Handle h\n"
+        " plan <h>      - Show the plan ie. sequence of 'do' statements pertaining to inference\n"
+        "                 result of PLN Handle h\n"
+        " trail <h>     - print the inference trail for PLN Handle #h\n"
+        "\n"
+        "--- Pool\n"
+        " pool          - Show the current BIT node expansion pool sorted by heuristic fitness\n"
+        " pool-size     - Return current BIT node expansion pool size\n"
+        " pool-fittest  - Show the current BIT node expansion pool sorted by heuristics\n"
+        "                 fitness and expand the fittest BIT node\n"
+        " pool-expand <n>- Execute the #n fittest BIT nodes\n"
+        "\n"
+        "--- BIT\n"
+        " bit <n>            - Print the inference (BIT) tree under node n (0 = root)\n"
+        " bit-expand <n>     - Expand BITNode with id n\n"
+        " bit-results <n>    - Print out the results of BIT node n (0 = root)\n"
+        " bit-parents <n>    - Show the parents of BITNode #n\n"
+        " bit-rule-args <n>  - Print the Rule arguments of BIT node n\n"
+        " bit-rule-target <n>- Print the Rule target of BIT node n\n"
+        " bit-direct-results #i - (disabled) Show the direct results (by lookup or hypothesis)\n "
+        "                 of BIT node #i\n"
+        "\n"
+        "--- Testing\n"
+        " load-axioms <path> - Load XML axiom file in 'path'\n"
+        " test-count         - count the number of pre-defined inference targets\n"
+        " test-target <n>    - Load in a new pre-defined target #n (from TestTargets.h)\n"
+        " = <n1> <n1>        - Check if BIT nodes n1 and n2 are equal.\n"
+        "\n"
+        "--- The following are not recommended unless you know what your doing:\n"
+        " bit-next-level     - Expand the tree's whole next level (usually not recommended)\n"
+        " bit-eval           - Manually evaluate the current tree (usually not recommended)\n"
+        " bit-find-node  bT b1 b2  a1T a10 a11 [a2T a20 a21] <Rule ptr> - find a BITNode \n"
+        "                 for the given rule with the given parameters. 3rd parameter depends \n"
+        "                 on rule number, but must be specified (needs to be more friendly).\n"
+        " loop-check         - check for loops\n";
 
 
 PLNModule::PLNModule() : Module()
@@ -329,29 +376,29 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             input(h, args);
             j = (long) h;
             state->infer(j, 0.000001f, 0.01f);
-            state->printResults();
+            ss << state->printResults();
             ss << "\n" << j << " $ remaining.\n";
         }
         else if (c == "atom") {
             input(h, args);
-            printTree((pHandle)h,0,0);
+            ss << printTree((pHandle)h,0,0);
         }
         else if (c == "plan") {
+            // I'm not sure if it makes sense to have plan?
+            // Looking at the code for extract plan, it uses a custom
+            // "do_template" vtree that doesn't look very general.
             input(h, args);
-            state->extract_plan((pHandle)h);
+            ss << state->extract_plan((pHandle)h);
         }
         else if (c == "trail") {
             input(h, args); state->printTrail((pHandle)h);
         }
         // Pool commands
         else if (c == "pool") {
-            tempi = currentDebugLevel;
-            currentDebugLevel = 10;
-            state->printFitnessPool();
-            currentDebugLevel = tempi;
+            ss << state->printFitnessPool();
         }
         else if (c == "pool-size") {
-            ss << "Pool size = " << state->getExecPoolSize() << endl;
+            ss << "Exceution pool size = " << state->getExecPoolSize() << endl;
         }
         else if (c == "pool-fittest") {
             state->expandFittest();
@@ -359,29 +406,29 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 state->getExecPoolSize() << endl;
         }
         else if (c == "pool-expand") {
-            s_i=0;
             input(h, args);
             for (int k=0;k<h;k++)
                 state->expandFittest();
+            ss << "Expanded fittest " << h << "times, pool size now = " <<
+                state->getExecPoolSize() << endl;
         }
         // BIT commands
         else if (c == "bit") {
             input(h, args);
             if (h == 0) h = (long) state->children[0].begin()->prover;
-            ((BITNodeRoot*)h)->print(); 
+            ss << ((BITNodeRoot*)h)->print(); 
         }
         else if (c == "bit-expand") {
             input(h, args);
             if (h == 0) h = (long) state;
             ((BITNodeRoot*)h)->expandNextLevel();
-/*          foreach(const parent_link& p, ((BITNodeRoot*)h)->GetParents())
-                p.link->removeIfFailure((BITNodeRoot*)h);*/
+            ss << "Expanded BIT node " << h << ", pool size now = " <<
+                state->getExecPoolSize() << endl;
         }
         else if (c == "bit-results") {
             input(h, args);
-            if (h == 0) h = (long)state;
-//          h = (int)state->children[0].begin()->prover;
-            ((BITNodeRoot*)h)->printResults();
+            if (h == 0) h = (long) state;
+            ss << ((BITNodeRoot*)h)->printResults();
 /*          foreach(const set<BoundVertex>& eval_res_set, ((BITNodeRoot*)h)->GetEvalResults())
             foreach(const BoundVertex& eval_res, eval_res_set)
                 printTree(v2h(eval_res.value),0,-10);*/
@@ -389,23 +436,27 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         else if (c == "bit-parents") {
             input(h, args);
             if (h == 0) h = (long)state;
-            foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents()) {
-                ss << "User Node = " << (ulong) p.link << endl;
-            }
+            ss << "Parents of " << (long) h << ":" << endl;
+            ss << ((BITNode*)h)->getBITRoot().printParents((BITNode*)h);
+            //foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents()) {
+            //    ss << "User Node = " << (ulong) p.link << endl;
+            //}
             // Use print_parents when it's changed to return a string
         }
         else if (c == "bit-rule-args") {
             input(h, args);
             if (h == 0) h = (long)state;
-            ((BITNodeRoot*)h)->printArgs();
+            ss << ((BITNodeRoot*)h)->printArgs();
         }
         else if (c == "bit-rule-target") { input(h, args);
             if (h == 0) h = (long)state;
-            cprintf(-10, "Target:\n");
-            ((BITNodeRoot*)h)->printTarget();
-            cprintf(-10, "Results:\n");
-            ((BITNodeRoot*)h)->printResults();
-            cprintf(0, "parent arg# %d\n", ((BITNodeRoot*)h)->getParents().begin()->parent_arg_i);
+            ss << "Target:\n";
+            ss << ((BITNodeRoot*)h)->printTarget();
+            ss << "Results:\n";
+            ss << ((BITNodeRoot*)h)->printResults();
+            ss << "Parent arg# "
+               << ((BITNodeRoot*)h)->getParents().begin()->parent_arg_i
+               << endl;
         }
         //! @todo work this out?
         else if (c == "bit-direct-results") {
@@ -437,9 +488,10 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             axioms_ok = atw->loadAxioms(temps);
             atw->archiveTheorems = false;
             ss << (axioms_ok ? "Input file was loaded."
-                    : "Input file was corrupt.");
-            ss << " Next you MUST (re)load a target atom with the pln target"
-                  " command! Otherwise things will break." << endl;
+                    : "Input file was corrupt or missing.") << endl;
+            ss << " Next you MUST (re)load a target atom with the "
+               << "'pln test-target' command or set a target manually."
+               << endl;
             // have to recreate the target vtrees to ensure that the
             // handles are correct after reloading axioms.
             initTests();
@@ -451,9 +503,8 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             input(test_i, args);
             Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
             state = Bstate.get();
-            cprintf(0,"Test target set: ");
-            rawPrint(*tests[test_i],tests[test_i]->begin(),0);
-            cprintf(0,"\n");
+            ss << "Test target set:" << endl;
+            ss << rawPrint(*tests[test_i],tests[test_i]->begin(),0);
         }
         else if (c == "=") { input(h, args); input(h2, args); 
 /*          cprintf(0, ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ? "EQ\n" : "IN-EQ\n"); */
@@ -466,7 +517,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             try {
                 state->evaluate();
             } catch(string s) {
-                cprintf(0,s.c_str());
+                ss << s.c_str();
             }
         }
         //! @todo deal with arguments to bit-find-node, make rule the first arg.
@@ -481,20 +532,21 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             avt1 = (mva((pHandle)a1T, NewNode(CONCEPT_NODE, a10), NewNode(CONCEPT_NODE, a11)));
             avt2 = (mva((pHandle)a2T, NewNode(CONCEPT_NODE, a20), NewNode(CONCEPT_NODE, a21)));
 
-            rawPrint(bvt, bvt.begin(), -2);
-            rawPrint(avt1, avt1.begin(), -2);
-            rawPrint(avt2, avt2.begin(), -2);
+            ss << "B =";
+            ss << rawPrint(bvt, bvt.begin(), -2);
+            ss << "A1 =";
+            ss << rawPrint(avt1, avt1.begin(), -2);
+            ss << "A2 =";
+            ss << rawPrint(avt2, avt2.begin(), -2);
 
             rule_args.clear();
             rule_args.push_back(BBvtree(new BoundVTree(avt1)));
             if (a2T)
                 rule_args.push_back(BBvtree(new BoundVTree(avt2)));
             else
-//              puts("Passing 1 arg.");
                 ss << "Passing 1 arg.\n";
-
-//          printf("BITNode %ld.", (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings));
-            ss << "BITNode " << (long) state->findNode((Rule*)qrule, meta(new vtree(bvt)), rule_args, new_bindings) << ".\n" ;
+            ss << "BITNode " << (long) state->findNode((Rule*)qrule,
+                    meta(new vtree(bvt)), rule_args, new_bindings) << ".\n" ;
 
         }
         else if (c == "loop-check") { state->loopCheck(); }
@@ -510,9 +562,12 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 using_root = true;
             }
         }*/
+        else if (c == "help") {
+            ss << usageInfo;
+        }
         else {
             ss << "Unknown PLN command: '" << c << "'.\n" <<
-                "Use 'help pln' for a list of valid commands." << endl;
+                "Use 'help pln' or 'pln help' for a list of valid commands." << endl;
 
         }
     } catch( std::exception& e )

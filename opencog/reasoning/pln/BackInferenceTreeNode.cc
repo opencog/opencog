@@ -172,18 +172,24 @@ direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 {
 }
 
-void BITNodeRoot::print_users(BITNode* b)
+string BITNodeRoot::printUsers(BITNode* b)
 {
+    stringstream ss;
     foreach(BITNode* u, users[b])
-        printf("[%ld] ", (long)u);
-    printf("\n");
+        ss << "[" << (long)u << "] ";
+    ss << endl;
+    cout << ss.str();
+    return ss.str();
 }
 
-void BITNodeRoot::print_parents(BITNode* b)
+string BITNodeRoot::printParents(BITNode* b)
 {
+    stringstream ss;
     foreach(const parent_link<BITNode>& p, b->parents)
-        printf("[%ld] ", (long)p.link);
-    printf("\n");
+        ss << "[" << (long)p.link << "] ";
+    ss << endl;
+    cout << ss.str();
+    return ss.str();
 }
 
 void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
@@ -1655,63 +1661,64 @@ bool BITNode_fitness_comp::operator()(BITNode* lhs, BITNode* rhs) const
 
 
 /* Action */
-
-
-void BITNodeRoot::extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const
+string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
+        vtree& do_template, pHandleSeq& plan) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
     map<pHandle, vtree> bindings;
+    stringstream ss;
     
-    if (atw->isType(h)) 
-        puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
+    if (atw->isType(h)) {
+        ss << "Can't make plan for a NULL/virtual target" << endl;
+    }
     
     map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
-    
-    if (rule != haxx::inferred_with.end())
-    {
-        foreach(pHandle arg_h, haxx::inferred_from[h])
-        {
-            if (unifiesTo(do_template, make_vtree(arg_h), bindings, bindings, true))
-            {
-                puts("Satisfies do_template:");
-                printTree(arg_h,level+1,0);
+    if (rule != haxx::inferred_with.end()) {
+        foreach(pHandle arg_h, haxx::inferred_from[h]) {
+            if (unifiesTo(do_template, make_vtree(arg_h),
+                        bindings, bindings, true)) {
+                ss << "Satisfies do_template:" << endl; 
+                ss << printTree(arg_h,level+1,0);
                 plan.push_back(arg_h);
             }
-        
-            extract_plan(arg_h, level+1, do_template, plan);
+            ss << extract_plan(arg_h, level+1, do_template, plan);
         }
     }
+    return ss.str();
 }
 
-void BITNodeRoot::extract_plan(pHandle h) const
+string BITNodeRoot::extract_plan(pHandle h) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
+    stringstream ss;
     vtree do_template = mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
                             mva((pHandle)LIST_LINK,
                                 NewNode(FW_VARIABLE_NODE, "$999999999")));
-
     pHandleSeq plan;
-    extract_plan(h,0,do_template,plan);
-puts("PLAN BEGIN");
+    ss << extract_plan(h,0,do_template,plan);
+    ss << "PLAN BEGIN" << endl;
     for (pHandleSeq::reverse_iterator i = plan.rbegin(); i!=plan.rend(); i++)
         printTree(*i,0,-10);
-puts("PLAN END");   
-    if (plan.size()>0)
-    {
-        puts("[plan found, exiting");
-        assert(0);
+    ss << "PLAN END" << endl;
+    if (plan.size()>0) {
+        ss << "[plan found, exiting]" << endl;
     }
+    return ss.str();
 }
 
-void BITNode::loopCheck() const
+string BITNode::loopCheck() const
 {
-    printf("%d %ld:     %d\n", depth, (long)this,  totalChildren());
+    stringstream ss;
+    ss << "-" << depth << " " << (long) this << ":" << totalChildren() << endl;
     for (vector<set<ParametrizedBITNode> >::const_iterator i = children.begin();
             i!=children.end(); i++) {
-        foreach(const ParametrizedBITNode& pbit, *i)
-            pbit.prover->loopCheck();
+        foreach(const ParametrizedBITNode& pbit, *i) {
+            ss << "  ";
+            ss << pbit.prover->loopCheck();
+        }
     }
+    return ss.str();
 }
 
 #if 0
@@ -1756,116 +1763,135 @@ void test_pool_policy()
 
 /* PRINTING METHODS */
 
-void BITNode::printResults() const
+string BITNode::printResults() const
 {
+    std::stringstream ss;
     foreach(const set<VtreeProvider*>& vset, eval_results)
     {
-        printf("[ ");
+        ss << "[ ";
+        cout << "[ "; 
         foreach(VtreeProvider* vtp, vset)
-            printTree(_v2h(*vtp->getVtree().begin()),0,-10);
+            ss << printTree(_v2h(*vtp->getVtree().begin()),0,-10);
 //          printf("%d ", _v2h(bv.value));
-        printf("]\n");
+        ss << "]" << endl;
+        cout << "]" << endl;
     }
+    return ss.str();
 }
 
-void BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > UsedBITNodes) const
+string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNodes) const
 {
-//  if (HasAncestor(this))
-//      return;
+    stringstream ss;
+    stringstream ss1;
 
-    if (UsedBITNodes == NULL)
-        UsedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
+    // Initialise the set of BITNodes that have already been printed
+    if (usedBITNodes == NULL) {
+        usedBITNodes = Btr<set<BITNode*> >(new set<BITNode*>());
+    }
 
 #define prlog cprintf ///! @todo replace prlog with logger
     if (rule) {
-        if (compact)
-			prlog(loglevel, "%s%s\n", repeatc(' ', depth*3).c_str(), rule->name.c_str());
-        else {
-            string cbuf("[ ");
+        if (compact) {
+            ss << repeatc(' ', depth*3) << rule->name << endl;
+			//prlog(loglevel, ss.str().c_str());
+        } else {
+            ss << repeatc(' ', depth*3) << rule->name << " ([" << (long)this
+                << "])" << endl;
+            ss << repeatc(' ', (depth+1)*3) << "[ ";
             if (direct_results) {
                 foreach(const BoundVertex& bv, *direct_results)
-                    cbuf += i2str(_v2h(bv.value)) + " ";
+                    ss << _v2h(bv.value) << " ";
             }
-            prlog(loglevel,"%s%s ([%ld])\n", repeatc(' ', depth*3).c_str(), rule->name.c_str(), (long)this);
-            prlog(loglevel,"%s%s]\n", repeatc(' ', (depth+1)*3).c_str(), cbuf.c_str());
+            ss << "]\n";
         }
-    } else
-		prlog(loglevel,"root\n");
+    } else {
+		ss << "root" << endl;
+    }
+    ss1 << ss.str();
+    prlog(loglevel, ss.str().c_str());
+    ss.clear();
     
-    if (STLhas2(*UsedBITNodes, this))
-		prlog(loglevel,  "%s(loop)\n", repeatc(' ', (depth+1)*3).c_str());
-    else {
-        UsedBITNodes->insert((BITNode*)this);
+    if (STLhas2(*usedBITNodes, this)) {
+        // If this subtree has already been printed...
+        ss << repeatc(' ', (depth+1)*3) << "(loop)" << endl;
+        ss1 << ss.str();
+        prlog(loglevel, ss.str().c_str());
+        ss.clear();
+    } else {
+        usedBITNodes->insert((BITNode*)this);
 
         int ccount=0;
         for (vector<set<ParametrizedBITNode> >::const_iterator i =
                 children.begin(); i!=children.end(); i++) {
             if (compact)
-				prlog(loglevel,  "%s#%d\n", repeatc(' ', (depth+1)*3).c_str(), ccount++);
+                ss << repeatc(' ', (depth+1)*3) << "#" << ccount << endl;
             else {
-				prlog(loglevel, "%sARG #%d:\n", repeatc(' ', (depth+1)*3).c_str(), ccount);
-				prlog(loglevel, "%s---\n", repeatc(' ', (depth+1)*3).c_str());
-                ccount++;
+				ss << repeatc(' ', (depth+1)*3) << "ARG #" << ccount << ":" << endl;
+				ss << repeatc(' ', (depth+1)*3) << "---" << endl;
             }
+            ccount++;
             int n_children = i->size();
 
+            ss1 << ss.str();
+            prlog(loglevel, ss.str().c_str());
+            ss.clear();
             foreach(const ParametrizedBITNode& pbit, *i) {
-                //cprintf(loglevel,"::: %d\n", (int)pbit.prover);
                 if (!compact || STLhas(stats::Instance().ITN2atom, pbit.prover))
-                    pbit.prover->print(loglevel, compact, UsedBITNodes);
+                    ss1 << pbit.prover->print(loglevel, compact, usedBITNodes);
             }
         }
-//      UsedBITNodes->erase((BITNode*)(int)this);
     }
+    return ss1.str();
 }
 
 static int _trail_print_more_count = 0;
 
-void BITNodeRoot::printTrail(pHandle h, unsigned int level) const //, int decimal_places) const
+string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
 {
     AtomSpaceWrapper *atw = GET_ATW;
+    stringstream ss;
     if (h == PHANDLE_UNDEFINED || atw->isType(h))
-        puts("NULL / Virtual? Syntax: t<enter> Handle#<enter>");
+        ss << "Error, trying to print trail for NULL / Virtual atom." << endl;
+
     map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
-        printf("%s[%u] was produced by applying %s to:\n", repeatc(' ', level*3).c_str(),
-                h, rule->second->name.c_str());
+        ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
+        ss << rule->second->name << " to:\n";
+
         map<pHandle,vector<pHandle> >::const_iterator h_it = haxx::inferred_from.find(h);
         assert (h_it != haxx::inferred_from.end());
+
+        NMPrinter nmp(NMP_ALL, 0,
+                NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
+                level+1);
+
         foreach(pHandle arg_h, h_it->second)
         {
-          // If the handle is used in other places too, then and only then print it's id.
-          typedef pair<pHandle, vector<pHandle> > hvhT;
-          int h_use_count = 0;
-          if (haxx::inferred_from.find(arg_h) != haxx::inferred_from.end())
-            h_use_count=2;
-          /*          foreach(const hvhT& hvh, inferred_from)
-            if (find(hvh.second.begin(), hvh.second.end(), arg_h)
-            != hvh.second.end())
-              h_use_count++;*/
-        NMPrinter(NMP_ALL, 0, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
-//      NMPrinter(((h_use_count>1)?NMP_HANDLE:0)|NMP_TYPE_NAME|NMP_NODE_NAME| NMP_NODE_TYPE_NAME|NMP_TRUTH_VALUE, 2, NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0, level+1).print(arg_h, -10);
-            printTrail(arg_h, level+1);
+            ss << nmp.toString(arg_h, -10);
+            ss << printTrail(arg_h, level+1);
         }
     }
     else
-        cout << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
+        ss << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
+    cout << ss.str();
+    return ss.str();
 }
 
-void BITNode::printArgs() const
+string BITNode::printArgs() const
 {
-    cprintf(-2,"%u args:\n", (unsigned int) args.size());
-//  for_each(args.begin(), args.end(), NMPrinter(NMP_ALL));
-   foreach(meta _arg, args)
-      NMPrinter(NMP_ALL).print(*_arg, -2);
-
-//      rawPrint(*_arg, _arg->begin(), -2);
+    stringstream ss;
+    ss << args.size() << " args:" <<endl;
+    foreach(meta _arg, args)
+        ss << NMPrinter(NMP_ALL).toString(*_arg, -2);
+    cprintf(-2,ss.str().c_str());
+    return ss.str();
 }
 
-void BITNode::printFitnessPool()
+string BITNode::printFitnessPool()
 {
-    tlog(0,"Fitness table: (%d)\n", root->exec_pool.size());
+    stringstream ss;
+    ss << tlog(0,"Fitness table: (%d)\n", root->exec_pool.size());
 
     if (!root->exec_pool.empty()) {
         if (!root->exec_pool_sorted) {
@@ -1875,63 +1901,73 @@ void BITNode::printFitnessPool()
 
         for (list<BITNode*>::iterator i = root->exec_pool.begin();
                 i != root->exec_pool.end(); i++) {
-            (*i)->tlog( 0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(),
+            ss << (*i)->tlog( 0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(),
                     (*i)->children.size(), (long)(*i), (*i)->parents.size() );
         }
     }
+    return ss.str();
 }
 
-void BITNodeRoot::printTrail(pHandle h) const
+string BITNodeRoot::printTrail(pHandle h) const
 {
-    printTree(h,0,0);
-    printTrail(h,0);
+    stringstream ss;
+    ss << printTree(h,0,0);
+    ss << printTrail(h,0);
+    return ss.str();
 }
 
 static bool bigcounter = true;
 
-int BITNode::tlog(int debugLevel, const char *format, ...) const
-    {
-        if (debugLevel > currentDebugLevel) return 0;
-
-         if (test::bigcount == 601)
-         { puts("Debug feature."); }
-        
-         printf("%ld %u/%ld %d [(%ld)] (%s): ", (bigcounter?(++test::bigcount):depth),
-                 (unsigned int) root->exec_pool.size(), root->InferenceNodes, haxxUsedProofResources,
-//          (test::LOG_WITH_NODE_ID ? ((int)this) : 0),
-            (long)this, (rule ? (rule->name.c_str()) : "(root)"));
-        
-        char buf[5000];
-        
-        va_list ap;
-        va_start(ap, format);
-        int answer = vsprintf(buf, format, ap);
-        
-        printf("%s", buf);
-        
-        fflush(stdout);
-        va_end(ap);
-        return answer;
-    }
-
-void BITNode::printChildrenSizes() const
-    {
-		if (currentDebugLevel>=3)
-			puts("next chi...0");
-        tlog(3,"next chi...0");
-        for(uint c=0; c< children.size(); c++)
-        {
-            tlog(3,"(%d:%d), ", c, children[c].size());
-            tlog(3,"\n");
-        }
-    }
-
-void BITNode::printTarget() const
+string BITNode::tlog(int debugLevel, const char *format, ...) const
 {
-	cprintf(0, "Raw target:\n");
-	rawPrint(*raw_target, raw_target->begin(),0);
-	cprintf(0, "Bound target:\n");
-	rawPrint(*GetTarget(), GetTarget()->begin(),0);
+    stringstream ss;
+    if (debugLevel > currentDebugLevel) return "";
+
+    if (test::bigcount == 601) {
+        ss << "Debug feature." << endl;
+    }
+
+    ss << (bigcounter? (++test::bigcount) : depth) << " "
+        << (unsigned int) root->exec_pool.size() << "/" << root->InferenceNodes
+        << haxxUsedProofResources << " [(" << (long)this << ")] ("
+        << (rule ? (rule->name.c_str()) : "(root)") << ")";
+
+    char buf[5000];
+
+    va_list ap;
+    va_start(ap, format);
+    int answer = vsprintf(buf, format, ap);
+    ss << buf;
+
+    cout << ss.str().c_str();
+    fflush(stdout);
+    va_end(ap);
+    return ss.str();
+}
+
+string BITNode::printChildrenSizes() const
+{
+    stringstream ss;
+    //if (currentDebugLevel>=3)
+    //    ss << "next chi...0";
+    ss << tlog(3,"next chi...0");
+    for(uint c=0; c< children.size(); c++)
+    {
+        ss << tlog(3,"(%d:%d), ", c, children[c].size());
+        ss << tlog(3,"\n");
+    }
+    return ss.str();
+}
+
+string BITNode::printTarget() const
+{
+    stringstream ss;
+    ss << "Raw target:\n";
+	ss << rawPrint(*raw_target, raw_target->begin(),0);
+	ss << "Bound target:\n";
+	ss << rawPrint(*GetTarget(), GetTarget()->begin(),0);
+	cprintf(0, ss.str().c_str());
+    return ss.str();
 }
 
 

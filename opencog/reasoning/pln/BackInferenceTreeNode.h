@@ -503,7 +503,7 @@ public:
 	void create();	
 
 	/// Use for debugging
-	void loopCheck() const;
+	string loopCheck() const;
 	
 	/// Use for debugging
 	int totalChildren() const;
@@ -535,14 +535,14 @@ public:
 	void expandFittest();
 
 	// Printing utilities
-	int tlog(int debugLevel, const char *format, ...) const;
+	string tlog(int debugLevel, const char *format, ...) const;
 	
-	void printChildrenSizes() const;
-	void print(int loglevel=0, bool compact=false, Btr<set<BITNode*> > UsedBITNodes = Btr<set<BITNode*> >()) const;
-	void printFitnessPool();
-	void printTarget() const;
-	void printArgs() const;
-	void printResults() const; 
+	string printChildrenSizes() const;
+	string print(int loglevel=0, bool compact=false, Btr<set<BITNode*> > UsedBITNodes = Btr<set<BITNode*> >()) const;
+	string printFitnessPool();
+	string printTarget() const;
+	string printArgs() const;
+	string printResults() const; 
 };
 
 /**
@@ -597,8 +597,8 @@ public:
 //	BoundVertex Generalize(const set<BoundVertex>&, Type _resultT) const;
 
 	/// Extraction of an actionable plan from the proof tree of the atom with pHandle h.
-	void extract_plan(pHandle h) const;
-	void extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
+	string extract_plan(pHandle h) const;
+	string extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
 
 	// Statistics
 	
@@ -607,10 +607,9 @@ public:
 	map<pHandle,BITNode*> hsource;
 	long InferenceNodes;
 
-	void printTrail(pHandle h) const;
-
-	void print_users(BITNode* b);
-	void print_parents(BITNode* b);
+	string printTrail(pHandle h) const;
+	string printUsers(BITNode* b);
+	string printParents(BITNode* b);
 
     int getExecPoolSize() const;
     void setRecordingTrails(bool x=true);
@@ -654,7 +653,7 @@ protected:
 	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 						
-	void printTrail(pHandle h, unsigned int level) const;
+	string printTrail(pHandle h, unsigned int level) const;
 
 	friend class BITNode;
 };

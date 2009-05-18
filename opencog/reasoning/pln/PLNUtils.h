@@ -131,8 +131,8 @@ void ReasoningLog(int l, std::string m);
 #define LOG_STR (_LOG_FIXED ? _LOGPOS : ( std::string(__FILE__) + ":" + i2str(__LINE__) ))
 
 // Print out trees
-void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
-void rawPrint(tree<Vertex>::iterator top, int _rloglevel);
+string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
+string rawPrint(tree<Vertex>::iterator top, int _rloglevel);
 
 // Make a string with count # of the char c
 string repeatc(const char c, const int count);
@@ -516,7 +516,7 @@ bool vectorHas(std::vector<T> box, T key)
 /*template<typename T>
 void swap(T* a, T* b) { T temp = *a; *a = *b; *b = temp; }*/
 
-void printTree(pHandle h, int level = 0, int LogLevel = 5);
+std::string printTree(pHandle h, int level = 0, int LogLevel = 5);
 std::string GetRandomString(int size);
 
 bool equal(pHandle A, pHandle B);

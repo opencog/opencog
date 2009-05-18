@@ -80,102 +80,109 @@ void ReasoningLog(int l, std::string m)
     cprintf(l, "%s\n", m.c_str());
 }
 
-void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel);
-void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel);
+string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel);
+string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel);
 
-void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel)
+string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel)
 {
-    rawPrint(t, top, 0, _rloglevel);
-}
-void rawPrint(tree<Vertex>::iterator top, int _rloglevel)
-{
-    rawPrint(top, 0, _rloglevel);
+    return rawPrint(t, top, 0, _rloglevel);
 }
 
-void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
+string rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 {
+    return rawPrint(top, 0, _rloglevel);
+}
+
+string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
+{
+    stringstream ss;
     AtomSpaceWrapper *atw = GET_ATW;
     if (_rloglevel > currentDebugLevel)
-        return;
+        return "";
 
+    // Does this vertex contain a handle?
     pHandle *hptr = boost::get<pHandle>(&*top);
     if (!hptr) {
-        printf("null\n");
-        return;
+        ss << "null\n";
+        cout << ss.str();
+        return ss.str();
     }
 
+    // Indentation
     for (int i = 0; i < level; i++) {
-        cprintf(_rloglevel, "   ");
+        ss << "   ";
     }
 
     if (hptr && !atw->isType(*hptr)) {
-//puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
-            cprintf(_rloglevel, "[%u]\n", (*hptr));
+            ss << "[" << *hptr << "]\n";
+            cprintf(_rloglevel, ss.str().c_str());
         } else
-            opencog::pln::printTree(*hptr, level, _rloglevel);
-
-        return;
+            ss << opencog::pln::printTree(*hptr, level, _rloglevel) << endl;
+        return ss.str();
     }
-
 
     IntegerWrapper* iptr;
-
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
+        ss << opencog::pln::Type2Name((Type)(*hptr)) << " ("
+            << top.number_of_children() << ")\n";
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
-        cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
+        ss << iptr->value << " (" << top.number_of_children() << ")\n";
     } else {
-        cprintf(_rloglevel, "Unsupported Vertex mode\n");
+        ss << "Unsupported Vertex mode\n";
     }
+    cprintf(_rloglevel, ss.str().c_str()); 
 
     for (tree<Vertex>::sibling_iterator c = t.begin(top);
             c != t.end(top);c++)
-        rawPrint(t, c, level + 1, _rloglevel);
+        ss << rawPrint(t, c, level + 1, _rloglevel);
+    return ss.str();
 }
 
-void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
+string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
+    stringstream ss;
 
     if (_rloglevel > currentDebugLevel)
-        return;
+        return "";
 
     pHandle *hptr = boost::get<pHandle>(&*top);
     if (!hptr) {
-        printf("null\n");
-        return;
+        ss << "null\n";
+        cout << ss.str();
+        return ss.str();
     }
 
     for (int i = 0; i < level; i++) {
-        cprintf(_rloglevel, "   ");
+        ss << "   ";
     }
 
     if (hptr && !atw->isType(*hptr)) {
 //puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
-            cprintf(_rloglevel, "[%d]\n", (*hptr));
+            ss << "[" << (*hptr) << "]\n";
+            cprintf(_rloglevel, ss.str().c_str() );
         } else
-            opencog::pln::printTree(*hptr, level, _rloglevel);
-
-        return;
+            ss << opencog::pln::printTree(*hptr, level, _rloglevel);
+        return ss.str();
     }
-
 
     IntegerWrapper* iptr;
-
     if (hptr) {
-        cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
+        ss << opencog::pln::Type2Name((Type)(*hptr)) << "("
+            << top.number_of_children() << ")\n";
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
-        cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
+        ss << iptr->value << "(" << top.number_of_children() << ")\n";
     } else {
-        cprintf(_rloglevel, "Unsupported Vertex mode\n");
+        ss << "Unsupported Vertex mode\n";
     }
+    cprintf(_rloglevel, ss.str().c_str()); 
 
     for (tree<Vertex>::sibling_iterator c = top.begin();
             c != top.end();c++)
-        rawPrint(c, level + 1, _rloglevel);
-
+        ss << rawPrint(c, level + 1, _rloglevel);
+    return ss.str();
 }
 
 string repeatc(const char c, const int count)
@@ -944,73 +951,68 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
     return (max_size > 0);
 }
 
-void printNode1(pHandle h, int level, int LogLevel)
+string printNode1(pHandle h, int level, int LogLevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 
+    std::stringstream ss;
     Type t = atw->getType(h);
     const TruthValue& tv = atw->getTV(h);
 
-    char buf[500];
-
     if (!tv.isNullTv())
-        sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(), opencog::pln::Type2Name(t), t, tv.getMean(), tv.getConfidence(), h);
+        ss << atw->getName(h) << ":" << opencog::pln::Type2Name(t) << 
+            " (" << t << ") " << tv.toString() << "\t[" << h << "]";
     else
-        sprintf(buf, "NULL TV!");
+        ss << "NULL TV!";
 
-    //if (LogLevel <= Log::getDefaultLevel())
-    LOG(LogLevel, (repeatc(' ', level*3) + buf).c_str());
+    LOG(LogLevel, (repeatc(' ', level*3) + ss.str()).c_str());
+    return ss.str();
 
-// LOG0(LogLevel, repeatc(' ', level*3) + buf);
 }
 
-void printTree(pHandle h, int level, int LogLevel)
+std::string printTree(pHandle h, int level, int LogLevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
-
-    if (LogLevel > currentDebugLevel)
-        return;
+    std::stringstream ss;
 
     if (level > 20) {
         level = 20;
     }
 
     if (h == PHANDLE_UNDEFINED) {
-        //LOG0(LogLevel, repeatc(' ', level*3) + "NULL HANDLE!");
-        return;
+        return "";
     }
 
     if (atw->isType(h)) {
-        char buf[500];
         Type t = (Type) h;
 
-        sprintf(buf, "Virtual %s (%d)\n", opencog::pln::Type2Name(t), t);
+        ss << "Virtual " << opencog::pln::Type2Name(t)
+            << "(" << t << ")" << endl;
 
-        printf("%s",(repeatc(' ', level*3) + buf ).c_str());
-        return;
+        if (LogLevel > currentDebugLevel)
+            printf("%s",(repeatc(' ', level*3) + ss.str() ).c_str());
+        return ss.str();
     }
 
     if (atw->getArity(h) == 0) {
-        printNode1(h, level, LogLevel);
+        ss << printNode1(h, level, LogLevel);
     } else {
         vector<pHandle> hs = atw->getOutgoing(h);
         Type t = atw->getType(h);
         const TruthValue& tv = atw->getTV(h);
 
-        char buf[500];
-
         if (!tv.isNullTv())
-            sprintf(buf, "%s:%s (%d) <%.6f, %.6f>\t[%d]", atw->getName(h).c_str(),
-                    opencog::pln::Type2Name(t), t, tv.getMean(), tv.getConfidence(),
-                    h);
+            ss << atw->getName(h).c_str() << ":" << opencog::pln::Type2Name(t)
+              << "(" << t << ") " << tv.toString() << "\t[" << h <<"]";
         else
-            sprintf(buf, "NULL TV!");
+            ss << "NULL TV!";
 
-        LOG(LogLevel, (repeatc(' ', level*3) + buf ).c_str());
+        LOG(LogLevel, (repeatc(' ', level*3) + ss.str() ).c_str());
 
         for (vector<pHandle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
-            printTree(*hi, level + 1, LogLevel);
+            ss << printTree(*hi, level + 1, LogLevel);
     }
+    return ss.str();
 
 }
 
@@ -1160,16 +1162,17 @@ void getAtomTreeString(const atom& a, string& outbuf)
 
 }
 
-void printNode1(const atom& a, int level, int LogLevel)
+string printNode1(const atom& a, int level, int LogLevel)
 {
-    char buf[500];
+    std::stringstream ss;
 
-    sprintf(buf, "%s:%s (%d) [%d]", a.name.c_str(), opencog::pln::Type2Name(a.T), a.T,
-            a.handle);
+    ss << a.name << ":" << opencog::pln::Type2Name(a.T) << " (" << a.T <<
+        ") [" << a.handle << "]";
 
-    string subst_buf = make_subst_buf(a);
+    ss << " (  " << make_subst_buf(a) << ")";
 
-    LOG(LogLevel, repeatc(' ', level*3) + buf + " (   " + subst_buf + ")");
+    LOG(LogLevel, repeatc(' ', level*3) + ss.str() );
+    return ss.str();
 }
 
 void printAtomTree(const atom& a, int level, int LogLevel)
