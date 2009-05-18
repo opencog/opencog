@@ -53,11 +53,6 @@ namespace test
     double custom_duration2 = 0.0;
 
     const bool LOG_WITH_NODE_ID = true;
-
-    extern int _test_count;
-    extern bool debugger_control;
-
-    extern FILE *logfile;
 }
 
 
@@ -147,7 +142,6 @@ namespace pln {
 const bool DIRECT_RESULTS_SPAWN = true;
 const bool USE_GENERATOR_CACHE = false; //true; /// This cache gives 30% speed-up
 static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.00001f;
-bool RECORD_TRAILS = true;
 const bool PREVENT_LOOPS = false;
 
 extern Btr<set<pHandle> > ForAll_handles;
@@ -192,7 +186,10 @@ void BITNodeRoot::print_parents(BITNode* b)
     printf("\n");
 }
 
-BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
+void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
+bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
+
+BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails)
 : InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
     AtomSpaceWrapper *atw = GET_ATW;
@@ -201,6 +198,8 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp)
     /// All CustomCrispUnificationRules must be re-created
     //ForAll_handles.reset();
     //RuleRepository::Instance().CreateCustomCrispUnificationRules();
+
+    recordingTrails = _rTrails;
     
     rule = NULL;
     root = this;
@@ -1365,7 +1364,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                     root->hsource[_v2h(next_result.value)] = const_cast<BITNode*>(this);
 
-                    if (RECORD_TRAILS) {
+                    if (root->getRecordingTrails()) {
                         foreach(VtreeProvider* v, rule_args)
                         {
 //                          root->inferred_from[_v2h(next_result.value)].push_back(_v2h(v.value));
@@ -1902,12 +1901,6 @@ int BITNode::tlog(int debugLevel, const char *format, ...) const
 //          (test::LOG_WITH_NODE_ID ? ((int)this) : 0),
             (long)this, (rule ? (rule->name.c_str()) : "(root)"));
         
-        if (test::logfile)
-            fprintf(test::logfile, "%d %ld [(%ld)] (%s): ", depth, root->InferenceNodes,
-//          (test::LOG_WITH_NODE_ID ? ((int)this) : 0),
-            (long)this,
-            (rule ? (rule->name.c_str()) : "(root)"));
-        
         char buf[5000];
         
         va_list ap;
@@ -1915,9 +1908,6 @@ int BITNode::tlog(int debugLevel, const char *format, ...) const
         int answer = vsprintf(buf, format, ap);
         
         printf("%s", buf);
-        
-        if (test::logfile)
-            fprintf(test::logfile, "%s", buf);
         
         fflush(stdout);
         va_end(ap);

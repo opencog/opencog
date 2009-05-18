@@ -94,6 +94,20 @@ private:
 
     Factory<BackChainingAgent, Agent> backChainingFactory;
 
+    const std::string* DEFAULT()
+    {
+        static const std::string defaultConfig[] = {
+            "PLN_RECORD_TRAILS",         "true",
+            "PLN_LOG_LEVEL",         "2",
+            "PLN_FW_VARS_IN_ATOMSPACE",  "true",
+            "PLN_PRINT_REAL_ATOMS",      "true",
+            "",                      ""
+        };
+        return defaultConfig;
+    }
+
+    void setParameters(const std::string* params);
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -101,6 +115,8 @@ public:
         static const ClassInfo _ci("opencog::PLNModule");
         return _ci;
     }
+
+    bool recordingTrails;
     
     static inline const char* id();
 
@@ -108,11 +124,23 @@ public:
     ~PLNModule();
     void init();
 
+    /** Process command request from do_pln
+     *
+     * @todo Need to add commands for exploring the AtomSpace as viewed
+     * through the AtomSpaceWrapper.
+     * @todo Need to add commands for controlling multiple roots/targets.
+     */
+    std::string runCommand(std::list<std::string> args);
+
 }; // class
 
-//! Takes a real handle, and sets the backward-chaining target to that atom.
+/** Takes a real handle, and sets the backward-chaining target to that atom.
+ */
 void setTarget(Handle h);
-//! Does steps inference steps on target h. Does not set the BC target used in the PLN commands.
+
+/** Does steps inference steps on target h. Does not set the BC target used
+ * in the PLN commands.
+ */
 void infer(Handle h, int &steps);
 
 } // namespace opencog

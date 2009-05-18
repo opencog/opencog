@@ -28,17 +28,13 @@
 
 #include "PLN.h"
 #include "rules/Rules.h"
-
-#define BackInferenceTreeRootT BITNodeRoot
-
-//#include "PTLEvaluator.h"
-
 #include "rules/RuleProvider.h"
 #include "AtomSpaceWrapper.h"
 #include "BackInferenceTreeNode.h"
+
 #include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
 #include <opencog/atomspace/utils.h>
-// #include <opencog/guile/SchemeEval.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -56,39 +52,32 @@ DECLARE_MODULE(PLNModule)
 #pragma warning(disable : 4312)
 #endif // _MSC_VER
 
-//! debug level, @todo replaced by opencog log system
+//! @todo replace by opencog log system
 extern int currentDebugLevel;
 
 namespace haxx
 {
     extern bool AllowFW_VARIABLENODESinCore;
     extern bool printRealAtoms;
-//    extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
 }
 
-namespace opencog {
-namespace pln
-{
-    extern bool RECORD_TRAILS;
-}}
 
-namespace test
-{
-    extern FILE *logfile;
-//    int _test_count = 0;
-    // not used (it's set but nothing responds to it)
-//    bool debugger_control = false;
-}
-
-//void initTestEnv();
-//void Init();
-std::string RunCommand(std::list<std::string> args);
 
 PLNModule::PLNModule() : Module()
 {
+    setParameters(DEFAULT());
+
     logger().info("[PLNModule] constructor");
 	do_pln_register();	
 	cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
+}
+
+void PLNModule::setParameters(const std::string* params) {
+    for (unsigned int i = 0; params[i] != ""; i += 2) {
+        if (!config().has(params[i])) {
+           config().set(params[i], params[i + 1]);
+        }
+    }
 }
 
 PLNModule::~PLNModule() {
@@ -98,18 +87,17 @@ PLNModule::~PLNModule() {
 }
 
 // state variables for running multiple PLNShell commands.
-Btr<BackInferenceTreeRootT> Bstate;
-BackInferenceTreeRootT* temp_state, *state;
+Btr<BITNodeRoot> Bstate;
+BITNodeRoot* temp_state, *state;
 
 void PLNModule::init()
 {
     logger().info("[PLNModule] init");
-//    CogServer& cogserver = static_cast<CogServer&>(server());
 
 //! @todo this should be moved to a separate method so it can
 // also be accessed from PLNUTest
 //	initTestEnv();
-    RECORD_TRAILS = true;
+    recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
 
     currentDebugLevel=100;
 	
@@ -122,18 +110,13 @@ void PLNModule::init()
     ((LocalATW*)asw)->SetCapacity(10000);
     #endif  
     
-    #if LOG_ON_FILE
-     test::logfile=fopen("pln.log","wt");
-     cout << "LOGGING TO FILE pln.log!\n";
-    #endif
-
     haxx::printRealAtoms = true;
     ((AtomSpaceWrapper*)asw)->archiveTheorems = false;
 
     // no longer done at module load - it would be inappropriate
     // for contexts other than testing PLN
     /*initTests();*
-    Bstate = Btr<BackInferenceTreeRootT>(new BITNodeRoot(tests[0],
+    Bstate = Btr<BITNodeRoot>(new BITNodeRoot(tests[0],
         new DefaultVariableRuleProvider));
     printf("BITNodeRoot init ok\n");
     temp_state = Bstate.get();
@@ -142,40 +125,27 @@ void PLNModule::init()
 
 std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 {
-/*	if (args.size() != 3)
-		return "sql-load: Wrong num args";*/
-
-/*	std::string dbname   = args.front(); args.pop_front();
-	std::string username = args.front(); args.pop_front();
-	std::string auth	   = args.front(); args.pop_front();*/
-
-//    initTestEnv(args);
-
-    std::string output = RunCommand(args);
-
+    std::string output = runCommand(args);
 	return output;
 }
 
-void opencog::setTarget(Handle h) {
+namespace opencog {
+
+void setTarget(Handle h) {
     pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
     pHandle fakeHandle = fakeHandles[0];
-//    vtree target* = new vtree(fakeHandle);
     Btr<vtree> target(new vtree(fakeHandle));
     
-//    opencog::pln::printTree(h,0,0);
-//    rawPrint(ret, ret.begin(), 0);
-
     Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
 
     printf("BITNodeRoot init ok\n");
-//    temp_state = Bstate.get();
     state = Bstate.get();
 }
 
-void opencog::infer(Handle h, int &steps)
+void infer(Handle h, int &steps)
 {
-    Btr<BackInferenceTreeRootT> Bstate;
-    BackInferenceTreeRootT *state;
+    Btr<BITNodeRoot> Bstate;
+    BITNodeRoot *state;
 
     pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
     pHandle fakeHandle = fakeHandles[0];
@@ -187,7 +157,7 @@ void opencog::infer(Handle h, int &steps)
     state = Bstate.get();
     state->infer(steps, 0.000001f, 0.01f);
     state->printResults();
-//    ss << "\n" << j << " $ remaining.\n";
+}
 
 }
 
@@ -197,7 +167,7 @@ void initTestEnv()
     try {
         puts("Initializing PLN test env...");
 
-        RECORD_TRAILS = true;
+        recordingTrails = true;
         haxx::printRealAtoms = true;
 
         currentDebugLevel=100;
@@ -273,10 +243,6 @@ void Init()
     ((LocalATW*)ASW())->SetCapacity(10000);
     #endif  
     
-    #if LOG_ON_FILE
-     test::logfile=fopen("pln.log","wt");
-     cout << "LOGGING TO FILE pln.log!\n";
-    #endif
 
     haxx::printRealAtoms = true;
 }
@@ -296,7 +262,7 @@ T input(T& a, std::list<std::string>& args)
     return a;
 }
 
-std::string RunCommand(std::list<std::string> args)
+std::string PLNModule::runCommand(std::list<std::string> args)
 {
     AtomSpaceWrapper* atw = GET_ATW;
     // All commands/strings in requiresRoot need for the state
@@ -310,7 +276,9 @@ std::string RunCommand(std::list<std::string> args)
         setRequiresRoot.insert(requiresRoot[i]);
     }
 
+    // For result...
     std::stringstream ss;
+
     try {
         int a1T, a2T, bT, tempi=0;
         string a10, a11, a20, a21, b1, b2;
@@ -319,7 +287,6 @@ std::string RunCommand(std::list<std::string> args)
         Rule::MPs rule_args;
         bindingsT new_bindings;
 
-        string c;
         std::string temps;
         long h=0, h2=0;
         int j;
@@ -330,13 +297,13 @@ std::string RunCommand(std::list<std::string> args)
         Vertex v;
         Handle eh=Handle::UNDEFINED;
 
+        // Command string
+        string c;
         // Get command
         input(c, args);
         
-#if LOG_ON_FILE
-        save_log();
-#endif
-        haxx::AllowFW_VARIABLENODESinCore = true; //false;
+        // To be removed when AtomSpaceWrapper filters FWVars
+        haxx::AllowFW_VARIABLENODESinCore = true;
 
         // Check whether command requires root to be set...
         set<string>::iterator rs_it;
@@ -348,16 +315,14 @@ std::string RunCommand(std::list<std::string> args)
         
         // Please keep these in the same order as the help
         // for the "pln" command!
-        //! @todo Need to add commands for exploring the AtomSpace as viewed
-        //! through the AtomSpaceWrapper.
-        //! @todo Need to add commands for controlling multiple roots/targets.
         if (c == "log") {
             input(h, args); currentDebugLevel = (int) h;
             ss << "PLN log level now " << currentDebugLevel << endl;
         }
         else if (c == "record-trails") {
-            RECORD_TRAILS = !RECORD_TRAILS;
-            ss << "Recording trails now " << (RECORD_TRAILS?"ON":"OFF") << endl;
+            recordingTrails = !recordingTrails;
+            ss << "Recording trails now " << (recordingTrails?"ON":"OFF") << endl;
+            state->setRecordingTrails(false);
         }
         else if (c == "infer") {
             // Give max nr of steps that we can take.
@@ -403,21 +368,21 @@ std::string RunCommand(std::list<std::string> args)
         else if (c == "bit") {
             input(h, args);
             if (h == 0) h = (long) state->children[0].begin()->prover;
-            ((BackInferenceTreeRootT*)h)->print(); 
+            ((BITNodeRoot*)h)->print(); 
         }
         else if (c == "bit-expand") {
             input(h, args);
             if (h == 0) h = (long) state;
-            ((BackInferenceTreeRootT*)h)->expandNextLevel();
-/*          foreach(const parent_link& p, ((BackInferenceTreeRootT*)h)->GetParents())
-                p.link->removeIfFailure((BackInferenceTreeRootT*)h);*/
+            ((BITNodeRoot*)h)->expandNextLevel();
+/*          foreach(const parent_link& p, ((BITNodeRoot*)h)->GetParents())
+                p.link->removeIfFailure((BITNodeRoot*)h);*/
         }
         else if (c == "bit-results") {
             input(h, args);
             if (h == 0) h = (long)state;
 //          h = (int)state->children[0].begin()->prover;
-            ((BackInferenceTreeRootT*)h)->printResults();
-/*          foreach(const set<BoundVertex>& eval_res_set, ((BackInferenceTreeRootT*)h)->GetEvalResults())
+            ((BITNodeRoot*)h)->printResults();
+/*          foreach(const set<BoundVertex>& eval_res_set, ((BITNodeRoot*)h)->GetEvalResults())
             foreach(const BoundVertex& eval_res, eval_res_set)
                 printTree(v2h(eval_res.value),0,-10);*/
         }
@@ -430,21 +395,21 @@ std::string RunCommand(std::list<std::string> args)
         }
         else if (c == "bit-rule-args") {
             input(h, args);
-            ((BackInferenceTreeRootT*)h)->printArgs();
+            ((BITNodeRoot*)h)->printArgs();
         }
         else if (c == "bit-rule-target") { input(h, args);
             cprintf(-10, "Target:\n");
-            ((BackInferenceTreeRootT*)h)->printTarget();
+            ((BITNodeRoot*)h)->printTarget();
             cprintf(-10, "Results:\n");
-            ((BackInferenceTreeRootT*)h)->printResults();
-            cprintf(0, "parent arg# %d\n", ((BackInferenceTreeRootT*)h)->getParents().begin()->parent_arg_i);
+            ((BITNodeRoot*)h)->printResults();
+            cprintf(0, "parent arg# %d\n", ((BITNodeRoot*)h)->getParents().begin()->parent_arg_i);
         }
         //! @todo work this out?
         else if (c == "bit-direct-results") {
             input(h, args);
             ss << "Disabled" << endl;
             /*cprintf(0, "Node has results & bindings:\n");
-            foreach(const BoundVertex& bv, *((BackInferenceTreeRootT*)h)->direct_results)
+            foreach(const BoundVertex& bv, *((BITNodeRoot*)h)->direct_results)
             {
                 cprintf(0,"[%d]\n", v2h(bv.value));
                 if (bv.bindings)
@@ -487,8 +452,8 @@ std::string RunCommand(std::list<std::string> args)
             cprintf(0,"\n");
         }
         else if (c == "=") { input(h, args); input(h2, args); 
-/*          cprintf(0, ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ? "EQ\n" : "IN-EQ\n"); */
-            ss << ( ((BackInferenceTreeRootT*)h)->eq((BackInferenceTreeRootT*)h2) ?
+/*          cprintf(0, ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ? "EQ\n" : "IN-EQ\n"); */
+            ss << ( ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ?
                 "EQ" : "IN-EQ" ) << std::endl;
         }
         // Not recommended
@@ -533,7 +498,7 @@ std::string RunCommand(std::list<std::string> args)
             if (using_root) {
                 temp_state = state;
                 input(h, args);
-                state = (BackInferenceTreeRootT*)h;
+                state = (BITNodeRoot*)h;
                 using_root = false;
             }
             else {
@@ -553,3 +518,4 @@ std::string RunCommand(std::list<std::string> args)
     }
     return ss.str();
 }
+

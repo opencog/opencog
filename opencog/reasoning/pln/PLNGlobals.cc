@@ -4,7 +4,6 @@
 
 namespace test
 {
-    FILE *logfile=NULL;
     //! @todo This variable is modified but not used anywhere
     int attachs=0;
 }

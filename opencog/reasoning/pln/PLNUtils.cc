@@ -50,12 +50,6 @@
 #include "opencog/atomspace/TimeServer.h"
 #endif
 
-//class HandleEntry;
-namespace test
-{
-extern FILE *logfile;
-}
-
 namespace haxx
 {
 // extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
@@ -112,16 +106,12 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
 
     for (int i = 0; i < level; i++) {
         cprintf(_rloglevel, "   ");
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "   ");
     }
 
     if (hptr && !atw->isType(*hptr)) {
 //puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
             cprintf(_rloglevel, "[%u]\n", (*hptr));
-            if (test::logfile && _rloglevel >= currentDebugLevel)
-                fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
             opencog::pln::printTree(*hptr, level, _rloglevel);
 
@@ -133,16 +123,10 @@ void rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlogl
 
     if (hptr) {
         cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%d (%d)\n", iptr->value, top.number_of_children());
     } else {
         cprintf(_rloglevel, "Unsupported Vertex mode\n");
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "Unsupported Vertex mode\n");
     }
 
     for (tree<Vertex>::sibling_iterator c = t.begin(top);
@@ -165,16 +149,12 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 
     for (int i = 0; i < level; i++) {
         cprintf(_rloglevel, "   ");
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "   ");
     }
 
     if (hptr && !atw->isType(*hptr)) {
 //puts("opencog::pln::printTree");
         if (!::haxx::printRealAtoms) {
             cprintf(_rloglevel, "[%d]\n", (*hptr));
-            if (test::logfile && _rloglevel >= currentDebugLevel)
-                fprintf(test::logfile, "[%u]\n", (*hptr));
         } else
             opencog::pln::printTree(*hptr, level, _rloglevel);
 
@@ -186,16 +166,10 @@ void rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 
     if (hptr) {
         cprintf(_rloglevel, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s (%d)\n", opencog::pln::Type2Name((Type)(*hptr)), top.number_of_children());
     } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
         cprintf(_rloglevel, "%d (%d)\n", iptr->value, top.number_of_children());
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "%d (%d)\n", iptr->value, top.number_of_children());
     } else {
         cprintf(_rloglevel, "Unsupported Vertex mode\n");
-        if (test::logfile && _rloglevel >= currentDebugLevel)
-            fprintf(test::logfile, "Unsupported Vertex mode\n");
     }
 
     for (tree<Vertex>::sibling_iterator c = top.begin();
@@ -984,9 +958,6 @@ void printNode1(pHandle h, int level, int LogLevel)
     else
         sprintf(buf, "NULL TV!");
 
-    if (test::logfile && LogLevel >= currentDebugLevel)
-        fprintf(test::logfile, "%s\n", buf);
-
     //if (LogLevel <= Log::getDefaultLevel())
     LOG(LogLevel, (repeatc(' ', level*3) + buf).c_str());
 
@@ -1015,9 +986,6 @@ void printTree(pHandle h, int level, int LogLevel)
 
         sprintf(buf, "Virtual %s (%d)\n", opencog::pln::Type2Name(t), t);
 
-        if (test::logfile && LogLevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s", buf);
-
         printf("%s",(repeatc(' ', level*3) + buf ).c_str());
         return;
     }
@@ -1037,9 +1005,6 @@ void printTree(pHandle h, int level, int LogLevel)
                     h);
         else
             sprintf(buf, "NULL TV!");
-
-        if (test::logfile && LogLevel >= currentDebugLevel)
-            fprintf(test::logfile, "%s\n", buf);
 
         LOG(LogLevel, (repeatc(' ', level*3) + buf ).c_str());
 

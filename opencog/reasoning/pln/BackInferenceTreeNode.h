@@ -507,6 +507,8 @@ public:
 	
 	/// Use for debugging
 	int totalChildren() const;
+
+    BITNodeRoot& getBITRoot() const;
 	
 	/// Use for debugging
 	bool hasAncestor(const BITNode* const _p) const;
@@ -560,8 +562,7 @@ public:
 	set<BITNode*> used_nodes;
 
 	// The class assumes ownership of the RuleProvider
-
-	BITNodeRoot(meta _target, RuleProvider* _rp);
+	BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails = true);
 	
     /**
      * Basic usage: 
@@ -612,6 +613,8 @@ public:
 	void print_parents(BITNode* b);
 
     int getExecPoolSize() const;
+    void setRecordingTrails(bool x=true);
+    bool getRecordingTrails() const;
 
 protected:
 	friend struct not_owned_var;
@@ -623,6 +626,8 @@ protected:
 	std::map<Rule*, float> priority;
 
 	Rule::MPs dummy_args;
+
+    bool recordingTrails;
 	
     /// "Users[b]" list is maintained in order to know which BITNodes directly
     /// or indirectly use (ie. Have as a subtree, with possibly some

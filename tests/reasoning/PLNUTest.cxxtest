@@ -116,7 +116,6 @@ namespace haxx
 
 namespace opencog {
 namespace pln {
-    extern bool RECORD_TRAILS;
     extern unsigned long now_interval_len   ;
 }}
 
@@ -252,8 +251,6 @@ public:
             //cogserver.loadModule(std::string("libscheme.so"));
             // Open network port
             //cogserver.enableNetworkServer();
-
-            RECORD_TRAILS = true;
             haxx::printRealAtoms = true;
 
             currentDebugLevel=100;
