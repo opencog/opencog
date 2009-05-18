@@ -388,6 +388,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         }
         else if (c == "bit-parents") {
             input(h, args);
+            if (h == 0) h = (long)state;
             foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents()) {
                 ss << "User Node = " << (ulong) p.link << endl;
             }
@@ -395,9 +396,11 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         }
         else if (c == "bit-rule-args") {
             input(h, args);
+            if (h == 0) h = (long)state;
             ((BITNodeRoot*)h)->printArgs();
         }
         else if (c == "bit-rule-target") { input(h, args);
+            if (h == 0) h = (long)state;
             cprintf(-10, "Target:\n");
             ((BITNodeRoot*)h)->printTarget();
             cprintf(-10, "Results:\n");
@@ -407,6 +410,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         //! @todo work this out?
         else if (c == "bit-direct-results") {
             input(h, args);
+            if (h == 0) h = (long)state;
             ss << "Disabled" << endl;
             /*cprintf(0, "Node has results & bindings:\n");
             foreach(const BoundVertex& bv, *((BITNodeRoot*)h)->direct_results)
