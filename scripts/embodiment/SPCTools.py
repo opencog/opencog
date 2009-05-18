@@ -91,12 +91,8 @@ else:
     exit(1)
 
 if command=='e':
-
-    print 'before'
     
     dataList = data.split('\n')
-
-    print 'after'
 
     #initialize f, doc, ioc, eoc, apc and aac
     f={}
@@ -110,7 +106,7 @@ if command=='e':
         wl = l.split()
         #determine the parameters of the new estimator
         if l.rfind('SPCTools - New estimator') != -1:
-            print 'new estimator'
+            #print 'new estimator'
             if len(f)!=0:
                 printDict(f)
                 f={}

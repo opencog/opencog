@@ -6,9 +6,9 @@ ENDIF (COMMAND CMAKE_POLICY)
 
 PROJECT(OPENCOG)
 
-############################
-#Comment to be in debug mode
-############################
+################################
+#uncomment to be in Release mode
+################################
 #SET(CMAKE_BUILD_TYPE Release)
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
