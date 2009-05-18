@@ -192,7 +192,7 @@ IF (NOT WIN32)
 ENDIF (NOT WIN32)
 
 ADD_CUSTOM_TARGET(cscope
-    COMMAND find opencog examples tests -name '*.cc' -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
+    COMMAND find opencog examples tests -name '*.cc' -o -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
     COMMAND cscope -b
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating CScope database"
