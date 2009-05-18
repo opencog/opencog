@@ -611,6 +611,8 @@ public:
 	void print_users(BITNode* b);
 	void print_parents(BITNode* b);
 
+    int getExecPoolSize() const;
+
 protected:
 	friend struct not_owned_var;
 	typedef list<BITNode*> exec_poolT;

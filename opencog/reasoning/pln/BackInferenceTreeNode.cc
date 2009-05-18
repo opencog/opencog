@@ -312,6 +312,8 @@ BITNode* BITNodeRoot::CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule:
     return ret;
 }
 
+int BITNodeRoot::getExecPoolSize() const { return exec_pool.size(); }
+
 Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
 {
     //! @todo why is there an assert zero and below results commented out?

@@ -44,42 +44,53 @@ class PLNModule : public Module
 private:
 
     DECLARE_CMD_REQUEST(PLNModule, "pln", do_pln, 
-       "Run a PLN command", 
-       "Usage: pln <command>\n\n"
-       "Run the specified PLN command.\n"
-       "(NOTE THE DIFFERENCE BETWEEN ARG TYPES:\n\
-Some commands take Handles, some take BITNodes.\n\
-\n\
--3 - Minimal log level  \n\
-0 - normal log level\n\
-2 - recommended maximally informative log level\n\
-test-count - print the number of inference targets\n\
-target #n - Load in a new pre-defined target #n (from TestTargets.h)\n\
-load-axioms <path> - Load XML axiom file in 'path'\n\
-infer #s - Infer until result found with conf>0.01 OR 's' inference steps have been taken \n\
-S #n - Execute the #n of the fittest BIT nodes\n\
-expand #n - Expand BITNode with id #n\n\
-results #n - Print out the results of the BITnode #n  (0 = root)\n\
-rule-arguments #n - Print the Rule arguments of BITnode #n\n\
-rule-target #n - Print the Rule target of BITnode #n\n\
-print-bit #n - print the inference (BIT) tree under node #n (0 = root)\n\
-plan #h - Show the plan ie. sequence of 'do' statements pertaining to inference result Handle #h\n\
-pool - Show the current BIT node expansion pool sorted by heuristic fitness\n\
-O #n - show the parent of BITNode #n\n\
-trail #h - print the inference trail for Handle #h\n\
-\n\
-record-trails - switch the recording of inference trails ON/OFF (default: ON)\n\
-direct-results #i - Show the direct results (by lookup or hypothesis) of BIT node #i\n\
-b #i - Show the target atom and pre-bindings of BIT node #i\n\
-f - Show the current BIT node expansion pool sorted by heuristics fitness and Execute the fittest BIT node\n\
-\n\
-n - expand the tree's whole next level (usually not recommended)\n\
-eval - manually evaluate the current tree (usually not recommended)\n\
-find-bitnode bT b1 b2   a1T a10 a11   [a2T a20 a21]   <Rule #> - find a BITNode for the given rule with the given parameters\n\
-atoms #t - output atoms of the given type\n\
-loop-check - check for loops\n\
-atom #h - print the atom with handle #h\n\
-These should be bug-free, but there's no type checking of parameters, so providing eg. BIT node number instead of Handle number will SegFault.")
+        "Run a PLN command", 
+        "Usage: pln <command>\n\n"
+        "Run the specified PLN command.\n"
+        "( NOTE THE DIFFERENCE BETWEEN ARG TYPES:\n"
+        "- some commands take PLN Handles, these are different from AtomSpace Handles!\n"
+        "- some take BITNode pointers. )\n"
+        "\n"
+        "---\n"
+        " log <[-4..4]> - Set log level (0 = normal log level).\n"
+        " record-trails - Switch the recording of inference trails ON/OFF (default: ON)\n"
+        " infer <s>     - Infer until result found with conf > 0.01 OR 's' inference steps\n"
+        "                 have been taken.\n"
+        " atom <h>      - print the atom with PLN Handle h\n"
+        " plan <h>      - Show the plan ie. sequence of 'do' statements pertaining to inference\n"
+        "                 result of PLN Handle h\n"
+        " trail <h>     - print the inference trail for PLN Handle #h\n"
+        "\n"
+        "--- Pool\n"
+        " pool          - Show the current BIT node expansion pool sorted by heuristic fitness\n"
+        " pool-size     - Return current BIT node expansion pool size\n"
+        " pool-fittest  - Show the current BIT node expansion pool sorted by heuristics\n"
+        "                 fitness and expand the fittest BIT node\n"
+        " pool-expand <n>- Execute the #n fittest BIT nodes\n"
+        "\n"
+        "--- BIT\n"
+        " bit <n>            - Print the inference (BIT) tree under node n (0 = root)\n"
+        " bit-expand <n>     - Expand BITNode with id n\n"
+        " bit-results <n>    - Print out the results of BIT node n (0 = root)\n"
+        " bit-parents <n>    - Show the parents of BITNode #n\n"
+        " bit-rule-args <n>  - Print the Rule arguments of BIT node n\n"
+        " bit-rule-target <n>- Print the Rule target of BIT node n\n"
+        " bit-direct-results #i - (disabled) Show the direct results (by lookup or hypothesis)\n "
+        "                 of BIT node #i\n"
+        "\n"
+        "--- Testing\n"
+        " load-axioms <path> - Load XML axiom file in 'path'\n"
+        " test-count         - count the number of pre-defined inference targets\n"
+        " test-target <n>    - Load in a new pre-defined target #n (from TestTargets.h)\n"
+        " = <n1> <n1>        - Check if BIT nodes n1 and n2 are equal.\n"
+        "\n"
+        "--- The following are not recommended unless you know what your doing:\n"
+        " bit-next-level     - Expand the tree's whole next level (usually not recommended)\n"
+        " bit-eval           - Manually evaluate the current tree (usually not recommended)\n"
+        " bit-find-node  bT b1 b2  a1T a10 a11 [a2T a20 a21] <Rule ptr> - find a BITNode \n"
+        "                 for the given rule with the given parameters. 3rd parameter depends \n"
+        "                 on rule number, but must be specified (needs to be more friendly).\n"
+        " loop-check         - check for loops\n");
 
     Factory<BackChainingAgent, Agent> backChainingFactory;
 
