@@ -38,8 +38,6 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
-enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
-
 int haxxUsedProofResources = 0;
 float temperature = 0.01;
 
@@ -102,10 +100,6 @@ namespace opencog {
 namespace pln {
 
 typedef pair<Rule*, vtree> directProductionArgs;
-
-FitnessEvalutorT FitnessEvaluator = DETERMINISTIC;
-//FitnessEvalutorT FitnessEvaluator = SOFTMAX;
-//FitnessEvalutorT FitnessEvaluator = RANDOM;
 
 struct less_dpargs : public binary_function<directProductionArgs, directProductionArgs, bool>
 {
@@ -193,7 +187,8 @@ string BITNodeRoot::printParents(BITNode* b)
 void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
 bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 
-BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails)
+BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
+        FitnessEvaluatorT _fe)
 : InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
     AtomSpaceWrapper *atw = GET_ATW;
@@ -204,6 +199,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails)
     //RuleRepository::Instance().CreateCustomCrispUnificationRules();
 
     recordingTrails = _rTrails;
+    fitnessEvaluator = _fe;
     
     rule = NULL;
     root = this;
@@ -1519,7 +1515,7 @@ float all_best_fitness = 0.0f;
 
 void BITNode::expandFittest()
 {
-    if (SOFTMAX == FitnessEvaluator)
+    if (SOFTMAX == root->fitnessEvaluator)
     {
         /*  tlog(2,"Fitness table: (%d)\n", root->exec_pool.size());
 
@@ -1591,7 +1587,7 @@ void BITNode::expandFittest()
 
         return;
     }
-    else if (FitnessEvaluator == RANDOM)
+    else if (root->fitnessEvaluator == RANDOM)
     {
         BITNodeRoot::exec_poolT::iterator ei = root->exec_pool.begin();
         int e = rand() % root->exec_pool.size();

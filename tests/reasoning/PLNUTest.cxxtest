@@ -85,12 +85,7 @@ namespace test
     extern double custom_duration2;
 }
 
-enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
-
-namespace opencog { namespace pln {
-//    void InitAxiomSet(string premiseFile);
-    extern FitnessEvalutorT FitnessEvaluator;
-}}
+FitnessEvaluatorT testFitnessEvaluator;
 void InitAxiomSet(string premiseFile);
 
 // These are now in PLNUtils.h
@@ -199,7 +194,7 @@ private:
      * temperatures/seeds.
      */
     void setupHeuristicTestRun() {
-        if (FitnessEvaluator == DETERMINISTIC)
+        if (testFitnessEvaluator == BEST)
             return;
     
         INstatsV.clear();
@@ -306,7 +301,7 @@ public:
         for (uint v=0; v < INstatsV[0].size(); v++)
         {
             fprintf(f, "\n");
-            for (int t=0; t < ( (FitnessEvaluator!=DETERMINISTIC) ? TestRepeats : 1); t++)
+            for (int t=0; t < ( (testFitnessEvaluator!=BEST) ? TestRepeats : 1); t++)
                 fprintf(f, "%d ", INstatsV[t][v]);
         }
 
@@ -332,7 +327,7 @@ public:
     }
     
     void testHeuristic() {
-        if (FitnessEvaluator == DETERMINISTIC)
+        if (testFitnessEvaluator == BEST)
         return;
 
         for (int t=0; t < TestRepeats; t++)
@@ -344,10 +339,10 @@ public:
 
             INstatsV[t].push_back(AllTestsInferenceNodes);
 
-            if (FitnessEvaluator != SOFTMAX)
+            if (testFitnessEvaluator != SOFTMAX)
             {
                 //No need to play with temperatures or multiple test repeats.
-                if (FitnessEvaluator != RANDOM)
+                if (testFitnessEvaluator != RANDOM)
                     t = TestRepeats;
                 tempi = temperaturesN;
             }
@@ -791,6 +786,7 @@ void InitPLNTests()
 
     assert(h1 == h2);
 */
+    testFitnessEvaluator=BEST;
     currentDebugLevel=100;
 }
 
@@ -1002,10 +998,10 @@ void RunPLNTestsOnce()
             RunPLNTestsOnce();
             INstatsV[t].push_back(AllTestsInferenceNodes);
 
-            if (FitnessEvaluator != SOFTMAX)
+            if (testFitnessEvaluator != SOFTMAX)
             {
                 //No need to play with temperatures or multiple test repeats.
-                if (FitnessEvaluator != RANDOM)
+                if (testFitnessEvaluator != RANDOM)
                     t = TestRepeats;
                 tempi = temperaturesN;
             }
@@ -1016,7 +1012,7 @@ void RunPLNTestsOnce()
     for (uint v=0; v < INstatsV[0].size(); v++)
     {
         fprintf(f, "\n");
-        for (int t=0; t < ( (FitnessEvaluator!=DETERMINISTIC) ? TestRepeats : 1); t++)
+        for (int t=0; t < ( (testFitnessEvaluator!=BEST) ? TestRepeats : 1); t++)
             fprintf(f, "%d ", INstatsV[t][v]);
     }
 

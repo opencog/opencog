@@ -57,10 +57,9 @@
 #include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
+#include "FitnessEvaluator.h"
 
 #include "AtomLookupProvider.h"
-//#include "PLNatom.h"
-//#include "AtomSpaceWrapper.h"
 
 using namespace std;
 using namespace opencog;
@@ -140,13 +139,17 @@ string repeatc(const char c, const int count);
 namespace opencog {
 namespace pln {
 
+FitnessEvaluatorT getFitnessEvaluator(string name);
+
 pHandle _v2h(const Vertex& v);
 
 // Check whether things are equivalent?
-bool unifiesTo(const vtree& lhs, const vtree& rhs, map<pHandle, vtree>& Lbindings,
-               map<pHandle, vtree>& Rbindings, bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
+bool unifiesTo(const vtree& lhs, const vtree& rhs,
+        map<pHandle, vtree>& Lbindings, map<pHandle, vtree>& Rbindings,
+        bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
+
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-                                 map<pHandle, pHandle>& bindings);
+        map<pHandle, pHandle>& bindings);
 
 typedef Btr< std::vector<Vertex> > VertexVector;
 typedef Btr< std::set<Vertex> > VertexSet;

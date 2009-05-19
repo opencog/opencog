@@ -132,6 +132,7 @@ void PLNModule::init()
 
     recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
     currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+    fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
 	
 	// Make sure that the ASW is initialized on module load
 	iAtomSpaceWrapper* asw = ASW();
@@ -146,7 +147,7 @@ void PLNModule::init()
     // for contexts other than testing PLN
     /*initTests();*
     Bstate = Btr<BITNodeRoot>(new BITNodeRoot(tests[0],
-        new DefaultVariableRuleProvider));
+        new DefaultVariableRuleProvider, recordingTrails));
     printf("BITNodeRoot init ok\n");
     temp_state = Bstate.get();
     state = Bstate.get();*/
@@ -165,7 +166,8 @@ void opencog::pln::setTarget(Handle h) {
     pHandle fakeHandle = fakeHandles[0];
     Btr<vtree> target(new vtree(fakeHandle));
     
-    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
+    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
+                recordingTrails));
 
     printf("BITNodeRoot init ok\n");
     state = Bstate.get();
@@ -181,7 +183,9 @@ void opencog::pln::infer(Handle h, int &steps)
     pHandle fakeHandle = fakeHandles[0];
     Btr<vtree> target(new vtree(fakeHandle));
 
-    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider));
+    bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
+    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
+                recordingTrails, getFitnessEvaluator(PLN_FITNESS_BEST)));
 
     printf("BITNodeRoot init ok\n");
     state = Bstate.get();
@@ -391,7 +395,8 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         }
         else if (c == "test-target") {
             input(test_i, args);
-            Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider));
+            Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider,
+                        recordingTrails, fitnessEvaluator));
             state = Bstate.get();
             ss << "Test target set:" << endl;
             ss << rawPrint(*tests[test_i],tests[test_i]->begin(),0);

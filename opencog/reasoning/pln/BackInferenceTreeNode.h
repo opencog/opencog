@@ -40,8 +40,11 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
+#include "AtomSpaceWrapper.h"
 #include "rules/RuleApp.h"
 #include "utils/NMPrinter.h"
+
+#include "FitnessEvaluator.h"
 
 namespace opencog {
 namespace pln {
@@ -562,7 +565,8 @@ public:
 	set<BITNode*> used_nodes;
 
 	// The class assumes ownership of the RuleProvider
-	BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails = true);
+	BITNodeRoot(meta _target, RuleProvider* _rp,
+            bool _rTrails = true, FitnessEvaluatorT fe = BEST);
 	
     /**
      * Basic usage: 
@@ -614,6 +618,8 @@ public:
     int getExecPoolSize() const;
     void setRecordingTrails(bool x=true);
     bool getRecordingTrails() const;
+
+    FitnessEvaluatorT fitnessEvaluator;
 
 protected:
 	friend struct not_owned_var;

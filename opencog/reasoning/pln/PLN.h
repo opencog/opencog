@@ -84,8 +84,8 @@ namespace pln {
     typedef tree<Vertex> vtree;
 
     typedef unsigned long ulong;
-    enum FitnessEvalutorT { DETERMINISTIC, RANDOM, SOFTMAX };
     enum MetaProperty { NONE, STRENGTH, CONFIDENCE, STRENGTH_CONFIDENCE, LTI, STI };
+
 
 }}
 

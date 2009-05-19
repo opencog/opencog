@@ -37,6 +37,7 @@
 #include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 #include "BackInferenceTreeNode.h"
+#include "FitnessEvaluator.h"
 
 #include "PLNUtils.h"
 
@@ -1295,6 +1296,13 @@ public:
 // bool operator()( &arg) { return NonHandleID; }
 };
 */
+
+FitnessEvaluatorT getFitnessEvaluator(string name) {
+    // Convert from string to enum
+    static string names[] = { "BEST", "RANDOM", "SOFTMAX" };
+
+    return BEST;
+}
 
 pHandle _v2h(const Vertex& v) {
    return  boost::get<pHandle>(v);

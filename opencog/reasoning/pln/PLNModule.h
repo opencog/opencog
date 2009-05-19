@@ -32,7 +32,9 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
+#include "BackInferenceTreeNode.h"
 #include "BackChainingAgent.h"
+#include "FitnessEvaluator.h"
 
 namespace opencog {
 
@@ -55,6 +57,7 @@ private:
             "PLN_LOG_LEVEL",         "2",
             "PLN_FW_VARS_IN_ATOMSPACE", "true",
             "PLN_PRINT_REAL_ATOMS",  "true",
+            "PLN_FITNESS_EVALUATOR", "best",
             "",                      ""
         };
         return defaultConfig;
@@ -70,10 +73,10 @@ public:
         return _ci;
     }
 
-    bool recordingTrails;
-    
     static inline const char* id();
 
+    bool recordingTrails;
+    
     PLNModule();
     ~PLNModule();
     void init();
@@ -85,6 +88,8 @@ public:
      * @todo Need to add commands for controlling multiple roots/targets.
      */
     std::string runCommand(std::list<std::string> args);
+
+    FitnessEvaluatorT fitnessEvaluator;
 
 }; // class
 
