@@ -37,7 +37,7 @@
 
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
-#include <opencog/adaptors/tulip/TulipWriter.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog::pln;
 
@@ -104,14 +104,6 @@ float getCount(float c)
     return SimpleTruthValue::confidenceToCount(c);
 //    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
 //    return -KKK*c/(c-1);
-}
-
-namespace haxx
-{
-    extern bool printRealAtoms;
-//    extern Handle VarTypes[STD_VARS];
-//    extern multimap<Handle,Handle> childOf;
-    extern bool AllowFW_VARIABLENODESinCore;
 }
 
 namespace opencog {
@@ -251,7 +243,6 @@ public:
             //cogserver.loadModule(std::string("libscheme.so"));
             // Open network port
             //cogserver.enableNetworkServer();
-            haxx::printRealAtoms = true;
 
             currentDebugLevel=100;
 
@@ -619,8 +610,6 @@ public:
                 new SimpleTruthValue(0.9f, getCount(0.9f)),
                 new SimpleTruthValue(0.999f, getCount(0.999f)),
                 15,0);
-        //TulipWriter tlp(std::string("small_demo.tlp"));
-        //tlp.write(0,0);//,atw->fakeToRealHandle(setLink).first);
     }
 
     void testInheritanceOsamaAbu()
@@ -650,8 +639,6 @@ public:
             new SimpleTruthValue(0.01f, getCount(0.20f)),
             new SimpleTruthValue(1.01f, getCount(1.01f)),
             460,0);
-        //TulipWriter tlp2(std::string("big_demo.tlp"));
-        //tlp2.write(0,0);//,atw->fakeToRealHandle(setLink).first);
     }
 
     void testAnotBdemo()
@@ -795,7 +782,8 @@ void InitPLNTests()
 #endif
 
     //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-    haxx::printRealAtoms = true;
+    config().set("PLN_LOG_LEVEL","2");
+    config().set("PLN_PRINT_REAL_ATOMS","true");
 
 /*  /// Test atom identity works
     Handle h1 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
@@ -1043,8 +1031,7 @@ void RunPLNTestsOnce()
     {
         AtomSpaceWrapper *atw = GET_ATW;
         atw->reset();
-        
-        haxx::AllowFW_VARIABLENODESinCore = true;
+        atw->allowFWVarsInAtomSpace = true;
 
         cprintf(-2,"loading...\n");     
         
@@ -1070,7 +1057,7 @@ void RunPLNTestsOnce()
         test::custom_duration = 0.0;
         start = clock();
         
-        haxx::AllowFW_VARIABLENODESinCore = true; //false;
+        atw->allowFWVarsInAtomSpace = true;
         
         fflush(stdout);
         currentDebugLevel=-4;

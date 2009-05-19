@@ -31,7 +31,6 @@
 namespace haxx
 {
 map<string, map<Handle, Handle> > scholemFunctions;
-extern bool AllowFW_VARIABLENODESinCore;
 opencog::pln::BITNodeRoot* bitnoderoot;
 
 /// \todo This data must persist even if the BITNodeRoot is deleted.
@@ -70,12 +69,6 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
     tree<Vertex>::sibling_iterator child2 = old_subst.begin(old_subst.begin());
     tree<Vertex>::sibling_iterator child1 = child2++;
 
-#ifdef _MSC_VER
-#pragma warning(Remove this hack ASAP!)
-#endif // _MSC_VER
-//#warning "Remove this hack ASAP!"
-    haxx::AllowFW_VARIABLENODESinCore = true;
-
 //  assert(!inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE));
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
     if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*child1)), VARIABLE_NODE)) {
@@ -90,7 +83,6 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
         printer.print(_v2h(*child2), 2);
     }
 
-
     *child2 = CreateVar(destTable);
 
     TableGather s(old_subst, destTable);
@@ -100,14 +92,9 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
         ret->insert(BoundVertex(Vertex(destTable->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
                                        TruthValue::TRUE_TV(),
                                        false, false))));
-
         return ret;
     }
-
-    haxx::AllowFW_VARIABLENODESinCore = false;
-
     /// This Rule shouldn't be used to produce EXISTING Scholem function mappings!
-
     LOG(3, "Tried to re-map a scholem function argument.");
 
     return ret;

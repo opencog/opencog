@@ -64,9 +64,6 @@ namespace haxx
 //    //! parent, second is child (I think...)
 //    multimap<Handle,Handle> childOf;
 
-    //! Whether to stores variable nodes as atoms in the AtomSpace
-    bool AllowFW_VARIABLENODESinCore = true;
-
     //! ?
     map<string,pHandle> variableShadowMap;
     
@@ -140,7 +137,7 @@ USize(800), USizeMode(CONST_SIZE)
 
     //! @todo Replace srand with opencog::RandGen
     srand(12345678);
-
+    allowFWVarsInAtomSpace = true;
     archiveTheorems = false;
 }
 
@@ -779,7 +776,7 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue
     
     pHandleSeq handles;
     pHandle head_type = boost::get<pHandle>(*it);
-    //assert(haxx::AllowFW_VARIABLENODESinCore || head_type != (Handle)FW_VARIABLE_NODE);
+    //assert(allowFWVarsInAtomSpace || head_type != (Handle)FW_VARIABLE_NODE);
     //vector<Handle> contexts;
     
     if (!isType(head_type))
@@ -840,7 +837,7 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const Trut
         cprintf(1,"inheritsType(T, LINK) && !arity\n");
     }   
     
-    if (!haxx::AllowFW_VARIABLENODESinCore) {
+    if (!allowFWVarsInAtomSpace) {
         foreach(pHandle ch, hs) {
             assert(!isType(ch));
             if (getType(ch) == FW_VARIABLE_NODE) {
@@ -2208,7 +2205,7 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
     
     assert(!tvn.isNullTv());
     
-//  assert(haxx::AllowFW_VARIABLENODESinCore || T != FW_VARIABLE_NODE);
+//  assert(allowFWVarsInAtomSpace || T != FW_VARIABLE_NODE);
 
     /// Disable confidence for variables:
 
@@ -2304,7 +2301,7 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn, bo
     AtomSpace *a = AS_PTR;
     assert(!tvn.isNullTv());
     
-    //assert(haxx::AllowFW_VARIABLENODESinCore || T != FW_VARIABLE_NODE);
+    //assert(allowFWVarsInAtomSpace || T != FW_VARIABLE_NODE);
 
     // Disable confidence for variables:
 #ifdef USE_PSEUDOCORE

@@ -379,9 +379,11 @@ public:
     //! Whether to generate CrispTheoremRules for all crisp theorems
     //! and add them to CrispTheoremRule::thms.
     bool archiveTheorems;
+
     //! Generate CrispTheoremRules for all crisp theorems in AtomSpace
     //! and add to CrispTheoremRule::thms.
     void makeCrispTheorems();
+
     //! Generate a CrispTheoremRule for crisp theorem pointed to by
     //! p then and add to CrispTheoremRule::thms.
     //! A crisp theorem has the format:
@@ -414,6 +416,8 @@ public:
     bool hasFalsum(pHandleSeq hs);
     bool containsNegation(pHandle ANDlink, pHandle h);
     Type getTypeV(const tree<Vertex>& _target) const;
+
+    bool allowFWVarsInAtomSpace;
 
 // TODELETE
 //  combo::NMCore* getCore() const { return core; }

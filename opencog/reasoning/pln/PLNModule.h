@@ -34,8 +34,7 @@
 
 #include "BackChainingAgent.h"
 
-namespace opencog
-{
+namespace opencog {
 
 class CogServer;
 
@@ -52,10 +51,10 @@ private:
     const std::string* DEFAULT()
     {
         static const std::string defaultConfig[] = {
-            "PLN_RECORD_TRAILS",         "true",
+            "PLN_RECORD_TRAILS",     "true",
             "PLN_LOG_LEVEL",         "2",
-            "PLN_FW_VARS_IN_ATOMSPACE",  "true",
-            "PLN_PRINT_REAL_ATOMS",      "true",
+            "PLN_FW_VARS_IN_ATOMSPACE", "true",
+            "PLN_PRINT_REAL_ATOMS",  "true",
             "",                      ""
         };
         return defaultConfig;
@@ -89,16 +88,20 @@ public:
 
 }; // class
 
+#if 0
 /** Takes a real handle, and sets the backward-chaining target to that atom.
  */
 void setTarget(Handle h);
+#endif
+
+namespace pln {
 
 /** Does steps inference steps on target h. Does not set the BC target used
  * in the PLN commands.
  */
 void infer(Handle h, int &steps);
 
-} // namespace opencog
+}} // ~namespace opencog::pln
 
 
 #endif // _OPENCOG_PLN_MODULE_H

@@ -58,8 +58,6 @@ namespace test
 
 namespace haxx
 {
-    extern bool AllowFW_VARIABLENODESinCore;
-//    extern uint maxDepth;
     extern opencog::pln::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.

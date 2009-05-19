@@ -21,10 +21,6 @@
 
 #include <opencog/util/exceptions.h>
 
-#ifdef WIN32
-#pragma warning(disable : 4996)
-#endif
-
 #include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
@@ -32,6 +28,7 @@
 #include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/utils.h>
+#include <opencog/util/Config.h>
 
 #include "PLN.h"
 
@@ -41,19 +38,13 @@
 #include "PLNatom.h"
 #include "BackInferenceTreeNode.h"
 
-//#include "spacetime.h"
-//#include "TimeStamp.h"
-
 #include "PLNUtils.h"
 
 #ifndef USE_PSEUDOCORE
 #include "opencog/atomspace/TimeServer.h"
 #endif
 
-namespace haxx
-{
-// extern opencog::pln::iAtomSpaceWrapper* defaultAtomSpaceWrapper;
-bool printRealAtoms = false;
+namespace haxx {
 pHandle VarTypes[STD_VARS];
 }
 
@@ -114,7 +105,7 @@ string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlo
     }
 
     if (hptr && !atw->isType(*hptr)) {
-        if (!::haxx::printRealAtoms) {
+        if (!config().get_bool("PLN_PRINT_REAL_ATOMS")) {
             ss << "[" << *hptr << "]\n";
             cprintf(_rloglevel, ss.str().c_str());
         } else
@@ -160,7 +151,7 @@ string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 
     if (hptr && !atw->isType(*hptr)) {
 //puts("opencog::pln::printTree");
-        if (!::haxx::printRealAtoms) {
+        if (!config().get_bool("PLN_PRINT_REAL_ATOMS")) {
             ss << "[" << (*hptr) << "]\n";
             cprintf(_rloglevel, ss.str().c_str() );
         } else
