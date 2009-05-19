@@ -1,3 +1,6 @@
 All core infrastructure to OpenCog and OpenCog Prime goes here.
 
 Tests, example and demo programs have their own directories.
+
+@todo Create doxygen filter to parse scm files.
+
