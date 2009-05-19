@@ -24,6 +24,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -1299,8 +1300,13 @@ public:
 
 FitnessEvaluatorT getFitnessEvaluator(string name) {
     // Convert from string to enum
-    static string names[] = { "BEST", "RANDOM", "SOFTMAX" };
-
+    static string names[] = { PLN_FITNESS_BEST, PLN_FITNESS_RANDOM,
+        PLN_FITNESS_SOFTMAX };
+    for (int i = 0; i < 3; i++) {
+        if (boost::iequals(name, names[i])) {
+            return (FitnessEvaluatorT) i;
+        }
+    }
     return BEST;
 }
 
