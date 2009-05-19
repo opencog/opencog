@@ -128,7 +128,7 @@ void BasicSCMUTest::test_single_atom(void)
 	eval.clear_pending();
 	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
 
-	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
+	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 
 	// We should add many more nodes, but I'm feeling lazy ... 
