@@ -17,15 +17,8 @@ ADD_LIBRARY (Procedure
 )
 
 TARGET_LINK_LIBRARIES (Procedure
-    PAI
-    MessagingSystem
-    comboreduct
+    LearningServerMessages
     WorldWrapper
-    pthread
-    ssl
-    crypto
-    dl
-    VirtualWorldData
 )
 
 #SET(CMAKE_BUILD_TYPE Debug)
@@ -36,12 +29,8 @@ ENDIF(COMMAND cmake_policy)
 
 ADD_EXECUTABLE (combo_shell_stdio ComboSTDIOExecutable)
 TARGET_LINK_LIBRARIES (combo_shell_stdio
-    comboreduct
     Procedure
-    behavior
-    PAI
-    Predavese
-    Control
+    WorldWrapper
     util
     ${XERCESC_LIBRARIES}
     PetComboVocabulary
@@ -49,19 +38,8 @@ TARGET_LINK_LIBRARIES (combo_shell_stdio
 
 ADD_EXECUTABLE (combo_shell ComboPAIExecutable)
 TARGET_LINK_LIBRARIES (combo_shell
-    comboreduct
     Procedure
-    behavior
-    PAI
-    Predavese
-    MessagingSystem
-    Control
     WorldWrapper
     util
     ${XERCESC_LIBRARIES}
-    ssl
-    crypto
-    pthread
-    dl
-    PetComboVocabulary
 )

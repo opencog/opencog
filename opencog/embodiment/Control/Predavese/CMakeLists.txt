@@ -12,6 +12,5 @@ ADD_LIBRARY(Predavese
 TARGET_LINK_LIBRARIES (Predavese
     util
     ${XERCESC_LIBRARIES}
-    comboreduct
     WorldWrapper
 )

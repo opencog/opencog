@@ -5,7 +5,6 @@ ADD_LIBRARY(PetaverseHC
 )
 
 TARGET_LINK_LIBRARIES(PetaverseHC
-        hillclimbing
 	RewritingRules
 	comboreduct
 	util

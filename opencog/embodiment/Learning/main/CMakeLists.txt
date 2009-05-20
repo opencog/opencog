@@ -5,7 +5,6 @@ ENDIF(COMMAND cmake_policy)
 ADD_EXECUTABLE (moses-petbrain moses-petbrain)
 TARGET_LINK_LIBRARIES (moses-petbrain
 	moses
-	hillclimbing
 	util
 	comboreduct
 )

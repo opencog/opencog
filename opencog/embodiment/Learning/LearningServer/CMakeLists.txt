@@ -31,7 +31,6 @@ TARGET_LINK_LIBRARIES (learningServer
     Filter
     FitnessEstimator
     Procedure
-    moses
     RewritingRules
 )
 
@@ -51,6 +50,5 @@ TARGET_LINK_LIBRARIES (LSMocky
     dl
     behavior
     Procedure
-    moses
     RewritingRules
 )
