@@ -26,7 +26,12 @@ def printDict(adict):
 
 def computeSizePenalty(a, b, doc, ioc, eoc, apc, aac, score, size):
     c = float(doc+ioc+eoc+apc+aac)
-    return math.exp(-a*math.log(b*c+math.exp(1.0))*float(size))
+    res = math.exp(-a*math.log(b*c+math.exp(1.0))*float(size))
+    print 'a =', a, ',b =', b
+    print 'doc =', doc, ',ioc =', ioc, ',eoc =', eoc, ',apc =', apc, ',aac =', aac
+    print 'score =', score, ',size =', size
+    print 'c =', c, ',sizePenalty =', res
+    return res
 
 def computegs(a, b, fs):
     gs = []
@@ -183,7 +188,7 @@ if command=='c':
     fs.append(((doc, ioc, eoc, apc, aac),f))
 
     #determine the set of values to check
-    ar = [ x/100.0 for x in range(0, 100) ]
+    ar = [ x/100.0 for x in range(2, 6) ]
     br = [ x/100.0 for x in range(0, 200) ]
 
     #evaluate for each parameter point if constraint is valide,
@@ -192,7 +197,7 @@ if command=='c':
         for b in br:
             gs = computegs(a, b, fs)
             for g in gs:
-                print a, b, isLastArgMax(g)
+                print 'a =', a, ',b =', b, ',is last arg max =', isLastArgMax(g)
 
     exit(0)
 
