@@ -38,6 +38,9 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
+//! @todo
+#include <opencog/ubigraph/BITUbigrapher.h>
+
 int haxxUsedProofResources = 0;
 float temperature = 0.01;
 
@@ -262,6 +265,14 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
     eval_results.push_back(set<VtreeProvider*>());
 	cprintf(3, "Root ok\n");
+
+#ifdef USE_BITUBIGRAPHER
+    haxx::BITUSingleton = new BITUbigrapher;
+    
+    haxx::BITUSingleton->drawRoot(this);
+    
+    haxx::BITUSingleton->drawBITNode(this, children);
+#endif
 }
 
 /// The complexity here results from bindings and virtuality.
@@ -1243,6 +1254,9 @@ void BITNode::expandNextLevel()
             CheckForDirectResults();
             CreateChildrenForAllArgs();
             Expanded = true;
+#ifdef USE_BITUBIGRAPHER
+            haxx::BITUSingleton->drawBITNode(this, children);
+#endif
         }
         else
             for (uint i = 0; i < args.size(); i++)

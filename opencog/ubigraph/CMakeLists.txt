@@ -1,6 +1,7 @@
 ADD_LIBRARY (ubigraph SHARED
 	UbigraphModule
 	Ubigrapher
+	BITUbigrapher
 )
 
 INCLUDE_DIRECTORIES (
@@ -20,7 +21,6 @@ TARGET_LINK_LIBRARIES(ubigraph
 #    xmlrpc_util
     xmlrpc_xmlparse
     xmlrpc_xmltok
-
 )
 
 INSTALL (TARGETS ubigraph
@@ -30,5 +30,6 @@ INSTALL (TARGETS ubigraph
 INSTALL (FILES
 	UbigraphModule.h
 	Ubigrapher.h
-DESTINATION "include/opencog/atomspace"
+	BITUbigrapher.h
+DESTINATION "include/opencog/ubigraph"
 )

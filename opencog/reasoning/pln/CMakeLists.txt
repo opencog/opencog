@@ -72,6 +72,7 @@ TARGET_LINK_LIBRARIES(pln
     xml
     util
     #${Boost_SIGNALS_LIBRARY}
+    ubigraph
 )
 
 INSTALL (TARGETS pln
