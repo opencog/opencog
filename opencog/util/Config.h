@@ -58,6 +58,7 @@ protected:
             "MIN_STI",               "-400",
             "PROMPT",                "opencog> ",
             "MODULES",               "libbuiltinreqs.so",
+            "SCM_PRELOAD",           ""
             "",                      ""
         };
         return defaultConfig;

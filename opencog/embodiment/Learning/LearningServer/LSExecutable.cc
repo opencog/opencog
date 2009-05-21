@@ -55,9 +55,17 @@ int main(int argc, char *argv[])
 
     server(LS::derivedCreateInstance);
 
-    static_cast<LS&>(server()).init(config().get("LS_ID"),
-                                    config().get("LS_IP"),
-                                    config().get_int("LS_PORT"));
+    LS& ls = static_cast<LS&>(server());
+    ls.init(config().get("LS_ID"),
+            config().get("LS_IP"),
+            config().get_int("LS_PORT"));
+
+    // Load modules specified in config
+    ls.loadModules(); 
+    ls.loadSCMModules();
+
+    // enable the network server and run the server's main loop
+    ls.enableNetworkServer();
 
     try  {
         static_cast<LS&>(server()).CogServer::serverLoop();

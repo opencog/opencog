@@ -38,12 +38,15 @@
 #include <sys/time.h>
 #endif
 
+#include <boost/filesystem/operations.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -507,3 +510,49 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
+void CogServer::loadModules() 
+{
+    // Load modules specified in the config file
+    std::vector<std::string> modules;
+    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+    for (std::vector<std::string>::const_iterator it = modules.begin();
+         it != modules.end(); ++it) {
+        loadModule(*it);
+    }
+}
+
+void CogServer::loadSCMModules(const char* config_paths[]) 
+{
+    // Load scheme modules specified in the config file
+    std::vector<std::string> scm_modules;
+    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
+#ifdef HAVE_GUILE
+    for (std::vector<std::string>::const_iterator it = scm_modules.begin();
+         it != scm_modules.end(); ++it) {
+
+        int rc = 2;
+        const char * mod = "";
+        for (int i = 0; config_paths[i] != NULL; ++i) {
+            boost::filesystem::path modulePath(config_paths[i]);
+            modulePath /= *it;
+            if (boost::filesystem::exists(modulePath)) {
+                mod = modulePath.string().c_str();
+                rc = load_scm_file(mod);
+                if (0 == rc) break;
+            }
+        }
+        if (rc)
+        {
+           logger().error("%d %s: %s", 
+                 rc, strerror(rc), mod);
+        }
+        else
+        {
+            logger().info("Loaded %s", mod);
+        }
+    }
+#else /* HAVE_GUILE */
+    logger().warn(
+        "Server compiled without SCM support");
+#endif /* HAVE_GUILE */
+}

@@ -34,7 +34,6 @@
 #include <string>
 
 #include <opencog/server/CogServer.h>
-#include <opencog/server/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -159,46 +158,9 @@ int main(int argc, char *argv[])
     
     CogServer& cogserver = static_cast<CogServer&>(server());
 
-    // Load modules specified in the config file
-    std::vector<std::string> modules;
-    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
-    for (std::vector<std::string>::const_iterator it = modules.begin();
-         it != modules.end(); ++it) {
-        cogserver.loadModule(*it);
-    }
-
-    // Load scheme modules specified in the config file
-    std::vector<std::string> scm_modules;
-    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
-#ifdef HAVE_GUILE
-    for (std::vector<std::string>::const_iterator it = scm_modules.begin();
-         it != scm_modules.end(); ++it) {
-
-        int rc = 2;
-        const char * mod = "";
-        for (int i = 0; DEFAULT_MODULE_PATHS[i] != NULL; ++i) {
-            boost::filesystem::path modulePath(DEFAULT_MODULE_PATHS[i]);
-            modulePath /= *it;
-            if (boost::filesystem::exists(modulePath)) {
-                mod = modulePath.string().c_str();
-                rc = load_scm_file(mod);
-                if (0 == rc) break;
-            }
-        }
-        if (rc)
-        {
-           logger().error("%d %s: %s", 
-                 rc, strerror(rc), mod);
-        }
-        else
-        {
-            logger().info("Loaded %s", mod);
-        }
-    }
-#else /* HAVE_GUILE */
-    logger().warn(
-        "Server compiled without SCM support");
-#endif /* HAVE_GUILE */
+    // Load modules specified in config
+    cogserver.loadModules(); 
+    cogserver.loadSCMModules(DEFAULT_CONFIG_PATHS);
 
     // enable the network server and run the server's main loop
     cogserver.enableNetworkServer();

@@ -40,8 +40,8 @@ void opc_unexpected_handler()
 int main(int argc, char *argv[])
 {
 
-    if (argc != 6) {
-        logger().error("OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <port>.");
+    if (argc != 7) {
+        logger().error("OPCExec - Usage: \n\topc <agent-id> <owner-id> <agent-type> <agent-traits> <NetworkElement port> <CogServer shell port>.");
         return (1);
     }
 
@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
         }
         
         config().set("EXTERNAL_TICK_MODE", "true");
+        config().set("SERVER_PORT", argv[6]);
 
         // setting unexpected handler in case a different exception from the
         // especified ones is throw in the code
@@ -73,14 +74,12 @@ int main(int argc, char *argv[])
                 PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
                 argv[3], argv[4]);
         
-        // TODO: Execute initialization that exists in CogServerMain's main method here
-        // so that we can use other features implemented for CogServer (like
-        // opencog shell). Alternatively OPC may be redesigned to become a loadable Module 
-        // (instead of a subclass of CogServer). This would imply reviewing the
-        // way Spawner calls OPC and mainly the way Embodiment servers use the
-        // configuration files (currently it uses a single configuration file
-        // for all servers)
-        // opc.enableNetworkServer(); // this does not work without other parts of CogServerMain intialization
+        // Load modules specified in config
+        opc.loadModules(); 
+        opc.loadSCMModules();
+
+        // enable the network server and run the server's main loop
+        opc.enableNetworkServer();
 
         // TODO: After making OPC a CogServerMain-compatible server, create a
         // shell command to list all configuration parameters (like MIN_STI

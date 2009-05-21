@@ -206,6 +206,11 @@ public:
     /** Retrieves the module's instance. Takes the module's id */
     virtual Module* getModule(const std::string& id);
 
+    /** Load all modules specified in configuration file */
+    virtual void loadModules();
+    /** Load all Scheme modules specified in configuration file */
+    virtual void loadSCMModules(const char* [] = NULL);
+
     /**** Agent Registry API ****/
     /** Register a new agent class/type. Takes the class' id and a derived
      *  factory for this particular agent type. (note: the caller owns the factory

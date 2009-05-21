@@ -130,6 +130,10 @@ bool Spawner::processNextMessage(Message *message)
             // TODO: notify PROXY about this problem
             return false;
         }
+        // Calculates the CogServer shell port to be used (based on the opcPort
+        // offset)
+        int portOffset = opcPort - minOpcPort + 1;
+        int cogServerShellPort = opencog::config().get_int("SERVER_PORT") + portOffset;
         std::string cmdPrefix;
         std::string cmdSuffix;
         if (opencog::config().get_bool("RUN_OPC_DEBUGGER")) {
@@ -139,7 +143,7 @@ bool Spawner::processNextMessage(Message *message)
                       << std::endl;
             std::cout << "Please enter the following 2 parameters in "
                       << cmdPrefix << " :" << std::endl;
-            std::cout << agentID << " " << ownerID << " " << agentType << " " << agentTraits << " " << opcPort << std::endl;
+            std::cout << agentID << " " << ownerID << " " << agentType << " " << agentTraits << " " << opcPort << " " << cogServerShellPort << std::endl;
             str << cmdPrefix << "./opc &";
         } else {
             if (opencog::config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
@@ -160,31 +164,17 @@ bool Spawner::processNextMessage(Message *message)
             << ownerID << " "
             << agentType << " "
             << agentTraits << " "
-            << opcPort << cmdSuffix << " &";
+            << opcPort << " " << cogServerShellPort << cmdSuffix << " &";
         }
-        logger().info("Starting OPC for %s %s %s (%s) at port %d (command: %s)", agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), opcPort, str.str().c_str( ) );
+        logger().info("Starting OPC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
+                agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 
+                opcPort, cogServerShellPort,  str.str().c_str( ) );
 
-#define USE_SYSTEM_FUNCTION
-#ifdef USE_SYSTEM_FUNCTION
         if (!opencog::config().get_bool("MANUAL_OPC_LAUNCH")) {
             system(str.str().c_str( ) );
         } else {
             printf("\nSpawner Command: %s\n", str.str().c_str());
         }
-#else
-        int pid = fork();
-        if (pid < 0) {
-            logger().error("Could not fork the spawner process to run opc %s\n", agentID.c_str());
-            // TODO: What to do now? Send a NACK back to proxy ???
-        } else {
-            if (pid == 0) {
-                // child proccess
-                int execResult = execl("./opc", "opc", agentID.c_str(), ownerID.c_str(), agentType.c_str( ), agentTraits.c_str( ), opcPortStr.c_str(), NULL);
-                logger().debug("exec method returned %d\n", execResult);
-                exit(0); // cannot continue spawner execution...
-            }
-        }
-#endif
     } else if (command == "UNLOAD_AGENT") {
         const std::string& agentID = args.front();
 
