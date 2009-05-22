@@ -97,7 +97,7 @@ static void * do_bogus_scm(void *p)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 /* There are bugs in guile-1.8.6 and earlier that prevent proper
  * multi-threaded operation. Currently, the most serious of these is
- * a prallel-define bug, documented in 
+ * a parallel-define bug, documented in 
  * https://savannah.gnu.org/bugs/index.php?24867
  * Until that bug is fixed and released, this work-around is needed.
  * The work-around serializes all guile-mode thread execution, by 
