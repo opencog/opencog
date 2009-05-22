@@ -31,7 +31,7 @@
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
-		^ _subj(be,$var0) ^ _obj(be,$var1)
+      ^ _subj(be,$var0) ^ _obj(be,$var1)
       ^ $prep($var1,$var2)              ; preposition 
       ^ %LemmaLink($var1,$word1)        ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
@@ -43,7 +43,7 @@
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
-		^ _subj(be,$var0) ^ _obj(be,$var1)   ; reversed subj, obj
+      ^ _subj(be,$var0) ^ _obj(be,$var1)   ; reversed subj, obj
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
@@ -57,7 +57,7 @@
 ; var0=blue, var1=color, var2=sky  $prep=of
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var1,$sent)  ; scope to sentence
-		^ _predadj($var1,$var0)
+      ^ _predadj($var1,$var0)
       ^ $prep($var1,$var2)              ; preposition 
       ^ %LemmaLink($var1,$word1)        ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
@@ -68,7 +68,7 @@
 ; var0=make  var1=pottery var2=clay  prep=from
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var0,$sent)  ; scope to sentence
-		^ _obj($var0,$var1)
+      ^ _obj($var0,$var1)
       ^ $prep($var0,$var2)              ; preposition 
       ^ %LemmaLink($var0,$word0)        ; word of word instance
       ^ $phrase($word0, $prep)          ; convert to phrase
@@ -79,7 +79,7 @@
 ; var1=yarn  var2=fibers  phinst=made_of
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($phinst,$sent)  ; scope to sentence
-		^ _obj($phinst,$var1) ^ _iobj($phinst,$var2)
+      ^ _obj($phinst,$var1) ^ _iobj($phinst,$var2)
       ^ %LemmaLink($phinst,$phrase)     ; word of word instance
       THEN ^3_$phrase($var2, $var1) 
 
@@ -90,7 +90,7 @@
 ; var1=heart  var2=chest phinst=in
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($phinst,$sent)  ; scope to sentence
-		^ _psubj($phinst,$var1) ^ _pobj($phinst,$var2)
+      ^ _psubj($phinst,$var1) ^ _pobj($phinst,$var2)
       ^ $prep(_%copula, $phinst)
       ^ %LemmaLink($phinst, $prword)
       ^ %ListLink($prep,$prword)
@@ -132,7 +132,7 @@
 ; XXX need to somehow indicate the allowed variable type
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var2,$sent)  ; scope to sentence
-		^ _predadj($var2, $var1) 
+      ^ _predadj($var2, $var1) 
       ^ ! $prep($var2,$var3)
       THEN ^3_isa($var1, $var2)
 
@@ -141,7 +141,7 @@
 ; var1=blue var2=color
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var2,$sent)  ; scope to sentence
-		^ _predadj($var2, $var1) 
+      ^ _predadj($var2, $var1) 
       ^ $prep($var2,$var3)
       THEN ^3_isa($var2, $var1)
 
@@ -165,9 +165,9 @@
 # IF %ListLink("# APPLY TRIPLE RULES", $sent)
       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $vrb must be
       ^ %WordInstanceLink($qvarinst,$sent) ; in the same sentence
-		^ _subj(be,$var0)
-		^ _obj($vrb,$var0)
-		^ _obj($prepinst,$qvarinst)
+      ^ _subj(be,$var0)
+      ^ _obj($vrb,$var0)
+      ^ _obj($prepinst,$qvarinst)
       ^ $prep(be, $prepinst)            ; preposition 
       ^ %LemmaLink($vrb,$word1)         ; word of word instance
       ^ $phrase($word1, $prep)          ; convert to phrase
