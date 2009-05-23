@@ -47,6 +47,9 @@
 #include "FitnessEvaluator.h"
 
 namespace opencog {
+
+class BITUbigrapher;
+
 namespace pln {
 
 class BITNode;
@@ -206,6 +209,9 @@ class BITNode
 	friend class bdrum_updater;
 	friend class BITNodeRoot;
 	friend class ExplicitlyEvaluatedBITNode;
+
+    friend class opencog::BITUbigrapher;
+
 protected:
     /** Whether to allow sibling spawning */
     enum spawn_mode { NO_SIBLING_SPAWNING = 0, ALLOW_SIBLING_SPAWNING };

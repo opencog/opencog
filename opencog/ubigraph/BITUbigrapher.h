@@ -34,6 +34,7 @@
 #include <opencog/reasoning/pln/BackInferenceTreeNode.h>
 
 using namespace opencog;
+using namespace opencog::pln;
 
 namespace opencog
 {
@@ -44,6 +45,7 @@ namespace opencog
  */
 class BITUbigrapher
 {
+
 private:
 protected:
     //! Initialise the various styles
@@ -54,6 +56,8 @@ public:
 
     void drawRoot(BITNode* root);
     
+    void drawBITNodeFitness(int node_id, float fitness);
+
     void drawBITNode(BITNode* node, vector<set<ParametrizedBITNode> > children);
         
     //! Redraw the ubigraph, based on how the BIT is now.
