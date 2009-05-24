@@ -32,49 +32,49 @@ using namespace reduct;
 using namespace opencog;
 using namespace ant_combo;
 
-int main() {
-  MT19937RandGen rng(1);
+int main()
+{
+    MT19937RandGen rng(1);
 
-  combo_tree tr;
+    combo_tree tr;
 
-  while (cin.good()) {
-    cin >> tr;
-    if (!cin.good())
-      break;
+    while (cin.good()) {
+        cin >> tr;
+        if (!cin.good())
+            break;
 
-    int a = arity(tr);
-    int s = sample_count(a);//return always 5, for the moment
+        int a = arity(tr);
+        int s = sample_count(a);//return always 5, for the moment
 
-    //produce random inputs
-    RndNumTable rnt(s, a, rng);
+        //produce random inputs
+        RndNumTable rnt(s, a, rng);
 
-    try {
+        try {
 
-      //print rnt, for debugging
-      cout << "Rnd matrix :" << endl << rnt;
+            //print rnt, for debugging
+            cout << "Rnd matrix :" << endl << rnt;
 
 
-      //evalutate tr over rnt and fill ct1
-      contin_table ct1(tr, rnt, rng);
+            //evalutate tr over rnt and fill ct1
+            contin_table ct1(tr, rnt, rng);
 
-      //print the tree before reduction, for debugging
-      cout << "Before : " << tr << endl;
+            //print the tree before reduction, for debugging
+            cout << "Before : " << tr << endl;
 
-      contin_reduce(tr,rng);
+            contin_reduce(tr, rng);
 
-      //evaluate tr over rnt and fill ct2
-      contin_table ct2(tr, rnt, rng);
+            //evaluate tr over rnt and fill ct2
+            contin_table ct2(tr, rnt, rng);
 
-      cout << "After  : " << tr << endl;
-      if (ct1!=ct2) {
-	cout << ct1 << endl << ct2 << endl;
-	cerr << "contin-tables don't match!" << endl;
-	//return 1;
-      }
+            cout << "After  : " << tr << endl;
+            if (ct1 != ct2) {
+                cout << ct1 << endl << ct2 << endl;
+                cerr << "contin-tables don't match!" << endl;
+                //return 1;
+            }
+        } catch (EvalException& e) {
+            cout << e.get_message() << " : " << e.get_vertex() << endl;
+        }
     }
-    catch(EvalException& e) {
-      cout << e.get_message() << " : " << e.get_vertex() << endl;
-    }
-  }
-  return 0;
+    return 0;
 }
