@@ -34,6 +34,12 @@ TARGET_LINK_LIBRARIES(perception-reductor
         util
 )
 
+ADD_EXECUTABLE (interactive-reductor interactive-reductor.cc)
+TARGET_LINK_LIBRARIES(interactive-reductor
+	comboreduct	
+        util
+)
+
 ADD_EXECUTABLE (tree_gen tree_gen.cc)
 TARGET_LINK_LIBRARIES(tree_gen
 	comboreduct
