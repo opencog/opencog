@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/main/moses-iteractive-hillclimbing.cc
+ * opencog/learning/moses/main/moses-disjunction.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -50,7 +50,6 @@ int main(int argc,char** argv) {
 
   opencog::MT19937RandGen rng(rand_seed);
 
-  //even_parity scorer;
   disjunction scorer;
 
   type_tree tt(id::lambda_type);
@@ -64,6 +63,5 @@ int main(int argc,char** argv) {
   
   cout << "build metapop" << endl;
 
-  //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
   moses::moses(metapop,max_evals,0);
 }

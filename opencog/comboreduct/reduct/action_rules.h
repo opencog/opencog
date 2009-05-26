@@ -30,7 +30,7 @@
 namespace reduct
 {
 
-//for ome intriging reason the operator tribool.safe_bool() is not usable
+//for some intriguing reason the operator tribool.safe_bool() is not usable
 //because considered private by gcc?
 //so I code one here
 bool safe_bool(boost::tribool t);
