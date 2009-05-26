@@ -47,14 +47,14 @@ The goal of this implementation is to:
    infrastructure for locks, use counts, etc. that are typical
    of multi-threaded programming.  This prototype should lay the 
    foundations for more sophisticated schemes (non-SQL-based) 
-   to take its place.  This arhcitectural work is inherently difficult,
+   to take its place.  This architectural work is inherently difficult,
    and is ongoing.
 
 3) Provide a baseline/reference implementation by which other 
    persistence designs can be measured. It is hoped that other systems
    would be at least as fast and as scalable as this one is: this is
    meant to provide a minimal function and performance level. The
-   strength of the current design is supposed to be simplcity, not
+   strength of the current design is supposed to be simplicity, not
    scalability or raw performance.
 
 
@@ -94,13 +94,13 @@ major drawbacks to using SQL. These include:
 -- Large performance overhead, even if an embedded SQL server were to
    be used. Other systems might have a lower overhead.
 -- Efficiency of incremental save/restore is unclear; there's potentially
-   large churn, if short-lived atoms are freuqently created/destroyed.
+   large churn, if short-lived atoms are frequently created/destroyed.
 
 
 Compiling
 ---------
-There are two popular packages that provide odbc for Linux: IODBC and 
-UnixODBC. The second is prefered, because it seems that IODBC has
+There are two popular packages that provide ODBC for Linux: IODBC and 
+UnixODBC. The second is preferred, because it seems that IODBC has
 trouble with UTF-8 strings. It is almost impossible to avoid UTF-8 
 strings in NLP input data.
 
@@ -113,12 +113,12 @@ drivers used by the persistence system.
 First, ODBC and drivers must be installed. The UnixODBC system is 
 recommended; although iODBC "works", it does not have the UTF-8 support
 needed for text-processing.  For Debian/Ubuntu, install the packages 
-odbc-postgresql and unixodbc (Assuming you want to use postgres). After
+ODBC-postgresql and UnixODBC (Assuming you want to use Postgres). After
 installing these two, edit /etc/odbcinst.ini and put the stanza below
 into it.
 
 [PostgreSQL]
-Description = PostgreSQL ODBC driver for Linux and Windows (unicode version)
+Description = PostgreSQL ODBC driver for Linux and Windows (Unicode version)
 Driver      = /usr/lib/odbc/psqlodbcw.so
 Setup       = /usr/lib/odbc/libodbcpsqlS.so
 Debug       = 0
@@ -135,7 +135,7 @@ Setup       = /usr/lib/odbc/libodbcmyS.so
 CPTimeout   =
 CPReuse     =
 
-Next, the postgres default configuration needs to be tweaked for 
+Next, the Postgres default configuration needs to be tweaked for 
 performance. Failure to do this will result in disastrous load and
 store times.
 
@@ -178,7 +178,7 @@ Then create the database tables:
    $ cat atom.sql | psql mycogdata
 
 Next, edit  ~/.odbc.ini in your home directory to add a stanza of 
-the form below. You MUST create one of these for EACH repositry 
+the form below. You MUST create one of these for EACH repository 
 you plan to use! The name of the stanza, and of the database,
 can be whatever you wish.
 
@@ -199,7 +199,7 @@ ShowOidColumn     = Yes
 FakeOidIndex      = Yes
 ConnSettings      =
 
-Be sure to adjust ther username and passwd appropriately.  The password
+Be sure to adjust their username and passwd appropriately.  The password
 to be supplied is the database password, not the system login password.
 The database password can be set by doing:
 
@@ -212,7 +212,7 @@ be your login password, and probably shouldn't be.)
 How To Pass the Unit Test
 -------------------------
 The collection of OpenCog unit tests includes one that tests the 
-persistance infrastructure. It is called BasicSaveUTest, and it
+persistence infrastructure. It is called BasicSaveUTest, and it
 will fail unless a test database is set up.  Toe set this up, 
 you'll need to repeat some of the above instructions:
 
@@ -295,7 +295,7 @@ It's presence can be verified by examining the database directly:
         2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf | 
     (1 row)
 
-The backing-store mechanism can now automatically retreive this atom at
+The backing-store mechanism can now automatically retrieve this atom at
 a later time.  Thus, for example, shut down the server, restart it, 
 re-open the database, and enter the scheme shell again. Then,
 
@@ -333,7 +333,7 @@ which returns the UUID:
 
 Copying Databases
 -----------------
-Sooner or later you will want to make a copy of your datbase, for 
+Sooner or later you will want to make a copy of your database, for 
 backup purposes, or sharing. Here's the current 'best practices' for 
 that:
 
@@ -396,24 +396,24 @@ after loading all atoms, rebuild the index. This time, get
    cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
    postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
 
-Try again, this time with inline outgoing sets. This improves 
+Try again, this time with in-line outgoing sets. This improves 
 performance even further:
 
    cogserver = 2:54 mm:ss = 0.113 millisecs/atom (8.83K atoms/sec)
    postgres  = 2:22 mm:ss = 0.092 millisecs/atom (10.82K atoms/sec)
 
 Try again, compiled with -O3, storing to an empty table, with
-no indexes on it (and with inline outgoing sets):
+no indexes on it (and with in-line outgoing sets):
    cogserver = 2:40 mm:ss
    postgres  = 2:16 mm:ss
 
 Try again, compiled with -O3, storing to empty table, while holding 
-the index on tables (and with inline outgoing sets).
+the index on tables (and with in-line outgoing sets).
 
    cogserver = 2:51 mm:ss
    postgres  = 2:06 mm:ss
 
-Appearently, the problem with the indexes has to do with holding them
+Apparently, the problem with the indexes has to do with holding them
 for the edge table; when there's no edge table, then there's no index 
 issue!?
 
@@ -422,12 +422,12 @@ Try again, compiled with -O3, saving to (updating) a *full* database.
    cogserver = 2:19 mm:ss
    postgres  = 4:35 mm:ss
 
-Try again, using unixodbc instead of iodbc, to empty table, withOUT
-index tables (and -O3 and inlined outgoing):
+Try again, using UnixODBC instead of iODBC, to empty table, withOUT
+index tables (and -O3 and in-lined outgoing):
    cogserver = 2:36 mm:ss
    postgres  = 2:13 mm:ss
 
-It appears that unixodbc is essentially identical to iodbc performance
+It appears that UnixODBC is essentially identical to iODBC performance
 
 begin; commit;  
 use analyze;
@@ -472,7 +472,7 @@ loading XML! Hurrah! Also, see below: RAM usage is significantly
 reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
 
-Implement inline edges, instead of storing eges in an outboard table.
+Implement in-line edges, instead of storing edges in an outboard table.
 
   cogserver = 41 seconds = 26.7 microsecs/atom (37.5K atoms/sec)
   postgres  =  7 seconds =  4.56 microsecs/atom (219K atoms/sec)
@@ -500,10 +500,10 @@ Almost one-third the ram !!
 
 The fragmentation occurs when the XML is piped to cogserver much faster
 than the cogserver can process it; the fragmentation is between data
-buffered from the sockets, and the cogserver itself.  The fragementation
+buffered from the sockets, and the cogserver itself.  The fragmentation
 does *not* occur when the data is piped in more slowly,i.e. at the same 
 rate that opencog processes it. Alternately, the problem may be a memory
-leak in CSockets; I think this is the true cluprit, but that's not yet
+leak in CSockets; I think this is the true culprit, but that's not yet
 clear.
 
 
