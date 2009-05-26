@@ -54,8 +54,8 @@ TARGET_LINK_LIBRARIES (moses-ant-hillclimbing
         util
 )
 
-ADD_EXECUTABLE (moses-iterative-hillclimbing moses-iterative-hillclimbing)
-TARGET_LINK_LIBRARIES (moses-iterative-hillclimbing
+ADD_EXECUTABLE (moses-disjunction moses-disjunction)
+TARGET_LINK_LIBRARIES (moses-disjunction
 	moses
         comboreduct
         util
