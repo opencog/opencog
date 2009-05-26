@@ -57,6 +57,7 @@ The goal of this implementation is to:
    strength of the current design is supposed to be simplcity, not
    scalability or raw performance.
 
+
 Design:
 -------
 The core design defines only a few very simple SQL tables, and some
@@ -85,6 +86,7 @@ fully populated; this makes it hard to leave some atoms on disk while
 others are in RAM.  These issues need to be resolved for *any* persistent
 back-end, and are not specific to this one.
 
+
 Caveats:
 --------
 The wisdom of an SQL-based design is not at all clear; there are several
@@ -103,67 +105,35 @@ trouble with UTF-8 strings. It is almost impossible to avoid UTF-8
 strings in NLP input data.
 
 
-Getting started
----------------
-Create a database called "OpenCog"; for example, in Postgres, at
-the Unix command line:
+Device Driver Setup
+-------------------
+A number of steps are required to install and configure the database
+drivers used by the persistence system.
 
-   $ createdb opencog
-
-(you may need to su - postgres; createuser <username> first)
-(You may need to edit pg_hba.conf)
-
-Then create the database tables:
-
-   $ cat atom.sql | psql opencog
-
-Next, set up the correct ODBC connection. This version uses iODBC
-So edit .odbc.ini in your home directory, and add a stanza similar
-to this, adjusting for user and passwd appropriately.  The password
-to be supplied is the database password, not the user password.
-The database password can be set by doing:
-
-   $ psql -c "ALTER USER linas WITH PASSWORD 'asdf'" -d template1
-
-(Substitute you name and some appropriate passwrd; it does not need to
-be your login password, and probably shouldn't be.)
-
-Next, odbc and drivers must be installed. Either iodbc or unixodbc will
-work. For debian/uuntu, install the packages odbc-postgresql and iodbc
-(Assuming you want to use postgres). After installing these two, edit
-/etc/odbcinst.ini and put the below in it.
+First, ODBC and drivers must be installed. The UnixODBC system is 
+recommended; although iODBC "works", it does not have the UTF-8 support
+needed for text-processing.  For Debian/Ubuntu, install the packages 
+odbc-postgresql and unixodbc (Assuming you want to use postgres). After
+installing these two, edit /etc/odbcinst.ini and put the stanza below
+into it.
 
 [PostgreSQL]
-Description=PostgreSQL ODBC driver for Linux and Windows (unicode version)
-Driver=/usr/lib/odbc/psqlodbcw.so
-Setup=/usr/lib/odbc/libodbcpsqlS.so
-Debug = 0
-CommLog = 0
+Description = PostgreSQL ODBC driver for Linux and Windows (unicode version)
+Driver      = /usr/lib/odbc/psqlodbcw.so
+Setup       = /usr/lib/odbc/libodbcpsqlS.so
+Debug       = 0
+CommLog     = 0
 
 The above stanza associates the name 'PostgreSQL' with a particular
-driver, this name is needed below.
+driver; this name is needed below.  MySQL users need the following stanza: 
+a file can safely contain may stanzas defining many different drivers.
 
-Next, edit  ~/.odbc.ini in your home directory to add a stanza of 
-the form below. You MUST create one of these for EACH repositry 
-you plan to use! The name of the stanza, and of the database,
-can be whatever you wish.
-
-[opencog]
-Description       = My Favorite Database
-Driver            = PostgreSQL
-Trace             = No
-TraceFile         =
-Database          = opencog
-Servername        = localhost
-Port              = 5432
-Username          = linas
-Password          = asdf
-ReadOnly          = No
-RowVersioning     = No
-ShowSystemTables  = Yes
-ShowOidColumn     = Yes
-FakeOidIndex      = Yes
-ConnSettings      =
+[MySQL]
+Description = MySQL driver
+Driver      = /usr/lib/odbc/libmyodbc.so
+Setup       = /usr/lib/odbc/libodbcmyS.so
+CPTimeout   =
+CPReuse     =
 
 Next, the postgres default configuration needs to be tweaked for 
 performance. Failure to do this will result in disastrous load and
@@ -189,6 +159,56 @@ usage has been exceeded. This can be fixed by:
 (save file contents, then)
    sysctl -p /etc/sysctl.conf
 
+
+Database Setup
+--------------
+This section shows how to set up the tables that will hold the data,
+and the individual ODBC connection to them.
+
+Create a database called "mycogdata"; for example, in Postgres, at
+the Unix command line:
+
+   $ createdb mycogdata
+
+(you may need to su - postgres; createuser <username> first)
+(You may need to edit pg_hba.conf)
+
+Then create the database tables:
+
+   $ cat atom.sql | psql mycogdata
+
+Next, edit  ~/.odbc.ini in your home directory to add a stanza of 
+the form below. You MUST create one of these for EACH repositry 
+you plan to use! The name of the stanza, and of the database,
+can be whatever you wish.
+
+[mycogdata]
+Description       = My Favorite Database
+Driver            = PostgreSQL
+Trace             = No
+TraceFile         =
+Database          = mycogdata
+Servername        = localhost
+Port              = 5432
+Username          = linas
+Password          = asdf
+ReadOnly          = No
+RowVersioning     = No
+ShowSystemTables  = Yes
+ShowOidColumn     = Yes
+FakeOidIndex      = Yes
+ConnSettings      =
+
+Be sure to adjust ther username and passwd appropriately.  The password
+to be supplied is the database password, not the system login password.
+The database password can be set by doing:
+
+   $ psql -c "ALTER USER linas WITH PASSWORD 'asdf'" -d template1
+
+(Substitute your name and some appropriate password; it does not need to
+be your login password, and probably shouldn't be.)
+
+
 How To Pass the Unit Test
 -------------------------
 The collection of OpenCog unit tests includes one that tests the 
@@ -206,11 +226,12 @@ you'll need to repeat some of the above instructions:
 
 After the above steps, the BasicSaveUTest should pass.
 
+
 Bulk save and restore
 ---------------------
 At last! bulk save of atoms that were previous created is done by
-issueing getting to the opencog prompt (netcat localhost 17001) and
-issuing the commands:
+getting to the opencog prompt (telnet localhost 17001) and issuing the
+commands:
 
     opencog> ?
     unknown command >>?<<
@@ -234,6 +255,7 @@ Stored 236000 atoms. When finished, its nice to say:
 
 Next time, you can load the data with:
 
+    opencog> sql-open nlp linas asdf
     opencog> sql-load
     SQL loader thread started
 
@@ -250,9 +272,6 @@ used as follows:
 
 Start the server:
     $ opencog/server/cogserver -c ../lib/opencog.conf
-
-Load required scheme commands:
-    $ opencog/scm/load.sh
 
 Open a shell:
     $ telnet localhost 17001
@@ -310,6 +329,7 @@ which returns the UUID:
 
     guile> (cog-handle y)
     2
+
 
 Copying Databases
 -----------------
@@ -491,7 +511,7 @@ TODO
 ----
 -- Store more CompositeTruthValues
 
--- Store attention values.
+-- Store attention values. (??)
 
 -- Run valgrind to track down the CSockets leak problem.
 
