@@ -90,8 +90,8 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		void setUp(void);
 
-		AtomStorage *store;
-		void tearDown(void) { delete store; }
+		AtomStorage *astore;
+		void tearDown(void) { delete astore; }
 		void single_atom_save_restore(std::string id);
 		void add_to_table(int, AtomTable *, std::string id);
 		void check_table(int, AtomTable *, std::string id);
@@ -108,17 +108,17 @@ void BasicSaveUTest::setUp(void)
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
 
-	store = new AtomStorage(dbname, username, passwd);
-	TSM_ASSERT("Not connected to database", store->connected());
+	astore = new AtomStorage(dbname, username, passwd);
+	TSM_ASSERT("Not connected to database", astore->connected());
 
-	if (!store->connected())
+	if (!astore->connected())
 	{
 		logger().debug("single_atom_save_restore: cannot connect to db");
 		return;
 	}
 
 	// Trash the contents of the database.
-	store->kill_data();
+	astore->kill_data();
 }
 
 // ============================================================
