@@ -215,6 +215,13 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 	store->kill_data();
 	delete store;
+
+	TLB::removeAtom(a);
+	TLB::removeAtom(a2);
+	TLB::removeAtom(l);
+	delete a;
+	delete a2;
+	delete l;	
 }
 
 // ============================================================
