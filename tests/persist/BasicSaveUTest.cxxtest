@@ -67,17 +67,17 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-            try {
-                // Get the database logins & etc from the config file.
-                dbname = config()["TEST_DB_NAME"].c_str();
-                username = config()["TEST_DB_USERNAME"].c_str();
-                passwd = config()["TEST_DB_PASSWD"].c_str();
-            }
-            catch (InvalidParamException &e)
-            {
-                TS_FAIL("Incomplete DB setup for test. Edit opencog-test.conf");
-                exit(1);
-            }
+			try {
+				// Get the database logins & etc from the config file.
+				dbname = config()["TEST_DB_NAME"].c_str();
+				username = config()["TEST_DB_USERNAME"].c_str();
+				passwd = config()["TEST_DB_PASSWD"].c_str();
+			}
+			catch (InvalidParamException &e)
+			{
+				TS_FAIL("Incomplete DB setup for test. Edit opencog-test.conf");
+				exit(1);
+			}
 
 		}
 
@@ -280,11 +280,11 @@ void BasicSaveUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-   single_atom_save_restore("aaa ");
-   single_atom_save_restore("bbb ");
-   single_atom_save_restore("ccc ");
-   single_atom_save_restore("ddd ");
-   single_atom_save_restore("eee ");
+	single_atom_save_restore("aaa ");
+	single_atom_save_restore("bbb ");
+	single_atom_save_restore("ccc ");
+	single_atom_save_restore("ddd ");
+	single_atom_save_restore("eee ");
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
