@@ -75,7 +75,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 		void check_node(const char *, const char *, float, float);
 		void test_single_atom(void);
-
+    //test links
     void test_reference_link(void);
     void test_word_instance_link(void);
     void check_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
