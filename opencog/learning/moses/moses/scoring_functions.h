@@ -33,6 +33,7 @@ using namespace boost;
 namespace moses
 {
 
+//even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)x2 is even
 struct even_parity {
     template<typename It>
     bool operator()(It from,It to) const {
@@ -43,6 +44,7 @@ struct even_parity {
     }
 };
 
+//disjunction(x1, ..., xn) = true iff there exists i such that xi is true
 struct disjunction {
     template<typename It>
     bool operator()(It from,It to) const {
@@ -65,8 +67,7 @@ struct simple_symbolic_regression {
     template<typename It>
     contin_t operator()(It from,It to) const {
         contin_t res = 0;
-        dorepeat(order)
-        res = (res + contin_t(1)) * (*from);
+        dorepeat(order) res = (res + contin_t(1)) * (*from);
         cout << "simple_symbolic_regression: "
              << "f(" << *from << ")_" << order << "=" << res << endl;
         return res;

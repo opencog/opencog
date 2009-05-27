@@ -54,7 +54,6 @@ int main(int argc,char** argv) {
 
   // scores for different propositional formulae
   even_parity scorer;
-  // disjunction scorer;
 
 /*
   metapopulation<logical_score,logical_bscore,univariate_optimization> 
@@ -71,7 +70,7 @@ int main(int argc,char** argv) {
 	    logical_score(scorer,arity,rng),
 	    logical_bscore(scorer,arity,rng),
 	    iterative_hillclimbing(rng));
-  //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
+
   moses::moses(metapop,max_evals,0);
 
 }
