@@ -269,8 +269,8 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
 
-	Link *lb = new Link(PARSE_LINK, hvec);
-	Handle hlb = table->getHandle(lb);
+	Link lb(PARSE_LINK, hvec);
+	Handle hlb = table->getHandle(&lb);
 	Atom *bl = TLB::getAtom(hlb);
 	atomCompare(al[idx], bl);
 }
