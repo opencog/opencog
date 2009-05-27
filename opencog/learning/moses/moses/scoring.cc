@@ -102,6 +102,11 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+/**
+ * return true if x dominates y
+ *        false if y dominates x
+ *        indeterminate otherwise
+ */
 tribool dominates(const behavioral_score& x, const behavioral_score& y)
 {
     //everything dominates an empty vector

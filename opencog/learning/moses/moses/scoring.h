@@ -212,8 +212,18 @@ protected:
 
 };
 
+/**
+ * return true if x dominates y
+ *        false if y dominates x
+ *        indeterminate otherwise
+ */
 tribool dominates(const behavioral_score& x, const behavioral_score& y);
 
+
+/**
+ * For all candidates c in [from, to), insert c in dst iff 
+ * no element of dst dominates c
+ */
 //this may turn out to be too slow...
 template<typename It, typename Set>
 void merge_nondominating(It from, It to, Set& dst)
