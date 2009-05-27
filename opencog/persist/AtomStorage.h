@@ -47,6 +47,7 @@ class AtomStorage
 		class Response;
 		class Outgoing;
 
+		void init(const char *, const char *, const char *);
 		Atom * makeAtom (Response &, Handle);
 		Atom * getAtom (const char *, int);
 

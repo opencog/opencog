@@ -322,9 +322,9 @@ void AtomStorage::storeOutgoing(Atom *atom, Handle h)
 /* ================================================================ */
 // Constructors
 
-AtomStorage::AtomStorage(const char * dbname,
-                         const char * username,
-                         const char * authentication)
+void AtomStorage::init(const char * dbname,
+                       const char * username,
+                       const char * authentication)
 {
 	db_conn = new ODBCConnection(dbname, username, authentication);
 	type_map_was_loaded = false;
@@ -338,19 +338,21 @@ AtomStorage::AtomStorage(const char * dbname,
 	if (!connected()) return;
 
 	reserve();
+	max_height = 0;
+}
+
+AtomStorage::AtomStorage(const char * dbname,
+                         const char * username,
+                         const char * authentication)
+{
+	init(dbname, username, authentication);
 }
 
 AtomStorage::AtomStorage(const std::string& dbname,
                          const std::string& username,
                          const std::string& authentication)
 {
-	db_conn = new ODBCConnection(dbname.c_str(), username.c_str(), authentication.c_str());
-	type_map_was_loaded = false;
-
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		db_typename[i] = NULL;
-	}
+	init(dbname.c_str(), username.c_str(), authentication.c_str());
 }
 
 AtomStorage::~AtomStorage()
