@@ -58,6 +58,8 @@ public:
     
     void drawBITNodeFitness(int node_id, float fitness);
 
+    void drawBITNodeLabel(BITNode * node, int node_id);
+
     void drawBITNode(BITNode* node, vector<set<ParametrizedBITNode> > children);
         
     //! Redraw the ubigraph, based on how the BIT is now.

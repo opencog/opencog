@@ -25,9 +25,9 @@
 
 #include <sstream>
 /*#include <iomanip>
-#include <string>
+#include <string>*/
 #include <unistd.h>
-#include <limits.h>
+/*#include <limits.h>
 #include <tr1/functional>
 using namespace std::tr1::placeholders;
 */
@@ -58,6 +58,19 @@ extern "C"
 
 using namespace std;
 
+// TODO duplicated from Ubigrapher.cc
+std::string initials(std::string s)
+{
+    std::string ret;
+    foreach (char c,  s) {
+        if (/*isUpperCase(c)*/ Isox(c) == c) {
+            ret += c;
+        }
+    }
+    return ret;
+}
+
+
 namespace opencog
 {
 
@@ -65,7 +78,7 @@ namespace opencog
     template <typename T>
     string to_string ( T arg )
     {
-        stringstream ss;
+        ostringstream ss;
         ss << arg;
         return ss.str();
     }
@@ -118,7 +131,24 @@ namespace opencog
         ubigraph_set_vertex_attribute(node_id, "size", ost.str().c_str());
     }
 
-// Actually just draws the args and children, doesn't draw the node itself
+    void BITUbigrapher::drawBITNodeLabel(BITNode * node, int node_id)
+    {
+        // The BITNodeRoot and (I think) the root variable scoper don't have a rule
+        if (node->rule != NULL) {
+            //ostringstream label;
+            string label;
+            label = node->rule->name;
+            //label << node->rules
+            if (label.rfind("Rule") != string::npos ||
+                label.rfind("(=>)") != string::npos)
+                label.erase(label.size() - 4 - 1);
+            label = initials(label);
+
+            ubigraph_set_vertex_attribute(node_id, "label", label.c_str());
+        }
+    }
+
+// Actually just draws the args and children, doesn't draw the node itself.
 // children is a vector of arguments, each having a set of ParametrizedBITNode's
 // ParametrizedBITNode is not a subclass of BITNode, it is a wrapper (i.e. they have a BITNode as a member).
 
@@ -137,6 +167,7 @@ namespace opencog
             cout << "node fitness: " << node->fitness() << endl;
     
             drawBITNodeFitness(node_id, node->fitness());
+            drawBITNodeLabel(node, node_id);
         }
 
         // Since this draws BITNodes, and the children are actually ParametrizedBITNodes referring to BITNodes, the same BITNode may
@@ -147,14 +178,18 @@ namespace opencog
         {
             cout << "Drawing BITNode arg #" << i << endl;
             // Display and attach that arg
-            int arg_id = node_id + i + 1; // since a BITNode takes up a lot more than a few bytes presumably
+            unsigned int arg_id = node_id + i + 1; // since a BITNode takes up a lot more than a few bytes presumably
             int status = ubigraph_new_vertex_w_id ( arg_id ); // TODO use a different id system
             if ( status )
                 logger().error ( "Drawing arg: Status was %d", status );
             else
             {
                 //        int arg_id = ubigraph_new_vertex();
-                ubigraph_set_vertex_attribute ( arg_id, "label", toString ( i ).c_str() );
+                ostringstream oss;
+                oss << "#" << i;
+                cout << oss.str() << endl;
+                //ubigraph_set_vertex_attribute ( arg_id, "label", toString ( i ).c_str() );
+                ubigraph_set_vertex_attribute ( arg_id, "label", oss.str().c_str() );
                 status = ubigraph_new_edge ( node_id, arg_id );
                 if ( status == -1 )
                 {
@@ -183,7 +218,7 @@ namespace opencog
 
                         cout << "child-node fitness: " << child.prover->fitness() << endl;
                         drawBITNodeFitness(child_id, child.prover->fitness());
-
+                        drawBITNodeLabel(child.prover, child_id);
 
                         status = ubigraph_new_edge ( arg_id, child_id );
                         if ( status == -1 )
