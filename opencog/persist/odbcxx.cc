@@ -234,7 +234,10 @@ ODBCConnection::exec(const char * buff)
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
-	SQLLEN err;
+	// IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
+	// The ODBC driver really wants to write a return value here!
+	static SQLLEN bogus;
+
 	SQLRETURN rc;
 	int i;
 
@@ -309,7 +312,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 			values[i][0] = 0;
 		}
 		rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR, 
-			values[i], vsizes[i], &err);
+			values[i], vsizes[i], &bogus);
 		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 		{
 			PERR ("Can't bind col=%d rc=%d", i, rc);
