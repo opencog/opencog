@@ -81,7 +81,7 @@ int main(int argc, char ** argv)
 			if(contin_arg_number==0){ //if the function is purely boolean
 				if(partial_probability >=0 && partial_probability <=1){
             		//  generate the truth-table
-	            	nsamples_bool = pow((float)2, (float)arg_number);
+	            	nsamples_bool = pow(2, arg_number);
     	        	truth_table truthtable(combo_tr, nsamples_bool, rng);
 	
     	        	// output the truth-table
@@ -99,8 +99,8 @@ int main(int argc, char ** argv)
         	    else if(partial_probability == -1 )
         	    {
         	    	// we stick to the usage 3. (the total number of samples is the one defined as parameter, nr_samples_conting)
-        	    	if(nsamples_contin > pow((float)2, (float)arg_number))
-        	    		nsamples_bool = pow((float)2, (float)arg_number);
+        	    	if(nsamples_contin > pow(2, arg_number))
+        	    		nsamples_bool = pow(2, arg_number);
        	    		else
        	    			nsamples_bool = nsamples_contin;
        	    			truth_table truthtable(combo_tr, nsamples_bool, rng);
@@ -119,7 +119,7 @@ int main(int argc, char ** argv)
     	   	
     	   		//this is to generate also the variables which are not present in the method. I make them of type contin
 		        	contin_arg_number=arg_number-boolean_arg_number;
-		        nsamples_bool = pow((float)2, (float)boolean_arg_number);        	
+		        nsamples_bool = pow(2, boolean_arg_number);        	
         		//generate the mixed table        	
         		mixed_table mt(combo_tr, rands,tr, rng);
         	

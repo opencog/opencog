@@ -52,7 +52,3 @@ debian/tmp/
 *.dll*
 *.nmake
 CTestTestfile.cmake
-
-CMakeLists.txt
-opencog/learning/moses/main/gen-mixed-table.cc
-opencog/learning/moses/main/gen-truth-table.cc
