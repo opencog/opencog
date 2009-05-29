@@ -47,45 +47,51 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	public:
 
-		BasicSCMUTest(void)
-		{
-			try
-			{
-				config().load("opencog-test.conf");
-			}
-			catch (RuntimeException &e)
-			{
-				std::cerr << e.getMessage() << std::endl;
-			}
-			logger().setFilename(config()["LOG_FILE"]);
-			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-		}
+    BasicSCMUTest(void)
+    {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+    }
 
-		~BasicSCMUTest()
-		{
-			// erase the log file if no assertions failed
-			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().getFilename().c_str());
-		}
+    ~BasicSCMUTest()
+    {
+        // erase the log file if no assertions failed
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().getFilename().c_str());
+    }
 
-		void setUp(void);
+    void setUp(void);
 
-		void tearDown(void) { }
+    void tearDown(void) { }
 
-		void check_node(const char *, const char *, float, float);
-		void test_single_atom(void);
-    //test links
+    //Nodes
+    void check_node(const char *, const char *, float, float);
+    void test_single_atom(void);
+    
+    //Links
+    void check_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
     void test_reference_link(void);
     void test_word_instance_link(void);
+    void test_inheritance_link(void);
     //TODO
     //void test_evaluation_link(void);
-    void test_parse_link(void);
-    void check_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
+ 
+    //Relex links
     void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
+    void check_frame_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);  
+    void test_parse_link(void);
     void test_lemma_link(void);
-    //test frameToAtoms
-    //void test_
+    void test_part_of_speech_link(void);   
+    void test_frame_element_link(void);
 };
 
 /*
@@ -101,7 +107,7 @@ void BasicSCMUTest::setUp(void)
 
 void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
 {
-  printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
+    printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
 	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
 	eval.eval(buff);
@@ -150,7 +156,6 @@ void BasicSCMUTest::test_single_atom(void)
 	check_node("LemmaNode", "When life gives you lemmas, make conjugations", 0.4765, 0.61154);
 	check_node("PartOfSpeechNode", "はにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくし てみました。", 0.34765, 0.33611);
 	
-
 	// We should also test links ... 
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -160,13 +165,10 @@ void BasicSCMUTest::test_word_instance_link(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	
-    const char * tipo = "WordInstanceLink";
-    const char * nodename1 = "WordInstanceNode";
-    const char * nodename2 = "ParseNode";
-    const char * value1 = "the@401c28c2-9de3-453f-b6d8-1b56061d127e";
-    const char * value2 = "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0";
-  
-    check_link(tipo, WORD_INSTANCE_LINK, nodename1, nodename2, value1, value2, 1.0, 1.0);
+    check_link("WordInstanceLink", WORD_INSTANCE_LINK, "WordInstanceNode", "ParseNode", 
+                                            "the@401c28c2-9de3-453f-b6d8-1b56061d127e", 
+                                            "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0",
+                                            1.0, 1.0);
   
     logger().debug("END TEST: %s", __FUNCTION__);
 
@@ -175,18 +177,36 @@ void BasicSCMUTest::test_reference_link(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	
-    const char * tipo = "ReferenceLink";
-    const char * nodename1 = "WordInstanceNode";
-    const char * nodename2 = "WordNode";
-    const char * value1 = "the@401c28c2-9de3-453f-b6d8-1b56061d127e";
-    const char * value2 = "the";
-
-    check_link(tipo, REFERENCE_LINK, nodename1, nodename2, value1, value2, 0.65, 0.45);
+    check_link("ReferenceLink", REFERENCE_LINK, "WordInstanceNode", "WordNode", 
+                                    "the@401c28c2-9de3-453f-b6d8-1b56061d127e", 
+                                    "the@401c28c2-9de3-453f-b6d8-1b56061d127e",
+                                    0.65, 0.45);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 
+void BasicSCMUTest::test_inheritance_link(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	
+    check_link("InheritanceLink", INHERITANCE_LINK, "WordInstanceNode", "DefinedLinguisticConceptNode",
+                                                   "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096", 
+                                                   "hyp", 1.0, 1.0);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BasicSCMUTest::test_part_of_speech_link(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	
+    check_link("PartOfSpeechLink", PART_OF_SPEECH_LINK, "WordInstanceNode", "DefinedLinguisticConceptNode", 
+                                                        "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096", "adj", 
+                                                        1.0, 1.0);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 void BasicSCMUTest::check_link(const char * tipo, Type type, 
                                const char * nodename1, const char * nodename2, 
@@ -204,7 +224,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 
     HandleSeq links;
     as->getHandleSet(back_inserter(links), type, true);
-    printf("Number of links found: %d\n",links.size());
+    //printf("Number of links found: %d\n",links.size());
     HandleSeq::const_iterator i;
     for(i = links.begin(); i != links.end(); ++i){
         const TruthValue &tv = as->getTV(*i);
@@ -212,7 +232,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
         float c = tv.getConfidence();
         TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
         TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-        printf("Link TruthValue: %f -- %f\n", m, c);
+        //printf("Link TruthValue: %f -- %f\n", m, c);
     }
 
     Type t1 = classserver().getType(nodename1);
@@ -235,16 +255,11 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 
 void BasicSCMUTest::test_parse_link()
 {
-	//(ParseLink (ParseNode "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0" (stv 1 0.94169998))
-    //(SentenceNode "sentence@8c13ec38-0295-4632-9205-e095035e4364"))
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    const char * tipo = "ParseLink";
-    const char * nodename1 = "ParseNode";
-    const char * nodename2 = "SentenceNode";
-    const char * value1 = "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0";
-    const char * value2 = "sentence@8c13ec38-0295-4632-9205-e095035e4364";
-
-    check_parse_link(tipo, PARSE_LINK, nodename1, nodename2, value1, value2, 1.0, 1.0);
+    check_parse_link("ParseLink", PARSE_LINK, "ParseNode", "SentenceNode", 
+                     "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0", 
+                     "sentence@8c13ec38-0295-4632-9205-e095035e4364", 1.0, 1.0);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -254,7 +269,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
                                const char * value1, const char * value2,
                                float truth, float conf)
 {
-    printf("check_link(%s,%s,%s,%f,%f)\n", tipo, nodename1, nodename2, truth, conf);
+    printf("check_parse_link(%s,%s,%s,%f,%f)\n", tipo, nodename1, nodename2, truth, conf);
     char buff[500];
     snprintf(buff, 500, "(%s  (%s \"%s\"(stv %f %f)) (%s \"%s\"))", tipo, nodename1, value1, truth, 
                 conf, nodename2, value2);
@@ -265,16 +280,15 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 
     HandleSeq links;
     as->getHandleSet(back_inserter(links), type, true);
-    printf("Number of links found: %d\n",links.size());
+    //printf("Number of links found: %d\n",links.size());
     HandleSeq::const_iterator i;
     for(i = links.begin(); i != links.end(); ++i){
         const TruthValue &tv = as->getTV(*i);
         float m = tv.getMean();
         float c = tv.getConfidence();
         //the link has TV 0.0
-        TS_ASSERT_LESS_THAN_EQUALS(0.0, 1.0e-6);
-        TS_ASSERT_LESS_THAN_EQUALS(0.0, 1.0e-6);
-        printf("Link TruthValue: %f -- %f\n", m, c);
+        TS_ASSERT_EQUALS(m,0.0);
+        TS_ASSERT_EQUALS(c,0.0);
     }
 
     Type t1 = classserver().getType(nodename1);
@@ -291,7 +305,6 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
     TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
     TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
     
-
     Type t2 = classserver().getType(nodename2);
     Handle h2 = as->getHandle(t2, value2 );
     TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
@@ -306,22 +319,68 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 void BasicSCMUTest::test_lemma_link()
 {
 
-   // (LemmaLink (stv 1.0 1.0)
-//   (WordInstanceNode "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096")
-//   (WordNode "blue")
-//)
-
-    const char * tipo = "LemmaLink";
-    const char * nodename1 = "WordInstanceNode";
-    const char * nodename2 = "WordNode";
-    const char * value1 = "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096";
-    const char * value2 = "blue";
-
-    check_parse_link(tipo, PARSE_LINK, nodename1, nodename2, value1, value2, 1.0, 1.0);
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    
+    check_parse_link("LemmaLink", LEMMA_LINK, "WordInstanceNode", "WordNode", 
+                                  "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096", 
+                                  "blue", 1.0, 1.0);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 
 
 }
+void BasicSCMUTest::check_frame_link(const char * tipo, Type type, 
+                               const char * nodename1, const char * nodename2, 
+                               const char * value1, const char * value2,
+                               float truth, float conf)
+{
+    printf("check_frame_link(%s,%s,%s,%f,%f)\n", tipo, nodename1, nodename2, truth, conf);
+    char buff[500];
+    snprintf(buff, 500, "(%s (%s \"%s\") (%s \"%s\") )", tipo, nodename1, value1, nodename2, value2);
+    eval.eval(buff);
+    bool eval_err = eval.eval_error();
+    eval.clear_pending();
+    TSM_ASSERT("Failed to create a frame link", !eval_err);
 
+    HandleSeq links;
+    as->getHandleSet(back_inserter(links), type, true);
+    //printf("Number of links found: %d\n",links.size());
+    HandleSeq::const_iterator i;
+    for(i = links.begin(); i != links.end(); ++i){
+        const TruthValue &tv = as->getTV(*i);
+        float m = tv.getMean();
+        float c = tv.getConfidence();
+        TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
+        TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
+        //printf("Link TruthValue: %f -- %f\n", m, c);
+    }
+
+    Type t1 = classserver().getType(nodename1);
+    Handle h1 = as->getHandle(t1, value1);
+    TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
+
+    Atom *a1 = TLB::getAtom(h1);
+    Node *n1 = static_cast<Node *>(a1);
+    TSM_ASSERT("Failed to find node", n1 != NULL);
+
+    Type t2 = classserver().getType(nodename2);
+    Handle h2 = as->getHandle(t2, value2 );
+    TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
+
+    Atom *a2 = TLB::getAtom(h2);
+    Node *n2 = static_cast<Node *>(a2);
+    TSM_ASSERT("Failed to find node", n2 != NULL);
+
+}
+
+void BasicSCMUTest::test_frame_element_link()
+{
+
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    check_frame_link("FrameElementLink", PARSE_LINK, "DefinedFrameNode", "DefinedFrameElementNode", 
+                     "#Temporal_colocation", "#Temporal_colocation:Time", 0.0, 0.0);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
 /* ============================= END OF FILE ================= */

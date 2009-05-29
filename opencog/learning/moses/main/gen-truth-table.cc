@@ -55,7 +55,7 @@ int main(int argc, char ** argv)
         MT19937RandGen output_rng(rand_seed);
 
         size_t arg_number = arg_type_list.size();
-        size_t sample_number = pow(2, arg_number);
+        size_t sample_number = pow((float)2, (float)arg_number);
 
         cout << "The number of args:" << arg_number << endl;
         try {
