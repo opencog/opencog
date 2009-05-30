@@ -2,8 +2,10 @@
                           OpenCog
                           -------
 
-OpenCog is a general-purpose reasoning system.
-It currently consists of only the barest of essentials.
+OpenCog is a framework for developing and running general-purpose 
+reasoning systems.  It currently consists of only the barest of 
+essentials.
+
 
 Prerequisites:
 --------------
@@ -16,7 +18,8 @@ cmake       -- a build management tool
 
 cxxtest     -- a test framework
                http://cxxtest.sourceforge.net/
-               (Not originally available in Debian/Ubuntu; get cxxtest from https://launchpad.net/~dhart/+archive/ppa)
+               (Not originally available in Debian/Ubuntu; get cxxtest 
+               from https://launchpad.net/~dhart/+archive/ppa)
 
 boost       -- a C++ utilities package -
                http://www.boost.org/
@@ -24,13 +27,15 @@ boost       -- a C++ utilities package -
 
 C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
                http://www.alhem.net/Sockets/
-               (Not originally available in Debian/Ubuntu; get csockets-dev from https://launchpad.net/~dhart/+archive/ppa)
+               (Not originally available in Debian/Ubuntu; get 
+               csockets-dev from https://launchpad.net/~dhart/+archive/ppa)
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
                Debian/Ubuntu package libexpat1-dev
-               Alternatively Debian/Ubuntu package libxmltok1-dev (supplies expat v1.2)
-               Version 2 seems to work as well.  http://expat.sourceforge.net/
+               Alternatively Debian/Ubuntu package libxmltok1-dev 
+               (supplies expat v1.2) Version 2 seems to work as well.  
+               http://expat.sourceforge.net/
 
 guile       -- Embedded scheme interperter
                http://www.gnu.org/software/guile/guile.html
@@ -53,28 +58,36 @@ Lua         -- Lua programming language
                Debian/Ubuntu package liblua5.1-dev
 
 Luabind     -- Binding between C++ and Lua
-               http://www.rasterbar.com/products/luabind.html (version 0.8.1 or later)
-               (Not originally available in Debian/Ubuntu; get libluabind-dev from https://launchpad.net/~arthur.loiret/+archive/ppa)
+               http://www.rasterbar.com/products/luabind.html (version 
+               0.8.1 or later) (Not originally available in Debian/Ubuntu;
+               get libluabind-dev from 
+               https://launchpad.net/~arthur.loiret/+archive/ppa)
 
 
 
 To build opencog:
 -----------------
-cd to project root dir
-mkdir bin
-cd bin
-cmake ..
-make
+Peform the following steps at the shell prompt:
 
-Libraries will be built into subdirectories within bin, mirroring the structure
-of the source directory root.
+   cd to project root dir
+   mkdir bin
+   cd bin
+   cmake -DCMAKE_BUILD_TYPE=Release ..
+   make
+
+Libraries will be built into subdirectories within bin, mirroring the
+structure of the source directory root. The flag -DCMAKE_BUILD_TYPE=Release
+results in binaries that are optimized for for performance; ommitting 
+this flag will result in faster builds, but slower executables.
+
 
 Unit tests:
 -----------
-To build and run the unit tests, from the ./bin directory enter (after building
-opencog as above): 
+To build and run the unit tests, from the ./bin directory enter (after
+building opencog as above): 
 
-make test
+   make test
+
 
 Running the server:
 -------------------
@@ -91,11 +104,13 @@ bin/opencog/server/cogserver. Then, from another terminal, run
 "telnet localhost 17001". Try loading the example XML file and ls
 to see all the nodes and links.
 
+
 Config file
 -----------
 The operation of the server can be altered by means of a config file.
 This config file is in lib/opencog.conf. To make use of it, say 
 "cogserver -c <config-filename>" when starting the server.
+
 
 Scheme shell
 ------------
@@ -110,6 +125,7 @@ for the available OpenCog commands can be found in src/guile/README.
 Modifying the list of basic types
 ---------------------------------
 See the example under ./examples/atomtypes
+ 
 
 CMake notes
 -----------
@@ -123,15 +139,17 @@ Some useful CMake's web sites/pages:
 
 
 The main CMakeLists.txt currently sets -DNDEBUG. This disables Boost
-matrix/vector debugging code and safety checks, with the benefit of making it
-much faster. Boost sparse matrixes and (dense) vectors are currently used by
-ECAN's ImportanceDiffusionAgent. If you use Boost ublas in other code, it may
-be a good idea to at least temporarily unset NDEBUG. Also if the Boost assert.h
-is used it will be necessary to unset NDEBUG. Boost ublas is intended to
-respond to a specific BOOST_UBLAS_NDEBUG, however this is not available as of
-the current Ubuntu standard version (1.34).
+matrix/vector debugging code and safety checks, with the benefit of
+making it much faster. Boost sparse matrixes and (dense) vectors are
+currently used by ECAN's ImportanceDiffusionAgent. If you use Boost
+ublas in other code, it may be a good idea to at least temporarily
+unset NDEBUG. Also if the Boost assert.h is used it will be necessary
+to unset NDEBUG. Boost ublas is intended to respond to a specific 
+BOOST_UBLAS_NDEBUG, however this is not available as of the current
+Ubuntu standard version (1.34).
 
--Wno-deprecated is currently enabled by default to avoid a number of warnings
-regarding hash_map being deprecated (because the alternative is still
-experimental!)
+-Wno-deprecated is currently enabled by default to avoid a number of
+warnings regarding hash_map being deprecated (because the alternative
+is still experimental!)
+
 
