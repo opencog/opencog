@@ -216,7 +216,8 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     //link lookup
     Handle lhs = tmp.front();
     HandleSeq children;
-    foreach(sib_it sib, it) {
+	
+    for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
         children.push_back(rec_lookup(as, pre_it(sib), self_id, owner_id));
         if (children.back() == Handle::UNDEFINED) {
             return Handle::UNDEFINED;
