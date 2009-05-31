@@ -25,13 +25,16 @@
  *  Predavese.cpp: Predavese utility functions and support classes.
  */
 
+
+#include <opencog/util/misc.h>
+
 #include "PredaveseStdafx.h"
 #include "Predavese.h"
 #include "PredaveseActions.h"
 #include "PredaveseParser.h"
 #include "PredaveseDefinitions.h"
 
-#include <opencog/util/misc.h>
+
 
 using namespace std;
 

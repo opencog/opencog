@@ -21,17 +21,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
 #include <fstream>
 #include <opencog/util/files.h>
-#include "PredaveseStdafx.h"
-#include "Predavese.h"
-#include "PredaveseParser.h"
-#include "PredaveseDefinitions.h"
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/PorterStemmer.h>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+
+#include "PredaveseStdafx.h"
+#include "Predavese.h"
+#include "PredaveseParser.h"
+#include "PredaveseDefinitions.h"
+
 
 #define ACCEPT_GENERIC_PET_COMMANDS 1
 #define ACCEPT_DEVELOPER_META_COMMANDS 1
