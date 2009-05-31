@@ -60,7 +60,7 @@ private:
 
 protected:
     /** Called from the socket system. Must be thread safe! Use this if the commands are carried out immediately (no queue). */
-    virtual void PerformCommand(shared_ptr<Command> sc) = 0;
+    virtual void PerformCommand(boost::shared_ptr<Command> sc) = 0;
 
 public:
     static SimServer* Get();
@@ -81,19 +81,19 @@ public:
     virtual Property*    findObjectFromRoot (std::string s) = 0;
 
     /** Get agent by index */
-    virtual shared_ptr<CSAgent> GetAgent(int index) const = 0;
+    virtual boost::shared_ptr<CSAgent> GetAgent(int index) const = 0;
 
     /** Get demon by index */
-    virtual shared_ptr<Demon>   GetDemon(int index) const = 0;
+    virtual boost::shared_ptr<Demon>   GetDemon(int index) const = 0;
 
     /** Get demon by port */
-    virtual shared_ptr<Demon>   GetDemonByPort(int port) const = 0;
+    virtual boost::shared_ptr<Demon>   GetDemonByPort(int port) const = 0;
 
     /** Create a new agent. \param material The CS name of the texture (eg. 'wood'). */
-    virtual shared_ptr<CSAgent> NewAgent (csRef<iMeshWrapper> mesh_wrap, float x, float y, float z, ServerSocket* socket) = 0;
+    virtual boost::shared_ptr<CSAgent> NewAgent (csRef<iMeshWrapper> mesh_wrap, float x, float y, float z, ServerSocket* socket) = 0;
 
     /** Create a new demon. */
-    virtual shared_ptr<Demon>   NewDemon (std::string nick, float x, float y, float z, ServerSocket* socket = NULL) = 0;
+    virtual boost::shared_ptr<Demon>   NewDemon (std::string nick, float x, float y, float z, ServerSocket* socket = NULL) = 0;
     /** Delete a demon or an agent. */
     virtual void     DeleteDemon (std::string name) = 0;
     /** Delete a demon or an agent. */
@@ -110,12 +110,12 @@ public:
     /** Called from CSbox's SetupFrame method */
     virtual void OnIdleEvent () = 0;
     /** Called from the socket system. Must be thread safe! Use this if the commands will be performed from OnIdleEvent. */
-    virtual void EnqueueCommand (shared_ptr<Command> sc) = 0;
+    virtual void EnqueueCommand (boost::shared_ptr<Command> sc) = 0;
     /**
      * Enqueue new commands generated from a special command in a high priority queue,
      * which should be processed before any other command in common queue.
      */
-    virtual void EnqueueHighPriorityCommand (shared_ptr<Command> sc) = 0;
+    virtual void EnqueueHighPriorityCommand (boost::shared_ptr<Command> sc) = 0;
 
     friend class LocalScriptWorld;
     friend class MapWorld;
@@ -139,7 +139,7 @@ struct PosListener : public Listener {
     PosListener (LocalObj3D &_obj, LocalServer &_server);
 
     void OnUpdate  (const void*);
-    void BounceAll (set<string>& non_bouncable);
+    void BounceAll (std::set<std::string>& non_bouncable);
 };
 
 //------------------------------------------------------------------------------------------------------------
@@ -150,13 +150,13 @@ class LocalServer : public SimServer    //, public CollisionSystem
 {
 protected:
     CST* cs;
-    set<shared_ptr<CSAgent> >  agents;
-    set<shared_ptr<Demon> >    demons;
+    std::set<boost::shared_ptr<CSAgent> >  agents;
+    std::set<boost::shared_ptr<Demon> >    demons;
 
     boost::mutex socket_lock_provider;
 
-    queue< shared_ptr<Command> > socketCommands;
-    queue< shared_ptr<Command> > highPrioritySocketCommands;
+    std::queue< boost::shared_ptr<Command> > socketCommands;
+    std::queue< boost::shared_ptr<Command> > highPrioritySocketCommands;
 
     bool initialized;
     void Init();
@@ -166,7 +166,7 @@ protected:
      Must be thread safe! */
 
     void    DequeueCommands();
-    virtual void PerformCommand(shared_ptr<Command> sc);
+    virtual void PerformCommand(boost::shared_ptr<Command> sc);
 
 public:
     LocalServer();
@@ -175,11 +175,11 @@ public:
     boost::mutex& AcquireLock();
 
     bool     ResetWorld(bool hard = true);
-    shared_ptr<CSAgent> GetAgent  (int index) const;
-    shared_ptr<Demon>   GetDemon  (int index) const;
-    shared_ptr<Demon>   GetDemonByPort  (int port) const;
-    shared_ptr<CSAgent> NewAgent  (shared_ptr<iMeshWrapper> mesh_wrap, float x, float y, float z, ServerSocket* socket = NULL);
-    shared_ptr<Demon>  NewDemon  (std::string nick, float x, float y, float z, ServerSocket* socket = NULL);
+    boost::shared_ptr<CSAgent> GetAgent  (int index) const;
+    boost::shared_ptr<Demon>   GetDemon  (int index) const;
+    boost::shared_ptr<Demon>   GetDemonByPort  (int port) const;
+    boost::shared_ptr<CSAgent> NewAgent  (boost::shared_ptr<iMeshWrapper> mesh_wrap, float x, float y, float z, ServerSocket* socket = NULL);
+    boost::shared_ptr<Demon>  NewDemon  (std::string nick, float x, float y, float z, ServerSocket* socket = NULL);
 
     void  DeleteDemon (std::string name);
     void    DeleteDemonByPort (int port);
@@ -191,8 +191,8 @@ public:
     bool ConnectToWorld     ();
     bool DisconnectFromWorld();
     void OnIdleEvent  ();
-    void EnqueueCommand  (shared_ptr<Command> sc);
-    void EnqueueHighPriorityCommand (shared_ptr<Command> sc);
+    void EnqueueCommand  (boost::shared_ptr<Command> sc);
+    void EnqueueHighPriorityCommand (boost::shared_ptr<Command> sc);
 
     static bool  UpdatePosition( double  dx, double  dy, double  dz, iMeshWrapper*  target);
 

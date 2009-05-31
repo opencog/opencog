@@ -28,6 +28,10 @@
 #include "simcommon.h"
 #include "remoteobject.h"
 
+using std::map;
+using std::set;
+using std::string;
+
 //------------------------------------------------------------------------------------------------------------
 RemoteObject::RemoteObject (bool _liberal) : liberal(_liberal)
 { }
@@ -130,7 +134,7 @@ void RemoteObject::AddValidValue (const nocase_string property, const nocase_str
 }
 
 //------------------------------------------------------------------------------------------------------------
-void RemoteObject::SetPropertyListener (const nocase_string property, shared_ptr<Listener> listener) {
+void RemoteObject::SetPropertyListener (const nocase_string property, boost::shared_ptr<Listener> listener) {
 	listeners[toupper(property)] = listener;
 }
 

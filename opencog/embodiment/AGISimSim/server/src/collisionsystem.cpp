@@ -32,6 +32,8 @@
 #include "CSagent.h"
 
 using namespace std;
+using boost::shared_ptr;
+
 
 #if CRYSTAL
 #include "CSserver.h"

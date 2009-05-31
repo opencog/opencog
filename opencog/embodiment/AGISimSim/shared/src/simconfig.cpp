@@ -29,6 +29,8 @@
 #include "simconfig.h"
 #include "XMLNode.h"
 
+using std::string;
+
 //------------------------------------------------------------------------------------------------------------
 std::map<std::string, int> Config::GetInt() {
 	return intconfig;

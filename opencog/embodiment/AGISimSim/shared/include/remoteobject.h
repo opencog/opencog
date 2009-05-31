@@ -25,6 +25,8 @@
 #ifndef REMOTE_OBJECT_H
 #define REMOTE_OBJECT_H
 
+#include <boost/shared_ptr.hpp>
+
 //class Listener;
 struct Listener;
 
@@ -37,11 +39,11 @@ struct Listener;
 class RemoteObject
 {
 protected:
-    map<nocase_string, nocase_string>         properties;
-    map<nocase_string, set<nocase_string> >    validValues;
-    map<nocase_string, shared_ptr<Listener> >  listeners;
-    set<nocase_string>             privateSetProperties;
-    set<nocase_string>                        privateGetProperties;
+    std::map<nocase_string, nocase_string>         properties;
+    std::map<nocase_string, std::set<nocase_string> >    validValues;
+    std::map<nocase_string, boost::shared_ptr<Listener> >  listeners;
+    std::set<nocase_string>             privateSetProperties;
+    std::set<nocase_string>                        privateGetProperties;
     bool liberal;
 public:
     /** @param liberal If true, the oject does not check for the validity of the inserted property values. */
@@ -74,7 +76,7 @@ public:
     @param property The name of the property variable
     @param value The set of valid values of the variable */
     void DefineValidValues(const nocase_string property,
-                           const set<nocase_string> value);
+                           const std::set<nocase_string> value);
 
     /** Add a single allowed value for the given property.
     NOTE: Does not <i>set</i> the value!
@@ -86,7 +88,7 @@ public:
 
     /** Set an object to be called whenever the property value changes. */
     void SetPropertyListener(const nocase_string property,
-                             shared_ptr<Listener> listener);
+                             boost::shared_ptr<Listener> listener);
 
     /** Disable the setting of the value of @param property outside the subclass */
     void MakePrivateSet(const nocase_string property);
@@ -95,10 +97,10 @@ public:
     void MakePrivateGet(const nocase_string property);
 
     /** Print and return a dump of the stored variable values */
-    string PrintList() const;
+    std::string PrintList() const;
 
     /** Return an XML dump of the stored variable values */
-    string AsXML() const;
+    std::string AsXML() const;
 };
 
 #endif

@@ -98,8 +98,8 @@ protected:
     typedef std::map<std::string, Command* > commap;
 
     commap commands;
-    bool   SendMsg  (string msg);
-    bool   SendError(string msg);
+    bool   SendMsg  (std::string msg);
+    bool   SendError(std::string msg);
 public:
     ServerSocket(ISocketHandler& );
     ~ServerSocket();
@@ -146,8 +146,8 @@ class SocketManager : public Singleton<SocketManager>
 protected:
     bool running;
 public:
-    set<int>    ports;
-    set<Socket*>  sockets;
+    std::set<int>    ports;
+    std::set<Socket*>  sockets;
     boost::mutex  lock_provider;
     boost::condition  condition_provider;
 
@@ -159,8 +159,8 @@ public:
 
     void Register   (Socket* socket, bool exist = true);
     bool IsRegistered (Socket* socket);
-    bool SendMsg   (Socket* socket, string msg);
-    bool SendError    (Socket* socket, string msg);
+    bool SendMsg   (Socket* socket, std::string msg);
+    bool SendError    (Socket* socket, std::string msg);
 
     /** Delete all queued messages in all sockets */
     void ClearAll();

@@ -52,20 +52,20 @@ public:
 };
 
 //------------------------------------------------------------------------------------------------------------
-struct less_mprofile : public binary_function<mprofile, mprofile, bool> { //!!! was ist das ???
+struct less_mprofile : public std::binary_function<mprofile, mprofile, bool> { //!!! was ist das ???
     bool operator()(const mprofile& oa, const mprofile& ob) const;
 };
 
-typedef map <mprofile, WorldObjectProperty, less_mprofile>  ProfileMap;
-typedef map <std::string, WorldObjectProperty>       PropertyMap;
+typedef std::map <mprofile, WorldObjectProperty, less_mprofile>  ProfileMap;
+typedef std::map <std::string, WorldObjectProperty>       PropertyMap;
 
 //------------------------------------------------------------------------------------------------------------
 struct CSObject {
     CSObject() {}
-    CSObject(string _label, string _meshtype, float _volume, csVector3 _startpos);
+    CSObject(std::string _label, std::string _meshtype, float _volume, csVector3 _startpos);
 
-    string     label;
-    string     meshtype;
+    std::string     label;
+    std::string     meshtype;
     float      volume;
     csVector3  startpos;
     double     phi;
@@ -83,8 +83,8 @@ struct SimWorld : public Singleton<SimWorld> {
 #endif
 protected:
     static ProfileMap  reg;
-    set<std::string>   movablenames;
-    map<std::string, CSObject>  objs;
+    std::set<std::string>   movablenames;
+    std::map<std::string, CSObject>  objs;
 
 public:
     virtual ~SimWorld();
@@ -114,7 +114,7 @@ public:
     void AddMovableInfo(const CSObject& obj);
 
     //void AddMovableInfo(std::string meshname, float radius);
-    set<std::string>  GetMovableNames() const;
+    std::set<std::string>  GetMovableNames() const;
     CSObject       GetMovable (std::string label) const;
     bool     IsMovable  (std::string label) const;
     float      GetRadius  (std::string s);

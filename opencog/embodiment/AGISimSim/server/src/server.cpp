@@ -80,6 +80,11 @@ Do not distribute.
     #include <sys/timeb.h>
 #endif
 
+using boost::shared_ptr;
+using std::string;
+using std::set;
+using std::map;
+
 long  lastflush = -1;
 long  wasted    =  0;
 

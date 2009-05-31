@@ -47,6 +47,10 @@ Do not distribute.
 #endif
 #define PI (M_PI_2*2)
 
+using boost::shared_ptr;
+using std::string;
+using std::map;
+
 /* NOTE: Dynamic movement is not supported, though there are some fragments
    of partial support, enabled depending on DYNAMIC_MOVEMENT preprocessor var. */
 

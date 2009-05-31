@@ -42,6 +42,10 @@ Do not distribute.
 #include "XMLNode.h"
 #include "simworld.h"
 
+using std::string;
+using std::map;
+using std::set;
+
 ProfileMap  SimWorld::reg;
 
 //------------------------------------------------------------------------------------------------------------------

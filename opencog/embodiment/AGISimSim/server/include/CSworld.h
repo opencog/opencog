@@ -45,7 +45,7 @@ class CSWorld : public CollisionSystem
 protected:
     // map<string, csVector3> object_positions;
     csRef<iMeshObjectFactory>  ball_factory;
-    set<string>       inertObjects;
+    std::set<std::string>       inertObjects;
     iSector*        room;
     std::map<const char*, const char*> liftedObjMap;
     std::map<const char*, float> originalLiftedHeightMap;
@@ -170,21 +170,21 @@ public:
     iSector* GetRoom () const;
 
     /** Load the color/material/texture names from texture.def */
-    map<string, string> LoadTextureFileNames () const;
+    std::map<std::string, std::string> LoadTextureFileNames () const;
 
     /** Get the next free mesh name based on padding index number to the
     end of the argument. */
-    string GetFreeName( string base);
+    std::string GetFreeName( std::string base);
 
     /** Create a neutral view to this sector */
     csRef<iView> CreateView (csVector3 pos);
 
     /** Tell the collision system to recognize the object with the given
     name as a static bouncer (ie. wall) */
-    void RegisterInert (string name);
+    void RegisterInert (std::string name);
 
-    bool IsInert(string name) const;
-    set<string> GetInertObjects() const;
+    bool IsInert(std::string name) const;
+    std::set<std::string> GetInertObjects() const;
 
     /** The initial creation of the CS meshes of the world. Varies for each implementation */
     virtual bool MakeWorld() = 0;
@@ -203,7 +203,7 @@ struct MapWorld : public CSWorld {
  \brief Superclass of worlds at least partially hard-coded.*/
 //------------------------------------------------------------------------------------------------------------
 struct HardWorld : public CSWorld {
-    void MakeWalls (string name, csVector3 corner1, csVector3 corner2);
+    void MakeWalls (std::string name, csVector3 corner1, csVector3 corner2);
     bool MakeWorld ();
 };
 

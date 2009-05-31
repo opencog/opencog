@@ -48,9 +48,9 @@ struct Sensation : public RemoteObject {
 //------------------------------------------------------------------------------------------------------------
 struct CustomSensation : public Sensation {
     CustomSensation () {}
-    CustomSensation (string _name, int _i, int _q)
+    CustomSensation (std::string _name, int _i, int _q)
             : Sensation(_q, _i), name(_name) {}
-    string name;
+    std::string name;
     std::string AsXML() const;
 };
 
@@ -147,11 +147,11 @@ struct Proprioception : public RemoteObject { //public iXMLvalue
 struct WorldObjectProperty : public RemoteObject {
     WorldObjectProperty();
 
-    vector<Sound>  sound;
+    std::vector<Sound>  sound;
     Smell      smell;
     Taste      taste;
 
-    string AsXML() const;
+    std::string AsXML() const;
 };
 
 //------------------------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ struct MapInfoObjectProperty : public RemoteObject {
     float rx, ry, rz;
     bool edible;
     bool drinkable;
-    string AsXML() const;
+    std::string AsXML() const;
 };
 
 #endif

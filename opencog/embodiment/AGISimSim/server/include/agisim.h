@@ -46,7 +46,7 @@ public:
     void SetStatusText   (std::string s);
     void SetEnergy    (int energy);
     void LogMessage    (std::string data, std::string type);
-    void OnSetupFrameBegin  (shared_ptr<unsigned char>& pixelsrc, int& w, int& h) { }
+    void OnSetupFrameBegin  (boost::shared_ptr<unsigned char>& pixelsrc, int& w, int& h) { }
     void OnSetupFrameEnd  () { } //gibt es einen Grund für die Klammern anstatt einfach einen ";" zu setzten ?
     void PleaseUpdateFrame   ();
     void PleaseSkipUpdateFrame ();

@@ -32,8 +32,8 @@
 //------------------------------------------------------------------------------------------------------------
 struct XMLtag {
     nocase_string       name;
-    map<nocase_string, nocase_string>  arguments;
-    string         textcontent;
+    std::map<nocase_string, nocase_string>  arguments;
+    std::string         textcontent;
 };
 
 //------------------------------------------------------------------------------------------------------------
@@ -54,16 +54,16 @@ struct XMLtag {
 class XMLNode
 {
 public:
-    typedef vector<XMLNode*> ChildNodes;
+    typedef std::vector<XMLNode*> ChildNodes;
 
     /** The typical way of creating an XMLNode. @param data The XML string. */
-    XMLNode (const string& data, XMLNode* _super = NULL);
+    XMLNode (const std::string& data, XMLNode* _super = NULL);
     XMLNode (char* data, XMLNode* _super, int size);
     XMLNode (const XMLNode& rhs);
     XMLNode ();
     ~XMLNode();
 
-    void   SetName   (string n);
+    void   SetName   (std::string n);
     XMLNode*    Super     ();
     ChildNodes  StealSub();
     ChildNodes& UnSafeSub ();
@@ -73,19 +73,19 @@ public:
     /** Returns the name and content of this XML node. */
     const XMLtag&    TagData ();
     bool           Add     (const XMLNode& node);
-    string         AsText  ();
+    std::string         AsText  ();
     bool      ok;
 private:
     int      bytesconsumed;
     XMLtag   tagdata;
     XMLNode* super;
-    vector<XMLNode*> sub;
+    std::vector<XMLNode*> sub;
 
-    static int   ExpandLevel(const string&  _source,
+    static int   ExpandLevel(const std::string&  _source,
                              XMLtag&   _contents,
-                             vector<XMLNode*>& _sub,
+                             std::vector<XMLNode*>& _sub,
                              XMLNode*   _super); //true = meaninful expansion was done.
-    static bool  ExpandArgument (char** ptr, map<nocase_string, nocase_string>& arg, bool* ends);
+    static bool  ExpandArgument (char** ptr, std::map<nocase_string, nocase_string>& arg, bool* ends);
     static char* nextc          (char **ptr);
 };
 
@@ -125,7 +125,7 @@ struct FloatXMLValue : XMLvalue<float> {
     std::string Value2String () const;
 };
 
-void CleanSpace    (string& s);
+void CleanSpace    (std::string& s);
 
 #define XMLVALIDATE(node, nodename, badnode_handling) \
     if ((node).TagData().name != (nodename))  \

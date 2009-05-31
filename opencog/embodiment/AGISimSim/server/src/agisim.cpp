@@ -304,7 +304,7 @@ puts(".");
 		}
 		//Alternative way would be:
 		//cs->RunLoop();
-	} catch(string s) { puts(s.c_str()); }
+	} catch(std::string s) { puts(s.c_str()); }
 	catch(...) { puts("Unknown exception in run loop."); }
 
 	return 0;

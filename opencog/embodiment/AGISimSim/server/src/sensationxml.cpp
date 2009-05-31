@@ -43,6 +43,7 @@ Do not distribute.
 #include "sensors.h"
 #include "world_vocabulary.h"
 
+using std::string;
 
 //---------------------------------------------------------------------------------------------------------------
 std::string  CustomSensation::AsXML() const

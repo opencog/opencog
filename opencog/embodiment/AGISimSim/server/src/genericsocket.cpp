@@ -40,6 +40,9 @@
 #include <sys\timeb.h>
 #endif
 
+using std::string;
+using std::set;
+
 timeval last_com;
 timeval last_response;
 long    total_process_time = 0;

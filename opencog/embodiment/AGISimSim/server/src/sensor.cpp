@@ -46,6 +46,10 @@ Do not distribute.
  #include <wx/image.h>
 #endif
 
+using boost::shared_ptr;
+using std::string;
+using std::map;
+
 const nocase_string  Sensor::MODE    = "MODE";
 const nocase_string  Sensor::POWERON = "POWERON";
 
@@ -223,7 +227,7 @@ try {
 		} //for yi
 	} //for xi
 
-} catch(exception e) { puts(e.what()); }
+} catch(std::exception e) { puts(e.what()); }
 catch(string s) { puts(s.c_str()); }
 catch(...) { LOG("OVSensor",1, "Exception in GVO"); }
 

@@ -62,8 +62,8 @@ public:
 
     virtual ~ReportProvider() {}
 
-    virtual void SendMsg   (string msg) = 0;
-    virtual void SendError (string msg) = 0;
+    virtual void SendMsg   (std::string msg) = 0;
+    virtual void SendError (std::string msg) = 0;
 
     /** Set the name of the source of the reports, eg. the command name. */
     void SetName(std::string _name)   {
@@ -83,13 +83,13 @@ public:
             : ReportProvider(_socket) {
     }
 
-    virtual void  SendMsg( string msg )  {
+    virtual void  SendMsg( std::string msg )  {
         TheSocketManager.SendMsg ( socket, msg );
         TheSocketManager.FlushAll();
         LOG( name, 3, msg );
     }
 
-    virtual void  SendError( string msg ) {
+    virtual void  SendError( std::string msg ) {
         TheSocketManager.SendError(socket, msg);
         TheSocketManager.FlushAll ();
         LOG( name, 2, msg );

@@ -109,7 +109,7 @@ protected:
     void AddNewSensation(std::string new_sense_data);
 
 public:
-    Sensor  (Demon* _demon, string _sense_name, bool updateOnFirstCall = true);
+    Sensor  (Demon* _demon, std::string _sense_name, bool updateOnFirstCall = true);
     virtual ~Sensor ();
 
     void AddTics     (unsigned long ticks);
@@ -292,7 +292,7 @@ public:
 class TasteSensor : public Sensor
 {
 protected:
-    queue<Taste> tastes;
+    std::queue<Taste> tastes;
 
 public:
     TasteSensor (Demon* _demon, bool updateOnFirstCall = true);

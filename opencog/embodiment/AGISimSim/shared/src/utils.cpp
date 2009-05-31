@@ -29,6 +29,9 @@
 #include "utils.h"
 #include "simconfig.h"
 
+using std::string;
+using std::vector;
+
 #ifdef WIN32
 #include <sys/timeb.h>
 //------------------------------------------------------------------------------------------------------------

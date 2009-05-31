@@ -59,7 +59,6 @@ unsigned long getElapsedMillis();
 #include <list>
 #include <set>
 
-using namespace std;
 
 typedef unsigned char byte;
 typedef unsigned short int word;
@@ -89,19 +88,19 @@ char Isox(char s);
  *  * Returns a string from the given argument by using the << operator
  *   */
 template <typename T>
-string toString(T data)
+std::string toString(T data)
 {
-    ostringstream oss;
-    string result;
+	std::ostringstream oss;
+	std::string result;
     oss << data;
     return oss.str();
 }
 
 /** Converts a string to upper case by return value */
-string toupper(string k);
+std::string toupper(std::string k);
 
 /** Load the contents of a textfile \param fname to \param dest. */
-bool LoadTextFile(const string fname, string& dest);
+bool LoadTextFile(const std::string fname, std::string& dest);
 
 /** A function to create XML elements.
  \param elem The element's name (eg. "xml" in "<xml> text <xml>")
@@ -113,33 +112,33 @@ std::string XMLembed (const std::string &elem, const std::string &pcdata);
 //------------------------------------------------------------------------------------------------------------
 /** Tokenize a string and produce a vector list of items */
 //------------------------------------------------------------------------------------------------------------
-class StringTokenizer : public vector<string>
+class StringTokenizer : public std::vector<std::string>
 {
 public:
-    StringTokenizer (const string &rStr, const string &rDelimiters = " ,\n");
-    vector<string> WithoutEmpty() const;
+    StringTokenizer (const std::string &rStr, const std::string &rDelimiters = " ,\n");
+    std::vector<std::string> WithoutEmpty() const;
 };
 
 //------------------------------------------------------------------------------------------------------------
 /** @class nocase_string
  \brief An STL string class which ignores the case. */
 //------------------------------------------------------------------------------------------------------------
-struct nocase_string : public string {
+struct nocase_string : public std::string {
 public:
     nocase_string (const char* str);
     nocase_string (const nocase_string& str);
-    nocase_string (const string& str);
+    nocase_string (const std::string& str);
     nocase_string ();
 
     bool operator <  (const char* rhs);
     bool operator <  (const nocase_string& rhs);
-    bool operator <  (const string& rhs);
+    bool operator <  (const std::string& rhs);
     bool operator == (const char* rhs);
     bool operator == (const nocase_string& rhs);
-    bool operator == (const string& rhs);
+    bool operator == (const std::string& rhs);
     bool operator != (const char* rhs);
     bool operator != (const nocase_string& rhs);
-    bool operator != (const string& rhs);
+    bool operator != (const std::string& rhs);
     void operator += (nocase_string s);
     nocase_string operator+ (nocase_string s);
 };

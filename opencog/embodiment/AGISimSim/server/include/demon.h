@@ -49,7 +49,7 @@ protected:
     ServerSocket*  socket;
     Obj3D*      body;
     int      port;
-    string      nick;
+    std::string      nick;
     csVector3     startpos;
 
     /** The way of storing sense data for this observer. */
@@ -57,7 +57,7 @@ protected:
     csRef<iView>         view;
 #endif
     std::queue<std::string>      sensationQueue;
-    std::map<std::string, shared_ptr<Sensor> >  senses;
+    std::map<std::string, boost::shared_ptr<Sensor> >  senses;
 
     /** Store this for the purposes of 'soft reset' */
     mutable boost::mutex                 lock_provider;
@@ -73,11 +73,11 @@ public:
     /** Insertion of a sensor into this demon
      \param __sname Sensor's exact case-insensitive name
      \param __sobject The sensor itself. */
-    void InsertSense(string __sname, shared_ptr<Sensor> __sobject);
+    void InsertSense(std::string __sname, boost::shared_ptr<Sensor> __sobject);
 
     /** Removal of a sensor from this demon \param __sname Sensor's exact case-insensitive name */
-    void RemoveSense( string __sname);
-    std::map<std::string, shared_ptr<Sensor> > GetSenses() const;
+    void RemoveSense( std::string __sname);
+    std::map<std::string, boost::shared_ptr<Sensor> > GetSenses() const;
 
     virtual int initialise (std::string _nick);
     Obj3D*      getRepresentation() const;
@@ -89,7 +89,7 @@ public:
 
     /** Send the last data packet of each sensor. Because only changes
     are normally reported, this data must sometimes be queried explicitly. */
-    void ResendSensorData (string sensorName = "all");
+    void ResendSensorData (std::string sensorName = "all");
 
     /** CustomSensations are added in a manner different from other
     sensations, because there is no specific "source" for them. */
@@ -116,7 +116,7 @@ public:
     void SetPort (int _port);
     int  GetPort () const;
 
-    string GetName() const;
+    std::string GetName() const;
 
     friend class Sensor;
     friend class SelfSensor;

@@ -62,6 +62,12 @@ Do not distribute.
 	#include <sys/timeb.h>
 #endif
 
+using boost::shared_ptr;
+using std::map;
+using std::set;
+using std::string;
+using std::vector;
+
 	typedef unsigned int  uint;
 
 //----------------------------------------------------------------------------------------------------------------

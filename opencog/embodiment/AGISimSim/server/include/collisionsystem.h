@@ -36,17 +36,17 @@ class ServerSocket;
 class CollisionSystem
 {
 protected:
-    map<iMeshWrapper*, csColliderWrapper*>  colliders;
-    map<ServerSocket*, set<string> >   poslisteners;
+    std::map<iMeshWrapper*, csColliderWrapper*>  colliders;
+    std::map<ServerSocket*, std::set<std::string> >   poslisteners;
     CollisionSystem () {}
     void ClosestColliders (csCollisionPair *pairs, int N, csCollisionPair& closest);
 public:
     virtual ~CollisionSystem();
     bool CreateColliders ();
-    bool CheckCollisions (iMeshWrapper* inert, const set<string>& non_bouncable, set<string>& bounce_archive);
+    bool CheckCollisions (iMeshWrapper* inert, const std::set<std::string>& non_bouncable, std::set<std::string>& bounce_archive);
     bool InitCollider    (iMeshWrapper* mesh);
 
-    void ListenObjectPosition(ServerSocket* listener, string objname);
+    void ListenObjectPosition(ServerSocket* listener, std::string objname);
 
     friend class PosListener;
 };

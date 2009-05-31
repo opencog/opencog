@@ -41,7 +41,6 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
-using namespace boost;
 
 #include "utils.h"
 #include "log.h"

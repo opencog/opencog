@@ -71,7 +71,7 @@ private:
 
     /** Set a variable to a given value.
      Should only be used from class CommandConfig */
-    void InsertVariable(string name, string value);
+    void InsertVariable(std::string name, std::string value);
 public:
     /** Initialize the defaults and load in the config file. */
     bool Create();

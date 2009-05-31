@@ -34,7 +34,7 @@ TARGET_LINK_LIBRARIES(AGISimSimServer
     pthread 
     ssl 
     crypto 
-    boost_thread 
+    ${Boost_THREAD_LIBRARY}
     dl
     ${CSOCKETS_LIBRARIES}
 )

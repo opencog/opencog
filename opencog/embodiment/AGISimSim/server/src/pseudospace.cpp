@@ -37,6 +37,11 @@ Do not distribute.
 #include "simworld.h"
 #include "CSagent.h"
 
+using boost::shared_ptr;
+using std::string;
+using std::map;
+using std::set;
+
 iGUIProvider*	CSpseudo::GUIprovider;
 CSproxy*        CSproxy::implementation = NULL;
 

@@ -25,6 +25,10 @@
 #include "utils.h"
 #include "XMLNode.h"
 
+using std::string;
+using std::map;
+using std::vector;
+
 //------------------------------------------------------------------------------------------------------------
 void CleanSpace (string& s) {
 	const char *str = s.c_str();

@@ -66,12 +66,12 @@ public:
 
 class iObject
 {
-    string name;
+    std::string name;
 public:
     const char* GetName() const {
         return name.c_str();
     }
-    void SetName(string _name) {
+    void SetName(std::string _name) {
         name = _name;
     }
 };
@@ -113,7 +113,7 @@ class iMeshWrapper
     csRef<iMovable> movable;
     csRef<iObject> obj;
 public:
-    string material;
+    std::string material;
     csVector3 dim;
 
     void GetWorldBoundingBox(csBox3& csdim) {
@@ -147,7 +147,7 @@ class iMeshList
     std:: map<std::string, csRef<iMeshWrapper> > meshes;
     //std:: map<iMeshWrapper*, std::string> mptr2name;
 public:
-    iMeshWrapper* FindByName(string name) {
+    iMeshWrapper* FindByName(std::string name) {
         return STLhas(meshes, name) ? meshes[name].get() : NULL;
     }
     int GetCount() const {
@@ -155,7 +155,7 @@ public:
     }
     iMeshWrapper* Get(int i) {
         int c = 0;
-        map<string, csRef<iMeshWrapper> >::iterator it;
+        std::map<std::string, csRef<iMeshWrapper> >::iterator it;
         for (it = meshes.begin(); it != meshes.end(); it++, c++)
             if (c == i)
                 break;
@@ -200,7 +200,7 @@ struct xy {
     }
 };
 
-struct lessxy : public binary_function<xy, xy, bool> {
+struct lessxy : public std::binary_function<xy, xy, bool> {
     bool operator()(const xy& lhs, const xy& rhs) const {
         return lhs.x < rhs.x || (lhs.x == rhs.x && lhs.y < rhs.y);
     }
@@ -215,9 +215,9 @@ class iEngine : public Singleton<iEngine>
     csVector3 amb;
     iLightList* ill;
 
-    set<iMovable*>** blocks;
-    map<iMovable*, set<xy, lessxy> > m2blocks;
-    map<iMovable*, map<iMovable*, set<xy, lessxy> > > overlap;
+    std::set<iMovable*>** blocks;
+    std::map<iMovable*, std::set<xy, lessxy> > m2blocks;
+    std::map<iMovable*, std::map<iMovable*, std::set<xy, lessxy> > > overlap;
     float dx, dy;
 
     int discrete_w, discrete_h;
@@ -230,10 +230,10 @@ public:
         return meshes.get();
     }
     void UpdateMove(iMovable* m);
-    iMeshWrapper* FindMeshObject(string name) {
+    iMeshWrapper* FindMeshObject(std::string name) {
         return meshes->FindByName(name);
     }
-    csRef<iMeshWrapper> CreateMeshWrapper(string material, string name, csVector3 pos, csVector3 dim) {
+    csRef<iMeshWrapper> CreateMeshWrapper(std::string material, std::string name, csVector3 pos, csVector3 dim) {
         csRef<iMeshWrapper> mesh(new iMeshWrapper());
         mesh->QueryObject()->SetName(name);
         mesh->material = material;
@@ -258,9 +258,9 @@ public:
     }
 
     /// Ari's extras
-    map< int, map<int, meshData> > GetVisibleObjects(float sx, float ex);
+    std::map< int, std::map<int, meshData> > GetVisibleObjects(float sx, float ex);
 // map<int, map<int, iMeshWrapper*> > VisibleObjects(csVector3 orig, float sphi);
-    map< int, map<int, meshData> > VisibleObjects(csVector3 orig, float sphi);
+    std::map< int, std::map<int, meshData> > VisibleObjects(csVector3 orig, float sphi);
     void MeshDump();
     void graphDump() const;
 
@@ -349,7 +349,7 @@ public:
     /** The GUI must give an instance of wxPanel to CS via this method.  \param panel The panel instance. */
     void Set2DPanel(void* panel) {}
 
-    map< string, meshData >  GetMovableVisibleObjects( CSAgent*  csagent1 );
+    std::map< std::string, meshData >  GetMovableVisibleObjects( CSAgent*  csagent1 );
 
     friend class CSproxy;
     friend class LocalServer;

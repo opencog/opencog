@@ -53,6 +53,9 @@ Do not distribute.
  #include "CSworld.h"
 #endif
 
+using boost::shared_ptr;
+using std::string;
+
 /* Guilty as charged. */
 extern void hacklog(string s, ServerSocket *socket = NULL);
 

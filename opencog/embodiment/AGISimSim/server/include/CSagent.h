@@ -47,7 +47,7 @@ class CSAgent : public Demon
     double    agent_eye_phi, agent_eye_theta;
     Obj3D     *hand;
     csVector3  liftedObjectPos;
-    shared_ptr<meshData>  liftedObject;
+    boost::shared_ptr<meshData>  liftedObject;
 
     csRef<iMeshWrapper> CS_body;
 
@@ -63,9 +63,9 @@ public:
     csRef<iMeshWrapper>   getCSBody  () const;
 
     void  GoTo(double x, double y, double z);
-    bool  Lift(shared_ptr<meshData> object);
+    bool  Lift(boost::shared_ptr<meshData> object);
     bool  Drop();
-    shared_ptr<meshData>  GetLifted() const;
+    boost::shared_ptr<meshData>  GetLifted() const;
     csVector3     GetLiftedObjectPosition() const;
 
     Obj3D* getRepresentation();

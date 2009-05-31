@@ -25,6 +25,8 @@
 #ifndef CSPROXY_H
 #define CSPROXY_H
 
+#include <boost/shared_ptr.hpp>
+
 //------------------------------------------------------------------------------------------------------------
 struct CSstatus {
     std::string cmd_url;
@@ -44,7 +46,7 @@ struct iGUIProvider {
     virtual void SetStatusText (std::string s) = 0;
     virtual void LogMessage (std::string data, std::string type) = 0;
 
-    virtual void OnSetupFrameBegin (shared_ptr<unsigned char>& pixelsrc, int& w, int& h) = 0;
+    virtual void OnSetupFrameBegin (boost::shared_ptr<unsigned char>& pixelsrc, int& w, int& h) = 0;
     virtual void OnSetupFrameEnd () = 0;
 
     /** Hint the CS frame system to update the visible frame ASAP */

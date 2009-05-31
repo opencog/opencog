@@ -51,6 +51,10 @@ Do not distribute.
  #include "CSMeshTool.h"
 #endif
 
+using boost::shared_ptr;
+using std::string;
+using std::set;
+using std::map;
 
 
 void CleanSpace    (string& s);

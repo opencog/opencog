@@ -36,6 +36,8 @@
 #include "serversocket.h"
 */
 
+using boost::shared_ptr;
+using namespace std;
 
 //----------------------------------------------------------------------------------------------------------------
 Command::Command( std::string  _name,  ReportProvider* _reporter)

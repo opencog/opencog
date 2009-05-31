@@ -49,6 +49,8 @@ Do not distribute.
 #else
 #endif
 
+using std::string;
+
 //--------------------------------------------------------------------------------------------------------------
 Sensation::Sensation()  {
 	Set( WQUALITY  , 0 );
