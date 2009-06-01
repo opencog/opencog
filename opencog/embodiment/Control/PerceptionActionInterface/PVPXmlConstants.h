@@ -110,4 +110,10 @@
 #define DONE_ACTION_STATUS       "done"
 #define ERROR_ACTION_STATUS      "error"
 
+// instruction tags
+#define SENTENCE_TYPE                   "sentence"
+#define PARSED_SENTENCE_TYPE            "parsed-sentence"
+#define CONTENT_TYPE_ATTRIBUTE          "content-type"
+#define TARGET_MODE_ATTRIBUTE           "target-mode"
+
 #endif /*PVPXMLCONSTANTS_H_*/

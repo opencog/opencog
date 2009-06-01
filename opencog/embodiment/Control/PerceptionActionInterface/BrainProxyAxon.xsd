@@ -201,17 +201,38 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:element name="instruction" type="pet:PetInstructionType"/>
+    <xsd:element name="instruction"/>
+
+    <xsd:annotation>
+      <xsd:documentation>
+        The text of an instruction can be plain, parsed or any other kind of format.
+        However it must contains a parameter called length to indicate the sized of the
+        given text. e.g.
+        suppose that tag instruction is of type PetInstructionTextType
+        &lt;instruction length="22"&gt;go fetch the blue ball&lt;/instruction&gt;
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="PetInstructionTextType">
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:string">
+          <xsd:attribute name="length" type="xsd:int"/>
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>    
 
     <xsd:complexType name="PetInstructionType">
         <xsd:sequence>
-            <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="sentence" type="pet:PetInstructionTextType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="parsed-sentence" type="pet:PetInstructionTextType" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
         <xsd:attribute name="pet-id" type="xsd:string" use="required"/>   
         <xsd:attribute name="avatar-id" type="xsd:string" use="required"/>       
         <xsd:attribute name="timestamp" type="xsd:dateTime" use="required"/>
+        <!-- describes what kind is that instruction: SPECIFIC_COMMAND, QUESTION, etc.-->
+        <xsd:attribute name="content-type" type="xsd:string" use="required"/> 
+        <!-- this instruction is destinated for what agent operation mode? PLAYING, LEARNING, ANY, etc.-->
+        <xsd:attribute name="target-mode" type="xsd:string" use="required"/>
     </xsd:complexType>
-
 
     <xsd:element name="agent-sensor-info" type="pet:AgentSensorInfoType"/>
 

@@ -34,6 +34,9 @@
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
+
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -986,23 +989,51 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     char* avatarID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
 
-    // getting instruction value
-    char* instruction = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getTextContent());
-    XERCES_CPP_NAMESPACE::XMLString::trim(instruction);
-#if 0
-    // According to XSD, it should come inside a <value> element, as bellow:
-    // <instruction ... >
-    //     <value>Good boy!!</value>
-    // </instruction>
-    // But since we need the text content, the code for extracting the instruction sentence is the same...
-    XERCES_CPP_NAMESPACE::XMLString::transcode("value", tag, PAIUtils::MAX_TAG_LENGTH);
-    XERCES_CPP_NAMESPACE::DOMNodeList * list = element->getElementsByTagName(tag);
+    /// getting content-type atribute value
+    XERCES_CPP_NAMESPACE::XMLString::transcode(CONTENT_TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* contentType = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+
+    /// getting target-mode atribute value
+    XERCES_CPP_NAMESPACE::XMLString::transcode(TARGET_MODE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* targetMode = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
+
+    
+    cassert( TRACE_INFO, strlen(contentType) > 0 );
+    cassert( TRACE_INFO, strlen(targetMode) > 0 );
+
+    /// getting the value of the sentence
+    XERCES_CPP_NAMESPACE::XMLString::transcode(SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XERCES_CPP_NAMESPACE::DOMNodeList *list = element->getElementsByTagName(tag);
     cassert(TRACE_INFO, list->getLength() == 1);
-    XERCES_CPP_NAMESPACE::DOMElement* valueElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
-    char* value = XERCES_CPP_NAMESPACE::XMLString::transcode(valueElement->getTextContent());
-    XERCES_CPP_NAMESPACE::XMLString::trim(value);
-    cassert(TRACE_INFO, !strcmp(instruction, value));
-#endif
+    XERCES_CPP_NAMESPACE::DOMElement* sentenceElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
+    char* sentenceText = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getTextContent());
+    /// getting the sentence length
+    XERCES_CPP_NAMESPACE::XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* length = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getAttribute(tag));    
+    int sentenceLength = atoi( length );
+    XERCES_CPP_NAMESPACE::XMLString::release(&length);
+    cassert( TRACE_INFO, static_cast<int>( strlen( sentenceText) ) == sentenceLength );
+    XERCES_CPP_NAMESPACE::XMLString::trim(sentenceText);
+
+    /// getting the value of the parsed-sentence
+    XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    list = element->getElementsByTagName(tag);
+    cassert(TRACE_INFO, list->getLength( ) == 0 || list->getLength( ) == 1 );
+    char* parsedSentenceText = NULL;
+    int parsedSentenceLength = 0;
+    if ( list->getLength() == 1 ) {
+        XERCES_CPP_NAMESPACE::DOMElement* parsedSentenceElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
+        parsedSentenceText = XERCES_CPP_NAMESPACE::XMLString::transcode(parsedSentenceElement->getTextContent());
+        /// getting the sentence length
+        XERCES_CPP_NAMESPACE::XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+        length = XERCES_CPP_NAMESPACE::XMLString::transcode(parsedSentenceElement->getAttribute(tag));
+        parsedSentenceLength = atoi( length );
+        XERCES_CPP_NAMESPACE::XMLString::release(&length);
+        cassert( TRACE_INFO, static_cast<int>( strlen( parsedSentenceText ) ) == parsedSentenceLength );
+        XERCES_CPP_NAMESPACE::XMLString::trim(parsedSentenceText);
+    } // if
+
+    // TODO: now handle the sentence and the parsed sentence
 
 
     // Add the perceptions into AtomSpace
@@ -1014,7 +1045,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     string sentence = "to:";
     sentence += internalPetId;
     sentence += ": ";
-    sentence += instruction;
+    sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
 
@@ -1047,7 +1078,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     // infer the avatar that is performing the exemplars.
 
     // let predavese parser decide if or not an instruction must be processed
-    predaveseParser->processInstruction(string(instruction), tsValue, internalAvatarId.c_str());
+    predaveseParser->processInstruction(string(sentenceText), tsValue, internalAvatarId.c_str());
 //    } else {
 //        logger().debug("Instruction from a non-owner avatar (%s). So, predavese parser not called for it", internalAvatarId.c_str());
 //    }
@@ -1055,7 +1086,10 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
     XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
     XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
-    XERCES_CPP_NAMESPACE::XMLString::release(&instruction);
+    XERCES_CPP_NAMESPACE::XMLString::release(&contentType);
+    XERCES_CPP_NAMESPACE::XMLString::release(&targetMode);
+    XERCES_CPP_NAMESPACE::XMLString::release(&sentenceText);
+    XERCES_CPP_NAMESPACE::XMLString::release(&parsedSentenceText);
 }
 
 void PAI::processAgentSensorInfo(XERCES_CPP_NAMESPACE::DOMElement * element)
