@@ -35,7 +35,7 @@ public:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	//Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
 	
 	///! Direct production was used here before. @todo Check whether this should be resumed!
 	NO_DIRECT_PRODUCTION;

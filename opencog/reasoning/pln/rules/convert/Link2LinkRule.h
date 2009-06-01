@@ -24,7 +24,7 @@
 
 namespace opencog { namespace pln {
 
-extern std::map<int, string> type2name;
+extern std::map<int, std::string> type2name;
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
 //template<typename FormulaType, Type SRC_LINK, Type DEST_LINK>
@@ -67,7 +67,7 @@ public:
 		return makeSingletonSet(ret);
 	}
 
-	virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
+	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
 	{
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
 
@@ -78,7 +78,7 @@ public:
 		return tvs;
 	}
 
-	virtual meta i2oType(const vector<Vertex>& h) const
+	virtual meta i2oType(const std::vector<Vertex>& h) const
 	{
 		assert(1==h.size());
 

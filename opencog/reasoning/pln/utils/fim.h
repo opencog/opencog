@@ -26,8 +26,6 @@
 #include <set>
 #include <map>
 
-using namespace std;
-
 namespace fim
 {
 /// Use integer patterns
@@ -38,7 +36,7 @@ typedef unsigned int* PAT;
 /// C++ helper structures & functions:
 
 template<int LEN>
-struct lessi : public binary_function<int*, int*, bool>
+struct lessi : public std::binary_function<int*, int*, bool>
 {
 	bool operator()(int* lhs, int* rhs)
 	{

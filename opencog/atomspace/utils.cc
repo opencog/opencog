@@ -331,7 +331,7 @@ bool less_tree_vertex::operator()(const vtree& lhs, const vtree& rhs,
     return false;
 }
 
-bool opencog::LoadTextFile(const string fname, string& dest)
+bool opencog::LoadTextFile(const std::string fname, std::string& dest)
 {
     FILE *f = fopen(fname.c_str(), "rt");
     if (f == NULL) {
@@ -359,7 +359,7 @@ bool opencog::LoadTextFile(const string fname, string& dest)
     return true;
 }
 
-string toupper(string k)
+std::string toupper(std::string k)
 {
     const char* data = k.c_str();
     char buf[1000];
@@ -401,9 +401,9 @@ bool opencog::nocase_equal(const char *s1, const char *s2)
         return (s1[i] == 0 && s2[i] == 0);
 }
 
-nocase_string::nocase_string(const char* str) : string(str) { }
-nocase_string::nocase_string(const nocase_string& str) : string(str.c_str()) { }
-nocase_string::nocase_string(const string& str) : string(str) { }
+nocase_string::nocase_string(const char* str) : std::string(str) { }
+nocase_string::nocase_string(const nocase_string& str) : std::string(str.c_str()) { }
+nocase_string::nocase_string(const std::string& str) : std::string(str) { }
 nocase_string::nocase_string() { }
 
 bool nocase_string::operator <(const char* rhs)
@@ -416,7 +416,7 @@ bool nocase_string::operator <(const nocase_string& rhs)
 	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
 
-bool nocase_string::operator <(const string& rhs)
+bool nocase_string::operator <(const std::string& rhs)
 {
 	return strcasecmp(this->c_str(), rhs.c_str()) < 0;
 }
@@ -431,7 +431,7 @@ bool nocase_string::operator ==(const nocase_string& rhs)
     return strcmp(this->c_str(), rhs.c_str()) == 0;
 }
 
-bool nocase_string::operator ==(const string& rhs)
+bool nocase_string::operator ==(const std::string& rhs)
 {
 	return strcasecmp(this->c_str(), rhs.c_str()) == 0;
 }
@@ -446,35 +446,35 @@ bool nocase_string::operator !=(const nocase_string& rhs)
 	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
 
-bool nocase_string::operator !=(const string& rhs)
+bool nocase_string::operator !=(const std::string& rhs)
 {
 	return strcasecmp(this->c_str(), rhs.c_str()) != 0;
 }
 
 void nocase_string::operator +=(nocase_string s)
 {
-    string::operator+=(s);
+    std::string::operator+=(s);
 }
 
 nocase_string nocase_string::operator+(nocase_string s)
 {
-    return nocase_string(string(*this) + string(s));
+    return nocase_string(std::string(*this) + std::string(s));
 }
 
-StringTokenizer::StringTokenizer(const string &rStr, const string &rDelimiters)
+StringTokenizer::StringTokenizer(const std::string &rStr, const std::string &rDelimiters)
 {
-    string::size_type lastPos(rStr.find_first_not_of(rDelimiters, 0));
-    string::size_type pos(rStr.find_first_of(rDelimiters, lastPos));
-    while (string::npos != pos || string::npos != lastPos) {
+    std::string::size_type lastPos(rStr.find_first_not_of(rDelimiters, 0));
+    std::string::size_type pos(rStr.find_first_of(rDelimiters, lastPos));
+    while (std::string::npos != pos || std::string::npos != lastPos) {
         push_back(rStr.substr(lastPos, pos - lastPos));
         lastPos = rStr.find_first_not_of(rDelimiters, pos);
         pos = rStr.find_first_of(rDelimiters, lastPos);
     }
 }
 
-std::vector<string> StringTokenizer::WithoutEmpty() const
+std::vector<std::string> StringTokenizer::WithoutEmpty() const
 {
-    std::vector<string> ret;
+    std::vector<std::string> ret;
 
     for (unsigned int i = 0; i < this->size(); i++)
         if (!(*this)[i].empty())
@@ -536,7 +536,7 @@ bool less_vtree::operator()(const vtree& lhs, const vtree& rhs) const
     return less_vtree_it(lhs, rhs, lhs.begin(), rhs.begin());
 }
 
-string opencog::i2str(int d)
+std::string opencog::i2str(int d)
 {
     char temp[20];
     sprintf(temp, "%d", d);

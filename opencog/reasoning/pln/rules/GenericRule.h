@@ -32,11 +32,11 @@ protected:
     mutable FormulaType f;
 
 public:
-    virtual set<MPs> o2iMetaExtra(meta outh,
+    virtual std::set<MPs> o2iMetaExtra(meta outh,
                                   bool& overrideInputFilter) const = 0;
-    virtual meta i2oType(const vector<Vertex>& h) const = 0;
+    virtual meta i2oType(const std::vector<Vertex>& h) const = 0;
 
-    virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray,
+    virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                        int* newN) const = 0;
 
     /// Always computable
@@ -44,7 +44,7 @@ public:
                 bool _FreeInputArity, std::string _name = "")
         : Rule(_destTable, _FreeInputArity, true, _name) { }
 
-    BoundVertex compute(const vector<Vertex>& premiseArray,
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED) const {
         const int n = (const int) premiseArray.size();
 

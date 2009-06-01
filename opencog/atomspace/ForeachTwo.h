@@ -35,7 +35,7 @@ inline bool foreach_outgoing_atom_pair(Handle ha, Handle hb,
 
     size_t vasz = va.size();
     size_t vbsz = vb.size();
-    size_t minsz = min(vasz, vbsz);
+    size_t minsz = std::min(vasz, vbsz);
 
     for (size_t i = 0; i < minsz; i++) {
         ha = va[i];

@@ -128,7 +128,7 @@ public:
     /**
      * Returns whether a class with name 'typeName' is defined.
      */
-    bool isDefined(const string& typeName);
+    bool isDefined(const std::string& typeName);
 
     /**
      * Returns the type of a given class.
@@ -136,7 +136,7 @@ public:
      * @param Class type name.
      * @return The type of a givenn class.
      */
-    Type getType(const string& typeName);
+    Type getType(const std::string& typeName);
 
     /**
      * Returns the string representation of a given atom type.

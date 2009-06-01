@@ -196,7 +196,7 @@ public:
 
     bool connectToSimWorld();
     bool loadPet(const std::string& petId);
-    void resetPhysiologicalModel(string petId);
+    void resetPhysiologicalModel(std::string petId);
 
     // ***********************************************/
     // Methods of the AsynchronousPerceptionAndStatusHandler interface:

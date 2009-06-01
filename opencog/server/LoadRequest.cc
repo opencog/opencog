@@ -46,7 +46,7 @@ LoadRequest::~LoadRequest()
 bool LoadRequest::execute()
 {
     logger().debug("[LoadRequest] execute");
-    ostringstream oss;
+    std::ostringstream oss;
 
     if (_parameters.empty()) {
         oss << "invalid syntax: load <filename>" << std::endl;

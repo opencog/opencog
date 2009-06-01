@@ -221,7 +221,7 @@ confidence_t IndefiniteTruthValue::getConfidenceLevel() const
     return confidenceLevel;
 }
 
-const vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution() const
+const std::vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution() const
 {
     return firstOrderDistribution;
 }
@@ -273,7 +273,7 @@ void IndefiniteTruthValue::setDiff(strength_t diff)
     this->diff = diff;
 }
 
-void IndefiniteTruthValue::setFirstOrderDistribution(const vector<strength_t*>& v)
+void IndefiniteTruthValue::setFirstOrderDistribution(const std::vector<strength_t*>& v)
 {
     this->firstOrderDistribution = v;
 }
@@ -301,7 +301,7 @@ count_t IndefiniteTruthValue::getCount() const
     if (count < 0) { // count must be updated
         strength_t W = W();
         // to avoid division by zero
-        W = max(W, static_cast<strength_t>(0.0000001)); 
+        W = std::max(W, static_cast<strength_t>(0.0000001)); 
         count = (DEFAULT_K * (1 - W) / W);
     }
     return count;

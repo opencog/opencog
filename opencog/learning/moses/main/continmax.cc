@@ -31,6 +31,11 @@
 
 using namespace boost::assign;
 
+using std::string;
+using std::vector;
+using boost::lexical_cast;
+
+
 int main(int argc, char** argv)
 {
 

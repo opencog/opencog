@@ -48,7 +48,7 @@ public:
 		which affect the Arg #2!
 	*/
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
 
 	NO_DIRECT_PRODUCTION;
 };

@@ -27,6 +27,7 @@
 
 using namespace opencog;
 using namespace opencog::pln;
+using namespace std;
 
 #define GET_ASW ((AtomSpaceWrapper*) ASW())
 

@@ -602,7 +602,7 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				double x;
 				x = c - a->getAttentionalFocusBoundary();
 				x = x / (a->getMaxSTI() - a->getAttentionalFocusBoundary());
-				multiplier = max(0.0, (exp(x) - (1.0 - y))/(1.0 + y));
+				multiplier = std::max(0.0, (exp(x) - (1.0 - y))/(1.0 + y));
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
 			}
 			break;
@@ -617,7 +617,7 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 				x = c - a->getAttentionalFocusBoundary();
 				x = x / (a->getMaxSTI() - a->getAttentionalFocusBoundary());
 				if (percentAmnesty < 0) percentAmnesty = 0;
-				multiplier = max(0.0, ::log((x - percentAmnesty) * 20) / 2.0);
+				multiplier = std::max(0.0, ::log((x - percentAmnesty) * 20) / 2.0);
 				stiRentCharged = (AttentionValue::sti_t) (multiplier * STIAtomRent);
 			}
 			break;
@@ -697,9 +697,9 @@ bool ImportanceUpdatingAgent::getUpdateLinksFlag() const
     return updateLinks;
 }
 
-string ImportanceUpdatingAgent::toString()
+std::string ImportanceUpdatingAgent::toString()
 {
-    ostringstream s;
+    std::ostringstream s;
 
     s << "Importance Updating Mind Agent\n";
     s << "STIAtomRent: " << STIAtomRent << "\n";

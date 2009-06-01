@@ -130,7 +130,7 @@ public:
     /**
      * Gets the name of TimeNode that would represent this Temporal object
      */
-    string getTimeNodeName() const;
+    std::string getTimeNodeName() const;
 
     /**
      * Returns a string representation of the given Temporal relationship code.

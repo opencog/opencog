@@ -338,7 +338,7 @@ public:
     OutputIterator getMapHandles(   OutputIterator outIt,
                                     unsigned long startMoment, unsigned long endMoment) const {
         Temporal t(startMoment, endMoment);
-        vector<HandleTemporalPair> pairs;
+        std::vector<HandleTemporalPair> pairs;
         Handle spaceMapNode = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
 	    if (spaceMapNode != Handle::UNDEFINED) {
             // Gets the first map before the given interval, if any
@@ -368,7 +368,7 @@ public:
         \param t     Type of the node
         \param name  Name of the node
         \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) */
-    Handle addNode(Type t, const string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /**
      * Add a new link to the Atom Table
@@ -554,7 +554,7 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const string& str) const {
+    Handle getHandle(Type t, const std::string& str) const {
         return atomTable.getHandle(str.c_str(), t);
     }
 
@@ -569,10 +569,10 @@ public:
     }
 
     /** Retrieve the name of a given Handle */
-    const string& getName(Handle) const;
+    const std::string& getName(Handle) const;
 
     /** Change the name of a given Handle */
-    void setName(Handle, const string& name);
+    void setName(Handle, const std::string& name);
 
     /** Retrieve the type of a given Handle */
     Type getType(Handle) const;
@@ -727,11 +727,11 @@ public:
     static const TruthValue& getDefaultTV();
 
     //type properties
-    Type getAtomType(const string& typeName) const;
+    Type getAtomType(const std::string& typeName) const;
     bool isNode(Type t) const;
     /** Does t1 inherit from t2 */
     bool inheritsType(Type t1, Type t2) const;
-    string getName(Type t) const;
+    std::string getName(Type t) const;
 
     /**
      * Gets a set of handles that matches with the given arguments.
@@ -757,7 +757,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
                  Type type,
-                 const string& name,
+                 const std::string& name,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         HandleEntry * handleEntry = atomTable.getHandleSet(name.c_str(), type, subclass, vh);
@@ -1100,7 +1100,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
         HandleEntry * handleEntry = atomTable.getHandleSet(type, subclass, vh);
-        vector<Handle> hs;
+        std::vector<Handle> hs;
         // these two lines could be replaced using a function that filters
         // a handleEntry list into an arbitrary sequence
         toOutputIterator(back_inserter(hs), handleEntry);
@@ -1134,7 +1134,7 @@ public:
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
         // get the handle set as a vector and sort it.
-        vector<Handle> hs;
+        std::vector<Handle> hs;
 
         getHandleSet(back_inserter(hs), type, subclass, vh);
         sort(hs.begin(), hs.end(), compare);
@@ -1280,7 +1280,7 @@ public:
     bool isList(Handle) const;
     bool containsVar(Handle) const;
 
-    Handle createHandle(Type t, const string& str, bool managed = false);
+    Handle createHandle(Type t, const std::string& str, bool managed = false);
     Handle createHandle(Type t, const HandleSeq& outgoing, bool managed = false);
 
     int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
@@ -1403,7 +1403,7 @@ private:
 
     TimeServer timeServer;
     AtomTable atomTable;
-    string emptyName;
+    std::string emptyName;
     SpaceServer* spaceServer;
 
     /**

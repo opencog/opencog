@@ -30,7 +30,7 @@
 
 namespace opencog { namespace pln {
 
-BoundVertex BaseCrispUnificationRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex BaseCrispUnificationRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
     const int n = premiseArray.size();
     

@@ -21,6 +21,12 @@
 
 #include "DeductionLookupTable.h"
 
+using std::cout;
+using std::endl;
+using std::ios;
+using std::string;
+using std::vector;
+
 namespace opencog {
 namespace pln {
 
@@ -71,7 +77,7 @@ void DeductionLookupTable::closeFile(){
     lookupTableFile.close();
 	if(CREATE_COMPACT_FILE){
         //printf("Fecnahdo arquivo\n");
-        mycompactfile << flush;
+        mycompactfile << std::flush;
 		mycompactfile.close();			  		
 	}
 }
@@ -97,7 +103,7 @@ void DeductionLookupTable::add(float A,
 		
 		if(CREATE_COMPACT_FILE){
 			mycompactfile << A << ";" << B << ";" << C << ";" << AB << ";" << BC << ";" << result << ";\n";
-            mycompactfile << flush;
+            mycompactfile << std::flush;
 		}
 		if(count >= tableSize){
 			cout << "Count = " << count << " -- Tabela completa\n\n";
@@ -145,7 +151,7 @@ void DeductionLookupTable::readTable()
 {
 	cout << "Reading lookup table\n";
 	
-	ifstream in(fname);
+	std::ifstream in(fname);
 	vector < vector <string> > data;
   string element, delimiters = ";";
   int row = 0;

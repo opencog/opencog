@@ -56,7 +56,7 @@ namespace opencog {
 namespace pln {
 
 struct atom;
-typedef pair<std::string, atom> subst;
+typedef std::pair<std::string, atom> subst;
 struct lessatom;
 struct less_subst;
 
@@ -72,7 +72,7 @@ public:
 
     std::vector<boost::shared_ptr<atom> > hs;
     
-    mutable set<subst>* forbiddenBindings;
+    mutable std::set<subst>* forbiddenBindings;
 
     bool operator<(const atom& rhs) const;
     bool operator!=(const atom& rhs) const { return (*this)<rhs || rhs<(*this); }
@@ -151,8 +151,8 @@ public:
     void getWithActualizedSubstitutions(atom& target) const;
     pHandle bindHandle(iAtomSpaceWrapper* table) const;
 
-    void extractVars(set<std::string>& vars) const;
-    void extractFWVars(set<std::string>& vars) const;
+    void extractVars(std::set<std::string>& vars) const;
+    void extractFWVars(std::set<std::string>& vars) const;
 
     atom(const tree<boost::shared_ptr<atom> >& a, tree<boost::shared_ptr<atom> >::iterator parent_node, bool root = true);
     atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root = true);
@@ -166,12 +166,12 @@ struct less_subst: public binary_function<subst, subst, bool>
     }
 };*/
 
-struct lessatom : public binary_function<atom, atom, bool>
+struct lessatom : public std::binary_function<atom, atom, bool>
 {
     bool operator()(const atom& lhs, const atom& rhs) const;
 };
 
-struct lessatom_ignoreVarNameDifferences : public binary_function<atom, atom, bool>
+struct lessatom_ignoreVarNameDifferences : public std::binary_function<atom, atom, bool>
 {
     bool operator()(const atom& lhs, const atom& rhs) const
     {
@@ -254,13 +254,13 @@ public:
     }
 };
 
-typedef set<atom, lessatom> atomset;
+typedef std::set<atom, lessatom> atomset;
 
 void getAtomTreeString(const atom& a, std::string& outbuf);
 
-void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
-                     set<subst>* forbiddenBindings);
-bool getLargestIntersection2(const set<atom,lessatom>& keyelem_set,
+void VariableMPforms(const atom& src, std::set<atom, lessatom_ignoreVarNameDifferences>& res,
+                     std::set<subst>* forbiddenBindings);
+bool getLargestIntersection2(const std::set<atom,lessatom>& keyelem_set,
                             const std::vector<pHandle>& link_set, std::vector<boost::shared_ptr<atom> >& result);
 
 atom* neBoundVertexWithNewType(Handle h, Type T);

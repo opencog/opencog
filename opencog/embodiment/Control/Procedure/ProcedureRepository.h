@@ -62,8 +62,8 @@ public:
     const char* getId() const;
     void saveRepository(FILE*) const;
 
-    int loadComboFromStream(istream& in);
-    int loadComboSelectFromStream(istream& in);
+    int loadComboFromStream(std::istream& in);
+    int loadComboSelectFromStream(std::istream& in);
 
     void loadRepository(FILE*, HandleMap<Atom *>*);
     void clear();

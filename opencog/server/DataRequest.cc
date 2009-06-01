@@ -58,7 +58,7 @@ bool DataRequest::execute()
     try {
         NMXmlParser::loadXML(readers, server().getAtomSpace());
     } catch (StandardException &e) {
-        ostringstream oss;
+        std::ostringstream oss;
         oss << "Error: unable to load inline xml data (" << e.getMessage() << ")" << std::endl;
         send(oss.str());
         return false;

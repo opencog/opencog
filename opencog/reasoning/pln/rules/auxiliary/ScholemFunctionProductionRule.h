@@ -32,7 +32,7 @@ class ScholemFunctionProductionRule : public Rule
 protected:
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-    BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const {
+    BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const {
         assert(0);
 
         return Vertex(PHANDLE_UNDEFINED);
@@ -46,7 +46,7 @@ public:
         return true;
     }
 
-    Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

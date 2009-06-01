@@ -358,7 +358,7 @@ public:
     virtual ~ImportanceUpdatingAgent();
     virtual void run(CogServer *server);
 
-    virtual string toString();
+    virtual std::string toString();
 
     /** Return the agent's logger object
      *

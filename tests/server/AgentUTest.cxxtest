@@ -34,6 +34,7 @@
 #include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
+using namespace std;
 
 #define AV1_STI 20000
 #define AV2_STI 500

@@ -46,6 +46,14 @@
 #include "opencog/atomspace/TimeServer.h"
 #endif
 
+using std::string;
+using std::map;
+using std::set;
+using std::vector;
+using std::auto_ptr;
+using std::cout;
+using std::endl;
+
 namespace haxx {
 pHandle VarTypes[STD_VARS];
 }
@@ -88,7 +96,7 @@ string rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 
 string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
 {
-    stringstream ss;
+    std::stringstream ss;
     AtomSpaceWrapper *atw = GET_ATW;
     if (_rloglevel > currentDebugLevel)
         return "";
@@ -135,7 +143,7 @@ string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlo
 string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 {
     AtomSpaceWrapper* atw = GET_ATW;
-    stringstream ss;
+    std::stringstream ss;
 
     if (_rloglevel > currentDebugLevel)
         return "";
@@ -409,8 +417,8 @@ void convertTo(const vector<Handle>& args, Handle*& ret)
 bool substitutableTo(atom& from, atom& to,
                      map<string, atom>& bindings,
                      const set<subst>& forbiddenBindings,
-                     pair<string, atom>** restart_from,
-                     pair<string, atom>** restart_to)
+                     std::pair<string, atom>** restart_from,
+                     std::pair<string, atom>** restart_to)
 {
     /*LOG(4, "-Source");
      printAtomTree(from,0,4);
@@ -438,7 +446,7 @@ bool substitutableTo(atom& from, atom& to,
     if (atw->inheritsType(to.T, FW_VARIABLE_NODE)) {
         if (!STLhas(forbiddenBindings, subst(to.name, from))) { //**next_from)))
             bindings[to.name] = from; //(from, next_from,false);
-            *restart_to = new pair<string, atom>(to.name, from);
+            *restart_to = new std::pair<string, atom>(to.name, from);
 
             LOG(4, "FW subst var" + to.name);
 
@@ -452,7 +460,7 @@ bool substitutableTo(atom& from, atom& to,
         if (atw->inheritsType(from.T, VARIABLE_NODE)) {
             LOG(5, "E");
 
-            *restart_from = new pair<string, atom>(from.name, to);
+            *restart_from = new std::pair<string, atom>(from.name, to);
 
             return true;
         } else
@@ -1924,7 +1932,7 @@ void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings)
 
     /// 3. Deconvert handle=>vtree to handle=>handle
 
-    typedef pair<pHandle, vtree> phvt;
+    typedef std::pair<pHandle, vtree> phvt;
     foreach(phvt vp, bindsWithVTree)
     ret_bindings[vp.first] = make_real(vp.second);
 }
@@ -2139,24 +2147,24 @@ void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 /// Ok, you're not allowed to laugh at the following. It's a collection of my
 /// various quick-hack binding printers from the last 6 months.
 
-void pr2(pair<pHandle, vtree> i)
+void pr2(std::pair<pHandle, vtree> i)
 {
     cprintf(4, "%d => ", i.first);
     rawPrint(i.second, i.second.begin(), 3);
 }
 
-void print_binding(pair<Handle, vtree> i)
+void print_binding(std::pair<Handle, vtree> i)
 {
     printf("%d => ", (int)i.first.value());
     rawPrint(i.second, i.second.begin(), -1);
 }
 
-void printBinding(const pair<string, Handle> p)
+void printBinding(const std::pair<string, Handle> p)
 {
     cprintf(3, "%s => %d\n", p.first.c_str(), (int)p.second.value());
 }
 
-void pr(pair<pHandle, pHandle> i)
+void pr(std::pair<pHandle, pHandle> i)
 {
     AtomSpaceWrapper* atw = GET_ATW;
 

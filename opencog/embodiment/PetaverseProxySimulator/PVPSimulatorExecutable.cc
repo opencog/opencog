@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 
     config(SimulationConfig::simulationCreateInstance, true);
 
-    string embodimentConfigFileName = config().get("CONFIG_FILE");
-    string simulationConfigFileName = config().get("PVPSIM_CONFIG_FILE");
+    std::string embodimentConfigFileName = config().get("CONFIG_FILE");
+    std::string simulationConfigFileName = config().get("PVPSIM_CONFIG_FILE");
     
     if (fileExists(embodimentConfigFileName.c_str())) {
         config().load(embodimentConfigFileName.c_str());

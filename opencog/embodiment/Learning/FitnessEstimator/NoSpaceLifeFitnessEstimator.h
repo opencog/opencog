@@ -55,7 +55,7 @@ typedef combo::combo_tree::sibling_iterator sib_it;
 /**
  *fitness estimation using NoSpaceLife and BehaviorDescriptionMatcher
  */
-struct NoSpaceLifeFitnessEstimator: unary_function<combo::combo_tree, fitness_t> {
+struct NoSpaceLifeFitnessEstimator: std::unary_function<combo::combo_tree, fitness_t> {
 
 public:
 

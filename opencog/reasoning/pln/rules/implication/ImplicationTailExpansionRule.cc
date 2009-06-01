@@ -84,7 +84,7 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
     return makeSingletonSet(ret);
 }
 
-BoundVertex ImplicationTailExpansionRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ImplicationTailExpansionRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
 

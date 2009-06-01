@@ -141,7 +141,7 @@ class RuleApp : public VtreeProvider, public Rule
 	mutable BoundVertex result;
 	mutable vtree vt_result;
 	mutable bool arg_changes_since_last_compute;
-	mutable vector<VtreeProvider*> args;
+	mutable std::vector<VtreeProvider*> args;
 	Rule* root_rule;
 public:
 	virtual ~RuleApp();
@@ -152,21 +152,21 @@ public:
 	bool Bind(int arg_i, VtreeProvider* arg) const;
 
 	/// false if arg was already bound.
-	bool Bind(vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
+	bool Bind(std::vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
 
 	const vtree& getVtree() const;
 
 	// From Rule
-	set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+	std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 	bool validate2				(MPs& _args) const { return true; }
 	//NO_DIRECT_PRODUCTION;
-	Btr<set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<set<BoundVertex> >(); }
+	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<std::set<BoundVertex> >(); }
 
 	/// For Rule interface.
 	/// This method aborts with assert failure if the RuleApp is called
 	/// with a wrong nr of args.
-	BoundVertex compute(const vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
 
 	/// Use this when you know that all the args have already been Bound.
 	/// The result is cached so the performance is unproblematic.
@@ -191,7 +191,7 @@ public:
 	template<typename IterT, typename IterT2>
 	BoundVertex compute(IterT begin, IterT end, IterT2& nextUnusedArg, pHandle CX = PHANDLE_UNDEFINED) const
 	{
-		vector<BoundVertex> bound_args;
+		std::vector<BoundVertex> bound_args;
 
 		if (begin == end && !arg_changes_since_last_compute)
 		{
@@ -209,7 +209,7 @@ public:
 
 		nextUnusedArg = begin;
 
-		for (vector<VtreeProvider*>::iterator ai = args.begin();
+		for (std::vector<VtreeProvider*>::iterator ai = args.begin();
 				ai != args.end();
 				++ai)
 		{

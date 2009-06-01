@@ -28,6 +28,10 @@
 #include <boost/variant.hpp>
 #include <time.h>
 
+using std::vector;
+using std::cout;
+using std::endl;
+
 namespace opencog {
 namespace pln {
 

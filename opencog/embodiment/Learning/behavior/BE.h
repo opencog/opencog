@@ -63,12 +63,12 @@ protected:
     Temporal next_moment;
 
 
-    map< tree<Vertex>, BDTracker*, less_combo_tree> factories;
-    typedef pair< tree<Vertex>, BDTracker*> VFpair;
+    std::map< tree<Vertex>, BDTracker*, less_combo_tree> factories;
+    typedef std::pair< tree<Vertex>, BDTracker*> VFpair;
 
     std::set<Handle> new_bds;
     WorldProvider* wp;
-    const string& pet_id; //this is used by tempUpdateRec so that it does not track the pet itself which is observing and not participating to the trick
+    const std::string& pet_id; //this is used by tempUpdateRec so that it does not track the pet itself which is observing and not participating to the trick
 public:
 
     /// Keep a record of all BDs created by my BD factories.
@@ -76,7 +76,7 @@ public:
 
     /// time_resolution is the minimum time that needs to lapse before
     /// we update again
-    BehaviorEncoder(WorldProvider* _wp, const string& _pet_id, Handle _trickExemplarAtTime, int _time_resolution, Temporal _next_moment = Temporal(0));
+    BehaviorEncoder(WorldProvider* _wp, const std::string& _pet_id, Handle _trickExemplarAtTime, int _time_resolution, Temporal _next_moment = Temporal(0));
     /// Add a behavior encoding rule that takes in atoms that satisfy the predicate.
     void addBETracker(const tree<Vertex>& atom_template, BDTracker* tracker);
 

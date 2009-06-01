@@ -23,6 +23,8 @@
 #include "../AtomSpaceWrapper.h"
 #include "RuleApp.h"
 
+using std::vector;
+
 namespace opencog { namespace pln {
 
 // Was:
@@ -119,9 +121,9 @@ bool RuleApp::Bind(vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) cons
 }
 
 // From Rule
-set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+std::set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    const set<Rule::MPs> my_arg_targets_s = root_rule->o2iMeta(outh);
+    const std::set<Rule::MPs> my_arg_targets_s = root_rule->o2iMeta(outh);
     assert(my_arg_targets_s.size()<2); //We can't deal with the more complex case in this kind of approach!
     if ( my_arg_targets_s.empty())
         return my_arg_targets_s;
@@ -136,7 +138,7 @@ set<Rule::MPs> RuleApp::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         const RuleApp* ra;
         if ((ra = dynamic_cast<const RuleApp*>(*ai)) != NULL) //If the arg is a RuleApp, take its input vector
         {
-            set<Rule::MPs> free_args_of_the_branch = ra->o2iMeta(*ret_i);
+            std::set<Rule::MPs> free_args_of_the_branch = ra->o2iMeta(*ret_i);
             assert(free_args_of_the_branch.size()<=1);
             if (!free_args_of_the_branch.empty())
                 final_input_args.insert(final_input_args.end(),

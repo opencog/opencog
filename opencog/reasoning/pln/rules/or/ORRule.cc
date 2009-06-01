@@ -57,7 +57,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 }
 
 #define USE_INCLUSION_EXCLUSION_IN_OR_RULE 0
-TruthValue** ORRule::formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
+TruthValue** ORRule::formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
 {
         const int N = (int)premiseArray.size();
         
@@ -104,7 +104,7 @@ cprintf(4, "ORRule::formatTVarray OK.");
         return tvs;
 }
 
-meta ORRule::i2oType(const vector<Vertex>& h) const
+meta ORRule::i2oType(const std::vector<Vertex>& h) const
 {
         meta ret(new tree<Vertex>(mva((pHandle)OR_LINK)));
 

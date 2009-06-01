@@ -37,7 +37,7 @@ public:
 				new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
 		assert(0);
 		return Vertex(PHANDLE_UNDEFINED);
@@ -48,7 +48,7 @@ public:
 
 	bool validate2(MPs& args) const { return true; }
 
-	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
+	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

@@ -66,9 +66,9 @@ class BDTracker
 {
 protected:
     AtomSpace* atomspace;
-    set<Handle> trackedObjects;
-    map<Handle, Handle> obj2lastBD;
-    set<BDCreationListener*> BDCreationListeners;
+    std::set<Handle> trackedObjects;
+    std::map<Handle, Handle> obj2lastBD;
+    std::set<BDCreationListener*> BDCreationListeners;
 
     /// Create the Handle of the behavior description (BD) which takes into account the
     /// given new perception for the given obj, and time.
@@ -119,7 +119,7 @@ public:
 
         //   puts("BDTracker::update()...");
 
-        set<Handle> signalingObjects, //contains the objects each perception is applying to
+        std::set<Handle> signalingObjects, //contains the objects each perception is applying to
         disappearedObjects,
         newObjects;
 

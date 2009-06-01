@@ -26,6 +26,8 @@
 #include <opencog/atomspace/TLB.h>
 
 
+using std::vector;
+using std::map;
 
 typedef unsigned long ulong;
 

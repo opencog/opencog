@@ -32,11 +32,11 @@ public:
 	
 	NO_DIRECT_PRODUCTION;
 	
-	virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const;
+	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const;
 public:
 	bool validate2				(MPs& args) const { return true; }
 
-	virtual meta i2oType(const vector<Vertex>& h) const;
+	virtual meta i2oType(const std::vector<Vertex>& h) const;
 };
 
 }} // namespace opencog { namespace pln {

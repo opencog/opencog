@@ -76,7 +76,7 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
     printer.print(outh->begin());
 #endif
 
-    Btr< set<Btr<ModifiedBoundVTree> > > varforms = FindMatchingUniversals(outh, destTable);
+    Btr< std::set<Btr<ModifiedBoundVTree> > > varforms = FindMatchingUniversals(outh, destTable);
     
 ///return Rule::setOfMPs();
 
@@ -89,7 +89,7 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
     {
         MPs ret1;
 
-        typedef pair<pHandle,vtree> phvt;
+        typedef std::pair<pHandle,vtree> phvt;
         DeclareBtr(bindingsT, pre_binds);
 
         foreach(phvt vp, *i->bindings)
@@ -118,7 +118,7 @@ printer.print(rootAtom->begin(),3);
         ///Record targets to prevent multiple occurrence of the same target in the arg set.
 
         //set<vtree, less_vtree> arg_targets;
-        set<vtree, less_vtree> arg_targets;
+        std::set<vtree, less_vtree> arg_targets;
 
         /// rootAtom->hs[0] is the 1st link under the HYPOTHETICAL_LINK
         /// rootAtom->hs[0].hs[0] is the 1st link that this Rule does NOT prove

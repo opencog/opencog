@@ -31,19 +31,19 @@
 namespace haxx
 {
     /// \todo This data must persist even if the BITNodeRoot is deleted.
-    extern map<pHandle,vector<pHandle> > inferred_from;
-    extern map<pHandle,opencog::pln::Rule*> inferred_with;
+    extern std::map<pHandle,std::vector<pHandle> > inferred_from;
+    extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
 }
 
 namespace opencog { namespace pln {
 
 bool UnificationRuleResultFreshness = true; //false;
 
-Btr<set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
+Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 {
     if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FORALL_LINK) ||
         GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
-        return Btr<set<BoundVertex > >();
+        return Btr<std::set<BoundVertex > >();
 
 #if 0
     rawPrint(*outh, outh->begin(),0);
@@ -55,12 +55,12 @@ cprintf(3,"FindMatchingUniversals...\n");
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
 cprintf(3,"FindMatchingUniversals OK!\n");
     if (!i)
-        return Btr<set<BoundVertex > >();
+        return Btr<std::set<BoundVertex > >();
 
-    Btr<set<BoundVertex > > ret(new set<BoundVertex >);
+    Btr<std::set<BoundVertex > > ret(new std::set<BoundVertex >);
     
     MPs ret1;
-    typedef pair<pHandle,vtree> phvt;
+    typedef std::pair<pHandle,vtree> phvt;
     DeclareBtr(bindingsT, pre_binds);
 
     foreach(phvt vp, *i->bindings)

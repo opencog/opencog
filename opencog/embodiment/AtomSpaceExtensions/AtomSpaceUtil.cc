@@ -47,6 +47,9 @@
 #include <algorithm>
 #include <cctype>
 
+using std::string;
+using std::list;
+
 #define IS_HOLDING_PREDICATE_NAME "isHolding"
 #define IS_HOLDING_SOMETHING_PREDICATE_NAME "isHoldingSomething"
 

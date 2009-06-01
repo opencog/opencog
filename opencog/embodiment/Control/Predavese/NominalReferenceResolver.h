@@ -28,21 +28,20 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/embodiment/Control/PetInterface.h>
 
-using namespace std;
 using namespace opencog;
 
 
-typedef map<Handle, double> scoreCandidatesMap;
+typedef std::map<Handle, double> scoreCandidatesMap;
 
 class NominalReferenceResolver
 {
 private:
     Control::PetInterface& petInterface;
 
-    bool createSetOfCandidates(const string& name, unsigned long timestamp, set<Handle> & candidates) const;
-    void scoreCandidates(const string& name, const string& speakerId, unsigned long timestamp, const set<Handle> & candidates, scoreCandidatesMap& scoredCandidates) const;
+    bool createSetOfCandidates(const std::string& name, unsigned long timestamp, std::set<Handle> & candidates) const;
+    void scoreCandidates(const std::string& name, const std::string& speakerId, unsigned long timestamp, const std::set<Handle> & candidates, scoreCandidatesMap& scoredCandidates) const;
     Handle selectCandidate(const scoreCandidatesMap& scoredCandidates) const;
 public:
     NominalReferenceResolver(Control::PetInterface& _petInterface);
-    string solve(const string& name, const string& speakerId, unsigned long timestamp) const;
+    std::string solve(const std::string& name, const std::string& speakerId, unsigned long timestamp) const;
 };

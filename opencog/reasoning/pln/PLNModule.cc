@@ -46,6 +46,12 @@
 using namespace opencog;
 using namespace opencog::pln;
 
+using std::string;
+using std::set;
+using std::cout;
+using std::endl;
+
+
 DECLARE_MODULE(PLNModule)
 
 //! @todo replace by opencog log system

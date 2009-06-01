@@ -53,17 +53,17 @@ public:
 
     virtual AtomSpace& getAtomSpace() = 0;
 
-    virtual void stopExecuting(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
 
     virtual bool isInLearningMode() const = 0;
-    virtual void startLearning(const vector<string> &commandStatement, unsigned long timestamp) = 0;
-    virtual void stopLearning(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
 
     virtual bool isExemplarInProgress() const = 0;
-    virtual void startExemplar(const vector<string> &commandStatement, unsigned long timestamp) = 0;
-    virtual void endExemplar(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
 
-    virtual void trySchema(const vector<string> &commandStatement, unsigned long timestamp) = 0;
+    virtual void trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp) = 0;
     virtual void reward(unsigned long timestamp) = 0;
     virtual void punish(unsigned long timestamp) = 0;
 
@@ -72,15 +72,15 @@ public:
      */
     virtual AgentModeHandler& getCurrentModeHandler( void ) = 0;
 
-    virtual void setOwnerId(const string& ownerId) = 0;
-    virtual void setExemplarAvatarId(const string& avatarId) = 0;
+    virtual void setOwnerId(const std::string& ownerId) = 0;
+    virtual void setExemplarAvatarId(const std::string& avatarId) = 0;
     virtual const std::string& getOwnerId() const = 0;
-    virtual void setName(const string& petName) = 0;
-    virtual const string& getName() const = 0;
+    virtual void setName(const std::string& petName) = 0;
+    virtual const std::string& getName() const = 0;
 
     // functions used to set, get and verify if Pet has something in its
     // mouth, i.e., if it has grabbed something
-    virtual void setGrabbedObj(const string& id) = 0;
+    virtual void setGrabbedObj(const std::string& id) = 0;
     virtual const std::string& getGrabbedObj() = 0;
     virtual bool hasGrabbedObj() = 0;
 
@@ -108,7 +108,7 @@ public:
      * @param command The requested trick
      * @param parameters The list of arguments of the trick
      */
-    virtual void setRequestedCommand(string command, vector<string> parameters) = 0;
+    virtual void setRequestedCommand(std::string command, std::vector<std::string> parameters) = 0;
     /**
      * Computes a speed for the pet to walk at in combo schema execution
      * (possibly based on its mood & the schema its executing, possibly with

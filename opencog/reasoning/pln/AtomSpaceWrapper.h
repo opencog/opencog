@@ -263,7 +263,7 @@ public:
     vhpair fakeToRealHandle(const pHandle f) const;
 
     //! Which XML files have been loaded by PLN to populate the AtomSpace
-    set<std::string> loadedFiles;
+    std::set<std::string> loadedFiles;
     
     //! Debug method to display nodes
     void DumpCoreNodes(int logLevel);
@@ -285,7 +285,7 @@ public:
     }
 
     //! Get handles with type t and name str optionally subtypes as well
-    virtual Btr<set<pHandle> > getHandleSet(Type T, const string& name,
+    virtual Btr<std::set<pHandle> > getHandleSet(Type T, const std::string& name,
             bool subclass = false);
     //! Get handle of node with type t and name str
     pHandle getHandle(Type t,const std::string& str);
@@ -310,7 +310,7 @@ public:
     virtual ~AtomSpaceWrapper() {}
 
     //! Load axioms from given xml filename
-    bool loadAxioms(const string& path);
+    bool loadAxioms(const std::string& path);
     //! Load other axioms from given xml filename and optionally replace?
     bool loadOther(const std::string& path, bool replaceOld);
 
@@ -361,7 +361,7 @@ public:
     pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
                       bool fresh, bool managed);
     //! Add Node via dummy contexts method
-    pHandle addNodeDC(Type t, const string& name, const TruthValue& tvn,
+    pHandle addNodeDC(Type t, const std::string& name, const TruthValue& tvn,
                       bool fresh, bool managed);
 
     /** Add concrete atom using dummy contexts if it already exists
@@ -395,7 +395,7 @@ public:
     //! returns whether 
     bool inheritsType(Type subT, Type superT);
 
-    void HandleEntry2HandleSet(HandleEntry& src, set<Handle>& dest) const;
+    void HandleEntry2HandleSet(HandleEntry& src, std::set<Handle>& dest) const;
     const TruthValue& getTV(pHandle h);
 
     bool isType(const pHandle h) const;
@@ -461,7 +461,7 @@ class NormalizingATW : public FIMATW
     NormalizingATW();
 
     template<typename T>
-    bool cutVector(const vector<T>& src, int index, vector<T>& dest)
+    bool cutVector(const std::vector<T>& src, int index, std::vector<T>& dest)
     {
         dest.clear();
 

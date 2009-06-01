@@ -29,6 +29,7 @@
 using namespace behavior;
 using namespace Control;
 using namespace opencog;
+using namespace std;
 
 class BEUTest : public CxxTest::TestSuite
 {

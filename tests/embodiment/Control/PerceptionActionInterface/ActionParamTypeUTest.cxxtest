@@ -24,6 +24,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 
 using namespace PerceptionActionInterface;
+using namespace std;
 
 class ActionParamTypeUTest :  public CxxTest::TestSuite
 {

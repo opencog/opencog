@@ -43,7 +43,6 @@
  * 
  */
 
-using std::string;
 
 namespace opencog {
 namespace pln {
@@ -75,10 +74,10 @@ class DeductionLookupTable
 		
 		int count;//counts the number of tubles saves in the table
 		
-		ofstream lookupTableFile;
-		string filePath;
+		std::ofstream lookupTableFile;
+		std::string filePath;
 		char *fname;
-		ofstream mycompactfile;
+		std::ofstream mycompactfile;
 		int tableSize;
 		
 		VectorLookupTable* table;

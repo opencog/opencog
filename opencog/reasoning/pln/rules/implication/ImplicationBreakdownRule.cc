@@ -66,7 +66,7 @@ Rule::setOfMPs ImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideI
         return makeSingletonSet(ret);
 }
 	
-BoundVertex ImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
         assert(validate(premiseArray));
 

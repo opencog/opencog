@@ -146,7 +146,7 @@ TruthValueType SimpleTruthValue::getType() const
 
 float SimpleTruthValue::confidenceToCount(confidence_t c)
 {
-    c = min(c, 0.9999999f);
+    c = std::min(c, 0.9999999f);
     return static_cast<count_t>(KKK * c / (1.0 - c));
 }
 

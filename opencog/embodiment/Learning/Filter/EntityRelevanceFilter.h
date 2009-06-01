@@ -110,7 +110,7 @@ public:
        */
     const combo::message_set getMessages(const WorldProvider& wp,
                                          const std::string& trick,
-                                         const std::string& toID = string(),
+                                         const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
                                          bool strict_within = true) const;
 
@@ -132,7 +132,7 @@ public:
        */
     const combo::message_set getMessages(const WorldProvider& wp,
                                          Temporal t,
-                                         const std::string& toID = string(),
+                                         const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
                                          bool strict_within = true) const;
 
@@ -154,7 +154,7 @@ public:
     */
     const combo::message_set getMessages(const AtomSpace& as,
                                          Temporal t,
-                                         const std::string& toID = string(),
+                                         const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
                                          bool strict_within = true) const;
 
@@ -174,7 +174,7 @@ public:
                                            const std::string& trick,
                                            const std::string& selfID,
                                            const std::string& ownerID,
-                                           const std::set<string>& exclude_set = std::set<string>()) const;
+                                           const std::set<std::string>& exclude_set = std::set<std::string>()) const;
 
     /**
     * Gets the set of all agent actions
@@ -192,7 +192,7 @@ public:
                                            const Temporal& t,
                                            const std::string& selfID,
                                            const std::string& ownerID,
-                                           const std::set<string>& exclude_set = std::set<string>()) const;
+                                           const std::set<std::string>& exclude_set = std::set<std::string>()) const;
 
     /**
     * Gets the set of all agent actions
@@ -210,7 +210,7 @@ public:
                                            const Temporal& t,
                                            const std::string& selfID,
                                            const std::string& ownerID,
-                                           const std::set<string>& exclude_set = std::set<string>()) const;
+                                           const std::set<std::string>& exclude_set = std::set<std::string>()) const;
 
 }; // class
 //}  // namespace

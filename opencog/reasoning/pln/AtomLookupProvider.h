@@ -56,7 +56,7 @@ public:
      * subclasses too is optional.  NOTE! atoms with confidence < 0.0000001 are
      * not returned!
      */
-    virtual boost::shared_ptr<set<pHandle> > getHandleSet(Type T, const string&
+    virtual boost::shared_ptr<std::set<pHandle> > getHandleSet(Type T, const std::string&
             name, bool subclass = false) =0 ;
 
     /** Return the set of all nodes with type T and the name str

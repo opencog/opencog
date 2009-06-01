@@ -30,6 +30,7 @@ using namespace Procedure;
 using namespace PerceptionActionInterface;
 using namespace Control;
 using namespace opencog;
+using namespace std;
 
 class PetActionSchemaUTest :  public CxxTest::TestSuite
 {

@@ -26,6 +26,10 @@
 
 #include "../AtomSpaceWrapper.h"
 
+using std::cout;
+using std::endl;
+using std::string;
+
 FILE* NMPrinter::logFile = NULL;
 int NMPrinter::numberOfPrintersUsingLogFile = 0;
 
@@ -116,14 +120,14 @@ void NMPrinter::print(NMPrintable p, int logLevel) const {
 
 string NMPrinter::toString(NMPrintable p, int logLevel) {
     //printf("NMPrinter::toString()\n");
-    stringstream ss;
+    std::stringstream ss;
     if (logLevelOk(logLevel)) {
         toStream(ss, p, initialIndentation);
     }
     return ss.str();
 }
 
-void NMPrinter::toStream(ostream& out, const NMPrintable p, int indentationLevel) const{
+void NMPrinter::toStream(std::ostream& out, const NMPrintable p, int indentationLevel) const{
     //printf("NMPrinter::toStream()\n");
     if (isHandle(p)) {
         //printf("PRINTING HANDLE:\n");
@@ -153,7 +157,7 @@ void NMPrinter::toStream(ostream& out, const NMPrintable p, int indentationLevel
     }
 }
 
-void NMPrinter::printSpaces(ostream& out, int indentationLevel) const{
+void NMPrinter::printSpaces(std::ostream& out, int indentationLevel) const{
     //printf("NMPrinter::printSpaces()\n");
     for (int i=0; i < indentationLevel; i++) {
         for (int j=0; j < indentationTabSize; j++) {
@@ -207,7 +211,7 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
   return result;
 }
 
-void NMPrinter::printHandle(ostream& out, pHandle h, int indentationLevel) const{
+void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
     AtomSpaceWrapper* atw = GET_ATW; 
@@ -302,7 +306,7 @@ void NMPrinter::printHandle(ostream& out, pHandle h, int indentationLevel) const
     }
 }
 
-void NMPrinter::printVTree(ostream& out, vtree::iterator top, int indentationLevel) const{
+void NMPrinter::printVTree(std::ostream& out, vtree::iterator top, int indentationLevel) const{
     //printf("NMPrinter::printVTree()\n");
 
     pHandle h = boost::get<pHandle>(*top);

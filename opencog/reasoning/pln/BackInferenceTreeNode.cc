@@ -59,8 +59,8 @@ namespace haxx
     extern opencog::pln::BITNodeRoot* bitnoderoot;
 
     //! @todo This data must persist even if the BITNodeRoot is deleted.
-    map<pHandle,vector<pHandle> > inferred_from;
-    map<pHandle,Rule*> inferred_with;
+    std::map<pHandle,std::vector<pHandle> > inferred_from;
+    std::map<pHandle,Rule*> inferred_with;
 }
 
 //! ARI: okay to delete design namespace?
@@ -99,9 +99,18 @@ namespace design
 namespace opencog {
 namespace pln {
 
-typedef pair<Rule*, vtree> directProductionArgs;
+using std::set;
+using std::pair;
+using std::vector;
+using std::string;
+using std::map;
+using std::stringstream;
+using std::endl;
+using std::cout;
 
-struct less_dpargs : public binary_function<directProductionArgs, directProductionArgs, bool>
+typedef std::pair<Rule*, vtree> directProductionArgs;
+
+struct less_dpargs : public std::binary_function<directProductionArgs, directProductionArgs, bool>
 {
     bool operator()(const directProductionArgs& lhs, const directProductionArgs& rhs) const
     {
@@ -151,7 +160,7 @@ template<typename V, typename Vit, typename Tit>
 void copy_vars(V& vars, Vit varsbegin, Tit bbvt_begin, Tit bbvt_end)
 {
     copy_if(bbvt_begin, bbvt_end, inserter(vars, varsbegin), 
-        bind(equal_to<Type>(), 
+        bind(std::equal_to<Type>(), 
         bind(getTypeFun, bind(&_v2h, _1)),
         (Type)FW_VARIABLE_NODE));
 }
@@ -245,7 +254,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
     copy_if(    raw_target->begin(),
                 raw_target->end(),
                 inserter(vars, vars.begin()),
-                bind(equal_to<Type>(),
+                bind(std::equal_to<Type>(),
                     bind(getTypeFun, bind(&_v2h, _1)),
                         (Type)FW_VARIABLE_NODE));
     foreach(Vertex v, vars)
@@ -730,7 +739,7 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
     for(vtree::post_order_iterator node = _target->begin_post(); node != _target->end_post(); ++node)
     {
         if (std::count_if(_target->begin(node), _target->end(node),
-            bind(equal_to<Type>(),
+            bind(std::equal_to<Type>(),
                 bind(getTypeFun, bind(&_v2h, _1)),
                 (Type)FW_VARIABLE_NODE ))
             > 1)
@@ -1016,7 +1025,7 @@ void BITNode::tryClone(hpair binding) const
 
         // when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
         map<pHandle, pHandle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
-                bind(equal_to<pHandle>(),
+                bind(std::equal_to<pHandle>(),
                     bind(&second<pHandle,pHandle>, _1),
                     binding.first));
 
@@ -1227,7 +1236,7 @@ void BITNode::expandNextLevel()
         tlog(0, "Rule:%s: ExpandNextLevel (%d children exist)\n", (rule?(rule->name.c_str()):"(root)"), children.size());
 
         // remove this BITNode from the roots execution pool
-        root->exec_pool.remove_if(bind2nd(equal_to<BITNode*>(), this));
+        root->exec_pool.remove_if(bind2nd(std::equal_to<BITNode*>(), this));
 
         if (!Expanded)
         {
@@ -1333,7 +1342,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
                 int s2 = rule_args.size();
 
-                indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider > ii;
+                boost::indirect_iterator<vector<VtreeProvider*>::const_iterator, const VtreeProvider > ii;
                 RuleApp* ruleApp = NULL;
                 ValidateRuleArgs(rule_args.begin(), rule_args.end());
 
@@ -1355,9 +1364,9 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 ii = rule_args.begin();
 
                 if (ValidRuleResult(next_result,
-                        indirect_iterator<vector<VtreeProvider*>::const_iterator,
+                        boost::indirect_iterator<vector<VtreeProvider*>::const_iterator,
                             const VtreeProvider>(rule_args.begin()),
-                        indirect_iterator<vector<VtreeProvider*>::const_iterator,
+                        boost::indirect_iterator<vector<VtreeProvider*>::const_iterator,
                             const VtreeProvider>(rule_args.end()),
                         Btr<bindingsT>(new bindingsT())))
                 {
@@ -1531,7 +1540,7 @@ void BITNode::expandFittest()
 
         // Get the fitness of all nodes in the execution pool
         vector<double> fitnesses;
-        transform(root->exec_pool.begin(), root->exec_pool.end(), back_inserter(fitnesses), mem_fun(&BITNode::fitness));
+        transform(root->exec_pool.begin(), root->exec_pool.end(), back_inserter(fitnesses), std::mem_fun(&BITNode::fitness));
 
         //float partition = o;
         //const float temperature = 0.1f;
@@ -1612,7 +1621,7 @@ void BITNode::expandFittest()
                     root->exec_pool_sorted = true;
                 }
 
-                list<BITNode*>::iterator i = root->exec_pool.begin();
+                std::list<BITNode*>::iterator i = root->exec_pool.begin();
                 (*i)->tlog(3, ": %f / %d [%ld]\n", (*i)->fitness(), (*i)->children.size(), (long)(*i));
 
                 for (++i; i != root->exec_pool.end(); i++)      
@@ -1894,7 +1903,7 @@ string BITNode::printFitnessPool()
             root->exec_pool_sorted = true;
         }
 
-        for (list<BITNode*>::iterator i = root->exec_pool.begin();
+        for (std::list<BITNode*>::iterator i = root->exec_pool.begin();
                 i != root->exec_pool.end(); i++) {
             ss << (*i)->tlog( 0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(),
                     (*i)->children.size(), (long)(*i), (*i)->parents.size() );

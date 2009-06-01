@@ -33,6 +33,7 @@
 #include "HopfieldOptions.h"
 
 using namespace opencog;
+using namespace std;
 #define foreach BOOST_FOREACH
 #define HDEMO_NORESULT -100
 

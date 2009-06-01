@@ -31,6 +31,7 @@
 #include "Predavese.h"
 
 using namespace opencog;
+using std::string;
 
 NominalReferenceResolver::NominalReferenceResolver(Control::PetInterface& _petInterface) : petInterface(_petInterface)
 {
@@ -44,7 +45,7 @@ string NominalReferenceResolver::solve(const string& name, const string& speaker
     if (name == "")
         return name;
 
-    set<Handle> candidates;
+    std::set<Handle> candidates;
     createSetOfCandidates(name, timestamp, candidates);
 
     scoreCandidatesMap scoredCandidates;
@@ -55,7 +56,7 @@ string NominalReferenceResolver::solve(const string& name, const string& speaker
     return petInterface.getAtomSpace().getName(nameSelected);
 }
 
-bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigned long timestamp, set<Handle> & candidates) const
+bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigned long timestamp, std::set<Handle> & candidates) const
 {
 
     logger().debug(" %s - Name: \"%s\".", __FUNCTION__, name.c_str());
@@ -82,7 +83,7 @@ bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigne
     // remove duplicate objects and adding new ones.
     copy(highLTIObjects.begin(), highLTIObjects.end(), inserter(candidates, candidates.end()));
 
-    stringstream strCandidates;
+    std::stringstream strCandidates;
     foreach(Handle it, candidates) {
         strCandidates << TLB::getAtom(it)->toString() << ", ";
     }
@@ -90,7 +91,7 @@ bool NominalReferenceResolver::createSetOfCandidates(const string& name, unsigne
     return true;
 }
 
-void NominalReferenceResolver::scoreCandidates(const string& name, const string& speakerId, unsigned long timestamp, const set<Handle> & candidatesSet, scoreCandidatesMap& scoredCandidates) const
+void NominalReferenceResolver::scoreCandidates(const string& name, const string& speakerId, unsigned long timestamp, const std::set<Handle> & candidatesSet, scoreCandidatesMap& scoredCandidates) const
 {
 
     logger().debug("%s - %d candidates.", __FUNCTION__, candidatesSet.size());
@@ -138,7 +139,7 @@ void NominalReferenceResolver::scoreCandidates(const string& name, const string&
 
         if (sm.containsObject(candidateId)) {
             SpaceServer::SpaceMapPoint candidatePos =  WorldWrapper::WorldWrapperUtil::getLocation(sm, as, candidate);
-            SpaceServer::SpaceMapPoint candidateDir = make_pair(    candidatePos.first - speakerPos.first,
+            SpaceServer::SpaceMapPoint candidateDir = std::make_pair(    candidatePos.first - speakerPos.first,
                     candidatePos.second - speakerPos.second);
             // dot product between vector and [1 0] X axis
             double angle = acos( candidateDir.first / (sqrt(pow(candidateDir.first, 2) + pow(candidateDir.second, 2)) ));
@@ -233,8 +234,8 @@ void NominalReferenceResolver::scoreCandidates(const string& name, const string&
         }
     }
 
-    typedef pair<Handle, double> scoredCandidate_t;
-    stringstream strScored;
+    typedef std::pair<Handle, double> scoredCandidate_t;
+    std::stringstream strScored;
     foreach(scoredCandidate_t it, scoredCandidates) {
         strScored << TLB::getAtom(it.first)->toString() << " score: " <<  it.second << ", ";
     }
@@ -245,7 +246,7 @@ Handle NominalReferenceResolver::selectCandidate(const scoreCandidatesMap& score
 {
     logger().debug(" %s. %d scored candidates.", __FUNCTION__, scoredCandidates.size());
 
-    typedef pair<Handle, double> candidate_t;
+    typedef std::pair<Handle, double> candidate_t;
     candidate_t selected = *scoredCandidates.begin();
     foreach(candidate_t candidate, scoredCandidates) {
         if (candidate.second > selected.second)

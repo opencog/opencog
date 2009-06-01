@@ -564,7 +564,7 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
 
 void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
 {
-    string tvStr = tv.toString();
+    std::string tvStr = tv.toString();
     logger().info( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
     TruthValueType type = tv.getType();
     int length = tvStr.size();
@@ -691,7 +691,7 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
         int idSize;
         fread(&idSize, sizeof(int), 1, f);
 
-        auto_ptr<char> id(new char[idSize]);
+        std::auto_ptr<char> id(new char[idSize]);
 
         fread(id.get(), sizeof(char), idSize, f);
 

@@ -71,8 +71,8 @@ private:
                        Handle smh,
                        unsigned long time,
                        AtomSpace& atomSpace,
-                       const string& self_id,
-                       const string& owner_id,
+                       const std::string& self_id,
+                       const std::string& owner_id,
                        combo::vertex& v,
                        bool isInThePast = false,
                        combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
@@ -137,8 +137,8 @@ private:
                                             Handle smh,
                                             unsigned long time,
                                             AtomSpace& atomSpace,
-                                            const string& self_id,
-                                            const string& owner_id,
+                                            const std::string& self_id,
+                                            const std::string& owner_id,
                                             const combo::combo_tree::iterator it,
                                             bool isInThePast = false,
                                             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
@@ -157,16 +157,16 @@ public:
      * in case of ambiguities between self_id and owner_id,
      * self_id is considered first
      */
-    static combo::definite_object atom_name_to_definite_object(const string& atom_name, const string& self_id, const string& owner_id);
+    static combo::definite_object atom_name_to_definite_object(const std::string& atom_name, const std::string& self_id, const std::string& owner_id);
 
     /**
      * returns the atom name corresponding to a definite object
      * in case of ambiguities between self_id and owner_id,
      * self_id is considered first
      */
-    static string definite_object_to_atom_name(const string& atom_name,
-            const string& self_id,
-            const string& owner_id);
+    static std::string definite_object_to_atom_name(const std::string& atom_name,
+            const std::string& self_id,
+            const std::string& owner_id);
 
     /**
      * test whether 2 definite objects are equal
@@ -175,14 +175,14 @@ public:
      */
     static bool definite_object_equal(const combo::definite_object& d1,
                                       const combo::definite_object& d2,
-                                      const string& self_id,
-                                      const string& owner_id);
+                                      const std::string& self_id,
+                                      const std::string& owner_id);
     /**
      * retrieve the Handle in the AtomSpace of a corresponding definite object
      * food_bowl, water_bowl and pet_home, self and owner are comprehended
      */
     static Handle toHandle(const AtomSpace& as, combo::definite_object obj,
-                           const string& self_id, const string& owner_id);
+                           const std::string& self_id, const std::string& owner_id);
 
     /**
      * atom-table querying for inheritance links of nullary predicates
@@ -222,32 +222,32 @@ public:
      * as a subtree
      */
     static Handle rec_lookup(const AtomSpace& as, combo::combo_tree::iterator it,
-                             const string& self_id, const string& owner_id);
+                             const std::string& self_id, const std::string& owner_id);
 
     /**
      * returns the handle representing pet or avatar of self_id
      * WARNING : if there exists a pet and an avatar with the same id
      * then the handle of the pet is returned
      */
-    static Handle selfHandle(const AtomSpace& as, const string& self_id);
+    static Handle selfHandle(const AtomSpace& as, const std::string& self_id);
 
     /**
      * returns the handle representing owner of owner_id
      */
-    static Handle ownerHandle(const AtomSpace& as, const string& owner_id);
+    static Handle ownerHandle(const AtomSpace& as, const std::string& owner_id);
 
     /**
      * returns the handle representing the avatar with of avatar_id
      */
-    static Handle getAvatarHandle(const AtomSpace& as, const string& avatar_id);
+    static Handle getAvatarHandle(const AtomSpace& as, const std::string& avatar_id);
 
     /**
      * check localspacemap for a Handle
      */
     static bool inSpaceMap(const SpaceServer::SpaceMap& sm,
                            const AtomSpace& as,
-                           const string& self_id,
-                           const string& owner_id,
+                           const std::string& self_id,
+                           const std::string& owner_id,
                            combo::vertex v);
 
     /**
@@ -266,8 +266,8 @@ public:
             Handle smh,
             unsigned long time,
             AtomSpace& atomSpace,
-            const string& self_id,
-            const string& owner_id,
+            const std::string& self_id,
+            const std::string& owner_id,
             combo::indefinite_object io,
             bool isInThePast = false,
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -278,8 +278,8 @@ public:
             Handle smh,
             unsigned long time,
             AtomSpace& atomSpace,
-            const string& self_id,
-            const string& owner_id,
+            const std::string& self_id,
+            const std::string& owner_id,
             combo::pet_indefinite_object_enum ioe,
             bool isInThePast = false,
             combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
@@ -298,8 +298,8 @@ public:
                                         Handle smh,
                                         unsigned long time,
                                         AtomSpace& atomSpace,
-                                        const string& self_id,
-                                        const string& owner_id,
+                                        const std::string& self_id,
+                                        const std::string& owner_id,
                                         const combo::combo_tree::iterator it,
                                         bool isInThePast = false,
                                         combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());

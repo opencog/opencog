@@ -32,9 +32,9 @@
 
 namespace opencog { namespace pln {
 
-boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
+boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
 {
-    set<BoundVertex>* ret = new set<BoundVertex>;
+    std::set<BoundVertex>* ret = new std::set<BoundVertex>;
     
     Type t = GET_ATW->getTypeV(*outh);
     bool hyp_link = GET_ATW->inheritsType(t, HYPOTHETICAL_LINK);
@@ -52,7 +52,7 @@ boost::shared_ptr<set<BoundVertex> > HypothesisRule::attemptDirectProduction(met
              printer.print(_v2h(ret->begin()->value), 4);
 		}
 
-    return boost::shared_ptr<set<BoundVertex> >(ret);
+    return boost::shared_ptr<std::set<BoundVertex> >(ret);
 }
 
 Rule::setOfMPs HypothesisRule:: o2iMetaExtra(meta outh, bool& overrideInputFilter) const

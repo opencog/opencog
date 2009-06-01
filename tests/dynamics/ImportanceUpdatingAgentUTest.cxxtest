@@ -33,6 +33,7 @@
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
 
 using namespace opencog;
+using namespace std;
 
 vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {

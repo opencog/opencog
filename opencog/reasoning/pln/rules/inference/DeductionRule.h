@@ -33,7 +33,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
     //DeductionFormula f;
     Type InclusionLink;
 
-	meta i2oType(const vector<Vertex>& h) const
+	meta i2oType(const std::vector<Vertex>& h) const
 	{
 		assert(h.size()==2);
 		AtomSpaceWrapper *nm = GET_ATW;	
@@ -51,7 +51,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 	{
 		return (args.size() == 2 && !(*args[0] == *args[1]));
 	}
-	TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
+	TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
 	{
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[5];
 

@@ -33,6 +33,7 @@
 #include <opencog/server/Agent.h>
 
 using namespace opencog;
+using namespace std;
 
 vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int number)
 {

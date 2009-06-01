@@ -113,12 +113,12 @@ public:
     /**
      * Datatype to handle the actions done by the pet or avatar
      */
-    class Action : public pair<std::string, std::vector<std::string> >
+    class Action : public std::pair<std::string, std::vector<std::string> >
     {
     public:
         inline Action( const std::string& name = "",
                        const std::vector<std::string>& parameters = std::vector<std::string>() ) :
-                pair<std::string, std::vector<std::string> >( name, parameters ) { }
+                std::pair<std::string, std::vector<std::string> >( name, parameters ) { }
 
         inline const std::string& getName( void ) const {
             return first;
@@ -299,7 +299,7 @@ private:
      * reward/punish rule implication links that were selected to execute or are
      * being executed during a time interval
      */
-    vector<float> gaussianVector;
+    std::vector<float> gaussianVector;
 
     // rule maps storing its type, precondition and effect
     std::map<std::string, int> ruleTypeMap;

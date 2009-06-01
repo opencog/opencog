@@ -61,13 +61,12 @@
 
 #include "AtomLookupProvider.h"
 
-using namespace std;
 using namespace opencog;
 using namespace opencog::pln;
 
 #undef STLhas
 #define STLhas(container, entity) ((container).find(entity) != (container).end())
-#define STLhas2(container, entity) (find((container).begin(), (container).end(), (entity)) != (container).end())
+#define STLhas2(container, entity) (std::find((container).begin(), (container).end(), (entity)) != (container).end())
 
 #define Btr boost::shared_ptr
 #define DeclareBtr(__T, __varname) Btr< __T > __varname(new __T)
@@ -80,7 +79,7 @@ const int STD_VARS = 100;
 /// meta is a vtree wrapped in a boost::shared_ptr
 typedef Btr<vtree> meta;
 /// hpair is a pair of pHandles
-typedef pair<pHandle, pHandle> hpair;
+typedef std::pair<pHandle, pHandle> hpair;
 
 typedef std::set<pHandle> pHandleSet;
 
@@ -130,26 +129,26 @@ void ReasoningLog(int l, std::string m);
 #define LOG_STR (_LOG_FIXED ? _LOGPOS : ( std::string(__FILE__) + ":" + i2str(__LINE__) ))
 
 // Print out trees
-string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
-string rawPrint(tree<Vertex>::iterator top, int _rloglevel);
+std::string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
+std::string rawPrint(tree<Vertex>::iterator top, int _rloglevel);
 
 // Make a string with count # of the char c
-string repeatc(const char c, const int count);
+std::string repeatc(const char c, const int count);
 
 namespace opencog {
 namespace pln {
 
-FitnessEvaluatorT getFitnessEvaluator(string name);
+FitnessEvaluatorT getFitnessEvaluator(std::string name);
 
 pHandle _v2h(const Vertex& v);
 
 // Check whether things are equivalent?
 bool unifiesTo(const vtree& lhs, const vtree& rhs,
-        map<pHandle, vtree>& Lbindings, map<pHandle, vtree>& Rbindings,
+        std::map<pHandle, vtree>& Lbindings, std::map<pHandle, vtree>& Rbindings,
         bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
 
 bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-        map<pHandle, pHandle>& bindings);
+        std::map<pHandle, pHandle>& bindings);
 
 typedef Btr< std::vector<Vertex> > VertexVector;
 typedef Btr< std::set<Vertex> > VertexSet;
@@ -179,7 +178,7 @@ class ObjectFactory
 {
 protected:
     ObjectFactory() {}
-    set<T*> objs;
+    std::set<T*> objs;
 public:
     T* New() {
         T* object = new T();
@@ -187,7 +186,7 @@ public:
         return object;
     }
     ~ObjectFactory() {
-        set<T*>::iterator s;
+        std::set<T*>::iterator s;
         for (std::set<T*>::iterator i = objs.begin(); i != objs.end(); i++) {
             delete *i;
         }
@@ -333,9 +332,9 @@ Btr<vtree> tree_transform(vtree& vt_const, TransformerT transformer)
 template<typename T2, typename T>
 struct mapper {
     T mbegin, mend;
-    map<T2, T2> m;
+    std::map<T2, T2> m;
 
-    mapper(map<T2, T2>& _m, T _mbegin, T _mend)
+    mapper(std::map<T2, T2>& _m, T _mbegin, T _mend)
             : mbegin(_mbegin), mend(_mend), m(_m) {}
     T2 operator()(const T2& key) {
         T i = m.find(key);
@@ -364,9 +363,9 @@ which must be found consistent when these guys are combined!
 */
 
 template<typename T>
-Btr<map<Vertex, Vertex> > toVertexMap(T mbegin, T mend)
+Btr<std::map<Vertex, Vertex> > toVertexMap(T mbegin, T mend)
 {
-    Btr<map<Vertex, Vertex> > ret(new map<Vertex, Vertex>);
+    Btr<std::map<Vertex, Vertex> > ret(new std::map<Vertex, Vertex>);
     for (T next = mbegin; next != mend; ++next) {
 //  (*ret)[Vertex(next->first)];
 //  Vertex vv(next->second);
@@ -409,11 +408,11 @@ bool consistent(TM& b1, TM& b2, bindContainerIterT b1start, bindContainerIterT b
     return true;
 }
 
-void print_binding(pair<Handle, vtree> i);
+void print_binding(std::pair<Handle, vtree> i);
 
 struct PLNexception {
-    string msg;
-    PLNexception(string _msg) : msg(_msg) {}
+    std::string msg;
+    PLNexception(std::string _msg) : msg(_msg) {}
     const char* what() const {
         return msg.c_str();
     }
@@ -423,8 +422,8 @@ template<typename T1, typename T2, typename T3>
 void insert_with_consistency_check(std::map<T1, T2>& m, T3 rstart, T3 rend)
 {
     ///haxx::
-    Btr<map<Vertex, Vertex> > mV(toVertexMap(m.begin(), m.end()));
-    Btr<map<Vertex, Vertex> > rV(toVertexMap(rstart, rend));
+    Btr<std::map<Vertex, Vertex> > mV(toVertexMap(m.begin(), m.end()));
+    Btr<std::map<Vertex, Vertex> > rV(toVertexMap(rstart, rend));
 
     if (consistent<Vertex>(*mV, *rV, mV->begin(), mV->end(), rV->begin(), rV->end()))
         m.insert(rstart, rend);
@@ -438,10 +437,10 @@ void insert_with_consistency_check(std::map<T1, T2>& m, T3 rstart, T3 rend)
     }
 }
 
-void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m, map<pHandle, vtree>::iterator rstart, map<pHandle, vtree>::iterator rend);
+void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m, std::map<pHandle, vtree>::iterator rstart, std::map<pHandle, vtree>::iterator rend);
 
 
-typedef pair<std::string, pHandle> hsubst;
+typedef std::pair<std::string, pHandle> hsubst;
 struct iAtomSpaceWrapper;
 
 bool within(float a, float b, float diff);
@@ -485,7 +484,7 @@ struct weak_atom {
 };
 
 typedef weak_atom<Vertex> BoundVertex;
-typedef set<Vertex> BasicVertexSet;
+typedef std::set<Vertex> BasicVertexSet;
 typedef std::vector<opencog::pln::BoundVertex> BV_Vector;
 typedef std::set<opencog::pln::BoundVertex> BV_Set;
 
@@ -505,7 +504,7 @@ struct TableGather : public std::set<weak_atom<Vertex> > {
 typedef TableGather::iterator TableGatherIt;
 typedef TableGather::const_iterator TableGatherConstIt;
 
-bool getLargestIntersection(const set<pHandle>& keyelem_set, const set<pHandle>& link_set, pHandle& result);
+bool getLargestIntersection(const std::set<pHandle>& keyelem_set, const std::set<pHandle>& link_set, pHandle& result);
 
 template<typename T>
 bool vectorHas(std::vector<T> box, T key)
@@ -554,19 +553,19 @@ struct atom;
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
                    bindingsT& bindings,
-                   set<hsubst>** forbiddenBindings = NULL,
+                   std::set<hsubst>** forbiddenBindings = NULL,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
-                   const vector<Btr<atom> >& rhsv,
+                   const std::vector<Btr<atom> >& rhsv,
                    bindingsT& bindings,
-                   set<hsubst>** forbiddenBindings = NULL,
+                   std::set<hsubst>** forbiddenBindings = NULL,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
               const atom& rhs,
               bindingsT& bindings,
-              set<hsubst>** forbiddenBindings = NULL,
+              std::set<hsubst>** forbiddenBindings = NULL,
               bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 template<typename OP1, typename OP2, typename ArgT, typename RetT>
@@ -607,19 +606,19 @@ public:
     }
 };
 
-void convertTo(const vector<Vertex>& args, auto_ptr<Handle>& ret);
-void convertTo(const VertexVector& args, auto_ptr<Handle>& ret);
-void convertTo(const vector<BoundVertex>& args, auto_ptr<Handle>& ret);
-void convertTo(const set<BoundVertex>& args, auto_ptr<Handle>& ret);
-void convertTo(const VertexSet& args, auto_ptr<Handle>& ret);
-void convertTo(const vector<Handle>& args, auto_ptr<Handle>& ret);
+void convertTo(const std::vector<Vertex>& args, std::auto_ptr<Handle>& ret);
+void convertTo(const VertexVector& args, std::auto_ptr<Handle>& ret);
+void convertTo(const std::vector<BoundVertex>& args, std::auto_ptr<Handle>& ret);
+void convertTo(const std::set<BoundVertex>& args, std::auto_ptr<Handle>& ret);
+void convertTo(const VertexSet& args, std::auto_ptr<Handle>& ret);
+void convertTo(const std::vector<Handle>& args, std::auto_ptr<Handle>& ret);
 void convertTo(const VertexVector& args, Handle*& ret);
-void convertTo(const vector<Vertex>& args, Handle*& ret);
-void convertTo(const vector<BoundVertex>& args, Handle*& ret);
-void convertTo(const vector<BoundVertex>& args, HandleSeq& ret);
-void convertTo(const set<BoundVertex>& args, Handle*& ret);
+void convertTo(const std::vector<Vertex>& args, Handle*& ret);
+void convertTo(const std::vector<BoundVertex>& args, Handle*& ret);
+void convertTo(const std::vector<BoundVertex>& args, HandleSeq& ret);
+void convertTo(const std::set<BoundVertex>& args, Handle*& ret);
 void convertTo(const VertexSet& args, Handle*& ret);
-void convertTo(const vector<Handle>& args, Handle*& ret);
+void convertTo(const std::vector<Handle>& args, Handle*& ret);
 
 template<typename T>
 bool deref_equal(T a, T b)
@@ -627,7 +626,7 @@ bool deref_equal(T a, T b)
     return *a == *b;
 }
 
-struct getOutgoingFun : public binary_function<pHandle, int, pHandle> {
+struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
     pHandle operator()(pHandle h, int i);
 };
 
@@ -635,8 +634,8 @@ struct getOutgoingFun : public binary_function<pHandle, int, pHandle> {
 //#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getOutgoing),GET_ATW)
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
-#define getFW_VAR(vt) (find_if((vt).begin(), (vt).end(), \
-                               bind(equal_to<Type>(), \
+#define getFW_VAR(vt) (std::find_if((vt).begin(), (vt).end(), \
+                               bind(std::equal_to<Type>(), \
                                     bind(getTypeFun, bind(&_v2h, _1)), \
                                     (Type)FW_VARIABLE_NODE )))
 
@@ -647,17 +646,17 @@ Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
 Vertex CreateVar(iAtomSpaceWrapper* atw);
 
 const char* Type2Name(Type t);
-string condensed_form(const atom& a);
+std::string condensed_form(const atom& a);
 
-Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, iAtomSpaceWrapper* table);
+Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, iAtomSpaceWrapper* table);
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, iAtomSpaceWrapper* table);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
-meta bind_vtree(vtree &targ, const map<pHandle, pHandle>& binds);
+meta bind_vtree(vtree &targ, const std::map<pHandle, pHandle>& binds);
 void bind_Bvtree(meta arg, const bindingsVTreeT& binds);
 void removeRecursionFromHandleHandleMap(bindingsT& ret_bindings);
 
-void printBinding(const pair<const Handle, Handle> p);
+void printBinding(const std::pair<const Handle, Handle> p);
 bool equalVariableStructure(const vtree& lhs, const vtree& rhs);
 bool equalVariableStructure2(BBvtree lhs, BBvtree rhs);
 
@@ -666,12 +665,12 @@ pHandle make_real(vtree& vt);
 // #define fabs(a) (((a)>0.0f) ? (a) : (-a)) // now using math.h as this define clashes with headers
 
 template<typename T, typename T2>
-T2 second(const pair<T, T2>& p)
+T2 second(const std::pair<T, T2>& p)
 {
     return p.second;
 }
 template<typename T, typename T2>
-T first(const pair<T, T2>& p)
+T first(const std::pair<T, T2>& p)
 {
     return p.first;
 }
@@ -685,7 +684,7 @@ void removeRecursionFromMap(T mbegin, T mend)
         T2 mnodenext = mnext->second.begin();
 
         while (mnodenext != mnext->second.end()) {
-            T next_mapping = find_if(mbegin, mend, bind(equal_to<pHandle>(), _v2h(*mnodenext), bind(&first<pHandle, vtree>, _1)) ); //mbegin->second == _1);
+            T next_mapping = find_if(mbegin, mend, bind(std::equal_to<pHandle>(), _v2h(*mnodenext), bind(&first<pHandle, vtree>, _1)) ); //mbegin->second == _1);
 
             if (next_mapping != mend) {
                 assert(next_mapping->first == _v2h(*mnodenext));
@@ -720,7 +719,7 @@ meta ForceRootLinkVirtual(meta target);
 
 void print_progress();
 
-bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set);
+bool RealHandle(meta _target, Btr<std::set<BoundVertex> > result_set);
 
 template<typename MapIteratorT, typename MapItemT>
 void removeRecursionFromMapSimple(MapIteratorT mbegin, MapIteratorT mend)
@@ -730,7 +729,7 @@ void removeRecursionFromMapSimple(MapIteratorT mbegin, MapIteratorT mend)
     MapIteratorT mnext = mbegin, next_mapping;
 
     while (mnext != mend) {
-        if ( (next_mapping = find_if(mbegin, mend, bind(equal_to<MapItemT>(), mnext->second, bind(&first<MapItemT, MapItemT>, _1))))
+        if ( (next_mapping = find_if(mbegin, mend, bind(std::equal_to<MapItemT>(), mnext->second, bind(&first<MapItemT, MapItemT>, _1))))
                 != mend) {
             assert(next_mapping->first == mnext->second);
             mnext->second = next_mapping->second;
@@ -744,7 +743,7 @@ void removeRecursionFromMapSimple(MapIteratorT mbegin, MapIteratorT mend)
 void makeHandletree(pHandle h, bool fullVirtual, tree<Vertex>& ret);
 
 bool substitutableTo(pHandle from, pHandle to,
-                     map<pHandle, pHandle>& bindings);
+                     std::map<pHandle, pHandle>& bindings);
 
 bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b);
 }} // namespace opencog::pln

@@ -28,6 +28,10 @@
 #include "../PLNatom.h"
 #include "../BackInferenceTreeNode.h"
 
+using std::vector;
+using std::set;
+using std::map;
+
 namespace haxx
 {
     /// Must invert the formula I*(I+1)/2 for 2-level incl. excl. in OR rule
@@ -35,7 +39,7 @@ namespace haxx
     map<int, int> total2level1;
     int contractInclusionExclusionFactorial(int total)
     {
-        map<int, int>::iterator T2L = total2level1.find(total);
+        std::map<int, int>::iterator T2L = total2level1.find(total);
 
         if(T2L != total2level1.end())
             return T2L->second;
@@ -225,11 +229,11 @@ void createPermutation(vector<C> seed, set< vector<C> >& result, int index)
             createPermutation<C>(seed, result, index+1);
 
             //C temp = seed[i];
-            swap<C>(seed[index], seed[i]);
+            std::swap<C>(seed[index], seed[i]);
 
             createPermutation<C>(seed, result, index+1);
 
-            swap<C>(seed[index], seed[i]); //Cancel
+            std::swap<C>(seed[index], seed[i]); //Cancel
         }
     }
 }
@@ -442,8 +446,8 @@ Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
 }
 #endif
 
-void pr2(pair<pHandle, vtree> i);
-void pr(pair<pHandle, pHandle> i);
+void pr2(std::pair<pHandle, vtree> i);
+void pr(std::pair<pHandle, pHandle> i);
 
 template <class InputIterator,
                         class OutputIterator,
@@ -466,7 +470,7 @@ OutputIterator transform_if(InputIterator first,
 }
 
 template<typename T>
-struct returnor  : public unary_function<T,T> 
+struct returnor  : public std::unary_function<T,T> 
 {
     const T& ret;
     returnor(const T& _ret) : ret(_ret) {}
@@ -474,7 +478,7 @@ struct returnor  : public unary_function<T,T>
 };
 
 template<typename T>
-struct converter  : public binary_function<T,T,void> 
+struct converter  : public std::binary_function<T,T,void> 
 {
     T src, dest;
     converter(const T& _src, const T& _dest) : src(_src), dest(_dest) {}
@@ -491,8 +495,8 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!
     vtree::iterator vit = ret->begin();
 
-    while(  (vit =  find_if(ret->begin(), ret->end(),
-                                bind(equal_to<Type>(),
+    while(  (vit =  std::find_if(ret->begin(), ret->end(),
+                                bind(std::equal_to<Type>(),
                                     bind(getTypeVFun, _1),
                                     (Type)(int)VARIABLE_NODE
                                 )
@@ -500,7 +504,7 @@ Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
                 ) != ret->end())
     {
         Vertex new_var = CreateVar(table);
-        for_each(ret->begin(), ret->end(), converter<Vertex>(*vit, new_var));
+        std::for_each(ret->begin(), ret->end(), converter<Vertex>(*vit, new_var));
 #if 0
         printTree(v2h(*vit),0,4);
         rawPrint(*ret, ret->begin(), 4);

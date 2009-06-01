@@ -112,12 +112,12 @@ bool ClassServer::isA(Type type, Type parent)
     return inheritanceMap[parent][type];
 }
 
-bool ClassServer::isDefined(const string& typeName)
+bool ClassServer::isDefined(const std::string& typeName)
 {
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
-Type ClassServer::getType(const string& typeName)
+Type ClassServer::getType(const std::string& typeName)
 {
     std::tr1::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {

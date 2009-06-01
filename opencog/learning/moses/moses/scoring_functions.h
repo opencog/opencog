@@ -26,10 +26,6 @@
 
 #include "using.h"
 
-using namespace std;
-using namespace boost;
-
-
 namespace moses
 {
 

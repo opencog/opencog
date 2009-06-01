@@ -42,7 +42,7 @@ HelpRequest::~HelpRequest()
 
 bool HelpRequest::execute()
 {
-    ostringstream oss;
+    std::ostringstream oss;
     CogServer& cogserver = static_cast<CogServer&>(server());
 
     if (_parameters.empty()) {

@@ -97,7 +97,7 @@ public:
 
     ///a simple error hanlder; may be overridden
     virtual void handleError(const std::string& error) const {
-        cerr << "ERROR: " << error << endl;
+        std::cerr << "ERROR: " << error << std::endl;
         exit(1);
     }
 

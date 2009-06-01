@@ -36,6 +36,7 @@
 #define DEBUG
 
 using namespace opencog;
+using namespace std;
 
 StorkeyAgent::StorkeyAgent()
 {

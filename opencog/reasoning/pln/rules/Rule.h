@@ -27,7 +27,7 @@
 #include "../PLNUtils.h"
 
 const TruthValue& getTV(pHandle); 
-#define NO_DIRECT_PRODUCTION Btr<set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<set<BoundVertex> >(); }
+#define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<std::set<BoundVertex> >(); }
 
 /** Reasoning namespace is being used instead of opencog while
  * tidying up the code.
@@ -51,10 +51,10 @@ public:
     const int RULE_INPUT_ARITY_MAX;
 
     typedef std::vector<BBvtree> MPs;
-    typedef set<MPs> setOfMPs;
+    typedef std::set<MPs> setOfMPs;
 
     typedef std::vector<meta> MPsIn;
-    typedef set<MPsIn> setOfMPsIn;
+    typedef std::set<MPsIn> setOfMPsIn;
 
 protected:
     /**
@@ -93,7 +93,7 @@ protected:
      * @param overrideInputFilter Whether the method overrides inputFilter.
      * @return The extra requirements filter.
      */
-    virtual set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
+    virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
     // virtual MPs* o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const=0;
 
 public:
@@ -133,16 +133,16 @@ public:
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
-    virtual BoundVertex compute(const vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const=0;
+    virtual BoundVertex compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const=0;
 
     //! A concrete computation method for generic rule
-    BoundVertex compute(const vector<BoundVertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex compute(const std::vector<BoundVertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
 
     //! Whether to attempt direct production.
-    virtual Btr<set<BoundVertex> > attemptDirectProduction(meta h)=0;
+    virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
 
     //! Just calls compute()
-    BoundVertex operator() (const vector<Vertex> h, pHandle CX = PHANDLE_UNDEFINED) const
+    BoundVertex operator() (const std::vector<Vertex> h, pHandle CX = PHANDLE_UNDEFINED) const
         { return compute(h,CX); }
 
     /** Check validity.
@@ -152,7 +152,7 @@ public:
      * @param h The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.
      */
-    bool validate(const vector<Vertex>& h) const;
+    bool validate(const std::vector<Vertex>& h) const;
 
     /** ARI: Another alternative for checking validity. ???
      *
@@ -167,7 +167,7 @@ public:
      * @param CX ???
      * @return The result of the rule being computed.
      */
-    BoundVertex computeIfValid (const vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex computeIfValid (const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
 
     //Handle compute(Handle h1) const;
     //Handle compute(Handle h1, Handle h2) const;

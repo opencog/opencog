@@ -61,12 +61,10 @@
 
 #define NM_PRINTER_LOG_FILE_NAME "nm_printer.log"
 
-using namespace std;
-using namespace boost;
 using namespace opencog;
 using namespace opencog::pln;
 
-typedef variant < pHandle, vtree, vtree::iterator_base > NMPrintable;
+typedef boost::variant < pHandle, vtree, vtree::iterator_base > NMPrintable;
 
 /**
  * This class provides methods for printing a data structure that represents an atom or 
@@ -130,7 +128,7 @@ public:
      * Converts a NMPPrintable object (Handle, vtree, etc) into a std::string object, according with the NMPrinter options defined 
      * in its constructor. Optionally, a specific log level (for only this call) may be specified in the second argument. 
      */
-    string toString(NMPrintable printable, int logLevel = NM_PRINTER_KEEP_DEFAULT_LOG_LEVEL);
+    std::string toString(NMPrintable printable, int logLevel = NM_PRINTER_KEEP_DEFAULT_LOG_LEVEL);
 
     /**
      * This static method was created for testing purposes (Unit tests, actually)
@@ -167,11 +165,11 @@ private:
     bool isVtree(NMPrintable) const;
     bool isVtreeIterator(NMPrintable p) const;
     
-    void toStream(ostream& out, const NMPrintable p, int indentationLevel) const;
-    void printHandle(ostream& out, pHandle h, int indentationLevel) const;
-    void printVTree(ostream& out, vtree::iterator top, int indentationLevel) const;
+    void toStream(std::ostream& out, const NMPrintable p, int indentationLevel) const;
+    void printHandle(std::ostream& out, pHandle h, int indentationLevel) const;
+    void printVTree(std::ostream& out, vtree::iterator top, int indentationLevel) const;
     bool logLevelOk(int logLevel) const;
-    void printSpaces(ostream& out, int indentationLevel) const;
+    void printSpaces(std::ostream& out, int indentationLevel) const;
     std::string getFloatStr(float value) const;
     std::string getFloatStrWithoutTrailingZeros(float value) const;
 };
@@ -180,7 +178,7 @@ private:
  * Boost visitor for checking real types inside NMPrintable variant.
  */
 class are_from_same_type_visitor
-    : public static_visitor<bool>
+: public boost::static_visitor<bool>
 {
 public:
 

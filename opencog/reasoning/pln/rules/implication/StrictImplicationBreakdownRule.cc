@@ -73,7 +73,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
         return makeSingletonSet(ret);
 }
 
-BoundVertex StrictImplicationBreakdownRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
         AtomSpaceWrapper *nm = GET_ATW;
         assert(validate(premiseArray));

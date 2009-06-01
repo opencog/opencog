@@ -37,7 +37,7 @@
 #include <opencog/util/Config.h>
 
 using namespace opencog;
-using std::find;
+using namespace std;
 
 #define NUM_VHS 4
 

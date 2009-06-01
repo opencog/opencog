@@ -39,9 +39,6 @@
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
-using std::cout;
-using std::endl;
-
 namespace moses
 {
 

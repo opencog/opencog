@@ -65,7 +65,7 @@ public:
 		return makeSingletonSet(ret);
 	}
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX=PHANDLE_UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX=PHANDLE_UNDEFINED) const
 	{
 		pHandle *hs = new pHandle[premiseArray.size()];
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(

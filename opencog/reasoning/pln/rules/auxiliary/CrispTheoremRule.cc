@@ -28,6 +28,10 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
+using std::vector;
+using std::map;
+using std::set;
+
 namespace opencog { namespace pln {
 
 CrispTheoremRule::CrispTheoremRule(iAtomSpaceWrapper *_destTable)

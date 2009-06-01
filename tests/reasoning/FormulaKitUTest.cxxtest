@@ -34,6 +34,8 @@
 #define STRENGTH_EPSILON 0.1
 #define COUNT_EPSILON 5
 
+using namespace std;
+
 class FormulasKitUTest : public CxxTest::TestSuite{
 private:
 //    SimpleTruthValue* atoms[NUM_ATOMS];

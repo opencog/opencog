@@ -51,6 +51,7 @@
 
 using namespace std;
 using namespace opencog;
+using boost::shared_ptr;
 
 namespace haxx
 {

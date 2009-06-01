@@ -78,7 +78,7 @@ public:
 
 	NO_DIRECT_PRODUCTION;
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = NULL) const
   {
 	AtomSpaceWrapper *nm = GET_ATW;
 	std::vector<pHandle> hs = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));

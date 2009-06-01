@@ -1,4 +1,4 @@
-map<int, Btr<vtree > > tests;
+std::map<int, Btr<vtree > > tests;
 
 void initTests()
 {

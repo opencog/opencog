@@ -23,6 +23,8 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlanSender.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
+using std::string;
+
 // Mock subclasses of ActionPlanSender
 class ResponsiveActionPlanSender : public PerceptionActionInterface::ActionPlanSender
 {

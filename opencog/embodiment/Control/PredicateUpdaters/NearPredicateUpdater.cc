@@ -55,7 +55,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     if (!spaceMap.containsObject(objectName)) {
         logger().debug("NearPredicateUpdater::update: Did  not find object %s in the map", objectName.c_str());
 
-        vector<std::string> entities;
+        std::vector<std::string> entities;
         spaceMap.findAllEntities(back_inserter(entities));
 
         foreach(std::string entity, entities) {
@@ -94,7 +94,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 //  const Spatial::Object& petObject = spaceMap.getObject( objectName );
     const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( objectName );
 
-    vector<std::string> entities;
+    std::vector<std::string> entities;
     spaceMap.findAllEntities(back_inserter(entities));
 
     foreach(std::string entity, entities) {

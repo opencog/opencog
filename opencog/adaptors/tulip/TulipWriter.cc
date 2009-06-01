@@ -27,6 +27,8 @@
 #include <time.h>
 #include <sstream>
 
+using std::endl;
+
 #define foreach BOOST_FOREACH
 
 namespace opencog {
@@ -261,7 +263,7 @@ std::string TulipWriter::getDateString()
 {
     time_t rawtime;
     struct tm * timeinfo;
-    ostringstream datestr;
+    std::ostringstream datestr;
 
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );

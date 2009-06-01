@@ -66,7 +66,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 
 	iAtomSpaceWrapper* parent = ASW();
 
-	Btr<set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
+	Btr<std::set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
 	
 	foreach(pHandle fah, *ForAll_handles)
 		AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
@@ -167,7 +167,7 @@ protected:
 	mutable FormulaType f;
 
 public:
-	virtual set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
+	virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
 //	virtual TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const=0;
 	
 	~GenericRule2() {}
@@ -175,7 +175,7 @@ public:
 	GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
 		
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
 	{
 		return Vertex();
 	}
@@ -191,7 +191,7 @@ protected:
 	std::vector<Type> ti;
 
 	~InversionRule2() {}
-	TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
+	TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
 	{
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
 
@@ -213,7 +213,7 @@ public:
 	}
 	bool validate2				(MPs& args) const { return true; }
 
-	virtual meta i2oType(const vector<Vertex>& h) const
+	virtual meta i2oType(const std::vector<Vertex>& h) const
 	{
 		return	meta(new tree<Vertex>());
 	}

@@ -34,6 +34,7 @@
 #include <opencog/server/Agent.h>
 #include <opencog/util/Config.h>
 
+using namespace std;
 using namespace opencog;
 
 vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)

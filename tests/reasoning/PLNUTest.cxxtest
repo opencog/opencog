@@ -40,6 +40,7 @@
 #include <opencog/util/Config.h>
 
 using namespace opencog::pln;
+using namespace std;
 
 #define RUN_FAILURE_TESTS 0
 #define WAIT_KEY_ON_FAILURE 0

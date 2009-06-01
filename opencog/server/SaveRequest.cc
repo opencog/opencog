@@ -49,7 +49,7 @@ SaveRequest::~SaveRequest()
 bool SaveRequest::execute()
 {
     logger().debug("[SaveRequest] execute");
-    ostringstream oss;
+    std::ostringstream oss;
 
     if (_parameters.empty()) {
         oss << "invalid syntax: save <filename>" << std::endl;
@@ -62,7 +62,7 @@ bool SaveRequest::execute()
     std::string& filename = _parameters.front();
     HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
     NMXmlExporter *exporter = new NMXmlExporter();
-    std::fstream file(filename.c_str(), fstream::out);
+    std::fstream file(filename.c_str(), std::fstream::out);
     try {
         file << exporter->toXML(handles);
         file.flush();

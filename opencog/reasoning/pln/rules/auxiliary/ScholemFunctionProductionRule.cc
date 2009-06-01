@@ -30,7 +30,7 @@
 
 namespace haxx
 {
-map<string, map<Handle, Handle> > scholemFunctions;
+std::map<std::string, std::map<Handle, Handle> > scholemFunctions;
 opencog::pln::BITNodeRoot* bitnoderoot;
 
 /// \todo This data must persist even if the BITNodeRoot is deleted.
@@ -49,9 +49,9 @@ Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& over
     Scholem links are not memory-managed.
 */
 
-boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDirectProduction(meta outh)
+boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemptDirectProduction(meta outh)
 {
-    boost::shared_ptr<set<BoundVertex > > ret;
+    boost::shared_ptr<std::set<BoundVertex > > ret;
 
     if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
         return ret;
@@ -88,7 +88,7 @@ boost::shared_ptr<set<BoundVertex > > ScholemFunctionProductionRule::attemptDire
     TableGather s(old_subst, destTable);
 
     if (s.empty()) {
-        ret = boost::shared_ptr<set<BoundVertex > >(new set<BoundVertex>);
+        ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
         ret->insert(BoundVertex(Vertex(destTable->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
                                        TruthValue::TRUE_TV(),
                                        false, false))));

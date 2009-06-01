@@ -196,7 +196,7 @@ public:
             ss << *it << " ";
             col++;
             if (col == width) {
-                ss << endl;
+                ss << std::endl;
                 col = 0;
             }
             it++;

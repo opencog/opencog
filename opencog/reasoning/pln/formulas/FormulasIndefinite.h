@@ -47,16 +47,15 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <vector>
 
-using namespace std;
 using namespace opencog;
 
 // ***************************************************
 // Syntactic sugar
 
 typedef float number_t;
-typedef vector<number_t> dvector;
-typedef vector<number_t*> pvector;
-typedef vector<vector<number_t> > dmatrix;
+typedef std::vector<number_t> dvector;
+typedef std::vector<number_t*> pvector;
+typedef std::vector<std::vector<number_t> > dmatrix;
 
 namespace opencog {
 namespace pln {
@@ -188,7 +187,7 @@ public:
     IndefiniteTruthValue* conclusion(const pvector& distribution);
 
 protected:
-    vector<IndefiniteTruthValue *> tvset;
+    std::vector<IndefiniteTruthValue *> tvset;
     Sampler *s;
 };
 
@@ -211,7 +210,7 @@ public:
                     IndefiniteTruthValue* const& TVb);
     IndefiniteTruthValue* solve();
     IndefiniteTruthValue* q_r_conclusion(float lower, float upper,
-                                         const vector<vector<float> >& d);
+                                         const std::vector<std::vector<float> >& d);
 };
 
 class RevisionRule : public IndefiniteRule

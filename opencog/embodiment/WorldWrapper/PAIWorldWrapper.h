@@ -147,7 +147,7 @@ private:
     PerceptionActionInterface::PetAction buildPetAction(sib_it from);
 
     //???
-    string toCamelCase(string str);
+    std::string toCamelCase(std::string str);
 
     //type of a handle -> string
     std::string resolveType(combo::vertex);

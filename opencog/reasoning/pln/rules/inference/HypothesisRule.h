@@ -29,7 +29,7 @@ class HypothesisRule : public Rule
 protected:
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
 		return premiseArray[0];
 	}
@@ -40,7 +40,7 @@ public:
 	{
 		//inputFilter.push_back(new atom(result));
 	}
-	Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
+	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

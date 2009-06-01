@@ -25,8 +25,6 @@
 #include <map.h>
 #include <vector.h>
 
-using namespace std;
-
 namespace opencog {
 namespace pln {
 

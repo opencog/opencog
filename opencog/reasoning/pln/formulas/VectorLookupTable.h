@@ -24,8 +24,6 @@
 
 #include <vector>
 
-using namespace std;
-
 namespace opencog {
 namespace pln {
 

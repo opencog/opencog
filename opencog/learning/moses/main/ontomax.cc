@@ -30,6 +30,9 @@
 #include <boost/assign/list_of.hpp> 
 
 using namespace boost::assign;
+using std::string;
+using std::vector;
+using boost::lexical_cast;
 
 void recbuild(onto_tree& tr,onto_tree::iterator it,
 	      int b,int maxd,int d,int s) {

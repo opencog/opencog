@@ -128,11 +128,11 @@ void BackChainingAgent::run(CogServer *server)
         state->infer(j, 0.000001f, 0.90f); // Sets j to the number of steps remaining for this cycle
         state->printResults();
         
-        cout << "\n" << j << " $ remaining.\n";
+        std::cout << "\n" << j << " $ remaining.\n";
         
         steps += (stepsPerCycle - j);
 
-        cout << "steps: " << steps << endl;
+        std::cout << "steps: " << steps << std::endl;
         // If it didn't use all the steps, then it is finished
         if (j > 0) {
             // Indicate to use a new target next cycle.

@@ -136,7 +136,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
         return;
     }
 
-    vector<std::string> entities;
+    std::vector<std::string> entities;
     spaceMap.findAllEntities( back_inserter(entities) );
     float meanValue;
     bool atHome = false;

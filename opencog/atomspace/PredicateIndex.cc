@@ -115,7 +115,7 @@ void PredicateIndex::addPredicateIndex(Handle ph,
 
 	// Ok, add it.
 	predicateHandles2Indices.insert(
-		pair<Handle,int>(ph, numberOfPredicateIndices));
+		std::pair<Handle,int>(ph, numberOfPredicateIndices));
 	predicateHandles[numberOfPredicateIndices] = ph;
 	predicateEvaluators[numberOfPredicateIndices] = evaluator;
 	numberOfPredicateIndices++;

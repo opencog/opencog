@@ -193,7 +193,7 @@ std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::
     
     for (std::vector<Agent*>::const_iterator it = agents.begin();
          it != agents.end(); ++it) {
-        oss << (*it)->to_string() << endl;
+        oss << (*it)->to_string() << std::endl;
     }
     
     return oss.str();

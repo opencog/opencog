@@ -28,6 +28,9 @@
 
 #include <opencog/util/StringTokenizer.h>
 
+using std::cout;
+using std::string;
+
 using namespace std;
 
 namespace opencog {
@@ -47,7 +50,7 @@ CogitaConfig::CogitaConfig() :
             }
         }
         for (int i = 0; defaultChannels[i]; i++) {
-            ircChannels.push_back(string(defaultChannels[i]));
+            ircChannels.push_back(std::string(defaultChannels[i]));
         }
 
 }

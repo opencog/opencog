@@ -76,7 +76,7 @@ void RunningComboSelectProcedure::cycle()
 
     combo::vertex firstScriptResult = interpreter.getResult(firstScriptId);
     this->unifier = interpreter.getUnifierResult(firstScriptId);
-    stringstream ss;
+    std::stringstream ss;
 
     ss << firstScriptResult;
     opencog::cassert(TRACE_INFO, is_builtin(firstScriptResult),

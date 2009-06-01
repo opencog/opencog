@@ -44,7 +44,7 @@ typedef std::map<RunningProcedureId, RunningComboProcedure> Map;
 typedef std::vector<Map::iterator> Vec;
 
 //
-class DonePred : public unary_function<Vec::iterator, bool>
+class DonePred : public std::unary_function<Vec::iterator, bool>
 {
 private:
     std::set<RunningProcedureId> _set;

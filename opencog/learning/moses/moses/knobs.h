@@ -37,8 +37,6 @@
 #include <opencog/learning/moses/eda/field_set.h>
 #include <bitset>
 
-using namespace std;
-
 
 namespace moses
 {

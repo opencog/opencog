@@ -341,7 +341,7 @@ void RuleProcessor::loadComboScripts(const std::string & comboLib,
                                      const std::string & comboSel,
                                      const std::string & comboAct)
 {
-    ifstream fin(comboLib.c_str());
+    std::ifstream fin(comboLib.c_str());
     if (fin.good()) {
         comboRepository.loadFromStream(fin);
     } else {

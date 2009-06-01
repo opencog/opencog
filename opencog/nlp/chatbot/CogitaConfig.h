@@ -24,7 +24,6 @@
 #include <vector>
 #include <set>
 
-using namespace std;
 
 namespace opencog {
 namespace chatbot {
@@ -43,12 +42,12 @@ namespace chatbot {
 class CogitaConfig {
     void createAttnVector();
 public:
-    string ircNetwork;
-    vector<string> ircChannels;
+    std::string ircNetwork;
+    std::vector<std::string> ircChannels;
     int ircPort;
-    string vstring;
-    string nick;
-    vector<string> attn;
+    std::string vstring;
+    std::string nick;
+    std::vector<std::string> attn;
     static const std::string helpOutput;
 
     CogitaConfig();

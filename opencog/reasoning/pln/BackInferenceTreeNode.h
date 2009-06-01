@@ -53,7 +53,7 @@ class BITNode;
 class BITNodeRoot;  //!< Root of a BIT, controls inference
 class RuleProvider; //!< Provide rules when expanding the tree
 
-struct BITNode_fitness_comp : public binary_function<BITNode*, BITNode*, bool>
+struct BITNode_fitness_comp : public std::binary_function<BITNode*, BITNode*, bool>
 {
     bool operator()(BITNode* lhs, BITNode* rhs) const;
 };
@@ -220,12 +220,12 @@ protected:
     /// A set is used to store the parent links because a node can have
     /// multiple parents when the parent node has different
     /// bindings
-	mutable set<parent_link<BITNode> > parents;
+	mutable std::set<parent_link<BITNode> > parents;
 
 	/// The results produced by combining all the possible results
 	/// for my arguments (contained as sets), with an entry in the vector for
     /// each argument.
-	vector<set<VtreeProvider*> > eval_results;
+	std::vector<std::set<VtreeProvider*> > eval_results;
 
 	unsigned int depth;
 	BITNodeRoot* root;
@@ -240,7 +240,7 @@ protected:
     /// bdrum = the Best (confidence of) Direct Result Under Me
 	float my_bdrum;
 	
-	typedef set<vtree, less_tree_vertex> vtreeset;
+	typedef std::set<vtree, less_tree_vertex> vtreeset;
 
 	/// Targets of all atoms above me... obsolete but partially still functions
 	vtreeset target_chain;
@@ -249,7 +249,7 @@ protected:
 	/// clumsy but gets the job done. The direct results that do not need
     /// evaluation. Could be referred to as "generators". One example is
     /// the LookUp rule which just checks if an atom exists.
-	Btr<set<BoundVertex> > direct_results;
+	Btr<std::set<BoundVertex> > direct_results;
 
 	/// The vector of targets of my children, which will then become Rule arguments.
     /// Refers downwards in the BIT.
@@ -275,7 +275,7 @@ protected:
 	{
 		using namespace boost;
 		
-		for (vector<set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
+		for (std::vector<std::set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
 			foreach(const ParametrizedBITNode& pbit, *i)
 				pbit.prover->ApplyDown<opT>(op);
 		op(this);
@@ -289,7 +289,7 @@ protected:
 		if (!op(this))
 			return false;
 
-		for (vector<set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
+		for (std::vector<std::set<ParametrizedBITNode> >::iterator i =  children.begin(); i!=children.end(); i++)
 			foreach(ParametrizedBITNode& pbit, *i)
 				if (!pbit.prover->ApplyDown2<opT>(op))
 					return false;
@@ -414,13 +414,13 @@ protected:
     /// Completely and exhaustively expand tree to the bottom.
 	template<typename VectorT, typename SetT, typename VectorOfSetsIterT>
 	void WithLog_expandVectorSet(const std::vector<Btr<SetT> >& child_results,
-								 set<VectorT>& argVectorSet) const
+								 std::set<VectorT>& argVectorSet) const
 	{
 		tlog(3, 	"expandVectorSet(child_results, argVectorSet)...\n");
 
 		expandVectorSet<VectorT, 
 						VectorOfSetsIterT,
-						insert_iterator<set<VectorT> > >(
+						std::insert_iterator<std::set<VectorT> > >(
 							child_results.begin(),
 							child_results.end(),
 							inserter(argVectorSet, argVectorSet.begin()));
@@ -429,7 +429,7 @@ protected:
 			(child_results.size()>1?child_results[1]->size():0), argVectorSet.size(),	(argVectorSet.empty() ? 0 : argVectorSet.begin()->size()) );	
 
 		if (!child_results.empty())
-		{ string bc = string("Arg Expansion results:\n");
+		{ std::string bc = std::string("Arg Expansion results:\n");
 		foreach(const VectorT& vbv, argVectorSet)
 			if (!vbv.empty())
 			{
@@ -444,7 +444,7 @@ protected:
 	
 	/// Add the new result from a Generator, and spawn new subtrees when necessary
 	/// according to the variable bindings that accompany the new result
-	void addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode spawning);
+	void addDirectResult(Btr<std::set<BoundVertex> > directResult, spawn_mode spawning);
 
 	/// Create children and do some (probably obsolete) pre-binding checks.
 	bool expandRule(Rule *rule, int target_i, BBvtree arg,
@@ -485,7 +485,7 @@ public:
 	/// Set of possible inputs for each index of the input vectors of the Rule
 	/// associated with this node. Contains the BITNodes, as opposed to the
     /// results as in direct_results
-	vector<set<ParametrizedBITNode> > children;
+	std::vector<std::set<ParametrizedBITNode> > children;
 
 	BITNode();
 	BITNode(	BITNodeRoot* _root,
@@ -506,7 +506,7 @@ public:
 	void create();	
 
 	/// Use for debugging
-	string loopCheck() const;
+	std::string loopCheck() const;
 	
 	/// Use for debugging
 	int totalChildren() const;
@@ -518,8 +518,8 @@ public:
 
 	bool isComputable() const { return rule->isComputable(); }
 
-	const vector<set<VtreeProvider*> >& getEvalResults() const { return eval_results; }
-	const set<parent_link<BITNode> >& getParents() const { return parents; }
+	const std::vector<std::set<VtreeProvider*> >& getEvalResults() const { return eval_results; }
+	const std::set<parent_link<BITNode> >& getParents() const { return parents; }
 	
 	/// Look for a node equal to an existing dummy node
 	BITNode* findNode(BITNode* new_child) const;
@@ -538,14 +538,14 @@ public:
 	void expandFittest();
 
 	// Printing utilities
-	string tlog(int debugLevel, const char *format, ...) const;
+	std::string tlog(int debugLevel, const char *format, ...) const;
 	
-	string printChildrenSizes() const;
-	string print(int loglevel=0, bool compact=false, Btr<set<BITNode*> > UsedBITNodes = Btr<set<BITNode*> >()) const;
-	string printFitnessPool();
-	string printTarget() const;
-	string printArgs() const;
-	string printResults() const; 
+	std::string printChildrenSizes() const;
+	std::string print(int loglevel=0, bool compact=false, Btr<std::set<BITNode*> > UsedBITNodes = Btr<std::set<BITNode*> >()) const;
+	std::string printFitnessPool();
+	std::string printTarget() const;
+	std::string printArgs() const;
+	std::string printResults() const; 
 };
 
 /**
@@ -562,7 +562,7 @@ public:
 
 	~BITNodeRoot();
 
-	set<BITNode*> used_nodes;
+	std::set<BITNode*> used_nodes;
 
 	// The class assumes ownership of the RuleProvider
 	BITNodeRoot(meta _target, RuleProvider* _rp,
@@ -588,32 +588,32 @@ public:
      * AtomSpaceWrapper, since within PLN doesn't know about PLN dummy
      * contexts).
      */
-	const set<VtreeProvider*>& infer(int& resources,
+	const std::set<VtreeProvider*>& infer(int& resources,
             float minConfidenceForStorage = 0.000001f,
             float minConfidenceForAbort = 1.00f);
 
 	/// Manual evaluation. Should not be needed anymore.
 
-	Btr<set<BoundVertex> > evaluate(set<const BITNode*>* chain = NULL) const;
+	Btr<std::set<BoundVertex> > evaluate(std::set<const BITNode*>* chain = NULL) const;
 
 	/// Apply either ForAllRule or VariableScopeRule, depending on the _resultT type.
-	BoundVertex Generalize(Btr<set<BoundVertex> >, Type _resultT) const;
-//	BoundVertex Generalize(const set<BoundVertex>&, Type _resultT) const;
+	BoundVertex Generalize(Btr<std::set<BoundVertex> >, Type _resultT) const;
+//	BoundVertex Generalize(const std::set<BoundVertex>&, Type _resultT) const;
 
 	/// Extraction of an actionable plan from the proof tree of the atom with pHandle h.
-	string extract_plan(pHandle h) const;
-	string extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
+	std::string extract_plan(pHandle h) const;
+	std::string extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
 
 	// Statistics
 	
-//	map<Handle,vector<Handle> > inferred_from;
-//	map<Handle,Rule*> inferred_with;
-	map<pHandle,BITNode*> hsource;
+//	std::map<Handle,std::vector<Handle> > inferred_from;
+//	std::map<Handle,Rule*> inferred_with;
+	std::map<pHandle,BITNode*> hsource;
 	long InferenceNodes;
 
-	string printTrail(pHandle h) const;
-	string printUsers(BITNode* b);
-	string printParents(BITNode* b);
+	std::string printTrail(pHandle h) const;
+	std::string printUsers(BITNode* b);
+	std::string printParents(BITNode* b);
 
     int getExecPoolSize() const;
     void setRecordingTrails(bool x=true);
@@ -623,10 +623,10 @@ public:
 
 protected:
 	friend struct not_owned_var;
-	typedef list<BITNode*> exec_poolT;
+	typedef std::list<BITNode*> exec_poolT;
 	exec_poolT exec_pool;
 
-	map<Vertex, set<BITNode*> > varOwner;
+	std::map<Vertex, std::set<BITNode*> > varOwner;
 
 	std::map<Rule*, float> priority;
 
@@ -638,13 +638,13 @@ protected:
     /// or indirectly use (ie. Have as a subtree, with possibly some
     /// inheritance-bindings) BITNode b. This information is used (only) to
     /// prevent circularity: a BITNode cannot indirectly or directly use itself.
-	map<BITNode*, set<BITNode*> > users;
+	std::map<BITNode*, std::set<BITNode*> > users;
 
 	/// It's too slow to sort the pool after every insertion. Otherwise we'd do this:
 	/// typedef set<BITNode*, BITNode_fitness_comp> exec_poolT;
 
 	bool exec_pool_sorted;
-	set<BITNode*> BITNodeTemplates;
+	std::set<BITNode*> BITNodeTemplates;
 
 	RuleProvider* rp;
 
@@ -659,7 +659,7 @@ protected:
 	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 						
-	string printTrail(pHandle h, unsigned int level) const;
+	std::string printTrail(pHandle h, unsigned int level) const;
 
 	friend class BITNode;
 };
@@ -673,11 +673,11 @@ public:
 	//! @todo Complete implementation
 	BoundVertex evaluate1(int index);
 	
-	Btr<set<BoundVertex> > evaluate(set<const BITNode*>* chain = NULL) const;
+	Btr<std::set<BoundVertex> > evaluate(std::set<const BITNode*>* chain = NULL) const;
 
 	/// Use for brute force checking of whether the tree can be evaluated (but do not really evaluate).
 	//! @todo This may no longer be up-2-date with the real evaluate()
-	Btr<set<BoundVertex> > pseudo_evaluate() const;
+	Btr<std::set<BoundVertex> > pseudo_evaluate() const;
 };
 
 	template<typename T>
@@ -724,9 +724,9 @@ public:
 		
 	public:
 		//Store the result set of each BITNode for later analysis.
-		typedef map<BITNode*, set<Vertex> > ITN2atomT;
-		typedef map<BITNode*, set<Vertex> >::iterator ITN2atomIteratorT;
-		typedef map<BITNode*, set<Vertex> >::const_iterator ITN2atomIteratorConstT;
+		typedef std::map<BITNode*, std::set<Vertex> > ITN2atomT;
+		typedef std::map<BITNode*, std::set<Vertex> >::iterator ITN2atomIteratorT;
+		typedef std::map<BITNode*, std::set<Vertex> >::const_iterator ITN2atomIteratorConstT;
 		typedef nofilter<ITN2atomIteratorConstT> nofilterT;
 		typedef triviality_filter<ITN2atomIteratorConstT, ITN2atomT> triviality_filterT;
 
@@ -738,7 +738,7 @@ public:
             puts("stats::print()\n");
             filter.create(ITN2atom.begin(), ITN2atom.end());
 
-            for (map<BITNode*, set<Vertex> >::const_iterator	i = filter.filteredBegin;
+            for (std::map<BITNode*, std::set<Vertex> >::const_iterator	i = filter.filteredBegin;
                                                                 i!= filter.filteredEnd; i++)
             {
     //			printf("[%d]: ", (int)i->first);

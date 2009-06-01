@@ -27,7 +27,7 @@ namespace opencog { namespace pln {
 class NotEvaluatorRule : public GenericRule<NotFormula>
 {
 protected:
-    TruthValue** formatTVarray(const vector<Vertex>& premiseArray,
+    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                int* newN) const {
         TruthValue** tvs = new TruthValue*[2];
 
@@ -51,7 +51,7 @@ protected:
 
 public:
     NotEvaluatorRule(iAtomSpaceWrapper *_destTable);
-    meta i2oType(const vector<Vertex>& h) const;
+    meta i2oType(const std::vector<Vertex>& h) const;
 
     bool validate2    (MPs& args) const {
         return true;

@@ -31,6 +31,8 @@ using namespace opencog;
 using namespace opencog::pln;
 using namespace boost::assign;
 
+using namespace std;
+
 #define GET_ASW ((AtomSpaceWrapper*) ASW())
 
 //min membership strength

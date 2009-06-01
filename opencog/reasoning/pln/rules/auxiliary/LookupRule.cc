@@ -40,7 +40,7 @@ bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
     for(vtree::iterator i = target.begin(); i != target.end(); i++)
         if (nm->inheritsType(nm->getType(_v2h(*i)), CONCEPT_NODE))
         {
-            string name = nm->getName(_v2h(*i));
+            std::string name = nm->getName(_v2h(*i));
             if (name == "!whileago" || name == "!now")
             {
 #ifndef WIN32
@@ -75,11 +75,11 @@ bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
     return is_changed;
 }
 
-boost::shared_ptr<set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
+boost::shared_ptr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
 {
     vtree target(*outh);
 
-    boost::shared_ptr<set<BoundVertex> > ret(new TableGather(target, destTable));
+    boost::shared_ptr<std::set<BoundVertex> > ret(new TableGather(target, destTable));
     
     if (ExpandEvaluationLinks(target, destTable))
     {
@@ -88,7 +88,7 @@ boost::shared_ptr<set<BoundVertex> > LookupRule::attemptDirectProduction(meta ou
 
 //      puts("Lookup macros!");
 //      NMPrinter()(NMPrintable(target), -3);
-        boost::shared_ptr<set<BoundVertex> > ret(new TableGather(target, destTable));
+        boost::shared_ptr<std::set<BoundVertex> > ret(new TableGather(target, destTable));
         
         /*foreach(const BoundVertex& bv, *ret)
         {

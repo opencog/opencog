@@ -79,7 +79,7 @@ void ComboSelectInterpreter::run(MessagingSystem::NetworkElement* ne)
             unifier.insert(make_pair(it->first, rp.getUnifierResult()));
         }
     } else {
-        stringstream ss;
+        std::stringstream ss;
         ss << rp.getResult();
         logger().debug(
                      "Third else - '%s'", ss.str().c_str());
@@ -93,7 +93,7 @@ Procedure::RunningProcedureId ComboSelectInterpreter::runProcedure(
     const std::vector<combo::vertex> arguments)
 {
     RunningProcedureId id(++next, COMBO_SELECT);
-    runningProc.insert(make_pair(id, RunningComboSelectProcedure(*comboInterpreter, f, s, arguments)));
+    runningProc.insert(std::make_pair(id, RunningComboSelectProcedure(*comboInterpreter, f, s, arguments)));
     return id;
 }
 
@@ -106,7 +106,7 @@ Procedure::RunningProcedureId ComboSelectInterpreter::runProcedure(
 {
 
     RunningProcedureId id(++next, COMBO_SELECT);
-    runningProc.insert(make_pair(id, RunningComboSelectProcedure(*comboInterpreter, f, s, arguments, vu)));
+    runningProc.insert(std::make_pair(id, RunningComboSelectProcedure(*comboInterpreter, f, s, arguments, vu)));
     return id;
 }
 

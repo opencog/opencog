@@ -49,6 +49,8 @@ using std::string;
 using std::cerr;
 using std::cout;
 using std::endl;
+using std::min;
+using std::max;
 using namespace std::tr1::placeholders;
 using namespace opencog;
 

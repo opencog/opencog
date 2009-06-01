@@ -27,6 +27,7 @@
 
 #include <boost/assign/list_of.hpp>
 
+using namespace std;
 using namespace opencog;
 using namespace opencog::pln;
 using namespace boost::assign;

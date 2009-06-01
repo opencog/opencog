@@ -532,7 +532,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
     for (it = atomSet.begin(); it != atomSet.end(); it++) {
         const Atom* atom = *it;
         bool matched = (subclass && classserver().isA(atom->getType(), type)) || type == atom->getType();
-        if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << endl;
+        if (matched) output << TLB::getHandle(atom) << ": " << atom->toString() << std::endl;
     }
 }
 

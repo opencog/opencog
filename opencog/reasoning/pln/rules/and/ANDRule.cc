@@ -52,7 +52,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
         MPs ret;
 
-        set<atom,lessatom> query_set;
+        std::set<atom,lessatom> query_set;
         for (tree<Vertex>::sibling_iterator i = outh->begin(top); i != outh->end(top); i++)
         {
             tree<Vertex> t_tmp(i);
@@ -85,7 +85,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
         /// Add the remaining ones.
 
-		for (set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
+		for (std::set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
 			ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(destTable))));
 
         overrideInputFilter = true;
@@ -99,7 +99,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     return attemptDirectANDProduction(destTable, outh, this);
 }*/
 
-BoundVertex ANDRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
     AtomSpaceWrapper *nm = GET_ATW;
     const int n = premiseArray.size();
@@ -118,22 +118,22 @@ BoundVertex ANDRule::compute(const vector<Vertex>& premiseArray, pHandle CX) con
     
 LOG(3, "ANDRule::compute");
 
-    set<pHandle> premises, nodes;
+    std::set<pHandle> premises, nodes;
     DistinguishNodes(premiseArray, premises, nodes);
 LOG(4, "ANDRule::compute");
 //  if (!nodes.empty())
 //      premises.push_back( computeSymmetric(nodes) );
 
-    for (set<pHandle>::iterator j = nodes.begin(); j != nodes.end(); j++) //Nodes included also separately.
+    for (std::set<pHandle>::iterator j = nodes.begin(); j != nodes.end(); j++) //Nodes included also separately.
     {
         premises.insert(*j);
     }
 LOG(4, "ANDRule::compute");
     TruthValue **partialTVs = new TruthValue*[premises.size()];
 
-    set<pHandle>::const_iterator i;
-    set<pHandle> conjunct;
-    set<TruthValue*> TVowner;
+    std::set<pHandle>::const_iterator i;
+    std::set<pHandle> conjunct;
+    std::set<TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
 LOG(4, "ANDRule::computeCC");
@@ -159,8 +159,8 @@ LOG(4, "22 ANDRule::compute");
     {
 LOG(4, "Q ANDRule::compute");
     /// Put into Di all the elements of the result conjunct not present in the premise #i
-        set<pHandle> Di;
-        for (set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
+        std::set<pHandle> Di;
+        for (std::set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
         {
             std::vector<pHandle> inc2; // = nm->getOutgoing(*i);
 
@@ -176,13 +176,13 @@ LOG(4, "Q ANDRule::compute");
 LOG(4, "W ANDRule::compute");
         int Dis = Di.size();
     
-        set<pHandle> DiSubsets;
+        std::set<pHandle> DiSubsets;
         pHandle largest_intersection;
 
 LOG(4,"ANDRule::compute:");
 
 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-for (set<pHandle>::const_iterator di = Di.begin(); di != Di.end(); di++)
+for (std::set<pHandle>::const_iterator di = Di.begin(); di != Di.end(); di++)
     printer.print(*di, 4);
         
 LOG(4, "ANDRule:: getLargestIntersection");
@@ -229,7 +229,7 @@ LOG(4, "ANDRule:: getLargestIntersection OK!");
         tvs[0] = (TruthValue*) &(GET_ATW->getTV(*i));
     
         int h=0;
-        set<pHandle>::const_iterator ss;
+        std::set<pHandle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
             tvs[h+1] = (TruthValue*) &(GET_ATW->getTV(*ss));
 LOG(4, "R ANDRule::compute");
@@ -267,7 +267,7 @@ LOG(4, "33 ANDRule::compute");
     TruthValue* retTV = fN.compute(partialTVs, premises.size());
 
     pHandleSeq outgoing;
-    for (set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
+    for (std::set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
         outgoing.push_back(*c);
 LOG(4, "44 ANDRule::compute");
     pHandle ret = destTable->addLink(AND_LINK, outgoing,
@@ -278,7 +278,7 @@ LOG(4, "55 ANDRule::compute");
     delete[] partialTVs;
     delete retTV;
     
-    for (set<TruthValue*>::iterator t= TVowner.begin();
+    for (std::set<TruthValue*>::iterator t= TVowner.begin();
             t != TVowner.end(); t++)
         delete *t;
 LOG(3, "ANDRule::compute ok.");		

@@ -49,8 +49,6 @@
 //#include <assert.h>
 #include <string>
 
-using namespace std;
-
 namespace opencog
 {
 

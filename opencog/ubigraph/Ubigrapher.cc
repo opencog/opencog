@@ -29,7 +29,6 @@
 #include <unistd.h>
 #include <limits.h>
 #include <tr1/functional>
-using namespace std::tr1::placeholders;
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/utils.h>
@@ -37,6 +36,9 @@ using namespace std::tr1::placeholders;
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/server/CogServer.h>
+
+using namespace std;
+using namespace std::tr1::placeholders;
 
 extern "C" {
     #include <UbigraphAPI.h>

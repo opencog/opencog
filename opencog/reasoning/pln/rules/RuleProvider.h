@@ -30,7 +30,7 @@ namespace opencog { namespace pln {
 /**
  * Takes ownership of the Rule objects given to it
  */
-class RuleProvider : public vector<Rule*> {
+class RuleProvider : public std::vector<Rule*> {
 protected:
 	void AddRule(Rule* r, float priority);
 public:

@@ -55,7 +55,7 @@ struct RuleProvider
 class DefaultRuleProvider : public RuleProvider
 {
 protected:	
-	vector<RULE> rs;
+	std::vector<RULE> rs;
 public:
 	DefaultRuleProvider();
 	virtual ~DefaultRuleProvider();
@@ -92,11 +92,11 @@ class SimplePLNEvaluator
 {
 	static bool exists(Handle top, Handle* args, const int N, Handle& ret);
 	static bool exists(Handle top, const VertexVector& args, Handle& ret);
-	static bool exists(Handle top, const vector<BoundVertex>& args, Handle& ret);
-	static bool exists(Handle top, const vector<Handle>& args, Handle& ret);
+	static bool exists(Handle top, const std::vector<BoundVertex>& args, Handle& ret);
+	static bool exists(Handle top, const std::vector<Handle>& args, Handle& ret);
 	static bool supportedOperator(Handle h);
 	
-	static Handle unify_all(const set<BoundVertex>& v);
+	static Handle unify_all(const std::set<BoundVertex>& v);
 	
 	static Btr<BV_Set> w_evaluate(const tree<Vertex>& target,
 											tree<Vertex>::iterator top,
@@ -151,8 +151,8 @@ namespace haxx
 {
 	using namespace opencog::pln;
 Handle exec(Handle* hs, const int N);
-Handle exec(vector<Handle>& hs);
-Handle exec(const vector<BoundVertex>& hs);
+Handle exec(std::vector<Handle>& hs);
+Handle exec(const std::vector<BoundVertex>& hs);
 }
 
 

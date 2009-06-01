@@ -31,7 +31,6 @@
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace combo;
-using namespace std;
 
 #define MIN_FITNESS -1.0e10
 

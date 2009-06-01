@@ -42,6 +42,7 @@
 #include "whirr-sockets.h"
 
 using namespace opencog::chatbot;
+using std::string;
 
 CogitaConfig cc;
 

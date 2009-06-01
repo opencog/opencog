@@ -29,6 +29,7 @@
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
+using namespace std;
 
 #define NUM_AVS 4
 #define AV1_STI 0

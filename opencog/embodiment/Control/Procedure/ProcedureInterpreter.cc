@@ -107,7 +107,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
-        _map.insert(make_pair(++_next, rcpID));
+        _map.insert(std::make_pair(++_next, rcpID));
     } else if (p.getType() == COMBO_SELECT) {
         logger().debug(
                      "ProcedureInterpreter - Running a combo select procedure.");
@@ -116,7 +116,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
             comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
                                                  procedure.getSecondScript(),
                                                  arguments);
-        _map.insert(make_pair(++_next, rcpID));
+        _map.insert(std::make_pair(++_next, rcpID));
 
     } else if (p.getType() == BUILT_IN) {
         logger().debug(
@@ -125,7 +125,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         // For now, runs built-in procedure immediately, since they are atomic
         // and caller may want to check for failure or get its result synchronously.
         rbp.run();
-        _map.insert(make_pair(++_next, rbp));
+        _map.insert(std::make_pair(++_next, rbp));
     } else {
         opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter -  unknown procedure type");
     }
@@ -141,7 +141,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
         RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments, vu);
-        _map.insert(make_pair(++_next, rcpID));
+        _map.insert(std::make_pair(++_next, rcpID));
 
     } else if (p.getType() == COMBO_SELECT) {
         logger().debug(
@@ -150,7 +150,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         RunningProcedureId rcpID = comboSelectInterpreter->runProcedure(procedure.getFirstScript(),
                                    procedure.getSecondScript(),
                                    arguments, vu);
-        _map.insert(make_pair(++_next, rcpID));
+        _map.insert(std::make_pair(++_next, rcpID));
 
     } else {
         opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters.");

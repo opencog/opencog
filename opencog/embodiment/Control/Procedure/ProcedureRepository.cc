@@ -109,12 +109,12 @@ void ProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* conv)
     comboSelectRepository->loadRepository(dump, conv);
 }
 
-int ProcedureRepository::loadComboFromStream(istream& in)
+int ProcedureRepository::loadComboFromStream(std::istream& in)
 {
     return comboRepository.loadFromStream(in);
 }
 
-int ProcedureRepository::loadComboSelectFromStream(istream& in)
+int ProcedureRepository::loadComboSelectFromStream(std::istream& in)
 {
     return comboSelectRepository->loadFromStream(in);
 }

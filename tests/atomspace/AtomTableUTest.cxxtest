@@ -52,6 +52,7 @@
 
 using namespace opencog;
 using namespace std::tr1::placeholders;
+using namespace std;
 
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};

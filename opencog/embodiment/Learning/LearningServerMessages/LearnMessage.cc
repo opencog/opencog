@@ -153,7 +153,7 @@ const char * LearnMessage::getPlainTextRepresentation()
     message.append(behaviorDescriptions);
     message.append(END_TOKEN);
     //schema arguments
-    message.append(boost::lexical_cast<string>(schemaArguments.size()));
+    message.append(boost::lexical_cast<std::string>(schemaArguments.size()));
     foreach(std::string s, schemaArguments) {
         message.append(END_TOKEN);
         message.append(s);

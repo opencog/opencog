@@ -52,7 +52,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
     setOfMPs ret;
     
     MPs ret1;
-    typedef pair<pHandle,vtree> phvt;
+    typedef std::pair<pHandle,vtree> phvt;
     DeclareBtr(bindingsT, pre_binds);
 
     foreach(phvt vp, *i->bindings)

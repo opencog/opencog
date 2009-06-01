@@ -29,6 +29,8 @@
 
 #ifndef _OPENCOG_HOPFIELD_UBIGRAPHER
 #define _OPENCOG_HOPFIELD_UBIGRAPHER
+
+using namespace std;
  
 namespace opencog
 {

@@ -291,7 +291,7 @@ public:
         return this->targetObject;
     };
 
-    void setRequestedCommand(string command, vector<string> parameters);
+    void setRequestedCommand(std::string command, std::vector<std::string> parameters);
 
     inline RequestedCommand& getLatestRequestedCommand( void ) {
         lastRequestedCommand.readed = true;
@@ -318,7 +318,7 @@ public:
      *
      * @param The object id
      */
-    void setGrabbedObj(const string& id);
+    void setGrabbedObj(const std::string& id);
 
     /**
      * Return the id of the grabbed object, i.e., the object that is in pet's
