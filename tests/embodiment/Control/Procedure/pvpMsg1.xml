@@ -69,23 +69,23 @@
         <velocity x="0.0" y="0.0" z="0.0"/>
     </blip>
   	</map-info>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>Good boy!!</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="10">Good boy!!</sentence>
     </instruction>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>learn to fetch</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="14">learn to fetch</sentence>
     </instruction>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>I fetch</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="7">I fetch</sentence>
     </instruction>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>done fetch</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="10">done fetch</sentence>
     </instruction>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>stop learning!</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="14">stop learning!</sentence>
     </instruction>
-    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00">
-        <value>Bad boy!!</value>
+    <instruction pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" avatar-id="Wynx" timestamp="2007-06-18T20:15:00.000-07:00" content-type="FACT" target-mode="ANY">
+        <sentence length="9">Bad boy!!</sentence>
     </instruction>
     <pet-signal pet-id="32f56136-7973-4703-915b-6ec1bf5c67fa" name="hunger" timestamp="2007-06-18T20:15:00.000-07:00">
         <param name="level" type="float" value="0.90" />
