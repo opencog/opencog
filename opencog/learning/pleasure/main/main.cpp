@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
     ttree.append_child(it, combo::id::boolean_type);
     ttree.append_child(it, combo::id::boolean_type);
     generate_generation_table(nlist, ttree, gtable);
-    enumerate_program_trees(gtable, 3, ttree, pop);
-    reduce(pop, combo::type_tree_arity(ttree), reduct::logical_reduction());
+    enumerate_program_trees(gtable, 3, ttree, pop, reduct::logical_reduction());
+    pleasure::reduce(pop, reduct::logical_reduction());
     
     for (population::iterator it = pop.begin(); it != pop.end(); it++) {
         std::cout << *it << std::endl;

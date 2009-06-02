@@ -8,14 +8,10 @@
 #include "comboreduct/combo/action_symbol.h"
 #include "comboreduct/combo/indefinite_object.h"
 
+namespace pleasure {
+    typedef std::set<combo::vertex> node_list;
 
-
-namespace pleasure
-{
-typedef std::set<combo::vertex> node_list;
-
-//std::istream& stream_to_node_list(std::istream& is, node_list& list);
-void stream_to_node_list(std::istream& is, node_list& list);
-
+    //std::istream& stream_to_node_list(std::istream& is, node_list& list);
+    void stream_to_node_list(std::istream& is, node_list& list);
 }
 
