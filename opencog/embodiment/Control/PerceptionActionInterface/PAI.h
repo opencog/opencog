@@ -46,6 +46,7 @@
 #include <opencog/embodiment/Control/Predavese/PredaveseParser.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
+#include <opencog/guile/SchemeEval.h>
 
 #include <map>
 #include <vector>
@@ -194,6 +195,10 @@ private:
      */
     bool logPVPMessage;
 
+    /**
+     * Used to eval scheme script
+     */
+    SchemeEval schemeEval;
 
 public:
 

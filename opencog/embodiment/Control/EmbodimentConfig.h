@@ -295,7 +295,9 @@ protected:
             "TYPE_CHECK_LOADING_PROCEDURES","true",
             "TYPE_CHECK_GENERATED_COMBO",   "true",
             
-            "MANUAL_OPC_LAUNCH",            "false"
+            "MANUAL_OPC_LAUNCH",            "false",
+
+            "SCHEME_TYPEDEFS_PATH",         "typedefs.scm",
 
             //used as halting condition by reset
             "",                             ""

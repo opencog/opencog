@@ -57,6 +57,8 @@
 #include "PetaverseDOMParser.h"
 #include "PetaverseErrorHandler.h"
 
+#include <opencog/server/load-file.h>
+
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace PerceptionActionInterface;
@@ -113,6 +115,13 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
 #endif
 
     logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
+
+
+    std::string scheme_file = opencog::config().get("SCHEME_TYPEDEFS_PATH");
+    std::cout << "SCHEME_TYPEDEFS_PATH: " << scheme_file << std::endl;
+    int rc = load_scm_file(scheme_file.c_str());
+//  cassert(TRACE_INFO, rc);
+
 }
 
 PAI::~PAI()
@@ -1016,7 +1025,8 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     XERCES_CPP_NAMESPACE::XMLString::trim(sentenceText);
 
     /// getting the value of the parsed-sentence
-    XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    //XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
+    XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, 56000);
     list = element->getElementsByTagName(tag);
     cassert(TRACE_INFO, list->getLength( ) == 0 || list->getLength( ) == 1 );
     char* parsedSentenceText = NULL;
@@ -1034,6 +1044,17 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     } // if
 
     // TODO: now handle the sentence and the parsed sentence
+    if(parsedSentenceText != NULL){
+        logger().debug("Running eval of scheme instructions");
+        char buff[parsedSentenceLength];
+    	snprintf(buff, parsedSentenceLength, "%s", parsedSentenceText );
+        schemeEval.eval(buff);
+        bool eval_err = schemeEval.eval_error();
+        if(eval_err){
+            logger().debug("error while running eval of scheme instructions");
+        }
+       	schemeEval.clear_pending();
+    }
 
 
     // Add the perceptions into AtomSpace

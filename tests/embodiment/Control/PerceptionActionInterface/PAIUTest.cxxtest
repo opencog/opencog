@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/server/CogServer.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include "PetInterfaceMock.h"
@@ -32,10 +33,17 @@
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
 
-#include <opencog/atomspace/AtomSpace.h>
-
 #include "PAITestUtil.h"
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/TLB.h>
+
+#include <opencog/server/load-file.h>
 
 using namespace PerceptionActionInterface;
 using namespace Control;
@@ -1261,6 +1269,14 @@ public:
         cout << "processing forth pvp message (" << PVP_XML_FILE_PATH << "/pvpMsg4.xml" << ")" << endl << pvpMsg4 << endl;
         TS_ASSERT(! pai.processPVPMessage(pvpMsg4, toUpdateHandles));
 
+
+
+
+        
+
+
+
+
     } // testProcessPVPMessage
 
     void testTimestampRelatedMethods() {
@@ -1339,6 +1355,299 @@ public:
         */
 
     }
-};
 
+    void testProcesstPVPMessageWithScheme(){
+        printf("testProcessPVPMessageWithScheme\n");
+        HandleSeq toUpdateHandles;
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+
+        if (fileExists(config().get("CONFIG_FILE").c_str())) {
+            config().load(config().get("CONFIG_FILE").c_str());
+        }
+
+        //set the scheme typesdefs path 
+        config().set("SCHEME_TYPEDEFS_PATH",OPENCOG_SOURCE_DIR"/opencog/scm/typedefs.scm");
+
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        //AtomSpace atomSpace;
+        AtomSpace *atomSpace = cogserver.getAtomSpace();
+
+//        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+//        TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
+
+        OKActionPlanSender sender(sentActionPlans);
+        PetInterfaceMock petInterface;
+        PAI pai(*atomSpace, sender, petInterface);
+        petInterface.setPAI(&pai);
+
+        TS_ASSERT_THROWS(pai.sendActionPlan("0"), RuntimeException&);
+        TS_ASSERT_THROWS(pai.sendActionPlan("1"), RuntimeException&);
+        TS_ASSERT_THROWS(pai.sendActionPlan("10"), RuntimeException&);
+
+
+        // process first scheme instruction message
+        string schemeMsg1;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg1.xml", schemeMsg1));
+        cout << "processing first scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg1.xml" << ")" << endl << schemeMsg1 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg1, toUpdateHandles));
+
+        //TODO check it it is needed to assert the timestamp
+        // Check latest received/processed timestamp
+        //TS_ASSERT(pai.getLatestSimWorldTimestamp() == PAI::getTimestampFromXsdDateTimeStr("2009-05-29T18:29:57.187"));
+
+    
+        // Check instruction atoms in AtomSpace
+        {
+ 
+        cout << "checking scheme instructions" << endl;
+        Handle node;
+
+        {
+        Handle wiNode = atomSpace->getHandle(WORD_INSTANCE_NODE, "go@0b75986f-7176-4f7a-8815-3f3afb0e2837");
+        TS_ASSERT(CoreUtils::compare(wiNode, Handle::UNDEFINED));
+
+        Handle wNode = atomSpace->getHandle(WORD_NODE, "go");
+        TS_ASSERT(CoreUtils::compare(wNode, Handle::UNDEFINED));
+
+        HandleSeq refLinkOutgoing;
+        refLinkOutgoing.push_back(wiNode);
+        refLinkOutgoing.push_back(wNode);
+        Handle refLink = atomSpace->getHandle(REFERENCE_LINK, refLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(refLink, Handle::UNDEFINED));        
+
+        Handle parseNode = atomSpace->getHandle(PARSE_NODE, "sentence@364a3d3d-f42f-4c5d-b3b0-73f5b824581d_parse_0");
+        TS_ASSERT(CoreUtils::compare(parseNode, Handle::UNDEFINED));
+        
+        HandleSeq wiLinkOutgoing;
+        wiLinkOutgoing.push_back(wiNode);
+        wiLinkOutgoing.push_back(parseNode);
+        Handle wiLink = atomSpace->getHandle(WORD_INSTANCE_LINK, wiLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(wiLink, Handle::UNDEFINED));
+        
+        /*
+        (LemmaLink (stv 1.0 1.0)
+           (WordInstanceNode "go@0b75986f-7176-4f7a-8815-3f3afb0e2837")
+           (WordNode "go")
+        )
+        */
+        HandleSeq lemmaLinkOutgoing;
+        lemmaLinkOutgoing.push_back(wiNode);
+        lemmaLinkOutgoing.push_back(wNode);
+        Handle lemmaLink = atomSpace->getHandle(LEMMA_LINK, lemmaLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(lemmaLink, Handle::UNDEFINED));
+
+        }
+
+        {
+        Handle wiNode = atomSpace->getHandle(WORD_INSTANCE_NODE, "fetch@85c27c19-7980-417d-89f2-d2748395932c");
+        TS_ASSERT(CoreUtils::compare(wiNode, Handle::UNDEFINED));
+
+        Handle wNode = atomSpace->getHandle(WORD_NODE, "fetch");
+        TS_ASSERT(CoreUtils::compare(wNode, Handle::UNDEFINED));
+
+        HandleSeq refLinkOutgoing;
+        refLinkOutgoing.push_back(wiNode);
+        refLinkOutgoing.push_back(wNode);
+        Handle refLink = atomSpace->getHandle(REFERENCE_LINK, refLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(refLink, Handle::UNDEFINED)); 
+
+        }
+
+        {
+        /*
+        (EvaluationLink (stv 1.0 1.0)
+           (LinkGrammarRelationshipNode "Wi")
+           (ListLink
+              (WordInstanceNode "LEFT-WALL")
+              (WordInstanceNode "go@0b75986f-7176-4f7a-8815-3f3afb0e2837")
+           )
+        )
+        */
+        Handle wiNode1 = atomSpace->getHandle(WORD_INSTANCE_NODE, "LEFT-WALL");
+        TS_ASSERT(CoreUtils::compare(wiNode1, Handle::UNDEFINED));
+
+        Handle wiNode2 = atomSpace->getHandle(WORD_INSTANCE_NODE, "go@0b75986f-7176-4f7a-8815-3f3afb0e2837");
+        TS_ASSERT(CoreUtils::compare(wiNode1, Handle::UNDEFINED));
+
+        HandleSeq listLinkOutgoing;
+        listLinkOutgoing.push_back(wiNode1);
+        listLinkOutgoing.push_back(wiNode2);
+        Handle listLink = atomSpace->getHandle(LIST_LINK, listLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(listLink, Handle::UNDEFINED)); 
+        
+        Handle linkGrammarNode = atomSpace->getHandle(LINK_GRAMMAR_RELATIONSHIP_NODE,"Wi");
+        TS_ASSERT(CoreUtils::compare(linkGrammarNode, Handle::UNDEFINED));
+
+        HandleSeq evalLinkOutgoing;
+        evalLinkOutgoing.push_back(linkGrammarNode);
+        evalLinkOutgoing.push_back(listLink);
+        Handle evalLink = atomSpace->getHandle(EVALUATION_LINK, evalLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED)); 
+
+
+        }
+        node = atomSpace->getHandle(WORD_INSTANCE_NODE, "the@783b930d-53e1-4c0d-bd8b-8566a24fefb6");        
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        node = atomSpace->getHandle(WORD_NODE, "the");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(WORD_INSTANCE_NODE, "blue@6e8d15d0-194a-456b-b8fb-aa3ea2fa43b6");        
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        node = atomSpace->getHandle(WORD_NODE, "blue");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+    
+        {
+        Handle wiNode = atomSpace->getHandle(WORD_INSTANCE_NODE, "pill@a8ef64ed-535d-4c71-a961-371e60661d08");        
+        TS_ASSERT(CoreUtils::compare(wiNode, Handle::UNDEFINED));
+        
+        Handle node = atomSpace->getHandle(WORD_NODE, "pill");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_amod");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        Handle conceptNode1 = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, "singular");
+        TS_ASSERT(CoreUtils::compare(conceptNode1, Handle::UNDEFINED));
+        
+        Handle conceptNode2 = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, "noun");
+        TS_ASSERT(CoreUtils::compare(conceptNode2, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, ".n");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, "definite");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        /*
+        (InheritanceLink (stv 1.0 1.0)
+           (WordInstanceNode "pill@a8ef64ed-535d-4c71-a961-371e60661d08")
+           (DefinedLinguisticConceptNode "singular")
+        )
+        ; pos (pill, noun)
+        (PartOfSpeechLink (stv 1.0 1.0)
+           (WordInstanceNode "pill@a8ef64ed-535d-4c71-a961-371e60661d08")
+           (DefinedLinguisticConceptNode "noun")
+        )
+        */
+        HandleSeq inLinkOutgoing;
+        inLinkOutgoing.push_back(wiNode);
+        inLinkOutgoing.push_back(conceptNode1);
+        Handle inLink = atomSpace->getHandle(INHERITANCE_LINK, inLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(inLink, Handle::UNDEFINED));      
+
+        HandleSeq posLinkOutgoing;
+        posLinkOutgoing.push_back(wiNode);
+        posLinkOutgoing.push_back(conceptNode2);
+        Handle posLink = atomSpace->getHandle(PART_OF_SPEECH_LINK, posLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(posLink, Handle::UNDEFINED));      
+
+
+        }
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, "adj");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, ".a");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+       
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, "det");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_CONCEPT_NODE, ".n");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_LINGUISTIC_RELATIONSHIP_NODE, "_obj");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+       
+
+        //frames
+
+        {
+        /*
+        (FrameElementLink
+           (DefinedFrameNode "#Becoming")
+           (DefinedFrameElementNode "#Becoming:Entity")
+        )
+        */
+        Handle frameNode = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Becoming");
+        TS_ASSERT(CoreUtils::compare(frameNode, Handle::UNDEFINED));
+
+        Handle frameElementNode = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Becoming:Entity");
+        TS_ASSERT(CoreUtils::compare(frameElementNode, Handle::UNDEFINED));
+
+        HandleSeq frameLinkOutgoing;
+        frameLinkOutgoing.push_back(frameNode);
+        frameLinkOutgoing.push_back(frameElementNode);
+        Handle frameLink = atomSpace->getHandle(FRAME_ELEMENT_LINK, frameLinkOutgoing);
+        TS_ASSERT(CoreUtils::compare(frameLink, Handle::UNDEFINED));
+
+
+        } 
+        node = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Purpose");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Purpose:Goal");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        node = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Emotion_directed");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Emotion_directed:State");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Bringing");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Bringing:Theme");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Request");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Request:Message");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        node = atomSpace->getHandle(DEFINED_FRAME_NODE, "#Transitive_action");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+
+        node = atomSpace->getHandle(DEFINED_FRAME_ELEMENT_NODE, "#Transitive_action:Agent");
+        TS_ASSERT(CoreUtils::compare(node, Handle::UNDEFINED));
+        
+        
+        //TODO not all nodes checked.......
+
+        }
+
+        
+        // process others scheme instruction message
+        string schemeMsg2;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg2.xml", schemeMsg2));
+        cout << "processing second scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg2.xml" << ")" << endl << schemeMsg2 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg2, toUpdateHandles));
+
+        string schemeMsg3;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg3.xml", schemeMsg3));
+        cout << "processing third scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg3.xml" << ")" << endl << schemeMsg3 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg3, toUpdateHandles));
+
+         string schemeMsg4;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg4.xml", schemeMsg4));
+        cout << "processing fourth scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg4.xml" << ")" << endl << schemeMsg4 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg4, toUpdateHandles));
+
+        string schemeMsg5;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg5.xml", schemeMsg5));
+        cout << "processing fifth scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg5.xml" << ")" << endl << schemeMsg5 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg5, toUpdateHandles));
+
+        string schemeMsg6;
+        TS_ASSERT(appendFileContent(PVP_XML_FILE_PATH "/schemeMsg6.xml", schemeMsg6));
+        cout << "processing sixth scheme message (" << PVP_XML_FILE_PATH << "/schemeMsg6.xml" << ")" << endl << schemeMsg6 << endl;
+        TS_ASSERT(pai.processPVPMessage(schemeMsg6, toUpdateHandles));        
+       
+    }
+
+
+};
 
