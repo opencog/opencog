@@ -1366,7 +1366,7 @@ public:
         }
 
         //set the scheme typesdefs path 
-        config().set("SCHEME_TYPEDEFS_PATH",OPENCOG_SOURCE_DIR"/opencog/scm/typedefs.scm");
+        config().set("SCHEME_TYPEDEFS_PATH",OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
 
         CogServer& cogserver = static_cast<CogServer&>(server());
         //AtomSpace atomSpace;

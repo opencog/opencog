@@ -68,7 +68,7 @@ $pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.conf \
 $pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
 $pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
 ./SPCTools.py \
-$pdh/opencog/scm/typedefs.scm \
+$pdh/opencog/scm/type_constructors.scm \
 ]
 
 set flistAGI [list \

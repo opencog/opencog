@@ -297,7 +297,7 @@ protected:
             
             "MANUAL_OPC_LAUNCH",            "false",
 
-            "SCHEME_TYPEDEFS_PATH",         "typedefs.scm",
+            "SCHEME_TYPEDEFS_PATH",         "type_constructors.scm",
 
             //used as halting condition by reset
             "",                             ""
