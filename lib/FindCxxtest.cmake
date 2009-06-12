@@ -11,37 +11,36 @@
 # Find path to the cxxtestgen.py script (NB: this stuff should move to FindCXXTEST.cmake)
 # CXXTEST_BIN_DIR enviroment variable must have been defined already
 
-
 # cxxtest has a Python version and a Perl version. First, look
 # for the Python version.
 FIND_PACKAGE(PythonInterp)
-FIND_PATH(CXXTEST_BIN_DIR cxxtestgen.py
+FIND_PATH(CXXTEST_PYTHON_BIN_DIR cxxtestgen.py
 	$ENV{CXXTEST_BIN_DIR}
 	/usr/bin
 	/usr/local/bin
 	DOC "Where is cxxtest located?"
 )
-IF (PYTHONINTERP_FOUND AND CXXTEST_BIN_DIR)
+IF (PYTHONINTERP_FOUND AND CXXTEST_PYTHON_BIN_DIR)
 	SET(CXXTEST_FOUND 1)
-	SET(CXXTEST_GEN "${CXXTEST_BIN_DIR}/cxxtestgen.py")
-ELSE (PYTHONINTERP_FOUND AND CXXTEST_BIN_DIR)
+	SET(CXXTEST_GEN "${CXXTEST_PYTHON_BIN_DIR}/cxxtestgen.py")
+ELSE (PYTHONINTERP_FOUND AND CXXTEST_PYTHON_BIN_DIR)
 
 	# The python version wasn't found--search for the perl version.
-	FIND_PATH(CXXTEST_BIN_DIR cxxtestgen.pl
+	FIND_PATH(CXXTEST_PERL_BIN_DIR cxxtestgen.pl
 		$ENV{CXXTEST_BIN_DIR}
 		/usr/bin
 		/usr/local/bin
 		DOC "Where is cxxtest located?"
 	)
-	IF (CXXTEST_BIN_DIR)
+	IF (CXXTEST_PERL_BIN_DIR)
 		SET(CXXTEST_FOUND 1)
-		SET(CXXTEST_GEN "${CXXTEST_BIN_DIR}/cxxtestgen.pl")
-	ELSE (CXXTEST_BIN_DIR)
+		SET(CXXTEST_GEN "${CXXTEST_PERL_BIN_DIR}/cxxtestgen.pl")
+	ELSE (CXXTEST_PERL_BIN_DIR)
 		# There is no cxxtest, either in Perl or Python
 		SET(CXXTEST_FOUND 0)
-	ENDIF (CXXTEST_BIN_DIR)
+	ENDIF (CXXTEST_PERL_BIN_DIR)
 
-ENDIF (PYTHONINTERP_FOUND AND CXXTEST_BIN_DIR)
+ENDIF (PYTHONINTERP_FOUND AND CXXTEST_PYTHON_BIN_DIR)
 
 IF (WIN32)
 	FIND_PATH(CXXTEST_INCLUDE_DIR "TestSuite.h"
