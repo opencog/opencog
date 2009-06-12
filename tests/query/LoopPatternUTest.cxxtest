@@ -27,6 +27,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
+#include <cstdio>
+
 using namespace opencog;
 
 class LoopPatternUTest :  public CxxTest::TestSuite

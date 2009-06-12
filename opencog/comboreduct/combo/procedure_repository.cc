@@ -28,6 +28,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/topological_sort.hpp>
+#include <cstdio>
 
 namespace combo {
   

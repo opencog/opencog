@@ -32,6 +32,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
+#include <cstdio>
+
 using namespace opencog;
 
 class BasicSaveUTest :  public CxxTest::TestSuite

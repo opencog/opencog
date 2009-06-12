@@ -25,6 +25,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <cstdio>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>

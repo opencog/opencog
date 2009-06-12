@@ -28,6 +28,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include <cstdio>
+
 using namespace opencog;
 
 class Boolean2NotUTest :  public CxxTest::TestSuite

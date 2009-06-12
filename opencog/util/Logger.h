@@ -29,6 +29,7 @@
 
 #include <string>
 
+#include <cstdarg>
 #include <pthread.h>
 
 //#undef ERROR

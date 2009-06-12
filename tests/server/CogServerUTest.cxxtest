@@ -23,6 +23,7 @@
  */
 
 #include <string>
+#include <cstdio>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>

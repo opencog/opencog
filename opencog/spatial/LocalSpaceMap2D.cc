@@ -31,6 +31,7 @@
 #include "StaticEntity.h"
 
 #include <boost/lexical_cast.hpp>
+#include <cstdio>
 
 #define HUGE_DISTANCE 999999.9
 

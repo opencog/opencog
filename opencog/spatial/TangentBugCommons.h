@@ -29,6 +29,7 @@
 #include <opencog/util/hash_set.h>
 #include <opencog/util/hash_map.h>
 
+#include <cstdio>
 #include <set>
 #include <string>
 #include <iostream>

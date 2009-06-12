@@ -27,6 +27,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
+#include <cstdio>
+
 using namespace opencog;
 
 class BigPatternUTest :  public CxxTest::TestSuite
