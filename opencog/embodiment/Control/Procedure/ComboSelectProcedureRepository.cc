@@ -193,7 +193,7 @@ void  ComboSelectProcedureRepository::saveRepository(FILE* dump) const
 {
     logger().debug("ComboSelectProcedureRepository - Saving %s (%ld)", getId(), ftell(dump));
 
-    fprintf(dump, "%lu", procedureMap.size());
+    fprintf(dump, "%z", procedureMap.size());
 
     Name2ProcedureMapIterator it;
     for (it = procedureMap.begin(); it != procedureMap.end(); it++) {
