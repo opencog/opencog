@@ -127,13 +127,13 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     // Check lower bound
     if (params.size() < mandatoryParamTypes.size()) {
-        sprintf(buffer, "PetAction's parameter validation: Insuficient number of parameters (%z) for action '%s'", params.size(), actionType.getName().c_str());
+        sprintf(buffer, "PetAction's parameter validation: Insuficient number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
     const ActionType::ParamTypes& optionalParamTypes = actionType.getOptionalParamTypes();
     // Check upper bound
     if (params.size() > (mandatoryParamTypes.size() + optionalParamTypes.size())) {
-        sprintf(buffer, "PetAction::containsValidParameters(): Exceeded number of parameters (%z) for action '%s'", params.size(), actionType.getName().c_str());
+        sprintf(buffer, "PetAction::containsValidParameters(): Exceeded number of parameters (%zu) for action '%s'", params.size(), actionType.getName().c_str());
         return buffer;
     }
 
