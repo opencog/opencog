@@ -292,6 +292,20 @@ input, and does not need to be processed from the prepositional form.
 (Right??) Certainly this is true for kind_of and capital_of, is this
 true for all prepositional uses of "of"?
 
+Normally, a country can have only one capital; thus we need an exclusion 
+rule:
+
+   if capital_of(X,Y) and different(Y,Z) then not capital_of(X,Z)
+
+There are potentially lots of such unique relations, so the above should
+be formulated as
+
+   if R(X,Y) and uniq_grnd_relation(R) and different(Y,Z) then not R(X,Z)
+
+Thus, we have a class of uniquely-grounded relations, of which capital_of
+is one.  Part of the learning process is to somehow discover rules of the
+above form.
+
 
 Using triples for input
 -----------------------
@@ -493,4 +507,8 @@ Alexander Yates and Oren Etzioni.
 Unsupervised Methods for Determining Object and Relation Synonyms on
 the Web]. Journal of Artificial Intelligence Research 34, March,
 2009, pages 255-296.
+
+Fabian M. Suchanek, Mauro Sozio, Gerhard Weikum
+SOFIE: A Self-Organizing Framework for Information Extraction
+WWW 2009 Madrid! 
 
