@@ -884,12 +884,12 @@ throw (RuntimeException)
 
         } else {
 
-            unsigned int openParentesis = param.find('(');
+            size_t openParentesis = param.find('(');
 
             // check if the parameter is a new function
             if (openParentesis != std::string::npos) {
 
-                unsigned int closeParentesis = param.rfind(')');
+                size_t closeParentesis = param.rfind(')');
                 if (closeParentesis == std::string::npos) {
                     throw RuntimeException(TRACE_INFO, "addSchemaExecLink - Unmatch parentesis in effect '%s' parameter '%s'.",
                                                     effect.c_str(), param.c_str());
