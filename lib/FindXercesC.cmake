@@ -11,6 +11,7 @@ FIND_PATH(XERCESC_INCLUDE_DIR xercesc/dom/DOM.hpp
   "[HKEY_CURRENT_USER\\software\\xerces-c\\src]"
   "[HKEY_CURRENT_USER\\xerces-c\\src]"
   $ENV{XERCESCROOT}/src/
+  $ENV{XERCESCROOT}/include/
   /usr/local/include
   /usr/include
 )
