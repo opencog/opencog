@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdio>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Config.h>
