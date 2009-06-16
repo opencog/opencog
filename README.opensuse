@@ -5,6 +5,7 @@ Instalation and dependency resolution for OpenSUSE 11.0 users
 Opencog depends on the following packages:
 
    gcc-c++ make cmake openssl-devel boost-devel libexpat-devel
+   guile-devel gsl-devel
 
 -------------------------------------------------------------------------------
 
@@ -24,6 +25,6 @@ They may be downloaded and installed using the following commands:
 
 Opencog also optionally depends on the following packages:
 
-   unixODBC-devel guile-devel gsl-devel
+   unixODBC-devel
 
 -------------------------------------------------------------------------------

@@ -5,7 +5,7 @@ Instalation and dependency resolution for Fedora 9 users
 Opencog depends on the following packages:
 
    gcc-c++ cmake openssl openssl-devel boost boost-devel expat
-   expat-devel 
+   expat-devel guile-devel gsl-devel
 
 ----------------------------------------------------------
 
@@ -28,6 +28,6 @@ They may be downloaded and installed using the following commands:
 
 Opencog also optionally depends on the following packages:
 
-   unixODBC-devel guile-devel gsl-devel
+   unixODBC-devel 
 
 ----------------------------------------------------------
