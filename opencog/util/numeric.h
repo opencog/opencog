@@ -192,7 +192,7 @@ inline unsigned int integer_log2(size_t v)
     v |= v >> 8;
     v |= v >> 16;
     v = (v >> 1) + 1;
-    return MultiplyDeBruijnBitPosition[((uint32_t)(v * 0x077CB531UL)) >> 27];
+    return MultiplyDeBruijnBitPosition[static_cast<uint32_t>(v * 0x077CB531UL) >> 27];
 }
 
 template<typename FloatT> FloatT log2(FloatT x)

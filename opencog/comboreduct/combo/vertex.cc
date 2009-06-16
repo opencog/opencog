@@ -64,6 +64,12 @@ std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
         return out << "impulse";
     case id::rand:
         return out << "rand";
+    case id::ann:
+        return out << "ann";
+    case id::ann_input:
+        return out << "ann_input";
+    case id::ann_node:
+        return out << "ann_node";
     default:
         return out << "BUILTIN : UNKNOWN_HANDLE";
     }

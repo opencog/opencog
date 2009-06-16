@@ -1,3 +1,10 @@
+ADD_EXECUTABLE (moses-ann moses-ann)
+TARGET_LINK_LIBRARIES (moses-ann
+	moses
+	comboreduct
+	util
+)
+
 ADD_EXECUTABLE (moses-sregression moses-sregression)
 TARGET_LINK_LIBRARIES (moses-sregression
 	moses

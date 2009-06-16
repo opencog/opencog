@@ -66,6 +66,7 @@ enum builtin {
     boolean_if,
     plus, times, div, exp, log, sin,
     greater_than_zero,
+    ann, ann_node, ann_input, //ann additions
     impulse,
     rand,         //random contin_t in [0,1) FIXME TODO : update reduct rules
     builtin_count //to get the number of builtin
@@ -712,6 +713,12 @@ void str_to_vertex(const std::string& str, vertex& v)
         v = id::times;
     else if (str == "/")
         v = id::div;
+    else if (str == "ann")
+        v = id::ann;
+    else if (str == "ann_input")
+        v = id::ann_input;
+    else if (str == "ann_node")
+        v = id::ann_node;
     else if (str == "log")
         v = id::log;
     else if (str == "exp")
