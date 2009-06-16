@@ -79,5 +79,19 @@ class SchemeEval
 
 }
 
+#else /* HAVE_GUILE */
+
+class SchemeEval
+{
+	public:
+		std::string eval(const std::string &) { return ""; }
+		Handle apply(const std::string&, Handle args) {
+			return Handle::UNDEFINED; }
+
+		bool input_pending(void) { return false; }
+		void clear_pending(void) {}
+		bool eval_error(void) { return false; }
+};
+
 #endif/* HAVE_GUILE */
 #endif /* OPENCOG_SCHEME_EVAL_H */
