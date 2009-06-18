@@ -4,3 +4,10 @@ TARGET_LINK_LIBRARIES(KnobTurningUTest
     comboreduct
     util
 )
+
+ADD_CXXTEST(NeighborSamplingUTest)
+TARGET_LINK_LIBRARIES(NeighborSamplingUTest
+    moses
+    comboreduct
+    util
+)
