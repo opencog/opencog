@@ -26,7 +26,10 @@
 #ifndef _OPENCOG_BITUBIGRAPHER
 #define _OPENCOG_BITUBIGRAPHER
 
-#define USE_BITUBIGRAPHER // (haxx) currently makes a BITNodeRoot automatically use a BITUbigrapher
+//#define USE_BITUBIGRAPHER 
+// (haxx::) currently makes a BITNodeRoot automatically use a BITUbigrapher.
+// Should disable the code if Ubigraphclient isn't found, and then have an option for attaching it to a particular BIT
+// (or at least be automatically used by any BITNodeRoot, but be disabled by default, as now).
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -55,13 +58,13 @@ public:
     virtual ~BITUbigrapher() {}
 
     void drawRoot(BITNode* root);
-    
+
     void drawBITNodeFitness(int node_id, float fitness);
 
     void drawBITNodeLabel(BITNode * node, int node_id);
 
     void drawBITNode(BITNode* node, vector<set<ParametrizedBITNode> > children);
-        
+
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
 };

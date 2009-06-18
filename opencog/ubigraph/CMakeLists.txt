@@ -1,14 +1,14 @@
 ADD_LIBRARY (ubigraph SHARED
-	UbigraphModule
-	Ubigrapher
-	BITUbigrapher
+    UbigraphModule
+    Ubigrapher
+    BITUbigrapher
 )
 
 INCLUDE_DIRECTORIES (
-	${CSOCKETS_INCLUDE_DIRS}
-	${OPENSSL_INCLUDE_DIR}
-	${ODBC_INCLUDE_DIRS}
-	${UBIGRAPHCLIENT_INCLUDE_DIRS}
+    ${CSOCKETS_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIR}
+    ${ODBC_INCLUDE_DIRS}
+    ${UBIGRAPHCLIENT_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(ubigraph
@@ -24,12 +24,12 @@ TARGET_LINK_LIBRARIES(ubigraph
 )
 
 INSTALL (TARGETS ubigraph
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+    LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
-	UbigraphModule.h
-	Ubigrapher.h
-	BITUbigrapher.h
+    UbigraphModule.h
+    Ubigrapher.h
+    BITUbigrapher.h
 DESTINATION "include/opencog/ubigraph"
 )
