@@ -25,8 +25,6 @@
 
 #include <sstream>
 #include <unistd.h>
-#include <vector>
-#include <set>
 #include <opencog/util/Logger.h>
 
 extern "C"

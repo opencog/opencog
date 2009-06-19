@@ -38,6 +38,9 @@
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h> // BackInferenceTreeNode.h breaks otherwise
 #include <opencog/reasoning/pln/BackInferenceTreeNode.h>
 
+#include <set>
+#include <vector>
+
 using namespace opencog;
 using namespace opencog::pln;
 
@@ -65,7 +68,8 @@ public:
 
     void drawBITNodeLabel(BITNode * node, int node_id);
 
-    void drawBITNode(BITNode* node, vector<set<ParametrizedBITNode> > children);
+    void drawBITNode(BITNode* node, std::vector<std::set<ParametrizedBITNode> >
+                     children);
 
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
