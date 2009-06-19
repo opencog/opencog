@@ -48,7 +48,7 @@ using namespace std;
 // We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
 // ensure we find the files whether or not we're building using a separate build
 // dir
-#define PLN_TEST_DIR OPENCOG_SOURCE_DIR"/tests/reasoning/"
+#define PLN_TEST_DIR OPENCOG_SOURCE_DIR"/tests/reasoning/pln"
 
 #if 0
 #include <windows.h>
