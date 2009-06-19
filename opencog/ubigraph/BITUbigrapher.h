@@ -28,8 +28,10 @@
 
 //#define USE_BITUBIGRAPHER
 // (haxx::) currently makes a BITNodeRoot automatically use a BITUbigrapher.
-// Should disable the code if Ubigraphclient isn't found, and then have an option for attaching it to a particular BIT
-// (or at least be automatically used by any BITNodeRoot, but be disabled by default, as now).
+// Being in the ubigraph directory, the code is disabled if Ubigraphclient
+// isn't found; it should have an option for attaching it to a particular BIT
+// (or at least be automatically used by any BITNodeRoot, but be disabled by
+// default, as now).
 
 #include <opencog/atomspace/AtomSpace.h>
 
