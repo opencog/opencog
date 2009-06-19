@@ -38,8 +38,10 @@
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
+#ifdef USE_BITUBIGRAPHER
 //! @todo
 #include <opencog/ubigraph/BITUbigrapher.h>
+#endif // USE_BITUBIGRAPHER
 
 int haxxUsedProofResources = 0;
 float temperature = 0.01;

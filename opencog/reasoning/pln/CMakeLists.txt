@@ -67,6 +67,7 @@ INCLUDE_DIRECTORIES (
     ${OPENCOG_SOURCE_DIR}/src/server
 )
 
+IF (UBIGRAPH_FOUND AND XMLRPC_FOUND) # Otherwise none of the code which uses ubigraph will be compiled
 TARGET_LINK_LIBRARIES(pln
     atomspace
     xml
@@ -74,6 +75,15 @@ TARGET_LINK_LIBRARIES(pln
     #${Boost_SIGNALS_LIBRARY}
     ubigraph
 )
+ELSE (UBIGRAPH_FOUND AND XMLRPC_FOUND)
+TARGET_LINK_LIBRARIES(pln
+    atomspace
+    xml
+    util
+    #${Boost_SIGNALS_LIBRARY}
+)
+ENDIF (UBIGRAPH_FOUND AND XMLRPC_FOUND)
+
 
 INSTALL (TARGETS pln
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

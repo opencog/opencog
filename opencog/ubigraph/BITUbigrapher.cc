@@ -23,6 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "BITUbigrapher.h"
+
+#ifdef USE_BITUBIGRAPHER
+
 #include <sstream>
 #include <unistd.h>
 #include <opencog/util/Logger.h>
@@ -31,7 +35,6 @@ extern "C"
 {
 #include <UbigraphAPI.h>
 }
-#include "BITUbigrapher.h"
 
 using namespace std;
 
@@ -206,3 +209,6 @@ void BITUbigrapher::graph()
 }
 
 } // namespace opencog
+
+#endif // USE_BITUBIGRAPHER
+

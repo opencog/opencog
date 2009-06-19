@@ -48,7 +48,9 @@
 
 namespace opencog {
 
+#ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
+#endif
 
 namespace pln {
 
@@ -210,7 +212,9 @@ class BITNode
 	friend class BITNodeRoot;
 	friend class ExplicitlyEvaluatedBITNode;
 
+#if USE_BITUBIGRAPHER
     friend class opencog::BITUbigrapher;
+#endif
 
 protected:
     /** Whether to allow sibling spawning */

@@ -33,6 +33,8 @@
 // (or at least be automatically used by any BITNodeRoot, but be disabled by
 // default, as now).
 
+#ifdef USE_BITUBIGRAPHER
+
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h> // BackInferenceTreeNode.h breaks otherwise
@@ -81,5 +83,7 @@ namespace haxx
 {
 opencog::BITUbigrapher* BITUSingleton;
 }
+
+#endif // USE_BITUBIGRAPHER
 
 #endif // _OPENCOG_BITUBIGRAPHER
