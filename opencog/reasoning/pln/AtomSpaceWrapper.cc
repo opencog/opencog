@@ -1499,7 +1499,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     bool ok_forall=false;
 
     char buf[500];
-    sprintf(buf, "Adding link of type %s (%d)", type2name[T].c_str(), T);
+    sprintf(buf, "Adding link of type %s (%d)", Type2Name(T), T);
     LOG(4, buf);
 
     if (hs.size() > 7)

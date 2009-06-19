@@ -1833,7 +1833,7 @@ bool substitutableTo(pHandle from, pHandle to,
     return ttsubstitutableTo<pHandle, handleNoOp, map<pHandle, pHandle>::iterator>(from, to, bindings, handleNoOp());
 }
 
-char unnamed_type[] = "unnamed-type";
+//char unnamed_type[] = "unnamed-type";
 const char* Type2Name(Type t)
 {
 

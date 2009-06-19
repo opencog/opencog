@@ -24,7 +24,8 @@
 
 namespace opencog { namespace pln {
 
-extern std::map<int, std::string> type2name;
+// TODELETE
+//extern std::map<int, std::string> type2name;
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
 //template<typename FormulaType, Type SRC_LINK, Type DEST_LINK>
@@ -43,7 +44,9 @@ public:
 	Link2LinkRule(iAtomSpaceWrapper *_destTable, Type src, Type dest)
 	: GenericRule<FormulaType>(_destTable,false,""), SRC_LINK(src), DEST_LINK(dest)
 	{
-		GenericRule<FormulaType>::name = "Link2Link(" + type2name[SRC_LINK] + "=>" + type2name[DEST_LINK] +")";
+		GenericRule<FormulaType>::name = "Link2Link(" +
+         std::string(Type2Name(SRC_LINK)) + "=>" +
+         std::string(Type2Name(DEST_LINK)) +")";
 		GenericRule<FormulaType>::inputFilter.push_back(meta(
 			new tree<Vertex>(
 				mva((pHandle)SRC_LINK,

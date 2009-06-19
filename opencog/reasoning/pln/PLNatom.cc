@@ -38,7 +38,8 @@ namespace pln {
 int atom_alloc_count=0;
 int inode_alloc_count=0;
 	
-extern std::map<int, string> type2name;
+// TODELETE
+//extern std::map<int, string> type2name;
 	
 bool existMPin(const vector<Btr<atom> >& hs);
 
@@ -555,7 +556,7 @@ void prn(tree< Btr<atom> >& tr)
 {
 	tree< Btr<atom> >::sibling_iterator sib=tr.begin();
       while(sib!=tr.end()) {
-         cout << type2name[(*sib)->T] << endl;
+         cout << Type2Name((*sib)->T) << endl;
          ++sib;
          }
       cout << endl;
@@ -564,7 +565,7 @@ void prn(tree< Btr<atom> >& tr)
       while(sib2!=end2) {
          for(int i=0; i<tr.depth(sib2); ++i) 
             cout << " ";
-         cout << type2name[(*sib2)->T] << endl;
+         cout << Type2Name((*sib2)->T) << endl;
          ++sib2;
       }
 }
