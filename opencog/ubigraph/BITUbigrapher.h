@@ -26,7 +26,7 @@
 #ifndef _OPENCOG_BITUBIGRAPHER
 #define _OPENCOG_BITUBIGRAPHER
 
-//#define USE_BITUBIGRAPHER 
+//#define USE_BITUBIGRAPHER
 // (haxx::) currently makes a BITNodeRoot automatically use a BITUbigrapher.
 // Should disable the code if Ubigraphclient isn't found, and then have an option for attaching it to a particular BIT
 // (or at least be automatically used by any BITNodeRoot, but be disabled by default, as now).
@@ -71,8 +71,9 @@ public:
 
 } // namespace opencog
 
-namespace haxx {
-    opencog::BITUbigrapher* BITUSingleton;
+namespace haxx
+{
+opencog::BITUbigrapher* BITUSingleton;
 }
 
 #endif // _OPENCOG_BITUBIGRAPHER
