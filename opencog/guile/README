@@ -432,7 +432,7 @@ interface.
          guile> (cog-tv x)
          (stv 0 0)
          guile> (cog-set-tv! x (cog-new-stv 0.9 0.8))
-         (ConceptNode "abc" (stv 0.9 0.8))
+         (ConceptNode "def" (stv 0.9 0.8))
          guile> (cog-tv x)
          (stv 0.9 0.8)
 
