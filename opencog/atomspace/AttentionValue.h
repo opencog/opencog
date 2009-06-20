@@ -110,20 +110,19 @@ public:
     // elements are equal false otherwise
     // @param none
     virtual bool operator==(const AttentionValue& av) const;
-    
+    inline bool operator!=(const AttentionValue& rhs) const
+         { return !(*this == rhs); }
+
     struct STISort {
         bool operator()(const Handle& h1, const Handle& h2);
-        
     };
 
     struct LTIAndTVAscendingSort {
         bool operator()(const Handle& h1, const Handle& h2);
-
     };
 
     struct LTIThenTVAscendingSort {
         bool operator()(const Handle& h1, const Handle& h2);
-
     };
 
 
