@@ -138,9 +138,9 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 	SCM svlti = scm_from_locale_symbol("vlti");
 	
 	SCM rc = SCM_EOL;
-	rc = scm_acons(ssti, sti, rc);
-	rc = scm_acons(slti, lti, rc);
 	rc = scm_acons(svlti, vlti, rc);
+	rc = scm_acons(slti, lti, rc);
+	rc = scm_acons(ssti, sti, rc);
 	return rc;
 }
 
