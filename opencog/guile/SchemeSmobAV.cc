@@ -123,94 +123,25 @@ AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname)
 }
 
 /**
- * Return association list holding contents of a truth value
+ * Return association list holding contents of an attention value
  */
-SCM SchemeSmob::ss_tv_get_value (SCM s)
+SCM SchemeSmob::ss_av_get_value (SCM s)
 {
-	AttentionValue *tv = verify_tv(s, "cog-tv->alist");
-	AttentionValueType tvt = tv->getType();
-	switch(tvt)
-	{
-		case SIMPLE_TRUTH_VALUE:
-		{
-			SimpleAttentionValue *stv = static_cast<SimpleAttentionValue *>(tv);
-			SCM mean = scm_from_double(stv->getMean());
-			SCM conf = scm_from_double(stv->getConfidence());
-			SCM smean = scm_from_locale_symbol("mean");
-			SCM sconf = scm_from_locale_symbol("confidence");
+	AttentionValue *av = verify_av(s, "cog-av->alist");
+
+	SCM sti = scm_from_short(av->getSTI());
+	SCM lti = scm_from_short(av->getLTI());
+	SCM vlti = scm_from_short(av->getVLTI());
+
+	SCM ssti = scm_from_locale_symbol("sti");
+	SCM slti = scm_from_locale_symbol("lti");
+	SCM svlti = scm_from_locale_symbol("vlti");
 	
-			SCM rc = SCM_EOL;
-			rc = scm_acons(sconf, conf, rc);
-			rc = scm_acons(smean, mean, rc);
-			return rc;
-		}
-		case COUNT_TRUTH_VALUE:
-		{
-			CountAttentionValue *ctv = static_cast<CountAttentionValue *>(tv);
-			SCM mean = scm_from_double(ctv->getMean());
-			SCM conf = scm_from_double(ctv->getConfidence());
-			SCM cont = scm_from_double(ctv->getCount());
-			SCM smean = scm_from_locale_symbol("mean");
-			SCM sconf = scm_from_locale_symbol("confidence");
-			SCM scont = scm_from_locale_symbol("count");
-	
-			SCM rc = SCM_EOL;
-			rc = scm_acons(scont, cont, rc), 
-			rc = scm_acons(sconf, conf, rc);
-			rc = scm_acons(smean, mean, rc);
-			return rc;
-		}
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			IndefiniteAttentionValue *itv = static_cast<IndefiniteAttentionValue *>(tv);
-			SCM lower = scm_from_double(itv->getL());
-			SCM upper = scm_from_double(itv->getU());
-			SCM conf = scm_from_double(itv->getConfidence());
-			SCM slower = scm_from_locale_symbol("lower");
-			SCM supper = scm_from_locale_symbol("upper");
-			SCM sconf = scm_from_locale_symbol("confidence");
-	
-			SCM rc = SCM_EOL;
-			rc = scm_acons(sconf, conf, rc);
-			rc = scm_acons(supper, upper, rc), 
-			rc = scm_acons(slower, lower, rc);
-			return rc;
-		}
-		case COMPOSITE_TRUTH_VALUE:
-		{
-			CompositeAttentionValue *mtv = static_cast<CompositeAttentionValue *>(tv);
-			const AttentionValue &ptv = mtv->getVersionedAV(NULL_VERSION_HANDLE);
-			AttentionValue *nptv = ptv.clone();
-			SCM sptv = take_tv(nptv);
-
-			SCM sprimary = scm_from_locale_symbol("primary");
-			SCM sversion = scm_from_locale_symbol("versions");
-
-			// Loop over all the version handles.
-			SCM vers = SCM_EOL;
-			int nvh = mtv->getNumberOfVersionedAVs();
-			for (int i=0; i<nvh; i++)
-			{
-				VersionHandle vh = mtv->getVersionHandle(i);
-				VersionHandle *nvh = new VersionHandle(vh);
-				SCM svh = take_vh(nvh);
-
-				const AttentionValue& vtv = mtv->getVersionedAV(vh);
-				AttentionValue *nvtv = vtv.clone();
-				SCM svtv = take_tv(nvtv);
-
-				vers = scm_acons(svh, svtv, vers);
-			}
-
-			SCM rc = SCM_EOL;
-			rc = scm_acons(sversion, vers, rc);
-			rc = scm_acons(sprimary, sptv, rc);
-			return rc;
-		}
-		default:
-			return SCM_EOL;
-	}
-	return SCM_EOL;
+	SCM rc = SCM_EOL;
+	rc = scm_acons(ssti, sti, rc);
+	rc = scm_acons(slti, lti, rc);
+	rc = scm_acons(svlti, vlti, rc);
+	return rc;
 }
 
 #endif /* HAVE_GUILE */
