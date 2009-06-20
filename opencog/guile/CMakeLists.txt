@@ -4,6 +4,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeExec.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
+	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc

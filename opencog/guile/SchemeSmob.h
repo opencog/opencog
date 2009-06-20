@@ -19,6 +19,8 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/types.h>
+
+#include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/VersionHandle.h>
 
@@ -110,6 +112,12 @@ class SchemeSmob
 		static SCM take_vh(VersionHandle *);
 		static SCM ss_vh_get_value(SCM);
 
+		// Attention values
+		static SCM ss_new_av(SCM, SCM, SCM);
+		static SCM ss_av_p(SCM);
+		static SCM take_av(AttentionValue *);
+		static SCM ss_av_get_value(SCM);
+
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
 		static SCM pln_bc(SCM, SCM);
@@ -120,15 +128,18 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
+		static std::string av_to_string(const AttentionValue *);
 		static std::string tv_to_string(const TruthValue *);
 		static std::string vh_to_string(const VersionHandle *);
 		static TruthValue *get_tv_from_list(SCM);
+		static AttentionValue *get_av_from_list(SCM);
 
 		static Type validate_atom(SCM, const char *);
 		static Type validate_node(SCM, const char *);
 		static Atom * verify_atom(SCM, const char *);
 		static Handle verify_handle(SCM, const char *);
 		static TruthValue * verify_tv(SCM, const char *);
+		static AttentionValue * verify_av(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:

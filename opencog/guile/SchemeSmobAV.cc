@@ -78,9 +78,9 @@ SCM SchemeSmob::take_av (AttentionValue *av)
  */
 SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 {
-	sti_t sti = scm_to_short(ssti);
-	lti_t lti = scm_to_short(slti);
-	vlti_t vlti = scm_to_short(svlti);
+	AttentionValue::sti_t sti = scm_to_short(ssti);
+	AttentionValue::lti_t lti = scm_to_short(slti);
+	AttentionValue::vlti_t vlti = scm_to_short(svlti);
 
 	AttentionValue *av = new AttentionValue(sti, lti, vlti);
 	return take_av(av);

@@ -135,6 +135,11 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-vh?",               1, 0, 0, C(ss_vh_p));
 	scm_c_define_gsubr("cog-vh->alist",         1, 0, 0, C(ss_vh_get_value));
 
+	// Attention values
+	scm_c_define_gsubr("cog-new-av",            2, 0, 0, C(ss_new_av));
+	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
+	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
+
 	// iterators
 	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));
