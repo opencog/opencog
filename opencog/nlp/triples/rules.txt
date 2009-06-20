@@ -9,11 +9,11 @@
 ;
 ; Note that these rules generate triples holding word instances.
 ; At a later stage, after we decide that we "like" a given triple,
-; if is "canonicalized" by replacing the word instances by the
+; it is "canonicalized" by replacing the word instances by the
 ; generic words themselves. 
 ;
 ; Some quick notes on evaluation: conjuncts are evaluated from 
-; first to last, and so the ordr of the terms matters. Terms that
+; first to last, and so the order of the terms matters. Terms that
 ; narrow down the search the most dramatically should come first,
 ; so as to avoid an overly-broad search of the atomspace.
 ;
