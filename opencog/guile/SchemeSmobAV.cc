@@ -51,62 +51,39 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-	std::string ret = "";
-	snprintf(buff, BUFLEN, "(stv %.8g ", stv->getMean());
-	ret += buff;
-	snprintf(buff, BUFLEN, "%.8g)", stv->getConfidence());
-	ret += buff;
+	snprintf(buff, BUFLEN, "(av %d %d %d)", 
+		av->getSTI(), av->getLTI(), av->getVLTI());
+	std::string ret = buff;
 	return ret;
 }
 
-#if 0
 /* ============================================================== */
 /**
- * Take over memory management of a truth value
+ * Take over memory management of an attention value
  */
-SCM SchemeSmob::take_tv (AttentionValue *tv)
+SCM SchemeSmob::take_av (AttentionValue *av)
 {
-	scm_gc_register_collectable_memory (tv,
-	                 sizeof(*tv), "opencog tv");
+	scm_gc_register_collectable_memory (av,
+	                 sizeof(*av), "opencog av");
 
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, tv);
+	SCM_NEWSMOB (smob, cog_misc_tag, av);
 	SCM_SET_SMOB_FLAGS(smob, COG_AV);
 	return smob;
 }
 
 /* ============================================================== */
 /**
- * Create a new simple truth value, with indicated mean and confidence.
+ * Create a new attention value, with indicated sti/lti/vlti
  */
-SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
+SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 {
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
+	sti_t sti = scm_to_short(ssti);
+	lti_t lti = scm_to_short(slti);
+	vlti_t vlti = scm_to_short(svlti);
 
-	float cnt = SimpleAttentionValue::confidenceToCount(confidence);
-	AttentionValue *tv = new SimpleAttentionValue(mean, cnt);
-	return take_tv(tv);
-}
-
-SCM SchemeSmob::ss_new_ctv (SCM smean, SCM sconfidence, SCM scount)
-{
-	double mean = scm_to_double(smean);
-	double confidence = scm_to_double(sconfidence);
-	double count = scm_to_double(scount);
-
-	AttentionValue *tv = new CountAttentionValue(mean, confidence, count);
-	return take_tv(tv);
-}
-
-SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
-{
-	double lower = scm_to_double(slower);
-	double upper = scm_to_double(supper);
-	double confidence = scm_to_double(sconfidence);
-
-	AttentionValue *tv = new IndefiniteAttentionValue(lower, upper, confidence);
-	return take_tv(tv);
+	AttentionValue *av = new AttentionValue(sti, lti, vlti);
+	return take_av(av);
 }
 
 /* ============================================================== */
@@ -130,6 +107,7 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 	return SCM_BOOL_F;
 }
 
+#if 0
 /**
  * Return true if the scm is a truth value
  */
