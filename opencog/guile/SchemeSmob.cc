@@ -138,7 +138,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-vh->alist",         1, 0, 0, C(ss_vh_get_value));
 
 	// Attention values
-	scm_c_define_gsubr("cog-new-av",            2, 0, 0, C(ss_new_av));
+	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));
 	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
 	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
