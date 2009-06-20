@@ -88,9 +88,9 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 
 /* ============================================================== */
 /**
- * Return true if the scm is a truth value
+ * Return true if the scm is an attention value
  */
-SCM SchemeSmob::ss_tv_p (SCM s)
+SCM SchemeSmob::ss_av_p (SCM s)
 {
 	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
 	{
@@ -107,48 +107,19 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 	return SCM_BOOL_F;
 }
 
-#if 0
-/**
- * Return true if the scm is a truth value
- */
-inline SCM SchemeSmob::tv_p (SCM s, AttentionValueType wanted)
-{
-	if (SCM_BOOL_F == ss_tv_p(s)) return SCM_BOOL_F;
-
-	AttentionValue *tv = (AttentionValue *) SCM_SMOB_DATA(s);
-	AttentionValueType tvt = tv->getType();
-	if (wanted == tvt) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-SCM SchemeSmob::ss_stv_p (SCM s)
-{
-	return tv_p(s, SIMPLE_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_ctv_p (SCM s)
-{
-	return tv_p(s, COUNT_TRUTH_VALUE);
-}
-
-SCM SchemeSmob::ss_itv_p (SCM s)
-{
-	return tv_p(s, INDEFINITE_TRUTH_VALUE);
-}
-
 /* ============================================================== */
 
-AttentionValue * SchemeSmob::verify_tv(SCM stv, const char *subrname)
+AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, stv))
-		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sav))
+		scm_wrong_type_arg_msg(subrname, 2, sav, "opencog attention value");
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(stv);
+	scm_t_bits misctype = SCM_SMOB_FLAGS(sav);
 	if (COG_AV != misctype)
-		scm_wrong_type_arg_msg(subrname, 2, stv, "opencog truth value");
+		scm_wrong_type_arg_msg(subrname, 2, sav, "opencog attention value");
 
-	AttentionValue *tv = (AttentionValue *) SCM_SMOB_DATA(stv);
-	return tv;
+	AttentionValue *av = (AttentionValue *) SCM_SMOB_DATA(sav);
+	return av;
 }
 
 /**
@@ -242,6 +213,5 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	return SCM_EOL;
 }
 
-#endif
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */
