@@ -37,6 +37,7 @@ class SchemeSmob
 			COG_HANDLE = 1,
 			COG_TV,  // truth values
 			COG_VH,  // version handles
+			COG_AV,  // attention values
 		};
 
 		static bool is_inited;
