@@ -495,9 +495,9 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
 {
     //! @todo check exists works on WIN32
     string fname(path);
-    string fname2("../tests/reasoning/" + path);
+    string fname2("../tests/reasoning/pln/" + path);
 //    string fname2(PLN_TEST_DIR + path);
-//    string fname2("tests/reasoning/" + path);
+//    string fname2("tests/reasoning/pln/" + path);
     if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());
         fname = fname2;

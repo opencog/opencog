@@ -166,7 +166,7 @@ To initialize the experiments, first load a test data file, for example use the 
 
   pln load-axioms smalldemo.xml
 
-which will load tests/reasoning/smalldemo.xml, which was previously loaded by default.
+which will load tests/reasoning/pln/smalldemo.xml, which was previously loaded by default.
 This is also when PLN now initializes the test targets, so it is necessary to use that command
 before using any of the test-specific commands such as the "pln target" command.
 
