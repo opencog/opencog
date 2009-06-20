@@ -54,6 +54,13 @@ public:
     static const sti_t MINSTI = SHRT_MIN;
     static const lti_t MINLTI = SHRT_MIN;
 
+    static const AttentionValue& DEFAULT_AV() {
+        static AttentionValue* instance = 
+            new AttentionValue(DEFAULTATOMSTI, 
+                               DEFAULTATOMLTI, 
+                               DEFAULTATOMVLTI);
+        return *instance;
+    }
 
 private:
 
