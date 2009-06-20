@@ -531,7 +531,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
          it != scm_modules.end(); ++it) {
 
         int rc = 2;
-        const char * mod = "";
+        const char * mod = (*it).c_str();
         for (int i = 0; config_paths[i] != NULL; ++i) {
             boost::filesystem::path modulePath(config_paths[i]);
             modulePath /= *it;

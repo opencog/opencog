@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
     // Load modules specified in config
     cogserver.loadModules(); 
-    cogserver.loadSCMModules(DEFAULT_CONFIG_PATHS);
+    cogserver.loadSCMModules(DEFAULT_MODULE_PATHS);
 
     // enable the network server and run the server's main loop
     cogserver.enableNetworkServer();
