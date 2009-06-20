@@ -73,6 +73,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 			ret += " ";
 			ret += tv_to_string (&tv);
 		}
+
+		// Print the attetnion value after the truth value
+		const AttentionValue &av = atom->getAttentionValue();
+		if (av != AttentionValue::DEFAULT_AV())
+		{
+			ret += " ";
+			ret += av_to_string (&av);
+		}
 		ret += ")";
 		return ret;
 	}

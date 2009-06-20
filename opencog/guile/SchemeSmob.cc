@@ -110,6 +110,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-link?",             1, 0, 1, C(ss_link_p));
 
 	// property setters
+	scm_c_define_gsubr("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 
 	// property getters
@@ -119,6 +120,7 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	scm_c_define_gsubr("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	scm_c_define_gsubr("cog-tv",                1, 0, 0, C(ss_tv));
+	scm_c_define_gsubr("cog-av",                1, 0, 0, C(ss_av));
 
 	// Truth-values
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));

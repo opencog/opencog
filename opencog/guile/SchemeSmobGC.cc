@@ -50,6 +50,14 @@ size_t SchemeSmob::free_misc(SCM node)
 
 	switch (misctype)
 	{
+		case COG_AV:
+			AttentionValue *av;
+			av = (AttentionValue *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (av,
+			                  sizeof(*av), "opencog av");
+			delete av;
+			return 0;
+
 		case COG_TV:
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(node);

@@ -97,6 +97,23 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	return satom;
 }
 
+SCM SchemeSmob::ss_av (SCM satom)
+{
+	const Atom *atom = verify_atom(satom, "cog-av");
+	const AttentionValue &av = atom->getAttentionValue();
+	AttentionValue *sav = av.clone();
+	return take_av(sav);
+}
+
+SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
+{
+	Atom *atom = verify_atom(satom, "cog-set-av!");
+	AttentionValue *av = verify_av(sav, "cog-set-av!");
+
+	atom->setAttentionValue(*av);
+	return satom;
+}
+
 /* ============================================================== */
 /**
  * Convert the outgoing set of an atom into a list; return the list.
