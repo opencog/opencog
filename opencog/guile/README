@@ -428,7 +428,7 @@ interface.
 
       Example:
          ; Define a node
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define x (cog-new-node 'ConceptNode "def"))
          guile> (cog-tv x)
          (stv 0 0)
          guile> (cog-set-tv! x (cog-new-stv 0.9 0.8))
@@ -443,6 +443,62 @@ interface.
          guile> (define x (cog-new-stv 0.7 0.9))
          guile> (cog-tv->alist x)
          ((mean . 0.699999988079071) (confidence . 0.899999976158142))
+
+=== cog-new-av sti lti vlti ===
+      Create an AttentionValue with the given sti, lti and vlti.
+      Unlike atoms, attention values are ephemeral: they are automatically
+      garbage-collected when no longer needed.
+
+      Example:
+          ; Create a new attention value:
+          guile> (cog-new-av 10 20 30)
+
+
+=== cog-av? exp ===
+      Return #t if exp is an attention value, else return #f
+
+      Example:
+         ; Define a simple attention value
+         guile> (define x (cog-new-av 15 25 35))
+         guile> (define y (+ 2 2))
+         guile> (cog-av? x)
+         #t
+         guile> (cog-av? y)
+         #f
+
+=== cog-av atom ===
+      Return the attention value of the atom. 
+
+      Example:
+         ; Define a node
+         guile> (define x 
+                   (cog-new-node 'ConceptNode "abc" 
+                      (cog-new-av 11 21 31)))
+         guile> (cog-av x)
+         (av 11 21 31)
+         guile> (cog-av? (cog-av x))
+         #t
+
+=== cog-set-av! atom av ===
+      Set the attention value of the atom. 
+
+      Example:
+         ; Define a node
+         guile> (define x (cog-new-node 'ConceptNode "def"))
+         guile> (cog-av x)
+         (av 0 0 0)
+         guile> (cog-set-av! x (cog-new-av 44 55 66))
+         (ConceptNode "def" (av 44 55 66))
+         guile> (cog-av x)
+         (av 44 55 66)
+
+=== cog-av->alist ===
+      Convert an attention value to an association list (alist).
+
+      Example:
+         guile> (define x (cog-new-av 99 88 77))
+         guile> (cog-av->alist x)
+         ((sti . 99) (lti . 88) (vlti . 77))
 
 === cog-new-vh indicator atom ===
       Create a VersionHandle of the indicated type, refering to the 
