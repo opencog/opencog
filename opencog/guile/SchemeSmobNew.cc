@@ -74,7 +74,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 			ret += tv_to_string (&tv);
 		}
 
-		// Print the attetnion value after the truth value
+		// Print the attention value after the truth value
 		const AttentionValue &av = atom->getAttentionValue();
 		if (av != AttentionValue::DEFAULT_AV())
 		{
@@ -92,6 +92,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		{
 			ret += " ";
 			ret += tv_to_string (&tv);
+		}
+
+		// Print the attention value after the truth value
+		const AttentionValue &av = atom->getAttentionValue();
+		if (av != AttentionValue::DEFAULT_AV())
+		{
+			ret += " ";
+			ret += av_to_string (&av);
 		}
 
 		// print the outgoing link set.
@@ -263,6 +271,15 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addNode(t, name, *tv);
 
+	// Was an attention value explicitly specified?
+	// If so, then we've got to set it.
+	const AttentionValue *av = get_av_from_list(kv_pairs);
+	if (av)
+	{
+		Atom *a = TLB::getAtom(h);
+		a->setAttentionValue(*av);
+	}
+
 	return handle_to_scm (h);
 }
 
@@ -282,12 +299,21 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	Handle h = as->getHandle(t, name);
 	if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
 
+	Atom *atom = NULL;
 	// If there was a truth value, change it.
 	const TruthValue *tv = get_tv_from_list(kv_pairs);
 	if (tv)
 	{
-		Atom *atom = TLB::getAtom(h);
+		if (NULL == atom) atom = TLB::getAtom(h);
 		atom->setTruthValue(*tv);
+	}
+
+	// If there was an attention value, change it.
+	const AttentionValue *av = get_av_from_list(kv_pairs);
+	if (av)
+	{
+		if (NULL == atom) atom = TLB::getAtom(h);
+		atom->setAttentionValue(*av);
 	}
 	return handle_to_scm (h);
 }
@@ -326,7 +352,6 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 	if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
 
-	const TruthValue *tv = NULL;
 	std::vector<Handle> outgoing_set;
 	SCM sl = satom_list;
 	int pos = 2;
@@ -353,10 +378,12 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 		else
 		{
 			// Its legit to have enmbedded truth values, just skip them.
-			tv = get_tv_from_list(sl);
-			if (tv == NULL)
+			const TruthValue *tv = get_tv_from_list(sl);
+			const AttentionValue *av = get_av_from_list(sl);
+			if ((tv == NULL) && (av == NULL))
 			{
-				// If its not an atom, and its not a truth value, its bad
+				// If its not an atom, and its not a truth value, and its
+				// not an attention value, then whatever it is, its bad.
 				scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
 			}
 		}
@@ -384,6 +411,15 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	// Now, create the actual link... in the actual atom space.
 	AtomSpace *as = CogServer::getAtomSpace();
 	Handle h = as->addLink(t, outgoing_set, *tv);
+
+	// Was an attention value explicitly specified?
+	// If so, then we've got to set it.
+	const AttentionValue *av = get_av_from_list(satom_list);
+	if (av)
+	{
+		Atom *a = TLB::getAtom(h);
+		a->setAttentionValue(*av);
+	}
 	return handle_to_scm (h);
 }
 
@@ -404,12 +440,22 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	Handle h = as->getHandle(t, outgoing_set);
 	if (!TLB::isValidHandle(h)) return SCM_EOL; // NIL
 
+	Atom *atom = NULL;
+
 	// If there was a truth value, change it.
 	const TruthValue *tv = get_tv_from_list(satom_list);
 	if (tv)
 	{
-		Atom *atom = TLB::getAtom(h);
+		if (NULL == atom) atom = TLB::getAtom(h);
 		atom->setTruthValue(*tv);
+	}
+
+	// If there was an attention value, change it.
+	const AttentionValue *av = get_av_from_list(satom_list);
+	if (av)
+	{
+		if (NULL == atom) atom = TLB::getAtom(h);
+		atom->setAttentionValue(*av);
 	}
 	return handle_to_scm (h);
 }
