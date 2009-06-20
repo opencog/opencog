@@ -54,6 +54,7 @@ static const char* DEFAULT_CONFIG_PATHS[] =
 
 static const char* DEFAULT_MODULE_PATHS[] = 
 {
+    DATADIR,
     "opencog",
     "../opencog",
 #ifndef WIN32

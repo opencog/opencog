@@ -146,6 +146,7 @@ IF (NOT DEFINED DATADIR)
     SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
 ENDIF (NOT DEFINED DATADIR)
 ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
+ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
 
 # include custom opencog cmake macros
 INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
