@@ -1,15 +1,44 @@
+#include <ctime>
 #include <cxxtest/TestSuite.h>
 #include "opencog/learning/moses/moses/optimization.h"
 
-using namespace moses;
 using namespace eda;
-
+using namespace moses;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {
 public:
-    
+    template<typename ScoreT>
+    void get_sample_size_and_distance(eda::instance_set<ScoreT> & deme, size_t& sample_size, int & distance) {
+        eda::field_set fs = deme.fields();
+        eda::instance inst_temp(fs.packed_width());
+        foreach(eda::instance& inst, deme) {
+            //            cout<<fs.stream(inst)<<endl; 
+            if (fs.count(inst)){
+                    distance = fs.hamming_distance(inst, inst_temp);
+                    sample_size++;
+                }
+        }
+    }
+
     void test_sample_from_neighborhood() {
-  
+        int rand_seed = clock();
+        int distance = 2;
+        size_t sample_size = 10;
+        
+
+        field_set fs(field_set::disc_spec(5), 20);
+        eda::instance_set<moses::tree_score>  deme(100,fs);
+
+        opencog::MT19937RandGen rng(rand_seed);
+        moses::sample_from_neighborhood(deme.fields(),distance,sample_size,deme.begin(),rng);
+        
+        size_t sampled_size = 0;
+        int sampled_distance = 0;
+        get_sample_size_and_distance(deme,sampled_size, sampled_distance);
+        //        cout << endl << "sample_size:" << sampled_size << "distance:" << sampled_distance <<endl;
+        TS_ASSERT(sample_size == sampled_size);
+        TS_ASSERT(distance == sampled_distance);
+
     }
   
 };
