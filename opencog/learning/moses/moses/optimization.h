@@ -112,7 +112,13 @@ struct eda_parameters {
     double terminate_if_gte;
 };
 
-
+/**
+ * This procedure generat the initial deme randomly
+ *
+ * @param fs the deme
+ * @param n  the size of deme
+ * @param out deme(where to store the instance)
+ */
 template<typename Out>
 void generate_initial_sample(const eda::field_set& fs, int n, Out out,
                              opencog::RandGen& rng)
@@ -142,13 +148,15 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
 }
 
 
-// This procedure samples sample_size instances at distance n from the exemplar
-// (i.e., with n non-zero elements in the sequence)
-// Params:
-// fs  - deme
-// n   - distance
-// sample_size  - number of instances to be generated
-// out - deme (where to store the instances)
+/**
+ * This procedure samples sample_size instances at distance n from the exemplar
+ * (i.e., with n non-zero elements in the sequence)
+ *
+ *@param fs  - deme
+ *@param n   - distance
+ *@param sample_size  - number of instances to be generated
+ *@param out - deme (where to store the instances)
+ */
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
                               int sample_size, Out out, opencog::RandGen& rng)
@@ -202,15 +210,16 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
     }
 }
 
-
-// Generates instances at distance n from the exemplar
-// (i.e., with n elements changed from 0 from the exemplar)
-// It calls a recursive function select_n_elements which varies
-// instance fields one by one (in all possible ways)
-// Params:
-// fs  - deme
-// n   - distance
-// out - deme (where to store the instances)
+/**
+ * Generates instances at distance n from the exemplar
+ * (i.e., with n elements changed from 0 from the exemplar)
+ * It calls a recursive function vary_n_knobs which varies
+ * instance fields one by one (in all possible ways)
+ *
+ * @param fs  - deme
+ * @param n   - distance
+ * @param out - deme (where to store the instances)
+ */
 template<typename Out>
 void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
 {
@@ -231,16 +240,18 @@ void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
     vary_n_knobs(fs, inst, n, 0, out);
 }
 
-// Used by the function generate_n_neighborhood (only)
-// for generating instances at distance n from the exemplar. It varies
-// all possible n knobs in all possible ways. It varies
-// one instance field (at the changing position starting_index and
-// calls itself for the remaining fields).
-// Params:
-// fs             - deme
-// n              - distance
-// starting_index - position of a field to be varied
-// out            - deme (where to store the instances)
+/**
+ * Used by the function generate_all_in_neighborhood (only)
+ * for generating instances at distance n from the exemplar. It varies
+ * all possible n knobs in all possible ways. It varies
+ * one instance field (at the changing position starting_index and
+ * calls itself for the remaining fields).
+ *
+ *@param fs              deme
+ *@param n               distance
+ *@param starting_index  position of a field to be varied
+ *@param out             deme (where to store the instances)
+ */
 template<typename Out>
 void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
                   int starting_index, Out& out)
@@ -302,14 +313,15 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
 }
 
 
-
-// Used by the function count_n_changed_knobs (only)
-// for counting instances at distance n from the exemplar. It counts
-// all possible n knobs changed in all possible ways.
-// Params:
-// fs             - deme
-// n              - distance
-// starting_index - position of a field to be varied
+/**
+ * Used by the function count_n_changed_knobs (only)
+ * for counting instances at distance n from the exemplar. It counts
+ * all possible n knobs changed in all possible ways.
+ * 
+ * @param fs             - deme
+ * @param n              - distance
+ * @param starting_index - position of a field to be varied
+ */
 inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
                                                   int n, int starting_index)
 {
@@ -347,13 +359,14 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
 
 
 
-
-// Counts instances at distance n from the exemplar
-// (i.e., with n elements changed from the exemplar)
-// It calls a recursive function count_n_changed_knobs_from_index
-// Params:
-// fs  - deme
-// n   - distance
+/**
+ * Counts instances at distance n from the exemplar
+ * (i.e., with n elements changed from the exemplar)
+ * It calls a recursive function count_n_changed_knobs_from_index
+ * 
+ * @param fs  - deme
+ * @param n   - distance
+ */
 inline long long count_n_changed_knobs(const eda::field_set& fs, int n)
 {
     return count_n_changed_knobs_from_index(fs, n, 0);
