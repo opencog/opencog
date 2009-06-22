@@ -13,12 +13,31 @@ public:
         eda::instance inst_temp(fs.packed_width());
         //        cout << fs.stream(inst_temp) << endl;
         foreach(eda::instance& inst, deme) {
-            //            cout<<fs.stream(inst)<<endl; 
+            // cout<<fs.stream(inst)<<endl; 
             if (fs.count(inst)){
-                    distance = fs.hamming_distance(inst, inst_temp);
-                    sample_size++;
-                }
+                distance = fs.hamming_distance(inst, inst_temp);
+                sample_size++;
+            }
         }
+    }
+
+    int factorial(int n) {
+        int answer = 1, current = 1;  
+        while (current <= n) {
+            answer *= current;
+            current++;
+        }
+        return answer; 
+    }
+
+    int permutation(int n, int m) {
+        return factorial(n)/factorial(n-m);
+    }
+
+
+    size_t total_number_of_neighborhood(int distance, arity_t arity) {
+        return distance * (MAX_DISTANCE_FROM_EXEMPLAR -1) * permutation (arity , distance);
+        
     }
 
     void test_sample_from_neighborhood() {
@@ -41,5 +60,35 @@ public:
         TS_ASSERT(distance == sampled_distance);
 
     }
-  
+    void test_generate_all_in_neighborhood() {
+        {
+            int distance = 0;
+            field_set fs(field_set::disc_spec(5), 3);
+            eda::instance_set<moses::tree_score>  deme(100,fs);
+            //    cout << "generate_all_in_neighborhood" << endl;
+            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin());
+            size_t generated_size = 0;
+            int generated_distance = 0;
+            
+            get_sample_size_and_distance(deme, generated_size, generated_distance);
+            TS_ASSERT(generated_size == 0 );
+            TS_ASSERT(generated_distance == distance);
+        }
+
+        {
+            int distance = 2;
+            arity_t arity = 5;
+            field_set fs(field_set::disc_spec(5), arity);
+            eda::instance_set<moses::tree_score>  deme(1000,fs);
+            //    cout << "generate_all_in_neighborhood" << endl;
+            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin());
+            size_t generated_size = 0;
+            int generated_distance = 0;
+            
+            get_sample_size_and_distance(deme, generated_size, generated_distance);
+            // cout << generated_size << " " << generated_distance <<endl;
+            TS_ASSERT(generated_size == total_number_of_neighborhood(distance,arity));
+            TS_ASSERT(generated_distance == distance);
+        }
+    }
 };
