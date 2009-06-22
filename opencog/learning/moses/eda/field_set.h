@@ -30,18 +30,19 @@
 
 namespace eda
 {
-
-// A field set creates a simple, optimally compact representation of a set of
-// ontological, continuous, and discrete variables. This is made possible by
-// assuming that the number of bits in the encoding of the smallest
-// ontological variable is either a multiple of bits_per_packed_t, or is
-// equal in size to or larger than the number of bits in the encoding of the
-// largest continuious variable. Similarly the smallest continuous variable
-// must be a multiple of bits_per_packed_t, or be larger (in bits) than the
-// largest discrete variable.
-//
-// Without such restrictions, the optimal packing problem is more complex (in
-// particular, it is NP-complete, IIRC).
+ /**
+  * A field set creates a simple, optimally compact representation of a set of
+  * ontological, continuous, and discrete variables. This is made possible by
+  * assuming that the number of bits in the encoding of the smallest
+  * ontological variable is either a multiple of bits_per_packed_t, or is
+  * equal in size to or larger than the number of bits in the encoding of the
+  * largest continuious variable. Similarly the smallest continuous variable
+  * must be a multiple of bits_per_packed_t, or be larger (in bits) than the
+  * largest discrete variable.
+  *
+  * Without such restrictions, the optimal packing problem is more complex (in
+  * particular, it is NP-complete, IIRC).
+  */
 struct field_set {
     typedef unsigned int arity_t;
     typedef std::size_t size_t;
@@ -73,6 +74,16 @@ struct field_set {
             return arity == rhs.arity;
         }
     };
+
+    /**
+     * The basic idea is to represent continuous quantities, conceptually, as variable-length
+     * sequences of bits, with a simplicity prior towards shorter sequences. Bit-sequences are
+     * mapped to continuous values using a simple information-theoretic approach.
+     * (i.e. consider representing a value in the range (-1,1) with a uniform prior)
+     * 
+     * There is a paper about the how to represent continous quantities , you could find it on
+     * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
+     */
     struct contin_spec {
         contin_spec(contin_t m, contin_t ss, contin_t ex, arity_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }

@@ -11,6 +11,7 @@ public:
     void get_sample_size_and_distance(eda::instance_set<ScoreT> & deme, size_t& sample_size, int & distance) {
         eda::field_set fs = deme.fields();
         eda::instance inst_temp(fs.packed_width());
+        //        cout << fs.stream(inst_temp) << endl;
         foreach(eda::instance& inst, deme) {
             //            cout<<fs.stream(inst)<<endl; 
             if (fs.count(inst)){
