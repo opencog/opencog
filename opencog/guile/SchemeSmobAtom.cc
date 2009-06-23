@@ -239,6 +239,61 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 	return list;
 }
 
+/**
+ * Return true if a type
+ */
+SCM SchemeSmob::ss_type_p (SCM stype)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	char * ct = scm_to_locale_string(stype);
+	Type t = classserver().getType(ct);
+	free(ct);
+
+   if (NOTYPE == t) return SCM_BOOL_F;
+
+	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if a subtype
+ */
+SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
+{
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	char * ct = scm_to_locale_string(stype);
+	Type parent = classserver().getType(ct);
+	free(ct);
+
+   if (NOTYPE == parent) return SCM_BOOL_F;
+
+	// Now investigate the child ... 
+	if (scm_is_true(scm_symbol_p(schild)))
+		schild = scm_symbol_to_string(schild);
+
+	if (scm_is_false(scm_string_p(schild)))
+		return SCM_BOOL_F;
+
+	ct = scm_to_locale_string(schild);
+	Type child = classserver().getType(ct);
+	free(ct);
+
+   if (NOTYPE == child) return SCM_BOOL_F;
+
+	if (classserver().isA(child, parent)) return SCM_BOOL_T;
+
+	return SCM_BOOL_F;
+}
+
 #endif
 
 /* ===================== END OF FILE ============================ */

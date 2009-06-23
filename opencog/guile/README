@@ -544,7 +544,16 @@ interface.
       Return a list of all of the atom types in the system.
 
       Example:
-      guile> (cog-get-types)
+          guile> (cog-get-types)
+
+=== cog-type? ===
+      Return #t if the symbol names an atom type, else return #f
+
+      Example:
+          guile> (cog-type? 'ConceptNode)
+          #t
+          guile> (cog-type? 'FlorgleBarf)
+          #f
 
 === cog-get-subtypes type ===
       Return a list of the subtypes of the given type.  Only the 
@@ -552,7 +561,20 @@ interface.
       function should be called recursively.
 
       Example:
-      guile> (cog-get-subtypes 'Node)
+          guile> (cog-get-subtypes 'Atom)
+          (Link Node)
+
+=== cog-subtype? type subtype ===
+      Return #t if 'subtype' is a subtype of 'type', else return #f.
+      The check is performed recursively.
+
+      Example:
+          guile> (cog-subtype? 'Node 'Link)
+          #f
+          guile> (cog-subtype? 'Atom 'Link)
+          #t
+          guile> (cog-subtype? 'Atom 'ConceptNode)
+          #t
 
 === cog-map-type proc type ===
       Call proceedure proc for each atom in the atomspace that is of 

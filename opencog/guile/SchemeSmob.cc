@@ -142,11 +142,15 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
 	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
-	// iterators
-	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
+	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));
+	scm_c_define_gsubr("cog-type?",             1, 0, 0, C(ss_type_p));
 	scm_c_define_gsubr("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
+	scm_c_define_gsubr("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
 	
+	// Iterators
+	scm_c_define_gsubr("cog-map-type",          2, 0, 0, C(ss_map_type));
+
 	// ad-hoc commands
 	scm_c_define_gsubr("cog-ad-hoc",            1, 1, 0, C(ss_ad_hoc));
 	scm_c_define_gsubr("pln-bc",                2, 0, 0, C(pln_bc));
