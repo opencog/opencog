@@ -327,16 +327,20 @@ HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Ty
     return result;
 }
 
-HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass) const throw (RuntimeException)
+HandleEntry* AtomTable::getHandleSet(const char** names, 
+                                     Type* types, 
+                                     bool* subclasses, 
+                                     Arity arity, 
+                                     Type type, 
+                                     bool subclass)
+    const throw (RuntimeException)
 {
-    //printf("getHandleSet begin\n");
-
     std::vector<HandleEntry*> sets(arity, NULL);
 
     int countdown = 0;
-    // a list for each array of names is built. Then, it's filtered by the
-    // name (to avoid hash conflicts) and by the correspondent type in the
-    // array of types.
+    // A list for each array of names is built. Then, it's filtered by
+    // the name (to avoid hash conflicts) and by the correspondent type
+    // in the array of types.
     for (int i = 0; i < arity; i++) {
         //printf("getHandleSet: arity %d\n", i);
         bool sub = subclasses == NULL ? false : subclasses[i];
@@ -344,25 +348,29 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
             if ((types != NULL) && (types[i] != NOTYPE)) {
                 sets[i] = getHandleSet(names[i], types[i], type, subclass);
                 if (sub) {
-                    // if subclasses are accepted, the subclasses are returned in the
-                    // array types.
+                    // If subclasses are accepted, the subclasses are
+                    // returned in the array types.
                     std::vector<Type> subTypes;
 
-                    classserver().getChildren(types[i], std::back_inserter(subTypes));
+                    classserver().getChildrenRecursive(types[i], 
+                                           std::back_inserter(subTypes));
 
-                    // for all subclasses found, a set is concatenated to the answer set
+                    // For all subclasses found, a set is concatenated
+                    // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
-                        HandleEntry *subSet = getHandleSet(names[i], subTypes[j], type, subclass);
+                        HandleEntry *subSet = getHandleSet(names[i], 
+                                          subTypes[j], type, subclass);
                         sets[i] = HandleEntry::concatenation(sets[i], subSet);
                     }
-                    //delete[](subTypes);
                 }
-                sets[i] = HandleEntry::filterSet(sets[i], names[i], types[i], sub, i, arity);
+                sets[i] = HandleEntry::filterSet(sets[i], names[i], 
+                                           types[i], sub, i, arity);
             } else {
                 for (int j = 0; j < i; j++) {
                     delete sets[j];
                 }
-                throw RuntimeException(TRACE_INFO, "Cannot make this search using only target name!\n");
+                throw RuntimeException(TRACE_INFO, 
+                    "Cannot make this search using only target name!\n");
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             sets[i] = getHandleSet(type, types[i], subclass, sub);
@@ -372,8 +380,8 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         }
     }
 
-    // if the empty set counter is not zero, removes them by shrinking the
-    // list of sets
+    // If the empty set counter is not zero, removes them by shrinking
+    // the list of sets
     if (countdown > 0) {
         //printf("newset allocated size = %d\n", (arity - countdown));
         // TODO: Perhaps it's better to simply erase the NULL entries of the sets
@@ -386,7 +394,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         sets = newset;
     }
 
-    /*
+#ifdef DEBUG
     for (int i = 0; i < arity; i++) {
         printf("arity %d\n:", i);
         for (HandleEntry* it = sets[i]; it != NULL; it = it->next) {
@@ -394,10 +402,10 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
         }
         printf("\n");
     }
-    */
-    // the intersection is made for all non-empty sets, and then is filtered
-    // by the optional specified type. Also, if subclasses are not accepted,
-    // it will not pass the filter.
+#endif
+    // The intersection is made for all non-empty sets, and then is
+    // filtered by the optional specified type. Also, if subclasses are
+    // not accepted, it will not pass the filter.
     //printf("getHandleSet: about to call intersection\n");
     HandleEntry* set = HandleEntry::intersection(sets);
     //printf("getHandleSet: about to call filterSet\n");

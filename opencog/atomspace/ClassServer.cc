@@ -3,11 +3,13 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
  *            Andre Senna <senna@vettalabs.com>
  *            Gustavo Gama <gama@vettalabs.com>
+ *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -50,7 +52,7 @@ ClassServer::ClassServer(void)
     #include "atom_types.inheritance"
 }
 
-ClassServer* ClassServer::createInstance(void) 
+ClassServer* ClassServer::createInstance(void)
 {
     return new ClassServer();
 }
@@ -60,38 +62,44 @@ Type ClassServer::addType(Type parent, const std::string& name)
     // check if a type with this name already exists
     std::tr1::unordered_map<std::string, Type>::iterator it;
     if ((it = name2CodeMap.find(name)) != name2CodeMap.end()) {
-        //logger().warn("Type \"%s\" has already been added (%d)", name.c_str(), it->second);
-        if (inheritanceMap[parent][it->second] == false) {
-            setParentRecursively(parent, it->second);
-            //logger().warn("Type \"%s\" (%d) was not a parent of \"%s\" (%d) previously.", code2NameMap[parent]->c_str(), parent, name.c_str(), it->second);
+        logger().warn("Type \"%s\" has already been added (%d)", name.c_str(), it->second);
+        if (recursiveMap[parent][it->second] == false) {
+            logger().warn("Type \"%s\" (%d) was not a parent of \"%s\" (%d) previously.", code2NameMap[parent]->c_str(), parent, name.c_str(), it->second);
         }
         return it->second;
     }
 
-    // assign type code and increment type counter
+    // Assign type code and increment type counter.
     Type type = nTypes++;
 
-    // resize inheritanceMap container
+    // Resize inheritanceMap container.
     inheritanceMap.resize(nTypes);
+    recursiveMap.resize(nTypes);
 
     std::for_each(inheritanceMap.begin(), inheritanceMap.end(),
-                  std::tr1::bind(&std::vector<bool>::resize, _1, nTypes, false));
+          std::tr1::bind(&std::vector<bool>::resize, _1, nTypes, false));
+
+    std::for_each(recursiveMap.begin(), recursiveMap.end(),
+          std::tr1::bind(&std::vector<bool>::resize, _1, nTypes, false));
 
     inheritanceMap[type][type]   = true;
+    inheritanceMap[parent][type] = true;
+    recursiveMap[type][type]   = true;
     setParentRecursively(parent, type);
     name2CodeMap[name]           = type;
     code2NameMap[type]           = &(name2CodeMap.find(name)->first);
 
-    // emit add type signal
+    // Emit add type signal.
     _addTypeSignal(type);
 
     return type;
 }
 
-void ClassServer::setParentRecursively(Type parent, Type type) {
-    inheritanceMap[parent][type] = true;
+void ClassServer::setParentRecursively(Type parent, Type type)
+{
+    recursiveMap[parent][type] = true;
     for (Type i = 0; i < nTypes; ++i) {
-        if ((inheritanceMap[i][parent]) && (i != parent)) {
+        if ((recursiveMap[i][parent]) && (i != parent)) {
             setParentRecursively(i, type);
         }
     }
@@ -107,9 +115,14 @@ unsigned int ClassServer::getNumberOfClasses()
     return nTypes;
 }
 
-bool ClassServer::isA(Type type, Type parent)
+bool ClassServer::isA_non_recursive(Type type, Type parent)
 {
     return inheritanceMap[parent][type];
+}
+
+bool ClassServer::isA(Type type, Type parent)
+{
+    return recursiveMap[parent][type];
 }
 
 bool ClassServer::isDefined(const std::string& typeName)
@@ -135,7 +148,8 @@ const std::string& ClassServer::getTypeName(Type type)
     return nullString;
 }
 
-ClassServer& opencog::classserver(ClassServerFactory* factory) {
+ClassServer& opencog::classserver(ClassServerFactory* factory)
+{
     static std::auto_ptr<ClassServer> instance((*factory)());
     return *instance;
 }

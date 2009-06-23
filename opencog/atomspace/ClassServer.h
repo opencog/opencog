@@ -3,11 +3,13 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2009 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
  *            Andre Senna <senna@vettalabs.com>
  *            Gustavo Gama <gama@vettalabs.com>
+ *            Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -60,6 +62,7 @@ private:
     Type nTypes;
 
     std::vector< std::vector<bool> > inheritanceMap;
+    std::vector< std::vector<bool> > recursiveMap;
     std::tr1::unordered_map<std::string, Type> name2CodeMap;
     std::tr1::unordered_map<Type, const std::string*> code2NameMap;
     boost::signal<void (Type)> _addTypeSignal;
@@ -93,6 +96,19 @@ public:
         return n_children;
     }
 
+    template<typename OutputIterator>
+    unsigned int getChildrenRecursive(Type type, OutputIterator result)
+    {
+        unsigned int n_children = 0;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (recursiveMap[type][i] && (type != i)) {
+                *(result++) = i;
+                n_children++;
+            }
+        }
+        return n_children;
+    }
+
     /**
      * Returns the total number of classes in the system.
      *
@@ -108,6 +124,7 @@ public:
      * @return Whether a given class is assignable from another.
      */
     bool isA(Type sub, Type super);
+    bool isA_non_recursive(Type sub, Type super);
 
     /**
      * Returns true if given class is a Link.

@@ -223,7 +223,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 {
 	SCM list = SCM_EOL;
 
-	Type t = validate_node(stype, "cog-get-subtypes");
+	Type t = validate_atom(stype, "cog-get-subtypes");
 	std::vector<Type> subl;
 	unsigned int ns = classserver().getChildren(t, std::back_inserter(subl));
 
