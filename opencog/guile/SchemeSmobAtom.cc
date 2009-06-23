@@ -216,6 +216,29 @@ SCM SchemeSmob::ss_get_types (void)
 	return list;
 }
 
+/**
+ * Return a list of the subtypes of the indicated type
+ */
+SCM SchemeSmob::ss_get_subtypes (SCM stype)
+{
+	SCM list = SCM_EOL;
+
+	Type t = validate_node(stype, "cog-get-subtypes");
+	std::vector<Type> subl;
+	unsigned int ns = classserver().getChildren(t, std::back_inserter(subl));
+
+	for (unsigned int i=0; i<ns; i++)
+	{
+		t = subl[i];
+		const std::string &tname = classserver().getTypeName(t);
+		SCM str = scm_from_locale_string(tname.c_str());
+		SCM sym = scm_string_to_symbol(str);
+		list = scm_cons(sym, list);
+	}
+
+	return list;
+}
+
 #endif
 
 /* ===================== END OF FILE ============================ */

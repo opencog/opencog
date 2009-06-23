@@ -546,6 +546,14 @@ interface.
       Example:
       guile> (cog-get-types)
 
+=== cog-get-subtypes type ===
+      Return a list of the subtypes of the given type.  Only the 
+      immediate subtypes are returned; to obtain all subtypes, this
+      function should be called recursively.
+
+      Example:
+      guile> (cog-get-subtypes 'Node)
+
 === cog-map-type proc type ===
       Call proceedure proc for each atom in the atomspace that is of 
       type type. If proc returns any value other than #f, then the 

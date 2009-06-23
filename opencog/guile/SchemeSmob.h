@@ -95,6 +95,7 @@ class SchemeSmob
 		// AtomTable query functions
 		static SCM ss_map_type(SCM, SCM);
 		static SCM ss_get_types(void);
+		static SCM ss_get_subtypes(SCM);
 
 		// Truth values
 		static SCM ss_new_stv(SCM, SCM);
