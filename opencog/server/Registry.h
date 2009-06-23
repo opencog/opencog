@@ -68,7 +68,8 @@ public:
     /** Unregisters the factory identified by 'id' */
     virtual bool unregister(const std::string& id)
     {
-        logger().debug("unregistering %s \"%s\"", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
+        logger().debug("unregistering %s \"%s\"", 
+            demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return factories.erase(id) == 1;
     }
 
@@ -77,12 +78,15 @@ public:
     {
         FactoryMapConstIterator it = factories.find(id);
         if (it == factories.end()) {
-            // not found
-            logger().error("unknown %s id: %s", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
+            // If it wasn't found, then the user probably made a 
+            // simple typo at the command line. 
+            logger().info("unknown %s command: %s", 
+               demangle(typeid(_BaseType).name()).c_str(), id.c_str());
             return NULL;
         }
         // invoke the creation function
-        logger().debug("creating %s instance with \"%s\"", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
+        logger().debug("creating %s instance with \"%s\"", 
+             demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return it->second->create();
     }
 
