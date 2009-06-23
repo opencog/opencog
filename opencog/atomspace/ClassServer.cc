@@ -59,22 +59,21 @@ ClassServer* ClassServer::createInstance(void)
 
 Type ClassServer::addType(Type parent, const std::string& name)
 {
-    // check if a type with this name already exists
-    std::tr1::unordered_map<std::string, Type>::iterator it;
-    if ((it = name2CodeMap.find(name)) != name2CodeMap.end()) {
-        logger().warn("Type \"%s\" has already been added (%d)", 
-                      name.c_str(), it->second);
-        if (recursiveMap[parent][it->second] == false) {
-            setParentRecursively(parent, it->second);
-            logger().warn("Type \"%s\" (%d) was not a parent of \"%s\" (%d) previously.",
-                   code2NameMap[parent]->c_str(),
-                   parent, name.c_str(), it->second);
-        }
-        return it->second;
+    // Check if a type with this name already exists. If it does, then
+    // the second and subsequent calls are to be interpreted as defining
+    // multiple inheritance for this type.  A real-life example is the
+    // GroundedSchemeNode, which inherits from several types.
+    Type type = getType(name);
+    if (type != NOTYPE) {
+        // logger().warn("Type \"%s\" has already been added (%d)", 
+        //              name.c_str(), type);
+        inheritanceMap[parent][type] = true;
+        setParentRecursively(parent, type);
+        return type;
     }
 
     // Assign type code and increment type counter.
-    Type type = nTypes++;
+    type = nTypes++;
 
     // Resize inheritanceMap container.
     inheritanceMap.resize(nTypes);
