@@ -71,9 +71,9 @@ namespace builtin_properties {
     { id::sin,                  "->(contin contin)" },
     { id::greater_than_zero,    "->(contin boolean)" }, 
     { id::impulse,              "->(boolean contin)" },
-    { id::ann,                  "->(arg_list(boolean))" },
-    { id::ann_node,             "->(arg_list(boolean))" },
-    { id::ann_input,           "boolean" },
+    //{ id::ann,                  "->(arg_list(boolean))" },
+    //{ id::ann_node,             "->(arg_list(boolean))" },
+    //{ id::ann_input,           "boolean" },
     { id::rand,                 "contin" },
   };
  

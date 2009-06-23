@@ -64,6 +64,8 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         combo::type_tree(combo::id::boolean_type);
     combo::type_tree contin_type_tree =
         combo::type_tree(combo::id::contin_type);
+    combo::type_tree ann_type_tree =
+        combo::type_tree(combo::id::ann_type);
     stringstream art_ss; //action_result_type
     art_ss << combo::id::action_result_type;
     OC_ASSERT(
@@ -82,6 +84,8 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         action_canonize(_exemplar.begin());
         build_action(_exemplar.begin());
         action_cleanup();
+    } else if (output_type == ann_type_tree) {
+        // ANN
     } else {
         OC_ASSERT(output_type == contin_type_tree,
                          "Types differ. Expected 'combo::id::contin_type', got '%s'",

@@ -43,6 +43,7 @@
 #include "definite_object.h"
 #include "indefinite_object.h"
 #include "message.h"
+#include "ann.h"
 //#include "procedure_call.h"
 
 namespace combo
@@ -66,12 +67,14 @@ enum builtin {
     boolean_if,
     plus, times, div, exp, log, sin,
     greater_than_zero,
-    ann, ann_node, ann_input, //ann additions
     impulse,
     rand,         //random contin_t in [0,1) FIXME TODO : update reduct rules
     builtin_count //to get the number of builtin
 };
+
 }
+
+
 typedef id::builtin builtin;
 
 //this idiom allows wild_card to live in namespace combo, but all
@@ -83,6 +86,8 @@ enum wild_card {
 };
 }
 typedef id::wild_card wild_card;
+
+
 
 /*
   class argument
@@ -148,7 +153,8 @@ typedef boost::variant < builtin,
                          indefinite_object,
                          message,
                          procedure_call,
-                         action_symbol > vertex;
+                         action_symbol,
+			 ann_ids > vertex;
 
 typedef std::vector<vertex> argument_list;
 typedef argument_list::iterator argument_list_it;
@@ -304,6 +310,28 @@ inline bool operator!=(const combo::vertex& v, combo::indefinite_object i)
 inline bool operator!=(combo::indefinite_object i, const combo::vertex& v)
 {
     return !(v == i);
+}
+
+//ann_ids == vertex
+inline bool operator==(const combo::vertex& v, combo::ann_ids a)
+{
+   if (const combo::ann_ids* va = boost::get<combo::ann_ids>(&v))
+	return (*va == a);
+   return false;
+}
+inline bool operator==(combo::ann_ids a, const combo::vertex& v)
+{
+   if (const combo::ann_ids* va = boost::get<combo::ann_ids>(&v))
+	return (*va == a);
+   return false;
+}
+inline bool operator!=(const combo::vertex& v, combo::ann_ids a)
+{
+    return !(v == a);
+}
+inline bool operator!=(combo::ann_ids a,const combo::vertex& v)
+{ 
+    return !(v == a);
 }
 
 //message == vertex

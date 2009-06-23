@@ -28,8 +28,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
-
-#include "simple_nn.h"
+#include <opencog/comboreduct/combo/simple_nn.h>
 
 using namespace combo;
 using namespace std;
@@ -37,72 +36,70 @@ using namespace std;
 #define MIN_FITNESS -1.0e10
 
 typedef combo_tree::sibling_iterator sib_it;
+typedef combo_tree::iterator pre_it;
 
-struct tree_transform
-{
+struct tree_transform {
 
- tree_transform() { }
+    tree_transform() { }
 
-ann* decodify_tree(combo_tree tr) const
-{
-	ann* new_ann = new ann();
+    ann decodify_tree(combo_tree tr) const {
+        ann new_ann = ann();
 
-	sib_it head = tr.begin();
-	if(*head != id::ann)
-	{
-		cout << "root node should be ann" << endl;	
-		cout << *head << endl;
-	}
-	for(sib_it sib = head.begin(); sib != head.end(); ++sib)
-	{
-		//add all of the output nodes
-		if(*sib != id::ann_node)
-		{
-			cout << "child of ann should be output nodes" << endl;
-			cout << *sib << endl;
-		}
-		ann_node* newnode = new ann_node(nodetype_output);
-		new_ann->add_node(newnode);
-		decodify_subtree(new_ann,newnode,sib);
-	}
-	return new_ann;
-}
+        sib_it it = tr.begin();
 
-void decodify_subtree(ann* nn, ann_node* dest_node, sib_it it) const
-{
-	vector<ann_node*> sources;
-	sib_it sib;
-	for(sib = it.begin(); sib!=it.end(); ++sib)
-	{
-		ann_nodetype type;
-		if(*sib != id::ann_node && *sib != id::ann_input)
-			break;	
-		ann_node* node = NULL; //nn->find_tag((void*)*sib);
+        if ((*it) != id::ann) {
+            cout << "root node should be ann" << endl;
+        }
 
-		if(*sib == id::ann_node)
-			type=nodetype_hidden;
-		else
-			type=nodetype_input;
+        for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
+            //add all of the output nodes
+            if (*sib != id::ann_node) {
+                cout << "child of ann should be output nodes" << endl;
+            }
 
-		if(node==NULL)
-			node = new ann_node(type);
+            ann_node* newnode = new ann_node(nodetype_output, (void*)sib.node);
+            new_ann.add_node(newnode);
 
-		sources.push_back(node);
+            cout << "looking at subtree..." << endl;
+            decodify_subtree(new_ann, newnode, sib);
+        }
+        return new_ann;
+    }
 
-		//recurse on hidden nodes		
-		if(*sib == id::ann_node)
-			decodify_subtree(nn,node,sib);
-	}
+    void decodify_subtree(ann& nn, ann_node* dest_node, sib_it it) const {
+        vector<ann_node*> sources;
+        sib_it sib;
+        for (sib = it.begin(); sib != it.end(); ++sib) {
+            ann_nodetype type;
+            if (*sib != id::ann_node && *sib != id::ann_input)
+                break;
 
-	//now add weights
-	int count=0;
-	for( ; sib!=it.end(); ++sib)
-	{
-		nn->add_connection(sources[count],dest_node,
-				boost::get<combo::contin_t>(*sib));
-		count++;
-	}
-}
+            //see if this node has already been referenced & created
+            ann_node* node = nn.find_tag((void*)sib.node);
+
+            if (*sib == id::ann_node)
+                type = nodetype_hidden;
+            else
+                type = nodetype_input;
+
+            if (node == NULL)
+                node = new ann_node(type, (void*)sib.node);
+            nn.add_node(node);
+            sources.push_back(node);
+
+            //recurse on hidden nodes
+            if (*sib == id::ann_node)
+                decodify_subtree(nn, node, sib);
+        }
+
+        //now add weights
+        int count = 0;
+        for ( ; sib != it.end(); ++sib) {
+            nn.add_connection(sources[count], dest_node,
+                              boost::get<combo::contin_t>(*sib));
+            count++;
+        }
+    }
 };
 
 struct AnnFitnessFunction : unary_function<combo_tree, double> {
@@ -113,8 +110,26 @@ struct AnnFitnessFunction : unary_function<combo_tree, double> {
     result_type operator()(argument_type tr) const {
         if (tr.empty())
             return MIN_FITNESS;
-        int sc = 0;
-        return (double)sc;
+
+        tree_transform tt;
+
+        //xor_problem
+        double inputs[4][2] = { {0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0} };
+        double outputs[4] = {0.0, 1.0, 1.0, 0.0};
+
+        ann nn = tt.decodify_tree(tr);
+        int depth = nn.feedforward_depth();
+
+        double error = 0.0;
+        for (int pattern = 0;pattern < 4;pattern++) {
+            nn.load_inputs(inputs[pattern]);
+            for (int x = 0;x < depth;x++)
+                nn.propagate();
+            double diff = outputs[pattern] - nn.outputs[0]->activation;
+            error += diff * diff;
+        }
+
+        return -error;
     }
 
 };

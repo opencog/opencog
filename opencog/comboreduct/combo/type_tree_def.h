@@ -51,6 +51,7 @@ namespace combo {
       message_type,
       action_symbol_type,
       wild_card_type,
+      ann_type, //for evolving anns
       //unknown type
       unknown_type,  //it is the uber type all types inherite from unkown
                      //but ill_formed_type

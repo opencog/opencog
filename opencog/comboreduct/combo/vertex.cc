@@ -26,6 +26,21 @@
 #include <boost/lexical_cast.hpp>
 #include "procedure_call.h"
 
+std::ostream& operator<<(std::ostream& out, const combo::ann_ids& h)
+{
+   using namespace combo;
+   switch (h) {
+    case id::ann:
+        return out << "ann";
+    case id::ann_input:
+        return out << "ann_input";
+    case id::ann_node:
+        return out << "ann_node";
+    default:
+        return out << "ANN : UNKNOWN_HANDLE";
+   }
+}
+
 std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
 {
     using namespace combo;
@@ -64,12 +79,6 @@ std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
         return out << "impulse";
     case id::rand:
         return out << "rand";
-    case id::ann:
-        return out << "ann";
-    case id::ann_input:
-        return out << "ann_input";
-    case id::ann_node:
-        return out << "ann_node";
     default:
         return out << "BUILTIN : UNKNOWN_HANDLE";
     }
@@ -95,6 +104,8 @@ std::ostream& operator<<(std::ostream& out, const combo::argument& a)
 
 std::ostream& operator<<(std::ostream& out, const combo::vertex& v)
 {
+    if (const combo::ann_ids* z = boost::get<combo::ann_ids>(&v))
+        return out << (*z);
     if (const combo::argument* a = boost::get<combo::argument>(&v))
         return out << (*a);
     if (const combo::builtin* h = boost::get<combo::builtin>(&v))
