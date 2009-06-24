@@ -168,10 +168,6 @@ static const char ** scan_common_attrs (Atom *r, const char **atts)
     if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
         atts++;
         sscanf(*atts, "%f", &buffer);
-        if (buffer == 1.0) {
-            throw RuntimeException(TRACE_INFO,
-                                   "fatal error: confidence can not be 1.0");
-        }
         SimpleTruthValue newTv((const SimpleTruthValue&)r->getTruthValue());
         newTv.setConfidence(buffer);
         r->setTruthValue(newTv);
