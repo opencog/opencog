@@ -210,6 +210,52 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
     }
 }
 
+template<typename Out>
+void sample_from_neighborhood_ex(const eda::field_set& fs, int n,
+                                 int sample_size, Out out, opencog::RandGen& rng,
+                                 const eda::instance & center_inst )
+{
+    if (n <= 0 || sample_size <= 0 ||
+        center_inst.size() != fs.packed_width())
+        return;
+    
+
+    cout << "bits size: " << fs.n_bits() << endl;
+    cout << "disc size: " << fs.n_disc() << endl;
+    cout << "Sampling : " << sample_size << endl;
+
+    int dim = fs.n_bits() + fs.n_disc();
+
+
+    dorepeat(sample_size) {
+
+        eda::instance new_inst(center_inst);
+
+        for (int i = 1;i <= n;) {
+            int r = rng.randint(dim);
+            eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
+            eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
+
+            if ((unsigned int)r < fs.n_bits()) {
+                itb += r;
+                if (*itb == false) {
+                    *itb = true;
+                    i++;
+                }
+            } else if ((unsigned int)r >= fs.n_bits()) {
+                itd += r - fs.n_bits();
+                if (*itd == 0) {
+                    *itd = 1 + rng.randint(itd.arity() - 1);
+                    i++;
+                }
+            }
+        }
+
+        *out++ = new_inst;
+        // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
+    }
+}
+
 /**
  * Generates instances at distance n from the exemplar
  * (i.e., with n elements changed from 0 from the exemplar)
