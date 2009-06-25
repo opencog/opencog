@@ -95,7 +95,9 @@ ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # Gnu Guile scheme interpreter
-FIND_PACKAGE(Guile 1.8.3)
+# Versions prior to 1.8.6 have assorted serious problems with
+# multi-threading.  If you need guile, you need this version.
+FIND_PACKAGE(Guile 1.8.6)
 IF (GUILE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(GUILE_DIR_MESSAGE "Guile was found.")

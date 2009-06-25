@@ -44,6 +44,7 @@ expat       -- an XML parsing library -
 
 guile       -- Embedded scheme interperter
                http://www.gnu.org/software/guile/guile.html
+               Version 1.8.6 is required.
                Debian/Ubuntu package guile-1.8-dev
 
 unixODBC    -- Generic SQL Database client access libraries
@@ -52,6 +53,7 @@ unixODBC    -- Generic SQL Database client access libraries
 
 openssl     -- SSL sockets library 
                Debian/Ubuntu package libssl-dev
+
 libgsl      -- The GNU Scientific Library
                Debian/Ubuntu package libgsl0-dev
 
