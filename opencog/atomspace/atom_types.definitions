@@ -27,6 +27,7 @@ opencog::Type opencog::IMPLICATION_LINK;
 opencog::Type opencog::VARIABLE_NODE;
 opencog::Type opencog::VARIABLE_SCOPE_LINK;
 opencog::Type opencog::EVALUATION_LINK;
+opencog::Type opencog::IS_ACCEPTABLE_SECOND_ARG_LINK;
 opencog::Type opencog::ASSOCIATIVE_LINK;
 opencog::Type opencog::INHERITANCE_LINK;
 opencog::Type opencog::SIMILARITY_LINK;

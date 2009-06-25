@@ -59,7 +59,19 @@ void IsPeePlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
 
     // only structures are considered pee place
     if (atomSpace.getType(object) == STRUCTURE_NODE) {
+        std::string objectName = atomSpace.getName(object);
+        Handle objectSemeNode = atomSpace.addNode( SEME_NODE, objectName );        
+        Handle staticObjectConceptNode = atomSpace.addNode( CONCEPT_NODE, "Structure" );
+
+        HandleSeq inheritsFrom;
+        inheritsFrom.push_back( objectSemeNode );        
+        inheritsFrom.push_back( staticObjectConceptNode );
+        Handle link = atomSpace.addLink( INHERITANCE_LINK, inheritsFrom );
+        
         tv.setMean(1.0);
+        atomSpace.setLTI( link, 1);
+        atomSpace.setTV( link, tv );
+
     }
     // all other objects are not pee places
 

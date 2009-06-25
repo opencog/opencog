@@ -52,32 +52,49 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
 
     logger().fine("IsMovable - Updating is_movable for obj %s.",
                  atomSpace.getName(object).c_str());
-
-
-    // 1. pets and structures are not movable
-    if (atomSpace.getType(object) == PET_NODE ||
-            atomSpace.getType(object) == STRUCTURE_NODE) {
-        return;
-    }
-
-
-    // truth value - mean equals 0.0 --> not smaller than pet
-    //     mean equals 1.0 --> is  smaller than pet
-    SimpleTruthValue tv(0.0, 1.0);
+    
 
     // 2. all avatars are movable - TV set to 1.0
-    if (atomSpace.getType(object) == AVATAR_NODE) {
-        tv.setMean(1.0);
-        AtomSpaceUtil::addPropertyPredicate(atomSpace, "is_movable", object, tv, true);
-        return;
-    }
+    Type objectType = atomSpace.getType(object);
+    std::string objectName = atomSpace.getName(object);
+    Handle objectSemeNode = atomSpace.addNode( SEME_NODE, objectName );
+    
+    HandleSeq inheritsFrom;
+    inheritsFrom.push_back( objectSemeNode );
 
-    // 3. other objects, if they are small, they are
-    //    movable
-    if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object)) {
-        tv.setMean(1.0);
-    } else {
-        tv.setMean(0.0);
-    }
-    AtomSpaceUtil::addPropertyPredicate(atomSpace, "is_movable", object, tv, true);
+    bool isMovable = false;
+    if ( objectType == PET_NODE ) {
+        isMovable = true;
+        Handle petConceptNode = atomSpace.getHandle( CONCEPT_NODE, "Pet" );
+        inheritsFrom.push_back( petConceptNode );
+
+    } else if ( objectType == AVATAR_NODE ) {
+        isMovable = true;
+        Handle avatarConceptNode = atomSpace.getHandle( CONCEPT_NODE, "Avatar" );
+        inheritsFrom.push_back( avatarConceptNode );
+
+    } else if ( objectType == HUMANOID_NODE ) {
+        isMovable = true;
+        Handle humanoidConceptNode = atomSpace.getHandle( CONCEPT_NODE, "Humanoid" );
+        inheritsFrom.push_back( humanoidConceptNode );
+
+    } else if ( objectType == ACCESSORY_NODE ) {
+        isMovable = true;
+        Handle movableObjectConceptNode = atomSpace.getHandle( CONCEPT_NODE, "Item" );
+        inheritsFrom.push_back( movableObjectConceptNode );
+
+    } // else if
+
+    SimpleTruthValue tv(0.0, 1.0);
+    if ( isMovable ) {
+        tv.setMean( 1.0 );
+
+        if ( inheritsFrom[1] != Handle::UNDEFINED ) {
+            Handle link = atomSpace.addLink( INHERITANCE_LINK, inheritsFrom );
+            atomSpace.setLTI( link, 1 );
+            atomSpace.setTV( link, tv );
+        } // if
+    } // if
+    AtomSpaceUtil::setPredicateValue(atomSpace, "is_movable", tv, object);
+
 }

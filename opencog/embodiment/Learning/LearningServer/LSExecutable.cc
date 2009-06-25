@@ -61,8 +61,9 @@ int main(int argc, char *argv[])
             config().get_int("LS_PORT"));
 
     // Load modules specified in config
-    ls.loadModules(); 
-    ls.loadSCMModules();
+    ls.loadModules(  ); 
+    const char* config_paths[] = { "." };
+    ls.loadSCMModules( config_paths );
 
     // enable the network server and run the server's main loop
     ls.enableNetworkServer();

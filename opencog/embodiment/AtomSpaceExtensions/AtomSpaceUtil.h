@@ -839,6 +839,90 @@ public:
     static void updateLatestIsExemplarAvatar(AtomSpace& as,
             Handle atTimeLink);
 
+
+    /**
+     * Retrieve the handles of all Frame Elements
+     *
+     * @param AtomSpace the agent atomSpace
+     * @param frameName the name of the FrameNet Frame
+     * @param frameElementsHandles A HandleSeq which will be filled with
+     *                             the Frame Elements handles
+     * @return The Frame handle. Handle::UNDEFINED if the frame doesn't exists
+     */
+    static Handle getFrameElements( AtomSpace& atomSpace, 
+                                    const std::string& frameName, 
+                                    HandleSeq& frameElementsHandles );
+
+    /**
+     * Creates a representation of a specific predicate instance
+     * in Framenet(http://framenet.icsi.berkeley.edu/) Frames format. 
+     * This method uses a previous definition of the Frame structure 
+     * to set the given frame elements values.
+     *
+     * i.e. suppose you want to create a Frame corresponding to the
+     * is_near predicate. So you will call this method giving the following
+     * parameters: <agent atom space>, "#Locative_relation", "is_near",
+     * HandleSeq(SemeNodeHandle(object1), SemeNodeHandle(object2), ConceptNodeHandle(is_near))
+     *
+     * Then, a Frame will be created as follows:
+     *
+     * InheritanceLink
+     *    DefinedFrameNode "#Locative_relation"
+     *    PredicateNode "is_near"
+     *  
+     * InheritanceLink
+     *    DefinedFrameElementNode "#Locative_relation:Figure"
+     *    PredicateNode "is_near_Figure"
+     *  
+     * InheritanceLink
+     *    DefinedFrameElementNode "#Locative_relation:Ground"
+     *    PredicateNode "is_near_Ground"
+     *  
+     * InheritanceLink
+     *    DefinedFrameElementNode "#Locative_relation:Relation_type"
+     *    PredicateNode "is_near_Relation_type"
+     *  
+     *  
+     * FrameElementLink
+     *    PredicateNode "is_near"
+     *    PredicateNode "is_near_Figure"
+     *  
+     * FrameElementLink
+     *    PredicateNode "is_near"
+     *    PredicateNode "is_near_Ground"
+     *  
+     * FrameElementLink
+     *    PredicateNode "is_near"
+     *    PredicateNode "is_near_Relation_type"
+     *  
+     *  
+     * EvaluationLink
+     *    PredicateNode "is_near_Figure"
+     *    SemeNode "object1"
+     *  
+     * EvaluationLink
+     *    PredicateNode "is_near_Ground"
+     *    SemeNode "object2"
+     *  
+     * EvaluationLink
+     *    PredicateNode "is_near_Relation_type"
+     *    ConceptNode "is_near"
+     *      
+     *
+     * @param atomSpace The AtomSpace reference where the Frame will be create into
+     * @param frameName The name of the Frame that will be instantiated
+     * @param predicateName The name of the frame instance
+     * @param frameElementsValuesHandles The map of the elements and its values that will be 
+     *                                   used to set the frame instance elements
+     * @param truthValue The truthValue that will be set as the frame instance TV
+     * @return The Frame instance handle
+     */
+    static Handle setPredicateFrameFromHandles( AtomSpace& atomSpace, 
+                                                const std::string& frameName, 
+                                                const std::string& frameInstanceName, 
+                                                const std::map<std::string, Handle>& frameElementsValuesHandles, 
+                                                const TruthValue& truthValue );
+
     //This is not needed, since setupHoldingObject (and getMostRecentIsHoldingAtTimeLink) method manages that.
     //static void updateLatestAgentHolding(AtomSpace& as, Handle atTimeLink, Handle agentNode);
 };

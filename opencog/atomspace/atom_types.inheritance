@@ -23,6 +23,7 @@ opencog::IMPLICATION_LINK = addType(opencog::ORDERED_LINK, "ImplicationLink");
 opencog::VARIABLE_NODE = addType(opencog::NODE, "VariableNode");
 opencog::VARIABLE_SCOPE_LINK = addType(opencog::ORDERED_LINK, "VariableScopeLink");
 opencog::EVALUATION_LINK = addType(opencog::ORDERED_LINK, "EvaluationLink");
+opencog::IS_ACCEPTABLE_SECOND_ARG_LINK = addType(opencog::ORDERED_LINK, "IsAcceptableSecondArgLink");
 opencog::ASSOCIATIVE_LINK = addType(opencog::ORDERED_LINK, "AssociativeLink");
 opencog::INHERITANCE_LINK = addType(opencog::ORDERED_LINK, "InheritanceLink");
 opencog::SIMILARITY_LINK = addType(opencog::UNORDERED_LINK, "SimilarityLink");

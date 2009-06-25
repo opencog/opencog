@@ -62,13 +62,61 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     //    small. If these requeriments aren't satisfied then
     //    they are not moveable
     if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) &&
-            AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
-            atomSpace.getType(object) == ACCESSORY_NODE &&
-            !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
+        AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
+        atomSpace.getType(object) == ACCESSORY_NODE &&
+        !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
         tv.setMean(1.0);
+
+        std::string objectName = atomSpace.getName( object );
+        std::string agentName = atomSpace.getName( pet );
+
+        Handle isSmallPredicate = atomSpace.getHandle( 
+            PREDICATE_NODE, agentName + "_" + objectName + "_is_small" );
+
+        if ( isSmallPredicate != Handle::UNDEFINED ) {
+
+            Handle comparison = 
+                atomSpace.getHandle( DEFINED_FRAME_NODE, "#Evaluative_comparison" );
+            cassert( TRACE_INFO, comparison != Handle::UNDEFINED,
+                     "#Evaluative_comparison wasn't defined yet. Please load the predicates-frames.scm file" );
+
+            HandleSeq isSmallFrame;
+            isSmallFrame.push_back( comparison );
+            isSmallFrame.push_back( isSmallPredicate );
+
+            Handle isSmallLink = atomSpace.getHandle( INHERITANCE_LINK, isSmallFrame );
+            cassert( TRACE_INFO, isSmallLink != Handle::UNDEFINED,
+                     "is_small frame wasn't defined for the object '%s'", objectName.c_str( ) );
+
+            Handle objectSemeNode =  atomSpace.getHandle( SEME_NODE, objectName );
+            cassert( TRACE_INFO, objectSemeNode != Handle::UNDEFINED,
+                     "A SemeNode wasn't yet defined for the object '%s'", objectName.c_str( ) );
+        
+            HandleSeq isMovableFrame;
+            isMovableFrame.push_back( objectSemeNode );
+            isMovableFrame.push_back( Handle::UNDEFINED );
+
+            HandleSeq parentHandles;
+            Type types[] = { SEME_NODE, CONCEPT_NODE };
+            
+            atomSpace.getHandleSet( back_inserter(parentHandles),
+                                    isMovableFrame, &types[0], NULL, 2, INHERITANCE_LINK, false );
+
+            cassert( TRACE_INFO, parentHandles.size( ) == 1, 
+                     "Invalid number of InheritanceLinks which defines the object type. %d but should be 1", 
+                     parentHandles.size( ) );
+        
+        
+            HandleSeq isPickupable;
+            isPickupable.push_back( parentHandles[0] ); // is_movable
+            isPickupable.push_back( isSmallLink ); // is_small
+        
+            atomSpace.addLink( EVALUATION_LINK, isPickupable );
+        } // if
+
     }
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_pickupable", tv, object);
-
+    
     logger().debug("IsPickupablePredicateUpdater - Is element %s pickupable: %s",
                  atomSpace.getName(object).c_str(),
                  ( tv.getMean( ) ? "t" : "f" ) );

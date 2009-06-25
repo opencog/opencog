@@ -62,7 +62,7 @@ public :
 
     void testNearestMovable() {
         std::string str("nearest_movable");
-        runProcedureInCombo(str, PAIUtils::getInternalId("Stick"));
+        runProcedureInCombo(str, PAIUtils::getInternalId("32f56136-7973-4703-915b-6ec1bf5c67fa"));
     }
 
     void testNearestPickupable() {

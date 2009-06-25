@@ -57,8 +57,6 @@
 #include "PetaverseDOMParser.h"
 #include "PetaverseErrorHandler.h"
 
-#include <opencog/server/load-file.h>
-
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace PerceptionActionInterface;
@@ -115,12 +113,6 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
 #endif
 
     logPVPMessage = !(config().get_bool("DISABLE_LOG_OF_PVP_MESSAGES"));
-
-
-    std::string scheme_file = opencog::config().get("SCHEME_TYPEDEFS_PATH");
-    std::cout << "SCHEME_TYPEDEFS_PATH: " << scheme_file << std::endl;
-    int rc = load_scm_file(scheme_file.c_str());
-//  cassert(TRACE_INFO, rc);
 
 }
 
@@ -1043,7 +1035,6 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         XERCES_CPP_NAMESPACE::XMLString::trim(parsedSentenceText);
     } // if
 
-    // TODO: now handle the sentence and the parsed sentence
     if(parsedSentenceText != NULL){
         logger().debug("Running eval of scheme instructions");
         char buff[parsedSentenceLength];
@@ -1055,7 +1046,6 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         }
        	schemeEval.clear_pending();
     }
-
 
     // Add the perceptions into AtomSpace
 

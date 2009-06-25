@@ -46,6 +46,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <stack>
+
+#include <boost/algorithm/string.hpp>
 
 using std::string;
 using std::list;
@@ -2035,3 +2038,177 @@ void AtomSpaceUtil::updateLatestIsExemplarAvatar(AtomSpace& as,
     updateGenericLatestSingleInfo(latestIsExemplarAvatar, as, atTimeLink);
 }
 
+
+Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string& frameName, HandleSeq& frameElementsHandles ) 
+{
+    Handle frameNode = atomSpace.getHandle( DEFINED_FRAME_NODE, frameName );
+    if ( frameNode != Handle::UNDEFINED ) {
+
+        HandleSeq frameElementLink;
+        frameElementLink.push_back(frameNode);
+        frameElementLink.push_back(Handle::UNDEFINED);
+        HandleSeq frameElementLinkHandles;
+        atomSpace.getHandleSet(back_inserter(frameElementLinkHandles),
+                               frameElementLink, NULL, NULL, 2, FRAME_ELEMENT_LINK, false);
+        
+        unsigned int i;
+        for( i = 0; i < frameElementLinkHandles.size( ); ++i ) {
+            frameElementsHandles.push_back( atomSpace.getOutgoing( frameElementLinkHandles[i], 1 ) );
+        } // for
+        return frameNode;
+    } // if
+    
+    return Handle::UNDEFINED;
+}
+
+Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const std::string& frameName, const std::string& frameInstanceName, const std::map<std::string, Handle>& frameElementsValuesHandles, const TruthValue& truthValue )
+{
+
+    Handle frameNode = atomSpace.getHandle( DEFINED_FRAME_NODE, frameName );
+
+    if ( frameNode != Handle::UNDEFINED ) {
+
+        // get all parents of this frame to copy its elements to this one
+        std::map<std::string, Handle> frameElements;
+        std::stack<Handle> parents;
+        parents.push( frameNode );
+        while( !parents.empty( ) ) {
+            Handle parent = parents.top( );
+            parents.pop( );
+
+            // get the frame elements
+            HandleSeq frameElementsHandles;
+            getFrameElements( atomSpace, atomSpace.getName( parent ), frameElementsHandles );
+            unsigned int i;
+            for( i = 0; i < frameElementsHandles.size( ); ++i ) {
+                std::vector<string> elementNameParts;
+                boost::algorithm::split( elementNameParts,
+                                         atomSpace.getName( frameElementsHandles[i] ),
+                                         boost::algorithm::is_any_of(":") );
+
+                cassert(TRACE_INFO, elementNameParts.size( ) == 2,
+                        "The name of a Frame element must be #FrameName:FrameElementName, but '%' was given",
+                        atomSpace.getName( frameElementsHandles[i] ).c_str( ) );
+
+                // only add a new element if it wasn't yet defined (overloading)
+                if ( frameElements.find( elementNameParts[1] ) == frameElements.end( ) ) {
+                    frameElements.insert( std::map<std::string, Handle>::value_type(
+                        elementNameParts[1], frameElementsHandles[i] ) );
+                } // if
+            } // for
+
+            // now get the element parents
+            HandleSeq parentLink;
+            parentLink.push_back( parent );
+            parentLink.push_back( Handle::UNDEFINED );
+            HandleSeq parentFrames;
+            atomSpace.getHandleSet(back_inserter(parentFrames),
+                                   parentLink, NULL, NULL, 2, INHERITANCE_LINK, false);            
+            for( i = 0; i < parentFrames.size( ); ++i ) {
+                Handle frameElementHandle = atomSpace.getOutgoing( parentFrames[i], 1 );
+                if ( atomSpace.getType( frameElementHandle ) == DEFINED_FRAME_NODE ) {
+                    parents.push( frameElementHandle );                    
+                } // if
+            } // for
+        } // while
+        
+
+        // check if there are one element value for each Frame element
+        if ( frameElements.size( ) > 0 ) {
+
+            Handle frameInstance = addNode(atomSpace,
+                                                 PREDICATE_NODE,
+                                                 frameInstanceName, true);
+
+            HandleSeq frameInstanceInheritance;
+            frameInstanceInheritance.push_back( frameNode );
+            frameInstanceInheritance.push_back( frameInstance );
+            Handle frameInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameInstanceInheritance, true );            
+
+            
+            std::map<std::string, Handle>::const_iterator it;
+            for( it = frameElements.begin( ); it != frameElements.end( ); ++it ) {
+                
+                // the element exists, so get its handle and check it
+                Handle frameElementHandle = it->second;
+                if ( frameElementHandle == Handle::UNDEFINED ) {
+                    logger().error( "AtomSpaceUtil - Invalid Undefined frame element node for frame '%s'",
+                                    frameName.c_str( ) );
+                    return Handle::UNDEFINED;
+                } // if
+
+                // then add a new eval link to a new element value if necessary
+                std::map<std::string, Handle>::const_iterator itValue =
+                    frameElementsValuesHandles.find( it->first );
+
+                // new prepare the name of the element for using at the Frame instance
+                std::stringstream frameElementInstanceName;
+                frameElementInstanceName << frameInstanceName << "_" << it->first;
+
+                Handle frameElementInstance = 
+                    addNode( atomSpace, PREDICATE_NODE, 
+                             frameElementInstanceName.str( ), true );
+
+                HandleSeq frameElementInheritance;
+                frameElementInheritance.push_back( frameElementHandle );
+                frameElementInheritance.push_back( frameElementInstance );
+                
+                Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
+                atomSpace.setLTI( frameElementInheritanceLink, 1 );
+                
+                HandleSeq predicateFrameElement;
+                predicateFrameElement.push_back( frameInstance );
+                predicateFrameElement.push_back( frameElementInstance );
+                                
+                Handle frameElementLink = addLink( atomSpace, FRAME_ELEMENT_LINK, predicateFrameElement, true );
+                atomSpace.setLTI( frameElementLink, 1 );
+                
+
+                // first, remove the older eval link, if one exist
+                HandleSeq predicateFrameValue;
+                predicateFrameValue.push_back( frameElementInstance );
+                predicateFrameValue.push_back( Handle::UNDEFINED );
+                
+                HandleSeq elementEvalLinkHandles;
+                atomSpace.getHandleSet(back_inserter(elementEvalLinkHandles),
+                                       predicateFrameValue, NULL, NULL, 2, EVALUATION_LINK, false);            
+                unsigned int i;
+                for( i = 0; i < elementEvalLinkHandles.size( ); ++i ) { 
+                    atomSpace.removeAtom( elementEvalLinkHandles[i] );
+                } // if
+
+                if ( itValue != frameElementsValuesHandles.end( ) && itValue->second != Handle::UNDEFINED ) {                
+                   // set a new value to the frame element
+                    predicateFrameValue[1] = itValue->second;
+                    Handle frameElementEvalLink = addLink( atomSpace, EVALUATION_LINK, predicateFrameValue, true );                    
+                    atomSpace.setLTI( frameElementEvalLink, 1 );
+                } // if
+
+            } // for
+
+            if ( frameElementsValuesHandles.size( ) == 0 ) {
+                std::stringstream msg;
+                msg << "AtomSpaceUtil - You created a Frame with Handle::UNDEFINED ";
+                msg << "in all of its elements, what is probably a useless Frame. Frame name '%s' ";
+                msg << " Frame instance name '%s'. # of Frame elements '%d' ";
+                msg << " # of Values given '%d' ";
+                logger().debug( msg.str( ).c_str( ), frameName.c_str( ), frameInstanceName.c_str( ),
+                                frameElements.size( ), frameElementsValuesHandles.size( ) );
+            } // if
+
+            atomSpace.setTV( frameInheritanceLink, truthValue );
+            atomSpace.setLTI( frameInheritanceLink, 1 );
+            return frameInstance;
+
+        } else {            
+            logger().debug( "AtomSpaceUtil - There are no configured frame elements for frame '%s'", 
+                            frameName.c_str( ) );
+        } // else
+        
+    } else {
+        logger().debug( "AtomSpaceUtil - There is no Registered Frame named '%s'", 
+                        frameName.c_str( ) );
+    } // else
+
+    return Handle::UNDEFINED;
+}

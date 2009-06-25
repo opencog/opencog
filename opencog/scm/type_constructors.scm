@@ -50,6 +50,8 @@
 	(apply cog-new-link (append (list 'VariableScopeLink) x)))
 (define (EvaluationLink . x)
 	(apply cog-new-link (append (list 'EvaluationLink) x)))
+(define (IsAcceptableSecondArgLink . x)
+	(apply cog-new-link (append (list 'IsAcceptableSecondArgLink) x)))
 (define (AssociativeLink . x)
 	(apply cog-new-link (append (list 'AssociativeLink) x)))
 (define (InheritanceLink . x)

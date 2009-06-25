@@ -532,15 +532,17 @@ void CogServer::loadSCMModules(const char* config_paths[])
 
         int rc = 2;
         const char * mod = (*it).c_str();
-        for (int i = 0; config_paths[i] != NULL; ++i) {
-            boost::filesystem::path modulePath(config_paths[i]);
-            modulePath /= *it;
-            if (boost::filesystem::exists(modulePath)) {
-                mod = modulePath.string().c_str();
-                rc = load_scm_file(mod);
-                if (0 == rc) break;
+        if ( config_paths != NULL ) {
+            for (int i = 0; config_paths[i] != NULL; ++i) {
+                boost::filesystem::path modulePath(config_paths[i]);
+                modulePath /= *it;
+                if (boost::filesystem::exists(modulePath)) {
+                    mod = modulePath.string().c_str();
+                    rc = load_scm_file(mod);
+                    if (0 == rc) break;
+                }
             }
-        }
+        } // if
         if (rc)
         {
            logger().error("%d %s: %s", 

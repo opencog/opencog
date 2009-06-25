@@ -68,7 +68,18 @@ $pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.conf \
 $pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
 $pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
 ./SPCTools.py \
+]
+
+set schemeOpencogFiles [list \
 $pdh/opencog/scm/type_constructors.scm \
+$pdh/opencog/scm/utilities.scm \
+$pdh/opencog/scm/file-utils.scm \
+$pdh/opencog/scm/persistence.scm \
+$pdh/opencog/scm/debug.scm \
+]
+
+set schemeEmbodimentFiles [list \
+$pdh/opencog/embodiment/scm/predicates-frames.scm \
 ]
 
 set flistAGI [list \
@@ -112,4 +123,17 @@ foreach file $flistAGI {
 
 foreach file $flistconfig {
     exec cp -r $file $distDir
+}
+
+
+# copy scheme sripts
+exec mkdir -p $distDir/scm
+exec mkdir -p $distDir/scm/embodiment
+
+foreach file $schemeOpencogFiles {
+    exec cp $file $distDir/scm/
+}
+
+foreach file $schemeEmbodimentFiles {
+    exec cp $file $distDir/scm/embodiment/
 }

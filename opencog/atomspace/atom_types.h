@@ -33,6 +33,7 @@ extern opencog::Type IMPLICATION_LINK;
 extern opencog::Type VARIABLE_NODE;
 extern opencog::Type VARIABLE_SCOPE_LINK;
 extern opencog::Type EVALUATION_LINK;
+extern opencog::Type IS_ACCEPTABLE_SECOND_ARG_LINK;
 extern opencog::Type ASSOCIATIVE_LINK;
 extern opencog::Type INHERITANCE_LINK;
 extern opencog::Type SIMILARITY_LINK;

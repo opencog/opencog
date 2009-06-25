@@ -130,8 +130,8 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
 
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
 
-    const std::string& petName = atomSpace.getName(pet);
-    if ( !spaceMap.containsObject(petName) ) {
+    const std::string& agentName = atomSpace.getName(pet);
+    if ( !spaceMap.containsObject(agentName) ) {
         logger().error("PetPsychePredicatesUpdater - Pet was not inserted in the map yet." );
         return;
     }
@@ -152,7 +152,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     // this predicate is needed by learning mode. It means near, but not much
     bool nextOwner = false;
 
-    const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( petName );
+    const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( agentName );
 
     SpaceServer::SpaceMapPoint petCenter( agentEntity->getPosition( ).x, agentEntity->getPosition( ).y );
 
@@ -218,6 +218,29 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                 } // if
             } // if
 
+            
+            { // setting Obviousness Frame
+                std::string level = meanValue > 0.7 ? "High" : meanValue > 0.3 ? "Medium" : "Low";
+                std::map<std::string, Handle> elements;
+                elements["Attribute"] = atomSpace.addNode( CONCEPT_NODE, "Visible" );
+                elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, level );
+                elements["Phenomenon"] = atomSpace.addNode( SEME_NODE, entity );
+                elements["Perceiver"] = atomSpace.addNode( SEME_NODE, agentName );
+
+                HandleSeq agentLocation;
+                agentLocation.push_back( atomSpace.addNode( NUMBER_NODE, 
+                    boost::lexical_cast<std::string>( agentEntity->getPosition( ).x ) ) );
+                agentLocation.push_back( atomSpace.addNode( NUMBER_NODE, 
+                    boost::lexical_cast<std::string>( agentEntity->getPosition( ).y ) ) );
+                agentLocation.push_back( atomSpace.addNode( NUMBER_NODE, 
+                    boost::lexical_cast<std::string>(agentEntity->getPosition( ).z ) ) );
+    
+                elements["Location_of_protagonist"] = atomSpace.addLink( LIST_LINK, agentLocation );
+                AtomSpaceUtil::setPredicateFrameFromHandles( 
+                   atomSpace, "#Obviousness", agentName + "_" + entity + "_inside_pet_fov", 
+                      elements, SimpleTruthValue( meanValue, 1.0) );
+
+            } // end block
             AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov", SimpleTruthValue( meanValue, 1.0f ), pet, entityHandle );
             logger().debug("PetPsychePredicatesUpdater - %s is inside pet fov? %s", entity.c_str( ), ( meanValue ? "y" : "n" ) );
         } // if
@@ -263,11 +286,34 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             */
         } // if
 
+        SimpleTruthValue movingTowardTV( 0.0f, 1.0f );
         if (isMovingToward) {
-            AtomSpaceUtil::setPredicateValue( atomSpace, "is_moving_toward", SimpleTruthValue( 1.0f, 1.0f ), entityHandle, pet);
-        } else {
-            AtomSpaceUtil::setPredicateValue( atomSpace, "is_moving_toward", SimpleTruthValue( 0.0f, 1.0f ), entityHandle, pet);
-        }
+            movingTowardTV.setMean( 1.0 );
+        } // if
+
+        AtomSpaceUtil::setPredicateValue( atomSpace, "is_moving_toward", movingTowardTV, entityHandle, pet);
+        { // defining is_moving_toward Frame
+            std::map<std::string, Handle> elements;
+            elements["Theme"] = atomSpace.addNode( SEME_NODE, entity );
+            
+            const Spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
+            const Spatial::EntityPtr& targetEntity = map.getEntity( entity );
+            HandleSeq movementDirection;
+            movementDirection.push_back( atomSpace.addNode( NUMBER_NODE, 
+                boost::lexical_cast<std::string>(targetEntity->getDirection( ).x ) ) );
+            movementDirection.push_back( atomSpace.addNode( NUMBER_NODE, 
+                boost::lexical_cast<std::string>(targetEntity->getDirection( ).y ) ) );
+            movementDirection.push_back( atomSpace.addNode( NUMBER_NODE, 
+                boost::lexical_cast<std::string>(targetEntity->getDirection( ).z ) ) );
+            elements["Direction"] = atomSpace.addLink( LIST_LINK, movementDirection );
+            elements["Goal"] = atomSpace.addNode( SEME_NODE, agentName );
+            elements["Path"] = atomSpace.addNode( CONCEPT_NODE, "Straightforward" );
+            
+            AtomSpaceUtil::setPredicateFrameFromHandles( 
+               atomSpace, "#Motion_directional", entity + "_" + agentName + "_is_moving_toward", 
+                  elements, movingTowardTV );
+        } // end block
+
 
         if ( atomSpace.getType(entityHandle) == AVATAR_NODE ) {
             logger().debug("PetPsychePredicatesUpdater - entity %s is an avatar", entity.c_str( ) );
@@ -333,7 +379,6 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     logger().debug("PetPsychePredicatesUpdater - current time: day[%d] month[%d] year[%d] hour[%d] min[%d] sec[%d]", timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900, timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec );
 
     // setup predicates
-
     meanValue = atHome ? 1.0f : 0.0f;
     AtomSpaceUtil::setPredicateValue( atomSpace, "home", SimpleTruthValue( meanValue, 1.0f ), pet );
 

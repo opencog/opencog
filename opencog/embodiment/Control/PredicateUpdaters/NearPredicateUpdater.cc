@@ -44,12 +44,16 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     // if we want only the predicates between the pet and other objects.
 
     std::string objectName = atomSpace.getName(object);
+    std::string agentName = atomSpace.getName( pet );
 
     // there is no map, no update is possible
     Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
     if (spaceMapHandle == Handle::UNDEFINED) {
         return;
     }
+
+    Handle isNear = atomSpace.addNode( CONCEPT_NODE, "is_near" );
+    Handle isNext = atomSpace.addNode( CONCEPT_NODE, "is_next" );
 
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
     if (!spaceMap.containsObject(objectName)) {
@@ -83,6 +87,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                                                         SimpleTruthValue(0.0, 1.0));
                     AtomSpaceUtil::addPropertyPredicate(atomSpace, "next", entityHandle, object,
                                                         SimpleTruthValue(0.0, 1.0));
+
                 } // if
 
             } // if
@@ -123,15 +128,37 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             Handle entityHandle = getHandle(entity);
             if (entityHandle != Handle::UNDEFINED) {
                 // no timestamp
-                AtomSpaceUtil::addPropertyPredicate(atomSpace, "near", object, entityHandle,
-                                                    SimpleTruthValue(nearDistStrength, 1.0), true);
-                AtomSpaceUtil::addPropertyPredicate(atomSpace, "near", entityHandle, object,
-                                                    SimpleTruthValue(nearDistStrength, 1.0), true);
+                AtomSpaceUtil::setPredicateValue(atomSpace, "near", SimpleTruthValue(nearDistStrength, 1.0),
+                                                 object, entityHandle );
+                AtomSpaceUtil::setPredicateValue(atomSpace, "near", SimpleTruthValue(nearDistStrength, 1.0),
+                                                 entityHandle, object );
+                { // defining isNear
+                    std::map<std::string, Handle> elements;
+                    elements["Figure"] = object;
+                    elements["Ground"] = pet;
+                    elements["Relation_type"] = isNear;
+                    
+                    AtomSpaceUtil::setPredicateFrameFromHandles( 
+                       atomSpace, "#Locative_relation", agentName + "_" + objectName + "_is_near", 
+                          elements, SimpleTruthValue(nearDistStrength, 1.0) );
+                } // end block
 
-                AtomSpaceUtil::addPropertyPredicate(atomSpace, "next", object, entityHandle,
-                                                    SimpleTruthValue(nextDistStrength, 1.0), true);
-                AtomSpaceUtil::addPropertyPredicate(atomSpace, "next", entityHandle, object,
-                                                    SimpleTruthValue(nextDistStrength, 1.0), true);
+                AtomSpaceUtil::setPredicateValue(atomSpace, "next", SimpleTruthValue(nextDistStrength, 1.0),
+                                                 object, entityHandle );
+                AtomSpaceUtil::setPredicateValue(atomSpace, "next", SimpleTruthValue(nextDistStrength, 1.0),
+                                                 entityHandle, object );
+
+                { // defining isNext
+                    std::map<std::string, Handle> elements;
+                    elements["Figure"] = object;
+                    elements["Ground"] = pet;
+                    elements["Relation_type"] = isNext;
+                       
+                    AtomSpaceUtil::setPredicateFrameFromHandles( 
+                       atomSpace, "#Locative_relation", agentName + "_" + objectName + "_is_next", 
+                          elements, SimpleTruthValue(nextDistStrength, 1.0) );
+                } // end block
+
             } // if
         } // if
     } // foreach

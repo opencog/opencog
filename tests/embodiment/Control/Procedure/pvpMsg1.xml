@@ -10,7 +10,7 @@
         <rotation pitch="30" roll="30" yaw="182.5"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
     </blip>
-    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="false">
+    <blip timestamp="2007-06-18T20:15:00.000-07:00" detector="false" length="2" width="2" height="2">
         <entity id="Wynx" name="Wynx" type="avatar"/>
         <position x="15" y="164" z="14"/>
         <rotation pitch="0.01" roll="0.02" yaw="2.53"/>

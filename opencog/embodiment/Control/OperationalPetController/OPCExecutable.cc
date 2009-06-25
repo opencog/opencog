@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
         
         // Load modules specified in config
         opc.loadModules(); 
-        opc.loadSCMModules();
+        const char* config_path[] = {"."};
+        opc.loadSCMModules(config_path);
 
         // enable the network server and run the server's main loop
         opc.enableNetworkServer();

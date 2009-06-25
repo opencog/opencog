@@ -30,8 +30,21 @@
 
 #include <opencog/util/StringManipulator.h>
 
+#include <opencog/atomspace/SavingLoading.h>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/server/load-file.h>
+
 #include <string>
 #include <stdio.h>
+
+
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/xml/NMXmlParser.h>
+#include <opencog/xml/NMXmlExporter.h>
+#include <opencog/xml/StringXMLBufferReader.h>
+
+#include <fstream>
 
 static const std::string petId = "Fido";
 static const std::string owner = "Dudu";
@@ -57,10 +70,30 @@ private:
 public:
 
     PredicatesUpdaterUTest() {
-        atomSpace = new AtomSpace();
+        // this levels are necessary to identify what is happening during
+        // the frames creation
+        logger().setLevel( Logger::ERROR );
+        logger().setLevel( Logger::DEBUG );
+
+
+
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        atomSpace = cogserver.getAtomSpace();
+
         updater = new PredicatesUpdater(*atomSpace, petId);
         addOnwerInfo();
         lastTimestamp = 0;
+
+
+        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
+        TSM_ASSERT_EQUALS("Failed to load type global opencog definitions", 0, rc);
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+        TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/predicates-frames.scm");        
+        TSM_ASSERT_EQUALS("Failed to load frames definitions", 0, rc);
+
     }
 
     ~PredicatesUpdaterUTest() {
@@ -213,7 +246,7 @@ public:
         // food should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // food should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // food should be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // food should be edible
@@ -234,7 +267,7 @@ public:
         // drink should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // drink should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // drink should not be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // drink should not be edible
@@ -320,12 +353,12 @@ public:
         printf("End checking owner predicates\n");
         printf("---------------------------------------------------------------\n");
 
-        printf("Round 02 - food predicates - should move\n");
+        printf("Round 02 - food predicates - not should move\n");
         obj = atomSpace->getHandle(OBJECT_NODE, food);
         // food should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // food should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // food should be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // food should not be noisy
@@ -337,12 +370,12 @@ public:
         printf("End checking food predicates\n");
         printf("---------------------------------------------------------------\n");
 
-        printf("Round 02 - drink predicates - should move\n");
+        printf("Round 02 - drink predicates - should not move\n");
         obj = atomSpace->getHandle(OBJECT_NODE, drink);
         // drink should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // drink should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // drink should not be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // drink should not be edible
@@ -442,7 +475,7 @@ public:
         // food should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // food should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // food should be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // food should be edible
@@ -464,7 +497,7 @@ public:
         // drink should be small
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_small", obj));
         // drink should be movable
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_movable", obj));
         // drink should not be pickupable
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_pickupable", obj));
         // drink should not be edible
@@ -541,6 +574,75 @@ public:
         fflush(fp);
         fclose(fp);
 
+    }
+
+    void testFramePredicates()
+    {
+        
+        Handle petH   = atomSpace->addNode( SEME_NODE, petId);
+        Handle ownerH = atomSpace->addNode( SEME_NODE, owner);
+        Handle stickH = atomSpace->addNode( SEME_NODE, stick);
+
+        Handle is_near = atomSpace->addNode( CONCEPT_NODE, "is_near" );
+
+        std::map<std::string, Handle> elements;
+        elements["Figure"] = petH;
+        elements["Ground"] = ownerH;
+        elements["Relation_type"] = is_near;
+        
+        
+        
+        Handle isNearFrameInstance = AtomSpaceUtil::setPredicateFrameFromHandles( 
+            *atomSpace, "#Locative_relation", "is_near", 
+                elements, SimpleTruthValue(1.0, 1.0) );
+
+        TS_ASSERT( isNearFrameInstance != Handle::UNDEFINED );
+
+        std::map<std::string, Handle> elements2;
+        elements2["Figure"] = stickH;
+        elements2["Ground"] = petH;
+        elements2["Relation_type"] = is_near;
+
+        Handle isNearFrameInstance2 = AtomSpaceUtil::setPredicateFrameFromHandles( 
+            *atomSpace, "#Locative_relation", "is_near", 
+                elements2, SimpleTruthValue(1.0, 1.0) );        
+        TS_ASSERT( isNearFrameInstance2 != Handle::UNDEFINED );
+
+
+        // test Figure
+        HandleSeq figureTest;
+        figureTest.push_back( atomSpace->getHandle( PREDICATE_NODE, "is_near_Figure" ) );
+        figureTest.push_back( Handle::UNDEFINED );        
+        HandleSeq figureHandles;
+        atomSpace->getHandleSet(back_inserter(figureHandles),
+                                figureTest, NULL, NULL, 2, EVALUATION_LINK, false);        
+        TS_ASSERT( figureHandles.size( ) == 1 );
+        TS_ASSERT( figureHandles[0] != Handle::UNDEFINED );            
+        TS_ASSERT_EQUALS( atomSpace->getOutgoing( figureHandles[0], 1 ), stickH );
+        
+        // test Ground
+        HandleSeq groundTest;
+        groundTest.push_back( atomSpace->getHandle( PREDICATE_NODE, "is_near_Ground" ) );
+        groundTest.push_back( Handle::UNDEFINED );        
+        HandleSeq groundHandles;
+        atomSpace->getHandleSet(back_inserter(groundHandles),
+                                groundTest, NULL, NULL, 2, EVALUATION_LINK, false);        
+        TS_ASSERT( groundHandles.size( ) == 1 );
+        TS_ASSERT( groundHandles[0] != Handle::UNDEFINED );
+        TS_ASSERT_EQUALS( atomSpace->getOutgoing( groundHandles[0], 1 ), petH );
+
+
+        // test Relation_type
+        HandleSeq relationTypeTest;
+        relationTypeTest.push_back( atomSpace->getHandle( PREDICATE_NODE, "is_near_Relation_type" ) );
+        relationTypeTest.push_back( Handle::UNDEFINED );        
+        HandleSeq relationTypeHandles;
+        atomSpace->getHandleSet(back_inserter(relationTypeHandles),
+                                relationTypeTest, NULL, NULL, 2, EVALUATION_LINK, false);        
+        TS_ASSERT( relationTypeHandles.size( ) == 1 );
+        TS_ASSERT( relationTypeHandles[0] != Handle::UNDEFINED );            
+        TS_ASSERT_EQUALS( atomSpace->getOutgoing( relationTypeHandles[0], 1 ), is_near );
+        
     }
 
 };
