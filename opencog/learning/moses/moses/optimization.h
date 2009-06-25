@@ -146,79 +146,14 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
     //caching not yet integrated
     //note: NOT YET USING RTR
 }
-
-
-/**
- * This procedure samples sample_size instances at distance n from the exemplar
- * (i.e., with n non-zero elements in the sequence)
- *
- *@param fs  - deme
- *@param n   - distance
- *@param sample_size  - number of instances to be generated
- *@param out - deme (where to store the instances)
- */
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
-                              int sample_size, Out out, opencog::RandGen& rng)
-{
-    if (n <= 0 || sample_size <= 0)
-        return;
-
-    cout << "bits size: " << fs.n_bits() << endl;
-    cout << "disc size: " << fs.n_disc() << endl;
-    cout << "Sampling : " << sample_size << endl;
-
-    int dim = fs.n_bits() + fs.n_disc();
-
-    eda::instance inst(fs.packed_width());
-
-    // reset all fields (contin and onto fields are ignored)
-    for (eda::field_set::bit_iterator it = fs.begin_bits(inst);
-            it != fs.end_bits(inst); ++it)
-        *it = false;
-
-    for (eda::field_set::disc_iterator it = fs.begin_disc(inst);
-            it != fs.end_disc(inst); ++it)
-        *it = 0;
-
-    dorepeat(sample_size) {
-
-        eda::instance new_inst(inst);
-
-        for (int i = 1;i <= n;) {
-            int r = rng.randint(dim);
-            eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
-            eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
-
-            if ((unsigned int)r < fs.n_bits()) {
-                itb += r;
-                if (*itb == false) {
-                    *itb = true;
-                    i++;
-                }
-            } else if ((unsigned int)r >= fs.n_bits()) {
-                itd += r - fs.n_bits();
-                if (*itd == 0) {
-                    *itd = 1 + rng.randint(itd.arity() - 1);
-                    i++;
-                }
-            }
-        }
-
-        *out++ = new_inst;
-        // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
-    }
-}
-
-template<typename Out>
-void sample_from_neighborhood_ex(const eda::field_set& fs, int n,
                                  int sample_size, Out out, opencog::RandGen& rng,
                                  const eda::instance & center_inst )
 {
-    if (n <= 0 || sample_size <= 0 ||
-        center_inst.size() != fs.packed_width())
-        return;
-    
+    opencog::cassert(TRACE_INFO,
+                     n > 0 && sample_size > 0 && center_inst.size() == fs.packed_width(),
+                     "Please make sure that the center_inst have the same size with the field_set");
 
     cout << "bits size: " << fs.n_bits() << endl;
     cout << "disc size: " << fs.n_disc() << endl;
@@ -255,6 +190,38 @@ void sample_from_neighborhood_ex(const eda::field_set& fs, int n,
         // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
     }
 }
+
+
+/**
+ * This procedure samples sample_size instances at distance n from the exemplar
+ * (i.e., with n non-zero elements in the sequence)
+ *
+ *@param fs  - deme
+ *@param n   - distance
+ *@param sample_size  - number of instances to be generated
+ *@param out - deme (where to store the instances)
+ */
+template<typename Out>
+void sample_from_neighborhood(const eda::field_set& fs, int n,
+                              int sample_size, Out out, opencog::RandGen& rng)
+{
+    if (n <= 0 || sample_size <= 0)
+        return;
+
+    eda::instance inst(fs.packed_width());
+
+    // reset all fields (contin and onto fields are ignored)
+    for (eda::field_set::bit_iterator it = fs.begin_bits(inst);
+            it != fs.end_bits(inst); ++it)
+        *it = false;
+
+    for (eda::field_set::disc_iterator it = fs.begin_disc(inst);
+            it != fs.end_disc(inst); ++it)
+        *it = 0;
+
+    sample_from_neighborhood(fs, n, sample_size, out, rng, inst);
+}
+
 
 /**
  * Generates instances at distance n from the exemplar
