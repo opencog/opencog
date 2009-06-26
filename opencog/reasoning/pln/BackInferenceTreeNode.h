@@ -671,6 +671,7 @@ protected:
 	BITNode* CreateChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
 						BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
 						
+    /// Basically a helper function for the public printTrail(pHandle)
 	std::string printTrail(pHandle h, unsigned int level) const;
 
 	friend class BITNode;

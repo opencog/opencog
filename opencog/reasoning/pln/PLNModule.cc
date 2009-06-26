@@ -298,7 +298,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             ss << state->extract_plan((pHandle)h);
         }
         else if (c == "trail") {
-            input(h, args); state->printTrail((pHandle)h);
+            input(h, args); ss << state->printTrail((pHandle)h);
         }
         // Pool commands
         else if (c == "pool") {

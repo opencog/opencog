@@ -1894,7 +1894,6 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
     }
     else
         ss << repeatc(' ', level*3) << "which is trivial (or axiom).\n";
-    cout << ss.str();
     return ss.str();
 }
 
@@ -1933,6 +1932,7 @@ string BITNodeRoot::printTrail(pHandle h) const
     stringstream ss;
     ss << printTree(h,0,0);
     ss << printTrail(h,0);
+    cout << ss.str();
     return ss.str();
 }
 
