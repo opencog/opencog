@@ -101,10 +101,19 @@ void setTarget(Handle h);
 
 namespace pln {
 
-/** Does steps inference steps on target h. Does not set the BC target used
- * in the PLN commands.
+/** Does steps inference steps on target h. Optionally sets the target used in
+ * the PLN cogserver commands.
+ * Intended for use by the pln-bc Scheme command; this is currently set up for
+ * practical use rather than testing use, and as such will not stop at the
+ * first result it finds.
+ *
+ * @param h The handle to do inference on (a normal handle, not a PLN handle)
+ * @param steps Takes the maximum number of steps allowed, and stores the
+ * number of steps performed
+ * @param setTarget If true, the BIT created here will be/replace the one
+ * used with the 'pln' cogserver command.
  */
-void infer(Handle h, int &steps);
+void infer(Handle h, int &steps, bool setTarget);
 
 }} // ~namespace opencog::pln
 

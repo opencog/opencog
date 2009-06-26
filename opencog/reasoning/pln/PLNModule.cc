@@ -180,23 +180,30 @@ void opencog::pln::setTarget(Handle h) {
 }
 #endif
 
-void opencog::pln::infer(Handle h, int &steps)
+void opencog::pln::infer(Handle h, int &steps, bool setTarget)
 {
-    Btr<BITNodeRoot> Bstate;
-    BITNodeRoot *state;
+    // Used by this function, and, if setTarget is true, assigned to the
+    // corresponding state variables used by the PLN commands.
+    Btr<BITNodeRoot> Bstate_;
+    BITNodeRoot *state_;
 
     pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
     pHandle fakeHandle = fakeHandles[0];
     Btr<vtree> target(new vtree(fakeHandle));
 
     bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
-    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
+    Bstate_.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
                 recordingTrails, getFitnessEvaluator(PLN_FITNESS_BEST)));
 
     printf("BITNodeRoot init ok\n");
-    state = Bstate.get();
-    state->infer(steps, 0.000001f, 0.01f);
-    state->printResults();
+    state_ = Bstate_.get();
+    state_->infer(steps, 0.000001f, 1.00f); //, 0.000001f, 0.01f);
+    state_->printResults();
+
+    if (setTarget) {
+        Bstate = Bstate_;
+        state = state_;
+    }
 }
 
 template <typename T>
