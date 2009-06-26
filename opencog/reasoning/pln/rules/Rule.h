@@ -29,9 +29,6 @@
 const TruthValue& getTV(pHandle); 
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<std::set<BoundVertex> >(); }
 
-/** Reasoning namespace is being used instead of opencog while
- * tidying up the code.
- */
 namespace opencog { namespace pln {
 
 /** Rule is a superclass for types of inference rules.
@@ -42,7 +39,7 @@ namespace opencog { namespace pln {
  * only constraints on the atom properties can be determined.  Eg. AND(A, B, C)
  * can be derived from AND(A,B) & AND(B,C) etc. ie. from any collection of
  * AndLinks with A, B, and C occurring somewhere. This can only be expressed as
- * a MP. What is an MP???
+ * a MP (metapredicate).
  */
 class Rule
 {
