@@ -250,10 +250,34 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
  * @param out - deme (where to store the instances)
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
+    void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out, 
+                                      const eda::instance& center_inst )
 {
-    if (n <= 0)
-        return;
+    opencog::cassert(TRACE_INFO, n > 0, "the distance should be great than 0");
+    opencog::cassert(TRACE_INFO, center_inst.size() == fs.packed_width(),
+                     " the size of center_instance should be equal to the width of fs");
+
+    eda::instance inst(center_inst);
+
+    vary_n_knobs(fs, inst, n, 0, out);
+}
+
+
+/**
+ * Generates instances at distance n from the exemplar
+ * (i.e., with n elements changed from 0 from the exemplar)
+ * It calls a recursive function vary_n_knobs which varies
+ * instance fields one by one (in all possible ways)
+ *
+ * @param fs  - deme
+ * @param n   - distance
+ * @param out - deme (where to store the instances)
+ */
+template<typename Out>
+    void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
+                                     
+{
+    opencog::cassert(TRACE_INFO, n > 0, "the distance should be great than 0");
 
     eda::instance inst(fs.packed_width());
 
@@ -266,8 +290,9 @@ void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
             it != fs.end_disc(inst); ++it)
         *it = 0;
 
-    vary_n_knobs(fs, inst, n, 0, out);
+    generate_all_in_neighborhood(fs, n, out, inst);
 }
+
 
 /**
  * Used by the function generate_all_in_neighborhood (only)
