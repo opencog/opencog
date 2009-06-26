@@ -146,13 +146,28 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
     //caching not yet integrated
     //note: NOT YET USING RTR
 }
+
+/**
+ * This procedure samples sample_size instances at distance n from the exemplar
+ * (i.e., with n non-zero elements in the sequence)
+ *
+ *@param fs  - deme
+ *@param n   - distance
+ *@param sample_size  - number of instances to be generated
+ *@param out - deme where to store the instances
+ *@param center_inst the center instance as the exemplar by given
+ */
+
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
                                  int sample_size, Out out, opencog::RandGen& rng,
                                  const eda::instance & center_inst )
 {
+    opencog::cassert(TRACE_INFO ,
+                     n > 0 && sample_size > 0,
+                     "Please Make sure the distance and sample_size should be great than 0");
     opencog::cassert(TRACE_INFO,
-                     n > 0 && sample_size > 0 && center_inst.size() == fs.packed_width(),
+                     center_inst.size() == fs.packed_width(),
                      "Please make sure that the center_inst have the same size with the field_set");
 
     cout << "bits size: " << fs.n_bits() << endl;
@@ -205,8 +220,9 @@ template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
                               int sample_size, Out out, opencog::RandGen& rng)
 {
-    if (n <= 0 || sample_size <= 0)
-        return;
+    opencog::cassert(TRACE_INFO ,
+                     n > 0 && sample_size > 0,
+                     "Please Make sure the distance and sample_size should be great than 0");
 
     eda::instance inst(fs.packed_width());
 
