@@ -34,10 +34,11 @@ public:
                 max_distance = min_distance = distance;
                 inst_index++;
             }
-            //  cout<<fs.stream(inst)<<endl; 
+             
             if (fs.count(inst)){
                 distance = fs.hamming_distance(inst_temp, inst);
-
+                cout<<"instance:" << fs.stream(inst)<<endl;
+                cout <<"\t distance:" << distance <<endl;
                 if( distance > max_distance )
                     max_distance = distance;
                 else if (distance < min_distance)
@@ -154,50 +155,34 @@ public:
             TS_ASSERT(distance == sampled_min_distance);
         }
         
-        // 3. test the exception condition
-        {
-            distance  = 5 ;
-            sample_size = -10;
-            fs_size = 15;
-            arity = 5;
-            
-            field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::tree_score>  deme(100, fs);
-
-            
-            moses::sample_from_neighborhood(deme.fields(),
-                                            distance,
-                                            sample_size,
-                                            deme.begin(), rng);
-            get_sample_size_and_distance(deme,
-                                         sampled_size,
-                                         sampled_max_distance,
-                                         sampled_min_distance);
-            // cout << endl << "sample_size:" << sampled_size << "
-            //   max_distance:" << sampled_max_distance <<" min_distance
-            //   :"<< sampled_min_distance <<endl;
-            TS_ASSERT(sample_size == sampled_size);
-            TS_ASSERT(distance == sampled_max_distance);
-            TS_ASSERT(distance == sampled_min_distance);
-        }
-
     }
 
 
     void test_generate_all_in_neighborhood() 
     {
         {
-            int distance = 0;
-            field_set fs(field_set::disc_spec(5), 3);
-            eda::instance_set<moses::tree_score>  deme(100,fs);
-            //    cout << "generate_all_in_neighborhood" << endl;
-            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin());
+            int distance = 3;
+            arity_t arity = 3;
+            size_t size = 5;
+            field_set fs(field_set::disc_spec(arity), size);
+            eda::instance_set<moses::tree_score>  deme(1000,fs);
+
+            eda::instance center_inst(fs.packed_width());
+            int rand_seed = clock();
+            opencog::MT19937RandGen rng(rand_seed);
+            eda::randomize(fs, center_inst,rng); 
+            cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
+            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin(), center_inst);
             size_t generated_size = 0;
             int generated_max_distance = 0;
             int generated_min_distance = 0;
             get_sample_size_and_distance(deme, generated_size, 
-                                         generated_max_distance, generated_min_distance);
-            TS_ASSERT(generated_size == 0 );
+                                         generated_max_distance, generated_min_distance, center_inst);
+            size_t total_size = total_number_of_neighborhood(distance,size,arity);
+            cout << generated_size << " " << generated_max_distance
+                 << " " << generated_min_distance <<endl;
+            cout << "total_size :" << total_size <<endl;
+            TS_ASSERT(generated_size == total_size);
             TS_ASSERT(generated_max_distance == distance);
             TS_ASSERT(generated_min_distance == distance);
         }
