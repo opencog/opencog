@@ -526,6 +526,8 @@ public:
 	/// Use for debugging
 	bool hasAncestor(const BITNode* const _p) const;
 
+    /// Whether the Rule for this BITNode is computable with arguments,
+    /// or whether it's a Generator
 	bool isComputable() const { return rule->isComputable(); }
 
 	const std::vector<std::set<VtreeProvider*> >& getEvalResults() const { return eval_results; }

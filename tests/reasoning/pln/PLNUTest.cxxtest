@@ -353,7 +353,8 @@ public:
         exit(0);
     }
     
-    //! @todo is this a macro ruletest or a macro-rule test?
+    // Tries to combine several RuleApps into a "macro rule", which takes one
+    // argument but applies several different rules
     void DISABLEtestMacroRuleTest()
     {
         AtomSpaceWrapper *atw = GET_ATW;
