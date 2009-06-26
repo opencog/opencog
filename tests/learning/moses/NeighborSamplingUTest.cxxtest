@@ -20,9 +20,12 @@ public:
                          "Please make sure the given center_inst have the "
                          "same size with field_set's width");
         eda::instance inst_temp(center_inst);
+        
+        // the *distance* is distance from the instance to center instance 
         int distance = 0;
         //        cout << fs.stream(inst_temp) << endl;
         int inst_index = 0;
+        sample_size = 0;
         foreach(eda::instance& inst, deme) {
             // get the fist distance as the max_distance and
             // min_distance, it could be 0
@@ -31,7 +34,7 @@ public:
                 max_distance = min_distance = distance;
                 inst_index++;
             }
-            cout<<fs.stream(inst)<<endl; 
+            //  cout<<fs.stream(inst)<<endl; 
             if (fs.count(inst)){
                 distance = fs.hamming_distance(inst_temp, inst);
 
@@ -51,7 +54,8 @@ public:
                                       int& min_distance)
     {
         eda::field_set fs = deme.fields();
-        eda::instance center_inst(fs.packed_width());
+        // the default center instance as exemplar is set to 0
+        eda::instance center_inst(fs.packed_width()); 
         
         get_sample_size_and_distance(deme, sample_size, max_distance, min_distance, center_inst);
        
@@ -89,7 +93,8 @@ public:
         size_t sampled_size = 0;
         int sampled_max_distance = 0;
         int sampled_min_distance = 0;        
-       
+        opencog::MT19937RandGen rng(rand_seed);
+
         // 1. test the exemplar is initialize to 0
         {    
             distance  = 2;
@@ -99,9 +104,15 @@ public:
             field_set fs(field_set::disc_spec(arity), fs_size);
             eda::instance_set<moses::tree_score>  deme(100,fs);
 
-            opencog::MT19937RandGen rng(rand_seed);
-            moses::sample_from_neighborhood(deme.fields(), distance, sample_size, deme.begin(), rng);
-            get_sample_size_and_distance(deme,sampled_size, sampled_max_distance, sampled_min_distance);
+            
+            moses::sample_from_neighborhood(deme.fields(),
+                                            distance,
+                                            sample_size,
+                                            deme.begin(), rng);
+            get_sample_size_and_distance(deme,
+                                         sampled_size,
+                                         sampled_max_distance,
+                                         sampled_min_distance);
             // cout << endl << "sample_size:" << sampled_size << "
             //   max_distance:" << sampled_max_distance <<" min_distance
             //   :"<< sampled_min_distance <<endl;
@@ -116,13 +127,14 @@ public:
             sample_size = 8;
             fs_size = 15;
             arity = 4;
-            field_set fs(field_set::disc_spec(arity),fs_size);
+            field_set fs(field_set::disc_spec(arity), fs_size);
             eda::instance_set<moses::tree_score>  deme(100,fs);
-            opencog::MT19937RandGen rng(rand_seed);
-            
+                        
             eda::instance center_inst(fs.packed_width());
-            eda::uniform_randomize_disc(fs, center_inst, rng);
-            cout<<fs.stream(center_inst)<<endl; 
+            eda::randomize(fs, center_inst, rng);
+          
+            //cout<<fs.stream(center_inst)<<endl; 
+
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
                                             sample_size,
@@ -134,9 +146,36 @@ public:
                                          sampled_min_distance,
                                          center_inst);
 
-             cout << endl << "sample_size:" << sampled_size << "  max_distance:" << 
-                 sampled_max_distance <<" min_distance :"<< sampled_min_distance <<endl;
+            //  cout << endl << "sample_size:" << sampled_size << "  max_distance:" << 
+            //   sampled_max_distance <<" min_distance :"<< sampled_min_distance <<endl;
 
+            TS_ASSERT(sample_size == sampled_size);
+            TS_ASSERT(distance == sampled_max_distance);
+            TS_ASSERT(distance == sampled_min_distance);
+        }
+        
+        // 3. test the exception condition
+        {
+            distance  = 5 ;
+            sample_size = -10;
+            fs_size = 15;
+            arity = 5;
+            
+            field_set fs(field_set::disc_spec(arity), fs_size);
+            eda::instance_set<moses::tree_score>  deme(100, fs);
+
+            
+            moses::sample_from_neighborhood(deme.fields(),
+                                            distance,
+                                            sample_size,
+                                            deme.begin(), rng);
+            get_sample_size_and_distance(deme,
+                                         sampled_size,
+                                         sampled_max_distance,
+                                         sampled_min_distance);
+            // cout << endl << "sample_size:" << sampled_size << "
+            //   max_distance:" << sampled_max_distance <<" min_distance
+            //   :"<< sampled_min_distance <<endl;
             TS_ASSERT(sample_size == sampled_size);
             TS_ASSERT(distance == sampled_max_distance);
             TS_ASSERT(distance == sampled_min_distance);
