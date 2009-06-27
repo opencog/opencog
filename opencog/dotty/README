@@ -15,7 +15,7 @@ telnet localhost 17001
 Trying 127.0.0.1...
 Connected to localhost.localdomain.
 Escape character is '^]'.
-opencog> dlopen src/DottyModule/libDottyModule.so
+opencog> loadmodule libdotty.so
 ok
 
 opencog> dotty
@@ -23,7 +23,7 @@ opencog> dotty
 
 Or perhaps more useful:
 
-$ echo 'dlopen src/DottyModule/libDottyModule.so' | nc -w 1 localhost 17001
+$ echo 'loadmodule libdotty.so' | nc -w 1 localhost 17001
 $ echo 'dotty' | nc -w 1 localhost 17001 | tail -n +2 > /tmp/opencog.dot
 $ dotty /tmp/opencog.dot
 
