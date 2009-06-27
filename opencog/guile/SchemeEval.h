@@ -81,6 +81,8 @@ class SchemeEval
 
 #else /* HAVE_GUILE */
 
+#include <opencog/atomspace/types.h>
+
 class SchemeEval
 {
 	public:
