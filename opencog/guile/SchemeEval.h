@@ -16,8 +16,6 @@
 
 namespace opencog {
 
-class SchemeSmob;
-
 class SchemeEval
 {
 	private:
@@ -83,6 +81,8 @@ class SchemeEval
 
 #include <opencog/atomspace/types.h>
 
+namespace opencog {
+
 class SchemeEval
 {
 	public:
@@ -95,5 +95,6 @@ class SchemeEval
 		bool eval_error(void) { return false; }
 };
 
+}
 #endif/* HAVE_GUILE */
 #endif /* OPENCOG_SCHEME_EVAL_H */
