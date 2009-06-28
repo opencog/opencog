@@ -68,7 +68,7 @@ const rule* select_rule(string rule_ref_str) {
                          "reduce_ors"))
         ("AND", make_pair(new downwards(reduce_ands()),
                          "reduce_ands"))
-        ("ENF", make_pair(new downwards(subtree_to_enf()),
+        ("ENF", make_pair(new subtree_to_enf(),
                           "subtree_to_enf"))
         //Contin rules
         ("PZ", make_pair(new downwards(reduce_plus_zero()),
