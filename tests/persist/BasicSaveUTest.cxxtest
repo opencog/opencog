@@ -2,6 +2,13 @@
  * tests/persist/BasicSaveUTest.cxxtest
  *
  * Most basic, simplest sniff test, saves and restores a few atoms.
+ *
+ * If this test is failing for you, then be sure to read
+ * ../../opencong/persist/README, and create/configure the SQL database
+ * as described there. Next, edit ../../lib/test-opencog.conf 
+ * appropriately, so as to indicate the location of your database.
+ * This test will then pass.
+ *
  * Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
@@ -77,7 +84,12 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			}
 			catch (InvalidParamException &e)
 			{
-				TS_FAIL("Incomplete DB setup for test. Edit opencog-test.conf");
+				TS_FAIL("The BasicSaveUTest failed.\n"
+					"Please be sure to read opencong/persist/README, and\n"
+					"create/configure" the SQL database as described there.\n"
+					"Next, edit lib/test-opencog.conf appropriately, so as\n"
+					"to indicate the location of your database. If this is\n"
+					"done correctly, then this test will pass.\n");
 				exit(1);
 			}
 
