@@ -42,6 +42,8 @@ namespace reduct {
       for(;it!=end;++it)
 	if(//combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
 	   //&& 
+           //TODO checking that it inherits would be better
+           //but has to be sure of it (Nil)
 	   combo::get_output_type_tree(*it)==type_tree(output))
 	  (*r)(tr,it);
   }

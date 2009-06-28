@@ -25,6 +25,7 @@
 #include <opencog/comboreduct/reduct/meta_rules.h>
 #include <opencog/comboreduct/reduct/logical_rules.h>
 #include <opencog/comboreduct/reduct/contin_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/type_tree.h>
@@ -51,6 +52,8 @@ typedef ref_rule_map::iterator ref_rule_map_it;
  * Returns a null pointer if no valid rule_ref_str or 'h'
  */
 const rule* select_rule(string rule_ref_str) {
+    static MT19937RandGen rnd = MT19937RandGen(0);
+
     const static ref_rule_map ref_rules = 
         map_list_of
         //Logical rules
@@ -91,11 +94,17 @@ const rule* select_rule(string rule_ref_str) {
                          "reduce_sum_log"))
         ("LDT", make_pair(new downwards(reduce_log_div_times()),
                           "reduce_log_div_times"))
-        ("ET", make_pair(new downwards(reduce_exp_div()),
+        ("ET", make_pair(new downwards(reduce_exp_times()),
+                         "reduce_exp_times"))
+        ("ED", make_pair(new downwards(reduce_exp_div()),
                          "reduce_exp_div"))
         ("SIN", make_pair(new downwards(reduce_sin()),
-                          "reduce_sin"));
-
+                          "reduce_sin"))
+        //General rules
+        ("LEV", make_pair(new downwards(level()),
+                          "level"))
+        ("EC", make_pair(new upwards(eval_constants(rnd)),
+                         "eval_constants"));
     if(rule_ref_str == "h") {
         for(ref_rule_map_const_it cit = ref_rules.begin();
             cit != ref_rules.end(); ++cit) {
