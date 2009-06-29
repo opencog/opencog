@@ -572,8 +572,8 @@ bool BehaviorEncoder::update(Temporal start_moment)
         //printf("new perc %s\n", htp.toString().c_str());
         new_perceptions.insert(htp.getHandle());
     }
-    bprintf("Found %u TOTAL perceptions\n", new_perceptions.size());
-    bprintf("%u factories\n", factories.size());
+    bprintf("Found %zu TOTAL perceptions\n", new_perceptions.size());
+    bprintf("%zu factories\n", factories.size());
 
     foreach(const VFpair& vf, factories) {
         set<Handle> f_perceptions;
@@ -582,7 +582,7 @@ bool BehaviorEncoder::update(Temporal start_moment)
                          inserter(f_perceptions, f_perceptions.begin()),
                          does_fit_template(vf.first, &wp->getAtomSpace()));
 
-        bprintf("Found %u valid perceptions\n", f_perceptions.size());
+        bprintf("Found %zu valid perceptions\n", f_perceptions.size());
 
         vf.second->update(trickExemplarAtTime,
                           t_now,
