@@ -2,11 +2,11 @@
                        Overview
                        --------
 
-The CogServer provides a simple network sehll server interface to the 
+The CogServer provides a simple network shell server interface to the 
 various functions in the opencog system.
 
-To acess the shell server, build everything and execute 
-bin/src/CogServer/cogServer.  From another terminal, run 
+To access the shell server, build everything and execute 
+bin/opencog/server/cogserver.  From another terminal, run 
 "telnet localhost 17001"; this will connect to the shell.
 Alternately, "netcat localhost 17001" can be used. Long or
 complex sequences of commands may be loaded by saying
@@ -25,10 +25,10 @@ scriptlets.
 Creating Loadable Modules
 -------------------------
 Loadable modules are shared libraries that implement some function. The
-"loadmodule" command in to cogserver command processor will load a module.
+"loadmodule" command will load a module.
 
 Modules can be automatically loaded on server startup by modifying the 
-lib/opencopg.conf file, and adding the module name to the list therein.
+lib/opencog.conf file, and adding the module name to the list therein.
 
 Loadable modules will typically need to expose new commands. There are
 three ways of doing this: by using DECLARE_CMD_REQUEST (to define a small

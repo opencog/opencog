@@ -4,12 +4,12 @@
                     Linas Vepstas, May 2008
 
 
-This directory contains an implementation of the a Scheme shell for the
+This directory contains an implementation of the Scheme shell for the
 OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
 code to manipulate the contents of an OpenCog AtomSpace.  
 
 This binding is intended to be used for day-to-day maintenance
-activities, experimentation and MindAgent development.  The shell is
+activities, experimentation, and MindAgent development.  The shell is
 implemented in [http://www.gnu.org/software/guile/guile.html guile]; 
 the [http://www.gnu.org/software/guile/manual/ guile reference manual
 is here]. The best book on the Scheme programming language (never-mind
@@ -23,9 +23,8 @@ Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
 Nodes, Links, TruthValues and VersionHandles, as well as ways to get 
 properties (such as the names of Nodes, or the outgoing sets of Links).  
-Although the 
-core interface is documented below, it is important to notice that
-scheme makes "syntactic sugar" very easy to use; thus the interface
+Although the core interface is documented below, it is important to notice
+that scheme makes "syntactic sugar" very easy to use; thus the interface
 below can be simplified, and has been simplified (in the  file
 ''opencog/scm/type_constructors.scm'', which may be loaded by running 
 the shell script ''opencog/scm/load.sh'') Thus, atom creation can be as
@@ -85,7 +84,7 @@ interface.
       Create a new node of the given type and name
 
       Optionally, a truth value can follow the node name.
-      Throws errors if node-type is not a valide atom type for a node,
+      Throws errors if node-type is not a valid atom type for a node,
       and if node-name is not a string.
 
       Example:
@@ -105,7 +104,7 @@ interface.
 
       Optionally, a truth value can follow the node name. If the node
       exists, then the truth value is modified.
-      Throws errors if node-type is not a valide atom type for a node,
+      Throws errors if node-type is not a valid atom type for a node,
       and if node-name is not a string.
 
       Example:
