@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
             partial_probility = lexical_cast<float>(argv[2]);
     } catch (...) {
         cout << "Description:" << endl;
-        cout << "\tgen-truth-table can generator the complete and partial table with"
+        cout << "\tgen-truth-table can generate the complete or partial table with"
              << " the different options" << endl;
         cout << "Usage:" << endl;
         cout << "\t\t" << "1. complete table: " << argv[0] << " rand_seed " << endl;
