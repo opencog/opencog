@@ -105,6 +105,7 @@ protected:
     void rec_canonize(combo_tree::iterator it);
     void append_linear_combination(combo_tree::iterator it);
     combo_tree::iterator mult_add(combo_tree::iterator it, const vertex& v);
+    void ann_canonize(combo_tree::iterator);
 };
 
 } //~namespace moses

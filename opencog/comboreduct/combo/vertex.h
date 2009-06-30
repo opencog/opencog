@@ -154,7 +154,7 @@ typedef boost::variant < builtin,
                          message,
                          procedure_call,
                          action_symbol,
-			 ann_ids > vertex;
+			 ann_type > vertex;
 
 typedef std::vector<vertex> argument_list;
 typedef argument_list::iterator argument_list_it;
@@ -312,8 +312,9 @@ inline bool operator!=(combo::indefinite_object i, const combo::vertex& v)
     return !(v == i);
 }
 
+/*
 //ann_ids == vertex
-inline bool operator==(const combo::vertex& v, combo::ann_ids a)
+inline bool operator==(const combo::vertex& v, combo::ann_type a)
 {
    if (const combo::ann_ids* va = boost::get<combo::ann_ids>(&v))
 	return (*va == a);
@@ -333,6 +334,7 @@ inline bool operator!=(combo::ann_ids a,const combo::vertex& v)
 { 
     return !(v == a);
 }
+*/
 
 //message == vertex
 inline bool operator==(const combo::vertex& v, combo::message m)
@@ -450,7 +452,11 @@ inline size_t hash_value(const combo::vertex& v)
         hash_combine(tmp, hash_value(*as));
         return tmp;
     }
-
+    if (const combo::ann_type* a = boost::get<combo::ann_type>(&v)) {
+        size_t tmp = c_last;
+        hash_combine(tmp, hash_value(*a->idx));
+        return tmp;
+    }
     OC_ASSERT(false, "A case is missing");
     return 0;
 }
@@ -605,6 +611,14 @@ inline argument& get_argument(vertex& v)
 {
     return boost::get<argument>(v);
 }
+inline bool is_ann_type(const vertex& v)
+{
+    return (boost::get<ann_type>(&v));
+}
+inline ann_type& get_ann_type(vertex& v)
+{
+    return (boost::get<ann_type>(v));
+}
 inline const argument& get_argument(const vertex& v)
 {
     return boost::get<argument>(v);
@@ -742,11 +756,7 @@ void str_to_vertex(const std::string& str, vertex& v)
     else if (str == "/")
         v = id::div;
     else if (str == "ann")
-        v = id::ann;
-    else if (str == "ann_input")
-        v = id::ann_input;
-    else if (str == "ann_node")
-        v = id::ann_node;
+        v = ann_type(0,id::ann);
     else if (str == "log")
         v = id::log;
     else if (str == "exp")
@@ -793,6 +803,14 @@ void str_to_vertex(const std::string& str, vertex& v)
         v = id::return_success;
     else if (str == "repeat_n")
         v = id::repeat_n;
+    else if (str[0] == '#' && str[1]=='N') {
+        int arg = boost::lexical_cast<int>(str.substr(2));
+        v=ann_type(arg,id::ann_node);
+        }
+    else if (str[0] == '#' && str[1]=='I') {
+        int arg = boost::lexical_cast<int>(str.substr(2));
+        v=ann_type(arg,id::ann_input);
+        }
     //argument
     else if (str[0] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(1));

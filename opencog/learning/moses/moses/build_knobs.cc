@@ -72,7 +72,8 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
                      (((os != NULL || perceptions != NULL || actions != NULL) &&
                        output_type == action_result_type_tree) ||
                       output_type == boolean_type_tree ||
-                      output_type == contin_type_tree),
+                      output_type == contin_type_tree ||
+                      output_type == ann_type_tree),
                      "Types differ. Expected '%s', got '%s'",
                      art_ss.str().c_str(), ss.str().c_str());
     if (output_type == boolean_type_tree) {
@@ -86,6 +87,8 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         action_cleanup();
     } else if (output_type == ann_type_tree) {
         // ANN
+        ann_canonize(_exemplar.begin());
+        build_contin(_exemplar.begin());
     } else {
         OC_ASSERT(output_type == contin_type_tree,
                          "Types differ. Expected 'combo::id::contin_type', got '%s'",
@@ -611,6 +614,93 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
     return --_exemplar.append_child
            (_exemplar.insert_above
             (_exemplar.append_child(it, v), id::times), contin_t(0));
+}
+
+static int get_max_id(sib_it it, int max_id = 0)
+{
+    int temp;
+    
+    if(!is_ann_type(*it))
+        return max_id;
+
+    if((temp=get_ann_type(*it).idx)>max_id)
+        max_id=temp;
+    
+    for (sib_it sib = it.begin(); sib!=it.end(); ++sib) 
+        max_id=get_max_id(sib,max_id);
+    
+    return max_id;
+}
+
+static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
+{
+    if(is_ann_type(*it))
+    {
+        bool duplicate=false;
+        for(vector<ann_type>::iterator node_it = nodes.begin();
+                node_it!=nodes.end();node_it++)
+            if(get_ann_type(*it).idx==(*node_it).idx)
+            {
+                duplicate=true;
+                break;
+            }
+        if(!duplicate)
+            nodes.push_back(get_ann_type(*it));
+    }    
+    for(sib_it sib=it.begin();sib!=it.end();++sib)
+    {
+        enumerate_nodes(sib,nodes);
+    }
+}
+
+void build_knobs::ann_canonize(pre_it it) {
+    cout << "Canonize called..." << endl;
+    cout << _exemplar << endl;
+    
+    if(get_ann_type(*it).id != id::ann) {
+        cout << "root node should be ann" << endl;
+    }
+    
+    //find maximum id of all nodes in tree
+    int max_id = get_max_id(it.begin());
+    cout << "MAXID: " << max_id << endl;
+
+    //now create a new node with a larger id
+    combo_tree new_node(ann_type(max_id+1,id::ann_node));
+    
+    //create connections to this new node from all
+    //hidden and input nodes
+
+    //first enumerate all hidden/input nodes
+    vector<ann_type> hidden_nodes;
+    for (sib_it sib = it.begin(); sib!=it.end(); ++sib) {
+        for(sib_it child=sib.begin();child!=sib.end();++child)
+         enumerate_nodes(child,hidden_nodes);
+    }
+
+    //now create connections in new subtree
+    for(vector<ann_type>::iterator node_it = hidden_nodes.begin();
+            node_it!=hidden_nodes.end();++node_it)
+    {
+        new_node.append_child(new_node.begin(),*node_it);
+    }
+
+    for(vector<ann_type>::iterator node_it = hidden_nodes.begin();
+            node_it!=hidden_nodes.end();++node_it)
+    {
+        new_node.append_child(new_node.begin(),0.0);
+    }
+ 
+    cout << "Created node: " << new_node << endl;
+
+    //now attach the subtree to the hidden nodes
+    //FIXME: now just attaches to the first output
+    sib_it first_hidden = it.begin();
+    
+    _exemplar.insert_subtree(first_hidden.begin(),new_node.begin());
+    _exemplar.insert_after(first_hidden.last_child(),0.0);
+
+    cout << "Completed tree: " << _exemplar << endl;
 }
 
 } //~namespace moses

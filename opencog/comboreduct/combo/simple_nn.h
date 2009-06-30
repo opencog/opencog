@@ -36,7 +36,7 @@ public:
 class ann_node
 {
 public:
-    ann_node(ann_nodetype type, void* _tag = NULL):
+    ann_node(ann_nodetype type, int _tag = 0):
             activation(0.0), nodetype(type), tag(_tag) { }
     bool visited;
     int counter; //used for determining network depth
@@ -45,7 +45,7 @@ public:
     vector<ann_connection*> in_connections;
     double activation;
     double incoming;
-    void* tag;
+    int tag;
     ann_nodetype nodetype;
 
     friend ostream& operator<<(ostream& os, const ann_node* n) {
@@ -74,7 +74,7 @@ public:
             delete (*iter);
     }
 
-    ann_node* find_tag(void* t) {
+    ann_node* find_tag(int t) {
         ann_node_it iter;
         for (iter = nodes.begin();iter != nodes.end();iter++)
             if ((*iter)->tag == t)

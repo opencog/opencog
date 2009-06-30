@@ -1,5 +1,6 @@
 #include <opencog/comboreduct/combo/eval.h>
 
+#include <iostream>
 #include <opencog/learning/moses/moses/moses.h>
 #include <opencog/learning/moses/moses/optimization.h>
 #include <opencog/learning/moses/moses/scoring_functions.h>
@@ -13,10 +14,9 @@
 using namespace moses;
 using namespace reduct;
 using namespace boost;
-
-#include <iostream>
-#include <opencog/learning/moses/moses/ann_scoring.h>
 using namespace std;
+using namespace opencog;
+
 
 int main(int argc, char** argv)
 {
@@ -25,32 +25,49 @@ int main(int argc, char** argv)
     opencog::logger().setPrintErrorLevelStdout();
 
     combo_tree tr;
-    combo_tree::iterator it, top, n1, n2, n3, n4;
+    cin >> tr; //"ann(ann_node(ann_input rand))";
 
-    it = tr.begin();
-    top = tr.insert(it, id::ann);
-    n1 = tr.append_child(top, id::ann_node);
-    n2 = tr.append_child(n1, id::ann_node);
-    n3 = tr.append_child(n1, id::ann_node);
-    tr.append_child(n1, 0.3);
-    tr.append_child(n1, 0.4);
-
-    combo_tree subtree;
-    n4 = tr.insert(it, id::ann_input);
-
-    tr.insert_subtree(n2.begin(), n4);
-    tr.insert(n2.end(), 0.9);
-
-    tr.insert_subtree(n3.begin(), n4);
-    tr.insert(n3.end(), 0.75);
-
-    //cin >> input_tree; //"ann(ann_node(ann_input rand))";
-
-    tree_transform tt;
-    ann nn = tt.decodify_tree(tr);
+    tree_transform trans;
+    ann nn = trans.decodify_tree(tr);
     cout << tr << endl;
     cout << "Network depth: " << nn.feedforward_depth() << endl;
     cout << &nn << endl;
+
+    opencog::MT19937RandGen rng(0);
+
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(), id::ann_type, 1);
+
+    ann_score score;
+    ann_bscore bscore;
+
+    metapopulation<ann_score, ann_bscore, univariate_optimization>
+    metapop(rng, tr,
+            tt, clean_reduction(),
+            score,
+            bscore,
+            univariate_optimization(rng));
+
+    moses::moses(metapop, 10000, 0);
+
+//TEST THE BEST NET ON XOR
+    combo_tree best = metapop.best_trees().front();
+    ann bestnet = trans.decodify_tree(best);
+    
+    double inputs[4][3] = { {0.0, 0.0,1.0}, 
+                                {0.0, 1.0,1.0}, 
+                                {1.0, 0.0,1.0},
+                                {1.0, 1.0,1.0}};
+    
+    int depth = bestnet.feedforward_depth();
+    for (int pattern = 0;pattern < 4;pattern++) {
+        bestnet.load_inputs(inputs[pattern]);
+        for (int x = 0;x < depth;x++)
+            bestnet.propagate();
+        cout << "Input [ " << inputs[pattern][0] << " " << inputs[pattern][1] << " ] : Output " << bestnet.outputs[0]->activation << endl;
+    
+    }
+    cout << &bestnet << endl;
 }
 
 
