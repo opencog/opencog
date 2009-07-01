@@ -43,6 +43,7 @@ friend class TLB;
 friend class ListRequest;
 friend class AtomStorage;
 friend class SchemeSmob;
+friend class AtomspaceHTabler;
 
 private:
 
