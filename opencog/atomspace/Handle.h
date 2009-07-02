@@ -96,9 +96,11 @@ namespace std { namespace tr1 {
 }} //namespace std::tr1
 
 
+namespace std { 
 inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h) {
     out << h.value();
     return out;
 }
+} //namespace std
 
 #endif // _OPENCOG_HANDLE_H
