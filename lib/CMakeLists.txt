@@ -1,10 +1,10 @@
 INSTALL (FILES
 	opencog.conf
+    opencog-chatbot.conf
 	DESTINATION "${CONFDIR}"
 )
 
 INSTALL (FILES
-	FindBoost.cmake
 	FindCSockets.cmake
 	FindCxxtest.cmake
 	FindGuile.cmake
