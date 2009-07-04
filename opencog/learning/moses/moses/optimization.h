@@ -360,7 +360,7 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
                 current = inst;
                 // vary all legal values, the neighborhood should 
                 // not equals to itself, so if it is same, set it to 0.
-                if (*itd == i)
+                if (static_cast<unsigned int>(*itd) == i)
                     *itd = 0;
                 else
                     *itd = i;
