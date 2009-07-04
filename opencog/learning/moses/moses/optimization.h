@@ -151,10 +151,10 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
  * This procedure samples sample_size instances at distance n from the exemplar
  * (i.e., with n non-zero elements in the sequence)
  *
- *@param fs  - deme
- *@param n   - distance
- *@param sample_size  - number of instances to be generated
- *@param out - deme where to store the instances
+ *@param fs   deme
+ *@param n    distance
+ *@param sample_size  number of instances to be generated
+ *@param out  deme where to store the instances
  *@param center_inst the center instance as the exemplar by given
  */
 
@@ -211,10 +211,10 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
  * This procedure samples sample_size instances at distance n from the exemplar
  * (i.e., with n non-zero elements in the sequence)
  *
- *@param fs  - deme
- *@param n   - distance
- *@param sample_size  - number of instances to be generated
- *@param out - deme (where to store the instances)
+ * @param fs   deme
+ * @param n    distance
+ * @param sample_size   number of instances to be generated
+ * @param out  deme (where to store the instances)
  */
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
@@ -245,9 +245,10 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
  * It calls a recursive function vary_n_knobs which varies
  * instance fields one by one (in all possible ways)
  *
- * @param fs  - deme
- * @param n   - distance
- * @param out - deme (where to store the instances)
+ * @param fs   deme
+ * @param n    distance
+ * @param out  deme (where to store the instances)
+ * @param center_inst the center instance as exemplar 
  */
 template<typename Out>
     void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out, 
@@ -269,9 +270,9 @@ template<typename Out>
  * It calls a recursive function vary_n_knobs which varies
  * instance fields one by one (in all possible ways)
  *
- * @param fs  - deme
- * @param n   - distance
- * @param out - deme (where to store the instances)
+ * @param fs   deme
+ * @param n    distance
+ * @param out  deme (where to store the instances)
  */
 template<typename Out>
     void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
@@ -347,7 +348,8 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
         if (fs.end_disc(inst) - itd > 0)  {
             // save the current version
             current = inst;
-            *itd = 0;
+            // *itd = 0;     // commented by xiaohui for the given center instance
+                             // but not the default instance value equals to 0
             // recursive call, moved for one position
             vary_n_knobs(fs, inst, n, starting_index + 1, out);
             // recover after the recursive calls
@@ -356,8 +358,12 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
             for (unsigned int i = 1;i <= itd.arity() - 1;i++)  {
                 // save the current version
                 current = inst;
-                // vary all legal values
-                *itd = i;
+                // vary all legal values, the neighborhood should 
+                // not equals to itself, so if it is same, set it to 0.
+                if (*itd == i)
+                    *itd = 0;
+                else
+                    *itd = i;
                 vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
                 // recover after the recursive calls
                 inst = current;
@@ -813,6 +819,10 @@ struct sliced_iterative_hillclimbing {
     int _evals_per_slice;
 };
 
+struct simulated_annealing {
+    
+    
+};
 } //~namespace moses
 
 
