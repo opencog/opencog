@@ -79,7 +79,7 @@ public:
 
 
     size_t total_number_of_neighborhood(int distance, size_t size,  arity_t arity) {
-        return  (arity -1) * (arity-1) * permutation (size , distance);
+        return  power(arity-1, distance)  * permutation (size , distance);
         
     }
 
@@ -134,7 +134,7 @@ public:
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
           
-            //cout<<fs.stream(center_inst)<<endl; 
+            cout<<fs.stream(center_inst)<<endl; 
 
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
@@ -161,7 +161,7 @@ public:
     void test_generate_all_in_neighborhood() 
     {
         {
-            int distance = 3;
+            int distance = 2;
             arity_t arity = 3;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
