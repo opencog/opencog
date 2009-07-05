@@ -305,7 +305,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             ss << state->printFitnessPool();
         }
         else if (c == "pool-size") {
-            ss << "Exceution pool size = " << state->getExecPoolSize() << endl;
+            ss << "Execution pool size = " << state->getExecPoolSize() << endl;
         }
         else if (c == "pool-fittest") {
             state->expandFittest();

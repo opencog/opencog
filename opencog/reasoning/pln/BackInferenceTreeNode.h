@@ -202,7 +202,8 @@ public:
  * - when a result is computed for a subtree, mark it as revised.
  *
  * @remarks BITNode supports pre-bindings extensively, but it's unclear whether
- * they are obsolete or not.
+ * they are obsolete or not. Joel: It's also unclear whether anyone understands
+ * what this remark really means.
  *
  */
 class BITNode

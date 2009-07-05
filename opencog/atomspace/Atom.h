@@ -279,7 +279,10 @@ public:
      */
     void unsetRemovalFlag();
 
-    /* tests the atom's sti */
+    /** tests the atom's sti 
+     * Joel: What is this used for and why is the LTI threshold
+     * hardcoded at 1??
+     */
     bool isOld(const AttentionValue::sti_t threshold) const
     {
         return ((attentionValue.getSTI() < threshold) &&

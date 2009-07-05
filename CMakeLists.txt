@@ -146,7 +146,6 @@ IF (UBIGRAPHCLIENT_FOUND)
     ENDIF (CURL_FOUND)
 ENDIF (UBIGRAPHCLIENT_FOUND)
 
-
 # At this time,. there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
 # IF (LIBMEMCACHED_FOUND)
