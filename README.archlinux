@@ -1,0 +1,31 @@
+##############################################################################
+Instalation and dependency resolution for ArchLinux users (7/2009)
+##############################################################################
+
+Opencog depends on the following packages:
+
+   g++ cmake openssl boost expat guile lua xerces-c-2 cxxtest
+
+----------------------------------------------------------
+
+Additionally, it depends on the following non-official packages.
+These are available from the AUR (http://aur.archlinux.org):
+
+   sockets luabind
+
+----------------------------------------------------------
+
+Archlinux puts xerces-c-2 in a nonstandard location--
+you will need to make sure the build can find its includes
+and shared libraries.
+
+You may set the environment variable XERCESCROOT to
+"/opt/xerces-c-2/", or you may add that folder to the
+PATHS section of the FIND_LIBRARY(XERCESC_LIBRARIES) command in
+opencog/lib/FindXercesC.cmake
+
+If you get an error about XERCESC_LIBRARIES or XERCESC_INCLUDE_DIR
+being undefined, it is probably because you did not set
+the XERCESROOT before running cmake.
+
+----------------------------------------------------------
