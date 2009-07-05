@@ -22,13 +22,9 @@
 #ifndef PTLATOM_H
 #define PTLATOM_H
 
-//! @todo remove need for the atom class in the unification methods.
-
-//! @todo remove extra definition
 #define MetaPredicate atom
 
-//! @todo use class server and add these to it. search for each to
-// see if they should be a node or a link
+//! @todo use class server to find out what this values should actually be
 #define RESTRICTOR   158
 #define INSTANCEOF_R 159
 #define HAS_R        160
@@ -52,15 +48,19 @@
 #include "iAtomSpaceWrapper.h"
 #include <boost/smart_ptr.hpp>
 
-namespace opencog {
-namespace pln {
+namespace opencog { namespace pln {
 
 struct atom;
 typedef std::pair<std::string, atom> subst;
 struct lessatom;
 struct less_subst;
 
-struct atom //: public BoundHandle
+/** atom structure
+ * Also called a MetaPredicate or MP in the rules.
+ *
+ * @todo remove need for the atom class in the unification methods.
+ */
+struct atom
 {
 public:
     mutable pHandle handle;
@@ -85,6 +85,12 @@ public:
     atom(Type _T, std::string _name);
     atom(Type _T, int _arity, ...);
     atom(Type _T, std::vector<boost::shared_ptr<atom> > hs);
+    atom(const tree<boost::shared_ptr<atom> >& a,
+        tree<boost::shared_ptr<atom> >::iterator parent_node,
+        bool root = true);
+    atom(const tree<Vertex>& a,
+        tree<Vertex>::iterator parent_node,
+        bool root = true);
 
     /** Create from an integer pattern of a pre-defined length. Doesn't change the ownership
         of the array.
@@ -96,20 +102,16 @@ public:
     bool well_formed() const;
 
     /// Probably expensive operation.
-
     void SetOutgoing(pHandleSeq _hs);
 
     /// Create a copy of this wrapper into the core, regardless whether this
     /// was created from a core handle.
-
     pHandle attach(iAtomSpaceWrapper* core) const;
     void detach() const;
 
     /// Copy this as an integer array into the dest array
-
     int asIntegerArray(unsigned int* dest, unsigned int patlen, std::map<atom,int,lessatom>& node2pat_id,
                         unsigned int& next_free_pat_id, int index = 0) const;
-
 
     MetaPredicate* getMeta() const;
     Handle getHandle() const;
@@ -128,7 +130,6 @@ public:
     bool forbidLastSubstitution() const;
 
     /** Metapredicate operation */
-
     bool operator()(pHandle h) const;
 
     static bool ValidMetaPredicate(Type T);
@@ -147,15 +148,12 @@ public:
     tree<Vertex> makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual=false) const; //tree<atom>& dest);
 
     /// Actualize the substitution from bindings, delete forbiddenBindings, on new instance..
-
     void getWithActualizedSubstitutions(atom& target) const;
     pHandle bindHandle(iAtomSpaceWrapper* table) const;
 
     void extractVars(std::set<std::string>& vars) const;
     void extractFWVars(std::set<std::string>& vars) const;
 
-    atom(const tree<boost::shared_ptr<atom> >& a, tree<boost::shared_ptr<atom> >::iterator parent_node, bool root = true);
-    atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root = true);
 };
 /*
 struct less_subst: public binary_function<subst, subst, bool>
@@ -265,7 +263,7 @@ bool getLargestIntersection2(const std::set<atom,lessatom>& keyelem_set,
 
 atom* neBoundVertexWithNewType(Handle h, Type T);
 
-}} //~namespace opencog::pln
+}} // ~namespace opencog::pln
 
 //#include "iAtomSpaceWrapper.h"
 

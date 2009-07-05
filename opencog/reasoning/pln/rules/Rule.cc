@@ -33,22 +33,20 @@ namespace opencog {
 namespace pln {
 
 Rule::Rule(opencog::pln::iAtomSpaceWrapper *_destTable,
-            bool _FreeInputArity,
+            bool _freeInputArity,
             bool _computable,
             std::string _name)
-: RULE_INPUT_ARITY_MAX(15), freeInputArity(_FreeInputArity), destTable(_destTable),
+: RULE_INPUT_ARITY_MAX(15), freeInputArity(_freeInputArity), destTable(_destTable),
 computable(_computable), priority(10.0f), name(_name) 
-{
-}
-
-Rule::Rule() : RULE_INPUT_ARITY_MAX(15)
 { }
+
+Rule::Rule() : RULE_INPUT_ARITY_MAX(15) { }
 
 Rule::~Rule()
 {
-/*  for (map<atom, setOfMPs, lessatom_ignoreVarNameDifferences>::iterator   i = o2iMetaCache.begin();
-                                                i!= o2iMetaCache.end();
-                                                i++)
+/*  for (map<atom, setOfMPs, lessatom_ignoreVarNameDifferences>::iterator i = o2iMetaCache.begin();
+            i!= o2iMetaCache.end();
+            i++)
         delete i->second;*/
 }
 
@@ -101,9 +99,8 @@ bool Rule::validate(const vector<Vertex>& h) const
     
     vector<Vertex> myh(h);
     
-    if (n != inputFilter.size())
-    {
-		cprintf(0,"Rule::validate FALSE. Input vector  size: %d\n", n);
+    if (n != inputFilter.size()) {
+        cprintf(0,"Rule::validate FALSE. Input vector size: %d\n", n);
 #if 0        
         for (int i=0;i<n;i++)
             printTree(v2h(h[i]),0,0);
@@ -121,36 +118,28 @@ bool Rule::validate(const vector<Vertex>& h) const
     // A vertex wrapper contains a vtree in a weak_atom
     //typedef weak_atom<boost::shared_ptr<tree<Vertex> > > vertex_wrapper;
     typedef weak_atom< meta > vertex_wrapper;
-
-    for (uint i = 0; i < n; i++)
-    {
+    // Check and sort the vector of inputs so that they satisfy the
+    // input filter...
+    for (uint i = 0; i < n; i++) {
         vertex_wrapper mp(inputFilter[i]);
         pHandle h2 = _v2h(myh[i]);
         if (!(mp(h2)))
         {
-            uint    r=0;
-            for (   r = i+1;
-                    r < n && !mp(_v2h(myh[r]));
-                    r++);
-            if (r < n)
+            uint r=0;
+            for ( r = i+1;
+                  r < n && !mp(_v2h(myh[r]));
+                  r++);
+            if (r < n) {
                 std::swap(myh[i], myh[r]);
-            else
-            {
-				cprintf(0,"Rule::validate FALSE. Input vector:\n");
-#if 0                
-                for (int j=0;j<n;j++)
-                    printTree(v2h(h[j]),0,0);
-#else 
+            } else {
+                cprintf(0,"Rule::validate FALSE. Input vector:\n");
                 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
                 for (uint j=0;j<n;j++)
                     printer.print(_v2h(h[j]));
-#endif             
-                
                 return false;
             }
         }
     }
-
     return true;
 }
 
@@ -165,7 +154,6 @@ BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX) const
 Rule::setOfMPs Rule::o2iMeta(meta outh) const
 {
     assert(computable);
-    
     Rule::setOfMPs ret;
     
     const int N = outh->begin().number_of_children();
@@ -173,38 +161,28 @@ Rule::setOfMPs Rule::o2iMeta(meta outh) const
         return ret;
 /*  if (Handle* ph = v2h(*outh.begin()))
         return makeSingletonSet(vector2<meta>(
-            new tree<Vertex>()
-        ));*/
-    
+                new tree<Vertex>()));*/
     bool overrideInputFilter = false;
     setOfMPs extraFilter = o2iMetaExtra(outh, overrideInputFilter);
-
     if (extraFilter.empty())
         return setOfMPs();
 
-    set<boost::shared_ptr<MPs> >::iterator e;
-    
-    /*      /// Ensure that there're no Handles involved! (Or, it's a special unprovable type,
+    /// Ensure that there're no Handles involved! (Or, it's a special unprovable type,
     /// in which case there may be a hack involved.
-    
-      for (e = extraFilter.begin(); e!=extraFilter.end(); e++)
-      {
-      for (Rule::MPs::iterator m = (*e)->begin(); m != (*e)->end(); m++)
-      {
-      puts(":::");
-      assert(!(*m)->real || UnprovableType((*m)->T));
-      }
-}*/
+    /* set<boost::shared_ptr<MPs> >::iterator e;
+    for (e = extraFilter.begin(); e!=extraFilter.end(); e++) {
+        for (Rule::MPs::iterator m = (*e)->begin(); m != (*e)->end(); m++) {
+            puts(":::");
+            assert(!(*m)->real || UnprovableType((*m)->T));
+        }
+    }*/
     
     if (overrideInputFilter)
         return extraFilter;
-    
 /** @todo Update this to the new types system
-    
     for (e = extraFilter->begin(); e!=extraFilter.end(); e++)
     {
         assert((*e)->size() == inputFilter.size());
-    
         boost::shared_ptr<MPs> ret1(new MPs);
         
         for (uint i = 0; i < inputFilter.size(); i++)
@@ -227,5 +205,4 @@ void Rule::CloneArgs(const Rule::MPs& src, Rule::MPs& dest)
         dest.push_back(Btr<BoundVTree>(bbvt->Clone()));
 }
 
-} //namespace opencog { namespace pln {
-}
+}} //namespace opencog { namespace pln {

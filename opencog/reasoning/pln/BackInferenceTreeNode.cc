@@ -1134,7 +1134,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
                 if (etv.getConfidence() > minConfidenceForAbort)
                     return *eval_res_vector_set.begin();
                 else 
-                    tlog(0,"TV conf too low: %f", etv.getConfidence());
+                    tlog(0,"TV conf too low: %f\n", etv.getConfidence());
             }
         }
         tlog(0, "infer() ok\n");
@@ -1231,7 +1231,7 @@ bool BITNode::CheckForDirectResults()
     }
     else
     {
-        tlog(3,"NO direct child_results generated.\n");
+        tlog(3,"No direct child results generated.\n");
         return false;           
     }
 }
@@ -1241,18 +1241,18 @@ void BITNode::expandNextLevel()
     AtomSpaceWrapper *atw = GET_ATW;
     try
     {
-        tlog(-2, "Expanding with fitness %.4f   In expansion pool: %s\n", fitness(), (STLhas2(root->exec_pool, this)?"YES":"NO"));
+        tlog(-2, "Expanding with fitness %.4f\n", fitness());
+        tlog(-2, "In expansion pool? %s\n", (STLhas2(root->exec_pool, this)? "YES":"NO"));
         rawPrint(*GetTarget(), GetTarget()->begin(), -2);
         printArgs();
         if (atw->getType(_v2h(*GetTarget()->begin())) == FW_VARIABLE_NODE)    
             tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
-        tlog(0, "Rule:%s: ExpandNextLevel (%d children exist)\n", (rule?(rule->name.c_str()):"(root)"), children.size());
+        tlog(-2, " %d children exist already\n", children.size());
 
-        // remove this BITNode from the roots execution pool
+        // Remove this BITNode from the roots execution pool
         root->exec_pool.remove_if(bind2nd(std::equal_to<BITNode*>(), this));
 
-        if (!Expanded)
-        {
+        if (!Expanded) {
             CheckForDirectResults();
             CreateChildrenForAllArgs();
             Expanded = true;
@@ -1260,18 +1260,17 @@ void BITNode::expandNextLevel()
             haxx::BITUSingleton->drawBITNode(this, children);
 #endif
         }
-        else
-            for (uint i = 0; i < args.size(); i++)
-            {   
+        else {
+            for (uint i = 0; i < args.size(); i++) {   
                 foreach(const ParametrizedBITNode& bisse, children[i])
                     bisse.prover->expandNextLevel();
 
-                if (children[i].empty())
-                {
+                if (children[i].empty()) {
                     tlog(1,"Arg %d proof failure.\n",i);        
                     break;
                 }           
             }       
+        }
     } catch(...) {
         tlog(0,"Exception in ExpandNextLevel()");
         throw;
@@ -1900,7 +1899,11 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
 string BITNode::printArgs() const
 {
     stringstream ss;
-    ss << args.size() << " args:" <<endl;
+    if (args.size() == 0) {
+        ss << "No arguments to BITNode [" << (long)this << endl;
+        return ss.str();
+    }
+    ss << "BITNode [" << (long)this << "] has << " << args.size() << " args:" <<endl;
     foreach(meta _arg, args)
         ss << NMPrinter(NMP_ALL).toString(*_arg, -2);
     cprintf(-2,ss.str().c_str());
@@ -1910,7 +1913,7 @@ string BITNode::printArgs() const
 string BITNode::printFitnessPool()
 {
     stringstream ss;
-    ss << tlog(0,"Fitness table: (%d)\n", root->exec_pool.size());
+    ss << tlog(0,"Fitness table (%d):\n", root->exec_pool.size());
 
     if (!root->exec_pool.empty()) {
         if (!root->exec_pool_sorted) {
@@ -1920,8 +1923,8 @@ string BITNode::printFitnessPool()
 
         for (std::list<BITNode*>::iterator i = root->exec_pool.begin();
                 i != root->exec_pool.end(); i++) {
-            ss << (*i)->tlog( 0, ": %f / %d [%ld] (P = %d)\n", (*i)->fitness(),
-                    (*i)->children.size(), (long)(*i), (*i)->parents.size() );
+            ss << (*i)->tlog( 0, "fitness: %f / C:%d / P:%d\n", (*i)->fitness(),
+                    (*i)->children.size(), (*i)->parents.size() );
         }
     }
     return ss.str();
@@ -1943,17 +1946,16 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
     stringstream ss;
     if (debugLevel > currentDebugLevel) return "";
 
-    if (test::bigcount == 601) {
-        ss << "Debug feature." << endl;
-    }
+    //if (test::bigcount == 601) {
+    //    ss << "Debug feature." << endl;
+    //}
 
     ss << (bigcounter? (++test::bigcount) : depth) << " "
         << (unsigned int) root->exec_pool.size() << "/" << root->InferenceNodes
-        << haxxUsedProofResources << " [(" << (long)this << ")] ("
-        << (rule ? (rule->name.c_str()) : "(root)") << ")";
+        << haxxUsedProofResources << " [" << (long)this << "-"
+        << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
 
     char buf[5000];
-
     va_list ap;
     va_start(ap, format);
     int answer = vsprintf(buf, format, ap);

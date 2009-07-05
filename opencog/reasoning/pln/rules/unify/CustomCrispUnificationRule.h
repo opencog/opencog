@@ -27,18 +27,22 @@ namespace opencog { namespace pln {
 class CustomCrispUnificationRule : public Rule
 {
 protected:
-	pHandle ForallLink;
-public:
+    /** The ForAllLink that this rule has been instantiated for.
+     */
+	pHandle hForAllLink;
 
-	CustomCrispUnificationRule(pHandle _ForallLink, iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,false,false,"CrispUnificationRule"), ForallLink(_ForallLink)
+public:
+	CustomCrispUnificationRule(pHandle _hForAllLink, iAtomSpaceWrapper *_destTable)
+	: Rule(_destTable,false,false,"CustomCrispUnificationRule"), hForAllLink(_hForAllLink)
 	{
-		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((pHandle)ATOM))));
+		inputFilter.push_back(
+                meta(new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 
 	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
 	{
+        // Assumedly, this assert(0) is because a CustomCrispUnification rule
+        // only makes sense when the variables within the ForAllLink are bound.
 		assert(0);
 		return Vertex(PHANDLE_UNDEFINED);
 	}

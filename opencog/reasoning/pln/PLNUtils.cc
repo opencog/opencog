@@ -967,6 +967,7 @@ string printNode1(pHandle h, int level, int LogLevel)
         ss << "NULL TV!";
 
     LOG(LogLevel, (repeatc(' ', level*3) + ss.str()).c_str());
+    ss << endl;
     return ss.str();
 
 }
@@ -983,6 +984,7 @@ std::string printTree(pHandle h, int level, int LogLevel)
     if (h == PHANDLE_UNDEFINED) {
         return "";
     }
+    ss << repeatc(' ', level*3);
 
     if (atw->isType(h)) {
         Type t = (Type) h;
@@ -991,7 +993,7 @@ std::string printTree(pHandle h, int level, int LogLevel)
             << "(" << t << ")" << endl;
 
         if (LogLevel > currentDebugLevel)
-            printf("%s",(repeatc(' ', level*3) + ss.str() ).c_str());
+            printf("%s",ss.str().c_str());
         return ss.str();
     }
 
@@ -1003,12 +1005,13 @@ std::string printTree(pHandle h, int level, int LogLevel)
         const TruthValue& tv = atw->getTV(h);
 
         if (!tv.isNullTv())
-            ss << atw->getName(h).c_str() << ":" << opencog::pln::Type2Name(t)
+            ss << opencog::pln::Type2Name(t)
               << "(" << t << ") " << tv.toString() << "\t[" << h <<"]";
         else
             ss << "NULL TV!";
 
-        LOG(LogLevel, (repeatc(' ', level*3) + ss.str() ).c_str());
+        LOG(LogLevel, ss.str().c_str());
+        ss << endl;
 
         for (vector<pHandle>::const_iterator hi = hs.begin(); hi != hs.end(); hi++)
             ss << printTree(*hi, level + 1, LogLevel);
@@ -1173,6 +1176,7 @@ string printNode1(const atom& a, int level, int LogLevel)
     ss << " (  " << make_subst_buf(a) << ")";
 
     LOG(LogLevel, repeatc(' ', level*3) + ss.str() );
+    ss << endl;
     return ss.str();
 }
 

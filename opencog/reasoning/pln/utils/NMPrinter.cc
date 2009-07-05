@@ -218,6 +218,8 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
 
     bool isNode = atw->isSubType(h,NODE); 
     Type type = atw->getType(h);
+
+    // Skip printing ListLinks to only one atom, instead, just print that atom
     if ((printOptions & NMP_NO_UNARY_LIST_LINKS) && (type == LIST_LINK) && (atw->getArity(h) == 1)) {
         pHandle newH = atw->getOutgoing(h, 0);
         printHandle(out, newH, indentationLevel);
@@ -277,7 +279,7 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
         if (printOptions & NMP_HANDLE) {
             char str[100];
             sprintf(str, "%u", h);
-            out << " [" << str << "]"; 
+            out << "[" << str << "]"; 
             if (printToFile) fprintf(logFile, " [%s]", str);
         }
         if (!(printOptions & NMP_BRACKETED)) {

@@ -45,17 +45,14 @@ Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction
         GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Btr<std::set<BoundVertex > >();
 
-#if 0
-    rawPrint(*outh, outh->begin(),0);
-#else 
-    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME|NMP_NODE_TYPE_NAME);
     printer.print(vtree(outh->begin()));
-#endif
-cprintf(3,"FindMatchingUniversals...\n");
-    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
-cprintf(3,"FindMatchingUniversals OK!\n");
-    if (!i)
-        return Btr<std::set<BoundVertex > >();
+
+    cprintf(3,"FindMatchingUniversals...\n");
+    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, hForAllLink, destTable);
+    cprintf(3,"FindMatchingUniversals OK!\n");
+
+    if (!i) return Btr<std::set<BoundVertex > >();
 
     Btr<std::set<BoundVertex > > ret(new std::set<BoundVertex >);
     
@@ -66,15 +63,9 @@ cprintf(3,"FindMatchingUniversals OK!\n");
     foreach(phvt vp, *i->bindings)
     {
         (*pre_binds)[vp.first] = make_real(vp.second);
-#if 0    
-        printTree(vp.first,0,0);
-        cprintf(0,"=");
-        printTree((*pre_binds)[vp.first],0,0);
-#else 
         printer.print(vp.first);
         cprintf(0,"=");
         printer.print((*pre_binds)[vp.first]);
-#endif
     }
 
     BBvtree rootAtom(new BoundVTree(*i, pre_binds));
@@ -90,11 +81,11 @@ cprintf(3,"FindMatchingUniversals OK!\n");
 
 /*  haxx::bitnoderoot->inferred_with[ret_h] = (Rule*)(int)this;
     if (haxx::bitnoderoot->inferred_from[ret_h].empty()) //comes here often, we want the link only once
-        haxx::bitnoderoot->inferred_from[ret_h].push_back(ForallLink);
+        haxx::bitnoderoot->inferred_from[ret_h].push_back(hForAllLink);
 */
     haxx::inferred_with[ret_h] = (Rule*)this;
     if (haxx::inferred_from[ret_h].empty()) //comes here often, we want the link only once
-        haxx::inferred_from[ret_h].push_back(ForallLink);
+        haxx::inferred_from[ret_h].push_back(hForAllLink);
 
     return ret;
 }

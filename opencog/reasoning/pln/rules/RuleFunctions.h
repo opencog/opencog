@@ -29,10 +29,18 @@ Handle child(Handle h, int i);
 namespace opencog { namespace pln {
 
 #ifndef WIN32
-  float max(float a, float b);
+//! Max of two floats
+float max(float a, float b);
 #endif
 
+/** Create a new FWVAR node with the given name.
+ * @relates AtomSpaceWrapper
+ */
 Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
+
+/** Create a new FWVAR node and generate the name.
+ * @relates AtomSpaceWrapper
+ */
 Vertex CreateVar(iAtomSpaceWrapper* atw);
 
 Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);

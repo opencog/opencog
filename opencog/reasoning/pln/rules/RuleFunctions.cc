@@ -32,11 +32,10 @@ using std::vector;
 using std::set;
 using std::map;
 
-namespace haxx
+/*namespace haxx
 {
-    /// Must invert the formula I*(I+1)/2 for 2-level incl. excl. in OR rule
-
     map<int, int> total2level1;
+    /// Must invert the formula I*(I+1)/2 for 2-level incl. excl. in OR rule
     int contractInclusionExclusionFactorial(int total)
     {
         std::map<int, int>::iterator T2L = total2level1.find(total);
@@ -52,30 +51,32 @@ namespace haxx
 
         return i-1;
     }
-}
+}*/
 
 namespace opencog { namespace pln {
 
 #ifndef WIN32
-  float max(float a, float b) { return ((a>b)?a:b); }
+float max(float a, float b) { return ((a>b)?a:b); }
 #endif
 
 extern int varcount;
 
 Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
 {
+    // Use the AtomSpaceWrapper to create a new node representing
+    // the variable and called varname, don't try to replace it
+    // if it already exists
     pHandle ret = atw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
     
-cprintf(4, "CreateVar Added node as NEW: %s / [%u]\n", varname.c_str(), ret);
-
+    cprintf(4, "CreateVar: added fwvar node %s [%u]\n", varname.c_str(), ret);
     varcount++;
-
     return Vertex(ret);
 }
 
 Vertex CreateVar(iAtomSpaceWrapper* atw)
-{
+{ 
+    // create a variable node with a name as a generated 10 char string
     return CreateVar(atw, "$"+GetRandomString(10));
 }
 
@@ -611,8 +612,8 @@ Btr<set<pHandle> > ForAll_handles;
 
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, iAtomSpaceWrapper* table)
 {
-	cprintf(4,"FindMatchingUniversal...");
-	
+    cprintf(4,"FindMatchingUniversal...");
+    
     Btr<ModifiedVTree> candidate = 
         convertToModifiedVTree(
                             ForAllLink,
@@ -633,9 +634,9 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
     printer.print(candidate->begin(), 4);
     printer.print(candidate->original_handle, 4);
 
-	cprintf(4,"universal binds:");
+    cprintf(4,"universal binds:");
     for_each(bindsInUniversal->begin(), bindsInUniversal->end(), pr2);
-	cprintf(4,"target binds:");
+    cprintf(4,"target binds:");
     for_each(bindsInTarget->begin(), bindsInTarget->end(), pr2);
 
     Btr<ModifiedBoundVTree> BoundUniversal(new ModifiedBoundVTree(*candidate));
@@ -650,7 +651,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
     ///Remove FW_VAR => FW_VAR mappings. WARNING! Potentially goes to infinite loop.
     removeRecursionFromMap<bindingsVTreeT::iterator, vtree::iterator>(bindsCombined->begin(), bindsCombined->end());
 
-	cprintf(4,"\ncombined binds:");
+    cprintf(4,"\ncombined binds:");
     for_each(bindsCombined->begin(), bindsCombined->end(), pr2);
 
 #if PREVIOUS_IMPLEMENTATION
@@ -690,7 +691,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
 
     BoundUniversal->bindings = bindsCombined;
 
-	cprintf(4,"\nresult binds:");
+    cprintf(4,"\nresult binds:");
     for_each(BoundUniversal->bindings->begin(), BoundUniversal->bindings->end(), pr2);
 
     return BoundUniversal;

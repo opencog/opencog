@@ -602,7 +602,7 @@ public:
      * contexts).
      */
 	const std::set<VtreeProvider*>& infer(int& resources,
-            float minConfidenceForStorage = 0.000001f,
+            float minConfidenceForStorage = 0.00000001f,
             float minConfidenceForAbort = 1.00f);
 
 	/// Manual evaluation. Should not be needed anymore.

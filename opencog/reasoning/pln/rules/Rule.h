@@ -27,7 +27,10 @@
 #include "../PLNUtils.h"
 
 const TruthValue& getTV(pHandle); 
-#define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<std::set<BoundVertex> >(); }
+#define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
+    attemptDirectProduction(meta outh) { \
+        return Btr<std::set<BoundVertex> >(); \
+    }
 
 namespace opencog { namespace pln {
 
@@ -132,10 +135,11 @@ public:
      */
     virtual BoundVertex compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const=0;
 
-    //! A concrete computation method for generic rule
+    //! A computation method on BoundVertex
+    //! @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
     BoundVertex compute(const std::vector<BoundVertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
 
-    //! Whether to attempt direct production.
+    //! Try to call rule as a direct producer
     virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
 
     //! Just calls compute()
@@ -192,7 +196,7 @@ public:
 
     friend class RuleApp;
 
-    //! Only for logging purposes. NO REAL FUNCTIONALITY, USE FREELY.
+    //! Only for logging purposes.
     std::string name; 
 };
 
@@ -270,8 +274,7 @@ enum RULE
     CrispUnification,
     StrictCrispUnification,
 
-/// Irrelevant Rules (the ones only used at startup, plus tautology)
-
+// Irrelevant Rules (the ones only used at startup, plus tautology)
     Tautology,
 
     OR2AND,
@@ -279,6 +282,8 @@ enum RULE
     Exist
 };
 
+//! Total number of rules in PLN (Not necessarily the number that are active
+//! though).
 static const int NUMBER_OF_RULES (((int)Exist)+1); // Exist being the last rule!
 
 }} // namespace opencog { namespace pln {
