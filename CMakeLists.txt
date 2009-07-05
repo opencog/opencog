@@ -94,6 +94,7 @@ ELSE (UnixODBC_FOUND)
 ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
+
 # Gnu Guile scheme interpreter
 # Versions prior to 1.8.6 have assorted serious problems with
 # multi-threading.  If you need guile, you need this version.
@@ -129,9 +130,22 @@ ENDIF (EXPAT_FOUND)
 # XML-RPC and Ubigraph client library, used by the ubigraph module
 FIND_PACKAGE(LibUbiGraphClient)
 IF (UBIGRAPHCLIENT_FOUND)
-	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
+    FIND_PACKAGE(XMLRPC)
+    IF (NOT XMLRPC_FOUND)
+        MESSAGE(STATUS "UbigraphClient library found but libxmlrpc missing.")
+    ENDIF (NOT XMLRPC_FOUND)
+    FIND_PACKAGE(CURL)
+    IF (NOT CURL_FOUND)
+        MESSAGE(STATUS "UbigraphClient library found but libcurl missing.")
+    ENDIF (NOT CURL_FOUND)
+    IF (CURL_FOUND)
+        IF (XMLRPC_FOUND)
+            MESSAGE(STATUS "UbigraphClient library and dependencies found.")
+            ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
+        ENDIF (XMLRPC_FOUND)
+    ENDIF (CURL_FOUND)
 ENDIF (UBIGRAPHCLIENT_FOUND)
-FIND_PACKAGE(XMLRPC)
+
 
 # At this time,. there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
