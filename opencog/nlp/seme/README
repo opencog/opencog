@@ -133,7 +133,7 @@ distinguishing and refining concepts.
 
 Another approach is to use part-of-speech tags, and disjunct tags, as
 stand-ins for word senses.  That is, the parser has already identified
-different word-instances according to thier part-of-speech, and so at
+different word-instances according to their part-of-speech, and so at
 least a rough word-sense classification is available from that.  That
 is, it is safe to assume that a noun and a verb never represent the 
 same concept (at a certain level...).  It has also been seen (see 
@@ -322,7 +322,7 @@ Concrete Data Representation
 Let's now look at how to represent some of these ideas concretely, in
 terms of OpenCog hypergraphs.
 
-First, a SemeNode wil be used as the main anchor point. A SemeNode is
+First, a SemeNode will be used as the main anchor point. A SemeNode is
 used, instead of a ConceptNode, so as to leave ConceptNode open for 
 other uses; the goal here is to minimize confusion/cross-talk between
 this and other parts of OpenCog.
@@ -342,7 +342,7 @@ betwen WordInstanceNodes and WordNodes, we create:
 
 although the lemmatized form should probably appear here (i.e. the
 LemmaLink would be used to obtain the source WordNode).  The idea that
-its red would then be:
+it's red would then be:
 
     EvaluationLink
        DefinedLinguisticRelationNode "amod"
@@ -416,7 +416,7 @@ simplest might be the following:
 Take a weighted average of link-comparisons, comparing:
 -- WordNode. A mismatch here means that it is highly unlikely that the
    concepts are identical, unless the WordNode is a pronoun.
--- ContextNode. A mismatch here means its highly unlike that the 
+-- ContextNode. A mismatch here means it's highly unlike that the 
    concepts are identical, unless the ContextNode is one of the base
    "common-sense" contexts.
 -- Compare modifiers. A modifier present in one, but absent in the 
@@ -467,7 +467,7 @@ Not clear how unambiguous the copulas and preps will be.
 
 ToDo:
 -----
-Create the following nes atoms types:
+Create the following new atoms types:
 SemeNode
 ContextNode
 SemanticRelationshipNode
