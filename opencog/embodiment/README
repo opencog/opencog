@@ -1,21 +1,35 @@
 Opencog Embodiment README
 =========================
 
-This readme just describes how to distribute (or deploy) the needed files (binaries, scripts and config files) for running Embodiment servers.
-For more general information about Embodiment please see http://www.opencog.org/wiki/Embodiment.
-Later, other useful Embodiment-related information should be added here too.
+This readme just describes how to distribute (or deploy) the needed files
+(binaries, scripts and config files) for running Embodiment servers.  For more
+general information about Embodiment please see
+http://www.opencog.org/wiki/Embodiment. Later, other useful Embodiment-related
+information should be added here too.
 
 =======================================================
 How to distribute, configure and run Embodiment servers
 =======================================================
 
-For distributing the files of Embodiment system, just go to <opencog's root dir>/scripts/embodiment and run the ./makeDistribution script, as follows: 
-./makeDistribution <compile_dir> <dist_subdirectory>
+For distributing the files of Embodiment system, just go to:
+
+ <opencog's root dir>/scripts/embodiment
+
+and run the ./makeDistribution script, as follows:
+
+ ./makeDistribution <compile_dir> <dist_subdirectory>
+
 where <compile_dir> is the folder where the opencog was built on
-and <dist_subdirectory> is any arbitrary name you want to give for the distribution directory
-For example, the following command: 
-./makeDistribution compile test
-will create the directory "<opencog's root dir>/dist/test" and put there all files needed to configure and run the Embodiment servers. Then:
-  - For configuring Embodiment, edit the "embodiment.conf" file in the created distribution folder.
-  - For running Embodiment servers, run the "pb.csh" script file.
-  - For killing Embodiment servers, run the "kill.csh" script file.
+and <dist_subdirectory> is any arbitrary name you want to give for the
+distribution directory For example, the following command: 
+
+ ./makeDistribution compile test
+
+will create the directory "<opencog's root dir>/dist/test" and put there all
+files needed to configure and run the Embodiment servers. Then:
+
+* For configuring Embodiment, edit the "embodiment.conf" file in the created
+distribution folder.
+* For running Embodiment servers, run the "pb.csh" script file.
+* For killing Embodiment servers, run the "kill.csh" script file.
+
