@@ -73,6 +73,12 @@ public:
         outgoing.push_back(h1);
         outgoing.push_back(h2);
 
+/*  /// Test atom identity works
+    Handle h1 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+    Handle h2 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+
+    assert(h1 == h2);
+*/
         cout << "test add link to NULL version nodes" << endl;
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 

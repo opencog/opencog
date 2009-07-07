@@ -516,7 +516,7 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
         NMXmlParser::loadXML(readers, AS_PTR);        
         delete readers[0];
 #else
-        LOG(0, "Thive version of opencog has no XML support"); 
+        LOG(0, "This version of OpenCog was compiled without XML support."); 
         return false;
 #endif /* HAVE_EXPAT */
 

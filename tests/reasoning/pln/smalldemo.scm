@@ -1,4 +1,4 @@
-scm
+;scm
 ;
 ; smalldemo.scm -- identical to smalldemo.xml
 ;
