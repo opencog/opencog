@@ -64,10 +64,10 @@ struct BITNode_fitness_comp : public std::binary_function<BITNode*, BITNode*, bo
 };
 
 /** 
-	Store the knowledge of which argument slow I inhabit in my parent's Rule,
-	and which variable-to-variable bindings the parent is applying to me,
-	ie. "How does the parent view me"
-*/
+ *  Store the knowledge of which argument slot I inhabit in my parent's Rule,
+ *  and which variable-to-variable bindings the parent is applying to me, ie.
+ *  "How does the parent view me"
+ */
 template<typename T>
 struct parent_link
 {

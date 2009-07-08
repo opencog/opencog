@@ -184,8 +184,8 @@ public:
     PerceptionActionInterface::PAI & getPAI();
 
     /**
-     * Return the pet's coginitive component. This component is responsable
-     * for updating the pet attentionValues and choose a schema to
+     * Return the pet's cognitive component. This component is responsible
+     * for updating the pet AttentionValues and for choosing a schema to
      * be executed.
      *
      * @return The pet's cognitive component.
@@ -193,14 +193,14 @@ public:
     Pet & getPet();
 
     /**
-     * Return The RuleEngine associated with the OPC.
+     * Get the RuleEngine associated with the OPC.
      *
      * @return The RuleEngine associated with the OPC.
      */
     RuleEngine & getRuleEngine();
 
     /**
-     * Return The Procedure Interpreter associated with the OPC.
+     * Get the Procedure Interpreter associated with the OPC.
      *
      * @return The ProcedureInterpreter associated with the OPC.
      */
@@ -208,7 +208,7 @@ public:
 
 
     /**
-     * Return The Procedure Repository associated with the OPC.
+     * Get the Procedure Repository associated with the OPC.
      *
      * @return The ProcedureRepository associated with the OPC.
      */

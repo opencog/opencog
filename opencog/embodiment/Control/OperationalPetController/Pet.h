@@ -57,8 +57,6 @@ enum PetMode {
 class Pet : public Control::PetInterface
 {
 
-
-
 private:
 
     // pet metadata
@@ -83,40 +81,46 @@ private:
 
     PerceptionActionInterface::PAI* pai;
 
-    std::string exemplarAvatarId;       // the Id of the avatar that is
-    // performing the exemplars
-    std::string triedSchema;   // last schema tried
-    std::vector<std::string> learningSchema;   // schema being learned
+    //! The ID of the avatar that is performing the exemplars
+    std::string exemplarAvatarId;
+    //! Last schema tried
+    std::string triedSchema;
+    //! Schema being learned
+    std::vector<std::string> learningSchema;
 
-    unsigned long exemplarStartTimestamp; // start/end timestamp to get behaviors from
-    unsigned long exemplarEndTimestamp;  // the atomSpace.
+    //! Start timestamp to get behaviors from the AtomSpace
+    unsigned long exemplarStartTimestamp;
+    //! End timestamp to get behaviors from the AtomSpace
+    unsigned long exemplarEndTimestamp;
 
     unsigned long startLearningSessionTimestamp;
     unsigned long endLearningSessionTimestamp;
 
     bool candidateSchemaExecuted;
 
-
-    std::string grabbedObjId; // the id of the object the pet has on its mouth,
-    // empty if there is no object grabbed.
+    /** the id of the object the pet has on its mouth, empty if there is no
+     * object grabbed. 
+     */
+    std::string grabbedObjId;
 
     opencog::RandGen* rng;
 
-    /**
-     * Populate atom space with behavior nodes
+    /** Populate atom space with behavior nodes
      */
     void executeBehaviorEncoder();
 
     /**
-     * Update the maps that should be kept (persisted) in spaceServer during the last exemplar session.
+     * Update the maps that should be kept (persisted) in spaceServer during the
+     * last exemplar session.
      */
     void updatePersistentSpaceMaps() throw (opencog::RuntimeException, std::bad_exception);
 
     /**
-     * Update is_exemplar_avatar predicate for the pet based on exemplarAvatarId object.
+     * Update is_exemplar_avatar predicate for the pet based on exemplarAvatarId
+     * object.
      *
-     * @param active Inform if the predicate is active or not. An active predicate has its
-     * TV set to 1.0 and 0.0 otherwise.
+     * @param active Inform if the predicate is active or not. An active
+     * predicate has its TV set to 1.0 and 0.0 otherwise.
      */
     void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
 
@@ -132,7 +136,7 @@ public:
     public:
         inline RequestedCommand( void ) : name( "" ), readed( true ) { }
         virtual inline ~RequestedCommand( void ) { }
-        //
+
         std::string name;
         std::vector<std::string> arguments;
         bool readed;
@@ -148,83 +152,102 @@ public:
      * @param ownerID The SL id of the owner of the pet.*
      * @param atomSpace A atomSpace with the Pet short memory AtomTable.
      */
-    Pet(const std::string& petId, const std::string& petName, const std::string& agentType,
-        const std::string& agentTraits, const std::string& ownerID, AtomSpace* atomSpace, MessageSender* sender);
+    Pet(const std::string& petId, const std::string& petName, const std::string&
+            agentType, const std::string& agentTraits, const std::string&
+            ownerID, AtomSpace* atomSpace, MessageSender* sender);
     ~Pet();
 
-    /**
-     * Set the PAI of this Pet
+    /** Set the PAI of this Pet
      */
     void setPAI(PerceptionActionInterface::PAI* pai);
 
+    /** Get the PAI of this Pet
+     */
     inline PerceptionActionInterface::PAI& getPai( void ) {
         return *pai;
     }
 
-    /**
-     * Set/Get the RuleEngine of this Pet
+    /** Set the RuleEngine of this Pet
      */
     void setRuleEngine(RuleEngine* ruleEngine);
+
+    /** Get the RuleEngine of this Pet
+     */
     inline RuleEngine* getRuleEngine( void ) {
         return ruleEngine;
     }
 
-    /**
-     * Init AtomSpace with pet traits, feelings and other atoms
+    /** Init AtomSpace with pet traits, feelings and other atoms
      */
     void initTraitsAndFeelings();
 
-    /**
-     * Getter and setter for the pet name.
+    /** Get the pet name.
+     *
+     * @return Pet's name.
      */
     const std::string& getName() const;
-    void  setName(const std::string& petName);
 
-    /**
-     * Getter for agent type. An agent should never have its type changed
+    /** Set the pet name.
+     *
+     * @param petName new pet name.
+     */
+    void setName(const std::string& petName);
+
+    /** Getter for agent type.
+     * @note An agent should never have its type changed
+     * @return Agent type
      */
     const std::string& getType() const;
 
-    /**
-     * Getter for pet id. A pet should never have its id changed
+    /** Getter for pet id.
+     * @note A pet should never have its id changed
      */
     const std::string& getPetId() const;
 
-    /**
-     * Getter and setter for owner id.
+    /** Getter for owner id.
      */
     const std::string& getOwnerId() const;
-    const std::string& getExemplarAvatarId() const;
+    /** Setter for owner id.
+     */
     void  setOwnerId(const std::string& ownerId);
 
-    // always use this method, even inside the class because it controls
-    // the is_teacher predicate for the pet
+    const std::string& getExemplarAvatarId() const;
+
+    /**
+     * @warning always use this method, even inside the class because it
+     * controls the is_teacher predicate for the pet
+     */
     void  setExemplarAvatarId(const std::string& exemplarAvatarId);
 
-    /**
-     * Getter and setter for  pet mode (PLAYING or LEARNING).
+    /** Get pet mode
+     * @return (PLAYING or LEARNING).
      */
     const PetMode getMode() const;
+
+    /** Set pet mode
+     * @param petMode (PLAYING or LEARNING)
+     */
     void  setMode(PetMode);
 
-    /**
-     * Get the tried and learning schemata names
+    /** Get the tried schemata names
      */
     const std::string & getTriedSchema();
-    const std::vector<std::string> & getLearningSchema();
 
     void setTriedSchema(const std::string & triedSchema);
+
+    /** Get the learning schemata names
+     */
+    const std::vector<std::string> & getLearningSchema();
 
     unsigned long getExemplarStartTimestamp();
     unsigned long getExemplarEndTimestamp();
 
-    /**
-     * Restart a learning process when the LS goes down. This method should
-     * ONLY be called when the LS goes up again and the Pet is still in
-     * LEARNING mode.
+    /** Restart a learning process when the LS goes down.
+     *
+     * This method should ONLY be called when the LS goes up again and the Pet
+     * is still in LEARNING mode.
      */
     void restartLearning() throw (opencog::RuntimeException, std::bad_exception);
-
 
     /**
      * Create a new Pet loading pet metadata from file.
@@ -235,7 +258,8 @@ public:
      *
      * @return The pet newly created.
      */
-    static Pet* importFromFile(const std::string& filename, const std::string& petId, AtomSpace* atomSpace, MessageSender* sender);
+    static Pet* importFromFile(const std::string& filename, const std::string&
+            petId, AtomSpace* atomSpace, MessageSender* sender);
 
     /**
      * Save pet metadata into file.
@@ -243,23 +267,30 @@ public:
      * @param filename The name of the file where data will be written.
      * @param pet The pet whose metadata will be written.
      */
-    static void exportToFile(const std::string& filename, Pet & pet) throw (opencog::IOException, std::bad_exception);
+    static void exportToFile(const std::string& filename, Pet & pet) throw
+        (opencog::IOException, std::bad_exception);
 
     // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above):
 
     AtomSpace& getAtomSpace();
 
-    void stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp);
+    void stopExecuting(const std::vector<std::string> &commandStatement,
+            unsigned long timestamp);
 
     bool isInLearningMode() const;
-    void startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp);
-    void stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp);
+    void startLearning(const std::vector<std::string> &commandStatement,
+            unsigned long timestamp);
+    void stopLearning(const std::vector<std::string> &commandStatement,
+            unsigned long timestamp);
 
     bool isExemplarInProgress() const;
-    void startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp);
-    void endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp);
+    void startExemplar(const std::vector<std::string> &commandStatement,
+            unsigned long timestamp);
+    void endExemplar(const std::vector<std::string> &commandStatement, unsigned
+            long timestamp);
 
-    void trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp);
+    void trySchema(const std::vector<std::string> &commandStatement, unsigned
+            long timestamp);
     void reward(unsigned long timestamp);
     void punish(unsigned long timestamp);
 
@@ -272,8 +303,10 @@ public:
     unsigned long getLatestRewardTimestamp( void );
     unsigned long getLatestPunishmentTimestamp( void );
 
-    void getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actionsDone);
-    void getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actionsDone);
+    void getAllActionsDoneInATrickAtTime(const Temporal& time,
+            HandleSeq& actionsDone);
+    void getAllObservedActionsDoneAtTime(const Temporal& time,
+            HandleSeq& actionsDone);
     bool isNear(const Handle& objectHandle);
     bool getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity);
     void getHighLTIObjects(HandleSeq& highLTIObjects);
@@ -281,9 +314,11 @@ public:
     /**
      * @see PetInterface::setLatestGotoTarget
      */
-    void setLatestGotoTarget( const std::pair<std::string, Spatial::Point>& target ) {
+    void setLatestGotoTarget(
+            const std::pair<std::string, Spatial::Point>& target ) {
         this->targetObject = target;
     };
+
     /**
      * @see PetInterface::getLatestGotoTarget
      */
@@ -291,7 +326,8 @@ public:
         return this->targetObject;
     };
 
-    void setRequestedCommand(std::string command, std::vector<std::string> parameters);
+    void setRequestedCommand(std::string command,
+            std::vector<std::string> parameters);
 
     inline RequestedCommand& getLatestRequestedCommand( void ) {
         lastRequestedCommand.readed = true;
@@ -303,7 +339,8 @@ public:
     }
 
     /**
-     * Callback method called by RuleEngine to indicate the candidate schema was selected to be executed
+     * Callback method called by RuleEngine to indicate the candidate schema was
+     * selected to be executed
      */
     void schemaSelectedToExecute(const std::string& schemaName);
 
@@ -316,7 +353,7 @@ public:
      * Set the id of the grabbed object, i.e., the object that is in pet's
      * mouth
      *
-     * @param The object id
+     * @param id The object id
      */
     void setGrabbedObj(const std::string& id);
 

@@ -38,7 +38,6 @@ ActionSelectionAgent::ActionSelectionAgent()
 
 void ActionSelectionAgent::run(opencog::CogServer *server)
 {
-
     logger().debug("ActionSelectionAgent - Executing schemaSelection().");
     ((OPC *) server)->schemaSelection();
 }

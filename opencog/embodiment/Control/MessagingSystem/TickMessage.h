@@ -48,11 +48,12 @@ public:
     // Inherited from message
 
     /**
-     * Return A (char *) representation of the message, a c-style string terminated with '\0'.
-     * Returned string is a const pointer hence it shaw not be modified and there is no need to
-     * free/delete it.
+     * Get a (char *) representation of the message, a c-style string
+     * terminated with '\0'. Returned string is a const pointer hence it shall
+     * not be modified and there is no need to free/delete it.
      *
-     * @return A (char *) representation of the message, a c-style string terminated with '\0'
+     * @return A (char *) representation of the message, a c-style string
+     * terminated with '\0'
      */
     const char *getPlainTextRepresentation();
 

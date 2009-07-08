@@ -38,7 +38,6 @@ TickMessage::TickMessage(const std::string &from, const std::string &to) : Messa
 {
 }
 
-
 // ***********************************************/
 // Overwritten from message
 

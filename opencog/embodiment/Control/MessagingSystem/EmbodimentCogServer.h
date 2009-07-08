@@ -21,18 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _EMBODIMENT_COG_SERVER_H
 #define _EMBODIMENT_COG_SERVER_H
 
 #include <opencog/server/CogServer.h>
+
 #include "Message.h"
 #include "NetworkElement.h"
 
 namespace MessagingSystem
 {
 
-/** Abstract CogServer class for embodiment servers which needs a NetworkElement */
+/** Abstract CogServer class for embodiment servers which needs a NetworkElement
+ */
 class EmbodimentCogServer : public opencog::CogServer
 {
 
@@ -42,12 +43,14 @@ private:
 protected:
     bool externalTickMode;
 
-    // controls the interval (in number of cycles) in which the
-    // serverLoop will check for messages
+    /** controls the interval (in number of cycles) in which the serverLoop will
+     * check for messages
+     */ 
     int unreadMessagesCheckInterval;
 
-    // sets the limit of messages per request to be retrieved from the
-    // router (-1 for unlimitted)
+    /** sets the limit of messages per request to be retrieved from the
+     * router (-1 for unlimitted)
+     */
     int unreadMessagesRetrievalLimit;
 
 public:
@@ -55,7 +58,7 @@ public:
     EmbodimentCogServer();
     virtual ~EmbodimentCogServer();
 
-    // override CogServer methods
+    //! override CogServer methods
     virtual bool customLoopRun(void);
 
     void setNetworkElement(NetworkElement*);
@@ -64,13 +67,15 @@ public:
     /**
      * This is called when this servers needs to process a Message received
      * from router. Subclasses must override this to perform something useful.
+     *
      * @return true, if the CogServer must be stopped (e.g. it received a
      * SAVE_AND_EXIT message)
      */
     virtual bool processNextMessage(Message *message) = 0;
 
-    // convenient medhods, which are delegated to NetworkElement
+    //! convenience method - delegated to NetworkElement
     virtual bool sendMessage(Message &msg);
+    //! convenience method - delegated to NetworkElement
     virtual bool sendCommandToRouter(const std::string &cmd);
 
     const std::string& getID(void);

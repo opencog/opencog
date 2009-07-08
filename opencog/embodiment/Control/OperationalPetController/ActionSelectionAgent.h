@@ -21,11 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef ACTIONSELECTIONAGENT_H
 #define ACTIONSELECTIONAGENT_H
 
 #include <opencog/server/Agent.h>
+
 #include <time.h>
 
 namespace OperationalPetController
@@ -49,7 +49,8 @@ public:
         return info();
     }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("OperationalPetController::ActionSelectionAgent");
+        static const ClassInfo _ci(
+                "OperationalPetController::ActionSelectionAgent");
         return _ci;
     }
 
