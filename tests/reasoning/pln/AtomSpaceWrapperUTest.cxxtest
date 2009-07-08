@@ -39,15 +39,12 @@ private:
 public:
 
     AtomSpaceWrapperUTest() {
-        puts("Initializing PLN test env...");
+        cout << "Initializing AtomSpaceWrapper test env...";
 
         // This access is required to initialise CogServer.
         CogServer& cogserver = static_cast<CogServer&>(server());
 
-        //currentDebugLevel=100;
-
         LOG(2, "Creating AtomSpaceWrappers...");
-        
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
         asw = GET_ASW;
@@ -59,27 +56,84 @@ public:
     
     void tearDown()
     {
+        asw->reset();
     }
 
-    void testAtomSpaceWrapper() {
-        puts("Testing atomspacewrapper");
-//        asw->testAtomSpaceWrapper();
+
+    void testAtomIdentity() {
+        // Test atom identity works
+        pHandle h1 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, false);
+        pHandle h2 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, false);
+        TS_ASSERT(h1 == h2);
+        
+        // Test with mananged == true
+        pHandle h3 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, true);
+        pHandle h4 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, true);
+        TS_ASSERT(h3 == h4);
+    }
+
+    void testAddDuplicateNode() {
         SimpleTruthValue tv(0.8, 0.9);
         SimpleTruthValue tv2(0.4, 0.9);
-        cout << "test add nodes" << endl;
         pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
         pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
+
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+
+        TS_ASSERT(h1 != h3);
+        TS_ASSERT(h1 != h4);
+
+        // Check that more than just one lot of duplicates can be stored
+        pHandle h5 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
+        pHandle h6 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+    
+        TS_ASSERT(h5 != h3);
+        TS_ASSERT(h6 != h4);
+    }
+
+    void testAddLinkWithNullVersionHandle() {
+        SimpleTruthValue tv(0.8, 0.9);
+        SimpleTruthValue tv2(0.4, 0.9);
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
+        pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
+
         pHandleSeq outgoing;
         outgoing.push_back(h1);
         outgoing.push_back(h2);
 
-/*  /// Test atom identity works
-    Handle h1 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
-    Handle h2 = ASW()->addNode(FW_VARIABLE_NODE, "filler",new SimpleTruthValue(0.001f,1.0f), false, false);
+        pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
-    assert(h1 == h2);
-*/
-        cout << "test add link to NULL version nodes" << endl;
+        vhpair rh1 = asw->fakeToRealHandle(h1);
+        vhpair rl1 = asw->fakeToRealHandle(l1);
+
+        // This access is required to initialise CogServer.
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        HandleSeq realOutgoing_l1 = cogserver.getAtomSpace()->getOutgoing(rl1.first);
+        HandleSeq realIncoming_h1 = cogserver.getAtomSpace()->getIncoming(rh1.first);
+
+        pHandleSeq plnIn_h1 = asw->getIncoming(h1);
+        pHandleSeq plnOut_l1 = asw->getOutgoing(l1);
+
+        TS_ASSERT(realOutgoing_l1.size() == plnOut_l1.size());
+        TS_ASSERT(realIncoming_h1.size() == plnIn_h1.size());
+    }
+
+    void testAtomSpaceWrapper() {
+
+        SimpleTruthValue tv(0.8, 0.9);
+        SimpleTruthValue tv2(0.4, 0.9);
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
+        pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
+
+        pHandleSeq outgoing;
+        outgoing.push_back(h1);
+        outgoing.push_back(h2);
+
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
         cout << "test getoutgoing: " << endl;
@@ -95,12 +149,9 @@ public:
         cout << endl;
 
         cout << "test add duplicate nodes (fresh = false)" << endl;
-        asw->addNode(CONCEPT_NODE, "test1", tv2, false, true);
-        asw->addNode(CONCEPT_NODE, "test2", tv2, false, true);
-
-        cout << "test add nodes fresh=true" << endl;
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, false, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, false, true);
+//--
 
         cout << "test add link to one versioned node" << endl;
         outgoing.clear();
