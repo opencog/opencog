@@ -87,7 +87,7 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	AttentionValue::lti_t lti = scm_to_short(slti);
     AttentionValue::vlti_t vlti = false;
     if (!scm_is_bool(svlti)) {
-        scm_wrong_type_arg_msg("cog-new-tv", 4, svlti, "boolean value");
+        scm_wrong_type_arg_msg("cog-new-av", 4, svlti, "boolean value");
     }
     if (scm_is_true(svlti)) {
         vlti = true;
