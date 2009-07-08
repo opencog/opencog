@@ -31,6 +31,7 @@ using namespace std;
 
 #define GET_ASW ((AtomSpaceWrapper*) ASW())
 
+/// @todo Check truth values and other functions in the AtomSpaceWrapper
 class AtomSpaceWrapperUTest :  public CxxTest::TestSuite {
 private:
 
@@ -44,7 +45,6 @@ public:
         // This access is required to initialise CogServer.
         CogServer& cogserver = static_cast<CogServer&>(server());
 
-        LOG(2, "Creating AtomSpaceWrappers...");
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
         asw = GET_ASW;
@@ -109,22 +109,44 @@ public:
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
         vhpair rh1 = asw->fakeToRealHandle(h1);
+        vhpair rh2 = asw->fakeToRealHandle(h2);
         vhpair rl1 = asw->fakeToRealHandle(l1);
 
-        // This access is required to initialise CogServer.
         CogServer& cogserver = static_cast<CogServer&>(server());
-        HandleSeq realOutgoing_l1 = cogserver.getAtomSpace()->getOutgoing(rl1.first);
         HandleSeq realIncoming_h1 = cogserver.getAtomSpace()->getIncoming(rh1.first);
+        HandleSeq realOutgoing_l1 = cogserver.getAtomSpace()->getOutgoing(rl1.first);
 
         pHandleSeq plnIn_h1 = asw->getIncoming(h1);
         pHandleSeq plnOut_l1 = asw->getOutgoing(l1);
 
         TS_ASSERT(realOutgoing_l1.size() == plnOut_l1.size());
+        /*cout << "REAL: ";
+        foreach (Handle realH,realIncoming_h1) {
+            cout << realH << " ";
+        }
+        cout << endl;
+        cout << "FAKE: ";
+        foreach (pHandle fakeH,plnIn_h1) {
+            cout << fakeH << " ";
+        }
+        cout << endl;*/
         TS_ASSERT(realIncoming_h1.size() == plnIn_h1.size());
+
+
+        pHandleSeq pOutgoing = asw->getOutgoing(l1);
+
+        vhpair vhFromLink = asw->fakeToRealHandle(pOutgoing[0]);
+        TS_ASSERT(vhFromLink.first == rh1.first);
+        TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
+        TS_ASSERT(rh1.second == NULL_VERSION_HANDLE);
+
+        vhFromLink = asw->fakeToRealHandle(pOutgoing[1]);
+        TS_ASSERT(vhFromLink.first == rh2.first);
+        TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
+        TS_ASSERT(rh2.second == NULL_VERSION_HANDLE);
     }
 
-    void testAtomSpaceWrapper() {
-
+    void testAddLinkToOneVersionedNode() {
         SimpleTruthValue tv(0.8, 0.9);
         SimpleTruthValue tv2(0.4, 0.9);
         pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
@@ -136,59 +158,78 @@ public:
 
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
-        cout << "test getoutgoing: " << endl;
-        foreach (pHandle i, asw->getOutgoing(l1)) {
-            cout << i << " ";
-        }
-        cout << endl;
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true, true);
 
-        cout << "test getincoming: " << endl;
-        foreach (pHandle i, asw->getIncoming(h1)) {
-            cout << i << " ";
-        }
-        cout << endl;
-
-        cout << "test add duplicate nodes (fresh = false)" << endl;
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, false, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, false, true);
-//--
-
-        cout << "test add link to one versioned node" << endl;
         outgoing.clear();
         outgoing.push_back(h1);
         outgoing.push_back(h4);
         pHandle l2 = asw->addLink(LINK, outgoing, tv, true, true);
-        cout << "test getoutgoing: " << endl;
-        foreach (pHandle i, asw->getOutgoing(l2)) {
-            cout << i << " ";
-        }
-        cout << endl;
-        cout << "test add link to both versioned nodes" << endl;
+
+        pHandleSeq pOutgoing = asw->getOutgoing(l2);
+        TS_ASSERT(outgoing.size() == pOutgoing.size());
+            
+        // Check nodes
+        int i = 0;
+        vhpair vhFromLink = asw->fakeToRealHandle(pOutgoing[i]);
+        vhpair vhFromNode = asw->fakeToRealHandle(outgoing[i]);
+        TS_ASSERT(vhFromLink.first == vhFromNode.first);
+        TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
+        TS_ASSERT(vhFromNode.second == NULL_VERSION_HANDLE);
+
+        i=1;
+        vhFromLink = asw->fakeToRealHandle(pOutgoing[i]);
+        vhFromNode = asw->fakeToRealHandle(outgoing[i]);
+        TS_ASSERT(vhFromLink.first == vhFromNode.first);
+        TS_ASSERT(vhFromLink.second == vhFromNode.second);
+
+        // Check links
+        vhFromLink = asw->fakeToRealHandle(l1);
+        TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
+        vhFromLink = asw->fakeToRealHandle(l2);
+        TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
+        
+    }
+
+    void testAddLinkBothVersionedNodes() {
+        SimpleTruthValue tv(0.8, 0.9);
+        SimpleTruthValue tv2(0.4, 0.9);
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
+        pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
+
+        pHandleSeq outgoing;
+        outgoing.push_back(h1);
+        outgoing.push_back(h2);
+
+        pHandle l1 = asw->addLink(LINK, outgoing, tv);
+
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true, true);
+
         outgoing.clear();
         outgoing.push_back(h3);
         outgoing.push_back(h4);
-        pHandle l3 = asw->addLink(LINK, outgoing, tv, true, true);
-        cout << "test getoutgoing: " << endl;
-        foreach (pHandle i, asw->getOutgoing(l3)) {
-            cout << i << " ";
-        }
-        cout << endl;
+        pHandle l2 = asw->addLink(LINK, outgoing, tv, true, true);
 
-        cout << "test getincoming of unversioned again: " << endl;
-        foreach (pHandle i, asw->getIncoming(h1)) {
-            cout << i << " ";
-        }
-        cout << endl;
+        pHandleSeq pOutgoing = asw->getOutgoing(l2);
+        TS_ASSERT(outgoing.size() == pOutgoing.size());
+            
+        // Check nodes
+        int i = 0;
+        vhpair vhFromLink = asw->fakeToRealHandle(pOutgoing[i]);
+        vhpair vhFromNode = asw->fakeToRealHandle(outgoing[i]);
+        TS_ASSERT(vhFromLink.first == vhFromNode.first);
+        TS_ASSERT(vhFromLink.second == vhFromNode.second);
 
-        cout << "test getincoming versioned: " << endl;
-        foreach (pHandle i, asw->getIncoming(h4)) {
-            cout << i << " ";
-        }
-        cout << endl;
+        i=1;
+        vhFromLink = asw->fakeToRealHandle(pOutgoing[i]);
+        vhFromNode = asw->fakeToRealHandle(outgoing[i]);
+        TS_ASSERT(vhFromLink.first == vhFromNode.first);
+        TS_ASSERT(vhFromLink.second == vhFromNode.second);
 
-        //! @todo ADD TS_ASSERT
-
-        asw->reset();
+        // Check link
+        vhFromLink = asw->fakeToRealHandle(l2);
+        TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
     }
 };
 

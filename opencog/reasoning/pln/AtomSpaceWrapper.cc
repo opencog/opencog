@@ -199,11 +199,11 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
     HandleSeq inLinks;
     pHandleSeq results;
     inLinks = AS_PTR->getIncoming(v.first);
-    cout << "getIncoming for " << h << endl; 
-    cout << "inLinks size " << inLinks.size() << endl;
+    //cout << "getIncoming for " << h << endl; 
+    //cout << "inLinks size " << inLinks.size() << endl;
     //foreach (Handle h2, inLinks) {
     //    cout << "arity = " << AS_PTR->getArity(h2) << " h= " << h2 << endl;
-   // }
+    // }
 
     // For each link in incoming, check that the context of h is
     // in the right position of the outgoing set of the link
