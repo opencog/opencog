@@ -36,6 +36,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+
 #include "RuleEngine.h"
 #include "ScavengerHuntAgentModeHandler.h"
 #include "DefaultAgentModeHandler.h"
@@ -58,8 +59,9 @@ const unsigned long Pet::UNDEFINED_TIMESTAMP = 0;
  * Constructor and destructor
  * ------------------------------------
  */
-Pet::Pet(const std::string& petId, const std::string& petName, const std::string& agentType,
-         const std::string& agentTraits, const std::string& ownerId, AtomSpace* atomSpace, MessageSender* sender)
+Pet::Pet(const std::string& petId, const std::string& petName, const
+        std::string& agentType, const std::string& agentTraits, const
+        std::string& ownerId, AtomSpace* atomSpace, MessageSender* sender)
 {
 
     this->pai = NULL;
@@ -74,16 +76,17 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
 
     setMode(PLAYING);
 
-    // lower case agent type soh that there is no problem with loading files
+    // lower case agent type so that there is no problem with loading files
     this->agentType.assign(agentType);
-    std::transform(this->agentType.begin(), this->agentType.end(), this->agentType.begin(), ::tolower);
+    std::transform(this->agentType.begin(), this->agentType.end(),
+            this->agentType.begin(), ::tolower);
 
     // lower case pet traits soh that there is no problem with loading files
     this->agentTraits.assign(agentTraits);
     std::transform(this->agentTraits.begin(), this->agentTraits.end(), this->agentTraits.begin(), ::tolower);
 
     this->ownerId.assign(ownerId);
-    this->rayOfVicinity = 7; // TODO: puts this in the constructor
+    this->rayOfVicinity = 7; // TODO: put this in the constructor
 
     this->triedSchema.assign("");
     this->learningSchema.clear();
@@ -103,18 +106,21 @@ Pet::Pet(const std::string& petId, const std::string& petName, const std::string
         rand_seed = time(NULL);
     }
     this->rng = new MT19937RandGen(rand_seed);
-    logger().info("Pet - Created random number generator (%p) for Pet with seed %lu", this->rng, rand_seed);
+    logger().info("Pet - Created random number generator (%p) for Pet with "
+            "seed %lu", this->rng, rand_seed);
 
     this->modeHandler[ LEARNING ] = new LearningAgentModeHandler( this );
     this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
-    this->modeHandler[ SCAVENGER_HUNT ] = new ScavengerHuntAgentModeHandler( this );
+    this->modeHandler[ SCAVENGER_HUNT ] =
+        new ScavengerHuntAgentModeHandler( this );
 }
 
 Pet::~Pet()
 {
     delete(rng);
     std::map<PetMode, Control::AgentModeHandler*>::iterator it;
-    for ( it = this->modeHandler.begin( ); it != this->modeHandler.end( ); ++it ) {
+    for ( it = this->modeHandler.begin( );
+            it != this->modeHandler.end( ); ++it ) {
         Control::AgentModeHandler* handler = it->second;
         it->second = 0;
         delete handler;
@@ -128,23 +134,33 @@ void Pet::initTraitsAndFeelings()
     Handle petHandle;
     AtomSpaceUtil::addNode(*atomSpace, AVATAR_NODE, getOwnerId(), true);
     if ( this->agentType == "pet" ) {
-        petHandle = AtomSpaceUtil::addNode(*atomSpace, PET_NODE, getPetId(), true);
+        petHandle = AtomSpaceUtil::addNode(*atomSpace, PET_NODE,
+                getPetId(), true);
     } else if ( this->agentType == "humanoid" ) {
-        petHandle = AtomSpaceUtil::addNode(*atomSpace, HUMANOID_NODE, getPetId(), true);
+        petHandle = AtomSpaceUtil::addNode(*atomSpace, HUMANOID_NODE,
+                getPetId(), true);
     }
 
     // feelings
     SimpleTruthValue tv(0.5f, 0.0f);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("fear"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("pride"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("love"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("hate"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("anger"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("gratitude"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("fear"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("pride"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("love"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("hate"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("anger"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("gratitude"), tv, petHandle), 1);
 
     tv.setMean(0.51f);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("happiness"), tv, petHandle), 1);
-    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace, std::string("excitement"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("happiness"), tv, petHandle), 1);
+    atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
+                std::string("excitement"), tv, petHandle), 1);
 
     // traits
     float value;
@@ -155,7 +171,8 @@ void Pet::initTraitsAndFeelings()
     std::string traitsFilenameMask = config().get("RE_TRAITS_FILENAME_MASK");
 
     std::stringstream name(std::stringstream::out);
-    name << boost::format( traitsFilenameMask ) % this->agentType % this->agentTraits;
+    name << boost::format( traitsFilenameMask ) % this->agentType %
+        this->agentTraits;
 
     std::ifstream fin;
     if (fileExists(name.str().c_str())) {
@@ -163,13 +180,14 @@ void Pet::initTraitsAndFeelings()
     } else {
         logger().error("Pet - File does not exist '%s'.", name.str().c_str());
         name.str(std::string());
-        name << boost::format( traitsFilenameMask ) % this->agentType % defaultDog;
+        name << boost::format( traitsFilenameMask ) % this->agentType %
+            defaultDog;
 
         if (fileExists(name.str().c_str())) {
             fin.open(name.str().c_str(), std::ios_base::in);
         } else {
-            logger().error("Pet - File does not exist '%s'.", name.str().c_str());
-        }
+            logger().error("Pet - File does not exist '%s'.",
+                    name.str().c_str()); }
     }
 
     if (fin.is_open()) {
@@ -187,7 +205,8 @@ void Pet::initTraitsAndFeelings()
                              name.str().c_str(), trait.c_str(), value);
 
                 tv.setMean(value);
-                AtomSpaceUtil::setPredicateValue(*atomSpace, trait, tv, petHandle);
+                AtomSpaceUtil::setPredicateValue(*atomSpace, trait, tv,
+                        petHandle);
             }
         }
     }
@@ -249,11 +268,14 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 
     if (this->exemplarAvatarId != "") {
         std::vector<Handle> exemplarAvatarSet;
-        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), OBJECT_NODE, this->exemplarAvatarId, true);
+        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), OBJECT_NODE,
+                this->exemplarAvatarId, true);
 
         if (exemplarAvatarSet.size() != 1) {
-            throw RuntimeException(TRACE_INFO, "Pet - Found '%d' node(s) with name '%s'. Expected exactly one node.",
-                                            exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
+            throw RuntimeException(TRACE_INFO,
+                    "Pet - Found '%d' node(s) with name '%s'. "
+                    "Expected exactly one node.",
+                    exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
         }
 
         SimpleTruthValue tv(0.0, 1.0);
@@ -261,9 +283,9 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
             tv.setMean(1.0);
         }
 
-        Handle atTimeLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "is_exemplar_avatar",
-                            exemplarAvatarSet[0], getMyHandle(), tv,
-                            Temporal(pai->getLatestSimWorldTimestamp()));
+        Handle atTimeLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace,
+                "is_exemplar_avatar", exemplarAvatarSet[0], getMyHandle(), tv,
+                Temporal(pai->getLatestSimWorldTimestamp()));
         AtomSpaceUtil::updateLatestIsExemplarAvatar(*atomSpace, atTimeLink);
     }
 }
@@ -289,10 +311,11 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
 
     case LEARNING: {
         logger().info(
-                     "Pet - '%s' entering LEARNING mode. Trick: '%s', exemplar avatar: '%s'.",
-                     this->petName.c_str(),
-                     learningSchema.empty() ? "" : learningSchema.front().c_str(),
-                     exemplarAvatarId.c_str());
+                 "Pet - '%s' entering LEARNING mode. Trick: '%s', exemplar"
+                 "avatar: '%s'.",
+                 this->petName.c_str(),
+                 learningSchema.empty() ? "" : learningSchema.front().c_str(),
+                 exemplarAvatarId.c_str());
 
         feedback.append(petName);
         feedback.append(" entering \"Learning Mode\"");
@@ -301,7 +324,8 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     break;
 
     case PLAYING: {
-        logger().info("Pet - '%s' entering PLAYING mode.", this->petName.c_str());
+        logger().info("Pet - '%s' entering PLAYING mode.",
+                this->petName.c_str());
 
         // remove previous info realated to  exemplar avatar id,
         // learning schema and tried schema
@@ -326,7 +350,8 @@ void Pet::setMode(OperationalPetController::PetMode  mode)
     // sending feedback (only if petName is already known -- this prevents
     // unnnecessary and bad feedback message at the startup)
     if (petName != config().get("UNKNOWN_PET_NAME")) { 
-        logger().info("Pet - setMode - PetId '%s' sending feedback '%s'.", this->petId.c_str(), feedback.c_str());
+        logger().info("Pet - setMode - PetId '%s' sending feedback '%s'.",
+                this->petId.c_str(), feedback.c_str());
         sender->sendFeedback(petId, feedback);
     }
 }
@@ -362,8 +387,9 @@ void Pet::schemaSelectedToExecute(const std::string & schemaName)
         sender->sendFeedback(petId, feedback);
 
     } else {
-        logger().debug("Pet - schemaSelectedToExecute: schemaName (%s) is different from triedSchema (%s)", schemaName.c_str(), triedSchema.c_str());
-    }
+        logger().debug("Pet - schemaSelectedToExecute: schemaName (%s) is"
+                "different from triedSchema (%s)", schemaName.c_str(),
+                triedSchema.c_str()); }
 }
 
 unsigned long Pet::getExemplarStartTimestamp()
@@ -380,7 +406,8 @@ unsigned long Pet::getExemplarEndTimestamp()
  * Public Methods
  * ------------------------------------
  */
-Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, AtomSpace* atomSpace, MessageSender* sender)
+Pet* Pet::importFromFile(const std::string& filename, const std::string& petId,
+        AtomSpace* atomSpace, MessageSender* sender)
 {
     Pet* pet;
     unsigned int petMode;
@@ -403,13 +430,15 @@ Pet* Pet::importFromFile(const std::string& filename, const std::string& petId, 
     }
     petFile.close();
 
-    pet = new Pet(petId, petName, agentType, agentTraits, ownerId, atomSpace, sender);
+    pet = new Pet(petId, petName, agentType, agentTraits, ownerId, atomSpace,
+            sender);
     pet->setMode((PetMode)petMode);
 
     return pet;
 }
 
-void Pet::exportToFile(const std::string& filename, Pet & pet) throw (IOException, std::bad_exception)
+void Pet::exportToFile(const std::string& filename, Pet & pet) throw
+    (IOException, std::bad_exception)
 {
     // remove previous saved dumps
     remove(filename.c_str());
@@ -440,14 +469,17 @@ AtomSpace& Pet::getAtomSpace()
     return *atomSpace;
 }
 
-void Pet::stopExecuting(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::stopExecuting(const std::vector<std::string> &commandStatement,
+        unsigned long timestamp)
 {
     logger().debug("Pet - Stop executing '%s' at %lu.",
                  commandStatement.front().c_str(), timestamp);
     // TODO:
     //  Cancel a Pet command instruction that was given before:
-    // * If it is not running yet: decrease the importance of the corresponding GoalSchemaImplicationLink
-    // * If it is alreday running: try to abort the execution of the corresponding GroundedSchema
+    // * If it is not running yet: decrease the importance of the corresponding
+    // GoalSchemaImplicationLink
+    // * If it is alreday running: try to abort the execution of the
+    // corresponding GroundedSchema
 }
 
 bool Pet::isInLearningMode() const
@@ -455,12 +487,15 @@ bool Pet::isInLearningMode() const
     return mode == LEARNING;
 }
 
-void Pet::startLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::startLearning(const std::vector<std::string> &commandStatement,
+        unsigned long timestamp)
 {
     logger().debug("Pet - Start learning '%s' trick at %lu with '%s'", commandStatement.front().c_str(), timestamp, getExemplarAvatarId().c_str());
 
     if (isInLearningMode()) {
-        logger().warn("Pet - Already in LEARNING mode. Canceling learning to '%s' with '%s'.", learningSchema.front().c_str(), exemplarAvatarId.c_str());
+        logger().warn("Pet - Already in LEARNING mode. Canceling learning "
+                "to '%s' with '%s'.", learningSchema.front().c_str(),
+                exemplarAvatarId.c_str());
         std::string newExemplarAvatarId = exemplarAvatarId;
         stopLearning(learningSchema, timestamp);
         setExemplarAvatarId(newExemplarAvatarId);
@@ -473,11 +508,11 @@ void Pet::startLearning(const std::vector<std::string> &commandStatement, unsign
     startLearningSessionTimestamp = timestamp;
     setMode(LEARNING);
 
-
     // TODO: Perhaps the "PayAttention" stuff should be here, instead of in PredaveseActions.cc
 }
 
-void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::stopLearning(const std::vector<std::string> &commandStatement,
+        unsigned long timestamp)
 {
     logger().debug("Pet - Stop learning '%s' trick at %lu.",
                  commandStatement.front().c_str(), timestamp);
@@ -488,15 +523,20 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
     // check if stop learning corresponds to currently learning schema
     if (learningSchema != commandStatement) {
-        logger().warn("Pet - Stop learn, trick command statement registered in learning is different from trick command statement provided.");
-        // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+        logger().warn("Pet - Stop learn, trick command statement registered in"
+                "learning is different from trick command statement provided.");
+        // TODO: Send a feedback message to the user about this problem so that
+        // he/she enter the right command
         return;
     }
 
     endLearningSessionTimestamp = timestamp;
-    Temporal learningTimeInterval(startLearningSessionTimestamp, endLearningSessionTimestamp);
-    Handle trickConceptNode = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE, learningSchema.front());
-    Handle atTimeLink = atomSpace->addTimeInfo(trickConceptNode, learningTimeInterval);
+    Temporal learningTimeInterval(startLearningSessionTimestamp,
+            endLearningSessionTimestamp);
+    Handle trickConceptNode = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE,
+            learningSchema.front());
+    Handle atTimeLink = atomSpace->addTimeInfo(trickConceptNode,
+            learningTimeInterval);
     // TODO: check if the updateLatest bellow is really needed
     //AtomSpaceUtil::updateLatestLearningSession(atomSpace, atTimeLink);
 
@@ -506,7 +546,8 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
     inhLinkHS.push_back(learningConceptNode);
     atomSpace->addLink(INHERITANCE_LINK, inhLinkHS);
 
-    //sender->sendCommand(config().get("STOP_LEARNING_CMD"), commandStatement.front());
+    //sender->sendCommand(config().get("STOP_LEARNING_CMD"),
+    //      commandStatement.front());
     std::vector<std::string> args;
     std::vector<std::string>::iterator it = learningSchema.begin();
     it++;
@@ -520,7 +561,10 @@ void Pet::stopLearning(const std::vector<std::string> &commandStatement, unsigne
 
     // NOTE: Pet will return to playing mode only when the learned schema is
     // stored in ProcedureRepository
-    // FOR NOW, put it in playing mode, so that OPC does not stay in Learning state forever if LS crashes or become unavailable for any reason ... (later, we could create a intermediate state/mode that implements a timeout waiting LS meSsage.
+    // FOR NOW, put it in playing mode, so that OPC does not stay in Learning
+    // state forever if LS crashes or become unavailable for any reason ...
+    // (later, we could create a intermediate state/mode that implements a
+    // timeout waiting LS meSsage.
     setMode(PLAYING);
 }
 
@@ -531,10 +575,13 @@ bool Pet::isExemplarInProgress() const
             exemplarEndTimestamp == Pet::UNDEFINED_TIMESTAMP);
 }
 
-void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::startExemplar(const std::vector<std::string> &commandStatement,
+        unsigned long timestamp)
 {
     logger().debug("Pet - Exemplars for '%s' trick started at %lu with '%s'.",
-                 (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp, getExemplarAvatarId().c_str());
+                 (commandStatement.size() > 0 ? commandStatement.front().c_str()
+                  : learningSchema.front().c_str()), timestamp,
+                 getExemplarAvatarId().c_str());
 
     if (!isInLearningMode()) {
         logger().warn("Pet - Unable to start exemplar. Not in LEARNING mode.");
@@ -542,8 +589,11 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().warn("Pet - Start exemplar, trick command statement registered in learning is different from trick command statement provided.");
-        // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+        logger().warn("Pet - Start exemplar, trick command statement "
+                "registered in learning is different from trick command "
+                "statement provided.");
+        // TODO: Send a feedback message to the user about this problem so that
+        // he/she enter the right command
         return;
     }
 
@@ -551,20 +601,28 @@ void Pet::startExemplar(const std::vector<std::string> &commandStatement, unsign
     exemplarStartTimestamp = timestamp;
 }
 
-void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
+        long timestamp)
 {
     logger().debug("Pet - Exemplars for '%s' trick ended at %lu.",
-                 (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
+                 (commandStatement.size() > 0 ? commandStatement.front().c_str()
+                  : learningSchema.front().c_str()), timestamp);
 
-    if (!isInLearningMode() || exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP) {
-        logger().warn("Pet - Unable to end exemplar. Not in LEARNING mode or StartExemplar message not received.");
-        // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+    if (!isInLearningMode() ||
+            exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP) {
+        logger().warn("Pet - Unable to end exemplar. Not in LEARNING mode or "
+                "StartExemplar message not received.");
+        // TODO: Send a feedback message to the user about this problem so that
+        // he/she enter the right command
         return;
     }
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
-        logger().warn("Pet - End exemplar, trick command statement registered in learning is different from trick command statement provided.");
-        // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+        logger().warn("Pet - End exemplar, trick command statement registered "
+                "in learning is different from trick command statement "
+                "provided.");
+        // TODO: Send a feedback message to the user about this problem so that
+        // he/she enter the right command
         return;
     }
 
@@ -584,9 +642,11 @@ void Pet::endExemplar(const std::vector<std::string> &commandStatement, unsigned
         it++;
     }
 
-    for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++)
+    for (std::vector<std::string>::iterator it = args.begin();
+            it != args.end(); it++)
         logger().debug(" args: %s", (*it).c_str());
-    sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace);
+    sender->sendExemplar(learningSchema.front(), args, ownerId,
+            exemplarAvatarId, *atomSpace);
 
     // after sending LearnMessage
     exemplarStartTimestamp = Pet::UNDEFINED_TIMESTAMP;
@@ -608,14 +668,19 @@ void Pet::executeBehaviorEncoder()
     //std::cout << "EXECUTE BEHAVIOR ENCODER EXEMPLAR TIME INTERVAL : " << exemplarTimeInterval << std::endl;
     //~debug print
 
-    // TODO: the command parameters (commandStatement[1], commandStatement[2], ...)  are beging ignored
-    Handle trickConceptNode = atomSpace->addNode(CONCEPT_NODE, learningSchema.front());
-    Handle trickExemplarAtTimeLink = atomSpace->addTimeInfo(trickConceptNode, exemplarTimeInterval);
+    // TODO: the command parameters:
+    // (commandStatement[1], commandStatement[2], ...)  are beging ignored
+    Handle trickConceptNode = atomSpace->addNode(CONCEPT_NODE,
+            learningSchema.front());
+    Handle trickExemplarAtTimeLink = atomSpace->addTimeInfo(trickConceptNode,
+            exemplarTimeInterval);
     // TODO: check if the updateLatest bellow is really needed
-    //AtomSpaceUtil::updateLatestTrickExemplar(atomSpace, trickExemplarAtTimeLink);
+    //AtomSpaceUtil::updateLatestTrickExemplar(atomSpace,
+    //  trickExemplarAtTimeLink);
 
     //BehaviorEncoder encoder(haxxWorldProvider, trickExemplarAtTimeLink, 1);
-    BehaviorEncoder encoder(new PAIWorldProvider(this->pai), petId, trickExemplarAtTimeLink, 1);
+    BehaviorEncoder encoder(new PAIWorldProvider(this->pai), petId,
+            trickExemplarAtTimeLink, 1);
 
     // Adds the inheritance link as Ari asked
     Handle exemplarConceptNode = atomSpace->addNode(CONCEPT_NODE, "exemplar");
@@ -624,8 +689,8 @@ void Pet::executeBehaviorEncoder()
     inhLinkHS.push_back(exemplarConceptNode);
     atomSpace->addLink(INHERITANCE_LINK, inhLinkHS);
 
-    //Note from Nil : I comment the POSITION tracker for now because hillclimbing
-    //does not deal with positions anyway
+    //Note from Nil : I comment the POSITION tracker for now because
+    //hillclimbing does not deal with positions anyway
     // position tracker
     /*
       atom_tree *positionTemplate =
@@ -643,20 +708,21 @@ void Pet::executeBehaviorEncoder()
     // action tracker
     atom_tree *actionTemplate =
         makeVirtualAtom(EVALUATION_LINK,
-                        makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME), NULL),
-                        makeVirtualAtom(LIST_LINK,
-                                        makeVirtualAtom(atomSpace->addNode(AVATAR_NODE, exemplarAvatarId), NULL),
-                                        NULL
-                                       ),
-                        NULL
-                       );
+            makeVirtualAtom(atomSpace->addNode(PREDICATE_NODE,
+                    ACTION_DONE_PREDICATE_NAME), NULL),
+            makeVirtualAtom(LIST_LINK,
+                    makeVirtualAtom(
+                        atomSpace->addNode(AVATAR_NODE, exemplarAvatarId),
+                        NULL),
+                    NULL),
+            NULL);
 
     encoder.addBETracker(*actionTemplate, new ActionBDTracker(atomSpace));
 
-    // TODO: Use the exemplarEndTimestamp as well -- the current BehaviorEncoder considers the "NOW" as end of the examplar interval.
+    // TODO: Use the exemplarEndTimestamp as well -- the current BehaviorEncoder
+    // considers the "NOW" as end of the examplar interval.
     Temporal startTime(exemplarStartTimestamp);
     encoder.tempUpdateRec(exemplarTimeInterval);
-
 
     //debug print
     //std::cout << "PRINT ATOMSPACE :" << std::endl;
@@ -665,10 +731,12 @@ void Pet::executeBehaviorEncoder()
 
 }
 
-void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned long timestamp)
+void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned
+        long timestamp)
 {
     logger().debug("Pet - Try '%s' trick at %lu.",
-                 (commandStatement.size() > 0 ? commandStatement.front().c_str() : learningSchema.front().c_str()), timestamp);
+             (commandStatement.size() > 0 ? commandStatement.front().c_str() :
+              learningSchema.front().c_str()), timestamp);
 
     if (learningSchema != commandStatement && commandStatement.size() > 0) {
         logger().warn("Pet - Try schema, trick differs");
@@ -676,7 +744,8 @@ void Pet::trySchema(const std::vector<std::string> &commandStatement, unsigned l
     }
 
     if (this->candidateSchemaExecuted) {
-        //sender->sendCommand(config().get("TRY_SCHEMA_CMD"), learningSchema.front().c_str());
+        //sender->sendCommand(config().get("TRY_SCHEMA_CMD"),
+        //learningSchema.front().c_str());
         std::vector<std::string> args;
 
         std::vector<std::string>::iterator it = learningSchema.begin();
@@ -701,13 +770,16 @@ void Pet::reward(unsigned long timestamp)
     this->latestRewardTimestamp = timestamp;
 
     if (isInLearningMode()) {
-        if (learningSchema.empty() ||  learningSchema.front() == "" || triedSchema == "") {
+        if (learningSchema.empty() ||  learningSchema.front() == "" ||
+                triedSchema == "") {
             logger().warn("Pet - Trying to reward a non-tried schema.");
-            // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+            // TODO: Send a feedback message to the user about this problem so
+            // that he/she enter the right command
             return;
         }
         this->candidateSchemaExecuted = true;
-        // TODO: the command parameters (commandStatement[1], commandStatement[2], ...)
+        // TODO: the command parameters
+        // (commandStatement[1], commandStatement[2], ...)
         // are beging ignored
         std::vector<std::string> args;
         std::vector<std::string>::iterator it = learningSchema.begin();
@@ -722,7 +794,8 @@ void Pet::reward(unsigned long timestamp)
         sender->sendReward(learningSchema.front(), args, triedSchema, config().get_double("POSITIVE_REWARD"));
 
     } else {
-        // call rule engine to reward implication links for latest selected rules
+        // call rule engine to reward implication links for latest selected
+        // rules
         ruleEngine->rewardRule(timestamp);
     }
 }
@@ -733,13 +806,16 @@ void Pet::punish(unsigned long timestamp)
     this->latestPunishmentTimestamp = timestamp;
 
     if (isInLearningMode()) {
-        if (learningSchema.empty() || learningSchema.front() == "" || triedSchema == "") {
+        if (learningSchema.empty() || learningSchema.front() == "" ||
+                triedSchema == "") {
             logger().warn("Pet - Trying to punish a non-tried schema.");
-            // TODO: Send a feedback message to the user about this problem so that he/she enter the right command
+            // TODO: Send a feedback message to the user about this problem so
+            // that he/she enter the right command
             return;
         }
         this->candidateSchemaExecuted = true;
-        // TODO: the command parameters (commandStatement[1], commandStatement[2], ...)
+        // TODO: the command parameters
+        // (commandStatement[1], commandStatement[2], ...)
         // are beging ignored
         std::vector<std::string> args;
         std::vector<std::string>::iterator it = learningSchema.begin();
@@ -793,7 +869,8 @@ void Pet::setGrabbedObj(const string& id)
 {
     if ( grabbedObjId == id ) {
         logger().debug(
-                     "Pet - Pet is already holding '%s', ignoring...", grabbedObjId.c_str() );
+             "Pet - Pet is already holding '%s', ignoring...",
+             grabbedObjId.c_str() );
         return;
     } // if
 
@@ -818,14 +895,15 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
     if (exemplarStartTimestamp == Pet::UNDEFINED_TIMESTAMP ||
             exemplarEndTimestamp   == Pet::UNDEFINED_TIMESTAMP) {
         logger().warn(
-                     "Pet - Exemplar start/end should be set to update SppaceMapsToHold.");
+             "Pet - Exemplar start/end should be set to update "
+             "SpaceMapsToHold.");
         return;
     }
 
     // sanity checks
     if (exemplarStartTimestamp > exemplarEndTimestamp) {
         logger().warn(
-                     "Pet - Exemplar start should be smaller than exemplar end.");
+             "Pet - Exemplar start should be smaller than exemplar end.");
         return;
     }
 
@@ -836,32 +914,32 @@ void Pet::updatePersistentSpaceMaps() throw (RuntimeException, std::bad_exceptio
     // concept node within the exemplar timestamped sections
     std::vector<HandleTemporalPair> pairs;
     atomSpace->getTimeInfo(back_inserter(pairs), spaceMapNode,
-                           Temporal(exemplarStartTimestamp, exemplarEndTimestamp),
-                           TemporalTable::STARTS_WITHIN);
+           Temporal(exemplarStartTimestamp, exemplarEndTimestamp),
+           TemporalTable::STARTS_WITHIN);
 
-    logger().fine(
-                 "Pet - %d candidate maps to be checked.", pairs.size());
+    logger().fine("Pet - %d candidate maps to be checked.", pairs.size());
 
     foreach(HandleTemporalPair pair, pairs) {
         // mark any still existing spaceMap in this period as persistent
         Handle mapHandle = atomSpace->getAtTimeLink(pair);
         if (atomSpace->getSpaceServer().containsMap(mapHandle)) {
-            logger().debug(
-                         "Pet - Marking map (%s) as persistent.",
+            logger().debug("Pet - Marking map (%s) as persistent.",
                          TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->getSpaceServer().markMapAsPersistent(mapHandle);
         } else {
-            // TODO: This should not be needed here. Remove it when a solution for that is implemented.
-            logger().debug(
-                         "Pet - Removing map handle (%s) from AtomSpace. Map already removed from SpaceServer.",
-                         TLB::getAtom(mapHandle)->toString().c_str());
+            // TODO: This should not be needed here. Remove it when a solution
+            // for that is implemented.
+            logger().debug("Pet - Removing map handle (%s) from AtomSpace. "
+                    "Map already removed from SpaceServer.",
+                     TLB::getAtom(mapHandle)->toString().c_str());
             atomSpace->removeAtom(mapHandle, true);
         }
     }
 }
 bool Pet::isNear(const Handle& objectHandle)
 {
-    return AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_near", objectHandle, getMyHandle() );
+    return AtomSpaceUtil::isPredicateTrue(*atomSpace, "is_near", objectHandle,
+            getMyHandle() );
 }
 
 Handle Pet::getMyHandle() const
@@ -876,22 +954,28 @@ Handle Pet::getMyHandle() const
 bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 {
     vector<string> entitiesInVicinity;
-    Handle spaceMapHandle = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(*atomSpace, timestamp);
+    Handle spaceMapHandle =
+        AtomSpaceUtil::getSpaceMapHandleAtTimestamp(*atomSpace, timestamp);
 
     if (spaceMapHandle != Handle::UNDEFINED) {
-        const SpaceServer::SpaceMap& spaceMap = atomSpace->getSpaceServer().getMap(spaceMapHandle);
-        Spatial::Point petLoc = WorldWrapperUtil::getLocation(spaceMap, *atomSpace, this->petId);
-        spaceMap.findEntities( spaceMap.snap(petLoc), rayOfVicinity, back_inserter(entitiesInVicinity) );
+        const SpaceServer::SpaceMap& spaceMap =
+            atomSpace->getSpaceServer().getMap(spaceMapHandle);
+        Spatial::Point petLoc = WorldWrapperUtil::getLocation(spaceMap,
+                *atomSpace, this->petId);
+        spaceMap.findEntities( spaceMap.snap(petLoc), rayOfVicinity,
+                back_inserter(entitiesInVicinity) );
     }
 
     // get the handle for each entity
     foreach(string entity, entitiesInVicinity) {
         HandleSeq objHandle;
-        atomSpace->getHandleSet(back_inserter(objHandle), OBJECT_NODE, entity, true);
+        atomSpace->getHandleSet(back_inserter(objHandle), OBJECT_NODE, entity,
+                true);
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
-            logger().error("Could not find handle of object with id \"%s\".", entity.c_str() );
+            logger().error("Could not find handle of object with id \"%s\".",
+                    entity.c_str() );
             petVicinity.clear();
             return false;
         }
@@ -905,7 +989,8 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
-        const AttentionValue& attentionValue = TLB::getAtom(*it)->getAttentionValue();
+        const AttentionValue& attentionValue =
+            TLB::getAtom(*it)->getAttentionValue();
         if (attentionValue.getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else it++;
@@ -918,13 +1003,16 @@ void Pet::getAllObservedActionsDoneAtTime(const Temporal& time, HandleSeq& actio
     logger().debug("Pet::getAllActionsDoneObservedAtTime");
 
     std::vector<HandleTemporalPair> everyEventThatHappened;
-    atomSpace->getTimeInfo(back_inserter(everyEventThatHappened), Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
+    atomSpace->getTimeInfo(back_inserter(everyEventThatHappened),
+            Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
     foreach(HandleTemporalPair event, everyEventThatHappened) {
         Handle eventAtTime = atomSpace->getAtTimeLink(event);
         if (atomSpace->getArity(eventAtTime) >= 2) {
             Handle evaluationLink = atomSpace->getOutgoing(eventAtTime, 1);
             if (atomSpace->getType(evaluationLink) == EVALUATION_LINK) {
-                if (atomSpace->getName(atomSpace->getOutgoing(evaluationLink, 0)) == ACTION_DONE_PREDICATE_NAME) {
+                if (atomSpace->getName(
+                            atomSpace->getOutgoing(evaluationLink, 0))
+                        == ACTION_DONE_PREDICATE_NAME) {
                     actionsDone.push_back(evaluationLink);
                 }
             }
@@ -942,24 +1030,37 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         patternToSearchLearningSession.push_back(conceptNode);
         // get the handles of all trick
         HandleSeq learningSessionHandles;
-        atomSpace->getHandleSet(back_inserter(learningSessionHandles), patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK, true);
+        atomSpace->getHandleSet(back_inserter(learningSessionHandles),
+                patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK,
+                true);
         foreach(Handle learningSessionHandle, learningSessionHandles) {
             if (atomSpace->getArity(learningSessionHandle) > 1)  {
                 std::set<Handle> actionHandles;
                 std::vector<HandleTemporalPair> learningSessionIntervals;
-                // Get temporal info for all the Handles that pertain to this trick
-                atomSpace->getTimeInfo(back_inserter(learningSessionIntervals), learningSessionHandle, time, TemporalTable::OVERLAPS);
+                // Get temporal info for all the Handles that pertain to this
+                // trick
+                atomSpace->getTimeInfo(back_inserter(learningSessionIntervals),
+                        learningSessionHandle, time, TemporalTable::OVERLAPS);
                 // get all action that occurred during each interval
-                foreach(HandleTemporalPair learningSessionInterval, learningSessionIntervals) {
-                    Temporal *learningSessionIntervalTemporal = learningSessionInterval.getTemporal();
+                foreach(HandleTemporalPair learningSessionInterval,
+                        learningSessionIntervals) {
+                    Temporal *learningSessionIntervalTemporal =
+                        learningSessionInterval.getTemporal();
                     std::vector<HandleTemporalPair> actionsInLearningSession;
-                    Handle learningSessionIntervalHandle = atomSpace->getAtTimeLink(learningSessionInterval);
-                    atomSpace->getTimeInfo(back_inserter(actionsInLearningSession), learningSessionIntervalHandle, *learningSessionIntervalTemporal, TemporalTable::OVERLAPS);
+                    Handle learningSessionIntervalHandle =
+                        atomSpace->getAtTimeLink(learningSessionInterval);
+                    atomSpace->getTimeInfo(back_inserter(actionsInLearningSession),
+                            learningSessionIntervalHandle,
+                            *learningSessionIntervalTemporal,
+                            TemporalTable::OVERLAPS);
 
-                    foreach(HandleTemporalPair action, actionsInLearningSession) {
+                    foreach(HandleTemporalPair action,
+                            actionsInLearningSession) {
                         Handle evaluationLink = atomSpace->getAtTimeLink(action);
-                        Handle predicateNode = atomSpace->getOutgoing(evaluationLink)[1];
-                        if (atomSpace->getName(predicateNode) == ACTION_DONE_PREDICATE_NAME) {
+                        Handle predicateNode =
+                            atomSpace->getOutgoing(evaluationLink)[1];
+                        if (atomSpace->getName(predicateNode) ==
+                                ACTION_DONE_PREDICATE_NAME) {
                             actionsDone.push_back(evaluationLink);
                         }
                     }
@@ -971,15 +1072,16 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
 
 void Pet::restartLearning() throw (RuntimeException, std::bad_exception)
 {
-
     // sanity checks
     if (learningSchema.empty()) {
-        throw RuntimeException(TRACE_INFO, "Pet - No learning schema set when restarting learning..");
+        throw RuntimeException(TRACE_INFO, "Pet - No learning schema set when "
+                "restarting learning..");
         return;
     }
 
     if (exemplarAvatarId == "") {
-        throw RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set when restarting learning..");
+        throw RuntimeException(TRACE_INFO, "Pet - No exemplar avatar id set "
+                "when restarting learning..");
         return;
     }
 
@@ -992,7 +1094,8 @@ void Pet::restartLearning() throw (RuntimeException, std::bad_exception)
     }
 
 //  std::copy(learningSchema.begin()+1, learningSchema.end(), args.begin());
-    sender->sendExemplar(learningSchema.front(), args, ownerId, exemplarAvatarId, *atomSpace);
+    sender->sendExemplar(learningSchema.front(), args, ownerId,
+            exemplarAvatarId, *atomSpace);
 }
 
 void Pet::setRequestedCommand(string command, vector<string> parameters)
@@ -1001,3 +1104,4 @@ void Pet::setRequestedCommand(string command, vector<string> parameters)
     this->lastRequestedCommand.arguments = parameters;
     this->lastRequestedCommand.readed = false;
 }
+

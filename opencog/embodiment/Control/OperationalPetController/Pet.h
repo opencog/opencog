@@ -247,7 +247,8 @@ public:
      * This method should ONLY be called when the LS goes up again and the Pet
      * is still in LEARNING mode.
      */
-    void restartLearning() throw (opencog::RuntimeException, std::bad_exception);
+    void restartLearning() throw (opencog::RuntimeException,
+            std::bad_exception);
 
     /**
      * Create a new Pet loading pet metadata from file.
@@ -270,7 +271,8 @@ public:
     static void exportToFile(const std::string& filename, Pet & pet) throw
         (opencog::IOException, std::bad_exception);
 
-    // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined above):
+    // IMPLEMENTATION OF METHODS OF PetInterface (getPetId() is already defined
+    // above):
 
     AtomSpace& getAtomSpace();
 
