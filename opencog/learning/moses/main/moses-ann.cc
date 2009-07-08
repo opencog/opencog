@@ -32,6 +32,8 @@ int main(int argc, char** argv)
     cout << tr << endl;
     cout << "Network depth: " << nn.feedforward_depth() << endl;
     cout << &nn << endl;
+    combo_tree blah = trans.encode_ann(nn);
+    cout << blah << endl;
 
     opencog::MT19937RandGen rng(0);
 

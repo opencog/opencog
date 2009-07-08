@@ -28,6 +28,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 
+//jladd
+#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/moses/ann_scoring.h>
 
 // uncomment this line for debug information to be given during execution
 // #define DEBUG_INFO
@@ -654,6 +657,17 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
 }
 
 void build_knobs::ann_canonize(pre_it it) {
+    tree_transform trans;
+    cout << _exemplar << endl << endl;
+    ann net = trans.decodify_tree(_exemplar);
+    cout << &net << endl;
+    cout << endl;
+    net.add_new_hidden();
+    cout << &net << endl;
+    _exemplar = trans.encode_ann(net);
+    cout << _exemplar << endl;
+
+    /*
     cout << "Canonize called..." << endl;
     cout << _exemplar << endl;
     
@@ -701,6 +715,7 @@ void build_knobs::ann_canonize(pre_it it) {
     _exemplar.insert_after(first_hidden.last_child(),0.0);
 
     cout << "Completed tree: " << _exemplar << endl;
+*/
 }
 
 } //~namespace moses
