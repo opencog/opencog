@@ -37,8 +37,8 @@ public:
              
             if (fs.count(inst)){
                 distance = fs.hamming_distance(inst_temp, inst);
-                cout<<"instance:" << fs.stream(inst)<<endl;
-                cout <<"\t distance:" << distance <<endl;
+                // cout<<"instance:" << fs.stream(inst)<<endl;
+                //cout <<"\t distance:" << distance <<endl;
                 if( distance > max_distance )
                     max_distance = distance;
                 else if (distance < min_distance)
@@ -134,7 +134,7 @@ public:
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
           
-            cout<<fs.stream(center_inst)<<endl; 
+            // cout<<fs.stream(center_inst)<<endl; 
 
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
@@ -171,7 +171,7 @@ public:
             int rand_seed = clock();
             opencog::MT19937RandGen rng(rand_seed);
             eda::randomize(fs, center_inst,rng); 
-            cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
+            // cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
             moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin(), center_inst);
             size_t generated_size = 0;
             int generated_max_distance = 0;
@@ -179,9 +179,9 @@ public:
             get_sample_size_and_distance(deme, generated_size, 
                                          generated_max_distance, generated_min_distance, center_inst);
             size_t total_size = total_number_of_neighborhood(distance,size,arity);
-            cout << generated_size << " " << generated_max_distance
-                 << " " << generated_min_distance <<endl;
-            cout << "total_size :" << total_size <<endl;
+            //  cout << generated_size << " " << generated_max_distance
+            //      << " " << generated_min_distance <<endl;
+            // cout << "total_size :" << total_size <<endl;
             TS_ASSERT(generated_size == total_size);
             TS_ASSERT(generated_max_distance == distance);
             TS_ASSERT(generated_min_distance == distance);
