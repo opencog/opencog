@@ -366,6 +366,7 @@ struct univariate_optimization {
                             const eda_parameters& p = eda_parameters())
         : rng(_rng), params(p) {}
 
+    //return # of evaluations actually performed
     template<typename Scoring>
     int operator()(eda::instance_set<tree_score>& deme,
                    const Scoring& score, int max_evals) {
@@ -430,6 +431,8 @@ struct iterative_hillclimbing {
                            const eda_parameters& p = eda_parameters())
         : rng(_rng), params(p) {}
 
+
+    //return # of evaluations actually performed
     template<typename Scoring>
     int operator()(eda::instance_set<tree_score>& deme,
                    const Scoring& score, int max_evals) {
@@ -572,6 +575,11 @@ struct sliced_iterative_hillclimbing {
         _evals_per_slice = evals_per_slice;
     }
 
+    //return # of evaluations actually performed
+    //WARNING: if an improvement has been made it returns
+    // -number_of_eval
+    //it is rather ugly and it is a temporary hack till the API of MOSES
+    //is better
     template<typename Scoring>
     int operator()(eda::instance_set<tree_score>& deme,
                    const Scoring& score, int max_evals) {

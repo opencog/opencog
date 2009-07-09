@@ -31,6 +31,7 @@ namespace eda {
     
     using namespace std;
   
+    //return # of evaluations actually performed
     template <typename ScoreT,
               typename ScoringPolicy,
               typename TerminationPolicy,
