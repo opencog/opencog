@@ -226,7 +226,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
                     bool fresh, bool managed);
 
-    //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int i = 0) const;
+    //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int
+    //      i = 0) const;
     //bool isSubcontextOf(const Handle sub, const Handle super);
 
     //! used by filter_type to merge collections of handles.
@@ -245,11 +246,26 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
                 TLB::getAtom(b)->getAttentionValue().getSTI();
         }
     };
+    
+    // For monitoring additions to the AtomSpace from outside of PLN
+    bool handleAddSignal(Handle h); //! Signal handler for atom adds.
+    bool handleRemoveSignal(Handle h); //! Signal handler for atom removals.
+
+    //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
+    bool watchingAtomSpace;
+
+    boost::signals::connection c_add; //! Connection to add atom signals
+    boost::signals::connection c_remove; //! Connection to remove atom signals
 
 protected:
     AtomSpace *atomspace;
 
 public:
+
+    //! Change whether AtomSpaceWrapper is listening for AtomSpace signals.
+    void setWatchingAtomSpace(bool watching);
+    //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
+    void isWatchingAtomSpace();
 
     //! Convert a specific VersionHandled TruthValue to a pln handle
     pHandle realToFakeHandle(const Handle h, const VersionHandle vh);

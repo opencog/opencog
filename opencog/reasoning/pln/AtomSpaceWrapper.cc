@@ -67,6 +67,49 @@ USize(800), USizeMode(CONST_SIZE), atomspace(a)
     srand(12345678);
     allowFWVarsInAtomSpace = true;
     archiveTheorems = false;
+    setWatchingAtomSpace(true);
+}
+
+void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
+{
+    if (watch) {
+        if (!watchingAtomSpace) {
+            c_add = atomspace->addAtomSignal().connect(
+                    std::tr1::bind(&AtomSpaceWrapper::handleAddSignal, this,
+                        std::tr1::placeholders::_1));
+            c_remove = atomspace->removeAtomSignal().connect(
+                    std::tr1::bind(&AtomSpaceWrapper::handleRemoveSignal, this,
+                        std::tr1::placeholders::_1));
+            assert(c_add.connected() && c_remove.connected());
+            watchingAtomSpace = true;
+            logger().info("[ASW] Watching AtomSpace.");
+        } else {
+            logger().info("[ASW] Already watching AtomSpace.");
+        }
+    } else {
+        if (watchingAtomSpace) {
+            c_add.disconnect();
+            c_remove.disconnect();
+            assert(!(c_add.connected() || c_remove.connected()));
+            watchingAtomSpace = false;
+            logger().info("[ASW] Not watching AtomSpace.");
+        } else {
+            logger().info("[ASW] Already not watching AtomSpace.");
+        }
+    }
+}
+
+bool AtomSpaceWrapper::handleAddSignal(Handle h)
+{
+    if (!archiveTheorems) return false;
+
+    return false;
+}
+
+bool AtomSpaceWrapper::handleRemoveSignal(Handle h)
+{
+    // If ImplicationLink then check whether there is a CrispTheorem 
+    return false;
 }
 
 void AtomSpaceWrapper::HandleEntry2HandleSet(
