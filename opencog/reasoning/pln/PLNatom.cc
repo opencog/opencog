@@ -45,10 +45,10 @@ bool existMPin(const vector<Btr<atom> >& hs);
 
 bool atom::ValidMetaPredicate(Type T)
 {
-	return GET_ATW->inheritsType(T, RESTRICTOR) ||
-		GET_ATW->inheritsType(T, AND_LINK) ||
-		GET_ATW->inheritsType(T, __OR) ||
-		GET_ATW->inheritsType(T, NOT_LINK);
+	return GET_ASW->inheritsType(T, RESTRICTOR) ||
+		GET_ASW->inheritsType(T, AND_LINK) ||
+		GET_ASW->inheritsType(T, __OR) ||
+		GET_ASW->inheritsType(T, NOT_LINK);
 }
 
 bool lessatom::operator()(const atom& lhs, const atom& rhs) const
@@ -95,7 +95,7 @@ bool echo=false;
 	if (T == ATOM)
 		return true;
 	
-	if (GET_ATW->inheritsType(T, RESTRICTOR))
+	if (GET_ASW->inheritsType(T, RESTRICTOR))
 	{
 		bool unnormed_ret = false;
 		bool normal_form = (T == __INSTANCEOF_N || T == __EQUALS_N);
@@ -103,7 +103,7 @@ bool echo=false;
 		switch(T)
 		{
 		case __INSTANCEOF_N:
-			unnormed_ret = GET_ATW->inheritsType(GET_ATW->getType(h), hs[0]->T);
+			unnormed_ret = GET_ASW->inheritsType(GET_ASW->getType(h), hs[0]->T);
 			
 			break;
 			
@@ -116,9 +116,9 @@ bool echo=false;
 		
 		if (!unnormed_ret && normal_form)
 		{
-			if (GET_ATW->inheritsType(GET_ATW->getType(h), FORALL_LINK))
-				return (*this)(GET_ATW->getOutgoing(h)[1]);
-			else if (GET_ATW->inheritsType(hs[0]->T, FORALL_LINK))
+			if (GET_ASW->inheritsType(GET_ASW->getType(h), FORALL_LINK))
+				return (*this)(GET_ASW->getOutgoing(h)[1]);
+			else if (GET_ASW->inheritsType(hs[0]->T, FORALL_LINK))
 				return ( *((MetaPredicate*)hs[1].get()) )(h);
 			else
 				return false;
@@ -265,9 +265,9 @@ LOG(5, "Variable arity argument list ok.");
 
 void atom::setHandle(pHandle h)
 {
-	T=GET_ATW->getType(h);
-	name=GET_ATW->getName(h);
-	pHandleSeq _hs = GET_ATW->getOutgoing(h);
+	T=GET_ASW->getType(h);
+	name=GET_ASW->getName(h);
+	pHandleSeq _hs = GET_ASW->getOutgoing(h);
 //	arity= _hs.size();
 
 	hs.clear();
@@ -391,7 +391,7 @@ LOG(4, "Attaching...");
 
 //	assert (!inheritsType(T, FW_VARIABLE_NODE));
 
-	if (GET_ATW->inheritsType(T, NODE))
+	if (GET_ASW->inheritsType(T, NODE))
 	{
 //printf("atom::attach: it's a node: type: %d, name: %s, core: %p\n", T, name.c_str(), core);
         handle = at->getHandle(T, name);
@@ -462,7 +462,7 @@ vector<Btr<atom> > atom::execOutTree() const
 {
 //	if (inheritsType(T, __INDEXER) && hs.size() > (T - __INDEX1))
 //		return hs[T - __INDEX1].execOutTree();
-	if (GET_ATW->inheritsType(T, RESTRICTOR))
+	if (GET_ASW->inheritsType(T, RESTRICTOR))
 		return vector<Btr<atom> >();
 
 	return hs;
@@ -477,8 +477,8 @@ bool atom::matchType(Type rhsT) const
 {
 	Type lhsT = this->execType();
 
-	return lhsT == rhsT || GET_ATW->inheritsType(lhsT, rhsT)
-        || GET_ATW->inheritsType(rhsT, lhsT);
+	return lhsT == rhsT || GET_ASW->inheritsType(lhsT, rhsT)
+        || GET_ASW->inheritsType(rhsT, lhsT);
 }
 
 bool atom::operator<(const atom& rhs) const
@@ -573,7 +573,7 @@ void prn(tree< Btr<atom> >& tr)
 void makeHandletree(Handle handle, iAtomSpaceWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
 {
 	Handle top=(Handle)0;
-	Type T=GET_ATW->getType(handle);
+	Type T=GET_ASW->getType(handle);
 
 	if (!fullVirtual || inheritsType(T, NODE))
 		ret.set_head(handle);
@@ -581,7 +581,7 @@ void makeHandletree(Handle handle, iAtomSpaceWrapper* table, bool fullVirtual, t
 	{
 		ret.set_head((Handle)T);
 	
-		HandleSeq _hs = GET_ATW->getOutgoing(handle);
+		HandleSeq _hs = GET_ASW->getOutgoing(handle);
 		foreach(Handle child_h, hs)
 		{
 			tree<Vertex> child = makeHandletree(child_h, table, fullVirtual);
@@ -601,14 +601,14 @@ void makeHandletree(pHandle h, bool fullVirtual, tree<Vertex>& ret)
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top)
 {
 	pHandle h = boost::get<pHandle>(*ret_top);
-	Type T=GET_ATW->getType(h);
+	Type T=GET_ASW->getType(h);
 
 	/// If virtual link, then we keep expanding
-	if (fullVirtual && !GET_ATW->inheritsType(T, NODE))
+	if (fullVirtual && !GET_ASW->inheritsType(T, NODE))
 	{
 		*ret_top = Vertex((pHandle)T);
 	
-		pHandleSeq _hs = GET_ATW->getOutgoing(h);
+		pHandleSeq _hs = GET_ASW->getOutgoing(h);
 		foreach(pHandle child_h, _hs)
 		{
 			tree<Vertex>::iterator next_i = ret.append_child(ret_top, child_h);
@@ -622,10 +622,10 @@ tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) co
 	tree<Vertex> ret;
 	pHandle top = PHANDLE_UNDEFINED;
 	
-	if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ATW->inheritsType(GET_ATW->getType(handle), FW_VARIABLE_NODE)))
+	if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ASW->inheritsType(GET_ASW->getType(handle), FW_VARIABLE_NODE)))
 		top = handle;
 	else
-		top = (GET_ATW->inheritsType(T, NODE)
+		top = (GET_ASW->inheritsType(T, NODE)
 					? attach(table)
 					: (pHandle)T);
 
@@ -669,12 +669,12 @@ atom::atom(const tree<Btr<atom> >& a, tree<Btr<atom> >::iterator parent_node, bo
 	name = (*parent_node)->name;
 	handle = (*parent_node)->handle;
 
-	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
+	if (!GET_ASW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Btr<atom> >::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !GET_ATW->inheritsType((*s)->T, NODE) )
+			if (s.number_of_children() > 0 && !GET_ASW->inheritsType((*s)->T, NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 			
 			b->T = (*s)->T;
@@ -697,22 +697,22 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 	if (parent_node == a.end())
 		return;
 
-	T = GET_ATW->getType(_v2h(*parent_node));
-	name = GET_ATW->getName(_v2h(*parent_node));
+	T = GET_ASW->getType(_v2h(*parent_node));
+	name = GET_ASW->getName(_v2h(*parent_node));
 	handle = _v2h(*parent_node);
 	
 //cprintf(4,"REAL: %d\n", handle);
 	
-	if (!GET_ATW->inheritsType(T, NODE)) //nodes have no children...
+	if (!GET_ASW->inheritsType(T, NODE)) //nodes have no children...
 		for (tree<Vertex>::sibling_iterator s = a.begin(parent_node);  s != a.end(parent_node); ++s)
 		{	
 			Btr<atom> b(new atom);
 			
-			if (s.number_of_children() > 0 && !GET_ATW->inheritsType(GET_ATW->getType(_v2h(*s)), NODE) )
+			if (s.number_of_children() > 0 && !GET_ASW->inheritsType(GET_ASW->getType(_v2h(*s)), NODE) )
 				b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 
-			b->T = GET_ATW->getType(_v2h(*s));
-			b->name = GET_ATW->getName(_v2h(*s));
+			b->T = GET_ASW->getType(_v2h(*s));
+			b->name = GET_ASW->getName(_v2h(*s));
 			b->handle = _v2h(*s);
 //cprintf(4,"REAL SUB: %d\n", b.handle);			
 			hs.push_back(b);
@@ -721,27 +721,27 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
 
 bool atom::containsVar() const
 { 
-	if (!GET_ATW->inheritsType(T, NODE))
+	if (!GET_ASW->inheritsType(T, NODE))
 	{
 		for (unsigned int i=0; i<hs.size(); ++i)
 			if (hs[i]->containsVar())
 				return true;
 			return false;
 	}
-	return GET_ATW->inheritsType(T, VARIABLE_NODE);
+	return GET_ASW->inheritsType(T, VARIABLE_NODE);
 }
 
 
 bool atom::containsFWVar() const
 { 
-	if (!GET_ATW->inheritsType(T, NODE))
+	if (!GET_ASW->inheritsType(T, NODE))
 	{
 		for (unsigned int i=0; i<hs.size(); ++i)
 			if (hs[i]->containsFWVar())
 				return true;
 			return false;
 	}
-	return GET_ATW->inheritsType(T, FW_VARIABLE_NODE);
+	return GET_ASW->inheritsType(T, FW_VARIABLE_NODE);
 }
 
 const int MAX_VARIABLE_NUMBER = 5;
@@ -753,7 +753,7 @@ void addatomcopy(const tree<Btr<atom> >& a, set<atom, lessatom_ignoreVarNameDiff
 
 void atom::extractVars(set<string>& vars) const
 {
-	if (GET_ATW->inheritsType(T, VARIABLE_NODE))
+	if (GET_ASW->inheritsType(T, VARIABLE_NODE))
 	{
 		vars.insert(name);
 	}
@@ -764,7 +764,7 @@ void atom::extractVars(set<string>& vars) const
 
 void atom::extractFWVars(set<string>& vars) const
 {
-	if (GET_ATW->inheritsType(T, FW_VARIABLE_NODE))
+	if (GET_ASW->inheritsType(T, FW_VARIABLE_NODE))
 	{
 		vars.insert(name);
 	}

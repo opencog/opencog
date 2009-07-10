@@ -36,7 +36,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
 	meta i2oType(const std::vector<Vertex>& h) const
 	{
 		assert(h.size()==2);
-		AtomSpaceWrapper *nm = GET_ATW;	
+		AtomSpaceWrapper *nm = GET_ASW;	
 		assert(nm->getArity(boost::get<pHandle>(h[0]))==2);
 		assert(nm->getArity(boost::get<pHandle>(h[1]))==2);
 		assert(nm->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
@@ -57,8 +57,8 @@ class DeductionRule : public GenericRule<DeductionFormula>
 
 		assert(premiseArray.size()==2);
 
-		pHandleSeq nodesAB = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[0]));
-		pHandleSeq nodesBC = GET_ATW->getOutgoing(boost::get<pHandle>(premiseArray[1]));
+		pHandleSeq nodesAB = GET_ASW->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+		pHandleSeq nodesBC = GET_ASW->getOutgoing(boost::get<pHandle>(premiseArray[1]));
 
 		if (CHECK_ARGUMENT_VALIDITY_FOR_DEDUCTION_RULE && !equal(nodesAB[1], nodesBC[0]))
 		{
@@ -69,7 +69,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
             assert(equal(nodesAB[1], nodesBC[0]));
 		}
 
-		AtomSpaceWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ASW;
 		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[0])));
 		tvs[1] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[1])));
 		tvs[2] = (TruthValue*) &(nm->getTV(nodesAB[0]));
@@ -103,7 +103,7 @@ public:
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if ( !GET_ATW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+		if ( !GET_ASW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
 			return Rule::setOfMPs();
 
 		std::string varname = ("$"+GetRandomString(10));

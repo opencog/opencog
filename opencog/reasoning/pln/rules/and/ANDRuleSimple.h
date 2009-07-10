@@ -47,7 +47,7 @@ public:
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType(GET_ATW->getType(boost::get<pHandle>(*outh->begin())), AND_LINK)
+		if (!GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), AND_LINK)
 			|| outh->begin().number_of_children() != N)
 			return Rule::setOfMPs();
 		
@@ -82,7 +82,7 @@ public:
 		//currentDebugLevel = 3;
 		pHandle ret = ((N>1)
 			      ? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
-			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ATW->getTV(boost::get<pHandle>(premiseArray[0])),
+			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])),
 				RuleResultFreshness));
 		    delete[] hs;
 

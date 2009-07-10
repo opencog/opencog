@@ -254,7 +254,7 @@ public:
 			#endif
 
 			//assert(v2h(bv.value)->isReal());
-			assert(!GET_ATW->isType(boost::get<pHandle>(bv.value)));
+			assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
 
 			bound_args.push_back(bv);
 		}
@@ -263,7 +263,7 @@ public:
 
         /// This used to be below out, but when args are empty so is
         ///result.value and isReal is false
-		assert(!GET_ATW->isType(boost::get<pHandle>(result.value)));
+		assert(!GET_ASW->isType(boost::get<pHandle>(result.value)));
 out:
 
 

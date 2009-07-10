@@ -68,7 +68,7 @@ public:
 	LINKTYPE_ASSERT(premiseArray[3], SIMILARITY_LINK);
 	LINKTYPE_ASSERT(premiseArray[4], EVALUATION_LINK);
 
-	AtomSpaceWrapper *nm = GET_ATW;
+	AtomSpaceWrapper *nm = GET_ASW;
 	HandleSeq PforB = nm->getOutgoing(premiseArray[4]);
 	Handle hP = PforB[0];
 
@@ -95,7 +95,7 @@ public:
 	retlist.push_back(premiseArray[0]); //P
 	retlist.push_back(hA);
 
-	const TruthValue& retTV = GET_ATW->getTV(eval1);
+	const TruthValue& retTV = GET_ASW->getTV(eval1);
 
 	Handle ret = destTable->addLink(EVALUATION_LINK, retlist,
 				retTV,

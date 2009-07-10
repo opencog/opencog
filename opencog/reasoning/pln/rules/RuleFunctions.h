@@ -58,7 +58,7 @@ Handle OR2ANDLink(Handle& andL);
 Handle AND2ORLink(Handle& andL);
 Handle Exist2ForAllLink(Handle& exL);
 std::pair<Handle,Handle> Equi2ImpLink(Handle&);
-#define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(GET_ATW->getType(__cLink), __cLinkType))
+#define LINKTYPE_ASSERT(__cLink, __cLinkType) assert(inheritsType(GET_ASW->getType(__cLink), __cLinkType))
 
 }} // namespace opencog { namespace pln {
 #endif // RULEFUNCTION_H

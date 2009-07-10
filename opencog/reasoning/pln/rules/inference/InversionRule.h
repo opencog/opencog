@@ -36,7 +36,7 @@ protected:
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
 
         assert(premiseArray.size() == 1);
-        AtomSpaceWrapper *nm = GET_ATW;
+        AtomSpaceWrapper *nm = GET_ASW;
         pHandleSeq nodes = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 
         tvs[0] = (TruthValue*) & (nm->getTV(boost::get<pHandle>(premiseArray[0])));
@@ -48,7 +48,7 @@ protected:
     std::vector<BoundVertex> r;
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        if (!GET_ATW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if (!GET_ASW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
 
         Rule::MPs ret;
@@ -87,9 +87,9 @@ public:
         cprintf(1,"INV New order:\n");
         printTree(child(boost::get<Handle>(h[0]),1),0,1);
         printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-        return meta(new tree<Vertex>(mva((pHandle)GET_ATW->getType(h0),
-                                         mva(GET_ATW->getOutgoing(h0, 1)),
-                                         mva(GET_ATW->getOutgoing(h0, 0))
+        return meta(new tree<Vertex>(mva((pHandle)GET_ASW->getType(h0),
+                                         mva(GET_ASW->getOutgoing(h0, 1)),
+                                         mva(GET_ASW->getOutgoing(h0, 0))
                                         )));
     }
     NO_DIRECT_PRODUCTION;

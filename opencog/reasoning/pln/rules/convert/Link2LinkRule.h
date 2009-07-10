@@ -56,7 +56,7 @@ public:
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ATW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
+		if (!GET_ASW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
 			return Rule::setOfMPs();
 
 		Rule::MPs ret;
@@ -76,7 +76,7 @@ public:
 
 		assert(premiseArray.size()==1);
 
-		tvs[0] = (TruthValue*) &(GET_ATW->getTV(boost::get<pHandle>(premiseArray[0])));
+		tvs[0] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
 
 		return tvs;
 	}

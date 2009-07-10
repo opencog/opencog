@@ -91,7 +91,7 @@ Links are assumed not inheritable either.
 
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
 
     Handle h0 = v2h(h[0]);
     Handle h1 = v2h(h[1]);

@@ -75,7 +75,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 
 BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
-        AtomSpaceWrapper *nm = GET_ATW;
+        AtomSpaceWrapper *nm = GET_ASW;
         assert(validate(premiseArray));
 
 //printTree(premiseArray[0],0,1);
@@ -129,14 +129,14 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     }
 #endif
     
-        std::vector<pHandle> args = GET_ATW->getOutgoing(_v2h(premiseArray[0]));
-        Type T = GET_ATW->getType(args[1]);
+        std::vector<pHandle> args = GET_ASW->getOutgoing(_v2h(premiseArray[0]));
+        Type T = GET_ASW->getType(args[1]);
         std::string pname = nm->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[0]))),
-            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[1]))),
-            (TruthValue*) &(GET_ATW->getTV(args[1]))
+            (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[1]))),
+            (TruthValue*) &(GET_ASW->getTV(args[1]))
         };
         
         TruthValue* retTV =
@@ -146,7 +146,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
 
         pHandle ret=PHANDLE_UNDEFINED;
     
-        assert (!(GET_ATW->inheritsType(T, NODE)));
+        assert (!(GET_ASW->inheritsType(T, NODE)));
 
         ret = destTable->addLink(T, new_args,
                     *retTV,

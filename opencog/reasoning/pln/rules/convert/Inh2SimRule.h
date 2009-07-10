@@ -51,7 +51,7 @@ public:
 	}
 	virtual bool valid(Handle* premiseArray, const int n) const
 	{
-		AtomSpaceWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ASW;
 		return (linkInherits(InclusionLink, IMPLICATION_LINK)
 			|| linkInherits(InclusionLink,INHERITANCE_LINK))
 			&& (nm->getOutgoing(premiseArray[0],0) == nm->getOutgoingng(premiseArray[1],1)

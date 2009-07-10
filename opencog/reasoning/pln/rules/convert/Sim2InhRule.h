@@ -62,7 +62,7 @@ public:
 
 	FirstPTLTruthValue* tvs[20];
 
-	tvs[0] = (TruthValue*) &(GET_ATW->getTV(premiseArray[0]));
+	tvs[0] = (TruthValue*) &(GET_ASW->getTV(premiseArray[0]));
 
     TruthValue* retTV = f.compute(tvs, n);
 

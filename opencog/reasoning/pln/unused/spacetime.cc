@@ -89,7 +89,7 @@ if (hs.size() < 2)
 }
 #endif
 
-AtomSpaceWrapper *as = GET_ATW;
+AtomSpaceWrapper *as = GET_ASW;
 nocase_string procedure_name = as->getName(hs[0]);
 
 //	puts(("Launching " + procedure_name).c_str());
@@ -225,7 +225,7 @@ sprintf(buff, "%d", N);
 //		TruthValue::TRIVIAL_TV()));
 
 //! @todo fresh bug
-return GET_ATW->addNode(NUMBER_NODE, strdup(buff),
+return GET_ASW->addNode(NUMBER_NODE, strdup(buff),
     TruthValue::TRIVIAL_TV());//,false,true);
 }
 
@@ -243,8 +243,8 @@ return (interval
 */
 // Alternatively: assumes that the name of the handle gives the timestamp.
 
-if (inheritsType(GET_ATW->getType(t), NODE))
-    return (timeUnit)atof(GET_ATW->getName(t).c_str());
+if (inheritsType(GET_ASW->getType(t), NODE))
+    return (timeUnit)atof(GET_ASW->getName(t).c_str());
     //return (timeUnit)atof(((Node*) TLB::getAtom(t))->getName().c_str());
 else
     return 0;
@@ -267,8 +267,8 @@ if (!interval)
 //Assumes interval is in the form LinkType(Start, End)
 
 //Atom* intervalAtom = TLB::getAtom(interval); 
-vector<Handle> intervalOutgoingSet = GET_ATW->getOutgoing(interval);
-int arity = GET_ATW->getArity(interval); 
+vector<Handle> intervalOutgoingSet = GET_ASW->getOutgoing(interval);
+int arity = GET_ASW->getArity(interval); 
 
 exec_assert(arity == 2);
 
@@ -288,8 +288,8 @@ if (!interval)
 
 
 //        Atom* intervalAtom = TLB::getAtom(interval); 
-vector<Handle> intervalOutgoingSet = GET_ATW->getOutgoing(interval);
-int arity = GET_ATW->getArity(interval); 
+vector<Handle> intervalOutgoingSet = GET_ASW->getOutgoing(interval);
+int arity = GET_ASW->getArity(interval); 
 exec_assert(arity == 2);
 
 if (intervalOutgoingSet.empty())
@@ -360,7 +360,7 @@ if (!h)
 { cprintf(2, ("NULL input at " + sname).c_str()); return false; }
 
 //    Atom* atom = TLB::getAtom(h);
-return (GET_ATW->getType(h) == NUMBER_NODE);
+return (GET_ASW->getType(h) == NUMBER_NODE);
 }
 
 int intFromNumberNode(Handle h)
@@ -371,7 +371,7 @@ if (!h)
 { cprintf(2, ("NULL input at " + sname).c_str()); return 0; }
 
 //       Node* numberNode = (Node*) TLB::getAtom(h);
-return atoi(GET_ATW->inheritsType(GET_ATW->getType(h), NODE) ? GET_ATW->getName(h).c_str() : "0");
+return atoi(GET_ASW->inheritsType(GET_ASW->getType(h), NODE) ? GET_ASW->getName(h).c_str() : "0");
 }
 
 Handle TimeApparatus::timeDiff(Handle F, Handle interval,int sign)
@@ -392,8 +392,8 @@ if (!args_start[0] || !args_end[0])
     return NULL;
 
 //! @todo fresh bug
-Handle arglist1 = GET_ATW->addLink(LIST_LINK, args_start, TruthValue::NULL_TV()); //, false, true);
-Handle arglist2 = GET_ATW->addLink(LIST_LINK, args_end, TruthValue::NULL_TV()); //, false, true);
+Handle arglist1 = GET_ASW->addLink(LIST_LINK, args_start, TruthValue::NULL_TV()); //, false, true);
+Handle arglist2 = GET_ASW->addLink(LIST_LINK, args_end, TruthValue::NULL_TV()); //, false, true);
 
 Handle hs_start[] = { F, arglist1 };
 Handle hs_end[] = { F, arglist2 };
@@ -427,10 +427,10 @@ argsList.push_back(arg2); // [time]
 
 std::vector<Handle> argsEval;
 //! @todo fresh bug
-argsEval.push_back(GET_ATW->addNode(PREDICATE_NODE, predName, TruthValue::NULL_TV())); //, false,true));
-argsEval.push_back(GET_ATW->addLink(LIST_LINK, argsList, TruthValue::NULL_TV())); //, false,true));
+argsEval.push_back(GET_ASW->addNode(PREDICATE_NODE, predName, TruthValue::NULL_TV())); //, false,true));
+argsEval.push_back(GET_ASW->addLink(LIST_LINK, argsList, TruthValue::NULL_TV())); //, false,true));
 
-return GET_ATW->addLink(EVALUATION_LINK, argsEval,
+return GET_ASW->addLink(EVALUATION_LINK, argsEval,
         SimpleTruthValue((float)tv, MAX_TV_COUNT)); //, false,true);
 }
 
@@ -462,7 +462,7 @@ struct moment_equal : public binary_function<reasoning::BoundVertex, timeUnit, b
 	bool operator()(reasoning::BoundVertex h, timeUnit t) const
 	{
         std::list<HandleTemporalPair> intervals;
-        GET_ATW->getTimeServer().get(back_inserter(intervals),
+        GET_ASW->getTimeServer().get(back_inserter(intervals),
                 boost::get<Handle>(h.value));
 		return (intervals.size() > 0
 				? (intervals.front().getTemporal()->getA() == t)

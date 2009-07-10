@@ -34,7 +34,7 @@ namespace opencog { namespace pln {
 unsigned long now_interval_len = 50000;
 bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)

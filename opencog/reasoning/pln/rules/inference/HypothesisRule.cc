@@ -36,8 +36,8 @@ boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProductio
 {
     std::set<BoundVertex>* ret = new std::set<BoundVertex>;
     
-    Type t = GET_ATW->getTypeV(*outh);
-    bool hyp_link = GET_ATW->inheritsType(t, HYPOTHETICAL_LINK);
+    Type t = GET_ASW->getTypeV(*outh);
+    bool hyp_link = GET_ASW->inheritsType(t, HYPOTHETICAL_LINK);
 
 	if (HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS || hyp_link)
         if (!hasFW_VAR(*outh))

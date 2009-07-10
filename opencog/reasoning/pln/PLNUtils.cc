@@ -97,7 +97,7 @@ string rawPrint(tree<Vertex>::iterator top, int _rloglevel)
 string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel)
 {
     std::stringstream ss;
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     if (_rloglevel > currentDebugLevel)
         return "";
 
@@ -142,7 +142,7 @@ string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlo
 
 string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     std::stringstream ss;
 
     if (_rloglevel > currentDebugLevel)
@@ -211,7 +211,7 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
                                  vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
                                  map<pHandle, pHandle>& bindings)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     if (lhs_t.empty() && rhs_t.empty()) {
         cprintf(4, "unify: Both sides empty!\n");
@@ -278,7 +278,7 @@ string make_subst_buf(const BoundVertex& a);
 
 pHandle getOutgoingFun::operator()(pHandle h, int i)
 {
-    return GET_ATW->getOutgoing(h, i);
+    return GET_ASW->getOutgoing(h, i);
 }
 
 bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
@@ -438,7 +438,7 @@ bool substitutableTo(atom& from, atom& to,
       cprintf(0, "Warning! FW_VARIABLE_NODE substitution to the wrong direction was used!");*/
     /// This would complicate things...
 // assert(!atw->inheritsType(from.T, FW_VARIABLE_NODE));
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     if (atw->inheritsType(to.T, FW_VARIABLE_NODE) && to.name == from.name)
         return true;
@@ -495,7 +495,7 @@ const float MIN_CONFIDENCE = 0.0000001f;
 void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
                          const Type VarT, int index)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     LOG(3, "BEGIN GATHER for:");
     rawPrint(_MP, _MP.begin(), 3);
@@ -753,7 +753,7 @@ TableGather::TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const
 template<>
 void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     for (tree<Vertex>::iterator v = value->begin(); v != value->end(); v++) {
         pHandle *ph = boost::get<pHandle>(&*v);
         if (ph && (atw->inheritsType((Type)*ph, NODE))) {
@@ -871,7 +871,7 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
 
 bool existMPin(const vector<Btr<atom> >& hs)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     for (vector<Btr<atom> >::const_iterator i = hs.begin(); i != hs.end(); i++)
         if (atw->inheritsType((*i)->T, RESTRICTOR))
             return true;
@@ -889,7 +889,7 @@ bool existMPin(const vector<Btr<atom> >& hs)
 
 bool getLargestIntersection(const set<pHandle>& keyelem_set, const set<pHandle>& link_set, pHandle& result)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     int max_size = 0;
 
@@ -922,7 +922,7 @@ bool getLargestIntersection(const set<pHandle>& keyelem_set, const set<pHandle>&
 bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
                              const pHandleSeq& link_set, std::vector<Btr<atom> >& result)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     if (keyelem_set.empty())
         return false;
@@ -954,7 +954,7 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
 
 string printNode1(pHandle h, int level, int LogLevel)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     std::stringstream ss;
     Type t = atw->getType(h);
@@ -974,7 +974,7 @@ string printNode1(pHandle h, int level, int LogLevel)
 
 std::string printTree(pHandle h, int level, int LogLevel)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     std::stringstream ss;
 
     if (level > 20) {
@@ -1024,7 +1024,7 @@ map<int, Type> counter;
 
 struct countAtom {
     static bool exec(pHandle h, int level) {
-        AtomSpaceWrapper* atw = GET_ATW;
+        AtomSpaceWrapper* atw = GET_ASW;
         Type t = atw->getType(h);
         counter[t]++;
 
@@ -1264,7 +1264,7 @@ pHandleSet constitutedSet(pHandle CP,
                           strength_t min_membershipStrength,
                           count_t min_membershipCount)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     assert(atw->isSubType(CP, CONCEPT_NODE));
     
@@ -1332,7 +1332,7 @@ bool MPunifyHandle(pHandle lhs,
                    set<hsubst>** forbiddenBindings,
                    bool* restart, const Type VarT)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     assert(!atw->isType(lhs));
 
@@ -1431,7 +1431,7 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
               set<hsubst>** forbiddenBindings,
               bool* restart, const Type VarT)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     *restart = false; //We would not be here if restart was really pending.
 
@@ -1573,7 +1573,7 @@ bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
  */
 inline bool isVariableAtom(string name, Type type, int arity)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     return (atw->inheritsType(type, FW_VARIABLE_NODE) ||
             (name.empty() && atw->inheritsType(type, NODE)) ||
             (!arity && atw->inheritsType(type, LINK)));
@@ -1581,7 +1581,7 @@ inline bool isVariableAtom(string name, Type type, int arity)
 
 string condensed_form(const atom& a)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     if (atw->inheritsType(a.T, NODE))
         return a.name;
     else {
@@ -1613,7 +1613,7 @@ class getNameOp
 {
 public:
     string operator()(pHandle h) {
-        AtomSpaceWrapper* atw = GET_ATW;
+        AtomSpaceWrapper* atw = GET_ASW;
         return string(atw->getName(h));
     }
 };
@@ -1639,7 +1639,7 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
                        map<BindKeyT, pHandle>& bindings,
                        BindKeyOpT bind_key_op)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     if (from == PHANDLE_UNDEFINED && to == PHANDLE_UNDEFINED)
         return true;
@@ -1880,6 +1880,27 @@ meta bind_vtree(vtree &targ, const map<pHandle, pHandle>& binds)
     return thm_substed;
 }
 
+//static map<Handle,vtree> h2vtree_cache;
+vtree make_vtree(pHandle h)
+{
+    // Makes vtree for internal PLN use, so don't convert to real 
+    // AtomSpace Handles
+    
+    //! @todo haxx:: Re-enable cache. It must simply be updated so that
+    //! reset takes it into account.
+    /* map<Handle,vtree>::iterator i = h2vtree_cache.find(h);
+       if (i != h2vtree_cache.end())
+          return i->second;*/
+    vtree ret;
+    makeHandletree(h, true, ret);
+    // h2vtree_cache[h] = ret;
+
+    printTree(h,0,0);
+    rawPrint(ret, ret.begin(), 0);
+
+    return ret;
+}
+
 /*
 meta bind_vtree(vtree &targ, const map<Handle, Handle>& binds)
 {
@@ -1979,7 +2000,7 @@ const vtree& BoundVTree::getStdTree()
 
 void BoundVTree::createMyStdTree()
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     bindingsT varmap;
 
@@ -2008,7 +2029,7 @@ void BoundVTree::createMyStdTree()
 
 bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     bindingsT varmap;
     if (lhs.size() != rhs.size())
@@ -2053,7 +2074,7 @@ bool equalVariableStructure2(BBvtree lhs, BBvtree rhs)
 
 void ForceVirtual(meta _target, vtree::iterator& vit)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     pHandle *ph = boost::get<pHandle>(&(*vit));
     if (ph && !atw->isType(*ph) && !atw->inheritsType(atw->getType(*ph), NODE)) {
@@ -2089,7 +2110,7 @@ meta ForceAllLinksVirtual(meta _target)
 
 meta ForceRootLinkVirtual(meta _target)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
 
@@ -2111,7 +2132,7 @@ void print_progress()
 
 bool RealHandle(meta _target, Btr<set<BoundVertex> > result_set)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
     if (ph && !atw->isType(*ph)) {
@@ -2170,7 +2191,7 @@ void printBinding(const std::pair<string, Handle> p)
 
 void pr(std::pair<pHandle, pHandle> i)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     string s1 = atw->inheritsType(atw->getType(i.first), NODE) ? atw->getName(i.first) : i2str(i.first);
     string s2 = atw->inheritsType(atw->getType(i.second), NODE) ? atw->getName(i.second) : i2str(i.second);
@@ -2188,7 +2209,7 @@ void printSubsts(BoundVertex a, int LogLevel)
 string make_subst_buf(const BoundVertex& a)
 {
     string subst_buf;
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     if (a.bindings)
         for (bindingsT::const_iterator si = a.bindings->begin();
@@ -2224,7 +2245,7 @@ Vertex transitive_produce( const containerT& chain,
 
 bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
     /// \todo Speed-optimize!
 
@@ -2243,7 +2264,7 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                 bool allow_rhs_binding,
                 Type VarType)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
 //cprintf(0,"U: %d %d\n",
     if (lhs_t.empty() && rhs_t.empty()) {

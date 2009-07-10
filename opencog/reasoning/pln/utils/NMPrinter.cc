@@ -214,7 +214,7 @@ std::string NMPrinter::getFloatStrWithoutTrailingZeros(float value) const
 void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) const{
     //printf("NMPrinter::printHandle()\n");
 //    printf("NMPrinter::printHandle(%p): printOptions = %X\n", h, printOptions);
-    AtomSpaceWrapper* atw = GET_ATW; 
+    AtomSpaceWrapper* atw = GET_ASW; 
 
     bool isNode = atw->isSubType(h,NODE); 
     Type type = atw->getType(h);
@@ -320,7 +320,7 @@ void NMPrinter::printVTree(std::ostream& out, vtree::iterator top, int indentati
         return;
     }
 
-    if (!GET_ATW->isType(h))
+    if (!GET_ASW->isType(h))
     {
         printHandle(out, h, indentationLevel);
     } else {

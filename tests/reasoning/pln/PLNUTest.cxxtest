@@ -249,7 +249,7 @@ public:
             haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif*/
             // This is necessary to make sure that the ASW is initialized at the right time.
-            AtomSpaceWrapper& atw = *GET_ATW;
+            AtomSpaceWrapper& atw = *GET_ASW;
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
@@ -272,7 +272,7 @@ public:
         AllTestsInferenceNodes = 0;
 
         // This next line is also necessary.
-        /*AtomSpaceWrapper **/atw = GET_ATW;
+        /*AtomSpaceWrapper **/atw = GET_ASW;
         INstats.clear();
 
         if(RUN_FAILURE_TESTS)
@@ -353,7 +353,7 @@ public:
     // argument but applies several different rules
     void DISABLEtestMacroRuleTest()
     {
-        AtomSpaceWrapper *atw = GET_ATW;
+        AtomSpaceWrapper *atw = GET_ASW;
         //typedef InversionRule RuleT1;
         //typedef DeductionRule RuleT2;
         iAtomSpaceWrapper* parent = ASW();
@@ -706,7 +706,7 @@ public:
     
     void DISABLEtest_unifiesWithVariableChangeTo()
     {
-	    AtomSpaceWrapper *atw = GET_ATW;
+	    AtomSpaceWrapper *atw = GET_ASW;
 
 	    map<pHandle,pHandle> bindings;
 
@@ -785,7 +785,7 @@ void InitPLNTests()
 #if 0
 void RunPLNTestsOnce()
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     INstats.clear();
 
     puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
@@ -1014,7 +1014,7 @@ void RunPLNTestsOnce()
 
     void InitAxiomSet(string premiseFile)
     {
-        AtomSpaceWrapper *atw = GET_ATW;
+        AtomSpaceWrapper *atw = GET_ASW;
         atw->reset();
         atw->allowFWVarsInAtomSpace = true;
 
@@ -1030,7 +1030,7 @@ void RunPLNTestsOnce()
 
     void RunPLNTest(Btr<PLNTest> t)
     {
-        AtomSpaceWrapper *atw = GET_ATW;
+        AtomSpaceWrapper *atw = GET_ASW;
         stats::Instance().ITN2atom.clear();
 
         currentDebugLevel=0;

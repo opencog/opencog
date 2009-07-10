@@ -141,7 +141,7 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
 	
 	// Make sure that the ASW is initialized on module load
-	iAtomSpaceWrapper* asw = ASW();
+	iAtomSpaceWrapper* asw = ASW(server().getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
@@ -221,7 +221,7 @@ T input(T& a, std::list<std::string>& args)
 
 std::string PLNModule::runCommand(std::list<std::string> args)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     // All commands/strings in requiresRoot need for the state
     // BITNodeRoot to be non-NULL
     static const char* requiresRoot[] = {

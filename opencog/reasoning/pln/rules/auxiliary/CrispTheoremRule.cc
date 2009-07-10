@@ -94,7 +94,7 @@ break_inner:
 
 Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     set<MPs> ret;   
 bool htemp=false;
     
@@ -257,7 +257,7 @@ bool htemp=false;
 
 BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray, pHandle CX) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
 
     /*vtree res(mva((Handle)IMPLICATION_LINK,
         mva(nm->getOutgoing(v2h(premiseArray[0]))[0]),

@@ -72,20 +72,20 @@ BoundVertex ImplicationBreakdownRule::compute(const std::vector<Vertex>& premise
 
 //printTree(premiseArray[0],0,1);
 
-        std::vector<pHandle> args = GET_ATW->getOutgoing(_v2h(premiseArray[0]));
-        Type T = GET_ATW->getType(args[1]);
-        std::string pname = GET_ATW->getName(args[1]);
+        std::vector<pHandle> args = GET_ASW->getOutgoing(_v2h(premiseArray[0]));
+        Type T = GET_ASW->getType(args[1]);
+        std::string pname = GET_ASW->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[0]))),
-            (TruthValue*) &(GET_ATW->getTV(args[0])),
-            (TruthValue*) &(GET_ATW->getTV(args[1]))
+            (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[0]))),
+            (TruthValue*) &(GET_ASW->getTV(args[0])),
+            (TruthValue*) &(GET_ASW->getTV(args[1]))
         };
         
         TruthValue* retTV =
             ImplicationBreakdownFormula().compute(tvs, 3);
 
-        std::vector<pHandle> new_args = GET_ATW->getOutgoing(args[1]);
+        std::vector<pHandle> new_args = GET_ASW->getOutgoing(args[1]);
 
         pHandle ret=PHANDLE_UNDEFINED;
 
@@ -96,7 +96,7 @@ BoundVertex ImplicationBreakdownRule::compute(const std::vector<Vertex>& premise
                     false);
         else*/
     
-        assert (!(GET_ATW->inheritsType(T, NODE)));
+        assert (!(GET_ASW->inheritsType(T, NODE)));
 
         ret = destTable->addLink(T, new_args,
                     *retTV,

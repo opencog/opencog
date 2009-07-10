@@ -34,7 +34,6 @@ namespace WorldWrapper
  * The WorldWrapperBase class is a layer used between the combo interpreter
  * and the world it is interpreted in.
  */
-
 class WorldWrapperBase
 {
 public:
@@ -79,7 +78,8 @@ public:
      * resolve wild_card symbol _*_
      */
     virtual combo::vertex evalPerception(pre_it per,
-                                         combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU()) = 0;
+            combo::variable_unifier& vu = 
+            combo::variable_unifier::DEFAULT_VU()) = 0;
 
     /**
      * evaluate an indefinite object. vu is the variable_unifier object used to

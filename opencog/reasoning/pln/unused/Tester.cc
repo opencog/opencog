@@ -266,7 +266,7 @@ void RunPLNTests()
 
 void MacroRuleTest()
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     //typedef InversionRule RuleT1;
     //typedef DeductionRule RuleT2;
     iAtomSpaceWrapper* parent = ::haxx::defaultAtomSpaceWrapper;
@@ -379,7 +379,7 @@ void MacroRuleTest()
 
 void RunPLNTestsOnce()
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     INstats.clear();
 
     puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
@@ -739,7 +739,7 @@ InitAxiomSet("smalldemo.xml");
 
     void InitAxiomSet(string premiseFile)
     {
-        AtomSpaceWrapper *atw = GET_ATW;
+        AtomSpaceWrapper *atw = GET_ASW;
         atw->reset();
         
         haxx::ArchiveTheorems = true;
@@ -755,7 +755,7 @@ InitAxiomSet("smalldemo.xml");
 
     void RunPLNTest(Btr<PLNTest> t)
     {
-        AtomSpaceWrapper *atw = GET_ATW;
+        AtomSpaceWrapper *atw = GET_ASW;
         stats::Instance().ITN2atom.clear();
 
         currentDebugLevel=0;

@@ -59,7 +59,7 @@ public:
 		assert(n == 1);
 		LINKTYPE_ASSERT(premiseArray[0], IN_LINK_TYPE);
 
-		AtomSpaceWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ASW;
 		std::vector<Handle> in_args = nm->getOutgoing(premiseArray[0]);
 
 		const TruthValue& retTV = nm->getTV(premiseArray[0]);

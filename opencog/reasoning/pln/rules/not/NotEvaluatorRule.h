@@ -43,7 +43,7 @@ protected:
         //! @todo create the TrivialTV to use here
 #endif
         tvs[1] = (TruthValue*) 
-            & (GET_ATW->getTV(boost::get<pHandle>(premiseArray[0])));
+            & (GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
         return tvs;
     }
 

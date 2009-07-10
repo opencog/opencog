@@ -39,7 +39,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
         tree<Vertex>::iterator top = outh->begin();
         
-        if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*top)), OR_LINK) ||
+        if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*top)), OR_LINK) ||
             top.number_of_children() > 2)
             return Rule::setOfMPs();
 
@@ -73,7 +73,7 @@ cprintf(3, "ORRule::formatTVarray...");
         int i = 0, ii=0;
         for (i = 0; i < N; i++)
         {
-            tvs[ii++] = (TruthValue*) &(GET_ATW->getTV(_v2h(premiseArray[i])));
+            tvs[ii++] = (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[i])));
 cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
         }
         

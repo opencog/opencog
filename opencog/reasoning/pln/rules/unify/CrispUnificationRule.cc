@@ -63,7 +63,7 @@ namespace haxx
 		{
 printf("dovar3: Next candidate...");
 			atom target(unsubsted_target); //'target' will experiece substs
-			AtomSpaceWrapper *nm = GET_ATW;
+			AtomSpaceWrapper *nm = GET_ASW;
 			if (nm->getArity(candidates[i]) < 2)
 				continue;
 
@@ -201,7 +201,7 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-	AtomSpaceWrapper *nm = GET_ATW;
+	AtomSpaceWrapper *nm = GET_ASW;
 	if (inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
 		inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();

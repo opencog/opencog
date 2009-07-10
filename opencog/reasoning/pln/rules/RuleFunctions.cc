@@ -90,8 +90,8 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 // Redundant, hopefully:
 BBvtree atomWithNewType(pHandle h, Type T)
 {
-    assert(GET_ATW->inheritsType(T, LINK));
-    AtomSpaceWrapper *nm = GET_ATW;
+    assert(GET_ASW->inheritsType(T, LINK));
+    AtomSpaceWrapper *nm = GET_ASW;
     vector<pHandle> children = nm->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
     foreach(pHandle c, children)
@@ -106,7 +106,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 {
     pHandle *ph = boost::get<pHandle>(&*v.begin());
 //! @todo just call the overloaded Vertex version below
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
     {
     
@@ -116,7 +116,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(GET_ATW->inheritsType(T, LINK));
+        assert(GET_ASW->inheritsType(T, LINK));
 
         vector<pHandle> children = nm->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
@@ -132,7 +132,7 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
 BBvtree atomWithNewType(const Vertex& v, Type T)
 {
     const pHandle *ph = boost::get<pHandle>(&v);
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
     {
     
@@ -142,7 +142,7 @@ BBvtree atomWithNewType(const Vertex& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(GET_ATW->inheritsType(T, LINK));
+        assert(GET_ASW->inheritsType(T, LINK));
 
         vector<pHandle> children = nm->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
@@ -159,8 +159,8 @@ BBvtree atomWithNewType(const Vertex& v, Type T)
 bool UnprovableType(Type T)
 {
     return  //inheritsType(T, OR_LINK) ||
-            GET_ATW->inheritsType(T, CONCEPT_NODE) ||
-            GET_ATW->inheritsType(T, FORALL_LINK);
+            GET_ASW->inheritsType(T, CONCEPT_NODE) ||
+            GET_ASW->inheritsType(T, FORALL_LINK);
 }
 
 template<Type T>
@@ -253,7 +253,7 @@ pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityF
 {
         TruthValue** tvs = new TruthValue*[n];
         for (int i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(GET_ATW->getTV(premiseArray[i]));
+            tvs[i] = (TruthValue*) &(GET_ASW->getTV(premiseArray[i]));
             //tvs[i] = (TruthValue*) destTable->getTruthValue(premiseArray[i]);
 //puts("Computing formula");
         TruthValue* retTV = fN.compute(tvs, n);
@@ -278,7 +278,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, 
 {
         const int N = outh->begin().number_of_children();
         
-        if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), OutLinkType) ||
+        if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), OutLinkType) ||
             N <= MAX_ARITY_FOR_PERMUTATION)
             return Rule::setOfMPs();
 
@@ -490,7 +490,7 @@ struct converter  : public std::binary_function<T,T,void>
 
 Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
 
     Btr<vtree> ret(new vtree(vt_const));
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!

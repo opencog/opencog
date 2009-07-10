@@ -126,8 +126,9 @@ private:
     void loadPet(const std::string & petId);
 
     /**
-     * Load the AtomTable and other repositories (TimeServer, SpaceServer, ProcedureRepository, etc).
-     * Before invoking this method the SavableRepository objects must be created and registered
+     * Load the AtomTable and other repositories (TimeServer, SpaceServer,
+     * ProcedureRepository, etc).  Before invoking this method the
+     * SavableRepository objects must be created and registered
      * (this may be done at the constructor).
      *
      * IMPORTANT: This method should be invoke only in OPC start up, i.e.
@@ -179,7 +180,7 @@ public:
 
     /**
      * @return The Percpetion/Action Interface object used to exchange
-     *            (send and receive) data with SL.
+     *            (send and receive) data with virtual world.
      */
     PerceptionActionInterface::PAI & getPAI();
 
@@ -221,12 +222,12 @@ public:
     PVPActionPlanSender & getPlanSender();
 
     /**
-     * Method inherited from network element
+     * Method inherited from EmbodimentCogServer 
      */
     bool processNextMessage(MessagingSystem::Message *msg);
 
     /**
-     * Method inherited from network element
+     * Method inherited from EmbodimentCogServer
      */
     void setUp();
 

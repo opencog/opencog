@@ -630,8 +630,8 @@ struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
     pHandle operator()(pHandle h, int i);
 };
 
-#define getTypeFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getType), GET_ATW)
-//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getOutgoing),GET_ATW)
+#define getTypeFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getType), GET_ASW)
+//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getOutgoing),GET_ASW)
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (std::find_if((vt).begin(), (vt).end(), \

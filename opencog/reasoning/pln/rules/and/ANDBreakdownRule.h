@@ -80,7 +80,7 @@ public:
 
 	BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = NULL) const
   {
-	AtomSpaceWrapper *nm = GET_ATW;
+	AtomSpaceWrapper *nm = GET_ASW;
 	std::vector<pHandle> hs = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 
 	assert(premiseArray.size() == 2);

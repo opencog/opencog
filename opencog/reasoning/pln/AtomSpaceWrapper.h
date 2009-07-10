@@ -51,9 +51,7 @@
 #define PLN_TRUE_MEAN 0.989
 
 //using namespace boost::bimaps;
-
-//#define GET_ATW ((AtomSpaceWrapper*) ::haxx::defaultAtomSpaceWrapper)*/
-#define GET_ATW ((AtomSpaceWrapper*) ASW())
+#define GET_ASW ((AtomSpaceWrapper*) ASW())
 
 namespace opencog {
 namespace pln {
@@ -248,6 +246,9 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
         }
     };
 
+protected:
+    AtomSpace *atomspace;
+
 public:
 
     //! Convert a specific VersionHandled TruthValue to a pln handle
@@ -306,7 +307,7 @@ public:
     void reset();
 
     //! Initialize new AtomSpaceWrapper with const universe size
-    AtomSpaceWrapper();
+    AtomSpaceWrapper(AtomSpace* as);
     virtual ~AtomSpaceWrapper() {}
 
     //! Load axioms from given xml filename
@@ -430,7 +431,7 @@ public:
 };
 
 // singleton instance (following meyer's design pattern)
-iAtomSpaceWrapper* ASW();
+iAtomSpaceWrapper* ASW(AtomSpace *a = NULL);
 
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.
 */
@@ -444,7 +445,7 @@ public:
     /// Semi-haxx::
     fim::grim myfim;
 
-    FIMATW() : next_free_pat_id(30001) {}
+    FIMATW(AtomSpace *a) : AtomSpaceWrapper(a), next_free_pat_id(30001) {}
     virtual ~FIMATW() {}
 
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
@@ -458,7 +459,7 @@ public:
 /** Normalizes atoms before passing forward */
 class NormalizingATW : public FIMATW
 {
-    NormalizingATW();
+    NormalizingATW(AtomSpace *a);
 
     template<typename T>
     bool cutVector(const std::vector<T>& src, int index, std::vector<T>& dest)
@@ -475,8 +476,10 @@ class NormalizingATW : public FIMATW
 public:
     virtual ~NormalizingATW() {}
        
-    static NormalizingATW& getInstance() {
-        static NormalizingATW* instance = new NormalizingATW();
+    static NormalizingATW& getInstance(AtomSpace *a = NULL) {
+        if (a == NULL)
+            a = server().getAtomSpace();
+        static NormalizingATW* instance = new NormalizingATW(a);
         return *instance;
     }
     
@@ -493,12 +496,14 @@ public:
 /** Forwards the requests without normalizing */
 class DirectATW : public AtomSpaceWrapper
 {
-    DirectATW();
+    DirectATW(AtomSpace* a);
 public:
     virtual ~DirectATW() { }
 
-    static DirectATW& getInstance() {
-        static DirectATW* instance = new DirectATW();
+    static DirectATW& getInstance(AtomSpace *a = NULL) {
+        if (a == NULL)
+            a = server().getAtomSpace();
+        static DirectATW* instance = new DirectATW(a);
         return *instance;
     }
     

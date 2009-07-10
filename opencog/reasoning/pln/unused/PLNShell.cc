@@ -227,7 +227,7 @@ void PLNShell_RunLoop(int argc, char** args)
         DirectATW::getInstance();
         haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
 #endif
-        AtomSpaceWrapper& atw = *GET_ATW;
+        AtomSpaceWrapper& atw = *GET_ASW;
            
 /*        if (RunPLNtest)
         {
@@ -322,7 +322,7 @@ map<int, Btr<vtree > > tests;
 
 void initTests()
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
     int testi = 0;
     tests.clear();
 /*  tests[31] = Btr<vtree > (new vtree(
@@ -688,7 +688,7 @@ void PLNShell::Init()
 
 string printTV (Handle h) {
   char str[500];
-  AtomSpaceWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ASW;
   const TruthValue& tv = atw->getTV(h);
   if (tv.isNullTv()) 
       sprintf (str,"(TruthValue::NULL_TV())");
@@ -699,7 +699,7 @@ string printTV (Handle h) {
 }
 
 void printOutgoing (Handle out) {
-  AtomSpaceWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ASW;
  vector<Handle> list=atw->getOutgoing(out);
   cout<<printTV(out);
   foreach (Handle h,list)
@@ -711,14 +711,14 @@ void printOutgoing (Handle out) {
 
 struct min_conf { 
   bool operator()(Handle h) {
-      AtomSpaceWrapper *atw = GET_ATW;
+      AtomSpaceWrapper *atw = GET_ASW;
       return atw->getTV(h).getConfidence()>0.8;
   }
 };
 
 struct inhlink { 
   bool operator()(Handle h) {
-      AtomSpaceWrapper *atw = GET_ATW;
+      AtomSpaceWrapper *atw = GET_ASW;
       return atw->inheritsType (atw->getType(h),INHERITANCE_LINK);
   }
 };
@@ -727,13 +727,13 @@ struct inhlink {
 struct compareStrength {
     // Warning, uses fake atomspace handles in comparison
     bool operator()(const Handle& a, const Handle& b) {
-        return GET_ATW->getTV(a).getConfidence() >
-            GET_ATW->getTV(b).getConfidence();
+        return GET_ASW->getTV(a).getConfidence() >
+            GET_ASW->getTV(b).getConfidence();
     }
 };
 
 void fw_beta (void) {
-  AtomSpaceWrapper *atw = GET_ATW;
+  AtomSpaceWrapper *atw = GET_ASW;
 
   atw->reset();
 
@@ -824,7 +824,7 @@ void PLNShell::Launch()
 
 void PLNShell::Launch(vtree *target)
 {
-    AtomSpaceWrapper* atw = GET_ATW;
+    AtomSpaceWrapper* atw = GET_ASW;
 
 /*  vector<Vertex> targs, targs2;
     targs.push_back(mva((Handle)INHERITANCE_LINK,

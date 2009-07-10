@@ -50,7 +50,7 @@ meta NotEvaluatorRule::i2oType(const std::vector<Vertex>& h) const
 Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
                                               bool& overrideInputFilter) const
 {
-    if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), NOT_LINK))
+    if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), NOT_LINK))
         return Rule::setOfMPs();
 
     //! @todo why not?

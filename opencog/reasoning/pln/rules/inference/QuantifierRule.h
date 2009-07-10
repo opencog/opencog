@@ -56,7 +56,7 @@ public:
 		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
 		int i;
 		for (i = 0; i < n; i++)
-			tvs[i] = (TruthValue*) &(GET_ATW->getTV(boost::get<pHandle>(premiseArray[i])));
+			tvs[i] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[i])));
 
 		TruthValue* retTV = f.compute(tvs, n);	
 

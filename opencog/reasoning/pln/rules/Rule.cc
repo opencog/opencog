@@ -53,7 +53,7 @@ Rule::~Rule()
 BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
 {
     bindingsT h_b;
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     foreach(const BoundVertex& bv, h)
     {
         if (nm->isType(_v2h(bv.value)))

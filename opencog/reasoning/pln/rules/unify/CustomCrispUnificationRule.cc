@@ -41,8 +41,8 @@ bool UnificationRuleResultFreshness = true; //false;
 
 Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 {
-    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Btr<std::set<BoundVertex > >();
 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME|NMP_NODE_TYPE_NAME);
@@ -72,9 +72,9 @@ Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction
     bind_Bvtree(rootAtom, *i->bindings);
     pHandle topologicalStub = destTable->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
 
-    pHandle ret_h = destTable->addLink(  GET_ATW->getType(topologicalStub),
-                                GET_ATW->getOutgoing(topologicalStub),
-                                GET_ATW->getTV(i->original_handle),
+    pHandle ret_h = destTable->addLink(  GET_ASW->getType(topologicalStub),
+                                GET_ASW->getOutgoing(topologicalStub),
+                                GET_ASW->getTV(i->original_handle),
                                 UnificationRuleResultFreshness);    
     
     ret->insert(BoundVertex(ret_h, pre_binds));

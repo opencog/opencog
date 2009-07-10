@@ -194,7 +194,7 @@ Handle Add1NodeFromXML(iAtomSpaceWrapper* table,
 	if (root_type == ELEMENT_NODE)
 		root_type = name2type[arguments["class"]];
 
-	const bool isVar = GET_ATW->inheritsType( root_type, VARIABLE_NODE);
+	const bool isVar = GET_ASW->inheritsType( root_type, VARIABLE_NODE);
 
 	if (STLhas(nodenames, arguments["name"])
 		&& !isVar)
@@ -327,17 +327,17 @@ LOG(5,"XMLITERATE:");
 LOG(5,"HandleXMLInputNodexx:");
 				Handle new_node = HandleXMLInputNode(table, **child1, all_scoped_names, returning_names, newVarName);
 				/// A special treatment is given to Listed ForAlls. Others, just add to da std::vector.
-				if (   !GET_ATW->isSubType(new_node, LIST_LINK)
-					|| GET_ATW->getArity(new_node) <= 0
-					|| !GET_ATW->isSubType(GET_ATW->getOutgoing(new_node,0), FORALL_LINK))
+				if (   !GET_ASW->isSubType(new_node, LIST_LINK)
+					|| GET_ASW->getArity(new_node) <= 0
+					|| !GET_ASW->isSubType(GET_ASW->getOutgoing(new_node,0), FORALL_LINK))
 				{
 					children.push_back(new_node);
 helper2=5;
 				}
 				else
 				{
-					for (int fl=0;fl<GET_ATW->getArity(new_node);fl++)
-						children.push_back(GET_ATW->getOutgoing(new_node, fl));
+					for (int fl=0;fl<GET_ASW->getArity(new_node);fl++)
+						children.push_back(GET_ASW->getOutgoing(new_node, fl));
 helper2=3;
 				}
 				/// The next level's names will be forgotten, unless next level was ListLink.

@@ -53,7 +53,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
 {
     boost::shared_ptr<std::set<BoundVertex > > ret;
 
-    if (!GET_ATW->inheritsType(GET_ATW->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
+    if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
         return ret;
 
     //assert(outh->begin().number_of_children() == 2);
@@ -71,13 +71,13 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
 
 //  assert(!inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE));
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
-    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*child1)), VARIABLE_NODE)) {
+    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*child1)), VARIABLE_NODE)) {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
         printer.print(_v2h(*child1), 2);
     }
 
-    if (GET_ATW->inheritsType(GET_ATW->getType(_v2h(*child2)), VARIABLE_NODE)) {
+    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*child2)), VARIABLE_NODE)) {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");
         printer.print(_v2h(*child2), 2);

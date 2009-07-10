@@ -205,7 +205,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         FitnessEvaluatorT _fe)
 : InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     haxx::DirectProducerCache.clear();
     
     /// All CustomCrispUnificationRules must be re-created
@@ -285,7 +285,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
 void BITNode::ForceTargetVirtual(spawn_mode spawning)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     pHandle *ph = boost::get<pHandle>(&(*raw_target->begin()));
     
     if (ph && !atw->isType(*ph) && atw->getType(*ph) != FW_VARIABLE_NODE)
@@ -360,7 +360,7 @@ Btr<set<BoundVertex> > BITNodeRoot::evaluate(set<const BITNode*>* chain) const
         Btr<set<BoundVertex> > nontrivial_results(new set<BoundVertex>);
 
         foreach(const BoundVertex& new_result, *results)
-            if (GET_ATW->getTV(_v2h(new_result.value)).getConfidence() > min_confidence)
+            if (GET_ASW->getTV(_v2h(new_result.value)).getConfidence() > min_confidence)
             {
                 printTree(_v2h(new_result.value),0,0);
 
@@ -460,7 +460,7 @@ BITNode::BITNode( BITNodeRoot* _root,
 : raw_target(_target), depth(_depth), root(_root), Expanded(false),
 rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     if (_parent)
         addNewParent(parent_link<BITNode>(_parent, _parent_arg_i));
 
@@ -631,7 +631,7 @@ static int count111=0;
 
 void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult, spawn_mode spawning)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
 // If we were to store the results, it would cause inconsistency because we no longer store the prebindings.
 //  direct_results->insert(directResult->begin(), directResult->end());
 
@@ -743,7 +743,7 @@ bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 
 bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     if (atw->inheritsType(atw->getTypeV(*_target), FW_VARIABLE_NODE))
         return false;
 
@@ -791,7 +791,7 @@ BITNode* BITNode::CreateChild(unsigned int target_i, Rule* new_rule,
     const Rule::MPs& rule_args, BBvtree _target, const bindingsT& new_bindings,
     spawn_mode spawning)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
 /*    if (this->depth == haxx::maxDepth)
     {
         puts("haxx::maxDepth !!! "); //press enter");
@@ -1089,7 +1089,7 @@ bool BITNode::hasAncestor(const BITNode* const _p) const
 
 const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenceForStorage, float minConfidenceForAbort)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
 
     if (raw_target == NULL) {
         puts("Target is null, aborting.\n");
@@ -1191,7 +1191,7 @@ void BITNode::CreateChildrenForAllArgs()
 
 bool BITNode::CheckForDirectResults()
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     if (!rule || rule->isComputable())
         return false;
 
@@ -1238,7 +1238,7 @@ bool BITNode::CheckForDirectResults()
 
 void BITNode::expandNextLevel()
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     try
     {
         tlog(-2, "Expanding with fitness %.4f\n", fitness());
@@ -1280,7 +1280,7 @@ void BITNode::expandNextLevel()
 /* Algorithm: Evaluation */
 bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     Vertex v = *(*new_result).getVtree().begin();
     pHandle h = _v2h(v);
     assert(!atw->isType(h));
@@ -1295,7 +1295,7 @@ bool BITNode::NotifyParentOfResult(VtreeProvider* new_result) const
 #if 1
 void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
 //  tlog(-1, "ARG %d:\n", arg_i);
 //  printTree(v2h(new_result), 0,-1);
     pHandle h_new_result = _v2h(*new_result->getVtree().begin());
@@ -1441,7 +1441,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
         tlog(0,"Generalizing results:\n");
 
         foreach(const BoundVertex& b, *bvs)
-            if (GET_ATW->getTV(_v2h(b.value)).getConfidence() > min_confidence)
+            if (GET_ASW->getTV(_v2h(b.value)).getConfidence() > min_confidence)
             {
                 printTree(_v2h(b.value),0,0);
                 ForAllArgs.push_back(b.value);
@@ -1473,7 +1473,7 @@ BoundVertex BITNodeRoot::Generalize(Btr<set<BoundVertex> > bvs, Type _resultT) c
 
 int BITNode::number_of_free_variables_in_target() const
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     /// Use set<> to prevent re-counting of the already-found Handles
     
     set<pHandle> vars;
@@ -1683,7 +1683,7 @@ bool BITNode_fitness_comp::operator()(BITNode* lhs, BITNode* rhs) const
 string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
         vtree& do_template, pHandleSeq& plan) const
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     map<pHandle, vtree> bindings;
     stringstream ss;
     
@@ -1708,7 +1708,7 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
 
 string BITNodeRoot::extract_plan(pHandle h) const
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     stringstream ss;
     vtree do_template = mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "do"),
@@ -1867,7 +1867,7 @@ static int _trail_print_more_count = 0;
 
 string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
 {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     stringstream ss;
     if (h == PHANDLE_UNDEFINED || atw->isType(h))
         ss << "Error, trying to print trail for NULL / Virtual atom." << endl;

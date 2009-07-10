@@ -52,12 +52,12 @@ int ForwardChainer::fillStack(int number, bool random)
     // create seed stack (using random or based on attention)
     if (random) {
         while (number > 0) {
-            newSeeds.insert(GET_ATW->getRandomHandle(ATOM));
+            newSeeds.insert(GET_ASW->getRandomHandle(ATOM));
             number--;
         }
     } else {
         // use atomspace to get top STI atoms
-        pHandleSeq hs = GET_ATW->getImportantHandles(number);
+        pHandleSeq hs = GET_ASW->getImportantHandles(number);
         copy(hs.begin(), hs.end(), back_inserter(seedStack));
     }
     // remove duplicates from stack
@@ -92,7 +92,7 @@ pHandle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
         if (getRNG()->randfloat() <= probStack) {
             a = seedStack[(int) getRNG()->randfloat() * seedStack.size()];
         } else {
-            a = GET_ATW->getRandomHandle(ATOM);
+            a = GET_ASW->getRandomHandle(ATOM);
         }
         // Check if a is already in args
         foreach(Vertex v, args) {
@@ -110,7 +110,7 @@ pHandle ForwardChainer::getRandomArgument(const std::vector< Vertex > &args)
 }
 
 pHandleSeq ForwardChainer::getLocalLink(pHandle lh, const std::vector< Vertex > &args) {
-    AtomSpaceWrapper *atw = GET_ATW;
+    AtomSpaceWrapper *atw = GET_ASW;
     pHandleSeq choices;
     cout << "get local link" <<endl;
     // foreach outgoing dest (currently only supports target of lh)
@@ -228,7 +228,7 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
 
         Vertex V=((r->compute(cleanArgs)).GetValue());
         out=boost::get<pHandle>(V);
-        const TruthValue& tv=GET_ATW->getTV(out);
+        const TruthValue& tv=GET_ASW->getTV(out);
         //cout<<printTV(out)<<'\n';
 
         if (!tv.isNullTv() && tv.getCount() > minConfidence) {
@@ -239,7 +239,7 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
             np.print(out);
         } else {
             // Remove atom if not satisfactory
-            GET_ATW->removeAtom(_v2h(V));
+            GET_ASW->removeAtom(_v2h(V));
         }
     }
     return results;

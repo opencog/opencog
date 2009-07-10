@@ -78,7 +78,7 @@ protected:
 				TruthValue::TRUE_TV(),
 				false);
 
-		AtomSpaceWrapper *nm = GET_ATW;
+		AtomSpaceWrapper *nm = GET_ASW;
 		HandleSeq hs = nm->getOutgoing(premiseArray[0]);
 
 		std::vector<Handle> psat;

@@ -64,7 +64,7 @@ combined, no conflict will be found!
 
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     if (nm->inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
         nm->inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();

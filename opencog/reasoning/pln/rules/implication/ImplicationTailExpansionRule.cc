@@ -51,7 +51,7 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(iAtomSpaceWrapper *_d
 
 Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
     if (!(nm->inheritsType(nm->getType(_v2h(*outh->begin())), IMPLICATION_LINK)))
         return Rule::setOfMPs();
         
@@ -86,7 +86,7 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
 
 BoundVertex ImplicationTailExpansionRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
-    AtomSpaceWrapper *nm = GET_ATW;
+    AtomSpaceWrapper *nm = GET_ASW;
 
 /*  for (int i=0;i<premiseArray.size();i++)
         printTree(v2h(premiseArray[i]),0,0);
@@ -103,7 +103,7 @@ BoundVertex ImplicationTailExpansionRule::compute(const std::vector<Vertex>& pre
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    return Vertex(destTable->addAtom(res, GET_ATW->getTV(_v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
+    return Vertex(destTable->addAtom(res, GET_ASW->getTV(_v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
 }
 
 }} // namespace opencog { namespace pln {
