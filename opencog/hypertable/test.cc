@@ -1,9 +1,9 @@
 #include "AtomspaceHTabler.h"
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
+#include "opencog/atomspace/Atom.h"
+#include "opencog/atomspace/Link.h"
+#include "opencog/atomspace/Node.h"
+#include "opencog/atomspace/SimpleTruthValue.h"
+#include "opencog/atomspace/TLB.h"
 
 using namespace opencog;
 
@@ -18,19 +18,46 @@ int atomCompare(Atom *a, Atom *b)
 
 	if (a->getType() != b->getType())
 	{
-		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), 
-		    b->getType());
-		rc --;
+		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+		--rc;
 	}
-
+	if (a->getArity() != b->getArity())
+	{
+		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->getArity(), b->getArity());
+		--rc;
+	}
+	if (0 < a->getArity())
+	{
+		std::vector<Handle> outa = a->getOutgoingSet();
+		std::vector<Handle> outb = b->getOutgoingSet();
+		for (int i =0; i< a->getArity(); i++)
+		{
+			if (outa[i] != outb[i])
+			{
+				fprintf(stderr, "Error, outgoing set mis-match, "
+				        "i=%d a=%lx b=%lx\n", i, outa[i], outb[i]);
+				--rc;
+			}
+		}
+	}
 	if (!(a->getTruthValue() == b->getTruthValue()))
 	{
 		const TruthValue &ta = a->getTruthValue();
 		const TruthValue &tb = b->getTruthValue();
-		fprintf(stderr, "Error, truth value miscompare, "
+		fprintf(stderr, "Error, truth value mis-match, "
 		        "ma=%f mb=%f ca=%f cb=%f\n",
 		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
-		rc --;
+		--rc;
+	}
+	if (!(a->getAttentionValue() == b->getAttentionValue()))
+	{
+	    const AttentionValue &ava = a->getAttentionValue();
+	    const AttentionValue &avb = b->getAttentionValue();
+	    fprintf(stderr, "Error, attention value mis-match, "
+	            "stia=%hd stib=%hd ltia=%hd ltib=%hd vltia=%hd vltib=%hd\n",
+	            ava.getSTI(), avb.getSTI(), ava.getLTI(), avb.getLTI(),
+	            ava.getVLTI(), avb.getVLTI());
+	    --rc;
 	}
 	return rc;
 }
@@ -43,6 +70,8 @@ int main (int argc, char **argv){
 	Atom *a = new Node(SCHEMA_NODE, "someNode");
 	SimpleTruthValue stv(0.55, 0.6);
 	a->setTruthValue(stv);
+	const AttentionValue av(42, 64, 1);
+	a->setAttentionValue(av);
 	TLB::addAtom(a);
 	Handle h = TLB::getHandle(a);
 	

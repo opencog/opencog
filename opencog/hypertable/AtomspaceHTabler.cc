@@ -32,13 +32,14 @@
 #include "Hypertable/Lib/Client.h"
 #include "Hypertable/Lib/KeySpec.h"
 
-#include <opencog/hypertable/AtomspaceHTabler.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/Link.h>
+#include "opencog/hypertable/AtomspaceHTabler.h"
+#include "opencog/atomspace/SimpleTruthValue.h"
+#include "opencog/atomspace/TruthValue.h"
+#include "opencog/atomspace/TLB.h"
+#include "opencog/atomspace/Atom.h"
+#include "opencog/atomspace/Node.h"
+#include "opencog/atomspace/Link.h"
+#include "opencog/atomspace/AttentionValue.h"
 
 
 using namespace opencog;
@@ -74,27 +75,23 @@ void AtomspaceHTabler::storeAtom(Handle h)
         std::cerr << e << std::endl;
         return;
     }
-
-    char rowbuff[BUFF_SIZE];
-    key.row_len = snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
-    key.row = rowbuff;
-
-    Type t = atom_ptr->getType();
-
-    char typebuff[BUFF_SIZE];
-    char stvbuff[BUFF_SIZE];
-    int type_len = snprintf(typebuff, BUFF_SIZE, "%d", t);
     
+    // Create row index from handle
+    char val[BUFF_SIZE];
+    int val_len;
+    key.row_len = snprintf(val, BUFF_SIZE, "%lu", h.value());
+    key.row = rowbuff;
+        
     // If it's a node...
     Node *n = dynamic_cast<Node *>(atom_ptr);
     if (n) {
-        const char *name = n->getName().c_str();
-        int name_len = n->getName().length();
+        //Store the name
         key.column_family = "name";
-        mutator_ptr->set(key, name, name_len);
+        mutator_ptr->set(key, n->getName().c_str(), n->getName().length());
     }
     // If it's a link...
     else {
+        // Store the outgoing set
         Link *l = dynamic_cast<Link *>(atom_ptr);
         int arity = l->getArity();
         std::vector<Handle> out = l->getOutgoingSet();
@@ -112,31 +109,50 @@ void AtomspaceHTabler::storeAtom(Handle h)
 		key.column_family = "outgoing";
 		mutator_ptr->set(key, outSet.c_str(), outSet.length());
     }
+    
+    // Store type
+    Type t = atom_ptr->getType();
+    val_len = snprintf(val, BUFF_SIZE, "%d", t);
+    key.column_family = "type";
+    mutator_ptr->set(key, val, val_len);
 
+    
+    // Store the importance
+    const AttentionValue& av = atom_ptr->getAttentionValue();
+    short sti = av.getSTI();
+    short lti = av.getLTI();
+    unsigned short vlti = av.getVLTI();
+    
+    val_len = snprintf(val, BUFF_SIZE, "%hd", sti);
+    key.column_family = "sti";
+    mutator_ptr->set(key, val, val_len);
+    
+    val_len = snprintf(val, BUFF_SIZE, "%hd", lti);
+    key.column_family = "lti";
+    mutator_ptr->set(key, val, val_len);
+    
+    val_len = snprintf(val, BUFF_SIZE, "%hu", vlti);
+    key.column_family = "vlti";
+    mutator_ptr->set(key, val, val_len);
+    
+    
+    // Store the truth value
     const TruthValue &tv = atom_ptr->getTruthValue();
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
     if (NULL == stv) {
-        fprintf(stderr, "Error: non-simple truth values are not handled\n");
+        std::cerr << "Non-simple truth values are not handled" << std::endl;
         return;
     }
+    val_len = snprintf(val, BUFF_SIZE, "(%20.16g, %20.16g)",
+                tv.getMean(), tv.getCount());
+    key.column_family = "stv";
+    mutator_ptr->set(key, stvbuff, stv_len);
+    
+    
+    //TODO: Find a way to get rid of this; it may hurt performance.
+    mutator_ptr->flush();
 
-    int stv_len = snprintf(stvbuff, BUFF_SIZE, "(%20.16g, %20.16g)", tv.getMean(), tv.getCount());
-
-    try {
-        key.column_family = "type";
-        mutator_ptr->set(key, typebuff, type_len);
-        key.column_family = "stv";
-        mutator_ptr->set(key, stvbuff, stv_len);
-        mutator_ptr->flush();
-    }
-
-    catch (Exception &e) {
-        mutator_ptr->show_failed(e);
-        std::cerr << "Exception during table mutation:" << std::endl;
-        std::cerr << e << std::endl;
-    }
     return;
-
 }
 
 /**
@@ -157,6 +173,15 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     ssb.add_column(str.c_str());
     str = "stv";
     ssb.add_column(str.c_str());
+    str = "outgoing";
+    ssb.add_column(str.c_str());
+    str = "sti";
+    ssb.add_column(str.c_str());
+    str = "lti";
+    ssb.add_column(str.c_str());
+    str = "vlti";
+    ssb.add_column(str.c_str());
+
     char rowbuff[BUFF_SIZE];
     snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
     ssb.add_row(rowbuff);
@@ -176,6 +201,9 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     char* stv;
     int type;
     std::vector<Handle> handles;
+    short sti;
+    short lti;
+    unsigned short vlti;   
     
     bool found = false;
     
@@ -188,46 +216,44 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
             name = (char *)cell.value;
         } else if (!strcmp("stv", cell.column_family)) {
             stv = (char *)cell.value;
-        } else if (!strcmp("outgoing", cell.column_family)) {
-            
+        } else if (!strcmp("outgoing", cell.column_family)) {         
             char *end = (char *)cell.value + cell.value_len + 1;
             char *comma = strchr ((const char *)cell.value, ',');
             while (comma != end) {
                 Handle h = (Handle) strtoul(comma+1, &comma, 10);
                 handles.push_back(h);
             }
-        
-            #if 0
-            String str((const char *)cell.value, cell.value_len);
-            unsigned int start = 0;
-            unsigned int end = str.find(',');
-            // loop through the (comma-separated) string of handles,
-            // pushing them into a vector
-            while (end != std::string::npos) 
-            {
-                handles.push_back((Handle)(atoi(str.substr(start, end-1).c_str())));
-                start = end+1;
-                end = str.find(',' , start);
-            }
-            #endif
+        } else if (!strcmp("sti", cell.column_family)) {
+            sti = (short) atoi((char *)cell.value);
+        } else if (!strcmp("lti", cell.column_family)) {
+            lti = (short) atoi((char *)cell.value);
+        } else if (!strcmp("sti", cell.column_family)) {
+            vlti = (unsigned short) atoi((char *)cell.value);
         }
     }
     
     if (!found){
         return NULL;
     }
-
+    
     if (classserver().isNode(type)) {
         atom_ptr = new Node(type, name);
     } else {
         atom_ptr = new Link(type, handles);
     }
-
+    
+    // Restore importance
+    const AttentionValue av(sti,lti,vlti);
+    atom_ptr->setAttentionValue(av);
+    
+    
+    // Restore truth value
     double mean = atof(stv + 1);
     char *comma = strchr(stv + 2, ',');
     double count = atof(comma + 1);
     SimpleTruthValue nstv(mean, count);
     atom_ptr->setTruthValue(nstv);
+    
 
     return atom_ptr;
 }
