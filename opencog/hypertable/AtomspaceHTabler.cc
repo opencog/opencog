@@ -63,18 +63,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
         return;
     }
 
-    TablePtr table_ptr;
-    TableMutatorPtr mutator_ptr;
     KeySpec key;
     memset(&key, 0, sizeof(key));
-
-    try {
-        table_ptr = client_ptr->open_table("Atomtable");
-        mutator_ptr = table_ptr->create_mutator(3000);
-    } catch (Exception &e) {
-        std::cerr << e << std::endl;
-        return;
-    }
     
     // Create row index from handle
     char row[BUFF_SIZE]; //TODO: Figure out how big this should actually be
@@ -86,7 +76,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     if (n) {
         //Store the name
         key.column_family = "name";
-        mutator_ptr->set(key, n->getName().c_str(), n->getName().length());
+        m_handle_mutator->set(key, n->getName().c_str(), n->getName().length());
     }
     // If it's a link...
     else {
@@ -95,8 +85,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         int arity = l->getArity();
         std::vector<Handle> out = l->getOutgoingSet();
         std::stringstream ss;
-        for (int i=0; i<arity; ++i)
-		{
+        for (int i = 0; i < arity; ++i)n{
 		    ss << ',';
             ss << out[i];
 		
@@ -105,7 +94,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
 			// with cycles.
 		}
 		key.column_family = "outgoing";
-		mutator_ptr->set(key, ss.str().c_str(), ss.str().length());
+		m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
     }
     
     
@@ -116,7 +105,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     Type t = atom_ptr->getType();
     val_len = snprintf(val, BUFF_SIZE, "%d", t);
     key.column_family = "type";
-    mutator_ptr->set(key, val, val_len);
+    m_handle_mutator->set(key, val, val_len);
 
     
     // Store the importance
@@ -127,15 +116,15 @@ void AtomspaceHTabler::storeAtom(Handle h)
     
     val_len = snprintf(val, BUFF_SIZE, "%hd", sti);
     key.column_family = "sti";
-    mutator_ptr->set(key, val, val_len);
+    m_handle_mutator->set(key, val, val_len);
     
     val_len = snprintf(val, BUFF_SIZE, "%hd", lti);
     key.column_family = "lti";
-    mutator_ptr->set(key, val, val_len);
+    m_handle_mutator->set(key, val, val_len);
     
     val_len = snprintf(val, BUFF_SIZE, "%hu", vlti);
     key.column_family = "vlti";
-    mutator_ptr->set(key, val, val_len);
+    m_handle_mutator->set(key, val, val_len);
     
     
     // Store the truth value
@@ -148,11 +137,54 @@ void AtomspaceHTabler::storeAtom(Handle h)
     val_len = snprintf(val, BUFF_SIZE, "(%20.16g, %20.16g)",
                 tv.getMean(), tv.getCount());
     key.column_family = "stv";
-    mutator_ptr->set(key, val, val_len);
+    m_handle_mutator->set(key, val, val_len);
+    
+    
+    // Store incoming set
+    HandleEntry *he = atom_ptr->getIncomingSet();
+    std::stringstream ss;
+    while (he) {
+        ss << ',';
+        ss << he->handle;
+        he = he->next;
+    }
+    key.column_family = "incoming";
+    m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
     
     //TODO: Find a way to get rid of this if possible; it may hurt performance.
-    mutator_ptr->flush();     
+    m_handle_mutator->flush();     
     return;
+}
+
+/**
+* Return a vector containing the handles of the entire incoming
+* set of the indicated handle. 
+*/
+std::vector<Handle> AtomspaceHTabler::getIncomingSet(Handle) const
+{
+    TableScannerPtr scanner_ptr;
+    ScanSpecBuilder ssb;
+    Cell cell;
+    std::vector<Handle> handles;
+    
+    ssb.add_column("incoming"); 
+    char rowbuff[BUFF_SIZE];
+    snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
+    ssb.add_row(rowbuff);
+    ssb.set_max_versions(1);
+    
+    scanner_ptr = m_handle_table->create_scanner(ssb.get());
+    
+    while (scanner_ptr->next(cell)) {
+        char *end = (char *)cell.value + cell.value_len;
+        char *comma = (char *)cell.value;
+        while (comma != end) {
+            Handle h = (Handle) strtoul(comma+1, &comma, 10);
+            handles.push_back(h);
+        }    
+    }
+    
+    return handles;
 }
 
 /**
@@ -161,26 +193,25 @@ void AtomspaceHTabler::storeAtom(Handle h)
  */
 Atom * AtomspaceHTabler::getAtom(Handle h) const
 {
-    TablePtr table_ptr;
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
     Cell cell;
-    String str;
+//    char *str;
 
-    str = "type";
-    ssb.add_column(str.c_str());
-    str = "name";
-    ssb.add_column(str.c_str());
-    str = "stv";
-    ssb.add_column(str.c_str());
-    str = "outgoing";
-    ssb.add_column(str.c_str());
-    str = "sti";
-    ssb.add_column(str.c_str());
-    str = "lti";
-    ssb.add_column(str.c_str());
-    str = "vlti";
-    ssb.add_column(str.c_str());
+//    str = "type";
+    ssb.add_column("type");
+//    str = "name";
+    ssb.add_column("name");
+//    str = "stv";
+    ssb.add_column("stv");
+//    str = "outgoing";
+    ssb.add_column("outgoing");
+//    str = "sti";
+    ssb.add_column("sti");
+//    str = "lti";
+    ssb.add_column("lti");
+//    str = "vlti";
+    ssb.add_column("vlti");
 
     char rowbuff[BUFF_SIZE];
     snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
@@ -190,8 +221,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     Atom *atom_ptr;
 
     try {
-        table_ptr = client_ptr->open_table("Atomtable");
-        scanner_ptr = table_ptr->create_scanner(ssb.get());
+        scanner_ptr = m_handle_table->create_scanner(ssb.get());
     } catch (Exception &e) {
         std::cerr << e << std::endl;
         return atom_ptr;
@@ -208,6 +238,8 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     
     bool found = false;
     
+    //XXX: Can we guarantee the order these will be found? If so, we don't
+    //      have to remember as much.
     // retrieve & process all the information about the atom
     while (scanner_ptr->next(cell)) {
         found = true;

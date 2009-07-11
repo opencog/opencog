@@ -38,14 +38,20 @@ namespace opencog
 class AtomspaceHTabler
 {
 private:
-        Client *client_ptr;
+        Client *m_client;
+        Table *m_handle_table;
+        TableMutator *m_handle_mutator;
 public:
         AtomspaceHTabler(){
-            client_ptr = new Client();
+            m_client = new Client();
+            m_handle_table = m_client->open_table("Atomtable");
+            m_handle_mutator = m_handle_table->create_mutator(3000);
         }      
         
         virtual ~AtomspaceHTabler(){
-            delete client_ptr;
+            delete m_client;
+            delete m_handle_table;
+            delete m_handle_mutator;
         }
 
 		/**
@@ -54,6 +60,12 @@ public:
 		 * truth value, etc. 
 		 */
 		virtual void storeAtom(Handle);
+		
+        /**
+         * Return a vector containing the handles of the entire incoming
+         * set of the indicated handle. 
+         */
+        virtual std::vector<Handle> getIncomingSet(Handle) const = 0;
 		
 		/** 
 		 * Return a pointer to an Atom associated with the given

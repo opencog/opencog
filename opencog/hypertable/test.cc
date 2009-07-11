@@ -9,68 +9,58 @@ using namespace opencog;
 
 int atomCompare(Atom *a, Atom *b)
 {
-	int rc = 0;
-	if (NULL == b)
-	{
-		fprintf(stderr, "Error: No atom found\n");
-		return -1;
-	}
+    int rc = 0;
+    if (NULL == b) {
+        fprintf(stderr, "Error: No atom found\n");
+        return -1;
+    }
 
-	if (a->getType() != b->getType())
-	{
-		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
-		--rc;
-	}
-	Link *na = dynamic_cast<Link *>(a);
-	Link *nb = dynamic_cast<Link *>(b);
-	if (na && nb)
-	{
-	    if (na->getArity() != nb->getArity())
-	    {
-		    fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->getArity(), nb->getArity());
-		    --rc;
-	    }
-	    if (0 < na->getArity())
-	    {
-		    std::vector<Handle> outa = na->getOutgoingSet();
-		    std::vector<Handle> outb = nb->getOutgoingSet();
-		    for (int i =0; i< na->getArity(); i++)
-		    {
-			    if (outa[i] != outb[i])
-			    {
-				    fprintf(stderr, "Error, outgoing set mis-match:");
-				    fprintf(stderr, "i=%d a[i]=%ld b[i]=%ld\n",i,
-				        outa[i].value(), outb[i].value());
-				    --rc;
-			    }
-		    }
-	    }
-	}
-	if (!(a->getTruthValue() == b->getTruthValue()))
-	{
-		const TruthValue &ta = a->getTruthValue();
-		const TruthValue &tb = b->getTruthValue();
-		fprintf(stderr, "Error, truth value mis-match, "
-		        "ma=%f mb=%f ca=%f cb=%f\n",
-		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
-		--rc;
-	}
-	if (!(a->getAttentionValue() == b->getAttentionValue()))
-	{
-	    const AttentionValue &ava = a->getAttentionValue();
-	    const AttentionValue &avb = b->getAttentionValue();
-	    fprintf(stderr, "Error, attention value mis-match, "
-	            "stia=%hd stib=%hd ltia=%hd ltib=%hd vltia=%hd vltib=%hd\n",
-	            ava.getSTI(), avb.getSTI(), ava.getLTI(), avb.getLTI(),
-	            ava.getVLTI(), avb.getVLTI());
-	    --rc;
-	}
-	return rc;
+    if (a->getType() != b->getType()) {
+        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+        --rc;
+    }
+    Link *na = dynamic_cast<Link *>(a);
+    Link *nb = dynamic_cast<Link *>(b);
+    if (na && nb) {
+        if (na->getArity() != nb->getArity()) {
+            fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->getArity(), nb->getArity());
+            --rc;
+        }
+            if (0 < na->getArity()) {
+            std::vector<Handle> outa = na->getOutgoingSet();
+            std::vector<Handle> outb = nb->getOutgoingSet();
+            for (int i =0; i< na->getArity(); i++) {
+                if (outa[i] != outb[i]) {
+                    fprintf(stderr, "Error, outgoing set mis-match:");
+                    fprintf(stderr, "i=%d a[i]=%ld b[i]=%ld\n",i,
+                            outa[i].value(), outb[i].value());
+                    --rc;
+                }
+            }
+        }
+    }
+    if (!(a->getTruthValue() == b->getTruthValue())) {
+        const TruthValue &ta = a->getTruthValue();
+        const TruthValue &tb = b->getTruthValue();
+        fprintf(stderr, "Error, truth value mis-match, "
+                "ma=%f mb=%f ca=%f cb=%f\n",
+                ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+        --rc;
+    }
+    if (!(a->getAttentionValue() == b->getAttentionValue())) {
+        const AttentionValue &ava = a->getAttentionValue();
+        const AttentionValue &avb = b->getAttentionValue();
+        fprintf(stderr, "Error, attention value mis-match, "
+                "stia=%hd stib=%hd ltia=%hd ltib=%hd vltia=%hd vltib=%hd\n",
+                ava.getSTI(), avb.getSTI(), ava.getLTI(), avb.getLTI(),
+                ava.getVLTI(), avb.getVLTI());
+        --rc;
+    }
+    return rc;
 }
 
 int main (int argc, char **argv){
-    try
-    {
+    try {
         AtomspaceHTabler table;
 
 	    // Create an atom ... 
@@ -90,7 +80,7 @@ int main (int argc, char **argv){
 	
 		    // Are they equal?
         int rc = atomCompare(a,b);
-        if (!rc){
+        if (!rc) {
             printf("node compare success\n");
         }
         else {
@@ -113,19 +103,15 @@ int main (int argc, char **argv){
 
 	    Atom *lb = table.getAtom(TLB::getHandle(l));
 	    rc = atomCompare(l,lb);
-	    if (!rc) 
-	    {
+	    if (!rc) {
             std::cout << "link compare success" << std::endl;
 	    }
-	    else
-	    {
+	    else {
 	        std::cout << "link compare failure" << std::endl;
 	    }
 	        
 	    return 0;
-	}
-	catch (Exception &e)
-	{
+	} catch (Exception &e) {
 	    std::cerr << e << std::endl;
 	    return 1;
 	}
