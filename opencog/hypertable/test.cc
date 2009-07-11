@@ -7,7 +7,7 @@
 
 using namespace opencog;
 
-int atomCompare(Atom *a, Atom *b)
+int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
 {
     int rc = 0;
     if (NULL == b) {
@@ -77,7 +77,7 @@ int main (int argc, char **argv){
 
 	    // Get it back
 	    Atom *b = table.getAtom(h);
-	
+	    
 		    // Are they equal?
         int rc = atomCompare(a,b);
         if (!rc) {
@@ -85,7 +85,17 @@ int main (int argc, char **argv){
         }
         else {
             printf("node compare failure\n");
-        }  
+        }
+        
+        // Get it back through get node
+        Atom *c = table.getNode(a->getType(), ((Node *)a)->getName().c_str());
+        rc = atomCompare(a,c);
+        if (!rc) {
+            printf("node compare success\n");
+        }
+        else {
+            printf("node compare failure\n");
+        }
         
         // Create a second atom, connect it to the first
 	    // with a link. Save it, fetch it ... are they equal?
@@ -109,10 +119,20 @@ int main (int argc, char **argv){
 	    else {
 	        std::cout << "link compare failure" << std::endl;
 	    }
+	    
+	    // Get the link back through get link
+	    Atom *lc = table.getLink(l->getType(), l->getOutgoingSet());
+	    rc = atomCompare(l,lc);
+	    if (!rc) {
+            std::cout << "link compare success" << std::endl;
+	    }
+	    else {
+	        std::cout << "link compare failure" << std::endl;
+	    }
 	        
 	    return 0;
 	} catch (Exception &e) {
-	    std::cerr << e << std::endl;
+	    //std::cerr << e << std::endl;
 	    return 1;
 	}
 }

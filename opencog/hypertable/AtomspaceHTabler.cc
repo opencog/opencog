@@ -41,63 +41,11 @@
 #include "opencog/atomspace/Link.h"
 #include "opencog/atomspace/AttentionValue.h"
 
-//TODO: make_key(*) and the corresponding table lookup functions
-//      use very similar code, which should probably be combined somehow
-//      Templates?
-
 
 using namespace opencog;
 using namespace Hypertable;
 
 const int BUFF_SIZE = 1028; //TODO: Figure out how big this should actually be
-
-// Creates a KeySpec with a row index containing just the handle
-KeySpec AtomspaceHTabler::make_key (Handle h)
-{
-    KeySpec key;
-    memset(&key, 0, sizeof(key));
-    
-    std::stringstream ss;
-    ss << h.value();
-    key.row = ss.str().c_str();
-    key.row_len = ss.str().length();
-    return key;
-}
-
-// Creates a KeySpec with row index of the form:
-// type_num,h1,h2,h3,h4
-KeySpec AtomspaceHTabler::make_key (Type t, std::vector<Handle>& handles)
-{
-    KeySpec key;
-    memset(&key, 0, sizeof(key));
-    
-    std::stringstream row;
-    row << (unsigned long) t;
-
-    std::vector<Handle>::iterator iter;
-    for (iter = handles.begin(); iter != handles.end(); ++iter) {
-	    row << ',';
-        row << (*iter).value();
-	}
-    key.row = row.str().c_str();
-    key.row_len = row.str().length();
-    
-    return key;
-}
-
-// Creates a KeySpec with row index of the form:
-// name,type
-KeySpec AtomspaceHTabler::make_key (Type t, std::string name)
-{
-    KeySpec key;
-    memset(&key, 0, sizeof(key));
-    
-    std::stringstream row;
-    row << name << ',' << (unsigned long) t;
-    key.row = row.str().c_str();
-    key.row_len = row.str().length();
-    return key;
-}
 
 /** 
  * This is a two-pass lookup: we get the handle from Outsettable
@@ -111,7 +59,7 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
     std::stringstream row;
     
     ssb.add_column("handle");
-    row << (unsigned long) t;
+    row << (unsigned short) t;
     std::vector<Handle>::const_iterator iter;
     for (iter = handles.begin(); iter != handles.end(); ++iter) {
 	    row << ',';
@@ -120,7 +68,7 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
 	ssb.add_row(row.str().c_str());
     ssb.set_max_versions(1);
 	
-    scanner_ptr = m_name_table->create_scanner(ssb.get());
+    scanner_ptr = m_outset_table->create_scanner(ssb.get());
     if (scanner_ptr->next(cell)) {
         Handle h(strtoul((char *)cell.value, NULL, 10));
         return dynamic_cast<Link *>(getAtom(h));
@@ -171,19 +119,35 @@ void AtomspaceHTabler::storeAtom(Handle h)
         std::cerr << "storeAtom(): Bad handle" << std::endl;
         return;
     }
+
+    KeySpec key;
+    memset(&key, 0, sizeof(key));
     
-    KeySpec handle_key = make_key(h);
+    // Create row index from handle
+    char row[BUFF_SIZE]; //TODO: Figure out how big this should actually be
+    key.row_len = snprintf(row, BUFF_SIZE, "%lu", h.value());
+    key.row = row;
         
     // If it's a node...
     Node *n = dynamic_cast<Node *>(atom_ptr);
     if (n) {
-        // Store the name
-        handle_key.column_family = "name";
-        m_handle_mutator->set(handle_key, n->getName().c_str(), 
-                n->getName().length());
-        // Create an index in the name table
-        KeySpec name_key = make_key(n->getType(), n->getName());
-        m_name_mutator->set(name_key, handle_key.row, handle_key.row_len);
+        //Store the name
+        key.column_family = "name";
+        m_handle_mutator->set(key, n->getName().c_str(), n->getName().length());
+        
+        KeySpec name_key;
+        memset(&name_key, 0, sizeof(name_key));
+    
+        char r[BUFF_SIZE];
+        snprintf(r, BUFF_SIZE, "%hu", n->getType());
+    
+        std::string name_index = n->getName() + ',' + r;
+        name_key.row = name_index.c_str();
+        name_key.row_len = name_index.length();
+        name_key.column_family = "handle";
+
+        m_name_mutator->set(name_key, key.row, key.row_len);
+        m_name_mutator->flush(); //TODO: Flush to get rid of if possible
     }
     // If it's a link...
     else {
@@ -200,8 +164,27 @@ void AtomspaceHTabler::storeAtom(Handle h)
 			// It makes sense that it would, though that leads to problems
 			// with cycles.
 		}
-		handle_key.column_family = "outgoing";
-		m_handle_mutator->set(handle_key, ss.str().c_str(), ss.str().length());
+		key.column_family = "outgoing";
+		m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
+		
+        KeySpec outset_key;
+        memset(&outset_key, 0, sizeof(outset_key));
+        
+        char r[BUFF_SIZE];
+        int len = snprintf(r, BUFF_SIZE, "%hu", l->getType());
+
+        std::vector<Handle>::const_iterator iter;
+        for (iter = l->getOutgoingSet().begin(); iter != l->getOutgoingSet().end(); 
+                ++iter) {
+            r[len++] = ',';
+            len += snprintf(r+len, BUFF_SIZE-len, "%lu", (*iter).value());
+	    }
+        outset_key.row = r;
+        outset_key.row_len = len;
+
+        outset_key.column_family = "handle";
+        m_outset_mutator->set(outset_key, key.row, key.row_len);
+        m_outset_mutator->flush(); //TODO: Flush to get rid of if possible
     }
     
     
@@ -211,8 +194,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
     // Store type
     Type t = atom_ptr->getType();
     val_len = snprintf(val, BUFF_SIZE, "%d", t);
-    handle_key.column_family = "type";
-    m_handle_mutator->set(handle_key, val, val_len);
+    key.column_family = "type";
+    m_handle_mutator->set(key, val, val_len);
 
     
     // Store the importance
@@ -222,16 +205,16 @@ void AtomspaceHTabler::storeAtom(Handle h)
     unsigned short vlti = av.getVLTI();
     
     val_len = snprintf(val, BUFF_SIZE, "%hd", sti);
-    handle_key.column_family = "sti";
-    m_handle_mutator->set(handle_key, val, val_len);
+    key.column_family = "sti";
+    m_handle_mutator->set(key, val, val_len);
     
     val_len = snprintf(val, BUFF_SIZE, "%hd", lti);
-    handle_key.column_family = "lti";
-    m_handle_mutator->set(handle_key, val, val_len);
+    key.column_family = "lti";
+    m_handle_mutator->set(key, val, val_len);
     
     val_len = snprintf(val, BUFF_SIZE, "%hu", vlti);
-    handle_key.column_family = "vlti";
-    m_handle_mutator->set(handle_key, val, val_len);
+    key.column_family = "vlti";
+    m_handle_mutator->set(key, val, val_len);
     
     
     // Store the truth value
@@ -243,8 +226,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
     }
     val_len = snprintf(val, BUFF_SIZE, "(%20.16g, %20.16g)",
                 tv.getMean(), tv.getCount());
-    handle_key.column_family = "stv";
-    m_handle_mutator->set(handle_key, val, val_len);
+    key.column_family = "stv";
+    m_handle_mutator->set(key, val, val_len);
     
     
     // Store incoming set
@@ -255,8 +238,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
         ss << he->handle;
         he = he->next;
     }
-    handle_key.column_family = "incoming";
-    m_handle_mutator->set(handle_key, ss.str().c_str(), ss.str().length());
+    key.column_family = "incoming";
+    m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
     
     //TODO: Find a way to get rid of this if possible; it may hurt performance.
     m_handle_mutator->flush();     
@@ -303,21 +286,13 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
     Cell cell;
-//    char *str;
 
-//    str = "type";
     ssb.add_column("type");
-//    str = "name";
     ssb.add_column("name");
-//    str = "stv";
     ssb.add_column("stv");
-//    str = "outgoing";
     ssb.add_column("outgoing");
-//    str = "sti";
     ssb.add_column("sti");
-//    str = "lti";
     ssb.add_column("lti");
-//    str = "vlti";
     ssb.add_column("vlti");
 
     char rowbuff[BUFF_SIZE];

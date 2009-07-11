@@ -25,10 +25,7 @@
 #include "Common/Compat.h"
 #include "Hypertable/Lib/Client.h"
 
-#include <string>
-
-#include "opencog/atomspace/HandleEntry.h"
-#include "opencog/atomspace/HandleSet.h"
+#include "opencog/atomspace/Handle.h"
 #include "opencog/atomspace/Node.h"
 #include "opencog/atomspace/Link.h"
 
@@ -42,35 +39,29 @@ namespace opencog
 class AtomspaceHTabler
 {
 private:
-        Table *m_handle_table;
-        TableMutator *m_handle_mutator;
-        Table *m_name_table;
-        TableMutator *m_name_mutator;
-        Table *m_outset_table;
-        TableMutator *m_outset_mutator;
+        ClientPtr c;
+        TablePtr m_handle_table;
+        TableMutatorPtr m_handle_mutator;
+        TablePtr m_name_table;
+        TableMutatorPtr m_name_mutator;
+        TablePtr m_outset_table;
+        TableMutatorPtr m_outset_mutator;
         
         KeySpec make_key(Handle);
-        KeySpec make_key(Type, std::vector<Handle>&);
-        KeySpec make_key(Type, std::string);
+        KeySpec make_key(Type, const std::vector<Handle>&);
+        KeySpec make_key(Type, const char*);
 public:
         AtomspaceHTabler(){
-            Client c;
-            m_handle_table = c.open_table("Atomtable");
+            c = new Client();
+            m_handle_table = c->open_table("Atomtable");
             m_handle_mutator = m_handle_table->create_mutator();
-            m_name_table = c.open_table("Nametable");
+            m_name_table = c->open_table("Nametable");
             m_name_mutator = m_name_table->create_mutator();
-            m_outset_table = c.open_table("Outsettable");
+            m_outset_table = c->open_table("Outsettable");
             m_outset_mutator = m_outset_table->create_mutator();
         }      
         
-        virtual ~AtomspaceHTabler(){
-            delete m_handle_table;
-            delete m_handle_mutator;
-            delete m_name_table;
-            delete m_name_mutator;
-            delete m_outset_table;
-            delete m_outset_mutator;
-        }
+        virtual ~AtomspaceHTabler(){}
         
         /** 
          * Return a pointer to a link of the indicated type and outset,
