@@ -8,41 +8,38 @@
 INCLUDE_DIRECTORIES(
 #    ${Boost_INCLUDE_DIRS}
     /opt/hypertable/0.9.2.4/include
+    /usr/hypertable/0.9.2.4/include
+    /usr/local/hypertable/0.9.2.4/include
 #    /home/jeremy/hypertable-0.9.3/0.9.2.4/include
 )
-
-ADD_EXECUTABLE(hypertable-test test.cc)
 
 ADD_LIBRARY(hypertabledb STATIC
 	AtomspaceHTabler.cc
 )
+
+ADD_EXECUTABLE(hypertable-test test.cc)
+
+LINK_DIRECTORIES(
+    /usr/local/hypertable/0.9.2.4/lib
+)
+
 TARGET_LINK_LIBRARIES(hypertable-test
+    -L /usr/local/hypertable/0.9.2.4/lib
     hypertabledb
-    /home/jeremy/compile/opencog/atomspace/libatomspace.so
-    /opt/hypertable/0.9.2.4/lib/libHyperComm.so
-    /opt/hypertable/0.9.2.4/lib/libHyperDfsBroker.so
-    /opt/hypertable/0.9.2.4/lib/libHyperRanger.so
-    /opt/hypertable/0.9.2.4/lib/libHypertable.so
-    /opt/hypertable/0.9.2.4/lib/libHyperThriftConfig.so
-    /opt/hypertable/0.9.2.4/lib/libHyperCommon.so
-    /opt/hypertable/0.9.2.4/lib/libHyperDfsCmds.so
-    /opt/hypertable/0.9.2.4/lib/libHyperspace.so
-    /opt/hypertable/0.9.2.4/lib/libHyperThrift.so
-    /opt/hypertable/0.9.2.4/lib/libHyperTools.so
 
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperComm.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperDfsBroker.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperRanger.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHypertable.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperThriftConfig.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperCommon.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperDfsCmds.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperspace.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperThrift.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperTools.so
-#/home/jeremy/hypertable-0.9.3/0.9.2.4/lib/libHyperCommon.so    
+    HyperComm
+    HyperDfsBroker
+    HyperRanger
+    Hypertable
+    HyperThriftConfig
+    HyperCommon
+    HyperDfsCmds
+    Hyperspace
+    HyperThrift
+    HyperTools
 
-    sigar-x86-linux
+#    sigar-x86-linux
+    sigar-x86_64-linux
     curses
     log4cpp
     ${EXPAT_LIBRARY}
