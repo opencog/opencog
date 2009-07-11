@@ -65,7 +65,7 @@ public:
          * Return a vector containing the handles of the entire incoming
          * set of the indicated handle. 
          */
-        virtual std::vector<Handle> getIncomingSet(Handle) const = 0;
+        virtual std::vector<Handle> getIncomingSet(Handle) const;
 		
 		/** 
 		 * Return a pointer to an Atom associated with the given

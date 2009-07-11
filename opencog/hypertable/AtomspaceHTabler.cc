@@ -85,7 +85,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         int arity = l->getArity();
         std::vector<Handle> out = l->getOutgoingSet();
         std::stringstream ss;
-        for (int i = 0; i < arity; ++i)n{
+        for (int i = 0; i < arity; ++i) {
 		    ss << ',';
             ss << out[i];
 		
@@ -160,7 +160,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
 * Return a vector containing the handles of the entire incoming
 * set of the indicated handle. 
 */
-std::vector<Handle> AtomspaceHTabler::getIncomingSet(Handle) const
+std::vector<Handle> AtomspaceHTabler::getIncomingSet(Handle h) const
 {
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
