@@ -21,24 +21,30 @@ int atomCompare(Atom *a, Atom *b)
 		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
 		--rc;
 	}
-	if (a->getArity() != b->getArity())
+	Link *na = dynamic_cast<Link *>(a);
+	Link *nb = dynamic_cast<Link *>(b);
+	if (na && nb)
 	{
-		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->getArity(), b->getArity());
-		--rc;
-	}
-	if (0 < a->getArity())
-	{
-		std::vector<Handle> outa = a->getOutgoingSet();
-		std::vector<Handle> outb = b->getOutgoingSet();
-		for (int i =0; i< a->getArity(); i++)
-		{
-			if (outa[i] != outb[i])
-			{
-				fprintf(stderr, "Error, outgoing set mis-match, "
-				        "i=%d a=%lx b=%lx\n", i, outa[i], outb[i]);
-				--rc;
-			}
-		}
+	    if (na->getArity() != nb->getArity())
+	    {
+		    fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->getArity(), nb->getArity());
+		    --rc;
+	    }
+	    if (0 < na->getArity())
+	    {
+		    std::vector<Handle> outa = na->getOutgoingSet();
+		    std::vector<Handle> outb = nb->getOutgoingSet();
+		    for (int i =0; i< na->getArity(); i++)
+		    {
+			    if (outa[i] != outb[i])
+			    {
+				    fprintf(stderr, "Error, outgoing set mis-match:");
+				    fprintf(stderr, "i=%d a[i]=%ld b[i]=%ld\n",i,
+				        outa[i].value(), outb[i].value());
+				    --rc;
+			    }
+		    }
+	    }
 	}
 	if (!(a->getTruthValue() == b->getTruthValue()))
 	{
@@ -63,57 +69,64 @@ int atomCompare(Atom *a, Atom *b)
 }
 
 int main (int argc, char **argv){
+    try
+    {
+        AtomspaceHTabler table;
 
-    AtomspaceHTabler table;
-
-	// Create an atom ... 
-	Atom *a = new Node(SCHEMA_NODE, "someNode");
-	SimpleTruthValue stv(0.55, 0.6);
-	a->setTruthValue(stv);
-	const AttentionValue av(42, 64, 1);
-	a->setAttentionValue(av);
-	TLB::addAtom(a);
-	Handle h = TLB::getHandle(a);
+	    // Create an atom ... 
+	    Atom *a = new Node(SCHEMA_NODE, "someNode");
+	    SimpleTruthValue stv(0.55, 0.6);
+	    a->setTruthValue(stv);
+	    const AttentionValue av(42, 64, 1);
+	    a->setAttentionValue(av);
+	    TLB::addAtom(a);
+	    Handle h = TLB::getHandle(a);
 	
-	// Store it
-	table.storeAtom(h);
+	    // Store it
+	    table.storeAtom(h);
 
-	// Get it back
-	Atom *b = table.getAtom(h);
+	    // Get it back
+	    Atom *b = table.getAtom(h);
 	
-		// Are they equal?
-    int rc = atomCompare(a,b);
-    if (!rc){
-        printf("node compare success\n");
-    }
-    else {
-        printf("node compare failure\n");
-    }
-    
-    // Create a second atom, connect it to the first
-	// with a link. Save it, fetch it ... are they equal?
-	Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
-	TLB::addAtom(a2);
-	table.storeAtom(TLB::getHandle(a2));
+		    // Are they equal?
+        int rc = atomCompare(a,b);
+        if (!rc){
+            printf("node compare success\n");
+        }
+        else {
+            printf("node compare failure\n");
+        }  
+        
+        // Create a second atom, connect it to the first
+	    // with a link. Save it, fetch it ... are they equal?
+	    Atom *a2 = new Node(SCHEMA_NODE, "otherNode");
+	    TLB::addAtom(a2);
+	    table.storeAtom(TLB::getHandle(a2));
 
-	std::vector<Handle> hvec;
-	hvec.push_back(TLB::getHandle(a));
-	hvec.push_back(TLB::getHandle(a2));
+	    std::vector<Handle> hvec;
+	    hvec.push_back(TLB::getHandle(a));
+	    hvec.push_back(TLB::getHandle(a2));
 
-	Link *l = new Link(SET_LINK, hvec);
-	TLB::addAtom(l);
-	table.storeAtom(TLB::getHandle(l));
+	    Link *l = new Link(SET_LINK, hvec);
+	    TLB::addAtom(l);
+	    table.storeAtom(TLB::getHandle(l));
 
-	Atom *lb = table.getAtom(TLB::getHandle(l));
-	rc = atomCompare(l,lb);
-	if (!rc) 
-	{
-        std::cout << "link compare success" << std::endl;
+	    Atom *lb = table.getAtom(TLB::getHandle(l));
+	    rc = atomCompare(l,lb);
+	    if (!rc) 
+	    {
+            std::cout << "link compare success" << std::endl;
+	    }
+	    else
+	    {
+	        std::cout << "link compare failure" << std::endl;
+	    }
+	        
+	    return 0;
 	}
-	else
+	catch (Exception &e)
 	{
-	    std::cout << "link compare failure" << std::endl;
+	    std::cerr << e << std::endl;
+	    return 1;
 	}
-	    
-	return 0;
 }

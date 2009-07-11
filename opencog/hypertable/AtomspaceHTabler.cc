@@ -45,8 +45,7 @@
 using namespace opencog;
 using namespace Hypertable;
 
-const int BUFF_SIZE = 1028;
-
+const int BUFF_SIZE = 1028; //TODO: Figure out how big this should actually be
 
 /**
  * Recursively store the atom and anything in its outgoing set.
@@ -60,6 +59,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     // If TLB didn't give us an atom, it was a bad handle and there's nothing
     // else to do.
     if (!atom_ptr) {
+        std::cerr << "storeAtom(): Bad handle" << std::endl;
         return;
     }
 
@@ -70,17 +70,16 @@ void AtomspaceHTabler::storeAtom(Handle h)
 
     try {
         table_ptr = client_ptr->open_table("Atomtable");
-        mutator_ptr = table_ptr->create_mutator();
+        mutator_ptr = table_ptr->create_mutator(3000);
     } catch (Exception &e) {
         std::cerr << e << std::endl;
         return;
     }
     
     // Create row index from handle
-    char val[BUFF_SIZE];
-    int val_len;
-    key.row_len = snprintf(val, BUFF_SIZE, "%lu", h.value());
-    key.row = rowbuff;
+    char row[BUFF_SIZE]; //TODO: Figure out how big this should actually be
+    key.row_len = snprintf(row, BUFF_SIZE, "%lu", h.value());
+    key.row = row;
         
     // If it's a node...
     Node *n = dynamic_cast<Node *>(atom_ptr);
@@ -95,20 +94,23 @@ void AtomspaceHTabler::storeAtom(Handle h)
         Link *l = dynamic_cast<Link *>(atom_ptr);
         int arity = l->getArity();
         std::vector<Handle> out = l->getOutgoingSet();
-        String outSet;
         std::stringstream ss;
         for (int i=0; i<arity; ++i)
 		{
+		    ss << ',';
             ss << out[i];
-		    outSet += ss.str() + ',';
 		
-			// XXX: Should the atom itself also be stored?
+			// XXX: Should the outgoing atom itself also be stored?
 			// It makes sense that it would, though that leads to problems
 			// with cycles.
 		}
 		key.column_family = "outgoing";
-		mutator_ptr->set(key, outSet.c_str(), outSet.length());
+		mutator_ptr->set(key, ss.str().c_str(), ss.str().length());
     }
+    
+    
+    char val[BUFF_SIZE];
+    int val_len;
     
     // Store type
     Type t = atom_ptr->getType();
@@ -146,12 +148,10 @@ void AtomspaceHTabler::storeAtom(Handle h)
     val_len = snprintf(val, BUFF_SIZE, "(%20.16g, %20.16g)",
                 tv.getMean(), tv.getCount());
     key.column_family = "stv";
-    mutator_ptr->set(key, stvbuff, stv_len);
+    mutator_ptr->set(key, val, val_len);
     
-    
-    //TODO: Find a way to get rid of this; it may hurt performance.
-    mutator_ptr->flush();
-
+    //TODO: Find a way to get rid of this if possible; it may hurt performance.
+    mutator_ptr->flush();     
     return;
 }
 
@@ -196,6 +196,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
         std::cerr << e << std::endl;
         return atom_ptr;
     }
+    
 
     char* name;
     char* stv;
@@ -217,8 +218,8 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
         } else if (!strcmp("stv", cell.column_family)) {
             stv = (char *)cell.value;
         } else if (!strcmp("outgoing", cell.column_family)) {         
-            char *end = (char *)cell.value + cell.value_len + 1;
-            char *comma = strchr ((const char *)cell.value, ',');
+            char *end = (char *)cell.value + cell.value_len;
+            char *comma = (char *)cell.value;
             while (comma != end) {
                 Handle h = (Handle) strtoul(comma+1, &comma, 10);
                 handles.push_back(h);
@@ -227,10 +228,11 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
             sti = (short) atoi((char *)cell.value);
         } else if (!strcmp("lti", cell.column_family)) {
             lti = (short) atoi((char *)cell.value);
-        } else if (!strcmp("sti", cell.column_family)) {
-            vlti = (unsigned short) atoi((char *)cell.value);
+        } else if (!strcmp("vlti", cell.column_family)) {
+            vlti = (short) atoi((char *)cell.value);
         }
     }
+    
     
     if (!found){
         return NULL;
