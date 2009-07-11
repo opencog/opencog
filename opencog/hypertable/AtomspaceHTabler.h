@@ -23,11 +23,15 @@
 #define _OPENCOG_ATOMSPACE_HTABLER_H
 
 #include "Common/Compat.h"
-
-#include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/HandleSet.h>
-
 #include "Hypertable/Lib/Client.h"
+
+#include <string>
+
+#include "opencog/atomspace/HandleEntry.h"
+#include "opencog/atomspace/HandleSet.h"
+#include "opencog/atomspace/Node.h"
+#include "opencog/atomspace/Link.h"
+
 
 namespace opencog
 {
@@ -38,28 +42,54 @@ namespace opencog
 class AtomspaceHTabler
 {
 private:
-        Client *m_client;
         Table *m_handle_table;
         TableMutator *m_handle_mutator;
+        Table *m_name_table;
+        TableMutator *m_name_mutator;
+        Table *m_outset_table;
+        TableMutator *m_outset_mutator;
+        
+        KeySpec make_key(Handle);
+        KeySpec make_key(Type, std::vector<Handle>&);
+        KeySpec make_key(Type, std::string);
 public:
         AtomspaceHTabler(){
-            m_client = new Client();
-            m_handle_table = m_client->open_table("Atomtable");
-            m_handle_mutator = m_handle_table->create_mutator(3000);
+            Client c;
+            m_handle_table = c.open_table("Atomtable");
+            m_handle_mutator = m_handle_table->create_mutator();
+            m_name_table = c.open_table("Nametable");
+            m_name_mutator = m_name_table->create_mutator();
+            m_outset_table = c.open_table("Outsettable");
+            m_outset_mutator = m_outset_table->create_mutator();
         }      
         
         virtual ~AtomspaceHTabler(){
-            delete m_client;
             delete m_handle_table;
             delete m_handle_mutator;
+            delete m_name_table;
+            delete m_name_mutator;
+            delete m_outset_table;
+            delete m_outset_mutator;
         }
+        
+        /** 
+         * Return a pointer to a link of the indicated type and outset,
+         * if it exists; else return NULL.
+         */
+		virtual Link * getLink(Type, const std::vector<Handle>&) const;
+		
+        /** 
+         * Return a pointer to a node of the indicated type and name,
+         * if it exists; else return NULL.
+         */
+        virtual Node * getNode(Type, const char *) const;
 
-		/**
-		 * Recursively store the atom and anything in its outgoing set.
-		 * If the atom is already in storage, this will update it's 
-		 * truth value, etc. 
-		 */
-		virtual void storeAtom(Handle);
+        /**
+         * Recursively store the atom and anything in its outgoing set.
+         * If the atom is already in storage, this will update it's 
+         * truth value, etc. 
+         */
+        virtual void storeAtom(Handle);
 		
         /**
          * Return a vector containing the handles of the entire incoming
@@ -67,11 +97,11 @@ public:
          */
         virtual std::vector<Handle> getIncomingSet(Handle) const;
 		
-		/** 
-		 * Return a pointer to an Atom associated with the given
-		 * handle, if it exists; else return NULL.
-		 */
-		virtual Atom * getAtom(Handle) const;
+        /** 
+         * Return a pointer to an Atom associated with the given
+         * handle, if it exists; else return NULL.
+         */
+        virtual Atom * getAtom(Handle) const;
 
 };
 
