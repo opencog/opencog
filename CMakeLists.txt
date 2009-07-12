@@ -156,6 +156,9 @@ ENDIF (UBIGRAPHCLIENT_FOUND)
 FIND_PACKAGE(HyperTable)
 IF (HYPERTABLE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
+	MESSAGE(STATUS "Hypertable was found.")
+ELSE (HYPERTABLE_FOUND)
+	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
 
 # global includes

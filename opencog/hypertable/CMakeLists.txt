@@ -1,15 +1,6 @@
-#SET(Boost_USE_STATIC_LIBS OFF)
-#SET(Boost_USE_MULTITHREADED ON)
-#FIND_PACKAGE(Boost 1.34 COMPONENTS program_options iostreams filesystem signals regex date_time thread REQUIRED)
-#FIND_PACKAGE(EXPAT REQUIRED)
-
-#SET(HYPERTABLE_INCLUDE_DIRS, /opt/hypertable/0.9.2.4/include)
 
 INCLUDE_DIRECTORIES(
-#    ${Boost_INCLUDE_DIRS}
-    /opt/hypertable/0.9.2.4/include
-    /usr/hypertable/0.9.2.4/include
-    /usr/local/hypertable/0.9.2.4/include
+	${HYPERTABLE_INCLUDE_DIRS}
 #    /home/jeremy/hypertable-0.9.3/0.9.2.4/include
 )
 
@@ -19,11 +10,12 @@ ADD_LIBRARY(hypertabledb STATIC
 
 ADD_EXECUTABLE(hypertable-test test.cc)
 
-LINK_DIRECTORIES(
-    /usr/local/hypertable/0.9.2.4/lib
-)
+# LINK_DIRECTORIES(
+#     /usr/local/hypertable/0.9.2.4/lib
+# )
 
 TARGET_LINK_LIBRARIES(hypertable-test
+    ${HYPERTABLE_LIBRARIES}
     hypertabledb
 
     HyperComm
