@@ -24,7 +24,6 @@ LINK_DIRECTORIES(
 )
 
 TARGET_LINK_LIBRARIES(hypertable-test
-    -L /usr/local/hypertable/0.9.2.4/lib
     hypertabledb
 
     HyperComm
