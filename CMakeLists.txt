@@ -146,11 +146,18 @@ IF (UBIGRAPHCLIENT_FOUND)
     ENDIF (CURL_FOUND)
 ENDIF (UBIGRAPHCLIENT_FOUND)
 
-# At this time,. there is no reason to build with memcached for
+# At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
 # IF (LIBMEMCACHED_FOUND)
 #	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
 # ENDIF (LIBMEMCACHED_FOUND)
+
+# Hypertable library
+FIND_PACKAGE(HyperTable)
+IF (HYPERTABLE_FOUND)
+	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
+ENDIF (HYPERTABLE_FOUND)
+
 # global includes
 
 # set confdir and datadir
