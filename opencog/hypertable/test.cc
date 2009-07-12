@@ -132,7 +132,7 @@ int main (int argc, char **argv){
 	        
 	    return 0;
 	} catch (Exception &e) {
-	    //std::cerr << e << std::endl;
+	    std::cerr << e << std::endl;
 	    return 1;
 	}
 }

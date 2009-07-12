@@ -3,7 +3,5 @@ This directory uses Hypertable to support persistent and (eventually) distribute
 1. Hypertable must be installed (of course).
 2. The Hypertable servers must be running. The command to start them is:
         <install_dir>/bin/start-all-servers.sh <local | hadoop | kfs>
-3. The table must be created through the hypertable shell. To start the shell:
-        <install_dir>/bin/hypertable
-   From the hypertable shell, run this command:
-        CREATE TABLE Atomtable ( name, type, stv, outgoing, incoming, sti, lti, vlti );
+3. The Hypertable install directory and default configuration file need to be 
+    specified in opencog/hypertable/AtomspaceHTabler.h
