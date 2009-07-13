@@ -1,4 +1,6 @@
 #include "CogServer_wrap.h"
+#include <opencog/server/BaseServer.h>
+
 #include <boost/python/class.hpp>
 
 //using namespace opencog;
@@ -6,7 +8,7 @@ using namespace boost::python;
 
 void init_CogServer_py()
 {
-    class_<CogServerWrap, boost::noncopyable>("CogServer")
+    class_<CogServerWrap, bases<BaseServer>, boost::noncopyable>("CogServer")
         .def("runAgent",
             &CogServer::runAgent,
             &CogServerWrap::default_runAgent)
