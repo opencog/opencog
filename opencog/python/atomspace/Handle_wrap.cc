@@ -7,5 +7,7 @@ using namespace boost::python;
 void init_Handle_py()
 {
     class_<Handle>("Handle", no_init)
+        .def(init<const Handle&>())
+        .def(init<>())
     ;
 }
