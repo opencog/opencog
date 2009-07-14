@@ -7,11 +7,23 @@ using namespace opencog;
 
 void init_SimpleTruthValue_py()
 {
-    class_<SimpleTruthValueWrap, bases<TruthValue>, boost::noncopyable>("SimpleTruthValue", 
-    no_init)
+    class_<SimpleTruthValueWrap, bases<TruthValue>, boost::noncopyable>("SimpleTruthValue", no_init)
+        .def(init<strength_t, count_t>())
+        .def(init<const TruthValue&>())
+        .def(init<SimpleTruthValue const&>())
         .def(self == self)
     ;
 }
+
+SimpleTruthValueWrap::SimpleTruthValueWrap(strength_t mean, count_t count):
+    SimpleTruthValue(mean, count)
+{}
+SimpleTruthValueWrap::SimpleTruthValueWrap(const TruthValue& tv):
+    SimpleTruthValue(tv)
+{}
+SimpleTruthValueWrap::SimpleTruthValueWrap(SimpleTruthValue const& stv):
+    SimpleTruthValue(stv)
+{}
 
 // Non-pure virtual functions.
 

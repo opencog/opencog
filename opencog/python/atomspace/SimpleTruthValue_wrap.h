@@ -16,6 +16,10 @@ void init_SimpleTruthValue_py();
  */
 struct SimpleTruthValueWrap : SimpleTruthValue, wrapper<SimpleTruthValue>
 {
+    SimpleTruthValueWrap(strength_t, count_t);
+    SimpleTruthValueWrap(const TruthValue&);
+    SimpleTruthValueWrap(SimpleTruthValue const&);
+
     // Non-pure virtual functions.
 
     bool operator==(const TruthValue& rhs) const;
