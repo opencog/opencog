@@ -17,6 +17,9 @@ void init_CompositeTruthValue_py();
 struct CompositeTruthValueWrap : CompositeTruthValue, 
 wrapper<CompositeTruthValue>
 {
+    CompositeTruthValueWrap(const TruthValue&, VersionHandle);
+    CompositeTruthValueWrap(CompositeTruthValue const&);
+
     // Non-pure virtual functions.
 
     bool operator==(const TruthValue& rhs) const;

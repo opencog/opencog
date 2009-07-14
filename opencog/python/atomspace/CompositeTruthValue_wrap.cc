@@ -8,9 +8,20 @@ using namespace opencog;
 void init_CompositeTruthValue_py()
 {
     class_<CompositeTruthValueWrap, bases<TruthValue>, boost::noncopyable>("CompositeTruthValue", no_init)
+        .def(init<const TruthValue&, VersionHandle>())
+        .def(init<CompositeTruthValue const&>())
         .def(self == self)
     ;
 }
+
+CompositeTruthValueWrap::CompositeTruthValueWrap(const TruthValue& t,
+    VersionHandle vh):
+    CompositeTruthValue(t, vh)
+{}
+CompositeTruthValueWrap::CompositeTruthValueWrap(CompositeTruthValue const& 
+ctv):
+    CompositeTruthValue(ctv)
+{}
 
 // Non-pure virtual functions.
 
