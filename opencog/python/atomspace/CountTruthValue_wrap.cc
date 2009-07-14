@@ -9,11 +9,25 @@ void init_CountTruthValue_py()
 {
     class_<CountTruthValueWrap, bases<TruthValue>, boost::noncopyable>("CountTruthValue", 
     no_init)
+        .def(init<strength_t, confidence_t, count_t>())
+        .def(init<const TruthValue&>())
+        .def(init<CountTruthValue const&>())
         .def(self == self)
         .def("merge", &CountTruthValue::merge,
             return_value_policy<manage_new_object>())
     ;
 }
+
+CountTruthValueWrap::CountTruthValueWrap(strength_t m, confidence_t n,
+    count_t c):
+    CountTruthValue(m, n, c)
+{}
+CountTruthValueWrap::CountTruthValueWrap(const TruthValue& source):
+    CountTruthValue(source)
+{}
+CountTruthValueWrap::CountTruthValueWrap(CountTruthValue const& source):
+    CountTruthValue(source)
+{}
 
 // Non-pure virtual functions.
 

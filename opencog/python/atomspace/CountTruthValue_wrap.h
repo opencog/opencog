@@ -16,6 +16,10 @@ void init_CountTruthValue_py();
  */
 struct CountTruthValueWrap : CountTruthValue, wrapper<CountTruthValue>
 {
+    CountTruthValueWrap(strength_t, confidence_t, count_t);
+    CountTruthValueWrap(const TruthValue&);
+    CountTruthValueWrap(CountTruthValue const&);
+
     // Non-pure virtual functions.
 
     bool operator==(const TruthValue& rhs) const;
