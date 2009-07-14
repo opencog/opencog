@@ -114,8 +114,3 @@ bool TruthValueWrap::default_isNullTv() const
 {
     return this->TruthValue::isNullTv();
 }
-
-//TruthValue* (*factoryx1)(const char*) = &TruthValue::factory;
-//TruthValue* (*factoryx2)(TruthValueType, const char*) = &TruthValue::factory;
-/*factoryx1 = TruthValue::factory;
-factoryx2 = TruthValue::factory;*/
