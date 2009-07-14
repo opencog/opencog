@@ -27,6 +27,9 @@
 #include <sstream>
 #include <string>
 
+// To parse and check ascii IP address optionally given by user
+#include <arpa/inet.h>
+
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
@@ -63,12 +66,39 @@ void UbigraphModule::init()
 std::string UbigraphModule::do_ubigraph(Request *dummy, std::list<std::string> args)
 {
     while (!args.empty()) {
-        if (args.front() == "with-incoming")
-            g.withIncoming = true;
-        if (args.front() == "--compact")
-            g.compact = true;
+        if (args.front().compare(0,2,"--")) {
+            if (args.front() == "--with-incoming")
+                g.withIncoming = true;
+            if (args.front() == "--compact")
+                g.compact = true;
+        } else {
+            // Whether parsing is successful
+            bool networkAddressSuccess = false; 
+            struct sockaddr_in sa;
+            // Should be an IP address and port
+            if ( args.front().find(':') == std::string::npos )
+                return "IP and port formatting error. Expects x.x.x.x:port";
+            g.serverIP = args.front().substr(0,args.front().find(':'));
+            int result = inet_pton(AF_INET, g.serverIP.c_str(), &(sa.sin_addr));
+            if (result == 0) {
+                // Not a valid IP address
+                networkAddressSuccess = false;
+                g.serverIP = "";
+                g.serverPort = 0;
+                return "IP address invalid.";
+            }
+            std::istringstream myStream(args.front().substr(args.front().find(':')+1));
+            if (!(myStream >> g.serverPort)) {
+                // conversion of port string to int failed
+                networkAddressSuccess = false;
+                g.serverIP = "";
+                g.serverPort = 0;
+                return "Port invalid.";
+            }
+        }
         args.pop_front();
     }
+    g.init();
     g.watchSignals();
     g.graph();
     return "";

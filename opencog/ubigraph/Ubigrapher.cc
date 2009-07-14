@@ -41,9 +41,13 @@ using namespace std;
 using namespace std::tr1::placeholders;
 
 extern "C" {
-    #include <UbigraphAPI.h>
+    #include "UbigraphAPI.h"
+    #include <xmlrpc.h>
 }
 #include "Ubigrapher.h"
+
+extern xmlrpc_env env;
+extern const char* ubigraph_url;
 
 namespace opencog
 {
@@ -52,36 +56,52 @@ std::string initials(std::string s)
 {
     std::string ret;
     foreach (char c,  s) {
-        if (/*isUpperCase(c)*/ Isox(c) == c) {
+        if (Isox(c) == c) {
             ret += c;
         }
     }
     return ret;
 }
 
-Ubigrapher::Ubigrapher() : pushDelay(1), withIncoming(false), compact(false)
+Ubigrapher::Ubigrapher() : pushDelay(1), connected(false),
+    withIncoming(false), compact(false)
 {
     space = CogServer::getAtomSpace();
+    serverIP = "localhost";
+    serverPort = 20738;
 
     compactLabels = true;
     labelsOn = true;
 
-    ubigraph_clear();
-    setStyles();
+}
+
+void Ubigrapher::init()
+{
+    std::ostringstream os;
+    os << "http://" << serverIP << ":" << serverPort << "/RPC2";
+    serverString = os.str();
+    logger().info("Ubigrapher will connect to " + serverString);
+    ubigraph_url = serverString.c_str();
+
+    if (ubigraph_clear() == UBIGRAPH_SUCCESS) {
+        connected = true;
+        setStyles();
+    }
 }
 
 void Ubigrapher::watchSignals()
 {
     if (!listening) {
         c_add = space->addAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleAddSignal, this, std::tr1::placeholders::_1));
+                std::tr1::bind(&Ubigrapher::handleAddSignal, this,
+                    std::tr1::placeholders::_1));
         c_remove = space->removeAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this, std::tr1::placeholders::_1));
+                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this,
+                    std::tr1::placeholders::_1));
         assert(c_add.connected() && c_remove.connected());
         listening = true;
     } else {
         logger().error("[Ubigrapher] Couldn't watch signals, already watching!");
-
     }
 }
 
@@ -100,7 +120,7 @@ void Ubigrapher::unwatchSignals()
 void Ubigrapher::setStyles()
 {
     //cout << "Ubigrapher setStyles" << endl;
-    // Set the styles for various types of edges and vertexes in the graph        
+    // Set the styles for various types of edges and vertexes in the graph
     nodeStyle = ubigraph_new_vertex_style(0);
     ubigraph_set_vertex_style_attribute(nodeStyle, "shape", "sphere");
     
@@ -116,11 +136,14 @@ void Ubigrapher::setStyles()
     // Makes it easier to see the direction of the arrows (cones),
     // but hides the number/type labels
     //ubigraph_set_edge_style_attribute(outgoingStyle, "arrow_radius", "1.5");
-    ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow_length", "2.0");
+    ubigraph_set_edge_style_attribute(outgoingStyleDirected, "arrow_length",
+            "2.0");
 
     compactLinkStyleDirected = ubigraph_new_edge_style(compactLinkStyle);
-    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow", "true");
-    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow_length", "2.0");
+    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow",
+            "true");
+    ubigraph_set_edge_style_attribute(compactLinkStyleDirected, "arrow_length",
+            "2.0");
     
 }
 

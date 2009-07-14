@@ -73,6 +73,13 @@ private:
     boost::signals::connection c_add; //! Connection to add atom signals
     boost::signals::connection c_remove; //! Connection to remove atom signals
 
+    /** Whether the Ubigrapher has successfully connected to an Ubigraph
+     * server.
+     */
+    bool connected;
+
+    std::string serverString; //!< Complete XMLRPC server string
+
 protected:
     //! Initialise the various styles
     virtual void setStyles();
@@ -80,6 +87,10 @@ protected:
 public:
     Ubigrapher();
     virtual ~Ubigrapher() {}
+    void init();
+
+    std::string serverIP;
+    int serverPort;
 
     AtomSpace *space;
 

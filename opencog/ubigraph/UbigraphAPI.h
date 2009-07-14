@@ -22,7 +22,7 @@ result_t    ubigraph_new_vertex_w_id(vertex_id_t x);
 result_t    ubigraph_new_edge_w_id(edge_id_t e, vertex_id_t x, vertex_id_t y);
 
 /* Delete all vertices and edges */
-void        ubigraph_clear();
+result_t    ubigraph_clear();
 
 /* Set a vertex attribute */
 result_t    ubigraph_set_vertex_attribute(vertex_id_t x,
