@@ -16,6 +16,13 @@ void init_Link_py();
  */
 struct LinkWrap : Link, wrapper<Link>
 {
+    LinkWrap(Type, const std::vector<Handle>&, const TruthValue&);
+    LinkWrap(Type, Handle&, const TruthValue&);
+    LinkWrap(Type, Handle&, Handle&, const TruthValue&);
+    LinkWrap(Type, Handle&, Handle&, Handle&, const TruthValue&);
+    LinkWrap(Type, Handle&, Handle&, Handle&, Handle&, const TruthValue&);
+    LinkWrap(const Link&);
+
     // Non-pure virtual functions.
 
     bool operator==(const Atom&) const;
