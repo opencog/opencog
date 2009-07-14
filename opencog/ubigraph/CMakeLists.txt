@@ -2,25 +2,19 @@ ADD_LIBRARY (ubigraph SHARED
     UbigraphModule
     Ubigrapher
     BITUbigrapher
+    client
 )
 
 INCLUDE_DIRECTORIES (
     ${CSOCKETS_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR}
     ${ODBC_INCLUDE_DIRS}
-    ${UBIGRAPHCLIENT_INCLUDE_DIRS}
 )
 
 TARGET_LINK_LIBRARIES(ubigraph
     m
-    curl # TODO currently requires making a library called libcurl.so (linked to a specific version) 
-    ${UBIGRAPHCLIENT_LIBRARIES} #    ubigraphclient
-    ${XMLRPC_LIBRARIES} #
-    xmlrpc_client
-    xmlrpc
-#    xmlrpc_util
-    xmlrpc_xmlparse
-    xmlrpc_xmltok
+    ${CURL_LIBRARIES} 
+    ${XMLRPC_LIBRARIES}
 )
 
 INSTALL (TARGETS ubigraph
@@ -28,8 +22,9 @@ INSTALL (TARGETS ubigraph
 )
 
 INSTALL (FILES
+    UbigraphAPI.h
     UbigraphModule.h
     Ubigrapher.h
     BITUbigrapher.h
-DESTINATION "include/opencog/ubigraph"
+    DESTINATION "include/opencog/ubigraph"
 )
