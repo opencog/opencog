@@ -7,11 +7,15 @@ using namespace boost::python;
 void init_Link_py()
 {
     class_<LinkWrap, bases<Atom>, boost::noncopyable>("Link", no_init)
-        .def(init<Type, const std::vector<Handle>&, const TruthValue&>())
-        .def(init<Type, Handle&, const TruthValue&>())
-        .def(init<Type, Handle&, Handle&, const TruthValue&>())
-        .def(init<Type, Handle&, Handle&, Handle&, const TruthValue&>())
-        .def(init<Type, Handle&, Handle&, Handle&, Handle&, const TruthValue&>())
+        .def(init<Type, const std::vector<Handle>&,
+            optional<const TruthValue&> >())
+        .def(init<Type, Handle&, optional<const TruthValue&> >())
+        .def(init<Type, Handle&, Handle&,
+            optional<const TruthValue&> >())
+        .def(init<Type, Handle&, Handle&, Handle&,
+            optional<const TruthValue&> >())
+        .def(init<Type, Handle&, Handle&, Handle&, Handle&,
+            optional<const TruthValue&> >())
         .def(init<const Link&>())
         .def(self == self)
         .def(self != self)
@@ -20,21 +24,23 @@ void init_Link_py()
 }
 
 LinkWrap::LinkWrap(Type t, const std::vector<Handle>& oset,
-    const TruthValue& tv):
+    const TruthValue& tv = TruthValue::NULL_TV()):
     Link(t, oset, tv)
 {}
-LinkWrap::LinkWrap(Type t, Handle& h, const TruthValue& tv):
+LinkWrap::LinkWrap(Type t, Handle& h,
+    const TruthValue& tv = TruthValue::NULL_TV()):
     Link(t, h, tv)
 {}
-LinkWrap::LinkWrap(Type t, Handle& ha, Handle& hb, const TruthValue& tv):
+LinkWrap::LinkWrap(Type t, Handle& ha, Handle& hb,
+    const TruthValue& tv = TruthValue::NULL_TV()):
     Link(t, ha, hb, tv)
 {}
 LinkWrap::LinkWrap(Type t, Handle& ha, Handle& hb, Handle& hc,
-    const TruthValue& tv):
+    const TruthValue& tv = TruthValue::NULL_TV()):
     Link(t, ha, hb, hc, tv)
 {}
 LinkWrap::LinkWrap(Type t, Handle& ha, Handle& hb, Handle& hc, Handle& hd,
-    const TruthValue& tv):
+    const TruthValue& tv = TruthValue::NULL_TV()):
     Link(t, ha, hb, hc, hd, tv)
 {}
 LinkWrap::LinkWrap(const Link &l):
