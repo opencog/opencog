@@ -16,6 +16,9 @@ void init_Node_py();
  */
 struct NodeWrap : Node, wrapper<Node>
 {
+    NodeWrap(Type, const std::string&, const TruthValue&);
+    NodeWrap(const Node&);
+
     // Non-pure virtual functions.
 
     bool operator==(const Atom&) const;

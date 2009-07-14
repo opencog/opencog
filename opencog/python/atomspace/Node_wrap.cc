@@ -7,11 +7,22 @@ using namespace boost::python;
 void init_Node_py()
 {
     class_<NodeWrap, bases<Atom>, boost::noncopyable>("Node", no_init)
+        .def(init<Type, const std::string&,
+            optional<const TruthValue&> >())
+        .def(init<const Node&>())
         .def(self == self)
         .def(self != self)
         .def("hashCode", pure_virtual(&Atom::hashCode))
     ;
 }
+
+NodeWrap::NodeWrap(Type t, const std::string& s,
+    const TruthValue& tv = TruthValue::NULL_TV()):
+    Node(t, s, tv)
+{}
+NodeWrap::NodeWrap(const Node &n):
+    Node(n)
+{}
 
 // For the pure virtual functions.
 
