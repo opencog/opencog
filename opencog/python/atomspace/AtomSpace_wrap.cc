@@ -16,7 +16,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(removeAtom_overloads, removeAtom, 1, 2)
 
 void init_AtomSpace_py()
 {
-    class_<AtomSpace, bases<SpaceServerContainer> >("AtomSpace")
+    class_<AtomSpaceWrap, bases<SpaceServerContainer>, boost::noncopyable >("AtomSpace")
         .def("storeAtom", &AtomSpace::storeAtom)
         .def("addNode", &AtomSpace::addNode, addNode_overloads())
         .def("addRealAtom", &AtomSpace::addRealAtom,
@@ -24,6 +24,10 @@ void init_AtomSpace_py()
         .def("removeAtom", &AtomSpace::removeAtom,
             removeAtom_overloads())
         //.def("addLink", &AtomSpace::addLink, addLink_overloads())
+        .def("addLink", &AtomSpaceWrap::addLinkx1)
+        .def("addLink", &AtomSpaceWrap::addLinkx2)
+        /*.def("addLink", addLinkx1)
+        .def("addLink", addLinkx2)*/
         .def("getSpaceServer", &AtomSpace::getSpaceServer,
             return_value_policy<reference_existing_object>())
     ;

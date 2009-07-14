@@ -3,10 +3,12 @@
 
 #include <boost/python/wrapper.hpp>
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/TruthValue.h>
 
-using namespace boost::python;
 using namespace opencog;
+using namespace boost::python;
 
 /** Exposes the AtomSpace class. */
 void init_AtomSpace_py();
@@ -18,13 +20,17 @@ void init_AtomSpace_py();
  */
 struct AtomSpaceWrap: AtomSpace, wrapper<AtomSpace>
 {
-    // Non-pure virtual functions.
-
+    Handle addLinkx1(Type t, const HandleSeq& outgoing, const TruthValue& tvn) {
+        return addLink(t, outgoing, tvn);
+    }
+    Handle addLinkx2(Type t, const Handle h, const TruthValue& tvn) {
+        return addLink(t, h, tvn);
+    }
 };
 
 /** A function pointer necessary for wrapping overloaded member methods of 
  * classes.  */
-//Handle (*addLinkx1)(Type, const HandleSeq&, const TruthValue&) = &AtomSpace::addLink;
-//Handle (*addLinkx2)(Type, Handle, const TruthValue&) = &AtomSpace::addLink;
+/*Handle (*addLinkx1)(Type t, const HandleSeq& outgoing, const TruthValue& tvn) = &AtomSpace::addLink;
+Handle (*addLinkx2)(Type t, Handle h, const TruthValue& tvn) = &AtomSpace::addLink;*/
 
 #endif // _OPENCOG_ATOMSPACE_WRAP_H
