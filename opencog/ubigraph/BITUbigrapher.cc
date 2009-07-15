@@ -33,7 +33,7 @@
 
 extern "C"
 {
-#include <UbigraphAPI.h>
+#include "UbigraphAPI.h"
 }
 
 using namespace std;

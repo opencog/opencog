@@ -10,14 +10,9 @@ DottyModule by Trent Waddington <trent.waddington@gmail.com>.
 
 == Dependencies ==
 
-This module depends on the ubigraph server (an Ubigraph server has to running
-for the module to load succesfully), and also the C client interface that comes
-as an in the examples/C directory of the Ubigraph distribution.
+For the module to do anything useful there has to be a running Ubigraph server.
 
-libubigraphclient.a (Ubigraph C client interface)
-
-=== Other library dependencies ===
-
+Libraries:
 XMLRPC
 libcurl
 libm
@@ -64,8 +59,6 @@ to show.
 * "Themes" to display TruthValues and AttentionValues visually (e.g. as color or
 size).
 
-* Make FindXMLRPC work correctly re the XMLRPC_LIBRARIES CMake variable.
-
 * Add callback for Ubigraph which displays atom info when a node or link is
 clicked. This needs OpenCog XML-RPC or JSON-RPC integration first however.
 
@@ -73,5 +66,4 @@ clicked. This needs OpenCog XML-RPC or JSON-RPC integration first however.
 another for NLP processing and dialogue pipeline. Eventually these should all be
 merged into separate views in a generic AtomSpace/OpenCog visualisation tool.
 
-* [related] Make the UbiGraph client library easier to compile and install.
 

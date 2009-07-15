@@ -12,22 +12,14 @@ INCLUDE_DIRECTORIES (
 	${CSOCKETS_INCLUDE_DIRS}
 	${OPENSSL_INCLUDE_DIR}
 	${ODBC_INCLUDE_DIRS}
-	${UBIGRAPHCLIENT_INCLUDE_DIRS}
 )
 
-IF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
+IF (XMLRPC_FOUND AND CURL_FOUND)
     SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
     SET (OPENCOG_UBI_LIB ubigraph
-        ${UBIGRAPHCLIENT_LIBRARIES}
-#       {$XMLRPC_LIBRARIES}
         ${XMLRPC_LIBRARIES}
-        #xmlrpc_client
-        #xmlrpc
-        #xmlrpc_util
-        #xmlrpc_xmlparse
-        #xmlrpc_xmltok
         )
-ENDIF (UBIGRAPHCLIENT_FOUND AND XMLRPC_FOUND)
+ENDIF (XMLRPC_FOUND AND CURL_FOUND)
 
 ADD_EXECUTABLE (hopfield
 	HopfieldDemo.cc
@@ -44,6 +36,7 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
+    ubigraph
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
