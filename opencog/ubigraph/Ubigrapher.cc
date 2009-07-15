@@ -46,7 +46,6 @@ extern "C" {
 }
 #include "Ubigrapher.h"
 
-extern xmlrpc_env env;
 extern const char* ubigraph_url;
 
 namespace opencog
@@ -67,17 +66,20 @@ Ubigrapher::Ubigrapher() : pushDelay(1), connected(false),
     withIncoming(false), compact(false)
 {
     space = CogServer::getAtomSpace();
-    serverIP = "localhost";
-    serverPort = 20738;
+    serverIP = "";
+    serverPort = 0;
 
     compactLabels = true;
     labelsOn = true;
 
 }
 
-void Ubigrapher::init()
+void Ubigrapher::init(std::string server, int port)
 {
     std::ostringstream os;
+    serverIP = server;
+    serverPort = port;
+    connected = false;
     os << "http://" << serverIP << ":" << serverPort << "/RPC2";
     serverString = os.str();
     logger().info("Ubigrapher will connect to " + serverString);
@@ -91,7 +93,7 @@ void Ubigrapher::init()
 
 void Ubigrapher::watchSignals()
 {
-    if (!listening) {
+    if (!isConnected() && !listening) {
         c_add = space->addAtomSignal().connect(
                 std::tr1::bind(&Ubigrapher::handleAddSignal, this,
                     std::tr1::placeholders::_1));
@@ -119,6 +121,7 @@ void Ubigrapher::unwatchSignals()
 
 void Ubigrapher::setStyles()
 {
+    if (!isConnected()) return;
     //cout << "Ubigrapher setStyles" << endl;
     // Set the styles for various types of edges and vertexes in the graph
     nodeStyle = ubigraph_new_vertex_style(0);
@@ -149,6 +152,7 @@ void Ubigrapher::setStyles()
 
 bool Ubigrapher::handleAddSignal(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
     usleep(pushDelay);
     if (space->isNode(a->getType()))
@@ -167,6 +171,7 @@ bool Ubigrapher::handleAddSignal(Handle h)
 
 bool Ubigrapher::handleRemoveSignal(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
     usleep(pushDelay);
     if (space->isNode(a->getType()))
@@ -186,6 +191,7 @@ bool Ubigrapher::handleRemoveSignal(Handle h)
 
 void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, float baseline)
 {
+    if (!isConnected()) return;
     float scaler;
     std::ostringstream ost;
     switch (p) {
@@ -215,6 +221,7 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
 
 void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float baseline)
 {
+    if (!isConnected()) return;
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
@@ -230,6 +237,7 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float 
 void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char startRGB[3],
         unsigned char endRGB[3], float hard)
 {
+    if (!isConnected()) return;
     unsigned char val[3];
     float scaler;
     int j;
@@ -291,6 +299,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
 void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB[3],
         unsigned char endRGB[3], float hard)
 {
+    if (!isConnected()) return;
     // Ubigraph doesn't display color properly when set for individual
     // links. Instead, we have to use a style for each base color and change the
     // brightness.
@@ -308,6 +317,7 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
 
 void Ubigrapher::applyStyleToType(Type t, int style)
 {
+    if (!isConnected()) return;
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     // Get all atoms (and subtypes) of type t
@@ -317,6 +327,7 @@ void Ubigrapher::applyStyleToType(Type t, int style)
 
 void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, float limit)
 {
+    if (!isConnected()) return;
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
@@ -351,6 +362,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
 
 void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 {
+    if (!isConnected()) return;
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         Atom *a = TLB::getAtom(h);
@@ -368,6 +380,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 }
 bool Ubigrapher::addVertex(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
     bool isNode = space->isNode(a->getType());
 
@@ -415,6 +428,7 @@ bool Ubigrapher::addVertex(Handle h)
  */
 bool Ubigrapher::addEdges(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
 
     usleep(pushDelay);
@@ -479,6 +493,7 @@ bool Ubigrapher::addEdges(Handle h)
  */
 bool Ubigrapher::removeVertex(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
 
     if (compact)
@@ -500,6 +515,7 @@ bool Ubigrapher::removeVertex(Handle h)
 
 bool Ubigrapher::removeEdges(Handle h)
 {
+    if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
 
     // This method is only relevant to binary Links with no incoming.
@@ -523,6 +539,7 @@ bool Ubigrapher::removeEdges(Handle h)
 
 void Ubigrapher::graph()
 {
+    if (!isConnected()) return;
     ubigraph_clear();
     setStyles();
     space->foreach_handle_of_type((Type)ATOM, &Ubigrapher::addVertex, this, true);

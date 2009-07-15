@@ -51,5 +51,6 @@ result_t    ubigraph_set_edge_style_attribute(style_id_t s,
 #define UBIGRAPH_SUCCESS   0
 #define UBIGRAPH_FAIL      -1
 
+#define UBIGRAPH_DEFAULT_PORT 20738
 #endif
 

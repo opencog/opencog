@@ -27,6 +27,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include "UbigraphAPI.h"
+
 #ifndef _OPENCOG_UBIGRAPHER
 #define _OPENCOG_UBIGRAPHER
 
@@ -87,10 +89,13 @@ protected:
 public:
     Ubigrapher();
     virtual ~Ubigrapher() {}
-    void init();
+    void init(std::string server = "localhost", int port = UBIGRAPH_DEFAULT_PORT);
 
     std::string serverIP;
     int serverPort;
+
+    bool isConnected() { return connected; };
+    std::string getServerString() { return serverString; };
 
     AtomSpace *space;
 
