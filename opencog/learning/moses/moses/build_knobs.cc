@@ -662,7 +662,10 @@ void build_knobs::ann_canonize(pre_it it) {
     ann net = trans.decodify_tree(_exemplar);
     cout << &net << endl;
     cout << endl;
+
     net.add_new_hidden();
+    net.add_memory_input();
+
     cout << &net << endl;
     _exemplar = trans.encode_ann(net);
     cout << _exemplar << endl;

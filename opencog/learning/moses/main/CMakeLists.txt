@@ -1,5 +1,19 @@
-ADD_EXECUTABLE (moses-ann moses-ann)
-TARGET_LINK_LIBRARIES (moses-ann
+ADD_EXECUTABLE (moses-ann-pole1 moses-ann-pole1)
+TARGET_LINK_LIBRARIES (moses-ann-pole1
+        moses
+        comboreduct
+        util
+)
+
+ADD_EXECUTABLE (moses-ann-pole2 moses-ann-pole2)
+TARGET_LINK_LIBRARIES (moses-ann-pole2
+        moses
+        comboreduct
+        util
+)
+
+ADD_EXECUTABLE (moses-ann-xor moses-ann-xor)
+TARGET_LINK_LIBRARIES (moses-ann-xor
 	moses
 	comboreduct
 	util

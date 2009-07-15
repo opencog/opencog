@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <math.h>
 using namespace std;
@@ -49,7 +50,7 @@ public:
     
     bool memory_node; //is this a memory node 
     ann_node* memory_ptr; //what node 
-
+  
     vector<ann_connection*> out_connections;
     vector<ann_connection*> in_connections;
     double activation;
@@ -81,6 +82,65 @@ public:
         ann_node_it iter;
         for (iter = nodes.begin();iter != nodes.end();iter++)
             delete (*iter);
+    }
+    
+    void write_dot(const char* filename)
+    {
+        ofstream outfile(filename);
+        ann_connection_it it;
+        ann_node_it nit; 
+        outfile << "digraph g { " << endl;
+
+        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        {
+            outfile << "N" << (*nit)->id << " [shape=box]" << endl;
+        }
+        
+        for(nit=outputs.begin();nit!=outputs.end();nit++)
+        {
+            outfile << "N" << (*nit)->id << " [shape=triangle]" << endl;
+        }
+
+        for(it=connections.begin();it!=connections.end();it++)
+        {
+            int n1 = (*it)->source->id;
+            int n2 = (*it)->dest->id;
+            outfile << "N" << n1 << " -> N" << n2 << " ";
+            if((*it)->weight > 0.3)
+                outfile << "[color=green] ";
+            else if ((*it)->weight < -0.3)
+                outfile << "[color=red] ";
+            outfile << endl;
+        }
+
+        
+        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        {
+            if((*nit)->memory_node)
+            {
+                int n1 = (*nit)->memory_ptr->id;
+                int n2 = (*nit)->id;
+                outfile << "N" << n1 << " -> N" << n2 << " [style=dotted] ";
+                outfile << endl;
+            }
+        }
+
+        outfile << " { rank=same; ";
+        for(nit=inputs.begin();nit!=inputs.end();nit++)
+        {
+            outfile << "N" << (*nit)->id << " ";
+        }
+        outfile << " } " << endl;
+
+
+        outfile << " { rank=same; ";
+        for(nit=outputs.begin();nit!=outputs.end();nit++)
+        {
+            outfile << "N" << (*nit)->id << " ";
+        }
+        outfile << " } " << endl;
+        
+        outfile << "}" << endl;
     }
 
     bool add_new_hidden()
@@ -134,11 +194,27 @@ public:
     {
         //first enumerate valid hidden nodes 
         ann_node_it iter;
+        ann_node_it in_iter;
         vector<ann_node*> possible;
+        
+        cout << "Adding memory node..."  << endl;
         for (iter = hidden.begin(); iter !=hidden.end();iter++)
         {
-            if (!(*iter)->memory_node)
+            bool memory=false;
+            cout << "Checking for unmemorized hidden nodes..." << endl;
+            for(in_iter = inputs.begin();in_iter!= inputs.end(); in_iter++)
             {
+                if(!(*in_iter)->memory_node)
+                    continue;
+                if((*in_iter)->memory_ptr == (*iter)) {
+                    memory=true;
+                    break;
+                }
+            }
+            
+            if (!memory)
+            {
+                cout << "Potential node found..." << endl;
                 possible.push_back(*iter);
             }
         }
@@ -155,13 +231,13 @@ public:
         ann_node *hidden_neuron = possible[selected];
 
         //increment tag for new neuron
-        int tag = biggest_tag() + 1;
+        int tag = biggest_tag() + 2;
 
         //create new input node
-        ann_node *new_input = new ann_node(nodetype_hidden,tag,hidden_neuron);
+        ann_node *new_input = new ann_node(nodetype_input,tag,hidden_neuron);
 
         //create possible connections to hidden & output nodes
-        int add_chance = 30;
+        int add_chance = 100;
         for(iter=hidden.begin();iter!=hidden.end();iter++)
             if (rand()%100 < add_chance)
                 add_connection(new_input,(*iter),0.0);
@@ -171,6 +247,7 @@ public:
                 add_connection(new_input,(*iter),0.0);
         
         add_node(new_input);
+        cout << "New input added..." << endl;
         return true;
     }
 
@@ -212,23 +289,25 @@ public:
         unsigned int counter=0;
         //memory nodes are loaded by the propagate method
         for (unsigned int x = 0;x < inputs.size();x++)
+        {
             if(!inputs[x]->memory_node)
                 inputs[x]->activation = vals[counter++];
+            else
+                inputs[x]->activation = inputs[x]->memory_ptr->activation;
+        }
     }
 
     void load_inputs(vector<double>& vals) {
         for (unsigned int x = 0;x < inputs.size();x++) {
-            inputs[x]->activation = vals[x];
+            if(!inputs[x]->memory_node)
+                inputs[x]->activation = vals[x];
+            else
+                inputs[x]->activation = inputs[x]->memory_ptr->activation;
         }
     }
 
     void propagate() {
         ann_node_it iter;
-
-        //load memory nodes
-        for (iter = inputs.begin();iter != inputs.end();iter++)
-            if ((*iter)->memory_node)
-                (*iter)->activation = (*iter)->memory_ptr->activation;
 
         //propagate signals through net
         for (iter = nodes.begin();iter != nodes.end();iter++) {

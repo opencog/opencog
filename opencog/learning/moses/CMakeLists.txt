@@ -13,7 +13,7 @@ ADD_LIBRARY (moses SHARED
 	moses/scoring_functions
 	moses/types
 	moses/using
-
+    moses/pole_balancing
         eda/field_set
         eda/initialization
         eda/local_structure
