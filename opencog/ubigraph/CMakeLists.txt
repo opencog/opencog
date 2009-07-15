@@ -15,6 +15,7 @@ TARGET_LINK_LIBRARIES(ubigraph
     m
     ${CURL_LIBRARIES} 
     ${XMLRPC_LIBRARIES}
+    xmlrpc_client
 )
 
 INSTALL (TARGETS ubigraph
