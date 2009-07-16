@@ -20,17 +20,23 @@ void init_AtomSpace_py();
  */
 struct AtomSpaceWrap: AtomSpace, wrapper<AtomSpace>
 {
-    Handle addLinkx1(Type t, const HandleSeq& outgoing, const TruthValue& tvn) {
+    Handle addLinkx1x1(Type t, const HandleSeq& outgoing) {
+        return addLink(t, outgoing);
+    }
+    Handle addLinkx1x2(Type t, const HandleSeq& outgoing, const TruthValue& tvn) {
         return addLink(t, outgoing, tvn);
     }
-    Handle addLinkx2(Type t, const Handle h, const TruthValue& tvn) {
+    Handle addLinkx2x1(Type t, const Handle h) {
+        return addLink(t, h);
+    }
+    Handle addLinkx2x2(Type t, const Handle h, const TruthValue& tvn) {
         return addLink(t, h, tvn);
     }
 };
 
 /** A function pointer necessary for wrapping overloaded member methods of 
  * classes.  */
-/*Handle (*addLinkx1)(Type t, const HandleSeq& outgoing, const TruthValue& tvn) = &AtomSpace::addLink;
-Handle (*addLinkx2)(Type t, Handle h, const TruthValue& tvn) = &AtomSpace::addLink;*/
+/*static Handle (AtomSpaceWrap::*addLinkp1)(Type t, const HandleSeq& outgoing, const TruthValue& tvn) = &AtomSpace::addLink;*/
+/*Handle (*addLinkx2)(Type t, Handle h, const TruthValue& tvn) = &AtomSpace::addLink;*/
 
 #endif // _OPENCOG_ATOMSPACE_WRAP_H
