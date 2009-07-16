@@ -16,6 +16,7 @@ void init_Logger_py()
     logger.def(init< optional<const std::string, Logger::Level, bool> >());
     logger.def(init<const Logger&>());
     logger.def("setLevel", &Logger::setLevel);
+    logger.def("getLevel", &Logger::getLevel);
 
     // Change scope to be within the just-exposed Logger class.
     scope within(logger);
