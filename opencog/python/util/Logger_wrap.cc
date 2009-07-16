@@ -17,6 +17,8 @@ void init_Logger_py()
     logger.def(init<const Logger&>());
     logger.def("setLevel", &Logger::setLevel);
     logger.def("getLevel", &Logger::getLevel);
+    logger.def("setBackTraceLevel", &Logger::setBackTraceLevel);
+    logger.def("getBackTraceLevel", &Logger::getBackTraceLevel);
 
     // Change scope to be within the just-exposed Logger class.
     scope within(logger);
