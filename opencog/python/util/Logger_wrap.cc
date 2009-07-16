@@ -24,6 +24,9 @@ void init_Logger_py()
     logger.def("setFilename", &Logger::setFilename);
     logger.def("getFilename", &Logger::getFilename,
         return_value_policy<copy_const_reference>());
+    //logger.def("log", &Logger::log);
+    logger.def("enable", &Logger::enable);
+    logger.def("disable", &Logger::disable);
 
     // Change scope to be within the just-exposed Logger class.
     scope within(logger);
