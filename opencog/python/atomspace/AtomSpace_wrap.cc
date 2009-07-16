@@ -25,6 +25,7 @@ void init_AtomSpace_py()
             addRealAtom_overloads())
         .def("removeAtom", &AtomSpace::removeAtom,
             removeAtom_overloads())
+        .def("fetchAtom", &AtomSpace::fetchAtom)
         //.def("addLink", &AtomSpace::addLink, addLink_overloads())
         //.def("addLink", &AtomSpaceWrap::addLinkp1)
         //.def("addLink", addLinkp1)
