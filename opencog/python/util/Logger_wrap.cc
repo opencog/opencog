@@ -1,6 +1,8 @@
 #include <boost/python/class.hpp>
 #include <boost/python/scope.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/copy_const_reference.hpp>
 
 #include <opencog/util/Logger.h>
 
@@ -19,6 +21,9 @@ void init_Logger_py()
     logger.def("getLevel", &Logger::getLevel);
     logger.def("setBackTraceLevel", &Logger::setBackTraceLevel);
     logger.def("getBackTraceLevel", &Logger::getBackTraceLevel);
+    logger.def("setFilename", &Logger::setFilename);
+    logger.def("getFilename", &Logger::getFilename,
+        return_value_policy<copy_const_reference>());
 
     // Change scope to be within the just-exposed Logger class.
     scope within(logger);
