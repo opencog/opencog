@@ -20,6 +20,8 @@ void init_AtomSpace_py()
 
     class_<AtomSpaceWrap, bases<SpaceServerContainer>, boost::noncopyable >("AtomSpace", no_init)
         .def(init<>())
+        /*.def("registerBackingStore", &AtomSpace::registerBackingStore)
+        .def("unregisterBackingStore", &AtomSpace::unregisterBackingStore)*/
         .def("storeAtom", &AtomSpace::storeAtom)
         .def("addNode", &AtomSpace::addNode, addNode_overloads())
         .def("addRealAtom", &AtomSpace::addRealAtom,
