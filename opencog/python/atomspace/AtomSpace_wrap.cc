@@ -18,7 +18,8 @@ void init_AtomSpace_py()
 {
     class_<std::vector<Handle> >("std_vector_Handle");
 
-    class_<AtomSpaceWrap, bases<SpaceServerContainer>, boost::noncopyable >("AtomSpace")
+    class_<AtomSpaceWrap, bases<SpaceServerContainer>, boost::noncopyable >("AtomSpace", no_init)
+        .def(init<>())
         .def("storeAtom", &AtomSpace::storeAtom)
         .def("addNode", &AtomSpace::addNode, addNode_overloads())
         .def("addRealAtom", &AtomSpace::addRealAtom,
