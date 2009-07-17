@@ -6,6 +6,7 @@ constructs.  All other directories contain wrapping code for their respective
 directories.
 
 Todos:
+    - Look into opencog/dynamics/attention for examples.
     - When done with bindings, remove PyOSG from references.
     - No need for Atom class, Node and Link are fine.
     - TruthValue not so much, SimpleTV, CompositeTV, IndefiniteTV, CountTV
