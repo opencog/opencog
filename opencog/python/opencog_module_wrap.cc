@@ -1,15 +1,17 @@
 #include <boost/python/module.hpp>
 #include <boost/python/scope.hpp>
 
-#include "opencog_wrap.h"
+#include "opencog_module_wrap.h"
 #include "atomspace_module_wrap.h"
 #include "server_module_wrap.h"
+#include "dynamics_module_wrap.h"
 #include "util_module_wrap.h"
 
 void init_opencog_py()
 {
     init_atomspace_module_py();
     init_server_module_py();
+    init_dynamics_module_py();
     init_util_module_py();
 }
 
