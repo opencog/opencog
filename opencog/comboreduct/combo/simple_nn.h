@@ -93,18 +93,18 @@ public:
 
         for(nit=inputs.begin();nit!=inputs.end();nit++)
         {
-            outfile << "N" << (*nit)->id << " [shape=box]" << endl;
+            outfile << "N" << (*nit)->tag << " [shape=box]" << endl;
         }
         
         for(nit=outputs.begin();nit!=outputs.end();nit++)
         {
-            outfile << "N" << (*nit)->id << " [shape=triangle]" << endl;
+            outfile << "N" << (*nit)->tag << " [shape=triangle]" << endl;
         }
 
         for(it=connections.begin();it!=connections.end();it++)
         {
-            int n1 = (*it)->source->id;
-            int n2 = (*it)->dest->id;
+            int n1 = (*it)->source->tag;
+            int n2 = (*it)->dest->tag;
             outfile << "N" << n1 << " -> N" << n2 << " ";
             if((*it)->weight > 0.3)
                 outfile << "[color=green] ";
@@ -118,8 +118,8 @@ public:
         {
             if((*nit)->memory_node)
             {
-                int n1 = (*nit)->memory_ptr->id;
-                int n2 = (*nit)->id;
+                int n1 = (*nit)->memory_ptr->tag;
+                int n2 = (*nit)->tag;
                 outfile << "N" << n1 << " -> N" << n2 << " [style=dotted] ";
                 outfile << endl;
             }
@@ -128,7 +128,7 @@ public:
         outfile << " { rank=same; ";
         for(nit=inputs.begin();nit!=inputs.end();nit++)
         {
-            outfile << "N" << (*nit)->id << " ";
+            outfile << "N" << (*nit)->tag << " ";
         }
         outfile << " } " << endl;
 
@@ -136,7 +136,7 @@ public:
         outfile << " { rank=same; ";
         for(nit=outputs.begin();nit!=outputs.end();nit++)
         {
-            outfile << "N" << (*nit)->id << " ";
+            outfile << "N" << (*nit)->tag << " ";
         }
         outfile << " } " << endl;
         
