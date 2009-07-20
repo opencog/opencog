@@ -422,11 +422,11 @@ void NetworkElement::parseCommandLine(const std::string &line, std::string &comm
 void *NetworkElement::portListener(void *arg)
 {
 
-    logger().debug("NetworElement - Port listener executing.");
+    logger().debug("NetworkElement - Port listener executing.");
 
     int port = *((int*) arg);
 
-    logger().info("NetworElement - Binding to port %d.", port);
+    logger().info("NetworkElement - Binding to port %d.", port);
 
     SocketHandler socketHandler;
     ListenSocket<ServerSocket> listenSocket(socketHandler);

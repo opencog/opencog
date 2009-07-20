@@ -209,14 +209,27 @@ protected:
             "MASSIF_DEPTH",                 "30",
             "MASSIF_DETAILED_FREQ",         "10",
             
+	    // launching OPC with a debugger
+	    // please note that CHECK_OPC_MEMORY_LEAKS, CHECK_OPC_MEMORY_USAGE
+	    // and RUN_OPC_DEBUGGER
+	    // are all exclusif (only one can be activated at a time)
             "RUN_OPC_DEBUGGER",             "false",
             "OPC_DEBUGGER_PATH",            "/usr/bin/gdb",
+
+	    // Call the debugger with the OPC arguments directly
+	    // appended at the end of the command line of the debugger call,
+	    // some debuggers, like nemiver, accept
+	    // the program to debug's argument in their command line
+	    // If it is false then the arguments are printed on the standard
+	    // output instead
+	    "PASS_OPC_ARG_DEBUGGER_COMMAND","true",
             
             // NetworkElement's message reading parameters
             "UNREAD_MESSAGES_CHECK_INTERVAL",
                                             "10",
             "UNREAD_MESSAGES_RETRIEVAL_LIMIT",
-                                            "1", // -1 for unlimited number of retrieved messages
+                                            "1", // -1 for unlimited number
+	                                         // of retrieved messages
             "NO_ACK_MESSAGES",              "false",
             "WAIT_LISTENER_READY_TIMEOUT",  "60",  // time (in seconds) to wait for socket Listener to be ready
             

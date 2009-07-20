@@ -102,7 +102,8 @@ bool Spawner::processNextMessage(Message *message)
     std::queue<std::string> args;
 
     NetworkElement::parseCommandLine(cmdLine, command, args);
-    logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).", cmdLine.c_str( ), command.c_str( ), args.size( ) );
+    logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).",
+                  cmdLine.c_str( ), command.c_str( ), args.size( ) );
 
     if (command == "LOAD_AGENT") {
         std::string agentID = args.front();
@@ -113,7 +114,9 @@ bool Spawner::processNextMessage(Message *message)
         args.pop( );
         std::string agentTraits = args.front();
 
-        logger().info("Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).", agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ), agentTraits.c_str( ) );
+        logger().info("Spawner - agentId(%s) ownerId(%s) agentType(%s) agentTraits(%s).",
+                      agentID.c_str( ), ownerID.c_str( ), agentType.c_str( ),
+                      agentTraits.c_str( ) );
 
         // TODO: Find a way to figure out that OPC is already running.
         // The call to isElementAvailable method does not work because it only knows the unavailable elements, not the
@@ -122,7 +125,7 @@ bool Spawner::processNextMessage(Message *message)
         //logger().warn("Trying to load an OPC that is already available: %s\n", petID.c_str());
         // TODO: send the LOAD SUCCESS message back
         //}
-        std::stringstream str;
+        std::stringstream command_ss;
         //char str[512];
         int opcPort = allocateOpcPort(agentID);
         if (opcPort <= 0) {
@@ -136,15 +139,24 @@ bool Spawner::processNextMessage(Message *message)
         int cogServerShellPort = opencog::config().get_int("SERVER_PORT") + portOffset;
         std::string cmdPrefix;
         std::string cmdSuffix;
+        std::string agentArgs = agentID + " " + ownerID + " " + agentType + " "
+            + agentTraits + " " + boost::lexical_cast<std::string>(opcPort)
+            + " " + boost::lexical_cast<std::string>(cogServerShellPort);
+
         if (opencog::config().get_bool("RUN_OPC_DEBUGGER")) {
-            cmdPrefix = opencog::config().get("OPC_DEBUGGER_PATH");
-            cmdPrefix += " ";
-            std::cout << "======= YOU MUST ENTER DEBUGGER PARAMETERS ======="
-                      << std::endl;
-            std::cout << "Please enter the following 2 parameters in "
-                      << cmdPrefix << " :" << std::endl;
-            std::cout << agentID << " " << ownerID << " " << agentType << " " << agentTraits << " " << opcPort << " " << cogServerShellPort << std::endl;
-            str << cmdPrefix << "./opc &";
+            std::string debuggerPath = opencog::config().get("OPC_DEBUGGER_PATH");
+            cmdPrefix = debuggerPath + " ";
+            if(opencog::config().get_bool("PASS_OPC_ARG_DEBUGGER_COMMAND")) {
+                command_ss << cmdPrefix << " ./opc " << agentArgs << " &";
+            }
+            else {
+                command_ss << cmdPrefix << " ./opc &";
+                std::cout << "====== YOU MUST ENTER DEBUGGER PARAMETERS ======"
+                          << std::endl;
+                std::cout << "Please enter the following 2 parameters in "
+                          << debuggerPath << " :" << std::endl;
+                std::cout << agentArgs << std::endl;
+            }
         } else {
             if (opencog::config().get_bool("CHECK_OPC_MEMORY_LEAKS")) {
                 cmdPrefix = opencog::config().get("VALGRIND_PATH");
@@ -159,21 +171,17 @@ bool Spawner::processNextMessage(Message *message)
                 cmdPrefix += " ";
                 cmdSuffix += " > opc.valgrind.massif 2>&1";
             }
-            str << cmdPrefix << "./opc "
-            << agentID << " "
-            << ownerID << " "
-            << agentType << " "
-            << agentTraits << " "
-            << opcPort << " " << cogServerShellPort << cmdSuffix << " &";
+            command_ss << cmdPrefix << "./opc " << agentArgs
+                       << " " << cmdSuffix << " &";
         }
         logger().info("Starting OPC for %s %s %s (%s) at NE port %d; Shell port %d (command: %s)", 
                 agentType.c_str( ), agentID.c_str(), ownerID.c_str(), agentTraits.c_str( ), 
-                opcPort, cogServerShellPort,  str.str().c_str( ) );
+                opcPort, cogServerShellPort,  command_ss.str().c_str( ) );
 
         if (!opencog::config().get_bool("MANUAL_OPC_LAUNCH")) {
-            system(str.str().c_str( ) );
+            system(command_ss.str().c_str( ) );
         } else {
-            printf("\nSpawner Command: %s\n", str.str().c_str());
+            printf("\nSpawner Command: %s\n", command_ss.str().c_str());
         }
     } else if (command == "UNLOAD_AGENT") {
         const std::string& agentID = args.front();
