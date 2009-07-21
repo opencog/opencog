@@ -22,11 +22,16 @@
 #ifndef SUBSETEVALRULE_H
 #define SUBSETEVALRULE_H
 
+#include "../../AtomLookupProvider.h"
+#include "../../formulas/Formulas.h"
+#include "../../rules/Rule.h"
+
 namespace opencog { namespace pln {
 
+/*
 class SubsetEvalRule
 {
-    Handle domain;
+    pHandle domain;
     SubsetEvalFormula f;
 
 protected:
@@ -46,8 +51,9 @@ public:
         return atomWithNewType(h[0], SUBSET_LINK);
     }
 
-    BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
+    BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = NULL) const
 };
+*/
 
 }} // namespace opencog { namespace pln {
 #endif // SUBSETEVALRULE_H

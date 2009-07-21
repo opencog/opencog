@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "SubsetEvalRule.h"
+
 #include <opencog/util/platform.h>
 #include "../../PLN.h"
 
@@ -29,27 +31,31 @@
 #include "../../BackInferenceTreeNode.h"
 
 namespace opencog { namespace pln {
-    /*
+
+/*
 SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
 {
-    inputFilter.push_back(boost::shared_ptr<atom>(new atom(__INSTANCEOF_N, 1, new atom(CONCEPT_NODE, 0))));
+    inputFilter.push_back(boost::shared_ptr<atom>(new atom(__INSTANCEOF_N,
+                                                           1,
+                                                           new atom(CONCEPT_NODE, 0))));
 }
 
-Handle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
-                               Handle CX) const
+pHandle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
+                                pHandle CX) const
 {
     assert(n == 2);
 
     assert(inheritsType(nm->getType(premiseArray[0]), CONCEPT_NODE));
     assert(inheritsType(nm->getType(premiseArray[1]), CONCEPT_NODE));
 
-    vector<Handle> set1;
-    vector<Handle> set2;
-    set<Handle> used;
+    vector<pHandle> set1;
+    vector<pHandle> set2;
+    set<pHandle> used;
 
     set1 = constitutedSet(premiseArray[0], 0.0f, 1);
     set2 = constitutedSet(premiseArray[1], 0.0f, 1);
 
+    //TODO: allocate that on the stack not the heap
     TruthValue** tvs1 = new SimpleTruthValue*[set1.size()+set2.size()];
     TruthValue** tvs2 = new SimpleTruthValue*[set1.size()+set2.size()];
 
@@ -59,10 +65,10 @@ Handle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 
     for (i = 0; i < set1.size(); i++) {
         tvs1[i] = getTruthValue(set1[i]);
-        vector<Handle>::iterator h2 =
-            find<vector<Handle>::iterator, Handle>(set2.begin(),
-                                                   set2.end(),
-                                                   set1[i]);
+        vector<pHandle>::iterator h2 =
+            find<vector<pHandle>::iterator, pHandle>(set2.begin(),
+                                                     set2.end(),
+                                                     set1[i]);
         if (h2 == set2.end())
             tvs2[i] = new SimpleTruthValue(0, 0);
         else {
@@ -90,17 +96,18 @@ Handle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     delete tvs1;
     delete tvs2;
 
-    vector<Handle> hs;
+    vector<pHandle> hs;
     hs.push_back(premiseArray[0]);
     hs.push_back(premiseArray[1]);
 
-    Handle ret = destTable->addLink(SUBSET_LINK,
-                                    hs,
-                                    retTV,
-                                    true);
-//                              false);
+    pHandle ret = destTable->addLink(SUBSET_LINK,
+                                     hs,
+                                     retTV,
+                                     true);
+    //                              false);
 
     return ret;
 }
-    */
+*/
+
 }} // namespace opencog { namespace pln {

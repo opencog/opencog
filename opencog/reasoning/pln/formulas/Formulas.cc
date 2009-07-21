@@ -24,12 +24,9 @@
 #include "Formulas.h"
 #include <assert.h>
 #include <memory>
+#include <algorithm>
 
 #define TV_MIN 0.000001f
-
-#define fmax_(a,b) (( (a)>(b) ) ? (a) : (b))
-#define fmin_(a,b) (( (a)<(b) ) ? (a) : (b))
-#define Abs(a) ( ((a)>0) ? (a) : (-a))
 
 using namespace std;
 
@@ -172,8 +169,8 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float sBA = sAB * sA / fmax_(sB, 0.00001f);
-    float nBA = nAB * nB / fmax_(nA, 0.00001f);
+    float sBA = sAB * sA / std::max(sB, 0.00001f);
+    float nBA = nAB * nB / std::max(nA, 0.00001f);
 
     return checkTruthValue( new SimpleTruthValue(sBA, nBA) );
 }
@@ -193,10 +190,10 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float n2 = min(nAB, nA);
+    float n2 = std::min(nAB, nA);
     float s2 = ((n2 + nB) > 0)
                ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
-                   / fmax_((n2 + nB), 0.00001f))
+                   / std::max((n2 + nB), 0.00001f))
                : sB;
 
     if (n2 < nB) {
@@ -258,10 +255,10 @@ TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
     DebugPTLBodyFor_Link2Node3;
 
     /// Temporary filtering fix to make sure that nAB >= nA
-    nA = min(nA, nAB);
+    nA = std::min(nA, nAB);
 
-    float secondDenominator = fmax_( (1 - sB), TV_MIN);
-    float thirdDenominator = fmax_( nB, TV_MIN);
+    float secondDenominator = std::max( (1 - sB), TV_MIN);
+    float thirdDenominator = std::max( nB, TV_MIN);
 
     float w1 = DEDUCTION_TERM_WEIGHT;
     float w2 = 2 - w1;
@@ -278,11 +275,11 @@ TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
 float DeductionGeometryFormula::g(float sA, float sB,
                                   float sC, float sAB) const
 {
-    float p1 = Abs(sA - sB) / fmax_(sA + sB, TV_MIN);
+    float p1 = std::abs(sA - sB) / std::max(sA + sB, TV_MIN);
     float p2 =
         1
-        - fmin_(1 + sB - sAB * sA - sC, sA + sB - sAB * sA)
-        + fmax_(sB, 1 - sC);
+        - std::min(1 + sB - sAB * sA - sC, sA + sB - sAB * sA)
+        + std::max(sB, 1 - sC);
 
     return p1 + (1 - p1)*p2;
 }
@@ -311,13 +308,14 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
     float sAC =
         sAB * sBC
         * (1 + g(sA, sB, sC, sAB)
-           * fmax_(0, -1 + 1 / (fmax_(sBA + sBC, TV_MIN))))
+           * std::max(0.0f, -1 + 1 / std::max(sBA + sBC, TV_MIN)))
         + (1 - sAB) * (1 - sBC)
         * (1 + g(sA, 1 - sB, sC, sAB)
-           * fmax_(0, -1 + 1 / fmax_(1 - sBA + 1 - sBC, TV_MIN)));
+           * std::max(0.0f, -1 + 1 / std::max(1 - sBA + 1 - sBC,
+                                              TV_MIN)));
     float nAC =
         IndependenceAssumptionGeometryDiscount * nA * nBC
-        / fmax_(nB, TV_MIN);
+        / std::max(nB, TV_MIN);
 
     return NULL;
     //    return checkTruthValue(  new SimpleTruthValue(sAC,nAC) );
@@ -338,14 +336,14 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_Atom2;
 
-    float wA = nA / fmax_(nA + nB, TV_MIN);
-    float wB = nB / fmax_(nA + nB, TV_MIN);
+    float wA = nA / std::max(nA + nB, TV_MIN);
+    float wB = nB / std::max(nA + nB, TV_MIN);
 
     float c_strength = REVISION_STRENGTH_DEPENDENCY;
     float c_count = REVISION_COUNT_DEPENDENCY;
 
     float s3 = (wA * sA + wB * sB - c_strength * sA * sB);
-    float n3 = fmax_(nA, nB) + c_count * fmin_(nA, nB);
+    float n3 = std::max(nA, nB) + c_count * std::min(nA, nB);
 
     return checkTruthValue( new SimpleTruthValue(s3, n3) );
 }
@@ -360,7 +358,7 @@ TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
     DebugPTLBodyFor_Link2Node2;
 
     float sABsim =
-        1 / ( ( 1 + sA / fmax_(sB, TV_MIN)) / fmax_(sAB - 1, TV_MIN));
+        1 / ( ( 1 + sA / std::max(sB, TV_MIN)) / std::max(sAB - 1, TV_MIN));
 
     float nABsim = nAB + nBA - sAB * nA;
 
@@ -376,9 +374,9 @@ TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
     DebugPTLBodyFor_Link1Node2;
 
     float sABinh =
-        (1 + sB / fmax_(sA, TV_MIN)) * sAB / (1 + fmax_(sAB, TV_MIN));
+        (1 + sB / std::max(sA, TV_MIN)) * sAB / (1 + std::max(sAB, TV_MIN));
 
-    float nABinh =  (nAB + sAB * nA) * nA / fmax_( nA + nB, TV_MIN );
+    float nABinh =  (nAB + sAB * nA) * nA / std::max( nA + nB, TV_MIN );
 
     return checkTruthValue( new SimpleTruthValue(sABinh, nABinh) );
 }
@@ -764,7 +762,7 @@ TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 float SubsetEvalFormula::f1(float a, float b) const
 {
-    return fmin_(a, b);
+    return std::min(a, b);
 }
 
 //===========================================================================//
@@ -787,13 +785,13 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVsub, int Nsub,
 
     float fs = 0.0f, s = 0.0f;
 
-    int i = 0, n = fmin_(Nsuper, Nsub);
+    int i = 0, n = std::min(Nsuper, Nsub);
     for (i = 0; i < n; i++) {
         fs += f1(TVsub[i]->getMean(), TVsuper[i]->getMean());
         s += TVsub[i]->getMean();
     }
 
-    float sSS = fs / fmax_(s, TV_MIN);
+    float sSS = fs / std::max(s, TV_MIN);
     float nSS = (float)Nsuper;
 
     return new SimpleTruthValue(sSS, nSS);
@@ -809,7 +807,7 @@ float SubsetEvalFormula2::f(float a, float b) const
 //===========================================================================//
 float SubsetEvalFormula1::f(float a, float b) const
 {
-    return fmin_(a, b);
+    return std::min(a, b);
 }
 
 /*=============================================================================
