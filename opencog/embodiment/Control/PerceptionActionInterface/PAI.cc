@@ -1508,7 +1508,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     XERCES_CPP_NAMESPACE::XMLString::transcode(BLIP_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList * blipList = element->getElementsByTagName(tag);
 
+    //printf("Blip List: %d\n",blipList->getLength());
+
     for (unsigned int i = 0; i < blipList->getLength(); i++) {
+    
 
         XERCES_CPP_NAMESPACE::DOMElement* blipElement = (XERCES_CPP_NAMESPACE::DOMElement*) blipList->item(i);
 
@@ -1521,61 +1524,115 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             continue;
         }
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(DETECTOR_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* detector = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        // Note from Tristan: All objects (toys, pets, and pet-owners) report map updates, usually on themselves,
-        // but sometimes on other avatars or objects (such as structures).
-        // The detector boolean simply means that the blip indicated was the one that the object reported on itself.
+        // Gets each properties element
+        XERCES_CPP_NAMESPACE::XMLString::transcode(PROPERTIES_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+        XERCES_CPP_NAMESPACE::DOMNodeList * propertiesList = blipElement->getElementsByTagName(tag);
 
-        XERCES_CPP_NAMESPACE::XMLString::transcode(REMOVE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* remove = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool objRemoval = !strcmp(remove, "true");
+        printf("Properties List: %d\n",propertiesList->getLength());
+        char* detector;
+        bool objRemoval=false;
+        bool isObjectInsidePetFov=false;
+        double length=0.0;
+        double width=0.0;
+        double height=0.0;
+        bool edible=false;
+        bool drinkable=false;
 
-        // visibility-status
-        XERCES_CPP_NAMESPACE::XMLString::transcode(VISIBILITY_STATUS_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* visibilityStatusStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool isObjectInsidePetFov = !strcmp(visibilityStatusStr, "visible" );
+        bool petHome=false;
+        bool foodBowl=false;
+        bool waterBowl=false;
 
-        // length
-        XERCES_CPP_NAMESPACE::XMLString::transcode(LENGTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* lengthStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        double length = atof(lengthStr);
+        for (unsigned int j = 0; j < propertiesList->getLength(); j++) {
 
-        // width
-        XERCES_CPP_NAMESPACE::XMLString::transcode(WIDTH_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* widthStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        double width = atof(widthStr);
+            XERCES_CPP_NAMESPACE::DOMElement* propertiesElement = 
+                     (XERCES_CPP_NAMESPACE::DOMElement*) propertiesList->item(j);
 
-        // height
-        XERCES_CPP_NAMESPACE::XMLString::transcode(HEIGHT_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* heightStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        double height = atof(heightStr);
+            XERCES_CPP_NAMESPACE::XMLString::transcode(PROPERTY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
+            XERCES_CPP_NAMESPACE::DOMNodeList * propertyList = propertiesElement->getElementsByTagName(tag);
 
-        // edible
-        XERCES_CPP_NAMESPACE::XMLString::transcode(EDIBLE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* edibleStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool edible = (strcmp(edibleStr, "true") == 0 ? true : false);
+            //printf("Property List: %d\n",propertyList->getLength());
+            
+            for (unsigned int p = 0; p < propertyList->getLength(); p++) {
 
-        // drinkable
-        XERCES_CPP_NAMESPACE::XMLString::transcode(DRINKABLE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* drinkableStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool drinkable = (strcmp(drinkableStr, "true") == 0 ? true : false);
+                XERCES_CPP_NAMESPACE::DOMElement* propertyElement = 
+                         (XERCES_CPP_NAMESPACE::DOMElement*) propertyList->item(p);
 
-        // pet home
-        XERCES_CPP_NAMESPACE::XMLString::transcode(PET_HOME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* petHomeStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool petHome = (strcmp(petHomeStr, "true") == 0 ? true : false);
 
-        // food bowl
-        XERCES_CPP_NAMESPACE::XMLString::transcode(FOOD_BOWL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* foodBowlStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool foodBowl = (strcmp(foodBowlStr, "true") == 0 ? true : false);
+                XERCES_CPP_NAMESPACE::XMLString::transcode(NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+                char* name =  XERCES_CPP_NAMESPACE::XMLString::transcode(propertyElement->getAttribute(tag));
 
-        // water bowl
-        XERCES_CPP_NAMESPACE::XMLString::transcode(WATER_BOWL_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
-        char* waterBowlStr = XERCES_CPP_NAMESPACE::XMLString::transcode(blipElement->getAttribute(tag));
-        bool waterBowl = (strcmp(waterBowlStr, "true") == 0 ? true : false);
+                XERCES_CPP_NAMESPACE::XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+                char* value =  XERCES_CPP_NAMESPACE::XMLString::transcode(propertyElement->getAttribute(tag));
 
+        
+                // Note from Tristan: All objects (toys, pets, and pet-owners) report map updates, usually on themselves,
+                // but sometimes on other avatars or objects (such as structures).
+                // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
+                if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
+                    detector = value;
+                    printf("Detector: %s\n",detector);
+                }
+
+
+                if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
+                    //objRemoval = !strcmp(value, "true");
+                    objRemoval = (strcmp(value, "true") == 0 ? true : false);
+                    printf("Remove: %s\n",value);
+                }
+
+
+                // visibility-status
+                if( strcmp(name, VISIBILITY_STATUS_ATTRIBUTE) == 0 ){
+                   isObjectInsidePetFov = !strcmp(value, "visible" );
+                    printf("Visible: %s\n",value);
+                }
+
+        
+                // length
+                if( strcmp(name, LENGTH_ATTRIBUTE) == 0 ){
+                   length = atof(value);
+                }
+
+                // width
+                if( strcmp(name, WIDTH_ATTRIBUTE) == 0 ){
+                   width = atof(value);
+                }
+
+                // height
+                if( strcmp(name, HEIGHT_ATTRIBUTE) == 0 ){
+                   height = atof(value);
+                }
+
+                // edible
+                if( strcmp(name, EDIBLE_ATTRIBUTE) == 0 ){
+                    edible = (strcmp(value, "true") == 0 ? true : false);
+                    printf("Edible: %s\n",value);
+                }
+
+                // drinkable
+                if( strcmp(name, DRINKABLE_ATTRIBUTE) == 0 ){
+                    drinkable = (strcmp(value, "true") == 0 ? true : false);
+                }
+
+
+                // pet home
+                if( strcmp(name, PET_HOME_ATTRIBUTE) == 0 ){
+                    petHome = (strcmp(value, "true") == 0 ? true : false);
+                }
+
+                // food bowl
+                if( strcmp(name, FOOD_BOWL_ATTRIBUTE) == 0 ){
+                    foodBowl = (strcmp(value, "true") == 0 ? true : false);
+                }
+
+
+                // water bowl
+                if( strcmp(name, WATER_BOWL_ATTRIBUTE) == 0 ){
+                    waterBowl = (strcmp(value, "true") == 0 ? true : false);
+                }
+            }// for property
+        } // for properties
+        
         // processing entity element of blip
         XERCES_CPP_NAMESPACE::XMLString::transcode(ENTITY_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMElement* entityElement =
@@ -1712,18 +1769,17 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         }
 
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
-        XERCES_CPP_NAMESPACE::XMLString::release(&detector);
-        XERCES_CPP_NAMESPACE::XMLString::release(&remove);
-        XERCES_CPP_NAMESPACE::XMLString::release(&lengthStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&widthStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&heightStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&edibleStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&drinkableStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&petHomeStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&foodBowlStr);
-        XERCES_CPP_NAMESPACE::XMLString::release(&waterBowlStr);
-
-
+        //if( detector != NULL)
+        //    XERCES_CPP_NAMESPACE::XMLString::release(&detector);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&remove);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&lengthStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&widthStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&heightStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&edibleStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&drinkableStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&petHomeStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&foodBowlStr);
+//        XERCES_CPP_NAMESPACE::XMLString::release(&waterBowlStr);
     }
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);

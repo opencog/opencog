@@ -31,53 +31,97 @@
         </param>
     </agent-signal>
     <map-info global-position-x="0" global-position-y="0" global-position-offset="256">
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="1" name="Fido" owner-id="2" owner-name="Wynx" type="pet"/>
         <position x="25" y="165" z="23.2"/>
         <rotation pitch="30" roll="30" yaw="182.5"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="Stick" type="accessory"/>
         <position x="5.051" y="64.251" z="4.251"/>
         <rotation pitch="10" roll="10" yaw="12.5"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" detector="false">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="2" name="Wynx" type="avatar"/>
         <position x="15" y="164" z="14"/>
         <rotation pitch="0.01" roll="0.02" yaw="2.53"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="false" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" detector="false">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="9" name="Maria" type="avatar"/>
         <position x="15" y="104" z="14"/>
         <rotation pitch="0.01" roll="0.02" yaw="2.53"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="false" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" edible="true" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="whistle" owner-id="2" owner-name="Wynx" type="accessory"/>
         <position x="5.052" y="64.252" z="4.252"/>
         <rotation pitch="20" roll="20" yaw="22.5"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+        <property name="edible" value="true" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" edible="false" petHome="true" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="house" owner-id="2" owner-name="Wynx" type="structure"/>
         <position x="15.052" y="74.252" z="14.252"/>
         <rotation pitch="20" roll="20" yaw="22.5"/>
         <velocity x="0.0" y="0.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+        <property name="edible" value="false" />
+        <property name="petHome" value="true" />
+      </properties>
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" edible="false" petHome="false" foodBowl="true" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="bow" owner-id="2" owner-name="Wynx" type="structure"/>
         <position x="19.052" y="78.252" z="18.252"/>
         <rotation pitch="20" roll="20" yaw="22.5"/>
         <velocity x="0.0" y="0.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+        <property name="edible" value="false" />
+        <property name="petHome" value="false" />
+        <property name="foodBowl" value="true" />
+      </properties>
+
     </blip>
-    <blip timestamp="2007-06-18T20:15:02.000-07:00"  visibility-status="visible" edible="false" petHome="false" foodBowl="false" waterBowl="true" detector="true">
+    <blip timestamp="2007-06-18T20:15:02.000-07:00" >
         <entity id="Water bow" owner-id="2" owner-name="Wynx" type="structure"/>
         <position x="17.052" y="76.252" z="16.252"/>
         <rotation pitch="20" roll="20" yaw="22.5"/>
         <velocity x="0.0" y="0.0" z="0.0"/>
+        <properties>
+        <property name="visibility-status" value="visible" />
+        <property name="detector" value="true" />
+        <property name="edible" value="false" />
+        <property name="petHome" value="false" />
+        <property name="foodBowl" value="false" />
+        <property name="waterBowl" value="true" />
+
+      </properties>
     </blip>
  
     </map-info>

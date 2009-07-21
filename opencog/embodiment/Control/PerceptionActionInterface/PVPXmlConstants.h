@@ -48,6 +48,8 @@
 #define EMOTIONAL_FEELING_ELEMENT "pet:emotional-feeling"
 #define FEELING_ELEMENT           "feeling"
 #define AGENT_SIGNAL_ELEMENT     "agent-signal"
+#define PROPERTIES_ELEMENT       "properties"
+#define PROPERTY_ELEMENT         "property"
 
 // xml attributes
 #define PET_ID_ATTRIBUTE                     "pet-id"
