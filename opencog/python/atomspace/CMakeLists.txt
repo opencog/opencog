@@ -4,12 +4,13 @@ add_library(atomspace_py SHARED
     Atom_wrap.cc
     AtomSpace_wrap.cc
     AttentionValue_wrap.cc
-	Handle_wrap.cc
-    Link_wrap.cc
-    Node_wrap.cc
+    ClassServer_wrap.cc
     CompositeTruthValue_wrap.cc
     CountTruthValue_wrap.cc
+	Handle_wrap.cc
     IndefiniteTruthValue_wrap.cc
+    Link_wrap.cc
+    Node_wrap.cc
     SavableRepository_wrap.cc
     SimpleTruthValue_wrap.cc
     SpaceServer_wrap.cc

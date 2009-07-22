@@ -4,12 +4,13 @@
 #include "AttentionValue_wrap.h"
 #include "Atom_wrap.h"
 #include "AtomSpace_wrap.h"
-#include "Handle_wrap.h"
-#include "Node_wrap.h"
-#include "Link_wrap.h"
 #include "CompositeTruthValue_wrap.h"
 #include "CountTruthValue_wrap.h"
+#include "ClassServer_wrap.h"
+#include "Handle_wrap.h"
 #include "IndefiniteTruthValue_wrap.h"
+#include "Node_wrap.h"
+#include "Link_wrap.h"
 #include "SavableRepository_wrap.h"
 #include "SimpleTruthValue_wrap.h"
 #include "SpaceServer_wrap.h"
@@ -42,6 +43,7 @@ void init_atomspace_module_py()
     init_AtomSpace_py();
     init_Node_py();
     init_Link_py();
+    init_ClassServer_py();
 }
 
 /*BOOST_PYTHON_MODULE(atomspace)
