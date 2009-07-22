@@ -12,6 +12,7 @@ using namespace boost::python;
 
 void init_ClassServer_py()
 {
-    /*class_<ClassServer>("ClassServer")
-    ;*/
+    class_<ClassServer, boost::noncopyable>("ClassServer", no_init)
+        .def("getType", &ClassServer::getType)
+    ;
 }
