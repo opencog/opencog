@@ -24,17 +24,27 @@ int main(int argc, char** argv)
     //set flag to print only cassert and other ERROR level logs on stdout
     opencog::logger().setPrintErrorLevelStdout();
 
+    //read in maximum evaluations and RNG seed from command line
+    int max_evals;
+    int seed;
+    try {
+        if (argc!=3)
+            throw "foo";
+        max_evals=lexical_cast<int>(argv[1]);
+        seed=lexical_cast<int>(argv[2]);
+    } catch (...) {
+        cerr << "usage: " << argv[0] << " maxevals seed" << endl;
+        exit(1);
+    }
+    
+    //read in the seed combo tree from stdin
     combo_tree tr;
     cin >> tr; 
 
-    tree_transform trans;
-    ann nn = trans.decodify_tree(tr);
+    opencog::MT19937RandGen rng(seed);
 
-    cout << "Network depth: " << nn.feedforward_depth() << endl;
-    cout << &nn << endl;
-
-    opencog::MT19937RandGen rng(0);
-
+    //this will let expansion know that we are
+    //dealing with an ANN
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);
 
@@ -50,8 +60,10 @@ int main(int argc, char** argv)
             bscore,
             univariate_optimization(rng));
    
-    moses::moses(metapop, 50000, 100000);
+    moses::moses(metapop, max_evals, 0.0);
 
+    //transform the best combo tree into an ANN
+    tree_transform trans; 
     combo_tree best = metapop.best_trees().front();
     ann bestnet = trans.decodify_tree(best);
     
@@ -72,10 +84,14 @@ int main(int argc, char** argv)
     
     }
    
+    //save the best network (can be viewed in any dot viewer)
     cout << "Best network: " << endl;
     cout << &bestnet << endl;
+    bestnet.write_dot("best_nn.dot");
+       
+    //write out the best score (to be used in parameter sweep)
+    cout << metapop.best_score().first << endl;
 }
-
 
 
 

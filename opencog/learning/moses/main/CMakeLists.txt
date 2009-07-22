@@ -5,6 +5,13 @@ TARGET_LINK_LIBRARIES (moses-ann-pole1
         util
 )
 
+ADD_EXECUTABLE (moses-ann-pole2-hillclimbing moses-ann-pole2-hillclimbing)
+TARGET_LINK_LIBRARIES (moses-ann-pole2-hillclimbing
+        moses
+        comboreduct
+        util
+)
+
 ADD_EXECUTABLE (moses-ann-pole2 moses-ann-pole2)
 TARGET_LINK_LIBRARIES (moses-ann-pole2
         moses

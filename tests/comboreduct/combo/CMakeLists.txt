@@ -1,3 +1,9 @@
+ADD_CXXTEST(annUTest)
+TARGET_LINK_LIBRARIES(annUTest
+    comboreduct
+        util
+)
+
 ADD_CXXTEST(vertexUTest)
 TARGET_LINK_LIBRARIES(vertexUTest
 	comboreduct

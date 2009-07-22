@@ -57,7 +57,7 @@ struct build_knobs : boost::noncopyable {
                 const operator_set* os = NULL,
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
-                contin_t step_size = 0.1, contin_t expansion = 2.0,
+                contin_t step_size = 1.0, contin_t expansion = 1.0,
                 eda::field_set::arity_t depth = 4);
 
     void build_logical(combo_tree::iterator it);

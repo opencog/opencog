@@ -230,7 +230,7 @@ struct AnnPole2FitnessFunction : unary_function<combo_tree, double> {
     the_cart = new CartPole(true,velocity);
     the_cart->nmarkov_long=false;
     the_cart->generalization_test=false;
-    double fitness = the_cart->evalNet(&nn);
+    double fitness = -100000+the_cart->evalNet(&nn);
     delete the_cart; 
     return fitness;
  }
