@@ -1,7 +1,7 @@
 #include "ClassServer_wrap.h"
 #include <boost/python/class.hpp>
-//#include <boost/python/return_value_policy.hpp>
-//#include <boost/python/reference_existing_object.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/manage_new_object.hpp>
 //#include <boost/python/overloads.hpp>
 #include <opencog/atomspace/ClassServer.h>
 
@@ -13,6 +13,9 @@ using namespace boost::python;
 void init_ClassServer_py()
 {
     class_<ClassServer, boost::noncopyable>("ClassServer", no_init)
+        .def("createInstance", &ClassServer::createInstance,
+            return_value_policy<manage_new_object>())
+        .staticmethod("createInstance")
         .def("getType", &ClassServer::getType)
     ;
 }
