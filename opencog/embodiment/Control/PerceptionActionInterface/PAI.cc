@@ -1528,7 +1528,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::transcode(PROPERTIES_ELEMENT, tag, PAIUtils::MAX_TAG_LENGTH);
         XERCES_CPP_NAMESPACE::DOMNodeList * propertiesList = blipElement->getElementsByTagName(tag);
 
-        printf("Properties List: %d\n",propertiesList->getLength());
+        // printf("Properties List: %d\n",propertiesList->getLength());
         char* detector;
         bool objRemoval=false;
         bool isObjectInsidePetFov=false;
@@ -1570,21 +1570,18 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
                 if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
                     detector = value;
-                    printf("Detector: %s\n",detector);
                 }
 
 
                 if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
                     //objRemoval = !strcmp(value, "true");
                     objRemoval = (strcmp(value, "true") == 0 ? true : false);
-                    printf("Remove: %s\n",value);
                 }
 
 
                 // visibility-status
                 if( strcmp(name, VISIBILITY_STATUS_ATTRIBUTE) == 0 ){
                    isObjectInsidePetFov = !strcmp(value, "visible" );
-                    printf("Visible: %s\n",value);
                 }
 
         
@@ -1606,7 +1603,6 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 // edible
                 if( strcmp(name, EDIBLE_ATTRIBUTE) == 0 ){
                     edible = (strcmp(value, "true") == 0 ? true : false);
-                    printf("Edible: %s\n",value);
                 }
 
                 // drinkable
