@@ -16,6 +16,10 @@ void init_AttentionValue_py();
  */
 struct AttentionValueWrap : AttentionValue, wrapper<AttentionValue>
 {
+    AttentionValueWrap();
+    AttentionValueWrap(sti_t STI);
+    AttentionValueWrap(sti_t STI, lti_t LTI);
+    AttentionValueWrap(sti_t STI, lti_t LTI, vlti_t VLTI);
     // Non-pure virtual functions.
 
     sti_t getSTI() const;

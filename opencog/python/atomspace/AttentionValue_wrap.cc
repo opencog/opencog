@@ -8,7 +8,11 @@ using namespace boost::python;
 
 void init_AttentionValue_py()
 {
-    class_<AttentionValueWrap, boost::noncopyable>("AttentionValue")
+    class_<AttentionValueWrap, boost::noncopyable>("AttentionValue", no_init)
+        .def(init<>())
+        .def(init< optional<AttentionValueWrap::sti_t,
+                    AttentionValueWrap::lti_t, AttentionValueWrap::vlti_t>
+                >())
         .def("getSTI", &AttentionValue::getSTI,
             &AttentionValueWrap::default_getSTI)
         .def("getScaledSTI", &AttentionValue::getScaledSTI,
@@ -34,7 +38,18 @@ void init_AttentionValue_py()
     ;
 }
 
-// Pure virtual functions.
+AttentionValueWrap::AttentionValueWrap():
+    AttentionValue()
+{}
+AttentionValueWrap::AttentionValueWrap(sti_t STI):
+    AttentionValue(STI)
+{}
+AttentionValueWrap::AttentionValueWrap(sti_t STI, lti_t LTI):
+    AttentionValue(STI, LTI)
+{}
+AttentionValueWrap::AttentionValueWrap(sti_t STI, lti_t LTI, vlti_t VLTI):
+    AttentionValue(STI, LTI, VLTI)
+{}
 
 // Non-pure virtual functions.
 
