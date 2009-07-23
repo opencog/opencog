@@ -9,11 +9,13 @@ using namespace boost::python;
 
 void init_Agent_py()
 {
-    class_<AgentWrap, bases<AttentionValue>, boost::noncopyable>("Agent")
+    class_<AgentWrap, bases<AttentionValue>, boost::noncopyable>("Agent",
+        no_init)
         .def(init<optional<const unsigned int> >())
         .def("run", pure_virtual(&Agent::run))
         .def("classinfo", pure_virtual(&Agent::classinfo),
             return_internal_reference<>())
+        .def("to_string", &Agent::to_string)
     ;
 }
 
@@ -28,7 +30,7 @@ AgentWrap::AgentWrap(const unsigned int f):
 
 void AgentWrap::run(CogServer* server)
 {
-    this->get_override("run")();
+    this->get_override("run")(ptr(server));
 }
 const ClassInfo& AgentWrap::classinfo() const
 {
