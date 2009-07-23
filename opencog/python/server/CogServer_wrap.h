@@ -3,7 +3,7 @@
 
 #include <boost/python/wrapper.hpp>
 
-//#include <opencog/server/Agent.h>
+#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 
 using namespace boost::python;
