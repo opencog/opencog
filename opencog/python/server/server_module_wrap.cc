@@ -2,6 +2,7 @@
 #include <boost/python/scope.hpp>
 
 #include "server_module_wrap.h"
+#include "Agent_wrap.h"
 #include "BaseServer_wrap.h"
 #include "CogServer_wrap.h"
 
@@ -18,4 +19,5 @@ void init_server_module_py()
 
     init_BaseServer_py();
     init_CogServer_py();
+    init_Agent_py();
 }

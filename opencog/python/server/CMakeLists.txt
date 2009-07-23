@@ -1,7 +1,8 @@
 include_directories(${PROJECT_SOURCE_DIR}/opencog/server)
 add_library(server_py SHARED
-    BaseServer_wrap.cc
     CogServer_wrap.cc
+    Agent_wrap.cc
+    BaseServer_wrap.cc
     Registry_wrap.cc
     server_module_wrap.cc
 )
