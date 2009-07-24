@@ -241,8 +241,8 @@ public:
                                  //<< atoms[n]->toString() << "\t"
                                  << e->toString() << "\t"
                                  << t->toString() << "\n";
-                            totalStrError += Abs(e->getMean() - t->getMean());
-                            totalCountError += Abs(e->getCount() - t->getCount());
+                            totalStrError += abs(e->getMean() - t->getMean());
+                            totalCountError += abs(e->getCount() - t->getCount());
                             num++;
                         }
                     }
@@ -280,8 +280,8 @@ public:
                      << atoms[b]->toString() << "\t";
                 cout << e->toString() << "\t";
                 cout << t->toString() << "\n";
-                totalStrError += Abs(e->getMean() - t->getMean());
-                totalCountError += Abs(e->getCount() - t->getCount());
+                totalStrError += abs(e->getMean() - t->getMean());
+                totalCountError += abs(e->getCount() - t->getCount());
 #endif
                 num++;
             }
@@ -318,8 +318,8 @@ public:
                      << atoms[b]->toString() << "\t"
                      << e->toString() << "\t"
                      << t->toString() << "\n";
-                totalStrError += Abs(e->getMean() - t->getMean());
-                totalCountError += Abs(e->getCount() - t->getCount());
+                totalStrError += abs(e->getMean() - t->getMean());
+                totalCountError += abs(e->getCount() - t->getCount());
 #endif
                 num++;
             }
@@ -355,8 +355,8 @@ public:
                      << atoms[b]->toString() << "\t"
                      << e->toString() << "\t"
                      << t->toString() << "\n";
-                totalStrError += Abs(e->getMean() - t->getMean());
-                totalCountError += Abs(e->getCount() - t->getCount());
+                totalStrError += abs(e->getMean() - t->getMean());
+                totalCountError += abs(e->getCount() - t->getCount());
 #endif
                 num++;
             }
@@ -396,8 +396,8 @@ public:
                      << atoms[b]->toString() << "\t"
                      << e->toString() << "\t"
                      << t->toString() << "\n";
-                totalStrError += Abs(e->getMean() - t->getMean());
-                totalCountError += Abs(e->getCount() - t->getCount());
+                totalStrError += abs(e->getMean() - t->getMean());
+                totalCountError += abs(e->getCount() - t->getCount());
 #endif
                 num++;
             }
@@ -438,8 +438,8 @@ public:
                                  << d->toString() << "\t"
                                  << e->toString() << "\t"
                                  << t->toString() << "\n";
-                            totalStrError += Abs(e->getMean() - t->getMean());
-                            totalCountError += Abs(e->getCount() - t->getCount());
+                            totalStrError += abs(e->getMean() - t->getMean());
+                            totalCountError += abs(e->getCount() - t->getCount());
 #endif
                             num++;
                         }

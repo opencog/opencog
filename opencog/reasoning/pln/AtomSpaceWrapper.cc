@@ -820,13 +820,13 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const Trut
 LOG(3, "Add ok.");
 
 /*  if (!tvn.isNullTv())
-        if (Abs(a->getTV(ret)->getMean() - tvn.getMean()) > 0.0001)
+        if (abs(a->getTV(ret)->getMean() - tvn.getMean()) > 0.0001)
         {
             printf("ATW: %s / %s\n", a->getTV(ret)->toString().c_str(),
                 tvn.toString().c_str());
         }*/
     
-//  assert(Abs(a->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
+//  assert(abs(a->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
 
     return ret;
 }

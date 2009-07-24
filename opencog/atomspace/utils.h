@@ -47,8 +47,6 @@
 /// Convert a boost::variant into a Handle
 #define v2h(v) boost::get<Handle>(v)
 
-#define Abs(a) ( ((a)>0) ? (a) : (-a) )
-
 namespace opencog
 {
 

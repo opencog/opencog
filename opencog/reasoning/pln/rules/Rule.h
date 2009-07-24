@@ -200,6 +200,10 @@ public:
     std::string name; 
 };
 
+
+/**
+ * Note: enum RULE is currently unused
+ */
 enum RULE
 {
     PTL_AND,

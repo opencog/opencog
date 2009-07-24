@@ -103,7 +103,6 @@
 
 #define USE_ALL_AVAILABLE_INFORMATION_FOR_AND_RULE_COMPUTATION 1
 #define MAX_ARITY_FOR_PERMUTATION 5
-#define Abs(a) ( ((a)>0) ? (a) : (-a) )
 
 //const bool RuleResultFreshness = true;
 
