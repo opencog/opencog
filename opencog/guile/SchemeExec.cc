@@ -27,7 +27,7 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 {
 	per_thread_init();
 	SCM sfunc = scm_from_locale_symbol(func.c_str());
-	SCM expr = sfunc;
+	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
 	Link *largs = dynamic_cast<Link *>(TLB::getAtom(varargs));
@@ -35,7 +35,6 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 	{
 		const std::vector<Handle> &oset = largs->getOutgoingSet();
 
-		expr = SCM_EOL;
 		size_t sz = oset.size();
 		for (int i=sz-1; i>=0; i--)
 		{
@@ -43,8 +42,8 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 			SCM sh = SchemeSmob::handle_to_scm(h);
 			expr = scm_cons(sh, expr);
 		}
-		expr = scm_cons(sfunc, expr);
 	}
+	expr = scm_cons(sfunc, expr);
 
 	// Apply the function to the args
    SCM sresult = do_scm_eval(expr);
