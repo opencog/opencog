@@ -89,6 +89,20 @@ void ExecutionUTest::setUp(void)
 
 #ifdef HAVE_GUILE
 	// Create initialzation
+	const char * setup = 
+	"(define (AndLink . x)\n"
+	"   (apply cog-new-link (append (list 'AndLink) x)))\n"
+	"(define (InheritanceLink . x)\n"
+	"   (apply cog-new-link (append (list 'InheritanceLink) x)))\n"
+	"(define (ImplicationLink . x)\n"
+	"   (apply cog-new-link (append (list 'ImplicationLink) x)))\n"
+	"(define (DefinedFrameNode . x)\n"
+	"   (apply cog-new-node (append (list 'DefinedFrameNode) x)))\n"
+	"(define (PredicateNode . x)\n"
+	"   (apply cog-new-node (append (list 'PredicateNode) x)))\n"
+	"(define (VariableNode . x)\n"
+	"   (apply cog-new-node (append (list 'VariableNode) x)))\n";
+	evaluator.eval(setup);
 
 	// Create an implication link that will be tested.
 	const char * imp = 
@@ -105,7 +119,8 @@ void ExecutionUTest::setUp(void)
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
 	")\n";
-	implication = evaluator.apply(imp, Handle::UNDEFINED);
+	// implication = evaluator.apply(imp, Handle::UNDEFINED);
+	evaluator.eval(imp);
 
 	// Create data on which the above pattern should match
 	const char * str = 
