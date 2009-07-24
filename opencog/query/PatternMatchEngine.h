@@ -111,6 +111,12 @@ class PatternMatchEngine
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle, Handle, Handle);
 
+		bool validate(const std::vector<Handle> &vars,
+		              std::vector<Handle> &clauses);
+
+		bool validate(const std::vector<Handle> &vars,
+		              Handle clause);
+
 		void match(PatternMatchCallback *,
 		           const std::vector<Handle> &vars,
 		           const std::vector<Handle> &clauses,

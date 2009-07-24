@@ -697,6 +697,89 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 }
 
+/**
+ * Validate -- every clause must contain at least one variable.
+ *
+ * Make sure that every clause contains at least one variable;
+ * if not, remove the clause from the list of clauses.
+ *
+ * The core idea is that pattern matching against a constant expression
+ * "doesn't make sense" -- the constant expression will always match to
+ * itself and is thus "trivial".  In principle, the programmer should
+ * never include constants in the list of clauses ... but, due to 
+ * programmer error, this can happen, and will lead to failures during
+ * pattern matching. Thus, the routine below can be used to validate
+ * the input.
+ *
+ * Returns true if the list of clauses was modified, else returns false.
+ */
+bool PatternMatchEngine::validate(
+                         const std::vector<Handle> &vars,
+                         std::vector<Handle> &clauses)
+{
+	bool modified = false;
+
+	std::vector<Handle>::iterator i;
+	for (i = clauses.begin();
+	     i != clauses.end();)
+	{
+		Handle clause = *i;
+		if (validate (vars, clause))
+		{
+			i++;
+		}
+		else
+		{
+			i = clauses.erase(i);
+			modified = true;
+		}
+	}
+
+	return modified;
+}
+
+/**
+ * Return true if clause contains one of the vars, else return false.
+ *
+ * If the clause, (or any of its subclauses) contain any variable in
+ * the list of variables, then return true; else return false.
+ */
+bool PatternMatchEngine::validate(
+                         const std::vector<Handle> &vars,
+                         Handle clause)
+{
+	// If its a node, then it must be one of the vars.
+	Node *n = dynamic_cast<Node *>(TLB::getAtom(clause));
+	if (n)
+	{
+		std::vector<Handle>::const_iterator i;
+		for (i = vars.begin();
+	     	i != vars.end(); i++)
+		{
+			Handle h = *i;
+			if (h == clause) return true;
+		}
+		return false;
+	}
+
+	// If its a link, then recurse to subclauses.
+	Link *l = dynamic_cast<Link *>(TLB::getAtom(clause));
+	if (l)
+	{
+		const std::vector<Handle> &oset = l->getOutgoingSet();
+		std::vector<Handle>::const_iterator i;
+		for (i = oset.begin();
+	     	i != oset.end(); i++)
+		{
+			Handle subclause = *i;
+			if (validate(vars, subclause)) return true;
+		}
+		return false;
+	}
+
+	return false;
+}
+
 void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
