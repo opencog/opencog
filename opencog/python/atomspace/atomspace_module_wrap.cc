@@ -1,6 +1,7 @@
 #include <boost/python/module.hpp>
 
 #include "atomspace_module_wrap.h"
+#include "atom_types_wrap.h"
 #include "AttentionValue_wrap.h"
 #include "Atom_wrap.h"
 #include "AtomSpace_wrap.h"
@@ -20,12 +21,12 @@
 using namespace boost::python;
 
 class atomspace_scope_t {};
+object atomspace_scope;
 
 void init_atomspace_module_py()
 {
     // Setup scope.
-    atomspace_scope =
-        class_<atomspace_scope_t>("atomspace");
+    atomspace_scope = class_<atomspace_scope_t>("atomspace");
     scope within(atomspace_scope);
 
     // Order matters!..
@@ -44,6 +45,7 @@ void init_atomspace_module_py()
     init_Node_py();
     init_Link_py();
     init_ClassServer_py();
+    init_atom_types_py();
 }
 
 /*BOOST_PYTHON_MODULE(atomspace)
