@@ -23,6 +23,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -106,6 +107,7 @@ void ExecutionUTest::setUp(void)
 
 	// Create an implication link that will be tested.
 	const char * imp = 
+	"(define (imp)\n"
 	"(ImplicationLink\n"
 	"   (AndLink\n"
 	"      (InheritanceLink\n"
@@ -118,9 +120,10 @@ void ExecutionUTest::setUp(void)
 	"      )\n"
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
+	")\n"
 	")\n";
-	// implication = evaluator.apply(imp, Handle::UNDEFINED);
 	evaluator.eval(imp);
+	implication = evaluator.apply("imp", Handle::UNDEFINED);
 
 	// Create data on which the above pattern should match
 	const char * str = 
@@ -157,9 +160,9 @@ void ExecutionUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-printf("duuude implication is %s\n", implication.str().c_str());
 	// Result should be a ListLink
 	Handle result = pm.crisp_logic_imply(implication);
+printf("duuude result is %s\n", SchemeSmob::to_string(result).c_str());
 
 #if 0
 	// There should be only one solution: the Berlin one.
