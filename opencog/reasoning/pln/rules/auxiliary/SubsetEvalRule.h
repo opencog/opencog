@@ -32,7 +32,7 @@ namespace opencog { namespace pln {
 class SubsetEvalRule
 {
     pHandle domain;
-    SubsetEvalFormula f;
+    SubsetEvalFormula formula;
 
 protected:
 

@@ -30,7 +30,7 @@ class VarInstantiationRule :	public Sim2InhRule<MEMBER_LINK>, //public Eval2MemR
 								public DeductionRule<DeductionRuleType,MEMBER_LINK>, public Inh2EvalRule
 {
 /*protected:
-	Sim2InhFormula f;*/
+	Sim2InhFormula formula;*/
 public:
 	VarInstantiationRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable)

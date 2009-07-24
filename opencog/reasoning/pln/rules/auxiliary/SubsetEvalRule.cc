@@ -85,7 +85,7 @@ pHandle SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
             tot++;
         }
 
-    TruthValue* retTV = f.compute(tvs1, tot, tvs2, tot);
+    TruthValue* retTV = formula.compute(tvs1, tot, tvs2, tot);
 
     for (i = 0; i < set1.size(); i++)
         delete tvs1[i];

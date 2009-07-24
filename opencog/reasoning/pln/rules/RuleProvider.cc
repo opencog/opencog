@@ -38,13 +38,13 @@ void delete_op(T* r) { delete r; }
 
 void RuleProvider::AddRule(Rule* r, float priority)
 {
-	push_back(r);
-	r->setPriority(priority);
+    push_back(r);
+    r->setPriority(priority);
 }
 
 RuleProvider::~RuleProvider(void)
 {
-	for_each(begin(), end(), &delete_op<Rule>);
+    for_each(begin(), end(), &delete_op<Rule>);
 }
 
 VariableRuleProvider::VariableRuleProvider(void)
@@ -57,29 +57,29 @@ VariableRuleProvider::~VariableRuleProvider(void)
 /*
 void VariableRuleProvider::CreateCustomCrispUnificationRules()
 {
-	iAtomSpaceWrapper* parent = ASW();
+iAtomSpaceWrapper* parent = ASW();
 	
 }
 */
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
-
-	iAtomSpaceWrapper* parent = ASW();
-
-	Btr<std::set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
-	
-	foreach(pHandle fah, *ForAll_handles)
-		AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
-
-	cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
-
-	AddRule(new LookupRule(parent), 20.0f);
+    
+    iAtomSpaceWrapper* parent = ASW();
+    
+    Btr<std::set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
+    
+    foreach(pHandle fah, *ForAll_handles)
+        AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
+    
+    cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
+    
+    AddRule(new LookupRule(parent), 20.0f);
 
 /// StrictCrispUnification always requires Hypothesis, too!	
 //	AddRule(new StrictCrispUnificationRule(parent), 7.5f);
 //	AddRule(new CrispUnificationRule(parent), 7.5f); ///Alternative implementation
 
-	float ANDEvaluatorPriority = 10.0f;
+    float ANDEvaluatorPriority = 10.0f;
 /// haxx:: \todo ANDRule sometimes confuses the order of atoms in the 
 /// outgoing vector of the resulting ANDLink. Ie. the order is not the same
 /// as the order in which the arguments were inputted. Eg. compute(a, b) may give
@@ -88,47 +88,47 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 /// as SequentialANDLinks, but there is another basic cause for it, too.
 //	AddRule(new ANDRule(parent), ANDEvaluatorPriority);
 
-	AddRule(new ORRule(parent), 10.0f);
-
-	AddRule(new SimpleANDRule<1>(parent), ANDEvaluatorPriority - 1.0f);
-	AddRule(new SimpleANDRule<2>(parent), ANDEvaluatorPriority - 1.1f);
-	AddRule(new SimpleANDRule<3>(parent), ANDEvaluatorPriority - 1.2f);
-//	AddRule(new SimpleANDRule<4>(parent), ANDEvaluatorPriority - 1.3f);
-//	AddRule(new SimpleANDRule<5>(parent), ANDEvaluatorPriority - 1.4f);
-
-	AddRule(new ANDPartitionRule(parent), 10.0f);
-	AddRule(new NotEvaluatorRule(parent), 10.0f);
-
-	AddRule( new ScholemFunctionProductionRule(parent), 20.0f);
-//	AddRule(new FORALLRule(parent,NULL), 5.0f);
-//	AddRule( new PLNPredicateRule(parent,NULL), 5.0f);
-
-//	AddRule(new ImplicationBreakdownRule(parent), 9.0f);
-	AddRule(new StrictImplicationBreakdownRule(parent), 9.0f);
-
-//	AddRule(new ImplicationTailExpansionRule(parent), 10.0f);
-//	AddRule(new ImplicationConstructionRule(parent), 10.0f);
+    AddRule(new ORRule(parent), 10.0f);
+    
+    AddRule(new SimpleANDRule<1>(parent), ANDEvaluatorPriority - 1.0f);
+    AddRule(new SimpleANDRule<2>(parent), ANDEvaluatorPriority - 1.1f);
+    AddRule(new SimpleANDRule<3>(parent), ANDEvaluatorPriority - 1.2f);
+    //	AddRule(new SimpleANDRule<4>(parent), ANDEvaluatorPriority - 1.3f);
+    //	AddRule(new SimpleANDRule<5>(parent), ANDEvaluatorPriority - 1.4f);
+    
+    AddRule(new ANDPartitionRule(parent), 10.0f);
+    AddRule(new NotEvaluatorRule(parent), 10.0f);
+    
+    AddRule( new ScholemFunctionProductionRule(parent), 20.0f);
+    //	AddRule(new FORALLRule(parent,NULL), 5.0f);
+    //	AddRule( new PLNPredicateRule(parent,NULL), 5.0f);
+    
+    //	AddRule(new ImplicationBreakdownRule(parent), 9.0f);
+    AddRule(new StrictImplicationBreakdownRule(parent), 9.0f);
+    
+    //	AddRule(new ImplicationTailExpansionRule(parent), 10.0f);
+    //	AddRule(new ImplicationConstructionRule(parent), 10.0f);
 //	AddRule(new InversionRule<IMPLICATION_LINK>(parent), 7.0f);
-	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, IMPLICATION_LINK), 8.0f);
-	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-	AddRule(new InversionRule(parent, INHERITANCE_LINK), 7.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK), 8.0f);
-			  
-//	AddRule(new ORPartitionRule(parent), 10.0f);
-	AddRule(new CrispTheoremRule(parent), 10.0f);
-
-	AddRule(new Int2ExtRule(parent, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-	AddRule(new Int2ExtRule(parent, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
-	AddRule(new Ext2IntRule(parent, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-	AddRule(new Ext2IntRule(parent, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
-
-	AddRule(new HypothesisRule(parent), 30.0f);
-//	AddRule(new SimSubstRule1(parent), 5.0f);
-
-	/* The rest of the Rules have rarely or never been used. Some of them just won't work. */
-
-/*	AddRule(new UnorderedLinkPermutationRule(parent), 10.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, IMPLICATION_LINK), 8.0f);
+    //AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
+    AddRule(new InversionRule(parent, INHERITANCE_LINK), 7.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK), 8.0f);
+    
+    //	AddRule(new ORPartitionRule(parent), 10.0f);
+    AddRule(new CrispTheoremRule(parent), 10.0f);
+    
+    AddRule(new Int2ExtRule(parent, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+    AddRule(new Int2ExtRule(parent, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
+    AddRule(new Ext2IntRule(parent, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+    AddRule(new Ext2IntRule(parent, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
+    
+    AddRule(new HypothesisRule(parent), 30.0f);
+    //	AddRule(new SimSubstRule1(parent), 5.0f);
+    
+    /* The rest of the Rules have rarely or never been used. Some of them just won't work. */
+    
+    /*	AddRule(new UnorderedLinkPermutationRule(parent), 10.0f);
 	AddRule(new VariableInstantiationRule(parent), 10.0f);
 	AddRule(new NOTEliminationRule(parent), 10.0f
 	AddRule(new Equi2ImplRule(parent), 10.0f
@@ -164,22 +164,22 @@ DefaultVariableRuleProvider::~DefaultVariableRuleProvider(void)
 class GenericRule2 : public Rule
 {
 protected:
-	mutable FormulaType f;
+    mutable FormulaType formula;
 
 public:
-	virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
-//	virtual TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const=0;
-	
-	~GenericRule2() {}
-	/// Always computable
-	GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
+    virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
+    //	virtual TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const=0;
+    
+    ~GenericRule2() {}
+    /// Always computable
+    GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
-		
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
-	{
-		return Vertex();
-	}
-	NO_DIRECT_PRODUCTION;
+    
+    BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+    {
+        return Vertex();
+    }
+    NO_DIRECT_PRODUCTION;
 };
 
 //template<Type InclusionLink>
@@ -188,46 +188,46 @@ public:
 class InversionRule2 : public GenericRule2 //<InversionFormula>
 {
 protected:
-	std::vector<Type> ti;
-
-	~InversionRule2() {}
-	TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
-	{
-		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
-
-		return tvs;
-	}
-	std::vector<BoundVertex> r;
-
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		Rule::MPs ret;
-
-		return makeSingletonSet(ret);
-	}
-
+    std::vector<Type> ti;
+    
+    ~InversionRule2() {}
+    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
+    {
+        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
+        
+        return tvs;
+    }
+    std::vector<BoundVertex> r;
+    
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        Rule::MPs ret;
+        
+        return makeSingletonSet(ret);
+    }
+    
 public:
-	InversionRule2(iAtomSpaceWrapper *_destTable)
+    InversionRule2(iAtomSpaceWrapper *_destTable)
 	: GenericRule2/*<InversionFormula>*/ (_destTable, false, "InversionRule")
-	{
-	}
-	bool validate2				(MPs& args) const { return true; }
-
-	virtual meta i2oType(const std::vector<Vertex>& h) const
-	{
-		return	meta(new tree<Vertex>());
-	}
-	NO_DIRECT_PRODUCTION;
+    {
+    }
+    bool validate2				(MPs& args) const { return true; }
+    
+    virtual meta i2oType(const std::vector<Vertex>& h) const
+    {
+        return	meta(new tree<Vertex>());
+    }
+    NO_DIRECT_PRODUCTION;
 };
-
-
+        
+        
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
-	iAtomSpaceWrapper* parent = ASW();
-	//AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-	//AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-	//AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
-	AddRule(new DeductionRule<DeductionSimpleFormula>(parent, ASSOCIATIVE_LINK), 8.0f);
+    iAtomSpaceWrapper* parent = ASW();
+    //AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, ASSOCIATIVE_LINK), 8.0f);
     reset();
 }
 

@@ -31,7 +31,7 @@ template<int N>
 class ANDBreakdownRule : public Rule
 {
 protected:
-	ANDBreakdownFormula f;
+	ANDBreakdownFormula formula;
 
 public:
 	ANDBreakdownRule(iAtomSpaceWrapper *_destTable)

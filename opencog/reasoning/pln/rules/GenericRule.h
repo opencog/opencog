@@ -29,7 +29,7 @@ template<typename FormulaType>
 class GenericRule : public Rule
 {
 protected:
-    mutable FormulaType f;
+    mutable FormulaType formula;
 
 public:
     virtual std::set<MPs> o2iMetaExtra(meta outh,
@@ -59,7 +59,7 @@ public:
         assert(validate(premiseArray));
 
         printf("formatTVarray...\n");
-        int TVN = f.TVN;
+        int TVN = formula.TVN;
         TruthValue** tvs = formatTVarray(premiseArray, &TVN);
         printf("formatTVarray OK\n");
 
@@ -69,7 +69,7 @@ public:
         }
 
         printf("Computing TV... \n");
-        TruthValue* retTV = f.compute(tvs, TVN);
+        TruthValue* retTV = formula.compute(tvs, TVN);
         printf("TV computation ok\n");
 
         delete[] tvs;

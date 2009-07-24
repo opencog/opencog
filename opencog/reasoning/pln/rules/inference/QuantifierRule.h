@@ -27,53 +27,55 @@ namespace opencog { namespace pln {
 template<typename FormulaType>
 class QuantifierRule : public Rule
 {
-	pHandle domain;
-	FormulaType f;
+    pHandle domain;
+    FormulaType formula;
     Type OUTPUT_LINK_TYPE;
 public:
-	bool validate2				(MPs& args) const { return true; }
-
-	QuantifierRule(iAtomSpaceWrapper *_destTable, const pHandle& _domain, Type outLinkType)
+    bool validate2(MPs& args) const { return true; }
+    
+    QuantifierRule(iAtomSpaceWrapper *_destTable,
+                   const pHandle& _domain, Type outLinkType)
 	: Rule(_destTable, false, true, "QuantifierRule"), 
-	domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
-		inputFilter.push_back(meta(
-			new tree<Vertex>(
-				mva((pHandle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
-					mva((pHandle)ATOM),
-					mva((pHandle)ATOM))
-			)));
-	}
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		return Rule::setOfMPs(); //No support (yet)
-	}
-
-	//Domain should be inferred instead from the premis ConceptNodes!!!
-
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		const int n = (int)premiseArray.size();
-		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
-		int i;
-		for (i = 0; i < n; i++)
-			tvs[i] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[i])));
-
-		TruthValue* retTV = f.compute(tvs, n);	
-
-		delete[] tvs;
-
-//haxx::
-		pHandle ret = destTable->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
-				*retTV,
-				RuleResultFreshness);	
-//				false);
-
+          domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
+        inputFilter.push_back(meta(
+                                   new tree<Vertex>(
+                                                    mva((pHandle)((OUTPUT_LINK_TYPE==FORALL_LINK) ? EXIST_LINK : FORALL_LINK),
+                                                        mva((pHandle)ATOM),
+                                                        mva((pHandle)ATOM))
+                                                    )));
+    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        return Rule::setOfMPs(); //No support (yet)
+    }
+    
+    //Domain should be inferred instead from the premis ConceptNodes!!!
+    
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const
+    {
+        const int n = (int)premiseArray.size();
+        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
+        int i;
+        for (i = 0; i < n; i++)
+            tvs[i] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[i])));
+        
+        TruthValue* retTV = formula.compute(tvs, n);	
+        
+        delete[] tvs;
+        
+        //haxx::
+        pHandle ret = destTable->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
+                                         *retTV,
+                                         RuleResultFreshness);	
+        //				false);
+        
         delete retTV;
-
-		return Vertex(ret);
-	}
+        
+        return Vertex(ret);
+    }
 	
-	NO_DIRECT_PRODUCTION;
+    NO_DIRECT_PRODUCTION;
 };
 
 typedef QuantifierRule<FORALLFormula> FORALLRule;
