@@ -18,4 +18,11 @@ void init_atom_types_py()
 
     a.def_readonly("ATOM", &ATOM);
     a.def_readonly("NODE", &NODE);
+    a.def_readonly("LINK", &LINK);
+    a.def_readonly("CONCEPT_NODE", &CONCEPT_NODE);
+    a.def_readonly("NUMBER_NODE", &NUMBER_NODE);
+    a.def_readonly("ORDERED_LINK", &ORDERED_LINK);
+    a.def_readonly("UNORDERED_LINK", &UNORDERED_LINK);
+    a.def_readonly("SET_LINK", &SET_LINK);
+    a.def_readonly("SUBSET_LINK", &SUBSET_LINK);
 }
