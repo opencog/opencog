@@ -25,7 +25,11 @@ using namespace opencog;
 
 /* ============================================================== */
 /**
- * return atom->toString() for the corresponding atom.
+ * Return a string holding the scheme representation of an atom/truthvalue.
+ *
+ * The input is assumed to be pointing at a Handle, a TruthValue, 
+ * an AttentionValue, or a VersionHandle. Returned is a valid scheme
+ * expression that represents that Handle, etc. 
  */
 std::string SchemeSmob::to_string(SCM node)
 {
@@ -36,6 +40,18 @@ std::string SchemeSmob::to_string(SCM node)
 		return misc_to_string(node);
 
 	return "";
+}
+
+/**
+ * Return a string holding the scheme representation of an atom.
+ *
+ * The input handle is represented in terms of a valid scheme 
+ * expression. Evaluating this expression should result in exactly
+ * the same atom being created.
+ */
+std::string SchemeSmob::to_string(Handle h)
+{
+   return handle_to_string(h, 0);
 }
 
 std::string SchemeSmob::handle_to_string(Handle h, int indent)

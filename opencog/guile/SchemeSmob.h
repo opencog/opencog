@@ -133,9 +133,6 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
-		static std::string av_to_string(const AttentionValue *);
-		static std::string tv_to_string(const TruthValue *);
-		static std::string vh_to_string(const VersionHandle *);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
 
@@ -150,6 +147,11 @@ class SchemeSmob
 	public:
 		static void init(void);
 		SchemeSmob(void);
+
+		static std::string to_string(Handle);
+		static std::string av_to_string(const AttentionValue *);
+		static std::string tv_to_string(const TruthValue *);
+		static std::string vh_to_string(const VersionHandle *);
 };
 
 } // namespace opencog
