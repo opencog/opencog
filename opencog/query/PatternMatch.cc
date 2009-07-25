@@ -96,7 +96,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	Type tclauses = lclauses->getType();
 	if (LIST_LINK != tvarbles)
 	{
-		logger().warn("%s: expected ListLink for bound variable list", __FUNCTION__);
+		logger().warn("%s: expected ListLink for bound variable list",
+			__FUNCTION__);
 		return;
 	}
 	if (AND_LINK != tclauses)
@@ -118,13 +119,23 @@ void PatternMatch::match(PatternMatchCallback *cb,
 			return;
 		}
 		negs = lnegates->getOutgoingSet();
-		pme.validate(vars, negs);
+		bool bogus = pme.validate(vars, negs);
+		if (bogus)
+		{
+			logger().warn("%s: Constant clauses removed from pattern rejection",
+				__FUNCTION__);
+		}
 	}
 
 	// Make sure that the user did not pass in bogus clauses
 	std::vector<Handle> clauses;
 	clauses = lclauses->getOutgoingSet();
-	pme.validate(vars, clauses);
+	bool bogus = pme.validate(vars, clauses);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
 
 	pme.match(cb, vars, clauses, negs);
 }
@@ -456,7 +467,7 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 		return Handle::UNDEFINED;
 	}
 
-	// Inpute is in conjunctive normal form, consisting of clasues,
+	// Input is in conjunctive normal form, consisting of clauses,
 	// or thier negations. Split these into two distinct lists.
 	// Any clause that is a NotLink is "negated"; strip off the 
 	// negation and put it into its own list.
@@ -483,6 +494,20 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	// Extract a list of variables.
 	FindVariables fv;
 	fv.find_vars(hclauses);
+
+	// Make sure that every clause contains at least one variable.
+	bool bogus = pme.validate(fv.varlist, affirm);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
+	bogus = pme.validate(fv.varlist, negate);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern negation",
+			__FUNCTION__);
+	}
 
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
