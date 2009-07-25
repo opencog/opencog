@@ -91,6 +91,7 @@ void ExecutionUTest::setUp(void)
 #ifdef HAVE_GUILE
 	// Create initialzation
 	const char * setup = 
+	"(define (stv mean conf) (cog-new-stv mean conf))\n"
 	"(define (AndLink . x)\n"
 	"   (apply cog-new-link (append (list 'AndLink) x)))\n"
 	"(define (InheritanceLink . x)\n"
@@ -114,7 +115,7 @@ void ExecutionUTest::setUp(void)
 	"         (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
 	"         (DefinedFrameNode \"#Manipulation\")\n"
 	"      )\n"
-	"      (InheritanceLink\n"
+	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
 	"         (DefinedFrameNode \"#Manipulation\")\n"
 	"      )\n"
@@ -144,11 +145,9 @@ void ExecutionUTest::setUp(void)
  *
  * Expect to get the following result, given the above data:
  *
- *    EvaluationLink
- *       DefinedLinguisticRelationshipNode "capital_of"
- *       ListLink
- *          WordNode "capital"
- *          DefinedLinguisticRelationshipNode "of"
+ *    ListLink
+ *       DefinedFrameNode #Ingestion
+ *       PredicateNode grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation
  */
 #define getlink(hand,pos) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getOutgoingHandle(pos)
@@ -162,24 +161,10 @@ void ExecutionUTest::test_exec(void)
 
 	// Result should be a ListLink
 	Handle result = pm.crisp_logic_imply(implication);
-printf("duuude result is %s\n", SchemeSmob::to_string(result).c_str());
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 
-#if 0
-	// There should be only one solution: the Berlin one.
-	// The Madrid graph should be rejected because of the 
-	// NOT definite link.
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
-
-	// Then, evaluationLink, as above.
-	Handle heval = getlink(result, 0);
-	Handle vcap_of = getlink(heval, 0);
-	Handle hlist = getlink(heval, 1);
-	Handle vcapital = getlink(hlist, 0);
-	Handle vprep = getlink(hlist, 1);
-
-	TSM_ASSERT_EQUALS("incorrect capital", hcapital, vcapital);
-	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
-#endif
+	// There should be two solutions: 
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
