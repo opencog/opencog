@@ -79,6 +79,14 @@ class ExecutionUTest :  public CxxTest::TestSuite
 
 /*
  * This function sets up an implication link, and some data.
+ *
+ * Several subsystems and functions are tested here:
+ * 1) Use of scheme for specifying hypergraphs.
+ * 2) Use of the scheme apply() method.
+ * 3) Validation of the pattern-matching clauses, which are not
+ *    supposed to contain constants (this tests explicitly includes
+ *    some constants)
+ * 4) Crisp-logic implication.
  */
 #define an as->addNode
 #define al as->addLink
