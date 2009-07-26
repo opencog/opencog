@@ -593,7 +593,10 @@ interface.
 
       Currently-implemented commands are:
       do-wsd                -- run word-sense disambiguation
-      do-implication handle -- run forward-chainer on handle.
+      do-varscope handle    -- run forward-chainer on handle.
+                               handle must be an VariableScopeLink.
+      do-implication handle -- DEPRECATED! Use do-varscope above.
+                               Run forward-chainer on handle.
                                handle must be an ImplicationLink.
       store-atom handle     -- store indicated atom to SQL/persistent 
                                storage.

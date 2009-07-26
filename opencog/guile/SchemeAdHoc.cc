@@ -41,7 +41,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 	}
 
 	// Run implication, assuming that the argument is a handle to 
-	// an ImplicationLink
+	// an ImplicationLink. XXX DEPRECATED: Use varscope below!
 	if (0 == cmdname.compare("do-implication"))
 	{
 		// XXX we should also allow opt-args to be a list of handles
@@ -52,6 +52,21 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		PatternMatch pm;
 		pm.set_atomspace(as);
 		Handle grounded_expressions = pm.crisp_logic_imply(h);
+		return handle_to_scm(grounded_expressions);
+	}
+
+	// Run implication, assuming that the argument is a handle to 
+	// an VarScopeLink containing variables and an ImplicationLink
+	if (0 == cmdname.compare("do-varscope"))
+	{
+		// XXX we should also allow opt-args to be a list of handles
+		Handle h = verify_handle(optargs, "cog-ad-hoc do-implication");
+
+		AtomSpace *as = &atomspace();
+
+		PatternMatch pm;
+		pm.set_atomspace(as);
+		Handle grounded_expressions = pm.varscope(h);
 		return handle_to_scm(grounded_expressions);
 	}
 
