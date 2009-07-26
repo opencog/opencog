@@ -14,6 +14,24 @@
 )
 
 ;; Example of an implication with just one predicate
+(define v
+   (VariableScopeLink
+      (ListLink
+         (VariableNode "$predicateNode")
+      )
+      (ImplicationLink
+         (InheritanceLink
+            (VariableNode "$predicateNode")
+            (DefinedFrameNode "#Manipulation")
+         )
+         (VariableNode "$predicateNode")
+      )
+   )
+)
+
+(cog-ad-hoc  "do-varscope" v)
+
+
 (define x
   (ImplicationLink
     (InheritanceLink

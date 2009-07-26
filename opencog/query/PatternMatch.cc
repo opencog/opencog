@@ -655,9 +655,9 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 
 	// Types must be as expected
 	Type tdecls = ldecls->getType();
-	if (LINK != tdecls)
+	if (LIST_LINK != tdecls)
 	{
-		logger().warn("%s: expected a Link holding a list of variable declarations",
+		logger().warn("%s: expected a ListLink holding variable declarations",
 		     __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
