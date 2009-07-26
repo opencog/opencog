@@ -27,8 +27,25 @@
    )
 )
 
-(cog-ad-hoc  "do-varscope" v)
+(cog-ad-hoc "do-varscope" v)
 
+(define v2
+   (VariableScopeLink
+      (TypedVariableLink
+         (VariableNode "$prNode")
+         (VariableTypeNode "PredicateNode")
+      )
+      (ImplicationLink
+         (InheritanceLink
+            (VariableNode "$prNode")
+            (DefinedFrameNode "#Manipulation")
+         )
+         (VariableNode "$prNode")
+      )
+   )
+)
+
+(cog-ad-hoc "do-varscope" v2)
 
 (define x
   (ImplicationLink

@@ -657,6 +657,21 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
    {
 		vset.push_back(hdecls);
    }
+	else if (TYPED_VARIABLE_LINK == tdecls)
+   {
+		Link * ltv = dynamic_cast<Link *>(adecls);
+		const std::vector<Handle>& ov = ltv->getOutgoingSet();
+		if (2 != ov.size())
+		{
+			logger().warn("%s: TypedVariableLink has wrong size",
+			       __FUNCTION__);
+			return Handle::UNDEFINED;
+		}
+
+		Handle varname = ov[0];
+		Handle vartype = ov[1];
+		vset.push_back(varname);
+	}
 	else if (LIST_LINK == tdecls)
    {
 		// The list of variable declarations should be .. a list of 
@@ -669,12 +684,31 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 			Handle h = dset[i];
 			Atom *a = TLB::getAtom(h);
 			Type t = a->getType();
-			if (VARIABLE_NODE != t)
+			if (VARIABLE_NODE == t)
 			{
-				logger().warn("%s: expected a VariableNode", __FUNCTION__);
+				vset.push_back(h);
+			}
+			else if (TYPED_VARIABLE_LINK == t)
+			{
+				Link * ltv = dynamic_cast<Link *>(a);
+				const std::vector<Handle>& ov = ltv->getOutgoingSet();
+				if (2 != ov.size())
+				{
+					logger().warn("%s: TypedVariableLink has wrong size",
+					       __FUNCTION__);
+					return Handle::UNDEFINED;
+				}
+
+				Handle varname = ov[0];
+				Handle vartype = ov[1];
+				vset.push_back(varname);
+			}
+			else
+			{
+				logger().warn("%s: expected a VariableNode or a TypedVariableLink",
+				           __FUNCTION__);
 				return Handle::UNDEFINED;
 			}
-			vset.push_back(h);
 		}
 	}
   	else
