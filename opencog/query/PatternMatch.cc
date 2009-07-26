@@ -648,36 +648,40 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	Handle himpl = oset[1];   // ImplicationLink
 
 	Atom * adecls = TLB::getAtom(hdecls);
-	Link * ldecls = dynamic_cast<Link *>(adecls);
 
-	// Must be non-empty.
-	if (!ldecls) return Handle::UNDEFINED;
-
-	// Types must be as expected
-	Type tdecls = ldecls->getType();
-	if (LIST_LINK != tdecls)
+	// Expecting the declaration list to be either a single
+	// variable, or a list of variable declarations
+	std::vector<Handle> vset;
+	Type tdecls = adecls->getType();
+	if (VARIABLE_NODE == tdecls)
+   {
+		vset.push_back(hdecls);
+   }
+	else if (LIST_LINK == tdecls)
+   {
+		// The list of variable declarations should be .. a list of 
+		// variables! Make sure its as expected.
+		Link * ldecls = dynamic_cast<Link *>(adecls);
+		const std::vector<Handle>& dset = ldecls->getOutgoingSet();
+		size_t dlen = dset.size();
+		for (size_t i=0; i<dlen; i++)
+		{
+			Handle h = dset[i];
+			Atom *a = TLB::getAtom(h);
+			Type t = a->getType();
+			if (VARIABLE_NODE != t)
+			{
+				logger().warn("%s: expected a VariableNode", __FUNCTION__);
+				return Handle::UNDEFINED;
+			}
+			vset.push_back(h);
+		}
+	}
+  	else
 	{
 		logger().warn("%s: expected a ListLink holding variable declarations",
 		     __FUNCTION__);
 		return Handle::UNDEFINED;
-	}
-
-	// The list of variable declarations should be .. a list of 
-	// variables! Make sure its as expected.
-	const std::vector<Handle>& dset = ldecls->getOutgoingSet();
-	std::vector<Handle> vset;
-	size_t dlen = dset.size();
-	for (size_t i=0; i<dlen; i++)
-	{
-		Handle h = dset[i];
-		Atom *a = TLB::getAtom(h);
-		Type t = a->getType();
-		if (VARIABLE_NODE != t)
-		{
-			logger().warn("%s: expected a VariableNode", __FUNCTION__);
-			return Handle::UNDEFINED;
-		}
-		vset.push_back(h);
 	}
 
 	Handle gl = do_imply(himpl, pmc, &vset);

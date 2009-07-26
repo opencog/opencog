@@ -16,9 +16,7 @@
 ;; Example of an implication with just one predicate
 (define v
    (VariableScopeLink
-      (ListLink
-         (VariableNode "$predicateNode")
-      )
+      (VariableNode "$predicateNode")
       (ImplicationLink
          (InheritanceLink
             (VariableNode "$predicateNode")
