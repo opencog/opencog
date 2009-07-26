@@ -25,6 +25,7 @@
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -464,14 +465,14 @@ Handle PatternMatch::do_imply (Handle himplication,
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
-	// XXX Should an OrList be supported ?? 
+	// XXX Should an OrList be supported ??
 	std::vector<Handle> affirm, negate;
 	Type tclauses = lclauses->getType();
 	if (AND_LINK == tclauses)
 	{
 		// Input is in conjunctive normal form, consisting of clauses,
 		// or thier negations. Split these into two distinct lists.
-		// Any clause that is a NotLink is "negated"; strip off the 
+		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
 		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
 		size_t clen = cset.size();
@@ -499,7 +500,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	}
 
 	// Extract a list of variables, if needed.
-	// This is used only by the deprecated imply() function, as the 
+	// This is used only by the deprecated imply() function, as the
 	// VariableScopeLink will include a list of variables up-front.
 	FindVariables fv;
 	if (NULL == varlist)
@@ -537,12 +538,15 @@ Handle PatternMatch::do_imply (Handle himplication,
 }
 
 /* ================================================================= */
+typedef std::pair<Atom *, const std::vector<Type> > ATPair;
+
 /**
  * Extract the variable type(s)
  */
-int PatternMatch::get_vartype(Handle htypelink, 
+int PatternMatch::get_vartype(Handle htypelink,
                               Atom * atypelink,
-                              std::vector<Handle> &vset)
+                              std::vector<Handle> &vset,
+                              std::map<Atom *, const std::vector<Type> > &typemap)
 {
 	Link * ltvl = dynamic_cast<Link *>(atypelink);
 	const std::vector<Handle>& oset = ltvl->getOutgoingSet();
@@ -555,7 +559,56 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 	Handle varname = oset[0];
 	Handle vartype = oset[1];
-	vset.push_back(varname);
+
+	Atom *avar = TLB::getAtom(varname);
+
+	// The vartype is either a single type name, or a list of typenames.
+	Atom *atype = TLB::getAtom(vartype);
+	Type t = atype->getType();
+	if (VARIABLE_TYPE_NODE == t)
+	{
+		const Node *n = dynamic_cast<const Node *>(atype);
+		const std::string &tn = n->getName();
+		Type vt = classserver().getType(tn);
+
+		std::vector<Type> tl;
+		tl.push_back(vt);
+		typemap.insert(ATPair(avar,tl));
+		vset.push_back(varname);
+	}
+	else if (LIST_LINK == t)
+	{
+		std::vector<Type> tl;
+
+		const Link *l = dynamic_cast<const Link *>(atype);
+		const std::vector<Handle>& tset = l->getOutgoingSet();
+		size_t tss = tset.size();
+		for (size_t i=0; i<tss; i++)
+		{
+			Handle h = tset[i];
+			Atom *a = TLB::getAtom(h);
+			if (VARIABLE_TYPE_NODE == a->getType())
+			{
+				logger().warn("%s: TypedVariableLink has unexpected content",
+			       __FUNCTION__);
+				return 3;
+			}
+			const Node *n = dynamic_cast<const Node *>(a);
+			const std::string &tn = n->getName();
+			Type vt = classserver().getType(tn);
+			tl.push_back(vt);
+		}
+
+		typemap.insert(ATPair(avar,tl));
+		vset.push_back(varname);
+	}
+	else
+	{
+		logger().warn("%s: Unexpected contents in TypedVariableLink",
+		       __FUNCTION__);
+		return 2;
+	}
+
 	return 0;
 }
 
@@ -563,7 +616,7 @@ int PatternMatch::get_vartype(Handle htypelink,
 /**
  * Evaluate an ImplicationLink embedded in an ImplicationLink
  *
- * Given a VariableScopeLink containin variable declarations and an 
+ * Given a VariableScopeLink containin variable declarations and an
  * ImplicationLink, this method will "evaluate" the implication, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
@@ -643,7 +696,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::do_varscope (Handle hvarscope, 
+Handle PatternMatch::do_varscope (Handle hvarscope,
                                   PatternMatchCallback *pmc)
 {
 	Atom * ascope = TLB::getAtom(hvarscope);
@@ -672,21 +725,25 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 
 	Atom * adecls = TLB::getAtom(hdecls);
 
+	// vset is the vector of variables.
+	// typemap is the (possibly empty) list of restrictions on atom types.
+	std::vector<Handle> vset;
+	std::map<Atom *, const std::vector<Type> > typemap;
+
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
-	std::vector<Handle> vset;
 	Type tdecls = adecls->getType();
 	if (VARIABLE_NODE == tdecls)
-   {
+	{
 		vset.push_back(hdecls);
-   }
+	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
-   {
-		if (get_vartype(hdecls, adecls, vset)) return Handle::UNDEFINED;
+	{
+		if (get_vartype(hdecls, adecls, vset, typemap)) return Handle::UNDEFINED;
 	}
 	else if (LIST_LINK == tdecls)
-   {
-		// The list of variable declarations should be .. a list of 
+	{
+		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
 		Link * ldecls = dynamic_cast<Link *>(adecls);
 		const std::vector<Handle>& dset = ldecls->getOutgoingSet();
@@ -702,7 +759,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
-				if (get_vartype(h, a, vset)) return Handle::UNDEFINED;
+				if (get_vartype(h, a, vset, typemap)) return Handle::UNDEFINED;
 			}
 			else
 			{
@@ -757,8 +814,8 @@ class CrispImplicator:
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * thier clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause 
- * is true, its accepted, if its false, its rejected. If the 
+ * These are evaluated using "crisp" logic: if a matched clause
+ * is true, its accepted, if its false, its rejected. If the
  * clause begins with a NotLink, true and false are reversed.
  *
  * The NotLink is also interpreted as an "absence of a clause";
@@ -782,8 +839,8 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * thier clauses, and statements that start with NotLink's.
- * These are evaluated using "crisp" logic: if a matched clause 
- * is true, its accepted, if its false, its rejected. If the 
+ * These are evaluated using "crisp" logic: if a matched clause
+ * is true, its accepted, if its false, its rejected. If the
  * clause begins with a NotLink, true and false are reversed.
  *
  * The NotLink is also interpreted as an "absence of a clause";

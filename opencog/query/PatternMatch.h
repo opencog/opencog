@@ -38,7 +38,9 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
-		int get_vartype(Handle, Atom *, std::vector<Handle> &);
+		int get_vartype(Handle, Atom *, 
+		                std::vector<Handle> &,
+		                std::map<Atom *, const std::vector<Type> > &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
 		Handle do_varscope(Handle, PatternMatchCallback *);
 	public:
