@@ -351,6 +351,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 
 /* ================================================================= */
 /**
+ * DEPRECATED: USE VAR_SCOPE INSTEAD!
  * Evaluate an ImplicationLink.
  * Given an ImplicationLink, this method will "evaluate" it, matching
  * the predicate, and creating a grounded implicand, assuming the
@@ -521,12 +522,188 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	return gl;
 }
 
+/* ================================================================= */
+/**
+ * Evaluate an ImplicationLink embedded in an ImplicationLink
+ *
+ * Given an ImplicationLink, this method will "evaluate" it, matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
+ *
+ *    ImplicationLink
+ *       AndList
+ *          EvaluationList
+ *             PredicateNode "_obj"
+ *             ListLink
+ *                ConceptNode "make"
+ *                VariableNode $var0
+ *          EvaluationList
+ *             PredicateNode "from"
+ *             ListLink
+ *                ConceptNode "make"
+ *                VariableNode $var1"
+ *       EvaluationList
+ *          PredicateNode "make_from"
+ *          ListLink
+ *             VariableNode $var0
+ *             VariableNode $var1
+ *
+ * Then, if the atomspace also contains a parsed version of the English
+ * sentence "Pottery is made from clay", that is, if it contains the
+ * hypergraph
+ *
+ *    EvaluationList
+ *       PredicateNode "_obj"
+ *       ListLink
+ *          ConceptNode "make"
+ *          ConceptNode "pottery"
+ *
+ * and the hypergraph
+ *
+ *    EvaluationList
+ *       PredicateNode "from"
+ *       ListLink
+ *          ConceptNode "make"
+ *          ConceptNode "clay"
+ *
+ * Then, by pattern matching, the predicate part of the ImplicationLink
+ * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
+ * These bindings are refered to as the 'groundings' or 'solutions'
+ * to the variables. So, e.g. $var0 is 'grounded' by "pottery".
+ *
+ * Next, a grounded copy of the implicand is then created; that is,
+ * the following hypergraph is created and added to the atomspace:
+ *
+ *    EvaluationList
+ *       PredicateNode "make_from"
+ *       ListLink
+ *          ConceptNode "pottery"
+ *          ConceptNode "clay"
+ *
+ * As the above example illustrates, this function expects that the
+ * input handle is an implication link. It expects the implication link
+ * to consist entirely of one disjunct (one AndList) and one (ungrounded)
+ * implicand.  All variables are implicit, and are identified by being
+ * VariableNodes.  These variables are interpreted as 'free variables'
+ * having no binding.  The act of pattern-matching to the predicate of
+ * the implication has an implicit 'for-all' flavour to it: the pattern
+ * is matched to 'all' matches in the atomspace.
+ *
+ * When a pattern match is found, the variables can be understood as
+ * being grounded by some explicit ground terms in the atomspace. This
+ * grounding is then used to create a grounded version of the
+ * (ungrounded) implicand. That is, the variables in the implicand are
+ * substituted by thier grounding values.  This method then returns a
+ * list of all of the grounded implicands that were created.
+ *
+ * Note that this method can be used to create a simple forward-chainer:
+ * One need only to take a set of implication links, and call this
+ * method repeatedly on them, until one is exhausted.
+ */
+
+Handle PatternMatch::do_varscope (Handle himplication, PatternMatchCallback *pmc)
+{
+	Atom * aimpl = TLB::getAtom(himplication);
+	Link * limpl = dynamic_cast<Link *>(aimpl);
+
+	// Must be non-empty.
+	if (!limpl) return Handle::UNDEFINED;
+
+	// Type must be as expected
+	Type timpl = limpl->getType();
+	if (IMPLICATION_LINK != timpl)
+	{
+		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
+		return Handle::UNDEFINED;
+	}
+
+	const std::vector<Handle>& oset = limpl->getOutgoingSet();
+	if (2 != oset.size())
+	{
+		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
+		return Handle::UNDEFINED;
+	}
+
+	Handle hclauses = oset[0];
+	Handle implicand = oset[1];
+
+	Atom * aclauses = TLB::getAtom(hclauses);
+	Link * lclauses = dynamic_cast<Link *>(aclauses);
+
+	// Must be non-empty.
+	if (!lclauses) return Handle::UNDEFINED;
+
+	// Types must be as expected
+	Type tclauses = lclauses->getType();
+	if (AND_LINK != tclauses)
+	{
+		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+		return Handle::UNDEFINED;
+	}
+
+	// Input is in conjunctive normal form, consisting of clauses,
+	// or thier negations. Split these into two distinct lists.
+	// Any clause that is a NotLink is "negated"; strip off the 
+	// negation and put it into its own list.
+	const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+	std::vector<Handle> affirm, negate;
+	size_t clen = cset.size();
+	for (size_t i=0; i<clen; i++)
+	{
+		Handle h = cset[i];
+		Atom *a = TLB::getAtom(h);
+		Type t = a->getType();
+		if (NOT_LINK == t)
+		{
+			Link *l = static_cast<Link *>(a);
+			h = l->getOutgoingHandle(0);
+			negate.push_back(h);
+		}
+		else
+		{
+			affirm.push_back(h);
+		}
+	}
+
+	// Extract a list of variables.
+	FindVariables fv;
+	fv.find_vars(hclauses);
+
+	// Make sure that every clause contains at least one variable.
+	bool bogus = pme.validate(fv.varlist, affirm);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern matching",
+			__FUNCTION__);
+	}
+	bogus = pme.validate(fv.varlist, negate);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern negation",
+			__FUNCTION__);
+	}
+
+	// Now perform the search.
+	Implicator *impl = dynamic_cast<Implicator *>(pmc);
+	impl->implicand = implicand;
+	pme.match(pmc, fv.varlist, affirm, negate);
+
+	// The result_list contains a list of the grounded expressions.
+	// Turn it into a true list, and return it.
+	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
+
+	return gl;
+}
+
+/* ================================================================= */
+
 class DefaultImplicator:
 	public virtual Implicator,
 	public virtual DefaultPatternMatchCB
 {};
 
 /**
+ * DEPRECATED: USE VAR_SCOPE INSTEAD!
  * Default evaluator of implication statements.  Does not consider
  * the truth value of any of the matched clauses; instead, looks
  * purely for a structural match.
@@ -547,6 +724,7 @@ class CrispImplicator:
 {};
 
 /**
+ * DEPRECATED: USE VAR_SCOPE INSTEAD!
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
  * thier clauses, and statements that start with NotLink's.
@@ -567,6 +745,31 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	CrispImplicator impl;
 	impl.as = atom_space;
 	return do_imply(himplication, &impl);
+}
+
+/**
+ * Evaluate an ImplicationLink embedded in a VarScopeLink
+ *
+ * Use the crisp-logic callback to evaluate boolean implication
+ * statements; i.e. statements that have truth values assigned
+ * thier clauses, and statements that start with NotLink's.
+ * These are evaluated using "crisp" logic: if a matched clause 
+ * is true, its accepted, if its false, its rejected. If the 
+ * clause begins with a NotLink, true and false are reversed.
+ *
+ * The NotLink is also interpreted as an "absence of a clause";
+ * if the atomspace does NOT contain a NotLink clause, then the
+ * match is considered postive, and the clause is accepted (and
+ * it has a null or "invalid" grounding).
+ *
+ * See the do_varscope function documentation for details.
+ */
+Handle PatternMatch::varscope (Handle himplication)
+{
+	// Now perform the search.
+	CrispImplicator impl;
+	impl.as = atom_space;
+	return do_varscope(himplication, &impl);
 }
 
 /* ===================== END OF FILE ===================== */

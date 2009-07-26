@@ -38,7 +38,8 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
-		Handle do_imply(Handle, PatternMatchCallback *);
+		Handle do_imply(Handle, PatternMatchCallback *); // deprecated
+		Handle do_varscope(Handle, PatternMatchCallback *);
 	public:
 		PatternMatch(void);
 		void set_atomspace(AtomSpace *as)
@@ -52,8 +53,9 @@ class PatternMatch
 		           Handle clauses,
 		           Handle negations = Handle::UNDEFINED);
 
-		Handle imply(Handle);
-		Handle crisp_logic_imply(Handle);
+		Handle imply(Handle);             // deprecated
+		Handle crisp_logic_imply(Handle); // deprecated
+		Handle varscope(Handle);
 };
 
 } // namespace opencog
