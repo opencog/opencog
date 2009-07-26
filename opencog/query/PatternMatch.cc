@@ -538,6 +538,29 @@ Handle PatternMatch::do_imply (Handle himplication,
 
 /* ================================================================= */
 /**
+ * Extract the variable type(s)
+ */
+int PatternMatch::get_vartype(Handle htypelink, 
+                              Atom * atypelink,
+                              std::vector<Handle> &vset)
+{
+	Link * ltvl = dynamic_cast<Link *>(atypelink);
+	const std::vector<Handle>& oset = ltvl->getOutgoingSet();
+	if (2 != oset.size())
+	{
+		logger().warn("%s: TypedVariableLink has wrong size",
+		       __FUNCTION__);
+		return 1;
+	}
+
+	Handle varname = oset[0];
+	Handle vartype = oset[1];
+	vset.push_back(varname);
+	return 0;
+}
+
+/* ================================================================= */
+/**
  * Evaluate an ImplicationLink embedded in an ImplicationLink
  *
  * Given a VariableScopeLink containin variable declarations and an 
@@ -659,18 +682,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
    }
 	else if (TYPED_VARIABLE_LINK == tdecls)
    {
-		Link * ltv = dynamic_cast<Link *>(adecls);
-		const std::vector<Handle>& ov = ltv->getOutgoingSet();
-		if (2 != ov.size())
-		{
-			logger().warn("%s: TypedVariableLink has wrong size",
-			       __FUNCTION__);
-			return Handle::UNDEFINED;
-		}
-
-		Handle varname = ov[0];
-		Handle vartype = ov[1];
-		vset.push_back(varname);
+		if (get_vartype(hdecls, adecls, vset)) return Handle::UNDEFINED;
 	}
 	else if (LIST_LINK == tdecls)
    {
@@ -690,18 +702,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 			}
 			else if (TYPED_VARIABLE_LINK == t)
 			{
-				Link * ltv = dynamic_cast<Link *>(a);
-				const std::vector<Handle>& ov = ltv->getOutgoingSet();
-				if (2 != ov.size())
-				{
-					logger().warn("%s: TypedVariableLink has wrong size",
-					       __FUNCTION__);
-					return Handle::UNDEFINED;
-				}
-
-				Handle varname = ov[0];
-				Handle vartype = ov[1];
-				vset.push_back(varname);
+				if (get_vartype(h, a, vset)) return Handle::UNDEFINED;
 			}
 			else
 			{
