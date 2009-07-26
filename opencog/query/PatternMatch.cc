@@ -620,96 +620,67 @@ Handle PatternMatch::do_imply (Handle himplication,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::do_varscope (Handle himplication, PatternMatchCallback *pmc)
+Handle PatternMatch::do_varscope (Handle hvarscope, 
+                                  PatternMatchCallback *pmc)
 {
-	Atom * aimpl = TLB::getAtom(himplication);
-	Link * limpl = dynamic_cast<Link *>(aimpl);
+	Atom * ascope = TLB::getAtom(hvarscope);
+	Link * lscope = dynamic_cast<Link *>(ascope);
 
 	// Must be non-empty.
-	if (!limpl) return Handle::UNDEFINED;
+	if (!lscope) return Handle::UNDEFINED;
 
 	// Type must be as expected
-	Type timpl = limpl->getType();
-	if (IMPLICATION_LINK != timpl)
+	Type tscope = lscope->getType();
+	if (VARIABLE_SCOPE_LINK != tscope)
 	{
-		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
+		logger().warn("%s: expected VarScopeLink", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	const std::vector<Handle>& oset = limpl->getOutgoingSet();
+	const std::vector<Handle>& oset = lscope->getOutgoingSet();
 	if (2 != oset.size())
 	{
-		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
+		logger().warn("%s: VariableScopeLink has wrong size", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	Handle hclauses = oset[0];
-	Handle implicand = oset[1];
+	Handle hdecls = oset[0];  // VariableNode declarations
+	Handle himpl = oset[1];   // ImplicationLink
 
-	Atom * aclauses = TLB::getAtom(hclauses);
-	Link * lclauses = dynamic_cast<Link *>(aclauses);
+	Atom * adecls = TLB::getAtom(hdecls);
+	Link * ldecls = dynamic_cast<Link *>(adecls);
 
 	// Must be non-empty.
-	if (!lclauses) return Handle::UNDEFINED;
+	if (!ldecls) return Handle::UNDEFINED;
 
 	// Types must be as expected
-	Type tclauses = lclauses->getType();
-	if (AND_LINK != tclauses)
+	Type tdecls = ldecls->getType();
+	if (LINK != tdecls)
 	{
-		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
+		logger().warn("%s: expected a Link holding a list of variable declarations",
+		     __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	// Input is in conjunctive normal form, consisting of clauses,
-	// or thier negations. Split these into two distinct lists.
-	// Any clause that is a NotLink is "negated"; strip off the 
-	// negation and put it into its own list.
-	const std::vector<Handle>& cset = lclauses->getOutgoingSet();
-	std::vector<Handle> affirm, negate;
-	size_t clen = cset.size();
-	for (size_t i=0; i<clen; i++)
+	// The list of variable declarations should be .. a list of 
+	// variables! Make sure its as expected.
+	const std::vector<Handle>& dset = ldecls->getOutgoingSet();
+	std::vector<Handle> vset;
+	size_t dlen = dset.size();
+	for (size_t i=0; i<dlen; i++)
 	{
-		Handle h = cset[i];
+		Handle h = dset[i];
 		Atom *a = TLB::getAtom(h);
 		Type t = a->getType();
-		if (NOT_LINK == t)
+		if (VARIABLE_NODE != t)
 		{
-			Link *l = static_cast<Link *>(a);
-			h = l->getOutgoingHandle(0);
-			negate.push_back(h);
+			logger().warn("%s: expected a VariableNode", __FUNCTION__);
+			return Handle::UNDEFINED;
 		}
-		else
-		{
-			affirm.push_back(h);
-		}
+		vset.push_back(h);
 	}
 
-	// Extract a list of variables.
-	FindVariables fv;
-	fv.find_vars(hclauses);
-
-	// Make sure that every clause contains at least one variable.
-	bool bogus = pme.validate(fv.varlist, affirm);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern matching",
-			__FUNCTION__);
-	}
-	bogus = pme.validate(fv.varlist, negate);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern negation",
-			__FUNCTION__);
-	}
-
-	// Now perform the search.
-	Implicator *impl = dynamic_cast<Implicator *>(pmc);
-	impl->implicand = implicand;
-	pme.match(pmc, fv.varlist, affirm, negate);
-
-	// The result_list contains a list of the grounded expressions.
-	// Turn it into a true list, and return it.
-	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
+	Handle gl = do_imply(himpl, pmc, &vset);
 
 	return gl;
 }

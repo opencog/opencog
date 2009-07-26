@@ -1,5 +1,7 @@
 ;
 ; Some examples of using implication links for pattern matching.
+; These examples make extensive use of the code in this directory,
+; and can be used for ad-hoc command-line testing.
 ;
 
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
