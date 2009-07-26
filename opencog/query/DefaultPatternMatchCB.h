@@ -32,7 +32,7 @@
 
 namespace opencog {
 
-typedef std::map<Atom *, const std::vector<Type> > VariableTypeMap;
+typedef std::map<Atom *, const std::set<Type> > VariableTypeMap;
 
 /**
  * Callback mixin class, used to provide a default node and link
@@ -78,8 +78,13 @@ class DefaultPatternMatchCB :
 				VariableTypeMap::const_iterator it = typemap->find(npat);
 				if (it == typemap->end()) return false;
 
-				std::vector<Type> tlist = it->second;
+				const std::set<Type> &tset = it->second;
+				Type soltype = npat->getType();
+				std::set<Type>::const_iterator allow = tset.find(soltype);
 printf ("duuude compar typos!!\n");
+				if (allow != tset.end())
+					return false;
+				return true;
 			}
 
 			return true;

@@ -538,7 +538,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 }
 
 /* ================================================================= */
-typedef std::pair<Atom *, const std::vector<Type> > ATPair;
+typedef std::pair<Atom *, const std::set<Type> > ATPair;
 
 /**
  * Extract the variable type(s)
@@ -546,7 +546,7 @@ typedef std::pair<Atom *, const std::vector<Type> > ATPair;
 int PatternMatch::get_vartype(Handle htypelink,
                               Atom * atypelink,
                               std::vector<Handle> &vset,
-                              std::map<Atom *, const std::vector<Type> > &typemap)
+                              VariableTypeMap &typemap)
 {
 	Link * ltvl = dynamic_cast<Link *>(atypelink);
 	const std::vector<Handle>& oset = ltvl->getOutgoingSet();
@@ -571,14 +571,14 @@ int PatternMatch::get_vartype(Handle htypelink,
 		const std::string &tn = n->getName();
 		Type vt = classserver().getType(tn);
 
-		std::vector<Type> tl;
-		tl.push_back(vt);
-		typemap.insert(ATPair(avar,tl));
+		std::set<Type> ts;
+		ts.insert(vt);
+		typemap.insert(ATPair(avar,ts));
 		vset.push_back(varname);
 	}
 	else if (LIST_LINK == t)
 	{
-		std::vector<Type> tl;
+		std::set<Type> ts;
 
 		const Link *l = dynamic_cast<const Link *>(atype);
 		const std::vector<Handle>& tset = l->getOutgoingSet();
@@ -596,10 +596,10 @@ int PatternMatch::get_vartype(Handle htypelink,
 			const Node *n = dynamic_cast<const Node *>(a);
 			const std::string &tn = n->getName();
 			Type vt = classserver().getType(tn);
-			tl.push_back(vt);
+			ts.insert(vt);
 		}
 
-		typemap.insert(ATPair(avar,tl));
+		typemap.insert(ATPair(avar,ts));
 		vset.push_back(varname);
 	}
 	else
@@ -728,7 +728,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	// vset is the vector of variables.
 	// typemap is the (possibly empty) list of restrictions on atom types.
 	std::vector<Handle> vset;
-	std::map<Atom *, const std::vector<Type> > typemap;
+	VariableTypeMap typemap;
 
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations

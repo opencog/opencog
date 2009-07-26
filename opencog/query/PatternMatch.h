@@ -41,7 +41,7 @@ class PatternMatch
 		PatternMatchEngine pme;
 		int get_vartype(Handle, Atom *, 
 		                std::vector<Handle> &,
-		                std::map<Atom *, const std::vector<Type> > &);
+		                VariableTypeMap &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
 		Handle do_varscope(Handle, DefaultPatternMatchCB *);
 	public:
