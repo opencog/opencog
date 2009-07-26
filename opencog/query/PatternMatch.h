@@ -38,7 +38,7 @@ class PatternMatch
 	private:
 		AtomSpace *atom_space;
 		PatternMatchEngine pme;
-		Handle do_imply(Handle, PatternMatchCallback *); // deprecated
+		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
 		Handle do_varscope(Handle, PatternMatchCallback *);
 	public:
 		PatternMatch(void);

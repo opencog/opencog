@@ -351,8 +351,8 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 
 /* ================================================================= */
 /**
- * DEPRECATED: USE VAR_SCOPE INSTEAD!
  * Evaluate an ImplicationLink.
+ *
  * Given an ImplicationLink, this method will "evaluate" it, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
@@ -363,17 +363,17 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  *             PredicateNode "_obj"
  *             ListLink
  *                ConceptNode "make"
- *                VariableNode $var0
+ *                VariableNode "$var0"
  *          EvaluationList
  *             PredicateNode "from"
  *             ListLink
  *                ConceptNode "make"
- *                VariableNode $var1"
+ *                VariableNode "$var1"
  *       EvaluationList
  *          PredicateNode "make_from"
  *          ListLink
- *             VariableNode $var0
- *             VariableNode $var1
+ *             VariableNode "$var0"
+ *             VariableNode "$var1"
  *
  * Then, if the atomspace also contains a parsed version of the English
  * sentence "Pottery is made from clay", that is, if it contains the
@@ -428,7 +428,9 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * method repeatedly on them, until one is exhausted.
  */
 
-Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
+Handle PatternMatch::do_imply (Handle himplication,
+                               PatternMatchCallback *pmc,
+                               std::vector<Handle> *varlist)
 {
 	Atom * aimpl = TLB::getAtom(himplication);
 	Link * limpl = dynamic_cast<Link *>(aimpl);
@@ -460,50 +462,62 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	// Must be non-empty.
 	if (!lclauses) return Handle::UNDEFINED;
 
-	// Types must be as expected
-	Type tclauses = lclauses->getType();
-	if (AND_LINK != tclauses)
-	{
-		logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
-		return Handle::UNDEFINED;
-	}
-
-	// Input is in conjunctive normal form, consisting of clauses,
-	// or thier negations. Split these into two distinct lists.
-	// Any clause that is a NotLink is "negated"; strip off the 
-	// negation and put it into its own list.
-	const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+	// The predicate is either an AndList, or a single clause
+	// If its an AndList, then its a list of clauses.
+	// XXX Should an OrList be supported ?? 
 	std::vector<Handle> affirm, negate;
-	size_t clen = cset.size();
-	for (size_t i=0; i<clen; i++)
+	Type tclauses = lclauses->getType();
+	if (AND_LINK == tclauses)
 	{
-		Handle h = cset[i];
-		Atom *a = TLB::getAtom(h);
-		Type t = a->getType();
-		if (NOT_LINK == t)
+		// Input is in conjunctive normal form, consisting of clauses,
+		// or thier negations. Split these into two distinct lists.
+		// Any clause that is a NotLink is "negated"; strip off the 
+		// negation and put it into its own list.
+		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
+		size_t clen = cset.size();
+		for (size_t i=0; i<clen; i++)
 		{
-			Link *l = static_cast<Link *>(a);
-			h = l->getOutgoingHandle(0);
-			negate.push_back(h);
-		}
-		else
-		{
-			affirm.push_back(h);
+			Handle h = cset[i];
+			Atom *a = TLB::getAtom(h);
+			Type t = a->getType();
+			if (NOT_LINK == t)
+			{
+				Link *l = static_cast<Link *>(a);
+				h = l->getOutgoingHandle(0);
+				negate.push_back(h);
+			}
+			else
+			{
+				affirm.push_back(h);
+			}
 		}
 	}
+	else
+	{
+		// There's just one single clause!
+		affirm.push_back(hclauses);
+	}
 
-	// Extract a list of variables.
+	// Extract a list of variables, if needed.
+	// This is used only by the deprecated imply() function, as the 
+	// VariableScopeLink will include a list of variables up-front.
 	FindVariables fv;
-	fv.find_vars(hclauses);
+	if (NULL == varlist)
+	{
+		fv.find_vars(hclauses);
+		varlist = &fv.varlist;
+	}
 
 	// Make sure that every clause contains at least one variable.
-	bool bogus = pme.validate(fv.varlist, affirm);
+	// (The presence of constant clauses will mess up the current
+	// pattern matcher.)
+	bool bogus = pme.validate(*varlist, affirm);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern matching",
 			__FUNCTION__);
 	}
-	bogus = pme.validate(fv.varlist, negate);
+	bogus = pme.validate(*varlist, negate);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern negation",
@@ -513,7 +527,7 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 	// Now perform the search.
 	Implicator *impl = dynamic_cast<Implicator *>(pmc);
 	impl->implicand = implicand;
-	pme.match(pmc, fv.varlist, affirm, negate);
+	pme.match(pmc, *varlist, affirm, negate);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
@@ -526,27 +540,32 @@ Handle PatternMatch::do_imply (Handle himplication, PatternMatchCallback *pmc)
 /**
  * Evaluate an ImplicationLink embedded in an ImplicationLink
  *
- * Given an ImplicationLink, this method will "evaluate" it, matching
+ * Given a VariableScopeLink containin variable declarations and an 
+ * ImplicationLink, this method will "evaluate" the implication, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
  *
- *    ImplicationLink
- *       AndList
+ *    VariableScopeLink
+ *       List
+ *          VariableNode "$var0"
+ *          VariableNode "$var1"
+ *       ImplicationLink
+ *          AndList
+ *             EvaluationList
+ *                PredicateNode "_obj"
+ *                ListLink
+ *                   ConceptNode "make"
+ *                   VariableNode "$var0"
+ *             EvaluationList
+ *                PredicateNode "from"
+ *                ListLink
+ *                   ConceptNode "make"
+ *                   VariableNode "$var1"
  *          EvaluationList
- *             PredicateNode "_obj"
+ *             PredicateNode "make_from"
  *             ListLink
- *                ConceptNode "make"
- *                VariableNode $var0
- *          EvaluationList
- *             PredicateNode "from"
- *             ListLink
- *                ConceptNode "make"
- *                VariableNode $var1"
- *       EvaluationList
- *          PredicateNode "make_from"
- *          ListLink
- *             VariableNode $var0
- *             VariableNode $var1
+ *                VariableNode "$var0"
+ *                VariableNode "$var1"
  *
  * Then, if the atomspace also contains a parsed version of the English
  * sentence "Pottery is made from clay", that is, if it contains the
@@ -715,7 +734,7 @@ Handle PatternMatch::imply (Handle himplication)
 	// Now perform the search.
 	DefaultImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl);
+	return do_imply(himplication, &impl, NULL);
 }
 
 class CrispImplicator:
@@ -744,7 +763,7 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
 	// Now perform the search.
 	CrispImplicator impl;
 	impl.as = atom_space;
-	return do_imply(himplication, &impl);
+	return do_imply(himplication, &impl, NULL);
 }
 
 /**
