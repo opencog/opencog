@@ -29,6 +29,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Atom.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
@@ -42,7 +43,7 @@ class PatternMatch
 		                std::vector<Handle> &,
 		                std::map<Atom *, const std::vector<Type> > &);
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
-		Handle do_varscope(Handle, PatternMatchCallback *);
+		Handle do_varscope(Handle, DefaultPatternMatchCB *);
 	public:
 		PatternMatch(void);
 		void set_atomspace(AtomSpace *as)

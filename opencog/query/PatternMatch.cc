@@ -697,7 +697,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  */
 
 Handle PatternMatch::do_varscope (Handle hvarscope,
-                                  PatternMatchCallback *pmc)
+                                  DefaultPatternMatchCB *pmc)
 {
 	Atom * ascope = TLB::getAtom(hvarscope);
 	Link * lscope = dynamic_cast<Link *>(ascope);
@@ -775,6 +775,8 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 		     __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
+
+	pmc->set_typemap(typemap);
 
 	Handle gl = do_imply(himpl, pmc, &vset);
 

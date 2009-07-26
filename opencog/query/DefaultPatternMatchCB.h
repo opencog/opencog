@@ -32,6 +32,8 @@
 
 namespace opencog {
 
+typedef std::map<Atom *, const std::vector<Type> > VariableTypeMap;
+
 /**
  * Callback mixin class, used to provide a default node and link
  * matching behaviour. This class is still a pure virtual class,
@@ -44,6 +46,11 @@ class DefaultPatternMatchCB :
 	public virtual PatternMatchCallback
 {
 	public:
+		DefaultPatternMatchCB(void)
+		{
+			typemap = NULL;
+		}
+
 		/**
 		 * Called when a node in the template pattern
 		 * needs to be compared to a possibly matching
@@ -63,7 +70,17 @@ class DefaultPatternMatchCB :
 
 			// If the ungrounded term is a variable, then OK.
 			Type pattype = npat->getType();
-			if (pattype == VARIABLE_NODE) return false;
+			if (pattype == VARIABLE_NODE)
+			{
+				if (NULL == typemap) return false;
+				// If we are here, there's a typemap.
+				// Validate the node type, if needed.
+				VariableTypeMap::const_iterator it = typemap->find(npat);
+				if (it == typemap->end()) return false;
+
+				std::vector<Type> tlist = it->second;
+printf ("duuude compar typos!!\n");
+			}
 
 			return true;
 		}
@@ -89,8 +106,7 @@ class DefaultPatternMatchCB :
 			Type soltype = lsoln->getType();
 
 			// If types differ, no match,
-			if ((pattype != VARIABLE_SCOPE_LINK) && 
-			    (pattype != soltype)) return true;
+			if (pattype != soltype) return true;
 			return false;
 		}
 
@@ -104,12 +120,18 @@ class DefaultPatternMatchCB :
 		                            const std::vector<Handle> &clauses,
 		                            const std::vector<Handle> &negations);
 
+		void set_typemap(VariableTypeMap &tm)
+		{
+printf("duuude ola!!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+			typemap = &tm;
+		}
 	private:
 		Handle root;
 		Handle starter_pred;
 		Handle find_starter(Handle);
 		bool loop_candidate(Handle);
 		PatternMatchEngine *pme;
+		VariableTypeMap *typemap;
 };
 
 } // namespace opencog
