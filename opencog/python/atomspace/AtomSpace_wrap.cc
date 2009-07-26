@@ -4,6 +4,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/overloads.hpp>
 
 using namespace opencog;
@@ -40,5 +41,30 @@ void init_AtomSpace_py()
         .def("addLink", addLinkx2)*/
         .def("getSpaceServer", &AtomSpace::getSpaceServer,
             return_value_policy<reference_existing_object>())
+        .def("getSTI",
+            (AttentionValue::sti_t (AtomSpace::*)(AttentionValueHolder*) const)
+            &AtomSpace::getSTI)
+        .def("getSTI",
+            (AttentionValue::sti_t (AtomSpace::*)(Handle) const)
+            &AtomSpace::getSTI)
+        .def("setSTI",
+            (void (AtomSpace::*)(AttentionValueHolder*, AttentionValue::sti_t))
+            &AtomSpace::setSTI)
+        .def("setSTI",
+            (void (AtomSpace::*)(Handle, AttentionValue::sti_t))
+            &AtomSpace::setSTI)
+        .def("getTV", &AtomSpace::getTV,
+            return_value_policy<copy_const_reference>())
+        .def("setTV", &AtomSpace::setTV)
+        .def("getName", (std::string (AtomSpace::*)(Type) const)
+            &AtomSpace::getName)
+        .def("getName", (const std::string& (AtomSpace::*)(Handle) const)
+            &AtomSpace::getName,
+            return_value_policy<copy_const_reference>())
+        .def("getOutgoing", (Handle (AtomSpace::*)(Handle, int) const)
+            &AtomSpace::getOutgoing)
+        .def("getOutgoing", (const HandleSeq& (AtomSpace::*)(Handle) const)
+            &AtomSpace::getOutgoing,
+            return_value_policy<copy_const_reference>())
     ;
 }
