@@ -41,7 +41,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 		SchemeEval evaluator;
 #endif
 		Handle implication;
-		Handle hcapital, hprep;
+		Handle implication2;
 
 	public:
 
@@ -87,6 +87,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
  *    supposed to contain constants (this tests explicitly includes
  *    some constants)
  * 4) Crisp-logic implication.
+ * 5) Single-clause implications.
  */
 #define an as->addNode
 #define al as->addLink
@@ -134,6 +135,20 @@ void ExecutionUTest::setUp(void)
 	evaluator.eval(imp);
 	implication = evaluator.apply("imp", Handle::UNDEFINED);
 
+	// Create an implication link without the conjunction (AndLink)
+	const char * imp2 =
+	"(define (imp2)\n"
+	"(ImplicationLink\n"
+	"   (InheritanceLink (stv 1 1)\n"
+	"      (VariableNode \"$predNode\")\n"
+	"      (DefinedFrameNode \"#Manipulation\")\n"
+	"   )\n"
+	"   (VariableNode \"$predNode\")\n"
+	")\n"
+	")\n";
+	evaluator.eval(imp2);
+	implication2 = evaluator.apply("imp2", Handle::UNDEFINED);
+
 	// Create data on which the above pattern should match
 	const char * str = 
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)\n"
@@ -172,6 +187,11 @@ void ExecutionUTest::test_exec(void)
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 
 	// There should be two solutions: 
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+
+	// Result should be a ListLink w/ two solutions
+	result = pm.crisp_logic_imply(implication2);
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
