@@ -35,12 +35,13 @@
 
 namespace opencog {
 
-typedef std::vector<Handle> RootList;
-typedef std::map<Handle, RootList *> RootMap;
-typedef std::pair<Handle, RootList *> RootPair;
-
 class PatternMatchEngine
 {
+	// Private, locally scoped typedefs, not used outside of this class.
+	typedef std::vector<Handle> RootList;
+	typedef std::map<Handle, RootList *> RootMap;
+	typedef std::pair<Handle, RootList *> RootPair;
+
 	protected:
 		AtomSpace *atom_space;
 
