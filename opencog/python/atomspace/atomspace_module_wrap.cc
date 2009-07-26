@@ -17,6 +17,7 @@
 #include "SpaceServer_wrap.h"
 #include "SpaceServerContainer_wrap.h"
 #include "TruthValue_wrap.h"
+#include "TLB_wrap.h"
 
 using namespace boost::python;
 
@@ -46,22 +47,5 @@ void init_atomspace_module_py()
     init_Link_py();
     init_ClassServer_py();
     init_atom_types_py();
+    init_TLB_py();
 }
-
-/*BOOST_PYTHON_MODULE(atomspace)
-{
-    // Setup the atomspace module info.
-    scope().attr("__doc__") = "Wrapper for the OpenCog AtomSpace library";
-    scope().attr("__name__") = "opencog.atomspace";
-#ifndef DEBUG
-    scope().attr("__version__") = "some version (debug)";
-#else
-    scope().attr("__version__") = "some version (release)";
-#endif
-    scope().attr("__author__") = "David Kilgore <davidpkilgore@gmail.com>";
-    scope().attr("__credits__") =
-        "Based on the following libraries:\n"
-        "Boost Python v2 (http://www.boost.org)";
-
-    init_atomspace_py();
-}*/
