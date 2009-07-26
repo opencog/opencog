@@ -1,10 +1,11 @@
-// Script for automatic 'atom type's generation. For more more information,
+//
+// Script for automatic "atom type" generation. For more more information,
 // consult  the documentation in the opencog/atomspace/README file.
-
-// special type designating that no atom type has been assigned
+//
+// Special type designating that no atom type has been assigned
 NOTYPE
 
-// base of hierarchy
+// Base of hierarchy
 ATOM
 NODE <- ATOM
 LINK <- ATOM
@@ -29,23 +30,25 @@ NOT_LINK <- UNORDERED_LINK
 FALSE_LINK <- ORDERED_LINK
 TRUE_LINK <- ORDERED_LINK
 
-// Logical quantifiers
-FORALL_LINK <- ORDERED_LINK
-EXIST_LINK <- ORDERED_LINK
-SCHOLEM_LINK <- ORDERED_LINK
-
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
-// Basic first-order logic ungrounded terms
-IMPLICATION_LINK <- ORDERED_LINK
+// Basic first-order logic ungrounded terms and term types
 VARIABLE_NODE <- NODE
+VARIABLE_TYPE_NODE <- NODE
+TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// Scoping and Logical quantifiers
 VARIABLE_SCOPE_LINK <- ORDERED_LINK
+FORALL_LINK <- VARIABLE_SCOPE_LINK
+EXIST_LINK <- VARIABLE_SCOPE_LINK
+SCHOLEM_LINK <- ORDERED_LINK
+
+// Basic first-order logic operations
+IMPLICATION_LINK <- ORDERED_LINK
 EVALUATION_LINK <- ORDERED_LINK
 
-// Perception specific terms
-IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
-
+// ??? symbol link not used anywhere. What is it's semantics?
 // SYMBOL_LINK <- ORDERED_LINK
 
 // Generic association
@@ -94,11 +97,11 @@ EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplicat
 HYPOTHETICAL_LINK <- ORDERED_LINK
 MIXED_IMPLICATION_LINK <- ORDERED_LINK
 EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-// Should be replaced by entensional and intensional
-// equivalence
+
+// Should be replaced by entensional and intensional equivalence
 EQUIVALENCE_LINK <- UNORDERED_LINK
 EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
-// 
+
 
 // Older parsing and language handling nodes;
 // Commented out, as these are currently unused,
@@ -222,6 +225,9 @@ HUMANOID_NODE <- OBJECT_NODE
 
 AT_TIME_LINK <- ORDERED_LINK
 TIME_NODE <- NODE
+
+// Perception specific terms
+IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
 
 // Attention allocation atoms:
 
