@@ -162,12 +162,6 @@ public:
      * @return The string representation of a givenn class.
      */
     const std::string& getTypeName(Type type);
-
-    /**
-     * The typeDesignator of T is the Handle which describes the type T
-     * (eg. a ConceptNode whose name is the corresponding type name.)
-     */
-    Handle typeDesignatorHandle(Type T);
 };
 
 /** Gets the singleton instance (following meyer's design pattern) */
