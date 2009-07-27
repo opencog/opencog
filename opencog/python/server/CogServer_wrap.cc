@@ -15,6 +15,9 @@ void init_CogServer_py()
         .def("registerAgent",
             &CogServer::registerAgent,
             &CogServerWrap::default_registerAgent)
+        .def("unregisterAgent",
+            &CogServer::unregisterAgent,
+            &CogServerWrap::default_unregisterAgent)
     ;
 }
 
@@ -44,4 +47,16 @@ bool CogServerWrap::default_registerAgent(const std::string& id,
 AbstractFactory<Agent> const* factory)
 {
     return this->CogServer::registerAgent(id, factory);
+}
+
+bool CogServerWrap::unregisterAgent(const std::string& id)
+{
+    if (override o = this->get_override("unregisterAgent"))
+        return unregisterAgent(id);
+
+    return CogServer::unregisterAgent(id);
+}
+bool CogServerWrap::default_unregisterAgent(const std::string& id)
+{
+    return this->CogServer::unregisterAgent(id);
 }
