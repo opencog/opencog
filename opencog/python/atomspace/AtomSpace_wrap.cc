@@ -70,6 +70,18 @@ void init_AtomSpace_py()
         .def("setAV",
             (void (AtomSpace::*)(Handle, const AttentionValue&))
             &AtomSpace::setAV)
+        .def("setLTI",
+            (void (AtomSpace::*)(AttentionValueHolder*, AttentionValue::lti_t))
+            &AtomSpace::setLTI)
+        .def("setLTI",
+            (void (AtomSpace::*)(Handle, AttentionValue::lti_t))
+            &AtomSpace::setLTI)
+        .def("getLTI",
+            (AttentionValue::lti_t (AtomSpace::*)(Handle) const)
+            &AtomSpace::getLTI)
+        .def("getLTI",
+            (AttentionValue::lti_t (AtomSpace::*)(AttentionValueHolder*) const)
+            &AtomSpace::getLTI)
         .def("getName", (std::string (AtomSpace::*)(Type) const)
             &AtomSpace::getName)
         .def("getName", (const std::string& (AtomSpace::*)(Handle) const)
