@@ -52,10 +52,10 @@ struct CogServerWrap : CogServer, wrapper<CogServer>
     void loadModules();
     void default_loadModules();
     void loadSCMModules(const char* [] = NULL);
-    void default_loadSCMModules(const char* [] = NULL);
+    void default_loadSCMModules(const char* [] = NULL);*/
     bool registerAgent(const std::string& id, AbstractFactory<Agent> const* factory);
     bool default_registerAgent(const std::string& id, AbstractFactory<Agent> const* factory);
-    bool unregisterAgent(const std::string& id);
+    /*bool unregisterAgent(const std::string& id);
     bool default_unregisterAgent(const std::string& id);
     std::list<const char*> agentIds(void) const;
     std::list<const char*> default_agentIds(void) const;
