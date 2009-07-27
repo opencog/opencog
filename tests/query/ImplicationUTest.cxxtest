@@ -40,7 +40,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 #ifdef HAVE_GUILE
 		SchemeEval evaluator;
 #endif
-		Handle varscope, restrict;
+		Handle varscope, restrict, restrict2;
 		Handle implication, implication2;
 
 	public:
@@ -119,6 +119,8 @@ void ExecutionUTest::setUp(void)
 	"   (apply cog-new-link (append (list 'ImplicationLink) x)))\n"
 	"(define (DefinedFrameNode . x)\n"
 	"   (apply cog-new-node (append (list 'DefinedFrameNode) x)))\n"
+	"(define (ConceptNode . x)\n"
+	"   (apply cog-new-node (append (list 'ConceptNode) x)))\n"
 	"(define (PredicateNode . x)\n"
 	"   (apply cog-new-node (append (list 'PredicateNode) x)))\n"
 	"(define (VariableNode . x)\n"
@@ -202,6 +204,41 @@ void ExecutionUTest::setUp(void)
 	evaluator.eval(strict);
 	restrict = evaluator.apply("restricto", Handle::UNDEFINED);
 
+	// Create a varscope link with a type restriction
+	const char * strict2 =
+	"(define (restrict2)\n"
+	"(VariableScopeLink\n"
+	"   (ListLink\n"
+	"      (TypedVariableLink\n"
+	"         (VariableNode \"$predNode\")\n"
+	"         (VariableTypeNode \"PredicateNode\")\n"
+	"      )\n"
+	"      (TypedVariableLink\n"
+	"         (VariableNode \"$framNode\")\n"
+	"         (VariableTypeNode \"DefinedFrameNode\")\n"
+	"      )\n"
+	"   )\n"
+	"   (ImplicationLink\n"
+	"      (AndLink\n"
+	"         (InheritanceLink (stv 1 1)\n"
+	"            (VariableNode \"$predNode\")\n"
+	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"         )\n"
+	"         (InheritanceLink (stv 1 1)\n"
+	"            (VariableNode \"$framNode\")\n"
+	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"         )\n"
+	"      )\n"
+	"      (ListLink\n"
+	"         (VariableNode \"$predNode\")\n"
+	"         (VariableNode \"$framNode\")\n"
+	"      )\n"
+	"   )\n"
+	")\n"
+	")\n";
+	evaluator.eval(strict2);
+	restrict2 = evaluator.apply("restrict2", Handle::UNDEFINED);
+
 	// Create data on which the above pattern should match
 	const char * str = 
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)\n"
@@ -254,6 +291,11 @@ void ExecutionUTest::test_exec(void)
 
 	// Result should be a ListLink w/ one solution
 	result = pm.varscope(restrict);
+	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	// Result should be a ListLink w/ one solution
+	result = pm.varscope(restrict2);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
