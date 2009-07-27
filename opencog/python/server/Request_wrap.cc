@@ -2,7 +2,9 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/pure_virtual.hpp>
+#include <boost/python/return_value_policy.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/manage_new_object.hpp>
 
 using namespace opencog;
 using namespace boost::python;
@@ -10,6 +12,23 @@ using namespace boost::python;
 void init_Request_py()
 {
     class_<RequestWrap, boost::noncopyable>("Request", no_init)
+        .def("execute", pure_virtual(&Request::execute))
+        .def("send",
+            &Request::send,
+            &RequestWrap::default_send)
+        .def("setSocketHolder",
+            &Request::setSocketHolder,
+            &RequestWrap::default_setSocketHolder)
+        .def("getSocketHolder",
+            &Request::getSocketHolder,
+            &RequestWrap::default_getSocketHolder,
+            return_value_policy<manage_new_object>())
+        .def("setParameters",
+            &Request::setParameters,
+            &RequestWrap::default_setParameters)
+        .def("addParameter",
+            &Request::addParameter,
+            &RequestWrap::default_addParameter)
     ;
 }
 
