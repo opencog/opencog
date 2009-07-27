@@ -541,7 +541,27 @@ Handle PatternMatch::do_imply (Handle himplication,
 typedef std::pair<Atom *, const std::set<Type> > ATPair;
 
 /**
- * Extract the variable type(s)
+ * Extract the variable type(s) from a TypedVariableLink
+ *
+ * The call is expecting htypelink to point to one of the two
+ * following structures:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       VariableTypeNode  "ConceptNode"
+ *
+ * or
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       ListLink
+ *          VariableTypeNode  "ConceptNode"
+ *          VariableTypeNode  "NumberNode"
+ *          VariableTypeNode  "WordNode"
+ *
+ * In either case, the variable itself is appended to "vset",
+ * and the list of allowed types are associated with the variable
+ * via the map "typemap". 
  */
 int PatternMatch::get_vartype(Handle htypelink,
                               Atom * atypelink,
