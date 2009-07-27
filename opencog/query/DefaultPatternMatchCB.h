@@ -68,8 +68,10 @@ class DefaultPatternMatchCB :
 			// If equality, then a match.
 			if (npat == nsoln) return false;
 
-			// If the ungrounded term is a variable, then see if there
-			// are any restrictions on the variable type. 
+			// Hmm. Its would be unusual/weird to be called with
+			// pattype being a variable node ..  we expect the
+			// variable_match callback to be called for this case ... 
+			// Should this be flagged as an error?
 			Type pattype = npat->getType();
 			if (pattype == VARIABLE_NODE)
 			{
@@ -78,21 +80,50 @@ class DefaultPatternMatchCB :
 				Type soltype = nsoln->getType();
 				if (soltype == VARIABLE_NODE) return true;
 
-				// if no restrictions, we are good to go.
-				if (NULL == type_restrictions) return false;
-
-				// If we are here, there's a restriction on the grounding type.
-				// Validate the node type, if needed.
-				VariableTypeMap::const_iterator it = type_restrictions->find(npat);
-				if (it == type_restrictions->end()) return false;
-
-				// Is the ground-atom type in our list of allowed types?
-				const std::set<Type> &tset = it->second;
-				std::set<Type>::const_iterator allow = tset.find(soltype);
-				if (allow != tset.end()) return false;
-				return true;
+				return false;
 			}
 
+			return true;
+		}
+
+		/**
+		 * Called when a variable in the template pattern
+		 * needs to be compared to a possible grounding
+		 * node in the atomspace. The first argument
+		 * is a variable from the pattern, and the second
+		 * is a possible grounding node from the atomspace.
+		 * Return false if the nodes match, else return
+		 * true. (i.e. return true if mis-match).
+		 */
+		virtual bool variable_match(Node *npat, Node *nsoln)
+		{
+			Type pattype = npat->getType();
+
+			// If the ungrounded term is not of type VariableNode, then just
+			// accept the match. This allows any kind of node types to be 
+			// explicitly bound as variables.  However, the type VariableNode
+			// gets special handling, below.
+			if (pattype != VARIABLE_NODE) return false;
+
+			// If the solution is variable too, reject it out-of-hand,
+			// even if its some variable in some utterly unrelated thing.
+			Type soltype = nsoln->getType();
+			if (soltype == VARIABLE_NODE) return true;
+
+			// If the ungrounded term is a variable, then see if there
+			// are any restrictions on the variable type. 
+			// If no restrictions, we are good to go.
+			if (NULL == type_restrictions) return false;
+
+			// If we are here, there's a restriction on the grounding type.
+			// Validate the node type, if needed.
+			VariableTypeMap::const_iterator it = type_restrictions->find(npat);
+			if (it == type_restrictions->end()) return false;
+
+			// Is the ground-atom type in our list of allowed types?
+			const std::set<Type> &tset = it->second;
+			std::set<Type>::const_iterator allow = tset.find(soltype);
+			if (allow != tset.end()) return false;
 			return true;
 		}
 

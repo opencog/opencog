@@ -52,6 +52,17 @@ class PatternMatchCallback
 		virtual bool node_match(Node *, Node *) = 0;
 
 		/**
+		 * Called when a variable in the template pattern
+		 * needs to be compared to a possible grounding
+		 * node in the atomspace. The first argument
+		 * is a variable from the pattern, and the second
+		 * is a possible solution node from the atomspace.
+		 * Return false if the grouding is acceptable, else
+		 * return true. (i.e. return true if mis-match).
+		 */
+		virtual bool variable_match(Node *, Node *) = 0;
+
+		/**
 		 * Called when a link in the template pattern
 		 * needs to be compared to a possibly matching
 		 * link in the atomspace. The first argument

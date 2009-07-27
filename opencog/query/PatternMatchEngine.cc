@@ -144,7 +144,7 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		Node *nb = dynamic_cast<Node *>(ab);
 		if (!na || !nb) return true;
 
-		if (pmc->node_match (na,nb)) return true;
+		if (pmc->variable_match (na,nb)) return true;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
