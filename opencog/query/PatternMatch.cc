@@ -776,7 +776,7 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 		return Handle::UNDEFINED;
 	}
 
-	pmc->set_typemap(typemap);
+	pmc->set_type_restrictions(typemap);
 
 	Handle gl = do_imply(himpl, pmc, &vset);
 

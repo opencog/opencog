@@ -48,7 +48,7 @@ class DefaultPatternMatchCB :
 	public:
 		DefaultPatternMatchCB(void)
 		{
-			typemap = NULL;
+			type_restrictions = NULL;
 		}
 
 		/**
@@ -68,22 +68,24 @@ class DefaultPatternMatchCB :
 			// If equality, then a match.
 			if (npat == nsoln) return false;
 
-			// If the ungrounded term is a variable, then OK.
+			// If the ungrounded term is a variable, then see if there
+			// are any restrictions on the variable type. 
 			Type pattype = npat->getType();
 			if (pattype == VARIABLE_NODE)
 			{
-				if (NULL == typemap) return false;
-				// If we are here, there's a typemap.
-				// Validate the node type, if needed.
-				VariableTypeMap::const_iterator it = typemap->find(npat);
-				if (it == typemap->end()) return false;
+				// if no restrictions, we are good to go.
+				if (NULL == type_restrictions) return false;
 
+				// If we are here, there's a restriction on the grounding type.
+				// Validate the node type, if needed.
+				VariableTypeMap::const_iterator it = type_restrictions->find(npat);
+				if (it == type_restrictions->end()) return false;
+
+				// Is the ground-atom type in our list of allowed types?
 				const std::set<Type> &tset = it->second;
-				Type soltype = npat->getType();
+				Type soltype = nsoln->getType();
 				std::set<Type>::const_iterator allow = tset.find(soltype);
-printf ("duuude compar typos!!\n");
-				if (allow != tset.end())
-					return false;
+				if (allow != tset.end()) return false;
 				return true;
 			}
 
@@ -125,10 +127,14 @@ printf ("duuude compar typos!!\n");
 		                            const std::vector<Handle> &clauses,
 		                            const std::vector<Handle> &negations);
 
-		void set_typemap(VariableTypeMap &tm)
+		/**
+		 * Indicate a set of restrictions on the types of the ground atoms.
+		 * The typemap contains a map from variables to a set of types
+		 * that the groundings for the variable are allowed to have.
+		 */
+		void set_type_restrictions(VariableTypeMap &tm)
 		{
-printf("duuude ola!!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			typemap = &tm;
+			type_restrictions = &tm;
 		}
 	private:
 		Handle root;
@@ -136,7 +142,7 @@ printf("duuude ola!!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 		Handle find_starter(Handle);
 		bool loop_candidate(Handle);
 		PatternMatchEngine *pme;
-		VariableTypeMap *typemap;
+		VariableTypeMap *type_restrictions;
 };
 
 } // namespace opencog
