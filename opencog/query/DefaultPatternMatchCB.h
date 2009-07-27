@@ -73,6 +73,11 @@ class DefaultPatternMatchCB :
 			Type pattype = npat->getType();
 			if (pattype == VARIABLE_NODE)
 			{
+				// If the solution is variable too, reject it out-of-hand,
+				// even if its some variable in some utterly unrelated thing.
+				Type soltype = nsoln->getType();
+				if (soltype == VARIABLE_NODE) return true;
+
 				// if no restrictions, we are good to go.
 				if (NULL == type_restrictions) return false;
 
@@ -83,7 +88,6 @@ class DefaultPatternMatchCB :
 
 				// Is the ground-atom type in our list of allowed types?
 				const std::set<Type> &tset = it->second;
-				Type soltype = nsoln->getType();
 				std::set<Type>::const_iterator allow = tset.find(soltype);
 				if (allow != tset.end()) return false;
 				return true;
