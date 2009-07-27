@@ -56,6 +56,20 @@ void init_AtomSpace_py()
         .def("getTV", &AtomSpace::getTV,
             return_value_policy<copy_const_reference>())
         .def("setTV", &AtomSpace::setTV)
+        .def("getAV",
+            (const AttentionValue& (AtomSpace::*)(AttentionValueHolder*) const)
+            &AtomSpace::getAV,
+            return_value_policy<copy_const_reference>())
+        .def("getAV",
+            (const AttentionValue& (AtomSpace::*)(Handle) const)
+            &AtomSpace::getAV,
+            return_value_policy<copy_const_reference>())
+        .def("setAV",
+            (void (AtomSpace::*)(AttentionValueHolder*, const AttentionValue&))
+            &AtomSpace::setAV)
+        .def("setAV",
+            (void (AtomSpace::*)(Handle, const AttentionValue&))
+            &AtomSpace::setAV)
         .def("getName", (std::string (AtomSpace::*)(Type) const)
             &AtomSpace::getName)
         .def("getName", (const std::string& (AtomSpace::*)(Handle) const)
