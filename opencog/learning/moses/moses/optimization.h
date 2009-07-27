@@ -180,9 +180,9 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
     dorepeat(sample_size) {
 
         eda::instance new_inst(center_inst);
-
+        opencog::lazy_random_selector select(dim, rng);
         for (int i = 1;i <= n;) {
-            int r = rng.randint(dim);
+            int r = select();
             eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
             eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
 
@@ -192,10 +192,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                     *itb = true;
                     i++;
                     }*/
-                if (*itb == false)
-                    *itb = true;
-                else
-                    *itb = false;
+                *itb = !(*itb);
                 i++;
             } else if ((unsigned int)r >= fs.n_bits()) {
                 itd += r - fs.n_bits();
