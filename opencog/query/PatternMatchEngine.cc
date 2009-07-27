@@ -138,6 +138,14 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 		}
 
 		// Else, we have a candidate grounding for this variable.
+		// The node_match may implement some tighter variable check,
+		// e.g. making sure that grounding is of some certain type.
+		Node *na = dynamic_cast<Node *>(aa);
+		Node *nb = dynamic_cast<Node *>(ab);
+		if (!na || !nb) return true;
+
+		if (pmc->node_match (na,nb)) return true;
+
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
 		prtmsg("$$ variable:    ", ha);
