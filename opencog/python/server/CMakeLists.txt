@@ -4,6 +4,7 @@ add_library(server_py SHARED
     Agent_wrap.cc
     BaseServer_wrap.cc
     Registry_wrap.cc
+    Request_wrap.cc
     server_module_wrap.cc
 )
 target_link_libraries(server_py
