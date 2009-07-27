@@ -9,6 +9,15 @@
 using namespace opencog;
 using namespace boost::python;
 
+//struct TruthValueWrap::TruthValue_to_python
+struct TruthValue_to_python
+{
+    static PyObject *convert(TruthValue const& tv)
+    {
+        return incref(object(tv).ptr());
+    }
+};
+
 void init_TruthValue_py()
 {
     enum_<TruthValueType>("TruthValueType")
@@ -19,9 +28,8 @@ void init_TruthValue_py()
         .value("NUMBER_OF_TRUTH_VALUE_TYPES", NUMBER_OF_TRUTH_VALUE_TYPES)
     ;
 
-    class_<TruthValueWrap, boost::noncopyable>("TruthValue")
+    class_<TruthValueWrap, boost::noncopyable>("TruthValue", no_init)
         .def("NULL_TV", &TruthValue::NULL_TV,
-            //return_value_policy<reference_existing_object>())
             return_value_policy<copy_const_reference>())
         .def("DEFAULT_TV", &TruthValue::DEFAULT_TV,
             return_value_policy<copy_const_reference>())
@@ -66,6 +74,9 @@ void init_TruthValue_py()
         .staticmethod("factory")
         //.staticmethod("DeleteAndSetDefaultTVIfPertinent")
     ;
+
+    //to_python_converter<TruthValue, &TruthValueWrap::TruthValue_to_python>();
+    to_python_converter<TruthValue, TruthValue_to_python>();
 }
 
 // Pure virtual functions.
@@ -85,16 +96,16 @@ TruthValueType TruthValueWrap::getType() const
 TruthValue* TruthValueWrap::clone() const
 { return this->get_override("clone")(); }
 TruthValue& TruthValueWrap::operator=(const TruthValue& rhs)
-{ return this->get_override("operator=")(); }
+{ return this->get_override("operator=")(rhs); }
 bool TruthValueWrap::operator==(const TruthValue& rhs) const
-{ return this->get_override("operator==")(); }
+{ return this->get_override("operator==")(rhs); }
 
 // Non-pure virtual functions.
 
 TruthValue* TruthValueWrap::merge(const TruthValue& other) const
 {
-    if (override merge = this->get_override("merge"))
-        return merge(other);
+    if (override o = this->get_override("merge"))
+        return o(other);
 
     return TruthValue::merge(other);
 }
@@ -105,8 +116,8 @@ TruthValue* TruthValueWrap::default_merge(const TruthValue& other) const
 
 bool TruthValueWrap::isNullTv() const
 {
-    if (override isNullTv = this->get_override("isNullTv"))
-        return isNullTv();
+    if (override o = this->get_override("isNullTv"))
+        return o();
 
     return TruthValue::isNullTv();
 }
