@@ -39,7 +39,7 @@
 #define FRACTION_OF_REMAINING     10
 #define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
-#define INIT_TEMPERARURE          30
+#define INIT_TEMPERATURE          30
 
 namespace moses
 {
@@ -188,16 +188,27 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
 
             if ((unsigned int)r < fs.n_bits()) {
                 itb += r;
-                if (*itb == false) {
+                /* if (*itb == false) {
                     *itb = true;
                     i++;
-                }
+                    }*/
+                if (*itb == false)
+                    *itb = true;
+                else
+                    *itb = false;
+                i++;
             } else if ((unsigned int)r >= fs.n_bits()) {
                 itd += r - fs.n_bits();
-                if (*itd == 0) {
+                /* if (*itd == 0) {
                     *itd = 1 + rng.randint(itd.arity() - 1);
                     i++;
-                }
+                    }*/
+                int temp = 1 + rng.randint(itd.arity() - 1);
+                if ( *itd == temp)
+                    *itd = 0;
+                else
+                    *itd = temp;
+                i++;
             }
         }
 
@@ -831,7 +842,7 @@ struct sliced_iterative_hillclimbing {
          if (energy_new < energy_old)
              return 1.0;
          else
-             return std::exp(-(energy_new - engergy_old)/(temperature));
+             return std::exp(-(energy_new - energy_old)/(temperature));
      }
      double cooling_schedule(double t)
      { 
@@ -845,17 +856,32 @@ struct sliced_iterative_hillclimbing {
          int max_gens_total = params.max_gens_total(deme.fields());
 
          long long current_number_of_instance = 0;
-
-         max_number_of_instances = max_gens_total * pop_size;
+         int max_number_of_instances = max_gens_total * pop_size;
          if (max_number_of_instances > max_evals)
              max_number_of_instances = max_evals;
 
-         number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
+         int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
          eda::instance exemplar(deme.fields().packed_width());
+         
+         eda::scored_instance<tree_score> scored_exemplar = exemplar;
+         score_t exemplar_score = score(scored_exemplar).first;
+         
+         if ( exemplar_score == 0) {
+             deme.resize(1);
+             *(deme.begin()++) = exemplar;
+         } else {
+             
+             int distance = 1;
+             bool bImprovement_made = false;
+             score_t best_score;
+             
+             do {
+                 
+             }while(1);
+         }
+         
+         return current_number_of_instance;
      }
-                        
-     int max_number_of_instances;
-     int number_of_fields;
      opencog::RandGen& rng;
      eda_parameters params;
     
