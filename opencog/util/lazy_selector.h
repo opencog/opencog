@@ -28,6 +28,11 @@
 namespace opencog
 {
 
+
+/**
+ * That class allows to select integers in [0,n) but never select twice the same
+ * When the operator is called more than n times an assertion is raised
+ */
 class lazy_selector
 {
 public:

@@ -41,7 +41,10 @@ int lazy_selector::operator()()
         }
         return idx;
     }
+    
     int res = (it == _map.end()) ? idx : it->second;
+    if(it != _map.end())
+        _map.erase(it);
     hash_map<int, int>::iterator last = _map.find(_n);
     if (last == _map.end()) {
         _map.insert(std::make_pair(idx, _n));

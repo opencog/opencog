@@ -30,8 +30,9 @@ namespace opencog
 {
 
 //a lazy random selector without replacement -
-//lets you select m random integers in [0,n) without replacement each in O(1)
-//and only uses O(m) memory - useful where n is much larger than m
+//lets you select m random integers in [0,n) without replacement
+//(i.e. it never selects twice the same number)
+//each in O(1) and only uses O(m) memory - useful where n is much larger than m
 struct lazy_random_selector : public lazy_selector {
     lazy_random_selector(int n, opencog::RandGen& _rng) : lazy_selector(n), rng(_rng) { }
     int select();
