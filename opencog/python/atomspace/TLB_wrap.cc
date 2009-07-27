@@ -10,8 +10,8 @@ using namespace boost::python;
 void init_TLB_py()
 {
     class_<TLB>("TLB", no_init)
-        /*.def("getAtom", &TLB::getAtom,
+        .def("getAtom", &TLB::getAtom,
             return_value_policy<manage_new_object>())
-        .staticmethod("getAtom")*/
+        .staticmethod("getAtom")
     ;
 }
