@@ -82,6 +82,12 @@ void init_AtomSpace_py()
         .def("getLTI",
             (AttentionValue::lti_t (AtomSpace::*)(AttentionValueHolder*) const)
             &AtomSpace::getLTI)
+        .def("getVLTI",
+            (AttentionValue::vlti_t (AtomSpace::*)(Handle) const)
+            &AtomSpace::getVLTI)
+        .def("getVLTI",
+            (AttentionValue::vlti_t (AtomSpace::*)(AttentionValueHolder*) const)
+            &AtomSpace::getVLTI)
         .def("getName", (std::string (AtomSpace::*)(Type) const)
             &AtomSpace::getName)
         .def("getName", (const std::string& (AtomSpace::*)(Handle) const)
