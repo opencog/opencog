@@ -63,7 +63,7 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     unregisterAgentRequests();
 }
 
-BuiltinRequestsModule::registerAgentRequests()
+void BuiltinRequestsModule::registerAgentRequests()
 {
     do_startAgents_register();
     do_stopAgents_register();
@@ -74,7 +74,7 @@ BuiltinRequestsModule::registerAgentRequests()
     do_activeAgents_register();
 }
 
-BuiltinRequestsModule::unregisterAgentRequests()
+void BuiltinRequestsModule::unregisterAgentRequests()
 {
     do_startAgents_unregister();
     do_stopAgents_unregister();
@@ -159,10 +159,13 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
              it != agents.end(); ++it) {
             (*it)->run(&cogserver());
         }
-        return "Ran a step of each started agent";
+        return "Ran a step of each active agent";
     } else {
+        std::list<std::string> unknownAgents;
+        int numberAgentsRun = 0;
         for (std::list<std::string>::const_iterator it = args.begin();
              it != args.end(); ++it) {
+            
             std::string agent_type = *it;
 
             // try to find an already started agent with that name
@@ -173,14 +176,26 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
             if (agents.end() == tmp) {
                 // construct a temporary agent
                 agent = cogserver().createAgent(*it, false);
-                agent->run(&cogserver());
-                cogserver().destroyAgent(agent);
+                if (agent) {
+                    agent->run(&cogserver());
+                    cogserver().destroyAgent(agent);
+                    numberAgentsRun++;
+                } else {
+                    unknownAgents.push_back(*it);
+                }
             } else {
                 agent = *tmp;
                 agent->run(&cogserver());
             }
         }
-        return "Ran a step of each specified agent";
+        std::stringstream returnMsg;
+        for (std::list<std::string>::iterator it = unknownAgents.begin();
+                it != unknownAgents.end(); ++it) {
+            returnMsg << "Unknown agent " << *it << std::endl;
+        }
+        returnMsg << "Successfully ran a step of " << numberAgentsRun <<
+            "/" << args.size() << " agents." << std::endl;
+        return returnMsg.str();
     }
 }
 

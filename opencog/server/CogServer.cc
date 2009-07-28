@@ -271,7 +271,9 @@ void CogServer::startAgent(Agent* agent)
 void CogServer::stopAgent(Agent* agent)
 {
     pthread_mutex_lock(&agentsLock);
-    agents.erase(std::find(agents.begin(), agents.end(), agent));
+    AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent); 
+    if (ai != agents.end())
+        agents.erase(ai);
     pthread_mutex_unlock(&agentsLock);
 }
 
