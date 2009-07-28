@@ -47,10 +47,14 @@ class Registry
 
 protected:
 
-    typedef typename std::map<const std::string, const AbstractFactory<_BaseType>*> FactoryMap;
-    typedef typename std::map<const std::string, const AbstractFactory<_BaseType>*>::const_iterator FactoryMapConstIterator;
-    typedef typename std::map<const std::string, const AbstractFactory<_BaseType>*>::iterator FactoryMapIterator;
-    typedef typename std::map<const std::string, const AbstractFactory<_BaseType>*>::value_type FactoryMapValueType;
+    typedef typename std::map<const std::string, const
+        AbstractFactory<_BaseType>*> FactoryMap;
+    typedef typename std::map<const std::string, const
+        AbstractFactory<_BaseType>*>::const_iterator FactoryMapConstIterator;
+    typedef typename std::map<const std::string, const
+        AbstractFactory<_BaseType>*>::iterator FactoryMapIterator;
+    typedef typename std::map<const std::string, const
+        AbstractFactory<_BaseType>*>::value_type FactoryMapValueType;
     FactoryMap factories;
 
 public:
@@ -59,9 +63,11 @@ public:
     virtual ~Registry() {}
 
     /** Registers a factory identified by 'id' */
-    virtual bool register_(const std::string& id, AbstractFactory<_BaseType> const* factory)
+    virtual bool register_(const std::string& id, AbstractFactory<_BaseType>
+            const* factory)
     {
-        logger().debug("registering %s \"%s\"", demangle(typeid(_BaseType).name()).c_str(), id.c_str());
+        logger().debug("registering %s \"%s\"",
+                demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return factories.insert(FactoryMapValueType(id, factory)).second;
     }
 
@@ -108,18 +114,21 @@ public:
         FactoryMapConstIterator it = factories.find(id);
         if (it == factories.end()) {
             // not found
-            logger().error("unknown %s id: %s", demangle(typeid(Request).name()).c_str(), id.c_str());
+            logger().error("unknown %s id: %s",
+                    demangle(typeid(Request).name()).c_str(), id.c_str());
             return emptyClassInfo;
         }
         // invoke the description function
-        logger().debug("returning %s classinfo with id \"%s\"", demangle(typeid(Request).name()).c_str(), id.c_str());
+        logger().debug("returning %s classinfo with id \"%s\"",
+                demangle(typeid(Request).name()).c_str(), id.c_str());
         return it->second->info();
     }
 
     /** Returns a list with all the ids from the registered factories */
     virtual std::list<const char*> all(void) const
     {
-        logger().debug("listing all %ss", demangle(typeid(_BaseType).name()).c_str());
+        logger().debug("listing all %ss",
+                demangle(typeid(_BaseType).name()).c_str());
         std::list<const char*> l;
         FactoryMapConstIterator it;
         for (it = factories.begin(); it != factories.end(); ++it) {

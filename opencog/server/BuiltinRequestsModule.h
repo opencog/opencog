@@ -90,10 +90,17 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start-loop", do_startAgentLoo
        "Start the agent loop (that is, start running agents during the CogServer loop).\n")
 
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-list", do_listAgents, 
-       "List running agents",
+       "List available agents",
        "Usage: agents-list\n\n"
+       "List all the available agents from loaded modules.\n")
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-active", do_activeAgents, 
+       "List running agents",
+       "Usage: agents-active\n\n"
        "List all the currently running agents, including their configuration parameters.\n")
 
+    void registerAgentRequests();
+    void unregisterAgentRequests();
 public:
 
     static inline const char* id() {

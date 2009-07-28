@@ -45,12 +45,7 @@ BuiltinRequestsModule::BuiltinRequestsModule()
     cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory); 
     cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
-    do_startAgents_register();
-    do_stopAgents_register();
-    do_stepAgents_register();
-    do_startAgentLoop_register();
-    do_stopAgentLoop_register();
-    do_listAgents_register();
+    registerAgentRequests();
 }
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
@@ -65,12 +60,29 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(ShutdownRequest::info().id);
     cogserver.unregisterRequest(LoadModuleRequest::info().id);
     cogserver.unregisterRequest(UnloadModuleRequest::info().id);
+    unregisterAgentRequests();
+}
+
+BuiltinRequestsModule::registerAgentRequests()
+{
+    do_startAgents_register();
+    do_stopAgents_register();
+    do_stepAgents_register();
+    do_startAgentLoop_register();
+    do_stopAgentLoop_register();
+    do_listAgents_register();
+    do_activeAgents_register();
+}
+
+BuiltinRequestsModule::unregisterAgentRequests()
+{
     do_startAgents_unregister();
     do_stopAgents_unregister();
     do_stepAgents_unregister();
     do_startAgentLoop_unregister();
     do_stopAgentLoop_unregister();
     do_listAgents_unregister();
+    do_activeAgents_unregister();
 }
 
 void BuiltinRequestsModule::init()
@@ -187,6 +199,19 @@ std::string BuiltinRequestsModule::do_startAgentLoop(Request *dummy, std::list<s
 }
 
 std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::string> args)
+{
+    std::list<const char*> agentNames = cogserver().agentIds();
+    std::ostringstream oss;
+    
+    for (std::list<const char*>::const_iterator it = agentNames.begin();
+         it != agentNames.end(); ++it) {
+        oss << (*it) << std::endl;
+    }
+    
+    return oss.str();
+}
+
+std::string BuiltinRequestsModule::do_activeAgents(Request *dummy, std::list<std::string> args)
 {
     std::vector<Agent*> agents = cogserver().runningAgents();
     std::ostringstream oss;
