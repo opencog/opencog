@@ -33,6 +33,25 @@
 #include "representation.h"
 #include "build_knobs.h"
 
+static contin_t stepsize = 1.0;
+static contin_t expansion = 1.0;
+static int depth = 4;
+
+void set_stepsize(double new_ss)
+{
+    stepsize = new_ss;
+}
+
+void set_expansion(double new_ex)
+{
+    expansion = new_ex;
+}
+
+void set_depth(int new_depth)
+{
+    depth = new_depth;
+}
+
 namespace moses
 {
 
@@ -51,7 +70,8 @@ representation::representation(const reduct::rule& simplify,
 #endif
 
     //build the knobs
-    build_knobs(rng, _exemplar, tt, *this, os, perceptions, actions);
+    build_knobs(rng, _exemplar, tt, *this, os, perceptions, actions,stepsize,
+                expansion, depth);
 
     //handle knob merging
 

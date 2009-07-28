@@ -33,6 +33,11 @@
 #include <boost/utility.hpp>
 
 
+
+void set_stepsize(double new_ss);
+void set_expansion(double new_ex);
+void set_depth(int new_depth);
+
 namespace moses
 {
 

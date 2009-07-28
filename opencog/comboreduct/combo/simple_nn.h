@@ -104,7 +104,22 @@ public:
         for (iter = nodes.begin();iter != nodes.end();iter++)
             delete (*iter);
     }
-    
+   
+    void reduce()
+    {
+        ann_connection_it iter;
+        for (iter = connections.begin();iter != connections.end(); iter++)
+        {
+             if((*iter)->weight != 0.0)
+                continue;
+             if (!remove_connection(*iter))
+                continue;
+             iter = connections.begin();
+             if (iter==connections.end())
+                 break;
+        }
+    } 
+
     //write out file in DOT format
     //common graph visualization format.
     void write_dot(const char* filename)
@@ -437,6 +452,27 @@ public:
         connections.push_back(newconnection);
         s->out_connections.push_back(newconnection);
         d->in_connections.push_back(newconnection);
+    }
+
+    void remove_from_vec(ann_connection* c, vector<ann_connection*>& l)
+    {
+     ann_connection_it loc;
+     
+     for(loc=l.begin();loc!=l.end();loc++)
+         if (*loc==c)
+             break;
+
+     if(loc!=l.end())
+         l.erase(loc);
+    } 
+
+    bool remove_connection(ann_connection* conn)
+    {
+     remove_from_vec(conn,connections);
+     remove_from_vec(conn,conn->source->out_connections);
+     remove_from_vec(conn,conn->dest->in_connections);
+     delete conn;
+     return true;   
     }
 
     //add a new node to the ANN

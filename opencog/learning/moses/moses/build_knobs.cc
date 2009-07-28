@@ -58,6 +58,9 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         _step_size(step_size), _expansion(expansion), _depth(depth),
         _os(os), _perceptions(perceptions), _actions(actions)
 {
+    cout << "step size " << step_size << endl;
+    cout << "expansion " << expansion << endl;
+    cout << "depth " << depth << endl;
     type_tree output_type = combo::type_tree_output_type_tree(_type);
     stringstream ss;
     ss << output_type;

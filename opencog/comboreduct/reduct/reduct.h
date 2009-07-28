@@ -50,6 +50,7 @@ namespace reduct {
     rule* clone() const { return new T(*((T*)this)); }
   };
 
+  const rule& ann_reduction();
   const rule& logical_reduction();
   const rule& contin_reduction(opencog::RandGen& rng);
   const rule& mixed_reduction(opencog::RandGen& rng);
