@@ -74,7 +74,7 @@ struct CogServerWrap : CogServer, wrapper<CogServer>
     void startAgentLoop(void);
     void default_startAgentLoop(void);
     void stopAgentLoop(void);
-    void default_stopAgentLoop(void);
+    void default_stopAgentLoop(void);*/
     bool registerRequest(const std::string& id, AbstractFactory<Request> const* factory);
     bool default_registerRequest(const std::string& id, AbstractFactory<Request> const* factory);
     bool unregisterRequest(const std::string& id);
@@ -85,12 +85,12 @@ struct CogServerWrap : CogServer, wrapper<CogServer>
     Request* default_createRequest(const std::string& id);
     const RequestClassInfo& requestInfo(const std::string& id) const;
     const RequestClassInfo& default_requestInfo(const std::string& id) const;
-    void pushRequest(Request* request);
+    /*void pushRequest(Request* request);
     void default_pushRequest(Request* request);
     Request* popRequest(void);
-    Request* default_popRequest(void);
+    Request* default_popRequest(void);*/
     int getRequestQueueSize(void);
-    int default_getRequestQueueSize(void);*/
+    int default_getRequestQueueSize(void);
 };
 
 #endif // _OPENCOG_COGSERVER_WRAP_H
