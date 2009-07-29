@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 by Novamente LLC
+ * Copyright (C) 2008-2009 by Novamente LLC
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
@@ -32,8 +32,6 @@ using namespace opencog;
 using namespace opencog::pln;
 using namespace boost::assign;
 
-#define GET_ASW ((AtomSpaceWrapper*) ASW())
-
 class TableGatherUTest :  public CxxTest::TestSuite {
 private:
 
@@ -42,13 +40,12 @@ private:
 public:
 
     TableGatherUTest() {
-        puts("Initializing PLN test env...");
+        logger().info("Initializing PLN test env...");
 
         // This access is required to initialise CogServer.
         CogServer& cogserver = static_cast<CogServer&>(server());
 
-        LOG(2, "Creating AtomSpaceWrappers...");
-        
+        logger().info("Creating AtomSpaceWrappers...");
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
         asw = GET_ASW;
