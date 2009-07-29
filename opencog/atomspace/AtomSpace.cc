@@ -84,7 +84,7 @@ AtomSpace::~AtomSpace()
     // Check if has already been deleted. See in code where it can be delete.
     if (_handle_iterator) {
         delete _handle_iterator;
-	     _handle_iterator = NULL;
+         _handle_iterator = NULL;
     }
     delete spaceServer;
     spaceServer = NULL;
@@ -94,12 +94,12 @@ AtomSpace::~AtomSpace()
 
 void AtomSpace::registerBackingStore(BackingStore *bs)
 {
-	backing_store = bs;
+    backing_store = bs;
 }
 
 void AtomSpace::unregisterBackingStore(BackingStore *bs)
 {
-	if (bs == backing_store) backing_store = NULL;
+    if (bs == backing_store) backing_store = NULL;
 }
 
 // ====================================================================
@@ -717,7 +717,7 @@ Handle AtomSpace::fetchAtom(Handle h)
         }
         if (a) return atomTable.add(a);
     }
-	
+    
     return Handle::UNDEFINED;
 }
 
@@ -866,11 +866,11 @@ const TruthValue& AtomSpace::getTV(Handle h, VersionHandle vh) const
 
     const TruthValue& tv  = TLB::getAtom(h)->getTruthValue();
     if (isNullVersionHandle(vh))
-	 {
+     {
         return tv;
     }
-	 else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
-	 {
+     else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
+     {
         return ((const CompositeTruthValue&) tv).getVersionedTV(vh);
     }
     return TruthValue::NULL_TV();
@@ -950,22 +950,22 @@ AttentionValue::sti_t AtomSpace::getSTI(AttentionValueHolder *avh) const
 float AtomSpace::getNormalisedSTI(AttentionValueHolder *avh, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
-	int normaliser;
+    int normaliser;
     float val;
     AttentionValue::sti_t s = getSTI(avh);
-	if (s > getAttentionalFocusBoundary()) {
-		normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+    if (s > getAttentionalFocusBoundary()) {
+        normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
         if (normaliser == 0) {
             return 0.0f;
         }
-		val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
-	} else {
-		normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
+    } else {
+        normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
         if (normaliser == 0) {
             return 0.0f;
         }
-		val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
-	}
+        val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
+    }
     if (clip) {
         return max(-1.0f,min(val,1.0f));
     } else {
@@ -975,7 +975,7 @@ float AtomSpace::getNormalisedSTI(AttentionValueHolder *avh, bool average, bool 
 
 float AtomSpace::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average, bool clip) const
 {
-	int normaliser;
+    int normaliser;
     float val;
     AttentionValue::sti_t s = getSTI(avh);
     normaliser = getMaxSTI(average) - getMinSTI(average);
