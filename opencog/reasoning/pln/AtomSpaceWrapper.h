@@ -51,7 +51,7 @@
 #define PLN_TRUE_MEAN 0.989
 
 //using namespace boost::bimaps;
-#define GET_ASW ((AtomSpaceWrapper*) ASW())
+#define GET_ASW ((AtomSpaceWrapper*) ASW(NULL))
 
 namespace opencog {
 namespace pln {
@@ -446,7 +446,10 @@ public:
 
 };
 
-// singleton instance (following meyer's design pattern)
+/**
+ * Singleton instance of AtomSpaceWrapper
+ * (following meyer's design pattern)
+ */
 iAtomSpaceWrapper* ASW(AtomSpace *a = NULL);
 
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.

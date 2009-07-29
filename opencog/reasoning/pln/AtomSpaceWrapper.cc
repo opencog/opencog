@@ -56,6 +56,28 @@ namespace haxx
 namespace opencog {
 namespace pln {
 
+// create and return the single instance
+iAtomSpaceWrapper* ASW(AtomSpace* a)
+{
+    static iAtomSpaceWrapper* instance;
+    if (instance == NULL || a != NULL) {    
+        if (instance != NULL) {
+            delete instance;
+        }
+        if (a == NULL) {
+            a = server().getAtomSpace();
+        }
+        LOG(2, "Creating AtomSpaceWrappers...");
+#if LOCAL_ATW
+        instance = &LocalATW::getInstance(a);
+#else
+        DirectATW::getInstance(a);
+        instance = &NormalizingATW::getInstance(a);
+#endif
+    }
+    return instance;
+}
+
 AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
 USize(800), USizeMode(CONST_SIZE), atomspace(a)
 {
@@ -109,6 +131,11 @@ bool AtomSpaceWrapper::handleAddSignal(Handle h)
 bool AtomSpaceWrapper::handleRemoveSignal(Handle h)
 {
     // If ImplicationLink then check whether there is a CrispTheorem 
+
+    // Otherwise remove from pHandle to Handle mappings
+
+    // and also remove from any existing BITs
+
     return false;
 }
 
@@ -475,7 +502,7 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
     
     try {
         printf("Loading axioms from: %s \n", fname.c_str());        
-    	
+        
         // Use the XML reader only if XML is available.
 #if HAVE_EXPAT
         std::vector<XMLBufferReader*> readers(1,
@@ -1428,27 +1455,6 @@ Handle AtomSpaceWrapper::Exist2ForAllLink(Handle& exL)
 }
 */
 
-// create and return the single instance
-iAtomSpaceWrapper* ASW(AtomSpace* a)
-{
-    static iAtomSpaceWrapper* instance;
-    if (instance == NULL || a != NULL) {    
-        if (instance != NULL) {
-            delete instance;
-        }
-        if (a == NULL) {
-            a = server().getAtomSpace();
-        }
-        LOG(2, "Creating AtomSpaceWrappers...");
-#if LOCAL_ATW
-        instance = &LocalATW::getInstance(a);
-#else
-        DirectATW::getInstance(a);
-        instance = &NormalizingATW::getInstance(a);
-#endif
-    }
-    return instance;
-}
 
 /////
 // NormalizingATW methods
