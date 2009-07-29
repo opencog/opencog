@@ -250,7 +250,7 @@ throw (RuntimeException, InconsistenceException)
         if (classserver().isA(typeFound, LINK)) {
 //            timeval s;
 //            gettimeofday(&s, NULL);
-            printf("Processing Link: %d (%s)\n", typeFound, name);
+            logger().fine("Processing Link: %d (%s)\n", typeFound, name);
             r = (Atom*) new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV());
 
             const TruthValue& t = r->getTruthValue();
