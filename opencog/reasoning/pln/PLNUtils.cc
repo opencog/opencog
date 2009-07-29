@@ -992,7 +992,7 @@ std::string printTree(pHandle h, int level, int LogLevel)
         ss << "Virtual " << opencog::pln::Type2Name(t)
             << "(" << t << ")" << endl;
 
-        if (LogLevel > currentDebugLevel)
+        if (LogLevel <= currentDebugLevel)
             printf("%s",ss.str().c_str());
         return ss.str();
     }
@@ -1323,7 +1323,13 @@ FitnessEvaluatorT getFitnessEvaluator(string name) {
 }
 
 pHandle _v2h(const Vertex& v) {
-   return  boost::get<pHandle>(v);
+    return boost::get<pHandle>(v);
+    /*pHandle* ph = (pHandle*) boost::get<pHandle>(&v);
+    if (ph)
+        return *ph;
+    else
+        return (pHandle) 0;
+    */
 }
 
 bool MPunifyHandle(pHandle lhs,
