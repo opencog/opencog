@@ -110,8 +110,8 @@ PLNModule::PLNModule() : Module()
 {
     logger().info("[PLNModule] constructor");
     setParameters(DEFAULT());
-	do_pln_register();	
-	cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
+    do_pln_register();  
+    cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
 }
 
 void PLNModule::setParameters(const std::string* params) {
@@ -139,9 +139,9 @@ void PLNModule::init()
     recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
     currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
-	
-	// Make sure that the ASW is initialized on module load
-	iAtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+    
+    // Make sure that the ASW is initialized on module load
+    iAtomSpaceWrapper* asw = ASW(server().getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
@@ -162,7 +162,7 @@ void PLNModule::init()
 std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 {
     std::string output = runCommand(args);
-	return output;
+    return output;
 }
 
 #if 0
