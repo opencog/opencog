@@ -198,8 +198,8 @@ private:
 
         temperature = temperatures[tempi];
 
-        //      time_t seconds;
-        //      time(&seconds);
+        //time_t seconds;
+        //time(&seconds);
         int seconds = 1;
         srand((unsigned int) seconds+(seed++));
         AllTestsInferenceNodes = 0;
@@ -217,39 +217,19 @@ public:
         tempi=0;
         // test repeat #
         t = 0;
-    
         temperature = 0.1f;
     
         // Initialize PLN test environment
-        // copied and pasted from the PLNShell_RunLoop method
-        
         try {
-            puts("Initializing PLN test env...");
+            logger().info("Initializing PLN test env...");
 
             f = fopen("results.txt","a");
             
             // This access is required to initialise CogServer.
             CogServer& cogserver = static_cast<CogServer&>(server());
-            // Load builtinreqs
-            //cogserver.loadModule(std::string("libbuiltinreqs.so"));
-            //cogserver.loadModule(std::string("libscheme.so"));
-            // Open network port
-            //cogserver.enableNetworkServer();
-
             currentDebugLevel=100;
 
-//            foo_pretest();
-
-//            LOG(2, "Creating AtomSpaceWrappers...");
-            
-/*#if LOCAL_ATW
-            haxx::defaultAtomSpaceWrapper = &LocalATW::getInstance();
-#else
-            DirectATW::getInstance();
-            haxx::defaultAtomSpaceWrapper = &NormalizingATW::getInstance();
-#endif*/
-            // This is necessary to make sure that the ASW is initialized at the right time.
-            AtomSpaceWrapper& atw = *GET_ASW;
+            atw = GET_ASW;
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
@@ -261,18 +241,13 @@ public:
         catch(...)
         {
             logger().error("Unknown exception at root level while initializing. ");
-            cout << "Unknown exception at root level while initializing. "<< endl;
         }
         
-        
         // Initialize PLN tests as such
-
         InitPLNTests();
 
         AllTestsInferenceNodes = 0;
 
-        // This next line is also necessary.
-        /*AtomSpaceWrapper **/atw = GET_ASW;
         INstats.clear();
 
         if(RUN_FAILURE_TESTS)
@@ -704,65 +679,64 @@ public:
         printf("Finger print: %lu\n", bvt.getFingerPrint());
     }
     
-    void DISABLEtest_unifiesWithVariableChangeTo()
+    void testUnifiesWithVariableChangeTo()
     {
-	    AtomSpaceWrapper *atw = GET_ASW;
+        map<pHandle,pHandle> bindings;
+        cout << "Testing unification" << endl;
 
-	    map<pHandle,pHandle> bindings;
+        TS_ASSERT( unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(CONCEPT_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(CONCEPT_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        bindings));
 
-	    TS_ASSERT( unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(CONCEPT_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(CONCEPT_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    bindings));
+        TS_ASSERT(!unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(CONCEPT_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(CONCEPT_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+                        bindings));
 
-	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(CONCEPT_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(CONCEPT_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					    bindings));
+        TS_ASSERT(!unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(CONCEPT_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "Osama"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        bindings));
 
-	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(CONCEPT_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "Osama"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    bindings));
+        TS_ASSERT( unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "1"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "2"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        bindings));
 
-	    TS_ASSERT( unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "1"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "2"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    bindings));
-
-	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "1"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "2"),
-						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					    bindings));
-	    TS_ASSERT(!unifiesWithVariableChangeTo(
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "1"),
-						    NewNode(CONCEPT_NODE, "terrorist")),
-					    mva((pHandle)AND_LINK,
-						    NewNode(FW_VARIABLE_NODE, "2"),
-						    NewNode(CONCEPT_NODE, "terrorist"),
-						    NewNode(CONCEPT_NODE, "terrorist_DIFF")),
-					    bindings));
+        TS_ASSERT(!unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "1"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "2"),
+                            NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+                        bindings));
+        TS_ASSERT(!unifiesWithVariableChangeTo(
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "1"),
+                            NewNode(CONCEPT_NODE, "terrorist")),
+                        mva((pHandle)AND_LINK,
+                            NewNode(FW_VARIABLE_NODE, "2"),
+                            NewNode(CONCEPT_NODE, "terrorist"),
+                            NewNode(CONCEPT_NODE, "terrorist_DIFF")),
+                        bindings));
     }
 
 };
