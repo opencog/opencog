@@ -32,27 +32,27 @@ namespace opencog { namespace pln {
  */
 class RuleProvider : public std::vector<Rule*> {
 protected:
-	void AddRule(Rule* r, float priority);
+    void AddRule(Rule* r, float priority);
 public:
-	RuleProvider(void);
+    RuleProvider(void);
 public:
-	virtual ~RuleProvider(void);
+    virtual ~RuleProvider(void);
 };
 
 class VariableRuleProvider : public RuleProvider {
 public:
-	VariableRuleProvider(void);
-	virtual ~VariableRuleProvider(void);
+    VariableRuleProvider(void);
+    virtual ~VariableRuleProvider(void);
 
-//	void CreateCustomCrispUnificationRules(); //Re-create these rules every time a new axiom set is loaded in!
-//	const set<uint>& GetCustomCrispUnificationRules() const { return CustomCrispUnificationRules; }
+//  void CreateCustomCrispUnificationRules(); //Re-create these rules every time a new axiom set is loaded in!
+//  const set<uint>& GetCustomCrispUnificationRules() const { return CustomCrispUnificationRules; }
 };
 
 class DefaultVariableRuleProvider : public VariableRuleProvider
 {
 public:
-	DefaultVariableRuleProvider(void);
-	virtual ~DefaultVariableRuleProvider(void);
+    DefaultVariableRuleProvider(void);
+    virtual ~DefaultVariableRuleProvider(void);
 };
 
 class ForwardChainerRuleProvider : public VariableRuleProvider
@@ -67,8 +67,8 @@ private:
 
     Rule* findHighestPriorityRule();
 public:
-	ForwardChainerRuleProvider(void);
-	virtual ~ForwardChainerRuleProvider(void);
+    ForwardChainerRuleProvider(void);
+    virtual ~ForwardChainerRuleProvider(void);
 
     //! Rules that have already be attempted.
     std::vector<Rule*> invalidRules;
