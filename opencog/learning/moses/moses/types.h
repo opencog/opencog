@@ -36,58 +36,61 @@ namespace moses {
     typedef double score_t;
     typedef combo::complexity_t complexity_t;
 
-    typedef std::pair<score_t,complexity_t> tree_score;
-    typedef opencog::tagged_item<combo::combo_tree,tree_score> scored_tree;
+    typedef std::pair<score_t,complexity_t> combo_tree_score;
+    typedef opencog::tagged_item<combo::combo_tree,
+                                 combo_tree_score> scored_combo_tree;
 
     typedef std::vector<float> behavioral_score;
 
-    typedef opencog::tagged_item<behavioral_score,tree_score> behavioral_tree_score;
+    typedef opencog::tagged_item<behavioral_score,
+                                 combo_tree_score> combo_tree_behavioral_score;
     typedef opencog::tagged_item<combo::combo_tree,
-                                 behavioral_tree_score> behavioral_scored_tree;
+                                 combo_tree_behavioral_score> behavioral_scored_combo_tree;
   
-    extern const tree_score worst_possible_score;
+    extern const combo_tree_score worst_possible_score;
 
     //convenience accessors
-    inline const combo::combo_tree& get_tree(const scored_tree& st) { 
+    inline const combo::combo_tree& get_tree(const scored_combo_tree& st) { 
         return st.first; 
     }
-    inline const combo::combo_tree& get_tree(const behavioral_scored_tree& bst) { 
+    inline const combo::combo_tree& get_tree(const behavioral_scored_combo_tree& bst) { 
         return bst.first;
     }
 
-    inline complexity_t get_complexity(const tree_score& ts) { 
+    inline complexity_t get_complexity(const combo_tree_score& ts) { 
         return ts.second; 
     }
-    inline complexity_t get_complexity(const behavioral_tree_score& ts) { 
+    inline complexity_t get_complexity(const combo_tree_behavioral_score& ts) { 
         return get_complexity(ts.second);
     }
-    inline complexity_t get_complexity(const behavioral_scored_tree& bst) { 
+    inline complexity_t get_complexity(const behavioral_scored_combo_tree& bst) { 
         return get_complexity(bst.second);
     }
-    inline complexity_t get_complexity(const scored_tree& st) { 
+    inline complexity_t get_complexity(const scored_combo_tree& st) { 
         return get_complexity(st.second);
     }
 
-    inline score_t get_score(const tree_score& ts) { 
+    inline score_t get_score(const combo_tree_score& ts) { 
         return ts.first;
     }
-    inline score_t get_score(const behavioral_tree_score& ts) { 
+    inline score_t get_score(const combo_tree_behavioral_score& ts) { 
         return get_score(ts.second);
     }
-    inline score_t get_score(const behavioral_scored_tree& bst) { 
+    inline score_t get_score(const behavioral_scored_combo_tree& bst) { 
         return get_score(bst.second);
     }
-    inline score_t get_score(const scored_tree& st) { 
+    inline score_t get_score(const scored_combo_tree& st) { 
         return get_score(st.second);
     }
 
 }
 
-inline std::ostream& operator<<(std::ostream& out,const moses::tree_score& ts) {
+inline std::ostream& operator<<(std::ostream& out,
+                                const moses::combo_tree_score& ts) {
     return (out << "[score=" << ts.first << ", complexity=" << -ts.second << "]");
 }
 inline std::ostream& operator<<(std::ostream& out,
-				const moses::behavioral_tree_score& s) {
+				const moses::combo_tree_behavioral_score& s) {
     out << "[ ";
     foreach (float f,s.first)
         out << f << " ";

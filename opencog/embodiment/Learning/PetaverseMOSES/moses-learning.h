@@ -113,7 +113,7 @@ private:
     ordered_programs _ordered_best_estimates; //_ordered_neighborhood;
     int _number_of_calls;
 
-    const tree_score max_score;
+    const combo_tree_score max_score;
 
     metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> *metapop;
 

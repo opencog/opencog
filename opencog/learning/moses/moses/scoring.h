@@ -124,13 +124,14 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
 };
 
 template<typename Scoring>
-struct complexity_based_scorer : public unary_function<eda::instance, tree_score> {
+struct complexity_based_scorer : public unary_function<eda::instance,
+                                                       combo_tree_score> {
     complexity_based_scorer(const Scoring& s,
                             representation& rep,
                             opencog::RandGen& _rng)
             : score(s), _rep(&rep), rng(_rng) { }
 
-    tree_score operator()(const eda::instance& inst) const {
+    combo_tree_score operator()(const eda::instance& inst) const {
         using namespace reduct;
 
         //cout << "top, got " << _rep->fields().stream(inst) << endl;
@@ -152,7 +153,7 @@ struct complexity_based_scorer : public unary_function<eda::instance, tree_score
         << " " << complexity(tr.begin()) << std::endl;*/
 #endif
 
-        return tree_score(score(tr), complexity(tr.begin()));
+        return combo_tree_score(score(tr), complexity(tr.begin()));
     }
 
     Scoring score;
@@ -162,14 +163,15 @@ protected:
 };
 
 template<typename Scoring>
-struct count_based_scorer : public unary_function<eda::instance, tree_score> {
+struct count_based_scorer : public unary_function<eda::instance,
+                                                  combo_tree_score> {
     count_based_scorer(const Scoring& s,
                        representation& rep,
                        int base_count,
                        opencog::RandGen& _rng)
             : score(s), _rep(&rep), _base_count(base_count), rng(_rng) { }
 
-    tree_score operator()(const eda::instance& inst) const {
+    combo_tree_score operator()(const eda::instance& inst) const {
 #ifdef DEBUG_INFO
         std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;
 #endif
@@ -192,9 +194,9 @@ struct count_based_scorer : public unary_function<eda::instance, tree_score> {
         // reduct::clean_reduce(tr);
         // reduct::contin_reduce(tr,rng);
 
-        tree_score ts = tree_score(score(tr),
-                                   -int(_rep->fields().count(inst))
-                                   + _base_count);
+        combo_tree_score ts = combo_tree_score(score(tr),
+                                               -int(_rep->fields().count(inst))
+                                               + _base_count);
 
 #ifdef DEBUG_INFO
         std::cout << "OKK " << tr << std::endl;

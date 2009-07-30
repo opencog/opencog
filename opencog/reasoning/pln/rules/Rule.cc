@@ -74,10 +74,12 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
 
     for(vector<BoundVertex>::const_iterator bv = h.begin(); bv != h.end(); bv++) {
         if (bv->bindings) {
-            insert_with_consistency_check(*bindings_of_all_args, bv->bindings->begin(), bv->bindings->end());
-
-          cprintf(3,"Bind [%d]:\n", _v2h(bv->value));
-
+            insert_with_consistency_check(*bindings_of_all_args,
+                                          bv->bindings->begin(),
+                                          bv->bindings->end());
+            
+            cprintf(3,"Bind [%d]:\n", _v2h(bv->value));
+            
             foreach(hpair phh, *bv->bindings)
             {
                 printTree(phh.first,0,3);

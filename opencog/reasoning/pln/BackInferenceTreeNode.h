@@ -489,6 +489,7 @@ protected:
     void ForceTargetVirtual(spawn_mode spawning);
     
     /// Fitness-for-being-selected-for-expansion-next.
+    /// The higher the better
     float fitness() const;
     
     /// If inserting the rule invocation node in the subtree obeys our policy

@@ -33,7 +33,7 @@ protected:
 
 public:
     virtual std::set<MPs> o2iMetaExtra(meta outh,
-                                  bool& overrideInputFilter) const = 0;
+                                       bool& overrideInputFilter) const = 0;
     virtual meta i2oType(const std::vector<Vertex>& h) const = 0;
 
     virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
@@ -77,8 +77,8 @@ public:
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
         pHandle ret = destTable->addAtom(*i2oType(premiseArray),
-                                        *retTV,
-                                        true);
+                                         *retTV,
+                                         true);
 //   false);
 
         delete retTV;

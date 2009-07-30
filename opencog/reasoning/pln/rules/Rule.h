@@ -79,6 +79,7 @@ protected:
     bool computable;
 
     //! Priority affects the order in which rules are preferred when doing inference.
+    // the higher the priority value is the higher priority the rule has
     float priority;
     
     /**
@@ -104,11 +105,11 @@ public:
      * @param _name The name of the rule.
      */
     Rule(iAtomSpaceWrapper *_destTable,
-        bool _freeInputArity,
-        bool _computable,
-        std::string _name = "");
-
-	Rule();
+         bool _freeInputArity,
+         bool _computable,
+         std::string _name = "");
+    
+    Rule();
 
     virtual ~Rule();
 
