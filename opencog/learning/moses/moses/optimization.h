@@ -39,7 +39,6 @@
 #define FRACTION_OF_REMAINING     10
 #define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
-#define INIT_TEMPERATURE          30
 
 namespace moses
 {
@@ -825,63 +824,6 @@ struct sliced_iterative_hillclimbing {
     eda_parameters params;
     MState m_state;
     int _evals_per_slice;
-};
-
- struct simulated_annealing {
-    
-     typedef score_t energy_t;
-     simulated_annealing(opencog::RandGen& _rng,
-                         const eda_parameters& p = eda_parameters())
-     : rng(_rng),params(p) {}
-     
-     double accept_probability(energy_t energy_new, energy_t energy_old, double temperature)
-     {
-         if (energy_new < energy_old)
-             return 1.0;
-         else
-             return std::exp(-(energy_new - energy_old)/(temperature));
-     }
-     double cooling_schedule(double t)
-     { 
-         return (double)INIT_TEMPERATURE / std::log(1 + t); 
-     }
-     
-     template<typename Scoring>
-     int operator()(eda::instance_set<tree_score>& deme,
-                    const Scoring& score, int max_evals) {
-         int pop_size = params.pop_size(deme.fields());
-         int max_gens_total = params.max_gens_total(deme.fields());
-
-         long long current_number_of_instance = 0;
-         int max_number_of_instances = max_gens_total * pop_size;
-         if (max_number_of_instances > max_evals)
-             max_number_of_instances = max_evals;
-
-         int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
-         eda::instance exemplar(deme.fields().packed_width());
-         
-         eda::scored_instance<tree_score> scored_exemplar = exemplar;
-         score_t exemplar_score = score(scored_exemplar).first;
-         
-         if ( exemplar_score == 0) {
-             deme.resize(1);
-             *(deme.begin()++) = exemplar;
-         } else {
-             
-             int distance = 1;
-             bool bImprovement_made = false;
-             score_t best_score;
-             
-             do {
-                 
-             }while(1);
-         }
-         
-         return current_number_of_instance;
-     }
-     opencog::RandGen& rng;
-     eda_parameters params;
-    
 };
 } //~namespace moses
 
