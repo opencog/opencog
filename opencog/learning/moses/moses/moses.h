@@ -93,7 +93,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     {
         insert(behavioral_scored_combo_tree
                (base, combo_tree_behavioral_score(behavioral_score(),
-                                            combo_tree_score(_best_score.first, 0))));
+                                                  combo_tree_score(_best_score.first, 0))));
     }
 
     ~metapopulation() {
@@ -366,9 +366,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
             //update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
-                    candidates.find(tr) == candidates.end()) {
-                candidates.insert(make_pair(tr, combo_tree_behavioral_score(bscore(tr),
-                                            inst.second)));
+                candidates.find(tr) == candidates.end()) {
+                candidates.insert(make_pair(tr,
+                                            combo_tree_behavioral_score
+                                            (bscore(tr), inst.second)));
                 // also update the record of the best-seen score & trees
                 if (inst.second >= _best_score) {
                     if (inst.second > _best_score) {

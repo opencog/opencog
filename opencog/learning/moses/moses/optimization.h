@@ -509,7 +509,10 @@ struct iterative_hillclimbing {
                 cout << "New size:" << current_number_of_instances + number_of_new_instances << endl;
 
                 // score all new instances in the deme
-                transform(deme.begin() + current_number_of_instances, deme.end(), deme.begin_scores() + current_number_of_instances, score);
+                transform(deme.begin() + current_number_of_instances, 
+                          deme.end(),
+                          deme.begin_scores() + current_number_of_instances,
+                          score);
 
                 best_score = exemplar_score;
                 // check if there is an instance in the deme better than the exemplar
