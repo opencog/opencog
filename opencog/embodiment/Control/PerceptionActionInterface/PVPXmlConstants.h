@@ -88,7 +88,17 @@
 #define SIGNAL_ATTRIBUTE           "signal"
 #define AGENT_ID_ATTRIBUTE       "agent-id"
 #define AGENT_TYPE_ATTRIBUTE     "agent-type"
-
+#define ENTITY_CLASS_ATTRIBUTE  "class"
+#define COLOR100_ATTRIBUTE      "color-100%"
+#define COLOR75_ATTRIBUTE       "color-75%"
+#define COLOR50_ATTRIBUTE       "color-50%"
+#define COLOR25_ATTRIBUTE       "color-25%"
+#define COLOR15_ATTRIBUTE       "color-15%"
+#define COLOR10_ATTRIBUTE       "color-10%"
+#define COLOR5_ATTRIBUTE        "color-5%"
+#define MATERIAL_ATTRIBUTE      "material"
+#define TEXTURE_ATTRIBUTE       "texture"
+#define IS_TOY_ATTRIBUTE        "isToy"
 
 #define PRIORITY_ATTRIBUTE       "priority" // Note from Tristan: this is actually used only when actions are sent from Proxy to SL. 
 #define GLOBAL_POS_X_ATTRIBUTE   "global-position-x"

@@ -937,7 +937,7 @@ public:
             // entities
             Handle wynxNode = atomSpace.getHandle(AVATAR_NODE, PAIUtils::getInternalId("2").c_str());
             TS_ASSERT(CoreUtils::compare(wynxNode, Handle::UNDEFINED));
-            Handle stickNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("Stick"));
+            Handle stickNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("Stick").c_str());
             TS_ASSERT(CoreUtils::compare(stickNode, Handle::UNDEFINED));
             Handle whistleNode = atomSpace.getHandle(ACCESSORY_NODE, PAIUtils::getInternalId("whistle").c_str());
             TS_ASSERT(CoreUtils::compare(whistleNode, Handle::UNDEFINED));
@@ -950,6 +950,15 @@ public:
             Handle waterBowlNode = atomSpace.getHandle(STRUCTURE_NODE, PAIUtils::getInternalId("Water bow").c_str());
             TS_ASSERT(CoreUtils::compare(waterBowlNode, Handle::UNDEFINED));
 
+            Handle woodConceptNode = atomSpace.getHandle(CONCEPT_NODE, "wood");
+            Handle smoothConceptNode = atomSpace.getHandle(CONCEPT_NODE, "smooth");
+            Handle brownConceptNode = atomSpace.getHandle(CONCEPT_NODE, "brown");
+            Handle redConceptNode = atomSpace.getHandle(CONCEPT_NODE, "red");
+            Handle blueConceptNode = atomSpace.getHandle(CONCEPT_NODE, "blue");
+            Handle greenConceptNode = atomSpace.getHandle(CONCEPT_NODE, "green");
+            Handle whiteConceptNode = atomSpace.getHandle(CONCEPT_NODE, "white");
+            Handle blackConceptNode = atomSpace.getHandle(CONCEPT_NODE, "black");
+            Handle grayConceptNode = atomSpace.getHandle(CONCEPT_NODE, "gray");
 
             TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(atomSpace,
                       "is_drinkable",
@@ -965,6 +974,135 @@ public:
             TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
                       "is_moving",
                       whistleNode));
+
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+                      "is_toy",
+                      stickNode));
+
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+                      "color",
+                      stickNode,
+                      brownConceptNode ));
+
+
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+                      "texture",
+                      stickNode,
+                      smoothConceptNode ));
+
+            TS_ASSERT(AtomSpaceUtil::isPredicateTrue(atomSpace,
+                      "material",
+                      stickNode,
+                      woodConceptNode));
+
+            Handle colorPredNode = atomSpace.getHandle(PREDICATE_NODE, "color");
+           
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(brownConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 1.0f, 0.001);
+            }
+
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(redConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.75f, 0.001);
+            }
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(blueConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.5f, 0.001);
+            }
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(greenConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.25f, 0.001);
+            }
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(whiteConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.15f, 0.001);
+            }
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(blackConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.1f, 0.001);
+            }
+            {
+            HandleSeq predicateListLinkOutgoing;
+            predicateListLinkOutgoing.push_back(stickNode);
+            predicateListLinkOutgoing.push_back(grayConceptNode);
+            Handle predicateListLink = atomSpace.getHandle(LIST_LINK, predicateListLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(predicateListLink, Handle::UNDEFINED));
+
+            HandleSeq evalLinkOutgoing;
+            evalLinkOutgoing.push_back(colorPredNode);
+            evalLinkOutgoing.push_back(predicateListLink);
+            Handle evalLink = atomSpace.getHandle(EVALUATION_LINK, evalLinkOutgoing);
+            TS_ASSERT(CoreUtils::compare(evalLink, Handle::UNDEFINED));
+
+            TS_ASSERT_DELTA(atomSpace.getTV(evalLink).getMean(), 0.05f, 0.001);
+            }
 
             HandleSeq seq;
             seq.push_back(homeNode);

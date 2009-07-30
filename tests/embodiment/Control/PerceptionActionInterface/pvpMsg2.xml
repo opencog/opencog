@@ -47,8 +47,22 @@
         <rotation pitch="10" roll="10" yaw="12.5"/>
         <velocity x="1.0" y="1.0" z="0.0"/>
         <properties>
+        <property name="length" value="2" />
+        <property name="width" value="2" />
+        <property name="height" value="2" />
         <property name="visibility-status" value="visible" />
         <property name="detector" value="true" />
+        <property name="color-100%" value="brown" />
+        <property name="color-75%" value="red" />
+        <property name="color-50%" value="blue" />
+        <property name="color-25%" value="green" />
+        <property name="color-15%" value="white" />
+        <property name="color-10%" value="black" />
+        <property name="color-5%" value="gray" />
+        <property name="material" value="wood" />
+        <property name="texture" value="smooth" />
+        <property name="isToy" value="true" />
+        <property name="class" value="stick"/>
       </properties>
     </blip>
     <blip timestamp="2007-06-18T20:15:02.000-07:00" >
