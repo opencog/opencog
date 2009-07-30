@@ -383,7 +383,7 @@ int BITNode::totalChildren() const
 }
 
 BITNodeRoot::~BITNodeRoot() {
-  delete rp;
+    delete rp;
     foreach(BITNode* b, used_nodes) delete b;
 }
 
@@ -392,7 +392,8 @@ BITNode::~BITNode() {
 
     if (root == this)
         cprintf(3, "BITNodeRoot dying...");
-    cprintf(4,"BITNode dying... root now has %ld => %ld BITNodes\n",
+    else
+        cprintf(4, "BITNode dying... root now has %ld => %ld BITNodes\n",
             root->InferenceNodes, root->InferenceNodes-1);
     root->InferenceNodes--;
 }

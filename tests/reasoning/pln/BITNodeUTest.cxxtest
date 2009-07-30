@@ -41,6 +41,7 @@ public:
     {
         atw = (AtomSpaceWrapper*) ASW();
         config().set("PLN_LOG_LEVEL","20");
+        currentDebugLevel = 20;
         config().set("PLN_PRINT_REAL_ATOMS","true");
     }
 
@@ -80,8 +81,6 @@ public:
         b2.root = root;
         b2.addNewParent(root,0);
         // Look at root->users
-        //cout << root->users[root].size() << endl;
-        //root->printUsers(root);
         b1.root = root;
         TS_ASSERT(b1.addNewParent(&b2, argNumber));
         // Test it's been added to the set of parents
@@ -98,7 +97,6 @@ public:
         argNumber += 1;
         b1.addNewParent(&b2, argNumber);
         TS_ASSERT(b1.parents.size() == 2);
-
         //parent_link<BITNode> pLink(&b2, argNumber, template_binds);
     }
 };
