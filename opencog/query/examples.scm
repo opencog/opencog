@@ -3,6 +3,31 @@
 ; These examples make extensive use of the code in this directory,
 ; and can be used for ad-hoc command-line testing.
 ;
+;
+;
+(define human-implies-animal
+	(VariableScopeLink
+   	(VariableNode "$H")
+   	(ImplicationLink
+      	(InheritanceLink
+         	(VariableNode "$H")
+         	(ConceptNode "human")
+			)
+    		(InheritanceLink
+     	 		(VariableNode "$H")
+         	(ConceptNode "animal")
+			)
+		)
+	)
+)
+
+(InheritanceLink (stv 1 1)
+	(ConceptNode "Linas")
+	(ConceptNode "human")
+)
+
+
+(cog-ad-hoc "do-varscope" human-implies-animal)
 
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
     (DefinedFrameNode "#Ingestion")
