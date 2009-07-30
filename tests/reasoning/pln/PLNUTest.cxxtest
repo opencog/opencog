@@ -87,14 +87,14 @@ namespace test
 }
 
 FitnessEvaluatorT testFitnessEvaluator;
-void InitAxiomSet(string premiseFile);
+void initAxiomSet(string premiseFile);
 
 // These are now in PLNUtils.h
 //#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
 //#define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
 
 #define maketest(test_description,a,b,c,d) \
-    RunPLNTest(Btr<PLNTest>(new PLNTest(test_description,a,b,c,d)))
+    runPLNTest(Btr<PLNTest>(new PLNTest(test_description,a,b,c,d)))
 
 float getCount(float c)
 { return SimpleTruthValue::confidenceToCount(c); }
@@ -107,7 +107,7 @@ namespace pln {
 vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
-static int AllTestsInferenceNodes=0;
+static int allTestsInferenceNodes=0;
 
 bool foo42=false;
 
@@ -134,9 +134,7 @@ struct PLNTest
     {}
 };
 
-void RunPLNTest(Btr<PLNTest> t);
-
-void InitPLNTests();
+void runPLNTest(Btr<PLNTest> t);
 
 const float temperatures[] = {
     0.00005, 0.00007, 10,
@@ -187,8 +185,8 @@ private:
     }
     
     /**
-     * If a nondeterministic function is used, run all the tests with other
-     * temperatures/seeds.
+     * If a nondeterministic function is used for fitness evaluator
+     * then try running all the tests with different temperatures/seeds.
      */
     void setupHeuristicTestRun() {
         if (testFitnessEvaluator == BEST)
@@ -202,7 +200,213 @@ private:
         //time(&seconds);
         int seconds = 1;
         srand((unsigned int) seconds+(seed++));
-        AllTestsInferenceNodes = 0;
+        allTestsInferenceNodes = 0;
+    }
+
+    void initPLNTests()
+    {
+#if LOG_ON_FILE
+        test::logfile=fopen("pln.log","wt");
+        cout << "LOGGING TO FILE pln.log!\n";
+#endif
+        //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
+        config().set("PLN_LOG_LEVEL","2");
+        config().set("PLN_PRINT_REAL_ATOMS","true");
+
+        testFitnessEvaluator=BEST;
+        currentDebugLevel=100;
+    }
+
+    void initAxiomSet(string premiseFile)
+    {
+        AtomSpaceWrapper *atw = GET_ASW;
+        atw->reset();
+        atw->allowFWVarsInAtomSpace = true;
+
+        cprintf(-2,"loading...\n");     
+        
+        atw->archiveTheorems = true;
+        bool axioms_ok = atw->loadAxioms(premiseFile);
+        assert(axioms_ok);      
+        atw->archiveTheorems = false;
+        
+        cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
+    }
+
+    void runPLNTest(Btr<PLNTest> t)
+    {
+        AtomSpaceWrapper *atw = GET_ASW;
+        stats::Instance().ITN2atom.clear();
+
+        currentDebugLevel=0;
+        rawPrint(*t->target, t->target->begin(), -2);
+        
+        clock_t start, finish;
+        double duration;
+
+        test::custom_duration = 0.0;
+        start = clock();
+        
+        atw->allowFWVarsInAtomSpace = true;
+        
+        fflush(stdout);
+        currentDebugLevel=-4;
+
+        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
+        uint s_i=0;
+        pHandle eh=PHANDLE_UNDEFINED;
+        TruthValue* etv = NULL;
+        bool passed=false;
+
+        set<VtreeProvider*> eres;
+
+        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+
+        const int expansions_per_run = 1000;
+
+        if (t->minEvalsOfFittestBIT > 0)
+        {
+            do
+            {
+
+/*              for (int k=0;k<expansions_per_run;k++)
+                    state->expandFittest();
+                
+                eres = state->evaluate();*/
+
+                cprintf(-3, "\n    Evaluating...\n");
+                
+                if (foo42)
+                    currentDebugLevel=4;
+                
+                int expansions = expansions_per_run;
+                eres = state->infer(expansions, 0.000001f, 0.01f);      
+                
+                if (expansions > 0)
+                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
+                else
+                    cprintf(2, "Failed for now... Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
+
+                currentDebugLevel=-4;
+
+                eh = (eres.empty() ? PHANDLE_UNDEFINED :
+                        _v2h(*(*eres.rbegin())->getVtree().begin()));
+
+                if (eh != PHANDLE_UNDEFINED )
+                    etv = atw->getTV(eh).clone();
+//                else
+//                    etv = new SimpleTruthValue(0.0f,0.0f);
+
+               /* float c1=t->minTV->getConfidence();
+                float c2=t->maxTV->getConfidence();
+                float m1=t->minTV->getMean();
+                float m2=t->maxTV->getMean(); */
+
+                if (etv)
+                {
+                    printf("%f / %f\n", etv->getConfidence(),
+                            t->minTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean(), t->minTV->getMean());
+                    printf("%f / %f\n", etv->getConfidence(),
+                            t->maxTV->getConfidence());
+                    printf("%f / %f\n", etv->getMean(), t->maxTV->getMean());
+                }
+
+                passed = (eh != PHANDLE_UNDEFINED && etv &&
+                etv->getConfidence() >= t->minTV->getConfidence() &&
+                etv->getMean()          >= t->minTV->getMean() &&
+                etv->getConfidence() <= t->maxTV->getConfidence() &&
+                etv->getMean()          <= t->maxTV->getMean()
+                );
+        
+                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
+            }
+            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
+                    && !passed);
+        }
+        else if (t->minExhaustiveEvals > 0) {
+            assert(0);
+            /// This should be updated to reflect the new BITNode interface
+            /*
+            for (uint L=0;L<t->minExhaustiveEvals;L++)
+                state->expandNextLevel();
+
+            eres = state->evaluate();
+            eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
+            if (eh) {
+                if (etv != NULL) delete etv;
+                etv = atw->TV(eh).clone();
+            }
+
+            passed = (eh && etv &&
+                etv->getConfidence() > t->minTV->getConfidence() &&
+                etv->getMean()          > t->minTV->getMean()
+                );*/
+        }
+        else
+            puts("ERROR IN TEST SETTINGS");
+
+        if (passed) {
+            printf("\n"
+                   "**********************************************\n"
+                   "passed: %s.\n"
+                   "**********************************************\n",
+                (etv?etv->toString().c_str():"(null TV)"));
+
+            finish = clock();
+            duration = (double)(finish - start) / CLOCKS_PER_SEC;
+            printf( "Test took %2.2f seconds TOTAL.\n", duration );
+
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration );
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration2 );
+        }
+        else {
+            printf("\n**********************************************\n"
+                   "FAILED: %s!\n"
+                   "**********************************************\n",
+            (etv?etv->toString().c_str():"(null TV)"));
+        }
+
+        printf("Test results: [");
+        foreach(VtreeProvider* bv, eres) {
+            const TruthValue& tv = atw->getTV(vt2h(*bv));
+            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+                printf("%d ", vt2h(*bv));
+        }
+        printf("]\n");
+
+        if (passed) {
+            allTestsInferenceNodes += state->inferenceNodes;
+
+            INstats.push_back(state->inferenceNodes);
+
+            cout << endl << "Exec pool size: " << state->exec_pool.size();
+            cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+                    "/" << allTestsInferenceNodes << endl;
+        }
+        else
+            INstats.push_back(0);
+
+/*      if (etv) {
+            string stv(etv->toString());
+            puts(stv.c_str());
+        }*/
+
+        //stats::Instance().print(stats::triviality_filterT());
+
+        TS_ASSERT(passed);
+#if WAIT_KEY_ON_FAILURE
+        if (!passed)
+            getc(stdin);
+#endif
+        if (etv != NULL) delete etv;
+        //atw->reset(NULL);
     }
 
 public:
@@ -244,9 +448,9 @@ public:
         }
         
         // Initialize PLN tests as such
-        InitPLNTests();
+        initPLNTests();
 
-        AllTestsInferenceNodes = 0;
+        allTestsInferenceNodes = 0;
 
         INstats.clear();
 
@@ -267,7 +471,7 @@ public:
         // some stats stuff
         INstatsV.push_back(INstats);
     
-        INstatsV[t].push_back(AllTestsInferenceNodes);
+        INstatsV[t].push_back(allTestsInferenceNodes);
         INstatsVT.push_back(INstatsV);
 
         for (uint v=0; v < INstatsV[0].size(); v++)
@@ -309,7 +513,7 @@ public:
             // run all of the relevant tests
             runPLNTestsOnce();
 
-            INstatsV[t].push_back(AllTestsInferenceNodes);
+            INstatsV[t].push_back(allTestsInferenceNodes);
 
             if (testFitnessEvaluator != SOFTMAX)
             {
@@ -439,12 +643,10 @@ public:
         printf("finish MacroRuleTest\n");
     }
 
-// not possible because CXXtest tries to access the tests anyway
-//#if RUN_FAILURE_TESTS
     void testTVChecksWork() {
         /// The test which is supposed to fail
         if(RUN_FAILURE_TESTS) {
-            InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
+            initAxiomSet(PLN_TEST_DIR"bigdemo.xml");
 
             puts("\nShould fail. The test for whether TV checks work.\n");
 
@@ -459,10 +661,8 @@ public:
     }
 
     void testRandomTVsTooHigh() {
-        //char *buf = new char[8174+2]; 
-        
         if(RUN_FAILURE_TESTS) {
-            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
 
@@ -482,7 +682,7 @@ public:
     void testSymmetricRelationFails() {
         if(RUN_FAILURE_TESTS) {
             puts("\nShould fail.");
-            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "symmetricRelation"),
                             mva((pHandle)LIST_LINK,
@@ -495,12 +695,11 @@ public:
                     10,0);
         }
     }
-//#endif // RUN_FAILURE_TESTS
     
     void testInverseBinding()
     {
         puts("\nInverse Binding test\n");
-        InitAxiomSet(PLN_TEST_DIR"inverse_binding.xml");
+        initAxiomSet(PLN_TEST_DIR"inverse_binding.xml");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "Possible"),
                         mva((pHandle)LIST_LINK,
@@ -514,11 +713,10 @@ public:
 
     void testBasicSpawning()
     {
-        for (int i = 0; i < 5; i++)
-        {
+        for (int i = 0; i < 5; i++) {
             printf("\nBasic spawning test %d\n", i);
             /// Basic spawning test
-            InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "friendOf"),
                         mva((pHandle)LIST_LINK,
@@ -535,7 +733,7 @@ public:
     {
         printf("\nTest for multiple roots spawning.\n");
         /// Test for multiple roots spawning
-        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "killed"),
                         mva((pHandle)LIST_LINK,
@@ -552,7 +750,7 @@ public:
     {
         printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
         /// Test Generalization for VARIABLE_SCOPE_LINK
-        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((pHandle)VARIABLE_SCOPE_LINK,
                     mva((pHandle)LIST_LINK), //empty dummy
                     mva((pHandle)INHERITANCE_LINK,
@@ -568,7 +766,7 @@ public:
     {
         printf("\nTest Generalization for FORALL_LINK.\n");
         /// Test Generalization for FORALL_LINK
-        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((pHandle)FORALL_LINK,
                     mva((pHandle)LIST_LINK), //empty dummy
                     mva((pHandle)INHERITANCE_LINK,
@@ -582,9 +780,8 @@ public:
 
     void testInheritanceOsamaAbu()
     {
-        //foo42=true;
         printf("\nTest inheritance Osama/Abu.\n");
-        InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                         NewNode(CONCEPT_NODE, "Osama"),
                         NewNode(CONCEPT_NODE, "Abu")
@@ -597,9 +794,9 @@ public:
     void testInheritanceMuhummadTerrorist()
     {
         printf("\nTest inheritance Muhummad->Terrorist.\n");
+        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
 // Takes a tad too long with bigdemo (but tested, and it works now)
-    InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-//    InitAxiomSet(PLN_TEST_DIR"bigdemo.xml");
+//        initAxiomSet(PLN_TEST_DIR"bigdemo.xml");
         maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
@@ -611,8 +808,7 @@ public:
 
     void testAnotBdemo()
     {    
-        InitAxiomSet(PLN_TEST_DIR"AnotBdemo.xml");
-
+        initAxiomSet(PLN_TEST_DIR"AnotBdemo.xml");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "found_under"),
                         mva((pHandle)LIST_LINK,
@@ -627,7 +823,7 @@ public:
 
     void testFetchDemo5()
     {    
-        InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
+        initAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
@@ -639,9 +835,8 @@ public:
 
     void testFetchDemo5_alt()
     {
-        //foo42=true;
         printf("\nTest fetch demo.\n");
-        InitAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
+        initAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "just_done"),
                             mva((pHandle)LIST_LINK,
@@ -662,8 +857,7 @@ public:
 
     void testWoaDemo()
     {    
-        //  InitAxiomSet(PLN_TEST_DIR"smalldemo.xml");
-        InitAxiomSet(PLN_TEST_DIR"woademo.xml");
+        initAxiomSet(PLN_TEST_DIR"woademo.xml");
         maketest(makemeta(mva((pHandle)SIMULTANEOUS_AND_LINK,
                             NewNode(WORD_NODE, "blockword"),
                             NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
@@ -741,23 +935,9 @@ public:
 
 };
 
-void InitPLNTests()
-{
-#if LOG_ON_FILE
-    test::logfile=fopen("pln.log","wt");
-    cout << "LOGGING TO FILE pln.log!\n";
-#endif
-    //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-    config().set("PLN_LOG_LEVEL","2");
-    config().set("PLN_PRINT_REAL_ATOMS","true");
-
-    testFitnessEvaluator=BEST;
-    currentDebugLevel=100;
-}
-
 // this has basically been reduced to a repository of commented out tests
 #if 0
-void RunPLNTestsOnce()
+void runPLNTestsOnce()
 {
     AtomSpaceWrapper *atw = GET_ASW;
     INstats.clear();
@@ -830,7 +1010,7 @@ void RunPLNTestsOnce()
             "bigdemo.xml",
             10,0);
 */
-/*      InitAxiomSet("bigdemo.xml");
+/*      initAxiomSet("bigdemo.xml");
         maketest(makemeta(mva((Handle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "friendOf"),
                     mva((Handle)LIST_LINK,
@@ -925,16 +1105,16 @@ void RunPLNTestsOnce()
 // No longer exists!
 //bool satSetTest();
 
-//void RunPLNTestsOnce();
+//void runPLNTestsOnce();
 
-/*void RunPLNTests()
+/*void runPLNTests()
 {
 //  goal::WalkTest();
 //  return;
     
 //  satSetTest();
 
-    InitPLNTests();
+    initPLNTests();
 
     /// You can run the tests multiple times, which makes sense if
     /// the heuristics function is not deterministic (eg. SoftMax)
@@ -958,10 +1138,10 @@ void RunPLNTestsOnce()
             //      time(&seconds);
             int seconds = 1;
             srand((unsigned int) seconds+(seed++));
-            AllTestsInferenceNodes = 0;
+            allTestsInferenceNodes = 0;
 
-            RunPLNTestsOnce();
-            INstatsV[t].push_back(AllTestsInferenceNodes);
+            runPLNTestsOnce();
+            INstatsV[t].push_back(allTestsInferenceNodes);
 
             if (testFitnessEvaluator != SOFTMAX)
             {
@@ -985,208 +1165,6 @@ void RunPLNTestsOnce()
 
     cout << "\n\nTests complete.\n";
 }*/
-
-    void InitAxiomSet(string premiseFile)
-    {
-        AtomSpaceWrapper *atw = GET_ASW;
-        atw->reset();
-        atw->allowFWVarsInAtomSpace = true;
-
-        cprintf(-2,"loading...\n");     
-        
-        atw->archiveTheorems = true;
-        bool axioms_ok = atw->loadAxioms(premiseFile);
-        assert(axioms_ok);      
-        atw->archiveTheorems = false;
-        
-        cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
-    }
-
-    void RunPLNTest(Btr<PLNTest> t)
-    {
-        AtomSpaceWrapper *atw = GET_ASW;
-        stats::Instance().ITN2atom.clear();
-
-        currentDebugLevel=0;
-        rawPrint(*t->target, t->target->begin(), -2);
-        
-        clock_t start, finish;
-        double duration;
-
-        test::custom_duration = 0.0;
-        start = clock();
-        
-        atw->allowFWVarsInAtomSpace = true;
-        
-        fflush(stdout);
-        currentDebugLevel=-4;
-
-        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-        uint s_i=0;
-        pHandle eh=PHANDLE_UNDEFINED;
-        TruthValue* etv = NULL;
-        bool passed=false;
-
-        set<VtreeProvider*> eres;
-
-        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
-
-        const int expansions_per_run = 1000;
-
-        if (t->minEvalsOfFittestBIT > 0)
-        {
-            do
-            {
-
-/*              for (int k=0;k<expansions_per_run;k++)
-                    state->expandFittest();
-                
-                eres = state->evaluate();*/
-
-                cprintf(-3, "\n    Evaluating...\n");
-                
-                if (foo42)
-                    currentDebugLevel=4;
-                
-                int expansions = expansions_per_run;
-                eres = state->infer(expansions, 0.000001f, 0.01f);      
-                
-                if (expansions > 0)
-                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
-                            "beginning of the cycle).\n", expansions,
-                            expansions_per_run);
-                else
-                    cprintf(2, "Failed for now... Saved $%d / $%d (from the "
-                            "beginning of the cycle).\n", expansions,
-                            expansions_per_run);
-
-                currentDebugLevel=-4;
-
-                eh = (eres.empty() ? PHANDLE_UNDEFINED :
-                        _v2h(*(*eres.rbegin())->getVtree().begin()));
-
-                if (eh != PHANDLE_UNDEFINED )
-                    etv = atw->getTV(eh).clone();
-//                else
-//                    etv = new SimpleTruthValue(0.0f,0.0f);
-
-               /* float c1=t->minTV->getConfidence();
-                float c2=t->maxTV->getConfidence();
-                float m1=t->minTV->getMean();
-                float m2=t->maxTV->getMean(); */
-
-                if (etv)
-                {
-                    printf("%f / %f\n", etv->getConfidence(),
-                            t->minTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean(), t->minTV->getMean());
-                    printf("%f / %f\n", etv->getConfidence(),
-                            t->maxTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean(), t->maxTV->getMean());
-                }
-
-                passed = (eh != PHANDLE_UNDEFINED && etv &&
-                etv->getConfidence() >= t->minTV->getConfidence() &&
-                etv->getMean()          >= t->minTV->getMean() &&
-                etv->getConfidence() <= t->maxTV->getConfidence() &&
-                etv->getMean()          <= t->maxTV->getMean()
-                );
-        
-                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
-            }
-            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
-                    && !passed);
-        }
-        else if (t->minExhaustiveEvals > 0)
-        {
-            assert(0);
-            /// This should be updated to reflect the new BITNode interface
-            /*
-            for (uint L=0;L<t->minExhaustiveEvals;L++)
-                state->expandNextLevel();
-
-            eres = state->evaluate();
-            eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
-            if (eh) {
-                if (etv != NULL) delete etv;
-                etv = atw->TV(eh).clone();
-            }
-
-            passed = (eh && etv &&
-                etv->getConfidence() > t->minTV->getConfidence() &&
-                etv->getMean()          > t->minTV->getMean()
-                );*/
-        }
-        else
-            puts("ERROR IN TEST SETTINGS");
-
-        if (passed)
-        {
-            printf("\n**********************************************\n"
-                   "passed: %s.\n"
-                   "**********************************************\n",
-            (etv?etv->toString().c_str():"(null TV)"));
-
-        finish = clock();
-            duration = (double)(finish - start) / CLOCKS_PER_SEC;
-            printf( "Test took %2.2f seconds TOTAL.\n", duration );
-
-            printf( "Custom test time was %3.3f seconds.\n",
-                    test::custom_duration );
-            printf( "Custom test time was %3.3f seconds.\n",
-                    test::custom_duration2 );
-        }
-        else
-        {
-            printf("\n**********************************************\n"
-                   "FAILED: %s!\n"
-                   "**********************************************\n",
-            (etv?etv->toString().c_str():"(null TV)"));
-        }
-
-        printf("Test results: [");
-        foreach(VtreeProvider* bv, eres) // state->child_results[0])
-        {
-            const TruthValue& tv = atw->getTV(vt2h(*bv));
-            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                printf("%d ", vt2h(*bv));
-        }
-        printf("]\n");
-
-        if (passed)
-        {
-            AllTestsInferenceNodes += state->InferenceNodes;
-
-            INstats.push_back(state->InferenceNodes);
-
-            //      printf("\n\n\nExec pool size: %d\n", state->exec_pool.size());
-            printf("\n\n\nInferenceNodes: %ld / %d\n", state->InferenceNodes, AllTestsInferenceNodes);
-        }
-        else
-            INstats.push_back(0);
-
-/*      if (etv)
-        {
-            string stv(etv->toString());
-            puts(stv.c_str());
-        }*/
-
-        //stats::Instance().print(stats::triviality_filterT());
-
-        TS_ASSERT(passed);
-#if WAIT_KEY_ON_FAILURE
-        if (!passed)
-            getc(stdin);
-#endif
-
-        if (etv != NULL) delete etv;
-        //atw->reset(NULL);
-        
-/*puts("buf alloc test...");fflush(stdout);
-char *tbuf = new char[8174+2];  
-puts("buf allo ok");
-delete[] tbuf;*/
-    }
 
 #if 0
 
@@ -1591,7 +1569,7 @@ void AgentTest2()
 {
     using namespace opencog::pln;
     
-    InitAxiomSet("fetch.xml");
+    initAxiomSet("fetch.xml");
 #if 1
     set<MindAgent*> agents;
     AtomSpaceWrapper& TheNM = *((AtomSpaceWrapper*)ASW());

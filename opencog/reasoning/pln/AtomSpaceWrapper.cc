@@ -44,12 +44,9 @@ using boost::shared_ptr;
 #define USE_MIND_SHADOW 0
 namespace haxx
 {
-    //! ?
-    map<string,pHandle> variableShadowMap;
-    
 #if USE_MIND_SHADOW
     vector<pHandle> mindShadow;
-    map<Type, vector<pHandle> > mindShadowMap;
+    map<Type, mindShadow > mindShadowMap;
 #endif
 }
 
@@ -64,14 +61,13 @@ iAtomSpaceWrapper* ASW(AtomSpace* a)
         if (instance != NULL) {
             delete instance;
         }
-        if (a == NULL) {
-            a = server().getAtomSpace();
-        }
         LOG(2, "Creating AtomSpaceWrappers...");
 #if LOCAL_ATW
         instance = &LocalATW::getInstance(a);
 #else
-        DirectATW::getInstance(a);
+        // DirectATW instance doesn't seem to be used anywhere,
+        // in fact we could probably remove it entirely, along with LocalATW
+        //DirectATW::getInstance(a);
         instance = &NormalizingATW::getInstance(a);
 #endif
     }
@@ -476,7 +472,7 @@ void AtomSpaceWrapper::reset()
     dummyContexts.clear();
     vhmap.clear();
     vhmap_reverse.clear();
-    ::haxx::variableShadowMap. clear();
+    variableShadowMap.clear();
     atomspace->clear();
     atomspace->addNode(CONCEPT_NODE, rootContext);
 }
@@ -2213,12 +2209,10 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
     
     LOG(3,"FIMATW::addNode");
 
-    if (inheritsType(T, FW_VARIABLE_NODE))
-    {
+    if (inheritsType(T, FW_VARIABLE_NODE)) {
         /// Safeguard the identity of variables.
-    
-        map<string,pHandle>::iterator existingHandle = haxx::variableShadowMap.find(name);
-        if (existingHandle != haxx::variableShadowMap.end())
+        map<string,pHandle>::iterator existingHandle = variableShadowMap.find(name);
+        if (existingHandle != variableShadowMap.end())
             return existingHandle->second;
         
     }   
@@ -2238,7 +2232,7 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
 #endif
 
     if (inheritsType(T, FW_VARIABLE_NODE))
-        haxx::variableShadowMap[name] = ret;
+        variableShadowMap[name] = ret;
     
 #if USE_MIND_SHADOW
     haxx::mindShadow.push_back(ret);    
@@ -2308,17 +2302,17 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
         
     if (inheritsType(T, FW_VARIABLE_NODE)) {
         // Safeguard the identity of variables.
-        map<string,pHandle>::iterator existingHandle = haxx::variableShadowMap.find(name);
-        if (existingHandle != haxx::variableShadowMap.end())
+        map<string,pHandle>::iterator existingHandle = variableShadowMap.find(name);
+        if (existingHandle != variableShadowMap.end())
             return existingHandle->second;
-    }   
+    }
     Node node( T,  name,  tvn);
     //! @todo add related context
     pHandle ret = addAtomDC(node, fresh, managed);
     LOG(3, "Add ok.");
     
     if (inheritsType(T, FW_VARIABLE_NODE))
-        haxx::variableShadowMap[name] = ret;
+        variableShadowMap[name] = ret;
     
 #if USE_MIND_SHADOW
     haxx::mindShadow.push_back(ret);    

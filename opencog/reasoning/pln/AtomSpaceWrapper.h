@@ -248,8 +248,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     };
     
     // For monitoring additions to the AtomSpace from outside of PLN
-    bool handleAddSignal(Handle h); //! Signal handler for atom adds.
-    bool handleRemoveSignal(Handle h); //! Signal handler for atom removals.
+    bool handleAddSignal(Handle h); //!< Signal handler for atom adds.
+    bool handleRemoveSignal(Handle h); //!< Signal handler for atom removals.
 
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     bool watchingAtomSpace;
@@ -259,6 +259,9 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
 
 protected:
     AtomSpace *atomspace;
+
+    //! Keep track of what FW Variables are in the system
+    std::map<std::string,pHandle> variableShadowMap;
 
 public:
 

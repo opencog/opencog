@@ -48,6 +48,7 @@
 #include "FitnessEvaluator.h"
 
 class BITNodeUTest;
+class PLNUTest;
 
 namespace opencog {
 
@@ -72,7 +73,7 @@ public:
         : std::runtime_error(msg) { };
 };
 
-struct BITNode_fitness_comp : public std::binary_function<BITNode*, BITNode*, bool>
+struct BITNodeFitnessCompare : public std::binary_function<BITNode*, BITNode*, bool>
 {
     bool operator()(BITNode* lhs, BITNode* rhs) const;
 };
@@ -226,12 +227,14 @@ public:
  */
 class BITNode
 {
-    friend class BITNode_fitness_comp;
-    friend class bdrum_updater;
+    friend class BITNodeFitnessCompare;
+    friend class BDRUMUpdater;
     friend class BITNodeRoot;
     friend class ExplicitlyEvaluatedBITNode;
 
+    // Let unit tests inspect BITNode state
     friend class ::BITNodeUTest;
+    friend class ::PLNUTest;
 #if USE_BITUBIGRAPHER
     friend class opencog::BITUbigrapher;
 #endif
@@ -594,6 +597,8 @@ public:
  */
 class BITNodeRoot : public BITNode
 {
+    // Let unit tests inspect BITNode state
+    friend class ::PLNUTest;
     friend class ::BITNodeUTest;
 public:
 
@@ -646,7 +651,7 @@ public:
 //  std::map<Handle,std::vector<Handle> > inferred_from;
 //  std::map<Handle,Rule*> inferred_with;
     std::map<pHandle,BITNode*> hsource;
-    long InferenceNodes;
+    long inferenceNodes;
 
     std::string printTrail(pHandle h) const;
     std::string printUsers(BITNode* b);
@@ -683,7 +688,7 @@ protected:
     std::map<BITNode*, std::set<BITNode*> > users;
 
     /// It's too slow to sort the pool after every insertion. Otherwise we'd do this:
-    /// typedef set<BITNode*, BITNode_fitness_comp> exec_poolT;
+    /// typedef set<BITNode*, BITNodeFitnessCompare> exec_poolT;
 
     bool exec_pool_sorted;
     std::set<BITNode*> BITNodeTemplates;

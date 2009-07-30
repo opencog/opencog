@@ -205,7 +205,7 @@ bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         FitnessEvaluatorT _fe)
-: InferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
+: inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
 {
     AtomSpaceWrapper *atw = GET_ASW;
     haxx::DirectProducerCache.clear();
@@ -394,8 +394,8 @@ BITNode::~BITNode() {
         cprintf(3, "BITNodeRoot dying...");
     else
         cprintf(4, "BITNode dying... root now has %ld => %ld BITNodes\n",
-            root->InferenceNodes, root->InferenceNodes-1);
-    root->InferenceNodes--;
+            root->inferenceNodes, root->inferenceNodes-1);
+    root->inferenceNodes--;
 }
 /*
         ParametrizedBITNode pn(this, plink.bindings);
@@ -506,7 +506,7 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
       printf("Unknown Exception in BITNode::BITNode!\n");
       throw;
     }
-    root->InferenceNodes++;
+    root->inferenceNodes++;
 }
 
 bool BITNode::eq(BITNode* rhs) const
@@ -633,10 +633,12 @@ BITNode* BITNode::findNode(Rule* new_rule, meta _target,
     return NULL;
 }
 
-struct bdrum_updater
+//! Best Direct Result Under Me - Updater
+//! ...used to apply a value to the BITNode class
+struct BDRUMUpdater
 {
     float val;
-    bdrum_updater(float _val) : val(_val) {}
+    BDRUMUpdater(float _val) : val(_val) {}
     void operator()(BITNode* b) { b->my_bdrum = val; }
 };
 
@@ -690,7 +692,7 @@ void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult,
     
     // If necessary, update all nodes under this one with the new my_bdrum value
     if (bdrum_changed)
-        ApplyDown(bdrum_updater(my_bdrum));
+        ApplyDown(BDRUMUpdater(my_bdrum));
     
     if (spawning && DIRECT_RESULTS_SPAWN)
     {
@@ -1651,7 +1653,7 @@ void BITNode::expandFittest()
             {
                 if (!root->exec_pool_sorted)
                 {
-                    root->exec_pool.sort(BITNode_fitness_comp());
+                    root->exec_pool.sort(BITNodeFitnessCompare());
                     root->exec_pool_sorted = true;
                 }
 
@@ -1678,7 +1680,7 @@ void BITNode::expandFittest()
     }
 }
 
-bool BITNode_fitness_comp::operator()(BITNode* lhs, BITNode* rhs) const
+bool BITNodeFitnessCompare::operator()(BITNode* lhs, BITNode* rhs) const
 {
 //return lhs>rhs;
     
@@ -1936,7 +1938,7 @@ string BITNode::printFitnessPool()
 
     if (!root->exec_pool.empty()) {
         if (!root->exec_pool_sorted) {
-            root->exec_pool.sort(BITNode_fitness_comp());
+            root->exec_pool.sort(BITNodeFitnessCompare());
             root->exec_pool_sorted = true;
         }
 
@@ -1970,7 +1972,7 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
     //}
 
     ss << (bigcounter? (++test::bigcount) : depth) << " "
-        << (unsigned int) root->exec_pool.size() << "/" << root->InferenceNodes
+        << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
         << haxxUsedProofResources << " [" << (long)this << "-"
         << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
 
@@ -2018,7 +2020,7 @@ string BITNode::printTarget() const
 BITNode* BITNode::Clone() const
     {
         BITNode* ret = new BITNode(*this);
-        InferenceNodes++; 
+        inferenceNodes++; 
         
         vector<set<BITNode*> > new_children;
         
