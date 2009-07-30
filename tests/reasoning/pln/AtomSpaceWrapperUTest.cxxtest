@@ -29,7 +29,8 @@ using namespace opencog;
 using namespace opencog::pln;
 using namespace std;
 
-#define GET_ASW ((AtomSpaceWrapper*) ASW())
+//already defined in AtomSpaceWrapper.h
+//#define GET_ASW ((AtomSpaceWrapper*) ASW())
 
 /// @todo Check truth values and other functions in the AtomSpaceWrapper
 class AtomSpaceWrapperUTest :  public CxxTest::TestSuite {

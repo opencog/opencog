@@ -33,7 +33,8 @@ using namespace boost::assign;
 
 using namespace std;
 
-#define GET_ASW ((AtomSpaceWrapper*) ASW())
+//already defined in AtomSpaceWrapper.h
+//#define GET_ASW ((AtomSpaceWrapper*) ASW())
 
 //min membership strength
 #define MIN_MS 0.1
