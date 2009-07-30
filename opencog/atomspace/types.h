@@ -44,8 +44,6 @@
 namespace opencog
 {
 
-typedef std::vector< Handle, std::allocator<Handle> > HandleSeq;
-
 typedef std::tr1::unordered_map<Handle, void *> HandleVoidPointerHashMap;
 
 // type and arity of Atoms, represented as short integers (16 bits)
