@@ -11,3 +11,10 @@ TARGET_LINK_LIBRARIES(NeighborSamplingUTest
     comboreduct
     util
 )
+
+ADD_CXXTEST(FieldSetUTest)
+TARGET_LINK_LIBRARIES(FieldSetUTest
+    moses
+    comboreduct
+    util
+)
