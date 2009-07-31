@@ -30,20 +30,21 @@ namespace opencog { namespace pln {
 class LookupRule : public Rule
 {
 protected:
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		return premiseArray[0];
-	}
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const
+    {
+        return premiseArray[0];
+    }
 public:
-	bool validate2				(MPs& args) const { return true; }
-	LookupRule(iAtomSpaceWrapper *_destTable)
+    bool validate2(MPs& args) const { return true; }
+    LookupRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable, false, false, "Lookup")
-	{
-		//inputFilter.push_back(new atom(result));
-	}
-	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
+    {
+        //inputFilter.push_back(new atom(result));
+    }
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

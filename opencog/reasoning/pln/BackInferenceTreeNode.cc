@@ -979,13 +979,14 @@ bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bind
 
             /// Different argument vectors of the same rule (eg. ForAllRule) may have different bindings.
 
-time( &test::custom_start2 );
+            time( &test::custom_start2 );
 
-            meta virtualized_target(bindings ? bind_vtree(*_target, *bindings) : meta(new vtree(*_target)));
+            meta virtualized_target(bindings ? bind_vtree(*_target,*bindings) : meta(new vtree(*_target)));
             ForceAllLinksVirtual(virtualized_target);
 
-time( &test::custom_finish2 );
-test::custom_duration2 += difftime( test::custom_finish2, test::custom_start2 );
+            time( &test::custom_finish2 );
+            test::custom_duration2 += difftime( test::custom_finish2,
+                                                test::custom_start2 );
 
             set<Rule::MPs> target_v_set = new_rule->o2iMeta(virtualized_target);
             
@@ -1000,28 +1001,26 @@ test::custom_duration += (double)(test::custom_finish - test::custom_start) / CL
             {       
                 tlog(2,"Rule.o2i gave %d results\n",target_v_set.size());
 
-                for (set<Rule::MPs>::iterator   j =target_v_set.begin();
-                                            j!=target_v_set.end();
-                                            j++)
-                {       
+                for (set<Rule::MPs>::iterator j =target_v_set.begin();
+                     j!=target_v_set.end(); j++) {       
                     Btr<BoundVTree> jtree = (*j->begin());
                     Btr<bindingsT> combined_binds(new bindingsT(*bindings));
-
+                    
                     /** If we spawn the new bindings that this Rule needs, then we will not create the new
-                         unbound childnode at all. The new (bound) version of that child will be probably
-                         created later.
-                         New variables may have been introduced in these bindings of jtree, eg.
-                         to get Imp(A, $2) we might have got arg vector of
-                         Imp(A, $1) and Imp($1, $2) where $2 = And(B, $4).
-                         Because the childnode will not be created here, $1 will simply disappear.
-                         $2 = And(B, $4) will be submitted to spawning. The owner of $4 will then be
-                         the owner of $2. We find this out by looking at the RHS of each binding that was
-                         fed to the spawning process, and finding if there are un-owned variables there.
-                         $4 was clearly unwoned.
-
-                         ToDo: we could maintain a list of un-owned variables and destroy them at proper times?
-                     */
-
+                        unbound childnode at all. The new (bound) version of that child will be probably
+                        created later.
+                        New variables may have been introduced in these bindings of jtree, eg.
+                        to get Imp(A, $2) we might have got arg vector of
+                        Imp(A, $1) and Imp($1, $2) where $2 = And(B, $4).
+                        Because the childnode will not be created here, $1 will simply disappear.
+                        $2 = And(B, $4) will be submitted to spawning. The owner of $4 will then be
+                        the owner of $2. We find this out by looking at the RHS of each binding that was
+                        fed to the spawning process, and finding if there are un-owned variables there.
+                        $4 was clearly unwoned.
+                        
+                        ToDo: we could maintain a list of un-owned variables and destroy them at proper times?
+                    */
+                    
                     if (spawning == ALLOW_SIBLING_SPAWNING
                         && jtree->bindings && root->spawns(*jtree->bindings))
                         root->spawn(jtree->bindings);
@@ -1047,7 +1046,7 @@ test::custom_duration += (double)(test::custom_finish - test::custom_start) / CL
         }
     } catch(...) { tlog(0,"Exception in ExpandRule()"); throw; }
 
-      return ret;
+    return ret;
 }
 
 void BITNode::tryClone(hpair binding) const
@@ -1057,47 +1056,44 @@ void BITNode::tryClone(hpair binding) const
         tlog(-2, "TryClone next...\n");
 
         // when 'binding' is from ($A to $B), try to find parent with bindings ($C to $A)
-        map<pHandle, pHandle>::const_iterator it = find_if(p.bindings->begin(), p.bindings->end(),
-                bind(std::equal_to<pHandle>(),
-                    bind(&second<pHandle,pHandle>, _1),
-                    binding.first));
-
-        if (p.bindings->end() != it)
-        {
+        map<pHandle, pHandle>::const_iterator it =
+            find_if(p.bindings->begin(), p.bindings->end(),
+                    bind(std::equal_to<pHandle>(),
+                         bind(&second<pHandle,pHandle>, _1),
+                         binding.first));
+        
+        if (p.bindings->end() != it) {
             // i.e. go up the tree as far as necessary until source of binding
             // chain found.
             p.link->tryClone(hpair(it->first, binding.second));
         }
-        else
-        {
+        else {
             // Then create a bound VTree from the source.
             // Create Child with this new binding:
             Rule::MPs new_args;
             Rule::CloneArgs(this->args, new_args);
-
+            
             // If validate2 fails... (which is only used by deduction)
             ///! @todo get rid of validate2.
             if (p.link && p.link->rule && !p.link->rule->validate2(new_args))
                 continue;
-
+            
             bindingsT single_bind;
             single_bind.insert(binding);
-
+            
             // Bind the args
-            foreach(BBvtree& bbvt, new_args)
-            {
+            foreach(BBvtree& bbvt, new_args) {
                 bbvt = BBvtree(new BoundVTree(*bind_vtree(*bbvt, single_bind)));
                 ForceAllLinksVirtual(bbvt);
             }
             Btr<BoundVTree> new_target(new BoundVTree(*bind_vtree(*this->raw_target, single_bind)));
-
-            BITNode* new_node = p.link->createChild(
-                p.parent_arg_i,
-                this->rule,
-                new_args,
-                new_target,
-                single_bind,
-                NO_SIBLING_SPAWNING); //Last arg probably redundant now
+            
+            BITNode* new_node = p.link->createChild(p.parent_arg_i,
+                                                    this->rule,
+                                                    new_args,
+                                                    new_target,
+                                                    single_bind,
+                                                    NO_SIBLING_SPAWNING); //Last arg probably redundant now
         }
     }
 }
@@ -1107,10 +1103,12 @@ bool BITNode::hasAncestor(const BITNode* const _p) const
     return this != root && STLhas(root->users[(BITNode*)this], (BITNode*)_p);
 }
 
-const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenceForStorage, float minConfidenceForAbort)
+const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
+                                              float minConfidenceForStorage,
+                                              float minConfidenceForAbort)
 {
     AtomSpaceWrapper *atw = GET_ASW;
-
+    
     if (raw_target == NULL) {
         puts("Target is null, aborting.\n");
         static set<VtreeProvider*> aborted;
@@ -1167,7 +1165,9 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources, float minConfidenc
     return *eval_res_vector_set.begin();
 }
 
-bool BITNode::createChildren(int i, BBvtree arg, Btr<bindingsT> bindings, spawn_mode spawning)
+bool BITNode::createChildren(int i, BBvtree arg,
+                             Btr<bindingsT> bindings,
+                             spawn_mode spawning)
 {
     assert(!arg->empty());
 
@@ -1185,8 +1185,8 @@ bool BITNode::createChildren(int i, BBvtree arg, Btr<bindingsT> bindings, spawn_
     }
     else
     {
-      foreach(Rule *r, *root->rp)
-          expandRule(r, i, arg, bindings, spawning);
+        foreach(Rule *r, *root->rp)
+            expandRule(r, i, arg, bindings, spawning);
     }
     tlog(1,"Rule expansion ok!\n");
 
@@ -1205,7 +1205,9 @@ void BITNode::createChildrenForAllArgs()
     tlog(1,"---createChildrenForAllArgs()\n");  
     
     for (uint i = 0; i < args.size(); i++)
-        if (!createChildren(i, args[i], Btr<bindingsT>(new bindingsT), ALLOW_SIBLING_SPAWNING))
+        if (!createChildren(i, args[i],
+                            Btr<bindingsT>(new bindingsT),
+                            ALLOW_SIBLING_SPAWNING))
             break;
 }
 
@@ -1214,27 +1216,26 @@ bool BITNode::CheckForDirectResults()
     AtomSpaceWrapper *atw = GET_ASW;
     if (!rule || rule->isComputable())
         return false;
-
+    
     pHandle th = _v2h(*getTarget()->begin());
-    if (!atw->isType(th) && atw->getType(th) == FW_VARIABLE_NODE)
-    {
+    if (!atw->isType(th) && atw->getType(th) == FW_VARIABLE_NODE) {
         tlog(-1,"Proof of FW_VARIABLE_NODE prohibited.\n");
         return true;
     }
-
+    
     boost::shared_ptr<set<BoundVertex> > directResult;
-
+    
     if (USE_GENERATOR_CACHE)
     {
         directProductionArgs dp_args(rule, *bound_target);
-
+        
         map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs>::iterator ex_it =
             haxx::DirectProducerCache.find(dp_args);
-    
+        
         directResult = ((haxx::DirectProducerCache.end() != ex_it)
-            ? ex_it->second
-            : haxx::DirectProducerCache[dp_args] = rule->attemptDirectProduction(bound_target));
-
+                        ? ex_it->second
+                        : haxx::DirectProducerCache[dp_args] = rule->attemptDirectProduction(bound_target));
+        
         if (haxx::DirectProducerCache.end() == ex_it)
             tlog(-1,"attemptDirectProduction. Cache size %d. Target:\n", haxx::DirectProducerCache.size());
         else

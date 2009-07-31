@@ -156,7 +156,7 @@ BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX) const
 Rule::setOfMPs Rule::o2iMeta(meta outh) const
 {
     assert(computable);
-    Rule::setOfMPs ret;
+    setOfMPs ret;
     
     const int N = outh->begin().number_of_children();
     if (N < 1)

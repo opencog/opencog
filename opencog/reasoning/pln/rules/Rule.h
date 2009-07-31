@@ -94,7 +94,7 @@ protected:
      * @param overrideInputFilter Whether the method overrides inputFilter.
      * @return The extra requirements filter.
      */
-    virtual std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
+    virtual setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
     // virtual MPs* o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const=0;
 
 public:
