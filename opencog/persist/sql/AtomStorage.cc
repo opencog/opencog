@@ -29,9 +29,10 @@
  */
 #ifdef HAVE_SQL_STORAGE
 
-#include "AtomStorage.h"
-
 #include <stdlib.h>
+
+#include "AtomStorage.h"
+#include "odbcxx.h"
 
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Atom.h>
@@ -44,7 +45,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/persist/odbcxx.h>
 
 using namespace opencog;
 

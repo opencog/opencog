@@ -20,7 +20,6 @@ ADD_EXECUTABLE(sniff
 
 TARGET_LINK_LIBRARIES(persist
 	${ODBC_LIBRARIES}
-    ${EXPAT_LIBRARIES}
 )
 
 TARGET_LINK_LIBRARIES(sniff
@@ -41,5 +40,5 @@ INSTALL (FILES
 	AtomStorage.h
 	odbcxx.h
 	PersistModule.h
-	DESTINATION "include/opencog/persist"
+	DESTINATION "include/opencog/persist/sql"
 )

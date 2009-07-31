@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 
-#include "AtomStorage.h"
+#include <opencog/persist/sql/AtomStorage.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>

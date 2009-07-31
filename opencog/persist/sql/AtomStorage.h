@@ -33,7 +33,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/persist/odbcxx.h>
+#include <opencog/persist/sql/odbcxx.h>
 
 namespace opencog
 {
