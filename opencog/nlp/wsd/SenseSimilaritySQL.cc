@@ -20,7 +20,7 @@
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/persist/odbcxx.h>
+#include <opencog/persist/sql/odbcxx.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/nlp/wsd/SenseSimilaritySQL.h>
 #include <opencog/util/Config.h>
