@@ -269,6 +269,14 @@ size_t Link::hashCode(void) const
 }
 
 #ifdef PUT_OUTGOING_SET_IN_LINKS
+class HandleComparison
+{
+    public:
+        bool operator()(const Handle& h1, const Handle& h2) const {
+            return (CoreUtils::compare(h1, h2) < 0);
+        }
+};
+
 void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
    throw (RuntimeException)
 {
@@ -292,7 +300,7 @@ void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
     if (classserver().isA(type, UNORDERED_LINK)) {
-        std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
+        std::sort(outgoing.begin(), outgoing.end(), HandleComparison());
     }
 }
 

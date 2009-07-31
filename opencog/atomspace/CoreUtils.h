@@ -75,12 +75,6 @@ public:
      * second argument.
      */
     static int compare(Handle, Handle);
-
-    class HandleComparison
-    {
-    public:
-        bool operator()(const Handle& h1, const Handle& h2) const;
-    };
 };
 
 } // namespace opencog
