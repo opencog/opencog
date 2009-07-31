@@ -34,10 +34,11 @@ namespace pln {
 
 Rule::Rule(opencog::pln::iAtomSpaceWrapper *_destTable,
             bool _freeInputArity,
-            bool _computable,
+            bool _composer,
             std::string _name)
-: RULE_INPUT_ARITY_MAX(15), freeInputArity(_freeInputArity), destTable(_destTable),
-computable(_computable), priority(10.0f), name(_name) 
+  : RULE_INPUT_ARITY_MAX(15), freeInputArity(_freeInputArity),
+    destTable(_destTable),
+    composer(_composer), priority(10.0f), name(_name) 
 { }
 
 Rule::Rule() : RULE_INPUT_ARITY_MAX(15) { }
@@ -155,7 +156,7 @@ BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX) const
 
 Rule::setOfMPs Rule::o2iMeta(meta outh) const
 {
-    assert(computable);
+    assert(composer);
     setOfMPs ret;
     
     const int N = outh->begin().number_of_children();

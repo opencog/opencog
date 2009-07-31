@@ -548,9 +548,9 @@ public:
     /// Use for debugging
     bool hasAncestor(const BITNode* const _p) const;
 
-    /// Whether the Rule for this BITNode is computable with arguments,
+    /// Whether the Rule for this BITNode is a Composer,
     /// or whether it's a Generator
-    bool isComputable() const { return rule->isComputable(); }
+    bool iscomposer() const { return rule->isComposer(); }
 
     const std::vector<std::set<VtreeProvider*> >& getEvalResults() const { return eval_results; }
     const std::set<parent_link<BITNode> >& getParents() const { return parents; }
@@ -750,7 +750,7 @@ public:
         triviality_filter(T begin, T end) { Create(begin, end); }
         void create(T begin, T end) {
             for(T i = begin; i != end; ++i)
-                if (i->first->isComputable())
+                if (i->first->isComposer())
                     filtered.insert(*i);
 
 //          remove_copy_if(begin, end, inserter(filtered, filtered.begin()), mem_fun(&T2::IsComputable));

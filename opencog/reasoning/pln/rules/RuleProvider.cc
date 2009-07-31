@@ -171,8 +171,9 @@ public:
     //	virtual TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const=0;
     
     ~GenericRule2() {}
-    /// Always computable
-    GenericRule2(iAtomSpaceWrapper *_destTable, bool _FreeInputArity, std::string _name = "")
+    /// Always a Composer
+    GenericRule2(iAtomSpaceWrapper *_destTable,
+                 bool _FreeInputArity, std::string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const

@@ -75,8 +75,10 @@ protected:
     //! Atom table interface
     iAtomSpaceWrapper *destTable;
 
-    //! Whether the the Rule can be computed?
-    bool computable;
+    //! Whether the the Rule is a Composer?
+    // If it is a Composer then it needs premises to derive the truth value
+    // of the conclusion, otherwise it is called a Generator
+    bool composer;
 
     //! Priority affects the order in which rules are preferred when doing inference.
     // the higher the priority value is the higher priority the rule has
@@ -101,12 +103,12 @@ public:
     /** Rule constructor
      * @param _destTable Pointer to the AtomTable interface.
      * @param _freeInputArity Are the number of arguments predetermined?
-     * @param _computable Whether the rule can be computed?
+     * @param _composer Whether the rule can be computed?
      * @param _name The name of the rule.
      */
     Rule(iAtomSpaceWrapper *_destTable,
          bool _freeInputArity,
-         bool _computable,
+         bool _composer,
          std::string _name = "");
     
     Rule();
@@ -186,7 +188,7 @@ public:
 
     //! Does the Rule have unfixed input arity?
     bool hasFreeInputArity() const { return freeInputArity; }
-    bool isComputable() const { return computable; }
+    bool isComposer() const { return composer; }
 
     /** Copy a bunch of vertices from src to dest ???
      *

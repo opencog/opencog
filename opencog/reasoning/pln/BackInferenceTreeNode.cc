@@ -438,7 +438,7 @@ void BITNode::create()
 
     target_chain.insert(*bound_target);
 
-    if (!rule || rule->isComputable())
+    if (!rule || rule->isComposer())
     {
         children.insert(children.begin(), args.size(), set<ParametrizedBITNode>());
     }
@@ -525,7 +525,7 @@ bool BITNode::eq(Rule* r,  const Rule::MPs& _args, meta _target, const bindingsT
 
         if (rule != r)
             ret = false;
-        else if (rule && !rule->isComputable())
+        else if (rule && !rule->isComposer())
         {
             //  meta _final_target(bind_vtree(*_target, GetPreBindings()));
             meta _final_target(new vtree(*_target));
@@ -754,7 +754,7 @@ bool BITNode::inferenceLoop(Rule::MPs reqs)
 bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 {
 //  return !(atw->inheritsType(atw->getTypeV(*_target), NODE)
-//      && new_rule->computable());
+//      && new_rule->isComposer());
 
     return true;
 }
@@ -851,7 +851,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
         BITNode* template_node = NULL;
         Btr<bindingsT> template_binds(new bindingsT);
         
-        if (new_rule && new_rule->isComputable()) //&& new_rule->name != "CrispUnificationRule")
+        if (new_rule && new_rule->isComposer()) //&& new_rule->name != "CrispUnificationRule")
         {
             if (test::bigcount >= 3175)
                 cout << new_rule->name << endl;
@@ -962,7 +962,7 @@ bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bind
     {
         tlog(-2, "Expanding rule... %s\n", (new_rule ? new_rule->name.c_str() : "?"));      
 
-        if (!new_rule->isComputable())          
+        if (!new_rule->isComposer())          
         {
             createChild(target_i, new_rule, Rule::MPs(), _target, *bindings, spawning);
         }
@@ -1214,7 +1214,7 @@ void BITNode::createChildrenForAllArgs()
 bool BITNode::CheckForDirectResults()
 {
     AtomSpaceWrapper *atw = GET_ASW;
-    if (!rule || rule->isComputable())
+    if (!rule || rule->isComposer())
         return false;
     
     pHandle th = _v2h(*getTarget()->begin());
@@ -2089,7 +2089,7 @@ bool indirect_less_BITNode::operator()(BITNode* lhs, BITNode* rhs) const
         return false;
 
     /// If target-determined
-    if (lhs->rule && !lhs->rule->IsComputable())
+    if (lhs->rule && !lhs->rule->isComposer())
     {
         if (less_vtree()(*lhs->getTarget(), *rhs->getTarget()))
             return true;
@@ -2143,7 +2143,7 @@ struct BITNodehash :  public stdext::hash_compare<BITNode*>
             return false;
 
         /// If target-determined
-        if (lhs->rule && !lhs->rule->IsComputable())
+        if (lhs->rule && !lhs->rule->isComposer())
         {
             /// \todo Should look at std_tree forms of targets here!
 
