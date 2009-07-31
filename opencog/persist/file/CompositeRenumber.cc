@@ -32,13 +32,15 @@
 
 using namespace opencog;
 
-void CompositeRenumber::updateVersionHandles(HandleMap<Atom *> *handles) {
+void CompositeRenumber::updateVersionHandles(CompositeTruthValue &ctv,
+                                             HandleMap<Atom *> *handles)
+{
     VersionedTruthValueMap newVersionedTVs;
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); itr++) {
+    for (VersionedTruthValueMap::const_iterator itr = ctv.versionedTVs.begin();
+            itr != ctv.versionedTVs.end(); itr++) {
         VersionHandle key = itr->first;
         CoreUtils::updateHandle(&(key.substantive), handles);
         newVersionedTVs[key] = itr->second;
     }
-    versionedTVs = newVersionedTVs;
+    ctv.versionedTVs = newVersionedTVs;
 }

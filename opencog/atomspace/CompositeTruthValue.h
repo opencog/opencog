@@ -52,9 +52,11 @@ typedef std::tr1::unordered_map<VersionHandle,
 #endif /* __APPLE__ */
 
 class Atom;
+class CompositeRenumber;
 
 class CompositeTruthValue: public TruthValue
 {
+   friend class CompositeRenumber; // XXX ugly hack
 
 private:
     TruthValue* primaryTV;
@@ -156,13 +158,6 @@ public:
      *        returns a NULL_VERSION_HANDLE.
      */
     VersionHandle getVersionHandle(int) const;
-
-    /**
-     * Updates all VersionHandles of the versioned TVs in this object
-     * using the HandleMap passed as argument.
-     * @param A HandleMap that maps old Handles to new ones.
-     */
-    void updateVersionHandles(HandleMap<Atom *> *handles);
 };
 
 } // namespace opencog

@@ -26,9 +26,11 @@
 /* SavingLoading.cc - Saves/loads the atom network (or a subset of it) to/from
  * disk */
 
+#include "CompositeRenumber.h"
 #include "SavingLoading.h"
 #include "SpaceServerSavable.h"
 #include "TimeServerSavable.h"
+#include "CoreUtils.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -40,7 +42,6 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
@@ -427,7 +428,7 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
     if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
         //logger().fine("SavingLoading::updateHandles: CTV");
         CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
-        ctv.updateVersionHandles( handles );
+        CompositeRenumber::updateVersionHandles(ctv, handles);
         atom->setTruthValue(ctv);        
     } // if
     

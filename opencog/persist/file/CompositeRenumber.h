@@ -28,18 +28,20 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 
 namespace opencog
 {
 
 class CompositeRenumber
 {
+public:
     /**
      * Updates all VersionHandles of the versioned TVs in this object
      * using the HandleMap passed as argument.
      * @param A HandleMap that maps old Handles to new ones.
      */
-    void updateVersionHandles(HandleMap<Atom *> *handles);
+    static void updateVersionHandles(CompositeTruthValue&, HandleMap<Atom *> *handles);
 };
 
 } // namespace opencog

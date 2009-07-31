@@ -27,7 +27,6 @@
 #include <opencog/util/platform.h>
 
 #include "CompositeTruthValue.h"
-#include "CoreUtils.h"
 #include "TLB.h"
 
 //#define USE_SHARED_DEFAULT_TV
@@ -502,16 +501,4 @@ VersionHandle CompositeTruthValue::getVersionHandle(int i) const {
         }
     }
     return NULL_VERSION_HANDLE;
-}
-
-
-void CompositeTruthValue::updateVersionHandles(HandleMap<Atom *> *handles) {
-    VersionedTruthValueMap newVersionedTVs;
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); itr++) {
-        VersionHandle key = itr->first;
-        CoreUtils::updateHandle(&(key.substantive), handles);
-        newVersionedTVs[key] = itr->second;
-    }
-    versionedTVs = newVersionedTVs;
 }

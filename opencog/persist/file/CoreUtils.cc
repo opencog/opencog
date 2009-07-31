@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/CoreUtils.cc
+ * opencog/perist/file/CoreUtils.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -31,18 +31,6 @@
 using namespace opencog;
 
 /* Module for including any core-specific common utilities */
-// XXX this should be deprecated/made obsolete ... Why?
-// Because its a bizarre hack having to do with how the
-// load-from-file code works. The load-from-file stuff
-// should go into its own directory. Why?  Because it is doing 
-// soemthing fairly "illegal" -- monkeying with Handle assignments
-// in really dangerous ways. -- and worse, in dangerous, 
-// hard-to-understand ways.  This means that whenever something
-// about TLB or Handles changes, this code is in the path of 
-// breaken stuff, and thus has to be repeatedly debugged and fixed. 
-// This sucks. Its a bad design.  The save-to-file, load-from-file
-// code needs to be redesigned, and this re-jiggering should go. 
-// At least, go away from here. XXXX
 void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (RuntimeException)
 {
     //printf("CoreUtils::updateHandle(%p)\n", *handle);

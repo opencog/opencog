@@ -26,7 +26,6 @@
 #include "TemporalTableFile.h"
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/TLB.h>
 

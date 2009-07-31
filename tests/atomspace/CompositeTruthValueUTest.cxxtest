@@ -30,6 +30,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/persist/file/CompositeRenumber.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -518,7 +519,7 @@ public:
         handles->add(atomhand[2], atoms[0]);
         for (int i = 0; i < NUM_TVS; i++) {
             CompositeTruthValue* tv = tvs[i];
-            tv->updateVersionHandles(handles);
+            CompositeRenumber::updateVersionHandles(*tv, handles);
             const TruthValue& versionedTv1 = tv->getVersionedTV(versionHandles[i]);
             TS_ASSERT(versionedTv1.isNullTv());
             //logger().debug("%d => %p", i+1, handles->get(i+1));

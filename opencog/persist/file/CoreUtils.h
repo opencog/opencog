@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/CoreUtils.h
+ * opencog/persist/file/CoreUtils.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/HandleMap.h>
-#include <opencog/util/exceptions.h>
 
 namespace opencog
 {
@@ -45,21 +44,15 @@ public:
      * This method is used to translate an old handle to a new one mapped
      * in a hash table.
      *
-     * XXX Deprecated. This handle-remapping is very specific of the
-     * save-to-file, restore-from-file persistence code, and does not
-     * really belong in the core. Its hacky, as it does potentially 
+     * Handle-remapping is very specific of the save-to-file, 
+     * restore-from-file persistence code.  It does potentially 
      * dangerous things with UUID's, and can easily trash a perfectly
-     * good hypergraph if misused. Its hard to debug. Stay Away!
+     * good hypergraph if misused. Its hard to debug. Caution!
      *
      * @param Handle which will be translated.
      * @param Table that maps from old to new handles.
      */
     static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
-
-    /** XXX Deprecated, do not use in new code. */
-    static int compare(Handle ha, Handle hb) {
-        return Handle::compare(ha, hb);
-    }
 };
 
 } // namespace opencog

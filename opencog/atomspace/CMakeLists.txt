@@ -12,7 +12,6 @@ ADD_LIBRARY (atomspace SHARED
 	ClassServer.cc
 	CompositeTruthValue.cc
 	CountTruthValue.cc
-	CoreUtils.cc
 	FixedIntegerIndex.cc
 	Handle.cc
 	HandleEntry.cc
@@ -75,7 +74,6 @@ INSTALL (FILES
 	ClassServer.h
 	CompositeTruthValue.h
 	CountTruthValue.h
-	CoreUtils.h
 	FixedIntegerIndex.h
 	FollowLink.h
 	ForeachChaseLink.h
