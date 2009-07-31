@@ -34,11 +34,14 @@
 namespace opencog
 {
 
+class TemporalTableFile;
+
 // TODO: Depending on the use cases, this class would have a better performance
 // if we use a sortedTemporalList in inverse cronological order.
 // Or, if saving space is not required, we can even have 2 sortedTemporalLists.
 class TemporalTable
 {
+    friend class TemporalTableFile;
 
 public:
 
@@ -137,20 +140,6 @@ public:
      * Returns a string representation of the given Temporal relationship code.
      */
     static const char* getTemporalRelationshipStr(TemporalRelationship criterion);
-
-    /**
-     * This method saves this table in the file specified.
-     * @param the file pointer where the TemporalTable must be saved.
-     */
-    void save(FILE *);
-
-    /**
-     * This method loads a TemporalTable stored in the file specified.
-     * @param the file pointer where the TemporalTable is stored.
-     * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
-     */
-    void load(FILE *, HandleMap<Atom *> *);
-
 
 private:
 

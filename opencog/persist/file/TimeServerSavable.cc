@@ -23,6 +23,7 @@
  */
 
 #include "TimeServerSavable.h"
+#include "TemporalTableFile.h"
 
 #include <opencog/util/Logger.h>
 
@@ -48,14 +49,16 @@ void TimeServerSavable::saveRepository(FILE *fp) const
 {
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     // Saves TemporalTable
-    timeserver->table->save(fp);
+    TemporalTableFile ttf;
+    ttf.save(fp, timeserver->table);
 }
 
 void TimeServerSavable::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
     // Loads the TemporalTable
-    timeserver->table->load(fp, conv);
+    TemporalTableFile ttf;
+    ttf.load(fp, timeserver->table, conv);
 }
 
 void TimeServerSavable::clear()
