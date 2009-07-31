@@ -856,7 +856,7 @@ void  PosListener::OnUpdate( const void*  obj )
 
     if ( bounce_archive.size() > 0 )  {
         char  t[200];
-         sprintf(t, "Agent pushed %lu objects with cost %.2f.\n", bounce_archive.size(), energycost);        
+         sprintf(t, "Agent pushed %zu objects with cost %.2f.\n", bounce_archive.size(), energycost);        
          LOG( "PosListener", 1, t);
         int   new_energy = (int)( _Int( agent->Get(WENERGY) ) - energycost );
         agent->Set( WENERGY, new_energy );
