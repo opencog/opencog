@@ -63,18 +63,10 @@ public:
      */
     static int handleCompare(const void*, const void*);
 
-    /**
-     * Returns a negative value, zero or a positive value if the first
-     * argument is respectively smaller than, equal to, or larger than
-     * the second argument.
-     *
-     * @param The first handle element.
-     * @param The second handle element.
-     * @return A negative value, zero or a positive value if the first
-     * argument is respectively smaller than, equal to, or larger then the
-     * second argument.
-     */
-    static int compare(Handle, Handle);
+    /** XXX Deprecated, do not use in new code. */
+    static int compare(Handle ha, Handle hb) {
+        return Handle::compare(ha, hb);
+    }
 };
 
 } // namespace opencog

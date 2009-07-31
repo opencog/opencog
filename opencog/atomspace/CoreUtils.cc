@@ -68,14 +68,3 @@ int CoreUtils::handleCompare(const void* e1, const void* e2)
     return compare(*((Handle *)e1), *((Handle *)e2));
 }
 
-int CoreUtils::compare(Handle h1, Handle h2)
-{
-    if (h1 < h2) {
-        return(-1);
-    } else if (h1 > h2) {
-        return(1);
-    } else {
-        return(0);
-    }
-}
-

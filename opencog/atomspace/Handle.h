@@ -85,6 +85,24 @@ public:
     inline bool operator<=(const Handle& h) const { return uuid <= h.uuid; }
     inline bool operator>=(const Handle& h) const { return uuid >= h.uuid; }
 
+
+    /**
+     * Returns a negative value, zero or a positive value if the first
+     * argument is respectively smaller than, equal to, or larger than
+     * the second argument.
+     *
+     * @param The first handle element.
+     * @param The second handle element.
+     * @return A negative value, zero or a positive value if the first
+     * argument is respectively smaller than, equal to, or larger then the
+     * second argument.
+     */
+    static int compare(Handle h1, Handle h2)
+    {
+        if (h1 < h2) return -1;
+        if (h1 > h2) return 1;
+        return 0;
+    }
 };
 
 typedef std::vector<Handle> HandleSeq;
