@@ -28,6 +28,7 @@
 #include <opencog/util/StringManipulator.h>
 
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TLB.h>
 
 #include <string>
@@ -39,10 +40,12 @@ using namespace opencog;
 
 SpaceServerSavable::SpaceServerSavable()
 {
+    server = NULL;
 }
 
 SpaceServerSavable::~SpaceServerSavable()
 {
+    server = NULL;
 }
 
 const char* SpaceServerSavable::getId() const
@@ -54,12 +57,12 @@ const char* SpaceServerSavable::getId() const
 void SpaceServerSavable::saveRepository(FILE * fp) const
 {
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
-    unsigned int mapSize = spaceMaps.size();
+    unsigned int mapSize = server->spaceMaps.size();
     fwrite(&mapSize, sizeof(unsigned int), 1, fp);
-    for (std::vector<Handle>::const_iterator itr = sortedMapHandles.begin(); itr != sortedMapHandles.end(); itr++) {
+    for (std::vector<Handle>::const_iterator itr = server->sortedMapHandles.begin(); itr != server->sortedMapHandles.end(); itr++) {
         Handle mapHandle = *itr;
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
-        SpaceMap* map = spaceMaps.find(mapHandle)->second;
+        SpaceServer::SpaceMap* map = server->spaceMaps.find(mapHandle)->second;
         float xMin, xMax, yMin, yMax, radius;
         unsigned int xDim, yDim;
         xMin = map->xMin();
@@ -78,9 +81,9 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
         fwrite(&yDim, sizeof(unsigned int), 1, fp);
         map->save(fp);
     }
-    unsigned int persistentHandlesSize = persistentMapHandles.size();
+    unsigned int persistentHandlesSize = server->persistentMapHandles.size();
     fwrite(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
-    for (std::set<Handle>::const_iterator itr = persistentMapHandles.begin(); itr != persistentMapHandles.end(); itr++) {
+    for (std::set<Handle>::const_iterator itr = server->persistentMapHandles.begin(); itr != server->persistentMapHandles.end(); itr++) {
         Handle mapHandle = *itr;
         fwrite(&mapHandle, sizeof(Handle), 1, fp);
     }
@@ -104,14 +107,14 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
         fread(&radius, sizeof(float), 1, fp);
         fread(&xDim, sizeof(unsigned int), 1, fp);
         fread(&yDim, sizeof(unsigned int), 1, fp);
-        SpaceMap* map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, radius);
+        SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, radius);
         map->load(fp);
 
         cassert(TRACE_INFO, conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
-        spaceMaps[newMapHandle] = map;
-        sortedMapHandles.push_back(newMapHandle);
+        server->spaceMaps[newMapHandle] = map;
+        server->sortedMapHandles.push_back(newMapHandle);
     }
     unsigned int persistentHandlesSize;
     fread(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
@@ -121,15 +124,12 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
         cassert(TRACE_INFO, conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
-        persistentMapHandles.insert(newMapHandle);
+        server->persistentMapHandles.insert(newMapHandle);
     }
 }
 
 void SpaceServerSavable::clear()
 {
-    for (HandleToSpaceMap::iterator itr = spaceMaps.begin(); itr != spaceMaps.end(); itr++) {
-        delete itr->second;
-    }
-    spaceMaps.clear();
+    server->clear();
 }
 

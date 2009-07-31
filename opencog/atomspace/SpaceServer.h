@@ -41,7 +41,6 @@
 #include <string>
 #include <map>
 
-#include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/SpaceServerContainer.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>
@@ -50,8 +49,11 @@
 namespace opencog
 {
 
-class SpaceServer : public SavableRepository
+class SpaceServerSavable;
+
+class SpaceServer 
 {
+    friend class SpaceServerSavable;
 
 public:
 
@@ -160,10 +162,6 @@ public:
     void setMapBoundaries(double xMin, double xMax, double yMin, double yMax,
                           unsigned int xDim, unsigned int yDim);
 
-    // Methods from SavableRepository interface:
-    const char* getId() const;
-    void saveRepository(FILE *) const;
-    void loadRepository(FILE *fp, opencog::HandleMap<opencog::Atom*> *conv);
     void clear();
 
     /**

@@ -381,89 +381,9 @@ void SpaceServer::removeObject(const std::string& objectId)
     }
 }
 
-const char* SpaceServer::getId() const
-{
-    static const char* id = "SpaceServer";
-    return id;
-}
-
 unsigned int SpaceServer::getSpaceMapsSize() const
 {
     return spaceMaps.size();
-}
-
-void SpaceServer::saveRepository(FILE * fp) const
-{
-    logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
-    unsigned int mapSize = spaceMaps.size();
-    fwrite(&mapSize, sizeof(unsigned int), 1, fp);
-    for (std::vector<Handle>::const_iterator itr = sortedMapHandles.begin(); itr != sortedMapHandles.end(); itr++) {
-        Handle mapHandle = *itr;
-        fwrite(&mapHandle, sizeof(Handle), 1, fp);
-        SpaceMap* map = spaceMaps.find(mapHandle)->second;
-        float xMin, xMax, yMin, yMax, radius;
-        unsigned int xDim, yDim;
-        xMin = map->xMin();
-        xMax = map->xMax();
-        yMin = map->yMin();
-        yMax = map->yMax();
-        radius = map->radius();
-        xDim = map->xDim();
-        yDim = map->yDim();
-        fwrite(&xMin, sizeof(float), 1, fp);
-        fwrite(&xMax, sizeof(float), 1, fp);
-        fwrite(&yMin, sizeof(float), 1, fp);
-        fwrite(&yMax, sizeof(float), 1, fp);
-        fwrite(&radius, sizeof(float), 1, fp);
-        fwrite(&xDim, sizeof(unsigned int), 1, fp);
-        fwrite(&yDim, sizeof(unsigned int), 1, fp);
-        map->save(fp);
-    }
-    unsigned int persistentHandlesSize = persistentMapHandles.size();
-    fwrite(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
-    for (std::set<Handle>::const_iterator itr = persistentMapHandles.begin(); itr != persistentMapHandles.end(); itr++) {
-        Handle mapHandle = *itr;
-        fwrite(&mapHandle, sizeof(Handle), 1, fp);
-    }
-}
-
-void SpaceServer::loadRepository(FILE *fp, opencog::HandleMap<opencog::Atom*> *conv)
-{
-    logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
-
-    unsigned int mapSize;
-    fread(&mapSize, sizeof(unsigned int), 1, fp);
-    for (unsigned int i = 0; i < mapSize; i++) {
-        Handle mapHandle;
-        fread(&mapHandle, sizeof(Handle), 1, fp);
-        float xMin, xMax, yMin, yMax, radius;
-        unsigned int xDim, yDim;
-        fread(&xMin, sizeof(float), 1, fp);
-        fread(&xMax, sizeof(float), 1, fp);
-        fread(&yMin, sizeof(float), 1, fp);
-        fread(&yMax, sizeof(float), 1, fp);
-        fread(&radius, sizeof(float), 1, fp);
-        fread(&xDim, sizeof(unsigned int), 1, fp);
-        fread(&yDim, sizeof(unsigned int), 1, fp);
-        SpaceMap* map = new SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, radius);
-        map->load(fp);
-
-        cassert(TRACE_INFO, conv->contains(mapHandle),
-                "SpaceServer - HandleMap conv does not contain mapHandle.");
-        Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
-        spaceMaps[newMapHandle] = map;
-        sortedMapHandles.push_back(newMapHandle);
-    }
-    unsigned int persistentHandlesSize;
-    fread(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
-    for (unsigned int i = 0; i < persistentHandlesSize; i++) {
-        Handle mapHandle;
-        fread(&mapHandle, sizeof(Handle), 1, fp);
-        cassert(TRACE_INFO, conv->contains(mapHandle),
-                "SpaceServer - HandleMap conv does not contain mapHandle.");
-        Handle newMapHandle = TLB::getHandle(conv->get(mapHandle));
-        persistentMapHandles.insert(newMapHandle);
-    }
 }
 
 void SpaceServer::clear()

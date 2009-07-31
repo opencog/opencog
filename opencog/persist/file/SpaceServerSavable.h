@@ -31,10 +31,9 @@
  *
  * @author Welter Luigi
  */
-#include <exception>
-#include <string>
 #include <map>
 
+#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/types.h>
 
@@ -43,10 +42,14 @@ namespace opencog
 
 class SpaceServerSavable : public SavableRepository
 {
+private:
+    SpaceServer *server;
 
 public:
     explicit SpaceServerSavable();
     virtual ~SpaceServerSavable();
+
+    void setServer(SpaceServer *s) { server = s; }
 
     const char* getId() const;
     void saveRepository(FILE *) const;

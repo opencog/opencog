@@ -27,6 +27,7 @@
  * disk */
 
 #include "SavingLoading.h"
+#include "SpaceServerSavable.h"
 #include "TimeServerSavable.h"
 
 #include <fcntl.h>
@@ -103,7 +104,10 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     tss.setServer(&atomSpace.timeServer);
     tss.saveRepository(f);
 
-    atomSpace.spaceServer->saveRepository(f);
+    SpaceServerSavable sss;
+    sss.setServer(atomSpace.spaceServer);
+    sss.saveRepository(f);
+
     saveRepositories(f);
 
     // closes the file
@@ -307,7 +311,10 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     tss.setServer(&atomSpace.timeServer);
     tss.loadRepository(f, handles);
 
-    atomSpace.spaceServer->loadRepository(f, handles);
+    SpaceServerSavable sss;
+    sss.setServer(atomSpace.spaceServer);
+    sss.loadRepository(f, handles);
+
     loadRepositories(f, handles);
 
     delete handles;
