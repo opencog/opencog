@@ -56,9 +56,19 @@ struct field_set {
     struct const_onto_iterator;
 
     /**
-     * The field struct provides the information needed to 
-     * get/set the value of some variable(of any type) in
-     * an instance (i.e. a packed/vector)
+     * The field struct provides the information needed to get/set the 
+     * value of some variable(of any type) in an instance (i.e. a packed/vector)
+     * 
+     * The major_offset is the index of the element in the instance where the
+     * value of the field is stored in. But since there may be values of many
+     * different variables stored in the same packed_t value of the instance,
+     * this is not enough. We need minor_offset to tell us where inside the
+     * packed_t value instance[major_offset] the value is stored. And we need
+     * width to tell us how many bits (starting at this position) are used to
+     * encode the value.
+     * 
+     * There is a wiki page about the field_set in the opencog, you could find it on
+     * http://www.opencog.org/wiki/The_struct_of_field_set_in_MOSES
      */
     struct field {
         field() { }
