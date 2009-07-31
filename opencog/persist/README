@@ -6,3 +6,11 @@ Various different systems used for the persistence of atoms to disk,
 database or remote locations. Some of these systems are also general
 systems for communicating atoms between servers.
 
+Systems include:
+
+file -- file-based storage
+hypertable -- experimental HyperTable support.
+memcache -- experimental/broken, uses memcached for persistence.
+sql -- works well for most uses -- with caveats
+xml -- XML-based file storage
+

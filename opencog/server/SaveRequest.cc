@@ -28,11 +28,8 @@
 #include <fstream>
 
 #include <opencog/server/CogServer.h>
-//#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlExporter.h>
+#include <opencog/persist/xml/NMXmlExporter.h>
 #include <opencog/util/Logger.h>
-//#include <opencog/xml/NMXmlParser.h>
-//#include <opencog/xml/XMLBufferReader.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/atomspace/HandleSet.h>
 

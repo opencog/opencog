@@ -29,9 +29,9 @@
 #include <opencog/util/tree.h>
 #include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/utils.h>
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/XMLBufferReader.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/XMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 
 #include  <boost/foreach.hpp>
 

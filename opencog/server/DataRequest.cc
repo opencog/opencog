@@ -29,9 +29,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
-#include <opencog/xml/NMXmlParser.h>
-#include <opencog/xml/StringXMLBufferReader.h>
-#include <opencog/xml/XMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
+#include <opencog/persist/xml/StringXMLBufferReader.h>
+#include <opencog/persist/xml/XMLBufferReader.h>
 
 using namespace opencog;
 

@@ -25,9 +25,9 @@
 #include "LearnMessage.h"
 
 #include <opencog/util/StringTokenizer.h>
-#include <opencog/xml/NMXmlParser.h>
-#include <opencog/xml/NMXmlExporter.h>
-#include <opencog/xml/StringXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
+#include <opencog/persist/xml/NMXmlExporter.h>
+#include <opencog/persist/xml/StringXMLBufferReader.h>
 
 using namespace LearningServerMessages;
 
