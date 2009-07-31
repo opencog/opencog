@@ -341,7 +341,7 @@ printf("Insert test %d\n", testi++);
 
 printf("Insert test %d\n", testi++);
             tests[31] = Btr<vtree > (new vtree(mva((pHandle)EVALUATION_LINK,
-                        NewNode(CONCEPT_NODE, "Possible"),
+                        NewNode(PREDICATE_NODE, "Possible"),
                         mva((pHandle)LIST_LINK,
                             NewNode(FW_VARIABLE_NODE, "$elmerist")
                         )

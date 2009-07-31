@@ -53,6 +53,8 @@
 //using namespace boost::bimaps;
 #define GET_ASW ((AtomSpaceWrapper*) ASW(NULL))
 
+class AtomSpaceWrapperUTest;
+
 namespace opencog {
 namespace pln {
 
@@ -165,6 +167,9 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  */
 class AtomSpaceWrapper : public iAtomSpaceWrapper
 {
+    // To allow test introspection
+    friend class ::AtomSpaceWrapperUTest;
+
     //! How to represent the universe size
     // CONST_SIZE = constant value
     // REAL_SIZE  = actual size of knowledge/experience
