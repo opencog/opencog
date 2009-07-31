@@ -35,7 +35,6 @@
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Defaults.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>

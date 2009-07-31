@@ -78,7 +78,6 @@ INSTALL (FILES
 	CompositeTruthValue.h
 	CountTruthValue.h
 	CoreUtils.h
-	Defaults.h
 	FixedIntegerIndex.h
 	FollowLink.h
 	ForeachChaseLink.h
