@@ -47,8 +47,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 
 using namespace opencog;
 using namespace std::tr1::placeholders;

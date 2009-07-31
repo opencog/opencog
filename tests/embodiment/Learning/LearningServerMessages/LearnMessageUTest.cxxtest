@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 
 #include <string.h>
 #include <stdlib.h>
