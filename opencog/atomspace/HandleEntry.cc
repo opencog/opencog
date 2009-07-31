@@ -162,6 +162,11 @@ HandleEntry* HandleEntry::remove(HandleEntry* set, Handle h)
     return head;
 }
 
+static int handleCompare(const void* e1, const void* e2)
+{
+    return Handle::compare(*((Handle *)e1), *((Handle *)e2));
+}
+
 HandleEntry* HandleEntry::intersection(std::vector<HandleEntry*>& sets) throw (InconsistenceException)
 {
 
@@ -209,7 +214,7 @@ HandleEntry* HandleEntry::intersection(std::vector<HandleEntry*>& sets) throw (I
         delete sets[i];
 
         // each list is ordered, to make intersection algorithm cheaper.
-        qsort(v[i], sizeArray[i], sizeof(Handle), CoreUtils::handleCompare);
+        qsort(v[i], sizeArray[i], sizeof(Handle), handleCompare);
     }
 
     // this call will actually compute the intersection
@@ -233,10 +238,10 @@ int HandleEntry::nextMatch(Handle** sets, int* sizes, std::vector<int>& cursors)
             if (cursors[j] >= sizes[j]) {
                 return -1;
             }
-            if (CoreUtils::handleCompare(&sets[j][cursors[j]], &max) > 0) {
+            if (sets[j][cursors[j]] >  max) {
                 max = sets[j][cursors[j]];
             }
-            if (CoreUtils::handleCompare(&sets[0][cursors[0]], &sets[j][cursors[j]])) {
+            if (sets[0][cursors[0]] != sets[j][cursors[j]]) {
                 fail = true;
                 // can't break here in order to compute max
             }
@@ -248,7 +253,7 @@ int HandleEntry::nextMatch(Handle** sets, int* sizes, std::vector<int>& cursors)
             // to the next element in each array which is greater than or
             // equals to max
             for (int j = 0; j < n; j++) {
-                while (CoreUtils::handleCompare(&sets[j][cursors[j]], &max) < 0) {
+                while (sets[j][cursors[j]] < max) {
                     cursors[j]++;
                     // overflow in one of the arrays: no more matches
                     if (cursors[j] >= sizes[j]) {

@@ -45,23 +45,16 @@ public:
      * This method is used to translate an old handle to a new one mapped
      * in a hash table.
      *
+     * XXX Deprecated. This handle-remapping is very specific of the
+     * save-to-file, restore-from-file persistence code, and does not
+     * really belong in the core. Its hacky, as it does potentially 
+     * dangerous things with UUID's, and can easily trash a perfectly
+     * good hypergraph if misused. Its hard to debug. Stay Away!
+     *
      * @param Handle which will be translated.
      * @param Table that maps from old to new handles.
      */
     static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
-
-    /**
-     * Handle sort criterion used by qsort. It returns a negative value,
-     * zero or a positive value if the first argument is respectively
-     * smaller than, equal to, or larger then the second argument.
-     *
-     * @param The pointer to the first handle element.
-     * @param The pointer to the second handle element.
-     * @return A negative value, zero or a positive value if the first
-     * argument is respectively smaller than, equal to, or larger than the
-     * second argument.
-     */
-    static int handleCompare(const void*, const void*);
 
     /** XXX Deprecated, do not use in new code. */
     static int compare(Handle ha, Handle hb) {

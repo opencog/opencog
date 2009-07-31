@@ -393,7 +393,7 @@ throw (InconsistenceException)
                     //cumulativeParseEnd1 += spentTime1;
                     // Updates last inserted/merged atom handle
                     ud->lastInsertedHandle = newHandle;
-                    if (CoreUtils::handleCompare(&oldHandle, &newHandle)) {
+                    if (Handle::compare(oldHandle, newHandle)) {
                         // already existed
                         delete currentAtom;
                         logger().fine("Already existed");
@@ -520,8 +520,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         }
         // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
-        Handle uh(Handle::UNDEFINED);
-        if (CoreUtils::handleCompare(&lastInsertedLinkHandle, &uh)) {
+        if (lastInsertedLinkHandle != Handle::UNDEFINED) {
             result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
         }
     }

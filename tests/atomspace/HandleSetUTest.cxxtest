@@ -112,7 +112,7 @@ public:
             TS_ASSERT(it->hasNext());
             Handle h = it->next();
             for (int j = 0; j < N_HANDLES; j++) {
-                if (!CoreUtils::handleCompare(&h, &handles[j])) {
+                if (h == handles[j]) {
                     iterated[i] = true;
                 }
             }

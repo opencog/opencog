@@ -63,8 +63,3 @@ void CoreUtils::updateHandle(Handle *handle, HandleMap<Atom *> *handles) throw (
     }
 }
 
-int CoreUtils::handleCompare(const void* e1, const void* e2)
-{
-    return compare(*((Handle *)e1), *((Handle *)e2));
-}
-
