@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/TLB.h>
@@ -117,9 +116,9 @@ public:
             // Check handles by time
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(times[i]));
             TS_ASSERT(ret.size() == 2);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0 || CoreUtils::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0 || Handle::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
             ret.pop_front();
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0 || CoreUtils::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0 || Handle::compare(ret.front().getHandle(), handles[N_TIMES-i-1]) == 0);
             ret.pop_front();
         }
     }
@@ -343,14 +342,14 @@ public:
         for (int i = 0; i < N_TIMES; i++) {
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(times[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[0]) == 0);
             ret.pop_front();
         }
         // Overlap match
         for (int i = 0; i < N_TIMES; i++) {
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[0]) == 0);
             ret.pop_front();
         }
 
@@ -363,7 +362,7 @@ public:
         TS_ASSERT(ret.size() == N_TIMES);
         for (int i = 0; i < N_TIMES; i++) {
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
         }
         // Overlap match
@@ -371,7 +370,7 @@ public:
         TS_ASSERT(ret.size() == N_TIMES);
         for (int i = 0; i < N_TIMES; i++) {
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
         }
     }
@@ -390,12 +389,12 @@ public:
         // Gets time with exact match
         timeServer->get(back_inserter(ret), Handle::UNDEFINED, time);
         TS_ASSERT(ret.size() == 1);
-        TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+        TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[0]) == 0);
         ret.pop_front();
         // Gets time with Overlap match
         timeServer->get(back_inserter(ret), Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
         TS_ASSERT(ret.size() == 1);
-        TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+        TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[0]) == 0);
         ret.pop_front();
         // Lookups using several different times whose interval is contained by the interval of the inserted time
         for (int i = 0; i < N_TIMES; i++) {
@@ -405,7 +404,7 @@ public:
             // Overlap match return one entry for all times
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[0]) == 0);
             ret.pop_front();
         }
     }
@@ -427,7 +426,7 @@ public:
         TS_ASSERT(ret.size() == N_TIMES / 2);
         for (int i = 0; i < N_TIMES / 2; i++) {
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
         }
         for (int i = 0; i < N_TIMES / 2; i++) {
@@ -447,14 +446,14 @@ public:
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
             // Overlap match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             TS_ASSERT(ret.size() == N_TIMES / 2);
             for (int j = 0; j < N_TIMES / 2; j++) {
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[j]) == 0);
                 ret.pop_front();
             }
         }
@@ -475,14 +474,14 @@ public:
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
             // Overlap match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             TS_ASSERT(ret.size() == N_TIMES / 2);
             for (int j = 0; j < N_TIMES / 2; j++) {
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[j]) == 0);
                 ret.pop_front();
             }
         }
@@ -503,7 +502,7 @@ public:
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
             // Overlap match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
@@ -511,7 +510,7 @@ public:
             TS_ASSERT(ret.size() == howManyIntersections);
             for (unsigned int j = 0; j < howManyIntersections; j++) {
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[j]) == 0);
                 ret.pop_front();
             }
         }
@@ -532,7 +531,7 @@ public:
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
             // Overlap match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
@@ -540,7 +539,7 @@ public:
             TS_ASSERT(ret.size() == howManyIntersections);
             for (unsigned int j = 0; j < howManyIntersections; j++) {
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[j]) == 0);
                 ret.pop_front();
             }
         }
@@ -561,13 +560,13 @@ public:
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]));
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
             // Overlap match
             // Exact match
             timeServer->get(back_inserter(ret), Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             TS_ASSERT(ret.size() == 1);
-            TS_ASSERT(CoreUtils::compare(ret.front().getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(ret.front().getHandle(), handles[i]) == 0);
             ret.pop_front();
         }
         for (int i = 0; i < N_TIMES / 2; i++) {

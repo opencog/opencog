@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/util/mt19937ar.h>
@@ -98,7 +97,7 @@ public:
             TS_ASSERT(it->hasNext());
             Handle h = it->next();
             for (int j = 0; j < N_HANDLES; j++) {
-                if (!CoreUtils::compare(h, handles[j])) {
+                if (!Handle::compare(h, handles[j])) {
                     iterated[i] = true;
                 }
             }

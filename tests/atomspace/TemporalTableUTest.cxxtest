@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -103,10 +102,10 @@ public:
             result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || Handle::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
             TS_ASSERT(hte->next);
             hte = hte->next;
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0 || Handle::compare(hte->handleTemporalPair.getHandle(), handles[N_TIMES-i-1]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
         }
@@ -364,7 +363,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
             TS_ASSERT(!(hte->next));
             delete result;
         }
@@ -373,7 +372,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
             TS_ASSERT(!(hte->next));
             delete result;
         }
@@ -388,7 +387,7 @@ public:
         for (int i = 0; i < N_TIMES; i++) {
             TS_ASSERT(hte);
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             hte = hte->next;
         }
         TS_ASSERT(!hte);
@@ -399,7 +398,7 @@ public:
         for (int i = 0; i < N_TIMES; i++) {
             TS_ASSERT(hte);
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             hte = hte->next;
         }
         TS_ASSERT(!hte);
@@ -418,14 +417,14 @@ public:
         HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, time);
         HandleTemporalPairEntry* hte = result;
         TS_ASSERT(hte);
-        TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
+        TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
         TS_ASSERT(!(hte->next));
         delete result;
         // Gets time with Overlap match
         result = temporalTable->get(Handle::UNDEFINED, time, TemporalTable::OVERLAPS);
         hte = result;
         TS_ASSERT(hte);
-        TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
+        TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
         TS_ASSERT(!(hte->next));
         delete result;
         // Lookups using several different times whose interval is contained by the interval of the inserted time
@@ -436,7 +435,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(times[i]), TemporalTable::OVERLAPS);
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[0]) == 0);
             TS_ASSERT(!(hte->next));
             delete result;
         }
@@ -458,7 +457,7 @@ public:
         for (int i = 0; i < N_TIMES / 2; i++) {
             TS_ASSERT(hte);
             // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-            // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             hte = hte->next;
         }
         TS_ASSERT(!hte);
@@ -480,7 +479,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
@@ -489,7 +488,7 @@ public:
             for (int j = 0; j < N_TIMES / 2; j++) {
                 TS_ASSERT(hte);
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
                 hte = hte->next;
             }
             TS_ASSERT(!hte);
@@ -512,7 +511,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
@@ -521,7 +520,7 @@ public:
             for (int j = 0; j < N_TIMES / 2; j++) {
                 TS_ASSERT(hte);
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
                 hte = hte->next;
             }
             TS_ASSERT(!hte);
@@ -544,7 +543,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
@@ -554,7 +553,7 @@ public:
             for (int j = 0; j < howManyIntersections; j++) {
                 TS_ASSERT(hte);
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
                 hte = hte->next;
             }
             TS_ASSERT(!hte);
@@ -577,7 +576,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
@@ -587,7 +586,7 @@ public:
             for (int j = 0; j < howManyIntersections; j++) {
                 TS_ASSERT(hte);
                 // Cannot ensure the order will be the same since it uses a HandleSet internally (not a sorted HandleEntry)
-                // TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
+                // TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[j]) == 0);
                 hte = hte->next;
             }
             TS_ASSERT(!hte);
@@ -610,7 +609,7 @@ public:
             HandleTemporalPairEntry* result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]));
             HandleTemporalPairEntry* hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
             // Overlap match
@@ -618,7 +617,7 @@ public:
             result = temporalTable->get(Handle::UNDEFINED, *(specialTimes[i]), TemporalTable::OVERLAPS);
             hte = result;
             TS_ASSERT(hte);
-            TS_ASSERT(CoreUtils::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
+            TS_ASSERT(Handle::compare(hte->handleTemporalPair.getHandle(), handles[i]) == 0);
             TS_ASSERT(!hte->next);
             delete result;
         }
