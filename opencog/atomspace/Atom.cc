@@ -193,7 +193,7 @@ void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
     outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
     if (classserver().isA(type, UNORDERED_LINK)) {
-        std::sort(outgoing.begin(), outgoing.end(), CoreUtils::HandleComparison());
+        std::sort(outgoing.begin(), outgoing.end(), HandleComparison());
     }
 }
 

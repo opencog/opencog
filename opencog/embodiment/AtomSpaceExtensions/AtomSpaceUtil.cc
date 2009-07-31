@@ -29,7 +29,6 @@
  * Copyright(c), 2007
  */
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/HandleTemporalPairEntry.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -150,11 +149,11 @@ bool AtomSpaceUtil::isActionPredicatePresent(const AtomSpace& atomSpace,
     HandleSeq evalListLinkOutgoing;
     evalListLinkOutgoing.push_back(actionExecLink);
     Handle evalListLink = atomSpace.getHandle(LIST_LINK, evalListLinkOutgoing);
-    if (CoreUtils::compare(evalListLink, Handle::UNDEFINED)) {
+    if (evalListLink != Handle::UNDEFINED) {
         //cout << "Found the ListLink with the ExecLink inside" << endl;
         Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE,
                                actionPredicateName);
-        if (CoreUtils::compare(predicateNode, Handle::UNDEFINED)) {
+        if (predicateNode != Handle::UNDEFINED) {
             //cout << "Found the PredicateNode" << endl;
             HandleSeq evalLinkOutgoing;
             evalLinkOutgoing.push_back(predicateNode);
@@ -162,7 +161,7 @@ bool AtomSpaceUtil::isActionPredicatePresent(const AtomSpace& atomSpace,
             Handle evalLink = atomSpace.getHandle(EVALUATION_LINK,
                                                   evalLinkOutgoing);
             //cout << "evalLink = " << evalLink << endl;
-            if (CoreUtils::compare(evalLink, Handle::UNDEFINED)) {
+            if (evalLink != Handle::UNDEFINED) {
                 //cout << "Found the EvalLink with the PredicateNode and the ListLink in its " << endl;
                 list<HandleTemporalPair> ocurrences;
                 atomSpace.getTimeInfo(back_inserter(ocurrences),

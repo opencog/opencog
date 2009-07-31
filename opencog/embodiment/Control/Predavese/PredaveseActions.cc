@@ -24,7 +24,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -255,12 +254,12 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
     logger().debug("pet_command - trick: %s", trickName.c_str());
     Handle S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, trickName);
 
-    if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
+    if (S == Handle::UNDEFINED) {
         logger().warn("pet_command - Found no schema node: %s", trickName.c_str());
         // Grounded schema S does not exist. Gets the built-in "unknowTrick" schema instead.
         // (i.e., the schema where pet makes an interrogation gesture or something like that)
         S = petInterface.getAtomSpace().getHandle(GROUNDED_SCHEMA_NODE, UNKNOWN_TRICK_SCHEMA_NAME);
-        if (!CoreUtils::compare(S, Handle::UNDEFINED)) {
+        if (S == Handle::UNDEFINED) {
             logger().warn("pet_command - Found no schema node: %s", UNKNOWN_TRICK_SCHEMA_NAME);
         } else {
             // the given command will feed RuleEngine with the unknow trick

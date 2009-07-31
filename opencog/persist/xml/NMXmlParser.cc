@@ -29,8 +29,6 @@
 #include <math.h>
 #include <expat.h>
 
-
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
