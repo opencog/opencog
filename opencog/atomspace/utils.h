@@ -106,25 +106,6 @@ template <> struct hash2int<char *> {
 enum padAlignment { CENTER, LEFT, RIGHT };
 std::string padstr(const char*, unsigned int, padAlignment) throw (InvalidParamException);
 
-class FileList
-{
-
-private:
-
-    std::vector<char *>fileList;
-
-public:
-
-    FileList(const char* ) throw (IOException);
-    FileList();
-    ~FileList();
-
-    static FileList *getAllFilesRecursively(const char* );
-
-    unsigned int getSize();
-    const char* getFile(unsigned int) throw (IndexErrorException);
-};
-
 /**
  * This method reads a line from a string and returns
  * the rest of the string.

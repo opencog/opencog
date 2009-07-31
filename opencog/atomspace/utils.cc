@@ -102,97 +102,6 @@ std::string opencog::padstr(const char* s, unsigned int size, padAlignment a) th
     return (answer);
 }
 
-#ifndef WIN32
-
-#include <dirent.h>
-
-FileList *FileList::getAllFilesRecursively(const char* arg)
-{
-
-    //printf("Getting files from <%s>\n", arg);
-    FileList *answer = new FileList();
-    DIR *d = opendir(arg);
-    if (d == NULL) {
-        //printf("is file\n");
-        //is file
-        answer->fileList.push_back(strdup(arg));
-        return answer;
-    } else {
-        //printf("is dir\n");
-        // is dir
-        struct dirent *dp;
-        while ((dp = readdir(d)) != NULL) {
-            if (!strcmp(dp->d_name, ".") || (!strcmp(dp->d_name, ".."))) {
-                continue;
-            }
-            char buf[1 << 16];
-            sprintf(buf, "%s", arg);
-            if (arg[strlen(arg) - 1] != '/') strcat(buf, "/");
-            strcat(buf, dp->d_name);
-            FileList *aux = getAllFilesRecursively(buf);
-            for (unsigned int i = 0; i < aux->fileList.size(); i++) {
-                answer->fileList.push_back(strdup(aux->fileList[i]));
-            }
-            delete aux;
-        }
-        closedir(d);
-        return answer;
-    }
-}
-
-FileList::FileList()
-{
-}
-
-FileList::FileList(const char* arg) throw (IOException)
-{
-
-    DIR *d = opendir(arg);
-    if (d != NULL) {
-        struct dirent *dp;
-        while ((dp = readdir(d)) != NULL) {
-            if (!strcmp(dp->d_name, ".") || (!strcmp(dp->d_name, ".."))) {
-                continue;
-            }
-            char buf[1 << 16];
-            sprintf(buf, "%s", arg);
-            if (arg[strlen(arg) - 1] != '/') strcat(buf, "/");
-            strcat(buf, dp->d_name);
-            fileList.push_back(strdup(buf));
-        }
-        closedir(d);
-    } else {
-        FILE *f = fopen(arg, "r");
-        if (f == NULL) {
-            throw IOException(TRACE_INFO, "utils - Unable to open file or directory '%s'.", arg);
-        }
-        fclose(f);
-        fileList.push_back(strdup(arg));
-    }
-}
-
-FileList::~FileList()
-{
-    for (unsigned int i = 0; i < fileList.size(); i++) {
-        free(fileList[i]);
-    }
-}
-
-unsigned int FileList::getSize()
-{
-    return fileList.size();
-}
-
-const char* FileList::getFile(unsigned int i) throw (IndexErrorException)
-{
-    if (i < 0 || i >= fileList.size()) {
-        throw IndexErrorException(TRACE_INFO, "utils - File index out of bounds: '%d'", i);
-    }
-    return fileList[i];
-}
-
-#endif // not WIN32
-
 const char* opencog::nextLine(const char *from, std::string &line)
 {
     line = "";
@@ -564,7 +473,8 @@ std::string opencog::XMLembed(const std::string &elem, const std::string &pcdata
 //typedef vtree vtree;
 typedef vtree::iterator pre_it;
 
-/*
+#if NOT_USED_ANYMORE_DELETE_ME_WHENEVER
+
 vtree opencog::MakeVirtualAtom_slow(Handle T, const vtree& t1, const vtree& t2, const vtree& t3, const vtree& t4, const vtree& t5)
 {
     //printf("MakeVirtualAtom_slow Handle, vtree, vtree, vtree, vtree, vtree\n");
@@ -767,5 +677,6 @@ vtree opencog::MakeVirtualAtom_slow(Vertex T)
         puts("MakeVirtualAtom_slow exception."); getc(stdin);  return vtree();
     }
 }
-*/
+
+#endif /* NOT_USED_ANYMORE_DELETE_ME_WHENEVER */
 
