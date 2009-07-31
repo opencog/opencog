@@ -50,10 +50,6 @@
 namespace opencog
 {
 
-//typedef unsigned int uint;
-//typedef unsigned long ulong;
-typedef tree<Vertex> vtree;
-
 // Specific toString method for float numbers (force 3 digits after decimal point)
 std::string toString(double data);
 
@@ -217,29 +213,6 @@ typedef TypeWrapper<signed char> CharWrapper;
 typedef TypeWrapper<short int> ShortIntegerWrapper;
 //typedef TypeWrapper<ShortFloat> ShortFloatWrapper;
 
-#define mva MakeVirtualAtom_slow
-
-/// Handles are actually mostly types, here. The Handle/Type ambiguity
-/// will be resolved soon enough. (says Ari, March 20, 2006)
-
-tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4, const tree<Vertex>& t5);
-tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3, const tree<Vertex>& t4);
-tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2, const tree<Vertex>& t3);
-tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1, const tree<Vertex>& t2);
-tree<Vertex> MakeVirtualAtom_slow(Vertex v, const tree<Vertex>& t1);
-tree<Vertex> MakeVirtualAtom_slow(Vertex v);
-
-
-/// Convert a real atom into vtree in which only NODEs are left as real atoms
-/// while all links become virtual, ie. tree branches
-
-struct less_tree_vertex : public std::binary_function<tree<Vertex>, tree<Vertex>, bool> {
-    bool operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const;
-    bool operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs,
-                    tree<Vertex>::iterator ltop,
-                    tree<Vertex>::iterator rtop) const;
-};
-
 /** Checks whether the character is printable */
 bool visible(char c);
 
@@ -263,10 +236,6 @@ public:
 struct Listener {
     virtual ~Listener() {}
     virtual void OnUpdate(const void*) = 0;
-};
-
-struct less_vtree : public std::binary_function<tree<Vertex>, tree<Vertex>, bool> {
-    bool operator()(const tree<Vertex>& lhs, const tree<Vertex>& rhs) const;
 };
 
 } // namespace opencog

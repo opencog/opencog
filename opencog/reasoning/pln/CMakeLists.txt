@@ -52,7 +52,8 @@ ADD_LIBRARY (pln SHARED
     utils/Grim.cc
 #    utils/XMLNode.cc
 #    utils/XMLNodeLoader.cc
-    utils/NMPrinter.cc
+	utils/NMPrinter.cc
+	utils/mva.cc
     # for later:
     #CrispUnificationRule.cc
     # convert to OpenCog specific class:

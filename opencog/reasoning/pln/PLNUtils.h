@@ -61,6 +61,8 @@
 
 #include "AtomLookupProvider.h"
 
+#include "utils/mva.h"
+
 using namespace opencog;
 using namespace opencog::pln;
 
