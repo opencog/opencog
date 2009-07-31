@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(
 	${OPENCOG_SOURCE_DIR}/src/util
 	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/xml
+	${OPENCOG_SOURCE_DIR}/src/persist/xml
 	${OPENCOG_SOURCE_DIR}/test/xml
 )
 

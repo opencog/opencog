@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 
-#include <opencog/xml/XMLBufferReader.h>
+#include <opencog/persist/xml/XMLBufferReader.h>
 #include <opencog/util/exceptions.h>
 
 #ifdef WIN32

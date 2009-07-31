@@ -34,7 +34,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
-#include <opencog/xml/XMLBufferReader.h>
+#include <opencog/persist/xml/XMLBufferReader.h>
 
 namespace opencog
 {

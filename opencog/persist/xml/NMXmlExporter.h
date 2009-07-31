@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleSet.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 
 namespace opencog
 {

@@ -28,7 +28,7 @@ INSTALL (FILES
 	NMXmlParser.h
 	StringXMLBufferReader.h
 	XMLBufferReader.h
-	DESTINATION "include/opencog/xml"
+	DESTINATION "include/opencog/persist/xml"
 )
 
 TARGET_LINK_LIBRARIES(xml

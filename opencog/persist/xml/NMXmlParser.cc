@@ -35,9 +35,9 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlDefinitions.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlDefinitions.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 
 /*
  * XXX To be fixed: remove all of the uses of "throw" in this code,

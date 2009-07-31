@@ -30,8 +30,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlParser.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlParser.h>
 #include "NMXmlParserExperiment.h"
 
 using namespace opencog;

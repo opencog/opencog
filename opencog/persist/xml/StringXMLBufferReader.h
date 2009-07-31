@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_STRING_XML_BUFFER_READER_H
 #define _OPENCOG_STRING_XML_BUFFER_READER_H
 
-#include <opencog/xml/XMLBufferReader.h>
+#include <opencog/persist/xml/XMLBufferReader.h>
 
 namespace opencog
 {

@@ -23,8 +23,8 @@
  */
 
 #include <opencog/util/platform.h>
-#include <opencog/xml/FileXMLBufferReader.h>
-#include <opencog/xml/NMXmlExporter.h>
+#include <opencog/persist/xml/FileXMLBufferReader.h>
+#include <opencog/persist/xml/NMXmlExporter.h>
 #include "NMXmlParserExperiment.h"
 
 using namespace opencog;

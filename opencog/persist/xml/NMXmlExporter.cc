@@ -27,7 +27,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/Link.h>
-#include <opencog/xml/NMXmlDefinitions.h>
+#include <opencog/persist/xml/NMXmlDefinitions.h>
 
 using namespace opencog;
 
