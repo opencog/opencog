@@ -55,6 +55,11 @@ struct field_set {
     struct const_contin_iterator;
     struct const_onto_iterator;
 
+    /**
+     * The field struct provides the information needed to 
+     * get/set the value of some variable(of any type) in
+     * an instance (i.e. a packed/vector)
+     */
     struct field {
         field() { }
         field(arity_t w, size_t ma, size_t mi)
