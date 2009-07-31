@@ -43,10 +43,10 @@ class Handle
 {
 
 friend class TLB;
-friend class ListRequest;
 friend class AtomStorage;
 friend class SchemeSmob;
 friend class AtomspaceHTabler;
+friend class ListRequest; // XXX fixme -- due to comand-line UUID ref.
 friend class CompositeTruthValue; // XXX fixme -- due to wacked fromString
 
 private:

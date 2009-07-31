@@ -62,7 +62,8 @@ bool ListRequest::execute()
         if (*it == "-h") { // filter by handle
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            handle = Handle(strtol((*it).c_str(), NULL, 0));
+            UUID uuid = strtol((*it).c_str(), NULL, 0);
+            handle = Handle(uuid);
             if (TLB::isInvalidHandle(handle)) {
                 _error << "invalid handle" << std::endl;
                 sendError();
