@@ -240,34 +240,6 @@ bool less_tree_vertex::operator()(const vtree& lhs, const vtree& rhs,
     return false;
 }
 
-bool opencog::LoadTextFile(const std::string fname, std::string& dest)
-{
-    FILE *f = fopen(fname.c_str(), "rt");
-    if (f == NULL) {
-        puts("File not found.");
-        return false;
-    }
-    fseek(f, 0L, SEEK_END);
-    long fsize = ftell(f);
-    fseek(f, 0L, SEEK_SET);
-
-    char *buf = new char[fsize+2];
-    long bptr = 0;
-
-    while (!feof(f))
-        buf[bptr++] = getc(f);
-// fread(buf, 8000, 1+(fsize/8000), f);
-    buf[bptr] = '\0';
-
-    fclose(f);
-
-    dest = buf;
-
-    delete[] buf;
-
-    return true;
-}
-
 std::string toupper(std::string k)
 {
     const char* data = k.c_str();
@@ -284,15 +256,6 @@ std::string toupper(std::string k)
 }
 
 /* MISC UTILITIES */
-
-bool opencog::exists(const char *fname)
-{
-    FILE* f = fopen(fname, "rb");
-    if (!f)
-        return false;
-    fclose(f);
-    return true;
-}
 
 char opencog::Isox(char s)
 {

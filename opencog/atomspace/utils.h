@@ -57,17 +57,6 @@ typedef tree<Vertex> vtree;
 // Specific toString method for float numbers (force 3 digits after decimal point)
 std::string toString(double data);
 
-/**
- * Returns a string from the given argument by using the << operator
- */
-//Nil: I comment that template because the exact same one is in StringManipulator
-//template <typename T>
-//std::string toString(T data)
-//{
-//    std::ostringstream oss;
-//    oss << data;
-//    return oss.str();
-//}
 
 /**
  * Returns a copy of the given string surrounded by ANSI bold tags.
@@ -190,12 +179,6 @@ InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
 
     return ret;
 }
-
-/** Load the contents of a textfile \param fname to \param dest. */
-bool LoadTextFile(const std::string fname, std::string& dest);
-
-/** Checks whether a file exists */
-bool exists(const char *fname);
 
 /** Checks whether the strings are equal, when case is ignored. */
 bool nocase_equal(const char *s1, const char *s2);

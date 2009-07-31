@@ -43,6 +43,10 @@ namespace opencog
  */
 bool fileExists(const char* filename);
 
+/** Checks whether a file exists */
+bool exists(const char *fname);
+
+
 /**
  * Expand the path string replacing any ocurrency of the $USER flag with the
  * current system user information. If no user is found, unknown_user is place.
@@ -67,6 +71,10 @@ bool createDirectory(const char* filename);
  * @return true if the file was successfully read into the string
  */
 bool appendFileContent(const char* filename, std::string &s);
+
+/** Load the contents of a textfile \param fname to \param dest. */
+bool LoadTextFile(const std::string fname, std::string& dest);
+
 
 } // namespace opencog
 

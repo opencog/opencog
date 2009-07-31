@@ -51,6 +51,15 @@ bool opencog::fileExists(const char* filename)
     return true;
 }
 
+bool opencog::exists(const char *fname)
+{
+    FILE* f = fopen(fname, "rb");
+    if (!f)
+        return false;
+    fclose(f);
+    return true;
+}
+
 void opencog::expandPath(std::string& path)
 {
 
@@ -96,4 +105,33 @@ bool opencog::appendFileContent(const char* filename, std::string &s) {
     s = str;
     return true;
 }
+
+bool opencog::LoadTextFile(const std::string fname, std::string& dest)
+{
+    FILE *f = fopen(fname.c_str(), "rt");
+    if (f == NULL) {
+        puts("File not found.");
+        return false;
+    }
+    fseek(f, 0L, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0L, SEEK_SET);
+
+    char *buf = new char[fsize+2];
+    long bptr = 0;
+
+    while (!feof(f))
+        buf[bptr++] = getc(f);
+// fread(buf, 8000, 1+(fsize/8000), f);
+    buf[bptr] = '\0';
+
+    fclose(f);
+
+    dest = buf;
+
+    delete[] buf;
+
+    return true;
+}
+
 

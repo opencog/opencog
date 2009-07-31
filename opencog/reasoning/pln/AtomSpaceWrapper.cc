@@ -24,14 +24,14 @@
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/util/Logger.h>
+#include <opencog/atomspace/utils.h>
 #include <opencog/server/CogServer.h> // To get access to AtomSpace
-#include <opencog/util/tree.h>
-#include <opencog/atomspace/utils.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/XMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/files.h>
+#include <opencog/util/tree.h>
 
 #include  <boost/foreach.hpp>
 
