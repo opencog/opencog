@@ -110,9 +110,10 @@ SCM SchemeSmob::ss_vh_get_value (SCM s)
 
 	const char * str = VersionHandle::indicatorToStr(vh->indicator);
 	SCM ind = scm_from_locale_string(str);
-	SCM shandle = scm_from_ulong(vh->substantive.value());
+	UUID uuid = vh->substantive.value();
+	SCM suuid = scm_from_ulong(uuid);
 	SCM h;
-	SCM_NEWSMOB (h, cog_handle_tag, shandle);
+	SCM_NEWSMOB (h, cog_handle_tag, suuid);
 	SCM sind = scm_from_locale_symbol("indicator");
 	SCM satom = scm_from_locale_symbol("atom");
 

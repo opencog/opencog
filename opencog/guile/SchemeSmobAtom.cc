@@ -34,7 +34,8 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 		scm_wrong_type_arg_msg(subrname, 1, satom, "opencog atom");
 
 	SCM shandle = SCM_SMOB_OBJECT(satom);
-	Handle h(scm_to_ulong(shandle));
+	UUID uuid = scm_to_ulong(shandle);
+	Handle h(uuid);
 	return h;
 }
 

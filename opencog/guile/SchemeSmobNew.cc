@@ -51,7 +51,7 @@ std::string SchemeSmob::to_string(SCM node)
  */
 std::string SchemeSmob::to_string(Handle h)
 {
-   return handle_to_string(h, 0);
+	return handle_to_string(h, 0);
 }
 
 std::string SchemeSmob::handle_to_string(Handle h, int indent)
@@ -148,14 +148,15 @@ std::string SchemeSmob::handle_to_string(SCM node)
  */
 SCM SchemeSmob::handle_to_scm (Handle h)
 {
-	SCM shandle = scm_from_ulong(h.value());
+	UUID uuid = h.value();
+	SCM shandle = scm_from_ulong(uuid);
 	SCM_RETURN_NEWSMOB (cog_handle_tag, shandle);
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
 	SCM suuid = SCM_SMOB_OBJECT(sh);
-	unsigned long uuid = scm_to_ulong(suuid);
+	UUID uuid = scm_to_ulong(suuid);
 	return Handle(uuid);
 }
 
@@ -202,7 +203,8 @@ SCM SchemeSmob::ss_node_p (SCM s)
 		return SCM_BOOL_F;
 
 	SCM shandle = SCM_SMOB_OBJECT(s);
-   Handle h(scm_to_ulong(shandle));
+	UUID uuid = scm_to_ulong(shandle);
+	Handle h(uuid);
 	Atom *a = TLB::getAtom(h);
 
 	if (dynamic_cast<Node *>(a)) return SCM_BOOL_T;
@@ -219,7 +221,8 @@ SCM SchemeSmob::ss_link_p (SCM s)
 		return SCM_BOOL_F;
 
 	SCM shandle = SCM_SMOB_OBJECT(s);
-   Handle h(scm_to_ulong(shandle));
+	UUID uuid = scm_to_ulong(shandle);
+	Handle h(uuid);
 	Atom *a = TLB::getAtom(h);
 
 	if (dynamic_cast<Link *>(a)) return SCM_BOOL_T;
@@ -380,7 +383,8 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 		{
 			// Get the handle  ... should we check for valid handles here?
 			SCM shandle = SCM_SMOB_OBJECT(satom);
-			Handle h(scm_to_ulong(shandle));
+			UUID uuid = scm_to_ulong(shandle);
+			Handle h(uuid);
 			outgoing_set.push_back(h);
 		}
 		else if (scm_is_pair(satom) && !scm_is_null(satom_list))
