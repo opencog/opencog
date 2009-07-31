@@ -17,7 +17,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/SenseSimilarity.h>
-#include <opencog/persist/odbcxx.h>
+#include <opencog/persist/sql/odbcxx.h>
 
 namespace opencog {
 
