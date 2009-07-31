@@ -41,9 +41,10 @@ private:
 public:
 
     AtomSpaceWrapperUTest() {
-        cout << "Initializing AtomSpaceWrapper test env...";
+        cout << "Initializing AtomSpaceWrapper test env..." << endl;
 
         // This access is required to initialise CogServer.
+        cout << "Initializing CogServer" << endl;
         CogServer& cogserver = static_cast<CogServer&>(server());
 
         // This is also necessary to make sure that the ASW is initialized
@@ -62,19 +63,33 @@ public:
 
 
     void testAtomIdentity() {
-        // Test atom identity works
-        pHandle h1 = asw->addNode(FW_VARIABLE_NODE, "filler",
+        // Test node identity works
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "x",
                 SimpleTruthValue(0.001f,1.0f), false, false);
-        pHandle h2 = asw->addNode(FW_VARIABLE_NODE, "filler",
+        pHandle h2 = asw->addNode(CONCEPT_NODE, "x",
                 SimpleTruthValue(0.001f,1.0f), false, false);
         TS_ASSERT(h1 == h2);
         
-        // Test with mananged == true
-        pHandle h3 = asw->addNode(FW_VARIABLE_NODE, "filler",
+        // Test with managed == true
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "x2",
                 SimpleTruthValue(0.001f,1.0f), false, true);
-        pHandle h4 = asw->addNode(FW_VARIABLE_NODE, "filler",
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "x2",
                 SimpleTruthValue(0.001f,1.0f), false, true);
         TS_ASSERT(h3 == h4);
+
+        // Test FW node identity works
+        pHandle h5 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, false);
+        pHandle h6 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false, false);
+        TS_ASSERT(h5 == h6);
+        
+        // Test FW with managed == true
+        pHandle h7 = asw->addNode(FW_VARIABLE_NODE, "filler2",
+                SimpleTruthValue(0.001f,1.0f), false, true);
+        pHandle h8 = asw->addNode(FW_VARIABLE_NODE, "filler2",
+                SimpleTruthValue(0.001f,1.0f), false, true);
+        TS_ASSERT(h7 == h8);
     }
 
     void testAddDuplicateNode() {
@@ -133,7 +148,6 @@ public:
         cout << endl;*/
         TS_ASSERT(realIncoming_h1.size() == plnIn_h1.size());
 
-
         pHandleSeq pOutgoing = asw->getOutgoing(l1);
 
         vhpair vhFromLink = asw->fakeToRealHandle(pOutgoing[0]);
@@ -145,6 +159,8 @@ public:
         TS_ASSERT(vhFromLink.first == rh2.first);
         TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
         TS_ASSERT(rh2.second == NULL_VERSION_HANDLE);
+
+        // check the returned truth values
     }
 
     void testAddLinkToOneVersionedNode() {
@@ -190,6 +206,7 @@ public:
         vhFromLink = asw->fakeToRealHandle(l2);
         TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
         
+        // check the returned truth values
     }
 
     void testAddLinkBothVersionedNodes() {
@@ -231,6 +248,150 @@ public:
         // Check link
         vhFromLink = asw->fakeToRealHandle(l2);
         TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
+        // check the returned truth values
     }
+
+    void testAddFWVar() {
+        SimpleTruthValue tv(0.8, 0.9);
+        std::string varName = "$testfwvar";
+        pHandle fw1 = asw->addNode(FW_VARIABLE_NODE, varName, tv);
+        // Check we got a proper pHandle back
+        TS_ASSERT(fw1 != PHANDLE_UNDEFINED);
+        // Check that we can the name back
+        TS_ASSERT(asw->getName(fw1) == varName);
+        // Check that we CANNOT add a link to this node
+        pHandleSeq outgoing;
+        outgoing.push_back(fw1);
+        pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv);
+        TS_ASSERT(l1 == PHANDLE_UNDEFINED);
+
+        // Check the arity is 0
+        TS_ASSERT(asw->getArity(fw1) == 0);
+
+        // Check the incoming set size is 0
+        TS_ASSERT(asw->getIncoming(fw1).size() == 0);
+
+        // Check that the outgoing set size is 0
+        TS_ASSERT(asw->getOutgoing(fw1).size() == 0);
+
+    }
+    
+    void testASW() {
+        //! @bug For some reason there is a segfault when we try to change the
+        //! AtomSpace. This isn't extremely important and so I've left it since
+        //! I couldn't trivially work it out. Anybody who can explain why this
+        //! happens please do.
+
+        //AtomSpace* test = new AtomSpace();
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        // test that the atomspace currently matches that of
+        // the cogserver
+        TS_ASSERT(asw->atomspace == cogserver.getAtomSpace());
+        // check that we can replace the AtomSpace ptr
+        //asw = (AtomSpaceWrapper*) ASW(test);
+        //TS_ASSERT(asw->atomspace == test);
+        //asw = (AtomSpaceWrapper*) ASW(cogserver.getAtomSpace());
+        //TS_ASSERT(asw->atomspace == cogserver.getAtomSpace());
+        // check that we get a result with NULL
+        //TS_ASSERT(((AtomSpaceWrapper*)ASW())->atomspace == cogserver.getAtomSpace());
+        //delete test;
+    }
+
+    void testInheritsType() {
+        // Test with immediate inheritance 
+        TS_ASSERT(asw->inheritsType(ORDERED_LINK, LINK));
+        // Test non-inheritance 
+        TS_ASSERT(!asw->inheritsType(CONCEPT_NODE, LINK));
+        // Test with extended inheritance 
+        TS_ASSERT(asw->inheritsType(AND_LINK, LINK));
+    }
+
+    void testIsSubType() {
+        SimpleTruthValue tv(0.8, 0.9);
+        pHandleSeq outgoing;
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "magneto", tv);
+        outgoing.push_back(h1);
+        pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv);
+        // Test with immediate inheritance 
+        TS_ASSERT(asw->isSubType(l1, ORDERED_LINK));
+        // Test with extended inheritance 
+        TS_ASSERT(asw->isSubType(l1, LINK));
+        // Test non-inheritance 
+        TS_ASSERT(!asw->isSubType(l1, FORALL_LINK));
+        // Test with FWVarNode
+        std::string varName = "$testfwvar";
+        pHandle fw1 = asw->addNode(FW_VARIABLE_NODE, varName, tv);
+        TS_ASSERT(asw->isSubType(fw1, FW_VARIABLE_NODE));
+        TS_ASSERT(!asw->isSubType(fw1, FORALL_LINK));
+    }
+
+    void testOutgoing() {
+        // nothing to add to the initial tests with versioning
+        // check the returned truth values
+
+    }
+
+    void testOutgoingAt() {
+        // add the initial tests a check for a specific index
+
+        // test that the right TV is retrieved
+    }
+
+    void testGetIncoming() {
+        SimpleTruthValue tv(0.8, 0.9);
+        // check for both node and link
+
+        // check with FWVar
+        std::string varName = "$testfwvar";
+        pHandle fw1 = asw->addNode(FW_VARIABLE_NODE, varName, tv);
+        TS_ASSERT(asw->getIncoming(fw1).size() == 0);
+    }
+
+    void testGetNextPHandle() {
+        SimpleTruthValue tv(0.8, 0.9);
+        pHandleSeq outgoing;
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "magneto", tv);
+        pHandle nextp = asw->getNextPHandle();
+        TS_ASSERT(h1 != nextp);
+        outgoing.push_back(h1);
+        pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv);
+        TS_ASSERT(l1 == nextp);
+        // add some nodes and FWvars then check that the new handle isn't in
+        // either variableShadowMap or vhmap
+        std::string varName = "$testfwvar";
+        nextp = asw->getNextPHandle();
+        pHandle fw1 = asw->addNode(FW_VARIABLE_NODE, varName, tv);
+        TS_ASSERT(fw1 == nextp);
+        nextp = asw->getNextPHandle();
+        // Check nextp isn't in either fw var shadow map
+        std::map<pHandle,std::string>::iterator i =
+            asw->reverseVariableShadowMap.find(nextp);
+        TS_ASSERT(i == asw->reverseVariableShadowMap.end());
+        // ... or in the version handle map to a real Handle
+        AtomSpaceWrapper::vhmap_t::iterator vi = asw->vhmap.find(nextp);
+        TS_ASSERT(vi == asw->vhmap.end());
+    }
+
+    void testGetTV() {
+        // check node, link, fwvar, and PHANDLE_UNDEFINED
+        SimpleTruthValue tv1(0.8, 0.9);
+        SimpleTruthValue tv2(0.2, 0.3);
+        SimpleTruthValue tv3(0.4, 0.2);
+        pHandleSeq outgoing;
+        pHandle h1 = asw->addNode(CONCEPT_NODE, "magneto", tv1);
+        TS_ASSERT(asw->getTV(h1) == tv1);
+        outgoing.push_back(h1);
+        pHandle l1 = asw->addLink(LIST_LINK, outgoing, tv2);
+        TS_ASSERT(asw->getTV(l1) == tv2);
+
+        // FWVar can't store a TV, it always returns a TRIVIAL_TV
+        std::string varName = "$testfwvar";
+        pHandle fw1 = asw->addNode(FW_VARIABLE_NODE, varName, tv3);
+        TS_ASSERT(asw->getTV(fw1) == TruthValue::TRIVIAL_TV());
+
+        // ... so does an undefined pHandle
+        TS_ASSERT(asw->getTV(PHANDLE_UNDEFINED) == TruthValue::TRIVIAL_TV());
+    }
+
 };
 

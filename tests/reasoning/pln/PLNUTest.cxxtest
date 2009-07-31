@@ -214,7 +214,7 @@ private:
         config().set("PLN_PRINT_REAL_ATOMS","true");
 
         testFitnessEvaluator=BEST;
-        currentDebugLevel=100;
+        currentDebugLevel=-4;
     }
 
     void initAxiomSet(string premiseFile)
@@ -238,7 +238,7 @@ private:
         AtomSpaceWrapper *atw = GET_ASW;
         stats::Instance().ITN2atom.clear();
 
-        currentDebugLevel=0;
+        //currentDebugLevel=0;
         rawPrint(*t->target, t->target->begin(), -2);
         
         clock_t start, finish;
@@ -250,7 +250,7 @@ private:
         atw->allowFWVarsInAtomSpace = true;
         
         fflush(stdout);
-        currentDebugLevel=-4;
+        //currentDebugLevel=-4;
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
         uint s_i=0;
@@ -264,11 +264,8 @@ private:
 
         const int expansions_per_run = 1000;
 
-        if (t->minEvalsOfFittestBIT > 0)
-        {
-            do
-            {
-
+        if (t->minEvalsOfFittestBIT > 0) {
+            do {
 /*              for (int k=0;k<expansions_per_run;k++)
                     state->expandFittest();
                 
@@ -276,8 +273,8 @@ private:
 
                 cprintf(-3, "\n    Evaluating...\n");
                 
-                if (foo42)
-                    currentDebugLevel=4;
+                //if (foo42)
+                    //currentDebugLevel=4;
                 
                 int expansions = expansions_per_run;
                 eres = state->infer(expansions, 0.000001f, 0.01f);      
@@ -291,7 +288,7 @@ private:
                             "beginning of the cycle).\n", expansions,
                             expansions_per_run);
 
-                currentDebugLevel=-4;
+                //currentDebugLevel=-4;
 
                 eh = (eres.empty() ? PHANDLE_UNDEFINED :
                         _v2h(*(*eres.rbegin())->getVtree().begin()));
@@ -306,8 +303,7 @@ private:
                 float m1=t->minTV->getMean();
                 float m2=t->maxTV->getMean(); */
 
-                if (etv)
-                {
+                if (etv) {
                     printf("%f / %f\n", etv->getConfidence(),
                             t->minTV->getConfidence());
                     printf("%f / %f\n", etv->getMean(), t->minTV->getMean());
@@ -316,11 +312,13 @@ private:
                     printf("%f / %f\n", etv->getMean(), t->maxTV->getMean());
                 }
 
-                passed = (eh != PHANDLE_UNDEFINED && etv &&
-                etv->getConfidence() >= t->minTV->getConfidence() &&
-                etv->getMean()          >= t->minTV->getMean() &&
-                etv->getConfidence() <= t->maxTV->getConfidence() &&
-                etv->getMean()          <= t->maxTV->getMean()
+                passed = (
+                    eh != PHANDLE_UNDEFINED &&
+                    etv &&
+                    etv->getConfidence() >= t->minTV->getConfidence() &&
+                    etv->getMean()       >= t->minTV->getMean() &&
+                    etv->getConfidence() <= t->maxTV->getConfidence() &&
+                    etv->getMean()       <= t->maxTV->getMean()
                 );
         
                 cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
@@ -431,7 +429,7 @@ public:
             
             // This access is required to initialise CogServer.
             CogServer& cogserver = static_cast<CogServer&>(server());
-            currentDebugLevel=100;
+            //currentDebugLevel=100;
 
             atw = GET_ASW;
         }
@@ -707,7 +705,7 @@ public:
                         )
                     )),
             new SimpleTruthValue(0.01f, getCount(0.01f)),
-            new SimpleTruthValue(1.0f, getCount(1.0f)), // was conf 1.01???
+            new SimpleTruthValue(1.0f, getCount(1.0f)),
             200,0);
     }
 
