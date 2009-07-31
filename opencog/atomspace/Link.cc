@@ -32,7 +32,6 @@
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
@@ -273,7 +272,7 @@ class HandleComparison
 {
     public:
         bool operator()(const Handle& h1, const Handle& h2) const {
-            return (CoreUtils::compare(h1, h2) < 0);
+            return (Handle::compare(h1, h2) < 0);
         }
 };
 

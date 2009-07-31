@@ -28,7 +28,6 @@
 
 #include "CompositeTruthValue.h"
 #include "CoreUtils.h"
-#include "ShortAtom.h"
 #include "TLB.h"
 
 //#define USE_SHARED_DEFAULT_TV
@@ -468,7 +467,7 @@ void CompositeTruthValue::removeVersionedTVs(Handle substantive) {
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
             itr != versionedTVs.end(); itr++) {
         VersionHandle key = itr->first;
-        if (!CoreUtils::compare(key.substantive, substantive)) {
+        if (key.substantive == substantive) {
             toBeRemovedEntries[key] = NULL;
             // Free TruthValue object at once
             TruthValue* versionedTv = itr->second;
