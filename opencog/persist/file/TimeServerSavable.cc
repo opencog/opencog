@@ -60,7 +60,6 @@ void TimeServerSavable::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
 
 void TimeServerSavable::clear()
 {
-    delete timeserver->table;
-    timeserver->init();
+    timeserver->clear();
 }
 

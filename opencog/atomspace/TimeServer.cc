@@ -87,3 +87,9 @@ TimeServer::TimeServer(const TimeServer& other)
             "TimeServer - Cannot copy an object of this class");
 }
 
+void TimeServer::clear()
+{
+    delete table;
+    init();
+}
+

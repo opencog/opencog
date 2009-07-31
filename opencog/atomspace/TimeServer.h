@@ -112,6 +112,8 @@ public:
      */
     unsigned long getLatestTimestamp() const;
 
+    void clear();
+
 private:
 
     /**
