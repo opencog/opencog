@@ -72,12 +72,12 @@ class AtomStorage
 		bool local_id_cache_is_inited;
 		std::set<Handle> local_id_cache;
 		void get_ids(void);
-		unsigned long getMaxObservedUUID(void);
+		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
 		bool idExists(const char *);
 
-		unsigned long getMaxUUID(void);
-		void setMaxUUID(unsigned long);
+		UUID getMaxUUID(void);
+		void setMaxUUID(UUID);
 
 		// TYPEMAP_SZ is defined as the maximum number of possible opencog Types
 		// (65536 as Type is a short int)

@@ -37,8 +37,8 @@ using namespace opencog;
 // last definable type (opencog::NOTYPE) opencog::NOTYPE is defined as
 // ((1 << (8 * sizeof(opencog::Type))) - 1), which is 65535 when Type is "unsigned
 // short int"
-// unsigned long TLB::uuid = (1 << (8 * sizeof(opencog::Type)));
-unsigned long TLB::uuid = 1;
+// UUID TLB::brk_uuid = (1 << (8 * sizeof(opencog::Type)));
+UUID TLB::brk_uuid = 1;
 
 std::map<Handle, const Atom*> TLB::handle_map;
 

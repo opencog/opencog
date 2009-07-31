@@ -72,7 +72,7 @@ private:
     TLB() {}
 
 #ifdef USE_TLB_MAP
-    static unsigned long uuid;
+    static UUID brk_uuid;
 #endif
 
 public:
@@ -114,7 +114,7 @@ public:
         return addAtom(atom);
 #endif
 #else
-        return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
+        return Handle(reinterpret_cast<UUID>(atom) ^ OBFUSCATE);
 #endif
     }
 
@@ -146,14 +146,14 @@ public:
         Handle ha = handle;
         if (ha == Handle::UNDEFINED)
         {
-            ha = Handle(uuid);
-            uuid++;
+            ha = Handle(brk_uuid);
+            brk_uuid++;
         }
         handle_map[ha] = atom;
         atom->handle = ha;
         return atom->handle;
 #else /* USE_TLB_MAP */
-        return Handle(reinterpret_cast<unsigned long>(atom) ^ OBFUSCATE);
+        return Handle(reinterpret_cast<UUID>(atom) ^ OBFUSCATE);
 #endif /* USE_TLB_MAP */
     }
 
@@ -183,7 +183,7 @@ public:
     static inline bool isInvalidHandle(const Handle& h) {
 #ifdef USE_TLB_MAP
         return (h == Handle::UNDEFINED) ||
-               (h.value() >= uuid) || 
+               (h.value() >= brk_uuid) || 
                (NULL == getAtom(h));
 #else
         return (h == Handle::UNDEFINED);
@@ -195,10 +195,10 @@ public:
     }
 
 #ifdef USE_TLB_MAP
-    static unsigned long getMaxUUID(void) { return uuid; }
-    static void reserve_range(unsigned long lo, unsigned long hi)
+    static UUID getMaxUUID(void) { return brk_uuid; }
+    static void reserve_range(UUID lo, UUID hi)
     {
-        if (uuid <= hi) uuid = hi+1;
+        if (brk_uuid <= hi) brk_uuid = hi+1;
     }
 #endif
 };

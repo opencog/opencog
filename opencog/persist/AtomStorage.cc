@@ -251,7 +251,7 @@ class AtomStorage::Response
 		bool note_id_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ...
-			unsigned long id = strtoul(colvalue, NULL, 10);
+			UUID id = strtoul(colvalue, NULL, 10);
 			Handle h(id);
 			id_set->insert(h);
 			return false;
@@ -295,7 +295,7 @@ class AtomStorage::Outgoing
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
 			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
-			        (unsigned long) src_handle, (unsigned long) h, pos);
+			        src_handle.value(), h.value(), pos);
 
 			Response rp;
 			rp.rs = db_conn->exec(buff);
@@ -873,7 +873,7 @@ bool AtomStorage::atomExists(Handle h)
 {
 #ifdef ASK_SQL_SERVER
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", (unsigned long) h);
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h.value());
 	return idExists(buff);
 #else
 	// look at the local cache of id's to see if the atom is in storage or not.
@@ -921,7 +921,7 @@ void AtomStorage::get_ids(void)
 void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", (unsigned long) h);
+	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", h.value());
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
@@ -1230,7 +1230,7 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	get_ids();
-	unsigned long max_uuid = TLB::getMaxUUID();
+	UUID max_uuid = TLB::getMaxUUID();
 	setMaxUUID(max_uuid);
 	fprintf(stderr, "Max UUID is %lu\n", max_uuid);
 
@@ -1352,7 +1352,7 @@ void AtomStorage::kill_data(void)
  * probably be eliminated.
  */
 
-unsigned long AtomStorage::getMaxUUID(void)
+UUID AtomStorage::getMaxUUID(void)
 {
 	Response rp;
 	rp.rs = db_conn->exec("SELECT max_uuid FROM Global;");
@@ -1361,7 +1361,7 @@ unsigned long AtomStorage::getMaxUUID(void)
 	return rp.intval;
 }
 
-void AtomStorage::setMaxUUID(unsigned long uuid)
+void AtomStorage::setMaxUUID(UUID uuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", uuid);
@@ -1393,7 +1393,7 @@ int AtomStorage::getMaxHeight(void)
 	return rp.intval;
 }
 
-unsigned long AtomStorage::getMaxObservedUUID(void)
+UUID AtomStorage::getMaxObservedUUID(void)
 {
 	Response rp;
 	rp.intval = 0;
@@ -1415,7 +1415,7 @@ int AtomStorage::getMaxObservedHeight(void)
 
 void AtomStorage::reserve(void)
 {
-	unsigned long max_observed_id = getMaxObservedUUID();
+	UUID max_observed_id = getMaxObservedUUID();
 	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
 	TLB::reserve_range(0, max_observed_id);
 }

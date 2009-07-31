@@ -36,6 +36,9 @@
 namespace opencog
 {
 
+// UUID == Universally Unique Identifier
+typedef unsigned long UUID;
+
 class Handle
 {
 
@@ -47,39 +50,39 @@ friend class AtomspaceHTabler;
 
 private:
 
-    unsigned long _value;
+    UUID uuid;
 
-    explicit Handle(const unsigned long h) : _value(h) {};
+    explicit Handle(const UUID u) : uuid(u) {};
 
 public:
 
     static const Handle UNDEFINED;
 
-    Handle(const Handle& h) : _value(h._value) {};
-    explicit Handle() : _value(UNDEFINED._value) {};
+    Handle(const Handle& h) : uuid(h.uuid) {};
+    explicit Handle() : uuid(UNDEFINED.uuid) {};
     ~Handle() {}
 
-    inline unsigned long value(void) const {
-        return _value;
+    inline UUID value(void) const {
+        return uuid;
     }
 
     inline std::string str(void) const {
         std::ostringstream oss;
-        oss << _value;
+        oss << uuid;
         return oss.str();
     }
 
     inline Handle& operator=(const Handle& h) {
-        _value = h._value;
+        uuid = h.uuid;
         return *this;
     }
 
-    inline bool operator==(const Handle& h) const { return _value == h._value; }
-    inline bool operator!=(const Handle& h) const { return _value != h._value; }
-    inline bool operator< (const Handle& h) const { return _value <  h._value; }
-    inline bool operator> (const Handle& h) const { return _value >  h._value; }
-    inline bool operator<=(const Handle& h) const { return _value <= h._value; }
-    inline bool operator>=(const Handle& h) const { return _value >= h._value; }
+    inline bool operator==(const Handle& h) const { return uuid == h.uuid; }
+    inline bool operator!=(const Handle& h) const { return uuid != h.uuid; }
+    inline bool operator< (const Handle& h) const { return uuid <  h.uuid; }
+    inline bool operator> (const Handle& h) const { return uuid >  h.uuid; }
+    inline bool operator<=(const Handle& h) const { return uuid <= h.uuid; }
+    inline bool operator>=(const Handle& h) const { return uuid >= h.uuid; }
 
 };
 
