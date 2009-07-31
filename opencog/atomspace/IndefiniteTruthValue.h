@@ -27,8 +27,6 @@
 #define _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 
 #include <vector>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_integration.h>
 
 #include <opencog/atomspace/TruthValue.h>
 

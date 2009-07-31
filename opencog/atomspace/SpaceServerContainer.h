@@ -26,7 +26,7 @@
 #define _SPACE_SERVER_CONTAINER_H
 
 #include <string>
-#include "Handle.h"
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {

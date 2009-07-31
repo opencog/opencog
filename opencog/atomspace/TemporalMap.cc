@@ -23,6 +23,7 @@
  */
 
 #include "TemporalMap.h"
+#include "Atom.h"
 
 #include <stdio.h>
 #include <stdlib.h>

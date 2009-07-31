@@ -32,7 +32,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>

@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/VersionHandle.h>
@@ -40,6 +39,7 @@
 namespace opencog
 {
 
+class Atom;
 class AtomTable;
 
 /**

@@ -37,7 +37,6 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/TimeServer.h>
 #include <opencog/atomspace/SpaceServer.h>

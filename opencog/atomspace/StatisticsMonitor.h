@@ -27,6 +27,7 @@
 #define _OPENCOG_STATISTICS_MONITOR_H
 
 #include <time.h>
+#include <vector>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/types.h>

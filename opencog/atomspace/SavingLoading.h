@@ -30,14 +30,13 @@
 
 #include <opencog/util/platform.h>
 
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/HandleMap.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/SavableRepository.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {

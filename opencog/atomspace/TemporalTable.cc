@@ -22,12 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "Atom.h"
+#include "CoreUtils.h"
+#include "HandleMap.h"
 #include "TemporalTable.h"
+#include "TLB.h"
 
 #include <set>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/HandleMap.h>
 
 // Minimal rate (number of entries / pending updates) so that an index table must be re-built
 #define PENDING_UPDATE_RATE_THRESHOLD 8

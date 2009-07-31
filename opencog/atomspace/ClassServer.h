@@ -36,8 +36,8 @@
 
 #include <boost/signal.hpp>
 
-#include "types.h"
-#include "atom_types.h"
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/util/platform.h>
 
 namespace opencog

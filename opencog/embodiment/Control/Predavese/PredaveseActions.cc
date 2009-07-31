@@ -21,18 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+#include <sstream>
+
+#include <opencog/atomspace/CoreUtils.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 
 #include "PredaveseActions.h"
-#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include "PredaveseStdafx.h"
-#include <opencog/spatial/LocalSpaceMap2DUtil.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 using namespace predavese;

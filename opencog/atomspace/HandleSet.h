@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_HANDLE_SET_H
 #define _OPENCOG_HANDLE_SET_H
 
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/platform.h>
 

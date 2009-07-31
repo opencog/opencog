@@ -23,6 +23,7 @@
  */
 
 #include "HandleSet.h"
+#include "TLB.h"
 
 using namespace opencog;
 

@@ -29,15 +29,16 @@
  * Copyright(c), 2007
  */
 
-#include <opencog/util/misc.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/CoreUtils.h>
+#include <opencog/atomspace/HandleTemporalPairEntry.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/TemporalTable.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/HandleTemporalPairEntry.h>
-#include <opencog/atomspace/SpaceServer.h>
+#include <opencog/atomspace/TLB.h>
 
+#include <opencog/util/misc.h>
 #include <opencog/util/Logger.h>
 
 #include "AtomSpaceUtil.h"

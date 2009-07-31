@@ -22,12 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CompositeTruthValue.h"
-
 #include <stdlib.h>
 
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/platform.h>
+
+#include "CompositeTruthValue.h"
+#include "CoreUtils.h"
+#include "ShortAtom.h"
+#include "TLB.h"
 
 //#define USE_SHARED_DEFAULT_TV
 

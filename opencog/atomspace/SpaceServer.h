@@ -21,30 +21,31 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef SPACESERVER_H
-#define SPACESERVER_H
+#ifndef _OPENCOG_SPACESERVER_H
+#define _OPENCOG_SPACESERVER_H
+
 /**
  * SpaceServer.h
- * This class is used to associate spatial information (coordinates) to atom handles (representing
- * entities) at a given timestamp.
- * It implements SavableRepository so that it can be saved and loaded by SavingLoading class.
+ * This class is used to associate spatial information (coordinates)
+ * to atom handles (representing entities) at a given timestamp.
+ * It implements SavableRepository so that it can be saved and loaded
+ * by SavingLoading class.
  *
- * NOTE: This API and the spatial information for each entity in SpaceServer are provisory
- * and they will be improved as new features are needed...
+ * NOTE: This API and the spatial information for each entity in
+ * SpaceServer are provisory and they will be improved as new features
+ * are needed...
  *
  * @author Welter Luigi
  */
-#include "SavableRepository.h"
-#include "types.h"
-#include "SpaceServerContainer.h"
-
-#include <opencog/util/exceptions.h>
-#include <opencog/spatial/LocalSpaceMap2D.h>
-
 #include <exception>
 #include <string>
 #include <map>
 
+#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/SpaceServerContainer.h>
+#include <opencog/spatial/LocalSpaceMap2D.h>
+#include <opencog/util/exceptions.h>
 
 namespace opencog
 {
@@ -243,4 +244,4 @@ private:
 };
 } // namespace opencog
 
-#endif // SPACESERVER_H
+#endif // _OPENCOG_SPACESERVER_H

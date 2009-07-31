@@ -25,6 +25,7 @@
 #include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TLB.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;

@@ -23,6 +23,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_integration.h>
+
 #include "IndefiniteTruthValue.h"
 
 #include <opencog/util/platform.h>

@@ -29,11 +29,12 @@
 #include <math.h>
 #include <expat.h>
 
-#include <opencog/util/platform.h>
 
+#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
 #include <opencog/xml/FileXMLBufferReader.h>
 #include <opencog/xml/NMXmlDefinitions.h>
 #include <opencog/xml/NMXmlParser.h>

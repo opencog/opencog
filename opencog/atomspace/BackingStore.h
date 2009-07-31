@@ -24,6 +24,10 @@
 #ifndef _OPENCOG_BACKING_STORE_H
 #define _OPENCOG_BACKING_STORE_H
 
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+
 namespace opencog
 {
 

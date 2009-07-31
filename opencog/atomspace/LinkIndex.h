@@ -25,9 +25,8 @@
 #include <set>
 #include <vector>
 
-#include "HandleSeqIndex.h"
-#include "Handle.h"
-#include "types.h"
+#include <opencog/atomspace/HandleSeqIndex.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {

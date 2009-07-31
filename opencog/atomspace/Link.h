@@ -26,12 +26,12 @@
 #ifndef _OPENCOG_LINK_H
 #define _OPENCOG_LINK_H
 
+#include <string>
+
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/atomspace/types.h>
-
-#include <string>
 
 namespace opencog
 {

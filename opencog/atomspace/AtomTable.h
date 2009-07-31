@@ -37,7 +37,6 @@
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/HandleIterator.h>
-#include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
@@ -65,10 +64,6 @@ struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*,
 };
 typedef std::tr1::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
 
-class Link;
-class Node;
-class HandleEntry;
-class HandleIterator;
 class SavingLoading;
 
 /**

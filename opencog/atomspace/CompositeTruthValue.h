@@ -51,6 +51,8 @@ typedef std::tr1::unordered_map<VersionHandle,
                                 eqVersionHandle> VersionedTruthValueMap;
 #endif /* __APPLE__ */
 
+class Atom;
+
 class CompositeTruthValue: public TruthValue
 {
 

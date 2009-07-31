@@ -34,6 +34,7 @@
 #include <tr1/functional>
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
