@@ -27,22 +27,23 @@
 
 #include <set>
 
-#include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/TemporalTable.h>
 
 namespace opencog
 {
 
+class TimeServerSavable;
+
 /**
  * This class is used to associate temporal information (timestamps or timelags) to
- * atom handles. It implements SavableRepository so that it can be saved and loaded by
- * SavingLoading class.
+ * atom handles. 
  *
  * TODO: Depending on the use cases, this class would have a better performance
  *       if we use a sortedTemporalList in inverse cronological order.
  */
-class TimeServer : public SavableRepository
+class TimeServer
 {
+    friend class TimeServerSavable;
 
     /**
      * Initializes the TimeServer
@@ -105,31 +106,6 @@ public:
      * @return True if any entry corresponding to the given arguments was removed. False, otherwise.
      */
     bool remove(Handle, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
-
-    // Methods from SavableRepository interface:
-
-    /**
-     * Returns an identifier for the Repository.
-     */
-    const char* getId() const;
-
-    /**
-     * This method stores this repository in the file specified.
-     * @param the file pointer where the TimeServer must be saved.
-     */
-    void saveRepository(FILE *) const;
-
-    /**
-     * This method loads a repository stored in the file specified.
-     * @param the file pointer where the TimeServer is stored.
-     * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
-     */
-    void loadRepository(FILE *, HandleMap<Atom *> *);
-
-    /**
-     * This method is used to clear the whole TimeServer repository.
-     */
-    void clear();
 
     /**
      * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.

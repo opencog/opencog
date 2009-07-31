@@ -70,32 +70,6 @@ bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRela
     return table->remove(h, t, criterion);
 }
 
-const char* TimeServer::getId() const
-{
-    static const char* id = "TimeServer";
-    return id;
-}
-
-void TimeServer::saveRepository(FILE *fp) const
-{
-    logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
-    // Saves TemporalTable
-    table->save(fp);
-}
-
-void TimeServer::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
-{
-    logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
-    // Loads the TemporalTable
-    table->load(fp, conv);
-}
-
-void TimeServer::clear()
-{
-    delete table;
-    init();
-}
-
 unsigned long TimeServer::getLatestTimestamp() const
 {
     return latestTimestamp;

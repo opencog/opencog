@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TimeServer.cc
+ * opencog/persist/file/TimeServerSavable.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,94 +22,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TimeServer.h"
+#include "TimeServerSavable.h"
 
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-int TimeServer::timeServerEntrys = 0;
-// USED TO SEEK MEMORY LEAK
-//std::set<Temporal> TimeServer::temporalSet;
-
-void TimeServer::init()
+TimeServerSavable::TimeServerSavable()
 {
-    table = new TemporalTable();
-    latestTimestamp = 0;
+    timeserver = NULL;
 }
 
-TimeServer::TimeServer()
+TimeServerSavable::~TimeServerSavable()
 {
-    init();
+    timeserver = NULL;
 }
 
-TimeServer::~TimeServer()
-{
-    delete table;
-}
-
-void TimeServer::add(Handle h, const Temporal& t)
-{
-    // USED TO SEEK MEMORY LEAK
-    //++timeServerEntrys;
-    //cout << "Total timeServerEntrys: " << timeServerEntrys << endl;
-
-    //if(temporalSet.find(t) == temporalSet.end()){
-    //   temporalSet.insert(t);
-    //   cout << "Total unique entrys: " << temporalSet.size() << endl;
-    //}
-
-    table->add(h, t);
-    if (t.getUpperBound() > latestTimestamp) {
-        latestTimestamp = t.getUpperBound();
-    }
-}
-
-bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion)
-{
-    return table->remove(h, t, criterion);
-}
-
-const char* TimeServer::getId() const
+const char* TimeServerSavable::getId() const
 {
     static const char* id = "TimeServer";
     return id;
 }
 
-void TimeServer::saveRepository(FILE *fp) const
+void TimeServerSavable::saveRepository(FILE *fp) const
 {
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     // Saves TemporalTable
-    table->save(fp);
+    timeserver->table->save(fp);
 }
 
-void TimeServer::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
+void TimeServerSavable::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
     // Loads the TemporalTable
-    table->load(fp, conv);
+    timeserver->table->load(fp, conv);
 }
 
-void TimeServer::clear()
+void TimeServerSavable::clear()
 {
-    delete table;
-    init();
-}
-
-unsigned long TimeServer::getLatestTimestamp() const
-{
-    return latestTimestamp;
-}
-
-TimeServer& TimeServer::operator=(const TimeServer& other)
-{
-    throw opencog::RuntimeException(TRACE_INFO, 
-            "TimeServer - Cannot copy an object of this class");
-}
-
-TimeServer::TimeServer(const TimeServer& other) 
-{
-    throw opencog::RuntimeException(TRACE_INFO, 
-            "TimeServer - Cannot copy an object of this class");
+    delete timeserver->table;
+    timeserver->init();
 }
 

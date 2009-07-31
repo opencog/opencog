@@ -26,6 +26,7 @@
 #ifndef _OPENCOG_TEMPORAL_TABLE_H
 #define _OPENCOG_TEMPORAL_TABLE_H
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/HandleToTemporalEntryMap.h>
 #include <opencog/atomspace/TemporalToHandleSetMap.h>
 #include <opencog/atomspace/HandleTemporalPairEntry.h>

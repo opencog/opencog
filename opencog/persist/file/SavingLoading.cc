@@ -27,6 +27,7 @@
  * disk */
 
 #include "SavingLoading.h"
+#include "TimeServerSavable.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -98,7 +99,10 @@ void SavingLoading::save(const char *fileName, AtomSpace& atomSpace) throw (IOEx
     saveNodes(f, atomTable, atomCount);
     saveLinks(f, atomTable, atomCount);
 
-    atomSpace.timeServer.saveRepository(f);
+    TimeServerSavable tss;
+    tss.setServer(&atomSpace.timeServer);
+    tss.saveRepository(f);
+
     atomSpace.spaceServer->saveRepository(f);
     saveRepositories(f);
 
@@ -299,7 +303,10 @@ void SavingLoading::load(const char *fileName, AtomSpace& atomSpace) throw (Runt
     fflush(stdout);
 
 
-    atomSpace.timeServer.loadRepository(f, handles);
+    TimeServerSavable tss;
+    tss.setServer(&atomSpace.timeServer);
+    tss.loadRepository(f, handles);
+
     atomSpace.spaceServer->loadRepository(f, handles);
     loadRepositories(f, handles);
 

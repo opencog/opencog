@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TimeServer.h
+ * opencog/persistfile/TimeServerSavable.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,91 +22,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_TIME_SERVER_H
-#define _OPENCOG_TIME_SERVER_H
+#ifndef _OPENCOG_TIME_SERVER_SAVABLE_H
+#define _OPENCOG_TIME_SERVER_SAVABLE_H
 
 #include <set>
 
 #include <opencog/persist/file/SavableRepository.h>
-#include <opencog/atomspace/TemporalTable.h>
+#include <opencog/atomspace/TimeServer.h>
 
 namespace opencog
 {
 
 /**
- * This class is used to associate temporal information (timestamps or timelags) to
- * atom handles. It implements SavableRepository so that it can be saved and loaded by
+ * This class implements SavableRepository so that it can be saved and loaded by
  * SavingLoading class.
- *
- * TODO: Depending on the use cases, this class would have a better performance
- *       if we use a sortedTemporalList in inverse cronological order.
  */
-class TimeServer : public SavableRepository
+class TimeServerSavable : public SavableRepository
 {
-
-    /**
-     * Initializes the TimeServer
-     */
-    void init();
+private:
+    TimeServer *timeserver;
 
 public:
+    TimeServerSavable();
+    virtual ~TimeServerSavable();
 
-    static int timeServerEntrys;
-
-    // USED TO SEEK MEMORY LEAK
-    //static std::set<Temporal> temporalSet;
-
-    TimeServer();
-    virtual ~TimeServer();
-
-    /**
-     * Adds into this TimeServer an entry composed by the given Atom Handle and Temporal object.
-     */
-    void add(Handle, const Temporal&);
-
-    /**
-     * Gets a list of HandleTemporalPair objects given an Atom Handle.
-     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
-     * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
-     * to restrict the return to only HandleTemporalPair objects whose Temporal
-     * matches with it, according to the temporal relationship (search criteria) argument to
-     * be applied with this given Temporal argument.
-     * See the definition of TemporalRelationship enumeration to see the possible values for it.
-     *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
-     *         std::list<HandleTemporalPair> ret;
-     *         timeServer->get(back_inserter(ret), Handle::UNDEFINED);
-     */
-    template<typename OutputIterator> OutputIterator
-    get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
-        TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
-
-        HandleTemporalPairEntry* hte = table->get(h, t, criterion);
-        HandleTemporalPairEntry* toRemove = hte;
-
-        while (hte) {
-            *(outIt++) = hte->handleTemporalPair;
-            hte = hte->next;
-        }
-        if (toRemove) delete toRemove;
-
-        return outIt;
-    }
-
-    /**
-     * Removes HandleTemporalPair objects related to a given Atom Handle.
-     * If the passed Handle object is Handle::UNDEFINED, it matches any Handle.
-     * If the optional Temporal object argument is not UNDEFINED_TEMPORAL, it will be used
-     * to restrict the removal to only HandleTemporalPair objects whose Temporal
-     * matches with it, according to the temporal relationship (search criteria) argument to
-     * be applied with this given Temporal argument.
-     * See the definition of TemporalRelationship enumeration to see the possible values for it.
-     * @return True if any entry corresponding to the given arguments was removed. False, otherwise.
-     */
-    bool remove(Handle, const Temporal& = UNDEFINED_TEMPORAL, TemporalTable::TemporalRelationship = TemporalTable::EXACT);
-
-    // Methods from SavableRepository interface:
+    void setServer(TimeServer *ts) { timeserver = ts; }
 
     /**
      * Returns an identifier for the Repository.
@@ -130,33 +70,8 @@ public:
      * This method is used to clear the whole TimeServer repository.
      */
     void clear();
-
-    /**
-     * Get the timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer.
-     */
-    unsigned long getLatestTimestamp() const;
-
-private:
-
-    /**
-     * The temporal table used by this TimeServer
-     */
-    TemporalTable* table;
-
-    /**
-     * The timestamp of the more recent upper bound of Temporal object already inserted into this TimeServer
-     */
-    unsigned long latestTimestamp;
-
-    /**
-     * Overrides and declares copy constructor and equals operator as private 
-     * for avoiding large object copying by mistake.
-     */
-    TimeServer& operator=(const TimeServer&);
-    TimeServer(const TimeServer&);
-
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG_TIME_SERVER_H
+#endif // _OPENCOG_TIME_SERVER_SAVABLE_H
