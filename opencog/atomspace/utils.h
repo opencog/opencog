@@ -183,9 +183,6 @@ InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
 /** Checks whether the strings are equal, when case is ignored. */
 bool nocase_equal(const char *s1, const char *s2);
 
-/** Converts a character to upper case (also some Scandinavian characters) */
-char Isox(char s);
-
 // Now in types.h
 /*template<typename T>
 struct TypeWrapper {
@@ -249,9 +246,6 @@ bool visible(char c);
 /** Converts an int to an STL string */
 std::string i2str(int v);
 
-/** Converts a string to upper case by return value */
-std::string toupper(std::string k);
-
 /** A function to create XML elements.
  \param elem The element's name (eg. "xml" in "<xml> text <xml>")
  \param pcdata The element data (eg. "text" in "<xml> text <xml>")
@@ -265,27 +259,6 @@ class StringTokenizer : public std::vector<std::string>
 public:
     StringTokenizer(const std::string &rStr, const std::string &rDelimiters = " ,\n");
     std::vector<std::string> WithoutEmpty() const;
-};
-
-/** nocase_string: STL string class which ignores the case. */
-struct nocase_string : public std::string {
-public:
-    nocase_string(const char* str);
-    nocase_string(const nocase_string& str);
-    nocase_string(const std::string& str);
-    nocase_string();
-
-    bool operator <(const char* rhs);
-    bool operator <(const nocase_string& rhs);
-    bool operator <(const std::string& rhs);
-    bool operator ==(const char* rhs);
-    bool operator ==(const nocase_string& rhs);
-    bool operator ==(const std::string& rhs);
-    bool operator !=(const char* rhs);
-    bool operator !=(const nocase_string& rhs);
-    bool operator !=(const std::string& rhs);
-    void operator +=(nocase_string s);
-    nocase_string operator+(nocase_string s);
 };
 
 #define _Int(s) atoi((s).c_str())

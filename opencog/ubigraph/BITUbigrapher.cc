@@ -24,6 +24,7 @@
  */
 
 #include "BITUbigrapher.h"
+#include "utils.h"
 
 #ifdef USE_BITUBIGRAPHER
 

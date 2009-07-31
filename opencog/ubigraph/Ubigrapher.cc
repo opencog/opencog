@@ -45,6 +45,7 @@ extern "C" {
     #include <xmlrpc.h>
 }
 #include "Ubigrapher.h"
+#include "utils.h"
 
 extern const char* ubigraph_url;
 
