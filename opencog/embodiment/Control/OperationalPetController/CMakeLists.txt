@@ -35,6 +35,7 @@ TARGET_LINK_LIBRARIES (OpcLib
     PAI
     MessagingSystem
     Procedure
+    savable
 )
 
 IF(COMMAND cmake_policy)

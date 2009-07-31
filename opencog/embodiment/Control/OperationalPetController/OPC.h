@@ -25,7 +25,7 @@
 #define OPC_H
 
 #include <string>
-#include <opencog/atomspace/SavingLoading.h>
+#include <opencog/persist/file/SavingLoading.h>
 #include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <opencog/embodiment/Control/MessagingSystem/EmbodimentCogServer.h>
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>

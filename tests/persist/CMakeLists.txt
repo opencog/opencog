@@ -1,6 +1,7 @@
 INCLUDE_DIRECTORIES (
 	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/persist
+	${OPENCOG_SOURCE_DIR}/src/persist/file
+	${OPENCOG_SOURCE_DIR}/src/persist/sql
 	${OPENCOG_SOURCE_DIR}/src/util
 )
 
@@ -17,7 +18,6 @@ LINK_LIBRARIES(
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
-    #${EXPAT_LIBRARIES}
 )
 
 ADD_CXXTEST(BasicSaveUTest)

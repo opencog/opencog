@@ -24,7 +24,7 @@
 #ifndef PROCEDUREREPOSITORY_H_
 #define PROCEDUREREPOSITORY_H_
 
-#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/persist/file/SavableRepository.h>
 #include "ComboProcedureRepository.h"
 #include "ComboSelectProcedureRepository.h"
 #include "BuiltInProcedureRepository.h"

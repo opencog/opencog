@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/SavingLoading.h
+ * opencog/persist/file/SavingLoading.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -34,9 +34,10 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SavableRepository.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
+
+#include <opencog/persist/file/SavableRepository.h>
 
 namespace opencog
 {

@@ -25,7 +25,7 @@
 #define COMBO_PROCEDURE_REPOSITORY_H
 
 #include "ComboProcedure.h"
-#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/persist/file/SavableRepository.h>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/procedure_repository.h>
 

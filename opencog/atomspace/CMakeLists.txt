@@ -31,8 +31,8 @@ ADD_LIBRARY (atomspace SHARED
 	NodeIndex.cc
 	NullTruthValue.cc
 	PredicateIndex.cc
-	SavingLoading.cc
 	SimpleTruthValue.cc
+	SpaceServer.cc
 	StatisticsMonitor.cc
 	StringIndex.cc
 	TargetTypeIndex.cc
@@ -47,16 +47,14 @@ ADD_LIBRARY (atomspace SHARED
 	TruthValue.cc
 	TypeIndex.cc
 	utils.cc
-#	utils2.cc
 	VersionHandle.cc
 	md5.c
 	types.cc
-        SpaceServer.cc
 )
 
 TARGET_LINK_LIBRARIES(atomspace
 	util
-        SpaceMap
+	SpaceMap
 	${GSL_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )
@@ -102,8 +100,6 @@ INSTALL (FILES
 	NullTruthValue.h
 	PredicateEvaluator.h
 	PredicateIndex.h
-	SavableRepository.h
-	SavingLoading.h
 	SimpleTruthValue.h
 	StatisticsMonitor.h
 	StringIndex.h
@@ -122,6 +118,5 @@ INSTALL (FILES
 	md5.h
 	types.h
 	utils.h
-#	utils2.h
 	DESTINATION "include/opencog/atomspace"
 )

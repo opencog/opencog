@@ -27,7 +27,7 @@
 #include "ComboSelectProcedure.h"
 #include "ComboProcedureRepository.h"
 
-#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/persist/file/SavableRepository.h>
 
 #include <string>
 #include <map>

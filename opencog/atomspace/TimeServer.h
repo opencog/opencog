@@ -27,7 +27,7 @@
 
 #include <set>
 
-#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/TemporalTable.h>
 
 namespace opencog

@@ -41,7 +41,7 @@
 #include <string>
 #include <map>
 
-#include <opencog/atomspace/SavableRepository.h>
+#include <opencog/persist/file/SavableRepository.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/SpaceServerContainer.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>

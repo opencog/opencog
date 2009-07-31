@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SavingLoading.h>
+#include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
