@@ -53,7 +53,7 @@ namespace opencog
 // Specific toString method for float numbers (force 3 digits after decimal point)
 std::string toString(double data);
 
-
+#if 0
 /**
  * Returns a copy of the given string surrounded by ANSI bold tags.
  *
@@ -69,6 +69,7 @@ std::string bold(const char*);
  * tags.
  */
 std::string bold(int i);
+#endif
 
 template <class _Key> struct hash2int { };
 
@@ -88,18 +89,6 @@ template <> struct hash2int<char *> {
     }
 };
 
-enum padAlignment { CENTER, LEFT, RIGHT };
-std::string padstr(const char*, unsigned int, padAlignment) throw (InvalidParamException);
-
-/**
- * This method reads a line from a string and returns
- * the rest of the string.
- *
- * @param Where the next line should be read from.
- * @param A reference to a string where the read next line will be.
- * @return The rest of the string after reading the line.
- */
-const char *nextLine(const char *, std::string&);
 
 /**
  * Initializes the reference time that will be used for getting current elapsed times
@@ -122,16 +111,6 @@ void to_list(OutT outIt, T inEntry)
     }
 }
 
-/** STL-Listifies a HandleEntry */
-
-template<typename T, typename OutT>
-void h_to_list(OutT outIt, T inEntry)
-{
-    while (inEntry) {
-        *(outIt++) = inEntry->handle;
-        inEntry = inEntry->next;
-    }
-}
 
 template<typename T>
 bool empty(const T& c)
@@ -139,12 +118,7 @@ bool empty(const T& c)
     return c.empty();
 }
 
-template<typename LinkT, typename ArgT1, typename ArgT2>
-LinkT make_tuple(const ArgT1& arg1, const ArgT2& arg2)
-{
-    return LinkT(arg1, arg2);
-}
-
+/** Used very rarely, one or twice, in learning behaviour and PLN backinference */
 template < typename ForwardIter,
 typename OutputIter,
 typename UnaryPred >
@@ -157,43 +131,6 @@ OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPre
     }
     return dest;
 }
-
-template<typename InputT, typename evalT, typename ValT>
-InputT GetBest(InputT start, InputT end, evalT op, ValT minVal)
-{
-    if (start == end)
-        return end;
-
-    ValT bestV = minVal, tempVal;
-
-    InputT ret = start;
-    while (++start != end)
-        if ( (tempVal = op(*start)) > bestV) {
-            bestV = tempVal;
-            ret = start;
-        }
-
-    return ret;
-}
-
-/** Checks whether the strings are equal, when case is ignored. */
-bool nocase_equal(const char *s1, const char *s2);
-
-// Now in types.h
-/*template<typename T>
-struct TypeWrapper {
-    T value;
-    explicit TypeWrapper(T _val) : value(_val) {}
-    T operator=(const TypeWrapper& rhs) {
-        return (value = rhs.value);
-    }
-    bool operator==(const TypeWrapper& rhs) const {
-        return value == rhs.value;
-    }
-    bool operator<(const TypeWrapper& rhs) const {
-        return value < rhs.value;
-    }
-};*/
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const TypeWrapper<T>&);
