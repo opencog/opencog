@@ -47,6 +47,7 @@ friend class ListRequest;
 friend class AtomStorage;
 friend class SchemeSmob;
 friend class AtomspaceHTabler;
+friend class CompositeTruthValue; // XXX fixme -- due to wacked fromString
 
 private:
 

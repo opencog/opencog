@@ -182,6 +182,12 @@ std::string CompositeTruthValue::toString() const
  * {0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
  * NOTE: string representation of tv types, VersionHandles and tv 
  * attributes cannot have '{', '}' or ';', which are separators
+ *
+ * XXX This function should be moved to its own file-persistance 
+ * directory. It really does not belong here, and things like the
+ * UUID wackinesss is just potential for bugs.  In general, all of 
+ * the file-persistence code should be removed from this directory.
+ * XXX
  */
 
 CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (InvalidParamException)
@@ -211,9 +217,11 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     // Get the versioned tvs
     while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
         char* substantiveStr = __strtok_r(tvToken, ";", &internalBuff);
-        Handle substantive;
-        // XXX this cast of a handle is soo wrong its not funny....
-        sscanf(substantiveStr, "%lu", (unsigned long *) &substantive);
+
+        UUID uuid;
+        sscanf(substantiveStr, "%lu", (UUID *) &uuid);
+        Handle substantive(uuid);
+
         // TODO: IF THIS IS USED BY SAVING & LOADING, THIS HANDLE
         // MUST BE CONVERTED TO A NEW/COMMON HANDLE FORMAT.
         char* indicatorStr = __strtok_r(NULL, ";", &internalBuff);
