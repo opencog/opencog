@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_DEFAULTS_H
 #define _OPENCOG_DEFAULTS_H
 
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog
@@ -48,25 +47,6 @@ private:
 
 public:
 
-    /**
-     * Returns the default importance value for a given atom type.
-     *
-     * @param Atom type.
-     * @return Default importance value for a given atom type.
-     */
-    static float getDefaultImportance(Type type) {
-        return 1;
-    }
-
-    /**
-     * Returns the default heat value for a given atom type.
-     *
-     * @param Atom type.
-     * @return Default heat value for a given atom type.
-     */
-    static float getDefaultHeat(Type type) {
-        return 0;
-    }
 };
 
 } // namespace opencog
