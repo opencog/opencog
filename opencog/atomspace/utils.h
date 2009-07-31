@@ -50,27 +50,6 @@
 namespace opencog
 {
 
-// Specific toString method for float numbers (force 3 digits after decimal point)
-std::string toString(double data);
-
-#if 0
-/**
- * Returns a copy of the given string surrounded by ANSI bold tags.
- *
- * @return Copy of the given string surrounded by ANSI bold tags.
- */
-std::string bold(const char*);
-
-/**
- * Returns the string representation of an integer surrounded by ANSI bold
- * tags.
- *
- * @return The string representation of an integer surrounded by ANSI bold
- * tags.
- */
-std::string bold(int i);
-#endif
-
 template <class _Key> struct hash2int { };
 
 inline size_t __hash2int(const char* __s)
@@ -101,22 +80,13 @@ void initReferenceTime();
  */
 unsigned long getElapsedMillis();
 
-/** STL-Listifies a TemporalEntry */
-template<typename T, typename OutT>
-void to_list(OutT outIt, T inEntry)
-{
-    while (inEntry) {
-        *(outIt++) = inEntry->handleTemporalPair; //handle;
-        inEntry = inEntry->next;
-    }
-}
-
-
+#if XXXXXXXXXX
 template<typename T>
 bool empty(const T& c)
 {
     return c.empty();
 }
+#endif
 
 /** Used very rarely, one or twice, in learning behaviour and PLN backinference */
 template < typename ForwardIter,
@@ -155,14 +125,6 @@ bool visible(char c);
 
 /** Converts an int to an STL string */
 std::string i2str(int v);
-
-/** Tokenize a string and produce a std::vector list of items */
-class StringTokenizer : public std::vector<std::string>
-{
-public:
-    StringTokenizer(const std::string &rStr, const std::string &rDelimiters = " ,\n");
-    std::vector<std::string> WithoutEmpty() const;
-};
 
 #define _Int(s) atoi((s).c_str())
 

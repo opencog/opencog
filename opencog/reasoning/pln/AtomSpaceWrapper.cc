@@ -31,6 +31,7 @@
 #include <opencog/persist/xml/NMXmlParser.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/files.h>
+#include <opencog/util/StringTokenizer.h>
 #include <opencog/util/tree.h>
 
 #include  <boost/foreach.hpp>
@@ -530,19 +531,19 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
     string buf;
     LoadTextFile(path, buf);
 
-    vector<string> lines = StringTokenizer(buf, "\n\r").WithoutEmpty();
+    vector<string> lines = AltStringTokenizer(buf, "\n\r").WithoutEmpty();
 
     for (uint i = 0; i < lines.size(); i++)
     {
-        vector<string> mainelems = StringTokenizer(lines[i], "(").WithoutEmpty();
+        vector<string> mainelems = AltStringTokenizer(lines[i], "(").WithoutEmpty();
         if (mainelems.size()<2)
             continue;
 
         float percentage = 0.0f;
 
-        percentage = atof(StringTokenizer(mainelems[1], "%")[0].c_str());
+        percentage = atof(AltStringTokenizer(mainelems[1], "%")[0].c_str());
 
-        vector<string> elems = StringTokenizer(mainelems[0], "\t ").WithoutEmpty();
+        vector<string> elems = AltStringTokenizer(mainelems[0], "\t ").WithoutEmpty();
 
         SimpleTruthValue tv(percentage/100.0f, 1);
 
@@ -579,10 +580,10 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
 
     puts("Adding the ANDs");
 
-    vector<string> lines = StringTokenizer(buf, "\n\r").WithoutEmpty();
+    vector<string> lines = AltStringTokenizer(buf, "\n\r").WithoutEmpty();
     for (int i = 0; i < lines.size(); i++)
     {
-        vector<string> elems = StringTokenizer(lines[i], "\t ").WithoutEmpty();
+        vector<string> elems = AltStringTokenizer(lines[i], "\t ").WithoutEmpty();
 
         if(elems.size() ==1)
         {

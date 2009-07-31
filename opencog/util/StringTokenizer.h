@@ -26,9 +26,18 @@
 #define _OPENCOG_STRING_TOKENIZER_H
 
 #include <string>
+#include <vector>
 
 namespace opencog
 {
+
+/** Tokenize a string and produce a std::vector list of items */
+class AltStringTokenizer : public std::vector<std::string>
+{
+public:
+    AltStringTokenizer(const std::string &rStr, const std::string &rDelimiters = " ,\n");
+    std::vector<std::string> WithoutEmpty() const;
+};
 
 class StringTokenizer
 {
