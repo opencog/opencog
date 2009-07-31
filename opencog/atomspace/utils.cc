@@ -329,17 +329,6 @@ bool opencog::visible(char c)
     return c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != 0;
 }
 
-std::string opencog::XMLembed(const std::string &elem, const std::string &pcdata)
-{
-    return std::string("<")
-           + elem
-           + std::string("> ")
-           + std::string(pcdata)
-           + std::string(" </")
-           + std::string(elem)
-           + std::string(">");
-};
-
 //this typedef is put is the .cc not the .h because that provokes a vtree clash
 //with combo::vtree
 //typedef vtree vtree;

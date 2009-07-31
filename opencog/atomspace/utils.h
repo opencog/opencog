@@ -246,13 +246,6 @@ bool visible(char c);
 /** Converts an int to an STL string */
 std::string i2str(int v);
 
-/** A function to create XML elements.
- \param elem The element's name (eg. "xml" in "<xml> text <xml>")
- \param pcdata The element data (eg. "text" in "<xml> text <xml>")
- \return The XML element.
-*/
-std::string XMLembed(const std::string &elem, const std::string &pcdata);
-
 /** Tokenize a string and produce a std::vector list of items */
 class StringTokenizer : public std::vector<std::string>
 {
