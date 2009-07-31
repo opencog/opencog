@@ -28,7 +28,6 @@
 
 #include <opencog/util/platform.h>
 
-#include <opencog/atomspace/CoreUtils.h>
 #include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TemporalEntry.h>
 
@@ -145,7 +144,7 @@ int HandleTemporalPairEntry::handleTemporalPairCompare(const void* e1, const voi
 
 int HandleTemporalPairEntry::compare(const HandleTemporalPair& ht1, const HandleTemporalPair& ht2)
 {
-    int handleDiff = CoreUtils::compare(ht1.getHandle(), ht2.getHandle());
+    int handleDiff = Handle::compare(ht1.getHandle(), ht2.getHandle());
     if (handleDiff != 0) {
         return handleDiff;
     } else {
