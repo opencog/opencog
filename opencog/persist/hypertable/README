@@ -1,7 +1,16 @@
-This directory uses Hypertable to support persistent and (eventually) distributed storage of atoms. Three things are needed in order for it to work:
 
-1. Hypertable must be installed (of course).
+                     HyperTable Support
+                     ------------------
+               Jeremy Schlatter Summer 2009
+
+This directory uses Hypertable to support persistent and (eventually)
+distributed storage of atoms. Three things are needed in order for it
+to work:
+
+1. HyperTable must be installed (of course). See http://hypertable.org
+
 2. The Hypertable servers must be running. The command to start them is:
-        <install_dir>/bin/start-all-servers.sh <local | hadoop | kfs>
-3. The Hypertable install directory and default configuration file need to be 
-    specified in opencog/hypertable/AtomspaceHTabler.h
+      <hypertable_install_dir>/bin/start-all-servers.sh <local | hadoop | kfs>
+
+3. The Hypertable install directory and default configuration file need
+   to be specified in opencog/persist/hypertable/AtomspaceHTabler.h
