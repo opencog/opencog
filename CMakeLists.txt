@@ -153,9 +153,19 @@ FIND_PACKAGE(HyperTable)
 IF (HYPERTABLE_FOUND)
 	ADD_DEFINITIONS(-DHAVE_HYPERTABLE)
 	MESSAGE(STATUS "Hypertable was found.")
+
+	# Don't bother looking for SIGAR unlesss hyperable was found.
+	FIND_PACKAGE(SIGAR)
+	IF (SIGAR_FOUND)
+	ELSE (SIGAR_FOUND)
+		MESSAGE(STATUS "SIGAR was not founds! It is needed for Hypertable support.")
+	ENDIF (SIGAR_FOUND)
+
 ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
+
+
 
 # global includes
 
