@@ -24,7 +24,7 @@ FIND_PATH(HYPERTABLE_INCLUDE_DIR Hypertable/Lib/Client.h
 FIND_LIBRARY(HYPERTABLE_LIBRARY 
 	NAMES
 		HyperCommon 
-	PATH 
+	PATHS
 		/usr/lib 
 		/usr/local/lib
 		/usr/hypertable/0.9.2.4/lib
