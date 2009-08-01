@@ -32,7 +32,7 @@
 #endif
 
 #include "utils.h"
-#include <opencog/util/platform.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 

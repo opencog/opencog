@@ -26,13 +26,8 @@
 #define _OPENCOG_HANDLE_SET_H
 
 #include <opencog/atomspace/types.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
-
-//#ifdef __APPLE__
-//#else
-//#include <tr1/unordered_set>
-//#ifndef WIN32
-//#endif
 
 namespace opencog
 {

@@ -27,14 +27,4 @@
 
 #include <opencog/util/platform.h>
 
-using namespace opencog;
 
-float ShortFloatOps::getValue(const ShortFloat *x)
-{
-    return(*x);
-}
-
-void ShortFloatOps::setValue(ShortFloat *x, float value)
-{
-    *x = value;
-}

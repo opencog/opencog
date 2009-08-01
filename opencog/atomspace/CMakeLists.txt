@@ -48,7 +48,6 @@ ADD_LIBRARY (atomspace SHARED
 	utils.cc
 	VersionHandle.cc
 	md5.c
-	types.cc
 )
 
 TARGET_LINK_LIBRARIES(atomspace

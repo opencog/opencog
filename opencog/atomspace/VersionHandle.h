@@ -26,7 +26,8 @@
 #define _OPENCOG_VERSIONHANDLE_H
 
 #include <boost/functional/hash.hpp>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/util/exceptions.h>
 
 namespace opencog
 {

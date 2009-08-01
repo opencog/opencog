@@ -26,23 +26,7 @@
 #ifndef OPENCOG_UTILS_H
 #define OPENCOG_UTILS_H
 
-#include <list>
-#include <string>
-#include <sstream>
-#include <vector>
-
 #include <boost/variant.hpp>
-#include <boost/foreach.hpp>
-
-#include <opencog/util/tree.h>
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/Temporal.h>
-
-#include <opencog/util/platform.h>
-#include <opencog/util/exceptions.h>
-
-/// Note! This does not re-define std::for_each!
-#define foreach BOOST_FOREACH
 
 namespace opencog
 {
@@ -72,23 +56,6 @@ OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPre
     }
     return dest;
 }
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const TypeWrapper<T>&);
-
-template<typename T>
-std::ostream& operator<<(std::ostream& out, const TypeWrapper<T>& t)
-{
-    return (out << t.value);
-}
-
-typedef TypeWrapper<Temporal> TimeStampWrapper;
-typedef TypeWrapper<int> IntegerWrapper;
-typedef TypeWrapper<float> FloatWrapper;
-typedef TypeWrapper<bool> BoolWrapper;
-typedef TypeWrapper<unsigned char> ByteWrapper;
-typedef TypeWrapper<signed char> CharWrapper;
-typedef TypeWrapper<short int> ShortIntegerWrapper;
 
 } // namespace opencog
 

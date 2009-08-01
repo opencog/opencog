@@ -123,12 +123,12 @@ string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rlo
         return ss.str();
     }
 
-    IntegerWrapper* iptr;
+    int* iptr;
     if (hptr) {
         ss << opencog::pln::Type2Name((Type)(*hptr)) << " ("
             << top.number_of_children() << ")\n";
-    } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
-        ss << iptr->value << " (" << top.number_of_children() << ")\n";
+    } else if ( (iptr = boost::get<int>(&*top)) != NULL) {
+        ss << *iptr << " (" << top.number_of_children() << ")\n";
     } else {
         ss << "Unsupported Vertex mode\n";
     }
@@ -169,12 +169,12 @@ string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel)
         return ss.str();
     }
 
-    IntegerWrapper* iptr;
+    int* iptr;
     if (hptr) {
         ss << opencog::pln::Type2Name((Type)(*hptr)) << "("
             << top.number_of_children() << ")\n";
-    } else if ( (iptr = boost::get<IntegerWrapper>(&*top)) != NULL) {
-        ss << iptr->value << "(" << top.number_of_children() << ")\n";
+    } else if ( (iptr = boost::get<int>(&*top)) != NULL) {
+        ss << *iptr << "(" << top.number_of_children() << ")\n";
     } else {
         ss << "Unsupported Vertex mode\n";
     }
@@ -1291,7 +1291,24 @@ pHandleSet constitutedSet(pHandle CP,
     return ret;
 }
 
-/*
+#ifdef DEAD_CODE_DELETE_AT_LIESURE
+
+template<typename T>
+struct TypeWrapper {
+    T value;
+    explicit TypeWrapper(T _val) : value(_val) {}
+    T operator=(const TypeWrapper& rhs) {
+        return (value = rhs.value);
+    }
+    bool operator==(const TypeWrapper& rhs) const {
+        return value == rhs.value;
+    }
+    bool operator<(const TypeWrapper& rhs) const {
+        return value < rhs.value;
+    }
+};
+
+
 #include <boost/variant/static_visitor.hpp>
 template<int LOGLEVEL>
 class printVisitor : public boost::static_visitor<bool>
@@ -1308,7 +1325,7 @@ public:
  bool operator()(const Handle &arg) { cprintf(LOGLEVEL,"Handle [%d]\n",(int)arg); return true; }
 // bool operator()( &arg) { return NonHandleID; }
 };
-*/
+#endif /* DEAD_CODE_DELETE_AT_LIESURE */
 
 FitnessEvaluatorT getFitnessEvaluator(string name) {
     // Convert from string to enum
