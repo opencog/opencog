@@ -70,6 +70,11 @@ Luabind     -- Binding between C++ and Lua
                get libluabind-dev from 
                https://launchpad.net/~arthur.loiret/+archive/ppa)
 
+HyperTable  -- Distributed storage.
+               Optional package, needed only for experimental support.
+               http://hypertable.org.
+               This requires SIGAR as well. 
+
 
 
 To build opencog:
