@@ -20,6 +20,25 @@ FIND_PATH(HYPERTABLE_INCLUDE_DIR Hypertable/Lib/Client.h
 	/opt/hypertable/0.9.2.4/include
 )
 
+# Look for the config file .. this is needed by the C++ code ...
+FIND_FILE(HYPERTABLE_CONFIG_FILE conf/hypertable.cfg
+	/usr/include
+	/usr/local/include 
+	/usr/hypertable/0.9.2.4
+	/usr/local/hypertable/0.9.2.4
+	/opt/hypertable/0.9.2.4
+)
+
+# Assume that the base path is the install path
+FIND_PATH(HYPERTABLE_INSTALL_DIR conf/hypertable.cfg
+	/usr/include
+	/usr/local/include 
+	/usr/hypertable/0.9.2.4
+	/usr/local/hypertable/0.9.2.4
+	/opt/hypertable/0.9.2.4
+)
+
+
 # Look for the libraries
 set(HYPER_LIB_PATHS 
 		/usr/lib 
@@ -44,6 +63,11 @@ IF(HYPERTABLE_INCLUDE_DIR AND HYPERTABLE_LIBRARY)
 	SET(HYPERTABLE_INCLUDE_DIRS ${HYPERTABLE_INCLUDE_DIR})
 
 	MESSAGE(STATUS "Found these hypertable libs: ${HYPERTABLE_LIBRARIES}")
+	MESSAGE(STATUS "Found hypertable install path: ${HYPERTABLE_INSTALL_DIR}")
+	MESSAGE(STATUS "Found hypertable config file: ${HYPERTABLE_CONFIG_FILE}")
+
+	ADD_DEFINITIONS(-DHYPERTABLE_INSTALL_DIR=\\"${HYPERTABLE_INSTALL_DIR}/\\")
+	ADD_DEFINITIONS(-DHYPERTABLE_CONFIG_FILE=\\"${HYPERTABLE_CONFIG_FILE}/\\")
 
 ELSE(HYPERTABLE_INCLUDE_DIR AND HYPERTABLE_LIBRARY)
 	SET(HYPERTABLE_FOUND 0)
