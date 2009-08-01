@@ -81,7 +81,10 @@ bool visible(char c);
 /** Checks whether the strings are equal, when case is ignored. */
 bool nocase_equal(const char *s1, const char *s2);
 
-/** Converts a character to upper case (also some Scandinavian characters) */
+/** Converts a character to upper case (also some Scandinavian characters)
+ * XXX This is just plain wrong -- should almost certainly be replaced by
+ * the standard C99 toupper() subr call.
+ */
 char Isox(char s);
 
 /**
