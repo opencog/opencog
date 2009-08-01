@@ -12,12 +12,19 @@
 
 # Look for the header file
 FIND_PATH(LINK_GRAMMAR_INCLUDE_DIR link-grammar/link-includes.h)
-FIND_PATH(LINK_GRAMMAR_DATA_DIR 4.0.dict PATH /usr/share/link-grammar/en/
-    /usr/local/share/link-grammar/en/)
+FIND_PATH(LINK_GRAMMAR_DATA_DIR 4.0.dict
+	PATHS 
+		/usr/share/link-grammar/en/
+		/usr/local/share/link-grammar/en/)
 
 # Look for the library
-FIND_LIBRARY(LINK_GRAMMAR_LIBRARY NAMES link-grammar PATH /usr/lib 
-	/usr/local/lib /opt/local/lib)
+FIND_LIBRARY(LINK_GRAMMAR_LIBRARY
+	NAMES
+		link-grammar
+	PATHS
+		/usr/lib 
+		/usr/local/lib
+		/opt/local/lib)
 
 # Copy the results to the output variables.
 IF (LINK_GRAMMAR_INCLUDE_DIR AND LINK_GRAMMAR_LIBRARY AND LINK_GRAMMAR_DATA_DIR)

@@ -15,7 +15,13 @@
 FIND_PATH(IODBC_INCLUDE_DIR iodbcunix.h /usr/include /usr/local/include /usr/include/iodbc /usr/local/include/iodbc /usr/include/libiodbc /usr/local/include/libiodbc)
 
 # Look for the library
-FIND_LIBRARY(IODBC_LIBRARY NAMES iodbc PATH /usr/lib /usr/local/lib)
+FIND_LIBRARY(IODBC_LIBRARY 
+	NAMES 
+		iodbc 
+	PATHS
+		/usr/lib
+		/usr/local/lib
+)
 
 # Copy the results to the output variables.
 IF (IODBC_INCLUDE_DIR AND IODBC_LIBRARY)

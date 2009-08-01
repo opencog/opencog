@@ -13,7 +13,7 @@
 FIND_PATH(LIBMEMCACHED_INCLUDE_DIR memcached.h /usr/include /usr/include/libmemcached /usr/local/include /usr/local/include/libmemcached)
 
 # Look for the library
-FIND_LIBRARY(LIBMEMCACHED_LIBRARY NAMES memcached PATH /usr/lib /usr/local/lib)
+FIND_LIBRARY(LIBMEMCACHED_LIBRARY NAMES memcached PATHS /usr/lib /usr/local/lib)
 
 # Copy the results to the output variables.
 IF (LIBMEMCACHED_INCLUDE_DIR AND LIBMEMCACHED_LIBRARY)

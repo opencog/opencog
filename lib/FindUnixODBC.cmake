@@ -10,10 +10,22 @@
 # UnixODBC_LIBRARIES - The libraries needed to use UnixODBC
 
 # Look for the header file
-FIND_PATH(UnixODBC_INCLUDE_DIR uodbc_stats.h /usr/include /usr/local/include /usr/include/odbc /usr/local/include/odbc /usr/include/libodbc /usr/local/include/libodbc)
+FIND_PATH(UnixODBC_INCLUDE_DIR uodbc_stats.h
+	/usr/include
+	/usr/local/include
+	/usr/include/odbc
+	/usr/local/include/odbc
+	/usr/include/libodbc
+	/usr/local/include/libodbc
+)
 
 # Look for the library
-FIND_LIBRARY(UnixODBC_LIBRARY NAMES odbc PATH /usr/lib /usr/local/lib)
+FIND_LIBRARY(UnixODBC_LIBRARY
+	NAMES
+		odbc
+	PATHS
+		/usr/lib
+		/usr/local/lib)
 
 # Copy the results to the output variables.
 IF (UnixODBC_INCLUDE_DIR AND UnixODBC_LIBRARY)
