@@ -21,10 +21,7 @@ FIND_PATH(HYPERTABLE_INCLUDE_DIR Hypertable/Lib/Client.h
 )
 
 # Look for the libraries
-FIND_LIBRARY(HYPERTABLE_LIBRARY 
-	NAMES
-		HyperCommon 
-	PATHS
+set(HYPER_LIB_PATHS 
 		/usr/lib 
 		/usr/local/lib
 		/usr/hypertable/0.9.2.4/lib
@@ -32,11 +29,22 @@ FIND_LIBRARY(HYPERTABLE_LIBRARY
 		/opt/hypertable/0.9.2.4/lib
 )
 
+FIND_LIBRARY(HYPERTABLE_LIBRARY NAMES HyperCommon PATHS ${HYPER_LIB_PATHS})
+FIND_LIBRARY(HYPER_DFS_BROKER NAMES HyperDfsBroker PATHS ${HYPER_LIB_PATHS})
+
+# XXX Unclear -- do we need to find *all* of these?
+# libHyperCommon.so  libHyperDfsBroker.so  libHyperRanger.so  libHypertable.so
+# libHyperComm.so    libHyperDfsCmds.so    libHyperspace.so   libHyperTools.so
+
+
 # Copy the results to the output variables.
 IF(HYPERTABLE_INCLUDE_DIR AND HYPERTABLE_LIBRARY)
 	SET(HYPERTABLE_FOUND 1)
-	SET(HYPERTABLE_LIBRARIES ${HYPERTABLE_LIBRARY})
+	SET(HYPERTABLE_LIBRARIES ${HYPERTABLE_LIBRARY} ${HYPER_DFS_BROKER})
 	SET(HYPERTABLE_INCLUDE_DIRS ${HYPERTABLE_INCLUDE_DIR})
+
+	MESSAGE(STATUS "Found these hypertable libs: ${HYPERTABLE_LIBRARIES}")
+
 ELSE(HYPERTABLE_INCLUDE_DIR AND HYPERTABLE_LIBRARY)
 	SET(HYPERTABLE_FOUND 0)
 	SET(HYPERTABLE_LIBRARIES)
