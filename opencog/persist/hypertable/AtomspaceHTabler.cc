@@ -19,27 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Common/Compat.h"
+#include <Common/Compat.h>
 
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include "Common/Error.h"
+#include <Common/Error.h>
 
-#include "Hypertable/Lib/ApacheLogParser.h"
-#include "Hypertable/Lib/Client.h"
-#include "Hypertable/Lib/KeySpec.h"
+#include <Hypertable/Lib/ApacheLogParser.h>
+#include <Hypertable/Lib/Client.h>
+#include <Hypertable/Lib/KeySpec.h>
 
-#include "opencog/hypertable/AtomspaceHTabler.h"
-#include "opencog/atomspace/SimpleTruthValue.h"
-#include "opencog/atomspace/TruthValue.h"
-#include "opencog/atomspace/TLB.h"
-#include "opencog/atomspace/Atom.h"
-#include "opencog/atomspace/Node.h"
-#include "opencog/atomspace/Link.h"
-#include "opencog/atomspace/AttentionValue.h"
+#include <opencog/persist/hypertable/AtomspaceHTabler.h>
+
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/TruthValue.h>
 
 
 using namespace opencog;
