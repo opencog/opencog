@@ -24,7 +24,6 @@
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/server/CogServer.h> // To get access to AtomSpace
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/XMLBufferReader.h>

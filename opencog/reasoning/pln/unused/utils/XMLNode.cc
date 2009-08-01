@@ -15,9 +15,6 @@
  */
 #include "../PLN.h"
 #include "XMLNode.h"
-#include <opencog/atomspace/utils.h>
-#include <opencog/atomspace/utils.h>
-//#include "PTLutils.h"
 
 namespace opencog { namespace pln
 {

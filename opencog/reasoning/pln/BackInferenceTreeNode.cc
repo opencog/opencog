@@ -33,7 +33,7 @@
 //#include "spacetime.h"
 #include "AtomSpaceWrapper.h"
 #include <opencog/server/CogServer.h>
-#include <opencog/atomspace/utils.h>
+#include <opencog/util/copyif.h>
 #include "BackInferenceTreeNode.h"
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>

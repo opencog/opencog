@@ -28,8 +28,6 @@
 #include "XMLNodeLoader.h"
 #include "../AtomSpaceWrapper.h"
 #include "../rules/Rules.h"
-#include <opencog/atomspace/utils.h>
-#include <opencog/atomspace/utils.h>
 
 using namespace opencog;
 #define ELEMENT_NODE 1000

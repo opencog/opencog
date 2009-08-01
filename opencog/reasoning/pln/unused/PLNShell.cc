@@ -137,7 +137,6 @@ These should be bug-free, but there's no type checking of parameters, so providi
 #include "ForwardChainer.h"
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/utils.h>
 // #include <opencog/guile/SchemeEval.h>
 #include <opencog/adaptors/tulip/TulipWriter.h>
 

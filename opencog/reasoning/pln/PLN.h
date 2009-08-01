@@ -41,30 +41,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-// C++ includes
-//#include <set>
-//#include <algorithm>
-//#include <stack>
-//#include <string>
-//#include <map>
-//#include <stack>
-
 // Boost includes
 #include <boost/smart_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lambda/lambda.hpp>
-//#include <boost/bind.hpp>
-
-// OpenCog includes
-//#include <AtomSpace.h>
-//#include <Link.h>
-//#include <Atom.h>
-//#include <Node.h>
-//#include <TLB.h>
-//#include <classes.h>
-//#include <SimpleTruthValue.h>
-
-#include <opencog/atomspace/utils.h>
 
 // The fixed length of a pattern
 #define PLN_CONFIG_PATTERN_LENGTH 13

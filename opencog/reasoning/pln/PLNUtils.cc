@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/util/Config.h>
 
 #include "PLN.h"

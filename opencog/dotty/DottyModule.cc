@@ -28,7 +28,6 @@
 
 #include "DottyModule.h"
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>

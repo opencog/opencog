@@ -1,5 +1,5 @@
 /*
- * src/AtomSpace/utils.cc
+ * opencog/util/copyif.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,44 +23,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
-#include <string>
-#include <time.h>
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <sys/time.h>
-#endif
+#ifndef OPENCOG_COPYIF_H
+#define OPENCOG_COPYIF_H
 
-#include "utils.h"
-#include <opencog/util/exceptions.h>
-
-using namespace opencog;
-
-namespace opencog {
-
-/**
- * Time used as reference to set/get timestamps over the code
- * Used as a handy-dandy but crude profiling utility
- */
-static timeval referenceTime;
-static bool referenceTimeInitialized = false;
-
-void initReferenceTime()
+namespace opencog
 {
-    gettimeofday(&referenceTime, NULL);
-    referenceTimeInitialized = true;
+
+template < typename ForwardIter,
+typename OutputIter,
+typename UnaryPred >
+OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPred f)
+{
+    while (begin != end) {
+        if (f(*begin))
+            *dest++ = *begin;
+        ++begin;
+    }
+    return dest;
 }
 
-unsigned long getElapsedMillis()
-{
-    cassert(TRACE_INFO, referenceTimeInitialized,
-            "utils - refenceTimeInitialized should have been initialized.");
-    timeval currentTime;
-    gettimeofday(&currentTime, NULL);
-    return (currentTime.tv_sec -referenceTime.tv_sec)*1000 + (currentTime.tv_usec - referenceTime.tv_usec) / 1000;
-}
+} // namespace opencog
 
-
-};
-
+#endif /* OPENCOG_COPYIF_H */

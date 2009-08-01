@@ -32,7 +32,7 @@ typedef unsigned long ulong;
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/utils.h>
+#include <opencog/util/copyif.h>
 
 #include "BE.h"
 #include "BDTracker.h"

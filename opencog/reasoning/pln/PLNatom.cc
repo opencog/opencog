@@ -20,7 +20,6 @@
  */
 
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/utils.h>
 
 #include "PLN.h"
 #include "AtomSpaceWrapper.h"

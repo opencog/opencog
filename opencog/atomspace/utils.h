@@ -26,8 +26,6 @@
 #ifndef OPENCOG_UTILS_H
 #define OPENCOG_UTILS_H
 
-#include <boost/variant.hpp>
-
 namespace opencog
 {
 
@@ -35,27 +33,13 @@ namespace opencog
  * Initializes the reference time that will be used for getting current elapsed times
  */
 void initReferenceTime();
+
 /**
  * Gets the elapsed time (in milliseconds) since the reference time initialized with
  * initReferenceTime() function. The initReferenceTime() function must be called before
  * this function be called by the first time.
  */
 unsigned long getElapsedMillis();
-
-
-/** Used very rarely, one or twice, in learning behaviour and PLN backinference */
-template < typename ForwardIter,
-typename OutputIter,
-typename UnaryPred >
-OutputIter copy_if(ForwardIter begin, ForwardIter end, OutputIter dest, UnaryPred f)
-{
-    while (begin != end) {
-        if (f(*begin))
-            *dest++ = *begin;
-        ++begin;
-    }
-    return dest;
-}
 
 } // namespace opencog
 

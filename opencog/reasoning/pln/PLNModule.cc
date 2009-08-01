@@ -34,7 +34,6 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
-#include <opencog/atomspace/utils.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
