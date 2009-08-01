@@ -84,30 +84,6 @@ typedef std::pair<pHandle, pHandle> hpair;
 
 typedef std::set<pHandle> pHandleSet;
 
-/**
- * vector2 appears to provide an easy way to instantiate vectors with 1-4 items.
- */
-template<typename T>
-class vector2 : public std::vector<T>
-{
-public:
-    vector2(const T& arg1, const T& arg2, const T& arg3, const T& arg4) {
-        push_back(arg1); push_back(arg2); push_back(arg3); push_back(arg4);
-    }
-
-    vector2(const T& arg1, const T& arg2, const T& arg3) {
-        push_back(arg1); push_back(arg2); push_back(arg3);
-    }
-
-    vector2(const T& arg1, const T& arg2) {
-        push_back(arg1); push_back(arg2);
-    }
-
-    vector2(const T& arg1) {
-        push_back(arg1);
-    }
-};
-
 // defines print levels
 #define SILENT          0
 #define SHY             1
@@ -448,7 +424,9 @@ void insert_with_consistency_check(std::map<T1, T2>& m, T3 rstart, T3 rend)
     }
 }
 
-void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m, std::map<pHandle, vtree>::iterator rstart, std::map<pHandle, vtree>::iterator rend);
+void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m,
+                                                  std::map<pHandle, vtree>::iterator rstart,
+                                                  std::map<pHandle, vtree>::iterator rend);
 
 
 typedef std::pair<std::string, pHandle> hsubst;
@@ -484,7 +462,8 @@ struct weak_atom {
         this->bindings = Btr<bindingsT>(rhs.bindings ?
                                         new bindingsT(*rhs.bindings)
                                         : new bindingsT);
-        insert_with_consistency_check(*this->bindings, _bindings->begin(), _bindings->end());
+        insert_with_consistency_check(*this->bindings,
+                                      _bindings->begin(), _bindings->end());
     }
 
     bool operator()(pHandle h);

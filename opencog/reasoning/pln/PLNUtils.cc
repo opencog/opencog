@@ -780,9 +780,10 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
     atom rhs(h);
     bool ok = false;
     do {
-        ok = opencog::pln::MPunify1(*value, value->begin(), rhs, *bindings, //bindings,
-                                 &forbiddenBindings,
-                                 &restart, FW_VARIABLE_NODE);
+        ok = opencog::pln::MPunify1(*value, value->begin(),
+                                    rhs, *bindings, //bindings,
+                                    &forbiddenBindings,
+                                    &restart, FW_VARIABLE_NODE);
     } while (restart);
 
     return ok;

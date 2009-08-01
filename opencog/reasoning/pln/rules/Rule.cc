@@ -164,7 +164,8 @@ Rule::setOfMPs Rule::o2iMeta(meta outh) const
         return ret;
 /*  if (Handle* ph = v2h(*outh.begin()))
         return makeSingletonSet(vector2<meta>(
-                new tree<Vertex>()));*/
+        //Note: vector2 has been removed because list_of can be used instead
+        new tree<Vertex>()));*/
     bool overrideInputFilter = false;
     setOfMPs extraFilter = o2iMetaExtra(outh, overrideInputFilter);
     if (extraFilter.empty())
