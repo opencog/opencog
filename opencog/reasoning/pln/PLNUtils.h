@@ -130,6 +130,16 @@ void ReasoningLog(int l, std::string m);
 #define LET_LOG _LOG_FIXED = false;
 #define LOG_STR (_LOG_FIXED ? _LOGPOS : ( std::string(__FILE__) + ":" + i2str(__LINE__) ))
 
+static inline std::string i2str(int d)
+{
+    char temp[20];
+    sprintf(temp, "%d", d);
+    return temp;
+}
+
+/// Convert a boost::variant into a Handle
+#define v2h(v) boost::get<Handle>(v)
+
 // Print out trees
 std::string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int _rloglevel);
 std::string rawPrint(tree<Vertex>::iterator top, int _rloglevel);

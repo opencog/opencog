@@ -44,30 +44,8 @@
 /// Note! This does not re-define std::for_each!
 #define foreach BOOST_FOREACH
 
-/// Convert a boost::variant into a Handle
-#define v2h(v) boost::get<Handle>(v)
-
 namespace opencog
 {
-
-template <class _Key> struct hash2int { };
-
-inline size_t __hash2int(const char* __s)
-{
-    unsigned long __h = 0;
-    size_t size = 2 * sizeof(int);
-    for (size_t i = 0; i < size; i++, __s++) {
-        __h = 5 * __h + *__s;
-    }
-    return size_t(__h);
-}
-
-template <> struct hash2int<char *> {
-    size_t operator()(const char* __s) const {
-        return __hash2int(__s);
-    }
-};
-
 
 /**
  * Initializes the reference time that will be used for getting current elapsed times
@@ -80,13 +58,6 @@ void initReferenceTime();
  */
 unsigned long getElapsedMillis();
 
-#if XXXXXXXXXX
-template<typename T>
-bool empty(const T& c)
-{
-    return c.empty();
-}
-#endif
 
 /** Used very rarely, one or twice, in learning behaviour and PLN backinference */
 template < typename ForwardIter,
@@ -118,24 +89,6 @@ typedef TypeWrapper<bool> BoolWrapper;
 typedef TypeWrapper<unsigned char> ByteWrapper;
 typedef TypeWrapper<signed char> CharWrapper;
 typedef TypeWrapper<short int> ShortIntegerWrapper;
-//typedef TypeWrapper<ShortFloat> ShortFloatWrapper;
-
-/** Checks whether the character is printable */
-bool visible(char c);
-
-/** Converts an int to an STL string */
-std::string i2str(int v);
-
-#define _Int(s) atoi((s).c_str())
-
-/** @class Listener
- \brief The abstract listener interface.
-*/
-
-struct Listener {
-    virtual ~Listener() {}
-    virtual void OnUpdate(const void*) = 0;
-};
 
 } // namespace opencog
 

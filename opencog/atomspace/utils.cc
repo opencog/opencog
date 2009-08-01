@@ -39,10 +39,9 @@ using namespace opencog;
 
 namespace opencog {
 
-/* MISC UTILITIES */
-
 /**
  * Time used as reference to set/get timestamps over the code
+ * Used as a handy-dandy but crude profiling utility
  */
 static timeval referenceTime;
 static bool referenceTimeInitialized = false;
@@ -62,14 +61,6 @@ unsigned long getElapsedMillis()
     return (currentTime.tv_sec -referenceTime.tv_sec)*1000 + (currentTime.tv_usec - referenceTime.tv_usec) / 1000;
 }
 
-
-// move to PLN
-std::string i2str(int d)
-{
-    char temp[20];
-    sprintf(temp, "%d", d);
-    return temp;
-}
 
 };
 
