@@ -21,9 +21,6 @@
 
 #ifndef _OPENCOG_ATOMSPACE_HTABLER_H
 #define _OPENCOG_ATOMSPACE_HTABLER_H
-#define HYPERTABLE_INSTALL_DIR "/opt/hypertable/0.9.2.4"
-#define HYPERTABLE_CONFIG_FILE "/opt/hypertable/0.9.2.4/conf/hypertable.cfg"
-//TODO: ^ Is there a way to automate finding these or to get threm from cmake?
 
 #include "Common/Compat.h"
 #include "Hypertable/Lib/Client.h"
@@ -104,8 +101,8 @@ private:
         KeySpec make_key(Type, const char*);
 public:
         #ifdef HYPERTABLE_INSTALL_DIR
-        AtomspaceHTabler(){
-            c = new Client(HYPERTABLE_INSTALL_DIR,HYPERTABLE_CONFIG_FILE);
+        AtomspaceHTabler(void) {
+            c = new Client(HYPERTABLE_INSTALL_DIR, HYPERTABLE_CONFIG_FILE);
             std::vector<String> tables;
             c->get_tables(tables);
             if (find(tables.begin(), tables.end(), "Atomtable") == tables.end()) {
