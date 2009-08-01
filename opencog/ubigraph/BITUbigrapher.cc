@@ -24,10 +24,10 @@
  */
 
 #include "BITUbigrapher.h"
-#include "utils.h"
 
 #ifdef USE_BITUBIGRAPHER
 
+#include <ctype.h>
 #include <sstream>
 #include <unistd.h>
 #include <opencog/util/Logger.h>
@@ -44,7 +44,7 @@ std::string initials(std::string s)
 {
     std::string ret;
     foreach (char c,  s) {
-        if (/*isUpperCase(c)*/ Isox(c) == c) {
+        if (/*isUpperCase(c)*/ toupper(c) == c) {
             ret += c;
         }
     }

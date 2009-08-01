@@ -26,8 +26,9 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <unistd.h>
+#include <ctype.h>
 #include <limits.h>
+#include <unistd.h>
 #include <tr1/functional>
 
 #include <opencog/util/Logger.h>
@@ -44,7 +45,6 @@ extern "C" {
     #include <xmlrpc.h>
 }
 #include "Ubigrapher.h"
-#include "utils.h"
 
 extern const char* ubigraph_url;
 
@@ -55,7 +55,7 @@ std::string initials(std::string s)
 {
     std::string ret;
     foreach (char c,  s) {
-        if (Isox(c) == c) {
+        if (toupper(c) == c) {
             ret += c;
         }
     }
