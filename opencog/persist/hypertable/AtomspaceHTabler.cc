@@ -116,11 +116,11 @@ AtomspaceHTabler::AtomspaceHTabler(void)
 #else
 AtomspaceHTabler::AtomspaceHTabler(void)
 {
-    std::cerr << "To use hypertable functionality, define" 
-        << " HYPERTABLE_INSTALL_DIR and HYPERTABLE_CONFIG_FILE" 
+    std::cerr << "To use hypertable functionality, define"
+        << " HYPERTABLE_INSTALL_DIR and HYPERTABLE_CONFIG_FILE"
         << " in opencog/hypertable/AtomspaceHTabler.h" << std::endl;
     exit(1);
-}   
+}
 #endif
 
 void AtomspaceHTabler::initTables(void)
@@ -152,7 +152,7 @@ void AtomspaceHTabler::clearData(void)
     initTables();
 }
 
-/** 
+/**
  * This is a two-pass lookup: we get the handle from Outsettable
  * and use it to index into the main Atomtable.
  */
@@ -162,17 +162,17 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
     ScanSpecBuilder ssb;
     Cell cell;
     std::stringstream row;
-    
+
     ssb.add_column("handle");
     row << (unsigned short) t;
     std::vector<Handle>::const_iterator iter;
     for (iter = handles.begin(); iter != handles.end(); ++iter) {
-	    row << ',';
+        row << ',';
         row << (*iter).value();
-	}
-	ssb.add_row(row.str().c_str());
+    }
+    ssb.add_row(row.str().c_str());
     ssb.set_max_versions(1);
-	
+
     scanner_ptr = m_outset_table->create_scanner(ssb.get());
     if (scanner_ptr->next(cell)) {
         std::string handle_str((char *)cell.value, cell.value_len);
@@ -184,7 +184,7 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
     }
 }
 
-/** 
+/**
  * This is a two-pass lookup: we get the handle from Nametable
  * and use it to index into the main Atomtable.
  */
@@ -193,13 +193,13 @@ Node * AtomspaceHTabler::getNode(Type t, const char * name) const
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
     Cell cell;
-    
+
     ssb.add_column("handle");
     std::stringstream row;
     row << name << ',' << (unsigned long) t;
     ssb.add_row(row.str().c_str());
     ssb.set_max_versions(1);
-    
+
     scanner_ptr = m_name_table->create_scanner(ssb.get());
     if (scanner_ptr->next(cell)) {
         std::string handle_str((char *)cell.value, cell.value_len);
@@ -230,26 +230,26 @@ void AtomspaceHTabler::storeAtom(Handle h)
 
     KeySpec key;
     memset(&key, 0, sizeof(key));
-    
+
     // Create row index from handle
     char row[BUFF_SIZE]; //TODO: Figure out how big this should actually be
     key.row_len = snprintf(row, BUFF_SIZE, "%lu", h.value());
     key.row = row;
-        
+
     // If it's a node...
     Node *n = dynamic_cast<Node *>(atom_ptr);
     if (n) {
         // Store the name
         key.column_family = "name";
         m_handle_mutator->set(key, n->getName().c_str(), n->getName().length());
-        
+
         // Store the handle in Nametable
         KeySpec name_key;
         memset(&name_key, 0, sizeof(name_key));
-    
+
         char r[BUFF_SIZE];
         int len = snprintf(r, BUFF_SIZE, "%hu", n->getType());
-    
+
         std::string name_index = n->getName() + ',' + std::string(r,len);
         name_key.row = name_index.c_str();
         name_key.row_len = name_index.length();
@@ -259,36 +259,39 @@ void AtomspaceHTabler::storeAtom(Handle h)
         m_name_mutator->flush(); //TODO: Flush to get rid of if possible
     }
     // If it's a link...
-    else {
+    else
+    {
         // Store the outgoing set
         Link *l = dynamic_cast<Link *>(atom_ptr);
         int arity = l->getArity();
         std::vector<Handle> out = l->getOutgoingSet();
         std::stringstream ss;
-        for (int i = 0; i < arity; ++i) {
+        for (int i = 0; i < arity; ++i)
+        {
             ss << out[i];
-		    ss << ',';
-		
-			// XXX: Should the outgoing atom itself also be stored?
-			// It makes sense that it would, though that leads to problems
-			// with cycles.
-		}
-		key.column_family = "outgoing";
-		m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
-		
-		// Store the handle in Outsettable
+            ss << ',';
+
+            // XXX: Should the outgoing atom itself also be stored?
+            // It makes sense that it would, though that leads to problems
+            // with cycles.
+        }
+        key.column_family = "outgoing";
+        m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
+
+        // Store the handle in Outsettable
         KeySpec outset_key;
         memset(&outset_key, 0, sizeof(outset_key));
-        
+
         char r[BUFF_SIZE];
         int len = snprintf(r, BUFF_SIZE, "%hu", l->getType());
 
         std::vector<Handle>::const_iterator iter;
-        for (iter = l->getOutgoingSet().begin(); 
-                iter != l->getOutgoingSet().end(); ++iter) {
+        for (iter = l->getOutgoingSet().begin();
+             iter != l->getOutgoingSet().end(); ++iter)
+        {
             r[len++] = ',';
             len += snprintf(r+len, BUFF_SIZE-len, "%lu", (*iter).value());
-	    }
+        }
         outset_key.row = r;
         outset_key.row_len = len;
 
@@ -296,36 +299,34 @@ void AtomspaceHTabler::storeAtom(Handle h)
         m_outset_mutator->set(outset_key, key.row, key.row_len);
         m_outset_mutator->flush(); //TODO: Flush to get rid of if possible
     }
-    
+
     char val[BUFF_SIZE];
     int val_len;
-    
+
     // Store type
     Type t = atom_ptr->getType();
     val_len = snprintf(val, BUFF_SIZE, "%d", t);
     key.column_family = "type";
     m_handle_mutator->set(key, val, val_len);
 
-    
     // Store the importance
     const AttentionValue& av = atom_ptr->getAttentionValue();
     short sti = av.getSTI();
     short lti = av.getLTI();
     unsigned short vlti = av.getVLTI();
-    
+
     val_len = snprintf(val, BUFF_SIZE, "%hd", sti);
     key.column_family = "sti";
     m_handle_mutator->set(key, val, val_len);
-    
+
     val_len = snprintf(val, BUFF_SIZE, "%hd", lti);
     key.column_family = "lti";
     m_handle_mutator->set(key, val, val_len);
-    
+
     val_len = snprintf(val, BUFF_SIZE, "%hu", vlti);
     key.column_family = "vlti";
     m_handle_mutator->set(key, val, val_len);
-    
-    
+
     // Store the truth value
     const TruthValue &tv = atom_ptr->getTruthValue();
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
@@ -337,8 +338,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
                 tv.getMean(), tv.getCount());
     key.column_family = "stv";
     m_handle_mutator->set(key, val, val_len);
-    
-    
+
     // Store incoming set
     HandleEntry *he = atom_ptr->getIncomingSet();
     std::stringstream ss;
@@ -349,40 +349,40 @@ void AtomspaceHTabler::storeAtom(Handle h)
     }
     key.column_family = "incoming";
     m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
-    
+
     //TODO: Find a way to get rid of this if possible; it may hurt performance.
-    m_handle_mutator->flush();     
+    m_handle_mutator->flush();
     return;
 }
 
 /**
-* Return a vector containing the handles of the entire incoming
-* set of the indicated handle. 
-*/
+ * Return a vector containing the handles of the entire incoming
+ * set of the indicated handle.
+ */
 std::vector<Handle> AtomspaceHTabler::getIncomingSet(Handle h) const
 {
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
     Cell cell;
     std::vector<Handle> handles;
-    
-    ssb.add_column("incoming"); 
+
+    ssb.add_column("incoming");
     char rowbuff[BUFF_SIZE];
     snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
     ssb.add_row(rowbuff);
     ssb.set_max_versions(1);
-    
+
     scanner_ptr = m_handle_table->create_scanner(ssb.get());
-    
+
     while (scanner_ptr->next(cell)) {
         char *end = (char *)cell.value + cell.value_len;
         char *comma = (char *)cell.value;
         while (comma != end) {
             Handle h = (Handle) strtoul(comma+1, &comma, 10);
             handles.push_back(h);
-        }    
+        }
     }
-    
+
     return handles;
 }
 
@@ -418,7 +418,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
         std::cerr << e << std::endl;
         return NULL;
     }
-    
+
     std::string name;
     const char* stv = 0;
     std::string stv_str;
@@ -426,27 +426,39 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     std::vector<Handle> handles;
     short sti;
     short lti;
-    unsigned short vlti;   
-    
+    unsigned short vlti;
+
     bool found = false;
-    
+
     std::cout<< "getAtom(): scanning and processing data..." <<std::endl;
-    
+
     //XXX: Can we guarantee the order these will be found? If so, we don't
     //      have to remember as much.
     // retrieve & process all the information about the atom
-    while (scanner_ptr->next(cell)) {
+    while (scanner_ptr->next(cell))
+    {
         found = true;
-        if (!strcmp("type", cell.column_family)) { std::cout<< "getAtom(): processing type..." <<std::endl;
+        if (!strcmp("type", cell.column_family))
+        {
+            std::cout << "getAtom(): processing type..." <<std::endl;
             type = atoi(std::string((char *)cell.value,cell.value_len).c_str());
-        } else if (!strcmp("name", cell.column_family)) { std::cout<< "getAtom(): processing name..." <<std::endl;
+        }
+        else if (!strcmp("name", cell.column_family))
+        {
+            std::cout << "getAtom(): processing name..." <<std::endl;
             name = std::string((char *)cell.value, cell.value_len);
-        } else if (!strcmp("stv", cell.column_family)) { std::cout<< "getAtom(): processing stv..." <<std::endl;
+        }
+        else if (!strcmp("stv", cell.column_family))
+        {
+            std::cout << "getAtom(): processing stv..." <<std::endl;
             std::cout << "getAtom(): stv length: " << cell.value_len << std::endl;
             stv = std::string((char *)cell.value, cell.value_len).c_str();
             stv_str = std::string((char *)cell.value, cell.value_len);
             std::cout << "getAtom(): cell data is at: " << &(cell.value) << ", stv is at: " << &stv << std::endl;
-        } else if (!strcmp("outgoing", cell.column_family)) { std::cout<< "getAtom(): processing outgoing..." <<std::endl;
+        }
+        else if (!strcmp("outgoing", cell.column_family))
+        {
+            std::cout << "getAtom(): processing outgoing..." <<std::endl;
             char *end = (char *)cell.value + cell.value_len;
             char *comma = (char *)cell.value;
             while (comma != end) {
@@ -454,66 +466,76 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
                 handles.push_back(h);
                 comma++;
             }
-        } else if (!strcmp("sti", cell.column_family)) { std::cout<< "getAtom(): processing sti..." <<std::endl;
+        }
+        else if (!strcmp("sti", cell.column_family))
+        {
+            std::cout << "getAtom(): processing sti..." <<std::endl;
             sti = (short) atoi(
                 std::string((char *)cell.value, cell.value_len).c_str());
-        } else if (!strcmp("lti", cell.column_family)) { std::cout<< "getAtom(): processing lti..." <<std::endl;
+        }
+        else if (!strcmp("lti", cell.column_family))
+        {
+            std::cout << "getAtom(): processing lti..." <<std::endl;
             lti = (short) atoi(
                 std::string((char *)cell.value, cell.value_len).c_str());
-        } else if (!strcmp("vlti", cell.column_family)) { std::cout<< "getAtom(): processing vlti..." <<std::endl;
+        }
+        else if (!strcmp("vlti", cell.column_family))
+        {
+            std::cout << "getAtom(): processing vlti..." <<std::endl;
             vlti = (short) atoi(
                 std::string((char *)cell.value, cell.value_len).c_str());
         }
-         std::cout<< "getAtom(): item processed" <<std::endl;
-         if(stv) std::cout << "getAtom(): stv char*: " << stv << std::endl;
+        std::cout << "getAtom(): item processed" <<std::endl;
+        if (stv) std::cout << "getAtom(): stv char*: " << stv << std::endl;
             std::cout << "getAtom(): stv string: " << stv_str << std::endl;
     }
     std::cout<< "getAtom(): Processing complete. Creating atom." <<std::endl;
     std::stringstream mystrstr;
     mystrstr << stv;
-    if (mystrstr.str().empty()){
-    	std::cout << "no further than this" << std::endl;
-    	//breakpoint here
-    	std::cout << "em effing stop" << std::endl;
+    if (mystrstr.str().empty())
+    {
+        std::cout << "no further than this" << std::endl;
+        // breakpoint here
+        std::cout << "em effing stop" << std::endl;
     }
-    std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
-            std::cout << "getAtom(): stv string: " << stv_str << std::endl;
-    
-    if (!found){
-        return NULL;
-    } 
-    
-    if (classserver().isNode(type)) {
+    std::cout << "getAtom(): stv char*: " << stv <<std::endl;
+    std::cout << "getAtom(): stv string: " << stv_str << std::endl;
+
+    if (!found) return NULL;
+
+    if (classserver().isNode(type))
+    {
         atom_ptr = new Node(type, name);
         std::cout<< "getAtom(): Node created" <<std::endl;
-    std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
-            std::cout << "getAtom(): stv string: " << stv_str << std::endl;
-    } else {
+        std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
+        std::cout << "getAtom(): stv string: " << stv_str << std::endl;
+    }
+    else
+    {
         atom_ptr = new Link(type, handles);
         std::cout<< "getAtom(): Link created" <<std::endl;
-    std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
-            std::cout << "getAtom(): stv string: " << stv_str << std::endl;
+        std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
+        std::cout << "getAtom(): stv string: " << stv_str << std::endl;
     }
 
     // Restore importance
     const AttentionValue av(sti,lti,vlti);
     atom_ptr->setAttentionValue(av);
     std::cout<< "getAtom(): importance restored" <<std::endl;
-    
+
     // Restore truth value
-    std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
-            std::cout << "getAtom(): stv string: " << stv_str << std::endl;
+    std::cout << "getAtom(): stv char*: " << stv <<std::endl;
+    std::cout << "getAtom(): stv string: " << stv_str << std::endl;
     double mean = atof(stv + 1);
-    std::cout<< "getAtom(): stv mean value: " << mean <<std::endl;
+    std::cout << "getAtom(): stv mean value: " << mean <<std::endl;
     char *comma = strchr(stv + 2, ',');
-    std::cout<< "getAtom(): stv comma:" << comma <<std::endl;
+    std::cout << "getAtom(): stv comma:" << comma <<std::endl;
     double count = atof(comma + 1);
-    std::cout<< "getAtom(): stv count OK" <<std::endl;
+    std::cout << "getAtom(): stv count OK" <<std::endl;
     SimpleTruthValue nstv(mean, count);
     atom_ptr->setTruthValue(nstv);
-    std::cout<< "getAtom(): truth value restored" <<std::endl;
+    std::cout << "getAtom(): truth value restored" <<std::endl;
 
     return atom_ptr;
 }
-
 
