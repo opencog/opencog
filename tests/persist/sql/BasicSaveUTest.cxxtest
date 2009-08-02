@@ -1,5 +1,5 @@
 /*
- * tests/persist/BasicSaveUTest.cxxtest
+ * tests/persist/sql/BasicSaveUTest.cxxtest
  *
  * Most basic, simplest sniff test, saves and restores a few atoms.
  *
