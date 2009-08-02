@@ -48,6 +48,109 @@ using namespace opencog;
 using namespace Hypertable;
 
 const int BUFF_SIZE = 1028; //TODO: Figure out how big this should actually be
+const int TIMEOUT = 3000;
+
+const String attribute_schema = "\
+<Schema>\n\
+  <AccessGroup name=\"default\">\n\
+    <ColumnFamily>\n\
+      <Name>name</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>type</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>stv</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>incoming</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>outgoing</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>sti</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>lti</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+    <ColumnFamily>\n\
+      <Name>vlti</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+  </AccessGroup>\n\
+</Schema>";
+
+const String handle_schema = "\
+<Schema>\n\
+  <AccessGroup name=\"default\">\n\
+    <ColumnFamily>\n\
+      <Name>handle</Name>\n\
+      <deleted>false</deleted>\n\
+    </ColumnFamily>\n\
+  </AccessGroup>\n\
+</Schema>";
+
+
+#ifdef HYPERTABLE_INSTALL_DIR
+AtomspaceHTabler::AtomspaceHTabler(void)
+{
+    try {
+        c = new Client(HYPERTABLE_INSTALL_DIR, HYPERTABLE_CONFIG_FILE, TIMEOUT);
+    }
+    catch (Hypertable::Exception& e) {
+        if (e.code() == Error::REQUEST_TIMEOUT) {
+            throw NetworkException(TRACE_INFO, "Timeout connecting to hyperspace."
+                    " Confirm Hypertable servers are running and try again.");
+        }
+    }
+    initTables();
+}
+#else
+AtomspaceHTabler::AtomspaceHTabler(void)
+{
+    std::cerr << "To use hypertable functionality, define" 
+        << " HYPERTABLE_INSTALL_DIR and HYPERTABLE_CONFIG_FILE" 
+        << " in opencog/hypertable/AtomspaceHTabler.h" << std::endl;
+    exit(1);
+}   
+#endif
+
+void AtomspaceHTabler::initTables(void)
+{
+    std::vector<String> tables;
+    c->get_tables(tables);
+    if (find(tables.begin(), tables.end(), "Atomtable") == tables.end()) {
+        c->create_table("Atomtable", attribute_schema);
+    }
+    if (find(tables.begin(), tables.end(), "Nametable") == tables.end()) {
+        c->create_table("Nametable", handle_schema);
+    }
+    if (find(tables.begin(), tables.end(), "Outsettable") == tables.end()) {
+        c->create_table("Outsettable", handle_schema);
+    }
+    m_handle_table = c->open_table("Atomtable");
+    m_handle_mutator = m_handle_table->create_mutator();
+    m_name_table = c->open_table("Nametable");
+    m_name_mutator = m_name_table->create_mutator();
+    m_outset_table = c->open_table("Outsettable");
+    m_outset_mutator = m_outset_table->create_mutator();
+}
+
+void AtomspaceHTabler::clearData(void)
+{
+    c->drop_table("Atomtable", true);
+    c->drop_table("Nametable", true);
+    c->drop_table("Outsettable", true);
+    initTables();
+}
 
 /** 
  * This is a two-pass lookup: we get the handle from Outsettable

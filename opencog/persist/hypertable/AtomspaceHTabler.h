@@ -30,54 +30,6 @@
 #include "opencog/atomspace/Link.h"
 #include "opencog/atomspace/BackingStore.h"
 
-
-        const String attribute_schema = "\
-<Schema>\n\
-  <AccessGroup name=\"default\">\n\
-    <ColumnFamily>\n\
-      <Name>name</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>type</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>stv</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>incoming</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>outgoing</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>sti</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>lti</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-    <ColumnFamily>\n\
-      <Name>vlti</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-  </AccessGroup>\n\
-</Schema>";
-
-        const String handle_schema = "\
-<Schema>\n\
-  <AccessGroup name=\"default\">\n\
-    <ColumnFamily>\n\
-      <Name>handle</Name>\n\
-      <deleted>false</deleted>\n\
-    </ColumnFamily>\n\
-  </AccessGroup>\n\
-</Schema>";
 namespace opencog
 {
 
@@ -87,7 +39,6 @@ namespace opencog
 class AtomspaceHTabler : public BackingStore
 {
 private:
-
         ClientPtr c;
         TablePtr m_handle_table;
         TableMutatorPtr m_handle_mutator;
@@ -99,37 +50,17 @@ private:
         KeySpec make_key(Handle);
         KeySpec make_key(Type, const std::vector<Handle>&);
         KeySpec make_key(Type, const char*);
+        
+        void initTables();
 public:
-        #ifdef HYPERTABLE_INSTALL_DIR
-        AtomspaceHTabler(void) {
-            c = new Client(HYPERTABLE_INSTALL_DIR, HYPERTABLE_CONFIG_FILE);
-            std::vector<String> tables;
-            c->get_tables(tables);
-            if (find(tables.begin(), tables.end(), "Atomtable") == tables.end()) {
-                c->create_table("Atomtable", attribute_schema);
-            }
-            if (find(tables.begin(), tables.end(), "Nametable") == tables.end()) {
-                c->create_table("Nametable", handle_schema);
-            }
-            if (find(tables.begin(), tables.end(), "Outsettable") == tables.end()) {
-                c->create_table("Outsettable", handle_schema);
-            }
-            m_handle_table = c->open_table("Atomtable");
-            m_handle_mutator = m_handle_table->create_mutator();
-            m_name_table = c->open_table("Nametable");
-            m_name_mutator = m_name_table->create_mutator();
-            m_outset_table = c->open_table("Outsettable");
-            m_outset_mutator = m_outset_table->create_mutator();
-        }
-        #else
-        AtomspaceHTabler(){
-            std::cerr << "To use hypertable functionality, define" 
-                << " HYPERTABLE_INSTALL_DIR and HYPERTABLE_CONFIG_FILE" 
-                << " in opencog/hypertable/AtomspaceHTabler.h" << std::endl;
-            exit(1);
-        }   
-        #endif
+
+        AtomspaceHTabler(void);
         virtual ~AtomspaceHTabler(){}
+        
+        /**
+         * Erases everything stored in the Hypertable.
+         */
+        void clearData();
         
         /** 
          * Return a pointer to a link of the indicated type and outset,
