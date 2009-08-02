@@ -164,19 +164,23 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
     std::stringstream row;
 
     ssb.add_column("handle");
-    row << (unsigned short) t;
+    row << t;
     std::vector<Handle>::const_iterator iter;
-    for (iter = handles.begin(); iter != handles.end(); ++iter) {
+    for (iter = handles.begin(); iter != handles.end(); ++iter)
+    {
         row << ',';
-        row << (*iter).value();
+        UUID uuid = (*iter).value();
+        row << uuid;
     }
     ssb.add_row(row.str().c_str());
     ssb.set_max_versions(1);
 
     scanner_ptr = m_outset_table->create_scanner(ssb.get());
-    if (scanner_ptr->next(cell)) {
+    if (scanner_ptr->next(cell))
+    {
         std::string handle_str((char *)cell.value, cell.value_len);
-        Handle h(strtoul(handle_str.c_str(), NULL, 10));
+        UUID uuid = strtoul(handle_str.c_str(), NULL, 10);
+        Handle h(uuid);
         return dynamic_cast<Link *>(getAtom(h));
     }
     else {
@@ -201,12 +205,15 @@ Node * AtomspaceHTabler::getNode(Type t, const char * name) const
     ssb.set_max_versions(1);
 
     scanner_ptr = m_name_table->create_scanner(ssb.get());
-    if (scanner_ptr->next(cell)) {
+    if (scanner_ptr->next(cell))
+    {
         std::string handle_str((char *)cell.value, cell.value_len);
-        Handle h(strtoul(handle_str.c_str(), NULL, 10));
+        UUID uuid = strtoul(handle_str.c_str(), NULL, 10);
+        Handle h(uuid);
         return dynamic_cast<Node *>(getAtom(h));
     }
-    else {
+    else
+    {
         return NULL;
     }
 }
@@ -233,12 +240,15 @@ void AtomspaceHTabler::storeAtom(Handle h)
 
     // Create row index from handle
     char row[BUFF_SIZE]; //TODO: Figure out how big this should actually be
-    key.row_len = snprintf(row, BUFF_SIZE, "%lu", h.value());
+
+    UUID uuid = h.value();
+    key.row_len = snprintf(row, BUFF_SIZE, "%lu", uuid);
     key.row = row;
 
     // If it's a node...
     Node *n = dynamic_cast<Node *>(atom_ptr);
-    if (n) {
+    if (n)
+    {
         // Store the name
         key.column_family = "name";
         m_handle_mutator->set(key, n->getName().c_str(), n->getName().length());
@@ -289,8 +299,9 @@ void AtomspaceHTabler::storeAtom(Handle h)
         for (iter = l->getOutgoingSet().begin();
              iter != l->getOutgoingSet().end(); ++iter)
         {
+            UUID uuid = (*iter).value();
             r[len++] = ',';
-            len += snprintf(r+len, BUFF_SIZE-len, "%lu", (*iter).value());
+            len += snprintf(r+len, BUFF_SIZE-len, "%lu", uuid);
         }
         outset_key.row = r;
         outset_key.row_len = len;
@@ -330,7 +341,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
     // Store the truth value
     const TruthValue &tv = atom_ptr->getTruthValue();
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
-    if (NULL == stv) {
+    if (NULL == stv)
+    {
         std::cerr << "Non-simple truth values are not handled\n";
         return;
     }
@@ -339,6 +351,8 @@ void AtomspaceHTabler::storeAtom(Handle h)
     key.column_family = "stv";
     m_handle_mutator->set(key, val, val_len);
 
+
+#ifdef THERE_IS_NO_NEED_TO_STORE_INCOMING_SET
     // Store incoming set
     HandleEntry *he = atom_ptr->getIncomingSet();
     std::stringstream ss;
@@ -349,9 +363,11 @@ void AtomspaceHTabler::storeAtom(Handle h)
     }
     key.column_family = "incoming";
     m_handle_mutator->set(key, ss.str().c_str(), ss.str().length());
+#endif /* THERE_IS_NO_NEED_TO_STORE_INCOMING_SET */
 
-    //TODO: Find a way to get rid of this if possible; it may hurt performance.
+    // TODO: Find a way to get rid of this if possible; it may hurt performance.
     m_handle_mutator->flush();
+
     return;
 }
 
@@ -406,7 +422,8 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     ssb.add_column("vlti");
 
     char rowbuff[BUFF_SIZE];
-    snprintf(rowbuff, BUFF_SIZE, "%lu", h.value());
+    UUID uuid = h.value();
+    snprintf(rowbuff, BUFF_SIZE, "%lu", uuid);
     ssb.add_row(rowbuff);
     ssb.set_max_versions(1);
 
@@ -441,7 +458,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
         if (!strcmp("type", cell.column_family))
         {
             std::cout << "getAtom(): processing type..." <<std::endl;
-            type = atoi(std::string((char *)cell.value,cell.value_len).c_str());
+            type = atoi(std::string((char *)cell.value, cell.value_len).c_str());
         }
         else if (!strcmp("name", cell.column_family))
         {
@@ -506,15 +523,15 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     if (classserver().isNode(type))
     {
         atom_ptr = new Node(type, name);
-        std::cout<< "getAtom(): Node created" <<std::endl;
-        std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
+        std::cout << "getAtom(): Node created" <<std::endl;
+        std::cout << "getAtom(): stv char*: " << stv <<std::endl;
         std::cout << "getAtom(): stv string: " << stv_str << std::endl;
     }
     else
     {
         atom_ptr = new Link(type, handles);
-        std::cout<< "getAtom(): Link created" <<std::endl;
-        std::cout<< "getAtom(): stv char*: " << stv <<std::endl;
+        std::cout << "getAtom(): Link created" <<std::endl;
+        std::cout << "getAtom(): stv char*: " << stv <<std::endl;
         std::cout << "getAtom(): stv string: " << stv_str << std::endl;
     }
 
