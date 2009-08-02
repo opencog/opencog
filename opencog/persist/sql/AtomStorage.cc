@@ -110,7 +110,8 @@ class AtomStorage::Response
 			}
 			else if (!strcmp(colname, "uuid"))
 			{
-				handle = Handle(strtoul(colvalue, NULL, 10));
+				UUID uuid = strtoul(colvalue, NULL, 10);
+				handle = Handle(uuid);
 			}
 			return false;
 		}
@@ -293,9 +294,11 @@ class AtomStorage::Outgoing
 		bool each_handle (Handle h)
 		{
 			char buff[BUFSZ];
+			UUID src_uuid = src_handle.value();
+			UUID dst_uuid = h.value();
 			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
 			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
-			        src_handle.value(), h.value(), pos);
+			        src_uuid, dst_uuid, pos);
 
 			Response rp;
 			rp.rs = db_conn->exec(buff);
@@ -555,7 +558,8 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 		Handle h = out[i];
 		if (i != 0) str += ", ";
 		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "%lu", h.value());
+		UUID uuid = h.value();
+		snprintf(buff, BUFSZ, "%lu", uuid);
 		str += buff;
 	}
 	str += "}\'";
@@ -639,7 +643,8 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
-	snprintf(uuidbuff, BUFSZ, "%lu", h.value());
+	UUID uuid = h.value();
+	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
 	bool update = atomExists(h);
 	if (update)
@@ -873,7 +878,8 @@ bool AtomStorage::atomExists(Handle h)
 {
 #ifdef ASK_SQL_SERVER
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h.value());
+	UUID uuid = h.value();
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
 	return idExists(buff);
 #else
 	// look at the local cache of id's to see if the atom is in storage or not.
@@ -921,7 +927,8 @@ void AtomStorage::get_ids(void)
 void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", h.value());
+	UUID uuid = h.value();
+	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
 	Response rp;
 	rp.rs = db_conn->exec(buff);
@@ -966,7 +973,8 @@ Atom * AtomStorage::getAtom(Handle h)
 {
 	setup_typemap();
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h.value());
+	UUID uuid = h.value();
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
 
 	return getAtom(buff, -1);
 }
@@ -980,7 +988,8 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 
 	setup_typemap();
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE outgoing @> ARRAY[%lu];", h.value());
+	UUID uuid = h.value();
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE outgoing @> ARRAY[%lu];", uuid);
 
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
@@ -1108,10 +1117,11 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		// Perform at least some basic sanity checking ...
 		if (realtype != atom->getType())
 		{
+			UUID uuid = h.value();
 			fprintf(stderr,
 				"Error: mismatched atom type for existing atom! "
 				"uuid=%lu real=%d atom=%d\n",
-				h.value(), realtype, atom->getType());
+				uuid, realtype, atom->getType());
 		}
 	}
 
