@@ -26,3 +26,8 @@ B. Verify that CMake correctly found the location of the hypertable
      -- Hypertable was found.
 
 C. Verify that SIGAR was found by CMake. Its needed for linking.
+
+TODO
+----
+-- search for TODO's in the code and deal witth them.
+-- Fix the getIncomingSet() function, its not implemented correctly.
