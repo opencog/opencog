@@ -38,7 +38,7 @@ namespace opencog
  */
 class AtomspaceHTabler : public BackingStore
 {
-private:
+    private:
         ClientPtr c;
         TablePtr m_handle_table;
         TableMutatorPtr m_handle_mutator;
@@ -52,8 +52,13 @@ private:
         KeySpec make_key(Type, const char*);
         
         void initTables();
-public:
+    public:
 
+        /**
+         * Initializes the object, connects to Hypertable.
+         * @throws NetworkException if the connection times out,
+         * usually indicating that the Hypertable servers are not running.
+         */
         AtomspaceHTabler(void);
         virtual ~AtomspaceHTabler(){}
         
@@ -66,8 +71,8 @@ public:
          * Return a pointer to a link of the indicated type and outset,
          * if it exists; else return NULL.
          */
-		virtual Link * getLink(Type, const std::vector<Handle>&) const;
-		
+        virtual Link * getLink(Type, const std::vector<Handle>&) const;
+
         /** 
          * Return a pointer to a node of the indicated type and name,
          * if it exists; else return NULL.
@@ -80,19 +85,18 @@ public:
          * truth value, etc. 
          */
         virtual void storeAtom(Handle);
-		
+
         /**
          * Return a vector containing the handles of the entire incoming
          * set of the indicated handle. 
          */
         virtual std::vector<Handle> getIncomingSet(Handle) const;
-		
+
         /** 
          * Return a pointer to an Atom associated with the given
          * handle, if it exists; else return NULL.
          */
         virtual Atom * getAtom(Handle) const;
-
 };
 
 } // namespace opencog
