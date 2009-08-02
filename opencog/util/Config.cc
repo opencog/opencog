@@ -83,12 +83,15 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     "../",
     "../../",
     "../../../",
+    "../../../../",
     "./lib/",
     "../lib/",
     "../../lib/",
     "../../../lib/",
+    "../../../../lib/", // yes, really needed for some test cases!
     CONFDIR,
 #ifndef WIN32
+    "/etc/opencog",
     "/etc",
 #endif // !WIN32
     NULL
