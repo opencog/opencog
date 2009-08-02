@@ -7,12 +7,3 @@ LINK
 SAVING_LOADING_TEST_LINK <- LINK
 SAVING_LOADING_TEST_NODE <- NODE
 
-// =====================================================================
-// The following types are needed by BasicSCMUTest 
-// =====================================================================
-SENTENCE_NODE <- NODE
-DOCUMENT_NODE <- NODE
-WORD_NODE <- NODE
-LEMMA_NODE <- NODE
-PART_OF_SPEECH_NODE <- NODE
-
