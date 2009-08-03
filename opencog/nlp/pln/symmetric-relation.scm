@@ -1,13 +1,15 @@
 ;
 ; symmetric-relation.scm
-; quick hack/port of XML demo for "SymmetricRelation"
+;
+; Quick hack/port of XML demo for "SymmetricRelation"
+; Many of the truth values were messed with ... 
 
 (define x
     (EvaluationLink (stv 0.8 0.6)
         (PredicateNode "friendOf")
         (ListLink 
-            (ConceptNode "AAA")
-            (ConceptNode "BBB")
+            (ConceptNode "AAA" (stv 1 0.5))
+            (ConceptNode "BBB" (stv 1 0.5))
         )
     )
 )
@@ -22,35 +24,38 @@
     )
 )
 
-(InheritanceLink (stv 0.999000 0.999000)
+(InheritanceLink (stv 0.999 0.999)
     (PredicateNode "friendOf")
     (ConceptNode "symmetricRelation")
 )
 
-(ForallLink (stv 0.990000 0.990000)
-    (ListLink (stv 1.000000 0.000000)
+; Define the meaning of a "symmetric relation"
+; If R inherits from symmetricRelation and
+; we have R(x,y) then deduce R(y,x)  
+(ForallLink (stv 0.99 0.99)
+    (ListLink (stv 1 0)
         (VariableNode "X007")
-        (VariableNode "X008")
-        (VariableNode "R000")
+        (VariableNode "Y008")
+        (VariableNode "R000")  ;; the relation
     )
-    (ImplicationLink (stv 1.000000 0.000000)
-        (AndLink (stv 1.000000 0.000000)
-            (InheritanceLink (stv 1.000000 0.000000)
-                (VariableNode "R000")
+    (ImplicationLink (stv 1 0)
+        (AndLink (stv 1 0)
+            (InheritanceLink (stv 1 0)
+                (VariableNode "R000")   
                 (ConceptNode "symmetricRelation")
             )
-            (EvaluationLink (stv 1.000000 0.000000)
+            (EvaluationLink (stv 1 0)
                 (VariableNode "R000")
-                (ListLink (stv 1.000000 0.000000)
+                (ListLink (stv 1 0)
                     (VariableNode "X007")
-                    (VariableNode "X008")
+                    (VariableNode "Y008")
                 )
             )
         )
-        (EvaluationLink (stv 1.000000 0.000000)
+        (EvaluationLink (stv 1 0)
             (VariableNode "R000")
-            (ListLink (stv 1.000000 0.000000)
-                (VariableNode "X008")
+            (ListLink (stv 1 0)
+                (VariableNode "Y008")
                 (VariableNode "X007")
             )
         )
@@ -58,49 +63,53 @@
 )
 
 (define a
-        (AndLink (stv 1.000000 0.000000)
-            (InheritanceLink (stv 1.000000 0.000000)
-                (VariableNode "R000")
-                (ConceptNode "symmetricRelation")
-            )
-            (EvaluationLink (stv 1.000000 0.000000)
-                (VariableNode "R000")
-                (ListLink (stv 1.000000 0.000000)
-                    (VariableNode "X007")
-                    (VariableNode "X008")
-                )
-            )
-        )
-)
-(define b
-        (EvaluationLink (stv 1.000000 0.000000)
+    (AndLink (stv 1 0.5)
+        (InheritanceLink (stv 1 0.5)
             (VariableNode "R000")
-            (ListLink (stv 1.000000 0.000000)
-                (VariableNode "X008")
+            (ConceptNode "symmetricRelation")
+        )
+        (EvaluationLink (stv 1 0.5)
+            (VariableNode "R000")
+            (ListLink (stv 1 0)
                 (VariableNode "X007")
+                (VariableNode "Y008")
             )
         )
+    )
 )
 
-(ForallLink (stv 0.990000 0.990000)
-    (ListLink (stv 1.000000 0.000000)
+(define b
+    (EvaluationLink (stv 1 0.5)
+        (VariableNode "R000")
+        (ListLink (stv 1 0.5)
+            (VariableNode "Y008")
+            (VariableNode "X007")
+        )
+    )
+)
+
+(ForallLink (stv 0.99 0.99)
+    (ListLink (stv 1 0)
         (VariableNode "X007")
-        (VariableNode "X008")
+        (VariableNode "Y008")
         (VariableNode "R000")
     )
-    (ImplicationLink (stv 1.000000 0.000000)
+    (ImplicationLink (stv 1 0.5)
         a b
     )
 )
-(pln-bc y 100)
+(pln-bc y 50)
 
- (define a (cog-tv->alist (cog-tv y)))
+(ConceptNode  "symmetricRelation" (stv 1 0.99))
+(VariableNode  "R000" (stv 1 0.99) )
 
 
-(VariableNode  "X007" (stv 1.000000 0.000000) )
-(VariableNode   "X008" (stv 1.000000 0.000000) )
-(VariableNode  "R000" (stv 1.000000 0.000000) )
-(ConceptNode  "symmetricRelation" (stv 1.000000 0.000000))
+ (define d (cog-tv->alist (cog-tv y)))
+
+
+(VariableNode  "X007" (stv 1 0.9) )
+(VariableNode  "Y008" (stv 1 0.9) )
+(VariableNode  "R000" (stv 1 0.9) )
 
 
 
