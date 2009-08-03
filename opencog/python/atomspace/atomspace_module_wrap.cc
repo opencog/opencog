@@ -5,6 +5,7 @@
 #include "AttentionValue_wrap.h"
 #include "Atom_wrap.h"
 #include "AtomSpace_wrap.h"
+#include "AtomTable_wrap.h"
 #include "CompositeTruthValue_wrap.h"
 #include "CountTruthValue_wrap.h"
 #include "ClassServer_wrap.h"
@@ -43,6 +44,7 @@ void init_atomspace_module_py()
     init_AttentionValue_py();
     init_Atom_py();
     init_AtomSpace_py();
+    init_AtomTable_py();
     init_Node_py();
     init_Link_py();
     init_ClassServer_py();

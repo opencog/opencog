@@ -4,6 +4,7 @@ add_library(atomspace_py SHARED
     atom_types_wrap.cc
     Atom_wrap.cc
     AtomSpace_wrap.cc
+    AtomTable_wrap.cc
     AttentionValue_wrap.cc
     ClassServer_wrap.cc
     CompositeTruthValue_wrap.cc
