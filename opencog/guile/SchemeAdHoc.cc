@@ -156,7 +156,7 @@ SCM SchemeSmob::pln_bc (SCM starget, SCM ssteps)
 	// We need to make a copy. Wish I could do this on stack ... 
 	TruthValue *t = a->getTruthValue().clone();
 
-    opencog::pln::infer(h, steps, true);
+	opencog::pln::infer(h, steps, true);
 
 	// Return true only if the truth value changed,
 	// else return false.
