@@ -9,6 +9,6 @@ void init_AtomTable_py()
 {
     class_<AtomTable, boost::noncopyable>("AtomTable", no_init)
         .def(init<optional<bool> >())
-        //.def(init<const Handle&>())
+        .def("getSize", &AtomTable::getSize)
     ;
 }
