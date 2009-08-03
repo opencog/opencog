@@ -449,6 +449,8 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
         const CompositeTruthValue ctv =
             dynamic_cast<const CompositeTruthValue&> (tv);
+        // Perhaps the below is needed ?? 
+        // ctv.removeInvalidTVs();
         for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
             VersionHandle vh = ctv.getVersionHandle(i);
             HandleSeq hs = atomspace->getOutgoing(vh.substantive);
