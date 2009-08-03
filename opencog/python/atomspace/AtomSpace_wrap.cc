@@ -104,5 +104,6 @@ void init_AtomSpace_py()
         .def("getHandle",
             (Handle (AtomSpace::*)(Type, const HandleSeq&) const)
             &AtomSpace::getHandle)
+        .def("getType", &AtomSpace::getType)
     ;
 }
