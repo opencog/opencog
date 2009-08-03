@@ -20,6 +20,10 @@ MIN_STI               = -400
 PROMPT                = "opencog> "
 MODULES               = libbuiltinreqs.so, libpersist.so, libpln.so, libscheme-shell.so
 
+# Used in the PLNUTest
+PLN_LOG_LEVEL         = 2
+PLN_PRINT_REAL_ATOMS  = true
+
 # IMPORTANT!
 # Database login credentials. Uncomment and change these to reflect your actual
 # setup!

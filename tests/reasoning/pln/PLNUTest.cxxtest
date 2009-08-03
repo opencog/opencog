@@ -205,16 +205,27 @@ private:
 
     void initPLNTests()
     {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+
 #if LOG_ON_FILE
         test::logfile=fopen("pln.log","wt");
         cout << "LOGGING TO FILE pln.log!\n";
 #endif
         //assert(finger_print_test(*tests[0]) != finger_print_test(*tests[1]));
-        config().set("PLN_LOG_LEVEL","2");
-        config().set("PLN_PRINT_REAL_ATOMS","true");
 
-        testFitnessEvaluator=BEST;
-        currentDebugLevel=-4;
+        // Get config settings from config file.
+        // config().set("PLN_LOG_LEVEL","2");
+        // config().set("PLN_PRINT_REAL_ATOMS","true");
+
+        testFitnessEvaluator = BEST;
+        currentDebugLevel = -4;
     }
 
     void initAxiomSet(string premiseFile)
