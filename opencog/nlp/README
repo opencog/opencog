@@ -67,6 +67,10 @@ The lexical-attraction directory contains a REAME file containing a
 short overview of Yuret's lexical attraction algorithm. A variant of
 this algo was implemented in java, in the lexat project on launchpad.
 
+pln
+---
+Misc pln experiments.
+
 question
 --------
 C++ code that implements a basic question-answering algorithm, based on
