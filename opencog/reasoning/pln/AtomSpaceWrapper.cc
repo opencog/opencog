@@ -1091,7 +1091,11 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
                 found = false;
                 for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
                     VersionHandle vh = ctv.getVersionHandle(i);
-                    if (atomspace->getOutgoing(vh.substantive,0) == existingLink) {
+
+                    // atoms in version handles may have been deleted!
+                    if (TLB::isValidHandle(vh.substantive) &&
+                       
+                        atomspace->getOutgoing(vh.substantive,0) == existingLink) {
                         existingLink = vh.substantive;
                         found = true;
                     }
