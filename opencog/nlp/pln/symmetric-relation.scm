@@ -67,6 +67,30 @@
 
 (pln-bc y 100)
 
+
+(define (prt-atom h) (display h) #f)
+
+(cog-map-type prt-atom 'ConceptNode)
+
+(define prt-all
+   (map (lambda (x) (cog-map-type prt-atom x)) (cog-get-types))
+)
+
+(define (cnt-all)
+	(define cnt 0)
+	(define (ink a) (set! cnt (+ cnt 1)) #f)
+	(map (lambda (x) (cog-map-type ink x)) (cog-get-types))
+	cnt
+)
+
+(cog-map-type (lambda (x) (cog-delete-recursive x) #f) 'FWVariableNode)
+(cog-map-type (lambda (x) (cog-delete-recursive x) #f) 'OrderedLink)
+(cog-map-type prt-atom 'FWVariableNode)
+
+(cog-delete-recursive (ConceptNode "___PLN___"))
+
+
+
 (ConceptNode  "symmetricRelation" (stv 1 0.99))
 (VariableNode  "R000" (stv 1 0.99) )
 
@@ -120,4 +144,24 @@
         a b
     )
 )
+
+
+(ImplicationLink 
+(mtv (stv 1 0)(vh "CONTEXTUAL" 96).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 188).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 207).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 134).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 196).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 162).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 109).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 203).(stv 0.99000001 0.99000001)) 
+
+(AndLink (mtv (stv 1 0)(vh "CONTEXTUAL" 96).(stv 0.7992 0.3996)) 
+   (InheritanceLink (stv 0.99900001 0.99900001) 
+      (PredicateNode "friendOf" (stv 1 0))
+      (ConceptNode "symmetricRelation" (stv 1 0)))
+   (EvaluationLink (stv 0.80000001 0.40000001) 
+       (PredicateNode "friendOf" (stv 1 0))
+       (ListLink 
+          (ConceptNode "Amir" (stv 9.9999997e-06 0.99900001))
+          (ConceptNode "Britney" (stv 9.9999997e-06 0.99900001))
+       )
+    )
+)
+    (EvaluationLink (mtv (stv 0 0)(vh "CONTEXTUAL" 96).(stv 1 0.3996)) (PredicateNode "friendOf" (stv 1 0))
+       (ListLink (ConceptNode "Britney" (stv 9.9999997e-06 0.99900001))
+          (ConceptNode "Amir" (stv 9.9999997e-06 0.99900001)))))
 

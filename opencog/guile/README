@@ -642,6 +642,20 @@ in a list.
          (cons (cog-delete (car lst)) 
                (killall (cdr lst)))))
 
+
+===Count the total number of atoms in the atomspace===
+Here is a simple example showing how to count the total number of atoms
+in the atomspace.
+
+   (define (cnt-all)
+      (define cnt 0)
+      (define (ink a) (set! cnt (+ cnt 1)) #f)
+      (define (cnt-type x) (cog-map-type ink x))
+      (map cnt-type (cog-get-types))
+      cnt
+   )
+
+
 === Calling scheme from C++ ===
 Scheme code can be called from C++. The most common case is handled
 below: calling a scheme function which expects 0,1,2 or more
