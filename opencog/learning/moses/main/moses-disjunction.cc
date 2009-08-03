@@ -55,11 +55,17 @@ int main(int argc,char** argv) {
   type_tree tt(id::lambda_type);
   tt.append_children(tt.begin(),id::boolean_type,arity+1);
 
-  metapopulation<logical_score,logical_bscore,iterative_hillclimbing> 
+  /*  metapopulation<logical_score,logical_bscore,iterative_hillclimbing> 
     metapop(rng,combo_tree(id::logical_and),tt,logical_reduction(),
 	    logical_score(scorer,arity,rng),
 	    logical_bscore(scorer,arity,rng),
 	    iterative_hillclimbing(rng));
+  */
+  metapopulation<logical_score, logical_bscore, simulated_annealing>
+      metapop(rng, combo_tree(id::logical_and), tt, logical_reduction(),
+              logical_score(scorer, arity, rng),
+              logical_bscore(scorer, arity, rng),
+              simulated_annealing(rng));
   
   cout << "build metapop" << endl;
 
