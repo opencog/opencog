@@ -3,6 +3,7 @@
 
 #include "server_module_wrap.h"
 #include "Agent_wrap.h"
+#include "Factory_wrap.h"
 #include "BaseServer_wrap.h"
 #include "CogServer_wrap.h"
 #include "Request_wrap.h"
@@ -21,5 +22,6 @@ void init_server_module_py()
     init_BaseServer_py();
     init_CogServer_py();
     init_Agent_py();
+    init_Factory_py();
     init_Request_py();
 }
