@@ -65,7 +65,7 @@
     )
 )
 
-(pln-bc y 50)
+(pln-bc y 250)
 
 (ConceptNode  "symmetricRelation" (stv 1 0.99))
 (VariableNode  "R000" (stv 1 0.99) )

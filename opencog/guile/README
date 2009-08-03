@@ -43,6 +43,8 @@ NLP-related utilities and MindAgents are located in ''opencog/nlp/scm'';
 not all of these are automatically loaded, but can be manually loaded by
 running ''opencog/nlp/scm/load-nlp.sh''.
 
+Much of this README is reproduced at http://opencog.org/wiki/Scheme
+
 == Running ==
 --------------
 The shell may be invoked by typing "scm" at the opencog prompt; however,
@@ -63,16 +65,6 @@ To get to the opencog shell, say
 
 To leave the shell, place a single . on the line, and hit enter.
 Alternately, hit ^D.
-
-== Multi-threading ==
----------------------
-Guile is multi-threading-capable, and can be used with multiple threads
-just fine, with just a few caveats: it must be initialized in *each*
-thread in which it is to be used. The method SchemeEval::thread_init()
-initializes guile only in the *current* thread: therefore, one must 
-call this method in every thread in which scheme is meant to be used.
-Note that OpenCog has a way of creating threads unexpectedly, in
-particular, in the server socket connection handling. Caveat Emptor.
 
 
 == Core Functions ==
@@ -606,45 +598,103 @@ interface.
                                SQL storage. The fetch is recursive.
 
 
-== Example utilities ==
------------------------
-Below follow some examples, in the form of utilities. Additional
-utilities can be found in the opencog/scm file. These utilities are
-loaded by the opencog/scm/load.sh shell script.
+=Notes, examples, utilities=
+Various related notes.
 
 === Load scheme data from a file ===
-
 There are two ways to load scheme from a file: automatically, at server
 startup, or manually.
 
-To load automatically, edit ''opencog.conf'', and append the 
+To load automatically, edit ''[[opencog.conf]]'', and append the
 filename to the line ''SCM_PRELOAD'', for example:
 
    SCM_PRELOAD = scm/type_constructors.scm, scm/utilities.scm
 
-The cogserver is then started with the -c flag: 
+The [[cogserver]] is then started with the -c flag:
 
    cogserver -c ../lib/opencog.conf
 
 To manually load scheme code, simply make sure the first 3 characters
-of the file are "scm" followed by a carraige return. Then, at the shell
-prompt, simply execute the command:
-
-  cat filename | telnet localhost 17001
-
-This assumes the scheme code is in "filename", that the cogserver is
-running on "localhost", and is listening on port 17001 (which is the
+of the file are "scm" followed by a carraige return. Then, at the shell 
+prompt, simply execute the command: 
+ 
+   cat filename | telnet localhost 17001 
+ 
+This assumes the scheme code is in "filename", that the cogserver is 
+running on "localhost", and is listening on port 17001 (which is the 
 default port for the cogserver).
 
-=== Delete a list of atoms ===
+=== Utilities ===
+A number of handy utilities can be found in
+<tt>opencog/scm/utilities.scm</tt> as well as [[NLP]]-specific utilities
+in <tt>opencog/nlp/scm/nlp-utils.scm</tt>.  These include small, simple
+routines for following a link from one atom type to another, finding all
+[[EvaluationLink]]s having some given form, filtering lists based on
+atom types, and so on.
 
-   (define (killall lst)
-           (if (null? lst)
-               '()
-               (cons (cog-delete (car lst))
-                     (killall (cdr lst)))))
+====Delete a list of atoms ====
+Below is a simple example of scheme code for deleting all of the atoms
+in a list.
 
+  (define (killall lst) 
+     (if (null? lst) 
+         '() 
+         (cons (cog-delete (car lst)) 
+               (killall (cdr lst)))))
 
+=== Calling scheme from C++ ===
+Scheme code can be called from C++. The most common case is handled
+below: calling a scheme function which expects 0,1,2 or more
+<tt>Handle</tt> arguments, and returns a <tt>Handle</tt>. So, for
+example, assume you have a scheme function called <tt>do-stuff</tt> as
+below:
+
+  (define (do-stuff handle1 handle2) (... return some-hand ...))
+
+Then you can call it from C++ as follows:
+
+  // Create a LIST_LINK on stack, holding the input arguments.
+  Handle arg1 = ...;
+  Handle arg2 = ...;
+  Link lnk(LIST_LINK, arg1, arg2;...);    // constructor runs on stack
+  Handle hlnk = TLB::getHandle(&lnk);     // handle of the list link
+  
+  // Call the "do-stuff" function
+  SchemeEval evaluator;
+  Handle answer = evaluator.apply("do-stuff", hlnk);
+
+If <tt>do-stuff</tt> doesn't take any arguments, then set <tt>hlink</tt>
+to <tt>Handle::UNDEFINED</tt>, or pass an empty [[ListLink]].
+
+The above form is used by the [[ExecutionLink]] to embed scheme callouts
+into hypergraphs.
+
+=== Calling C++ from scheme ===
+There is no generic way of calling some arbitrary C++ method from
+scheme; toe enable this, new, explicit C++ code must be written.  There
+are two ways to do this: create a formal API, or provide an ad-hoc
+extension.  Creating a formal API without some general experimentation
+and experience is discouraged -- it takes more work, its more complex,
+and the first stab at it will likely need changes.  Instead, try using
+the 'ad-hoc' mechanism.
+
+Calls to miscellaneous C++ functions can be implemented by modifying the
+<tt>opencog/guile/SchemeAdHoc.cc</tt> file.  Its easy: just add a new
+command name, and the code to execute.
+
+===Calling scheme from Hypergraphs===
+The [[ExecutionLink]], whem used with the [[GroundedSchemaNode]], allows
+scheme code to be invoked when the given ExecutionLink is evaluated.
+See that page for details.
+
+===Multi-threading===
+Guile is multi-threading-capable, and can be used with multiple threads
+just fine, with just a few caveats: it must be initialized in *each*
+thread in which it is to be used. The method SchemeEval::thread_init()
+initializes guile only in the *current* thread: therefore, one must 
+call this method in every thread in which scheme is meant to be used.
+Note that OpenCog has a way of creating threads unexpectedly, in
+particular, in the server socket connection handling. Caveat Emptor.
 
 
 ToDo
