@@ -918,17 +918,20 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs, const TruthVal
     pHandle ret;
     HandleSeq hsReal;
     HandleSeq contexts;
+
     // Convert outgoing links to real Handles
     foreach(pHandle h, hs) {
         vhpair v = fakeToRealHandle(h);
         hsReal.push_back(v.first);
-        if (v.second.substantive == Handle::UNDEFINED) {
+
+        // isInvalidHandle makes sure the atom was not deleted.
+        if (TLB::isInvalidHandle(v.second.substantive)) {
             contexts.push_back(atomspace->getHandle(CONCEPT_NODE, rootContext));
         } else {
             contexts.push_back(v.second.substantive);
         }
     }
-    
+ 
     // Construct a Link then use addAtomDC
     Link l(t,hsReal,tvn);
     ret = addAtomDC(l, fresh, managed, contexts);
@@ -1044,6 +1047,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
             // Get the existing context link if not all contexts are NULL 
             if (!allNull) {
                 contexts.insert(contexts.begin(),atomspace->getHandle(CONCEPT_NODE, rootContext));
+
                 Handle existingContext = atomspace->getHandle(ORDERED_LINK,contexts);
                 if (TLB::isInvalidHandle(existingContext)) {
                     existingContext = a->addLink(ORDERED_LINK,contexts);
