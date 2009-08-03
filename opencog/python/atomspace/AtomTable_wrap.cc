@@ -64,5 +64,8 @@ void init_AtomTable_py()
             const)
             &AtomTable::getHandleSet,
             return_value_policy<manage_new_object>())
+        .def("add", &AtomTable::add)
+        .def("holds", &AtomTable::holds)
+        .def("remove", &AtomTable::remove)
     ;
 }
