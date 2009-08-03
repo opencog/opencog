@@ -64,6 +64,29 @@ void init_AtomTable_py()
             const)
             &AtomTable::getHandleSet,
             return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)(Type, bool, VersionHandle) const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (Type, Type, bool, bool, VersionHandle, VersionHandle)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (Handle, Type, bool, VersionHandle)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (const std::vector<Handle>&, Type*, bool*, Arity, Type, bool,
+                    VersionHandle)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
         .def("add", &AtomTable::add)
         .def("holds", &AtomTable::holds)
         .def("remove", &AtomTable::remove)
