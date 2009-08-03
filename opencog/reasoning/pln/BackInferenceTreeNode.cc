@@ -1260,8 +1260,8 @@ bool BITNode::CheckForDirectResults()
 void BITNode::expandNextLevel()
 {
     AtomSpaceWrapper *atw = GET_ASW;
-    try
-    {
+//    try
+//    {
         tlog(-2, "Expanding with fitness %.4f\n", fitness());
         tlog(-2, "In expansion pool? %s\n", (STLhas2(root->exec_pool, this)? "YES":"NO"));
         rawPrint(*getTarget(), getTarget()->begin(), -2);
@@ -1292,10 +1292,12 @@ void BITNode::expandNextLevel()
                 }           
             }       
         }
+#if 0 // Don't catch and rethrow, this just hides the original thrower!!
     } catch(...) {
         tlog(0,"Exception in ExpandNextLevel()");
         throw;
     }
+#endif
 }
 
 /* Algorithm: Evaluation */
