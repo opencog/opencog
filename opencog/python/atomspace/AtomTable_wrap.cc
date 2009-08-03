@@ -28,5 +28,41 @@ void init_AtomTable_py()
             (HandleEntry* (AtomTable::*)(Type, bool) const)
             &AtomTable::getHandleSet,
             return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)(Handle, Type, bool) const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (const std::vector<Handle>&, Type*, bool*, Arity, Type, bool)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)(const char*, Type, bool) const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)(const char*, Type, Type, bool) const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (const char**, Type*, bool*, Arity, Type, bool)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (Type*, bool*, Arity, Type, bool)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
+        .def("getHandleSet",
+            (HandleEntry* (AtomTable::*)
+                (AttentionValue::sti_t, AttentionValue::sti_t)
+            const)
+            &AtomTable::getHandleSet,
+            return_value_policy<manage_new_object>())
     ;
 }
