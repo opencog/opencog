@@ -98,5 +98,11 @@ void init_AtomSpace_py()
         .def("getOutgoing", (const HandleSeq& (AtomSpace::*)(Handle) const)
             &AtomSpace::getOutgoing,
             return_value_policy<copy_const_reference>())
+        .def("getHandle",
+            (Handle (AtomSpace::*)(Type, const std::string&) const)
+            &AtomSpace::getHandle)
+        .def("getHandle",
+            (Handle (AtomSpace::*)(Type, const HandleSeq&) const)
+            &AtomSpace::getHandle)
     ;
 }
