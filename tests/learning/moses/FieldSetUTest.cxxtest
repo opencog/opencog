@@ -3,17 +3,44 @@
 #include "opencog/learning/moses/eda/initialization.h"
 #include "opencog/util/mt19937ar.h"
 
+using namespace eda;
+
 class FieldSetUTest : public CxxTest::TestSuite {
 public:
 
     void test_contin_spec()
     {
-        eda::field_set fs(eda::field_set::contin_spec(0.0,0.5,0.5,2), 20);
-        eda::instance inst(fs.packed_width());
+        field_set fs(field_set::contin_spec(0.0,0.5,0.5,4), 1);
+        instance inst(fs.packed_width());
         opencog::MT19937RandGen rng(1);
 
-        eda::randomize(fs, inst, rng);
+        randomize(fs, inst, rng);
         std::cout << std::endl
                   << fs.stream(inst) << std::endl;
+        std::cout << fs.stream_raw(inst) << std::endl;
+        
+        /*  size_t idx = 1;
+        contin_t rv, v = 0.5;
+        
+        fs.set_contin(inst, idx, v);
+        rv = fs.get_contin(inst, idx);
+        TS_ASSERT_EQUALS(v, rv);*/
+        
     }
+    
+    void test_get_set_raw()
+    {
+        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), 1);
+        instance inst(fs.packed_width());
+        opencog::MT19937RandGen rng(1);
+        eda::randomize(fs, inst, rng);
+        
+        size_t idx = 1;
+        disc_t rv, v = field_set::contin_spec::Left;
+        
+        fs.set_raw(inst, idx, v);
+        rv = fs.get_raw(inst,idx);
+        TS_ASSERT_EQUALS(v, rv);
+    }
+
 };
