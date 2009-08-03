@@ -446,7 +446,8 @@ const TruthValue& CompositeTruthValue::getVersionedTV(VersionHandle vh) const {
     }
 }
 
-void CompositeTruthValue::removeVersionedTV(VersionHandle vh) {
+void CompositeTruthValue::removeVersionedTV(VersionHandle vh)
+{
     VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
     if (itr != versionedTVs.end()) {
         TruthValue* versionedTv = itr->second;
@@ -461,17 +462,24 @@ void CompositeTruthValue::removeVersionedTV(VersionHandle vh) {
     }
 }
 
-void CompositeTruthValue::removeVersionedTVs(Handle substantive) {
+void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
+{
     VersionedTruthValueMap toBeRemovedEntries;
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); itr++) {
+
+    VersionedTruthValueMap::const_iterator itr;
+    for (itr = versionedTVs.begin();
+         itr != versionedTVs.end(); itr++)
+    {
         VersionHandle key = itr->first;
-        if (key.substantive == substantive) {
+        if (key.substantive == substantive)
+        {
             toBeRemovedEntries[key] = NULL;
+
             // Free TruthValue object at once
             TruthValue* versionedTv = itr->second;
 #ifdef USE_SHARED_DEFAULT_TV
-            if (versionedTv != &(TruthValue::DEFAULT_TV())) {
+            if (versionedTv != &(TruthValue::DEFAULT_TV()))
+            {
                 delete versionedTv;
             }
 #else
@@ -479,8 +487,45 @@ void CompositeTruthValue::removeVersionedTVs(Handle substantive) {
 #endif
         }
     }
-    for (VersionedTruthValueMap::const_iterator itr = toBeRemovedEntries.begin();
-            itr != toBeRemovedEntries.end(); itr++) {
+    for (itr = toBeRemovedEntries.begin();
+         itr != toBeRemovedEntries.end(); itr++)
+    {
+        VersionHandle key = itr->first;
+        versionedTVs.erase(key);
+    }
+}
+
+/**
+ * Nearly identical to above, except tht all invalid handles are removed 
+ */
+void CompositeTruthValue::removeInvalidTVs(void)
+{
+    VersionedTruthValueMap toBeRemovedEntries;
+
+    VersionedTruthValueMap::const_iterator itr;
+    for (itr = versionedTVs.begin();
+         itr != versionedTVs.end(); itr++)
+    {
+        VersionHandle key = itr->first;
+        if (TLB::isInvalidHandle(key.substantive))
+        {
+            toBeRemovedEntries[key] = NULL;
+
+            // Free TruthValue object at once
+            TruthValue* versionedTv = itr->second;
+#ifdef USE_SHARED_DEFAULT_TV
+            if (versionedTv != &(TruthValue::DEFAULT_TV()))
+            {
+                delete versionedTv;
+            }
+#else
+            delete versionedTv;
+#endif
+        }
+    }
+    for (itr = toBeRemovedEntries.begin();
+         itr != toBeRemovedEntries.end(); itr++)
+    {
         VersionHandle key = itr->first;
         versionedTVs.erase(key);
     }

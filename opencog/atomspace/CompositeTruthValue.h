@@ -144,7 +144,14 @@ public:
      * VersionHandle whose substantive component is equals to the
      * given Handle.
      */
-    void removeVersionedTVs(Handle);
+    void removeVersionedTVs(const Handle &);
+
+    /**
+     * Removes all versioned TruthValue objects associated with any
+     * VersionHandle whose substantive component is not a valid handle.
+     * (i.e. whose corresponding atom has been deleted).
+     */
+    void removeInvalidTVs(void);
 
     /**
      * Gets the number of versioned TVs of this CTV.
