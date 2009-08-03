@@ -10,6 +10,7 @@ add_library(atomspace_py SHARED
     CompositeTruthValue_wrap.cc
     CountTruthValue_wrap.cc
 	Handle_wrap.cc
+	HandleEntry_wrap.cc
     IndefiniteTruthValue_wrap.cc
     Link_wrap.cc
     Node_wrap.cc

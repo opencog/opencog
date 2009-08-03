@@ -10,6 +10,7 @@
 #include "CountTruthValue_wrap.h"
 #include "ClassServer_wrap.h"
 #include "Handle_wrap.h"
+#include "HandleEntry_wrap.h"
 #include "IndefiniteTruthValue_wrap.h"
 #include "Node_wrap.h"
 #include "Link_wrap.h"
@@ -33,6 +34,7 @@ void init_atomspace_module_py()
 
     // Order matters!..
     init_Handle_py();
+    init_HandleEntry_py();
     init_SavableRepository_py();
     init_SpaceServerContainer_py();
     init_SpaceServer_py();
