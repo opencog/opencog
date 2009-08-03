@@ -466,7 +466,7 @@ interface.
                    (cog-new-node 'ConceptNode "abc" 
                       (cog-new-av 11 21 #f)))
          guile> (cog-av x)
-         (av 11 21 31)
+         (av 11 21 #f)
          guile> (cog-av? (cog-av x))
          #t
 
