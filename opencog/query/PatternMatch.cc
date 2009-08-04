@@ -607,10 +607,12 @@ int PatternMatch::get_vartype(Handle htypelink,
 		{
 			Handle h = tset[i];
 			Atom *a = TLB::getAtom(h);
-			if (VARIABLE_TYPE_NODE == a->getType())
+			if (VARIABLE_TYPE_NODE != a->getType())
 			{
-				logger().warn("%s: TypedVariableLink has unexpected content",
-			       __FUNCTION__);
+				logger().warn("%s: TypedVariableLink has unexpected content:\n"
+				              "Expected VariableTypeNode, got %s",
+			                 __FUNCTION__,
+                          classserver().getTypeName(a->getType()).c_str());
 				return 3;
 			}
 			const Node *n = dynamic_cast<const Node *>(a);
@@ -624,8 +626,10 @@ int PatternMatch::get_vartype(Handle htypelink,
 	}
 	else
 	{
-		logger().warn("%s: Unexpected contents in TypedVariableLink",
-		       __FUNCTION__);
+		logger().warn("%s: Unexpected contents in TypedVariableLink\n"
+				        "Expected VariableTypeNode or ListLink, got %s",
+		              __FUNCTION__,
+		              classserver().getTypeName(t).c_str());
 		return 2;
 	}
 
