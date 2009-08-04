@@ -1,5 +1,0 @@
-/* File automatically generated. Do not edit */
-opencog::WR_LINK = opencog::classserver().addType(opencog::ASSOCIATIVE_LINK , "WRLink");
-opencog::FREQUENCY_LINK = opencog::classserver().addType(opencog::INHERITANCE_LINK, "FrequencyLink");
-opencog::FEELING_NODE = opencog::classserver().addType(opencog::GROUNDED_PREDICATE_NODE, "FeelingNode");
-opencog::PHRASE_NODE = opencog::classserver().addType(opencog::NODE, "PhraseNode");

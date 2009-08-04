@@ -4,6 +4,7 @@
 #include <boost/python/class.hpp>
 
 #include "hopfield_module_wrap.h"
+#include "HopfieldServer_wrap.h"
 
 using namespace boost::python;
 
@@ -16,5 +17,5 @@ void init_hopfield_module_py()
     hopfield_scope = class_<hopfield_scope_t>("hopfield");
     scope within(hopfield_scope);
 
-    //init_hopfield_py();
+    init_HopfieldServer_py();
 }

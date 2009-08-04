@@ -3,4 +3,4 @@
 
 extern void init_HopfieldServer_py();
 
-#endif
+#endif // _OPENCOG_HOPFIELD_SERVER_WRAP_H
