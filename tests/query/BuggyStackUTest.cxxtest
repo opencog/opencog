@@ -91,10 +91,15 @@ void ExecutionUTest::setUp(void)
 	config().set("SCM_PRELOAD",
 		"opencog/scm/type_constructors.scm, "
 		"tests/query/stack-bug.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
 	const char * paths[] = 
 	{
 		"./",
 		"../",
+		"../../",
+		"../../../",
 		NULL
 	};
 	cogserver.loadSCMModules(paths);
