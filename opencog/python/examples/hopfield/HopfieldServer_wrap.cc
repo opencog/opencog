@@ -15,5 +15,9 @@ void init_HopfieldServer_py()
             &HopfieldServer::derivedCreateInstance,
             return_value_policy<manage_new_object>())
         .staticmethod("derivedCreateInstance")
+        .def("init", &HopfieldServer::init)
+        .def("encodePattern", &HopfieldServer::encodePattern)
+        .def("totalEnergy", &HopfieldServer::totalEnergy)
+        .def("retrievePattern", &HopfieldServer::retrievePattern)
     ;
 }
