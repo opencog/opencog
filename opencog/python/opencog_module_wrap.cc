@@ -6,6 +6,7 @@
 #include "server_module_wrap.h"
 #include "dynamics_module_wrap.h"
 #include "util_module_wrap.h"
+#include "hopfield_module_wrap.h"
 
 void init_opencog_py()
 {
@@ -13,6 +14,7 @@ void init_opencog_py()
     init_server_module_py();
     init_dynamics_module_py();
     init_util_module_py();
+    init_hopfield_module_py();
 }
 
 BOOST_PYTHON_MODULE(opencog)
