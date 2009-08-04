@@ -101,7 +101,7 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  *
  * Compare two incidence trees, side-by-side. It is assumed that the 
  * first of these is a clause in the predicate, and so the comparison
- * is between the clause, and a candidate graph. 
+ * is between the clause, and a candidate grounding. 
  *
  * The graph/tree refered to here is the incidence graph/tree (aka 
  * Levi graph) of the hypergraph (and not the hypergraph itself).
@@ -120,11 +120,11 @@ bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 	Handle hp = TLB::getHandle(ap);
 	Handle hg = TLB::getHandle(ag);
 
-	// Atom ap is from the clause, and it might be one
+	// Atom ap is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
 	if (bound_vars.end() != bound_vars.find(hp))
 	{
-		// But... if atom b happens to also be a bound var,
+		// But... if atom g happens to also be a bound var,
 		// then its a mismatch.
 		if (bound_vars.end() != bound_vars.find(hg)) return true;
 
@@ -270,6 +270,12 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		dbgprt("clause match callback no_match=%d\n", no_match);
 		if (no_match) return false;
 
+		curr_soln_handle = TLB::getHandle(as);
+		clause_grounding[curr_root] = curr_soln_handle;
+		prtmsg("---------------------\nclause:", curr_root);
+		prtmsg("ground:", curr_soln_handle);
+		dbgprt("--- That's it, now push and do the next one.\n\n");
+		
 		root_handle_stack.push(curr_root);
 		pred_handle_stack.push(curr_pred_handle);
 		soln_handle_stack.push(curr_soln_handle);
@@ -278,12 +284,6 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		issued_stack.push(issued);
 		pmc->push();
 
-		curr_soln_handle = TLB::getHandle(as);
-		clause_grounding[curr_root] = curr_soln_handle;
-		prtmsg("--------------------- \nclause:", curr_root);
-		prtmsg("ground:", curr_soln_handle);
-		dbgprt("\n");
-		
 		get_next_untried_clause();
 
 		prtmsg("next clause is", curr_root);
@@ -572,7 +572,7 @@ bool PatternMatchEngine::do_candidate(Handle do_clause, Handle starter, Handle a
 
 /**
  * Create an associative array that gives a list of all of the
- * predicates that a given node participates in.
+ * clauses that a given node participates in.
  */
 bool PatternMatchEngine::note_root(Handle h)
 {
