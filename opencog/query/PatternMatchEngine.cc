@@ -115,78 +115,78 @@ inline void PatternMatchEngine::prtmsg(const char * msg, Handle h)
  * the entire tree, without mismatches.  Since a return value of true
  * stops the iteration, true is used to signal a mismatch.
  */
-bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
+bool PatternMatchEngine::tree_compare(Atom *ap, Atom *ag)
 {
-	Handle ha = TLB::getHandle(aa);
-	Handle hb = TLB::getHandle(ab);
+	Handle hp = TLB::getHandle(ap);
+	Handle hg = TLB::getHandle(ag);
 
-	// Atom aa is from the predicate, and it might be one
+	// Atom ap is from the clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (bound_vars.end() != bound_vars.find(ha))
+	if (bound_vars.end() != bound_vars.find(hp))
 	{
 		// But... if atom b happens to also be a bound var,
 		// then its a mismatch.
-		if (bound_vars.end() != bound_vars.find(hb)) return true;
+		if (bound_vars.end() != bound_vars.find(hg)) return true;
 
 		// If we already have a grounding for this variable, the new
 		// proposed grounding must match the existing one. Such multiple
 		// groundings can occur when traversing graphs with loops in them.
-		Handle gnd = var_grounding[ha];
+		Handle gnd = var_grounding[hp];
 		if (TLB::isValidHandle(gnd))
 		{
-			return (gnd != hb);
+			return (gnd != hg);
 		}
 
 		// Else, we have a candidate grounding for this variable.
 		// The node_match may implement some tighter variable check,
 		// e.g. making sure that grounding is of some certain type.
-		Node *na = dynamic_cast<Node *>(aa);
-		Node *nb = dynamic_cast<Node *>(ab);
-		if (!na || !nb) return true;
+		Node *np = dynamic_cast<Node *>(ap);
+		Node *ng = dynamic_cast<Node *>(ag);
+		if (!np || !ng) return true;
 
-		if (pmc->variable_match (na,nb)) return true;
+		if (pmc->variable_match (np,ng)) return true;
 
 		// Make a record of it.
 		dbgprt("Found grounding of variable:\n");
-		prtmsg("$$ variable:    ", ha);
-		prtmsg("$$ ground term: ", hb);
-		var_grounding[ha] = hb;
+		prtmsg("$$ variable:    ", hp);
+		prtmsg("$$ ground term: ", hg);
+		var_grounding[hp] = hg;
 		return false;
 	}
 
 	// If they're the same atom, then clearly they match.
-	// ... but only if ab is not a subclause of the current clause.
-	if ((ha == hb) && (hb != curr_pred_handle))
+	// ... but only if ag is not a subclause of the current clause.
+	if ((hp == hg) && (hg != curr_pred_handle))
 	{
-		var_grounding[ha] = hb;
+		var_grounding[hp] = hg;
 		return false;
 	}
 
 	// If both are links, compare them as such.
-	Link *la = dynamic_cast<Link *>(aa);
-	Link *lb = dynamic_cast<Link *>(ab);
-	if (la && lb)
+	Link *lp = dynamic_cast<Link *>(ap);
+	Link *lg = dynamic_cast<Link *>(ag);
+	if (lp && lg)
 	{
 		// Let the callback perform basic checking.
-		bool mismatch = pmc->link_match(la, lb);
+		bool mismatch = pmc->link_match(lp, lg);
 		if (mismatch) return true;
 
 		dbgprt("depth=%d\n", depth);
-		prtmsg("> tree_compare", aa);
-		prtmsg(">           to", ab);
+		prtmsg("> tree_compare", ap);
+		prtmsg(">           to", ag);
 
 		// The recursion step: traverse down the tree.
 		// Only links can have non-empty outgoing sets.
 		depth ++;
 		var_solutn_stack.push(var_grounding);
-		mismatch = foreach_outgoing_atom_pair(ha, hb,
+		mismatch = foreach_outgoing_atom_pair(hp, hg,
 		              	      &PatternMatchEngine::tree_compare, this);
 		depth --;
 		dbgprt("tree_comp down link mismatch=%d\n", mismatch);
 
 		if (false == mismatch)
 		{
-			var_grounding[ha] = hb;
+			var_grounding[hp] = hg;
 			var_solutn_stack.pop();  // pop entry created, but keep current.
 		}
 		else
@@ -195,18 +195,18 @@ bool PatternMatchEngine::tree_compare(Atom *aa, Atom *ab)
 	}
 
 	// If both are nodes, compare them as such.
-	Node *na = dynamic_cast<Node *>(aa);
-	Node *nb = dynamic_cast<Node *>(ab);
-	if (na && nb)
+	Node *np = dynamic_cast<Node *>(ap);
+	Node *ng = dynamic_cast<Node *>(ag);
+	if (np && ng)
 	{
 		// Call the callback to make the final determination.
-		bool mismatch = pmc->node_match(na, nb);
+		bool mismatch = pmc->node_match(np, ng);
 		if (false == mismatch)
 		{
 			dbgprt("Found matching nodes\n");
-			prtmsg("# pattern: ", ha);
-			prtmsg("# match:   ", hb);
-			var_grounding[ha] = hb;
+			prtmsg("# pattern: ", hp);
+			prtmsg("# match:   ", hg);
+			var_grounding[hp] = hg;
 		}
 		return mismatch;
 	}
@@ -295,8 +295,8 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		bool found = false;
 		if (Handle::UNDEFINED == curr_root)
 		{
-			dbgprt ("==================== FINITO!\n");
 #ifdef DEBUG
+			dbgprt ("==================== FINITO!\n");
 			print_solution(var_grounding, clause_grounding);
 #endif
 			found = pmc->solution(clause_grounding, var_grounding);
@@ -305,11 +305,12 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 		{
 			// Else, start solving the next unsolved clause. Note: this is
 			// a recursive call, and not a loop. Recursion is halted when
-			// the next unsolved calsue has no grounding.
+			// the next unsolved clause has no grounding.
 			//
-			// We continue our search at the atom that "joins" (is shared in common)
-			// between the previous (solved) clause, and this clause. If the "join"
-			// was a variable, look up its grounding; else the join is a 'real' atom.
+			// We continue our search at the atom that "joins" (is shared
+			// in common) between the previous (solved) clause, and this
+			// clause. If the "join" was a variable, look up its grounding;
+			// else the join is a 'real' atom.
 
 			clause_accepted = false;
 			curr_soln_handle = var_grounding[curr_pred_handle];
@@ -444,7 +445,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	bool solved = false;
 
 	RootMap::iterator k;
-	for (k=root_map.begin(); k != root_map.end(); k++)
+	for (k = root_map.begin(); k != root_map.end(); k++)
 	{
 		RootPair vk = *k;
 		RootList *rl = vk.second;
@@ -454,7 +455,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		solved = false;
 
 		std::vector<Handle>::iterator i;
-		for (i=rl->begin(); i != rl->end(); i++)
+		for (i = rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
 			if(TLB::isValidHandle(clause_grounding[root]))
@@ -816,13 +817,16 @@ void PatternMatchEngine::print_solution(
 	printf("\nGrounded clauses:\n");
 	std::map<Handle, Handle>::const_iterator m;
 	int i = 0;
-	for (m = clauses.begin(); m != clauses.end(); m++) 
+	for (m = clauses.begin(); m != clauses.end(); m++, i++) 
 	{
 		Atom *ac = TLB::getAtom(m->second);
-		if (NULL == ac) continue;
+		if (NULL == ac)
+		{
+			prtmsg("ERROR: ungrounded clause: ", m->first);
+			continue;
+		}
 		std::string str = ac->toString();
 		printf ("%d.   %s\n", i, str.c_str());
-		i++;
 	}
 	printf ("\n");
 }
