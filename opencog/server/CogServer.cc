@@ -529,9 +529,10 @@ void CogServer::loadSCMModules(const char* config_paths[])
     std::vector<std::string> scm_modules;
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 #ifdef HAVE_GUILE
-    for (std::vector<std::string>::const_iterator it = scm_modules.begin();
-         it != scm_modules.end(); ++it) {
-
+    std::vector<std::string>::const_iterator it;
+    for (it = scm_modules.begin();
+         it != scm_modules.end(); ++it)
+    {
         int rc = 2;
         const char * mod = (*it).c_str();
         if ( config_paths != NULL ) {
@@ -547,8 +548,8 @@ void CogServer::loadSCMModules(const char* config_paths[])
         } // if
         if (rc)
         {
-           logger().error("%d %s: %s", 
-                 rc, strerror(rc), mod);
+           logger().error("Failed to load %s: %d %s", 
+                 mod, rc, strerror(rc));
         }
         else
         {

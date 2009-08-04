@@ -3,6 +3,8 @@
 ; The bug was stupid, and is unlikely to reappear, but
 ; this still seems like a good test case to have around.
 
+(define (stv mean conf) (cog-new-stv mean conf))
+
 ; Input data
 (InheritanceLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation")

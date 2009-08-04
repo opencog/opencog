@@ -27,7 +27,6 @@
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -88,7 +87,17 @@ void ExecutionUTest::setUp(void)
 	as = cogserver.getAtomSpace();
 	pm.set_atomspace(as);
 
-	load_scm_file("stack-bug.scm");
+	// Load the required data
+	config().set("SCM_PRELOAD",
+		"opencog/scm/type_constructors.scm, "
+		"tests/query/stack-bug.scm");
+	const char * paths[] = 
+	{
+		"./",
+		"../",
+		NULL
+	};
+	cogserver.loadSCMModules(paths);
 
 #ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
@@ -109,12 +118,10 @@ void ExecutionUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-#if 0
 	// Result should be a ListLink w/ one solution
 	Handle result = pm.varscope(restrict);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
-#endif 
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
