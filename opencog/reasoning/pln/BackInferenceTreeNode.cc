@@ -1957,9 +1957,14 @@ string BITNode::printFitnessPool()
 string BITNodeRoot::printTrail(pHandle h) const
 {
     stringstream ss;
-    ss << printTree(h,0,0);
-    ss << printTrail(h,0);
-    cout << ss.str();
+    AtomSpaceWrapper* asw = (AtomSpaceWrapper*) ASW();
+    if (asw->isValidPHandle(h)) {
+        ss << printTree(h,0,0);
+        ss << printTrail(h,0);
+        cout << ss.str();
+    } else {
+        ss << "Unknown pHandle " << h << endl;
+    }
     return ss.str();
 }
 

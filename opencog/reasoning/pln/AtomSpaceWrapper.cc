@@ -271,6 +271,15 @@ unsigned int index) const
     return result;
 }*/
 
+bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
+{
+    vhmap_t::const_iterator i = vhmap.find(h);
+    if (i != vhmap.end()) {
+        return true;
+    }
+    return false;
+}
+
 vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 {
     // Don't map Handles that are Types

@@ -275,6 +275,8 @@ public:
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     void isWatchingAtomSpace();
 
+    //! Check whether a pHandle is known to the AtomSpaceWrapper
+    bool isValidPHandle(const pHandle h) const;
     //! Convert a specific VersionHandled TruthValue to a pln handle
     pHandle realToFakeHandle(const Handle h, const VersionHandle vh);
     //! Convert a a real handle into a fake handle for each VersionedHandled TV
