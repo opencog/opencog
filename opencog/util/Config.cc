@@ -133,18 +133,19 @@ void Config::load(const char* filename, bool resetFirst)
     string name;
     string value;
     unsigned int line_number = 0;
-    boolean want_more = false;
+    bool have_name = false;
+    bool have_value = false;
 
     while (++line_number, fin.good() && getline(fin, line))
     {
         string::size_type idx;
 
-        // Find comment and discard the rest of the line
+        // Find comment and discard the rest of the line.
         if ((idx = line.find('#')) != string::npos) {
             line.replace(idx, line.size() - idx, "");
         }
 
-        // Search for the '=' character
+        // Search for the '=' character.
         if ((idx = line.find('=')) != string::npos)
         {
             // Select name and value
@@ -156,13 +157,38 @@ void Config::load(const char* filename, bool resetFirst)
             value = strip(value);
             value = strip(value, "\"");
 
-            // finally, store the entries
-            table[name] = value;
+            have_name = true;
+
+            // Look for trailing comma.
+            if (',' != value[value.size()-1])
+                have_value = true;
         }
+
+        // Append more to value
+        else if ((string::npos != line.find_first_not_of(blank_chars)) &&
+            have_name &&
+            !have_value)
+        {
+            value += strip(line);
+
+            // Look for trailing comma.
+            if (',' != value[value.size()-1])
+                have_value = true;
+        }
+        
         else if (line.find_first_not_of(blank_chars) != string::npos)
         {
             throw InvalidParamException(TRACE_INFO,
                   "[ERROR] invalid configuration entry (line %d)", line_number);
+        }
+
+        if (have_name && have_value)
+        {
+            // Finally, store the entries.
+            table[name] = value;
+            have_name = false;
+            have_value = false;
+            value = "";
         }
     }
     fin.close();
