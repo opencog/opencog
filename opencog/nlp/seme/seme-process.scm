@@ -1,4 +1,3 @@
-scm
 ;
 ; seme-process.scm
 ;
@@ -210,5 +209,3 @@ scm
 	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
 )
 
-.
-exit
