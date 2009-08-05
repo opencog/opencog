@@ -113,6 +113,64 @@
 
 ; --------------------------------------------------------------------
 ; 
+; do-seme-processing-chat -- ad-hoc routine under development.
+;
+; Process parsed text obtained from chatbot to identify semes.
+;
+; This will run the preposition-triple rules through the forward
+; chainer.
+
+(define (do-seme-processing-chat)
+	(define cnt 0)
+	(define seme-cnt 0)
+
+	; Get the new input sentences, and run them through the triples processing code.
+	; But do it one at a time.
+	(define (do-one-sentence sent)
+		(attach-sents-for-triple-processing (list sent))
+
+		(set! cnt (+ cnt 1))
+		(system (string-join (list "echo start work on sentence " (object->string cnt))))
+		(system "date")
+		(create-triples)
+		(dettach-sents-from-triple-anchor)
+		(let* ((trip-list (get-new-triples))
+			 	(trip-seme-list (promote-to-seme same-lemma-promoter trip-list)))
+
+			; Print resulting semes to track progress ...
+			;;(for-each 
+			;;	(lambda (x) 
+			;;		(system (string-join (list "echo done triple: \"" (object->string x) "\"")))
+			;;	)
+			;;	trip-seme-list
+  			;;)
+  			(set! seme-cnt (+ seme-cnt (length trip-seme-list)))
+			(system (string-join (list "echo found  " 
+				(object->string (length trip-seme-list)) " triples for a total of "
+				(object->string seme-cnt)))
+			)
+
+			; Delete the links to the recently generated triples,
+			; and then delete the triples themselves.
+			(delete-result-triple-links)
+			(for-each delete-hypergraph trip-list)
+		)
+
+		; Delete the sentence, its parses, and the word-instances
+		(delete-sentence sent)
+
+		; Delete upwards ... this deletes the link to the document,
+		; and also the link to the new-parsed-sentences anchor.
+		; XXX but it leaves a DocumentNode with nothing pointing to it.
+		(cog-delete-recursive sent)
+	)
+
+	(for-each do-one-sentence (get-new-parsed-sentences))
+)
+
+
+; --------------------------------------------------------------------
+; 
 ; do-seme-processing -- ad-hoc routine under development.
 ;
 ; Process parsed text through the prepositional-triples code.
@@ -179,7 +237,7 @@
 		(delete-sentence sent)
 
 		; Delete upwards ... this deletes the link to the document,
-		; and also the lonk to the new-parsed-sentences anchor.
+		; and also the link to the new-parsed-sentences anchor.
 		; XXX but it leaves a DocumentNode with nothing pointing to it.
 		(cog-delete-recursive sent)
 	)
