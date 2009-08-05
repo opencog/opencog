@@ -126,11 +126,22 @@ But in order to find out tv3, I must also FindTV of
             A<tv2>.
 
 NOTE 5: On Unification
-0. A "simple MP" = an atom A that is not a MP, but will implicitly be considered as the complex MP "EqualTo(A)". Also an MP atom whose outgoing set contains no variables is considered a simple one, since it can no longer be used as a "real" MP.
-1. While BW-chaining, the proof of formulas that are simple MPs but contain variables is never attempted.
-2. The Unifier rule produces, for the desired output, the non-redundant set of all possible combinations of static and variable structures that would, upon unification, produce the output. All these structures will be simple MPs.
-3. No "actual" unification will take place - the results of the inverted Unifier rule will be looked for, and if they aren't found, the proof path is cut.
-4. When a query is made for a MP, it is first considered a simple MP and then a complex one. Ie. first we query the atom table for whether the exact atom designated by the MP exists, and if it doesn't, then we try to actually "run" the MP (in case it has a complex aspect, too), ie. seek atoms that fulfill the MP. 
+0. A "simple MP" = an atom A that is not a MP, but will implicitly be considered
+as the complex MP "EqualTo(A)". Also an MP atom whose outgoing set contains no
+variables is considered a simple one, since it can no longer be used as a "real"
+MP.
+1. While BW-chaining, the proof of formulas that are simple MPs but contain
+variables is never attempted.
+2. The Unifier rule produces, for the desired output, the non-redundant set of
+all possible combinations of static and variable structures that would, upon
+unification, produce the output. All these structures will be simple MPs.
+3. No "actual" unification will take place - the results of the inverted Unifier
+rule will be looked for, and if they aren't found, the proof path is cut.
+4. When a query is made for a MP, it is first considered a simple MP and then a
+complex one. Ie. first we query the atom table for whether the exact atom
+designated by the MP exists, and if it doesn't, then we try to actually "run"
+the MP (in case it has a complex aspect, too), ie. seek atoms that fulfill the
+MP. 
 
 
 StrictCrispUnification is currently buggy and cannot be used!
