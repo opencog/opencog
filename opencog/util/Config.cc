@@ -41,12 +41,14 @@
 using namespace opencog;
 using namespace std;
 
-// returns a string with leading/trailing characters of a set stripped
+// Returns a string with leading/trailing characters of a set stripped
 static char const* blank_chars = " \t\f\v\n\r";
 static string strip(string const& str, char const *strip_chars = blank_chars)
 {
     string::size_type const first = str.find_first_not_of(strip_chars);
-    return (first == string::npos) ? string() : str.substr(first, str.find_last_not_of(strip_chars) - first + 1);
+    return (first == string::npos) ? 
+        string() : 
+        str.substr(first, str.find_last_not_of(strip_chars) - first + 1);
 }
 
 
@@ -131,25 +133,34 @@ void Config::load(const char* filename, bool resetFirst)
     string name;
     string value;
     unsigned int line_number = 0;
+    boolean want_more = false;
 
-    while (++line_number, fin.good() && getline(fin, line)) {
+    while (++line_number, fin.good() && getline(fin, line))
+    {
         string::size_type idx;
-        // find comment and discard the rest of the line
+
+        // Find comment and discard the rest of the line
         if ((idx = line.find('#')) != string::npos) {
             line.replace(idx, line.size() - idx, "");
         }
-        // search for the '=' character
-        if ((idx = line.find('=')) != string::npos) {
-            // select name and value
+
+        // Search for the '=' character
+        if ((idx = line.find('=')) != string::npos)
+        {
+            // Select name and value
             name  = line.substr(0, idx);
             value = line.substr(idx + 1);
-            // strip them
+
+            // Strip out whitespace, etc. 
             name  = strip(name);
             value = strip(value);
             value = strip(value, "\"");
+
             // finally, store the entries
             table[name] = value;
-        } else if (line.find_first_not_of(blank_chars) != string::npos) {
+        }
+        else if (line.find_first_not_of(blank_chars) != string::npos)
+        {
             throw InvalidParamException(TRACE_INFO,
                   "[ERROR] invalid configuration entry (line %d)", line_number);
         }
