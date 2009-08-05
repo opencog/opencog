@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -13,6 +14,11 @@ using namespace std;
 class ann;
 class ann_node;
 class ann_connection;
+
+struct compare_connection
+{
+    bool operator() (ann_connection* lhs, ann_connection* rhs);
+};
 
 //simple iterator types
 typedef vector<ann_node*>::iterator ann_node_it;
@@ -36,7 +42,9 @@ public:
         os << "Connection with weight " << a->weight << endl;
         return os;
     }
+
 };
+
 
 //node class
 class ann_node
@@ -53,7 +61,7 @@ public:
     bool visited; //used for constructing combotrees
     int counter; //used for determining network depth
     int id; //internal identifier
-    
+    double sort_val; //used for sorting nodes    
     bool memory_node; //is this a memory node 
     ann_node* memory_ptr; //what hidden node will feed this input
   
@@ -69,6 +77,24 @@ public:
     int tag;
     //what kind of node is this
     ann_nodetype nodetype;
+    
+    void calculate_sort_value(void)
+    {
+        ann_connection_it it;        
+        //reset sort value
+        sort_val=0.0;
+        //add magnitude of all incoming connections
+        for(it=in_connections.begin();it!=in_connections.end();it++)
+            sort_val += fabs((*it)->weight);
+        //add magnitude of all outgoing connections
+        for(it=out_connections.begin();it!=out_connections.end();it++)
+            sort_val += fabs((*it)->weight);
+    }
+
+    void sort_connections(void)
+    {
+       sort(in_connections.begin(),in_connections.end(),compare_connection());
+    }
 
     friend ostream& operator<<(ostream& os, const ann_node* n) {
         if (n->nodetype == nodetype_input) os << "input" << endl;
@@ -77,6 +103,7 @@ public:
         return os;
     }
 };
+
 
 //ANN class..
 class ann
@@ -108,16 +135,53 @@ public:
     void reduce()
     {
         ann_connection_it iter;
-        for (iter = connections.begin();iter != connections.end(); iter++)
+        bool dirty=true;
+        while(dirty)
         {
-             if((*iter)->weight != 0.0)
-                continue;
-             if (!remove_connection(*iter))
-                continue;
-             iter = connections.begin();
-             if (iter==connections.end())
+           dirty = false; 
+           //remove impact-less connections
+           for (iter = connections.begin();iter != connections.end(); iter++)
+           {
+              if((*iter)->weight != 0.0)
+                 continue;
+              if (!remove_connection(*iter))
+                 continue;
+              iter = connections.begin();
+              if (iter==connections.end())
                  break;
+           }
+    
+           //remove disconnected hidden neurons
+           ann_node_it node_iter;
+           for (node_iter = hidden.begin(); node_iter != hidden.end(); 
+                   node_iter++)
+           {
+              //if there are no outgoing connections
+              //this neuron has no impact
+              if((*node_iter)->out_connections.size()==0)
+              {
+                remove_node(*node_iter);
+                node_iter = hidden.begin();
+                dirty=true;
+              }
+           }
         }
+       
+       //now sort nodes (and connections by this sort value so there is a
+       //cannonical order of expressing an nn)
+       ann_node_it node_iter;
+       for (node_iter = nodes.begin(); node_iter != nodes.end();
+               node_iter++)
+       {
+          (*node_iter)->calculate_sort_value();
+       }
+       
+       for (node_iter = nodes.begin(); node_iter != nodes.end();
+               node_iter++)
+       {
+          (*node_iter)->sort_connections();
+       }
+
     } 
 
     //write out file in DOT format
@@ -206,7 +270,7 @@ public:
         {
 
         //selectively connect the node from inputs
-        int add_chance = 30;
+        int add_chance = 100;
         for(iter=inputs.begin();iter!=inputs.end();iter++)
         {
             cout << "considering adding connection from input to new hidden" << endl;
@@ -290,7 +354,7 @@ public:
         bool connected=false;
         while(!connected)
         {
-        int add_chance = 30;
+        int add_chance = 100;
         for(iter=hidden.begin();iter!=hidden.end();iter++)
             if (rand()%100 < add_chance)
             {
@@ -453,6 +517,16 @@ public:
         s->out_connections.push_back(newconnection);
         d->in_connections.push_back(newconnection);
     }
+    
+    void remove_from_vec(ann_node* n, vector<ann_node*> & l)
+    {
+     ann_node_it loc;
+     for(loc=l.begin();loc!=l.end();loc++)
+         if (*loc==n)
+             break;
+     if(loc!=l.end())
+         l.erase(loc);
+    }
 
     void remove_from_vec(ann_connection* c, vector<ann_connection*>& l)
     {
@@ -465,6 +539,29 @@ public:
      if(loc!=l.end())
          l.erase(loc);
     } 
+
+    void delete_connections(vector<ann_connection*>& c)
+    { 
+        ann_connection_it iter;
+        for(iter=c.begin(); iter!= c.end(); iter++)
+        {
+            remove_connection(*iter);
+            iter=c.begin();
+        }
+    }
+
+    bool remove_node(ann_node* node)
+    {
+        //first delete all the connections
+        delete_connections(node->out_connections);
+        delete_connections(node->in_connections);
+        remove_from_vec(node,nodes);
+        remove_from_vec(node,inputs);
+        remove_from_vec(node,hidden);
+        remove_from_vec(node,outputs);        
+        delete node;
+        return true;
+    }  
 
     bool remove_connection(ann_connection* conn)
     {
