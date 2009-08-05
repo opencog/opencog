@@ -2,7 +2,7 @@
                        La Cogita Chatbot
                        -----------------
                 Linas Vepstas <linasvepstas@gmail.com>
-                          April 2009
+                          August 2009
 
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
@@ -213,4 +213,5 @@ is as follows:
    Overview at http://www.opencog.org/wiki/SegSim
 
 
-
+Initial draft: April 2009 Linas Vepstas
+Updated: August 2009 Linas Vepstas

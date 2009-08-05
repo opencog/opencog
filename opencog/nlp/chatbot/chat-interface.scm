@@ -129,7 +129,7 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-	; If a question was asked, and  the previous attempt to answer the
+	; If a question was asked, and the previous attempt to answer the
 	; question failed, try again with pattern matching on the triples.
 	(if (and is-question (null? (get-simple-answer)))
 		(let ((trips (get-new-triples)))

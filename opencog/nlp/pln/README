@@ -2,3 +2,30 @@
 So far, just some misc pln experiments relating to language.
 
 
+Becky is a cat.
+A cat is an animal.
+Is Becky a cat?
+Is Becky an animal?
+
+
+; Becky is a cat.
+   _subj(be, Becky)
+   _obj(be, cat)
+
+; A cat is an animal.
+   _subj(be, cat)
+   _obj(be, animal)
+
+; Is Becky a cat?
+   _subj(be, Becky)
+   _obj(be, cat)
+   HYP(be, T)
+   TRUTH-QUERY-FLAG(be, T)
+
+; Is Becky an animal?
+   _subj(be, Becky)
+   _obj(be, animal)
+   HYP(be, T)
+   TRUTH-QUERY-FLAG(be, T)
+
+

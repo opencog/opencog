@@ -282,6 +282,7 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 
 	// Word instances match only if they have the same word lemma.
 	if ((WORD_INSTANCE_NODE == soltype) ||
+	    (WORD_NODE == soltype) || // XXX get rid of WordNode here, someday.
 	    (SEME_NODE == soltype))
 	{
 		bool mismatch = word_instance_match(npat, nsoln);
@@ -323,7 +324,7 @@ printf("duude compare %s to %s\n", sa, sb);
 		return true;
 	}
 
-	fprintf(stderr, "Error: unexpected node type %d %s\n", soltype,
+	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
 	        classserver().getTypeName(soltype).c_str());
 
 	std::string sa = npat->toString();

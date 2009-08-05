@@ -621,4 +621,13 @@ See also:
 DIRT - Discovery of Inference Rules from Text, Dekang Lin and Patrick Pantel.
 
 
+TODO
+----
+ * Parts of the system are still using WordNodes, when they should be
+   using SemeNodes. See, for example WordRelQuery.cc. The WordNode's
+   should be removed.
+
+ * Code here still uses the old implication interface, should use the
+   new VariableScope interface (and/or ForAll, ThereExists, etc). The
+   goal is to explicitly declare the variables.
 
