@@ -28,4 +28,12 @@ Is Becky an animal?
    HYP(be, T)
    TRUTH-QUERY-FLAG(be, T)
 
+At this point, want to use PLN to obtain truth value for
 
+    (EvaluationLink
+       (DefinedLinguisticRelationshipNode "isa")
+       (ListLink
+          (WordInstanceNode "animal@123")
+          (WordInstanceNode "Becky@456")
+
+given the starting points above.
