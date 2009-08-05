@@ -1260,44 +1260,36 @@ bool BITNode::CheckForDirectResults()
 void BITNode::expandNextLevel()
 {
     AtomSpaceWrapper *atw = GET_ASW;
-//    try
-//    {
-        tlog(-2, "Expanding with fitness %.4f\n", fitness());
-        tlog(-2, "In expansion pool? %s\n", (STLhas2(root->exec_pool, this)? "YES":"NO"));
-        rawPrint(*getTarget(), getTarget()->begin(), -2);
-        printArgs();
-        if (atw->getType(_v2h(*getTarget()->begin())) == FW_VARIABLE_NODE)    
-            tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
-        tlog(-2, " %d children exist already\n", children.size());
+    tlog(-2, "Expanding with fitness %.4f\n", fitness());
+    tlog(-2, "In expansion pool? %s\n", (STLhas2(root->exec_pool, this)? "YES":"NO"));
+    rawPrint(*getTarget(), getTarget()->begin(), -2);
+    printArgs();
+    if (atw->getType(_v2h(*getTarget()->begin())) == FW_VARIABLE_NODE)    
+        tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
+    tlog(-2, " %d children exist already\n", children.size());
 
-        // Remove this BITNode from the roots execution pool
-        root->exec_pool.remove_if(bind2nd(std::equal_to<BITNode*>(), this));
+    // Remove this BITNode from the roots execution pool
+    root->exec_pool.remove_if(bind2nd(std::equal_to<BITNode*>(), this));
 
-        if (!Expanded) {
-            CheckForDirectResults();
-            createChildrenForAllArgs();
-            Expanded = true;
+    if (!Expanded) {
+        CheckForDirectResults();
+        createChildrenForAllArgs();
+        Expanded = true;
 #ifdef USE_BITUBIGRAPHER
-            haxx::BITUSingleton->drawBITNode(this, children);
+        haxx::BITUSingleton->drawBITNode(this, children);
 #endif
-        }
-        else {
-            for (uint i = 0; i < args.size(); i++) {   
-                foreach(const ParametrizedBITNode& bisse, children[i])
-                    bisse.prover->expandNextLevel();
-
-                if (children[i].empty()) {
-                    tlog(1,"Arg %d proof failure.\n",i);        
-                    break;
-                }           
-            }       
-        }
-#if 0 // Don't catch and rethrow, this just hides the original thrower!!
-    } catch(...) {
-        tlog(0,"Exception in ExpandNextLevel()");
-        throw;
     }
-#endif
+    else {
+        for (uint i = 0; i < args.size(); i++) {   
+            foreach(const ParametrizedBITNode& bisse, children[i])
+                bisse.prover->expandNextLevel();
+
+            if (children[i].empty()) {
+                tlog(1,"Arg %d proof failure.\n",i);        
+                break;
+            }           
+        }       
+    }
 }
 
 /* Algorithm: Evaluation */

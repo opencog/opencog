@@ -447,21 +447,26 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
         vhs.push_back(v.second);
     }
     // get real handle, and then check whether link has appropriate context
-    // compared to outgoing set, otherwise return NULL_VERSION_HANDLE link
-    // in order to find appropriate context you also need to find the common
+    // compared to outgoing set, otherwise return NULL_VERSION_HANDLE link.
+    // in order to find appropriate context we also need to find the common
     // context of the outgoing set. either that or a context that inherits from
     // all the contexts of outgoing set.
     Handle real = atomspace->getHandle(t,outgoingReal);
-    // Find a a versionhandle with a context that has the same order of contexts
+    // Find a a VersionHandle with a context that has the same order of contexts
     // as vhs, otherwise return default
+    // (need to clone, because we want to remove any invalid TVs before using)
     const TruthValue& tv = atomspace->getTV(real);
     if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
-        const CompositeTruthValue ctv =
-            dynamic_cast<const CompositeTruthValue&> (tv);
-        // Perhaps the below is needed ?? 
-        // ctv.removeInvalidTVs();
-        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
-            VersionHandle vh = ctv.getVersionHandle(i);
+        CompositeTruthValue* ctv = (CompositeTruthValue*) tv.clone();
+        // The below removal should probably become a utility mindagent that checks
+        // for invalid versioned TVs...
+        // Remove any invalid version TVs
+        ctv->removeInvalidTVs();
+        // Update the atomspace TV
+        atomspace->setTV(real,*ctv);
+
+        for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) { 
+            VersionHandle vh = ctv->getVersionHandle(i);
             HandleSeq hs = atomspace->getOutgoing(vh.substantive);
             bool matches = true;
             assert(hs.size() == (vhs.size()+1));
@@ -471,9 +476,12 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
                     break;
                 }
             }
-            if (matches)
+            if (matches) {
+                delete ctv;
                 return realToFakeHandle(real,vh);
+            }
         }
+        delete ctv;
     }
     return realToFakeHandle(real,NULL_VERSION_HANDLE);
 }
