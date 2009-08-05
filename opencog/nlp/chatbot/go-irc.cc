@@ -19,7 +19,7 @@
 
 /* 
  * Go onto IRC
- * badly hacked.
+ * This is pretty totally a pure hack with little/no design to it.
  * Linas October 2007 
  */
 
@@ -185,38 +185,43 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	}
 #endif /* ENABLE_SHELL_ESCAPES */
 	
-	// printf ("Sending to opencog: %s\n", cmdline);
-	char * reply = whirr_sock_io (cmdline);
-	printf ("opencog reply: %s\n", reply);
-
-	/* Each newline has to be on its own line */
-	/* Limit to 5 replies so we don't get kicked for flooding */
-	int cnt = 0;
-	char * p = reply;
-	while (*p)
+	bool more_io = true;
+	while (more_io)
 	{
-		char *ep = strchr (p, '\n');
-		if (!ep)
+		more_io = false;
+
+		// printf ("Sending to opencog: %s\n", cmdline);
+		char * reply = whirr_sock_io (cmdline);
+		printf ("opencog reply: %s\n", reply);
+
+		/* Each newline has to be on its own line */
+		/* Limit to 5 replies so we don't get kicked for flooding */
+		int cnt = 0;
+		char * p = reply;
+		while (*p)
 		{
+			char *ep = strchr (p, '\n');
+			if (!ep)
+			{
+				if (is_nonblank(p))
+					conn->privmsg (msg_target, p);
+				break;
+			}
+			ep ++;
+			int save = *ep;
+			*ep = 0x0;
 			if (is_nonblank(p))
 				conn->privmsg (msg_target, p);
-			break;
-		}
-		ep ++;
-		int save = *ep;
-		*ep = 0x0;
-		if (is_nonblank(p))
-			conn->privmsg (msg_target, p);
-		*ep = save;
-		p = ep;
-		cnt ++;
+			*ep = save;
+			p = ep;
+			cnt ++;
 
-		/* Sleep so that we don't get kicked for flooding */
-		if (4 < cnt) sleep(1);
-		if (8 < cnt) sleep(1);
+			/* Sleep so that we don't get kicked for flooding */
+			if (4 < cnt) sleep(1);
+		}
+		free(reply);
 	}
 
-	free(reply);
 	return 0;
 }
 
