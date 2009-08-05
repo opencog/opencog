@@ -33,37 +33,37 @@ more. It is up to you to do something with it!  Also: it is subject to
 change at any time, as I am likely to twiddle, tweak and change it about.
 (Adding reasoning is a difficult but important priority).
 
-Configuring: 
------------
-There is an assortment of hard-coded configuration stuff in the source
-code.  See go-irc.c for setable values for the name of the chatbot, the
-irc channel and irc network to join, and the bot ID strings, etc.
+Running the chatbot requires three steps:
+1) Running the parser server.
+2) Running the opencog server.
+3) Running the chat-to-opencog bridge.
 
-By default, it connects to the #opencog channel on freenode.net.
+Run the parser server:
+----------------------
+The chatbot requires the English parser daemon to be running.  The 
+parser is available in the newer versions of RelEx, and is started by
+running ./opencog-server.sh from the main RelEx directory. (You must
+compile RelEx first, by installing java and ant, and saying "ant" to
+build RelEx).
 
-The bot tries to connect to an opencog server at port 17004. This port 
-number is hard-coded in whirr-sockets.cc.
+The parse server listens on port 4444: it will read plain-text input, 
+and generates parsed text in opencog format.  The chatbot needs this
+server to process text.
 
-Running:
---------
-After modifying the hard-coded config as desired, start the bot by 
-saying "opencog/nlp/chatbot/cogita". It should then appear on the IRC
-channel. You can then talk to it by addressing it by name, i.e. 
-prefacing comments with cog:, cogita: or cogita-bot:
+There is a simple "sniff-test" that can be used to verify that the 
+server is running: try "telnet localhost 4444" to connect to the server,
+then type in an English sentence, then hit return. It should respond
+with a verbose parse of the sentence.
 
-To have it do something, you must have an opencog server running on
-port 17004, and have the opencog server appropriately loaded up with
-assorted databses, code, etc.
-
-You also have to have the latest version of RelEx installed, and then
-run ./opencog-server.sh from the main RelEx directory. This will create
-a parse server on port 4444: it will read plain-text input, and generate
-parsed text in opencog format.  The chatbot needs this server to process
-text.
+Run the OpenCog server:
+-----------------------
+The chatbot requires an opencog server running on port 17004. This 
+server needs to be appropriately configured and loaded with assorted 
+databases, code, etc.
 
 This is most easily done by starting the cogserver using the 
-lib/opencog-chatbot.conf configuration file, which sets the correct port,
-silences the opencog prompt, and loads the needed scheme files.
+"lib/opencog-chatbot.conf" configuration file, which sets the correct
+port, silences the opencog prompt, and loads the needed scheme files.
 
 In addition, triples-processing, described in step 4 below, requires
 that the shell scripts opencog/nlp/triples/load-chatbot.sh and 
@@ -88,6 +88,26 @@ For example:
 
 Then do the two load-chatbot.sh files. The system is now ready to do 
 question-answering.
+
+Configure and run the chat bridge: 
+----------------------------------
+The chatbot itself is just a simple deamon that bridges text from the
+chat system to the OpenCog server. The cogita chatbot is tailored for
+IRC chat; other chat systems could be supported in a straightforward
+manner. 
+
+The IRC chatbot has an assortment of hard-coded config parameters in
+the source code.  See go-irc.c for setable values for the name of the 
+chatbot, the irc channel and irc network to join, and the bot ID strings,
+etc.  By default, it connects to the #opencog channel on freenode.net.
+
+The bot tries to connect to an opencog server at port 17004. This port 
+number is hard-coded in whirr-sockets.cc.
+
+After modifying the hard-coded config as desired, start the bot by 
+saying "opencog/nlp/chatbot/cogita". It should then appear on the IRC
+channel. You can then talk to it by addressing it by name, i.e. 
+prefacing comments with cog:, cogita: or cogita-bot:
 
 
 Architecture:
