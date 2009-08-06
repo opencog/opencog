@@ -1,30 +1,41 @@
+# 
+# The build order used here is loosely in terms of 
+# dependencies: the later parts depend on, or may
+# someday depend on the earlier parts.
+#
 ADD_SUBDIRECTORY (util)
 ADD_SUBDIRECTORY (atomspace)
-ADD_SUBDIRECTORY (server)
-ADD_SUBDIRECTORY (dotty)
-
-IF (CURL_FOUND AND XMLRPC_FOUND)
-    ADD_SUBDIRECTORY (ubigraph)
-ENDIF (CURL_FOUND AND XMLRPC_FOUND)
-
 ADD_SUBDIRECTORY (dynamics)
+ADD_SUBDIRECTORY (server)
 
+IF (NOT WIN32)
+	ADD_SUBDIRECTORY(modules)
+ENDIF (NOT WIN32)
+
+# Extension language support
 IF (GUILE_FOUND)
 	ADD_SUBDIRECTORY (guile)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (shell)
 ENDIF (GUILE_FOUND)
 
+IF (PYTHONLIBS_FOUND)
+	ADD_SUBDIRECTORY (python)
+ENDIF (PYTHONLIBS_FOUND)
+
 ADD_SUBDIRECTORY (persist)
 ADD_SUBDIRECTORY (adaptors)
 ADD_SUBDIRECTORY (query)
 ADD_SUBDIRECTORY (nlp)
-IF (NOT WIN32)
-	ADD_SUBDIRECTORY(modules)
-ENDIF (NOT WIN32)
 ADD_SUBDIRECTORY (reasoning)
 ADD_SUBDIRECTORY (comboreduct)
 ADD_SUBDIRECTORY (spatial)
 ADD_SUBDIRECTORY (learning)
 ADD_SUBDIRECTORY (embodiment)
-ADD_SUBDIRECTORY (python)
+
+# Graphics and visualization subsystems
+ADD_SUBDIRECTORY (dotty)
+IF (CURL_FOUND AND XMLRPC_FOUND)
+    ADD_SUBDIRECTORY (ubigraph)
+ENDIF (CURL_FOUND AND XMLRPC_FOUND)
+
