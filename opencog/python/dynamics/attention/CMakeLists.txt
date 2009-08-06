@@ -9,6 +9,9 @@ target_link_libraries(attention_py
 )
 set_target_properties(attention_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "attention"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    OUTPUT_NAME "python_attention"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
+INSTALL (TARGETS attention_py
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+) 

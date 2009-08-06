@@ -29,6 +29,9 @@ target_link_libraries(atomspace_py
 )
 set_target_properties(atomspace_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "atomspace"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    OUTPUT_NAME "python_atomspace"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
+)
+INSTALL (TARGETS atomspace_py
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

@@ -165,7 +165,25 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
 
+# find python destination dir for python bindings
+FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(PythonLibs)
 
+IF (PYTHONLIBS_FOUND)
+    EXECUTE_PROCESS(
+        COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print 'test'; print get_python_lib()"
+        OUTPUT_VARIABLE PYTHON_DEST
+    )
+    # replace new line at end
+    STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+    IF ("${PYTHON_DEST}" STREQUAL "")
+        MESSAGE(STATUS "Python destination dir not found")
+    ELSE ("${PYTHON_DEST}" STREQUAL "") 
+        MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+    ENDIF ("${PYTHON_DEST}" STREQUAL "")
+ELSE(PYTHONLIBS_FOUND)
+    MESSAGE(STATUS "Python not found" )
+ENDIF(PYTHONLIBS_FOUND)
 
 # global includes
 

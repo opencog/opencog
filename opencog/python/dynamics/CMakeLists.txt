@@ -12,6 +12,9 @@ target_link_libraries(dynamics_py
 )
 set_target_properties(dynamics_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "dynamics"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    OUTPUT_NAME "python_dynamics"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
+)
+INSTALL (TARGETS dynamics_py
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

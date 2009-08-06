@@ -8,5 +8,5 @@ target_link_libraries(custom_string_py
 set_target_properties(custom_string_py PROPERTIES
     PREFIX ""
     OUTPUT_NAME "custom_string"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )

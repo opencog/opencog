@@ -9,5 +9,5 @@ target_link_libraries(hello_py
 set_target_properties(hello_py PROPERTIES
     PREFIX ""
     OUTPUT_NAME "hello"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )

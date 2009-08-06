@@ -14,6 +14,9 @@ target_link_libraries(server_py
 )
 set_target_properties(server_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "server"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    OUTPUT_NAME "python_server"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
+)
+INSTALL (TARGETS server_py
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

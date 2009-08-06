@@ -30,3 +30,7 @@ set_target_properties(opencog_py PROPERTIES
     OUTPUT_NAME "opencog"
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
+INSTALL (TARGETS
+    opencog_py
+	LIBRARY DESTINATION "${PYTHON_DEST}"
+)

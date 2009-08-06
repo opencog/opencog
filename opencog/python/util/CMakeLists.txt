@@ -9,6 +9,9 @@ target_link_libraries(util_py
 )
 set_target_properties(util_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "util"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    OUTPUT_NAME "python_util"
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
+)
+INSTALL (TARGETS util_py
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
