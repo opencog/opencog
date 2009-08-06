@@ -192,6 +192,9 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 		// printf ("Sending to opencog: %s\n", cmdline);
 		char * reply = whirr_sock_io (cmdline);
+		free(cmdline);
+		cmdline = NULL;
+
 		printf ("opencog reply: %s\n", reply);
 
 		/* Each newline has to be on its own line */
@@ -201,6 +204,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		while (*p)
 		{
 			char *ep = strchr (p, '\n');
+
+			// The last line -- no newline found.
 			if (!ep)
 			{
 				if (is_nonblank(p))
@@ -210,6 +215,19 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			ep ++;
 			int save = *ep;
 			*ep = 0x0;
+
+			// If the line starts with a hash mark, resubmit it to the 
+			// server. This is a kind-of cheap, hacky way of doing
+			// multi-processing. 
+			if ('#' == *p)
+			{
+				free(reply);
+				reply = whirr_sock_io (p+1);
+				p = reply;
+				continue;
+			} 
+
+			// Else print output.
 			if (is_nonblank(p))
 				conn->privmsg (msg_target, p);
 			*ep = save;
@@ -217,7 +235,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			cnt ++;
 
 			/* Sleep so that we don't get kicked for flooding */
-			if (4 < cnt) sleep(1);
+			if (3 < cnt) { sleep(1); cnt = 0; }
 		}
 		free(reply);
 	}
