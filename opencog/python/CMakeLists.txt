@@ -1,4 +1,10 @@
+#
+# XXX the correct python version number should be automatically
+# determined and modified/set here.  
+#
 include_directories("/usr/include/python2.6")
+include_directories("/usr/include/python2.5")
+include_directories("/usr/include/python2.4")
 
 # Submodules
 add_subdirectory(atomspace)
