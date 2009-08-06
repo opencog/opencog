@@ -4,8 +4,7 @@ Instalation and dependency resolution for Gentoo (circa Sep. 2008)
 
 Opencog depends on the following packages:
 
-  dev-util/cmake dev-libs/openssl dev-libs/boost dev-libs/expat
-  dev-scheme/guile sci-libs/gsl
+  dev-util/cmake dev-libs/openssl dev-libs/boost sci-libs/gsl
 
 ----------------------------------------------------------
 
@@ -24,6 +23,10 @@ the following commands:
 
 Opencog also _optionally_ depends on the following packages:
 
-  dev-db/unixODBC 
+  dev-db/unixODBC  -- needed for SQL persistence
+
+  dev-scheme/guile -- needed for scheme bindings
+
+  dev-libs/expat   -- needed for embodiment
 
 ----------------------------------------------------------

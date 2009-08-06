@@ -4,8 +4,8 @@ Instalation and dependency resolution for Ubuntu 8.04 (hardy) users
 
 Opencog depends on the following packages:
 
-   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev libexpat-dev \
-       libboost-signals-dev libgsl0-dev guile-1.8-dev
+   g++ make cmake libssl-dev libboost-dev libboost-filesystem-dev \
+       libboost-signals-dev libgsl0-dev 
 
 ----------------------------------------------------------
 
@@ -21,6 +21,10 @@ which are available at the folowing PPA:
 
 Opencog also _optionally_ depends on the following packages:
 
-   libiodbc2-dev
+   libunixodbc-dev  -- needed for SQL persistence
+
+   guile-1.8-dev    -- needed for scheme bindings
+
+   libexpat-dev     -- needed for embodiment
 
 ----------------------------------------------------------
