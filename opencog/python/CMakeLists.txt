@@ -23,7 +23,7 @@ target_link_libraries(opencog_py
     server_py
     dynamics_py
     util_py
-    hopfield_py
+    #    hopfield_py
 )
 set_target_properties(opencog_py PROPERTIES
     PREFIX ""

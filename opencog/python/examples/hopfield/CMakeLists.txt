@@ -3,6 +3,7 @@ add_library(hopfield_lib SHARED
     ${PROJECT_SOURCE_DIR}/examples/hopfield/HopfieldServer.cc
     ${PROJECT_SOURCE_DIR}/examples/hopfield/Pattern.cc
     ${PROJECT_SOURCE_DIR}/examples/hopfield/HopfieldOptions.cc
+    ${PROJECT_SOURCE_DIR}/examples/hopfield/HopfieldUbigrapher.cc
     ${PROJECT_SOURCE_DIR}/examples/hopfield/StorkeyAgent.cc
     ${PROJECT_SOURCE_DIR}/examples/hopfield/ImprintAgent.cc
 )

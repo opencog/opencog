@@ -14,7 +14,7 @@ void init_opencog_py()
     init_server_module_py();
     init_dynamics_module_py();
     init_util_module_py();
-    init_hopfield_module_py();
+//    init_hopfield_module_py();
 }
 
 BOOST_PYTHON_MODULE(opencog)
