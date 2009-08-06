@@ -1,5 +1,6 @@
 #include "SpaceServer_wrap.h"
 #include "SpaceServer.h"
+#include <opencog/persist/file/SavableRepository.h>
 #include <boost/python/class.hpp>
 
 using namespace opencog;

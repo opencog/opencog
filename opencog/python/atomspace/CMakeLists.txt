@@ -1,4 +1,6 @@
-include_directories(${PROJECT_SOURCE_DIR}/opencog/atomspace)
+include_directories(
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/opencog/atomspace)
 add_library(atomspace_py SHARED
     atomspace_module_wrap.cc
     atom_types_wrap.cc

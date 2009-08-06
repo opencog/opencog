@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "SavableRepository.h"
+#include <opencog/persist/file/SavableRepository.h>
 #include <boost/python/wrapper.hpp>
 
 using namespace opencog;

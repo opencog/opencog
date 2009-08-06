@@ -1,5 +1,5 @@
 #include "SavableRepository_wrap.h"
-#include "SavableRepository.h"
+#include <opencog/persist/file/SavableRepository.h>
 #include <boost/python.hpp>
 
 using namespace opencog;

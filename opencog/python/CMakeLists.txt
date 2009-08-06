@@ -28,5 +28,5 @@ target_link_libraries(opencog_py
 set_target_properties(opencog_py PROPERTIES
     PREFIX ""
     OUTPUT_NAME "opencog"
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/python
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
