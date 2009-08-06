@@ -1,6 +1,29 @@
-All core infrastructure to OpenCog and OpenCog Prime goes here.
 
-Tests, example and demo programs have their own directories.
+                  OpenCog Source Code
+                  -------------------
+
+This directory contains core OpenCog code.  Tests, example and demo 
+programs have their own directories.
+
+Source code overview:
+
+atomspace       -- Defines atoms, nodes, links, truth values, etc. 
+                   Everything else depends on this.
+
+persist         -- Methods for saving/restoring the atomspace to disk,
+                   database, hypertable, etc.
+
+guile, scm      -- Scheme language bindings.
+python          -- Python langauge bindings.  
+
+nlp             -- English language processing
+pln             -- Backward-chainer
+
+embodiment      -- Avatars
+
+ubigraph, dotty -- Visualization, graphics.
+
+cycl-import     -- Import OpenCyc datasets
 
 @todo Create doxygen filter to parse scm files.
 
