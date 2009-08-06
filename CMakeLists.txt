@@ -114,6 +114,8 @@ ENDIF (GSL_FOUND)
 FIND_PACKAGE(EXPAT)
 IF (EXPAT_FOUND)
 	ADD_DEFINITIONS(-DHAVE_EXPAT)
+ELSE (EXPAT_FOUND)
+	MESSAGE(STATUS "Expat XML parser missing: needed for hypertable support.")
 ENDIF (EXPAT_FOUND)
 
 # These are required for building the embodiment code
