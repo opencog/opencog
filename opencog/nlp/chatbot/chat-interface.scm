@@ -13,6 +13,12 @@
 (define (fflush) (force-output (car  (fdes->ports 1))))
 
 ; -----------------------------------------------------------------------
+
+(define (whassup) 
+	"Hey there dog"
+)
+
+; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user entered.
 ;
@@ -162,4 +168,5 @@
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
 	""
+	":scm hush\r (whassup)"
 )

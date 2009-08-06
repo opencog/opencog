@@ -157,8 +157,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		}
 	}
 
-#define ENABLE_SHELL_ESCAPES 0
-#ifdef ENABLE_SHELL_ESCAPES
+// #define ENABLE_SHELL_ESCAPES 0
+#if ENABLE_SHELL_ESCAPES
 	/*
 	 * XXX DANGER DANGER Extreme Caution Advised XXX
 	 * Shell escapes are a potential security hole, as they allow access
@@ -216,12 +216,14 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			int save = *ep;
 			*ep = 0x0;
 
-			// If the line starts with a hash mark, resubmit it to the 
+			// If the line starts with ":scm", resubmit it to the 
 			// server. This is a kind-of cheap, hacky way of doing
 			// multi-processing. 
-			if ('#' == *p)
+			if (0 == strncmp(p, ":scm", 4))
 			{
 				free(reply);
+				char * cr = strchr(p, '\r');
+				if (cr) *cr = '\n';
 				reply = whirr_sock_io (p+1);
 				p = reply;
 				continue;
