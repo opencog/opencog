@@ -51,8 +51,6 @@ LINK_LIBRARIES (
 #ADD_CXXTEST(XMLNodeLoaderUTest)
 # ENDIF (EXPAT_FOUND)
 
-ADD_CXXTEST(FormulaKitUTest)
-ADD_CXXTEST(IndefinitePLNFormulaUTest)
 ADD_CXXTEST(AtomSpaceWrapperUTest)
 ADD_CXXTEST(ConstitutedSetUTest)
 ADD_CXXTEST(TableGatherUTest)
@@ -64,4 +62,4 @@ IF (EXPAT_FOUND)
 	ADD_CXXTEST(PLNUTest)
 ENDIF (EXPAT_FOUND)
 
-
+ADD_SUBDIRECTORY(formulas)

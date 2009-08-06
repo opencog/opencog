@@ -760,52 +760,43 @@ TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 =============================================================================*/
 
 //===========================================================================//
-float SubsetEvalFormula::f1(float a, float b) const
+TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
 {
-    return std::min(a, b);
-}
+    cassert(TRACE_INFO, (N % 2) == 0, "N = %d must be pair", N);
 
-//===========================================================================//
-float SubsetEvalFormula::f2(float a, float b) const
-{
-    return a*b;
-}
+    int Nsub = N/2;
+    int Nsuper = Nsub;
 
-//===========================================================================//
-TruthValue* SubsetEvalFormula::compute(TruthValue** TVsub, int Nsub,
-                                       TruthValue** TVsuper, int Nsuper,
-                                       long U) const
-{
-    assert(Nsuper == Nsub); //Must be balanced with padded zeros
+    TruthValue** TVsub = TVs;
+    TruthValue** TVsuper = TVsub + Nsub;
 
     //if (Log::getDefaultLevel() >= 3) printf("SubSetEval...\n");
 
-    float sTot = 1.0f;
-    float nTot = 1.0f;
+    strength_t sTot = 1.0f;
+    count_t nTot = 1.0f;
 
-    float fs = 0.0f, s = 0.0f;
+    strength_t fs = 0.0f, s = 0.0f;
 
-    int i = 0, n = std::min(Nsuper, Nsub);
-    for (i = 0; i < n; i++) {
-        fs += f1(TVsub[i]->getMean(), TVsuper[i]->getMean());
+    for (int i = 0; i < N; i++) {
+        fs += f(TVsub[i]->getMean(), TVsuper[i]->getMean());
         s += TVsub[i]->getMean();
     }
 
-    float sSS = fs / std::max(s, TV_MIN);
-    float nSS = (float)Nsuper;
+    strength_t sSS = fs / std::max(s, TV_MIN);
+    count_t nSS = (count_t)Nsuper;
 
     return new SimpleTruthValue(sSS, nSS);
     //  return checkTruthValue( new SimpleTruthValue(sSS, nSS) );
 }
 
 //===========================================================================//
-float SubsetEvalFormula2::f(float a, float b) const
+strength_t SubsetEvalFormulaTimes::f(strength_t a, strength_t b) const
 {
     return a*b;
 }
 
 //===========================================================================//
-float SubsetEvalFormula1::f(float a, float b) const
+strength_t SubsetEvalFormulaMin::f(strength_t a, strength_t b) const
 {
     return std::min(a, b);
 }

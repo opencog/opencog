@@ -25,34 +25,37 @@
 namespace opencog { namespace pln {
 class AND2ORRule : public Rule
 {
-	AND2ORRule(iAtomSpaceWrapper *_destTable)
+    AND2ORRule(iAtomSpaceWrapper *_destTable)
 	: Rule(_destTable, false, true, "AND2ORRule")
-	{
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(AndLink))));
-	}
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		Btr<MPs> ret(new MPs);
-		ret->push_back(Btr<atom>(new atom(neBoundVertexWithNewType(outh, AndLink))));
-		return makeSingletonSet(ret);
-	}
+    {
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
+                                                 1, new atom(AndLink))));
+    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        Btr<MPs> ret(new MPs);
+        ret->push_back(Btr<atom>(new atom(neBoundVertexWithNewType(outh,
+                                                                   AndLink))));
+        return makeSingletonSet(ret);
+    }
+    
+    virtual atom i2oType(Handle* h, const int n) const
+    {
+        assert(1==n);
 
-	virtual atom i2oType(Handle* h, const int n) const
-	{
-		assert(1==n);
+        /*return atomWithNewType(h[0], OR_LINK);*/
+    }
+    virtual bool valid(Handle* h, const int n) const
+    {
+        return isSubType(h[0], AND_LINK);
+    }
 
-		/*return atomWithNewType(h[0], OR_LINK);*/
-	}
-	virtual bool valid(Handle* h, const int n) const
-	{
-		return isSubType(h[0], AND_LINK);
-	}
-
-	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
-	{
-		assert(n==1);
-		return AND2ORLink(premiseArray[0]);
-	}
+    BoundVertex compute(const vector<Vertex>& premiseArray,
+                        Handle CX = NULL) const
+    {
+        assert(n==1);
+        return AND2ORLink(premiseArray[0]);
+    }
 };
 
 }} // namespace opencog { namespace pln {

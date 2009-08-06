@@ -38,7 +38,7 @@ namespace moses
 
 representation::representation(const reduct::rule& simplify,
                                const combo_tree& exemplar_,
-                               const type_tree& t,
+                               const type_tree& tt,
                                opencog::RandGen& _rng,
                                const operator_set* os,
                                const combo_tree_ns_set* perceptions,
@@ -51,7 +51,7 @@ representation::representation(const reduct::rule& simplify,
 #endif
 
     //build the knobs
-    build_knobs(rng, _exemplar, t, *this, os, perceptions, actions);
+    build_knobs(rng, _exemplar, tt, *this, os, perceptions, actions);
 
     //handle knob merging
 
@@ -95,30 +95,22 @@ void representation::transform(const instance& inst)
 void representation::clear_exemplar()
 {
     foreach(disc_v& v, disc)
-    v.second->clear_exemplar();
+        v.second->clear_exemplar();
     foreach(contin_v& v, contin)
-    v.second.clear_exemplar();
+        v.second.clear_exemplar();
 }
 
 
-void representation::get_clean_exemplar(combo_tree& result)
+combo_tree representation::get_clean_exemplar()
 {
     using namespace reduct;
-    using std::cout;
 
-    result.clear();
-    result = exemplar();
+    combo_tree result = exemplar();
 
-    clean_reduce(result);
+    clean_reduce(result); //remove null vertices
+    (*_simplify)(result, result.begin()); //reduce
 
-    (*_simplify)(result, result.begin());
-
-    // clean_and_full_reduce(result,rng);
-    //sequential(downwards(remove_null_vertices()),downwards(remove_dangling_junctors()))(result,result.begin());
-
-    return;
+    return result;
 }
-
-
 
 } //~namespace moses

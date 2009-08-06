@@ -80,6 +80,9 @@ namespace reduct {
   }
   inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
 
+  /**
+   * clean_reduce removes null vertices
+   */
   inline void clean_reduce(combo_tree& tr,combo_tree::iterator it) {
     clean_reduction()(tr,it);
   }

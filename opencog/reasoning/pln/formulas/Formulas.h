@@ -422,34 +422,58 @@ public:
 =============================================================================*/ 
 
 /**
- *
+ * 
  */
-class SubsetEvalFormula : public ArityFreeFormula<TruthValue,TruthValue*>
+class SubsetEvalFormula : public ArityFreeFormula<TruthValue, TruthValue*>
 {
 private:
-    float f1(float a, float b) const;
-    float f2(float a, float b) const;
+    //by default compute uses min
+    virtual strength_t f(strength_t a, strength_t b) const
+    {
+        return std::min(a, b);
+    }
 public:
-    TruthValue* compute(TruthValue** TVsub, int Nsub, TruthValue** TVsuper,
-                        int Nsuper, long U = DefaultU) const;
+
+    /*virtual TruthValue * compute(TruthValue** tv1, int N1,
+                                 TruthValue** tv2, int N2) const
+    {
+        return NULL;
+        }*/
+
+
+    /**
+     * it assumes that TVs = TVsub @ TVsuper and that
+     * TVsub and TVsuper have same size
+     *
+     * Note that it is still posible to use the method with the signature
+     *
+     * TruthValue* compute(TruthValue** TVsub, int Nsub,
+     *                     TruthValue** TVsuper, int Nsuper,
+     *                     long U = DefaultU) const {
+     *
+     * as it is defined in formula.h
+     */
+    virtual TruthValue* compute(TruthValue** TVs, int N,
+                                long U = DefaultU) const;
+
 };
 
 /**
  *
  */
-class SubsetEvalFormula2 : SubsetEvalFormula
+class SubsetEvalFormulaTimes : SubsetEvalFormula
 {
 protected:
-    float f(float a, float b) const;
+    strength_t f(strength_t a, strength_t b) const;
 };
 
 /**
  *
  */
-class SubsetEvalFormula1 : SubsetEvalFormula
+class SubsetEvalFormulaMin : SubsetEvalFormula
 {
 protected:
-    float f(float a, float b) const;
+    strength_t f(strength_t a, strength_t b) const;
 };
 
 /*=============================================================================

@@ -83,6 +83,8 @@ typedef Btr<vtree> meta;
 typedef std::pair<pHandle, pHandle> hpair;
 
 typedef std::set<pHandle> pHandleSet;
+typedef pHandleSet::iterator pHandleSetIt;
+typedef pHandleSet::const_iterator pHandleSetConstIt;
 
 // defines print levels
 #define SILENT          0

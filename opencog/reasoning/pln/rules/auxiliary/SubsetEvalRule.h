@@ -22,22 +22,25 @@
 #ifndef SUBSETEVALRULE_H
 #define SUBSETEVALRULE_H
 
+#include "../../PLNUtils.h"
 #include "../../AtomLookupProvider.h"
 #include "../../formulas/Formulas.h"
 #include "../../rules/Rule.h"
+#include "../../rules/RuleFunctions.h"
 
 namespace opencog { namespace pln {
 
-/*
-class SubsetEvalRule
+using std::vector;
+
+class SubsetEvalRule : public Rule
 {
-    pHandle domain;
+    //pHandle domain; //used nowhere ???
     SubsetEvalFormula formula;
 
 protected:
 
-    MPs inputFilter;
-    iAtomSpaceWrapper *destTable;
+    //MPs inputFilter; //already in Rule
+    //iAtomSpaceWrapper *destTable; //already in Rule
 public:
     virtual ~SubsetEvalRule() {}
     SubsetEvalRule(iAtomSpaceWrapper *_destTable);
@@ -47,13 +50,14 @@ public:
     }
 
     meta i2oType(const vector<Vertex>& h) const {
-        assert(n == 1);
+        opencog::cassert(TRACE_INFO, h.size() == 1);
         return atomWithNewType(h[0], SUBSET_LINK);
     }
-
-    BoundVertex compute(const vector<Vertex>& premiseArray, pHandle CX = NULL) const
+    
+    BoundVertex compute(const vector<Vertex>& premiseArray,
+                        pHandle CX = NULL) const;
 };
-*/
+ 
 
 }} // namespace opencog { namespace pln {
 #endif // SUBSETEVALRULE_H

@@ -36,6 +36,9 @@
 namespace moses
 {
 
+/**
+ * Do the representation-building, create a field_set
+ */
 struct representation : public knob_mapper, boost::noncopyable {
     typedef eda::instance instance;
 
@@ -56,7 +59,14 @@ struct representation : public knob_mapper, boost::noncopyable {
 
     void transform(const instance&);
     void clear_exemplar();
-    void get_clean_exemplar(combo_tree& result); // PJ & Moshe Looks
+
+    /**
+     * returns a clean and reduced version of the current exemplar
+     * (usually after turning some of its knobs)
+     *
+     * @return It returns a copy of _exemplar, cleaned and reduced
+     */
+    combo_tree get_clean_exemplar();
 
     const field_set& fields() const {
         return _fields;

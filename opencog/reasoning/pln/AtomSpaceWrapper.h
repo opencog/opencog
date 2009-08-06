@@ -343,7 +343,7 @@ public:
 
     //! Add atom from tree vertex
     pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
-            bool managed=true);
+                    bool managed=true);
     //! Add link
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
                             bool fresh=false, bool managed=true)=0;
@@ -397,11 +397,12 @@ public:
      * nodes. This can be ensured by using the appropriate addNodeDC or
      * addNodeDC classes.
      */
-    pHandle addAtomDC(Atom &a, bool fresh, bool managed, HandleSeq contexts = HandleSeq());
+    pHandle addAtomDC(Atom &a, bool fresh, bool managed,
+                      HandleSeq contexts = HandleSeq());
     Handle getNewContextLink(Handle h, HandleSeq destContexts);
 
     pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-        bool fresh,bool managed);
+                          bool fresh,bool managed);
 
     //! Whether to generate CrispTheoremRules for all crisp theorems
     //! and add them to CrispTheoremRule::thms.

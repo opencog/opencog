@@ -89,7 +89,7 @@ protected:
      * its \c inputFilter, plus extra requirements for each desired output. The
      * extras are given by this method.
      *
-     * If the extra filter includes the restrictions on of the input filter too,
+     * If the extra filter includes the restrictions on the input filter too,
      * then the method should set overrideInputFilter True on return.
      *
      * @param outh ???

@@ -1,0 +1,2 @@
+ADD_CXXTEST(FormulaKitUTest)
+ADD_CXXTEST(IndefinitePLNFormulaUTest)

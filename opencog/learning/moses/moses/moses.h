@@ -178,8 +178,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         //do some optimization according to the scoring function
         /*_n_evals+=optimize(deme,complexity_based_scorer<Scoring>(score,rep),
         max_evals);*/
-        _n_evals += optimize(deme, count_based_scorer<Scoring>(score, rep,
-                             get_complexity(*exemplar), rng),
+        _n_evals += optimize(deme,
+                             count_based_scorer<Scoring>(score, rep,
+                                                         get_complexity(*exemplar),
+                                                         rng),
                              max_evals);
 
         //add (as potential exemplars for future demes) all unique non-dominated
@@ -197,14 +199,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             if (get_score(inst.second) == get_score(worst_possible_score))
                 continue;
 
-            //generate the tree
-            combo_tree tr;
-            //cout << "inst : " << rep.fields().stream(inst) << endl;
+            //generate the tree coded by inst
+
+            //turn the knobs of rep._exemplar as stored in inst
             rep.transform(inst);
 
-            //tr=rep.exemplar();        // otherwise dangling junctors and
-            rep.get_clean_exemplar(tr);  // the scoring are not in accordance with each other
-            //apply_rule(sequential(*simplify),tr,tr.begin());
+            //get the combo_tree associated to inst, cleaned and reduced
+            combo_tree tr = rep.get_clean_exemplar();
 
 #ifdef DEBUG_INFO
             cout << "Instance explored: " << inst.second << endl;
@@ -350,14 +351,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             if (get_score(inst.second) == get_score(worst_possible_score))
                 continue;
 
-            //generate the tree
-            combo_tree tr;
-            //cout << "inst : " << rep.fields().stream(inst) << endl;
+            //generate the tree coded by inst
+
+            //turn the knobs of rep._exemplar as stored in inst
             _rep->transform(inst);
 
-            //tr=_rep->exemplar();        // otherwise dangling junctors and
-            _rep->get_clean_exemplar(tr);  // the scoring are not in accordance with each other
-            //apply_rule(sequential(*simplify),tr,tr.begin());
+            //get the combo_tree associated to inst, cleaned and reduced
+            combo_tree tr = _rep->get_clean_exemplar();
 
 #ifdef DEBUG_INFO
             cout << "Instance explored: " << inst.second << endl;
