@@ -95,8 +95,9 @@
 ; processing is going on, the processing as been split into stages,
 ; designed so that each stage returns from the scheme interpreter,
 ; with some output for the chatbot.  The next stage of processing can
-; then be continued by writing ":scm hish\r (sheme code)\n" to the 
-; chat processor.
+; then be continued by writing ":scm hush\r (scheme code)\n" to the 
+; chat processor. The ":scm" and the "\r" are both important parts of
+; the syntax, as the chat bridge looks for these. Don't mess them up.
 ;
 ; This interactive design is not very pretty, and it would be better
 ; to come up with some sort of multi-threaded design, with one of the 
@@ -190,7 +191,7 @@
 			; Grab just the first triple for now ... and try to 
 			; pattern-match it.
 			(if (not (null? trips))
-				(cog-ad-hoc "triple-question" (car (get-new-triples)))
+				(cog-ad-hoc "triple-question" (car trips))
 			)
 			(let ((answer-list (chat-get-simple-answer)))
 				(if (not (null? answer-list))
@@ -198,6 +199,8 @@
 					(display "No answer was found to your question.")
 				)
 			)
+
+			; To
 		)
 	)
 

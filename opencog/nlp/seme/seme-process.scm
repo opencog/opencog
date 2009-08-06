@@ -86,7 +86,12 @@
 ; Fetch, from persistant (SQL) storage, all knowledge related to the
 ; recently produced triples. Specifically, hunt out the SemeNode's that
 ; occur in the triples, and get everything we know about them (by getting
-; everything that has that seme-node in it's outgoing set.)
+; everything that has that seme-node in it's outgoing set.) Basically,
+; the goal is to get stuff out of persistent store and into RAM.
+;
+; The input triples are presumed to be expressed in terms of
+; word-instances. This routine looks up the words, and then any semes
+; associated with that word.
 ; 
 (define (fetch-related-semes triple-list)
 
@@ -95,10 +100,10 @@
 	; connected to these qord nodes from SQL. Then hunt down the 
 	; corresponding SemeNodes, and load those too.
 	(define (fetch-seme trip)
-		(let* ((w-inst1 (car (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
-				(w-inst2 (cadr (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
-				(word1 (word-inst-get-lemma w-inst1))
-				(word2 (word-inst-get-lemma w-inst2))
+		(let* ((wrd-inst1 (car (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
+				(wrd-inst2 (cadr (cog-outgoing-set (cadr (cog-outgoing-set trip)))))
+				(word1 (word-inst-get-lemma wrd-inst1))
+				(word2 (word-inst-get-lemma wrd-inst2))
 			)
 			(load-referers word1)
 			(load-referers word2)
