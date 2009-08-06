@@ -40,7 +40,6 @@ ENDIF(COMMAND cmake_policy)
 
 ADD_EXECUTABLE (tangentbug TangentBugTestExec.cc)
 TARGET_LINK_LIBRARIES(tangentbug
-    Control
     SpaceMap
     TangentBug
     util
@@ -65,7 +64,6 @@ ADD_LIBRARY (AStar
 
 ADD_EXECUTABLE (astartest AStarTest)
 TARGET_LINK_LIBRARIES(astartest
-    Control
     SpaceMap
     TangentBug
     AStar

@@ -6,21 +6,18 @@
 ADD_CXXTEST(LocalSpaceMap2DUTest)
 TARGET_LINK_LIBRARIES(LocalSpaceMap2DUTest
     SpaceMap 
-    Control
     util
 )
 
 ADD_CXXTEST(VisibilityMapUTest)
 TARGET_LINK_LIBRARIES(VisibilityMapUTest
     SpaceMap
-    Control
     util
 )
 
 ADD_CXXTEST(HPASearchUTest)
 TARGET_LINK_LIBRARIES(HPASearchUTest
     SpaceMap 
-    Control
     util
     HPASearch
 )
@@ -28,6 +25,5 @@ TARGET_LINK_LIBRARIES(HPASearchUTest
 ADD_CXXTEST(MathUTest)
 TARGET_LINK_LIBRARIES(MathUTest
     SpaceMap
-    Control
     util
 )

@@ -31,7 +31,10 @@ ADD_SUBDIRECTORY (reasoning)
 ADD_SUBDIRECTORY (comboreduct)
 ADD_SUBDIRECTORY (spatial)
 ADD_SUBDIRECTORY (learning)
-ADD_SUBDIRECTORY (embodiment)
+
+IF (XERCESC_FOUND)
+	ADD_SUBDIRECTORY (embodiment)
+ENDIF (XERCESC_FOUND)
 
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (dotty)
