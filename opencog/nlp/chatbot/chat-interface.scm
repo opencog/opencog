@@ -13,12 +13,6 @@
 (define (fflush) (force-output (car  (fdes->ports 1))))
 
 ; -----------------------------------------------------------------------
-
-(define (whassup) 
-	"Hey there dog"
-)
-
-; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -60,7 +54,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; print stuff ...
+; chat-prt-soln -- print a list of words as the answer to a question
+;
+; Typically, this routine will be used to print single-word replies
+; e.g. "yes", but sometimes a list of words shows up for extensive
+; questions (e.g. "what is an instrument" lists many instruments)
 ;
 (define (chat-prt-soln soln-list)
 	(define (do-prt-soln soln-list)
@@ -85,6 +83,18 @@
 		(do-prt-soln soln-list)
 	)
 )
+
+; -----------------------------------------------------------------------
+; convert hypothetical isa to plain is but nuke the truth value
+; This is needed for PLN.
+
+(define (hypothetical-to-uncertain triple)
+	(EvaluationLink
+		(DefinedLinguisticRelationshipNode "isa")
+		(cadr (cog-outgoing-set triple))
+	)
+)
+
 
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
@@ -209,8 +219,15 @@
 	; XXX under construction, not done.
 	(if #t
 		(let* ((trips (get-new-triples))
-				(trip-semes (promote-to-seme same-lemma-promoter trips)))
-(display trip-semes)
+				(trip-semes (promote-to-seme same-lemma-promoter trips))
+				(ftrip (car trip-semes))
+				(uncert (hypothetical-to-uncertain ftrip))
+				(deduced (pln-bc uncert 300))
+			)
+			(if deduced
+(display uncert)
+				(display "Unable to deduce via PLN")
+			)
 (fflush)
 		)
 	)
