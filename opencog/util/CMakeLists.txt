@@ -5,24 +5,24 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 ADD_LIBRARY(util
-        algorithm
-        based_variant
+	algorithm
+	based_variant
 	Config
-        digraph
-        dorepeat
+	digraph
+	dorepeat
 	exceptions
-        files
-        functional.h
-        lazy_normal_selector
-        lazy_random_selector
-        lazy_selector
+	files
+	functional.h
+	lazy_normal_selector
+	lazy_random_selector
+	lazy_selector
 	Logger
-        lru_cache
+	lru_cache
 	misc
 	mt19937ar
 	platform
-        PorterStemmer
-        StringManipulator
+	PorterStemmer
+	StringManipulator
 	StringTokenizer
 	tree
 	${WIN32_GETOPT_FILES}
@@ -33,32 +33,32 @@ TARGET_LINK_LIBRARIES(util
 )
 
 INSTALL (FILES
-        algorithm.h
+	algorithm.h
 	based_variant.h
 	Config.h
-        digraph.h
-        dorepeat.h
+	digraph.h
+	dorepeat.h
 	exceptions.h
-        files.h
-        functional.h
+	files.h
+	functional.h
 	hashing.h
 	hash_map.h
 	hash_set.h
-        lazy_normal_selector.h
-        lazy_random_selector.h
-        lazy_selector.h
+	lazy_normal_selector.h
+	lazy_random_selector.h
+	lazy_selector.h
 	Logger.h
-        lru_cache.h
-        misc.h
-        mt19937ar.h
+	lru_cache.h
+	misc.h
+	mt19937ar.h
 	numeric.h
 	platform.h
-        PorterStemmer.h
+	PorterStemmer.h
 	RandGen.h
 	recent_val.h
-        selection.h
-        slist.h
-        StringManipulator.h
+	selection.h
+	slist.h
+	StringManipulator.h
 	StringTokenizer.h
 	tree.h
 	DESTINATION "include/opencog/util"
