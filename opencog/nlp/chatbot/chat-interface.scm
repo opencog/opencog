@@ -19,16 +19,18 @@
 )
 
 ; -----------------------------------------------------------------------
+; chat-get-simple-answer -- get single-word replies to a question.
 ;
-; Define a super-dooper cheesy way of getting the answer to the question
+; This is a super-dooper cheesy way of reporting the answer to a question.
 ; Right now, its looks for Nodes attached, via ListLink, to an 
-; AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
-; and is just a placeholder for now.
+; AnchorNode called "# QUERY SOLUTION". Some other stage of processing 
+; needs to have attached the nodes to this anchor.
+;
 ; Anyway, three different kinds of things can be found:
 ; WordNodes, almost always "yes", in answer to a yes/no question.
-; WordInstanceNodes, in answer to simple pattern matching
+; WordInstanceNodes, in answer to simple pattern matching.
 ; SemeNodes, in answer to triples matching.
-; Handle each of these.
+; A list of these "answers" is returned.
 ; 
 (define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
 (define (chat-get-simple-answer)
@@ -118,7 +120,7 @@
 	(set! sents (get-new-parsed-sentences))
 
 	; Hmm. Seems like sents is never null, unless there's a 
-	; programmig error in Relex.  Otherwise, it always returns 
+	; programmig error in RelEx.  Otherwise, it always returns 
 	; something, even if the input was non-sense.
 	(if (null? sents)
 		(let ()
@@ -128,17 +130,25 @@
 			(display "\" but I couldn't parse that.")
 			(newline)
 		)
+
+		; Perform a simple pattern matching to the syntactic
+		; form of the sentence.
 		(set! is-question (cog-ad-hoc "question" (car sents)))
 	)
 
-	;; was a question asked?
+	;; Was a question asked?
 	(if is-question 
-		(let ()
+		(let ((ans (chat-get-simple-answer)))
 			(display nick)
 			(display ", you asked a question: ")
 			(display txt)
 			(newline)
-			(chat-prt-soln (chat-get-simple-answer))
+
+			; If pattern-matching found an answer, print it.
+			(if (null? ans)
+				(display "There was no simple answer; attempting triples search\n")
+				(chat-prt-soln ans)
+			)
 		)
 		(let ()
 			(display nick)
@@ -156,6 +166,11 @@
 	""
 )
 
+; -----------------------------------------------------------------------
+; say-part-2 -- run part 2 of the chat processing
+; The first part, "say-id-english", parsed the user input, and made
+; some quick replies. Processing continues below.
+;
 (define (say-part-2 is-question)
 
 	; Run the triples processing.
@@ -163,11 +178,11 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-	; If a question was asked, and the previous attempt to answer the
-	; question failed, try again with pattern matching on the triples.
+	; If a question was asked, and the simple syntactic pattern matching
+	; failed to come up with anything, then try again with pattern
+	; matching on the triples.
 	(if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
-			(display "There was no simple answer; attempting triples search\n")
 
 			; First, pull in any semes that might be related...
 			(fetch-related-semes trips) 
@@ -196,5 +211,6 @@
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
 	""
-	; ":scm hush\r (whassup)"
 )
+
+; -----------------------------------------------------------------------
