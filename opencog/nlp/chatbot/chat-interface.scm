@@ -179,10 +179,10 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-	; If a question was asked, and the simple syntactic pattern matching
-	; failed to come up with anything, then try again with pattern
-	; matching on the triples.
-	(if (and is-question (null? (chat-get-simple-answer)))
+   ; If a question was asked, and the simple syntactic pattern matching
+   ; failed to come up with anything, then try again with pattern
+   ; matching on the triples.
+   (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
 			; First, pull in any semes that might be related...
@@ -199,8 +199,19 @@
 					(display "No answer was found to your question.")
 				)
 			)
+		)
+	)
 
-			; To
+	; If we still don't have an answer, try running PLN 
+	; (this is an extremely simple-minded hack right now)
+	; First, the question needs to be promoted to semes,
+	; because the PLN resoner will only work on those ... 
+	; XXX under construction, not done.
+	(if #t
+		(let* ((trips (get-new-triples))
+				(trip-semes (promote-to-seme same-lemma-promoter trips)))
+(display trip-semes)
+(fflush)
 		)
 	)
 
