@@ -118,14 +118,17 @@ ENDIF (EXPAT_FOUND)
 
 # These are required for building the embodiment code
 FIND_PACKAGE(XercesC)
-FIND_PACKAGE(Lua51)
-FIND_PACKAGE(Luabind 0.8.1)
 IF (XERCESC_FOUND)
 	INCLUDE_DIRECTORIES(${XERCESC_INCLUDE_DIR})
 ELSE (XERCESC_FOUND)
-    MESSAGE(STATUS "XercesC missing: needed for embodiment code.")
+	MESSAGE(STATUS "XercesC missing: needed for embodiment code.")
 ENDIF (XERCESC_FOUND)
 
+FIND_PACKAGE(Lua51)
+FIND_PACKAGE(Luabind 0.8.1)
+IF (NOT LUABIND_FOUND)
+	MESSAGE(STATUS "Luabind missing: needed for embodiment code.")
+ENDIF (NOT LUABIND_FOUND)
 
 # Not used at this time, its incompatible with the current code.
 #
