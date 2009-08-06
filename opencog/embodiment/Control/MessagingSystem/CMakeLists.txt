@@ -20,7 +20,7 @@ ADD_LIBRARY (MessagingSystem
 	#DummyServer.cc
 	RouterHttpPostSocket.cc
 	#MemoryLeakTask.cc
-        EmbodimentCogServer
+	EmbodimentCogServer
 )
 
 IF(COMMAND cmake_policy)
@@ -35,11 +35,11 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	ssl 
 	crypto 
 	dl 
-        xml
+	xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
-        server
-        ${CSOCKETS_LIBRARIES}
+	server
+	${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 )
 

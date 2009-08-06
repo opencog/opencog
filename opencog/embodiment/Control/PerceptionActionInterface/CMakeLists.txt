@@ -16,6 +16,7 @@ ADD_LIBRARY (PAI
 )
 
 TARGET_LINK_LIBRARIES(PAI 
+	AtomSpaceExtensions
 	Predavese 
 	util 
 	${XERCESC_LIBRARIES}

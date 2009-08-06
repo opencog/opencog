@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES(WorldWrapper
     AStar
     HPASearch
     MessagingSystem
-    ImaginaryLife
+#    ImaginaryLife
     PetComboVocabulary
     VirtualWorldData
     ${XERCESC_LIBRARIES}
