@@ -40,7 +40,7 @@ procedure_call_base::procedure_call_base(const std::string& name,
     else if (infer_type) {
         //infer type tree
         set_type_tree(infer_type_tree(_body));
-        opencog::cassert(TRACE_INFO, is_well_formed(_type_tree),
+        OC_ASSERT(is_well_formed(_type_tree),
                           "Cannot instantiate a procedure with a ill formed combo tree");
     }
 }
@@ -65,7 +65,7 @@ void procedure_call_base::set_type_tree(const type_tree& tt)
     //setting arity
     _arity = type_tree_arity(_type_tree);
     //setting output type
-    opencog::cassert(TRACE_INFO, !_type_tree.empty());
+    OC_ASSERT(!_type_tree.empty());
     type_tree_pre_it ty_it = _type_tree.begin();
     type_tree_sib_it sib = ty_it.begin();
     if (*ty_it == id::lambda_type)
@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& out,
 
 std::ostream& operator<<(std::ostream& out, combo::procedure_call pc)
 {
-    opencog::cassert(TRACE_INFO, pc);
+    OC_ASSERT(pc);
     return pc->toStream(out);
 }
 

@@ -69,7 +69,7 @@ void annotate(pat& replacement_pat_with_annotations, const pat& oldrange)
 
                }*/
 
-        //        cassert(TRACE_INFO, replacement_pat_with_annotations.size()==1);
+        //        OC_ASSERT(replacement_pat_with_annotations.size()==1);
         pAtom new_atom(new Atom((*first_repl_atom)->id, oldrange));
         replacement_pat_with_annotations[0] = new_atom;
         //        (*first_repl_atom)->out = oldrange;

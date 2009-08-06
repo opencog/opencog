@@ -23,6 +23,7 @@
 
 #include "ActionType.h"
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 #include <iostream>
 
@@ -723,10 +724,10 @@ ActionType::ActionType(ActionTypeCode _code,
         helpText(_helpText)
 {
     if (ActionType::existCode(code)) {
-        opencog::cassert(TRACE_INFO, false, "ActionType - Duplicate action type code definition: %d.", _code);
+        OC_ASSERT(false, "ActionType - Duplicate action type code definition: %d.", _code);
     }
     if (ActionType::existName(name)) {
-        opencog::cassert(TRACE_INFO, false, "ActionType - Duplicate action type name definition: %s.", _name.c_str());
+        OC_ASSERT(false, "ActionType - Duplicate action type name definition: %s.", _name.c_str());
     }
     nameMap[name] = this;
     codeMap[code] = this;
@@ -885,7 +886,7 @@ const ActionType& ActionType::getFromName(const std::string& name)
     init();
     Name2ActionTypeMap::const_iterator itr = nameMap.find(name);
     if (itr == nameMap.end()) {
-        opencog::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown name: %s.", name.c_str());
+        OC_ASSERT(false, "ActionType - Trying to get an ActionType with an invalid/unknown name: %s.", name.c_str());
     }
     return *(itr->second);
 }
@@ -895,7 +896,7 @@ const ActionType& ActionType::getFromCode(ActionTypeCode code)
     init();
     Code2ActionTypeMap::const_iterator itr = codeMap.find(code);
     if (itr == codeMap.end()) {
-        opencog::cassert(TRACE_INFO, false, "ActionType - Trying to get an ActionType with an invalid/unknown code: %d.", code);
+        OC_ASSERT(false, "ActionType - Trying to get an ActionType with an invalid/unknown code: %d.", code);
     }
     return *(itr->second);
 }

@@ -108,7 +108,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
     //treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
-        opencog::cassert(TRACE_INFO, ++sib_it(from) == to); //there is only one compound action
+        OC_ASSERT(++sib_it(from) == to); //there is only one compound action
         pre_it it = from;
         builtin_action ba = get_builtin_action(*it);
         pet_builtin_action_enum bae = get_enum(ba);
@@ -116,9 +116,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
         case id::goto_obj: {
             logger().debug(
                          "PAIWorldWrapper - Handling goto_obj. # of parameters = %d", it.number_of_children() );
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2);
-            opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-            opencog::cassert(TRACE_INFO, is_contin(*++it.begin()));
+            OC_ASSERT(it.number_of_children() == 2);
+            OC_ASSERT(is_definite_object(*it.begin()));
+            OC_ASSERT(is_contin(*++it.begin()));
 
 
             std::string target = get_definite_object( *it.begin() );
@@ -207,9 +207,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
         case id::gonear_obj: {
             try {
-                opencog::cassert(TRACE_INFO, it.number_of_children() == 2);
-                opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-                opencog::cassert(TRACE_INFO, is_contin(*++it.begin()));
+                OC_ASSERT(it.number_of_children() == 2);
+                OC_ASSERT(is_definite_object(*it.begin()));
+                OC_ASSERT(is_contin(*++it.begin()));
 
                 std::string target = get_definite_object( *it.begin() );
                 float walkSpeed = get_contin( *++it.begin() );
@@ -260,9 +260,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
 
         case id::gobehind_obj: {
 
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2);
-            opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-            opencog::cassert(TRACE_INFO, is_contin(*++it.begin()));
+            OC_ASSERT(it.number_of_children() == 2);
+            OC_ASSERT(is_definite_object(*it.begin()));
+            OC_ASSERT(is_contin(*++it.begin()));
 
             std::string target = get_definite_object( *it.begin() );
             float walkSpeed = get_contin( *++it.begin() );
@@ -317,7 +317,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
         break;
 
         case id::heel:
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 0);
+            OC_ASSERT(it.number_of_children() == 0);
             //first goto the owner, if we can find it
             if (!WorldWrapperUtil::inSpaceMap(sm, as,
                                               selfName(), ownerName(),
@@ -335,9 +335,9 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             _pai.addAction(_planID, PetAction(ActionType::HEEL()));
             break;
         case id::nudge_to:
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2);
-            opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-            opencog::cassert(TRACE_INFO, is_definite_object(*++it.begin()));
+            OC_ASSERT(it.number_of_children() == 2);
+            OC_ASSERT(is_definite_object(*it.begin()));
+            OC_ASSERT(is_definite_object(*++it.begin()));
             //make sure we can find the obj to nudge and its destination
             if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                               *it.begin()) ||
@@ -364,10 +364,10 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             }
             break;
         case id::go_behind: {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3);
-            opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-            opencog::cassert(TRACE_INFO, is_definite_object(*++it.begin()));
-            opencog::cassert(TRACE_INFO, is_contin(*++(++it.begin())));
+            OC_ASSERT(it.number_of_children() == 3);
+            OC_ASSERT(is_definite_object(*it.begin()));
+            OC_ASSERT(is_definite_object(*++it.begin()));
+            OC_ASSERT(is_contin(*++(++it.begin())));
 
             //and just goto it, if we can find the args on the map
             if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
@@ -391,13 +391,13 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
         }
         break;
         case id::follow: {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3);
-            opencog::cassert(TRACE_INFO, is_definite_object(*it.begin()));
-            opencog::cassert(TRACE_INFO, is_contin(*++it.begin()));
-            opencog::cassert(TRACE_INFO, is_contin(*++(++it.begin())));
+            OC_ASSERT(it.number_of_children() == 3);
+            OC_ASSERT(is_definite_object(*it.begin()));
+            OC_ASSERT(is_contin(*++it.begin()));
+            OC_ASSERT(is_contin(*++(++it.begin())));
             {
                 Handle obj = toHandle(get_definite_object(*it.begin()));
-                opencog::cassert(TRACE_INFO, obj != Handle::UNDEFINED);
+                OC_ASSERT(obj != Handle::UNDEFINED);
                 //first goto the obj to follow, if we can find it
                 if (!WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(),
                                                   *it.begin())) {
@@ -486,7 +486,7 @@ combo::vertex PAIWorldWrapper::evalPerception(pre_it it, combo::variable_unifier
 {
     Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
     unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
+    OC_ASSERT(smh != Handle::UNDEFINED,
                      "A SpaceMap must exists");
     combo::vertex v = WorldWrapperUtil::evalPerception(rng, smh, current_time,
                       _pai.getAtomSpace(),
@@ -512,7 +512,7 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
 {
     Handle smh = _pai.getAtomSpace().getSpaceServer().getLatestMapHandle();
     unsigned int current_time = _pai.getLatestSimWorldTimestamp();
-    opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
+    OC_ASSERT(smh != Handle::UNDEFINED,
                      "A SpaceMap must exists");
 
     combo::vertex v = WorldWrapperUtil::evalIndefiniteObject(rng, smh, current_time,
@@ -753,8 +753,8 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
     std::string goalName = atomSpace.getName(goalHandle);
 
-    opencog::cassert(TRACE_INFO, goalHandle != Handle::UNDEFINED);
-    opencog::cassert(TRACE_INFO, spaceMap.containsObject(goalName));
+    OC_ASSERT(goalHandle != Handle::UNDEFINED);
+    OC_ASSERT(spaceMap.containsObject(goalName));
 
     Spatial::Point startPoint;
     Spatial::Point endPoint;
@@ -836,7 +836,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         (id::look_at, ActionType::LOOK_AT())
         (id::whine_at, ActionType::WHINE());
 
-    opencog::cassert(TRACE_INFO, WorldWrapperUtil::is_builtin_atomic_action(*from));
+    OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
     builtin_action ba = get_builtin_action(*from);
     pet_builtin_action_enum bae = get_enum(ba);
 
@@ -1006,7 +1006,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     break;
 
     case id::receive_latest_group_commands: {
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 0);
+        OC_ASSERT(from.number_of_children() == 0);
 
         logger().debug(
                      "PAIWorldWrapper - receiving latest_group_commands from all agents" );
@@ -1078,13 +1078,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     //these have the target and specific parts
     case id::sniff_avatar_part: { // sniff_avatar_part(avatar,RIGHT_FOOT|LEFT_FOOT|RIGHT_HAND|LEFT_HAND|CROTCH|BUTT)
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 2);
+        OC_ASSERT(from.number_of_children() == 2);
         action.addParameter(ActionParameter("avatar",
                                             ActionParamType::ENTITY(),
                                             Entity(get_definite_object(*from.begin()),
                                                    resolveType(*from.begin()))));
         combo::vertex v = *from.last_child();
-        opencog::cassert(TRACE_INFO, is_action_symbol(v),
+        OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
         combo::pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
         string part;
@@ -1110,19 +1110,19 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             break;
         default:
             logger().error("PAIWorldWrapper - Invalid avatar part as parameter for sniff_avatar_part: %s.", instance(ase)->get_name().c_str());
-            opencog::cassert(TRACE_INFO, false);
+            OC_ASSERT(false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
     }
     break;
     case id::sniff_pet_part: {  // sniff_pet_part(pet,NOSE|NECK|BUTT)
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 2);
+        OC_ASSERT(from.number_of_children() == 2);
         action.addParameter(ActionParameter("pet",
                                             ActionParamType::ENTITY(),
                                             Entity(get_definite_object(*from.begin()),
                                                    resolveType(*from.begin()))));
         combo::vertex v = *from.last_child();
-        opencog::cassert(TRACE_INFO, is_action_symbol(v),
+        OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
         pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
         string part;
@@ -1138,7 +1138,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             break;
         default:
             logger().error("PAIWorldWrapper - Invalid pet part as parameter for sniff_pet_part: %s.", instance(ase)->get_name().c_str());
-            opencog::cassert(TRACE_INFO, false);
+            OC_ASSERT(false);
         }
         action.addParameter(ActionParameter("part", ActionParamType::INT(), part));
     }
@@ -1146,7 +1146,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     //these have specific actions for each part
     case id::scratch_self: {    // scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
         combo::vertex v = *from.begin();
-        opencog::cassert(TRACE_INFO, is_action_symbol(v),
+        OC_ASSERT(is_action_symbol(v),
                          "It is assumed v is an action_symbol");
         combo::pet_action_symbol_enum ase = get_enum(get_action_symbol(v));
         switch (ase) {
@@ -1170,7 +1170,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             break;
         default:
             logger().error("PAIWorldWrapper - Invalid pet part as parameter for scratch_self: %s.", instance(ase)->get_name().c_str());
-            opencog::cassert(TRACE_INFO, false);
+            OC_ASSERT(false);
         }
     }
     break;
@@ -1244,8 +1244,8 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         }
         break;
     case id::step_towards:      // step_towards(obj,TOWARDS|AWAY)
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 2);
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(from.number_of_children() == 2);
+        OC_ASSERT(
                          *from.last_child() == instance(id::TOWARDS) ||
                          *from.last_child() == instance(id::AWAY));
         {
@@ -1283,7 +1283,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     }
     break;
     case id::move_head:         // move_head(angle, angle)
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 3);
+        OC_ASSERT(from.number_of_children() == 3);
         action.addParameter(ActionParameter("position",
                                             ActionParamType::VECTOR(),
                                             Vector(0.0, 0.0, 0.0)));
@@ -1308,15 +1308,15 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
     case id::turn_to_face: {    // turn_to_face(obj)
 
-        opencog::cassert(TRACE_INFO, from.number_of_children() == 1);
-        opencog::cassert(TRACE_INFO, is_definite_object(*from.begin()));
+        OC_ASSERT(from.number_of_children() == 1);
+        OC_ASSERT(is_definite_object(*from.begin()));
         /*
           const string& slObjName = get_definite_object(*from.begin());
           double angleFacing = getAngleFacing(WorldWrapperUtil::selfHandle(as, selfName()));
           logger().debug("PAIWorldWrapper: angleFacing = %f", angleFacing);
           logger().debug("PAIWorldWrapper: slObjName = %s", slObjName.c_str());
-          opencog::cassert(TRACE_INFO,  WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), selfName()));
-          opencog::cassert(TRACE_INFO,  WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), slObjName));
+          OC_ASSERT( WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), selfName()));
+          OC_ASSERT( WorldWrapperUtil::inSpaceMap(sm, as, selfName(), ownerName(), slObjName));
           const SpaceServer::SpaceMapPoint& selfObjPoint = WorldWrapperUtil::getLocation(sm, as, toHandle(selfName()));
           const SpaceServer::SpaceMapPoint& slObjPoint =  WorldWrapperUtil::getLocation(sm, as, toHandle(slObjName));
           double deltaX = slObjPoint.first - selfObjPoint.first;
@@ -1423,8 +1423,8 @@ string PAIWorldWrapper::toCamelCase(string str)
 
 string PAIWorldWrapper::resolveType(combo::vertex v)
 {
-    opencog::cassert(TRACE_INFO, is_definite_object(v));
-    opencog::cassert(TRACE_INFO, toHandle(get_definite_object(v)) != Handle::UNDEFINED);
+    OC_ASSERT(is_definite_object(v));
+    OC_ASSERT(toHandle(get_definite_object(v)) != Handle::UNDEFINED);
     return resolveType(toHandle(get_definite_object(v)));
 }
 string PAIWorldWrapper::resolveType(Handle h)
@@ -1468,7 +1468,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
     const SpaceServer& spaceServer = as.getSpaceServer();
     //get the time node of the latest map, via the link AtTimeLink(TimeNode,SpaceMap)
     Handle atTimeLink = spaceServer.getLatestMapHandle();
-    opencog::cassert(TRACE_INFO, atTimeLink != Handle::UNDEFINED);
+    OC_ASSERT(atTimeLink != Handle::UNDEFINED);
 #if 1
     const SpaceServer::SpaceMap& sm = spaceServer.getLatestMap();
     const string& slObjName = as.getName(slobj);
@@ -1479,11 +1479,11 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
         return result;
     }
 #else
-    opencog::cassert(TRACE_INFO, TLB::getAtom(atTimeLink)->getType() == AT_TIME_LINK);
-    opencog::cassert(TRACE_INFO, TLB::getAtom(atTimeLink)->getArity() == 2);
+    OC_ASSERT(TLB::getAtom(atTimeLink)->getType() == AT_TIME_LINK);
+    OC_ASSERT(TLB::getAtom(atTimeLink)->getArity() == 2);
 
     Handle timeNode = TLB::getAtom(atTimeLink)->getOutgoingSet()[0];
-    opencog::cassert(TRACE_INFO, TLB::getAtom(timeNode)->getType() == TIME_NODE);
+    OC_ASSERT(TLB::getAtom(timeNode)->getType() == TIME_NODE);
 
     //now use it to lookup the AtTimeLink to our obj
     HandleSeq outgoing = boost::assign::list_of(timeNode)(Handle::UNDEFINED);
@@ -1503,7 +1503,7 @@ double PAIWorldWrapper::getAngleFacing(Handle slobj) throw (opencog::ComboExcept
                 Handle ll = TLB::getAtom(TLB::getAtom(TLB::getAtom(h)->getOutgoingSet()[1]))->getOutgoingSet()[1];
                 if (TLB::getAtom(ll)->getOutgoingSet()[0] == slobj) {
                     //return the yaw
-                    opencog::cassert(TRACE_INFO, TLB::getAtom(ll)->getOutgoingSet().size() == 4);
+                    OC_ASSERT(TLB::getAtom(ll)->getOutgoingSet().size() == 4);
                     double result = lexical_cast<double>(as.getName(as.getOutgoing(ll, 3)));
                     logger().debug("getAngleFacing(%s) => %f", as.getName(slobj).c_str(), result);
                     return result;

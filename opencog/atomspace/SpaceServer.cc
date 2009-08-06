@@ -27,6 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/atom_types.h>
 
@@ -285,7 +286,7 @@ const bool SpaceServer::isLatestMapValid() const
 
 const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const throw (opencog::AssertionException, std::bad_exception)
 {
-    cassert(TRACE_INFO, isLatestMapValid(), "SpaceServer - No lastestMap avaiable to return.");
+    OC_ASSERT(isLatestMapValid(), "SpaceServer - No lastestMap avaiable to return.");
     HandleToSpaceMap::const_iterator itr = spaceMaps.find(getLatestMapHandle());
     return *(itr->second);
 }

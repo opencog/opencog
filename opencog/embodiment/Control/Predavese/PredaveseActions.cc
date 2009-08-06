@@ -155,7 +155,7 @@ bool pet_command::operator()(const pAtom& arg, unsigned long timestamp, const st
     // TODO: Only handles intransitive and transitive verbs. Ditransitive is not addressed yet
     vector<string> f_args;
     FormatArgs(arg->out, 0, back_inserter(f_args), arity);
-    opencog::cassert(TRACE_INFO, !f_args.empty(), "pet_command - Unable to format arguments.");
+    OC_ASSERT(!f_args.empty(), "pet_command - Unable to format arguments.");
 
     { // block used to handle playing
         std::vector<std::string> arguments;

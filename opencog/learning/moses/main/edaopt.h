@@ -29,6 +29,7 @@
 #include <opencog/learning/moses/eda/optimize.h>
 
 #include <opencog/util/selection.h>
+#include <opencog/util/oc_assert.h>
 
 #include <boost/lexical_cast.hpp>
 

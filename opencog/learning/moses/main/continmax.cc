@@ -26,6 +26,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 
 #include <boost/assign/list_of.hpp>
 

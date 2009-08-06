@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "type_tree_def.h"
+#include <opencog/util/oc_assert.h>
 
 namespace combo {
 
@@ -29,7 +30,7 @@ namespace combo {
     return (int)n>=id::argument_type;
   }
   unsigned int arg_to_idx(type_node n) {
-    opencog::cassert(TRACE_INFO, is_argument_type(n),
+    OC_ASSERT(is_argument_type(n),
 		      "Cannot find the idx of a non-argument type");
     return (unsigned int)((int)n-(int)id::argument_type+1);
   }

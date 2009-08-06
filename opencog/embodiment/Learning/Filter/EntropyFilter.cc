@@ -106,7 +106,7 @@ EntropyFilter::EntropyFilter(const std::string& self_id,
 
     _spaceMapNode = _atomSpace.getHandle(CONCEPT_NODE,
                                          SpaceServer::SPACE_MAP_NODE_NAME);
-    opencog::cassert(TRACE_INFO, _spaceMapNode != Handle::UNDEFINED,
+    OC_ASSERT(_spaceMapNode != Handle::UNDEFINED,
                      "There must a be a map node in the atomSpace");
 }
 
@@ -119,14 +119,14 @@ void EntropyFilter::generateFilteredPerceptions(combo_tree_ns_set& pred_set,
         const argument_list_list& all)
 {
     const std::vector<CompositeBehaviorDescription>& bdce = BDCat.getEntries();
-    opencog::cassert(TRACE_INFO, !bdce.empty(), "Error : No exemplars");
-    opencog::cassert(TRACE_INFO, _arity == 0 || all.size() == bdce.size(),
+    OC_ASSERT(!bdce.empty(), "Error : No exemplars");
+    OC_ASSERT(_arity == 0 || all.size() == bdce.size(),
                      "If the program to learn has a non-null arity then the number of argument lists must be equal to the number of behavior descriptions");
     argument_list_list_const_it alli = all.begin();
     std::vector<CompositeBehaviorDescription>::const_iterator bdi = bdce.begin();
     std::vector<Temporal>::const_iterator eti = est.begin();
     for (; bdi != bdce.end(); ++bdi, ++alli, ++eti) {
-        opencog::cassert(TRACE_INFO, !bdi->empty(),
+        OC_ASSERT(!bdi->empty(),
                          "Exemplar should not be empty for now, ask Nil to fix that");
         updatePerceptToTime(*eti, *alli);
     }
@@ -151,14 +151,14 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
     unsigned long tl = temp.getLowerBound();
     unsigned long tu = temp.getUpperBound();
     long diff = (long)tu - (long)tl;
-    opencog::cassert(TRACE_INFO, diff >= 0, "diff = %d is not positive or null", diff);
+    OC_ASSERT(diff >= 0, "diff = %d is not positive or null", diff);
     //get the list of spaceMap that occurs in that range
     std::vector<HandleTemporalPair> htps;
     //get the first map at tl or if not before tl
     Temporal temp_right_after(tl + 1, tu);
     _atomSpace.getTimeInfo(back_inserter(htps), _spaceMapNode, temp_right_after,
                            TemporalTable::PREVIOUS_BEFORE_START_OF);
-    opencog::cassert(TRACE_INFO, !htps.empty(),
+    OC_ASSERT(!htps.empty(),
                      "There must be a map that starts at %d or at least before %d",
                      tl, tl);
     //try to get the map
@@ -174,7 +174,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
             htp_it != htps.end(); ++htp_it) {
         //determine spaceMap
         Handle smh = _atomSpace.getAtTimeLink(*htp_it);
-        opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
+        OC_ASSERT(smh != Handle::UNDEFINED,
                          "There must be a spaceMap for that handle");
         const SpaceServer::SpaceMap& sm = _atomSpace.getSpaceServer().getMap(smh);
         //determine lower and upper boundary of that spaceMap
@@ -190,7 +190,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
         ++htp_it_next;
         if (htp_it_next != htps.end()) {
             ltu = htp_it_next->getTemporal()->getLowerBound();
-            opencog::cassert(TRACE_INFO, ltu <= tu, "The start time of the last spaceMap must occur at or before the exemplar stop time");
+            OC_ASSERT(ltu <= tu, "The start time of the last spaceMap must occur at or before the exemplar stop time");
         } else ltu = tu;
         unsigned long ldiff = ltu - ltl;
 #ifdef ISMOVING_OPTIMIZE
@@ -231,7 +231,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
                                                                    true /*isInThePast*/);
                         //only non random indefinite objects go in the cache
                         if (!is_random(io)) {
-                            opencog::cassert(TRACE_INFO, is_definite_object(*opra),
+                            OC_ASSERT(is_definite_object(*opra),
                                              "opra must contain a definite_object");
                             _indefToDef[(unsigned int)ioe] = get_definite_object(*opra);
                         } else { //is moving optimization cannot work with random object
@@ -246,12 +246,12 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
 #ifdef ISMOVING_OPTIMIZE
             //check if the perception is is_moving then look at _isMoving
             if (head == instance(id::is_moving)) {
-                opencog::cassert(TRACE_INFO, head_it.has_one_child(),
+                OC_ASSERT(head_it.has_one_child(),
                                  "is_moving must have only one child");
                 //eval the new perception
                 std::pair<bool, unsigned long>& p = vti->second;
                 //look into the isMoving cache
-                opencog::cassert(TRACE_INFO, is_definite_object(*head_it.begin()),
+                OC_ASSERT(is_definite_object(*head_it.begin()),
                                  "the argument of is_moving must be a definite object");
                 p.first = getIsMoving(get_definite_object(*head_it.begin()));
                 if (p.first)
@@ -261,7 +261,7 @@ void EntropyFilter::updatePerceptToTime(const Temporal& temp,
             //hasSaidDelay time intervals between the start and the end of
             //the spaceMap
             else if (head == instance(id::has_said)) {
-                opencog::cassert(TRACE_INFO, _hasSaidDelay > 0,
+                OC_ASSERT(_hasSaidDelay > 0,
                                  "_hasSaidDelay cannot be null otherwise that may provoke an infinite loop");
                 for (unsigned long i = ltu; i > ltl; i -= _hasSaidDelay) {
                     if (combo::vertex_to_bool(WorldWrapperUtil::evalPerception(_rng,
@@ -593,9 +593,9 @@ void EntropyFilter::build_and_insert_atomic_perceptions(perception p)
 void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
         arity_t arity)
 {
-    opencog::cassert(TRACE_INFO, arity >= 0,
+    OC_ASSERT(arity >= 0,
                      "arity is necessarily positive or null");
-    opencog::cassert(TRACE_INFO, !tr.empty(), "tr cannot be empty");
+    OC_ASSERT(!tr.empty(), "tr cannot be empty");
     pre_it head = tr.begin();
 
     //debug print
@@ -653,7 +653,7 @@ void EntropyFilter::build_and_insert_atomic_perceptions(const combo_tree& tr,
                     dci != aaci->second.end(); ++dci) {
                 combo_tree tmp = tr;
                 pre_it tmp_head = tmp.begin();
-                opencog::cassert(TRACE_INFO, tmp_head.is_childless(),
+                OC_ASSERT(tmp_head.is_childless(),
                                  "to work well there must be no child");
                 tmp.append_child(tmp_head, aaci->first);
                 for (definite_object_vec_const_it dvci = dci->begin();

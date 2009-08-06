@@ -173,7 +173,7 @@ namespace reduct {
   //using the reduce_and_assumptions
   void reduce_or_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::logical_or) {
-      opencog::cassert(TRACE_INFO, !it.is_childless(), "combo_tree node should not be childless (reduce_or_assumptions).");
+      OC_ASSERT(!it.is_childless(), "combo_tree node should not be childless (reduce_or_assumptions).");
       *it = id::logical_not;
       pre_it new_or = tr.prepend_child(it, id::logical_or);
       tr.reparent(new_or, tr.next_sibling(it.begin()), it.end());
@@ -394,7 +394,7 @@ namespace reduct {
 	      }
 	  gchild=tr.erase(tr.flatten(gchild));
 	} else {
-	  opencog::cassert(TRACE_INFO, is_argument(*gchild.begin()), "gchild should be an argument.");
+	  OC_ASSERT(is_argument(*gchild.begin()), "gchild should be an argument.");
 	  gchild=tr.erase(tr.flatten(gchild));
 	}
       } else {
@@ -431,7 +431,7 @@ namespace reduct {
   subtree_to_enf::reduce_to_enf::reduce(sib_it current,
 					const subtree_set& dominant,
 					const subtree_set& command) {
-    opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp), 
+    OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(),comp), 
             "dominant subtree_set should be sorted (reduce)");
 
     //first remove duplicate children
@@ -447,9 +447,9 @@ namespace reduct {
       }
     }
 
-    opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp),
+    OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(),comp),
             "dominant subtree_set should be sorted (reduce)");
-    opencog::cassert(TRACE_INFO, opencog::is_sorted(command.begin(),command.end(),comp), 
+    OC_ASSERT(opencog::is_sorted(command.begin(),command.end(),comp), 
             "command subtree_set should be sorted (reduce).");
 
     if (*current==id::logical_and)
@@ -458,7 +458,7 @@ namespace reduct {
       return reduce_or(current,dominant,command);
 
     //should be an argument or something
-    //opencog::cassert(TRACE_INFO, is_argument(*current));
+    //OC_ASSERT(is_argument(*current));
     return Keep;
   }
 
@@ -496,7 +496,7 @@ namespace reduct {
 	std::list<sib_it>(make_counting_iterator(current.begin()),
 			  make_counting_iterator(current.end()));
 	    	  
-      opencog::cassert(TRACE_INFO, opencog::is_sorted(dominant.begin(),dominant.end(),comp),
+      OC_ASSERT(opencog::is_sorted(dominant.begin(),dominant.end(),comp),
             "dominant subtree_set should be sorted (reduce_and)");
 
       if (!opencog::is_sorted(make_counting_iterator(current.begin()),
@@ -522,9 +522,9 @@ namespace reduct {
 	tr.validate(child);
 	tr.validate();
 
-	opencog::cassert(TRACE_INFO, opencog::is_sorted(command.begin(),command.end(),comp),
+	OC_ASSERT(opencog::is_sorted(command.begin(),command.end(),comp),
             "command subtree_set should be sorted (reduce_and)");
-	opencog::cassert(TRACE_INFO, opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
+	OC_ASSERT(opencog::is_sorted(handle_set.begin(),handle_set.end(),comp),
             "handle_set subtree_set should be sorted (reduce_and)");
 	subtree_set::iterator tmp_it=handle_set.find(child);
 	sib_it tmp;
@@ -550,7 +550,7 @@ namespace reduct {
 			       comp))
 	    tr.sort_on_subtrees(current.begin(),current.end(),comp);
 
-	  opencog::cassert(TRACE_INFO, child.begin()!=child.end(), "child should have siblings"); //not sure if this is ok..
+	  OC_ASSERT(child.begin()!=child.end(), "child should have siblings"); //not sure if this is ok..
 	  //make res the disjunction of child's children's guard sets
 	  //important: we use references to the last child because we are
 	  //later going to iterate (left-to-right) removing these iterators

@@ -31,7 +31,7 @@ namespace reduct {
 
   void reduce_ultrametric::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_ultrametric(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2, 
+      OC_ASSERT(it.number_of_children()==2, 
               "combo_tree node should have exactly two children (reduce_ultrametric).");
       std::vector<pre_it> it_vec;
       if(find_vertices_in_assumptions(tr, *it, it_vec)) {
@@ -39,7 +39,7 @@ namespace reduct {
 	std::vector<pre_it> arg2;
 	for(std::vector<pre_it>::iterator it_vec_it = it_vec.begin();
 	    it_vec_it != it_vec.end(); ++it_vec_it) {
-	  opencog::cassert(TRACE_INFO, (*it_vec_it).number_of_children()==2,
+	  OC_ASSERT((*it_vec_it).number_of_children()==2,
                "combo_tree vertice node should have exactly two children (reduce_ultrametric).");
 	  arg1.push_back(pre_it(tr.child(*it_vec_it, 0)));
 	  arg2.push_back(pre_it(tr.child(*it_vec_it, 1)));
@@ -99,7 +99,7 @@ namespace reduct {
 
   void reduce_transitive::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_transitive(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2, 
+      OC_ASSERT(it.number_of_children()==2, 
               "combo_tree node should have exactly two children (reduce_transitive).");
       pre_it main_tree = tr.begin();
       sib_it assum = tr.next_sibling(main_tree);
@@ -108,7 +108,7 @@ namespace reduct {
 	std::vector<pre_it> arg2;
 	for(;assum != tr.end(); ++assum) {
 	  if(*assum==*it) {
-	    opencog::cassert(TRACE_INFO, assum.number_of_children()==2,
+	    OC_ASSERT(assum.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_transitive - assum).");
 	    arg1.push_back(pre_it(tr.child(assum, 0)));
 	    arg2.push_back(pre_it(tr.child(assum, 1)));
@@ -135,7 +135,7 @@ namespace reduct {
 
   void reduce_reflexive::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_reflexive(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
+      OC_ASSERT(it.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_reflexive).");
       if(tr.equal_subtree(pre_it(tr.child(it, 0)), pre_it(tr.child(it, 1)))) {
 	*it = id::logical_true;
@@ -146,7 +146,7 @@ namespace reduct {
 
   void reduce_irreflexive::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_irreflexive(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
+      OC_ASSERT(it.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_irreflexive).");
       if(tr.equal_subtree(pre_it(tr.child(it, 0)), pre_it(tr.child(it, 1)))) {
 	*it = id::logical_false;
@@ -157,7 +157,7 @@ namespace reduct {
 
   void reduce_symmetric::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_symmetric(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
+      OC_ASSERT(it.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_symmetric).");
       //look at the set assumptions to find near(arg1, arg2)
       //and each time add near(arg2, arg1)
@@ -168,14 +168,14 @@ namespace reduct {
 	std::vector<pre_it> arg2;
 	for(;assum != tr.end(); ++assum) {
 	  if(*assum==*it) {
-	    opencog::cassert(TRACE_INFO, assum.number_of_children()==2,
+	    OC_ASSERT(assum.number_of_children()==2,
                 "combo_tree node should have exactly two children (reduce_symmetric - assum).");
 	    arg1.push_back(pre_it(tr.child(assum, 0)));
 	    arg2.push_back(pre_it(tr.child(assum, 1)));
 	  }
 	}
 	if(!arg1.empty() /*or arg2 not empty*/) {
-	  opencog::cassert(TRACE_INFO, arg1.size()==arg2.size(),
+	  OC_ASSERT(arg1.size()==arg2.size(),
               "arg1 and arg2 vectors should have the same size.");
 	  for(unsigned int i = 0; i < arg1.size(); i++) {
 	    if(!tr.equal_subtree(arg1[i], arg2[i])) {
@@ -196,7 +196,7 @@ namespace reduct {
 
   void reduce_identity_of_indiscernibles::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(is_identity_of_indiscernibles(*it)) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==2,
+      OC_ASSERT(it.number_of_children()==2,
               "combo_tree node should have exactly two children (reduce_identity_of_indiscernibles).");
       if(tr.equal_subtree(pre_it(tr.child(it, 0)), pre_it(tr.child(it, 1)))) {
 	*it = 0.0;

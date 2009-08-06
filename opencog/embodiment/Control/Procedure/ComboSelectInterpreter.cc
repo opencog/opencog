@@ -128,18 +128,18 @@ bool ComboSelectInterpreter::isFailed(Procedure::RunningProcedureId id)
 
 combo::vertex ComboSelectInterpreter::getResult(RunningProcedureId id)
 {
-    opencog::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
-    opencog::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
+    OC_ASSERT(isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+    OC_ASSERT(!isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
 
     idVertexMap::iterator it = result.find(id);
 
     if (it == result.end()) {
         idProcedureMap::iterator runningProcIt = runningProc.find(id);
         if (runningProcIt == runningProc.end()) {
-            opencog::cassert(TRACE_INFO, false, "ERROR.");
+            OC_ASSERT(false, "ERROR.");
         }
 
-        opencog::cassert(TRACE_INFO, runningProcIt->second.isFinished(), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+        OC_ASSERT(runningProcIt->second.isFinished(), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
         return runningProcIt->second.getResult();
     }
     return it->second;
@@ -147,8 +147,8 @@ combo::vertex ComboSelectInterpreter::getResult(RunningProcedureId id)
 
 combo::variable_unifier& ComboSelectInterpreter::getUnifierResult(RunningProcedureId id)
 {
-    opencog::cassert(TRACE_INFO, isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
-    opencog::cassert(TRACE_INFO, !isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
+    OC_ASSERT(isFinished(id), "ComboSelectInterpreter - Procedure '%lu' not finished.", id.getId());
+    OC_ASSERT(!isFailed(id),  "ComboSelectInterpreter - Procedure '%lu' failed.", id.getId());
 
     idUnifierMap::iterator it = unifier.find(id);
 

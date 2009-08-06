@@ -42,6 +42,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
@@ -999,13 +1000,13 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     char* targetMode = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
 
     
-    cassert( TRACE_INFO, strlen(contentType) > 0 );
-    cassert( TRACE_INFO, strlen(targetMode) > 0 );
+    OC_ASSERT(strlen(contentType) > 0 );
+    OC_ASSERT(strlen(targetMode) > 0 );
 
     /// getting the value of the sentence
     XERCES_CPP_NAMESPACE::XMLString::transcode(SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::DOMNodeList *list = element->getElementsByTagName(tag);
-    cassert(TRACE_INFO, list->getLength() == 1);
+    OC_ASSERT(list->getLength() == 1);
     XERCES_CPP_NAMESPACE::DOMElement* sentenceElement = (XERCES_CPP_NAMESPACE::DOMElement*) list->item(0);
     char* sentenceText = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getTextContent());
     /// getting the sentence length
@@ -1013,14 +1014,14 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     char* length = XERCES_CPP_NAMESPACE::XMLString::transcode(sentenceElement->getAttribute(tag));    
     int sentenceLength = atoi( length );
     XERCES_CPP_NAMESPACE::XMLString::release(&length);
-    cassert( TRACE_INFO, static_cast<int>( strlen( sentenceText) ) == sentenceLength );
+    OC_ASSERT(static_cast<int>( strlen( sentenceText) ) == sentenceLength );
     XERCES_CPP_NAMESPACE::XMLString::trim(sentenceText);
 
     /// getting the value of the parsed-sentence
     //XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, PAIUtils::MAX_TAG_LENGTH);
     XERCES_CPP_NAMESPACE::XMLString::transcode(PARSED_SENTENCE_TYPE, tag, 56000);
     list = element->getElementsByTagName(tag);
-    cassert(TRACE_INFO, list->getLength( ) == 0 || list->getLength( ) == 1 );
+    OC_ASSERT(list->getLength( ) == 0 || list->getLength( ) == 1 );
     char* parsedSentenceText = NULL;
     int parsedSentenceLength = 0;
     if ( list->getLength() == 1 ) {
@@ -1031,7 +1032,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         length = XERCES_CPP_NAMESPACE::XMLString::transcode(parsedSentenceElement->getAttribute(tag));
         parsedSentenceLength = atoi( length );
         XERCES_CPP_NAMESPACE::XMLString::release(&length);
-        cassert( TRACE_INFO, static_cast<int>( strlen( parsedSentenceText ) ) == parsedSentenceLength );
+        OC_ASSERT(static_cast<int>( strlen( parsedSentenceText ) ) == parsedSentenceLength );
         XERCES_CPP_NAMESPACE::XMLString::trim(parsedSentenceText);
     } // if
 

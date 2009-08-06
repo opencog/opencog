@@ -61,7 +61,7 @@ namespace reduct {
 	}
       }
       else {
-        opencog::cassert(TRACE_INFO, false, "Not implemented yet");
+        OC_ASSERT(false, "Not implemented yet");
       }
     }
     else {

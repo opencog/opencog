@@ -129,7 +129,7 @@ struct RunningComboProcedure : public combo::Evaluator {
     // - procedure execution is finished (checked by isFinished() method)
     // returns null_procedure if execution was stopped in the middle
     combo::vertex getResult() {
-        opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+        OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
         if (_hasBegun)
             return isFailed() ? combo::id::action_failure : combo::id::action_success;
         if (_tr.size() == 1)
@@ -138,7 +138,7 @@ struct RunningComboProcedure : public combo::Evaluator {
     }
 
     combo::variable_unifier& getUnifierResult() {
-        opencog::cassert(TRACE_INFO, isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+        OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
         return _vu;
     }
 

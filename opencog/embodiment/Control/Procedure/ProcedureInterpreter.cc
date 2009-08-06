@@ -127,7 +127,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         rbp.run();
         _map.insert(std::make_pair(++_next, rbp));
     } else {
-        opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter -  unknown procedure type");
+        OC_ASSERT(false, "ProcedureInterpreter -  unknown procedure type");
     }
     return _next;
 }
@@ -153,7 +153,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
         _map.insert(std::make_pair(++_next, rcpID));
 
     } else {
-        opencog::cassert(TRACE_INFO, false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters.");
+        OC_ASSERT(false, "ProcedureInterpreter - Only combo procedures accept variable unifier parameters.");
     }
     return _next;
 }
@@ -211,8 +211,8 @@ bool ProcedureInterpreter::isFailed(RunningProcedureID id) const
 combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
 {
     logger().fine("ProcedureInterpreter - getResult(%lu).", id);
-    opencog::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
-    opencog::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
+    OC_ASSERT(isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
+    OC_ASSERT(!isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
 
     combo::vertex result = combo::id::action_success;
     Map::const_iterator it = _map.find(id);
@@ -235,7 +235,7 @@ combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
 
     } else {
         ResultMap::iterator it = _resultMap.find(id);
-        opencog::cassert(TRACE_INFO, it != _resultMap.end(),
+        OC_ASSERT(it != _resultMap.end(),
                          "ProcedureInterpreter - Cannot find result for procedure '%d'.", id);
         result = it->second;
     }
@@ -244,10 +244,10 @@ combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
 
 combo::variable_unifier& ProcedureInterpreter::getUnifierResult(RunningProcedureID id)
 {
-    opencog::cassert(TRACE_INFO, isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
-    opencog::cassert(TRACE_INFO, !isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
+    OC_ASSERT(isFinished(id), "ProcedureInterpreter - Procedure '%d' not finished.", id);
+    OC_ASSERT(!isFailed(id), "ProcedureInterpreter - Procedure '%d' failed.", id);
     UnifierResultMap::iterator it = _unifierResultMap.find(id);
-    opencog::cassert(TRACE_INFO, it != _unifierResultMap.end(),
+    OC_ASSERT(it != _unifierResultMap.end(),
                      "ProcedureInterpreter - Cannot find unifier result for procedure '%d'.", id);
     return it->second;
 }

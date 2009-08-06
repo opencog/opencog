@@ -198,15 +198,15 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 logger().debug("BE - The following atom structure has been selected to be an elementary behavior description or contributing to define one: %s", TLB::getAtom(h)->toString().c_str());
 
                 //create BD
-                opencog::cassert(TRACE_INFO, as.getType(h) == EVALUATION_LINK,
+                OC_ASSERT(as.getType(h) == EVALUATION_LINK,
                                  "Handle h should be an 'EVALUATION_LINK'.");
-                opencog::cassert(TRACE_INFO, as.getArity(h) == 2,
+                OC_ASSERT(as.getArity(h) == 2,
                                  "Handle h should have arity 2.");
 
                 Handle behaved_h = as.addNode(PREDICATE_NODE, BEHAVED_PREDICATE_NAME);
 
                 Handle arg_list_h = as.getOutgoing(h, 1);
-                opencog::cassert(TRACE_INFO, as.getType(arg_list_h) == LIST_LINK,
+                OC_ASSERT(as.getType(arg_list_h) == LIST_LINK,
                                  "Handle h outgoingAtom[1] should be a 'LIST_LINK'.");
 
                 //determine the subject
@@ -216,7 +216,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                 //to be checked if walk perceptions
                 //per_h is in fact the action of the subject observed
                 Handle per_h = as.getOutgoing(arg_list_h, 1);
-                opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(per_h)),
+                OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(per_h)),
                                  "Handle per_h should be a 'Node'.");
 
                 bool is_walk = as.getName(per_h) == WALK_PERCEPT_NAME;
@@ -244,27 +244,27 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //get walk destination coordinates
                     //check if the walk destination is close to an object
 
-                    opencog::cassert(TRACE_INFO, as.getArity(arg_list_h) > 2,
+                    OC_ASSERT(as.getArity(arg_list_h) > 2,
                                      "arg_list_h should have more than 2 outgoings" );
 
                     Handle actionParametersList_h = as.getOutgoing(arg_list_h, 2);
 
                     //get the position of the walk destination
-                    opencog::cassert(TRACE_INFO, as.getArity(actionParametersList_h) > 0,
+                    OC_ASSERT(as.getArity(actionParametersList_h) > 0,
                                      "ListLink arg_list should have arity greater than 0 (walk perception).");
 
                     Handle pos_list_h = as.getOutgoing(actionParametersList_h, 0);
-                    opencog::cassert(TRACE_INFO, as.getType(pos_list_h) == LIST_LINK,
+                    OC_ASSERT(as.getType(pos_list_h) == LIST_LINK,
                                      "Handle pos_list should be a 'LIST_LINK' (walk perception)");
-                    opencog::cassert(TRACE_INFO, as.getArity(pos_list_h) == 3,
+                    OC_ASSERT(as.getArity(pos_list_h) == 3,
                                      "ListLink pos_list should have arity 3 (walk perception)." );
 
                     Handle x_h = as.getOutgoing(pos_list_h, 0);
-                    opencog::cassert(TRACE_INFO, as.getType(x_h) == NUMBER_NODE,
+                    OC_ASSERT(as.getType(x_h) == NUMBER_NODE,
                                      "Handle x_h should be a 'NUMBER_NODE'.");
                     float x = atof(as.getName(x_h).c_str());
                     Handle y_h = as.getOutgoing(pos_list_h, 1);
-                    opencog::cassert(TRACE_INFO, as.getType(y_h) == NUMBER_NODE,
+                    OC_ASSERT(as.getType(y_h) == NUMBER_NODE,
                                      "Handle y_h should be a 'NUMBER_NODE'.");
                     float y = atof(as.getName(y_h).c_str());
                     SpaceServer::SpaceMapPoint p_walk_dest(x, y);
@@ -298,7 +298,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //get the position of the avatar at the start of the walk
                     //COULD BE OPTIMIZED
                     Handle sms_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tl);
-                    opencog::cassert(TRACE_INFO, sms_h != Handle::UNDEFINED,
+                    OC_ASSERT(sms_h != Handle::UNDEFINED,
                                      "Handle sms_h should not be an 'Handle::UNDEFINED'.");
                     const SpaceServer::SpaceMap& sms = wp->getAtomSpace().getSpaceServer().getMap(sms_h);
                     //sas stands for Subject At Start
@@ -329,7 +329,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //find the nearest object to the subject at the end of the walk
                     //which is different of the object at the start if there is
                     Handle sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tu);
-                    opencog::cassert(TRACE_INFO, sm_h != Handle::UNDEFINED,
+                    OC_ASSERT(sm_h != Handle::UNDEFINED,
                                      "Handle sm_h should not be an 'Handle::UNDEFINED'.");
                     const SpaceServer::SpaceMap& sm = wp->getAtomSpace().getSpaceServer().getMap(sm_h);
                     std::string obj_id = sm.findNearestFiltered(p_walk_dest, pred);
@@ -378,7 +378,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     //debug print
                     //Handle instant_next_sm_h = AtomSpaceUtil::getSpaceMapHandleAtTimestamp(wp->getAtomSpace(), tu+1);
-                    //opencog::cassert(TRACE_INFO, instant_next_sm_h!=Handle::UNDEFINED,
+                    //OC_ASSERT(instant_next_sm_h!=Handle::UNDEFINED,
                     //     "Handle sm_h should not be an 'Handle::UNDEFINED'.");
                     //const SpaceServer::SpaceMap& instant_next_sm = wp->getAtomSpace().getSpaceServer().getMap(instant_next_sm_h);
 
@@ -416,7 +416,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                         std::list<Handle> ret;
                         as.getHandleSet(std::back_inserter(ret), OBJECT_NODE,
                                         obj_id, true);
-                        opencog::cassert(TRACE_INFO, ret.size() == 1,
+                        OC_ASSERT(ret.size() == 1,
                                          "HandleSet should contain exactly one object.");
                         Handle obj_h = *ret.begin();
                         //get handle of speed
@@ -436,7 +436,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     if (as.getArity(arg_list_h) > 2) {
 
                         Handle action_arg_list_h = as.getOutgoing(arg_list_h, 2);
-                        opencog::cassert(TRACE_INFO,
+                        OC_ASSERT(
                                          as.getType(action_arg_list_h) == LIST_LINK,
                                          "It is assumed that the arguments of the subject's action are wrapped in a listLink");
 
@@ -460,7 +460,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     tl = previous_tu + MinPauseTime;
                     //check that the previous action + MinPauseTime ends
                     //before the end of the current one + MinActionTime
-                    cassert(TRACE_INFO, tu >= tl + MinActionTime,
+                    OC_ASSERT(tu >= tl + MinActionTime,
                             "Apparently the previous action overlaps too much the current one and it's not clear which one should be first.");
                 }
 
@@ -615,7 +615,7 @@ Handle extractObjectID::operator()(Handle h) const
             return atomspace->getOutgoing(out21, 0);
     }
 
-    opencog::cassert(TRACE_INFO, 0, "Perception data syntax error!");
+    OC_ASSERT(0, "Perception data syntax error!");
     return Handle::UNDEFINED;
 }
 

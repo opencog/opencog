@@ -34,7 +34,7 @@ namespace combo {
   void insert_assumption(combo_tree& tr, combo_tree::iterator assum_it) {
     typedef opencog::lexicographic_subtree_order<vertex> Comp;
     pre_it main_tree = tr.begin();
-    opencog::cassert(TRACE_INFO, tr.is_valid(main_tree), "combo_tree ins't valid (insert_assumption).");
+    OC_ASSERT(tr.is_valid(main_tree), "combo_tree ins't valid (insert_assumption).");
     int max_pos = tr.number_of_siblings(main_tree);
     if(max_pos>1) {
       int min_pos = 1;
@@ -68,7 +68,7 @@ namespace combo {
 	  tr.insert_subtree(cur_sib, assum_it);
 	}
       }
-      else opencog::cassert(TRACE_INFO, false, "should never get here (insert_assumption).");
+      else OC_ASSERT(false, "should never get here (insert_assumption).");
     }
     else tr.insert_subtree_after(main_tree, assum_it);
   }
@@ -76,7 +76,7 @@ namespace combo {
   bool find_vertices_in_assumptions(const combo_tree& tr, vertex v,
 				    std::vector<combo_tree::iterator>& res) {
     pre_it tr_it = tr.begin();
-    opencog::cassert(TRACE_INFO, tr.is_valid(tr_it), "combo_tree isn't valid (find_vertices_in_assumptions).");
+    OC_ASSERT(tr.is_valid(tr_it), "combo_tree isn't valid (find_vertices_in_assumptions).");
     pre_it assum_it = tr.next_sibling(tr_it);
     bool is_there = false;
     if(tr.is_valid(assum_it)) {
@@ -91,7 +91,7 @@ namespace combo {
   }
   
   bool equal_assumptions(const combo_tree& tr1, const combo_tree& tr2) {
-    opencog::cassert(TRACE_INFO, !tr1.empty() && !tr2.empty(), "assumptions should not be empty (equal_assumptions).");
+    OC_ASSERT(!tr1.empty() && !tr2.empty(), "assumptions should not be empty (equal_assumptions).");
     sib_it assum1 = tr1.next_sibling(tr1.begin());
     sib_it assum2 = tr2.next_sibling(tr2.begin());
     if(tr1.is_valid(assum1) && tr2.is_valid(assum2)) {
@@ -106,7 +106,7 @@ namespace combo {
   }
 
   void delete_all_assumptions(combo_tree& tr) {
-    opencog::cassert(TRACE_INFO, !tr.empty(), "combo_tree should not be empty (delete_all_assumptions).");
+    OC_ASSERT(!tr.empty(), "combo_tree should not be empty (delete_all_assumptions).");
     sib_it assum = tr.next_sibling(tr.begin());
     if(tr.is_valid(assum))
       for(; assum != tr.end();) 

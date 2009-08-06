@@ -50,7 +50,7 @@ SizePenalty::~SizePenalty() { }
 //tends to 1 when the size of the combo tends to 1
 double SizePenalty::computeSizePenalty(const combo::combo_tree& tr) const
 {
-    opencog::cassert(TRACE_INFO, !tr.empty(),
+    OC_ASSERT(!tr.empty(),
                      "SizePenalty - combo_tree should not be empty.");
     int s = DistortedComboSize::size(tr, _dos);
 
@@ -73,7 +73,7 @@ void SizePenalty::setc(int indefinite_object_count, int operator_count,
 {
     int sum = (_dos.size() + indefinite_object_count
                + operator_count + condition_count + action_count);
-    opencog::cassert(TRACE_INFO, sum > 0,
+    OC_ASSERT(sum > 0,
                      "SizePenalty - sum should be greater than 0.");
     c = (double)(sum);
 }

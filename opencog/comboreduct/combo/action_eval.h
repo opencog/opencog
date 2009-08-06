@@ -50,7 +50,7 @@ namespace combo {
     if(is_argument(*it)) {
       int idx=get_argument(*it).idx;
       //assumption : when idx is negative the argument is necessary boolean
-      opencog::cassert(TRACE_INFO, idx > 0, "argument is necessarily an action and therefore never has a neg idx.");
+      OC_ASSERT(idx > 0, "argument is necessarily an action and therefore never has a neg idx.");
       if (const vertex* v=boost::get<const vertex>(&binding(idx)))
 	return *v;
       else
@@ -78,7 +78,7 @@ namespace combo {
     }
     //action_if
     else if(*it==id::boolean_action_if) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==3, 
+      OC_ASSERT(it.number_of_children()==3, 
              "combo_tree node should have exactly three children (id::boolean_if).");
       sib_it sib = it.begin();
       vertex vcond = action_eval_throws(rng, sib);
@@ -93,7 +93,7 @@ namespace combo {
       }
     }
     else if(*it==id::contin_action_if) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==3,
+      OC_ASSERT(it.number_of_children()==3,
              "combo_tree node should have exactly three children (id::contin_action_if).");
       sib_it sib = it.begin();
       vertex vcond = action_eval_throws(rng, sib);
@@ -108,7 +108,7 @@ namespace combo {
       }
     }
     else if(*it==id::action_action_if) {
-      opencog::cassert(TRACE_INFO, it.number_of_children()==3,
+      OC_ASSERT(it.number_of_children()==3,
              "combo_tree node should have exactly three children (id::contin_action_if).");
       sib_it sib = it.begin();
       vertex vcond = action_eval_throws(rng, sib);

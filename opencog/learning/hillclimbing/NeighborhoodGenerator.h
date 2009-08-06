@@ -89,7 +89,7 @@ public:
     _action_reduction(action_reduction), _full_reduction(full_reduction),
     _arg_count(arg_count), _action_boolean_if_both_branches(abibb),
     _reduct_enabled(reduct_enabled) {
-        opencog::cassert(TRACE_INFO, arg_count >= 0);
+        OC_ASSERT(arg_count >= 0);
     }
 
     ~NeighborhoodGenerator() {}
@@ -146,12 +146,12 @@ public:
             if (*osi == id::action_boolean_if) {
                 for (combo_tree_ns_set_const_it cond = _composite_perceptions.begin();
                         cond != _composite_perceptions.end(); ++cond) {
-                    opencog::cassert(TRACE_INFO, !cond->empty(),
+                    OC_ASSERT(!cond->empty(),
                                      "condition cannot be empty");
                     pre_it cond_head_it = cond->begin();
                     for (combo_tree_ns_set_const_it act1 = _actions.begin();
                             act1 != _actions.end(); ++act1) {
-                        opencog::cassert(TRACE_INFO, !act1->empty(),
+                        OC_ASSERT(!act1->empty(),
                                          "atomic action cannot be empty");
                         pre_it act1_head_it = act1->begin();
                         //add action_boolean_if(cond and_seq(act) and_seq())
@@ -196,14 +196,14 @@ public:
             else if (*osi == id::action_action_if) {
                 for (combo_tree_ns_set_const_it act_cond = _actions.begin();
                         act_cond != _actions.end(); ++act_cond) {
-                    opencog::cassert(TRACE_INFO, !act_cond->empty(),
+                    OC_ASSERT(!act_cond->empty(),
                                      "condition action cannot be empty");
                     combo_tree tmp_cond(act_cond->begin());
                     pre_it cond_head = tmp_cond.begin();
                     cond_head = tmp_cond.wrap(cond_head, id::sequential_and);
                     for (combo_tree_ns_set_const_it act = _actions.begin();
                             act != _actions.end(); ++act) {
-                        opencog::cassert(TRACE_INFO, !act->empty(),
+                        OC_ASSERT(!act->empty(),
                                          "atomic action cannot be empty");
                         pre_it act_head = act->begin();
                         { //add action_action_if(cond and_seq(act) and_seq())
@@ -251,7 +251,7 @@ public:
             else if (*osi == id::action_while) {
                 for (combo_tree_ns_set_const_it act = _actions.begin();
                         act != _actions.end(); ++act) {
-                    opencog::cassert(TRACE_INFO, !act->empty(),
+                    OC_ASSERT(!act->empty(),
                                      "while action cannot be empty");
                     {
                         combo_tree tmp;
@@ -280,11 +280,11 @@ public:
             else if (*osi == id::boolean_while) {
                 for (combo_tree_ns_set_const_it cond = _composite_perceptions.begin();
                         cond != _composite_perceptions.end(); ++cond) {
-                    opencog::cassert(TRACE_INFO, !cond->empty(),
+                    OC_ASSERT(!cond->empty(),
                                      "while condition cannot be empty");
                     for (combo_tree_ns_set_const_it act = _actions.begin();
                             act != _actions.end(); ++act) {
-                        opencog::cassert(TRACE_INFO, !act->empty(),
+                        OC_ASSERT(!act->empty(),
                                          "while action cannot be empty");
                         combo_tree tmp;
                         tmp.set_head(id::boolean_while);
@@ -304,8 +304,8 @@ public:
     //on the subtree starting from it
     void populate_neighborhood(neighborhood& nh, const combo_tree& tr, pre_it it) {
 
-        opencog::cassert(TRACE_INFO, !tr.empty(), "center should not be empty");
-        opencog::cassert(TRACE_INFO, tr.is_valid(it),
+        OC_ASSERT(!tr.empty(), "center should not be empty");
+        OC_ASSERT(tr.is_valid(it),
                          "Invalide node associated to the tree");
         //proceed recursively by case
         //-------
@@ -322,7 +322,7 @@ public:
             //insert any composite action
             for (combo_tree_ns_set_const_it compact = _composite_actions.begin();
                     compact != _composite_actions.end(); ++compact) {
-                opencog::cassert(TRACE_INFO, !compact->empty(),
+                OC_ASSERT(!compact->empty(),
                                  "composite action cannot be empty");
                 pre_it compact_head = compact->begin();
                 { //insert first child composite action
@@ -347,7 +347,7 @@ public:
         //action_boolean_if
         //-----------------
         else if (*it == id::action_boolean_if) {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+            OC_ASSERT(it.number_of_children() == 3,
                              "action_boolean_if has necessarily 3 children");
             //apply recursively that population method
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 0)));
@@ -358,7 +358,7 @@ public:
         //action_action_if
         //----------------
         else if (*it == id::action_action_if) {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+            OC_ASSERT(it.number_of_children() == 3,
                              "action_boolean_if has necessarily 3 children");
             //apply recursively that population method
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 0)));
@@ -395,7 +395,7 @@ public:
         //action_while
         //------------
         else if (*it == id::action_while) {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                              "action_while has necessarily one child");
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 0)));
             //if action_not is in the operator set then
@@ -411,7 +411,7 @@ public:
         //boolean_while
         //-------------
         else if (*it == id::boolean_while) {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+            OC_ASSERT(it.number_of_children() == 2,
                              "boolean_while has necessarily 2 children");
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 0)));
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 1)));
@@ -420,7 +420,7 @@ public:
         //action_not
         //----------
         else if (*it == id::action_not) {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                              "action_not must have one child");
             populate_neighborhood(nh, tr, pre_it(it.begin()));
             //if action_not is in the operator set then
@@ -436,7 +436,7 @@ public:
         //logical_not
         //-----------
         else if (*it == id::logical_not) {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                              "logical_not must have one child");
             populate_neighborhood(nh, tr, pre_it(tr.child(it, 0)));
         }
@@ -446,7 +446,7 @@ public:
         else if (is_perception(*it)) {
             for (combo_tree_ns_set_const_it cond = _composite_perceptions.begin();
                     cond != _composite_perceptions.end(); ++cond) {
-                opencog::cassert(TRACE_INFO, !cond->empty(), "condition cannot be empty");
+                OC_ASSERT(!cond->empty(), "condition cannot be empty");
                 pre_it cond_head = cond->begin();
                 combo_tree tmp = tr;
                 pre_it tmp_it = get_same_position(tr, tmp, it);
@@ -464,7 +464,7 @@ public:
             //substitute the action by any composite actions
             for (combo_tree_ns_set_const_it compact = _composite_actions.begin();
                     compact != _composite_actions.end(); ++compact) {
-                opencog::cassert(TRACE_INFO, !compact->empty(),
+                OC_ASSERT(!compact->empty(),
                                  "composite action cannot be empty");
                 pre_it compact_head = compact->begin();
                 combo_tree tmp = tr;
@@ -520,7 +520,7 @@ public:
             std::stringstream ss_tr, ss_it;
             ss_tr << tr;
             ss_it << combo_tree(it);
-            opencog::cassert(TRACE_INFO, false,
+            OC_ASSERT(false,
                              "Should not get into that part of the code, the combo_tree %s, has subtree %s which is not yet handled by the method populate_neighborhood",
                              ss_tr.str().c_str(),
                              ss_it.str().c_str());
@@ -588,7 +588,7 @@ private:
             //and_seq(builtin_action)
             //if it is then do not insert it since it would already have been
             //inserted as atomic action
-            opencog::cassert(TRACE_INFO, !tr.empty(),
+            OC_ASSERT(!tr.empty(),
                              "the composite action cannot be empty");
             pre_it head = tr.begin();
             insert_action = !(//single action wrapped with and and_seq
@@ -610,9 +610,9 @@ private:
     pre_it get_same_position(const combo_tree& tr,
                              const combo_tree& tmp,
                              pre_it it) {
-        opencog::cassert(TRACE_INFO, !tr.empty());
-        opencog::cassert(TRACE_INFO, !tmp.empty());
-        opencog::cassert(TRACE_INFO, tr == tmp);
+        OC_ASSERT(!tr.empty());
+        OC_ASSERT(!tmp.empty());
+        OC_ASSERT(tr == tmp);
         pre_it tr_it = tr.begin();
         pre_it res = tmp.begin();
         for (; tr_it != it && tr_it != tr.end(); ++tr_it)

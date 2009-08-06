@@ -21,12 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+
 #include "IsPickupablePredicateUpdater.h"
 
 using namespace OperationalPetController;
@@ -77,20 +80,21 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
 
             Handle comparison = 
                 atomSpace.getHandle( DEFINED_FRAME_NODE, "#Evaluative_comparison" );
-            cassert( TRACE_INFO, comparison != Handle::UNDEFINED,
-                     "#Evaluative_comparison wasn't defined yet. Please load the predicates-frames.scm file" );
+            OC_ASSERT(comparison != Handle::UNDEFINED,
+                      "#Evaluative_comparison wasn't defined yet. Please load the predicates-frames.scm file" );
 
             HandleSeq isSmallFrame;
             isSmallFrame.push_back( comparison );
             isSmallFrame.push_back( isSmallPredicate );
 
             Handle isSmallLink = atomSpace.getHandle( INHERITANCE_LINK, isSmallFrame );
-            cassert( TRACE_INFO, isSmallLink != Handle::UNDEFINED,
-                     "is_small frame wasn't defined for the object '%s'", objectName.c_str( ) );
+            OC_ASSERT(isSmallLink != Handle::UNDEFINED,
+                      "is_small frame wasn't defined for the object '%s'", objectName.c_str( ) );
 
             Handle objectSemeNode =  atomSpace.getHandle( SEME_NODE, objectName );
-            cassert( TRACE_INFO, objectSemeNode != Handle::UNDEFINED,
-                     "A SemeNode wasn't yet defined for the object '%s'", objectName.c_str( ) );
+            OC_ASSERT(objectSemeNode != Handle::UNDEFINED,
+                      "A SemeNode wasn't yet defined for the object '%s'",
+                      objectName.c_str( ) );
         
             HandleSeq isMovableFrame;
             isMovableFrame.push_back( objectSemeNode );
@@ -102,9 +106,9 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             atomSpace.getHandleSet( back_inserter(parentHandles),
                                     isMovableFrame, &types[0], NULL, 2, INHERITANCE_LINK, false );
 
-            cassert( TRACE_INFO, parentHandles.size( ) == 1, 
-                     "Invalid number of InheritanceLinks which defines the object type. %d but should be 1", 
-                     parentHandles.size( ) );
+            OC_ASSERT(parentHandles.size( ) == 1, 
+                      "Invalid number of InheritanceLinks which defines the object type. %d but should be 1", 
+                      parentHandles.size( ) );
         
         
             HandleSeq isPickupable;

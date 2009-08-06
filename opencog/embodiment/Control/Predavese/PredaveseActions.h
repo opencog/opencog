@@ -71,7 +71,7 @@ void FormatArgs(vector<c>& i_args, int start_index, OutIterT next_arg, int end_i
         //printf("String %s\n", s->c_str());
 
 #ifdef USE_ASSERT_OR_EXIT
-        cassert(TRACE_INFO, s, "predavese::FormatArgs: Got no string from the argument %d\n", i);
+        OC_ASSERT(s, "predavese::FormatArgs: Got no string from the argument %d\n", i);
 #else
         if (!s) {
             throw opencog::RuntimeException(TRACE_INFO, "predavese::FormatArgs: Got no string from the argument %d\n", i);

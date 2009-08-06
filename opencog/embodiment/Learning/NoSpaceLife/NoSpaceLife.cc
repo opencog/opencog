@@ -59,7 +59,7 @@ bool NoSpaceLife::processSequential_and(sib_it from, sib_it to)
     unsigned long end_time = 0;
     const std::vector<long>& tl = _imitatedBD.getTimelineIntervals();
     while (from != to) {
-        opencog::cassert(TRACE_INFO, is_builtin_action(*from));
+        OC_ASSERT(is_builtin_action(*from));
         //determine action start and end time
         unsigned long start_time = _currentTime;
         if (_currentIndex < tl.size())
@@ -127,7 +127,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
                                        unsigned long start_time,
                                        unsigned long end_time)
 {
-    opencog::cassert(TRACE_INFO, is_builtin_action(*it));
+    OC_ASSERT(is_builtin_action(*it));
 
     builtin_action a = get_builtin_action(*it);
     HandleSeq hs;
@@ -155,7 +155,7 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
                 obj = get_definite_object(*sib);
             else if (is_indefinite_object(*sib)) {
                 indefinite_object io = get_indefinite_object(*sib);
-                opencog::cassert(TRACE_INFO, is_random(io),
+                OC_ASSERT(is_random(io),
                                  "%s must be random",
                                  io->get_name().c_str());
                 //determine the definite object obj that fits the best
@@ -169,10 +169,10 @@ void NoSpaceLife::generateElementaryBD(ElementaryBehaviorDescription& ebd,
             arg_h = _atomSpace.addNode(NUMBER_NODE,
                                        boost::lexical_cast<std::string>(get_contin(*sib)));
         } else {
-            opencog::cassert(TRACE_INFO, false,
+            OC_ASSERT(false,
                              "That case is not handled yet");
         }
-        opencog::cassert(TRACE_INFO, arg_h != Handle::UNDEFINED);
+        OC_ASSERT(arg_h != Handle::UNDEFINED);
         hs.push_back(arg_h);
     }
 
@@ -205,7 +205,7 @@ builtin_action NoSpaceLife::choose_random_step() const
     case 3:
         return instance(id::rotate_right);
     default:
-        opencog::cassert(TRACE_INFO, false,
+        OC_ASSERT(false,
                          "Combo2BD::choose_random_step() : UNKNOWN CASE");
         return instance(id::random_step);
     }
@@ -222,24 +222,24 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
     if (_currentIndex < tls.size()) {
         const PredicateHandleSet& hs = tls[_currentIndex];
         unsigned s = hs.getSize();
-        opencog::cassert(TRACE_INFO, s == 0 || s == 1, "hs should have at 0 or 1 element.");
+        OC_ASSERT(s == 0 || s == 1, "hs should have at 0 or 1 element.");
         if (s > 0) { //if there is an element then check if it could fit
 
             //get the Handle of the arg_index argument if there is
             Handle h = *hs.getSet().begin();
             //check that it matches Behavior Description atom structure
-            opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED);
-            opencog::cassert(TRACE_INFO, _atomSpace.getType(h) == EVALUATION_LINK);
-            opencog::cassert(TRACE_INFO, _atomSpace.getArity(h) == 2, "An EvaluationLink must have only 2 arguments");
+            OC_ASSERT(h != Handle::UNDEFINED);
+            OC_ASSERT(_atomSpace.getType(h) == EVALUATION_LINK);
+            OC_ASSERT(_atomSpace.getArity(h) == 2, "An EvaluationLink must have only 2 arguments");
 
             Handle list_h = _atomSpace.getOutgoing(h, 1);
-            opencog::cassert(TRACE_INFO, _atomSpace.getType(list_h) == LIST_LINK);
+            OC_ASSERT(_atomSpace.getType(list_h) == LIST_LINK);
             //check if the equivalent argument exists
             //and can correspond to a random operator
             if (arg_index < _atomSpace.getArity(list_h) - 2) {
                 Handle arg_h = _atomSpace.getOutgoing(list_h, arg_index + 2);
-                opencog::cassert(TRACE_INFO, arg_h != Handle::UNDEFINED);
-                opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(arg_h)),
+                OC_ASSERT(arg_h != Handle::UNDEFINED);
+                OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(arg_h)),
                                  "arg_h must be a Node");
                 //convert to self or owner if name is _avatar_id or _owner_id
                 //(avatarName corresponds to self because the puts itself under its
@@ -275,7 +275,7 @@ definite_object NoSpaceLife::choose_definite_object_that_fits(indefinite_object 
                    _owner_id,
                    io,
                    true);
-        opencog::cassert(TRACE_INFO, is_definite_object(v));
+        OC_ASSERT(is_definite_object(v));
         return get_definite_object(v);
     }
 }

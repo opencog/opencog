@@ -191,7 +191,7 @@ void LS::sendCandidateSchema(const combo::combo_tree & schema)
 
 void LS::sendBestSchema(const combo::combo_tree& schema)
 {
-    cassert(TRACE_INFO, isBusy());
+    OC_ASSERT(isBusy());
     sendSchema(schema, learningSchema);
     resetLearningServer();
     //inform imitation learning task to stop learning

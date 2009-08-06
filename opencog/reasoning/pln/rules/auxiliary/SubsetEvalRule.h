@@ -50,7 +50,7 @@ public:
     }
 
     meta i2oType(const vector<Vertex>& h) const {
-        opencog::cassert(TRACE_INFO, h.size() == 1);
+        OC_ASSERT(h.size() == 1);
         return atomWithNewType(h[0], SUBSET_LINK);
     }
     

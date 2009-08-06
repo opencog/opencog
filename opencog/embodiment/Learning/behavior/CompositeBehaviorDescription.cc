@@ -30,6 +30,7 @@
 #include <algorithm>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace behavior;
 
@@ -288,7 +289,7 @@ void CompositeBehaviorDescription::buildTimelineRepresentation(std::vector<Predi
     }
 
     delete separators;
-    opencog::cassert(TRACE_INFO, timelineSets.size() == timelineIntervals.size());
+    OC_ASSERT(timelineSets.size() == timelineIntervals.size());
     timelineRepresentationIsValid = true;
 }
 
@@ -382,7 +383,7 @@ std::string CompositeBehaviorDescription::toStringTimeline(std::vector<Predicate
         std::vector<std::string> names;
         for (std::set<Handle>::iterator it = timelineSets[i].getSet().begin(); it != timelineSets[i].getSet().end(); it++) {
             //the assert below is here to insure that the atom is a node
-            opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(*it)));
+            OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(*it)));
             names.push_back(((Node *) TLB::getAtom(*it))->getName());
         }
         std::sort(names.begin(), names.end());

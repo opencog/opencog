@@ -22,6 +22,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include "BehaviorDescriptionMatcher.h"
 #include "EvaluationLinkSimilarityEvaluator.h"
 #include <math.h>
@@ -126,7 +127,7 @@ float BehaviorDescriptionMatcher::computePertinenceDegree(const CompositeBehavio
     float acc = 0; //the accumlated similarity score before being normalized to correspond to f
     float f = 0;
     unsigned pause_count = 0;
-    opencog::cassert(TRACE_INFO, s1 > 0 || s2 > 0, "tls1 or tls2 should have at least one 'PredicateHandleSet'.");
+    OC_ASSERT(s1 > 0 || s2 > 0, "tls1 or tls2 should have at least one 'PredicateHandleSet'.");
     if (s1 > s2) {
         std::vector<PredicateHandleSet>::iterator i1 = tls1.begin();
         std::vector<PredicateHandleSet>::iterator i2 = tls2.begin();
@@ -191,9 +192,9 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
     //foreach(Handle h, ps2.getSet()) {
     //  std::cout << "PS2 H : " << h->toString() << std::endl;
     //}
-    opencog::cassert(TRACE_INFO, s1 == 0 || s1 == 1,
+    OC_ASSERT(s1 == 0 || s1 == 1,
                      "PredicateHandleSet ps1 should have 0 or 1 item.");
-    opencog::cassert(TRACE_INFO, s2 == 0 || s2 == 1,
+    OC_ASSERT(s2 == 0 || s2 == 1,
                      "PredicateHandleSet ps2 should have 0 or 1 item.");
     if (s1 == 0 && s2 == 0)
         return 1.0;
@@ -203,17 +204,17 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         Handle h1 = *ps1.getSet().begin();
         Handle h2 = *ps2.getSet().begin();
 
-        opencog::cassert(TRACE_INFO, atomSpace->getType(h1) == EVALUATION_LINK && atomSpace->getArity(h1) == 2,
+        OC_ASSERT(atomSpace->getType(h1) == EVALUATION_LINK && atomSpace->getArity(h1) == 2,
                          "Handle h1 should be an 'EVALUATION_LINK' and have arity 2.");
-        opencog::cassert(TRACE_INFO, atomSpace->getType(h2) == EVALUATION_LINK && atomSpace->getArity(h2) == 2,
+        OC_ASSERT(atomSpace->getType(h2) == EVALUATION_LINK && atomSpace->getArity(h2) == 2,
                          "Handle h2 should be an 'EVALUATION_LINK' and have arity 2.");
 
         Handle hargs1 = atomSpace->getOutgoing(h1, 1);
         Handle hargs2 = atomSpace->getOutgoing(h2, 1);
 
-        opencog::cassert(TRACE_INFO, atomSpace->getType(hargs1) == LIST_LINK && atomSpace->getArity(hargs1) >= 2,
+        OC_ASSERT(atomSpace->getType(hargs1) == LIST_LINK && atomSpace->getArity(hargs1) >= 2,
                          "Handle hargs1 should be an 'LIST_LINK' and have arity 2.");
-        opencog::cassert(TRACE_INFO, atomSpace->getType(hargs2) == LIST_LINK && atomSpace->getArity(hargs2) >= 2,
+        OC_ASSERT(atomSpace->getType(hargs2) == LIST_LINK && atomSpace->getArity(hargs2) >= 2,
                          "Handle hargs2 should be an 'LIST_LINK' and have arity 2.");
 
         Handle hact1 = atomSpace->getOutgoing(hargs1, 1);
@@ -224,10 +225,10 @@ float BehaviorDescriptionMatcher::computeHandleSetSimilarity(const PredicateHand
         //std::cout << "act2 : " << hact2->toString() << std::endl;
         //~print for debug
 
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          dynamic_cast<Node*>(TLB::getAtom(hact1)),
                          "Failed to dynamically cast hact1 to a 'Node'");
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          dynamic_cast<Node*>(TLB::getAtom(hact2)),
                          "Failed to dynamically cast hact2 to a 'Node'");
         if (atomSpace->getName(hact1) == atomSpace->getName(hact2)) {
@@ -488,7 +489,7 @@ float BehaviorDescriptionMatcher::computeIntervalFitness(CompositeBehaviorDescri
 
     std::vector<PredicateHandleSet> sets = bd.getTimelineSets();
     std::vector<long> intervals = bd.getTimelineIntervals();
-    opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
+    OC_ASSERT(sets.size() == intervals.size(),
                      "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalFitness).");
 
     float sum = 0;
@@ -529,7 +530,7 @@ float BehaviorDescriptionMatcher::computeIntervalRelevance(BehaviorCategory &cat
     for (unsigned int i = 0; i < bds.size(); i++) {
         std::vector<PredicateHandleSet> sets = bds[i].getTimelineSets();
         std::vector<long> intervals = bds[i].getTimelineIntervals();
-        opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
+        OC_ASSERT(sets.size() == intervals.size(),
                          "TimelineSet and TimelineIntervals should have equal sizes (computeIntervalRelevance).");
         for (unsigned int j = 0; j < sets.size(); j++) {
             long d1 = intervals[j] - lowerBound[sets[j]];
@@ -558,7 +559,7 @@ void BehaviorDescriptionMatcher::computeTimeLengthBoundaries(BehaviorCategory &c
     for (unsigned int i = 0; i < bds.size(); i++) {
         std::vector<PredicateHandleSet> sets = bds[i].getTimelineSets();
         std::vector<long> intervals = bds[i].getTimelineIntervals();
-        opencog::cassert(TRACE_INFO, sets.size() == intervals.size(),
+        OC_ASSERT(sets.size() == intervals.size(),
                          "TimelineSet and TimelineIntervals should have equal sizes (computeTimeLengthBoundaries).");
         for (unsigned int j = 0; j < sets.size(); j++) {
             if (upperBound.find(sets[j]) == upperBound.end()) {

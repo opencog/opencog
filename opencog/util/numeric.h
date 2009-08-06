@@ -31,7 +31,8 @@
 #include <numeric>
 #include <set>
 
-#include <opencog/util/exceptions.h>
+#include "exceptions.h"
+#include "oc_assert.h"
 
 #define PI 3.141592653589793
 #define EXPONENTIAL 2.71828182845905
@@ -242,8 +243,8 @@ template<typename FloatT> bool isEqual(FloatT x, FloatT y)
 //compute the binary entropy of probability p
 template<typename FloatT> FloatT binaryEntropy(FloatT p)
 {
-    cassert(TRACE_INFO, p >= 0 && p <= 1,
-            "probability %f is not between 0 and 1", p);
+    OC_ASSERT(p >= 0 && p <= 1,
+              "probability %f is not between 0 and 1", p);
     FloatT cp = 1.0 - p;
     FloatT res;
     if (p > PROB_EPSILON && cp > PROB_EPSILON)
@@ -255,7 +256,7 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
 
 //compute the smallest divisor of n
 template<typename IntT> IntT smallest_divisor(IntT n) {
-    cassert(TRACE_INFO, n > 0, "n must be supperior than 0");
+    OC_ASSERT(n > 0, "n must be supperior than 0");
     if(n<3)
         return n;
     else {

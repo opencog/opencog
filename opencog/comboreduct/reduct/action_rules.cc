@@ -52,8 +52,8 @@ bool safe_bool(boost::tribool t)
 //3) sometimes succeeds or fails (in this case it returns unknown)
 boost::tribool get_action_result(const combo_tree& tr, pre_it it)
 {
-    opencog::cassert(TRACE_INFO, !tr.empty(), "combo_tree cannot be empty");
-    opencog::cassert(TRACE_INFO, tr.is_valid(it),
+    OC_ASSERT(!tr.empty(), "combo_tree cannot be empty");
+    OC_ASSERT(tr.is_valid(it),
                      "the iterator must be valid");
     //base cases
     if (*it == id::action_success)
@@ -90,11 +90,11 @@ boost::tribool get_action_result(const combo_tree& tr, pre_it it)
             return boost::logic::indeterminate;
         else return false;
     } else if (*it == id::action_not) {
-        opencog::cassert(TRACE_INFO, it.has_one_child(),
+        OC_ASSERT(it.has_one_child(),
                          "action must have one child");
         return !get_action_result(tr, pre_it(it.begin()));
     } else if (*it == id::action_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "must have 3 children");
         pre_it cond = tr.child(it, 0);
         pre_it br1 = tr.child(it, 1);
@@ -114,8 +114,8 @@ boost::tribool get_action_result(const combo_tree& tr, pre_it it)
 void substitute_condition_init_instant(combo_tree& tr, pre_it it,
                                        pre_it cond, vertex sub)
 {
-    opencog::cassert(TRACE_INFO, !tr.empty(), "tr must not be empty");
-    opencog::cassert(TRACE_INFO, tr.is_valid(it) && tr.is_valid(cond),
+    OC_ASSERT(!tr.empty(), "tr must not be empty");
+    OC_ASSERT(tr.is_valid(it) && tr.is_valid(cond),
                      "it and cond must be valid");
     vertex v = *it;
     //base cases
@@ -137,7 +137,7 @@ void substitute_condition_init_instant(combo_tree& tr, pre_it it,
             substitute_condition_init_instant(tr, pre_it(it.begin()), cond, sub);
         }
     } else if (v == id::action_boolean_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "action_boolean_if must have 3 children");
         //call recursively on the 3 children because they all start at the same
         //instant
@@ -145,7 +145,7 @@ void substitute_condition_init_instant(combo_tree& tr, pre_it it,
         substitute_condition_init_instant(tr, pre_it(tr.child(it, 1)), cond, sub);
         substitute_condition_init_instant(tr, pre_it(tr.child(it, 2)), cond, sub);
     } else if (v == id::action_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "action_action_if must have 3 children");
         //recursive call only on the first child because then the other
         //branche start later
@@ -163,7 +163,7 @@ void substitute_condition_init_instant(combo_tree& tr, pre_it it,
 void reduce_action_if::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it == id::action_boolean_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "combo_tree node should have exactly three children (reduce_action_if)");
         pre_it cond = tr.child(it, 0);
         pre_it b1 = tr.child(it, 1);
@@ -192,7 +192,7 @@ void reduce_action_if::operator()(combo_tree& tr, combo_tree::iterator it) const
 void reduce_action_action_if::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it == id::action_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "combo_tree node should have exactly three children (reduce_action_action_if)");
         pre_it cond = tr.child(it, 0);
         pre_it b1 = tr.child(it, 1);
@@ -215,7 +215,7 @@ void reduce_const_cond_action_if::operator()
     if (*it == id::action_action_if ||
             *it == id::boolean_action_if ||
             *it == id::contin_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "combo_tree node should have exactly three children (reduce_cond_cond_action_if)");
         pre_it cond = tr.child(it, 0);
         pre_it b1 = tr.child(it, 1);
@@ -239,7 +239,7 @@ void reduce_not_cond_action_boolean_if::operator()
 (combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it == id::action_boolean_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "action_boolean_if must have 3 children");
         pre_it cond = it.begin();
         if (*cond == id::logical_not) {
@@ -317,7 +317,7 @@ void reduce_empty_arg_seq::operator() (combo_tree& tr, pre_it it) const
 void reduce_double_action_not::operator() (combo_tree& tr, pre_it it) const
 {
     if (*it == id::action_not) {
-        opencog::cassert(TRACE_INFO, it.has_one_child(),
+        OC_ASSERT(it.has_one_child(),
                          "action_not must have one child");
         pre_it it_child = it.begin();
         if (*it_child == id::action_not) {
@@ -336,7 +336,7 @@ void reduce_repeat_out_action_while::operator() (combo_tree& tr, pre_it it) cons
             //will not do anything anyway
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 if (*sib == id::action_while) {
-                    opencog::cassert(TRACE_INFO, sib.has_one_child(),
+                    OC_ASSERT(sib.has_one_child(),
                                      "action_while has only one child");
                     pre_it while_child = sib.begin();
                     if (!while_child.is_childless()) {
@@ -380,7 +380,7 @@ void reduce_repeat_out_action_while::operator() (combo_tree& tr, pre_it it) cons
 void reduce_repeat_in_action_while::operator() (combo_tree& tr, pre_it it) const
 {
     if (*it == id::action_while) {
-        opencog::cassert(TRACE_INFO, it.has_one_child(),
+        OC_ASSERT(it.has_one_child(),
                          "action_while must have one child");
         pre_it while_child = it.begin();
         if (*while_child == id::sequential_and) {
@@ -418,7 +418,7 @@ void reduce_action_boolean_if_sub_cond::operator() (combo_tree& tr,
         pre_it it) const
 {
     if (*it == id::action_boolean_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "The number of children of action_boolean_if must be 3");
         //substitute in subtre of branche 1 and branche 2
         pre_it cond = it.begin();
@@ -437,7 +437,7 @@ void reduce_action_boolean_if_sub_cond::operator() (combo_tree& tr,
 void reduce_boolean_while_sub_cond::operator() (combo_tree& tr, pre_it it) const
 {
     if (*it == id::boolean_while) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+        OC_ASSERT(it.number_of_children() == 2,
                          "The number of children of boolean_while must be 3");
         //substitute in subtree of branche 1
         pre_it cond = it.begin();
@@ -455,7 +455,7 @@ void reduce_action_action_if_always_succeeds::operator() (combo_tree& tr,
         pre_it it) const
 {
     if (*it == id::action_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "The number of children of action_action_if mut be 3");
         //check if the action at the conditions always succeeds
         if (safe_bool(get_action_result(tr, pre_it(it.begin())))) {
@@ -470,7 +470,7 @@ void reduce_action_action_if_always_fails::operator() (combo_tree& tr,
         pre_it it) const
 {
     if (*it == id::action_action_if) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "The number of children of action_action_if mut be 3");
         //check if the action at the conditions always succeeds
         if (!safe_bool(get_action_result(tr, pre_it(it.begin())))) {
@@ -485,7 +485,7 @@ void reduce_action_while_always_fails::operator() (combo_tree& tr,
         pre_it it) const
 {
     if (*it == id::action_while) {
-        opencog::cassert(TRACE_INFO, it.has_one_child(), "action_while has only 1 child");
+        OC_ASSERT(it.has_one_child(), "action_while has only 1 child");
         //check if the action at the conditions always fails
         if (safe_bool(!get_action_result(tr, pre_it(it.begin())))) {
             //remove action_while operator
@@ -501,7 +501,7 @@ void reduce_boolean_while_depend_condition::operator() (combo_tree& tr,
         pre_it it) const
 {
     if (*it == id::boolean_while) {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+        OC_ASSERT(it.number_of_children() == 2,
                          "boolean_while must have 2 children");
         pre_it cond = it.begin();
         //check if the condition is true
@@ -609,7 +609,7 @@ void reduce_additive::operator() (combo_tree& tr, combo_tree::iterator it) const
         if (a->exists_additive_argument()) {
             pre_it ns_it = tr.next_sibling(it);
             if (tr.is_valid(ns_it) && *it == *ns_it) {
-                opencog::cassert(TRACE_INFO, tr.number_of_children(it) == tr.number_of_children(ns_it),
+                OC_ASSERT(tr.number_of_children(it) == tr.number_of_children(ns_it),
                                  "combo_tree node and its next sibling should have the same number of children.");
                 std::vector<int> arg_add; //vector of additive arguments
                 for (unsigned int i = 0; i < tr.number_of_children(it); i++) {
@@ -669,7 +669,7 @@ void reduce_modular_argument::operator() (combo_tree& tr, combo_tree::iterator i
             if (a->is_modulo(i)) {
                 double min = a->modulo_min(i);
                 double max = a->modulo_max(i);
-                opencog::cassert(TRACE_INFO, max >= min, "max smaller than min (reduce_modular_argument)");
+                OC_ASSERT(max >= min, "max smaller than min (reduce_modular_argument)");
                 pre_it it_child = tr.child(it, i);
                 if (min == max)
                     *it_child = min;

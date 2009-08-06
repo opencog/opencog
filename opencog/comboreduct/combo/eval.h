@@ -158,7 +158,7 @@ vertex eval_throws(opencog::RandGen& rng,
                 }
             }
 
-            opencog::cassert(TRACE_INFO, vu.empty()
+            OC_ASSERT(vu.empty()
                               || vu.isOneVariableActiveTMP(),
                               "Since it returns logical_true from that point"
                               " there should be at least one active variable");
@@ -177,7 +177,7 @@ vertex eval_throws(opencog::RandGen& rng,
                 // wild card case
             } else {
                 
-                opencog::cassert(TRACE_INFO, vu.isOneVariableActiveTMP(),
+                OC_ASSERT(vu.isOneVariableActiveTMP(),
                                   "the OR wild_card case relies on the fact"
                                   " that at least one variable is active");
 
@@ -211,7 +211,7 @@ vertex eval_throws(opencog::RandGen& rng,
                     //ASSUMING THAT unify has done actually something
                     //which is only the case if updated is true
                     if(!work_vu.isOneVariableActiveTMP()) {
-                        //opencog::cassert(TRACE_INFO, res,
+                        //OC_ASSERT(res,
                         //                "res should be true because work_vu"
                         //                " should start the iteration with"
                         //                " at least one active variable");
@@ -226,7 +226,7 @@ vertex eval_throws(opencog::RandGen& rng,
                         id::logical_false);
             }
         case id::logical_not : {
-            opencog::cassert(TRACE_INFO,
+            OC_ASSERT(
                               it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::logical_not)");
@@ -250,12 +250,12 @@ vertex eval_throws(opencog::RandGen& rng,
             return negate_vertex(vx);
         }
         case id::boolean_if : {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+            OC_ASSERT(it.number_of_children() == 3,
                               "combo_tree node should have exactly three children"
                               " (id::boolean_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
-            opencog::cassert(TRACE_INFO, is_boolean(vcond),
+            OC_ASSERT(is_boolean(vcond),
                               "vertex should be a booelan.");
             ++sib;
             if (vcond == id::logical_true) {
@@ -267,12 +267,12 @@ vertex eval_throws(opencog::RandGen& rng,
         }
         //mixed operators
         case id::contin_if : {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+            OC_ASSERT(it.number_of_children() == 3,
                               "combo_tree node should have exactly three children"
                               " (id::contin_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
-            opencog::cassert(TRACE_INFO, is_boolean(vcond),
+            OC_ASSERT(is_boolean(vcond),
                               "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
@@ -285,22 +285,22 @@ vertex eval_throws(opencog::RandGen& rng,
             }
         }
         case id::greater_than_zero : {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                               "combo_tree node should have exactly three children"
                               " (id::greater_than_zero).");
             sib_it sib = it.begin();
             vertex x = eval_throws(rng, sib, pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(x),
+            OC_ASSERT(is_contin(x),
                               "vertex should be a contin.");
             return bool_to_vertex(0 < get_contin(x));
         }
         case id::impulse : {
             vertex i;
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::impulse).");
             i = eval_throws(rng, it.begin(), pe, vu);
-            opencog::cassert(TRACE_INFO, is_boolean(i),
+            OC_ASSERT(is_boolean(i),
                               "vetex should be a boolean).");
             return (i == id::logical_true ? 1.0 : 0.0);
         }
@@ -310,7 +310,7 @@ vertex eval_throws(opencog::RandGen& rng,
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                opencog::cassert(TRACE_INFO, is_contin(vres),
+                OC_ASSERT(is_contin(vres),
                                   "vertex should be a contin.");
                 res += get_contin(vres);
             }
@@ -323,7 +323,7 @@ vertex eval_throws(opencog::RandGen& rng,
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                opencog::cassert(TRACE_INFO, is_contin(vres),
+                OC_ASSERT(is_contin(vres),
                                   "vertex should be a contin");
                 res *= get_contin(vres);
             }
@@ -331,17 +331,17 @@ vertex eval_throws(opencog::RandGen& rng,
         }
         case id::div : {
             contin_t x, y;
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+            OC_ASSERT(it.number_of_children() == 2,
                               "combo_tree node should have exactly two children"
                               " (id::div).");
             sib_it sib = it.begin();
             vertex vx = eval_throws(rng, sib, pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(vx),
+            OC_ASSERT(is_contin(vx),
                               "vertex should be a contin.");
             x = get_contin(vx);
             ++sib;
             vertex vy = eval_throws(rng, sib, pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(vy),
+            OC_ASSERT(is_contin(vy),
                               "vertex should be a contin.");
             y = get_contin(vy);
             contin_t res = x / y;
@@ -349,22 +349,22 @@ vertex eval_throws(opencog::RandGen& rng,
             return res;
         }
         case id::log : {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::log).");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(vx),
+            OC_ASSERT(is_contin(vx),
                               "vertex should be a contin");
             contin_t res = log(get_contin(vx));
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
             return res;
         }
         case id::exp : {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::exp)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(vx),
+            OC_ASSERT(is_contin(vx),
                               "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
             //this may happen in case the argument is too high, then exp will be infty
@@ -372,23 +372,23 @@ vertex eval_throws(opencog::RandGen& rng,
             return res;
         }
         case id::sin : {
-            opencog::cassert(TRACE_INFO, it.has_one_child(),
+            OC_ASSERT(it.has_one_child(),
                               "combo_tree node should have exactly one child"
                               " (id::sin)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
-            opencog::cassert(TRACE_INFO, is_contin(vx),
+            OC_ASSERT(is_contin(vx),
                               "vertex should be a contin.");
             return sin(get_contin(vx));
         }
         default :
-            opencog::cassert(TRACE_INFO, false,
+            OC_ASSERT(false,
                               "That case is not handled");
             return v;
         }
     }
     //action
     else if (is_action(*it) && pe) {
-        opencog::cassert(TRACE_INFO, pe,
+        OC_ASSERT(pe,
                           "Non null Evaluator must be provided");
         return pe->eval_action(it, vu);
     }
@@ -402,13 +402,13 @@ vertex eval_throws(opencog::RandGen& rng,
     }
     //indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
-        opencog::cassert(TRACE_INFO, pe,
+        OC_ASSERT(pe,
                           "Non null Evaluator must be provided");
         return pe->eval_indefinite_object(*io, vu);
     }
     //definite objects evaluate to themselves
     else if (is_definite_object(*it)) {
-        opencog::cassert(TRACE_INFO, it.is_childless(),
+        OC_ASSERT(it.is_childless(),
                           "combo_tree node should be childless (definite_object '%s').",
                           get_definite_object(*it).c_str());
         return v;
@@ -836,7 +836,7 @@ public:
                 else if (is_contin(e))
                     _vt.push_back(get_contin(e));
                 //should never get to this part
-                else opencog::cassert(TRACE_INFO, false,
+                else OC_ASSERT(false,
                                        "should never get to this part.");
             }
         }

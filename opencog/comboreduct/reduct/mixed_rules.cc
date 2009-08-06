@@ -35,7 +35,7 @@ namespace reduct {
   //WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
   void reduce_gt_zero_times_const::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(), 
+      OC_ASSERT(it.has_one_child(), 
               "combo_tree node should have exactly one child (reduce_gt_zero_times_const).");
       pre_it it_child = it.begin();
       if(*it_child==id::times) {
@@ -82,7 +82,7 @@ namespace reduct {
     typedef subtree_parity::iterator subtree_parity_it;
     typedef subtree_parity::const_iterator subtree_parity_const_it;
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
               "combo_tree node should have exactly one child (reduce_gt_zero_pair_power).");
       pre_it it_child = it.begin();
       bool is_neg_const = false;
@@ -126,11 +126,11 @@ namespace reduct {
   //WARNING : this rule is deprecated, use reduce_gt_zero_div instead
   void reduce_gt_zero_const_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(), 
+      OC_ASSERT(it.has_one_child(), 
              "combo_tree node should have exactly one child (reduce_gt_zero_const_div)."); 
       pre_it it_child = it.begin();
       if(*it_child==id::div) {
-	opencog::cassert(TRACE_INFO, it_child.number_of_children() == 2,
+	OC_ASSERT(it_child.number_of_children() == 2,
             "combo_tree child node should have exactly two children (reduce_gt_zero_const_div).");
 	pre_it num = it_child.begin();
 	if(is_contin(*num)) {
@@ -157,11 +157,11 @@ namespace reduct {
   //0<log(x) -> 0<-1+x
   void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),             
+      OC_ASSERT(it.has_one_child(),             
              "combo_tree node should have exactly one child (reduce_gt_zero_log)."); 
       pre_it it_child = it.begin();
       if(*it_child==id::log) {
-	opencog::cassert(TRACE_INFO, it_child.has_one_child(),
+	OC_ASSERT(it_child.has_one_child(),
            "combo_tree child node should have exactly one child (reduce_gt_zero_log).");
 	*it_child = id::plus;
 	tr.append_child(it_child, -1.0);
@@ -172,11 +172,11 @@ namespace reduct {
   //0<exp(x) -> true
   void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_gt_zero_exp)."); 
       pre_it it_child = it.begin();
       if(*it_child==id::exp) {
-	opencog::cassert(TRACE_INFO, it_child.has_one_child(),
+	OC_ASSERT(it_child.has_one_child(),
            "combo_tree child node should have exactly one child (reduce_gt_zero_exp).");
 	tr.erase_children(it);
 	*it = id::logical_true;
@@ -188,7 +188,7 @@ namespace reduct {
   //WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
   void reduce_gt_zero_minus_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_gt_zero_minus_exp).");
       pre_it it_child = it.begin();
       if(*it_child==id::times) {
@@ -213,7 +213,7 @@ namespace reduct {
   //WARNING : this rule is deprecated, use reduce_gt_zero_prod instead
   void reduce_gt_zero_prod_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(), 
+      OC_ASSERT(it.has_one_child(), 
               "combo_tree node should have exactly one child (reduce_gt_zero_prod_exp).");
       pre_it it_child = it.begin();
       if(*it_child==id::times) {
@@ -234,7 +234,7 @@ namespace reduct {
   //WARNING : this rule is deprecated, use reduce_gt_zero_sum_sin instead
   void reduce_gt_zero_const_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(), 
+      OC_ASSERT(it.has_one_child(), 
               "combo_tree node should have exactly one child (reduce_gt_zero_const_sum_sin).");
       pre_it it_child = it.begin();
       if(*it_child==id::plus) {
@@ -264,11 +264,11 @@ namespace reduct {
   //0<impulse(x) -> x
   void reduce_gt_zero_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_gt_zero_impulse).");
       pre_it it_child = it.begin();
       if(*it_child==id::impulse) {
-	opencog::cassert(TRACE_INFO, it_child.has_one_child(),
+	OC_ASSERT(it_child.has_one_child(),
            "combo_tree child node should have exactly one child (reduce_gt_zero_impulse).");
 	pre_it new_it = it_child.begin();
 	*it = *new_it;
@@ -286,7 +286,7 @@ namespace reduct {
       subtree_quotient sq;
       for(sib_it sib = it.begin(); sib != it.end();) {
 	if(*sib==id::impulse) {
-	  opencog::cassert(TRACE_INFO, sib.has_one_child(),
+	  OC_ASSERT(sib.has_one_child(),
               "combo_tree sibling node should have exactly one child (reduce_impulse_power).");
 	  if(sq.count(pre_it(sib)) > 0) {
 	    sib = tr.erase(sib);
@@ -312,7 +312,7 @@ namespace reduct {
       pre_it new_and;
       for(sib_it sib = it.begin(); sib != it.end();) {
 	if(*sib==id::impulse) {
-	  opencog::cassert(TRACE_INFO, sib.has_one_child(),
+	  OC_ASSERT(sib.has_one_child(),
              "combo_tree sibling node should have exactly one child (reduce_impulse_prod).");
 	  if(tr.is_valid(fic)) {
 	    if(!tr.is_valid(new_and))
@@ -337,7 +337,7 @@ namespace reduct {
   //0<(sum impulse(x_i)) -> or x_i
   void reduce_impulse_sum::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
               "combo_tree sibling node should have exactly one child (reduce_impulse_sum).");
       pre_it it_child = it.begin();
       if(*it_child==id::plus) {
@@ -357,7 +357,7 @@ namespace reduct {
   //if(x 0 1) -> impulse(NOT(x))
   void reduce_contin_if_to_impulse::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
              "combo_tree node should have exactly three children (reduce_contin_if_to_impulse).");
       pre_it cond = tr.child(it, 0);
       pre_it b1 = tr.child(it, 1);
@@ -386,7 +386,7 @@ namespace reduct {
   //if(x y if(x z w)) -> if(x y w)
   void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
              "combo_tree node should have exactly three children (reduce_contin_if).");
       pre_it cond = tr.child(it, 0);
       pre_it b1 = tr.child(it, 1);
@@ -406,7 +406,7 @@ namespace reduct {
 	tr.erase(b2);
       }
       else if(*b1==id::contin_if) {
-	opencog::cassert(TRACE_INFO, tr.number_of_children(b1)==3, 
+	OC_ASSERT(tr.number_of_children(b1)==3, 
             "combo_tree node should have exactly three children (reduce_contin_if - b1).");
 	pre_it b1_cond = tr.child(b1, 0);
 	pre_it b1_b1 = tr.child(b1, 1);
@@ -416,7 +416,7 @@ namespace reduct {
 	}
       }
       else if(*b2==id::contin_if) {
-	opencog::cassert(TRACE_INFO, tr.number_of_children(b2)==3,
+	OC_ASSERT(tr.number_of_children(b2)==3,
            "combo_tree node should have exactly three children (reduce_contin_if - b2).");
 	pre_it b2_cond = tr.child(b2, 0);
 	pre_it b2_b2 = tr.child(b2, 2);
@@ -435,14 +435,14 @@ namespace reduct {
     typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::div) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==2, 
+      OC_ASSERT(tr.number_of_children(it)==2, 
               "combo_tree node should have exactly two children (reduce_op_contin_if).");
       pre_it num = tr.child(it, 0);
       pre_it denum = tr.child(it, 1);
       if(*num==id::contin_if && *denum==id::contin_if) {
-	opencog::cassert(TRACE_INFO, tr.number_of_children(num)==3,
+	OC_ASSERT(tr.number_of_children(num)==3,
             "combo_tree node should have exactly two children (reduce_op_contin_if - num).");
-	opencog::cassert(TRACE_INFO, tr.number_of_children(denum)==3,
+	OC_ASSERT(tr.number_of_children(denum)==3,
             "combo_tree node should have exactly two children (reduce_op_contin_if - denum).");
 	pre_it num_cond = tr.child(num, 0);
 	pre_it denum_cond = tr.child(denum, 0);
@@ -461,7 +461,7 @@ namespace reduct {
       subtree_quotient sq;
       for(sib_it sib = it.begin(); sib != it.end(); ) {
 	if(*sib==id::contin_if) {
-	  opencog::cassert(TRACE_INFO, tr.number_of_children(sib)==3,
+	  OC_ASSERT(tr.number_of_children(sib)==3,
              "combo_tree sibling node should have exactly two children (reduce_op_contin_if).");
 	  pre_it sib_cond = tr.child(sib, 0);
 	  subtree_quotient_const_it sqi = sq.find(sib_cond);
@@ -499,7 +499,7 @@ namespace reduct {
   void reduce_contin_if_equal_branch::operator()(combo_tree& tr,
 						 combo_tree::iterator it) const {
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
               "combo_tree node should have exactly two children (reduce_op_contin_if).");
       pre_it cond = tr.child(it, 0);
       pre_it b1 = tr.child(it, 1);
@@ -521,7 +521,7 @@ namespace reduct {
     typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
               "combo_tree node should have exactly three children (reduce_contin_if_inner_op).");
       pre_it b1 = tr.child(it, 1);
       pre_it b2 = tr.child(it, 2);
@@ -529,9 +529,9 @@ namespace reduct {
 	builtin b1_builtin = get_builtin(*b1);
 	if(b1_builtin==*b2) {
 	  if(b1_builtin==id::div) {
-	    opencog::cassert(TRACE_INFO, tr.number_of_children(b1)==2,
+	    OC_ASSERT(tr.number_of_children(b1)==2,
                 "combo_tree node should have exactly two children (reduce_contin_if_inner_op - b1).");
-	    opencog::cassert(TRACE_INFO, tr.number_of_children(b2)==2,
+	    OC_ASSERT(tr.number_of_children(b2)==2,
                 "combo_tree node should have exactly two children (reduce_contin_if_inner_op - b2).");	    pre_it b1_num = tr.child(b1, 0);
 	    pre_it b1_denum = tr.child(b1, 1);
 	    pre_it b2_num = tr.child(b2, 0);
@@ -596,7 +596,7 @@ namespace reduct {
   void reduce_contin_if_substitute_cond::operator()(combo_tree& tr,
 						    combo_tree::iterator it) const {
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
              "combo_tree node should have exactly three children (reduce_contin_if_substitute_cond).");
       pre_it cond = tr.child(it, 0);
       pre_it b1 = tr.child(it, 1);
@@ -650,7 +650,7 @@ namespace reduct {
       subtree_quotient sq;
       for(sib_it sib = it.begin(); sib != it.end();) {
 	if(*sib==id::greater_than_zero) {
-	  opencog::cassert(TRACE_INFO, sib.has_one_child(),
+	  OC_ASSERT(sib.has_one_child(),
               "combo_tree node should have exactly one child (reduce_junction_gt_zero_const_sum_constante).");
 	  pre_it sib_child = sib.begin();
 	  if(*sib_child==id::plus) {
@@ -712,18 +712,18 @@ namespace reduct {
       bool is_strict2 = true; //= true just to get rid of stupid C++ warning
       //determine if ine1_child is a strict inequality
       if(*it1==id::greater_than_zero) {
-	opencog::cassert(TRACE_INFO, it1.has_one_child(),
+	OC_ASSERT(it1.has_one_child(),
             "combo_tree node should have exactly one child (reduce_from_assumptions - it1).");
 	ine1_child = it1.begin();
 	is_strict1 = true;
       }
       //determine if ine1_child is a non-strict inequality
       else if(*it1==id::logical_not) {
-	opencog::cassert(TRACE_INFO, it1.has_one_child(),
+	OC_ASSERT(it1.has_one_child(),
            "combo_tree node should have exactly one child (reduce_from_assumptions - it1).");
 	pre_it it1_child = it1.begin();
 	if(*it1_child==id::greater_than_zero) {
-	  opencog::cassert(TRACE_INFO, it1_child.has_one_child(),
+	  OC_ASSERT(it1_child.has_one_child(),
               "combo_tree child node should have exactly one child (reduce_from_assumptions - it1).");
 	  ine1_child = it1_child.begin();
 	  is_strict1 = false;
@@ -731,18 +731,18 @@ namespace reduct {
       }
       //determine if ine2_child is a strict inequality
       if(*it2==id::greater_than_zero) {
-	opencog::cassert(TRACE_INFO, it2.has_one_child(),
+	OC_ASSERT(it2.has_one_child(),
            "combo_tree node should have exactly one child (reduce_from_assumptions - it2).");
 	ine2_child = it2.begin();
 	is_strict2 = true;
       }
       //determine if ine2_child is a non-strict inequality
       else if(*it2==id::logical_not) {
-	opencog::cassert(TRACE_INFO, it2.has_one_child(),
+	OC_ASSERT(it2.has_one_child(),
            "combo_tree node should have exactly one child (reduce_from_assumptions - it2).");
 	pre_it it2_child = it2.begin();
 	if(*it2_child==id::greater_than_zero) {
-	  opencog::cassert(TRACE_INFO, it2_child.has_one_child(),
+	  OC_ASSERT(it2_child.has_one_child(),
             "combo_tree child node should have exactly one child (reduce_from_assumptions - it2).");
 	  ine2_child = it2_child.begin();
 	  is_strict2 = false;
@@ -893,7 +893,7 @@ namespace reduct {
 	    return;
 	  }
 	  else if(*assum==id::logical_not) {
-	    opencog::cassert(TRACE_INFO, assum.has_one_child(),
+	    OC_ASSERT(assum.has_one_child(),
                "combo_tree node should have exactly one child (reduce_from_assumptions - assum).");
 	    if(implies(tr, it, pre_it(assum.begin()))) {
 	      *it = id::logical_false;
@@ -920,7 +920,7 @@ namespace reduct {
   //if(x y z) -> if(NOT(x) z y)  if |NOT(x)|<|x|
   void reduce_contin_if_not::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::contin_if) {
-      opencog::cassert(TRACE_INFO, tr.number_of_children(it)==3,
+      OC_ASSERT(tr.number_of_children(it)==3,
               "combo_tree node should have exactly three children (reduce_contin_if_not).");
       pre_it cond = tr.child(it, 0);
       pre_it b1 = tr.child(it, 1);
@@ -951,11 +951,11 @@ namespace reduct {
   //maybe TODO : 0<sum x_i -> true if exist i 0<x_i->true and forall other i 0<=x_i
   void reduce_gt_zero_sum::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
               "combo_tree node should have exactly one child (reduce_gt_zero_sum).");
       pre_it it_child = it.begin();
       if(*it_child==id::plus) {
-	opencog::cassert(TRACE_INFO, !it_child.is_childless(),
+	OC_ASSERT(!it_child.is_childless(),
            "combo_tree child node should have at least one child (reduce_gt_zero_sum).");
 	bool res = true;// = true to get rid of stupid C++ wraning
 	for(sib_it sib = it_child.begin(); sib != it_child.end(); ++sib) {
@@ -988,7 +988,7 @@ namespace reduct {
   //                           that is 0<x_i -> false and 0<-1*x_i -> false
   void reduce_gt_zero_prod::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_gt_zero_prod).");
       pre_it it_child = it.begin();
       if(*it_child==id::times) {
@@ -1045,11 +1045,11 @@ namespace reduct {
   //0<x/y -> false  if x==0, that is not(0<x) -> true and not(0<-x) -> true
   void reduce_gt_zero_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
             "combo_tree node should have exactly one child (reduce_gt_zero_div).");
       pre_it it_child = it.begin();
       if(*it_child==id::div) {
-	opencog::cassert(TRACE_INFO, it_child.number_of_children()==2,
+	OC_ASSERT(it_child.number_of_children()==2,
            "combo_tree child node should have exactly two children (reduce_gt_zero_div).");
 	pre_it num = tr.child(it_child, 0);
 	pre_it denom = tr.child(it_child, 1);
@@ -1127,7 +1127,7 @@ namespace reduct {
   //0<x+sin(y) -> false if 0<x+1 -> false
   void reduce_gt_zero_sum_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_gt_zero_sum_sin).");
       pre_it it_child = it.begin();
       if(*it_child==id::plus && tr.is_valid(it_child.find_child(id::sin))) {
@@ -1176,11 +1176,11 @@ namespace reduct {
   //0<sin(y) -> false if 0<y -> false and 0<-(y+pi) -> false
   void reduce_gt_zero_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
             "combo_tree node should have exactly one child (reduce_gt_zero_sin).");
       pre_it it_child = it.begin();
       if(*it_child==id::sin) {
-	opencog::cassert(TRACE_INFO, it_child.has_one_child(),
+	OC_ASSERT(it_child.has_one_child(),
            "combo_tree child node should have exactly one child (reduce_gt_zero_sin).");
 	pre_it y = it_child.begin();
 	combo_tree copy_tr = tr.subtree(sib_it(it), tr.next_sibling(sib_it(it)));
@@ -1261,7 +1261,7 @@ namespace reduct {
 
   bool reduce_inequality_from_assumptions::gaussJordanElimination(double_matrix& dm, double eps) const {
     unsigned int h = dm.size(); //number of rows
-    opencog::cassert(TRACE_INFO, h>0, "Number of rows should be greater than 0 (gaussJordanElimitation)");
+    OC_ASSERT(h>0, "Number of rows should be greater than 0 (gaussJordanElimitation)");
     unsigned int w = dm[h-1].size(); //number of columns
     for(unsigned int y = 0; y < h; y++) {
       unsigned int maxrow = y;
@@ -1297,7 +1297,7 @@ namespace reduct {
 
   void reduce_inequality_from_assumptions::gaussianElimination(double_matrix& dm) const {
     unsigned int m = dm.size(); //number of rows
-    opencog::cassert(TRACE_INFO, m>0, "Number of rows should be greater than 0 (gaussianElimitation)");
+    OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation)");
     unsigned int n = dm[m-1].size(); //number of columns
     for(unsigned int i = 0; i < m; i++) {
       for(unsigned int j = 0; j < n; j++) {
@@ -1311,7 +1311,7 @@ namespace reduct {
 	  dm[i] = dm[maxi];
 	  dm[maxi] = tmp_row;
 	  double c = dm[i][j];
-	  opencog::cassert(TRACE_INFO, c != 0.0, "dm[%d][%d] == 0.0. Should be diferent", i, j);
+	  OC_ASSERT(c != 0.0, "dm[%d][%d] == 0.0. Should be diferent", i, j);
 	  for(unsigned int k = 0; k < n; k++)
 	    dm[i][k] = dm[i][k] / c;
 	  for(unsigned int u = i+1; u < m; u++) {
@@ -1326,9 +1326,9 @@ namespace reduct {
 
   bool reduce_inequality_from_assumptions::gaussianElimination2(double_matrix& dm, double eps) const {
     int m = dm.size(); //number of rows
-    opencog::cassert(TRACE_INFO, m>0, "Number of rows should be greater than 0 (gaussianElimitation2)");
+    OC_ASSERT(m>0, "Number of rows should be greater than 0 (gaussianElimitation2)");
     int n = dm[m-1].size(); //number of columns
-    opencog::cassert(TRACE_INFO, n>0, "Number of columns should be greater than 0 (gaussianElimitation2)");
+    OC_ASSERT(n>0, "Number of columns should be greater than 0 (gaussianElimitation2)");
     for(int i = 0; i < std::min(m, n-1); i++) {
       //swap below until find non-zero
       int ipivot = -1;
@@ -1356,11 +1356,11 @@ namespace reduct {
   }
 
   bool reduce_inequality_from_assumptions::backSubstitution(double_matrix& dm, std::vector<double>& solution, double eps) const {
-    opencog::cassert(TRACE_INFO, solution.empty(), "There should not be any previous solution (backSubstitution)");
+    OC_ASSERT(solution.empty(), "There should not be any previous solution (backSubstitution)");
     int m = dm.size(); //number of rows
-    opencog::cassert(TRACE_INFO, m>0, "Number of rows should be greater than 0 (backSubstitution)");
+    OC_ASSERT(m>0, "Number of rows should be greater than 0 (backSubstitution)");
     int n = dm[m-1].size(); //number of columns
-    opencog::cassert(TRACE_INFO, n>0, "Number of rows should be greater than 0 (backSubstitution)");
+    OC_ASSERT(n>0, "Number of rows should be greater than 0 (backSubstitution)");
     solution.resize(n-1, 0.0);
     bool allNull = true;
     for(int i = m-1; i >= 0; i--) {
@@ -1405,17 +1405,17 @@ namespace reduct {
     pre_it term_it;
     //check if strict positive inequality or negative or null
     if(*it==id::greater_than_zero) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
               "combo_tree node should have exactly one child (reduce_inequality_from_assumptions).");
       term_it = ctr.begin().begin();
       termStrictPositive = true;
     }
     else if(*it==id::logical_not) {
-      opencog::cassert(TRACE_INFO, it.has_one_child(),
+      OC_ASSERT(it.has_one_child(),
              "combo_tree node should have exactly one child (reduce_inequality_from_assumptions).");
       pre_it it_child = it.begin();
       if(*it_child==id::greater_than_zero) {
-	opencog::cassert(TRACE_INFO, it_child.has_one_child(),
+	OC_ASSERT(it_child.has_one_child(),
            "combo_tree child node should have exactly one child (reduce_inequality_from_assumptions).");
 	term_it = ctr.begin().begin().begin();
 	termStrictPositive = false;
@@ -1441,7 +1441,7 @@ namespace reduct {
 	    isStrictPositives.push_back(true);
 	  }
 	  else if(*assum==id::logical_not) {
-	    opencog::cassert(TRACE_INFO, assum.has_one_child(),
+	    OC_ASSERT(assum.has_one_child(),
                "combo_tree node should have exactly one child (reduce_inequality_from_assumptions - assum).");
 	    pre_it assum_child = assum.begin();
 	    if(*assum_child==id::greater_than_zero) {
@@ -1535,7 +1535,7 @@ namespace reduct {
 	  //or by filling the matrix
 	  for(unsigned int i = 0; i < assumptions.size(); i++) {
 	    pre_it assum = assumptions[i];
-	    opencog::cassert(TRACE_INFO, *assum==id::greater_than_zero && assum.has_one_child(),
+	    OC_ASSERT(*assum==id::greater_than_zero && assum.has_one_child(),
                "Assum diferent from greater_than_zero or has none or more than one child.");
 	    pre_it assum_child = assum.begin();
 	    //same remark as previously about -1*x

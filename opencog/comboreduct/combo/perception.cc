@@ -25,6 +25,6 @@
 #include "descriptions.h"
 
 std::ostream& operator<<(std::ostream& out, combo::perception p) {
-  opencog::cassert(TRACE_INFO, p);
+  OC_ASSERT(p);
   return out << p->get_name();
 }

@@ -63,7 +63,7 @@ int main(int argc,char** argv) {
           cout << rep.exemplar() << endl;
           
           rep.clear_exemplar();
-          cassert(TRACE_INFO, tmp==rep.exemplar());
+          OC_ASSERT(tmp==rep.exemplar());
           }*/
     }
 }

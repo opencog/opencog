@@ -77,7 +77,7 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
 vertex RunningComboProcedure::eval_action(combo_tree::iterator it, combo::variable_unifier& vu)
 {
     //TODO
-    opencog::cassert(TRACE_INFO, false, "Not implemented yet");
+    OC_ASSERT(false, "Not implemented yet");
     return vertex();
 }
 
@@ -104,7 +104,7 @@ void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it
     //input arguments
     combo::arity_t exp_arity = combo::abs_min_arity(ar);
     arity_t ap_args = it.number_of_children();
-    //opencog::cassert(TRACE_INFO, ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
+    //OC_ASSERT(ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
     if (fixed_arity) {
         if (ap_args != ar) {
             throw opencog::ComboException(TRACE_INFO,
@@ -197,7 +197,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         sib_it parent = _tr.parent(_it);
         //logger().error("ptp");
         if (*_it == id::action_while) {
-            opencog::cassert(TRACE_INFO, _it.number_of_children() == 1);
+            OC_ASSERT(_it.number_of_children() == 1);
             if (isFailed()) {
                 _failed = false;
                 moveOn();
@@ -216,7 +216,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
         } else if (*_it == id::action_action_if) {
             //need to eval an action_action_if's first child
-            opencog::cassert(TRACE_INFO, _it.number_of_children() == 3);
+            OC_ASSERT(_it.number_of_children() == 3);
             _it = _it.begin();
 
         } else if (*_it == id::action_boolean_if) {
@@ -254,7 +254,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     if (res == id::logical_true) {
                         _it = ++_it.begin();
                     } else {
-                        opencog::cassert(TRACE_INFO,
+                        OC_ASSERT(
                                          res == id::logical_false);
                         moveOn();
                         return;
@@ -287,7 +287,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             moveOn();
 
         } else if (*_it == id::return_success) {
-            opencog::cassert(TRACE_INFO, _failed == false || boost::logic::indeterminate(_failed));
+            OC_ASSERT(_failed == false || boost::logic::indeterminate(_failed));
             _it = _tr.end();
             return;
 
@@ -295,7 +295,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             if (_stack.empty() || _stack.top().first != _it) {
                 try {
                     vertex res = eval_throws(_rng, _it.begin(), this, _vu);
-                    opencog::cassert(TRACE_INFO, is_contin(res));
+                    OC_ASSERT(is_contin(res));
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
                     //some kind of runtime exception - halt execution and
@@ -308,7 +308,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             if (get_contin(_stack.top().second) >= 0.99) {
                 _it = _it.last_child();
             } else {
-                opencog::cassert(TRACE_INFO, !_stack.empty());
+                OC_ASSERT(!_stack.empty());
                 _stack.pop();
                 moveOn();
             }
@@ -380,7 +380,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             }
 
         } else if (is_argument(*_it)) {
-            opencog::cassert(TRACE_INFO, false);
+            OC_ASSERT(false);
 
         } else {
 
@@ -515,7 +515,7 @@ void RunningComboProcedure::moveOn()
                 _it = parent;
             }
         } else if (*parent == id::action_boolean_if) {
-            opencog::cassert(TRACE_INFO, _it != parent.begin(),
+            OC_ASSERT(_it != parent.begin(),
                              "we must be in an action branch");
             _it = parent;
         } else if (*parent == id::action_while) {
@@ -526,23 +526,23 @@ void RunningComboProcedure::moveOn()
             _stack.top().second = get_contin(_stack.top().second) - 1;
             return;
         } else if (*parent == id::boolean_while) {
-            opencog::cassert(TRACE_INFO, _it != parent.begin()); //we must be in an action branch
-            opencog::cassert(TRACE_INFO, _it == parent.last_child());
+            OC_ASSERT(_it != parent.begin()); //we must be in an action branch
+            OC_ASSERT(_it == parent.last_child());
             _it = parent;
             return;
         } else if (*parent == id::action_while) {
-            opencog::cassert(TRACE_INFO, _it == parent.begin());
+            OC_ASSERT(_it == parent.begin());
             _it = parent;
             if (!isFailed()) //back for another action_while loop
                 return;
         } else if (*parent == id::action_not) {
-            opencog::cassert(TRACE_INFO, _it == parent.begin());
+            OC_ASSERT(_it == parent.begin());
             _failed = !isFailed();
             _it = parent;
         }
 
-        opencog::cassert(TRACE_INFO, !is_procedure_call(*parent));
-        opencog::cassert(TRACE_INFO, _it != tmp_it,
+        OC_ASSERT(!is_procedure_call(*parent));
+        OC_ASSERT(_it != tmp_it,
                          "The loop go infinitly other wise, there must be a bug in that method or somewhere else");
     }
     //we are at the root and have executed it already - invalidate the iterator

@@ -195,7 +195,7 @@ namespace reduct {
 	if (*c.begin()<0) {
 	  typename tree::pre_order_iterator tmp=
 	    _int2item.find(-*c.begin())->second.begin();
-	  opencog::cassert(TRACE_INFO, is_argument(*tmp), "Tree node referenced by iterator isn't an argument.");
+	  OC_ASSERT(is_argument(*tmp), "Tree node referenced by iterator isn't an argument.");
 	  *sib=*tmp;
 	  get_argument(*sib).negate();
 	} else {

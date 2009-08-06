@@ -90,7 +90,7 @@ unsigned int ComboProcedureRepository::loadFromStream(istream& in)
             stringstream ss;
             toStream(ss, true);
             print(true);
-            opencog::cassert(TRACE_INFO, type_check_success,
+            OC_ASSERT(type_check_success,
                              "Type Checking Error, one or more function are ill formed. See the list of function and there types :\n%s", ss.str().c_str());
         }
     }
@@ -105,7 +105,7 @@ bool ComboProcedureRepository::contains(const std::string& name) const
 const ComboProcedure& ComboProcedureRepository::get(const std::string& name) const
 {
     procedure_call pc = instance(name);
-    opencog::cassert(TRACE_INFO, pc,
+    OC_ASSERT(pc,
                      "No ComboProcedure matches that name, you cannot get it");
     return dynamic_cast<const ComboProcedure&>(*pc);
 }
@@ -189,7 +189,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
             stringstream ss;
             toStream(ss, true);
             print(true);
-            opencog::cassert(TRACE_INFO, type_check_success,
+            OC_ASSERT(type_check_success,
                              "Type Checking Error, one or more function are ill formed. See the list of function and there types :\n%s", ss.str().c_str());
         }
     }

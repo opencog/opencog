@@ -70,7 +70,7 @@ public:
 //WARNING : it is assumed that s is non-empty
 template<typename T> T randset(const std::set<T>& s, RandGen& rng)
 {
-    cassert(TRACE_INFO, !s.empty(), "numeric - std::set should be empty.");
+    OC_ASSERT(!s.empty(), "numeric - std::set should be empty.");
     int chosen_int = rng.randint(s.size());
     typename std::set<T>::const_iterator s_it = s.begin();
     //can be optimized maybe

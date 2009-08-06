@@ -346,7 +346,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
         }
 
     case id::is_null:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1);
+        OC_ASSERT(it.number_of_children() == 1);
         {
 
             combo::vertex v = *it.begin();
@@ -440,7 +440,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
     case id::get_gratitude:
     case id::get_happiness:
     case id::get_excitement:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_X perception accept only one argument. Got '%d'.",
                          it.number_of_children());
         {
@@ -539,7 +539,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
     }
 
     case id::has_said:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+        OC_ASSERT(it.number_of_children() == 2,
                          "WWUtil - hasSaid - must have 2 children");
 
         {
@@ -571,13 +571,13 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
         }
 
     case id::is_there_relation:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "WWUtil - is_there_relation perception needs three arguments. Got '%d'.",
                          it.number_of_children());
         {
             sib_it sib_arg = it.begin();
             vertex vr = *sib_arg;
-            opencog::cassert(TRACE_INFO, is_definite_object(vr),
+            OC_ASSERT(is_definite_object(vr),
                              "is_there_relation - invalid relation.");
             std::string relation = get_definite_object(vr);
 
@@ -614,7 +614,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
         }
 
     case id::is_agent_state:
-        opencog::cassert(TRACE_INFO, ( it.number_of_children() == 1 && is_contin(*it.begin()) ),
+        OC_ASSERT(( it.number_of_children() == 1 && is_contin(*it.begin()) ),
                          "is_agent_state accept one argument and it must be a contin. Got '%d' arguments.",
                          it.number_of_children());
         {
@@ -623,7 +623,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
         }
 
     case id::is_last_agent_action:
-        opencog::cassert(TRACE_INFO, it.number_of_children() >= 2,
+        OC_ASSERT(it.number_of_children() >= 2,
                          "WWUtil - is_last_agent_action perception needs at least two arguments. Got '%d'.",
                          it.number_of_children());
         {
@@ -634,7 +634,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
                 WorldWrapperUtilMock::getDefiniteObjects(vo1, vw, vu);
 
             vertex vo2 = *(++sib_arg);
-            opencog::cassert(TRACE_INFO, is_definite_object(vo2),
+            OC_ASSERT(is_definite_object(vo2),
                              "WWUtil - is_last_agent_action 2nd parameter should be a definite_object");
 
             // action name comes with an ACTION_NAME_POSTFIX so it won't be
@@ -672,7 +672,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
         }
 
     case id::is_proportional_next:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 4,
+        OC_ASSERT(it.number_of_children() == 4,
                          "WWUtil - is_proportional_next perception needs four arguments. Got '%d'.",
                          it.number_of_children());
         {
@@ -680,7 +680,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
 
 
     case id::is_last_pet_schema:
-        opencog::cassert(TRACE_INFO, it.number_of_children() >= 2,
+        OC_ASSERT(it.number_of_children() >= 2,
                          "is_last_pet_schema perception needs at least one argument. Got '%d'.",
                          it.number_of_children());
         {
@@ -689,7 +689,7 @@ combo::vertex WorldWrapperUtilMock::evalPerception(const pre_it it,
             std::string schemaName = get_action_name(get_definite_object(vo1));
 
             vo1 = *(++sib_arg);
-            opencog::cassert(TRACE_INFO, is_action_result(vo1),
+            OC_ASSERT(is_action_result(vo1),
                              "WWUtil - is_last_pet_schema 2nd parameter should be an action_result");
 
             std::string schemaResult = "action_failure";
@@ -784,7 +784,7 @@ std::vector<combo::definite_object> WorldWrapperUtilMock::getDefiniteObjects(
         }
 
     } else if (is_wild_card(v)) {
-        opencog::cassert(TRACE_INFO, !vu.empty(),
+        OC_ASSERT(!vu.empty(),
                          "WWUtil - evalPerception - unifier should not be empty.");
 
         combo::UnifierIt it;

@@ -59,7 +59,7 @@ const pet_builtin_action* pet_builtin_action::init_actions()
 void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
                                     pet_builtin_action* action_array)
 {
-    opencog::cassert(TRACE_INFO, pbae < id::pet_builtin_action_count);
+    OC_ASSERT(pbae < id::pet_builtin_action_count);
     _enum = pbae;
     //printf("_enum = %d\n", _enum);
     //fill the various properties using the arrays edited by the developer
@@ -68,7 +68,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
     set_basic_description(pbae);
     //standard and PetBrain properties specific to action
     unsigned int apd_count = sizeof(apd) / sizeof(action_property_description);
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      apd_count == (unsigned int)id::pet_builtin_action_count,
                      "there must be entries for all actions.");
     bool found = false;
@@ -84,7 +84,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
             else _reversal = NULL;
         }
     }
-    opencog::cassert(TRACE_INFO, found,
+    OC_ASSERT(found,
                      "pet_builtin_action with enum %d has not been found in apd", pbae);
     //standard properties specific to action argument
     unsigned int aapd_count =
@@ -106,10 +106,10 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
             //take the found index argument off arg_not_found
             arity_t index = aapd[i].argument_index;
             std::set<arity_t>::iterator it = arg_not_found.find(index);
-            opencog::cassert(TRACE_INFO, it != arg_not_found.end(),
+            OC_ASSERT(it != arg_not_found.end(),
                              "Either action %s does not have argument %d or this argument has already been found", _name.c_str(), index);
             arg_not_found.erase(it);
-            opencog::cassert(TRACE_INFO, index < abs_arity);
+            OC_ASSERT(index < abs_arity);
             _arg_additive[index] = aapd[i].additive;
             _arg_zero_neutral[index] = aapd[i].zero_neutral;
             _arg_modulo[index] = aapd[i].modular;
@@ -117,7 +117,7 @@ void pet_builtin_action::set_action(pet_builtin_action_enum pbae,
             _arg_modulo_max[index] = aapd[i].max_value;
         }
     }
-    opencog::cassert(TRACE_INFO, arg_not_found.empty(),
+    OC_ASSERT(arg_not_found.empty(),
                      "Some argument are not found in aapd for action %s", _name.c_str());
     //check if exists additive, zero_neutral
     bool not_exists_additive = true;
@@ -154,7 +154,7 @@ builtin_action pet_builtin_action::instance(const std::string& name)
 builtin_action pet_builtin_action::instance(pet_builtin_action_enum pbae)
 {
     static const pet_builtin_action* actions = init_actions();
-    opencog::cassert(TRACE_INFO, pbae < id::pet_builtin_action_count);
+    OC_ASSERT(pbae < id::pet_builtin_action_count);
     return static_cast<builtin_action>(&actions[pbae]);
 }
 

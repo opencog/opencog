@@ -77,7 +77,7 @@ const definite_object_set EntityRelevanceFilter::getEntities(const WorldProvider
     definite_object_set result;
     //get all maps that span over the exemplars of the trick
     Handle h = wp.getAtomSpace().getHandle(CONCEPT_NODE, trick_name);
-    opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
+    OC_ASSERT(h != Handle::UNDEFINED,
                      "EntityRelevanceFilter - There is no CONCEPT_NODE in AtomSpace for trick '%s'.",
                      trick_name.c_str());
     std::list<HandleTemporalPair> retP;
@@ -196,7 +196,7 @@ const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
             listLink_h = atomSpace.getOutgoing(executionLink_h, 1);
             Handle sentence_h = atomSpace.getOutgoing(listLink_h, 1);
 
-            opencog::cassert(TRACE_INFO, dynamic_cast<Node*>(TLB::getAtom(sentence_h)),
+            OC_ASSERT(dynamic_cast<Node*>(TLB::getAtom(sentence_h)),
                              "Failed to dynamically cast sentence_h to a 'Node'.");
             std::string message_str = atomSpace.getName(sentence_h);
             if (exclude_prefix) {

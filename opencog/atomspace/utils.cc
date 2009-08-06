@@ -34,6 +34,7 @@
 
 #include "utils.h"
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
@@ -54,7 +55,7 @@ void initReferenceTime()
 
 unsigned long getElapsedMillis()
 {
-    cassert(TRACE_INFO, referenceTimeInitialized,
+    OC_ASSERT(referenceTimeInitialized,
             "utils - refenceTimeInitialized should have been initialized.");
     timeval currentTime;
     gettimeofday(&currentTime, NULL);

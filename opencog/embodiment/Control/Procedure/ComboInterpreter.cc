@@ -180,14 +180,14 @@ bool ComboInterpreter::isFailed(RunningProcedureId id)
 // - procedure execution was not stopped (by calling stopProcedure() method)
 combo::vertex ComboInterpreter::getResult(RunningProcedureId id)
 {
-    opencog::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
-    opencog::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
+    OC_ASSERT(isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
+    OC_ASSERT(!isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
 
     ResultMap::iterator it = _resultMap.find(id);
 
     if (it == _resultMap.end()) {
         Map::iterator mi = _map.find(id);
-        opencog::cassert(TRACE_INFO, mi != _map.end(), "ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
+        OC_ASSERT(mi != _map.end(), "ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
         return mi->second.getResult();
     }
     return it->second;
@@ -195,13 +195,13 @@ combo::vertex ComboInterpreter::getResult(RunningProcedureId id)
 
 combo::variable_unifier& ComboInterpreter::getUnifierResult(RunningProcedureId id)
 {
-    opencog::cassert(TRACE_INFO, isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
-    opencog::cassert(TRACE_INFO, !isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
+    OC_ASSERT(isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
+    OC_ASSERT(!isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
 
     UnifierResultMap::iterator it = _unifierResultMap.find(id);
     if (it == _unifierResultMap.end()) {
         Map::iterator m_it = _map.find(id);
-        opencog::cassert(TRACE_INFO, m_it != _map.end(), "ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
+        OC_ASSERT(m_it != _map.end(), "ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
         return m_it->second.getUnifierResult();
     }
     return it->second;

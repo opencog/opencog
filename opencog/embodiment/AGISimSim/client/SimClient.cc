@@ -23,6 +23,7 @@
 
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include "SimProxy.h"
 #include <stdio.h>
 
@@ -50,7 +51,7 @@ void initReferenceTime()
 
 ulong getElapsedMillis()
 {
-    opencog::cassert(TRACE_INFO, referenceTimeInitialized,
+    OC_ASSERT(referenceTimeInitialized,
                      "SimClient - refenceTimeInitialized should have been initialized.");
     timeval currentTime;
     gettimeofday(&currentTime, NULL);

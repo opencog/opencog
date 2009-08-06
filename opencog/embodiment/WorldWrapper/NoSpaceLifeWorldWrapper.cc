@@ -72,9 +72,9 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
     //Behavior Description that is to be tried to be fitted
     unsigned int simulated_time = _noSpaceLife.getCurrentTime();
     for (sib_it sib = from; sib != to; ++sib) {
-        opencog::cassert(TRACE_INFO, is_builtin_action(*sib));
+        OC_ASSERT(is_builtin_action(*sib));
         for (sib_it arg = sib.begin(); arg != sib.end(); ++arg) {
-            opencog::cassert(TRACE_INFO,
+            OC_ASSERT(
                              is_definite_object(*arg)
                              || is_indefinite_object(*arg)
                              || is_contin(*arg),
@@ -85,9 +85,9 @@ bool NoSpaceLifeWorldWrapper::sendSequential_and(sib_it from, sib_it to)
                 indefinite_object io = get_indefinite_object(*arg);
                 //check that it's not a random indefinite object and evaluate it
                 if (!is_random(io)) {
-                    opencog::cassert(TRACE_INFO, arg.is_childless());
+                    OC_ASSERT(arg.is_childless());
                     Handle h = _noSpaceLife.getCurrentMapHandle();
-                    opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
+                    OC_ASSERT(h != Handle::UNDEFINED,
                                      "A SpaceMap must exists");
                     //eval indefinite object, put _avatarName as selfName to get
                     //avatar_to_imitate's view point
@@ -108,7 +108,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalPerception(pre_it it, combo::variable
 {
     Handle h = _noSpaceLife.getCurrentMapHandle();
     unsigned int simulated_time = _noSpaceLife.getCurrentTime();
-    opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED, "A SpaceMap must exists");
+    OC_ASSERT(h != Handle::UNDEFINED, "A SpaceMap must exists");
     //eval perception, put _avatarName as selfName to get
     //avatar_to_imitate's view point
     return WorldWrapperUtil::evalPerception(rng, h, simulated_time,
@@ -120,7 +120,7 @@ combo::vertex NoSpaceLifeWorldWrapper::evalIndefiniteObject(combo::indefinite_ob
 {
     Handle h = _noSpaceLife.getCurrentMapHandle();
     unsigned int simulated_time = _noSpaceLife.getCurrentTime();
-    opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED, "A SpaceMap must exists");
+    OC_ASSERT(h != Handle::UNDEFINED, "A SpaceMap must exists");
     //eval indefinite object, put _avatarName as selfName to get
     //avatar_to_imitate's view point
     return WorldWrapperUtil::evalIndefiniteObject(rng, h,

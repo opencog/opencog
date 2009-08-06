@@ -28,6 +28,7 @@
 #include "hashing.h"
 #include "hash_map.h"
 #include "exceptions.h"
+#include "oc_assert.h"
 
 //define this in case you want to count the number of evaluations
 //that is when the function call isn't yet in the cache
@@ -146,8 +147,8 @@ namespace opencog {
         _lru.pop_back();
       }
       
-      opencog::cassert(TRACE_INFO, _map.size()<=_n, "lru_cache - _map size greater than _n (%d).", _n);
-      opencog::cassert(TRACE_INFO, _lru.size()==_map.size(), "lru_cache - _lru size different from _map size.");
+      OC_ASSERT(_map.size()<=_n, "lru_cache - _map size greater than _n (%d).", _n);
+      OC_ASSERT(_lru.size()==_map.size(), "lru_cache - _lru size different from _map size.");
       
       //return the result
       return it->second;

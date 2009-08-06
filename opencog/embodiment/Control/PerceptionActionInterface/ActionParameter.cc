@@ -27,6 +27,7 @@
 #include "PAIUtils.h"
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
 
 using namespace PerceptionActionInterface;
@@ -46,19 +47,19 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
     case INT_CODE:
     case FLOAT_CODE:
     case STRING_CODE:
-        opencog::cassert(TRACE_INFO, isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        OC_ASSERT(isStringValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
         break;
     case VECTOR_CODE:
-        opencog::cassert(TRACE_INFO, isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        OC_ASSERT(isVectorValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
         break;
     case ROTATION_CODE:
-        opencog::cassert(TRACE_INFO, isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        OC_ASSERT(isRotationValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
         break;
     case ENTITY_CODE:
-        opencog::cassert(TRACE_INFO, isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
+        OC_ASSERT(isEntityValue(), "ActionParameter constructor: got invalid value for parameter of the type: %s\n", _type.getName().c_str());
         break;
     default:
-        opencog::cassert(TRACE_INFO, false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
+        OC_ASSERT(false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
         break;
     }
 }

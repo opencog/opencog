@@ -111,7 +111,7 @@ Handle WorldWrapperUtil::toHandle(const AtomSpace& as,
         HandleSeq tmp;
         as.getHandleSet(std::back_inserter(tmp), OBJECT_NODE, id);
         //unique id assumption
-        opencog::cassert(TRACE_INFO, tmp.size() <= 1);
+        OC_ASSERT(tmp.size() <= 1);
         return tmp.empty() ? Handle::UNDEFINED : tmp.front();
     }
     return h;
@@ -205,7 +205,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
 //    if(tmp.size()==0) //do a dump before failing
 //      as.print();
 
-    opencog::cassert(TRACE_INFO, tmp.size() <= 1); //need to assume that PredicateNode names are unique
+    OC_ASSERT(tmp.size() <= 1); //need to assume that PredicateNode names are unique
     if (tmp.empty()) {
         logger().debug(
                      "WWUtil - rec_lookup found no predicate node for '%s'.",
@@ -255,9 +255,9 @@ bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
                                   const string& owner_id,
                                   vertex v)
 {
-    opencog::cassert(TRACE_INFO, is_definite_object(v));
+    OC_ASSERT(is_definite_object(v));
 
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      toHandle(as, get_definite_object(v), self_id, owner_id)
                      != Handle::UNDEFINED,
                      "WorldWrapperUtil - Null handle for definite objetc %s.",
@@ -304,7 +304,7 @@ throw (opencog::ComboException,
     std::string res;
     SpaceServer::SpaceMapPoint selfLoc;
 
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      smh != Handle::UNDEFINED,
                      "A SpaceMap must exist");
     const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
@@ -807,13 +807,13 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         combo::variable_unifier& vu)
 {
 
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      is_perception(*it),
                      "It is assumed that '*it' is a perception");
 
     perception p = get_perception(*it);
     if (p == instance(id::is_null)) { //just check directly
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1);
+        OC_ASSERT(it.number_of_children() == 1);
 
         combo::vertex v = *it.begin();
         if (is_indefinite_object(v)) { //eval indefinite object of argument
@@ -830,9 +830,9 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         return combo::bool_to_vertex(get_definite_object(v) == id::null_obj);
 
     } else if (p == instance(id::exists)) {
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          it.number_of_children() == 1);
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          smh != Handle::UNDEFINED,
                          "A SpaceMap must exist");
         const SpaceServer::SpaceMap& sm = atomSpace.getSpaceServer().getMap(smh);
@@ -1138,7 +1138,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         //is_moving predicate
     case id::is_moving: {
         if (isInThePast) {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 1);
+            OC_ASSERT(it.number_of_children() == 1);
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
                 WorldWrapperUtil::getDefiniteObjects(rng, smh, time,
@@ -1146,7 +1146,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                      self_id, owner_id, vo,
                                                      isInThePast, vu);
 
-            opencog::cassert(TRACE_INFO,
+            OC_ASSERT(
                              is_definite_object(vo),
                              "Should be of type definite object");
 
@@ -1208,12 +1208,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     break; //if not in the past then get off the case
 
     case id::is_holding_something: {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "is_holding_something perception takes"
                          " only one argument and got %d",
                          it.number_of_children());
         if (isInThePast) {
-            opencog::cassert(TRACE_INFO, false, "not implemented yet");
+            OC_ASSERT(false, "not implemented yet");
         } else {
             vertex vo = *it.begin();
             std::vector<definite_object> definite_objects =
@@ -1276,7 +1276,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         // no cache here since this case only care with past occurencies.
         // present occurancies are taken care as default
         if (isInThePast) {
-            opencog::cassert(TRACE_INFO, it.number_of_children() == 2,
+            OC_ASSERT(it.number_of_children() == 2,
                              "WWUtil - near - wrong number of arguments (should be 2) : %d",
                              it.number_of_children());
             {
@@ -1306,7 +1306,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 foreach(combo::definite_object vo1_def_obj,
                         vo1_definite_objects) {
                     Handle h1 = toHandle(atomSpace, vo1_def_obj, self_id, owner_id);
-                    opencog::cassert(TRACE_INFO,
+                    OC_ASSERT(
                                      h1 != Handle::UNDEFINED,
                                      "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
 
@@ -1316,8 +1316,8 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                         Handle h2 = toHandle(atomSpace, vo2_def_obj,
                                              self_id, owner_id);
 
-                        opencog::cassert(TRACE_INFO, h1 != Handle::UNDEFINED, "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
-                        opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED, "WWUtil - near - A SpaceMap must exist");
+                        OC_ASSERT(h1 != Handle::UNDEFINED, "WWUtil - near - Handle h1 should not be Handle::UNDEFINED.");
+                        OC_ASSERT(smh != Handle::UNDEFINED, "WWUtil - near - A SpaceMap must exist");
 
                         stringstream ss;
                         ss << instance(pe);
@@ -1362,7 +1362,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     break; //if not in the past then get off the case
 
     case id::has_said: {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 2, "WWUtil - hasSaid - must have 2 children");
+        OC_ASSERT(it.number_of_children() == 2, "WWUtil - hasSaid - must have 2 children");
 
         sib_it sib_arg = it.begin();
         vertex va1 = *sib_arg;
@@ -1374,7 +1374,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         //not necessary since we do not use the destination to reconstitute
         //the message but rather the message
         vertex va2 = *(++sib_arg);
-        opencog::cassert(TRACE_INFO, is_message(va2), "WWUtil - hasSaid - 2nd argument must be of type message");
+        OC_ASSERT(is_message(va2), "WWUtil - hasSaid - 2nd argument must be of type message");
         const std::string& message = get_message(va2).getContent();
 
         // cache predicate data variables
@@ -1429,7 +1429,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     // -------------- pet feelings (signals) perceptions. these return the value of the signal
     // at the moment. is_X functions for pet feelings are implemented as combo scripts.
     case id::get_hunger: {
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - getHunger perception accept only one argument. Got '%d'.", it.number_of_children());
         vertex vo = *it.begin();
         if (is_indefinite_object(vo)) {
@@ -1468,7 +1468,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     break;
 
     case id::get_thirst:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_thirst perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
@@ -1507,7 +1507,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_energy:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_energy perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
@@ -1546,7 +1546,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_fitness:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_fitness perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
@@ -1585,7 +1585,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_pee_urgency:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_pee_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
@@ -1623,7 +1623,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::get_poo_urgency:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 1,
+        OC_ASSERT(it.number_of_children() == 1,
                          "WWUtil - get_poo_urgency perception accept only one argument. Got '%d'.", it.number_of_children());
         {
             vertex vo = *it.begin();
@@ -1671,7 +1671,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         if (repetition == CACHE_MISS) {
             Handle handle = atomSpace.getHandle(CONCEPT_NODE,
                                                 "currentActionRepetition");
-            opencog::cassert(TRACE_INFO, handle != Handle::UNDEFINED,
+            OC_ASSERT(handle != Handle::UNDEFINED,
                              "WWUtil - There should be a ConceptNode for currentActionRepetition");
 
             HandleSeq result;
@@ -1708,7 +1708,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     break;
 
     case id::is_agent_state: {
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          it.number_of_children() == 1 && is_contin(*it.begin()),
                          "WWUtil - is_agent_state perception accept one argument and it must be a contin. Got '%d' arguments.",
                          it.number_of_children());
@@ -1730,7 +1730,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
 
         if (state == CACHE_MISS) {
             Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, self_id );
-            opencog::cassert(TRACE_INFO,
+            OC_ASSERT(
                              agentHandle != Handle::UNDEFINED,
                              "WWUtil - is_agent_state invalid agentHandle");
             Handle stateNodeHandle = atomSpace.getHandle( NUMBER_NODE, stateNumber );
@@ -1756,7 +1756,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     break;
 
     case id::is_there_relation:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 3,
+        OC_ASSERT(it.number_of_children() == 3,
                          "WWUtil - is_there_relation perception needs"
                          " three arguments. Got '%d'.",
                          it.number_of_children());
@@ -1777,7 +1777,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::is_proportional_next:
-        opencog::cassert(TRACE_INFO, it.number_of_children() == 4,
+        OC_ASSERT(it.number_of_children() == 4,
                          "WWUtil - is_proportional_next perception needs four arguments. Got '%d'.", it.number_of_children());
         {
             WorldWrapperUtil::changePredicateName(tmp, std::string("next"));
@@ -1836,7 +1836,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     name = get_definite_object(*tree_it);
 
                 } else {
-                    opencog::cassert(TRACE_INFO,
+                    OC_ASSERT(
                                      false,
                                      "WWUtil - is_proportional_next - argument should be perception or definite_object");
                 }
@@ -1890,7 +1890,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                     name = get_definite_object(*tree_it);
 
                 } else {
-                    opencog::cassert(TRACE_INFO, false, "WWUtil - is_proportional_next - argument should be perception or definite_object");
+                    OC_ASSERT(false, "WWUtil - is_proportional_next - argument should be perception or definite_object");
                 }
 
                 for (it = vu.begin(); it != vu.end(); it++) {
@@ -1944,11 +1944,12 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::is_last_group_command:
-        opencog::cassert(TRACE_INFO, it.number_of_children() >= 2, "WWUtil - is_last_group_command perception needs at least two arguments. Got '%d'.", it.number_of_children());
+        OC_ASSERT(it.number_of_children() >= 2, "WWUtil - is_last_group_command perception needs at least two arguments. Got '%d'.", it.number_of_children());
         {
             sib_it sib_arg = it.begin();
 
-            opencog::cassert( TRACE_INFO, is_definite_object(*sib_arg), "WWUtil - is_last_group_command 1nd parameter should be a definite_object" );
+            OC_ASSERT(is_definite_object(*sib_arg),
+                      "WWUtil - is_last_group_command 1nd parameter should be a definite_object" );
 
             combo::vertex vo1 = *sib_arg;
             std::vector<combo::definite_object> agent_definite_objects =
@@ -1961,7 +1962,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             // std::string targetName = get_definite_object(*sib_arg);
             ++sib_arg;
 
-            opencog::cassert( TRACE_INFO, is_definite_object(*sib_arg), "WWUtil - is_last_group_command 2nd parameter should be a definite_object" );
+            OC_ASSERT(is_definite_object(*sib_arg), "WWUtil - is_last_group_command 2nd parameter should be a definite_object" );
             std::string command = get_definite_object(*sib_arg);
 
 
@@ -2129,7 +2130,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::is_last_agent_action:
-        opencog::cassert(TRACE_INFO, it.number_of_children() >= 2,
+        OC_ASSERT(it.number_of_children() >= 2,
                          "WWUtil - is_last_agent_action perception needs at least two arguments. Got '%d'.", it.number_of_children());
         {
             sib_it sib_arg = it.begin();
@@ -2141,7 +2142,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                                                      isInThePast, vu);
 
             vertex vo2 = *(++sib_arg);
-            opencog::cassert(TRACE_INFO, is_definite_object(vo2), "WWUtil - is_last_agent_action 2nd parameter should be a definite_object");
+            OC_ASSERT(is_definite_object(vo2), "WWUtil - is_last_agent_action 2nd parameter should be a definite_object");
 
             // action name comes with an ACTION_NAME_POSTFIX so it won't be
             // confused with combo actions - so first we need to remove this
@@ -2157,7 +2158,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                              owner_id, get_indefinite_object(v_temp),
                              isInThePast);
                 }
-                opencog::cassert(TRACE_INFO, is_definite_object(v_temp),
+                OC_ASSERT(is_definite_object(v_temp),
                                  "WWUtil - is_last_agent_action action parameters should already be a definite_objects.");
                 parameters.push_back(std::string(get_definite_object(v_temp)));
             }
@@ -2272,7 +2273,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         break;
 
     case id::is_last_pet_schema:
-        opencog::cassert(TRACE_INFO, it.number_of_children() >= 1,
+        OC_ASSERT(it.number_of_children() >= 1,
                          "WWUtil - is_last_pet_schema perception needs at"
                          " least one argument. Got '%d'.",
                          it.number_of_children());
@@ -2280,14 +2281,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
             sib_it sib_arg = it.begin();
 
             vertex vo1 = *sib_arg;
-            opencog::cassert(TRACE_INFO, is_definite_object(vo1),
+            OC_ASSERT(is_definite_object(vo1),
                              "WWUtil - is_last_pet_action 1st parameter"
                              " should be a definite_object");
 
             std::string action_name = get_action_name(get_definite_object(vo1));
 
             vo1 = *(++sib_arg);
-            opencog::cassert(TRACE_INFO, is_action_result(vo1),
+            OC_ASSERT(is_action_result(vo1),
                              "WWUtil - is_last_pet_schema 2nd parameter"
                              " should be an action_result");
 
@@ -2548,7 +2549,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
     //get the string of tmp, just for the opencog::cassert
     stringstream ss;
     ss << tmp;
-    opencog::cassert(TRACE_INFO, !isInThePast, "There is no methods yet to evaluate the perception %s in the past",
+    OC_ASSERT(!isInThePast, "There is no methods yet to evaluate the perception %s in the past",
                      ss.str().c_str());
 
 
@@ -2589,14 +2590,14 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         } else if (is_definite_object(*tmp_it)) {
             name = get_definite_object(*tmp_it);
         } else {
-            opencog::cassert(TRACE_INFO, false,
+            OC_ASSERT(false,
                              "WWUtil - default - argument tmp_it should"
                              " be a perception or definite_object.");
         }
         std::vector<std::string> arguments;
 
         for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
-            opencog::cassert(TRACE_INFO, is_definite_object(*arg),
+            OC_ASSERT(is_definite_object(*arg),
                              "WWUtil - default eval - argument should"
                              " already be definite_object");
             arguments.push_back(get_definite_object(*arg));
@@ -2655,7 +2656,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
         } else if (is_definite_object(*tmp_it)) {
             name = get_definite_object(*tmp_it);
         } else {
-            opencog::cassert(TRACE_INFO, false,
+            OC_ASSERT(false,
                              "WWUtil - default - argument tmp_it should"
                              " be a perception or definite_object.");
         }
@@ -2671,7 +2672,7 @@ combo::vertex WorldWrapperUtil::evalPerception(opencog::RandGen& rng,
                 // cache predicate arguments
                 std::vector<std::string> arguments;
                 for (sib_it arg = tmp_it.begin(); arg != tmp_it.end(); ++arg) {
-                    opencog::cassert(TRACE_INFO, is_definite_object(*arg),
+                    OC_ASSERT(is_definite_object(*arg),
                                      "WWUtil - default eval - argument should"
                                      " already be definite_object");
                     arguments.push_back(get_definite_object(*arg));
@@ -2830,7 +2831,7 @@ perception WorldWrapperUtil::nearest_random_X_to_is_X(pet_indefinite_object_enum
         return instance(id::is_pee_place);
         //default
     default:
-        opencog::cassert(TRACE_INFO, false, "nothing is associated with io");
+        OC_ASSERT(false, "nothing is associated with io");
         return instance(id::is_null);
     }
 }
@@ -2876,7 +2877,7 @@ WorldWrapperUtil::getDefiniteObjects(opencog::RandGen& rng,
         }
 
     } else if (is_wild_card(v)) {
-        opencog::cassert(TRACE_INFO, !vu.empty(),
+        OC_ASSERT(!vu.empty(),
                          "WWUtil - evalPerception - unifier should"
                          " not be empty.");
         definite_objects = vu.getActiveSet();
@@ -2976,14 +2977,14 @@ float WorldWrapperUtil::getEmotionalFeelingOrTrait(opencog::RandGen& rng,
     if (is_definite_object(*it)) {
         name = get_definite_object(*it);
     } else {
-        opencog::cassert(TRACE_INFO, false,
+        OC_ASSERT(false,
                          "WWUtil - getEmotionalFeelingOrTrait - argument"
                          " it should be definite_object.");
     }
     std::vector<std::string> arguments;
 
     for (sib_it arg = it.begin(); arg != it.end(); ++arg) {
-        opencog::cassert(TRACE_INFO, is_definite_object(*arg),
+        OC_ASSERT(is_definite_object(*arg),
                          "WWUtil -  getEmotionalFeelingOrTrait - argument"
                          " should be definite_object");
         arguments.push_back(get_definite_object(*arg));

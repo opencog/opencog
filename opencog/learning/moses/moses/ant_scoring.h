@@ -129,7 +129,7 @@ struct AntFitnessFunction : unary_function<combo_tree, double> {
 
         // std::cout << "ANT EVAL : " << combo_tree(it) << std::endl;
 
-        // cassert(TRACE_INFO, is_action(*it) || is_builtin_action(*it));
+        // OC_ASSERT(is_action(*it) || is_builtin_action(*it));
 
         if (at_time >= _steps)
             return 0;
@@ -166,7 +166,7 @@ struct AntFitnessFunction : unary_function<combo_tree, double> {
             sib_it b2 = ++(++it.begin());
             return eval(trail[yn][xn] != ' ' ? b1 : b2, x, y, facing, at_time);
         } else {
-            opencog::cassert(TRACE_INFO, is_builtin_action(*it));
+            OC_ASSERT(is_builtin_action(*it));
             ++at_time;
             builtin_action a = get_builtin_action(*it);
             if (is_move_forward(a)) { //move forward

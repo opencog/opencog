@@ -304,16 +304,6 @@ public:
     AssertionException(const char* fmt, va_list ap);
 };
 
-/**
- * cassert complet with message and trace info
- */
-void cassert(const char * trace,  bool condition, const char * msg, ...);
-
-/**
- * cassert without message. Just trace information
- */
-void cassert(const char * trace, bool condition);
-
 } // namespace opencog
 
 #endif // _OPENCOG_EXCEPTIONS_H

@@ -32,6 +32,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlDefinitions.h>
@@ -480,7 +481,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
                      bool freshLinks)
 {
     logger().fine("NMXmlParser::loadXML");
-    cassert(TRACE_INFO, atomSpace != NULL,
+    OC_ASSERT(atomSpace != NULL,
             "loadXML - atomSpace should pointer should not be NULL.");
     HandleEntry* result = NULL;
 

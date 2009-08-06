@@ -27,6 +27,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/RandGen.h>
+#include <opencog/util/oc_assert.h>
 
 #include "field_set.h"
 #include <cmath>
@@ -106,7 +107,7 @@ struct ontomax: public unary_function<instance, contin_t> {
         for (field_set::const_onto_iterator it = fields.begin_onto(inst);
                 it != fields.end_onto(inst);++it) {
             onto_t s = *it;
-            opencog::cassert(TRACE_INFO, s.length() == 2,
+            OC_ASSERT(s.length() == 2,
                              "onto_t length should be equals to two");
             int a = boost::lexical_cast<int>(s[0]);
             int b = boost::lexical_cast<int>(s[1]);

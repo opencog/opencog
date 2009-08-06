@@ -296,7 +296,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
             this->petIsMoving = true;
             this->currentWalkingProcedure = schemaName;
 
-            cassert(TRACE_INFO, !arguments.empty(),
+            OC_ASSERT(!arguments.empty(),
                     "There must be at least one argument applied"
                     " to procedure '%s', instead there is no argument",
                     schemaName.c_str());

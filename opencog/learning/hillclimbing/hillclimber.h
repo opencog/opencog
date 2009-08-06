@@ -26,6 +26,7 @@
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/hash_set.h>
@@ -173,7 +174,7 @@ struct hillclimber {
         }
         case HC_INIT:
             if (_current_program.empty()) {
-                cassert(TRACE_INFO, _center.empty(),
+                OC_ASSERT(_center.empty(),
                         "_center must be empty, or maybe not?? Anyway fix that bug Nil!");
             }
             _hcState = HC_START_ITERATION;
@@ -204,7 +205,7 @@ struct hillclimber {
             estimate_fitness_at_most(_fitnessEstimationPerCycle);
             //update _best_fitness_estimated
             ordered_neighborhood_const_it oni = _ordered_best_estimates.begin();
-            cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
+            OC_ASSERT(!_ordered_best_estimates.empty(),
                     "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
             fitness_t fit = oni->first;
             if (fit >= _best_fitness_estimated) {
@@ -221,7 +222,7 @@ struct hillclimber {
         }
         break;
         default:
-            cassert(TRACE_INFO, false, "Hillclimber operator unknown case");
+            OC_ASSERT(false, "Hillclimber operator unknown case");
             break;
         }
     }
@@ -358,7 +359,7 @@ private:
     //---------------------------------------------------------------------
 
     void estimate_fitness_at_most(int n) {
-        cassert(TRACE_INFO, n > 0);
+        OC_ASSERT(n > 0);
         for (int i = 0; i < n && !_neighborhood.empty(); i++) {
 #ifdef COUNT_NUMBER_OF_FITNESS
             _number_of_fitness++;
@@ -412,7 +413,7 @@ private:
 
     //return the nth+1 the best (fitness, cadidate)
     ordered_neighborhood_it nth_best_candidate(int n) {
-        cassert(TRACE_INFO, n >= 0 && n < (int)_ordered_best_estimates.size());
+        OC_ASSERT(n >= 0 && n < (int)_ordered_best_estimates.size());
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
         for (int i_co = 0; i_co < n; i_co++)
             ++res;
@@ -440,7 +441,7 @@ private:
     //from ordered_neighborhood_it
     ordered_neighborhood_it random_best_candidate(RandGen& rng) {
         ordered_neighborhood_it res = _ordered_best_estimates.begin();
-        cassert(TRACE_INFO, !_ordered_best_estimates.empty(),
+        OC_ASSERT(!_ordered_best_estimates.empty(),
                 "_ordered_best_estimates should not be empty, if it may indeed be  empty then it is a bug, ask Nil to fix it");
         fitness_t fit = res->first;
         //choose randomly among programs with the same fitness
@@ -450,7 +451,7 @@ private:
             for (int i_co = 0; i_co < chosen_one; i_co++)
                 ++res;
         }
-        cassert(TRACE_INFO, fit == res->first);
+        OC_ASSERT(fit == res->first);
         return res;
     }
 
@@ -474,7 +475,7 @@ private:
         return true;
 #else
         tr = choose_rand_tree_from_order_neighborhood();
-        cassert(TRACE_INFO, false, "Not sure that piece of code is working well, if you see that assert tell Nil about it");
+        OC_ASSERT(false, "Not sure that piece of code is working well, if you see that assert tell Nil about it");
         return true;
 #endif
     }
@@ -506,7 +507,7 @@ private:
 
             int i = (int)((double)_ordered_best_estimates.size() * y);
             i = i % _ordered_best_estimates.size();
-            cassert(TRACE_INFO, i >= 0 && i < (int)_ordered_best_estimates.size());
+            OC_ASSERT(i >= 0 && i < (int)_ordered_best_estimates.size());
             oni = nth_best_candidate(i);
         } while (has_been_used_as_center(oni->second)); //to not use a center
         //that has

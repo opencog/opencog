@@ -53,7 +53,7 @@ const ant_perception* ant_perception::init_perceptions() {
 }
 
 void ant_perception::set_perception(ant_perception_enum ape) {
-  opencog::cassert(TRACE_INFO, ape<id::ant_perception_count);
+  OC_ASSERT(ape<id::ant_perception_count);
   _enum = ape;
   //fill the various properties using the arrays edited by the developer
 
@@ -61,7 +61,7 @@ void ant_perception::set_perception(ant_perception_enum ape) {
   set_basic_description(ape);
   //standard properties specific to action
   unsigned int ppd_count = sizeof(ppd)/sizeof(perception_property_description);
-  opencog::cassert(TRACE_INFO,
+  OC_ASSERT(
 	  ppd_count==(unsigned int)id::ant_perception_count,
 	  "there must be entries for all perceptions.");
   bool found = false;
@@ -76,7 +76,7 @@ void ant_perception::set_perception(ant_perception_enum ape) {
       _identity_of_indiscernibles = ppd[i].identity_of_indiscernibles;
     }
   }
-  opencog::cassert(TRACE_INFO, found,
+  OC_ASSERT(found,
 	  "ant_perception with enum %d has not been found in ppd", ape);
 }
 
@@ -93,7 +93,7 @@ const ant_perception* ant_perception::instance(const std::string& name) {
 
 const ant_perception* ant_perception::instance(ant_perception_enum ape) {
   static const ant_perception* perceptions=ant_perception::init_perceptions();
-  opencog::cassert(TRACE_INFO, ape<id::ant_perception_count);
+  OC_ASSERT(ape<id::ant_perception_count);
   return &perceptions[ape];
 }
 

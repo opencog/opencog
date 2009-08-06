@@ -175,7 +175,7 @@ public:
         stringstream ss;
         ss << "and_seq(move_forward)";
         ss >> center;
-        cassert(TRACE_INFO, !center.empty(), "in this test center cannot be empty");
+        OC_ASSERT(!center.empty(), "in this test center cannot be empty");
         ng.populate_neighborhood(nh, center, pre_it(center.begin()));
 
         for (combo_tree_ns_set_it i = nh.begin(); i != nh.end(); ++i) {

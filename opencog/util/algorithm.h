@@ -59,10 +59,10 @@ template<typename Erase, typename It1, typename It2, typename Comp>
 void erase_set_intersection(Erase erase, It1 from1, It1 to1,
                             It2 from2, It2 to2, Comp comp)
 {
-    cassert(TRACE_INFO, is_sorted(from1, to1, comp),
-            "algorithm - from1 -> to1 aren't sorted (erase_set_intersection).");
-    cassert(TRACE_INFO, is_sorted(from2, to2, comp),
-            "algorithm - from2 -> to2 aren't sorted (erase_set_intersection).");
+    OC_ASSERT(is_sorted(from1, to1, comp),
+              "algorithm - from1 -> to1 aren't sorted (erase_set_intersection).");
+    OC_ASSERT(is_sorted(from2, to2, comp),
+              "algorithm - from2 -> to2 aren't sorted (erase_set_intersection).");
 
     while (from1 != to1 && from2 != to2)
         if (comp(*from1, *from2)) {
@@ -81,10 +81,10 @@ template<typename Erase, typename It1, typename It2, typename Comp>
 void erase_set_difference(Erase erase, It1 from1, It1 to1,
                           It2 from2, It2 to2, Comp comp)
 {
-    cassert(TRACE_INFO, is_sorted(from1, to1, comp),
-            "algorithm - from1 -> to1 aren't sorted (erase_set_difference).");
-    cassert(TRACE_INFO, is_sorted(from2, to2, comp),
-            "algorithm - from2 -> to2 aren't sorted (erase_set_difference).");
+    OC_ASSERT(is_sorted(from1, to1, comp),
+              "algorithm - from1 -> to1 aren't sorted (erase_set_difference).");
+    OC_ASSERT(is_sorted(from2, to2, comp),
+              "algorithm - from2 -> to2 aren't sorted (erase_set_difference).");
 
     while (from1 != to1 && from2 != to2)
         if (comp(*from1, *from2)) {

@@ -58,13 +58,13 @@ const pet_perception* pet_perception::init_perceptions()
 
 void pet_perception::set_perception(pet_perception_enum ppe)
 {
-    opencog::cassert(TRACE_INFO, ppe < id::pet_perception_count);
+    OC_ASSERT(ppe < id::pet_perception_count);
     _enum = ppe;
     //fill the various properties using the arrays edited by the developer
     set_basic_description(ppe);
     //standard properties specific to action
     unsigned int ppd_count = sizeof(ppd) / sizeof(perception_property_description);
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      ppd_count == (unsigned int)id::pet_perception_count,
                      "there must be entries for all perceptions.");
     bool found = false;
@@ -79,7 +79,7 @@ void pet_perception::set_perception(pet_perception_enum ppe)
             _identity_of_indiscernibles = ppd[i].identity_of_indiscernibles;
         }
     }
-    opencog::cassert(TRACE_INFO, found,
+    OC_ASSERT(found,
                      "pet_perception with enum %d has not been found in ppd", ppe);
 }
 
@@ -98,7 +98,7 @@ perception pet_perception::instance(const std::string& name)
 perception pet_perception::instance(pet_perception_enum ppe)
 {
     static const pet_perception* perceptions = init_perceptions();
-    opencog::cassert(TRACE_INFO, ppe < id::pet_perception_count);
+    OC_ASSERT(ppe < id::pet_perception_count);
     return static_cast<perception>(&perceptions[ppe]);
 }
 

@@ -91,7 +91,7 @@ BuiltInProcedureRepository::~BuiltInProcedureRepository()
 
 void BuiltInProcedureRepository::add(BuiltInProcedure* proc)
 {
-    opencog::cassert(TRACE_INFO, !contains(proc->getName()),
+    OC_ASSERT(!contains(proc->getName()),
                      "BuitInProcedureRepository - Repository already contains procedure %s.",
                      proc->getName().c_str());
     _map[proc->getName()] = proc;

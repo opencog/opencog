@@ -762,7 +762,7 @@ TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
 {
-    cassert(TRACE_INFO, (N % 2) == 0, "N = %d must be pair", N);
+    OC_ASSERT((N % 2) == 0, "N = %d must be pair", N);
 
     int Nsub = N/2;
     int Nsuper = Nsub;

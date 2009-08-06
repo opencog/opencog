@@ -22,6 +22,7 @@
  */
 
 #include "CompareAtomTreeTemplate.h"
+#include <opencog/util/oc_assert.h>
 
 //------------------------
 //is_atom_tree_template_of
@@ -42,8 +43,8 @@ bool is_atom_tree_template_of::is_atom_tree_template_it(const atom_tree& tr1,
         const opencog::AtomSpace* as,
         bool ec) const
 {
-    cassert(TRACE_INFO, tr1.is_valid(it1), "atom_tree tr1 isn't a valid one.");
-    cassert(TRACE_INFO, tr2.is_valid(it2), "atom_tree tr2 isn't a valid one.");
+    OC_ASSERT(tr1.is_valid(it1), "atom_tree tr1 isn't a valid one.");
+    OC_ASSERT(tr2.is_valid(it2), "atom_tree tr2 isn't a valid one.");
     Vertex v1 = *it1;
     Vertex v2 = *it2;
 
@@ -53,8 +54,8 @@ bool is_atom_tree_template_of::is_atom_tree_template_it(const atom_tree& tr1,
     Type* t2_ptr = boost::get<Type>(&v2);
 
     //assert that the vertices are Handle
-    cassert(TRACE_INFO, (h1_ptr != NULL) ^ (t1_ptr != NULL), "atom_vertex v1 should be 'Handle' or 'Type' typed.");
-    cassert(TRACE_INFO, (h2_ptr != NULL) ^ (t2_ptr != NULL), "atom_vertex v2 should be 'Handle' or 'Type' typed.");
+    OC_ASSERT((h1_ptr != NULL) ^ (t1_ptr != NULL), "atom_vertex v1 should be 'Handle' or 'Type' typed.");
+    OC_ASSERT((h2_ptr != NULL) ^ (t2_ptr != NULL), "atom_vertex v2 should be 'Handle' or 'Type' typed.");
 
     //debug print
     //std::cout << "XEQUAL H1 : " << ((h1_ptr != NULL)?TLB::getAtom(*h1_ptr)->toString():"TYPE")

@@ -26,6 +26,7 @@
 
 #include "field_set.h"
 #include <opencog/util/digraph.h>
+#include <opencog/util/oc_assert.h>
 
 namespace eda
 {

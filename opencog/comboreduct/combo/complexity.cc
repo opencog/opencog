@@ -43,7 +43,7 @@ namespace combo {
     if (*it==id::logical_not)
       return complexity(it.begin());
 
-//    cassert(TRACE_INFO, *it==id::logical_and || *it==id::logical_or, 
+//    OC_ASSERT(*it==id::logical_and || *it==id::logical_or, 
 //            "combo_tree node should be of logical types 'id::logical_and' or 'id::logical_or'.");
 // PJ now complexity for action trees can also be computed
 

@@ -141,7 +141,7 @@ namespace reduct {
 	      if (sib!=up)
 		*dom_out++=sib;
           } else {
-	    opencog::cassert(TRACE_INFO, *p==id::logical_or);
+	    OC_ASSERT(*p==id::logical_or);
 	    for (sib_it sib=p.begin();sib!=p.end();++sib)
 	      if (sib!=up && is_argument(*sib))
 		*cmd_out++=sib;

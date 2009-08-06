@@ -29,6 +29,7 @@
 #include "foreach.h"
 #include "algorithm.h"
 #include "exceptions.h"
+#include "oc_assert.h"
 #include <boost/iterator/counting_iterator.hpp>
 
 namespace opencog
@@ -99,7 +100,7 @@ Out randomized_topological_sort(digraph g, Out out)
                 q.push(dst);
         }
     }
-    cassert(TRACE_INFO, g.empty(), "digraph - g must be a DAG."); //must be a dag
+    OC_ASSERT(g.empty(), "digraph - g must be a DAG."); //must be a dag
     return out;
 }
 

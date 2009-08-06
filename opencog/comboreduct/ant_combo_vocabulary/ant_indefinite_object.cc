@@ -46,7 +46,7 @@ const ant_indefinite_object* ant_indefinite_object::init_indefinite_object() {
 }
 
 void ant_indefinite_object::set_indefinite_object(ant_indefinite_object_enum pioe) {
-  opencog::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
+  OC_ASSERT(pioe<id::ant_indefinite_object_count);
   _enum = pioe;
   //fill the various properties using the arrays edited by the developer
   set_basic_description(pioe);
@@ -65,7 +65,7 @@ indefinite_object ant_indefinite_object::instance(const std::string& name) {
 
 indefinite_object ant_indefinite_object::instance(ant_indefinite_object_enum pioe) {
   static const ant_indefinite_object* indefinite_objects=init_indefinite_object();
-  opencog::cassert(TRACE_INFO, pioe<id::ant_indefinite_object_count);
+  OC_ASSERT(pioe<id::ant_indefinite_object_count);
   return static_cast<indefinite_object>(&indefinite_objects[pioe]);
 }
 

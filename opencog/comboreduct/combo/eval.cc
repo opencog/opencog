@@ -65,7 +65,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                     } else { //raise an assert
                         std::stringstream ss;
                         ss << *at;
-                        opencog::cassert(TRACE_INFO, false,
+                        OC_ASSERT(false,
                                           "There is not enough arguments given"
                                           " in input, %s needs at least %d"
                                           " arguments and only %d are provided",
@@ -124,7 +124,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator it,
                     } else { //raise an assert
                         std::stringstream ss;
                         ss << *at;
-                        opencog::cassert(TRACE_INFO, false,
+                        OC_ASSERT(false,
                                           "There is not enough arguments given"
                                           " in input, %s needs at least %d"
                                           " arguments and only %d are provided",
@@ -153,7 +153,7 @@ void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
 truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
 {
-    opencog::cassert(TRACE_INFO, other.size() == size(),
+    OC_ASSERT(other.size() == size(),
                       "truth_tables size should be the same.");
 
     size_type res = 0;
@@ -185,7 +185,7 @@ contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, opencog:
         //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, t);
         //assumption : res is contin_t
-        opencog::cassert(TRACE_INFO, is_contin(res),
+        OC_ASSERT(is_contin(res),
                           "vertex isn't contin (contin_table)");
         push_back(get_contin(res));
     }
@@ -206,7 +206,7 @@ bool contin_table::operator==(const contin_table& ct) const
 
 contin_t contin_table::abs_distance(const contin_table& other) const
 {
-    opencog::cassert(TRACE_INFO, other.size() == size(),
+    OC_ASSERT(other.size() == size(),
                       "contin_tables should have the same size.");
 
     contin_t res = 0;

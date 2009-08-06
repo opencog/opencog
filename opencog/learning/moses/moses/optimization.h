@@ -405,7 +405,7 @@ struct univariate_optimization {
                                          rng),
                     logger, rng);
         } else { //truncation selection
-            opencog::cassert(TRACE_INFO, TRACE_INFO, false,
+            OC_ASSERT(TRACE_INFO, false,
                              "Trunction selection not implemented. Tournament should be used instead.");
             return 42;
             /*

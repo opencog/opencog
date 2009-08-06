@@ -45,6 +45,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 
 using std::string;
 using std::cerr;
@@ -127,9 +128,9 @@ void AtomSpace::atomRemoved(Handle h)
     Type type = getType(h);
     if (type == AT_TIME_LINK)
     {
-        cassert(TRACE_INFO, getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
+        OC_ASSERT(getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", getArity(h));
         Handle timeNode = getOutgoing(h, 0);
-        cassert(TRACE_INFO, getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
+        OC_ASSERT(getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
         Handle timedAtom = getOutgoing(h, 1);
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
         // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
@@ -174,15 +175,15 @@ void AtomSpace::print(std::ostream& output, Type type, bool subclass) const
 
 Handle AtomSpace::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv)
 {
-    cassert(TRACE_INFO, TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
+    OC_ASSERT(TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
     std::string nodeName = Temporal::getTimeNodeName(timestamp);
     return addTimeInfo(h, nodeName, tv);
 }
 
 Handle AtomSpace::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
 {
-    cassert(TRACE_INFO, TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
-    cassert(TRACE_INFO, t != UNDEFINED_TEMPORAL, "AtomSpace::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
+    OC_ASSERT(TLB::isValidHandle(h), "AtomSpace::addTimeInfo: Got an invalid handle as argument\n");
+    OC_ASSERT(t != UNDEFINED_TEMPORAL, "AtomSpace::addTimeInfo: Got an UNDEFINED_TEMPORAL as argument\n");
     return addTimeInfo(h, t.getTimeNodeName(), tv);
 }
 
@@ -219,8 +220,8 @@ bool AtomSpace::removeTimeInfo(Handle h, const Temporal& t, TemporalTable::Tempo
         if (TLB::isValidHandle(atTimeLink)) {
             Handle timeNode = getOutgoing(atTimeLink, 0);
             //printf("Got timeNode = %p\n", timeNode);
-            cassert(TRACE_INFO, getArity(atTimeLink) == 2, "AtomSpace::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n", getArity(atTimeLink));
-            cassert(TRACE_INFO, TLB::isValidHandle(timeNode) && getType(timeNode) == TIME_NODE, "AtomSpace::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
+            OC_ASSERT(getArity(atTimeLink) == 2, "AtomSpace::removeTimeInfo: Got invalid arity for AtTimeLink = %d\n", getArity(atTimeLink));
+            OC_ASSERT(TLB::isValidHandle(timeNode) && getType(timeNode) == TIME_NODE, "AtomSpace::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
             if (removeAtom(atTimeLink, recursive)) {
                 //printf("atTimeLink removed from AT successfully\n");
                 if (removeDisconnectedTimeNodes && getIncoming(timeNode).empty()) {
@@ -442,7 +443,7 @@ string AtomSpace::getName(Type t) const
 
     /*
     if (ClassServer::getClassName()->find(t) == ClassServer::getClassName()->end()) {
-        cassert(TRACE_INFO, false, "AtomSpace::getName(): Unknown atom type.");
+        OC_ASSERT(false, "AtomSpace::getName(): Unknown atom type.");
     }
     */
     return classserver().getTypeName(t);
@@ -525,7 +526,7 @@ Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const Trut
 
     Handle* head_handle_ptr = boost::get<Handle>(&(*it));
     Type* head_type_ptr = boost::get<Type>(&(*it));
-    cassert(TRACE_INFO, (head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "AtomSpace::addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "AtomSpace::addAtom(): Vertex should be of 'Handle' or 'Type' type.");
 
     HandleSeq handles;
 
@@ -833,7 +834,7 @@ int AtomSpace::getArity(Handle h) const
 void AtomSpace::setName(Handle h, const string& name)
 {
     Node *nnn = dynamic_cast<Node*>(TLB::getAtom(h));
-    cassert(TRACE_INFO, nnn != NULL, "AtomSpace::setName(): Handle h should be of 'Node' type.");
+    OC_ASSERT(nnn != NULL, "AtomSpace::setName(): Handle h should be of 'Node' type.");
     nnn->setName(name);
 }
 

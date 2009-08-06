@@ -61,7 +61,7 @@ ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
         _PVoc = new HCPetaverseVocabularyProvider();
     else if (ILALGO == Control::ImitationLearningAlgo::MOSES)
         _PVoc = new HCPetaverseVocabularyProvider();
-    else opencog::cassert(TRACE_INFO, false, "A valid learning algo must be selected");
+    else OC_ASSERT(false, "A valid learning algo must be selected");
 }
 
 ImitationLearningAgent::~ImitationLearningAgent()
@@ -80,7 +80,7 @@ void ImitationLearningAgent::run(CogServer* server)
 
     switch (_lts) {
     case LTS_LEARN:
-        opencog::cassert(TRACE_INFO, _PIL != NULL);
+        OC_ASSERT(_PIL != NULL);
         (*_PIL)();
         break;
 
@@ -104,7 +104,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         const string& avatar_id,
         const string& trick_name)
 {
-    opencog::cassert(TRACE_INFO, wp, "The World Provider points to NULL");
+    OC_ASSERT(wp, "The World Provider points to NULL");
     //retreive exemplars
     _BDCat.clear();
     _exemplarTemporals.clear();
@@ -128,13 +128,13 @@ bool ImitationLearningAgent::initLearning(int nepc,
 
         //for now it is assumed that _BDCat constins only one BD
         unsigned int bdcs = _BDCat.getSize();
-        opencog::cassert(TRACE_INFO, bdcs == 1,
+        OC_ASSERT(bdcs == 1,
                          "For now it is assumed that _BDCat contains only one BD");
 
         _arity = al.size();
         _all.push_back(al);
 
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          bdcs == _all.size() && bdcs == _exemplarTemporals.size(),
                          "The number of behavior description, argument lists and exemplar temporals must be equal");
 
@@ -143,7 +143,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //----------------------------------------
         logger().debug("ImitationLearningAgent - Getting definite objects from SpaceMap.");
         EntityRelevanceFilter filter;
-        opencog::cassert(TRACE_INFO, _definite_objects.empty(),
+        OC_ASSERT(_definite_objects.empty(),
                          "_definite_objects must be empty because it should have been cleared by stopLearning");
         //the filter transform owner id and avatar to imitate id into
         //"owner" and "self" respectively that's because the pet
@@ -216,7 +216,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //-----------------------------------------
         //generate filtered perceptions and actions
         //-----------------------------------------
-        opencog::cassert(TRACE_INFO, _entropyFilter == NULL,
+        OC_ASSERT(_entropyFilter == NULL,
                          "_entropyFilter must be NULL because it should have been deleted by stopLearning");
         //get petaverse elementary actions, perceptions and indefinite objects
         //and elementary operators
@@ -240,7 +240,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                            _atas,
                                            atl,
                                            *_rng);
-        opencog::cassert(TRACE_INFO, _atomic_perceptions.empty(),
+        OC_ASSERT(_atomic_perceptions.empty(),
                          "_atomic_perceptions must be empty because stopLearning would have clear it");
 
         _entropyFilter->generateFilteredPerceptions(_atomic_perceptions, config().get_double("ENTROPY_PERCEPTION_FILTER_THRESHOLD"), _BDCat, _exemplarTemporals, _all);
@@ -269,7 +269,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         Filter::ActionFilter af(_avatar_id, _owner_id, *wp, _definite_objects,
                                 io, ea, _arity, type_check_actions, *_rng);
 
-        opencog::cassert(TRACE_INFO, _atomic_actions.empty(),
+        OC_ASSERT(_atomic_actions.empty(),
                          "_atomic_actions must be empty because stopLearning would have clear it");
         af.insertActionSubseqs(_atomic_actions, _BDCat, _all,
                                config().get_int("ACTION_FILTER_SEQ_MAX"),
@@ -301,7 +301,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //--------------------------------
         //instanciate the fitness function
         //--------------------------------
-        opencog::cassert(TRACE_INFO, _fitnessEstimator == NULL,
+        OC_ASSERT(_fitnessEstimator == NULL,
                          "_fitnessEstimator must be NULL because it should have been deleted by stopLearning");
         _fitnessEstimator =
             new FE(wp, _pet_id, _owner_id, _avatar_id, _trick_name,
@@ -312,7 +312,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
         //----------------------------------
         //instanciate petaverse-hillclimbing
         //----------------------------------
-        opencog::cassert(TRACE_INFO, _PIL == NULL,
+        OC_ASSERT(_PIL == NULL,
                          "PIL must be NULL because it should have been deleted by stopLearning");
 
         //debug log for SPCTools
@@ -341,7 +341,7 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              _definite_objects, eo,
                                              _atomic_perceptions,
                                              _atomic_actions, *_rng);
-        } else opencog::cassert(TRACE_INFO, false,
+        } else OC_ASSERT(false,
                                     "A valid learning algo must be selected, see src/Control/SystemParameters.h for the various options");
 
         //initLearning succeeds
@@ -353,13 +353,13 @@ bool ImitationLearningAgent::initLearning(int nepc,
 void ImitationLearningAgent::addLearningExample(WorldProvider* wp,
         const argument_list& al)
 {
-    opencog::cassert(TRACE_INFO, wp, "The World Provider points to NULL");
+    OC_ASSERT(wp, "The World Provider points to NULL");
     //add new exemplar
     int cat_count = _BDCat.getSize();
     BDRetriever::addLastExemplar(_BDCat, _exemplarTemporals, *wp, _trick_name);
     if (cat_count != _BDCat.getSize()) { //a new exemplar has been added
 
-        opencog::cassert(TRACE_INFO, (int)al.size() == _arity,
+        OC_ASSERT((int)al.size() == _arity,
                          "For now the arity must be the same for all exemplars");
         _all.push_back(al);
 
@@ -493,14 +493,14 @@ void ImitationLearningAgent::waitForReward()
 
 void ImitationLearningAgent::setFitness(fitness_t f)
 {
-    opencog::cassert(TRACE_INFO, _PIL != NULL);
+    OC_ASSERT(_PIL != NULL);
     _PIL->set_current_fitness(f);
     _lts = LTS_LEARN;
 }
 
 void ImitationLearningAgent::stopLearning()
 {
-    opencog::cassert(TRACE_INFO, _PIL != NULL);
+    OC_ASSERT(_PIL != NULL);
 
     _definite_objects.clear();
     _messages.clear();
@@ -521,7 +521,7 @@ void ImitationLearningAgent::stopLearning()
 //return the best schema learned so far
 const combo_tree& ImitationLearningAgent::getBestSchema()
 {
-    opencog::cassert(TRACE_INFO, _PIL != NULL);
+    OC_ASSERT(_PIL != NULL);
     //if the bestSchema is empty, it means that the user didn't provide
     //any reward
     //then the best schema estimated is returned
@@ -535,7 +535,7 @@ const combo_tree& ImitationLearningAgent::getBestSchema()
 //the iteration has started
 const combo_tree& ImitationLearningAgent::getBestSchemaEstimated()
 {
-    opencog::cassert(TRACE_INFO, _PIL != NULL);
+    OC_ASSERT(_PIL != NULL);
     const combo_tree& cp = _PIL->current_program();
     return cp;
 }

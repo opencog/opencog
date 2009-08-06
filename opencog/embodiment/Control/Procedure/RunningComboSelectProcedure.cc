@@ -79,7 +79,7 @@ void RunningComboSelectProcedure::cycle()
     std::stringstream ss;
 
     ss << firstScriptResult;
-    opencog::cassert(TRACE_INFO, is_builtin(firstScriptResult),
+    OC_ASSERT(is_builtin(firstScriptResult),
                      "RunningComboSelectProcedure - First script result should be a buit-in. Got '%s'",
                      ss.str().c_str());
 
@@ -88,7 +88,7 @@ void RunningComboSelectProcedure::cycle()
 
         // no need for unification, normal execution
         if (this->secondScript.getArity() == 0) {
-            opencog::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            OC_ASSERT(this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
 
             Procedure::RunningProcedureId id = interpreter.runProcedure(secondScript.getComboTree(), empty_args);
             while (!interpreter.isFinished(id)) {
@@ -109,7 +109,7 @@ void RunningComboSelectProcedure::cycle()
             // one or more parameters, if unifier isn't empty, the last parameter MUST be an
             // unifier result
         } else {
-            opencog::cassert(TRACE_INFO, this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
+            OC_ASSERT(this->arguments.size() == 0, "RunningComboSelectProcedure - args should be empty.");
 
             // variable unifier - use it
             if (!unifier.empty()) {
@@ -209,7 +209,7 @@ bool RunningComboSelectProcedure::isFailed() const
 
 combo::vertex RunningComboSelectProcedure::getResult()
 {
-    opencog::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
+    OC_ASSERT(isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
     if (isFailed()) {
         return combo::id::action_failure;
     }
@@ -218,8 +218,8 @@ combo::vertex RunningComboSelectProcedure::getResult()
 
 combo::variable_unifier& RunningComboSelectProcedure::getUnifierResult()
 {
-    opencog::cassert(TRACE_INFO, isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
-    opencog::cassert(TRACE_INFO, !isFailed(), "RunningComboSelectProcedure - Procedure failed.");
+    OC_ASSERT(isFinished(), "RunningComboSelectProcedure - Procedure isn't finished.");
+    OC_ASSERT(!isFailed(), "RunningComboSelectProcedure - Procedure failed.");
 
     return unifier;
 }

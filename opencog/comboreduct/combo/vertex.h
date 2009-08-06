@@ -34,6 +34,7 @@
 #include <opencog/util/tree.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 #include "action.h"
 #include "builtin_action.h"
@@ -95,7 +96,7 @@ class argument
 {
 public:
     explicit argument(int i) : idx(i) {
-        opencog::cassert(TRACE_INFO, idx != 0,
+        OC_ASSERT(idx != 0,
                          "idx should be different fro zero.");
     }
     int idx;
@@ -421,7 +422,7 @@ inline size_t hash_value(const combo::vertex& v)
         return tmp;
     }
 
-    opencog::cassert(TRACE_INFO, false, "A case is missing");
+    OC_ASSERT(false, "A case is missing");
     return 0;
 }
 } //~namespace boost
@@ -635,14 +636,14 @@ inline vertex bool_to_vertex(bool b)
 }
 inline bool vertex_to_bool(const vertex& v)
 {
-    opencog::cassert(TRACE_INFO, v == id::logical_true || v == id::logical_false,
+    OC_ASSERT(v == id::logical_true || v == id::logical_false,
                      "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true);
 }
 //renamed negate_vertex to not enter in conflict with negate(string) of STL
 inline vertex negate_vertex(const vertex& v)
 {
-    opencog::cassert(TRACE_INFO, v == id::logical_true || v == id::logical_false,
+    OC_ASSERT(v == id::logical_true || v == id::logical_false,
                      "vertex should be of logical types 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true ? id::logical_false : id::logical_true);
 }
@@ -689,7 +690,7 @@ inline bool may_have_side_effects(combo_tree::iterator /*it*/)
 template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
 void str_to_vertex(const std::string& str, vertex& v)
 {
-    opencog::cassert(TRACE_INFO, !str.empty(), "input to string should not be empty.");
+    OC_ASSERT(!str.empty(), "input to string should not be empty.");
     //builtin
     if (str == "and" || str == "logical_and")
         v = id::logical_and;
@@ -760,7 +761,7 @@ void str_to_vertex(const std::string& str, vertex& v)
     //argument
     else if (str[0] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(1));
-        opencog::cassert(TRACE_INFO, arg != 0, "arg value should be different from zero.");
+        OC_ASSERT(arg != 0, "arg value should be different from zero.");
         v = argument(arg);
     }
     //constant

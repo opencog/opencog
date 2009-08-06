@@ -25,6 +25,7 @@
 #include <sstream>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 namespace eda
 {
@@ -83,7 +84,7 @@ contin_t field_set::get_contin(const instance& inst, size_t idx) const
         } else if (direction == contin_spec::Left) {
             stepper.left();
         } else { //direction==contin_spec::Right
-            opencog::cassert(TRACE_INFO, direction == contin_spec::Right,
+            OC_ASSERT(direction == contin_spec::Right,
                              "direction should be set to contin_spec::Right (get_contin).");
             stepper.right();
         }
@@ -170,7 +171,7 @@ void field_set::build_spec(const spec& s, size_t n)
             _nbool += n;
     } else if (const contin_spec* c = boost::get<contin_spec>(&s)) {
         //depth must be 2^n
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          c->depth == opencog::next_power_of_two(c->depth),
                          "depth must be 2^n and it is %d", 
                          c->depth); 
@@ -184,7 +185,7 @@ void field_set::build_spec(const spec& s, size_t n)
         _contin.insert(_contin.end(), n, *c);
     } else {
         const onto_spec* o = boost::get<onto_spec>(&s);
-        opencog::cassert(TRACE_INFO, o, "Null onto_spec pointer error.");
+        OC_ASSERT(o, "Null onto_spec pointer error.");
         size_t base = back_offset(), width = opencog::nbits_to_pack(o->branching);
         size_t total_width = size_t((width * o->depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;

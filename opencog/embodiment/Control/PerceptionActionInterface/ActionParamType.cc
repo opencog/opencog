@@ -23,6 +23,7 @@
 
 #include "ActionParamType.h"
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 #include <iostream>
 
 using namespace PerceptionActionInterface;
@@ -80,10 +81,10 @@ ActionParamType::ActionParamType(ActionParamTypeCode _code, const std::string& _
         code(_code), name(_name)
 {
     if (ActionParamType::existCode(code)) {
-        opencog::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type code: %d", _code);
+        OC_ASSERT(false, "ActionParamType - Duplicate action parameter type code: %d", _code);
     }
     if (ActionParamType::existName(name)) {
-        opencog::cassert(TRACE_INFO, false, "ActionParamType - Duplicate action parameter type name: %s", _name.c_str());
+        OC_ASSERT(false, "ActionParamType - Duplicate action parameter type name: %s", _name.c_str());
     }
     nameMap[name] = this;
     codeMap[code] = this;

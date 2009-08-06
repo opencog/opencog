@@ -1493,7 +1493,7 @@ void RuleEngine::processNextAction( void )
         } // for
     } // end block
 
-    cassert(TRACE_INFO, !weightedActions.empty(), "RuleEngine - weightedActions should not be empty, maybe you forgot to affect a non-null weight to defaultAction rules");
+    OC_ASSERT(!weightedActions.empty(), "RuleEngine - weightedActions should not be empty, maybe you forgot to affect a non-null weight to defaultAction rules");
 
     { // calculating the strength mean of all suggested actions..
         std::map<Action, std::vector<float> >::iterator it, it_chosen;

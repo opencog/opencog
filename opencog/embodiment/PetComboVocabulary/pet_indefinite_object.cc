@@ -53,14 +53,14 @@ const pet_indefinite_object* pet_indefinite_object::init_indefinite_object()
 
 void pet_indefinite_object::set_indefinite_object(pet_indefinite_object_enum pioe)
 {
-    opencog::cassert(TRACE_INFO, pioe < id::pet_indefinite_object_count);
+    OC_ASSERT(pioe < id::pet_indefinite_object_count);
     _enum = pioe;
     //fill the various properties using the arrays edited by the developer
     set_basic_description(pioe);
     //fill the properties
     unsigned int iopd_count =
         sizeof(iopd) / sizeof(indefinite_object_property_description);
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      iopd_count == (unsigned int)id::pet_indefinite_object_count,
                      "there must be entries for all indefinite objects.");
     bool found = false;
@@ -70,7 +70,7 @@ void pet_indefinite_object::set_indefinite_object(pet_indefinite_object_enum pio
             _random = iopd[i].random;
         }
     }
-    opencog::cassert(TRACE_INFO, found,
+    OC_ASSERT(found,
                      "pet_perception with enum %d has not been found in iopd", pioe);
 }
 
@@ -89,7 +89,7 @@ indefinite_object pet_indefinite_object::instance(const std::string& name)
 indefinite_object pet_indefinite_object::instance(pet_indefinite_object_enum pioe)
 {
     static const pet_indefinite_object* indefinite_objects = init_indefinite_object();
-    opencog::cassert(TRACE_INFO, pioe < id::pet_indefinite_object_count);
+    OC_ASSERT(pioe < id::pet_indefinite_object_count);
     return static_cast<indefinite_object>(&indefinite_objects[pioe]);
 }
 

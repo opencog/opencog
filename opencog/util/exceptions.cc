@@ -275,32 +275,3 @@ AssertionException::AssertionException(const char* fmt, va_list ap)
     opencog::logger().error(buf);
 }
 
-void opencog::cassert(const char * trace, bool condition, const char *fmt, ...)
-{
-    if (condition) return;
-
-    va_list        ap;
-    va_start(ap, fmt);
-
-    char * c_msg = new char[strlen(fmt) + strlen(trace) + 1];
-    *c_msg = '\0'; // empty c-string
-
-    strcat(c_msg, fmt);
-    strcat(c_msg, trace);
-
-    AssertionException ex = AssertionException(c_msg, ap);
-    va_end(ap);
-
-    delete [] c_msg;
-    throw ex;
-}
-
-void opencog::cassert(const char * trace, bool condition)
-{
-
-    if (condition) return;
-
-    AssertionException ex = AssertionException(trace);
-    throw ex;
-}
-

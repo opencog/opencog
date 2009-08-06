@@ -89,7 +89,7 @@ namespace combo {
   void ant_operator<OPERATOR_ENUM, enum_count>::set_basic_description(OPERATOR_ENUM oe) {
     const basic_description* bd = get_basic_description_array();
     unsigned int bd_count = get_basic_description_array_count();
-    opencog::cassert(TRACE_INFO, bd_count==(unsigned int)enum_count,
+    OC_ASSERT(bd_count==(unsigned int)enum_count,
 	    "there must be entries for all perceptions.");
     bool found = false;
     for(unsigned int i = 0; i < bd_count && !found; ++i) {
@@ -113,7 +113,7 @@ namespace combo {
 	_arg_type_tree = type_tree_input_arg_types(_type_tree);
       }
     }
-    opencog::cassert(TRACE_INFO, found,
+    OC_ASSERT(found,
 	    "ant_perception with enum %d has not been found in pbd", oe);    
   }
 

@@ -27,6 +27,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 namespace eda
 {
@@ -53,7 +54,7 @@ void local_structure_model::rec_split_onto(iptr_iter l, iptr_iter u,
         return;
     }
 
-    opencog::cassert(TRACE_INFO, node->size() == 1,
+    OC_ASSERT(node->size() == 1,
                      "dtree node size should be equals to 1.");
     (begin() + idx)->append_children(node, *node, raw_arity);
     node->front() = src_idx;
@@ -116,7 +117,7 @@ void local_structure_model::make_dtree(super::iterator dtr, int arity)
 void local_structure_model::split(int src_idx, int tgt_idx,
                                   dtree::iterator tgt)
 {
-    opencog::cassert(TRACE_INFO, tgt.number_of_children() == 0,
+    OC_ASSERT(tgt.number_of_children() == 0,
                      "dtree node should have exactly zero child (split)");
     (begin() + tgt_idx)->append_children(tgt, *tgt, tgt->size() - 1);
     *tgt = dtree_node(1, src_idx);
@@ -146,9 +147,9 @@ void local_structure_model::sample(dtree::iterator dtr, disc_t& dst,
         else
             dst = 0;//rng.randint(dtr->size()-1); //if no data, do uniform selection
     } else {
-        opencog::cassert(TRACE_INFO, dtr->size() == 1,
+        OC_ASSERT(dtr->size() == 1,
                          "dtree node size should be equals to 1.");
-        opencog::cassert(TRACE_INFO, (int)dtr.number_of_children() > margs[dtr->front()],
+        OC_ASSERT((int)dtr.number_of_children() > margs[dtr->front()],
                          "dtree node children number grearter than margs.");
         dtree::sibling_iterator child = dtr.begin();
         child += margs[dtr->front()];

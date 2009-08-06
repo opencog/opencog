@@ -22,8 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "action_symbol.h"
+#include <opencog/util/oc_assert.h>
 
 std::ostream& operator<<(std::ostream& out, combo::action_symbol as) {
-  opencog::cassert(TRACE_INFO, as);
+  OC_ASSERT(as);
   return out << as->get_name();
 }

@@ -22,6 +22,7 @@
 
 #include "lazy_selector.h"
 #include "exceptions.h"
+#include "oc_assert.h"
 
 namespace opencog
 {
@@ -29,7 +30,7 @@ namespace opencog
 int lazy_selector::operator()()
 {
 
-    cassert(TRACE_INFO, !empty(), "lazy_selector - selector is empty.");
+    OC_ASSERT(!empty(), "lazy_selector - selector is empty.");
     int idx = select();
     _n--;
 

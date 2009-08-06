@@ -64,7 +64,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                                        bool only_min_max) const
 {
     const std::vector<CompositeBehaviorDescription>& cbds = bc.getEntries();
-    opencog::cassert(TRACE_INFO, all.size() == cbds.size(),
+    OC_ASSERT(all.size() == cbds.size(),
                      "There must be as many behavior descriptions"
                      " as argument lists");
     std::vector<CompositeBehaviorDescription>::const_iterator ie = cbds.begin();
@@ -84,7 +84,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
     combo_tree_ns_set completeSeq_set = generateCompleteActionSeqs(cbd, al);
 
     //then select all sub sequences of size <=max_size
-    opencog::cassert(TRACE_INFO, max_size > 0 || max_size == -1,
+    OC_ASSERT(max_size > 0 || max_size == -1,
                      "You wanna select no action? Don't use an action"
                      " filter then!");
     for (combo_tree_ns_set_const_it ias = completeSeq_set.begin();
@@ -103,7 +103,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
             ms = sub_seq_size;
         }
         else {
-            cassert(TRACE_INFO, max_size >= 0);
+            OC_ASSERT(max_size >= 0);
             ms = std::min((unsigned)max_size, sub_seq_size);
         }
 
@@ -137,7 +137,7 @@ void ActionFilter::insertActionSubseqs(combo_tree_ns_set& actSubseq_set,
                     }
                 }
             } else {
-                opencog::cassert(TRACE_INFO, is_builtin_action(*head),
+                OC_ASSERT(is_builtin_action(*head),
                                  "If head is not and_seq them must be"
                                  " single builtin_action");
                 if (s == 1) actSubseq_set.insert(*ias);
@@ -169,7 +169,7 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
     if (index < tls.size()) {
         const PredicateHandleSet& phs = tls[index];
         unsigned s = phs.getSize();
-        opencog::cassert(TRACE_INFO, s == 0 || s == 1,
+        OC_ASSERT(s == 0 || s == 1,
                          "There must is 0 or 1 action in phs");
         if (s > 0) {
             Handle h = *phs.getSet().begin();
@@ -179,7 +179,7 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
             Handle smh =
                 AtomSpaceUtil::getSpaceMapHandleAtTimestamp(_wp.getAtomSpace(),
                                                             time);
-            opencog::cassert(TRACE_INFO, smh != Handle::UNDEFINED,
+            OC_ASSERT(smh != Handle::UNDEFINED,
                              "There must be a SpaceMap, ask Nil for more.");
             generatePossibleActions(act_set, h, al, smh, time);
             //when actPrefix_set is empty
@@ -197,13 +197,13 @@ void ActionFilter::completeActionPrefixes(combo_tree_ns_set& actPrefix_set,
                     vsi != ps_copy.end(); ++vsi) {
                 combo_tree prefix = *vsi;
                 pre_it prefix_head = prefix.begin();
-                opencog::cassert(TRACE_INFO,
+                OC_ASSERT(
                                  *prefix_head == id::sequential_and,
                                  "It should be assumed that prefix_head"
                                  " is sequential_and");
                 for (combo_tree_ns_set_it ai = act_set.begin();
                         ai != act_set.end(); ++ai) {
-                    opencog::cassert(TRACE_INFO, !ai->empty(),
+                    OC_ASSERT(!ai->empty(),
                                      "ai should not be empty");
                     combo_tree tmp(prefix_head);
                     tmp.replace(tmp.append_child(tmp.begin()), ai->begin());
@@ -224,21 +224,21 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
 {
     const AtomSpace& as = _wp.getAtomSpace();
 
-    opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
+    OC_ASSERT(h != Handle::UNDEFINED,
                      "h must conrrespond to a defined handle");
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      as.getType(h) == EVALUATION_LINK,
                      "ActionFilter - h should be of type EVALUATION_LINK.");
     //get the list of args
     Handle list_arg_h = as.getOutgoing(h, 1);
-    opencog::cassert(TRACE_INFO, list_arg_h != Handle::UNDEFINED,
+    OC_ASSERT(list_arg_h != Handle::UNDEFINED,
                      "list_arg_h must correspond to a defined handle");
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      as.getType(list_arg_h) == LIST_LINK,
                      "ActionFilter - h outgoing atom 1 should be of type LIST_LINK. ");
     //get finally action name
     Handle action_h = as.getOutgoing(list_arg_h, 1);
-    opencog::cassert(TRACE_INFO,
+    OC_ASSERT(
                      as.inheritsType(as.getType(action_h), NODE),
                      "ActionFilter - action handle should inherits from NODE");
     //get the action name
@@ -248,7 +248,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     vertex head_v;
     stringstream ss(action_name);
     ss >> head_v;
-    opencog::cassert(TRACE_INFO, is_builtin_action(head_v),
+    OC_ASSERT(is_builtin_action(head_v),
                      "%s is not a builtin_action", ss.str().c_str());
 
     if (_bas.find(get_builtin_action(head_v)) != _bas.end()) {
@@ -279,7 +279,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
                 }
                 //that case is not handle yet
                 else {
-                    cassert(TRACE_INFO, false,
+                    OC_ASSERT(false,
                             "Only identifier and number are accepted as argument");
                 }
             }
@@ -316,7 +316,7 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
             type_tree tt = infer_type_tree(*ati);
             stringstream ss_tr;
             ss_tr << *ati;
-            opencog::cassert(TRACE_INFO, is_well_formed(tt),
+            OC_ASSERT(is_well_formed(tt),
                              "Action combo tree '%s' is not well formed,"
                              " see the log for more information",
                              ss_tr.str().c_str());
@@ -330,7 +330,7 @@ void ActionFilter::generatePossibleOperands(std::set< std::vector<vertex> >& opr
         Handle smh,
         unsigned long time) const
 {
-    opencog::cassert(TRACE_INFO, opras_set.empty(),
+    OC_ASSERT(opras_set.empty(),
                      "opars_set must be empty");
     completePrefixOperands(opras_set, 0, ovl, al, smh, time);
 }
@@ -384,7 +384,7 @@ void ActionFilter::generatePossibleOperands(std::set<vertex>& opras,
     //definite_object case
     if (is_definite_object(operand)) {
         definite_object defo = get_definite_object(operand);
-        opencog::cassert(TRACE_INFO, _dos.find(defo) != _dos.end(),
+        OC_ASSERT(_dos.find(defo) != _dos.end(),
                          "The definite object %s found in the behavior"
                          " descriptions is not in the set of definite object"
                          " of interest, there must be something wrong"

@@ -188,7 +188,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
 
     void turn(int idx) {
         idx = map_idx(idx);
-        opencog::cassert(TRACE_INFO, (idx < 3), "Index greater than 3.");
+        OC_ASSERT((idx < 3), "Index greater than 3.");
 
         if (idx == _current) //already set, nothing to
             return;
@@ -236,7 +236,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
                         vector<combo_tree>& perms)
         : knob_with_arity<MAX_PERM_ACTIONS>(tr), _current(0), _loc(tr.end()), _perms(perms) {
 
-        opencog::cassert(TRACE_INFO, ((int)_perms.size() < MAX_PERM_ACTIONS),
+        OC_ASSERT(((int)_perms.size() < MAX_PERM_ACTIONS),
                          "Too many perms.");
 
         for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;i++)
@@ -262,7 +262,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     void turn(int idx) {
         idx = map_idx(idx);
-        opencog::cassert(TRACE_INFO, (idx <= (int)_perms.size()),
+        OC_ASSERT((idx <= (int)_perms.size()),
                          "Index too big.");
 
         if (idx == _current) //already set, nothing to
@@ -324,7 +324,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
 
     void turn(int idx) {
         idx = map_idx(idx);
-        opencog::cassert(TRACE_INFO, (idx < 4), "Index greater than 3.");
+        OC_ASSERT((idx < 4), "Index greater than 3.");
 
         if (idx == _current) //already set, nothing to
             return;
@@ -394,7 +394,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
 
     void turn(int idx) {
         idx = map_idx(idx);
-        opencog::cassert(TRACE_INFO, (idx < 2), "Index greater than 2.");
+        OC_ASSERT((idx < 2), "Index greater than 2.");
 
         if (idx == _current) //already set, nothing to
             return;

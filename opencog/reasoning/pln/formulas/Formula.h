@@ -30,6 +30,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 #define LIMIT_TRUTH_VALUES 1
 #define IS_NAN(f) (!((f)==(f)))
@@ -92,9 +93,9 @@ public:
     virtual ResultType compute2(TVType** TVsub, int Nsub,
                                 TVType** TVsuper, int Nsuper,
                                 long U = DefaultU) const {
-        cassert(TRACE_INFO, Nsub == Nsuper,
-                "That is the current assumption otherwise it is hard to know"
-                " what is TVsub and what is TVsuper in TVs");
+        OC_ASSERT(Nsub == Nsuper,
+                  "That is the current assumption otherwise it is hard to know"
+                  " what is TVsub and what is TVsuper in TVs");
 
         int N = Nsub + Nsuper;
 

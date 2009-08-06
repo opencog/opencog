@@ -25,7 +25,8 @@
 #define _SPATIAL_TBASSERT_H_
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
-#define TB_ASSERT(x) if (!(x)) opencog::cassert(TRACE_INFO, "TB_ASSERT - %s",  #x)
+#define TB_ASSERT(x) if (!(x)) OC_ASSERT("TB_ASSERT - %s",  #x)
 
 #endif

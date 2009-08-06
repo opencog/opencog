@@ -67,7 +67,7 @@ NoSpaceLifeFitnessEstimator::NoSpaceLifeFitnessEstimator
         _rng(rng)
 {
 
-    opencog::cassert(TRACE_INFO, BDCat.getSize() == (int)all.size(),
+    OC_ASSERT(BDCat.getSize() == (int)all.size(),
                      "There must be as many behavior category as argument lists");
 
     _randomOperatorOptimization = opencog::config().get_bool("RANDOM_OPERATOR_OPTIMIZATION");
@@ -97,7 +97,7 @@ fitness_t NoSpaceLifeFitnessEstimator::operator()(const combo::combo_tree& tr) c
     //back into the context to each exemplar
     //then take the mean of their similarity
     const std::vector<CompositeBehaviorDescription>& bdce = _BDCat.getEntries();
-    opencog::cassert(TRACE_INFO, !bdce.empty(), "Error : No exemplars");
+    OC_ASSERT(!bdce.empty(), "Error : No exemplars");
 
     //debug log
     opencog::logger().debug("NoSpaceLifeFitnessEstimator - Loop over Behavior Category starts");
@@ -226,7 +226,7 @@ void NoSpaceLifeFitnessEstimator::update(int indefinite_object_count,
         int action_count) {
     _sizePenalty.update(indefinite_object_count, operator_count,
                         condition_count, action_count);
-    opencog::cassert(TRACE_INFO, _BDCat.getSize() == (int)_all.size(),
+    OC_ASSERT(_BDCat.getSize() == (int)_all.size(),
                      "There must be as many behavior category as argument lists");
 }
 

@@ -23,6 +23,7 @@
 
 #include "BDTracker.h"
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/TLB.h>
 
 
@@ -81,7 +82,7 @@ Handle BDTracker::updateEndOfInterval(Handle perception, Handle bd, const Tempor
     // printf("%s %s: %d %d\n", perception->toString().c_str(),
     // bd->toString().c_str(), new_end, old_end);
 
-    opencog::cassert(TRACE_INFO, new_end >= old_end, "new_end interval should be greater than old_end interval.");
+    OC_ASSERT(new_end >= old_end, "new_end interval should be greater than old_end interval.");
 
     // Remove old interval
     atomspace->removeTimeInfo(bd, old_interval);
@@ -211,7 +212,7 @@ Handle MovementBDTracker::getBDHandle(Handle obj, Handle percept)
     hs2.push_back(atomspace->addNode(PREDICATE_NODE, "behaved"));
     HandleSeq listLinkHS;
     Handle perceptListLink = atomspace->getOutgoing(percept, 1);
-    opencog::cassert(TRACE_INFO, atomspace->getType(perceptListLink) == LIST_LINK,
+    OC_ASSERT(atomspace->getType(perceptListLink) == LIST_LINK,
                      "Handle perceptListLink should be a 'LIST_LINK'.");
     HandleSeq perceptListLinkHS = atomspace->getOutgoing(perceptListLink);
     listLinkHS.push_back(perceptListLinkHS[0]);

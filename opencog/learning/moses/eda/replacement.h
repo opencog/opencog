@@ -39,7 +39,7 @@ namespace eda
 struct replace_the_worst {
     template<typename NewInst, typename Dst>
     void operator()(NewInst from,NewInst to, Dst from_dst, Dst to_dst) const {
-        opencog::cassert(TRACE_INFO,
+        OC_ASSERT(
                          distance(from, to) <= distance(from_dst, to_dst),
                          "Distance from -> to greater than distance from_dst -> to_dst.");
         nth_element(from_dst, from_dst + distance(from, to), to_dst);
@@ -54,7 +54,7 @@ struct rtr_replacement {
 
     template<typename NewInst, typename Dst>
     void operator()(NewInst from,NewInst to, Dst from_dst, Dst to_dst) const {
-        opencog::cassert(TRACE_INFO, window_size <= distance(from_dst, to_dst),
+        OC_ASSERT(window_size <= distance(from_dst, to_dst),
                          "windows size greater than distance from_dst -> to_dst.");
 
         for (;from != to;++from)

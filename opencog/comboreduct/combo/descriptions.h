@@ -110,7 +110,7 @@ namespace builtin_properties {
       
       // setting arities and other properties of single actions
       unsigned int number_of_builtin_descriptions = sizeof(bd)/sizeof(builtin_description);
-      opencog::cassert(TRACE_INFO, number_of_builtin_descriptions==(unsigned int)id::builtin_count,
+      OC_ASSERT(number_of_builtin_descriptions==(unsigned int)id::builtin_count,
              "there must be entries for all builtins.");
       // there must be entries for all actions 
       
@@ -118,14 +118,14 @@ namespace builtin_properties {
 
       for(unsigned int i=0;i<number_of_builtin_descriptions;i++) { 
         for(unsigned int j=0;j<i;j++) { 
-          opencog::cassert(TRACE_INFO, bd[i].b!=bd[j].b, 
+          OC_ASSERT(bd[i].b!=bd[j].b, 
                   "there must not be two entries for one builtin.");           
           // there must not be two entries for one builtin 
         }
-        opencog::cassert(TRACE_INFO, bd[i].b>=(id::builtin)0, 
+        OC_ASSERT(bd[i].b>=(id::builtin)0, 
                 "must be one of the defined builtins.");
         // must be one of the defined builtins
-        opencog::cassert(TRACE_INFO, bd[i].b<id::builtin_count,
+        OC_ASSERT(bd[i].b<id::builtin_count,
                 "must be one of the defined builtins.");
         // must be one of the defined builtins
 
@@ -237,7 +237,7 @@ namespace action_properties {
       
       // setting arities and other properties of single actions
       unsigned int number_of_action_descriptions = sizeof(ad)/sizeof(action_description);
-      opencog::cassert(TRACE_INFO, number_of_action_descriptions==(unsigned int)id::action_count,
+      OC_ASSERT(number_of_action_descriptions==(unsigned int)id::action_count,
              "there must be entries for all actions.");
       // there must be entries for all actions 
       
@@ -245,14 +245,14 @@ namespace action_properties {
 
       for(unsigned int i=0;i<number_of_action_descriptions;i++) { 
         for(unsigned int j=0;j<i;j++) { 
-          opencog::cassert(TRACE_INFO, ad[i].a!=ad[j].a, 
+          OC_ASSERT(ad[i].a!=ad[j].a, 
                   "there must not be two entries for one action.");           
           // there must not be two entries for one action 
         }
-        opencog::cassert(TRACE_INFO, ad[i].a>=(id::action)0, 
+        OC_ASSERT(ad[i].a>=(id::action)0, 
                 "must be one of the defined actions.");
         // must be one of the defined actions
-        opencog::cassert(TRACE_INFO, ad[i].a<id::action_count,
+        OC_ASSERT(ad[i].a<id::action_count,
                 "must be one of the defined actions.");
         // must be one of the defined actions
 

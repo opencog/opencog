@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Temporal.h>
 #include <opencog/atomspace/TemporalTable.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 namespace behavior
@@ -54,10 +55,10 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                   trickConceptNode, temp,
                                   TemporalTable::EXACT);
     if (!retP.empty()) {
-        opencog::cassert(TRACE_INFO, retP.size() == 1,
+        OC_ASSERT(retP.size() == 1,
                          "retP std::list should have exactly one 'HandleTemporal Pair'.");
         Handle h = wp.getAtomSpace().getAtTimeLink(*(retP.begin()));
-        opencog::cassert(TRACE_INFO, h != Handle::UNDEFINED,
+        OC_ASSERT(h != Handle::UNDEFINED,
                          "Handle h should not be an 'Handle::UNDEFINED'.");
         std::list<Handle> result;
         std::vector<Handle> outputs;
@@ -71,14 +72,14 @@ void BDRetriever::retrieveExemplar(CompositeBehaviorDescription& bd,
                                        types, NULL, 2, MEMBER_LINK, false);
         for (std::list<Handle>::iterator ih = result.begin(); ih != result.end(); ++ih) {
 
-            opencog::cassert(TRACE_INFO, (*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,
+            OC_ASSERT((*ih) != Handle::UNDEFINED && wp.getAtomSpace().getArity(*ih) == 2,
                              "Handle should not be an 'Handle::UNDEFINED' and should have arity 2.");
 
             Handle h_at_time = wp.getAtomSpace().getOutgoing(*ih, 0);
-            opencog::cassert(TRACE_INFO, h_at_time != Handle::UNDEFINED && wp.getAtomSpace().getType(h_at_time) == AT_TIME_LINK,
+            OC_ASSERT(h_at_time != Handle::UNDEFINED && wp.getAtomSpace().getType(h_at_time) == AT_TIME_LINK,
                              "Handle h_at_time should not be an 'Handle::UNDEFINED' and should be an 'AT_TIME_LINK'.");
 
-            opencog::cassert(TRACE_INFO, wp.getAtomSpace().getArity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
+            OC_ASSERT(wp.getAtomSpace().getArity(h_at_time) == 2, "Handle h_at_time should have arity 2.");
 
             Temporal t = Temporal::getFromTimeNodeName(wp.getAtomSpace().getName(wp.getAtomSpace().getOutgoing(h_at_time, 0)).c_str());
             Handle h_bd = wp.getAtomSpace().getOutgoing(h_at_time, 1);
@@ -99,7 +100,7 @@ void BDRetriever::retrieveLastExemplar(CompositeBehaviorDescription& bd,
                                       Temporal(wp.getLatestSimWorldTimestamp()),
                                       TemporalTable::PREVIOUS_BEFORE_START_OF);
         if (!retP.empty()) {
-            opencog::cassert(TRACE_INFO, retP.size() == 1,
+            OC_ASSERT(retP.size() == 1,
                              "retP std::list should have exactly one 'HandleTemporal Pair'.");
             et = *retP.begin()->getTemporal();
             retrieveExemplar(bd, wp, h, et);
@@ -112,7 +113,7 @@ void BDRetriever::addLastExemplar(BehaviorCategory& bc,
                                   const WorldProvider& wp,
                                   const std::string& tn)
 {
-    opencog::cassert(TRACE_INFO, bc.getSize() == (int)est.size(),
+    OC_ASSERT(bc.getSize() == (int)est.size(),
                      "bc and est should have the same size");
     CompositeBehaviorDescription bd;
     Temporal et(0);

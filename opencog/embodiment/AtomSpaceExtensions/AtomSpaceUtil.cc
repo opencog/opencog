@@ -39,6 +39,7 @@
 
 #include <opencog/util/misc.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
@@ -351,7 +352,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
         const std::string& message,
         bool include_to)
 {
-    opencog::cassert(TRACE_INFO, delay < timestamp,
+    OC_ASSERT(delay < timestamp,
                      "timestamp - delay must be positive");
     unsigned long tl = timestamp - delay;
     unsigned long tu = timestamp;
@@ -377,7 +378,7 @@ bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
         //create the sentence atom
         string atom_message_name;
         if (include_to) {
-            opencog::cassert(TRACE_INFO,
+            OC_ASSERT(
                              dynamic_cast<Node*>(TLB::getAtom(to_h)),
                              "Handle to_h should be a 'Node'.");
             atom_message_name = string("to:") + atomSpace.getName(to_h)
@@ -450,7 +451,7 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
                                         Handle obj)
 {
     //TODO
-    opencog::cassert(TRACE_INFO, false);
+    OC_ASSERT(false);
     return false;
 }
 
@@ -1226,9 +1227,9 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
     for (std::vector<Handle>::const_iterator h_i = handles.begin();
             h_i != handles.end(); ++h_i) {
         Handle listLink = atomSpace.getOutgoing(*h_i, 1);
-        cassert(TRACE_INFO, listLink != Handle::UNDEFINED,
+        OC_ASSERT(listLink != Handle::UNDEFINED,
                 "ListLink must be defined");
-        cassert(TRACE_INFO, atomSpace.getArity(listLink) == 2,
+        OC_ASSERT(atomSpace.getArity(listLink) == 2,
                 "IsHolding predicate must have 2 arguments");
         // get only holder's eval-links occuring within 'time'
 
@@ -1262,7 +1263,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
                     tsi != timestamps.end(); ++tsi) {
                 s +=  std::string("'") + tsi->toString() + std::string("' ");
             }
-            opencog::cassert(TRACE_INFO, false, s.c_str());
+            OC_ASSERT(false, s.c_str());
         }
         return timestamps[0].getHandle();
     } else return Handle::UNDEFINED;
@@ -1867,7 +1868,7 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
         // the concept node is created
         // and its LTI is set to 1 so that it is not forgotten
         // by STI decayment. This may not be the best approach though.
-        //opencog::cassert(TRACE_INFO, as.getHandle(CONCEPT_NODE, objectId) != Handle::UNDEFINED);
+        //OC_ASSERT(as.getHandle(CONCEPT_NODE, objectId) != Handle::UNDEFINED);
         return atomSpace.getHandle(CONCEPT_NODE, objectId);
     } else { //Now let's deal with the default case
         HandleSeq tmp;
@@ -1879,7 +1880,7 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
         }
 
         //assume that structure and accessories have distinct id
-        opencog::cassert(TRACE_INFO, tmp.size() <= 1);
+        OC_ASSERT(tmp.size() <= 1);
 
         return tmp.empty() ? Handle::UNDEFINED : tmp.front();
     }
@@ -1910,13 +1911,13 @@ Handle AtomSpaceUtil::getAgentHandle( const AtomSpace& atomSpace,
 
 Temporal AtomSpaceUtil::getTemporal(AtomSpace& as, Handle atTimeLink)
 {
-    cassert(TRACE_INFO, atTimeLink != Handle::UNDEFINED,
+    OC_ASSERT(atTimeLink != Handle::UNDEFINED,
             "No HandleTemporalPair correspond to Handle::UNDEFINED");
-    cassert(TRACE_INFO, as.getType(atTimeLink) == AT_TIME_LINK,
+    OC_ASSERT(as.getType(atTimeLink) == AT_TIME_LINK,
             "The Atom %s must be an atTimeLink",
             TLB::getAtom(atTimeLink)->toString().c_str());
     Handle timeNode = as.getOutgoing(atTimeLink, 0);
-    cassert(TRACE_INFO, as.getType(timeNode) == TIME_NODE,
+    OC_ASSERT(as.getType(timeNode) == TIME_NODE,
             "The Atom %s must be a TimeNode",
             TLB::getAtom(timeNode)->toString().c_str());
 
@@ -1925,9 +1926,9 @@ Temporal AtomSpaceUtil::getTemporal(AtomSpace& as, Handle atTimeLink)
 
 Handle AtomSpaceUtil::getTimedHandle(AtomSpace& as, Handle atTimeLink)
 {
-    cassert(TRACE_INFO, atTimeLink != Handle::UNDEFINED,
+    OC_ASSERT(atTimeLink != Handle::UNDEFINED,
             "No HandleTemporalPair correspond to Handle::UNDEFINED");
-    cassert(TRACE_INFO, as.getType(atTimeLink) == AT_TIME_LINK,
+    OC_ASSERT(as.getType(atTimeLink) == AT_TIME_LINK,
             "The Atom %s must be an atTimeLink", TLB::getAtom(atTimeLink)->toString().c_str());
 
     return as.getOutgoing(atTimeLink, 1);
@@ -2086,7 +2087,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                                          atomSpace.getName( frameElementsHandles[i] ),
                                          boost::algorithm::is_any_of(":") );
 
-                cassert(TRACE_INFO, elementNameParts.size( ) == 2,
+                OC_ASSERT(elementNameParts.size( ) == 2,
                         "The name of a Frame element must be #FrameName:FrameElementName, but '%' was given",
                         atomSpace.getName( frameElementsHandles[i] ).c_str( ) );
 

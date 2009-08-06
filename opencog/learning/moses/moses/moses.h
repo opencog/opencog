@@ -112,7 +112,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     const_iterator select_exemplar() const {
-        opencog::cassert(TRACE_INFO, !empty(),
+        OC_ASSERT(!empty(),
                          "Empty metapopulation in function select_exemplar().");
         
         cout << "METAPOPULATION size : " << size() << endl << endl;
@@ -152,7 +152,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         using namespace reduct;
 
-        // cassert(TRACE_INFO, !empty(), "Empty metapopulation in function expand(..).");
+        // OC_ASSERT(!empty(), "Empty metapopulation in function expand(..).");
         if (empty())
             return false;
 
@@ -264,7 +264,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         if (empty())
             return false;
-        // cassert(TRACE_INFO, !empty(), "Empty metapopulation in function expand(..).");
+        // OC_ASSERT(!empty(), "Empty metapopulation in function expand(..).");
 
         _exemplar = select_exemplar();
 

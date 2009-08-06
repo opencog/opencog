@@ -27,6 +27,9 @@
 #include <cstring>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
+
+
 
 using namespace opencog;
 
@@ -78,8 +81,8 @@ void StringTokenizer::reset()
 
 const std::string StringTokenizer::nextToken()
 {
-    cassert(TRACE_INFO, str != "", "StringTokenizer - string should not be empty.");
-    cassert(TRACE_INFO, delimiter != "", "StringTokenized - delimiter should not be empty.");
+    OC_ASSERT(str != "", "StringTokenizer - string should not be empty.");
+    OC_ASSERT(delimiter != "", "StringTokenized - delimiter should not be empty.");
 
     // end of the string
     if (end == str.size()) {

@@ -50,7 +50,7 @@ Matrix3::Matrix3( void )
  */
 Matrix3::Matrix3( const std::vector<std::vector<double> >& m )
 {
-    //opencog::cassert( m.size( ) == 3 && m[0].size( ) == 3 && m[1].size( ) == 3 && m[2].size( ) == 3 );
+    //OC_ASSERT((m.size( ) == 3 && m[0].size( ) == 3 && m[1].size( ) == 3 && m[2].size( ) == 3 );
     unsigned int i;
     unsigned int j;
     for ( i = 0; i < 4; ++i ) {
@@ -158,13 +158,13 @@ bool Matrix3::inverse( Matrix3& rkInverse, double fTolerance) const
 
 void Matrix3::set( int x, int y, double value )
 {
-//  opencog::cassert( x >= 0 && x < 3 && y >= 0 && y < 3 );
+//  OC_ASSERT( x >= 0 && x < 3 && y >= 0 && y < 3 );
     this->m[x][y] = value;
 }
 
 double Matrix3::get( int x, int y )
 {
-//  opencog::cassert( x >= 0 && x < 3 && y >= 0 && y < 3 );
+//  OC_ASSERT( x >= 0 && x < 3 && y >= 0 && y < 3 );
     return this->m[x][y];
 }
 

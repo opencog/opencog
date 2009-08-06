@@ -44,7 +44,7 @@ ComboProcedure::ComboProcedure(const procedure_call_base& pc) : procedure_call_b
 ComboProcedure::ComboProcedure(const std::string& name, unsigned int arity, const combo::combo_tree& tree, bool infer_type) : procedure_call_base(name, arity_t(arity), tree, infer_type)
 {
     //below is commented because it seems that arity is not used anyway
-    //cassert(TRACE_INFO, (int)a==arity(),
+    //OC_ASSERT((int)a==arity(),
     //"The arity suggested and the arity infered are different, there must be a problem somewhere, if not and that's really what you want ask Nil to fix it");
 }
 
