@@ -457,16 +457,16 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // (need to clone, because we want to remove any invalid TVs before using)
     const TruthValue& tv = atomspace->getTV(real);
     if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValue* ctv = (CompositeTruthValue*) tv.clone();
-        // The below removal should probably become a utility mindagent that checks
-        // for invalid versioned TVs...
+        CompositeTruthValue ctv = dynamic_cast<const CompositeTruthValue&> (tv);
+        // The below removal should probably become a utility mindagent
+        // that checks for invalid versioned TVs...
         // Remove any invalid version TVs
-        ctv->removeInvalidTVs();
+        ctv.removeInvalidTVs();
         // Update the atomspace TV
-        atomspace->setTV(real,*ctv);
+        atomspace->setTV(real,ctv);
 
-        for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) { 
-            VersionHandle vh = ctv->getVersionHandle(i);
+        for (int i = 0; i < ctv.getNumberOfVersionedTVs(); i++) { 
+            VersionHandle vh = ctv.getVersionHandle(i);
             HandleSeq hs = atomspace->getOutgoing(vh.substantive);
             bool matches = true;
             assert(hs.size() == (vhs.size()+1));
@@ -477,11 +477,9 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
                 }
             }
             if (matches) {
-                delete ctv;
                 return realToFakeHandle(real,vh);
             }
         }
-        delete ctv;
     }
     return realToFakeHandle(real,NULL_VERSION_HANDLE);
 }
