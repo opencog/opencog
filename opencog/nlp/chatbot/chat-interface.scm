@@ -86,13 +86,27 @@
 
 ; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
-; args are: user nick from the IRC channel, and the text that the user entered.
+; args are: user nick from the IRC channel, and the text that the user 
+; entered.
 ;
-; XXX FIXME: use of display here is no good, since nothing is written till
-; processing is done.  We need to replace this by incremenntal processing
-; and/or handle i/o on a distinct thread.
+; IMPORTANT NOTE: To get semi-interactive I/O while potentially lengthly
+; processing is going on, the processing as been split into stages,
+; designed so that each stage returns from the scheme interpreter,
+; with some output for the chatbot.  The next stage of processing can
+; then be continued by writing ":scm hish\r (sheme code)\n" to the 
+; chat processor.
+;
+; This interactive design is not very pretty, and it would be better
+; to come up with some sort of multi-threaded design, with one of the 
+; threads listening on the scheme port.  FIXME XXX This should be fixed,
+; because the current approach has *many* problems. However, the fix is
+; hard, sowe just punt for now.
 ;
 (define (say-id-english nick txt)
+
+	; Declare some state variables for the imperative style to follow
+	(define sents '())
+	(define is-question #f)
 
 	(display "Hello ")
 	(display nick)
@@ -100,10 +114,6 @@
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
-
-	; Declare some state variables for the imperative style to follow
-	(define sents '())
-	(define is-question #f)
 
 	(set! sents (get-new-parsed-sentences))
 
@@ -137,6 +147,8 @@
 			(newline)
 		)
 	)
+
+	; Invoke the next step of processing.
 	(display ":scm hush\r (say-part-2 ")
 	(display is-question)
 	(display ")\n")
