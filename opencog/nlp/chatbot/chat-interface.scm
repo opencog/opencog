@@ -206,11 +206,25 @@
 			(let ((answer-list (chat-get-simple-answer)))
 				(if (not (null? answer-list))
 					(chat-prt-soln answer-list)
-					(display "No answer was found to your question.")
+					(display "Triple matching found no answer, attempting PLN.")
 				)
 			)
 		)
 	)
+
+	; Invoke the next step of processing.
+	(display ":scm hush\r (say-part-3 ")
+	(display is-question)
+	(display ")\n")
+	(fflush)
+	""
+)
+
+; -----------------------------------------------------------------------
+; say-part-3 -- run part 3 of the chat processing
+; This part attempts to use PLN.
+;
+(define (say-part-3 is-question)
 
 	; If we still don't have an answer, try running PLN 
 	; (this is an extremely simple-minded hack right now)
@@ -245,6 +259,14 @@
 		)
 	)
 
+	; Call the final stage
+	":scm hush\r (say-final-cleanup)"
+)
+
+; -----------------------------------------------------------------------
+; say-final-cleanup -- run cleanup of the chat processing
+;
+(define (say-final-cleanup)
 	; Delete list of triples, so they don't interfere with the next question.
 	(delete-result-triple-links)
 
