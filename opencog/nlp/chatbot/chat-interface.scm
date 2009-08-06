@@ -19,48 +19,48 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-id-english -- process user input from chatbot.
-; args are: user nick from the IRC channel, and the text that the user entered.
 ;
-; XXX FIXME: use of display here is no good, since nothing is written till
-; processing is done.  We need to replace this by incremenntal processing
-; and/or handle i/o on a distinct thread.
-;
+; Define a super-dooper cheesy way of getting the answer to the question
+; Right now, its looks for Nodes attached, via ListLink, to an 
+; AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
+; and is just a placeholder for now.
+; Anyway, three different kinds of things can be found:
+; WordNodes, almost always "yes", in answer to a yes/no question.
+; WordInstanceNodes, in answer to simple pattern matching
+; SemeNodes, in answer to triples matching.
+; Handle each of these.
+; 
 (define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
-(define (say-id-english nick txt)
-
-	; Define a super-dooper cheesy way of getting the answer to the question
-	; Right now, its looks for Nodes attached, via ListLink, to an 
-	; AnchorNode called "# QUERY SOLUTION". This is of course very wrong,
-	; and is just a placeholder for now.
-	; Anyway, three different kinds of things can be found:
-	; WordNodes, almost always "yes", in answer to a yes/no question.
-	; WordInstanceNodes, in answer to simple pattern matching
-	; SemeNodes, in answer to triples matching.
-	; Handle each of these.
-	(define (get-simple-answer)
-		(define (do-one-answer answ)
-			(let ((tipo (cog-type answ)))
-				(cond 
-					((eq? tipo 'WordNode) answ)
-					((eq? tipo 'WordInstanceNode) (word-inst-get-lemma answ))
-					((eq? tipo 'SemeNode) 
-						; the lemma-link for a seme might still be sitting on disk!
-						(load-referers answ)
-						(word-inst-get-lemma answ)
-					)
-					(else '())
+(define (chat-get-simple-answer)
+	(define (do-one-answer answ)
+		(let ((tipo (cog-type answ)))
+			(cond 
+				((eq? tipo 'WordNode) answ)
+				((eq? tipo 'WordInstanceNode) (word-inst-get-lemma answ))
+				((eq? tipo 'SemeNode) 
+					; the lemma-link for a seme might still be sitting on disk!
+					(load-referers answ)
+					(word-inst-get-lemma answ)
 				)
+				(else '())
 			)
 		)
-		(map 
-			(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
-			(cog-incoming-set query-soln-anchor)
-		)
 	)
-	(define (delete-simple-answer)
-		(for-each (lambda (x) (cog-delete x)) (cog-incoming-set query-soln-anchor))
+	(map 
+		(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
+		(cog-incoming-set query-soln-anchor)
 	)
+)
+(define (chat-delete-simple-answer)
+	(for-each (lambda (x) (cog-delete x)) 
+		(cog-incoming-set query-soln-anchor)
+	)
+)
+
+; -----------------------------------------------------------------------
+; print stuff ...
+;
+(define (chat-prt-soln soln-list)
 	(define (do-prt-soln soln-list)
 		;; display *all* items in the list.
 		(define (show-item wlist)
@@ -79,23 +79,31 @@
 		(show-item soln-list)
 	)
 
-	(define (prt-soln soln-list)
-		(if (not (null? soln-list))
-			(do-prt-soln soln-list)
-		)
+	(if (not (null? soln-list))
+		(do-prt-soln soln-list)
 	)
+)
 
-	; Declare some state variables for the imperative style to follow
-	(define sents '())
-	(define is-question #f)
+; -----------------------------------------------------------------------
+; say-id-english -- process user input from chatbot.
+; args are: user nick from the IRC channel, and the text that the user entered.
+;
+; XXX FIXME: use of display here is no good, since nothing is written till
+; processing is done.  We need to replace this by incremenntal processing
+; and/or handle i/o on a distinct thread.
+;
+(define (say-id-english nick txt)
 
 	(display "Hello ")
 	(display nick)
 	(display ", parsing ...\n")
-	(fflush)
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
+
+	; Declare some state variables for the imperative style to follow
+	(define sents '())
+	(define is-question #f)
 
 	(set! sents (get-new-parsed-sentences))
 
@@ -120,7 +128,7 @@
 			(display ", you asked a question: ")
 			(display txt)
 			(newline)
-			(prt-soln (get-simple-answer))
+			(chat-prt-soln (chat-get-simple-answer))
 		)
 		(let ()
 			(display nick)
@@ -129,6 +137,14 @@
 			(newline)
 		)
 	)
+	(display ":scm hush\r (say-part-2 ")
+	(display is-question)
+	(display ")\n")
+	(fflush)
+	""
+)
+
+(define (say-part-2 is-question)
 
 	; Run the triples processing.
 	(attach-sents-for-triple-processing (get-new-parsed-sentences))
@@ -137,7 +153,7 @@
 
 	; If a question was asked, and the previous attempt to answer the
 	; question failed, try again with pattern matching on the triples.
-	(if (and is-question (null? (get-simple-answer)))
+	(if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 			(display "There was no simple answer; attempting triples search\n")
 
@@ -149,9 +165,9 @@
 			(if (not (null? trips))
 				(cog-ad-hoc "triple-question" (car (get-new-triples)))
 			)
-			(let ((answer-list (get-simple-answer)))
+			(let ((answer-list (chat-get-simple-answer)))
 				(if (not (null? answer-list))
-					(prt-soln answer-list)
+					(chat-prt-soln answer-list)
 					(display "No answer was found to your question.")
 				)
 			)
@@ -163,10 +179,10 @@
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
-	(delete-simple-answer)
+	(chat-delete-simple-answer)
 
 	; cleanup -- these sentences are not new any more
 	(delete-new-parsed-sent-links)
 	""
-	":scm hush\r (whassup)"
+	; ":scm hush\r (whassup)"
 )
