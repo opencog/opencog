@@ -690,8 +690,17 @@ Handle AtomSpace::fetchAtom(Handle h)
            for (size_t i=0; i<arity; i++)
            {
               Handle oh = fetchAtom(ogs[i]);
-              if (oh != ogs[i]) throw new RuntimeException(TRACE_INFO,
-                    "Unexpected handle mismatch -A!\n");
+              if (oh != ogs[i])
+              {
+                  Atom *ah = TLB::getAtom(oh);
+                  Atom *ag = TLB::getAtom(ogs[i]);
+                  throw new RuntimeException(TRACE_INFO,
+                      "Unexpected handle mismatch:\n"
+                      "oh=%lu ogs[%d]=%lu\n"
+                      "oh=%s ogs=%s\n",
+                      oh.value(), i, ogs[i].value(),
+                      ah->toString().c_str(), ag->toString().c_str());
+              }
            }
         }
         return atomTable.add(a);
