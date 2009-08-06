@@ -202,7 +202,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		printf ("opencog reply: %s\n", reply);
 
 		/* Each newline has to be on its own line */
-		/* Limit to 5 replies so we don't get kicked for flooding */
+		/* Limit length of reply so we don't get kicked for flooding */
 		int cnt = 0;
 		char * p = reply;
 		while (*p)
@@ -235,13 +235,16 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 			// Else print output.
 			if (is_nonblank(p))
+			{
 				conn->privmsg (msg_target, p);
+				cnt += strlen (p);
+			}
 			*ep = save;
 			p = ep;
-			cnt ++;
 
 			/* Sleep so that we don't get kicked for flooding */
-			if (3 < cnt) { sleep(1); cnt = 0; }
+#define FLOOD_CHAR_COUNT 120
+			if (FLOOD_CHAR_COUNT < cnt) { sleep(1); cnt -= FLOOD_CHAR_COUNT; }
 		}
 		free(reply);
 	}
