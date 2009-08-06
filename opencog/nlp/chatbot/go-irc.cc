@@ -1,4 +1,4 @@
-/*   
+/*
  *   IRC interfaces for La Cogita IRC chatbot
  *   Copyright (C) 2007 Linas Vepstas <linas@linas.org>
  *
@@ -17,10 +17,10 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/* 
+/*
  * Go onto IRC
  * This is pretty totally a pure hack with little/no design to it.
- * Linas October 2007 
+ * Linas October 2007
  */
 
 #include <string.h>
@@ -51,21 +51,21 @@ CogitaConfig cc;
  */
 int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
-	IRC* conn = (IRC*)data; 
+	IRC* conn = (IRC*) data;
 
-	printf("duude par=%s\n", params);
-	printf("duude got motd nick=%s ident=%s host=%s target=%s\n", 
+	printf("chatbot got params=%s\n", params);
+	printf("chatbot got motd nick=%s ident=%s host=%s target=%s\n",
 		ird->nick, ird->ident, ird->host, ird->target);
 
 	sleep(1);
 	conn->join (cc.ircChannels[0].c_str());
-	printf("duude done join\n");
+	printf("chatbot sent channel join %s\n", cc.ircChannels[0].c_str());
 	sleep(2);
 	conn->notice (cc.ircChannels[0].c_str(), "ola");
-	printf("duude done notice\n");
+	printf("chatbot sent channel notice\n");
 	sleep(2);
 	conn->privmsg (cc.ircChannels[0].c_str(), "here we are");
-	printf("duude done priv\n");
+	printf("chatbot said hello to the channel\n");
 	return 0;
 }
 
@@ -84,7 +84,7 @@ static bool is_nonblank(const char * str)
  */
 int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
-	IRC* conn = (IRC*)data; 
+	IRC* conn = (IRC*) data;
 
 	printf("input=%s\n", params);
 	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
@@ -97,20 +97,24 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	if (!strcmp (ird->target, cc.nick.c_str())) {priv = 1; start = params+1; }
 
 	if (!strncmp (&params[1], cc.nick.c_str(), cc.nick.size())) {
-        start = params+1 + cc.nick.size();
-    } else if (!strncmp (params, ":cog-sh:", 8)) {
-        start = params+8; cmd = SHELL_CMD;
-    } else if (!strncmp (params, ":scm:", 5)) {
-        start = params+5; cmd = SCM_CMD;
-    } else {   
-        // Check across all potential 
-        foreach (string it, cc.attn) {
-            if (! it.compare(0,it.size(),&params[1]) ) {
-                start = params + it.size();
-                break;
-            }
-        }
-    }
+		start = params+1 + cc.nick.size();
+		start = strchr(start, ':');
+		if (start) start ++;
+	} else if (!strncmp (params, ":cog-sh:", 8)) {
+		start = params+8; cmd = SHELL_CMD;
+	} else if (!strncmp (params, ":scm:", 5)) {
+		start = params+5; cmd = SCM_CMD;
+	} else {
+		// Check for alternative nick/attention strings
+		foreach (string it, cc.attn) {
+			if (! it.compare(0,it.size(),&params[1]) ) {
+				start = params + it.size();
+				start = strchr(start, ':');
+				if (start) start ++;
+				break;
+			}
+		}
+	}
 
 	if (!start) return 0;
 	char * msg_target = NULL;
@@ -162,7 +166,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	/*
 	 * XXX DANGER DANGER Extreme Caution Advised XXX
 	 * Shell escapes are a potential security hole, as they allow access
-	 * to the cog-server to total strangers. In particular, the scheme 
+	 * to the cog-server to total strangers. In particular, the scheme
 	 * interface is a general programming API and can be used to root
 	 * the system.
 	 */
@@ -184,7 +188,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 		return 0;
 	}
 #endif /* ENABLE_SHELL_ESCAPES */
-	
+
 	bool more_io = true;
 	while (more_io)
 	{
@@ -216,9 +220,9 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			int save = *ep;
 			*ep = 0x0;
 
-			// If the line starts with ":scm", resubmit it to the 
+			// If the line starts with ":scm", resubmit it to the
 			// server. This is a kind-of cheap, hacky way of doing
-			// multi-processing. 
+			// multi-processing.
 			if (0 == strncmp(p, ":scm", 4))
 			{
 				free(reply);
@@ -227,7 +231,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 				reply = whirr_sock_io (p+1);
 				p = reply;
 				continue;
-			} 
+			}
 
 			// Else print output.
 			if (is_nonblank(p))
@@ -245,7 +249,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	return 0;
 }
 
-/** 
+/**
  * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
  * package libtclap-dev in Ubuntu.
  * However, its probably more portable to use plain-old getopt,
@@ -258,15 +262,14 @@ int main (int argc, char * argv[])
 
 	IRC conn;
 
-    if (cc.parseOptions(argc,argv))
-        return 0;
+	if (cc.parseOptions(argc,argv)) return 0;
 
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 
 	const char *login = getlogin();
 
-	// The login-name, nick, etc. are there only to make it look 
+	// The login-name, nick, etc. are there only to make it look
 	// pretty on IRC ident.
 	conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
 	            "La Cogita OpenCog chatbot", "asdf");
