@@ -217,18 +217,31 @@
 	; First, the question needs to be promoted to semes,
 	; because the PLN resoner will only work on those ... 
 	; XXX under construction, not done.
-	(if #t
-		(let* ((trips (get-new-triples))
-				(trip-semes (promote-to-seme same-lemma-promoter trips))
-				(ftrip (car trip-semes))
-				(uncert (hypothetical-to-uncertain ftrip))
-				(deduced (pln-bc uncert 300))
-			)
-			(if deduced
+	(let* ((trips (get-new-triples))
+			(trip-semes (promote-to-seme same-lemma-promoter trips))
+			(answer-list (chat-get-simple-answer))
+		)
+		(if (and is-question (null? answer-list))
+			(let* ((ftrip (car trip-semes))
+					(uncert (hypothetical-to-uncertain ftrip))
+					(deduced (pln-bc uncert 3300))
+				)
+
+				; Run PLN only if a question is involved -- 
+				; We don't need to run pln on assertions.
+				(if deduced
+					(let* ((context-tv (cog-tv uncert))
+							(ctv-list (cog-tv->alist context-tv))
+						)
+(newline)
 (display uncert)
-				(display "Unable to deduce via PLN")
-			)
+(newline)
+(display ctv-list)
+					)
+					(display "Unable to deduce via PLN")
+				)
 (fflush)
+			)
 		)
 	)
 
