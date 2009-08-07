@@ -102,6 +102,21 @@ public:
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
 
+static inline std::string operator+ (const char *lhs, Handle h)
+{
+	std::string rhs = lhs;
+   char buff[25];
+   snprintf(buff, 24, "%lu)", h.value());
+   return rhs + buff;
+}
+
+static inline std::string operator+ (const std::string &lhs, Handle h)
+{
+   char buff[25];
+   snprintf(buff, 24, "%lu)", h.value());
+   return lhs + buff;
+}
+
 } // namespace opencog
 
 namespace std { namespace tr1 {

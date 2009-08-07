@@ -1640,7 +1640,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         unsigned int j;
         for ( j = 0; j < incomingLinks.size( ); ++j ) {
             logger().debug(
-                         "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%lu], outgoing0[%slu] predicateNode[%lu]",
+                         "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%lu], outgoing0[%lu] predicateNode[%lu]",
                          j,
                          classserver().getTypeName( atomSpace.getType( incomingLinks[j] ) ).c_str( ),
                          classserver().getTypeName( EVALUATION_LINK ).c_str( ),
