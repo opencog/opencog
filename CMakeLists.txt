@@ -171,7 +171,7 @@ FIND_PACKAGE(PythonLibs)
 
 IF (PYTHONLIBS_FOUND)
     EXECUTE_PROCESS(
-        COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print 'test'; print get_python_lib()"
+        COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
         OUTPUT_VARIABLE PYTHON_DEST
     )
     # replace new line at end

@@ -1,6 +1,7 @@
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/opencog/atomspace)
+
 add_library(atomspace_py SHARED
     atomspace_module_wrap.cc
     atom_types_wrap.cc
@@ -29,7 +30,7 @@ target_link_libraries(atomspace_py
 )
 set_target_properties(atomspace_py PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "python_atomspace"
+    OUTPUT_NAME "libopencog-atomspace-python"
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/opencog/python
 )
 INSTALL (TARGETS atomspace_py
