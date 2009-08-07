@@ -52,6 +52,10 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 
+#ifdef HAVE_SQL_STORAGE
+#include <opencog/persist/sql/PersistModule.h>
+#endif /* HAVE_SQL_STORAGE */
+
 using namespace opencog;
 
 namespace opencog {
@@ -560,4 +564,38 @@ void CogServer::loadSCMModules(const char* config_paths[])
     logger().warn(
         "Server compiled without SCM support");
 #endif /* HAVE_GUILE */
+}
+
+void CogServer::openDatabase(void)
+{
+    // No-op if the user has not configured a storage backend
+    if (!config().has("STORAGE")) return;
+
+#ifdef HAVE_SQL_STORAGE
+    const std::string &dbname = config()["STORAGE"];
+    const std::string &username = config()["STORAGE_USERNAME"];
+    const std::string &passwd = config()["STORAGE_PASSWD"];
+
+    std::list<std::string> args;
+    args.push_back(dbname);
+    args.push_back(username);
+    args.push_back(passwd);
+
+    // Do this all very politely, by loading the required module,
+    // and then calling methods on it, as needed.
+    loadModule("libpersist.so");
+
+    Module *mod = getModule("opencog::PersistModule");
+    if (NULL == mod)
+    {
+        logger().error("Failed to pre-load database, because persist module not found!\n");
+        return;
+    }
+    PersistModule *pm = static_cast<PersistModule *>(mod);
+    pm->do_open(NULL, args);  
+
+#else /* HAVE_SQL_STORAGE */
+    logger().warn(
+        "Server compiled without database support");
+#endif /* HAVE_SQL_STORAGE */
 }

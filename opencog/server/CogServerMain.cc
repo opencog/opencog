@@ -159,6 +159,11 @@ int main(int argc, char *argv[])
     
     CogServer& cogserver = static_cast<CogServer&>(server());
 
+    // Open database *before* loading modules, since the modules
+    // might create atoms, and we can't have that happen until 
+    // storage is open, as otherwise, there will be handle conflicts.
+    cogserver.openDatabase(); 
+
     // Load modules specified in config
     cogserver.loadModules(); 
     cogserver.loadSCMModules(DEFAULT_MODULE_PATHS);

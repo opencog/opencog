@@ -39,7 +39,7 @@ namespace opencog
 
 /**
  * The DECLARE_CMD_REQUEST macro provides a simple, easy-to-use interface
- * to the creation of new modules, while also sheilding the module writer
+ * to the creation of new modules, while also shielding the module writer
  * from the guts and inner workings of the module loading and command
  * processing system.
  *
@@ -199,7 +199,7 @@ struct RequestClassInfo : public ClassInfo
  *
  * Since requests are registered with the cogserver using the
  * Registry+Factory pattern, request classes must implement a static
- * 'info' method which uniquelly identifies its class. Note that the
+ * 'info' method which uniquely identifies its class. Note that the
  * Request class uses an extended 'info' class (RequestClassInfo)
  * which should add a description attribute and some text about the
  * request's usage.

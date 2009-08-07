@@ -59,6 +59,7 @@ private:
        "The loading ocurrs in a distinct thread; this command only initiates\n"
        "the loading.")
 
+public:
     DECLARE_CMD_REQUEST(PersistModule, "sql-open", do_open,
        "Open connection to SQL storage",
        "Usage: sql-open <dbname> <username> <auth-passwd>\n\n"
@@ -66,6 +67,7 @@ private:
        "atomtable contents. If the tables needed to hold atomtable\n"
        "information do not yet exist, they will be created.")
 
+private:
     DECLARE_CMD_REQUEST(PersistModule, "sql-store", do_store,
        "Save the atomtable on the SQL database",
        "Usage: sql-store\n\n"

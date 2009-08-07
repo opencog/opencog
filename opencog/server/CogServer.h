@@ -208,8 +208,12 @@ public:
 
     /** Load all modules specified in configuration file */
     virtual void loadModules();
+
     /** Load all Scheme modules specified in configuration file */
     virtual void loadSCMModules(const char* [] = NULL);
+
+    /** Open database specified in configuration file */
+    virtual void openDatabase();
 
     /**** Agent Registry API ****/
     /** Register a new agent class/type. Takes the class' id and a derived
