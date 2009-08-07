@@ -134,7 +134,7 @@ std::string Link::toString(void) const
                 snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
                 answer += buf;
                 if (nnn->getName() == "")
-                    answer += "#" + h.str();
+                    answer += "#" + h.value();
                 else
                     answer += nnn->getName();
                 answer += "]";
