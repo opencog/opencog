@@ -239,6 +239,7 @@
 			(let* ((ftrip (car trip-semes))
 					(uncert (hypothetical-to-uncertain ftrip))
 					(deduced (pln-bc uncert 3300))
+					; (deduced (pln-bc uncert 2700))
 				)
 
 				; Run PLN only if a question is involved -- 
@@ -246,11 +247,14 @@
 				(if deduced
 					(let* ((context-tv (cog-tv uncert))
 							(ctv-list (cog-tv->alist context-tv))
+							(vh-list (assoc-ref "versions" ctv-list))
 						)
 (newline)
 (display uncert)
 (newline)
 (display ctv-list)
+(newline)
+(display vh-list)
 					)
 					(display "Unable to deduce via PLN")
 				)
