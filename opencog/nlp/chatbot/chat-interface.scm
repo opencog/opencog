@@ -105,8 +105,8 @@
 ; processing is going on, the processing as been split into stages,
 ; designed so that each stage returns from the scheme interpreter,
 ; with some output for the chatbot.  The next stage of processing can
-; then be continued by writing ":scm hush\r (scheme code)\n" to the 
-; chat processor. The ":scm" and the "\r" are both important parts of
+; then be continued by writing "\n:scm hush\r (scheme code)\n" to the 
+; chat processor. The "\n:scm" and the "\r" are both important parts of
 ; the syntax, as the chat bridge looks for these. Don't mess them up.
 ;
 ; This interactive design is not very pretty, and it would be better
@@ -170,7 +170,7 @@
 	)
 
 	; Invoke the next step of processing.
-	(display ":scm hush\r (say-part-2 ")
+	(display "\n:scm hush\r (say-part-2 ")
 	(display is-question)
 	(display ")\n")
 	(fflush)
@@ -206,14 +206,14 @@
 			(let ((answer-list (chat-get-simple-answer)))
 				(if (not (null? answer-list))
 					(chat-prt-soln answer-list)
-					(display "Triple matching found no answer, attempting PLN.")
+					(display "Triple matching found no answer, attempting PLN.\n")
 				)
 			)
 		)
 	)
 
 	; Invoke the next step of processing.
-	(display ":scm hush\r (say-part-3 ")
+	(display "\n:scm hush\r (say-part-3 ")
 	(display is-question)
 	(display ")\n")
 	(fflush)
@@ -260,7 +260,7 @@
 	)
 
 	; Call the final stage
-	":scm hush\r (say-final-cleanup)"
+	"\n:scm hush\r (say-final-cleanup)"
 )
 
 ; -----------------------------------------------------------------------
