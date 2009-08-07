@@ -61,6 +61,13 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time thread REQUIRED)
+FIND_PACKAGE(Boost 1.34 COMPONENTS python)
+IF (Boost_FOUND)
+  MESSAGE(STATUS "Found boost libraries in ${Boost_INCLUDE_DIR} as ${Boost_LIBRARIES}")
+ELSE (Boost_FOUND)
+  MESSAGE(FATAL_ERROR "Boost libraries were not found")
+ENDIF (Boost_FOUND)
+
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)

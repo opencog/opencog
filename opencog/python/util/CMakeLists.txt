@@ -1,4 +1,7 @@
-include_directories(${PROJECT_SOURCE_DIR}/opencog/util)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/opencog/util
+    ${Boost_INCLUDE_DIR}
+)
 
 add_library(util_py SHARED
     util_module_wrap.cc
@@ -6,7 +9,7 @@ add_library(util_py SHARED
 )
 
 target_link_libraries(util_py
-    boost_python
+    ${Boost_LIBRARIES}
     util
 )
 

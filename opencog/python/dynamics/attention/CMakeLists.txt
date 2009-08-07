@@ -1,4 +1,7 @@
-include_directories(${PROJECT_SOURCE_DIR}/opencog/dynamics/attention)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/opencog/dynamics/attention
+    ${Boost_INCLUDE_DIR}
+)
 
 add_library(attention_py SHARED
     attention_module_wrap.cc
@@ -7,7 +10,7 @@ add_library(attention_py SHARED
 
 target_link_libraries(attention_py
     attention
-    boost_python
+    ${Boost_LIBRARIES}
 )
 
 set_target_properties(attention_py PROPERTIES

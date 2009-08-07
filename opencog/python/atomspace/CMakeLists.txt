@@ -1,6 +1,8 @@
 include_directories(
     ${PROJECT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/opencog/atomspace)
+    ${PROJECT_SOURCE_DIR}/opencog/atomspace
+    ${Boost_INCLUDE_DIR}
+    )
 
 add_library(atomspace_py SHARED
     atomspace_module_wrap.cc
@@ -26,7 +28,7 @@ add_library(atomspace_py SHARED
 )
 target_link_libraries(atomspace_py
     atomspace
-    boost_python
+    ${Boost_LIBRARIES}
 )
 set_target_properties(atomspace_py PROPERTIES
     PREFIX ""

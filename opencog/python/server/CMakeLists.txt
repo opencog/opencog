@@ -1,4 +1,7 @@
-include_directories(${PROJECT_SOURCE_DIR}/opencog/server)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/opencog/server
+    ${Boost_INCLUDE_DIR}
+)
 
 add_library(server_py SHARED
     CogServer_wrap.cc
@@ -11,7 +14,7 @@ add_library(server_py SHARED
 )
 
 target_link_libraries(server_py
-    boost_python
+    ${Boost_LIBRARIES}
     server
 )
 

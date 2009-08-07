@@ -2,7 +2,10 @@
 # XXX the correct python version number should be automatically
 # determined and modified/set here.  
 #
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(
+    ${PYTHON_INCLUDE_PATH}
+    ${Boost_INCLUDE_DIR}
+)
 #include_directories("/usr/include/python2.6")
 #include_directories("/usr/include/python2.5")
 #include_directories("/usr/include/python2.4")
@@ -24,13 +27,13 @@ add_library(opencog_py SHARED
     opencog_module_wrap.cc
 )
 target_link_libraries(opencog_py
-    boost_python
+    ${Boost_LIBRARIES}
 
     atomspace_py
     server_py
     dynamics_py
     util_py
-    #    hopfield_py
+    # hopfield_py
 )
 set_target_properties(opencog_py PROPERTIES
     PREFIX ""
