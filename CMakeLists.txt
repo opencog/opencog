@@ -62,12 +62,6 @@ SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time thread REQUIRED)
 FIND_PACKAGE(Boost 1.34 COMPONENTS python)
-IF (Boost_FOUND)
-  MESSAGE(STATUS "Found boost libraries in ${Boost_INCLUDE_DIR} as ${Boost_LIBRARIES}")
-ELSE (Boost_FOUND)
-  MESSAGE(FATAL_ERROR "Boost libraries were not found")
-ENDIF (Boost_FOUND)
-
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
@@ -189,11 +183,12 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
 
-# find python destination dir for python bindings
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
+IF (Boost_PYTHON_FOUND)
+  # find python destination dir for python bindings
+  FIND_PACKAGE(PythonInterp)
+  FIND_PACKAGE(PythonLibs)
 
-IF (PYTHONLIBS_FOUND)
+  IF (PYTHONLIBS_FOUND)
     EXECUTE_PROCESS(
         COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
         OUTPUT_VARIABLE PYTHON_DEST
@@ -201,13 +196,17 @@ IF (PYTHONLIBS_FOUND)
     # replace new line at end
     STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
     IF ("${PYTHON_DEST}" STREQUAL "")
-        MESSAGE(STATUS "Python destination dir not found")
+        MESSAGE(FATAL_ERROR "Python destination dir not found")
     ELSE ("${PYTHON_DEST}" STREQUAL "") 
         MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+        MESSAGE(STATUS "Found Boost::Python and Python, we will build Python bindings")
     ENDIF ("${PYTHON_DEST}" STREQUAL "")
-ELSE(PYTHONLIBS_FOUND)
-    MESSAGE(STATUS "Python not found" )
-ENDIF(PYTHONLIBS_FOUND)
+  ELSE(PYTHONLIBS_FOUND)
+    MESSAGE(STATUS "Python not found, we won't build Python bindings." )
+  ENDIF(PYTHONLIBS_FOUND)
+ELSE (Boost_PYTHON_FOUND)
+  MESSAGE(STATUS "Boost Python libraries were not found, we won't build Python bindings.")
+ENDIF (Boost_PYTHON_FOUND)
 
 # global includes
 
