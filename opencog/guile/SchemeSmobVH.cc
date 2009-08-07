@@ -34,9 +34,13 @@ using namespace opencog;
 
 std::string SchemeSmob::vh_to_string(const VersionHandle *vh)
 {
+#define BUFLEN 120
+	char buff[BUFLEN];
+
 	std::string ret = "(vh \"";
 	ret += VersionHandle::indicatorToStr(vh->indicator);
-	ret += "\" " + vh->substantive.value();
+	snprintf(buff, BUFLEN, "\" %lu)", vh->substantive.value());
+	ret += buff;
 	return ret;
 }
 
