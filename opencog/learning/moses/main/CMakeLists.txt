@@ -99,3 +99,9 @@ TARGET_LINK_LIBRARIES (gen-truth-table
         comboreduct
         util
 )
+ADD_EXECUTABLE (moses-disjunction-SA moses-disjunction-SA)
+TARGET_LINK_LIBRARIES (moses-disjunction-SA
+        moses
+        comboreduct
+        util
+)
