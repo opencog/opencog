@@ -206,7 +206,7 @@
 			(let ((answer-list (chat-get-simple-answer)))
 				(if (not (null? answer-list))
 					(chat-prt-soln answer-list)
-					(display "Triple matching found no answer, attempting PLN.\n")
+					(display "Triple matching found no answer, attempting deduction.\n")
 				)
 			)
 		)
@@ -221,10 +221,12 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-part-3 -- run part 3 of the chat processing
-; This part attempts to use PLN.
+; say-part-pln-3 -- run part 3 of the chat processing
+; This part attempts to use PLN. XXX this is disabled/unsued right
+; now, due to PLN performance problems.  A simpler approach will
+; be used instead, for the interim.
 ;
-(define (say-part-3 is-question)
+(define (say-part-pln-3 is-question)
 
 	; If we still don't have an answer, try running PLN 
 	; (this is an extremely simple-minded hack right now)
@@ -258,6 +260,34 @@
 					)
 					(display "Unable to deduce via PLN")
 				)
+(fflush)
+			)
+		)
+	)
+
+	; Call the final stage
+	"\n:scm hush\r (say-final-cleanup)"
+)
+
+; -----------------------------------------------------------------------
+; say-part-3 -- run part 3 of the chat processing
+; This attempts to do some basic deduction
+;
+(define (say-part-3 is-question)
+
+	; If we still don't have an answer, try making a deduction
+	; (this is an extremely simple-minded hack right now)
+	; First, the question needs to be promoted to semes,
+	(let* ((trips (get-new-triples))
+			(trip-semes (promote-to-seme same-lemma-promoter trips))
+			(answer-list (chat-get-simple-answer))
+		)
+		(if (and is-question (null? answer-list))
+			(let* ((ftrip (car trip-semes))
+				)
+(newline)
+	(display trip-semes)
+(newline)
 (fflush)
 			)
 		)
