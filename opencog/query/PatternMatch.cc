@@ -26,6 +26,7 @@
 #include "CrispLogicPMCB.h"
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -317,8 +318,11 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
  *
  * This class is meant to be used with the pattern matcher. When the
  * pattern matcher calls the callback, it will do so with a particular
- * grounding of the search pattern. This class then holds an ungrounded
- * implicand, and will create a grounded version of the implicand.
+ * grounding of the search pattern. If this class is holding an ungrounded
+ * implicand, and will create a grounded version of the implicand. If
+ * the implcand is alrready grounded, then it's a no-op -- this class
+ * alone will *NOT* change its truth value.  Use a derived class for
+ * this. 
  *
  * The 'var_soln' argument in the callback contains the map from variables
  * to ground terms. 'class Instantiator' is used to perform the actual
@@ -327,7 +331,7 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 class Implicator :
 	public virtual PatternMatchCallback
 {
-	private:
+	protected:
 		Instantiator inst;
 	public:
 		AtomSpace *as;
@@ -770,7 +774,44 @@ Handle PatternMatch::imply (Handle himplication)
 class CrispImplicator:
 	public virtual Implicator,
 	public virtual CrispLogicPMCB
-{};
+{
+	public:
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+		                      std::map<Handle, Handle> &var_soln);
+};
+
+/**
+ * The crisp implicator needs to tweak the truth value of the 
+ * resulting implicand. In most cases, this is not (strictly) needed,
+ * for example, if the implcand has ungrounded variables, then
+ * a truth value can be assigned to it, and the implicand will obtain
+ * that truth value upon grounding.
+ *
+ * HOWEVER, if the implicand is fully grounded, then it will be given
+ * a truth value of (false, uncertain) to start out with, and, if a
+ * solution is found, then the goal here is to change its truth value 
+ * to (true, certain).  That is the whole point of this function:
+ * to tweak (affirm) the truth value of existing clauses!
+ */
+bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
+                          std::map<Handle, Handle> &var_soln)
+{
+	// PatternMatchEngine::print_solution(pred_soln,var_soln);
+	inst.as = as;
+	Handle h = inst.instantiate(implicand, var_soln);
+	if (h != Handle::UNDEFINED)
+	{
+		result_list.push_back(h);
+
+		// Set truth value to true+confident
+		Atom *a = TLB::getAtom(h);
+		SimpleTruthValue stv(1,0);
+		stv.setConfidence(1);
+		a->setTruthValue(stv);
+	}
+	return false;
+}
+
 
 /**
  * DEPRECATED: USE VAR_SCOPE INSTEAD!
