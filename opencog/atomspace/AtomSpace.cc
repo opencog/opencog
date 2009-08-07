@@ -692,14 +692,23 @@ Handle AtomSpace::fetchAtom(Handle h)
               Handle oh = fetchAtom(ogs[i]);
               if (oh != ogs[i])
               {
+                  logger().info(
+                      "Unexpected handle mismatch:\n"
+                      "oh=%lu ogs[%d]=%lu\n",
+                      oh.value(), i, ogs[i].value());
+
                   Atom *ah = TLB::getAtom(oh);
                   Atom *ag = TLB::getAtom(ogs[i]);
+                  if (ah) logger().info("Atom oh: %s\n",
+                      ah->toString().c_str());
+                  else logger().info("Atom oh: (null)\n");
+
+                  if (ag) logger().info("Atom ogs[i]: %s\n",
+                      ag->toString().c_str());
+                  else logger().info("Atom ogs[i]: (null)\n");
+
                   throw new RuntimeException(TRACE_INFO,
-                      "Unexpected handle mismatch:\n"
-                      "oh=%lu ogs[%d]=%lu\n"
-                      "oh=%s ogs=%s\n",
-                      oh.value(), i, ogs[i].value(),
-                      ah->toString().c_str(), ag->toString().c_str());
+                      "Unexpected handle mismatch\n");
               }
            }
         }
