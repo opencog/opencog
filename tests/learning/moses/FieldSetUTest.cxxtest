@@ -8,7 +8,7 @@ using namespace eda;
 class FieldSetUTest : public CxxTest::TestSuite {
 public:
 
-    void test_contin_spec()
+    void test_set_get_contin()
     {
         field_set fs(field_set::contin_spec(0.0,0.5,0.5,4), 1);
         instance inst(fs.packed_width());
@@ -19,12 +19,17 @@ public:
                   << fs.stream(inst) << std::endl;
         std::cout << fs.stream_raw(inst) << std::endl;
         
-        /*  size_t idx = 1;
+        field_set::const_contin_iterator it = fs.begin_contin(inst);
+        size_t idx = fs.contin_to_raw_idx(it.idx());
+        std::cout << "idx:" << idx << std::endl;
+
         contin_t rv, v = 0.5;
         
         fs.set_contin(inst, idx, v);
         rv = fs.get_contin(inst, idx);
-        TS_ASSERT_EQUALS(v, rv);*/
+        TS_ASSERT_EQUALS(v, rv);
+        
+        std::cout << "after test: "<< fs.stream(inst) << std::endl;
         
     }
     
