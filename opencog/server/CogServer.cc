@@ -592,7 +592,10 @@ void CogServer::openDatabase(void)
         return;
     }
     PersistModule *pm = static_cast<PersistModule *>(mod);
-    pm->do_open(NULL, args);  
+    const std::string &resp = pm->do_open(NULL, args);  
+
+    logger().info("Preload >>%s: %s as user %s\n", 
+        resp.c_str(), dbname.c_str(), username.c_str());
 
 #else /* HAVE_SQL_STORAGE */
     logger().warn(
