@@ -67,12 +67,6 @@ public:
         return uuid;
     }
 
-    inline std::string str(void) const {
-        std::ostringstream oss;
-        oss << uuid;
-        return oss.str();
-    }
-
     inline Handle& operator=(const Handle& h) {
         uuid = h.uuid;
         return *this;

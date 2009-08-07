@@ -130,7 +130,7 @@ void NMXmlExporter::exportAtom(Handle atomHandle, bool typesUsed[], std::string&
         }
         std::string name = ((Node*)atom)->getName();
         if (name == "")
-            name = "#" + atomHandle.str();
+            name = "#" + atomHandle.value();
         sprintf(aux, "%s=\"%s\" />\n", NAME_TOKEN, name.c_str());
         result += aux;
     } else {

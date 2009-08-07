@@ -1639,13 +1639,13 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         unsigned int j;
         for ( j = 0; j < incomingLinks.size( ); ++j ) {
             logger().debug(
-                         "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%s], outgoing0[%s] predicateNode[%s]",
+                         "AtomSpaceUtil - %d) type[%s] EVAL_LINK[%lu], outgoing0[%slu] predicateNode[%lu]",
                          j,
                          classserver().getTypeName( atomSpace.getType( incomingLinks[j] ) ).c_str( ),
                          classserver().getTypeName( EVALUATION_LINK ).c_str( ),
-                         atomSpace.getOutgoing( incomingLinks[j], 0 ).str( ).c_str( ),
-                         predicateNodeHandle.str( ).c_str( ),
-                         atomSpace.getOutgoing( incomingLinks[j], 1 ).str( ).c_str( ) );
+                         atomSpace.getOutgoing( incomingLinks[j], 0 ).value(),
+                         predicateNodeHandle.value(),
+                         atomSpace.getOutgoing( incomingLinks[j], 1 ).value() );
             if ( atomSpace.getType( incomingLinks[j] ) == EVALUATION_LINK &&
                     atomSpace.getOutgoing( incomingLinks[j], 0 ) == predicateNodeHandle ) {
                 atomSpace.getTimeInfo( back_inserter(timestamps),

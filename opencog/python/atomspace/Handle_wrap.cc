@@ -78,7 +78,6 @@ void init_Handle_py()
         .def(init<>())
         .def(init<const Handle&>())
         .def_readonly("UNDEFINED", &Handle::UNDEFINED)
-        .def("str", &Handle::str)
-        .def("__str__", boost::lexical_cast<std::string, Handle const&>)
+        .def("__str__", boost::lexical_cast<std::string, const Handle&>)
     ;
 }
