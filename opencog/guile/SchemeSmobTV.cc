@@ -4,6 +4,21 @@
  * Scheme small objects (SMOBS) for truth values.
  *
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifdef HAVE_GUILE
@@ -159,11 +174,13 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			int nvh = mtv->getNumberOfVersionedTVs();
 			for (int i=0; i<nvh; i++)
 			{
+				ret += "(";
 				VersionHandle vh = mtv->getVersionHandle(i);
 				ret += vh_to_string(&vh);
 				const TruthValue& vtv = mtv->getVersionedTV(vh);
-				ret += ".";
+				ret += " ";
 				ret += tv_to_string(&vtv);
+				ret += ")";
 			}
 			ret += ")";
 			return ret;
@@ -349,21 +366,27 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 
 			SCM sprimary = scm_from_locale_symbol("primary");
 			SCM sversion = scm_from_locale_symbol("versions");
+			SCM svhandle = scm_from_locale_symbol("vhandle");
+			SCM stvalue = scm_from_locale_symbol("tvalue");
 
 			// Loop over all the version handles.
 			SCM vers = SCM_EOL;
 			int nvh = mtv->getNumberOfVersionedTVs();
 			for (int i=0; i<nvh; i++)
 			{
+				SCM one = SCM_EOL;
+
 				VersionHandle vh = mtv->getVersionHandle(i);
 				VersionHandle *nvh = new VersionHandle(vh);
 				SCM svh = take_vh(nvh);
+				one = scm_acons(svhandle, svh, one);
 
 				const TruthValue& vtv = mtv->getVersionedTV(vh);
 				TruthValue *nvtv = vtv.clone();
 				SCM svtv = take_tv(nvtv);
+				one = scm_acons(stvalue, svtv, one);
 
-				vers = scm_acons(svh, svtv, vers);
+				vers = scm_cons(one, vers);
 			}
 
 			SCM rc = SCM_EOL;
