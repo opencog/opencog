@@ -638,9 +638,9 @@ int PatternMatch::get_vartype(Handle htypelink,
 
 /* ================================================================= */
 /**
- * Evaluate an ImplicationLink embedded in an ImplicationLink
+ * Evaluate an ImplicationLink embedded in a VariableScopeLink
  *
- * Given a VariableScopeLink containin variable declarations and an
+ * Given a VariableScopeLink containing variable declarations and an
  * ImplicationLink, this method will "evaluate" the implication, matching
  * the predicate, and creating a grounded implicand, assuming the
  * predicate can be satisfied. Thus, for example, given the structure
@@ -651,73 +651,10 @@ int PatternMatch::get_vartype(Handle htypelink,
  *          VariableNode "$var1"
  *       ImplicationLink
  *          AndList
- *             EvaluationList
- *                PredicateNode "_obj"
- *                ListLink
- *                   ConceptNode "make"
- *                   VariableNode "$var0"
- *             EvaluationList
- *                PredicateNode "from"
- *                ListLink
- *                   ConceptNode "make"
- *                   VariableNode "$var1"
- *          EvaluationList
- *             PredicateNode "make_from"
- *             ListLink
- *                VariableNode "$var0"
- *                VariableNode "$var1"
- *
- * Then, if the atomspace also contains a parsed version of the English
- * sentence "Pottery is made from clay", that is, if it contains the
- * hypergraph
- *
- *    EvaluationList
- *       PredicateNode "_obj"
- *       ListLink
- *          ConceptNode "make"
- *          ConceptNode "pottery"
- *
- * and the hypergraph
- *
- *    EvaluationList
- *       PredicateNode "from"
- *       ListLink
- *          ConceptNode "make"
- *          ConceptNode "clay"
- *
- * Then, by pattern matching, the predicate part of the ImplicationLink
- * can be fulfilled, binding $var0 to "pottery" and $var1 to "clay".
- * These bindings are refered to as the 'groundings' or 'solutions'
- * to the variables. So, e.g. $var0 is 'grounded' by "pottery".
- *
- * Next, a grounded copy of the implicand is then created; that is,
- * the following hypergraph is created and added to the atomspace:
- *
- *    EvaluationList
- *       PredicateNode "make_from"
- *       ListLink
- *          ConceptNode "pottery"
- *          ConceptNode "clay"
- *
- * As the above example illustrates, this function expects that the
- * input handle is an implication link. It expects the implication link
- * to consist entirely of one disjunct (one AndList) and one (ungrounded)
- * implicand.  All variables are implicit, and are identified by being
- * VariableNodes.  These variables are interpreted as 'free variables'
- * having no binding.  The act of pattern-matching to the predicate of
- * the implication has an implicit 'for-all' flavour to it: the pattern
- * is matched to 'all' matches in the atomspace.
- *
- * When a pattern match is found, the variables can be understood as
- * being grounded by some explicit ground terms in the atomspace. This
- * grounding is then used to create a grounded version of the
- * (ungrounded) implicand. That is, the variables in the implicand are
- * substituted by thier grounding values.  This method then returns a
- * list of all of the grounded implicands that were created.
- *
- * Note that this method can be used to create a simple forward-chainer:
- * One need only to take a set of implication links, and call this
- * method repeatedly on them, until one is exhausted.
+ *             etc ...
+ * Evaluation proceeds as decribed in the "do_imply()" function above.
+ * The whole point of the VariableScopeLink is to do nothing more than 
+ * to limit the range of the scope of the variables.
  */
 
 Handle PatternMatch::do_varscope (Handle hvarscope,
