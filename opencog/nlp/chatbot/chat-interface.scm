@@ -85,18 +85,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; convert hypothetical isa to plain is but nuke the truth value
-; This is needed for PLN.
-
-(define (hypothetical-to-uncertain triple)
-	(EvaluationLink
-		(DefinedLinguisticRelationshipNode "isa")
-		(cadr (cog-outgoing-set triple))
-	)
-)
-
-
-; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user 
 ; entered.
@@ -169,6 +157,7 @@
 		)
 	)
 
+
 	; Invoke the next step of processing.
 	(display "\n:scm hush\r (say-part-2 ")
 	(display is-question)
@@ -213,12 +202,25 @@
 	)
 
 	; Invoke the next step of processing.
+	(newline)
 	(display "\n:scm hush\r (say-part-3 ")
 	(display is-question)
 	(display ")\n")
 	(fflush)
 	""
 )
+
+; -----------------------------------------------------------------------
+; convert hypothetical isa to plain is but nuke the truth value
+; This is needed for PLN.
+
+(define (hypothetical-to-uncertain triple)
+	(EvaluationLink
+		(DefinedLinguisticRelationshipNode "isa")
+		(cadr (cog-outgoing-set triple))
+	)
+)
+
 
 ; -----------------------------------------------------------------------
 ; say-part-pln-3 -- run part 3 of the chat processing
@@ -284,16 +286,18 @@
 		)
 		(if (and is-question (null? answer-list))
 			(let* ((ftrip (car trip-semes))
+					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
 				)
-(newline)
-	(display trip-semes)
-(newline)
-(fflush)
+				(if ans
+					(display "Yes.\n")
+					(display "Simple deduction found no answer.\n")
+				)
 			)
 		)
 	)
 
 	; Call the final stage
+	(newline)
 	"\n:scm hush\r (say-final-cleanup)"
 )
 

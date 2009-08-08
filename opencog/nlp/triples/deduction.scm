@@ -38,6 +38,7 @@
 
 ; -----------------------------------------------------------------------
 ; make-one-chain -- build a simple, single-step implication chain
+; aka a "deduction rule". This is a simple, single-step deduction.
 ; The structure should be obvious by reading the code below!
 ;
 (define (make-one-chain hypothesis evaluand-a evaluand-b pred-first pred-next)
