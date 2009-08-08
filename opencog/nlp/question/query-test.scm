@@ -27,6 +27,8 @@
 	)
 )
 
+(find-wh-words quest)
+
 (define impl (make-triple-question quest))
 
 (cog-ad-hoc "do-varscope" impl)
