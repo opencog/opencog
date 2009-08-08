@@ -134,17 +134,20 @@
 
 	(let* ((ques (replace-wh-words trip))
 			(vars (find-vars ques))
-			(var (if (pair? vars) (car vars) '())) ; assume only one var
 			)
-		(VariableScopeLink
-			var
-			(ImplicationLink
-				ques
-				(ListLink
-					(AnchorNode "# QUERY SOLUTION")
+		; if variables were found, then assume that only
+		; one variable was found.
+		(if (pair? vars)
+			(let ((var (car vars)))
+				(VariableScopeLink
 					var
+					(ImplicationLink
+						ques
+						var
+					)
 				)
 			)
+			'() ; no vars were found, return empty list.
 		)
 	)
 )
