@@ -16,7 +16,7 @@ ADD_LIBRARY(util
 	lazy_normal_selector
 	lazy_random_selector
 	lazy_selector
-        oc_assert
+	oc_assert
 	Logger
 	lru_cache
 	misc
@@ -42,7 +42,7 @@ INSTALL (FILES
 	exceptions.h
 	files.h
 	functional.h
-        oc_assert.h
+	oc_assert.h
 	hashing.h
 	hash_map.h
 	hash_set.h
