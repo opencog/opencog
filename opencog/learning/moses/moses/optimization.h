@@ -858,7 +858,9 @@ struct sliced_iterative_hillclimbing {
      
      double cooling_schedule(double t)
      { 
-         return (double)INIT_TEMPERATURE / std::log(1 + t); 
+         opencog::cassert(TRACE_INFO, t > 0, "t should greater than 0");
+         //return (double) init_temp / std::log(1.0 + t); 
+         return (double) init_temp / (1.0 + t);
      }
      
      energy_t energy(const eda::scored_instance<tree_score>& inst)
@@ -923,7 +925,7 @@ struct sliced_iterative_hillclimbing {
              deme.resize(1);
              *(deme.begin()++) = exemplar;
          } else {
-             int step = 0;
+             int step = 1;
              int distance = MAX_DISTANCE_FROM_EXEMPLAR;
              double current_temp = init_temp;
              eda::instance center_instance(exemplar);
@@ -932,6 +934,7 @@ struct sliced_iterative_hillclimbing {
              do {
                  
                  cout << "distance in this iteration: " << distance << endl;
+                 cout << "current_temp :" << current_temp << endl;
                  // the numeber of all neighbours at the distance d
                  long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
                  cout << "Number of possible instances:"
@@ -968,17 +971,22 @@ struct sliced_iterative_hillclimbing {
                  energy_t current_instance_energy;
                  double actual_accept_prob;
 
-                 for ( int i = 0 ; i < /* total_number_of_neighbours*/ 10; i++ ) {
+                 //     for ( int i = 0 ; i < total_number_of_neighbours; i++ ) {
                      
                      // sample one neighbour of the center_instance from distance
                      deme.resize(current_number_of_instances + number_of_new_instances);
                      sample_from_neighborhood(deme.fields(), distance, number_of_new_instances,
                                               deme.begin() + current_number_of_instances,
                                               rng, center_instance);
+                   
+                     // score all new instances in the deme
+                     transform(deme.begin() + current_number_of_instances , deme.end(),
+                               deme.begin_scores() + current_number_of_instances,
+                               score);
                      
                      eda::scored_instance<tree_score>& current_scored_instance = deme[current_number_of_instances];
-                     eda::instance current_instance = current_scored_instance.first;
-                     score(current_scored_instance);
+                     eda::instance& current_instance = current_scored_instance.first;
+                   
                      current_instance_energy = energy(current_scored_instance);
                                          
                      // check if the current instance in the deme is better than
@@ -992,7 +1000,7 @@ struct sliced_iterative_hillclimbing {
                      }
                      
                      current_number_of_instances += number_of_new_instances;
-                  }
+                     //  }
                  
                  cout <<"\tThe  instance:" << deme.fields().stream(center_instance) <<endl;
                  cout <<"\tthe energy is:" << center_instance_energy << endl;
