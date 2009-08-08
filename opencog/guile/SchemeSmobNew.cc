@@ -388,18 +388,23 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 			Handle h(uuid);
 			outgoing_set.push_back(h);
 		}
-		// Be sure to do this check *before* the pair check below.
-		else if (scm_is_null(satom)) 
-		{
-			// No-op, just ignore.
-		}
 		else if (scm_is_pair(satom) && !scm_is_null(satom_list))
 		{
 			// Allow lists to be specified: e.g. 
 			// (cog-new-link 'ListLink (list x y z))
-			// Do this via a recursive call, although we expect 
-			// the recursion to never be more than one deep.
-			outgoing_set = decode_handle_list(satom, subrname);
+			// Do this via a recursive call, flattening nested lists
+			// as we go along.
+			const std::vector<Handle> &oset =
+				decode_handle_list(satom, subrname);
+			std::vector<Handle>::const_iterator it;
+			for (it = oset.begin(); it != oset.end(); it++)
+			{
+				outgoing_set.push_back(*it);
+			}
+		}
+		else if (scm_is_null(satom)) 
+		{
+			// No-op, just ignore.
 		}
 		else
 		{
