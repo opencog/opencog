@@ -124,7 +124,8 @@ interface.
 
       Optionally, a truth value can follow the list of atoms.
       Throws errors if the link type is not a valid opencog link type,
-      or if any of the arguments after the link type are not atoms.
+      or if any of the arguments after the link type are not atoms,
+      truth values, or nil.
 
       Example:
           ; Creates two nodes, and a new link:
@@ -145,7 +146,8 @@ interface.
       link exists, then the truth value is modified.
 
       Throws errors if the link type is not a valid opencog link type,
-      or if any of the arguments after the link type are not atoms.
+      or if any of the arguments after the link type are not atoms,
+      truth values, or nil.
 
       Example:
           ; Create two nodes:
