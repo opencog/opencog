@@ -8,10 +8,9 @@
 ; Linas Vepstas August 2009
 ;
 ; ---------------------------------------------------------------------
+; is-qvar? node -- Return #t if the node is a WH query word, else return #f
 ;
-; Return #t if the node is a WH query word, else return #f
-;
-(define (is_qvar wrd)
+(define (is-qvar? wrd)
 	(if (eq? (cog-type wrd) 'DefinedLinguisticConceptNode)
 		(let ((wstr (cog-name wrd)))
 			(or (equal?  "who" wstr)
@@ -26,13 +25,35 @@
 )
 
 ; ---------------------------------------------------------------------
+; is-word-a-query? word-inst
+; Return #t if the word-instance is a WH query word, else return #f
 ;
-; Return #t if the word is a WH query word, else return #f
-;
-(define (is-word-a-query word-inst)
+(define (is-word-a-query? word-inst)
 	(cog-map-chase-link
 		'InheritanceLink 'DefinedLinguisticConceptNode
-		is_qvar word-inst
+		is-qvar? word-inst
 	)
 )
 
+; ---------------------------------------------------------------------
+;
+; Create a list of all the query variables in a link
+;
+(define (find-vars atom-list)
+	(define (fv atoms lst)
+		(if (eq? atoms '())
+			lst      ;; we're done, return
+			(if (pair? atoms) ;; if its a list
+				(append! (fv (car atoms) '()) (fv (cdr atoms) lst))
+				(if (cog-link? atoms)
+					(fv (cog-outgoing-set atoms) lst) ;; traverse outgoing set.
+					(if (is-word-a-query? atoms) ;; single atom -- is it a query?
+						(cons atoms lst)
+						lst
+					)
+				)
+			)
+		)
+	)
+	(fv atom-list '())
+)

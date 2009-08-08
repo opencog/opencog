@@ -284,7 +284,7 @@
 			(trip-semes (promote-to-seme same-lemma-promoter trips))
 			(answer-list (chat-get-simple-answer))
 		)
-		(if (and is-question (null? answer-list))
+		(if (and is-question (null? answer-list) (not (null? trip-semes)))
 			(let* ((ftrip (car trip-semes))
 					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
 				)
