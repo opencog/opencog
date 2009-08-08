@@ -47,11 +47,26 @@
 ; questions (for example: "That is what I said." is not a WH-question).
 ;
 (define (find-wh-words atom-list)
+	(filter-hypergraph is-word-a-query? atom-list)
+)
+
+; ---------------------------------------------------------------------
+; filter-hypergraph pred? atom-list
+;
+; Given a list of atoms, and a scheme-predicate pred?, return a
+; list of atoms that satisfy the scheme-predicate.  This is not
+; a simple srfi-1 'filter', rather, it traverses the hypergraph,
+; applying the predicate to the subgraphs.
+;
+; In the current implementation, the scheme-rpdicate is assumed to 
+; select only for Nodes.  
+;
+(define (filter-hypergraph pred? atom-list)
 	(define (fv atoms lst)
 		(cond
 			; If its a query word, append it to the list
 			((cog-node? atoms)
-				(if (is-word-a-query? atoms)
+				(if (pred? atoms)
 					(cons atoms lst)
 					lst
 				)
@@ -64,7 +79,11 @@
 
 			; If its a list then scan the list
 			((pair? atoms)
-				(append! (append-map! find-wh-words atoms) lst)
+				(append! 
+					(append-map! 
+						(lambda (x) (filter-hypergraph pred? x)) atoms) 
+					lst
+				)
 			)
 		)
 	)
@@ -72,9 +91,11 @@
 )
 
 ; ---------------------------------------------------------------------
+; replace-wh-words atoms
+;
 ; Create a copy of a hypergraph, replacing any WH-words with
-; VariableNodes
-
+; VariableNodes (of the same name as the WH-words)
+;
 (define (replace-wh-words atoms)
 	(cond
  		; If its a query word, replace by variable
@@ -101,20 +122,28 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Create a VarScopeLink hold the question to be answered.
+; Create a VarScopeLink holding a triple to be matched
 ;
 (define (make-triple-question trip)
+	(define (find-vars atoms)
+		(define (is-var? atom) 
+			(eq? 'VariableNode (cog-type atom))
+		)
+		(filter-hypergraph is-var? atoms)
+	)
 
-	(let* ((vars (find-wh-words trip))
-			(var (if (pair? vars) (car vars) '()))
+	(let* ((ques (replace-wh-words trip))
+			(vars (find-vars ques))
+			(var (if (pair? vars) (car vars) '())) ; assume only one var
 			)
 		(VariableScopeLink
 			var
 			(ImplicationLink
-				(AndLink
-					trip
+				ques
+				(ListLink
+					(AnchorNode "# QUERY SOLUTION")
+					var
 				)
-				trip
 			)
 		)
 	)
