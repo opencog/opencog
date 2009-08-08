@@ -698,7 +698,8 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
 	Type tdecls = adecls->getType();
-	if (VARIABLE_NODE == tdecls)
+	if ((VARIABLE_NODE == tdecls) ||
+	    (dynamic_cast<Node *>(adecls))) // allow *any* node as a variable
 	{
 		vset.push_back(hdecls);
 	}
