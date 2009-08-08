@@ -12,7 +12,6 @@ LINK_LIBRARIES(
 
 ADD_LIBRARY(question SHARED
 	FrameQuery.cc
-	HypQuery.cc
 	SentenceQuery.cc
 	TripleQuery.cc
 	WordRelQuery.cc
@@ -24,7 +23,6 @@ INSTALL (TARGETS question
 
 INSTALL (FILES
 	FrameQuery.h
-	HypQuery.h
 	SentenceQuery.h
 	TripleQuery.h
 	WordRelQuery.h
