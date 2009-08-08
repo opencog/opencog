@@ -14,5 +14,3 @@ cat preps.txt | ./preplist-to-atoms.pl | netcat -q60 $HOST $PORT > /dev/null
 cat prep-rules.txt | ./rules-to-implications.pl prep-rule | netcat -q60 $HOST $PORT > /dev/null
 cat rules.txt | ./rules-to-implications.pl frame-rule | netcat -q60 $HOST $PORT > /dev/null
 
-cat triples-pipeline.scm  | netcat -q60 $HOST $PORT > /dev/null
-cat deduction.scm  | netcat -q60 $HOST $PORT > /dev/null

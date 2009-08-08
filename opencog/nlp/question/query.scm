@@ -1,6 +1,7 @@
 ;
 ; query.scm
-; Question-answwering related code, a re-implementation of the C++
+;
+; Question-answering related code, a re-implementation of the C++
 ; code in scheme.
 ; Most of the code here is very specific to the RelEx representation
 ; of sentences, and thus is "fragile" if that represtation changes.
@@ -56,4 +57,23 @@
 		)
 	)
 	(fv atom-list '())
+)
+
+; ---------------------------------------------------------------------
+;
+; Create a VarScopeLink hold the question to be answered.
+;
+(define (make-triple-question trip)
+
+	(let* ((vars (find-vars trip))
+			(var (if (pair? vars) (car vars) '()))
+			)
+		(VariableScopeLink
+			var
+			(AndLink
+				trip
+			)
+			trip
+		)
+	)
 )
