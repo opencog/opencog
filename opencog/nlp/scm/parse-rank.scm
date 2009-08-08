@@ -241,7 +241,7 @@ scm
 	; Expects as input a ParseAnchor (node anchoring a parse)
 	; Returns whatever proc returns, as an or-map.
 	(define (map-links proc parse-inst)
-   	(cog-map-chase-link 'LinkGrammarLinkageLink 'EvaluationLink
+   	(cog-map-chase-link-dbg 'LinkGrammarLinkageLink 'EvaluationLink
       	""  " --------- linkage-found ------------ \n"
       	proc parse-inst
    	)

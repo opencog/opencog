@@ -33,7 +33,7 @@
       (throw 'wrong-atom-type 'map-parses
           "Error: expecting SentenceNode" sent)
    )
-	(cog-map-chase-link 'ParseLink ParseAnchor
+	(cog-map-chase-link-dbg 'ParseLink ParseAnchor
 		" ========= sentence ============ \n" ""
 		proc sent
 	)
@@ -48,7 +48,7 @@
 ; connnected via a ParseInstanceLink to the individual words.
 ; 
 (define (map-word-instances proc parse) 
-	(cog-map-chase-link 'ParseInstanceLink WordAnchor
+	(cog-map-chase-link-dbg 'ParseInstanceLink WordAnchor
 		" --------- parse ------------ \n" ""
 		proc parse
 	)
@@ -63,7 +63,7 @@
 ; to the actual word node.
 ;
 (define (map-word-node proc word-inst) 
-	(cog-map-chase-link 'ReferenceLink 'WordNode 
+	(cog-map-chase-link-dbg 'ReferenceLink 'WordNode 
 		"" ""  ; " --------- word-found ------------ \n"
 		proc word-inst
 	)

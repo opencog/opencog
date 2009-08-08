@@ -33,7 +33,7 @@ scm
 	
 	; loop over all the words in the sentence
 	; XXX this is wrong, this is not how words are indicated
-	; (cog-map-chase-link 'SentenceLink 'WordInstanceNode "" "" dj-per-word sent-node)
+	; (cog-map-chase-link 'SentenceLink 'WordInstanceNode dj-per-word sent-node)
 	
 	#f
 )

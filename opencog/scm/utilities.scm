@@ -264,12 +264,12 @@
 			(set! lst (cons inst lst))
 			#f
 		)
-		(cog-map-chase-link link-type endpoint-type '() '() mklist anchor)
+		(cog-map-chase-link link-type endpoint-type mklist anchor)
 		lst
 	)
 )
 
-; cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
+; cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
 ;
 ; Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.
 ;
@@ -285,11 +285,11 @@
 ; halted the iteration.
 ;
 ; Example usage:
-; (cog-map-chase-link 'ReferenceLink 'WordNode "" "" proc word-inst)
+; (cog-map-chase-link-dbg 'ReferenceLink 'WordNode '() '() proc word-inst)
 ; Given a 'word-inst', this will chase all ReferenceLink's to all 
 ; WordNode's, and then will call 'proc' on these WordNodes.
 ;
-(define (cog-map-chase-link link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
+(define (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 	(define (get-endpoint w)
 		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
 		; cog-filter-map returns the return value from proc, we pass it on
@@ -303,6 +303,10 @@
 		'()
 		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
 	)
+)
+
+(define (cog-map-chase-link link-type endpoint-type proc anchor)
+	(cog-map-chase-link-dbg link-type endpoint-type '() '() proc anchor)
 )
 
 ; -----------------------------------------------------------------------
