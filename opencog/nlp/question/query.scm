@@ -37,10 +37,16 @@
 )
 
 ; ---------------------------------------------------------------------
+; find-wh-words list-of-links
 ;
-; Create a list of all the query variables in a link
+; Create a list of all the word-instances representing a WH-query
+; (what, who, where, etc.) give a list of links. Note that is is
+; not a simple scan for these words in a sentence -- rather, the
+; parser has already marked these words as query-words. This is 
+; important, because WH_words can be used in sentences that are not
+; questions (for example: "That is what I said." is not a WH-question).
 ;
-(define (find-vars atom-list)
+(define (find-wh-words atom-list)
 	(define (fv atoms lst)
 		(if (eq? atoms '())
 			lst      ;; we're done, return
