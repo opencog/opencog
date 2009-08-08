@@ -70,10 +70,12 @@
 			)
 		(VariableScopeLink
 			var
-			(AndLink
+			(ImplicationLink
+				(AndLink
+					trip
+				)
 				trip
 			)
-			trip
 		)
 	)
 )
