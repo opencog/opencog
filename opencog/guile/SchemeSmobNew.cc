@@ -366,8 +366,9 @@ static Type verify_link (SCM stype, const char * subrname)
 std::vector<Handle>
 SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 {
-	// Verify that second arg is an actual list. Allow null list.
-	// (I think that there are legit null lists, right?)
+	// Verify that second arg is an actual list. Allow null list
+	// (which is rather unusal, but legit.  Allow embedded nulls
+	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(satom_list) && !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, 2, satom_list, "a list of atoms");
 
@@ -395,9 +396,13 @@ SchemeSmob::decode_handle_list (SCM satom_list, const char * subrname)
 			// the recursion to never be more than one deep.
 			outgoing_set = decode_handle_list(satom, subrname);
 		}
+		else if (scm_is_null(satom))
+		{
+			// No-op, just ignore.
+		}
 		else
 		{
-			// Its legit to have enmbedded truth values, just skip them.
+			// Its legit to have embedded truth values, just skip them.
 			const TruthValue *tv = get_tv_from_list(sl);
 			const AttentionValue *av = get_av_from_list(sl);
 			if ((tv == NULL) && (av == NULL))
