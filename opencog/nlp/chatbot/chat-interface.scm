@@ -174,19 +174,24 @@
 ; -----------------------------------------------------------------------
 ; re-anchor the result triples
 ;
-(define (re-anchor trip-list)
+(define bottom-anchor (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
+(define (anchor-bottom-side trip-list)
 	(define (re-anchor-one trip)
 		(let* ((ll (cadr (cog-outgoing-set trip)))
 				(li (car (cog-outgoing-set ll)))
 				)
-			(ListLink (stv 1 1)
-				(AnchorNode "# TRIPLE BOTTOM ANCHOR")
-				li
-			)
+			(ListLink (stv 1 1) bottom-anchor li)
 		)
 	)
 	(map re-anchor-one trip-list)
 )
+
+(define (delete-bottom-anchor)
+   (for-each (lambda (x) (cog-delete x))
+      (cog-incoming-set bottom-anchor)
+   )
+)
+
 
 ; -----------------------------------------------------------------------
 ; say-part-2 -- run part 2 of the chat processing
@@ -206,7 +211,7 @@
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
-			(re-anchor trips)
+			(anchor-bottom-side trips)
 			(cog-ad-hoc "do-varscope" quest-rule-vscope-0)
 
 (if #f 
@@ -342,6 +347,10 @@
 
 (display "duude cleaning up now\n")
 (newline)
+
+	; Delete re-anchored triples
+	(delete-bottom-anchor)
+
 	; Delete list of triples, so they don't interfere with the next question.
 	(delete-result-triple-links)
 
