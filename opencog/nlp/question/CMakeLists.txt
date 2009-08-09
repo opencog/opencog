@@ -13,7 +13,6 @@ LINK_LIBRARIES(
 ADD_LIBRARY(question SHARED
 	FrameQuery.cc
 	SentenceQuery.cc
-	TripleQuery.cc
 	WordRelQuery.cc
 )
 
@@ -24,7 +23,6 @@ INSTALL (TARGETS question
 INSTALL (FILES
 	FrameQuery.h
 	SentenceQuery.h
-	TripleQuery.h
 	WordRelQuery.h
 	DESTINATION "include/opencog/nlp/question"
 )
