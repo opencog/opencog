@@ -650,7 +650,7 @@ int PatternMatch::get_vartype(Handle htypelink,
  * predicate can be satisfied. Thus, for example, given the structure
  *
  *    VariableScopeLink
- *       List
+ *       ListLink
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       ImplicationLink
