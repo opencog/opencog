@@ -29,3 +29,11 @@ when editing a source file from opencog's tree:
 
 autocmd BufNewFile,BufReadPost * if match(expand("%:p:h"), "/opencog") >= 0 && &filetype == "cpp" | set ts=4 sw=4 tw=80 ff=unix cindent expandtab | endif
 
+
+-------------------------------------------------------------------------------
+EMACS USERS
+
+If you use Emacs, you may add the following lines to your ".emacs" as well:
+
+(setq-default indent-tabs-mode nil) ;; use spaces instead of tab
+(setq-default c-basic-offset 4) ;; set c based language indent to 4
