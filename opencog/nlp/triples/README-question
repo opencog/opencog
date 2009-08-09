@@ -1,0 +1,20 @@
+
+               Question-Answering by Pattern Matching
+               --------------------------------------
+                    Linas Vepstas August 2009
+
+Consider the factual statement capital_of(France,Paris). This provides
+an answer to the question capital_of(France, what) and simple pattern
+matching is enough to supply the answer.  The only extra work we need to
+do here is to validate that the second tripe is really a question. Tords
+that end, we write the rule:
+
+   IF $prep($var, $qvar) ^  # the question
+      query_var($qvar) ^    # validate question
+      $prep($var, $ans)     # answer
+   THEN
+      declare_answer($ans)
+
+	   %InheritanceLink($qvar, DefinedLingRel "what") ^  # qvar is a query word
+
+
