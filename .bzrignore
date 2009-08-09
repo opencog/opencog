@@ -56,3 +56,15 @@ debian/tmp/
 *.dll*
 *.nmake
 CTestTestfile.cmake
+
+#CTAGS
+TAGS
+
+#GNU GLOBAL
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+#Embodiment installation dir
+dist
