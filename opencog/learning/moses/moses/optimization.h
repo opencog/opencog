@@ -863,7 +863,7 @@ struct sliced_iterative_hillclimbing {
          return (double) init_temp / (1.0 + t);
      }
      
-     energy_t energy(const eda::scored_instance<tree_score>& inst)
+     energy_t energy(const eda::scored_instance<combo_tree_score>& inst)
      {
          energy_t instance_energy;
 
@@ -883,7 +883,7 @@ struct sliced_iterative_hillclimbing {
      }
        
      template<typename Scoring>
-     int operator()(eda::instance_set<tree_score>& deme,
+     int operator()(eda::instance_set<combo_tree_score>& deme,
                     const Scoring& score, int max_evals) {
          int pop_size = params.pop_size(deme.fields());
          int max_gens_total = params.max_gens_total(deme.fields());
@@ -914,7 +914,7 @@ struct sliced_iterative_hillclimbing {
               it != deme.fields().end_disc(exemplar); ++it)
              *it = 0;
                   
-         eda::scored_instance<tree_score> scored_exemplar = exemplar;
+         eda::scored_instance<combo_tree_score> scored_exemplar = exemplar;
          score_t exemplar_score = score(scored_exemplar).first;
          
          // NOTICE: in the optimize, we always wanna the max_score. But in the SA, the best
@@ -984,7 +984,7 @@ struct sliced_iterative_hillclimbing {
                                deme.begin_scores() + current_number_of_instances,
                                score);
                      
-                     eda::scored_instance<tree_score>& current_scored_instance = deme[current_number_of_instances];
+                     eda::scored_instance<combo_tree_score>& current_scored_instance = deme[current_number_of_instances];
                      eda::instance& current_instance = current_scored_instance.first;
                    
                      current_instance_energy = energy(current_scored_instance);

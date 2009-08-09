@@ -71,8 +71,8 @@ typedef ordered_programs::iterator ordered_programs_it;
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 
-struct metapopulation : public set < behavioral_scored_tree,
-                                     std::greater<behavioral_scored_tree> > {
+struct metapopulation : public set < behavioral_scored_combo_tree,
+                                     std::greater<behavioral_scored_combo_tree> > {
     /**
      * the parameter to decide how to select the deme from the population
      */
