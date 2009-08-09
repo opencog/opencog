@@ -184,6 +184,7 @@
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
+(if #f 
 			; Grab just the first triple for now ... and try to 
 			; pattern-match it.
 			(if (not (null? trips))
@@ -199,6 +200,10 @@
 				)
 				(display "No triples found, attempting deduction.\n")
 			)
+)
+(display "duude trips are:\n")
+(display trips)
+(newline)
 		)
 	)
 

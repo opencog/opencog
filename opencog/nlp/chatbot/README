@@ -4,6 +4,10 @@
                 Linas Vepstas <linasvepstas@gmail.com>
                           August 2009
 
+XXX As of this instant, important parts of the chatbot are being
+re-desinged, and so things sort of don't work. I beleive that
+revision 3150 has a working chatbot.
+
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
 At this time, the bot is a demo of the OpenCog natural-language 
