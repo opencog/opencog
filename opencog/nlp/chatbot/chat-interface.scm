@@ -184,19 +184,20 @@
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
-			; First, pull in any semes that might be related...
-			(fetch-related-semes trips) 
-
 			; Grab just the first triple for now ... and try to 
 			; pattern-match it.
 			(if (not (null? trips))
-				(cog-ad-hoc "triple-question" (car trips))
-			)
-			(let ((answer-list (chat-get-simple-answer)))
-				(if (not (null? answer-list))
-					(chat-prt-soln answer-list)
-					(display "Triple matching found no answer, attempting deduction.\n")
+				(let ((trip (car trips))
+						(impl (make-triple-question trip))
+					)
+					(if (not (null? impl))
+						; First, pull in any semes that might be related...
+						(fetch-related-semes trips) 
+
+						(cog-ad-hoc "do-varscope" impl)
+					)
 				)
+				(display "No triples found, attempting deduction.\n")
 			)
 		)
 	)
