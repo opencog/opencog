@@ -1,0 +1,17 @@
+;
+; question-pipeline.txt
+; 
+; An experimental set of question-answering rules
+;
+; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
+;
+; -----------------------------------------------------------
+; The following answers a simple WH-question (who, what, when etc.)
+; The question is presumed to be a simple triple itself.
+
+# IF $prep($var, $qvar)       ; the question
+		^ &query_var($qvar)     ; validate WH-question
+		^ $prep($var, $ans)     ; answer
+	THEN
+      ^3_&declare_answer($ans)
+
