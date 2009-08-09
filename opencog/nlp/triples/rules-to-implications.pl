@@ -57,7 +57,7 @@ sub parse_clause
 	if ($pred eq "" || $item1 eq "" || $item2 eq "")
 	{
 		# The pattern matches "blah(ding)"
-		$clause =~ m/^\s*([\$!%\-\w]+)\s*\(\s*([\$%#\-\w]+)\s*\)(.*)$/;
+		$clause =~ m/^\s*([\$\&!%\-\w]+)\s*\(\s*([\$%#\-\w]+)\s*\)(.*)$/;
 		$pred = $1;
 		$item1 = $2;
 		$rest = $3;
@@ -149,10 +149,20 @@ sub print_triple_clause
 }
 
 # --------------------------------------------------------------------
-# Print a triple-style clause. 
-# Expects as input a clause, for example, "_subj(be,$var0)", and 
+# Handle a function
+#
+sub print_function
+{
+	my ($clause, $indent) = @_;
+	print "$indent;; $clause\n";
+print "heyyyy\n";
+}
+
+# --------------------------------------------------------------------
+# Print a double-style clause. 
+# Expects as input a clause, for example, "DEFINITE-FLAG(ball)", and 
 # some whitespace to indent by. Prints, as output, the standard
-# OpenCog EvaluationLink equivalent of the clause.
+# OpenCog InheritanceLink equivalent of the clause.
 #
 sub print_double_clause
 {
@@ -161,7 +171,13 @@ sub print_double_clause
 	# Pull the two parts out of the clause.
 	my ($pred, $item1) = parse_clause($clause);
 
-	# strip out the -FLAG at the end
+	if ($clause =~ /\&/)
+	{
+		print_function @_;
+		return;
+	}
+
+	# strip out the -FLAG at the end, and lower-case the whole string
 	$pred =~ s/-FLAG//;
 	$pred =~ tr/[A-Z]/[a-z]/;
 
