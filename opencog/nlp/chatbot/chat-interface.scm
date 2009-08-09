@@ -212,38 +212,27 @@
    ; failed to come up with anything, then try again with pattern
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
-		(let ((trips (get-new-triples))
+		(let* ((trips (get-new-triples))
 				(ancs (anchor-bottom-side trips))
 				(rslt (cog-ad-hoc "do-varscope" quest-rule-vscope-0))
+
+				; The do-varscope returns a list-link. We need to nuke
+				; that, as it will only cause trouble later.
+				(ax (cog-delete rslt))
+				(ans (chat-get-simple-answer))
 			)
 
-			; The do-varscope returns a list-link. We need to nuke
-			; that, as it will only cause trouble later.
-			(cog-delete rslt)
-
-(if #f 
-			; Grab just the first triple for now ... and try to 
-			; pattern-match it.
-			(if (not (null? trips))
-				(let ((trip (car trips))
-						(impl (make-triple-question trip))
-					)
-					(if (not (null? impl))
+			;  XXX need to do semes now ... 
 						; First, pull in any semes that might be related...
-						(fetch-related-semes trips) 
-
-						(cog-ad-hoc "do-varscope" impl)
-					)
-				)
-				(display "No triples found, attempting deduction.\n")
-			)
-)
-(display "duude trips are:\n")
+						; (fetch-related-semes trips) 
+			
+(display "duude question trips are:\n")
 (display trips)
 (newline)
-(display "duuude anweros\n")
-(display (chat-get-simple-answer))
-(newline)
+			(if (null? ans)
+				(display "No triples found, attempting deduction.\n")
+				(chat-prt-soln ans)
+			)
 		)
 	)
 
