@@ -189,7 +189,11 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	}
 #endif /* ENABLE_SHELL_ESCAPES */
 
+#define FLOOD_CHAR_COUNT 120
+
 	bool more_io = true;
+	size_t flood_cnt = FLOOD_CHAR_COUNT;
+	size_t cnt = 0;
 	while (more_io)
 	{
 		more_io = false;
@@ -203,7 +207,6 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 		/* Each newline has to be on its own line */
 		/* Limit length of reply so we don't get kicked for flooding */
-		int cnt = 0;
 		char * p = reply;
 		while (*p)
 		{
@@ -243,8 +246,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			p = ep;
 
 			/* Sleep so that we don't get kicked for flooding */
-#define FLOOD_CHAR_COUNT 120
-			if (FLOOD_CHAR_COUNT < cnt) { sleep(1); cnt -= FLOOD_CHAR_COUNT; }
+			if (flood_cnt < cnt) { sleep(1); cnt -= FLOOD_CHAR_COUNT; }
+			if (50 < flood_cnt) flood_cnt -= 15;
 		}
 		free(reply);
 	}
