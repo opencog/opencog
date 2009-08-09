@@ -15,4 +15,4 @@ cat prep-rules.txt | ./rules-to-implications.pl prep-rule | netcat -q60 $HOST $P
 cat rules.txt | ./rules-to-implications.pl frame-rule | netcat -q60 $HOST $PORT > /dev/null
 
 # Experimental question-piepine
-#  cat question-pipeline.txt | ./rules-to-implications.pl quest-rule |netcat -q60 $HOST $PORT > /dev/null
+cat question-pipeline.txt | ./rules-to-implications.pl quest-rule |netcat -q60 $HOST $PORT > /dev/null

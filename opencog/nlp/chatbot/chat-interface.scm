@@ -167,6 +167,23 @@
 )
 
 ; -----------------------------------------------------------------------
+; re-anchor the result triples
+;
+(define (re-anchor trip-list)
+	(define (re-anchor-one trip)
+		(let* ((ll (cadr (get-outgoing-set trip)))
+				(li (car (get-outgoing-set ll)))
+				)
+			(ListLink (stv 1 1)
+				(AnchorLink "# TRIPLE BOTTOM ANCHOR")
+				li
+			)
+		)
+	)
+	(map re-anchor-one trip)
+)
+
+; -----------------------------------------------------------------------
 ; say-part-2 -- run part 2 of the chat processing
 ; The first part, "say-id-english", parsed the user input, and made
 ; some quick replies. Processing continues below.
@@ -183,6 +200,9 @@
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
+
+			(re-anchor trips)
+			(cog-ad-hoc "do-varscope" quest-rule-vscope-0)
 
 (if #f 
 			; Grab just the first triple for now ... and try to 
@@ -203,6 +223,9 @@
 )
 (display "duude trips are:\n")
 (display trips)
+(newline)
+(display "duuude anweros\n")
+(display (chat-get-simple-answer))
 (newline)
 		)
 	)

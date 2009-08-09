@@ -8,8 +8,12 @@
 ; -----------------------------------------------------------
 ; The following answers a simple WH-question (who, what, when etc.)
 ; The question is presumed to be a simple triple itself.
+;
+; To limit the scope of the search (for performance), the bottom
+; of the prep-triple is assumed to be anchored.
 
-# IF $prep($var, $qvar)       ; the question
+# IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
+		^ $prep($var, $qvar)    ; the question
 		^ &query_var($qvar)     ; validate WH-question
 		^ $prep($var, $ans)     ; answer
 	THEN
