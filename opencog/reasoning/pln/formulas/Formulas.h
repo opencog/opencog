@@ -143,6 +143,9 @@ const int AND_MAX_ARITY = FORMULA_MAX_ARITY;
 const int OR_MAX_ARITY = FORMULA_MAX_ARITY;
 const int FORALL_MAX_ARITY = FORMULA_MAX_ARITY;
 
+// TV_MIN is usually used to avoid division by zero or that sort of things
+const float TV_MIN = 0.000001f;
+
 #define DEDUCTION_TERM_WEIGHT 1.0f
 
 #define REVISION_STRENGTH_DEPENDENCY 0.0f
@@ -496,7 +499,7 @@ public:
 class PredicateTVFormula : public Formula<FORALL_MAX_ARITY>
 {
 public:
-	TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
+    TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
 };
 
 /**

@@ -26,8 +26,6 @@
 #include <memory>
 #include <algorithm>
 
-#define TV_MIN 0.000001f
-
 using namespace std;
 
 const bool PTLdebug = true;
@@ -777,7 +775,7 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
 
     strength_t fs = 0.0f, s = 0.0f;
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < Nsuper; i++) {
         fs += f(TVsub[i]->getMean(), TVsuper[i]->getMean());
         s += TVsub[i]->getMean();
     }

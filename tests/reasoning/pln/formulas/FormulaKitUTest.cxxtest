@@ -36,7 +36,7 @@
 
 using namespace std;
 
-class FormulasKitUTest : public CxxTest::TestSuite{
+class FormulasKitUTest : public CxxTest::TestSuite {
 private:
 //    SimpleTruthValue* atoms[NUM_ATOMS];
     TruthValue* atoms[NUM_ATOMS];
@@ -44,7 +44,7 @@ private:
     SimpleTruthValue* similarity[NUM_ATOMS][NUM_ATOMS];
 
 public:
-	FormulasKitUTest(){
+    FormulasKitUTest() {
         atoms[0] = new SimpleTruthValue(0.36,36.0);
         atoms[1] = new SimpleTruthValue(0.49,49.0);
         atoms[2] = new SimpleTruthValue(0.42,42.0);
@@ -92,7 +92,7 @@ public:
         similarity[4][1] = new SimpleTruthValue(0.3043478,69);
         similarity[4][2] = new SimpleTruthValue(0.2769231,65);
         similarity[4][3] = new SimpleTruthValue(0.2647059,68);
-	}
+    }
 
     void testSimpleFormulas() {
         printf("testSimpleFormulas()\n");
