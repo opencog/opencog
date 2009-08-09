@@ -43,7 +43,7 @@
 ; (what, who, where, etc.) give a list of links. Note that is is
 ; not a simple scan for these words in a sentence -- rather, the
 ; parser has already marked these words as query-words. This is 
-; important, because WH_words can be used in sentences that are not
+; important, because WH-words can be used in sentences that are not
 ; questions (for example: "That is what I said." is not a WH-question).
 ;
 (define (find-wh-words atom-list)
