@@ -1,6 +1,13 @@
 /**
  * TripleQuery.cc
  *
+ * XXXXXXXXXXXXXXXXX
+ * This code is more or less obsolete ... it represents a bad
+ * design. This code should be removed ASAP. The chatbot no longer
+ * uses it .. and this code will be killed once the chatbot is finally
+ * refactored.
+ * XXXXXXXXXXXXXXXXX
+ *
  * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify

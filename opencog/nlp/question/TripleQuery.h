@@ -1,6 +1,14 @@
 /**
  * TripleQuery.h
  *
+ * * XXXXXXXXXXXXXXXXX
+ *  * This code is more or less obsolete ... it represents a bad
+ *   * design. This code should be removed ASAP. The chatbot no longer
+ *    * uses it .. and this code will be killed once the chatbot is
+ *    finally
+ *     * refactored.
+ *      * XXXXXXXXXXXXXXXXX
+ *
  * Impelement query processing for relex based queries.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
