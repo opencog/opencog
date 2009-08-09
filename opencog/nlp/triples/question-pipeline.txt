@@ -18,6 +18,7 @@
 		^ %LemmaLink($word-inst, $word) ; common word-instance
 		^ %LemmaLink($join-inst, $word) ; common seme
 		^ $prep($join-inst, $ans)       ; answer
+		^ ! &query_var($ans)            ; answer should NOT be a query
 	THEN
       ^3_&declare_answer($ans)
 

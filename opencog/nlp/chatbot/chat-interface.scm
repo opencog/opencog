@@ -46,10 +46,12 @@
 			)
 		)
 	)
-	(remove! null?
-		(map 
-			(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
-			(cog-incoming-set query-soln-anchor)
+	(delete-duplicates! ;; remove dup answers
+		(remove! null?     ; remove nulls
+			(map            ; get each answer ... 
+				(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
+				(cog-incoming-set query-soln-anchor)
+			)
 		)
 	)
 )
@@ -117,7 +119,8 @@
 
 	(display "Hello ")
 	(display nick)
-	(display ", parsing ...\n")
+	; (display ", parsing ...\n")
+	(display ", cogita is currently broken, but will try anyway ...\n")
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
@@ -211,15 +214,8 @@
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
-(display "duude the anchor is")
-(display
 			(anchor-bottom-side trips)
-) (newline)
-(display "duude the varscope result is")
-(display
 			(cog-ad-hoc "do-varscope" quest-rule-vscope-0)
-)
-(newline)
 
 (if #f 
 			; Grab just the first triple for now ... and try to 
