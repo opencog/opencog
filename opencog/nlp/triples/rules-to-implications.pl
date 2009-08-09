@@ -149,13 +149,25 @@ sub print_triple_clause
 }
 
 # --------------------------------------------------------------------
-# Handle a function
+# Handle various special-case macros.
 #
 sub print_function
 {
 	my ($clause, $indent) = @_;
 	print "$indent;; $clause\n";
-print "heyyyy\n";
+
+	# Pull the two parts out of the clause.
+	my ($pred, $item1) = parse_clause($clause);
+
+	# A long list of WH-words
+	# XXX add ORLink to handle what,where, how etc.
+	if ($pred =~ /\&query_var/)
+	{
+		print "$indent(InheritanceLink (stv 1.0 1.0)\n";
+		print_var_or_word_instance($item1, $indent . "   ");
+		print "$indent   (DefinedLinguisticConceptNode \"what\")\n";
+		print "$indent)\n";
+	}
 }
 
 # --------------------------------------------------------------------
@@ -168,14 +180,14 @@ sub print_double_clause
 {
 	my ($clause, $indent) = @_;
 
-	# Pull the two parts out of the clause.
-	my ($pred, $item1) = parse_clause($clause);
-
 	if ($clause =~ /\&/)
 	{
 		print_function @_;
 		return;
 	}
+
+	# Pull the two parts out of the clause.
+	my ($pred, $item1) = parse_clause($clause);
 
 	# strip out the -FLAG at the end, and lower-case the whole string
 	$pred =~ s/-FLAG//;
