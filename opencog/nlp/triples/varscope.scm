@@ -13,7 +13,7 @@
 ; This just simply locates all of the VariableNodes in the
 ; ImplicationLink, and declares them up-front in the VariableScopeLink.
 ;
-(define (varscope-wrap-inplication impl)
+(define (varscope-wrap-implication impl)
 
 	; Find all VariableNode's in the implication,
 	; and return them as a list.

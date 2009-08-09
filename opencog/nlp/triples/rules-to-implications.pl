@@ -498,12 +498,27 @@ if ($have_rule)
 }
 
 # Make a list of all the rules.
-print "(define $rule_name-list (list \n";
+print "\n(define $rule_name-list (list \n";
 for (my $i=0; $i<$rule_cnt; $i++)
 {
 	print "   $rule_name-$i\n";
 }
-print "))\n";
+print "))\n\n";
+
+# Add VariableScope wrappers
+for (my $i=0; $i<$rule_cnt; $i++)
+{
+	print "(define $rule_name-vscope-$i (varscope-wrap-implication $rule_name-$i))\n";
+}
+print "\n";
+
+#Print list of the var-scoped implications
+print "(define $rule_name-vscope-list (list \n";
+for (my $i=0; $i<$rule_cnt; $i++)
+{
+	print "   $rule_name-vscope-$i\n";
+}
+print "))\n\n";
 
 print "; Processed $rule_cnt rules\n";
 print "\n.\nexit\n";
