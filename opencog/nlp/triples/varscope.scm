@@ -7,10 +7,13 @@
 ; Linas Vepstas August 2009
 ;
 ; ---------------------------------------------------------------------
+; varscope-wrap-inplication implication
 ;
-; Create a VarScopeLink wrapping the ImplicationLink
+; Create a VariableScopeLink wrapping the ImplicationLink
+; This just simply locates all of the VariableNodes in the
+; ImplicationLink, and declares them up-front in the VariableScopeLink.
 ;
-(define (varscope-wrap impl)
+(define (varscope-wrap-inplication impl)
 
 	; Find all VariableNode's in the implication,
 	; and return them as a list.
@@ -23,7 +26,9 @@
 
 	; Create a VariableScopeLink declaring all of the 
 	; VariableNodes that we found.
-	(let ((vars (find-vars impl)))
+	(let* ((all-vars (find-vars impl))
+			(vars (delete-duplicates! all-vars))
+		)
 		(VariableScopeLink
 			(ListLink
 				vars
