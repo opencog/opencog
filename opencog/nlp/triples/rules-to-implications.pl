@@ -159,6 +159,7 @@ sub print_function
 	# Pull the two parts out of the clause.
 	my ($pred, $item1) = parse_clause($clause);
 
+	# Special-case handling for question-answering.
 	# A long list of WH-words
 	# XXX add ORLink to handle what,where, how etc.
 	if ($pred =~ /\&query_var/)
@@ -167,7 +168,20 @@ sub print_function
 		print_var_or_word_instance($item1, $indent . "   ");
 		print "$indent   (DefinedLinguisticConceptNode \"what\")\n";
 		print "$indent)\n";
+		return;
 	}
+
+	# Special-case handling for question-answering code.
+	if ($pred =~ /\&declare_answer/)
+	{
+		print "$indent(ListLink (stv 1.0 1.0)\n";
+		print "$indent   (AnchorNode \"# QUERY SOLUTION\")\n";
+		print_var_or_word_instance($item1, $indent . "   ");
+		print "$indent)\n";
+		return;
+	}
+
+	print "Error! Unknown function! $clause\n";
 }
 
 # --------------------------------------------------------------------
@@ -435,9 +449,13 @@ sub parse_rule
 			$clause = $p . "(" . $i1 . ", " . $i2 . ")";
 		}
 
-		if ($clause =~ /\&/)
+		if ($clause =~ /\&scm/)
 		{
 			print_exec ($clause, "   ");
+		}
+		elsif ($clause =~ /\&/)
+		{
+			print_function ($clause, "   ");
 		}
 		else
 		{
