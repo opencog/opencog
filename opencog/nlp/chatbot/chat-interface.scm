@@ -38,13 +38,19 @@
 					(load-referers answ)
 					(word-inst-get-lemma answ)
 				)
+
+				; Explicitly ignore VariableNodes, these can be there
+				; due to ImplicationLinks ... 
+				((eq? tipo 'VariableNode) '())
 				(else '())
 			)
 		)
 	)
-	(map 
-		(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
-		(cog-incoming-set query-soln-anchor)
+	(remove! null?
+		(map 
+			(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
+			(cog-incoming-set query-soln-anchor)
+		)
 	)
 )
 (define (chat-delete-simple-answer)
@@ -157,7 +163,6 @@
 		)
 	)
 
-
 	; Invoke the next step of processing.
 	(display "\n:scm hush\r (say-part-2 ")
 	(display is-question)
@@ -171,16 +176,16 @@
 ;
 (define (re-anchor trip-list)
 	(define (re-anchor-one trip)
-		(let* ((ll (cadr (get-outgoing-set trip)))
-				(li (car (get-outgoing-set ll)))
+		(let* ((ll (cadr (cog-outgoing-set trip)))
+				(li (car (cog-outgoing-set ll)))
 				)
 			(ListLink (stv 1 1)
-				(AnchorLink "# TRIPLE BOTTOM ANCHOR")
+				(AnchorNode "# TRIPLE BOTTOM ANCHOR")
 				li
 			)
 		)
 	)
-	(map re-anchor-one trip)
+	(map re-anchor-one trip-list)
 )
 
 ; -----------------------------------------------------------------------
@@ -334,6 +339,9 @@
 ; say-final-cleanup -- run cleanup of the chat processing
 ;
 (define (say-final-cleanup)
+
+(display "duude cleaning up now\n")
+(newline)
 	; Delete list of triples, so they don't interfere with the next question.
 	(delete-result-triple-links)
 
