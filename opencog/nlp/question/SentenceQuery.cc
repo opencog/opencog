@@ -14,15 +14,25 @@
  * closely resemble the structure of a sentence in the corpus; otherwise,
  * no matching response will be found.  Some generality can be obtained
  * by converting dependency graphs into semantic triples; the code below
- * show work for that case as well.
+ * should work for that case as well.
  *
  * Strategy for truth-query questions:
  * 1) Determine if question is of truth-query type.
  * 2) Assume its a hypothetical copula (i.e. Is X a Y?)
  * 3) pattern-match the triple:
  *    is-a(city, Madrid) to hyp-is-a(city, Madrid)
- * 4) Accept only the above, return yes, no.
+ * 4) Accept only the above pattern, and return yes, no.
  *
+ * This code was used to perform the experiments described in the README
+ * file. It is also currently used to power the initial stages of the
+ * chatbot.  However, work is underway to make this code obsolete, and
+ * to replace it purely with ImplicationLinks. The goal is to be able to
+ * perform question-answering without requiring any C++ code (except
+ * for the pattern matcher) and also without requiring any scheme code
+ * either (except for basic i/o interfacing).
+ *
+ * Once the above is done, this code will be "of historical interest
+ * only", as they say.
  *
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  *
@@ -347,7 +357,7 @@ bool SentenceQuery::parse_solve(Handle parse_node)
  *
  * So the strategy is:
  * 1) Find all parses that are a part of this sentence.
- * 2) For each wordinstance in the parse, find all relations it 
+ * 2) For each word-instance in the parse, find all relations it 
  *    participates in, add these to the predicate.
  * 3) Avoid duplication in step 3)
  * 4) Find the query var.
@@ -376,6 +386,7 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 
 #define DEBUG
 #ifdef DEBUG
+	printf("SentenceQuery: basic sentence structure matching:\n");
 	PatternMatchEngine::print_predicate(bound_vars, normed_predicate);
 #endif
 

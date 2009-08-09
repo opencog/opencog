@@ -212,10 +212,14 @@
    ; failed to come up with anything, then try again with pattern
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
-		(let ((trips (get-new-triples)))
+		(let ((trips (get-new-triples))
+				(ancs (anchor-bottom-side trips))
+				(rslt (cog-ad-hoc "do-varscope" quest-rule-vscope-0))
+			)
 
-			(anchor-bottom-side trips)
-			(cog-ad-hoc "do-varscope" quest-rule-vscope-0)
+			; The do-varscope returns a list-link. We need to nuke
+			; that, as it will only cause trouble later.
+			(cog-delete rslt)
 
 (if #f 
 			; Grab just the first triple for now ... and try to 
