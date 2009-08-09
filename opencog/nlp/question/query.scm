@@ -3,8 +3,12 @@
 ;
 ; Question-answering related code, a re-implementation of the C++
 ; code in scheme.
-; Most of the code here is very specific to the RelEx representation
-; of sentences, and thus is "fragile" if that represtation changes.
+; XXX Most of this code is just plain wrong, its based on a bad design
+; point (the same bad design that the C++ code had).   Please see 
+; the file triples/README-question for the correct design.
+;
+; XXX this whole file should be deleted as soon as dependencies to the
+; chatbot are cut.
 ;
 ; Linas Vepstas August 2009
 ;
@@ -51,50 +55,11 @@
 )
 
 ; ---------------------------------------------------------------------
-; filter-hypergraph pred? atom-list
-;
-; Given a list of atoms, and a scheme-predicate pred?, return a
-; list of atoms that satisfy the scheme-predicate.  This is not
-; a simple srfi-1 'filter', rather, it traverses the hypergraph,
-; applying the predicate to the subgraphs.
-;
-; In the current implementation, the scheme-rpdicate is assumed to 
-; select only for Nodes.  
-;
-(define (filter-hypergraph pred? atom-list)
-	(define (fv atoms lst)
-		(cond
-			; If its a query word, append it to the list
-			((cog-node? atoms)
-				(if (pred? atoms)
-					(cons atoms lst)
-					lst
-				)
-			)
-
-			; If its a link, scan its outgoing set
-			((cog-link? atoms)
-				(fv (cog-outgoing-set atoms) lst)
-			)
-
-			; If its a list then scan the list
-			((pair? atoms)
-				(append! 
-					(append-map! 
-						(lambda (x) (filter-hypergraph pred? x)) atoms) 
-					lst
-				)
-			)
-		)
-	)
-	(fv atom-list '())
-)
-
-; ---------------------------------------------------------------------
 ; replace-wh-words atoms
 ;
 ; Create a copy of a hypergraph, replacing any WH-words with
 ; VariableNodes (of the same name as the WH-words)
+; XXXX bad don't do this.
 ;
 (define (replace-wh-words atoms)
 	(cond
