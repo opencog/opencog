@@ -178,7 +178,7 @@
 (define (anchor-bottom-side trip-list)
 	(define (re-anchor-one trip)
 		(let* ((ll (cadr (cog-outgoing-set trip)))
-				(li (car (cog-outgoing-set ll)))
+				(li (cadr (cog-outgoing-set ll)))
 				)
 			(ListLink (stv 1 1) bottom-anchor li)
 		)
@@ -211,8 +211,15 @@
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let ((trips (get-new-triples)))
 
+(display "duude the anchor is")
+(display
 			(anchor-bottom-side trips)
+) (newline)
+(display "duude the varscope result is")
+(display
 			(cog-ad-hoc "do-varscope" quest-rule-vscope-0)
+)
+(newline)
 
 (if #f 
 			; Grab just the first triple for now ... and try to 

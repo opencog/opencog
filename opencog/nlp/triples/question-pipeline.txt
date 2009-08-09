@@ -13,9 +13,18 @@
 ; of the prep-triple is assumed to be anchored.
 
 # IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
-		^ $prep($var, $qvar)    ; the question
+		^ $prep($word-inst, $qvar)      ; the question
+		^ &query_var($qvar)             ; validate WH-question
+		^ %LemmaLink($word-inst, $word) ; common word-instance
+		^ %LemmaLink($join-inst, $word) ; common seme
+		^ $prep($join-inst, $ans)       ; answer
+	THEN
+      ^3_&declare_answer($ans)
+
+# IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
+		^ $prep($qvar, $var)    ; the question
 		^ &query_var($qvar)     ; validate WH-question
-		^ $prep($var, $ans)     ; answer
+		^ $prep($ans, $var)     ; answer
 	THEN
       ^3_&declare_answer($ans)
 
