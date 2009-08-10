@@ -103,7 +103,7 @@ public:
             fs_size = 20;
             arity = 5;
             field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::tree_score>  deme(100,fs);
+            eda::instance_set<moses::combo_tree_score>  deme(100,fs);
 
             
             moses::sample_from_neighborhood(deme.fields(),
@@ -129,7 +129,7 @@ public:
             fs_size = 15;
             arity = 4;
             field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::tree_score>  deme(100,fs);
+            eda::instance_set<moses::combo_tree_score>  deme(100,fs);
                         
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
@@ -165,7 +165,7 @@ public:
             arity_t arity = 3;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
-            eda::instance_set<moses::tree_score>  deme(1000,fs);
+            eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
 
             eda::instance center_inst(fs.packed_width());
             int rand_seed = clock();
@@ -192,7 +192,7 @@ public:
             arity_t arity = 8;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
-            eda::instance_set<moses::tree_score>  deme(1000,fs);
+            eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
             //    cout << "generate_all_in_neighborhood" << endl;
             moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin());
             size_t generated_size = 0;
