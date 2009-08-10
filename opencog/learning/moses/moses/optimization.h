@@ -150,6 +150,69 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
 }
 
 /**
+ * It generates the contin neighbor with the haming distance from 
+ * the given instance.For examples, if the contin[it.idx()] is encoded
+ * with depth = 4,like (L R S S), so the neighbors with distance = 1 of it
+ * are (R L S S), (L L S S),(L R L S) and (L R R S). And we randomly chose
+ * one of them to return.
+ * 
+ * @param fs   deme
+ * @param inst the instance will be modified is contin encoded with distance
+ *             equal to n 
+ * @param it   the contin iterator of the instance
+ * @param n    the haming distance contin encode will be midified
+ * @param rng  the random generator
+ */
+ void generate_contin_neighbor(const eda::field_set & fs, eda::instance & inst, 
+                               eda::field_set::contin_iterator it, 
+                               int n, opencog::RandGen& rng)
+ {
+     size_t begin = fs.contin_to_raw_idx(it.idx());
+     size_t end = fs.contin()[it.idx()].depth;
+     
+     size_t current = begin;
+     eda::disc_t temp_raw;
+     
+     // get the number of raw code for contin before the first *Stop*
+     for (;current != end;) {
+         temp_raw =fs.get_raw(inst, begin);
+
+         if (temp_raw ==  eda::field_set::contin_spec::Left ||
+             temp_raw ==  eda::field_set::contin_spec::Right) {
+             ++current;
+         } else if (temp_raw == eda::field_set::contin_spec::Stop) {
+             ++current;
+             break;
+         }
+     }
+     
+     // Here the lazy_random_selector make sure it will generate the different
+     // random number , so we could change the distance one at one time. We need
+     // do it n times.
+     opencog::lazy_random_selector select(current - begin, rng);
+     for( int i = 1; i <= n; i++) {
+         //opencog::lazy_random_selector select(current - begin, rng);
+         size_t r = select();
+         temp_raw = fs.get_raw(inst,begin + r);
+
+         if (temp_raw == eda::field_set::contin_spec::Left ) {
+             fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
+         } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
+             fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
+         } else {
+             // NOTICE: the 'current++;' is used for changing 'Stop' to 'Left' or 'Right'
+             //         after the continuous 'Stop'. it is not implemented correctly for 
+             //         the reason of lazy_random_selector maybe generator the same random number.
+             //         But it should work correctly when the distance is equal to 1.
+             // current++; 
+             fs.set_raw(inst, begin + r, rng.randbool() ?
+                        eda::field_set::contin_spec::Left:
+                        eda::field_set::contin_spec::Right);
+         }
+     }
+ }
+
+/**
  * This procedure samples sample_size instances at distance n from the exemplar
  * (i.e., with n non-zero elements in the sequence)
  *
@@ -157,6 +220,7 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
  *@param n    distance
  *@param sample_size  number of instances to be generated
  *@param out  deme where to store the instances
+ *@param rng   the random generator
  *@param center_inst the center instance as the exemplar by given
  */
 
@@ -174,21 +238,23 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
 
     cout << "bits size: " << fs.n_bits() << endl;
     cout << "disc size: " << fs.n_disc() << endl;
+    cout << "contin size:"<< fs.n_contin() << endl;
     cout << "Sampling : " << sample_size << endl;
 
-    int dim = fs.n_bits() + fs.n_disc();
+    int dim = fs.n_bits() + fs.n_disc() + fs.n_contin();
 
 
     dorepeat(sample_size) {
 
         eda::instance new_inst(center_inst);
         opencog::lazy_random_selector select(dim, rng);
+
         for (int i = 1;i <= n;) {
-            int r = select();
+            size_t r = select();
             eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
             eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
-
-            if ((unsigned int)r < fs.n_bits()) {
+            eda::field_set::contin_iterator itc = fs.begin_contin(new_inst);
+            if (r < fs.n_bits()) {
                 itb += r;
                 /* if (*itb == false) {
                     *itb = true;
@@ -196,7 +262,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                     }*/
                 *itb = !(*itb);
                 i++;
-            } else if ((unsigned int)r >= fs.n_bits()) {
+            } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc())) ) {
                 itd += r - fs.n_bits();
                 /* if (*itd == 0) {
                     *itd = 1 + rng.randint(itd.arity() - 1);
@@ -208,7 +274,11 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                 else
                     *itd = temp;
                 i++;
+            } else if ( r >= (fs.n_bits() + fs.n_disc())) {
+                itc += r - fs.n_bits() - fs.n_disc();
+                generate_contin_neighbor(fs, new_inst, itc, 1, rng);                
             }
+            
         }
 
         *out++ = new_inst;
