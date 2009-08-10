@@ -13,7 +13,6 @@
 #include <opencog/server/CogServer.h>
 
 #include <opencog/nlp/question/SentenceQuery.h>
-#include <opencog/nlp/question/TripleQuery.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/pln/PLNModule.h>
