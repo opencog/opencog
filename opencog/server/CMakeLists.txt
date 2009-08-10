@@ -33,24 +33,23 @@ ADD_LIBRARY (server SHARED
 	load-file
 )
 
+SET(SERVER_LINK_LIBS 
+	util
+	atomspace
+	xml
+	${CSOCKETS_LIBRARIES}
+	${OPENSSL_LIBRARIES}
+)
+
 IF (GUILE_FOUND)
-	TARGET_LINK_LIBRARIES(server
-		util
-		atomspace
-		${CSOCKETS_LIBRARIES}
-		${OPENSSL_LIBRARIES}
-		smob
-		xml
-	)
-ELSE (GUILE_FOUND)
-	TARGET_LINK_LIBRARIES(server
-		util
-		atomspace
-		${CSOCKETS_LIBRARIES}
-		${OPENSSL_LIBRARIES}
-		xml
-	)
+	SET(SERVER_LINK_LIBS smob ${SERVER_LINK_LIBS})
 ENDIF (GUILE_FOUND)
+
+IF (ODBC_FOUND)
+	SET(SERVER_LINK_LIBS persist ${SERVER_LINK_LIBS})
+ENDIF (ODBC_FOUND)
+
+TARGET_LINK_LIBRARIES(server ${SERVER_LINK_LIBS})
 
 # to ease testing/debugging modules on the source tree
 # IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
