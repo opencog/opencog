@@ -63,6 +63,12 @@ To get to the opencog shell, say
 
    telnet localhost 17001
 
+or 
+
+   rlwrap telnet localhost 17001
+
+This second form will provide an editable command-line history.
+
 To leave the shell, place a single . on the line, and hit enter.
 Alternately, hit ^D.
 

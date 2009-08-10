@@ -10,7 +10,8 @@ bin/opencog/server/cogserver.  From another terminal, run
 "telnet localhost 17001"; this will connect to the shell.
 Alternately, "netcat localhost 17001" can be used. Long or
 complex sequences of commands may be loaded by saying
-"cat somefile | telnet localhost 17001" 
+"cat somefile | telnet localhost 17001". An editable command-line
+history can be obtained with "rlwrap telnet localhost 17001".
 
 The main command dispatcher is implemented in CommandRequestProcessor.cc
 This command dispatcher understands various commands, such as loading
