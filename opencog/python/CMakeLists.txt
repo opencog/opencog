@@ -26,15 +26,21 @@ include_directories(./examples/hopfield)
 add_library(opencog_py SHARED
     opencog_module_wrap.cc
 )
-target_link_libraries(opencog_py
-    ${Boost_LIBRARIES}
 
+SET(NEEDED_LINK_LIBS 
     atomspace_py
     server_py
     dynamics_py
     util_py
-    # hopfield_py
+    ${Boost_LIBRARIES}
 )
+
+IF (ODBC_FOUND)
+	SET(NEEDED_LINK_LIBS persist ${NEEDED_LINK_LIBS})
+ENDIF (ODBC_FOUND)
+
+target_link_libraries(opencog_py ${NEEDED_LINK_LIBS})
+
 set_target_properties(opencog_py PROPERTIES
     PREFIX ""
     OUTPUT_NAME "opencog"
