@@ -120,4 +120,31 @@
 	(exec-scm-from-cmd (string-join (list "cat \"" filename "\"" ) ""))
 )
 
+; ---------------------------------------------------------------------
+; export-all-atoms filename
+;
+; Export the entire contents of the atomspace to the file 'filename'
+; If an absolute path is not specified, then the filename will be
+; written to the directory in which the opencog server was started.
+;
+(define (export-all-atoms filename)
+	(define (prt-atom-list port lst)
+		(if (not (null? lst))
+			(let ()
+				(display (car lst) port)
+				(prt-atom-list port (cdr lst))
+			)
+		)
+	)
+
+	(let ((port (open-file filename "w"))
+		)
+		(for-each 
+			(lambda (x) (prt-atom-list port (cog-get-atoms x)))
+			(cog-get-types)
+		)
+
+		(close-port port)
+	)
+)
 
