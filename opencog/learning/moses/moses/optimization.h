@@ -163,20 +163,22 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
  * @param n    the haming distance contin encode will be midified
  * @param rng  the random generator
  */
- void generate_contin_neighbor(const eda::field_set & fs, eda::instance & inst, 
+ void generate_contin_neighbor(const eda::field_set& fs, eda::instance& inst, 
                                eda::field_set::contin_iterator it, 
                                int n, opencog::RandGen& rng)
  {
      size_t begin = fs.contin_to_raw_idx(it.idx());
-     size_t end = fs.contin()[it.idx()].depth;
-     
+     size_t end = begin + fs.contin()[it.idx()].depth;
+     cout << "idx = " << it.idx() <<endl;
+    
      size_t current = begin;
      eda::disc_t temp_raw;
-     
+     cout << " current = " << current << endl;
+     cout << " end = " << end << endl;
      // get the number of raw code for contin before the first *Stop*
      for (;current != end;) {
-         temp_raw =fs.get_raw(inst, begin);
-
+         temp_raw =fs.get_raw(inst, current);
+         cout << "temp_raw = " << temp_raw << endl;
          if (temp_raw ==  eda::field_set::contin_spec::Left ||
              temp_raw ==  eda::field_set::contin_spec::Right) {
              ++current;
@@ -184,8 +186,10 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
              ++current;
              break;
          }
+         cout << " current = " << current << endl;
      }
-     
+     cout << "begin = " << begin << endl;
+     cout << "current = " << current << endl;
      // Here the lazy_random_selector make sure it will generate the different
      // random number , so we could change the distance one at one time. We need
      // do it n times.
@@ -275,6 +279,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                     *itd = temp;
                 i++;
             } else if ( r >= (fs.n_bits() + fs.n_disc())) {
+                cout << "i = " << i << "  r = " << r << endl;
                 itc += r - fs.n_bits() - fs.n_disc();
                 generate_contin_neighbor(fs, new_inst, itc, 1, rng);                
             }

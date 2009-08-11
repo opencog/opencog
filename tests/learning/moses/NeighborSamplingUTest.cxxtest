@@ -154,7 +154,41 @@ public:
             TS_ASSERT(distance == sampled_max_distance);
             TS_ASSERT(distance == sampled_min_distance);
         }
-        
+        /*        
+        // 3. test the contin_spec
+        {
+            distance = 1;
+            sample_size = 8;
+            fs_size = 2;
+            
+            field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
+            eda::instance_set<moses::combo_tree_score> deme(100, fs);
+            
+            eda::instance center_inst(fs.packed_width());
+            eda::randomize(fs, center_inst, rng);
+            
+            cout << "the initial randomize instance:\n"
+                 << fs.stream(center_inst) << endl;
+            
+            moses::sample_from_neighborhood(deme.fields(),
+                                            distance,
+                                            sample_size,
+                                            deme.begin(),
+                                            rng, center_inst);
+
+            get_sample_size_and_distance(deme,sampled_size,
+                                         sampled_max_distance,
+                                         sampled_min_distance,
+                                         center_inst);
+            
+            //  cout << endl << "sample_size:" << sampled_size << "  max_distance:" << 
+            //   sampled_max_distance <<" min_distance :"<< sampled_min_distance <<endl;
+            
+            TS_ASSERT(sample_size == sampled_size);
+            TS_ASSERT(distance == sampled_max_distance);
+            TS_ASSERT(distance == sampled_min_distance);
+        }
+        */
     }
 
 
@@ -211,4 +245,25 @@ public:
         }
     }
     
+    void test_generate_contin_neighbor()
+    {
+        int distance = 2;
+        int depth = 4;
+        int rand_seed = clock();
+        opencog::MT19937RandGen rng(rand_seed);
+        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), 5);
+        eda::instance inst(fs.packed_width());
+        eda::randomize(fs, inst, rng);
+        
+        eda::instance new_inst(inst);
+        
+        eda::field_set::contin_iterator it = fs.begin_contin(inst) + rng.randint(depth -1);
+        cout << "before generate:" << fs.stream_raw(inst) << endl;
+        moses::generate_contin_neighbor(fs, new_inst, it, distance, rng);
+        cout << "after generate:" << fs.stream_raw(new_inst) << endl;
+        
+        int new_dist = fs.hamming_distance(inst, new_inst);
+        
+        TS_ASSERT(distance == new_dist);        
+    }
 };
