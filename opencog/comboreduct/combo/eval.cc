@@ -196,7 +196,7 @@ bool contin_table::operator==(const contin_table& ct) const
     if (ct.size() == size()) {
         const_cv_it ct_i = ct.begin();
         for (const_cv_it i = begin(); i != end(); ++i, ++ct_i) {
-            if (!opencog::isEqual(*i, *ct_i))
+            if (!isApproxEq(*i, *ct_i))
                 return false;
         }
         return true;

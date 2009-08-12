@@ -131,8 +131,8 @@ typedef std::pair<Handle,VersionHandle> vhpair;
  * have CompositeTruthValues:
  * 
  * \code
- *  dc_x <- OrderedLink (ConceptNode "__PLN__")
- *  dc_y <- OrderedLink (ConceptNode "__PLN__")
+ *  dc_x <- OrderedLink (ConceptNode "___PLN___")
+ *  dc_y <- OrderedLink (ConceptNode "___PLN___")
  *  InheritanceLink <0.8, 0.9>
  *      ConceptNode "x" <0.8, 0.9> [ Context dc_x <0.5, 0.5> ]
  *      ConceptNode "y" <0.8, 0.9> [ Context dc_y <0.1, 0.5> ]
@@ -268,6 +268,25 @@ protected:
     //! Keep track of what FW Variables are in the system
     std::map<std::string,pHandle> variableShadowMap;
 
+    //! Add Link via dummy contexts method
+    pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
+                      bool fresh, bool managed);
+    //! Add Node via dummy contexts method
+    pHandle addNodeDC(Type t, const std::string& name, const TruthValue& tvn,
+                      bool fresh, bool managed);
+
+    /** Add concrete atom using dummy contexts if it already exists
+     * 
+     * @note Contexts should have actual handles for links, or be empty for
+     * nodes. This can be ensured by using the appropriate addNodeDC or
+     * addNodeDC classes.
+     */
+    pHandle addAtomDC(Atom &a, bool fresh, bool managed,
+                      HandleSeq contexts = HandleSeq());
+
+    pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
+                          bool fresh,bool managed);
+
 public:
 
     //! Change whether AtomSpaceWrapper is listening for AtomSpace signals.
@@ -344,13 +363,13 @@ public:
     //! Add atom from tree vertex
     pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
                     bool managed=true);
-    //! Add link
+    //! Add link, pure virtual
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                            bool fresh=false, bool managed=true)=0;
-    //! Add node
+                            bool fresh=false, bool managed=true) = 0;
+    //! Add node, pure virtual
     virtual pHandle addNode(Type T, const std::string& name,
                             const TruthValue& tvn, bool fresh=false,
-                            bool managed=true)=0;
+                            bool managed=true) = 0;
 
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
@@ -384,25 +403,7 @@ public:
     //! Convert from AND to OR link
     pHandle AND2ORLink(pHandle& andL);
     
-    //! Add Link via dummy contexts method
-    pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
-                      bool fresh, bool managed);
-    //! Add Node via dummy contexts method
-    pHandle addNodeDC(Type t, const std::string& name, const TruthValue& tvn,
-                      bool fresh, bool managed);
-
-    /** Add concrete atom using dummy contexts if it already exists
-     * 
-     * @note Contexts should have actual handles for links, or be empty for
-     * nodes. This can be ensured by using the appropriate addNodeDC or
-     * addNodeDC classes.
-     */
-    pHandle addAtomDC(Atom &a, bool fresh, bool managed,
-                      HandleSeq contexts = HandleSeq());
     Handle getNewContextLink(Handle h, HandleSeq destContexts);
-
-    pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                          bool fresh,bool managed);
 
     //! Whether to generate CrispTheoremRules for all crisp theorems
     //! and add them to CrispTheoremRule::thms.

@@ -639,9 +639,9 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
 
 int AtomSpaceWrapper::getFirstIndexOfType(const pHandleSeq hs, const Type T) const
 {
-    AtomSpace *a = atomspace;
+    AtomSpace *as = atomspace;
     for (unsigned int i = 0; i < hs.size(); i++)
-        if (a->getType(fakeToRealHandle(hs[i]).first) == T)
+        if (as->getType(fakeToRealHandle(hs[i]).first) == T)
             return i;
     return -1;
 }
@@ -773,7 +773,9 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, b
     return addAtom(a,a.begin(),tvn,fresh,managed);
 }
 
-pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue& tvn, bool fresh, bool managed)
+pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
+                                  const TruthValue& tvn, bool fresh,
+                                  bool managed)
 {
     AtomSpace *as = atomspace;
     cprintf(3,"Handle AtomSpaceWrapper::addAtom...");
@@ -790,6 +792,9 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue
         return head_type;
     }
 
+    // Apply recusively addAtom to the children of 'it' if there are not real.
+    // And fill handles with the real children or the result of addAtom
+    // of the children which are types
     for (vtree::sibling_iterator i = a.begin(it); i!=a.end(it); i++)
     {
         pHandle *h_ptr = boost::get<pHandle>(&*i);
@@ -810,10 +815,11 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it, const TruthValue
     return addLink(head_type, handles, tvn, fresh, managed);
 }
 
-pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-        bool fresh,bool managed)
+pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs,
+                                        const TruthValue& tvn,
+                                        bool fresh,bool managed)
 {
-    AtomSpace *a = atomspace;
+    AtomSpace *as = atomspace;
     if (tvn.isNullTv())
     {
         LOG(0, "I don't like FactoryTruthValues, so passing "
@@ -860,13 +866,13 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs, const Trut
 LOG(3, "Add ok.");
 
 /*  if (!tvn.isNullTv())
-        if (abs(a->getTV(ret)->getMean() - tvn.getMean()) > 0.0001)
+        if (isApproxEq(a->getTV(ret)->getMean(), tvn.getMean(), 0.0001))
         {
             printf("ATW: %s / %s\n", a->getTV(ret)->toString().c_str(),
                 tvn.toString().c_str());
         }*/
     
-//  assert(abs(a->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
+//  assert(abs(as->getTV(ret)->getMean() - tvn.getMean()) < 0.0001);
 
     return ret;
 }
@@ -2215,7 +2221,9 @@ LOG(4,"Node add ok.");
 *********************************/
 pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
-    AtomSpace *a = atomspace;
+    //Nil: not used so I comment it out
+    //AtomSpace *as = atomspace;
+
     // The method should be, AFAIK, identical to the one in DirectATW, unless
     // FIM is actually in use.
     
@@ -2309,7 +2317,7 @@ pHandle DirectATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
 pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
         bool fresh, bool managed)
 {
-    AtomSpace *a = atomspace;
+    AtomSpace *as = atomspace;
     assert(!tvn.isNullTv());
     
     //assert(allowFWVarsInAtomSpace || T != FW_VARIABLE_NODE);
@@ -2321,7 +2329,7 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
     const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f); 
     const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv;
 
-    return a->addNode( T, name, mod_tvn, fresh, managed );
+    return as->addNode( T, name, mod_tvn, fresh, managed );
 #else
     LOG(3, "DirectATW::addNode");
         

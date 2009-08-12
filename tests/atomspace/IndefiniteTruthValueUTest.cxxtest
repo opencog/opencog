@@ -178,7 +178,7 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-        TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
@@ -192,7 +192,7 @@ public:
 	    float computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
 	    std::cout << "COMPUTE DIFF : " << computedDiff
 		      << " DIFF : " << tv->getDiff() << std::endl;
-	    TS_ASSERT(isEqual(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
             TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
             float expectedCount = count(ls[i], us[i]);
@@ -213,7 +213,7 @@ public:
         TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         float expectedCount = count(0, 0);
         float expectedConfidence = confidence(0, 0);
-        TS_ASSERT(isEqual(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
         //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
         TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
@@ -225,7 +225,7 @@ public:
             TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
 	    //compute diff using a method provided with the UTest
 	    float computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
-	    TS_ASSERT(isEqual(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
             TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
             float expectedCount = count(ls[i], us[i]);
@@ -245,7 +245,7 @@ public:
             TS_ASSERT(fabs(tv.getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
 	    //compute diff using a method provided with the UTest
 	    float computedDiff = computeDiff(tv.getL(), tv.getU(), default_k, tv.getConfidenceLevel());
-	    TS_ASSERT(isEqual(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv.isSymmetric());
             TS_ASSERT(fabs(tv.getMean() - means[i]) <= ERROR_THRESHOLD);
             float expectedCount = count(ls[i], us[i]);
@@ -261,7 +261,7 @@ public:
             TS_ASSERT(fabs(tv.getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
 	    //compute diff using a method provided with the UTest
 	    float computedDiff = computeDiff(tv.getL(), tv.getU(), default_k, tv.getConfidenceLevel());
-	    TS_ASSERT(isEqual(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv.isSymmetric());
             TS_ASSERT(fabs(tv.getMean() - means[i]) <= ERROR_THRESHOLD);
             float expectedCount = count(ls[i], us[i]);
@@ -306,7 +306,7 @@ public:
 	    //compute diff using a method provided with the UTest
 	    float computedDiff = computeDiff(itv->getL(), itv->getU(),
 					     default_k, itv->getConfidenceLevel());
-	    TS_ASSERT(isEqual(itv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(itv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(itv->isSymmetric());
             if (testChangedMean) {
                 //logger().debug("itv->getMean() = %f, means[0] = %f", itv->getMean(), means[0]);
@@ -349,7 +349,7 @@ public:
                 tvs[i]->setL(l);
                 TS_ASSERT(fabs(tv->getL()  - l) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(isEqual(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
+                TS_ASSERT(isApproxEq(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
                 float expectedCount = count(l, us[i]);
                 float expectedConfidence = confidence(l, us[i]);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
@@ -366,7 +366,7 @@ public:
                 tvs[i]->setU(u);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - u) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(isEqual(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
+                TS_ASSERT(isApproxEq(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
                 float expectedCount = count(ls[i], u);
                 float expectedConfidence = confidence(ls[i], u);
                 TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
@@ -461,7 +461,7 @@ public:
 	    //compute diff using a method provided with the UTest
 	    float computedDiff = computeDiff(clonedTv->getL(), clonedTv->getU(),
 					     default_k, clonedTv->getConfidenceLevel());
-	    TS_ASSERT(isEqual(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
+	    TS_ASSERT(isApproxEq(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(clonedTv->isSymmetric());
             TS_ASSERT(fabs(clonedTv->getMean() - means[i]) <= ERROR_THRESHOLD);
             float expectedCount = count(ls[i], us[i]);

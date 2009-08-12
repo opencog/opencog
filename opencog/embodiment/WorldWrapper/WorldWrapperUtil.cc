@@ -2910,7 +2910,7 @@ bool WorldWrapperUtil::evaluateLogicalOperation(int operation,
     case 1: // lesser equals
         return ( valueA <= valueB );
     case 2: // equals
-        return ( (valueA - valueB)  < 0.001);
+        return isApproxEq(valueA, valueB, 0.001);
     case 3: // greater than
         return ( valueA > valueB );
     case 4: // greater equals then

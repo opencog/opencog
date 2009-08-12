@@ -1,11 +1,10 @@
 /*
- * opencog/atomspace/types.h
+ * tests/reasoning/FormulaKitUTest.cxxtest
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
  *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
+ * Author Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,29 +22,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * basic type definitions.
- */
+#include <opencog/reasoning/pln/rules/auxiliary/SubsetEvalRule.h>
+#include <opencog/reasoning/pln/AtomSpaceWrapper.h>
 
-#ifndef _OPENCOG_TYPES_H
-#define _OPENCOG_TYPES_H
+using namespace opencog;
+using namespace pln;
 
-#include <boost/variant.hpp>
+class SubsetEvalRuleUTest : public CxxTest::TestSuite {
+private:
+    AtomSpaceWrapper* _atw;
+public:
+    SubsetEvalRuleUTest() {
+        AtomSpace as;
+        _atw = &DirectATW::getInstance(&as);
+    }
 
-#include <opencog/atomspace/Handle.h>
-
-namespace opencog
-{
-
-// type and arity of Atoms, represented as short integers (16 bits)
-typedef unsigned short Type;
-typedef unsigned short Arity;
-// stimulus
-typedef short stim_t;
-
-typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
-                       unsigned char, char, short int> Vertex;
-
-} // namespace opencog
-
-#endif // _OPENCOG_TYPES_H
+    void testSubsetEvalRuleUTest() {
+        
+    }
+};

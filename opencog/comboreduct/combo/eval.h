@@ -46,6 +46,8 @@
 namespace combo
 {
 
+using opencog::isApproxEq;
+
 struct Evaluator {
     virtual ~Evaluator() { }
     virtual vertex eval_action(combo_tree::iterator, combo::variable_unifier&) = 0;
@@ -708,8 +710,8 @@ public:
             if (boost::get<bool>(&(*il))) {
                 if (boost::get<bool>(*il) != boost::get<bool>(*ir))
                     return false;
-            } else if (!opencog::isEqual(boost::get<contin_t>(*il),
-                                          boost::get<contin_t>(*ir)))
+            } else if (!isApproxEq(boost::get<contin_t>(*il),
+                                   boost::get<contin_t>(*ir)))
                 return false;
         }
         return true;
@@ -854,8 +856,8 @@ public:
             if (boost::get<bool>(&(*il))) {
                 if (boost::get<bool>(*il) != boost::get<bool>(*ir))
                     return false;
-            } else if (!opencog::isEqual(boost::get<contin_t>(*il),
-                                          boost::get<contin_t>(*ir)))
+            } else if (!isApproxEq(boost::get<contin_t>(*il),
+                                   boost::get<contin_t>(*ir)))
                 return false;
         }
         return true;

@@ -129,8 +129,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT_EQUALS(link->getType(), SUBSET_LINK);
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hC));
-        TS_ASSERT(abs(tv->getMean() - (link->getTruthValue()->getMean())) < 0.001f);
-        TS_ASSERT(abs(tv->getCount() - (link->getTruthValue()->getCount())) < 0.001f);
+        TS_ASSERT(isApproxEq(tv->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.001f));
+        TS_ASSERT(isApproxEq(tv->getCount(),
+                             link->getTruthValue()->getCount(),
+                             0.001f));
         delete tv;
 
         FirstPTLTruthValue* nTv = new FirstPTLTruthValue (0.0,100);
@@ -138,8 +142,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT_EQUALS(link->getType(), SUBSET_LINK);
         TS_ASSERT(revisedLink->isSource(hA));
         TS_ASSERT(revisedLink->isTarget(hC));
-        TS_ASSERT(abs(tv->getMean() - (revisedLink->getTruthValue()->getMean())) > 0.001f);
-        TS_ASSERT(abs(tv->getCount() - (revisedLink->getTruthValue()->getCount())) < 0.001f);
+        TS_ASSERT(!isApproxEq(tv->getMean(),
+                              revisedLink->getTruthValue()->getMean(),
+                              0.001f));
+        TS_ASSERT(isApproxEq(tv->getCount(),
+                             revisedLink->getTruthValue()->getCount(),
+                             0.001f));
     }
 
     void testFindInferenceLinkType(){
@@ -156,10 +164,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT_EQUALS(link->getType(), INHERITANCE_LINK);
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hB1));
-        TS_ASSERT(abs(linkAB1->getTruthValue()->getMean() -
-                      link->getTruthValue()->getMean()) < 0.001f);
-        TS_ASSERT(abs(linkAB1->getTruthValue()->getCount() -
-                      link->getTruthValue()->getCount()) < 0.001f);
+        TS_ASSERT(isApproxEq(linkAB1->getTruthValue()->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.001f));
+        TS_ASSERT(isApproxEq(linkAB1->getTruthValue()->getCount(),
+                             link->getTruthValue()->getCount(),
+                             0.001f);
     }
 
     void testFindInferenceLinkBasicFailHandle(){
@@ -181,10 +191,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT_EQUALS(link->getType(), INHERITANCE_LINK);
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hB1));
-        TS_ASSERT(abs(linkAB1->getTruthValue()->getMean() -
-                      link->getTruthValue()->getMean()) < 0.001f);
-        TS_ASSERT(abs(linkAB1->getTruthValue()->getCount() -
-                      link->getTruthValue()->getCount()) < 0.001f);
+        TS_ASSERT(isApproxEq(linkAB1->getTruthValue()->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.001f));
+        TS_ASSERT(isApproxEq(linkAB1->getTruthValue()->getCount(),
+                             link->getTruthValue()->getCount(),
+                             0.001f));
     }
 
     void testFindInferenceLinkWithInversion(){
@@ -196,10 +208,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT(link->isSource(hB1));
         TS_ASSERT(link->isTarget(hA));
         TruthValue* expected = new FirstPTLTruthValue(0.3877551,49);
-        TS_ASSERT(abs(expected->getMean() -
-                      link->getTruthValue()->getMean()) < 0.01f);
-        TS_ASSERT(abs(expected->getCount() -
-                      link->getTruthValue()->getCount()) < 0.01f);
+        TS_ASSERT(isApproxEq(expected->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.01f));
+        TS_ASSERT(isApproxEq(expected->getCount(),
+                             link->getTruthValue()->getCount(),
+                             0.01f));
         delete expected;
     }
 
@@ -212,10 +226,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hC));
         TruthValue* expected = new FirstPTLTruthValue(0.3888889,36);
-        TS_ASSERT(abs(expected->getMean() -
-                      link->getTruthValue()->getMean()) < 0.1f);
-        TS_ASSERT(abs(expected->getCount() -
-                      link->getTruthValue()->getCount()) < 1.0f);
+        TS_ASSERT(isApproxEq(expected->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.1f));
+        TS_ASSERT(isApproxEq(expected->getCount(),
+                             link->getTruthValue()->getCount(),
+                             1.0f));
     }
 
     void testDeductLinkLinkFail(){
@@ -231,10 +247,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hC));
         TruthValue* expected = new FirstPTLTruthValue(0.3888889,36);
-        TS_ASSERT(abs(expected->getMean() -
-                      link->getTruthValue()->getMean()) < 0.1f);
-        TS_ASSERT(abs(expected->getCount() -
-                      link->getTruthValue()->getCount()) < 1.0f);
+        TS_ASSERT(isApproxEq(expected->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.1f));
+        TS_ASSERT(isApproxEq(expected->getCount(),
+                             link->getTruthValue()->getCount(),
+                             1.0f));
     }
 
     void testDeductionHandleHandleHandleFailType(){
@@ -254,10 +272,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT(link->isSource(hA));
         TS_ASSERT(link->isTarget(hC));
         TruthValue* expected = new FirstPTLTruthValue(0.3888889,36);
-        TS_ASSERT(abs(expected->getMean() -
-                      link->getTruthValue()->getMean()) < 0.05f);
-        TS_ASSERT(abs(expected->getCount() -
-                      link->getTruthValue()->getCount()) < 1.0f);
+        TS_ASSERT(isApproxEq(expected->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.05f));
+        TS_ASSERT(isApproxEq(expected->getCount(),
+                             link->getTruthValue()->getCount(),
+                             1.0f);
     }
 
     void testDeductionHandleHandleFailType(){
@@ -277,10 +297,12 @@ class InferenceMindAgentUTest : public CxxTest::TestSuite{
         TS_ASSERT(link->isSource(hB3));
         TS_ASSERT(link->isTarget(hC));
         TruthValue* expected = new FirstPTLTruthValue(0.4,45);
-        TS_ASSERT(abs(expected->getMean() -
-                      link->getTruthValue()->getMean()) < 0.05f);
-        TS_ASSERT(abs(expected->getCount() -
-                      link->getTruthValue()->getCount()) < 1.0f);
+        TS_ASSERT(isApproxEq(expected->getMean(),
+                             link->getTruthValue()->getMean(),
+                             0.05f));
+        TS_ASSERT(isApproxEq(expected->getCount(),
+                             link->getTruthValue()->getCount(),
+                             1.0f));
     }
 
     void testInversionFailType(){
