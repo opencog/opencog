@@ -53,7 +53,8 @@ struct eda_parameters {
         term_improv(1),        //generations, or term_improv*sqrt(N/w) consecutive
         //generations with no improvement (w=windowsize)
         
-        pop_size_ratio(20),     //populations are sized at N = popsize_ratio*n^1.05
+//was 20...
+        pop_size_ratio(200),     //populations are sized at N = popsize_ratio*n^1.05
         //where n is problem size in info-t bits
         
         window_size_pop(0.05), //window size for RTR is

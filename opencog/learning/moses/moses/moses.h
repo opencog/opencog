@@ -118,8 +118,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         rng(_rng), type(t), simplify(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa),
         _n_evals(0), _best_score(worst_possible_score),
-        _rep(NULL), _deme(NULL)
-
+        _rep(NULL), _deme(NULL), scorer(sc, NULL, 0, rng)
     {
         insert(behavioral_scored_combo_tree
                (base, combo_tree_behavioral_score(behavioral_score(),
@@ -189,17 +188,18 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
 
     /**
-     * expand do representation-building and create a deme first, and then do some
-     * optimization according to the scoring function, and add all unique non-dominated
-     * trees in the final deme as potential exemplars for future demes.
+     * expand do representation-building and create a deme first, and
+     * then do some optimization according to the scoring function,
+     * and add all unique non-dominated trees in the final deme as
+     * potential exemplars for future demes.
      *
-     *@param max_evals the max evals
-     *@param max_score the max score
-     *@param os the operator set
-     *@param perceptions a set of perceptions of an interactive agent
-     *@param actions a set of actions of an interactive agent
+     * @param max_evals    the max evals
+     * @param max_score    the max score
+     * @param os           the operator set
+     * @param perceptions  set of perceptions of an interactive agent
+     * @param actions      set of actions of an interactive agent
      *
-     *@return return true if expansion has succeeded, false otherwise
+     * @return return true if expansion has succeeded, false otherwise
      *
      */
     bool expand(int max_evals,
@@ -237,11 +237,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         //do some optimization according to the scoring function
         /*_n_evals+=optimize(deme,complexity_based_scorer<Scoring>(score,rep),
         max_evals);*/
-        _n_evals += optimize(deme,
-                             count_based_scorer<Scoring>(score, rep,
-                                                         get_complexity(*exemplar),
-                                                         rng),
-                             max_evals);
+
+        scorer._rep = &rep;
+        scorer._base_count = get_complexity(*exemplar); 
+        _n_evals += optimize(deme, scorer,max_evals-n_evals()); 
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
@@ -385,12 +384,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
-        int n = optimize(*_deme,
-                         count_based_scorer<Scoring>(score,
-                                                     *_rep,
-                                                     exemplar_complexity,
-                                                     rng),
-                         max_evals - n_evals());
+        scorer._base_count = exemplar_complexity;
+        scorer._rep = _rep;
+        int n = optimize(*_deme,scorer,max_evals - n_evals());
 
         // This is very ugly, but saves the old MOSES' architecture
         // The only return value of the operator is used for two
@@ -509,7 +505,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     BScoring bscore; //behavioral score
     Optimization optimize;
     parameters params;
-
+    count_based_scorer<Scoring> scorer;
+    
 protected:
     int _n_evals;
     int _evals_before_this_deme;

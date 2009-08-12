@@ -33,10 +33,10 @@ int main(int argc, char** argv)
         //    throw "foo";
         max_evals=lexical_cast<int>(argv[1]);
         seed=lexical_cast<int>(argv[2]);
-        set_stepsize(lexical_cast<double>(argv[3]));
-        set_expansion(lexical_cast<double>(argv[4]));
-        set_depth(lexical_cast<int>(argv[5]));
-        reduce = lexical_cast<int>(argv[6]);
+        set_stepsize(1.25); //lexical_cast<double>(argv[3]));
+        set_expansion(1.5); //lexical_cast<double>(argv[4]));
+        set_depth(4) ; //exical_cast<int>(argv[5]));
+        reduce = true;
     } catch (...) {
         cerr << "usage: " << argv[0] << " maxevals seed" << endl;
         exit(1);

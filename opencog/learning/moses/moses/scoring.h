@@ -27,7 +27,7 @@
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/reduct/meta_rules.h>
-
+#include <opencog/util/lru_cache.h>
 #include "using.h"
 #include "representation.h"
 #include "types.h"
@@ -41,9 +41,11 @@ namespace moses
 {
 
 #define NEG_INFINITY INT_MIN
-
+ 
 typedef float fitness_t;
 
+//LRU additions (maybe use IS_FE_LRU_CACHE flag)
+#define MOSES_TREE_CACHE_SIZE 1000000
 
 double information_theoretic_bits(const eda::field_set& fs);
 
@@ -163,13 +165,27 @@ protected:
 };
 
 template<typename Scoring>
-struct count_based_scorer : public unary_function<eda::instance,
-                                                  combo_tree_score> {
-    count_based_scorer(const Scoring& s,
-                       representation& rep,
-                       int base_count,
-                       opencog::RandGen& _rng)
-            : score(s), _rep(&rep), _base_count(base_count), rng(_rng) { }
+struct cached_scoring_wrapper : 
+        public unary_function<combo::combo_tree, fitness_t> {
+    cached_scoring_wrapper(const Scoring& s):
+        score(s) { }
+    fitness_t operator()(const combo::combo_tree& tree)
+    {
+        return score(tree);
+    } 
+private:
+    Scoring score;
+};
+
+template<typename Scoring>
+count_based_scorer(const Scoring& s,
+                   representation* rep,
+                   int base_count,
+                   opencog::RandGen& _rng)
+    : score_w(s), score(s),_rep(rep), _base_count(base_count), rng(_rng) { 
+                
+    treecache = new opencog::lru_cache< cached_scoring_wrapper<Scoring> >(MOSES_TREE_CACHE_SIZE,score_w);
+            }
 
     combo_tree_score operator()(const eda::instance& inst) const {
 #ifdef DEBUG_INFO
@@ -200,14 +216,20 @@ struct count_based_scorer : public unary_function<eda::instance,
         // reduct::clean_reduce(tr);
         // reduct::contin_reduce(tr,rng);
 
+        tree_score ts = tree_score((*treecache)(tr),
+
+//        tree_score ts = tree_score(score(tr),
+//                                   -int(_rep->fields().count(inst))
+//                                   + _base_count);
     }
-
+    
     Scoring score;
-protected:
-    representation* _rep;
+    cached_scoring_wrapper<Scoring> score_w;
     int _base_count;
+    representation* _rep;
+protected:
     opencog::RandGen& rng;
-
+    opencog::lru_cache<cached_scoring_wrapper<Scoring> >* treecache;
 };
 
 /**
