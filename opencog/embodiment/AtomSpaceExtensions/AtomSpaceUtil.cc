@@ -2098,8 +2098,8 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                 } // if
             } // for
 
-            // now get the element parents
-            HandleSeq parentLink;
+            // now get the parents of this frame
+            HandleSeq parentLink;            
             parentLink.push_back( parent );
             parentLink.push_back( Handle::UNDEFINED );
             HandleSeq parentFrames;
@@ -2122,8 +2122,8 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                                                  frameInstanceName, true);
 
             HandleSeq frameInstanceInheritance;
-            frameInstanceInheritance.push_back( frameNode );
             frameInstanceInheritance.push_back( frameInstance );
+            frameInstanceInheritance.push_back( frameNode );
             Handle frameInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameInstanceInheritance, true );            
 
             
@@ -2151,9 +2151,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                              frameElementInstanceName.str( ), true );
 
                 HandleSeq frameElementInheritance;
-                frameElementInheritance.push_back( frameElementHandle );
                 frameElementInheritance.push_back( frameElementInstance );
-                
+                frameElementInheritance.push_back( frameElementHandle );
+
                 Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
                 atomSpace.setLTI( frameElementInheritanceLink, 1 );
                 
@@ -2212,4 +2212,175 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
     } // else
 
     return Handle::UNDEFINED;
+}
+
+std::map<std::string, Handle>  AtomSpaceUtil::getFrameInstanceElementsValues( AtomSpace& atomSpace, Handle frameInstancePredicateNode ) 
+{
+
+    std::map<std::string, Handle> elementsValues;
+    // first check if this is really a frame instance
+    Type type = atomSpace.getType( frameInstancePredicateNode );
+    if ( atomSpace.getType( frameInstancePredicateNode ) != PREDICATE_NODE ) {
+        logger().error(
+            "AtomSpaceUtil - The given handle isn't a PREDICATE_NODE: '%d'.", 
+            type );
+        return elementsValues;
+    } // if
+
+    std::string frameName;
+    { // check the inheritance
+        HandleSeq inheritanceLink;
+        inheritanceLink.push_back( frameInstancePredicateNode );
+        inheritanceLink.push_back( Handle::UNDEFINED );
+
+        Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
+        HandleSeq inheritanceLinks;
+        atomSpace.getHandleSet( back_inserter( inheritanceLinks ),
+                                &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );        
+        if ( inheritanceLinks.size( ) > 0 ) {
+            // ok it is a frame instance
+            if ( inheritanceLinks.size( ) > 1 ) {
+                logger().error(
+                   "AtomSpaceUtil - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered." );                
+            } // if
+            frameName = atomSpace.getName( atomSpace.getOutgoing( inheritanceLinks[0], 1 ) );
+        } else {
+            logger().error(
+                "AtomSpaceUtil - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE." );
+            return elementsValues;
+        } // else
+    } // end block
+
+
+    // get the Frame type elements handles
+    HandleSeq frameElementsHandles;
+    Handle frame = getFrameElements( atomSpace, frameName, frameElementsHandles );
+
+    // get the predicate nodes that represents the frame instance elements
+    HandleSeq frameElement;
+    frameElement.push_back( frameInstancePredicateNode );
+    frameElement.push_back( Handle::UNDEFINED );
+    Type frameElementTypes[] = { PREDICATE_NODE, PREDICATE_NODE };
+    HandleSeq frameElements;
+    atomSpace.getHandleSet( back_inserter( frameElements ),
+                            &frameElementTypes[0], NULL, 2, FRAME_ELEMENT_LINK, false );
+    unsigned int j;
+    for( j = 0; j < frameElements.size( ); ++j ) {
+        // check if the elements are part of the same frame instance
+        HandleSeq inheritance;
+        inheritance.push_back( Handle::UNDEFINED );
+        inheritance.push_back( atomSpace.getOutgoing( frameElements[j], 1 ) );
+        
+        Type inheritanceTypes[] = { PREDICATE_NODE, DEFINED_FRAME_ELEMENT_NODE };
+        HandleSeq inheritances;
+        atomSpace.getHandleSet( back_inserter( inheritances ),
+                                &inheritanceTypes[0], NULL, 2, INHERITANCE_LINK, false );
+        if ( inheritances.size( ) != 1 ) {
+            logger().error( "AtomSpaceUtil - Invalid frame instance. It has a predicate node linked by a FrameElementLink that isn't a DefinedFrameElementNode" );
+            elementsValues.clear( );
+            return elementsValues;
+        } // if
+
+        // ok, the predicate is a DefinedFrameElementNode, now check if
+        // it belongs to the correct Frame type
+        bool validElement = false;
+        unsigned int k;
+        for( k = 0; !validElement && k < frameElementsHandles.size(); ++k ) {
+            if ( atomSpace.getOutgoing(inheritances[0], 1) == frameElementsHandles[k] ) {
+                validElement = true;
+            } // if
+        } // for
+
+        if ( !validElement ) {
+            logger().error( "AtomSpaceUtil - An element that does not belongs to the Frame type was defined for an instance of the Frame" );
+            elementsValues.clear( );
+            return elementsValues;
+        } // if
+        // well, everything is ok with the Frame element, so
+        // put it into the result map;
+        std::vector<string> elementNameParts;
+        boost::algorithm::split( elementNameParts,
+                                 atomSpace.getName( atomSpace.getOutgoing( inheritances[0], 1 ) ),
+                                 boost::algorithm::is_any_of(":") );
+        
+        elementsValues[elementNameParts[1]] = atomSpace.getOutgoing( inheritances[0], 0 );
+        
+    } // for
+
+    return elementsValues;
+}
+
+
+HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue ) 
+{
+
+    HandleSeq instances;
+
+    HandleSeq frameElementsHandles;
+    Handle frame = getFrameElements( atomSpace, frameName, frameElementsHandles );
+
+    if ( frame == Handle::UNDEFINED ) {
+        logger().error(
+                     "AtomSpaceUtil - Invalid given frame name '%s'.",
+                     frameName.c_str());
+        return instances;
+    } // if
+
+    // get the predicate node associated with the element value
+    HandleSeq evalLink;
+    evalLink.push_back( Handle::UNDEFINED );
+    evalLink.push_back( aElementValue );
+    HandleSeq evalLinks;
+    Type evalLinkTypes[] = {PREDICATE_NODE, atomSpace.getType( aElementValue ) };
+    atomSpace.getHandleSet( back_inserter( evalLinks ),
+                            &evalLinkTypes[0], NULL, 2, EVALUATION_LINK, false );
+
+    // now check if the predicate nodes belongs to a specific frame instance    
+    unsigned int i;
+    for( i = 0; i < evalLinks.size( ); ++i ) {
+        // test against all the frame elements
+        unsigned int j;
+        for( j = 0; j < frameElementsHandles.size( ); ++j ) {            
+            HandleSeq inheritanceElements(2);
+            inheritanceElements[0] = atomSpace.getOutgoing( evalLinks[i], 0 );
+            inheritanceElements[1] = frameElementsHandles[j];
+            Handle inheritance = 
+                atomSpace.getHandle(INHERITANCE_LINK, inheritanceElements );
+            if ( inheritance != Handle::UNDEFINED ) {
+                // ok, it is part of a frame instance, now get the frame
+                // predicate
+
+                // get all the predicate nodes that is part of a FrameElementLink
+                HandleSeq frameElementLink;
+                frameElementLink.push_back( Handle::UNDEFINED );
+                frameElementLink.push_back( atomSpace.getOutgoing( evalLinks[i], 0 ) );
+                
+                HandleSeq frameElementLinks;
+                Type frameElementLinkTypes[] = { PREDICATE_NODE, PREDICATE_NODE };
+                atomSpace.getHandleSet( back_inserter( frameElementLinks ),
+                                        &frameElementLinkTypes[0], NULL, 2,
+                                        FRAME_ELEMENT_LINK, false );
+                // finally check if the upper predicate node inherits from
+                // the correct frame node
+                unsigned int k;
+                for( k = 0; k < frameElementLinks.size( ); ++k ) {
+                    inheritanceElements[0] = atomSpace.getOutgoing( frameElementLinks[k], 0 );
+                    inheritanceElements[1] = frame;
+
+                    inheritance = 
+                        atomSpace.getHandle(INHERITANCE_LINK, inheritanceElements );
+                    if ( inheritance != Handle::UNDEFINED ) {
+                        // Ah, we found a predicate node that identifies a Frame instance
+                        instances.push_back( atomSpace.getOutgoing( frameElementLinks[k], 0) );
+                    } // if
+                                                      
+                } // for
+
+            } // if
+
+        } // for                                   
+    } // for
+
+    return instances;
+    
 }

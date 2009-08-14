@@ -923,8 +923,31 @@ public:
                                                 const std::map<std::string, Handle>& frameElementsValuesHandles, 
                                                 const TruthValue& truthValue );
 
-    //This is not needed, since setupHoldingObject (and getMostRecentIsHoldingAtTimeLink) method manages that.
-    //static void updateLatestAgentHolding(AtomSpace& as, Handle atTimeLink, Handle agentNode);
+    /**
+     * Given a predicate Node handle this method returns all the elements
+     * and their values of the Frame instance represented by the PredicateNode
+     *
+     * @param atomSpace The AtomSpace reference
+     * @param frameInstancePredicateNode The handle of the PredicateNode which represents the frame instance
+     * @return A Map containing the names and values of all the Frame instance elements
+     */
+    static std::map<std::string, Handle> getFrameInstanceElementsValues
+        ( AtomSpace& atomSpace, Handle frameInstancePredicateNode );
+
+    /**
+     * Given a value of a Frame instance element and the name of the frame.
+     * this method returns a list of all PredicateNodes that represents
+     * instances of the frame of name 'frameName', that has
+     * 'aElementValue' as a value of at least one of its elements
+     *
+     * @param atomSpace The AtomSpace reference
+     * @param frameName The name of the frame
+     * @param aElementValue the element value
+     * @return A handleSeq containing all the matched predicateNodes
+     */
+    static HandleSeq retrieveFrameInstancesUsingAnElementValue
+        ( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
+
 };
 
 

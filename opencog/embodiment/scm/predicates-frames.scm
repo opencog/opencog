@@ -36,6 +36,21 @@
 ; to represent the Embodiment Perceptions.
 
 
+; Definition of Frame Request
+
+; #Request:Message
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+   (DefinedFrameNode "#Request")
+   (DefinedFrameElementNode "#Request:Message")
+)
+
+; #Request:Addressee
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+   (DefinedFrameNode "#Request")
+   (DefinedFrameElementNode "#Request:Addressee")
+)
+
+
 ; Definition of Frame Relation
 
 ; #Relation:Entity1
@@ -519,7 +534,6 @@
    (DefinedFrameNode "#Intentionally_affect")
 )
 
-
 ; #Manipulation:Agent
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
    (DefinedFrameNode "#Manipulation")
@@ -554,6 +568,12 @@
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
    (DefinedFrameNode "#Manipulation")
    (DefinedFrameElementNode "#Manipulation:Duration")
+)
+
+; #Manipulation:Depictive
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
+   (DefinedFrameNode "#Manipulation")
+   (DefinedFrameElementNode "#Manipulation:Depictive")
 )
 
 

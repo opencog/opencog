@@ -84,8 +84,8 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
                       "#Evaluative_comparison wasn't defined yet. Please load the predicates-frames.scm file" );
 
             HandleSeq isSmallFrame;
-            isSmallFrame.push_back( comparison );
             isSmallFrame.push_back( isSmallPredicate );
+            isSmallFrame.push_back( comparison );
 
             Handle isSmallLink = atomSpace.getHandle( INHERITANCE_LINK, isSmallFrame );
             OC_ASSERT(isSmallLink != Handle::UNDEFINED,
