@@ -200,23 +200,26 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     }
 
     //otherwise search for a predicate node
+    /*
     HandleSeq tmp;
     as.getHandleSet(std::back_inserter(tmp), PREDICATE_NODE, obj);
+
 //    if(tmp.size()==0) //do a dump before failing
 //      as.print();
 
     OC_ASSERT(tmp.size() <= 1); //need to assume that PredicateNode names are unique
-    if (tmp.empty()) {
+    */
+    Handle lhs = as.getHandle( PREDICATE_NODE, obj );
+    if (lhs == Handle::UNDEFINED ) {
         logger().debug(
                      "WWUtil - rec_lookup found no predicate node for '%s'.",
                      obj.c_str());
         return Handle::UNDEFINED;
     }
-
+    
     //link lookup
-    Handle lhs = tmp.front();
-    HandleSeq children;
-	
+    
+    HandleSeq children;	
     for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
         children.push_back(rec_lookup(as, pre_it(sib), self_id, owner_id));
         if (children.back() == Handle::UNDEFINED) {
