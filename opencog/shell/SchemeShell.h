@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/guile/SchemeEval.h>
+//#include <opencog/guile/SchemeEval.h>
 #include <opencog/server/SocketHolder.h>
 
 namespace opencog {
@@ -38,7 +38,7 @@ class SchemeShell : public GenericShell
 {
 	friend class SchemeShellModule;
 	private:
-		SchemeEval *evaluator;
+//		SchemeEval *evaluator;
 
 		std::string normal_prompt;
 		std::string pending_prompt;

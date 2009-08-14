@@ -37,9 +37,6 @@ class ExecutionUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-#ifdef HAVE_GUILE
-		SchemeEval evaluator;
-#endif
 		Handle restrict;
 
 	public:
@@ -106,7 +103,7 @@ void ExecutionUTest::setUp(void)
 
 #ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
-	restrict = evaluator.apply("impy", Handle::UNDEFINED);
+	restrict = SchemeEval::instance().apply("impy", Handle::UNDEFINED);
 #endif /* HAVE_GUILE */
 }
 

@@ -20,6 +20,9 @@
 
 using namespace opencog;
 
+
+SchemeEval* SchemeEval::singletonInstance = 0;
+
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -186,6 +189,7 @@ void SchemeEval::per_thread_init(void)
 SchemeEval::~SchemeEval()
 {
 	scm_with_guile(c_wrap_finish, this);
+        delete singletonInstance;
 }
 
 /* ============================================================== */
@@ -638,5 +642,51 @@ void * SchemeEval::c_wrap_apply(void * p)
 	return self;
 }
 
+
+/**
+ * Execute the schema specified in an ExecutionLink
+ */
+std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
+{
+	pexpr = &func;
+	hargs = varargs;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_lock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	scm_with_guile(c_wrap_apply_scm, this);
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_unlock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	return answer;
+}
+
+void * SchemeEval::c_wrap_apply_scm(void * p)
+{
+        logger().info( "%s: calling wrap", __FUNCTION__ );
+
+	SchemeEval *self = (SchemeEval *) p;
+        SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
+        logger().info( "%s: done", __FUNCTION__ );
+        self->answer = SchemeSmob::to_string(genericAnswer);
+        logger().info( "%s: answer: %s",__FUNCTION__, self->answer.c_str( ) );
+
+	return self;
+}
+
+
 #endif
+
+SchemeEval& SchemeEval::instance() 
+{
+    if ( !singletonInstance ) {
+        singletonInstance = new SchemeEval( );
+    } // if
+    return *singletonInstance;
+}
+
+
 /* ===================== END OF FILE ============================ */

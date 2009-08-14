@@ -36,10 +36,6 @@ class ExecutionUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-#ifdef HAVE_GUILE
-		SchemeEval evaluator;
-#endif
-
 		Handle implication;
 		Handle hcapital, hprep;
 
@@ -151,7 +147,7 @@ void ExecutionUTest::setUp(void)
 	"		) \n"
 	"	) \n"
 	")";
-	evaluator.eval(str);
+	SchemeEval::instance().eval(str);
 #endif /* HAVE_GUILE */
 }
 
