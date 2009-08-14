@@ -35,6 +35,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
 #include <opencog/embodiment/Control/PetInterface.h>
 
+#include <opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h>
 #include "MessageSender.h"
 
 using namespace opencog;
@@ -57,7 +58,7 @@ enum PetMode {
 class Pet : public Control::PetInterface
 {
 
-private:
+private:    
 
     // pet metadata
     std::string petId;
@@ -124,6 +125,7 @@ private:
      */
     void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
 
+    LanguageComprehension* languageTool;
 public:
 
     static const unsigned long UNDEFINED_TIMESTAMP;
@@ -380,6 +382,8 @@ public:
 
     // target object used by goto and gonear combo functions
     std::pair<std::string, Spatial::Point> targetObject;
+
+    LanguageComprehension& getLanguageTool( void );
 
 }; // class
 }  // namespace

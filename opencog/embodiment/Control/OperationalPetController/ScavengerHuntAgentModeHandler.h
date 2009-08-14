@@ -24,7 +24,7 @@
 #ifndef SCAVENGER_HUNT_AGENT_MODE_HANDLER_H
 #define SCAVENGER_HUNT_AGENT_MODE_HANDLER_H
 
-#include <opencog/embodiment/Control/AgentModeHandler.h>
+#include <opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h>
 #include <opencog/spatial/VisibilityMap.h>
 #include <sstream>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
@@ -35,7 +35,7 @@ class Pet;
 /**
  * Handle commands used by scavenger Hunt mode
  */
-class ScavengerHuntAgentModeHandler : public Control::AgentModeHandler
+class ScavengerHuntAgentModeHandler : public BaseAgentModeHandler
 {
 public:
 

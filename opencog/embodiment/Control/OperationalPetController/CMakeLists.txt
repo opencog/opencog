@@ -16,9 +16,11 @@ ADD_LIBRARY (OpcLib
     #NewRuleEngineUtil
     RuleEngineLearnedTricksHandler
     SchemaRunner
+    BaseAgentModeHandler
     ScavengerHuntAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
+    LanguageComprehension
 )
 
 INCLUDE_DIRECTORIES (

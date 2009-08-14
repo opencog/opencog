@@ -520,13 +520,19 @@ void RuleEngine::suggestAction( const std::string& rule,
 
     } else if ( action == "executeRequestedAction" ) {
         unsigned int procArity;
-        procArity = opc->getProcedureRepository().get(opc->getPet().getLatestRequestedCommand().name).getArity();
-        if (procArity == this->opc->getPet().getLatestRequestedCommand().arguments.size()) {
-            finalAction = this->opc->getPet( ).getLatestRequestedCommand( ).name;
+        finalAction = this->opc->getPet( ).getLatestRequestedCommand( ).name;
+        logger().debug( "RuleEngine::%s - Handling requested action %s ", __FUNCTION__,  finalAction.c_str() );
+        
+        procArity = opc->getProcedureRepository().get(finalAction).getArity();
 
+        if (procArity == this->opc->getPet().getLatestRequestedCommand().arguments.size()) {
             std::vector<std::string>& arguments =
                 this->opc->getPet( ).getLatestRequestedCommand( ).arguments;
+            finalParameters.resize( arguments.size() );
             std::copy( arguments.begin( ), arguments.end( ), finalParameters.begin( ) );
+        } else {
+            logger().error( "RuleEngine - An invalid list of arguments was sent to the action '%s'. %d arguments was sent but should be %d",
+                            finalAction.c_str(), procArity, this->opc->getPet().getLatestRequestedCommand().arguments.size() );
         }
     } else if ( action == "runRandomTopFiveLearnedTrick" ) {
         std::set<std::string> arguments;
@@ -536,8 +542,8 @@ void RuleEngine::suggestAction( const std::string& rule,
     } // else if
 
     logger().debug(
-                 "RuleEngine - Rule '%s' action '%s'",
-                 rule.c_str(), action.c_str());
+                 "RuleEngine - Rule '%s' action '%s' finalAction '%s'",
+                 rule.c_str(), action.c_str(), finalAction.c_str());
 
     // get rule -> action implication link strength
     float strength = AtomSpaceUtil::getRuleImplicationLinkStrength(*(this->opc->getAtomSpace()), rule, this->opc->getPet( ).getCurrentModeHandler( ).getModeName( ) );

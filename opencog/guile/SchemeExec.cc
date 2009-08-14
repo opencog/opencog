@@ -23,38 +23,47 @@ using namespace opencog;
  * is applied to them. If the function returns an atom handle, then
  * this is returned, in turn.
  */
-Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
+
+SCM SchemeEval::do_apply_scm( const std::string& func, Handle varargs )
 {
-	per_thread_init();
-	SCM sfunc = scm_from_locale_symbol(func.c_str());
-	SCM expr = SCM_EOL;
-
-	// If there were args, pass the args to the function.
-	Link *largs = dynamic_cast<Link *>(TLB::getAtom(varargs));
-	if (largs)
+    per_thread_init();
+    SCM sfunc = scm_from_locale_symbol(func.c_str());
+    SCM expr = SCM_EOL;
+    
+    // If there were args, pass the args to the function.
+    Link *largs = dynamic_cast<Link *>(TLB::getAtom(varargs));
+    if (largs)
 	{
-		const std::vector<Handle> &oset = largs->getOutgoingSet();
-
-		size_t sz = oset.size();
-		for (int i=sz-1; i>=0; i--)
+            const std::vector<Handle> &oset = largs->getOutgoingSet();
+            
+            size_t sz = oset.size();
+            for (int i=sz-1; i>=0; i--)
 		{
-			Handle h = oset[i];
-			SCM sh = SchemeSmob::handle_to_scm(h);
-			expr = scm_cons(sh, expr);
+                    Handle h = oset[i];
+                    SCM sh = SchemeSmob::handle_to_scm(h);
+                    expr = scm_cons(sh, expr);
 		}
 	}
-	expr = scm_cons(sfunc, expr);
-
-	// Apply the function to the args
-   SCM sresult = do_scm_eval(expr);
-
-	// If the result is a handle, return the handle.
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sresult))
-	{
-   	return Handle::UNDEFINED;
-	}
-	return SchemeSmob::scm_to_handle(sresult);
+    expr = scm_cons(sfunc, expr);
+    return do_scm_eval(expr);
+    
 }
+
+Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
+{
+
+    // Apply the function to the args
+    SCM sresult = do_apply_scm( func, varargs );
+    
+    // If the result is a handle, return the handle.
+    if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sresult))
+	{
+            return Handle::UNDEFINED;
+	}
+    return SchemeSmob::scm_to_handle(sresult);
+}
+
+
 
 #endif
 /* ===================== END OF FILE ============================ */

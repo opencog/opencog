@@ -34,3 +34,16 @@ TARGET_LINK_LIBRARIES(HttpRequestTest
 IF(WIN32)
     TARGET_LINK_LIBRARIES(HttpRequestTest winmm)
 ENDIF(WIN32)
+
+
+ADD_CXXTEST(LanguageComprehensionUTest)
+TARGET_LINK_LIBRARIES(LanguageComprehensionUTest 
+  OpcLib
+  behavior
+  ${XERCESC_LIBRARIES}
+)
+
+IF(WIN32)
+    TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
+ENDIF(WIN32)
+

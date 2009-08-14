@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LearningAgentModeHandler.h
+ * opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -20,23 +20,26 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifndef BASE_AGENT_MODE_HANDLER
+#define BASE_AGENT_MODE_HANDLER
 
-#ifndef LEARNING_AGENT_MODE_HANDLER_H
-#define LEARNING_AGENT_MODE_HANDLER_H
-
-#include <opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h>
+#include <opencog/embodiment/Control/AgentModeHandler.h>
+#include <opencog/spatial/VisibilityMap.h>
+#include <queue>
 
 namespace OperationalPetController
 {
 class Pet;
 /**
- * Handle commands used by Learning mode
+ * If a given mode doesn't need a handler, use a base handler to be returned by PetInterface
  */
-class LearningAgentModeHandler : public BaseAgentModeHandler
+class BaseAgentModeHandler : public Control::AgentModeHandler
 {
 public:
-    LearningAgentModeHandler( Pet* agent );
-    inline virtual ~LearningAgentModeHandler( void ) { };
+
+    BaseAgentModeHandler( Pet* agent );
+
+    virtual inline ~BaseAgentModeHandler( void ) { };
 
     void handleCommand( const std::string& name, const std::vector<std::string>& arguments );
 
@@ -44,11 +47,13 @@ public:
         return this->modeName;
     }
 
+    void update( void );
+
 protected:
     const std::string modeName;
+    std::queue<std::vector<std::string> > commandsQueue;
     Pet* agent;
 };
-
 }; // OperationalPetController
 
-#endif // LEARNING_AGENT_MODE_HANDLER_H
+#endif // BASE_AGENT_MODE_HANDLER

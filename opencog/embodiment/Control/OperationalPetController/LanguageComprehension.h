@@ -1,7 +1,7 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LearningAgentModeHandler.h
+ * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h
  *
- * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
  * Author(s): Samir Araujo
  *
@@ -21,34 +21,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LEARNING_AGENT_MODE_HANDLER_H
-#define LEARNING_AGENT_MODE_HANDLER_H
+#ifndef LANGUAGECOMPREHENSION_H
+#define LANGUAGECOMPREHENSION_H
 
-#include <opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/embodiment/Control/PetInterface.h>
 
 namespace OperationalPetController
 {
-class Pet;
-/**
- * Handle commands used by Learning mode
- */
-class LearningAgentModeHandler : public BaseAgentModeHandler
-{
-public:
-    LearningAgentModeHandler( Pet* agent );
-    inline virtual ~LearningAgentModeHandler( void ) { };
+    
+    class LanguageComprehension 
+    {
+    public: 
+        LanguageComprehension( Control::PetInterface& agent );
+        
+        virtual ~LanguageComprehension( void );        
 
-    void handleCommand( const std::string& name, const std::vector<std::string>& arguments );
+        void solveLatestSentenceReference( void );
 
-    inline const std::string& getModeName( void ) {
-        return this->modeName;
-    }
+        void solveLatestSentenceCommand( void );
 
-protected:
-    const std::string modeName;
-    Pet* agent;
+    protected:
+
+        void init(void);
+
+//        opencog::SchemeEval evaluator;
+        Control::PetInterface& agent;
+                
+    };
+
 };
 
-}; // OperationalPetController
 
-#endif // LEARNING_AGENT_MODE_HANDLER_H
+
+
+
+
+#endif // LANGUAGECOMPREHENSION_H

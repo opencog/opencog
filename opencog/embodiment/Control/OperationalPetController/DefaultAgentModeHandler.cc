@@ -35,13 +35,71 @@
 using namespace OperationalPetController;
 
 DefaultAgentModeHandler::DefaultAgentModeHandler( Pet* agent ) :
-        modeName( "PLAYING_MODE" ), agent( agent ), visibilityMap(0)
+    BaseAgentModeHandler( agent ), modeName( "PLAYING_MODE" ), 
+    agent( agent ), visibilityMap(0)
 {
 }
 
 void DefaultAgentModeHandler::handleCommand( const std::string& name, const std::vector<std::string>& arguments )
 {
-    if ( name == "visibilityMap" ) {
+    BaseAgentModeHandler::handleCommand( name, arguments );
+
+    if ( name == "instruction" ) {
+        if ( arguments.size( ) != 3 ) {
+            logger().debug("DefaultAgentModeHandler::%s - Invalid instruction. %d arguments", __FUNCTION__, arguments.size() );
+            return;
+        } // if
+        std::vector<std::string> tokens;
+        boost::split( tokens, arguments[0], boost::is_any_of(" ") );
+        
+        if ( tokens[0] == "LEARN" ) {
+            std::string avatarId = this->agent->getOwnerId( );
+            if ( tokens.size( ) == 4 && tokens[2] == "WITH" ) {
+                std::string avatarId = AtomSpaceUtil::getObjIdFromName( this->agent->getAtomSpace(), tokens[3] );
+                if ( avatarId.empty() ) {
+                    logger().debug("DefaultAgentModeHandler::%s - found no avatar with name %s", 
+                                   __FUNCTION__, tokens[3].c_str());
+                    // There is no object/avatar with such name
+                    return;
+                } // if                
+            } // with
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[1] );
+            long timestamp = boost::lexical_cast<long>( arguments[1] );
+            this->agent->setExemplarAvatarId( avatarId );
+            this->agent->startLearning( commandStatement, timestamp );
+            return;
+
+        } else if ( tokens[0] == "DO" ) {
+            if ( tokens.size( ) < 2 ) {
+                logger().debug("DefaultAgentModeHandler::%s - invalid DO command. it should be DO <something> <args>, but was: %s", 
+                               __FUNCTION__, arguments[0].c_str());
+                return;
+            } // if
+            std::vector<std::string> command;
+            command.push_back( tokens[1] );
+            unsigned int i;
+            for( i = 2; i < tokens.size( ); ++i ) {
+                std::string param = AtomSpaceUtil::getObjIdFromName( this->agent->getAtomSpace(), tokens[i] );
+                command.push_back( param.length( ) > 0 ? param : tokens[i] );
+            } // for
+            handleCommand( "requestedCommand", command );
+            return;
+
+        } else if ( tokens.size( ) > 2 && tokens[0] == "LETS" && tokens[1] == "PLAY" && 
+                    ( tokens[2] == "SH" || ( tokens.size( ) == 4 && tokens[2] == "SCAVENGER" && tokens[3] == "HUNT") ) ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( "lets_play_scavenger_hunt" );
+            handleCommand( "receivedOwnerCommand", commandStatement );
+            logger().debug("DefaultAgentModeHandler::%s - Starting to play scavenger hunt", __FUNCTION__ );
+            return;
+
+        } else {
+            logger().debug("DefaultAgentModeHandler::%s - Invalid instruction %s", __FUNCTION__, arguments[0].c_str( ) );
+            return;
+        } // else
+        
+    } else if ( name == "visibilityMap" ) {
         if ( arguments.size( ) == 0 ) {
             logger().debug("DefaultAgentModeHandler - Invalid visibility map signal, string 0 signed" );
             return;
@@ -139,8 +197,4 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
     this->visibilityMap = new Spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
 
     return this->visibilityMap;
-}
-
-void DefaultAgentModeHandler::update( void )
-{
 }

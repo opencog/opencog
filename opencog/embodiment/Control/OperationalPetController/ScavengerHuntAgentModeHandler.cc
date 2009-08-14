@@ -45,9 +45,10 @@ const std::string ScavengerHuntAgentModeHandler::RED_TEAM_BASE("red_base");
 const std::string ScavengerHuntAgentModeHandler::BLUE_TEAM_BASE("blue_base");
 
 ScavengerHuntAgentModeHandler::ScavengerHuntAgentModeHandler( Pet* agent ) :
-        modeName( "SCAVENGER_HUNT_MODE" ), agent(agent), visibilityMap(0), agentState(0),
-        previousAgentState(0), exploringArea(NUMBER_OF_AREAS), playing(false),
-        runningProcedureId(0), needToCollectProcedureId(false)
+    BaseAgentModeHandler( agent ),
+    modeName( "SCAVENGER_HUNT_MODE" ), agent(agent), visibilityMap(0), agentState(0),
+    previousAgentState(0), exploringArea(NUMBER_OF_AREAS), playing(false),
+    runningProcedureId(0), needToCollectProcedureId(false)
 {
 }
 
@@ -93,6 +94,8 @@ void ScavengerHuntAgentModeHandler::changeState( int from, int to )
 void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, const std::vector<std::string>& arguments )
 {
 
+    BaseAgentModeHandler::handleCommand( name, arguments );
+
     std::stringstream args;
     std::copy(arguments.begin(), arguments.end(), std::ostream_iterator<std::string>(args, ", "));
 
@@ -106,7 +109,83 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
 
     logger().debug("ScavengerHuntAgentModeHandler - handlingCommand[%s] params[%s]", name.c_str( ), args.str( ).c_str( ) );
 
-    if ( name == "groupCommandDone" ) {
+    if ( name == "instruction" ) {
+        if ( arguments.size( ) != 3 ) {
+            logger().debug("LearningAgentModeHandler::%s - Invalid instruction. %d arguments", __FUNCTION__, arguments.size() );
+            return;
+        } // if
+        std::vector<std::string> tokens;
+        boost::split( tokens, arguments[0], boost::is_any_of(" ") );
+        //long timestamp = boost::lexical_cast<long>( arguments[1] );        
+        
+        if ( tokens.size( ) > 2 && tokens[0] == "GO" && ( tokens[1] == "FIND" || tokens[1] == "AFTER" ) && 
+             ( tokens[2] == "TREASURE" || tokens[2] == "TREASURES" ) ) {
+            std::vector<std::string> commandStatement;
+            if ( tokens.size( ) == 4 ) {
+                commandStatement.push_back( tokens[3] );
+            } // if
+            this->agent->getCurrentModeHandler( ).handleCommand( "goFindTreasure", commandStatement );
+            return;
+        } else if ( tokens[0] == "FOLLOW" && tokens[1] == "ME" && ( tokens.size( ) == 3 || tokens.size( ) == 4 ) ) {
+            if ( tokens.size( ) == 3 ) {
+                std::vector<std::string> commandStatement;
+                commandStatement.push_back( tokens[2] );
+                commandStatement.push_back( arguments[2] );
+                this->agent->getCurrentModeHandler( ).handleCommand( "followMe", commandStatement );
+                return;
+            } else if ( tokens.size( ) == 4 ) {
+                std::vector<std::string> commandStatement;
+                commandStatement.push_back( tokens[3] );
+                commandStatement.push_back( arguments[2] );
+                this->agent->getCurrentModeHandler( ).handleCommand( "followMeAndCollectTreasures", commandStatement );
+                return;
+            } // else if
+        } else if ( tokens[0] == "COME" && tokens[1] == "HERE" && tokens.size( ) == 3 ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[2] );
+            commandStatement.push_back( arguments[2] );
+            this->agent->getCurrentModeHandler( ).handleCommand( "comeHere", commandStatement );
+            return;
+        } else if ( tokens[0] == "EXPLORE" && tokens[1] == "AREA" && tokens.size( ) == 4  ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[2] );
+            commandStatement.push_back( tokens[3] );
+            commandStatement.push_back( arguments[2] );
+            this->agent->getCurrentModeHandler( ).handleCommand( "exploreArea", commandStatement );
+            return;
+        } else if ( tokens[0] == "WAIT" && tokens.size( ) == 2  ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[1] );
+            commandStatement.push_back( arguments[2] );
+            this->agent->getCurrentModeHandler( ).handleCommand( "wait", commandStatement );
+            return;
+        } else if ( tokens[0] == "REGROUP" && tokens[1] == "TEAM" && tokens.size( ) == 3 ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[2] );
+            commandStatement.push_back( arguments[2] );
+            this->agent->getCurrentModeHandler( ).handleCommand( "regroupTeam", commandStatement );
+            return;
+        } else if ( tokens[0] == "SPY" && tokens.size( ) == 3 ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( tokens[1] );
+            commandStatement.push_back( tokens[2] );
+            commandStatement.push_back( arguments[2] );
+            this->agent->getCurrentModeHandler( ).handleCommand( "spy", commandStatement );
+            return;
+        } else if ( tokens.size( ) == 2 && tokens[0] == "I" && ( tokens[1] == "BLUE" || tokens[1] == "RED" ) && tokens[2] == "TEAM"  ) {
+            std::vector<std::string> commandStatement;
+            commandStatement.push_back( arguments[2] );
+            commandStatement.push_back( "lets_play_scavenger_hunt" );
+            commandStatement.push_back( (tokens[1] == "BLUE") ? "1" : "0" ); // 0 = RED, 1 = BLUE
+            commandStatement.push_back( "1.0" ); // greatest rand double
+            this->agent->getCurrentModeHandler( ).handleCommand( "receivedGroupCommand", commandStatement );
+            return;
+
+        } else {
+            logger().debug("ScavengerHuntAgentModeHandler::%s - Invalid instruction %s", __FUNCTION__, arguments[0].c_str( ) );            
+        } // else
+        
+    } else if ( name == "groupCommandDone" ) {
         if ( arguments[0] == "lets_play_scavenger_hunt" ) {
             if ( !this->playing ) {
                 resetGame( );
@@ -367,6 +446,7 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void )
 
 void ScavengerHuntAgentModeHandler::update( void )
 {
+    BaseAgentModeHandler::update( );
     logger().debug("ScavengerHuntAgentModeHandler - Updating... Current state[%d] Previous state[%d] ElapsedTicks[%d]", this->agentState, this->previousAgentState, this->elapsedTicks );
 
     switch ( this->agentState ) {

@@ -80,6 +80,9 @@ $pdh/opencog/scm/debug.scm \
 
 set schemeEmbodimentFiles [list \
 $pdh/opencog/embodiment/scm/predicates-frames.scm \
+$pdh/opencog/embodiment/scm/language-comprehension.scm \
+$pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
+$pdh/opencog/embodiment/scm/command-resolution-rules.scm \
 ]
 
 set flistAGI [list \

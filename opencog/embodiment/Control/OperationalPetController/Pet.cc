@@ -113,6 +113,9 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
     this->modeHandler[ PLAYING ] = new DefaultAgentModeHandler( this );
     this->modeHandler[ SCAVENGER_HUNT ] =
         new ScavengerHuntAgentModeHandler( this );
+
+    this->languageTool = new LanguageComprehension( *this );
+
 }
 
 Pet::~Pet()
@@ -1105,3 +1108,7 @@ void Pet::setRequestedCommand(string command, vector<string> parameters)
     this->lastRequestedCommand.readed = false;
 }
 
+LanguageComprehension& Pet::getLanguageTool( void ) 
+{
+    return *this->languageTool;
+}

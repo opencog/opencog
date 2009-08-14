@@ -31,6 +31,10 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/format.hpp>
+
+
 using namespace opencog;
 
 PatternMatch::PatternMatch(void)
@@ -132,6 +136,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	// Make sure that the user did not pass in bogus clauses
 	std::vector<Handle> clauses;
 	clauses = lclauses->getOutgoingSet();
+
+
 	bool bogus = pme.validate(vars, clauses);
 	if (bogus)
 	{
@@ -140,6 +146,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 
 	pme.match(cb, vars, clauses, negs);
+
+
 }
 
 /* ================================================================= */
@@ -209,12 +217,16 @@ Handle Instantiator::execution_link()
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
-		SchemeEval applier;
-		Handle h = applier.apply(schema.substr(4), oset[1]);
+		//SchemeEval applier;
+		Handle h = SchemeEval::instance().apply(schema.substr(4), oset[1]);
 		return h;
 #endif /* HAVE_GUILE */
-	}
-	return Handle::UNDEFINED;
+	} else {
+            // ok, i can't handle that type of procedure, so return it allowing
+            // the user to execute it in a future circustance
+            return as->addLink( EXECUTION_LINK, oset, TruthValue::TRUE_TV( ) );
+        } // else
+
 }
 
 bool Instantiator::walk_tree(Handle expr)
@@ -329,16 +341,17 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
  * grounding.  A list of grounded expressions is created in 'result_list'.
  */
 class Implicator :
-	public virtual PatternMatchCallback
+    public virtual PatternMatchCallback
 {
-	protected:
-		Instantiator inst;
-	public:
-		AtomSpace *as;
-		Handle implicand;
-		std::vector<Handle> result_list;
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+protected:
+    Instantiator inst;
+public:
+    AtomSpace *as;
+    Handle implicand;
+    std::vector<Handle> result_list;
+    std::map<unsigned int, std::map<Handle,Handle> > ground_vars;
+    virtual bool solution(std::map<Handle, Handle> &pred_soln,
+                          std::map<Handle, Handle> &var_soln);
 };
 
 bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
@@ -347,9 +360,14 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (h != Handle::UNDEFINED)
+	if (h != Handle::UNDEFINED )
 	{
-		result_list.push_back(h);
+            result_list.push_back(h);
+            
+            std::map<Handle, Handle>::const_iterator it;
+            for( it = var_soln.begin( ); it != var_soln.end( ); ++it ) {
+                ground_vars[result_list.size()-1][it->first] = it->second;
+            } // for
 	}
 	return false;
 }
@@ -503,6 +521,44 @@ Handle PatternMatch::do_imply (Handle himplication,
 		affirm.push_back(hclauses);
 	}
 
+
+        HandleSeq gpnClauses;
+        HandleSeq nonGpnClauses;
+
+        unsigned int i;
+        for( i = 0; i < affirm.size( ); ++i ) {
+            // check if there is some GroundedPredicateNode to be evaluated
+            Atom * clauseAtom = TLB::getAtom(affirm[i]);
+
+            if (EVALUATION_LINK == clauseAtom->getType( ) ) {
+                Link * evalLink = dynamic_cast<Link *>(clauseAtom);
+
+                const std::vector<Handle> &outgoing = evalLink->getOutgoingSet();
+
+                if ( outgoing.size( ) == 2 ) {
+                    Atom * firstElementAtom = TLB::getAtom(outgoing[0]);
+
+                    if ( GROUNDED_PREDICATE_NODE == firstElementAtom->getType( ) ) {
+                        if (LIST_LINK != TLB::getAtom(outgoing[1])->getType( ) ) {
+                            logger().error( "%s - A list link must be uses to hold the GPN parameters",
+                                            __FUNCTION__ );
+                            return Handle::UNDEFINED;
+                        } // if
+                        gpnClauses.push_back( affirm[i] );
+                        continue;
+                    } // if
+                } // if
+            } // if
+            nonGpnClauses.push_back( affirm[i] );
+        } // for
+        
+        logger().info( "%s - # of affirm clauses %d. # of gpn clauses %d", 
+                       __FUNCTION__, affirm.size( ), gpnClauses.size( ) );
+
+        if ( affirm.size( ) != nonGpnClauses.size( ) ) {
+            affirm = nonGpnClauses;
+        } // if        
+
 	// Extract a list of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// VariableScopeLink will include a list of variables up-front.
@@ -534,11 +590,142 @@ Handle PatternMatch::do_imply (Handle himplication,
 	impl->implicand = implicand;
 	pme.match(pmc, *varlist, affirm, negate);
 
+
+        HandleSeq validResults;
+        unsigned int j;
+        for( j = 0; j < impl->result_list.size( ); ++j ) {
+            bool validResult = true;
+            for( i = 0; i < gpnClauses.size( ); ++i ) {
+                if ( !isGroundedPredicateNodeTrue
+                     ( gpnClauses[i], 
+                       impl->ground_vars[j] ) ) {
+                    validResult = false;
+                } // if
+            }
+
+            
+            //std::map<Handle, Handle>& vars = impl->ground_vars[ impl->result_list[j] ];
+            //std::cout << "EEE " << TLB::getAtom( impl->result_list[j] )->toString( ) << " (" << validResult << ") " 
+            //          << TLB::getAtom( vars[ atom_space->getHandle( VARIABLE_NODE, "$framePredicateNode") ] )->toString( ) << std::endl;
+           
+            
+            //std::map<Handle, Handle>::const_iterator it;
+            //std::stringstream varsOut;
+            //for( it = vars.begin( ); it != vars.end( ); ++it ) {
+                //varsOut << TLB::getAtom(it->first)->toString( ) << " -> " << TLB::getAtom( it->second)->toString( ) << " | ";
+            //} // for
+            //std::cout << varsOut.str( ) << std::endl;
+
+            if ( validResult ) {
+                validResults.push_back( impl->result_list[j] );
+            } // if
+
+        } // for
+
+        if ( gpnClauses.size( ) > 0 ) {
+            impl->result_list = validResults;
+        } // if
+        
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	Handle gl = atom_space->addLink(LIST_LINK, impl->result_list);
 
 	return gl;
+}
+
+bool PatternMatch::isGroundedPredicateNodeTrue( Handle gpn, const std::map<Handle, Handle>& ground_vars ) 
+{
+    Atom* gpnAtom = TLB::getAtom(gpn);
+    if ( EVALUATION_LINK != gpnAtom->getType( ) ) {
+        logger().error( "%s - GPN must be surrounded by an EvaluationLink",
+                        __FUNCTION__ );
+        return false;
+    } // if
+    Link * evalLink = dynamic_cast<Link *>(gpnAtom);
+    const std::vector<Handle> &evalLinkNodes = evalLink->getOutgoingSet();
+    Atom* predicate = TLB::getAtom( evalLinkNodes[0] );
+    
+    if ( GROUNDED_PREDICATE_NODE != predicate->getType( ) ) {
+        logger().error( "%s - It isn't a GroundedPredicateNode because a GPN node wasn't found",
+                        __FUNCTION__ );
+        return false;
+    } // if
+    
+    Atom* argumentsAtom = TLB::getAtom( evalLinkNodes[1] );
+    if ( LIST_LINK != argumentsAtom->getType( ) ) {
+        logger().error( "%s - The GPN arguments must be surrounded by a ListLink",
+                        __FUNCTION__ );
+        return false;        
+    } // if
+    Link* listLink = dynamic_cast<Link* >( argumentsAtom );
+    
+    const std::vector<Handle> &originalArguments = listLink->getOutgoingSet();
+
+    HandleSeq arguments;
+    unsigned int i;
+    for ( i = 0; i < originalArguments.size( ); ++i ) {
+        if ( VARIABLE_NODE == TLB::getAtom( originalArguments[i] )->getType( ) ) {
+            std::map<Handle,Handle>::const_iterator it = ground_vars.find( originalArguments[i] );
+            Handle ground = ( it != ground_vars.end( ) ? it->second : Handle::UNDEFINED );
+            if ( ground == Handle::UNDEFINED ) {
+                logger().error( "%s - There is no ground for the given variable %s",
+                                __FUNCTION__, TLB::getAtom( originalArguments[i])->toString( ).c_str( ) );
+                return false;
+            } // if
+            logger().info( "%s - Ground variable found %s -> %s",
+                           __FUNCTION__, 
+                           TLB::getAtom( originalArguments[i])->toString( ).c_str( ),
+                           TLB::getAtom( ground )->toString( ).c_str( )
+                           );
+            
+            arguments.push_back( ground );
+        } else {
+            arguments.push_back( originalArguments[i] );
+        } // else
+    } // for
+    
+    Handle argumentsListLink = atom_space->addLink(LIST_LINK, arguments );
+
+    const std::string& schema = dynamic_cast<Node* >( predicate )->getName( );
+    if (0 == schema.compare(0,4,"scm:", 4) ) {
+#ifdef HAVE_GUILE
+        logger().info( "%s - ok it is a Scheme Grounded Predicate. executing...",
+                       __FUNCTION__ );
+        //SchemeEval applier;
+        std::string answer = SchemeEval::instance( ).apply_generic(schema.substr(4), argumentsListLink );
+        
+        boost::trim(answer);
+        
+        logger().info( "%s - executed: %s", __FUNCTION__, answer.c_str( ) );
+        
+        std::stringstream isTrueProgram;
+        isTrueProgram << "(let ((tv %s))\n";
+        isTrueProgram << "  (and (cog-tv? tv ) \n";
+        isTrueProgram << "     (number? (assoc-ref (cog-tv->alist tv) 'mean ))\n";
+        isTrueProgram << "     (> (assoc-ref (cog-tv->alist tv ) 'mean) 0.5 )) )\n";
+        
+        std::string finalProgram = 
+            ( boost::format( isTrueProgram.str( ) ) % answer ).str( );
+        
+        logger().info( "%s - now verifying if the answer is valid or not: %s", 
+                       __FUNCTION__, finalProgram.c_str() );
+        
+        
+        answer = SchemeEval::instance().eval( finalProgram );
+        
+        boost::trim(answer);
+        logger().info( "%s - verified : %s", answer.c_str( ) );                            
+        
+        return ( answer == "#t");
+        
+#endif // HAVE_GUILE 
+    } else {
+        logger().error( "Cant handle other kind of programs than Scheme");
+        return false;
+    } // else
+
+    return false;
+    
 }
 
 /* ================================================================= */
@@ -799,7 +986,9 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 {
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
-	Handle h = inst.instantiate(implicand, var_soln);
+        Handle h = inst.instantiate(implicand, var_soln);
+
+	//Handle h = inst.instantiate(implicand, var_soln);        
 	if (h != Handle::UNDEFINED)
 	{
 		result_list.push_back(h);
@@ -809,6 +998,11 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 		SimpleTruthValue stv(1,0);
 		stv.setConfidence(1);
 		a->setTruthValue(stv);
+
+                std::map<Handle, Handle>::const_iterator it;
+                for( it = var_soln.begin( ); it != var_soln.end( ); ++it ) {
+                    ground_vars[result_list.size()-1][it->first] = it->second;
+                } // for
 	}
 	return false;
 }
