@@ -1,7 +1,7 @@
 /*
  * opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h
  *
- * Copyright (C) 2002-2009 Novamente LLC
+ * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
  * Author(s): Samir Araujo
  *
