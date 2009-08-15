@@ -113,7 +113,7 @@ using std::stringstream;
 using std::endl;
 using std::cout;
 
-typedef std::pair<Rule*, vtree> directProductionArgs;
+typedef pair<Rule*, vtree> directProductionArgs;
 
 struct less_dpargs : public std::binary_function<directProductionArgs, directProductionArgs, bool>
 {
@@ -138,7 +138,7 @@ namespace haxx
 {
 
 using namespace opencog::pln;
-static map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs> DirectProducerCache;
+static map<directProductionArgs, Btr<set<BoundVertex> >, less_dpargs> DirectProducerCache;
 
 }
 
@@ -292,7 +292,7 @@ void BITNode::ForceTargetVirtual(spawn_mode spawning)
     {
         cprintf(2,"ForceTargetVirtual: Arg [%u] (exists).\n", *ph);
         
-        boost::shared_ptr<set<BoundVertex> > directResult(new set<BoundVertex>);
+        Btr<set<BoundVertex> > directResult(new set<BoundVertex>);
         
         /// Though the target was conceived directly, it is under my pre-bindings!
         directResult->insert(BoundVertex(*ph, Btr<bindingsT>(new bindingsT)));
@@ -649,7 +649,7 @@ struct BDRUMUpdater
 
 static int count111=0;
 
-void BITNode::addDirectResult(boost::shared_ptr<set<BoundVertex> > directResult, spawn_mode spawning)
+void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode spawning)
 {
     AtomSpaceWrapper *atw = GET_ASW;
 // If we were to store the results, it would cause inconsistency because we no longer store the prebindings.
@@ -771,10 +771,10 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
     /// \todo Goes over far more child atoms than necessary. Should be made smarter.
     for(vtree::post_order_iterator node = _target->begin_post(); node != _target->end_post(); ++node)
     {
-        if (std::count_if(_target->begin(node), _target->end(node),
-            bind(std::equal_to<Type>(),
-                bind(getTypeFun, bind(&_v2h, _1)),
-                (Type)FW_VARIABLE_NODE ))
+        if (count_if(_target->begin(node), _target->end(node),
+                     bind(std::equal_to<Type>(),
+                          bind(getTypeFun, bind(&_v2h, _1)),
+                          (Type)FW_VARIABLE_NODE ))
             > 1)
         {
             cprintf(-1, "Dis-obeys pool policy:\n");
@@ -1223,16 +1223,16 @@ bool BITNode::CheckForDirectResults()
         return true;
     }
     
-    boost::shared_ptr<set<BoundVertex> > directResult;
+    Btr<set<BoundVertex> > directResult;
     
     if (USE_GENERATOR_CACHE)
     {
         directProductionArgs dp_args(rule, *bound_target);
         
-        map<directProductionArgs, boost::shared_ptr<set<BoundVertex> >, less_dpargs>::iterator ex_it =
+        map<directProductionArgs, Btr<set<BoundVertex> >, less_dpargs>::iterator ex_it =
             haxx::DirectProducerCache.find(dp_args);
         
-        directResult = ((haxx::DirectProducerCache.end() != ex_it)
+        directResult = (haxx::DirectProducerCache.end() != ex_it
                         ? ex_it->second
                         : haxx::DirectProducerCache[dp_args] = rule->attemptDirectProduction(bound_target));
         
@@ -1349,7 +1349,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     removeRecursionFromHandleHandleMap(bv.bindings); */
         }
 
-        std::set<vector<VtreeProvider*> > argVectorSet;
+        set<vector<VtreeProvider*> > argVectorSet;
         // Commented this out, this seems to do nothing... -- Joel
         //int s1 = argVectorSet.empty() ? 0 : argVectorSet.begin()->size();
 
@@ -1361,10 +1361,10 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
 
         BoundVertex next_result;
 
-        for (std::set<vector<VtreeProvider*> >::iterator    a = argVectorSet.begin();
-                                                    a!= argVectorSet.end();
-                                                    a++)
-            if (!a->empty() && (rule->hasFreeInputArity() || a->size() >= rule->getInputFilter().size()))
+        for (set<vector<VtreeProvider*> >::iterator a = argVectorSet.begin();
+             a!= argVectorSet.end(); a++)
+            if (!a->empty() && (rule->hasFreeInputArity() 
+                                || a->size() >= rule->getInputFilter().size()))
             {
                 /// Arg vector size excession prohibited.
 

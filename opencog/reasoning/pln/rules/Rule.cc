@@ -33,9 +33,9 @@ namespace opencog {
 namespace pln {
 
 Rule::Rule(opencog::pln::iAtomSpaceWrapper *_destTable,
-            bool _freeInputArity,
-            bool _composer,
-            std::string _name)
+           bool _freeInputArity,
+           bool _composer,
+           std::string _name)
   : RULE_INPUT_ARITY_MAX(15), freeInputArity(_freeInputArity),
     destTable(_destTable),
     composer(_composer), priority(10.0f), name(_name) 

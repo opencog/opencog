@@ -934,10 +934,10 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
 //}
 
 
-pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
-        bool fresh, bool managed)
+pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
+                                    const TruthValue& tvn,
+                                    bool fresh, bool managed)
 {
-    AtomSpace *a = atomspace;
     pHandle ret;
     HandleSeq hsReal;
     HandleSeq contexts;
@@ -961,18 +961,19 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs, const TruthVal
     return ret;
 }
 
-pHandle AtomSpaceWrapper::addNodeDC(Type t, const string& name, const TruthValue& tvn,
-        bool fresh, bool managed)
+pHandle AtomSpaceWrapper::addNodeDC(Type t, const string& name,
+                                    const TruthValue& tvn,
+                                    bool fresh, bool managed)
 {
-    AtomSpace *a = atomspace;
     // Construct a Node then use addAtomDC
     Node n(t, name, tvn);
     return addAtomDC(n, fresh, managed);
 }
 
-pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, HandleSeq contexts)
+pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
+                                    bool managed, HandleSeq contexts)
 {
-    AtomSpace *a = atomspace;
+    AtomSpace *as = atomspace;
     Handle result;
     pHandle fakeHandle;
     // check if fresh true
@@ -982,10 +983,10 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
         Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
         if (nnn) {
             const Node& node = (const Node&) atom;
-            result = a->getHandle(node.getType(), node.getName());
+            result = as->getHandle(node.getType(), node.getName());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
-                return realToFakeHandle(a->addNode(node.getType(),
+                return realToFakeHandle(as->addNode(node.getType(),
                         node.getName(), node.getTruthValue()),
                         NULL_VERSION_HANDLE);
             }
@@ -995,24 +996,25 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
             //    outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
             //}
             //outgoing = link.getOutgoingSet();
-            result = a->getHandle(link.getType(), link.getOutgoingSet());
+            result = as->getHandle(link.getType(), link.getOutgoingSet());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then add normally
                 bool allNull = true;
                 // if all null context
                 for (HandleSeq::iterator i = contexts.begin();
-                        i != contexts.end();
-                        i++) {
-                    if (atomspace->getName(*i) != rootContext) {
+                     i != contexts.end();
+                     i++) {
+                    if (as->getName(*i) != rootContext) {
                         allNull = false;
 
                     }
                 }
-                result = a->addLink(link.getType(), link.getOutgoingSet(),
-                        TruthValue::TRIVIAL_TV());
+                result = as->addLink(link.getType(), link.getOutgoingSet(),
+                                     TruthValue::TRIVIAL_TV());
                 fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
                 if (allNull) {
-                    a->setTV(result, atom.getTruthValue(), NULL_VERSION_HANDLE);
+                    as->setTV(result, atom.getTruthValue(),
+                              NULL_VERSION_HANDLE);
                     return fakeHandle;
                 } else {
                     printf("Not all contexts of new link are null! Needs to be "
@@ -1048,7 +1050,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
         dummyContexts.insert(vh);
         // vh is now a version handle for a free context
         // for which we can set a truth value
-        a->setTV(result, atom.getTruthValue(), vh);
+        as->setTV(result, atom.getTruthValue(), vh);
 
         // Link <handle,vh> to a long int
         fakeHandle = realToFakeHandle(result,vh);
@@ -1062,18 +1064,19 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
             for (HandleSeq::iterator i = contexts.begin();
                     i != contexts.end();
                     i++) {
-                if (atomspace->getName(*i) != rootContext) {
+                if (as->getName(*i) != rootContext) {
                     allNull = false;
 
                 }
             }
             // Get the existing context link if not all contexts are NULL 
             if (!allNull) {
-                contexts.insert(contexts.begin(),atomspace->getHandle(CONCEPT_NODE, rootContext));
+                contexts.insert(contexts.begin(),
+                                as->getHandle(CONCEPT_NODE, rootContext));
 
-                Handle existingContext = atomspace->getHandle(ORDERED_LINK,contexts);
+                Handle existingContext = as->getHandle(ORDERED_LINK, contexts);
                 if (TLB::isInvalidHandle(existingContext)) {
-                    existingContext = a->addLink(ORDERED_LINK,contexts);
+                    existingContext = as->addLink(ORDERED_LINK,contexts);
                     vh = VersionHandle(CONTEXTUAL,existingContext);
                     dummyContexts.insert(vh);
                 } else {
@@ -1082,11 +1085,11 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, bool managed, Handle
             }
         }
         // add it and let AtomSpace deal with merging it
-        result = a->addRealAtom(atom);
+        result = as->addRealAtom(atom);
         if (vh != NULL_VERSION_HANDLE) {
             // if it's not for the root context, we still have to
             // specify the truth value for that VersionHandle
-            atomspace->setTV(result, atom.getTruthValue(), vh);
+            as->setTV(result, atom.getTruthValue(), vh);
         }
         fakeHandle = realToFakeHandle(result, vh);
         
@@ -2221,9 +2224,6 @@ LOG(4,"Node add ok.");
 *********************************/
 pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
 {
-    //Nil: not used so I comment it out
-    //AtomSpace *as = atomspace;
-
     // The method should be, AFAIK, identical to the one in DirectATW, unless
     // FIM is actually in use.
     

@@ -136,17 +136,20 @@ public:
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
-    virtual BoundVertex compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const=0;
+    virtual BoundVertex compute(const std::vector<Vertex>& h,
+                                pHandle CX = PHANDLE_UNDEFINED) const=0;
 
     //! A computation method on BoundVertex
     //! @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
-    BoundVertex compute(const std::vector<BoundVertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex compute(const std::vector<BoundVertex>& h,
+                        pHandle CX = PHANDLE_UNDEFINED) const;
 
     //! Try to call rule as a direct producer
     virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
 
     //! Just calls compute()
-    BoundVertex operator() (const std::vector<Vertex> h, pHandle CX = PHANDLE_UNDEFINED) const
+    BoundVertex operator() (const std::vector<Vertex> h,
+                            pHandle CX = PHANDLE_UNDEFINED) const
         { return compute(h,CX); }
 
     /** Check validity.

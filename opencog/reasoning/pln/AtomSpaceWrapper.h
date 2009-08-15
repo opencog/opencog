@@ -365,11 +365,33 @@ public:
                     bool managed=true);
     //! Add link, pure virtual
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                            bool fresh=false, bool managed=true) = 0;
+                            bool fresh=false, bool managed=true)=0;
+
+    // helper functions for addLink
+    inline pHandle addLink(Type t, pHandle ha, pHandle hb,
+                           const TruthValue& tvn,
+                           bool fresh=false, bool managed=true)
+    {
+        pHandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        return addLink(t, oset, tvn, fresh, managed);
+    }
+    inline pHandle addLink(Type t, pHandle ha, pHandle hb, pHandle hc,
+                           const TruthValue& tvn,
+                           bool fresh=false, bool managed=true)
+    {
+        pHandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        oset.push_back(hc);
+        return addLink(t, oset, tvn, fresh, managed);
+    }
+
     //! Add node, pure virtual
     virtual pHandle addNode(Type T, const std::string& name,
                             const TruthValue& tvn, bool fresh=false,
-                            bool managed=true) = 0;
+                            bool managed=true)=0;
 
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
@@ -527,21 +549,21 @@ public:
 /** Forwards the requests without normalizing */
 class DirectATW : public AtomSpaceWrapper
 {
-    DirectATW(AtomSpace* a);
+    DirectATW(AtomSpace* as);
 public:
     virtual ~DirectATW() { }
 
-    static DirectATW& getInstance(AtomSpace *a = NULL) {
-        if (a == NULL)
-            a = server().getAtomSpace();
-        static DirectATW* instance = new DirectATW(a);
+    static DirectATW& getInstance(AtomSpace *as = NULL) {
+        if (as == NULL)
+            as = server().getAtomSpace();
+        static DirectATW* instance = new DirectATW(as);
         return *instance;
     }
     
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+                    bool fresh, bool managed=true);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+                    bool fresh, bool managed=true);
     //Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
 
 };

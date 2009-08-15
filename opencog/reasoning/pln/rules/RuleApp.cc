@@ -44,15 +44,15 @@ const vtree& RuleApp::getVtree() const
 
 BoundVertex RuleApp::compute(const vector<Vertex>& h, pHandle CX) const
 {
-	vector<VtreeProvider*>::iterator next_unused_arg;
-
-	vector<VtreeProvider*> vs;
-	Vertices_TO_VtreeProviders(h, back_inserter(vs));
-
-	BoundVertex ret = compute(vs.begin(), vs.end(), next_unused_arg, CX);
-	assert(next_unused_arg == vs.end()); // We don't allow args to remain unused ultimately.
-
-	return ret;
+    vector<VtreeProvider*>::iterator next_unused_arg;
+    
+    vector<VtreeProvider*> vs;
+    Vertices_TO_VtreeProviders(h, back_inserter(vs));
+    
+    BoundVertex ret = compute(vs.begin(), vs.end(), next_unused_arg, CX);
+    assert(next_unused_arg == vs.end()); // We don't allow args to remain unused ultimately.
+    
+    return ret;
 }
 
 BoundVertex RuleApp::compute(pHandle CX) const
@@ -66,18 +66,18 @@ RuleApp::~RuleApp() {
         delete vtp;
 }
 RuleApp::RuleApp(//iAtomSpaceWrapper *_destTable,
-        Rule *_root_rule)
-        :	Rule(_root_rule->destTable, false, true, "Inference Pathway"),
-         result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
+                 Rule *_root_rule)
+    :	Rule(_root_rule->destTable, false, true, "Inference Pathway"),
+        result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
 { 
     if (!_root_rule->hasFreeInputArity())
     { int i = 1; }
     //args.resize(_root_rule->getInputFilter().size());
     args.insert(args.begin(), 
-        (!_root_rule->hasFreeInputArity()
-        ? _root_rule->getInputFilter().size()
-        : 50),
-        (VtreeProviderWrapper*)NULL);
+                (!_root_rule->hasFreeInputArity()
+                 ? _root_rule->getInputFilter().size()
+                 : 50),
+                (VtreeProviderWrapper*)NULL);
 }
 //const* VtreeProvider clone() const { assert(0); }
 
@@ -85,26 +85,24 @@ RuleApp::RuleApp(//iAtomSpaceWrapper *_destTable,
 /// false if arg was already bound. (And assert failure.)
 bool RuleApp::Bind(int arg_i, VtreeProvider* arg) const
 {
-    if (args[arg_i])
-    {
+    if (args[arg_i]) {
         VtreeProviderWrapper* vtw = dynamic_cast<VtreeProviderWrapper*>(args[arg_i]);
-
+        
         pHandle nh = PHANDLE_UNDEFINED;
-        if (!vtw || vtw->val != vtree(nh))
-        {
+        if (!vtw || vtw->val != vtree(nh)) {
             assert(0);
             return false;
         }
     }
-
+    
     args[arg_i] = arg;
     arg_changes_since_last_compute = true;
-
+    
     bool isvtree = (dynamic_cast<VtreeProviderWrapper*>(args[arg_i]) != /*(VtreeProviderWrapper*)*/NULL);
     bool isruleapp = (dynamic_cast<RuleApp*>(args[arg_i]) != /*(VtreeProviderWrapper*)*/NULL);
     assert(isvtree || isruleapp);
-//		assert(dynamic_cast<VtreeProviderWrapper*>(ra) != /*(VtreeProviderWrapper*)*/NULL)
-
+    //		assert(dynamic_cast<VtreeProviderWrapper*>(ra) != /*(VtreeProviderWrapper*)*/NULL)
+    
     return true;
 }
 
@@ -114,9 +112,9 @@ bool RuleApp::Bind(vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) cons
 {
     int i=0;
     
-    for (vector<VtreeProvider*>::iterator	ai2 = args.begin(); ai2!= ai; ++i,++ai2)
-        ;
-
+    for (vector<VtreeProvider*>::iterator ai2 = args.begin();
+         ai2!= ai; ++i,++ai2);
+    
     return Bind(i, arg);
 }
 

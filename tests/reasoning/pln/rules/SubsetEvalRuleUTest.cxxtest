@@ -24,20 +24,94 @@
 
 #include <opencog/reasoning/pln/rules/auxiliary/SubsetEvalRule.h>
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/assign/list_of.hpp>
 
 using namespace opencog;
 using namespace pln;
 
+using boost::lexical_cast;
+using boost::assign::list_of;
+using std::string;
+
+//number of elements used in the test
+const unsigned int ne = 10;
+
+//member link strength of some elements of sub
+const strength_t e0_sub_s = 0.1;
+const strength_t e2_sub_s = 0.5;
+const strength_t e4_sub_s = 0.2;
+const strength_t e5_sub_s = 0.9;
+const strength_t e7_sub_s = 1.0;
+const strength_t e8_sub_s = 0.0;
+
+//member link strength of some elements of super
+const strength_t e1_super_s = 0.2;
+const strength_t e2_super_s = 0.9;
+const strength_t e3_super_s = 0.8;
+const strength_t e6_super_s = 0.4;
+const strength_t e8_super_s = 0.6;
+const strength_t e9_super_s = 0.0;
+
 class SubsetEvalRuleUTest : public CxxTest::TestSuite {
 private:
-    AtomSpaceWrapper* _atw;
+    AtomSpaceWrapper* _asw;
+    pHandle _sub_h;
+    pHandle _super_h;
+
 public:
+
+    // initialize the atom space wrapper with 2 concepts, sub and super,
+    // and elements connected to them by member links
     SubsetEvalRuleUTest() {
+        //instantiate the atom space wrapper
         AtomSpace as;
-        _atw = &DirectATW::getInstance(&as);
+        _asw = &DirectATW::getInstance(&as);
+
+        //add the 2 concept nodes sub and super to compute Subset(sub super)
+        _sub_h = _asw->addNode(CONCEPT_NODE, "sub", TruthValue::DEFAULT_TV());
+        _super_h = _asw->addNode(CONCEPT_NODE, "super", TruthValue::DEFAULT_TV());
+
+        //add the members
+        pHandleSeq ehv;
+        for(unsigned int i = 0; i < ne; i++) {
+            string e_name = string("e") + lexical_cast<string>(i);
+            pHandle e_h = _asw->addNode(NODE, e_name, TruthValue::DEFAULT_TV());
+            ehv.push_back(e_h);
+        }
+
+        //add members of sub
+        _asw->addLink(MEMBER_LINK, ehv[0], _sub_h,
+                      SimpleTruthValue(e0_sub_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[2], _sub_h,
+                      SimpleTruthValue(e2_sub_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[4], _sub_h,
+                      SimpleTruthValue(e4_sub_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[5], _sub_h,
+                      SimpleTruthValue(e5_sub_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[7], _sub_h,
+                      SimpleTruthValue(e7_sub_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[8], _sub_h,
+                      SimpleTruthValue(e8_sub_s, 1.0));
+
+        //add members of super
+        _asw->addLink(MEMBER_LINK, ehv[1], _super_h,
+                      SimpleTruthValue(e1_super_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[2], _super_h,
+                      SimpleTruthValue(e2_super_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[3], _super_h,
+                      SimpleTruthValue(e3_super_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[6], _super_h,
+                      SimpleTruthValue(e6_super_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[8], _super_h,
+                      SimpleTruthValue(e8_super_s, 1.0));
+        _asw->addLink(MEMBER_LINK, ehv[9], _super_h,
+                      SimpleTruthValue(e9_super_s, 1.0));
     }
 
     void testSubsetEvalRuleUTest() {
-        
+        //SubsetEvalRule sser(_asw);
+        //BoundVertex bv = sser.compute(list_of(_sub_h)(_super_h));
+        TS_ASSERT(true);
     }
 };

@@ -81,8 +81,7 @@ Btr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
 {
     vtree target(*outh);
     
-    Btr<std::set<BoundVertex> > ret(new TableGather(target,
-                                                    destTable));
+    Btr<std::set<BoundVertex> > ret(new TableGather(target, destTable));
     
     if (ExpandEvaluationLinks(target, destTable)) {
         TableGather dynamic_lookup(target, destTable);
@@ -91,8 +90,7 @@ Btr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
         
         //      puts("Lookup macros!");
         //      NMPrinter()(NMPrintable(target), -3);
-        Btr<std::set<BoundVertex> > ret(new TableGather(target,
-                                                        destTable));
+        Btr<std::set<BoundVertex> > ret(new TableGather(target, destTable));
         
         /*foreach(const BoundVertex& bv, *ret)
         {

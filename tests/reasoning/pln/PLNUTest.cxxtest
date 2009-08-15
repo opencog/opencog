@@ -123,14 +123,14 @@ struct PLNTest
 
     uint minEvalsOfFittestBIT; //Divided by ten
     uint minExhaustiveEvals; //Use either this one or the prev one
-    PLNTest(    meta _target,
-                TruthValue* _minTV,
-                TruthValue* _maxTV,
-                uint _minEvalsOfFittestBIT,
-                uint _minExhaustiveEvals)
+    PLNTest(meta _target,
+            TruthValue* _minTV,
+            TruthValue* _maxTV,
+            uint _minEvalsOfFittestBIT,
+            uint _minExhaustiveEvals)
         : target(_target), minTV(_minTV), maxTV(_maxTV),
-        minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
-        minExhaustiveEvals(_minExhaustiveEvals)
+          minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
+          minExhaustiveEvals(_minExhaustiveEvals)
     {}
 };
 
@@ -792,12 +792,12 @@ public:
         printf("\nTest inheritance Osama/Abu.\n");
         initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
         maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
-                        NewNode(CONCEPT_NODE, "Osama"),
-                        NewNode(CONCEPT_NODE, "Abu")
-                )),
-                new SimpleTruthValue(0.0001f, getCount(0.90f)),
-                new SimpleTruthValue(0.999f, getCount(1.01f)),
-                40,0);
+                              NewNode(CONCEPT_NODE, "Osama"),
+                              NewNode(CONCEPT_NODE, "Abu")
+                              )),
+                 new SimpleTruthValue(0.0001f, getCount(0.90f)),
+                 new SimpleTruthValue(0.999f, getCount(1.01f)),
+                 40,0);
     }
     
     void testInheritanceMuhummadTerrorist()

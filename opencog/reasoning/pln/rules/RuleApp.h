@@ -81,43 +81,43 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
 struct VtreeProvider
 {
-	virtual const vtree& getVtree() const=0;
+    virtual const vtree& getVtree() const=0;
     virtual ~VtreeProvider() {};
     //virtual const* VtreeProvider clone() const=0;
 };
 
 struct VtreeProviderWrapper : public VtreeProvider
 {
-	vtree val;
-	VtreeProviderWrapper(const vtree& _val) : val(_val) {}
-	VtreeProviderWrapper(const Vertex& _val) : val(vtree(_val)) {}
-	const vtree& getVtree() const { assert(this); return val; }
+    vtree val;
+    VtreeProviderWrapper(const vtree& _val) : val(_val) {}
+    VtreeProviderWrapper(const Vertex& _val) : val(vtree(_val)) {}
+    const vtree& getVtree() const { assert(this); return val; }
     virtual ~VtreeProviderWrapper() {};
-	//const* VtreeProvider clone() const { return new VtreeProviderWrapper(val); }
+    //const* VtreeProvider clone() const { return new VtreeProviderWrapper(val); }
 };
 
 template<typename VTPContainerT, typename OutIterT>
 OutIterT VtreeProviders_TO_BoundVertices(const VTPContainerT& vtps, OutIterT out)
 {
-	foreach(VtreeProvider* vtp, vtps)
-		(*out)++ = BoundVertex(*vtp->getVtree().begin());
-	return out;
+    foreach(VtreeProvider* vtp, vtps)
+        (*out)++ = BoundVertex(*vtp->getVtree().begin());
+    return out;
 }
 
 template<typename BVContainerT, typename OutIterT>
 OutIterT BoundVertices_TO_VtreeProviders(const BVContainerT& bvs, OutIterT out)
 {
-	foreach(const BoundVertex& bv, bvs)
-		(*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(bv.value));
-	return out;
+    foreach(const BoundVertex& bv, bvs)
+        (*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(bv.value));
+    return out;
 }
 
 template<typename VContainerT, typename OutIterT>
 OutIterT Vertices_TO_VtreeProviders(const VContainerT& vs, OutIterT out)
 {
-	foreach(const Vertex& v, vs)
-		(*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(v));
-	return out;
+    foreach(const Vertex& v, vs)
+        (*out)++ = /*Btr<VtreeProvider*>*/(new VtreeProviderWrapper(v));
+    return out;
 }
 
 /**
@@ -138,137 +138,142 @@ OutIterT Vertices_TO_VtreeProviders(const VContainerT& vs, OutIterT out)
 
 class RuleApp : public VtreeProvider, public Rule
 {
-	mutable BoundVertex result;
-	mutable vtree vt_result;
-	mutable bool arg_changes_since_last_compute;
-	mutable std::vector<VtreeProvider*> args;
-	Rule* root_rule;
+    mutable BoundVertex result;
+    mutable vtree vt_result;
+    mutable bool arg_changes_since_last_compute;
+    mutable std::vector<VtreeProvider*> args;
+    Rule* root_rule;
 public:
-	virtual ~RuleApp();
-	RuleApp(Rule *_root_rule);
+    virtual ~RuleApp();
+    RuleApp(Rule *_root_rule);
+    
+    /// Takes ownership of the "arg"
+    /// false if arg was already bound. (And assert failure.)
+    bool Bind(int arg_i, VtreeProvider* arg) const;
+    
+    /// false if arg was already bound.
+    bool Bind(std::vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
+    
+    const vtree& getVtree() const;
 
-	/// Takes ownership of the "arg"
-	/// false if arg was already bound. (And assert failure.)
-	bool Bind(int arg_i, VtreeProvider* arg) const;
+    // From Rule
+    std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	/// false if arg was already bound.
-	bool Bind(std::vector<VtreeProvider*>::iterator ai, VtreeProvider* arg) const;
+    bool validate2(MPs& _args) const { return true; }
 
-	const vtree& getVtree() const;
+    //NO_DIRECT_PRODUCTION;
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh)
+    { 
+        return Btr<std::set<BoundVertex> >(); 
+    }
 
-	// From Rule
-	std::set<MPs> o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    /// For Rule interface.
+    /// This method aborts with assert failure if the RuleApp is called
+    /// with a wrong nr of args.
+    BoundVertex compute(const std::vector<Vertex>& h,
+                        pHandle CX = PHANDLE_UNDEFINED) const;
+    
+    /// Use this when you know that all the args have already been Bound.
+    /// The result is cached so the performance is unproblematic.
+    BoundVertex compute(pHandle CX = PHANDLE_UNDEFINED) const;
+    //{
+    //	vector<VtreeProvider*> dummy_vp;
+    //	return compute(dummy_vp.end(), dummy_vp.end(), CX);
+    //}
+    
+    template<typename IterT>
+    BoundVertex compute(IterT begin, IterT end, pHandle CX = PHANDLE_UNDEFINED) const
+    {
+        IterT next_unused_arg;
+        BoundVertex ret = compute(begin, end, next_unused_arg, CX);
+        assert(next_unused_arg == end); // We don't allow args to remain unused ultimately.
+        return ret;
+    }
 
-	bool validate2				(MPs& _args) const { return true; }
-	//NO_DIRECT_PRODUCTION;
-	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh) { return Btr<std::set<BoundVertex> >(); }
-
-	/// For Rule interface.
-	/// This method aborts with assert failure if the RuleApp is called
-	/// with a wrong nr of args.
-	BoundVertex compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
-
-	/// Use this when you know that all the args have already been Bound.
-	/// The result is cached so the performance is unproblematic.
-	BoundVertex compute(pHandle CX = PHANDLE_UNDEFINED) const;
-	//{
-	//	vector<VtreeProvider*> dummy_vp;
-	//	return compute(dummy_vp.end(), dummy_vp.end(), CX);
-	//}
-
-	template<typename IterT>
-	BoundVertex compute(IterT begin, IterT end, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		IterT next_unused_arg;
-		BoundVertex ret = compute(begin, end, next_unused_arg, CX);
-		assert(next_unused_arg == end); // We don't allow args to remain unused ultimately.
-		return ret;
-	}
-
-	/// Give the VtreeProvider* args in (begin, end). In the nextUnusedArg, we store the iterator
-	/// that points to the first argument, of the given ones, which was not used.
-	/// Note: An argument is not used if that same arg is already bound to a value.
-	template<typename IterT, typename IterT2>
-	BoundVertex compute(IterT begin, IterT end, IterT2& nextUnusedArg, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		std::vector<BoundVertex> bound_args;
-
-		if (begin == end && !arg_changes_since_last_compute)
-		{
-			nextUnusedArg = end;
-			goto out;
-		}
-
-		arg_changes_since_last_compute = false;
-
-		/// Use the given args to bind recursively the open arg slots of the children,
-		/// starting from the left-bottom-most one.
-		/// If my arg_i is already filled in with a RuleApp, I pass the arg list to the RuleApp object.
-		/// If my arg_i is already filled in with a vtree, I try my next arg slot.
-		/// my arg_i is empty, I fill it with the given arg.
-
-		nextUnusedArg = begin;
-
-		for (std::vector<VtreeProvider*>::iterator ai = args.begin();
-				ai != args.end();
-				++ai)
-		{
-			BoundVertex bv;
-			RuleApp* ra;
-
-			if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
-                //A bound a arg is a RuleApp
-				bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
-			else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != NULL)
-                //A bound arg has type VtreeProviderWrapper
-				bv = *((*ai)->getVtree().begin());
-			else  //A bound arg not found
-			{
-				if (nextUnusedArg == end) //No more caller-supplied args available
-					#if FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
-						assert(0); //Not implemented yet
-					#else
-					{
-						if (!root_rule->hasFreeInputArity())
-						{
-							result = BoundVertex(PHANDLE_UNDEFINED);
-							goto out;
-						}
-						else // If no more arg information, and free input arity.
-						{
-							break;
-						}
-					}
-					#endif
-					
-				bv = *(*(nextUnusedArg++))->getVtree().begin();
-			}
-
-			#if !FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
-				if (bv.value == Vertex(PHANDLE_UNDEFINED))
-				{
-					nextUnusedArg = end;
-					result = BoundVertex(PHANDLE_UNDEFINED);
-					goto out;
-				}
-			#endif
-
-			//assert(v2h(bv.value)->isReal());
-			assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
-
-			bound_args.push_back(bv);
-		}
-
-		result = root_rule->compute(bound_args);
-
+    /// Give the VtreeProvider* args in (begin, end). In the nextUnusedArg, we store the iterator
+    /// that points to the first argument, of the given ones, which was not used.
+    /// Note: An argument is not used if that same arg is already bound to a value.
+    template<typename IterT, typename IterT2>
+    BoundVertex compute(IterT begin, IterT end, IterT2& nextUnusedArg, pHandle CX = PHANDLE_UNDEFINED) const
+    {
+        std::vector<BoundVertex> bound_args;
+        
+        if (begin == end && !arg_changes_since_last_compute)
+            {
+                nextUnusedArg = end;
+                goto out;
+            }
+        
+        arg_changes_since_last_compute = false;
+        
+        /// Use the given args to bind recursively the open arg slots of the children,
+        /// starting from the left-bottom-most one.
+        /// If my arg_i is already filled in with a RuleApp, I pass the arg list to the RuleApp object.
+        /// If my arg_i is already filled in with a vtree, I try my next arg slot.
+        /// my arg_i is empty, I fill it with the given arg.
+        
+        nextUnusedArg = begin;
+        
+        for (std::vector<VtreeProvider*>::iterator ai = args.begin();
+             ai != args.end();
+             ++ai)
+            {
+                BoundVertex bv;
+                RuleApp* ra;
+                
+                if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
+                    //A bound a arg is a RuleApp
+                    bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
+                else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != NULL)
+                    //A bound arg has type VtreeProviderWrapper
+                    bv = *((*ai)->getVtree().begin());
+                else  //A bound arg not found
+                    {
+                        if (nextUnusedArg == end) //No more caller-supplied args available
+#if FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
+                            assert(0); //Not implemented yet
+#else
+                        {
+                            if (!root_rule->hasFreeInputArity())
+                                {
+                                    result = BoundVertex(PHANDLE_UNDEFINED);
+                                    goto out;
+                                }
+                            else // If no more arg information, and free input arity.
+                                {
+                                    break;
+                                }
+                        }
+#endif
+                        
+                        bv = *(*(nextUnusedArg++))->getVtree().begin();
+                    }
+                
+#if !FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
+                if (bv.value == Vertex(PHANDLE_UNDEFINED))
+                    {
+                        nextUnusedArg = end;
+                        result = BoundVertex(PHANDLE_UNDEFINED);
+                        goto out;
+                    }
+#endif
+                
+                //assert(v2h(bv.value)->isReal());
+                assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
+                
+                bound_args.push_back(bv);
+            }
+        
+        result = root_rule->compute(bound_args);
+        
         /// This used to be below out, but when args are empty so is
         ///result.value and isReal is false
-		assert(!GET_ASW->isType(boost::get<pHandle>(result.value)));
-out:
-
-
-		return result;
-	}
+        assert(!GET_ASW->isType(boost::get<pHandle>(result.value)));
+    out:
+        
+        
+        return result;
+    }
 };
 
 }} //namespace opencog { namespace pln {
