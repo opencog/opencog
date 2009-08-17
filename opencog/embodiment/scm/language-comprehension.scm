@@ -621,7 +621,21 @@
               (map
                (lambda (semeNode)
                  (set! semeNodes (append semeNodes (list semeNode) ) )
-                 (set! anaphoricSemeNodeStrength (append anaphoricSemeNodeStrength (list (cons semeNode strength ) ) ) )
+                 ; keep the greater strength suggestion
+                 (let ((oldSuggestion (assoc semeNode anaphoricSemeNodeStrength)))
+                   (cond ( (and 
+                            oldSuggestion
+                            (> strength (cdr oldSuggestion) ) 
+                            )
+                           (set! anaphoricSemeNodeStrength (alist-delete semeNode anaphoricSemeNodeStrength ) )
+                           (set! oldSuggestion #f)
+                           ))
+
+                   (if (not oldSuggestion)
+                       (set! anaphoricSemeNodeStrength (append anaphoricSemeNodeStrength (list (cons semeNode strength ) ) ) )
+                       )
+                   
+                   ) ; let                 
                  (set! groundedRulesCounter (append groundedRulesCounter (list (cons semeNode 0 ) ) ) )
                  ) ; lambda
                values
@@ -632,7 +646,7 @@
           ) ; map
 
          (if (not (null? semeNodes))
-             (set! objects (append objects (list (cons win semeNodes))))
+             (set! objects (append objects (list (cons win (delete-duplicates semeNodes )))))
              )
 
          ) ; let
@@ -662,9 +676,6 @@
                          )
                         ; remove those semeNodes that must not be present in the answer
                         (set! objects (filter-objects objects winAndSemes) )
-                        ; filter the objects by their strengths given by the anaphora resolution
-                        ; if there is no anaphoric suggestion, the objects list will remains the same
-                        (set! objects (filter-by-strength objects anaphoricSemeNodeStrength ) )
                         ) ; let*
                  )) ; cond
           )
@@ -675,8 +686,13 @@
      reference-resolution-rules
      )
 
+
     ; filter by the number of satisfied rules
     (set! objects (filter-by-strength objects groundedRulesCounter ) )
+
+    ; filter the objects by their strengths given by the anaphora resolution
+    ; if there is no anaphoric suggestion, the objects list will remains the same
+    (set! objects (filter-by-strength objects anaphoricSemeNodeStrength ) )
     
     ; now apply the latest filter, the distance
     (map
@@ -693,7 +709,9 @@
     solvedReferences
     
     )
+  
 )
+
 
 ; When a sentence containing an imperative verb is parsed
 ; Frames that represents the given command can be identified and then
