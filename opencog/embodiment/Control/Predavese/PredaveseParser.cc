@@ -25,11 +25,11 @@
 #include <fstream>
 #include <opencog/util/files.h>
 #include <opencog/util/StringTokenizer.h>
-#include <opencog/util/PorterStemmer.h>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
+#include "PorterStemmer.h"
 #include "PredaveseStdafx.h"
 #include "Predavese.h"
 #include "PredaveseParser.h"

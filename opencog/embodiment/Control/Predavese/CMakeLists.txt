@@ -3,6 +3,7 @@ IF(NOT WIN32)
 ENDIF(NOT WIN32)
 
 ADD_LIBRARY(Predavese 
+    PorterStemmer.cc
     Predavese.cc
     PredaveseParser.cc
     PredaveseActions.cc
@@ -10,7 +11,6 @@ ADD_LIBRARY(Predavese
 )
 
 TARGET_LINK_LIBRARIES (Predavese
-    util
     ${XERCESC_LIBRARIES}
     WorldWrapper
 )

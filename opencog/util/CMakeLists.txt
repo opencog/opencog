@@ -23,7 +23,6 @@ ADD_LIBRARY(util
 	misc-test
 	mt19937ar
 	platform
-	PorterStemmer
 	StringManipulator
 	StringTokenizer
 	tree
@@ -56,7 +55,6 @@ INSTALL (FILES
 	mt19937ar.h
 	numeric.h
 	platform.h
-	PorterStemmer.h
 	RandGen.h
 	recent_val.h
 	selection.h
