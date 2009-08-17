@@ -22,6 +22,8 @@
  */
 
 #include <vector>
+#include <boost/lexical_cast.hpp>
+
 #include "LearnMessage.h"
 
 #include <opencog/util/StringTokenizer.h>
