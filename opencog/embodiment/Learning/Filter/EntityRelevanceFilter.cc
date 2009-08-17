@@ -27,6 +27,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 
 #include "EntityRelevanceFilter.h"
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>

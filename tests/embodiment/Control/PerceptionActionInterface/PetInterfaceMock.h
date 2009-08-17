@@ -24,6 +24,7 @@
 #define PET_INTERFACE_MOCK_H_
 
 #include "PetInterfaceMock.h"
+#include <opencog/util/misc.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BDTracker.h>
 #include <opencog/embodiment/Learning/behavior/PAIWorldProvider.h>

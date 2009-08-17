@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/misc.h>
 #include <opencog/embodiment/Control/Procedure/BuiltInProcedureRepository.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/PetInterfaceMock.h>

@@ -22,6 +22,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/misc.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/lru_cache.h>
 

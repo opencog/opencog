@@ -22,6 +22,7 @@
 #ifndef IATOMTABLEWRAPPER_H
 #define IATOMTABLEWRAPPER_H
 
+#include <opencog/util/tree.h>
 #include "AtomLookupProvider.h"
 
 namespace opencog {
