@@ -11,7 +11,6 @@ using namespace opencog;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addNode_overloads, addNode, 1, 3)
-// BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addRealAtom_overloads, addRealAtom, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(removeAtom_overloads, removeAtom, 1, 2)
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addLink_overloads, addLink, 1, 11)
 
@@ -25,7 +24,6 @@ void init_AtomSpace_py()
         .def("unregisterBackingStore", &AtomSpace::unregisterBackingStore)*/
         .def("storeAtom", &AtomSpace::storeAtom)
         .def("addNode", &AtomSpace::addNode, addNode_overloads())
-        // .def("addRealAtom", &AtomSpace::addRealAtom, addRealAtom_overloads())
         .def("removeAtom", &AtomSpace::removeAtom,
             removeAtom_overloads())
         .def("fetchAtom", &AtomSpace::fetchAtom)

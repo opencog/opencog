@@ -494,8 +494,10 @@ public:
     }
 
     /**
-     * Add an atom represented by a given handle with an optional
-     * TruthValue object to the Atom Table
+     * DEPRECATED! 
+     * Add an atom an optional TruthValue object to the Atom Table
+     * This is a deprecated function; do not use it in new code,
+     * if at all possible.
      *
      * @param the handle of the Atom to be added
      * @param the TruthValue object to be associated to the added
