@@ -42,9 +42,7 @@
 #include <opencog/atomspace/SpaceServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/misc.h>
 #include <opencog/util/recent_val.h>
-#include <opencog/util/tree.h>
 
 
 namespace opencog
@@ -507,30 +505,6 @@ public:
                        const TruthValue& tvn = TruthValue::NULL_TV());
 
     /**
-     * Add a new atom represented by a tree of Vertex to the
-     * Atom Table.
-     *
-     * @param the tree of Vertex that contains the representation
-     *        of the atom to be added
-     * @param the iterator that points to the Vertex as root of
-     *        the subTree (of the given Tree of Vertex) to be
-     *        added as an Atom is.
-     * @param the TruthValue object to be associated to the added atom
-     * @param a flag to indicate if it does not need to check for
-     *         already existing atoms in AtomTable.
-     * @param managed ???
-     */
-    Handle addAtom(tree<Vertex>& a,
-                   tree<Vertex>::iterator it, const TruthValue& tvn);
-
-    /**
-     * Add a new atom represented by a tree of Vertex to the Atom Table
-     * @param the tree of Vertex representation of the atom to be added
-     * @param the TruthValue object to be associated to the added atom
-     */
-    Handle addAtom(tree<Vertex>& a, const TruthValue& tvn);
-
-    /**
      * Removes an atom from the atomspace
      *
      * @param The Handle of the atom to be removed.
@@ -575,9 +549,6 @@ public:
 
     /** Retrieve the type of a given Handle */
     Type getType(Handle) const;
-
-    /** Retrieve the type of a given Vertex tree */
-    Type getTypeV(const tree<Vertex>& _target) const;
 
     /** Retrieve the TruthValue of a given Handle */
     const TruthValue& getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;

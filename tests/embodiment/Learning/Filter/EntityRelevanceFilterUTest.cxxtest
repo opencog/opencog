@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/misc.h>
+#include <opencog/util/misc-test.h>
 
 /* #include "CompareAtomTreeTemplate.h" */
 #include <opencog/atomspace/AtomSpace.h>
@@ -158,7 +158,7 @@ public:
                             NULL
                            );
 
-        Handle eval1_h = atomSpace->addAtom(*at1, TruthValue::DEFAULT_TV());
+        Handle eval1_h = addAtom(*atomSpace, *at1, TruthValue::DEFAULT_TV());
         TS_ASSERT( eval1_h != Handle::UNDEFINED );
         atomSpace->addTimeInfo(eval1_h, T1);
 
@@ -182,7 +182,7 @@ public:
                             NULL
                            );
 
-        Handle eval2_h = atomSpace->addAtom(*at2, TruthValue::DEFAULT_TV());
+        Handle eval2_h = addAtom(*atomSpace, *at2, TruthValue::DEFAULT_TV());
         atomSpace->addTimeInfo(eval2_h, T2);
 
 
@@ -199,7 +199,7 @@ public:
                             NULL
                            );
 
-        Handle eval3_h = atomSpace->addAtom(*at3, TruthValue::DEFAULT_TV());
+        Handle eval3_h = addAtom(*atomSpace, *at3, TruthValue::DEFAULT_TV());
         atomSpace->addTimeInfo(eval3_h, T1);
     }
 

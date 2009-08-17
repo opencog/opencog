@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <opencog/util/misc-test.h>
 #include <opencog/embodiment/Learning/behavior/BE.h>
 #include <opencog/embodiment/Learning/behavior/BasicWorldProvider.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
@@ -30,6 +31,7 @@ using namespace behavior;
 using namespace Control;
 using namespace opencog;
 using namespace std;
+
 
 class BEUTest : public CxxTest::TestSuite
 {
@@ -97,13 +99,13 @@ public:
                                                                 NULL),
                                                 NULL);
 
-        Handle action1_eval_h = as.addAtom(*action1_at, TruthValue::DEFAULT_TV());
+        Handle action1_eval_h = addAtom(as, *action1_at, TruthValue::DEFAULT_TV());
         Handle t1_h = as.addTimeInfo(action1_eval_h, Temporal(tl1, tu1));
 
-        Handle action2_eval_h = as.addAtom(*action2_at, TruthValue::DEFAULT_TV());
+        Handle action2_eval_h = addAtom(as, *action2_at, TruthValue::DEFAULT_TV());
         Handle t2_h = as.addTimeInfo(action2_eval_h, Temporal(tl2, tu2));
 
-        Handle action3_eval_h = as.addAtom(*action3_at, TruthValue::DEFAULT_TV());
+        Handle action3_eval_h = addAtom(as, *action3_at, TruthValue::DEFAULT_TV());
         Handle t3_h = as.addTimeInfo(action3_eval_h, Temporal(tl3, tu3));
 
         Temporal ex_temp(tl1, tu3);
@@ -156,9 +158,9 @@ public:
                                             makeVirtualAtom(action3_h, NULL),
                                             NULL),
                             NULL);
-        Handle action1_beh_h = as.addAtom(*action1_beh_at, TruthValue::DEFAULT_TV());
-        Handle action2_beh_h = as.addAtom(*action2_beh_at, TruthValue::DEFAULT_TV());
-        Handle action3_beh_h = as.addAtom(*action3_beh_at, TruthValue::DEFAULT_TV());
+        Handle action1_beh_h = addAtom(as, *action1_beh_at, TruthValue::DEFAULT_TV());
+        Handle action2_beh_h = addAtom(as, *action2_beh_at, TruthValue::DEFAULT_TV());
+        Handle action3_beh_h = addAtom(as, *action3_beh_at, TruthValue::DEFAULT_TV());
 
         expected_bd.addPredicate(action1_beh_h, tl1, tu1);
         expected_bd.addPredicate(action2_beh_h, tu1 + BehaviorEncoder::MinPauseTime, tu2);

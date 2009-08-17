@@ -395,13 +395,6 @@ const TruthValue& AtomSpace::getDefaultTV()
     return TruthValue::DEFAULT_TV();
 }
 
-Type AtomSpace::getTypeV(const tree<Vertex>& _target) const
-{
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-    return getType(boost::get<Handle>(*_target.begin()));
-}
-
 Type AtomSpace::getType(Handle h) const
 {
     //fprintf(stdout,"Atom space address: %p\n", this);
@@ -517,41 +510,6 @@ bool AtomSpace::containsVersionedTV(Handle h, VersionHandle vh) const
                  !(((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv());
     }
     return result;
-}
-
-Handle AtomSpace::addAtom(tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
-{
-    // fprintf(stdout,"Atom space address: %p\n", this);
-    // fflush(stdout);
-
-    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
-    Type* head_type_ptr = boost::get<Type>(&(*it));
-    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "AtomSpace::addAtom(): Vertex should be of 'Handle' or 'Type' type.");
-
-    HandleSeq handles;
-
-    if (head_handle_ptr != NULL) {
-        return addRealAtom(*(TLB::getAtom(*head_handle_ptr)), tvn);
-    }
-
-    for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
-        Handle *h_ptr = boost::get<Handle>(&*i);
-
-        if (h_ptr) {
-            handles.push_back(addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
-        } else {
-            handles.push_back(addAtom(a, i, TruthValue::TRIVIAL_TV()));
-        }
-    }
-
-    return addLink(*head_type_ptr, handles, tvn);
-}
-
-Handle AtomSpace::addAtom(tree<Vertex>& a, const TruthValue& tvn)
-{
-    //fprintf(stdout,"Atom space address: %p\n", this);
-    //fflush(stdout);
-    return addAtom(a, a.begin(), tvn);
 }
 
 bool AtomSpace::removeAtom(Handle h, bool recursive)

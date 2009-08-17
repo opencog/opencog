@@ -22,6 +22,7 @@
  */
 
 
+#include <opencog/util/misc-test.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
 
@@ -179,7 +180,7 @@ public:
                             NULL
                            );
 
-        Handle eval_h = atomSpace.addAtom(*at, TruthValue::DEFAULT_TV());
+        Handle eval_h = addAtom(atomSpace, *at, TruthValue::DEFAULT_TV());
         atomSpace.addTimeInfo(eval_h, T2);
         //add is_last_agent_action perceptions
         //for avatar (supposed to be considered by EntropyFilter)
@@ -196,7 +197,7 @@ public:
                             NULL
                            );
 
-        Handle eval_da_h = atomSpace.addAtom(*dat, TruthValue::DEFAULT_TV());
+        Handle eval_da_h = addAtom(atomSpace, *dat, TruthValue::DEFAULT_TV());
         atomSpace.addTimeInfo(eval_da_h, Temporal(T1, T2));
         //for pet (supposed not to be considered by EntropyFilter)
         atom_tree *dapt =
@@ -213,7 +214,7 @@ public:
                             NULL
                            );
 
-        Handle eval_dap_h = atomSpace.addAtom(*dapt, TruthValue::DEFAULT_TV());
+        Handle eval_dap_h = addAtom(atomSpace, *dapt, TruthValue::DEFAULT_TV());
         atomSpace.addTimeInfo(eval_dap_h, Temporal(T1, T2));
         //create the ListLink atoms for goto_obj(stick)
         HandleSeq a1_seq;
