@@ -1834,34 +1834,29 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             addInheritanceLink(std::string("food_bowl"), objectNode, foodBowl);
             addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
 
-
-            //TODO check if must create the atoms only when the objectNode is a
-            //AccessoryNode
-
-            //create the nodes related to the properties of the object:
-            //AccessoryNode "ball_99"
-            //Handle acessoryNode = AtomSpaceUtil::addNode(atomSpace, ACCESSORY_NODE, entityId);
-            //SemeNode "ball_99"
+            
             Handle objSemeNode = atomSpace.addNode( SEME_NODE, internalEntityId);
-            //WordNode "ball"
             Handle objWordNode = atomSpace.addNode( WORD_NODE, entityClass);
 
             //connect the acessory node to the seme node
             HandleSeq referenceLinkOutgoing1;
-            //referenceLinkOutgoing1.push_back(acessoryNode);
+
             referenceLinkOutgoing1.push_back(objectNode);
             referenceLinkOutgoing1.push_back(objSemeNode);
-            atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV( ) );
-            //AtomSpaceUtil::addLink(atomSpace, REFERENCE_LINK, referenceLinkOutgoing1);
+            {
+                Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing1, TruthValue::TRUE_TV( ) );
+                atomSpace.setLTI( referenceLink, 1 );
+            }
 
 
             //connect the seme node to the word node
             HandleSeq referenceLinkOutgoing2;
             referenceLinkOutgoing2.push_back(objSemeNode);
             referenceLinkOutgoing2.push_back(objWordNode);
-            atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing2, TruthValue::TRUE_TV( ) );
-//            Handle link2 = AtomSpaceUtil::addLink(atomSpace, REFERENCE_LINK, referenceLinkOutgoing2);
- //           atomSpace.setTV(link2, SimpleTruthValue(1.0, 1.0));
+            {
+                Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing2, TruthValue::TRUE_TV( ) );
+                atomSpace.setLTI( referenceLink, 1 );
+            }
 
             //material property
             if ( material && strlen(material) ){
@@ -1874,10 +1869,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 referenceLinkOutgoing.push_back(materialConceptNode);
                 referenceLinkOutgoing.push_back(materialWordNode);
 
-                //TODO setar TV de todos os links pra 1.0
-                //Handle link = AtomSpaceUtil::addLink(atomSpace, REFERENCE_LINK, referenceLinkOutgoing);
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ) );
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ) );
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "material",
                                                   SimpleTruthValue( 1.0, 1.0 ), objectNode, materialConceptNode );
@@ -1892,8 +1887,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(textureConceptNode);
                 referenceLinkOutgoing.push_back(textureWordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "texture",
                                                   SimpleTruthValue( 1.0f, 1.0f ), objectNode, textureConceptNode );
@@ -1907,8 +1904,11 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color100ConceptNode);
                 referenceLinkOutgoing.push_back(color100WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
+                    
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 1.0f, 1.0f ), objectNode, color100ConceptNode );
@@ -1921,8 +1921,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color75ConceptNode);
                 referenceLinkOutgoing.push_back(color75WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {                    
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.75f, 1.0f ), objectNode, color75ConceptNode );
@@ -1935,8 +1937,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color50ConceptNode);
                 referenceLinkOutgoing.push_back(color50WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.50f, 1.0f ), objectNode, color50ConceptNode );
@@ -1949,8 +1953,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color25ConceptNode);
                 referenceLinkOutgoing.push_back(color25WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.25f, 1.0f ), objectNode, color25ConceptNode );
@@ -1963,8 +1969,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color15ConceptNode);
                 referenceLinkOutgoing.push_back(color15WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.15f, 1.0f ), objectNode, color15ConceptNode );
@@ -1977,8 +1985,10 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color10ConceptNode);
                 referenceLinkOutgoing.push_back(color10WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.10f, 1.0f ), objectNode, color10ConceptNode );
@@ -1991,14 +2001,15 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 HandleSeq referenceLinkOutgoing;
                 referenceLinkOutgoing.push_back(color5ConceptNode);
                 referenceLinkOutgoing.push_back(color5WordNode);
-                atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                //atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+                {
+                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
+                    atomSpace.setLTI( referenceLink, 1 );
+                }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
                                                   SimpleTruthValue( 0.05f, 1.0f ), objectNode, color5ConceptNode );
             }
 
-            //      logger().info("PAI - processMapInfo(): after addInheritanceLink");
         }
 
         XERCES_CPP_NAMESPACE::XMLString::release(&entityId);
@@ -2007,17 +2018,6 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::release(&ownerId);
 
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
-        //if( detector != NULL)
-        //    XERCES_CPP_NAMESPACE::XMLString::release(&detector);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&remove);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&lengthStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&widthStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&heightStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&edibleStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&drinkableStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&petHomeStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&foodBowlStr);
-//        XERCES_CPP_NAMESPACE::XMLString::release(&waterBowlStr);
     }
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);
