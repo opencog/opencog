@@ -60,7 +60,6 @@ INSTALL (FILES
 	RandGen.h
 	recent_val.h
 	selection.h
-	slist.h
 	StringManipulator.h
 	StringTokenizer.h
 	tree.h
