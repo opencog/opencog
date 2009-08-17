@@ -20,6 +20,7 @@ ADD_LIBRARY(util
 	Logger
 	lru_cache
 	misc
+	misc-test
 	mt19937ar
 	platform
 	PorterStemmer

@@ -26,7 +26,6 @@
  */
 
 #include "misc.h"
-#include "misc-test.h"
 
 using namespace opencog;
 
@@ -77,39 +76,6 @@ tree<Vertex>* opencog::makeVirtualAtom(Vertex vertex, ...)
     va_end(args);
 
     return ret; 
-}
-
-/*
- * These functions appear to be used only by three different tests
- */
-static Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
-{
-    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
-    Type* head_type_ptr = boost::get<Type>(&(*it));
-    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
-
-    HandleSeq handles;
-
-    if (head_handle_ptr != NULL) {
-        return as.addRealAtom(*(TLB::getAtom(*head_handle_ptr)), tvn);
-    }
-
-    for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
-        Handle *h_ptr = boost::get<Handle>(&*i);
-
-        if (h_ptr) {
-            handles.push_back(as.addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
-        } else {
-            handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
-        }
-    }
-
-    return as.addLink(*head_type_ptr, handles, tvn);
-}
-
-Handle opencog::addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& tvn)
-{
-    return addAtomIter(as, a, a.begin(), tvn);
 }
 
 #ifndef WIN32
