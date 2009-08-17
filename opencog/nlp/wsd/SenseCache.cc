@@ -75,13 +75,7 @@ bool SenseCache::find_sense(Handle sense, Handle link)
 void SenseCache::set_similarity(Handle sense_a, Handle sense_b, const TruthValue &tv)
 {
 	// Create a link connecting the two senses.
-	std::vector<Handle> out;
-	out.push_back(sense_a);
-	out.push_back(sense_b);
-	
-	Link slink(SIMILARITY_LINK, out, tv);
-
-	atom_space->addRealAtom(slink);
+	atom_space->addLink(SIMILARITY_LINK, sense_a, sense_b, tv);
 }
 
 /* ============================== END OF FILE ====================== */
