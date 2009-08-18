@@ -1702,6 +1702,11 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
                     texture = value;
                 }
+
+
+                XERCES_CPP_NAMESPACE::XMLString::release(&value);
+                XERCES_CPP_NAMESPACE::XMLString::release(&name);
+
           }// for property
         } // for properties
         
@@ -2022,6 +2027,19 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosOffsetStr);
+
+    delete detector;
+    delete entityClass;
+    delete color100;
+    delete color75;
+    delete color50;
+    delete color25;
+    delete color15;
+    delete color10;
+    delete color5;
+    delete material;
+    delete texture;
+
 
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
     // will eventually remove the atoms that represents the space maps and, this
