@@ -140,11 +140,12 @@ double CartPole::evalNet(ann *net)
 			(0.9*(0.75/(jiggletotal))));
      else nmarkov_fitness=(0.1*(((double) balanced_sum)/1000.0));
 
-#ifndef NO_SCREEN_OUTR
-     cout<<"Balanced:  "<<balanced_sum<<" jiggle: "<<jiggletotal<<" ***"<<endl;
-#endif
+     //cout <<"fitness: " << nmarkov_fitness << endl;
+//#ifndef NO_SCREEN_OUTR
+//     cout<<"Balanced:  "<<balanced_sum<<" jiggle: "<<jiggletotal<<" ***"<<endl;
+//#endif
 
-     return nmarkov_fitness;
+     return nmarkov_fitness * 100000;
    }
    else return (double) steps;
 

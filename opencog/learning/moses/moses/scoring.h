@@ -183,10 +183,14 @@ count_based_scorer(const Scoring& s,
                    int base_count,
                    opencog::RandGen& _rng)
     : score_w(s), score(s),_rep(rep), _base_count(base_count), rng(_rng) { 
-                
+    
     treecache = new opencog::lru_cache< cached_scoring_wrapper<Scoring> >(MOSES_TREE_CACHE_SIZE,score_w);
-            }
+}
 
+    int get_misses() {
+        return treecache->get_number_of_evaluations();
+    }
+    
     combo_tree_score operator()(const eda::instance& inst) const {
 #ifdef DEBUG_INFO
         std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;

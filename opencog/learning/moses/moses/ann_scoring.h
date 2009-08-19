@@ -39,6 +39,25 @@ using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10
 
+struct AnnPole2NVFitnessFunction : unary_function<combo_tree, double> {
+ result_type operator()(argument_type tr) const {
+    bool velocity = false;
+    if (tr.empty())
+        return MIN_FITNESS;
+    tree_transform tt;
+    ann nn = tt.decodify_tree(tr);
+
+    CartPole *the_cart;
+    the_cart = new CartPole(true,velocity);
+    the_cart->nmarkov_long=false;
+    the_cart->generalization_test=false;
+    double fitness = -100000.0+the_cart->evalNet(&nn);
+    delete the_cart; 
+    return fitness;
+ }
+
+};
+
 struct AnnPole2FitnessFunction : unary_function<combo_tree, double> {
  result_type operator()(argument_type tr) const {
     bool velocity = true;
@@ -222,6 +241,26 @@ struct AnnFitnessFunction : unary_function<combo_tree, double> {
 
 namespace moses
 {
+
+struct ann_pole2nv_score {
+   ann_pole2nv_score() { }
+   double operator()(const combo_tree& tr) const {
+      return p2ff(tr);
+   }
+   AnnPole2NVFitnessFunction p2ff;
+};
+
+struct ann_pole2nv_bscore {
+    ann_pole2nv_bscore( ) { }
+
+    behavioral_score operator()(const combo_tree& tr) const {
+        behavioral_score bs(2);
+        bs[0] = -moses::ann_pole2nv_score()(tr);
+        bs[1] = tr.size();
+
+        return bs;
+    }
+};
 
 struct ann_pole2_score {
    ann_pole2_score() { }
