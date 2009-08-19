@@ -5,13 +5,13 @@
 ; BE BROKEN IF YOU DO!  XXXX
 ;
 ; If you think you need this file, you don't; what you probably want is
-; the "opencog/scm/type_constructors.scm" which is gauranteed to have the 
+; the "opencog/scm/type_constructors.scm" which is guaranteed to have the 
 ; correct content.
 ;
 (define (stv mean conf) (cog-new-stv mean conf))
 (define (itv mean conf) (cog-new-itv mean conf))
 (define (ctv mean conf) (cog-new-ctv mean conf))
-;
+
 (define (Node . x)
 	(apply cog-new-node (append (list 'Node) x)))
 (define (Link . x)
@@ -230,3 +230,16 @@
 	(apply cog-new-link (append (list 'InverseHebbianLink) x)))
 (define (SymmetricInverseHebbianLink . x)
 	(apply cog-new-link (append (list 'SymmetricInverseHebbianLink) x)))
+(define (SavingLoadingTestLink . x)
+	(apply cog-new-link (append (list 'SavingLoadingTestLink) x)))
+(define (SavingLoadingTestNode . x)
+	(apply cog-new-node (append (list 'SavingLoadingTestNode) x)))
+(define (AnchorNode . x)
+        (apply cog-new-node (append (list 'AnchorNode) x)))
+(define (SemeNode . x)
+        (apply cog-new-node (append (list 'SemeNode) x)))
+(define (TypedVariableLink . x)
+        (apply cog-new-link (append (list 'TypedVariableLink) x)))
+(define (VariableTypeNode . x)
+        (apply cog-new-node (append (list 'VariableTypeNode) x)))
+
