@@ -2023,22 +2023,24 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::release(&ownerId);
 
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
+
+        delete detector;
+        delete entityClass;
+        delete color100;
+        delete color75;
+        delete color50;
+        delete color25;
+        delete color15;
+        delete color10;
+        delete color5;
+        delete material;
+        delete texture;
+
     }
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosYStr);
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosOffsetStr);
 
-    delete detector;
-    delete entityClass;
-    delete color100;
-    delete color75;
-    delete color50;
-    delete color25;
-    delete color15;
-    delete color10;
-    delete color5;
-    delete material;
-    delete texture;
 
 
     // TODO: Check if this is really needed. It seems ImportanceDecayAgent
