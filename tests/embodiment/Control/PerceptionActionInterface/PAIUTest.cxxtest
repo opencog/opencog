@@ -1494,7 +1494,7 @@ public:
 
     }
 
-    void testProcesstPVPMessageWithScheme(){
+    void testProcessPVPMessageWithScheme(){
         printf("testProcessPVPMessageWithScheme\n");
         HandleSeq toUpdateHandles;
         config(Control::EmbodimentConfig::embodimentCreateInstance, true);
@@ -1510,10 +1510,7 @@ public:
         //AtomSpace atomSpace;
         AtomSpace *atomSpace = cogserver.getAtomSpace();
 
-        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/type_constructors.scm");
-        TSM_ASSERT_EQUALS("Failed to load type global opencog definitions", 0, rc);
-
-        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);

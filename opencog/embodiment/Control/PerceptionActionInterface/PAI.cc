@@ -1549,7 +1549,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::DOMNodeList * propertiesList = blipElement->getElementsByTagName(tag);
 
         // printf("Properties List: %d\n",propertiesList->getLength());
-        char* detector;
+        std::string detector="";
         bool objRemoval=false;
         bool isObjectInsidePetFov=false;
         double length=0.0;
@@ -1562,16 +1562,16 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         bool foodBowl=false;
         bool waterBowl=false;
 
-        const char* entityClass="";
-        const char* color100="";
-        const char* color75="";
-        const char* color50="";
-        const char* color25="";
-        const char* color15="";
-        const char* color10="";
-        const char* color5="";
-        const char* material="";
-        const char* texture="";
+        std::string entityClass="";
+        std::string color100="";
+        std::string color75="";
+        std::string color50="";
+        std::string color25="";
+        std::string color15="";
+        std::string color10="";
+        std::string color5="";
+        std::string material="";
+        std::string texture="";
         bool isToy=false;
 
         for (unsigned int j = 0; j < propertiesList->getLength(); j++) {
@@ -1601,7 +1601,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 // but sometimes on other avatars or objects (such as structures).
                 // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
                 if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
-                    detector = value;
+                    detector = strdup(value);
                 }
 
                 if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
@@ -1656,36 +1656,36 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
                 //entity class
                 if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
-                    entityClass = value;
+                    entityClass = strdup(value);
                 }
 
                 //color 100%
                 if( strcmp(name, COLOR100_ATTRIBUTE) == 0 ){
-                    color100 = value;
+                    color100 = strdup(value);
                 }
                 //color 75%
                 if( strcmp(name, COLOR75_ATTRIBUTE) == 0 ){
-                    color75 = value;
+                    color75 = strdup(value);
                 }
                 //color 50%
                 if( strcmp(name, COLOR50_ATTRIBUTE) == 0 ){
-                    color50 = value;
+                    color50 = strdup(value);
                 }
                 //color 25%
                 if( strcmp(name, COLOR25_ATTRIBUTE) == 0 ){
-                    color25 = value;
+                    color25 = strdup(value);
                 }
                 //color 15%
                 if( strcmp(name, COLOR15_ATTRIBUTE) == 0 ){
-                    color15 = value;
+                    color15 = strdup(value);
                 }
                 //color 10%
                 if( strcmp(name, COLOR10_ATTRIBUTE) == 0 ){
-                    color10 = value;
+                    color10 = strdup(value);
                 }
                 //color 5%
                 if( strcmp(name, COLOR5_ATTRIBUTE) == 0 ){
-                    color5 = value;
+                    color5 = strdup(value);
                 }
                 
                 // is toy
@@ -1695,12 +1695,12 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
  
                 //material
                 if( strcmp(name, MATERIAL_ATTRIBUTE) == 0 ){
-                    material = value;
+                    material = strdup(value);
                 }
  
                 //texture
                 if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
-                    texture = value;
+                    texture = strdup(value);
                 }
 
 
@@ -1864,8 +1864,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
 
             //material property
-            if ( material && strlen(material) ){
-                printf("Material found: %s\n",material);
+            if ( material.length() > 0 ){
+                printf("Material found: %s\n",material.c_str());
                 
                 Handle materialWordNode = atomSpace.addNode( WORD_NODE, material );
                 Handle materialConceptNode = atomSpace.addNode( CONCEPT_NODE, material );
@@ -1885,8 +1885,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
 
              //texture property
-            if ( texture && strlen(texture) ){
-                printf("Texture found: %s\n",texture);
+            if ( texture.length() ){
+                printf("Texture found: %s\n",texture.c_str());
                 Handle textureWordNode = atomSpace.addNode( WORD_NODE, texture);
                 Handle textureConceptNode = atomSpace.addNode( CONCEPT_NODE, texture);
                 HandleSeq referenceLinkOutgoing;
@@ -1902,8 +1902,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
             
               //color 100% property
-            if ( color100 && strlen(color100) ){
-                printf("Color 100 found: %s\n",color100);
+            if ( color100.length() ){
+                printf("Color 100 found: %s\n",color100.c_str());
                 Handle color100WordNode = atomSpace.addNode( WORD_NODE, color100);
                 Handle color100ConceptNode = atomSpace.addNode( CONCEPT_NODE, color100);
                 HandleSeq referenceLinkOutgoing;
@@ -1920,7 +1920,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
             
                //color 75% property
-            if ( color75 && strlen(color75) ){
+            if ( color75.length() ){
                 Handle color75WordNode = atomSpace.addNode( WORD_NODE, color75);
                 Handle color75ConceptNode = atomSpace.addNode( CONCEPT_NODE, color75);
                 HandleSeq referenceLinkOutgoing;
@@ -1936,7 +1936,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
 
             //color 50% property
-            if ( color50 && strlen(color50) ){
+            if ( color50.length() ){
                 Handle color50WordNode = atomSpace.addNode( WORD_NODE, color50);
                 Handle color50ConceptNode = atomSpace.addNode( CONCEPT_NODE, color50);
                 HandleSeq referenceLinkOutgoing;
@@ -1952,7 +1952,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
  
             //color 25% property
-            if ( color25 && strlen(color25) ){
+            if ( color25.length() ){
                 Handle color25WordNode = atomSpace.addNode( WORD_NODE, color25);
                 Handle color25ConceptNode = atomSpace.addNode( CONCEPT_NODE, color25);
                 HandleSeq referenceLinkOutgoing;
@@ -1968,7 +1968,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
  
             //color 15% property
-            if ( color15 && strlen(color15) ){
+            if ( color15.length() ){
                 Handle color15WordNode = atomSpace.addNode( WORD_NODE, color15);
                 Handle color15ConceptNode = atomSpace.addNode( CONCEPT_NODE, color15);
                 HandleSeq referenceLinkOutgoing;
@@ -1984,7 +1984,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
          
             //color 10% property
-            if ( color10 && strlen(color10) ){
+            if ( color10.length() ){
                 Handle color10WordNode = atomSpace.addNode( WORD_NODE, color10);
                 Handle color10ConceptNode = atomSpace.addNode( CONCEPT_NODE, color10);
                 HandleSeq referenceLinkOutgoing;
@@ -2000,7 +2000,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             }
 
             //color 5% property
-            if ( color5 && strlen(color5) ){
+            if ( color5.length() ){
                 Handle color5WordNode = atomSpace.addNode( WORD_NODE, color5);
                 Handle color5ConceptNode = atomSpace.addNode( CONCEPT_NODE, color5);
                 HandleSeq referenceLinkOutgoing;
@@ -2024,6 +2024,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
         XERCES_CPP_NAMESPACE::XMLString::release(&timestamp);
 
+        /*
         delete detector;
         delete entityClass;
         delete color100;
@@ -2035,6 +2036,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         delete color5;
         delete material;
         delete texture;
+        */
 
     }
     XERCES_CPP_NAMESPACE::XMLString::release(&globalPosXStr);
