@@ -169,34 +169,17 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
                                int n, opencog::RandGen& rng)
  {
      size_t begin = fs.contin_to_raw_idx(it.idx());
-     size_t end = begin + fs.contin()[it.idx()].depth;
      cout << "idx = " << it.idx() <<endl;
-    
-     size_t current = begin;
-     eda::disc_t temp_raw;
-     cout << " current = " << current << endl;
-     cout << " end = " << end << endl;
-     // get the number of raw code for contin before the first *Stop*
-     for (;current != end;) {
-         temp_raw =fs.get_raw(inst, current);
-         cout << "temp_raw = " << temp_raw << endl;
-         if (temp_raw ==  eda::field_set::contin_spec::Left ||
-             temp_raw ==  eda::field_set::contin_spec::Right) {
-             ++current;
-         } else if (temp_raw == eda::field_set::contin_spec::Stop) {
-             ++current;
-             break;
-         }
-         cout << " current = " << current << endl;
-     }
-     cout << "begin = " << begin << endl;
-     cout << "current = " << current << endl;
+
+     size_t num = fs.get_num_before_stop(inst, it.idx());
+     cout << "num of Left and Right befor Stop:" << num << endl;
      // Here the lazy_random_selector make sure it will generate the different
      // random number , so we could change the distance one at one time. We need
      // do it n times.
-     opencog::lazy_random_selector select(current - begin, rng);
+     // opencog::lazy_random_selector select(current - begin, rng);
+     eda::disc_t temp_raw;
+     opencog::lazy_random_selector select(num + 1, rng);
      for( int i = 1; i <= n; i++) {
-         //opencog::lazy_random_selector select(current - begin, rng);
          size_t r = select();
          temp_raw = fs.get_raw(inst,begin + r);
 
@@ -209,7 +192,6 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
              //         after the continuous 'Stop'. it is not implemented correctly for 
              //         the reason of lazy_random_selector maybe generator the same random number.
              //         But it should work correctly when the distance is equal to 1.
-             // current++; 
              fs.set_raw(inst, begin + r, rng.randbool() ?
                         eda::field_set::contin_spec::Left:
                         eda::field_set::contin_spec::Right);
@@ -244,7 +226,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
     cout << "contin size:"<< fs.n_contin() << endl;
     cout << "Sampling : " << sample_size << endl;
 
-    int dim = fs.n_bits() + fs.n_disc() + fs.n_contin();
+    int dim = fs.n_bits() + fs.n_disc() + fs.contin().size();
 
 
     dorepeat(sample_size) {

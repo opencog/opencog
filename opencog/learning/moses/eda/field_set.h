@@ -337,6 +337,26 @@ struct field_set {
             raw_idx += it->depth;
         return raw_idx;
     }
+    size_t get_num_before_stop(const instance& inst, size_t idx) const
+    {
+        size_t raw_begin = contin_to_raw_idx(idx);
+        size_t raw_end = raw_begin + _contin[idx].depth;
+        size_t current = raw_begin;
+        disc_t temp_raw;
+        std::cout << " current = " << current << std::endl;
+        std::cout << " end = " << raw_end << std::endl;
+        // get the number of raw code for contin before the first *Stop*
+        for (;current != raw_end;) {
+            temp_raw = get_raw(inst, current);
+            if (temp_raw ==  contin_spec::Left ||
+                temp_raw ==  contin_spec::Right) {
+                ++current;
+            } else if (temp_raw == eda::field_set::contin_spec::Stop) {
+                break;
+            }
+        }
+        return current;
+    }
 
 protected:
     vector<field> _fields;
