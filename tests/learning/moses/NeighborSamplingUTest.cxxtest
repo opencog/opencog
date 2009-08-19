@@ -154,11 +154,11 @@ public:
             TS_ASSERT(distance == sampled_max_distance);
             TS_ASSERT(distance == sampled_min_distance);
         }
-        /*        
+               
         // 3. test the contin_spec
         {
             distance = 1;
-            sample_size = 8;
+            sample_size = 1;
             fs_size = 2;
             
             field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
@@ -168,7 +168,7 @@ public:
             eda::randomize(fs, center_inst, rng);
             
             cout << "the initial randomize instance:\n"
-                 << fs.stream(center_inst) << endl;
+                 << fs.stream_raw(center_inst) << endl;
             
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
@@ -188,8 +188,7 @@ public:
             TS_ASSERT(distance == sampled_max_distance);
             TS_ASSERT(distance == sampled_min_distance);
         }
-        */
-    }
+     }
 
 
     void test_generate_all_in_neighborhood() 
