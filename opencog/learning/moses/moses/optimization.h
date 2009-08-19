@@ -34,6 +34,7 @@
 #include <opencog/util/selection.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_assert.h>
 
 #define MAX_DISTANCE_FROM_EXEMPLAR 5
 #define FRACTION_OF_REMAINING     10
@@ -153,8 +154,8 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
  * It generates the contin neighbor with the haming distance from 
  * the given instance.For examples, if the contin[it.idx()] is encoded
  * with depth = 4,like (L R S S), so the neighbors with distance = 1 of it
- * are (R L S S), (L L S S),(L R L S) and (L R R S). And we randomly chose
- * one of them to return.
+ * are (R R S S), (L L S S),(L R L S),(L S S S) and (L R R S). And we 
+ * randomly chose one of them to return.
  * 
  * @param fs   deme
  * @param inst the instance will be modified is contin encoded with distance
@@ -233,11 +234,9 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                                  int sample_size, Out out, opencog::RandGen& rng,
                                  const eda::instance & center_inst )
 {
-    opencog::cassert(TRACE_INFO ,
-                     n > 0 && sample_size > 0,
-                     "Please Make sure the distance and sample_size should be great than 0");
-    opencog::cassert(TRACE_INFO,
-                     center_inst.size() == fs.packed_width(),
+    OC_ASSERT( n > 0 && sample_size > 0,
+               "Please Make sure the distance and sample_size should be great than 0");
+    OC_ASSERT( center_inst.size() == fs.packed_width(),
                      "Please make sure that the center_inst have the same size with the field_set");
 
     cout << "bits size: " << fs.n_bits() << endl;
@@ -305,9 +304,8 @@ template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, int n,
                               int sample_size, Out out, opencog::RandGen& rng)
 {
-    opencog::cassert(TRACE_INFO ,
-                     n > 0 && sample_size > 0,
-                     "Please Make sure the distance and sample_size should be great than 0");
+    OC_ASSERT( n > 0 && sample_size > 0,
+               "Please Make sure the distance and sample_size should be great than 0");
 
     eda::instance inst(fs.packed_width());
 
@@ -339,8 +337,8 @@ template<typename Out>
     void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out, 
                                       const eda::instance& center_inst )
 {
-    opencog::cassert(TRACE_INFO, n > 0, "the distance should be great than 0");
-    opencog::cassert(TRACE_INFO, center_inst.size() == fs.packed_width(),
+    OC_ASSERT( n > 0, "the distance should be great than 0");
+    OC_ASSERT( center_inst.size() == fs.packed_width(),
                      " the size of center_instance should be equal to the width of fs");
 
     eda::instance inst(center_inst);
@@ -363,7 +361,7 @@ template<typename Out>
     void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
                                      
 {
-    opencog::cassert(TRACE_INFO, n > 0, "the distance should be great than 0");
+    OC_ASSERT( n > 0, "the distance should be great than 0");
 
     eda::instance inst(fs.packed_width());
 
@@ -563,8 +561,8 @@ struct univariate_optimization {
                                          rng),
                     logger, rng);
         } else { //truncation selection
-            OC_ASSERT(TRACE_INFO, false,
-                             "Trunction selection not implemented. Tournament should be used instead.");
+            OC_ASSERT( false,
+                       "Trunction selection not implemented. Tournament should be used instead.");
             return 42;
             /*
             return optimize(deme,n_select,n_generate,args.max_gens,score,
@@ -933,7 +931,7 @@ struct sliced_iterative_hillclimbing {
      
      double cooling_schedule(double t)
      { 
-         opencog::cassert(TRACE_INFO, t > 0, "t should greater than 0");
+         OC_ASSERT( t > 0, "t should greater than 0");
          //return (double) init_temp / std::log(1.0 + t); 
          return (double) init_temp / (1.0 + t);
      }

@@ -16,7 +16,7 @@ public:
                                          const eda::instance& center_inst) 
     {
         eda::field_set fs = deme.fields();
-        opencog::cassert(TRACE_INFO, center_inst.size() == fs.packed_width(),
+        OC_ASSERT( center_inst.size() == fs.packed_width(),
                          "Please make sure the given center_inst have the "
                          "same size with field_set's width");
         eda::instance inst_temp(center_inst);
@@ -257,7 +257,7 @@ public:
         
         eda::instance new_inst(inst);
         
-        eda::field_set::contin_iterator it = fs.begin_contin(inst) + rng.randint(depth -1);
+        eda::field_set::contin_iterator it = fs.begin_contin(inst) + rng.randint(4);
         cout << "before generate:" << fs.stream_raw(inst) << endl;
         moses::generate_contin_neighbor(fs, new_inst, it, distance, rng);
         cout << "after generate:" << fs.stream_raw(new_inst) << endl;
