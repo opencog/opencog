@@ -1601,7 +1601,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                 // but sometimes on other avatars or objects (such as structures).
                 // The detector boolean simply means that the blip indicated was the one that the object reported on itself.     
                 if( strcmp(name, DETECTOR_ATTRIBUTE) == 0 ){
-                    detector = strdup(value);
+                    detector = value;
                 }
 
                 if( strcmp(name, REMOVE_ATTRIBUTE) == 0 ){
@@ -1656,36 +1656,36 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
 
                 //entity class
                 if( strcmp(name, ENTITY_CLASS_ATTRIBUTE) == 0 ){
-                    entityClass = strdup(value);
+                    entityClass = value;
                 }
 
                 //color 100%
                 if( strcmp(name, COLOR100_ATTRIBUTE) == 0 ){
-                    color100 = strdup(value);
+                    color100 = value;
                 }
                 //color 75%
                 if( strcmp(name, COLOR75_ATTRIBUTE) == 0 ){
-                    color75 = strdup(value);
+                    color75 = value;
                 }
                 //color 50%
                 if( strcmp(name, COLOR50_ATTRIBUTE) == 0 ){
-                    color50 = strdup(value);
+                    color50 = value;
                 }
                 //color 25%
                 if( strcmp(name, COLOR25_ATTRIBUTE) == 0 ){
-                    color25 = strdup(value);
+                    color25 = value;
                 }
                 //color 15%
                 if( strcmp(name, COLOR15_ATTRIBUTE) == 0 ){
-                    color15 = strdup(value);
+                    color15 = value;
                 }
                 //color 10%
                 if( strcmp(name, COLOR10_ATTRIBUTE) == 0 ){
-                    color10 = strdup(value);
+                    color10 = value;
                 }
                 //color 5%
                 if( strcmp(name, COLOR5_ATTRIBUTE) == 0 ){
-                    color5 = strdup(value);
+                    color5 = value;
                 }
                 
                 // is toy
@@ -1695,12 +1695,12 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
  
                 //material
                 if( strcmp(name, MATERIAL_ATTRIBUTE) == 0 ){
-                    material = strdup(value);
+                    material = value;
                 }
  
                 //texture
                 if( strcmp(name, TEXTURE_ATTRIBUTE) == 0 ){
-                    texture = strdup(value);
+                    texture = value;
                 }
 
 
