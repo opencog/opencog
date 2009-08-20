@@ -178,25 +178,50 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
      // do it n times.
      // opencog::lazy_random_selector select(current - begin, rng);
      eda::disc_t temp_raw;
-     opencog::lazy_random_selector select(num + 1, rng);
+     //     opencog::lazy_random_selector select(num + 1, rng);
      for( int i = 1; i <= n; i++) {
+         // NOTICE: here we let the lazy_random_selector to change dynamiclly,
+         //         but it will generate the same random ,so it needs to be fixed.
+         opencog::lazy_random_selector select(num + 1, rng);
          size_t r = select();
+         cout << "num = " << num << " r= " << r <<endl;
          temp_raw = fs.get_raw(inst,begin + r);
-         //NOTICE: if the temp_raw is the last non-stop, we could change it to
-         //        *Stop*.
+         //FIXME: if the temp_raw is the last non-stop, we could change it to
+         //       *Stop*. But  when the distance greater than 1, maybe it will 
+         //       change the first time and it will change back the second time.
+         //       but the distance won't change. Now,it works for the distance = 1.
+
 
          if (temp_raw == eda::field_set::contin_spec::Left ) {
-             fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
+             if( r + 1 == num) {
+                 fs.set_raw(inst, begin + r, rng.randbool() ?
+                            eda::field_set::contin_spec::Right :
+                            eda::field_set::contin_spec::Stop);
+                 if(fs.get_raw(inst, begin + r) == 
+                    eda::field_set::contin_spec::Stop)
+                     num --;
+             } 
+             else             
+                 fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
          } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
-             fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
+             if( r + 1 == num) {
+                 fs.set_raw(inst, begin + r, rng.randbool() ?
+                            eda::field_set::contin_spec::Left :
+                            eda::field_set::contin_spec::Stop);
+                 if(fs.get_raw(inst, begin + r) == 
+                    eda::field_set::contin_spec::Stop)
+                     num --;
+             } 
+             else
+                 fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
          } else {
              //FIXME: if it is the last 0 ,shall we change it?
              fs.set_raw(inst, begin + r, rng.randbool() ?
                         eda::field_set::contin_spec::Left:
                         eda::field_set::contin_spec::Right);
-             // num ++;
-             
+             num ++;
          }
+         cout << "The " << i << " time  generate :" << fs.stream_raw(inst) << endl;
      }
  }
 
