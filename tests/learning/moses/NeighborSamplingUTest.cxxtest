@@ -246,11 +246,11 @@ public:
     
     void test_generate_contin_neighbor()
     {
-        int distance = 2;
-        int depth = 4;
+        int distance = 3;
+        int depth = 8;
         int rand_seed = clock();
         opencog::MT19937RandGen rng(rand_seed);
-        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), 5);
+        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), 4);
         eda::instance inst(fs.packed_width());
         eda::randomize(fs, inst, rng);
         

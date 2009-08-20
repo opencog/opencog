@@ -172,7 +172,7 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
      cout << "idx = " << it.idx() <<endl;
 
      size_t num = fs.get_num_before_stop(inst, it.idx());
-     cout << "num of Left and Right befor Stop:" << num << endl;
+     cout << "num of Left and Right before Stop:" << num << endl;
      // Here the lazy_random_selector make sure it will generate the different
      // random number , so we could change the distance one at one time. We need
      // do it n times.
@@ -182,19 +182,20 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
      for( int i = 1; i <= n; i++) {
          size_t r = select();
          temp_raw = fs.get_raw(inst,begin + r);
+         //NOTICE: if the temp_raw is the last non-stop, we could change it to
+         //        *Stop*.
 
          if (temp_raw == eda::field_set::contin_spec::Left ) {
              fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
          } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
              fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
          } else {
-             // NOTICE: the 'current++;' is used for changing 'Stop' to 'Left' or 'Right'
-             //         after the continuous 'Stop'. it is not implemented correctly for 
-             //         the reason of lazy_random_selector maybe generator the same random number.
-             //         But it should work correctly when the distance is equal to 1.
+             //FIXME: if it is the last 0 ,shall we change it?
              fs.set_raw(inst, begin + r, rng.randbool() ?
                         eda::field_set::contin_spec::Left:
                         eda::field_set::contin_spec::Right);
+             // num ++;
+             
          }
      }
  }
@@ -224,8 +225,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
     cout << "bits size: " << fs.n_bits() << endl;
     cout << "disc size: " << fs.n_disc() << endl;
     cout << "contin size:"<< fs.n_contin() << endl;
-    cout << "Sampling : " << sample_size << endl;
-
+   
     int dim = fs.n_bits() + fs.n_disc() + fs.contin().size();
 
 
@@ -233,7 +233,7 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
 
         eda::instance new_inst(center_inst);
         opencog::lazy_random_selector select(dim, rng);
-
+       
         for (int i = 1;i <= n;) {
             size_t r = select();
             eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
@@ -260,11 +260,12 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
                     *itd = temp;
                 i++;
             } else if ( r >= (fs.n_bits() + fs.n_disc())) {
-                cout << "i = " << i << "  r = " << r << endl;
+                //cout << "i = " << i << "  r = " << r << endl;
                 itc += r - fs.n_bits() - fs.n_disc();
                 generate_contin_neighbor(fs, new_inst, itc, 1, rng);                
-            }
-            
+                i++;
+            }            
+                                    
         }
 
         *out++ = new_inst;

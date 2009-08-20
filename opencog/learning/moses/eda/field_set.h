@@ -337,14 +337,21 @@ struct field_set {
             raw_idx += it->depth;
         return raw_idx;
     }
+    /**
+     *  Get number of non-stop in the contin encode at the idx-th
+     *  contin. For instance, the inst is {LRSSRLLS} of two contin_spec
+     *  with the depth 4. So if the idx = 1, then it will return 3 since
+     *  there are one 'R' and 2 'L's before the 'S'(stop).if the idx = 0,
+     *  then, 2 will be returned.
+     */
     size_t get_num_before_stop(const instance& inst, size_t idx) const
     {
         size_t raw_begin = contin_to_raw_idx(idx);
         size_t raw_end = raw_begin + _contin[idx].depth;
         size_t current = raw_begin;
         disc_t temp_raw;
-        std::cout << " current = " << current << std::endl;
-        std::cout << " end = " << raw_end << std::endl;
+        std::cout << " raw_begin = " << raw_begin << std::endl;
+        std::cout << " raw_end  = " << raw_end << std::endl;
         // get the number of raw code for contin before the first *Stop*
         for (;current != raw_end;) {
             temp_raw = get_raw(inst, current);
@@ -355,7 +362,7 @@ struct field_set {
                 break;
             }
         }
-        return current;
+        return current - raw_begin;
     }
 
 protected:
