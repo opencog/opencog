@@ -171,10 +171,9 @@ void field_set::build_spec(const spec& s, size_t n)
             _nbool += n;
     } else if (const contin_spec* c = boost::get<contin_spec>(&s)) {
         //depth must be 2^n
-        OC_ASSERT(
-                         c->depth == opencog::next_power_of_two(c->depth),
-                         "depth must be 2^n and it is %d", 
-                         c->depth); 
+        OC_ASSERT(c->depth == opencog::next_power_of_two(c->depth),
+                  "depth must be 2^n and it is %d", 
+                  c->depth); 
         //all have arity of 3 (left, right, or stop) and hence are 2 wide
         size_t base = back_offset(), width = 2;
         dorepeat(n*c->depth) {
@@ -189,7 +188,7 @@ void field_set::build_spec(const spec& s, size_t n)
         size_t base = back_offset(), width = opencog::nbits_to_pack(o->branching);
         size_t total_width = size_t((width * o->depth - 1) /
                                     bits_per_packed_t + 1) * bits_per_packed_t;
-
+        
         dorepeat(n) {
             dorepeat(o->depth) {
                 _fields.push_back(field(width, base / bits_per_packed_t,

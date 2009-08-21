@@ -442,6 +442,8 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
             // *itd = 0;     // commented by xiaohui for the given center instance
                              // but not the default instance value equals to 0
             // recursive call, moved for one position
+            cout << "move forword:\n" << "\t n=" << n <<"\tstarting_index = "
+                 << starting_index << endl;
             vary_n_knobs(fs, inst, n, starting_index + 1, out);
             // recover after the recursive calls
             inst = current;
@@ -455,6 +457,9 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
                     *itd = 0;
                 else
                     *itd = i;
+                cout << "change value:\n" << "\t n=" << n <<"\tstarting_index = "
+                 << starting_index << endl;
+                cout << "\t\tvalue:" <<fs.stream(inst)<< endl;
                 vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
                 // recover after the recursive calls
                 inst = current;

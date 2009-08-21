@@ -265,4 +265,24 @@ public:
         
         TS_ASSERT(distance == new_dist);        
     }
+    
+    void test_vary_n_knobs()
+    {
+        int distance = 2;
+        arity_t arity = 8;
+        size_t size = 5;
+        field_set fs(field_set::disc_spec(arity), size);
+        eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
+        eda::instance center_inst(fs.packed_width());
+        int rand_seed = clock();
+        opencog::MT19937RandGen rng(rand_seed);
+        eda::randomize(fs, center_inst,rng); 
+        cout << "center_inst:\n" << fs.stream(center_inst)  << endl;
+        eda::instance_set<moses::combo_tree_score>::iterator out = deme.begin();
+        moses::vary_n_knobs(deme.fields(), center_inst, distance, 0, out);
+        //cout << "after vary knobs:" << endl;
+        //foreach (eda::instance& inst, deme) {
+        // cout <<fs.stream(inst) << endl;*/
+        //}
+    }
 };
