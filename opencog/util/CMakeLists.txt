@@ -4,7 +4,15 @@ ELSE (WIN32)
 	SET(WIN32_GETOPT_FILES)
 ENDIF (WIN32)
 
-ADD_LIBRARY(util SHARED
+# XXX FIXME -- setting util as a shared library breaks the build,
+# since it requires a link to libatomspace, which hasn't been built yet.
+# This is because misc.cc references Handles.  Similar problem with 
+# misc-test.cc,  Yucko.  Basically, we need to ditch the misc* files
+# somehow, banish them somewhere ... (no, they don't belong in
+# atomsapce...)
+#
+# ADD_LIBRARY(util SHARED
+ADD_LIBRARY(util 
 	algorithm
 	based_variant
 	Config
