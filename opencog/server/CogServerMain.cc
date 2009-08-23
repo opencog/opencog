@@ -109,9 +109,9 @@ int main(int argc, char *argv[])
             // unknown option (or help)
             usage(progname.c_str());
             if (c == 'h')
-                return 0;
+                exit(0);
             else
-                return 1;
+                exit(1);
         }
 
     }
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     config().reset();
     if (configFiles.size() == 0) {
         cerr << "No config files could be found!" << endl;
-        return -1;
+        exit(-1);
     }
     // Each config file sequentially overwrites the next
     BOOST_FOREACH (string configFile, configFiles) {
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
             break;
         } catch (RuntimeException &e) {
             std::cerr << e.getMessage() << std::endl;
-            return 1;
+            exit(1);
         }
     }
     // Each specific option
@@ -171,4 +171,5 @@ int main(int argc, char *argv[])
     // enable the network server and run the server's main loop
     cogserver.enableNetworkServer();
     cogserver.serverLoop();
+    exit(0);
 }
