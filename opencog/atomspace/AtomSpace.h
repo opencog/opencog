@@ -50,6 +50,8 @@ namespace opencog
 
 typedef std::vector<HandleSet*> HandleSetSeq;
 
+//XXX FIXME: do NOT inherit from SpaceServerContainer;
+//instead used atom table signals to accomplish work.
 class AtomSpace : public SpaceServerContainer
 {
     friend class SavingLoading;
@@ -112,6 +114,7 @@ public:
     const TimeServer& getTimeServer() const;
 
     /**
+     * XXX TODO eliminate this function
      * @return a reference to the SpaceServer object of this AtomSpace
      */
     SpaceServer& getSpaceServer() const;
@@ -289,6 +292,11 @@ public:
     }
 
     /**
+     * XXX TODO: Move this function out of here, and into its own
+     * class, somewhere not in the atomspace dirctory. The SpaceServer
+     * should be using the AtomTable addAtom, RemoveAtom() signals 
+     * to acomplish its work.
+     *
      * Adds space information about an object represented by a Node.
      * @param objectNode the Handle of the node that represents the object to be associated to the space info
      * @param timestamp The timestamp to be associated to this operation.
@@ -300,6 +308,11 @@ public:
                               double objLength, double objWidth, double objHeight,
                               double objYaw, bool isObstacle = true);
     /**
+     * XXX TODO: Move this function out of here, and into its own
+     * class, somewhere not in the atomspace dirctory. The SpaceServer
+     * should be using the AtomTable addAtom, RemoveAtom() signals 
+     * to acomplish its work.
+     *
      * Add a whole space map into the SpaceServer.
      * NOTE: This is just used when a whole space map is received
      * from a remote SpaceServer (in LearningServer, for instance).
@@ -307,6 +320,11 @@ public:
     Handle addSpaceMap(unsigned long timestamp, SpaceServer::SpaceMap * spaceMap);
 
     /**
+     * XXX TODO: Move this function out of here, and into its own
+     * class, somewhere not in the atomspace dirctory. The SpaceServer
+     * should be using the AtomTable addAtom, RemoveAtom() signals 
+     * to acomplish its work.
+     *
      * Removes space information about an object from the latest map (object is no longer at map's range)
      * @param objectNode the Handle of the node that represents the object to be removed from space map
      * @param timestamp The timestamp to be associated to this operation.
@@ -315,6 +333,11 @@ public:
     Handle removeSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp);
 
      /**
+     * XXX TODO: Move this function out of here, and into its own
+     * class, somewhere not in the atomspace dirctory. The SpaceServer
+     * should be using the AtomTable addAtom, RemoveAtom() signals 
+     * to acomplish its work.
+     *
      * Gets all SpaceMap handles that would be needed inside the given interval.
      * For getting the SpaceMap of each handle returned,
      * use the spaceServer.getMap(Handle spaceMapHandle) method.
@@ -351,6 +374,11 @@ public:
     }
 
     /**
+     * XXX TODO: Move this function out of here, and into its own
+     * class, somewhere not in the atomspace dirctory. The SpaceServer
+     * should be using the AtomTable addAtom, RemoveAtom() signals 
+     * to acomplish its work.
+     *
      * Remove old maps from SpaceServer in order to save memory. SpaceMaps
      * associated with exemplar sections, i.e., marked as persistent and the
      * latest (newest) space map are preserved.

@@ -64,6 +64,10 @@ AtomSpace::AtomSpace(void) :
     _handle_iterator = NULL;
     emptyName = "";
     backing_store = NULL;
+
+    // XXX this is wrong, the space server should live in its own
+    // directory, and not here. It needs to use the addAtom, removeAtom
+    // signals to get its work done.
     spaceServer = new SpaceServer(*this);
 
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
