@@ -20,7 +20,6 @@ ADD_LIBRARY(util SHARED
 	Logger
 	lru_cache
 	misc
-	misc-test
 	mt19937ar
 	platform
 	StringManipulator
@@ -30,7 +29,7 @@ ADD_LIBRARY(util SHARED
 )
 
 TARGET_LINK_LIBRARIES(util
-	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_REGEX_LIBRARY}
 )
 
 INSTALL (FILES

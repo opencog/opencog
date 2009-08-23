@@ -30,15 +30,47 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/TLB.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 
 namespace opencog
 {
 
-/**
- * Handy dandy utilty used by some test cases
+/*
+ * These functions appear to be used only by four test cases, and 
+ * no-where else.  This should probably be moved to some test directory.
  */
-Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& tvn);
+static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
+{
+    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
+    Type* head_type_ptr = boost::get<Type>(&(*it));
+    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+
+    HandleSeq handles;
+
+    if (head_handle_ptr != NULL) {
+        return as.addRealAtom(*(TLB::getAtom(*head_handle_ptr)), tvn);
+    }
+
+    for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
+        Handle *h_ptr = boost::get<Handle>(&*i);
+
+        if (h_ptr) {
+            handles.push_back(as.addRealAtom(*TLB::getAtom(*h_ptr), TruthValue::NULL_TV()));
+        } else {
+            handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
+        }
+    }
+
+    return as.addLink(*head_type_ptr, handles, tvn);
+}
+
+static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& tvn)
+{
+    return addAtomIter(as, a, a.begin(), tvn);
+}
+
 
 } // namespace opencog
 
