@@ -4,7 +4,7 @@ ELSE (WIN32)
 	SET(WIN32_GETOPT_FILES)
 ENDIF (WIN32)
 
-ADD_LIBRARY(util
+ADD_LIBRARY(util SHARED
 	algorithm
 	based_variant
 	Config

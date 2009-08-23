@@ -25,7 +25,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/TLB.h>
 #include "misc-test.h"
+#include "oc_assert.h"
 
 using namespace opencog;
 
