@@ -613,6 +613,18 @@ interface.
                                SQL storage. The fetch is recursive.
 
 
+= Flow control =
+The implementation uses a simple exception mechanism to allow scheme
+code to return to the opencog server from anywhere. To use this, simply
+throw 'cog-yield from anywhere.  The catch handler will promptly return
+to the cogserver.  This can be used with continuations to implement 
+some simple multi-threading.
+
+      Example:
+         guile> (throw 'cog-yield "hello world")
+         (hello world)
+
+
 =Notes, examples, utilities=
 Various related notes.
 

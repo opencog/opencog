@@ -365,7 +365,16 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		return SCM_EOL;
 	}
 
-	// If its not a read error, then its a regular error; report it.
+	// Check for a simple flow-control directive: i.e. just return to
+	// the C code from anywhere withing the scheme code.
+	if (0 == strcmp(restr, "cog-yield"))
+	{
+		free(restr);
+		return throw_args;
+	}
+
+	// If it's not a read error, and it's not flow-control, 
+	// then its a regular error; report it.
 	caught_error = true;
 
 	/* get string port into which we write the error message and stack. */
