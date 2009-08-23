@@ -3,7 +3,7 @@
 # Cogita is just a simple, staind-alone binary,
 # it translates between IRC protocol and the cog-server
 ADD_EXECUTABLE(cogita 
-    CogitaConfig
+	CogitaConfig
 	IRC
 	go-irc
 	whirr-sockets
@@ -16,6 +16,7 @@ LINK_DIRECTORIES (
 ADD_DEPENDENCIES(cogita utils)
 
 TARGET_LINK_LIBRARIES (cogita
+	atomspace
 	util
 )
 
