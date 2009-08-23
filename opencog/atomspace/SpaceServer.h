@@ -71,11 +71,12 @@ public:
 
     /**
      * Gets a const reference to a specific SpaceMap for make queries
-     * @throws RuntimeException if the given Handle is not a valid SpaceMap handle
-     * or if there is no SpaceMap for that node
-     * in SpaceServer
+     * @throws RuntimeException if the given Handle is not a valid 
+     *        SpaceMap handle or if there is no SpaceMap for that node
+     *         in SpaceServer
      */
-    const SpaceMap& getMap(Handle spaceMapHandle) const throw (opencog::RuntimeException, std::bad_exception);
+    const SpaceMap& getMap(Handle spaceMapHandle) const
+        throw (opencog::RuntimeException, std::bad_exception);
 
     /**
      * Checks if this SpaceServer contains a map with the given handle
@@ -83,9 +84,11 @@ public:
     const bool containsMap(Handle spaceMapHandle) const;
 
     /**
-     * Gets a const reference to the latest (more recent) map in this SpaceServer
+     * Gets a const reference to the latest (more recent) map in this 
+     * SpaceServer
      */
-    const SpaceMap& getLatestMap() const throw (opencog::AssertionException, std::bad_exception);
+    const SpaceMap& getLatestMap() const
+        throw (opencog::AssertionException, std::bad_exception);
 
     /**
      * Return true iff reference for latest map is not NULL
@@ -103,16 +106,20 @@ public:
     Handle getOlderMapHandle() const;
 
     /**
-     * Gets the Handle of the previous map to the map associated to the given spaceMap handle.
-     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, if such map does not exist or
-     * if the given spaceMap handle is not of a map inside this SpaceServer.
+     * Gets the Handle of the previous map to the map associated to the
+     * given spaceMap handle.
+     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, 
+     *      if such map does not exist or if the given spaceMap handle
+     *      is not of a map inside this SpaceServer.
      */
     Handle getPreviousMapHandle(Handle spaceMapHandle) const;
 
     /**
-     * Gets the Handle of the next map to the map associated to the given spaceMap handle.
-     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, if such map does not exist or
-     * if the given spaceMap handle is not of a map inside this SpaceServer.
+     * Gets the Handle of the next map to the map associated to the 
+     * given spaceMap handle.
+     * @return the Handle of the desired spaceMap or Handle::UNDEFINED, 
+     *         if such map does not exist or if the given spaceMap handle
+     *         is not of a map inside this SpaceServer.
      */
     Handle getNextMapHandle(Handle spaceMapHandle) const;
 
@@ -128,7 +135,8 @@ public:
     void removeMap(Handle spaceMapHandle);
 
     /**
-     * Mark the spaceMap as persistent so that it cannot be removed by internal cleanups.
+     * Mark the spaceMap as persistent so that it cannot be removed 
+     * by internal cleanups.
      */
     void markMapAsPersistent(Handle spaceMapHandle);
 
@@ -138,10 +146,13 @@ public:
     bool isMapPersistent(Handle spaceMapHandle) const;
 
     /**
-     * Adds or updates into the space map with the given hangle, the object with the given id and spatial properties.
-     * @return true if any property of the object has changed (or it's a new object). False, otherwise.
+     * Adds or updates into the space map with the given hangle, the
+     * object with the given id and spatial properties.
+     * @return true if any property of the object has changed (or it's 
+     *          a new object). False, otherwise.
      */
-    bool add(bool keepPreviousMap, Handle spaceMapHandle, const std::string& objectId,
+    bool add(bool keepPreviousMap, Handle spaceMapHandle,
+             const std::string& objectId,
              double centerX, double centerY, double length, double width,
              double height, double yaw, bool isObstacle = true);
 
@@ -151,10 +162,12 @@ public:
     void add(Handle spaceMapHandle, SpaceMap * spaceMap);
 
     // Removes the objectNode from the map
-    void remove(bool keepPreviousMap, Handle spaceMapHandle, const std::string& objectId);
+    void remove(bool keepPreviousMap, 
+                Handle spaceMapHandle, const std::string& objectId);
 
     /**
-     * Remove the object related to the given id from all spaceMaps in the SpaceServer.
+     * Remove the object related to the given id from all spaceMaps
+     * in the SpaceServer.
      */
     void removeObject(const std::string& objectId);
 
@@ -184,7 +197,8 @@ private:
 
     /**
      * space maps contained by this SpaceServer. Each space map is
-     * associated to an Atom handle, which is associated to a specific timestamp.
+     * associated to an Atom handle, which is associated to a 
+     * specific timestamp.
      */
     HandleToSpaceMap spaceMaps;
     std::vector<Handle> sortedMapHandles;

@@ -133,6 +133,9 @@ void AtomSpace::atomRemoved(Handle h)
         OC_ASSERT(getType(timeNode) == TIME_NODE, "AtomSpace::atomRemoved: Got no TimeNode node at the first position of the AtTimeLink\n");
         Handle timedAtom = getOutgoing(h, 1);
         timeServer.remove(timedAtom, Temporal::getFromTimeNodeName(((Node*) TLB::getAtom(timeNode))->getName().c_str()));
+
+        // XXX THIS IS WRONG --- instead, the space server
+        // should listen for the removeAtomSignal signal, and go with that.
         // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
         if( getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom ){
            spaceServer->removeMap(h);
