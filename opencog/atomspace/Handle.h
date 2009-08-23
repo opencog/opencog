@@ -26,6 +26,7 @@
 #ifndef _OPENCOG_HANDLE_H
 #define _OPENCOG_HANDLE_H
 
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <sstream>
