@@ -13,6 +13,30 @@
 (define (fflush) (force-output (car  (fdes->ports 1))))
 
 ; -----------------------------------------------------------------------
+; pseudo-multi-threading hack. The core problem here is the
+; command-response nature of the current opencog server design,
+; coupled to the fact that no response is generated until the 
+; command completes, and that no response is possible after the 
+; command completes. So instead, the chat server needs to poll
+; the opencog server to see if there's more output expected.
+;
+; It would be nice to use call-with-current-continuation but 
+; unfortuantely, scm_with_guile() erects a continuation barrier,
+; making this hard/impossible. Argh.
+;
+
+(define (chat-yield x)
+	(throw 'cog-yield 
+		(string-join 
+			(list "\n:scm hush\r "
+				(call-with-output-string (lambda (y) (display x y)))
+				"\n"
+			)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -167,11 +191,7 @@
 	)
 
 	; Invoke the next step of processing.
-	(display "\n:scm hush\r (say-part-2 ")
-	(display is-question)
-	(display ")\n")
-	(fflush)
-	""
+	(chat-yield (list "say-part-2 " is-question))
 )
 
 ; -----------------------------------------------------------------------
@@ -237,12 +257,7 @@
 	)
 
 	; Invoke the next step of processing.
-	(newline)
-	(display "\n:scm hush\r (say-part-3 ")
-	(display is-question)
-	(display ")\n")
-	(fflush)
-	""
+	(chat-yield (list "say-part-3 " is-question))
 )
 
 ; -----------------------------------------------------------------------
