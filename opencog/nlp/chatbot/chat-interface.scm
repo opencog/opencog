@@ -25,7 +25,7 @@
 ; making this hard/impossible. Argh.
 ;
 
-(define (chat-yield x)
+(define (chat-return x)
 	(throw 'cog-yield 
 		(string-join 
 			(list "\n:scm hush\r "
@@ -128,12 +128,13 @@
 ; then be continued by writing "\n:scm hush\r (scheme code)\n" to the 
 ; chat processor. The "\n:scm" and the "\r" are both important parts of
 ; the syntax, as the chat bridge looks for these. Don't mess them up.
+; Or use (chat-return ) instead.
 ;
 ; This interactive design is not very pretty, and it would be better
 ; to come up with some sort of multi-threaded design, with one of the 
 ; threads listening on the scheme port.  FIXME XXX This should be fixed,
 ; because the current approach has *many* problems. However, the fix is
-; hard, sowe just punt for now.
+; hard, so we just punt for now.
 ;
 (define (say-id-english nick txt)
 
@@ -191,7 +192,7 @@
 	)
 
 	; Invoke the next step of processing.
-	(chat-yield (list "say-part-2 " is-question))
+	(chat-return (list "say-part-2 " is-question))
 )
 
 ; -----------------------------------------------------------------------
@@ -223,9 +224,14 @@
 ;
 (define (say-part-2 is-question)
 
+(display "wtf 1\n")
+(fflush)
 	; Run the triples processing.
 	(attach-sents-for-triple-processing (get-new-parsed-sentences))
+(display "wtf 1a\n")
+(fflush)
 	(create-triples)
+(display "wtf 1b\n")
 	(dettach-sents-from-triple-anchor)
 
    ; If a question was asked, and the simple syntactic pattern matching
@@ -257,7 +263,7 @@
 	)
 
 	; Invoke the next step of processing.
-	(chat-yield (list "say-part-3 " is-question))
+	(chat-return (list "say-part-3 " is-question))
 )
 
 ; -----------------------------------------------------------------------
