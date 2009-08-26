@@ -26,9 +26,9 @@
 namespace eda
 {
 
-void occam_randomize(const field_set& fs, instance& inst,
-                     field_set::const_contin_iterator it,
-                     RandGen& rng)
+void occam_randomize_contin(const field_set& fs, instance& inst,
+                            field_set::const_contin_iterator it,
+                            RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     size_t end = begin + fs.contin()[it.idx()].depth;
@@ -44,9 +44,9 @@ void occam_randomize(const field_set& fs, instance& inst,
 
 //tree should be roughly balanced for this to be effective - otherwise there
 //will be a bias towards smaller programs
-void occam_randomize(const field_set& fs, instance& inst,
-                     field_set::const_onto_iterator it,
-                     RandGen& rng)
+void occam_randomize_onto(const field_set& fs, instance& inst,
+                          field_set::const_onto_iterator it,
+                          RandGen& rng)
 {
     //if there are n levels
     size_t begin = fs.onto_to_raw_idx(it.idx());
@@ -71,7 +71,7 @@ void occam_randomize_onto(const field_set& fs, instance& inst,
 {
     for (field_set::const_onto_iterator it = fs.begin_onto(inst);
             it != fs.end_onto(inst);++it)
-        occam_randomize(fs, inst, it, rng);
+        occam_randomize_onto(fs, inst, it, rng);
 }
 
 void occam_randomize_contin(const field_set& fs, instance& inst,
@@ -79,7 +79,7 @@ void occam_randomize_contin(const field_set& fs, instance& inst,
 {
     for (field_set::const_contin_iterator it = fs.begin_contin(inst);
             it != fs.end_contin(inst);++it)
-        occam_randomize(fs, inst, it, rng);
+        occam_randomize_contin(fs, inst, it, rng);
 }
 
 void uniform_randomize_bits(const field_set& fs, instance& inst,

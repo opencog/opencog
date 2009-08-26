@@ -191,7 +191,7 @@ public:
     }
 
     static inline bool isValidHandle(Handle h) {
-        return (false == isInvalidHandle(h));
+        return !isInvalidHandle(h);
     }
 
 #ifdef USE_TLB_MAP

@@ -89,6 +89,8 @@ public:
 
         return Vertex(ret);
     }
+
+    //macro for attemptDirectProduction doing nothing
     NO_DIRECT_PRODUCTION;
 };
 

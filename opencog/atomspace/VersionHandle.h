@@ -41,6 +41,9 @@ struct VersionHandle
 
     // Default constructor, gets a NULL_VERSION_HANDLE.
     VersionHandle();
+
+    // subs represents the context or hypothesis, not the atom to make the 
+    // handle for
     VersionHandle(IndicatorType ind, Handle subs);
     VersionHandle( const VersionHandle& other );
 
@@ -72,5 +75,15 @@ struct eqVersionHandle
 #define isNullVersionHandle(vh) TLB::isInvalidHandle(vh.substantive)
 
 } // namespace opencog
+
+//overload of operator<< to print VersionHandle
+namespace std { 
+    inline std::ostream& operator<<(std::ostream& out,
+                                    const opencog::VersionHandle& vh) {
+    out << "(indicator=" << vh.indicatorToStr(vh.indicator)
+        << ",substantive=" << vh.substantive << ")";
+    return out;
+}
+} // ~namespace std
 
 #endif // _OPENCOG_VERSIONHANDLE_H

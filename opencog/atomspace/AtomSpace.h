@@ -135,6 +135,11 @@ public:
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const;
 
+    //helper for GDB, because print seems to mess things up
+    void printGDB() const {
+        print();
+    }
+
     /**
      * Adds both the AtTime(TimeNode <timestamp>, atom) atom
      * representation into the AtomTable and the entry (atom,

@@ -30,9 +30,12 @@
 
 #include <opencog/util/mt19937ar.h>
 
+#include <opencog/util/dorepeat.h>
+
 using namespace opencog;
 
-static const int n = 50;
+static const unsigned int n = 10; // selecting in [0,n) 
+static const unsigned int s = 9; // what returns lazy_normal_selector::select
 
 class lazy_selectorUTest : public CxxTest::TestSuite
 {
@@ -43,17 +46,25 @@ public:
 
         std::cout << "test_lazy_normal_selector" << std::endl;
 
-        lazy_normal_selector lns(n);
+        lazy_normal_selector lns(n,s);
 
-        std::set<int> nset;
+        std::set<unsigned int> nset;
 
-        for(int i=0; i<n; i++) {
-            int selected = lns();
+        dorepeat(n) {
+            unsigned int selected = lns();
             std::cout << "Selected number: " << selected << std::endl;
             //check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
+//         lns.resize(n*2);
+//         dorepeat(n) {
+//             unsigned int selected = lns();
+//             std::cout << "Selected number: " << selected << std::endl;
+//             //check that the selected number has not been previously selected
+//             TS_ASSERT(nset.find(selected) == nset.end());
+//             nset.insert(selected);
+//         }        
     }
 
     void test_lazy_random_selector() {
@@ -63,10 +74,10 @@ public:
 
         lazy_random_selector lrs(n, rnd);
 
-        std::set<int> nset;
+        std::set<unsigned int> nset;
 
-        for(int i=0; i<n; i++) {
-            int selected = lrs();
+        for(unsigned int i=0; i<n; i++) {
+            unsigned int selected = lrs();
             std::cout << "Selected number: " << selected << std::endl;
             //check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());

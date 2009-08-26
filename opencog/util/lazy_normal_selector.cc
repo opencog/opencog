@@ -25,9 +25,9 @@
 namespace opencog
 {
 
-int lazy_normal_selector::select()
+unsigned int lazy_normal_selector::select()
 {
-    return 0;
+    return _s;
 }
 
 } //~namespace opencog

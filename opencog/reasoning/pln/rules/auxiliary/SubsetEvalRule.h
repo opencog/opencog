@@ -27,6 +27,7 @@
 #include "../../formulas/Formulas.h"
 #include "../../rules/Rule.h"
 #include "../../rules/RuleFunctions.h"
+#include "../../AtomSpaceWrapper.h"
 
 namespace opencog { namespace pln {
 
@@ -34,13 +35,9 @@ using std::vector;
 
 class SubsetEvalRule : public Rule
 {
-    //pHandle domain; //used nowhere ???
     SubsetEvalFormula formula;
+    AtomSpaceWrapper* asw;
 
-protected:
-
-    //MPs inputFilter; //already in Rule
-    //iAtomSpaceWrapper *destTable; //already in Rule
 public:
     virtual ~SubsetEvalRule() {}
     SubsetEvalRule(iAtomSpaceWrapper *_destTable);
@@ -56,6 +53,14 @@ public:
     
     BoundVertex compute(const vector<Vertex>& premiseArray,
                         pHandle CX = NULL) const;
+
+    //TODO: note sure it is enough
+    bool validate2(MPs& args) const {
+        return true;
+    }
+
+    //TODO: note sure it is right
+    NO_DIRECT_PRODUCTION;
 };
  
 

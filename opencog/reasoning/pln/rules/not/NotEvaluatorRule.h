@@ -53,7 +53,7 @@ public:
     NotEvaluatorRule(iAtomSpaceWrapper *_destTable);
     meta i2oType(const std::vector<Vertex>& h) const;
 
-    bool validate2    (MPs& args) const {
+    bool validate2(MPs& args) const {
         return true;
     }
     NO_DIRECT_PRODUCTION;

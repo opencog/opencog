@@ -32,6 +32,7 @@
 
 #include <boost/config.hpp>
 #include <boost/smart_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 // Attempted to use boost::bimap in boost 1.35+ but had too much trouble
 //#include <boost/bimap/unordered_set_of.hpp>
 //#include <boost/bimap/multiset_of.hpp>
@@ -61,6 +62,7 @@ namespace pln {
 //! Construct a vtree around Handle h
 vtree make_vtree(pHandle h);
 
+// there exists a method to print (overloading <<) it see at the end of the file
 typedef std::pair<Handle,VersionHandle> vhpair;
 
 /** The bridge between the OpenCog AtomSpace and PLN.
@@ -280,6 +282,9 @@ protected:
      * @note Contexts should have actual handles for links, or be empty for
      * nodes. This can be ensured by using the appropriate addNodeDC or
      * addNodeDC classes.
+     * @param tvn what truth value they should be given
+     * @param fresh allows atoms to be added with the same name/outgoing set
+     * @param managed some kind of mechanism to manage memory
      */
     pHandle addAtomDC(Atom &a, bool fresh, bool managed,
                       HandleSeq contexts = HandleSeq());
@@ -361,9 +366,16 @@ public:
     bool loadOther(const std::string& path, bool replaceOld);
 
     //! Add atom from tree vertex
+    //! @param tvn what truth value they should be given
+    //! @param fresh allows atoms to be added with the same name/outgoing set
+    //! @param managed some kind of mechanism to manage memory
     pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
                     bool managed=true);
+
     //! Add link, pure virtual
+    //! @param tvn what truth value they should be given
+    //! @param fresh allows atoms to be added with the same name/outgoing set
+    //! @param managed some kind of mechanism to manage memory
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
                             bool fresh=false, bool managed=true)=0;
 
@@ -389,6 +401,9 @@ public:
     }
 
     //! Add node, pure virtual
+    //! @param tvn what truth value they should be given
+    //! @param fresh allows atoms to be added with the same name/outgoing set
+    //! @param managed some kind of mechanism to manage memory
     virtual pHandle addNode(Type T, const std::string& name,
                             const TruthValue& tvn, bool fresh=false,
                             bool managed=true)=0;
@@ -469,6 +484,9 @@ public:
     Type getTypeV(const tree<Vertex>& _target) const;
 
     bool allowFWVarsInAtomSpace;
+
+    //for debugging
+    std::string vhmapToString() const;
 
 // TODELETE
 //  combo::NMCore* getCore() const { return core; }
@@ -599,5 +617,29 @@ public:
 
 
 }} //~namespace opencog::pln
+
+namespace std { 
+//Nil: I wrap it under that namespace to avoid a weird ambiguous overload...
+namespace overloadmadness {
+//overload of operator<< to print vhpair
+inline std::ostream& operator<<(std::ostream& out,
+                                const opencog::pln::vhpair& vhp) {
+    out << "(Handle=" << vhp.first
+        << ",VersionHandle=" << vhp.second << ")";
+    return out;
+}
+} // ~namespace overloadmadness
+
+//overload of operator<< to print std::pair<pHandle,vhpair>
+inline std::ostream& operator<<(std::ostream& out,
+                                const std::pair<opencog::pln::pHandle,
+                                                opencog::pln::vhpair>& pvp) {
+    using namespace overloadmadness;
+    out << "(pHandle=" << pvp.first
+        << ",vhpair=" << pvp.second << ")";
+    return out;
+}
+} // ~namespace std
+
 
 #endif

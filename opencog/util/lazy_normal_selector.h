@@ -24,13 +24,22 @@
 #define _OPENCOG_LAZY_NORMAL_SELECTOR_H
 
 #include "lazy_selector.h"
+#include "oc_assert.h"
 
 namespace opencog
 {
 
+// apply lazy_selector but the select method returns always the same
+// number, created for testing
 struct lazy_normal_selector : public lazy_selector {
-    lazy_normal_selector(int n) : lazy_selector(n) { }
-    int select();
+private:
+    unsigned int _s;
+public:
+    lazy_normal_selector(unsigned int n, unsigned int s = 0) :
+        lazy_selector(n), _s(s) {
+        OC_ASSERT(s < n);
+    }
+    unsigned int select();
 };
 
 } //~namespace opencog

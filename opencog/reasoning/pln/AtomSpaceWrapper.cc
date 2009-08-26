@@ -777,7 +777,6 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
                                   const TruthValue& tvn, bool fresh,
                                   bool managed)
 {
-    AtomSpace *as = atomspace;
     cprintf(3,"Handle AtomSpaceWrapper::addAtom...");
     rawPrint(a,it,3);
     
@@ -819,7 +818,6 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs,
                                         const TruthValue& tvn,
                                         bool fresh,bool managed)
 {
-    AtomSpace *as = atomspace;
     if (tvn.isNullTv())
     {
         LOG(0, "I don't like FactoryTruthValues, so passing "
@@ -987,8 +985,9 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then just add normally
                 return realToFakeHandle(as->addNode(node.getType(),
-                        node.getName(), node.getTruthValue()),
-                        NULL_VERSION_HANDLE);
+                                                    node.getName(),
+                                                    node.getTruthValue()),
+                                        NULL_VERSION_HANDLE);
             }
         } else {
             const Link& link = (const Link&) atom;
@@ -1002,11 +1001,9 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
                 bool allNull = true;
                 // if all null context
                 for (HandleSeq::iterator i = contexts.begin();
-                     i != contexts.end();
-                     i++) {
+                     i != contexts.end(); i++) {
                     if (as->getName(*i) != rootContext) {
                         allNull = false;
-
                     }
                 }
                 result = as->addLink(link.getType(), link.getOutgoingSet(),
@@ -1061,12 +1058,10 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
             // if the atom doesn't exist already, then add normally
             bool allNull = true;
             // if all null context
-            for (HandleSeq::iterator i = contexts.begin();
-                    i != contexts.end();
-                    i++) {
+            for (HandleSeq::iterator i = contexts.begin(); i != contexts.end();
+                 i++) {
                 if (as->getName(*i) != rootContext) {
                     allNull = false;
-
                 }
             }
             // Get the existing context link if not all contexts are NULL 
@@ -1092,10 +1087,8 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
             as->setTV(result, atom.getTruthValue(), vh);
         }
         fakeHandle = realToFakeHandle(result, vh);
-        
     }
     return fakeHandle;
-
 }
 
 Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
@@ -1304,12 +1297,12 @@ Handle singular(HandleSeq hs) {
 
 bool AtomSpaceWrapper::equal(Handle A, Handle B)
 {
-    AtomSpace *a = atomspace;
-    if (a->getType(A) != a->getType(B))
+    AtomSpace *as = atomspace;
+    if (as->getType(A) != as->getType(B))
         return false;
 
-    vector<Handle> hsA = a->getOutgoing(A);
-    vector<Handle> hsB = a->getOutgoing(B);
+    vector<Handle> hsA = as->getOutgoing(A);
+    vector<Handle> hsB = as->getOutgoing(B);
 
     const size_t Asize = hsA.size();
 
@@ -1456,6 +1449,13 @@ Type AtomSpaceWrapper::getTypeV(const tree<Vertex>& _target) const
     // fprintf(stdout,"Atom space address: %p\n", this);
     // fflush(stdout);
     return getType(boost::get<pHandle>(*_target.begin()));
+}
+
+std::string AtomSpaceWrapper::vhmapToString() const {
+    std::stringstream ss;
+    std::copy(vhmap.begin(), vhmap.end(),
+              ostream_iterator<vhmap_pair_t>(ss, "\n"));
+    return ss.str();
 }
 
 /*

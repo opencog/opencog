@@ -331,10 +331,10 @@ protected:
     void compute_starts() {
         _contin_start = _fields.begin();
         foreach(const onto_spec& o, _onto)
-        _contin_start += o.depth; //# of fields
+            _contin_start += o.depth; //# of fields
         _disc_start = _contin_start;
         foreach(const contin_spec& c, _contin)
-        _disc_start += c.depth;
+            _disc_start += c.depth;
     }
 
     template<typename Self, typename Iterator>

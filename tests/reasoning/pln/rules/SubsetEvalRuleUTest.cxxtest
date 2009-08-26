@@ -24,6 +24,7 @@
 
 #include <opencog/reasoning/pln/rules/auxiliary/SubsetEvalRule.h>
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
+#include <opencog/util/foreach.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/assign/list_of.hpp>
 
@@ -33,6 +34,8 @@ using namespace pln;
 using boost::lexical_cast;
 using boost::assign::list_of;
 using std::string;
+using std::cout;
+using std::pair;
 
 //number of elements used in the test
 const unsigned int ne = 10;
@@ -64,13 +67,24 @@ public:
     // initialize the atom space wrapper with 2 concepts, sub and super,
     // and elements connected to them by member links
     SubsetEvalRuleUTest() {
+
+        //set flag to print only OC_ASSERT and other ERROR level logs on stdout
+        opencog::logger().setPrintErrorLevelStdout();
+
         //instantiate the atom space wrapper
         AtomSpace as;
         _asw = &DirectATW::getInstance(&as);
 
+        as.print();
+
         //add the 2 concept nodes sub and super to compute Subset(sub super)
         _sub_h = _asw->addNode(CONCEPT_NODE, "sub", TruthValue::DEFAULT_TV());
+
+        as.print();
+
         _super_h = _asw->addNode(CONCEPT_NODE, "super", TruthValue::DEFAULT_TV());
+
+        as.print();
 
         //add the members
         pHandleSeq ehv;
@@ -107,11 +121,17 @@ public:
                       SimpleTruthValue(e8_super_s, 1.0));
         _asw->addLink(MEMBER_LINK, ehv[9], _super_h,
                       SimpleTruthValue(e9_super_s, 1.0));
+
+        cout << _asw->vhmapToString() << std::endl;
+
+        as.print();
+
     }
 
     void testSubsetEvalRuleUTest() {
-        //SubsetEvalRule sser(_asw);
-        //BoundVertex bv = sser.compute(list_of(_sub_h)(_super_h));
+        SubsetEvalRule sser(_asw);
+        const vector<Vertex> vv = list_of(_sub_h)(_super_h);
+        BoundVertex bv = sser.compute(vv);
         TS_ASSERT(true);
     }
 };

@@ -99,7 +99,10 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AddRule(new ANDPartitionRule(parent), 10.0f);
     AddRule(new NotEvaluatorRule(parent), 10.0f);
     
-    AddRule( new ScholemFunctionProductionRule(parent), 20.0f);
+    AddRule(new ScholemFunctionProductionRule(parent), 20.0f);
+    
+    AddRule(new SubsetEvalRule(parent), 10.0f);
+
     //	AddRule(new FORALLRule(parent,NULL), 5.0f);
     //	AddRule( new PLNPredicateRule(parent,NULL), 5.0f);
     

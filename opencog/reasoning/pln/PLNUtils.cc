@@ -23,7 +23,6 @@
 
 #include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <opencog/atomspace/HandleTemporalPair.h>
@@ -936,7 +935,7 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
         vector<atom> base_set;
 
         foreach(Btr<atom> a, atom_i.hs)
-        base_set.push_back(*a);
+            base_set.push_back(*a);
 
         bool is_subset = (base_set.empty()
                           && includes(keyelem_set.begin(), keyelem_set.end(),
@@ -945,7 +944,7 @@ bool getLargestIntersection2(const set<atom, lessatom>& keyelem_set,
         if (is_subset && base_set.size() > max_size) {
             result.clear();
             foreach(const atom& a, base_set)
-            result.push_back(Btr<atom>(new atom(a)));
+                result.push_back(Btr<atom>(new atom(a)));
             max_size = base_set.size();
         }
     }

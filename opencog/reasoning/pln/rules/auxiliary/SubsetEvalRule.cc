@@ -38,6 +38,7 @@ using std::find;
 SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
     : Rule(_destTable, false, false, "SubsetEvalRule")
 {
+    asw = static_cast<AtomSpaceWrapper*>(_destTable);
     /*inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
                                              1,
                                              new atom(CONCEPT_NODE, 0))));*/
@@ -46,12 +47,10 @@ SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
 BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
                                     pHandle CX) const
 {
-    assert(premiseArray.size() == 2);
+    OC_ASSERT(premiseArray.size() == 2);
 
-    assert(GET_ASW->inheritsType(GET_ASW->getType(_v2h(premiseArray[0])),
-                                 CONCEPT_NODE));
-    assert(GET_ASW->inheritsType(GET_ASW->getType(_v2h(premiseArray[1])),
-                                 CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(_v2h(premiseArray[0]), CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(_v2h(premiseArray[1]), CONCEPT_NODE));
 
     pHandleSet used;
 
@@ -65,7 +64,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // so that each element of tvsSub and tvsSuper are aligned
 
     foreach(const pHandle& h_sub, satSetSub) {
-        tvsSub.push_back(GET_ASW->getTV(h_sub).clone());
+        tvsSub.push_back(asw->getTV(h_sub).clone());
         pHandleSetConstIt h_super_cit =
             find<pHandleSetConstIt, pHandle>(satSetSuper.begin(),
                                              satSetSuper.end(),
@@ -105,16 +104,10 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     delete tvs1;
     delete tvs2;
 
-    vector<pHandle> hs;
-    hs.push_back(_v2h(premiseArray[0]));
-    hs.push_back(_v2h(premiseArray[1]));
-
-    pHandle ret = NULL;/*destTable->addLink(SUBSET_LINK,
-                                     hs,
-                                     retTV,
-                                     true);*/
-    //                              false);
-
+    pHandle ret = asw->addLink(SUBSET_LINK,
+                               _v2h(premiseArray[0]),
+                               _v2h(premiseArray[1]),
+                               *retTV, true);
     return BoundVertex(ret);
 }
 

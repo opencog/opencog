@@ -25,7 +25,7 @@
 namespace opencog
 {
 
-int lazy_random_selector::select()
+unsigned int lazy_random_selector::select()
 {
     return rng.randint(_n);
 }

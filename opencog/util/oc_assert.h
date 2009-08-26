@@ -26,6 +26,8 @@
 #ifndef _OPENCOG_ASSERT_H
 #define _OPENCOG_ASSERT_H
 
+#include "exceptions.h"
+
 
 // Macro OC_ASSERT corresponding to opencog::cassert(TRACE_INFO, ...)
 // if IGNORE_OC_ASSERT is not defined, and ignored otherwise
