@@ -57,14 +57,14 @@ public:
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
-//         lns.resize(n*2);
-//         dorepeat(n) {
-//             unsigned int selected = lns();
-//             std::cout << "Selected number: " << selected << std::endl;
-//             //check that the selected number has not been previously selected
-//             TS_ASSERT(nset.find(selected) == nset.end());
-//             nset.insert(selected);
-//         }        
+        lns.reset_range(n*2);
+        dorepeat(n) {
+            unsigned int selected = lns();
+            std::cout << "Selected number: " << selected << std::endl;
+            //check that the selected number has not been previously selected
+            TS_ASSERT(nset.find(selected) == nset.end());
+            nset.insert(selected);
+        }        
     }
 
     void test_lazy_random_selector() {
@@ -76,12 +76,20 @@ public:
 
         std::set<unsigned int> nset;
 
-        for(unsigned int i=0; i<n; i++) {
+        dorepeat(n) {
             unsigned int selected = lrs();
             std::cout << "Selected number: " << selected << std::endl;
             //check that the selected number has not been previously selected
             TS_ASSERT(nset.find(selected) == nset.end());
             nset.insert(selected);
         }
+        lrs.reset_range(n*2);
+        dorepeat(n) {
+            unsigned int selected = lrs();
+            std::cout << "Selected number: " << selected << std::endl;
+            //check that the selected number has not been previously selected
+            TS_ASSERT(nset.find(selected) == nset.end());
+            nset.insert(selected);
+        }        
     }
 };

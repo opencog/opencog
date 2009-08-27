@@ -1,8 +1,10 @@
 /*
  * opencog/util/lazy_selector.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ *
+ * Authors Moshe Looks, Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,79 +25,85 @@
 #include "lazy_selector.h"
 #include "exceptions.h"
 #include "oc_assert.h"
+#include "foreach.h"
+#include <iostream>
+#include <iterator>
 
 namespace opencog
 {
 
+using std::make_pair;
+using std::cout;
+using std::ostream_iterator;
+
 lazy_selector::lazy_selector(unsigned int n) 
-    : _n(n), _l(0), _u(n-1) {
+    : _n(n), _l(0) {
     OC_ASSERT(n>0, "you cannot select any thing from an empty list");
 }
 
 bool lazy_selector::empty() const {
-    return _n == 0;
+    return _l == _n;
 }
 
-void lazy_selector::resize(unsigned int new_n) {
+void lazy_selector::reset_range(unsigned int new_n) {
     OC_ASSERT(_n < new_n);
     _n = new_n;
 }
 
-/** returns the selected number (never twice the same)
+/**
+ * returns the selected number (never twice the same)
  *
- * it works by pointing any already selected number
- * either to _l or _u.
- * If the selected number is _l then it points to _u and vice versa.
- * If it is both (because _l == _u) then it points to _n.
- * Yes _n is out of the range but that is what is doing the trick
- * so the range can be resize higher.
- *
- * Each time a pointer is created toward _l, it increments,
- * and each time a pointer is created toward _u, it decrements.
- *
- * All the rest of the algo is pointer maintance so that a pointer
- * never points to an already chosen value.
+ * It works by creating a maping between already selected indices and
+ * free indices (never selected yet).
+ * 
+ * To chose the free indices, we use an index _l, that
+ * goes from the lower range to the upper range and only corresponds to
+ * free indices. So every time _l corresponds to a non free index
+ * it is incremented until it gets to a free index.
  *
  */
 unsigned int lazy_selector::operator()()
 {
     OC_ASSERT(!empty(), "lazy_selector - selector is empty.");
 
-    unsigned int sel = select();
+    unsigned int sel_idx = select();
 
+    uint_one_to_many_map_cit sel_idx_cit = _map.find(sel_idx);
+
+    // if the selected index points to nothing then the result is itself
+    // otherwise it is the pointed index
+    unsigned int res = sel_idx_cit == _map.end()? sel_idx : sel_idx_cit->second;
     
+    // move _l from res so that it is now a free index
+    if(res == _l) increase_l_till_free();
 
-    // if(sel != _u) {
-        //TODO
-    //} else if (sel != _l) {
-        //TODO
-    //} else if 
+    // redirect all links pointing to res so they point now to _l
+    modify_target(res, _l);
 
+    // create a link from res to _l
+    _map.insert(make_pair(res, _l));
 
-
-    unsigned int idx = select();
-    _n--;
-
-    hash_map<unsigned int, unsigned int>::iterator it = _map.find(idx);
-    if (idx == _n) {
-        if (it != _map.end()) {
-            idx = it->second;
-            _map.erase(it);
-        }
-        return idx;
-    }
-
-    unsigned int res = (it == _map.end()) ? idx : it->second;
-    if(it != _map.end())
-        _map.erase(it);
-    hash_map<unsigned int, unsigned int>::iterator last = _map.find(_n);
-    if (last == _map.end()) {
-        _map.insert(std::make_pair(idx, _n));
-    } else {
-        _map.insert(std::make_pair(idx, last->second));
-        _map.erase(last);
-    }
     return res;
+}
+
+bool lazy_selector::is_free(unsigned int idx) const {
+    return _map.find(idx) == _map.end();
+}
+
+void lazy_selector::increase_l_till_free() {
+    do {
+        _l++;
+    } while(!is_free(_l));
+}
+
+void lazy_selector::modify_target(unsigned int src_to, unsigned int dst_to) {
+    typedef uint_one_to_many_map::index<to>::type::iterator to_it;
+    std::pair<to_it, to_it> range = get<to>(_map).equal_range(src_to);
+    for(to_it it = range.first; it != range.second;) {
+        unsigned int from_idx = it->first;
+        it = get<to>(_map).erase(it);
+        _map.insert(make_pair(from_idx, dst_to));
+    }
 }
 
 } //~namespace opencog

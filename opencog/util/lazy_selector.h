@@ -1,8 +1,10 @@
 /*
  * opencog/util/lazy_selector.h
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
+ *
+ * Authors Moshe Looks, Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,12 +25,15 @@
 #ifndef _OPENCOG_LAZY_SELECTOR_H
 #define _OPENCOG_LAZY_SELECTOR_H
 
-#include "hash_map.h"
 #include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/hashed_index.hpp>
 
 namespace opencog
 {
 
+using boost::multi_index_container;
+using namespace boost::multi_index;
 
 /**
  * That class allows to select integers in [0,n)
@@ -37,6 +42,40 @@ namespace opencog
  */
 class lazy_selector
 {
+    typedef std::pair<unsigned int, unsigned int> uint_pair;
+
+    /* tags for accessing both sides of a bidirectional map */    
+    struct from{};
+    struct to{};
+
+    /* A bidirectional map one-to-many issimulated as a multi_index_container
+     * of pairs of (unsinged int,unsigned int) with first unique index, 
+     * and second non unique index.
+     *
+     * That structure is used to represent what element should be returned when
+     * the selected element has already been chosen.
+     * 
+     * The one-to-many mapping is used because an already chosen element
+     * should only have one possible choice to return instead of itself, 
+     * but on the other hand several already chosen elements can points to the
+     * same alternative. Of course if one of them is chosen and must return
+     * a given alternative all element pointing to it must be updated which
+     * is why we use a multi_index_container to quickly access either the first
+     * or the second element of the pair.
+     */
+
+    typedef multi_index_container<
+        uint_pair,
+        indexed_by<
+            hashed_unique<
+                tag<from>,member<uint_pair, unsigned int, &uint_pair::first> >,
+            hashed_non_unique<
+                tag<to>, member<uint_pair, unsigned int, &uint_pair::second> >
+            >
+        > uint_one_to_many_map;
+    typedef uint_one_to_many_map::iterator uint_one_to_many_map_it;
+    typedef uint_one_to_many_map::const_iterator uint_one_to_many_map_cit;
+
 public:
     lazy_selector(unsigned int n);
     virtual ~lazy_selector() {}
@@ -45,15 +84,27 @@ public:
     // returns the selected number (never twice the same)
     unsigned int operator()();
 
-    // warning : it assumes that the new size is higher than before
-    void resize(unsigned int new_n);
+    // warning : it assumes that the new size is higher than the previous one
+    void reset_range(unsigned int new_n);
+
+    virtual unsigned int select() = 0; // a method that choses an int in [0,_n)
 
 protected:
-    virtual unsigned int select() = 0; // a method that choses an int in [0,_n)
     unsigned int _n; // size of the integer list [0,_n)
+
+private:
     unsigned int _l; // lower index
-    unsigned int _u; // upper index
-    hash_map<unsigned int, unsigned int> _map;
+    uint_one_to_many_map _map;
+
+    // an index is free if it has never been chosen before
+    // that is if no links are going out of it
+    inline bool is_free(unsigned int idx) const; 
+
+    // increase _l until it is located on a free index
+    inline void increase_l_till_free();
+
+    // modify all links coming into src_to so that they now go to dst_to
+    inline void modify_target(unsigned int src_to, unsigned int dst_to);
 };
 
 } //~namespace opencog
