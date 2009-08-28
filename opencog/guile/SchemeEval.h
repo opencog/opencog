@@ -39,9 +39,9 @@ class SchemeEval
 		std::string input_line;
 		bool pending_input;
 
-                SCM do_apply_scm( const std::string& func, Handle varargs );
 		// Handle apply
-		Handle do_apply(const std::string&, Handle args);
+		Handle do_apply(const std::string& func, Handle varargs);
+		SCM do_apply_scm(const std::string& func, Handle varargs);
 		Handle hargs;
 		static void * c_wrap_apply(void *);
 		static void * c_wrap_apply_scm(void *);
@@ -68,19 +68,20 @@ class SchemeEval
 
 		SchemeEval(void);
 
-                static SchemeEval* singletonInstance;
+		static SchemeEval* singletonInstance;
+
 	public:
 
 		~SchemeEval();
 		std::string eval(const std::string &);
-		Handle apply(const std::string&, Handle args);
-                std::string apply_generic(const std::string&, Handle args);
+		Handle apply(const std::string& func, Handle varargs);
+		std::string apply_generic(const std::string& func, Handle varargs);
 
 		bool input_pending(void);
 		void clear_pending(void);
 		bool eval_error(void);
 
-                static SchemeEval& instance(void);
+		static SchemeEval& instance(void);
 };
 
 }
