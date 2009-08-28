@@ -129,6 +129,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
                     logger().debug("SpaceServer - Previous map (%s) transfered to new map (%s).", TLB::getAtom(latestMapHandle)->toString().c_str(), TLB::getAtom(spaceMapHandle)->toString().c_str());
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
+                    container.mapRemoved(latestMapHandle);
                     map = latestMap; // reuse the spaceMap object
                     mapReused = true;
                 }
@@ -149,6 +150,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
 
                     sortedMapHandles.erase(sortedMapHandles.end() - 1);
                     spaceMaps.erase(latestMapHandle);
+                    container.mapRemoved(latestMapHandle);
                     delete latestMap;
                 }
             }
@@ -159,6 +161,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
         }
         spaceMaps[spaceMapHandle] = map;
         sortedMapHandles.push_back(spaceMapHandle);
+        container.mapPersisted(spaceMapHandle); // Ensure the latest map will not be removed by forgetting mechanism
         logger().debug("SpaceServer - spaceMaps size: %u, sortedMapHandles size: %u", spaceMaps.size(), sortedMapHandles.size());
 
     } else {
