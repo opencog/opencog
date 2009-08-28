@@ -30,7 +30,8 @@ the structure of questions themselves, and respond to that structure.
 
 XXX As of 13 May 2008, changes to the RelEx output have broken the 
 operation of the frame-query part of this code. As of 23 April 2009,
-th simpler RelEx query style has been resotred and now works again. XXX
+the simpler RelEx query style has been restored and now works again. 
+As of August 2009, things are kind of broken again. XXX
 
 General conclusion: while superficial question answering is possible, 
 a robust system remains difficult.  Work continues (very slowly) along
@@ -46,7 +47,7 @@ for answer-generation (4) Pursue work on "question comprehension".
 
 Question Answering Overview
 ---------------------------
-Curreently, the question answering code dependings on a processing
+Currently, the question answering code dependings on a processing
 pipeline
 
  -- Input of English language sentences
@@ -556,7 +557,7 @@ By contrast, "what color is the book?" becomes
 and the manner in which this should be converted into a "color_of"
 question is unclear.
 
-"You eat metal"  and " do you eat metal?"
+"You eat metal"  and "do you eat metal?"
 
 What colour is the car?
     QUERY-FLAG(colour, T)
