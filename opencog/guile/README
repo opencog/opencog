@@ -741,8 +741,16 @@ particular, in the server socket connection handling. Caveat Emptor.
 ToDo
 ----
 -- support readline/editline (uparrows, etc.) on input.
+   Note, however, 'rlwrap telnet localhost 17001' does the trick...
 
 -- change cog-delete to also accept a list of atoms 
 -- change cog-delete to return null, not #t (?why?)
 -- add ability to create CompositeTruthValue
+
+-- It would be nice to be able to use continuations; however, the
+   scm_with_guile() call has a continuation barrier in it.  I beleive
+   that this continuation barrier is far too pessimistic -- it can 
+   make some fairly simple checks on the C stack in order to avoid
+   data corruption. However, guile needs to be fixed to change this 
+   behaviour.
 
