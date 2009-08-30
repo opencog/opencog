@@ -235,7 +235,13 @@
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let* ((trips (get-new-triples))
+				; We need to anchor becasue of ??? why?
 				(ancs (anchor-bottom-side trips))
+
+				; Pull in any semes that might be related...
+				(s (fetch-related-semes trips))
+
+				; Now try to find answers to the question
 				(rslt (cog-ad-hoc "do-varscope" quest-rule-vscope-0))
 
 				; The do-varscope returns a list-link. We need to nuke
@@ -244,10 +250,6 @@
 				(ans (chat-get-simple-answer))
 			)
 
-			;  XXX need to do semes now ... 
-						; First, pull in any semes that might be related...
-						; (fetch-related-semes trips) 
-			
 (display "duude question trips are:\n")
 (display trips)
 (newline)
