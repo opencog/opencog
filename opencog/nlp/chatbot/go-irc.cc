@@ -191,92 +191,80 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 #define FLOOD_CHAR_COUNT 120
 
-	bool more_io = true;
 	size_t flood_cnt = FLOOD_CHAR_COUNT;
 	size_t cnt = 0;
-	while (more_io)
+	bool dosend = true;
+
+	// printf ("Sending to opencog: %s\n", cmdline);
+	char * reply = whirr_sock_io (cmdline);
+	free(cmdline);
+	cmdline = NULL;
+
+	printf ("opencog reply: %s\n", reply);
+
+	/* Each newline has to be on its own line */
+	/* Limit length of reply so we don't get kicked for flooding */
+	char * p = reply;
+	while (*p)
 	{
-		more_io = false;
-		bool nosend = false;
+		char *ep = strchr (p, '\n');
 
-		// printf ("Sending to opencog: %s\n", cmdline);
-		char * reply = whirr_sock_io (cmdline);
-		free(cmdline);
-		cmdline = NULL;
-
-		printf ("opencog reply: %s\n", reply);
-
-		/* Each newline has to be on its own line */
-		/* Limit length of reply so we don't get kicked for flooding */
-		char * p = reply;
-		while (*p)
+		// The last line -- no newline found.
+		if (!ep)
 		{
-			char *ep = strchr (p, '\n');
-
-			// The last line -- no newline found.
-			if (!ep)
-			{
-				if (is_nonblank(p))
-					conn->privmsg (msg_target, p);
-				break;
-			}
-			ep ++;
-			int save = *ep;
-			*ep = 0x0;
-
-			// If the line starts with ":scm", resubmit it to the
-			// server. This is a kind-of cheap, hacky way of doing
-			// multi-processing.
-			if (0 == strncmp(p, ":scm", 4))
-			{
-				char * cr = strchr(p, '\r');
-				if (cr) *cr = '\n';
-				char * r = whirr_sock_io (p+1);
-				free(reply);
-				reply = r;
-				p = reply;
-				printf ("opencog reply: %s\n", reply);
-				continue;
-			}
-
-			// If the line starts with ":dbg", then print to stdout, 
-			// but do not send to chatroom.
-			if (0 == strncmp(p, ":dbg", 4))
-			{
-				*ep = save;
-				p = ep;
-				nosend = true;
-				continue;
-			}
-			if (0 == strncmp(p, ":end-dbg", 8))
-			{
-				*ep = save;
-				p = ep;
-				nosend = false;
-				continue;
-			}
-			if (nosend)
-			{
-				*ep = save;
-				p = ep;
-				continue;
-			}
-
-			// Else print output.
 			if (is_nonblank(p))
-			{
 				conn->privmsg (msg_target, p);
-				cnt += strlen (p);
-			}
+			break;
+		}
+		ep ++;
+		int save = *ep;
+		*ep = 0x0;
+
+		// If the line starts with ":scm", resubmit it to the
+		// server. This is a kind-of cheap, hacky way of doing
+		// multi-processing.
+		if (0 == strncmp(p, ":scm", 4))
+		{
+			char * cr = strchr(p, '\r');
+			if (cr) *cr = '\n';
+			char * r = whirr_sock_io (p+1);
+			free(reply);
+			reply = r;
+			p = reply;
+			printf ("opencog reply: %s\n", reply);
+			continue;
+		}
+
+		// If the line starts with ":dbg", the do not send to chatroom
+		if (0 == strncmp(p, ":dbg", 4))
+		{
 			*ep = save;
 			p = ep;
+			dosend = false;
+			continue;
+		}
+		if (0 == strncmp(p, ":end-dbg", 8))
+		{
+			*ep = save;
+			p = ep;
+			dosend = true;
+			continue;
+		}
+
+		// Else send output to chatroom
+		if (dosend && is_nonblank(p))
+		{
+			conn->privmsg (msg_target, p);
+			cnt += strlen (p);
 
 			/* Sleep so that we don't get kicked for flooding */
 			if (flood_cnt < cnt) { sleep(1); cnt -= FLOOD_CHAR_COUNT; }
 			if (50 < flood_cnt) flood_cnt -= 15;
 		}
-		free(reply);
+		*ep = save;
+		p = ep;
 	}
+	free(reply);
 
 	return 0;
 }
