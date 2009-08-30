@@ -69,7 +69,7 @@ const std::string CogitaConfig::helpOutput =
 
 void CogitaConfig::printHelp() { cout << helpOutput; }
 
-void CogitaConfig::printVersion() { cout << "Cogita version 0.1.1" << endl; }
+void CogitaConfig::printVersion() { cout << COGITA_VSTRING << endl; }
 
 int CogitaConfig::parseOptions(int argc, char* argv[])
 {
