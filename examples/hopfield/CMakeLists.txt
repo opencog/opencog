@@ -36,7 +36,6 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
-    ubigraph
 	${Boost_SIGNALS_LIBRARY}
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
