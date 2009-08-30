@@ -268,14 +268,24 @@
 (end-dbg-display)
 
 			(if (null? ans)
-				(display "No triples found, attempting deduction.\n")
-				(chat-prt-soln ans)
+				(let ()
+					(display "No triples found, attempting deduction.\n")
+					(chat-return "(say-part-3)")
+				)
+				(let ()
+					; print, and skip to the end of processing
+					(chat-prt-soln ans)
+					(chat-return "(say-final-cleanup)")
+				)
 			)
 		)
 	)
 
 	; Invoke the next step of processing.
-	(chat-return (list "say-part-3 " is-question))
+	(if is-question
+		(chat-return "(say-part-3)")
+		(chat-return "(say-final-cleanup)")
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -289,74 +299,26 @@
 	)
 )
 
-
-; -----------------------------------------------------------------------
-; say-part-pln-3 -- run part 3 of the chat processing
-; This part attempts to use PLN. XXX this is disabled/unsued right
-; now, due to PLN performance problems.  A simpler approach will
-; be used instead, for the interim.
-;
-(define (say-part-pln-3 is-question)
-
-	; If we still don't have an answer, try running PLN 
-	; (this is an extremely simple-minded hack right now)
-	; First, the question needs to be promoted to semes,
-	; because the PLN resoner will only work on those ... 
-	; XXX under construction, not done.
-	(let* ((trips (get-new-triples))
-			(trip-semes (promote-to-seme same-lemma-promoter trips))
-			(answer-list (chat-get-simple-answer))
-		)
-		(if (and is-question (null? answer-list))
-			(let* ((ftrip (car trip-semes))
-					(uncert (hypothetical-to-uncertain ftrip))
-					(deduced (pln-bc uncert 3300))
-					; (deduced (pln-bc uncert 2700))
-				)
-
-				; Run PLN only if a question is involved -- 
-				; We don't need to run pln on assertions.
-				(if deduced
-					(let* ((context-tv (cog-tv uncert))
-							(ctv-list (cog-tv->alist context-tv))
-							(vh-list (assoc-ref "versions" ctv-list))
-						)
-(newline)
-(display uncert)
-(newline)
-(display ctv-list)
-(newline)
-(display vh-list)
-					)
-					(display "Unable to deduce via PLN")
-				)
-(fflush)
-			)
-		)
-	)
-
-	; Call the final stage
-	"\n:scm hush\r (say-final-cleanup)"
-)
-
 ; -----------------------------------------------------------------------
 ; say-part-3 -- run part 3 of the chat processing
 ; This attempts to do some basic deduction
 ;
-(define (say-part-3 is-question)
+(define (say-part-3)
 
 	; If we still don't have an answer, try making a deduction
 	; (this is an extremely simple-minded hack right now)
 	; First, the question needs to be promoted to semes,
 	(let* ((trips (get-new-triples))
 			(trip-semes (promote-to-seme same-lemma-promoter trips))
-			(answer-list (chat-get-simple-answer))
 		)
-		(if (and is-question (null? answer-list) (not (null? trip-semes)))
+		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
 					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
 				)
-(dbg-display "duude ch is:\n")
+(dbg-display "duude trip-semes are:\n")
+(display trip-semes)
+(newline)
+(display"and the chain is\n")
 (display (make-simple-chain ftrip))
 (end-dbg-display)
 				(if ans
