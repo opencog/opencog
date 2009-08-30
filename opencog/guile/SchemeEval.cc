@@ -370,7 +370,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	if (0 == strcmp(restr, "cog-yield"))
 	{
 		free(restr);
-		return throw_args;
+		return SCM_CAR(throw_args);
 	}
 
 	// If it's not a read error, and it's not flow-control, 
