@@ -27,8 +27,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; pseudo-multi-threading hack. The core problem here is the
-; command-response nature of the current opencog server design,
+; chat-return -- throw a return to the chat client.
+;
+; This is a pseudo-multi-threading hack. The core problem here is
+; the command-response nature of the current opencog server design,
 ; coupled to the fact that no response is generated until the 
 ; command completes, and that no response is possible after the 
 ; command completes. So instead, the chat server needs to poll
@@ -38,6 +40,15 @@
 ; unfortuantely, scm_with_guile() erects a continuation barrier,
 ; making this hard/impossible. Argh.
 ;
+; So instead, what's implemented here is throw-catch semantics.
+; An exceptiuon is thrown, its caught by the guile interpreter, 
+; and thus passed on to the chat client.  Because this is a throw,
+; it can be used anywhere in the code to break out of evaluation.
+;
+; The chat client is looking for "\n:scm hush\r (scheme code)\n".
+; If it sees this, then the (scheme code) is resubmitted to opencog.
+; The "\n:scm" and the "\r" are both important parts of the syntax,
+; don't mess them up.
 
 (define (chat-return x)
 	(throw 'cog-yield 
@@ -140,9 +151,7 @@
 ; processing is going on, the processing as been split into stages,
 ; designed so that each stage returns from the scheme interpreter,
 ; with some output for the chatbot.  The next stage of processing can
-; then be continued by writing "\n:scm hush\r (scheme code)\n" to the 
-; chat processor. The "\n:scm" and the "\r" are both important parts of
-; the syntax, as the chat bridge looks for these. Don't mess them up.
+; then be continued by 
 ; Or use (chat-return ) instead.
 ;
 ; This interactive design is not very pretty, and it would be better
@@ -203,6 +212,7 @@
 			(display ", you made a statement: ")
 			(display txt)
 			(newline)
+			(chat-return "(say-declaration)")
 		)
 	)
 
@@ -239,7 +249,7 @@
 ;
 (define (say-part-2 is-question)
 
-	; Run the triples processing.
+	; Run the triples processing.  
 	(attach-sents-for-triple-processing (get-new-parsed-sentences))
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
@@ -300,6 +310,29 @@
 )
 
 ; -----------------------------------------------------------------------
+; say-statement -- User made a declaration. Perform processing
+; of declarative statements
+
+(define (say-declaration)
+(dbg-display "entering declaration processing\n")
+
+	; Run the triples processing.  
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
+	(create-triples)
+	(dettach-sents-from-triple-anchor)
+
+	; promote triples to semes.
+	(let* ((trips (get-new-triples))
+		(trip-semes (promote-to-seme same-lemma-promoter trips))
+		)
+(dbg-display "statement triple semes are:\n")
+(display trip-semes)
+	)
+
+	(chat-return "(say-final-cleanup)")
+)
+
+; -----------------------------------------------------------------------
 ; say-part-3 -- run part 3 of the chat processing
 ; This attempts to do some basic deduction
 ;
@@ -336,8 +369,7 @@
 	)
 
 	; Call the final stage
-	(newline)
-	"\n:scm hush\r (say-final-cleanup)"
+	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
