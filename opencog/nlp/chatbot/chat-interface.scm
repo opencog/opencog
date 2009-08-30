@@ -13,6 +13,20 @@
 (define (fflush) (force-output (car  (fdes->ports 1))))
 
 ; -----------------------------------------------------------------------
+; Debug printing support.  Turnging on debug printing will prevent
+; output from being sent to the chat room.  It is still printed by the
+; chatbot to its stdout, and so can be debugged there. The chat client
+; explicitly looks for ":dbg" and ":end-dbg" in the chat stream.
+;
+(define (dbg-display x)
+	(display "\n:dbg\n")
+	(display x)
+)
+(define (end-dbg-display)
+	(display "\n:end-dbg\n")
+)
+
+; -----------------------------------------------------------------------
 ; pseudo-multi-threading hack. The core problem here is the
 ; command-response nature of the current opencog server design,
 ; coupled to the fact that no response is generated until the 
@@ -249,10 +263,10 @@
 				(ax (cog-delete rslt))
 				(ans (chat-get-simple-answer))
 			)
-
-(display "duude question trips are:\n")
+(dbg-display "duude question trips are:\n")
 (display trips)
-(newline)
+(end-dbg-display)
+
 			(if (null? ans)
 				(display "No triples found, attempting deduction.\n")
 				(chat-prt-soln ans)
@@ -342,6 +356,9 @@
 			(let* ((ftrip (car trip-semes))
 					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
 				)
+(dbg-display "duude ch is:\n")
+(display (make-simple-chain ftrip))
+(end-dbg-display)
 				(if ans
 					(display "Yes.\n")
 					(display "Simple deduction found no answer.\n")
