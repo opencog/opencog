@@ -28,6 +28,7 @@
 (define (chat-return x)
 	(throw 'cog-yield 
 		(string-join 
+			; Must use \r here, not \n, as else the chatbot will screw up.
 			(list "\n:scm hush\r "
 				(call-with-output-string (lambda (y) (display x y)))
 				"\n"
@@ -224,14 +225,9 @@
 ;
 (define (say-part-2 is-question)
 
-(display "wtf 1\n")
-(fflush)
 	; Run the triples processing.
 	(attach-sents-for-triple-processing (get-new-parsed-sentences))
-(display "wtf 1a\n")
-(fflush)
 	(create-triples)
-(display "wtf 1b\n")
 	(dettach-sents-from-triple-anchor)
 
    ; If a question was asked, and the simple syntactic pattern matching
