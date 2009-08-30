@@ -197,6 +197,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	while (more_io)
 	{
 		more_io = false;
+		bool nosend = false;
 
 		// printf ("Sending to opencog: %s\n", cmdline);
 		char * reply = whirr_sock_io (cmdline);
@@ -228,11 +229,36 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 			// multi-processing.
 			if (0 == strncmp(p, ":scm", 4))
 			{
-				free(reply);
 				char * cr = strchr(p, '\r');
 				if (cr) *cr = '\n';
-				reply = whirr_sock_io (p+1);
+				char * r = whirr_sock_io (p+1);
+				free(reply);
+				reply = r;
 				p = reply;
+				printf ("opencog reply: %s\n", reply);
+				continue;
+			}
+
+			// If the line starts with ":dbg", then print to stdout, 
+			// but do not send to chatroom.
+			if (0 == strncmp(p, ":dbg", 4))
+			{
+				*ep = save;
+				p = ep;
+				nosend = true;
+				continue;
+			}
+			if (0 == strncmp(p, ":end-dbg", 8))
+			{
+				*ep = save;
+				p = ep;
+				nosend = false;
+				continue;
+			}
+			if (nosend)
+			{
+				*ep = save;
+				p = ep;
 				continue;
 			}
 
