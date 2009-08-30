@@ -281,7 +281,7 @@
 		)
 	)
 
-	; Invoke the next step of processing.
+	; If the question is still unanswered, try deduction, else cleanup.
 	(if is-question
 		(chat-return "(say-part-3)")
 		(chat-return "(say-final-cleanup)")
@@ -318,12 +318,18 @@
 (dbg-display "duude trip-semes are:\n")
 (display trip-semes)
 (newline)
-(display"and the chain is\n")
+(display "and the chain is\n")
 (display (make-simple-chain ftrip))
+(display "and the ans is is\n")
+(display (cog-outgoing-set ans))
 (end-dbg-display)
-				(if ans
+				(if (and ans (not (null? (cog-outgoing-set ans))))
 					(display "Yes.\n")
 					(display "Simple deduction found no answer.\n")
+				)
+
+				(if ans
+					(cog-delete ans)
 				)
 			)
 		)
@@ -339,8 +345,7 @@
 ;
 (define (say-final-cleanup)
 
-(display "duude cleaning up now\n")
-(newline)
+	(dbg-display "Cleaning up now\n")
 
 	; Delete re-anchored triples
 	(delete-bottom-anchor)
