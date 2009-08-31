@@ -169,7 +169,7 @@
 	(display "Hello ")
 	(display nick)
 	; (display ", parsing ...\n")
-	(display ", cogita is currently broken, but will try anyway ...\n")
+	(display ", Cogita is currently broken, but will try anyway ...\n")
 
 	; Parse the input, send it to the question processor
 	(relex-parse txt)
@@ -259,7 +259,8 @@
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let* ((trips (get-new-triples))
-				; We need to anchor becasue of ??? why?
+				; We need to anchor because of ??? why?
+				; Maybe for the quest-rule ??
 				(ancs (anchor-bottom-side trips))
 
 				; Pull in any semes that might be related...
@@ -348,7 +349,7 @@
 			(let* ((ftrip (car trip-semes))
 					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
 				)
-(dbg-display "duude trip-semes are:\n")
+(dbg-display "duude question-deduct trip-semes are:\n")
 (display trip-semes)
 (newline)
 (display "and the chain is\n")

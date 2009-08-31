@@ -143,6 +143,7 @@
       ^ %WordInstanceLink($var2,$sent)  ; scope to sentence
       ^ _predadj($var2, $var1) 
       ^ $prep($var2,$var3)
+      ^ !HYP-FLAG($var1)       ; Disallow "Is Socrates mortal?"
       THEN ^3_isa($var2, $var1)
 
 ; Sentence: "Berlin is in Germany", alternate parse
@@ -150,7 +151,7 @@
 ; var1=Berlin var2=Germany $prep=in
 ; However, this can't work if defined as simply as this: there are
 ; too many bogus matches for 'prep'.
-; XXX FIXME (this is same,similar problem to the ohter XXX above.)
+; XXX FIXME (this is same, similar problem to the other XXX above.)
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;      ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
 ;      ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
