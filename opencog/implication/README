@@ -16,6 +16,30 @@ ImplicationLinks for many common usage scenarios.
 Right now, this is JUST A BUNCH OF IDEAS. Nothing works yet.
 
 
+domains
+	rlx { r(a,b) } = {
+		EvaluationLink
+			DefinedLinguisticRelationshipNode r
+			ListLink
+				WordInstanceNode a
+				WordInstanceNode b
+	}
+
+clauses
+	rlx { _subj(Berlin,is) }
+
+
+
+
+
+===========================
 
 domains
-	
+	wrd-inst = WordInstanceNode
+
+
+predicates
+	rel(wrd-inst, wrd-inst)
+
+clauses
+	likes(bill,X) if likes(tom,X)
