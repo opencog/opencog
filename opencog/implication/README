@@ -1,0 +1,21 @@
+
+                      Implication
+                      -----------
+                Linas Vepstas September 2009
+
+OpenCog performs much of its reasoning by representing logical
+constructs with ImplicationLinks. Roughly speaking, these resemble
+the "rules" of popular "rule engines", but differ in significant ways.
+A long-term goal is to have a system that is able to learn these 
+automatically.  However, in the short term, many of these "rules" are
+written by hand, in order to acheive specific goals.  When writing them
+by hand, they prove to be rather verbose.  The goal of the code in this
+directory is to provide a more "human-freindly" way to write
+ImplicationLinks for many common usage scenarios.
+
+Right now, this is JUST A BUNCH OF IDEAS. Nothing works yet.
+
+
+
+domains
+	
