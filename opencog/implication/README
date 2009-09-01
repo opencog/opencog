@@ -54,7 +54,7 @@ domains
 		)
 	}
 
-	;; No namespace, this si globally defined.
+	;; No namespace, this is globally defined.
 	IF P THEN Q  = {
 		(ImplicationLink
 			P

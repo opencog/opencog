@@ -12,8 +12,42 @@
 #
 #    cat some-rule-file.txt | ./rules-to-implications.pl "my-rules"
 #
+# An example of the kind of input that this script understands is:
+#
+# ; Sentence: "Lisbon is the capital of Portugaul"
+# ; var0=Lisbon, var1=capital var2=Portugaul
+# # IF %ListLink("# APPLY TRIPLE RULES", $sent)
+#       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+#       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+#       ^ _subj(be,$var0) ^ _obj(be,$var1)
+#       ^ $prep($var1,$var2)              ; preposition 
+#       ^ %LemmaLink($var1,$word1)        ; word of word instance
+#       ^ $phrase($word1, $prep)          ; convert to phrase
+#       THEN ^3_$phrase($var2, $var0) 
+#
+# Here's another example, showing the use of the ! for NOT:
+#
+# ; 6
+# ; Sentence "Berlin is a city"
+# ; var1=Berlin var2=city
+# ; Must be careful not to make the pattern too simple, as, for example,
+# ; "the captial of Germany is Berlin", the prep is crucial to reversing
+# ; the order of the subject and object! Alternately, demand that $var2
+# ; is indefinite.
+# # IF %ListLink("# APPLY TRIPLE RULES", $sent)
+#       ^ %WordInstanceLink($var1,$sent)  ; $var1 and $var2 must be
+#       ^ %WordInstanceLink($var2,$sent)  ; in the same sentence
+#       ^ %WordInstanceLink(be,$sent)     ; hyp-flag "be" in same sentence
+#       ^ _subj(be, $var1) ^ _obj(be, $var2)
+#       ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
+#       ^ !HYP-FLAG(be)                   ; Disallow "Is Berlin a city?"
+#       THEN ^3_isa($var2, $var1) 
+#
+#
 # This perl script implements a very simple parser. Some day in the future,
 # it would proably make sense to re-write this in terms of lex & yacc. Maybe.
+# In fact, this file has already become unmaintainable, and the syntax
+# is unsupportable. New rules should NOT be written in this syntax.
 #
 # Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 # Created in January, March 2009.
