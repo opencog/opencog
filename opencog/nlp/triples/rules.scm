@@ -92,14 +92,20 @@
 			; av, bv are true if a,b start with $
 			(av (r-isvar? a))
 			(bv (r-isvar? b))
+			(rv (r-isvar? rel))
+
 			; avn is the variable name to use
 			(avn (if av a (get-anon-var-id! a)))
 			(bvn (if bv b (get-anon-var-id! b)))
+			(rvn (if rv rel (get-anon-var-id! rel)))
 
 			; The basic RelEx predicate structure
 			(pred
 				(EvaluationLink (stv 1 1)
-					(DefinedLinguisticRelationshipNode rel)
+					(if rv
+						(VariableNode rvn)
+						(DefinedLinguisticRelationshipNode rel)
+					)
 					(ListLink
 						(VariableNode avn)
 						(VariableNode bvn)
@@ -244,6 +250,8 @@
 )
 
 ; -----------------------------------------------------------------
+; r-anchor-trips -- declare a sentence anchored to a rule
+;
 (define (r-anchor-trips sent)
 	(r-and 
 		(r-anchor "# APPLY TRIPLE RULES" sent)
@@ -252,14 +260,38 @@
 )
 
 ; -----------------------------------------------------------------
+; r-decl-word-inst -- declare a word instance belonging to a sentence
+;
+(define (r-decl-word-inst word-inst sent)
+	(r-and
+		(r-link WordInstanceLink word-inst sent)
+		(r-decl-var "WordInstanceNode" word-inst)
+	)
+)
+; -----------------------------------------------------------------
 (define (x)
-(r-and
-	(r-anchor-trips $sent)
-	(r-link WordInstanceLink "$var0" "$sent")
-	(r-link WordInstanceLink "$var1" "$sent")
-	(r-rlx "_subj" "be" "$var0")
-	(r-rlx "_obj" "be" "$var1")
-))
+	; Sentence: "Lisbon is the capital of Portugaul"
+	;   _subj(be, Lisbon)
+	;   _obj(be, capital)
+	;   of(capital, Portugaul)
+	; var0=Lisbon, var1=capital var2=Portugaul
+	(r-and
+		; We are looking for sentences anchored to the 
+		; triples-processing ; node
+		(r-anchor-trips "$sent")
+	
+		; $var0 and $var1 must belong to the same sentence
+		(r-decl-word-inst "$var0" "$sent") 
+		(r-decl-word-inst "$var1" "$sent")
+	
+		; Match subject and object as indicated above
+		(r-rlx "_subj" "be" "$var0")
+		(r-rlx "_obj" "be" "$var1")
+
+		; Match the proposition
+		(r-rlx "$prep" "$var1" "$var2")
+	)
+)
 
 (define (r-ifthen P Q)
 	(ImplicationLink  P Q)
