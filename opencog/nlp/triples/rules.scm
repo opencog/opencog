@@ -20,6 +20,10 @@
 ; new string.  Only minimal measures are taken to ensure uniqueness;
 ; so the result is not "strong". This is intended for use in generating
 ; "unique" variable names in ImplicatinLinks
+;
+; Example usage:
+;     > (get-anon-var-id! "beee")
+;     > $anon-beee-3
 
 (define *anon-var-id* 0)
 (define *anon-prefix* "$anon-")
@@ -39,51 +43,103 @@
 (define (set-anon-prefix! str) (set! *anon-prefix* str))
 
 ; -----------------------------------------------------------------
+; r-isvar? -- return #t if arg is a variable name, i.e. starts with $
+; Returns #t if the string starts with a $
 
-(define (r-ifthen P Q)
-	(ImplicationLink  P Q)
+(define (r-isvar? v)
+	(eq? #\$ (string-ref v 0))
 )
 
+; -----------------------------------------------------------------
+; r-rlx -- format a RelEx-like expression
+; The r-rlx routine takes a RelEx-like expression and outputs a list
+; of appropriate OpenCog linbk structures.  Thus, for example
+; _subj(be, $var) is exprssed as (r-rlx "_subj" "be" "$var")
+; which is then processed into the appropriate OpenCog graph.
+; An appropriate indirection for "be" as a word-instance of the 
+; word "be" is made.
+
 (define (r-rlx rel a b)
+
+	; The lemma-link needed for joining words to wod-instances.
+	(define (lem var wrd)
+		(LemmaLink (stv 1 1)
+			(VariableNode var)
+			(WordNode wrd)
+		)
+	)
+
+	; Create a basic variable typing declaration
+	(define (var-type var type)
+		(TypedVariableLink
+			(VariableNode var)
+			(VariableTypeNode type)
+		)
+	)
+
+	; prepend to list, maybe
+	(define (vpend bool name lst)
+		(define (pend bool item lst)
+			(if bool (cons item lst) lst)
+		)
+		(pend bool (var-type name "WordInstanceNode") lst)
+	)
+
 	(let* (
 			; av, bv are true if a,b start with $
-			(av (eq? #\? (string-ref a 0)))
-			(bv (eq? #\? (string-ref b 0)))
+			(av (r-isvar? a))
+			(bv (r-isvar? b))
 			; avn is the variable name to use
 			(avn (if av a (get-anon-var-id! a)))
 			(bvn (if bv b (get-anon-var-id! b)))
-		)
-		(define pred
-			(EvaluationLink (stv 1 1)
-				(DefinedLinguisticRelationshipNode rel)
-				(ListLink
-					(VariableNode avn)
-					(VariableNode bvn)
+
+			; The basic RelEx predicate structure
+			(pred
+				(EvaluationLink (stv 1 1)
+					(DefinedLinguisticRelationshipNode rel)
+					(ListLink
+						(VariableNode avn)
+						(VariableNode bvn)
+					)
 				)
 			)
 		)
-		(define (lem var wrd)
-			(LemmaLink (stv 1 1)
-				(VariableNode var)
-				(WordNode wrd)
+
+		; The clauses needed to work with this relex expression
+		(define clauses
+			(cond
+				((and av bv) pred)
+				((and (not av) bv)
+					(list pred (lem avn a))
+				)
+				((and av (not bv))
+					(list pred (lem bvn b))
+				)
+				((and (not av) (not bv))
+					(list pred (lem avn a) (lem bvn b))
+				)
 			)
 		)
-		(cond
-			((and av bv) pred)
-			((and (not av) bv)
-				(list pred (lem avn a))
+		
+		; The variables appearing in the clauses
+		(define vartypes
+			(vpend (not av) avn
+				(vpend (not bv) bvn '())
 			)
-			((and av (not bv))
-				(list pred (lem bvn b))
-			)
-			((and (not av) (not bv))
-				(list pred (lem avn a) (lem bvn b))
-			)
+		)
+
+		(cons
+			(cons "vardecls" vartypes)
+			(cons "clauses" clauses)
 		)
 	)
 )
 
 
 (r-rlx "_subj" "be" "$var0")   ;; _subj(be, $var0)
+
+(define (r-ifthen P Q)
+	(ImplicationLink  P Q)
+)
 
 
