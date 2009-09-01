@@ -139,8 +139,17 @@
 )
 
 ; -----------------------------------------------------------------
+; r-and -- concatenate a list of r-clauses together.
+; Accepts a variable number of clauses and returns a concatenation 
+; of them into one clause structure.
 ;
-(define (r-and alst)
+; Example usage:
+;    (r-and
+;       (r-rlx "_subj" "be" "$var0")
+;       (r-rlx "_obj" "be" "$var1")
+;    )
+;
+(define (r-and . alst)
 
 	; Merge two alists together into one.
 	(define (merge item otem)
@@ -170,6 +179,7 @@
 				(clauses (append ic oc))
 			)
 
+
 			; Return the variables and clauses in an association list
 			(alist-cons 'vardecls varbles
 				(alist-cons 'clauses clauses '())
@@ -191,25 +201,32 @@
 	(do-merge alst '())
 )
 
+; -----------------------------------------------------------------
+; r-link -- declare a simple opencog link connecting two items
+; 
+; Example usage:
+;   (r-link WordInstanceLink "$var1" "$sent")
+;
+(define (r-link lnk-type item-1 item-2)
+	(define lnk
+		(lnk-type (stv 1 1)
+			(VariableNode item-1)
+			(VariableNode item-2)
+		)
+	)
+	(alist-cons 'clauses (list lnk) '())
+)
+
+; -----------------------------------------------------------------
 (define (x)
 (r-and
-	(list
+	(r-link WordInstanceLink "$var0" "$sent")
+	(r-link WordInstanceLink "$var1" "$sent")
 	(r-rlx "_subj" "be" "$var0")
 	(r-rlx "_obj" "be" "$var1")
-	(r-rlx "_booger" "be" "$var2")
-	)
-)
-)
-(define (y)
-(r-and
-	(list
-	(r-rlx "_subj" "be" "$var0")
-	)
-)
-)
+))
 
 (define (r-ifthen P Q)
 	(ImplicationLink  P Q)
 )
-
 
