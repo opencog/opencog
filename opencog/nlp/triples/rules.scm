@@ -218,8 +218,43 @@
 )
 
 ; -----------------------------------------------------------------
+; r-decl-var -- declare a variable type
+;
+(define (r-decl-var vartype varname)
+	(define (vd vtype vname)
+		(TypedVariableLink
+			(VariableNode vname)
+			(VariableTypeNode vtype)
+		)
+	)
+	(alist-cons 'vardecls (list (vd vartype varname)) '())
+)
+
+; -----------------------------------------------------------------
+; r-anchor -- link a variable to an anchor
+;
+(define (r-anchor anchor-name var)
+	(define lnk
+		(ListLink (stv 1 1)
+			(AnchorNode anchor-name)
+			(VariableNode var)
+		)
+	)
+	(alist-cons 'clauses (list lnk) '())
+)
+
+; -----------------------------------------------------------------
+(define (r-anchor-trips sent)
+	(r-and 
+		(r-anchor "# APPLY TRIPLE RULES" sent)
+		(r-decl-var "SentenceNode" sent)
+	)
+)
+
+; -----------------------------------------------------------------
 (define (x)
 (r-and
+	(r-anchor-trips $sent)
 	(r-link WordInstanceLink "$var0" "$sent")
 	(r-link WordInstanceLink "$var1" "$sent")
 	(r-rlx "_subj" "be" "$var0")
