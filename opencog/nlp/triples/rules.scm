@@ -58,7 +58,10 @@
 ; which is then processed into the appropriate OpenCog graph.
 ; An appropriate indirection for "be" as a word-instance of the 
 ; word "be" is made.
-
+;
+; Example:
+;      (r-rlx "_subj" "be" "$var0")   ;; _subj(be, $var0)
+;
 (define (r-rlx rel a b)
 
 	; The lemma-link needed for joining words to wod-instances.
@@ -128,15 +131,82 @@
 			)
 		)
 
-		(cons
-			(cons "vardecls" vartypes)
-			(cons "clauses" clauses)
+		; Return the variables and clauses in an association list
+		(alist-cons 'vardecls vartypes
+			(alist-cons 'clauses clauses '())
 		)
 	)
 )
 
+; -----------------------------------------------------------------
+;
+(define (r-and alst)
 
-(r-rlx "_subj" "be" "$var0")   ;; _subj(be, $var0)
+	; Merge two alists together into one.
+	(define (merge item otem)
+		(let* (
+				; ivp == item variable pair
+				(ivp (assoc 'vardecls item))
+				; iv == item variables
+				(iv (if ivp (cdr ivp) '()))
+				
+				; icp == item clauses pair
+				(icp (assoc 'clauses item))
+				; ic == item clauses
+				(ic (if icp (cdr icp) '()))
+				
+				; ovp == other item variable pair
+				(ovp (assoc 'vardecls otem))
+				; ov == other item variables
+				(ov (if ovp (cdr ovp) '()))
+				
+				; ocp == other item clauses pair
+				(ocp (assoc 'clauses otem))
+				; oc == other item clauses
+				(oc (if ocp (cdr ocp) '()))
+
+				;; concatenate
+				(varbles (append iv ov))
+				(clauses (append ic oc))
+			)
+
+			; Return the variables and clauses in an association list
+			(alist-cons 'vardecls varbles
+				(alist-cons 'clauses clauses '())
+			)
+		)
+	)
+
+	; concatenate a bunch of alists into one
+	(define (do-merge lst reslt)
+		(if (not (null? lst))
+			(do-merge (cdr lst)
+				(merge (car lst) reslt)
+			)
+			reslt
+		)
+	)
+
+	; And now do it.
+	(do-merge alst '())
+)
+
+(define (x)
+(r-and
+	(list
+	(r-rlx "_subj" "be" "$var0")
+	(r-rlx "_obj" "be" "$var1")
+	(r-rlx "_booger" "be" "$var2")
+	)
+)
+)
+(define (y)
+(r-and
+	(list
+	(r-rlx "_subj" "be" "$var0")
+	)
+)
+)
 
 (define (r-ifthen P Q)
 	(ImplicationLink  P Q)
