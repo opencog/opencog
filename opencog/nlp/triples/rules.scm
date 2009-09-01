@@ -15,8 +15,46 @@
 ;
 ;
 
+(define *anon-var-id* 0)
+(define (get-anon-var-id! str)
+	(set! *anon-var-id* (1+ *anon-var-id*))
+	(string-concatenate/shared
+		(list str "-anon-"
+			(call-with-output-string 
+				(lambda (port)
+					(display *anon-var-id* port)
+				)
+			)
+		)
+	)
+)
+
+
+
 (define (r-ifthen P Q)
 	(ImplicationLink  P Q)
 )
+
+(define (r-rlx rel a b)
+	(let* ((av (eq? #\? (string-ref a 0)))
+			(bv (eq? #\? (string-ref b 0)))
+			(avn 
+		)
+	)
+	(define pred
+		(EvaluationLink (stv 1 1)
+			(DefinedLinguisticRelationshipNode rel)
+			(ListLink
+				(VariableNode a)
+				(VariableNode b)
+			)
+		)
+	)
+	(if (not av)
+	)
+)
+
+
+(r-rlx "_subj" "be" "$var0")   ;; _subj(be, $var0)
 
 
