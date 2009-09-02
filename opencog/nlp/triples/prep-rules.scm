@@ -76,4 +76,14 @@
 	(prep-rule-template "_obj" "$var1" "$var0")
 )
 
+; -----------------------------------------------------------
+; needed by the triples-processing pipeline
+;
+(define prep-rule-list (list
+   prep-rule-0
+   prep-rule-1
+   prep-rule-2
+   prep-rule-3
+))
+
 ; ----------------------- END OF FILE -----------------------

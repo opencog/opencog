@@ -86,9 +86,9 @@
 	; First, create all of the preposition phrases that we'll need.
 	(for-each
 		(lambda (rule)
-			(cog-ad-hoc "do-implication" rule)
+			(cog-ad-hoc "do-varscope" rule)
 		)
-		prep-rule-list ; this list defined by the /triples/prep-rules.txt file
+		prep-rule-list ; this list defined by the /triples/prep-rules.scm file
 	)
 
 	; Now, create the actual triples
