@@ -24,22 +24,13 @@
     </ImplicationLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="pastForm"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="kill"/>
-    <AndLink strength="1.000000" confidence="0.925926">
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <Element class="PredicateNode" name="killed"/>
-            <ExecutionOutputLink strength="0.990000" confidence="0.990000">
-                <Element class="PredicateNode" name="pastForm"/>
-                <Element class="PredicateNode" name="kill"/>
-            </ExecutionOutputLink>
-        </ImplicationLink>
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <ExecutionOutputLink strength="0.990000" confidence="0.990000">
-                <Element class="PredicateNode" name="pastForm"/>
-                <Element class="PredicateNode" name="kill"/>
-            </ExecutionOutputLink>
-            <Element class="PredicateNode" name="killed"/>
-        </ImplicationLink>
-    </AndLink>
+    <EquivalenceLink strength="1.000000" confidence="0.000000">
+        <Element class="PredicateNode" name="killed"/>
+        <ExecutionOutputLink strength="0.990000" confidence="0.990000">
+            <Element class="PredicateNode" name="pastForm"/>
+            <Element class="PredicateNode" name="kill"/>
+        </ExecutionOutputLink>
+    </EquivalenceLink>
     <EvaluationLink strength="0.200000" confidence="0.600000">
         <Element class="PredicateNode" name="isDead"/>
         <ListLink strength="1.000000" confidence="0.000000">
@@ -233,5 +224,6 @@
         <tag name="ExtensionalInheritanceLink" value="ExtensionalInheritanceLink"/>
         <tag name="PredicateNode" value="PredicateNode"/>
         <tag name="ExecutionOutputLink" value="ExecutionOutputLink"/>
+        <tag name="EquivalenceLink" value="EquivalenceLink"/>
     </tagdescription>
 </list>

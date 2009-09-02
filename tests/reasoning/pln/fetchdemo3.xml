@@ -31,7 +31,7 @@
                 <Element class="VariableNode" name="$a"/>
                 <Element class="VariableNode" name="$c"/>
             </ListLink>
-            <FalseLink strength="0.999000" confidence="0.999000">
+            <ImplicationLink strength="0.999000" confidence="0.999000">
                 <AndLink strength="1.000000" confidence="0.000000">
                     <Element class="VariableNode" name="$b"/>
                     <ImplicationLink strength="1.000000" confidence="0.000000">
@@ -46,9 +46,9 @@
                         <Element class="VariableNode" name="$c"/>
                     </AndLink>
                 </ImplicationLink>
-            </FalseLink>
+            </ImplicationLink>
         </ForallLink>
-        <FalseLink strength="0.800000" confidence="0.999000">
+        <ImplicationLink strength="0.800000" confidence="0.999000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <EvaluationLink strength="1.000000" confidence="0.000000">
                     <Element class="PredicateNode" name="can"/>
@@ -69,8 +69,8 @@
                     <Element class="ConceptNode" name="G"/>
                 </ListLink>
             </EvaluationLink>
-        </FalseLink>
-        <FalseLink strength="0.999000" confidence="0.999000">
+        </ImplicationLink>
+        <ImplicationLink strength="0.999000" confidence="0.999000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <Element class="FWVariableNode" name="$4"/>
                 <EvaluationLink strength="1.000000" confidence="0.000000">
@@ -86,8 +86,8 @@
                     <Element class="ConceptNode" name="G"/>
                 </ListLink>
             </EvaluationLink>
-        </FalseLink>
-        <FalseLink strength="0.999000" confidence="0.999000">
+        </ImplicationLink>
+        <ImplicationLink strength="0.999000" confidence="0.999000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <AndLink strength="1.000000" confidence="0.000000">
                     <Element class="FWVariableNode" name="$4"/>
@@ -105,7 +105,7 @@
                 </AndLink>
                 <Element class="FWVariableNode" name="$6"/>
             </ImplicationLink>
-        </FalseLink>
+        </ImplicationLink>
         <ImplicationLink strength="0.999000" confidence="0.999000">
             <EvaluationLink strength="0.999000" confidence="0.999000">
                 <Element class="PredicateNode" name="just_done"/>
@@ -140,7 +140,6 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="FalseLink" value="FalseLink"/>
         <tag name="ForallLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>

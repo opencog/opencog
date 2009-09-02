@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <list>
-    <FalseLink strength="1.000000" confidence="0.999000">
+    <ImplicationLink strength="1.000000" confidence="0.999000">
         <AndLink strength="1.000000" confidence="0.000000">
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="just_done"/>
@@ -20,7 +20,7 @@
                 <Element class="FWVariableNode" name="$2"/>
             </ListLink>
         </EvaluationLink>
-    </FalseLink>
+    </ImplicationLink>
     <EvaluationLink strength="1.000000" confidence="0.990000">
         <Element class="PredicateNode" name="can_do"/>
         <ListLink strength="1.000000" confidence="0.000000">
@@ -143,7 +143,7 @@
     <FWVariableNode strength="1.000000" confidence="0.000000" name="$1"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="can_do"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="just_done"/>
-    <FalseLink strength="1.000000" confidence="0.999000">
+    <ImplicationLink strength="1.000000" confidence="0.999000">
         <AndLink strength="1.000000" confidence="0.000000">
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="do"/>
@@ -164,7 +164,7 @@
                 <Element class="FWVariableNode" name="$1"/>
             </ListLink>
         </EvaluationLink>
-    </FalseLink>
+    </ImplicationLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="NOTEnear"/>
     <EvaluationLink strength="1.000000" confidence="0.999000">
         <Element class="PredicateNode" name="NOTEnear"/>
@@ -188,7 +188,7 @@
     <PredicateNode strength="1.000000" confidence="0.000000" name="teacher_say"/>
     <WordNode strength="1.000000" confidence="0.000000" name="fetch"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="+++"/>
-    <FalseLink strength="1.000000" confidence="0.990000">
+    <ImplicationLink strength="1.000000" confidence="0.990000">
         <AndLink strength="1.000000" confidence="0.000000">
             <EvaluationLink strength="0.990000" confidence="0.990000">
                 <Element class="PredicateNode" name="teacher_say"/>
@@ -212,10 +212,10 @@
         <EvaluationLink strength="1.000000" confidence="0.000000">
             <Element class="PredicateNode" name="+++"/>
         </EvaluationLink>
-    </FalseLink>
+    </ImplicationLink>
     <SchemaNode strength="1.000000" confidence="0.000000" name="hold"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="near"/>
-    <FalseLink strength="1.000000" confidence="0.990000">
+    <ImplicationLink strength="1.000000" confidence="0.990000">
         <AndLink strength="1.000000" confidence="0.000000">
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="just_done"/>
@@ -247,13 +247,12 @@
                 </EvaluationLink>
             </ListLink>
         </EvaluationLink>
-    </FalseLink>
+    </ImplicationLink>
     <FWVariableNode strength="1.000000" confidence="0.000000" name="$2"/>
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="FalseLink" value="FalseLink"/>
         <tag name="ForallLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>

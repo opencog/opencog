@@ -124,7 +124,7 @@
     <ConceptNode strength="0.000033" confidence="0.000031" name="starts"/>
     <AssociativeLink strength="0.079869" confidence="0.000000">
         <Element class="ConceptNode" name="example"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="starts"/>
         </NotLink>
     </AssociativeLink>
@@ -149,7 +149,7 @@
     <ConceptNode strength="0.000062" confidence="0.000058" name="performance"/>
     <AssociativeLink strength="0.281801" confidence="0.000000">
         <Element class="ConceptNode" name="and"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="performance"/>
         </NotLink>
     </AssociativeLink>
@@ -192,7 +192,7 @@
     <ConceptNode strength="0.000348" confidence="0.000325" name="possible"/>
     <AssociativeLink strength="0.015013" confidence="0.000000">
         <Element class="ConceptNode" name="dollars"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="possible"/>
         </NotLink>
     </AssociativeLink>
@@ -218,7 +218,7 @@
     <ConceptNode strength="0.007637" confidence="0.007131" name="they"/>
     <AssociativeLink strength="0.002485" confidence="0.000000">
         <Element class="ConceptNode" name="pill"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="they"/>
         </NotLink>
     </AssociativeLink>
@@ -250,7 +250,7 @@
     <ConceptNode strength="0.000112" confidence="0.000105" name="classes"/>
     <AssociativeLink strength="0.140689" confidence="0.000000">
         <Element class="ConceptNode" name="can"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="classes"/>
         </NotLink>
     </AssociativeLink>
@@ -316,7 +316,7 @@
     <ConceptNode strength="0.000859" confidence="0.000802" name="water"/>
     <AssociativeLink strength="0.053309" confidence="0.000001">
         <Element class="ConceptNode" name="other"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="water"/>
         </NotLink>
     </AssociativeLink>
@@ -330,7 +330,7 @@
     <ConceptNode strength="0.000338" confidence="0.000316" name="second"/>
     <AssociativeLink strength="0.076136" confidence="0.000001">
         <Element class="ConceptNode" name="that"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="second"/>
         </NotLink>
     </AssociativeLink>
@@ -344,7 +344,7 @@
     <ConceptNode strength="0.000009" confidence="0.000009" name="bay"/>
     <AssociativeLink strength="0.033188" confidence="0.000002">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="bay"/>
         </NotLink>
     </AssociativeLink>
@@ -380,7 +380,7 @@
     <ConceptNode strength="0.070650" confidence="0.065969" name="."/>
     <AssociativeLink strength="0.003243" confidence="0.000000">
         <Element class="ConceptNode" name="environmentalists"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="."/>
         </NotLink>
     </AssociativeLink>
@@ -405,7 +405,7 @@
     <ConceptNode strength="0.000027" confidence="0.000025" name="Observatory"/>
     <AssociativeLink strength="0.095805" confidence="0.000000">
         <Element class="ConceptNode" name=":"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Observatory"/>
         </NotLink>
     </AssociativeLink>
@@ -419,7 +419,7 @@
     <ConceptNode strength="0.000866" confidence="0.000809" name="way"/>
     <AssociativeLink strength="0.152519" confidence="0.000000">
         <Element class="ConceptNode" name="system"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="way"/>
         </NotLink>
     </AssociativeLink>
@@ -450,7 +450,7 @@
     <ConceptNode strength="0.000008" confidence="0.000007" name="eczema"/>
     <AssociativeLink strength="0.046912" confidence="0.000000">
         <Element class="ConceptNode" name="of"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="eczema"/>
         </NotLink>
     </AssociativeLink>
@@ -469,7 +469,7 @@
     <ConceptNode strength="0.000001" confidence="0.000001" name="Employers"/>
     <AssociativeLink strength="0.013466" confidence="0.000000">
         <Element class="ConceptNode" name="the"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Employers"/>
         </NotLink>
     </AssociativeLink>
@@ -494,7 +494,7 @@
     <ConceptNode strength="0.000884" confidence="0.000826" name="three"/>
     <AssociativeLink strength="0.078821" confidence="0.000001">
         <Element class="ConceptNode" name="three"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="&#x201D;"/>
         </NotLink>
     </AssociativeLink>
@@ -524,7 +524,7 @@
     <ConceptNode strength="0.000021" confidence="0.000020" name="releases"/>
     <AssociativeLink strength="0.040440" confidence="0.000000">
         <Element class="ConceptNode" name="three"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="releases"/>
         </NotLink>
     </AssociativeLink>
@@ -544,7 +544,7 @@
     <ConceptNode strength="0.001162" confidence="0.001085" name="scientists"/>
     <AssociativeLink strength="0.118884" confidence="0.000002">
         <Element class="ConceptNode" name="have"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="scientists"/>
         </NotLink>
     </AssociativeLink>
@@ -608,7 +608,7 @@
     <ConceptNode strength="0.000592" confidence="0.000553" name="home"/>
     <AssociativeLink strength="0.142734" confidence="0.000000">
         <Element class="ConceptNode" name="and"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="home"/>
         </NotLink>
     </AssociativeLink>
@@ -616,7 +616,7 @@
     <ConceptNode strength="0.000130" confidence="0.000121" name="systems"/>
     <AssociativeLink strength="0.002571" confidence="0.000000">
         <Element class="ConceptNode" name="open"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="systems"/>
         </NotLink>
     </AssociativeLink>
@@ -669,7 +669,7 @@
     <ConceptNode strength="0.001058" confidence="0.000988" name="help"/>
     <AssociativeLink strength="0.070072" confidence="0.000000">
         <Element class="ConceptNode" name="treatment"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="help"/>
         </NotLink>
     </AssociativeLink>
@@ -681,7 +681,7 @@
     <ConceptNode strength="0.000067" confidence="0.000063" name="recordings"/>
     <AssociativeLink strength="0.093356" confidence="0.000006">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="recordings"/>
         </NotLink>
     </AssociativeLink>
@@ -711,7 +711,7 @@
     <ConceptNode strength="0.000103" confidence="0.000096" name="wild"/>
     <AssociativeLink strength="0.190854" confidence="0.000000">
         <Element class="ConceptNode" name="wild"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="of"/>
         </NotLink>
     </AssociativeLink>
@@ -778,7 +778,7 @@
     <ConceptNode strength="0.000106" confidence="0.000099" name="husband"/>
     <AssociativeLink strength="0.072837" confidence="0.000000">
         <Element class="ConceptNode" name="have"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="husband"/>
         </NotLink>
     </AssociativeLink>
@@ -791,14 +791,14 @@
     <ConceptNode strength="0.000010" confidence="0.000010" name="bags"/>
     <AssociativeLink strength="0.044470" confidence="0.000000">
         <Element class="ConceptNode" name="are"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="bags"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000048" confidence="0.000045" name="wedding"/>
     <AssociativeLink strength="0.138376" confidence="0.000000">
         <Element class="ConceptNode" name="wedding"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="to"/>
         </NotLink>
     </AssociativeLink>
@@ -849,7 +849,7 @@
     <ConceptNode strength="0.000004" confidence="0.000004" name="expectations"/>
     <AssociativeLink strength="0.038000" confidence="0.000001">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="expectations"/>
         </NotLink>
     </AssociativeLink>
@@ -857,7 +857,7 @@
     <ConceptNode strength="0.000090" confidence="0.000084" name="Secretary"/>
     <AssociativeLink strength="0.032070" confidence="0.000000">
         <Element class="ConceptNode" name="her"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Secretary"/>
         </NotLink>
     </AssociativeLink>
@@ -870,7 +870,7 @@
     <ConceptNode strength="0.000011" confidence="0.000010" name="bars"/>
     <AssociativeLink strength="0.188269" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="bars"/>
         </NotLink>
     </AssociativeLink>
@@ -971,7 +971,7 @@
     <ConceptNode strength="0.000005" confidence="0.000004" name="retiring"/>
     <AssociativeLink strength="0.026269" confidence="0.000000">
         <Element class="ConceptNode" name="retiring"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="to"/>
         </NotLink>
     </AssociativeLink>
@@ -1043,7 +1043,7 @@
     <ConceptNode strength="0.000063" confidence="0.000059" name="employees"/>
     <AssociativeLink strength="0.008285" confidence="0.000000">
         <Element class="ConceptNode" name="more"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="employees"/>
         </NotLink>
     </AssociativeLink>
@@ -1088,7 +1088,7 @@
     <ConceptNode strength="0.004407" confidence="0.004115" name="with"/>
     <AssociativeLink strength="0.043864" confidence="0.000000">
         <Element class="ConceptNode" name="rule"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="with"/>
         </NotLink>
     </AssociativeLink>
@@ -1135,7 +1135,7 @@
     <ConceptNode strength="0.000229" confidence="0.000214" name="objects"/>
     <AssociativeLink strength="0.039394" confidence="0.000000">
         <Element class="ConceptNode" name="objects"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="name"/>
         </NotLink>
     </AssociativeLink>
@@ -1193,7 +1193,7 @@
     <ConceptNode strength="0.000059" confidence="0.000055" name="A"/>
     <AssociativeLink strength="0.104765" confidence="0.000000">
         <Element class="ConceptNode" name="A"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="with"/>
         </NotLink>
     </AssociativeLink>
@@ -1201,7 +1201,7 @@
     <ConceptNode strength="0.000225" confidence="0.000210" name="levels"/>
     <AssociativeLink strength="0.105448" confidence="0.000000">
         <Element class="ConceptNode" name="took"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="levels"/>
         </NotLink>
     </AssociativeLink>
@@ -1237,7 +1237,7 @@
     <ConceptNode strength="0.000019" confidence="0.000018" name="biology"/>
     <AssociativeLink strength="0.015226" confidence="0.000001">
         <Element class="ConceptNode" name="biology"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="."/>
         </NotLink>
     </AssociativeLink>
@@ -1305,7 +1305,7 @@
     <ConceptNode strength="0.000064" confidence="0.000060" name="concern"/>
     <AssociativeLink strength="0.017631" confidence="0.000000">
         <Element class="ConceptNode" name="concern"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="be"/>
         </NotLink>
     </AssociativeLink>
@@ -1435,7 +1435,7 @@
     <ConceptNode strength="0.000016" confidence="0.000015" name="placebo"/>
     <AssociativeLink strength="0.159607" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="placebo"/>
         </NotLink>
     </AssociativeLink>
@@ -1474,7 +1474,7 @@
     <ConceptNode strength="0.000072" confidence="0.000067" name="forests"/>
     <AssociativeLink strength="0.062289" confidence="0.000001">
         <Element class="ConceptNode" name="forests"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="."/>
         </NotLink>
     </AssociativeLink>
@@ -1493,7 +1493,7 @@
     <ConceptNode strength="0.000114" confidence="0.000106" name="One"/>
     <AssociativeLink strength="0.015642" confidence="0.000000">
         <Element class="ConceptNode" name="both"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="One"/>
         </NotLink>
     </AssociativeLink>
@@ -1618,7 +1618,7 @@
     <ConceptNode strength="0.000002" confidence="0.000001" name="Skywalk"/>
     <AssociativeLink strength="0.014160" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Skywalk"/>
         </NotLink>
     </AssociativeLink>
@@ -1688,21 +1688,21 @@
     <ConceptNode strength="0.000066" confidence="0.000062" name="base"/>
     <AssociativeLink strength="0.082432" confidence="0.000000">
         <Element class="ConceptNode" name="base"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="before"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000272" confidence="0.000254" name="look"/>
     <AssociativeLink strength="0.088793" confidence="0.000000">
         <Element class="ConceptNode" name="look"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="during"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000024" confidence="0.000022" name="Carson"/>
     <AssociativeLink strength="0.076593" confidence="0.000000">
         <Element class="ConceptNode" name="of"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Carson"/>
         </NotLink>
     </AssociativeLink>
@@ -1720,7 +1720,7 @@
     <ConceptNode strength="0.000007" confidence="0.000006" name="definition"/>
     <AssociativeLink strength="0.015837" confidence="0.000000">
         <Element class="ConceptNode" name="that"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="definition"/>
         </NotLink>
     </AssociativeLink>
@@ -1843,7 +1843,7 @@
     <ConceptNode strength="0.000145" confidence="0.000136" name="fighting"/>
     <AssociativeLink strength="0.017394" confidence="0.000000">
         <Element class="ConceptNode" name="where"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="fighting"/>
         </NotLink>
     </AssociativeLink>
@@ -1895,7 +1895,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.008444" confidence="0.000000">
         <Element class="ConceptNode" name="power"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="during"/>
         </NotLink>
     </AssociativeLink>
@@ -1903,7 +1903,7 @@
     <ConceptNode strength="0.000152" confidence="0.000142" name="minutes"/>
     <AssociativeLink strength="0.140660" confidence="0.000000">
         <Element class="ConceptNode" name="by"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="minutes"/>
         </NotLink>
     </AssociativeLink>
@@ -2040,7 +2040,7 @@
     <ConceptNode strength="0.000005" confidence="0.000005" name="hybrids"/>
     <AssociativeLink strength="0.063329" confidence="0.000000">
         <Element class="ConceptNode" name="hybrids"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="of"/>
         </NotLink>
     </AssociativeLink>
@@ -2063,7 +2063,7 @@
     <ConceptNode strength="0.000021" confidence="0.000019" name="deer"/>
     <AssociativeLink strength="0.046487" confidence="0.000000">
         <Element class="ConceptNode" name="deer"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="for"/>
         </NotLink>
     </AssociativeLink>
@@ -2121,13 +2121,13 @@
     <ConceptNode strength="0.002459" confidence="0.002296" name="years"/>
     <AssociativeLink strength="0.067447" confidence="0.000001">
         <Element class="ConceptNode" name="long"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="years"/>
         </NotLink>
     </AssociativeLink>
     <AssociativeLink strength="0.032137" confidence="0.000000">
         <Element class="ConceptNode" name="two"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="engineering"/>
         </NotLink>
     </AssociativeLink>
@@ -2222,7 +2222,7 @@
     <ConceptNode strength="0.000014" confidence="0.000013" name="victories"/>
     <AssociativeLink strength="0.056171" confidence="0.000002">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="victories"/>
         </NotLink>
     </AssociativeLink>
@@ -2247,21 +2247,21 @@
     <ConceptNode strength="0.000061" confidence="0.000057" name="chances"/>
     <AssociativeLink strength="0.002663" confidence="0.000000">
         <Element class="ConceptNode" name="but"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="chances"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000594" confidence="0.000555" name="four"/>
     <AssociativeLink strength="0.098315" confidence="0.000000">
         <Element class="ConceptNode" name="four"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="through"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000011" confidence="0.000010" name="Cemetery"/>
     <AssociativeLink strength="0.187220" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Cemetery"/>
         </NotLink>
     </AssociativeLink>
@@ -2279,7 +2279,7 @@
     <ConceptNode strength="0.000064" confidence="0.000059" name="Brown"/>
     <AssociativeLink strength="0.037686" confidence="0.000001">
         <Element class="ConceptNode" name="Brown"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="of"/>
         </NotLink>
     </AssociativeLink>
@@ -2304,7 +2304,7 @@
     <ConceptNode strength="0.000031" confidence="0.000029" name="withdraw"/>
     <AssociativeLink strength="0.011688" confidence="0.000000">
         <Element class="ConceptNode" name="that"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="withdraw"/>
         </NotLink>
     </AssociativeLink>
@@ -2363,21 +2363,21 @@
     <ConceptNode strength="0.000032" confidence="0.000030" name="Laboratory"/>
     <AssociativeLink strength="0.069345" confidence="0.000000">
         <Element class="ConceptNode" name="for"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Laboratory"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000090" confidence="0.000084" name="purpose"/>
     <AssociativeLink strength="0.046051" confidence="0.000001">
         <Element class="ConceptNode" name="was"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="purpose"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000015" confidence="0.000014" name="sixty-one"/>
     <AssociativeLink strength="0.043889" confidence="0.000000">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="sixty-one"/>
         </NotLink>
     </AssociativeLink>
@@ -2421,7 +2421,7 @@
     <ConceptNode strength="0.000164" confidence="0.000153" name="taking"/>
     <AssociativeLink strength="0.118299" confidence="0.000004">
         <Element class="ConceptNode" name="taking"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="."/>
         </NotLink>
     </AssociativeLink>
@@ -2450,7 +2450,7 @@
     <ConceptNode strength="0.000792" confidence="0.000739" name="see"/>
     <AssociativeLink strength="0.058263" confidence="0.000000">
         <Element class="ConceptNode" name="person"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="see"/>
         </NotLink>
     </AssociativeLink>
@@ -2468,7 +2468,7 @@
     <ConceptNode strength="0.000058" confidence="0.000054" name="Clark"/>
     <AssociativeLink strength="0.062668" confidence="0.000000">
         <Element class="ConceptNode" name="had"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Clark"/>
         </NotLink>
     </AssociativeLink>
@@ -2484,7 +2484,7 @@
     <ConceptNode strength="0.000002" confidence="0.000001" name="Blige"/>
     <AssociativeLink strength="0.053910" confidence="0.000000">
         <Element class="ConceptNode" name="in"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Blige"/>
         </NotLink>
     </AssociativeLink>
@@ -2602,7 +2602,7 @@
     <ConceptNode strength="0.000002" confidence="0.000002" name="doping"/>
     <AssociativeLink strength="0.142150" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="doping"/>
         </NotLink>
     </AssociativeLink>
@@ -2630,7 +2630,7 @@
     <ConceptNode strength="0.004425" confidence="0.004132" name="as"/>
     <AssociativeLink strength="0.052247" confidence="0.000001">
         <Element class="ConceptNode" name="as"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="sound"/>
         </NotLink>
     </AssociativeLink>
@@ -2664,7 +2664,7 @@
     <ConceptNode strength="0.000037" confidence="0.000034" name="cholesterol"/>
     <AssociativeLink strength="0.002757" confidence="0.000000">
         <Element class="ConceptNode" name="cholesterol"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="as"/>
         </NotLink>
     </AssociativeLink>
@@ -2741,7 +2741,7 @@
     <ConceptNode strength="0.000009" confidence="0.000008" name="hatred"/>
     <AssociativeLink strength="0.142383" confidence="0.000000">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="hatred"/>
         </NotLink>
     </AssociativeLink>
@@ -2794,7 +2794,7 @@
     <ConceptNode strength="0.000853" confidence="0.000797" name="group"/>
     <AssociativeLink strength="0.099888" confidence="0.000000">
         <Element class="ConceptNode" name="hundred"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="group"/>
         </NotLink>
     </AssociativeLink>
@@ -2889,7 +2889,7 @@
     <ConceptNode strength="0.000028" confidence="0.000026" name="turns"/>
     <AssociativeLink strength="0.030672" confidence="0.000000">
         <Element class="ConceptNode" name="turns"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="like"/>
         </NotLink>
     </AssociativeLink>
@@ -2942,7 +2942,7 @@
     <ConceptNode strength="0.000009" confidence="0.000009" name="associate"/>
     <AssociativeLink strength="0.056332" confidence="0.000000">
         <Element class="ConceptNode" name="the"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="associate"/>
         </NotLink>
     </AssociativeLink>
@@ -2955,14 +2955,14 @@
     <ConceptNode strength="0.000081" confidence="0.000076" name="warm"/>
     <AssociativeLink strength="0.021593" confidence="0.000000">
         <Element class="ConceptNode" name="warm"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="like"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000013" confidence="0.000012" name="detail"/>
     <AssociativeLink strength="0.003755" confidence="0.000000">
         <Element class="ConceptNode" name="detail"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="in"/>
         </NotLink>
     </AssociativeLink>
@@ -3034,7 +3034,7 @@
     <ConceptNode strength="0.000018" confidence="0.000016" name="thanks"/>
     <AssociativeLink strength="0.082898" confidence="0.000000">
         <Element class="ConceptNode" name="the"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="thanks"/>
         </NotLink>
     </AssociativeLink>
@@ -3082,7 +3082,7 @@
     <ConceptNode strength="0.000541" confidence="0.000505" name="just"/>
     <AssociativeLink strength="0.029868" confidence="0.000000">
         <Element class="ConceptNode" name="spent"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="just"/>
         </NotLink>
     </AssociativeLink>
@@ -3177,7 +3177,7 @@
     <ConceptNode strength="0.000089" confidence="0.000083" name="store"/>
     <AssociativeLink strength="0.087809" confidence="0.000000">
         <Element class="ConceptNode" name="yet"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="store"/>
         </NotLink>
     </AssociativeLink>
@@ -3230,7 +3230,7 @@
     <ConceptNode strength="0.000269" confidence="0.000252" name="care"/>
     <AssociativeLink strength="0.083576" confidence="0.000000">
         <Element class="ConceptNode" name="all"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="care"/>
         </NotLink>
     </AssociativeLink>
@@ -3336,7 +3336,7 @@
     <ConceptNode strength="0.000153" confidence="0.000143" name="Asia"/>
     <AssociativeLink strength="0.094229" confidence="0.000000">
         <Element class="ConceptNode" name="but"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Asia"/>
         </NotLink>
     </AssociativeLink>
@@ -3380,7 +3380,7 @@
     <ConceptNode strength="0.000115" confidence="0.000108" name="taxes"/>
     <AssociativeLink strength="0.072508" confidence="0.000001">
         <Element class="ConceptNode" name=","/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="taxes"/>
         </NotLink>
     </AssociativeLink>
@@ -3402,7 +3402,7 @@
     <ConceptNode strength="0.000024" confidence="0.000023" name="debts"/>
     <AssociativeLink strength="0.163797" confidence="0.000000">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="debts"/>
         </NotLink>
     </AssociativeLink>
@@ -3419,7 +3419,7 @@
     <ConceptNode strength="0.000751" confidence="0.000701" name="thousand"/>
     <AssociativeLink strength="0.020429" confidence="0.000002">
         <Element class="ConceptNode" name="thousand"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="have"/>
         </NotLink>
     </AssociativeLink>
@@ -3431,21 +3431,21 @@
     </AssociativeLink>
     <AssociativeLink strength="0.161600" confidence="0.000000">
         <Element class="ConceptNode" name="state"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="have"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000003" confidence="0.000003" name="rolls"/>
     <AssociativeLink strength="0.036960" confidence="0.000000">
         <Element class="ConceptNode" name="rolls"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="to"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000047" confidence="0.000044" name="factories"/>
     <AssociativeLink strength="0.040999" confidence="0.000008">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="factories"/>
         </NotLink>
     </AssociativeLink>
@@ -3463,7 +3463,7 @@
     <ConceptNode strength="0.000021" confidence="0.000019" name="Faulkner"/>
     <AssociativeLink strength="0.075934" confidence="0.000000">
         <Element class="ConceptNode" name="Faulkner"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name=","/>
         </NotLink>
     </AssociativeLink>
@@ -3496,7 +3496,7 @@
     <ConceptNode strength="0.000831" confidence="0.000776" name="life"/>
     <AssociativeLink strength="0.098106" confidence="0.000000">
         <Element class="ConceptNode" name="life"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="kilometers"/>
         </NotLink>
     </AssociativeLink>
@@ -3523,7 +3523,7 @@
     <ConceptNode strength="0.000126" confidence="0.000118" name="chief"/>
     <AssociativeLink strength="0.307331" confidence="0.000000">
         <Element class="ConceptNode" name="to"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="chief"/>
         </NotLink>
     </AssociativeLink>
@@ -3536,7 +3536,7 @@
     <ConceptNode strength="0.000004" confidence="0.000004" name="fines"/>
     <AssociativeLink strength="0.058403" confidence="0.000000">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="fines"/>
         </NotLink>
     </AssociativeLink>
@@ -3544,7 +3544,7 @@
     <ConceptNode strength="0.000413" confidence="0.000385" name="want"/>
     <AssociativeLink strength="0.248430" confidence="0.000000">
         <Element class="ConceptNode" name="American"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="want"/>
         </NotLink>
     </AssociativeLink>
@@ -3572,7 +3572,7 @@
     <ConceptNode strength="0.000060" confidence="0.000056" name="pregnant"/>
     <AssociativeLink strength="0.036098" confidence="0.000001">
         <Element class="ConceptNode" name="pregnant"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="in"/>
         </NotLink>
     </AssociativeLink>
@@ -3601,7 +3601,7 @@
     <ConceptNode strength="0.000191" confidence="0.000179" name="ground"/>
     <AssociativeLink strength="0.069964" confidence="0.000000">
         <Element class="ConceptNode" name="cut"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="ground"/>
         </NotLink>
     </AssociativeLink>
@@ -3693,7 +3693,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.026811" confidence="0.000000">
         <Element class="ConceptNode" name="under"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="care"/>
         </NotLink>
     </AssociativeLink>
@@ -3706,7 +3706,7 @@
     <ConceptNode strength="0.000242" confidence="0.000226" name="Indians"/>
     <AssociativeLink strength="0.014783" confidence="0.000000">
         <Element class="ConceptNode" name="trade"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Indians"/>
         </NotLink>
     </AssociativeLink>
@@ -3778,7 +3778,7 @@
     <ConceptNode strength="0.000703" confidence="0.000657" name="how"/>
     <AssociativeLink strength="0.039199" confidence="0.000000">
         <Element class="ConceptNode" name="into"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="how"/>
         </NotLink>
     </AssociativeLink>
@@ -3790,7 +3790,7 @@
     <ConceptNode strength="0.000019" confidence="0.000018" name="borrowed"/>
     <AssociativeLink strength="0.031429" confidence="0.000000">
         <Element class="ConceptNode" name="with"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="borrowed"/>
         </NotLink>
     </AssociativeLink>
@@ -3806,7 +3806,7 @@
     <ConceptNode strength="0.000059" confidence="0.000055" name="demanded"/>
     <AssociativeLink strength="0.084648" confidence="0.000000">
         <Element class="ConceptNode" name="demanded"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name=","/>
         </NotLink>
     </AssociativeLink>
@@ -3874,7 +3874,7 @@
     <ConceptNode strength="0.000017" confidence="0.000016" name="hang"/>
     <AssociativeLink strength="0.156481" confidence="0.000000">
         <Element class="ConceptNode" name="hang"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="it"/>
         </NotLink>
     </AssociativeLink>
@@ -3903,7 +3903,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.102215" confidence="0.000000">
         <Element class="ConceptNode" name="during"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="aid"/>
         </NotLink>
     </AssociativeLink>
@@ -3941,14 +3941,14 @@
     <ConceptNode strength="0.000128" confidence="0.000120" name="share"/>
     <AssociativeLink strength="0.018119" confidence="0.000001">
         <Element class="ConceptNode" name="share"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="it"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000812" confidence="0.000758" name="last"/>
     <AssociativeLink strength="0.138776" confidence="0.000001">
         <Element class="ConceptNode" name="last"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="are"/>
         </NotLink>
     </AssociativeLink>
@@ -4013,7 +4013,7 @@
     <ConceptNode strength="0.000252" confidence="0.000235" name="mother"/>
     <AssociativeLink strength="0.033416" confidence="0.000003">
         <Element class="ConceptNode" name="was"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="mother"/>
         </NotLink>
     </AssociativeLink>
@@ -4076,7 +4076,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.046265" confidence="0.000000">
         <Element class="ConceptNode" name="group"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="until"/>
         </NotLink>
     </AssociativeLink>
@@ -4099,7 +4099,7 @@
     <ConceptNode strength="0.000495" confidence="0.000462" name="land"/>
     <AssociativeLink strength="0.014800" confidence="0.000000">
         <Element class="ConceptNode" name="land"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="space"/>
         </NotLink>
     </AssociativeLink>
@@ -4219,7 +4219,7 @@
     <ConceptNode strength="0.000017" confidence="0.000016" name="bombing"/>
     <AssociativeLink strength="0.046395" confidence="0.000001">
         <Element class="ConceptNode" name="bombing"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="."/>
         </NotLink>
     </AssociativeLink>
@@ -4231,7 +4231,7 @@
     <ConceptNode strength="0.000104" confidence="0.000097" name="single"/>
     <AssociativeLink strength="0.126291" confidence="0.000000">
         <Element class="ConceptNode" name="single"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="person"/>
         </NotLink>
     </AssociativeLink>
@@ -4255,7 +4255,7 @@
     <ConceptNode strength="0.000053" confidence="0.000050" name="organs"/>
     <AssociativeLink strength="0.000776" confidence="0.000000">
         <Element class="ConceptNode" name="however"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="organs"/>
         </NotLink>
     </AssociativeLink>
@@ -4289,7 +4289,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.003430" confidence="0.000000">
         <Element class="ConceptNode" name="elected"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="own"/>
         </NotLink>
     </AssociativeLink>
@@ -4351,7 +4351,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.191355" confidence="0.000000">
         <Element class="ConceptNode" name="in"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="degree"/>
         </NotLink>
     </AssociativeLink>
@@ -4396,7 +4396,7 @@
     <ConceptNode strength="0.000023" confidence="0.000021" name="putting"/>
     <AssociativeLink strength="0.054870" confidence="0.000002">
         <Element class="ConceptNode" name="LEFT-WALL"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="putting"/>
         </NotLink>
     </AssociativeLink>
@@ -4414,13 +4414,13 @@
     <ConceptNode strength="0.000152" confidence="0.000142" name="party"/>
     <AssociativeLink strength="0.060099" confidence="0.000001">
         <Element class="ConceptNode" name="about"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="party"/>
         </NotLink>
     </AssociativeLink>
     <AssociativeLink strength="0.047053" confidence="0.000001">
         <Element class="ConceptNode" name="has"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="away"/>
         </NotLink>
     </AssociativeLink>
@@ -4471,7 +4471,7 @@
     <ConceptNode strength="0.000005" confidence="0.000005" name="graft"/>
     <AssociativeLink strength="0.012609" confidence="0.000000">
         <Element class="ConceptNode" name="to"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="graft"/>
         </NotLink>
     </AssociativeLink>
@@ -4513,7 +4513,7 @@
     <ConceptNode strength="0.000052" confidence="0.000049" name="ruled"/>
     <AssociativeLink strength="0.076304" confidence="0.000000">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="ruled"/>
         </NotLink>
     </AssociativeLink>
@@ -4524,7 +4524,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.018224" confidence="0.000001">
         <Element class="ConceptNode" name="as"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="meant"/>
         </NotLink>
     </AssociativeLink>
@@ -4599,13 +4599,13 @@
     <ConceptNode strength="0.000327" confidence="0.000306" name="twenty"/>
     <AssociativeLink strength="0.077540" confidence="0.000000">
         <Element class="ConceptNode" name="place"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="twenty"/>
         </NotLink>
     </AssociativeLink>
     <AssociativeLink strength="0.015768" confidence="0.000001">
         <Element class="ConceptNode" name="came"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="year"/>
         </NotLink>
     </AssociativeLink>
@@ -4664,7 +4664,7 @@
     <ConceptNode strength="0.000082" confidence="0.000077" name="messages"/>
     <AssociativeLink strength="0.019410" confidence="0.000000">
         <Element class="ConceptNode" name="new"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="messages"/>
         </NotLink>
     </AssociativeLink>
@@ -4698,7 +4698,7 @@
     <ConceptNode strength="0.000005" confidence="0.000005" name="hypothermia"/>
     <AssociativeLink strength="0.019364" confidence="0.000000">
         <Element class="ConceptNode" name="to"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="hypothermia"/>
         </NotLink>
     </AssociativeLink>
@@ -4727,14 +4727,14 @@
     </AssociativeLink>
     <AssociativeLink strength="0.030842" confidence="0.000000">
         <Element class="ConceptNode" name="into"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="fighting"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000005" confidence="0.000004" name="Orbiter"/>
     <AssociativeLink strength="0.053119" confidence="0.000000">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Orbiter"/>
         </NotLink>
     </AssociativeLink>
@@ -4794,7 +4794,7 @@
     <ConceptNode strength="0.000158" confidence="0.000148" name="vaccine"/>
     <AssociativeLink strength="0.070873" confidence="0.000000">
         <Element class="ConceptNode" name="vaccine"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="by"/>
         </NotLink>
     </AssociativeLink>
@@ -4833,7 +4833,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.115413" confidence="0.000000">
         <Element class="ConceptNode" name="&#x2019;s"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="still"/>
         </NotLink>
     </AssociativeLink>
@@ -4857,7 +4857,7 @@
     <ConceptNode strength="0.000338" confidence="0.000316" name="drugs"/>
     <AssociativeLink strength="0.124971" confidence="0.000000">
         <Element class="ConceptNode" name="drugs"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="organization"/>
         </NotLink>
     </AssociativeLink>
@@ -4901,7 +4901,7 @@
     <ConceptNode strength="0.000238" confidence="0.000222" name="industry"/>
     <AssociativeLink strength="0.053943" confidence="0.000002">
         <Element class="ConceptNode" name="with"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="industry"/>
         </NotLink>
     </AssociativeLink>
@@ -4972,7 +4972,7 @@
     <ConceptNode strength="0.000639" confidence="0.000597" name="out"/>
     <AssociativeLink strength="0.040597" confidence="0.000003">
         <Element class="ConceptNode" name="is"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="out"/>
         </NotLink>
     </AssociativeLink>
@@ -4997,7 +4997,7 @@
     <ConceptNode strength="0.000339" confidence="0.000317" name="cells"/>
     <AssociativeLink strength="0.204927" confidence="0.000000">
         <Element class="ConceptNode" name="area"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="cells"/>
         </NotLink>
     </AssociativeLink>
@@ -5078,7 +5078,7 @@
     <ConceptNode strength="0.000697" confidence="0.000651" name="president"/>
     <AssociativeLink strength="0.017236" confidence="0.000000">
         <Element class="ConceptNode" name="recently"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="president"/>
         </NotLink>
     </AssociativeLink>
@@ -5095,13 +5095,13 @@
     </AssociativeLink>
     <AssociativeLink strength="0.021354" confidence="0.000001">
         <Element class="ConceptNode" name="get"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="same"/>
         </NotLink>
     </AssociativeLink>
     <AssociativeLink strength="0.094654" confidence="0.000000">
         <Element class="ConceptNode" name="find"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="same"/>
         </NotLink>
     </AssociativeLink>
@@ -5133,14 +5133,14 @@
     <ConceptNode strength="0.000004" confidence="0.000004" name="Petroleum"/>
     <AssociativeLink strength="0.025576" confidence="0.000000">
         <Element class="ConceptNode" name="the"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Petroleum"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.003771" confidence="0.003522" name="not"/>
     <AssociativeLink strength="0.201291" confidence="0.000000">
         <Element class="ConceptNode" name="not"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="people"/>
         </NotLink>
     </AssociativeLink>
@@ -5152,14 +5152,14 @@
     </AssociativeLink>
     <AssociativeLink strength="0.046639" confidence="0.000001">
         <Element class="ConceptNode" name="says"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="house"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000123" confidence="0.000115" name="word"/>
     <AssociativeLink strength="0.019467" confidence="0.000000">
         <Element class="ConceptNode" name="word"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="two"/>
         </NotLink>
     </AssociativeLink>
@@ -5178,7 +5178,7 @@
     <ConceptNode strength="0.000059" confidence="0.000055" name="class"/>
     <AssociativeLink strength="0.057300" confidence="0.000000">
         <Element class="ConceptNode" name="working"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="class"/>
         </NotLink>
     </AssociativeLink>
@@ -5196,7 +5196,7 @@
     <ConceptNode strength="0.000306" confidence="0.000286" name="move"/>
     <AssociativeLink strength="0.177038" confidence="0.000000">
         <Element class="ConceptNode" name="move"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="thousand"/>
         </NotLink>
     </AssociativeLink>
@@ -5226,14 +5226,14 @@
     <ConceptNode strength="0.000106" confidence="0.000099" name="Ford"/>
     <AssociativeLink strength="0.036142" confidence="0.000000">
         <Element class="ConceptNode" name="as"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Ford"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000087" confidence="0.000081" name="Thomas"/>
     <AssociativeLink strength="0.070426" confidence="0.000000">
         <Element class="ConceptNode" name="Thomas"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="month"/>
         </NotLink>
     </AssociativeLink>
@@ -5281,7 +5281,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.041336" confidence="0.000000">
         <Element class="ConceptNode" name="story"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="between"/>
         </NotLink>
     </AssociativeLink>
@@ -5314,7 +5314,7 @@
     <ConceptNode strength="0.000080" confidence="0.000075" name="Science"/>
     <AssociativeLink strength="0.035611" confidence="0.000000">
         <Element class="ConceptNode" name="&#x201C;"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Science"/>
         </NotLink>
     </AssociativeLink>
@@ -5353,7 +5353,7 @@
     </AssociativeLink>
     <AssociativeLink strength="0.053335" confidence="0.000000">
         <Element class="ConceptNode" name="two"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="fought"/>
         </NotLink>
     </AssociativeLink>
@@ -5371,14 +5371,14 @@
     <ConceptNode strength="0.000042" confidence="0.000040" name="worst"/>
     <AssociativeLink strength="0.042943" confidence="0.000000">
         <Element class="ConceptNode" name="that"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="worst"/>
         </NotLink>
     </AssociativeLink>
     <ConceptNode strength="0.000032" confidence="0.000030" name="persons"/>
     <AssociativeLink strength="0.015246" confidence="0.000000">
         <Element class="ConceptNode" name="with"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="persons"/>
         </NotLink>
     </AssociativeLink>
@@ -5459,7 +5459,7 @@
     <ConceptNode strength="0.000094" confidence="0.000087" name="Ohio"/>
     <AssociativeLink strength="0.137933" confidence="0.000000">
         <Element class="ConceptNode" name="people"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Ohio"/>
         </NotLink>
     </AssociativeLink>
@@ -5489,7 +5489,7 @@
     <ConceptNode strength="0.000236" confidence="0.000220" name="always"/>
     <AssociativeLink strength="0.023686" confidence="0.000000">
         <Element class="ConceptNode" name="always"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="place"/>
         </NotLink>
     </AssociativeLink>
@@ -5507,7 +5507,7 @@
     <ConceptNode strength="0.000063" confidence="0.000059" name="farming"/>
     <AssociativeLink strength="0.067863" confidence="0.000001">
         <Element class="ConceptNode" name="farming"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="of"/>
         </NotLink>
     </AssociativeLink>
@@ -5594,7 +5594,7 @@
     <ConceptNode strength="0.000012" confidence="0.000012" name="richest"/>
     <AssociativeLink strength="0.006292" confidence="0.000000">
         <Element class="ConceptNode" name=","/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="richest"/>
         </NotLink>
     </AssociativeLink>
@@ -5606,7 +5606,7 @@
     <ConceptNode strength="0.000046" confidence="0.000043" name="Memorial"/>
     <AssociativeLink strength="0.129682" confidence="0.000000">
         <Element class="ConceptNode" name="a"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Memorial"/>
         </NotLink>
     </AssociativeLink>
@@ -5628,7 +5628,7 @@
     <ConceptNode strength="0.000038" confidence="0.000035" name="Jones"/>
     <AssociativeLink strength="0.003363" confidence="0.000002">
         <Element class="ConceptNode" name="in"/>
-        <NotLink strength="1.000000" confidence="0.999999">
+        <NotLink strength="1.000000" confidence="1.000000">
             <Element class="ConceptNode" name="Jones"/>
         </NotLink>
     </AssociativeLink>

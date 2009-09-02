@@ -118,22 +118,13 @@
     </ImplicationLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="pastForm"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="kill"/>
-    <AndLink strength="1.000000" confidence="0.925926">
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <Element class="PredicateNode" name="killed"/>
-            <ExecutionOutputLink strength="0.990000" confidence="0.990000">
-                <Element class="PredicateNode" name="pastForm"/>
-                <Element class="PredicateNode" name="kill"/>
-            </ExecutionOutputLink>
-        </ImplicationLink>
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <ExecutionOutputLink strength="0.990000" confidence="0.990000">
-                <Element class="PredicateNode" name="pastForm"/>
-                <Element class="PredicateNode" name="kill"/>
-            </ExecutionOutputLink>
-            <Element class="PredicateNode" name="killed"/>
-        </ImplicationLink>
-    </AndLink>
+    <EquivalenceLink strength="1.000000" confidence="0.000000">
+        <Element class="PredicateNode" name="killed"/>
+        <ExecutionOutputLink strength="0.990000" confidence="0.990000">
+            <Element class="PredicateNode" name="pastForm"/>
+            <Element class="PredicateNode" name="kill"/>
+        </ExecutionOutputLink>
+    </EquivalenceLink>
     <EvaluationLink strength="0.200000" confidence="0.600000">
         <Element class="PredicateNode" name="isDead"/>
         <ListLink strength="1.000000" confidence="0.000000">
@@ -144,8 +135,13 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X005"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="T000"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="atTime"/>
-    <AndLink strength="1.000000" confidence="0.925926">
-        <ImplicationLink strength="1.000000" confidence="0.000000">
+    <ForallLink strength="0.990000" confidence="0.990000">
+        <ListLink strength="1.000000" confidence="0.000000">
+            <Element class="VariableNode" name="X003"/>
+            <Element class="VariableNode" name="X005"/>
+            <Element class="VariableNode" name="T000"/>
+        </ListLink>
+        <EquivalenceLink strength="1.000000" confidence="0.000000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <InheritanceLink strength="1.000000" confidence="0.000000">
                     <Element class="VariableNode" name="X003"/>
@@ -175,117 +171,8 @@
                     </ListLink>
                 </EvaluationLink>
             </AndLink>
-        </ImplicationLink>
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <AndLink strength="1.000000" confidence="0.000000">
-                <EvaluationLink strength="1.000000" confidence="0.000000">
-                    <Element class="PredicateNode" name="atTime"/>
-                    <ListLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="T000"/>
-                        <EvaluationLink strength="1.000000" confidence="0.000000">
-                            <Element class="PredicateNode" name="kill"/>
-                            <ListLink strength="1.000000" confidence="0.000000">
-                                <Element class="VariableNode" name="X003"/>
-                                <Element class="VariableNode" name="X005"/>
-                            </ListLink>
-                        </EvaluationLink>
-                    </ListLink>
-                </EvaluationLink>
-            </AndLink>
-            <AndLink strength="1.000000" confidence="0.000000">
-                <InheritanceLink strength="1.000000" confidence="0.000000">
-                    <Element class="VariableNode" name="X003"/>
-                    <Element class="ConceptNode" name="killer"/>
-                </InheritanceLink>
-                <ScholemLink strength="1.000000" confidence="0.000000">
-                    <Element class="VariableNode" name="X003"/>
-                    <Element class="VariableNode" name="T000"/>
-                </ScholemLink>
-                <ScholemLink strength="1.000000" confidence="0.000000">
-                    <Element class="VariableNode" name="X003"/>
-                    <Element class="VariableNode" name="X005"/>
-                </ScholemLink>
-            </AndLink>
-        </ImplicationLink>
-    </AndLink>
-    <ListLink strength="1.000000" confidence="0.925926">
-        <ForallLink strength="0.990000" confidence="0.990000">
-            <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="VariableNode" name="X003"/>
-                <Element class="VariableNode" name="X005"/>
-                <Element class="VariableNode" name="T000"/>
-            </ListLink>
-            <ImplicationLink strength="1.000000" confidence="0.000000">
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <InheritanceLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="ConceptNode" name="killer"/>
-                    </InheritanceLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="VariableNode" name="T000"/>
-                    </ScholemLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="VariableNode" name="X005"/>
-                    </ScholemLink>
-                </AndLink>
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <EvaluationLink strength="1.000000" confidence="0.000000">
-                        <Element class="PredicateNode" name="atTime"/>
-                        <ListLink strength="1.000000" confidence="0.000000">
-                            <Element class="VariableNode" name="T000"/>
-                            <EvaluationLink strength="1.000000" confidence="0.000000">
-                                <Element class="PredicateNode" name="kill"/>
-                                <ListLink strength="1.000000" confidence="0.000000">
-                                    <Element class="VariableNode" name="X003"/>
-                                    <Element class="VariableNode" name="X005"/>
-                                </ListLink>
-                            </EvaluationLink>
-                        </ListLink>
-                    </EvaluationLink>
-                </AndLink>
-            </ImplicationLink>
-        </ForallLink>
-        <ForallLink strength="0.990000" confidence="0.990000">
-            <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="VariableNode" name="X003"/>
-                <Element class="VariableNode" name="X005"/>
-                <Element class="VariableNode" name="T000"/>
-            </ListLink>
-            <ImplicationLink strength="1.000000" confidence="0.000000">
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <EvaluationLink strength="1.000000" confidence="0.000000">
-                        <Element class="PredicateNode" name="atTime"/>
-                        <ListLink strength="1.000000" confidence="0.000000">
-                            <Element class="VariableNode" name="T000"/>
-                            <EvaluationLink strength="1.000000" confidence="0.000000">
-                                <Element class="PredicateNode" name="kill"/>
-                                <ListLink strength="1.000000" confidence="0.000000">
-                                    <Element class="VariableNode" name="X003"/>
-                                    <Element class="VariableNode" name="X005"/>
-                                </ListLink>
-                            </EvaluationLink>
-                        </ListLink>
-                    </EvaluationLink>
-                </AndLink>
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <InheritanceLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="ConceptNode" name="killer"/>
-                    </InheritanceLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="VariableNode" name="T000"/>
-                    </ScholemLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X003"/>
-                        <Element class="VariableNode" name="X005"/>
-                    </ScholemLink>
-                </AndLink>
-            </ImplicationLink>
-        </ForallLink>
-    </ListLink>
+        </EquivalenceLink>
+    </ForallLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAD"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="X008"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAE"/>
@@ -477,8 +364,12 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X004"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="X006"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="wasKilled"/>
-    <AndLink strength="1.000000" confidence="0.925926">
-        <ImplicationLink strength="1.000000" confidence="0.000000">
+    <ForallLink strength="0.990000" confidence="0.990000">
+        <ListLink strength="1.000000" confidence="0.000000">
+            <Element class="VariableNode" name="X004"/>
+            <Element class="VariableNode" name="X006"/>
+        </ListLink>
+        <EquivalenceLink strength="1.000000" confidence="0.000000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <EvaluationLink strength="1.000000" confidence="0.000000">
                     <Element class="PredicateNode" name="killed"/>
@@ -498,85 +389,8 @@
                     <Element class="VariableNode" name="X004"/>
                 </ListLink>
             </EvaluationLink>
-        </ImplicationLink>
-        <ImplicationLink strength="1.000000" confidence="0.000000">
-            <EvaluationLink strength="1.000000" confidence="0.000000">
-                <Element class="PredicateNode" name="wasKilled"/>
-                <ListLink strength="1.000000" confidence="0.000000">
-                    <Element class="VariableNode" name="X004"/>
-                </ListLink>
-            </EvaluationLink>
-            <AndLink strength="1.000000" confidence="0.000000">
-                <EvaluationLink strength="1.000000" confidence="0.000000">
-                    <Element class="PredicateNode" name="killed"/>
-                    <ListLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X006"/>
-                        <Element class="VariableNode" name="X004"/>
-                    </ListLink>
-                </EvaluationLink>
-                <ScholemLink strength="1.000000" confidence="0.000000">
-                    <Element class="VariableNode" name="X004"/>
-                    <Element class="VariableNode" name="X006"/>
-                </ScholemLink>
-            </AndLink>
-        </ImplicationLink>
-    </AndLink>
-    <ListLink strength="1.000000" confidence="0.925926">
-        <ForallLink strength="0.990000" confidence="0.990000">
-            <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="VariableNode" name="X004"/>
-                <Element class="VariableNode" name="X006"/>
-            </ListLink>
-            <ImplicationLink strength="1.000000" confidence="0.000000">
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <EvaluationLink strength="1.000000" confidence="0.000000">
-                        <Element class="PredicateNode" name="killed"/>
-                        <ListLink strength="1.000000" confidence="0.000000">
-                            <Element class="VariableNode" name="X006"/>
-                            <Element class="VariableNode" name="X004"/>
-                        </ListLink>
-                    </EvaluationLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X004"/>
-                        <Element class="VariableNode" name="X006"/>
-                    </ScholemLink>
-                </AndLink>
-                <EvaluationLink strength="1.000000" confidence="0.000000">
-                    <Element class="PredicateNode" name="wasKilled"/>
-                    <ListLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X004"/>
-                    </ListLink>
-                </EvaluationLink>
-            </ImplicationLink>
-        </ForallLink>
-        <ForallLink strength="0.990000" confidence="0.990000">
-            <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="VariableNode" name="X004"/>
-                <Element class="VariableNode" name="X006"/>
-            </ListLink>
-            <ImplicationLink strength="1.000000" confidence="0.000000">
-                <EvaluationLink strength="1.000000" confidence="0.000000">
-                    <Element class="PredicateNode" name="wasKilled"/>
-                    <ListLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X004"/>
-                    </ListLink>
-                </EvaluationLink>
-                <AndLink strength="1.000000" confidence="0.000000">
-                    <EvaluationLink strength="1.000000" confidence="0.000000">
-                        <Element class="PredicateNode" name="killed"/>
-                        <ListLink strength="1.000000" confidence="0.000000">
-                            <Element class="VariableNode" name="X006"/>
-                            <Element class="VariableNode" name="X004"/>
-                        </ListLink>
-                    </EvaluationLink>
-                    <ScholemLink strength="1.000000" confidence="0.000000">
-                        <Element class="VariableNode" name="X004"/>
-                        <Element class="VariableNode" name="X006"/>
-                    </ScholemLink>
-                </AndLink>
-            </ImplicationLink>
-        </ForallLink>
-    </ListLink>
+        </EquivalenceLink>
+    </ForallLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$KILLER"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$KILLED"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="isDead"/>
@@ -636,5 +450,6 @@
         <tag name="ExtensionalInheritanceLink" value="ExtensionalInheritanceLink"/>
         <tag name="PredicateNode" value="PredicateNode"/>
         <tag name="ExecutionOutputLink" value="ExecutionOutputLink"/>
+        <tag name="EquivalenceLink" value="EquivalenceLink"/>
     </tagdescription>
 </list>
