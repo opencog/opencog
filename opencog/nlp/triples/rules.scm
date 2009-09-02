@@ -115,6 +115,7 @@
 
 ; -----------------------------------------------------------------
 ; r-rlx -- format a RelEx-like expression
+;
 ; The r-rlx routine takes a RelEx-like expression and outputs a list
 ; of appropriate OpenCog linbk structures.  Thus, for example
 ; _subj(be, $var) is exprssed as (r-rlx "_subj" "be" "$var")
@@ -124,6 +125,9 @@
 ;
 ; Example:
 ;      (r-rlx "_subj" "be" "$var0")   ;; _subj(be, $var0)
+;
+; This routine returns a r-expression containing the clause and the
+; variables appearing in that clause.
 ;
 (define (r-rlx rel a b)
 
@@ -208,9 +212,11 @@
 )
 
 ; -----------------------------------------------------------------
-; r-and -- concatenate a list of r-clauses together.
-; Accepts a variable number of clauses and returns a concatenation 
-; of them into one clause structure.
+; r-and -- concatenate a list of r-expressions together.
+;
+; Accepts a variable number of r-expressions and returns a concatenation 
+; of them into one r-expression structure. The order of the clauses is
+; preserved.
 ;
 ; Example usage:
 ;    (r-and
@@ -244,10 +250,9 @@
 				(oc (if ocp (cdr ocp) '()))
 
 				;; concatenate
-				(varbles (append iv ov))
-				(clauses (append ic oc))
+				(varbles (append ov iv))
+				(clauses (append oc ic))
 			)
-
 
 			; Return the variables and clauses in an association list
 			(alist-cons 'vardecls varbles
@@ -272,6 +277,8 @@
 
 ; -----------------------------------------------------------------
 ; r-link -- declare a simple opencog link connecting two items
+;
+; Returns an r-expression defining the link.
 ; 
 ; Example usage:
 ;   (r-link WordInstanceLink "$var1" "$sent")
@@ -289,6 +296,15 @@
 ; -----------------------------------------------------------------
 ; r-decl-var -- declare a variable type
 ;
+; During pattern matching, a variable can be constrained to be of a 
+; a certain type, so that it is not matched too freely. This is done
+; by using TypedVariableLink's and VariableTypeNode's. 
+;
+; This routine returns an r-expression.
+;
+; Example usage:
+;	(r-decl-var "WordInstanceNode" "$var0")
+;
 (define (r-decl-var vartype varname)
 	(define (vd vtype vname)
 		(TypedVariableLink
@@ -300,30 +316,29 @@
 )
 
 ; -----------------------------------------------------------------
-; r-varscope -- create a varscope structure from the r-expressions
+; r-varscope -- create a varscope structure from r-expressions
 ;
-; A VaraibleScopeLink consists of an implication link P->Q, with
-; P a sequence of disjuncts (to be conjoined together) and Q the 
-; implicand.  Here, both P and Q are taken to be r-expressions, 
-; constructed with the r-* routines.  A VariableScopeLink also 
-; contains a list of the bound variables which will be grounded 
-; when the implication is evaluated. The variables are taken from
-; the P r-expression. Any variables appearing in Q must also appear
-; in P.
+; A VariableScopeLink consists of an implication link P->Q, with the
+; predicate P being a sequence of disjuncts (to be conjoined together)
+; and Q the implicand.  Here, both P and Q are taken to be r-expressions,
+; constructed with the r-* routines.  A VariableScopeLink also contains
+; a list of the bound variables which will be grounded when the 
+; implication is evaluated. The variables are taken from the predicate 
+; P r-expression. Any variables appearing in Q must also appear in P.
 ;
-; Returns the VariableScopeLink
+; Returns the constructed VariableScopeLink.
 ;
-(define (r-varscope disjuncts implicand)
+(define (r-varscope predicates implicand)
 	(let* (
-			; dvp == disjuncts variable pair
-			(dvp (assoc 'vardecls disjuncts))
-			; dv == disjuncts variables
-			(dv (if dvp (cdr dvp) '()))
+			; pvp == predicates variable pair
+			(pvp (assoc 'vardecls predicates))
+			; pv == predicates variables
+			(pv (if pvp (cdr pvp) '()))
 			
-			; dcp == disjuncts clauses pair
-			(dcp (assoc 'clauses disjuncts))
-			; dc == disjuncts clauses
-			(dc (if dcp (cdr dcp) '()))
+			; pcp == predicates clauses pair
+			(pcp (assoc 'clauses predicates))
+			; pc == predicates clauses
+			(pc (if pcp (cdr pcp) '()))
 
 			; icp == implicand clauses pair
 			(icp (assoc 'clauses implicand))
@@ -333,16 +348,26 @@
 
 		; The Big Kahuna -- a list of variables, and the implication.
 		(VariableScopeLink
-			(ListLink dv)
+			(ListLink pv)
 			(ImplicationLink 
-				(AndLink dc)
+				(AndLink pc)
 				ic
 			)
 		)
 	)
 )
+
 ; -----------------------------------------------------------------
-; r-anchor -- link a variable to an anchor
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
+; The routines below are "utilities" aimed primarily with the 
+; specifics of the triples-processing code.  These are not "core"
+; routines like those above.
+;
+; -----------------------------------------------------------------
+; r-anchor -- link a variable to an AnchorNode
+;
+; Returns an r-expression.
 ;
 (define (r-anchor anchor-name var)
 	(define lnk
@@ -355,7 +380,9 @@
 )
 
 ; -----------------------------------------------------------------
-; r-anchor-trips -- declare a sentence anchored to a rule
+; r-anchor-trips -- declare a sentence anchored to the triples anchor
+;
+; Returns an r-expression
 ;
 (define (r-anchor-trips sent)
 	(r-and 
@@ -367,6 +394,13 @@
 ; -----------------------------------------------------------------
 ; r-decl-word-inst -- declare a word instance belonging to a sentence
 ;
+; This routine presumes that "word-inst" is a variable, and declares
+; it as such. (It does NOT make sense to declare a non-variable to be 
+; a part of a sentence -- this was already done during parse and
+; shouldn't be redone).
+;
+; Returns an r-expression.
+;
 (define (r-decl-word-inst word-inst sent)
 	(r-and
 		(r-link WordInstanceLink word-inst sent)
@@ -377,12 +411,22 @@
 ; -----------------------------------------------------------------
 ; r-decl-lemma -- declare a lemma of a word-instance
 ;
+; If "lemma" is a variable, then it is declared to be typed as
+; a WordNode
+;
+; Returns an r-expression.
+;
 (define (r-decl-lemma word-inst lemma)
-	(r-and
-		(r-link LemmaLink word-inst lemma)
-		(r-decl-var "WordNode" lemma)
+	(define rl (r-link LemmaLink word-inst lemma))
+
+	; If lemma is a string beginging with $, then declare it
+	; to be a variable that must be a WordNode.
+	(if (r-isvar? lemma)
+		(r-and rl (r-decl-var "WordNode" lemma))
+		rl
 	)
 )
+
 ; -----------------------------------------------------------------
 (define (x)
 	; Sentence: "Lisbon is the capital of Portugaul"
