@@ -237,6 +237,48 @@
 )
 
 ; -----------------------------------------------------------------
+; r-varscope -- create a varscope structure from the r-expressions
+;
+; A VaraibleScopeLink consists of an implication link P->Q, with
+; P a sequence of disjuncts (to be conjoined together) and Q the 
+; implicand.  Here, both P and Q are taken to be r-expressions, 
+; constructed with the r-* routines.  A VariableScopeLink also 
+; contains a list of the bound variables which will be grounded 
+; when the implication is evaluated. The variables are taken from
+; the P r-expression. Any variables appearing in Q must also appear
+; in P.
+;
+; Returns the VariableScopeLink
+;
+(define (r-varscope disjuncts implicand)
+	(let* (
+			; dvp == disjuncts variable pair
+			(dvp (assoc 'vardecls disjuncts))
+			; dv == disjuncts variables
+			(dv (if dvp (cdr dvp) '()))
+			
+			; dcp == disjuncts clauses pair
+			(dcp (assoc 'clauses disjuncts))
+			; dc == disjuncts clauses
+			(dc (if dcp (cdr dcp) '()))
+
+			; icp == implicand clauses pair
+			(icp (assoc 'clauses implicand))
+			; ic == implicand clauses
+			(ic (if icp (cdr icp) '()))
+		)
+
+		; The Big Kahuna -- a list of variables, and the implication.
+		(VariableScopeLink
+			(ListLink dv)
+			(ImplicationLink 
+				(AndLink dc)
+				ic
+			)
+		)
+	)
+)
+; -----------------------------------------------------------------
 ; r-anchor -- link a variable to an anchor
 ;
 (define (r-anchor anchor-name var)
@@ -289,32 +331,35 @@
 	; We expect the following variable grounding:
 	; var0=Lisbon, var1=capital var2=Portugaul
 	;
-	(r-and
-		; We are looking for sentences anchored to the 
-		; triples-processing node.
-		(r-anchor-trips "$sent")
+	(r-varscope
+		(r-and
+			; We are looking for sentences anchored to the 
+			; triples-processing node.
+			(r-anchor-trips "$sent")
+		
+			; $var0 and $var1 are word-instances that must 
+			; belong to the same sentence.
+			(r-decl-word-inst "$var0" "$sent") 
+			(r-decl-word-inst "$var1" "$sent")
+		
+			; Match subject and object as indicated above.
+			(r-rlx "_subj" "be" "$var0")
+			(r-rlx "_obj" "be" "$var1")
 	
-		; $var0 and $var1 are word-instances that must 
-		; belong to the same sentence.
-		(r-decl-word-inst "$var0" "$sent") 
-		(r-decl-word-inst "$var1" "$sent")
-	
-		; Match subject and object as indicated above.
-		(r-rlx "_subj" "be" "$var0")
-		(r-rlx "_obj" "be" "$var1")
+			; Match the proposition
+			(r-rlx "$prep" "$var1" "$var2")
 
-		; Match the proposition
-		(r-rlx "$prep" "$var1" "$var2")
+			; Get the lemma form of the word instance
+			(r-decl-lemma "$var1" "$word1")
 
-		; Get the lemma form of the word instance
-		(r-decl-lemma "$var1" "$word1")
-
-		; Convert to a phrase
-		(r-rlx "$phrase" "$word1" "$prep")
+			; Convert to a phrase
+			(r-rlx "$phrase" "$word1" "$prep")
+		)
+		; The implicand
+		(r-rlx "$phrase" "$var2" "$var0")
 	)
 )
 
-(define (r-ifthen P Q)
-	(ImplicationLink  P Q)
-)
 
+; ------------------------ END OF FILE ----------------------------
+; -----------------------------------------------------------------

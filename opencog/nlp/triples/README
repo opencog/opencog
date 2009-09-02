@@ -549,6 +549,8 @@ example:
 Note the use of WordInstanceLink to force both words to belong to 
 the same sentence.
 
+R-expressions
+-------------
 
 Demonstration run
 -----------------
