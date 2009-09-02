@@ -225,6 +225,7 @@
 ;       ^ !HYP-FLAG(be)                   ; Disallow "Is Berlin a city?"
 ;       THEN ^3_isa($var2, $var1) 
 ; 
+; -----------------------------------------------------------------
 ; 7
 ; Truth-query question: "Is Berlin a city?"
 ; var1=Berlin var2=city

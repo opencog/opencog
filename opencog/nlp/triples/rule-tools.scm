@@ -213,6 +213,44 @@
 )
 
 ; -----------------------------------------------------------------
+; Utility routines to fetch the components of the r-expression
+
+(define (r-get-vardecls expr)
+	(let ((evp (assoc 'vardecls expr)))
+		(if evp (cdr evp) '())
+	)
+)
+
+(define (r-get-clauses expr)
+	(let ((evp (assoc 'clauses expr)))
+		(if evp (cdr evp) '())
+	)
+)
+
+; -----------------------------------------------------------------
+; r-not -- invert the truth-value of an r-expression
+; Wrap a given r-expression with a NotLink
+;
+; Example usage:
+;    (r-not (r-rlx "_subj" "be" "$var0"))
+;
+(define (r-not expr)
+
+	; a(def
+	; ;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	; NOT DONE
+
+	; split out the 
+	(let* (
+			; ev == expr variables
+			(ev (r-get-vardecls expr))
+			; ec == expr clauses
+			(ec (r-get-clauses expr))
+		)
+	)
+)
+
+; -----------------------------------------------------------------
 ; r-and -- concatenate a list of r-expressions together.
 ;
 ; Accepts a variable number of r-expressions and returns a concatenation 
@@ -230,25 +268,17 @@
 	; Merge two alists together into one.
 	(define (merge item otem)
 		(let* (
-				; ivp == item variable pair
-				(ivp (assoc 'vardecls item))
 				; iv == item variables
-				(iv (if ivp (cdr ivp) '()))
+				(iv (r-get-vardecls item))
 				
-				; icp == item clauses pair
-				(icp (assoc 'clauses item))
 				; ic == item clauses
-				(ic (if icp (cdr icp) '()))
+				(ic (r-get-clauses item))
 				
-				; ovp == other item variable pair
-				(ovp (assoc 'vardecls otem))
 				; ov == other item variables
-				(ov (if ovp (cdr ovp) '()))
+				(ov (r-get-vardecls otem))
 				
-				; ocp == other item clauses pair
-				(ocp (assoc 'clauses otem))
 				; oc == other item clauses
-				(oc (if ocp (cdr ocp) '()))
+				(oc (r-get-clauses otem))
 
 				;; concatenate
 				(varbles (append ov iv))
@@ -331,20 +361,14 @@
 ;
 (define (r-varscope predicates implicand)
 	(let* (
-			; pvp == predicates variable pair
-			(pvp (assoc 'vardecls predicates))
 			; pv == predicates variables
-			(pv (if pvp (cdr pvp) '()))
-			
-			; pcp == predicates clauses pair
-			(pcp (assoc 'clauses predicates))
+			(pv (r-get-vardecls predicates))
+				
 			; pc == predicates clauses
-			(pc (if pcp (cdr pcp) '()))
+			(pc (r-get-clauses predicates))
 
-			; icp == implicand clauses pair
-			(icp (assoc 'clauses implicand))
 			; ic == implicand clauses
-			(ic (if icp (cdr icp) '()))
+			(ic (r-get-clauses implicand))
 		)
 
 		; The Big Kahuna -- a list of variables, and the implication.
@@ -454,6 +478,9 @@
 ; In order to get a meaningful result here, the "preps.scm" 
 ; preposition dictionary must be loaded.
 ;
+; Assumes that both "prep" and "prep-word" are vairables, 
+; and declares "prep" to be of type DefinedLinguisticRelationshipNode
+;
 ; Returns an r-expression.
 ;
 (define (r-decl-prep prep prep-word)
@@ -462,6 +489,26 @@
 		(r-link ListLink prep prep-word)
 		(r-decl-var "DefinedLinguisticRelationshipNode" prep)
 	)
+)
+
+; -----------------------------------------------------------------
+; r-rlx-flag -- create a ReleEx flag-style relationship
+;
+; Returns an r-expression defining the flag.
+; 
+; Example usage:
+;   (r-rlx-flag "definite" "$var2")
+;
+; creates the equivalent to the RelEx DEFINITE-FLAG($var2)
+;
+(define (r-rlx-flag flag var)
+	(define lnk
+		(InheritanceLink (stv 1 1)
+			(VariableNode var)
+			(DefinedLinguisticConceptNode flag)
+		)
+	)
+	(alist-cons 'clauses (list lnk) '())
 )
 
 ; ------------------------ END OF FILE ----------------------------
