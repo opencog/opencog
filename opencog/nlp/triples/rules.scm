@@ -1,18 +1,81 @@
 ;
 ; rules.scm
 ;
-; An experimental set of copula/preposition-mangling rules.
+; A set of routines for constructing ImplicationLinks and 
+; VariableScopeLinks in a "simplified" manner. The goal here is
+; to make it easier to write, read and debug hand-written 
+; Implication/VarScope links.
+;
+; All of the names of the routines here begin with the string "r-".
+; Most of the routines take as input, or create as output, an object
+; called an "r-expression".  The "r-expression" is a very simple object:
+; it is just a scheme association-list with two items: "clauses" and
+; "vardecls".  The "clauses" are just a list of clauses that will
+; eventually be anded together to create an ImplicationLink. The 
+; "vardecls" is a list of variable declarations that will appear in the
+; final VariableScopeLink that is constructed.
+;
+; A "real-life" example is given below; it constructs the
+; VariableScopeLink needed to convert the parsed sentence 
+; "Lisbon is the capital of Portugaul" into the semantic triple
+; "capital_of(Porutgaul, Lisbon)".
+;
+;   (define my-varscope-link
+;
+;      ; Sentence: "Lisbon is the capital of Portugaul"
+;      ; The RelEx parse is:
+;      ;   _subj(be, Lisbon)
+;      ;   _obj(be, capital)
+;      ;   of(capital, Portugaul)
+;      ;
+;      ; We expect the following variable grounding:
+;      ; var0=Lisbon, var1=capital var2=Portugaul
+;      ;
+;      (r-varscope
+;         (r-and
+;            ; We are looking for sentences anchored to the 
+;            ; triples-processing node.
+;            (r-anchor-trips "$sent")
+;         
+;            ; $var0 and $var1 are word-instances that must 
+;            ; belong to the same sentence.
+;            (r-decl-word-inst "$var0" "$sent") 
+;            (r-decl-word-inst "$var1" "$sent")
+;         
+;            ; Match subject and object as indicated above.
+;            (r-rlx "_subj" "be" "$var0")
+;            (r-rlx "_obj" "be" "$var1")
+;      
+;            ; Match the proposition
+;            (r-rlx "$prep" "$var1" "$var2")
+;   
+;            ; Get the lemma form of the word instance
+;            (r-decl-lemma "$var1" "$word1")
+;   
+;            ; Convert to a phrase
+;            (r-rlx "$phrase" "$word1" "$prep")
+;         )
+;         ; The implicand
+;         (r-rlx "$phrase" "$var2" "$var0")
+;      )
+;   )
+;
+; The comparable IF...THEN expression to the above is:
+;
+; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
+;       ^ %WordInstanceLink($var0,$sent)  ; $var0 and $var1 must be
+;       ^ %WordInstanceLink($var1,$sent)  ; in the same sentence
+;       ^ _subj(be,$var0)
+;       ^ _obj(be,$var1)
+;       ^ $prep($var1,$var2)              ; preposition 
+;       ^ %LemmaLink($var1,$word1)        ; word of word instance
+;       ^ $phrase($word1, $prep)          ; convert to phrase
+;       THEN ^3_$phrase($var2, $var0) 
 ;
 ; Some quick notes on evaluation: conjuncts are evaluated from 
 ; first to last, and so the order of the terms matters. Terms that
 ; narrow down the search the most dramatically should come first,
 ; so as to avoid an overly-broad search of the atomspace.
-;
-; All of these rules are structured so that a search is performed
-; only over sentences That are tagged with a link to the node
-; "# APPLY TRIPLE RULES". Since this rule is first, this prevents 
-; a search over the entire atomspace.
-;
 ;
 ; -----------------------------------------------------------------
 ; get-anon-var-id! given a string, return a new unique string

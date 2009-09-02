@@ -551,6 +551,40 @@ the same sentence.
 
 R-expressions
 -------------
+The above examples are written in an application-specific language that
+is an extension of the way that the Frame rules are written in RelEx. 
+Although the RelEx frame rules are sufficent to do processing in RelEx,
+they don't provide enough flexibility to work well in OpenCog, and so 
+extesnions sub as %WordInstanceLink and %LemmaLink and so on are needed.
+
+The  perl script "rules-to-implications.pl" will convert rules written
+in this syntax into OpenCog ImplicationLinks.  This script could be 
+useful for importing the Frame rules into OpenCog.
+
+However, even with these extensions, problems arose. The most serious 
+problem was that some of the variables needed to be scoped: if they
+range too freely, they will match too many OpenCog hypergraphs that
+are quite irrelevant to the problem (e.g. they might match
+EvaluationLink's that describe the Link-Grammar linkages, which are 
+unwanted at this stage of processing.)  Another problem is that the
+"rules-to-implications.pl" perl script started life as an ad-hoc script,
+and has become unmaintainable as features were added. It should probably
+have been created as a lex/yacc program from the get-go.
+
+Finally, the IF..THEN syntax very explicitly presumes that RelEx
+expressions appear in the IF clause.  Howeve, some users (e.g.
+embodiment) need to have similar functions but have other kinds of 
+hypergraphs appearing on the "input" side. 
+
+To step around these problems, a variant of the above was written in
+pure scheme, and is encoded in the file "rules.scm".  RelEx expressions
+are converted into "r-expressions" which hold both clauses and lists of
+variables. As a final step, an r-expression is converted into a
+VariableScopeLink contiaing variable declarations and an ImplicationLink.
+
+New code should use "rules.scm". The perl script "rules-to-implications.pl"
+should be avoided, except possibly during a port of RelEx to OpenCog.
+
 
 Demonstration run
 -----------------
