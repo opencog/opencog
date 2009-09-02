@@ -359,6 +359,27 @@
 )
 
 ; -----------------------------------------------------------------
+; r-schema -- declare a GroundedSchemaNode
+;
+; Returns an r-expression defining the schema
+; 
+; Example usage:
+;   (r-schema "scm:make-prep-phrase" "$word1" "$prep")
+;
+(define (r-schema schema-name item-1 item-2)
+	(define lnk
+		(ExecutionLink
+			(GroundedSchemaNode schema-name)
+			(ListLink
+				(VariableNode item-1)
+				(VariableNode item-2)
+			)
+		)
+	)
+	(alist-cons 'clauses (list lnk) '())
+)
+
+; -----------------------------------------------------------------
 ; -----------------------------------------------------------------
 ; -----------------------------------------------------------------
 ; The routines below are "utilities" aimed primarily with the 
