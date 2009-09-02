@@ -228,24 +228,37 @@
 )
 
 ; -----------------------------------------------------------------
-; r-not -- invert the truth-value of an r-expression
-; Wrap a given r-expression with a NotLink
+; r-not -- wrap each clause of an r-expression with a NotLink
+;
+; Caution: because this wraps *each clause* in the r-expression
+; in a NotLink, you may not quite get what you were expecting,
+; since more complex r-expressions may have many caluses in them!
+; This works best when the r-expression just contains a *single* 
+; clause!
+;
+; Returns an r-expression.
 ;
 ; Example usage:
-;    (r-not (r-rlx "_subj" "be" "$var0"))
+;    (r-not (r-link InheritanceLink "$var1" "$var2"))
 ;
 (define (r-not expr)
 
-	; a(def
-	; ;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	; NOT DONE
-
-	; split out the 
+	; split out the variables and clauses;
+	; invert the clauses 
 	(let* (
 			; ev == expr variables
 			(ev (r-get-vardecls expr))
+
 			; ec == expr clauses
 			(ec (r-get-clauses expr))
+
+			; nc == inverteted clauses
+			(nc (map NotLink ec))
+		)
+
+		; Return the variables and clauses in an association list
+		(alist-cons 'vardecls ev
+			(alist-cons 'clauses nc '())
 		)
 	)
 )
