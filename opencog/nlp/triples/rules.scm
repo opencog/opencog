@@ -132,7 +132,7 @@
 	)
 )
 
-; 
+; -----------------------------------------------------------------
 ; 3
 ; Sentence: "Pottery is made from clay."
 ; var0=make  var1=pottery var2=clay  prep=from
@@ -143,7 +143,22 @@
 ;       ^ %LemmaLink($var0,$word0)        ; word of word instance
 ;       ^ $phrase($word0, $prep)          ; convert to phrase
 ;       THEN ^3_$phrase($var2, $var1) 
-; 
+
+(define triple-rule-3
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var0" "$sent")
+			(r-rlx "_obj" "$var0" "$var1")
+			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-lemma "$var0" "$word0")
+			(r-rlx "$phrase" "$word0" "$prep")
+		)
+		(r-rlx "$phrase" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
 ; 4
 ; Sentence: "Yarn is made of fibers."
 ; var1=yarn  var2=fibers  phinst=made_of
@@ -152,8 +167,21 @@
 ;       ^ _obj($phinst,$var1) ^ _iobj($phinst,$var2)
 ;       ^ %LemmaLink($phinst,$phrase)     ; word of word instance
 ;       THEN ^3_$phrase($var2, $var1) 
-; 
-; 
+
+(define triple-rule-4
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$phinst" "$sent")
+			(r-rlx "_obj"  "$phinst" "$var1")
+			(r-rlx "_iobj" "$phinst" "$var2")
+			(r-decl-lemma "$phinst" "$phrase")
+		)
+		(r-rlx "$phrase" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
 ; 5
 ; Sentence: "The heart is in the chest." 
 ; also, "The garage is behind the house"
@@ -165,7 +193,22 @@
 ;       ^ %LemmaLink($phinst, $prword)
 ;       ^ %ListLink($prep,$prword)
 ;       THEN ^3_$prep($var2, $var1) 
-; 
+
+(define triple-rule-5
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$phinst" "$sent")
+			(r-rlx "_psubj" "$phinst" "$var1")
+			(r-rlx "_pobj"  "$phinst" "$var2")
+			(r-decl-lemma "$phinst" "$prword")
+			(r-decl-prep "$prep" "$prword")
+		)
+		(r-rlx "$prep" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
 ; 6
 ; Sentence "Berlin is a city"
 ; var1=Berlin var2=city

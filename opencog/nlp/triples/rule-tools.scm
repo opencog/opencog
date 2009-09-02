@@ -449,5 +449,20 @@
 	)
 )
 
+; -----------------------------------------------------------------
+; r-decl-prep -- declare a preposition relation
+; In order to get a meaningful result here, the "preps.scm" 
+; preposition dictionary must be loaded.
+;
+; Returns an r-expression.
+;
+(define (r-decl-prep prep prep-word)
+
+	(r-and 
+		(r-link ListLink prep prep-word)
+		(r-decl-var "DefinedLinguisticRelationshipNode" prep)
+	)
+)
+
 ; ------------------------ END OF FILE ----------------------------
 ; -----------------------------------------------------------------
