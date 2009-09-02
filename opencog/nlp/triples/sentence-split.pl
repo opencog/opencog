@@ -4,7 +4,7 @@
 #
 # Take as input a file containing multiple sentences expressed
 # as opencog scheme. Split it into multiple files, with each file
-# containg one sentence.
+# containing one sentence.
 #
 # Usage:
 #    cat somefile.scm | ./sentence-split.pl /some/file-prefix-
