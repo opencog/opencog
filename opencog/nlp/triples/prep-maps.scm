@@ -1,6 +1,6 @@
-scm
 ;
 ; prep-maps.scm
+; Copyright (c) 2009 Linas Vepstas 
 ;
 ; Create maps linking word-preposition pairs to a single term
 ; These are needed to output word-prep-style triples.
@@ -48,5 +48,4 @@ scm
 	)
 )
 
-.
-exit
+; ---------------------- END OF FILE ----------------------
