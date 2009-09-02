@@ -388,7 +388,7 @@
 (define (r-anchor-trips sent)
 	(r-and 
 		(r-anchor "# APPLY TRIPLE RULES" sent)
-		(r-decl-var "SentenceNode" sent)
+		(r-decl-var "ParseNode" sent)
 	)
 )
 
