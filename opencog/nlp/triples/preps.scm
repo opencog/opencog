@@ -2,8 +2,10 @@
 ; preps.scm
 ; Copyright (c) 2009 Linas Vepstas
 ;
-; List of English-language prepositions
+; List of English-language prepositions.
 ; These are needed to allow the various triple-rules to be processed.
+;
+; Note that the list is quoted -- 
 ;
 (define prep-master-list (list
 'aboard
