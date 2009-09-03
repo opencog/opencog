@@ -438,6 +438,28 @@
 ; Returns the constructed VariableScopeLink.
 ;
 (define (r-varscope predicates implicand)
+
+	; Return #t if the var appears in the variable-type declaration
+	; else return #f.  The vartype is assumed to be of the form:
+	; (TypedVariableLink (VariableNode "$abc") (VariableTypeNode "WhateverNode"))
+	; so that car of outgoping set identifies the variable.
+	(define (is-vdecl? vartype var)
+		(equal? var
+			(car (cog-outgoing-set vartype))
+		)
+	)
+
+	; Return #f if the var appears in the list of variable-type
+	; declarations, else  return #t
+	(define (in-vdecls? typelist var)
+		(null? (filter (lambda (x) (is-vdecl? x var)) typelist))
+	)
+
+	; Delete from varlist any variables that appear in typelist
+	(define (delvar typelist varlist)
+		(filter (lambda (x) (in-vdecls? typelist x)) varlist)
+	)
+
 	(let* (
 			; pv == predicates variables
 			(pv (r-get-vardecls predicates))
@@ -450,13 +472,14 @@
 
 			; ic == implicand clauses
 			(ic (r-get-clauses implicand))
-		)
 
-(display "duuuuude\n") (display pf) (display "\nyasssir\n") (newline)
+			; ff == freevars not appearing in pv
+			(ff (delvar pv pf))
+		)
 
 		; The Big Kahuna -- a list of variables, and the implication.
 		(VariableScopeLink
-			(ListLink pv)
+			(ListLink pv ff)
 			(ImplicationLink 
 				(AndLink pc)
 				ic
