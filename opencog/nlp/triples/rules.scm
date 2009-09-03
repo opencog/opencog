@@ -51,14 +51,13 @@
 			; triples-processing node.
 			(r-anchor-trips "$sent")
 		
-			; $var0 and $var1 are word-instances that must 
-			; belong to the same sentence.
-			(r-decl-word-inst "$var0" "$sent") 
-			(r-decl-word-inst "$var1" "$sent")
-		
+			; The word "be" must occure in the sentence
+			(r-decl-word-inst "$be" "$sent")
+			(r-decl-lemma "$be" "be")
+
 			; Match subject and object as indicated above.
-			(r-rlx "_subj" "be" "$var0")
-			(r-rlx "_obj" "be" "$var1")
+			(r-rlx "_subj" "$be" "$var0")
+			(r-rlx "_obj" "$be" "$var1")
 	
 			; Match the proposition
 			(r-rlx "$prep" "$var1" "$var2")
@@ -94,10 +93,10 @@
 	(r-varscope
 		(r-and
 			(r-anchor-trips "$sent")
-			(r-decl-word-inst "$var0" "$sent") 
-			(r-decl-word-inst "$var1" "$sent")
-			(r-rlx "_subj" "be" "$var0")
-			(r-rlx "_obj" "be" "$var1")
+			(r-decl-word-inst "$be" "$sent")
+			(r-decl-lemma "$be" "be")
+			(r-rlx "_subj" "$be" "$var0")
+			(r-rlx "_obj" "$be" "$var1")
 			(r-rlx "$prep" "$var0" "$var2")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
@@ -224,7 +223,22 @@
 ;       ^ !DEFINITE-FLAG($var2)           ; accept "a city" but not "the city"
 ;       ^ !HYP-FLAG(be)                   ; Disallow "Is Berlin a city?"
 ;       THEN ^3_isa($var2, $var1) 
-; 
+
+(define triple-rule-6
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$be" "$sent")
+			(r-decl-lemma "$be" "be")
+			(r-rlx "_subj" "$be" "$var1")
+			(r-rlx "_obj"  "$be" "$var2")
+			(r-not (r-rlx-flag "hyp" "$be"))
+			(r-not (r-rlx-flag "definite" "$var2"))
+		)
+		(r-rlx "isa" "$var2" "$var1")
+	)
+)
+
 ; -----------------------------------------------------------------
 ; 7
 ; Truth-query question: "Is Berlin a city?"
