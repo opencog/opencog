@@ -320,18 +320,23 @@
 )
 
 ; -----------------------------------------------------------------
-; r-link -- declare a simple opencog link connecting two items
+; r-link -- declare a simple opencog link holding variables
 ;
 ; Returns an r-expression defining the link.
 ; 
 ; Example usage:
 ;   (r-link WordInstanceLink "$var1" "$sent")
 ;
-(define (r-link lnk-type item-1 item-2)
+; will expand into the following:
+;    (WordInstanceLink (stv 1 1)
+;       (VariableNode "$var1")
+;       (VariableNode "$sent")
+;    )
+;
+(define (r-link lnk-type . items)
 	(define lnk
 		(lnk-type (stv 1 1)
-			(VariableNode item-1)
-			(VariableNode item-2)
+			(map VariableNode items)
 		)
 	)
 	(alist-cons 'clauses (list lnk) '())
