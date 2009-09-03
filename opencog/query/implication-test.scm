@@ -21,6 +21,10 @@ scm
 ; possible results from the implication; in this case, there is only one
 ; possible result.
 ;
+; Note that this test has been largely superceeded by the automated unit
+; tests for the query engine. But its still useful here as a demo of 
+; "what's going on".
+;
 (define x
 	(ImplicationLink 
 		(AndLink
