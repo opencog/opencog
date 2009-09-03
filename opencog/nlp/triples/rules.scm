@@ -137,8 +137,14 @@
 ; 3
 ; Sentence: "Pottery is made from clay."
 ; var0=make  var1=pottery var2=clay  prep=from
+;
+; However, we want to reject a match to [Madrid is a city in Spain.]
+; which has a similar pattern -- but it has a subj, while the pottery
+; example does not.
+;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;       ^ %WordInstanceLink($var0,$sent)  ; scope to sentence
+;       ^ !_subj($var0,$var-unwanted)     ; Must not have a subj
 ;       ^ _obj($var0,$var1)
 ;       ^ $prep($var0,$var2)              ; preposition 
 ;       ^ %LemmaLink($var0,$word0)        ; word of word instance
@@ -150,6 +156,7 @@
 		(r-and
 			(r-anchor-trips "$sent")
 			(r-decl-word-inst "$var0" "$sent")
+			(r-not (r-rlx "_subj" "$var0" "$var-unwanted"))
 			(r-rlx "_obj" "$var0" "$var1")
 			(r-rlx "$prep" "$var0" "$var2")
 			(r-decl-lemma "$var0" "$word0")
