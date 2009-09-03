@@ -1,13 +1,16 @@
 scm
 ;
-; implication-test.scm
+; implication-example.scm
 ;
 ; Linas Vepstas January 2009
 ;
-; This file contains a simple, visual-inspection test for the operation
-; of the query engine (in opencog/query) in the handling of
-; ImplicationLinks. The below defines a single implication link and
-; two chunks of data, and then calls the implication engine. 
+; This file contains a simple, visual-inspection demo example for the 
+; use of the query engine in the handling of ImplicationLinks. The below 
+; defines a single implication link and two chunks of data, and then calls
+; the implication engine. 
+;
+; This example can be loaded by cut-n-paste, or by issuing:
+;    cat implication-example.scm | telnet localhost 17001
 ;
 ; The expected result, after running the below, is that the following
 ; should be printed:
@@ -20,10 +23,6 @@ scm
 ; Note the outermost ListLink is simply an enumeration of all of the 
 ; possible results from the implication; in this case, there is only one
 ; possible result.
-;
-; Note that this test has been largely superceeded by the automated unit
-; tests for the query engine. But its still useful here as a demo of 
-; "what's going on".
 ;
 (define x
 	(ImplicationLink 

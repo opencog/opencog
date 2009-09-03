@@ -1,4 +1,5 @@
-                          query processing
+
+                  Query Processing/Pattern Matching
                           ----------------
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
@@ -13,6 +14,9 @@ and so on.
 
 This code does not currently expose a "hypergraph query language" (HQL),
 but doing so should not be hard to add. See the design notes below.
+
+A simple example of one possible use of this code is in the file 
+"implication-example.scm".
 
 Subgraph Isomorphism Discovery
 ------------------------------
