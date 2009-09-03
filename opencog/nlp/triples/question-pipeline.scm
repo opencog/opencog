@@ -35,7 +35,7 @@
 			(r-rlx "$prep" "$join-inst" "$ans")
 			(r-not (r-rlx-flag "what" "$ans"))
 		)
-		(r-anchor "# QUERY SOLUTION" $ans)
+		(r-anchor "# QUERY SOLUTION" "$ans")
 	)
 )
 

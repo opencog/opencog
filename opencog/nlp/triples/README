@@ -588,13 +588,19 @@ should be avoided, except possibly during a port of RelEx to OpenCog.
 
 Demonstration run
 -----------------
-The file "rules.txt" contains the current set of rules.  The perl script
-"rules-to-implications.pl" will convert rules into OpenCog 
-ImplicationLinks, as described above. 
+The file "rules.scm" contains the current set of rules.  The
+opencog3.conf configuration file should be modified and the following
+clauses added to the SCM_PRELOAD list:
 
-The shell script "load.sh" in this directory will load the assorted
-scheme bits and pieces.  In addition, text that was parsed by RelEx,
-and output in opencog format, must be loaded, using "load-examples.sh".
+        nlp/triples/preps.scm,
+        nlp/triples/prep-maps.scm,
+        nlp/triples/rule-tools.scm,
+        nlp/triples/prep-rules.scm,
+        nlp/triples/rules.scm,
+        nlp/triples/triples-pipeline.scm,
+
+Text that was parsed by RelEx, and output in opencog format, must be 
+loaded, using "load-examples.sh".
 
 Sentences must be pre-processed by running the following:
    (cog-ad-hoc "do-implication" prep-rule-0)
