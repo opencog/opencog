@@ -250,7 +250,22 @@
 ;       ^ _subj(be, $var1) ^ _obj(be, $var2)
 ;       ^ HYP-FLAG(be)                    ; Hyp must be present.
 ;       THEN ^3_hypothetical_isa($var2, $var1) 
-; 
+
+(define triple-rule-7
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$be" "$sent")
+			(r-decl-lemma "$be" "be")
+			(r-rlx "_subj" "$be" "$var1")
+			(r-rlx "_obj"  "$be" "$var2")
+			(r-rlx-flag "hyp" "$be")
+		)
+		(r-rlx "hypothetical_isa" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
 ; Sentence "Men are mortal"
 ; var1=mortal var2=men
 ; Must reject prepositions, so that "the color (of the sky) is blue." 
