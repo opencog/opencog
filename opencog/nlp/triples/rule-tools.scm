@@ -343,7 +343,7 @@
 )
 
 ; -----------------------------------------------------------------
-; r-decl-var -- declare a variable type
+; r-decl-vartype -- declare a variable type
 ;
 ; During pattern matching, a variable can be constrained to be of a 
 ; a certain type, so that it is not matched too freely. This is done
@@ -352,9 +352,9 @@
 ; This routine returns an r-expression.
 ;
 ; Example usage:
-;	(r-decl-var "WordInstanceNode" "$var0")
+;	(r-decl-vartype "WordInstanceNode" "$var0")
 ;
-(define (r-decl-var vartype varname)
+(define (r-decl-vartype vartype varname)
 	(define (vd vtype vname)
 		(TypedVariableLink
 			(VariableNode vname)
@@ -451,7 +451,7 @@
 (define (r-anchor-trips sent)
 	(r-and 
 		(r-anchor "# APPLY TRIPLE RULES" sent)
-		(r-decl-var "ParseNode" sent)
+		(r-decl-vartype "ParseNode" sent)
 	)
 )
 
@@ -468,7 +468,7 @@
 (define (r-decl-word-inst word-inst sent)
 	(r-and
 		(r-link WordInstanceLink word-inst sent)
-		(r-decl-var "WordInstanceNode" word-inst)
+		(r-decl-vartype "WordInstanceNode" word-inst)
 	)
 )
 
@@ -498,7 +498,7 @@
 		; If lemma is a string begining with $, then declare it
 		; to be a variable that must be a WordNode.
 		(if is-lem-var
-			(r-and r-exp (r-decl-var "WordNode" lemma))
+			(r-and r-exp (r-decl-vartype "WordNode" lemma))
 			r-exp
 		)
 	) 
@@ -518,7 +518,7 @@
 
 	(r-and 
 		(r-link ListLink prep prep-word)
-		(r-decl-var "DefinedLinguisticRelationshipNode" prep)
+		(r-decl-vartype "DefinedLinguisticRelationshipNode" prep)
 	)
 )
 
