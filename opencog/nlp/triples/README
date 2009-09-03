@@ -600,40 +600,36 @@ clauses added to the SCM_PRELOAD list:
         nlp/triples/triples-pipeline.scm,
 
 Text that was parsed by RelEx, and output in opencog format, must be 
-loaded, using "load-examples.sh".
+loaded, by running "./load-examples.sh".
 
 Sentences must be pre-processed by running the following:
-   (cog-ad-hoc "do-implication" prep-rule-0)
+   (cog-ad-hoc "do-varscope" prep-rule-0)
 and again for prep-rule 1,2,3 inclusive.
 
 Implications can be processed with the scheme interpreter, using the 
 ad-hoc command:
 
-  (cog-ad-hoc "do-implication" stmt)
+  (cog-ad-hoc "do-varscope" stmt)
 
-where the stmt is the implication to evaluate. So, for example, after
-loading rules.txt, (and starting at the 5th rule -- the first 4
-perform some setup) one would try:
+where the stmt is the implication to evaluate. So, for example, 
 
-xxxxxxxxx
-  (cog-ad-hoc "do-implication" frame-rule-0)
   (cog-ad-hoc "do-varscope" triple-rule-0)
 
 This will search the entire contents of the atomtable, looking for any
 hypergraphs that match the predicate of the implication.  The output is
 a list of all possible implicands: thus, for example:
 
-guile> (cog-ad-hoc "do-implication" frame-rule-0)
+guile> (cog-ad-hoc "do-varscope" triple-rule-0)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Germany@3cdca1f8-adf4-4532-a2d6-622da3f43ce6")
        (WordInstanceNode "Berlin@a0d168f7-3735-48a1-b603-33dd0fc95228"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-1)
+guile> (cog-ad-hoc "do-varscope" triple-rule-1)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "capital_of")
     (ListLink (WordInstanceNode "Portugaul@36d41058-3dc8-4e6c-82b9-300a5f48e283")
        (WordInstanceNode "Lisbon@9d5031b1-5caf-48eb-ae7c-b3a89bb11381"))))
 
-guile> (cog-ad-hoc "do-implication" frame-rule-2)
+guile> (cog-ad-hoc "do-varscope" triple-rule-2)
 (ListLink (EvaluationLink (DefinedLinguisticRelationshipNode "color_of")
     (ListLink (WordInstanceNode "sky@f3924dad-81a0-4967-81c8-900e31254f74")
        (WordInstanceNode "blue@df54a7e9-1fb2-4643-be97-ca6ee1e7a359"))))

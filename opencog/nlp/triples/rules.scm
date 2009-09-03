@@ -60,6 +60,7 @@
 			(r-rlx "_obj" "$be" "$var1")
 	
 			; Match the proposition
+			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var1" "$var2")
 
 			; Get the lemma form of the word instance
@@ -97,6 +98,7 @@
 			(r-decl-lemma "$be" "be")
 			(r-rlx "_subj" "$be" "$var0")
 			(r-rlx "_obj" "$be" "$var1")
+			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var0" "$var2")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
