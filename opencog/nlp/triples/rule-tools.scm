@@ -208,7 +208,7 @@
 		)
 
 		; Return the variables and clauses in an association list
-		(r-new-expr vartypes clauses (r-fvl rel a b))
+		(r-new-expr vartypes clauses (r-fv rel a b))
 	)
 )
 
@@ -303,26 +303,22 @@
 		(let* (
 				; iv == item variables
 				(iv (r-get-vardecls item))
-				
-				; ic == item clauses
-				(ic (r-get-clauses item))
+				(ic (r-get-clauses  item))
+				(ir (r-get-freevars item))
 				
 				; ov == other item variables
 				(ov (r-get-vardecls otem))
-				
-				; oc == other item clauses
-				(oc (r-get-clauses otem))
+				(oc (r-get-clauses  otem))
+				(or (r-get-freevars otem))
 
 				;; concatenate
 				(varbles (append ov iv))
 				(clauses (append oc ic))
+				(freevrs (append or ir))
 			)
 
 			; Return the variables and clauses in an association list
-		;  FIXME xxxxxxxxxxxxxxxxx
-			(alist-cons 'vardecls varbles
-				(alist-cons 'clauses clauses '())
-			)
+			(r-new-expr varbles clauses (delete-duplicates freevrs))
 		)
 	)
 
@@ -344,6 +340,8 @@
 ; r-link -- declare a simple opencog link holding variables
 ;
 ; Returns an r-expression defining the link.
+; Caution: at this time, assumes that *all* arguments are 
+; variables!  May need to fix this as appropriate!!
 ; 
 ; Example usage:
 ;   (r-link WordInstanceLink "$var1" "$sent")
@@ -360,7 +358,7 @@
 			(map VariableNode items)
 		)
 	)
-	(r-new-expr '() (list lnk) '())
+	(r-new-expr '() (list lnk) (r-decl-freevarlist items))
 )
 
 ; -----------------------------------------------------------------
@@ -386,17 +384,19 @@
 ;   (r-decl-freevar "$var1" "$sent")
 ;
 (define (r-decl-freevar . items)
-	(r-new-expr '() '() 
-		(list 
-			(map VariableNode 
-				(filter r-isvar? items)  ;; only if its actually a var..
-			)
-		)
-	)
+	(r-decl-freevarlist items)
+)
+
+(define (r-decl-freevarlist vlist)
+	(r-new-expr '() '() (list (r-fvl vlist)))
 )
 
 ; A nearly-equivalent internal-use-only routine.
-(define (r-fvl . items)
+(define (r-fv . items) 
+	(r-fvl items)
+)
+
+(define (r-fvl items)
 	(map VariableNode 
 		(filter r-isvar? items)  ;; only if its actually a var..
 	)
@@ -478,7 +478,7 @@
 			)
 		)
 	)
-	(r-new-expr '() (list lnk) '())
+	(r-new-expr '() (list lnk) (r-decl-freevar item-1 item-2))
 )
 
 ; -----------------------------------------------------------------
@@ -500,7 +500,7 @@
 			(VariableNode var)
 		)
 	)
-	(r-new-expr '() (list lnk) '())
+	(r-new-expr '() (list lnk) (r-decl-freevar var))
 )
 
 ; -----------------------------------------------------------------
@@ -552,7 +552,7 @@
 					)
 				)
 			)
-			(r-exp (r-new-expr '() (list lem-lnk) '()))
+			(r-exp (r-new-expr '() (list lem-lnk) (r-decl-freevar word-inst lemma)))
 		)
 
 		; If lemma is a string begining with $, then declare it
@@ -599,7 +599,7 @@
 			(DefinedLinguisticConceptNode flag)
 		)
 	)
-	(r-new-expr '() (list lnk) '())
+	(r-new-expr '() (list lnk) (r-decl-freevar var))
 )
 
 ; ------------------------ END OF FILE ----------------------------
