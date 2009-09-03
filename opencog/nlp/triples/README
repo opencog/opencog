@@ -588,6 +588,8 @@ should be avoided, except possibly during a port of RelEx to OpenCog.
 
 Demonstration run
 -----------------
+(See also HOWTO below)
+
 The file "rules.scm" contains the current set of rules.  The
 opencog3.conf configuration file should be modified and the following
 clauses added to the SCM_PRELOAD list:
@@ -634,8 +636,7 @@ guile> (cog-ad-hoc "do-varscope" triple-rule-2)
     (ListLink (WordInstanceNode "sky@f3924dad-81a0-4967-81c8-900e31254f74")
        (WordInstanceNode "blue@df54a7e9-1fb2-4643-be97-ca6ee1e7a359"))))
 
-Note that the rule numbering is subject to change; more setup rules
-might be added.
+Note that the rule numbering is subject to change.
 
 
 IsA Sentences
@@ -714,9 +715,10 @@ question: "Is Berlin a capital?" parses out to:
 
 If the truth-query and hyp flags are ignored, then this parse can be
 mistaken for a statement, not a question.  This suggests that the rules
-should include a !HYP term in them.
+should include a !HYP term in them.  The above is implemented in
+"triple-rule-6" in "rules.scm".
 
-
+...
 
 Consider now: "Men are mortal."
    _predadj(men, mortal)
@@ -744,10 +746,13 @@ and also the inverted word-order case:
        $prep($var1,$var3)
        THEN ^3_isa($var1, $var2)
 
-XXX However, this doesn't quite work because  $prep($var2,$var3) is
-so broad, that it can match to just about anything, including things
-are not DefinedLinguisticRelationship nodes. Thus, we need to force
-type matching in variables.
+However, this doesn't quite work because  $prep($var2,$var3) is so broad
+that it can match to just about anything, including things are not 
+DefinedLinguisticRelationship nodes. Thus, to get a proper match, we need 
+to force type matching in variables.
+
+XXX finish me w.r.t the variables ... 
+...
 
 Other problems: Consider the sentences:
 "A hospital is a place where you go when you are sick."
@@ -771,16 +776,17 @@ Parse:
 
 HOWTO
 -----
+(See also "Demonstration Run" above.)
+
 How to run the current code in example/demo/debug mode:
 -- start cog-server
--- run load.sh
 -- run load-examples.sh  to load the example sentences.
 -- Enter the scheme shell
--- run (cog-ad-hoc "do-implication" prep-rule-0) through
-   (cog-ad-hoc "do-implication" prep-rule-3) 
+-- run (cog-ad-hoc "do-varscope" prep-rule-0) through
+   (cog-ad-hoc "do-varscope" prep-rule-3) 
    These is a require step to perform some initial setup.
--- run (cog-ad-hoc "do-implication" frame-rule-0) through
-   (cog-ad-hoc "do-implication" frame-rule-9) and observe results.
+-- run (cog-ad-hoc "do-varscope" triple-rule-0) through
+   (cog-ad-hoc "do-varscope" triple-rule-7) and observe results.
 -- That's all. The results printed above are a "demo" of the
    kinds of things that the rules can currently produce.
 
@@ -798,7 +804,6 @@ Next step:
 -- open the database created above
 -- Edit nlp/seme/config.scm and change file patch to parsed sentences.
    xx xx move these docs to the seme directory
--- run load.sh
 -- Enter the scheme shell
 
 XXXXXXXXXXXXXX TEMPORARILY BROKEN, input sentences must be linked to
