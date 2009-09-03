@@ -435,6 +435,11 @@
 ; implication is evaluated. The variables are taken from the predicate 
 ; P r-expression. Any variables appearing in Q must also appear in P.
 ;
+; During the construction of the varscope, all variables -- i.e. nodes
+; with names that start with a $ -- are promoted to bound variables. 
+; This is done "for convenience", so that the user does not have to 
+; explicitly declare variables.
+;
 ; Returns the constructed VariableScopeLink.
 ;
 (define (r-varscope predicates implicand)
