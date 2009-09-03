@@ -318,5 +318,19 @@
 ;       ^ %LemmaLink($qvarintst,$qvar)    ; word of word instance
 ;       THEN ^3_$phrase($qvar, $var0) 
 
+; -----------------------------------------------------------------
+; needed by the triples-processing pipeline
+;
+(define triple-rule-list (list
+	triple-rule-0
+	triple-rule-1
+	triple-rule-2
+	triple-rule-3
+	triple-rule-4
+	triple-rule-5
+	triple-rule-6
+	triple-rule-7
+))
+
 ; ------------------------ END OF FILE ----------------------------
 ; -----------------------------------------------------------------

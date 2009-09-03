@@ -94,9 +94,9 @@
 	; Now, create the actual triples
 	(for-each
 		(lambda (rule)
-			(attach-triples (cog-ad-hoc "do-implication" rule))
+			(attach-triples (cog-ad-hoc "do-varscope" rule))
 		)
-		frame-rule-list ; this list defined by the /triples/rules.txt file
+		triple-rule-list ; this list defined by the /triples/rules.scm file
 	)
 )
 

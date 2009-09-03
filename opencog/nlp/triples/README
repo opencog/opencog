@@ -609,7 +609,9 @@ where the stmt is the implication to evaluate. So, for example, after
 loading rules.txt, (and starting at the 5th rule -- the first 4
 perform some setup) one would try:
 
+xxxxxxxxx
   (cog-ad-hoc "do-implication" frame-rule-0)
+  (cog-ad-hoc "do-varscope" triple-rule-0)
 
 This will search the entire contents of the atomtable, looking for any
 hypergraphs that match the predicate of the implication.  The output is
