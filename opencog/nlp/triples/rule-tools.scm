@@ -343,6 +343,20 @@
 )
 
 ; -----------------------------------------------------------------
+; r-decl-var -- declare a variable
+;
+; Returns an r-expression holding variable declarations
+; 
+; Example usage:
+;   (r-decl-var "$var1" "$sent")
+;
+(define (r-decl-var . items)
+	(alist-cons
+		'vardecls (list (map VariableNode items)) '()
+	)
+)
+
+; -----------------------------------------------------------------
 ; r-decl-vartype -- declare a variable type
 ;
 ; During pattern matching, a variable can be constrained to be of a 
