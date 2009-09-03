@@ -10,11 +10,13 @@
 ; All of the names of the routines here begin with the string "r-".
 ; Most of the routines take as input, or create as output, an object
 ; called an "r-expression".  The "r-expression" is a very simple object:
-; it is just a scheme association-list with two items: "clauses" and
-; "vardecls".  The "clauses" are just a list of clauses that will
-; eventually be anded together to create an ImplicationLink. The 
-; "vardecls" is a list of variable declarations that will appear in the
-; final VariableScopeLink that is constructed.
+; it is just a scheme association-list with three items: "clauses", 
+; "vardecls" and "freevars".  The "clauses" are just a list of clauses
+; that will eventually be and'ed together to create an ImplicationLink.
+; The "vardecls" is a list of variable declarations that will appear in
+; the final VariableScopeLink that is constructed.  The "freevars" is a 
+; list of variables that were found along the way; these will be promoted
+; to bound variables in the final varscope.
 ;
 ; A "real-life" example is given below; it constructs the
 ; VariableScopeLink needed to convert the parsed sentence 
@@ -206,17 +208,37 @@
 		)
 
 		; Return the variables and clauses in an association list
-		(alist-cons 'vardecls vartypes
-			(alist-cons 'clauses clauses '())
+		(r-new-expr vartypes clauses (r-fvl rel a b))
+	)
+)
+
+; -----------------------------------------------------------------
+; r-new-expr -- constructor for the r-expression object
+;
+; Create a new r-expression object. Tkes three arguments: 
+; a list of variable declarations, a list of clauses, and a list
+; of free variables.
+;
+(define (r-new-expr vdcl claus freev)
+	(alist-cons 'vardecls vdcl
+		(alist-cons 'clauses claus 
+			(alist-cons 'freevars  freev '())
 		)
 	)
 )
 
 ; -----------------------------------------------------------------
-; Utility routines to fetch the components of the r-expression
+; Getters for the r-expression object, returning the vardecls, clauses
+; and freevars.
 
 (define (r-get-vardecls expr)
 	(let ((evp (assoc 'vardecls expr)))
+		(if evp (cdr evp) '())
+	)
+)
+
+(define (r-get-freevars expr)
+	(let ((evp (assoc 'freevars expr)))
 		(if evp (cdr evp) '())
 	)
 )
@@ -257,9 +279,7 @@
 		)
 
 		; Return the variables and clauses in an association list
-		(alist-cons 'vardecls ev
-			(alist-cons 'clauses nc '())
-		)
+		(r-new-expr ev nc (r-get-freevars expr))
 	)
 )
 
@@ -299,6 +319,7 @@
 			)
 
 			; Return the variables and clauses in an association list
+		;  FIXME xxxxxxxxxxxxxxxxx
 			(alist-cons 'vardecls varbles
 				(alist-cons 'clauses clauses '())
 			)
@@ -339,11 +360,11 @@
 			(map VariableNode items)
 		)
 	)
-	(alist-cons 'clauses (list lnk) '())
+	(r-new-expr '() (list lnk) '())
 )
 
 ; -----------------------------------------------------------------
-; r-decl-var -- declare a variable
+; r-decl-var -- declare a (bound) variable
 ;
 ; Returns an r-expression holding variable declarations
 ; 
@@ -351,8 +372,33 @@
 ;   (r-decl-var "$var1" "$sent")
 ;
 (define (r-decl-var . items)
-	(alist-cons
-		'vardecls (list (map VariableNode items)) '()
+	(r-new-expr (list (map VariableNode items)) '() '())
+)
+
+; -----------------------------------------------------------------
+; r-decl-freevar -- declare a (free) variable
+;
+; Returns an r-expression holding free-variable declarations.
+; The declared variables *must* begine with a $, else they will not
+; actually be treted as variables.
+; 
+; Example usage:
+;   (r-decl-freevar "$var1" "$sent")
+;
+(define (r-decl-freevar . items)
+	(r-new-expr '() '() 
+		(list 
+			(map VariableNode 
+				(filter r-isvar? items)  ;; only if its actually a var..
+			)
+		)
+	)
+)
+
+; A nearly-equivalent internal-use-only routine.
+(define (r-fvl . items)
+	(map VariableNode 
+		(filter r-isvar? items)  ;; only if its actually a var..
 	)
 )
 
@@ -375,7 +421,7 @@
 			(VariableTypeNode vtype)
 		)
 	)
-	(alist-cons 'vardecls (list (vd vartype varname)) '())
+	(r-new-expr (list (vd vartype varname)) '() '())
 )
 
 ; -----------------------------------------------------------------
@@ -432,7 +478,7 @@
 			)
 		)
 	)
-	(alist-cons 'clauses (list lnk) '())
+	(r-new-expr '() (list lnk) '())
 )
 
 ; -----------------------------------------------------------------
@@ -454,7 +500,7 @@
 			(VariableNode var)
 		)
 	)
-	(alist-cons 'clauses (list lnk) '())
+	(r-new-expr '() (list lnk) '())
 )
 
 ; -----------------------------------------------------------------
@@ -506,7 +552,7 @@
 					)
 				)
 			)
-			(r-exp (alist-cons 'clauses (list lem-lnk) '()))
+			(r-exp (r-new-expr '() (list lem-lnk) '()))
 		)
 
 		; If lemma is a string begining with $, then declare it
@@ -553,7 +599,7 @@
 			(DefinedLinguisticConceptNode flag)
 		)
 	)
-	(alist-cons 'clauses (list lnk) '())
+	(r-new-expr '() (list lnk) '())
 )
 
 ; ------------------------ END OF FILE ----------------------------
