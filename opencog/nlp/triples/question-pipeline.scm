@@ -57,13 +57,13 @@
 			(r-rlx-flag "what" "$qvar")
 			(r-rlx "$prep" "$ans" "$var")
 		)
-		(r-anchor "# QUERY SOLUTION" $ans)
+		(r-anchor "# QUERY SOLUTION" "$ans")
 	)
 )
 
 ; -----------------------------------------------------------------
 ;
-(define quest-rule-list (list
+(define question-rule-list (list
 	question-rule-0
 	question-rule-1
 ))

@@ -267,7 +267,7 @@
 				(s (fetch-related-semes trips))
 
 				; Now try to find answers to the question
-				(rslt (cog-ad-hoc "do-varscope" quest-rule-vscope-0))
+				(rslt (cog-ad-hoc "do-varscope" question-rule-0))
 
 				; The do-varscope returns a list-link. We need to nuke
 				; that, as it will only cause trouble later.

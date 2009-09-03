@@ -4,6 +4,12 @@
 ; Wrapper to create proper VariableScopeLinks from the naked
 ; ImplicationLinks that the perl files generate.
 ;
+; XXX This is not used any more, because the perl script is not used any
+; more.  This is currently kept here because it might still come in 
+; handy during the conversion of the RelEx frame rules into pure
+; opencog.  Delete this file when frames have been removed from RelEx
+; (or fully added to OpenCog) XXX
+;
 ; Linas Vepstas August 2009
 ;
 ; ---------------------------------------------------------------------
