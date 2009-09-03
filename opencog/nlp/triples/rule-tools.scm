@@ -476,19 +476,32 @@
 ; r-decl-lemma -- declare a lemma of a word-instance
 ;
 ; If "lemma" is a variable, then it is declared to be typed as
-; a WordNode
+; a WordNode.
 ;
 ; Returns an r-expression.
 ;
 (define (r-decl-lemma word-inst lemma)
-	(define rl (r-link LemmaLink word-inst lemma))
+	(let* ((is-lem-var (r-isvar? lemma))
+			(lem-lnk
+				; If lemma is NOT a variable, then it MUST be a word node
+				(LemmaLink (stv 1 1)
+					(VariableNode word-inst)
+					(if is-lem-var 
+						(VariableNode lemma)
+						(WordNode lemma)
+					)
+				)
+			)
+			(r-exp (alist-cons 'clauses (list lem-lnk) '()))
+		)
 
-	; If lemma is a string beginging with $, then declare it
-	; to be a variable that must be a WordNode.
-	(if (r-isvar? lemma)
-		(r-and rl (r-decl-var "WordNode" lemma))
-		rl
-	)
+		; If lemma is a string begining with $, then declare it
+		; to be a variable that must be a WordNode.
+		(if is-lem-var
+			(r-and r-exp (r-decl-var "WordNode" lemma))
+			r-exp
+		)
+	) 
 )
 
 ; -----------------------------------------------------------------
