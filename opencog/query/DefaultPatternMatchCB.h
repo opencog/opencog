@@ -52,37 +52,21 @@ class DefaultPatternMatchCB :
 		}
 
 		/**
-		 * Called when a node in the template pattern
-		 * needs to be compared to a possibly matching
-		 * node in the atomspace. The first argument
-		 * is a node from the pattern, and the second
-		 * is a possible solution node from the atomspace.
+		 * Called when a node in the template pattern needs to 
+		 * be compared to a possibly matching node in the atomspace.
+		 * The first argument is a node from the pattern, and the
+		 * second is a possible solution (grounding) node from the
+		 * atomspace.
+		 *
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 *
-		 * By default, the nodes must be identical,
-		 * or one of them must be a variable.
+		 * By default, the nodes must be identical.
 		 */
 		virtual bool node_match(Node *npat, Node *nsoln)
 		{
 			// If equality, then a match.
 			if (npat == nsoln) return false;
-
-			// Hmm. Its would be unusual/weird to be called with
-			// pattype being a variable node ..  we expect the
-			// variable_match callback to be called for this case ... 
-			// Should this be flagged as an error?
-			Type pattype = npat->getType();
-			if (pattype == VARIABLE_NODE)
-			{
-				// If the solution is variable too, reject it out-of-hand,
-				// even if its some variable in some utterly unrelated thing.
-				Type soltype = nsoln->getType();
-				if (soltype == VARIABLE_NODE) return true;
-
-				return false;
-			}
-
 			return true;
 		}
 

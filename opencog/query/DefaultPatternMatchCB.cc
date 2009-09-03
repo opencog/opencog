@@ -1,5 +1,5 @@
 /*
- * PatternMatchEngine.cc
+ * DefaultPatternMatchCB.cc
  *
  * Copyright (C) 2008,2009 Linas Vepstas
  *
