@@ -358,7 +358,7 @@
 			(map VariableNode items)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-decl-freevarlist items))
+	(r-new-expr '() (list lnk) (r-fvl items))
 )
 
 ; -----------------------------------------------------------------
@@ -388,7 +388,7 @@
 )
 
 (define (r-decl-freevarlist vlist)
-	(r-new-expr '() '() (list (r-fvl vlist)))
+	(r-new-expr '() '() (r-fvl vlist))
 )
 
 ; A nearly-equivalent internal-use-only routine.
@@ -445,9 +445,14 @@
 			; pc == predicates clauses
 			(pc (r-get-clauses predicates))
 
+			; pf == predicates free-vars
+			(pf (r-get-freevars predicates))
+
 			; ic == implicand clauses
 			(ic (r-get-clauses implicand))
 		)
+
+(display "duuuuude\n") (display pf) (display "\nyasssir\n") (newline)
 
 		; The Big Kahuna -- a list of variables, and the implication.
 		(VariableScopeLink
@@ -478,7 +483,7 @@
 			)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-decl-freevar item-1 item-2))
+	(r-new-expr '() (list lnk) (r-fv item-1 item-2))
 )
 
 ; -----------------------------------------------------------------
@@ -500,7 +505,7 @@
 			(VariableNode var)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-decl-freevar var))
+	(r-new-expr '() (list lnk) (r-fv var))
 )
 
 ; -----------------------------------------------------------------
@@ -552,7 +557,7 @@
 					)
 				)
 			)
-			(r-exp (r-new-expr '() (list lem-lnk) (r-decl-freevar word-inst lemma)))
+			(r-exp (r-new-expr '() (list lem-lnk) (r-fv word-inst lemma)))
 		)
 
 		; If lemma is a string begining with $, then declare it
@@ -599,7 +604,7 @@
 			(DefinedLinguisticConceptNode flag)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-decl-freevar var))
+	(r-new-expr '() (list lnk) (r-fv var))
 )
 
 ; ------------------------ END OF FILE ----------------------------
