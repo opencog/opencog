@@ -551,6 +551,8 @@ Some more examples:
     on(sit, mat)
     _subj(sit, cat)
 
+gets the triple "sit_on(mat,cat)"
+
 	[What did the cat sit on?]
    _obj(sit_on, _$qVar)
    _subj(sit_on, cat)
