@@ -38,6 +38,44 @@
 
 ; Definition of Frame Request
 
+; #Entity:Entity
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Entity")
+   (DefinedFrameElementNode "#Entity:Entity")
+)
+; #Entity:Name
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Entity")
+   (DefinedFrameElementNode "#Entity:Name")
+)
+; #Entity:Type
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Entity")
+   (DefinedFrameElementNode "#Entity:Type")
+)
+
+
+; #Questioning:Addressee
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Questioning")
+   (DefinedFrameElementNode "#Questioning:Addressee")
+)
+; #Questioning:Message
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Questioning")
+   (DefinedFrameElementNode "#Questioning:Message")
+)
+; #Questioning:Speaker
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Questioning")
+   (DefinedFrameElementNode "#Questioning:Speaker")
+)
+; #Questioning:Manner
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Questioning")
+   (DefinedFrameElementNode "#Questioning:Manner")
+)
+
 ; #Request:Message
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
    (DefinedFrameNode "#Request")

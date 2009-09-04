@@ -39,6 +39,8 @@ namespace OperationalPetController
 
         void solveLatestSentenceReference( void );
 
+        void answerLatestQuestion( void );
+
         void solveLatestSentenceCommand( void );
 
     protected:
