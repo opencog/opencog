@@ -208,6 +208,11 @@
 		)
 
 		; Return the variables and clauses in an association list
+		; XXX FIXME: really, if a or b are vars, then they are WordInstanceNodes.
+		; XXX However, to fix this, we will need to modify the varscope code to
+		; merge together lits of possibly duplicate var decls!
+		; XXX err, well, no, since b can sometimes be a 
+		; DefinedLinguisticRelationshipNode when building a prep-phrase
 		(r-new-expr vartypes clauses (r-fv rel a b))
 	)
 )
@@ -501,17 +506,16 @@
 ; Example usage:
 ;   (r-schema "scm:make-prep-phrase" "$word1" "$prep")
 ;
-(define (r-schema schema-name item-1 item-2)
+(define (r-schema schema-name . args)
 	(define lnk
 		(ExecutionLink
 			(GroundedSchemaNode schema-name)
 			(ListLink
-				(VariableNode item-1)
-				(VariableNode item-2)
+				(map VariableNode args)
 			)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-fv item-1 item-2))
+	(r-new-expr '() (list lnk) (r-fvl args))
 )
 
 ; -----------------------------------------------------------------
