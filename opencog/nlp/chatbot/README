@@ -228,6 +228,9 @@ The following dialog works (or has worked at various times in the past):
 <me>         What is the color of the book?
 <cogita-bot> Triples abstraction found: red
 
+<me>         the cat sat on the mat
+<me>         what did the cat sit on?
+<cogita-bot> Triples abstraction found: mat
 
 ToDo:
 -----

@@ -26,7 +26,7 @@
 ;    THEN
 ;       ^3_&declare_answer($ans)
  
-(define (wh-question wh-clause)
+(define (wh-question wh-clause ans-clause)
 	(r-varscope
 		(r-and
 			(r-anchor "# TRIPLE BOTTOM ANCHOR" "$qvar")
@@ -37,7 +37,9 @@
 			(r-rlx-flag "what" "$qvar")
 			(r-decl-lemma  "$word-inst" "$word")
 			(r-decl-lemma  "$join-inst" "$word")
-			(r-rlx "$prep" "$join-inst" "$ans")
+
+			ans-clause
+
 			(r-not (r-rlx-flag "what" "$ans"))
 		)
 		(r-anchor "# QUERY SOLUTION" "$ans")
@@ -45,11 +47,17 @@
 )
 
 (define question-rule-0
-	(wh-question (r-rlx "$prep" "$word-inst" "$qvar"))
+	(wh-question 
+		(r-rlx "$prep" "$word-inst" "$qvar")
+		(r-rlx "$prep" "$join-inst" "$ans")
+	)
 )
 
 (define question-rule-1
-	(wh-question (r-rlx "$prep" "$qvar" "$word-inst"))
+	(wh-question 
+		(r-rlx "$prep" "$qvar" "$word-inst")
+		(r-rlx "$prep" "$ans"  "$join-inst")
+	)
 )
 
 ; -----------------------------------------------------------------

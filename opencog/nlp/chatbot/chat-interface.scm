@@ -257,22 +257,9 @@
 (define (loop-over-questions)
 	(define (do-one-question quest)
 
-(dbg-display "applyig questin\n")
-(display quest)
-(newline)
 		; The do-varscope returns a ListLink. We need to nuke
 		; that, as otherwise it will only cause trouble later.
-		; (cog-delete (cog-ad-hoc "do-varscope" quest))
-		(let* ((rslt (cog-ad-hoc "do-varscope" quest)))
-(display "above got varscope list: ")
-(display rslt)
-(newline)
-			(cog-delete rslt)
-		)
-(display "above got answ: ")
-(display (chat-get-simple-answer))
-(newline)
-(end-dbg-display)
+		(cog-delete (cog-ad-hoc "do-varscope" quest))
 
 		; return #t if the rule found an answer
 		(not (null? (chat-get-simple-answer)))
@@ -281,7 +268,6 @@
 	; one of them returns #t (i.e. when an answer is found)
 	(any do-one-question *question-rule-list*)
 )
-
 
 ; -----------------------------------------------------------------------
 ; say-part-2 -- run part 2 of the chat processing

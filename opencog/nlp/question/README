@@ -558,11 +558,9 @@ gets the triple "sit_on(mat,cat)". The corresponding question
    _subj(sit_on, cat)
    QUERY-TYPE(_$qVar, what)
 
-gets: "sit_on(what,cat)"
-
-
-
-
+gets: "sit_on(what,cat)". Unlike that color-of example above, this
+triple has the query var in the first, not the second location.
+Basic triple pattern matching can solve this.
 
 
 Yes/No questions, Question Comprehension
