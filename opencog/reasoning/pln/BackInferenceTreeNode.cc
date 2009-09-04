@@ -870,7 +870,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 foreach(const parent_link<BITNode>& p, template_node->parents)
                     if (p.link == this && p.parent_arg_i == target_i)
                     {
-                        tlog(-1, "I already have this node as a child");
+                        tlog(-1, "I already have this node as a child\n");
                         foreach(const parent_link<BITNode>& myp, parents)
                             tlog(-2, "Parent: %ld\n", (long)myp.link);
                         return template_node;
