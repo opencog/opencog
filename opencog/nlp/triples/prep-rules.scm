@@ -78,10 +78,17 @@
 )
 
 ; -----------------------------------------------------------
+; Sentence: "The cat sat on the mat"
+;
+(define prep-rule-4
+	(prep-rule-template "_subj" "$var1" "$var0")
+)
+
+; -----------------------------------------------------------
 ; Sentence: What did the cat sit on? 
 ; This treats "on" as a particle, and creates a polyword "sit_on"
 ;
-(define prep-rule-4
+(define prep-rule-5
 	(r-varscope
 		(r-and
 			(r-anchor-trips "$sent")
@@ -103,6 +110,7 @@
    prep-rule-2
    prep-rule-3
    prep-rule-4
+   prep-rule-5
 ))
 
 ; ----------------------- END OF FILE -----------------------
