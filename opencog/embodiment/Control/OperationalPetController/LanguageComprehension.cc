@@ -24,6 +24,7 @@
 #include "LanguageComprehension.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace OperationalPetController;
 using namespace opencog;
@@ -153,5 +154,72 @@ void LanguageComprehension::solveLatestSentenceCommand( void )
             agent.getCurrentModeHandler( ).handleCommand( "requestedCommand", arguments );
         } // for
     } // if
+}
+
+std::string LanguageComprehension::resolveFrames2Relex( )
+{
+    std::set<Handle> handles; 
+    std::set< std::string > pre_conditions;
+
+    opencog::AtomSpace& as = agent.getAtomSpace( );
+
+    HandleSeq predicateHandles(2);
+    predicateHandles[0] = as.getHandle( PREDICATE_NODE, "latestQuestionFrames" );
+    predicateHandles[1] = Handle::UNDEFINED;
+    
+    Type types[] = {PREDICATE_NODE, LIST_LINK };
+    HandleSeq evalLinks;
+    as.getHandleSet( back_inserter(evalLinks),
+                     predicateHandles, &types[0], NULL, 2, EVALUATION_LINK, false );
+    logger().debug( "LanguageComprehension::%s - # of detected predicates 'latestQuestionFrames': %d", 
+                    __FUNCTION__, evalLinks.size( ) );
+
+    // only one eval link must has a tv = true
+    unsigned int i;
+    for( i = 0; i < evalLinks.size(); ++i ) {
+
+        Handle latestEvalLink = evalLinks[i];
+        if ( as.getTV( latestEvalLink ).isNullTv( ) || as.getTV( latestEvalLink ).getMean( ) == 0 ) {
+            continue;
+        } // if
+       
+        Handle elementsList = as.getOutgoing( latestEvalLink, 1);
+
+        unsigned int j;
+        unsigned int numberOfElements = as.getArity( elementsList );
+        for( j = 0; j < numberOfElements; ++j ) {
+            Handle predicateElement = as.getOutgoing( elementsList, j );
+            std::map<std::string, Handle> elements =
+                    AtomSpaceUtil::getFrameInstanceElementsValues( as, predicateElement );
+            
+            logger().debug( "LanguageComprehension::%s - # of elements found: %d", 
+                            __FUNCTION__, elements.size());
+
+            std::map<std::string, Handle>::iterator it;
+            for(it = elements.begin(); it != elements.end(); ++it) {
+                //printf("Element: %s\n",it->first.c_str() );
+                //printf("Element Value: %s\n", as.getName( it->second ).c_str() );
+                handles.insert( it->second );
+                pre_conditions.insert ( it->first );
+            }//for
+       }//for
+       //set the TV of the list to NULL
+       as.setTV( latestEvalLink, SimpleTruthValue(0.0f, 0.0f) );
+    }
+   
+   logger().debug("LanguageComprehension::%s - Pre-Conditions",__FUNCTION__);
+   std::set< std::string >::iterator it;
+   for(it = pre_conditions.begin(); it != pre_conditions.end(); ++it){
+        logger().debug("LanguageComprehension::%s - Pre-Condition: %s",__FUNCTION__,(*it).c_str());
+   }
+   logger().debug("LanguageComprehension::%s - End of Pre-Conditions",__FUNCTION__);   
+   
+   OutputRelex* output_relex = FramesToRelexRuleEngine::instance().resolve( pre_conditions );
+   if( output_relex == NULL ){
+       logger().debug("LanguageComprehension::%s - Output Relex is NULL for the Pre-Conditions",__FUNCTION__);
+       return "";
+   }
+
+   return output_relex->getOutput( as, handles );
 
 }

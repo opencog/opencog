@@ -1,9 +1,9 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h
+ * opencog/embodiment/Control/OperationalPetController/OutputRelex.h
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Samir Araujo
+ * Author(s): Fabricio Silva 
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,43 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LANGUAGECOMPREHENSION_H
-#define LANGUAGECOMPREHENSION_H
+#ifndef OUTPUTRELEX_H
+#define OUTPUTRELEX_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/Control/PetInterface.h>
-#include "OutputRelex.h"
-#include "FramesToRelexRuleEngine.h"
+
+using namespace opencog;
 
 namespace OperationalPetController
 {
-    
-    class LanguageComprehension 
+    class OutputRelex
     {
-    public: 
-        LanguageComprehension( Control::PetInterface& agent );
-        
-        virtual ~LanguageComprehension( void );        
-
-        void solveLatestSentenceReference( void );
-
-        void solveLatestSentenceCommand( void );
-
-        std::string resolveFrames2Relex( );
-    protected:
-
-        void init(void);
-
-//        opencog::SchemeEval evaluator;
-        Control::PetInterface& agent;
-                
+    public:
+        OutputRelex( ){ }
+        virtual std::string getOutput( const AtomSpace &atomSpace, std::set<Handle> handles ) = 0;
     };
-
 };
 
-
-
-
-
-
-#endif // LANGUAGECOMPREHENSION_H
+#endif // OUTPUTRELEX_H

@@ -59,13 +59,9 @@ private:
     static const std::string agentType;
 
     static const std::string ballId1;
-    static const std::string ballName1;
     static const std::string ballId2;
-    static const std::string ballName2;
     static const std::string ballId3;
-    static const std::string ballName3; 
     static const std::string ballId4;
-    static const std::string ballName4;
    
 public:
     
@@ -101,6 +97,8 @@ public:
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/reference-resolution-rules.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/question-answering-rules.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
         
@@ -253,7 +251,7 @@ public:
 
     void testResolution( ) 
     {
-
+        /*
         // first call it without sentence to parse
         this->language->solveLatestSentenceReference( );
         // testing: grab the red ball
@@ -419,8 +417,18 @@ public:
             TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
-
+        */
     } 
+
+    
+    void testQuestionAnswering( void )
+    {
+    //    int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/are_you_angry.scm");
+    //    TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+    //    this->language->solveLatestSentenceReference( );
+    //    this->language->answerLatestQuestion( );
+        
+    }
     
     
     /*
@@ -459,7 +467,49 @@ public:
         
     //}
     */  
-    
+
+
+    void testFrames2Relex()
+    {
+        //color
+        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question1.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
+
+        std::string output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        printf( "Saida Relex: %s\n",output.c_str() );
+
+        //yes
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question2.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        printf( "Saida Relex: %s\n",output.c_str() );
+
+        //no
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question3.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        printf( "Saida Relex: %s\n",output.c_str() );
+
+
+        //hungry
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question4.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        printf( "Saida Relex: %s\n",output.c_str() );
+        
+
+        //expect that questions above were already answered
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output == "");
+    }
+
 }; 
 
 const std::string LanguageComprehensionUTest::petId = "1";
@@ -470,10 +520,6 @@ const std::string LanguageComprehensionUTest::petOwnerId = "2";
 const std::string LanguageComprehensionUTest::agentType = "pet";
 
 const std::string LanguageComprehensionUTest::ballId1 = "3";
-const std::string LanguageComprehensionUTest::ballName1 = "ball_99";
 const std::string LanguageComprehensionUTest::ballId2 = "4";
-const std::string LanguageComprehensionUTest::ballName2 = "ball_98";
 const std::string LanguageComprehensionUTest::ballId3 = "5";
-const std::string LanguageComprehensionUTest::ballName3 = "ball_97";
 const std::string LanguageComprehensionUTest::ballId4 = "6";
-const std::string LanguageComprehensionUTest::ballName4 = "ball_96";

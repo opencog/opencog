@@ -1,9 +1,9 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h
+ * opencog/embodiment/Control/OperationalPetController/FramesToRelexRuleEngine.h
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Samir Araujo
+ * Author(s): Fabricio Silva 
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,43 +21,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LANGUAGECOMPREHENSION_H
-#define LANGUAGECOMPREHENSION_H
+#ifndef FRAMESTORELEXRULEENGINE_H
+#define FRAMESTORELEXRULEENGINE_H
 
+#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/Control/PetInterface.h>
-#include "OutputRelex.h"
-#include "FramesToRelexRuleEngine.h"
+#include "OutputRelexColor.h"
+#include "OutputRelexYesNo.h"
+#include "OutputRelexPhysiological.h"
+//#include "FramesToRelexRule.h"
+
+#include <string>
 
 namespace OperationalPetController
 {
-    
-    class LanguageComprehension 
+    class FramesToRelexRuleEngine
     {
-    public: 
-        LanguageComprehension( Control::PetInterface& agent );
-        
-        virtual ~LanguageComprehension( void );        
-
-        void solveLatestSentenceReference( void );
-
-        void solveLatestSentenceCommand( void );
-
-        std::string resolveFrames2Relex( );
-    protected:
-
-        void init(void);
-
-//        opencog::SchemeEval evaluator;
-        Control::PetInterface& agent;
-                
+    public:
+        FramesToRelexRuleEngine( );
+        ~FramesToRelexRuleEngine( );
+        OutputRelex* resolve( std::set< std::string > pre_conditions );
+        static FramesToRelexRuleEngine& instance(void);
+    private:
+        //std::vector<FramesToRelexRule*> rules;
+        std::map< std::set<std::string>, OutputRelex*> rules;
+        static FramesToRelexRuleEngine* singletonInstance;
     };
-
 };
 
-
-
-
-
-
-#endif // LANGUAGECOMPREHENSION_H
+#endif // FRAMESTORELEXRULEENGINE_H

@@ -21,6 +21,7 @@ ADD_LIBRARY (OpcLib
     DefaultAgentModeHandler
     LearningAgentModeHandler
     LanguageComprehension
+    FramesToRelexRuleEngine
 )
 
 INCLUDE_DIRECTORIES (
