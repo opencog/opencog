@@ -948,6 +948,16 @@ public:
     static HandleSeq retrieveFrameInstancesUsingAnElementValue
         ( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
 
+
+    /**
+     * Excludes from the given AtomSpace an instance of a Frame represented
+     * by the given frame instance PredicateNode handle
+     *
+     * @param atomSpace The AtomSpace reference
+     * @param frameInstance Handle of the PredicateNode which represents the frame instance
+     */
+    static void deleteFrameInstance( AtomSpace& atomSpace, Handle frameInstance );
+
 };
 
 
