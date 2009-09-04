@@ -237,7 +237,7 @@ ToDo:
 * Syntax pattern matching only looks at the first parse. The other
   parses should be considered.
 
-*Do the "what color is the book" question in the question README
+* Do the "what color is the book" question in nlp/question/README
 
 
 References
