@@ -551,17 +551,18 @@ Some more examples:
     on(sit, mat)
     _subj(sit, cat)
 
-gets the triple "sit_on(mat,cat)"
+gets the triple "sit_on(mat,cat)". The corresponding question
 
 	[What did the cat sit on?]
    _obj(sit_on, _$qVar)
    _subj(sit_on, cat)
    QUERY-TYPE(_$qVar, what)
 
+gets: "sit_on(what,cat)"
 
 
 
-What did the cat sit on?
+
 
 
 Yes/No questions, Question Comprehension
