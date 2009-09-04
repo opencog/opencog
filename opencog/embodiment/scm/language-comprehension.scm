@@ -152,7 +152,6 @@
     )
   )
 
-
 ;;; Functions used by GroundedPredicateNodes to filter the results
 
 ; This function check if an ReferenceLink connects a given structure to
@@ -285,7 +284,7 @@
        )
      (get-latest-word-instance-nodes)
      )
-    predicates
+    (delete-duplicates predicates)
     )
 )
 
@@ -756,3 +755,490 @@
     commands
     ) ; let
   )
+
+
+; Frames manipulation helper functions
+(define (get-frame-instance-element-type predicateNode)
+  (let ((link (cog-get-link
+               'InheritanceLink
+               'DefinedFrameElementNode
+               predicateNode
+               )))
+    (if (not (null? link))
+        (cog-name (car (gdr (car link)) ))
+        '()
+        )
+    )    
+  )
+
+(define (get-frame-instance-type predicateNode)
+  (let ((link (cog-get-link
+               'InheritanceLink
+               'DefinedFrameNode
+               predicateNode
+               )))
+    (if (not (null? link))
+        (cog-name (car (gdr (car link)) ))
+        '()
+        )
+    )
+  )
+
+
+(define (get-frame-instance-elements-predicates predicateNode)
+  (let ((predicates '()))
+    (map
+     (lambda (link)
+       (set! predicates (append predicates (gdr link)))       
+       )
+     (cog-filter-incoming
+      'FrameElementLink
+      predicateNode
+      )
+     )
+    predicates
+    )
+  )
+
+(define (get-frame-instance-element-value elementPredicateNode)
+  (let ((values
+         (cog-filter-incoming
+          'EvaluationLink
+          elementPredicateNode
+          ))
+        )
+    (if values
+        (car (gdr (car values)))
+        '()
+        )
+    )
+  )
+
+(define (get-frame-instance-element-predicate predicateNode elementName)  
+  (let ((elementPredicateNode '()))
+    (map
+     (lambda (elementPredicate)
+       (let* (
+	      (name (get-frame-instance-element-type elementPredicate))
+	      (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list name)))
+	      )
+	 ; do a split in the element name and compare it without the frame prefix
+	 ; i.e. it name is #Color:Entity, but compares only the second part Entity == elementName
+	 (if (and colonIndex (string=? (substring name (+ colonIndex 1) (string-length name)) elementName) )
+	     (set! elementPredicateNode elementPredicate)
+	     )
+	 )
+       )
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+    elementPredicateNode
+    )
+  )
+
+(define (get-frame-elements frameType)
+  (let ((elements '()))
+    (map
+     (lambda (link)
+       (set! elements (append elements (gdr link)))
+       )
+     (cog-get-link
+      'FrameElementLink
+      'DefinedFrameElementNode
+      (DefinedFrameNode frameType)
+      )    
+     )
+    elements
+    )
+  )
+
+
+(define (get-corresponding-node word)
+  (let ((node (assoc-ref (get-word-node-map) word)))
+    
+    (if node
+        node
+        (ConceptNode word)
+        )
+    )
+  )
+
+(define (is-frame-instance-element? predicateNode)
+  (not (null? (cog-get-link 'InheritanceLink 'DefinedFrameElementNode predicateNode)))      
+)
+
+(define (is-frame-instance? predicateNode)
+  (not (null? (cog-get-link 'InheritanceLink 'DefinedFrameNode predicateNode)))      
+)
+
+
+(define (get-frame-instances-given-its-type-and-an-element-value frameType value)
+  (let* ((instances '())
+         (elements (get-frame-elements frameType))
+         (links (cog-get-link 'EvaluationLink 'PredicateNode value))
+         )
+    (if (not (null? links))
+        (map
+         (lambda (definedFrameElement)       
+           (map
+            (lambda (link)              
+              (if (not (null? (cog-link 'InheritanceLink (gar link) definedFrameElement)))
+                 ; the value really belongs to a frame instance of the given type
+                 ; now get the predicate of the instance                  
+                  (set! 
+                   instances 
+                   (append 
+                    instances
+		    (list
+		     (gar (car (cog-get-link 'FrameElementLink 'PredicateNode (gar link))))                    
+		     )
+                    )
+                   )
+                  
+                  )
+              )
+            links
+            )
+           )
+         elements 
+         )        
+        )
+    instances
+    )
+
+  )
+
+(define (belongs-to-frame-instance-of-type? frameType value)
+  (let* (
+         (elements (get-frame-elements frameType))
+         (belongs? (not (null? elements)))
+         (links '())
+         )
+    (map
+     (lambda (element)
+       (set! links (cog-get-link 'EvaluationLink 'PredicateNode value))
+       (if (null? links)
+           (set! belongs? #f)
+           )
+       (map
+        (lambda (link)
+          (if (null? (cog-link 'InheritanceLink (gar link) element))
+              (set! belongs? #f)
+              )
+          )
+        links        
+        )
+       
+       )
+     elements
+     )
+    belongs?
+    )  
+  )
+
+
+(define (frame-instance-contains-variable? predicateNode)
+  (let ((containsVariable? #f))
+    (map
+     (lambda (predicate)
+       (let ((value (get-frame-instance-element-value predicate)))
+         (if (and value (equal? 'ConceptNode (cog-type value)))
+             (let ((name (cog-name value)))
+               (if (and (> (string-length name) 2) (equal? (substring name 0 3) "#_$"))
+                   (set! containsVariable? #t)
+                   )
+               )
+             )
+         )
+       )
+     (get-frame-instance-elements-predicates predicateNode)
+     )      
+    containsVariable?
+    )
+  )
+
+(define (is-frame-instance-grounded? predicateNode)
+  (not (null? (get-grounded-frame-instance-predicate predicateNode)))
+  )
+
+(define (get-grounded-frame-instance-predicate predicateNode)
+  (let ((grounded #t)
+        (frameType (get-frame-instance-type predicateNode))
+        (framesCandidates '())
+        (groundedElements '())
+	(groundedFramePredicate '())
+        )
+
+    (map
+     (lambda (elementPredicate)
+       (let* ((value (get-frame-instance-element-value elementPredicate))
+             (groundedValue (get-grounded-element-value value))
+             )
+	 (set! grounded (and grounded (not (null? groundedValue))))
+         (cond (grounded
+		(set!
+		 framesCandidates
+		 (append
+		  framesCandidates		  
+		  (get-frame-instances-given-its-type-and-an-element-value 
+		   frameType
+		   groundedValue
+		   )		  
+		  )
+		 )
+
+		(set! 
+		 groundedElements
+		 (append 
+		  groundedElements
+		  (list 
+		   (cons (get-frame-instance-element-type elementPredicate) groundedValue)
+		   )
+		  )
+		 )
+		
+		)) ; cond
+         ) ; let
+       ) ; lambda
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+
+    (if (null? framesCandidates)
+	(set! grounded #f)
+	(set! framesCandidates (delete-duplicates framesCandidates))
+	)
+
+    (if grounded
+	(let ((validCandidateFound #f))
+	  (map
+	   (lambda (frameCandidate)
+	     (if (not validCandidateFound)
+		 (let ((validCandidate #t))
+		   
+		   (map
+		    (lambda (groundedElement)
+		      (if validCandidate
+			  (let* (
+				 (elementType (car groundedElement))
+				 (elementValue (gdr groundedElement))
+				 (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list elementType)))
+				 (elementName (substring elementType (+ colonIndex 1) (string-length elementType)))
+				 (candidateElementPredicate (get-frame-instance-element-predicate frameCandidate elementName))
+				 (candidateElementValue (get-frame-instance-element-value candidateElementPredicate))
+				 )			    
+			    (set! validCandidate (and validCandidate (equal? candidateElementValue elementValue) ) )
+			    )
+			  )
+		      )
+		    groundedElements
+		    )
+
+		   (cond (validCandidate
+			  (set! validCandidateFound #t)
+			  (set! groundedFramePredicate frameCandidate)
+			  ))
+
+		   ) ; let
+		 ) ; if
+	     )
+	   framesCandidates
+	   ) ; map
+
+	  (if (not validCandidateFound)
+	      (set! grounded #f)
+	      )
+	  ) ; let
+	) ; if
+    groundedFramePredicate
+;    frameType
+
+    )
+  )
+
+(define (get-grounded-element-value value)
+  (let ((groundedValue '()))
+  ; first try to find a reference resolution semeNode
+    (if (equal? (cog-type value) 'WordInstanceNode)
+        (let ((refLinks (cog-get-link
+                         'ReferenceLink
+                         'SemeNode
+                         value)
+                        ))
+          (if (not (null? refLinks))
+              (set! groundedValue (car (gdr (car refLinks))))
+              ) ; let             
+          ) ; if        
+        ) ; if
+
+   ; if there is no semeNode, then try to find a corresponding node
+    (if (null? groundedValue)
+        (let ((wordNode (get-word-node value)))
+          (if (not (null? wordNode))
+              (set! groundedValue (get-corresponding-node (cog-name wordNode)))
+            )
+        )
+      ) ; if
+    groundedValue
+    ) ; let  
+  )
+
+
+(define (build-implication-link predicateNode)
+  (let ((variableCounter 1)
+	(variablesDeclaration '())
+	(elementsDeclaration '())
+	)
+    (map
+     (lambda (predicate)
+       (let* ((value (get-frame-instance-element-value predicate))
+	      (groundedValue (get-grounded-element-value value))
+	     )
+         (if (and value (equal? 'VariableNode (cog-type value)))
+             (set! groundedValue value)
+             )
+         (set! variablesDeclaration (append variablesDeclaration (list
+	    (TypedVariableLink
+             (VariableNode (string-append "$var" (number->string variableCounter)))
+             (VariableTypeNode "PredicateNode")
+             )
+            (TypedVariableLink
+             groundedValue
+             (ListLink
+              (VariableTypeNode "SemeNode")
+              (VariableTypeNode "ConceptNode")
+              )
+             )
+            ) ) )
+         (set! elementsDeclaration (append elementsDeclaration (list		     
+	    (FrameElementLink
+             (VariableNode "$var0")
+             (VariableNode (string-append "$var" (number->string variableCounter) ))
+             )
+            (InheritanceLink
+             (VariableNode (string-append "$var" (number->string variableCounter) ))
+             (DefinedFrameElementNode (get-frame-instance-element-type predicate))
+             )
+            (EvaluationLink
+             (VariableNode (string-append "$var" (number->string variableCounter) ))
+             groundedValue
+             )
+            ) ) )
+	 (set! variableCounter (+ variableCounter 1))
+	 ) ; let
+       ) ; lambda
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+
+    (VariableScopeLink
+     (ListLink
+      variablesDeclaration
+      (TypedVariableLink
+       (VariableNode "$var0")
+       (VariableTypeNode "PredicateNode")
+       )
+      )
+     (ImplicationLink
+      (AndLink
+       (InheritanceLink
+	(VariableNode "$var0")
+	(DefinedFrameNode (get-frame-instance-type predicateNode))
+	)
+       elementsDeclaration
+       )
+      (EvaluationLink
+       (PredicateNode "groundedFrame")
+       (ListLink
+        predicateNode
+;        (let ((vars '()))
+;          (do ((i 1 (+ i 1)))
+;              ((= i variableCounter ) vars)
+;            (set! vars (append vars (list (VariableNode (string-append "$var" (number->string i) )))))
+;            )
+;          )
+        (VariableNode "$var0")
+        )       
+       )
+      )
+     )
+
+    ) ; let
+  )
+
+(define (answer-question2)
+  ;(get-frame-instances-given-its-type-and-an-element-value "#Entity" (SemeNode "1"))
+  ;(get-grounded-frame-instance-predicate (car (get-latest-frame-predicates)))
+  (map
+   (lambda (evalLink)
+     (cog-set-tv! evalLink (stv 0 0))
+     )
+   (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+   )
+  (car 
+   (cog-outgoing-set
+    (cog-ad-hoc 
+     "do-varscope" 
+     (build-implication-link (PredicateNode "storedEntity2"))
+     )
+    )
+   )
+  )
+
+(define (answer-question)
+  (let ((framesPredicates (get-latest-frame-predicates))
+        (question? #f)
+        (questionFrames '())
+        (finalFrames '())
+        )
+    ; first check if the incoming sentence is a question
+    (map
+     (lambda (predicate)
+       (if (string=? (get-frame-instance-type predicate) "#Questioning")
+	   (set! question? #t)
+           (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
+               (set! questionFrames (append questionFrames (list predicate)))
+               )
+           )
+       )
+     framesPredicates
+     )
+
+    (if question? 
+	(map ; ok it is a question, so handle it
+	  ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
+	  ;questionFrames
+	 (lambda (predicate)
+	   
+	   (if (not (frame-instance-contains-variable? predicate))
+	       (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
+		 (if (not (null? groundedFrameInstance))
+		     (set! finalFrames (append finalFrames groundedFrameInstance ))
+		     )
+		 ) ; let
+	       (let ((groundedFrame
+                      (cog-outgoint-set
+                       (cog-ad-hoc 
+                        "do-varscope" 
+                        (build-implication-link predicate)
+                        )
+                       )
+                      ))
+                 (if (not (null? groundedFrame))
+                     (set! finalFrames (append finalFrames (gdr (gdr (car groundedFrame)))))
+                     )
+                 ) ; let
+	       ) ; if
+	   ) ; lambda
+	 questionFrames
+	 )
+	)
+    (EvaluationLink (stv 1 1)
+     (PredicateNode "latestQuestionFrames")
+     (ListLink
+      finalFrames
+      )
+     )
+    ;questionFrames
+    ;finalFrames
+
+    )  
+  )
+
