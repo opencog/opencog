@@ -157,7 +157,8 @@ is as follows:
    it is straight-forward to pattern-match the statement to the question,
    and determine that "who" corresponds to "John".
 
-   The set-up for RelEx-based matching is done in nlp/question/RelexQuery.cc.
+   The set-up for RelEx-based pattern matching passes through
+   (cog-ad-hoc "question") to the code in nlp/question/SentenceQuery.cc.
    The actual pattern-matching is done by generic hypergraph predicate
    maching code in query/PatternMatchEngine.cc.
 
@@ -170,11 +171,15 @@ is as follows:
    parses of the statement and the question are quite different.
    
    Code to extract and create such triples is in the nlp/triples 
-   directory. The pattern-matching for such triples is done by 
-   nlp/question/TripleQuery.cc.  This code is triggered and run
-   if the process in step-3 fails for find an answer (although
-   triples are extracted for all new statements, in case they are
-   needed for question-answering later.
+   directory; overall operation is explained in triples/README. 
+   The question, now in "triple" form, can then be pattern-matched
+   to a database of existing triples (including those learned from 
+   earlier in the conversation).  This pattern matching is done via
+   the "question-rule" patterns, also found in the triples directory.
+
+   This code is triggered and run only if the process in step-3 above
+   failed to find an answer.  However, triples are extracted for all 
+   new statements, in case they are needed for question-answering later.
 
 5) Common sense database. The semantic-triple format allows a 
    repository of common-sense triples to be created, and questions 
@@ -215,9 +220,9 @@ The following dialog works (or has worked at various times in the past):
 <me>         Fred threw a red ball
 <me>         Mary threw a blue rock
 <me>         who threw a ball?
-<cogita-bot> Fred John
+<cogita-bot> Syntax pattern match found: Fred John  
 <me>         who threw a red ball?
-<cogita-bot> Fred
+<cogita-bot> Syntax pattern match found: Fred
 
 
 

@@ -118,7 +118,7 @@
 ; e.g. "yes", but sometimes a list of words shows up for extensive
 ; questions (e.g. "what is an instrument" lists many instruments)
 ;
-(define (chat-prt-soln soln-list)
+(define (chat-prt-soln msg soln-list)
 	(define (do-prt-soln soln-list)
 		;; display *all* items in the list.
 		(define (show-item wlist)
@@ -133,7 +133,7 @@
 				)
 			)
 		)
-		(display "The answer to your question is: ")
+		(display msg)
 		(show-item soln-list)
 	)
 
@@ -171,9 +171,8 @@
 	; (display ", parsing ...\n")
 	(display ", Cogita is currently broken, but will try anyway ...\n")
 
-	; Parse the input, send it to the question processor
+	; Parse the input, load it into opencog.
 	(relex-parse txt)
-
 	(set! sents (get-new-parsed-sentences))
 
 	; Hmm. Seems like sents is never null, unless there's a 
@@ -186,12 +185,13 @@
 			(display txt)
 			(display "\" but I couldn't parse that.")
 			(newline)
+			(chat-return "(say-final-cleanup)")
 		)
-
-		; Perform a simple pattern matching to the syntactic
-		; form of the sentence.
-		(set! is-question (cog-ad-hoc "question" (car sents)))
 	)
+
+	; Perform a simple pattern matching to the syntactic
+	; form of the sentence.
+	(set! is-question (cog-ad-hoc "question" (car sents)))
 
 	;; Was a question asked?
 	(if is-question 
@@ -202,9 +202,8 @@
 			(newline)
 
 			; If pattern-matching found an answer, print it.
-			(if (null? ans)
-				(display "There was no simple answer; attempting triples search\n")
-				(chat-prt-soln ans)
+			(if (not (null? ans))
+				(chat-prt-soln "Syntax pattern match found: " ans)
 			)
 		)
 		(let ()
@@ -285,7 +284,7 @@
 				)
 				(let ()
 					; print, and skip to the end of processing
-					(chat-prt-soln ans)
+					(chat-prt-soln "Triples abstraction found answer: " ans)
 					(chat-return "(say-final-cleanup)")
 				)
 			)
