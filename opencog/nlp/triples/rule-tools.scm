@@ -213,6 +213,7 @@
 		; merge together lits of possibly duplicate var decls!
 		; XXX err, well, no, since b can sometimes be a 
 		; DefinedLinguisticRelationshipNode when building a prep-phrase
+		; XXX SemeNodes can appear here as well.
 		(r-new-expr vartypes clauses (r-fv rel a b))
 	)
 )

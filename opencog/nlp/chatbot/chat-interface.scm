@@ -218,25 +218,68 @@
 )
 
 ; -----------------------------------------------------------------------
-; re-anchor the result triples.
-; The question-answering rule looks for things on this anchor.
+; anchor-bottom-side -- anchor triples for pattern matching.
+;
+; In order for the pattern matcher to locate things attached to
+; anchors, they need to be attached in a way to "keep things simple"
+; The simplest way to do this seems to be to attach one of the
+; parts of the triple to the anchor.  e.g. given the triple
+; "made_from(clay,pottery)" this attaches "clay" to the anchor.
+;
+; The question-answering rules look for things on this anchor.
 ;
 (define bottom-anchor (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
 (define (anchor-bottom-side trip-list)
 	(define (re-anchor-one trip)
 		(let* ((ll (cadr (cog-outgoing-set trip)))
-				(li (cadr (cog-outgoing-set ll)))
+				(os (cog-outgoing-set ll))
 				)
-			(ListLink (stv 1 1) bottom-anchor li)
+			(ListLink (stv 1 1) bottom-anchor (car os))
+			(ListLink (stv 1 1) bottom-anchor (cadr os))
 		)
 	)
 	(map re-anchor-one trip-list)
+(dbg-display "bottumsup\n")
+(display (cog-incoming-set bottom-anchor))
+(newline)
+(end-dbg-display)
 )
 
 (define (delete-bottom-anchor)
    (for-each (lambda (x) (cog-delete x))
       (cog-incoming-set bottom-anchor)
    )
+)
+
+; -----------------------------------------------------------------------
+; Go through the question rules, one by one.
+;
+(define (loop-over-questions)
+	(define (do-one-question quest)
+
+(dbg-display "applyig questin\n")
+(display quest)
+(newline)
+		; The do-varscope returns a ListLink. We need to nuke
+		; that, as otherwise it will only cause trouble later.
+		; (cog-delete (cog-ad-hoc "do-varscope" quest))
+		(let* ((rslt (cog-ad-hoc "do-varscope" quest)))
+(display "above got varscope list: ")
+(display rslt)
+(newline)
+			(cog-delete rslt)
+		)
+(display "above got answ: ")
+(display (chat-get-simple-answer))
+(newline)
+(end-dbg-display)
+
+		; return #t if the rule found an answer
+		(not (null? (chat-get-simple-answer)))
+	)
+	; "any" will call "do one question" on each rule, until
+	; one of them returns #t (i.e. when an answer is found)
+	(any do-one-question *question-rule-list*)
 )
 
 
@@ -265,11 +308,8 @@
 				(s (fetch-related-semes trips))
 
 				; Now try to find answers to the question
-				(rslt (cog-ad-hoc "do-varscope" question-rule-0))
+				(r (loop-over-questions))
 
-				; The do-varscope returns a list-link. We need to nuke
-				; that, as it will only cause trouble later.
-				(ax (cog-delete rslt))
 				(ans (chat-get-simple-answer))
 			)
 (dbg-display "duude question trips are:\n")

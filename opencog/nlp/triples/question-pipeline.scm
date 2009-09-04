@@ -76,7 +76,7 @@
 
 ; -----------------------------------------------------------------
 ;
-(define question-rule-list (list
+(define *question-rule-list* (list
 	question-rule-0
 	question-rule-1
 ;	question-rule-2
