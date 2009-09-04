@@ -166,11 +166,6 @@
 	(define sents '())
 	(define is-question #f)
 
-	(display "Hello ")
-	(display nick)
-	; (display ", parsing ...\n")
-	(display ", Cogita is currently broken, but will try anyway ...\n")
-
 	; Parse the input, load it into opencog.
 	(relex-parse txt)
 	(set! sents (get-new-parsed-sentences))
@@ -180,6 +175,7 @@
 	; something, even if the input was non-sense.
 	(if (null? sents)
 		(let ()
+			(display "Hello ")
 			(display nick)
 			(display ", you said: \"")
 			(display txt)
@@ -196,6 +192,7 @@
 	;; Was a question asked?
 	(if is-question 
 		(let ((ans (chat-get-simple-answer)))
+			(display "Hello ")
 			(display nick)
 			(display ", you asked a question: ")
 			(display txt)
@@ -207,6 +204,7 @@
 			)
 		)
 		(let ()
+			(display "Hello ")
 			(display nick)
 			(display ", you made a statement: ")
 			(display txt)
@@ -284,7 +282,7 @@
 				)
 				(let ()
 					; print, and skip to the end of processing
-					(chat-prt-soln "Triples abstraction found answer: " ans)
+					(chat-prt-soln "Triples abstraction found: " ans)
 					(chat-return "(say-final-cleanup)")
 				)
 			)

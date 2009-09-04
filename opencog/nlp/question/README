@@ -512,30 +512,16 @@ good ways of inducing that yarn is used to make cloth...
 Triples matching
 ----------------
 The nlp/triples directory contains code that generates semantic triples
-from RelEx input.  So for example: "Bats are made of wood." results in
-the semantic triple "made_of(wood, bat)", which is derived from the
-raw relex dependencies:
+from RelEx input.  
 
-    _obj (made_of, bat)
-    _iobj (made_of, wood)
+For example: "The color of the book is red." has the parse:
 
-By contrast, consider the question: "What are bats made of?" It has a
-very different RelEx dependency structure:
-
-    _subj (be, bat)
-    _obj (make, bat) 
-    _obj (of, _$qVar) 
-    of (be, of)
-
-Because if this, performing simple patern matchin on the dependency 
-structure will fail.
-
-Lets try another: "The color of the book is red."
     _predadj (color, red)
     of (color, book) 
-Which the semantic-triple rules convert to "color_of(book,red)"
 
-By contrast, "what is the color of the book?" becomes
+The semantic-triple rules convert this to "color_of(book,red)"
+
+The question "what is the color of the book?" parses as
 
     _subj (be, _$qVar)
     _obj (be, color)
@@ -543,11 +529,12 @@ By contrast, "what is the color of the book?" becomes
     QUERY-TYPE (_$qVar, what)
     COPULA-QUESTION-FLAG (color, T)
 
-which does have a semantic triple form: "color_of(book,what)"
-Thus, for this case, question-answering by such normalized
-"semantic triples" should work just fine.
+and so syntax pattern matching on the dependency structure will fail. By 
+contrast, the triples code generates "color_of(book,what)" which can be
+pattern-matched.  Thus, for this case, question-answering by such 
+normalized "semantic triples" should work just fine.
 
-By contrast, "what color is the book?" becomes
+The related question, "what color is the book?" becomes
 
     _obj (be, book)
     _subj (be, color)
@@ -555,17 +542,24 @@ By contrast, "what color is the book?" becomes
     QUERY-FLAG (color, T)
 
 and the manner in which this should be converted into a "color_of"
-question is unclear.
+question is unclear -- some higher-order reasoning about copulas are
+needed.
 
-"You eat metal"  and "do you eat metal?"
+Some more examples:
 
-What colour is the car?
-    QUERY-FLAG(colour, T)
-    _subj(be, colour) 
-    _obj(be, car)
-    QUERY-TYPE(_$qVar, what)
+    [The cat sat on the mat.]
+    on(sit, mat)
+    _subj(sit, cat)
 
-note the borken parse -- missing connection to qVar.
+	[What did the cat sit on?]
+   _obj(sit_on, _$qVar)
+   _subj(sit_on, cat)
+   QUERY-TYPE(_$qVar, what)
+
+
+
+
+What did the cat sit on?
 
 
 Yes/No questions, Question Comprehension
@@ -636,3 +630,4 @@ TODO
    new VariableScope interface (and/or ForAll, ThereExists, etc). The
    goal is to explicitly declare the variables.
 
+ 

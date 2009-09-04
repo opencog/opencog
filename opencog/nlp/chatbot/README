@@ -224,6 +224,17 @@ The following dialog works (or has worked at various times in the past):
 <me>         who threw a red ball?
 <cogita-bot> Syntax pattern match found: Fred
 
+<me>         The color of the book is red.
+<me>         What is the color of the book?
+<cogita-bot> Triples abstraction found: red
+
+
+ToDo:
+-----
+* Syntax pattern matching only looks at the first parse. The other
+  parses should be considered.
+
+*Do the "what color is the book" question in the question README
 
 
 References
