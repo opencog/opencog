@@ -1,8 +1,64 @@
 
-                          Semantic Triples
-                          ----------------
-                      Linas Vepstas January 2009
+                     Semantic Triples Part Two
+                     -------------------------
+                      Linas Vepstas Fall 2009
 
+Continue with examination of specific sentence and question types, and
+an alaysis of the kinds of pattern-matchig challenges they present.
+
+Using Triples for question-answering
+ matching
+----------------
+The nlp/triples directory contains code that generates semantic triples
+from RelEx input.  
+
+For example: "The color of the book is red." has the parse:
+
+    _predadj (color, red)
+    of (color, book) 
+
+The semantic-triple rules convert this to "color_of(book,red)"
+
+The question "what is the color of the book?" parses as
+
+    _subj (be, _$qVar)
+    _obj (be, color)
+    of (color, book) 
+    QUERY-TYPE (_$qVar, what)
+    COPULA-QUESTION-FLAG (color, T)
+
+and so syntax pattern matching on the dependency structure will fail. By 
+contrast, the triples code generates "color_of(book,what)" which can be
+pattern-matched.  Thus, for this case, question-answering by such 
+normalized "semantic triples" should work just fine.
+
+The related question, "what color is the book?" becomes
+
+    _obj (be, book)
+    _subj (be, color)
+    QUERY-TYPE (_$qVar, what)
+    QUERY-FLAG (color, T)
+
+and the manner in which this should be converted into a "color_of"
+question is unclear -- some higher-order reasoning about copulas are
+needed.
+
+Some more examples:
+
+    [The cat sat on the mat.]
+    on(sit, mat)
+    _subj(sit, cat)
+
+gets the triple "sit_on(mat,cat)". The corresponding question
+
+	[What did the cat sit on?]
+   _obj(sit_on, _$qVar)
+   _subj(sit_on, cat)
+   QUERY-TYPE(_$qVar, what)
+
+gets: "sit_on(what,cat)". Unlike that color-of example above, this
+triple has the query var in the first, not the second location.
+Basic triple pattern matching can solve this.
 
 
 IsA Sentences
@@ -138,5 +194,50 @@ Parse:
    TRUTH-QUERY-FLAG (capital, T)
    TRUTH-QUERY-FLAG (be, T)
    HYP (be, T)
+
+
+
+Yes/No questions, Question Comprehension
+----------------------------------------
+"Did John throw a rock?"
+
+    _subj(throw, John)
+    _obj(throw, rock)
+    HYP (throw, T)
+    TRUTH-QUERY-FLAG (throw, T)
+    TRUTH-QUERY-FLAG (rock, T)
+
+Suggests a pattern-based approach:
+  # IF _subj($vrb, $sb) ^
+       _obj ($vrb, $ob) ^
+       HYP($vrb)
+    THEN answer "yes" if match ... 
+
+More generally, this suggests a program of "question comprehension",
+wherein a set of pattern-matching proedicates, such as the above,
+attempt to identify the type of question being asked, and determine
+what it is that the question is asking for. Only after "comprehending"
+the question, should a search for the answer be undertaken.
+
+Some extrememly preliminary work has been done. The file 
+"nlp/triples/question-tags.txt" contains a single rule that attempts
+to identify "hypotheitcal copula" questions: "Is X a Y?"
+
+Some other question forms needing identification:
+ "Does X verb Y?"       e.g. "Did John throw a rock?"
+ "Is X prep_phrase Y?"  e.g. "Is Berlin in Germany?"
+                             "Is Berlin the captial of Germany?"
+
+
+Also: "What color is the book?" needs to be recognized as being
+"What is the color of the book?" 
+
+
+Rhetorical Questions
+--------------------
+How to distinguish rhetorical questions from queries that should be
+answered?  A block of input text may contain rhetorical questions, 
+which should be ignored.
+
 
 
