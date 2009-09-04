@@ -4,6 +4,7 @@
 ; An experimental set of copula/preposition-mangling rules. 
 ;
 ; See "rule-tools.scm" for more information about the file format.
+; See "prep-maps.scm" for "make-prep-phrase"
 ;
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -77,13 +78,31 @@
 )
 
 ; -----------------------------------------------------------
-; needed by the triples-processing pipeline
+; Sentence: What did the cat sit on? 
+; This treats "on" as a particle, and creates a polyword "sit_on"
+;
+(define prep-rule-4
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var1" "$sent")
+			(r-rlx "_subj" "$pwi" "$var1")
+			(r-rlx-flag "polyword" "$pwi")
+			(r-decl-lemma "$pwi" "$pw")
+		)
+		(r-schema "scm:make-polyword-phrase" "$pw")
+	)
+)
+;
+; -----------------------------------------------------------
+; The list below is needed by the triples-processing pipeline
 ;
 (define prep-rule-list (list
    prep-rule-0
    prep-rule-1
    prep-rule-2
    prep-rule-3
+   prep-rule-4
 ))
 
 ; ----------------------- END OF FILE -----------------------

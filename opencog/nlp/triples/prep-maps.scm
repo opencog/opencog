@@ -39,8 +39,8 @@
 					(string-append word-str "_" prep-str)
 				)
 				(ListLink
-					(WordNode (cog-name word))
-					(DefinedLinguisticRelationshipNode (cog-name prep))
+					(WordNode word-str)
+					(DefinedLinguisticRelationshipNode prep-str)
 				)
 			)
 			'()
@@ -48,4 +48,21 @@
 	)
 )
 
+; ---------------------------------------------------------
+; Similar to above, except that we are promoting a ppolyword phrase
+;
+(define (make-polyword-phrase polyword)
+	(let ((polyword-str (cog-name polyword)))
+		(if (eq? (cog-type polyword) 'WordNode)
+			(EvaluationLink (stv 1.0 1.0)
+				(DefinedLinguisticRelationshipNode polyword-str)
+				(ListLink
+					(WordNode polyword-str)
+					(DefinedLinguisticRelationshipNode polyword-str)
+				)
+			)
+			'()
+		)
+	)
+)
 ; ---------------------- END OF FILE ----------------------
