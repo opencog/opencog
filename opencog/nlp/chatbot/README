@@ -5,7 +5,7 @@
                           August 2009
 
 XXX As of this instant, important parts of the chatbot are being
-re-desinged, and so things sort of don't work. I beleive that
+re-designed, and so things sort of don't work. I beleive that
 revision 3150 has a working chatbot.
 
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
@@ -69,9 +69,6 @@ This is most easily done by starting the cogserver using the
 "lib/opencog-chatbot.conf" configuration file, which sets the correct
 port, silences the opencog prompt, and loads the needed scheme files.
 
-In addition, triples-processing, described in step 4 below, requires
-that the shell scripts opencog/nlp/triples/load-chatbot.sh be run.
-
 To enable the common-sense database (described in step 5), you must
 first create and populate the database. This can be done from scratch,
 or by using a database dump, obtained from 
@@ -79,18 +76,9 @@ or by using a database dump, obtained from
        http://gnucash.org/linas/nlp/data/conceptnet/
 
 The database should be created and populated, as described in 
-opencog/nlp/triples/README.  Then, after starting opencog, but *before*
-running load-chatbot.sh, telnet to the cogserver, and open the database:
+opencog/nlp/triples/README.  The config file "lib/opencog-chatbot.conf"
+needs to be edited, and the database name and login credentials updated.
 
-     $ telnet localhost 17004
-     cog-server> sql-open <dbname> <userid> <passwd>
-
-For example:
-
-     cog-server> sql-open triples linas asdf
-
-Then do the two load-chatbot.sh files. The system is now ready to do 
-question-answering.
 
 Configure and run the chat bridge: 
 ----------------------------------
@@ -99,8 +87,8 @@ chat system to the OpenCog server. The cogita chatbot is tailored for
 IRC chat; other chat systems could be supported in a straightforward
 manner. 
 
-The IRC chatbot has an assortment of hard-coded config parameters in
-the source code.  See go-irc.c for setable values for the name of the 
+The IRC chatbot has an assortment of hard-coded config parameters in the
+source code.  See CogitaConfig.cc for setable values for the name of the 
 chatbot, the irc channel and irc network to join, and the bot ID strings,
 etc.  By default, it connects to the #opencog channel on freenode.net.
 
@@ -140,9 +128,9 @@ is as follows:
 
    Note that if the cog-server is busy, then whirr can block for an
    indefinitely long time. The person who is chatting will start to 
-   wonder about the lack of response. This should be fixed -- best
-	fix is probably to multi-thread, while periodically telling the
-	user that the cog server is thinking ...  XXX FIXME
+   wonder about the lack of response. This is currently hacked around
+   by having the chat processing periodically return to the bridge,
+   and then resume again. A proper architecture remains unimplemented.
 
 2) Parsing of english text by RelEx. The very first thing that the 
    ''say-id-english'' routine does is to send the input text to RelEx
@@ -211,13 +199,27 @@ is as follows:
    reasoning engine, PLN itself.  All details for how to go about doing
    this are yet to be fleshed out.
 
-8) NLgen (not yet hooked up). Natural language output.
+8) NLgen/NLGen2 (not yet hooked up). Natural language output.
    Code at https://launchpad.net/nlgen 
    Overview at http://www.opencog.org/wiki/SegSim
 
 
 Note that steps 3,4,5,6,7 very very crudely echo the kind of design
 discussed in [Katz05].
+
+Examples:
+---------
+The following dialog works (or has worked at various times in the past):
+
+<me>         John threw a green ball.
+<me>         Fred threw a red ball
+<me>         Mary threw a blue rock
+<me>         who threw a ball?
+<cogita-bot> Fred John
+<me>         who threw a red ball?
+<cogita-bot> Fred
+
+
 
 References
 ==========
