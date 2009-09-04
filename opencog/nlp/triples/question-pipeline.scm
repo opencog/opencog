@@ -11,6 +11,10 @@
 ;
 ; To limit the scope of the search (for performance), the bottom
 ; of the prep-triple is assumed to be anchored.
+;
+; Basically, we are trying to handle triples of the form
+; "capital_of(France, what)" and verifying that "what" is a query,
+; and then yanking out the answer.
 ; 
 ; # IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
 ;       ^ $prep($word-inst, $qvar)      ; the question
@@ -22,11 +26,12 @@
 ;    THEN
 ;       ^3_&declare_answer($ans)
  
-(define question-rule-0
+(define (wh-question wh-clause)
 	(r-varscope
 		(r-and
 			(r-anchor "# TRIPLE BOTTOM ANCHOR" "$qvar")
-			(r-rlx "$prep" "$word-inst" "$qvar")
+
+			wh-clause  ; the prep-phrase we are matching!
 
 			;; XXX someday, this needs to be an or-list of WH- words.
 			(r-rlx-flag "what" "$qvar")
@@ -39,6 +44,14 @@
 	)
 )
 
+(define question-rule-0
+	(wh-question (r-rlx "$prep" "$word-inst" "$qvar"))
+)
+
+(define question-rule-1
+	(wh-question (r-rlx "$prep" "$qvar" "$word-inst"))
+)
+
 ; -----------------------------------------------------------------
 ; # IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
 ;       ^ $prep($qvar, $var)    ; the question
@@ -47,7 +60,7 @@
 ;    THEN
 ;       ^3_&declare_answer($ans)
 
-(define question-rule-1
+(define question-rule-2
 	(r-varscope
 		(r-and
 			(r-anchor "# TRIPLE BOTTOM ANCHOR" "$qvar")
@@ -66,6 +79,7 @@
 (define question-rule-list (list
 	question-rule-0
 	question-rule-1
+;	question-rule-2
 ))
 
 ; ------------------------ END OF FILE ----------------------------
