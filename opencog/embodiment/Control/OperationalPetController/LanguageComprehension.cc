@@ -68,6 +68,20 @@ void LanguageComprehension::solveLatestSentenceReference( void )
     SchemeEval::instance().clear_pending( );    
 }
 
+void LanguageComprehension::answerLatestQuestion( void )
+{
+    init();
+
+    std::string answer = SchemeEval::instance().eval( "(answer-question)");    
+    logger().info( "LanguageComprehension::%s - (answer-question) answer: %s", __FUNCTION__, answer.c_str() );
+    if ( SchemeEval::instance().eval_error() ) {
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to solve reference: %s",
+                        __FUNCTION__, answer.c_str( ) );
+    } // if
+    SchemeEval::instance().clear_pending( );
+}
+
+
 void LanguageComprehension::solveLatestSentenceCommand( void )
 {
     init();
