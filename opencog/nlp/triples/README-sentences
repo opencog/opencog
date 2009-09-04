@@ -146,7 +146,6 @@ implemented in "triple-rule-6" in "rules.scm".
 
 Very short sentences
 --------------------
-
 Consider now: "Men are mortal."
    _predadj(men, mortal)
 
@@ -174,12 +173,14 @@ and also the inverted word-order case: xxx ???? xxxx
        THEN ^3_isa($var1, $var2)
 
 However, this doesn't quite work because  $prep($var2,$var3) is so broad
-that it can match to just about anything, including things are not 
-DefinedLinguisticRelationship nodes. Thus, to get a proper match, we need 
-to force type matching in variables.
+that it can match to _predadj itself, and so is self-defeating. There
+are two possible solutions: 
+1) change output so that preps don't use DefinedLinguisticRelationshipNode
+2) enhance pattern matching to allow exclusive groundings of variables.
 
-XXX finish me w.r.t the variables ... 
-...
+
+Other ....
+---------
 
 Other problems: Consider the sentences:
 "A hospital is a place where you go when you are sick."
@@ -249,3 +250,4 @@ which should be ignored.
 ToDo:
 -----
 * "What color is the book?" per above.
+* "Men are mortal" per above.
