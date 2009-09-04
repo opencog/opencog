@@ -199,7 +199,7 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
         n2 = nB;
     }
 
-    printf("ImBD: %f %f %f %f %f", s2, n2, (sAB * sA * n2 + sB*nB), sA, sB);
+    printf("ImBD: %f %f %f %f %f\n", s2, n2, (sAB * sA * n2 + sB*nB), sA, sB);
 
     return checkTruthValue(  new SimpleTruthValue(s2, n2) );
 }

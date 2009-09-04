@@ -315,12 +315,14 @@ private:
                 float m2=t->maxTV->getMean(); */
 
                 if (etv) {
-                    printf("%f / %f\n", etv->getConfidence(),
+                    printf("c: %f min: %f\n", etv->getConfidence(),
                             t->minTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean(), t->minTV->getMean());
-                    printf("%f / %f\n", etv->getConfidence(),
+                    printf("s: %f min: %f\n", etv->getMean(),
+                            t->minTV->getMean());
+                    printf("c: %f max: %f\n", etv->getConfidence(),
                             t->maxTV->getConfidence());
-                    printf("%f / %f\n", etv->getMean(), t->maxTV->getMean());
+                    printf("s: %f max: %f\n", etv->getMean(),
+                            t->maxTV->getMean());
                 }
 
                 passed = (
