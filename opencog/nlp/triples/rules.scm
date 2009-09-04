@@ -280,6 +280,7 @@
 )
 
 ; -----------------------------------------------------------------
+; 8
 ; Sentence "The cat sat on the mat"
 ; Parse:
 ;        _subj(sit, cat)
@@ -302,6 +303,35 @@
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
 		(r-rlx "$phrase" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
+; 9
+; Sentence "What did the cat sit on?"
+; This has two parses; one with a normal preposition construction, 
+; and one which treats "on" as a particle, so:
+;
+;    _subj(sit_on, cat)
+;    _obj(sit_on, _$qVar)
+;    POLYWORD-FLAG(sit_on, T)
+;    QUERY-TYPE(_$qVar, what)
+;
+; This rule presumes that such polyword constructions are suiteable
+; triples.
+
+(define triple-rule-9
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var0" "$sent")
+			(r-rlx "_subj" "$var0" "$var1")
+			(r-rlx "_obj" "$var0" "$var2")
+			(r-rlx-flag "polyword" "$var0") ; check for polyword flag
+			(r-decl-lemma "$var0" "$pw")
+			(r-rlx "$pwrel" "$pw" "$pwrel") ; promote to define relation
+		)
+		(r-rlx "$pwrel" "$var2" "$var1")
 	)
 )
 
@@ -372,6 +402,7 @@
 	triple-rule-6
 	triple-rule-7
 	triple-rule-8
+	triple-rule-9
 ))
 
 ; ------------------------ END OF FILE ----------------------------

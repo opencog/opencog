@@ -218,7 +218,8 @@
 )
 
 ; -----------------------------------------------------------------------
-; re-anchor the result triples
+; re-anchor the result triples.
+; The question-answering rule looks for things on this anchor.
 ;
 (define bottom-anchor (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
 (define (anchor-bottom-side trip-list)
@@ -256,8 +257,8 @@
    ; matching on the triples.
    (if (and is-question (null? (chat-get-simple-answer)))
 		(let* ((trips (get-new-triples))
-				; We need to anchor because of ??? why?
-				; Maybe for the quest-rule ??
+				; The question-rule-x looks for stuff attached to 
+				; this anchor.
 				(ancs (anchor-bottom-side trips))
 
 				; Pull in any semes that might be related...
