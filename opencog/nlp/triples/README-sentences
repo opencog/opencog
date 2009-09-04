@@ -6,11 +6,13 @@
 Continue with examination of specific sentence and question types, and
 an alaysis of the kinds of pattern-matchig challenges they present.
 
-Using Triples for question-answering
- matching
-----------------
-The nlp/triples directory contains code that generates semantic triples
-from RelEx input.  
+Using triples for question-answering
+------------------------------------
+Basic question-answering based on dependency-parse patten matching is 
+described in nlp/question/README.  The short-falls of this style of
+question-answering is documented there.  Triples provide a more robust
+way of normalizing statements and questions, and enable pattern-matching
+to occur at a more abstract level.
 
 For example: "The color of the book is red." has the parse:
 
@@ -125,6 +127,8 @@ is examined to compute the effect of !. The default truth value
 in Opencog is (false, unconfident), so it must be over-ridden
 to state (true, confident).
 
+Hypothetical rejection in IsA statements
+----------------------------------------
 Another case where we must be careful is with hypothetical statements
 or questions that superficially resemble statements. For example, the 
 question: "Is Berlin a capital?" parses out to:
@@ -137,10 +141,11 @@ question: "Is Berlin a capital?" parses out to:
 
 If the truth-query and hyp flags are ignored, then this parse can be
 mistaken for a statement, not a question.  This suggests that the rules
-should include a !HYP term in them.  The above is implemented in
-"triple-rule-6" in "rules.scm".
+should include a !HYP term in them.  Hypothetical-rejection is 
+implemented in "triple-rule-6" in "rules.scm".
 
-...
+Very short sentences
+--------------------
 
 Consider now: "Men are mortal."
    _predadj(men, mortal)
@@ -162,7 +167,7 @@ intended sense. The next-most naive rule is then:
        ! $prep($var1,$var3)
        THEN ^3_isa($var2, $var1)
 
-and also the inverted word-order case:
+and also the inverted word-order case: xxx ???? xxxx
 
   # IF _predadj($var1, $var2) ^ 
        $prep($var1,$var3)
@@ -241,3 +246,6 @@ which should be ignored.
 
 
 
+ToDo:
+-----
+* "What color is the book?" per above.

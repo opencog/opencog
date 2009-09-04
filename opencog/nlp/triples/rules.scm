@@ -335,21 +335,41 @@
 	)
 )
 
-;
 ; -----------------------------------------------------------------
 ; Sentence "Men are mortal"
-; var1=mortal var2=men
-; Must reject prepositions, so that "the color (of the sky) is blue." 
-; is rejected.
-; XXX This fails in 'real life', since $prep($var2,$var3) matches
-; to LinkGrammarRelationshipNode's which cause a reject to happen.
-; XXX need to somehow indicate the allowed variable type
+; Has a *single* depedency:
+;     _predadj(man, mortal)
+;
+; var1=mortal var2=man
+; Must reject prepositions, so that e.g. "the color (of the sky) is blue." 
+; which contains _predadj, is rejected.
+;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
-;       ^ %WordInstanceLink($var2,$sent)  ; scope to sentence
+;       ^ %WordInstanceLink($var2, $sent)  ; scope to sentence
 ;       ^ _predadj($var2, $var1) 
 ;       ^ ! $prep($var2,$var3)
 ;       THEN ^3_isa($var1, $var2)
 ; 
+; Unfortunately, the problem here is that $prep can match _predadj,
+; so this rule is self-cancelling.
+;
+;(define triple-rule-xx
+;	(r-varscope
+;		(r-and
+;			(r-anchor-trips "$sent")
+;			(r-decl-word-inst "$var2" "$sent")
+;			(r-rlx "_predadj" "$var2" "$var1")
+;			; (r-not (r-rlx "$prep" "$var2" "$var3"))
+;			(r-rlx "$prep" "$var2" "$var3")
+;			(r-decl-vartype "DefinedLinguisticRelationshipNode" "$prep")
+;			(r-decl-vartype "WordInstanceNode" "$var3")
+;		)
+;		;(r-rlx "isa" "$var1" "$var2")
+;		(r-link ListLink "$var2" "$var1" "$prep")
+;	)
+;)
+; 
+; -----------------------------------------------------------------
 ; Sentence "The color (of the sky) is blue."
 ; if the prep is present, then reverse the order.
 ; var1=blue var2=color
