@@ -136,11 +136,16 @@
 ; -----------------------------------------------------------------
 ; 3
 ; Sentence: "Pottery is made from clay."
+; Parse:
+;    _obj(make, pottery)
+;    from(make, clay)
+;
 ; var0=make  var1=pottery var2=clay  prep=from
 ;
 ; However, we want to reject a match to [Madrid is a city in Spain.]
 ; which has a similar pattern -- but it has a subj, while the pottery
-; example does not.
+; example does not. See also rule-8 for a similar caase, with missing
+; obj.
 ;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;       ^ %WordInstanceLink($var0,$sent)  ; scope to sentence
@@ -275,6 +280,33 @@
 )
 
 ; -----------------------------------------------------------------
+; Sentence "The cat sat on the mat"
+; Parse:
+;        _subj(sit, cat)
+;        on(sit, mat)
+; Desired output:  sit_on(mat,cat)
+; Note missing _obj in sentence -- need to reject sentences with objects.
+; This is very similar to rule-3 above.
+; This also picks up alternate parses for [Paris is in France] and 
+; [The heart is in the chest] with var0==be.
+;
+(define triple-rule-8
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var0" "$sent")
+			(r-rlx "_subj" "$var0" "$var1")
+			(r-not (r-rlx "_obj" "$var0" "$var-unwanted"))
+			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-lemma "$var0" "$word0")
+			(r-rlx "$phrase" "$word0" "$prep")
+		)
+		(r-rlx "$phrase" "$var2" "$var1")
+	)
+)
+
+;
+; -----------------------------------------------------------------
 ; Sentence "Men are mortal"
 ; var1=mortal var2=men
 ; Must reject prepositions, so that "the color (of the sky) is blue." 
@@ -339,6 +371,7 @@
 	triple-rule-5
 	triple-rule-6
 	triple-rule-7
+	triple-rule-8
 ))
 
 ; ------------------------ END OF FILE ----------------------------
