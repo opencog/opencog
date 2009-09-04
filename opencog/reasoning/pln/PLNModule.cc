@@ -186,16 +186,27 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
     Btr<BITNodeRoot> Bstate_;
     BITNodeRoot *state_;
 
-    pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
-    pHandle fakeHandle = fakeHandles[0];
-    Btr<vtree> target(new vtree(fakeHandle));
+    // Reuse the BIT if it's the same handle
+    static Handle prev_h;
 
-    bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
-    Bstate_.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
-                recordingTrails, getFitnessEvaluator(PLN_FITNESS_BEST)));
+    // TODO make it work without setTarget, if necessary
+    if (prev_h == h && setTarget) {
+        Bstate_ = Bstate;
+        state_ = state;
+    } else {
+        pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
+        pHandle fakeHandle = fakeHandles[0];
+        Btr<vtree> target(new vtree(fakeHandle));
 
-    printf("BITNodeRoot init ok\n");
-    state_ = Bstate_.get();
+        bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
+        Bstate_.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
+                    recordingTrails, getFitnessEvaluator(PLN_FITNESS_BEST)));
+
+        printf("BITNodeRoot init ok\n");
+
+        state_ = Bstate_.get();
+    }
+
     state_->infer(steps, 0.000001f, 1.00f); //, 0.000001f, 0.01f);
     state_->printResults();
 
