@@ -218,7 +218,31 @@
 
 	; If we are here, a question was asked, and syntax matching
 	; did not provide an answer.
-	(chat-return "(say-try-triple-qa)")
+	(chat-return "(say-try-truth-query)")
+)
+
+; -----------------------------------------------------------------------
+; say-declaration -- User made a declaration. Perform processing
+; of declarative statements
+
+(define (say-declaration)
+(dbg-display "entering declaration processing\n")
+
+	; Run the triples processing.  
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
+	(create-triples)
+	(dettach-sents-from-triple-anchor)
+
+	; promote triples to semes.
+	(let* ((trips (get-new-triples))
+		(trip-semes (promote-to-seme same-lemma-promoter trips))
+		)
+(dbg-display "statement triple semes are:\n")
+(display trip-semes)
+(end-dbg-display)
+	)
+
+	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
@@ -256,9 +280,10 @@
 )
 
 ; -----------------------------------------------------------------------
-; Go through the question rules, one by one.
+; Loop over a list of question rules, one by one. Stop iterating upon
+; the first one that returns an answer.
 ;
-(define (loop-over-questions)
+(define (loop-over-questions q-list)
 	(define (do-one-question quest)
 
 		; The do-varscope returns a ListLink. We need to nuke
@@ -270,7 +295,35 @@
 	)
 	; "any" will call "do one question" on each rule, until
 	; one of them returns #t (i.e. when an answer is found)
-	(any do-one-question *question-rule-list*)
+	(any do-one-question q-list)
+)
+
+; -----------------------------------------------------------------------
+; say-try-truth-query -- try answering a yes/no question
+; Some questions are truth queries, posing a hypothesis, and asking for a 
+; yes/no answer. This handles these.
+;
+(define (say-try-truth-query)
+
+	; Try each truth-query template ... 
+	(loop-over-questions *truth-query-rule-list*)
+
+	(let ((ans (chat-get-simple-answer)))
+
+		(if (null? ans)
+			(let ()
+				; Try triples-based question-answering.
+				(dbg-display "No truth-query found, try triples-qa.\n")
+				(end-dbg-display)
+				(chat-return "(say-try-triple-qa)")
+			)
+			(let ()
+				; Print, and skip to the end of processing
+				(chat-prt-soln "Truth query found: " ans)
+				(chat-return "(say-final-cleanup)")
+			)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -307,7 +360,7 @@
 (end-dbg-display)
 
 		; Now try to find answers to the question
-		(loop-over-questions)
+		(loop-over-questions *question-rule-list*)
 
 		(let ((ans (chat-get-simple-answer)))
 
@@ -326,41 +379,6 @@
 		)
 	)
 	; Can't reach here, above should have handled all returns
-)
-
-; -----------------------------------------------------------------------
-; convert hypothetical isa to plain is but nuke the truth value
-; This is needed for PLN.
-
-(define (hypothetical-to-uncertain triple)
-	(EvaluationLink
-		(DefinedLinguisticRelationshipNode "isa")
-		(cadr (cog-outgoing-set triple))
-	)
-)
-
-; -----------------------------------------------------------------------
-; say-statement -- User made a declaration. Perform processing
-; of declarative statements
-
-(define (say-declaration)
-(dbg-display "entering declaration processing\n")
-
-	; Run the triples processing.  
-	(attach-sents-for-triple-processing (get-new-parsed-sentences))
-	(create-triples)
-	(dettach-sents-from-triple-anchor)
-
-	; promote triples to semes.
-	(let* ((trips (get-new-triples))
-		(trip-semes (promote-to-seme same-lemma-promoter trips))
-		)
-(dbg-display "statement triple semes are:\n")
-(display trip-semes)
-(end-dbg-display)
-	)
-
-	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------

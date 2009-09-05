@@ -61,7 +61,7 @@
 )
 
 ; -----------------------------------------------------------------
-; 2
+; 0
 ; Truth-query question: "Did John throw a rock?"
 ;        _subj(throw, John)
 ;        _obj(throw, rock)
@@ -77,7 +77,7 @@
 	(r-decl-lemma  word-inst-b "$word")
 )
 
-(define question-rule-2
+(define truth-query-rule-0
 	(r-varscope
 		(r-and
 			(r-anchor-trips "$sent")
@@ -109,7 +109,10 @@
 (define *question-rule-list* (list
 	question-rule-0
 	question-rule-1
-	question-rule-2
+))
+
+(define *truth-query-rule-list* (list
+	truth-query-rule-0
 ))
 
 ; ------------------------ END OF FILE ----------------------------
