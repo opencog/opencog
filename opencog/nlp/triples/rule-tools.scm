@@ -531,14 +531,18 @@
 ;
 ; Returns an r-expression.
 ;
-(define (r-anchor anchor-name var)
+(define (r-anchor-node anchor var)
 	(define lnk
 		(ListLink (stv 1 1)
-			(AnchorNode anchor-name)
+			anchor
 			(VariableNode var)
 		)
 	)
 	(r-new-expr '() (list lnk) (r-fv var))
+)
+
+(define (r-anchor anchor-name var)
+	(r-anchor-node (AnchorNode anchor-name) var)
 )
 
 ; -----------------------------------------------------------------

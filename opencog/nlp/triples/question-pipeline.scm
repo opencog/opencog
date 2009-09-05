@@ -29,7 +29,7 @@
 (define (wh-question wh-clause ans-clause)
 	(r-varscope
 		(r-and
-			(r-anchor "# TRIPLE BOTTOM ANCHOR" "$qvar")
+			(r-anchor-node *bottom-anchor* "$qvar")
 
 			wh-clause  ; the prep-phrase we are matching!
 
@@ -42,7 +42,7 @@
 
 			(r-not (r-rlx-flag "what" "$ans"))
 		)
-		(r-anchor "# QUERY SOLUTION" "$ans")
+		(r-anchor-node *query-soln-anchor* "$ans")
 	)
 )
 
@@ -104,7 +104,7 @@
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)
-		(r-anchor "# QUERY SOLUTION" "yes")
+		(r-anchor-node *query-soln-anchor* "$v")
 	)
 )
 

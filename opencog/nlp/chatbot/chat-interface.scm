@@ -84,7 +84,7 @@
 ; SemeNodes, in answer to triples matching.
 ; A list of these "answers" is returned.
 ; 
-(define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
+(define *query-soln-anchor* (AnchorNode "# QUERY SOLUTION"))
 (define (chat-get-simple-answer)
 	(define (do-one-answer answ)
 		(let ((tipo (cog-type answ)))
@@ -108,14 +108,14 @@
 		(remove! null?     ; remove nulls
 			(map            ; get each answer ... 
 				(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
-				(cog-incoming-set query-soln-anchor)
+				(cog-incoming-set *query-soln-anchor*)
 			)
 		)
 	)
 )
 (define (chat-delete-simple-answer)
 	(for-each (lambda (x) (cog-delete x)) 
-		(cog-incoming-set query-soln-anchor)
+		(cog-incoming-set *query-soln-anchor*)
 	)
 )
 
@@ -264,26 +264,26 @@
 ;
 ; The question-answering rules look for things on this anchor.
 ;
-(define bottom-anchor (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
+(define *bottom-anchor* (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
 (define (anchor-bottom-side trip-list)
 	(define (re-anchor-one trip)
 		(let* ((ll (cadr (cog-outgoing-set trip)))
 				(os (cog-outgoing-set ll))
 				)
-			(ListLink (stv 1 1) bottom-anchor (car os))
-			(ListLink (stv 1 1) bottom-anchor (cadr os))
+			(ListLink (stv 1 1) *bottom-anchor* (car os))
+			(ListLink (stv 1 1) *bottom-anchor* (cadr os))
 		)
 	)
 	(map re-anchor-one trip-list)
 (dbg-display "bottumsup\n")
-(display (cog-incoming-set bottom-anchor))
+(display (cog-incoming-set *bottom-anchor*))
 (newline)
 (end-dbg-display)
 )
 
 (define (delete-bottom-anchor)
    (for-each (lambda (x) (cog-delete x))
-      (cog-incoming-set bottom-anchor)
+      (cog-incoming-set *bottom-anchor*)
    )
 )
 
