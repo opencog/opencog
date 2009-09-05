@@ -63,6 +63,14 @@
 )
 
 ; -----------------------------------------------------------------------
+; Attach parses to a place where they can be found.
+;
+(define *new-parses-anchor* (AnchorNode "# NEW PARSES" (stv 1 1)))
+(define (attach-new-parses sent-list)
+   (attach-parses-to-anchor sent-list *new-parses-anchor*)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -288,7 +296,12 @@
 
 		; The do-varscope returns a ListLink. We need to nuke
 		; that, as otherwise it will only cause trouble later.
-		(cog-delete (cog-ad-hoc "do-varscope" quest))
+		(let ((rslt (cog-ad-hoc "do-varscope" quest)))
+(dbg-display "q-apply result is\n")
+(display rslt)
+(end-dbg-display)
+			(cog-delete rslt)
+		)
 
 		; return #t if the rule found an answer
 		(not (null? (chat-get-simple-answer)))
@@ -304,6 +317,8 @@
 ; yes/no answer. This handles these.
 ;
 (define (say-try-truth-query)
+
+	(attach-new-parses (get-new-parsed-sentences))
 
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)

@@ -72,15 +72,19 @@
 
 ; Make sure that the two parts share a common word
 ; XXX This should really be "the same seme" not "common word"
-(define (common-word word-inst-a word-inst-b)
-	(r-decl-lemma  word-inst-a "$word")
-	(r-decl-lemma  word-inst-b "$word")
+(define (common-word word-inst-a tmp-var word-inst-b)
+	(r-and 
+		(r-decl-lemma  word-inst-a tmp-var)
+		(r-decl-lemma  word-inst-b tmp-var)
+		(r-decl-vartype "WordInstanceNode" word-inst-a)
+		(r-decl-vartype "WordInstanceNode" word-inst-b)
+	)
 )
 
 (define truth-query-rule-0
 	(r-varscope
 		(r-and
-			(r-anchor-trips "$sent")
+			(r-anchor "# NEW PARSES" "$sent")
 			(r-decl-word-inst "$verb" "$sent")
 
 			; Identify the question.
@@ -90,9 +94,9 @@
 			(r-rlx-flag "truth-query" "$verb")
 
 			; abstract to words (XXX - should be semes!!)
-			(common-word "$svar" "$ans-svar")
-			(common-word "$ovar" "$ans-ovar")
-			(common-word "$verb" "$ans-verb")
+			(common-word "$svar" "$s" "$ans-svar")
+			(common-word "$ovar" "$o" "$ans-ovar")
+			(common-word "$verb" "$v" "$ans-verb")
 			
 			; Now look for a matching assertion
 			(r-rlx "_subj" "$ans-verb" "$ans-svar")
