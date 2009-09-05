@@ -552,7 +552,10 @@
 ;
 (define (r-anchor-trips sent)
 	(r-and 
-		(r-anchor-node *ready-for-triples-anchor* sent)
+		; This anchor is not yet defined when this file is loaded,
+		; So do it manually. Should probably split up this file.
+		; (r-anchor-node *ready-for-triples-anchor* sent)
+		(r-anchor-node (AnchorNode "# APPLY TRIPLE RULES") sent)
 		(r-decl-vartype "ParseNode" sent)
 	)
 )
