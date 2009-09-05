@@ -318,7 +318,7 @@
 ;    QUERY-TYPE(_$qVar, what)
 ;
 ; This rule presumes that such polyword constructions are suiteable
-; triples.
+; triples (which might not always be the case?)
 
 (define triple-rule-9
 	(r-varscope

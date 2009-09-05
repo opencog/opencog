@@ -200,7 +200,10 @@
 
 			; If pattern-matching found an answer, print it.
 			(if (not (null? ans))
-				(chat-prt-soln "Syntax pattern match found: " ans)
+				(let () 
+					(chat-prt-soln "Syntax pattern match found: " ans)
+					(chat-return "(say-final-cleanup)")
+				)
 			)
 		)
 		(let ()
