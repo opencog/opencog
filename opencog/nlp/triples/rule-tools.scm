@@ -552,7 +552,7 @@
 ;
 (define (r-anchor-trips sent)
 	(r-and 
-		(r-anchor "# APPLY TRIPLE RULES" sent)
+		(r-anchor-node *ready-for-triples-anchor* sent)
 		(r-decl-vartype "ParseNode" sent)
 	)
 )

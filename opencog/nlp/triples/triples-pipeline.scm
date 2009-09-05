@@ -12,10 +12,10 @@
 ; -----------------------------------------------------------------------
 ; Semantic triples processing code.
 ;
-; The ready-for-triples-anchor is an anchor node at which sentences may
+; The *ready-for-triples-anchor* is an anchor node at which sentences may
 ; be queued up for triples processing.  Sentences that are linked to 
 ; this node will eventually have triples built from them.
-(define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
+(define *ready-for-triples-anchor* (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
 ; attach-sents-for-triple-processing -- 
 ; Attach a list of sentences to the input triple processing anchor
@@ -27,7 +27,7 @@
 ; return value is undefined
 ;
 (define (attach-sents-for-triple-processing sent-list)
-	(attach-parses-to-anchor sent-list ready-for-triples-anchor)
+	(attach-parses-to-anchor sent-list *ready-for-triples-anchor*)
 )
 
 ; Dettach sentences that were waiting for triples processing
@@ -42,7 +42,7 @@
 		)
 	)
 
-	(for-each remove-anch (cog-incoming-set ready-for-triples-anchor))
+	(for-each remove-anch (cog-incoming-set *ready-for-triples-anchor*))
 )
 
 ; -----------------------------------------------------------------------
