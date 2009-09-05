@@ -63,3 +63,31 @@
 )
 
 ; -----------------------------------------------------------------------
+; attach-parses-to-anchor -- given sentences, attach the parses to anchor.
+; 
+; Given a list of sentences i.e. a list of SentenceNodes, go through them,
+; locate the ParseNodes, and attach the parse nodes to the anchor.
+;
+; return value is undefined (no return value).
+;
+(define (attach-parses-to-anchor sent-list anchor)
+
+	;; Attach all parses of a sentence to the anchor.
+	(define (attach-parses sent)
+		;; Get list of parses for the sentence.
+		(define (get-parses sent)
+			(cog-chase-link 'ParseLink 'ParseNode sent)
+		)
+		;; Attach all parses of the sentence to the anchor.
+		;; This must have a true/confident TV so that the pattern
+		;; matcher will find and use this link.
+		(for-each (lambda (x) (ListLink anchor x (stv 1 1)))
+			(get-parses sent)
+		)
+	)
+	;; Attach all parses of all sentences to the anchor.
+	(for-each attach-parses sent-list)
+)
+
+; -----------------------------------------------------------------------
+; -----------------------------------------------------------------------

@@ -27,22 +27,7 @@
 ; return value is undefined
 ;
 (define (attach-sents-for-triple-processing sent-list)
-
-	;; Attach all parses of a sentence to the anchor.
-	(define (attach-parses sent)
-		;; Get list of parses for the sentence.
-		(define (get-parses sent)
-			(cog-chase-link 'ParseLink 'ParseNode sent)
-		)
-		;; Attach all parses of the sentence to the anchor.
-		;; This must have a true/confident TV so that the pattern
-		;; matcher will find and use this link.
-		(for-each (lambda (x) (ListLink ready-for-triples-anchor x (stv 1 1)))
-			(get-parses sent)
-		)
-	)
-	;; Attach all parses of all sentences to the anchor.
-	(for-each attach-parses sent-list)
+	(attach-parses-to-anchor sent-list ready-for-triples-anchor)
 )
 
 ; Dettach sentences that were waiting for triples processing
