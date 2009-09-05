@@ -334,7 +334,7 @@
 			)
 			(let ()
 				; Print, and skip to the end of processing
-				(chat-prt-soln "Truth query found: " ans)
+				(chat-prt-soln "Truth query determined \"yes\": " ans)
 				(chat-return "(say-final-cleanup)")
 			)
 		)
