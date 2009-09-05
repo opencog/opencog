@@ -216,8 +216,9 @@
 		)
 	)
 
-	; Invoke the next step of processing.
-	(chat-return (list "say-part-2 " is-question))
+	; If we are here, a question was asked, and syntax matching
+	; did not provide an answer.
+	(chat-return "(say-try-triple-qa)")
 )
 
 ; -----------------------------------------------------------------------
@@ -273,42 +274,48 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-part-2 -- run part 2 of the chat processing
-; The first part, "say-id-english", parsed the user input, and made
-; some quick replies. Processing continues below.
+; say-try-triple-qa -- try answering questions using triples 
+; The first part, "say-id-english", parsed the user input, and 
+; attempted a syntax-pattern match to any questions.  If that fails,
+; this is called.
 ;
-(define (say-part-2 is-question)
+(define (say-try-triple-qa)
 
 	; Run the triples processing.  
 	(attach-sents-for-triple-processing (get-new-parsed-sentences))
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-   ; If a question was asked, and the simple syntactic pattern matching
-   ; failed to come up with anything, then try again with pattern
-   ; matching on the triples.
-   (if (and is-question (null? (chat-get-simple-answer)))
-		(let* ((trips (get-new-triples))
-				; The question-rule-x looks for stuff attached to 
-				; this anchor.
-				(ancs (anchor-bottom-side trips))
-
-				; Pull in any semes that might be related...
-				(s (fetch-related-semes trips))
-
-				; Now try to find answers to the question
-				(r (loop-over-questions))
-
-				(ans (chat-get-simple-answer))
+   ; Try again with pattern matching on the triples.
+	(let ((trips (get-new-triples)))
+		(if (null? trips)
+			(let ()
+				(dbg-display "No question triples found, try deduction.\n")
+				(end-dbg-display)
+				(chat-return "(say-try-deduction)")
 			)
+		)
+
+		; The question-rule-x looks for stuff attached to this anchor
+		(anchor-bottom-side trips)
+
+		; Pull in any semes that might be related...
+		(fetch-related-semes trips)
+
 (dbg-display "duude question trips are:\n")
 (display trips)
 (end-dbg-display)
 
+		; Now try to find answers to the question
+		(loop-over-questions)
+
+		(let ((ans (chat-get-simple-answer)))
+
 			(if (null? ans)
 				(let ()
-					(display "No triples found, attempting deduction.\n")
-					(chat-return "(say-part-3)")
+					(dbg-display "No asnwer triples found, try deduction.\n")
+					(end-dbg-display)
+					(chat-return "(say-try-deduction)")
 				)
 				(let ()
 					; print, and skip to the end of processing
@@ -318,12 +325,7 @@
 			)
 		)
 	)
-
-	; If the question is still unanswered, try deduction, else cleanup.
-	(if is-question
-		(chat-return "(say-part-3)")
-		(chat-return "(say-final-cleanup)")
-	)
+	; Can't reach here, above should have handled all returns
 )
 
 ; -----------------------------------------------------------------------
@@ -355,16 +357,17 @@
 		)
 (dbg-display "statement triple semes are:\n")
 (display trip-semes)
+(end-dbg-display)
 	)
 
 	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
-; say-part-3 -- run part 3 of the chat processing
+; say-try-deduction -- try answering question via basic deduction
 ; This attempts to do some basic deduction
 ;
-(define (say-part-3)
+(define (say-try-deduction)
 
 	; If we still don't have an answer, try making a deduction
 	; (this is an extremely simple-minded hack right now)
@@ -396,6 +399,7 @@
 		)
 	)
 
+	(display "Deduction step found no answer.\n")
 	; Call the final stage
 	(chat-return "(say-final-cleanup)")
 )
