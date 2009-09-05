@@ -224,6 +224,9 @@ The following dialog works (or has worked at various times in the past):
 <me>         who threw a red ball?
 <cogita-bot> Syntax pattern match found: Fred
 
+<me>         Did Fred throw a ball?
+<cogita-bot> Truth query determined "yes": throw
+
 <me>         The color of the book is red.
 <me>         What is the color of the book?
 <cogita-bot> Triples abstraction found: red
@@ -238,6 +241,8 @@ ToDo:
   parses should be considered.
 
 * Do the "what color is the book" question in nlp/question/README
+
+* Handle "Did Fred throw a green ball?" correctly.
 
 
 References

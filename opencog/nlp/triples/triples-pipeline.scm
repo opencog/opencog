@@ -46,8 +46,8 @@
 )
 
 ; -----------------------------------------------------------------------
-; The result-triples-anchor anchors the results of triples processing.
-(define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
+; The *result-triples-anchor* anchors the results of triples processing.
+(define *result-triples-anchor* (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
 
 ; create-triples -- extract semantic triples from RelEx dependency
 ; parses, using the code in the nlp/triples directory.
@@ -57,7 +57,7 @@
 		;; Attach all of the recently created triples to the anchor.
 		;; This must have a true/confident TV so that the pattern
 		;; matcher will find and use this link.
-		(for-each (lambda (x) (ListLink result-triples-anchor x (stv 1 1)))
+		(for-each (lambda (x) (ListLink *result-triples-anchor* x (stv 1 1)))
 			(cog-outgoing-set triple-list) 
 		)
 
@@ -89,15 +89,13 @@
 ; get-new-triples -- Return a list of semantic triples that were created.
 ;
 (define (get-new-triples)
-	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
+	(cog-chase-link 'ListLink 'EvaluationLink *result-triples-anchor*)
 )
 
-; delete-result-triple-links -- delete links to result triples anchor.
+; release-result-triples -- delete links to result triples anchor.
 ;
-(define (delete-result-triple-links)
-	(for-each (lambda (x) (cog-delete x))
-		(cog-incoming-set result-triples-anchor)
-	)
+(define (release-result-triples)
+	(release-from-anchor *result-triples-anchor*)
 )
 
 ; -----------------------------------------------------------------------

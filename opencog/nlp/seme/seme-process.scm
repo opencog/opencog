@@ -176,7 +176,7 @@
 
 			; Delete the links to the recently generated triples,
 			; and then delete the triples themselves.
-			(delete-result-triple-links)
+			(release-result-triples)
 			(for-each delete-hypergraph trip-list)
 		)
 

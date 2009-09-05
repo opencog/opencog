@@ -69,6 +69,9 @@
 (define (attach-new-parses sent-list)
    (attach-parses-to-anchor sent-list *new-parses-anchor*)
 )
+(define (release-new-parses)
+	(release-from-anchor *new-parses-anchor*)
+)
 
 ; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
@@ -113,10 +116,8 @@
 		)
 	)
 )
-(define (chat-delete-simple-answer)
-	(for-each (lambda (x) (cog-delete x)) 
-		(cog-incoming-set *query-soln-anchor*)
-	)
+(define (chat-release-simple-answer)
+	(release-from-anchor *query-soln-anchor*)
 )
 
 ; -----------------------------------------------------------------------
@@ -281,10 +282,8 @@
 (end-dbg-display)
 )
 
-(define (delete-bottom-anchor)
-   (for-each (lambda (x) (cog-delete x))
-      (cog-incoming-set *bottom-anchor*)
-   )
+(define (release-bottom-anchor)
+	(release-from-anchor *bottom-anchor*)
 )
 
 ; -----------------------------------------------------------------------
@@ -444,18 +443,19 @@
 
 	(dbg-display "Cleaning up now\n")
 
-	; Delete re-anchored triples
-	(delete-bottom-anchor)
+	; un-anchor assorted items
+	(release-bottom-anchor)
+	(release-new-parses)
 
 	; Delete list of triples, so they don't interfere with the next question.
-	(delete-result-triple-links)
+	(release-result-triples)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
-	(chat-delete-simple-answer)
+	(chat-release-simple-answer)
 
 	; cleanup -- these sentences are not new any more
-	(delete-new-parsed-sent-links)
+	(release-new-parsed-sents)
 	""
 )
 

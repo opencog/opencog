@@ -9,25 +9,34 @@
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; -----------------------------------------------------------------------
+; Release items attached to the named anchor
+;
+(define (release-from-anchor anchor)
+   (for-each (lambda (x) (cog-delete x))
+      (cog-incoming-set anchor)
+   )
+)
+
+; -----------------------------------------------------------------------
 ; global vars:
 ; new-sent anchor points at the node to which all new sentences are connected
 ;
-(define new-parsed-sent-anchor (AnchorNode "# New Parsed Sentence" (stv 1 1)))
+(define *new-parsed-sent-anchor* (AnchorNode "# New Parsed Sentence" (stv 1 1)))
 
 ; Return the list of SentenceNodes that are attached to the 
 ; freshly-parsed anchor.  This list will be non-empty if relex-parse
 ; has been recently run. This list can be emptied with the call
-; delete-new-parsed-sent-links below.
+; release-new-parsed-sent below.
 ;
 (define (get-new-parsed-sentences)
-	(cog-chase-link 'ListLink 'SentenceNode new-parsed-sent-anchor)
+	(cog-chase-link 'ListLink 'SentenceNode *new-parsed-sent-anchor*)
 )
 
-; delete-new-parsed-sent-links deletes the links that anchor sentences to 
+; release-new-parsed-sents deletes the links that anchor sentences to 
 ; to new-parsed-sent anchor.
 ;
-(define (delete-new-parsed-sent-links)
-	(for-each (lambda (x) (cog-delete x)) (cog-incoming-set new-parsed-sent-anchor))
+(define (release-new-parsed-sents)
+	(release-from-anchor *new-parsed-sent-anchor*)
 )
 
 ; -----------------------------------------------------------------------
@@ -37,7 +46,7 @@
 ; to a running instance of the RelEx parser, which should be listening 
 ; on port 4444. The parser will return a set of atoms, and these are
 ; then loaded into this opencog instance. After import, these are attached
-; to the "new-parsed-sent-anchor" via a ListLink; the set of newly added
+; to the "*new-parsed-sent-anchor*" via a ListLink; the set of newly added
 ; sentences can be fetched with the "get-new-parsed-sentences" call.
 ;
 (define (relex-parse plain-txt)

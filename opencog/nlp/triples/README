@@ -5,7 +5,7 @@
 
 This directory contains some experimental code to extract "semantic
 triples" from English text.  A semantic triple is a triple of 
-subject-predicate-object, and is popularly the topic of "Semantic Web
+subject-relation-object, and is popularly the topic of "Semantic Web
 RDF" technology discussions[WP-RDF].  An example of a "semantic triple"
 is "the sky is blue". Written in prefix notation, the triple is then 
 "color_of(sky, blue)", with "color_of" being the property or predicate,
@@ -19,7 +19,18 @@ Prejudice', 'Jane Austen')" and "wrote('Pride and Prejudice', 'Jane
 Austen')" are more or less synonymous expressions. Normalizing more
 complex structures (such as the output of RelEx, or of dependency 
 parsers in general), make it considerably easier to automatically
-discover such synonymous expressions.
+discover such synonymous expressions. This is an important point: the
+triples extraction process does not create new information; it just
+makes given classes of hypergraphs easier to work with.
+
+There is a major semantic distinction between "prepositional relations"
+and "action" or "verbing" relations. So, for example, "next_to(house, tree)"
+is a prepositional relation, while "throw(John,rock)" is an action 
+relation. Roughly speaking, prepositional relations hold over extended 
+periods of time (the tree and house are not likely to move anytime soon)
+while verb/action relations hold only during instants in time (once the
+throwing is done, it becomes something that happened in the past). This
+distinction is important when performing commn-sense reasoning.
 
 The primary challenge here is of dealing with the diversity of
 expression in the English language, where most sentences are NOT short,
@@ -667,7 +678,7 @@ Next step:
        cat opencog/persist/atom.sql | psql triples
 -- Run cogserver
 -- open the database created above
--- Edit nlp/seme/config.scm and change file patch to parsed sentences.
+-- Edit nlp/seme/config.scm and change file path to parsed sentences.
    xx xx move these docs to the seme directory
 -- Enter the scheme shell
 
@@ -675,10 +686,10 @@ XXXXXXXXXXXXXX TEMPORARILY BROKEN, input sentences must be linked to
 AnchorNode "# APPLY TRIPLE RULES" via list link to apply.
 
 -- run command (do-triples n) where n is the number of files
-   to process.
+   to process. XXX this command has been moved to chatbot dir ... 
 
 Alternately, load data in some other way, and then
-issues the scheme expression (fire-all-triple-rules) to create
+issue the scheme expression (fire-all-triple-rules) to create
 the assorted triples.
 
 
