@@ -58,7 +58,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
 	// printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 	// printf("Loop candidate: %s\n", TLB::getAtom(h)->toString().c_str());
-	return pme->do_candidate(root,starter_pred,h);
+	return pme->do_candidate(root, starter_pred, h);
 }
 
 /**
