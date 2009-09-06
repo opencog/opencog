@@ -348,7 +348,7 @@
 ;
 ; var1=mortal var2=man
 ; Must reject prepositions, so that e.g. "the color (of the sky) is blue." 
-; which contains _predadj, is rejected.
+; which contains _predadj as well as a prep "of", is rejected.
 ;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;       ^ %WordInstanceLink($var2, $sent)  ; scope to sentence
@@ -356,8 +356,9 @@
 ;       ^ ! $prep($var2,$var3)
 ;       THEN ^3_isa($var1, $var2)
 ; 
-; Unfortunately, the problem here is that $prep can match _predadj,
-; so this rule is self-cancelling.
+; For some unclear reason, this is not working, and a match to 
+; "color of sky is blue" is still made.  XXXX This seems like a
+; possible bug in the pattern matcher code!?
 ;
 ;(define triple-rule-xx
 ;	(r-varscope
@@ -365,16 +366,15 @@
 ;			(r-anchor-trips "$sent")
 ;			(r-decl-word-inst "$var2" "$sent")
 ;			(r-rlx "_predadj" "$var2" "$var1")
-;			; (r-not (r-rlx "$prep" "$var2" "$var3"))
-;			(r-rlx "$prep" "$var2" "$var3")
-;			(r-decl-vartype "DefinedLinguisticRelationshipNode" "$prep")
+;			(r-not (r-rlx "$prep" "$var2" "$var3"))
+;			(r-decl-vartype "PrepostionalRelationshipNode" "$prep")
 ;			(r-decl-vartype "WordInstanceNode" "$var3")
 ;		)
-;		;(r-rlx "isa" "$var1" "$var2")
-;		(r-link ListLink "$var2" "$var1" "$prep")
+;		; (r-rlx "isa" "$var1" "$var2")
+;		(r-link ListLink "$var1" "$var2" "$var3" "$prep")
 ;	)
 ;)
-; 
+;
 ; -----------------------------------------------------------------
 ; Sentence "The color (of the sky) is blue."
 ; if the prep is present, then reverse the order.
