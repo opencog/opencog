@@ -349,6 +349,8 @@
 ; var1=mortal var2=man
 ; Must reject prepositions, so that e.g. "the color (of the sky) is blue." 
 ; which contains _predadj as well as a prep "of", is rejected.
+; XXX This rejects sentences with prep phrases, but it should also probably
+; reject anything with _subj, _obj, etc. XXX
 ;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;       ^ %WordInstanceLink($var2, $sent)  ; scope to sentence
@@ -356,25 +358,20 @@
 ;       ^ ! $prep($var2,$var3)
 ;       THEN ^3_isa($var1, $var2)
 ; 
-; For some unclear reason, this is not working, and a match to 
-; "color of sky is blue" is still made.  XXXX This seems like a
-; possible bug in the pattern matcher code!?
-;
-;(define triple-rule-xx
-;	(r-varscope
-;		(r-and
-;			(r-anchor-trips "$sent")
-;			(r-decl-word-inst "$var2" "$sent")
-;			(r-rlx "_predadj" "$var2" "$var1")
-;			(r-not (r-rlx "$prep" "$var2" "$var3"))
-;			(r-decl-vartype "PrepostionalRelationshipNode" "$prep")
-;			(r-decl-vartype "WordInstanceNode" "$var3")
-;		)
-;		; (r-rlx "isa" "$var1" "$var2")
-;		(r-link ListLink "$var1" "$var2" "$var3" "$prep")
-;	)
-;)
-;
+(define triple-rule-10
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var2" "$sent")
+			(r-rlx "_predadj" "$var2" "$var1")
+			(r-not (r-rlx "$prep" "$var2" "$var3"))
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$var3")
+		)
+		(r-rlx "isa" "$var1" "$var2")
+	)
+)
+
 ; -----------------------------------------------------------------
 ; Sentence "The color (of the sky) is blue."
 ; if the prep is present, then reverse the order.
@@ -429,6 +426,7 @@
 	triple-rule-7
 	triple-rule-8
 	triple-rule-9
+	triple-rule-10
 ))
 
 ; ------------------------ END OF FILE ----------------------------
