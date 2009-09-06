@@ -18,11 +18,15 @@
 )
 
 
-; (cog-ad-hoc "do-varscope" triple-rule-xx)
 ; The whole point here is that the NotLink means that no match at all
 ; should be found. i.e. $prep can match "of" and should thus be
 ; rejected.
 ;
+
+(define (impy)
+	(cog-ad-hoc "do-varscope" rule-xx)
+)
+
 (define rule-xx
    (VariableScopeLink
       (ListLink 
