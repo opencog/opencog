@@ -235,6 +235,27 @@ The following dialog works (or has worked at various times in the past):
 <me>         what did the cat sit on?
 <cogita-bot> Triples abstraction found: mat
 
+
+Notes about the data flow:
+--------------------------
+Currently, much of the data flow is done by looking for things attached
+to AnchorNode's, mangling them, and attaching other results to other 
+AnchorNode's. Some of this is currently done in scheme code, and some of
+this is done by pattern matching.
+
+A long-term goal is to use pattern-matching for *all* processing, and 
+*not* use any scheme code for this.  This is kind of an important point:
+in order to fully leverage the "learning" capabilities within opencog,
+we will want to have all processing done within opencog.  However, for 
+right now, scheme glue code will continue to be used in various ways.
+
+One such example: there's scheme code to take a list of SentenceNodes
+(from recent parsed sentences) get thier corresponding ParseNode's,
+and attach them to a different anchor. This *could* be done by pattern
+matching, instead of scheme code ... and it would be quite easy, and 
+probably reasonably fast.
+
+
 ToDo:
 -----
 * Syntax pattern matching only looks at the first parse. The other

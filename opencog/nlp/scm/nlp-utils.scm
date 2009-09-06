@@ -2,8 +2,17 @@
 ; nlp-utils.scm
 ;
 ; Assorted NLP utilities.
+;
+; Important Design Note: A long-term goal of NLP within opencog is to
+; do processing not in scheme, but in OpenCog itself, using pattern
+; matching. The reason fior this is so that we can apply OpenCog leraning
+; algos to learn new ways of processing. Many/most of the utilities below
+; could be implemented by using pattern maching. Code that depends on these
+; utilities should be converted to use pattern matching as soon as reasonable.
+; Code that cannot be converted will eventually (in the distant future ...) 
+; become obsolete.
 ; 
-; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; =============================================================
 
@@ -176,6 +185,16 @@
 ;
 (define (sentence-get-parses sent-node)
 	(cog-chase-link 'ParseLink 'ParseNode sent-node)
+)
+
+; -----------------------------------------------------------------------
+; sent-list get-parses -- return parses of the sentences
+; Given a list of sentences, return a list of parses of those sentences.
+; That is, given a List of SentenceNode's, return a list of ParseNode's
+; associated with those sentences.
+
+(define (sent-list-get-parses sent-list)
+	(concatenate! (map sentence-get-parses sent-list))
 )
 
 ; ---------------------------------------------------------------------

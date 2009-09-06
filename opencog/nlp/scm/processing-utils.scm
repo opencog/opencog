@@ -95,8 +95,8 @@
 ;
 ; return value is undefined (no return value).
 ;
-; XXX there is currently just one user of this function; this should 
-; probably placed into the environment of that one user ... !?
+; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+; and probably should be, when processing becomes fully rule-driven.
 ;
 (define (attach-parses-to-anchor sent-list anchor)
 

@@ -231,6 +231,18 @@
 )
 
 ; -----------------------------------------------------------------------
+; relex-to-seme promotion
+
+
+(define (do-stuff sent-list)
+
+	; get a list of parse
+	; get a list of relex evallinks for these
+	; promote these to semes.
+
+)
+
+; -----------------------------------------------------------------------
 ; say-declaration -- User made a declaration. Perform processing
 ; of declarative statements
 
