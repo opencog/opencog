@@ -244,6 +244,9 @@ ToDo:
 
 * Handle "Did Fred throw a green ball?" correctly.
 
+* Create an object holding the name of the user, the chat connection, 
+  and the 'pseudo-continuation' of the chat status.
+
 
 References
 ==========

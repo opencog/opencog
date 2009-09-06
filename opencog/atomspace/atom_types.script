@@ -162,8 +162,11 @@ FEATURE_NODE <- CONCEPT_NODE
 FEATURE_LINK <- ORDERED_LINK
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX+"
 LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
+
+// Used to represent RelEx dependency relations
 DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
-DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE
+DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
+PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
 
 // Frame related stuff, almost certainly will be changed soon
 // These are semi-obsolete, probably need to be redesigned.

@@ -16,7 +16,7 @@
 ;
 ; All of these rules are structured so that a search is performed
 ; only over sentences That are tagged with a link to the node
-; "# APPLY TRIPLE RULES". Since this rule is first, this prevents 
+; "# APPLY TRIPLE RULES". Since this rule is first, this prevents
 ; a search over the entire atomspace.
 ;
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
@@ -62,6 +62,7 @@
 			; Match the proposition
 			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var1" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 
 			; Get the lemma form of the word instance
 			(r-decl-lemma "$var1" "$word1")
@@ -100,6 +101,7 @@
 			(r-rlx "_obj" "$be" "$var1")
 			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
@@ -126,6 +128,7 @@
 			(r-decl-word-inst "$var1" "$sent")
 			(r-rlx "_predadj" "$var1" "$var0")
 			(r-rlx "$prep" "$var1" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var1" "$word1")
 			(r-rlx "$phrase" "$word1" "$prep")
 		)
@@ -164,6 +167,7 @@
 			(r-not (r-rlx "_subj" "$var0" "$var-unwanted"))
 			(r-rlx "_obj" "$var0" "$var1")
 			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
@@ -299,6 +303,7 @@
 			(r-rlx "_subj" "$var0" "$var1")
 			(r-not (r-rlx "_obj" "$var0" "$var-unwanted"))
 			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
@@ -328,6 +333,7 @@
 			(r-rlx "_subj" "$var0" "$var1")
 			(r-rlx "_obj" "$var0" "$var2")
 			(r-rlx-flag "polyword" "$var0") ; check for polyword flag
+			(r-decl-vartype "PrepositionalRelationshipNode" "$polyword")
 			(r-decl-lemma "$var0" "$pw")
 			(r-rlx "$pwrel" "$pw" "$pwrel") ; promote to define relation
 		)
