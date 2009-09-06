@@ -25,7 +25,7 @@
 ; rejected.
 ;
 
-(define (rule-xx)
+(define (rule-good)
    (VariableScopeLink
       (ListLink 
          (TypedVariableLink
@@ -34,7 +34,57 @@
          )
          (TypedVariableLink
             (VariableNode "$prep")
-            (VariableTypeNode "PrepostionalRelationshipNode")
+            (VariableTypeNode "PrepositionalRelationshipNode")
+         )
+         (TypedVariableLink
+             (VariableNode "$var3")
+             (VariableTypeNode "WordInstanceNode")
+         )
+         (VariableNode "$var1")
+      )
+      (ImplicationLink
+         (AndLink
+            (EvaluationLink (stv 1 0.99999988)
+               (DefinedLinguisticRelationshipNode "_predadj")
+               (ListLink 
+                  (VariableNode "$var2")
+                  (VariableNode "$var1")
+               )
+            )
+            (NotLink 
+               (EvaluationLink (stv 1 0.99999988) 
+                  (VariableNode "$prep")
+                  (ListLink 
+                     (VariableNode "$var2")
+                     (VariableNode "$var3")
+                  )
+               )
+            )
+         )
+         (ListLink (stv 1 0.99999988)
+            (VariableNode "$var1")
+            (VariableNode "$var2")
+            (VariableNode "$var3")
+            (VariableNode "$prep")
+         )
+      )
+   )
+)
+
+
+; This rule has an explicitly bad VariableTypeNode -- 
+; PreposxitionalRelationshipNode is misspelled (on purpose,
+; since we want to test for the mis-spelled case).
+(define (rule-bad)
+   (VariableScopeLink
+      (ListLink 
+         (TypedVariableLink
+            (VariableNode "$var2")
+            (VariableTypeNode "WordInstanceNode")
+         )
+         (TypedVariableLink
+            (VariableNode "$prep")
+            (VariableTypeNode "PreposxitionalRelationshipNode")
          )
          (TypedVariableLink
              (VariableNode "$var3")
