@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-class ExecutionUTest :  public CxxTest::TestSuite
+class BuggyStackUTest :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
@@ -41,7 +41,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 
 	public:
 
-		ExecutionUTest(void)
+		BuggyStackUTest(void)
 		{
 			try
 			{
@@ -59,7 +59,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~ExecutionUTest()
+		~BuggyStackUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -78,7 +78,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-void ExecutionUTest::setUp(void)
+void BuggyStackUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
@@ -116,7 +116,7 @@ void ExecutionUTest::setUp(void)
 #define getarity(hand) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
 
-void ExecutionUTest::test_exec(void)
+void BuggyStackUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
