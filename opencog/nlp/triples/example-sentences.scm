@@ -214,7 +214,7 @@ scm
 )
 ; of (<<capital>>, <<Germany>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "of")
+   (PrepositionalRelationshipNode "of")
    (ListLink
       (WordInstanceNode "capital@15dc1948-8a1c-46e0-8af5-36e2f405021e")
       (WordInstanceNode "Germany@93793e93-790c-499d-9047-c9535bc12d3d")
@@ -470,7 +470,7 @@ scm
 )
 ; in (<<_%copula>>, <<in>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "is@ce336736-ce77-455d-ac60-455d7d312c19")
       (WordInstanceNode "in@daec1fe5-a4b9-4555-aff6-0652e5f1ba03")
@@ -628,7 +628,7 @@ scm
 )
 ; in (<<be>>, <<France>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "is@947b682c-9313-45ff-82f1-a53851ca479c")
       (WordInstanceNode "France@25e17da2-5e22-4f0e-b41f-1a1a3fb1e22c")
@@ -883,7 +883,7 @@ scm
 )
 ; in (<<be>>, <<Spain>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "is@57703ee1-b449-4254-99a6-c97912efdaa2")
       (WordInstanceNode "Spain@755140d0-a52f-4bba-a3ef-929fc7f97536")
@@ -1210,7 +1210,7 @@ scm
 )
 ; in (<<city>>, <<Spain>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "city@b7637133-d428-44d5-9a09-f4153d44ee2b")
       (WordInstanceNode "Spain@4f46a3a4-8f9e-47e6-a985-cbd2cc0aa7d8")
@@ -1616,7 +1616,7 @@ scm
 )
 ; in (<<_%copula>>, <<in>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "is@d4acd4a4-a6a0-4770-8015-f3bbce6fdd61")
       (WordInstanceNode "in@0a882cc9-d00a-4e09-94b5-144b13cd2c99")
@@ -1880,7 +1880,7 @@ scm
 )
 ; in (<<be>>, <<chest>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "in")
+   (PrepositionalRelationshipNode "in")
    (ListLink
       (WordInstanceNode "is@a93d0193-5545-4cd2-ac6d-6e4ac6031823")
       (WordInstanceNode "chest@473f5dbb-79a7-495b-8a78-34b327351062")
@@ -2112,7 +2112,7 @@ scm
 )
 ; inside (<<_%copula>>, <<inside>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "inside")
+   (PrepositionalRelationshipNode "inside")
    (ListLink
       (WordInstanceNode "is@9f236a8d-9aa0-4adf-a57c-e65c282681a6")
       (WordInstanceNode "inside@801fcf74-6686-4e4f-9216-8ed3258a9f7f")
@@ -2394,7 +2394,7 @@ scm
 )
 ; inside (<<be>>, <<chest>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "inside")
+   (PrepositionalRelationshipNode "inside")
    (ListLink
       (WordInstanceNode "is@69f7385d-b922-48cd-9366-32ebc71e45c0")
       (WordInstanceNode "chest@b7c6b699-c611-4379-ac93-9b5047f23752")
@@ -2618,7 +2618,7 @@ scm
 )
 ; behind (<<_%copula>>, <<behind>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "behind")
+   (PrepositionalRelationshipNode "behind")
    (ListLink
       (WordInstanceNode "is@afc8c3fe-3c78-4c19-a591-788c642a348a")
       (WordInstanceNode "behind@f7c714f4-edaa-49d6-84e0-f538de894440")
@@ -2900,7 +2900,7 @@ scm
 )
 ; behind (<<be>>, <<house>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "behind")
+   (PrepositionalRelationshipNode "behind")
    (ListLink
       (WordInstanceNode "is@1084b5fc-a949-432a-823b-ce27dd898b45")
       (WordInstanceNode "house@aafaf3bd-e506-4ab3-9996-1ca6369b5424")
@@ -3127,7 +3127,7 @@ scm
 )
 ; of (<<capital>>, <<Portugaul>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "of")
+   (PrepositionalRelationshipNode "of")
    (ListLink
       (WordInstanceNode "capital@6af9cd0e-f7a6-49da-a0f2-aabe946837f8")
       (WordInstanceNode "Portugaul@f7dfb26b-53be-40e9-a8c6-23235c2d8a9b")
@@ -3425,7 +3425,7 @@ scm
 )
 ; of (<<color>>, <<sky>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "of")
+   (PrepositionalRelationshipNode "of")
    (ListLink
       (WordInstanceNode "color@8947b41d-b6d8-44c5-95a0-a909220596d5")
       (WordInstanceNode "sky@d30ab6dd-0785-4b14-8969-f23697d384a7")
@@ -3647,7 +3647,7 @@ scm
 )
 ; from (<<make>>, <<clay>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "from")
+   (PrepositionalRelationshipNode "from")
    (ListLink
       (WordInstanceNode "made@db43b0c8-5a1b-461b-8c3e-214105d3dcb5")
       (WordInstanceNode "clay@05ca90dc-7655-46b9-a808-bb67ec08e42f")
@@ -3859,7 +3859,7 @@ scm
 )
 ; from (<<spin>>, <<fiber>>) 
 (EvaluationLink (stv 1.0 1.0)
-   (DefinedLinguisticRelationshipNode "from")
+   (PrepositionalRelationshipNode "from")
    (ListLink
       (WordInstanceNode "spun@c6133c2e-825a-4fe0-ad55-3a7894a6db14")
       (WordInstanceNode "fibers[!]@136504de-be65-41db-8702-b2d9612aa2f4")
