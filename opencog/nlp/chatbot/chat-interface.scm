@@ -231,14 +231,25 @@
 )
 
 ; -----------------------------------------------------------------------
-; relex-to-seme promotion
+; relex-relations-to-semes -- perform seme promotion of relex parses
+; 
+; Algorithm plan:
+; Get a list of parses for the sentences
+; Get a list of relex relations for each parse
+; Promote each relex relation to a relation of semes.
 
-
-(define (do-stuff sent-list)
-
-	; get a list of parse
-	; get a list of relex evallinks for these
-	; promote these to semes.
+(define (relex-relations-to-semes sent-list)
+	(let* (
+			; get a list of parses
+			(parse-list (sent-list-get-parses sent-list))
+			; get a list or relations in that parse
+			(rels (map parse-get-relations parse-list))
+			; flatten the resulting list-of-lists
+			(rel-list (concatenate! rels))
+			(sl (promote-to-seme same-lemma-promoter rel-list))
+		)
+sl
+	)
 
 )
 
