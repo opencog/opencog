@@ -248,7 +248,7 @@
 			(rel-list (concatenate! rels))
 			(sl (promote-to-seme same-lemma-promoter rel-list))
 		)
-sl
+		sl
 	)
 
 )
@@ -271,6 +271,14 @@ sl
 		)
 (dbg-display "statement triple semes are:\n")
 (display trip-semes)
+(end-dbg-display)
+	)
+
+	(let ((semy
+				(relex-relations-to-semes (get-new-parsed-sentences)))
+		)
+(dbg-display "statement relex semes are:\n")
+(display semy)
 (end-dbg-display)
 	)
 
