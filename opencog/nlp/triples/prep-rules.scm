@@ -21,6 +21,7 @@
 			(r-decl-word-inst "$var1" "$sent")
 			(r-rlx rel a b)
 			(r-rlx "$prep" "$var1" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var1" "$word1")
 		)
 		(r-schema "scm:make-prep-phrase" "$word1" "$prep")
@@ -100,7 +101,7 @@
 		(r-schema "scm:make-polyword-phrase" "$pw")
 	)
 )
-;
+
 ; -----------------------------------------------------------
 ; The list below is needed by the triples-processing pipeline
 ;

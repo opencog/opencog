@@ -17,11 +17,11 @@
 ; and then yanking out the answer.
 ; 
 ; # IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
-;       ^ $tripl($word-inst, $qvar)      ; the question
+;       ^ $tripl($word-inst, $qvar)     ; the question
 ;       ^ &query_var($qvar)             ; validate WH-question
 ;       ^ %LemmaLink($word-inst, $word) ; common word-instance
 ;       ^ %LemmaLink($join-inst, $word) ; common seme
-;       ^ $tripl($join-inst, $ans)       ; answer
+;       ^ $tripl($join-inst, $ans)      ; answer
 ;       ^ ! &query_var($ans)            ; answer should NOT be a query
 ;    THEN
 ;       ^3_&declare_answer($ans)
