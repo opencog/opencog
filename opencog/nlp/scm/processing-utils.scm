@@ -72,12 +72,31 @@
 )
 
 ; -----------------------------------------------------------------------
+; get-parses-of-sents -- return parses of the sentences
+; Given a list of sentences, return a list of parses of those sentences.
+; That is, given a List of SentenceNode's, return a list of ParseNode's
+; associated with those sentences.
+;
+; OPENCOG RULE: FYI this could be easily implemented as a pattern match,
+; and probably should be, when processing becomes fully rule-driven.
+
+(define (get-parses-of-sents sent-list)
+	(define (get-parses sent)
+		(cog-chase-link 'ParseLink 'ParseNode sent)
+	)
+	(concatenate! (map get-parses sent-list))
+)
+
+; -----------------------------------------------------------------------
 ; attach-parses-to-anchor -- given sentences, attach the parses to anchor.
 ; 
 ; Given a list of sentences i.e. a list of SentenceNodes, go through them,
 ; locate the ParseNodes, and attach the parse nodes to the anchor.
 ;
 ; return value is undefined (no return value).
+;
+; XXX there is currently just one user of this function; this should 
+; probably placed into the environment of that one user ... !?
 ;
 (define (attach-parses-to-anchor sent-list anchor)
 

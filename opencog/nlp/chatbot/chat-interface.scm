@@ -319,6 +319,10 @@
 
 	(attach-new-parses (get-new-parsed-sentences))
 
+	;	(trip-semes (promote-to-seme same-lemma-promoter trips))
+	
+	; First, we want to 
+	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
 
