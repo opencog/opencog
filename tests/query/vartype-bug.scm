@@ -1,4 +1,6 @@
 
+(define (stv mean conf) (cog-new-stv mean conf))
+
 ; SENTENCE: [The color of the sky is blue.]
 ; _predadj (<<color>>, <<blue>>) 
 (EvaluationLink (stv 1.0 1.0)
@@ -23,11 +25,7 @@
 ; rejected.
 ;
 
-(define (impy)
-	(cog-ad-hoc "do-varscope" rule-xx)
-)
-
-(define rule-xx
+(define (rule-xx)
    (VariableScopeLink
       (ListLink 
          (TypedVariableLink

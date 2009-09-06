@@ -37,7 +37,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle restrict;
+		Handle vscope;
 
 	public:
 
@@ -103,7 +103,7 @@ void VarTypeNot::setUp(void)
 
 #ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
-	restrict = SchemeEval::instance().apply("impy", Handle::UNDEFINED);
+	vscope = SchemeEval::instance().apply("rule-xx", Handle::UNDEFINED);
 #endif /* HAVE_GUILE */
 }
 
@@ -121,7 +121,7 @@ void VarTypeNot::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = pm.varscope(restrict);
+	Handle result = pm.varscope(vscope);
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 

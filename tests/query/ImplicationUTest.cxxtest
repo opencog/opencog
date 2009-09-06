@@ -78,7 +78,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
  * This function sets up an implication link, and some data.
  *
  * Note: although raw ImplicationLinks occuring outside of a
- * VarScopeLink are now deprecated, this test still tests that
+ * VariableScopeLink are now deprecated, this test still tests that
  * function, since there's a fair amount of existing code that
  * still uses it.  At any rate, under the covers, both share a
  * code path, so its a good test no matter what.
