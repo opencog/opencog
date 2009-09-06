@@ -861,7 +861,9 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	Type tscope = lscope->getType();
 	if (VARIABLE_SCOPE_LINK != tscope)
 	{
-		logger().warn("%s: expected VarScopeLink", __FUNCTION__);
+		const std::string& tname = classserver().getTypeName(tscope);
+		logger().warn("%s: expected VariableScopeLink, got %s",
+			 __FUNCTION__, tname.c_str());
 		return Handle::UNDEFINED;
 	}
 
