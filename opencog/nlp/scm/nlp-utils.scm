@@ -104,10 +104,20 @@
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return a list of attributes for the word.
+;
 (define (word-inst-get-attr word-inst)
 	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode 
 		word-inst
 	)
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return a list of relations the word participates in.
+; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
+; _subj(dog,*), _obj(dog,*) etc.
+;
+(define (word-inst-get-relations word-inst)
+	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -198,10 +208,27 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a parse, return a list of all words in the parse
+; parse-get-words - Given a parse, return a list of all words in the parse
 ;
 (define (parse-get-words parse-node)
 	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink parse-node)))
+)
+
+; --------------------------------------------------------------------
+; Given a parse, return a list of all relex relations
+;
+(define (parse-get-relations parse-node)
+	; Get a list of words in the parse
+	; Get a list of lists of relations for each word
+	; Conctenate will reduce the list of lists to a plain list
+	; Remove duplicates
+	(delete-duplicates!
+		(concatenate!
+			(map word-inst-get-relations 
+				(parse-get-words parse-node)
+			)
+		)
+	)
 )
 
 ; --------------------------------------------------------------------
