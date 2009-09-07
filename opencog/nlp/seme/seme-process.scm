@@ -118,7 +118,10 @@
 					(find (lambda (se) (seme-match? se wrd-inst)) seme-list))
 				)
 			(if matching-seme
-				matching-seme
+				(let ()
+					(InheritanceLink (stv 1 1) word-inst matching-seme)
+					matching-seme
+				)
 				(make-new-seme wrd-inst)
 			)
 		)
