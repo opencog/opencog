@@ -6,28 +6,6 @@
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; --------------------------------------------------------------------
-; All "seme promoters" function by accepting a word-instance, and
-; returning a corresponding seme. The various promoters are of 
-; different levels of sophistication, and use different algoorithms.
-; They all create an InheritenceLink relating the original word instance
-; to the seme, like so:
-;
-;    InheritenceLink
-;       WordInstanceNode hello@123
-;       SemeNode  greeting@789
-;
-; Most/all of these also create a link to the lemmatized word form
-; i.e. "the english word" that corresponds to the seme:
-;
-;    LemmaLink
-;       SemeNode  greeting@789
-;       WordNode  hello
-;
-; All of these promoters could be, and eventually should be
-; re-implemented as ImplicationLinks, so that all promotion runs
-; entirely withing OpenCog.  For now, they are implemented in scheme.
-;
-; --------------------------------------------------------------------
 ; trivial-promoter -- promote WordInstanceNode to a SemeNode
 ;
 ; Given a word instance node, returns a corresponding seme node.
@@ -82,6 +60,13 @@
 			)
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+; same-modifiers-promoter -- re-use an existing seme if it has a superset
+; of the modifiers of the word instance. Otherwise, create a new seme.
+;
+(define (same-modifiers-promoter word-inst)
 )
 
 ; --------------------------------------------------------------------
