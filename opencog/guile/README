@@ -244,6 +244,9 @@ interface.
 === cog-node? exp ===
       Return #t if exp is an node, else return #f
 
+      See also cog-node, which will check to see if a specific node
+      already exists.
+
       Example:
          ; Define a node and a link
          guile> (define x (cog-new-node 'ConceptNode "abc"))
@@ -256,6 +259,9 @@ interface.
 
 === cog-link? exp ===
       Return #t if exp is an link, else return #f
+
+      See also cog-link, which will check to see if a specific link
+      already exists.
 
       Example:
          ; Define a node and a link

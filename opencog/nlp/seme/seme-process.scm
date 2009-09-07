@@ -175,7 +175,37 @@
 ; same-modifiers-promoter -- re-use an existing seme if it has a superset
 ; of the modifiers of the word instance. Otherwise, create a new seme.
 ;
-; XX unfinished ... 
+; The idea here is that if we have a word instance, such as "ball", and
+; a seme "green ball", we can deduce "oh the ball, that must be the 
+; green ball".  But is the word-instance is "red ball", then it cannot
+; be the seme "green ball", and a new seme, specific to "red ball" is
+; created. 
+;
+; Sepcifically, we try to make sure that *every* modifier to the word-inst
+; is also a modifier to the seme. i.e. that the modifiers on the word-inst
+; are a subset of the modifiers on the seme. i.e. that the word-inst is 
+; "semantically broader" than the seme.  
+;
+; This is a fairly basic operation, and lacks in many ways: we'd like 
+; to do this only for recent words in the conversation, and we'd also like
+; to do narrowing, e.g. so if we get "John threw the ball. John threw the 
+; blue ball.", we conclude that the ball in the second sentence is the same
+; as that in the first. The routine fails to handle this situation.  This
+; routine should probably not be "fixed", and instead, a new, more 
+; sophisticated promoter should be created.
+;
+; Anyway, seme promotion should not be done in scheme, but with opencog
+; pattern-matching. So, for example, the following ImplicationLink is a 
+; step in that direction:
+;
+; IF   %InheritanceLink(word-inst $word-seme)
+;    ^ $modtype (word-inst, $attr-inst)
+;    ^ $modtype is _amod or _nn etc.
+;    ^ %InheritanceLink($attr-inst $attr-seme)
+;    ^ $modtype ($seme, $attr-seme)
+;    ^ $seme is a SemeNode
+; THEN $modtype($seme, $attr-seme)
+;
 (define (same-modifiers-promoter word-inst)
 
 	; Create a new seme, given a word-instance. The new seme will 
@@ -194,15 +224,14 @@
 		)
 	)
 
-	; IF
-	;    ^ %InheritanceLink(mod-inst $mod)
-	;       ^ modtype (seme, $mod)
-	;       THEN modtype(seme, $mod)
-	;  EvaluationLink
-	;     prednode (a DefinedLinguisticPredicateNode)
-	;     ListLink
-	;        headword
-	;        modword   (a WordInstanceNode)
+	; Given a seme, and a "modifier relation" mod-rel of the form:
+	;    EvaluationLink
+	;       prednode (a DefinedLinguisticPredicateNode)
+	;       ListLink
+	;          headword   (a WordInstanceNode)
+	;          attr-word  (a WordInstanceNode)
+	; this routine checks to see if the corresponding relation
+	; exists for seme. If it does, it returns #t else it returns #f
 	;
 	(define (does-seme-have-rel? seme mod-rel)
 		(let* ((oset (cog-outgoing-set mod-rel))
@@ -218,7 +247,7 @@
 	; Could this word-inst correspond to this seme?
 	; It does, if *every* modifier to the word-inst is also a
 	; modifier to the seme. i.e. if the modifiers on the word-inst
-	; are a subset of teh modifiers on the seme. i.e. if the
+	; are a subset of the modifiers on the seme. i.e. if the
 	; word-inst is "semantically broader" than the seme.  Thus,
 	; the word-inst "ball" matches the seme "green ball".
 	(define (seme-match? seme wrd-inst)

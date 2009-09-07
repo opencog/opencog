@@ -227,6 +227,9 @@ The following dialog works (or has worked at various times in the past):
 <me>         Did Fred throw a ball?
 <cogita-bot> Truth query determined "yes": throw
 
+<me>         Did Fred throw a red ball?
+<cogita-bot> Truth query determined "yes": throw
+
 <me>         The color of the book is red.
 <me>         What is the color of the book?
 <cogita-bot> Triples abstraction found: red
@@ -234,6 +237,10 @@ The following dialog works (or has worked at various times in the past):
 <me>         the cat sat on the mat
 <me>         what did the cat sit on?
 <cogita-bot> Triples abstraction found: mat
+
+Some things that don't work:
+"Did Fred throw a green ball?" -- gets no reply, as opposed to a negative.
+"Did Fred throw a round ball?" -- doesn't know that balls are round.
 
 
 Notes about the data flow:
@@ -263,7 +270,6 @@ ToDo:
 
 * Do the "what color is the book" question in nlp/question/README
 
-* Handle "Did Fred throw a green ball?" correctly.
 
 * Create an object holding the name of the user, the chat connection, 
   and the 'pseudo-continuation' of the chat status.
