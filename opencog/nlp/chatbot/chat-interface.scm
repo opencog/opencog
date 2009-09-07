@@ -277,6 +277,9 @@
 (end-dbg-display)
 	)
 
+	; Gack. We should do this *only* if we didn't pull out triples.
+	; The problem is that this generates garbage for the more-complex 
+	; triple-style sentences. XXX FIXME
 	(let ((semy
 				(relex-relations-to-semes (get-new-parsed-sentences)))
 		)

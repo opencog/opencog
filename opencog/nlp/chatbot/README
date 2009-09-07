@@ -270,6 +270,8 @@ ToDo:
 
 * Do the "what color is the book" question in nlp/question/README
 
+* XXX Critical: fix the relex-promotion-to-scheme part of things.
+  the current design is no good!
 
 * Create an object holding the name of the user, the chat connection, 
   and the 'pseudo-continuation' of the chat status.
