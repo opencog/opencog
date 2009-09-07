@@ -93,6 +93,7 @@
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the lemma for of the word.
+; Also works if the word-inst is actually a seme.
 (define (word-inst-get-lemma word-inst)
 	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
 		(if (null? wlist)

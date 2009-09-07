@@ -364,8 +364,7 @@
 	; only the words that are participating in relations.)
 (dbg-display "qu-tru semes are\n")
 (display
-	(map same-lemma-promoter-two
-	; (map same-modifiers-promoter
+	(map same-modifiers-promoter
 	; (for-each same-modifiers-promoter
 		(concatenate! 
 			(map parse-get-words

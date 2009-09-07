@@ -42,20 +42,20 @@
 	(define (lemma-get-seme-list lemma)
 		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
 
-	(define (make-new-seme wrd-inst)
-		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
-				(lemma (word-inst-get-lemma wrd-inst))
-			)
+	(define (make-new-seme wrd-inst lemma)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1))))
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
 			newseme
 		)
 	)
 
-	(let* ((seme-list (lemma-get-seme-list lemma)))
+	(let* ((lemma (word-inst-get-lemma word-inst))
+			(seme-list (lemma-get-seme-list lemma))
+		)
 		(if (null? seme-list)
 			; create a new seme
-			(make-new-seme word-inst)
+			(make-new-seme word-inst lemma)
 
 			; re-use an existing seme
 			(let ((seme (car seme-list)))
@@ -77,6 +77,9 @@
 ; The seme-match-proc? must acepet two arguments: a seme and word-inst,
 ; and return #t if the word-inst can be understood to be and instance of
 ; the seme.
+;
+; A (relatively) simple example of the use of this promoter can be found in 
+; the same-lemma-promoter-two example, below.
 ;
 (define (generic-promoter make-new-seme-proc seme-match-proc? word-inst)
 
@@ -105,12 +108,33 @@
 		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
 	)
 
-	; Get list of candidate semes. If one provdides a 
-	; suerpset, then use it, else create a new seme.
-	(let* ((seme-list (get-candidate-semes word-inst)))
-		(if (null? seme-list)
-			(make-new-seme-proc word-inst)
-			(find-existing-seme seme-list word-inst)
+	; Get list of candidate semes, based on thier having a common lemma
+	; The vet each of these, to see if one provides the desired match.
+	; If so, then return it. If not, then create a new seme.
+	(define (find-or-make-seme wrd-inst)
+		(let* ((seme-list (get-candidate-semes wrd-inst)))
+			(if (null? seme-list)
+				(make-new-seme-proc wrd-inst)
+				(find-existing-seme seme-list wrd-inst)
+			)
+		)
+	)
+
+	; Perform an immediate check: this word instance may already
+	; belong to some seme. This will typically not be the case when
+	; encountering a word for the first time, but will commonly be 
+	; true when promoting relations. So we add this as a short-cut
+	; into the processing path.
+	(define (get-existing-seme wrd-inst)
+		(let ((slist (cog-chase-link 'InheritanceLink 'SemeNode wrd-inst)))
+			(if (null? slist) '() (car slist))
+		)
+	)
+
+	(let ((exist-seme (get-existing-seme word-inst)))
+		(if (null? exist-seme)
+			(find-or-make-seme word-inst)
+			exist-seme
 		)
 	)
 )
@@ -161,6 +185,8 @@
 				(lemma (word-inst-get-lemma wrd-inst))
 				(mods (word-inst-get-relex-modifiers wrd-inst))
 			)
+			; Be sure to create the inheritance link, etc. before
+			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
 			(promote-to-seme same-modifiers-promoter mods)
@@ -176,6 +202,7 @@
 	(define (seme-match? seme wrd-inst)
 		(let* ((mods (word-inst-get-relex-modifiers wrd-inst))
 			)
+			#t
 		)
 		#t
 	)
