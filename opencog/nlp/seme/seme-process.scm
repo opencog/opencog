@@ -10,10 +10,15 @@
 ;
 ; Given a word instance node, returns a corresponding seme node.
 ; The promotion is "trivial", in that ever word instance is converted
-; to a seme, without any checking at all.
+; to its own unique seme, without any checking at all. 
+;
+; Return the seme itself.
 
 (define (trivial-promoter word-inst)
-	(SemeNode (cog-name word-inst) (stv 1 1))
+	(let ((seme (SemeNode (cog-name word-inst) (stv 1 1))))
+		(InheritanceLink (stv 1 1) word-inst seme)
+		seme
+	)
 )
 
 ; --------------------------------------------------------------------
@@ -40,11 +45,18 @@
 			(seme-list (lemma-get-seme-list lemma))
 		)
 		(if (null? seme-list)
+			; create a new seme
 			(let ((newseme (SemeNode (cog-name word-inst) (stv 1 1))))
-				(LemmaLink newseme lemma (stv 1 1))
+				(LemmaLink (stv 1 1) newseme lemma)
+				(InheritanceLink (stv 1 1) word-inst newseme)
 				newseme
 			)
-			(car seme-list)
+
+			; re-use an existing seme
+			(let ((seme (car seme-list)))
+				(InheritanceLink (stv 1 1) word-inst seme)
+				seme
+			)
 		)
 	)
 )
