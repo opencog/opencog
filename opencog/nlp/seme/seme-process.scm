@@ -66,7 +66,78 @@
 ; same-modifiers-promoter -- re-use an existing seme if it has a superset
 ; of the modifiers of the word instance. Otherwise, create a new seme.
 ;
+; XX unfinished ... 
 (define (same-modifiers-promoter word-inst)
+
+	; There are a few other modiiers we should probaly deal with,
+	; including quantity multiplier, etc.
+	(define (is-modifier? str)
+		(cond ((string=? str "_amod") #t)
+				((string=? str "_advmod") #t)
+				((string=? str "_appo") #t)
+				((string=? str "_nn") #t)
+				((string=? str "_%quantity") #t)
+				(else #f)
+		)
+	)
+
+	; Return #t if the relex relation is a modifier
+	(define (relex-mod? rel)
+		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
+	)
+
+	; Create a new seme, given a word-instance
+	(define (make-new-seme wrd-inst)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				; Get all the relex relations
+				(all-rels (word-inst-get-relations wrd-inst))
+				; filter out only the modifiers.
+				(mods (filter! relex-mod? all-rels))
+			)
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			(promote-to-seme same-modifiers-promoter mods)
+			newseme
+		)
+	)
+
+	; Could this word-inst correspond to this seme?
+	; Several checks are made:
+	; 1) its already linked
+	; 2) it has a subset of the seme modifiers.
+	; xxxxxxxxxxxxxxxxxxxxx unfinished
+	(define (seme-match? seme wrd-inst)
+		#t
+	)
+
+	; We have a list of candidate semes. Are any appropriate?
+	; Create one if none are found.
+	(define (find-existing-seme seme-list wrd-inst)
+		(let ((matching-seme 
+					(find (lambda (se) (seme-match? se wrd-inst)) seme-list))
+				)
+			(if matching-seme
+				matching-seme
+				(make-new-seme wrd-inst)
+			)
+		)
+	)
+
+	; Get a list of semes with this lemma. 
+	(define (lemma-get-seme-list lemma)
+		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
+
+	; Get possible, candidate semes for this word-inst
+	(define (get-candidate-semes wrd-inst)
+		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
+	)
+
+	(let* ((seme-list (get-candidate-semes word-inst)))
+		(if (null? seme-list)
+			(make-new-seme word-inst)
+			(find-existing-seme seme-list word-inst)
+		)
+	)
 )
 
 ; --------------------------------------------------------------------
