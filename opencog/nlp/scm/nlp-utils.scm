@@ -156,7 +156,8 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return a list of the word-senses associated with the word.
+; Given a word instance, return a list of the word-senses associated
+; with the word.
 (define (word-inst-get-senses word-inst)
 	(cog-chase-link 'InheritanceLink 'WordSenseNode word-inst)
 )
@@ -229,6 +230,33 @@
 			)
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+; Given a word-instance, return a list of relex modifiers that this 
+; word-instance participates in.
+;
+(define (word-inst-get-relex-modifiers wrd-inst)
+
+	; There are a few other modifiers we should probably deal with,
+	; including quantity multiplier, etc. Right now, this is unclear.
+	(define (is-modifier? str)
+		(cond ((string=? str "_amod") #t)
+				((string=? str "_advmod") #t)
+				((string=? str "_appo") #t)
+				((string=? str "_nn") #t)
+				((string=? str "_%quantity") #t)
+				(else #f)
+		)
+	)
+
+	; Return #t if the relex relation is a modifier
+	(define (relex-mod? rel)
+		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
+	)
+
+	; Get all relations, and filter them out.
+	(filter! relex-mod? (word-inst-get-relations wrd-inst))
 )
 
 ; --------------------------------------------------------------------
