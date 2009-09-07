@@ -15,6 +15,11 @@
 ; Basically, we are trying to handle triples of the form
 ; "capital_of(France, what)" and verifying that "what" is a query,
 ; and then yanking out the answer.
+;
+; Note that this uses an unqualified seme promotion: the question
+; word and the seme just need to share a common lemma. Thus, this
+; will fail when a qualified question is is asked: e.g. "what is
+; the fuel of a gasoline engine" as opposed to "a diesel engine".
 ; 
 ; # IF %ListLink("# TRIPLE BOTTOM ANCHOR", $qvar) 
 ;       ^ $tripl($word-inst, $qvar)     ; the question
@@ -32,6 +37,7 @@
 			(r-anchor-node *bottom-anchor* "$qvar")
 
 			wh-clause  ; the prep-phrase we are matching!
+			(r-decl-vartype "PrepositionalRelationshipNode" "$tripl")
 
 			;; XXX someday, this needs to be an or-list of WH- words.
 			(r-rlx-flag "what" "$qvar")
