@@ -255,7 +255,10 @@
 
 ; -----------------------------------------------------------------------
 ; say-declaration -- User made a declaration. Perform processing
-; of declarative statements
+; of declarative statements.
+;
+; We assume that all declarations are true; therefore, immediately
+; promote them to semes.
 
 (define (say-declaration)
 (dbg-display "entering declaration processing\n")
@@ -265,7 +268,7 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-	; promote triples to semes.
+	; Promote triples to semes.
 	(let* ((trips (get-new-triples))
 		(trip-semes (promote-to-seme same-lemma-promoter trips))
 		)
@@ -350,9 +353,22 @@
 
 	(attach-new-parses (get-new-parsed-sentences))
 
+	; Hmm promot trip semes ?? -- later 
+	; Also -- cannot blithly promote, do *only* the semes
+	; but not the triples themselves
 	;	(trip-semes (promote-to-seme same-lemma-promoter trips))
-	
-	; First, we want to 
+	;
+
+	; First, we want to grab all of the words in the question, and
+	; tag them with semes. (XXX We don't really need all the words,
+	; only the words that are participating in relations.)
+	(for-each same-lemma-promoter 
+		(concatenate! 
+			(map parse-get-words
+				(sent-list-get-parses (get-new-parsed-sentences))
+			)
+		)
+	)
 	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)

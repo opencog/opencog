@@ -70,14 +70,12 @@
 ;
 ; or more generally "did X verb Y?"
 
-; Make sure that the two parts share a common word
-; XXX This should really be "the same seme" not "common word"
-(define (common-word word-inst-a tmp-var word-inst-b)
+; Find the seme for this word-instance
+(define (r-seme-of-word-inst word-inst seme)
 	(r-and 
-		(r-decl-lemma  word-inst-a tmp-var)
-		(r-decl-lemma  word-inst-b tmp-var)
-		(r-decl-vartype "WordInstanceNode" word-inst-a)
-		(r-decl-vartype "WordInstanceNode" word-inst-b)
+		(r-link InheritanceLink word-inst seme)
+		(r-decl-vartype "WordInstanceNode" word-inst)
+		(r-decl-vartype "SemeNode" seme)
 	)
 )
 
@@ -94,17 +92,19 @@
 			(r-rlx-flag "truth-query" "$verb")
 
 			; abstract to words (XXX - should be semes!!)
-			(common-word "$svar" "$s" "$ans-svar")
-			(common-word "$ovar" "$o" "$ans-ovar")
-			(common-word "$verb" "$v" "$ans-verb")
+			(r-seme-of-word-inst "$svar" "$ans-svar")
+			(r-seme-of-word-inst "$ovar" "$ans-ovar")
+			(r-seme-of-word-inst "$verb" "$ans-verb")
 			
-			; Now look for a matching assertion
+			; Now look for a matching assertion with these semes
 			(r-rlx "_subj" "$ans-verb" "$ans-svar")
 			(r-rlx "_obj"  "$ans-verb" "$ans-ovar")
+
+			; the belwo are probably not needed -- for semes.
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)
-		(r-anchor-node *query-soln-anchor* "$v")
+		(r-anchor-node *query-soln-anchor* "$ans-verb")
 	)
 )
 
