@@ -236,10 +236,12 @@
 ; Given a word-instance, return a list of relex modifiers that this 
 ; word-instance participates in.
 ;
-(define (word-inst-get-relex-modifiers wrd-inst)
+(define (word-inst-get-relex-modifiers word-inst)
 
 	; There are a few other modifiers we should probably deal with,
 	; including quantity multiplier, etc. Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
 	(define (is-modifier? str)
 		(cond ((string=? str "_amod") #t)
 				((string=? str "_advmod") #t)
@@ -256,7 +258,7 @@
 	)
 
 	; Get all relations, and filter them out.
-	(filter! relex-mod? (word-inst-get-relations wrd-inst))
+	(filter! relex-mod? (word-inst-get-relations word-inst))
 )
 
 ; --------------------------------------------------------------------
