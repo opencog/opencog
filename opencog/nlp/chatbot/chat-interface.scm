@@ -246,7 +246,7 @@
 			(rels (map parse-get-relations parse-list))
 			; flatten the resulting list-of-lists
 			(rel-list (concatenate! rels))
-			(sl (promote-to-seme same-lemma-promoter rel-list))
+			(sl (promote-to-seme same-modifiers-promoter rel-list))
 		)
 		sl
 	)
@@ -270,7 +270,7 @@
 
 	; Promote triples to semes.
 	(let* ((trips (get-new-triples))
-		(trip-semes (promote-to-seme same-lemma-promoter trips))
+		(trip-semes (promote-to-seme same-modifiers-promoter trips))
 		)
 (dbg-display "statement triple semes are:\n")
 (display trip-semes)
@@ -349,31 +349,30 @@
 ; Some questions are truth queries, posing a hypothesis, and asking for a 
 ; yes/no answer. This handles these.
 ;
+; XXX FIXME: this should be called only if we catually *have* a 
+; truth query. And if we do have a truth query, then we should NOT
+; do the triples pipeline.
+;
 (define (say-try-truth-query)
 
 	(attach-new-parses (get-new-parsed-sentences))
 
-	; Hmm promot trip semes ?? -- later 
+	; Hmm promote trip semes ?? -- later 
 	; Also -- cannot blithly promote, do *only* the semes
 	; but not the triples themselves
-	;	(trip-semes (promote-to-seme same-lemma-promoter trips))
+	;	(trip-semes (promote-to-seme same-modifiers-promoter trips))
 	;
 
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.)
-(dbg-display "qu-tru semes are\n")
-(display
-	(map same-modifiers-promoter
-	; (for-each same-modifiers-promoter
+	(for-each same-modifiers-promoter
 		(concatenate! 
 			(map parse-get-words
 				(sent-list-get-parses (get-new-parsed-sentences))
 			)
 		)
 	)
-)
-(end-dbg-display)
 	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
@@ -461,7 +460,7 @@
 	; (this is an extremely simple-minded hack right now)
 	; First, the question needs to be promoted to semes,
 	(let* ((trips (get-new-triples))
-			(trip-semes (promote-to-seme same-lemma-promoter trips))
+			(trip-semes (promote-to-seme same-modifiers-promoter trips))
 		)
 		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
