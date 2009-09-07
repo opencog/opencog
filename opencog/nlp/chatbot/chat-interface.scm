@@ -362,13 +362,19 @@
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.)
-	(for-each same-lemma-promoter 
+(dbg-display "qu-tru semes are\n")
+(display
+	(map same-lemma-promoter-two
+	; (map same-modifiers-promoter
+	; (for-each same-modifiers-promoter
 		(concatenate! 
 			(map parse-get-words
 				(sent-list-get-parses (get-new-parsed-sentences))
 			)
 		)
 	)
+)
+(end-dbg-display)
 	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
@@ -377,7 +383,7 @@
 
 		(if (null? ans)
 			(let ()
-				; Try triples-based question-answering.
+				; No answer, now try triples-based question-answering next.
 				(dbg-display "No truth-query found, try triples-qa.\n")
 				(end-dbg-display)
 				(chat-return "(say-try-triple-qa)")

@@ -42,16 +42,20 @@
 	(define (lemma-get-seme-list lemma)
 		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
 
-	(let* ((lemma (word-inst-get-lemma word-inst))
-			(seme-list (lemma-get-seme-list lemma))
+	(define (make-new-seme wrd-inst)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+			)
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			newseme
 		)
+	)
+
+	(let* ((seme-list (lemma-get-seme-list lemma)))
 		(if (null? seme-list)
 			; create a new seme
-			(let ((newseme (SemeNode (cog-name word-inst) (stv 1 1))))
-				(LemmaLink (stv 1 1) newseme lemma)
-				(InheritanceLink (stv 1 1) word-inst newseme)
-				newseme
-			)
+			(make-new-seme word-inst)
 
 			; re-use an existing seme
 			(let ((seme (car seme-list)))
@@ -63,37 +67,99 @@
 )
 
 ; --------------------------------------------------------------------
+; Generic seme promoter. 
+; Given a word inst, and two routines: a new-seme creation routine, and a
+; seme matching routine, this will perform the seme promotion.
+;
+; The make-new-seme-proc must accept a word instance as its sole argument,
+; and return a seme.
+;
+; The seme-match-proc? must acepet two arguments: a seme and word-inst,
+; and return #t if the word-inst can be understood to be and instance of
+; the seme.
+;
+(define (generic-promoter make-new-seme-proc seme-match-proc? word-inst)
+
+	; We have a list of candidate semes. Are any appropriate?
+	; Create one if none are found.
+	(define (find-existing-seme seme-list wrd-inst)
+		(let ((matching-seme 
+					(find (lambda (se) (seme-match-proc? se wrd-inst)) seme-list))
+				)
+			(if matching-seme
+				(let ()
+					(InheritanceLink (stv 1 1) word-inst matching-seme)
+					matching-seme
+				)
+				(make-new-seme-proc wrd-inst)
+			)
+		)
+	)
+
+	; Get a list of semes with this lemma. 
+	(define (lemma-get-seme-list lemma)
+		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
+
+	; Get possible, candidate semes for this word-inst
+	(define (get-candidate-semes wrd-inst)
+		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
+	)
+
+	; Get list of candidate semes. If one provdides a 
+	; suerpset, then use it, else create a new seme.
+	(let* ((seme-list (get-candidate-semes word-inst)))
+		(if (null? seme-list)
+			(make-new-seme-proc word-inst)
+			(find-existing-seme seme-list word-inst)
+		)
+	)
+)
+
+; --------------------------------------------------------------------
+; A re-implementation of the same-lemma-promoter, but using the 
+; generic-promoter routine. Operationally, this is supposed to
+; work the same way as same-lemma-promoter -- see that for further
+; documentation.
+;
+(define (same-lemma-promoter-two word-inst)
+
+	; Create a new seme corresponding to this word-instance.
+	(define (make-new-seme wrd-inst)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+			)
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			newseme
+		)
+	)
+
+	; If the seme and the word inst have the same lemma,
+	; then they match.
+	(define (match-seme? seme wrd-inst)
+		(equal?
+			(word-inst-get-lemma seme)
+			(word-inst-get-lemma wrd-inst)
+		)
+	)
+
+	; Use the generic routine.
+	(generic-promoter make-new-seme match-seme? word-inst)
+)
+
+; --------------------------------------------------------------------
 ; same-modifiers-promoter -- re-use an existing seme if it has a superset
 ; of the modifiers of the word instance. Otherwise, create a new seme.
 ;
 ; XX unfinished ... 
 (define (same-modifiers-promoter word-inst)
 
-	; There are a few other modiiers we should probaly deal with,
-	; including quantity multiplier, etc.
-	(define (is-modifier? str)
-		(cond ((string=? str "_amod") #t)
-				((string=? str "_advmod") #t)
-				((string=? str "_appo") #t)
-				((string=? str "_nn") #t)
-				((string=? str "_%quantity") #t)
-				(else #f)
-		)
-	)
-
-	; Return #t if the relex relation is a modifier
-	(define (relex-mod? rel)
-		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
-	)
-
-	; Create a new seme, given a word-instance
+	; Create a new seme, given a word-instance. The new seme will 
+	; have the same modifiers that the word-instance has.
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
-				; Get all the relex relations
-				(all-rels (word-inst-get-relations wrd-inst))
-				; filter out only the modifiers.
-				(mods (filter! relex-mod? all-rels))
+				(mods (word-inst-get-relex-modifiers wrd-inst))
 			)
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
@@ -108,40 +174,12 @@
 	; 2) it has a subset of the seme modifiers.
 	; xxxxxxxxxxxxxxxxxxxxx unfinished
 	(define (seme-match? seme wrd-inst)
-		#t
-	)
-
-	; We have a list of candidate semes. Are any appropriate?
-	; Create one if none are found.
-	(define (find-existing-seme seme-list wrd-inst)
-		(let ((matching-seme 
-					(find (lambda (se) (seme-match? se wrd-inst)) seme-list))
-				)
-			(if matching-seme
-				(let ()
-					(InheritanceLink (stv 1 1) word-inst matching-seme)
-					matching-seme
-				)
-				(make-new-seme wrd-inst)
+		(let* ((mods (word-inst-get-relex-modifiers wrd-inst))
 			)
 		)
+		#t
 	)
-
-	; Get a list of semes with this lemma. 
-	(define (lemma-get-seme-list lemma)
-		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
-
-	; Get possible, candidate semes for this word-inst
-	(define (get-candidate-semes wrd-inst)
-		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
-	)
-
-	(let* ((seme-list (get-candidate-semes word-inst)))
-		(if (null? seme-list)
-			(make-new-seme word-inst)
-			(find-existing-seme seme-list word-inst)
-		)
-	)
+	(generic-promoter make-new-seme seme-match? word-inst)
 )
 
 ; --------------------------------------------------------------------
