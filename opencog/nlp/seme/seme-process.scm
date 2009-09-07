@@ -88,7 +88,8 @@
 
 	; Create a new seme, given a word-instance
 	(define (make-new-seme wrd-inst)
-		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
 				; Get all the relex relations
 				(all-rels (word-inst-get-relations wrd-inst))
 				; filter out only the modifiers.
