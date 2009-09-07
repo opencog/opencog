@@ -194,17 +194,38 @@
 		)
 	)
 
-	; Could this word-inst correspond to this seme?
-	; Several checks are made:
-	; 1) its already linked
-	; 2) it has a subset of the seme modifiers.
-	; xxxxxxxxxxxxxxxxxxxxx unfinished
-	(define (seme-match? seme wrd-inst)
-		(let* ((mods (word-inst-get-relex-modifiers wrd-inst))
+	; IF
+	;    ^ %InheritanceLink(mod-inst $mod)
+	;       ^ modtype (seme, $mod)
+	;       THEN modtype(seme, $mod)
+	;  EvaluationLink
+	;     prednode (a DefinedLinguisticPredicateNode)
+	;     ListLink
+	;        headword
+	;        modword   (a WordInstanceNode)
+	;
+	(define (does-seme-have-rel? seme mod-rel)
+		(let* ((oset (cog-outgoing-set mod-rel))
+				(prednode (car oset))
+				(attr-word (cadr (cog-outgoing-set (cadr oset))))
+				(attr-seme (same-modifiers-promoter attr-word))
+				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
 			)
-			#t
+			(if (null? seme-rel) #f #t)
 		)
-		#t
+	)
+
+	; Could this word-inst correspond to this seme?
+	; It does, if *every* modifier to the word-inst is also a
+	; modifier to the seme. i.e. if the modifiers on the word-inst
+	; are a subset of teh modifiers on the seme. i.e. if the
+	; word-inst is "semantically broader" than the seme.  Thus,
+	; the word-inst "ball" matches the seme "green ball".
+	(define (seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(word-inst-get-relex-modifiers wrd-inst)
+		)
 	)
 	(generic-promoter make-new-seme seme-match? word-inst)
 )
