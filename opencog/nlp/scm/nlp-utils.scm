@@ -234,8 +234,9 @@
 )
 
 ; --------------------------------------------------------------------
-; Given a word-instance, return a list of relex modifiers that this 
-; word-instance participates in.
+; Given a word-instance, return a list of relex modifiers that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _amod(head-word, attr-word)
 ;
 (define (word-inst-get-relex-modifiers word-inst)
 
@@ -258,8 +259,24 @@
 		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
 	)
 
+	; Return #t if the relex relation is a modifier
+	; and the word-inst is the head-word.
+	(define (head-mod? rel wrd-inst)
+		(let* ((oset (cog-outgoing-set rel))
+				(head (car (cog-outgoing-set (cadr oset))))
+			)
+			(and 
+				(equal? head wrd-inst)
+				(is-modifier? (cog-name (car oset)))
+			)
+		)
+	)
+
 	; Get all relations, and filter them out.
-	(filter! relex-mod? (word-inst-get-relations word-inst))
+	(filter! 
+		(lambda (rel) (head-mod? rel word-inst))
+		(word-inst-get-relations word-inst)
+	)
 )
 
 ; --------------------------------------------------------------------
