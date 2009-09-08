@@ -79,8 +79,10 @@
 (define *truth-assertion-anchor* (AnchorNode "# TRUTH ASSERTION" (stv 1 1)))
 
 (define (get-truth-assertions)
-	;(cog-chase-link 'ListLink 'EvaluationLink *truth-assertion-anchor*)
-	(cog-incoming-set *truth-assertion-anchor*)
+	(define (get-verbs)
+		(cog-chase-link 'ListLink 'WordInstanceNode *truth-assertion-anchor*)
+	)
+	(concatenate! (map word-inst-get-head-relations (get-verbs)))
 )
 
 (define (release-truth-assertions)
@@ -245,29 +247,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; relex-relations-to-semes -- perform seme promotion of relex parses
-; 
-; Algorithm plan:
-; Get a list of parses for the sentences
-; Get a list of relex relations for each parse
-; Promote each relex relation to a relation of semes.
-
-(define (relex-relations-to-semes sent-list)
-	(let* (
-			; get a list of parses
-			(parse-list (sent-list-get-parses sent-list))
-			; get a list or relations in that parse
-			(rels (map parse-get-relations parse-list))
-			; flatten the resulting list-of-lists
-			(rel-list (concatenate! rels))
-			(sl (promote-to-seme same-modifiers-promoter rel-list))
-		)
-		sl
-	)
-
-)
-
-; -----------------------------------------------------------------------
 ; say-declaration -- User made a declaration. Perform processing
 ; of declarative statements.
 ;
@@ -292,23 +271,21 @@
 	)
 
 	; Look for truth assertions, and promote those to semes.
-	; Truth assertions do not have preps in them.
+	; By "truth assertion" we mean "subject verb object" sentences
+	; that do not have any prepositions in them.
+	;
+	; We don't want to just promote any-old relex relations to semes, 
+	; as that will create all sorts of havoc. We only want to promote
+	; actual subject-verb-object assertions, so that we can answer
+	; truth-query questions on them. 
+	(attach-new-parses (get-new-parsed-sentences))
 	(find-truth-assertions)
-(dbg-display "truth-assertions are:\n")
-(display (get-truth-assertions))
-(end-dbg-display)
-	
 
-	; Gack. We should do this *only* if we didn't pull out triples.
-	; The problem is that this generates garbage for the more-complex 
-	; triple-style sentences. XXX FIXME
-;	(let ((semy
-;				(relex-relations-to-semes (get-new-parsed-sentences)))
-;		)
-;(dbg-display "statement relex semes are:\n")
-;(display semy)
-;(end-dbg-display)
-;	)
+(dbg-display "truth-assertions are:\n")
+(display 
+	(promote-to-seme same-modifiers-promoter (get-truth-assertions))
+)
+(end-dbg-display)
 
 	(chat-return "(say-final-cleanup)")
 )

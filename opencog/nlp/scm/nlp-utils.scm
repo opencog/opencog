@@ -117,6 +117,9 @@
 ; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
 ; _subj(dog,*), _obj(dog,*) etc.
 ;
+; See also word-inst-get-head-relations and 
+; word-inst-get-relex-modifiers below.
+;
 (define (word-inst-get-relations word-inst)
 	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
 )
@@ -230,6 +233,29 @@
 				(parse-get-words parse-node)
 			)
 		)
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a word-instance, return a list of relex relations that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _amod(head-word, attr-word)
+;
+(define (word-inst-get-head-relations word-inst)
+
+	; Return #t if the word-inst is the head-word.
+	(define (head? rel wrd-inst)
+		(let* ((oset (cog-outgoing-set rel))
+				(head (car (cog-outgoing-set (cadr oset))))
+			)
+			(equal? head wrd-inst)
+		)
+	)
+
+	; Get all relations, and filter them out.
+	(filter! 
+		(lambda (rel) (head? rel word-inst))
+		(word-inst-get-relations word-inst)
 	)
 )
 
