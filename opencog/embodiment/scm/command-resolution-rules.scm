@@ -58,6 +58,13 @@
      (VariableNode "$targetEntitySemeNode")
      (VariableTypeNode "SemeNode")
      )
+    (TypedVariableLink
+     (VariableNode "$targetRealNode")
+     (ListLink      
+      (VariableTypeNode "AccessoryNode")
+      (VariableTypeNode "ObjectNode")
+      )
+     )
     )
    (ImplicationLink
     (AndLink
@@ -177,6 +184,13 @@
      (VariableNode "$targetThemeSemeNode")
      (VariableTypeNode "SemeNode")
      )
+    (TypedVariableLink
+     (VariableNode "$targetRealNode")
+     (ListLink
+      (VariableTypeNode "AccessoryNode")
+      (VariableTypeNode "ObjectNode")
+      )
+     )
     )
    (ImplicationLink
     (AndLink
@@ -218,7 +232,7 @@
       )
      (EvaluationLink
       (VariableNode "$frameDepictivePredicateNode")
-      (VariableNode "#drop")
+      (ConceptNode "#drop")
       )
      (EvaluationLink
       (VariableNode "$frameThemePredicateNode")
@@ -248,7 +262,6 @@
        (VariableNode "$source")
        )
       )
-
      )
     
     (ExecutionLink
@@ -289,6 +302,17 @@
     (TypedVariableLink
      (VariableNode "$goalSemeNode")
      (VariableTypeNode "SemeNode")
+     )
+    (TypedVariableLink
+     (VariableNode "$goalRealNode")
+     (ListLink
+      (VariableTypeNode "AccessoryNode")
+      (VariableTypeNode "ObjectNode")
+      (VariableTypeNode "AvatarNode")
+      (VariableTypeNode "PetNode")
+      (VariableTypeNode "StructureNode")
+      (VariableTypeNode "HumanoidNode")
+      )
      )
     )
    (ImplicationLink
