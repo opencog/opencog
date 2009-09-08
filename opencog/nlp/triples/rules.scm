@@ -364,6 +364,8 @@
 			(r-anchor-trips "$sent")
 			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "_predadj" "$var2" "$var1")
+
+			; Must NOT have a prep phrase in it!
 			(r-not (r-rlx "$prep" "$var2" "$var3"))
 			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-vartype "WordInstanceNode" "$var3")
@@ -412,6 +414,43 @@
 ;       ^ %LemmaLink($qvarintst,$qvar)    ; word of word instance
 ;       THEN ^3_$phrase($qvar, $var0) 
 
+
+; -----------------------------------------------------------------
+; 1000
+; Truth assertion: "John threw a rock"
+;        _subj(throw, John)
+;        _obj(throw, rock)
+; 
+; or more generally "X verbed Y".
+; We use this to identify sentences that do *not* have prepositional
+; sttements in them. We need to identify these so that seme-promotion 
+; works correctly: we need to seme-promote the subject, object for
+; these kinds of sentences, but not for any of the others, above.
+;
+
+(define truth-assertion-rule-0
+	(r-varscope
+		(r-and
+			(r-anchor "# NEW PARSES" "$sent")
+			(r-decl-word-inst "$verb" "$sent")
+
+			; Identify the assertion.
+			(r-rlx "_subj" "$verb" "$svar")
+			(r-rlx "_obj"  "$verb" "$ovar")
+
+			; Must not be a question.
+			(r-not (r-rlx-flag "hyp" "$verb"))
+			(r-not (r-rlx-flag "truth-query" "$verb"))
+
+			; Must NOT have a prep phrase in it!
+			(r-not (r-rlx "$prep" "$ovar" "$var3"))
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$var3")
+		)
+		(r-anchor-node *truth-assertion-anchor* "$verb")
+	)
+)
+
 ; -----------------------------------------------------------------
 ; needed by the triples-processing pipeline
 ;
@@ -427,6 +466,10 @@
 	triple-rule-8
 	triple-rule-9
 	triple-rule-10
+))
+
+(define truth-assertion-list (list
+	truth-assertion-rule-0
 ))
 
 ; ------------------------ END OF FILE ----------------------------

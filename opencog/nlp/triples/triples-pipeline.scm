@@ -99,3 +99,25 @@
 )
 
 ; -----------------------------------------------------------------------
+; -----------------------------------------------------------------------
+; truth-assertion pipeline
+;
+(define (find-truth-assertions)
+
+	(define (drule verb-list)
+		;; Delete the ListLink that binds all of these together. This 
+		;; ListLink was created when the ImplicationLink was run, to
+		;; hold the results. But from now-on out, it will only get in
+		;; the way, so get rid of it.
+		(cog-delete verb-list)
+	)
+
+	; Apply the truth-asserton rules
+	(for-each
+		(lambda (rule)
+			(drule (cog-ad-hoc "do-varscope" rule))
+		)
+		truth-assertion-list ; this list defined by the /triples/rules.scm file
+	)
+)
+

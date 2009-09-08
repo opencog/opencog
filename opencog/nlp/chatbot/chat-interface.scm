@@ -74,6 +74,20 @@
 )
 
 ; -----------------------------------------------------------------------
+; Anchor for truth-assertion relations. These need to be promoted to semes.
+
+(define *truth-assertion-anchor* (AnchorNode "# TRUTH ASSERTION" (stv 1 1)))
+
+(define (get-truth-assertions)
+	;(cog-chase-link 'ListLink 'EvaluationLink *truth-assertion-anchor*)
+	(cog-incoming-set *truth-assertion-anchor*)
+)
+
+(define (release-truth-assertions)
+	(release-from-anchor *truth-assertion-anchor*)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -277,16 +291,24 @@
 (end-dbg-display)
 	)
 
+	; Look for truth assertions, and promote those to semes.
+	; Truth assertions do not have preps in them.
+	(find-truth-assertions)
+(dbg-display "truth-assertions are:\n")
+(display (get-truth-assertions))
+(end-dbg-display)
+	
+
 	; Gack. We should do this *only* if we didn't pull out triples.
 	; The problem is that this generates garbage for the more-complex 
 	; triple-style sentences. XXX FIXME
-	(let ((semy
-				(relex-relations-to-semes (get-new-parsed-sentences)))
-		)
-(dbg-display "statement relex semes are:\n")
-(display semy)
-(end-dbg-display)
-	)
+;	(let ((semy
+;				(relex-relations-to-semes (get-new-parsed-sentences)))
+;		)
+;(dbg-display "statement relex semes are:\n")
+;(display semy)
+;(end-dbg-display)
+;	)
 
 	(chat-return "(say-final-cleanup)")
 )
@@ -507,6 +529,7 @@
 
 	; Delete list of triples, so they don't interfere with the next question.
 	(release-result-triples)
+	(release-truth-assertions)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
