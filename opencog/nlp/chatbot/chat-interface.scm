@@ -408,14 +408,19 @@
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
 
+	; The meta-idea here is that we assume a "closed universe" -- 
+	; If a truth-query question was asked, and we can't answer in the 
+	; affirmative, then we will answer in the negative. This is not
+	; correct in the open-universe model, where the answer would be
+	; "no I don't really have enough information to answer this".
 	(let ((ans (chat-get-simple-answer)))
 
 		(if (null? ans)
 			; No answer, tell them so.
-			(chat-prt-soln "Truth query determined \"no\". " '())
+			(chat-prt-soln "Truth query determined: No, not that I know of. " '())
 
 			; The answer must be yes.
-			(chat-prt-soln "Truth query determined \"yes\": " ans)
+			(chat-prt-soln "Truth query determined: Yes, verb was: " ans)
 		)
 	)
 
