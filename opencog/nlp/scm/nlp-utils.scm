@@ -268,7 +268,7 @@
 (define (word-inst-filter-relex-rels word-inst rel-name-list)
 
 	(define (is-modifier? str)
-		(any string=? rel-name-list)
+		(any (lambda (rel) (string=? rel str)) rel-name-list)
 	)
 
 	; Return #t if the relex relation is in the rel-name-list
