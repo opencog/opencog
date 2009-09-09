@@ -67,6 +67,23 @@
 )
 
 ; -----------------------------------------------------------------
+; Identify a truth-query as such, anchor it.
+;
+(define truth-query-id-rule-0
+	(r-varscope
+		(r-and
+			(r-anchor-node *new-parses-anchor* "$sent")
+			(r-decl-word-inst "$verb" "$sent")
+
+			; Identify the question.
+			(r-rlx-flag "hyp" "$verb")
+			(r-rlx-flag "truth-query" "$verb")
+		)
+		(r-anchor-node *truth-query-anchor* "$sent")
+	)
+)
+
+; -----------------------------------------------------------------
 ; 0
 ; Truth-query question: "Did John throw a rock?"
 ;        _subj(throw, John)
@@ -88,7 +105,7 @@
 (define truth-query-rule-0
 	(r-varscope
 		(r-and
-			(r-anchor "# NEW PARSES" "$sent")
+			(r-anchor-node *truth-query-anchor* "$sent")
 			(r-decl-word-inst "$verb" "$sent")
 
 			; Identify the question.
@@ -119,6 +136,10 @@
 (define *question-rule-list* (list
 	question-rule-0
 	question-rule-1
+))
+
+(define *truth-query-id-list* (list
+	truth-query-id-rule-0
 ))
 
 (define *truth-query-rule-list* (list

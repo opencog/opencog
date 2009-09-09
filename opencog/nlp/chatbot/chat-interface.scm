@@ -90,6 +90,21 @@
 )
 
 ; -----------------------------------------------------------------------
+; Anchor for truth-query parses. The things that get attached to this
+; anchor are ParseNodes of parses that seem to be (as yet unasnwered) 
+; truth-query questions.
+;
+(define *truth-query-anchor* (AnchorNode "# TRUTH QUERY" (stv 1 1)))
+
+(define (get-truth-queries)
+	(cog-chase-link 'ListLink 'ParseNode *truth-query-anchor*)
+)
+
+(define (release-truth-query-anchor)
+	(release-from-anchor *truth-query-anchor*)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -144,26 +159,20 @@
 ; questions (e.g. "what is an instrument" lists many instruments)
 ;
 (define (chat-prt-soln msg soln-list)
-	(define (do-prt-soln soln-list)
-		;; display *all* items in the list.
-		(define (show-item wlist)
-			(if (not (null? wlist))
-				(let ((wrd (car wlist)))
-					(if (null? wrd)
-						(display "(null)")
-						(display (cog-name wrd))
-					)
-					(display " ")
-					(show-item (cdr wlist))
-				)
-			)
+
+	(define (prt-one item)
+		(if (null? item)
+			(display "(null)")
+			(display (cog-name item))
 		)
-		(display msg)
-		(show-item soln-list)
+		(display " ")
 	)
 
-	(if (not (null? soln-list))
-		(do-prt-soln soln-list)
+	(display msg)
+	(cond
+		((null? soln-list) '())
+		((list? soln-list) (for-each prt-one soln-list))
+		((string? soln-list) (display sln-list))
 	)
 )
 
@@ -359,6 +368,26 @@
 
 	(attach-new-parses (get-new-parsed-sentences))
 
+	; Apply a set of rules to determin if we even *have* a truth query.
+	(for-each
+		(lambda (rule) 
+			(cog-delete ; need to delete the returned ListLink
+				(cog-ad-hoc "do-varscope" rule)
+			)
+		) 
+		*truth-query-id-list*
+	)
+
+	; If this does not apear to be a truth query, then cut out
+	; of here, and try something else.
+	(if (null? (get-truth-queries))
+		(let ()
+			(dbg-display "No truth-query found, try triples-qa.\n")
+			(end-dbg-display)
+			(chat-return "(say-try-triple-qa)")
+		)
+	)
+
 	; Hmm promote trip semes ?? -- later 
 	; Also -- cannot blithly promote, do *only* the semes
 	; but not the triples themselves
@@ -382,19 +411,15 @@
 	(let ((ans (chat-get-simple-answer)))
 
 		(if (null? ans)
-			(let ()
-				; No answer, now try triples-based question-answering next.
-				(dbg-display "No truth-query found, try triples-qa.\n")
-				(end-dbg-display)
-				(chat-return "(say-try-triple-qa)")
-			)
-			(let ()
-				; Print, and skip to the end of processing
-				(chat-prt-soln "Truth query determined \"yes\": " ans)
-				(chat-return "(say-final-cleanup)")
-			)
+			; No answer, tell them so.
+			(chat-prt-soln "Truth query determined \"no\". " '())
+
+			; The answer must be yes.
+			(chat-prt-soln "Truth query determined \"yes\": " ans)
 		)
 	)
+
+	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
@@ -507,6 +532,7 @@
 	; Delete list of triples, so they don't interfere with the next question.
 	(release-result-triples)
 	(release-truth-assertions)
+	(release-truth-query-anchor)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
