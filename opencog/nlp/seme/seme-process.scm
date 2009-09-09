@@ -206,20 +206,20 @@
 ;    ^ $seme is a SemeNode
 ; THEN $modtype($seme, $attr-seme)
 ;
-(define (same-modifiers-promoter word-inst)
+(define (noun-same-modifiers-promoter word-inst)
 
 	; Create a new seme, given a word-instance. The new seme will 
 	; have the same modifiers that the word-instance has.
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
-				(mods (word-inst-get-relex-modifiers wrd-inst))
+				(mods (noun-inst-get-relex-modifiers wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
-			(promote-to-seme same-modifiers-promoter mods)
+			(promote-to-seme noun-same-modifiers-promoter mods)
 			newseme
 		)
 	)
@@ -237,7 +237,64 @@
 		(let* ((oset (cog-outgoing-set mod-rel))
 				(prednode (car oset))
 				(attr-word (cadr (cog-outgoing-set (cadr oset))))
-				(attr-seme (same-modifiers-promoter attr-word))
+				(attr-seme (noun-same-modifiers-promoter attr-word))
+				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
+			)
+			(if (null? seme-rel) #f #t)
+		)
+	)
+
+	; Could this noun word-inst correspond to this seme?
+	; It does, if *every* modifier to the word-inst is also a
+	; modifier to the seme. i.e. if the modifiers on the word-inst
+	; are a subset of the modifiers on the seme. i.e. if the
+	; word-inst is "semantically broader" than the seme.  Thus,
+	; the word-inst "ball" matches the seme "green ball".
+	(define (noun-seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(noun-inst-get-relex-modifiers wrd-inst)
+		)
+	)
+	(generic-promoter make-new-seme noun-seme-match? word-inst)
+)
+
+(define (same-modifiers-promoter word-inst)
+	(noun-same-modifiers-promoter word-inst)
+)
+
+(define (all-pos-same-modifiers-promoter word-inst)
+
+	; Create a new seme, given a word-instance. The new seme will 
+	; have the same modifiers that the word-instance has.
+	(define (make-new-seme wrd-inst)
+		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+				(mods (noun-inst-get-relex-modifiers wrd-inst))
+			)
+			; Be sure to create the inheritance link, etc. before
+			; doing the promotion.
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			(promote-to-seme noun-same-modifiers-promoter mods)
+			newseme
+		)
+	)
+
+	; Given a seme, and a "modifier relation" mod-rel of the form:
+	;    EvaluationLink
+	;       prednode (a DefinedLinguisticPredicateNode)
+	;       ListLink
+	;          headword   (a WordInstanceNode)
+	;          attr-word  (a WordInstanceNode)
+	; this routine checks to see if the corresponding relation
+	; exists for seme. If it does, it returns #t else it returns #f
+	;
+	(define (does-seme-have-rel? seme mod-rel)
+		(let* ((oset (cog-outgoing-set mod-rel))
+				(prednode (car oset))
+				(attr-word (cadr (cog-outgoing-set (cadr oset))))
+				(attr-seme (noun-same-modifiers-promoter attr-word))
 				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
 			)
 			(if (null? seme-rel) #f #t)
@@ -250,13 +307,13 @@
 	; are a subset of the modifiers on the seme. i.e. if the
 	; word-inst is "semantically broader" than the seme.  Thus,
 	; the word-inst "ball" matches the seme "green ball".
-	(define (seme-match? seme wrd-inst)
+	(define (noun-seme-match? seme wrd-inst)
 		(every 
 			(lambda (md) (does-seme-have-rel? seme md)) 
-			(word-inst-get-relex-modifiers wrd-inst)
+			(noun-inst-get-relex-modifiers wrd-inst)
 		)
 	)
-	(generic-promoter make-new-seme seme-match? word-inst)
+	(generic-promoter make-new-seme noun-seme-match? word-inst)
 )
 
 ; --------------------------------------------------------------------
