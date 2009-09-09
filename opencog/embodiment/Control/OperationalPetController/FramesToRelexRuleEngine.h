@@ -26,12 +26,15 @@
 
 #include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "OutputRelexColor.h"
-#include "OutputRelexYesNo.h"
-#include "OutputRelexPhysiological.h"
-//#include "FramesToRelexRule.h"
 
+#include "OutputRelex.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+#include <iostream>
 #include <string>
+#include <fstream>
 
 namespace OperationalPetController
 {
@@ -41,6 +44,8 @@ namespace OperationalPetController
         FramesToRelexRuleEngine( );
         ~FramesToRelexRuleEngine( );
         OutputRelex* resolve( std::set< std::string > pre_conditions );
+        void loadRules( void );//load the rules from the default file
+        void loadRules( const char* ruleFileName );//load the rules from a specific file
         static FramesToRelexRuleEngine& instance(void);
     private:
         //std::vector<FramesToRelexRule*> rules;
