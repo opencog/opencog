@@ -25,8 +25,12 @@ run_follow(1) := follow(#1 10 6)
 drop(0) := drop
 turn_to_face(1) := turn_to_face(#1)
 
+say(2) := say(#1 #2)
+
 # Low level functions
 ######################
+
+say_n_bark(2) := and_seq( say(#1 #2) bark )
 
 drop_n_eat(1) := and_seq( drop eat(#1) )
 drop_n_drink(1) := and_seq( drop drink(#1) )
