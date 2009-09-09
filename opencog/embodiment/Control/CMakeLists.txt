@@ -1,5 +1,4 @@
 ADD_SUBDIRECTORY (MessagingSystem)
-ADD_SUBDIRECTORY (Predavese)
 ADD_SUBDIRECTORY (PerceptionActionInterface)
 ADD_SUBDIRECTORY (OperationalPetController)
 ADD_SUBDIRECTORY (Procedure)

@@ -27,7 +27,7 @@
 #include <opencog/atomspace/SpaceServer.h>
 
 #include <opencog/util/files.h>
-#include <opencog/xml/NMXmlExporter.h>
+#include <opencog/persist/xml/NMXmlExporter.h>
 
 
 using namespace PerceptionActionInterface;

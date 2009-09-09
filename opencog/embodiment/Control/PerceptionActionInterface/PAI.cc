@@ -61,7 +61,6 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace PerceptionActionInterface;
-using namespace predavese;
 using namespace Control;
 using namespace opencog;
 
@@ -74,8 +73,6 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
         atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
-    predaveseParser = new PredaveseParser(petInterface);
-    predaveseParser->Create();
     xMin = -1;
     yMin = -1;
     xMax = -1;
@@ -120,7 +117,6 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
 PAI::~PAI()
 {
     delete parser;
-    delete predaveseParser;
     // TODO: Cannot terminate here because other PAI objects may be using it...
     //PAIUtils::terminateXMLPlatform();
 }
@@ -133,11 +129,6 @@ AtomSpace& PAI::getAtomSpace()
 PetInterface& PAI::getPetInterface()
 {
     return petInterface;
-}
-
-PredaveseParser* PAI::getPredaveseParser()
-{
-    return predaveseParser;
 }
 
 ActionPlanID PAI::createActionPlan()
@@ -1102,17 +1093,6 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, avatarNode);
-
-//    if (internalAvatarId == petInterface.getOwnerId()) {
-    // Uses the Predavese parser created for the specific pet in order to process the instruction
-    // TODO: the avatarID is passed as a hack for now. In future predavese will
-    // infer the avatar that is performing the exemplars.
-
-    // let predavese parser decide if or not an instruction must be processed
-//    predaveseParser->processInstruction(string(sentenceText), tsValue, internalAvatarId.c_str());
-//    } else {
-//        logger().debug("Instruction from a non-owner avatar (%s). So, predavese parser not called for it", internalAvatarId.c_str());
-//    }
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
     XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);

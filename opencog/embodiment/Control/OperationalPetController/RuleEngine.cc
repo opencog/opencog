@@ -33,6 +33,7 @@
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/StringManipulator.h>
 
 #include "RuleEngine.h"
 #include "RuleEngineUtil.h"
