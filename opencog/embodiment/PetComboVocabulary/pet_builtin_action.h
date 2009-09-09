@@ -315,6 +315,9 @@ enum pet_builtin_action_enum {
     // look at object for a few seconds
     look_at,
 
+    //=== say a sentence ===
+    say,
+
     pet_builtin_action_count //to give the number of actions
 };
 }
@@ -440,8 +443,9 @@ static const action_basic_description abd[] = {
     { id::kick_right,        "kick_right",        "action_result" },
     { id::group_command,     "group_command",     "->(union(definite_object indefinite_object wild_card) definite_object arg_list(union(definite_object contin boolean)) action_result)" },
     //{ id::group_command,     "group_command",     "->(union(definite_object indefinite_object wild_card) definite_object union(definite_object contin boolean) union(definite_object contin boolean) action_result)" },
-    { id::receive_latest_group_commands,     "receive_latest_group_commands",     "action_result" },
-    { id::look_at,     "look_at",     "->(union(definite_object indefinite_object wild_card) action_result)" }
+    { id::receive_latest_group_commands,          "receive_latest_group_commands",     "action_result" },
+    { id::look_at,           "look_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
+    { id::say,               "say",               "->(definite_object union(definite_object indefinite_object wild_card) action_result)" }
 
 
 };
@@ -530,6 +534,7 @@ static const action_property_description apd[] = {
     { id::receive_latest_group_commands,
       false,    false,     false,      true,           (pet_builtin_action_enum)0 },
     { id::look_at,        false,    false,     false,      true,           (pet_builtin_action_enum)0 },
+    { id::say,            false,    false,     false,      true,           (pet_builtin_action_enum)0 },
 };
 
 
@@ -589,6 +594,8 @@ static const action_argument_property_description aapd[] = {
     { id::group_command,            2,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::group_command,            3,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::look_at,                  0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::say,                      0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::say,                      1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
 };
 
 static const action_precedence must_precede[] = {

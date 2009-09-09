@@ -259,6 +259,7 @@ void PhysiologicalModel::processCommand(const PerceptionActionInterface::PetActi
     case KICK_CODE:
     case GROUP_COMMAND_CODE:
     case RECEIVE_LATEST_GROUP_COMMANDS_CODE:
+    case SAY_CODE:
     case LOOK_AT_CODE: {
         // any command can wake up the pet
         petMode = ACTIVE;
@@ -410,6 +411,7 @@ double PhysiologicalModel::actionCost(const PerceptionActionInterface::PetAction
     case RECEIVE_LATEST_GROUP_COMMANDS_CODE:
         return 0.5;
     case LOOK_AT_CODE:                     return 0.5;
+    case SAY_CODE:                     return 0.5;
     case NUMBER_OF_ACTION_TYPES:           return 0;
     }
 
