@@ -263,6 +263,7 @@
 	(noun-same-modifiers-promoter word-inst)
 )
 
+; XXXXXXXXXXXXXXXX under consruction
 (define (all-pos-same-modifiers-promoter word-inst)
 
 	; Create a new seme, given a word-instance. The new seme will 
@@ -301,8 +302,8 @@
 		)
 	)
 
-	; Could this word-inst correspond to this seme?
-	; It does, if *every* modifier to the word-inst is also a
+	; Could this noun word-inst correspond to this seme?
+	; It does, if *every* modifier to the noun word-inst is also a
 	; modifier to the seme. i.e. if the modifiers on the word-inst
 	; are a subset of the modifiers on the seme. i.e. if the
 	; word-inst is "semantically broader" than the seme.  Thus,
@@ -313,6 +314,14 @@
 			(noun-inst-get-relex-modifiers wrd-inst)
 		)
 	)
+
+	(define (verb-seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(verb-inst-get-relex-rels wrd-inst)
+		)
+	)
+
 	(generic-promoter make-new-seme noun-seme-match? word-inst)
 )
 

@@ -302,7 +302,22 @@
 	; Modifiers are documented at:
 	; http://opencog.org/wiki/Binary_relations
 	(word-inst-filter-relex-rels word-inst 
-		(list "_amod" "_advmod" "_appo" "_nn" "_%quantity")
+		(list "_amod" "_appo" "_nn" "_poss" "_%quantity")
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a verb word-instance, return a list of relex relations that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _subj(head-word, dependency-word)
+;
+(define (verb-inst-get-relex-rels word-inst)
+	; There are a few other relations we should probably deal with,
+	; e.g. _predadj Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
+	(word-inst-filter-relex-rels word-inst 
+		(list "_advmod" "_iobj" "_obj" "_subj")
 	)
 )
 
