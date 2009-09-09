@@ -17,7 +17,6 @@ ADD_LIBRARY (PAI
 
 TARGET_LINK_LIBRARIES(PAI 
 	AtomSpaceExtensions
-	Predavese 
 	util 
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 

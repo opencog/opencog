@@ -68,6 +68,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
             getline(&line, &dummy, stdin);
             logger().debug("line = %s", line);
             line[strlen(line) - 1] = '\0'; // removes trailing \n
+            /*
             if (strcasestr(line, "PREDAVESE") != NULL) {
                 logger().debug("predavese");
                 char* buf;
@@ -80,7 +81,7 @@ void InterfaceListenerAgent::run(opencog::CogServer *server)
                     textToken = __strtok_r( NULL, " ", &buf);
                 }
                 ((PVPSimulator *) server)->sendPredavese(text.c_str(), petId);
-            } else if (strcasestr(line, "AVATARACTION") != NULL) {
+            } else */if (strcasestr(line, "AVATARACTION") != NULL) {
                 logger().debug("DEBUG - InterfaceListenerAgent - line %s", line);
 
                 if (strcasestr(line, "(OWNER)") != NULL) {
