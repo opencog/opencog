@@ -68,6 +68,7 @@ $pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.conf \
 $pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
 $pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
 ./SPCTools.py \
+$pdh/opencog/embodiment/Control/OperationalPetController/frames2relex-rules.txt \
 ]
 
 set schemeOpencogFiles [list \

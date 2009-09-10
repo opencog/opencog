@@ -36,18 +36,19 @@ FramesToRelexRuleEngine::FramesToRelexRuleEngine( void )
 void FramesToRelexRuleEngine::loadRules ( void ) {
     //TODO change this in order to work with the dist and change the
     //makeDistribution script to copy the rules file
-    loadRules("embodiment/Controle/OperationalPetController/frames2relex-rules.txt");
+    loadRules("frames2relex-rules.txt");
 }
 
 void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
     std::string rule;
     std::ifstream rulesFile(rulesFileName);
     if (rulesFile.is_open())
-    {
+    { 
         while (! rulesFile.eof() )
         {
             getline (rulesFile,rule);
-            std::cout << "Rule: " << rule << std::endl;
+            //std::cout << "Rule: " << rule << std::endl;
+            logger().debug("FramesToRelexRuleEngine::%s - Read rule %s", __FUNCTION__, rule.c_str() );
 
             std::map< std::string, unsigned int> frame_elements_count;
 
