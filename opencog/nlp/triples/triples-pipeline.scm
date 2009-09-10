@@ -12,10 +12,10 @@
 ; -----------------------------------------------------------------------
 ; Semantic triples processing code.
 ;
-; The ready-for-triples-anchor is an anchor node at which sentences may
+; The *ready-for-triples-anchor* is an anchor node at which sentences may
 ; be queued up for triples processing.  Sentences that are linked to 
 ; this node will eventually have triples built from them.
-(define ready-for-triples-anchor (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
+(define *ready-for-triples-anchor* (AnchorNode "# APPLY TRIPLE RULES" (stv 1 1)))
 
 ; attach-sents-for-triple-processing -- 
 ; Attach a list of sentences to the input triple processing anchor
@@ -27,22 +27,7 @@
 ; return value is undefined
 ;
 (define (attach-sents-for-triple-processing sent-list)
-
-	;; Attach all parses of a sentence to the anchor.
-	(define (attach-parses sent)
-		;; Get list of parses for the sentence.
-		(define (get-parses sent)
-			(cog-chase-link 'ParseLink 'ParseNode sent)
-		)
-		;; Attach all parses of the sentence to the anchor.
-		;; This must have a true/confident TV so that the pattern
-		;; matcher will find and use this link.
-		(for-each (lambda (x) (ListLink ready-for-triples-anchor x (stv 1 1)))
-			(get-parses sent)
-		)
-	)
-	;; Attach all parses of all sentences to the anchor.
-	(for-each attach-parses sent-list)
+	(attach-parses-to-anchor sent-list *ready-for-triples-anchor*)
 )
 
 ; Dettach sentences that were waiting for triples processing
@@ -57,12 +42,12 @@
 		)
 	)
 
-	(for-each remove-anch (cog-incoming-set ready-for-triples-anchor))
+	(for-each remove-anch (cog-incoming-set *ready-for-triples-anchor*))
 )
 
 ; -----------------------------------------------------------------------
-; The result-triples-anchor anchors the results of triples processing.
-(define result-triples-anchor (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
+; The *result-triples-anchor* anchors the results of triples processing.
+(define *result-triples-anchor* (AnchorNode "# RESULT TRIPLES" (stv 1 1)))
 
 ; create-triples -- extract semantic triples from RelEx dependency
 ; parses, using the code in the nlp/triples directory.
@@ -72,7 +57,7 @@
 		;; Attach all of the recently created triples to the anchor.
 		;; This must have a true/confident TV so that the pattern
 		;; matcher will find and use this link.
-		(for-each (lambda (x) (ListLink result-triples-anchor x (stv 1 1)))
+		(for-each (lambda (x) (ListLink *result-triples-anchor* x (stv 1 1)))
 			(cog-outgoing-set triple-list) 
 		)
 
@@ -104,15 +89,35 @@
 ; get-new-triples -- Return a list of semantic triples that were created.
 ;
 (define (get-new-triples)
-	(cog-chase-link 'ListLink 'EvaluationLink result-triples-anchor)
+	(cog-chase-link 'ListLink 'EvaluationLink *result-triples-anchor*)
 )
 
-; delete-result-triple-links -- delete links to result triples anchor.
+; release-result-triples -- delete links to result triples anchor.
 ;
-(define (delete-result-triple-links)
-	(for-each (lambda (x) (cog-delete x))
-		(cog-incoming-set result-triples-anchor)
-	)
+(define (release-result-triples)
+	(release-from-anchor *result-triples-anchor*)
 )
 
 ; -----------------------------------------------------------------------
+; -----------------------------------------------------------------------
+; truth-assertion pipeline
+;
+(define (find-truth-assertions)
+
+	(define (drule verb-list)
+		;; Delete the ListLink that binds all of these together. This 
+		;; ListLink was created when the ImplicationLink was run, to
+		;; hold the results. But from now-on out, it will only get in
+		;; the way, so get rid of it.
+		(cog-delete verb-list)
+	)
+
+	; Apply the truth-asserton rules
+	(for-each
+		(lambda (rule)
+			(drule (cog-ad-hoc "do-varscope" rule))
+		)
+		truth-assertion-list ; this list defined by the /triples/rules.scm file
+	)
+)
+

@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-class ExecutionUTest :  public CxxTest::TestSuite
+class ImplicationUTest :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
@@ -42,7 +42,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 
 	public:
 
-		ExecutionUTest(void)
+		ImplicationUTest(void)
 		{
 			try
 			{
@@ -60,7 +60,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~ExecutionUTest()
+		~ImplicationUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -78,7 +78,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
  * This function sets up an implication link, and some data.
  *
  * Note: although raw ImplicationLinks occuring outside of a
- * VarScopeLink are now deprecated, this test still tests that
+ * VariableScopeLink are now deprecated, this test still tests that
  * function, since there's a fair amount of existing code that
  * still uses it.  At any rate, under the covers, both share a
  * code path, so its a good test no matter what.
@@ -96,7 +96,7 @@ class ExecutionUTest :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-void ExecutionUTest::setUp(void)
+void ImplicationUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
@@ -265,7 +265,7 @@ void ExecutionUTest::setUp(void)
 #define getarity(hand) \
 	dynamic_cast<Link *>(TLB::getAtom(hand))->getArity()
 
-void ExecutionUTest::test_exec(void)
+void ImplicationUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

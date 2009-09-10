@@ -445,15 +445,43 @@ The current implementation does just about none of the whiz-bang stuff
 discussed above.  So far, just the most basic scaffolding has been set
 up.
 
-The promotion of word instances to semes is done by routines with the
-name "promoter" in them.  There are currently two such routines:
+All "seme promoters" function by accepting a word-instance, and
+returning a corresponding seme. The various promoters are of
+different levels of sophistication, and use different algoorithms.
+They all create an InheritenceLink relating the original word instance
+to the seme, like so:
 
--- trivial-promoter -- creates a new SemeNode for *every* input 
-                       WordInstanceNode
--- same-lemma-promoter -- Creates a new SemeNode only if there isn't one
-                       already having the same lemma as the word instance.
+   InheritenceLink
+      WordInstanceNode hello@123
+      SemeNode  greeting@789
 
-Both of these are nearly trivial.
+Most/all of these also create a link to the lemmatized word form
+i.e. "the English-language word" that corresponds to the seme:
+
+   LemmaLink
+      SemeNode  greeting@789
+      WordNode  hello
+
+All of these promoters could be, and eventually should be
+re-implemented as ImplicationLinks, so that all promotion runs
+entirely withing OpenCog.  For now, they are implemented in scheme.
+
+There are currently three promoters
+
+-- trivial-promoter -- 
+   Creates a new, unique SemeNode for *every* input WordInstanceNode. 
+   That is, no two words are ever assumed to refer to the saem seme.
+
+-- same-lemma-promoter -- 
+   Creates a new SemeNode only if there isn't one already having the 
+   same lemma as the word instance.  That is, it assumes that any given 
+   word always refers to the same seme. This is the "opposite* behaviour
+   from the trivial promoter.
+
+-- same-modifiers-promoter --
+   Re-uses an existing seme only if it has a superset of the modifiers 
+   of the word-instance. Otherwise, it creates a new seme.
+   (UNDER DEVELOPMENT)
 
 
 Deduction
@@ -468,7 +496,6 @@ Not clear how unambiguous the copulas and preps will be.
 ToDo:
 -----
 Create the following new atoms types:
-SemeNode
 ContextNode
 SemanticRelationshipNode
 

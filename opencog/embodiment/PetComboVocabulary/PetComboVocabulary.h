@@ -45,6 +45,7 @@ static const definite_object custom_path = "custom_path";
 // custom object or position are defined inside agentModeHandler.
 static const definite_object custom_object = "custom_object";
 static const definite_object custom_position = "custom_position";
+static const definite_object custom_message = "custom_message";
 // a custom object which represents all the avaiable agents
 static const definite_object all_agents = "all_agents";
 

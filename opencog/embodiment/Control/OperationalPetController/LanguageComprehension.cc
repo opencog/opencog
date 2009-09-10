@@ -26,6 +26,11 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
+#include "ClientSocket.h"
+#include "NLGenClient.h"
+#include <Sockets/SocketHandler.h>
+#include <Sockets/ListenSocket.h>
+
 using namespace OperationalPetController;
 using namespace opencog;
 
@@ -283,6 +288,30 @@ std::string LanguageComprehension::resolveFrames2Relex( )
        return "";
    }
 
-   return output_relex->getOutput( as, handles );
+    std::string text = output_relex->getOutput( as, handles );
+    if( text == "")
+        return "output relex vazio";
+
+    //NLGenClient client;
+    SocketHandler h;
+    logger().debug("LanguageComprehension - Socket 1");
+	ListenSocket<ClientSocket> l(h);
+    logger().debug("LanguageComprehension - Socket 2");
+	l.Bind(5555);
+    logger().debug("LanguageComprehension - Socket 3");
+	h.Add(&l);
+    logger().debug("LanguageComprehension - Socket 4");
+	NLGenClient sock(h, text);
+    logger().debug("LanguageComprehension - Socket 5");
+	sock.Open("localhost", 5555);
+    logger().debug("LanguageComprehension - Socket 6");
+	h.Add(&sock);
+    logger().debug("LanguageComprehension - Socket 7");
+	while (h.GetCount())
+	{
+		h.Select(1, 0);
+	}
+
+   return "testando...";
 
 }

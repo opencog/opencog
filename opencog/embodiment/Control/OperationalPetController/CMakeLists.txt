@@ -22,6 +22,7 @@ ADD_LIBRARY (OpcLib
     LearningAgentModeHandler
     LanguageComprehension
     FramesToRelexRuleEngine
+    ClientSocket
 )
 
 INCLUDE_DIRECTORIES (

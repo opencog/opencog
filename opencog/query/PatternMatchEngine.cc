@@ -351,7 +351,7 @@ bool PatternMatchEngine::do_soln_up(Handle hsoln)
 				}
 				else
 				{
-					// Now see if this optional clauses has any solutions,
+					// Now see if this optional clause has any solutions,
 					// or not. If it does, we'll recurse. If it does not,
 					// we'll loop around back to here again.
 					clause_accepted = false;
@@ -489,6 +489,9 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
+	unsolved = false;
+	solved = false;
+
 	// Try again, this time, considering the optional clauses.
 	for (k=root_map.begin(); k != root_map.end(); k++)
 	{
@@ -503,7 +506,8 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		for (i=rl->begin(); i != rl->end(); i++)
 		{
 			Handle root = *i;
-			if(TLB::isValidHandle(clause_grounding[root]))
+			Handle root_gnd = clause_grounding[root];
+			if(TLB::isValidHandle(root_gnd) && root_gnd != invalid_grounding)
 			{
 				solved = true;
 			}
@@ -533,6 +537,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 	}
 
+	// If we are here, there are no more unsolved clauses to consider.
 	curr_root = Handle::UNDEFINED;
 	curr_pred_handle = Handle::UNDEFINED;
 }

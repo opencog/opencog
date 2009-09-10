@@ -140,6 +140,8 @@
 	(apply cog-new-node (append (list 'DefinedLinguisticConceptNode) x)))
 (define (DefinedLinguisticRelationshipNode . x)
 	(apply cog-new-node (append (list 'DefinedLinguisticRelationshipNode) x)))
+(define (PrepositionalRelationshipNode . x)
+	(apply cog-new-node (append (list 'PrepositionalRelationshipNode) x)))
 (define (DefinedFrameNode . x)
 	(apply cog-new-node (append (list 'DefinedFrameNode) x)))
 (define (DefinedFrameElementNode . x)

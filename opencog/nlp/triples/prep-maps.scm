@@ -7,15 +7,15 @@
 ;
 ; For example, given the input 
 ;    (make-prep-phrase (WordNode "capital")
-;       (DefinedLinguisticRelationshipNode "of"))
+;       (PrepositionalRelationshipNode "of"))
 ;
 ; this will generate the following structure:
 ;
 ;    (EvaluationLink (stv 1.0 1.0)
-;       (DefinedLinguisticRelationshipNode "capital_of")
+;       (PrepositionalRelationshipNode "capital_of")
 ;       (ListLink
 ;          (WordNode "capital")
-;          (DefinedLinguisticRelationshipNode "of")
+;          (PrepositionalRelationshipNode "of")
 ;       )
 ;    )
 
@@ -31,16 +31,16 @@
 			;; we don't create garbage.
 			(and
 				(eq? (cog-type word) 'WordNode)
-				(eq? (cog-type prep) 'DefinedLinguisticRelationshipNode)
+				(eq? (cog-type prep) 'PrepositionalRelationshipNode)
 				(not (eq? #\_ (car (string->list prep-str 0 1))))
 			)
 			(EvaluationLink (stv 1.0 1.0)
-				(DefinedLinguisticRelationshipNode
+				(PrepositionalRelationshipNode
 					(string-append word-str "_" prep-str)
 				)
 				(ListLink
-					(WordNode (cog-name word))
-					(DefinedLinguisticRelationshipNode (cog-name prep))
+					(WordNode word-str)
+					(PrepositionalRelationshipNode prep-str)
 				)
 			)
 			'()
@@ -48,4 +48,21 @@
 	)
 )
 
+; ---------------------------------------------------------
+; Similar to above, except that we are promoting a ppolyword phrase
+;
+(define (make-polyword-phrase polyword)
+	(let ((polyword-str (cog-name polyword)))
+		(if (eq? (cog-type polyword) 'WordNode)
+			(EvaluationLink (stv 1.0 1.0)
+				(PrepositionalRelationshipNode polyword-str)
+				(ListLink
+					(WordNode polyword-str)
+					(PrepositionalRelationshipNode polyword-str)
+				)
+			)
+			'()
+		)
+	)
+)
 ; ---------------------- END OF FILE ----------------------

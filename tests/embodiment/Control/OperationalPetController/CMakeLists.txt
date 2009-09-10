@@ -4,7 +4,6 @@ TARGET_LINK_LIBRARIES(PetUTest
 	Procedure 
 	behavior 
 	PAI 
-	Predavese 
 	MessagingSystem 
 	Control 
         comboreduct

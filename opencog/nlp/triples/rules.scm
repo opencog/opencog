@@ -16,7 +16,7 @@
 ;
 ; All of these rules are structured so that a search is performed
 ; only over sentences That are tagged with a link to the node
-; "# APPLY TRIPLE RULES". Since this rule is first, this prevents 
+; "# APPLY TRIPLE RULES". Since this rule is first, this prevents
 ; a search over the entire atomspace.
 ;
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
@@ -62,6 +62,7 @@
 			; Match the proposition
 			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var1" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 
 			; Get the lemma form of the word instance
 			(r-decl-lemma "$var1" "$word1")
@@ -100,6 +101,7 @@
 			(r-rlx "_obj" "$be" "$var1")
 			(r-decl-word-inst "$var2" "$sent")
 			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
@@ -126,6 +128,7 @@
 			(r-decl-word-inst "$var1" "$sent")
 			(r-rlx "_predadj" "$var1" "$var0")
 			(r-rlx "$prep" "$var1" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var1" "$word1")
 			(r-rlx "$phrase" "$word1" "$prep")
 		)
@@ -136,11 +139,16 @@
 ; -----------------------------------------------------------------
 ; 3
 ; Sentence: "Pottery is made from clay."
+; Parse:
+;    _obj(make, pottery)
+;    from(make, clay)
+;
 ; var0=make  var1=pottery var2=clay  prep=from
 ;
 ; However, we want to reject a match to [Madrid is a city in Spain.]
 ; which has a similar pattern -- but it has a subj, while the pottery
-; example does not.
+; example does not. See also rule-8 for a similar caase, with missing
+; obj.
 ;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
 ;       ^ %WordInstanceLink($var0,$sent)  ; scope to sentence
@@ -159,6 +167,7 @@
 			(r-not (r-rlx "_subj" "$var0" "$var-unwanted"))
 			(r-rlx "_obj" "$var0" "$var1")
 			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
 			(r-decl-lemma "$var0" "$word0")
 			(r-rlx "$phrase" "$word0" "$prep")
 		)
@@ -275,19 +284,97 @@
 )
 
 ; -----------------------------------------------------------------
+; 8
+; Sentence "The cat sat on the mat"
+; Parse:
+;        _subj(sit, cat)
+;        on(sit, mat)
+; Desired output:  sit_on(mat,cat)
+; Note missing _obj in sentence -- need to reject sentences with objects.
+; This is very similar to rule-3 above.
+; This also picks up alternate parses for [Paris is in France] and 
+; [The heart is in the chest] with var0==be.
+;
+(define triple-rule-8
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var0" "$sent")
+			(r-rlx "_subj" "$var0" "$var1")
+			(r-not (r-rlx "_obj" "$var0" "$var-unwanted"))
+			(r-rlx "$prep" "$var0" "$var2")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-lemma "$var0" "$word0")
+			(r-rlx "$phrase" "$word0" "$prep")
+		)
+		(r-rlx "$phrase" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
+; 9
+; Sentence "What did the cat sit on?"
+; This has two parses; one with a normal preposition construction, 
+; and one which treats "on" as a particle, so:
+;
+;    _subj(sit_on, cat)
+;    _obj(sit_on, _$qVar)
+;    POLYWORD-FLAG(sit_on, T)
+;    QUERY-TYPE(_$qVar, what)
+;
+; This rule presumes that such polyword constructions are suiteable
+; triples (which might not always be the case?)
+
+(define triple-rule-9
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var0" "$sent")
+			(r-rlx "_subj" "$var0" "$var1")
+			(r-rlx "_obj" "$var0" "$var2")
+			(r-rlx-flag "polyword" "$var0") ; check for polyword flag
+			(r-decl-vartype "PrepositionalRelationshipNode" "$polyword")
+			(r-decl-lemma "$var0" "$pw")
+			(r-rlx "$pwrel" "$pw" "$pwrel") ; promote to define relation
+		)
+		(r-rlx "$pwrel" "$var2" "$var1")
+	)
+)
+
+; -----------------------------------------------------------------
 ; Sentence "Men are mortal"
-; var1=mortal var2=men
-; Must reject prepositions, so that "the color (of the sky) is blue." 
-; is rejected.
-; XXX This fails in 'real life', since $prep($var2,$var3) matches
-; to LinkGrammarRelationshipNode's which cause a reject to happen.
-; XXX need to somehow indicate the allowed variable type
+; Has a *single* depedency:
+;     _predadj(man, mortal)
+;
+; var1=mortal var2=man
+; Must reject prepositions, so that e.g. "the color (of the sky) is blue." 
+; which contains _predadj as well as a prep "of", is rejected.
+; XXX This rejects sentences with prep phrases, but it should also probably
+; reject anything with _subj, _obj, etc. XXX
+;
 ; # IF %ListLink("# APPLY TRIPLE RULES", $sent)
-;       ^ %WordInstanceLink($var2,$sent)  ; scope to sentence
+;       ^ %WordInstanceLink($var2, $sent)  ; scope to sentence
 ;       ^ _predadj($var2, $var1) 
 ;       ^ ! $prep($var2,$var3)
 ;       THEN ^3_isa($var1, $var2)
 ; 
+(define triple-rule-10
+	(r-varscope
+		(r-and
+			(r-anchor-trips "$sent")
+			(r-decl-word-inst "$var2" "$sent")
+			(r-rlx "_predadj" "$var2" "$var1")
+
+			; Must NOT have a prep phrase in it!
+			(r-not (r-rlx "$prep" "$var2" "$var3"))
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$var3")
+		)
+		(r-rlx "isa" "$var1" "$var2")
+	)
+)
+
+; -----------------------------------------------------------------
 ; Sentence "The color (of the sky) is blue."
 ; if the prep is present, then reverse the order.
 ; var1=blue var2=color
@@ -327,6 +414,43 @@
 ;       ^ %LemmaLink($qvarintst,$qvar)    ; word of word instance
 ;       THEN ^3_$phrase($qvar, $var0) 
 
+
+; -----------------------------------------------------------------
+; 1000
+; Truth assertion: "John threw a rock"
+;        _subj(throw, John)
+;        _obj(throw, rock)
+; 
+; or more generally "X verbed Y".
+; We use this to identify sentences that do *not* have prepositional
+; sttements in them. We need to identify these so that seme-promotion 
+; works correctly: we need to seme-promote the subject, object for
+; these kinds of sentences, but not for any of the others, above.
+;
+
+(define truth-assertion-rule-0
+	(r-varscope
+		(r-and
+			(r-anchor "# NEW PARSES" "$sent")
+			(r-decl-word-inst "$verb" "$sent")
+
+			; Identify the assertion.
+			(r-rlx "_subj" "$verb" "$svar")
+			(r-rlx "_obj"  "$verb" "$ovar")
+
+			; Must not be a question.
+			(r-not (r-rlx-flag "hyp" "$verb"))
+			(r-not (r-rlx-flag "truth-query" "$verb"))
+
+			; Must NOT have a prep phrase in it!
+			(r-not (r-rlx "$prep" "$ovar" "$var3"))
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$var3")
+		)
+		(r-anchor-node *truth-assertion-anchor* "$verb")
+	)
+)
+
 ; -----------------------------------------------------------------
 ; needed by the triples-processing pipeline
 ;
@@ -339,6 +463,13 @@
 	triple-rule-5
 	triple-rule-6
 	triple-rule-7
+	triple-rule-8
+	triple-rule-9
+	triple-rule-10
+))
+
+(define truth-assertion-list (list
+	truth-assertion-rule-0
 ))
 
 ; ------------------------ END OF FILE ----------------------------

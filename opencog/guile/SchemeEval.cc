@@ -624,7 +624,11 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 /* ============================================================== */
 
 /**
- * Execute the schema specified in an ExecutionLink
+ * apply -- apply named function func to arguments in ListLink
+ * It is assumed that varargs is a ListLink, containing a list of
+ * atom handles. This list is unpacked, and then the fuction func
+ * is applied to them. If the function returns an atom handle, then
+ * this is returned.
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
@@ -653,7 +657,16 @@ void * SchemeEval::c_wrap_apply(void * p)
 
 
 /**
- * Execute the schema specified in an ExecutionLink
+ * apply_generic -- apply named function func to arguments in ListLink
+ * It is assumed that varargs is a ListLink, containing a list of
+ * atom handles. This list is unpacked, and then the fuction func
+ * is applied to them. The function is presumed to return some generic
+ * scheme code, which is converted to a string and returned.
+ *
+ * XXX This seems awfully hacky to me -- is this really a good idea?
+ * Isn't there some other, better way of accomplishing this?  My
+ * gut instinct is the say "this should be reviewed and possibly
+ * dprecatted/removed". XXX
  */
 std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 {
@@ -675,13 +688,13 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 
 void * SchemeEval::c_wrap_apply_scm(void * p)
 {
-        logger().info( "%s: calling wrap", __FUNCTION__ );
+	logger().info( "%s: calling wrap", __FUNCTION__ );
 
 	SchemeEval *self = (SchemeEval *) p;
-        SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-        logger().info( "%s: done", __FUNCTION__ );
-        self->answer = SchemeSmob::to_string(genericAnswer);
-        logger().info( "%s: answer: %s",__FUNCTION__, self->answer.c_str( ) );
+	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
+	logger().info( "%s: done", __FUNCTION__ );
+	self->answer = SchemeSmob::to_string(genericAnswer);
+	logger().info( "%s: answer: %s",__FUNCTION__, self->answer.c_str( ) );
 
 	return self;
 }

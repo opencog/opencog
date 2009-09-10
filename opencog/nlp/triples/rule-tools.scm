@@ -208,6 +208,12 @@
 		)
 
 		; Return the variables and clauses in an association list
+		; XXX FIXME: really, if a or b are vars, then they are WordInstanceNodes.
+		; XXX However, to fix this, we will need to modify the varscope code to
+		; merge together lits of possibly duplicate var decls!
+		; XXX err, well, no, since b can sometimes be a 
+		; DefinedLinguisticRelationshipNode when building a prep-phrase
+		; XXX SemeNodes can appear here as well.
 		(r-new-expr vartypes clauses (r-fv rel a b))
 	)
 )
@@ -501,17 +507,16 @@
 ; Example usage:
 ;   (r-schema "scm:make-prep-phrase" "$word1" "$prep")
 ;
-(define (r-schema schema-name item-1 item-2)
+(define (r-schema schema-name . args)
 	(define lnk
 		(ExecutionLink
 			(GroundedSchemaNode schema-name)
 			(ListLink
-				(VariableNode item-1)
-				(VariableNode item-2)
+				(map VariableNode args)
 			)
 		)
 	)
-	(r-new-expr '() (list lnk) (r-fv item-1 item-2))
+	(r-new-expr '() (list lnk) (r-fvl args))
 )
 
 ; -----------------------------------------------------------------
@@ -526,14 +531,18 @@
 ;
 ; Returns an r-expression.
 ;
-(define (r-anchor anchor-name var)
+(define (r-anchor-node anchor var)
 	(define lnk
 		(ListLink (stv 1 1)
-			(AnchorNode anchor-name)
+			anchor
 			(VariableNode var)
 		)
 	)
 	(r-new-expr '() (list lnk) (r-fv var))
+)
+
+(define (r-anchor anchor-name var)
+	(r-anchor-node (AnchorNode anchor-name) var)
 )
 
 ; -----------------------------------------------------------------
@@ -543,7 +552,10 @@
 ;
 (define (r-anchor-trips sent)
 	(r-and 
-		(r-anchor "# APPLY TRIPLE RULES" sent)
+		; This anchor is not yet defined when this file is loaded,
+		; So do it manually. Should probably split up this file.
+		; (r-anchor-node *ready-for-triples-anchor* sent)
+		(r-anchor-node (AnchorNode "# APPLY TRIPLE RULES") sent)
 		(r-decl-vartype "ParseNode" sent)
 	)
 )

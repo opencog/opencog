@@ -782,6 +782,13 @@ int PatternMatch::get_vartype(Handle htypelink,
 		const std::string &tn = n->getName();
 		Type vt = classserver().getType(tn);
 
+		if (NOTYPE == vt)
+		{
+			logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+			               __FUNCTION__, tn.c_str());
+			return 4;
+		}
+
 		std::set<Type> ts;
 		ts.insert(vt);
 		typemap.insert(ATPair(avar,ts));
@@ -802,13 +809,19 @@ int PatternMatch::get_vartype(Handle htypelink,
 			{
 				logger().warn("%s: TypedVariableLink has unexpected content:\n"
 				              "Expected VariableTypeNode, got %s",
-			                 __FUNCTION__,
-                          classserver().getTypeName(a->getType()).c_str());
+				              __FUNCTION__,
+				              classserver().getTypeName(a->getType()).c_str());
 				return 3;
 			}
 			const Node *n = dynamic_cast<const Node *>(a);
 			const std::string &tn = n->getName();
 			Type vt = classserver().getType(tn);
+			if (NOTYPE == vt)
+			{
+				logger().warn("%s: VariableTypeNode specifies unknown type: %s\n",
+				               __FUNCTION__, tn.c_str());
+				return 5;
+			}
 			ts.insert(vt);
 		}
 
@@ -861,7 +874,9 @@ Handle PatternMatch::do_varscope (Handle hvarscope,
 	Type tscope = lscope->getType();
 	if (VARIABLE_SCOPE_LINK != tscope)
 	{
-		logger().warn("%s: expected VarScopeLink", __FUNCTION__);
+		const std::string& tname = classserver().getTypeName(tscope);
+		logger().warn("%s: expected VariableScopeLink, got %s",
+			 __FUNCTION__, tname.c_str());
 		return Handle::UNDEFINED;
 	}
 

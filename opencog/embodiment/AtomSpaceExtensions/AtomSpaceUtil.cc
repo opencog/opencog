@@ -2251,7 +2251,6 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameInstanceElementsValues( Ato
                    "AtomSpaceUtil::%s - The given handle represents more than one instance of Frame, what is unacceptable. Only the first occurrence will be considered.", __FUNCTION__ );                
             } // if
             frameName = atomSpace.getName( atomSpace.getOutgoing( inheritanceLinks[0], 1 ) );
-            printf("Fame Name: %s\n",frameName.c_str());
         } else {
             logger().debug(
                 "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE: %s", __FUNCTION__, atomSpace.getName( frameInstancePredicateNode ).c_str( ) );

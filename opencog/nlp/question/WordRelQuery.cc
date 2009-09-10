@@ -268,7 +268,8 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 
 	// DefinedLinguisticRelation nodes must usually match exactly;
 	// so if we are here, there's probably already a mismatch.
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype)
+	if ((DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) ||
+	    (PREPOSITIONAL_RELATIONSHIP_NODE == soltype))
 	{
 		const char *spat = npat->getName().c_str();
 		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return true;
@@ -290,7 +291,7 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 		return mismatch;
 	}
 
-	// XXX This code is never reached, due to above if statment.
+	// XXX This code is never reached !!!??? 
 	// This is a bit of dead code, which may need to be revived for more
 	// proper relex matching ... or maybe not ... 
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == soltype)

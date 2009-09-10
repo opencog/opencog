@@ -31,7 +31,12 @@ the structure of questions themselves, and respond to that structure.
 XXX As of 13 May 2008, changes to the RelEx output have broken the 
 operation of the frame-query part of this code. As of 23 April 2009,
 the simpler RelEx query style has been restored and now works again. 
-As of August 2009, things are kind of broken again. XXX
+As of August 2009, things are kind of broken again. As of September
+2009, much of the C++ code has been deprecated and removed, and has 
+been ported over to scheme, and made operational within the chatbot
+infrastructure. Basically, the chatbot provides a more coherent
+infrastructure for pursuing this work. See nlp/chatbot/README for 
+details. XXX
 
 General conclusion: while superficial question answering is possible, 
 a robust system remains difficult.  Work continues (very slowly) along
@@ -508,107 +513,14 @@ corpus, without lots of activation, and repeated similar but not
 identical restatements of the same ideas, I don't see any particularly
 good ways of inducing that yarn is used to make cloth...
 
-
 Triples matching
 ----------------
-The nlp/triples directory contains code that generates semantic triples
-from RelEx input.  So for example: "Bats are made of wood." results in
-the semantic triple "made_of(wood, bat)", which is derived from the
-raw relex dependencies:
-
-    _obj (made_of, bat)
-    _iobj (made_of, wood)
-
-By contrast, consider the question: "What are bats made of?" It has a
-very different RelEx dependency structure:
-
-    _subj (be, bat)
-    _obj (make, bat) 
-    _obj (of, _$qVar) 
-    of (be, of)
-
-Because if this, performing simple patern matchin on the dependency 
-structure will fail.
-
-Lets try another: "The color of the book is red."
-    _predadj (color, red)
-    of (color, book) 
-Which the semantic-triple rules convert to "color_of(book,red)"
-
-By contrast, "what is the color of the book?" becomes
-
-    _subj (be, _$qVar)
-    _obj (be, color)
-    of (color, book) 
-    QUERY-TYPE (_$qVar, what)
-    COPULA-QUESTION-FLAG (color, T)
-
-which does have a semantic triple form: "color_of(book,what)"
-Thus, for this case, question-answering by such normalized
-"semantic triples" should work just fine.
-
-By contrast, "what color is the book?" becomes
-
-    _obj (be, book)
-    _subj (be, color)
-    QUERY-TYPE (_$qVar, what)
-    QUERY-FLAG (color, T)
-
-and the manner in which this should be converted into a "color_of"
-question is unclear.
-
-"You eat metal"  and "do you eat metal?"
-
-What colour is the car?
-    QUERY-FLAG(colour, T)
-    _subj(be, colour) 
-    _obj(be, car)
-    QUERY-TYPE(_$qVar, what)
-
-note the borken parse -- missing connection to qVar.
-
-
-Yes/No questions, Question Comprehension
-----------------------------------------
-"Did John throw a rock?"
-
-    _subj(throw, John)
-    _obj(throw, rock)
-    HYP (throw, T)
-    TRUTH-QUERY-FLAG (throw, T)
-    TRUTH-QUERY-FLAG (rock, T)
-
-Suggests a pattern-based approach:
-  # IF _subj($vrb, $sb) ^
-       _obj ($vrb, $ob) ^
-       HYP($vrb)
-    THEN answer "yes" if match ... 
-
-More generally, this suggests a program of "question comprehension",
-wherein a set of pattern-matching proedicates, such as the above,
-attempt to identify the type of question being asked, and determine
-what it is that the question is asking for. Only after "comprehending"
-the question, should a search for the answer be undertaken.
-
-Some extrememly preliminary work has been done. The file 
-"nlp/triples/question-tags.txt" contains a single rule that attempts
-to identify "hypotheitcal copula" questions: "Is X a Y?"
-
-Some other question forms needing identification:
- "Does X verb Y?"       e.g. "Did John throw a rock?"
- "Is X prep_phrase Y?"  e.g. "Is Berlin in Germany?"
-                             "Is Berlin the captial of Germany?"
-
-
-Also: "What color is the book?" needs to be recognized as being
-"What is the color of the book?" 
-
-
-Rhetorical Questions
---------------------
-How to distinguish rhetorical questions from queries that should be
-answered?  A block of input text may contain rhetorical questions, 
-which should be ignored.
+The discussion of question-answering via sentence templates continues
+in the file nlp/triples/README and nlp/triples/README-sentences. The
+first file reviews the core concept of the semantic triple, and the
+machinery needed to construct these within OpenCog.  The second file
+continues by analyzing various specific types of declarations and 
+questions, including copulas and yes/no questions.
 
 
 References
@@ -636,3 +548,4 @@ TODO
    new VariableScope interface (and/or ForAll, ThereExists, etc). The
    goal is to explicitly declare the variables.
 
+ 

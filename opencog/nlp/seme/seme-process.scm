@@ -10,10 +10,16 @@
 ;
 ; Given a word instance node, returns a corresponding seme node.
 ; The promotion is "trivial", in that ever word instance is converted
-; to a seme, without any checking at all.
+; to its own unique seme, without any checking at all. 
+;
+; Return the seme itself.
 
 (define (trivial-promoter word-inst)
-	(SemeNode (cog-name word-inst) (stv 1 1))
+	(let ((seme (SemeNode (cog-name word-inst) (stv 1 1))))
+		(LemmaLink (stv 1 1) seme lemma)
+		(InheritanceLink (stv 1 1) word-inst seme)
+		seme
+	)
 )
 
 ; --------------------------------------------------------------------
@@ -36,20 +42,223 @@
 	(define (lemma-get-seme-list lemma)
 		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
 
+	(define (make-new-seme wrd-inst lemma)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1))))
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			newseme
+		)
+	)
+
 	(let* ((lemma (word-inst-get-lemma word-inst))
 			(seme-list (lemma-get-seme-list lemma))
 		)
 		(if (null? seme-list)
-			(let ((newseme (SemeNode (cog-name word-inst) (stv 1 1))))
-				(LemmaLink newseme lemma (stv 1 1))
-				newseme
+			; create a new seme
+			(make-new-seme word-inst lemma)
+
+			; re-use an existing seme
+			(let ((seme (car seme-list)))
+				(InheritanceLink (stv 1 1) word-inst seme)
+				seme
 			)
-			(car seme-list)
 		)
 	)
 )
 
+; --------------------------------------------------------------------
+; Generic seme promoter. 
+; Given a word inst, and two routines: a new-seme creation routine, and a
+; seme matching routine, this will perform the seme promotion.
 ;
+; The make-new-seme-proc must accept a word instance as its sole argument,
+; and return a seme.
+;
+; The seme-match-proc? must acepet two arguments: a seme and word-inst,
+; and return #t if the word-inst can be understood to be and instance of
+; the seme.
+;
+; A (relatively) simple example of the use of this promoter can be found in 
+; the same-lemma-promoter-two example, below.
+;
+(define (generic-promoter make-new-seme-proc seme-match-proc? word-inst)
+
+	; We have a list of candidate semes. Are any appropriate?
+	; Create one if none are found.
+	(define (find-existing-seme seme-list wrd-inst)
+		(let ((matching-seme 
+					(find (lambda (se) (seme-match-proc? se wrd-inst)) seme-list))
+				)
+			(if matching-seme
+				(let ()
+					(InheritanceLink (stv 1 1) word-inst matching-seme)
+					matching-seme
+				)
+				(make-new-seme-proc wrd-inst)
+			)
+		)
+	)
+
+	; Get a list of semes with this lemma. 
+	(define (lemma-get-seme-list lemma)
+		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
+
+	; Get possible, candidate semes for this word-inst
+	(define (get-candidate-semes wrd-inst)
+		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
+	)
+
+	; Get list of candidate semes, based on thier having a common lemma
+	; The vet each of these, to see if one provides the desired match.
+	; If so, then return it. If not, then create a new seme.
+	(define (find-or-make-seme wrd-inst)
+		(let* ((seme-list (get-candidate-semes wrd-inst)))
+			(if (null? seme-list)
+				(make-new-seme-proc wrd-inst)
+				(find-existing-seme seme-list wrd-inst)
+			)
+		)
+	)
+
+	; Perform an immediate check: this word instance may already
+	; belong to some seme. This will typically not be the case when
+	; encountering a word for the first time, but will commonly be 
+	; true when promoting relations. So we add this as a short-cut
+	; into the processing path.
+	(define (get-existing-seme wrd-inst)
+		(let ((slist (cog-chase-link 'InheritanceLink 'SemeNode wrd-inst)))
+			(if (null? slist) '() (car slist))
+		)
+	)
+
+	(let ((exist-seme (get-existing-seme word-inst)))
+		(if (null? exist-seme)
+			(find-or-make-seme word-inst)
+			exist-seme
+		)
+	)
+)
+
+; --------------------------------------------------------------------
+; A re-implementation of the same-lemma-promoter, but using the 
+; generic-promoter routine. Operationally, this is supposed to
+; work the same way as same-lemma-promoter -- see that for further
+; documentation.
+;
+(define (same-lemma-promoter-two word-inst)
+
+	; Create a new seme corresponding to this word-instance.
+	(define (make-new-seme wrd-inst)
+		(let ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+			)
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			newseme
+		)
+	)
+
+	; If the seme and the word inst have the same lemma,
+	; then they match.
+	(define (match-seme? seme wrd-inst)
+		(equal?
+			(word-inst-get-lemma seme)
+			(word-inst-get-lemma wrd-inst)
+		)
+	)
+
+	; Use the generic routine.
+	(generic-promoter make-new-seme match-seme? word-inst)
+)
+
+; --------------------------------------------------------------------
+; same-modifiers-promoter -- re-use an existing seme if it has a superset
+; of the modifiers of the word instance. Otherwise, create a new seme.
+;
+; The idea here is that if we have a word instance, such as "ball", and
+; a seme "green ball", we can deduce "oh the ball, that must be the 
+; green ball".  But is the word-instance is "red ball", then it cannot
+; be the seme "green ball", and a new seme, specific to "red ball" is
+; created. 
+;
+; Sepcifically, we try to make sure that *every* modifier to the word-inst
+; is also a modifier to the seme. i.e. that the modifiers on the word-inst
+; are a subset of the modifiers on the seme. i.e. that the word-inst is 
+; "semantically broader" than the seme.  
+;
+; This is a fairly basic operation, and lacks in many ways: we'd like 
+; to do this only for recent words in the conversation, and we'd also like
+; to do narrowing, e.g. so if we get "John threw the ball. John threw the 
+; blue ball.", we conclude that the ball in the second sentence is the same
+; as that in the first. The routine fails to handle this situation.  This
+; routine should probably not be "fixed", and instead, a new, more 
+; sophisticated promoter should be created.
+;
+; Anyway, seme promotion should not be done in scheme, but with opencog
+; pattern-matching. So, for example, the following ImplicationLink is a 
+; step in that direction:
+;
+; IF   %InheritanceLink(word-inst $word-seme)
+;    ^ $modtype (word-inst, $attr-inst)
+;    ^ $modtype is _amod or _nn etc.
+;    ^ %InheritanceLink($attr-inst $attr-seme)
+;    ^ $modtype ($seme, $attr-seme)
+;    ^ $seme is a SemeNode
+; THEN $modtype($seme, $attr-seme)
+;
+(define (same-modifiers-promoter word-inst)
+
+	; Create a new seme, given a word-instance. The new seme will 
+	; have the same modifiers that the word-instance has.
+	(define (make-new-seme wrd-inst)
+		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+				(mods (word-inst-get-relex-modifiers wrd-inst))
+			)
+			; Be sure to create the inheritance link, etc. before
+			; doing the promotion.
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			(promote-to-seme same-modifiers-promoter mods)
+			newseme
+		)
+	)
+
+	; Given a seme, and a "modifier relation" mod-rel of the form:
+	;    EvaluationLink
+	;       prednode (a DefinedLinguisticPredicateNode)
+	;       ListLink
+	;          headword   (a WordInstanceNode)
+	;          attr-word  (a WordInstanceNode)
+	; this routine checks to see if the corresponding relation
+	; exists for seme. If it does, it returns #t else it returns #f
+	;
+	(define (does-seme-have-rel? seme mod-rel)
+		(let* ((oset (cog-outgoing-set mod-rel))
+				(prednode (car oset))
+				(attr-word (cadr (cog-outgoing-set (cadr oset))))
+				(attr-seme (same-modifiers-promoter attr-word))
+				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
+			)
+			(if (null? seme-rel) #f #t)
+		)
+	)
+
+	; Could this word-inst correspond to this seme?
+	; It does, if *every* modifier to the word-inst is also a
+	; modifier to the seme. i.e. if the modifiers on the word-inst
+	; are a subset of the modifiers on the seme. i.e. if the
+	; word-inst is "semantically broader" than the seme.  Thus,
+	; the word-inst "ball" matches the seme "green ball".
+	(define (seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(word-inst-get-relex-modifiers wrd-inst)
+		)
+	)
+	(generic-promoter make-new-seme seme-match? word-inst)
+)
+
 ; --------------------------------------------------------------------
 ;
 ; promote-to-seme -- promote all WordInstanceNodes to SemeNodes
@@ -176,7 +385,7 @@
 
 			; Delete the links to the recently generated triples,
 			; and then delete the triples themselves.
-			(delete-result-triple-links)
+			(release-result-triples)
 			(for-each delete-hypergraph trip-list)
 		)
 

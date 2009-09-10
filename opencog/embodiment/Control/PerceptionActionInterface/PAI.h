@@ -37,7 +37,6 @@
 #include "ActionPlan.h"
 #include "ActionPlanSender.h"
 #include <opencog/embodiment/Control/PetInterface.h>
-#include <opencog/embodiment/Control/Predavese/PredaveseParser.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 #include <map>
@@ -106,13 +105,7 @@ private:
     ActionPlanSender& actionSender;
 
     /**
-     * The reference to a PredaveseParser object this PAI uses to process a
-     * received instruction
-     */
-    predavese::PredaveseParser* predaveseParser;
-
-    /**
-     * A reference to a PredavePetInterface (actualy a pet)
+     * A reference to a PetInterface (actualy a pet)
      */
     Control::PetInterface& petInterface;
 
@@ -251,11 +244,6 @@ public:
      */
     Control::PetInterface& getPetInterface();
 
-    /**
-     * Gets the reference to the Predavse parser this PAI works with
-     * (just for tests)
-     */
-    predavese::PredaveseParser* getPredaveseParser();
 
     /**
      * Creates an Action Plan XML message to be sent to the PVP. Once

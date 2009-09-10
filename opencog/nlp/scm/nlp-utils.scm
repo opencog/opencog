@@ -2,8 +2,17 @@
 ; nlp-utils.scm
 ;
 ; Assorted NLP utilities.
+;
+; Important Design Note: A long-term goal of NLP within opencog is to
+; do processing not in scheme, but in OpenCog itself, using pattern
+; matching. The reason fior this is so that we can apply OpenCog leraning
+; algos to learn new ways of processing. Many/most of the utilities below
+; could be implemented by using pattern maching. Code that depends on these
+; utilities should be converted to use pattern matching as soon as reasonable.
+; Code that cannot be converted will eventually (in the distant future ...) 
+; become obsolete.
 ; 
-; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; =============================================================
 
@@ -84,6 +93,7 @@
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the lemma for of the word.
+; Also works if the word-inst is actually a seme.
 (define (word-inst-get-lemma word-inst)
 	(let ((wlist (cog-chase-link 'LemmaLink 'WordNode word-inst)))
 		(if (null? wlist)
@@ -95,10 +105,23 @@
 
 ; ---------------------------------------------------------------------
 ; Given a word instance, return a list of attributes for the word.
+;
 (define (word-inst-get-attr word-inst)
 	(cog-chase-link 'InheritanceLink 'DefinedLinguisticConceptNode 
 		word-inst
 	)
+)
+
+; ---------------------------------------------------------------------
+; Given a word instance, return a list of relations the word participates in.
+; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
+; _subj(dog,*), _obj(dog,*) etc.
+;
+; See also word-inst-get-head-relations and 
+; word-inst-get-relex-modifiers below.
+;
+(define (word-inst-get-relations word-inst)
+	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -137,7 +160,8 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return a list of the word-senses associated with the word.
+; Given a word instance, return a list of the word-senses associated
+; with the word.
 (define (word-inst-get-senses word-inst)
 	(cog-chase-link 'InheritanceLink 'WordSenseNode word-inst)
 )
@@ -178,11 +202,107 @@
 	(cog-chase-link 'ParseLink 'ParseNode sent-node)
 )
 
+; -----------------------------------------------------------------------
+; sent-list get-parses -- return parses of the sentences
+; Given a list of sentences, return a list of parses of those sentences.
+; That is, given a List of SentenceNode's, return a list of ParseNode's
+; associated with those sentences.
+
+(define (sent-list-get-parses sent-list)
+	(concatenate! (map sentence-get-parses sent-list))
+)
+
 ; ---------------------------------------------------------------------
-; Given a parse, return a list of all words in the parse
+; parse-get-words - Given a parse, return a list of all words in the parse
 ;
 (define (parse-get-words parse-node)
 	(cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'ListLink parse-node)))
+)
+
+; --------------------------------------------------------------------
+; Given a parse, return a list of all relex relations
+;
+(define (parse-get-relations parse-node)
+	; Get a list of words in the parse
+	; Get a list of lists of relations for each word
+	; Conctenate will reduce the list of lists to a plain list
+	; Remove duplicates
+	(delete-duplicates!
+		(concatenate!
+			(map word-inst-get-relations 
+				(parse-get-words parse-node)
+			)
+		)
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a word-instance, return a list of relex relations that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _amod(head-word, attr-word)
+;
+(define (word-inst-get-head-relations word-inst)
+
+	; Return #t if the word-inst is the head-word.
+	(define (head? rel wrd-inst)
+		(let* ((oset (cog-outgoing-set rel))
+				(head (car (cog-outgoing-set (cadr oset))))
+			)
+			(equal? head wrd-inst)
+		)
+	)
+
+	; Get all relations, and filter them out.
+	(filter! 
+		(lambda (rel) (head? rel word-inst))
+		(word-inst-get-relations word-inst)
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a word-instance, return a list of relex modifiers that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _amod(head-word, attr-word)
+;
+(define (word-inst-get-relex-modifiers word-inst)
+
+	; There are a few other modifiers we should probably deal with,
+	; including quantity multiplier, etc. Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
+	(define (is-modifier? str)
+		(cond ((string=? str "_amod") #t)
+				((string=? str "_advmod") #t)
+				((string=? str "_appo") #t)
+				((string=? str "_nn") #t)
+				((string=? str "_%quantity") #t)
+				(else #f)
+		)
+	)
+
+	; Return #t if the relex relation is a modifier
+	(define (relex-mod? rel)
+		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
+	)
+
+	; Return #t if the relex relation is a modifier
+	; and the word-inst is the head-word.
+	(define (head-mod? rel wrd-inst)
+		(let* ((oset (cog-outgoing-set rel))
+				(head (car (cog-outgoing-set (cadr oset))))
+			)
+			(and 
+				(equal? head wrd-inst)
+				(is-modifier? (cog-name (car oset)))
+			)
+		)
+	)
+
+	; Get all relations, and filter them out.
+	(filter! 
+		(lambda (rel) (head-mod? rel word-inst))
+		(word-inst-get-relations word-inst)
+	)
 )
 
 ; --------------------------------------------------------------------

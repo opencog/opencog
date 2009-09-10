@@ -309,7 +309,6 @@
       (VariableTypeNode "AccessoryNode")
       (VariableTypeNode "ObjectNode")
       (VariableTypeNode "AvatarNode")
-      (VariableTypeNode "AgentNode")
       (VariableTypeNode "PetNode")
       (VariableTypeNode "StructureNode")
       (VariableTypeNode "HumanoidNode")

@@ -260,7 +260,9 @@ bool SentenceQuery::assemble_predicate(Atom *atom)
  */
 bool SentenceQuery::is_ling_rel(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == atom->getType()) return true;
+	Type t = atom->getType();
+	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == t) return true;
+	if (PREPOSITIONAL_RELATIONSHIP_NODE == t) return true;
 	return false;
 }
 

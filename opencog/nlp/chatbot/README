@@ -5,7 +5,7 @@
                           August 2009
 
 XXX As of this instant, important parts of the chatbot are being
-re-desinged, and so things sort of don't work. I beleive that
+re-designed, and so things sort of don't work. I beleive that
 revision 3150 has a working chatbot.
 
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
@@ -69,9 +69,6 @@ This is most easily done by starting the cogserver using the
 "lib/opencog-chatbot.conf" configuration file, which sets the correct
 port, silences the opencog prompt, and loads the needed scheme files.
 
-In addition, triples-processing, described in step 4 below, requires
-that the shell scripts opencog/nlp/triples/load-chatbot.sh be run.
-
 To enable the common-sense database (described in step 5), you must
 first create and populate the database. This can be done from scratch,
 or by using a database dump, obtained from 
@@ -79,18 +76,9 @@ or by using a database dump, obtained from
        http://gnucash.org/linas/nlp/data/conceptnet/
 
 The database should be created and populated, as described in 
-opencog/nlp/triples/README.  Then, after starting opencog, but *before*
-running load-chatbot.sh, telnet to the cogserver, and open the database:
+opencog/nlp/triples/README.  The config file "lib/opencog-chatbot.conf"
+needs to be edited, and the database name and login credentials updated.
 
-     $ telnet localhost 17004
-     cog-server> sql-open <dbname> <userid> <passwd>
-
-For example:
-
-     cog-server> sql-open triples linas asdf
-
-Then do the two load-chatbot.sh files. The system is now ready to do 
-question-answering.
 
 Configure and run the chat bridge: 
 ----------------------------------
@@ -99,8 +87,8 @@ chat system to the OpenCog server. The cogita chatbot is tailored for
 IRC chat; other chat systems could be supported in a straightforward
 manner. 
 
-The IRC chatbot has an assortment of hard-coded config parameters in
-the source code.  See go-irc.c for setable values for the name of the 
+The IRC chatbot has an assortment of hard-coded config parameters in the
+source code.  See CogitaConfig.cc for setable values for the name of the 
 chatbot, the irc channel and irc network to join, and the bot ID strings,
 etc.  By default, it connects to the #opencog channel on freenode.net.
 
@@ -140,9 +128,9 @@ is as follows:
 
    Note that if the cog-server is busy, then whirr can block for an
    indefinitely long time. The person who is chatting will start to 
-   wonder about the lack of response. This should be fixed -- best
-	fix is probably to multi-thread, while periodically telling the
-	user that the cog server is thinking ...  XXX FIXME
+   wonder about the lack of response. This is currently hacked around
+   by having the chat processing periodically return to the bridge,
+   and then resume again. A proper architecture remains unimplemented.
 
 2) Parsing of english text by RelEx. The very first thing that the 
    ''say-id-english'' routine does is to send the input text to RelEx
@@ -169,7 +157,8 @@ is as follows:
    it is straight-forward to pattern-match the statement to the question,
    and determine that "who" corresponds to "John".
 
-   The set-up for RelEx-based matching is done in nlp/question/RelexQuery.cc.
+   The set-up for RelEx-based pattern matching passes through
+   (cog-ad-hoc "question") to the code in nlp/question/SentenceQuery.cc.
    The actual pattern-matching is done by generic hypergraph predicate
    maching code in query/PatternMatchEngine.cc.
 
@@ -182,11 +171,15 @@ is as follows:
    parses of the statement and the question are quite different.
    
    Code to extract and create such triples is in the nlp/triples 
-   directory. The pattern-matching for such triples is done by 
-   nlp/question/TripleQuery.cc.  This code is triggered and run
-   if the process in step-3 fails for find an answer (although
-   triples are extracted for all new statements, in case they are
-   needed for question-answering later.
+   directory; overall operation is explained in triples/README. 
+   The question, now in "triple" form, can then be pattern-matched
+   to a database of existing triples (including those learned from 
+   earlier in the conversation).  This pattern matching is done via
+   the "question-rule" patterns, also found in the triples directory.
+
+   This code is triggered and run only if the process in step-3 above
+   failed to find an answer.  However, triples are extracted for all 
+   new statements, in case they are needed for question-answering later.
 
 5) Common sense database. The semantic-triple format allows a 
    repository of common-sense triples to be created, and questions 
@@ -211,13 +204,78 @@ is as follows:
    reasoning engine, PLN itself.  All details for how to go about doing
    this are yet to be fleshed out.
 
-8) NLgen (not yet hooked up). Natural language output.
+8) NLgen/NLGen2 (not yet hooked up). Natural language output.
    Code at https://launchpad.net/nlgen 
    Overview at http://www.opencog.org/wiki/SegSim
 
 
 Note that steps 3,4,5,6,7 very very crudely echo the kind of design
 discussed in [Katz05].
+
+Examples:
+---------
+The following dialog works (or has worked at various times in the past):
+
+<me>         John threw a green ball.
+<me>         Fred threw a red ball
+<me>         Mary threw a blue rock
+<me>         who threw a ball?
+<cogita-bot> Syntax pattern match found: Fred John  
+<me>         who threw a red ball?
+<cogita-bot> Syntax pattern match found: Fred
+
+<me>         Did Fred throw a ball?
+<cogita-bot> Truth query determined "yes": throw
+
+<me>         Did Fred throw a red ball?
+<cogita-bot> Truth query determined "yes": throw
+
+<me>         The color of the book is red.
+<me>         What is the color of the book?
+<cogita-bot> Triples abstraction found: red
+
+<me>         the cat sat on the mat
+<me>         what did the cat sit on?
+<cogita-bot> Triples abstraction found: mat
+
+Some things that don't work:
+"Did Fred throw a green ball?" -- gets no reply, as opposed to a negative.
+"Did Fred throw a round ball?" -- doesn't know that balls are round.
+
+
+Notes about the data flow:
+--------------------------
+Currently, much of the data flow is done by looking for things attached
+to AnchorNode's, mangling them, and attaching other results to other 
+AnchorNode's. Some of this is currently done in scheme code, and some of
+this is done by pattern matching.
+
+A long-term goal is to use pattern-matching for *all* processing, and 
+*not* use any scheme code for this.  This is kind of an important point:
+in order to fully leverage the "learning" capabilities within opencog,
+we will want to have all processing done within opencog.  However, for 
+right now, scheme glue code will continue to be used in various ways.
+
+One such example: there's scheme code to take a list of SentenceNodes
+(from recent parsed sentences) get thier corresponding ParseNode's,
+and attach them to a different anchor. This *could* be done by pattern
+matching, instead of scheme code ... and it would be quite easy, and 
+probably reasonably fast.
+
+
+ToDo:
+-----
+* Syntax pattern matching only looks at the first parse. The other
+  parses should be considered.
+
+* Do the "what color is the book" question in nlp/question/README
+
+* XXX Critical: fix the relex-promotion-to-scheme part of things.
+  the current design is no good!
+
+* Create an object holding the name of the user, the chat connection, 
+  and the 'pseudo-continuation' of the chat status.
+
 
 References
 ==========

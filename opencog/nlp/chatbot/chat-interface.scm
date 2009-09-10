@@ -63,6 +63,33 @@
 )
 
 ; -----------------------------------------------------------------------
+; Attach parses to a place where they can be found.
+;
+(define *new-parses-anchor* (AnchorNode "# NEW PARSES" (stv 1 1)))
+(define (attach-new-parses sent-list)
+   (attach-parses-to-anchor sent-list *new-parses-anchor*)
+)
+(define (release-new-parses)
+	(release-from-anchor *new-parses-anchor*)
+)
+
+; -----------------------------------------------------------------------
+; Anchor for truth-assertion relations. These need to be promoted to semes.
+
+(define *truth-assertion-anchor* (AnchorNode "# TRUTH ASSERTION" (stv 1 1)))
+
+(define (get-truth-assertions)
+	(define (get-verbs)
+		(cog-chase-link 'ListLink 'WordInstanceNode *truth-assertion-anchor*)
+	)
+	(concatenate! (map word-inst-get-head-relations (get-verbs)))
+)
+
+(define (release-truth-assertions)
+	(release-from-anchor *truth-assertion-anchor*)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -76,7 +103,7 @@
 ; SemeNodes, in answer to triples matching.
 ; A list of these "answers" is returned.
 ; 
-(define query-soln-anchor (AnchorNode "# QUERY SOLUTION"))
+(define *query-soln-anchor* (AnchorNode "# QUERY SOLUTION"))
 (define (chat-get-simple-answer)
 	(define (do-one-answer answ)
 		(let ((tipo (cog-type answ)))
@@ -100,15 +127,13 @@
 		(remove! null?     ; remove nulls
 			(map            ; get each answer ... 
 				(lambda (x) (do-one-answer (cadr (cog-outgoing-set x)))) 
-				(cog-incoming-set query-soln-anchor)
+				(cog-incoming-set *query-soln-anchor*)
 			)
 		)
 	)
 )
-(define (chat-delete-simple-answer)
-	(for-each (lambda (x) (cog-delete x)) 
-		(cog-incoming-set query-soln-anchor)
-	)
+(define (chat-release-simple-answer)
+	(release-from-anchor *query-soln-anchor*)
 )
 
 ; -----------------------------------------------------------------------
@@ -118,7 +143,7 @@
 ; e.g. "yes", but sometimes a list of words shows up for extensive
 ; questions (e.g. "what is an instrument" lists many instruments)
 ;
-(define (chat-prt-soln soln-list)
+(define (chat-prt-soln msg soln-list)
 	(define (do-prt-soln soln-list)
 		;; display *all* items in the list.
 		(define (show-item wlist)
@@ -133,7 +158,7 @@
 				)
 			)
 		)
-		(display "The answer to your question is: ")
+		(display msg)
 		(show-item soln-list)
 	)
 
@@ -166,14 +191,8 @@
 	(define sents '())
 	(define is-question #f)
 
-	(display "Hello ")
-	(display nick)
-	; (display ", parsing ...\n")
-	(display ", Cogita is currently broken, but will try anyway ...\n")
-
-	; Parse the input, send it to the question processor
+	; Parse the input, load it into opencog.
 	(relex-parse txt)
-
 	(set! sents (get-new-parsed-sentences))
 
 	; Hmm. Seems like sents is never null, unless there's a 
@@ -181,33 +200,39 @@
 	; something, even if the input was non-sense.
 	(if (null? sents)
 		(let ()
+			(display "Hello ")
 			(display nick)
 			(display ", you said: \"")
 			(display txt)
 			(display "\" but I couldn't parse that.")
 			(newline)
+			(chat-return "(say-final-cleanup)")
 		)
-
-		; Perform a simple pattern matching to the syntactic
-		; form of the sentence.
-		(set! is-question (cog-ad-hoc "question" (car sents)))
 	)
+
+	; Perform a simple pattern matching to the syntactic
+	; form of the sentence.
+	(set! is-question (cog-ad-hoc "question" (car sents)))
 
 	;; Was a question asked?
 	(if is-question 
 		(let ((ans (chat-get-simple-answer)))
+			(display "Hello ")
 			(display nick)
 			(display ", you asked a question: ")
 			(display txt)
 			(newline)
 
 			; If pattern-matching found an answer, print it.
-			(if (null? ans)
-				(display "There was no simple answer; attempting triples search\n")
-				(chat-prt-soln ans)
+			(if (not (null? ans))
+				(let () 
+					(chat-prt-soln "Syntax pattern match found: " ans)
+					(chat-return "(say-final-cleanup)")
+				)
 			)
 		)
 		(let ()
+			(display "Hello ")
 			(display nick)
 			(display ", you made a statement: ")
 			(display txt)
@@ -216,103 +241,17 @@
 		)
 	)
 
-	; Invoke the next step of processing.
-	(chat-return (list "say-part-2 " is-question))
+	; If we are here, a question was asked, and syntax matching
+	; did not provide an answer.
+	(chat-return "(say-try-truth-query)")
 )
 
 ; -----------------------------------------------------------------------
-; re-anchor the result triples
+; say-declaration -- User made a declaration. Perform processing
+; of declarative statements.
 ;
-(define bottom-anchor (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
-(define (anchor-bottom-side trip-list)
-	(define (re-anchor-one trip)
-		(let* ((ll (cadr (cog-outgoing-set trip)))
-				(li (cadr (cog-outgoing-set ll)))
-				)
-			(ListLink (stv 1 1) bottom-anchor li)
-		)
-	)
-	(map re-anchor-one trip-list)
-)
-
-(define (delete-bottom-anchor)
-   (for-each (lambda (x) (cog-delete x))
-      (cog-incoming-set bottom-anchor)
-   )
-)
-
-
-; -----------------------------------------------------------------------
-; say-part-2 -- run part 2 of the chat processing
-; The first part, "say-id-english", parsed the user input, and made
-; some quick replies. Processing continues below.
-;
-(define (say-part-2 is-question)
-
-	; Run the triples processing.  
-	(attach-sents-for-triple-processing (get-new-parsed-sentences))
-	(create-triples)
-	(dettach-sents-from-triple-anchor)
-
-   ; If a question was asked, and the simple syntactic pattern matching
-   ; failed to come up with anything, then try again with pattern
-   ; matching on the triples.
-   (if (and is-question (null? (chat-get-simple-answer)))
-		(let* ((trips (get-new-triples))
-				; We need to anchor because of ??? why?
-				; Maybe for the quest-rule ??
-				(ancs (anchor-bottom-side trips))
-
-				; Pull in any semes that might be related...
-				(s (fetch-related-semes trips))
-
-				; Now try to find answers to the question
-				(rslt (cog-ad-hoc "do-varscope" question-rule-0))
-
-				; The do-varscope returns a list-link. We need to nuke
-				; that, as it will only cause trouble later.
-				(ax (cog-delete rslt))
-				(ans (chat-get-simple-answer))
-			)
-(dbg-display "duude question trips are:\n")
-(display trips)
-(end-dbg-display)
-
-			(if (null? ans)
-				(let ()
-					(display "No triples found, attempting deduction.\n")
-					(chat-return "(say-part-3)")
-				)
-				(let ()
-					; print, and skip to the end of processing
-					(chat-prt-soln ans)
-					(chat-return "(say-final-cleanup)")
-				)
-			)
-		)
-	)
-
-	; If the question is still unanswered, try deduction, else cleanup.
-	(if is-question
-		(chat-return "(say-part-3)")
-		(chat-return "(say-final-cleanup)")
-	)
-)
-
-; -----------------------------------------------------------------------
-; convert hypothetical isa to plain is but nuke the truth value
-; This is needed for PLN.
-
-(define (hypothetical-to-uncertain triple)
-	(EvaluationLink
-		(DefinedLinguisticRelationshipNode "isa")
-		(cadr (cog-outgoing-set triple))
-	)
-)
-
-; -----------------------------------------------------------------------
-; say-statement -- User made a declaration. Perform processing
-; of declarative statements
+; We assume that all declarations are true; therefore, immediately
+; promote them to semes.
 
 (define (say-declaration)
 (dbg-display "entering declaration processing\n")
@@ -322,28 +261,208 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-	; promote triples to semes.
+	; Promote triples to semes.
 	(let* ((trips (get-new-triples))
-		(trip-semes (promote-to-seme same-lemma-promoter trips))
+		(trip-semes (promote-to-seme same-modifiers-promoter trips))
 		)
 (dbg-display "statement triple semes are:\n")
 (display trip-semes)
+(end-dbg-display)
 	)
+
+	; Look for truth assertions, and promote those to semes.
+	; By "truth assertion" we mean "subject verb object" sentences
+	; that do not have any prepositions in them.
+	;
+	; We don't want to just promote any-old relex relations to semes, 
+	; as that will create all sorts of havoc. We only want to promote
+	; actual subject-verb-object assertions, so that we can answer
+	; truth-query questions on them. 
+	(attach-new-parses (get-new-parsed-sentences))
+	(find-truth-assertions)
+
+(dbg-display "truth-assertions are:\n")
+(display 
+	(promote-to-seme same-modifiers-promoter (get-truth-assertions))
+)
+(end-dbg-display)
 
 	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
-; say-part-3 -- run part 3 of the chat processing
+; anchor-bottom-side -- anchor triples for pattern matching.
+;
+; In order for the pattern matcher to locate things attached to
+; anchors, they need to be attached in a way to "keep things simple"
+; The simplest way to do this seems to be to attach one of the
+; parts of the triple to the anchor.  e.g. given the triple
+; "made_from(clay,pottery)" this attaches "clay" to the anchor.
+;
+; The question-answering rules look for things on this anchor.
+;
+(define *bottom-anchor* (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
+(define (anchor-bottom-side trip-list)
+	(define (re-anchor-one trip)
+		(let* ((ll (cadr (cog-outgoing-set trip)))
+				(os (cog-outgoing-set ll))
+				)
+			(ListLink (stv 1 1) *bottom-anchor* (car os))
+			(ListLink (stv 1 1) *bottom-anchor* (cadr os))
+		)
+	)
+	(map re-anchor-one trip-list)
+(dbg-display "bottumsup\n")
+(display (cog-incoming-set *bottom-anchor*))
+(newline)
+(end-dbg-display)
+)
+
+(define (release-bottom-anchor)
+	(release-from-anchor *bottom-anchor*)
+)
+
+; -----------------------------------------------------------------------
+; Loop over a list of question rules, one by one. Stop iterating upon
+; the first one that returns an answer.
+;
+(define (loop-over-questions q-list)
+	(define (do-one-question quest)
+
+		; The do-varscope returns a ListLink. We need to nuke
+		; that, as otherwise it will only cause trouble later.
+		(let ((rslt (cog-ad-hoc "do-varscope" quest)))
+(dbg-display "q-apply result is\n")
+(display rslt)
+(end-dbg-display)
+			(cog-delete rslt)
+		)
+
+		; return #t if the rule found an answer
+		(not (null? (chat-get-simple-answer)))
+	)
+	; "any" will call "do one question" on each rule, until
+	; one of them returns #t (i.e. when an answer is found)
+	(any do-one-question q-list)
+)
+
+; -----------------------------------------------------------------------
+; say-try-truth-query -- try answering a yes/no question
+; Some questions are truth queries, posing a hypothesis, and asking for a 
+; yes/no answer. This handles these.
+;
+; XXX FIXME: this should be called only if we catually *have* a 
+; truth query. And if we do have a truth query, then we should NOT
+; do the triples pipeline.
+;
+(define (say-try-truth-query)
+
+	(attach-new-parses (get-new-parsed-sentences))
+
+	; Hmm promote trip semes ?? -- later 
+	; Also -- cannot blithly promote, do *only* the semes
+	; but not the triples themselves
+	;	(trip-semes (promote-to-seme same-modifiers-promoter trips))
+	;
+
+	; First, we want to grab all of the words in the question, and
+	; tag them with semes. (XXX We don't really need all the words,
+	; only the words that are participating in relations.)
+	(for-each same-modifiers-promoter
+		(concatenate! 
+			(map parse-get-words
+				(sent-list-get-parses (get-new-parsed-sentences))
+			)
+		)
+	)
+	
+	; Try each truth-query template ... 
+	(loop-over-questions *truth-query-rule-list*)
+
+	(let ((ans (chat-get-simple-answer)))
+
+		(if (null? ans)
+			(let ()
+				; No answer, now try triples-based question-answering next.
+				(dbg-display "No truth-query found, try triples-qa.\n")
+				(end-dbg-display)
+				(chat-return "(say-try-triple-qa)")
+			)
+			(let ()
+				; Print, and skip to the end of processing
+				(chat-prt-soln "Truth query determined \"yes\": " ans)
+				(chat-return "(say-final-cleanup)")
+			)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
+; say-try-triple-qa -- try answering questions using triples 
+; The first part, "say-id-english", parsed the user input, and 
+; attempted a syntax-pattern match to any questions.  If that fails,
+; this is called.
+;
+(define (say-try-triple-qa)
+
+	; Run the triples processing.  
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
+	(create-triples)
+	(dettach-sents-from-triple-anchor)
+
+   ; Try again with pattern matching on the triples.
+	(let ((trips (get-new-triples)))
+		(if (null? trips)
+			(let ()
+				(dbg-display "No question triples found, try deduction.\n")
+				(end-dbg-display)
+				(chat-return "(say-try-deduction)")
+			)
+		)
+
+		; The question-rule-x looks for stuff attached to this anchor
+		(anchor-bottom-side trips)
+
+		; Pull in any semes that might be related...
+		(fetch-related-semes trips)
+
+(dbg-display "duude question trips are:\n")
+(display trips)
+(end-dbg-display)
+
+		; Now try to find answers to the question
+		(loop-over-questions *question-rule-list*)
+
+		(let ((ans (chat-get-simple-answer)))
+
+			(if (null? ans)
+				(let ()
+					(dbg-display "No asnwer triples found, try deduction.\n")
+					(end-dbg-display)
+					(chat-return "(say-try-deduction)")
+				)
+				(let ()
+					; print, and skip to the end of processing
+					(chat-prt-soln "Triples abstraction found: " ans)
+					(chat-return "(say-final-cleanup)")
+				)
+			)
+		)
+	)
+	; Can't reach here, above should have handled all returns
+)
+
+; -----------------------------------------------------------------------
+; say-try-deduction -- try answering question via basic deduction
 ; This attempts to do some basic deduction
 ;
-(define (say-part-3)
+(define (say-try-deduction)
 
 	; If we still don't have an answer, try making a deduction
 	; (this is an extremely simple-minded hack right now)
 	; First, the question needs to be promoted to semes,
 	(let* ((trips (get-new-triples))
-			(trip-semes (promote-to-seme same-lemma-promoter trips))
+			(trip-semes (promote-to-seme same-modifiers-promoter trips))
 		)
 		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
@@ -369,6 +488,7 @@
 		)
 	)
 
+	(display "Deduction step found no answer.\n")
 	; Call the final stage
 	(chat-return "(say-final-cleanup)")
 )
@@ -380,18 +500,20 @@
 
 	(dbg-display "Cleaning up now\n")
 
-	; Delete re-anchored triples
-	(delete-bottom-anchor)
+	; un-anchor assorted items
+	(release-bottom-anchor)
+	(release-new-parses)
 
 	; Delete list of triples, so they don't interfere with the next question.
-	(delete-result-triple-links)
+	(release-result-triples)
+	(release-truth-assertions)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
-	(chat-delete-simple-answer)
+	(chat-release-simple-answer)
 
 	; cleanup -- these sentences are not new any more
-	(delete-new-parsed-sent-links)
+	(release-new-parsed-sents)
 	""
 )
 
