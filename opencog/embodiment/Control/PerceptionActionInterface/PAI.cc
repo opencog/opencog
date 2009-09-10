@@ -1563,13 +1563,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         bool waterBowl=false;
 
         std::string entityClass="";
-        std::string color100="";
-        std::string color75="";
-        std::string color50="";
-        std::string color25="";
-        std::string color15="";
-        std::string color10="";
-        std::string color5="";
+        std::map<std::string, float> colors;
         std::string material="";
         std::string texture="";
         bool isToy=false;
@@ -1659,33 +1653,18 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                     entityClass = value;
                 }
 
-                //color 100%
-                if( strcmp(name, COLOR100_ATTRIBUTE) == 0 ){
-                    color100 = value;
-                }
-                //color 75%
-                if( strcmp(name, COLOR75_ATTRIBUTE) == 0 ){
-                    color75 = value;
-                }
-                //color 50%
-                if( strcmp(name, COLOR50_ATTRIBUTE) == 0 ){
-                    color50 = value;
-                }
-                //color 25%
-                if( strcmp(name, COLOR25_ATTRIBUTE) == 0 ){
-                    color25 = value;
-                }
-                //color 15%
-                if( strcmp(name, COLOR15_ATTRIBUTE) == 0 ){
-                    color15 = value;
-                }
-                //color 10%
-                if( strcmp(name, COLOR10_ATTRIBUTE) == 0 ){
-                    color10 = value;
-                }
-                //color 5%
-                if( strcmp(name, COLOR5_ATTRIBUTE) == 0 ){
-                    color5 = value;
+                //color
+                if( strncmp(name, COLOR_ATTRIBUTE, strlen(COLOR_ATTRIBUTE)) == 0 ){
+                    // color properties in the following format:
+                    // color-<sequencial>
+                    char *savePtr;
+                    char *color = strtok_r(value, "-%", &savePtr);
+                    char *percent = strtok_r(NULL, "-%", &savePtr);
+                    if (percent != NULL) {
+                        colors[color] = atof(percent)/100.0f;
+                    } else {
+                        logger().error("Got an invalid value for color attribute in blip element");
+                    }
                 }
                 
                 // is toy
@@ -1901,14 +1880,15 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                                                   SimpleTruthValue( 1.0f, 1.0f ), objectNode, textureConceptNode );
             }
             
-              //color 100% property
-            if ( color100.length() ){
-                printf("Color 100 found: %s\n",color100.c_str());
-                Handle color100WordNode = atomSpace.addNode( WORD_NODE, color100);
-                Handle color100ConceptNode = atomSpace.addNode( CONCEPT_NODE, color100);
+            //color properties
+            std::map<std::string, float>::const_iterator it;
+            for (it = colors.begin(); it != colors.end(); it++) {
+                printf("Color property found: %s (%f)\n", it->first.c_str(), it->second);
+                Handle colorWordNode = atomSpace.addNode( WORD_NODE, it->first);
+                Handle colorConceptNode = atomSpace.addNode( CONCEPT_NODE, it->first);
                 HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color100ConceptNode);
-                referenceLinkOutgoing.push_back(color100WordNode);
+                referenceLinkOutgoing.push_back(colorConceptNode);
+                referenceLinkOutgoing.push_back(colorWordNode);
                 {
                     Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
                     atomSpace.setLTI( referenceLink, 1 );
@@ -1916,105 +1896,8 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                     
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 1.0f, 1.0f ), objectNode, color100ConceptNode );
+                                                  SimpleTruthValue( it->second, 1.0f ), objectNode, colorConceptNode );
             }
-            
-               //color 75% property
-            if ( color75.length() ){
-                Handle color75WordNode = atomSpace.addNode( WORD_NODE, color75);
-                Handle color75ConceptNode = atomSpace.addNode( CONCEPT_NODE, color75);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color75ConceptNode);
-                referenceLinkOutgoing.push_back(color75WordNode);
-                {                    
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.75f, 1.0f ), objectNode, color75ConceptNode );
-            }
-
-            //color 50% property
-            if ( color50.length() ){
-                Handle color50WordNode = atomSpace.addNode( WORD_NODE, color50);
-                Handle color50ConceptNode = atomSpace.addNode( CONCEPT_NODE, color50);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color50ConceptNode);
-                referenceLinkOutgoing.push_back(color50WordNode);
-                {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.50f, 1.0f ), objectNode, color50ConceptNode );
-            }
- 
-            //color 25% property
-            if ( color25.length() ){
-                Handle color25WordNode = atomSpace.addNode( WORD_NODE, color25);
-                Handle color25ConceptNode = atomSpace.addNode( CONCEPT_NODE, color25);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color25ConceptNode);
-                referenceLinkOutgoing.push_back(color25WordNode);
-                {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.25f, 1.0f ), objectNode, color25ConceptNode );
-            }
- 
-            //color 15% property
-            if ( color15.length() ){
-                Handle color15WordNode = atomSpace.addNode( WORD_NODE, color15);
-                Handle color15ConceptNode = atomSpace.addNode( CONCEPT_NODE, color15);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color15ConceptNode);
-                referenceLinkOutgoing.push_back(color15WordNode);
-                {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.15f, 1.0f ), objectNode, color15ConceptNode );
-            }
-         
-            //color 10% property
-            if ( color10.length() ){
-                Handle color10WordNode = atomSpace.addNode( WORD_NODE, color10);
-                Handle color10ConceptNode = atomSpace.addNode( CONCEPT_NODE, color10);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color10ConceptNode);
-                referenceLinkOutgoing.push_back(color10WordNode);
-                {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.10f, 1.0f ), objectNode, color10ConceptNode );
-            }
-
-            //color 5% property
-            if ( color5.length() ){
-                Handle color5WordNode = atomSpace.addNode( WORD_NODE, color5);
-                Handle color5ConceptNode = atomSpace.addNode( CONCEPT_NODE, color5);
-                HandleSeq referenceLinkOutgoing;
-                referenceLinkOutgoing.push_back(color5ConceptNode);
-                referenceLinkOutgoing.push_back(color5WordNode);
-                {
-                    Handle referenceLink = atomSpace.addLink( REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV( ));
-                    atomSpace.setLTI( referenceLink, 1 );
-                }
-
-                AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( 0.05f, 1.0f ), objectNode, color5ConceptNode );
-            }
-
         }
 
         XERCES_CPP_NAMESPACE::XMLString::release(&entityId);
