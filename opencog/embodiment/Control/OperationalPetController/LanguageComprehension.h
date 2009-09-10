@@ -29,6 +29,7 @@
 #include "OutputRelex.h"
 #include "FramesToRelexRuleEngine.h"
 
+
 namespace OperationalPetController
 {
     
@@ -52,7 +53,11 @@ namespace OperationalPetController
 
 //        opencog::SchemeEval evaluator;
         Control::PetInterface& agent;
-                
+        std::string nlgen_server_host;
+        int nlgen_server_port;
+        FramesToRelexRuleEngine framesToRelexRuleEngine;
+    private:
+
     };
 
 };

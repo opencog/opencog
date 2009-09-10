@@ -31,6 +31,8 @@
 #include <Sockets/SocketHandler.h>
 #include <Sockets/ListenSocket.h>
 
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+
 using namespace OperationalPetController;
 using namespace opencog;
 
@@ -57,7 +59,11 @@ void LanguageComprehension::init( void )
                             __FUNCTION__, answer.c_str( ) );
         } // if
         
-        SchemeEval::instance().clear_pending( );        
+        SchemeEval::instance().clear_pending( );
+
+        this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
+        this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
+
     } // if
 }
 
@@ -269,7 +275,6 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     std::map< std::string, unsigned int>::const_iterator iter;
     for( iter = frame_elements_count.begin(); iter != frame_elements_count.end(); ++iter) {
         std::string precondition = iter->first+"$"+boost::lexical_cast<std::string>(iter->second);
-        //std::cout << "Pre-Condition: " << precondition << std::endl;
         logger().debug( "LanguageComprehension::%s - Pre-Condition detected: %s", 
                                                                 __FUNCTION__, precondition.c_str() );
         pre_conditions.insert( precondition );
@@ -282,36 +287,45 @@ std::string LanguageComprehension::resolveFrames2Relex( )
    }
    logger().debug("LanguageComprehension::%s - End of Pre-Conditions",__FUNCTION__);   
    
-   OutputRelex* output_relex = FramesToRelexRuleEngine::instance().resolve( pre_conditions );
+   OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
    if( output_relex == NULL ){
-       logger().debug("LanguageComprehension::%s - Output Relex is NULL for the Pre-Conditions",__FUNCTION__);
-       return "";
+       logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions",__FUNCTION__);
+       return "ERROR::No rule found for the pre-conditions";
    }
 
     std::string text = output_relex->getOutput( as, handles );
-    if( text == "")
-        return "output relex vazio";
+    if( text.empty() ){
+        logger().error("LanguageComprehension::%s - Output Relex returned an empty string.",__FUNCTION__);
+        return "ERROR::It was not possible to get the sentence from NLGen because output relex was empty";
+    }
 
-    //NLGenClient client;
+    //connect to the NLGen server and try to get the sentence from the relex
+    //content
+    std::string nlgen_sentence;
     SocketHandler h;
-    logger().debug("LanguageComprehension - Socket 1");
-	ListenSocket<ClientSocket> l(h);
-    logger().debug("LanguageComprehension - Socket 2");
-	l.Bind(5555);
-    logger().debug("LanguageComprehension - Socket 3");
-	h.Add(&l);
-    logger().debug("LanguageComprehension - Socket 4");
 	NLGenClient sock(h, text);
-    logger().debug("LanguageComprehension - Socket 5");
-	sock.Open("localhost", 5555);
-    logger().debug("LanguageComprehension - Socket 6");
+	//sock.Open("localhost", 5555);
+    if ( !(sock.Open(nlgen_server_host, nlgen_server_port)) ){
+        logger().error("LanguageComprehension::%s - It was not possible to open the socket connection with the NLGen server using host %s and port %d.",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
+        return "ERROR::It was not possible to connect to the NLGen server";
+    }
 	h.Add(&sock);
-    logger().debug("LanguageComprehension - Socket 7");
 	while (h.GetCount())
 	{
 		h.Select(1, 0);
 	}
+    if( !sock.isConnected() ){
+        logger().error("LanguageComprehension::%s - The connection to the NLGen server socket was not estabilished using host %s and port %d.",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
+        return "ERROR::It was not possible to connect to the NLGen server";
+    }
 
-   return "testando...";
+    nlgen_sentence = sock.getOutput();
+    if( nlgen_sentence.empty() ){
+        logger().debug("LanguageComprehension::%s - NLGen Sentence is EMPTY. Probably it was not possible to connect to the NLGen server socket on host %s and port %d",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
+        return "ERROR::NLGen returned an empty sentence....";
+    }
+    logger().debug("LanguageComprehension::%s - NLGen Sentence: %s",__FUNCTION__,nlgen_sentence.c_str() );
+
+   return nlgen_sentence;
 
 }

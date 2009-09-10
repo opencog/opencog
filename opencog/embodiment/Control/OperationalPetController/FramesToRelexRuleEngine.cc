@@ -22,11 +22,10 @@
  */
 
 #include "FramesToRelexRuleEngine.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace OperationalPetController;
 using namespace opencog;
-
-FramesToRelexRuleEngine* FramesToRelexRuleEngine::singletonInstance = 0; 
 
 FramesToRelexRuleEngine::FramesToRelexRuleEngine( void ) 
 {
@@ -34,20 +33,17 @@ FramesToRelexRuleEngine::FramesToRelexRuleEngine( void )
 }
 
 void FramesToRelexRuleEngine::loadRules ( void ) {
-    //TODO change this in order to work with the dist and change the
-    //makeDistribution script to copy the rules file
-    loadRules("frames2relex-rules.txt");
+    loadRules( config().get("FRAMES_2_RELEX_RULES_FILE") );
 }
 
-void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
+void FramesToRelexRuleEngine::loadRules( std::string rulesFileName ){
     std::string rule;
-    std::ifstream rulesFile(rulesFileName);
+    std::ifstream rulesFile(rulesFileName.c_str());
     if (rulesFile.is_open())
     { 
         while (! rulesFile.eof() )
         {
             getline (rulesFile,rule);
-            //std::cout << "Rule: " << rule << std::endl;
             logger().debug("FramesToRelexRuleEngine::%s - Read rule %s", __FUNCTION__, rule.c_str() );
 
             std::map< std::string, unsigned int> frame_elements_count;
@@ -56,7 +52,6 @@ void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
             boost::split( tokens, rule, boost::is_any_of( "|" ) );
 
             if ( tokens.size( ) != 2 ) {
-                //std::cerr << "Error: " << tokens.size( ) << std::endl;
                 logger().error("FramesToRelexRuleEngine::%s - ERROR while reading thr Frames2Reles rules. The tokes expected was 2, but was found %d.",
                         __FUNCTION__,tokens.size( ));
                 return;
@@ -106,7 +101,6 @@ void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
             
             std::map<unsigned int, std::string>::const_iterator it;
             for( it = frames_order.begin( ); it != frames_order.end( ); ++it ) {
-                //std::cout << "FElement: " << it->first << " " << it->second << std::endl;
                 logger().debug("FramesToRelexRuleEngine::%s - FrameElement found in order: %d - %s",__FUNCTION__,it->first,it->second.c_str() );
             } // for
             
@@ -115,7 +109,6 @@ void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
             std::map< std::string, unsigned int>::const_iterator iter;
             for( iter = frame_elements_count.begin(); iter != frame_elements_count.end(); ++iter) {
                 std::string precondition = iter->first+"$"+boost::lexical_cast<std::string>(iter->second);
-                //std::cout << "Pre-Condition: " << precondition << std::endl;
                 logger().debug("FramesToRelexRuleEngine::%s - Pre-Condition found: %s",__FUNCTION__, precondition.c_str());
                 preconditions_set.insert( precondition );
             }
@@ -149,9 +142,8 @@ void FramesToRelexRuleEngine::loadRules( const char* rulesFileName ){
         rulesFile.close();
     }//if file open 
     else {
-        //std::cout << "Unable to open relex2frames file" << std::endl;
-        logger().error("FramesToRelexRuleEngine::%s - Unable to open the Frames2Reles rules file named %s.",
-                        __FUNCTION__,rulesFileName );
+        logger().error("FramesToRelexRuleEngine::%s - Unable to open the Frames2Relex rules file named %s.",
+                        __FUNCTION__,rulesFileName.c_str() );
     }
 
 }
@@ -165,16 +157,8 @@ OutputRelex* FramesToRelexRuleEngine::resolve( std::set< std::string > pre_condi
     if( rules.find(pre_conditions) != rules.end() ){
         return rules.find(pre_conditions)->second;
     }else{
-        printf("No rule found\n");
+        logger().error("FramesToRelexRuleEngine::%s - No rule found",__FUNCTION__);
     }
 
     return NULL;
-}
-
-FramesToRelexRuleEngine& FramesToRelexRuleEngine::instance() 
-{
-    if ( !singletonInstance ) {
-        singletonInstance = new FramesToRelexRuleEngine( );
-    } // if
-    return *singletonInstance;
 }

@@ -45,12 +45,9 @@ namespace OperationalPetController
         ~FramesToRelexRuleEngine( );
         OutputRelex* resolve( std::set< std::string > pre_conditions );
         void loadRules( void );//load the rules from the default file
-        void loadRules( const char* ruleFileName );//load the rules from a specific file
-        static FramesToRelexRuleEngine& instance(void);
+        void loadRules( std::string ruleFileName );//load the rules from a specific file
     private:
-        //std::vector<FramesToRelexRule*> rules;
         std::map< std::set<std::string>, OutputRelex*> rules;
-        static FramesToRelexRuleEngine* singletonInstance;
     };
 };
 

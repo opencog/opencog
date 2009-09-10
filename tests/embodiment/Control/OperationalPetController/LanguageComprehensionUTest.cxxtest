@@ -50,6 +50,7 @@ private:
     LSMessageSenderMock* sender;
 
     LanguageComprehension* language;
+    FramesToRelexRuleEngine* framesToRelexRuleEngine;
 
     static const std::string petId;
     static const std::string petName;
@@ -77,6 +78,9 @@ public:
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
         
         config(EmbodimentConfig::embodimentCreateInstance, true);
+
+        //set the frames2relex file to be load by the FramesToRelexRuleEngine
+        config().set("FRAMES_2_RELEX_RULES_FILE", OPENCOG_SOURCE_DIR"/opencog/embodiment/frames2relex.rules");
 
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	this->atomSpace = cogserver.getAtomSpace();
@@ -230,9 +234,6 @@ public:
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
        
-
-        //load the frames2reles rules
-         FramesToRelexRuleEngine::instance().loadRules (OPENCOG_SOURCE_DIR"/opencog/embodiment/Control/OperationalPetController/frames2relex-rules.txt" );
     }
 
     ~LanguageComprehensionUTest( ) 
@@ -547,7 +548,7 @@ public:
   
         //expect that questions above were already answered
         output = this->language->resolveFrames2Relex( );
-        TS_ASSERT(output == "");
+        TS_ASSERT(output.find("ERROR") != std::string::npos);
     }
 
 }; 
