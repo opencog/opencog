@@ -394,16 +394,21 @@
 	;	(trip-semes (promote-to-seme same-modifiers-promoter trips))
 	;
 
+; Err, here's the rub -- either we don't promote quetions
+; ; (and then the truth-query pattern matcher as currently written fails)
+; ; of wee promote questios, in which case we need to promote the HYP
+; ; and TRUTH-QUERY_FLAG as well. To be deicded.
+;
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.)
-	(for-each same-modifiers-promoter
-		(concatenate! 
-			(map parse-get-words
-				(sent-list-get-parses (get-new-parsed-sentences))
-			)
-		)
-	)
+;	(for-each same-modifiers-promoter
+;		(concatenate! 
+;			(map parse-get-words
+;				(sent-list-get-parses (get-new-parsed-sentences))
+;			)
+;		)
+;	)
 	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)

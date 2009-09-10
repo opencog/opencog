@@ -172,8 +172,11 @@
 )
 
 ; --------------------------------------------------------------------
-; same-modifiers-promoter -- re-use an existing seme if it has a superset
-; of the modifiers of the word instance. Otherwise, create a new seme.
+; noun-same-modifiers-promoter -- re-use an existing seme if it has a 
+; superset of the modifiers of the word instance. Otherwise, create a 
+; new seme. DEPRECATED -- USE same-dependency-modifier BELOW. The reason
+; that this is deprecated is because it only works correctly for nouns;
+; whereas it will alias together all verbs, which is incorrect for verbs!
 ;
 ; The idea here is that if we have a word instance, such as "ball", and
 ; a seme "green ball", we can deduce "oh the ball, that must be the 
@@ -259,10 +262,6 @@
 	(generic-promoter make-new-seme noun-seme-match? word-inst)
 )
 
-(define (same-modifiers-promoter word-inst)
-	(noun-same-modifiers-promoter word-inst)
-)
-
 ; XXXXXXXXXXXXXXXX under consruction
 (define (same-dependency-promoter word-inst)
 
@@ -279,32 +278,32 @@
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
-				(mods (get-relex-rels wrd-inst))
+				(rels (get-relex-rels wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
-			(promote-to-seme same-dependency-promoter mods)
+			(promote-to-seme same-dependency-promoter rels)
 			newseme
 		)
 	)
 
-	; Given a seme, and a "modifier relation" mod-rel of the form:
+	; Given a seme, and a relex relation rel of the form:
 	;    EvaluationLink
 	;       prednode (a DefinedLinguisticPredicateNode)
 	;       ListLink
 	;          headword   (a WordInstanceNode)
 	;          attr-word  (a WordInstanceNode)
-	; this routine checks to see if the corresponding relation
+	; This routine checks to see if the corresponding relation
 	; exists for seme. If it does, it returns #t else it returns #f
 	;
-	(define (does-seme-have-rel? seme mod-rel)
-		(let* ((oset (cog-outgoing-set mod-rel))
+	(define (does-seme-have-rel? seme rel)
+		(let* ((oset (cog-outgoing-set rel))
 				(prednode (car oset))
-				(attr-word (cadr (cog-outgoing-set (cadr oset))))
-				(attr-seme (same-dependency-promoter attr-word))
-				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
+				(dependent-word (cadr (cog-outgoing-set (cadr oset))))
+				(dependent-seme (same-dependency-promoter dependent-word))
+				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme dependent-seme)))
 			)
 			(if (null? seme-rel) #f #t)
 		)
@@ -333,7 +332,10 @@
 	)
 
 	; For anything that's not a noun or a verb, all that we ask
-	; for is that its the same word lemma.
+	; for is that has the same word lemma. This seems safe for now,
+	; but will go bad if there's a chain of noun-adj-noun-adj modifiers
+	; such as those in medical text.  This might fail for chained
+	; adverbial modifers (?not sure?)
 	(define (same-lemma-match? seme wrd-inst)
 		(equal?
 			(word-inst-get-lemma seme)
@@ -350,6 +352,11 @@
 	)
 
 	(generic-promoter make-new-seme seme-match? word-inst)
+)
+
+(define (same-modifiers-promoter word-inst)
+	; (noun-same-modifiers-promoter word-inst)
+	(same-dependency-promoter word-inst)
 )
 
 ; --------------------------------------------------------------------
