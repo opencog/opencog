@@ -229,7 +229,10 @@ public:
         
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
-        
+       
+
+        //load the frames2reles rules
+         FramesToRelexRuleEngine::instance().loadRules (OPENCOG_SOURCE_DIR"/opencog/embodiment/Control/OperationalPetController/frames2relex-rules.txt" );
     }
 
     ~LanguageComprehensionUTest( ) 
@@ -251,7 +254,7 @@ public:
 
     void testResolution( ) 
     {
-
+        
         // first call it without sentence to parse
         this->language->solveLatestSentenceReference( );
         // testing: grab the red ball
@@ -418,8 +421,9 @@ public:
             TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
-
+        
     } 
+
     
     void testQuestionAnswering( void )
     {
@@ -454,7 +458,12 @@ public:
                                                    "latestQuestionFrames", 
                                                    atomSpace->getHandle( PREDICATE_NODE, "storedEntity3")
                                                    ) )
-    }
+          
+        std::string output = this->language->resolveFrames2Relex( );
+
+
+    }    
+
     
     /*
     //    void testRealSituation( void ) 
@@ -492,7 +501,55 @@ public:
         
     //}
     */  
-    
+
+
+    void testFrames2Relex()
+    {
+        //color
+        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question1.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
+
+        std::string output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        logger().debug("testFrames2Relex - Relex Output for relex-question1.scm input: %s",output.c_str() );
+
+        //yes
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question2.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        logger().debug("testFrames2Relex - Relex Output for relex-question2.scm input: %s",output.c_str() );
+
+        //no
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question3.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        logger().debug("testFrames2Relex - Relex Output for relex-question3.scm input: %s",output.c_str() );
+
+        //hungry
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question4.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        logger().debug("testFrames2Relex - Relex Output for relex-question4.scm input: %s",output.c_str() );
+       
+        //two colors
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question5.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);          
+
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output != "");
+        logger().debug("testFrames2Relex - Relex Output for relex-question5.scm input: %s",output.c_str() );
+  
+        //expect that questions above were already answered
+        output = this->language->resolveFrames2Relex( );
+        TS_ASSERT(output == "");
+    }
+
 }; 
 
 const std::string LanguageComprehensionUTest::petId = "1";

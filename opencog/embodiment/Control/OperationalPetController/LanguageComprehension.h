@@ -26,6 +26,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PetInterface.h>
+#include "OutputRelex.h"
+#include "FramesToRelexRuleEngine.h"
 
 namespace OperationalPetController
 {
@@ -43,6 +45,7 @@ namespace OperationalPetController
 
         void solveLatestSentenceCommand( void );
 
+        std::string resolveFrames2Relex( );
     protected:
 
         void init(void);
