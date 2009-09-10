@@ -263,6 +263,10 @@
 )
 
 ; XXXXXXXXXXXXXXXX under consruction
+; Err, here's the rub -- either we don't promote quetions
+; (and then the truth-query pattern matcher as currently written fails)
+; of wee promote questios, in which case we need to promote the HYP 
+; and TRUTH-QUERY_FLAG as well. To be deicded.
 (define (same-dependency-promoter word-inst)
 
 	(define (get-relex-rels wrd-inst)
