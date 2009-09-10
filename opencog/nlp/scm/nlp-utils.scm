@@ -113,6 +113,33 @@
 )
 
 ; ---------------------------------------------------------------------
+; Return the part-of-speech of a word-instance
+; 
+(define (word-inst-get-pos word-inst)
+	(cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode 
+		word-inst
+	)
+)
+
+; ---------------------------------------------------------------------
+; Return #t is the word-instance is a noun
+; 
+(define (word-inst-is-noun? word-inst)
+	(string=? "noun" 
+		(cog-name (car (word-inst-get-pos word-inst)))
+	)
+)
+
+; ---------------------------------------------------------------------
+; Return #t is the word-instance is a verb
+; 
+(define (word-inst-is-verb? word-inst)
+	(string=? "verb" 
+		(cog-name (car (word-inst-get-pos word-inst)))
+	)
+)
+
+; ---------------------------------------------------------------------
 ; Given a word instance, return a list of relations the word participates in.
 ; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
 ; _subj(dog,*), _obj(dog,*) etc.

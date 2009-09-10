@@ -264,20 +264,28 @@
 )
 
 ; XXXXXXXXXXXXXXXX under consruction
-(define (all-pos-same-modifiers-promoter word-inst)
+(define (same-dependency-promoter word-inst)
+
+	(define (get-relex-rels wrd-inst)
+		(cond
+			((word-inst-is-noun? wrd-inst) (noun-inst-get-relex-modifiers wrd-inst))
+			((word-inst-is-verb? wrd-inst) (verb-inst-get-relex-rels wrd-inst))
+			(else '())
+		)
+	)
 
 	; Create a new seme, given a word-instance. The new seme will 
 	; have the same modifiers that the word-instance has.
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
-				(mods (noun-inst-get-relex-modifiers wrd-inst))
+				(mods (get-relex-rels wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
-			(promote-to-seme noun-same-modifiers-promoter mods)
+			(promote-to-seme same-dependency-promoter mods)
 			newseme
 		)
 	)
@@ -295,7 +303,7 @@
 		(let* ((oset (cog-outgoing-set mod-rel))
 				(prednode (car oset))
 				(attr-word (cadr (cog-outgoing-set (cadr oset))))
-				(attr-seme (noun-same-modifiers-promoter attr-word))
+				(attr-seme (same-dependency-promoter attr-word))
 				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
 			)
 			(if (null? seme-rel) #f #t)
@@ -315,6 +323,8 @@
 		)
 	)
 
+	; As above, but for verbs. In particular, the subject and
+	; object of the verb must match.
 	(define (verb-seme-match? seme wrd-inst)
 		(every 
 			(lambda (md) (does-seme-have-rel? seme md)) 
@@ -322,7 +332,24 @@
 		)
 	)
 
-	(generic-promoter make-new-seme noun-seme-match? word-inst)
+	; For anything that's not a noun or a verb, all that we ask
+	; for is that its the same word lemma.
+	(define (same-lemma-match? seme wrd-inst)
+		(equal?
+			(word-inst-get-lemma seme)
+			(word-inst-get-lemma wrd-inst)
+		)
+	)
+
+	(define (seme-match? seme wrd-inst)
+		(cond
+			((word-inst-is-noun? wrd-inst) (noun-seme-match? seme wrd-inst))
+			((word-inst-is-verb? wrd-inst) (verb-seme-match? seme wrd-inst))
+			(else (same-lemma-match? seme wrd-inst))
+		)
+	)
+
+	(generic-promoter make-new-seme seme-match? word-inst)
 )
 
 ; --------------------------------------------------------------------
