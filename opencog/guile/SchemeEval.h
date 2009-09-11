@@ -68,13 +68,14 @@ class SchemeEval
 		SCM outport;
 		SCM saved_outport;
 
+		// Make constructor, destructor private; force
+		// everyone to use the singleton instance, for now.
 		SchemeEval(void);
-
+		~SchemeEval();
 		static SchemeEval* singletonInstance;
 
 	public:
 
-		~SchemeEval();
 		std::string eval(const std::string &);
 		Handle eval_h(const std::string &);
 		Handle apply(const std::string& func, Handle varargs);
@@ -84,7 +85,14 @@ class SchemeEval
 		void clear_pending(void);
 		bool eval_error(void);
 
-		static SchemeEval& instance(void);
+		// Someone thinks that there some scheme threading bug somewhere,
+		// and the current hack around this is to use a singleton instance.
+		static SchemeEval& instance(void)
+		{
+			if (!singletonInstance) 
+				singletonInstance = new SchemeEval();
+			return *singletonInstance;
+		}
 };
 
 }

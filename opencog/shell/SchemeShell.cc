@@ -50,7 +50,7 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
-//	evaluator = NULL;
+	evaluator = NULL;
 	holder = NULL;
 	self_destruct = false;
 }
@@ -63,7 +63,8 @@ SchemeShell::~SchemeShell()
 		holder->AtomicInc(-1);
 		holder = NULL;
 	}
-//	if (evaluator) delete evaluator;
+	// Don't delete, its currently set to a singleton instance.
+	//	if (evaluator) delete evaluator;
 }
 
 /**
@@ -81,7 +82,11 @@ void SchemeShell::set_holder(SocketHolder *h)
 	holder->AtomicInc(+1);
 	holder->SetShell(this);
 
-//	if (!evaluator) evaluator = new SchemeEval();
+	//	if (!evaluator) evaluator = new SchemeEval();
+	//	Someone did this singleton instance crapola because 
+	//	some scheme threading somehow doesn't work somewhere.
+	//	buncha crap. fix this shit.
+	if (!evaluator) evaluator = &SchemeEval::instance();
 }
 
 void SchemeShell::socketClosed(void)
@@ -125,7 +130,7 @@ const std::string& SchemeShell::get_prompt(void)
 
 	// Use different prompts, depending on whether there is pending
 	// input or not.
-	if (SchemeEval::instance().input_pending())
+	if (evaluator->input_pending())
 	{
 		return pending_prompt;
 	}
@@ -193,7 +198,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
-				SchemeEval::instance().clear_pending();
+				evaluator->clear_pending();
 				return abort_prompt;
 			}
 
@@ -212,14 +217,14 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((0x16 == c) || (0x18 == c) || (0x1b == c))
 	{
-		SchemeEval::instance().clear_pending();
+		evaluator->clear_pending();
 		return "\n" + normal_prompt;
 	}
 
 	// Look for either an isolated control-D, or a single period on a line
 	// by itself. This means "leave the shell". We leave the shell by
 	// unsetting the shell pointer in the ConsoleSocket.
-	if ((false == SchemeEval::instance().input_pending()) &&
+	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
@@ -239,9 +244,9 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	 */
 	std::string input = expr + "\n";
 
-	std::string result = SchemeEval::instance().eval(input.c_str());
+	std::string result = evaluator->eval(input.c_str());
 
-	if (SchemeEval::instance().input_pending())
+	if (evaluator->input_pending())
 	{
 		if (show_output && show_prompt)
 			return pending_prompt;
@@ -249,7 +254,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 			return "";
 	}
 
-	if (show_output || SchemeEval::instance().eval_error())
+	if (show_output || evaluator->eval_error())
 	{
 		if (show_prompt) result += normal_prompt;
 		return result;

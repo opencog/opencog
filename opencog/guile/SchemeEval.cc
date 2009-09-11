@@ -824,13 +824,4 @@ void * SchemeEval::c_wrap_apply_scm(void * p)
 
 #endif
 
-SchemeEval& SchemeEval::instance() 
-{
-    if ( !singletonInstance ) {
-        singletonInstance = new SchemeEval( );
-    } // if
-    return *singletonInstance;
-}
-
-
 /* ===================== END OF FILE ============================ */
