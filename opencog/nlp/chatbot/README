@@ -225,10 +225,10 @@ The following dialog works (or has worked at various times in the past):
 <cogita-bot> Syntax pattern match found: Fred
 
 <me>         Did Fred throw a ball?
-<cogita-bot> Truth query determined "yes": throw
+<cogita-bot> Truth query determined: Yes, verb was: throw
 
 <me>         Did Fred throw a red ball?
-<cogita-bot> Truth query determined "yes": throw
+<cogita-bot> Truth query determined: Yes, verb was: throw
 <me>         Did Fred throw a green ball?
 <cogita-bot> Truth query determined: No, not that I know of. 
 
