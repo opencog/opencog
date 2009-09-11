@@ -36,7 +36,56 @@
 ; to represent the Embodiment Perceptions.
 
 
-; Definition of Frame Request
+; Definition of Frame Emotion_directed
+
+; #Emotion_directed:Event
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Event")
+)
+; #Emotion_directed:Experiencer
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Experiencer")
+)
+; #Emotion_directed:Expressor
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Expressor")
+)
+; #Emotion_directed:Stimulus
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Stimulus")
+)
+; #Emotion_directed:State
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:State")
+)
+; #Emotion_directed:Degree
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Degree")
+)
+; #Emotion_directed:Manner
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Manner")
+)
+; #Emotion_directed:Empathy_target
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Empathy_target")
+)
+; #Emotion_directed:Reason
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Emotion_directed")
+   (DefinedFrameElementNode "#Emotion_directed:Reason")
+)
+
+
+; Definition of Frame Entity
 
 ; #Entity:Entity
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
@@ -54,6 +103,7 @@
    (DefinedFrameElementNode "#Entity:Type")
 )
 
+; Definition of Frame Questioning
 
 ; #Questioning:Addressee
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
@@ -75,6 +125,8 @@
    (DefinedFrameNode "#Questioning")
    (DefinedFrameElementNode "#Questioning:Manner")
 )
+
+; Definition of Frame Request
 
 ; #Request:Message
 (FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
@@ -816,4 +868,20 @@
    (ConceptNode "Agent")
 )
 
+; #Color:Color
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Color")
+   (DefinedFrameElementNode "#Color:Color")
+)
+  
+; #Color:Entity
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Color")
+   (DefinedFrameElementNode "#Color:Entity")
+)
 
+; #Answer:Message
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Answer")
+   (DefinedFrameElementNode "#Answer:Message")
+)

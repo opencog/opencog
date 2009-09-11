@@ -1,9 +1,9 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h
+ * opencog/embodiment/Control/OperationalPetController/FramesToRelexRuleEngine.h
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
- * Author(s): Samir Araujo
+ * Author(s): Fabricio Silva 
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,50 +21,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LANGUAGECOMPREHENSION_H
-#define LANGUAGECOMPREHENSION_H
+#ifndef FRAMESTORELEXRULEENGINE_H
+#define FRAMESTORELEXRULEENGINE_H
 
+#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/embodiment/Control/PetInterface.h>
-#include "OutputRelex.h"
-#include "FramesToRelexRuleEngine.h"
 
+#include "OutputRelex.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+#include <iostream>
+#include <string>
+#include <fstream>
 
 namespace OperationalPetController
 {
-    
-    class LanguageComprehension 
+    class FramesToRelexRuleEngine
     {
-    public: 
-        LanguageComprehension( Control::PetInterface& agent );
-        
-        virtual ~LanguageComprehension( void );        
-
-        void solveLatestSentenceReference( void );
-
-        void answerLatestQuestion( void );
-
-        void solveLatestSentenceCommand( void );
-
-        std::string resolveFrames2Relex( );
-    protected:
-
-        void init(void);
-
-//        opencog::SchemeEval evaluator;
-        Control::PetInterface& agent;
-        std::string nlgen_server_host;
-        int nlgen_server_port;
-        FramesToRelexRuleEngine framesToRelexRuleEngine;
+    public:
+        FramesToRelexRuleEngine( );
+        ~FramesToRelexRuleEngine( );
+        OutputRelex* resolve( std::set< std::string > pre_conditions );
+        void loadRules( void );//load the rules from the default file
+        void loadRules( std::string ruleFileName );//load the rules from a specific file
     private:
-
+        std::map< std::set<std::string>, OutputRelex*> rules;
     };
-
 };
 
-
-
-
-
-
-#endif // LANGUAGECOMPREHENSION_H
+#endif // FRAMESTORELEXRULEENGINE_H

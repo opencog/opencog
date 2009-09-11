@@ -1,0 +1,5 @@
+#Color(Entity,Color);#Color(Entity,Color)|_subj($1, $2);adj($2);_det($3, $4);pos($4)
+#Color(Entity,Color)|present($2);.a($2);adj($2);_predadj($1, $2);definite($1);.n($1);noun($1);singular($1);.v(be);verb(be);punctuation(.);det(the)
+#Answer(Message)|word($1)
+#Biological_urge(Experiencer);#Gradable_attributes(Attribute,Degree,Value)|_sub($1)
+#Entity(Entity,Name)|noun($2);det(the)

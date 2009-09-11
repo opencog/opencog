@@ -1874,9 +1874,17 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                     atomSpace.setLTI( referenceLink, 1 );
                 }
                     
-
+                SimpleTruthValue tv( it->second, 1.0 );
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( it->second, 1.0f ), objectNode, colorConceptNode );
+                                                  tv, objectNode, colorConceptNode );
+
+                std::map<std::string, Handle> elements;
+                elements["Color"] = colorConceptNode;
+                elements["Entity"] = objSemeNode;
+                AtomSpaceUtil::setPredicateFrameFromHandles( 
+                    atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
+                        elements, tv );
+
             }
         }
 
@@ -2281,7 +2289,33 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
 
     Handle atTimeLink = atomSpace.addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
+    
+    // setup the frame for the given physiological feeling
+    float value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
 
+    std::string feeling = name;
+    boost::replace_first( feeling, "_urgency", "");
+
+    std::string frameInstanceName = petInterface.getPetId() + "_" + feeling + "_biological_urge";
+
+    if ( value > 0 ) {
+        std::string degree = value >= 0.7 ? "High" : value >= 0.3 ? "Medium" : "Low";
+        std::map<std::string, Handle> elements;
+        elements["Experiencer"] = atomSpace.addNode( SEME_NODE, petInterface.getPetId() );
+        elements["Attribute"] = atomSpace.addNode( CONCEPT_NODE, feeling );
+        elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
+        elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
+
+        AtomSpaceUtil::setPredicateFrameFromHandles( 
+            atomSpace, "#Biological_urge", frameInstanceName,
+                 elements, SimpleTruthValue( value, 1.0 ) );        
+    } else {
+        Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, frameInstanceName );
+        if ( predicateNode != Handle::UNDEFINED ) {
+            AtomSpaceUtil::deleteFrameInstance( atomSpace, predicateNode );
+        } // if
+    } // else
+    
     return evalLink;
 }
 

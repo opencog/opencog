@@ -1631,6 +1631,25 @@ void RuleEngine::processNextAction( void )
                                                               0.0f),
                                              this->petHandle);
 
+            if ( oldValue != revisedValue ) {
+                std::string frameInstanceName = this->opc->getPet( ).getPetId( ) + "_" + it->first + "_emotion_directed";
+                try {
+                    std::map<std::string, Handle> elements;
+                    elements["Experiencer"] = opc->getAtomSpace()->addNode( SEME_NODE, this->opc->getPet( ).getPetId( ) );
+                    elements["State"] = opc->getAtomSpace()->addNode( CONCEPT_NODE, it->first );
+                    AtomSpaceUtil::setPredicateFrameFromHandles( 
+                        *(opc->getAtomSpace()), "#Emotion_directed", frameInstanceName,
+                            elements, SimpleTruthValue( revisedValue, 0.0 ) );        
+                        
+                } catch ( const opencog::NotFoundException& ex ) {
+                    Handle predicateNode = opc->getAtomSpace()->getHandle( PREDICATE_NODE, frameInstanceName );
+                    if ( predicateNode != Handle::UNDEFINED ) {
+                        AtomSpaceUtil::deleteFrameInstance( *this->opc->getAtomSpace(), predicateNode );
+                    } // if
+                } // catch
+                
+            } // if
+
             feelingsUpdatedMap[ it->first ] = revisedValue;
         } // for
 

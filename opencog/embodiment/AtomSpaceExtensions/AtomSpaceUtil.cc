@@ -2123,9 +2123,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
             std::map<std::string, Handle> currentElements = 
                 getFrameInstanceElementsValues( atomSpace, frameInstance );
 
-            if ( currentElements.size( ) > 0 ) {
-                deleteFrameInstance( atomSpace, frameInstance );
-            } // if
+            //if ( currentElements.size( ) > 0 ) {
+            //    deleteFrameInstance( atomSpace, frameInstance );
+            //} // if
 
             HandleSeq frameInstanceInheritance;
             frameInstanceInheritance.push_back( frameInstance );
