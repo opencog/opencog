@@ -33,6 +33,7 @@ class SchemeEval
 		// Things related to evaluation
 		std::string do_eval(const std::string &);
 		static void * c_wrap_eval(void *);
+		static void * c_wrap_eval_h(void *);
 		const std::string *pexpr;
 		std::string answer;
 
@@ -74,6 +75,7 @@ class SchemeEval
 
 		~SchemeEval();
 		std::string eval(const std::string &);
+		Handle eval_h(const std::string &);
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
 
