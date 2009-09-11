@@ -43,10 +43,12 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		SchemeEval &eval;
 
 	public:
 
-    BasicSCMUTest(void)
+    BasicSCMUTest(void) :
+        eval(SchemeEval::instance())
     {
         try
         {
@@ -106,12 +108,12 @@ void BasicSCMUTest::setUp(void)
 
 void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
 {
-    printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
+	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
 	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
-	SchemeEval::instance().eval(buff);
-        bool eval_err = SchemeEval::instance().eval_error();
-	SchemeEval::instance().clear_pending();
+	eval.eval(buff);
+	bool eval_err = eval.eval_error();
+	eval.clear_pending();
 	TSM_ASSERT("Failed to create a node", !eval_err);
 
 	Type t = classserver().getType(tipo);
@@ -134,14 +136,14 @@ void BasicSCMUTest::test_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval::instance().eval("(+ 2 2)");
-	bool eval_err = SchemeEval::instance().eval_error();
-	SchemeEval::instance().clear_pending();
+	eval.eval("(+ 2 2)");
+	bool eval_err = eval.eval_error();
+	eval.clear_pending();
 	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
 
-        SchemeEval::instance().eval("Evaluating this will cause an error to be thrown!");
-	eval_err = SchemeEval::instance().eval_error();
-	SchemeEval::instance().clear_pending();
+	eval.eval("Evaluating this will cause an error to be thrown!");
+	eval_err = eval.eval_error();
+	eval.clear_pending();
 	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
 
     //TODO check if it is ok
@@ -179,7 +181,7 @@ void BasicSCMUTest::test_reference_link(void)
 	
     check_link("ReferenceLink", REFERENCE_LINK, "WordInstanceNode", "WordNode", 
                                     "the@401c28c2-9de3-453f-b6d8-1b56061d127e", 
-                                    "the@401c28c2-9de3-453f-b6d8-1b56061d127e",
+                                    "the",
                                     0.65, 0.45);
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -217,9 +219,9 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
     char buff[500];
     snprintf(buff, 500, "(%s (stv %f %f) (%s \"%s\") (%s \"%s\") )", tipo, truth, 
                 conf, nodename1, value1, nodename2, value2);
-    SchemeEval::instance().eval(buff);
-    bool eval_err = SchemeEval::instance().eval_error();
-    SchemeEval::instance().clear_pending();
+    eval.eval(buff);
+    bool eval_err = eval.eval_error();
+    eval.clear_pending();
     TSM_ASSERT("Failed to create a link", !eval_err);
 
     HandleSeq links;
@@ -273,9 +275,9 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
     char buff[500];
     snprintf(buff, 500, "(%s  (%s \"%s\"(stv %f %f)) (%s \"%s\"))", tipo, nodename1, value1, truth, 
                 conf, nodename2, value2);
-    SchemeEval::instance().eval(buff);
-    bool eval_err = SchemeEval::instance().eval_error();
-    SchemeEval::instance().clear_pending();
+    eval.eval(buff);
+    bool eval_err = eval.eval_error();
+    eval.clear_pending();
     TSM_ASSERT("Failed to create parse link", !eval_err);
 
     HandleSeq links;
@@ -337,9 +339,9 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
     printf("check_frame_link(%s,%s,%s,%f,%f)\n", tipo, nodename1, nodename2, truth, conf);
     char buff[500];
     snprintf(buff, 500, "(%s (%s \"%s\") (%s \"%s\") )", tipo, nodename1, value1, nodename2, value2);
-    SchemeEval::instance().eval(buff);
-    bool eval_err = SchemeEval::instance().eval_error();
-    SchemeEval::instance().clear_pending();
+    eval.eval(buff);
+    bool eval_err = eval.eval_error();
+    eval.clear_pending();
     TSM_ASSERT("Failed to create a frame link", !eval_err);
 
     HandleSeq links;
