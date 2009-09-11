@@ -40,16 +40,17 @@ class SchemeEval
 		std::string input_line;
 		bool pending_input;
 
+		// straight-up evaluation
+		static SCM wrap_scm_eval(void *);
+		SCM do_scm_eval(SCM);
+		SCM do_scm_eval_str(const std::string &);
+
 		// Handle apply
 		Handle do_apply(const std::string& func, Handle varargs);
 		SCM do_apply_scm(const std::string& func, Handle varargs);
 		Handle hargs;
 		static void * c_wrap_apply(void *);
 		static void * c_wrap_apply_scm(void *);
-
-		// straight-up evaluation
-		SCM do_scm_eval(SCM);
-		static SCM wrap_scm_eval(void *);
 
 		// Error handling stuff
 		SCM error_string_port;
