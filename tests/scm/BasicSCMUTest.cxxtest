@@ -130,6 +130,15 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
+
+	// Test the eval_h function also -- it returns a handle.
+	snprintf(buff, 500, "(cog-atom %lu)", h.value());
+	Handle h2 = eval.eval_h(buff);
+
+	eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Failed to eval_h", !eval_err);
+	TSM_ASSERT("Failed to get the correct handle", h == h2);
 }
 
 void BasicSCMUTest::test_single_atom(void)
