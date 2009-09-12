@@ -51,16 +51,16 @@ int load_scm_file (const char * filename)
 		return norr;
 	}
 
-	//SchemeEval evaluator;
+	SchemeEval &evaluator = SchemeEval::instance();
 	int lineno = 0;
 
 	while(1)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);
 		if (NULL == rc) break;
-		std::string rv = SchemeEval::instance().eval(buff);
+		std::string rv = evaluator.eval(buff);
 
-		if (SchemeEval::instance().eval_error())
+		if (evaluator.eval_error())
 		{
 			fprintf(stderr, "File: %s line: %d\n", filename, lineno);
 			fprintf(stderr, "%s\n", rv.c_str());

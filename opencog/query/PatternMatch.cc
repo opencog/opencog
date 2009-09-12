@@ -217,15 +217,17 @@ Handle Instantiator::execution_link()
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
-		//SchemeEval applier;
-		Handle h = SchemeEval::instance().apply(schema.substr(4), oset[1]);
+		SchemeEval &applier = SchemeEval::instance();
+		Handle h = applier.apply(schema.substr(4), oset[1]);
 		return h;
 #endif /* HAVE_GUILE */
-	} else {
-            // ok, i can't handle that type of procedure, so return it allowing
-            // the user to execute it in a future circustance
-            return as->addLink( EXECUTION_LINK, oset, TruthValue::TRUE_TV( ) );
-        } // else
+	}
+	else
+	{
+		// Unkown proceedure type.  Return it, maybe some other
+		// execution-link handler will be able to process it.
+		return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
+	}
 
 }
 
@@ -341,17 +343,17 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
  * grounding.  A list of grounded expressions is created in 'result_list'.
  */
 class Implicator :
-    public virtual PatternMatchCallback
+	public virtual PatternMatchCallback
 {
-protected:
-    Instantiator inst;
-public:
-    AtomSpace *as;
-    Handle implicand;
-    std::vector<Handle> result_list;
-    std::map<unsigned int, std::map<Handle,Handle> > ground_vars;
-    virtual bool solution(std::map<Handle, Handle> &pred_soln,
-                          std::map<Handle, Handle> &var_soln);
+	protected:
+		Instantiator inst;
+	public:
+		AtomSpace *as;
+		Handle implicand;
+		std::vector<Handle> result_list;
+		std::map<unsigned int, std::map<Handle,Handle> > ground_vars;
+		virtual bool solution(std::map<Handle, Handle> &pred_soln,
+		                      std::map<Handle, Handle> &var_soln);
 };
 
 bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
@@ -360,11 +362,13 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (h != Handle::UNDEFINED )
+	if (TLB::isValidHandle(h))
 	{
-            result_list.push_back(h);
+		result_list.push_back(h);
             
-            std::map<Handle, Handle>::const_iterator it;
+		// WTF is this ??  xxxxxxxxxxxxxxx FIXME
+		// This cannot possibly be correct as written! xxxxxxxxxxxxxx
+		std::map<Handle, Handle>::const_iterator it;
             for( it = var_soln.begin( ); it != var_soln.end( ); ++it ) {
                 ground_vars[result_list.size()-1][it->first] = it->second;
             } // for
@@ -522,6 +526,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	}
 
 
+// xxxxxxxxxxxxxxxxxx WTF is this stuff ???? 
         HandleSeq gpnClauses;
         HandleSeq nonGpnClauses;
 
@@ -684,14 +689,15 @@ bool PatternMatch::isGroundedPredicateNodeTrue( Handle gpn, const std::map<Handl
         } // else
     } // for
     
-    Handle argumentsListLink = atom_space->addLink(LIST_LINK, arguments );
+    Handle argumentsListLink = atom_space->addLink(LIST_LINK, arguments);
 
-    const std::string& schema = dynamic_cast<Node* >( predicate )->getName( );
-    if (0 == schema.compare(0,4,"scm:", 4) ) {
+    const std::string& schema = dynamic_cast<Node* >(predicate)->getName();
+    if (0 == schema.compare(0,4,"scm:", 4))
+	 {
 #ifdef HAVE_GUILE
         logger().info( "%s - ok it is a Scheme Grounded Predicate. executing...",
                        __FUNCTION__ );
-        //SchemeEval applier;
+        // SchemeEval applier;
         std::string answer = SchemeEval::instance( ).apply_generic(schema.substr(4), argumentsListLink );
         
         boost::trim(answer);
