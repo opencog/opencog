@@ -295,5 +295,10 @@ int main (int argc, char * argv[])
 	            "La Cogita OpenCog chatbot", "asdf");
 
 	conn.message_loop();
+
+	fprintf(stderr, "%s: Fatal Error: Unexpected exit from message loop\n",
+		argv[0]);
+
+	return 1;
 }
 
