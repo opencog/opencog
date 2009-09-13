@@ -88,7 +88,7 @@
 	(define (find-existing-seme seme-list wrd-inst)
 		(let ((matching-seme 
 					(find (lambda (se) (seme-match-proc? se wrd-inst)) seme-list))
-				)
+			)
 			(if matching-seme
 				(let ()
 					(InheritanceLink (stv 1 1) word-inst matching-seme)
@@ -267,7 +267,7 @@
 ; (and then the truth-query pattern matcher as currently written fails)
 ; or we promote questions, in which case we need to promote the HYP 
 ; and TRUTH-QUERY_FLAG as well. To be deicded.
-(define (same-dependency-promoter word-inst)
+(define (same-dependency-promoter word-instance)
 
 	; Return a list of all of the relex relationships for which this
 	; word instance is the head-word.
@@ -301,7 +301,15 @@
 	; TRUTH-QUERY flags, if present.  This list will be promoted, below.
 	(define (get-truqu-flags wrd-inst)
 		(filter! is-truqu?
-			(cog-filter-incoming 'InheritanceLink word-inst)
+			(cog-filter-incoming 'InheritanceLink wrd-inst)
+		)
+	)
+
+	; Don't bother looking for truth query flags unless its a verb
+	(define (get-truqu-flags-for-verb wrd-inst)
+		(if (word-inst-is-verb? wrd-inst)
+			(get-truqu-flags wrd-inst)
+			'()
 		)
 	)
 
@@ -313,7 +321,7 @@
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
 				(rels (get-relex-rels wrd-inst))
-				(flgs (get-truqu-flags wrd-inst))
+				(flgs (get-truqu-flags-for-verb wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
@@ -374,12 +382,22 @@
 	; -- both have HYP/TRUTH-QUERY markings
 	; -- neither have HYP/TRUTH-QUERY markings
 	(define (qu-verb-seme-match? seme wrd-inst)
-(dbg-display "promotion stuff -- seme and word inst\n")
+(if (verb-seme-match? seme wrd-inst) (let ()
+(display "prom -- seme and word are:\n")
+(display seme)
+(display wrd-inst)
+(newline)
+(display "promotion stuff -- seme:\n")
 (display (null? (get-truqu-flags seme)))
 (display (get-truqu-flags seme))
+(newline)
+(display (cog-incoming-set seme))
+(newline)
+(display "promotion stuff -- word inst:\n")
 (display (null? (get-truqu-flags wrd-inst)))
-(display (get-truqu-flags wrd-inst))
-(end-dbg-display)
+(display (cog-incoming-set wrd-inst))
+(newline)
+))
 		(and
 			(verb-seme-match? seme wrd-inst)
 			(xor
@@ -411,7 +429,7 @@
 		)
 	)
 
-	(generic-promoter make-new-seme seme-match? word-inst)
+	(generic-promoter make-new-seme seme-match? word-instance)
 )
 
 (define (same-modifiers-promoter word-inst)
@@ -427,6 +445,8 @@
 ; will walk over all the hypergraphs, find every WordInstanceNode, call
 ; the promoter on it to get a SemeNode, and then construct a brand-new
 ; hypergraph with the SemeNode taking the place of the WordInstanceNode.
+;
+; Returns the list of the euqivalent, promoted relations.
 
 (define (promote-to-seme promoter atom-list)
 	(define (promote atom)
