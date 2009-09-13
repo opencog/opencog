@@ -269,6 +269,8 @@
 ; and TRUTH-QUERY_FLAG as well. To be deicded.
 (define (same-dependency-promoter word-inst)
 
+	; Return a list of all of the relex relationships for which this
+	; word instance is the head-word.
 	(define (get-relex-rels wrd-inst)
 		(cond
 			((word-inst-is-noun? wrd-inst) (noun-inst-get-relex-modifiers wrd-inst))
@@ -277,20 +279,45 @@
 		)
 	)
 
+	; Return a list of InheritenceLinks containing the HYP and
+	; TRUTH-QUERY flags, if present.  This list will be promoted, below.
+	(define (get-truqu-flags wrd-inst)
+		(define (is-truqu-str? str)
+			(or
+				(string=? "truth-query" str)
+				(string=? "hyp" str)
+			)
+		)
+		(define (is-truqu-node? node)
+			(and
+				(eq? 'DefinedLinguisticConceptNode (cog-type node))
+				(is-truqu-str? (cog-name node))
+			)
+		)
+		(define (is-truqu? link)
+			(is-truqu-node? (cadr (cog-outgoing-set link)))
+		)
+		(filter! is-truqu?
+			(cog-filter-incoming 'InheritanceLink word-inst)
+		)
+	)
+
 	; Create a new seme, given a word-instance. The new seme will 
 	; have the same modifiers that the word-instance has.
 	; Since this is used for promoting words in questions as well, 
-	; we need to be xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	; we need to promote the HYP and TRUTH-QUERY flags as well.
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
 				(rels (get-relex-rels wrd-inst))
+				(flgs (get-truqu-flags wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
 			(promote-to-seme same-dependency-promoter rels)
+			(promote-to-seme same-dependency-promoter flgs)
 			newseme
 		)
 	)
