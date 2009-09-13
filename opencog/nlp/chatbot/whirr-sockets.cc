@@ -105,6 +105,7 @@ char * whirr_sock_io (const char * msg)
 	}
 
 	shutdown (sock, SHUT_RD);
+	close(sock);
 
 	return retstr;
 }
