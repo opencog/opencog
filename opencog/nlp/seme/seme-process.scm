@@ -279,9 +279,9 @@
 		)
 	)
 
-	; Return a list of InheritenceLinks containing the HYP and
-	; TRUTH-QUERY flags, if present.  This list will be promoted, below.
-	(define (get-truqu-flags wrd-inst)
+	; Given an InheritanceLink 'link', returns #t if the link has a 
+	; truth-query or hypothetical attribute.
+	(define (is-truqu? link)
 		(define (is-truqu-str? str)
 			(or
 				(string=? "truth-query" str)
@@ -294,9 +294,12 @@
 				(is-truqu-str? (cog-name node))
 			)
 		)
-		(define (is-truqu? link)
-			(is-truqu-node? (cadr (cog-outgoing-set link)))
-		)
+		(is-truqu-node? (cadr (cog-outgoing-set link)))
+	)
+
+	; Return a list of InheritenceLinks containing the HYP and
+	; TRUTH-QUERY flags, if present.  This list will be promoted, below.
+	(define (get-truqu-flags wrd-inst)
 		(filter! is-truqu?
 			(cog-filter-incoming 'InheritanceLink word-inst)
 		)
@@ -364,6 +367,28 @@
 		)
 	)
 
+	(define (xor a b) (or (and a b) (not (or a b))))
+
+	; As above, but also checks for truth-query markings.
+	; A word-inst can be promoted to a seme if:
+	; -- both have HYP/TRUTH-QUERY markings
+	; -- neither have HYP/TRUTH-QUERY markings
+	(define (qu-verb-seme-match? seme wrd-inst)
+(dbg-display "promotion stuff -- seme and word inst\n")
+(display (null? (get-truqu-flags seme)))
+(display (get-truqu-flags seme))
+(display (null? (get-truqu-flags wrd-inst)))
+(display (get-truqu-flags wrd-inst))
+(end-dbg-display)
+		(and
+			(verb-seme-match? seme wrd-inst)
+			(xor
+				(null? (get-truqu-flags seme))
+				(null? (get-truqu-flags wrd-inst))
+			)
+		)
+	)
+
 	; For anything that's not a noun or a verb, all that we ask for
 	; is that it has the same word lemma. This seems safe for now,
 	; but will go bad if there's a chain of noun-adj-noun-adj modifiers
@@ -376,10 +401,12 @@
 		)
 	)
 
+	; Return #t if the word inst could be promoted to the seme, else
+	; return #f.
 	(define (seme-match? seme wrd-inst)
 		(cond
 			((word-inst-is-noun? wrd-inst) (noun-seme-match? seme wrd-inst))
-			((word-inst-is-verb? wrd-inst) (verb-seme-match? seme wrd-inst))
+			((word-inst-is-verb? wrd-inst) (qu-verb-seme-match? seme wrd-inst))
 			(else (same-lemma-match? seme wrd-inst))
 		)
 	)

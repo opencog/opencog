@@ -532,11 +532,22 @@ which is rendered as
 Thus, the following verb promotion rules are needed:
 
 1) If a seme is decorated with HYP or TRUTH-QUERY, then a word instance
-   without these decorations must not be promoted to that seme.
+   without these decorations must not be promoted to that seme. This
+   avoids the problem that would occur if the question "Did Ben throw a 
+   rock?" was followed by the question "What did Ben throw?". The second
+   "throw" does not have either HYP or TRUTH-QUERY, and so if promotion 
+   wass allowed, it would find "rock" as an answer.
 
-2) If a word-instance is decorated with HYP or TRUTH-QUERY, then, when
+2) If a seme is NOT decorated with HYP or TRUTH-QUERY, then a word
+   instance that does have these decorations must not be promoted to
+   that seme.  This minimizes any chances that parts of the question
+   might get promoted into statements, or that a statement might be 
+   reverted into a question.
+
+3) If a word-instance is decorated with HYP or TRUTH-QUERY, then, when
    a seme is first being created, these decorations must be attached to
    the seme.
+
 
  
 
