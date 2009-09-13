@@ -2,6 +2,7 @@
                       Semes - Concept Formation
                       -------------------------
                        Linas Vepstas May 2009
+                       Revised September 2009
 
 
 This directory contains some notes and experimental code for forming
@@ -328,6 +329,30 @@ One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
 
 
+Pseudo-clustering
+-----------------
+A key step in concept formation is determining if/when two distinct
+instances are really the same concept. This is to be accomplished by 
+comparing two concepts, and returning a (simple) truth value indicating
+the likelyhood that they are the same.  Many algos are possible.  The
+simplest might be the following:
+
+Take a weighted average of link-comparisons, comparing:
+-- WordNode. A mismatch here means that it is highly unlikely that the
+   concepts are identical, unless the WordNode is a pronoun.
+-- ContextNode. A mismatch here means it's highly unlike that the 
+   concepts are identical, unless the ContextNode is one of the base
+   "common-sense" contexts.
+-- Compare modifiers. A modifier present in one, but absent in the 
+   other, is "neutral". Conflicting modifiers suggest a conceptual
+   mis-match: If the current sentence calls a ball "green", while 
+   a previous one called it "red", then the two references are probably
+   to two different balls. Ditto for big, small, light, heavy, etc.
+-- Compare relations, e.g. capital_of, next_to, etc. Much like comparing
+   modifiers.
+
+
+
 Part III -- Implementation
 ==========================
 
@@ -475,11 +500,45 @@ the same structure as the RelEx relations: that is, both can still be
 considered to be "decorations", and so pattern matching and other
 algorithms can benefit from this structural similarity.
 
+
 Promotion and decoration of questions
 -------------------------------------
+The act of seme promotion, as described above, performs question
+answering more-or-less as a side-effect.  That is, the result of seme
+promotion on the sentence "Ben threw a ball" and the question "Did Ben
+throw a ball?" is a match on "Ben" and "ball", leaving only the verb
+to be compared. The primary algorithmic concern is to avoid accidentally
+promoting the question into a statement: i.e. to map both verbs to the 
+same seme. 
 
+RelEx decorates the verb "throw" in the question with 
 
+   TRUTH-QUERY-FLAG(throw, T)
+   HYP(throw, T)
 
+which is rendered as
+
+   ; TRUTH-QUERY-FLAG (throw, T)
+   (InheritanceLink (stv 1.0 1.0)
+      (WordInstanceNode "throw@dcae1b05-54cf-4f8a-b650-cd7327fe6fb6")
+      (DefinedLinguisticConceptNode "truth-query")
+   )
+   ; HYP (throw, T)
+   (InheritanceLink (stv 1.0 1.0)
+      (WordInstanceNode "throw@dcae1b05-54cf-4f8a-b650-cd7327fe6fb6")
+      (DefinedLinguisticConceptNode "hyp")
+   )
+
+Thus, the following verb promotion rules are needed:
+
+1) If a seme is decorated with HYP or TRUTH-QUERY, then a word instance
+   without these decorations must not be promoted to that seme.
+
+2) If a word-instance is decorated with HYP or TRUTH-QUERY, then, when
+   a seme is first being created, these decorations must be attached to
+   the seme.
+
+ 
 
 Contextual representation
 -------------------------
@@ -514,29 +573,6 @@ The only reason for using ContextLinks instead of
 
 Is to save a bit of RAM storage; there will be at least one ContextLink
 for every SemeNode.
-
-Pseudo-clustering
------------------
-A key step in concept formation is determining if/when two distinct
-instances are really the same concept. This is to be accomplished by 
-comparing two concepts, and returning a (simple) truth value indicating
-the likelyhood that they are the same.  Many algos are possible.  The
-simplest might be the following:
-
-Take a weighted average of link-comparisons, comparing:
--- WordNode. A mismatch here means that it is highly unlikely that the
-   concepts are identical, unless the WordNode is a pronoun.
--- ContextNode. A mismatch here means it's highly unlike that the 
-   concepts are identical, unless the ContextNode is one of the base
-   "common-sense" contexts.
--- Compare modifiers. A modifier present in one, but absent in the 
-   other, is "neutral". Conflicting modifiers suggest a conceptual
-   mis-match: If the current sentence calls a ball "green", while 
-   a previous one called it "red", then the two references are probably
-   to two different balls. Ditto for big, small, light, heavy, etc.
--- Compare relations, e.g. capital_of, next_to, etc. Much like comparing
-   modifiers.
-
 
 
 Boostraping
