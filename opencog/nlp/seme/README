@@ -4,13 +4,15 @@
                        Linas Vepstas May 2009
 
 
-This directory contains some notes and experimental code for extracting
-conceptual entities or "semes" from English text.  An example of a 
-"conceptual entity" would be the "Great Southern Railroad": a business,
-a railway, that existed at a certain point in space and time. This task 
-encompasses what is commonly called "named entity extraction". This task
-is meant to be more general, encompassing what is called "reference 
-resolution" (including pronoun resolution) as well.
+This directory contains some notes and experimental code for forming
+and extracting conceptual entities or "semes" from English text.  An
+example of a "conceptual entity" would be the "Great Southern Railroad":
+a business, a railway, that existed at a certain point in space and time.
+Seme formation overlaps and combines two related tasks: "named entity
+extraction" and "reference resolution". The first, "named entity
+extraction" attempts to identify named objects. "Reference resolution"
+attempts to determine when two different words (usually in different
+sentences) refer to the same thing.
 
 The primary challenges of seme extraction are:
 1) Constructing a data representation that is amenable to reasoning,
@@ -19,13 +21,18 @@ The primary challenges of seme extraction are:
    (so that they can be merged)
 3) Recognizing when one seme (incorrectly) refers to distinct concepts,
    and should be split apart.
-4) Learning new conceptual classifications and relations; so, for example,
-   when encountering a new word, to determine that it is, for example, a
-   color.
+4) Learning new conceptual classifications, ontologies and relations;
+   so, for example, when encountering a new, unknown, word, to determine
+   that it is, for example, a previously unknown color name.
+
+The text below is split into three parts: A motivational overview of
+"semes", a discussion of various issues that arise in concept formation,
+and, finally, details of the data structures and algorithms currently
+implemented in this directory.
 
 
-Why semes?
-----------
+Part I -- Motivation -- Why semes?
+=======================-----------
 The notion of a seme is introduced here to solve a "simple" technical
 problem in knowledge representation.  The goal of using "semes" is to
 move away from using words and/or word-instances to represent "things".
@@ -44,13 +51,15 @@ in different sentences (... sentences that were possibly uttered by
 different individuals at different times, even!)
 
 Thus, "semes", as defined here, are meant to be an abstraction that 
-behaves much like "concepts" (whatever that may be).  Yet, they are
-also meant to be fairly closely related to "words": they are only 
-one small step towards the general goal of "conceptualization". In 
-particular, semes are meant to be sufficiently word-like that they
-can be used in most relations that words are used in.  so, for example,
-if there's a RelEx2Frame structure that connects two words, then one
-could have exactly the same structure connecting two semes. 
+behaves much like "concepts", yet, in a certain way, behinving much
+like "words".  This leaves the notion of "concepts" free for other,
+more abstract usage. Semes are meant to be fairly closely related to
+"words": they are only one small step towards the general goal of 
+"conceptualization". In particular, semes are meant to be sufficiently
+word-like that they can be used in most relations that words are used
+in.  so, for example, if there's a RelEx relation that connects two
+words, then one could have exactly the same structure connecting two
+semes. 
 
 Thus, "semes" are removed by only a small step from linguistic usage;
 they provide a needed abstraction on the road to true "concepts" and
@@ -67,14 +76,14 @@ In order to promote text input into concepts, and to reason with
 concepts, we need to define what a concept is, and where its boundaries
 extend to.  At this point, the goal is not to define a super-abstract
 notion of a concept that passes all epistomological tests, but rather 
-a practical if flawed data structure that is adequate for representing
+a practical, if flawed, data structure that is adequate for representing
 data learned by reading, learned through linguistic corpus analysis. 
 The emphasis here is "flawed but practical": it should be just enough
 to take us to the next level of abstraction.
 
 Naively, a concept would seem to have the following parts:
 -- a SemeNode, to serve as an anchor (could be ConceptNode)
--- a linguistic expression complex.
+-- a linguistic expression complex. 
 -- a WordNet sense tag (optional)
 -- a DBPedia URI tag (optional)
 -- an OpenCyc tag ... etc. you get the idea.
@@ -157,6 +166,9 @@ whether two distinct statements are compatible with each other. When
 they are, then the two different word-instances can be assumed to refer
 to the same concept; relationships can then be merged.
 
+Part II -- Issues 
+=================
+A short discussion of issues that arise in concept/seme formation.
 
 Context
 -------
@@ -217,60 +229,7 @@ definite or indefinite: "THE color of ...." vs. "A form of.." or
 XXX This is a real bug/hang-up in the triples processing code:
 being unaware of this distinction seems to cause some triples
 to come out "backwards" (i.e. that clothing is always a skirt).
-Caution to be used during seme formation!
-
-
-Reference Resolution, and "Decorations"
----------------------------------------
-Consider the statement and truth-query below:
-
-"Ben violently threw the green ball."
-"Did Ben softly throw the green ball?"
-
-The problem of reference resolution is that of determining wether the
-"Ben" in the question is the same "Ben" as in the statement. Likewie
-for the verb "throw", since maybe there was some *other* ball that Ben
-did throw softly.
-
-The current code uses the notion of "decorations", and then pattern
-matches against the decorations to determine whether different word 
-instances might refer to the same seme.  
-
-Given some seme, its "decorations" are all of the relations that have
-that seme appearing in the head-position of the relation.  So, for 
-example, for the verb V == "throw", the word instance V is promoted 
-to the "seme" V by decorating V with relations.  In this example,  
-V is "decorated" with _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
-
-Then later, when I see "Did Mike throw a ball?" the answer is no,
-because this V is decorated in a different way.  That is, this instance
-of "throw" can't possibly be the same "throw" as in the earlier
-sentence, because of the different decorations.
-
-"Did Ben throw a ball?" -- yes, because this V is decorated with
-a subset of  _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
-
-"Did Ben softly throw the ball"? No -- This instance of "throw" is
-decorated differently -- it can't possibly be the same "seme"
-as the violent throw.
-
-Perhaps there is some other  "throw" in the system ... maybe
-there is another sentence ---  "Ben threw  a red ball softly" already
-in the system, in which case the "throw" seme does appear to
-be the same.  And also, the "ball" word-instance does match
-"red ball" so the answer is "yes". (and as a bonus, we know
-which ball was referred to -- it had to be the red ball -- its the
-only match).
-
-Anyway, I think that at some point, these "decorations" could
-be replaced by bona-fide "frames" (and clearly they need to
-be -- throwing is an instantaneous activity, while many other
-verbs are quite static: "The Big Ben building stood next to
-the blue building" -- and only frames will be able to "decorate"
-the differences between "throwing" and "standing" correctly.)
-
-The above is currently implemented in the "same-dependency-promoter"
-routine.
+Caution to be used during seme formation! XXX
 
 
 Learning Semantic Categories
@@ -369,6 +328,9 @@ One may deduce that "A hospital is a place", but one must be careful
 in making use of such knowledge....
 
 
+Part III -- Implementation
+==========================
+
 Concrete Data Representation
 ----------------------------
 Let's now look at how to represent some of these ideas concretely, in
@@ -388,21 +350,22 @@ threw a red ball" leads to
 A basic name is needed for the concept, and so, in complete analogy
 betwen WordInstanceNodes and WordNodes, we create:
 
-   ReferenceLink
+   LemmaLink
        SemeNode "ball@634a32ebc"
        WordNode "ball"
 
-although the lemmatized form should probably appear here (i.e. the
-LemmaLink would be used to obtain the source WordNode).  The idea that
-it's red would then be:
+The LemmaLink is used to indicate the root form of the word, stripped
+of inflection, number, tense, etc.  The idea that it's red is indicated
+by using modifiers, the *same* modifiers as RelEx uses, with essentially
+the same meanings:
 
     EvaluationLink
-       DefinedLinguisticRelationNode "amod"
+       DefinedLinguisticRelationNode "_amod"
        ListLink
           SemeNode "ball@634a32ebc"
-          WordNode "red"
+          SemeNode "red@a47343df"
 
-At some point, we need to convert the above to:
+It is presumed that, at some point, the aobve will be converted to:
 
     EvaluationLink
        SemanticRelationNode "color_of@6543"
@@ -421,6 +384,65 @@ How do we bootstrap to there? Via upper-ontology-like statments:
 abstract stage, one must ask: "Is a ball the kind of object that
 can have a color?"; but at first, we shall start naively, and 
 assume that it is.
+
+
+Seme Promotion
+--------------
+The current code is organized around the idea of "seme promotion":
+
+
+
+Reference Resolution, and "Decorations"
+---------------------------------------
+Consider the statement and truth-query below:
+
+"Ben violently threw the green ball."
+"Did Ben softly throw the green ball?"
+
+The problem of reference resolution is that of determining wether the
+"Ben" in the question is the same "Ben" as in the statement. Likewie
+for the verb "throw", since maybe there was some *other* ball that Ben
+did throw softly.
+
+The current code uses the notion of "decorations", and uses pattern
+matching against the decorations to determine whether different word 
+instances might refer to the same seme.  
+
+Given some seme, its "decorations" are all of the relations that have
+that seme appearing in the head-position of the relation.  So, for 
+example, for the verb V == "throw", the word instance V is promoted 
+to the "seme" V by decorating V with relations.  In this example,  
+V is "decorated" with _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
+
+Then later, when I see "Did Mike throw a ball?" the answer is no,
+because this V is decorated in a different way.  That is, this instance
+of "throw" can't possibly be the same "throw" as in the earlier
+sentence, because of the different decorations.
+
+"Did Ben throw a ball?" -- yes, because this V is decorated with
+a subset of  _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
+
+"Did Ben softly throw the ball"? No -- This instance of "throw" is
+decorated differently -- it can't possibly be the same "seme"
+as the violent throw.
+
+Perhaps there is some other  "throw" in the system ... maybe
+there is another sentence ---  "Ben threw  a red ball softly" already
+in the system, in which case the "throw" seme does appear to
+be the same.  And also, the "ball" word-instance does match
+"red ball" so the answer is "yes". (and as a bonus, we know
+which ball was referred to -- it had to be the red ball -- its the
+only match).
+
+Anyway, I think that at some point, these "decorations" could
+be replaced by bona-fide "frames" (and clearly they need to
+be -- throwing is an instantaneous activity, while many other
+verbs are quite static: "The Big Ben building stood next to
+the blue building" -- and only frames will be able to "decorate"
+the differences between "throwing" and "standing" correctly.)
+
+The above is currently implemented in the "same-dependency-promoter"
+routine.
 
 
 Contextual representation
@@ -549,6 +571,8 @@ ToDo:
 Create the following new atoms types:
 ContextNode
 SemanticRelationshipNode
+
+todo -- add POS tagging!!
 
 
 ToDo: Reification of triples ...

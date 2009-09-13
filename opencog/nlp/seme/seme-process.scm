@@ -265,7 +265,7 @@
 ; XXXXXXXXXXXXXXXX under consruction
 ; Err, here's the rub -- either we don't promote quetions
 ; (and then the truth-query pattern matcher as currently written fails)
-; of wee promote questios, in which case we need to promote the HYP 
+; or we promote questions, in which case we need to promote the HYP 
 ; and TRUTH-QUERY_FLAG as well. To be deicded.
 (define (same-dependency-promoter word-inst)
 
@@ -279,6 +279,8 @@
 
 	; Create a new seme, given a word-instance. The new seme will 
 	; have the same modifiers that the word-instance has.
+	; Since this is used for promoting words in questions as well, 
+	; we need to be xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
@@ -335,8 +337,8 @@
 		)
 	)
 
-	; For anything that's not a noun or a verb, all that we ask
-	; for is that has the same word lemma. This seems safe for now,
+	; For anything that's not a noun or a verb, all that we ask for
+	; is that it has the same word lemma. This seems safe for now,
 	; but will go bad if there's a chain of noun-adj-noun-adj modifiers
 	; such as those in medical text.  This might fail for chained
 	; adverbial modifers (?not sure?)
@@ -368,7 +370,7 @@
 ; promote-to-seme -- promote all WordInstanceNodes to SemeNodes
 ;
 ; Given a specific promotor, and a list of hypergraphs, this routine
-; will walk over all the hyprgraphs, find every WordInstanceNode, call
+; will walk over all the hypergraphs, find every WordInstanceNode, call
 ; the promoter on it to get a SemeNode, and then construct a brand-new
 ; hypergraph with the SemeNode taking the place of the WordInstanceNode.
 

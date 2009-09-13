@@ -107,7 +107,7 @@ All 23 are #$TermOfUnit, which is used to define anonymous
 constants, taking the form 
    (#$TermOfUnit #$<(#$Some #$Expr)> (#$Some #$Expr))
 
-That 23  of these are makred as being of "unknown tructh value"
+That 23  of these are marked as being of "unknown truth value"
 seems like a data entry error. 
 
 Strength
