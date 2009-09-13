@@ -389,23 +389,50 @@ assume that it is.
 Seme Promotion
 --------------
 The current code is organized around the idea of "seme promotion":
+snippets of scheme code that, given a word instance, return a seme.
+Currently, three different promoters are implemented.
 
+-- trivial-promoter -- 
+   Creates a new, unique SemeNode for *every* input WordInstanceNode. 
+   That is, no two words are ever assumed to refer to the same seme.
+
+-- same-lemma-promoter -- 
+   Creates a new SemeNode only if there isn't one already having the 
+   same lemma as the word instance.  That is, it assumes that any given 
+   word always refers to the same seme. In a certain way, this is the
+   "opposite* behaviour from the trivial promoter.
+
+-- same-dependency-promoter --
+   Re-uses an existing seme only if it has a superset of the dependency
+   relations of the word-instance. Otherwise, it creates a new seme.
+
+The motivation for, and operation of this last is discussed below. It
+has a number of subtle points, including problems with representing
+hypothetical (truth-query) questions.
+
+Although the current seme-promotion code is implemented in scheme, a 
+long-term goal is to re-implement this code in terms of patterns, or
+ImplicationLinks, so that all seme promotion could be done by using the
+pattern matcher (i.e. a forward/backward chainer).  That is, we want to
+minimize/eliminate the use of scheme code (or C++ code or python... or
+any code at all), and represent all graph transformations as hypergraphs
+themselves.
 
 
 Reference Resolution, and "Decorations"
 ---------------------------------------
 Consider the statement and truth-query below:
 
-"Ben violently threw the green ball."
-"Did Ben softly throw the green ball?"
+   "Ben violently threw the green ball."
+   "Did Ben softly throw the green ball?"
 
 The problem of reference resolution is that of determining wether the
-"Ben" in the question is the same "Ben" as in the statement. Likewie
+"Ben" in the question is the same "Ben" as in the statement. Likewise
 for the verb "throw", since maybe there was some *other* ball that Ben
 did throw softly.
 
 The current code uses the notion of "decorations", and uses pattern
-matching against the decorations to determine whether different word 
+matching against the decorations to determine whether different word
 instances might refer to the same seme.  
 
 Given some seme, its "decorations" are all of the relations that have
@@ -414,35 +441,44 @@ example, for the verb V == "throw", the word instance V is promoted
 to the "seme" V by decorating V with relations.  In this example,  
 V is "decorated" with _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
 
-Then later, when I see "Did Mike throw a ball?" the answer is no,
+Then later, when I see "Did Mike throw a ball?" the answer is no, 
 because this V is decorated in a different way.  That is, this instance
-of "throw" can't possibly be the same "throw" as in the earlier
+of "throw" can't possibly be the same "throw" as in the earlier 
 sentence, because of the different decorations.
 
-"Did Ben throw a ball?" -- yes, because this V is decorated with
-a subset of  _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
+"Did Ben throw a ball?" -- yes, because this V is decorated with a 
+subset of  _subj(V, Ben), _obj(V, ball) _advmod(V, violently).
 
-"Did Ben softly throw the ball"? No -- This instance of "throw" is
-decorated differently -- it can't possibly be the same "seme"
-as the violent throw.
+"Did Ben softly throw the ball"?  No -- This instance of "throw" is
+decorated differently -- it can't possibly be the same "seme" as the 
+violent throw.
 
-Perhaps there is some other  "throw" in the system ... maybe
-there is another sentence ---  "Ben threw  a red ball softly" already
-in the system, in which case the "throw" seme does appear to
-be the same.  And also, the "ball" word-instance does match
-"red ball" so the answer is "yes". (and as a bonus, we know
-which ball was referred to -- it had to be the red ball -- its the
-only match).
+Perhaps there is some other  "throw" in the system ... maybe there is
+another sentence ---  "Ben threw  a red ball softly" already in the
+system, in which case the "throw" seme does appear to be the same.  And
+also, the "ball" word-instance does match "red ball" so the answer is
+"yes".  And, as a bonus, we know which ball was referred to -- it had to
+be the red ball -- its the only match.
 
-Anyway, I think that at some point, these "decorations" could
-be replaced by bona-fide "frames" (and clearly they need to
-be -- throwing is an instantaneous activity, while many other
-verbs are quite static: "The Big Ben building stood next to
-the blue building" -- and only frames will be able to "decorate"
-the differences between "throwing" and "standing" correctly.)
+In the above, all "decorations" were in the form of RelEx relations. 
+At some point, these can be, and should be, replaced by bona-fide 
+"frames".  The need for this is already fairly clear, when one compares
+questions such as "Has Ben always been throwing balls?" to the 
+syntactically similar "Has that tree always been standing there?".
+Here, "throwing" is a dyanmic, transient activity, while "standing"
+is not.  Decorating with RelEx relations is not enough to capture this
+difference.  Any sort of more sophisticated logical deduction or 
+inference will need access to such frame decorations.
 
-The above is currently implemented in the "same-dependency-promoter"
-routine.
+An important point here is that "bona-fide" frame relations can have
+the same structure as the RelEx relations: that is, both can still be
+considered to be "decorations", and so pattern matching and other
+algorithms can benefit from this structural similarity.
+
+Promotion and decoration of questions
+-------------------------------------
+
+
 
 
 Contextual representation
@@ -540,21 +576,6 @@ All of these promoters could be, and eventually should be
 re-implemented as ImplicationLinks, so that all promotion runs
 entirely withing OpenCog.  For now, they are implemented in scheme.
 
-There are currently three promoters
-
--- trivial-promoter -- 
-   Creates a new, unique SemeNode for *every* input WordInstanceNode. 
-   That is, no two words are ever assumed to refer to the saem seme.
-
--- same-lemma-promoter -- 
-   Creates a new SemeNode only if there isn't one already having the 
-   same lemma as the word instance.  That is, it assumes that any given 
-   word always refers to the same seme. This is the "opposite* behaviour
-   from the trivial promoter.
-
--- same-modifiers-promoter --
-   Re-uses an existing seme only if it has a superset of the modifiers 
-   of the word-instance. Otherwise, it creates a new seme.
 
 
 Deduction
