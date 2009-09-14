@@ -247,7 +247,7 @@
 			(display ", you asked a truth-query question: ")
 			(display txt)
 			(newline)
-			(chat-return "(say-try-truth-query)")
+			(chat-return "(say-handle-truth-query)")
 		)
 	)
 
@@ -276,6 +276,11 @@
 	)
 
 ; Dead code, maintain as reference for just a little while.
+; When removing this, be sure to:
+; 1) remove "chat-get-simple-answer", if needed,
+; 2) remove SentenceQuery.cc from CMakefile
+; 3) remove cog-ad-hoc "question" support.
+;
 ;	; Perform a simple pattern matching to the syntactic
 ;	; form of the sentence.
 ;	(set! is-question (cog-ad-hoc "question" (car sents)))
@@ -405,15 +410,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-try-truth-query -- try answering a yes/no question
+; say-handle-truth-query -- try answering a yes/no question
 ; Some questions are truth queries, posing a hypothesis, and asking for a 
 ; yes/no answer. This handles these.
 ;
-; XXX FIXME: this should be called only if we catually *have* a 
-; truth query. And if we do have a truth query, then we should NOT
-; do the triples pipeline.
-;
-(define (say-try-truth-query)
+(define (say-handle-truth-query)
 
 	; Hmm promote trip semes ?? -- later 
 	; Also -- cannot blithly promote, do *only* the semes
