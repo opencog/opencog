@@ -177,6 +177,20 @@
 )
 
 ; -----------------------------------------------------------------------
+; Run all rules in a list of rules -- i.e. apply do-varscope to each.
+;
+(define (apply-all-rules rule-list)
+	(for-each
+		(lambda (rule) 
+			(cog-delete ; need to delete the returned ListLink
+				(cog-ad-hoc "do-varscope" rule)
+			)
+		)
+		rule-list
+	)
+)
+
+; -----------------------------------------------------------------------
 ; say-id-english -- process user input from chatbot.
 ; args are: user nick from the IRC channel, and the text that the user 
 ; entered.
@@ -219,6 +233,24 @@
 		)
 	)
 
+	(attach-new-parses (get-new-parsed-sentences))
+
+	; Apply a set of rules to determin if we even *have* a truth query.
+	(apply-all-rules *truth-query-id-list*)
+
+	; If this is a truth query, then handle it
+	(if (not (null? (get-truth-queries)))
+		(let ()
+			(display "Hello ")
+			(display nick)
+			(display ", you asked a truth-query question: ")
+			(display txt)
+			(newline)
+			(chat-return "(say-try-truth-query)")
+		)
+	)
+
+
 	; Perform a simple pattern matching to the syntactic
 	; form of the sentence.
 	(set! is-question (cog-ad-hoc "question" (car sents)))
@@ -252,7 +284,7 @@
 
 	; If we are here, a question was asked, and syntax matching
 	; did not provide an answer.
-	(chat-return "(say-try-truth-query)")
+	(chat-return "(say-try-triple-qa)")
 )
 
 ; -----------------------------------------------------------------------
@@ -365,28 +397,6 @@
 ; do the triples pipeline.
 ;
 (define (say-try-truth-query)
-
-	(attach-new-parses (get-new-parsed-sentences))
-
-	; Apply a set of rules to determin if we even *have* a truth query.
-	(for-each
-		(lambda (rule) 
-			(cog-delete ; need to delete the returned ListLink
-				(cog-ad-hoc "do-varscope" rule)
-			)
-		) 
-		*truth-query-id-list*
-	)
-
-	; If this does not apear to be a truth query, then cut out
-	; of here, and try something else.
-	(if (null? (get-truth-queries))
-		(let ()
-			(dbg-display "No truth-query found, try triples-qa.\n")
-			(end-dbg-display)
-			(chat-return "(say-try-triple-qa)")
-		)
-	)
 
 	; Hmm promote trip semes ?? -- later 
 	; Also -- cannot blithly promote, do *only* the semes
