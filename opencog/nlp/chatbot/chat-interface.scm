@@ -218,9 +218,9 @@
 	(relex-parse txt)
 	(set! sents (get-new-parsed-sentences))
 
-	; Hmm. Seems like sents is never null, unless there's a 
-	; programmig error in RelEx.  Otherwise, it always returns 
-	; something, even if the input was non-sense.
+	; Hmm. Seems like sents is never null, unless there's a programming
+	; error in RelEx.  Otherwise, it always returns something, even if the
+	; input was non-sense. We'll check anyway, just to avoid crudola.
 	(if (null? sents)
 		(let ()
 			(display "Hello ")
@@ -233,9 +233,10 @@
 		)
 	)
 
+	; Attach parses to an anchor where they can be found.
 	(attach-new-parses (get-new-parsed-sentences))
 
-	; Apply a set of rules to determin if we even *have* a truth query.
+	; Apply a set of rules to determine if we have a truth query.
 	(apply-all-rules *truth-query-id-list*)
 
 	; If this is a truth query, then handle it
@@ -250,41 +251,53 @@
 		)
 	)
 
+	; Apply a set of rules to determine if we have a WH-question
+	(apply-all-rules *wh-question-id-list*)
 
-	; Perform a simple pattern matching to the syntactic
-	; form of the sentence.
-	(set! is-question (cog-ad-hoc "question" (car sents)))
-
-	;; Was a question asked?
-	(if is-question 
-		(let ((ans (chat-get-simple-answer)))
-			(display "Hello ")
-			(display nick)
-			(display ", you asked a question: ")
-			(display txt)
-			(newline)
-
-			; If pattern-matching found an answer, print it.
-			(if (not (null? ans))
-				(let () 
-					(chat-prt-soln "Syntax pattern match found: " ans)
-					(chat-return "(say-final-cleanup)")
-				)
-			)
-		)
+	(if (not (null? (get-wh-qvars)))
 		(let ()
 			(display "Hello ")
 			(display nick)
-			(display ", you made a statement: ")
+			(display ", you asked a WH-question: ")
 			(display txt)
 			(newline)
-			(chat-return "(say-declaration)")
+			(chat-return "(say-try-triple-qa)")
 		)
 	)
 
-	; If we are here, a question was asked, and syntax matching
-	; did not provide an answer.
-	(chat-return "(say-try-triple-qa)")
+	; If we are here, its not a question, but a statement
+	(let ()
+		(display "Hello ")
+		(display nick)
+		(display ", you made a statement: ")
+		(display txt)
+		(newline)
+		(chat-return "(say-declaration)")
+	)
+
+; Dead code, maintain as reference for just a little while.
+;	; Perform a simple pattern matching to the syntactic
+;	; form of the sentence.
+;	(set! is-question (cog-ad-hoc "question" (car sents)))
+;
+;	;; Was a question asked?
+;	(if is-question 
+;		(let ((ans (chat-get-simple-answer)))
+;			(display "Hello ")
+;			(display nick)
+;			(display ", you asked a question: ")
+;			(display txt)
+;			(newline)
+;
+;			; If pattern-matching found an answer, print it.
+;			(if (not (null? ans))
+;				(let () 
+;					(chat-prt-soln "Syntax pattern match found: " ans)
+;					(chat-return "(say-final-cleanup)")
+;				)
+;			)
+;		)
+;	)
 )
 
 ; -----------------------------------------------------------------------
@@ -319,7 +332,6 @@
 	; as that will create all sorts of havoc. We only want to promote
 	; actual subject-verb-object assertions, so that we can answer
 	; truth-query questions on them. 
-	(attach-new-parses (get-new-parsed-sentences))
 	(find-truth-assertions)
 
 (dbg-display "truth-assertions are:\n")
@@ -343,6 +355,11 @@
 ; The question-answering rules look for things on this anchor.
 ;
 (define *bottom-anchor* (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
+
+(define (get-wh-qvars)
+	(cog-chase-link 'ListLink 'WordInstanceNode *bottom-anchor*)
+)
+
 (define (anchor-bottom-side trip-list)
 	(define (re-anchor-one trip)
 		(let* ((ll (cadr (cog-outgoing-set trip)))
