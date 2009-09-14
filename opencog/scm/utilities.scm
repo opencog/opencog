@@ -441,4 +441,98 @@
 	(fv atom-list '())
 )
 
+; --------------------------------------------------------------------
+; cartesian-prod - distribute the cartesian product across the tuple
+
+; This returns the Cartestion product of a tuple of sets by distributing
+; the product across the set elements. Examples are given below.
+;
+; Let the tuple consist of sets s_1, s_2, ..., s_m
+; Let the cardinality of s_k be n_k
+; Then this returns a list of n_1 * n_2 *... * n_m tuples,
+; where the projection of the coordinate k is an element of s_k.
+;
+; guile> (cartesian-prod (list 'p 'q))
+; (p q)
+; guile> (cartesian-prod (list 'p (list 'x 'y)))
+; ((p x) (p y))
+; guile> (cartesian-prod (list (list 'p 'q) 'x))
+; ((p x) (q x))
+; guile> (cartesian-prod (list (list 'p 'q) (list 'x 'y)))
+; ((p x) (q x) (p y) (q y))
+; guile> (cartesian-prod (list (list 'p 'q) 'a (list 'x 'y)))
+; ((p a x) (q a x) (p a y) (q a y))
+; guile> (cartesian-prod (list 'a (list 'p 'q) (list 'x 'y)))
+; ((a p x) (a q x) (a p y) (a q y))
+;
+(define (cartesian-prod tuple-of-lists)
+
+	; distribute example usage:
+	; guile> (distribute (list 'p 'q)  (list '1 '2 '3))
+	; ((p 1 2 3) (q 1 2 3))
+	; guile> (distribute 'p (list '1 '2 '3))
+	; (p 1 2 3)
+	; guile> (distribute 'p '1)
+	; (p 1)
+	; guile> (distribute (list 'p 'q) '1)
+	; ((p 1) (q 1))
+	;
+	(define (distribute heads a-tail)
+		(define (match-up a-head tale)
+			(if (list? tale)
+				(cons a-head tale)
+				(list a-head tale)
+			)
+		)
+		(if (list? heads)
+			(map (lambda (hed) (match-up hed a-tail)) heads)
+			(match-up heads a-tail)
+		)
+	)
+
+	; guile> (all-combos 'p (list 'x 'y))
+	; ((p x) (p y))
+	; guile> (all-combos 'p (list (list 'a 'b) (list 'y 'z)))
+	; ((p a b) (p y z))
+	; guile> (all-combos (list 'p 'q) (list 'x 'y))
+	; ((p x) (q x) (p y) (q y))
+	; guile> (all-combos (list 'p 'q) 'x)
+	; ((p x) (q x))
+	; guile> (all-combos 'p  'x)
+	; (p x)
+	;
+	(define (all-combos heads tails)
+		(if (list? tails)
+			(let ((ll (map (lambda (tale) (distribute heads tale)) tails)))
+				(if (list? heads)
+					(concatenate! ll)
+					ll
+				)
+			)
+
+			; tails is not a list
+			(distribute heads tails)
+		)
+	)
+
+	(cond 
+		((null? tuple-of-lists) '())
+		((not (list? tuple-of-lists)) tuple-of-lists)
+		(else 
+			(let ((lc (car tuple-of-lists))
+					(rc (cdr tuple-of-lists))
+				)
+				(if (null? rc)
+					lc
+					; cartesian-prod always returns tails, so we
+					; just need to take all combinations of the
+					; head against the returned tails.
+					; (This is not a tail-recursive call but I don't care)
+					(all-combos lc (cartesian-prod rc))
+				)
+			)
+		)
+	)
+)
+
 ; ---------------------------------------------------------------------
