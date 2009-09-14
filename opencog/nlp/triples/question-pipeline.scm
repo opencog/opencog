@@ -41,6 +41,59 @@
 (define wh-question-id-rule-3 (wh-question-pattern "where"))
 (define wh-question-id-rule-4 (wh-question-pattern "why"))
 
+; -----------------------------------------------------------------
+; Find a possble, candidate seme for this word instance. It is
+; a candidate if it has the same lemma form as the word-instance.
+(define (r-candidate-of-word-inst word-inst seme)
+	(r-and 
+		(r-link LemmaLink word-inst "$var-lemma")
+		(r-decl-vartype "WordInstanceNode" word-inst)
+		(r-decl-vartype "WordNode" "$var-lemma")
+		(r-link LemmaLink seme "$var-lemma")
+		(r-decl-vartype "SemeNode" seme)
+	)
+)
+
+; -----------------------------------------------------------------
+; The following answers an SVO (subject-verb-object) WH-question.
+; In particular, it is aimed at questions of the form "What did
+; subject verb?" (What did Fred throw?) so that the WH-word is the 
+; object of the sentence.
+;
+(define question-rule-2
+	(r-varscope
+		(r-and
+			(r-anchor-node *bottom-anchor* "$qVar")
+			(r-decl-word-inst "$qVar" "$parse")
+			(r-decl-vartype "ParseNode" "$parse")
+
+			; Not needed, since we already have the qvar ... 
+			; (r-anchor-node *new-parses-anchor* "$parse")
+
+			(r-decl-word-inst "$verb" "$parse")
+			(r-rlx "_obj"  "$verb" "$qVar")
+			(r-rlx "_subj" "$verb" "$svar")
+
+			; Look for seme matching the subject
+			(r-seme-of-word-inst "$svar" "$seme-svar")
+
+			; Look for candidate verb semes.
+			(r-candidate-of-word-inst "$verb" "$ans-verb")
+			(r-rlx "_subj" "$ans-verb" "$seme-svar")
+			(r-rlx "_obj"  "$ans-verb" "$ans-ovar")
+
+			; XXX we should also make sure that adverbs, if any, that
+			; modify the verb, are also matched up.
+
+			; The below make sure that a previous truth query is not
+			; mis-interpreted as a statement.
+			(r-not (r-rlx-flag "hyp" "$ans-verb"))
+			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
+		)
+		(r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans-ovar")
+	)
+)
+			
 
 ; -----------------------------------------------------------------
 ; The following answers a simple WH-question (who, what, when etc.)
@@ -130,29 +183,6 @@
 ;
 ; or more generally "did X verb Y?"
 
-; Find the seme for this word-instance. Such an InheritanceLink
-; will exist if and only if the seme is *definintely* correct for
-; this word instance.
-(define (r-seme-of-word-inst word-inst seme)
-	(r-and 
-		(r-link InheritanceLink word-inst seme)
-		(r-decl-vartype "WordInstanceNode" word-inst)
-		(r-decl-vartype "SemeNode" seme)
-	)
-)
-
-; Find a possble, candidate seme for this word instance. It is
-; a candidate if it has the same lemma form as the word-instance.
-(define (r-candidate-of-word-inst word-inst seme)
-	(r-and 
-		(r-link LemmaLink word-inst "$var-lemma")
-		(r-decl-vartype "WordInstanceNode" word-inst)
-		(r-decl-vartype "WordNode" "$var-lemma")
-		(r-link LemmaLink seme "$var-lemma")
-		(r-decl-vartype "SemeNode" seme)
-	)
-)
-
 (define truth-query-rule-0
 	(r-varscope
 		(r-and
@@ -178,7 +208,7 @@
 			; XXX we should also make sure that adverbs, if any, that
 			; modify the verb, are also matched up.
 
-			; The below make sure that a provious truth query is not
+			; The below make sure that a previous truth query is not
 			; mis-interpreted as a statement.
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))

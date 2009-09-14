@@ -647,5 +647,18 @@
 	(r-new-expr '() (list lnk) (r-fv var))
 )
 
+; -----------------------------------------------------------------
+; Find the seme for this word-instance. Such an InheritanceLink
+; will exist if and only if the seme is *definintely* correct for
+; this word instance.
+;
+(define (r-seme-of-word-inst word-inst seme)
+	(r-and 
+		(r-link InheritanceLink word-inst seme)
+		(r-decl-vartype "WordInstanceNode" word-inst)
+		(r-decl-vartype "SemeNode" seme)
+	)
+)
+
 ; ------------------------ END OF FILE ----------------------------
 ; -----------------------------------------------------------------

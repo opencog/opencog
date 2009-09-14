@@ -261,7 +261,7 @@
 			(display ", you asked a WH-question: ")
 			(display txt)
 			(newline)
-			(chat-return "(say-try-triple-qa)")
+			(chat-return "(say-try-svo-qa)")
 		)
 	)
 
@@ -458,6 +458,33 @@
 )
 
 ; -----------------------------------------------------------------------
+; say-try-svo-qa -- try answering WH-questions using SVO pattern matching
+;
+(define (say-try-svo-qa)
+
+	; First, we want to grab all of the words in the question, and
+	; tag them with semes. (XXX We don't really need all the words,
+	; only the words that are participating in relations.) Actually,
+	; we pretty much just need to promote the verb, everything else
+	; will follow.
+	(for-each same-modifiers-promoter
+		(concatenate! 
+			(map parse-get-words
+				(sent-list-get-parses (get-new-parsed-sentences))
+			)
+		)
+	)
+	
+(dbg-display "running the svo-wh:\n")
+(let ((rslt (cog-ad-hoc "do-varscope" question-rule-2)))
+(display rslt)(newline)
+(cog-delete rslt))
+(end-dbg-display)
+
+	(chat-return "(say-try-triple-qa)")
+)
+
+; -----------------------------------------------------------------------
 ; say-try-triple-qa -- try answering questions using triples 
 ; The first part, "say-id-english", parsed the user input, and 
 ; attempted a syntax-pattern match to any questions.  If that fails,
@@ -481,6 +508,7 @@
 		)
 
 		; The question-rule-x looks for stuff attached to this anchor
+		; XXX is this still neccessary ?? 
 		(anchor-bottom-side trips)
 
 		; Pull in any semes that might be related...
