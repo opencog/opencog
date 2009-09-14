@@ -45,6 +45,12 @@ namespace OperationalPetController
         			Send(m_data + "\n");
                 }
 	        }
+            //XXX If NLGen returns more than one sentence as cand idate, just
+            //the last one is considered. This case occurs when relex has more
+            //than one parser for one sentence, and will cause no problem in
+            //this case because the sentences candidates will be the same. Just
+            //the case when two sentences originate the same relex output is a
+            //problem case, which I think will be rare or impossible
             void OnLine(const std::string& line){
                 logger().debug("NLGenClient::%s - Incoming Line: %s", __FUNCTION__, line.c_str() );
                 output_data = line;
