@@ -269,6 +269,13 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	return 0;
 }
 
+int got_kick(const char* params, irc_reply_data* ird, void* data)
+{
+	printf("got kicked -- input=%s\n", params);
+	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
+	return 0;
+}
+
 /**
  * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
  * package libtclap-dev in Ubuntu.
@@ -286,6 +293,7 @@ int main (int argc, char * argv[])
 
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
+	conn.hook_irc_command("KICK", &got_kick);
 
 	const char *login = getlogin();
 
@@ -296,7 +304,7 @@ int main (int argc, char * argv[])
 
 	conn.message_loop();
 
-	fprintf(stderr, "%s: Fatal Error: Unexpected exit from message loop\n",
+	fprintf(stderr, "%s: Fatal Error: Remote side closed socket\n",
 		argv[0]);
 
 	return 1;
