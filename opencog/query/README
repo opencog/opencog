@@ -293,7 +293,16 @@ Currently Implemented Algorithm
    if a grounding for an optional clause is found, then the match as 
    as a whole can be rejected. This kind of pattern-rejection is 
    explicitly done with the crisp-boolean-logic callback.
-   
+
+
+Open Questions
+--------------
+In many ways, the above algorithm resembles that of a recursive descent
+parser.  However, it does a *lot* of backtracking during its solution
+search. It is throughly unclear as to whether the hypergraph
+pattern-matching problem can be reformulated to resemble an LL(k)
+grammar, so that linear-time predictive parsing techniques can be used.
+
 
 Summary
 -------
@@ -310,6 +319,7 @@ Example Code
 The test/query directory contains several test cases checking on this
 functionality. The BigPatternUTest test case is a small, simple, clear
 example of using the simple forward chainer.
+
 
 Ranking; Approximate matching; Crisp and Fuzzy Logic
 ----------------------------------------------------
@@ -373,6 +383,7 @@ simple forward-chainer. For example, one may create a collection of
 ImplicationLinks. Then, calling each in turn, from a loop, will cause
 cause each to be evaluated. Thus, N iterations of the loop is equivalent
 to chaining N levels deep.
+
 
 Hypergraph Query Language (HQL)
 -------------------------------
@@ -466,6 +477,11 @@ The algorithm makes heavy use of "foreach" iterators to walk the
 incoming and outgoing edges of an atom.  The "foreach" mechanism
 has multiple advantages over other techniques, and it is important
 to understand these.
+
+On the other hand, given that this is C++ and not C, the correct
+solution is almost surely to re-write the for-eachs as C++ iterators,
+which offers the same advantages as foreach, but has a more mundane
+programming paradigm.
 
 A) The details of the Atom.h incoming and outgoing sets are abstracted.
    Thus, while the outgoing set uses std:vector, the incoming set uses

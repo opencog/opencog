@@ -11,9 +11,7 @@ ADD_LIBRARY (OpcLib
     MockOpcHCTest
     HCTestAgent
     RuleEngine
-    #NewRuleEngine
     RuleEngineUtil
-    #NewRuleEngineUtil
     RuleEngineLearnedTricksHandler
     SchemaRunner
     BaseAgentModeHandler
@@ -22,7 +20,6 @@ ADD_LIBRARY (OpcLib
     LearningAgentModeHandler
     LanguageComprehension
     FramesToRelexRuleEngine
-    ClientSocket
 )
 
 INCLUDE_DIRECTORIES (

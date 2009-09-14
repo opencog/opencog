@@ -52,13 +52,13 @@
         <property name="height" value="2" />
         <property name="visibility-status" value="visible" />
         <property name="detector" value="true" />
-        <property name="color-100%" value="brown" />
-        <property name="color-75%" value="red" />
-        <property name="color-50%" value="blue" />
-        <property name="color-25%" value="green" />
-        <property name="color-15%" value="white" />
-        <property name="color-10%" value="black" />
-        <property name="color-5%" value="gray" />
+        <property name="color-1" value="brown-100%" />
+        <property name="color-2" value="red-75%" />
+        <property name="color-3" value="blue-50%" />
+        <property name="color-4" value="green-25%" />
+        <property name="color-5" value="white-15%" />
+        <property name="color-6" value="black-10%" />
+        <property name="color-7" value="gray-5%" />
         <property name="material" value="wood" />
         <property name="texture" value="smooth" />
         <property name="isToy" value="true" />

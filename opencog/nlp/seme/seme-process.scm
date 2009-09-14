@@ -172,8 +172,11 @@
 )
 
 ; --------------------------------------------------------------------
-; same-modifiers-promoter -- re-use an existing seme if it has a superset
-; of the modifiers of the word instance. Otherwise, create a new seme.
+; noun-same-modifiers-promoter -- re-use an existing seme if it has a 
+; superset of the modifiers of the word instance. Otherwise, create a 
+; new seme. DEPRECATED -- USE same-dependency-modifier BELOW. The reason
+; that this is deprecated is because it only works correctly for nouns;
+; whereas it will alias together all verbs, which is incorrect for verbs!
 ;
 ; The idea here is that if we have a word instance, such as "ball", and
 ; a seme "green ball", we can deduce "oh the ball, that must be the 
@@ -206,20 +209,20 @@
 ;    ^ $seme is a SemeNode
 ; THEN $modtype($seme, $attr-seme)
 ;
-(define (same-modifiers-promoter word-inst)
+(define (noun-same-modifiers-promoter word-inst)
 
 	; Create a new seme, given a word-instance. The new seme will 
 	; have the same modifiers that the word-instance has.
 	(define (make-new-seme wrd-inst)
 		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
 				(lemma (word-inst-get-lemma wrd-inst))
-				(mods (word-inst-get-relex-modifiers wrd-inst))
+				(mods (noun-inst-get-relex-modifiers wrd-inst))
 			)
 			; Be sure to create the inheritance link, etc. before
 			; doing the promotion.
 			(LemmaLink (stv 1 1) newseme lemma)
 			(InheritanceLink (stv 1 1) wrd-inst newseme)
-			(promote-to-seme same-modifiers-promoter mods)
+			(promote-to-seme noun-same-modifiers-promoter mods)
 			newseme
 		)
 	)
@@ -237,26 +240,123 @@
 		(let* ((oset (cog-outgoing-set mod-rel))
 				(prednode (car oset))
 				(attr-word (cadr (cog-outgoing-set (cadr oset))))
-				(attr-seme (same-modifiers-promoter attr-word))
+				(attr-seme (noun-same-modifiers-promoter attr-word))
 				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme attr-seme)))
 			)
 			(if (null? seme-rel) #f #t)
 		)
 	)
 
-	; Could this word-inst correspond to this seme?
+	; Could this noun word-inst correspond to this seme?
 	; It does, if *every* modifier to the word-inst is also a
 	; modifier to the seme. i.e. if the modifiers on the word-inst
 	; are a subset of the modifiers on the seme. i.e. if the
 	; word-inst is "semantically broader" than the seme.  Thus,
 	; the word-inst "ball" matches the seme "green ball".
-	(define (seme-match? seme wrd-inst)
+	(define (noun-seme-match? seme wrd-inst)
 		(every 
 			(lambda (md) (does-seme-have-rel? seme md)) 
-			(word-inst-get-relex-modifiers wrd-inst)
+			(noun-inst-get-relex-modifiers wrd-inst)
 		)
 	)
+	(generic-promoter make-new-seme noun-seme-match? word-inst)
+)
+
+; XXXXXXXXXXXXXXXX under consruction
+(define (same-dependency-promoter word-inst)
+
+	(define (get-relex-rels wrd-inst)
+		(cond
+			((word-inst-is-noun? wrd-inst) (noun-inst-get-relex-modifiers wrd-inst))
+			((word-inst-is-verb? wrd-inst) (verb-inst-get-relex-rels wrd-inst))
+			(else '())
+		)
+	)
+
+	; Create a new seme, given a word-instance. The new seme will 
+	; have the same modifiers that the word-instance has.
+	(define (make-new-seme wrd-inst)
+		(let* ((newseme (SemeNode (cog-name wrd-inst) (stv 1 1)))
+				(lemma (word-inst-get-lemma wrd-inst))
+				(rels (get-relex-rels wrd-inst))
+			)
+			; Be sure to create the inheritance link, etc. before
+			; doing the promotion.
+			(LemmaLink (stv 1 1) newseme lemma)
+			(InheritanceLink (stv 1 1) wrd-inst newseme)
+			(promote-to-seme same-dependency-promoter rels)
+			newseme
+		)
+	)
+
+	; Given a seme, and a relex relation rel of the form:
+	;    EvaluationLink
+	;       prednode (a DefinedLinguisticPredicateNode)
+	;       ListLink
+	;          headword   (a WordInstanceNode)
+	;          attr-word  (a WordInstanceNode)
+	; This routine checks to see if the corresponding relation
+	; exists for seme. If it does, it returns #t else it returns #f
+	;
+	(define (does-seme-have-rel? seme rel)
+		(let* ((oset (cog-outgoing-set rel))
+				(prednode (car oset))
+				(dependent-word (cadr (cog-outgoing-set (cadr oset))))
+				(dependent-seme (same-dependency-promoter dependent-word))
+				(seme-rel (cog-link 'EvaluationLink prednode (ListLink seme dependent-seme)))
+			)
+			(if (null? seme-rel) #f #t)
+		)
+	)
+
+	; Could this noun word-inst correspond to this seme?
+	; It does, if *every* modifier to the noun word-inst is also a
+	; modifier to the seme. i.e. if the modifiers on the word-inst
+	; are a subset of the modifiers on the seme. i.e. if the
+	; word-inst is "semantically broader" than the seme.  Thus,
+	; the word-inst "ball" matches the seme "green ball".
+	(define (noun-seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(noun-inst-get-relex-modifiers wrd-inst)
+		)
+	)
+
+	; As above, but for verbs. In particular, the subject and
+	; object of the verb must match.
+	(define (verb-seme-match? seme wrd-inst)
+		(every 
+			(lambda (md) (does-seme-have-rel? seme md)) 
+			(verb-inst-get-relex-rels wrd-inst)
+		)
+	)
+
+	; For anything that's not a noun or a verb, all that we ask
+	; for is that has the same word lemma. This seems safe for now,
+	; but will go bad if there's a chain of noun-adj-noun-adj modifiers
+	; such as those in medical text.  This might fail for chained
+	; adverbial modifers (?not sure?)
+	(define (same-lemma-match? seme wrd-inst)
+		(equal?
+			(word-inst-get-lemma seme)
+			(word-inst-get-lemma wrd-inst)
+		)
+	)
+
+	(define (seme-match? seme wrd-inst)
+		(cond
+			((word-inst-is-noun? wrd-inst) (noun-seme-match? seme wrd-inst))
+			((word-inst-is-verb? wrd-inst) (verb-seme-match? seme wrd-inst))
+			(else (same-lemma-match? seme wrd-inst))
+		)
+	)
+
 	(generic-promoter make-new-seme seme-match? word-inst)
+)
+
+(define (same-modifiers-promoter word-inst)
+	; (noun-same-modifiers-promoter word-inst)
+	(same-dependency-promoter word-inst)
 )
 
 ; --------------------------------------------------------------------

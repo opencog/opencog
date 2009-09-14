@@ -90,6 +90,21 @@
 )
 
 ; -----------------------------------------------------------------------
+; Anchor for truth-query parses. The things that get attached to this
+; anchor are ParseNodes of parses that seem to be (as yet unasnwered) 
+; truth-query questions.
+;
+(define *truth-query-anchor* (AnchorNode "# TRUTH QUERY" (stv 1 1)))
+
+(define (get-truth-queries)
+	(cog-chase-link 'ListLink 'ParseNode *truth-query-anchor*)
+)
+
+(define (release-truth-query-anchor)
+	(release-from-anchor *truth-query-anchor*)
+)
+
+; -----------------------------------------------------------------------
 ; chat-get-simple-answer -- get single-word replies to a question.
 ;
 ; This is a super-dooper cheesy way of reporting the answer to a question.
@@ -144,26 +159,20 @@
 ; questions (e.g. "what is an instrument" lists many instruments)
 ;
 (define (chat-prt-soln msg soln-list)
-	(define (do-prt-soln soln-list)
-		;; display *all* items in the list.
-		(define (show-item wlist)
-			(if (not (null? wlist))
-				(let ((wrd (car wlist)))
-					(if (null? wrd)
-						(display "(null)")
-						(display (cog-name wrd))
-					)
-					(display " ")
-					(show-item (cdr wlist))
-				)
-			)
+
+	(define (prt-one item)
+		(if (null? item)
+			(display "(null)")
+			(display (cog-name item))
 		)
-		(display msg)
-		(show-item soln-list)
+		(display " ")
 	)
 
-	(if (not (null? soln-list))
-		(do-prt-soln soln-list)
+	(display msg)
+	(cond
+		((null? soln-list) '())
+		((list? soln-list) (for-each prt-one soln-list))
+		((string? soln-list) (display sln-list))
 	)
 )
 
@@ -359,42 +368,68 @@
 
 	(attach-new-parses (get-new-parsed-sentences))
 
+	; Apply a set of rules to determin if we even *have* a truth query.
+	(for-each
+		(lambda (rule) 
+			(cog-delete ; need to delete the returned ListLink
+				(cog-ad-hoc "do-varscope" rule)
+			)
+		) 
+		*truth-query-id-list*
+	)
+
+	; If this does not apear to be a truth query, then cut out
+	; of here, and try something else.
+	(if (null? (get-truth-queries))
+		(let ()
+			(dbg-display "No truth-query found, try triples-qa.\n")
+			(end-dbg-display)
+			(chat-return "(say-try-triple-qa)")
+		)
+	)
+
 	; Hmm promote trip semes ?? -- later 
 	; Also -- cannot blithly promote, do *only* the semes
 	; but not the triples themselves
 	;	(trip-semes (promote-to-seme same-modifiers-promoter trips))
 	;
 
+; Err, here's the rub -- either we don't promote quetions
+; ; (and then the truth-query pattern matcher as currently written fails)
+; ; of wee promote questios, in which case we need to promote the HYP
+; ; and TRUTH-QUERY_FLAG as well. To be deicded.
+;
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.)
-	(for-each same-modifiers-promoter
-		(concatenate! 
-			(map parse-get-words
-				(sent-list-get-parses (get-new-parsed-sentences))
-			)
-		)
-	)
+;	(for-each same-modifiers-promoter
+;		(concatenate! 
+;			(map parse-get-words
+;				(sent-list-get-parses (get-new-parsed-sentences))
+;			)
+;		)
+;	)
 	
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
 
+	; The meta-idea here is that we assume a "closed universe" -- 
+	; If a truth-query question was asked, and we can't answer in the 
+	; affirmative, then we will answer in the negative. This is not
+	; correct in the open-universe model, where the answer would be
+	; "no I don't really have enough information to answer this".
 	(let ((ans (chat-get-simple-answer)))
 
 		(if (null? ans)
-			(let ()
-				; No answer, now try triples-based question-answering next.
-				(dbg-display "No truth-query found, try triples-qa.\n")
-				(end-dbg-display)
-				(chat-return "(say-try-triple-qa)")
-			)
-			(let ()
-				; Print, and skip to the end of processing
-				(chat-prt-soln "Truth query determined \"yes\": " ans)
-				(chat-return "(say-final-cleanup)")
-			)
+			; No answer, tell them so.
+			(chat-prt-soln "Truth query determined: No, not that I know of. " '())
+
+			; The answer must be yes.
+			(chat-prt-soln "Truth query determined: Yes, verb was: " ans)
 		)
 	)
+
+	(chat-return "(say-final-cleanup)")
 )
 
 ; -----------------------------------------------------------------------
@@ -507,6 +542,7 @@
 	; Delete list of triples, so they don't interfere with the next question.
 	(release-result-triples)
 	(release-truth-assertions)
+	(release-truth-query-anchor)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.

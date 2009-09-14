@@ -492,6 +492,10 @@ rule( "executeRequestedAction", SCHEMA_RULE, { PLAYING_MODE=0.861, SCAVENGER_HUN
       "executeRequestedActionPrecondition",
       "executeRequestedAction()" );
 
+rule( "saySomething", SCHEMA_RULE, { PLAYING_MODE=0.9, SCAVENGER_HUNT_MODE=0.9, LEARNING_MODE=0.9 },
+      "saySomethingPrecondition",
+      "say_n_bark('custom_message', 'all_agents')" );
+
 ------ GROUP ACTIONS -------
 --rule( "goBehindPetToInspectIt",  SCHEMA_RULE, { PLAYING_MODE=0.22, SCAVENGER_HUNT_MODE=0, LEARNING_MODE=0 },
 --      "goBehindPetToInspectItPrecondition",

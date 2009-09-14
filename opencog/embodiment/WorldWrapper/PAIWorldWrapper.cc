@@ -964,10 +964,14 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
             message = get_definite_object(*arguments);
         } // else
 
-
         if ( message == "custom_message" ) {
             message = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
-        } // else
+        } // if
+
+        // once the say action was executed set the has_something_to_say predicate to false
+        // to avoid repetitions
+        AtomSpaceUtil::setPredicateValue( as, "has_something_to_say", TruthValue::FALSE_TV( ),
+                                          AtomSpaceUtil::getAgentHandle( as, _pai.getPetInterface( ).getPetId( ) ) );
                         
         action.addParameter( ActionParameter( "message", ActionParamType::STRING( ), message ) );
 

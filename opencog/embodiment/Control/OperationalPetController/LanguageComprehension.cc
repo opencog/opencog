@@ -26,7 +26,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
-#include "ClientSocket.h"
 #include "NLGenClient.h"
 #include <Sockets/SocketHandler.h>
 #include <Sockets/ListenSocket.h>
@@ -91,6 +90,16 @@ void LanguageComprehension::answerLatestQuestion( void )
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );
+
+    std::string relations = resolveFrames2Relex( );
+    // call nlgen using relations
+    std::string finalSentence = relations;
+    if ( finalSentence.length( ) > 0 ) {
+        agent.getCurrentModeHandler( ).setProperty( "customMessage", finalSentence );
+        AtomSpaceUtil::setPredicateValue( agent.getAtomSpace( ), "has_something_to_say", TruthValue::TRUE_TV( ),
+                                          AtomSpaceUtil::getAgentHandle( agent.getAtomSpace( ), agent.getPetId( ) ) ); 
+    } // if
+
 }
 
 

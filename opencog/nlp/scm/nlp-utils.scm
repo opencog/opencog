@@ -113,6 +113,33 @@
 )
 
 ; ---------------------------------------------------------------------
+; Return the part-of-speech of a word-instance
+; 
+(define (word-inst-get-pos word-inst)
+	(cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode 
+		word-inst
+	)
+)
+
+; ---------------------------------------------------------------------
+; Return #t is the word-instance is a noun
+; 
+(define (word-inst-is-noun? word-inst)
+	(string=? "noun" 
+		(cog-name (car (word-inst-get-pos word-inst)))
+	)
+)
+
+; ---------------------------------------------------------------------
+; Return #t is the word-instance is a verb
+; 
+(define (word-inst-is-verb? word-inst)
+	(string=? "verb" 
+		(cog-name (car (word-inst-get-pos word-inst)))
+	)
+)
+
+; ---------------------------------------------------------------------
 ; Given a word instance, return a list of relations the word participates in.
 ; That is, given (WordInstanceNode "dog"), return all _subj(*,dog)
 ; _subj(dog,*), _obj(dog,*) etc.
@@ -260,32 +287,18 @@
 )
 
 ; --------------------------------------------------------------------
-; Given a word-instance, return a list of relex modifiers that 
-; this word-instance is the head-word of. (It is the head-word
-; if it is first e.g. _amod(head-word, attr-word)
-;
-(define (word-inst-get-relex-modifiers word-inst)
+; Given a word-instance and a list of relex relation names, return a
+; list of the relex relations for which this word-instance is the 
+; head-word.  The head-word is the first word in the relation -- 
+; for example _amod(head-word, dpendent-word)
 
-	; There are a few other modifiers we should probably deal with,
-	; including quantity multiplier, etc. Right now, this is unclear.
-	; Modifiers are documented at:
-	; http://opencog.org/wiki/Binary_relations
+(define (word-inst-filter-relex-rels word-inst rel-name-list)
+
 	(define (is-modifier? str)
-		(cond ((string=? str "_amod") #t)
-				((string=? str "_advmod") #t)
-				((string=? str "_appo") #t)
-				((string=? str "_nn") #t)
-				((string=? str "_%quantity") #t)
-				(else #f)
-		)
+		(any (lambda (rel) (string=? rel str)) rel-name-list)
 	)
 
-	; Return #t if the relex relation is a modifier
-	(define (relex-mod? rel)
-		(is-modifier? (cog-name (car (cog-outgoing-set rel))))
-	)
-
-	; Return #t if the relex relation is a modifier
+	; Return #t if the relex relation is in the rel-name-list
 	; and the word-inst is the head-word.
 	(define (head-mod? rel wrd-inst)
 		(let* ((oset (cog-outgoing-set rel))
@@ -302,6 +315,36 @@
 	(filter! 
 		(lambda (rel) (head-mod? rel word-inst))
 		(word-inst-get-relations word-inst)
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a noun word-instance, return a list of relex modifiers that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _amod(head-word, attr-word)
+;
+(define (noun-inst-get-relex-modifiers word-inst)
+	; There are a few other modifiers we should probably deal with,
+	; including quantity multiplier, etc. Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
+	(word-inst-filter-relex-rels word-inst 
+		(list "_amod" "_appo" "_nn" "_poss" "_%quantity")
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a verb word-instance, return a list of relex relations that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _subj(head-word, dependency-word)
+;
+(define (verb-inst-get-relex-rels word-inst)
+	; There are a few other relations we should probably deal with,
+	; e.g. _predadj Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
+	(word-inst-filter-relex-rels word-inst 
+		(list "_advmod" "_iobj" "_obj" "_subj")
 	)
 )
 

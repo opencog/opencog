@@ -66,15 +66,16 @@ form here:
 
 (InheritanceLink (stv 0.98 0.99)
 	(ConceptNode "famous")
-	(ConceptNode "artist"))
-
+	(ConceptNode "artist")
+)
 (ExtensionalImplicationLink (stv 0.99 0.99)
 	(ConceptNode "Muhammad")
-	(ConceptNode "artist"))
-
+	(ConceptNode "artist")
+)
 (ExtensionalImplicationLink (stv 0.99 0.99)
 	(ConceptNode "Britney")
-	(ConceptNode "artist"))
+	(ConceptNode "artist")
+)
 
 
 The simple truth values can appear either before, or after the nodes, 
@@ -83,6 +84,31 @@ thus:
 (ExtensionalImplicationLink 
 	(ConceptNode "Britney")
 	(ConceptNode "artist")
-	(stv 0.99 0.99))
+	(stv 0.99 0.99)
+)
 
 will also work.
+
+The above can be entered at the scheme shell prompt. There are several
+ways to view what was created. One crude way is to exit the shell (with
+a single '.' followed by newline) and type 'ls', which will display the
+entire contents of the atomspace. A more refined way to view graphs is
+with the cog-map-type, cog-incoming-set and cog-outgoing-set
+procedures.  So, for example:
+
+         ; Define a function that prints the atoms:
+         guile> (define (prt-atom h) (display h) #f)
+         ; Print all atoms of type ConceptNode:
+         guile> (cog-map-type prt-atom 'ConceptNode)
+
+The following will return all of the atoms that reference the
+ConceptNode "artist":
+
+        guile> (cog-incoming-set (ConceptNode "artist"))
+
+The scheme "define" command is handy for naming atoms. So:
+
+        guile> (define a (ConceptNode "artist"))
+        guile> (cog-incoming-set a)
+
+

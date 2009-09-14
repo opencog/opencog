@@ -229,6 +229,8 @@ The following dialog works (or has worked at various times in the past):
 
 <me>         Did Fred throw a red ball?
 <cogita-bot> Truth query determined "yes": throw
+<me>         Did Fred throw a green ball?
+<cogita-bot> Truth query determined: No, not that I know of. 
 
 <me>         The color of the book is red.
 <me>         What is the color of the book?
@@ -239,7 +241,6 @@ The following dialog works (or has worked at various times in the past):
 <cogita-bot> Triples abstraction found: mat
 
 Some things that don't work:
-"Did Fred throw a green ball?" -- gets no reply, as opposed to a negative.
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
 
 
@@ -270,9 +271,6 @@ ToDo:
 
 * Do the "what color is the book" question in nlp/question/README
 
-* XXX Critical: fix the relex-promotion-to-scheme part of things.
-  the current design is no good!
-
 * Create an object holding the name of the user, the chat connection, 
   and the 'pseudo-continuation' of the chat status.
 
@@ -288,4 +286,4 @@ References
 http://en.wikipedia.org/wiki/MultiNet
 
 Initial draft: April 2009 Linas Vepstas
-Updated: August 2009 Linas Vepstas
+Updated: September 2009 Linas Vepstas
