@@ -60,7 +60,7 @@
 ; subject verb?" (What did Fred throw?) so that the WH-word is the 
 ; object of the sentence.
 ;
-(define question-rule-2
+(define (wh-question-soln core)
 	(r-varscope
 		(r-and
 			(r-anchor-node *bottom-anchor* "$qVar")
@@ -71,16 +71,8 @@
 			; (r-anchor-node *new-parses-anchor* "$parse")
 
 			(r-decl-word-inst "$verb" "$parse")
-			(r-rlx "_obj"  "$verb" "$qVar")
-			(r-rlx "_subj" "$verb" "$svar")
 
-			; Look for seme matching the subject
-			(r-seme-of-word-inst "$svar" "$seme-svar")
-
-			; Look for candidate verb semes.
-			(r-candidate-of-word-inst "$verb" "$ans-verb")
-			(r-rlx "_subj" "$ans-verb" "$seme-svar")
-			(r-rlx "_obj"  "$ans-verb" "$ans-ovar")
+			core
 
 			; XXX we should also make sure that adverbs, if any, that
 			; modify the verb, are also matched up.
@@ -90,11 +82,29 @@
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)
-		; (r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans-ovar")
-		(r-anchor-node *query-soln-anchor* "$ans-ovar")
+		; (r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans")
+		(r-anchor-node *query-soln-anchor* "$ans")
+	)
+)
+
+(define wh-subject
+	(r-and
+		(r-rlx "_obj"  "$verb" "$qVar")
+		(r-rlx "_subj" "$verb" "$svar")
+
+		; Look for seme matching the subject
+		(r-seme-of-word-inst "$svar" "$seme-svar")
+
+		; Look for candidate verb semes.
+		(r-candidate-of-word-inst "$verb" "$ans-verb")
+		(r-rlx "_subj" "$ans-verb" "$seme-svar")
+		(r-rlx "_obj"  "$ans-verb" "$ans")
 	)
 )
 			
+(define wh-question-rule-0
+	(wh-question-soln wh-subject)
+)
 
 ; -----------------------------------------------------------------
 ; The following answers a simple WH-question (who, what, when etc.)
@@ -226,6 +236,11 @@
 	wh-question-id-rule-2
 	wh-question-id-rule-3
 	wh-question-id-rule-4
+))
+
+(define *wh-question-rule-list* (list
+	wh-question-rule-0
+	; wh-question-rule-1
 ))
 
 (define *question-rule-list* (list

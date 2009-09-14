@@ -483,6 +483,9 @@
 
 ; -----------------------------------------------------------------------
 ; say-try-svo-qa -- try answering WH-questions using SVO pattern matching
+; "SVO" is "Subject-Verb-Object", and the WH-question typically has a
+; WH-word in the subject or object position. The answer to the question is
+; the word that occupies the same location in another SVO assertion.
 ;
 (define (say-try-svo-qa)
 
@@ -499,12 +502,8 @@
 		)
 	)
 	
-(dbg-display "running the svo-wh:\n")
-	(let ((rslt (cog-ad-hoc "do-varscope" question-rule-2)))
-(display rslt)(newline)
-		(cog-delete rslt)
-	)
-(end-dbg-display)
+	; Try each wh-question template ... 
+	(loop-over-questions *wh-question-rule-list*)
 
 	; If SVO pattern-matching found an answer, print it.
 	(let ((ans (chat-get-simple-answer)))
