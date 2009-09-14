@@ -442,15 +442,21 @@
 )
 
 ; --------------------------------------------------------------------
-; cartesian-prod - distribute the cartesian product across the tuple
+; cartesian-prod - distribute the cartesian product across a tuple of sets
 
 ; This returns the Cartestion product of a tuple of sets by distributing
-; the product across the set elements. Examples are given below.
+; the product across the set elements. Returned is a list of tuples, where
+; the elements of the tuple are elements from the corresponding sets.
 ;
-; Let the tuple consist of sets s_1, s_2, ..., s_m
-; Let the cardinality of s_k be n_k
-; Then this returns a list of n_1 * n_2 *... * n_m tuples,
+; Let the input tuple be [s_1, s_2, ..., s_m] where each s_k is a set of
+; one or more elements.  Let the cardinality of s_k be n_k.
+; Then this returns a list of n_1 * n_2 *... * n_m tuples.
 ; where the projection of the coordinate k is an element of s_k.
+; That is, let p_k be the k'th cordinate projection, so that 
+; p_k [a_1, a_2, ... , a_m] = a_k
+;
+; Then, if t is a tuple returned by this function, one has that
+; p_k(t) is element of s_k for all t and all 1<= k <= m.
 ;
 ; guile> (cartesian-prod (list 'p 'q))
 ; (p q)
