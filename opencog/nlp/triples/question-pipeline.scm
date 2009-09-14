@@ -93,11 +93,25 @@
 ;
 ; or more generally "did X verb Y?"
 
-; Find the seme for this word-instance
+; Find the seme for this word-instance. Such an InheritanceLink
+; will exist if and only if the seme is *definintely* correct for
+; this word instance.
 (define (r-seme-of-word-inst word-inst seme)
 	(r-and 
 		(r-link InheritanceLink word-inst seme)
 		(r-decl-vartype "WordInstanceNode" word-inst)
+		(r-decl-vartype "SemeNode" seme)
+	)
+)
+
+; Find a possble, candidate seme for this word instance. It is
+; a candidate if it has the same lemma form as the word-instance.
+(define (r-candidate-of-word-inst word-inst seme)
+	(r-and 
+		(r-link LemmaLink word-inst "$var-lemma")
+		(r-decl-vartype "WordInstanceNode" word-inst)
+		(r-decl-vartype "WordNode" "$var-lemma")
+		(r-link LemmaLink seme "$var-lemma")
 		(r-decl-vartype "SemeNode" seme)
 	)
 )
@@ -114,16 +128,21 @@
 			(r-rlx-flag "hyp" "$verb")
 			(r-rlx-flag "truth-query" "$verb")
 
-			; abstract to words (XXX - should be semes!!)
+			; Look for semes with these same words.
 			(r-seme-of-word-inst "$svar" "$ans-svar")
 			(r-seme-of-word-inst "$ovar" "$ans-ovar")
-			(r-seme-of-word-inst "$verb" "$ans-verb")
 			
-			; Now look for a matching assertion with these semes
+			; Look for a candidate verb, and verify that the semes
+			; decorate the verb the same way.
+			(r-candidate-of-word-inst "$verb" "$ans-verb")
 			(r-rlx "_subj" "$ans-verb" "$ans-svar")
 			(r-rlx "_obj"  "$ans-verb" "$ans-ovar")
 
-			; the belwo are probably not needed -- for semes.
+			; XXX we should also make sure that adverbs, if any, that
+			; modify the verb, are also matched up.
+
+			; The below make sure that a provious truth query is not
+			; mis-interpreted as a statement.
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)

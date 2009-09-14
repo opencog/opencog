@@ -382,15 +382,6 @@
 	; -- both have HYP/TRUTH-QUERY markings
 	; -- neither have HYP/TRUTH-QUERY markings
 	(define (qu-verb-seme-match? seme wrd-inst)
-(if (verb-seme-match? seme wrd-inst) (let ()
-(dbg-display "will prom ? -- ")
-(display (xor (null? (get-truqu-flags seme)) (null? (get-truqu-flags wrd-inst))))
-(display " -- seme and word are:\n")
-(display seme)
-(display wrd-inst)
-(newline)
-(end-dbg-display)
-))
 		(and
 			(verb-seme-match? seme wrd-inst)
 			(xor
