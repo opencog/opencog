@@ -180,34 +180,15 @@
 ;
 ; The idea here is that if we have a word instance, such as "ball", and
 ; a seme "green ball", we can deduce "oh the ball, that must be the 
-; green ball".  But is the word-instance is "red ball", then it cannot
+; green ball".  But if the word-instance is "red ball", then it cannot
 ; be the seme "green ball", and a new seme, specific to "red ball" is
 ; created. 
 ;
-; Sepcifically, we try to make sure that *every* modifier to the word-inst
+; Specifically, we try to make sure that *every* modifier to the word-inst
 ; is also a modifier to the seme. i.e. that the modifiers on the word-inst
 ; are a subset of the modifiers on the seme. i.e. that the word-inst is 
-; "semantically broader" than the seme.  
-;
-; This is a fairly basic operation, and lacks in many ways: we'd like 
-; to do this only for recent words in the conversation, and we'd also like
-; to do narrowing, e.g. so if we get "John threw the ball. John threw the 
-; blue ball.", we conclude that the ball in the second sentence is the same
-; as that in the first. The routine fails to handle this situation.  This
-; routine should probably not be "fixed", and instead, a new, more 
-; sophisticated promoter should be created.
-;
-; Anyway, seme promotion should not be done in scheme, but with opencog
-; pattern-matching. So, for example, the following ImplicationLink is a 
-; step in that direction:
-;
-; IF   %InheritanceLink(word-inst $word-seme)
-;    ^ $modtype (word-inst, $attr-inst)
-;    ^ $modtype is _amod or _nn etc.
-;    ^ %InheritanceLink($attr-inst $attr-seme)
-;    ^ $modtype ($seme, $attr-seme)
-;    ^ $seme is a SemeNode
-; THEN $modtype($seme, $attr-seme)
+; "semantically broader" than the seme.  This idea is discussed in greater
+; detail in the README file.
 ;
 (define (noun-same-modifiers-promoter word-inst)
 
@@ -262,11 +243,51 @@
 	(generic-promoter make-new-seme noun-seme-match? word-inst)
 )
 
-; XXXXXXXXXXXXXXXX under consruction
-; Err, here's the rub -- either we don't promote quetions
-; (and then the truth-query pattern matcher as currently written fails)
-; or we promote questions, in which case we need to promote the HYP 
-; and TRUTH-QUERY_FLAG as well. To be deicded.
+; --------------------------------------------------------------------
+; same-dependency-promoter -- re-use an existing seme if it has a 
+; superset of the modifiers of the word instance. Otherwise, create a 
+; new seme.  This performs seme promotion for both nouns and verbs,
+; looking for noun-modifiers (e.g. _amod) on nouns and looking at 
+; subject, object, adverb relations for verbs.
+;
+; The idea here is that if we have a word instance, such as "ball", and
+; a seme "green ball", we can deduce "oh this ball, it must refer to the 
+; green ball".  But if the word-instance is "red ball", then it cannot
+; be the seme "green ball", and a new seme, specific to "red ball" is
+; created. 
+;
+; Specifically, we try to make sure that *every* modifier to the word-inst
+; is also a modifier to the seme. i.e. that the modifiers on the word-inst
+; are a subset of the modifiers on the seme. i.e. that the word-inst is 
+; "semantically broader" than the seme.  
+;
+; This is a fairly basic operation, and lacks in many ways: we'd like 
+; to do this only for recent words in the conversation, and we'd also like
+; to do narrowing, e.g. so if we get "John threw the ball. John threw the 
+; blue ball.", we conclude that the ball in the second sentence is the same
+; as that in the first. The routine fails to handle this situation.  This
+; routine should probably not be "fixed", and instead, a new, more 
+; sophisticated promoter should be created.
+;
+; Anyway, seme promotion should not be done in scheme, but with opencog
+; pattern-matching. So, for example, the following ImplicationLink is a 
+; step in that direction:
+;
+; IF   %InheritanceLink(word-inst $word-seme)
+;    ^ $modtype (word-inst, $attr-inst)
+;    ^ $modtype is _amod or _nn etc.
+;    ^ %InheritanceLink($attr-inst $attr-seme)
+;    ^ $modtype ($seme, $attr-seme)
+;    ^ $seme is a SemeNode
+; THEN $modtype($seme, $attr-seme)
+;
+; When promoting verbs, this promoter is careful to handle the HYP
+; and TRUTH-QUERY_FLAG as well.  The README file goes into more detail
+; on the how and why of handling these two flags.
+;
+; As of mid-September 2009, this is working well, and doing the right 
+; thing for general question answering.
+;
 (define (same-dependency-promoter word-instance)
 
 	; Return a list of all of the relex relationships for which this
@@ -417,7 +438,6 @@
 )
 
 (define (same-modifiers-promoter word-inst)
-	; (noun-same-modifiers-promoter word-inst)
 	(same-dependency-promoter word-inst)
 )
 
