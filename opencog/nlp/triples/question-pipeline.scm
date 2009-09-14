@@ -56,9 +56,6 @@
 
 ; -----------------------------------------------------------------
 ; The following answers an SVO (subject-verb-object) WH-question.
-; In particular, it is aimed at questions of the form "What did
-; subject verb?" (What did Fred throw?) so that the WH-word is the 
-; object of the sentence.
 ;
 (define (wh-question-soln core)
 	(r-varscope
@@ -87,7 +84,10 @@
 	)
 )
 
-(define wh-subject
+; The wh-object provides the core template for questions of the form
+; "What did subject verb?" (What did Fred throw?) so that the WH-word 
+; is the object of the question.
+(define wh-object
 	(r-and
 		(r-rlx "_obj"  "$verb" "$qVar")
 		(r-rlx "_subj" "$verb" "$svar")
@@ -101,9 +101,31 @@
 		(r-rlx "_obj"  "$ans-verb" "$ans")
 	)
 )
-			
+
+; The wh-subject provides the core template for questions of the form
+; "Who verb'ed object?" (Who ate an apple?) so that the WH-word 
+; is the subject of the question.
+(define wh-subject
+	(r-and
+		(r-rlx "_subj" "$verb" "$qVar")
+		(r-rlx "_obj"  "$verb" "$ovar")
+
+		; Look for seme matching the object
+		(r-seme-of-word-inst "$ovar" "$seme-ovar")
+
+		; Look for candidate verb semes.
+		(r-candidate-of-word-inst "$verb" "$ans-verb")
+		(r-rlx "_obj"  "$ans-verb" "$seme-ovar")
+		(r-rlx "_subj" "$ans-verb" "$ans")
+	)
+)
+
 (define wh-question-rule-0
 	(wh-question-soln wh-subject)
+)
+
+(define wh-question-rule-1
+	(wh-question-soln wh-object)
 )
 
 ; -----------------------------------------------------------------
@@ -240,7 +262,7 @@
 
 (define *wh-question-rule-list* (list
 	wh-question-rule-0
-	; wh-question-rule-1
+	wh-question-rule-1
 ))
 
 (define *question-rule-list* (list
