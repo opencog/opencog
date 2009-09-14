@@ -223,6 +223,8 @@ The following dialog works (or has worked at various times in the past):
 <cogita-bot> Syntax pattern match found: Fred John  
 <me>         who threw a red ball?
 <cogita-bot> Syntax pattern match found: Fred
+<me>         What did Fred throw?
+<cogita-bot> SVO pattern match found: red ball
 
 <me>         Did Fred throw a ball?
 <cogita-bot> Truth query determined: Yes, verb was: throw

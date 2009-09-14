@@ -114,7 +114,8 @@
 ;
 ; Anyway, three different kinds of things can be found:
 ; WordNodes, almost always "yes", in answer to a yes/no question.
-; WordInstanceNodes, in answer to simple pattern matching.
+;     XXX except that above isn't done any more XXX
+; WordInstanceNodes, in answer to SVO pattern matching.
 ; SemeNodes, in answer to triples matching.
 ; A list of these "answers" is returned.
 ; 
@@ -126,9 +127,11 @@
 				((eq? tipo 'WordNode) answ)
 				((eq? tipo 'WordInstanceNode) (word-inst-get-lemma answ))
 				((eq? tipo 'SemeNode) 
-					; the lemma-link for a seme might still be sitting on disk!
+					; The lemma-link for a seme might still be sitting on disk!
+					; We will need the lemma when printing, etc.
+					; XXX should we defer this loading till later ?? 
 					(load-referers answ)
-					(word-inst-get-lemma answ)
+					answ
 				)
 
 				; Explicitly ignore VariableNodes, these can be there
@@ -160,14 +163,35 @@
 ;
 (define (chat-prt-soln msg soln-list)
 
-	(define (prt-one item)
-		(if (null? item)
-			(display "(null)")
-			(display (cog-name item))
-		)
+	; Get the lemma of the word or seme instance, print it.
+	(define (prt-lemma winst)
+		(display (cog-name (word-inst-get-lemma winst)))
 		(display " ")
 	)
 
+	; Print lemma of word or seme instance.
+	; If word or seme inst has modifiers, then print those first
+	(define (prt-with-mods winst)
+		(let ((mods (noun-inst-get-relex-modifiers winst))
+			)
+			(if (not (null? mods))
+				(for-each prt-lemma
+					(map relation-get-dependent mods)
+				)
+			)
+			(prt-lemma winst)
+		)
+	)
+
+	; winst might be a word-instance or a seme
+	(define (prt-one winst)
+		(if (null? winst)
+			(display "(null) ")
+			(prt-with-mods winst)
+		)
+	)
+
+	; First display the message, then display the rest.
 	(display msg)
 	(cond
 		((null? soln-list) '())
@@ -277,7 +301,7 @@
 
 ; Dead code, maintain as reference for just a little while.
 ; When removing this, be sure to:
-; 1) remove "chat-get-simple-answer", if needed,
+; 1) review usage of "chat-get-simple-answer", if needed,
 ; 2) remove SentenceQuery.cc from CMakefile
 ; 3) remove cog-ad-hoc "question" support.
 ;
@@ -536,7 +560,7 @@
 
 			(if (null? ans)
 				(let ()
-					(dbg-display "No asnwer triples found, try deduction.\n")
+					(dbg-display "No answer triples found, try deduction.\n")
 					(end-dbg-display)
 					(chat-return "(say-try-deduction)")
 				)

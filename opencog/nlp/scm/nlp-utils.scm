@@ -290,7 +290,7 @@
 ; Given a word-instance and a list of relex relation names, return a
 ; list of the relex relations for which this word-instance is the 
 ; head-word.  The head-word is the first word in the relation -- 
-; for example _amod(head-word, dpendent-word)
+; for example _amod(head-word, dependent-word)
 
 (define (word-inst-filter-relex-rels word-inst rel-name-list)
 
@@ -345,6 +345,23 @@
 	; http://opencog.org/wiki/Binary_relations
 	(word-inst-filter-relex-rels word-inst 
 		(list "_advmod" "_iobj" "_obj" "_subj")
+	)
+)
+
+; --------------------------------------------------------------------
+; Given a relation, return the dependent item in the relation. 
+; That is, given the relation  _rel(head-word, dependent-word)
+; return the dependent-word.  This does no error checking.
+;
+(define (relation-get-dependent rel)
+	; cadr because the dependent word is second in the relation.
+	(cadr 
+		(cog-outgoing-set
+			; cadr because ListLink is second in the EvaluationLink
+			(cadr
+				(cog-outgoing-set rel)
+			)
+		)
 	)
 )
 
