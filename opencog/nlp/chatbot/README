@@ -243,6 +243,10 @@ The following dialog works (or has worked at various times in the past):
 Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
 
+Latest bugs:
+XXX FIXME:
+syntax pattern matching incorrectly takes truth queries as statements.
+
 
 Notes about the data flow:
 --------------------------

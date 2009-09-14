@@ -113,7 +113,7 @@ bool SentenceQuery::is_parse_a_truth_query(Handle parse)
  * Return true if sentence has a parse which is a query.
  * The input argument is a handle to a SentenceNode.
  *
- * Two checks are made: for sentences taht are simple queries,
+ * Two checks are made: for sentences that are simple queries,
  * and for truth queries. Simple queries have the form "Who did X?"
  * while truth queries ask for yes/no responses: "Is X a Y?"
  *
