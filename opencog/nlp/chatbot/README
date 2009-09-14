@@ -222,7 +222,7 @@ The following dialog works (or has worked at various times in the past):
 <me>         who threw a ball?
 <cogita-bot> Syntax pattern match found: Fred John  
 <me>         who threw a red ball?
-<cogita-bot> Syntax pattern match found: Fred
+<cogita-bot> SVO pattern match found: Fred
 <me>         What did Fred throw?
 <cogita-bot> SVO pattern match found: red ball
 
@@ -245,9 +245,20 @@ The following dialog works (or has worked at various times in the past):
 Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
 
-Latest bugs:
-XXX FIXME:
-syntax pattern matching incorrectly takes truth queries as statements.
+Untested, probably won't work:
+ * Do questions (What did Mike do? Mike threw a rock)
+ * Who died?    (John Kennedy died)
+ * Did John die?
+ * John is dead?
+ * Who is Kennedy?
+ * What is yarn?
+ * When questions.
+ * Where questions.
+ * Why questions.
+ * How questions
+ * How-much questions (how-tall, how-safe etc)
+ * Which questions
+
 
 
 Notes about the data flow:
