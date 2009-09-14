@@ -476,10 +476,21 @@
 	)
 	
 (dbg-display "running the svo-wh:\n")
-(let ((rslt (cog-ad-hoc "do-varscope" question-rule-2)))
+	(let ((rslt (cog-ad-hoc "do-varscope" question-rule-2)))
 (display rslt)(newline)
-(cog-delete rslt))
+		(cog-delete rslt)
+	)
 (end-dbg-display)
+
+	; If SVO pattern-matching found an answer, print it.
+	(let ((ans (chat-get-simple-answer)))
+		(if (not (null? ans))
+			(let () 
+				(chat-prt-soln "SVO pattern match found: " ans)
+				(chat-return "(say-final-cleanup)")
+			)
+		)
+	)
 
 	(chat-return "(say-try-triple-qa)")
 )

@@ -90,7 +90,8 @@
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)
-		(r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans-ovar")
+		; (r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans-ovar")
+		(r-anchor-node *query-soln-anchor* "$ans-ovar")
 	)
 )
 			
