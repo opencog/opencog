@@ -459,8 +459,7 @@
 )
 
 (define (same-modifiers-promoter word-inst)
-	; (same-dependency-promoter word-inst)
-	(same-lemma-promoter-two word-inst)
+	(same-dependency-promoter word-inst)
 )
 
 ; --------------------------------------------------------------------
@@ -475,7 +474,7 @@
 ;
 ; Returns the list of the equivalent, promoted relations.
 
-(define (new-promote-to-seme promoter atom-list)
+(define (promote-to-seme promoter atom-list)
 
 	(define (promote atom)
 		; Returns a list of one or more different possible promotions
@@ -513,36 +512,6 @@
 	)
 
 	(concatenate! (map promote atom-list))
-)
-
-; Same as above, but assumes that the promoter returns
-; just a single seme, instead of a list of semes.
-; This routine is obsolete, but is here for reference.
-;
-(define (mono-promote-to-seme promoter atom-list)
-
-	(define (promote atom)
-		(cond
-			((eq? 'WordInstanceNode (cog-type atom))
-				(promoter atom)
-			)
-			((cog-link? atom)
-				(cog-new-link 
-					(cog-type atom) 
-					(map promote (cog-outgoing-set atom))
-					(cog-tv atom)
-				)
-			)
-			(else atom)
-		)
-	)
-
-	(map promote atom-list)
-)
-
-(define (promote-to-seme promoter atom-list)
-	; (mono-promote-to-seme promoter atom-list)
-	(new-promote-to-seme promoter atom-list)
 )
 
 ; --------------------------------------------------------------------

@@ -216,11 +216,11 @@ Examples:
 ---------
 The following dialog works (or has worked at various times in the past):
 
-<me>         John threw a green ball.
 <me>         Fred threw a red ball
+<me>         John threw a green ball.
 <me>         Mary threw a blue rock
 <me>         who threw a ball?
-<cogita-bot> Syntax pattern match found: Fred John  
+<cogita-bot> SVO pattern match found: John Fred
 <me>         who threw a red ball?
 <cogita-bot> SVO pattern match found: Fred
 <me>         What did Fred throw?
