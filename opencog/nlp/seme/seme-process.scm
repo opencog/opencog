@@ -18,7 +18,7 @@
 	(let ((seme (SemeNode (cog-name word-inst) (stv 1 1))))
 		(LemmaLink (stv 1 1) seme lemma)
 		(InheritanceLink (stv 1 1) word-inst seme)
-		seme
+		(list seme)
 	)
 )
 
@@ -55,12 +55,12 @@
 		)
 		(if (null? seme-list)
 			; create a new seme
-			(make-new-seme word-inst lemma)
+			(list (make-new-seme word-inst lemma))
 
 			; re-use an existing seme
 			(let ((seme (car seme-list)))
 				(InheritanceLink (stv 1 1) word-inst seme)
-				seme
+				(list seme)
 			)
 		)
 	)
@@ -439,6 +439,7 @@
 
 (define (same-modifiers-promoter word-inst)
 	(same-dependency-promoter word-inst)
+	; (same-lemma-promoter word-inst)
 )
 
 ; --------------------------------------------------------------------
@@ -447,12 +448,58 @@
 ;
 ; Given a specific promotor, and a list of hypergraphs, this routine
 ; will walk over all the hypergraphs, find every WordInstanceNode, call
-; the promoter on it to get a SemeNode, and then construct a brand-new
-; hypergraph with the SemeNode taking the place of the WordInstanceNode.
+; the promoter on it to get one or more SemeNodes, and then construct a 
+; brand-new hypergraph with each SemeNode taking the place of the 
+; WordInstanceNode.  
 ;
-; Returns the list of the euqivalent, promoted relations.
+; Returns the list of the equivalent, promoted relations.
 
-(define (promote-to-seme promoter atom-list)
+(define (new-promote-to-seme promoter atom-list)
+
+	(define (promote atom)
+		; Returns a list of one or more different possible promotions
+		; of a link.  If eny elt in the outgoing set can be promoted 
+		; in more than one way, then the returned list will have more 
+		; than one link in it.
+		(define (promo-link lnk)
+
+			; Given a link and an outgoing set, make a new link of the 
+			; same type and TV, but with the given outset.
+			(define (mklink lnk oset)
+				(cog-new-link (cog-type lnk) oset (cog-tv lnk))
+			)
+
+			; Note the recursion in bowles of this below.
+			(map 
+				(lambda (oset) (mklink lnk oset)) 
+				; The cartesian prod will distribute the list of lists.
+				(cartesian-prod 
+					; Applying map will generate a list of lists
+					(map promote (cog-outgoing-set lnk))
+				)
+			)
+		)
+
+		(cond
+			((eq? 'WordInstanceNode (cog-type atom))
+				(promoter atom)
+			)
+			((cog-link? atom)
+				(promo-link atom)
+			)
+			(else atom)
+		)
+	)
+
+	(concatenate! (map promote atom-list))
+)
+
+; Same as above, but assumes that the promoter returns
+; just a single seme, instead of a list of semes.
+; This routine is obsolete, but is here for reference.
+;
+(define (mono-promote-to-seme promoter atom-list)
+
 	(define (promote atom)
 		(cond
 			((eq? 'WordInstanceNode (cog-type atom))
@@ -470,6 +517,11 @@
 	)
 
 	(map promote atom-list)
+)
+
+(define (promote-to-seme promoter atom-list)
+	(mono-promote-to-seme promoter atom-list)
+	; (new-promote-to-seme promoter atom-list)
 )
 
 ; --------------------------------------------------------------------

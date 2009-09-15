@@ -442,7 +442,7 @@
 )
 
 ; --------------------------------------------------------------------
-; cartesian-prod - distribute the cartesian product across a tuple of sets
+; cartesian-prod - distribute the Cartesian product across a tuple of sets
 
 ; This returns the Cartestion product of a tuple of sets by distributing
 ; the product across the set elements. Returned is a list of tuples, where
@@ -456,7 +456,10 @@
 ; p_k [a_1, a_2, ... , a_m] = a_k
 ;
 ; Then, if t is a tuple returned by this function, one has that
-; p_k(t) is element of s_k for all t and all 1<= k <= m.
+; p_k(t) is element of s_k for all t and all 1<= k <= m. Every possible
+; combination of set elements is returned.
+;
+; Example usage and output:
 ;
 ; guile> (cartesian-prod (list 'p 'q))
 ; (p q)
