@@ -246,6 +246,7 @@ Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
 
 Untested, probably won't work:
+ * truth-query w/ preps: Is Berlin the capital of Germany?
  * Do questions (What did Mike do? Mike threw a rock)
  * Who died?    (John Kennedy died)
  * Did John die?

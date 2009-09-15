@@ -492,7 +492,7 @@
 			; Note the recursion in bowles of this below.
 			(map 
 				(lambda (oset) (mklink lnk oset)) 
-				; The cartesian prod will distribute the list of lists.
+				; The Cartesian prod will distribute the list of lists.
 				(cartesian-prod 
 					; Applying map will generate a list of lists
 					(map promote (cog-outgoing-set lnk))

@@ -122,21 +122,36 @@
 )
 
 ; ---------------------------------------------------------------------
+; Return #t is the word-instance has part-of-speech pos else #f
+; "word-inst" must have a PartOfSpeechLink on it; typically its 
+; a WordInstanceNode.
+; "pos" is a string, typically "noun" or "verb".
+;
+; Not all word instances are always tagged. For example, in a sentence
+; with "John Kennedy", John won't have a pos tag, because RelEx will
+; have already meged this into an entity string (and tagged the string).
+;
+(define (word-inst-match-pos? word-inst pos)
+	(let ((pos-list (word-inst-get-pos word-inst)))
+		(if (null? pos-list)
+			#f
+			(string=? pos (cog-name (car pos-list)))
+		)
+	)
+)
+
+; ---------------------------------------------------------------------
 ; Return #t is the word-instance is a noun
 ; 
 (define (word-inst-is-noun? word-inst)
-	(string=? "noun" 
-		(cog-name (car (word-inst-get-pos word-inst)))
-	)
+	(word-inst-match-pos? word-inst "noun")
 )
 
 ; ---------------------------------------------------------------------
 ; Return #t is the word-instance is a verb
 ; 
 (define (word-inst-is-verb? word-inst)
-	(string=? "verb" 
-		(cog-name (car (word-inst-get-pos word-inst)))
-	)
+	(word-inst-match-pos? word-inst "verb")
 )
 
 ; ---------------------------------------------------------------------
