@@ -149,7 +149,7 @@ is as follows:
    each other.
 
 3) Question-Answering. The bot can recognize some simple questions and
-   answer them. This is doen by a very simple form of pattern-matching
+   answer them. This is done by a very simple form of pattern-matching
    on RelEx output. Thus, for example, the dependency parse of "John
    threw the ball" results in "_subj(throw,John) _obj(throw,ball)".
    The question "Who threw a ball?" results in "_subj(throw,who) 
@@ -157,10 +157,12 @@ is as follows:
    it is straight-forward to pattern-match the statement to the question,
    and determine that "who" corresponds to "John".
 
-   The set-up for RelEx-based pattern matching passes through
-   (cog-ad-hoc "question") to the code in nlp/question/SentenceQuery.cc.
-   The actual pattern-matching is done by generic hypergraph predicate
-   maching code in query/PatternMatchEngine.cc.
+	Currently, three types of questions are handled: simple SVO or 
+   Subject-Verb-Object queries, which can be pattern matched as above.
+   A second type are SVO truth-query questions ("Did X verb Y?").
+   A third type involves statements with prepostions, which are turned
+   into "triples", as described below. Question-answering patterns are
+   located in nlp/triples/question.scm.
 
 4) Semantic triples. The scope of questions that can be answered can be
    slightly broadened by converting them into a normalized form, here
@@ -194,10 +196,14 @@ is as follows:
 
    If the database has been opened, then the same code as described in 
    the previous step, above, will look for answers to questions there.
+
+   XXX As of Sept 2009, that database is no longer functional, due to 
+   changes in the hypergraph representation of prepositions. XXX
    
 6) Frames.  (Not hooked up) Additional context can be provided by 
    frame-net-like frames. There's code in RelEx for this, its not
-   hooked up.
+   hooked up.  Some basic work for "seme promotion", which is similar
+   to framing, has been done.
     
 7) Reasoning (not implemented). In principle, reasoning could be done.
    Right now, there is no infrastructure for this, aside from the core
@@ -214,7 +220,9 @@ discussed in [Katz05].
 
 Examples:
 ---------
-The following dialog works (or has worked at various times in the past):
+The following dialog work, or has worked at various times in the past.
+Because the infrastructure is in development, any given snapshot may be
+broken.
 
 <me>         Fred threw a red ball
 <me>         John threw a green ball.
@@ -241,6 +249,7 @@ The following dialog works (or has worked at various times in the past):
 <me>         the cat sat on the mat
 <me>         what did the cat sit on?
 <cogita-bot> Triples abstraction found: mat
+
 
 Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
