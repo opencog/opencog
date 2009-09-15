@@ -68,82 +68,103 @@
 
 ; --------------------------------------------------------------------
 ; Generic seme promoter. 
-; Given a word inst, and two routines: a new-seme creation routine, and a
-; seme matching routine, this will perform the seme promotion.
+;
+; Given a word inst, and two routines: a new-seme creation routine, and
+; a seme matching routine, this will perform all of the other steps
+; required for seme promotion in a "generic" way.
 ;
 ; The make-new-seme-proc must accept a word instance as its sole argument,
-; and return a seme.
+; and return a single new seme. 
 ;
-; The seme-match-proc? must acepet two arguments: a seme and word-inst,
-; and return #t if the word-inst can be understood to be and instance of
-; the seme.
+; The seme-match-proc? must accepet two arguments: a seme and word-inst,
+; and return #t if the word-inst can be understood to be an instance of
+; the seme. Else it should return #f.
+;
+; This routine works by creating a list of "candidate semes" for the
+; input word-inst. A "candidate seme" is one that has the same lemma as
+; the word-inst.  These candidates are then passed through the 
+; seme-match-proc? predicate, to locate one or more possible promotions
+; for the word-inst.  If any match, these are returned.
+;
+; If none of the identified "candidate semes" are accepted by the
+; predicate seme-match-proc?, then a brand-new seme is created by 
+; invoking make-new-seme-proc, and this brand-new seme is returned.
 ;
 ; A (relatively) simple example of the use of this promoter can be found in 
 ; the same-lemma-promoter-two example, below.
 ;
-(define (generic-promoter make-new-seme-proc seme-match-proc? word-inst)
+(define (generic-promoter make-new-seme-proc seme-match-proc? word-instance)
 
 	; We have a list of candidate semes. Are any appropriate?
 	; Create one if none are found.
-	(define (find-existing-seme seme-list wrd-inst)
-		(let ((matching-seme 
-					(find (lambda (se) (seme-match-proc? se wrd-inst)) seme-list))
+	(define (find-existing-semes seme-list wrd-inst)
+		(let ((matching-semes 
+					(filter (lambda (se) (seme-match-proc? se wrd-inst)) seme-list))
 			)
-			(if matching-seme
+			(if (null? matching-semes)
+				; If list was empty, create a new seme
+				(list (make-new-seme-proc wrd-inst))
+
+				; If we got a list of semes, attach each to this word-inst.
 				(let ()
-					(InheritanceLink (stv 1 1) word-inst matching-seme)
-					matching-seme
+					(for-each
+						(lambda (seme) 
+							(InheritanceLink (stv 1 1) wrd-inst seme)
+						)
+						matching-semes
+					)
+					matching-semes
 				)
-				(make-new-seme-proc wrd-inst)
 			)
 		)
 	)
 
-	; Get a list of semes with this lemma. 
+	; Get a list of "candidate semes" having this lemma. 
 	(define (lemma-get-seme-list lemma)
-		 (cog-chase-link 'LemmaLink 'SemeNode lemma))
+		 (cog-chase-link 'LemmaLink 'SemeNode lemma)
+	)
 
-	; Get possible, candidate semes for this word-inst
+	; Get a list of possible, candidate semes for this word-inst
 	(define (get-candidate-semes wrd-inst)
 		(lemma-get-seme-list (word-inst-get-lemma wrd-inst))
 	)
 
 	; Get list of candidate semes, based on thier having a common lemma
-	; The vet each of these, to see if one provides the desired match.
-	; If so, then return it. If not, then create a new seme.
-	(define (find-or-make-seme wrd-inst)
+	; The vet each of these, to see if one or more provide the desired
+	; match. If so, then return them. If not, then create a new seme.
+	(define (find-or-make-semes wrd-inst)
 		(let* ((seme-list (get-candidate-semes wrd-inst)))
 			(if (null? seme-list)
-				(make-new-seme-proc wrd-inst)
-				(find-existing-seme seme-list wrd-inst)
+				(list (make-new-seme-proc wrd-inst))
+				(find-existing-semes seme-list wrd-inst)
 			)
 		)
 	)
 
 	; Perform an immediate check: this word instance may already
-	; belong to some seme. This will typically not be the case when
-	; encountering a word for the first time, but will commonly be 
-	; true when promoting relations. So we add this as a short-cut
-	; into the processing path.
-	(define (get-existing-seme wrd-inst)
-		(let ((slist (cog-chase-link 'InheritanceLink 'SemeNode wrd-inst)))
-			(if (null? slist) '() (car slist))
-		)
+	; be associated with one or more semes. This will not be the 
+	; case when encountering a word for the first time, but will 
+	; commonly be true when promoting relations. So we add this
+	; as a short-cut into the processing path.
+	(define (get-existing-semes wrd-inst)
+		(cog-chase-link 'InheritanceLink 'SemeNode wrd-inst)
 	)
 
-	(let ((exist-seme (get-existing-seme word-inst)))
-		(if (null? exist-seme)
-			(find-or-make-seme word-inst)
-			exist-seme
+	(let ((exist-semes (get-existing-semes word-instance)))
+		(if (null? exist-semes)
+			(find-or-make-semes word-instance)
+			exist-semes
 		)
 	)
 )
 
 ; --------------------------------------------------------------------
 ; A re-implementation of the same-lemma-promoter, but using the 
-; generic-promoter routine. Operationally, this is supposed to
-; work the same way as same-lemma-promoter -- see that for further
-; documentation.
+; generic-promoter routine. Operationally, this is supposed to return
+; exactly the same results as same-lemma-promoter -- see that routine
+; for further documentation. The point is that this implementation 
+; should be easier to understand and debug, since it just implements
+; the two basic routines needed by the generic promoter.
 ;
 (define (same-lemma-promoter-two word-inst)
 
@@ -438,8 +459,8 @@
 )
 
 (define (same-modifiers-promoter word-inst)
-	(same-dependency-promoter word-inst)
-	; (same-lemma-promoter word-inst)
+	; (same-dependency-promoter word-inst)
+	(same-lemma-promoter-two word-inst)
 )
 
 ; --------------------------------------------------------------------
@@ -520,8 +541,8 @@
 )
 
 (define (promote-to-seme promoter atom-list)
-	(mono-promote-to-seme promoter atom-list)
-	; (new-promote-to-seme promoter atom-list)
+	; (mono-promote-to-seme promoter atom-list)
+	(new-promote-to-seme promoter atom-list)
 )
 
 ; --------------------------------------------------------------------
