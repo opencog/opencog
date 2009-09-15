@@ -4,9 +4,10 @@
                 Linas Vepstas <linasvepstas@gmail.com>
                           August 2009
 
-XXX As of this instant, important parts of the chatbot are being
-re-designed, and so things sort of don't work. I beleive that
-revision 3150 has a working chatbot.
+XXX Important parts of the chatbot are being worked on, and so the  
+chatbot might be broken in small or large ways.  I beleive that the
+following revisions should mostly work: 3150, 3470.
+XXX
 
 A quick-n-dirty hookup of the OpenCog NLP pipeline to an IRC chatbot.
 
