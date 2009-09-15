@@ -12,7 +12,6 @@
 
 #include <opencog/server/CogServer.h>
 
-#include <opencog/nlp/question/SentenceQuery.h>
 #include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/reasoning/pln/PLNModule.h>
@@ -101,6 +100,12 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 		return handle_to_scm(h);
 	}
 
+#if REVIVE_OLD_C_CODE_FOR_SENTENCE_PATTERN_MATCH
+	// As of September 2009, this code is "obsolete", in that all sentence
+	// pattern matching is now done via scheme, and not C++. This makes
+	// sentence-handling code simpler, easier to structure, and less
+	// squirmy. The code below can be deleted after its allowed to smolder
+	// for a while, say, sometime in 2010. We keep it just in case :-)
 	if (0 == cmdname.compare("question"))
 	{
 		Handle h = verify_handle(optargs, "cog-ad-hoc question");
@@ -123,6 +128,7 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 
 		return handle_to_scm(h);
 	}
+#endif // REVIVE_OLD_C_CODE_FOR_SENTENCE_PATTERN_MATCH
 	return SCM_BOOL_F;
 }
 

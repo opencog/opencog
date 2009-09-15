@@ -1,3 +1,8 @@
+#
+# Build C++ queston answering code. All of this code is now deprecated
+# (See the README for the status and additional info.) We'll keep this
+# build file around for a little while, as a point of reference.
+
 INCLUDE_DIRECTORIES(
 	${OPENCOG_SOURCE_DIR}/src/atomspace
 	${OPENCOG_SOURCE_DIR}/src/query

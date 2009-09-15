@@ -298,35 +298,6 @@
 		(newline)
 		(chat-return "(say-declaration)")
 	)
-
-; Dead code, maintain as reference for just a little while.
-; When removing this, be sure to:
-; 1) review usage of "chat-get-simple-answer", if needed,
-; 2) remove SentenceQuery.cc from CMakefile
-; 3) remove cog-ad-hoc "question" support.
-;
-;	; Perform a simple pattern matching to the syntactic
-;	; form of the sentence.
-;	(set! is-question (cog-ad-hoc "question" (car sents)))
-;
-;	;; Was a question asked?
-;	(if is-question 
-;		(let ((ans (chat-get-simple-answer)))
-;			(display "Hello ")
-;			(display nick)
-;			(display ", you asked a question: ")
-;			(display txt)
-;			(newline)
-;
-;			; If pattern-matching found an answer, print it.
-;			(if (not (null? ans))
-;				(let () 
-;					(chat-prt-soln "Syntax pattern match found: " ans)
-;					(chat-return "(say-final-cleanup)")
-;				)
-;			)
-;		)
-;	)
 )
 
 ; -----------------------------------------------------------------------

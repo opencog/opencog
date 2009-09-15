@@ -4,6 +4,7 @@
                         Created 18 March 2008
                         Revised on 13 May 2008
                         Revised on 7 May 2009
+                        Revised on 15 September 2009
 
 This directory contains code that implements natural language question
 answering via subgraph isomorphism. This README file describes the 
@@ -28,15 +29,22 @@ relations with situational context infered from the sentences. The
 style relational triples.  Finally, "question comprehension" recognizes
 the structure of questions themselves, and respond to that structure.
 
-XXX As of 13 May 2008, changes to the RelEx output have broken the 
+XXXXXX As of 13 May 2008, changes to the RelEx output have broken the 
 operation of the frame-query part of this code. As of 23 April 2009,
 the simpler RelEx query style has been restored and now works again. 
 As of August 2009, things are kind of broken again. As of September
-2009, much of the C++ code has been deprecated and removed, and has 
-been ported over to scheme, and made operational within the chatbot
-infrastructure. Basically, the chatbot provides a more coherent
-infrastructure for pursuing this work. See nlp/chatbot/README for 
-details. XXX
+2009, all of the C++ code has been deprecated, and various parts have
+been removed.  A new, far superior implementation has been created in
+a combination of scheme and pattern-matching, in the nlp/triples and
+the nlp/seme directories.  The new implementtion now power the chatbot.
+
+Because of this, the C++ code in this directory is no longer being
+built or maintained. It is not being deleted, not just yet -- its of
+some historical interest (to me, Linas), as it provides an example of
+why C++ sucks for any non-core OpenCog info processing.  Also, this
+README file should never be deleted, but should be permanently archived,
+as it provides concrete documentation of (early) research results.
+XXXXXX
 
 General conclusion: while superficial question answering is possible, 
 a robust system remains difficult.  Work continues (very slowly) along

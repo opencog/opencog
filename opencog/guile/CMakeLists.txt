@@ -15,7 +15,6 @@ TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 	pln
 	query
-	question
 	wsd
 )
 
