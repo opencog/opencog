@@ -69,7 +69,7 @@
 
 			(r-decl-word-inst "$verb" "$parse")
 
-			core
+			(core "$ans" "$clause")
 
 			; XXX we should also make sure that adverbs, if any, that
 			; modify the verb, are also matched up.
@@ -78,6 +78,20 @@
 			; mis-interpreted as a statement.
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
+
+			; These reject self-referential answers for copula
+			; questions (who is, what is) XXX need to revisit this.
+			; Maybe not needed?
+			; (r-not (r-decl-lemma "$ans" "what"))
+			; (r-not (r-decl-lemma "$ans" "when"))
+			; (r-not (r-decl-lemma "$ans" "where"))
+			; (r-not (r-decl-lemma "$ans" "who"))
+			; (r-not (r-decl-lemma "$ans" "why"))
+
+			; Reject sentences that have propositions in them.
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-not (r-rlx "$prep" "$clause" "$var-any"))
+			(r-not (r-rlx "$prep" "$var-other" "$clause"))
 		)
 		; (r-link ListLink "$seme-svar" "$ans-verb" "$qVar" "$ans")
 		(r-anchor-node *query-soln-anchor* "$ans")
@@ -87,36 +101,36 @@
 ; The wh-object provides the core template for questions of the form
 ; "What did subject verb?" (What did Fred throw?) so that the WH-word 
 ; is the object of the question.
-(define wh-object
+(define (wh-object answer-obj subj-var)
 	(r-and
 		(r-rlx "_obj"  "$verb" "$qVar")
-		(r-rlx "_subj" "$verb" "$svar")
+		(r-rlx "_subj" "$verb" subj-var)
 
 		; Look for seme matching the subject
-		(r-seme-of-word-inst "$svar" "$seme-svar")
+		(r-seme-of-word-inst subj-var "$seme-svar")
 
 		; Look for candidate verb semes.
 		(r-candidate-of-word-inst "$verb" "$ans-verb")
 		(r-rlx "_subj" "$ans-verb" "$seme-svar")
-		(r-rlx "_obj"  "$ans-verb" "$ans")
+		(r-rlx "_obj"  "$ans-verb" answer-obj)
 	)
 )
 
 ; The wh-subject provides the core template for questions of the form
 ; "Who verb'ed object?" (Who ate an apple?) so that the WH-word 
 ; is the subject of the question.
-(define wh-subject
+(define (wh-subject answer-subj obj-var)
 	(r-and
 		(r-rlx "_subj" "$verb" "$qVar")
-		(r-rlx "_obj"  "$verb" "$ovar")
+		(r-rlx "_obj"  "$verb" obj-var)
 
 		; Look for seme matching the object
-		(r-seme-of-word-inst "$ovar" "$seme-ovar")
+		(r-seme-of-word-inst obj-var "$seme-ovar")
 
 		; Look for candidate verb semes.
 		(r-candidate-of-word-inst "$verb" "$ans-verb")
 		(r-rlx "_obj"  "$ans-verb" "$seme-ovar")
-		(r-rlx "_subj" "$ans-verb" "$ans")
+		(r-rlx "_subj" "$ans-verb" answer-subj)
 	)
 )
 

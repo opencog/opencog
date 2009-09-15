@@ -616,6 +616,7 @@
 ;
 ; Assumes that both "prep" and "prep-word" are vairables, 
 ; and declares "prep" to be of type DefinedLinguisticRelationshipNode
+; XXX this is wrong, it should be PrepositionalRelationshipNode ??? XXX
 ;
 ; Returns an r-expression.
 ;
