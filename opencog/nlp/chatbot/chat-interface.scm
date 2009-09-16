@@ -41,7 +41,7 @@
 ; making this hard/impossible. Argh.
 ;
 ; So instead, what's implemented here is throw-catch semantics.
-; An exceptiuon is thrown, its caught by the guile interpreter, 
+; An exception is thrown, its caught by the guile interpreter, 
 ; and thus passed on to the chat client.  Because this is a throw,
 ; it can be used anywhere in the code to break out of evaluation.
 ;
@@ -114,9 +114,11 @@
 ;
 ; Anyway, three different kinds of things can be found:
 ; WordNodes, almost always "yes", in answer to a yes/no question.
-;     XXX except that above isn't done any more XXX
+;     XXX except that above isn't done any more -- WordNodes are
+;     never attached, it seems. XXX
 ; WordInstanceNodes, in answer to SVO pattern matching.
 ; SemeNodes, in answer to triples matching.
+;
 ; A list of these "answers" is returned.
 ; 
 (define *query-soln-anchor* (AnchorNode "# QUERY SOLUTION"))
@@ -344,7 +346,7 @@
 )
 
 ; -----------------------------------------------------------------------
-; anchor-bottom-side -- anchor triples for pattern matching.
+; *bottom-anchor* -- anchor triples for pattern matching.
 ;
 ; In order for the pattern matcher to locate things attached to
 ; anchors, they need to be attached in a way to "keep things simple"
@@ -358,22 +360,6 @@
 
 (define (get-wh-qvars)
 	(cog-chase-link 'ListLink 'WordInstanceNode *bottom-anchor*)
-)
-
-(define (anchor-bottom-side trip-list)
-	(define (re-anchor-one trip)
-		(let* ((ll (cadr (cog-outgoing-set trip)))
-				(os (cog-outgoing-set ll))
-				)
-			(ListLink (stv 1 1) *bottom-anchor* (car os))
-			(ListLink (stv 1 1) *bottom-anchor* (cadr os))
-		)
-	)
-	(map re-anchor-one trip-list)
-(dbg-display "bottumsup\n")
-(display (cog-incoming-set *bottom-anchor*))
-(newline)
-(end-dbg-display)
 )
 
 (define (release-bottom-anchor)
@@ -490,10 +476,9 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-try-triple-qa -- try answering questions using triples 
-; The first part, "say-id-english", parsed the user input, and 
-; attempted a syntax-pattern match to any questions.  If that fails,
-; this is called.
+; say-try-triple-qa -- try answering questions using triples.
+; Takes a question, tries to extract prepositional triples
+; from it, then attempts a pattern match on the results.
 ;
 (define (say-try-triple-qa)
 
@@ -502,7 +487,7 @@
 	(create-triples)
 	(dettach-sents-from-triple-anchor)
 
-   ; Try again with pattern matching on the triples.
+   ; Perform pattern matching on the triples.
 	(let ((trips (get-new-triples)))
 		(if (null? trips)
 			(let ()
@@ -511,10 +496,6 @@
 				(chat-return "(say-try-deduction)")
 			)
 		)
-
-		; The question-rule-x looks for stuff attached to this anchor
-		; XXX is this still neccessary ?? 
-		(anchor-bottom-side trips)
 
 		; Pull in any semes that might be related...
 		(fetch-related-semes trips)
