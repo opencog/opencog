@@ -527,26 +527,6 @@
 ; routines like those above.
 ;
 ; -----------------------------------------------------------------
-; r-property -- link a property to variable
-; Creates an InheritanceLink to the named property.
-;
-; Returns an r-expression.
-;
-(define (r-inheritance-tag var prop)
-	(define lnk
-		(InheritanceLink (stv 1 1)
-			(VariableNode var)
-			prop
-		)
-	)
-	(r-new-expr '() (list lnk) (r-fv var))
-)
-
-(define (r-property var prop-name)
-	(r-inheritance-tag var (DefinedLinguisticConceptNode prop-name))
-)
-
-; -----------------------------------------------------------------
 ; r-anchor -- link a variable to an AnchorNode
 ;
 ; Returns an r-expression.

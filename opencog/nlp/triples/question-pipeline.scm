@@ -218,7 +218,7 @@
 			(r-rlx-flag "hyp" "$verb")
 			(r-rlx-flag "truth-query" "$verb")
 		)
-		(r-property "$sent" "truth-query")
+		(r-rlx-flag "truth-query" "$sent")
 	)
 )
 
@@ -236,7 +236,7 @@
 	(r-varscope
 		(r-and
 			(r-anchor-node *new-parses-anchor* "$sent")
-			(r-property "$sent" "truth-query")
+			(r-rlx-flag "truth-query" "$sent")
 			(r-decl-word-inst "$verb" "$sent")
 
 			; Identify the question.
@@ -284,7 +284,7 @@
 ;	(r-varscope
 ;		(r-and
 ;			(r-anchor-node *new-parses-anchor* "$sent")
-;			(r-property "$sent" "truth-query")
+;			(r-rlx-flag "truth-query" "$sent")
 ;			(r-decl-word-inst "$verb" "$sent")
 
 ; -----------------------------------------------------------------

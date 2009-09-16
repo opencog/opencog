@@ -99,14 +99,18 @@
 ; These must have been previously tagged as such by running appropriate
 ; pattern matches.
 ; 
-(define (get-truth-queries)
-	(define tq (DefinedLinguisticConceptNode "truth-query"))
+(define (get-parses-with-property prop-name)
+	(define prop (DefinedLinguisticConceptNode prop-name))
 	(remove! null?
 		(map
-			(lambda (parse) (cog-link 'InheritanceLink parse tq))
+			(lambda (parse) (cog-link 'InheritanceLink parse prop))
 			(get-new-parses)
 		)
 	)
+)
+
+(define (get-truth-queries)
+	(get-parses-with-property "truth-query")
 )
 
 ; -----------------------------------------------------------------------
