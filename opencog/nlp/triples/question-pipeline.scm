@@ -205,6 +205,8 @@
 
 ; -----------------------------------------------------------------
 ; Identify a truth-query as such, anchor it.
+; Basically, we promote the truth-query flag from the head-word
+; of the parse, to the parse itself.
 ;
 (define truth-query-id-rule-0
 	(r-varscope
@@ -216,13 +218,13 @@
 			(r-rlx-flag "hyp" "$verb")
 			(r-rlx-flag "truth-query" "$verb")
 		)
-		(r-anchor-node *truth-query-anchor* "$sent")
+		(r-property "$sent" "truth-query")
 	)
 )
 
 ; -----------------------------------------------------------------
 ; 0
-; Truth-query question: "Did John throw a rock?"
+; SVO-format truth-query question: "Did John throw a rock?"
 ;        _subj(throw, John)
 ;        _obj(throw, rock)
 ;        HYP (throw, T)
@@ -233,7 +235,8 @@
 (define truth-query-rule-0
 	(r-varscope
 		(r-and
-			(r-anchor-node *truth-query-anchor* "$sent")
+			(r-anchor-node *new-parses-anchor* "$sent")
+			(r-property "$sent" "truth-query")
 			(r-decl-word-inst "$verb" "$sent")
 
 			; Identify the question.
@@ -263,6 +266,26 @@
 		(r-anchor-node *query-soln-anchor* "$ans-verb")
 	)
 )
+
+; -----------------------------------------------------------------
+; 1
+; Prep-triple-format truth-query question:
+; "Is Berlin the capital of Germany?"
+;        of(capital, Germany)
+;        _obj(be, capital)
+;        _subj(be, Berlin)
+;        TRUTH-QUERY-FLAG(be, T)
+;        HYP(be, T)
+; which gets
+;
+; or more generally "did X verb Y?"
+
+;(define truth-query-rule-1
+;	(r-varscope
+;		(r-and
+;			(r-anchor-node *new-parses-anchor* "$sent")
+;			(r-property "$sent" "truth-query")
+;			(r-decl-word-inst "$verb" "$sent")
 
 ; -----------------------------------------------------------------
 ;

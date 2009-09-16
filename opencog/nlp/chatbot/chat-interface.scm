@@ -69,6 +69,11 @@
 (define (attach-new-parses sent-list)
    (attach-parses-to-anchor sent-list *new-parses-anchor*)
 )
+
+(define (get-new-parses)
+	(cog-chase-link 'ListLink 'ParseNode *new-parses-anchor*)
+)
+
 (define (release-new-parses)
 	(release-from-anchor *new-parses-anchor*)
 )
@@ -90,18 +95,18 @@
 )
 
 ; -----------------------------------------------------------------------
-; Anchor for truth-query parses. The things that get attached to this
-; anchor are ParseNodes of parses that seem to be (as yet unasnwered) 
-; truth-query questions.
-;
-(define *truth-query-anchor* (AnchorNode "# TRUTH QUERY" (stv 1 1)))
-
+; get-truth-queries -- return a list of new parses that are truth queries
+; These must have been previously tagged as such by running appropriate
+; pattern matches.
+; 
 (define (get-truth-queries)
-	(cog-chase-link 'ListLink 'ParseNode *truth-query-anchor*)
-)
-
-(define (release-truth-query-anchor)
-	(release-from-anchor *truth-query-anchor*)
+	(define tq (DefinedLinguisticConceptNode "truth-query"))
+	(remove! null?
+		(map
+			(lambda (parse) (cog-link 'InheritanceLink parse tq))
+			(get-new-parses)
+		)
+	)
 )
 
 ; -----------------------------------------------------------------------
@@ -397,12 +402,6 @@
 ;
 (define (say-handle-truth-query)
 
-	; Hmm promote trip semes ?? -- later 
-	; Also -- cannot blithly promote, do *only* the semes
-	; but not the triples themselves
-	;	(trip-semes (promote-to-seme same-modifiers-promoter trips))
-	;
-
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.) Actually,
@@ -581,7 +580,6 @@
 	; Delete list of triples, so they don't interfere with the next question.
 	(release-result-triples)
 	(release-truth-assertions)
-	(release-truth-query-anchor)
 
 	; Delete  the list of solutions, so that we don't accidentally
 	; replay it when the next question is asked.
