@@ -77,6 +77,15 @@ public:
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
     /**
+     * Do a bulk update, with a list of objects
+     *
+     * @param objects A HandleSeq containing all the objects handles
+     * @param pet The handle of the pet
+     * @param timestamp the current timestamp
+     */
+    virtual void update(const HandleSeq& objects, Handle pet, unsigned long timestamp );
+
+    /**
      * Return true if there is already a is_X predicate created for the given
      * object handle.
      *

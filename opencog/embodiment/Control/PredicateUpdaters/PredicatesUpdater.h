@@ -50,6 +50,7 @@ private:
      * takes place
      */
     std::vector<BasicPredicateUpdater *> updaters;
+    std::vector<BasicPredicateUpdater *> bulkUpdaters;
     BasicPredicateUpdater* petPsychePredicatesUpdater;
 
     AtomSpace &atomSpace;

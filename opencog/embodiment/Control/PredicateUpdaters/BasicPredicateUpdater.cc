@@ -106,5 +106,10 @@ bool BasicPredicateUpdater::isUpdated(Handle object, std::string predicateName)
 
 void BasicPredicateUpdater::update(Handle object, Handle pet, unsigned long timestamp )
 {
-    logger().warn("BasicPredUpdater - Virtual method. Subclasses should implement it.");
+    logger().warn("BasicPredUpdater::update - Virtual method. Subclasses should implement it.");
+}
+
+void BasicPredicateUpdater::update(const HandleSeq& objects, Handle pet, unsigned long timestamp )
+{
+    logger().warn("BasicPredUpdater::update (bulk version) - Virtual method. Subclasses should implement it.");
 }
