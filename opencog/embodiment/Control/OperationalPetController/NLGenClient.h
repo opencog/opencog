@@ -24,43 +24,63 @@
 #ifndef NLGENCLIENT_H
 #define NLGENCLIENT_H
 
-#include <Sockets/TcpSocket.h>
-#include <Sockets/ISocketHandler.h>
 #include <string>
+#include <cstdlib>
+#include <iostream>
+#include <boost/asio.hpp>
 
+using boost::asio::ip::tcp;
 
 namespace OperationalPetController
 {
-    class NLGenClient : public TcpSocket {
+    class NLGenClient {
         public:
-            NLGenClient(ISocketHandler& h) : TcpSocket(h) {}
-            NLGenClient(ISocketHandler& h, const std::string& data) : TcpSocket(h), m_data(data) {}
-            void OnConnect() {
-                connected = true;
-        		SetLineProtocol();
-		        if (m_data.empty()) {
-		           logger().error("NLGenClient::%s - trying to send empty data to NLGen server socket.",__FUNCTION__); 
-                } else {
-                    logger().debug("NLGenClient::%s - sending data %s to NLGen server socket.",__FUNCTION__,m_data.c_str());
-        			Send(m_data + "\n");
-                }
-	        }
-            void OnLine(const std::string& line){
-                logger().debug("NLGenClient::%s - Incoming Line: %s", __FUNCTION__, line.c_str() );
-                output_data = line;
-            }
-            std::string getOutput(){
-               return output_data;
-            }
-            bool isConnected(){
-                return connected;
+            NLGenClient(std::string host, int port){
+                this->port = port;
+                this->host = host;
+                connect();
+             }
+            ~NLGenClient(){
+                logger().debug("[NLGenClient.%s] - closing socket connection",__FUNCTION__);
+                socket->close();
+                delete socket;
+                logger().debug("[NLGenClient.%s] - socket connection closed with success",__FUNCTION__);
             }
 
+            void connect(){
+               try{
+                    logger().debug("[NLGenClient.%s] - opening socket connection",__FUNCTION__);
+                     
+                    tcp::resolver resolver(io_service);
+                    tcp::resolver::query query(tcp::v4(), host, boost::lexical_cast<std::string>(port));
+                    tcp::resolver::iterator iterator = resolver.resolve(query);
+                    socket = new tcp::socket(io_service);
+                    socket->connect(*iterator);
+                    
+                    logger().debug("[NLGenClient.%s] - socket connection opened with success",__FUNCTION__);
+                }catch(std::exception& e){
+                    logger().error("[NLGenClient.%s] - Failed to open socket. Exception Message: %s",__FUNCTION__,e.what());
+                }
+            }
+
+            std::string send(std::string text){
+                logger().debug("[NLGenClient.%s] - sending text %s",__FUNCTION__,text.c_str());
+
+                size_t request_length = text.length();
+                boost::asio::write(*socket, boost::asio::buffer(text.c_str(), request_length));
+                char reply[1024];//TODO max of sentence size is 1024.....
+                size_t reply_length = socket->read_some(boost::asio::buffer(reply));
+                //size_t reply_length = boost::asio::read(*socket,boost::asio::buffer(reply));
+                std::string nlgenResult = std::string(reply); 
+                logger().debug("[NLGenClient.%s] - read %d characters",__FUNCTION__,reply_length);
+                return nlgenResult.substr(0,reply_length-1);
+           }
+
         private:
-        	std::string m_data;
-            std::string output_data;
-            bool connected;
-            
+            boost::asio::io_service io_service;
+            tcp::socket *socket;
+            std::string host; 
+            int port;
     };
 };
 

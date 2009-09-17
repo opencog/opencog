@@ -1211,14 +1211,18 @@
 	 questionFrames
 	 )
 	)
-    (EvaluationLink (stv 1 1)
-     (PredicateNode "latestQuestionFrames")
-     (ListLink
+
+    (if (not (null? finalFrames))
+      (EvaluationLink (stv 1 1)
+       (PredicateNode "latestQuestionFrames")
+       (ListLink
+        finalFrames
+        )
+       )
       finalFrames
-      )
-     )
-    ;questionFrames
-    ;finalFrames
+    )
+      ;questionFrames
+      ;finalFrames
 
     )  
   )

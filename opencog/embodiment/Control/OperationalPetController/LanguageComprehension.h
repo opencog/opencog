@@ -28,11 +28,10 @@
 #include <opencog/embodiment/Control/PetInterface.h>
 #include "OutputRelex.h"
 #include "FramesToRelexRuleEngine.h"
-
+#include "NLGenClient.h"
 
 namespace OperationalPetController
 {
-    
     class LanguageComprehension 
     {
     public: 
@@ -56,6 +55,8 @@ namespace OperationalPetController
         std::string nlgen_server_host;
         int nlgen_server_port;
         FramesToRelexRuleEngine framesToRelexRuleEngine;
+        NLGenClient *nlgenClient;
+
     private:
 
     };
