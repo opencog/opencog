@@ -2291,7 +2291,11 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
     
     // setup the frame for the given physiological feeling
-    float value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
+    float value = 0.0f;
+    try {
+        value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
+    } catch ( boost::bad_lexical_cast &ex ) { } // ignore
+
 
     std::string feeling = name;
     boost::replace_first( feeling, "_urgency", "");

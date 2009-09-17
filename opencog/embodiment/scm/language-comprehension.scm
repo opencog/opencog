@@ -72,21 +72,21 @@
 
 ; This function retrieves all the semeNodes related to the given WordInstanceNode
 ; that matches the given relationType using distance predicates defined into the application
-(define (filterByDistance figureWIN figureWN groundWIN groundWN relationTypeWN)
+(define (filterByDistance figureWIN figureWN groundWIN groundWN relationTypeCN)
   (let ((tv '())
         (predicateNode '())
         (semeNodes '())
-        (relation (cog-name relationTypeWN))
+        (relation (cog-name relationTypeCN))
         )
     (map
      (lambda (figureSemeNode)
 
        (map
         (lambda (groundSemeNode)
-          (cond ((equal? "near" relation)
+          (cond ((equal? "#near" relation)
                  (set! predicateNode (PredicateNode "near"))
                  )
-                ((equal? "next" relation)
+                ((equal? "#next" relation)
                  (set! predicateNode (PredicateNode "next"))
                  )
                 )
@@ -111,7 +111,7 @@
      (get-seme-nodes figureWN)
      )
     (ListLink 
-     (append (list wordInstanceNode ) semeNodes )     
+     (append (list figureWN ) semeNodes )     
      )
 
     )  

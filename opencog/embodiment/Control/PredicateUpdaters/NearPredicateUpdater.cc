@@ -135,11 +135,11 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                 { // defining isNear
                     std::map<std::string, Handle> elements;
                     elements["Figure"] = object;
-                    elements["Ground"] = pet;
+                    elements["Ground"] = entityHandle;
                     elements["Relation_type"] = isNear;
                     
                     AtomSpaceUtil::setPredicateFrameFromHandles( 
-                       atomSpace, "#Locative_relation", agentName + "_" + objectName + "_is_near", 
+                       atomSpace, "#Locative_relation", entity + "_" + objectName + "_is_near", 
                           elements, SimpleTruthValue(nearDistStrength, 1.0) );
                 } // end block
 
@@ -151,11 +151,11 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
                 { // defining isNext
                     std::map<std::string, Handle> elements;
                     elements["Figure"] = object;
-                    elements["Ground"] = pet;
+                    elements["Ground"] = entityHandle;
                     elements["Relation_type"] = isNext;
                        
                     AtomSpaceUtil::setPredicateFrameFromHandles( 
-                       atomSpace, "#Locative_relation", agentName + "_" + objectName + "_is_next", 
+                       atomSpace, "#Locative_relation", entity + "_" + objectName + "_is_next", 
                           elements, SimpleTruthValue(nextDistStrength, 1.0) );
                 } // end block
 
@@ -165,3 +165,90 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 
 }
 
+
+
+void NearPredicateUpdater::update(const HandleSeq& objects, Handle pet, unsigned long timestamp )
+{
+    // there is no map, no update is possible
+    Handle spaceMapHandle = atomSpace.getSpaceServer().getLatestMapHandle();
+    if (spaceMapHandle == Handle::UNDEFINED) {
+        return;
+    }
+    const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap();
+
+    std::vector<std::string> entities;
+    std::tr1::unordered_set<std::string> processedEntities;
+    spaceMap.findAllEntities(back_inserter(entities));
+
+    
+    std::list<std::string> involvedEntities;
+    std::tr1::unordered_set<std::string> removedObjects;
+
+    unsigned int i;
+    for( i = 0; i < objects.size( ); ++i ) {
+        const std::string& objectId = atomSpace.getName( objects[i] );
+        if ( !spaceMap.containsObject(objectId) ) {
+            removedObjects.insert( objectId );
+        } // if
+        entityHandleMap[ objectId ] = objects[i];
+    } // for
+    
+    unsigned int j;
+    for( i = 0; i < entities.size( ); ++i ) {
+        
+        const std::string& entityAId = entities[i];        
+        const Spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
+        entityHandleMap[ entityAId ] = getHandle( entities[i] );
+
+        for( j = 0; j < objects.size( ); ++j ) {
+            const std::string& entityBId = atomSpace.getName( objects[j] );
+            if ( entityAId == entityBId || processedEntities.find( entityBId ) != processedEntities.end( ) ) {
+                // do not compare an object with itself or an already processed entity
+                continue;
+            } // if
+            
+            if ( removedObjects.find( entityBId ) != removedObjects.end( ) ) {
+                logger().debug( "NearPredicateUpdater::%s - Removing predicates from '%s' and '%s'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ) );
+                setPredicate( entityAId, entityBId, "near", 0.0f );
+                setPredicate( entityAId, entityBId, "next", 0.0f );
+            } else {
+                logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ) );
+                const Spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
+                double distance = entityA->distanceTo( entityB );
+
+                // distance to near 3,125%
+                double nearDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.003125;
+                // distance to next 10,0%
+                double nextDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.1;
+                
+                setPredicate( entityAId, entityBId, "near", ( distance < nearDistance ) ? 1.0f : 0.0f );
+                setPredicate( entityAId, entityBId, "next", ( distance < nextDistance ) ? 1.0f : 0.0f );
+            } // else
+        } // for
+
+        processedEntities.insert( entityAId );
+    } // for
+
+}
+
+void NearPredicateUpdater::setPredicate( const std::string& entityAId, const std::string& entityBId, const std::string& predicateName, float mean )
+{
+    
+    SimpleTruthValue tv( mean, 1 );
+    Handle entityA = entityHandleMap[ entityAId ];
+    Handle entityB = entityHandleMap[ entityBId ];
+
+    AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
+    AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityB, entityA );
+
+    { // defining isNear
+        static std::map<std::string, Handle> elements;
+        elements["Figure"] = entityA;
+        elements["Ground"] = entityB;
+        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, "is_" + predicateName );
+        
+        AtomSpaceUtil::setPredicateFrameFromHandles( 
+           atomSpace, "#Locative_relation", entityAId + "_" + entityBId + predicateName, 
+              elements, tv );
+    } // end block
+}
