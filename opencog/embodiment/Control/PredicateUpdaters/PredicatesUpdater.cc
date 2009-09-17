@@ -50,8 +50,8 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
     // relation predicates
-    //updaters.push_back(new NearPredicateUpdater(atomSpace));
-    bulkUpdaters.push_back(new NearPredicateUpdater(atomSpace));
+    updaters.push_back(new NearPredicateUpdater(atomSpace));
+
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }
 
@@ -73,19 +73,12 @@ void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timest
     } // if
 
     for (unsigned int i = 0; i < objects.size(); i++) {
-
         // updating all predicates ...
         for (unsigned int j = 0; j < updaters.size(); j++) {
             updaters[j]->update(objects[i], petHandle, timestamp );
         }
 
     } // for
-
-    unsigned int j;
-    for (j = 0; j < bulkUpdaters.size(); j++) {
-        bulkUpdaters[j]->update(objects, petHandle, timestamp );
-    } // for
-
 
     if (objects.size() > 0) {
         petPsychePredicatesUpdater->update( Handle::UNDEFINED, petHandle, timestamp );
