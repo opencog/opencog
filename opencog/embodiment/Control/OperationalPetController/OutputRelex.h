@@ -104,6 +104,11 @@ namespace OperationalPetController
             for ( iter_effect = effect.begin(); iter_effect != effect.end(); ++iter_effect ){
                 output = output + (*iter_effect) + "\n";
             }
+
+            if (output.empty() ){
+                return output;
+            }
+
             //NLGen client socket requires a END line to indicates the end of
             //the relex input
             output = output + "END\n";

@@ -25,12 +25,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-
-#include "NLGenClient.h"
-#include <Sockets/SocketHandler.h>
-#include <Sockets/ListenSocket.h>
-
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <boost/regex.hpp>
 
 using namespace OperationalPetController;
 using namespace opencog;
@@ -41,6 +37,7 @@ LanguageComprehension::LanguageComprehension( Control::PetInterface& agent ) : a
 
 LanguageComprehension::~LanguageComprehension( void )
 {
+    delete nlgenClient;
 }
 
 void LanguageComprehension::init( void )
@@ -62,6 +59,8 @@ void LanguageComprehension::init( void )
 
         this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
         this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
+
+        nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);
 
     } // if
 }
@@ -298,42 +297,40 @@ std::string LanguageComprehension::resolveFrames2Relex( )
    
    OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
    if( output_relex == NULL ){
-       logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions",__FUNCTION__);
-       return "ERROR::No rule found for the pre-conditions";
+       logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
+       return "";//TODO return empty or relex string
    }
 
     std::string text = output_relex->getOutput( as, handles );
     if( text.empty() ){
         logger().error("LanguageComprehension::%s - Output Relex returned an empty string.",__FUNCTION__);
-        return "ERROR::It was not possible to get the sentence from NLGen because output relex was empty";
+        return "";
     }
 
     //connect to the NLGen server and try to get the sentence from the relex
     //content
-    std::string nlgen_sentence;
-    SocketHandler h;
-	NLGenClient sock(h, text);
-	//sock.Open("localhost", 5555);
-    if ( !(sock.Open(nlgen_server_host, nlgen_server_port)) ){
-        logger().error("LanguageComprehension::%s - It was not possible to open the socket connection with the NLGen server using host %s and port %d.",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
-        return "ERROR::It was not possible to connect to the NLGen server";
-    }
-	h.Add(&sock);
-	while (h.GetCount())
-	{
-		h.Select(1, 0);
-	}
-    if( !sock.isConnected() ){
-        logger().error("LanguageComprehension::%s - The connection to the NLGen server socket was not estabilished using host %s and port %d.",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
-        return "ERROR::It was not possible to connect to the NLGen server";
-    }
+    std::string nlgen_sentence = nlgenClient->send(text);
+    logger().debug("LanguageComprehension::%s - NLGen Sentence: %s",__FUNCTION__,nlgen_sentence.c_str() );
 
-    nlgen_sentence = sock.getOutput();
     if( nlgen_sentence.empty() ){
         logger().debug("LanguageComprehension::%s - NLGen Sentence is EMPTY. Probably it was not possible to connect to the NLGen server socket on host %s and port %d",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
-        return "ERROR::NLGen returned an empty sentence....";
+        return text;
     }
-    logger().debug("LanguageComprehension::%s - NLGen Sentence: %s",__FUNCTION__,nlgen_sentence.c_str() );
+    //TODO check NLGEn error codes
+    if(boost::starts_with(nlgen_sentence, "ERROR")){
+        //TODO get the code and message
+        const boost::regex errorRegex( "ERROR\\[(\\d)\\](.*)");
+        boost::cmatch matches;
+        if ( boost::regex_match( nlgen_sentence.c_str( ), matches, errorRegex ) ) {
+            std::string code = matches[1];
+            std::string msg = matches[2];
+            logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR message with code %s and message %s",__FUNCTION__, code.c_str(), msg.c_str());
+        }else{
+            logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR but it was not possible to get the code. Error: %s",__FUNCTION__, nlgen_sentence.c_str());
+        }
+        return text;
+    }
+
 
    return nlgen_sentence;
 
