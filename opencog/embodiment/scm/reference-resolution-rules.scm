@@ -259,11 +259,7 @@
       )
      (TypedVariableLink
       (VariableNode "$relationTypeValue")
-      (VariableTypeNode "WordInstanceNode")
-      )
-     (TypedVariableLink
-      (VariableNode "$relationTypeWordNode")
-      (VariableTypeNode "WordNode")
+      (VariableTypeNode "ConceptNode")
       )
      (TypedVariableLink
       (VariableNode "$relationTypePredicateNode")
@@ -324,10 +320,6 @@
        (VariableNode "$groundValue") 
        (VariableNode "$groundWordNode") 
        )
-      (ReferenceLink
-       (VariableNode "$relationTypeValue") 
-       (VariableNode "$relationWordNode") 
-       )
 
       (EvaluationLink
        (GroundedPredicateNode "scm:inLatestSentence")
@@ -345,7 +337,7 @@
        (VariableNode "$figureWordNode") 
        (VariableNode "$groundValue")
        (VariableNode "$groundWordNode")
-       (VariableNode "$relationTypeWordNode") 
+       (VariableNode "$relationTypeValue") 
        )
       )
 

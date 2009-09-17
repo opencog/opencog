@@ -84,6 +84,7 @@ $pdh/opencog/embodiment/scm/predicates-frames.scm \
 $pdh/opencog/embodiment/scm/language-comprehension.scm \
 $pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
 $pdh/opencog/embodiment/scm/command-resolution-rules.scm \
+$pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 set flistAGI [list \
