@@ -282,7 +282,7 @@
 			(display ", you asked a truth-query question: ")
 			(display txt)
 			(newline)
-			(chat-return "(say-handle-truth-query)")
+			(chat-return "(say-try-svo-truth-query)")
 		)
 	)
 
@@ -400,11 +400,11 @@
 )
 
 ; -----------------------------------------------------------------------
-; say-handle-truth-query -- try answering a yes/no question
+; say-try-svo-truth-query -- try answering a yes/no question
 ; Some questions are truth queries, posing a hypothesis, and asking for a 
 ; yes/no answer. This handles these.
 ;
-(define (say-handle-truth-query)
+(define (say-try-svo-truth-query)
 
 	; First, we want to grab all of the words in the question, and
 	; tag them with semes. (XXX We don't really need all the words,
@@ -422,19 +422,57 @@
 	; Try each truth-query template ... 
 	(loop-over-questions *truth-query-rule-list*)
 
+	; If there's no answer, try again, with triples processing
+	; this time.
+	(let ((ans (chat-get-simple-answer)))
+
+		(if (null? ans)
+			; No answer, try the prep-triples approach
+			(chat-return "(say-try-triple-truth-query)")
+
+			; The answer must be yes.
+			(chat-prt-soln "SVO Truth query determined: Yes, verb was: " ans)
+		)
+	)
+
+	(chat-return "(say-final-cleanup)")
+)
+
+; -----------------------------------------------------------------------
+; say-try-triple-truth-query -- try answering a triples-based truth query
+;
+(define (say-try-triple-truth-query)
+
+	; Run the triples processing.  
+	(attach-sents-for-triple-processing (get-new-parsed-sentences))
+	(create-triples)
+	(dettach-sents-from-triple-anchor)
+
+	; Try each truth-query template ... 
+	; (loop-over-questions *truth-query-rule-list*)
+(dbg-display "triple-truth-query trips are:\n")
+(display (get-new-triples))
+(end-dbg-display)
+;	(let* ((trips (get-new-triples))
+;		(trip-semes (promote-to-seme same-modifiers-promoter trips))
+;		)
+;(dbg-display "triple-truth-query semes are:\n")
+;(display trip-semes)
+;(end-dbg-display)
+;	)
+
 	; The meta-idea here is that we assume a "closed universe" -- 
 	; If a truth-query question was asked, and we can't answer in the 
 	; affirmative, then we will answer in the negative. This is not
 	; correct in the open-universe model, where the answer would be
 	; "no I don't really have enough information to answer this".
 	(let ((ans (chat-get-simple-answer)))
-
 		(if (null? ans)
 			; No answer, tell them so.
-			(chat-prt-soln "Truth query determined: No, not that I know of. " '())
+			(chat-prt-soln "Triples truth query determined: No, not that I know of. " '())
 
 			; The answer must be yes.
-			(chat-prt-soln "Truth query determined: Yes, verb was: " ans)
+			(chat-prt-soln "Triples truth query determined: Yes, verb was: " ans)
 		)
 	)
 
