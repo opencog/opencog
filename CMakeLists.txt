@@ -135,7 +135,7 @@ IF (NOT LUA51_FOUND)
 	MESSAGE(STATUS "Lua missing: needed for embodiment code.")
 ENDIF (NOT LUA51_FOUND)
 
-FIND_PACKAGE(Luabind 0.8.1)
+FIND_PACKAGE(Luabind)
 IF (NOT LUABIND_FOUND)
 	MESSAGE(STATUS "Luabind missing: needed for embodiment code.")
 ENDIF (NOT LUABIND_FOUND)

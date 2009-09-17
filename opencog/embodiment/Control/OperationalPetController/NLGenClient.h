@@ -27,27 +27,40 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
-#include <boost/asio.hpp>
+#include <boost/version.hpp>
 
+#define BOOST_MINOR_VERSION (BOOST_VERSION / 100 % 1000)
+#define BOOST_ACCEPTED_VERSION 35
+
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
+#include <boost/asio.hpp>
 using boost::asio::ip::tcp;
+#endif
 
 namespace OperationalPetController
 {
     class NLGenClient {
         public:
             NLGenClient(std::string host, int port){
+
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
+
                 this->port = port;
                 this->host = host;
                 connect();
-             }
+#endif
+            }
             ~NLGenClient(){
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
                 logger().debug("[NLGenClient.%s] - closing socket connection",__FUNCTION__);
                 socket->close();
                 delete socket;
                 logger().debug("[NLGenClient.%s] - socket connection closed with success",__FUNCTION__);
+#endif
             }
 
             void connect(){
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
                try{
                     logger().debug("[NLGenClient.%s] - opening socket connection",__FUNCTION__);
                      
@@ -61,9 +74,13 @@ namespace OperationalPetController
                 }catch(std::exception& e){
                     logger().error("[NLGenClient.%s] - Failed to open socket. Exception Message: %s",__FUNCTION__,e.what());
                 }
+#else
+                logger().debug("[NLGenClient.%s] - Failed to connect to the socket server. BOOST Version must be equals or greater than %d but is %d",__FUNCTION__,BOOST_ACCEPTED_VERSION, BOOST_MINOR_VERSION);
+#endif
             }
 
             std::string send(std::string text){
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
                 logger().debug("[NLGenClient.%s] - sending text %s",__FUNCTION__,text.c_str());
 
                 size_t request_length = text.length();
@@ -74,13 +91,19 @@ namespace OperationalPetController
                 std::string nlgenResult = std::string(reply); 
                 logger().debug("[NLGenClient.%s] - read %d characters",__FUNCTION__,reply_length);
                 return nlgenResult.substr(0,reply_length-1);
-           }
+#else
+                logger().debug("[NLGenClient.%s] - Failed to send text to the socket server. BOOST Version must be equals or greater than %d but is %d",__FUNCTION__,BOOST_ACCEPTED_VERSION,BOOST_MINOR_VERSION);
+                return "";
+#endif
+            }
 
         private:
+#if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
             boost::asio::io_service io_service;
             tcp::socket *socket;
             std::string host; 
             int port;
+#endif
     };
 };
 
