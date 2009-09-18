@@ -111,7 +111,7 @@
      (get-seme-nodes figureWN)
      )
     (ListLink 
-     (append (list figureWN ) semeNodes )     
+     (append (list figureWIN ) semeNodes )     
      )
 
     )  
