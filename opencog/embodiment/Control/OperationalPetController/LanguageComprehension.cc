@@ -90,6 +90,8 @@ void LanguageComprehension::answerLatestQuestion( void )
     } // if
     SchemeEval::instance().clear_pending( );
 
+    boost::trim(answer);
+
     std::string finalSentence;
     if ( answer == "#truth-query" ) {
         // yes/no question
@@ -304,7 +306,8 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     return resolveRelex2Sentence( text );
 }
 
-std::string LanguageComprehension::resolveRelex2Sentence( std::string relexInput ) {
+std::string LanguageComprehension::resolveRelex2Sentence( const std::string& relexInput ) 
+{
     
     //connect to the NLGen server and try to get the sentence from the relex
     //content

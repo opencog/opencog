@@ -46,11 +46,11 @@ namespace OperationalPetController
         void solveLatestSentenceCommand( void );
 
         std::string resolveFrames2Relex( );
-        std::string resolveRelex2Sentence( std::string relexInput );
+
     protected:
 
         HandleSeq getActivePredicateArguments( const std::string& predicateName );
-
+        std::string resolveRelex2Sentence( const std::string& relexInput );
 
         void init(void);
 

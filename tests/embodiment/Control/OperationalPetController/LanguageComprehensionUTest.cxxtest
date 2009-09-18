@@ -537,7 +537,7 @@ public:
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
-        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "Yes" )
+        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )
 
         AtomSpaceUtil::setPredicateValue( *atomSpace, "has_something_to_say", TruthValue::FALSE_TV(), 
             this->atomSpace->getHandle( PET_NODE, petId ) );
@@ -548,7 +548,7 @@ public:
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
-        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "No" )
+        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "No" )
 
     }
     
