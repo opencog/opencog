@@ -44,13 +44,15 @@ public:
 
     virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
-    virtual void update(const HandleSeq& objects, Handle pet, unsigned long timestamp );
-
  protected:
     
-    void setPredicate( const std::string& entityAId, const std::string& entityBId, const std::string& predicateName, float mean );
+    void setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean );    
 
-    std::tr1::unordered_map<std::string, Handle, boost::hash<std::string> > entityHandleMap;
+    unsigned long lastTimestamp;
+
+    std::tr1::unordered_set<std::string, boost::hash<std::string> > processedEntities;
+        
+
     
 }; // class
 }  // namespace

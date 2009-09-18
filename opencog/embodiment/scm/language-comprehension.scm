@@ -1163,25 +1163,6 @@
     ) ; let
   )
 
-(define (answer-question2)
-  ;(get-frame-instances-given-its-type-and-an-element-value "#Entity" (SemeNode "1"))
-  ;(get-grounded-frame-instance-predicate (car (get-latest-frame-predicates)))
-  (map
-   (lambda (evalLink)
-     (cog-set-tv! evalLink (stv 0 0))
-     )
-   (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
-   )
-  (car 
-   (cog-outgoing-set
-    (cog-ad-hoc 
-     "do-varscope" 
-     (build-implication-link (PredicateNode "storedEntity2"))
-     )
-    )
-   )
-  )
-
 (define (answer-question)
   (let ((framesPredicates (get-latest-frame-predicates))
         (question? #f)
@@ -1230,14 +1211,18 @@
 	 questionFrames
 	 )
 	)
-    (EvaluationLink (stv 1 1)
-     (PredicateNode "latestQuestionFrames")
-     (ListLink
+
+    (if (not (null? finalFrames))
+      (EvaluationLink (stv 1 1)
+       (PredicateNode "latestQuestionFrames")
+       (ListLink
+        finalFrames
+        )
+       )
       finalFrames
-      )
-     )
-    ;questionFrames
-    ;finalFrames
+    )
+      ;questionFrames
+      ;finalFrames
 
     )  
   )

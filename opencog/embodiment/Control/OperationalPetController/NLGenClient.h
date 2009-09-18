@@ -59,8 +59,12 @@ namespace OperationalPetController
 #endif
             }
 
-            void connect(){
+            bool connect(){
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
+                
+                if(connected){
+                    return true;                
+                }
                try{
                     logger().debug("[NLGenClient.%s] - opening socket connection",__FUNCTION__);
                      
@@ -69,11 +73,13 @@ namespace OperationalPetController
                     tcp::resolver::iterator iterator = resolver.resolve(query);
                     socket = new tcp::socket(io_service);
                     socket->connect(*iterator);
-                    
                     logger().debug("[NLGenClient.%s] - socket connection opened with success",__FUNCTION__);
+                    connected = true;
                 }catch(std::exception& e){
                     logger().error("[NLGenClient.%s] - Failed to open socket. Exception Message: %s",__FUNCTION__,e.what());
+                    connected = false;
                 }
+               return connected;
 #else
                 logger().debug("[NLGenClient.%s] - Failed to connect to the socket server. BOOST Version must be equals or greater than %d but is %d",__FUNCTION__,BOOST_ACCEPTED_VERSION, BOOST_MINOR_VERSION);
 #endif
@@ -82,6 +88,11 @@ namespace OperationalPetController
             std::string send(std::string text){
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
                 logger().debug("[NLGenClient.%s] - sending text %s",__FUNCTION__,text.c_str());
+
+                if(!connect()){//if it is not connect, try to connect
+                    logger().debug("[NLGenClient.%s] - it was not possible to send the text to nlgen because the socket is closed",__FUNCTION__);
+                    return "";
+                }
 
                 size_t request_length = text.length();
                 boost::asio::write(*socket, boost::asio::buffer(text.c_str(), request_length));
@@ -103,6 +114,7 @@ namespace OperationalPetController
             tcp::socket *socket;
             std::string host; 
             int port;
+            bool connected;
 #endif
     };
 };
