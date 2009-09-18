@@ -56,6 +56,12 @@
    (WordInstanceNode "0.9")
 )
 
+(map
+ (lambda (evalLink)
+   (cog-set-tv! evalLink (stv 0 0))
+   )
+ (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+ )
 
 (EvaluationLink (stv 1.0 1.0)
    (PredicateNode "latestQuestionFrames")

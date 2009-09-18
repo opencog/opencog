@@ -25,7 +25,28 @@
    "#Attributes"
    "#Possibilities"
    "#Temporal_colocation"
-   "#Emotion_directed"
+   )
+  )
+
+(define normalized-names
+  (list 
+
+   (list "happiness" "happy" "happily")
+   (list "fear" "fright" "panic" "fearful" "fearfulness" "scared")
+   (list "pride" "proud" "pridefulness")
+   (list "love" "loving" "loves" "loved")
+   (list "hate" "hated" "hates" "hating" "hatred" "dislike" "hateful" "hatefully" "hatefulness")
+   (list "anger" "angry" "angered" "angering" "angers" "rage" "fury" "wrath" "ire" "choler")
+   (list "gratitude" "grateful" "gratefulness" "thankfulness")
+   (list "excitement" "exited" "exhilaration")
+          
+   (list "hunger" "hungered" "hungering" "hungers" "hungry" "hungriness" "hungrily")
+   (list "thirst" "thirsted" "thirsts" "thirsty" "thirstiness" "thirsting")
+   (list "pee_urgency" "excrement" "poo" "pooed" "pooing" "poos" "defecating" "defecated" "defecates")
+   (list "poo_urgency" "urine" "pee" "pees" "peeing" "peed" "urinating" "urinated" "urinates")
+   (list "fitness" "fittingness")
+   (list "energy" "vigor" "power" "vitality" "vigour" "powered" "energized")
+   
    )
   )
 
@@ -34,9 +55,23 @@
 (define (get-word-node-map)
   (if (null? word-node-map)
       (set! word-node-map
-            (list
-             (cons "you" agentSemeNode)
-             )
+            (append (let ((elements '()))
+                      (map
+                       (lambda (words)
+                         (map
+                          (lambda (word)
+                            (set! elements (append elements (list (cons word (ConceptNode (car words)) ))))
+                            )
+                          (cdr words)
+                          )
+                         (set! elements (append elements (list (cons (car words) (ConceptNode (car words)) ))))
+                         )
+                       normalized-names
+                       )
+                      elements
+                      )                   
+                    (list (cons "you" agentSemeNode))
+                    )
             )
       )
   word-node-map

@@ -52,21 +52,38 @@ private:
     LanguageComprehension* language;
     FramesToRelexRuleEngine* framesToRelexRuleEngine;
 
-    static const std::string petId;
-    static const std::string petName;
-    static const std::string petTraits;
-    static const std::string petOwner;
-    static const std::string petOwnerId;
-    static const std::string agentType;
+    const std::string petId;
+    const std::string petName;
+    const std::string petTraits;
+    const std::string petOwner;
+    const std::string petOwnerId;
+    const std::string agentType;
 
-    static const std::string ballId1;
-    static const std::string ballId2;
-    static const std::string ballId3;
-    static const std::string ballId4;
-   
+    const std::string ballId1;
+    const std::string ballId2;
+    const std::string ballId3;
+    const std::string ballId4;
+
+    const std::string treeId1;
+    const std::string treeId2;
+    const std::string treeId3;
+
 public:
     
-    LanguageComprehensionUTest() 
+    LanguageComprehensionUTest() :
+        petId("1"),
+        petName("Fido"),
+        petTraits("maxie"),
+        petOwner("Sally"),
+        petOwnerId("2"),
+        agentType("pet"),
+        ballId1("3"),
+        ballId2("4"),
+        ballId3("5"),
+        ballId4("6"),
+        treeId1("7"),
+        treeId2("8"),
+        treeId3("9")
     {
         try {
             config().load("opencog-test.conf");
@@ -165,8 +182,49 @@ public:
 
         HandleSeq wordNodeReference(2);
 
-        wordNodeReference[1] = this->atomSpace->addNode( WORD_NODE, "ball" );
+        wordNodeReference[1] = this->atomSpace->addNode( WORD_NODE, "tree" );        
+        Handle tree1 = this->atomSpace->addNode( STRUCTURE_NODE, treeId1 );
+        { // setup tree 1
+            Handle semeNode = this->atomSpace->addNode( SEME_NODE, treeId1 );
+            semeNodeReference[0] = tree1;
+            semeNodeReference[1] = semeNode;
+            
+            this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference,TruthValue::TRUE_TV( ) );        
+            
+            wordNodeReference[0] = semeNode;
+            this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
+            
+            this->atomSpace->addSpaceInfo(true, semeNode, 1, 50, 100, 2, 2, 2, 0, false );            
+        }
+        Handle tree2 = this->atomSpace->addNode( STRUCTURE_NODE, treeId2 );
+        { // setup tree 2
+            Handle semeNode = this->atomSpace->addNode( SEME_NODE, treeId2 );
+            semeNodeReference[0] = tree2;
+            semeNodeReference[1] = semeNode;
+            
+            this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference,TruthValue::TRUE_TV( ) );        
+            
+            wordNodeReference[0] = semeNode;
+            this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
+            
+            this->atomSpace->addSpaceInfo(true, semeNode, 1, 50, 150, 2, 2, 2, 0, false );            
+        }
+        Handle tree3 = this->atomSpace->addNode( STRUCTURE_NODE, treeId3 );
+        { // setup tree 3
+            Handle semeNode = this->atomSpace->addNode( SEME_NODE, treeId3 );
+            semeNodeReference[0] = tree3;
+            semeNodeReference[1] = semeNode;
+            
+            this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference,TruthValue::TRUE_TV( ) );        
+            
+            wordNodeReference[0] = semeNode;
+            this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
+            
+            this->atomSpace->addSpaceInfo(true, semeNode, 1, 50, 200, 2, 2, 2, 0, false );            
+        }
 
+        wordNodeReference[1] = this->atomSpace->addNode( WORD_NODE, "ball" );
+        
         // setup ball 1
         Handle semeNode1 = this->atomSpace->addNode( SEME_NODE, ballId1 );
         Handle ball1 = this->atomSpace->addNode( ACCESSORY_NODE, ballId1 );
@@ -200,6 +258,11 @@ public:
 
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 0.1, 1.0), ball2, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 0.1, 1.0), petNode, ball2 );
+
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 1.0, 1.0), ball2, tree2 );
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 1.0, 1.0), tree2, ball2 );
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 1.0, 1.0), ball2, tree2 );
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 1.0, 1.0), tree2, ball2 );
 
 
         // setup ball 3
@@ -422,6 +485,13 @@ public:
             TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
+
+
+        // testing: grab the white ball
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence6.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->solveLatestSentenceReference( );
+        this->language->solveLatestSentenceCommand( );
         
     } 
 
@@ -449,6 +519,17 @@ public:
                                                         elements, 
                                                         SimpleTruthValue(1.0, 1.0) );
         }
+        {
+            std::map<std::string, Handle> elements;
+            elements["Experiencer"] = this->atomSpace->addNode( SEME_NODE, "1");
+            elements["State"] = this->atomSpace->addNode( CONCEPT_NODE, "anger");
+
+            AtomSpaceUtil::setPredicateFrameFromHandles(*atomSpace, 
+                                                        "#Emotion_directed", 
+                                                        "angryFido", 
+                                                        elements, 
+                                                        SimpleTruthValue(1.0, 1.0) );
+        }
 
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
@@ -456,7 +537,19 @@ public:
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
-        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "" )
+        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "Yes" )
+
+        AtomSpaceUtil::setPredicateValue( *atomSpace, "has_something_to_say", TruthValue::FALSE_TV(), 
+            this->atomSpace->getHandle( PET_NODE, petId ) );
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question7.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->solveLatestSentenceReference( );
+        this->language->answerLatestQuestion( );
+        TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
+            this->atomSpace->getHandle( PET_NODE, petId ) ) )
+        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "No" )
+
     }
     
     /*
@@ -539,23 +632,6 @@ public:
         TS_ASSERT(output != "");
         logger().debug("testFrames2Relex - Relex Output for relex-question5.scm input: %s",output.c_str() );
   
-        //expect that questions above were already answered
-        output = this->language->resolveFrames2Relex( );
-        logger().debug("testFrames2Relex - Relex Output for none input: %s",output.c_str() );
-        //TS_ASSERT(output.find("ERROR") != std::string::npos);
-        TS_ASSERT(output == "");
     }
 
 }; 
-
-const std::string LanguageComprehensionUTest::petId = "1";
-const std::string LanguageComprehensionUTest::petName = "Fido";
-const std::string LanguageComprehensionUTest::petTraits = "maxie";
-const std::string LanguageComprehensionUTest::petOwner = "Sally";
-const std::string LanguageComprehensionUTest::petOwnerId = "2";
-const std::string LanguageComprehensionUTest::agentType = "pet";
-
-const std::string LanguageComprehensionUTest::ballId1 = "3";
-const std::string LanguageComprehensionUTest::ballId2 = "4";
-const std::string LanguageComprehensionUTest::ballId3 = "5";
-const std::string LanguageComprehensionUTest::ballId4 = "6";

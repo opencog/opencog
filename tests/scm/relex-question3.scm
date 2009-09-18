@@ -14,6 +14,14 @@
    (PredicateNode "no_Answer_Message")
    (WordInstanceNode "no")
 )
+
+(map
+ (lambda (evalLink)
+   (cog-set-tv! evalLink (stv 0 0))
+   )
+ (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+ )
+
 (EvaluationLink (stv 1.0 1.0)
    (PredicateNode "latestQuestionFrames")
    (ListLink

@@ -49,6 +49,9 @@ namespace OperationalPetController
         std::string resolveRelex2Sentence( std::string relexInput );
     protected:
 
+        HandleSeq getActivePredicateArguments( const std::string& predicateName );
+
+
         void init(void);
 
 //        opencog::SchemeEval evaluator;
