@@ -306,15 +306,18 @@ std::string LanguageComprehension::resolveFrames2Relex( )
         logger().error("LanguageComprehension::%s - Output Relex returned an empty string.",__FUNCTION__);
         return "";
     }
+    return resolveRelex2Sentence( text );
+}
 
+std::string LanguageComprehension::resolveRelex2Sentence( std::string relexInput ) {
     //connect to the NLGen server and try to get the sentence from the relex
     //content
-    std::string nlgen_sentence = nlgenClient->send(text);
+    std::string nlgen_sentence = nlgenClient->send(relexInput);
     logger().debug("LanguageComprehension::%s - NLGen Sentence: %s",__FUNCTION__,nlgen_sentence.c_str() );
 
     if( nlgen_sentence.empty() ){
         logger().debug("LanguageComprehension::%s - NLGen Sentence is EMPTY. Probably it was not possible to connect to the NLGen server socket on host %s and port %d",__FUNCTION__, nlgen_server_host.c_str(), nlgen_server_port);
-        return text;
+        return relexInput;
     }
     //TODO check NLGEn error codes
     if(boost::starts_with(nlgen_sentence, "ERROR")){
@@ -328,7 +331,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
         }else{
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR but it was not possible to get the code. Error: %s",__FUNCTION__, nlgen_sentence.c_str());
         }
-        return text;
+        return relexInput;
     }
 
 

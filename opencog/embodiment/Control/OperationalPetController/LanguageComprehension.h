@@ -46,6 +46,7 @@ namespace OperationalPetController
         void solveLatestSentenceCommand( void );
 
         std::string resolveFrames2Relex( );
+        std::string resolveRelex2Sentence( std::string relexInput );
     protected:
 
         void init(void);
