@@ -59,7 +59,9 @@ Subdirectories (in alphabetical order)
 chatbot
 -------
 The chatbot directory contains some crude code to tie opencog NLP
-processing to chat systems, and particularly, to IRC chat. 
+processing to chat systems, and particularly, to IRC chat.  Provides
+a high-level implementation of a simple, hard-coded question-answering 
+system, resting on the foundations of "seme" and "trples".
 
 lexical_attraction
 ------------------
@@ -77,6 +79,9 @@ C++ code that implements a basic question-answering algorithm, based on
 matching the NL pattern of a question to the NL pattern of an assertion.
 If the atomspace contains an assertion such as "John threw the ball", 
 then this code can correctly answer the question "Who threw the ball?"
+This code is now obsolete, and is not built any more. HOWEVER, the README
+does explain the research results, and provides a general introduction to 
+question answering, and should be kept around indefinitely.
 
 refres
 ------
@@ -89,6 +94,9 @@ the same concept.
 
 This directory is currently empty, it is meant to someday hold an 
 implementation of teh Hobbs reference resolution algorithm.
+
+See also the "seme" directory, which contains a practical, working 
+implementation of reference resolution.
 
 scm
 ---
@@ -104,7 +112,9 @@ empty and is not currently used.
 
 seme
 ----
-Notes on concept formation from linguistic input.
+Notes on concept formation and reference resolution from linguistic input.
+Contains a working implementation of basic reference resolution that is
+used by the chatbot.
 
 similarity
 ----------

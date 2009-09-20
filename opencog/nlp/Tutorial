@@ -6,6 +6,7 @@
 
 
 OpenCog NLP tutorial, provides short overview of important NLP components.
+Concludes with some open research questions.
 
 
 Outline
@@ -102,19 +103,19 @@ Parsed sentences as OpenCog hypergraphs
 -- Can be quickly generated from a "compact parse format":
    Allows parsed texts to be saved, input to opencog later.
 
--- word instances are a special case of a word:
+-- Word instances are a special case of a word:
    (ReferenceLink (stv 1.0 1.0)
       (WordInstanceNode "John@df4398c5-7f03-45c9-bb30-85f715ba83c0")
       (WordNode "John")
    )
 
--- word instances belong to a parse:
+-- Word instances belong to a parse:
    (WordInstanceLink (stv 1.0 1.0)
       (WordInstanceNode "John@df4398c5-7f03-45c9-bb30-85f715ba83c0")
       (ParseNode "sentence@235033cb-a934-4a57-8b0f-0307705ed931_parse_0")
    )
 
--- parses belong to a sentence; sentences belong to a document, etc.
+-- Parses belong to a sentence; sentences belong to a document, etc.
 -- Link Grammar links:
 
    (EvaluationLink (stv 1.0 1.0)
@@ -135,7 +136,7 @@ Parsed sentences as OpenCog hypergraphs
       )
    )
 
--- word features:
+-- Word features:
    ; tense (throw, past)
    (InheritanceLink (stv 1.0 1.0)
       (WordInstanceNode "threw@e69139f2-6322-4836-9d8c-73ce8d1cf881")
@@ -165,7 +166,7 @@ Pattern matching
 bzr: opencog/query/README
 
 -- Similar in idea to RelEx pattern matching, but this time its
-   1) full general, 2) implemented within OpenCog.
+   1) fully general, 2) implemented within OpenCog.
 
 -- Given a hypergraph, containing VariableNodes, find a matching 
    hypegraph which "solves" or "grounds" the variables.
@@ -193,14 +194,18 @@ bzr: opencog/query/README
 -- Works vaguely like push-down automaton, maintains stack of partial
    matches/groundings.  
 
--- Final accept/reject of a potential match is determined by user callback,
-   and is thus configurable.  NLP callbacks are in opencog/nlp/question/*.
+-- Final accept/reject of a potential match is determined by user
+   callback, and is thus configurable.  
 
 -- Solutions/groundings are reported via callback, too, so search can be
    run to exhaustion, or terminated early.
 
 -- Can test for "optional" clauses, and/or absence of clauses (to reject
    matches that also contain certain subgraphs).
+
+-- Currently used primarily for performing implications "IF P THEN Q"
+   i.e. if a match to pattern P is found, then create pattern Q. Both
+   P and Q contain variables.
 
 
 Semantic normalization aka Semantic Triples
@@ -262,6 +267,26 @@ Semantic normalization aka Semantic Triples
    those sentences that are attached to this AnchorNode.
    After processing, the anchor is released.
 
+Semes, Reference Resolution
+===========================
+-- Consider two sentences: "John threw a ball" and "What did John throw?"
+   How can we know that the "John" in the first sentence is the same 
+   thing as the "John" in the second sentence?
+
+-- Answer: create "semes", which behave like words, but represent a 
+   single concept across multiple sentences. Thus, "John" is a seme.
+
+-- Semes are "decorated" by modifiers in the same way that words are 
+   decorated by modifiers. For example: "green ball" -- green is a 
+   "decoration" on "ball".
+
+-- Words can be "promoted" to semes using many different algorithms. 
+   One of the simplest is to compare decorations. Thus, "green ball"
+   and "red ball" cannot refer to the same seme "ball", because the 
+   decorations differ. These must be two distinct semes (in this case,
+   two different balls).
+
+
 
 Common-sense Reasoning
 ======================
@@ -289,7 +314,7 @@ Important things this tutorial did not cover:
 =============================================
 -- Many link-grammar details, including post-grocessing, SAT solver
 -- Framenet-like markup in RelEx
--- Pronoun resolution in RelEx
+-- Pronoun/anaphora resolution in RelEx
 -- Word-sense disambiguation in OpenCog.
 
 
@@ -297,5 +322,41 @@ Fun queries:
 ============
 what is a tunnel?
 what is an instrument?
+
+
+
+Open Research Questions
+=======================
+
+-- How to extended the hard-coded triples, seme and qeustion-answering
+   code using automated systems, e.g. Markov Logic Nets [USP09].
+
+-- I have a feeling that about 100 or patterns (for the triples
+   and QA code) will take care of the most common, basic expression
+   types, but I don't know.  It would be interesting to quantify.
+
+-- I learned that one must be careful to not over-generalize: e.g.  
+   its easy to mistake a question for a statement, and introduce
+   erroneous "facts".  Its not clear how narrow the rules must be,
+   and still be useful.
+
+-- There are some interesting data representation issues involving
+   adverbs and other modifiers, esp modifiers to the predicate part of 
+   a triples.
+
+-- Its unclear how large, complex sentences fit into the picture.
+
+-- I started some work on basic reasoning, but got distracted.
+   Hand-coding some of these relationships should be fun. 
+   e.g. If Berlin is a capital and capitals are cities then Berlin is
+   a city.  Again, there's a question of how many of such hard-coded
+   deductive rules are needed to handle a "majority" of cases.
+
+References
+==========
+
+[USP09] Hoifung Poon, Pedro Domingos, "Unsupervised Semantic Parsing"
+    Proceedings of the 2009 Conference on Empirical Methods in Natural
+    Language Processing, pages 1–10, Singapore, 6-7 August 2009
 
 
