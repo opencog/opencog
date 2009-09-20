@@ -13,16 +13,21 @@ How-To
 The current code "doesn't do anything yet"; rather, it is a platform for
 running experiments. Thus, what is contained here should be thought of
 as a "bag of parts".  It is up to you to figure out what these parts
-are, and to assemble them into something meaningful.
+are, and to assemble them into something meaningful.  Some fragile 
+examples have been constructed (e.g. the chatbot) but its up to you to
+do better.
 
-Currently, there are three basic experimental flows that are possble:
-the semantic triples process, the word-sense-disambiguation (WSD) process, 
-and the question-answering process.  The semantic-triples process is
-described in nlp/triples/README, and is the simplest/most-straightforward
-experiment. The question-answering process is described in 
-nlp/question/README, and is also very striaght-forward. The most
-difficult process is WSD, which requires creating and maintain large,
-complex databases.  It is summarized here:
+Currently, there are two basic experimental flows that are possble:
+the chatbot process and the word-sense-disambiguation (WSD) process.
+
+The chatbot process is the more ambitious of the two, combining many
+different components, including "semantic triples" (nlp/triples/README)
+"question answering" (nlp/question/README) and reference resolution/
+concept-formation (nlp/seme/README).  The high-level overview of the 
+chatbot process is given in nlp/chatbot/README.
+
+The WSD process is the more complex, and requires creating and maintaining
+large, complex databases.  The WSD process is summarized here:
 
  * Download and compile opencog, relex, lexical-attraction from
    launchpad.
