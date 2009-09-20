@@ -57,6 +57,14 @@ bool SaveRequest::execute()
     AtomSpace* atomSpace = CogServer::getAtomSpace();
 
     std::string& filename = _parameters.front();
+
+    // XXX/FIXME This is an insanely inefficient way to export the 
+    // atomspace! For anything containing a million or more handles,
+    // this is just mind-bogglingly bad, as it will results in a vast
+    // amount of mallocs & frees, and blow out RAM usage.  Strongly
+    // suggest redesign using appropriate iterators.  Anyway, should
+    // probably be exporting to scheme, not XML, anyway ... since XML
+    // is slow in general.
     HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
     NMXmlExporter exporter;
     std::fstream file(filename.c_str(), std::fstream::out);
