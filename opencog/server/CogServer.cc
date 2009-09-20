@@ -105,7 +105,7 @@ CogServer::~CogServer()
 
 CogServer::CogServer() : cycleCount(1)
 {
-    if (atomSpace != NULL) delete atomSpace;
+    delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
 
