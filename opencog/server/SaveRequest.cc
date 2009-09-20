@@ -58,18 +58,21 @@ bool SaveRequest::execute()
 
     std::string& filename = _parameters.front();
     HandleEntry *handles = atomSpace->getAtomTable().getHandleSet(ATOM, true);
-    NMXmlExporter *exporter = new NMXmlExporter();
+    NMXmlExporter exporter;
     std::fstream file(filename.c_str(), std::fstream::out);
+    bool rc = true;
     try {
-        file << exporter->toXML(handles);
-        file.flush();
-        file.close();
+        file << exporter.toXML(handles);
+        oss << "Info: done" << std::endl;
+        rc = true;
     } catch (StandardException &e) {
         oss << "Error: unable to save to XML (" << e.getMessage() << ")" << std::endl;
-        send(oss.str());
-        return false;
+        rc = false;
     }
-    oss << "done" << std::endl;
+
+    file.flush();
+    file.close();
+    delete handles;
     send(oss.str());
-    return true;
+    return rc;
 }
