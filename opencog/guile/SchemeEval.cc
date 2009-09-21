@@ -748,9 +748,12 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 /**
  * apply -- apply named function func to arguments in ListLink
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
+ * atom handles. This list is unpacked, and then the function func
  * is applied to them. If the function returns an atom handle, then
- * this is returned.
+ * this is returned. If the function does not return a handle, then 
+ * Handle::UNDEFINED is returned. If an error occurs during evaluation,
+ * then a guile stack trace is logged in the OpenCog error log file,
+ * and Handle::UNDEFINED is returned.
  */
 Handle SchemeEval::apply(const std::string &func, Handle varargs)
 {
