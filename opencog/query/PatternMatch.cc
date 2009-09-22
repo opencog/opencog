@@ -72,8 +72,8 @@ PatternMatch::PatternMatch(void)
  * the atomspace (i.e. of the universe of hypergraphs stored in the
  * atomspace). When a solution is found, PatternMatchCallback::solution
  * method is called, and it is passed two maps: one mapping the bound
- * variables to thier solutions, and the other mapping the pattern
- * clauses to thier corresponding solution clauses.
+ * variables to their solutions, and the other mapping the pattern
+ * clauses to their corresponding solution clauses.
  *
  * At this time, the list of clauses is understood to be a single
  * disjunct; that is, all of the clauses must be simultaneously
@@ -280,7 +280,7 @@ bool Instantiator::walk_tree(Handle expr)
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
-	// the variables have been substituted by thier values.
+	// the variables have been substituted by their values.
 	const TruthValue& tv = a->getTruthValue();
 	Handle sh = as->addLink(t, oset, tv);
 
@@ -297,10 +297,10 @@ bool Instantiator::walk_tree(Handle expr)
  * this will create a grounded expression.
  *
  * The set of groundings is to be passed in with the map 'vars', which
- * maps variable names to thier groundings -- it maps variable names to
+ * maps variable names to their groundings -- it maps variable names to
  * atoms that already exist in the atomspace.  This method will then go
  * through all of the variables in the expression, and substitute them
- * with thier values, creating a new expression. The new expression is
+ * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
 Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
@@ -447,7 +447,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
  * being grounded by some explicit ground terms in the atomspace. This
  * grounding is then used to create a grounded version of the
  * (ungrounded) implicand. That is, the variables in the implicand are
- * substituted by thier grounding values.  This method then returns a
+ * substituted by their grounding values.  This method then returns a
  * list of all of the grounded implicands that were created.
  *
  * Note that this method can be used to create a simple forward-chainer:
@@ -497,7 +497,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	if (AND_LINK == tclauses)
 	{
 		// Input is in conjunctive normal form, consisting of clauses,
-		// or thier negations. Split these into two distinct lists.
+		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
 		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
@@ -1033,7 +1033,7 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
  * DEPRECATED: USE VAR_SCOPE INSTEAD!
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
- * thier clauses, and statements that start with NotLink's.
+ * their clauses, and statements that start with NotLink's.
  * These are evaluated using "crisp" logic: if a matched clause
  * is true, its accepted, if its false, its rejected. If the
  * clause begins with a NotLink, true and false are reversed.
@@ -1058,7 +1058,7 @@ Handle PatternMatch::crisp_logic_imply (Handle himplication)
  *
  * Use the crisp-logic callback to evaluate boolean implication
  * statements; i.e. statements that have truth values assigned
- * thier clauses, and statements that start with NotLink's.
+ * their clauses, and statements that start with NotLink's.
  * These are evaluated using "crisp" logic: if a matched clause
  * is true, its accepted, if its false, its rejected. If the
  * clause begins with a NotLink, true and false are reversed.

@@ -523,7 +523,7 @@ TruthValue* AtomStorage::getTV(int tvid)
 /**
  * Return largest distance from this atom to any node under it.
  * Nodes have a height of 0, by definition.  Links that contain only
- * nodes in thier outgoing set have a height of 1, by definition. 
+ * nodes in their outgoing set have a height of 1, by definition. 
  * The height of a link is, by definition, one more than the height
  * of the tallest atom in its outgoing set.
  */

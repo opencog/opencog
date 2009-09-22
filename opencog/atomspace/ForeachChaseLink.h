@@ -12,7 +12,7 @@
  *       FirstAtom
  *       SecondAtom
  *
- * then, given a handle to "FirstAtom", the the link type "SomeLink",
+ * then, given a handle to "FirstAtom", and the link type "SomeLink",
  * the "foreach_binary_link" will call the callback on "SecondAtom".
  *
  * The link-chasing is order dependent; if, instead, one has

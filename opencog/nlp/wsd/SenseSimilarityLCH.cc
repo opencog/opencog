@@ -206,7 +206,7 @@ bool SenseSimilarityLCH::up_second(Handle up)
 
 	// If we found the match to the candidate, compute the distance,
 	// and save it. The distance is number of steps from each sense,
-	// to thier common (indirect) hypernym, i.e. to thier "least common
+	// to their common (indirect) hypernym, i.e. to their "least common
 	// subsumer".
 	if (up == join_candidate)
 	{

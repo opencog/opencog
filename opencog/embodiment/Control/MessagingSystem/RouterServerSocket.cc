@@ -365,7 +365,7 @@ void RouterServerSocket::storeNewMessage()
 
         // Router has its own message type (RouterMessage) to encapsulate all
         // messages received. It is not Router's duty to check if a message
-        // is well formed or not. This sould be done by the NetworkElement
+        // is well formed or not. This should be done by the NetworkElement
         // receiving the message.
 
 

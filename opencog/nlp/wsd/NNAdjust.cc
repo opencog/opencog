@@ -24,7 +24,7 @@ using namespace opencog;
 NNAdjust::NNAdjust(void)
 {
 	/* The "strength_adjust" value is a multiplicative value by which
-	 * all _nn-related word-senses will have thier connecting links 
+	 * all _nn-related word-senses will have their connecting links 
 	 * boosted by. The goal is to more strongly tie together the word
 	 * senses of any two words related by _nn (noun modifier) relations.
 	 */

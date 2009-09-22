@@ -54,7 +54,7 @@ namespace opencog
  *    for specifying a command, and what should be done in reaction to
  *    that command. In particular, the person creating a new module 
  *    does not have to learn how the command processing system works;
- *    they can focus all thier energies on creating the module.
+ *    they can focus all their energies on creating the module.
  *
  * 3) A module has only a small number of regular, simple commands that
  *    it needs implemented.  If the module has a large number of

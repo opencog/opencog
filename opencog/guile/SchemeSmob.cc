@@ -64,7 +64,7 @@ int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 
 SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 {
-	// Two atoms are equal if thier handles are the same.
+	// Two atoms are equal if their handles are the same.
 	if (SCM_SMOB_OBJECT(a) == SCM_SMOB_OBJECT(b)) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }

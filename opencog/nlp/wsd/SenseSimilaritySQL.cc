@@ -166,7 +166,7 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle fs, Handle ss)
 		if (0 == first_pos.compare("noun"))
 		{
 			// for nouns, jcn is best, per Sinha & Mihalcea
-			// Also .. use thier normalization, section 5.2
+			// Also .. use their normalization, section 5.2
 			sim = (rp.jcn - 0.04) / (0.2-0.04);
 		}
 		else if (0 == first_pos.compare("verb"))

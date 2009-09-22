@@ -291,10 +291,10 @@ public:
     /**
      * Returns neighboring atoms, following links and returning their
      * target sets.
-     * @param fanin Whether directional links point to this node sould be
+     * @param fanin Whether directional links point to this node should be
      * considered.
      * @param fanout Whether directional links point from this node to
-     * another sould be considered.
+     * another should be considered.
      */
     HandleEntry *getNeighbors(bool fanin = true,
                               bool fanout = true,

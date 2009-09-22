@@ -98,7 +98,7 @@ public:
      * Use the backing store to load the entire incoming set of the atom.
      * If the flag is true, then the load is done recursively. 
      * This method queries the backing store to obtain all atoms that 
-     * contain this one in thier outgoing sets. All of these atoms are
+     * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
     Handle fetchIncomingSet(Handle, bool);
