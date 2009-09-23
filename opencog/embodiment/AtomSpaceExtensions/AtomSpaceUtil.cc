@@ -2138,7 +2138,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
             frameInstanceInheritance.push_back( frameInstance );
             frameInstanceInheritance.push_back( frameNode );
             Handle frameInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameInstanceInheritance, true );
-
+            atomSpace.setTV( frameInheritanceLink, TruthValue::FALSE_TV() );
             
             std::map<std::string, Handle>::const_iterator it;
             for( it = frameElements.begin( ); it != frameElements.end( ); ++it ) {
