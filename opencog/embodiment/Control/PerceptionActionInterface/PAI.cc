@@ -2306,7 +2306,7 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
         std::string degree = value >= 0.7 ? "High" : value >= 0.3 ? "Medium" : "Low";
         std::map<std::string, Handle> elements;
         elements["Experiencer"] = atomSpace.addNode( SEME_NODE, petInterface.getPetId() );
-        elements["Attribute"] = atomSpace.addNode( CONCEPT_NODE, feeling );
+        elements["State"] = atomSpace.addNode( CONCEPT_NODE, feeling );
         elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
         elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
 
