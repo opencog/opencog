@@ -111,7 +111,7 @@
      (get-seme-nodes figureWN)
      )
     (ListLink 
-     (append (list figureWN ) semeNodes )     
+     (append (list figureWIN ) semeNodes )     
      )
 
     )  
@@ -576,7 +576,7 @@
                  )
              )
        (set! candidateDistance (assoc-ref (cog-tv->alist tv) 'mean))
-       (cond ((or (null? distance) (< candidateDistance distance))
+       (cond ((or (null? distance) (and (> candidateDistance 0) (< candidateDistance distance) ) )
               (set! distance candidateDistance)
               (set! nearest candidate)
               )
@@ -1168,12 +1168,22 @@
         (question? #f)
         (questionFrames '())
         (finalFrames '())
+        (questionType '())
         )
     ; first check if the incoming sentence is a question
     (map
      (lambda (predicate)
        (if (string=? (get-frame-instance-type predicate) "#Questioning")
-	   (set! question? #t)
+           (begin
+             (set! question? #t)
+             (set! questionType 
+                   (cog-name
+                    (get-frame-instance-element-value
+                     (get-frame-instance-element-predicate predicate "Manner") 
+                     )
+                    )
+                   )
+             )
            (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
                (set! questionFrames (append questionFrames (list predicate)))
                )
@@ -1191,7 +1201,7 @@
 	   (if (not (frame-instance-contains-variable? predicate))
 	       (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
 		 (if (not (null? groundedFrameInstance))
-		     (set! finalFrames (append finalFrames groundedFrameInstance ))
+		     (set! finalFrames (append finalFrames (list groundedFrameInstance )))
 		     )
 		 ) ; let
 	       (let ((groundedFrame
@@ -1212,18 +1222,26 @@
 	 )
 	)
 
-    (if (not (null? finalFrames))
-      (EvaluationLink (stv 1 1)
-       (PredicateNode "latestQuestionFrames")
-       (ListLink
-        finalFrames
+    (if question?
+        (begin
+          ; first remove old predicates
+          (map
+           (lambda (evalLink)
+             (cog-set-tv! evalLink (stv 0 0))
+             )
+           (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+           )
+          ; then create a new one
+          (EvaluationLink (stv 1 1)
+             (PredicateNode "latestQuestionFrames")
+             (ListLink
+              (if (= (length questionFrames) (length finalFrames) ) finalFrames '() )
+              )
+             )
+          questionType
+          )
+        '()
         )
-       )
-      finalFrames
-    )
-      ;questionFrames
-      ;finalFrames
-
     )  
   )
 

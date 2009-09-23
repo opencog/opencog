@@ -203,7 +203,7 @@
 )
 (EvaluationLink (stv 1 1)
    (PredicateNode "angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a_Emotion_directed_State")
-   (WordInstanceNode "you@1d9ee2aa-e164-40ab-99b1-cf92b30593ae")
+   (WordInstanceNode "angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a")
 )
 (InheritanceLink (stv 1 1)
    (PredicateNode "angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a_Emotion_directed_Experiencer")

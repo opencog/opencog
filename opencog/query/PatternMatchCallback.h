@@ -28,6 +28,8 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 
+#include <map>
+
 namespace opencog {
 class PatternMatchEngine;
 

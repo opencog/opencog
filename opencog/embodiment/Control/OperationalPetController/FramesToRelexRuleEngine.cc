@@ -45,6 +45,7 @@ void FramesToRelexRuleEngine::loadRules( std::string rulesFileName ){
         {
             getline (rulesFile,rule);
             logger().debug("FramesToRelexRuleEngine::%s - Read rule %s", __FUNCTION__, rule.c_str() );
+            if(rule.empty()) continue;
 
             std::map< std::string, unsigned int> frame_elements_count;
 
@@ -52,7 +53,7 @@ void FramesToRelexRuleEngine::loadRules( std::string rulesFileName ){
             boost::split( tokens, rule, boost::is_any_of( "|" ) );
 
             if ( tokens.size( ) != 2 ) {
-                logger().error("FramesToRelexRuleEngine::%s - ERROR while reading thr Frames2Reles rules. The tokes expected was 2, but was found %d.",
+                logger().error("FramesToRelexRuleEngine::%s - ERROR while reading the Frames2Reles rules. The tokens expected is 2, but was found %d.",
                         __FUNCTION__,tokens.size( ));
                 return;
             } 

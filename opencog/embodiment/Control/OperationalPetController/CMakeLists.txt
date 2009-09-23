@@ -20,6 +20,7 @@ ADD_LIBRARY (OpcLib
     LearningAgentModeHandler
     LanguageComprehension
     FramesToRelexRuleEngine
+    NLGenClient
 )
 
 INCLUDE_DIRECTORIES (
