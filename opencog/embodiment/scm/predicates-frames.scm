@@ -773,6 +773,12 @@
    (DefinedFrameElementNode "#Biological_urge:Expressor")
 )
 
+; #Biological_urge:State
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Biological_urge")
+   (DefinedFrameElementNode "#Biological_urge:State")
+)
+
 
 
 

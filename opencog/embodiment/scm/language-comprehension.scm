@@ -220,7 +220,7 @@
 
 ; Retrieve a list containing the WordInstanceNodes that belongs to the most
 ; recent sentences parses
-(define (get-latest-word-instance-nodes)
+(define (get-latest-word-instance-nodes . parses)
   (let ((wins (list)))
     (map
      (lambda (win)
@@ -235,17 +235,23 @@
          )
         )
        )
-     (get-latest-parses)
-     )
+     (if (= (length parses) 0) 
+         (get-latest-parses) 
+         (if (list? (car parses))
+             (car parses)
+             parses
+             ) ; if
+         ) ; if     
+     ) ; map
     wins
-    )
-)
+    ) ; let
+  )
 
 
 ; Retrieve a list containing all the PredicateNodes, that represent
 ; Frames, which belong to the most recent parsed sentences
 ; It used the most recent WordInstanceNodes to find the PredicateNodes
-(define (get-latest-frame-predicates)
+(define (get-latest-frame-predicates . wordInstanceNodes)
   (let ((predicates (list)))
     (map
      (lambda (win)
@@ -282,7 +288,13 @@
          )
         )
        )
-     (get-latest-word-instance-nodes)
+     (if (= (length wordInstanceNodes) 0) 
+         (get-latest-word-instance-nodes) 
+         (if (list? (car wordInstanceNodes))
+             (car wordInstanceNodes)
+             wordInstanceNodes
+             )
+         )
      )
     (delete-duplicates predicates)
     )
@@ -871,6 +883,27 @@
 )
 
 
+(define (get-frame-instances-given-an-element frameType elementType elementValue)
+  (let ((instances '()))
+    (map
+     (lambda (evalLink)
+       (if (not (null? (cog-link 'InheritanceLink (gar evalLink) (DefinedFrameElementNode elementType))))
+           (map
+            (lambda (frameLink)
+              (if (not (null? (cog-link 'InheritanceLink (gar frameLink) (DefinedFrameNode frameType))))
+                  (set! instances (append instances (list (gar frameLink))))
+                  )
+              )
+            (cog-get-link 'FrameElementLink 'PredicateNode (gar evalLink))
+            )
+           )
+       )
+     (cog-get-link 'EvaluationLink 'PredicateNode elementValue)
+     )
+    (delete-duplicates instances)
+    )
+  )
+
 (define (get-frame-instances-given-its-type-and-an-element-value frameType value)
   (let* ((instances '())
          (elements (get-frame-elements frameType))
@@ -961,96 +994,54 @@
   )
 
 (define (get-grounded-frame-instance-predicate predicateNode)
-  (let ((grounded #t)
-        (frameType (get-frame-instance-type predicateNode))
-        (framesCandidates '())
-        (groundedElements '())
-	(groundedFramePredicate '())
+  (let* (
+        (frameType (get-frame-instance-type predicateNode))        
+        (elementsPredicates (get-frame-instance-elements-predicates predicateNode))
+        (numberOfElements (length elementsPredicates))
+        (candidates '())
+        (chosenPredicate '())
         )
-
+    
     (map
      (lambda (elementPredicate)
-       (let* ((value (get-frame-instance-element-value elementPredicate))
-             (groundedValue (get-grounded-element-value value))
-             )
-	 (set! grounded (and grounded (not (null? groundedValue))))
-         (cond (grounded
-		(set!
-		 framesCandidates
-		 (append
-		  framesCandidates		  
-		  (get-frame-instances-given-its-type-and-an-element-value 
-		   frameType
-		   groundedValue
-		   )		  
-		  )
-		 )
-
-		(set! 
-		 groundedElements
-		 (append 
-		  groundedElements
-		  (list 
-		   (cons (get-frame-instance-element-type elementPredicate) groundedValue)
-		   )
-		  )
-		 )
-		
-		)) ; cond
-         ) ; let
-       ) ; lambda
-     (get-frame-instance-elements-predicates predicateNode)
+       (let* ((elementValue (get-frame-instance-element-value elementPredicate))
+              (elementType (get-frame-instance-element-type elementPredicate))
+              (groundedValue (get-grounded-element-value elementValue))             
+              )
+         (map
+          (lambda (candidate)              
+            (let ((value (assoc-ref candidates candidate))
+                  (tv (cog-tv (InheritanceLink candidate (DefinedFrameNode frameType))))
+                  )
+              (if (eq? value #f)
+                  (set! value 0)
+                  )
+               ; only frames with truth value higher than 0.5 will be considered
+              (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0.5)
+                  (set! candidates (alist-cons candidate (+ value 1) (alist-delete candidate candidates)))
+                  )
+              )
+            )
+          (get-frame-instances-given-an-element frameType elementType groundedValue)
+          )
+               
+         )
+       )
+     elementsPredicates
      )
 
-    (if (null? framesCandidates)
-	(set! grounded #f)
-	(set! framesCandidates (delete-duplicates framesCandidates))
-	)
+    ; only a frame instance which matched the same number of elements of the original frame
+    ; can be considered valid. so, i'll pick the first
+    (map
+     (lambda (candidate)
+       (if (and (null? chosenPredicate) (= (cdr candidate) numberOfElements))
+           (set! chosenPredicate (car candidate))
+           )
+       )
+     candidates
+     )
 
-    (if grounded
-	(let ((validCandidateFound #f))
-	  (map
-	   (lambda (frameCandidate)
-	     (if (not validCandidateFound)
-		 (let ((validCandidate #t))
-		   
-		   (map
-		    (lambda (groundedElement)
-		      (if validCandidate
-			  (let* (
-				 (elementType (car groundedElement))
-				 (elementValue (gdr groundedElement))
-				 (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list elementType)))
-				 (elementName (substring elementType (+ colonIndex 1) (string-length elementType)))
-				 (candidateElementPredicate (get-frame-instance-element-predicate frameCandidate elementName))
-				 (candidateElementValue (get-frame-instance-element-value candidateElementPredicate))
-				 )			    
-			    (set! validCandidate (and validCandidate (equal? candidateElementValue elementValue) ) )
-			    )
-			  )
-		      )
-		    groundedElements
-		    )
-
-		   (cond (validCandidate
-			  (set! validCandidateFound #t)
-			  (set! groundedFramePredicate frameCandidate)
-			  ))
-
-		   ) ; let
-		 ) ; if
-	     )
-	   framesCandidates
-	   ) ; map
-
-	  (if (not validCandidateFound)
-	      (set! grounded #f)
-	      )
-	  ) ; let
-	) ; if
-    groundedFramePredicate
-;    frameType
-
+    chosenPredicate
     )
   )
 
@@ -1163,47 +1154,97 @@
     ) ; let
   )
 
+
+
 (define (answer-question)
-  (let ((framesPredicates (get-latest-frame-predicates))
+
+  (let ((chosenAnswer '())
         (question? #f)
-        (questionFrames '())
-        (finalFrames '())
         (questionType '())
         )
-    ; first check if the incoming sentence is a question
     (map
-     (lambda (predicate)
-       (if (string=? (get-frame-instance-type predicate) "#Questioning")
-           (begin
-             (set! question? #t)
-             (set! questionType 
-                   (cog-name
-                    (get-frame-instance-element-value
-                     (get-frame-instance-element-predicate predicate "Manner") 
-                     )
-                    )
-                   )
+     (lambda (parse)
+       (let ((incomingPredicates (get-latest-frame-predicates (get-latest-word-instance-nodes parse)))
+             (questionParse? #f)
+             (questionFrames '())
              )
-           (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
-               (set! questionFrames (append questionFrames (list predicate)))
+
+         (map
+          (lambda (predicate)
+            (if (string=? (get-frame-instance-type predicate) "#Questioning")
+                (begin
+                  (set! question? #t)
+                  (set! questionParse? #t)
+                  (set! questionType
+                        (cog-name
+                         (get-frame-instance-element-value
+                          (get-frame-instance-element-predicate predicate "Manner")
+                          )
+                         )
+                        )
+                  )
+                (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
+                    (set! questionFrames (append questionFrames (list predicate)))
+                    )
+                )
+            )
+          incomingPredicates
+          )
+
+         (if questionParse?
+             (let* ((numberOfIncomingPredicates (length questionFrames))
+                    (groundedPredicates (find-grounded-frame-instances-predicates questionFrames))
+                    (numberOfGroundedPredicates (length groundedPredicates))
+                    (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
+                    )
+               (if (or (null? chosenAnswer) (< balance (car chosenAnswer)))
+                   (set! chosenAnswer (cons balance groundedPredicates))
+                   )
                )
-           )
+             )
+         )
        )
-     framesPredicates
+     (get-latest-parses)
      )
 
-    (if question? 
-	(map ; ok it is a question, so handle it
-	  ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
+     (if question?
+         (begin
+          ; first remove old predicates
+          (map
+           (lambda (evalLink)
+             (cog-set-tv! evalLink (stv 0 0))
+             )
+           (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+           )
+          ; then create a new one
+          (EvaluationLink (stv 1 1)
+             (PredicateNode "latestQuestionFrames")
+             (ListLink
+              (if (= (car chosenAnswer) 0) (cdr chosenAnswer) '() )
+              )
+             )
+
+          questionType
+          )
+        '()
+        ) ; if
+  
+     ) ; let
+  )
+
+
+(define (find-grounded-frame-instances-predicates . framesPredicates)
+  (let ((finalFrames '()))
+    (map ; ok it is a question, so handle it
+	; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
 	  ;questionFrames
-	 (lambda (predicate)
-	   
-	   (if (not (frame-instance-contains-variable? predicate))
-	       (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
-		 (if (not (null? groundedFrameInstance))
-		     (set! finalFrames (append finalFrames (list groundedFrameInstance )))
-		     )
-		 ) ; let
+     (lambda (predicate)	   
+       (if (not (frame-instance-contains-variable? predicate))
+           (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
+             (if (not (null? groundedFrameInstance))
+                 (set! finalFrames (append finalFrames (list groundedFrameInstance )))
+                 )
+             ) ; let
 	       (let ((groundedFrame
                       (cog-outgoint-set
                        (cog-ad-hoc 
@@ -1217,31 +1258,9 @@
                      )
                  ) ; let
 	       ) ; if
-	   ) ; lambda
-	 questionFrames
-	 )
-	)
-
-    (if question?
-        (begin
-          ; first remove old predicates
-          (map
-           (lambda (evalLink)
-             (cog-set-tv! evalLink (stv 0 0))
-             )
-           (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
-           )
-          ; then create a new one
-          (EvaluationLink (stv 1 1)
-             (PredicateNode "latestQuestionFrames")
-             (ListLink
-              (if (= (length questionFrames) (length finalFrames) ) finalFrames '() )
-              )
-             )
-          questionType
-          )
-        '()
-        )
-    )  
+       ) ; lambda
+     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates)
+     )
+    finalFrames
+    )
   )
-

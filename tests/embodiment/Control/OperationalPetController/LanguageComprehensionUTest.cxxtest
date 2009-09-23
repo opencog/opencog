@@ -103,7 +103,7 @@ public:
 	this->atomSpace = cogserver.getAtomSpace();
 
         this->sender = new LSMessageSenderMock();
-        
+
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
@@ -296,7 +296,7 @@ public:
         
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
-       
+
     }
 
     ~LanguageComprehensionUTest( ) 
@@ -318,7 +318,7 @@ public:
 
     void testResolution( ) 
     {
-        
+
         // first call it without sentence to parse
         this->language->solveLatestSentenceReference( );
         // testing: grab the red ball
@@ -492,13 +492,25 @@ public:
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->solveLatestSentenceReference( );
         this->language->solveLatestSentenceCommand( );
-        
+        {
+            HandleSeq arguments(1);
+            arguments[0] = this->atomSpace->addNode( ACCESSORY_NODE, "4");
+            HandleSeq command(2);
+            command[0] = this->atomSpace->addNode( GROUNDED_SCHEMA_NODE, "goto_object_and_grabit");
+            command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
+            
+            Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
+            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
+            TS_ASSERT( execLink != Handle::UNDEFINED );
+        }
+
     } 
 
     
     void testQuestionAnswering( void )
     {
-        
+
+        int rc;        
         {
             std::map<std::string, Handle> elements;
             elements["Entity"] = this->atomSpace->addNode( SEME_NODE, "1");
@@ -531,7 +543,21 @@ public:
                                                         SimpleTruthValue(1.0, 1.0) );
         }
 
-        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question6.scm");
+        
+        {
+            std::map<std::string, Handle> elements;
+            elements["Experiencer"] = this->atomSpace->addNode( SEME_NODE, "1");
+            elements["State"] = this->atomSpace->addNode( CONCEPT_NODE, "pride");
+
+            AtomSpaceUtil::setPredicateFrameFromHandles(*atomSpace, 
+                                                        "#Emotion_directed", 
+                                                        "proudFido", 
+                                                        elements, 
+                                                        SimpleTruthValue(1.0, 1.0) );
+        }
+
+        
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->solveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
@@ -550,21 +576,31 @@ public:
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
         TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "No" )
 
+        
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question8.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->solveLatestSentenceReference( );
+        this->language->answerLatestQuestion( );
+        TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
+            this->atomSpace->getHandle( PET_NODE, petId ) ) )
+        TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )
+
+
     }
     
-    /*
-    //    void testRealSituation( void ) 
-    //{      
     
-          // this test can be used to evaluate the latest sentence
-          // stored into the agent atomTable. To use it copy
-          // the content of the dir /tmp/<user>/Petaverse/PetDatabase/pet_id_xxxxx/
-          // to the bin dir of this test and change the id in the Pet class instantiation
-          // bellow. Compile and run the test
+    //void testRealSituation( void ) 
+    //{      
+    /*
+        // this test can be used to evaluate the latest sentence
+        // stored into the agent atomTable. To use it copy
+        // the content of the dir /tmp/<user>/Petaverse/PetDatabase/pet_id_xxxxx/
+        // to the bin dir of this test and change the id in the Pet class instantiation
+        // bellow. Compile and run the test
         SavingLoading savingLoading;
         savingLoading.load( "atomSpace.dump", *this->atomSpace );
         
-        Pet* pet = Pet::importFromFile( "pet.dump", "id_118855", this->atomSpace, sender );
+        Pet* pet = Pet::importFromFile( "pet.dump", "id_36962", this->atomSpace, sender );
         
         LanguageComprehension lang( *pet );
         int rc;
@@ -580,18 +616,21 @@ public:
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        
         lang.solveLatestSentenceReference( );
         lang.solveLatestSentenceCommand( );
-
-        delete pet;
+        lang.answerLatestQuestion( );
         
+        delete pet;
+    */    
     //}
-    */  
+      
 
 
     void testFrames2Relex()
-    {
+    {        
         //color
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
@@ -631,7 +670,7 @@ public:
         output = this->language->resolveFrames2Relex( );
         TS_ASSERT(output != "");
         logger().debug("testFrames2Relex - Relex Output for relex-question5.scm input: %s",output.c_str() );
-  
+
     }
 
 }; 

@@ -25,6 +25,15 @@
    "#Attributes"
    "#Possibilities"
    "#Temporal_colocation"
+   "#Entity"
+   "#Intentionally_act"
+   "#Transitive_action"
+   "#Excreting"
+   "#Desiring"
+   "#Successful_action"
+   "#Request"
+   "#Purpose"
+   "#Ingest_substance"
    )
   )
 
@@ -34,16 +43,16 @@
    (list "happiness" "happy" "happily")
    (list "fear" "fright" "panic" "fearful" "fearfulness" "scared")
    (list "pride" "proud" "pridefulness")
-   (list "love" "loving" "loves" "loved")
+   (list "love" "loving" "loves" "loved" "lovely")
    (list "hate" "hated" "hates" "hating" "hatred" "dislike" "hateful" "hatefully" "hatefulness")
    (list "anger" "angry" "angered" "angering" "angers" "rage" "fury" "wrath" "ire" "choler")
    (list "gratitude" "grateful" "gratefulness" "thankfulness")
-   (list "excitement" "exited" "exhilaration")
+   (list "excitement" "excited" "exhilaration")
           
    (list "hunger" "hungered" "hungering" "hungers" "hungry" "hungriness" "hungrily")
    (list "thirst" "thirsted" "thirsts" "thirsty" "thirstiness" "thirsting")
-   (list "pee_urgency" "excrement" "poo" "pooed" "pooing" "poos" "defecating" "defecated" "defecates")
-   (list "poo_urgency" "urine" "pee" "pees" "peeing" "peed" "urinating" "urinated" "urinates")
+   (list "poo" "excrement" "poo_urgency" "pooed" "pooing" "poos" "defecating" "defecated" "defecates")
+   (list "pee" "urine" "pee_urgency" "pees" "peeing" "peed" "urinating" "urinated" "urinates")
    (list "fitness" "fittingness")
    (list "energy" "vigor" "power" "vitality" "vigour" "powered" "energized")
    
