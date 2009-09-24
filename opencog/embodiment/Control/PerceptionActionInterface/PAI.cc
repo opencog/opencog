@@ -2312,7 +2312,7 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
 
         AtomSpaceUtil::setPredicateFrameFromHandles( 
             atomSpace, "#Biological_urge", frameInstanceName,
-                 elements, SimpleTruthValue( value, 1.0 ) );        
+                 elements, SimpleTruthValue( (value < 0.5) ? 0.0 : value, 1.0 ) );        
     } else {
         Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, frameInstanceName );
         if ( predicateNode != Handle::UNDEFINED ) {

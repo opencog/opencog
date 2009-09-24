@@ -570,34 +570,63 @@
 ; (which represents a real element into the environment) 
 ; The TruthValue of the predicate "near" is evaluated 
 (define (get-nearest-candidate semeNodes)
-  (let ((distance '())
-        (candidateDistance 0)
-        (nearest '())
-        (tv '())
-        (agentNode (get-real-node agentSemeNode)))
+  (let ((agentNode (get-real-node agentSemeNode))
+        (distances '())
+        (nearCandidates '())
+        (nextCandidates '())
+        )   
     (map
      (lambda (candidate)
-       (set! tv (cog-tv 
-                 (EvaluationLink
-                  (PredicateNode "near")
-                  (ListLink
-                   agentNode
-                   (get-real-node candidate)
-                   )
-                  )
+       (let ((nearStrength (assoc-ref 
+                            (cog-tv->alist 
+                             (cog-tv 
+                              (EvaluationLink
+                               (PredicateNode "near")
+                               (ListLink
+                                agentNode
+                                (get-real-node candidate)
+                                )
+                               )
+                              )
+                             ) 'mean ) )
+             (nextStrength (assoc-ref 
+                            (cog-tv->alist 
+                             (cog-tv 
+                              (EvaluationLink
+                               (PredicateNode "next")
+                               (ListLink
+                                agentNode
+                                (get-real-node candidate)
+                                )
+                               )
+                              )
+                             ) 'mean ) ) )
+
+         
+         (if (or (= (length nearCandidates) 0) (> nearStrength  (cdr (car nearCandidates))))
+             (set! nearCandidates (list (cons candidate nearStrength)))
+             (if (and (> (length nearCandidates) 0) (= nearStrength  (cdr (car nearCandidates))))
+                 (set! nearCandidates (append nearCandidates (list (cons candidate nearStrength))))
                  )
              )
-       (set! candidateDistance (assoc-ref (cog-tv->alist tv) 'mean))
-       (cond ((or (null? distance) (and (> candidateDistance 0) (< candidateDistance distance) ) )
-              (set! distance candidateDistance)
-              (set! nearest candidate)
-              )
-             )
-       )
+
+         (if (or (= (length nextCandidates) 0) (> nextStrength  (cdr (car nextCandidates))))
+             (set! nextCandidates (list (cons candidate nextStrength)))
+             (if (and (> (length nextCandidates) 0) (= nextStrength  (cdr (car nextCandidates))))
+                 (set! nextCandidates (append nextCandidates (list (cons candidate nextStrength))))
+                 )
+             )             
+         
+       ) ; let       
+     ) ; lambda
      semeNodes
-     )
-    nearest
-    )
+    ) ; map
+    
+    (if (or (= (length nearCandidates) 1) (and (> (length nearCandidates) 1) (> (cdr (car nearCandidates)) 0)))
+        (car (car nearCandidates))
+        (car (car nextCandidates))
+        )
+    ) ; let
   )
 
 
@@ -722,7 +751,6 @@
     )
   
 )
-
 
 ; When a sentence containing an imperative verb is parsed
 ; Frames that represents the given command can be identified and then
@@ -974,17 +1002,17 @@
     (map
      (lambda (predicate)
        (let ((value (get-frame-instance-element-value predicate)))
-         (if (and value (equal? 'ConceptNode (cog-type value)))
-             (let ((name (cog-name value)))
-               (if (and (> (string-length name) 2) (equal? (substring name 0 3) "#_$"))
+         (if (and (not (null? value)) (equal? 'VariableNode (cog-type value)))
+;             (let ((name (cog-name value)))
+;               (if (and (> (string-length name) 2) (equal? (substring name 0 3) "$"))
                    (set! containsVariable? #t)
+;                   )
+;               )
                    )
-               )
-             )
          )
        )
      (get-frame-instance-elements-predicates predicateNode)
-     )      
+     )    
     containsVariable?
     )
   )
@@ -1008,23 +1036,24 @@
               (elementType (get-frame-instance-element-type elementPredicate))
               (groundedValue (get-grounded-element-value elementValue))             
               )
-         (map
-          (lambda (candidate)              
-            (let ((value (assoc-ref candidates candidate))
-                  (tv (cog-tv (InheritanceLink candidate (DefinedFrameNode frameType))))
+         (if (not (null? groundedValue))
+             (map
+              (lambda (candidate)              
+                (let ((value (assoc-ref candidates candidate))
+                      (tv (cog-tv (InheritanceLink candidate (DefinedFrameNode frameType))))
+                      )
+                  (if (eq? value #f)
+                      (set! value 0)
+                      )
+                  ; only frames with truth value greater than 0 will be considered
+                  (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
+                      (set! candidates (alist-cons candidate (+ value 1) (alist-delete candidate candidates)))
+                      )
                   )
-              (if (eq? value #f)
-                  (set! value 0)
-                  )
-               ; only frames with truth value higher than 0.5 will be considered
-              (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0.5)
-                  (set! candidates (alist-cons candidate (+ value 1) (alist-delete candidate candidates)))
-                  )
+                )
+              (get-frame-instances-given-an-element frameType elementType groundedValue)
               )
-            )
-          (get-frame-instances-given-an-element frameType elementType groundedValue)
-          )
-               
+             ) ; if               
          )
        )
      elementsPredicates
@@ -1055,18 +1084,23 @@
                          value)
                         ))
           (if (not (null? refLinks))
-              (set! groundedValue (car (gdr (car refLinks))))
+              (set! groundedValue (gar (car refLinks)))
               ) ; let             
-          ) ; if        
+          ) ; if
         ) ; if
 
    ; if there is no semeNode, then try to find a corresponding node
     (if (null? groundedValue)
-        (let ((wordNode (get-word-node value)))
-          (if (not (null? wordNode))
-              (set! groundedValue (get-corresponding-node (cog-name wordNode)))
-            )
-        )
+        (let ((name (cog-name value)))
+          (if (and (> (string-length name) 1) (string=? "#" (substring name 0 1)))
+              (set! groundedValue (get-corresponding-node (substring name 1 (string-length name))))
+              (let ((wordNode (get-word-node value)))
+                (if (not (null? wordNode))
+                    (set! groundedValue (get-corresponding-node (cog-name wordNode)))
+                    )
+                )
+              )
+          )
       ) ; if
     groundedValue
     ) ; let  
@@ -1153,8 +1187,6 @@
 
     ) ; let
   )
-
-
 
 (define (answer-question)
 
@@ -1259,7 +1291,7 @@
                  ) ; let
 	       ) ; if
        ) ; lambda
-     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates)
+     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
      )
     finalFrames
     )

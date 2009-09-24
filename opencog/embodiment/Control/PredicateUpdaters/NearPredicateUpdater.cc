@@ -87,7 +87,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             double nextDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.1;
             
             setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0f : 0.0f );
-            setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0f : 0.0f );
+            setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? distance/nextDistance : 0.0f );
         } // else
     } // for
         
@@ -107,7 +107,7 @@ void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& en
         static std::map<std::string, Handle> elements;
         elements["Figure"] = entityA;
         elements["Ground"] = entityB;
-        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, "is_" + predicateName );
+        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, predicateName );
         
         AtomSpaceUtil::setPredicateFrameFromHandles( 
            atomSpace, "#Locative_relation", entityAId + "_" + entityBId + "_" + predicateName, 
