@@ -1286,6 +1286,27 @@ std::string AtomSpaceUtil::getHoldingObjectIdAtTime(const AtomSpace& as,
     return as.getName(objectHandle);
 }
 
+std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace, 
+                                          Handle object )
+{
+    std::string name("");
+
+    if ( object != Handle::UNDEFINED ) {
+        HandleSeq objectName(2);
+        objectName[0] = Handle::UNDEFINED;
+        objectName[1] = object;
+        Type types[] = { WORD_NODE, atomSpace.getType( object ) };
+        HandleSeq wrLinks;
+        atomSpace.getHandleSet( back_inserter(wrLinks), objectName,
+                                &types[0], NULL, 2, WR_LINK, false );
+        if ( wrLinks.size( ) > 0 ) {
+            name = atomSpace.getName( atomSpace.getOutgoing( wrLinks[0], 0 ) );
+        } // if
+    } // if
+
+    return name;
+}
+
 std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
         const std::string& objName )
 {
@@ -2169,14 +2190,16 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
 
                 Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
                 atomSpace.setLTI( frameElementInheritanceLink, 1 );
-                
+                atomSpace.setTV( frameElementInheritanceLink, truthValue );
+
                 HandleSeq predicateFrameElement;
                 predicateFrameElement.push_back( frameInstance );
                 predicateFrameElement.push_back( frameElementInstance );
                                 
                 Handle frameElementLink = addLink( atomSpace, FRAME_ELEMENT_LINK, predicateFrameElement, true );
                 atomSpace.setLTI( frameElementLink, 1 );
-                
+                atomSpace.setTV( frameElementLink, truthValue );
+
                 HandleSeq predicateFrameValue(2);
                 predicateFrameValue[0] = frameElementInstance;
 
@@ -2186,6 +2209,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     predicateFrameValue[1] = itValue->second;
                     Handle frameElementEvalLink = addLink( atomSpace, EVALUATION_LINK, predicateFrameValue, true );                    
                     atomSpace.setLTI( frameElementEvalLink, 1 );                
+                    atomSpace.setTV( frameElementEvalLink, truthValue );
                     newValueDefined = true;
                 } // if
 
