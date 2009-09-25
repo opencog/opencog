@@ -1126,7 +1126,7 @@
              (VariableTypeNode "PredicateNode")
              )
             (TypedVariableLink
-             groundedValue
+             value
              (ListLink
               (VariableTypeNode "SemeNode")
               (VariableTypeNode "ConceptNode")
@@ -1189,7 +1189,6 @@
   )
 
 (define (answer-question)
-
   (let ((chosenAnswer '())
         (question? #f)
         (questionType '())
@@ -1277,19 +1276,19 @@
                  (set! finalFrames (append finalFrames (list groundedFrameInstance )))
                  )
              ) ; let
-	       (let ((groundedFrame
-                      (cog-outgoint-set
-                       (cog-ad-hoc 
-                        "do-varscope" 
-                        (build-implication-link predicate)
-                        )
-                       )
-                      ))
-                 (if (not (null? groundedFrame))
-                     (set! finalFrames (append finalFrames (gdr (gdr (car groundedFrame)))))
-                     )
-                 ) ; let
-	       ) ; if
+           (let ((groundedFrame
+                  (cog-outgoing-set
+                   (cog-ad-hoc 
+                    "do-varscope" 
+                    (build-implication-link predicate)
+                    )
+                   )
+                  ))
+             (if (not (null? groundedFrame))
+                 (set! finalFrames (append finalFrames (gdr (gar (gdr (gar groundedFrame))))))
+                 )
+             ) ; let
+           ) ; if
        ) ; lambda
      (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
      )
