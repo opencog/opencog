@@ -21,6 +21,7 @@ ADD_LIBRARY (OpcLib
     LanguageComprehension
     FramesToRelexRuleEngine
     NLGenClient
+    OutputRelex
 )
 
 INCLUDE_DIRECTORIES (
