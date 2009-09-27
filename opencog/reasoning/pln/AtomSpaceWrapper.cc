@@ -884,11 +884,11 @@ void AtomSpaceWrapper::makeCrispTheorems() {
     CrispTheoremRule::thms.clear();
     LOG(4,"Cleared list of crisp theorems");
     if (archiveTheorems) {    
-/*        Btr<set<pHandle> > links = getHandleSet(IMPLICATION_LINK, "");
+        Btr<set<pHandle> > links = getHandleSet(IMPLICATION_LINK, "");
         foreach(pHandle h, *links)
         {
             makeCrispTheorem(h);
-        }*/
+        }
     } else {
         LOG(4,"We are not archiving theorems, no rules added to list of "
             "crisp theorems");
