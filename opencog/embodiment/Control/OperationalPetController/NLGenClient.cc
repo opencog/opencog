@@ -32,7 +32,7 @@ NLGenClient::NLGenClient(const std::string& host, unsigned int port)
 {
     
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
-    
+    connected = false;    
     this->port = port;
     this->host = host;
     this->connected = false;
