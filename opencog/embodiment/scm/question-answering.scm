@@ -34,6 +34,9 @@
    "#Request"
    "#Purpose"
    "#Ingest_substance"
+   "#Existence"
+   "#Inheritance"
+   "#Categorization"
    )
   )
 

@@ -1702,7 +1702,7 @@ void RuleEngine::processNextAction( void )
                     elements["State"] = opc->getAtomSpace()->addNode( CONCEPT_NODE, feeling );
                     AtomSpaceUtil::setPredicateFrameFromHandles( 
                         *(opc->getAtomSpace()), "#Emotion_directed", frameInstanceName,
-                            elements, SimpleTruthValue( revisedValue, 0.0 ) );        
+                            elements, SimpleTruthValue( (revisedValue < 0.5) ? 0.0 : revisedValue, 0.0 ) );        
                         
                 } catch ( const opencog::NotFoundException& ex ) {
                     Handle predicateNode = opc->getAtomSpace()->getHandle( PREDICATE_NODE, frameInstanceName );

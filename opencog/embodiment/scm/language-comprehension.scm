@@ -568,36 +568,42 @@
 ; position will be considered the nearest SemeNode.
 ; To determine the distance between the agent and the SemeNode
 ; (which represents a real element into the environment) 
-; The TruthValue of the predicate "near" is evaluated 
+; The TruthValue of the predicate "proximity" is evaluated 
 (define (get-nearest-candidate semeNodes)
-  (let ((distance '())
-        (candidateDistance 0)
-        (nearest '())
-        (tv '())
-        (agentNode (get-real-node agentSemeNode)))
+  (let ((agentNode (get-real-node agentSemeNode))
+        (candidates '())
+        )   
     (map
      (lambda (candidate)
-       (set! tv (cog-tv 
-                 (EvaluationLink
-                  (PredicateNode "near")
-                  (ListLink
-                   agentNode
-                   (get-real-node candidate)
-                   )
-                  )
+       (let ((distance (assoc-ref 
+                        (cog-tv->alist 
+                         (cog-tv 
+                          (EvaluationLink
+                           (PredicateNode "proximity")
+                           (ListLink
+                            agentNode
+                            (get-real-node candidate)
+                            )
+                           )
+                          )
+                         ) 'mean ) ))
+
+         (if (or (= (length candidates) 0) (> distance  (cdr (car candidates))))
+             (set! candidates (list (cons candidate distance)))
+             (if (and (> (length candidates) 0) (= distance  (cdr (car candidates))))
+                 (set! candidates (append candidates (list (cons candidate candidates))))
                  )
-             )
-       (set! candidateDistance (assoc-ref (cog-tv->alist tv) 'mean))
-       (cond ((or (null? distance) (and (> candidateDistance 0) (< candidateDistance distance) ) )
-              (set! distance candidateDistance)
-              (set! nearest candidate)
-              )
-             )
-       )
+             )         
+       ) ; let       
+     ) ; lambda
      semeNodes
-     )
-    nearest
-    )
+    ) ; map
+    
+    (if (> (length candidates) 0)
+        (car (car candidates))
+        '()
+        )
+    ) ; let
   )
 
 
@@ -723,7 +729,6 @@
   
 )
 
-
 ; When a sentence containing an imperative verb is parsed
 ; Frames that represents the given command can be identified and then
 ; transformed into a grounded command. This function is responsible
@@ -847,8 +852,40 @@
     )
   )
 
+
+(define (get-frame-element-name elementName)
+  (if (not (null? elementName))
+      (let ((colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list elementName))))
+        (substring elementName (+ colonIndex 1) (string-length elementName))
+        )
+      '()
+      )
+  )
+
+(define (get-frame-element-node frameType elementName)
+  (let ((chosenElementNode '()))
+    (map
+     (lambda (elementNode)
+       (let* ((name (cog-name elementNode))
+              (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list name)))
+              )
+         ; do a split in the element name and compare it without the frame prefix
+         ; i.e. it name is #Color:Entity, but compares only the second part Entity == elementName
+         (if (and colonIndex (string=? (substring name (+ colonIndex 1) (string-length name)) elementName) )
+             (set! chosenElementNode elementNode)
+             )
+         )
+       )
+     (get-frame-elements frameType)
+     )
+    chosenElementNode
+    )
+  )
+
 (define (get-frame-elements frameType)
-  (let ((elements '()))
+  (let ((elements '())
+        (frameNode (DefinedFrameNode frameType))
+        )
     (map
      (lambda (link)
        (set! elements (append elements (gdr link)))
@@ -856,9 +893,24 @@
      (cog-get-link
       'FrameElementLink
       'DefinedFrameElementNode
-      (DefinedFrameNode frameType)
+      frameNode
       )    
      )
+    
+    (map
+     (lambda (link)
+       (let ((parent (car (gdr link))))
+         (if (and (equal? 'DefinedFrameNode (cog-type parent)) (not (equal? parent frameNode)) )
+             (set! elements (append elements (get-frame-elements (cog-name parent))))
+             )
+         )
+       )
+     (cog-filter-incoming
+      'InheritanceLink
+      frameNode
+      )
+     )
+
     elements
     )
   )
@@ -879,27 +931,36 @@
 )
 
 (define (is-frame-instance? predicateNode)
-  (not (null? (cog-get-link 'InheritanceLink 'DefinedFrameNode predicateNode)))      
+  (not (null? (cog-get-link 'InheritanceLink 'DefinedFrameNode predicateNode)))
 )
 
 
 (define (get-frame-instances-given-an-element frameType elementType elementValue)
-  (let ((instances '()))
-    (map
-     (lambda (evalLink)
-       (if (not (null? (cog-link 'InheritanceLink (gar evalLink) (DefinedFrameElementNode elementType))))
-           (map
-            (lambda (frameLink)
-              (if (not (null? (cog-link 'InheritanceLink (gar frameLink) (DefinedFrameNode frameType))))
-                  (set! instances (append instances (list (gar frameLink))))
+  (let* (
+         (instances '())
+         (colonIndex (list-index (lambda (char) (char=? char #\:)) (string->list elementType)))
+         (elementName (substring elementType (+ colonIndex 1) (string-length elementType)))
+         (frameElementNode (get-frame-element-node frameType elementName))
+         )
+
+    (if (not (null? frameElementNode))
+        (map
+         (lambda (evalLink)
+           (if (not (null? (cog-link 'InheritanceLink (gar evalLink) frameElementNode)))
+               (map
+                (lambda (frameLink)
+                  (if (not (null? (cog-link 'InheritanceLink (gar frameLink) (DefinedFrameNode frameType))))
+                      (set! instances (append instances (list (gar frameLink))))
+                      )
                   )
-              )
-            (cog-get-link 'FrameElementLink 'PredicateNode (gar evalLink))
-            )
+                (cog-get-link 'FrameElementLink 'PredicateNode (gar evalLink))
+                )
+               )
            )
-       )
-     (cog-get-link 'EvaluationLink 'PredicateNode elementValue)
-     )
+         (cog-get-link 'EvaluationLink 'PredicateNode elementValue)
+         )
+        ) ; if
+    
     (delete-duplicates instances)
     )
   )
@@ -974,17 +1035,17 @@
     (map
      (lambda (predicate)
        (let ((value (get-frame-instance-element-value predicate)))
-         (if (and value (equal? 'ConceptNode (cog-type value)))
-             (let ((name (cog-name value)))
-               (if (and (> (string-length name) 2) (equal? (substring name 0 3) "#_$"))
+         (if (and (not (null? value)) (equal? 'VariableNode (cog-type value)))
+;             (let ((name (cog-name value)))
+;               (if (and (> (string-length name) 2) (equal? (substring name 0 3) "$"))
                    (set! containsVariable? #t)
+;                   )
+;               )
                    )
-               )
-             )
          )
        )
      (get-frame-instance-elements-predicates predicateNode)
-     )      
+     )    
     containsVariable?
     )
   )
@@ -1008,23 +1069,24 @@
               (elementType (get-frame-instance-element-type elementPredicate))
               (groundedValue (get-grounded-element-value elementValue))             
               )
-         (map
-          (lambda (candidate)              
-            (let ((value (assoc-ref candidates candidate))
-                  (tv (cog-tv (InheritanceLink candidate (DefinedFrameNode frameType))))
+         (if (not (null? groundedValue))
+             (map
+              (lambda (candidate)              
+                (let ((value (assoc-ref candidates candidate))
+                      (tv (cog-tv (InheritanceLink candidate (DefinedFrameNode frameType))))
+                      )
+                  (if (eq? value #f)
+                      (set! value 0)
+                      )
+                  ; only frames with truth value greater than 0 will be considered
+                  (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
+                      (set! candidates (alist-cons candidate (+ value 1) (alist-delete candidate candidates)))
+                      )
                   )
-              (if (eq? value #f)
-                  (set! value 0)
-                  )
-               ; only frames with truth value higher than 0.5 will be considered
-              (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0.5)
-                  (set! candidates (alist-cons candidate (+ value 1) (alist-delete candidate candidates)))
-                  )
+                )
+              (get-frame-instances-given-an-element frameType elementType groundedValue)
               )
-            )
-          (get-frame-instances-given-an-element frameType elementType groundedValue)
-          )
-               
+             ) ; if               
          )
        )
      elementsPredicates
@@ -1055,18 +1117,23 @@
                          value)
                         ))
           (if (not (null? refLinks))
-              (set! groundedValue (car (gdr (car refLinks))))
+              (set! groundedValue (gar (car refLinks)))
               ) ; let             
-          ) ; if        
+          ) ; if
         ) ; if
 
    ; if there is no semeNode, then try to find a corresponding node
     (if (null? groundedValue)
-        (let ((wordNode (get-word-node value)))
-          (if (not (null? wordNode))
-              (set! groundedValue (get-corresponding-node (cog-name wordNode)))
-            )
-        )
+        (let ((name (cog-name value)))
+          (if (and (> (string-length name) 1) (string=? "#" (substring name 0 1)))
+              (set! groundedValue (get-corresponding-node (substring name 1 (string-length name))))
+              (let ((wordNode (get-word-node value)))
+                (if (not (null? wordNode))
+                    (set! groundedValue (get-corresponding-node (cog-name wordNode)))
+                    )
+                )
+              )
+          )
       ) ; if
     groundedValue
     ) ; let  
@@ -1077,28 +1144,36 @@
   (let ((variableCounter 1)
 	(variablesDeclaration '())
 	(elementsDeclaration '())
+        (frameType (get-frame-instance-type predicateNode))
 	)
     (map
      (lambda (predicate)
        (let* ((value (get-frame-instance-element-value predicate))
 	      (groundedValue (get-grounded-element-value value))
+              (variable? (and value (equal? 'VariableNode (cog-type value))))
+              (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
 	     )
-         (if (and value (equal? 'VariableNode (cog-type value)))
-             (set! groundedValue value)
-             )
          (set! variablesDeclaration (append variablesDeclaration (list
 	    (TypedVariableLink
              (VariableNode (string-append "$var" (number->string variableCounter)))
              (VariableTypeNode "PredicateNode")
-             )
-            (TypedVariableLink
-             groundedValue
-             (ListLink
-              (VariableTypeNode "SemeNode")
-              (VariableTypeNode "ConceptNode")
-              )
-             )
-            ) ) )
+             ) 
+            )))
+         (if variable?
+             (begin
+               (set! groundedValue value)
+               (set! variablesDeclaration (append variablesDeclaration (list
+                  (TypedVariableLink
+                   value
+                   (ListLink
+                    (VariableTypeNode "SemeNode")
+                    (VariableTypeNode "ConceptNode")
+                    )
+                   )
+                  )))
+               ) ; begin
+             ) ; if
+         
          (set! elementsDeclaration (append elementsDeclaration (list		     
 	    (FrameElementLink
              (VariableNode "$var0")
@@ -1106,7 +1181,7 @@
              )
             (InheritanceLink
              (VariableNode (string-append "$var" (number->string variableCounter) ))
-             (DefinedFrameElementNode (get-frame-instance-element-type predicate))
+             elementNode
              )
             (EvaluationLink
              (VariableNode (string-append "$var" (number->string variableCounter) ))
@@ -1154,10 +1229,7 @@
     ) ; let
   )
 
-
-
 (define (answer-question)
-
   (let ((chosenAnswer '())
         (question? #f)
         (questionType '())
@@ -1197,7 +1269,7 @@
                     (numberOfGroundedPredicates (length groundedPredicates))
                     (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
                     )
-               (if (or (null? chosenAnswer) (< balance (car chosenAnswer)))
+               (if (and (> numberOfIncomingPredicates 0) (or (null? chosenAnswer) (< balance (car chosenAnswer))))
                    (set! chosenAnswer (cons balance groundedPredicates))
                    )
                )
@@ -1245,21 +1317,21 @@
                  (set! finalFrames (append finalFrames (list groundedFrameInstance )))
                  )
              ) ; let
-	       (let ((groundedFrame
-                      (cog-outgoint-set
-                       (cog-ad-hoc 
-                        "do-varscope" 
-                        (build-implication-link predicate)
-                        )
-                       )
-                      ))
-                 (if (not (null? groundedFrame))
-                     (set! finalFrames (append finalFrames (gdr (gdr (car groundedFrame)))))
-                     )
-                 ) ; let
-	       ) ; if
+           (let ((groundedFrame
+                  (cog-outgoing-set
+                   (cog-ad-hoc 
+                    "do-varscope" 
+                    (build-implication-link predicate)
+                    )
+                   )
+                  ))
+             (if (not (null? groundedFrame))
+                 (set! finalFrames (append finalFrames (gdr (gar (gdr (gar groundedFrame))))))
+                 )
+             ) ; let
+           ) ; if
        ) ; lambda
-     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates)
+     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
      )
     finalFrames
     )

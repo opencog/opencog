@@ -327,6 +327,11 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
             std::string code = matches[1];
             std::string msg = matches[2];
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR message with code %s and message %s",__FUNCTION__, code.c_str(), msg.c_str());
+            if( code == "1"){
+                return "I don't know!";
+            }else if( code == "2" ){
+                return "I know the answer, but I don't know how to say it.";
+            }
         }else{
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR but it was not possible to get the code. Error: %s",__FUNCTION__, nlgen_sentence.c_str());
         }

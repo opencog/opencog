@@ -81,6 +81,12 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             const Spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
             double distance = entityA->distanceTo( entityB );
             logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );            
+
+            Spatial::Math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
+            Spatial::Math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
+            
+            double mapDiagonal = ( maxCorner - minCorner ).length( );
+
             // distance to near 3,125%
             double nearDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.003125;
             // distance to next 10,0%
@@ -88,6 +94,11 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             
             setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0f : 0.0f );
             setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0f : 0.0f );
+
+            SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
+            AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, object, entityBHandle );
+            AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, entityBHandle, object );
+            
         } // else
     } // for
         
@@ -105,9 +116,9 @@ void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& en
 
     { // defining isNear
         static std::map<std::string, Handle> elements;
-        elements["Figure"] = entityA;
-        elements["Ground"] = entityB;
-        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, "is_" + predicateName );
+        elements["Figure"] = atomSpace.addNode( SEME_NODE, entityAId );
+        elements["Ground"] = atomSpace.addNode( SEME_NODE, entityBId );
+        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, predicateName );
         
         AtomSpaceUtil::setPredicateFrameFromHandles( 
            atomSpace, "#Locative_relation", entityAId + "_" + entityBId + "_" + predicateName, 

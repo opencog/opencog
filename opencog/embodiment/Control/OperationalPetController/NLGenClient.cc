@@ -32,9 +32,11 @@ NLGenClient::NLGenClient(const std::string& host, unsigned int port)
 {
     
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
-    
+    connected = false;    
     this->port = port;
     this->host = host;
+    this->connected = false;
+    this->socket = NULL;
     connect();
 #endif
 }
@@ -43,7 +45,9 @@ NLGenClient::~NLGenClient()
 {
 #if BOOST_MINOR_VERSION >= BOOST_ACCEPTED_VERSION
     logger().debug("[NLGenClient.%s] - closing socket connection",__FUNCTION__);
-    socket->close();
+    if ( this->connected ) {
+        socket->close();
+    } // if
     delete socket;
     logger().debug("[NLGenClient.%s] - socket connection closed with success",__FUNCTION__);
 #endif
