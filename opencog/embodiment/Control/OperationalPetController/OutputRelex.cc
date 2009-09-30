@@ -57,21 +57,20 @@ std::string OutputRelex::getOutput( const AtomSpace &atomSpace, std::vector< std
                     std::string elementValue = atomSpace.getName(iter_handles->second);
                     
                     if ( atomSpace.getType( iter_handles->second ) == SEME_NODE ) {
-                        HandleSeq incoming = const_cast<AtomSpace*>( &atomSpace )->getIncoming( iter_handles->second );
-                        unsigned int i;                        
-                        bool nameFound = false;
-                        for ( i = 0; !nameFound && i < incoming.size( ); ++i ) {
-                            if ( atomSpace.getType( incoming[i] ) == REFERENCE_LINK ) {
-                                Handle partner = atomSpace.getOutgoing( incoming[i], 0 );
-                                if ( partner != iter_handles->second ) {
-                                    if ( atomSpace.inheritsType( atomSpace.getType( partner ), OBJECT_NODE ) ) {
-                                        // ok, we found the corresponding node for the given semeNode
-                                        nameFound = true;
-                                        // get the real name of the seme node
-                                        elementValue = AtomSpaceUtil::getObjectName( atomSpace, partner );                        
-                                    } // if
-                                } // if
+                        HandleSeq realObject(2);
+                        realObject[0] = Handle::UNDEFINED;
+                        realObject[1] = iter_handles->second;
+                        Type types[] = {OBJECT_NODE, SEME_NODE};
+                        bool lookForSubTypes[] = {true, false};
+                        HandleSeq refLinks;
+                        atomSpace.getHandleSet( back_inserter(refLinks), realObject, &types[0], &lookForSubTypes[0], 2, REFERENCE_LINK, false );
+                        
+                        if ( refLinks.size( ) > 0 ) {
+                            if ( refLinks.size( ) > 1 ) {
+                                logger().error( "OutputRelex:%s - It should be linked just one real node to the SemeNode %s but # %d links were found",
+                                                __FUNCTION__, elementValue.c_str( ), refLinks.size( ) );
                             } // if
+                            elementValue = AtomSpaceUtil::getObjectName( atomSpace, atomSpace.getOutgoing( refLinks[0], 0) );
                         } // if
                     } // if
                     
