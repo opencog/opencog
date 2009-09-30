@@ -36,7 +36,7 @@ void FramesToRelexRuleEngine::loadRules ( void ) {
     loadRules( config().get("FRAMES_2_RELEX_RULES_FILE") );
 }
 
-void FramesToRelexRuleEngine::loadRules( std::string rulesFileName ){
+void FramesToRelexRuleEngine::loadRules( const std::string& rulesFileName ){
     std::string rule;
     std::ifstream rulesFile(rulesFileName.c_str());
     if (rulesFile.is_open())
@@ -151,9 +151,14 @@ void FramesToRelexRuleEngine::loadRules( std::string rulesFileName ){
 
 FramesToRelexRuleEngine::~FramesToRelexRuleEngine( void )
 {
+    std::map< std::set<std::string>, OutputRelex*>::iterator it;
+    for ( it = rules.begin( ); it != rules.end( ); ++it ) {
+        delete it->second;
+        it->second = NULL;
+    } // for
 }
 
-OutputRelex* FramesToRelexRuleEngine::resolve( std::set< std::string > pre_conditions )
+OutputRelex* FramesToRelexRuleEngine::resolve( const std::set< std::string >& pre_conditions )
 {
     if( rules.find(pre_conditions) != rules.end() ){
         return rules.find(pre_conditions)->second;

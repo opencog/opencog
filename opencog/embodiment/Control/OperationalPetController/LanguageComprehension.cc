@@ -146,7 +146,8 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
         } // if
 
         activeEvalLinkFound = true;
-
+        logger().debug( "LanguageComprehension::%s - Chosen link '%s'", 
+                        __FUNCTION__, TLB::getAtom( evalLinks[k] )->toString( ).c_str( ) );
         elements = as.getOutgoing(as.getOutgoing( evalLinks[k], 1 ));
     } // for
     return elements;
@@ -255,11 +256,15 @@ std::string LanguageComprehension::resolveFrames2Relex( )
         std::map<std::string, Handle> elements =
             AtomSpaceUtil::getFrameInstanceElementsValues( as, predicateElement );
             
-        logger().debug( "LanguageComprehension::%s - # of elements found: %d", 
-                        __FUNCTION__, elements.size());
+        logger().debug( "LanguageComprehension::%s - # of elements found: '%d' for predicate: '%s'", 
+                        __FUNCTION__, elements.size(), TLB::getAtom(predicateElement)->toString().c_str( ) );
+        
+        
         
         std::map<std::string, Handle>::iterator it;
         for(it = elements.begin(); it != elements.end(); ++it) {
+            logger().debug( "LanguageComprehension::%s - Inspecting element: '%s' atom: '%s'", 
+                            __FUNCTION__, it->first.c_str(), TLB::getAtom(it->second)->toString( ).c_str()  );
             std::string frameElementName = frameName+":"+it->first;
             handles.push_back( std::pair<std::string, Handle>(frameElementName, it->second ) );
             //count the number of times each element appears to be part of
@@ -279,7 +284,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     std::map< std::string, unsigned int>::const_iterator iter;
     for( iter = frame_elements_count.begin(); iter != frame_elements_count.end(); ++iter) {
         std::string precondition = iter->first+"$"+boost::lexical_cast<std::string>(iter->second);
-        logger().debug( "LanguageComprehension::%s - Pre-Condition detected: %s", 
+        logger().debug( "LanguageComprehension::%s - Pre-Condition detected: '%s'", 
                         __FUNCTION__, precondition.c_str() );
         pre_conditions.insert( precondition );
     }

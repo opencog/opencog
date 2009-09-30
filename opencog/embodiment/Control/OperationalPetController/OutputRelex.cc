@@ -26,7 +26,7 @@
 
 using namespace OperationalPetController;
 
-std::string OutputRelex::getOutput( const AtomSpace &atomSpace, std::vector< std::pair<std::string, Handle> >& handles ) 
+std::string OutputRelex::getOutput( const AtomSpace &atomSpace, const std::vector< std::pair<std::string, Handle> >& handles ) 
 {
     //for each frames_order
     //for each handle
@@ -38,14 +38,21 @@ std::string OutputRelex::getOutput( const AtomSpace &atomSpace, std::vector< std
     //iterators
     std::map<unsigned int, std::string>::const_iterator iter_frames_order;
     std::vector< std::string>::iterator iter_effect;
-    std::vector< std::pair<std::string, Handle> >::iterator iter_handles;
+
+    std::list< std::pair<std::string, Handle> > usedElements;
+    std::copy( handles.begin( ), handles.end( ), std::back_inserter(usedElements) );
+    std::list< std::pair<std::string, Handle> >::iterator iter_handles;
+
+    std::vector<std::string> outputEffect = effect;
+
     //for each frame in frames_order 
     for( iter_frames_order = frames_order.begin(); iter_frames_order != frames_order.end(); ++iter_frames_order ){
         //std::cout << "Frame order: " << iter_frames_order->second << " -- " << iter_frames_order->first << std::endl;
         logger().debug("OutputRelex::%s - Frame %s found in order %d.",__FUNCTION__, iter_frames_order->second.c_str(),  iter_frames_order->first);
         
         //for each handle
-        for ( iter_handles = handles.begin(); iter_handles != handles.end(); ++iter_handles ){
+        bool elementFound = false;
+        for ( iter_handles = usedElements.begin(); !elementFound && iter_handles != usedElements.end(); ++iter_handles ){
             //std::cout << "Handle: " << iter_handles->first << std::endl;
             logger().debug("OutputRelex::%s - Handle %s found.",__FUNCTION__, iter_handles->first.c_str() );
             
@@ -53,7 +60,7 @@ std::string OutputRelex::getOutput( const AtomSpace &atomSpace, std::vector< std
             if ( boost::equals(iter_frames_order->second, iter_handles->first) ){
                 //for each effect, replace the variable of the frame
                 //order by the hande value
-                for ( iter_effect = effect.begin(); iter_effect != effect.end(); ++iter_effect ) {
+                for ( iter_effect = outputEffect.begin(); iter_effect != outputEffect.end(); ++iter_effect ) {
                     std::string elementValue = atomSpace.getName(iter_handles->second);
                     
                     if ( atomSpace.getType( iter_handles->second ) == SEME_NODE ) {
@@ -80,15 +87,15 @@ std::string OutputRelex::getOutput( const AtomSpace &atomSpace, std::vector< std
                     logger().debug("OutputRelex::%s - Effect after replacing the variable %s .",__FUNCTION__, (*iter_effect).c_str() );
                 }//for effect
                 //remove the handle so it will not be used anymore 
-                handles.erase(iter_handles);
-                break;
+                usedElements.erase(iter_handles);
+                elementFound = true;
             }//if order
         }//for handles
     }//for frames_order
     
     //create the complete output as all the effects
     std::string output;
-    for ( iter_effect = effect.begin(); iter_effect != effect.end(); ++iter_effect ){
+    for ( iter_effect = outputEffect.begin(); iter_effect != outputEffect.end(); ++iter_effect ){
         output = output + (*iter_effect) + "\n";
     }
     
