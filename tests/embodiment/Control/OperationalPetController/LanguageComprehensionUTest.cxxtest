@@ -92,7 +92,7 @@ public:
         ballName1("red ball"),
         ballName2("green ball"),
         ballName3("red ball2"),
-        ballName4("white ball"),
+        ballName4("ball"),
         
         treeId1("7"),
         treeId2("8"),
@@ -333,24 +333,6 @@ public:
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 0.6, 1.0), ball3, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "near", SimpleTruthValue( 0.6, 1.0), petNode, ball3 );
 
-        // setup ball 4
-        Handle semeNode4 = this->atomSpace->addNode( SEME_NODE, ballId4 );
-        Handle ball4 = this->atomSpace->addNode( ACCESSORY_NODE, ballId4 );
-        semeNodeReference[0] = ball4;
-        semeNodeReference[1] = semeNode4;
-        this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference, TruthValue::TRUE_TV( ) );
-        this->atomSpace->addLink( WR_LINK, this->atomSpace->addNode( WORD_NODE, ballName4 ), ball4 );
-
-        wordNodeReference[0] = semeNode4;
-        this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference, TruthValue::TRUE_TV( ) );
-
-        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "color", TruthValue::TRUE_TV( ), ball4, white );
-        this->atomSpace->addSpaceInfo(true, semeNode4, 1, 40, 105, 2, 2, 2, 0, false );
-        
-        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
-        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
- 
-       
         // setup stick
         Handle semeNodeStick = this->atomSpace->addNode( SEME_NODE, stickId );
         Handle stickHandle = this->atomSpace->addNode( ACCESSORY_NODE, stickId );
@@ -377,6 +359,37 @@ public:
                                                         
         }
 
+
+        // setup ball 4
+        Handle semeNode4 = this->atomSpace->addNode( SEME_NODE, ballId4 );
+        Handle ball4 = this->atomSpace->addNode( ACCESSORY_NODE, ballId4 );
+        semeNodeReference[0] = ball4;
+        semeNodeReference[1] = semeNode4;
+        this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference, TruthValue::TRUE_TV( ) );
+        this->atomSpace->addLink( WR_LINK, this->atomSpace->addNode( WORD_NODE, ballName4 ), ball4 );
+
+        wordNodeReference[0] = semeNode4;
+        this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference, TruthValue::TRUE_TV( ) );
+
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "color", TruthValue::TRUE_TV( ), ball4, white );
+        {
+            std::map<std::string, Handle> elements;
+            elements["Entity"] = semeNode4;
+            elements["Color"] = white;
+            AtomSpaceUtil::setPredicateFrameFromHandles(*atomSpace, 
+                                                        "#Color", 
+                                                        "colorBall4", 
+                                                        elements, 
+                                                        SimpleTruthValue(1.0, 1.0) );
+                                                        
+        }
+
+      this->atomSpace->addSpaceInfo(true, semeNode4, 1, 40, 105, 2, 2, 2, 0, false );
+        
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
+ 
+       
        
     }
 
