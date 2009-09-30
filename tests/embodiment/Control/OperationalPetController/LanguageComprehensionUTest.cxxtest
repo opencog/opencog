@@ -73,6 +73,9 @@ private:
     const std::string treeId2;
     const std::string treeId3;
 
+    const std::string stickId;
+    const std::string stickName;
+
 public:
     
     LanguageComprehensionUTest() :
@@ -93,7 +96,11 @@ public:
         
         treeId1("7"),
         treeId2("8"),
-        treeId3("9")
+        treeId3("9"),
+
+        stickId("10"),
+        stickName("Stick")
+
     {
         try {
             config().load("opencog-test.conf");
@@ -342,7 +349,35 @@ public:
         
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
-        
+ 
+       
+        // setup stick
+        Handle semeNodeStick = this->atomSpace->addNode( SEME_NODE, stickId );
+        Handle stickHandle = this->atomSpace->addNode( ACCESSORY_NODE, stickId );
+        semeNodeReference[0] = stickHandle;
+        semeNodeReference[1] = semeNodeStick;
+
+        this->atomSpace->addLink( REFERENCE_LINK, semeNodeReference,TruthValue::TRUE_TV( ) );        
+        this->atomSpace->addLink( WR_LINK, this->atomSpace->addNode( WORD_NODE, stickName ), stickHandle );
+
+        wordNodeReference[0] = semeNodeStick;
+        this->atomSpace->addLink( REFERENCE_LINK, wordNodeReference,TruthValue::TRUE_TV( ) );
+
+
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "color", TruthValue::TRUE_TV( ), stickHandle , brown );
+        {
+            std::map<std::string, Handle> elements;
+            elements["Entity"] = semeNodeStick;
+            elements["Color"] = brown;
+            AtomSpaceUtil::setPredicateFrameFromHandles(*atomSpace, 
+                                                        "#Color", 
+                                                        "colorStick", 
+                                                        elements, 
+                                                        SimpleTruthValue(1.0, 1.0) );
+                                                        
+        }
+
+       
     }
 
     ~LanguageComprehensionUTest( ) 
@@ -639,6 +674,18 @@ public:
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
         TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "" )
+        logger().debug("Question 9 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
+    
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question10.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->solveLatestSentenceReference( );
+        this->language->answerLatestQuestion( );
+        TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
+            this->atomSpace->getHandle( PET_NODE, petId ) ) )
+        //TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )    
+        logger().debug("Question 10 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
+    
+    
     }
     
     
