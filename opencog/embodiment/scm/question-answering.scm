@@ -37,6 +37,8 @@
    "#Existence"
    "#Inheritance"
    "#Categorization"
+   "#Part_whole"
+   "#Physical_entity"
    )
   )
 

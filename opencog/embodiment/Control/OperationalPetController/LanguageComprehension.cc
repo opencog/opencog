@@ -217,7 +217,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
 
     if ( elements.size( ) == 0 ) {
         // there is no question to answer
-        return "";
+        return "I don't know.";
     } // if
 
     unsigned int j;
