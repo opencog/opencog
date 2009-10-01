@@ -1714,7 +1714,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             HandleSeq outgoing;
             outgoing.push_back(objNameNode);
             outgoing.push_back(objectNode);
-            AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, isPetObject || isPetOwner);
+            AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, true);
         }
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
