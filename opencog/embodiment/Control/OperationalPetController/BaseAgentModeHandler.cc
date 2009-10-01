@@ -50,7 +50,8 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         } // if
         logger().debug("BaseAgentModeHandler - Scheduling command" );
         this->commandsQueue.push( arguments );
-    } else if ( name == "evaluateSentence" ) {        
+
+    } else if ( name == "evaluateSentence" ) {
         logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
         logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
         this->agent->getLanguageTool( ).solveLatestSentenceReference( );
@@ -58,9 +59,15 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         logger().debug("BaseAgentModeHandler - Starting latest sentence command resolution" );
         this->agent->getLanguageTool( ).solveLatestSentenceCommand( );
         logger().debug("BaseAgentModeHandler - Command resolution done");
+
+    } else if ( name == "answerQuestion") {
+        logger().debug("BaseAgentModeHandler - Answering a question" );
+        logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
+        this->agent->getLanguageTool( ).solveLatestSentenceReference( );
         logger().debug("BaseAgentModeHandler - Starting question answering" );
         this->agent->getLanguageTool( ).answerLatestQuestion( );
         logger().debug("BaseAgentModeHandler - Question answering done");
+
     } else if ( name == "instruction" ) {
         if ( arguments.size( ) != 3 ) {
             logger().debug("BaseAgentModeHandler::%s - Invalid instruction number of arguments: %d", __FUNCTION__, arguments.size( ) );

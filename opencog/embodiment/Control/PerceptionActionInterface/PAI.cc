@@ -1037,11 +1037,15 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
                             __FUNCTION__, answer.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );
-
-        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
     }
     
-    if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
+    if ( std::string( contentType ) == "FACT" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "QUESTION" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
         if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
             std::vector<std::string> arguments;        
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
