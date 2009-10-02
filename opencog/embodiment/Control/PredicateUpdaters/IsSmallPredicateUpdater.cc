@@ -114,7 +114,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
     double agentVolume = getSize(pet);
     double objectVolume = getSize(object);
-    if ( agentVolume*0.5 > objectVolume ) {
+    if ( objectVolume/agentVolume < 0.9 ) {
         tv.setMean(1.0);
 
         std::string objectName = atomSpace.getName( object );
