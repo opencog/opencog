@@ -217,6 +217,8 @@ std::string LanguageComprehension::resolveFrames2Relex( )
 
     if ( elements.size( ) == 0 ) {
         // there is no question to answer
+        logger().debug( "LanguageComprehension::%s - elements size of the answer is 0. 'I don't know' answer will be reported.",
+                        __FUNCTION__ );
         return "I don't know.";
     } // if
 
@@ -299,7 +301,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     OutputRelex* output_relex = framesToRelexRuleEngine.resolve( pre_conditions );
     if( output_relex == NULL ){
         logger().debug("LanguageComprehension::%s - Output Relex is NULL for the pre-conditions. No rules were found.",__FUNCTION__);
-        return "";//TODO return empty or relex string
+        return "I know it, but I don't know how to say it.";//TODO return empty or relex string
     }
     
     std::string text = output_relex->getOutput( as, handles );
