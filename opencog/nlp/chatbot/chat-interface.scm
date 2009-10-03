@@ -363,6 +363,10 @@
 ; parts of the triple to the anchor.  e.g. given the triple
 ; "made_from(clay,pottery)" this attaches "clay" to the anchor.
 ;
+; The attachment to this anchor is done by the implications in the 
+; wh-question-id-list -- these implications find (identify) questions,
+; and anchor them.
+;
 ; The question-answering rules look for things on this anchor.
 ;
 (define *bottom-anchor* (AnchorNode "# TRIPLE BOTTOM ANCHOR"))
@@ -546,7 +550,7 @@
 (end-dbg-display)
 
 		; Now try to find answers to the question
-		(loop-over-questions *question-rule-list*)
+		(loop-over-questions *wh-trip-question-rule-list*)
 
 		(let ((ans (chat-get-simple-answer)))
 

@@ -251,6 +251,9 @@ broken.
 <me>         what did the cat sit on?
 <cogita-bot> Triples abstraction found: mat
 
+<me>         John and Berd turned into monsters
+<me>         who turned into monsters?
+<cogita-bot> Triples abstraction found: John Berd Berd John
 
 Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.

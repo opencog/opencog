@@ -143,7 +143,7 @@
 )
 
 ; -----------------------------------------------------------------
-; The following answers a simple WH-question (who, what, when etc.)
+; The following answers a triple-style WH-question (who, what, when etc.)
 ; The question is presumed to be a simple triple itself.
 ;
 ; To limit the scope of the search (for performance), the bottom
@@ -168,7 +168,7 @@
 ;    THEN
 ;       ^3_&declare_answer($ans)
  
-(define (wh-question wh-clause ans-clause)
+(define (wh-trip-question wh-word wh-clause ans-clause)
 	(r-varscope
 		(r-and
 			(r-anchor-node *bottom-anchor* "$qvar")
@@ -177,27 +177,45 @@
 			(r-decl-vartype "PrepositionalRelationshipNode" "$tripl")
 
 			;; XXX someday, this needs to be an or-list of WH- words.
-			(r-rlx-flag "what" "$qvar")
+			(r-rlx-flag wh-word "$qvar")
 			(r-decl-lemma  "$word-inst" "$word")
 			(r-decl-lemma  "$join-inst" "$word")
 
 			ans-clause
 
-			(r-not (r-rlx-flag "what" "$ans"))
+			(r-not (r-rlx-flag wh-word "$ans"))
 		)
 		(r-anchor-node *query-soln-anchor* "$ans")
 	)
 )
 
-(define question-rule-0
-	(wh-question 
+(define wh-trip-question-rule-0
+	(wh-trip-question 
+		"what"
 		(r-rlx "$tripl" "$word-inst" "$qvar")
 		(r-rlx "$tripl" "$join-inst" "$ans")
 	)
 )
 
-(define question-rule-1
-	(wh-question 
+(define wh-trip-question-rule-1
+	(wh-trip-question 
+		"what"
+		(r-rlx "$tripl" "$qvar" "$word-inst")
+		(r-rlx "$tripl" "$ans"  "$join-inst")
+	)
+)
+
+(define wh-trip-question-rule-2
+	(wh-trip-question 
+		"who"
+		(r-rlx "$tripl" "$word-inst" "$qvar")
+		(r-rlx "$tripl" "$join-inst" "$ans")
+	)
+)
+
+(define wh-trip-question-rule-3
+	(wh-trip-question 
+		"who"
 		(r-rlx "$tripl" "$qvar" "$word-inst")
 		(r-rlx "$tripl" "$ans"  "$join-inst")
 	)
@@ -302,9 +320,11 @@
 	wh-question-rule-1
 ))
 
-(define *question-rule-list* (list
-	question-rule-0
-	question-rule-1
+(define *wh-trip-question-rule-list* (list
+	wh-trip-question-rule-0
+	wh-trip-question-rule-1
+	wh-trip-question-rule-2
+	wh-trip-question-rule-3
 ))
 
 (define *truth-query-id-list* (list
