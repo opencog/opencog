@@ -166,6 +166,10 @@
 	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
 )
 
+(define (word-inst-get-prep-relations word-inst)
+	(cog-get-pred word-inst 'PrepositionalRelationshipNode)
+)
+
 ; ---------------------------------------------------------------------
 ; Given a word instance, return the inflection string for it.
 ; The "inflection string" is the part that follows the period in
@@ -334,9 +338,27 @@
 )
 
 ; --------------------------------------------------------------------
+; Given a verb word-instance, return a list of relex relations that 
+; this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. _subj(head-word, dependency-word)
+;
+(define (verb-inst-get-relex-rels word-inst)
+	; There are a few other relations we should probably deal with,
+	; e.g. _predadj Right now, this is unclear.
+	; Modifiers are documented at:
+	; http://opencog.org/wiki/Binary_relations
+	(word-inst-filter-relex-rels word-inst 
+		(list "_advmod" "_iobj" "_obj" "_subj")
+	)
+)
+
+; --------------------------------------------------------------------
 ; Given a noun word-instance, return a list of relex modifiers that 
 ; this word-instance is the head-word of. (It is the head-word
 ; if it is first e.g. _amod(head-word, attr-word)
+;
+; This very explicitly returns *only* modifiers, and not relations in
+; general. 
 ;
 (define (noun-inst-get-relex-modifiers word-inst)
 	; There are a few other modifiers we should probably deal with,
@@ -349,17 +371,29 @@
 )
 
 ; --------------------------------------------------------------------
-; Given a verb word-instance, return a list of relex relations that 
-; this word-instance is the head-word of. (It is the head-word
-; if it is first e.g. _subj(head-word, dependency-word)
+; Given a noun word-instance, return a list of prepositional relations
+; that this word-instance is the head-word of. (It is the head-word
+; if it is first e.g. prep(head-word, dependent-word)
 ;
-(define (verb-inst-get-relex-rels word-inst)
-	; There are a few other relations we should probably deal with,
-	; e.g. _predadj Right now, this is unclear.
-	; Modifiers are documented at:
-	; http://opencog.org/wiki/Binary_relations
-	(word-inst-filter-relex-rels word-inst 
-		(list "_advmod" "_iobj" "_obj" "_subj")
+(define (noun-inst-get-prep-rels word-inst)
+
+	; Return #t if the relex relation is prepositional,
+	; and the word-inst is the head-word.
+	(define (head-prel? rel wrd-inst)
+		(let* ((oset (cog-outgoing-set rel))
+				(head (car (cog-outgoing-set (cadr oset))))
+			)
+			(and 
+				(equal? head wrd-inst)
+				(eq? 'PrepositionalRelationshipNode (cog-type (car oset)))
+			)
+		)
+	)
+
+	; Get all relations, and filter them out.
+	(filter! 
+		(lambda (rel) (head-prel? rel word-inst))
+		(word-inst-get-prep-relations word-inst)
 	)
 )
 
