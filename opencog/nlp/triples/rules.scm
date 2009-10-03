@@ -416,16 +416,20 @@
 
 
 ; -----------------------------------------------------------------
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
 ; 1000
+; Rules to identify truth assertions. We need to identify thruth assersions
+; so that seme-promotion works correctly: we need to seme-promote the subject,
+; object for these kinds of sentences, but do not want to do seme promotions
+; on triple-style assertions (these are handled above).
+;
 ; Truth assertion: "John threw a rock"
 ;        _subj(throw, John)
 ;        _obj(throw, rock)
 ; 
-; or more generally "X verbed Y".
-; We use this to identify sentences that do *not* have prepositional
-; sttements in them. We need to identify these so that seme-promotion 
-; works correctly: we need to seme-promote the subject, object for
-; these kinds of sentences, but not for any of the others, above.
+; or more generally "X verbed Y".  Use this to identify sentences that do *not* 
+; have prepositional statements in them. 
 ;
 
 (define truth-assertion-rule-0
@@ -452,6 +456,41 @@
 )
 
 ; -----------------------------------------------------------------
+; 1001 -- Rules to identify truth assertions. 
+;
+; Truth assertion: "John made fun of Sarah."
+;     _subj(make, John)
+;     _obj(make, fun)
+;     of(fun, Sarah)
+;
+; or more generally "X verbed Y prep Z". 
+;
+; XXX FIXME, rule below is just rule above, but without the prep check.
+; This means this rule might break one of the triple-style rules above...
+
+(define truth-assertion-rule-1
+	(r-varscope
+		(r-and
+			(r-anchor "# NEW PARSES" "$sent")
+			(r-decl-word-inst "$verb" "$sent")
+
+			; Identify the assertion.
+			(r-rlx "_subj" "$verb" "$svar")
+			(r-rlx "_obj"  "$verb" "$ovar")
+			(r-rlx "$prep" "$ovar" "$pvar")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$pvar")
+
+			; Must not be a question.
+			(r-not (r-rlx-flag "hyp" "$verb"))
+			(r-not (r-rlx-flag "truth-query" "$verb"))
+
+		)
+		(r-anchor-node *truth-assertion-anchor* "$verb")
+	)
+)
+
+; -----------------------------------------------------------------
 ; needed by the triples-processing pipeline
 ;
 (define triple-rule-list (list
@@ -470,6 +509,7 @@
 
 (define truth-assertion-list (list
 	truth-assertion-rule-0
+	truth-assertion-rule-1
 ))
 
 ; ------------------------ END OF FILE ----------------------------
