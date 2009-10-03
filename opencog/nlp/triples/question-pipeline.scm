@@ -56,6 +56,8 @@
 
 ; -----------------------------------------------------------------
 ; The following answers an SVO (subject-verb-object) WH-question.
+; This pattern explicitly fails to match questions with prepostions
+; in them.
 ;
 (define (wh-svo-question-soln core)
 	(r-varscope
@@ -134,12 +136,54 @@
 	)
 )
 
-(define wh-question-rule-0
+(define wh-svo-question-rule-0
 	(wh-svo-question-soln wh-subject)
 )
 
-(define wh-question-rule-1
+(define wh-svo-question-rule-1
 	(wh-svo-question-soln wh-object)
+)
+
+; -----------------------------------------------------------------
+; The following answers an SVOP (subject-verb-object-prep) WH-question.
+; This pattern explicitly matches questions with prepostions in them.
+;
+(define wh-svop-question-rule-0
+	(r-varscope
+		(r-and
+			(r-anchor-node *bottom-anchor* "$qVar")
+			(r-decl-word-inst "$qVar" "$parse")
+			(r-decl-vartype "ParseNode" "$parse")
+
+			(r-decl-word-inst "$verb" "$parse")
+
+			(r-rlx "_subj" "$verb" "$qVar")
+			(r-rlx "_obj"  "$verb" "$ovar")
+			(r-rlx "$prep" "$ovar" "$pvar")
+			(r-decl-vartype "PrepositionalRelationshipNode" "$prep")
+			(r-decl-vartype "WordInstanceNode" "$pvar")
+
+			; Look for semes matching the object and prep
+			(r-seme-of-word-inst "$ovar" "$seme-ovar")
+			(r-seme-of-word-inst "$pvar" "$seme-pvar")
+
+			; Look for candidate verb semes.
+			(r-candidate-of-word-inst "$verb" "$ans-verb")
+			(r-rlx "_obj"  "$ans-verb" "$seme-ovar")
+			; (r-rlx "$prep" "$seme-ovar" "$seme-pvar")
+			(r-rlx "_subj" "$ans-verb" "$ans")
+
+			; XXX we should also make sure that adverbs, if any, that
+			; modify the verb, are also matched up.
+
+			; The below make sure that a previous truth query is not
+			; mis-interpreted as a statement.
+			(r-not (r-rlx-flag "hyp" "$ans-verb"))
+			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
+		)
+		(r-link ListLink "$seme-ovar" "$prep" "$pvar" "$seme-pvar" "$ans-verb" "$qVar" "$ans")
+		; (r-anchor-node *query-soln-anchor* "$ans")
+	)
 )
 
 ; -----------------------------------------------------------------
@@ -316,8 +360,9 @@
 ))
 
 (define *wh-question-rule-list* (list
-	wh-question-rule-0
-	wh-question-rule-1
+	wh-svo-question-rule-0
+	wh-svo-question-rule-1
+	wh-svop-question-rule-0
 ))
 
 (define *wh-trip-question-rule-list* (list
