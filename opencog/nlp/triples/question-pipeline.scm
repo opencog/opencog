@@ -180,6 +180,13 @@
 			; mis-interpreted as a statement.
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
+
+			; Reject answers that pattern-match to triples-questions.
+			(r-not (r-decl-lemma "$ans" "who"))
+			(r-not (r-decl-lemma "$ans" "what"))
+			(r-not (r-decl-lemma "$ans" "when"))
+			(r-not (r-decl-lemma "$ans" "where"))
+			(r-not (r-decl-lemma "$ans" "why"))
 		)
 		; (r-link ListLink "$seme-ovar" "$prep" "$pvar" "$seme-pvar" "$ans-verb" "$qVar" "$ans")
 		(r-anchor-node *query-soln-anchor* "$ans")
