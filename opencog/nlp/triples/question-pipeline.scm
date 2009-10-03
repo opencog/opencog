@@ -57,7 +57,7 @@
 ; -----------------------------------------------------------------
 ; The following answers an SVO (subject-verb-object) WH-question.
 ;
-(define (wh-question-soln core)
+(define (wh-svo-question-soln core)
 	(r-varscope
 		(r-and
 			(r-anchor-node *bottom-anchor* "$qVar")
@@ -135,11 +135,11 @@
 )
 
 (define wh-question-rule-0
-	(wh-question-soln wh-subject)
+	(wh-svo-question-soln wh-subject)
 )
 
 (define wh-question-rule-1
-	(wh-question-soln wh-object)
+	(wh-svo-question-soln wh-object)
 )
 
 ; -----------------------------------------------------------------
