@@ -315,7 +315,12 @@
 	; word instance is the head-word.
 	(define (get-relex-rels wrd-inst)
 		(cond
-			((word-inst-is-noun? wrd-inst) (noun-inst-get-relex-modifiers wrd-inst))
+			((word-inst-is-noun? wrd-inst) 
+				(append! 
+					(noun-inst-get-relex-modifiers wrd-inst)
+					(noun-inst-get-prep-rels wrd-inst)
+				)
+			)
 			((word-inst-is-verb? wrd-inst) (verb-inst-get-relex-rels wrd-inst))
 			(else '())
 		)

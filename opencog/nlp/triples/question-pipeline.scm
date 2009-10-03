@@ -170,7 +170,7 @@
 			; Look for candidate verb semes.
 			(r-candidate-of-word-inst "$verb" "$ans-verb")
 			(r-rlx "_obj"  "$ans-verb" "$seme-ovar")
-			; (r-rlx "$prep" "$seme-ovar" "$seme-pvar")
+			(r-rlx "$prep" "$seme-ovar" "$seme-pvar")
 			(r-rlx "_subj" "$ans-verb" "$ans")
 
 			; XXX we should also make sure that adverbs, if any, that
@@ -181,8 +181,8 @@
 			(r-not (r-rlx-flag "hyp" "$ans-verb"))
 			(r-not (r-rlx-flag "truth-query" "$ans-verb"))
 		)
-		(r-link ListLink "$seme-ovar" "$prep" "$pvar" "$seme-pvar" "$ans-verb" "$qVar" "$ans")
-		; (r-anchor-node *query-soln-anchor* "$ans")
+		; (r-link ListLink "$seme-ovar" "$prep" "$pvar" "$seme-pvar" "$ans-verb" "$qVar" "$ans")
+		(r-anchor-node *query-soln-anchor* "$ans")
 	)
 )
 

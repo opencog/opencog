@@ -255,6 +255,10 @@ broken.
 <me>         who turned into monsters?
 <cogita-bot> Triples abstraction found: John Berd Berd John
 
+<me>         John made fun of Sarah.
+<me>         Who made fun of Sarah?
+<cogita-bot> SVO pattern match found: John
+
 Some things that don't work:
 "Did Fred throw a round ball?" -- doesn't know that balls are round.
 
@@ -272,7 +276,6 @@ Untested, probably won't work:
  * How questions
  * How-much questions (how-tall, how-safe etc)
  * Which questions
- * John made fun of Sarah. Who made fun of Sarah?
 
 
 

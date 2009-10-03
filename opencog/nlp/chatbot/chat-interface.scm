@@ -495,7 +495,7 @@
 	; tag them with semes. (XXX We don't really need all the words,
 	; only the words that are participating in relations.) Actually,
 	; we pretty much just need to promote the verb, everything else
-	; will follow.
+	; will follow. Err.. well, and preps too ... 
 	(for-each same-modifiers-promoter
 		(concatenate! 
 			(map parse-get-words
