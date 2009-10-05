@@ -711,7 +711,11 @@
   (let ((predicates '()))
     (map
      (lambda (link)
-       (set! predicates (append predicates (gdr link)))       
+       (let ((candidate (car (gdr link))))
+         (if (and (equal? 'PredicateNode (cog-type candidate)) (not (equal? predicateNode candidate)))
+             (set! predicates (append predicates (list candidate)))
+             )
+         )
        )
      (cog-filter-incoming
       'FrameElementLink
@@ -1139,6 +1143,86 @@
   )
 
 
+; Given a predicate which represents a frame instance
+; this function tries to find a grounded frame that
+; matches the given frame
+(define (match-frame predicateNode)
+ 
+  (let ((candidates '())
+        (evaluatedElements 0)
+        (frameType (get-frame-instance-type predicateNode))
+        )
+    (map ; inspect all the frame elements
+     (lambda (elementPredicate)
+       (let* (
+              (value (get-frame-instance-element-value elementPredicate))
+              (groundedValue (get-grounded-element-value value))
+              (elementType (get-frame-instance-element-type elementPredicate))
+              (elementName (get-frame-element-name elementType))
+              (elementTypeNode (get-frame-element-node frameType elementName ))
+              (elementsCandidates '())
+             )
+         ; check if the element has a Variable as its value
+         (if (equal? 'VariableNode (cog-type value))
+             ; ok, it has a variable and must be matched against a stored frame
+             (map  ; retrieve from AT all elements of the same type
+              (lambda (inheritanceLink)
+                (let* ((candidate (gar inheritanceLink ))
+                       (frameInstancePredicate (gar (car (cog-filter-incoming 'FrameElementLink candidate))))
+                       )
+                  (if (equal? 'PredicateNode (cog-type candidate))
+                      
+                      (map
+                       (lambda (evalLink)
+                         (let* ((elementValue (car (gdr evalLink)))
+                                (valueType (cog-type elementValue))
+                                )
+                           (if (or (equal? 'SemeNode valueType) (equal? 'ConceptNode valueType))                               
+                               (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                               )
+                           )
+                         )
+                       (cog-filter-incoming 'EvaluationLink candidate)
+                       )
+                      )
+                  )
+                )
+              (cog-filter-incoming 'InheritanceLink elementTypeNode)
+              )
+             (map ; else
+              (lambda (evalLink)
+                (let* ((candidate (gar evalLink))
+                       (candidateType (cog-type candidate))
+                      )
+                  (if (and (equal? 'PredicateNode candidateType) 
+                           (not (null? (cog-link 'InheritanceLink candidate elementTypeNode))) )
+                      (let ((frameInstancePredicate (gar (car (cog-filter-incoming 'FrameElementLink candidate)))))
+                        (if (not (equal? frameInstancePredicate predicateNode))
+                            (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                            )
+                        )
+                      )
+                  )
+                )
+              (cog-filter-incoming 'EvaluationLink groundedValue)
+              )
+             ) ; if
+
+         (if (= evaluatedElements 0)
+             (set! candidates elementsCandidates)
+             (set! candidates (filter (lambda (x) (member x elementsCandidates)) candidates))
+             )
+         )
+       
+       (set! evaluatedElements 1)
+       )
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+    
+    candidates
+    )
+  )
+
 ; When a Frame instance with VariableNodes in its elements
 ; is used in a PatternMatching process to find a grounded Frame Instance,
 ; it is necessary to build a customized ImplicationLink to conclude that task.
@@ -1249,16 +1333,9 @@
                  (set! finalFrames (append finalFrames (list groundedFrameInstance )))
                  )
              ) ; let
-           (let ((groundedFrame
-                  (cog-outgoing-set
-                   (cog-ad-hoc 
-                    "do-varscope" 
-                    (build-implication-link predicate)
-                    )
-                   )
-                  ))
+           (let ((groundedFrame (match-frame predicate)))
              (if (not (null? groundedFrame))
-                 (set! finalFrames (append finalFrames (list (gar (gar (gdr (gar groundedFrame)))))))
+                 (set! finalFrames (append finalFrames (list (car groundedFrame ))))
                  )
              ) ; let
            ) ; if
