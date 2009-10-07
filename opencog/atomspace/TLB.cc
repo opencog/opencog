@@ -40,6 +40,6 @@ using namespace opencog;
 // UUID TLB::brk_uuid = (1 << (8 * sizeof(opencog::Type)));
 UUID TLB::brk_uuid = 1;
 
-std::map<Handle, const Atom*> TLB::handle_map;
+std::tr1::unordered_map<Handle, const Atom*, std::tr1::hash<opencog::Handle> > TLB::handle_map;
 
 #endif

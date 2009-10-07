@@ -695,6 +695,14 @@ const ActionType& ActionType::LOOK_AT()
     return *result;
 }
 
+const ActionType& ActionType::SAY()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"message", "target"};
+    static ActionType* result = new ActionType(SAY_CODE, "say", STRING, STRING, paramNames, "void say( string message, string target )");
+    return *result;
+}
+
 
 #if 0
 // TEMPLATE FOR ADDING OTHER TYPES ABOVE
@@ -876,6 +884,7 @@ void ActionType::init()
         GROUP_COMMAND();
         RECEIVE_LATEST_GROUP_COMMANDS();
         LOOK_AT();
+        SAY();
 
         initialized = true;
     }

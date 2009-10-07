@@ -42,8 +42,18 @@ public:
     NearPredicateUpdater(AtomSpace& _atomSpace);
     ~NearPredicateUpdater();
 
-    void update(Handle object, Handle pet, unsigned long timestamp );
+    virtual void update(Handle object, Handle pet, unsigned long timestamp );
 
+ protected:
+    
+    void setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean );    
+
+    unsigned long lastTimestamp;
+
+    std::tr1::unordered_set<std::string, boost::hash<std::string> > processedEntities;
+        
+
+    
 }; // class
 }  // namespace
 

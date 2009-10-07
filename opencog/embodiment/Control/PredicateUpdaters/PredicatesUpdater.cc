@@ -73,7 +73,6 @@ void PredicatesUpdater::update(std::vector<Handle> objects, unsigned long timest
     } // if
 
     for (unsigned int i = 0; i < objects.size(); i++) {
-
         // updating all predicates ...
         for (unsigned int j = 0; j < updaters.size(); j++) {
             updaters[j]->update(objects[i], petHandle, timestamp );

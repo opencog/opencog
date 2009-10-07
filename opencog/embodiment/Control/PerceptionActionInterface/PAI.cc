@@ -61,7 +61,6 @@
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 using namespace PerceptionActionInterface;
-using namespace predavese;
 using namespace Control;
 using namespace opencog;
 
@@ -74,8 +73,6 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
         atomSpace(_atomSpace), actionSender(_actionSender), petInterface(_petInterface), nextActionPlanId(nextPlanID)
 {
     PAIUtils::initializeXMLPlatform();
-    predaveseParser = new PredaveseParser(petInterface);
-    predaveseParser->Create();
     xMin = -1;
     yMin = -1;
     xMax = -1;
@@ -120,7 +117,6 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender, PetInterface& _
 PAI::~PAI()
 {
     delete parser;
-    delete predaveseParser;
     // TODO: Cannot terminate here because other PAI objects may be using it...
     //PAIUtils::terminateXMLPlatform();
 }
@@ -133,11 +129,6 @@ AtomSpace& PAI::getAtomSpace()
 PetInterface& PAI::getPetInterface()
 {
     return petInterface;
-}
-
-PredaveseParser* PAI::getPredaveseParser()
-{
-    return predaveseParser;
 }
 
 ActionPlanID PAI::createActionPlan()
@@ -1046,11 +1037,15 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
                             __FUNCTION__, answer.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );
-
-        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
     }
     
-    if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
+    if ( std::string( contentType ) == "FACT" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "QUESTION" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
         if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
             std::vector<std::string> arguments;        
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
@@ -1102,17 +1097,6 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, avatarNode);
-
-//    if (internalAvatarId == petInterface.getOwnerId()) {
-    // Uses the Predavese parser created for the specific pet in order to process the instruction
-    // TODO: the avatarID is passed as a hack for now. In future predavese will
-    // infer the avatar that is performing the exemplars.
-
-    // let predavese parser decide if or not an instruction must be processed
-//    predaveseParser->processInstruction(string(sentenceText), tsValue, internalAvatarId.c_str());
-//    } else {
-//        logger().debug("Instruction from a non-owner avatar (%s). So, predavese parser not called for it", internalAvatarId.c_str());
-//    }
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
     XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
@@ -1734,7 +1718,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             HandleSeq outgoing;
             outgoing.push_back(objNameNode);
             outgoing.push_back(objectNode);
-            AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, isPetObject || isPetOwner);
+            AtomSpaceUtil::addLink(atomSpace, WR_LINK, outgoing, true);
         }
 
         XERCES_CPP_NAMESPACE::XMLString::transcode(OWNER_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -1894,9 +1878,17 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
                     atomSpace.setLTI( referenceLink, 1 );
                 }
                     
-
+                SimpleTruthValue tv( it->second, 1.0 );
                 AtomSpaceUtil::setPredicateValue( atomSpace, "color",
-                                                  SimpleTruthValue( it->second, 1.0f ), objectNode, colorConceptNode );
+                                                  tv, objectNode, colorConceptNode );
+
+                std::map<std::string, Handle> elements;
+                elements["Color"] = colorConceptNode;
+                elements["Entity"] = objSemeNode;
+                AtomSpaceUtil::setPredicateFrameFromHandles( 
+                    atomSpace, "#Color", internalEntityId + "_" + it->first + "_color",
+                        elements, tv );
+
             }
         }
 
@@ -2301,7 +2293,37 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
 
     Handle atTimeLink = atomSpace.addTimeInfo( evalLink, timestamp);
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, predicateNode);
+    
+    // setup the frame for the given physiological feeling
+    float value = 0.0f;
+    try {
+        value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
+    } catch ( boost::bad_lexical_cast &ex ) { } // ignore
 
+
+    std::string feeling = name;
+    boost::replace_first( feeling, "_urgency", "");
+
+    std::string frameInstanceName = petInterface.getPetId() + "_" + feeling + "_biological_urge";
+
+    if ( value > 0 ) {
+        std::string degree = value >= 0.7 ? "High" : value >= 0.3 ? "Medium" : "Low";
+        std::map<std::string, Handle> elements;
+        elements["Experiencer"] = atomSpace.addNode( SEME_NODE, petInterface.getPetId() );
+        elements["State"] = atomSpace.addNode( CONCEPT_NODE, feeling );
+        elements["Degree"] = atomSpace.addNode( CONCEPT_NODE, degree );
+        elements["Value"] = atomSpace.addNode( NUMBER_NODE, boost::lexical_cast<std::string>( value ) );
+
+        AtomSpaceUtil::setPredicateFrameFromHandles( 
+            atomSpace, "#Biological_urge", frameInstanceName,
+                 elements, SimpleTruthValue( (value < 0.5) ? 0.0 : value, 1.0 ) );        
+    } else {
+        Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, frameInstanceName );
+        if ( predicateNode != Handle::UNDEFINED ) {
+            AtomSpaceUtil::deleteFrameInstance( atomSpace, predicateNode );
+        } // if
+    } // else
+    
     return evalLink;
 }
 

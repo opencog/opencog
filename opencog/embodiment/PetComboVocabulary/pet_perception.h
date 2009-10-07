@@ -76,6 +76,7 @@ enum pet_perception_enum {
     has_novelty,
     has_learned_tricks,
     has_requested_schema,
+    has_something_to_say,
 
     // traits
     get_aggressiveness,
@@ -194,6 +195,7 @@ static const perception_basic_description pbd[] = {
 
     { id::has_learned_tricks,   "has_learned_tricks",   "->(union(definite_object indefinite_object) boolean)" },
     { id::has_requested_schema, "has_requested_schema", "->(union(definite_object indefinite_object) boolean)" },
+    { id::has_something_to_say,          "has_something_to_say",          "->(union(definite_object indefinite_object) boolean)" },
 
     { id::get_aggressiveness,   "get_aggressiveness",   "->(union(definite_object indefinite_object) contin)"},
     { id::get_curiosity,        "get_curiosity",     "->(union(definite_object indefinite_object) contin)"},
@@ -279,6 +281,7 @@ static const perception_property_description ppd[] = {
     { id::has_novelty,       false,      false,     false,      false,    false,    false },
     { id::has_learned_tricks,   false,   false,     false,      false,    false,    false },
     { id::has_requested_schema, false,   false,     false,      false,    false,    false },
+    { id::has_something_to_say, false,   false,     false,      false,    false,    false },
 
     { id::get_aggressiveness,   false,   false,     false,      false,    false,    false },
     { id::get_curiosity,        false,   false,     false,      false,    false,    false },

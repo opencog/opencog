@@ -26,10 +26,12 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PetInterface.h>
+#include "OutputRelex.h"
+#include "FramesToRelexRuleEngine.h"
+#include "NLGenClient.h"
 
 namespace OperationalPetController
 {
-    
     class LanguageComprehension 
     {
     public: 
@@ -39,15 +41,28 @@ namespace OperationalPetController
 
         void solveLatestSentenceReference( void );
 
+        void answerLatestQuestion( void );
+
         void solveLatestSentenceCommand( void );
 
+        std::string resolveFrames2Relex( );
+
     protected:
+
+        HandleSeq getActivePredicateArguments( const std::string& predicateName );
+        std::string resolveRelex2Sentence( const std::string& relexInput );
 
         void init(void);
 
 //        opencog::SchemeEval evaluator;
         Control::PetInterface& agent;
-                
+        std::string nlgen_server_host;
+        int nlgen_server_port;
+        FramesToRelexRuleEngine framesToRelexRuleEngine;
+        NLGenClient *nlgenClient;
+
+    private:
+
     };
 
 };

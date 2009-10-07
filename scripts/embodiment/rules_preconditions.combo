@@ -620,6 +620,9 @@ tryRunSchemaPrecondition(0) :=
 executeRequestedActionPrecondition(0) :=
       has_requested_schema(self)
 
+saySomethingPrecondition(0) :=
+      has_something_to_say(self)
+
 # ----------------------- Group Preconditions ----------------------
 #goBehindPetToInspectItPrecondition(0) :=
 #      "isPet( '*' ) and isInsidePetFov( '*' ) and ( not_fear( ) or next_owner( ) ) and isNext('*') and isNotNear('*') and isThereRelation('*', 'curious_about') and isNotThereRelation('*', 'friend' ) and isNotThereRelation('*', 'enemy' )",

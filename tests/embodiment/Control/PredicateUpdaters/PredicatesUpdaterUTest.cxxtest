@@ -597,7 +597,11 @@ public:
                 elements, SimpleTruthValue(1.0, 1.0) );
 
         TS_ASSERT( isNearFrameInstance != Handle::UNDEFINED );
-
+        {
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance );
+            TS_ASSERT_EQUALS( elements, storedElements )
+        }
         std::map<std::string, Handle> elements2;
         elements2["Figure"] = stickH;
         elements2["Ground"] = petH;
@@ -607,8 +611,37 @@ public:
             *atomSpace, "#Locative_relation", "is_near", 
                 elements2, SimpleTruthValue(1.0, 1.0) );        
         TS_ASSERT( isNearFrameInstance2 != Handle::UNDEFINED );
+        {
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance2 );
+            TS_ASSERT_EQUALS( elements2, storedElements )
+        }
 
+        {
+            HandleSeq isNearInstances =
+                AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( *atomSpace, "#Locative_relation", is_near );
+            
+            TS_ASSERT( isNearInstances.size( ) > 0 )
+            if ( isNearInstances.size( ) > 0 ) {
+                std::map<std::string, Handle> storedElements = 
+                    AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearInstances[isNearInstances.size()-1] );
+                TS_ASSERT_EQUALS( elements2, storedElements )
+            } // if                        
+        }
 
+        {
+            HandleSeq isNearInstances =
+                AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( *atomSpace, "#Locative_relation", petH );
+
+            TS_ASSERT( isNearInstances.size( ) == 11 )
+            if ( isNearInstances.size( ) == 1 ) {
+                std::map<std::string, Handle> storedElements = 
+                    AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearInstances[0] );
+                TS_ASSERT_EQUALS( elements2, storedElements )
+            } // if
+            
+        }        
+        
         // test Figure
         HandleSeq figureTest;
         figureTest.push_back( atomSpace->getHandle( PREDICATE_NODE, "is_near_Figure" ) );
@@ -643,6 +676,14 @@ public:
         TS_ASSERT( relationTypeHandles[0] != Handle::UNDEFINED );            
         TS_ASSERT_EQUALS( atomSpace->getOutgoing( relationTypeHandles[0], 1 ), is_near );
         
+
+        {
+            AtomSpaceUtil::deleteFrameInstance( *atomSpace, isNearFrameInstance2 );
+            
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance2 );
+            TS_ASSERT( storedElements.size( ) == 0 )
+        }
     }
 
 };

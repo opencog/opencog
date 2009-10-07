@@ -30,6 +30,7 @@
 #include <opencog/util/files.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
@@ -463,7 +464,7 @@ bool PVPSimulator::sendOwnerAction(char *txt)
     logger().debug("DEBUG - PVPSimulator - Action:  %s to Owner: %s", txt, DEFAULT_OWNER_ID);
     return sendAgentAction(txt, DEFAULT_OWNER_ID, "avatar" );
 }
-
+/*
 void PVPSimulator::sendPredavese(const char *txt, string petId)
 {
 
@@ -513,7 +514,7 @@ void PVPSimulator::sendPredavese(const char *txt, string petId)
     pthread_mutex_unlock(&currentTimeLock);
 
 }
-
+*/
 void PVPSimulator::sendPetSignals()
 {
 

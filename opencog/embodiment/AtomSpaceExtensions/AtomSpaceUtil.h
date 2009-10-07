@@ -91,6 +91,7 @@ private:
     static std::map<Handle, Handle> latestPetActionPredicate;
     static std::map<Handle, std::map<Handle, Handle> > latestSpatialPredicate;
     static std::map<Handle, Handle> latestSchemaPredicate;
+    static std::tr1::unordered_map<std::string, HandleSeq> frameElementsCache;
     static Handle latestIsExemplarAvatar;
 
     static void updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
@@ -623,6 +624,21 @@ public:
     static bool isHoldingSomething(const AtomSpace& atomSpace,
                                    const std::string& holderId );
 
+
+
+    /**
+     * Given the handle of an object, it will return the real name of the
+     * object, stored in a WORD_NODE.
+     * Whether there is no defined name for the handle, an empty string will
+     * be returned.
+     *
+     * @param atomSpace The agent AtomSpace
+     * @param object The object handle
+     * @return the name of the object if it exists, or an empty string, otherwise.
+     */
+    static std::string getObjectName( const AtomSpace& atomSpace, 
+                                      Handle object );
+    
     /**
      * Given the name of an object, whose letters  may be all in upercase, gets its id.
      * @return the id of the object, if it exists, or an empty string, otherwise.
@@ -947,6 +963,16 @@ public:
      */
     static HandleSeq retrieveFrameInstancesUsingAnElementValue
         ( AtomSpace& atomSpace, const std::string& frameName, Handle aElementValue );
+
+
+    /**
+     * Excludes from the given AtomSpace an instance of a Frame represented
+     * by the given frame instance PredicateNode handle
+     *
+     * @param atomSpace The AtomSpace reference
+     * @param frameInstance Handle of the PredicateNode which represents the frame instance
+     */
+    static void deleteFrameInstance( AtomSpace& atomSpace, Handle frameInstance );
 
 };
 

@@ -312,6 +312,12 @@ protected:
 
             "SCHEME_TYPEDEFS_PATH",         "type_constructors.scm",
 
+            "FRAMES_2_RELEX_RULES_FILE",    "frames2relex.rules",
+
+            "NLGEN_SERVER_PORT",            "5555",
+
+            "NLGEN_SERVER_HOST",            "localhost",
+
             //used as halting condition by reset
             "",                             ""
         };

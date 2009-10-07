@@ -130,6 +130,7 @@ enum ActionTypeCode {
     GROUP_COMMAND_CODE,
     RECEIVE_LATEST_GROUP_COMMANDS_CODE,
     LOOK_AT_CODE,
+    SAY_CODE,
 
     // This is not really a type and must be at the end of that enumeration in order to count the number of action types.
     NUMBER_OF_ACTION_TYPES
@@ -504,6 +505,10 @@ public:
      * void look_at( EntityID target )
      */
     static const ActionType& LOOK_AT();
+    /**
+     * void say( string message, string target )
+     */
+    static const ActionType& SAY();
 
 private:
     // Attributes

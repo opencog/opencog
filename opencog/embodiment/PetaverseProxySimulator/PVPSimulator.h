@@ -184,7 +184,7 @@ public:
     std::string createAvatar(const std::string& avatarId, float x, float y);
     std::string createPet(const std::string& petId, const std::string& ownerId, float x, float y);
 
-    void sendPredavese(const char *txt, std::string petId);
+//    void sendPredavese(const char *txt, std::string petId);
     bool sendOwnerAction(char *txt);
     void sendPetSignals();
     void sendActionStatusPetSignal(const std::string& planId, const std::string& petId, const PerceptionActionInterface::PetAction& action, bool success);

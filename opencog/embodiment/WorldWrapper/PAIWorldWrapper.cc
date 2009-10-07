@@ -453,6 +453,13 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 PetAction action = buildPetAction(from);
                 _pai.addAction(_planID, action);
                 ++from;
+            } catch( const opencog::StandardException& ex ) {
+                std::stringstream ss (stringstream::out);
+                ss << combo_tree(from);
+                ss << " " << const_cast<opencog::StandardException*>( &ex )->getMessage( );
+                logger().error( "PAIWorldWrapper::%s - Failed to build PetAction '%s'",
+                                __FUNCTION__, ss.str().c_str( )  );
+                from = to;
             } catch (...) {
                 //log error
                 std::stringstream ss (stringstream::out);
@@ -834,11 +841,18 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         (id::receive_latest_group_commands, ActionType::RECEIVE_LATEST_GROUP_COMMANDS())
         (id::sit, ActionType::SIT())
         (id::look_at, ActionType::LOOK_AT())
+        (id::say, ActionType::SAY())
         (id::whine_at, ActionType::WHINE());
 
     OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
     builtin_action ba = get_builtin_action(*from);
     pet_builtin_action_enum bae = get_enum(ba);
+
+    stringstream ss;
+    ss << *from;
+
+    logger().debug("PAIWorldWrapper::%s - Trying to build pet action '%s' for builtin_action_enum %d'", 
+                   __FUNCTION__, ss.str().c_str( ), bae);
 
     /****
          this switch statement deals with
@@ -933,6 +947,49 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
         action.addParameter( ActionParameter( "target", ActionParamType::ENTITY( ),
                                               Entity( targetName, resolveType(targetName) ) ) );
+    }
+    break;
+
+    case id::say: {
+        if ( from.number_of_children( ) != 2 ) {
+            throw opencog::InvalidParamException(TRACE_INFO,
+                                                 "PAIWorldWrapper - Invalid number of arguments for say %d", from.number_of_children( )  );
+        } // if
+        sib_it arguments = from.begin( );
+        
+        std::string message = "";
+        if ( !is_definite_object(*arguments) ) {
+            logger().error( "PAIWorldWrapper::%s - The first 'say' argument must be a definite_object which defines the string message" );            
+        } else {
+            message = get_definite_object(*arguments);
+        } // else
+
+        if ( message == "custom_message" ) {
+            message = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customMessage" );
+        } // if
+
+        // once the say action was executed set the has_something_to_say predicate to false
+        // to avoid repetitions
+        AtomSpaceUtil::setPredicateValue( as, "has_something_to_say", TruthValue::FALSE_TV( ),
+                                          AtomSpaceUtil::getAgentHandle( as, _pai.getPetInterface( ).getPetId( ) ) );
+                        
+        action.addParameter( ActionParameter( "message", ActionParamType::STRING( ), message ) );
+
+        ++arguments;
+
+        std::string targetName;
+        if ( is_indefinite_object( *arguments ) ) {
+            combo::variable_unifier vu;
+            targetName = get_definite_object( evalIndefiniteObject( get_indefinite_object( *arguments ), vu ) );
+        } else {
+            targetName = get_definite_object( *arguments );
+        } // else
+        
+        if ( targetName == "custom_object" ) {
+            targetName = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
+        } // else
+        
+        action.addParameter( ActionParameter( "target", ActionParamType::STRING( ), targetName ) );
     }
     break;
 
@@ -1404,8 +1461,12 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
            whine
            widen_eyes
         **/
+
         stringstream ss;
         ss << *from;
+        logger().debug("PAIWorldWrapper::%s - Cannot find type for action '%s'", 
+                       __FUNCTION__, ss.str().c_str( ));
+
         action = PetAction(ActionType::getFromName(toCamelCase(ss.str())));
     }
     return action;
