@@ -1151,6 +1151,7 @@
   (let ((candidates '())
         (evaluatedElements 0)
         (frameType (get-frame-instance-type predicateNode))
+        (elementsStrength '())
         )
     (map ; inspect all the frame elements
      (lambda (elementPredicate)
@@ -1179,6 +1180,7 @@
                                 )
                            (if (or (equal? 'SemeNode valueType) (equal? 'ConceptNode valueType))                               
                                (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                               (set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate (assoc-ref (cog-tv->alist (cog-tv inheritanceLink)) 'mean)))))
                                )
                            )
                          )
@@ -1198,7 +1200,11 @@
                            (not (null? (cog-link 'InheritanceLink candidate elementTypeNode))) )
                       (let ((frameInstancePredicate (gar (car (cog-filter-incoming 'FrameElementLink candidate)))))
                         (if (not (equal? frameInstancePredicate predicateNode))
-                            (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                    	    (begin
+                        	(set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
+                        	(set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate 
+                            	     (assoc-ref (cog-tv->alist (cog-tv (cog-link 'InheritanceLink candidate elementTypeNode))) 'mean)))))
+                             )
                             )
                         )
                       )
@@ -1218,8 +1224,8 @@
        )
      (get-frame-instance-elements-predicates predicateNode)
      )
-    
-    candidates
+    ; sort by the candidate tv mean strength. strongest first.
+    (sort candidates (lambda (x y) (> (assoc-ref elementsStrength x) (assoc-ref elementsStrength y))) )
     )
   )
 
