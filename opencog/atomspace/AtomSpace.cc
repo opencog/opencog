@@ -803,7 +803,7 @@ void AtomSpace::setName(Handle h, const string& name)
     nnn->setName(name);
 }
 
-HandleSeq AtomSpace::getIncoming(Handle h)
+HandleSeq AtomSpace::getIncoming(Handle h) const
 {
     // Ugh. It is possible that the incoming set that we currently 
     // hold is much smaller than what is in storage. In this case,
