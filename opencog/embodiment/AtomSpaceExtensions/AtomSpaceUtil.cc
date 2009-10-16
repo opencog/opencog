@@ -488,39 +488,11 @@ throw(opencog::NotFoundException)
     seq.push_back(predicateHandle);
     seq.push_back(listLinkHandle);
 
-    std::vector<Handle> allHandles;
-    atomSpace.getHandleSet(back_inserter(allHandles),
-                           seq, NULL, NULL, 2, EVALUATION_LINK, false);
-
-    if ( allHandles.size() != 1) {
+    Handle evalLinkHandle = atomSpace.getHandle(EVALUATION_LINK, seq);
+    if (evalLinkHandle == Handle::UNDEFINED) {
         throw opencog::NotFoundException( TRACE_INFO, ( "AtomSpaceUtil - There is no evaluation link for predicate: " + predicateName ).c_str( ) );
     } // if
-
-    /*
-    std::vector<Handle> allHandles;
-    atomSpace.getHandleSet(back_inserter(allHandles), seq, NULL, NULL, 2, EVALUATION_LINK, false);
-
-    if(allHandles.size() != 1){
-
-      if(b == Handle::UNDEFINED){
-        //TODO: elvys remove logs comment
-        //          logger().debug("AtomSpaceUtil - [%s ListLink(%s)]: found %d predicates.",
-        //            predicateName.c_str(), atomSpace.getName(a).c_str(), allHandles.size());
-      } else {
-        //          logger().debug("AtomSpaceUtil - [%s ListLink(%s, %s)]: found %d predicates.",
-        //            predicateName.c_str(), atomSpace.getName(a)).c_str(),
-        //            atomSpace.getName(b)).c_str(), allHandles.size());
-      } // else
-
-      std::stringstream message;
-      message << "The search must return just one item, but ";
-      message << allHandles.size( );
-      message << "  was found";
-      throw opencog::NotFoundException( TRACE_INFO, message.str( ).c_str( ) );
-
-    } // if
-    */
-    return atomSpace.getTV(allHandles[0]).getMean();
+    return atomSpace.getTV(evalLinkHandle).getMean();
 }
 
 
@@ -565,16 +537,11 @@ bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
     seq.push_back(predicateHandle);
     seq.push_back(listLinkHandle);
 
-    std::vector<Handle> allHandles;
-    atomSpace.getHandleSet(back_inserter(allHandles),
-                           seq, NULL, NULL, 2, EVALUATION_LINK, false);
-
-    if (allHandles.size() != 1) {
-        logger().warn(
-                     "IsFriendly - Found %d EvalLinks. Should be one.",
-                     allHandles.size());
+    Handle evalLinkHandle = atomSpace.getHandle(EVALUATION_LINK, seq);
+    if (evalLinkHandle == Handle::UNDEFINED) {
+        logger().warn("IsFriendly - Found no EvalLink.");
         return false;
-    } // if
+    }
 
     return true;
 
@@ -593,6 +560,7 @@ bool AtomSpaceUtil::getSizeInfo(const AtomSpace& atomSpace,
         return false;
     }
 
+#ifdef USE_GET_HANDLE_SET
     HandleSeq seq;
     seq.push_back(sizePredicate);
     seq.push_back(Handle::UNDEFINED);
@@ -618,6 +586,27 @@ bool AtomSpaceUtil::getSizeInfo(const AtomSpace& atomSpace,
             }
         }
     }
+#else
+    HandleSeq incomingSet = atomSpace.getIncoming(sizePredicate);
+    foreach(Handle incomingHandle, incomingSet) {
+        Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+        if (incomingLink->getType() == EVALUATION_LINK &&  incomingLink->getArity() == 2 && 
+                incomingLink->getOutgoingHandle(0) == sizePredicate) {
+            Handle targetHandle = incomingLink->getOutgoingHandle(1);
+            Atom* targetAtom = TLB::getAtom(targetHandle);
+            if (targetAtom->getType() == LIST_LINK) {
+                Link* listLink = (Link*) targetAtom;
+                if (listLink->getArity() == 4 && listLink->getOutgoingHandle(0) == object) {
+                    length = atof(atomSpace.getName(listLink->getOutgoingHandle(1)).c_str());
+                    width = atof(atomSpace.getName(listLink->getOutgoingHandle(2)).c_str());
+                    height = atof(atomSpace.getName(listLink->getOutgoingHandle(3)).c_str());
+                    return true;
+                }
+            }
+        }
+    } 
+#endif 
+
 //TODO: elvys remove logs comment
 //    logger().fine("AtomSpaceUtil - No size pred for obj %s found.",
 //                    atomSpace.getName(object).c_str());
@@ -1628,6 +1617,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         return Handle::UNDEFINED;
     } // if
 
+#ifdef USE_GET_HANDLE_SET
     // retrieve all list_links which describes the given action
     HandleSeq listLinkDescription;
     listLinkDescription.push_back( agentHandle );
@@ -1645,6 +1635,18 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
         // there is no group command for the given agent
         return Handle::UNDEFINED;
     } // if
+#else
+    std::vector<Handle> handles;
+    HandleSeq incomingSet = atomSpace.getIncoming(agentHandle);
+    foreach(Handle incomingHandle, incomingSet) {
+        Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+        if (incomingLink->getType() == LIST_LINK &&  incomingLink->getArity() == 3 && 
+                incomingLink->getOutgoingHandle(0) == agentHandle && 
+                incomingLink->getOutgoingHandle(1) == actionNodeHandle) {
+            handles.push_back(incomingHandle);
+        }
+    }
+#endif
 
 
     std::vector<HandleTemporalPair> timestamps;
@@ -2078,6 +2080,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
         
 
 
+#ifdef USE_GET_HANDLE_SET
         HandleSeq frameElementLink;
         frameElementLink.push_back(frameNode);
         frameElementLink.push_back(Handle::UNDEFINED);
@@ -2098,12 +2101,33 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
         HandleSeq parentFrames;
         atomSpace.getHandleSet(back_inserter(parentFrames),
                                parentLink, NULL, NULL, 2, INHERITANCE_LINK, false);            
-        for( i = 0; i < parentFrames.size( ); ++i ) {
+        for(unsigned int i = 0; i < parentFrames.size( ); ++i ) {
             Handle parentFrameHandle = atomSpace.getOutgoing( parentFrames[i], 1 );
             if ( atomSpace.getType( parentFrameHandle ) == DEFINED_FRAME_NODE ) {
                 getFrameElements( atomSpace, atomSpace.getName( parentFrameHandle ), frameElementsHandles );
             } // if
         } // for
+#else
+        HandleSeq parentFrames;
+        HandleSeq incomingSet = atomSpace.getIncoming(frameNode);
+        foreach(Handle incomingHandle, incomingSet) {
+            Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+            if (incomingLink->getType() == FRAME_ELEMENT_LINK &&  
+                incomingLink->getArity() == 2 && 
+                incomingLink->getOutgoingHandle(0) == frameNode) {
+                frameElementsHandles.push_back(incomingLink->getOutgoingHandle(1));
+            } else if (incomingLink->getType() == INHERITANCE_LINK &&  
+                incomingLink->getArity() == 2 && 
+                incomingLink->getOutgoingHandle(0) == frameNode) {
+                parentFrames.push_back(incomingLink->getOutgoingHandle(1));
+            }
+        }
+        foreach(Handle parentFrameHandle, parentFrames) {
+            if ( atomSpace.getType( parentFrameHandle ) == DEFINED_FRAME_NODE ) {
+                getFrameElements( atomSpace, atomSpace.getName( parentFrameHandle ), frameElementsHandles );
+            } // if
+        } // for
+#endif
 
         frameElementsCache[frameName] = frameElementsHandles;
 
@@ -2137,11 +2161,10 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                       atomSpace.getName( frameElementsHandles[i] ).c_str( ) );
             
             // only add a new element if it wasn't yet defined (overloading)
-            if ( frameElements.find( elementNameParts[1] ) == frameElements.end( ) &&
-                 frameElementsValuesHandles.find( elementNameParts[1] ) != frameElementsValuesHandles.end( ) ) {
+            if ( frameElements.find( elementNameParts[1] ) == frameElements.end( ) ) {
                 frameElements.insert( std::map<std::string, Handle>::value_type(
-                    elementNameParts[1], frameElementsHandles[i] ) );
-                } // if
+                elementNameParts[1], frameElementsHandles[i] ) );
+            } // if
         } // for
                 
 
@@ -2151,9 +2174,6 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
             Handle frameInstance = addNode(atomSpace,
                                                  PREDICATE_NODE,
                                                  frameInstanceName, true);
-
-            std::map<std::string, Handle> currentElements = 
-                getFrameInstanceElementsValues( atomSpace, frameInstance );
 
             HandleSeq frameInstanceInheritance;
             frameInstanceInheritance.push_back( frameInstance );
@@ -2184,49 +2204,57 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     addNode( atomSpace, PREDICATE_NODE, 
                              frameElementInstanceName.str( ), true );
 
-                HandleSeq frameElementInheritance;
-                frameElementInheritance.push_back( frameElementInstance );
-                frameElementInheritance.push_back( frameElementHandle );
+                // Remove any old value
+                HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
+                foreach(Handle incomingHandle, incomingSet) {
+                    Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+                    if (incomingLink->getType() == EVALUATION_LINK &&  
+                        incomingLink->getArity() == 2 && 
+                        incomingLink->getOutgoingHandle(0) == frameElementInstance) {
+                        atomSpace.removeAtom(incomingHandle);
+                    } 
+                }
 
-                Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
-                atomSpace.setLTI( frameElementInheritanceLink, 1 );
-                atomSpace.setTV( frameElementInheritanceLink, truthValue );
-
-                HandleSeq predicateFrameElement;
-                predicateFrameElement.push_back( frameInstance );
-                predicateFrameElement.push_back( frameElementInstance );
-                                
-                Handle frameElementLink = addLink( atomSpace, FRAME_ELEMENT_LINK, predicateFrameElement, true );
-                atomSpace.setLTI( frameElementLink, 1 );
-                atomSpace.setTV( frameElementLink, truthValue );
-
-                HandleSeq predicateFrameValue(2);
-                predicateFrameValue[0] = frameElementInstance;
-
-                bool newValueDefined = false;
                 if ( itValue != frameElementsValuesHandles.end( ) && itValue->second != Handle::UNDEFINED ) {                
-                   // set a new value to the frame element
+                    HandleSeq frameElementInheritance;
+                    frameElementInheritance.push_back( frameElementInstance );
+                    frameElementInheritance.push_back( frameElementHandle );
+    
+                    Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
+                    atomSpace.setLTI( frameElementInheritanceLink, 1 );
+                    atomSpace.setTV( frameElementInheritanceLink, truthValue );
+
+                    HandleSeq predicateFrameElement;
+                    predicateFrameElement.push_back( frameInstance );
+                    predicateFrameElement.push_back( frameElementInstance );
+                                
+                    Handle frameElementLink = addLink( atomSpace, FRAME_ELEMENT_LINK, predicateFrameElement, true );
+                    atomSpace.setLTI( frameElementLink, 1 );
+                    atomSpace.setTV( frameElementLink, truthValue );
+
+                    // set a new value to the frame element
+                    HandleSeq predicateFrameValue(2);
+                    predicateFrameValue[0] = frameElementInstance;
                     predicateFrameValue[1] = itValue->second;
                     Handle frameElementEvalLink = addLink( atomSpace, EVALUATION_LINK, predicateFrameValue, true );                    
                     atomSpace.setLTI( frameElementEvalLink, 1 );                
                     atomSpace.setTV( frameElementEvalLink, truthValue );
-                    newValueDefined = true;
-                } // if
-
-                // keep just the latest evaluation link active
-                predicateFrameValue[1] = Handle::UNDEFINED;
-                
-                HandleSeq elementEvalLinkHandles;
-                atomSpace.getHandleSet(back_inserter(elementEvalLinkHandles),
-                                       predicateFrameValue, NULL, NULL, 2, EVALUATION_LINK, false);            
-
-                if ( elementEvalLinkHandles.size( ) > 1 || ( elementEvalLinkHandles.size( ) > 0 && !newValueDefined ) ) {
-                    unsigned int i;
-                    for( i = 0; i < elementEvalLinkHandles.size( )-1; ++i ) { 
-                        atomSpace.removeAtom( elementEvalLinkHandles[i] );
-                    } // if
-                } // if
-
+                } else {
+                    // Remove any other atoms for representing this element, since it's not
+                    // present anymore
+                    HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
+                    foreach(Handle incomingHandle, incomingSet) {
+                        Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+                        if (incomingLink->getArity() == 2 && 
+                           ((incomingLink->getType() == INHERITANCE_LINK &&   
+                             incomingLink->getOutgoingHandle(0) == frameElementInstance) || 
+                            (incomingLink->getType() == FRAME_ELEMENT_LINK &&  
+                             incomingLink->getOutgoingHandle(1) == frameElementInstance))) {  
+                            atomSpace.removeAtom(incomingHandle);
+                        } 
+                    }
+                    atomSpace.removeAtom(frameElementInstance);
+                }
 
             } // for
 
@@ -2428,6 +2456,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
 
     std::string frameName;
     { // check the inheritance
+#ifdef USE_GET_HANDLE_SET
         HandleSeq inheritanceLink;
         inheritanceLink.push_back( frameInstance );
         inheritanceLink.push_back( Handle::UNDEFINED );
@@ -2451,11 +2480,35 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
                 "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherits from a DEFINED_FRAME_NODE.", __FUNCTION__ );
             return;
         } // else
+#else 
+        bool found = false;
+        HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
+        foreach(Handle incomingHandle, incomingSet) { 
+            Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+            if (incomingLink->getType() == INHERITANCE_LINK) {
+                if (incomingLink->getArity() == 2 && incomingLink->getOutgoingHandle(0) == frameInstance) {
+                    Handle targetHandle = incomingLink->getOutgoingHandle(1);
+                    Atom* targetAtom = TLB::getAtom(targetHandle);
+                    if (targetAtom->getType() == DEFINED_FRAME_NODE) {
+                        found = true;
+                        atomSpace.removeAtom(incomingHandle);
+                        break; // discard aditional inheritance, if any
+                    }
+                }
+            }
+        } 
+        if (!found) {
+            logger().debug(
+                "AtomSpaceUtil::%s - The given handle isn't a Frame instance. It doesn't inherit from a DEFINED_FRAME_NODE.", __FUNCTION__ );
+            return;
+        }
+#endif
         
     } // end block
 
     std::string instanceName = atomSpace.getName( frameInstance );
 
+#ifdef USE_GET_HANDLE_SET
     HandleSeq frameElement;
     frameElement.push_back( frameInstance );
     frameElement.push_back( Handle::UNDEFINED );
@@ -2463,11 +2516,28 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
     HandleSeq frameElements;
     atomSpace.getHandleSet( back_inserter( frameElements ),
                             frameElement, &frameElementTypes[0], NULL, 2, FRAME_ELEMENT_LINK, false );
+#else
+    HandleSeq frameElements;
+    HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
+    foreach(Handle incomingHandle, incomingSet) {
+        Link* incomingLink = (Link*) TLB::getAtom(incomingHandle);
+        if (incomingLink->getType() == FRAME_ELEMENT_LINK) {
+            if (incomingLink->getArity() == 2 && incomingLink->getOutgoingHandle(0) == frameInstance) {
+                Handle targetHandle = incomingLink->getOutgoingHandle(1);
+                Atom* targetAtom = TLB::getAtom(targetHandle);
+                if (targetAtom->getType() == PREDICATE_NODE) {
+                    frameElements.push_back(incomingHandle);
+                }
+            }
+        }
+    }
+#endif
     unsigned int j;
     for( j = 0; j < frameElements.size( ); ++j ) {
         Handle elementPredicate = atomSpace.getOutgoing( frameElements[j], 1 );
             
         // check if the elements are part of the same frame instance
+#ifdef USE_GET_HANDLE_SET
         HandleSeq inheritance;
         inheritance.push_back( elementPredicate );
         inheritance.push_back( Handle::UNDEFINED );
@@ -2477,12 +2547,33 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         atomSpace.getHandleSet( back_inserter( inheritances ),
                                 inheritance, &inheritanceTypes[0], NULL, 2, INHERITANCE_LINK, false );
         if ( inheritances.size( ) != 1 ) {
-            logger().error( "AtomSpaceUtil::%s - Invalid frame instance. It has a predicate node linked by a FrameElementLink that isn't a DefinedFrameElementNode", __FUNCTION__ );
+            logger().error( "AtomSpaceUtil::%s - Invalid frame instance. It has a predicate node linked by a InheritanceLink that isn't a DefinedFrameElementNode", __FUNCTION__ );
             return;
         } // if
-
+#else
+        Handle inheritanceLink = Handle::UNDEFINED;
+        HandleSeq elemIncomingSet = atomSpace.getIncoming(elementPredicate);
+        foreach (Handle elemIncomingHandle, elemIncomingSet) {
+            Link* elemIncomingLink = (Link*) TLB::getAtom(elemIncomingHandle);
+            if (elemIncomingLink->getType() == INHERITANCE_LINK) {
+                if (elemIncomingLink->getArity() == 2 && elemIncomingLink->getOutgoingHandle(0) == elementPredicate) {
+                    Handle targetHandle = elemIncomingLink->getOutgoingHandle(1);
+                    Atom* targetAtom = TLB::getAtom(targetHandle);
+                    if (targetAtom->getType() == DEFINED_FRAME_ELEMENT_NODE) {
+                        inheritanceLink = elemIncomingHandle;
+                        break;
+                    }
+                }
+            }
+        }
+        if (inheritanceLink == Handle::UNDEFINED) {
+            logger().error( "AtomSpaceUtil::%s - Invalid frame instance. It has a predicate node linked by a InheritanceLink that isn't a DefinedFrameElementNode", __FUNCTION__ );
+            return;
+        }
+#endif
 
         // check if the elements are part of the same frame instance
+#ifdef USE_GET_HANDLE_SET
         HandleSeq evaluation;
         evaluation.push_back( elementPredicate );
         evaluation.push_back( Handle::UNDEFINED );
@@ -2495,11 +2586,31 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
                             __FUNCTION__, values.size( ) );
             return;
         } // if
-       
+#else
+        Handle valueHandle = Handle::UNDEFINED;
+        foreach (Handle elemIncomingHandle, elemIncomingSet) {
+            Link* elemIncomingLink = (Link*) TLB::getAtom(elemIncomingHandle);
+            if (elemIncomingLink->getType() == EVALUATION_LINK) {
+                if (elemIncomingLink->getArity() == 2 && elemIncomingLink->getOutgoingHandle(0) == elementPredicate) {
+                    valueHandle = elemIncomingHandle;
+                    break;
+                }
+            }
+        }
+        if (valueHandle == Handle::UNDEFINED) {
+            logger().error( "AtomSpaceUtil::%s - Did not find element value", __FUNCTION__);
+            return;
+        }
+#endif
+      
         // first, remove the evaluation link
         HandleSeq elementPair(2);
         elementPair[0] = elementPredicate;
+#ifdef USE_GET_HANDLE_SET
         elementPair[1] = atomSpace.getOutgoing( values[0], 1 );
+#else
+        elementPair[1] = atomSpace.getOutgoing( valueHandle, 1 );
+#endif
 
         Handle link = atomSpace.getHandle( EVALUATION_LINK, elementPair );
         atomSpace.removeAtom( link );
@@ -2512,7 +2623,11 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
 
 
         // then, remove the inheritance link
+#ifdef USE_GET_HANDLE_SET
         atomSpace.removeAtom( inheritances[0] );
+#else
+        atomSpace.removeAtom( inheritanceLink );
+#endif
 
         // finaly, remove the element predicate node
         atomSpace.removeAtom( elementPredicate );

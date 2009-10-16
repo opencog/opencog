@@ -676,7 +676,60 @@ public:
         TS_ASSERT( relationTypeHandles[0] != Handle::UNDEFINED );            
         TS_ASSERT_EQUALS( atomSpace->getOutgoing( relationTypeHandles[0], 1 ), is_near );
         
+        // test re-creating the instance with fewer elements
+        std::map<std::string, Handle> elements3;
+        elements3["Figure"] = stickH;
+        elements3["Relation_type"] = is_near;
 
+        Handle isNearFrameInstance3 = AtomSpaceUtil::setPredicateFrameFromHandles( 
+            *atomSpace, "#Locative_relation", "is_near", 
+                elements3, SimpleTruthValue(1.0, 1.0) );        
+        TS_ASSERT( isNearFrameInstance3 != Handle::UNDEFINED );
+        {
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance3 );
+            TS_ASSERT_EQUALS( elements3, storedElements )
+        }
+
+        // test removing an element using UNDEFINED for its value and re-ading
+        // an element previously removed
+        std::map<std::string, Handle> elements4;
+        elements4["Figure"] = stickH;
+        elements4["Ground"] = petH;
+        elements4["Relation_type"] = Handle::UNDEFINED;
+
+        std::map<std::string, Handle> elements5;
+        elements5["Figure"] = stickH;
+        elements5["Ground"] = petH;
+
+        Handle isNearFrameInstance4 = AtomSpaceUtil::setPredicateFrameFromHandles( 
+            *atomSpace, "#Locative_relation", "is_near", 
+                elements4, SimpleTruthValue(1.0, 1.0) );        
+        TS_ASSERT( isNearFrameInstance4 != Handle::UNDEFINED );
+        {
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance4 );
+            TS_ASSERT_EQUALS( elements5, storedElements )
+        }
+
+        // test re-creating the instance with fewer elements
+        std::map<std::string, Handle> elements6;
+        elements6["Figure"] = stickH;
+        elements6["Relation_type"] = is_near;
+        elements6["inexistent_element1"] = petH;
+        elements6["inexistent_element2"] = ownerH;
+
+        Handle isNearFrameInstance6 = AtomSpaceUtil::setPredicateFrameFromHandles( 
+            *atomSpace, "#Locative_relation", "is_near", 
+                elements6, SimpleTruthValue(1.0, 1.0) );        
+        TS_ASSERT( isNearFrameInstance6 != Handle::UNDEFINED );
+        {
+            std::map<std::string, Handle> storedElements = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance6 );
+            TS_ASSERT_EQUALS( elements3, storedElements )
+        }
+
+        // test removing frameInstance
         {
             AtomSpaceUtil::deleteFrameInstance( *atomSpace, isNearFrameInstance2 );
             
