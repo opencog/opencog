@@ -56,6 +56,7 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
 
     std::set<RunningProcedureId> done;
 
+#if 0 // According to cpu time profiling, lazy_selector is taking too much time.
     opencog::lazy_selector* sel;
     if (!opencog::config().get_bool("AUTOMATED_SYSTEM_TESTS")) {
         //loop in random order until we find a running procedure that's ready
@@ -80,6 +81,20 @@ void ComboInterpreter::run(MessagingSystem::NetworkElement *ne)
         }
     }
     delete sel;
+#else
+    
+    for (Vec::iterator it = _vec.begin(); it != _vec.end(); it++) {
+        RunningComboProcedure& rp = (*it)->second;
+        if (rp.isReady()) {
+            logger().debug("Running procedure id '%d'.",  ((RunningProcedureId&) (*it)->first).getId());
+            rp.cycle();
+
+        } else if (rp.isFinished()) {
+            logger().debug("Done procedure id '%d'.", ((RunningProcedureId&) (*it)->first).getId());
+            done.insert((*it)->first);
+        }
+    }
+#endif
 
     Vec::iterator last = _vec.end();
     if (!done.empty()) {
