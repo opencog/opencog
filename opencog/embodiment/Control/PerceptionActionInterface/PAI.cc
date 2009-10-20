@@ -978,6 +978,8 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     // TODO: Do we need to check if pedID matches the id of the Pet being controlled by this OPC?
 
     /// getting avatar-id atribute value
+    // TODO: Rename avatar-id to agent-id, since any agent (avatar, pet,
+    // humanoid) may say something.
     XERCES_CPP_NAMESPACE::XMLString::transcode(AVATAR_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* avatarID = XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
     string internalAvatarId = PAIUtils::getInternalId(avatarID);
@@ -1066,7 +1068,10 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
 
     Handle predicateNode = AtomSpaceUtil::addNode(atomSpace, PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME, true);
     Handle saySchemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, SAY_SCHEMA_NAME, true);
-    Handle avatarNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId.c_str());
+    Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, internalAvatarId);
+    if (agentNode == Handle::UNDEFINED) {
+        agentNode = AtomSpaceUtil::addNode(atomSpace, AVATAR_NODE, internalAvatarId);
+    } 
 
     string sentence = "to:";
     sentence += internalPetId;
@@ -1078,7 +1083,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
 
     HandleSeq schemaListLinkOutgoing;
-    schemaListLinkOutgoing.push_back(avatarNode);
+    schemaListLinkOutgoing.push_back(agentNode);
     schemaListLinkOutgoing.push_back(sentenceNode);
     Handle schemaListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, schemaListLinkOutgoing);
 
@@ -1096,7 +1101,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
-    AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, avatarNode);
+    AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
     XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
