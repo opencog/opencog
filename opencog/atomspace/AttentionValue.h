@@ -146,7 +146,7 @@ protected:
     AttentionValue attentionValue;
 
     /** Sets the AttentionValue object */
-    void setAttentionValue(const AttentionValue &a) {
+    virtual void setAttentionValue(const AttentionValue &a) {
         attentionValue = a;
     }
 
@@ -154,7 +154,7 @@ protected:
 
 public:
     /** Returns the AttentionValue object */
-    const AttentionValue& getAttentionValue() const {
+    virtual const AttentionValue& getAttentionValue() const {
         return attentionValue;
     }
 };
