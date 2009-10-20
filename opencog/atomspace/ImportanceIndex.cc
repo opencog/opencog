@@ -94,6 +94,7 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 	HandleEntry* oldAtoms = NULL;
 
 	unsigned int bin;
+#if 0
 	for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
 	{
 		std::set<Handle> move_it;
@@ -103,11 +104,6 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 		{
 			Handle h = *hit;
 			Atom *atom = TLB::getAtom(h);
-
-			// Update STI
-			// Potential optimization: if we may reliably assume that all atoms
-			// decrease the sti by one unit (i.e. --sti), we could update the
-			// indexes with "importanceIndex[band - 1] = importanceIndex[band];"
 
 			atom->attentionValue.decaySTI();
 			unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
@@ -122,6 +118,31 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 			remove(bin, *hit);
 		}
 	}
+#else
+    // Update STI
+    // Optimization: Assuming that all atoms decrease the sti by one unit 
+    // (i.e. --sti), we could update the indexes with:
+    // "importanceIndex[band - 1] = importanceIndex[band];"
+
+    std::set<Handle> & band = idx[1];
+    for (std::set<Handle>::iterator hit = band.begin(); hit != band.end(); hit++) {
+        Handle h = *hit;
+        Atom *atom = TLB::getAtom(h);
+        atom->attentionValue.decaySTI();
+    }
+    idx[0].insert(idx[1].begin(), idx[1].end());
+	for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
+    {
+        idx[bin] = idx[bin+1];
+        std::set<Handle> & band = idx[bin];
+        for (std::set<Handle>::iterator hit = band.begin(); hit != band.end(); hit++) {
+            Handle h = *hit;
+            Atom *atom = TLB::getAtom(h);
+            atom->attentionValue.decaySTI();
+        }
+    }
+    idx[bin].clear();
+#endif
 
 	AttentionValue::sti_t minSTI = config().get_int("MIN_STI");
 	unsigned int lowerStiBand = importanceBin(minSTI);
