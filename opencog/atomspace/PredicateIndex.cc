@@ -57,7 +57,7 @@ void PredicateIndex::insertHandle(Handle h)
 
 void PredicateIndex::removeHandle(Handle h)
 {
-	std::vector<std::set<Handle> >::iterator s;
+	std::vector<UnorderedHandleSet>::iterator s;
 	for (s = idx.begin(); s != idx.end(); s++)
 	{
 		s->erase(h);
@@ -66,8 +66,8 @@ void PredicateIndex::removeHandle(Handle h)
 
 HandleEntry * PredicateIndex::getHandleSet(int index) const
 {
-	const std::set<Handle> &s = idx.at(index);
-	std::set<Handle>::const_iterator it;
+	const UnorderedHandleSet &s = idx.at(index);
+	UnorderedHandleSet::const_iterator it;
 	HandleEntry *he = NULL;
 	for (it = s.begin(); it != s.end(); it++)
 	{

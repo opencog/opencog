@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
+#include <set>
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>

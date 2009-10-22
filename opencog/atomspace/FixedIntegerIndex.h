@@ -22,7 +22,6 @@
 #ifndef _OPENCOG_FIXEDINTEGERINDEX_H
 #define _OPENCOG_FIXEDINTEGERINDEX_H
 
-#include <set>
 #include <vector>
 
 #include <opencog/atomspace/AtomIndex.h>
@@ -41,7 +40,7 @@ class FixedIntegerIndex:
 		void resize(size_t);
 
 	public:
-		std::vector<std::set<Handle> > idx;
+		std::vector<UnorderedHandleSet> idx; 
 		virtual ~FixedIntegerIndex() {}
 		virtual void insert(int, Handle);
 		virtual Handle get(int) const;

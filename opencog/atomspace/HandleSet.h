@@ -45,7 +45,7 @@ private:
     #ifdef __APPLE__
     typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
     #else
-    typedef std::tr1::unordered_set<Handle> InternalHandleSet;
+    typedef UnorderedHandleSet InternalHandleSet;
     #endif
 
 public:

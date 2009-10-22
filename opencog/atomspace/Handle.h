@@ -102,6 +102,7 @@ public:
 
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
+typedef std::tr1::unordered_set<Handle, std::tr1::hash<opencog::Handle> > UnorderedHandleSet;
 
 static inline std::string operator+ (const char *lhs, Handle h)
 {

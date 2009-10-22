@@ -97,9 +97,9 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 #if 0
 	for (bin = 0; bin < IMPORTANCE_INDEX_SIZE; bin++)
 	{
-		std::set<Handle> move_it;
-		std::set<Handle> & band = idx[bin];
-		std::set<Handle>::iterator hit;
+		UnorderedHandleSet move_it;
+		UnorderedHandleSet & band = idx[bin];
+		UnorderedHandleSet::iterator hit;
 		for (hit = band.begin(); hit != band.end(); hit++)
 		{
 			Handle h = *hit;
@@ -124,8 +124,8 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
     // (i.e. --sti), we could update the indexes with:
     // "importanceIndex[band - 1] = importanceIndex[band];"
 
-    std::set<Handle> & band = idx[1];
-    for (std::set<Handle>::iterator hit = band.begin(); hit != band.end(); hit++) {
+    UnorderedHandleSet & band = idx[1];
+    for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
         Handle h = *hit;
         Atom *atom = TLB::getAtom(h);
         atom->attentionValue.decaySTI();
@@ -134,8 +134,8 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 	for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
     {
         idx[bin] = idx[bin+1];
-        std::set<Handle> & band = idx[bin];
-        for (std::set<Handle>::iterator hit = band.begin(); hit != band.end(); hit++) {
+        UnorderedHandleSet & band = idx[bin];
+        for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
             Handle h = *hit;
             Atom *atom = TLB::getAtom(h);
             atom->attentionValue.decaySTI();
@@ -149,8 +149,8 @@ HandleEntry* ImportanceIndex::decayShortTermImportance(void)
 
 	for (bin = 0; bin <= lowerStiBand; bin++)
 	{
-		std::set<Handle>::iterator hit;
-		std::set<Handle> & band = idx[bin];
+		UnorderedHandleSet::iterator hit;
+		UnorderedHandleSet & band = idx[bin];
 		for (hit = band.begin(); hit != band.end(); hit++)
 		{
 			Atom *atom = TLB::getAtom(*hit);
@@ -214,8 +214,8 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	int upperBin = importanceBin(upperBound);
 
 	// Build a list of atoms whose importance is equal to the lower bound.
-	std::set<Handle>::const_iterator hit;
-	const std::set<Handle> &sl = idx[lowerBin];
+	UnorderedHandleSet::const_iterator hit;
+	const UnorderedHandleSet &sl = idx[lowerBin];
 	for (hit = sl.begin(); hit != sl.end(); hit++)
 	{
 		HandleEntry *he = new HandleEntry(*hit);
@@ -241,7 +241,7 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	// add to the list.
 	while (++lowerBin < upperBin)
 	{
-		const std::set<Handle> &ss = idx[lowerBin];
+		const UnorderedHandleSet &ss = idx[lowerBin];
 		for (hit = ss.begin(); hit != ss.end(); hit++)
 		{
 			HandleEntry *he = new HandleEntry(*hit);
@@ -251,7 +251,7 @@ ImportanceIndex::getHandleSet(AttentionValue::sti_t lowerBound,
 	}
 
 	HandleEntry *uset = NULL;
-	const std::set<Handle> &su = idx[upperBin];
+	const UnorderedHandleSet &su = idx[upperBin];
 	for (hit = su.begin(); hit != su.end(); hit++)
 	{
 		HandleEntry *he = new HandleEntry(*hit);
