@@ -419,7 +419,8 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
     if (fs.end_bits(inst) - itb > 0)  {
         // save the current version
         current = inst;
-        *itb = false;
+        // *itb = false; //comment it since now it will use the given 
+                         //center instance, but not the default false
         // recursive call, moved for one position
         vary_n_knobs(fs, inst, n, starting_index + 1, out);
         // recover after the recursive calls
@@ -427,7 +428,8 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
 
         // save the current version
         current = inst;
-        *itb = true;
+        //*itb = true;
+        *itb = !(*itb);   // it should changed to the opposite value
         // recursive call, moved for one position
         vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
         // recover after the recursive calls
@@ -441,9 +443,10 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
             current = inst;
             // *itd = 0;     // commented by xiaohui for the given center instance
                              // but not the default instance value equals to 0
+            //cout << "move forword:\n" << "\t n=" << n <<"\tstarting_index = "
+            //   << starting_index << endl;
+            
             // recursive call, moved for one position
-            cout << "move forword:\n" << "\t n=" << n <<"\tstarting_index = "
-                 << starting_index << endl;
             vary_n_knobs(fs, inst, n, starting_index + 1, out);
             // recover after the recursive calls
             inst = current;
@@ -457,15 +460,27 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
                     *itd = 0;
                 else
                     *itd = i;
-                cout << "change value:\n" << "\t n=" << n <<"\tstarting_index = "
-                 << starting_index << endl;
-                cout << "\t\tvalue:" <<fs.stream(inst)<< endl;
+                //cout << "change value:\n" << "\t n=" << n <<"\tstarting_index = "
+                //<< starting_index << endl;
+                //cout << "\t\tvalue:" <<fs.stream(inst)<< endl;
                 vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
                 // recover after the recursive calls
                 inst = current;
             }
         }
     }
+
+    eda::field_set::contin_iterator itc = fs.begin_contin(inst);
+    itc += starting_index;
+    if (fs.end_contin(inst) - itc > 0) {
+        //save the current version
+        current = inst;
+        // recursive call, moved for one position
+        vary_n_knobs(fs, inst, n, startinf_index + 1, out);
+        // recover after the recursive calls
+        inst = current;
+        
+    }    
 }
 
 

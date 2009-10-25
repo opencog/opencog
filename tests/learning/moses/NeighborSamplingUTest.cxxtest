@@ -284,5 +284,35 @@ public:
         //foreach (eda::instance& inst, deme) {
         // cout <<fs.stream(inst) << endl;*/
         //}
+        size_t generated_size = 0;
+        int generated_max_distance = 0;
+        int generated_min_distance = 0;
+        
+        get_sample_size_and_distance(deme, generated_size, 
+                                     generated_max_distance,
+                                     generated_min_distance,
+                                     center_inst);
+        // cout << generated_size << " " << generated_max_distance
+        //  << " " << generated_min_distance <<endl;
+        size_t total_size = total_number_of_neighborhood(distance,size,arity);
+        // cout << "total_size :" << total_size <<endl;
+        TS_ASSERT(generated_size == total_size);
+        TS_ASSERT(generated_max_distance == distance);
+        TS_ASSERT(generated_min_distance == distance);
+    }
+    
+    void test_vary_n_knobs_contin()
+    {
+        int dist  = 2;
+        size_t size = 5;
+        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5,4),size);
+        eda::instance_set<moses::combo_tree_score> deme(1000,fs);
+        eda::instance center_inst(fs.packed_width());
+        opencog::MT19937RandGen rng(1);
+        eda::randomize(fs, center_inst, rng);
+        
+        eda::instance_set<moses::combo_tree_score>::iterator out = deme.begin();
+        moses::vary_n_knobs(deme.fields(), center_inst, dist, 0, out);
+        
     }
 };
