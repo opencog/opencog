@@ -21,14 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <lua.hpp>
+#include <luabind/luabind.hpp>
+
 #include "OPC.h"
 #include "SchemaRunner.h"
 #include "RuleEngine.h"
 #include "RuleEngineUtil.h"
 #include "RuleEngineLearnedTricksHandler.h"
-
-#include <lua.hpp>
-#include <luabind/luabind.hpp>
 
 using namespace OperationalPetController;
 

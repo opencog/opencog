@@ -15,7 +15,7 @@ add_library(hopfield_py SHARED
 )
 target_link_libraries(hopfield_py
     hopfield_lib
-    boost_python
+    ${Boost_PYTHON}
 )
 set_target_properties(hopfield_py PROPERTIES
     PREFIX ""

@@ -4,7 +4,7 @@ add_library(hello_py SHARED
     hello_wrap.cc
 )
 target_link_libraries(hello_py
-    boost_python
+    ${Boost_PYTHON}
 )
 set_target_properties(hello_py PROPERTIES
     PREFIX ""
