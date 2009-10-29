@@ -440,6 +440,7 @@ private:
     // before running the inference.
     void runSCMTarget(const char* conf_file)
     {
+#ifdef HAVE_GUILE
         Config test;
         std::cout << conf_file << std::endl;
         test.load(conf_file);
@@ -661,6 +662,7 @@ private:
         //atw->reset(NULL);
         
         return;
+#endif // HAVE_GUILE
     }
 
 

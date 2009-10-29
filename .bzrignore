@@ -1,3 +1,7 @@
+.bzrignore
+lib/opencog.conf
+scripts/embodiment/makeDistribution
+
 *.a
 opencog.log
 

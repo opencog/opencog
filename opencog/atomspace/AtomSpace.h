@@ -1188,7 +1188,7 @@ public:
     /**
      * Decays STI of all atoms (one cycle of importance decay).
      * Deprecated, importance updating should be done by ImportanceUpdating
-     * Agent.
+     * Agent. Still used by Embodiment.
      */
     void decayShortTermImportance();
 
