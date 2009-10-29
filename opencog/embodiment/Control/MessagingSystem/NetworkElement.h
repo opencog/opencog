@@ -32,15 +32,18 @@
 #include <vector>
 #include <exception>
 
-#include <Sockets/ListenSocket.h>
-#include <Sockets/SocketHandler.h>
-
 #include "Message.h"
 #include "MessageCentral.h"
 #include "MemoryMessageCentral.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+
+#define USE_BOOST_ASIO
+#ifdef USE_BOOST_ASIO
+#include <boost/asio.hpp>
+using boost::asio::ip::tcp;
+#endif
 
 namespace MessagingSystem
 {
@@ -120,7 +123,12 @@ private:
     int routerPort;
 
     char threadArgs[256]; // used to pass arguments to static method called by listener thread
+#ifdef USE_BOOST_ASIO
+    boost::asio::io_service io_service;
+    tcp::socket* sock;
+#else
     int sock;
+#endif
 
     /**
      * Used to hold the ids of the NetworkElements that are currently

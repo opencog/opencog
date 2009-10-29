@@ -40,6 +40,13 @@
 #include "Message.h"
 #include <pthread.h>
 
+
+#define USE_BOOST_ASIO
+#ifdef USE_BOOST_ASIO
+#include <boost/asio.hpp>
+using boost::asio::ip::tcp;
+#endif
+
 namespace MessagingSystem
 {
 
@@ -55,7 +62,11 @@ enum NotificationType {
 struct NotificationData {
 
     std::string toId;
+#ifdef USE_BOOST_ASIO
+    tcp::socket *sock;
+#else
     int sock;
+#endif
     NotificationType type;
     std::string element;
     unsigned int numMessages;
@@ -63,10 +74,22 @@ struct NotificationData {
     /**
      * Constructor
      */
+#ifdef USE_BOOST_ASIO
+    NotificationData(const std::string& _toId, tcp::socket* _sock, NotificationType _type, const std::string& _element, unsigned int _numMessages) :
+#else
     NotificationData(const std::string& _toId, int _sock, NotificationType _type, const std::string& _element, unsigned int _numMessages) :
+#endif
             toId(_toId), sock(_sock), type(_type), element(_element), numMessages(_numMessages) {}
 
 }; // struct NotificationData
+
+
+#ifdef USE_BOOST_ASIO
+    typedef std::map<std::string, tcp::socket*> Id2SocketMap;
+#else
+    typedef std::map<std::string, int> Id2SocketMap;
+#endif
+
 
 /**
  * Router is not supposed to be used directly by PB entities. All communication with it is
@@ -188,8 +211,11 @@ private:
 
     std::map<std::string, std::string> ipAddress;
     std::map<std::string, int> portNumber;
-    std::map<std::string, int> controlSockets;
-    std::map<std::string, int> dataSockets;
+#ifdef USE_BOOST_ASIO
+    boost::asio::io_service io_service;
+#endif
+    Id2SocketMap controlSockets;
+    Id2SocketMap dataSockets;
 
     /**
      * Control the run() function main loop. Once set false, the Router will
@@ -303,8 +329,13 @@ public:
     bool knownID(const std::string &id);
     int getPortNumber(const std::string &id);
     const std::string &getIPAddress(const std::string &id);
+#ifdef USE_BOOST_ASIO    
+    tcp::socket* getControlSocket(const std::string &id);
+    tcp::socket* getDataSocket(const std::string &id);
+#else
     int getControlSocket(const std::string &id);
     int getDataSocket(const std::string &id);
+#endif
     void closeControlSocket(const std::string &id);
     void closeDataSocket(const std::string &id);
     void removeNetworkElement(const std::string &strId);

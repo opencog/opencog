@@ -63,8 +63,8 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.34 COMPONENTS filesystem signals regex date_time thread REQUIRED)
-FIND_PACKAGE(Boost 1.34 COMPONENTS python)
+FIND_PACKAGE(Boost 1.35 COMPONENTS filesystem signals regex date_time thread REQUIRED)
+FIND_PACKAGE(Boost 1.35 COMPONENTS python)
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)

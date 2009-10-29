@@ -35,6 +35,10 @@
 #include "RouterServerSocket.h"
 #include "NetworkElement.h"
 
+#ifdef USE_BOOST_ASIO
+#include <boost/lexical_cast.hpp>
+#endif
+
 using namespace MessagingSystem;
 using namespace opencog;
 
@@ -252,10 +256,16 @@ const std::string &Router::getIPAddress(const std::string &id)
     return ip;
 }
 
+#ifdef USE_BOOST_ASIO    
+tcp::socket* Router::getControlSocket(const std::string &id)
+{
+    tcp::socket* sock = NULL;
+#else
 int Router::getControlSocket(const std::string &id)
 {
     int sock = -1;
-    std::map<std::string, int>::iterator it = controlSockets.find(id);
+#endif
+    Id2SocketMap::iterator it = controlSockets.find(id);
     if (it != controlSockets.end()) {
         sock = it->second;
     }
@@ -263,10 +273,16 @@ int Router::getControlSocket(const std::string &id)
     return sock;
 }
 
+#ifdef USE_BOOST_ASIO    
+tcp::socket* Router::getDataSocket(const std::string &id)
+{
+    tcp::socket* sock = NULL;
+#else
 int Router::getDataSocket(const std::string &id)
 {
     int sock = -1;
-    std::map<std::string, int>::iterator it = dataSockets.find(id);
+#endif
+    Id2SocketMap::iterator it = dataSockets.find(id);
     if (it != dataSockets.end()) {
         sock = it->second;
     }
@@ -277,24 +293,40 @@ int Router::getDataSocket(const std::string &id)
 void Router::closeControlSocket(const std::string &id)
 {
     logger().debug("Closing control socket for element '%s'.", id.c_str());
-    std::map<std::string, int>::iterator it = controlSockets.find(id);
+    Id2SocketMap::iterator it = controlSockets.find(id);
     if (it != controlSockets.end()) {
+#ifdef USE_BOOST_ASIO    
+        tcp::socket* sock = it->second;
+        sock->close();
+        delete sock;
+        controlSockets.erase(id);
+        logger().debug("Closed control socket for element '%s'.", id.c_str());
+#else
         int sock = it->second;
         close(sock);
         controlSockets.erase(id);
         logger().debug("Closed control socket: '%d'.", sock);
+#endif
     }
 }
 
 void Router::closeDataSocket(const std::string &id)
 {
     logger().debug("Closing data socket for element '%s'.", id.c_str());
-    std::map<std::string, int>::iterator it = dataSockets.find(id);
+    Id2SocketMap::iterator it = dataSockets.find(id);
     if (it != dataSockets.end()) {
+#ifdef USE_BOOST_ASIO    
+        tcp::socket* sock = it->second;
+        sock->close();
+        delete sock;
+        dataSockets.erase(id);
+        logger().debug("Closed data socket for element '%s'.", id.c_str());
+#else
         int sock = it->second;
         close(sock);
         dataSockets.erase(id);
         logger().debug("Closed data socket: '%d'.", sock);
+#endif
     }
 }
 
@@ -554,6 +586,30 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         }
     } // if
 
+#ifdef USE_BOOST_ASIO
+    tcp::socket* sock = NULL;
+    std::string ipAddr = getIPAddress(ne_id);
+    int port = getPortNumber(ne_id);
+    try {
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(tcp::v4(), ipAddr, boost::lexical_cast<std::string>(port));
+        tcp::resolver::iterator iterator = resolver.resolve(query);
+        sock = new tcp::socket(io_service);
+        logger().debug("Router - controlSocketConnection(%s): created new socket: %p.", ne_id.c_str(), sock);
+        sock->connect(*iterator);
+        logger().debug(
+                     "Router - controlSocketConnection(%s). Connection established. ip=%s, port=%d",
+                     ne_id.c_str(), ipAddr.c_str(), port);
+        controlSockets[ne_id] = sock;
+        return true;
+    }catch(std::exception& e){
+        logger().error(
+                 "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                 ne_id.c_str(), ipAddr.c_str(), port, e.what());
+        if (sock != NULL) delete sock;
+        sock = NULL;
+    }
+#else
     int sock;
     if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
         throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
@@ -593,6 +649,7 @@ bool Router::controlSocketConnection(const std::string& ne_id)
     logger().error(
                  "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d",
                  ne_id.c_str(), ipAddr.c_str(), port);
+#endif
 
     closeControlSocket(ne_id);
     closeDataSocket(ne_id);
@@ -617,6 +674,30 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         }
     } // if
 
+#ifdef USE_BOOST_ASIO
+    tcp::socket* sock = NULL;
+    std::string ipAddr = getIPAddress(ne_id);
+    int port = getPortNumber(ne_id);
+    try {
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(tcp::v4(), ipAddr, boost::lexical_cast<std::string>(port));
+        tcp::resolver::iterator iterator = resolver.resolve(query);
+        sock = new tcp::socket(io_service);
+        logger().debug("Router - dataSocketConnection(%s): created new socket: %p.", ne_id.c_str(), sock);
+        sock->connect(*iterator);
+        logger().debug(
+                     "Router - dataSocketConnection(%s). Connection established. ip=%s, port=%d",
+                     ne_id.c_str(), ipAddr.c_str(), port);
+        dataSockets[ne_id] = sock;
+        return true;
+    }catch(std::exception& e){
+        logger().error(
+                 "Router - dataSocketConnection. Unable to connect to element %s. ip=%s, port=%d. Exception Message: %s",
+                 ne_id.c_str(), ipAddr.c_str(), port, e.what());
+        if (sock != NULL) delete sock;
+        sock = NULL;
+    }
+#else
     int sock;
     if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
         throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
@@ -655,6 +736,7 @@ bool Router::dataSocketConnection(const std::string& ne_id)
     logger().error(
                  "Router - dataSocketConnection. Unable to connect to element %s. ip=%s, port=%d",
                  ne_id.c_str(), ipAddr.c_str(), port);
+#endif
 
     closeDataSocket(ne_id);
     closeControlSocket(ne_id);
@@ -696,6 +778,16 @@ bool Router::sendNotification(const NotificationData& data)
             break;
         }
 
+#ifdef USE_BOOST_ASIO
+        logger().debug("Router - Sending notification (socket = %p) '%s'.", data.sock, cmd.c_str());
+ 
+        boost::system::error_code error;
+        boost::asio::write(*data.sock, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+        if (error) {
+            logger().error("Router - sendNotification. Error transfering data");
+            return false;
+        }
+#else
         logger().debug("Router - Sending notification (socket = %d) '%s'.", data.sock, cmd.c_str());
 
         unsigned int sentBytes = 0;
@@ -703,6 +795,7 @@ bool Router::sendNotification(const NotificationData& data)
             logger().error("Router - sendNotification. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
             return false;
         }
+#endif
 
         if (noAckMessages) {
             return true;
@@ -710,9 +803,13 @@ bool Router::sendNotification(const NotificationData& data)
 
 #define BUFFER_SIZE 256
         char response[BUFFER_SIZE];
+#ifdef USE_BOOST_ASIO
+        size_t receivedBytes = data.sock->read_some(boost::asio::buffer(response), error);
+        if (error && error != boost::asio::error::eof) {
+#else
         int receivedBytes = 0;
-
         if ( (receivedBytes = recv(data.sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
+#endif
             logger().error("Router - sendNotification. Invalid response. recv returned %d ", receivedBytes );
             return false;
         }

@@ -175,7 +175,11 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
         if (!master->dataSocketConnection(id)) {
             return;
         }
+#ifdef USE_BOOST_ASIO
+        tcp::socket* sock = master->getDataSocket(id);
+#else
         int sock = master->getDataSocket(id);
+#endif
 
         while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
 
@@ -188,6 +192,10 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
 
             cmd.assign(s);
             cmd.append("\n");
+#ifdef USE_BOOST_ASIO
+            // TODO: Error handling
+            boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length()));
+#else
             unsigned int sentBytes = 0;
             if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
                 logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
@@ -197,6 +205,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                 delete(message); // TODO: Shouldn't message be put back to the queue?
                 return;
             }
+#endif
 
             std::istringstream stream(message->getPlainTextRepresentation());
             std::string line;
@@ -204,6 +213,10 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                 logger().debug("Sending line <d%s>", line.c_str());
                 line.insert(0, "d");
                 line.append("\n");
+#ifdef USE_BOOST_ASIO
+                // TODO: Error handling
+                boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length()));
+#else
                 sentBytes = 0;
                 if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
                     logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
@@ -213,6 +226,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                     delete(message); // TODO: Shouldn't message be put back to the queue?
                     return;
                 }
+#endif
                 // TODO: Shouldn't the protocol be changed to expect a feedback (OK or FAILED) per message here?
                 // And, if OK is not received, message may be kept on the queue (until it be eventually sent or,
                 // at least, until N attempts are made)
@@ -220,8 +234,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             delete(message);
             if (limit > 0) limit--;
         }
-        unsigned int sentBytes = 0;
         cmd.assign("cNO_MORE_MESSAGES\n");
+#ifdef USE_BOOST_ASIO
+        // TODO: Error handling
+        boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length()));
+#else
+        unsigned int sentBytes = 0;
         if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
             logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
             master->closeControlSocket(id);
@@ -229,14 +247,21 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             master->markElementUnavailable(id);
             return;
         }
+#endif
 
 
         if (!master->noAckMessages) {
             logger().debug("RouterServerSocket - Waiting OK (after sending message).");
 #define BUFFER_SIZE 256
             char response[BUFFER_SIZE];
+#ifdef USE_BOOST_ASIO
+            boost::system::error_code error;
+            size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
+            if (error && error != boost::asio::error::eof) {
+#else
             int receivedBytes = 0;
             if ( (receivedBytes = recv(sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
+#endif
                 logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
