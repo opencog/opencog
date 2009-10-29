@@ -92,6 +92,7 @@ static const char* DEFAULT_CONFIG_PATHS[] =
     "../../../lib/",
     "../../../../lib/", // yes, really needed for some test cases!
     CONFDIR,
+    "", // If you don't have this, then absolute paths won't work!
 #ifndef WIN32
     "/etc/opencog",
     "/etc",

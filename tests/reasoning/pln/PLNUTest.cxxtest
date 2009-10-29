@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2008-2009 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,9 +38,15 @@
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
 #include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog::pln;
+using namespace opencog;
 using namespace std;
+
+#include <boost/filesystem.hpp>
+
+using namespace boost::filesystem;
 
 #define RUN_FAILURE_TESTS 0
 #define WAIT_KEY_ON_FAILURE 0
@@ -166,6 +172,7 @@ private:
         // if you want to disable some of these tests,
         // comment out the content in their implementation
         // (so that they won't be run outside of testHeuristic either)
+        testSCMTargets();
         testTVChecksWork();
         testRandomTVsTooHigh();
         testSymmetricRelationFails();
@@ -244,6 +251,7 @@ private:
         cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
     }
 
+// Does 1000 runs per expansion phase
     void runPLNTest(Btr<PLNTest> t)
     {
         AtomSpaceWrapper *atw = GET_ASW;
@@ -264,7 +272,7 @@ private:
         //currentDebugLevel=-4;
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
-        uint s_i=0;
+        uint s_i=0; // Expansion phase #
         pHandle eh=PHANDLE_UNDEFINED;
         TruthValue* etv = NULL;
         bool passed=false;
@@ -420,6 +428,242 @@ private:
         //atw->reset(NULL);
     }
 
+    //! @todo Replace with an existing method, after tweaking various things to
+    // make it suitable.
+    static SimpleTruthValue* parseSTV(const char* tvStr) {
+        float mean, conf;
+        sscanf(tvStr, "[%f,%f]", &mean, &conf);
+        return new SimpleTruthValue(mean, getCount(conf));
+    }
+
+    // Beware that this will create the target as a hypothetical atom
+    // before running the inference.
+    void runSCMTarget(const char* conf_file)
+    {
+        Config test;
+        std::cout << conf_file << std::endl;
+        test.load(conf_file);
+        //std::cout << test.to_string() << std::endl;
+        
+        std::cout << test["COMMENT"] << std::endl;
+        
+        std::string axiomsFile = test["LOAD"]+".xml";//+".scm";
+        
+        initAxiomSet(axiomsFile); // TODO use scm in loadAxioms
+        
+        std::string targetScheme = test["TARGET"];
+        std::cout << "Target: " << targetScheme << std::endl;
+        
+        // get target atom
+        SchemeEval& eval = SchemeEval::instance();        
+        Handle h = eval.eval_h(targetScheme);
+
+        pHandleSeq fakeHandles =
+            ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+        pHandle fakeHandle = fakeHandles[0];
+        meta target(new vtree(fakeHandle));
+        
+        // Set parameters
+                
+        uint minEvalsOfFittestBIT = test.get_int("MAX_STEPS")/100;
+        
+        // Changed because we don't want to have to specify the count
+        // as well, in the test's .conf file
+        //TruthValue* minTV = SimpleTruthValue::fromString(test["MIN_TV"].c_str());
+        //TruthValue* maxTV = SimpleTruthValue::fromString(test["MAX_TV"].c_str());
+        TruthValue* minTV = parseSTV(test["MIN_TV"].c_str());
+        TruthValue* maxTV = parseSTV(test["MAX_TV"].c_str());
+        
+        std::cout << "Set parameters of test OK" << std::endl;
+
+        // Initialize misc test stuff
+
+        AtomSpaceWrapper *atw = GET_ASW;
+        stats::Instance().ITN2atom.clear();
+
+        clock_t start, finish;
+        double duration;
+
+        test::custom_duration = 0.0;
+        start = clock();
+        
+        atw->allowFWVarsInAtomSpace = true;
+        
+        fflush(stdout);
+        //currentDebugLevel=-4;
+
+                
+        // create a BIT with that atom as target
+//        pHandle fakeHandle =
+//            ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h, NULL_VERSION_HANDLE);
+//        meta target(new vtree(fakeHandle));
+
+        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(target,
+            new DefaultVariableRuleProvider()));
+        
+        // Do weird loop
+
+        uint s_i=0; // Expansion phase #
+        pHandle eh=PHANDLE_UNDEFINED;
+        TruthValue* etv = NULL;
+        bool passed=false;
+
+        set<VtreeProvider*> eres;
+
+        minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+
+        const int expansions_per_run = 1000;
+
+        if (minEvalsOfFittestBIT > 0) {
+            do {
+/*              for (int k=0;k<expansions_per_run;k++)
+                    state->expandFittest();
+                
+                eres = state->evaluate();*/
+
+                cprintf(-3, "\n    Evaluating...\n");
+                
+                //if (foo42)
+                    //currentDebugLevel=4;
+                
+                int expansions = expansions_per_run;
+                eres = state->infer(expansions, 0.000001f, 0.01f);      
+                
+                if (expansions > 0)
+                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
+                else
+                    cprintf(2, "Failed for now... Saved $%d / $%d (from the "
+                            "beginning of the cycle).\n", expansions,
+                            expansions_per_run);
+
+                //currentDebugLevel=-4;
+
+                eh = (eres.empty() ? PHANDLE_UNDEFINED :
+                        _v2h(*(*eres.rbegin())->getVtree().begin()));
+
+                if (eh != PHANDLE_UNDEFINED )
+                    etv = atw->getTV(eh).clone();
+//                else
+//                    etv = new SimpleTruthValue(0.0f,0.0f);
+
+               /* float c1=t->minTV->getConfidence();
+                float c2=t->maxTV->getConfidence();
+                float m1=t->minTV->getMean();
+                float m2=t->maxTV->getMean(); */
+
+                if (etv) {
+                    printf("c: %f min: %f\n", etv->getConfidence(),
+                            minTV->getConfidence());
+                    printf("s: %f min: %f\n", etv->getMean(),
+                            minTV->getMean());
+                    printf("c: %f max: %f\n", etv->getConfidence(),
+                            maxTV->getConfidence());
+                    printf("s: %f max: %f\n", etv->getMean(),
+                            maxTV->getMean());
+                }
+
+                passed = (
+                    eh != PHANDLE_UNDEFINED &&
+                    etv &&
+                    etv->getConfidence() >= minTV->getConfidence() &&
+                    etv->getMean()       >= minTV->getMean() &&
+                    etv->getConfidence() <= maxTV->getConfidence() &&
+                    etv->getMean()       <= maxTV->getMean()
+                );
+
+                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
+            }
+            while ((++s_i)*expansions_per_run < minEvalsOfFittestBIT
+                    && !passed);
+        }
+#if 0
+        else if (t->minExhaustiveEvals > 0) {
+            assert(0);
+            /// This should be updated to reflect the new BITNode interface
+            /*
+            for (uint L=0;L<t->minExhaustiveEvals;L++)
+                state->expandNextLevel();
+
+            eres = state->evaluate();
+            eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
+            if (eh) {
+                if (etv != NULL) delete etv;
+                etv = atw->TV(eh).clone();
+            }
+
+            passed = (eh && etv &&
+                etv->getConfidence() > t->minTV->getConfidence() &&
+                etv->getMean()          > t->minTV->getMean()
+                );*/
+        }
+#endif
+        else
+            puts("ERROR IN TEST SETTINGS");
+
+        if (passed) {
+            printf("\n"
+                   "**********************************************\n"
+                   "passed: %s.\n"
+                   "**********************************************\n",
+                (etv?etv->toString().c_str():"(null TV)"));
+
+            finish = clock();
+            duration = (double)(finish - start) / CLOCKS_PER_SEC;
+            printf( "Test took %2.2f seconds TOTAL.\n", duration );
+
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration );
+            printf( "Custom test time was %3.3f seconds.\n",
+                    test::custom_duration2 );
+        }
+        else {
+            printf("\n**********************************************\n"
+                   "FAILED: %s!\n"
+                   "**********************************************\n",
+            (etv?etv->toString().c_str():"(null TV)"));
+        }
+
+        printf("Test results: [");
+        foreach(VtreeProvider* bv, eres) {
+            const TruthValue& tv = atw->getTV(vt2h(*bv));
+            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+                printf("%d ", vt2h(*bv));
+        }
+        printf("]\n");
+
+        if (passed) {
+            allTestsInferenceNodes += state->inferenceNodes;
+
+            INstats.push_back(state->inferenceNodes);
+
+            cout << endl << "Exec pool size: " << state->exec_pool.size();
+            cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+                    "/" << allTestsInferenceNodes << endl;
+        }
+        else
+            INstats.push_back(0);
+
+/*      if (etv) {
+            string stv(etv->toString());
+            puts(stv.c_str());
+        }*/
+
+        //stats::Instance().print(stats::triviality_filterT());
+
+        TS_ASSERT(passed);
+#if WAIT_KEY_ON_FAILURE
+        if (!passed)
+            getc(stdin);
+#endif
+        if (etv != NULL) delete etv;
+        //atw->reset(NULL);
+        
+        return;
+    }
+
+
 public:
 
     static PLNUTest* createSuite() { return new PLNUTest(); }
@@ -439,12 +683,10 @@ public:
             logger().info("Initializing PLN test env...");
 
             f = fopen("results.txt","a");
-            
-            // This access is required to initialise CogServer.
-            CogServer& cogserver = static_cast<CogServer&>(server());
+
             //currentDebugLevel=100;
 
-            atw = GET_ASW;
+            atw = GET_ASW;                                  
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
@@ -460,6 +702,22 @@ public:
         
         // Initialize PLN tests as such
         initPLNTests();
+
+        // Necessary if you use test data and/or targets in Scheme.
+        logger().debug("Loading Scheme modules");
+        config().set("SCM_PRELOAD",
+                "opencog/scm/type_constructors.scm");
+        // Blindly search a bunch of paths hoping to find the files
+        // in one of them ...
+        const char * paths[] = 
+        {
+                "./",
+                "../",
+                "../../",
+                "../../../",
+                NULL
+        };
+        cogserver().loadSCMModules(paths);
 
         allTestsInferenceNodes = 0;
 
@@ -513,6 +771,24 @@ public:
     {
     }
     
+    void testSCMTargets () {
+        // TODO maybe use regex_iterator
+//        try {
+            string testDir = PLN_TEST_DIR"targets";
+
+            // TODO apparently there is a way to make iterators only cover
+            // either files or directories. The boost::filesystem
+            // documentation is very obsolete however.
+            for (recursive_directory_iterator end, dir(testDir);
+                  dir != end; ++dir) {
+                if (!is_directory(dir->status()))
+                    runSCMTarget(dir->path().string().c_str());
+            }
+//        } catch (basic_filesystem_error e) {
+//            std::cerr << e.what();
+//        }
+    }
+
     void testHeuristic() {
         if (testFitnessEvaluator == BEST)
         return;
