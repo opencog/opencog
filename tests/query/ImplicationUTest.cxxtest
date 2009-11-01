@@ -102,7 +102,6 @@ void ImplicationUTest::setUp(void)
 	as = cogserver.getAtomSpace();
 	pm.set_atomspace(as);
 
-#ifdef HAVE_GUILE
 	// Create initialzation
 	const char * setup = 
 	"(define (stv mean conf) (cog-new-stv mean conf))\n"
@@ -247,7 +246,6 @@ void ImplicationUTest::setUp(void)
 	"   (DefinedFrameNode \"#Manipulation\")\n"
 	")\n";
 	SchemeEval::instance( ).eval(str);
-#endif /* HAVE_GUILE */
 }
 
 /*

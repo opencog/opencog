@@ -277,6 +277,8 @@ Untested, probably won't work:
  * How-much questions (how-tall, how-safe etc)
  * Which questions
 
+ * The red ball is under the couch. Where is the red ball?
+   The RelEx coding is correct, the output is not.
 
 
 Notes about the data flow:
