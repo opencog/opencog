@@ -97,7 +97,7 @@ public:
         pHandle m7_h = asw->addLink(MEMBER_LINK, m7_hs, m3_tv);
 
         //test constitutedSet
-        pHandleSet constituted_hs = constitutedSet(c_h, MIN_MS, MIN_MC);
+        pHandleSet constituted_hs = constitutedSet(c_h, MIN_MS, MIN_MC, asw);
 
         cout << "test constitutedSet: " << endl;
         foreach (pHandle i, constituted_hs) {
