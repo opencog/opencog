@@ -35,6 +35,7 @@ using boost::lexical_cast;
 using boost::assign::list_of;
 using std::string;
 using std::cout;
+using std::endl;
 using std::pair;
 
 //number of elements used in the test
@@ -58,6 +59,7 @@ const strength_t e9_super_s = 0.0;
 
 class SubsetEvalRuleUTest : public CxxTest::TestSuite {
 private:
+    AtomSpace* _as;
     AtomSpaceWrapper* _asw;
     pHandle _sub_h;
     pHandle _super_h;
@@ -71,20 +73,28 @@ public:
         //set flag to print only OC_ASSERT and other ERROR level logs on stdout
         opencog::logger().setPrintErrorLevelStdout();
 
+        //instantiate the atom space
+        _as = new AtomSpace;
+        
         //instantiate the atom space wrapper
-        AtomSpace as;
-        _asw = &DirectATW::getInstance(&as);
+        _asw = &DirectATW::getInstance(_as);
 
-        as.print();
+	cout << "AFTER GETTING ATOMSPACE INSTANCE" << endl;
+        _as->print();
 
         //add the 2 concept nodes sub and super to compute Subset(sub super)
         _sub_h = _asw->addNode(CONCEPT_NODE, "sub", TruthValue::DEFAULT_TV());
 
-        as.print();
+	cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
+
+	cout << "AFTER ADDING sub" << endl;
+
+        _as->print();
 
         _super_h = _asw->addNode(CONCEPT_NODE, "super", TruthValue::DEFAULT_TV());
 
-        as.print();
+	cout << "AFTER ADDING super" << endl;
+        _as->print();
 
         //add the members
         pHandleSeq ehv;
@@ -122,9 +132,12 @@ public:
         _asw->addLink(MEMBER_LINK, ehv[9], _super_h,
                       SimpleTruthValue(e9_super_s, 1.0));
 
-        cout << _asw->vhmapToString() << std::endl;
+        cout << "_asw->vhmapToString(): " << _asw->vhmapToString() << endl;
 
-        as.print();
+	cout << "AFTER ADDING ALL ATOMS" << endl;
+        _as->print();
+
+	cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
 
     }
 

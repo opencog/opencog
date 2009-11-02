@@ -49,13 +49,16 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 {
     OC_ASSERT(premiseArray.size() == 2);
 
-    OC_ASSERT(asw->isSubType(_v2h(premiseArray[0]), CONCEPT_NODE));
-    OC_ASSERT(asw->isSubType(_v2h(premiseArray[1]), CONCEPT_NODE));
+    pHandle h_sub = _v2h(premiseArray[0]);
+    pHandle h_super = _v2h(premiseArray[1]);
+
+    OC_ASSERT(asw->isSubType(h_sub, CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(h_super, CONCEPT_NODE));
 
     pHandleSet used;
 
-    pHandleSet satSetSub = constitutedSet(_v2h(premiseArray[0]), 0.0f, 1);
-    pHandleSet satSetSuper = constitutedSet(_v2h(premiseArray[1]), 0.0f, 1);
+    pHandleSet satSetSub = constitutedSet(h_sub, 0.0f, 1, asw);
+    pHandleSet satSetSuper = constitutedSet(h_super, 0.0f, 1, asw);
 
     vector<TruthValue*> tvsSub;
     vector<TruthValue*> tvsSuper;
@@ -63,23 +66,23 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // We fill tvsSub and tvsSuper by padding the missing TVs with zeros
     // so that each element of tvsSub and tvsSuper are aligned
 
-    foreach(const pHandle& h_sub, satSetSub) {
-        tvsSub.push_back(asw->getTV(h_sub).clone());
-        pHandleSetConstIt h_super_cit =
+    foreach(const pHandle& h_el_sub, satSetSub) {
+        tvsSub.push_back(asw->getTV(h_el_sub).clone());
+        pHandleSetConstIt h_el_super_cit =
             find<pHandleSetConstIt, pHandle>(satSetSuper.begin(),
                                              satSetSuper.end(),
-                                             h_sub);
-        if (h_super_cit == satSetSuper.end())
+                                             h_el_sub);
+        if (h_el_super_cit == satSetSuper.end())
             tvsSuper.push_back(new SimpleTruthValue(0, 0));
         else {
-            tvsSuper.push_back(GET_ASW->getTV(*h_super_cit).clone());
-            used.insert(*h_super_cit);
+            tvsSuper.push_back(GET_ASW->getTV(*h_el_super_cit).clone());
+            used.insert(*h_el_super_cit);
         }
     }
     
-    foreach(const pHandle& h_super, satSetSuper) {
-        if (!STLhas(used, h_super)) {
-            tvsSuper.push_back(GET_ASW->getTV(h_super).clone());
+    foreach(const pHandle& h_el_super, satSetSuper) {
+        if (!STLhas(used, h_el_super)) {
+            tvsSuper.push_back(GET_ASW->getTV(h_el_super).clone());
             tvsSub.push_back(new SimpleTruthValue(0, 0));
         }
     }

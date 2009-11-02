@@ -1261,11 +1261,10 @@ Handle satisfyingSet(Handle P)
 
 pHandleSet constitutedSet(pHandle CP,
                           strength_t min_membershipStrength,
-                          count_t min_membershipCount)
+                          count_t min_membershipCount,
+                          AtomSpaceWrapper* asw)
 {
-    AtomSpaceWrapper* atw = GET_ASW;
-
-    assert(atw->isSubType(CP, CONCEPT_NODE));
+    assert(asw->isSubType(CP, CONCEPT_NODE));
     
     map<pHandle, float> members;
     pHandleSet ret;
@@ -1274,12 +1273,12 @@ pHandleSet constitutedSet(pHandle CP,
     TableGather mems(tr);
     for(TableGatherConstIt tgci = mems.begin(); tgci != mems.end(); ++tgci) {
         pHandle h = boost::get<pHandle>(tgci->GetValue());
-        pHandleSeq hs = atw->getOutgoing(h);
+        pHandleSeq hs = asw->getOutgoing(h);
         
         assert(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
-            const TruthValue& tv = atw->getTV(h);
+            const TruthValue& tv = asw->getTV(h);
             
             if (min_membershipStrength <= tv.getMean()
                 && min_membershipCount <= tv.getCount())

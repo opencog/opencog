@@ -433,6 +433,7 @@ void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m,
 
 typedef std::pair<std::string, pHandle> hsubst;
 struct iAtomSpaceWrapper;
+struct AtomSpaceWrapper;
 
 bool within(float a, float b, float diff);
 bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs);
@@ -520,19 +521,21 @@ Handle satisfyingSet(Handle h);
 /**
  * Return the set of members of a given concept node (or inheriting concept)
  * 
- * @param P The pHandle of the concept node (or inheriting concept)
+ * @param concept The pHandle of the concept node (or inheriting concept)
  * @param min_membershipStrength The minimum strength of the element
  *                                WARNING: element or membership? to be defined
  *                               to be taken in consideration
  * @param min_membershipCount The minimum count of the element to be taken
  *                                WARNING: element or membership? to be defined
  *                            in consideration
+ * @param asw AtomSpaceWrapper pointer where to look for the concept P
  * @return The pHandleSet containing all elements that are member of P and
  *         have their TV above the given threshold strength and count
  */
-pHandleSet constitutedSet(pHandle P,
+pHandleSet constitutedSet(pHandle concept,
                           strength_t min_membershipStrength,
-                          count_t min_membershipCount);
+                          count_t min_membershipCount,
+                          AtomSpaceWrapper* asw);
 
 template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
