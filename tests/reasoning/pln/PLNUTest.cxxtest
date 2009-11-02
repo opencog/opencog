@@ -501,6 +501,7 @@ private:
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(target,
             new DefaultVariableRuleProvider()));
+        std::cout << "BITNodeRoot init ok" << std::endl;
         
         // Do weird loop
 
