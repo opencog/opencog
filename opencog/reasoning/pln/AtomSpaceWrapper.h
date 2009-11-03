@@ -487,6 +487,7 @@ public:
 
     //for debugging
     std::string vhmapToString() const;
+    std::string pHandleToString(pHandle ph) const;
 
 // TODELETE
 //  combo::NMCore* getCore() const { return core; }

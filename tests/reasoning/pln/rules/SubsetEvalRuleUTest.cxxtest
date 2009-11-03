@@ -145,6 +145,8 @@ public:
         SubsetEvalRule sser(_asw);
         const vector<Vertex> vv = list_of(_sub_h)(_super_h);
         BoundVertex bv = sser.compute(vv);
+        pHandle res_h = _v2h(bv.GetValue());
+        cout << "res = " << _asw->pHandleToString(res_h) << endl;
         TS_ASSERT(true);
     }
 };

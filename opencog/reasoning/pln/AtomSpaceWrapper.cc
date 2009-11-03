@@ -1462,6 +1462,17 @@ std::string AtomSpaceWrapper::vhmapToString() const {
     return ss.str();
 }
 
+std::string AtomSpaceWrapper::pHandleToString(pHandle ph) const {
+    vhpair hvh = fakeToRealHandle(ph);
+    Handle h = hvh.first;
+    Atom* a = TLB::getAtom(h);
+    VersionHandle vh = hvh.second;
+    std::stringstream ss;
+    ss << "(Handle = " << h << "; Atom = " << a->toString()
+       << "; VersionHandle = " << vh;
+    return ss.str();
+}
+
 /*
 Handle AtomSpaceWrapper::Exist2ForAllLink(Handle& exL)
 {
