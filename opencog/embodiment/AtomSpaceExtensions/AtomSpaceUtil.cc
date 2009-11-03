@@ -547,7 +547,7 @@ bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
 
 }
 
-bool AtomSpaceUtil::getSizeInfo(const AtomSpace& atomSpace,
+bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
                                 Handle object,
                                 double& length, double& width, double &height)
 {

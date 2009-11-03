@@ -723,7 +723,7 @@ public:
     const HandleSeq& getOutgoing(Handle h) const;
 
     /** Retrieve the incoming set of a given atom */
-    HandleSeq getIncoming(Handle) const;
+    HandleSeq getIncoming(Handle);
 
     /** Retrieve the Count of a given Handle */
     float getCount(Handle) const;

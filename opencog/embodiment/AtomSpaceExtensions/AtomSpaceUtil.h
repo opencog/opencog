@@ -415,7 +415,7 @@ public:
      * otherwise. If false is returned then the results of the passed by
      * reference objects are not valid. (May be corrupted)
      */
-    static bool getSizeInfo(const AtomSpace& atomSpace,
+    static bool getSizeInfo(AtomSpace& atomSpace,
                             Handle object, double& length,
                             double& width, double &height);
 
