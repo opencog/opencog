@@ -522,12 +522,9 @@ Handle satisfyingSet(Handle h);
  * Return the set of members of a given concept node (or inheriting concept)
  * 
  * @param concept The pHandle of the concept node (or inheriting concept)
- * @param min_membershipStrength The minimum strength of the element
- *                                WARNING: element or membership? to be defined
+ * @param min_membershipStrength The minimum strength of the  membership
  *                               to be taken in consideration
- * @param min_membershipCount The minimum count of the element to be taken
- *                                WARNING: element or membership? to be defined
- *                            in consideration
+ * @param min_membershipCount The minimum count of the membership
  * @param asw AtomSpaceWrapper pointer where to look for the concept P
  * @return The pHandleSet containing all elements that are member of P and
  *         have their TV above the given threshold strength and count

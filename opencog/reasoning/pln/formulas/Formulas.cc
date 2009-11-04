@@ -770,9 +770,6 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
 
     //if (Log::getDefaultLevel() >= 3) printf("SubSetEval...\n");
 
-    strength_t sTot = 1.0f;
-    count_t nTot = 1.0f;
-
     strength_t fs = 0.0f, s = 0.0f;
 
     for (int i = 0; i < Nsuper; i++) {

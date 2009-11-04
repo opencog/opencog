@@ -67,6 +67,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // so that each element of tvsSub and tvsSuper are aligned
 
     foreach(const pHandle& h_el_sub, satSetSub) {
+        std::cout << asw->pHandleToString(h_el_sub) << std::endl;
         tvsSub.push_back(asw->getTV(h_el_sub).clone());
         pHandleSetConstIt h_el_super_cit =
             find<pHandleSetConstIt, pHandle>(satSetSuper.begin(),
@@ -93,6 +94,15 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 
     TruthValue** tvs1 = new TruthValue*[N];
     TruthValue** tvs2 = new TruthValue*[N];
+
+    std::cout << "SUB" << std::endl;
+    for(unsigned int i = 0; i < N; i++) {
+        std::cout << tvsSub[i]->toString() << std::endl;
+    }
+    std::cout << "SUPER" << std::endl;
+    for(unsigned int i = 0; i < N; i++) {
+        std::cout << tvsSuper[i]->toString() << std::endl;
+    }
 
     std::copy(tvsSub.begin(), tvsSub.end(), tvs1);
     std::copy(tvsSuper.begin(), tvsSuper.end(), tvs2);

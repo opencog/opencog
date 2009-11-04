@@ -1,5 +1,5 @@
 /*
- * tests/reasoning/FormulaKitUTest.cxxtest
+ * tests/reasoning/pln/rules/SubsetEvalRuleUTest.cxxtest
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
@@ -77,7 +77,7 @@ public:
         _as = new AtomSpace;
         
         //instantiate the atom space wrapper
-        _asw = &DirectATW::getInstance(_as);
+        _asw = static_cast<AtomSpaceWrapper*>(ASW(_as));
 
 	cout << "AFTER GETTING ATOMSPACE INSTANCE" << endl;
         _as->print();
@@ -105,8 +105,11 @@ public:
         }
 
         //add members of sub
-        _asw->addLink(MEMBER_LINK, ehv[0], _sub_h,
+        pHandle h0 = _asw->addLink(MEMBER_LINK, ehv[0], _sub_h,
                       SimpleTruthValue(e0_sub_s, 1.0));
+
+        
+
         _asw->addLink(MEMBER_LINK, ehv[2], _sub_h,
                       SimpleTruthValue(e2_sub_s, 1.0));
         _asw->addLink(MEMBER_LINK, ehv[4], _sub_h,
