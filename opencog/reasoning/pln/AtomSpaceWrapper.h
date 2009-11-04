@@ -336,8 +336,9 @@ public:
     }
 
     //! Get handles with type t and name str optionally subtypes as well
-    virtual Btr<std::set<pHandle> > getHandleSet(Type T, const std::string& name,
-            bool subclass = false);
+    virtual Btr<std::set<pHandle> > getHandleSet(Type T,
+                                                 const std::string& name,
+                                                 bool subclass = false);
     //! Get handle of node with type t and name str
     pHandle getHandle(Type t,const std::string& str);
     //! Get handle of link with type t and outgoing set 

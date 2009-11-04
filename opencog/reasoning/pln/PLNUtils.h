@@ -521,17 +521,36 @@ bool equal(pHandle A, pHandle B);
 Handle satisfyingSet(Handle h);
 
 /**
- * Return the set of members of a given concept node (or inheriting concept)
+ * Return the set of membership links of a given concept node
+ * (or inheriting concept)
  * 
  * @param concept The pHandle of the concept node (or inheriting concept)
  * @param min_membershipStrength The minimum strength of the  membership
  *                               to be taken in consideration
  * @param min_membershipCount The minimum count of the membership
+ * @param asw AtomSpaceWrapper where to look for the concept
+ *        Note that it is not const because TableGather is not const
+ *        it must be fixed
+ * @return The pHandleSet containing all memberLinks of members of P and
+ *         have their TV above the given threshold strength and count
+ */
+pHandleSet memberLinkSet(pHandle concept,
+                         strength_t min_membershipStrength,
+                         count_t min_membershipCount,
+                         AtomSpaceWrapper* asw);
+
+/**
+ * Return the set of members of a given concept node (or inheriting concept)
+ * 
+ * @param concept The pHandle of the concept node (or inheriting concept)
+ * @param min_membershipStrength The minimum strength of the membership
+ *                               to be taken in consideration
+ * @param min_membershipCount The minimum count of the membership
  * @param asw AtomSpaceWrapper where to look for the concept P
  *        Note that it is not const because TableGather is not const
  *        it must be fixed
- * @return The pHandleSet containing all elements that are member of P and
- *         have their TV above the given threshold strength and count
+ * @return The pHandleSet containing all elements that are member of concept and
+ *         have their memberLink TV above the given threshold strength and count
  */
 pHandleSet constitutedSet(pHandle concept,
                           strength_t min_membershipStrength,

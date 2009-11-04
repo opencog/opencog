@@ -1256,12 +1256,12 @@ Handle satisfyingSet(Handle P)
 }
 */
 
-pHandleSet constitutedSet(pHandle CP,
-                          strength_t min_membershipStrength,
-                          count_t min_membershipCount,
-                          AtomSpaceWrapper* asw)
+pHandleSet memberLinkSet(pHandle CP,
+                         strength_t min_membershipStrength,
+                         count_t min_membershipCount,
+                         AtomSpaceWrapper* asw)
 {
-    assert(asw->isSubType(CP, CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(CP, CONCEPT_NODE));
     
     map<pHandle, float> members;
     pHandleSet ret;
@@ -1272,17 +1272,33 @@ pHandleSet constitutedSet(pHandle CP,
         pHandle h = boost::get<pHandle>(tgci->GetValue());
         pHandleSeq hs = asw->getOutgoing(h);
         
-        assert(hs.size() == 2);
+        OC_ASSERT(hs.size() == 2);
         
         if (equal(hs[1], CP)) {
             const TruthValue& tv = asw->getTV(h);
             
             if (min_membershipStrength <= tv.getMean()
                 && min_membershipCount <= tv.getCount())
-                ret.insert(hs[0]);
+                ret.insert(h);
         }
     }
 
+    return ret;
+}
+
+
+pHandleSet constitutedSet(pHandle CP,
+                          strength_t min_membershipStrength,
+                          count_t min_membershipCount,
+                          AtomSpaceWrapper* asw)
+{
+    OC_ASSERT(asw->isSubType(CP, CONCEPT_NODE));
+    pHandleSet memberLinks = memberLinkSet(CP, min_membershipStrength,
+                                           min_membershipCount, asw);
+    pHandleSet ret;
+    foreach(pHandle ml, memberLinks) {
+        ret.insert(asw->getOutgoing(ml, 0));
+    }
     return ret;
 }
 
