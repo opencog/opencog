@@ -64,7 +64,7 @@ iAtomSpaceWrapper* parent = ASW();
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
     
-    iAtomSpaceWrapper* parent = ASW();
+    AtomSpaceWrapper* parent = ASW();
     
     Btr<std::set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
     

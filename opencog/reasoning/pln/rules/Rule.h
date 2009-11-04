@@ -73,7 +73,7 @@ protected:
     bool freeInputArity;
 
     //! Atom table interface
-    iAtomSpaceWrapper *destTable;
+    iAtomSpaceWrapper* destTable;
 
     //! Whether the the Rule is a Composer?
     // If it is a Composer then it needs premises to derive the truth value

@@ -96,7 +96,7 @@ void BackChainingAgent::chooseTarget()
 //    Btr<BackInferenceTreeRootT> Bstate;
 //    BackInferenceTreeRootT *state;
 
-    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
     if (fakeHandles.empty()) {
         log->error("[BackChainingAgent] fakeHandles is empty");
         Bstate.reset();

@@ -52,7 +52,7 @@
 #define PLN_TRUE_MEAN 0.989
 
 //using namespace boost::bimaps;
-#define GET_ASW ((AtomSpaceWrapper*) ASW(NULL))
+#define GET_ASW ASW(NULL)
 
 class AtomSpaceWrapperUTest;
 
@@ -503,7 +503,7 @@ public:
  * Singleton instance of AtomSpaceWrapper
  * (following meyer's design pattern)
  */
-iAtomSpaceWrapper* ASW(AtomSpace *a = NULL);
+AtomSpaceWrapper* ASW(AtomSpace *a = NULL);
 
 /** Passes the atoms via FIM analyzer. To turn this off, set FIM=0 in Config.
 */

@@ -490,11 +490,9 @@ const float MIN_CONFIDENCE = 0.0000001f;
 
 /// index arg is not used
 
-void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
+void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
                          const Type VarT, int index)
 {
-    AtomSpaceWrapper* atw = GET_ASW;
-
     LOG(3, "BEGIN GATHER for:");
     rawPrint(_MP, _MP.begin(), 3);
 
@@ -504,31 +502,31 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
         return;
     }
 
-    Type T = atw->getType(*h_ptr);
+    Type T = asw->getType(*h_ptr);
 
     /// Needs to be handled separately.
-    if (!atw->isType(*h_ptr) && T != VarT) {
+    if (!asw->isType(*h_ptr) && T != VarT) {
         LOG(2, "TableGather:: Note: A real handle was asked for.\n");
         insert(Vertex(*h_ptr));
         return;
     }
-    if (!atw->isType(*h_ptr) && T == VarT) {
+    if (!asw->isType(*h_ptr) && T == VarT) {
         LOG(0, "Lookup for a VarT is NOT allowed!\n");
         return;
     }
 
-    string name(atw->inheritsType(T, NODE) ? atw->getName(*h_ptr) : "");
+    string name(asw->inheritsType(T, NODE) ? asw->getName(*h_ptr) : "");
 
     /// First, we fill this vector (TableGather object),
     /// then, we intersect it one by one by each new set of looup child_results.
 
-    /* if (atw->inheritsType(T, HYPOTHETICAL_LINK)) /// Just return the query, with stub TV
+    /* if (asw->inheritsType(T, HYPOTHETICAL_LINK)) /// Just return the query, with stub TV
      {
-      insert(Vertex(aprovider->addAtom(_MP, TruthValue::TRIVIAL_TV(), false)));
+      insert(Vertex(asw->addAtom(_MP, TruthValue::TRIVIAL_TV(), false)));
      }
      else
      {*/
-    Btr<set<pHandle> > lookupResults = aprovider->getHandleSet(T, name);
+    Btr<set<pHandle> > lookupResults = asw->getHandleSet(T, name);
 
     cprintf(3, "%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
 
@@ -536,7 +534,7 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
 
     for (set<pHandle>::iterator i = lookupResults->begin();
             i != lookupResults->end(); i++) {
-        const TruthValue& tv = atw->getTV(*i);
+        const TruthValue& tv = asw->getTV(*i);
 
         if (tv.isNullTv()) {
             printf("NULL TV! %d\n", *i);
@@ -622,48 +620,48 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
                 tree<Vertex>::pre_order_iterator listNode = child;
                 pHandle listHandle = boost::get<pHandle>(*listNode);
                 if (listHandle == (pHandle) LIST_LINK) {
-                    Type t = atw->getType(predicateHandle);
+                    Type t = asw->getType(predicateHandle);
                     if (t == PREDICATE_NODE) {
-                        std::string nameStr = atw->getName(predicateHandle);
+                        std::string nameStr = asw->getName(predicateHandle);
                         const char* name = nameStr.c_str();
                         if (!strcmp(name, "atTime")) {
                             if (listNode.number_of_children() == 2) {
                                 tree<Vertex>::sibling_iterator child = listNode.begin();
                                 tree<Vertex>::pre_order_iterator ANode = child++;
                                 pHandle tHandle = boost::get<pHandle>(*child);
-                                if (atw->getType(tHandle) == NUMBER_NODE) {
+                                if (asw->getType(tHandle) == NUMBER_NODE) {
                                     // Case 1:
                                     printf("Case 1 detected\n");
                                     // Gets the A subtree as a tree<Vertex>
                                     tree<Vertex> ATree(ANode);
-                                    TableGather matchingSet(ATree, aprovider, VarT);
+                                    TableGather matchingSet(ATree, asw, VarT);
                                     TableGather::iterator itr = matchingSet.begin();
                                     while (itr != matchingSet.end()) {
                                         pHandle matchingHandle = boost::get<pHandle>(itr->value);
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
-                                        unsigned long tLong = atol(atw->getName(tHandle).c_str());
+                                        unsigned long tLong = atol(asw->getName(tHandle).c_str());
                                         //TimeStamp* ts = new TimeStamp(false, tLong);
                                         Temporal* ts = new Temporal(false, tLong, tLong);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries with the exact timestamp: " << ts->toString() << endl;
-                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; // what about the version handle?
-                                        atw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *ts, TemporalTable::EXACT);
+                                        Handle realMatchingHandle = asw->fakeToRealHandle(matchingHandle).first; // what about the version handle?
+                                        asw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *ts, TemporalTable::EXACT);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            pHandle tNode = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle tNode = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            pHandle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            pHandle atTimePredNode = atw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
+                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
                                             pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            pHandle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
                                             if (itr->bindings) {
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
@@ -681,43 +679,43 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
                                 tree<Vertex>::pre_order_iterator ANode = child++;
                                 pHandle t1Handle = boost::get<pHandle>(*child++);
                                 pHandle t2Handle = boost::get<pHandle>(*child);
-                                if (atw->getType(t1Handle) == NUMBER_NODE &&
-                                        atw->getType(t2Handle) == NUMBER_NODE) {
+                                if (asw->getType(t1Handle) == NUMBER_NODE &&
+                                        asw->getType(t2Handle) == NUMBER_NODE) {
                                     // Case 2:
                                     printf("Case 2 detected\n");
                                     tree<Vertex> ATree(ANode);
-                                    TableGather matchingSet(ATree, aprovider, VarT);
+                                    TableGather matchingSet(ATree, asw, VarT);
                                     TableGather::iterator itr = matchingSet.begin();
                                     while (itr != matchingSet.end()) {
                                         pHandle matchingHandle = boost::get<pHandle>(itr->value);
                                         cout << "got a matching element for A: " << matchingHandle << endl;
                                         // Checks if the matching atom satisfy the time condition
-                                        unsigned long t1Long = atol(atw->getName(t1Handle).c_str());
-                                        unsigned long t2Long = atol(atw->getName(t2Handle).c_str());
+                                        unsigned long t1Long = atol(asw->getName(t1Handle).c_str());
+                                        unsigned long t2Long = atol(asw->getName(t2Handle).c_str());
                                         Temporal* tl = new Temporal(t1Long, t2Long);
                                         std::list<HandleTemporalPair> timeEntries;
                                         cout << "Looking for HandleTime entries inside the following temporal: " << tl->toString() << endl;
                                         //! @todo: is STARTS_WITHIN correct?
-                                        Handle realMatchingHandle = atw->fakeToRealHandle(matchingHandle).first; //! @todo what about the version handle? 
-                                        atw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *tl, TemporalTable::STARTS_WITHIN);
+                                        Handle realMatchingHandle = asw->fakeToRealHandle(matchingHandle).first; //! @todo what about the version handle? 
+                                        asw->getTimeServer().get(back_inserter(timeEntries), realMatchingHandle, *tl, TemporalTable::STARTS_WITHIN);
                                         if (timeEntries.size() > 0) {
                                             cout << "matched element satisfies the time condition: " << timeEntries.front().toString() << endl;
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", t1Long);
-                                            pHandle t1Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle t1Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             sprintf(tNodeName, "%lu", t2Long);
-                                            pHandle t2Node = atw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle t2Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
                                             pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(t1Node);
                                             listLinkOutgoing.push_back(t2Node);
-                                            pHandle listLink = atw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            pHandle atTimePredNode = atw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
+                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
+                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
                                             pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            pHandle evalLink = atw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
 
                                             cprintf(1, "Created new atInterval link:\n");
                                             printTree(evalLink, 0, 1);
@@ -741,11 +739,10 @@ void TableGather::gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider,
 #endif
 }
 
-TableGather::TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider, const Type VarT, int index)
+TableGather::TableGather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
+                         const Type VarT, int index)
 {
-//printf("Gather...\n");
-    gather(_MP, (aprovider ? aprovider : ASW()), VarT, index);
-// printf("----------------------\n");
+    gather(_MP, asw, VarT, index);
 }
 
 template<>
@@ -1270,7 +1267,7 @@ pHandleSet constitutedSet(pHandle CP,
     pHandleSet ret;
     
     tree<Vertex> tr(static_cast<pHandle>(MEMBER_LINK));
-    TableGather mems(tr);
+    TableGather mems(tr, asw);
     for(TableGatherConstIt tgci = mems.begin(); tgci != mems.end(); ++tgci) {
         pHandle h = boost::get<pHandle>(tgci->GetValue());
         pHandleSeq hs = asw->getOutgoing(h);

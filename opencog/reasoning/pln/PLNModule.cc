@@ -140,12 +140,12 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
     
     // Make sure that the ASW is initialized on module load
-    iAtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+    AtomSpaceWrapper* asw = ASW(server().getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
-    ((AtomSpaceWrapper*)asw)->archiveTheorems = false;
-    ((AtomSpaceWrapper*)asw)->allowFWVarsInAtomSpace = 
+    asw->archiveTheorems = false;
+    asw->allowFWVarsInAtomSpace = 
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
     // no longer done at module load - it would be inappropriate
@@ -186,7 +186,7 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
     Btr<BITNodeRoot> Bstate_;
     BITNodeRoot *state_;
 
-    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
+    pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
     pHandle fakeHandle = fakeHandles[0];
     Btr<vtree> target(new vtree(fakeHandle));
 

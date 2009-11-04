@@ -35,10 +35,10 @@ namespace opencog { namespace pln {
 using std::set;
 using std::find;
 
-SubsetEvalRule::SubsetEvalRule(iAtomSpaceWrapper *_destTable)
-    : Rule(_destTable, false, false, "SubsetEvalRule")
+SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
+    : Rule(asw, false, false, "SubsetEvalRule")
 {
-    asw = static_cast<AtomSpaceWrapper*>(_destTable);
+    _asw = asw;
     /*inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
                                              1,
                                              new atom(CONCEPT_NODE, 0))));*/
@@ -52,13 +52,13 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     pHandle h_sub = _v2h(premiseArray[0]);
     pHandle h_super = _v2h(premiseArray[1]);
 
-    OC_ASSERT(asw->isSubType(h_sub, CONCEPT_NODE));
-    OC_ASSERT(asw->isSubType(h_super, CONCEPT_NODE));
+    OC_ASSERT(_asw->isSubType(h_sub, CONCEPT_NODE));
+    OC_ASSERT(_asw->isSubType(h_super, CONCEPT_NODE));
 
     pHandleSet used;
 
-    pHandleSet satSetSub = constitutedSet(h_sub, 0.0f, 1, asw);
-    pHandleSet satSetSuper = constitutedSet(h_super, 0.0f, 1, asw);
+    pHandleSet satSetSub = constitutedSet(h_sub, 0.0f, 1, _asw);
+    pHandleSet satSetSuper = constitutedSet(h_super, 0.0f, 1, _asw);
 
     vector<TruthValue*> tvsSub;
     vector<TruthValue*> tvsSuper;
@@ -67,8 +67,8 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // so that each element of tvsSub and tvsSuper are aligned
 
     foreach(const pHandle& h_el_sub, satSetSub) {
-        std::cout << asw->pHandleToString(h_el_sub) << std::endl;
-        tvsSub.push_back(asw->getTV(h_el_sub).clone());
+        std::cout << _asw->pHandleToString(h_el_sub) << std::endl;
+        tvsSub.push_back(_asw->getTV(h_el_sub).clone());
         pHandleSetConstIt h_el_super_cit =
             find<pHandleSetConstIt, pHandle>(satSetSuper.begin(),
                                              satSetSuper.end(),
@@ -76,14 +76,14 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
         if (h_el_super_cit == satSetSuper.end())
             tvsSuper.push_back(new SimpleTruthValue(0, 0));
         else {
-            tvsSuper.push_back(GET_ASW->getTV(*h_el_super_cit).clone());
+            tvsSuper.push_back(_asw->getTV(*h_el_super_cit).clone());
             used.insert(*h_el_super_cit);
         }
     }
     
     foreach(const pHandle& h_el_super, satSetSuper) {
         if (!STLhas(used, h_el_super)) {
-            tvsSuper.push_back(GET_ASW->getTV(h_el_super).clone());
+            tvsSuper.push_back(_asw->getTV(h_el_super).clone());
             tvsSub.push_back(new SimpleTruthValue(0, 0));
         }
     }
@@ -117,10 +117,10 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     delete tvs1;
     delete tvs2;
 
-    pHandle ret = asw->addLink(SUBSET_LINK,
-                               _v2h(premiseArray[0]),
-                               _v2h(premiseArray[1]),
-                               *retTV, true);
+    pHandle ret = _asw->addLink(SUBSET_LINK,
+                                _v2h(premiseArray[0]),
+                                _v2h(premiseArray[1]),
+                                *retTV, true);
     return BoundVertex(ret);
 }
 

@@ -85,7 +85,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
 
     *child2 = CreateVar(destTable);
 
-    TableGather s(old_subst, destTable);
+    TableGather s(old_subst, static_cast<AtomSpaceWrapper*>(destTable));
 
     if (s.empty()) {
         ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);

@@ -54,9 +54,9 @@ namespace opencog {
 namespace pln {
 
 // create and return the single instance
-iAtomSpaceWrapper* ASW(AtomSpace* a)
+AtomSpaceWrapper* ASW(AtomSpace* a)
 {
-    static iAtomSpaceWrapper* instance;
+    static AtomSpaceWrapper* instance;
     if (instance == NULL || a != NULL) {    
         if (instance != NULL) {
             delete instance;

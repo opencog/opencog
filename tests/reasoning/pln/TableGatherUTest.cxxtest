@@ -76,11 +76,11 @@ public:
 
         //test TableGather
         tree<Vertex> mp1(static_cast<pHandle>(MEMBER_LINK));
-        TableGather table1(mp1);
+        TableGather table1(mp1, asw);
         tree<Vertex> mp2(static_cast<pHandle>(EVALUATION_LINK));
-        TableGather table2(mp2);
+        TableGather table2(mp2, asw);
         tree<Vertex> mp3(static_cast<pHandle>(LINK));
-        TableGather table3(mp3);
+        TableGather table3(mp3, asw);
 
         cout << "test table1: " << endl;
         for(TableGatherConstIt i = table1.begin(); i != table1.end(); i++) {

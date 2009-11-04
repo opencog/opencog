@@ -490,8 +490,10 @@ typedef std::set<opencog::pln::BoundVertex> BV_Set;
  * but it works well with a link type, see TableGatherUTest for an example
  */
 struct TableGather : public std::set<weak_atom<Vertex> > {
-    TableGather(tree<Vertex>& _MP, AtomLookupProvider* aprovider = NULL, const Type VarT = FW_VARIABLE_NODE, int index = -1);
-    void gather(tree<Vertex>& _MP, AtomLookupProvider* aprovider = NULL, const Type VarT = FW_VARIABLE_NODE, int index = -1);
+    TableGather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
+                const Type VarT = FW_VARIABLE_NODE, int index = -1);
+    void gather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
+                const Type VarT = FW_VARIABLE_NODE, int index = -1);
 };
 
 typedef TableGather::iterator TableGatherIt;
@@ -525,7 +527,9 @@ Handle satisfyingSet(Handle h);
  * @param min_membershipStrength The minimum strength of the  membership
  *                               to be taken in consideration
  * @param min_membershipCount The minimum count of the membership
- * @param asw AtomSpaceWrapper pointer where to look for the concept P
+ * @param asw AtomSpaceWrapper where to look for the concept P
+ *        Note that it is not const because TableGather is not const
+ *        it must be fixed
  * @return The pHandleSet containing all elements that are member of P and
  *         have their TV above the given threshold strength and count
  */

@@ -36,11 +36,11 @@ using std::vector;
 class SubsetEvalRule : public Rule
 {
     SubsetEvalFormula formula;
-    AtomSpaceWrapper* asw;
+    AtomSpaceWrapper* _asw;
 
 public:
     virtual ~SubsetEvalRule() {}
-    SubsetEvalRule(iAtomSpaceWrapper *_destTable);
+    SubsetEvalRule(AtomSpaceWrapper *asw);
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
         return setOfMPs(); //No support (yet)

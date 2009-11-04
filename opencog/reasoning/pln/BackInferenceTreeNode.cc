@@ -1949,7 +1949,7 @@ string BITNode::printFitnessPool()
 string BITNodeRoot::printTrail(pHandle h) const
 {
     stringstream ss;
-    AtomSpaceWrapper* asw = (AtomSpaceWrapper*) ASW();
+    AtomSpaceWrapper* asw = ASW();
     if (asw->isValidPHandle(h)) {
         ss << printTree(h,0,0);
         ss << printTrail(h,0);
