@@ -25,6 +25,11 @@
 #define _SPATIAL_MATH_BOUNDINGBOX_H_
 
 #include <vector>
+#include <list>
+#include <tr1/unordered_map>
+
+#include <boost/functional/hash.hpp>
+
 #include "Vector3.h"
 #include "LineSegment.h"
 #include "SquareFace.h"
@@ -116,14 +121,28 @@ public:
 
     BoundingBox& operator=( const BoundingBox& bb );
 
+    const std::list<LineSegment*>& getEdges( const Vector3& corner ) const throw(opencog::NotFoundException);
+
 private:
     void buildCorners( void );
     void buildFaces( void );
     void buildEdges( void );
 
+
+    struct Vector3Hash {
+        inline std::size_t operator()(const Vector3& o) const {
+            std::size_t seed = 0;
+            boost::hash_combine( seed, o.x );
+            boost::hash_combine( seed, o.y );
+            boost::hash_combine( seed, o.z );
+            return seed;
+        }
+    };
+
     Entity* entity;
     std::vector<SquareFace> squareFaces;
     std::vector<LineSegment> edges;
+    std::tr1::unordered_map<Vector3, std::list<LineSegment*>, Vector3Hash > cornerEdges;
     std::vector<Vector3> corners;
 
 }; // BoundingBox

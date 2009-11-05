@@ -130,6 +130,7 @@ const std::vector<SquareFace>& BoundingBox::getAllFaces( )
 void BoundingBox::buildEdges( void )
 {
     this->edges.clear( );
+    this->cornerEdges.clear( );
 
     edges.push_back( LineSegment( this->corners[0], this->corners[1] ) );
     edges.push_back( LineSegment( this->corners[1], this->corners[2] ) );
@@ -145,6 +146,12 @@ void BoundingBox::buildEdges( void )
     edges.push_back( LineSegment( this->corners[1], this->corners[5] ) );
     edges.push_back( LineSegment( this->corners[2], this->corners[6] ) );
     edges.push_back( LineSegment( this->corners[3], this->corners[7] ) );
+
+    unsigned int i;
+    for( i = 0; i < edges.size( ); ++i ) {
+        cornerEdges[edges[i].pointA].push_back( &edges[i] );
+        cornerEdges[edges[i].pointB].push_back( &edges[i] );
+    } // for
 }
 
 void BoundingBox::buildFaces( void )
@@ -211,4 +218,16 @@ BoundingBox& BoundingBox::operator=( const BoundingBox & bb )
     this->corners = bb.corners;
 
     return *this;
+}
+
+const std::list<LineSegment*>& BoundingBox::getEdges( const Vector3& corner ) const throw(opencog::NotFoundException)
+{
+    std::tr1::unordered_map<Vector3, std::list<LineSegment*>, BoundingBox::Vector3Hash >::const_iterator it = 
+        this->cornerEdges.find( corner );
+    
+    if ( it != this->cornerEdges.end( ) ) {
+        return it->second;
+    } // if
+    throw opencog::NotFoundException( "BoundingBox there is no edges connected to the given corner[%s]", 
+                                      TRACE_INFO, corner.toString( ).c_str( ) );
 }
