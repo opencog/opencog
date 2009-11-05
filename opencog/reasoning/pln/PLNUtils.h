@@ -39,6 +39,7 @@
 #include <iostream>
 #include <stack>
 #include <math.h>
+#include <functional>
 
 #include <boost/variant.hpp>
 #include <boost/smart_ptr.hpp>
@@ -64,6 +65,7 @@
 
 using namespace opencog;
 using namespace opencog::pln;
+using std::unary_function;
 
 #undef STLhas
 #define STLhas(container, entity) ((container).find(entity) != (container).end())
@@ -556,6 +558,19 @@ pHandleSet constitutedSet(pHandle concept,
                           strength_t min_membershipStrength,
                           count_t min_membershipCount,
                           AtomSpaceWrapper* asw);
+
+/**
+ * Return the set of members of a given memberLink set
+ *
+ * @param memberLinks memberLink set
+ * @param asw AtomSpaceWrapper where to look for the concept P
+ *        Note that it is not const because TableGather is not const
+ *        it must be fixed
+ * @return The pHandleSet containing all elements of the memberLink set
+ */
+pHandleSet constitutedSet(const pHandleSet& memberLinks,
+                          AtomSpaceWrapper* asw);
+
 
 template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);

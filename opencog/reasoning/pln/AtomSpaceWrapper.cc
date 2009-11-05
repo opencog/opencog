@@ -180,7 +180,7 @@ pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
     }
 }
 
-pHandle AtomSpaceWrapper::getOutgoing(const pHandle h, const int i) 
+pHandle AtomSpaceWrapper::getOutgoing(const pHandle h, const int i)
 {
     if (i < getArity(h))
         return getOutgoing(h)[i];
@@ -348,9 +348,9 @@ std::vector< pHandle > AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     return result;
 }
 
-std::vector< pHandle > AtomSpaceWrapper::realToFakeHandles(
-        std::vector< Handle > hs, bool expand) {
-    std::vector<pHandle> result;
+pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
+                                               bool expand) {
+    pHandleSeq result;
     foreach (Handle h, hs) {
         if (expand) 
             mergeCopy(result,realToFakeHandle(h));
@@ -360,7 +360,8 @@ std::vector< pHandle > AtomSpaceWrapper::realToFakeHandles(
     return result;
 }
 
-pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h, const Handle c)
+pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h,
+                                               const Handle c)
 {
     // c is a context whose outgoing set of contexts matches contexts of each
     // handle in outgoing of real handle h.

@@ -302,12 +302,14 @@ public:
     //! Check whether a pHandle is known to the AtomSpaceWrapper
     bool isValidPHandle(const pHandle h) const;
     //! Convert a specific VersionHandled TruthValue to a pln handle
+    // Note that realToFakeHandle cannot be const because it modifies vhmap
+    // Or vhmap should be declared mutable
     pHandle realToFakeHandle(const Handle h, const VersionHandle vh);
     //! Convert a a real handle into a fake handle for each VersionedHandled TV
     pHandleSeq realToFakeHandle(const Handle hs);
     //! Convert a pHandleSeq of pln handles to real, optionally expanding to
     //! include every VersionHandled TV in each real handle
-    pHandleSeq realToFakeHandles(HandleSeq hs, bool expand=false);
+    pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
     //! Match each context in the outgoing set of "context" with the handles
     pHandleSeq realToFakeHandles(Handle h, Handle context);
 
@@ -498,6 +500,24 @@ public:
 //  void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
 //                     set<subst>* forbiddenBindings);
 
+};
+
+/*
+ * Operator to check that the outgoing pHandles of 2 pHandles
+ * both at a given index are equal
+ */
+struct EqOutgoing : public unary_function<pHandle, bool> {
+    EqOutgoing(const pHandle h, const int idx, AtomSpaceWrapper* asw)
+        : _h(h), _idx(idx), _asw(asw)
+    {}
+    bool operator()(const pHandle h)
+    {
+        return _asw->getOutgoing(_h, _idx) == _asw->getOutgoing(h, _idx);
+    }
+private:
+    const pHandle _h;
+    const int _idx;
+    AtomSpaceWrapper* _asw;
 };
 
 /**

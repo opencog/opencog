@@ -1211,6 +1211,12 @@ opencog::pln::atom* newAtomWithNewType(Handle h, Type T)
  return ret;
  }*/
 
+
+// WARNING: do not modify that, rather operator== for pHandle should be
+// overloaded (which will be possible once pHandle is a struct instead
+// of an integer)
+// In the meantime it is unlikely that we need something different anyway
+// and equal should probably be removed anyway.
 bool equal(pHandle A, pHandle B) {
     return A == B;
 }
@@ -1286,6 +1292,15 @@ pHandleSet memberLinkSet(pHandle CP,
     return ret;
 }
 
+pHandleSet constitutedSet(const pHandleSet& memberLinks,
+                          AtomSpaceWrapper* asw)
+{
+    pHandleSet ret;
+    foreach(pHandle ml, memberLinks) {
+        ret.insert(asw->getOutgoing(ml, 0));
+    }
+    return ret;
+}
 
 pHandleSet constitutedSet(pHandle CP,
                           strength_t min_membershipStrength,
@@ -1295,11 +1310,7 @@ pHandleSet constitutedSet(pHandle CP,
     OC_ASSERT(asw->isSubType(CP, CONCEPT_NODE));
     pHandleSet memberLinks = memberLinkSet(CP, min_membershipStrength,
                                            min_membershipCount, asw);
-    pHandleSet ret;
-    foreach(pHandle ml, memberLinks) {
-        ret.insert(asw->getOutgoing(ml, 0));
-    }
-    return ret;
+    return constitutedSet(memberLinks, asw);
 }
 
 #ifdef DEAD_CODE_DELETE_AT_LIESURE

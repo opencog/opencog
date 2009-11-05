@@ -34,6 +34,7 @@ namespace opencog { namespace pln {
 
 using std::set;
 using std::find;
+using std::find_if;
 
 SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
     : Rule(asw, false, false, "SubsetEvalRule")
@@ -43,6 +44,9 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
                                              1,
                                              new atom(CONCEPT_NODE, 0))));*/
 }
+
+const strength_t MIN_MEMBERS_STRENGTH = 0.000001;
+const strength_t MIN_MEMBERS_COUNT = 1;
 
 BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
                                     pHandle CX) const
@@ -57,8 +61,10 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 
     pHandleSet used;
 
-    pHandleSet satSetSub = constitutedSet(h_sub, 0.0f, 1, _asw);
-    pHandleSet satSetSuper = constitutedSet(h_super, 0.0f, 1, _asw);
+    pHandleSet mlSetSub = memberLinkSet(h_sub, MIN_MEMBERS_STRENGTH,
+                                         MIN_MEMBERS_COUNT, _asw);
+    pHandleSet mlSetSuper = memberLinkSet(h_super, MIN_MEMBERS_STRENGTH,
+                                         MIN_MEMBERS_COUNT, _asw);
 
     vector<TruthValue*> tvsSub;
     vector<TruthValue*> tvsSuper;
@@ -66,24 +72,25 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // We fill tvsSub and tvsSuper by padding the missing TVs with zeros
     // so that each element of tvsSub and tvsSuper are aligned
 
-    foreach(const pHandle& h_el_sub, satSetSub) {
-        std::cout << _asw->pHandleToString(h_el_sub) << std::endl;
-        tvsSub.push_back(_asw->getTV(h_el_sub).clone());
-        pHandleSetConstIt h_el_super_cit =
-            find<pHandleSetConstIt, pHandle>(satSetSuper.begin(),
-                                             satSetSuper.end(),
-                                             h_el_sub);
-        if (h_el_super_cit == satSetSuper.end())
+    foreach(const pHandle& h_ml_sub, mlSetSub) {
+        std::cout << _asw->pHandleToString(h_ml_sub) << std::endl;
+        tvsSub.push_back(_asw->getTV(h_ml_sub).clone());
+
+        EqOutgoing eqMember(h_ml_sub, 0, _asw);
+        pHandleSetConstIt h_ml_super_cit =
+            find_if(mlSetSuper.begin(), mlSetSuper.end(), eqMember);
+        if (h_ml_super_cit == mlSetSuper.end())
             tvsSuper.push_back(new SimpleTruthValue(0, 0));
         else {
-            tvsSuper.push_back(_asw->getTV(*h_el_super_cit).clone());
-            used.insert(*h_el_super_cit);
+            tvsSuper.push_back(_asw->getTV(*h_ml_super_cit).clone());
+            used.insert(*h_ml_super_cit);
         }
     }
     
-    foreach(const pHandle& h_el_super, satSetSuper) {
-        if (!STLhas(used, h_el_super)) {
-            tvsSuper.push_back(_asw->getTV(h_el_super).clone());
+    foreach(const pHandle& h_ml_super, mlSetSuper) {
+        std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
+        if (!STLhas(used, h_ml_super)) {
+            tvsSuper.push_back(_asw->getTV(h_ml_super).clone());
             tvsSub.push_back(new SimpleTruthValue(0, 0));
         }
     }
