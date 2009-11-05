@@ -14,6 +14,10 @@
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
+#include <boost/function.hpp>
+//#include <functional>
+#include <boost/bind.hpp>
+
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
@@ -153,6 +157,23 @@ void SchemeEval::thread_unlock(void)
 	}
 }
 #endif
+
+bool SchemeEval::register_function(SchemeEval::SchemeFunction* function)
+{   
+    if ( function == NULL || function->getFunctionPointer( ) == NULL ) {
+        logger().error("%s: Cannot register a new function (invalid pointer)",
+			 __FUNCTION__ );
+        return false;
+    } // if
+
+    scm_c_define_gsubr( function->getName( ).c_str( ), 
+                        function->getNumberOfRequiredArguments( ),
+                        function->getNumberOfOptionalArguments( ),
+                        function->getNumberOfRestArguments( ),
+                        function->getFunctionPointer( )                        
+                        );
+    return true;
+}
 
 SchemeEval::SchemeEval(void)
 {
