@@ -47,7 +47,7 @@ const strength_t e2_sub_s = 0.5;
 const strength_t e4_sub_s = 0.2;
 const strength_t e5_sub_s = 0.9;
 const strength_t e7_sub_s = 1.0;
-const strength_t e8_sub_s = 0.0;
+const strength_t e8_sub_s = 0.4;
 
 //member link strength of some elements of super
 const strength_t e1_super_s = 0.2;
@@ -57,12 +57,18 @@ const strength_t e6_super_s = 0.4;
 const strength_t e8_super_s = 0.6;
 const strength_t e9_super_s = 0.0;
 
+//e9_super_s is null so it is not included in ne_non_null
+const unsigned int ne_non_null = 9;
+
 class SubsetEvalRuleUTest : public CxxTest::TestSuite {
 private:
     AtomSpace* _as;
     AtomSpaceWrapper* _asw;
     pHandle _sub_h;
     pHandle _super_h;
+    strength_t f(strength_t s1, strength_t s2) {
+        return std::min(s1, s2);
+    }
 
 public:
 
@@ -91,7 +97,8 @@ public:
 
         _as->print();
 
-        _super_h = _asw->addNode(CONCEPT_NODE, "super", TruthValue::DEFAULT_TV());
+        _super_h = _asw->addNode(CONCEPT_NODE, "super",
+                                 TruthValue::DEFAULT_TV());
 
 	cout << "AFTER ADDING super" << endl;
         _as->print();
@@ -107,8 +114,6 @@ public:
         //add members of sub
         pHandle h0 = _asw->addLink(MEMBER_LINK, ehv[0], _sub_h,
                       SimpleTruthValue(e0_sub_s, 1.0));
-
-        
 
         _asw->addLink(MEMBER_LINK, ehv[2], _sub_h,
                       SimpleTruthValue(e2_sub_s, 1.0));
@@ -149,7 +154,24 @@ public:
         const vector<Vertex> vv = list_of(_sub_h)(_super_h);
         BoundVertex bv = sser.compute(vv);
         pHandle res_h = _v2h(bv.GetValue());
+        const TruthValue& res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
-        TS_ASSERT(true);
+
+        // build the TV result manually
+        strength_t numerator =
+            f(e2_sub_s, e2_super_s) + f(e8_sub_s, e8_super_s);
+        strength_t denominator =
+            e0_sub_s + e2_sub_s + e4_sub_s + e5_sub_s + e7_sub_s + e8_sub_s;
+        strength_t expected_strength = numerator / denominator;
+        // check strength
+        TS_ASSERT(isApproxEq(res_tv.getMean(), expected_strength));
+        
+        count_t expected_count = ne_non_null;
+        // check count
+        TS_ASSERT(isApproxEq(res_tv.getCount(), expected_count));
+
+        // check that first child is sub_h and second child is super_h
+        TS_ASSERT(_asw->getOutgoing(res_h, 0) == _sub_h);
+        TS_ASSERT(_asw->getOutgoing(res_h, 1) == _super_h);
     }
 };

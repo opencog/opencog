@@ -237,7 +237,7 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon) {
 //compare 2 FloatT with precision EPSILON
 template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 {
-    return isApproxEq(x, y, EPSILON);
+    return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
 }
 
 //compute the binary entropy of probability p
