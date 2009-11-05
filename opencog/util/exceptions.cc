@@ -81,7 +81,7 @@ StandardException::~StandardException()
     }
 }
 
-const char * StandardException::getMessage()
+const char * StandardException::getMessage() const
 {
     if (message == NULL) {
         return "";

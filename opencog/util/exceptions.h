@@ -72,7 +72,7 @@ public:
      * @return A c-string representing the error message. If no message have
      * been created just return an empty string.
      */
-    const char* getMessage();
+    const char* getMessage() const;
 
     /**
      * Set the error message.
