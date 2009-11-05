@@ -63,8 +63,6 @@ class SchemeSmob
 		static size_t free_misc(SCM);
 
 		// Atom creation and deletion functions
-		static SCM handle_to_scm(Handle);
-		static Handle scm_to_handle(SCM);
 		static SCM ss_new_node(SCM, SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);
@@ -145,6 +143,10 @@ class SchemeSmob
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 
 	public:
+                // Helper functions
+		static SCM handle_to_scm(Handle);
+		static Handle scm_to_handle(SCM);
+
 		static void init(void);
 		SchemeSmob(void);
 
