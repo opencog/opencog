@@ -26,9 +26,11 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PetInterface.h>
-#include "OutputRelex.h"
-#include "FramesToRelexRuleEngine.h"
-#include "NLGenClient.h"
+#include <opencog/embodiment/Control/OperationalPetController/OutputRelex.h>
+#include <opencog/embodiment/Control/OperationalPetController/FramesToRelexRuleEngine.h>
+#include <opencog/embodiment/Control/OperationalPetController/NLGenClient.h>
+
+#include <opencog/guile/SchemeEval.h>
 
 namespace OperationalPetController
 {
@@ -60,6 +62,8 @@ namespace OperationalPetController
         int nlgen_server_port;
         FramesToRelexRuleEngine framesToRelexRuleEngine;
         NLGenClient *nlgenClient;
+
+        SchemeEval::SchemeFunction* spatialRelationsEvaluatorCaller;
 
     private:
 

@@ -177,6 +177,119 @@
  
 ;;; Helper functions
 
+; Call some method to prepare instance of frames
+; given an ungrounded predicateNode
+; The given Frame instance can contains VariableNodes
+; in its elements values
+; If there is a mapped function that will preprocess
+; the frame the return value is #t and #f otherwise
+(define (frame-preprocessor predicateNode)
+  (let ((frameType (get-frame-instance-type predicateNode)))
+    (cond ((equal? frameType "#Locative_relation")
+           ; first remove all old known spatial relations
+           (map
+            (lambda (evalLink)              
+              (map 
+               (lambda (oldFrame)
+                 (remove-frame-instance oldFrame)
+                 )
+               (cog-outgoing-set (car (gdr evalLink)))
+              )
+              )
+             (cog-filter-incoming
+              'EvaluationLink
+              (PredicateNode "knownSpatialRelations")
+              )             
+            )
+
+           ; then compute the new spatial relations and re-define the predicate
+           (EvaluationLink (stv 1 1)
+            (PredicateNode "knownSpatialRelations" )
+            (cog-emb-compute-spatial-relations 
+             (get-sentence-author (car (get-latest-sentences)))
+             (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Figure")))
+             (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Ground")))
+             (get-grounded-element-value (get-frame-instance-element-value (get-frame-instance-element-predicate predicateNode "Ground_2")))
+             )
+            )
+
+           #t
+           )
+          )
+    #f
+    )
+  )
+
+
+(define (remove-frame-instance predicateNode)  
+  (let ((removed? #f))
+    (if (and (not (null? predicateNode)) (equal? (cog-type predicateNode) 'PredicateNode))
+        (begin         
+
+    
+          (map
+           (lambda (elementLink)
+             ; first remove all eval link that connects the 
+             ; value to its respetive element
+             (let ((elementPredicate (car (gdr elementLink))))
+               (map
+                (lambda (evalLink)
+                  (cog-delete evalLink)
+                  )
+                (cog-filter-incoming
+                 'EvaluationLink
+                 elementPredicate
+                 )
+                )
+               
+               (map
+                (lambda (inheritanceLink)
+                  (cog-delete inheritanceLink)
+                  )
+                (cog-filter-incoming
+                 'InheritanceLink
+                 elementPredicate
+                 )
+                )               
+               )
+             ; then disconnect the frame element from the frame instance
+             (cog-delete elementLink)
+             )
+           (cog-filter-incoming
+            'FrameElementLink
+            predicateNode
+            )
+           )
+         ; finally remove the inheritance link
+          (map
+           (lambda (inheritance)
+             (cog-delete inheritance)
+             (set! removed? #t)
+             )
+           (cog-filter-incoming
+            'InheritanceLink
+            predicateNode
+            )
+           )
+        )
+        )
+    removed?
+    )
+  )
+
+(define (remove-frame-instances frameType)
+  (map
+   (lambda (inheritance)
+     (remove-frame-instance (gar inheritance))
+     )
+   (cog-get-link
+    'InheritanceLink
+    'PredicateNode
+    (DefinedFrameNode frameType)
+    )
+   )    
+  )
+
 ; Retrieve a list containing the sentences that belong to the most
 ; recent parsed text
 (define (get-latest-sentences)
@@ -194,6 +307,24 @@
         )
     )  
 )
+
+; Retrieve the node of the agent who says the given sentence
+(define (get-sentence-author sentence)
+  (let ((author '()))
+    (map
+     (lambda (link)
+       (if (and (equal? (car (gdr link)) sentence) (cog-subtype? 'ObjectNode (cog-type (gar link))))
+           (set! author (gar link))
+           )
+       )    
+     (cog-filter-incoming
+      'ListLink
+      sentence
+      )
+     )      
+    author
+    )
+  )
 
 ; Retrieve a list containing the parses that belongs to the most
 ; recent parsed sentences
@@ -732,17 +863,20 @@
 ; i.e. (get-frame-instance-element-value
 ;        (PredicateNode "ball_99_color_Color") ) = (ConceptNode "blue")
 (define (get-frame-instance-element-value elementPredicateNode)
-  (let ((values
-         (cog-filter-incoming
-          'EvaluationLink
-          elementPredicateNode
-          ))
+  (if (not (null? elementPredicateNode))
+      (let ((values
+             (cog-filter-incoming
+              'EvaluationLink
+              elementPredicateNode
+              ))
+            )
+        (if values
+            (car (gdr (car values)))
+            '()
+            )
         )
-    (if values
-        (car (gdr (car values)))
-        '()
-        )
-    )
+      '()
+      )
   )
 
 ; Given a PredicateNode, which represents a
@@ -1111,35 +1245,38 @@
 ; For instance, a grounded node for a SemeNode is a ObjectNode (or a child of it)
 ; i.e. (get-grounded-element-value (WordNode "blue")) = (ConceptNode "blue")
 (define (get-grounded-element-value value)
-  (let ((groundedValue '()))
-  ; first try to find a reference resolution semeNode
-    (if (equal? (cog-type value) 'WordInstanceNode)
-        (let ((refLinks (cog-get-link
-                         'ReferenceLink
-                         'SemeNode
-                         value)
-                        ))
-          (if (not (null? refLinks))
-              (set! groundedValue (gar (car refLinks)))
-              ) ; let             
-          ) ; if
-        ) ; if
-
-   ; if there is no semeNode, then try to find a corresponding node
-    (if (null? groundedValue)
-        (let ((name (cog-name value)))
-          (if (and (> (string-length name) 1) (string=? "#" (substring name 0 1)))
-              (set! groundedValue (get-corresponding-node (substring name 1 (string-length name))))
-              (let ((wordNode (get-word-node value)))
-                (if (not (null? wordNode))
-                    (set! groundedValue (get-corresponding-node (cog-name wordNode)))
+  (if (or (null? value) (equal? (cog-type value) 'VariableNode))
+      value
+      (let ((groundedValue '()))
+      ; first try to find a reference resolution semeNode
+        (if (equal? (cog-type value) 'WordInstanceNode)
+            (let ((refLinks (cog-get-link
+                             'ReferenceLink
+                             'SemeNode
+                             value)
+                            ))
+              (if (not (null? refLinks))
+                  (set! groundedValue (gar (car refLinks)))
+                  ) ; let             
+              ) ; if
+            ) ; if
+        
+       ; if there is no semeNode, then try to find a corresponding node
+        (if (null? groundedValue)
+            (let ((name (cog-name value)))
+              (if (and (> (string-length name) 1) (string=? "#" (substring name 0 1)))
+                  (set! groundedValue (get-corresponding-node (substring name 1 (string-length name))))
+                  (let ((wordNode (get-word-node value)))
+                    (if (not (null? wordNode))
+                        (set! groundedValue (get-corresponding-node (cog-name wordNode)))
+                        )
                     )
-                )
+                  )
               )
-          )
-      ) ; if
-    groundedValue
-    ) ; let  
+            ) ; if
+        groundedValue
+        ) ; let  
+      )
   )
 
 
@@ -1153,6 +1290,7 @@
         (frameType (get-frame-instance-type predicateNode))
         (elementsStrength '())
         )
+
     (map ; inspect all the frame elements
      (lambda (elementPredicate)
        (let* (
@@ -1171,6 +1309,7 @@
                 (let* ((candidate (gar inheritanceLink ))
                        (frameInstancePredicate (gar (car (cog-filter-incoming 'FrameElementLink candidate))))
                        )
+                  ; only PredicateNodes are welcome
                   (if (equal? 'PredicateNode (cog-type candidate))
                       
                       (map
@@ -1180,7 +1319,8 @@
                                 )
                            (if (or (equal? 'SemeNode valueType) (equal? 'ConceptNode valueType))                               
                                (set! elementsCandidates (append elementsCandidates (list frameInstancePredicate)))
-                               (set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate (assoc-ref (cog-tv->alist (cog-tv inheritanceLink)) 'mean)))))
+                               (set! elementsStrength (append elementsStrength (list (cons frameInstancePredicate 
+                                   (assoc-ref (cog-tv->alist (cog-tv inheritanceLink)) 'mean)))))
                                )
                            )
                          )
@@ -1332,16 +1472,17 @@
     (map ; ok it is a question, so handle it
 	; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
 	  ;questionFrames
-     (lambda (predicate)	   
+     (lambda (predicate)
+       (frame-preprocessor predicate)
        (if (not (frame-instance-contains-variable? predicate))
            (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
-             (if (not (null? groundedFrameInstance))
-                 (set! finalFrames (append finalFrames (list groundedFrameInstance )))
+             (if (not (null? groundedFrameInstance))                                    
+                 (set! finalFrames (append finalFrames (list groundedFrameInstance )))                   
                  )
              ) ; let
-           (let ((groundedFrame (match-frame predicate)))
-             (if (not (null? groundedFrame))
-                 (set! finalFrames (append finalFrames (list (car groundedFrame ))))
+           (let ((groundedFrameInstances (match-frame predicate)))
+             (if (not (null? groundedFrameInstances))
+                 (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
                  )
              ) ; let
            ) ; if
@@ -1522,6 +1663,10 @@
 ; This function is responsible for getting a bunch of Frames instances
 ; that represents a question made by another agent and start a pattern
 ; matching process to find the answer inside the agent's AtomSpace.
+; The matching starts by getting all parses of the sentence that 
+; represent the questions. Each parse has a list of frames.
+; The parse which matches a greater number of frames will be chosen
+; as the question answer. 
 (define (answer-question)
   (let ((chosenAnswer '())
         (question? #f)
@@ -1562,8 +1707,8 @@
                     (numberOfGroundedPredicates (length groundedPredicates))
                     (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
                     )
-               (if (and (> numberOfIncomingPredicates 0) (or (null? chosenAnswer) (< balance (car chosenAnswer))))
-                   (set! chosenAnswer (cons balance groundedPredicates))
+               (if (and (> numberOfIncomingPredicates 0) (= balance 0) (or (null? chosenAnswer) (> numberOfGroundedPredicates (car chosenAnswer))))
+                   (set! chosenAnswer (cons numberOfGroundedPredicates groundedPredicates))
                    )
                )
              )
@@ -1585,7 +1730,7 @@
           (EvaluationLink (stv 1 1)
              (PredicateNode "latestQuestionFrames")
              (ListLink
-              (if (= (car chosenAnswer) 0) (cdr chosenAnswer) '() )
+              (if (not (null? chosenAnswer) ) (cdr chosenAnswer) '() )
               )
              )
 
@@ -1596,3 +1741,4 @@
   
      ) ; let
   )
+

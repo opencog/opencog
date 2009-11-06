@@ -120,7 +120,7 @@ public:
 	this->atomSpace = cogserver.getAtomSpace();
 
         this->sender = new LSMessageSenderMock();
-        
+
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
@@ -390,7 +390,6 @@ public:
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
  
        
-       
     }
 
     ~LanguageComprehensionUTest( ) 
@@ -412,7 +411,7 @@ public:
 
     void testResolution( ) 
     {
-        
+ 
         // first call it without sentence to parse
         this->language->solveLatestSentenceReference( );
         // testing: grab the red ball
@@ -597,13 +596,13 @@ public:
             TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
             TS_ASSERT( execLink != Handle::UNDEFINED );
         }
-        
+
     } 
 
     
     void testQuestionAnswering( void )
     {
-        
+
         int rc;        
         {
             std::map<std::string, Handle> elements;
@@ -697,7 +696,16 @@ public:
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
         //TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )    
         logger().debug("Question 10 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
-    
+
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question11.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->solveLatestSentenceReference( );
+        this->language->answerLatestQuestion( );
+        this->language->answerLatestQuestion( ); // repeat to force the spatial relations re-processing
+        TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
+            this->atomSpace->getHandle( PET_NODE, petId ) ) )
+        logger().debug("Question 11 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
     
     }
     
@@ -705,45 +713,43 @@ public:
     //void testRealSituation( void ) 
     //{      
     /*
-      // this test can be used to evaluate the latest sentence
-      // stored into the agent atomTable. To use it copy
-      // the content of the dir /tmp/<user>/Petaverse/PetDatabase/pet_id_xxxxx/
-      // to the bin dir of this test and change the id in the Pet class instantiation
-      // bellow. Compile and run the test
-      SavingLoading savingLoading;
-      savingLoading.load( "atomSpace.dump", *this->atomSpace );
-      
-      Pet* pet = Pet::importFromFile( "pet.dump", "id_46564", this->atomSpace, sender );
-      
-      LanguageComprehension lang( *pet );
-      int rc;
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/scm/utilities.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/predicates-frames.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/language-comprehension.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/reference-resolution-rules.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
-      TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-      
-      lang.solveLatestSentenceReference( );
-      lang.solveLatestSentenceCommand( );
-      lang.answerLatestQuestion( );
-      
-      delete pet;
-      */   
-    //}
-      
-
+        // this test can be used to evaluate the latest sentence
+        // stored into the agent atomTable. To use it copy
+        // the content of the dir /tmp/<user>/Petaverse/PetDatabase/pet_id_xxxxx/
+        // to the bin dir of this test and change the id in the Pet class instantiation
+        // bellow. Compile and run the test
+        SavingLoading savingLoading;
+        savingLoading.load( "atomSpace.dump", *this->atomSpace );
+        
+        Pet* pet = Pet::importFromFile( "pet.dump", "id_62862", this->atomSpace, sender );
+        
+        LanguageComprehension lang( *pet );
+        int rc;
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/scm/utilities.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/predicates-frames.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/language-comprehension.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/reference-resolution-rules.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/command-resolution-rules.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        
+        lang.solveLatestSentenceReference( );
+        lang.solveLatestSentenceCommand( );
+        lang.answerLatestQuestion( );
+        
+        delete pet;
+    */
+    //}      
 
     void testFrames2Relex()
-    {   
+    {  
         //color
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);     
@@ -771,8 +777,33 @@ public:
         output = this->language->resolveFrames2Relex( );
         TS_ASSERT(output != "");
         logger().debug("testFrames2Relex - Relex Output for relex-question5.scm input: %s",output.c_str() );
-        
-        
+                
+    }
+
+    void testSpatialRelationsExtractor( void ) 
+    {
+        std::stringstream command;
+        command << "(cog-emb-compute-spatial-relations ";
+        command << "   (AvatarNode \"" << petOwnerId << "\")";
+        command << "   (SemeNode \""<< petId << "\")";
+        command << "   (SemeNode \""<< treeId1 << "\")";
+        command << ")";        
+
+        std::string answer = SchemeEval::instance( ).eval( command.str( ) );
+        if ( SchemeEval::instance().eval_error() ) {
+            logger().error( answer );
+            SchemeEval::instance().clear_pending();
+        } // if
+
+        Handle frameInstancePredicate = this->atomSpace->getHandle( PREDICATE_NODE, petId + "_" + treeId1 + "_far" );
+        TS_ASSERT( frameInstancePredicate != Handle::UNDEFINED )
+        if ( frameInstancePredicate != Handle::UNDEFINED ) {
+            std::map<std::string, Handle> values = 
+                AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, frameInstancePredicate );
+            TS_ASSERT_EQUALS( values["Relation_type"], this->atomSpace->getHandle( CONCEPT_NODE, "far" ) )
+            TS_ASSERT_EQUALS( values["Figure"], this->atomSpace->getHandle( SEME_NODE, petId ) )
+            TS_ASSERT_EQUALS( values["Ground"], this->atomSpace->getHandle( SEME_NODE, treeId1 ) )
+        } // if        
     }
 
 }; 
