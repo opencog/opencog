@@ -36,6 +36,51 @@
 ; to represent the Embodiment Perceptions.
 
 
+; Definition of Frame Social_behavior_evaluation
+; #Gradable_attributes <- #Social_behavior_evaluation
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Social_behavior_evaluation")
+   (DefinedFrameNode "#Gradable_attributes")
+)
+
+; #Social_behavior_evaluation:Behavior
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Social_behavior_evaluation")
+   (DefinedFrameElementNode "#Social_behavior_evaluation:Behavior")
+)
+; #Social_behavior_evaluation:Individual
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Social_behavior_evaluation")
+   (DefinedFrameElementNode "#Social_behavior_evaluation:Individual")
+)
+; #Social_behavior_evaluation:Judge
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Social_behavior_evaluation")
+   (DefinedFrameElementNode "#Social_behavior_evaluation:Judge")
+)
+
+
+; Definition of Frame Morality_evaluation
+
+; #Social_behavior_evaluation <- #Morality_evaluation
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Morality_evaluation")
+   (DefinedFrameNode "#Social_behavior_evaluation")
+)
+
+; #Morality_evaluation:Evaluee
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Morality_evaluation")
+   (DefinedFrameElementNode "#Morality_evaluation:Evaluee")
+)
+; #Morality_evaluation:Expressor
+(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
+   (DefinedFrameNode "#Morality_evaluation")
+   (DefinedFrameElementNode "#Morality_evaluation:Expressor")
+)
+
+
+
 ; Definition of Frame Emotion_directed
 
 ; #Emotion_directed:Event
