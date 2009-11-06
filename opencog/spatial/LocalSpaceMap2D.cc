@@ -38,6 +38,9 @@
 using namespace Spatial;
 using namespace opencog;
 
+const double LocalSpaceMap2D::NEXT_FACTOR = 0.1;
+const double LocalSpaceMap2D::NEAR_FACTOR = 0.003125;
+
 bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity )
 {
     bool merged = false;
@@ -55,7 +58,7 @@ bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity )
 
         //std::cout << "inspecting " << it2->first << std::endl;
 
-        if ( it2->second->intersects( entity ) ) {
+        if ( it2->second->intersects( *entity ) ) {
             //std::cout << it2->first << " intersects " << entity->getId( ) << std::endl;
 
             if ( intersection[ it2->first ].get( ) == NULL ) {
@@ -262,6 +265,7 @@ void LocalSpaceMap2D::save(FILE* fp) const
 
         Spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
                                           it->second->getPosition( ).y,
+                                          it->second->getPosition( ).z,
                                           it->second->getLength( ),
                                           it->second->getWidth( ),
                                           it->second->getHeight( ),
@@ -568,6 +572,7 @@ void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
     for ( it = otherMap.entities.begin( ); it != otherMap.entities.end( ); ++it ) {
         Spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
                                           it->second->getPosition( ).y,
+                                          it->second->getPosition( ).z,
                                           it->second->getLength( ),
                                           it->second->getWidth( ),
                                           it->second->getHeight( ),
@@ -915,7 +920,7 @@ void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::Obj
 {
 
     long idHash = boost::hash<std::string>()( id );
-    EntityPtr entity( new StaticEntity( idHash, id, Math::Vector3( metadata.centerX, metadata.centerY ), Math::Dimension3( metadata.width, metadata.height, metadata.length ), Math::Quaternion( Math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
+    EntityPtr entity( new StaticEntity( idHash, id, Math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), Math::Dimension3( metadata.width, metadata.height, metadata.length ), Math::Quaternion( Math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
     entity->setProperty( Entity::OBSTACLE, isObstacle );
 
     //  std::cout << entity->toString( ) << " MetaData: " << metadata.centerX << " " << metadata.centerY << " " << metadata.length << " " << metadata.width << " " << metadata.height << " " << metadata.yaw << " " << isObstacle << std::endl;
@@ -957,6 +962,7 @@ void LocalSpaceMap2D::updateObject( const Spatial::ObjectID& id, const Spatial::
         const EntityPtr& entity = getEntity( id );
         Spatial::ObjectMetaData metaData( entity->getPosition( ).x,
                                           entity->getPosition( ).y,
+                                          entity->getPosition( ).z,
                                           entity->getLength( ),
                                           entity->getWidth( ),
                                           entity->getHeight( ),
@@ -1184,3 +1190,313 @@ void rec_find::johnnie_walker(Spatial::Distance d)
     }
 }
 
+
+Entity::LimitRelation LocalSpaceMap2D::computeObjectsLimits( 
+   const Entity& entityA, const Entity& entityB )
+{
+    Entity::LimitRelation status( &entityA, &entityB );
+
+    const Math::BoundingBox& bb1 = entityA.getBoundingBox( );
+    const Math::BoundingBox& bb2 = entityB.getBoundingBox( );
+    
+    const std::vector<Math::Vector3>& corners1 = bb1.getAllCorners( );
+    const std::vector<Math::Vector3>& corners2 = bb2.getAllCorners( );
+    
+    static double min = std::numeric_limits<double>::max( );
+    static double max = -min;
+    
+    double xMinA = min; double xMaxA = max; 
+    double yMinA = min; double yMaxA = max; 
+    double zMinA = min; double zMaxA = max;
+
+    double xMinB = min; double xMaxB = max; 
+    double yMinB = min; double yMaxB = max; 
+    double zMinB = min; double zMaxB = max;
+
+    unsigned int i;
+    for( i = 0; i < corners1.size( ); ++i ) {
+        if ( corners1[i].x < xMinA ) {
+            xMinA = corners1[i].x;
+            status.limitsA[Entity::XMIN] = &corners1[i];
+        } // if
+        if ( corners1[i].x > xMaxA ) {
+            xMaxA = corners1[i].x;
+            status.limitsA[Entity::XMAX] = &corners1[i];
+        } // if
+
+        if ( corners1[i].y < yMinA ) {
+            yMinA = corners1[i].y;
+            status.limitsA[Entity::YMIN] = &corners1[i];
+        } //if        
+        if ( corners1[i].y > yMaxA ) {
+            yMaxA = corners1[i].y;
+            status.limitsA[Entity::YMAX] = &corners1[i];
+        } // if
+
+        if ( corners1[i].z < zMinA ) {
+            zMinA = corners1[i].z;
+            status.limitsA[Entity::ZMIN] = &corners1[i];
+        } // if
+        if ( corners1[i].z > zMaxA ) {
+            zMaxA = corners1[i].z;
+            status.limitsA[Entity::ZMAX] = &corners1[i];
+        } // if
+
+
+
+        if ( corners2[i].x < xMinB ) {
+            xMinB = corners2[i].x;
+            status.limitsB[Entity::XMIN] = &corners2[i];
+        } // if
+        if ( corners2[i].x > xMaxB ) {
+            xMaxB = corners2[i].x;
+            status.limitsB[Entity::XMAX] = &corners2[i];
+        } // if
+
+        if ( corners2[i].y < yMinB ) {
+            yMinB = corners2[i].y;
+            status.limitsB[Entity::YMIN] = &corners2[i];
+        } //if        
+        if ( corners2[i].y > yMaxB ) {
+            yMaxB = corners2[i].y;
+            status.limitsB[Entity::YMAX] = &corners2[i];
+        } // if
+
+        if ( corners2[i].z < zMinB ) {
+            zMinB = corners2[i].z;
+            status.limitsB[Entity::ZMIN] = &corners2[i];
+        } // if
+        if ( corners2[i].z > zMaxB ) {
+            zMaxB = corners2[i].z;
+            status.limitsB[Entity::ZMAX] = &corners2[i];
+        } // if
+    } // for
+    
+    status.relations[Entity::LimitRelation::X] = (xMaxA < xMinB ) ? 1 : 
+        ( xMaxB < xMinA ) ? 2 : 
+        ( xMinA < xMinB && xMaxA < xMaxB ) ? 4 : 
+        ( xMinB < xMinA && xMaxB < xMaxA ) ? 8 : 
+        ( xMaxA == xMinB ) ? 16 :
+        ( xMaxB == xMinA ) ? 32 :
+        ( xMinA == xMinB && xMaxA == xMaxB ) ? 64 : // perfect overlap
+        ( xMinA > xMinB && xMaxA < xMaxB ) ? 128 : // non perfect B overlaps A
+        ( xMinB > xMinA && xMaxB < xMaxA ) ? 256 : // non perfect A overlaps B
+        ( (xMinA == xMinB && xMaxA < xMaxB) || (xMinA > xMinB && xMaxA == xMaxB ) ) ? 512 : 1024;
+
+    status.relations[Entity::LimitRelation::Y] = (yMaxA < yMinB ) ? 1 : 
+        ( yMaxB < yMinA ) ? 2 : 
+        ( yMinA < yMinB && yMaxA < yMaxB ) ? 4 : 
+        ( yMinB < yMinA && yMaxB < yMaxA ) ? 8 : 
+        ( yMaxA == yMinB ) ? 16 :
+        ( yMaxB == yMinA ) ? 32 :
+        ( yMinA == yMinB && yMaxA == yMaxB ) ? 64 : // perfect overlap
+        ( yMinA > yMinB && yMaxA < yMaxB ) ? 128 : // non perfect B overlaps A
+        ( yMinB > yMinA && yMaxB < yMaxA ) ? 256 : // non perfect A overlaps B
+        ( (yMinA == yMinB && yMaxA < yMaxB) || (yMinA > yMinB && yMaxA == yMaxB ) ) ? 512 : 1024;
+
+
+    status.relations[Entity::LimitRelation::Z] = (zMaxA < zMinB ) ? 1 : 
+        ( zMaxB < zMinA ) ? 2 : 
+        ( zMinA < zMinB && zMaxA < zMaxB ) ? 4 : 
+        ( zMinB < zMinA && zMaxB < zMaxA ) ? 8 : 
+        ( zMaxA == zMinB ) ? 16 :
+        ( zMaxB == zMinA ) ? 32 :
+        ( zMinA == zMinB && zMaxA == zMaxB ) ? 64 : // perfect overlap
+        ( zMinA > zMinB && zMaxA < zMaxB ) ? 128 : // non perfect B overlaps A
+        ( zMinB > zMinA && zMaxB < zMaxA ) ? 256 : // non perfect A overlaps B
+        ( (zMinA == zMinB && zMaxA < zMaxB) || (zMinA > zMinB && zMaxA == zMaxB ) ) ? 512 : 1024;
+
+
+    return status;
+}
+
+std::list<LocalSpaceMap2D::SPATIAL_RELATION> LocalSpaceMap2D::computeSpatialRelations( 
+ const Math::Vector3& observerPosition, double besideDistance, const Entity& entityA, const Entity& entityB, const Entity& entityC )
+{
+    std::list<LocalSpaceMap2D::SPATIAL_RELATION> spatialRelationsAB = computeSpatialRelations( observerPosition, besideDistance, entityA, entityB );
+    std::list<LocalSpaceMap2D::SPATIAL_RELATION> spatialRelationsAC = computeSpatialRelations( observerPosition, besideDistance, entityA, entityC );
+    
+    std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations;
+    
+    std::vector<bool> activeRelationsAB(TOTAL_RELATIONS);
+    unsigned int i;
+    for( i = 0; i < activeRelationsAB.size( ); ++i ) {
+        activeRelationsAB[i] = false;
+    } // for
+
+    std::vector<bool> relationsAB(6);
+
+    std::list<SPATIAL_RELATION>::const_iterator it;    
+    for( it = spatialRelationsAB.begin( ); it != spatialRelationsAB.end( ); ++it ) {
+        if ( *it == RIGHT_OF ) {
+            relationsAB[0] = true;
+        } else if ( *it == LEFT_OF ) {
+            relationsAB[1] = true;
+        } else if ( *it == BEHIND ) {
+            relationsAB[2] = true;
+        } else if ( *it == IN_FRONT_OF ) {
+            relationsAB[3] = true;
+        } else if ( *it == ABOVE ) {
+            relationsAB[4] = true;
+        } else if ( *it == BELOW ) {
+            relationsAB[5] = true;
+        } // else
+        activeRelationsAB[*it] = true;
+    } // for
+
+    for( it = spatialRelationsAC.begin( ); it != spatialRelationsAC.end( ); ++it ) {
+        if ( ( *it == LEFT_OF && relationsAB[0] ) ||
+             ( *it == RIGHT_OF && relationsAB[1] ) ||
+             ( *it == BEHIND && relationsAB[2] ) ||
+             ( *it == IN_FRONT_OF && relationsAB[3] ) ||
+             ( *it == BELOW && relationsAB[4] ) ||
+             ( *it == ABOVE && relationsAB[5] ) ) {
+            relations.push_back( BETWEEN );
+        } // if
+        if ( activeRelationsAB[*it] ) {
+            relations.push_back( *it );
+        } // if
+    } // for
+
+    return relations;
+}
+
+std::list<LocalSpaceMap2D::SPATIAL_RELATION> LocalSpaceMap2D::computeSpatialRelations( 
+ const Math::Vector3& observerPosition, double besideDistance, const Entity& entityA, const Entity& entityB )
+{
+    std::list<LocalSpaceMap2D::SPATIAL_RELATION> spatialRelations;
+
+    Math::Vector3 pointInA;
+    Math::Vector3 pointInB;
+
+    Entity::LimitRelation status;
+    double distance = entityA.distanceTo( entityB, &pointInA, &pointInB, &status );
+
+    bool computeAsideRelations = false;
+    if ( ( status.relations[0] & 64 ) > 0 && ( status.relations[1] & 64 ) > 0 && ( status.relations[2] & 64 ) > 0 ) {
+        // A overlaps B and vice-versa
+        spatialRelations.push_back(INSIDE);
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+        return spatialRelations;
+    } else if ( ( status.relations[0] & 128 ) > 0 && ( status.relations[1] & 128 ) > 0 && ( status.relations[2] & 128 ) > 0 ) {
+        // A is inside B
+        spatialRelations.push_back(INSIDE);
+        spatialRelations.push_back(NEAR);
+        return spatialRelations;
+    } else if ( ( status.relations[0] & 256 ) > 0 && ( status.relations[1] & 256 ) > 0 && ( status.relations[2] & 256 ) > 0 ) {
+        // A is outside B
+        spatialRelations.push_back(OUTSIDE);
+        spatialRelations.push_back(NEAR);
+    } else if ( ( status.relations[0] & (64|128|512) ) > 0 && ( status.relations[1] & (64|128|512) ) > 0 && ( status.relations[2] & (64|128|512) ) > 0 ) {
+        // A is inside B and touching it
+        spatialRelations.push_back(INSIDE);
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+        return spatialRelations;
+    } else if ( ( status.relations[0] & (64|256|1024) ) > 0 && ( status.relations[1] & (64|256|1024) ) > 0 && ( status.relations[2] & (64|256|1024) ) > 0 ) {
+        // A is outside B but touching it
+        spatialRelations.push_back(OUTSIDE);
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+    } else if ( ( status.relations[0] & (1|2) ) == 0 && ( status.relations[1] & (1|2) ) == 0 && ( status.relations[2] & (1|2) ) == 0 ) {
+        // A is not completely inside B or vice-versa, but they intersect
+        spatialRelations.push_back(TOUCHING);
+        spatialRelations.push_back(NEAR);
+    } else { 
+        computeAsideRelations = true;
+    } // else
+
+
+    // UP AXIS = Z (TODO: customize it)
+    // an intersection must occur at X and Y besides
+    if ( ( status.relations[0] & (1|2) ) == 0 && ( status.relations[1] & (1|2) ) == 0 ) {
+        if ( ( status.relations[2] & (1|4|16) ) > 0 ) {
+            spatialRelations.push_back(BELOW);
+            //return spatialRelations;
+        } else if ( ( status.relations[2] & (2|8|32) ) > 0 ) {
+            spatialRelations.push_back(ABOVE);
+            //return spatialRelations;
+        } // else if
+    } // if
+
+
+    if ( distance > besideDistance ) {
+        spatialRelations.push_back(FAR_);
+        return spatialRelations;
+    } else if ( distance < besideDistance * (Spatial::LocalSpaceMap2D::NEAR_FACTOR/Spatial::LocalSpaceMap2D::NEXT_FACTOR) ) {
+        spatialRelations.push_back(NEAR);
+    } else {
+        spatialRelations.push_back(BESIDE);
+    } // else
+
+    if ( !computeAsideRelations ) {
+        return spatialRelations;
+    } // if
+
+    // GROUND AXIS Y-X
+    Math::Vector3 observerDirection( entityA.getBoundingBox( ).isInside( observerPosition ) ? 
+                                     ( pointInA - pointInB ) : entityB.getBoundingBox( ).isInside( observerPosition ) ?  
+                                     ( pointInB - pointInA ) : ( observerPosition - pointInA ) );
+    Math::Vector3 objectDirection( pointInB - pointInA );
+
+    bool observerBetweenObjects = false;
+    {
+        Math::Vector3 directionA( pointInA - observerPosition );
+        directionA.normalise( );
+        Math::Vector3 directionB( pointInB - observerPosition );
+        directionB.normalise( );
+        
+        double angle = std::acos( directionA.dotProduct( directionB ) );
+        observerBetweenObjects = ( std::abs(angle) > M_PI_2 );
+    } // if
+
+    observerDirection.normalise( );
+    objectDirection.normalise( );
+
+    double angle;
+    {
+        angle = std::atan2( objectDirection.y, objectDirection.x ) - std::atan2( observerDirection.y, observerDirection.x );
+        if ( angle < 0 ) {
+            angle += ( M_PI * 2 );
+        } // angle
+    }
+    
+    if ( angle >= M_PI_4 && angle < (M_PI_2+M_PI_4) ) {
+        spatialRelations.push_back( LEFT_OF );
+    } else if ( angle >= (M_PI_2+M_PI_4) && angle < (M_PI+M_PI_4) ) {
+        spatialRelations.push_back( observerBetweenObjects ? BEHIND : IN_FRONT_OF );
+    } else if ( angle >= (M_PI+M_PI_4) && angle < (M_PI+M_PI_4+M_PI_2) ) {
+        spatialRelations.push_back( RIGHT_OF );
+    } else {
+        spatialRelations.push_back( observerBetweenObjects ? IN_FRONT_OF : BEHIND );
+    } // else
+
+    // BESIDE = next
+    // NEAR = near
+    
+    return spatialRelations;
+    
+}
+
+
+std::string LocalSpaceMap2D::spatialRelationToString( LocalSpaceMap2D::SPATIAL_RELATION relation ) {
+    switch( relation ) {
+    case LEFT_OF: return "left_of";
+    case RIGHT_OF: return "right_of";
+    case ABOVE: return "above";
+    case BELOW: return "below";
+    case BEHIND: return "behind";
+    case IN_FRONT_OF: return "in_front_of";
+    case BESIDE: return "beside";
+    case NEAR: return "near";
+    case FAR_: return "far";
+    case TOUCHING: return "touching";
+    case BETWEEN: return "between";
+    case INSIDE: return "inside";
+    case OUTSIDE: return "outside";
+    default:
+    case TOTAL_RELATIONS:
+        return " invalid relation ";
+    }
+}

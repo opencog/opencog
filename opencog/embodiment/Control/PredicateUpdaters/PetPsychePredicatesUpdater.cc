@@ -262,7 +262,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             const Spatial::EntityPtr& agentEntity = map.getEntity( atomSpace.getName(pet) );
             //const Spatial::Object& petObject = map.getObject(atomSpace.getName(pet));
 
-            float distance = agentEntity->distanceTo( targetEntity );
+            float distance = agentEntity->distanceTo( *targetEntity );
 
             // verify if the target will possibly collide with pet if it continues it's current path
             Spatial::MovableEntityPtr futureTargetEntity( new Spatial::MovableEntity( targetEntity->getId( ), targetEntity->getName( ),
@@ -271,7 +271,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                     targetEntity->getExpansionRadius( ) ) );
 
 
-            if ( agentEntity->distanceTo( futureTargetEntity ) < 0.00000001 ) {
+            if ( agentEntity->distanceTo( *futureTargetEntity ) < 0.00000001 ) {
                 isMovingToward = true;
             } // if
 

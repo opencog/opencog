@@ -79,18 +79,17 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             setPredicate( object, entityBHandle, "next", 0.0f );
         } else {
             const Spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
-            double distance = entityA->distanceTo( entityB );
-            logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );            
+            double distance = entityA->distanceTo( *entityB );
+            logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );
 
             Spatial::Math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
             Spatial::Math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
             
             double mapDiagonal = ( maxCorner - minCorner ).length( );
 
-            // distance to near 3,125%
-            double nearDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.003125;
-            // distance to next 10,0%
-            double nextDistance = ( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.1;
+            
+            double nearDistance = spaceMap.getNearDistance( );
+            double nextDistance = spaceMap.getNextDistance( );
             
             setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0 : 0.0f );
             setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f );
@@ -106,22 +105,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
 
 void NearPredicateUpdater::setPredicate( const Handle& entityA, const Handle& entityB, const std::string& predicateName, float mean )
 {
-    
     SimpleTruthValue tv( mean, 1 );
-    const std::string& entityAId = atomSpace.getName( entityA );
-    const std::string& entityBId = atomSpace.getName( entityB );
-
     AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityA, entityB );
     AtomSpaceUtil::setPredicateValue( atomSpace, predicateName, tv, entityB, entityA );
-
-    { // defining isNear
-        static std::map<std::string, Handle> elements;
-        elements["Figure"] = atomSpace.addNode( SEME_NODE, entityAId );
-        elements["Ground"] = atomSpace.addNode( SEME_NODE, entityBId );
-        elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, predicateName );
-        
-        AtomSpaceUtil::setPredicateFrameFromHandles( 
-           atomSpace, "#Locative_relation", entityAId + "_" + entityBId + "_" + predicateName, 
-              elements, tv );
-    } // end block
 }

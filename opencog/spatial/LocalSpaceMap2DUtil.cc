@@ -76,8 +76,8 @@ bool CollisionDetector::operator()( const Spatial::GridPoint& gridPoint )
  */
 ObjectMetaData::ObjectMetaData() {}
 
-ObjectMetaData::ObjectMetaData(double cx, double cy, double l, double w, double h, double y) :
-        centerX(cx), centerY(cy), length(l), width(w), height(h),  yaw(y)
+ObjectMetaData::ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y) :
+        centerX(cx), centerY(cy), centerZ(cz), length(l), width(w), height(h),  yaw(y)
 {
 }
 
@@ -85,6 +85,7 @@ bool ObjectMetaData::operator==(const ObjectMetaData& rhs) const
 {
     return (centerX == rhs.centerX &&
             centerY == rhs.centerY &&
+            centerZ == rhs.centerZ &&
             length == rhs.length &&
             width == rhs.width &&
             height == rhs.height &&
@@ -106,6 +107,7 @@ void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
     for (int cnt = 0; cnt < obstacles; ++cnt) {
         unsigned int center_x = rng.pos_gaussian_rand(std_dev, prob_center.first);
         unsigned int center_y = rng.pos_gaussian_rand(std_dev, prob_center.second);
+        unsigned int center_z = rng.pos_gaussian_rand(std_dev, prob_center.second);
         unsigned int radius_y = 1 + static_cast<unsigned int>
                                 (30 * rng.randDoubleOneExcluded());
         unsigned int radius_x = 1 + static_cast<unsigned int>
@@ -114,6 +116,7 @@ void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
         Spatial::ObjectMetaData metaData;
         metaData.centerX = center_x;
         metaData.centerY = center_y;
+        metaData.centerZ = center_z;
         metaData.width = radius_x;
         metaData.height = 1;
         metaData.length = radius_y;

@@ -35,6 +35,10 @@
 #include <opencog/spatial/TB_ASSERT.h>
 #include <opencog/spatial/StaticEntity.h>
 
+#include <boost/date_time.hpp>
+#include <boost/thread.hpp>
+
+
 using namespace Spatial;
 using namespace opencog;
 using namespace std;
@@ -42,9 +46,10 @@ using namespace std;
 class MockObject
 {
 public:
-    MockObject( const std::string& name, double centerX, double centerY, double length, double width, double height, double yaw, bool isObstacle ) : name( name ), isObstacle( isObstacle ) {
+    MockObject( const std::string& name, double centerX, double centerY, double centerZ, double length, double width, double height, double yaw, bool isObstacle ) : name( name ), isObstacle( isObstacle ) {
         metadata.centerX = centerX;
         metadata.centerY = centerY;
+        metadata.centerZ = centerZ;
         metadata.length = length;
         metadata.width = width;
         metadata.height = height;
@@ -61,26 +66,25 @@ public:
 // Attention. If you change the mock objects, probably you will need to setup new
 // targetPoints on testFindNextFreePoint method
 MockObject mockyObjects[] = {
-    MockObject( "id_26325", -94185.0, -213453.0, 500.0, 250.0, 250.0, 4.965551, false ),
-    MockObject( "id_26313", -109466.0, -175968.0, 300.0, 300.0, 300.0, 0.0, true ),
-    MockObject( "id_433", -91281.0, -212702.0, 250.0, 250.0, 1800.0, 1.823958, true ),
-    MockObject( "id_26312", -108964.0, -205111.0, 1000.0, 50.0, 50.0, 0.0, false ),
-    MockObject( "id_26304", -69829.0, -225023.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
-    MockObject( "id_26308", -81856.0, -210180.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
-    MockObject( "id_26305", -85675.0, -232839.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
-    MockObject( "id_26306", -106396.0, -223562.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
-    MockObject( "id_26315", -95944.0, -209464.0, 250.0, 250.0, 1800.0, 0.0, true ),
-    MockObject( "id_26311", -85317.0, -225213.0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
-//  MockObject( "id_26311", -85317.0, -225213.0, 11785.0, 12025.0, 9000.0, 0.785, true ),
-    MockObject( "id_26301", -140499.0, -189222.0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
-    MockObject( "id_26307", -82048.0, -205749.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
-    MockObject( "id_26316", -92945.0, -209464.0, 250.0, 250.0, 1800.0, 0.0, true ),
-    MockObject( "id_26310", -81594.0, -218727.0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
-    MockObject( "id_26303", -111829.0, -204420.0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
-    MockObject( "id_26302", -135840.500000, -227315.500000, 15009.0, 10145.0, 12000.0, 0.0, true ),
-    //MockObject( "id_26302", -135840.500000, -227315.500000, 15009.0, 10145.0, 12000.0, 0.785, true ),
-    MockObject( "id_26314", -132150.0, -241469.0, 300.0, 100.0, 100.0, 0.0, false ),
-    MockObject( "id_26309", -81695.0, -214680.0, 529.800000, 4537.600000, 2178.700000, 0.0, true )
+    MockObject( "id_26325", -94185.0, -213453.0, 0, 500.0, 250.0, 250.0, 4.965551, false ),
+    MockObject( "id_26313", -109466.0, -175968.0, 30, 00.0, 300.0, 300.0, 0.0, true ),
+    MockObject( "id_433", -91281.0, -212702.0, 0, 250.0, 250.0, 1800.0, 1.823958, true ),
+    MockObject( "id_26312", -108964.0, -205111.0, 0, 1000.0, 50.0, 50.0, 0.0, false ),
+    MockObject( "id_26304", -69829.0, -225023.0, 0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26308", -81856.0, -210180.0, 0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26305", -85675.0, -232839.0, 0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26306", -106396.0, -223562.0, 0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26315", -95944.0, -209464.0, 0, 250.0, 250.0, 1800.0, 0.0, true ),
+    MockObject( "id_26311", -85317.0, -225213.0, 0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
+//  MockObject( "id_26311", -85317.0, -225213.0, 0, 11785.0, 12025.0, 9000.0, 0.785, true ),
+    MockObject( "id_26301", -140499.0, -189222.0, 0, 11785.0, 12025.0, 9000.0, 1.570796, true ),
+    MockObject( "id_26307", -82048.0, -205749.0, 0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26316", -92945.0, -209464.0, 0, 250.0, 250.0, 1800.0, 0.0, true ),
+    MockObject( "id_26310", -81594.0, -218727.0, 0, 529.800000, 4537.600000, 2178.700000, 0.0, true ),
+    MockObject( "id_26303", -111829.0, -204420.0, 0, 441.200000, 591.200000, 1672.080000, 0.0, true ),
+    MockObject( "id_26302", -135840.500000, -227315.500000, 0, 15009.0, 10145.0, 12000.0, 0.0, true ),
+    MockObject( "id_26314", -132150.0, -241469.0, 0, 300.0, 100.0, 100.0, 0.0, false ),
+    MockObject( "id_26309", -81695.0, -214680.0, 0, 529.800000, 4537.600000, 2178.700000, 0.0, true )
 };
 
 unsigned int numberOfObjects = sizeof( mockyObjects ) / sizeof( MockObject );
@@ -544,38 +548,24 @@ public:
         StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(1, 0, 0), Math::Dimension3(4, 1, 8 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
         StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(5, 0, 0), Math::Dimension3(3, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
 
-        /*
-        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -99260.804688, -212415.20312 ), Math::Vector3( -99260.804688, -212688.796875) ) );
-        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -99260.804688, -212688.796875 ), Math::Vector3( -98837.195312, -212688.796875 ) ) );
-        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -98837.195312, -212688.796875 ), Math::Vector3( -98837.195312, -212415.203125 ) ) );
-        object5.borderSegments.push_back( Math::LineSegment( Math::Vector3( -98837.195312, -212415.203125 ), Math::Vector3(  -99260.804688, -212415.20312 ) ) );
 
-        Object object6;
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95306.703125, -213242.468750 ), Math::Vector3( -95672.531250, -212941.671875 ) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95672.531250, -212941.671875 ), Math::Vector3( -95973.296875, -213307.531250 ) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95973.296875, -213307.531250 ), Math::Vector3( -95607.468750, -213608.328125) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95607.468750, -213608.328125 ), Math::Vector3( -95306.703125, -213242.468750 ) ) );
-        */
-        TS_ASSERT_EQUALS( e1->distanceTo(e2), 0.0f );
-        TS_ASSERT_EQUALS( e1->distanceTo(e3), 0.0f );
-        TS_ASSERT_EQUALS( e1->distanceTo(e4), 0.0f );
+        StaticEntityPtr e5( new StaticEntity( 5, "e5", Math::Vector3(5, 0, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e6( new StaticEntity( 6, "e6", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e7( new StaticEntity( 7, "e7", Math::Vector3(10, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e8( new StaticEntity( 8, "e8", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+
+        TS_ASSERT_EQUALS( e1->distanceTo(*e2), 0.0f );
+        TS_ASSERT_EQUALS( e1->distanceTo(*e3), 0.0f );
+        TS_ASSERT_EQUALS( e1->distanceTo(*e4), 0.0f );
+
+        TS_ASSERT( ( e5->distanceTo(*e6) - 35.128338 ) < 0.01 );
+        TS_ASSERT( ( e5->distanceTo(*e7) - 35.196857 ) < 0.01 );
+        TS_ASSERT( ( e5->distanceTo(*e8) - 34.818203 ) < 0.01 );
+        
     }
 
     void testPointInsideObstacle( ) {
         StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(), Math::Dimension3(4, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-
-        /*
-        Object object6;
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95306.703125, -213242.468750 ), Math::Vector3( -95672.531250, -212941.671875 ) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95672.531250, -212941.671875 ), Math::Vector3( -95973.296875, -213307.531250 ) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95973.296875, -213307.531250 ), Math::Vector3( -95607.468750, -213608.328125) ) );
-        object6.borderSegments.push_back( Math::LineSegment( Math::Vector3( -95607.468750, -213608.328125 ), Math::Vector3( -95306.703125, -213242.468750 ) ) );
-        
-        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ).toString( ) << std::endl;
-        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ).toString( ) << std::endl;
-        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ).toString( ) << std::endl;
-        std::cout << e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ).toString( ) << std::endl;
-        */
 
         TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) - Math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
         TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) - Math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
@@ -584,13 +574,6 @@ public:
 
         TS_ASSERT( e1->getBoundingBox( ).isInside( Math::Vector3( 0, 0 ) ) )
         TS_ASSERT( !e1->getBoundingBox( ).isInside( Math::Vector3( 0, -2.1 ) ) )
-
-        /*
-        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -99260.804688, -212415.20312 ), object6 ) );
-        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -99260.804688, -212688.796875 ), object6 ) );
-        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -98837.195312, -212688.796875 ), object6 ) );
-        TS_ASSERT( !isPointInsideObstacle( Math::Vector3( -98837.195312, -212415.203125 ), object6 ) );
-        */
     }
 
 
@@ -656,5 +639,147 @@ public:
         map3 = map1;
     }
     */
+
+    void testSpatialRelations( void )
+    {
+
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(10, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e2( new StaticEntity( 2, "e2", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(0, 35, 5), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(0, 35, 5), Math::Dimension3(4, 4, 4 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+
+
+        double besideDistance = ( xMax - xMin ) * LocalSpaceMap2D::NEXT_FACTOR;
+
+
+        { // IN_FRONT_OF
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 35, 0 ), besideDistance, *e1, *e2 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::IN_FRONT_OF ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+
+        { // RIGHT_OF
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e1, *e2 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::RIGHT_OF ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+        { // LEFT_OF
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e2, *e1 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::LEFT_OF ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+        { // BELOW
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e2, *e3 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::BELOW ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+        { // ABOVE
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e3, *e2 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::ABOVE ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+
+        { // IN_FRONT_OF
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 20, 40, 0 ), besideDistance, *e1, *e2 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::IN_FRONT_OF ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+        { // BEHIND
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( -20, 40, 0 ), besideDistance, *e1, *e2 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::BEHIND ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        }
+
+        { // INSIDE
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 0, 0, 0 ), besideDistance, *e3, *e4 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::INSIDE ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+        { // OUTSIDE
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
+                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 0, 0, 0 ), besideDistance, *e4, *e3 );
+            
+            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            bool hasRelation = false;
+            for( it = relations.begin( ); it != relations.end( ); ++it ) {
+                if ( *it == LocalSpaceMap2D::OUTSIDE ) {
+                    hasRelation = true;
+                } // if
+            } // for
+            TS_ASSERT( hasRelation );
+        } // end block
+
+    }
 
 }; // class

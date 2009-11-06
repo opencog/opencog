@@ -338,7 +338,7 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     const Spatial::EntityPtr& subjectEndEntity = sm.getEntity(subject_id);
 
-                    double dist_subject_end = objectEntity->distanceTo(subjectEndEntity);
+                    double dist_subject_end = objectEntity->distanceTo(*subjectEndEntity);
 
 
                     //WARNING : not used because position after a walk command and of walk command destination does not coincide

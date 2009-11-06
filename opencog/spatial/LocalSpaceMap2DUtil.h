@@ -68,13 +68,14 @@ class ObjectMetaData
 public:
     double centerX;
     double centerY;
+    double centerZ;
     double length;
     double width;
     double height;
     double yaw;
 
     ObjectMetaData();
-    ObjectMetaData(double cx, double cy, double l, double w, double h, double y);
+    ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y);
 
     bool operator==(const ObjectMetaData& rhs) const;
     bool operator!=(const ObjectMetaData& rhs) const;

@@ -640,7 +640,7 @@ void ScavengerHuntAgentModeHandler::update( void )
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         try {
             const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
-            if ( agentEntity->distanceTo( target ) > 4000 ) {
+            if ( agentEntity->distanceTo( *target ) > 4000 ) {
                 setFollowingPosition( );
                 changeState( this->agentState, 1319 ); // go near target
             } // if
@@ -694,7 +694,7 @@ void ScavengerHuntAgentModeHandler::update( void )
             const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
             const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
-            if ( agentEntity->distanceTo( target ) > 4000 ) {
+            if ( agentEntity->distanceTo( *target ) > 4000 ) {
                 setFollowingPosition( );
                 changeState( this->agentState, 1319 ); // go near target
             } // if
@@ -958,7 +958,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void )
                 continue;
             } // if
 
-            if ( redBaseEntity->distanceTo( entity ) <= 800 || blueBaseEntity->distanceTo( entity ) <= 800 ) {
+            if ( redBaseEntity->distanceTo( *entity ) <= 800 || blueBaseEntity->distanceTo( *entity ) <= 800 ) {
                 logger().debug("ScavengerHuntAgentModeHandler - %s is near a team base", (*it).c_str());
                 continue;
             } // if
@@ -970,7 +970,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void )
 
             logger().debug("ScavengerHuntAgentModeHandler - %s is a treasure", (*it).c_str());
             treasures.push_back( *it );
-            distanceToAgent.push_back( agentEntity->distanceTo( entity ) );
+            distanceToAgent.push_back( agentEntity->distanceTo( *entity ) );
 
         } // for
 
@@ -1023,7 +1023,7 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void )
         const Spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
         const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
 
-        if ( redBaseEntity->distanceTo( treasureEntity ) <= 800 || blueBaseEntity->distanceTo( treasureEntity ) <= 800 ) {
+        if ( redBaseEntity->distanceTo( *treasureEntity ) <= 800 || blueBaseEntity->distanceTo( *treasureEntity ) <= 800 ) {
             logger().debug("ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure is near a team base" );
             return false;
         } // if
@@ -1061,10 +1061,10 @@ bool ScavengerHuntAgentModeHandler::isAgentNearBase( void )
 
         if ( this->myTeamCode == 0 ) {
             const Spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
-            return ( redBaseEntity->distanceTo( agentEntity ) <= 800 );
+            return ( redBaseEntity->distanceTo( *agentEntity ) <= 800 );
         } else {
             const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
-            return ( blueBaseEntity->distanceTo( agentEntity ) <= 800 );
+            return ( blueBaseEntity->distanceTo( *agentEntity ) <= 800 );
         } // else
     } catch ( opencog::NotFoundException& ex ) {
         logger().error("ScavengerHuntAgentModeHandler::isAgentNearBase - %s", ex.getMessage( ) );
@@ -1360,7 +1360,7 @@ bool ScavengerHuntAgentModeHandler::isAgentNextTo( const std::string& targetId )
         const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         const Spatial::EntityPtr& targetEntity = spaceMap.getEntity( targetId );
 
-        if ( agentEntity->distanceTo( targetEntity ) < 4000 ) {
+        if ( agentEntity->distanceTo( *targetEntity ) < 4000 ) {
             return true;
         } // if
         return false;

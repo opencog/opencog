@@ -30,11 +30,15 @@
 #include "Math/Quaternion.h"
 
 #include <vector>
-#include <ext/hash_map>
 #include <string>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
+
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
+
+
 
 namespace Spatial
 {
@@ -50,7 +54,38 @@ typedef boost::shared_ptr<Entity> EntityPtr;
 class Entity
 {
 public:
+
+
+    class LimitRelation {
+    public:
+        enum RELATION_AXIS {
+            X = 0,
+            Y,
+            Z
+        };
+        
+    LimitRelation( const Entity* entityA = NULL, const Entity* entityB = NULL ) :
+        entityA( entityA ), entityB( entityB ), limitsA(6), limitsB(6), relations(3) { }
+        
+        virtual ~LimitRelation( void ) { }
+        
+        const Entity* entityA;
+        const Entity* entityB;
+
+        std::vector<const Math::Vector3*> limitsA;
+        std::vector<const Math::Vector3*> limitsB;
+        std::vector<unsigned int> relations;
+    }; 
+
+
     typedef boost::variant<std::string, int, double, bool> PropertyValueType;
+
+    enum OBJECT_LIMITS {
+        XMIN = 0, XMAX,
+        YMIN, YMAX,
+        ZMIN, ZMAX
+    };
+
 
     /**
      * All the types of entities
@@ -78,7 +113,7 @@ public:
         NUMBER_OF_PROPERTIES
     };
 
-    typedef __gnu_cxx::hash_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
+    typedef std::tr1::unordered_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
 
     /**
      * Comparator class used to measure the distance between two objects
@@ -102,8 +137,8 @@ public:
          *
          */
         inline bool operator()( const EntityPtr& o1, const EntityPtr& o2) const {
-            double distanceToObject1 = referenceEntity->distanceTo(o1);
-            double distanceToObject2 = referenceEntity->distanceTo(o2);
+            double distanceToObject1 = referenceEntity->distanceTo(*o1);
+            double distanceToObject2 = referenceEntity->distanceTo(*o2);
             if ( distanceToObject1 < distanceToObject2 ) {
                 return true;
             } else {
@@ -262,14 +297,17 @@ public:
     bool operator==( const Entity& entity ) const;
     bool operator!=( const Entity& entity ) const;
 
-    bool intersects( const EntityPtr& other ) const;
+    bool intersects( const Entity& other ) const;
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     std::string toString( ) const;
 
-    double distanceTo( const EntityPtr& entity ) const;
+    double distanceTo( const Entity& entity, 
+                       Math::Vector3* pointInA = NULL, 
+                       Math::Vector3* pointInB = NULL, 
+                       LimitRelation* = NULL ) const;
 
 protected:
     long id;
@@ -294,7 +332,7 @@ protected:
 
 }; // Entity
 
-typedef __gnu_cxx::hash_map<long, EntityPtr, __gnu_cxx::hash<long> > LongEntityPtrHashMap;
+ typedef std::tr1::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
 
 } // Spatial
 

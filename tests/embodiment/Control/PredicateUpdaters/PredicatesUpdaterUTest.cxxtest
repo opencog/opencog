@@ -633,7 +633,7 @@ public:
             HandleSeq isNearInstances =
                 AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( *atomSpace, "#Locative_relation", petH );
 
-            TS_ASSERT( isNearInstances.size( ) == 11 )
+            TS_ASSERT( isNearInstances.size( ) == 1 )
             if ( isNearInstances.size( ) == 1 ) {
                 std::map<std::string, Handle> storedElements = 
                     AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearInstances[0] );
