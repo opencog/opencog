@@ -153,7 +153,7 @@ public:
      */
     bool add(bool keepPreviousMap, Handle spaceMapHandle,
              const std::string& objectId,
-             double centerX, double centerY, double length, double width,
+             double centerX, double centerY, double centerZ, double length, double width,
              double height, double yaw, bool isObstacle = true);
 
     // Add a whole space map into the SpaceServer.

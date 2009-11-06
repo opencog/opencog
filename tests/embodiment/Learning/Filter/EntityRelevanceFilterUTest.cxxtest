@@ -127,10 +127,10 @@ public:
     }
 
     void setUp() {
-        atomSpace->addSpaceInfo(true, pet_h, 0, 100, 100, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, avatar_h, 0, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, ball_h, 0, 92, 88, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, meat_h, 0, 100, 90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, pet_h, 0, 100, 100, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, avatar_h, 0, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, ball_h, 0, 92, 88, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, meat_h, 0, 100, 90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
         //add say sentence1 and say sentence 2 perception
         Handle sentence1_h = atomSpace->addNode(SENTENCE_NODE, str1);
@@ -225,10 +225,10 @@ public:
 
     void testSecondMap() {
 
-        atomSpace->addSpaceInfo(true, pet_h, T2, 100, 80, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, avatar_h, T2, 80,  90, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, bone_h, T2, 85, 85, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-        atomSpace->addSpaceInfo(true, stick_h, T2, 95, 95, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, pet_h, T2, 100, 80, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, avatar_h, T2, 80,  90, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, bone_h, T2, 85, 85, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
+        atomSpace->addSpaceInfo(true, stick_h, T2, 95, 95, 0, OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
 
         filter = new EntityRelevanceFilter(atomSpace->getSpaceServer().getLatestMap(), "pet", "avatar");
         std::set<std::string> ent = filter->getEntities();

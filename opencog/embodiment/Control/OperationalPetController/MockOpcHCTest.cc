@@ -37,14 +37,19 @@ std::vector<std::string> TRICK_ARGS;
 
 #define OWNER_X1 35.0
 #define OWNER_Y1 35.0
+#define OWNER_Z1 0.0
 #define OWNER_X2 5.5
 #define OWNER_Y2 5.5
+#define OWNER_Z2 0.0
 #define OWNER_X3 45.0
 #define OWNER_Y3 45.0
+#define OWNER_Z3 0.0
 #define PET_X 20.0
 #define PET_Y 20.0
+#define PET_Z 0.0
 #define OBJ_X 5.0
 #define OBJ_Y 5.0
+#define OBJ_Z 0.0
 
 #define OBJ_LENGTH 0.5
 #define OBJ_WIDTH 0.5
@@ -94,15 +99,15 @@ void MockOpcHCTest::init(const std::string & myId,
     speed_h = atomSpace->addNode(NUMBER_NODE,
                                  boost::lexical_cast<string>(2));
 
-    atomSpace->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y,
+    atomSpace->addSpaceInfo(true, pet_h, T1, PET_X, PET_Y, PET_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y,
+    atomSpace->addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1,
+    atomSpace->addSpaceInfo(true, owner_h, T1, OWNER_X1, OWNER_Y1, OWNER_Z1,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2,
+    atomSpace->addSpaceInfo(true, owner_h, T2, OWNER_X2, OWNER_Y2, OWNER_Z2,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
-    atomSpace->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3,
+    atomSpace->addSpaceInfo(true, owner_h, T3, OWNER_X3, OWNER_Y3, OWNER_Z3,
                             OBJ_LENGTH, OBJ_WIDTH, OBJ_HEIGHT, OBJ_YAW);
     //add necessary nodes to represent BDs
     behaved_h = atomSpace->addNode(PREDICATE_NODE, BEHAVED_STR);

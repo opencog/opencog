@@ -309,7 +309,7 @@ public:
      * @return true if any property of the object has changed (or it's a new object). False, otherwise.
      */
     bool addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY,
+                              double objX, double objY, double objZ,
                               double objLength, double objWidth, double objHeight,
                               double objYaw, bool isObstacle = true);
     /**

@@ -101,9 +101,9 @@ public:
         unsigned int yDim = 1024;
         Spatial::LocalSpaceMap2D map( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
 //    try {
-        map.addObject( "entity1", ObjectMetaData( 3.0, 3.0, 1, 1, 1, 0 ), true );
-        map.addObject( "entity2", ObjectMetaData( 20.0, 20.0, 1, 1, 1, 0 ), true );
-        map.addObject( "entity3", ObjectMetaData( 3.5, 3.5, 1, 1, 1, 0 ), true );
+        map.addObject( "entity1", ObjectMetaData( 3.0, 3.0, 0.0, 1, 1, 1, 0 ), true );
+        map.addObject( "entity2", ObjectMetaData( 20.0, 20.0, 0.0, 1, 1, 1, 0 ), true );
+        map.addObject( "entity3", ObjectMetaData( 3.5, 3.5, 0.0, 1, 1, 1, 0 ), true );
 //    } catch( opencog::InvalidParamException& ex ) {
 //        std::cout << ex.getMessage( ) << std::endl;
 //    } // catch

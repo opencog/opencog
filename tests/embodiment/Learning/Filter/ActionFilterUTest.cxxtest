@@ -52,21 +52,26 @@ using namespace boost::assign;
 //This has been done because it is easier to code and it is fine so far...
 #define PET_X 5.0
 #define PET_Y 5.0
+#define PET_Z 0.0
 //Fixed object (named strick) position
 #define OBJ_X 3.0
 #define OBJ_Y 3.0
+#define OBJ_Z 0.0
 //Avatar (named Paul) position at time T1
 #define T1 0
 #define AVATAR_X1 20.0
 #define AVATAR_Y1 20.0
+#define AVATAR_Z1 0.0
 //Avatar (named Paul) position at time T2
 #define T2 ACTION_DONE_TIME/2
 #define AVATAR_X2 3.5
 #define AVATAR_Y2 3.5
+#define AVATAR_Z2 0.0
 //Avatar (named Paul) position at time T3
 #define T3 2*ACTION_DONE_TIME
 #define AVATAR_X3 25.0
 #define AVATAR_Y3 25.0
+#define AVATAR_Z3 0.0
 
 #define GOTO_OBJ_SPEED_STR "2.5"
 
@@ -110,15 +115,15 @@ public:
 
         //fill the spacemap with the locations of Fido, stick and Paul
         atomSpace.addSpaceInfo(true, pet_h, T1,
-                               PET_X, PET_Y, 1, 1, 1, 0);
+                               PET_X, PET_Y, PET_Z, 1, 1, 1, 0);
         atomSpace.addSpaceInfo(true, obj_h,
-                               T1, OBJ_X, OBJ_Y, 1, 1, 1, 0);
+                               T1, OBJ_X, OBJ_Y, OBJ_Z,1, 1, 1, 0);
         atomSpace.addSpaceInfo(true, avatar_h, T1,
-                               AVATAR_X1, AVATAR_Y1, 1, 1, 1, 0);
+                               AVATAR_X1, AVATAR_Y1, AVATAR_Z1, 1, 1, 1, 0);
         atomSpace.addSpaceInfo(true, avatar_h, T2,
-                               AVATAR_X2, AVATAR_Y2, 1, 1, 1, 0);
+                               AVATAR_X2, AVATAR_Y2, AVATAR_Z2, 1, 1, 1, 0);
         atomSpace.addSpaceInfo(true, avatar_h, T3,
-                               AVATAR_X3, AVATAR_Y3, 1, 1, 1, 0);
+                               AVATAR_X3, AVATAR_Y3, AVATAR_Z3, 1, 1, 1, 0);
 
         FILE* mapFile = fopen( "file.bin", "wb+" );
         atomSpace.getSpaceServer().getLatestMap( ).save( mapFile );

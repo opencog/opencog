@@ -172,7 +172,7 @@ SpaceServer::SpaceMap* SpaceServer::addOrGetSpaceMap(bool keepPreviousMap, Handl
 }
 
 bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::string& objectId,
-                      double centerX, double centerY,
+                      double centerX, double centerY, double centerZ,
                       double length, double width, double height,
                       double yaw, bool isObstacle)
 {
@@ -186,7 +186,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
                  map->xMin(), map->xMax(), map->yMin(), map->yMax(),
                  map->xGridWidth(), map->yGridWidth());
 
-    SpaceServer::ObjectMetadata metadata(centerX, centerY, length, width, height, yaw);
+    SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw);
     bool mapContainsObject = map->containsObject(objectId);
     bool needUpdate = false;
 //    logger().fine("SpaceServer::add After contains");
@@ -194,11 +194,12 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
         //const SpaceServer::ObjectMetadata& oldMetadata = map->getMetaData(objectId);
         const Spatial::EntityPtr& oldEntity = map->getEntity( objectId );
         SpaceServer::ObjectMetadata oldMetadata( oldEntity->getPosition( ).x,
-                oldEntity->getPosition( ).y,
-                oldEntity->getLength( ),
-                oldEntity->getWidth( ),
-                oldEntity->getHeight( ),
-                oldEntity->getOrientation( ).getRoll( ) );
+                                                 oldEntity->getPosition( ).y,
+                                                 oldEntity->getPosition( ).z,
+                                                 oldEntity->getLength( ),
+                                                 oldEntity->getWidth( ),
+                                                 oldEntity->getHeight( ),
+                                                 oldEntity->getOrientation( ).getRoll( ) );
 
 //    logger().fine("SpaceServer::add After getMetaData");
 
@@ -206,7 +207,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
             needUpdate = true;
             logger().fine(
                          "SpaceServer::add Old metadata (x=%lf, y=%lf, length=%lf, width=%lf, height=%lf, yaw=%lf) is different: object must be updated",
-                         oldMetadata.centerX, oldMetadata.centerY,
+                         oldMetadata.centerX, oldMetadata.centerY, oldMetadata.centerZ,
                          oldMetadata.length, oldMetadata.width, oldMetadata.height,
                          oldMetadata.yaw);
         } else {
@@ -225,7 +226,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
 
         logger().debug(
                      "SpaceServer - add(mapH=%lu, objId=%s, x=%lf, y=%lf, length=%lf, width=%lf, height=%lf, yaw=%lf, isObstacle=%d)",
-                     spaceMapHandle.value(), objectId.c_str(), centerX, centerY,
+                     spaceMapHandle.value(), objectId.c_str(), centerX, centerY, centerZ,
                      length, width, height, yaw, isObstacle);
 
         if (mapContainsObject) {
@@ -451,6 +452,9 @@ std::string SpaceServer::mapObjectsToString(const SpaceServer::SpaceMap& map) co
         mapObjects << entity->getPosition( ).y;
         mapObjects << DELIMITER;
 
+        mapObjects << entity->getPosition( ).z;
+        mapObjects << DELIMITER;
+
         mapObjects << entity->getLength( );
         mapObjects << DELIMITER;
 
@@ -507,9 +511,9 @@ SpaceServer::TimestampMap SpaceServer::mapFromString(const std::string& stringMa
         // Object Metadata
         // NOTE: Temp variables must be used. Otherwise (passing them directly to ObjMetaData's constructor), the
         // compiler will evaluate them in the inverse order (from the right to the left)
-        double centerX, centerY, length, width, height, yaw;
+        double centerX, centerY, centerZ, length, width, height, yaw;
         std::string obstacleFlag;
-        parser >> centerX >> centerY >> length >> width >> height >> yaw >> obstacleFlag;
+        parser >> centerX >> centerY >> centerZ >> length >> width >> height >> yaw >> obstacleFlag;
 
 
         /*
@@ -521,7 +525,7 @@ SpaceServer::TimestampMap SpaceServer::mapFromString(const std::string& stringMa
           double yaw = atof(st.nextToken().c_str());
         bool isObstacle = ( st.nextToken( ) == "y" );
         */
-        SpaceServer::ObjectMetadata metadata(centerX, centerY, length, width, height, yaw);
+        SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw);
 
         spaceMap->addObject(objId, metadata, ( obstacleFlag == "y" ) );
 

@@ -72,8 +72,8 @@ public:
         Handle obj_h = atomSpace.addNode(OBJECT_NODE, obj_str);
         Handle owner_h = atomSpace.addNode(AVATAR_NODE, owner_str);
         //fill add these object into a SpaceMap
-        atomSpace.addSpaceInfo(false, obj_h, T1, 20, 20, 1, 1, 1, 1);
-        atomSpace.addSpaceInfo(false, owner_h, T1, 10, 10, 1, 1, 1, 1);
+        atomSpace.addSpaceInfo(false, obj_h, T1, 20, 20, 0, 1, 1, 1, 1);
+        atomSpace.addSpaceInfo(false, owner_h, T1, 10, 10, 0, 1, 1, 1, 1);
 
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);

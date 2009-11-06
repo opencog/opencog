@@ -120,7 +120,7 @@ public:
         map1 = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
         unsigned int i;
         for ( i = 0; i < OBJECTS_COUNT; i++ ) {
-            ObjectMetaData metaData( objects[ i ]->position.x, objects[ i ]->position.y,
+            ObjectMetaData metaData( objects[ i ]->position.x, objects[ i ]->position.y, 0,
                                      objects[ i ]->dimension.length,
                                      objects[ i ]->dimension.width,
                                      objects[ i ]->dimension.height,

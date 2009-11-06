@@ -1039,30 +1039,8 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
                             __FUNCTION__, answer.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );
-    }
-    
-    if ( std::string( contentType ) == "FACT" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
-
-    } else if ( std::string( contentType ) == "QUESTION" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", std::vector<std::string>() );
-
-    } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
-        if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
-            std::vector<std::string> arguments;        
-            // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
-            arguments.push_back( sentenceText );
-            boost::to_upper(arguments[0]);
-            
-            arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
-            arguments.push_back( internalAvatarId );
-            petInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );
-        } else {
-            logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. Current Mode: %s, Target Mode: %s, Command: %s", 
-                            __FUNCTION__, petInterface.getCurrentModeHandler( ).getModeName( ).c_str( ), targetMode, sentenceText );
-        } // else
-    } // if
-
+        
+    }    
 
     // Add the perceptions into AtomSpace
 
@@ -1087,6 +1065,50 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     schemaListLinkOutgoing.push_back(sentenceNode);
     Handle schemaListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, schemaListLinkOutgoing);
 
+    if ( parsedSentenceText != NULL ) {
+        // ok there is an incoming parsed (by relex sentece)
+        // so, connect the author of the Relex sentences to each sentence
+        // it will be useful to identify which agent says each sentence
+        HandleSeq sentenceOwner(2);
+        sentenceOwner[0] = agentNode;
+
+        logger().debug( "PAI::%s - Connecting sentences to its respective owners",
+                        __FUNCTION__ );
+                        
+        Handle anchorNode = atomSpace.getHandle( ANCHOR_NODE, "# New Parsed Sentence");
+        HandleSeq incomingSet = atomSpace.getIncoming(anchorNode);
+        unsigned int i;
+        bool linkFound = false;
+        for( i = 0; !linkFound && i < incomingSet.size( ); ++i ) {
+            if ( atomSpace.getType( incomingSet[i] ) == LIST_LINK ) {
+                logger().debug( "PAI::%s - LIST_LINK found, now inspect it to identify the sentences",
+                                __FUNCTION__);
+                HandleSeq outgoingSet = atomSpace.getOutgoing( incomingSet[i] );
+                if ( outgoingSet.size( ) == 0 || outgoingSet[0] != anchorNode ) {
+                    logger().debug( "PAI::%s - Wrong LIST_LINK arity[%d]",
+                                    __FUNCTION__, outgoingSet.size() );
+                    continue;
+                } // if
+
+                linkFound = true;
+                unsigned int j;
+                for( j = 1; j < outgoingSet.size( ); ++j ) {
+                    if ( atomSpace.getType( outgoingSet[j] ) == SENTENCE_NODE ) {
+                        sentenceOwner[1] = outgoingSet[j];
+                        Handle sentenceOwnerLink = 
+                            AtomSpaceUtil::addLink(atomSpace, LIST_LINK, sentenceOwner );
+                        atomSpace.setTV( sentenceOwnerLink, TruthValue::TRUE_TV( ) );
+                        logger().debug( "PAI::%s - Sentence found. now connecting[%s]",
+                                        __FUNCTION__, atomSpace.getName( sentenceOwner[1] ).c_str( ) );
+
+                    } // if                    
+                } // for
+            } // if
+        } // for
+
+    } // if
+
+
     HandleSeq execLinkOutgoing;
     execLinkOutgoing.push_back(saySchemaNode);
     execLinkOutgoing.push_back(schemaListLink);
@@ -1102,6 +1124,30 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
     Handle atTimeLink = atomSpace.addTimeInfo(evalLink, tsValue);
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
+
+
+    if ( std::string( contentType ) == "FACT" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "QUESTION" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
+        if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
+            std::vector<std::string> arguments;        
+            // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
+            arguments.push_back( sentenceText );
+            boost::to_upper(arguments[0]);
+            
+            arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
+            arguments.push_back( internalAvatarId );
+            petInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );
+        } else {
+            logger().debug( "PAI::%s - A specific command of another mode was sent. Ignoring it. Current Mode: %s, Target Mode: %s, Command: %s", 
+                            __FUNCTION__, petInterface.getCurrentModeHandler( ).getModeName( ).c_str( ), targetMode, sentenceText );
+        } // else
+    } // if
+
 
     XERCES_CPP_NAMESPACE::XMLString::release(&petID);
     XERCES_CPP_NAMESPACE::XMLString::release(&avatarID);
@@ -2269,7 +2315,7 @@ bool PAI::addSpacePredicates(bool keepPreviousMap, Handle objectNode, unsigned l
 
     logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
 
-    return atomSpace.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, length, width, height, rotation.yaw, isObstacle);
+    return atomSpace.addSpaceInfo(keepPreviousMap, objectNode, timestamp, position.x, position.y, position.z, length, width, height, rotation.yaw, isObstacle);
 }
 
 Handle PAI::addPhysiologicalFeelingParam(const char* paramName,

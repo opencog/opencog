@@ -298,14 +298,14 @@ Handle AtomSpace::getSpaceMapNode()
 }
 
 bool AtomSpace::addSpaceInfo(bool keepPreviousMap, Handle objectNode, unsigned long timestamp,
-                              double objX, double objY,
+                              double objX, double objY, double objZ,
                               double objLength, double objWidth, double objHeight,
                               double objYaw, bool isObstacle) {
 
     Handle spaceMapNode = getSpaceMapNode();
     Handle spaceMapAtTimeLink = addTimeInfo(spaceMapNode, timestamp);
     bool result =  spaceServer->add( keepPreviousMap, spaceMapAtTimeLink, getName(objectNode),
-                        objX, objY, objLength, objWidth, objHeight, objYaw, isObstacle);
+                        objX, objY, objZ, objLength, objWidth, objHeight, objYaw, isObstacle);
 
     return result;
 }

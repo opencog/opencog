@@ -53,14 +53,19 @@ using namespace opencog;
 
 #define PET_X 5.0
 #define PET_Y 5.0
+#define PET_Z 0.0
 #define OBJ_X 3.0
 #define OBJ_Y 3.0
+#define OBJ_Z 0.0
 #define AVATAR_X1 20.0
 #define AVATAR_Y1 20.0
+#define AVATAR_Z1 0.0
 #define AVATAR_X2 3.5
 #define AVATAR_Y2 3.5
+#define AVATAR_Z2 0.0
 #define AVATAR_X3 25.0
 #define AVATAR_Y3 25.0
+#define AVATAR_Z3 0.0
 #define T1 10*TIME_INTERVAL
 #define T2 T1 + ACTION_DONE_TIME/2
 #define T3 T1 + 2*ACTION_DONE_TIME
@@ -136,10 +141,10 @@ public:
         atomSpace.addNode(CONCEPT_NODE, trick_name);
 
         //fill the spacemap with the locations of stick and Paul
-        atomSpace.addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, 1, 1, 1, 0);
-        atomSpace.addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, 1, 1, 1, 0);
+        atomSpace.addSpaceInfo(true, obj_h, T1, OBJ_X, OBJ_Y, OBJ_Z, 1, 1, 1, 0);
+        atomSpace.addSpaceInfo(true, avatar_h, T1, AVATAR_X1, AVATAR_Y1, AVATAR_Z1, 1, 1, 1, 0);
+        atomSpace.addSpaceInfo(true, avatar_h, T2, AVATAR_X2, AVATAR_Y2, AVATAR_Z2,1, 1, 1, 0);
+        atomSpace.addSpaceInfo(true, avatar_h, T3, AVATAR_X3, AVATAR_Y3, AVATAR_Z3,1, 1, 1, 0);
 
         //fill atomSpace with behaved concept node
         Handle behaved_h = atomSpace.addNode(PREDICATE_NODE, BEHAVED_STR);
