@@ -2137,7 +2137,10 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const std::string& frameName, const std::string& frameInstanceName, const std::map<std::string, Handle>& frameElementsValuesHandles, const TruthValue& truthValue )
+Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const std::string& frameName, 
+                                                    const std::string& frameInstanceName, 
+                                                    const std::map<std::string, Handle>& frameElementsValuesHandles, 
+                                                    const TruthValue& truthValue, bool permanent )
 {
     Handle frameNode = atomSpace.getHandle( DEFINED_FRAME_NODE, frameName );
 
@@ -2221,7 +2224,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     frameElementInheritance.push_back( frameElementHandle );
     
                     Handle frameElementInheritanceLink = addLink( atomSpace, INHERITANCE_LINK, frameElementInheritance, true );
-                    atomSpace.setLTI( frameElementInheritanceLink, 1 );
+                    if ( permanent ) {
+                        atomSpace.setLTI( frameElementInheritanceLink, 1 );
+                    } // if
                     atomSpace.setTV( frameElementInheritanceLink, truthValue );
 
                     HandleSeq predicateFrameElement;
@@ -2229,7 +2234,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     predicateFrameElement.push_back( frameElementInstance );
                                 
                     Handle frameElementLink = addLink( atomSpace, FRAME_ELEMENT_LINK, predicateFrameElement, true );
-                    atomSpace.setLTI( frameElementLink, 1 );
+                    if ( permanent ) {
+                        atomSpace.setLTI( frameElementLink, 1 );
+                    } // if
                     atomSpace.setTV( frameElementLink, truthValue );
 
                     // set a new value to the frame element
@@ -2237,7 +2244,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     predicateFrameValue[0] = frameElementInstance;
                     predicateFrameValue[1] = itValue->second;
                     Handle frameElementEvalLink = addLink( atomSpace, EVALUATION_LINK, predicateFrameValue, true );                    
-                    atomSpace.setLTI( frameElementEvalLink, 1 );                
+                    if ( permanent ) {
+                        atomSpace.setLTI( frameElementEvalLink, 1 );                
+                    } // if
                     atomSpace.setTV( frameElementEvalLink, truthValue );
                 } else {
                     // Remove any other atoms for representing this element, since it's not
@@ -2269,7 +2278,9 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
             } // if
 
             atomSpace.setTV( frameInheritanceLink, truthValue );
-            atomSpace.setLTI( frameInheritanceLink, 1 );
+            if ( permanent ) {
+                atomSpace.setLTI( frameInheritanceLink, 1 );
+            } // if
             return frameInstance;
 
         } else {            

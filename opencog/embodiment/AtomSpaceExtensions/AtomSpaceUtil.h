@@ -929,15 +929,17 @@ public:
      * @param frameName The name of the Frame that will be instantiated
      * @param predicateName The name of the frame instance
      * @param frameElementsValuesHandles The map of the elements and its values that will be 
-     *                                   used to set the frame instance elements
+     *                                   used to set the frame instance elements     
      * @param truthValue The truthValue that will be set as the frame instance TV
+     * @param permanent If true set the LTI of the frame atoms to 1, 0 otherwise
      * @return The Frame instance handle
      */
     static Handle setPredicateFrameFromHandles( AtomSpace& atomSpace, 
                                                 const std::string& frameName, 
                                                 const std::string& frameInstanceName, 
                                                 const std::map<std::string, Handle>& frameElementsValuesHandles, 
-                                                const TruthValue& truthValue );
+                                                const TruthValue& truthValue,
+                                                bool permanent = true );
 
     /**
      * Given a predicate Node handle this method returns all the elements
