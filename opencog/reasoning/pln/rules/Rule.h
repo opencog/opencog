@@ -103,7 +103,7 @@ public:
     /** Rule constructor
      * @param _destTable Pointer to the AtomTable interface.
      * @param _freeInputArity Are the number of arguments predetermined?
-     * @param _composer Whether the rule can be computed?
+     * @param _composer Whether the rule has premises?
      * @param _name The name of the rule.
      */
     Rule(iAtomSpaceWrapper *_destTable,

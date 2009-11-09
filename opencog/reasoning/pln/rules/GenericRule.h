@@ -39,7 +39,7 @@ public:
     virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                        int* newN) const = 0;
 
-    /// Always computable
+    /// Always a composer
     GenericRule(iAtomSpaceWrapper *_destTable,
                 bool _FreeInputArity, std::string _name = "")
         : Rule(_destTable, _FreeInputArity, true, _name) { }
@@ -90,7 +90,8 @@ public:
         return Vertex(ret);
     }
 
-    //macro for attemptDirectProduction doing nothing
+    // macro for attemptDirectProduction doing nothing
+    // this is because a GenericRule is a composer
     NO_DIRECT_PRODUCTION;
 };
 
