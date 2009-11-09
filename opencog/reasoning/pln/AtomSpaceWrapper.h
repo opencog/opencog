@@ -315,7 +315,8 @@ public:
 
     vhpair fakeToRealHandle(const pHandle f) const;
 
-    //! Which XML files have been loaded by PLN to populate the AtomSpace
+    //! Which XML files have been loaded by PLN to populate the AtomSpace.
+    //! No longer accessed (but it is updated).
     std::set<std::string> loadedFiles;
     
     //! Debug method to display nodes

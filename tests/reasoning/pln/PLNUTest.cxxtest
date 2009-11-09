@@ -448,7 +448,7 @@ private:
         
         std::cout << test["COMMENT"] << std::endl;
         
-        std::string axiomsFile = test["LOAD"]+".xml";//+".scm";
+        std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";//+".scm";
         
         initAxiomSet(axiomsFile); // TODO use scm in loadAxioms
         
@@ -1251,7 +1251,7 @@ void runPLNTestsOnce()
             100);
 */
 
-/*
+/* // Just obsolete - there is no fetchdemo4, and this is done with fetchdemo5
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "just_done"),
                         mva((Handle)LIST_LINK,
