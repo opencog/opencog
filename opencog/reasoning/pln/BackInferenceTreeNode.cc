@@ -1919,7 +1919,7 @@ string BITNode::printArgs() const
         ss << "No arguments to BITNode [" << (long)this << endl;
         return ss.str();
     }
-    ss << "BITNode [" << (long)this << "] has << " << args.size() << " args:" <<endl;
+    ss << "BITNode [" << (long)this << "] has " << args.size() << " args:" <<endl;
     foreach(meta _arg, args)
         ss << NMPrinter(NMP_ALL).toString(*_arg, -2);
     cprintf(-2,ss.str().c_str());

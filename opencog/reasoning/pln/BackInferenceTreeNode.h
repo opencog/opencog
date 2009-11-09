@@ -474,7 +474,9 @@ protected:
     }
     
     /// Add the new result from a Generator, and spawn new subtrees when necessary
-    /// according to the variable bindings that accompany the new result
+    /// according to the variable bindings that accompany the new result.
+    /// I.e. it produces clones of this node, with vars replaced by results.
+    /// They get put into the expansion pool.
     void addDirectResult(Btr<std::set<BoundVertex> > directResult, spawn_mode spawning);
 
     /// Create children and do some (probably obsolete) pre-binding checks.
