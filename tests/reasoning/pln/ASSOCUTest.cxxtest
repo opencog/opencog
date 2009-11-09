@@ -1,0 +1,95 @@
+/*
+ * tests/reasoning/pln/ASSOCUTest.cxxtest
+ *
+ * Copyright (C) 2009 Novamente LLC
+ * All Rights Reserved
+ *
+ * Author Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/reasoning/pln/ASSOC.h>
+
+using namespace opencog;
+using namespace pln;
+
+class ASSOCUTest : public CxxTest::TestSuite {
+private:
+    AtomSpace* _as;
+    AtomSpaceWrapper* _asw;
+    pHandle _lion_h;
+public:
+    ASSOCUTest() {
+
+        //set flag to print only OC_ASSERT and other ERROR level logs on stdout
+        opencog::logger().setPrintErrorLevelStdout();
+
+        //instantiate the atom space
+        _as = new AtomSpace;
+        
+        //instantiate the atom space wrapper
+        _asw = static_cast<AtomSpaceWrapper*>(ASW(_as));
+    
+        //add concept and its negation
+        _lion_h = _asw->addNode(CONCEPT_NODE, "Lion",
+                                 TruthValue::DEFAULT_TV());
+        pHandle not_lion_h = _asw->addLink(NOT_LINK, _lion_h,
+                                           TruthValue::DEFAULT_TV());
+
+        //add super concepts
+        pHandle mammal_h = _asw->addNode(CONCEPT_NODE, "Mammal",
+                                         TruthValue::DEFAULT_TV());
+        pHandle carnivor_h = _asw->addNode(CONCEPT_NODE, "Carnivor",
+                                           TruthValue::DEFAULT_TV());
+        pHandle striped_h = _asw->addNode(CONCEPT_NODE, "Stiped",
+                                          TruthValue::DEFAULT_TV());
+        pHandle predator_h = _asw->addNode(CONCEPT_NODE, "Predator",
+                                           TruthValue::DEFAULT_TV());
+        pHandle facingExtincion_h = _asw->addNode(CONCEPT_NODE,
+                                                  "FacingExtincion",
+                                                  TruthValue::DEFAULT_TV());
+
+        //add SubSet Lion X relationships
+        _asw->addLink(SUBSET_LINK, _lion_h, mammal_h,
+                      SimpleTruthValue(1, 1));
+        _asw->addLink(SUBSET_LINK, _lion_h, carnivor_h,
+                      SimpleTruthValue(1, 1));
+        _asw->addLink(SUBSET_LINK, _lion_h, striped_h,
+                      SimpleTruthValue(1, 1));
+        _asw->addLink(SUBSET_LINK, _lion_h, predator_h,
+                      SimpleTruthValue(1, 1));
+        _asw->addLink(SUBSET_LINK, _lion_h, facingExtincion_h,
+                      SimpleTruthValue(0.8, 1));
+        //add SubSet NOT Lion X relationships
+        _asw->addLink(SUBSET_LINK, not_lion_h, mammal_h,
+                      SimpleTruthValue(0.2, 1));
+        _asw->addLink(SUBSET_LINK, not_lion_h, carnivor_h,
+                      SimpleTruthValue(0.1, 1));
+        _asw->addLink(SUBSET_LINK, not_lion_h, striped_h,
+                      SimpleTruthValue(0.1, 1));
+        _asw->addLink(SUBSET_LINK, not_lion_h, predator_h,
+                      SimpleTruthValue(0.3, 1));
+        _asw->addLink(SUBSET_LINK, not_lion_h, facingExtincion_h,
+                      SimpleTruthValue(0.4, 1));        
+    }
+
+    void testASSOCUTest() {
+        //TODO
+        //CreateConceptASSOC(_asw, _lion_h);
+        TS_ASSERT(true);
+    }
+};

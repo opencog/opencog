@@ -745,6 +745,14 @@ TableGather::TableGather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
     gather(_MP, asw, VarT, index);
 }
 
+std::string TableGather::toString() const {
+    std::stringstream ss;
+    for(TableGatherConstIt i = begin(); i != end(); i++) {
+        ss << boost::get<pHandle>(i->GetValue()) << " ";
+    }
+    return ss.str();
+}
+
 template<>
 void weak_atom<Btr<tree<Vertex> > >::apply_bindings()
 {

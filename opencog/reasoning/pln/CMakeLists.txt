@@ -59,6 +59,7 @@ ADD_LIBRARY (pln SHARED
     # convert to OpenCog specific class:
 	#TimeStamp.cc
 	#spacetime.cc
+        ASSOC
 )
 
 INCLUDE_DIRECTORIES (

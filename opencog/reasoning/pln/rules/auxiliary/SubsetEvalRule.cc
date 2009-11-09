@@ -62,9 +62,9 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     pHandleSet used;
 
     pHandleSet mlSetSub = memberLinkSet(h_sub, MIN_MEMBERS_STRENGTH,
-                                         MIN_MEMBERS_COUNT, _asw);
+                                        MIN_MEMBERS_COUNT, _asw);
     pHandleSet mlSetSuper = memberLinkSet(h_super, MIN_MEMBERS_STRENGTH,
-                                         MIN_MEMBERS_COUNT, _asw);
+                                          MIN_MEMBERS_COUNT, _asw);
 
     vector<TruthValue*> tvsSub;
     vector<TruthValue*> tvsSuper;
@@ -73,7 +73,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     // so that each element of tvsSub and tvsSuper are aligned
 
     foreach(const pHandle& h_ml_sub, mlSetSub) {
-        std::cout << _asw->pHandleToString(h_ml_sub) << std::endl;
+        //std::cout << _asw->pHandleToString(h_ml_sub) << std::endl;
         tvsSub.push_back(_asw->getTV(h_ml_sub).clone());
 
         EqOutgoing eqMember(h_ml_sub, 0, _asw);
@@ -88,7 +88,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     }
     
     foreach(const pHandle& h_ml_super, mlSetSuper) {
-        std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
+        //std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
         if (!STLhas(used, h_ml_super)) {
             tvsSuper.push_back(_asw->getTV(h_ml_super).clone());
             tvsSub.push_back(new SimpleTruthValue(0, 0));
@@ -102,14 +102,14 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     TruthValue** tvs1 = new TruthValue*[N];
     TruthValue** tvs2 = new TruthValue*[N];
 
-    std::cout << "SUB" << std::endl;
-    for(unsigned int i = 0; i < N; i++) {
-        std::cout << tvsSub[i]->toString() << std::endl;
-    }
-    std::cout << "SUPER" << std::endl;
-    for(unsigned int i = 0; i < N; i++) {
-        std::cout << tvsSuper[i]->toString() << std::endl;
-    }
+//     std::cout << "SUB" << std::endl;
+//     for(unsigned int i = 0; i < N; i++) {
+//         std::cout << tvsSub[i]->toString() << std::endl;
+//     }
+//     std::cout << "SUPER" << std::endl;
+//     for(unsigned int i = 0; i < N; i++) {
+//         std::cout << tvsSuper[i]->toString() << std::endl;
+//     }
 
     std::copy(tvsSub.begin(), tvsSub.end(), tvs1);
     std::copy(tvsSuper.begin(), tvsSuper.end(), tvs2);

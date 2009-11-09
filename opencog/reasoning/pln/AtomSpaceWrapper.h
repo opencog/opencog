@@ -345,6 +345,18 @@ public:
     pHandle getHandle(Type t,const std::string& str);
     //! Get handle of link with type t and outgoing set 
     pHandle getHandle(Type t,const pHandleSeq& outgoing);
+    // helper methods for getHandle
+    inline pHandle getHandle(Type t, pHandle ha) {
+        pHandleSeq oset;
+        oset.push_back(ha);
+        return getHandle(t, oset);
+    }
+    inline pHandle getHandle(Type t, pHandle ha, pHandle hb) {
+        pHandleSeq oset;
+        oset.push_back(ha);
+        oset.push_back(hb);
+        return getHandle(t, oset);
+    }
 
     pHandleSeq getOutgoing(const pHandle h);
 
@@ -382,7 +394,15 @@ public:
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
                             bool fresh=false, bool managed=true)=0;
 
-    // helper functions for addLink
+    // helper methods for addLink
+    inline pHandle addLink(Type t, pHandle ha,
+                           const TruthValue& tvn,
+                           bool fresh=false, bool managed=true)
+    {
+        pHandleSeq oset;
+        oset.push_back(ha);
+        return addLink(t, oset, tvn, fresh, managed);
+    }
     inline pHandle addLink(Type t, pHandle ha, pHandle hb,
                            const TruthValue& tvn,
                            bool fresh=false, bool managed=true)

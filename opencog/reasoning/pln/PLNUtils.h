@@ -487,7 +487,7 @@ typedef std::set<opencog::pln::BoundVertex> BV_Set;
 /**
  * TableGather retrieves links given a template
  * (_MP that stands for meta predicate)
- * Warning: apparently it does not work with atom type
+ * Warning: apparently it does not work with node type
  * as root of the meta predicate
  * but it works well with a link type, see TableGatherUTest for an example
  */
@@ -496,6 +496,8 @@ struct TableGather : public std::set<weak_atom<Vertex> > {
                 const Type VarT = FW_VARIABLE_NODE, int index = -1);
     void gather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
                 const Type VarT = FW_VARIABLE_NODE, int index = -1);
+    // for debugging
+    std::string toString() const;
 };
 
 typedef TableGather::iterator TableGatherIt;

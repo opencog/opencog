@@ -25,29 +25,41 @@
 #define _PLN_ASSOC_H
 
 #include "AtomSpaceWrapper.h"
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 namespace opencog { namespace pln {
 
 /**
- * ASSOC is in charge of creating ASSOC of concepts as defined in the PLN book.
+ * CreateConceptASSOC is in charge of creating the concept AC such
+ * that AC(x) = ASSOC(x, C).
  *
- * In the PLN book ASSOC(F, G) = max(P(F|G) − P(F|NOT G), 0)
+ * where ASSOC(F, G) = max(P(F|G) − P(F|NOT G), 0)
  *
  * Here P(F|G) will be measured by SubSet G F
- * 
- * and what that function will return is 
  *
- * This class is used for Intensional Inheritance.
- * It operates on an AtomSpaceWrapper.
- * If it turns out that creating ASSOC is useful by other modules than PLN
- * the code can be moved to operate over AtomSpace directly.
+ * This procedure is used by Intensional Inheritance.
+ *
+ * It operates on an AtomSpaceWrapper. If it turns out that creating ASSOC
+ * is useful by other modules than PLN the code can be moved to operate
+ * over AtomSpace directly.
  *
  * @param asw the AtomSpaceWrapper over which the creating takes place
- * @param concept the pHandle of the concept, it must be of (sub)type CONCEPT
+ * @param c_h the pHandle of the concept, must be of type or subtype CONCEPT
  * 
- * @return the pHandle containing the concept ASSOC_conceptName, such that
- * forall E (sub)type CONCEPT_NODE, ASSOC_conceptName(E) = ASSOC(E, concept)
+ * @return the pHandle containing the concept AC, such that
+ * forall x, AC(x) = ASSOC(x, c_h)
  */
-pHandle ASSOC(AtomSpaceWrapper* asw, pHandle concept);
+pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h);
+
+
+/**
+ * @param tv1 TruthValue representing P(F|G)
+ * @param tv2 TruthValue representing P(F|NOT G)
+ *
+ * @return SimpleTruthValue such that strength = max(tv1.s - tv2.s, 0)
+ */
+SimpleTruthValue ASSOC(const TruthValue& tv1, const TruthValue& tv2);
 
 }}
+
+#endif

@@ -59,13 +59,11 @@ public:
     virtual boost::shared_ptr<std::set<pHandle> > getHandleSet(Type T, const std::string&
             name, bool subclass = false) =0 ;
 
-    /** Return the set of all nodes with type T and the name str
-     * NOTE! atoms with confidence < 0.0000001 are not returned!
+    /** Return pHandle with type T and the name str
      */
     virtual pHandle getHandle(Type t,const std::string& str) =0;
 
-    /** return the set of all links with type T and the given outgoing set
-      * NOTE! atoms with confidence < 0.0000001 are not returned!
+    /** return pHanlde with type T and the given outgoing set
       */
     virtual pHandle getHandle(Type t,const pHandleSeq& outgoing) =0;
     virtual ~AtomLookupProvider() { };

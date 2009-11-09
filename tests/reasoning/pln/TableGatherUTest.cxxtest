@@ -81,24 +81,22 @@ public:
         TableGather table2(mp2, asw);
         tree<Vertex> mp3(static_cast<pHandle>(LINK));
         TableGather table3(mp3, asw);
+        // it seems that the case below LINK(NODE VARIABLE_NODE) does not pass
+        // TableGather because of NODE type
+        // this can be rectified when TableGather is replaced by
+        // Linas's Pattern Matcher
+        //tree<Vertex> mp4(static_cast<pHandle>(LINK));
+        //mp4.append_child(mp4.begin(), static_cast<pHandle>(NODE));
+        //mp4.append_child(mp4.begin(), static_cast<pHandle>(VARIABLE_NODE));
+        //TableGather table4(mp4, asw);
 
-        cout << "test table1: " << endl;
-        for(TableGatherConstIt i = table1.begin(); i != table1.end(); i++) {
-            cout << boost::get<pHandle>(i->GetValue()) << " ";
-        }
-        cout << endl;
+        cout << "test table1: " << table1.toString() << endl;
 
-        cout << "test table2: " << endl;
-        for(TableGatherConstIt i = table2.begin(); i != table2.end(); i++) {
-            cout << boost::get<pHandle>(i->GetValue()) << " ";
-        }
-        cout << endl;
+        cout << "test table2: " << table2.toString() << endl;
 
-        cout << "test table3: " << endl;
-        for(TableGatherConstIt i = table3.begin(); i != table3.end(); i++) {
-            cout << boost::get<pHandle>(i->GetValue()) << " ";
-        }
-        cout << endl;
+        cout << "test table3: " << table3.toString() << endl;
+
+        //cout << "test table4: " << table4.toString() << endl;
 
         //check table1
         TS_ASSERT(table1.find(weak_atom<Vertex>(l1_h)) != table1.end());
@@ -118,6 +116,10 @@ public:
         TS_ASSERT(table3.find(weak_atom<Vertex>(l3_h)) != table3.end());
         TS_ASSERT(table3.find(weak_atom<Vertex>(l4_h)) != table3.end());
 
-        //! @todo perhaps add more test cases with variables...?
+        //check table4
+        //TS_ASSERT(table3.find(weak_atom<Vertex>(l1_h)) != table3.end());
+        //TS_ASSERT(table3.find(weak_atom<Vertex>(l2_h)) != table3.end());
+        //TS_ASSERT(table3.find(weak_atom<Vertex>(l3_h)) == table3.end());
+        //TS_ASSERT(table3.find(weak_atom<Vertex>(l4_h)) != table3.end());
     }
 };
