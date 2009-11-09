@@ -25,7 +25,9 @@
 namespace opencog { namespace pln {
 
 /** 
- * LookupRule
+ * LookupRule - simply looks up an atom's TV in the AtomSpace. Ignores
+ * hypothetical atoms (i.e. with 0-confidence TVs), because TableGather::gather
+ * does.
  */
 class LookupRule : public Rule
 {

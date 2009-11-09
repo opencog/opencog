@@ -1155,7 +1155,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
                     tlog(0,"TV conf too low: %f\n", etv.getConfidence());
             }
         }
-        tlog(0, "infer() ok\n");
+        tlog(0, "infer(): one step ok\n");
     }
 
     const vector<set<VtreeProvider*> >& eval_res_vector_set = variableScoper->getEvalResults();

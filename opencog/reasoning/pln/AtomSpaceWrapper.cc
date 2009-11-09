@@ -120,6 +120,7 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
 bool AtomSpaceWrapper::handleAddSignal(Handle h)
 {
     if (!archiveTheorems) {
+        // Will create a new entry in the vhmap. This must not involve making new atoms...
         pHandle ph = realToFakeHandle(h, NULL_VERSION_HANDLE);
         makeCrispTheorem(ph);
         return false;
