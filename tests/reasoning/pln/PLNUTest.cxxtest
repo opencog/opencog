@@ -462,7 +462,11 @@ private:
         pHandleSeq fakeHandles =
             ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
         pHandle fakeHandle = fakeHandles[0];
-        meta target(new vtree(fakeHandle));
+        //meta target(new vtree(fakeHandle));
+        
+        meta target_(new vtree(fakeHandle));
+        
+        meta target = ForceAllLinksVirtual(target_);
         
         // Set parameters
                 

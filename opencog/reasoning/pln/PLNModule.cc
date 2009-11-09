@@ -196,7 +196,12 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
     } else {
         pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
         pHandle fakeHandle = fakeHandles[0];
-        Btr<vtree> target(new vtree(fakeHandle));
+        
+//        Btr<vtree> target(new vtree(fakeHandle));
+        
+        Btr<vtree> target_(new vtree(fakeHandle));
+        
+        Btr<vtree> target = ForceAllLinksVirtual(target_);
 
         bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
         Bstate_.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
