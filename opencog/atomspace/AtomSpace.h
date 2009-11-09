@@ -89,7 +89,7 @@ public:
      * explicitly use the backing store to obtain an instance of the
      * atom. If an atom corresponding to the handle cannot be found,
      * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is gauranteed to have been
+     * then the corresponding atom is guaranteed to have been
      * instantiated in the atomspace.
      */
     Handle fetchAtom(Handle);
