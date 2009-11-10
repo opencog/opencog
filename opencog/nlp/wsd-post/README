@@ -74,6 +74,7 @@ ordinary guile interpreter.
  * cluster.scm: Cheapo data clustering algo.
 
 ------------------------------------------------
+Database: "lexat" -- i.e. use "psql lexat" to connect to it.
 
 Misc notes:
 
@@ -486,6 +487,20 @@ Notice that link-grammar correctly guessed "widpread" (a typo), sigmoidal and ei
 it flopped on bassist.
 
 
+Stats:
+------
+53653 articles in the coged directory (53.6K wikipedia articles, in 
+the latters A-E range.)  How many senteces? Try grep:
+    grep "<sentence index=" */* |wc 
+1186858 sentences (1.2M) or 22.121 sentences per article
+    grep "<parse id=" |wc
+3383657 parses: (3.4M) or 2.85094 parses per sentence.
+
+Many/most of these were discarded ... 
+
+In the lexat database: (psql lexat)
+select * from unigramcount; --- 13436741 (13.4M)
+select * from lemmacount; -- 12936465 (12.9M)
 
 
 

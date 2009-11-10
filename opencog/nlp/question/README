@@ -36,7 +36,7 @@ As of August 2009, things are kind of broken again. As of September
 2009, all of the C++ code has been deprecated, and various parts have
 been removed.  A new, far superior implementation has been created in
 a combination of scheme and pattern-matching, in the nlp/triples and
-the nlp/seme directories.  The new implementtion now power the chatbot.
+the nlp/seme directories.  The new implemention now powers the chatbot.
 
 Because of this, the C++ code in this directory is no longer being
 built or maintained. It is not being deleted, not just yet -- its of
