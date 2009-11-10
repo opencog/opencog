@@ -94,6 +94,7 @@ protected:
      *
      * @param outh ???
      * @param overrideInputFilter Whether the method overrides inputFilter.
+     *                            if it is unchanged then it is considered false
      * @return The extra requirements filter.
      */
     virtual setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
