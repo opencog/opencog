@@ -12,6 +12,7 @@ ADD_LIBRARY (MessagingSystem
 	FeedbackMessage.cc
 	RouterMessage.cc
 	NetworkElement.cc
+	NetworkElementCommon.cc
 	MessagingSystemExceptions.cc
 	ServerSocket.cc
 	Router.cc
@@ -41,6 +42,7 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	server
 	${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
 )
 
 ADD_EXECUTABLE (router RouterExecutable.cc)

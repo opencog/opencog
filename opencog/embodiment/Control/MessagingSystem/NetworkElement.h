@@ -39,6 +39,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
+#define REPLACE_CSOCKETS_BY_ASIO
+
 #define USE_BOOST_ASIO
 #ifdef USE_BOOST_ASIO
 #include <boost/asio.hpp>
@@ -47,6 +49,10 @@ using boost::asio::ip::tcp;
 
 namespace MessagingSystem
 {
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    class ServerSocket;
+#endif
 
 /**
  * The basic class of communications layer is a NetworkElement (NE). The idea here is that every entity
@@ -130,6 +136,10 @@ private:
     int sock;
 #endif
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    static std::vector<ServerSocket*> serverSockets;
+#endif
+
     /**
      * Used to hold the ids of the NetworkElements that are currently
      * unavailable. To be removed from the list an IS_AVAILABLE_COMPONENT <id>
@@ -166,7 +176,6 @@ private:
      */
     bool startListener();
 
-
     /**
      * Convenience method used to simplify the flow of retrieveMessages(). It creates the proper message to be sent to router and send it away.
      */
@@ -179,10 +188,6 @@ private:
 
 
 public:
-
-    static const std::string OK_MESSAGE;
-    static const std::string FAILED_MESSAGE;
-    static const std::string FAILED_TO_CONNECT_MESSAGE;
 
     bool noAckMessages; // flag to define if the protocol should use ACK messages (OK,FAILED) or not.
 
@@ -269,11 +274,6 @@ public:
 
     // END OF API
 
-    /**
-     * Convenience method to parse command lines into commands and arguments.
-     */
-    static void parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args);
-
     const std::string &getIPAddress();
     int getPortNumber();
     const std::string &getID();
@@ -343,6 +343,13 @@ public:
     unsigned int getIncomingQueueSize();
     bool isIncomingQueueEmpty();
     Message* popIncomingQueue();
+
+    /**
+     * Method to check if NetworkElment is still listenning to its tcp port
+     */
+    static bool isListenerThreadStopped() { 
+        return !stopListenerThreadFlag;
+    }
 
 }; // class
 }  // namespace

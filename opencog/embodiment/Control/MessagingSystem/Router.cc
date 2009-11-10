@@ -33,7 +33,7 @@
 
 #include "Router.h"
 #include "RouterServerSocket.h"
-#include "NetworkElement.h"
+#include "NetworkElementCommon.h"
 
 #ifdef USE_BOOST_ASIO
 #include <boost/lexical_cast.hpp>
@@ -81,7 +81,7 @@ void Router::startListener()
     pthread_attr_setdetachstate(&socketListenerAttr, PTHREAD_CREATE_DETACHED);
     int errorCode = pthread_create(&socketListenerThread, &socketListenerAttr, Router::portListener, &routerPort);
     if (errorCode) {
-        reportThreadError(errorCode);
+        NetworkElementCommon::reportThreadError(errorCode);
     } else {
         sleep(1); // Give time so that it starts listening server port before sending any message to NE's.
     }
@@ -403,32 +403,6 @@ void Router::removeNetworkElement(const std::string &id)
 void Router::clearNetworkElementMessageQueue(const std::string &id)
 {
     messageCentral->clearQueue(id);
-}
-
-void Router::reportThreadError(const int &errorCode)
-{
-
-    std::string errorMsg;
-    switch (errorCode) {
-    case EAGAIN:
-        errorMsg = "The system lacked the necessary resources to create another thread,"
-                   " or the system-imposed limit on the total number of threads in a "
-                   "process PTHREAD_THREADS_MAX would be exceeded.";
-        break;
-    case EINVAL:
-        errorMsg = "The value specified by attr is invalid.";
-        break;
-    case EPERM:
-        errorMsg = "The caller does not have appropriate permission to set the required "
-                   "scheduling parameters or scheduling policy.";
-        break;
-    default:
-        errorMsg = "Unknown error code: ";
-        errorMsg += opencog::toString(errorCode);
-        // When pthread_join is not called, this gets error code 12 after 380 created threads!
-    }
-    logger().error(
-                 "Thread error: \n%s.", errorMsg.c_str());
 }
 
 void Router::persistState()
@@ -826,7 +800,7 @@ bool Router::sendNotification(const NotificationData& data)
 
         std::string answer = response;
 
-        if (answer == NetworkElement::OK_MESSAGE) {
+        if (answer == NetworkElementCommon::OK_MESSAGE) {
             logger().debug("Router - Sucessfully sent notification to '%s'.",
                          data.toId.c_str());
             markElementAvailable(data.toId);

@@ -27,19 +27,33 @@
 
 #include "NetworkElement.h"
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <boost/thread/thread.hpp>
+#else
 #include <Sockets/TcpSocket.h>
 #include <Sockets/ISocketHandler.h>
+#endif
 
 namespace MessagingSystem
 {
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+class ServerSocket
+#else
 class ServerSocket : public TcpSocket
+#endif
 {
 
 private:
 
     // Used to call-back when Message arrives
     static NetworkElement *master;
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    boost::asio::io_service io_service;
+    tcp::socket* socket;
+    boost::thread connectionThread;
+#endif
 
     // States used in in the state machine inside onLine()
     static const int DOING_NOTHING = 0;
@@ -58,7 +72,15 @@ public:
     // Constructors/destructors
 
     ~ServerSocket();
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    ServerSocket();
+    void Send(const std::string& cmd);
+    static void handle_connection(ServerSocket*);
+    void start();
+    tcp::socket* getSocket();
+#else
     ServerSocket(ISocketHandler &handler);
+#endif
 
     // ***********************************************/
     // General

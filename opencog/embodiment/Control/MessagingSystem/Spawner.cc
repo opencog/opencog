@@ -31,6 +31,7 @@
 #include "StringMessage.h"
 #include <iostream>
 #include <sstream>
+#include "NetworkElementCommon.h"
 
 using namespace MessagingSystem;
 using namespace opencog;
@@ -101,7 +102,7 @@ bool Spawner::processNextMessage(Message *message)
     std::string command;
     std::queue<std::string> args;
 
-    NetworkElement::parseCommandLine(cmdLine, command, args);
+    NetworkElementCommon::parseCommandLine(cmdLine, command, args);
     logger().info("Spawner - line(%s) command(%s) # of parsed arguments(%d).",
                   cmdLine.c_str( ), command.c_str( ), args.size( ) );
 

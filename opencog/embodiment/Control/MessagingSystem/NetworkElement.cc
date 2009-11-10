@@ -26,9 +26,13 @@
 #include <vector>
 #include <signal.h>
 
+#include "ServerSocket.h"
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <opencog/util/foreach.h>
+#else
 #include <Sockets/ListenSocket.h>
 #include <Sockets/SocketHandler.h>
-#include "ServerSocket.h"
+#endif
 
 #ifndef USE_BOOST_ASIO
 #include <sys/socket.h>
@@ -36,7 +40,6 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #endif
-
 
 //for the random generator initilization
 #include <cmath>
@@ -48,7 +51,7 @@
 
 #include "Message.h"
 #include "NetworkElement.h"
-#include "Router.h"
+#include "NetworkElementCommon.h"
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
 
@@ -59,22 +62,21 @@
 #include <boost/algorithm/string/regex.hpp>
 #ifdef USE_BOOST_ASIO
 #include <boost/lexical_cast.hpp>
+#include <boost/bind.hpp>
 #endif
 
 
 using namespace MessagingSystem;
 using namespace opencog;
 
-const std::string NetworkElement::OK_MESSAGE = "OK";
-const std::string NetworkElement::FAILED_MESSAGE = "FAILED";
-const std::string NetworkElement::FAILED_TO_CONNECT_MESSAGE = "FAILED_TO_CONNECT";
-
 unsigned sleep(unsigned seconds);
 
 // static definition
 bool NetworkElement::stopListenerThreadFlag = false;
 bool NetworkElement::socketListenerIsReady = false;
-
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+std::vector<ServerSocket*> NetworkElement::serverSockets;
+#endif
 
 // Public interface
 
@@ -93,6 +95,12 @@ NetworkElement::~NetworkElement()
     }
 #else
     if (this->sock != -1) close(this->sock);
+#endif
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    foreach(ServerSocket* ss, serverSockets) {
+        delete ss;
+    }
 #endif
 
     pthread_mutex_destroy(&messageQueueLock);
@@ -239,7 +247,7 @@ bool NetworkElement::sendMessage(Message &msg)
     std::string msg_to_send = message.str();
     std::string response = sendMessageToRouter( msg_to_send );
 
-    if ( response == OK_MESSAGE ) {
+    if ( response == NetworkElementCommon::OK_MESSAGE ) {
         logger().debug(
                      "NetworkElement - sendMessage - response = 'OK'");
         return true;
@@ -352,7 +360,7 @@ bool NetworkElement::startListener()
     pthread_attr_setdetachstate(&socketListenerAttr, PTHREAD_CREATE_DETACHED);
     int errorCode = pthread_create(&socketListenerThread, &socketListenerAttr, NetworkElement::portListener, &portNumber);
     if (errorCode) {
-        Router::reportThreadError(errorCode);
+        NetworkElementCommon::reportThreadError(errorCode);
         return false;
     } else {
         // Give time so that it starts listening server port before sending any message to ROUTER.
@@ -373,10 +381,10 @@ bool NetworkElement::sendCommandToRouter(const std::string &cmd)
 
     std::string response = sendMessageToRouter( cmd );
 
-    if ( response == OK_MESSAGE ) {
+    if ( response == NetworkElementCommon::OK_MESSAGE ) {
         logger().debug("NetworkElement - response = 'OK'");
         return true;
-    } else if ( response == FAILED_TO_CONNECT_MESSAGE || response == FAILED_MESSAGE ) {
+    } else if ( response == NetworkElementCommon::FAILED_TO_CONNECT_MESSAGE || response == NetworkElementCommon::FAILED_MESSAGE ) {
         logger().warn(
                      "NetworkElement - Unable to connect to Router in sendCommandToRouter.");
         // cannot connect to router, add it to unavailable elements list
@@ -427,20 +435,6 @@ void NetworkElement::logoutFromRouter()
     }
 }
 
-void NetworkElement::parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args)
-{
-    std::vector<std::string> parameters;
-    boost::split( parameters, line, boost::is_any_of( " " ) );
-    if ( parameters.size( ) > 0 ) {
-        command = parameters[0];
-    } // if
-
-    unsigned int j;
-    for ( j = 1; j < parameters.size( ); ++j ) {
-        args.push( parameters[j] );
-    } // for
-}
-
 // static methods
 
 void *NetworkElement::portListener(void *arg)
@@ -452,6 +446,35 @@ void *NetworkElement::portListener(void *arg)
 
     logger().info("NetworkElement - Binding to port %d.", port);
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    try
+    {
+        boost::asio::io_service io_service;
+        boost::asio::ip::tcp::acceptor acceptor(io_service);
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
+        acceptor.open(endpoint.protocol());
+        //acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+        acceptor.bind(endpoint);
+        logger().debug("Port listener ready.");
+        acceptor.listen();
+        logger().debug("Acceptor listening.");
+        socketListenerIsReady = true;
+        while (!stopListenerThreadFlag)
+        {
+            ServerSocket* ss = new ServerSocket();
+            serverSockets.push_back(ss);
+            acceptor.accept(*(ss->getSocket()));
+            ss->start();
+        }
+    } catch (boost::system::system_error& e)
+    {
+        logger().error("NetworkElement - Boost system error listening to port %d. Error message", port, e.what());
+    } catch (std::exception& e)
+    {
+        logger().error("NetworkElement - Error listening to port %d. Exception message: %s", port, e.what());
+    }
+
+#else
     SocketHandler socketHandler;
     ListenSocket<ServerSocket> listenSocket(socketHandler);
 
@@ -472,6 +495,7 @@ void *NetworkElement::portListener(void *arg)
         }
         socketHandler.Select(0, 200);
     }
+#endif
 
     logger().debug("Port listener finished.");
     return NULL;
@@ -600,12 +624,12 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
     if ( message.length( ) == 0 ) {
         logger().error("NetworkElement - sendMessageToRouter. Invalid zero length message" );
         pthread_mutex_unlock(&socketAccessLock);
-        return FAILED_MESSAGE;
+        return NetworkElementCommon::FAILED_MESSAGE;
     } // if
 
     if ( !connectToRouter( ) ) {
         pthread_mutex_unlock(&socketAccessLock);
-        return FAILED_MESSAGE;
+        return NetworkElementCommon::FAILED_MESSAGE;
     } // if
 
     std::string sentText =  message;
@@ -618,7 +642,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
     boost::asio::write(*sock, boost::asio::buffer(sentText), boost::asio::transfer_all(), error);
     if (error) {
         logger().debug("NetworkElement - sendMessageToRouter (socket = %p) Error transfering data.", sock);
-        return FAILED_MESSAGE;
+        return NetworkElementCommon::FAILED_MESSAGE;
     }
 #else
     unsigned int sentBytes = 0;
@@ -627,13 +651,13 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
         close(this->sock);
         this->sock = -1;
         pthread_mutex_unlock(&socketAccessLock);
-        return FAILED_MESSAGE;
+        return NetworkElementCommon::FAILED_MESSAGE;
     } // if
 #endif
 
     if (noAckMessages) {
         pthread_mutex_unlock(&socketAccessLock);
-        return NetworkElement::OK_MESSAGE;
+        return NetworkElementCommon::OK_MESSAGE;
     }
 
 #define BUFFER_SIZE 256
@@ -652,7 +676,7 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
         this->sock = -1;
 #endif
         pthread_mutex_unlock(&socketAccessLock);
-        return FAILED_MESSAGE;
+        return NetworkElementCommon::FAILED_MESSAGE;
     } // if
 
     buffer[receivedBytes] = '\0'; // Assure null terminated string

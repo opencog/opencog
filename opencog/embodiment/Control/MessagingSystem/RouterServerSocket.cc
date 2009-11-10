@@ -26,7 +26,7 @@
 #include "RouterMessage.h"
 #include "RouterServerSocket.h"
 #include "RouterHttpPostSocket.h"
-#include "NetworkElement.h"
+#include "NetworkElementCommon.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
@@ -87,7 +87,7 @@ void RouterServerSocket::addNetworkElement(const std::string &id, const std::str
     } else if (errorCode == Router::ID_EXISTS) {
         answer.assign("FAILED - id already exists: "); answer.append(id);
     } else if (errorCode == Router::NO_ERROR || errorCode == Router::HAS_PENDING_MSGS) {
-        answer.assign(NetworkElement::OK_MESSAGE);
+        answer.assign(NetworkElementCommon::OK_MESSAGE);
     } else {
         answer.assign("FAILED - unknown error code.");
     }
@@ -133,7 +133,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
 
     if (known) {
         logger().fine("RouterServerSocket - known destination");
-        answer.assign(NetworkElement::OK_MESSAGE);
+        answer.assign(NetworkElementCommon::OK_MESSAGE);
         sendAnswer(answer);
     } else {
         logger().warn("RouterServerSocket - unknow destination");
@@ -192,12 +192,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
 
             cmd.assign(s);
             cmd.append("\n");
-#ifdef USE_BOOST_ASIO
-            // TODO: Error handling
-            boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length()));
-#else
             unsigned int sentBytes = 0;
+#ifdef USE_BOOST_ASIO
+            if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) { 
+#else
             if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
+#endif
                 logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
@@ -205,7 +205,6 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                 delete(message); // TODO: Shouldn't message be put back to the queue?
                 return;
             }
-#endif
 
             std::istringstream stream(message->getPlainTextRepresentation());
             std::string line;
@@ -213,12 +212,12 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                 logger().debug("Sending line <d%s>", line.c_str());
                 line.insert(0, "d");
                 line.append("\n");
-#ifdef USE_BOOST_ASIO
-                // TODO: Error handling
-                boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length()));
-#else
                 sentBytes = 0;
+#ifdef USE_BOOST_ASIO
+                if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length())) ) != line.length() ) { 
+#else
                 if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
+#endif
                     logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
                     master->closeDataSocket(id);
                     master->closeControlSocket(id);
@@ -226,7 +225,6 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                     delete(message); // TODO: Shouldn't message be put back to the queue?
                     return;
                 }
-#endif
                 // TODO: Shouldn't the protocol be changed to expect a feedback (OK or FAILED) per message here?
                 // And, if OK is not received, message may be kept on the queue (until it be eventually sent or,
                 // at least, until N attempts are made)
@@ -235,19 +233,18 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
             if (limit > 0) limit--;
         }
         cmd.assign("cNO_MORE_MESSAGES\n");
-#ifdef USE_BOOST_ASIO
-        // TODO: Error handling
-        boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length()));
-#else
         unsigned int sentBytes = 0;
+#ifdef USE_BOOST_ASIO
+        if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) {
+#else
         if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
+#endif
             logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
             master->closeControlSocket(id);
             master->closeDataSocket(id);
             master->markElementUnavailable(id);
             return;
         }
-#endif
 
 
         if (!master->noAckMessages) {
@@ -280,7 +277,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
                          response, receivedBytes );
             std::string answer = response;
 
-            if (answer == NetworkElement::OK_MESSAGE) {
+            if (answer == NetworkElementCommon::OK_MESSAGE) {
                 logger().debug("RouterServerSocket - Sucessfully sent messages to '%s'.",
                              id.c_str());
             } else {
@@ -410,7 +407,7 @@ void RouterServerSocket::storeNewMessage()
     }
 
     // Ack sender that message was delivered successfully
-    answer.assign(NetworkElement::OK_MESSAGE);
+    answer.assign(NetworkElementCommon::OK_MESSAGE);
     logger().debug("RouterServerSocket - Sending OK.");
     sendAnswer(answer);
 
@@ -436,7 +433,7 @@ void RouterServerSocket::OnLine(const std::string& line)
     case WAITING_COMMAND: {
         std::string command;
         std::queue<std::string> args;
-        NetworkElement::parseCommandLine(line, command, args);
+        NetworkElementCommon::parseCommandLine(line, command, args);
         logger().debug("RouterServerSocket - Parsed command <%s>. Args size: %d.", command.c_str(), args.size());
         if (command == "LOGIN") {
             // handshake
@@ -462,7 +459,7 @@ void RouterServerSocket::OnLine(const std::string& line)
                          "RouterServerSocket - Logout: id = %s.", id.c_str());
 
             master->removeNetworkElement(id);
-            sendAnswer(NetworkElement::OK_MESSAGE);
+            sendAnswer(NetworkElementCommon::OK_MESSAGE);
 
         } else if (command == "CLEAR_MESSAGE_QUEUE") {
             // request the removal of all messages from a NE message queue
@@ -483,7 +480,7 @@ void RouterServerSocket::OnLine(const std::string& line)
                          requestorId.c_str(), targetId.c_str());
 
             master->clearNetworkElementMessageQueue(targetId);
-            sendAnswer(NetworkElement::OK_MESSAGE);
+            sendAnswer(NetworkElementCommon::OK_MESSAGE);
 
         } else if (command == "SHUTDOWN") {
             // exit

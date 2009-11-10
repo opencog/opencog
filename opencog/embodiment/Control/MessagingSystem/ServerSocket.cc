@@ -25,6 +25,10 @@
 #include "ServerSocket.h"
 #include <string.h>
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <boost/bind.hpp>
+#endif
+
 using namespace MessagingSystem;
 using namespace opencog;
 
@@ -32,17 +36,29 @@ NetworkElement *ServerSocket::master = NULL;
 
 ServerSocket::~ServerSocket()
 {
-    logger().debug("ServerSocket - Connection closed.");
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    socket->close();
+    delete socket;
+#endif
+    logger().debug("ServerSocket destroyed - Connection closed.");
 }
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+ServerSocket::ServerSocket()
+#else
 ServerSocket::ServerSocket(ISocketHandler &handler): TcpSocket(handler)
+#endif
 {
 
     logger().debug("ServerSocket - Serving connection.");
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    socket = new tcp::socket(io_service);
+#else
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
     SetLineProtocol();
     SetSoKeepalive(); // trying to never close connection
+#endif
 
     currentState = DOING_NOTHING;
     currentMessage.assign("");
@@ -52,6 +68,52 @@ void ServerSocket::setMaster(NetworkElement *ne)
 {
     master = ne;
 }
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+tcp::socket* ServerSocket::getSocket() 
+{
+    return socket;
+}
+
+void ServerSocket::start()
+{
+    connectionThread = boost::thread(boost::bind(&handle_connection, this)); 
+}
+
+void ServerSocket::handle_connection(ServerSocket* ss)
+{
+    logger().debug("ServerSocket::handle_connection()");
+    boost::asio::streambuf b;
+    for (;;) 
+    {
+        try {
+        //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
+        boost::asio::read_until(*(ss->getSocket()), b, boost::regex("\n"));
+        //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
+        std::istream is(&b);
+        std::string line;
+        std::getline(is, line); 
+        //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
+        ss->OnLine(line);
+        } catch (boost::system::system_error& e) {
+            if (ss->master->isListenerThreadStopped()) {
+                break;
+            } else {
+                logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
+            }
+        }
+    }
+}
+
+void ServerSocket::Send(const std::string& cmd)
+{
+    boost::system::error_code error;
+    boost::asio::write(*socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    if (error) {
+        logger().error("ServerSocket::Send(): Error transfering data.");
+    }
+}
+#endif
 
 void ServerSocket::OnLine(const std::string& line)
 {
@@ -127,8 +189,11 @@ void ServerSocket::OnLine(const std::string& line)
             }
 
         } else if (command == "START_MESSAGE") {
+            logger().debug("ServerSocket - Handling START_MESSAGE command");
             if (currentState == READING_MESSAGES) {
+                logger().debug("ServerSocket - Calling newMessageRead");
                 master->newMessageRead(currentMessageFrom, currentMessageTo, currentMessageType, currentMessage);
+                logger().debug("ServerSocket - Cleaning control variables");
                 currentMessage.assign("");
                 lineCount = 0;
                 currentMessageFrom.assign("");
@@ -136,6 +201,7 @@ void ServerSocket::OnLine(const std::string& line)
                 currentMessageType = -1;
             } else {
                 if (currentState == DOING_NOTHING) {
+                    logger().debug("ServerSocket - Starting new message reading");
                     currentState = READING_MESSAGES;
                 } else {
                     logger().warn("ServerSocket - Unexpected command (%s). Discarding the entire line:\n\t%s", command.c_str(), line.c_str());
@@ -162,7 +228,9 @@ void ServerSocket::OnLine(const std::string& line)
             lineCount = 0;
 
         } else if (command == "NO_MORE_MESSAGES") {
+            logger().debug("ServerSocket - Handling NO_MORE_MESSAGES command");
             if (currentState == READING_MESSAGES) {
+                logger().debug("ServerSocket - Starting new message reading");
                 master->newMessageRead(currentMessageFrom, currentMessageTo, currentMessageType, currentMessage);
                 master->noMoreMessages();
                 currentMessage.assign("");
@@ -178,7 +246,7 @@ void ServerSocket::OnLine(const std::string& line)
             // Currently, router does not manage error during a message delivery. That's why we are sending
             // an OK even if above error occurs.
             if (!master->noAckMessages) {
-                //logger().debug("ServerSocket - Answering OK");
+                logger().debug("ServerSocket - Answering OK");
                 Send("OK\n");
             }
 

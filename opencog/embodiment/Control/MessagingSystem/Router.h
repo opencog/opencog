@@ -408,13 +408,6 @@ public:
     */
     bool dataSocketConnection(const std::string& ne_id);
 
-    /**
-     * Log thread error message based on standard error codes.
-     *
-     * @param erroCode The errorCode that should be translated into some meaningfull message
-     */
-    static void reportThreadError(const int &errorCode);
-
 }; // class Router
 }  // namespace
 
