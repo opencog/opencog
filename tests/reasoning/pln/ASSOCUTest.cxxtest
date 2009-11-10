@@ -132,7 +132,7 @@ public:
                           SimpleTruthValue(not_lion_facingExtincion_s, 1));
     }
 
-    void testASSOCUTest() {
+    void testASSOC() {
         pHandle lion_ASSOC = CreateConceptASSOC(_asw, _lion_h);
 
         pHandle mem_mammal_lion = _asw->getHandle(MEMBER_LINK,
