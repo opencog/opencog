@@ -582,7 +582,7 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
     //}
 
     // IF NO RESULT WAS FOUND, CHECK FOR SPECIAL CASES
-    cprintf(0, "TABLEGATHER END: SIZE = %d\n", size());
+    //cprintf(0, "TABLEGATHER END: SIZE = %d\n", size());
 
 #ifndef USE_PSEUDOCORE
 

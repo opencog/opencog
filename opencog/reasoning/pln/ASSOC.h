@@ -29,6 +29,9 @@
 
 namespace opencog { namespace pln {
 
+// suffix to add to the concept created by CreateConceptASSOC
+const std::string ASSOC_suffix = "__ASSOC__";
+
 /**
  * CreateConceptASSOC is in charge of creating the concept AC such
  * that AC(x) = ASSOC(x, C).
@@ -47,7 +50,8 @@ namespace opencog { namespace pln {
  * @param c_h the pHandle of the concept, must be of type or subtype CONCEPT
  * 
  * @return the pHandle containing the concept AC, such that
- * forall x, AC(x) = ASSOC(x, c_h)
+ * forall x, AC(x) = ASSOC(x, c_h), the name of AC is Name__ASSOC__, where
+ * Name is the name of c_h
  */
 pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h);
 
