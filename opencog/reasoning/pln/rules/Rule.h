@@ -75,9 +75,9 @@ protected:
     //! Atom table interface
     iAtomSpaceWrapper* destTable;
 
-    //! Whether the the Rule is a Composer?
-    // If it is a Composer then it needs premises to derive the truth value
-    // of the conclusion, otherwise it is called a Generator
+    //! Whether the the Rule is a Composer.
+    //! If it is a Composer then it needs premises to derive the truth value
+    //! of the conclusion, otherwise it is called a Generator
     bool composer;
 
     //! Priority affects the order in which rules are preferred when doing inference.
@@ -92,7 +92,10 @@ protected:
      * If the extra filter includes the restrictions on the input filter too,
      * then the method should set overrideInputFilter True on return.
      *
-     * @param outh ???
+     * The above may be incorrect (see the doc for o2iMeta()) -- JaredW.
+     *
+     * @param outh The MetaPredicate describing the desired output for this
+     * Rule.
      * @param overrideInputFilter Whether the method overrides inputFilter.
      *                            if it is unchanged then it is considered false
      * @return The extra requirements filter.
@@ -104,7 +107,7 @@ public:
     /** Rule constructor
      * @param _destTable Pointer to the AtomTable interface.
      * @param _freeInputArity Are the number of arguments predetermined?
-     * @param _composer Whether the rule has premises?
+     * @param _composer Whether the rule has premises.
      * @param _name The name of the rule.
      */
     Rule(iAtomSpaceWrapper *_destTable,
@@ -145,7 +148,7 @@ public:
     BoundVertex compute(const std::vector<BoundVertex>& h,
                         pHandle CX = PHANDLE_UNDEFINED) const;
 
-    //! Try to call rule as a direct producer
+    //! Try to call rule as a direct producer (Generator)
     virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
 
     //! Just calls compute()
@@ -162,7 +165,8 @@ public:
      */
     bool validate(const std::vector<Vertex>& h) const;
 
-    /** ARI: Another alternative for checking validity. ???
+    /** ARI: Another alternative for checking validity. Only used by ANDRule,
+     * and should be refactored out.
      *
      * @param args The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.
@@ -181,9 +185,18 @@ public:
     //Handle compute(Handle h1, Handle h2) const;
     //Handle compute(Handle h1, Handle h2, Handle h3) const;
 
-    /** ???
-     * @param meta ???
-     * @return ???
+    /** Called while the BIT is determining whether to create a new child node
+     * with this Rule. Used by BITNode::expandRule(). Determines the target for
+     * the child node.
+     *
+     * Calls the o2iMetaExtra method in the subclass.
+     * If that method sets overrideInputFilter to true, this returns its result.
+     * Otherwise, this returns an empty set - that is, there are no possible
+     * child nodes in this case.
+     *
+     * @param outh a metapredicate specifying the target for that BITNode.
+     * @return a set of vectors of MetaPredicates. Each vector is one possible
+     * input, with a MetaPredicate for each input slot (maybe -- JaredW).
      */
     setOfMPs o2iMeta(meta outh) const;
 

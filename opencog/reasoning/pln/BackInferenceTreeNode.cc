@@ -52,6 +52,7 @@ namespace test
 
     double custom_duration = 0.0;
     clock_t custom_start, custom_finish;
+    //! How long it takes to virtualise the target during BITNode::expandRule
     time_t custom_start2, custom_finish2;
     double custom_duration2 = 0.0;
 
@@ -999,7 +1000,7 @@ test::custom_duration += (double)(test::custom_finish - test::custom_start) / CL
             }
             else
             {       
-                tlog(2,"Rule.o2i gave %d results\n",target_v_set.size());
+                tlog(2,"Rule.o2iMeta gave %d results\n",target_v_set.size());
 
                 for (set<Rule::MPs>::iterator j =target_v_set.begin();
                      j!=target_v_set.end(); j++) {       
