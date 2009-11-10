@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2009 by Singularity Institute for Artificial Intelligence
+ * All Rights Reserved
+ *
+ * Author Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef INTENSIONALINHERITANCERULE_H
+#define INTENSIONALINHERITANCERULE_H
+
+#include "../../rules/Rule.h"
+#include "../../AtomSpaceWrapper.h"
+
+#include "SubsetEvalRule.h"
+
+namespace opencog { namespace pln {
+
+class IntensionalInheritanceRule : public Rule
+{
+    AtomSpaceWrapper* _asw;
+    SubsetEvalRule _sser;
+
+public:
+    IntensionalInheritanceRule(AtomSpaceWrapper* asw);
+
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
+        return setOfMPs(); //No support (yet)
+    }
+
+    meta i2oType(const vector<Vertex>& h) const {
+        OC_ASSERT(h.size() == 1);
+        return atomWithNewType(h[0], INTENSIONAL_INHERITANCE_LINK);
+    }
+    
+    BoundVertex compute(const vector<Vertex>& premiseArray,
+                        pHandle CX = NULL) const;
+
+    //TODO: note sure it is enough
+    bool validate2(MPs& args) const {
+        return true;
+    }
+
+    //TODO: this is probably not correct and must be taken care of
+    NO_DIRECT_PRODUCTION;  
+};
+
+}} // namespace opencog { namespace pln {
+
+#endif

@@ -24,8 +24,6 @@
 #include <opencog/util/platform.h>
 #include "../../PLN.h"
 
-//#include "../Rule.h"
-//#include "../Rules.h"
 #include "../../AtomSpaceWrapper.h"
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
@@ -53,17 +51,17 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 {
     OC_ASSERT(premiseArray.size() == 2);
 
-    pHandle h_sub = _v2h(premiseArray[0]);
-    pHandle h_super = _v2h(premiseArray[1]);
+    pHandle sub_h = _v2h(premiseArray[0]);
+    pHandle super_h = _v2h(premiseArray[1]);
 
-    OC_ASSERT(_asw->isSubType(h_sub, CONCEPT_NODE));
-    OC_ASSERT(_asw->isSubType(h_super, CONCEPT_NODE));
+    OC_ASSERT(_asw->isSubType(sub_h, CONCEPT_NODE));
+    OC_ASSERT(_asw->isSubType(super_h, CONCEPT_NODE));
 
     pHandleSet used;
 
-    pHandleSet mlSetSub = memberLinkSet(h_sub, MIN_MEMBERS_STRENGTH,
+    pHandleSet mlSetSub = memberLinkSet(sub_h, MIN_MEMBERS_STRENGTH,
                                         MIN_MEMBERS_COUNT, _asw);
-    pHandleSet mlSetSuper = memberLinkSet(h_super, MIN_MEMBERS_STRENGTH,
+    pHandleSet mlSetSuper = memberLinkSet(super_h, MIN_MEMBERS_STRENGTH,
                                           MIN_MEMBERS_COUNT, _asw);
 
     vector<TruthValue*> tvsSub;
@@ -124,10 +122,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
     delete tvs1;
     delete tvs2;
 
-    pHandle ret = _asw->addLink(SUBSET_LINK,
-                                _v2h(premiseArray[0]),
-                                _v2h(premiseArray[1]),
-                                *retTV, true);
+    pHandle ret = _asw->addLink(SUBSET_LINK, sub_h, super_h, *retTV, true);
     return BoundVertex(ret);
 }
 

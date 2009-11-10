@@ -27,6 +27,7 @@ ADD_LIBRARY (pln SHARED
 	rules/or/ORPartitionRule.cc
 	rules/or/ORRule.cc
 	rules/auxiliary/SubsetEvalRule.cc
+	rules/auxiliary/IntensionalInheritanceRule
 	rules/auxiliary/CrispTheoremRule.cc
 	rules/auxiliary/LookupRule.cc
 	rules/auxiliary/ScholemFunctionProductionRule.cc
