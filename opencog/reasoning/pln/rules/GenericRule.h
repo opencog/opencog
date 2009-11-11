@@ -32,8 +32,6 @@ protected:
     mutable FormulaType formula;
 
 public:
-    virtual std::set<MPs> o2iMetaExtra(meta outh,
-                                       bool& overrideInputFilter) const = 0;
     /**                                
      * Unlike o2iMetaExtra, i2oType is used on the way back
      * up the BIT (i.e. once it has reached existing atoms,
