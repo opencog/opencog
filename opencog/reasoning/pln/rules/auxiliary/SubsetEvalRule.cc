@@ -42,6 +42,12 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
 {
 }
 
+
+Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
+                                            bool& overrideInputFilter) const {
+        return setOfMPs(); //No support (yet)
+}
+
 meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
 {
     OC_ASSERT(h_vec.size()==2);
@@ -51,14 +57,13 @@ meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
                                      )));
 }
 
-
-BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
-                                    pHandle CX) const
+TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
+                                           int* newN) const
 {
-    OC_ASSERT(premiseArray.size() == 2);
+    OC_ASSERT(premises.size() == 2);
 
-    pHandle sub_h = _v2h(premiseArray[0]);
-    pHandle super_h = _v2h(premiseArray[1]);
+    pHandle sub_h = _v2h(premises[0]);
+    pHandle super_h = _v2h(premises[1]);
 
     OC_ASSERT(_asw->isSubType(sub_h, CONCEPT_NODE));
     OC_ASSERT(_asw->isSubType(super_h, CONCEPT_NODE));
@@ -103,9 +108,6 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 
     unsigned int N = tvsSub.size();
 
-    TruthValue** tvs1 = new TruthValue*[N];
-    TruthValue** tvs2 = new TruthValue*[N];
-
 //     std::cout << "SUB" << std::endl;
 //     for(unsigned int i = 0; i < N; i++) {
 //         std::cout << tvsSub[i]->toString() << std::endl;
@@ -115,20 +117,33 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 //         std::cout << tvsSuper[i]->toString() << std::endl;
 //     }
 
-    std::copy(tvsSub.begin(), tvsSub.end(), tvs1);
-    std::copy(tvsSuper.begin(), tvsSuper.end(), tvs2);
+    *newN = 2 * N;
 
-    TruthValue* retTV = formula.compute2(tvs1, (int)N, tvs2, (int)N);
+    TruthValue** tvs = new TruthValue*[*newN];
 
-    for (unsigned int i = 0; i < N; i++) {
-        delete tvs1[i];
-        delete tvs2[i];
+    std::copy(tvsSub.begin(), tvsSub.end(), tvs);
+    std::copy(tvsSuper.begin(), tvsSuper.end(), tvs + N);
+    
+    return tvs;
+}
+
+
+BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
+                                    pHandle CX) const
+{
+    int N;
+
+    TruthValue** tvs = formatTVarray(premiseArray, &N);
+
+    TruthValue* retTV = formula.compute(tvs, N);
+
+    for (unsigned int i = 0; i < (unsigned int)N; i++) {
+        delete tvs[i];
     }
 
-    delete tvs1;
-    delete tvs2;
+    delete tvs;
 
-    pHandle ret = _asw->addLink(SUBSET_LINK, sub_h, super_h, *retTV, true);
+    pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, true);
     return BoundVertex(ret);
 }
 

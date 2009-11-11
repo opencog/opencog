@@ -42,11 +42,12 @@ public:
     virtual ~SubsetEvalRule() {}
     SubsetEvalRule(AtomSpaceWrapper *asw);
 
-    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        return setOfMPs(); //No support (yet)
-    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
     meta i2oType(const vector<Vertex>& h) const;
+
+    TruthValue** formatTVarray(const std::vector<Vertex>& premises,
+                               int* newN) const;
     
     BoundVertex compute(const vector<Vertex>& premiseArray,
                         pHandle CX = NULL) const;
