@@ -42,10 +42,7 @@ public:
         return setOfMPs(); //No support (yet)
     }
 
-    meta i2oType(const vector<Vertex>& h) const {
-        OC_ASSERT(h.size() == 1);
-        return atomWithNewType(h[0], INTENSIONAL_INHERITANCE_LINK);
-    }
+    meta i2oType(const vector<Vertex>& h) const;
     
     BoundVertex compute(const vector<Vertex>& premiseArray,
                         pHandle CX = NULL) const;

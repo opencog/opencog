@@ -30,9 +30,18 @@ namespace opencog { namespace pln {
 using boost::assign::list_of;
 
 IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* asw)
-    : Rule(asw, false, false, "IntensionalInheritanceRule"), _sser(asw)
+    : Rule(asw, false, false, "IntensionalInheritanceRule"),
+      _asw(asw), _sser(asw)
 {
-    _asw = asw;
+}
+
+meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const
+{
+    OC_ASSERT(h_vec.size()==2);
+    return meta(new tree<Vertex>(mva((pHandle)INTENSIONAL_INHERITANCE_LINK, 
+                                     vtree(h_vec[0]),
+                                     vtree(h_vec[1])
+                                     )));
 }
 
 BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArray,
@@ -53,7 +62,7 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     BoundVertex bv = _sser.compute(ASSOC_vv);
     pHandle subset_ASSOC_h = _v2h(bv.GetValue());
 
-    pHandle ret = _asw->addLink(INTENSIONAL_INHERITANCE_LINK, sub_h, super_h,
+    pHandle ret = _asw->addAtom(*i2oType(premiseArray),
                                 _asw->getTV(subset_ASSOC_h), true);
     return BoundVertex(ret);
 }
