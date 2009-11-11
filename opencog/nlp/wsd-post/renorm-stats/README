@@ -163,3 +163,5 @@ ordinary guile interpreter.
    script merely totals up the counts, and computes the various
    probabilities.
 
+ * file-stats.pl: collect miscellaneous word-count statistcics about
+   a collection of CFF files.

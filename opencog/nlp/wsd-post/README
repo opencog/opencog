@@ -496,13 +496,24 @@ the latters A-E range.)  How many senteces? Try grep:
     grep "<parse id=" |wc
 3383657 parses: (3.4M) or 2.85094 parses per sentence.
 
-Many/most of these were discarded ... 
+weighted parse score = 991235 (991K)
+= sum exp-(0.012*len+0.06*disj + 0.2*and + 0.4*skipped)
+= 0.292948 per parse = 0.29*2.85 = 0.835178 per sentence
+
+word-count = 76129120 = 76M = 22.5 words per sentence.
+weighted word-count = 17665277 = 17.7M = 0.2320436 per word
+
+Above is what we *should* have gotten ... except that a portion of the
+early test runs were discarded due to bad data/bugs/flawed runs. So of 
+the 17M, here's what actually ended up in the database:
 
 In the lexat database: (psql lexat)
 select * from unigramcount; --- 13436741 (13.4M)
 select * from lemmacount; -- 12936465 (12.9M)
 
+13.4M/17.7M= 76% of the data was kept.  Good.
 
+So, defacto, 3/4ths of 53653 articles were used, etc.
 
 
 TODO
