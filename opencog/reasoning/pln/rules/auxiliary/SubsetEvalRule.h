@@ -57,7 +57,6 @@ public:
         return true;
     }
 
-    //TODO: this is probably not correct and must be taken care of
     NO_DIRECT_PRODUCTION;
 };
  

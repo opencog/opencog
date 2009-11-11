@@ -35,6 +35,10 @@ IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* asw)
 {
 }
 
+Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
+    return setOfMPs(); //No support (yet)
+}
+
 meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const
 {
     OC_ASSERT(h_vec.size()==2);

@@ -38,9 +38,7 @@ class IntensionalInheritanceRule : public Rule
 public:
     IntensionalInheritanceRule(AtomSpaceWrapper* asw);
 
-    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        return setOfMPs(); //No support (yet)
-    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
     meta i2oType(const vector<Vertex>& h) const;
     
@@ -52,7 +50,6 @@ public:
         return true;
     }
 
-    //TODO: this is probably not correct and must be taken care of
     NO_DIRECT_PRODUCTION;  
 };
 
