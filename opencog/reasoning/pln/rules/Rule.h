@@ -65,6 +65,11 @@ protected:
      * e.g. if the root is a NOT_LINK and it has 1 child which is just ATOM,
      * then it matches to any NOT_LINK with 1 child. The ATOM can also be at the
      * root, in which case any atom will do.
+     *
+     * Note that the inputFilter is not used when making child nodes in the BIT.
+     * See o2iMetaExtra for that. inputFilter seems to be used on the way back
+     * up the BIT (i.e. once it has reached existing atoms, and is evaluating Rules
+     * on the path back up to the target). Also in forward chaining.
      */
     MPsIn inputFilter;
     // mutable std::map<atom, setOfMPs, lessatom_ignoreVarNameDifferences> o2iMetaCache;
@@ -165,8 +170,9 @@ public:
      */
     bool validate(const std::vector<Vertex>& h) const;
 
-    /** ARI: Another alternative for checking validity. Only used by ANDRule,
-     * and should be refactored out.
+    /** ARI: Another alternative for checking validity. Only used by deduction,
+     * to avoid things like "Imp A A" where an atom implies itself. This method
+     * should be refactored out.
      *
      * @param args The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.
