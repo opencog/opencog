@@ -34,17 +34,23 @@ using std::set;
 using std::find;
 using std::find_if;
 
-SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
-    : Rule(asw, false, false, "SubsetEvalRule")
-{
-    _asw = asw;
-    /*inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
-                                             1,
-                                             new atom(CONCEPT_NODE, 0))));*/
-}
-
 const strength_t MIN_MEMBERS_STRENGTH = 0.000001;
 const strength_t MIN_MEMBERS_COUNT = 1;
+
+SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
+    : Rule(asw, false, false, "SubsetEvalRule"), _asw(asw)
+{
+}
+
+meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
+{
+    OC_ASSERT(h_vec.size()==2);
+    return meta(new tree<Vertex>(mva((pHandle)SUBSET_LINK, 
+                                     vtree(h_vec[0]),
+                                     vtree(h_vec[1])
+                                     )));
+}
+
 
 BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
                                     pHandle CX) const
