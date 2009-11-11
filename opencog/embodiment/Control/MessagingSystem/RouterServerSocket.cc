@@ -25,7 +25,6 @@
 #include "Message.h"
 #include "RouterMessage.h"
 #include "RouterServerSocket.h"
-#include "RouterHttpPostSocket.h"
 #include "NetworkElementCommon.h"
 
 #include <opencog/util/Logger.h>
@@ -96,32 +95,24 @@ void RouterServerSocket::addNetworkElement(const std::string &id, const std::str
     // sending pending messages stored in component queue
     if (errorCode == Router::HAS_PENDING_MSGS) {
 
-        if (id == opencog::config().get("PROXY_ID") &&
-                master->getPortNumber(id) == 8211) {
-            // TODO: this is a temporary hack so that we can use both proxy and mocky proxy
-
-            // Send all pending messages to the router
-            sendRequestedMessages(id, -1, true);
+        // notify about messages in queue
+        //
+        // IMPORTANT:
+        // Since the component has just done the handshaking process the
+        // chance to fail to receive the notification is null. If this
+        // proves to be wrong then get the sender of the first message in
+        // the queue.
+        unsigned int numMessages = master->getMessageCentral()->queueSize(id);
+        logger().debug("RouterServerSocket - Number of pending messages to %s: %u", id.c_str(), numMessages);
+        if (no_msg_arrival_notification) {
+            sendRequestedMessages(id, numMessages);
         } else {
-            // notify about messages in queue
-            //
-            // IMPORTANT:
-            // Since the component has just done the handshaking process the
-            // chance to fail to receive the notification is null. If this
-            // proves to be wrong then get the sender of the first message in
-            // the queue.
-            unsigned int numMessages = master->getMessageCentral()->queueSize(id);
-            logger().debug("RouterServerSocket - Number of pending messages to %s: %u", id.c_str(), numMessages);
-            if (no_msg_arrival_notification) {
-                sendRequestedMessages(id, numMessages);
-            } else {
-                master->notifyMessageArrival(id, numMessages);
-            }
+            master->notifyMessageArrival(id, numMessages);
         }
     }
 }
 
-void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit, bool useHttpRequest)
+void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
 {
 
     std::string answer;
@@ -148,190 +139,124 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit,
     }
 
     logger().info("RouterServerSocket - Delivering messages to %s", id.c_str());
-    if (useHttpRequest) {
-        while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
+    std::string cmd;
+    if (!master->dataSocketConnection(id)) {
+        return;
+    }
+#ifdef USE_BOOST_ASIO
+    tcp::socket* sock = master->getDataSocket(id);
+#else
+    int sock = master->getDataSocket(id);
+#endif
 
-            Message *message = master->getMessageCentral()->pop(id);
-            if (message->getType() != Message::STRING) {
-                logger().warn(
-                             "RouterServerSocket - HttpRequest support STRING messages. Discarding message type: %d.",
-                             message->getType());
+    while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
 
-                // TODO: convert non Message::STRING types on the fly
-                continue;
-            }
+        // Remember that all message stored within the router are of
+        // RouterMessage type.
+        RouterMessage *message = (RouterMessage *)master->getMessageCentral()->pop(id);
+        sprintf(s, "cSTART_MESSAGE %s %s %d", message->getFrom().c_str(),
+                message->getTo().c_str(), message->getEncapsulateType());
+        logger().debug("RouterServerSocket - Sending message (socket = %d): <%s>", sock, s);
 
-            sendHttpRequest(message->getFrom().c_str(), message->getTo().c_str(),
-                            message->getPlainTextRepresentation());
-
-            logger().debug(
-                         "RouterServerSocket - Message sent to %s using HttpRequest.", id.c_str());
-
-            delete(message);
-            if (limit > 0) limit--;
-        }
-    } else {
-        std::string cmd;
-        if (!master->dataSocketConnection(id)) {
+        cmd.assign(s);
+        cmd.append("\n");
+        unsigned int sentBytes = 0;
+#ifdef USE_BOOST_ASIO
+        if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) { 
+#else
+        if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
+#endif
+            logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+            master->closeDataSocket(id);
+            master->closeControlSocket(id);
+            master->markElementUnavailable(id);
+            delete(message); // TODO: Shouldn't message be put back to the queue?
             return;
         }
+
+        std::istringstream stream(message->getPlainTextRepresentation());
+        std::string line;
+        while (getline(stream, line)) {
+            logger().debug("Sending line <d%s>", line.c_str());
+            line.insert(0, "d");
+            line.append("\n");
+            sentBytes = 0;
 #ifdef USE_BOOST_ASIO
-        tcp::socket* sock = master->getDataSocket(id);
+            if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length())) ) != line.length() ) { 
 #else
-        int sock = master->getDataSocket(id);
+            if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
 #endif
-
-        while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
-
-            // Remember that all message stored within the router are of
-            // RouterMessage type.
-            RouterMessage *message = (RouterMessage *)master->getMessageCentral()->pop(id);
-            sprintf(s, "cSTART_MESSAGE %s %s %d", message->getFrom().c_str(),
-                    message->getTo().c_str(), message->getEncapsulateType());
-            logger().debug("RouterServerSocket - Sending message (socket = %d): <%s>", sock, s);
-
-            cmd.assign(s);
-            cmd.append("\n");
-            unsigned int sentBytes = 0;
-#ifdef USE_BOOST_ASIO
-            if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) { 
-#else
-            if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-#endif
-                logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+                logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
                 master->markElementUnavailable(id);
                 delete(message); // TODO: Shouldn't message be put back to the queue?
                 return;
             }
-
-            std::istringstream stream(message->getPlainTextRepresentation());
-            std::string line;
-            while (getline(stream, line)) {
-                logger().debug("Sending line <d%s>", line.c_str());
-                line.insert(0, "d");
-                line.append("\n");
-                sentBytes = 0;
-#ifdef USE_BOOST_ASIO
-                if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length())) ) != line.length() ) { 
-#else
-                if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
-#endif
-                    logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
-                    master->closeDataSocket(id);
-                    master->closeControlSocket(id);
-                    master->markElementUnavailable(id);
-                    delete(message); // TODO: Shouldn't message be put back to the queue?
-                    return;
-                }
-                // TODO: Shouldn't the protocol be changed to expect a feedback (OK or FAILED) per message here?
-                // And, if OK is not received, message may be kept on the queue (until it be eventually sent or,
-                // at least, until N attempts are made)
-            }
-            delete(message);
-            if (limit > 0) limit--;
+            // TODO: Shouldn't the protocol be changed to expect a feedback (OK or FAILED) per message here?
+            // And, if OK is not received, message may be kept on the queue (until it be eventually sent or,
+            // at least, until N attempts are made)
         }
-        cmd.assign("cNO_MORE_MESSAGES\n");
-        unsigned int sentBytes = 0;
+        delete(message);
+        if (limit > 0) limit--;
+    }
+    cmd.assign("cNO_MORE_MESSAGES\n");
+    unsigned int sentBytes = 0;
 #ifdef USE_BOOST_ASIO
-        if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) {
+    if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) {
 #else
-        if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
+    if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
 #endif
-            logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-            master->closeControlSocket(id);
+        logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
+        master->closeControlSocket(id);
+        master->closeDataSocket(id);
+        master->markElementUnavailable(id);
+        return;
+    }
+
+
+    if (!master->noAckMessages) {
+        logger().debug("RouterServerSocket - Waiting OK (after sending message).");
+#define BUFFER_SIZE 256
+        char response[BUFFER_SIZE];
+#ifdef USE_BOOST_ASIO
+        boost::system::error_code error;
+        size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
+        if (error && error != boost::asio::error::eof) {
+#else
+        int receivedBytes = 0;
+        if ( (receivedBytes = recv(sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
+#endif
+            logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
             master->closeDataSocket(id);
+            master->closeControlSocket(id);
             master->markElementUnavailable(id);
             return;
         }
 
-
-        if (!master->noAckMessages) {
-            logger().debug("RouterServerSocket - Waiting OK (after sending message).");
-#define BUFFER_SIZE 256
-            char response[BUFFER_SIZE];
-#ifdef USE_BOOST_ASIO
-            boost::system::error_code error;
-            size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
-            if (error && error != boost::asio::error::eof) {
-#else
-            int receivedBytes = 0;
-            if ( (receivedBytes = recv(sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
-#endif
-                logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
-                master->closeDataSocket(id);
-                master->closeControlSocket(id);
-                master->markElementUnavailable(id);
-                return;
-            }
-
-            response[receivedBytes] = '\0'; // Assure null terminated string
-            // chomp all trailing slashes from string
-            int i;
-            for ( i = receivedBytes - 1; i >= 0 && (response[i] == '\n' || response[i] == '\r')  ; --i ) {
-                response[i] = '\0';
-            }
-
-            logger().debug("RouterServerSocket - Received response (after chomp): '%s' bytes: %d",
-                         response, receivedBytes );
-            std::string answer = response;
-
-            if (answer == NetworkElementCommon::OK_MESSAGE) {
-                logger().debug("RouterServerSocket - Sucessfully sent messages to '%s'.",
-                             id.c_str());
-            } else {
-                logger().error("RouterServerSocket - Failed to send messages to '%s'. (answer = %s)",
-                             id.c_str(), answer.c_str());
-            }
+        response[receivedBytes] = '\0'; // Assure null terminated string
+        // chomp all trailing slashes from string
+        int i;
+        for ( i = receivedBytes - 1; i >= 0 && (response[i] == '\n' || response[i] == '\r')  ; --i ) {
+            response[i] = '\0';
         }
 
-        logger().debug("RouterServerSocket - id <%s> message queue size %d", id.c_str(), master->getMessageCentral()->queueSize(id));
+        logger().debug("RouterServerSocket - Received response (after chomp): '%s' bytes: %d",
+                     response, receivedBytes );
+        std::string answer = response;
+
+        if (answer == NetworkElementCommon::OK_MESSAGE) {
+            logger().debug("RouterServerSocket - Sucessfully sent messages to '%s'.",
+                         id.c_str());
+        } else {
+            logger().error("RouterServerSocket - Failed to send messages to '%s'. (answer = %s)",
+                         id.c_str(), answer.c_str());
+        }
     }
+
+    logger().debug("RouterServerSocket - id <%s> message queue size %d", id.c_str(), master->getMessageCentral()->queueSize(id));
 
     logger().debug("RouterServerSocket - OK");
-}
-
-bool RouterServerSocket::sendHttpRequest(const std::string& messageFrom, const std::string& messageTo, const std::string& messageText)
-{
-    logger().debug("RouterServerSocket - Send HttpRequest. From '%s'. To '%s'.", messageFrom.c_str(), messageTo.c_str());
-    // example of url: "http://localhost:8211/petproxy/pet/78/action/5dfe52f9-7344-4ffe-99b7-493f428d5b34"
-    //
-    std::string url = "http://";
-    url += master->getIPAddress(currentMessageTo).c_str();
-    url += ":" ;
-    url += opencog::toString(master->getPortNumber(currentMessageTo));
-    url += "/petproxy/pet/";
-    url += messageFrom;
-#if 1
-    url += "/action";
-#else
-    // TODO: Remove this uggly hack when the action plan id is not needed in the URI anymore...
-    char* petId = strdup(messageFrom.c_str());
-    char* p = petId;
-    while (*p != ':' && *p != '\0') p++;
-    *p = '\0';
-    char* actionPlanId = p + 1;
-    url += petId;
-    url += "/action/";
-    url += actionPlanId;
-    free(petId);
-#endif
-    logger().debug("RouterServerSocket - HTTP request to url = %s", url.c_str());
-
-    StdoutLog log;
-    SocketHandler h(&log);
-    RouterHttpPostSocket sock( h, url);
-    sock.SetBody(messageText);
-    sock.Open();
-    h.Add(&sock);
-    //sock.AddFile("actionPlan", ACTION_PLAN_TEST_XML_FILE, "text/plain"); // Old method using HttpPostSocket
-    h.Select(1, 0);
-    while (h.GetCount()) {
-        h.Select(1, 0);
-    }
-    logger().debug("RouterServerSocket - Status: %s %s", sock.GetStatus().c_str(), sock.GetStatusText().c_str());
-    return (!strcmp(sock.GetStatus().c_str(), "200"));
 }
 
 void RouterServerSocket::storeNewMessage()
@@ -371,14 +296,6 @@ void RouterServerSocket::storeNewMessage()
         answer.assign("FAILED - Element unavailable: "); answer.append(currentMessageTo);
         sendAnswer(answer);
         return;
-    }
-
-    if (currentMessageTo == opencog::config().get("PROXY_ID") &&
-            currentMessageFrom != opencog::config().get("SPAWNER_ID") &&
-            master->getPortNumber(currentMessageTo) == 8211) { // TODO: this is a temporary hack so that we can use both proxy and mocky proxy
-        // Send message as a http request
-        addToMasterQueue = !sendHttpRequest(currentMessageFrom, currentMessageTo, currentMessageText);
-        notifyMessageArrival = false;
     }
 
     if (addToMasterQueue) {

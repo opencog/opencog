@@ -29,9 +29,8 @@
 #include "boost/filesystem.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <SystemParameters.h>
 #include <opencog/util/exceptions.h>
-#include "StringMessage.h"
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 
 #include <fstream>
 #include <iostream>
@@ -52,7 +51,6 @@ class FileMessageCentral : public MessageCentral
 
 private:
 
-    const Control::SystemParameters& parameters;
     path directory;
 
 public:
@@ -61,8 +59,7 @@ public:
      * Constructors and destructor
      */
     ~FileMessageCentral();
-
-    FileMessageCentral(const Control::SystemParameters &params) throw (RuntimeException, std::bad_exception);
+    FileMessageCentral();
 
     void createQueue(const std::string id, const bool reset = false);
 
@@ -72,7 +69,7 @@ public:
 
     const bool isQueueEmpty(const std::string id);
 
-    const int sizeQueue(const std::string id);
+    const unsigned int queueSize(const std::string id);
 
     const bool existsQueue(const std::string id);
 

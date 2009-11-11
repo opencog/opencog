@@ -58,8 +58,7 @@ private:
     void parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args);
     void sendAnswer(const std::string &msg);
     void addNetworkElement(const std::string &id, const std::string &ip, int port);
-    void sendRequestedMessages(const std::string &id, int limit, bool useHttpRequest = false);
-    bool sendHttpRequest(const std::string& messageFrom, const std::string& messageTo, const std::string& messageText);
+    void sendRequestedMessages(const std::string &id, int limit);
     void storeNewMessage();
 
 public:

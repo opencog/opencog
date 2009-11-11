@@ -26,8 +26,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/files.h>
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 
 FileMessageCentral::~FileMessageCentral()
@@ -35,10 +38,9 @@ FileMessageCentral::~FileMessageCentral()
     //TODO: need I clear the queue ??
 }
 
-FileMessageCentral::FileMessageCentral(const Control::SystemParameters &params) : MessageCentral(), parameters(params) throw (RuntimeException, std::bad_exception)
+FileMessageCentral::FileMessageCentral() : MessageCentral()
 {
-
-    std::string dir = this->parameters.get("MESSAGE_DIR");
+    std::string dir = opencog::config().get("MESSAGE_DIR");
     expandPath(dir);
 
     /**
@@ -53,7 +55,7 @@ FileMessageCentral::FileMessageCentral(const Control::SystemParameters &params) 
         dir.replace(user_index, strlen(USER_FLAG), username);
     }
     */
-    logger().log(Util::Logger::WARN, "FileMessageCentral - creating message dir: %s\n", dir.c_str());
+    logger().warn("FileMessageCentral - creating message dir: %s\n", dir.c_str());
     this->directory = dir;
 
     lockQueue();
@@ -129,9 +131,6 @@ void FileMessageCentral::removeQueue(const std::string id)
     }
 }
 
-}
-
-
 const bool FileMessageCentral::isQueueEmpty(const std::string id)
 {
 
@@ -155,10 +154,10 @@ const bool FileMessageCentral::isQueueEmpty(const std::string id)
     return value;
 }
 
-const int FileMessageCentral::sizeQueue(const std::string id)
+const unsigned int FileMessageCentral::queueSize(const std::string id)
 {
 
-    int value = true;
+    unsigned int value = 0;
     boost::filesystem::path m_path = this->directory / id;
 
 

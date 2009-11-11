@@ -22,7 +22,7 @@
  */
 
 
-#include <StringMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
 #include <string>
 #include <string.h>
 
@@ -40,14 +40,17 @@ public:
 
     void testLoadPlainTextRepresentation() {
 
+        std::string from("PROXY");
+        std::string to("SPAWNER");
+
         char *msg = strdup("msg1");
-        std::string stmsg(strdup("msg2"));
+        std::string stmsg("msg2");
 
-        StringMessage *obj1 = new StringMessage(msg);
-        StringMessage *obj2 = new StringMessage(stmsg);
+        StringMessage *obj1 = new StringMessage(from, to, msg);
+        StringMessage *obj2 = new StringMessage(from, to, stmsg);
 
-        StringMessage *obj3 = new StringMessage();
-        StringMessage *obj4 = new StringMessage();
+        StringMessage *obj3 = new StringMessage(from, to);
+        StringMessage *obj4 = new StringMessage(from, to);
 
         obj3->loadPlainTextRepresentation(obj1->getPlainTextRepresentation());
         obj4->loadPlainTextRepresentation(obj2->getPlainTextRepresentation());

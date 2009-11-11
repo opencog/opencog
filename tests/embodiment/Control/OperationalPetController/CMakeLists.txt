@@ -22,20 +22,6 @@ IF(WIN32)
     TARGET_LINK_LIBRARIES(PetUTest winmm)
 ENDIF(WIN32)
 
-ADD_EXECUTABLE(HttpRequestTest HttpRequestTest.cc)
-TARGET_LINK_LIBRARIES(HttpRequestTest 
-	pthread 
-	ssl
-	crypto 
-	dl 
-	${CSOCKETS_LIBRARIES}
-)
-
-IF(WIN32)
-	TARGET_LINK_LIBRARIES(HttpRequestTest winmm)
-ENDIF(WIN32)
-
-
 ADD_CXXTEST(LanguageComprehensionUTest)
 TARGET_LINK_LIBRARIES(LanguageComprehensionUTest 
   OpcLib

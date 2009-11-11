@@ -23,17 +23,21 @@
 
 
 
-#include "FileMessageCentral.h"
-#include "StringMessage.h"
-#include "Message.h"
-#include "util/numeric.h"
+#include <opencog/embodiment/Control/MessagingSystem/FileMessageCentral.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <opencog/util/numeric.h>
 #include "stdio.h"
 #include "stdlib.h"
-#include "util/files.h"
+#include <opencog/util/files.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <iostream>
 
 using namespace MessagingSystem;
+using namespace opencog;
 
 class FileMessageCentralUTest :  public CxxTest::TestSuite
 {
@@ -43,11 +47,10 @@ public:
 
     std::string id1, id2;
 
-    Control::SystemParameters spar;
-
     FileMessageCentralUTest() {
         TS_ASSERT(fileExists(TEST_CONFIG_FILE));
-        spar.loadFromFile(TEST_CONFIG_FILE);
+        config(Control::EmbodimentConfig::embodimentCreateInstance, true);
+        config().load(TEST_CONFIG_FILE);
     }
 
     ~FileMessageCentralUTest() {
@@ -56,7 +59,7 @@ public:
     void setUp() {
 
 
-        fmc = new FileMessageCentral( spar );
+        fmc = new FileMessageCentral();
 
         id1 = ("id1");
         id2 = ("id2");
@@ -199,9 +202,11 @@ public:
 
         FileMessageCentral *fmc = (FileMessageCentral *) args;
 
+        MT19937RandGen rng(12345678);
+
         for (int i = 0; i < 2000; i++) {
 
-            int choice = opencog::randint(5);
+            int choice = rng.randint(5);
 
             switch (choice) {
             case 0:
@@ -213,7 +218,7 @@ public:
                 msg.append(num);
                 StringMessage * str_message = new StringMessage(std::string("from"), std::string("to"), msg);
 
-                if (opencog::randbool()) {
+                if (rng.randbool()) {
                     fmc->push(id1, str_message);
                     std::cout << "--push--1-" << msg << "\n";
                 } else {
@@ -226,7 +231,7 @@ public:
             case 3: {
                 Message *ret_message = NULL;
 
-                if (opencog::randbool()) {
+                if (rng.randbool()) {
                     ret_message = fmc->pop(id1);
                     if (ret_message != NULL) {
                         std::cout << "--pop---1-" << ret_message->getPlainTextRepresentation() << " <<<<\n";
@@ -249,7 +254,7 @@ public:
             break;
             case 4: {
 
-                if (opencog::randbool()) {
+                if (rng.randbool()) {
                     if (fmc->isQueueEmpty(id1)) {
                         std::cout << "--ID1---IS EMPTY\n";
                     }

@@ -6,7 +6,7 @@ ADD_LIBRARY (MessagingSystem
 	Message.cc
 	MessageCentral.cc
 	MemoryMessageCentral.cc
-	#FileMessageCentral.cc
+	FileMessageCentral.cc
 	StringMessage.cc
 	TickMessage.cc
 	FeedbackMessage.cc
@@ -18,9 +18,6 @@ ADD_LIBRARY (MessagingSystem
 	Router.cc
 	RouterServerSocket.cc
 	Spawner.cc
-	#DummyServer.cc
-	RouterHttpPostSocket.cc
-	#MemoryLeakTask.cc
 	EmbodimentCogServer
 )
 
@@ -40,7 +37,6 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
 	server
-	${CSOCKETS_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
         ${Boost_THREAD_LIBRARY}
 )

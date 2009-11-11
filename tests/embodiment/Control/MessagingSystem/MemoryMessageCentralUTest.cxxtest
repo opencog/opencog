@@ -22,14 +22,14 @@
  */
 
 
-#include "MemoryMessageCentral.h"
-#include "StringMessage.h"
-#include "Message.h"
-#include "util/numeric.h"
+#include <opencog/embodiment/Control/MessagingSystem/MemoryMessageCentral.h>
+#include <opencog/embodiment/Control/MessagingSystem/StringMessage.h>
+#include <opencog/embodiment/Control/MessagingSystem/Message.h>
+#include <opencog/util/numeric.h>
 #include "stdio.h"
 #include "stdlib.h"
 //#include "pthread.h"
-#include "util/mt19937ar.h"
+#include <opencog/util/mt19937ar.h>
 
 #include <iostream>
 
