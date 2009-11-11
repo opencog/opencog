@@ -67,9 +67,8 @@ protected:
      * root, in which case any atom will do.
      *
      * Note that the inputFilter is not used when making child nodes in the BIT.
-     * See o2iMetaExtra for that. inputFilter seems to be used on the way back
-     * up the BIT (i.e. once it has reached existing atoms, and is evaluating Rules
-     * on the path back up to the target). Also in forward chaining.
+     * See o2iMetaExtra for that. It's only used in forward chaining. See also
+     * i2oType in GenericRule.
      */
     MPsIn inputFilter;
     // mutable std::map<atom, setOfMPs, lessatom_ignoreVarNameDifferences> o2iMetaCache;

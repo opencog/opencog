@@ -34,6 +34,11 @@ protected:
 public:
     virtual std::set<MPs> o2iMetaExtra(meta outh,
                                        bool& overrideInputFilter) const = 0;
+    /**                                
+     * Unlike o2iMetaExtra, i2oType is used on the way back
+     * up the BIT (i.e. once it has reached existing atoms, and is evaluating Rules
+     * on the path back up to the target).
+     */
     virtual meta i2oType(const std::vector<Vertex>& h) const = 0;
 
     virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
