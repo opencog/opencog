@@ -36,11 +36,20 @@ public:
                                        bool& overrideInputFilter) const = 0;
     /**                                
      * Unlike o2iMetaExtra, i2oType is used on the way back
-     * up the BIT (i.e. once it has reached existing atoms, and is evaluating Rules
-     * on the path back up to the target).
+     * up the BIT (i.e. once it has reached existing atoms,
+     * and is evaluating Rules on the path back up to the target).
      */
     virtual meta i2oType(const std::vector<Vertex>& h) const = 0;
 
+    /**
+     * formatTVarray generates the array of TVs to be passed to formula.compute
+     * given the permises.
+     * 
+     * @param premiseArray the array of premises
+     * @param newN the number of TVs output
+     *
+     * @return the array of TVs to be used by formula.compute
+     */
     virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                        int* newN) const = 0;
 
