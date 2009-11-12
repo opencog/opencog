@@ -22,6 +22,7 @@
 
 #include "IntensionalInheritanceRule.h"
 #include "../../ASSOC.h"
+#include "../../BackInferenceTreeNode.h"
 
 #include <boost/assign/list_of.hpp>
 
@@ -36,7 +37,19 @@ IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* asw)
 }
 
 Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-    return setOfMPs(); //No support (yet)
+    if(_asw->inheritsType((Type)_v2h(*outh->begin()),
+                          INTENSIONAL_INHERITANCE_LINK))
+        return setOfMPs();
+
+    tree<Vertex>::iterator head_it = outh->begin();
+
+    Rule::MPs ret;
+    ret.push_back(BBvtree(new BoundVTree(outh->begin(head_it))));
+    ret.push_back(BBvtree(new BoundVTree(outh->last_child(head_it))));
+            
+    overrideInputFilter = true;
+
+    return makeSingletonSet(ret);
 }
 
 meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const

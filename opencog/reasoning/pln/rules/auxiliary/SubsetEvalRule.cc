@@ -45,7 +45,18 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
 
 Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
                                             bool& overrideInputFilter) const {
-    return setOfMPs(); //No support (yet)
+    if(_asw->inheritsType((Type)_v2h(*outh->begin()), SUBSET_LINK))
+        return setOfMPs();
+
+    tree<Vertex>::iterator head_it = outh->begin();
+
+    Rule::MPs ret;
+    ret.push_back(BBvtree(new BoundVTree(outh->begin(head_it))));
+    ret.push_back(BBvtree(new BoundVTree(outh->last_child(head_it))));
+            
+    overrideInputFilter = true;
+
+    return makeSingletonSet(ret);
 }
 
 meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const

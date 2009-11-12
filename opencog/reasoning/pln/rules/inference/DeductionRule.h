@@ -107,8 +107,6 @@ public:
         if ( !GET_ASW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
         
-        std::string varname = ("$"+GetRandomString(10));
-        
         Rule::MPs ret;
         
         tree<Vertex>::iterator top0 = outh->begin();
