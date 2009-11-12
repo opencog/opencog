@@ -86,10 +86,16 @@ print "Starting to renormalize synsets in the DisjunctSenses table\n";
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
+print "Will examine $select->rows rows in the DisjunctSenses table\n"
+
 my $examined = 0;
 for (my $i=0; $i<$select->rows; $i++)
 {
 	$examined ++;
+	if ($examined %10000 == 0)
+	{
+		print "So far, examined=$examined updated=$updated inserted=$inserted\n";
+	}
 	my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
 
 	# Extract the lemma form from the sense key, and from the word.

@@ -155,7 +155,7 @@
 ;; conditional probability of seeing that disjunct, given that the
 ;; word is being observed.
 ;;
-;; Arguments: the word, and the number of times tis been observed.
+;; Arguments: the word, and the number of times its been observed.
 ;;
 (define (update-disjunct-cond-probability word word-cnt)
 	(define drow #f)

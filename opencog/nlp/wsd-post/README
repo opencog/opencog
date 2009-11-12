@@ -157,6 +157,19 @@ she suffered a stroke   dj=Ss- Os+
 
 Clearly,  suffer%2:29:01:: is a big winner accross the board.
 
+Also:
+
+ suffers.v      | Ss- Os+ MVp+                  |   6.29677110165358 |
+4.70087794722605 |                 |                 0 |               1
+ suffers.v      | Ss- E- Os+ MVp+               |   3.12097296118736 |
+5.45552526908809 |                 |                 0 |               1
+ suffers.v      | Ss- MVa+ MVs+                 |   3.07256299257278 |
+5.47807853897718 |                 |                 0 |               1
+ suffers.v      | Ss- E- MVp+                   |   10.7104850448668 |
+3.90891863346821 |                 |                 0 |               1
+ suffers.v      | Ss- Ss- E- MVp+               |   0.72284644842148 |
+7.56576000898761 |                 |                 0 |               1
+
 
 Other Candidates
 ----------------
@@ -184,6 +197,8 @@ Nouns:
  home.n            | Cs- D*u- Ss+             | home%1:06:02::    |     0.01489989871691 |               2 |  0.00155725637510752
 
 Adjectives, adverbs, etc:
+British.a
+
  personal.a        | A+                       | personal%3:00:00::|   0.0105270084251467 |               2 |     2.05028355814664
  personal.a        | A+                       | personal%3:01:01::|   0.0105270084251467 |               2 |   0.0018719470709944
 
@@ -514,6 +529,112 @@ select * from lemmacount; -- 12936465 (12.9M)
 13.4M/17.7M= 76% of the data was kept.  Good.
 
 So, defacto, 3/4ths of 53653 articles were used, etc.
+
+But wait -- how many were taged with disjuncts?
+
+select sum(count) from disjuncts;  -- 23444129.  i.e. 23M !! ??
+select sum(count) from disjunctsenses; -- 593003 i.e 593K !!??
+
+I'm getting confused a bit here ... 
+Did I pump some huge amount of data into the disjuncts table, 
+but not the disjunct-senses table ?? Or did the mihalcea algo
+fail to normalize properly, and knock down the counts?
+
+How many unique words observed?
+-------------------------------
+select count(*) from unigram; 230018 i.e. 230K words
+select count(*) from unigram where count > 1.0; 116628 i.e. 117K
+
+This includes foreign words, numbers.
+
+select count(distinct inflected_word) from disjuncts; -- 953386 -- i.e. 953K wow!!
+select count(distinct inflected_word) from disjuncts where count > 1.0; -- 330520 -- 330K
+
+select count(distinct inflected_word) from disjunctsenses; -- 15194 -- 15K
+select count(distinct inflected_word) from disjunctsenses where count > 1.0; -- 4788 -- 5K
+
+
+How many disjuncts observed?
+----------------------------
+(redo previous analysis in now 2009)
+SELECT COUNT(*) FROM disjuncts; 5666488 -- i.e. 5.6M word-disjunct pairs.
+
+SELECT COUNT(*) FROM disjuncts where count > 1.0; 1528731 -- i.e. 1.5M pairs above thresh.
+
+SELECT COUNT(*) FROM disjuncts where count > 1.0 and log_cond_probability<5; 
+685953 i.e. 686K
+
+SELECT COUNT(DISTINCT disjunct) FROM disjuncts;
+394832 i.e. 395K  ?? wtf ?? wow .. this is really correct! -- verified
+by dumping all data into file then sort | uniq |wc to count lines in file.
+
+OK. but wait ... 
+SELECT COUNT(DISTINCT disjunct) FROM disjuncts where count > 1.0;  
+gives a MUCH lower number: 83644 -- i.e. 83.6K wow!
+
+SELECT COUNT(DISTINCT disjunct) FROM disjunctsenses;
+gives 46490 -- i.e. 46.5K wow whoa wtf ... 
+
+SELECT COUNT(DISTINCT disjunct) FROM disjunctsenses where count > 1.0;
+gives 8940 -- i.e. 9K wowww
+
+Of these 46.5K dj's there are 588 connectors, 430 link types, of which
+45 were idiom links.
+
+WTF major links: disjunctsenses has 89, but disjuncts have 106 !!!
+The following were not observed in disjunctsenses:
+AA -- occur only in questions
+AM -- as many
+ER -- the better the more 
+EZ -- almost as idiomatics
+FL -- for long idiom
+FM -- from prep
+H -- how many much questions
+HA -- how many 
+JQ -- prep question
+LE -- comparatives
+MF -- idiomatic
+NF -- two third of a
+NT -- not to
+NW -- two thirds
+TR -- comparatives
+UN -- until
+WR -- where queston
+
+
+
+How many senses were observed?
+------------------------------
+SELECT COUNT(DISTINCT word_sense) FROM disjunctsenses;
+19704 -- 19.7K
+
+
+How many unique word-disjunct pairs?
+-------------------------------------
+ SELECT distinct on (inflected_word, disjunct) * INTO xx FROM disjunctsenses;
+ SELECT count(*) from xx;
+ 237012 = 237K
+
+SELECT inflected_word, disjunct, count into xx FROM disjunctsenses;
+CREATE INDEX xxi on xx (inflected_word, disjunct);
+SELECT inflected_word, disjunct, SUM(count) AS sum_count into xy FROM xx GROUP BY inflected_word, disjunct;
+SELECT COUNT(*) FROM xy;
+SELECT COUNT(*) FROM xy WHERE sum_count > 1.0;
+
+the last says: 56605 -- 56.6K had significant counts.
+
+
+How many word-disjunct-senst triples?
+-------------------------------------
+SELECT COUNT(*) FROM disjunctsenses;
+ 642776 -- 643K
+
+SELECT COUNT(*) FROM disjunctsenses where count > 1.0;
+78128 -- 78K
+
+Entropy distribution
+--------------------
+
 
 
 TODO

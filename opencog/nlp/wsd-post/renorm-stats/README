@@ -49,13 +49,14 @@ instructions below explain how to creae these dictionaries.
    Recent run took 102 minutes. Looked at 902337 words, observed
    an average of 24 times.
 
-3) Merge synsets by running the ./resynset-renorm.pl script. One
+3) Merge synsets by running the ./synset-renorm.pl script. One
    problem with the WSD code is that it does not (did not?) properly
    collapse synsets; thus, this needs to be done manually, as a post-
    processing step.  This modifies the DisjunctSenses table only.
 
    Takes about 5-10 minutes to run;
    recently reported: "examined=447804 updated=68775 inserted=53702"
+	in Nov 2009, examined=611998 updated=74124 inserted=42303
 
 4) Run the ./dj-probs.pl script. This updates the conditional 
    probabilities on the DisjunctSenses table, and stores entropies and 
