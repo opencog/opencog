@@ -22,8 +22,14 @@
  */
 
 
+#include "Router.h"
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <opencog/util/foreach.h>
+#else
 #include <Sockets/SocketHandler.h>
 #include <Sockets/ListenSocket.h>
+#endif
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
 #include <fstream>
@@ -31,7 +37,6 @@
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
 
-#include "Router.h"
 #include "RouterServerSocket.h"
 #include "NetworkElementCommon.h"
 
@@ -43,12 +48,22 @@ using namespace MessagingSystem;
 using namespace opencog;
 
 bool Router::stopListenerThreadFlag = false;
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+std::vector<RouterServerSocket*> Router::serverSockets;
+#endif
 
 Router::~Router()
 {
     if (!Router::stopListenerThreadFlag) {
         Router::stopListenerThread();
     }
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    foreach(RouterServerSocket* rss, serverSockets) {
+        delete rss;
+    }
+#endif
+
 }
 
 Router::Router()
@@ -95,6 +110,32 @@ void *Router::portListener(void *arg)
 
     logger().info("Router - Binding to port %d.", port);
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    try
+    {
+        boost::asio::io_service io_service;
+        boost::asio::ip::tcp::acceptor acceptor(io_service);
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
+        acceptor.open(endpoint.protocol());
+        acceptor.bind(endpoint);
+        logger().debug("Port listener ready.");
+        acceptor.listen();
+        logger().debug("Acceptor listening.");
+        while (!stopListenerThreadFlag)
+        {
+            RouterServerSocket* rss = new RouterServerSocket();
+            serverSockets.push_back(rss);
+            acceptor.accept(*(rss->getSocket()));
+            rss->start();
+        }
+    } catch (boost::system::system_error& e)
+    {
+        logger().error("Router - Boost system error listening to port %d. Error message", port, e.what());
+    } catch (std::exception& e)
+    {
+        logger().error("Router - Error listening to port %d. Exception message: %s", port, e.what());
+    }
+#else
     SocketHandler socketHandler;
     ListenSocket<RouterServerSocket> listenSocket(socketHandler);
 
@@ -114,6 +155,7 @@ void *Router::portListener(void *arg)
         }
         socketHandler.Select(0, 200);
     }
+#endif
 
     logger().debug("Port listener finished.");
     return NULL;

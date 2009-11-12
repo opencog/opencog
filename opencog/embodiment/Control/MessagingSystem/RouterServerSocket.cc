@@ -30,8 +30,12 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <boost/bind.hpp>
+#else
 #include <Sockets/SocketHandler.h>
 #include <Sockets/StdoutLog.h>
+#endif
 
 #include <sstream>
 #include <string.h>
@@ -45,26 +49,87 @@ bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work 
 
 RouterServerSocket::~RouterServerSocket()
 {
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    socket->close();
+    delete socket;
+#endif
     logger().debug("RouterServerSocket[%p] - destroyed. Connection closed.", this);
 }
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+RouterServerSocket::RouterServerSocket()
+#else
 RouterServerSocket::RouterServerSocket(ISocketHandler &handler): TcpSocket(handler)
+#endif
 {
 
     logger().debug("RouterServerSocket[%p] - Serving connection", this);
     currentState = WAITING_COMMAND;
     logger().debug("RouterServerSocket - CurrentState = %d", currentState);
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    socket = new tcp::socket(io_service);
+#else
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
     SetLineProtocol();
     SetSoKeepalive(); // trying to never close connection
+#endif
 }
 
 void RouterServerSocket::setMaster(Router *router)
 {
     master = router;
 }
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+tcp::socket* RouterServerSocket::getSocket() 
+{
+    return socket;
+}
+
+void RouterServerSocket::start()
+{
+    connectionThread = boost::thread(boost::bind(&handle_connection, this)); 
+}
+
+void RouterServerSocket::handle_connection(RouterServerSocket* ss)
+{
+    logger().debug("RouterServerSocket::handle_connection()");
+    boost::asio::streambuf b;
+    for (;;) 
+    {
+        try {
+        //logger().debug("%p: RouterServerSocket::handle_connection(): Called read_until", ss);
+        boost::asio::read_until(*(ss->getSocket()), b, boost::regex("\n"));
+        //logger().debug("%p: RouterServerSocket::handle_connection(): returned from read_until", ss);
+        std::istream is(&b);
+        std::string line;
+        std::getline(is, line); 
+        if (!line.empty() && line[line.length()-1] == '\r') {
+            line.erase(line.end()-1);
+        }
+        //logger().debug("%p: RouterServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
+        ss->OnLine(line);
+        } catch (boost::system::system_error& e) {
+            if (ss->master->isListenerThreadStopped()) {
+                break;
+            } else {
+                logger().error("RouterServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
+            }
+        }
+    }
+}
+
+void RouterServerSocket::Send(const std::string& cmd)
+{
+    boost::system::error_code error;
+    boost::asio::write(*socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    if (error) {
+        logger().error("RouterServerSocket::Send(): Error transfering data.");
+    }
+}
+#endif
 
 void RouterServerSocket::sendAnswer(const std::string &msg)
 {

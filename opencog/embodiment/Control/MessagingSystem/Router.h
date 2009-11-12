@@ -40,6 +40,7 @@
 #include "Message.h"
 #include <pthread.h>
 
+#define REPLACE_CSOCKETS_BY_ASIO
 
 #define USE_BOOST_ASIO
 #ifdef USE_BOOST_ASIO
@@ -49,6 +50,10 @@ using boost::asio::ip::tcp;
 
 namespace MessagingSystem
 {
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    class RouterServerSocket;
+#endif
 
 enum NotificationType {
     MESSAGE,
@@ -216,6 +221,10 @@ private:
 #endif
     Id2SocketMap controlSockets;
     Id2SocketMap dataSockets;
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    static std::vector<RouterServerSocket*> serverSockets;
+#endif
 
     /**
      * Control the run() function main loop. Once set false, the Router will
@@ -407,6 +416,13 @@ public:
     * Returns true if the connection is established. False, otherwise.
     */
     bool dataSocketConnection(const std::string& ne_id);
+
+    /**
+     * Method to check if NetworkElment is still listenning to its tcp port
+     */
+    static bool isListenerThreadStopped() {
+        return !stopListenerThreadFlag;
+    }
 
 }; // class Router
 }  // namespace

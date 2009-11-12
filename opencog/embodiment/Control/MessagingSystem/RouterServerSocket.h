@@ -25,15 +25,23 @@
 #ifndef ROUTERSERVERSOCKET_H
 #define ROUTERSERVERSOCKET_H
 
+#include "Router.h"
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <boost/thread/thread.hpp>
+#else
 #include <Sockets/TcpSocket.h>
 #include <Sockets/ISocketHandler.h>
-
-#include "Router.h"
+#endif
 
 namespace MessagingSystem
 {
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+class RouterServerSocket
+#else
 class RouterServerSocket : public TcpSocket
+#endif
 {
 
 private:
@@ -53,9 +61,12 @@ private:
     // Used to call-back when messages arrive
     static Router *master;
 
-    std::map<std::string, int> sockets;
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    boost::asio::io_service io_service;
+    tcp::socket* socket;
+    boost::thread connectionThread;
+#endif
 
-    void parseCommandLine(const std::string &line, std::string &command, std::queue<std::string> &args);
     void sendAnswer(const std::string &msg);
     void addNetworkElement(const std::string &id, const std::string &ip, int port);
     void sendRequestedMessages(const std::string &id, int limit);
@@ -67,7 +78,15 @@ public:
     // Constructors/destructors
 
     ~RouterServerSocket();
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    RouterServerSocket();
+    void Send(const std::string& cmd);
+    static void handle_connection(RouterServerSocket*);
+    void start();
+    tcp::socket* getSocket();
+#else
     RouterServerSocket(ISocketHandler &handler);
+#endif
 
     // ***********************************************/
     // General

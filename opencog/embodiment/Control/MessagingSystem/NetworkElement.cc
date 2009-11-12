@@ -453,7 +453,6 @@ void *NetworkElement::portListener(void *arg)
         boost::asio::ip::tcp::acceptor acceptor(io_service);
         boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
         acceptor.open(endpoint.protocol());
-        //acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
         acceptor.bind(endpoint);
         logger().debug("Port listener ready.");
         acceptor.listen();
@@ -473,7 +472,6 @@ void *NetworkElement::portListener(void *arg)
     {
         logger().error("NetworkElement - Error listening to port %d. Exception message: %s", port, e.what());
     }
-
 #else
     SocketHandler socketHandler;
     ListenSocket<ServerSocket> listenSocket(socketHandler);
