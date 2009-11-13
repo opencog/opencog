@@ -38,7 +38,8 @@ sub compute_prob
 	# First, total up the marginal counts
 	my $tot_count = 0.0;
 	my $items = 0;
-	print "Will look at $select->rows rows in DisjunctSenses\n";
+	my $nr = $select->rows;
+	print "Will look at $nr rows in DisjunctSenses\n";
 	for (my $i=0; $i<$select->rows; $i++)
 	{
 		my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
@@ -74,7 +75,8 @@ sub compute_prob
 			or die "Couldn't execute statement: " . $update->errstr;
 	}
 
-	print "Done updating the probs for $select->rows rows\n";
+	$nr = $select->rows;
+	print "Done updating the probs for $nr rows\n";
 
 	# Now update the entropies and the sense-counts.
 	my $ups = $dbh->prepare(
@@ -83,6 +85,7 @@ sub compute_prob
 	my $djcnt = 0;
 	my $sncnt = 0;
 	my $encnt = 0;
+	my @bins = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 	foreach my $pair (keys %wdj_entropy)
 	{
 		my ($infword, $disjunct) = split(/%%%/, $pair);
@@ -92,6 +95,8 @@ sub compute_prob
 		$djcnt ++;
 		$sncnt += $sense_count;
 		$encnt += $entropy;
+		$bins[$sense_count] ++;
+
 		$ups->execute($entropy, $sense_count, $infword, $disjunct)
 			or die "Couldn't execute statement: " . $update->errstr;
 	}
@@ -100,6 +105,13 @@ sub compute_prob
 	$encnt /= $djcnt;
 	print "Done updating the entropy of $djcnt disjuncts\n";
 	print "    Avg sense cnt=$sncnt  avg entropy=$encnt;\n";
+	print "    Bins:\n";
+	my $i = 0;
+	foreach(@bins)
+	{
+		print "     num-senses= $i   num-triples= $_\n";
+		$i ++;
+	}
 }
 
 
