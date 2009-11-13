@@ -31,7 +31,7 @@ sub show_ent
 	my $i=0;
 	for ($i=0; $i<$nbins; $i++) { $bins[$i] = 0; }
 	
-	my $select = $dbh->prepare('SELECT (entropy) FROM Disjuncts WHERE entropy >= 0.0;' )
+	my $select = $dbh->prepare('SELECT entropy FROM Disjuncts WHERE entropy >= 0.0;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	$select->execute()
@@ -41,7 +41,7 @@ sub show_ent
 	print "#\n# bincount of entropy \n";
 	print "#\n# Will look at $nr rows in Disjuncts\n";
 	print "#\n# bin into $nbins bins\n#\n";
-	for (my $i=0; $i<$select->rows; $i++)
+	for (my $j=0; $j<$select->rows; $j++)
 	{
 		my ($ent) = $select->fetchrow_array();
 

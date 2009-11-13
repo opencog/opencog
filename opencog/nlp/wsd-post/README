@@ -634,6 +634,38 @@ SELECT COUNT(*) FROM disjunctsenses where count > 1.0;
 
 Entropy distribution
 --------------------
+Total count is 593003.630924276 for 537985 items
+Done updating the entropy of 226679 disjuncts
+Avg sense cnt=2.37333409799761 avg entropy=0.777430272279844;
+
+SELECT * FROM Disjuncts WHERE entropy >= 1.0 and entropy < 1.01333333333333;
+ word      | disjunct  |     count           |     entropy      | senses_observed 
+ wish.v    | Sp- TO+   |    42.1725730542092 | 1.01283940271225 | 4
+Court      | AN+       |    132.541593157099 |                1 | 2
+electricity.n  | AN+   |    140.905140136138 | .999650369735075 | 2
+hit.n      | AN+       |    330.162172231242 | .996723422284469 | 3
+particular.n  | AN+    |     794.61839278614 | .991380485748673 | 2
+
+
+
+      word_sense       | inflected_word | disjunct |      count       | log_cond_probability 
+-----------------------+----------------+----------+------------------+----------------------
+ electricity%1:19:01:: | electricity.n  | AN+      | 2.85156721992663 |    0.968583915135987
+ electricity%1:19:00:: | electricity.n  | AN+      | 2.72871836278425 |     1.03211545839439
+(2 rows)
+
+lexat=# SELECT * FROM DisjunctSenses WHERE inflected_word='hit.n' and disjunct='AN+ ';
+  word_sense   | inflected_word | disjunct |       count        | log_cond_probability 
+---------------+----------------+----------+--------------------+----------------------
+ hit%1:04:03:: | hit.n          | AN+      |  0.785423368973435 |     0.39030935108556
+ hit%1:04:00:: | hit.n          | AN+      |  0.172659081097037 |     2.57585365922672
+ hit%1:11:01:: | hit.n          | AN+      | 0.0713518655147212 |     3.85075681975652
+(3 rows)
+
+
+
+
+
 
 
 
