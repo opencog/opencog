@@ -437,7 +437,8 @@ private:
     }
 
     // Beware that this will create the target as a hypothetical atom
-    // before running the inference.
+    // before running the inference. It does give the virtual version
+    // to the BIT, however.
     void runSCMTarget(const char* conf_file)
     {
 #ifdef HAVE_GUILE
@@ -450,7 +451,7 @@ private:
         
         std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";//+".scm";
         
-        initAxiomSet(axiomsFile); // TODO use scm in loadAxioms
+        initAxiomSet(axiomsFile); // TODO use scm in initAxioms
         
         std::string targetScheme = test["TARGET"];
         std::cout << "Target: " << targetScheme << std::endl;
