@@ -122,7 +122,9 @@ void BuggyStackUTest::test_exec(void)
 
 	// Result should be a ListLink w/ one solution
 	Handle result = pm.varscope(restrict);
+#ifdef HAVE_GUILE
 	logger().debug("result is %s\n", SchemeSmob::to_string(result).c_str());
+#endif 
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
