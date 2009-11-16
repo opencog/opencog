@@ -15,6 +15,12 @@ See the file "README-overview" for a more detailed motivational
 explanation of *why* this stuff is being done. See the README-example 
 for an example of the WSD results in action.
 
+Note: the Mihalcea research (PageRank on Semantic Networks, with 
+Application to Word Sense Disambiguation Rada Mihalcea, Paul Tarau, 
+Elizabeth Figa (2004)) shows that the Most Frequent Sense (MFS)
+provides a very strong signal for the correct sense assignment. Thus,
+the grammatical tags should improve on this.
+
 The nlp/wsd directory contains an implementation of the Rada Mihalcea
 word-sense disambiguation algorithm. The "stats-collection" directory 
 contains a set of scripts that attach word senses to link-grammar parse 
@@ -664,11 +670,29 @@ lexat=# SELECT * FROM DisjunctSenses WHERE inflected_word='hit.n' and disjunct='
 
 
 
-
-
-
-
-
 TODO
 ----
-Also -- need to make sure the wsd is using only one word per sysnet .. !!??
+sense-tagged triples (word, disjunct,sense) table needs to be redone,
+due to following problems:
+
+-- Current database has bad/broken entropy distribution on these triples.
+   This is because there were islands in the graph algo, which resulted
+   in equal-weight sense tags to be stored. These cause huge artificial
+   bumps in the entropy-vs (word,disjunct) distribution.
+-- Islands can be tagged using most-frequent sense. (MFS)
+-- Accuracy can be improved by weighting with most-frequent sense.
+   In fact, MFS seems to provide a very strong WSD signal.
+-- recent link-grammar changes have changed subscripts, making old 
+   table obsolete. 
+-- should not record triples from sentences which have unsed words
+   in the parse.
+-- need to make sure the wsd is using only one word per sysnet ....
+   I think this is OK right now, .. but having two from the same 
+   synset dilutes the strneght going to the nodes and wrecks the data.
+-- Also, maybe need to tweak the sense-similarity scores?  i.e. are
+   the sense-similarity scores invariant under synsets? This is not
+   obvious ...
+
+-- See the draft journal paper for more info, see also the lexat
+   project and the src/lexat/senseval/README file for a complimentary 
+   take on this.

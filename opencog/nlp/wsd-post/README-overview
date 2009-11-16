@@ -10,6 +10,12 @@ http://brainwave.opencog.org/2009/01/12/determining-word-senses-from-grammatical
 It provides a reasonably good overview of how the WSD data is currently
 being used, and why its interesting/exciting to explore further.
 
+Note: the Mihalcea research (PageRank on Semantic Networks, with 
+Application to Word Sense Disambiguation Rada Mihalcea, Paul Tarau, 
+Elizabeth Figa (2004)) shows that the Most Frequent Sense (MFS)
+provides a very strong signal for the correct sense assignment. Thus,
+the grammatical tags should improve on this.
+
 ---------------
 Blog post:
 
