@@ -40,6 +40,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/server/load-file.h>
 
 using namespace opencog::pln;
 using namespace opencog;
@@ -236,6 +237,7 @@ private:
         currentDebugLevel = -4;
     }
 
+    // Now uses SCM. Won't search any alternative locations for the file.
     void initAxiomSet(string premiseFile)
     {
         AtomSpaceWrapper *atw = GET_ASW;
@@ -243,11 +245,27 @@ private:
         atw->allowFWVarsInAtomSpace = true;
 
         cprintf(-2,"loading...\n");     
-        
+
+#if 0
         atw->archiveTheorems = true;
         bool axioms_ok = atw->loadAxioms(premiseFile);
         if (!axioms_ok) throw std::string("failed to load file");
         atw->archiveTheorems = false;
+        
+#elif HAVE_GUILE
+        int rc = load_scm_file(premiseFile.c_str());
+
+        atw->archiveTheorems = true;
+        atw->makeCrispTheorems();
+        atw->archiveTheorems = false;
+
+        // The error-checking is after the call to makeCrispTheorems, because
+        // if there was an error, then the AS is now empty and makeCrispTheorems
+        // will (correctly) record that there are none.
+        if (rc) throw std::string("failed to load file");
+#else
+        throw std::string("Not allowed to use XML or SCM!");
+#endif
         
         cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
     }
@@ -449,10 +467,11 @@ private:
         //std::cout << test.to_string() << std::endl;
         
         std::cout << test["COMMENT"] << std::endl;
+
+        //std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";        
+        std::string axiomsFile = std::string(PLN_TEST_DIR"scm/")+test["LOAD"]+".scm";
         
-        std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";//+".scm";
-        
-        initAxiomSet(axiomsFile); // TODO use scm in initAxioms
+        initAxiomSet(axiomsFile); // TODO use scm in initAxiomSet
         
         std::string targetScheme = test["TARGET"];
         std::cout << "Target: " << targetScheme << std::endl;
@@ -712,10 +731,12 @@ public:
         // Initialize PLN tests as such
         initPLNTests();
 
+#ifdef HAVE_GUILE
         // Necessary if you use test data and/or targets in Scheme.
         logger().debug("Loading Scheme modules");
         config().set("SCM_PRELOAD",
-                "opencog/scm/type_constructors.scm");
+                "opencog/scm/type_constructors.scm,"
+                "opencog/scm/utilities.scm");
         // Blindly search a bunch of paths hoping to find the files
         // in one of them ...
         const char * paths[] = 
@@ -727,6 +748,7 @@ public:
                 NULL
         };
         cogserver().loadSCMModules(paths);
+#endif
 
         allTestsInferenceNodes = 0;
 
@@ -964,7 +986,7 @@ public:
     void testTVChecksWork() {
         /// The test which is supposed to fail
         if(RUN_FAILURE_TESTS) {
-            initAxiomSet(PLN_TEST_DIR"bigdemo.xml");
+            initAxiomSet(PLN_TEST_DIR"scm/bigdemo.scm");
 
             puts("\nShould fail. The test for whether TV checks work.\n");
 
@@ -980,7 +1002,7 @@ public:
 
     void testRandomTVsTooHigh() {
         if(RUN_FAILURE_TESTS) {
-            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
 
@@ -1000,7 +1022,7 @@ public:
     void testSymmetricRelationFails() {
         if(RUN_FAILURE_TESTS) {
             puts("\nShould fail.");
-            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "symmetricRelation"),
                             mva((pHandle)LIST_LINK,
@@ -1017,7 +1039,7 @@ public:
     void testInverseBinding()
     {
         puts("\nInverse Binding test\n");
-        initAxiomSet(PLN_TEST_DIR"inverse_binding.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/inverse_binding.scm");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "Possible"),
                         mva((pHandle)LIST_LINK,
@@ -1034,7 +1056,7 @@ public:
         for (int i = 0; i < 5; i++) {
             printf("\nBasic spawning test %d\n", i);
             /// Basic spawning test
-            initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+            initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "friendOf"),
                         mva((pHandle)LIST_LINK,
@@ -1051,7 +1073,7 @@ public:
     {
         printf("\nTest for multiple roots spawning.\n");
         /// Test for multiple roots spawning
-        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "killed"),
                         mva((pHandle)LIST_LINK,
@@ -1068,7 +1090,7 @@ public:
     {
         printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
         /// Test Generalization for VARIABLE_SCOPE_LINK
-        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
         maketest(makemeta(mva((pHandle)VARIABLE_SCOPE_LINK,
                     mva((pHandle)LIST_LINK), //empty dummy
                     mva((pHandle)INHERITANCE_LINK,
@@ -1084,7 +1106,7 @@ public:
     {
         printf("\nTest Generalization for FORALL_LINK.\n");
         /// Test Generalization for FORALL_LINK
-        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
         maketest(makemeta(mva((pHandle)FORALL_LINK,
                     mva((pHandle)LIST_LINK), //empty dummy
                     mva((pHandle)INHERITANCE_LINK,
@@ -1099,7 +1121,7 @@ public:
     void testInheritanceOsamaAbu()
     {
         printf("\nTest inheritance Osama/Abu.\n");
-        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
         maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                               NewNode(CONCEPT_NODE, "Osama"),
                               NewNode(CONCEPT_NODE, "Abu")
@@ -1112,9 +1134,9 @@ public:
     void testInheritanceMuhummadTerrorist()
     {
         printf("\nTest inheritance Muhummad->Terrorist.\n");
-        initAxiomSet(PLN_TEST_DIR"smalldemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
 // Takes a tad too long with bigdemo (but tested, and it works now)
-//        initAxiomSet(PLN_TEST_DIR"bigdemo.xml");
+//        initAxiomSet(PLN_TEST_DIR"scm/bigdemo.scm");
         maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                     NewNode(CONCEPT_NODE, "Muhammad"),
                     NewNode(CONCEPT_NODE, "terrorist")
@@ -1126,7 +1148,7 @@ public:
 
     void testAnotBdemo()
     {    
-        initAxiomSet(PLN_TEST_DIR"AnotBdemo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/AnotBdemo.scm");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                     NewNode(PREDICATE_NODE, "found_under"),
                         mva((pHandle)LIST_LINK,
@@ -1141,7 +1163,7 @@ public:
 
     void testFetchDemo5()
     {    
-        initAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/fetchdemo5.scm");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                         NewNode(PREDICATE_NODE, "+++")
                     )
@@ -1154,7 +1176,7 @@ public:
     void testFetchDemo5_alt()
     {
         printf("\nTest fetch demo.\n");
-        initAxiomSet(PLN_TEST_DIR"fetchdemo5.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/fetchdemo5.scm");
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                             NewNode(PREDICATE_NODE, "just_done"),
                             mva((pHandle)LIST_LINK,
@@ -1175,7 +1197,7 @@ public:
 
     void testWoaDemo()
     {    
-        initAxiomSet(PLN_TEST_DIR"woademo.xml");
+        initAxiomSet(PLN_TEST_DIR"scm/woademo.scm");
         maketest(makemeta(mva((pHandle)SIMULTANEOUS_AND_LINK,
                             NewNode(WORD_NODE, "blockword"),
                             NewNode(FW_VARIABLE_NODE, "$blockword_associatee")

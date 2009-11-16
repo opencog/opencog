@@ -9,7 +9,7 @@ formulas/      : new C++ tests for Formulas should be put here.
 
 === Test data files ===
 
-The *.xml files are PLN test data from when Ari was working on it in 2006. Most or all of them are still used in PLNUTest. There are Scheme versions in the scm/ subdirectory, which are much easier to read. Currently PLNUTest still uses the XML version, but this will be changed soon.
+The *.xml files are PLN test data from when Ari was working on it in 2006. Most or all of them are still used in PLNUTest. There are Scheme versions in the scm/ subdirectory, which are much easier to read. Currently PLNUTest only uses the Scheme version.
 
 === The new PLN test system ===
 
