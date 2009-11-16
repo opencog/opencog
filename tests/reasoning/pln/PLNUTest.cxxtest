@@ -38,6 +38,7 @@
 #include "opencog/reasoning/pln/rules/RuleProvider.h"
 
 #include <opencog/util/Config.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/guile/SchemeEval.h>
 
 using namespace opencog::pln;
@@ -245,7 +246,7 @@ private:
         
         atw->archiveTheorems = true;
         bool axioms_ok = atw->loadAxioms(premiseFile);
-        assert(axioms_ok);      
+        if (!axioms_ok) throw std::string("failed to load file");
         atw->archiveTheorems = false;
         
         cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
@@ -687,7 +688,7 @@ public:
         temperature = 0.1f;
     
         // Initialize PLN test environment
-        try {
+        try {        
             logger().info("Initializing PLN test env...");
 
             f = fopen("results.txt","a");
@@ -781,7 +782,13 @@ public:
     
     void testSCMTargets () {
         // TODO maybe use regex_iterator
-//        try {
+        
+        // This method is the main one for current and future tests.
+        // Also, there are a lot of different errors that can happen.
+        // So, it has/needs somewhat elaborate exception-handling.
+        // This is partly because CXXTest doesn't give you any info
+        // about an exception, just telling you it happened.
+        try {
             string testDir = PLN_TEST_DIR"targets";
 
             // TODO apparently there is a way to make iterators only cover
@@ -792,9 +799,25 @@ public:
                 if (!is_directory(dir->status()))
                     runSCMTarget(dir->path().string().c_str());
             }
-//        } catch (basic_filesystem_error e) {
-//            std::cerr << e.what();
-//        }
+        }
+        catch(std::string s) {
+            std::cerr << "testSCMTargets:" << s;
+            throw s;
+        }
+        catch(StandardException e) {
+            std::cerr << "testSCMTargets:" << e.getMessage();
+            throw e;
+        }
+        catch(PLNexception e)
+        {
+            std::cerr << "testSCMTargets:" << e.what();
+            throw e;
+        }
+        catch(...)
+        {
+            std::cerr << "Unknown exception during SCM targets" << std::endl;
+            throw;
+        }
     }
 
     void testHeuristic() {
