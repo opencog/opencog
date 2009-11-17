@@ -40,13 +40,13 @@ const count_t properties = 5;
 const strength_t null_s = 0;
 const strength_t lion_mammal_s = 1;
 const strength_t lion_carnivor_s = 1;
-const strength_t lion_striped_s = 1;
+const strength_t lion_striped_s = 0.0;
 const strength_t lion_predator_s = 1;
 const strength_t lion_facingExtincion_s = 0.8;
 
 const strength_t not_lion_mammal_s = 0.2;
 const strength_t not_lion_carnivor_s = 0.1;
-const strength_t not_lion_striped_s = 0.1;
+const strength_t not_lion_striped_s = 0.17;
 const strength_t not_lion_predator_s = 0.3;
 const strength_t not_lion_facingExtincion_s = 0.4;
 
@@ -63,7 +63,7 @@ const strength_t facingExtincion_lion_ASSOC_s =
 
 const strength_t tiger_mammal_s = 1;
 const strength_t tiger_carnivor_s = 1;
-const strength_t tiger_striped_s = 0.0;
+const strength_t tiger_striped_s = 0.9;
 const strength_t tiger_predator_s = 1;
 const strength_t tiger_facingExtincion_s = 1;
 
