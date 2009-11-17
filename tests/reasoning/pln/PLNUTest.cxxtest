@@ -244,14 +244,15 @@ private:
         atw->reset();
         atw->allowFWVarsInAtomSpace = true;
 
-        cprintf(-2,"loading...\n");     
+        //cprintf(-2,"loading...\n");     
+        std::cout << "loading " << premiseFile << std::endl;
 
 #if 0
         atw->archiveTheorems = true;
         bool axioms_ok = atw->loadAxioms(premiseFile);
         if (!axioms_ok) throw std::string("failed to load file");
         atw->archiveTheorems = false;
-        
+
 #elif HAVE_GUILE
         int rc = load_scm_file(premiseFile.c_str());
 
