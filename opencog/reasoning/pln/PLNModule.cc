@@ -193,7 +193,10 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
     if (prev_h == h && setTarget) {
         Bstate_ = Bstate;
         state_ = state;
+        printf("reusing BITNodeRoot\n");
     } else {
+        prev_h = h;
+
         pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
         pHandle fakeHandle = fakeHandles[0];
         
