@@ -84,6 +84,8 @@
 //#include "auxiliary/PrintRule.h"
 #include "auxiliary/ScholemFunctionProductionRule.h"
 #include "auxiliary/SubsetEvalRule.h"
+#include "auxiliary/IntensionalInheritanceRule.h"
+
 //#include "auxiliary/VarInstantiationRule.h"
 
 //#include "simsubst/SimSubstRule1.h"

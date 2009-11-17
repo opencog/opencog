@@ -103,6 +103,8 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     
     AddRule(new SubsetEvalRule(parent), 10.0f);
 
+    AddRule(new IntensionalInheritanceRule(parent), 10.f);
+
     //	AddRule(new FORALLRule(parent,NULL), 5.0f);
     //	AddRule( new PLNPredicateRule(parent,NULL), 5.0f);
     
