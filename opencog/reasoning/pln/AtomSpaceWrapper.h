@@ -307,7 +307,7 @@ public:
     pHandle realToFakeHandle(const Handle h, const VersionHandle vh);
     //! Convert a a real handle into a fake handle for each VersionedHandled TV
     pHandleSeq realToFakeHandle(const Handle hs);
-    //! Convert a pHandleSeq of pln handles to real, optionally expanding to
+    //! Convert real handles to pln pHandleSeq , optionally expanding to
     //! include every VersionHandled TV in each real handle
     pHandleSeq realToFakeHandles(const HandleSeq& hs, bool expand=false);
     //! Match each context in the outgoing set of "context" with the handles

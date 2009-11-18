@@ -221,6 +221,20 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
     }
 }
 
+Handle opencog::pln::applyRule(const string& ruleName,
+                               const HandleSeq& premises)
+{
+    static RuleProvider* rp = new DefaultVariableRuleProvider;
+    const Rule* rule = rp->findRule(ruleName);
+    pHandleSeq phs = ASW()->realToFakeHandles(premises);
+    vector<Vertex> vv;
+    copy(phs.begin(), phs.end(), back_inserter(vv));
+    BoundVertex bv = rule->compute(vv);
+    vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
+    // ignore VersionHandle for now
+    return vhp.first;
+}
+
 template <typename T>
 T input(T& a, std::list<std::string>& args)
 {

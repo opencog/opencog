@@ -29,6 +29,8 @@
 
 namespace opencog { namespace pln {
 
+using std::string;
+
 RuleProvider::RuleProvider(void)
 {
 }
@@ -45,6 +47,27 @@ void RuleProvider::AddRule(Rule* r, float priority)
 RuleProvider::~RuleProvider(void)
 {
     for_each(begin(), end(), &delete_op<Rule>);
+}
+
+struct EqRuleName
+{
+private:
+    const string& _name;
+public:
+    EqRuleName(const string& name) : _name(name) {}
+    bool operator()(Rule* r) {
+        OC_ASSERT(r != NULL);
+        return r->getName() == _name;
+    }
+};
+
+const Rule* RuleProvider::findRule(const string& ruleName) const
+{
+    EqRuleName eq(ruleName);
+    RuleProvider::const_iterator cit = find_if(begin(), end(), eq);
+    if(cit == end())
+        return NULL;
+    else return *cit;
 }
 
 VariableRuleProvider::VariableRuleProvider(void)
@@ -178,10 +201,11 @@ public:
     ~GenericRule2() {}
     /// Always a Composer
     GenericRule2(iAtomSpaceWrapper *_destTable,
-                 bool _FreeInputArity, std::string _name = "")
+                 bool _FreeInputArity, string _name = "")
 	: Rule(_destTable, _FreeInputArity, true, _name) {	}
     
-    BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        Handle CX = Handle::UNDEFINED) const
     {
         return Vertex();
     }

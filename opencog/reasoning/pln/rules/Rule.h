@@ -221,8 +221,10 @@ public:
 
     friend class RuleApp;
 
-    //! Only for logging purposes.
+    // Used for logging purposes and retrieving rule based on its name
     std::string name; 
+
+    const std::string& getName() { return name; }
 };
 
 

@@ -35,8 +35,15 @@ protected:
     void AddRule(Rule* r, float priority);
 public:
     RuleProvider(void);
-public:
     virtual ~RuleProvider(void);
+
+    /**
+     * @param ruleName the name of the rule we are looking for
+     *
+     * @return a pointer to the rule with name ruleName.
+     *         If no such rule exists then it return NULL
+     */
+    const Rule* findRule(const std::string& ruleName) const;
 };
 
 class VariableRuleProvider : public RuleProvider {
