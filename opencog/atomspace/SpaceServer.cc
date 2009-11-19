@@ -39,7 +39,6 @@
 using namespace opencog;
 
 const char* SpaceServer::SPACE_MAP_NODE_NAME = "SpaceMap";
-#define DELIMITER " "
 
 SpaceServer::SpaceServer(SpaceServerContainer &_container): container(_container)
 {
@@ -404,135 +403,30 @@ std::string SpaceServer::mapToString(Handle mapHandle) const
 {
 
     std::stringstream stringMap;
-    stringMap.precision(16);
+    stringMap.precision(25);
     const SpaceMap& map = getMap(mapHandle);
 
     stringMap << container.getMapIdString(mapHandle);
-    stringMap << DELIMITER;
-    stringMap << map.xMin();
-    stringMap << DELIMITER;
-    stringMap << map.xMax();
-    stringMap << DELIMITER;
-    stringMap << map.yMin();
-    stringMap << DELIMITER;
-    stringMap << map.yMax();
-    stringMap << DELIMITER;
-    stringMap << map.radius();
-    stringMap << DELIMITER;
-    stringMap << map.xDim();
-    stringMap << DELIMITER;
-    stringMap << map.yDim();
-    stringMap << DELIMITER;
+    stringMap << " ";
 
-    stringMap << mapObjectsToString(map);
-    //std::cout << "Codified string: " << stringMap.str( ) << std::endl;
+    stringMap << SpaceMap::toString( map );
+
     return stringMap.str( );
-}
-
-std::string SpaceServer::mapObjectsToString(const SpaceServer::SpaceMap& map) const
-{
-    std::stringstream mapObjects;
-    mapObjects.precision(16);
-    std::vector<std::string> mapObjectsIds;
-
-    map.findAllEntities(back_inserter(mapObjectsIds));
-    mapObjects << mapObjectsIds.size();
-    mapObjects << DELIMITER;
-
-    for (unsigned int i = 0; i < mapObjectsIds.size(); i++) {
-        const Spatial::EntityPtr& entity = map.getEntity( mapObjectsIds[i] );
-
-        // object name
-        mapObjects << entity->getName( );
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getPosition( ).x;
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getPosition( ).y;
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getPosition( ).z;
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getLength( );
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getWidth( );
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getHeight( );
-        mapObjects << DELIMITER;
-
-        mapObjects << entity->getOrientation( ).getRoll( );
-        mapObjects << DELIMITER;
-
-        mapObjects << (entity->getBooleanProperty( Spatial::Entity::OBSTACLE ) ? "y" : "n");
-        mapObjects << DELIMITER;
-
-    } // for
-    return mapObjects.str( );
 }
 
 SpaceServer::TimestampMap SpaceServer::mapFromString(const std::string& stringMap)
 {
 
-    std::stringstream parser( stringMap );
-    parser.precision(16);
-
-    //opencog::StringTokenizer st(stringMap, std::string(DELIMITER));
     unsigned long timestamp;
-    parser >> timestamp;
-    //= atoll(st.nextToken().c_str());
+    std::stringstream mapParser;
+    {
+        std::stringstream parser( stringMap );
+        parser.precision(25);    
+        parser >> timestamp;
+        mapParser << parser.rdbuf( );
+    }        
 
-    double xMin, xMax, yMin, yMax, radius;
-    unsigned int xDim, yDim;
-
-    /*
-    xMin   = atof(st.nextToken().c_str());
-    xMax   = atof(st.nextToken().c_str());
-    yMin   = atof(st.nextToken().c_str());
-    yMax   = atof(st.nextToken().c_str());
-    radius = atof(st.nextToken().c_str());
-    xDim   = atoi(st.nextToken().c_str());
-    yDim   = atoi(st.nextToken().c_str());
-    */
-    parser >> xMin >> xMax >> yMin >> yMax >> radius >> xDim >> yDim;
-    // create the new map
-    SpaceMap *spaceMap = new SpaceServer::SpaceMap(xMin, xMax, xDim, yMin, yMax, yDim, radius);
-
-    int numObjects = 0;// = atoi(st.nextToken().c_str());
-    parser >> numObjects;
-    for (int i = 0; i < numObjects; i++) {
-        std::string objId;
-        parser >> objId;
-        //string objId = st.nextToken().c_str();
-
-        // Object Metadata
-        // NOTE: Temp variables must be used. Otherwise (passing them directly to ObjMetaData's constructor), the
-        // compiler will evaluate them in the inverse order (from the right to the left)
-        double centerX, centerY, centerZ, length, width, height, yaw;
-        std::string obstacleFlag;
-        parser >> centerX >> centerY >> centerZ >> length >> width >> height >> yaw >> obstacleFlag;
-
-
-        /*
-        double centerX = atof(st.nextToken().c_str());
-          double centerY = atof(st.nextToken().c_str());
-          double length = atof(st.nextToken().c_str());
-          double width = atof(st.nextToken().c_str());
-          double height = atof(st.nextToken().c_str());
-          double yaw = atof(st.nextToken().c_str());
-        bool isObstacle = ( st.nextToken( ) == "y" );
-        */
-        SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw);
-
-        spaceMap->addObject(objId, metadata, ( obstacleFlag == "y" ) );
-
-        //std::cout << "Created entity: " << spaceMap->getEntity( objId )->toString( ) << " MetaData: " << centerX << " " << centerY << " " << length << " " << width << " " << height << " " << yaw << " " << obstacleFlag << std::endl;
-    }
-
-    SpaceServer::TimestampMap timestampMap(timestamp, spaceMap);
+    SpaceServer::TimestampMap timestampMap(timestamp, SpaceMap::fromString( mapParser.str( ) ) );
 
     return timestampMap;
 }

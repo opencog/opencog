@@ -242,11 +242,6 @@ private:
     SpaceMap* addOrGetSpaceMap(bool keepPreviousMap, Handle spaceMapHandle);
 
     /**
-     *
-     */
-    std::string mapObjectsToString(const SpaceServer::SpaceMap& map) const;
-
-    /**
      * Overrides and declares copy constructor and equals operator as private 
      * for avoiding large object copying by mistake.
      */

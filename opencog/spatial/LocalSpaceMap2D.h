@@ -180,9 +180,8 @@ public:
     /**
      * Persistence
      */
-    void save(FILE* fp) const;
-    void load(FILE* fp);
-    void saveASCIIMap(const std::string fileName) const;
+    void save(FILE* fp ) const;
+    void load(FILE* fp );
 
     Spatial::Distance xGridWidth() const;
     Spatial::Distance yGridWidth() const;
@@ -600,6 +599,9 @@ public:
      * Return a string description of the relation
      */
     static std::string spatialRelationToString( SPATIAL_RELATION relation );
+
+    static std::string toString( const LocalSpaceMap2D& map );
+    static LocalSpaceMap2D* fromString( const std::string& map );
 
 }; // struct LocalSpaceMap2D
 

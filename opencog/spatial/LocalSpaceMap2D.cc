@@ -31,7 +31,8 @@
 #include "StaticEntity.h"
 
 #include <boost/lexical_cast.hpp>
-#include <cstdio>
+
+#include <fstream>
 
 #define HUGE_DISTANCE 999999.9
 
@@ -243,19 +244,13 @@ bool LocalSpaceMap2D::operator==(const LocalSpaceMap2D& other) const
 
 }
 
-void LocalSpaceMap2D::save(FILE* fp) const
+void LocalSpaceMap2D::save( FILE* fp ) const
 {
-
-    //unsigned int numberOfObjects = this->objects.size();
     unsigned int numberOfObjects = this->entities.size();
     fwrite( &numberOfObjects, sizeof(unsigned int), 1, fp );
 
-    //ObjectHashMap::const_iterator it;
     LongEntityPtrHashMap::const_iterator it;
-    //for( it = this->objects.begin( ); it != this->objects.end( ); ++it ) {
     for ( it = this->entities.begin( ); it != this->entities.end( ); ++it ) {
-
-        //std::string id = it->first;
         std::string id = it->second->getName( );
         unsigned int length = id.size();
 
@@ -275,15 +270,10 @@ void LocalSpaceMap2D::save(FILE* fp) const
 
         fwrite(&metaData, sizeof(Spatial::ObjectMetaData), 1, fp);
         fwrite(&isObstacle, sizeof(bool), 1, fp );
-
-        //fwrite(&it->second.metaData, sizeof(Spatial::ObjectMetaData), 1, fp);
-        //fwrite(&it->second.isObstacle, sizeof(bool), 1, fp );
-
     } // for
-
 }
 
-void LocalSpaceMap2D::load(FILE* fp)
+void LocalSpaceMap2D::load( FILE* fp )
 {
     unsigned int numberOfObjects;
     fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
@@ -307,7 +297,6 @@ void LocalSpaceMap2D::load(FILE* fp)
 
         delete id;
     } // for
-
 }
 
 Spatial::Distance LocalSpaceMap2D::xGridWidth() const
@@ -824,29 +813,6 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
 
 }
 
-void LocalSpaceMap2D::saveASCIIMap(const std::string fileName) const
-{
-    FILE *fp = fopen(fileName.c_str(), "w");
-
-    if (fp != NULL) {
-        for (unsigned int i = 0; i < xDim(); i++) {
-            if (i == 0) {
-                fprintf(fp, "    ");
-                for (unsigned int j = 0; j < yDim(); j++) fprintf(fp, " %u", j);
-                fprintf(fp, "\n");
-            }
-            for (unsigned int j = 0; j < yDim(); j++) {
-                if (j == 0) fprintf(fp, "%u:  ", i);
-                fprintf(fp, " %c", gridOccupied(i, j) ? 'O' : '-');
-            }
-            fprintf(fp, "\n");
-        }
-        fclose(fp);
-    } else logger().error("Error to create the file '%s'", fileName.c_str());
-}
-
-
-
 void LocalSpaceMap2D::calculateSegmentGridPoints( std::vector<Spatial::GridPoint>& points,  const Math::LineSegment& segment )
 {
 
@@ -923,7 +889,6 @@ void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::Obj
     EntityPtr entity( new StaticEntity( idHash, id, Math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), Math::Dimension3( metadata.width, metadata.height, metadata.length ), Math::Quaternion( Math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
     entity->setProperty( Entity::OBSTACLE, isObstacle );
 
-    //  std::cout << entity->toString( ) << " MetaData: " << metadata.centerX << " " << metadata.centerY << " " << metadata.length << " " << metadata.width << " " << metadata.height << " " << metadata.yaw << " " << isObstacle << std::endl;
     if ( isObstacle ) {
         addToSuperEntity( entity );
     } // if
@@ -1499,4 +1464,80 @@ std::string LocalSpaceMap2D::spatialRelationToString( LocalSpaceMap2D::SPATIAL_R
     case TOTAL_RELATIONS:
         return " invalid relation ";
     }
+}
+
+std::string LocalSpaceMap2D::toString( const LocalSpaceMap2D& map )
+{
+    std::stringstream out;
+    out.precision(25);
+
+    out << map.xMin( ) << " " << map.xMax( ) << " " << map.xDim( ) << " ";
+    out << map.yMin( ) << " " << map.yMax( ) << " " << map.yDim( ) << " ";
+    out << map.radius( ) << " ";
+
+    out << map.entities.size() << " ";
+
+    LongEntityPtrHashMap::const_iterator it;
+    for ( it = map.entities.begin( ); it != map.entities.end( ); ++it ) {        
+        out << it->second->getName( ) << " ";
+
+        out << it->second->getPosition( ).x << " " 
+            << it->second->getPosition( ).y << " " 
+            << it->second->getPosition( ).z << " ";
+
+        out << it->second->getLength( ) << " " 
+            << it->second->getWidth( ) << " " 
+            << it->second->getHeight( ) << " ";
+
+        out << it->second->getOrientation( ).x << " "
+            << it->second->getOrientation( ).y << " " 
+            << it->second->getOrientation( ).z << " "
+            << it->second->getOrientation( ).w << " ";
+        
+        out << it->second->getBooleanProperty( Entity::OBSTACLE ) << " ";
+    } // for
+    return out.str( );
+}
+
+LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
+{
+    std::stringstream parser(map);
+    parser.precision(25);
+
+    double xMin = 0, xMax = 0;
+    double yMin = 0, yMax = 0;
+    double agentRadius = 0;
+    unsigned int xDim = 0, yDim = 0, numberOfObjects = 0;
+
+    parser >> xMin >> xMax >> xDim;
+    parser >> yMin >> yMax >> yDim;
+    parser >> agentRadius;
+   
+    LocalSpaceMap2D* newMap = new LocalSpaceMap2D( xMin, xMax, xDim, yMin, yMax, yDim, agentRadius );
+
+    parser >> numberOfObjects;
+    unsigned int i;
+    for( i = 0; i < numberOfObjects; ++i ) {
+        std::string name;
+        Math::Vector3 position( 0, 0, 0);
+        Math::Dimension3 dimension;
+        double orientationX = 0, orientationY = 0, orientationZ = 0, orientationW = 0;
+        bool obstacle = false;
+        parser >> name 
+               >> position.x >> position.y >> position.z
+               >> dimension.length >> dimension.width >> dimension.height
+               >> orientationX >> orientationY >> orientationZ >> orientationW
+               >> obstacle;
+        Math::Quaternion orientation( orientationX, orientationY, orientationZ, orientationW );
+        Spatial::ObjectMetaData metaData( position.x, 
+                                          position.y, 
+                                          position.z,
+                                          dimension.length,
+                                          dimension.width,
+                                          dimension.height,
+                                          orientation.getRoll( ) );
+        newMap->addObject( name, metaData, obstacle );
+    } // for  
+
+    return newMap;    
 }
