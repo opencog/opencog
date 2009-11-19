@@ -48,24 +48,25 @@ public:
     /**
      * Corners
      *
-     *      1+------+2
+     *      4+------+5
      *      /|     /|
      *     / |    / |
-     *   6+------+7 |
-     *    | 0+---|--+3
-     *    | /    | /
+     *   7+------+6 | --front-->
+     *    | 0+---|--+1
+     *    | /    | /  
      *    |/     |/
-     *   5+------+4
+     *   3+------+2
      */
     enum CORNER {
-        FAR_LEFT_BOTTOM,   // 0
-        FAR_LEFT_TOP,      // 1
-        FAR_RIGHT_TOP,     // 2
-        FAR_RIGHT_BOTTOM,  // 3
-        NEAR_RIGHT_BOTTOM, // 4
-        NEAR_LEFT_BOTTOM,  // 5
-        NEAR_LEFT_TOP,     // 6
-        NEAR_RIGHT_TOP     // 7
+        NEAR_LEFT_BOTTOM,  
+        FAR_LEFT_BOTTOM,
+        FAR_RIGHT_BOTTOM,  
+        NEAR_RIGHT_BOTTOM, 
+
+        NEAR_LEFT_TOP,     
+        FAR_LEFT_TOP,      
+        FAR_RIGHT_TOP,
+        NEAR_RIGHT_TOP     
     };
 
     /**
