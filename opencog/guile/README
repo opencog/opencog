@@ -717,17 +717,43 @@ The above form is used by the [[ExecutionLink]] to embed scheme callouts
 into hypergraphs.
 
 === Calling C++ from scheme ===
-There is no generic way of calling some arbitrary C++ method from
-scheme; toe enable this, new, explicit C++ code must be written.  There
-are two ways to do this: create a formal API, or provide an ad-hoc
-extension.  Creating a formal API without some general experimentation
-and experience is discouraged -- it takes more work, its more complex,
-and the first stab at it will likely need changes.  Instead, try using
-the 'ad-hoc' mechanism.
+Basically, there three ways to do this: register a new SchemeFunction, 
+create a formal API or provide an ad-hoc extension. Creating a formal API
+without some general experimentation and experience is discouraged -- it
+takes more work, its more complex, and the first stab at it will likely 
+need changes. Instead, try using the 'ad-hoc' mechanism. It is also possible
+to map a C++ function to Scheme by using a SchemeFunction. SchemeFunction
+ is an anstract class that must be implemented by your concrete class. It
+can be found at opencog/guile/SchemeEval.h. After implementing the 
+concrete class you can register the new function by calling 
+"SchemeEval::register_function". Here follows an example:
 
-Calls to miscellaneous C++ functions can be implemented by modifying the
-<tt>opencog/guile/SchemeAdHoc.cc</tt> file.  Its easy: just add a new
-command name, and the code to execute.
+class Foo : public SchemeEval::SchemeFunction {
+   public:
+      Foo( void ) : 
+         SchemeEval::SchemeFunction::SchemeFunction( "foo", 2, 0, 0 ) { }
+
+         virtual SchemeEval::SchemeFunction::FunctionPointer 
+            getFunctionPointer( void ) {
+             return (SchemeEval::SchemeFunction::FunctionPointer)&FOO::execute;
+         }
+   private:
+         static SCM execute( SCM arg1, SCM arg2 ) {
+             // foo code goes here
+         }
+};
+... 
+// then register the new function by calling:
+Foo *foo = new Foo();
+SchemeEval::instance( ).register_function( foo );
+ ...
+
+By using SchemeFunction you avoid creating a dependency between 
+the new code and the OpenCog Scheme module.
+
+Calls to miscellaneous C++ functions can be implemented by modifying 
+the <tt>opencog/guile/SchemeAdHoc.cc</tt> file.  Its easy: just add 
+a new command name, and the code to execute.
 
 ===Calling scheme from Hypergraphs===
 The [[ExecutionLink]], whem used with the [[GroundedSchemaNode]], allows
