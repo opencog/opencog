@@ -47,6 +47,18 @@ public:
 
     bool operator==( const Rectangle& o ) const;
 
+    const Vector3& getLeftTopCorner( void ) const {
+        return this->leftTopCorner;
+    }
+    const Vector3& getRightTopCorner( void ) const {
+        return this->rightTopCorner;
+    }
+    const Vector3& getLeftBottomCorner( void ) const {
+        return this->leftBottomCorner;
+    }
+    const Vector3& getRightBottomCorner( void ) const {
+        return this->rightBottomCorner;
+    }
 
 private:
     Vector3 leftTopCorner;
