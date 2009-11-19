@@ -318,6 +318,10 @@ protected:
 
             "NLGEN_SERVER_HOST",            "localhost",
 
+            "VISUAL_DEBUGGER_ACTIVE",       "false",
+            "VISUAL_DEBUGGER_HOST",         "localhost",
+            "VISUAL_DEBUGGER_PORT",         "6000",
+
             //used as halting condition by reset
             "",                             ""
         };

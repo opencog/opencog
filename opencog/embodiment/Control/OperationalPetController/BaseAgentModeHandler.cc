@@ -77,13 +77,16 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         std::vector<std::string> tokens;
         boost::split( tokens, arguments[0], boost::is_any_of(" ") );
         
-        if (tokens[0] == "SAVE_MAP") {
+        if (tokens[0] == "save_map") {
             this->agent->saveSpaceMapFile();
-        } else if (tokens[0] == "SAVE_VISMAP") {
+        } else if (tokens[0] == "save_vismap") {
             this->agent->getCurrentModeHandler( ).handleCommand( "saveVisMap", std::vector<std::string>() );
         } // else if
-        
+
+    } else if ( name == "notifyMapUpdate" ) {
+        this->agent->sendMapToVisualDebuggerClients( this->agent->getAtomSpace( ).getSpaceServer( ).getLatestMap( ) );
     } // else
+    
 }
 
 void BaseAgentModeHandler::update( void )

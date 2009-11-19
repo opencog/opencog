@@ -1,3 +1,4 @@
+
 /*
  * opencog/embodiment/Control/OperationalPetController/Pet.h
  *
@@ -36,6 +37,8 @@
 #include <opencog/embodiment/Control/PetInterface.h>
 
 #include <opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h>
+#include <opencog/spatial/MapExplorerServer.h>
+
 #include "MessageSender.h"
 
 using namespace opencog;
@@ -126,6 +129,10 @@ private:
     void adjustIsExemplarAvatarPredicate(bool active) throw (opencog::RuntimeException);
 
     LanguageComprehension* languageTool;
+
+    opencog::spatial::MapExplorerServer* visualDebuggerServer;
+
+    
 public:
 
     static const unsigned long UNDEFINED_TIMESTAMP;
@@ -384,6 +391,30 @@ public:
     std::pair<std::string, Spatial::Point> targetObject;
 
     LanguageComprehension& getLanguageTool( void );
+
+    /**
+     * Visual debugger is a service that let the user to see, through a 3D client,
+     * the current state of the agent LocalSpaceMap. This method starts a server
+     * that will be used to send the LocalSpaceMap for each connected client.
+     *
+     * @param host Host used to bind the server
+     * @param port Port used to bind the server
+     */
+    void startVisualDebuggerServer( const std::string& host, const std::string& port );
+
+    /**
+     * This function will stop the visual debugger server, if called
+     */
+    void stopVisualDebuggerServer( void );  
+
+    /**
+     * Updates the LocalSpaceMap used by the visual debugger clients to render
+     * the environemtn.
+     *
+     * @param map Latest LocalSpaceMap
+     */
+    void sendMapToVisualDebuggerClients( const Spatial::LocalSpaceMap2D& map );
+
 
 }; // class
 }  // namespace

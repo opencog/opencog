@@ -64,7 +64,38 @@ FIND_PACKAGE(OpenSSL REQUIRED)
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost 1.35 COMPONENTS filesystem signals regex date_time thread REQUIRED)
-FIND_PACKAGE(Boost 1.35 COMPONENTS python)
+FIND_PACKAGE(Boost 1.35 COMPONENTS python program_options)
+
+IF(Boost_PROGRAM_OPTIONS_FOUND)
+  MESSAGE(STATUS "Found Boost::program_options")
+ELSE(Boost_PROGRAM_OPTIONS_FOUND)
+  MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")  
+ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
+
+FIND_PACKAGE(OpenGL)
+
+IF(OPENGL_FOUND)
+  MESSAGE(STATUS "OpenGL was found.")
+ELSE(OPENGL_FOUND)
+  MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
+ENDIF(OPENGL_FOUND)
+
+FIND_PACKAGE(SDL)
+
+IF(SDL_FOUND)
+  MESSAGE(STATUS "SDL was found.")
+ELSE(SDL_FOUND)
+  MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")  
+ENDIF(SDL_FOUND)
+
+FIND_PACKAGE(SDL_gfx)
+
+IF(SDLGFX_FOUND)
+  MESSAGE(STATUS "SDL_gfx was found")
+ELSE(SDLGFX_FOUND)
+  MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+ENDIF(SDLGFX_FOUND)
+
 
 # At this time, there is no reason to build with memcached for 
 # FIND_PACKAGE(LibMemCached)
@@ -107,6 +138,7 @@ ELSE (GUILE_FOUND)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
 ENDIF (GUILE_FOUND)
 MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
+
 
 # Gnu Scientific Library
 FIND_PACKAGE(GSL REQUIRED)

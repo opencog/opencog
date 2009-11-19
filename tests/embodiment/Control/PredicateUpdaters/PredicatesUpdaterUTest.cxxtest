@@ -134,51 +134,63 @@ public:
 
         // adding pet
         Handle objs = atomSpace->addNode(PET_NODE, petId);
-        atomSpace->addSpaceInfo(true, objs, timestamp, baseX, baseY, 0.5, 0.5, 0.5, 0, false);
-        addSizeInfo(objs, 0.5, 0.5);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                baseX, baseY, 0, // position
+                                0.5, 0.5, 0.5, 0, false);
+        addSizeInfo(objs, 0.5, 0.5, 0.5);
         handles.push_back(objs);
 
         // adding avatar
         objs = atomSpace->addNode(AVATAR_NODE, owner);
-        atomSpace->addSpaceInfo(true, objs, timestamp, baseX + 1.5, baseY + 1.5, 0.5, 0.5, 0.5, 0, false);
-        addSizeInfo(objs, 1, 1);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                baseX + 1.5, baseY + 1.5, 0, // position
+                                0.5, 0.5, 0.5, 0, false);
+        addSizeInfo(objs, 0.5, 0.5, 0.5);
         handles.push_back(objs);
 
         // adding stick
         objs = atomSpace->addNode(ACCESSORY_NODE, stick);
-        atomSpace->addSpaceInfo(true, objs, timestamp, baseX + 0.2, baseY + 0.2, 0.2, 0.2, 0.2, 0, false);
-        addSizeInfo(objs, 0.2, 0.2);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                baseX + 10.2, baseY + 10.2, 0,  // position
+                                0.2, 0.2, 0.2, 0, false);
+        addSizeInfo(objs, 0.2, 0.2, 0.2);
         handles.push_back(objs);
 
         // adding food
         objs = atomSpace->addNode(OBJECT_NODE, food);
-        atomSpace->addSpaceInfo(true, objs, timestamp, baseX, baseY + 0.4, 0.1, 0.1, 0.1, 0, false);
-        addSizeInfo(objs, 0.1, 0.1);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                baseX, baseY + 0.4, 0,  // position
+                                0.1, 0.1, 0.1, 0, false);
+        addSizeInfo(objs, 0.1, 0.1, 0.1);
         handles.push_back(objs);
         AtomSpaceUtil::addPropertyPredicate(*atomSpace, "is_edible", objs, SimpleTruthValue(1.0, 1.0));
 
         // adding drink
         objs = atomSpace->addNode(OBJECT_NODE, drink);
-        atomSpace->addSpaceInfo(true, objs, timestamp, baseX, baseY + 0.4, 0.1, 0.1, 0.1, 0, false);
-        addSizeInfo(objs, 0.1, 0.1);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                baseX, baseY + 0.4, 0,  // position
+                                0.1, 0.1, 0.1, 0, false);
+        addSizeInfo(objs, 0.1, 0.1, 0.1);
         handles.push_back(objs);
         AtomSpaceUtil::addPropertyPredicate(*atomSpace, "is_drinkable", objs, SimpleTruthValue(1.0, 1.0));
 
         // adding wall
         objs = atomSpace->addNode(STRUCTURE_NODE, wall);
-        atomSpace->addSpaceInfo(true, objs, timestamp, 3, 3, 2, 0.2, 1, 0, true);
-        addSizeInfo(objs, 2, 0.2);
+        atomSpace->addSpaceInfo(true, objs, timestamp, 
+                                3, 3, 0,  // position
+                                2, 0.2, 1, 0, true);
+        addSizeInfo(objs, 2, 0.2, 1);
         handles.push_back(objs);
 
         lastTimestamp = timestamp;
     }
 
-    void addSizeInfo(Handle obj, double length, double width) {
+    void addSizeInfo(Handle obj, double length, double width, double height) {
         HandleSeq seq0;
         seq0.push_back(obj);
         seq0.push_back(atomSpace->addNode(NUMBER_NODE, opencog::toString(length)));
         seq0.push_back(atomSpace->addNode(NUMBER_NODE, opencog::toString(width)));
-        seq0.push_back(atomSpace->addNode(NUMBER_NODE, "1.0")); // TODO: height must be considered too...
+        seq0.push_back(atomSpace->addNode(NUMBER_NODE, opencog::toString(height)));
 
         HandleSeq seq;
         seq.push_back(atomSpace->addNode(PREDICATE_NODE, "size"));
@@ -197,6 +209,7 @@ public:
         // add objs
         addSpaceInfoMock(10, 10);
         updater->update(handles, PerceptionActionInterface::PAITestUtil::getCurrentTimestamp());
+
 
         printf("---------------------------------------------------------------\n");
         printf("Round 01 - stick predicates - should not move\n");
@@ -547,13 +560,13 @@ public:
         // pet near
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, foodH));
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, drinkH));
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, stickH));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, stickH));
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, wallH));
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", petH, ownerH));
 
         // owner
         TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH, petH));
-        TS_ASSERT(AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH,  stickH));
+        TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH,  stickH));
         TS_ASSERT(!AtomSpaceUtil::isPredicateTrue(*atomSpace, "near", ownerH, wallH));
 
         // wall - near to nothing

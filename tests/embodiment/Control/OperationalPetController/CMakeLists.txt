@@ -15,6 +15,7 @@ TARGET_LINK_LIBRARIES(PetUTest
 	${Boost_DATE_TIME_LIBRARY}
 	${XERCESC_LIBRARIES}
 	${OPENCOG_LIBRARIES}
+        ${Boost_THREAD_LIBRARY} 
 )
 
 IF(WIN32)
@@ -40,6 +41,7 @@ TARGET_LINK_LIBRARIES(LanguageComprehensionUTest
   OpcLib
   behavior
   ${XERCESC_LIBRARIES}
+  ${Boost_THREAD_LIBRARY}
 )
 
 IF(WIN32)

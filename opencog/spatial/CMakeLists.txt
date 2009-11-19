@@ -22,6 +22,8 @@ ADD_LIBRARY(SpaceMap
     Entity.cc
     SuperEntity.cc
     MovableEntity.cc
+    
+    MapExplorerServer.cc
 )
 
 ADD_LIBRARY(HPASearch
@@ -70,18 +72,20 @@ TARGET_LINK_LIBRARIES(astartest
     util
 )
 
-# uncomment the lines below to compile MapViewer. You must have libsdl and libsdl_gfx
-# installed on your system
+IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
+ADD_EXECUTABLE(MapTools
+    MapTools
+    MapExplorerRenderer
+    MapExplorerSystem
+)
 
-#ADD_EXECUTABLE(MapViewer
-#    MapViewer
-#    Renderer
-#)
-#TARGET_LINK_LIBRARIES(MapViewer
-#    SpaceMap
-#    util
-#    HPASearch
-#    SDL
-#    SDL_gfx
-#)
-
+TARGET_LINK_LIBRARIES(MapTools
+    SpaceMap
+    util
+    ${SDL_LIBRARY}
+    ${SDLGFX_LIBRARY}
+    ${OPENGL_LIBRARY}
+    ${Boost_THREAD_LIBRARY} 
+    ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)
+ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)

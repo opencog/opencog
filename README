@@ -76,7 +76,23 @@ HyperTable  -- Distributed storage.
                http://hypertable.org.
                This requires SIGAR as well. 
 
+OpenGL      -- Open Graphics Library
+               Optional package
+               Required by opencog/spatial/MapTool
+               info: http://www.opengl.org
+               Commonly provided with your video card driver
 
+SDL         -- Simple DirectMedia Layer
+               Optional package
+               Required by opencog/spatial/MapTool
+               http://www.libsdl.org
+               Debian/Ubuntu package libsdl1.2-dev
+
+SDL_gfx     -- Simple DirectMedia Layer extension
+               Optional package
+               Required by opencog/spatial/MapTool
+               http://www.ferzkopp.net/joomla/content/view/19/14/
+               Debian/Ubuntu package libsdl-gfx1.2-dev
 
 To build opencog:
 -----------------

@@ -46,6 +46,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+
 #include <boost/format.hpp>
 
 using namespace behavior;
@@ -73,7 +74,7 @@ Pet::Pet(const std::string& petId, const std::string& petName, const
 
     this->petId.assign(petId);
     this->petName.assign(petName);
-
+    this->visualDebuggerServer = NULL;
     setMode(PLAYING);
 
     // lower case agent type so that there is no problem with loading files
@@ -129,6 +130,7 @@ Pet::~Pet()
         delete handler;
     } // for
 
+    stopVisualDebuggerServer( );
 }
 
 void Pet::initTraitsAndFeelings()
@@ -1111,4 +1113,32 @@ void Pet::setRequestedCommand(string command, vector<string> parameters)
 LanguageComprehension& Pet::getLanguageTool( void ) 
 {
     return *this->languageTool;
+}
+
+void Pet::startVisualDebuggerServer( const std::string& host, const std::string& port )
+{
+    if ( this->visualDebuggerServer == NULL ) {
+        this->visualDebuggerServer = new opencog::spatial::MapExplorerServer( host, port );
+    } // if
+    if ( !this->visualDebuggerServer->isRunning( ) ) {
+        this->visualDebuggerServer->start( );
+    } // if
+}
+
+void Pet::stopVisualDebuggerServer( void )
+{
+    if ( this->visualDebuggerServer != NULL ) {
+        if ( this->visualDebuggerServer->isRunning( ) ) {
+            this->visualDebuggerServer->stop( );
+        } // if
+        delete this->visualDebuggerServer;
+        this->visualDebuggerServer = NULL;
+    } // if
+}
+
+void Pet::sendMapToVisualDebuggerClients( const Spatial::LocalSpaceMap2D& map )
+{
+    if ( this->visualDebuggerServer != NULL && this->visualDebuggerServer->isRunning( ) ) {
+        this->visualDebuggerServer->sendMap( map );
+    } // if
 }

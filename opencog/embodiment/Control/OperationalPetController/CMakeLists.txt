@@ -52,6 +52,7 @@ TARGET_LINK_LIBRARIES (OpcTester
     PetComboVocabulary
     AtomSpaceExtensions
     ImaginaryLife
+    ${Boost_THREAD_LIBRARY}
 )
 
 ADD_EXECUTABLE (opc OPCExecutable.cc)
@@ -60,6 +61,7 @@ TARGET_LINK_LIBRARIES (opc
     comboreduct
     PetComboVocabulary
     ImaginaryLife
+    ${Boost_THREAD_LIBRARY} 
 )
 
 ADD_EXECUTABLE (opcHcTester MockOpcHCTestExec.cc)

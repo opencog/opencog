@@ -1977,6 +1977,9 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
     // AtomSpace::atomRemoved() method connected to removal signal of AtomSpace.
     if (!keepPreviousMap) atomSpace.cleanupSpaceServer();
 
+
+    this->petInterface.getCurrentModeHandler( ).handleCommand( "notifyMapUpdate", std::vector<std::string>() );
+
 }
 
 Vector PAI::getVelocityData(XERCES_CPP_NAMESPACE::DOMElement* velocityElement)

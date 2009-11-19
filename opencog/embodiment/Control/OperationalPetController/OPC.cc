@@ -212,6 +212,24 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
         exit(-1);
     }
 
+    if ( config().get("VISUAL_DEBUGGER_ACTIVE") == "true" ) {
+        int minPort = boost::lexical_cast<unsigned int>
+            ( config().get("MIN_OPC_PORT") );
+
+        std::string visualDebuggerHost = 
+            config().get("VISUAL_DEBUGGER_HOST");
+
+        std::string visualDebuggerStartPort =
+            config().get("VISUAL_DEBUGGER_PORT");
+
+        unsigned int visualDebuggerPort = static_cast<unsigned int>
+            ( boost::lexical_cast<unsigned int>( visualDebuggerStartPort ) + ( portNumber - minPort ) );
+        
+        this->pet->startVisualDebuggerServer( visualDebuggerHost, 
+            boost::lexical_cast<std::string>( visualDebuggerPort ) );
+
+    } // if
+
 }
 
 OPC::~OPC()
