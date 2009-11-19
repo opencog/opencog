@@ -49,7 +49,7 @@ Rectangle::Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorne
     this->leftTopCorner = leftTopCorner;
     this->rightTopCorner = rightTopCorner;
     this->rightBottomCorner = rightBottomCorner;
-    this->leftBottomCorner = Vector3( ( vec2 * rightSideLength ) + rightTopCorner );
+    this->leftBottomCorner = Vector3( ( vec2 * rightSideLength ) + leftTopCorner );
 }
 
 bool Rectangle::isInside( const Vector3& point )
