@@ -41,6 +41,7 @@
    "#Taking_sides"
    "#Position_on_a_scale"
    "#Assessing"
+   "#Morality_evaluation"
    )
   )
 
