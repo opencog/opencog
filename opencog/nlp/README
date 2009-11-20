@@ -5,7 +5,7 @@
 
 This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on establishing
-statistical correlations between word senses and gramatical constructions,
+statistical correlations between word senses and grammatical constructions,
 on reference resolution, and on reasoning with prepositional relations.
 
 How-To
@@ -17,7 +17,7 @@ are, and to assemble them into something meaningful.  Some fragile
 examples have been constructed (e.g. the chatbot) but its up to you to
 do better.
 
-Currently, there are two basic experimental flows that are possble:
+Currently, there are two basic experimental flows that are possible:
 the chatbot process and the word-sense-disambiguation (WSD) process.
 
 The chatbot process is the more ambitious of the two, combining many
@@ -29,13 +29,13 @@ chatbot process is given in nlp/chatbot/README.
 The WSD process is the more complex, and requires creating and maintaining
 large, complex databases.  The WSD process is summarized here:
 
- * Download and compile opencog, relex, lexical-attraction from
+ * Download and compile opencog, RelEx, lexical-attraction from
    launchpad.
  * Create a bunch of SQL tables, as specified in the lexical-attr 
    package. Configure locations and passwords in opencog.conf.
- * Parse a bunch of English text, using relex, to obtain frequency
+ * Parse a bunch of English text, using RelEx, to obtain frequency
    counts. Alternately, download pre-parsed texts from 
-   http://relex.swlabs.org/~linas/ which contains several cpu-years
+   http://gnucash.org/linas/nlp/ which contains several cpu-years
    worth of parsed data. 
  * Run the scripts in the wordnet-import directory to load opencog
    with basic wordnet relationships.
@@ -66,17 +66,17 @@ chatbot
 The chatbot directory contains some crude code to tie opencog NLP
 processing to chat systems, and particularly, to IRC chat.  Provides
 a high-level implementation of a simple, hard-coded question-answering 
-system, resting on the foundations of "seme" and "trples".
+system, resting on the foundations of "seme" and "triples".
 
 lexical_attraction
 ------------------
-The lexical-attraction directory contains a REAME file containing a
-short overview of Yuret's lexical attraction algorithm. A variant of
-this algo was implemented in java, in the lexat project on launchpad.
+The lexical-attraction directory contains a README file describing some
+ideas for performing pattern recognition to automatically extract 
+semantic content, primarily by employing mutual information.
 
 pln
 ---
-Misc pln experiments.
+Misc pln experiments.  Nothing of significance.
 
 question
 --------
@@ -86,7 +86,7 @@ If the atomspace contains an assertion such as "John threw the ball",
 then this code can correctly answer the question "Who threw the ball?"
 This code is now obsolete, and is not built any more. HOWEVER, the README
 does explain the research results, and provides a general introduction to 
-question answering, and should be kept around indefinitely.
+question-answering, and should be kept around indefinitely.
 
 refres
 ------
@@ -98,10 +98,12 @@ Alternately, anaphora (he, she, it, etc.) may also be used to refer to
 the same concept.
 
 This directory is currently empty, it is meant to someday hold an 
-implementation of teh Hobbs reference resolution algorithm.
+implementation of the Hobbs reference resolution algorithm.
 
 See also the "seme" directory, which contains a practical, working 
-implementation of reference resolution.
+implementation of reference resolution. See also the "lexical-attraction"
+directory, which outlines a far more general, and hopefully far more
+effective approach.
 
 scm
 ---
@@ -131,14 +133,14 @@ triples
 -------
 The triples directory contains some experimental code for extracting
 prepositional triples from text. So, for example: "Lisbon is the 
-capital of Portugaul" would be turned into "capital_of(Portugaul,
+capital of Portugal" would be turned into "capital_of(Portugal,
 Lisbon)".  Such "prepositional relations" extend the usual ontological 
 concepts of "is_a", "has_a", "part_of" and "uses" to more general
 relations.
 
-Importantly, this directory contains code to convert plan-text
+Importantly, this directory contains code to convert plain-text
 IF...THEN... relations into OpenCog ImplicationLinks. This is one
-of the primary acheivements of the code here.  Note that the IF...THEN..
+of the primary achievements of the code here.  Note that the IF...THEN..
 structure used is almost identical to the RelEx Frame rules, and so
 should be usable for porting RelEx frames to OpenCog.
 
@@ -161,14 +163,14 @@ different senses. The links are weighted by a word-sense similarity
 measure. The result is a graph whose vertices are word-senses, and 
 whose edges are these links.  The graph is essentially just a Markov 
 chain, and is solved as such, looking for a stationary vector of 
-probabilities for the word-sense verticies. The verticies with the 
+probabilities for the word-sense vertices. The vertices with the 
 highest scores are then the most likely meaning for a word.
 
 wsd-post
 --------
 The wsd-post directory contains code for generating datasets which may
 be used for extremely fast (but partial) word-sense disambiguation,
-based on gramatical (syntactical) usage. Generating the data-sets can
+based on grammatical (syntactical) usage. Generating the data-sets can
 take cpu-month to cpu-years; the table-lookup can be done in milli or
 microseconds.
 
@@ -203,7 +205,7 @@ for the more "primitive" graph:
 
 The above InheritenceLink essentially assigns a "type" to the word
 instance. This type can be used in the same way that types are
-ordinarily used in other programming langauges. When managing
+ordinarily used in other programming languages. When managing
 hypergraphs, it is almost always easier and faster to locate,
 manipulate and delete narrowly typed atoms.
 
@@ -227,7 +229,7 @@ which stands for the more "primitive" construct:
 
 Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
-the other, cand cannot freely intermingle these cases.
+the other, and cannot freely intermingle these cases.
 
 Not everything in the RelEx export gets its own specially-declared
 node or link type. Those that do not are explicitly declared in the
