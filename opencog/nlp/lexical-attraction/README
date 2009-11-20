@@ -1,6 +1,79 @@
 
-                      Counting Statistics
-                      -------------------
+                     Lexical Attraction, Redux
+                     -------------------------
+                     Linas Vepstas November 2009
+
+
+Proof of concept:
+-- Deniz Yuret has shown that high-mutual-information word pairs 
+   capture semantic content. This has been verified in the LexAt 
+   code, which has a bunch of interesting pairs.
+-- Many of these pairs can and should be considered to be "semes"
+   (see "seme/README")
+-- Dekang Lin's DIRT shows how mutual information can be used to 
+   discover synonymous phrases.
+-- Hoifung Poon + Pedro Domingos have shown how a very small number
+   of relatively simple logical assertions can be used to extract
+   important information, including synonymous phrases (USP parsing)
+   and coreference resolution.
+
+
+Core idea:
+-- Synthesize the above four points. That is, the Yuret work gives 
+   a very basic definition of mutual information for word pairs.
+   Lin shows how a more general notion can be put to effective use.
+   Domingos points out that thinking about logical patterns in general
+   is the correct approach.
+
+-- A key difficulty with the Domingos approach is it's wedding to 
+   Markov networks, which have difficulty being tractable (i.e. a
+   seeming need to compute the parition function).  The work of Poon
+   makes me wonder whether this is strictly necessary: rather, Poon 
+   (indirectly, between the lines) suggests that maybe what is really 
+   needed are the ability to recognize patterns, and to perform 
+   clustering when these are found.  Poon uses the machinery of
+   Markov nets to provide a measure of when the clustering should be 
+   performed.  Perhaps instead, a simpler measure, such as MI, could
+   serve just as well.
+
+-- To summarize: look for patterns that have high mutual information.
+   Do so hierarchically. Perform clustering .. err ... 
+
+
+Implementation:
+-- Look for certain kinds of patterns in the dependency parses as passed
+   into opencog. Make note of those that have high MI.
+
+-- Key stumbling blocks: 
+   In a dream world, we'd look for any and all possible patterns.
+   In practice, we'd probably only look for a select few. 
+   Step 1: do word-pairs, except this time, using the existing 
+   hypergraph respresentations.
+   Step 2: do synonymous phrases
+
+-- Stumlbing block:
+   How to correctly define mutual-info for an arbitrary pattern?
+
+-- Stumlbing block:
+   Once a high-MI pattern has been identified, it needs to be tagged 
+   in some way, such that the tag can be a stand-in for the pattern.
+   Why? So that hierarchical groupsing can be (more easily) discovered.
+   This seems to somehow be key.  So: how should this grouping be best
+   represented as a hypergraph?
+
+   Examples: "X borders Y" and "X is next to Y" are synonymous phrases
+   that should be discoverable by applying appropriate patter detectors.
+   however, the underlying dependency parses are quite different, and so
+   a key part of the seme-abstraction process is to normalize across 
+   these.
+
+
+
+
+=======================================================================
+
+                      Count Truth Value
+                      -----------------
                    Linas Vepstas February 2009
 
 Until now, statistical data gathering in the OpenCog NLP pipeline has
@@ -152,8 +225,6 @@ usage.
 =======================================================================
 
 
-
-
                         Lexical Attraction
                         ------------------
                      Linas Vepstas June 2008
@@ -163,7 +234,10 @@ attraction" algorithm for the discovery of synatctic links between
 words in a sentence [Yuret 1998]. The goal of this algorithm is to
 provide a score for ranking the output of the link-grammar parser.
 
-So far, nothing has been implemented; this is a pre-prototype.
+The stuff discussed below has been implemented in Java, as a part of
+the LexAt package, aka the statistical-relex package, available on
+the launchpad site.  It has been used to fish out a large number of
+MI values for word pairs.  Many of these are quite interesting.
 
 
 Data Structures
@@ -227,4 +301,5 @@ and word statistics. AAAI 1997.
 * Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical
   Attraction'' (1998) PhD Thesis
   http://citeseer.ist.psu.edu/yuret98discovery.html
+* Dekang Lin, DIRT inferencing, 2001
 
