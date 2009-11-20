@@ -20,11 +20,13 @@
 
 using namespace opencog;
 /**
- * Remove edges between senses of sets of words
+ * Remove word senses and edges between senses of sets of words.
+ * These routines are used to remove senses that are not connected
+ * to anything, and also to remove all but the largest graph.
  *
  * The routines in this file operate in a manner similr to those in
  * MihalceaEdge, but "in reverse" -- removing edges instead of adding
- * them.  Most of the routines will have a "count" paramter, indicating
+ * them.  Most of the routines will have a "count" parameter, indicating
  * the number of edges to keep. The "count" parameter works as follows:
  *
  * If zero, it will remove all edges between all word pairs.
@@ -177,7 +179,7 @@ bool EdgeThin::make_sense_list(Handle sense_h, Handle sense_link_h)
 
 /**
  * Remove a similarity relation between a pair of word senses.
- * The arg should be a handle to a CosenseLink, previusly constructed
+ * The arg should be a handle to a CosenseLink, previously constructed
  * by MihalceaEdge::sense_of_second_inst().
  */
 bool EdgeThin::delete_sim(Handle h)
@@ -265,7 +267,7 @@ bool EdgeThin::thin_word(Handle word_h)
 
 	// We can be here only if 'keep' was positive.
 	// We'll delete all of the recently disconnected senses. The reason
-	// for this is that we don't want these intering with the final score
+	// for this is that we don't want these interfering with the final score
 	// determination process: Some of the disconnected senses might end
 	// up with a higher score than the remaining senses, which would be
 	// wrong; it would be an inversion of how scoring is meant to work.
