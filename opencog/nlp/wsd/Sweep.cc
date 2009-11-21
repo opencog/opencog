@@ -8,34 +8,15 @@
  * Copyright(c) 2009 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-#include <list>
-#include <set>
-
-#include <opencog/atomspace/types.h>
 #include "ForeachWord.h"
-
-namespace opencog {
-
-class Sweep
-{
-	private:
-		std::set<Handle> maxgraph;
-		std::set<Handle> curgraph;
-		std::list<Handle> maxedges;
-		std::list<Handle> curedges;
-		bool mark_word(Handle);
-		bool start_mark_sense(Handle, Handle);
-		bool mark_sense(Handle, Handle);
-		void delete_edges(std::list<Handle> edges);
-	public:
-		void sweep_parse(Handle);
-};
-
-};
-
-#include "ForeachWord.h"
+#include "Sweep.h"
 
 using namespace opencog;
+
+void Sweep::set_atom_space(AtomSpace *as)
+{
+   atom_space = as;
+}
 
 /**
  * Walk over all graphs associated with this parse, deleting
@@ -70,14 +51,10 @@ bool Sweep::mark_word(Handle wordinst)
  * we've previously visited, and then search that bag for each new
  * sense that we encounter. Bummer.
  */
-bool Sweep::start_mark_sense(Handle sense, Handle edge)
+bool Sweep::start_mark_sense(Handle sense, Handle slink)
 {
 	// Have we already visited this node? If so, try the next sense.
-	if (maxgraph.end() != maxgraph.find(sense))
-	{
-		maxedges.push_back(edge);
-		return false;
-	}
+	if (maxgraph.end() != maxgraph.find(sense)) return false;
 
 	// Hmm. We've never seen this sense before. Find the graph that
 	// its connected to.
@@ -85,20 +62,27 @@ bool Sweep::start_mark_sense(Handle sense, Handle edge)
 	curedges.clear();
 
 	// Walk the entire connected component
+	curgraph.insert(sense);
 	foreach_sense_edge(sense, &Sweep::mark_sense, this);
 
+	// At this point, "curgraph" holds an entire connected component.
 	// If we found a small graph, delete it.
 	if (curgraph.size() <= maxgraph.size())
 	{
-		// delete all edges in currgraph
-		
+		// delete all edges in curgraph
+		delete_edges(curedges);
 	}
 	else
 	{
-		// delete all senses and edges in maxgraph
+		// Delete all edges in maxgraph (we'll delete sensdes later)
+		delete_edges(maxedges);
+
 		// Save the new maxgraph
 		maxgraph = curgraph;
+		maxedges = curedges;
 	}
+	curgraph.clear();
+	curedges.clear();
 	
 	return false;
 }
@@ -108,13 +92,20 @@ bool Sweep::start_mark_sense(Handle sense, Handle edge)
  */
 bool Sweep::mark_sense(Handle sense, Handle edge)
 {
-	curedges.push_back(edge);
+	curedges.insert(edge);
 	if (curgraph.end() != curgraph.find(sense)) return false;
 	curgraph.insert(sense);
 	foreach_sense_edge(sense, &Sweep::mark_sense, this);
 	return false;
 }
  
-void Sweep::delete_edges(std::list<Handle> edges)
+void Sweep::delete_edges(std::set<Handle> &edges)
 {
+	// Remove all of the senses
+	std::set<Handle>::iterator it;
+	for (it=edges.begin(); it != edges.end(); it++)
+	{
+		Handle edge_h = *it;
+		atom_space->removeAtom(edge_h, false);
+	}
 }

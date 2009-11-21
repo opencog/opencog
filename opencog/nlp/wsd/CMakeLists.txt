@@ -43,6 +43,7 @@ INSTALL (FILES
 	SenseCache.h
 	SenseRank.h
 	SenseSimilarity.h
+	Sweep.h
 	WordSenseProcessor.h
 	DESTINATION "include/opencog/nlp/wsd"
 )
