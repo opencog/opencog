@@ -40,6 +40,7 @@ void Mihalcea::set_atom_space(AtomSpace *as)
 	labeller.set_atom_space(as);
 	edger.set_atom_space(as);
 	thinner.set_atom_space(as);
+	sweeper.set_atom_space(as);
 }
 
 bool Mihalcea::process_sentence(Handle h)
@@ -74,10 +75,6 @@ bool Mihalcea::process_sentence(Handle h)
 	if (Handle::UNDEFINED != previous_parse)
 	{
 		edger.annotate_parse_pair(previous_parse, top_parse);
-
-		// If there are any senses that are not attached to anything,
-		// get rid of them now.
-		thinner.prune_parse(previous_parse);
 	}
 	previous_parse = top_parse;
 
@@ -90,6 +87,19 @@ bool Mihalcea::process_sentence(Handle h)
 		Handle earliest = short_list.front();
 		short_list.pop_front();
 		thinner.thin_parse(earliest, 0);
+	}
+
+	// Find the largest disconnected component of the graph, 
+	// and keep only that. Discard all smaller connected components.
+	sweeper.sweep_parse(top_parse);
+
+	// If there are any senses that are not attached to anything,
+	// get rid of them now.
+	std::deque<Handle>::iterator it;
+	for (it = short_list.begin(); it != short_list.end(); it++)
+	{
+		Handle parse = *it;
+		thinner.prune_parse(parse);
 	}
 
 	// THICKNESS is the number of senses that we leave attached to a 

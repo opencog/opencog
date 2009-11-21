@@ -19,6 +19,7 @@
 #include <opencog/nlp/wsd/ParseRank.h>
 #include <opencog/nlp/wsd/SenseRank.h>
 #include <opencog/nlp/wsd/ReportRank.h>
+#include <opencog/nlp/wsd/Sweep.h>
 
 #include "EdgeThin.h"
 
@@ -31,6 +32,7 @@ class Mihalcea
 		MihalceaLabel labeller;
 		MihalceaEdge edger;
 		EdgeThin thinner;
+		Sweep sweeper;
 		NNAdjust nn_adjuster;
 		ParseRank parse_ranker;
 		SenseRank sense_ranker;

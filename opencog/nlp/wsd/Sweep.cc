@@ -19,8 +19,10 @@ void Sweep::set_atom_space(AtomSpace *as)
 }
 
 /**
- * Walk over all graphs associated with this parse, deleting
- * all graphs but the single largest one.
+ * Walk over all word-sense graphs associated with this parse, 
+ * deleting all graphs but the single largest one. Here, a "graph"
+ * is the mihalcea graph, with word-senses as vertexes, and word-sense
+ * pairs forming edges.
  */
 void Sweep::sweep_parse(Handle h)
 {
@@ -30,7 +32,7 @@ void Sweep::sweep_parse(Handle h)
 }
 
 /**
- * walk over the entire connected graph for this word.
+ * Walk over the entire connected graph for this word.
  */
 bool Sweep::mark_word(Handle wordinst)
 {
