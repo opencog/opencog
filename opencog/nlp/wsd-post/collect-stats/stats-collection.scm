@@ -252,6 +252,10 @@ scm
 ; into the database. This is the "full" routine, in that it updates
 ; the word, word-sense and sense-disjunct tables.
 ;
+; Note that the current implementation will also record negative sense
+; score -- i.e. the score is negative when we're quite sure the sense
+; assignment is wrong.
+;
 ; Arguments:
 ; word  - word instance
 ; iword - inflected word
@@ -260,8 +264,8 @@ scm
 ;
 (define (ldj-process-disjunct-senses word iword djstr parse-score)
 
-	; skip over any senses which have negative scores
-	(define (skip-sense sense)
+	; Skip over any senses which have negative scores
+	(define (do-skip-sense sense)
 		(let ((sense-score (word-inst-sense-score word sense)))
 			(if (<= 0.0 sense-score)
 				(ldj-process-one-sense iword djstr parse-score sense sense-score)
@@ -269,8 +273,16 @@ scm
 		)
 	)
 
+	; Do not skip any senses .. go ahead and subtract negative values!
+	(define (record-sense sense)
+		(let ((sense-score (word-inst-sense-score word sense)))
+			(ldj-process-one-sense iword djstr parse-score sense sense-score)
+		)
+	)
+
 	; loop over all of the word-senses associated with this word.
-	(for-each skip-sense
+	; (for-each skip-sense
+	(for-each record-sense
 		(word-inst-get-senses word)
 	)
 )
