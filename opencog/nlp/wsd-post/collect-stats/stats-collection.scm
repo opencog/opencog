@@ -77,6 +77,7 @@ scm
 	; CREATE TABLE InflectMarginal (
 	;    inflected_word TEXT NOT NULL UNIQUE,
 	;    count FLOAT,
+	;    obscnt INT,
 	;    probability FLOAT )
 	;
 	(define (update-marginal-table i-word p-score)
@@ -86,7 +87,7 @@ scm
 				(string-append
 					"UPDATE " tbl-inflect-marginal " SET count = "
 					(number->string up-score)
-					" WHERE inflected_word = E'" i-word "'"
+					" , obscnt=obscnt+1 WHERE inflected_word = E'" i-word "'"
 				)
 			)
 		)
@@ -98,8 +99,8 @@ scm
 			)
 			update-proc
 			(string-append
-				"INSERT INTO " tbl-inflect-marginal " (inflected_word, count) VALUES (E'"
-				i-word "', " (number->string p-score) ")"
+				"INSERT INTO " tbl-inflect-marginal " (inflected_word, count, obscnt) VALUES (E'"
+				i-word "', " (number->string p-score) ", 1)"
 			)
 		)
 	)
@@ -111,6 +112,7 @@ scm
 	;    inflected_word TEXT NOT NULL,
 	;    disjunct TEXT NOT NULL,
 	;    count FLOAT,
+	;    obscnt INT,
 	;    cond_probability FLOAT
 	; );
 	;
@@ -120,7 +122,7 @@ scm
 				(string-append
 					"UPDATE " tbl-disjuncts " SET count = "
 					(number->string up-score)
-					" WHERE inflected_word = E'" i-word
+					" , obscnt=obscnt+1 WHERE inflected_word = E'" i-word
 					"' AND disjunct = '" disj-str "'"
 				)
 			)
@@ -133,8 +135,8 @@ scm
 			update-proc
 
 			(string-append
-				"INSERT INTO " tbl-disjuncts " (inflected_word, disjunct, count) VALUES (E'"
-				i-word "', '" disj-str "', " (number->string p-score) ")"
+				"INSERT INTO " tbl-disjuncts " (inflected_word, disjunct, count, obscnt) VALUES (E'"
+				i-word "', '" disj-str "', " (number->string p-score) ", 1)"
 			)
 		)
 	)
@@ -164,6 +166,7 @@ scm
 	;    word_sense TEXT NOT NULL,
 	;    inflected_word TEXT NOT NULL,
 	;    count FLOAT,
+	;    obscnt INT,
 	;    log_probability FLOAT,
 	;    log_cond_probability FLOAT
 	;
@@ -174,7 +177,7 @@ scm
 				(string-append
 					"UPDATE " tbl-sense-freq " SET count = "
 					(number->string up-score)
-					" WHERE word_sense = E'" w-sense
+					" , obscnt=obscnt+1 WHERE word_sense = E'" w-sense
 					"' AND inflected_word=E'" i-word "'")
 			)
 		)
@@ -186,8 +189,8 @@ scm
 			)
 			update-proc
 			(string-append
-				"INSERT INTO " tbl-sense-freq " (word_sense, inflected_word, count) VALUES (E'"
-				w-sense "', E'" i-word "', " (number->string p-score) ")"
+				"INSERT INTO " tbl-sense-freq " (word_sense, inflected_word, count, obscnt) VALUES (E'"
+				w-sense "', E'" i-word "', " (number->string p-score) ", 1)"
 			)
 		)
 	)
@@ -200,6 +203,7 @@ scm
 	;    inflected_word TEXT NOT NULL,
 	;    disjunct TEXT NOT NULL,
 	;    count FLOAT,
+	;    obscnt INT,
 	;    log_cond_probability FLOAT
 	; );
 	;
@@ -209,7 +213,7 @@ scm
 				(string-append
 					"UPDATE " tbl-dj-senses " SET count = "
 					(number->string up-score)
-					" WHERE word_sense = E'" w-sense
+					", obscnt=obscnt+1 WHERE word_sense = E'" w-sense
 					"' AND inflected_word = E'" i-word
 					"' AND disjunct = '" disj-str "'"
 				)
@@ -225,8 +229,8 @@ scm
 			update-proc
 
 			(string-append
-				"INSERT INTO " tbl-dj-senses " (word_sense, inflected_word, disjunct, count) VALUES (E'"
-				w-sense "', E'" i-word "', '" disj-str "', " (number->string p-score) ")"
+				"INSERT INTO " tbl-dj-senses " (word_sense, inflected_word, disjunct, count, obscnt) VALUES (E'"
+				w-sense "', E'" i-word "', '" disj-str "', " (number->string p-score) ", 1)"
 			)
 		)
 	)
@@ -259,10 +263,6 @@ scm
 ; into the database. This is the "full" routine, in that it updates
 ; the word, word-sense and sense-disjunct tables.
 ;
-; Note that the current implementation will also record negative sense
-; score -- i.e. the score is negative when we're quite sure the sense
-; assignment is wrong.
-;
 ; Arguments:
 ; word  - word instance
 ; iword - inflected word
@@ -274,13 +274,16 @@ scm
 	; Skip over any senses which have negative scores
 	(define (do-skip-sense sense)
 		(let ((sense-score (word-inst-sense-score word sense)))
-			(if (<= 0.0 sense-score)
+			(if (< 0.01 sense-score)
 				(ldj-process-one-sense iword djstr parse-score sense sense-score)
 			)
 		)
 	)
 
 	; Do not skip any senses .. go ahead and subtract negative values!
+	; Well, this is a bad idea, actually. Negative sense assignments doesn't
+	; necessarily mean that they're wrong -- only that they're weakly 
+	; supported by other nodes. 
 	(define (record-sense sense)
 		(let ((sense-score (word-inst-sense-score word sense)))
 			(ldj-process-one-sense iword djstr parse-score sense sense-score)
@@ -289,7 +292,7 @@ scm
 
 	; loop over all of the word-senses associated with this word.
 	; (for-each skip-sense
-	(for-each record-sense
+	(for-each do-skip-sense
 		(word-inst-get-senses word)
 	)
 )
@@ -325,6 +328,9 @@ scm
 ;
 (define (ldj-process-parse parse-node)
 	(let ((word-list (parse-get-words parse-node)))
+		; (display "Starting new parse\n")
+		; (display word-list)
+		; (newline)
 		(for-each
 			(lambda (word) (ldj-process-disjunct word parse-node))
 			word-list

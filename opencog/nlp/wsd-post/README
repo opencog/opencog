@@ -686,7 +686,7 @@ due to following problems:
    In fact, MFS seems to provide a very strong WSD signal.
 -- Recent link-grammar changes have changed subscripts, making old 
    table obsolete. 
--- Should not record triples from sentences which have unsed words
+-- Should not record triples from sentences which have unused words
    in the parse. Current plan is to avoid these by assigning a parse
    rank of 0.0 to these sentences -- this seems like the easiest 
    solution. Its currently implemented in the relex script
