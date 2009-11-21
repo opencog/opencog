@@ -13,8 +13,11 @@ namespace opencog {
 class Sweep
 {
 	private:
-		int total_labels;
+		std::set<Handle> maxgraph;
+		std::set<Handle> curgraph;
 		bool mark_word(Handle h);
+		bool start_mark_sense(Handle h);
+		bool mark_sense(Handle h);
 	public:
 		void sweep_parse(Handle);
 };
@@ -32,27 +35,57 @@ using namespace opencog;
 void sweep_parse(Handle h)
 {
 	total_labels = 0;
+	maxgraph.clear();
 	foreach_word_instance(h, &Sweep::mark_word, this);
 }
 
 /**
  * walk over the entire connected graph for this word.
  */
-bool Sweep::mark_word(Handle h)
+bool Sweep::mark_word(Handle wordinst)
 {
-	// Find the part-of-speech for this word instance.
-	std::string word_inst_pos = get_part_of_speech(h);
+	curgraph.clear();
+	foreach_word_sense_of_inst(wordinst, 
+	                        &Sweep::start_mark_sense, this);
+	return false;
+}
 
-	// Reject some unwanted parts-of-speech.
-	if (0 == word_inst_pos.compare("")) return false;
-	if (0 == word_inst_pos.compare("WORD")) return false;
-	if (0 == word_inst_pos.compare("det")) return false;
-	if (0 == word_inst_pos.compare("particle")) return false;
-	if (0 == word_inst_pos.compare("prep")) return false;
-	if (0 == word_inst_pos.compare("punctuation")) return false;
+/**
+ * Starting at this sense, walk and mark all connected senses.
+ */
+bool Sweep::start_mark_sense(Handle sense, Handle edge)
+{
+	// Have we already visited this node? if so, try the next sense.
+	if(maxgraph.end() != maxgraph.find(sense)) return false;
 
-	Handle lemma_h = get_lemma_of_word_instance(h);
-	foreach_dict_word_sense_pos(lemma_h, word_inst_pos,
-	                        &MihalceaLabel::annotate_word_sense, this);
+	// Hmm. We've never seen this sense before. Find the graph that
+	// its connected to.
+	curgraph.clear();
+
+	// Walk the entire connected component
+	foreach_sense_edge(sense, &Sweep::mark_sense, this);
+
+	if (curgraph.size() <= maxgraph.size())
+	{
+		// delete all senses and edges in currgraph
+	}
+	else
+	{
+		// delete all senses and edges in maxgraph
+		// Save the new maxgraph
+		maxgraph = curgraph;
+	}
+	
+	return false;
+}
+
+/**
+ * Recursive walk to all attached senses
+ */
+bool Sweep::mark_sense(Handle sense, Handle edge)
+{
+	if (curgraph.end() != curgraph.find(sense)) return false;
+	curgraph.insert(sense);
+	foreach_sense_edge(sense, &Sweep::mark_sense, this);
 	return false;
 }

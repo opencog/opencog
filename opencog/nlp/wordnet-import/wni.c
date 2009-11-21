@@ -438,6 +438,8 @@ main (int argc, char * argv[])
 	exit(0);
 #endif
 
+	// XXX ?? is there some reason these are not "DefinedLinguisticConceptNode" ??
+	// I'd think they should be, right ... ? Is this a bug ??
 #ifdef GENERATE_NMXML
 	printf("data\n");
 	printf("<list>\n");
