@@ -1,7 +1,7 @@
 /*
  * ReportRank.cc
  *
- * Implements the PageRank graph centrality algorithm for word-senses.
+ * Report most likely word-senses for each word.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -40,6 +40,20 @@ void ReportRank::report_sentence(Handle h)
 }
 
 
+/**
+ * Renormalize the distribution of senses for this document, store result
+ * in the truth values.
+ *
+ * After running the graph algo, scores will have flowed to different
+ * senses, with many senses getting a strong boost, others loosing out.
+ * This code renormalizes the scores so that they are expressed as a 
+ * deviation from a mean.  This is done in two (conceptual) steps:
+ *   1) renormalize so that the mean score is 1.0
+ *   2) subtract 1.0 from all scores.
+ * The result of doing this is that unlikely senses get netgative
+ * scores, likely senses get strong positive scores.  It appears that 
+ * "typical" distributions seem to go from -0.8 to +3.5 or there-abouts.
+ */
 void ReportRank::report_document(const std::deque<Handle> &parse_list)
 {
 	normalization = 0.0;
@@ -60,7 +74,10 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 		normalization, sense_count, word_count);
 #endif
 
-	normalization = 1.0 / normalization;
+	// Compute the average score per sense. Then renormalize 
+	// according to deviations from this average.
+	double average = normalization / sense_count;
+	normalization = 1.0 / average;
 
 	for (i = parse_list.begin(); i != parse_list.end(); i++)
 	{
@@ -75,7 +92,7 @@ void ReportRank::report_document(const std::deque<Handle> &parse_list)
 }
 
 /**
- * For each parse, walk over each word.
+ * Same as report_document, but done only for one parse
  */
 void ReportRank::report_parse(Handle h)
 {
@@ -89,7 +106,10 @@ void ReportRank::report_parse(Handle h)
 	choosen_sense_count = 0.0;
 	foreach_word_instance(h, &ReportRank::count_word, this);
 
-	normalization = 1.0 / normalization;
+	// Compute the average score per sense. Then renormalize 
+	// according to deviations from this average.
+	double average = normalization / sense_count;
+	normalization = 1.0 / average;
 	foreach_word_instance(h, &ReportRank::renorm_word, this);
 }
 
@@ -139,7 +159,7 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	Link *l = dynamic_cast<Link *>(TLB::getAtom(sense_link_h));
 	double score = l->getTruthValue().getCount();
 
-	score *= normalization * sense_count;
+	score *= normalization;
 	score -= 1.0;
 
 	// Update the truth value, it will store deviation from average.

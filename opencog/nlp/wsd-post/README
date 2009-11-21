@@ -680,15 +680,18 @@ due to following problems:
    in equal-weight sense tags to be stored. These cause huge artificial
    bumps in the entropy-vs (word,disjunct) distribution.
 -- Islands can be tagged using most-frequent sense. (MFS)
+   (Alternately, islands can be removed entirely -- this will be the 
+   final strategy -- and is now done in Sweep.cc)
 -- Accuracy can be improved by weighting with most-frequent sense.
    In fact, MFS seems to provide a very strong WSD signal.
+   Plan: record, in a separate table, the MFS results.
 -- recent link-grammar changes have changed subscripts, making old 
    table obsolete. 
 -- should not record triples from sentences which have unsed words
    in the parse.
 -- need to make sure the wsd is using only one word per sysnet ....
    I think this is OK right now, .. but having two from the same 
-   synset dilutes the strneght going to the nodes and wrecks the data.
+   synset dilutes the strength going to the nodes and wrecks the data.
 -- Also, maybe need to tweak the sense-similarity scores?  i.e. are
    the sense-similarity scores invariant under synsets? This is not
    obvious ...
