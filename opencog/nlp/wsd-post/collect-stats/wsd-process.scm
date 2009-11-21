@@ -52,6 +52,7 @@ scm
 			(system (string-join (list "echo done delete: \"" filename "\"")))
 			(system "date")
 			(set! cnt (+ cnt 1))
+			(system (string-join (list "echo done file: \"" (object->string cnt) "\"")))
 		)
 	)
 	

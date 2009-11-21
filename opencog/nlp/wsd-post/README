@@ -684,6 +684,7 @@ due to following problems:
    final strategy -- and is now done in Sweep.cc)
 -- Accuracy can be improved by weighting with most-frequent sense.
    In fact, MFS seems to provide a very strong WSD signal.
+   (This will not be used for tagging).
 -- Recent link-grammar changes have changed subscripts, making old 
    table obsolete. 
 -- Should not record triples from sentences which have unused words
@@ -695,8 +696,8 @@ due to following problems:
    I think this is OK right now, .. but having two from the same 
    synset dilutes the strength going to the nodes and wrecks the data.
 -- Also, maybe need to tweak the sense-similarity scores?  i.e. are
-   the sense-similarity scores invariant under synsets? This is not
-   obvious ...
+   the sense-similarity scores invariant under synsets? That this 
+   is correctly done/stored is not obvious ...
 
 -- See the draft journal paper for more info, see also the lexat
    project and the src/lexat/senseval/README file for a complimentary 
