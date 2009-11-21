@@ -17,6 +17,13 @@ scm
 (define db-connection
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
+;; Configureable SQL table names
+(define tbl-inflect-marginal "InflectMarginal")
+(define tbl-disjuncts  "Disjuncts")
+(define tbl-sense-freq "WordSenseFreq")
+(define tbl-dj-senses  "DisjunctSenses")
+
+
 ; ---------------------------------------------------------------------
 ; Generic SQL table update framework. Given some data, we want to 
 ; create a new database record, if it does not already exist; otherwise
@@ -72,7 +79,7 @@ scm
 		(define (update-proc srow)
 			(let ((up-score (+ p-score (assoc-ref srow "count"))))
 				(string-append
-					"UPDATE InflectMarginal SET count = "
+					"UPDATE " tbl-inflect-marginal " SET count = "
 					(number->string up-score)
 					" WHERE inflected_word = E'" i-word "'"
 				)
@@ -81,12 +88,12 @@ scm
 
 		(sql-update-table
 			(string-append
-				"SELECT * FROM InflectMarginal WHERE inflected_word=E'"
+				"SELECT * FROM " tbl-inflect-marginal " WHERE inflected_word=E'"
 				i-word "'"
 			)
 			update-proc
 			(string-append
-				"INSERT INTO InflectMarginal (inflected_word, count) VALUES (E'"
+				"INSERT INTO " tbl-inflect-marginal " (inflected_word, count) VALUES (E'"
 				i-word "', " (number->string p-score) ")"
 			)
 		)
@@ -106,7 +113,7 @@ scm
 		(define (update-proc srow)
 			(let ((up-score (+ p-score (assoc-ref srow "count"))))
 				(string-append
-					"UPDATE Disjuncts SET count = "
+					"UPDATE " tbl-disjuncts " SET count = "
 					(number->string up-score)
 					" WHERE inflected_word = E'" i-word
 					"' AND disjunct = '" disj-str "'"
@@ -115,13 +122,13 @@ scm
 		)
 
 		(sql-update-table
-			(string-append "SELECT * FROM Disjuncts WHERE inflected_word=E'"
+			(string-append "SELECT * FROM " tbl-disjuncts " WHERE inflected_word=E'"
 				i-word "' AND disjunct = '" disj-str "'"
 			)
 			update-proc
 
 			(string-append
-				"INSERT INTO Disjuncts (inflected_word, disjunct, count) VALUES (E'"
+				"INSERT INTO " tbl-disjuncts " (inflected_word, disjunct, count) VALUES (E'"
 				i-word "', '" disj-str "', " (number->string p-score) ")"
 			)
 		)
@@ -160,7 +167,7 @@ scm
 		(define (update-proc srow)
 			(let ((up-score (+ p-score (assoc-ref srow "count"))))
 				(string-append
-					"UPDATE WordSenseFreq SET count = "
+					"UPDATE " tbl-sense-freq " SET count = "
 					(number->string up-score)
 					" WHERE word_sense = E'" w-sense
 					"' AND inflected_word=E'" i-word "'")
@@ -169,12 +176,12 @@ scm
 
 		(sql-update-table
 			(string-append
-				"SELECT * FROM WordSenseFreq WHERE word_sense=E'" 
+				"SELECT * FROM " tbl-sense-freq " WHERE word_sense=E'" 
 				w-sense "' AND inflected_word=E'" i-word "'"
 			)
 			update-proc
 			(string-append
-				"INSERT INTO WordSenseFreq (word_sense, inflected_word, count) VALUES (E'"
+				"INSERT INTO " tbl-sense-freq " (word_sense, inflected_word, count) VALUES (E'"
 				w-sense "', E'" i-word "', " (number->string p-score) ")"
 			)
 		)
@@ -195,7 +202,7 @@ scm
 		(define (update-proc srow)
 			(let ((up-score (+ p-score (assoc-ref srow "count"))))
 				(string-append
-					"UPDATE DisjunctSenses SET count = "
+					"UPDATE " tbl-dj-senses " SET count = "
 					(number->string up-score)
 					" WHERE word_sense = E'" w-sense
 					"' AND inflected_word = E'" i-word
@@ -205,7 +212,7 @@ scm
 		)
 
 		(sql-update-table
-			(string-append "SELECT * FROM DisjunctSenses "
+			(string-append "SELECT * FROM " tbl-dj-senses " "
 				"WHERE word_sense=E'" w-sense 
 				"' AND inflected_word=E'" i-word
 				"' AND disjunct = '" disj-str "'"
@@ -213,7 +220,7 @@ scm
 			update-proc
 
 			(string-append
-				"INSERT INTO DisjunctSenses (word_sense, inflected_word, disjunct, count) VALUES (E'"
+				"INSERT INTO " tbl-dj-senses " (word_sense, inflected_word, disjunct, count) VALUES (E'"
 				w-sense "', E'" i-word "', '" disj-str "', " (number->string p-score) ")"
 			)
 		)
