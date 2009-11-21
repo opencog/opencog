@@ -107,18 +107,11 @@ void SenseRank::init_parse(Handle h)
 }
 
 /**
- * For each parse, find some place to start. There is some chance
- * that the graph may have multiple, disconnected components (which 
- * is bad, but we have no strategy for handling this yet), and so
- * we'll give it a whirl, starting at each word. That way, at least
- * we'll sample each disconnected component. 
- *
- * Almost all disconnected components are single senses, or simple
- * cycles. Eliminate these, and most of the problem is taken care of.
- *
- * Here's a simple algo to use: start at every node, walk resurisvely.
- * Use this to find the largest connected component. Remove all edges
- * that are not a part of the connected component.
+ * For each parse, find some place to start. The graph should not have
+ * any disconnected components (this has been taken care of by the 
+ * Sweep code).  There might still be some weakly-connected components
+ * that fail to mix well. So, just to make sure things are fair, we will
+ * iterate for a while, starting at every sense of every word in the parse.
  */
 void SenseRank::rank_parse(Handle h)
 {
@@ -135,9 +128,7 @@ bool SenseRank::rank_parse_f(Handle h)
 }
 
 /**
- * For every word sense, try walking the graph from there. Some word
- * senses might be disconnected from the main graph, but we don't know
- * a-priori which ones, so have to try them all.
+ * For every word sense, try walking the graph from there. 
  */
 bool SenseRank::start_word(Handle h)
 {
@@ -150,26 +141,13 @@ bool SenseRank::start_word(Handle h)
 }
 
 /**
- * Walk randomly over a connected component. 
+ * Walk randomly over a connected component, applying the 
+ * page-rank algo as we walk. Stop iterating when all values
+ * are sufficiently converged.
  */
 bool SenseRank::start_sense(Handle word_sense_h,
                             Handle sense_link_h)
 {
-	// Make sure that this word sense is actually connected to something.
-	// If its not, return, and better luck next time.
-	edge_sum = 0.0;
-	foreach_sense_edge(sense_link_h, &SenseRank::inner_sum, this);
-	if (edge_sum < 1.0e-10)
-	{
-#ifdef DEBUG
-		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
-		printf ("; SenseRank disconnnected sense %s\n", n->getName().c_str());
-#endif
-		// Well, if its a dead edge, lets delete it, so that we don't
-		// waste time here again.
-		atomspace().removeAtom(sense_link_h);
-		return false;
-	}
 #ifdef DEBUG
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 	printf ("; SenseRank start at %s\n", n->getName().c_str());
