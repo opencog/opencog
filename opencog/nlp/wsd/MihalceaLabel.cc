@@ -67,7 +67,7 @@ bool MihalceaLabel::annotate_parse_f(Handle h)
 }
 
 /**
- * Anotate the given word with every possible word sense, given its 
+ * Annotate the given word with every possible word sense, given its 
  * part-of-speech. The argument handle is assumed to point at a specific 
  * word-instance in some parse.
  */
