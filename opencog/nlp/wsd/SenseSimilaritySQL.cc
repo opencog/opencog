@@ -29,6 +29,8 @@
 
 using namespace opencog;
 
+// #define DEBUG
+
 class SenseSimilaritySQL::Response
 {
 	public:

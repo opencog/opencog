@@ -38,10 +38,11 @@ large, complex databases.  The WSD process is summarized here:
    http://gnucash.org/linas/nlp/ which contains several cpu-years
    worth of parsed data. 
  * Run the scripts in the wordnet-import directory to load opencog
-   with basic wordnet relationships.
+   with basic wordnet relationships. Can save soe time by loading,
+   then saving to sql database. Next time, reload from the sql 
+   database, its much quicker.  (sql-open nlp )
  * Modify A.scm to change the hard-coded paths to point at the actual
    location of the data.
- * Run "nlp/scm/load-nlp.sh" to load NLP and WSD-related scheme utilities. 
  * Get to the scheme prompt, and run "(do-wsd 20)". This will run the
    current word-sense disambiguation code one 20 files, and will populate
    the databases with statistical results.  Caution; this is extremely 

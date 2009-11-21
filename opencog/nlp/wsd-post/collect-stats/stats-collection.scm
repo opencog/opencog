@@ -18,10 +18,15 @@ scm
 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
 ;; Configureable SQL table names
-(define tbl-inflect-marginal "InflectMarginal")
-(define tbl-disjuncts  "Disjuncts")
-(define tbl-sense-freq "WordSenseFreq")
-(define tbl-dj-senses  "DisjunctSenses")
+; (define tbl-inflect-marginal "InflectMarginal")
+; (define tbl-disjuncts  "Disjuncts")
+; (define tbl-sense-freq "WordSenseFreq")
+; (define tbl-dj-senses  "DisjunctSenses")
+
+(define tbl-inflect-marginal "NewInflectMarginal")
+(define tbl-disjuncts  "NewDisjuncts")
+(define tbl-sense-freq "NewWordSenseFreq")
+(define tbl-dj-senses  "NewDisjunctSenses")
 
 
 ; ---------------------------------------------------------------------

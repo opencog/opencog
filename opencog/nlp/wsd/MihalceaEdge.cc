@@ -30,6 +30,7 @@
 
 #define DEBUG
 // #define DETAIL_DEBUG
+// #define SENSE_DETAIL_DEBUG
 // #define LINK_DEBUG
 
 using namespace opencog;
@@ -177,7 +178,12 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
 {
 	first_word_sense = first_word_sense_h;
 
-	// printf("first sense %s\n", sense->getName().c_str());
+#ifdef SENSE_DETAIL_DEBUG
+	Node *f = dynamic_cast<Node *>(TLB::getAtom(first_word_sense_h));
+	const std::string &fn = f->getName();
+	printf ("; First word sense: %s\n", fn.c_str());
+#endif
+
 	// Get the handle of the link itself ...
 	first_sense_link = first_sense_link_h;
 
@@ -212,7 +218,11 @@ bool MihalceaEdge::sense_of_first_inst(Handle first_word_sense_h,
 bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
                                         Handle second_sense_link)
 {
-	// printf("second sense %s!\n", sense->getName().c_str());
+#ifdef SENSE_DETAIL_DEBUG
+	Node *f = dynamic_cast<Node *>(TLB::getAtom(second_word_sense_h));
+	const std::string &fn = f->getName();
+	printf ("; Second word sense: %s\n", fn.c_str());
+#endif
 
 	// Get the similarity between the two word senses out of the
 	// cache (if it exists).

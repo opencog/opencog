@@ -10,12 +10,27 @@ The actual SQL tables are defined and created by a different project
 (sorry!), the 'lexical attraction' package on launchpad.  See, in
 particular, src/sql/disjunct.sql from that package.
 
+HowTo
+-----
+Steps to run WSD:  (See also detailed instuctions in main NLP readme)
+0) Parse text, create CFF files. Modify A.scm to specify the location
+   of these files.
+1) create the database "lexat". If using a different name, edit 
+   stats-collection.scm to suit.
+2) create the tables by running src/sql/disjunct.sql from the 
+   lexat package.
+3) Start opencog: opencog/server/cogserver -c ../lib/opencog-wsd.conf
+4) sql-load
+5) ./load-wsd.sh
+6) telnet localhost 17001 and get the scheme shell.
+7) issue scheme command (do-wsd 1)  this will process 1 file.
+
 
 Processing files
 ----------------
 The following scripts are meant to run within the OpenCog scheme
 interpreter (as they manipulate OpenCog atoms directly). They should
-be manually loaded with the "load-nlp.sh" shell script.
+be manually loaded with the "load-wsd.sh" shell script.
 
  * stats-collection.scm: Look for documents for which word-sense
    disambiguation has been performed; use these to update a database
