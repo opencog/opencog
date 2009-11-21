@@ -684,12 +684,14 @@ due to following problems:
    final strategy -- and is now done in Sweep.cc)
 -- Accuracy can be improved by weighting with most-frequent sense.
    In fact, MFS seems to provide a very strong WSD signal.
-   Plan: record, in a separate table, the MFS results.
--- recent link-grammar changes have changed subscripts, making old 
+-- Recent link-grammar changes have changed subscripts, making old 
    table obsolete. 
--- should not record triples from sentences which have unsed words
-   in the parse.
--- need to make sure the wsd is using only one word per sysnet ....
+-- Should not record triples from sentences which have unsed words
+   in the parse. Current plan is to avoid these by assigning a parse
+   rank of 0.0 to these sentences -- this seems like the easiest 
+   solution. Its currently implemented in the relex script
+   relex/src/perl/cff-to-opencog.pl
+-- Need to make sure the wsd is using only one word per sysnet ....
    I think this is OK right now, .. but having two from the same 
    synset dilutes the strength going to the nodes and wrecks the data.
 -- Also, maybe need to tweak the sense-similarity scores?  i.e. are

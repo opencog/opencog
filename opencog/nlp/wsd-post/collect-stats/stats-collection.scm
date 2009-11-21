@@ -4,7 +4,7 @@ scm
 ;
 ; Update the SQL database with counts of disjuncts, word senses, etc.
 ;
-; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 (use-modules (srfi srfi-1))
 (use-modules (dbi dbi))
@@ -238,6 +238,8 @@ scm
 	; (display sense-score)
 	; (display "\n")
 
+	; Tables will store the product of the parse-ranking times the 
+	; word-sense score.
 	(let ((w-sense (cog-name sense))
 			(tot-score (* parse-score sense-score))
 		)
@@ -291,7 +293,7 @@ scm
 ; Process a disjunct -- stuff into database, whatever.
 (define (ldj-process-disjunct word parse-node)
 
-	; return the parse score for this parse.
+	; Return the parse score for this parse.
 	(define (parse-get-score pn)
 		(assq-ref (cog-tv->alist (cog-tv pn)) 'confidence)
 	)
