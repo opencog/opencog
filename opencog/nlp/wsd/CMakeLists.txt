@@ -21,6 +21,7 @@ ADD_LIBRARY (wsd SHARED
 	SenseRank.cc
 	SenseSimilarityLCH.cc
 	SenseSimilaritySQL.cc
+	Sweep.cc
 	WordSenseProcessor.cc
 )
 
