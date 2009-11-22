@@ -90,10 +90,12 @@ Implementation:
    a key part of the seme-abstraction process is to normalize across 
    these.
 
-Worked Example
---------------
+Worked Example -- Word Pairs
+----------------------------
 Here, we work out the details for a given example: high mutual-information
-word-pairs -- that is, word-pairs frequently observed together.  
+word-pairs -- that is, word-pairs frequently observed together.  There
+are three steps involved: counting the frequency of word-pairs, computing
+the mutual information, and then, applying the results.
 
 
 Worked Example: Counting
@@ -163,15 +165,18 @@ doesn't match any accidentally similar hypergraphs.
                LemmaLink
                   VariableNode "$wi-b"
                   VariableNode "$word-b"
-            CountLink
-               VariableNode "$word-a"
-               VariableNode "$word-b"
+            CountLink    ;; should be EvaluationLink, actually ... 
+               DefinedPatternNode "word-pairs"  ; Maybe a DefinedRelationshipNode ??
+               ListLink
+                  VariableNode "$word-a"
+                  VariableNode "$word-b"
 
 Once the pattern has been recognized, we need to maintain a count of
 the number of times that it's been seen.  For this, another new link
 type is introduced: the CountLink.  Above, it is used as the implicand
 of the ImplicationLink.  Upon running the the implication, the count
-on the implicand should be incremented.
+on the implicand should be incremented. In this example, CountLink
+inherits from EvaluationLink.
 
 (TODO: it might be better to not have a new count-link type, and 
 instead, have the pattern matcher always perform counting, by using
@@ -185,10 +190,60 @@ matcher to find the above pattern, and increment pattern counts.
 Example: Computing the mutual information
 -----------------------------------------
 Once some fairly large number of sentences have been input, the 
-mutual information must be computed.
+mutual information must be computed. See the section called "Lexical
+Attraction" at the bottom for a defintion.  The conditional 
+probabilities can be obtained by running three different patterns,
+to obtain n(x,*), n(*,y) and n(*,*)
 
-Computing 
-Now what?
+For example, the count n(x,*) for x==bicycle is obtained by matching
+the following:
+
+      TemplateLink 
+         TypedVariableLink
+            VariableNode "$word-b"
+            VariableTypeNode "WordNode"
+         ImplicationLink
+            EvaluationLink
+               DefinedPatternNode "word-pairs"
+               ListLink
+                  WordNode "bicycle"
+                  VariableNode "$word-b"
+            EvaluationLink   ;; CountLink, actually ...
+               DefinedPatternNode "word-pairs"
+               ListLink
+                  WordNode "bicycle"
+                  StarNode "match-any"
+
+The StarNode is introduced here to act as a place-holder. It prevents
+an accidental pattern-match to WordNode during the pattern search.
+
+Example: Applying the results
+-----------------------------
+A basic premise of the above is that high MI word pairs correspond to
+semantic concepts. Thus, for example, a "bicycle helmet" is a specific
+kind of thing.  From the linguistic construction _nn, we know that it
+is a kind-of helmet.  We might eventual learn other thigs about it.
+In order to make other manipulations simpler, and to be able to more
+easily find related patterns, we want to represent this as a single
+node. Provisionally, it seems like the idea of a SemeNode (see 
+nlp/seme/README for details) would be the best representation.
+Thus, one might construct something like:
+
+      SemeLink
+         SemeNode "bicycle helmet"
+         ListLink
+            WordNode "bicycle"
+            WordNode "helmet"
+
+... or something like that. This is an incompletely-worked example, 
+because that's not the current focus, right .. ??  Need something 
+more motivated, e.g. synonymous sentences ... XXX TODO finish me.
+ 
+
+Worked example: DIRT, USP, synonymous phrases
+----------------------------------------------
+In this example, redo Lin's DIRT and/or Domingos USP.
+
 
 
 
