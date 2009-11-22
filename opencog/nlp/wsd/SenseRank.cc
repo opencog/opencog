@@ -18,6 +18,7 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
@@ -152,6 +153,17 @@ bool SenseRank::start_sense(Handle word_sense_h,
 	Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 	printf ("; SenseRank start at %s\n", n->getName().c_str());
 #endif
+
+	if (TLB::isInvalidHandle(sense_link_h))
+	{
+		// This can't/shouldn't happen -- it would mean that we have
+		// arrived at a sense node that has no connected edges.
+		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+		const char *s = "";
+		if (n) s = n->getName().c_str();
+		logger().error("SenseRank: bad starting sense for word: %s", s);
+		return false;
+	}
 
 	// Walk randomly over the connected component 
 	do
@@ -292,9 +304,18 @@ Handle SenseRank::pick_random_edge(Handle h)
 	foreach_sense_edge(h, &SenseRank::inner_sum, this);
 
 	// randy needs to be exceeeded for an edge to be choosen.
+	next_sense = Handle::UNDEFINED;
 	randy *= edge_sum;
 	edge_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::random_sum, this);
+
+	if (Handle::UNDEFINED == next_sense)
+	{
+		// This can't/shouldn't happen -- it would mean that we have
+		// arrived at a sense node that has no connected edges.
+		logger().error("SenseRank: failed to find a random edge!");
+		next_sense = h;
+	}
 	return next_sense;
 }
 
