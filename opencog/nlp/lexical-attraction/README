@@ -20,10 +20,20 @@ Proof of concept:
 
 Core idea:
 -- Synthesize the above four points. That is, the Yuret work gives 
-   a very basic definition of mutual information for word pairs.
-   Lin shows how a more general notion can be put to effective use.
-   Domingos points out that thinking about logical patterns in general
-   is the correct approach.
+   a very basic definition of mutual information (MI) for word pairs.
+   Lin shows how a more general notion of MI can be put to effective
+   use.  Domingos points out that thinking about logical formulas
+   (ungrounded patterns) in general is the correct approach.
+
+-- A key point from Domingos is the focus on "ungrounded formulas". 
+   Recast in terms of hypergraphs, the idea is to work with "pattern
+   templates" -- smaller hypergraphs containing variable nodes. These
+   are the hypegraph analogs of (ungrounded) logical formulas. One
+   then looks for pattern matches to these templates -- i.e. for 
+   "groundings" of the templates. Domingos says that the resulting 
+   matches are used to define a partition function, and a probability.
+   The idea here is to instead use mutual information to find frequent,
+   semantically meaningful patterns.
 
 -- A key difficulty with the Domingos approach is it's wedding to 
    Markov networks, which have difficulty being tractable (i.e. a
@@ -33,12 +43,12 @@ Core idea:
    needed are the ability to recognize patterns, and to perform 
    clustering when these are found.  Poon uses the machinery of
    Markov nets to provide a measure of when the clustering should be 
-   performed.  Perhaps instead, a simpler measure, such as MI, could
-   serve just as well.
+   performed.  The hypothesis here is that perhaps, instead, a simpler
+   measure, such as MI, could serve just as well. 
 
 -- To summarize: look for patterns that have high mutual information.
    Do so hierarchically. Perform clustering to find patterns with
-   synonymous meanings.
+   synonymous meanings.  
 
 
 Implementation:
@@ -68,6 +78,69 @@ Implementation:
    a key part of the seme-abstraction process is to normalize across 
    these.
 
+Worked Example
+--------------
+Here, we work out the details for a given example: high mutual-information
+word-pairs -- that is, word-pairs frequently observed together.  The 
+primary complication is that the opencog input is in terms of word-instances
+whereas we are interested in lemma-pairs.  Consider the word pair 
+"bicycle helmet", which we might expect to have a high MI. This word 
+pair will typically be observed via the _nn (noun-modifier) relation:
+
+      ; _nn (<<helmet>>, <<bicycle>>) 
+      EvaluationLink (stv 1.0 1.0)
+         DefinedLinguisticRelationshipNode "_nn"
+         ListLink
+            WordInstanceNode "helmet@9a282977-c5b5-452f-b2e4-b4f6f08e39a7"
+            WordInstanceNode "bicycle@25211c6e-8d78-40d5-ae2e-92ebbf181ab2"
+
+But we are interested in the lemma forms:
+
+      LemmaLink (stv 1.0 1.0)
+         WordInstanceNode "bicycle@25211c6e-8d78-40d5-ae2e-92ebbf181ab2"
+         WordNode "bicycle"
+      LemmaLink (stv 1.0 1.0)
+         WordInstanceNode "helmet@9a282977-c5b5-452f-b2e4-b4f6f08e39a7"
+         WordNode "helmet"
+
+The template pattern to recognize the above is shown below.  Note that
+the TemplateLink is a subtype of a VariableScopeLink. (see 
+http://opencog.org/wiki/VariableScopeLink for details).  Note the strong
+typing used here. The strong typing is probably not strictly necessary,
+but is useful for making sure the pattern template doesn't match any
+accidentally similar hypergraphs.
+
+      TemplateLink 
+         ListLink
+            TypedVariableLink
+               VariableNode "$rel-var"
+               VariableTypeNode "DefinedLinguisticRelationshipNode"
+            TypedVariableLink
+               VariableNode "$wi-a"
+               VariableTypeNode "WordInstanceNode"
+            TypedVariableLink
+               VariableNode "$wi-b"
+               VariableTypeNode "WordInstanceNode"
+            TypedVariableLink
+               VariableNode "$word-a"
+               VariableTypeNode "WordNode"
+            TypedVariableLink
+               VariableNode "$word-b"
+               VariableTypeNode "WordNode"
+         AndLink
+            EvaluationLink
+               VariableNode "$rel-var"
+               ListLink
+                  VariableNode "$wi-a"
+                  VariableNode "$wi-b"
+            LemmaLink
+               VariableNode "$wi-a"
+               VariableNode "$word-a"
+            LemmaLink
+               VariableNode "$wi-b"
+               VariableNode "$word-b"
+
+Now what?
 
 
 

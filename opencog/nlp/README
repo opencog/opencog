@@ -6,7 +6,8 @@
 This directory contains a miscellany of natural language processing
 tools (for the English language). Current focus is on establishing
 statistical correlations between word senses and grammatical constructions,
-on reference resolution, and on reasoning with prepositional relations.
+on reference resolution, and on reasoning with prepositional relations,
+and most importantly, on finding semantically important patterns.
 
 How-To
 ======
