@@ -156,12 +156,29 @@ bool SenseRank::start_sense(Handle word_sense_h,
 
 	if (TLB::isInvalidHandle(sense_link_h))
 	{
-		// This can't/shouldn't happen -- it would mean that we have
-		// arrived at a sense node that has no connected edges.
+		// This can't/shouldn't happen -- 
 		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
 		const char *s = "";
 		if (n) s = n->getName().c_str();
 		logger().error("SenseRank: bad starting sense for word: %s", s);
+		return false;
+	}
+
+	// Make sure that this sense is connected to others by sense-pair
+	// edges.  Under rare circumstances, it might not be -- for example,
+	// the result of thining may have left the sense disconnected.  This
+	// sense would not have been culled by teh sweep routine, since it
+	// was connected before the thining.  Bascially, if we find one of
+	// these, we ignore it.
+	next_sense = Handle::UNDEFINED;
+	foreach_sense_edge(sense_link_h, &SenseRank::inner_sum, this);
+	if (TLB::isInvalidHandle(next_sense))
+	{
+		// This can't/shouldn't happen -- 
+		Node *n = dynamic_cast<Node *>(TLB::getAtom(word_sense_h));
+		const char *s = "";
+		if (n) s = n->getName().c_str();
+		logger().info("SenseRank: disconnected sense: %s", s);
 		return false;
 	}
 
@@ -266,6 +283,7 @@ bool SenseRank::outer_sum(Handle sense_b_h, Handle hedge)
  */
 bool SenseRank::inner_sum(Handle sense_c_h, Handle hedge_bc)
 {
+	next_sense = sense_c_h;
 	Link *edge = dynamic_cast<Link *>(TLB::getAtom(hedge_bc));
 	double weight_to_b = edge->getTruthValue().getMean();
 	edge_sum += weight_to_b;
@@ -296,19 +314,22 @@ bool SenseRank::random_sum(Handle h, Handle hedge)
  */
 Handle SenseRank::pick_random_edge(Handle h)
 {
-	// get a random number between zero and one.
-	randy = ((double) rand()) / ((double) RAND_MAX);
-
 	// Get the total weight of the edges
 	edge_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::inner_sum, this);
 
-	// randy needs to be exceeeded for an edge to be choosen.
+	// get a random number between zero and one.
+	randy = ((double) rand()) / ((double) RAND_MAX);
+
+	// randy needs to be exceeded for an edge to be choosen.
 	next_sense = Handle::UNDEFINED;
 	randy *= edge_sum;
 	edge_sum = 0.0;
 	foreach_sense_edge(h, &SenseRank::random_sum, this);
 
+	// The handle will still be undefined if h is a word-sense
+	// without any connected sense-pair-similarity edges. We
+	// should not ever see any of these ...
 	if (Handle::UNDEFINED == next_sense)
 	{
 		// This can't/shouldn't happen -- it would mean that we have
