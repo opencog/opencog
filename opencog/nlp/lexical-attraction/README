@@ -37,7 +37,8 @@ Core idea:
    serve just as well.
 
 -- To summarize: look for patterns that have high mutual information.
-   Do so hierarchically. Perform clustering .. err ... 
+   Do so hierarchically. Perform clustering to find patterns with
+   synonymous meanings.
 
 
 Implementation:

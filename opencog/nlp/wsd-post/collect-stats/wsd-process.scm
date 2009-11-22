@@ -1,4 +1,3 @@
-scm
 ;
 ; wsd-process.scm
 ; Work through a bunch of RelEx files that are in the compact-file-format,
@@ -63,6 +62,4 @@ scm
 
 (define (do-wsd num-to-do) (wsd-process-data input-filedir done-filedir num-to-do))
 
-.
-exit
 
