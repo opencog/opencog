@@ -28,7 +28,7 @@ Core idea:
 -- A key point from Domingos is the focus on "ungrounded formulas". 
    Recast in terms of hypergraphs, the idea is to work with "pattern
    templates" -- smaller hypergraphs containing variable nodes. These
-   are the hypegraph analogs of (ungrounded) logical formulas. One
+   are the hypergraph analogs of (ungrounded) logical formulas. One
    then looks for pattern matches to these templates -- i.e. for 
    "groundings" of the templates. Domingos says that the resulting 
    matches are used to define a partition function, and a probability.
@@ -37,7 +37,7 @@ Core idea:
 
 -- A key difficulty with the Domingos approach is it's wedding to 
    Markov networks, which have difficulty being tractable (i.e. a
-   seeming need to compute the parition function).  The work of Poon
+   seeming need to compute the partition function).  The work of Poon
    makes me wonder whether this is strictly necessary: rather, Poon 
    (indirectly, between the lines) suggests that maybe what is really 
    needed are the ability to recognize patterns, and to perform 
@@ -53,16 +53,16 @@ Core idea:
 
 Implementation:
 -- Look for certain kinds of patterns in the dependency parses as passed
-   into opencog. Make note of those that have high MI.
+   into OpenCog. Make note of those that have high MI.
 
 -- Key stumbling blocks: 
    In a dream world, we'd look for any and all possible patterns.
    In practice, we'd probably only look for a select few. 
    Step 1: do word-pairs, except this time, using the existing 
-   hypergraph respresentations.
+   hypergraph representations.
    Step 2: do synonymous phrases
 
--- Stumlbing block:
+-- Stumbling block:
    How to correctly define mutual-info for an arbitrary pattern?
 
 -- Key point:
@@ -77,10 +77,10 @@ Implementation:
    and just take it as a given, known fact.  (Other unrelated mechanisms
    could lead to the active destruction/forgetting of learned pattern.)
 
--- Stumlbing block:
+-- Stumbling block:
    Once a high-MI pattern has been identified, it needs to be tagged 
    in some way, such that the tag can be a stand-in for the pattern.
-   Why? So that hierarchical groupsing can be (more easily) discovered.
+   Why? So that hierarchical grouping can be (more easily) discovered.
    This seems to somehow be key.  So: how should this grouping be best
    represented as a hypergraph?
 
@@ -102,7 +102,7 @@ Worked Example: Counting
 ------------------------
 The first step for computing the mutual information for word-pairs is 
 counting -- we want to count how often certain words are observed
-together.  The primary complication is that the opencog representation
+together.  The primary complication is that the OpenCog representation
 of input text is in terms of word-instances whereas we are interested in
 lemma-pairs.  
 
@@ -127,7 +127,7 @@ But we are interested in the lemma forms:
          WordNode "helmet"
 
 The template pattern to recognize the above word-pair is shown below. 
-The actual patten recognition will be done by the query pattern matcher.
+The actual pattern recognition will be done by the query pattern matcher.
 To distinguish this from other uses, we invent a new TemplateLink, which
 derives from VariableScopeLink (http://opencog.org/wiki/VariableScopeLink)
 
@@ -180,7 +180,7 @@ inherits from EvaluationLink.
 
 (TODO: it might be better to not have a new count-link type, and 
 instead, have the pattern matcher always perform counting, by using
-a Composite truth value on the implicand, and having a CountTruuthValue
+a Composite truth value on the implicand, and having a CountTruthValue
 appearing in the composite.  This would allow for defacto counting for
 all uses of the pattern matcher, which is probably a good idea...)
 
@@ -191,7 +191,7 @@ Example: Computing the mutual information
 -----------------------------------------
 Once some fairly large number of sentences have been input, the 
 mutual information must be computed. See the section called "Lexical
-Attraction" at the bottom for a defintion.  The conditional 
+Attraction" at the bottom for a definition.  The conditional 
 probabilities can be obtained by running three different patterns,
 to obtain n(x,*), n(*,y) and n(*,*)
 
@@ -222,7 +222,7 @@ Example: Applying the results
 A basic premise of the above is that high MI word pairs correspond to
 semantic concepts. Thus, for example, a "bicycle helmet" is a specific
 kind of thing.  From the linguistic construction _nn, we know that it
-is a kind-of helmet.  We might eventual learn other thigs about it.
+is a kind-of helmet.  We might eventual learn other things about it.
 In order to make other manipulations simpler, and to be able to more
 easily find related patterns, we want to represent this as a single
 node. Provisionally, it seems like the idea of a SemeNode (see 
@@ -271,8 +271,8 @@ statistical manner.
 Statistics gathering are to be done using the CountTruthValue class,
 which includes a counter, together with atom persistence, allowing for
 a much larger hypergraph than what can be kept in RAM.  As text is
-processed, the relevent atoms are pulled in from persistent store,
-thier counts updated, and then stored back.  It is eventually planned
+processed, the relevant atoms are pulled in from persistent store,
+their counts updated, and then stored back.  It is eventually planned
 to tie this to the short-term importance mechanism for RAM management.
 
 At this time, all data mining, including the computation of conditional
@@ -284,16 +284,16 @@ Hypergraphs specific to NLP
 
 Below follows some of the relations of current interest. Statistical
 information will be kept by maintaining counts on all of the links and
-nodes.  This should be sufficeint for computing conditional
+nodes.  This should be sufficient for computing conditional
 probabilities, mutual information and entropy.
 
 Consider first word-pairs:
 
 	WordPairLink  ; CountTruthValue stores count
 		WordNode "red"
-		WordNode "baloon"
+		WordNode "balloon"
 
-To determine the proability P(left,right), one needs only the count
+To determine the probability P(left,right), one needs only the count
 on the WordPairLink, since P(left,right) = N(left,right) / N(*,*)
 That is, the counts on the individual WordNodes are not needed to
 obtain the word-pair probabilities, mutual information, etc.
@@ -347,7 +347,7 @@ Thus, pairs of words might be gathered together as:
 Of some interest is the connection between grammatical usage/construction,
 and word sense.  That is, the occurrence of triples of the form
 (inflected-word, word-sense, disjunct). These are used to narrow down
-the likelyhood of a given word sense, given that it was used with a
+the likelihood of a given word sense, given that it was used with a
 certain disjunct.  That is, we are interested in the conditional
 probability P(sense |word, disjunct)
 
@@ -359,7 +359,7 @@ CountLink                                ; kind-of-like an evaluation link
 
 Also of interest is not only how syntax affixes meaning to a single
 word, but also how syntax is used to narrow down meanings of pairs
-of words. In particular, we expect to see a lot of collcations here,
+of words. In particular, we expect to see a lot of collocations here,
 and in particular, collocations involving noun-modifiers. Link-grammar
 uses "AN+" links to denote noun-modifier phrases, e.g. "hand grip",
 "lead glass", "soup bowl", where the modifier is a noun.
@@ -390,8 +390,8 @@ particular hypergraphs from the mish-mash of input hypergraphs is to
 use the query/forward-chainer to perform the assembly.  The result
 of assembly will probably be a hypergraph that is sequestered in the
 persistence (SQL) database. This hypergraph will be automatically
-retreived by the atomspace, using the "BackingStore" mechanism. After
-identification and retreival, the count on the count link needs to be
+retrieved by the atomspace, using the "BackingStore" mechanism. After
+identification and retrieval, the count on the count link needs to be
 updated, and then saved back to the backing store.  At this point, its
 acceptable to delete the count link structures, so as to save on RAM
 usage.
@@ -407,7 +407,7 @@ usage.
                      Linas Vepstas June 2008
 
 This directory contains a prototype implementation of Yuret's "lexical
-attraction" algorithm for the discovery of synatctic links between
+attraction" algorithm for the discovery of syntactic links between
 words in a sentence [Yuret 1998]. The goal of this algorithm is to
 provide a score for ranking the output of the link-grammar parser.
 
@@ -420,13 +420,13 @@ MI values for word pairs.  Many of these are quite interesting.
 Data Structures
 ---------------
 The Yuret algorithm requires, as input, the mutual information between
-pairs of words. Computing the mutal information requires performing a
+pairs of words. Computing the mutual information requires performing a
 statistical analysis on a large corpus of sentences. The statistical
 analysis needs to maintain four counts:
 -- n(x,y) = the number of times a word pair was observed
--- n(x,*) = the number of times a word occured as the left element of a
+-- n(x,*) = the number of times a word occurred as the left element of a
             word pair
--- n(*,y) = the number of times a word occured as the right element of
+-- n(*,y) = the number of times a word occurred as the right element of
             a word pair
 -- n(*,*) = N = the number of word pairs observed.
 
@@ -451,7 +451,7 @@ value of LA; that is, as:
 
   MI(x,y) = E[LA(x,y)] = p(x,y) LA(x,y)
 
-See for example, wikipedia "mutual information" or [Ash, Chapter 1.5]
+See for example, Wikipedia "mutual information" or [Ash, Chapter 1.5]
 
 
 
@@ -470,7 +470,7 @@ Both parses are more or less legitimate, and have valid interpretations.
 
 References
 ----------
-See also probablistic context-free grammars.
+See also probabilistic context-free grammars.
 E. Charniak, 1997. Statistical parsing with a context-free grammar
 and word statistics. AAAI 1997.
 
