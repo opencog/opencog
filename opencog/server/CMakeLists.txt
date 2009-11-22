@@ -26,6 +26,7 @@ ADD_LIBRARY (server SHARED
 	CogServer
 	Request
 	NetworkServer
+        ServerSocket
 	ConsoleSocket
 	SocketHolder
 	Agent
@@ -40,6 +41,7 @@ SET(SERVER_LINK_LIBS
 	${CSOCKETS_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_THREAD_LIBRARY}
 )
 
 IF (GUILE_FOUND)

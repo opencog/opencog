@@ -44,7 +44,11 @@ SocketHolder::~SocketHolder()
 {
 }
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+void SocketHolder::setSocket (ServerSocket *s)
+#else
 void SocketHolder::setSocket (TcpSocket *s)
+#endif
 {
     pthread_mutex_lock(&sock_lock);
     _sock = s;
@@ -86,7 +90,9 @@ void SocketHolder::send(const std::string& msg)
     logger().debug("[SocketHolder] send\n");
     pthread_mutex_lock(&sock_lock);
     if (_sock) {
+#ifndef REPLACE_CSOCKETS_BY_ASIO
         Lock l(_sock->MasterHandler().GetMutex());
+#endif
         _sock->Send(msg);
     }
     pthread_mutex_unlock(&sock_lock);

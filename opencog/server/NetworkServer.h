@@ -30,12 +30,17 @@
 
 #include <pthread.h>
 
+#include <opencog/server/ConsoleSocket.h>
+
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+#include <opencog/server/SocketListener.h>
+#else
 #include <Sockets/Mutex.h>
 #include <Sockets/Lock.h>
 #include <Sockets/SocketHandler.h>
 #include <Sockets/ListenSocket.h>
+#endif
 
-#include <opencog/server/NetworkServer.h>
 #include <opencog/util/Logger.h>
 
 namespace opencog
@@ -74,9 +79,14 @@ protected:
 
     bool _started;
     bool _running;
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    boost::asio::io_service io_service;
+    std::vector<SocketPort*> _listeners;
+#else
     Mutex _mutex;
     SocketHandler _shandler;
     std::vector<Socket*> _listeners;
+#endif
     pthread_t _thread;
 
 public:
@@ -89,9 +99,7 @@ public:
     virtual ~NetworkServer();
 
     /** Starts the NetworkServer by creating a new pthread and
-     * (indirectly) calling the method 'run' -- which is essentially
-     * a loop around the SocketHandler.Select method (from Alhem's
-     * Sockets library).
+     * (indirectly) calling the method 'run'
      */
     virtual void start();
 
@@ -110,11 +118,16 @@ public:
 
     /** Instantiates a listener socket (i.e. server socket) of class
      * '_Socket' and binds it to port 'port'. Returns 'true' if
-     * successful an 'false' otherwise.
+     * successful and 'false' otherwise.
      */
     template<class _Socket>
     bool addListener(const unsigned int port) {
         logger().debug("adding listener to port %d", port);
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+        SocketListener<_Socket>* sl = new SocketListener<_Socket>(io_service, port);
+        //TODO: Error handling (what if bind does not work?)
+        _listeners.push_back(sl);
+#else
         ListenSocket<_Socket>* lsocket = new ListenSocket<_Socket>(_shandler);
         try {
             // we throw an exception ourselves because csockets may
@@ -127,7 +140,7 @@ public:
         }
         _shandler.Add(lsocket);
         _listeners.push_back(lsocket);
-        printf("Listening on port %d", port);
+#endif
         return true;
     }
 

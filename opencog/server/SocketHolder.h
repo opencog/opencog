@@ -23,12 +23,18 @@
 
 #include <pthread.h>
 
+#define REPLACE_CSOCKETS_BY_ASIO
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+//#include <opencog/server/ServerSocket.h>
+#else
 #include <Sockets/TcpSocket.h>
+#endif
 #include <opencog/shell/GenericShell.h>
 
 namespace opencog
 {
 
+    class ServerSocket;
 /**
  * This class is a "holder" or "handle" for the Alhem CSocket library
  * sockets.  It's only reason for existence is to work around a
@@ -60,7 +66,11 @@ namespace opencog
 class SocketHolder
 {
     private:
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+        ServerSocket *_sock;
+#else
         TcpSocket *_sock;
+#endif
         pthread_mutex_t sock_lock;
         int use_count;
         pthread_mutex_t use_count_lock;
@@ -71,7 +81,11 @@ class SocketHolder
         SocketHolder(void);
         ~SocketHolder();
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+        void setSocket(ServerSocket *s);
+#else
         void setSocket(TcpSocket *s);
+#endif
         int AtomicInc(int inc);
 
         // Misc OpenCog socket things.

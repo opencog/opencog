@@ -1,5 +1,5 @@
 /*
- * opencog/server/ServerSocket.cc
+ * opencog/server/ConsoleSocket.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -34,16 +34,16 @@
 
 using namespace opencog;
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+ConsoleSocket::ConsoleSocket(boost::asio::io_service& _io_service) : 
+    ServerSocket(_io_service),
+    IHasMimeType("text/plain")
+#else
 ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
     : TcpSocket(handler), IHasMimeType("text/plain")
+#endif
 {
     SetLineProtocol(true);
-
-    // Hmm. Attempt to keep this instance from self-destructing on 
-    // socket close.
-    // SetCloseAndDelete(false);
-    // SetDeleteByHandler(false);
-    // SetDeleteOnExit(false);
     _shell = NULL;
     holder = new SocketHolder();
     holder->setSocket(this);
@@ -60,6 +60,17 @@ ConsoleSocket::~ConsoleSocket()
     holder->AtomicInc(-1);
 }
 
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+void ConsoleSocket::OnConnection()
+{
+    logger().debug("[ConsoleSocket] OnConnection");
+    if (!isClosed()) Send(config()["PROMPT"]);
+}
+tcp::socket& ConsoleSocket::getSocket()
+{
+    return ServerSocket::getSocket();
+}
+#else
 void ConsoleSocket::OnAccept()
 {
     logger().debug("[ConsoleSocket] OnAccept");
@@ -75,6 +86,7 @@ void ConsoleSocket::OnDetached()
     Send(config()["PROMPT"]);
     SetNonblocking(true);
 }
+#endif
 
 void ConsoleSocket::OnLine(const std::string& line)
 {
@@ -132,7 +144,20 @@ void ConsoleSocket::OnLine(const std::string& line)
         // in which case, we *must* enter shell mode before handling any
         // additional input from the socket (since that input is almost
         // surely intended for the shell, and not for the cogserver).
+#if 0 
+       // Welter's comment: Calling this method here is causing concurrency problems 
+       // since this runs in a separate thread (for socket handler) instead of main 
+       // thread (where server loop runs).
+       // TODO: Find another way to avoid next line to be handled by cogserver
+       // shell when the previous command is for entering scheme (or any other)
+       // shell. Perhaps we should create Disable/Enable methods for the
+       // ConsoleSocket (and SocketHolder) so it is disabled here and re-enabled
+       // when the request is executed. 
         cogserver.processRequests();
+#endif
+    } else {
+        // reset input buffer
+        _buffer.clear();
     }
 }
 
@@ -181,6 +206,7 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
 
 void ConsoleSocket::OnRequestComplete()
 {
+    logger().debug("[ConsoleSocket] OnRequestComplete");
     Send(config()["PROMPT"]);
 }
 
