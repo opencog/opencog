@@ -65,6 +65,18 @@ Implementation:
 -- Stumlbing block:
    How to correctly define mutual-info for an arbitrary pattern?
 
+-- Key point:
+   Computing the mutual information for a pattern is a time-consuming
+   "global" process. The probability of observing a pattern has to 
+   divided by the conditional probabilities of observing portions of
+   the pattern. Maintaining a large collection of conditional 
+   probabilities takes a lot of space; computing these when finally 
+   needed requires an (expensive) scan over the entire atomspace. 
+   Thus once an MI is computed once, it should be learned "forever".
+   That is, once may stop collecting new evidence for the pattern,
+   and just take it as a given, known fact.  (Other unrelated mechanisms
+   could lead to the active destruction/forgetting of learned pattern.)
+
 -- Stumlbing block:
    Once a high-MI pattern has been identified, it needs to be tagged 
    in some way, such that the tag can be a stand-in for the pattern.
@@ -81,11 +93,20 @@ Implementation:
 Worked Example
 --------------
 Here, we work out the details for a given example: high mutual-information
-word-pairs -- that is, word-pairs frequently observed together.  The 
-primary complication is that the opencog input is in terms of word-instances
-whereas we are interested in lemma-pairs.  Consider the word pair 
-"bicycle helmet", which we might expect to have a high MI. This word 
-pair will typically be observed via the _nn (noun-modifier) relation:
+word-pairs -- that is, word-pairs frequently observed together.  
+
+
+Worked Example: Counting
+------------------------
+The first step for computing the mutual information for word-pairs is 
+counting -- we want to count how often certain words are observed
+together.  The primary complication is that the opencog representation
+of input text is in terms of word-instances whereas we are interested in
+lemma-pairs.  
+
+Consider the word pair "bicycle helmet", which we might expect to have
+a high MI. This word pair will typically be observed via the _nn
+(noun-modifier) relation:
 
       ; _nn (<<helmet>>, <<bicycle>>) 
       EvaluationLink (stv 1.0 1.0)
@@ -103,12 +124,14 @@ But we are interested in the lemma forms:
          WordInstanceNode "helmet@9a282977-c5b5-452f-b2e4-b4f6f08e39a7"
          WordNode "helmet"
 
-The template pattern to recognize the above is shown below.  Note that
-the TemplateLink is a subtype of a VariableScopeLink. (see 
-http://opencog.org/wiki/VariableScopeLink for details).  Note the strong
-typing used here. The strong typing is probably not strictly necessary,
-but is useful for making sure the pattern template doesn't match any
-accidentally similar hypergraphs.
+The template pattern to recognize the above word-pair is shown below. 
+The actual patten recognition will be done by the query pattern matcher.
+To distinguish this from other uses, we invent a new TemplateLink, which
+derives from VariableScopeLink (http://opencog.org/wiki/VariableScopeLink)
+
+Note the strong typing used here. The strong typing is probably not 
+strictly necessary, but is useful for making sure the pattern template
+doesn't match any accidentally similar hypergraphs.
 
       TemplateLink 
          ListLink
@@ -127,19 +150,44 @@ accidentally similar hypergraphs.
             TypedVariableLink
                VariableNode "$word-b"
                VariableTypeNode "WordNode"
-         AndLink
-            EvaluationLink
-               VariableNode "$rel-var"
-               ListLink
+         ImplicationLink
+            AndLink
+               EvaluationLink
+                  VariableNode "$rel-var"
+                  ListLink
+                     VariableNode "$wi-a"
+                     VariableNode "$wi-b"
+               LemmaLink
                   VariableNode "$wi-a"
+                  VariableNode "$word-a"
+               LemmaLink
                   VariableNode "$wi-b"
-            LemmaLink
-               VariableNode "$wi-a"
+                  VariableNode "$word-b"
+            CountLink
                VariableNode "$word-a"
-            LemmaLink
-               VariableNode "$wi-b"
                VariableNode "$word-b"
 
+Once the pattern has been recognized, we need to maintain a count of
+the number of times that it's been seen.  For this, another new link
+type is introduced: the CountLink.  Above, it is used as the implicand
+of the ImplicationLink.  Upon running the the implication, the count
+on the implicand should be incremented.
+
+(TODO: it might be better to not have a new count-link type, and 
+instead, have the pattern matcher always perform counting, by using
+a Composite truth value on the implicand, and having a CountTruuthValue
+appearing in the composite.  This would allow for defacto counting for
+all uses of the pattern matcher, which is probably a good idea...)
+
+To summarize: for each new sentence that is input, we run the pattern
+matcher to find the above pattern, and increment pattern counts.
+
+Example: Computing the mutual information
+-----------------------------------------
+Once some fairly large number of sentences have been input, the 
+mutual information must be computed.
+
+Computing 
 Now what?
 
 
