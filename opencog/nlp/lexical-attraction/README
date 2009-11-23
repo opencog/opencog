@@ -165,6 +165,8 @@ doesn't match any accidentally similar hypergraphs.
                LemmaLink
                   VariableNode "$wi-b"
                   VariableNode "$word-b"
+
+				;; The implicand, if the above pattern is matched.
             CountLink    ;; should be EvaluationLink, actually ... 
                DefinedPatternNode "word-pairs"  ; Maybe a DefinedRelationshipNode ??
                ListLink
@@ -279,6 +281,126 @@ arity-2 "path" case, just to keep things simple.
 
 Example: Counting Paths
 -----------------------
+Consider the example sentence "John threw a ball". The dependency parse
+is "_subj(throw, John) _obj(throw, ball)". The opencog reprsentation
+for this parse is
+
+      ; _subj (<<throw>>, <<John>>) 
+      EvaluationLink (stv 1.0 1.0)
+         DefinedLinguisticRelationshipNode "_subj"
+         ListLink
+            WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
+            WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
+      
+      ; _obj (<<throw>>, <<ball>>) 
+      EvaluationLink (stv 1.0 1.0)
+         DefinedLinguisticRelationshipNode "_obj"
+         ListLink
+            WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
+            WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
+
+      LemmaLink 
+         WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
+         WordNode "John"
+      LemmaLink 
+         WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
+         WordNode "throw"
+      LemmaLink 
+         WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
+         WordNode "ball"
+
+      WordInstanceLink 
+         WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
+         ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
+      WordInstanceLink 
+         WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
+         ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
+      WordInstanceLink 
+         WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
+         ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
+ 
+Notable in the above are the WordInstanceLinks, which are used to
+confirm that that each word instance belongs to the same parse of the
+same sentence. This will be important below, as otherwise, we risk
+joining together relations sentences that have nothing to do with each
+other. 
+
+A pattern template to recognize the above construct, and create a "path",
+is shown below.
+
+      TemplateLink
+         ListLink
+            TypedVariableLink
+               VariableNode "$rel-l"
+               VariableTypeNode "DefinedLinguisticRelationshipNode"
+            TypedVariableLink
+               VariableNode "$rel-r"
+               VariableTypeNode "DefinedLinguisticRelationshipNode"
+            TypedVariableLink
+               VariableNode "$wi-head"
+               VariableTypeNode "WordInstanceNode"
+            TypedVariableLink
+               VariableNode "$wi-a"
+               VariableTypeNode "WordInstanceNode"
+            TypedVariableLink
+               VariableNode "$wi-b"
+               VariableTypeNode "WordInstanceNode"
+            TypedVariableLink
+               VariableNode "$word-a"
+               VariableTypeNode "WordNode"
+            TypedVariableLink
+               VariableNode "$word-b"
+               VariableTypeNode "WordNode"
+            TypedVariableLink
+               VariableNode "$parse"
+               VariableTypeNode "ParseNode"
+         ImplicationLink
+            AndLink
+					;; The pattern matcher operates more efficiently if
+					;; we first ask for three words belonging to the same
+					;; sentence, and then do the rest of the pattern.
+      			WordInstanceLink 
+                  VariableNode "$wi-head"
+                  VariableNode "$parse"
+      			WordInstanceLink 
+                  VariableNode "$wi-a"
+                  VariableNode "$parse"
+      			WordInstanceLink 
+                  VariableNode "$wi-b"
+                  VariableNode "$parse"
+
+					;; The two relations, subj and obj (this matches *any*
+					;; two relations.
+               EvaluationLink
+                  VariableNode "$rel-l"
+                  ListLink
+                     VariableNode "$wi-head"
+                     VariableNode "$wi-a"
+               EvaluationLink
+                  VariableNode "$rel-r"
+                  ListLink
+                     VariableNode "$wi-head"
+                     VariableNode "$wi-b"
+               LemmaLink
+                  VariableNode "$wi-a"
+                  VariableNode "$word-a"
+               LemmaLink
+                  VariableNode "$wi-b"
+                  VariableNode "$word-b"
+
+				;; The implicand, if the above pattern is matched.
+            CountLink    ;; should be EvaluationLink, actually ...
+					Callback xxxx
+					ListLink
+                  VariableNode "$word-a"
+                  VariableNode "$word-b"
+
+
+Yes, the above is painfully long/verbose.
+
+
+   
+
 
 
 =======================================================================
