@@ -9,7 +9,7 @@ Proof of concept:
    capture semantic content. This has been verified in the LexAt 
    code, which has a bunch of interesting pairs.
 -- Many of these pairs can and should be considered to be "semes"
-   (see "seme/README")
+   (see "nlp/seme/README")
 -- Dekang Lin's DIRT shows how mutual information can be used to 
    discover synonymous phrases.
 -- Hoifung Poon + Pedro Domingos have shown how a very small number
@@ -231,19 +231,34 @@ Thus, one might construct something like:
 
       SemeLink
          SemeNode "bicycle helmet"
-         ListLink
-            WordNode "bicycle"
-            WordNode "helmet"
+         EvaluationLink
+            DefinedLinguisticRelationshipNode "_nn"
+            ListLink
+               WordNode "bicycle"
+               WordNode "helmet"
 
 ... or something like that. This is an incompletely-worked example, 
 because that's not the current focus, right .. ??  Need something 
 more motivated, e.g. synonymous sentences ... XXX TODO finish me.
+
+Representation points -- 
+-- need to have some way of driving output, so have the _nn rel
+in place to do this.
+-- The semes are usually nouns or noun phrases.
  
 
 Worked example: DIRT, USP, synonymous phrases
 ----------------------------------------------
 In this example, redo Lin's DIRT and/or Domingos USP.
 
+In DIRT, Lin focuses only on binary relations (triples)
+From Meaning-Text theory, we know that there are semantic relations 
+with other arities as well.
+
+Both Lin and Domingos decompose sentences into parts --
+Lin does this casually, with "paths", Domingos formally,
+with lambda-partitions. So to keep example simple, do paths first,
+then the general case.
 
 
 
@@ -478,5 +493,6 @@ and word statistics. AAAI 1997.
 * Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical
   Attraction'' (1998) PhD Thesis
   http://citeseer.ist.psu.edu/yuret98discovery.html
-* Dekang Lin, DIRT inferencing, 2001
+* [Lin2001] Dekang Lin and Patrick Pantel, ''DIRT – Discovery of 
+  Inference Rules from Text'', KDD01
 
