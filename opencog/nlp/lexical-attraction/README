@@ -248,18 +248,37 @@ in place to do this.
  
 
 Worked example: DIRT, USP, synonymous phrases
-----------------------------------------------
-In this example, redo Lin's DIRT and/or Domingos USP.
+---------------------------------------------
+Below follows a worked example of synonymous phrase extraction,
+roughly equivalent to Dekang Lin's DIRT [Lin2001] or Poon & Domingos
+USP [Poon2009]. The DIRT system focuses on triples of the form
+(X VP Y) where X and Y are nouns, and VP is a verb phrase. DIRT then
+uses mutual information to find pairings between VP and X, and also
+between  VP and Y.  Synonymous X's, Y's and VP's are then discovered
+by using a similarity measure btween such pairings.
 
-In DIRT, Lin focuses only on binary relations (triples)
-From Meaning-Text theory, we know that there are semantic relations 
-with other arities as well.
+DIRT proceeds by starting with a dependency parse of a sentence, and
+then collecting statistics on all possible "paths" in the parse. A
+"path" is a directed graph, starting at the head-word (almost always
+a verb) and moving to its dependents, via chaining of head-to-dependent. 
+DIRT's "paths" always have arity 2, i.e. they always connect some X to
+some Y, in the form of (X VP Y).  As Lin demonstrates, this works 
+reasonably well.  However, it is "well known" that not all semantic
+relationships have arity 2.
 
-Both Lin and Domingos decompose sentences into parts --
-Lin does this casually, with "paths", Domingos formally,
-with lambda-partitions. So to keep example simple, do paths first,
-then the general case.
+One of the more convincing analysis of the arity of semantic concepts
+is that of Mel'cuk's "Meaning-Test Theory" (MTT), which provides many
+examples of semantic relationship with various different arities. A 
+computational framework for representing expressions with different 
+arities is provided by [Poon 2009], which defines "lambda forms" --
+a notation based on lambda calculus that enables something akin to
+Lin's "paths", but of arbitrary arity.  (See the section "USP Notes"
+below for a quick tour).  The worked example below focuses first on the
+arity-2 "path" case, just to keep things simple.
 
+
+Example: Counting Paths
+-----------------------
 
 
 =======================================================================
@@ -468,8 +487,123 @@ value of LA; that is, as:
 
 See for example, Wikipedia "mutual information" or [Ash, Chapter 1.5]
 
+=======================================================================
+
+                     USP Notes
+                     ---------
+              Linas Vepstas November 2009
+            
+Notes about the paper "Unsupervised Semantic Learning", by Hoifung Poon
+and Pedro Domingos.  Notes are intended to lead to a possible
+implementation within OpenCog, maybe.
 
 
+Definition of Terms
+===================
+
+Example Sentence
+----------------
+Utah borders Idaho
+
+Dependency parse:
+-----------------
+_subj(border, Utah) & _obj(border, Idaho)  
+
+
+QLF "Quasi-Logical Form":
+-------------------------
+reify the above into:
+border(n1) & Utah(n2) & Idaho(n3) & subj(n1, n2) & obj(n1, n3)
+(for feature tags, maybe also & definite(n2) & etc)
+
+The ni are called "Skolem constants" (i.e. there exists n1 s.t....)
+
+Lambda form:
+------------
+Partition graph by cutting, replace cut by lambda-bound variable.
+L == lambda
+
+Lx2.Lx3.border(n1) & subj(n1, x2) & obj(n1, x3)
+
+Decompose parts using Davidsonian semantics:
+--------------------------------------------
+Core form:
+----------
+borders (n1)  contains no variables
+
+Argument forms:
+---------------
+Lx2.subj(n1, x2)  each argument from contains only one variable.
+Lx3.obj(n1, x3)
+
+Argument type:
+--------------
+A cluster of argument forms. e.g containing dobj and nsubjpass,
+which normalizes for semantic content of distinct syntactic 
+presentations. (just like in MTT!)
+
+Semantic cluster:
+-----------------
+Collection of semantically equivalent lambda forms. All lambda
+forms have same arity.  Cluster contains core forms and argument 
+types. 
+
+Abstract Lambda Form:
+---------------------
+Representationn of the semantic cluster as follows:
+Let T(n) stand for core forms, let arity of cluster be k, let
+Ai(n,xi) be the Argument type, then the ALF is
+
+Lx1.Lx2... Lxk.T(n)A1(n,x1)A2(n,x2) ...A(n,xk) 
+
+Yes, of course binding order is important, that's the point of the
+argument types.
+
+MLN:
+----
+Partition QLF Q into parts. Assign each part to a semantic cluster.
+Let L be a partition of Q. Then model joint probability distribution 
+given Q and L i.e.  probability Pr(Q,L) of pair (Q,L)
+
+MLN predicates:
+---------------
+Distributions over lambda forms uses two MLN predicates:
+Form (p, f!), ArgForm (p,i,f!)
+
+p a part, i index, f a "QLF subformula" (actually, a "Davidsonian form")
+i.e. f is a core form or arg form.
+
+Form(p,f) is true iff p has core form f
+ArgForm(p,i,f) is true iff ith arg of p has arg form f
+
+Distribution over arguments uses three predicates:
+ArgType(p,i,a!)
+Arg(p,i,p')
+Number(p,a,n)
+
+Formulas:
+---------
+In(p,c) & Form(p,f)
+ArgType(p,i,a) & ArgForm(p,i,f)
+ArgType(p,i,a) & Arg(p,i,p') & In(p', c')
+Number(p,a,n)
+
+(p is member of some cluster c) and (p has some core form f)
+(arg has some arg type) and (arg has some arg form) 
+(arg has some arg type) and (arg is some part) and (part is in a cluster)
+(p has n args of arg type a)
+
+Each formula has a distinct weight for each parameter f,c,a,p',c'
+Have exponential prior weight on number of parameters to avoid
+overfitting.
+
+MAP Semantic parse
+------------------
+MAP=="Maximum a posteriori"
+Most likely parse according to the weighting.
+
+
+=======================================================================
 
 Misc comments
 -------------
@@ -496,3 +630,5 @@ and word statistics. AAAI 1997.
 * [Lin2001] Dekang Lin and Patrick Pantel, ''DIRT – Discovery of 
   Inference Rules from Text'', KDD01
 
+* [Poon2009] Hoifung Poon, Pedro Domingos, ''Unsupervised Semantic
+  Parsing''
