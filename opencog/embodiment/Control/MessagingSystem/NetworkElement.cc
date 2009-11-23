@@ -68,6 +68,9 @@
 
 using namespace MessagingSystem;
 using namespace opencog;
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+using boost::asio::ip::tcp;
+#endif
 
 unsigned sleep(unsigned seconds);
 
@@ -450,24 +453,19 @@ void *NetworkElement::portListener(void *arg)
     try
     {
         boost::asio::io_service io_service;
-        boost::asio::ip::tcp::acceptor acceptor(io_service);
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
-        acceptor.open(endpoint.protocol());
-        acceptor.bind(endpoint);
-        logger().debug("Port listener ready.");
-        acceptor.listen();
-        logger().debug("Acceptor listening.");
+        tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), port));
+        logger().debug("NetworkElment - Listening to port %d.", port);
         socketListenerIsReady = true;
         while (!stopListenerThreadFlag)
         {
             ServerSocket* ss = new ServerSocket();
             serverSockets.push_back(ss);
-            acceptor.accept(*(ss->getSocket()));
+            acceptor.accept(ss->getSocket());
             ss->start();
         }
     } catch (boost::system::system_error& e)
     {
-        logger().error("NetworkElement - Boost system error listening to port %d. Error message", port, e.what());
+        logger().error("NetworkElement - Boost system error listening to port %d. Error message: %s", port, e.what());
     } catch (std::exception& e)
     {
         logger().error("NetworkElement - Error listening to port %d. Exception message: %s", port, e.what());

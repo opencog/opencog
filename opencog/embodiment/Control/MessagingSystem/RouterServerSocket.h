@@ -63,7 +63,7 @@ private:
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
     boost::asio::io_service io_service;
-    tcp::socket* socket;
+    tcp::socket socket;
     boost::thread connectionThread;
 #endif
 
@@ -83,7 +83,7 @@ public:
     void Send(const std::string& cmd);
     static void handle_connection(RouterServerSocket*);
     void start();
-    tcp::socket* getSocket();
+    tcp::socket& getSocket();
 #else
     RouterServerSocket(ISocketHandler &handler);
 #endif

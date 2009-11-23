@@ -37,23 +37,20 @@ NetworkElement *ServerSocket::master = NULL;
 ServerSocket::~ServerSocket()
 {
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-    socket->close();
-    delete socket;
+    socket.close();
 #endif
     logger().debug("ServerSocket destroyed - Connection closed.");
 }
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-ServerSocket::ServerSocket()
+ServerSocket::ServerSocket() : socket(io_service)
 #else
 ServerSocket::ServerSocket(ISocketHandler &handler): TcpSocket(handler)
 #endif
 {
 
     logger().debug("ServerSocket - Serving connection.");
-#ifdef REPLACE_CSOCKETS_BY_ASIO
-    socket = new tcp::socket(io_service);
-#else
+#ifndef REPLACE_CSOCKETS_BY_ASIO
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
     SetLineProtocol();
@@ -70,7 +67,7 @@ void ServerSocket::setMaster(NetworkElement *ne)
 }
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-tcp::socket* ServerSocket::getSocket() 
+tcp::socket& ServerSocket::getSocket() 
 {
     return socket;
 }
@@ -88,11 +85,14 @@ void ServerSocket::handle_connection(ServerSocket* ss)
     {
         try {
         //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
-        boost::asio::read_until(*(ss->getSocket()), b, boost::regex("\n"));
+        boost::asio::read_until(ss->getSocket(), b, boost::regex("\n"));
         //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
         std::istream is(&b);
         std::string line;
         std::getline(is, line); 
+        if (!line.empty() && line[line.length()-1] == '\r') {
+            line.erase(line.end()-1);
+        }
         //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
         ss->OnLine(line);
         } catch (boost::system::system_error& e) {
@@ -108,7 +108,7 @@ void ServerSocket::handle_connection(ServerSocket* ss)
 void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(*socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
     if (error) {
         logger().error("ServerSocket::Send(): Error transfering data.");
     }

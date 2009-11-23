@@ -46,11 +46,12 @@
 
 using namespace MessagingSystem;
 using namespace opencog;
-
-bool Router::stopListenerThreadFlag = false;
 #ifdef REPLACE_CSOCKETS_BY_ASIO
+using boost::asio::ip::tcp;
+
 std::vector<RouterServerSocket*> Router::serverSockets;
 #endif
+bool Router::stopListenerThreadFlag = false;
 
 Router::~Router()
 {
@@ -114,23 +115,18 @@ void *Router::portListener(void *arg)
     try
     {
         boost::asio::io_service io_service;
-        boost::asio::ip::tcp::acceptor acceptor(io_service);
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
-        acceptor.open(endpoint.protocol());
-        acceptor.bind(endpoint);
-        logger().debug("Port listener ready.");
-        acceptor.listen();
-        logger().debug("Acceptor listening.");
+        tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), port));
+        logger().debug("Router - Listening to port %d.", port);
         while (!stopListenerThreadFlag)
         {
             RouterServerSocket* rss = new RouterServerSocket();
             serverSockets.push_back(rss);
-            acceptor.accept(*(rss->getSocket()));
+            acceptor.accept(rss->getSocket());
             rss->start();
         }
     } catch (boost::system::system_error& e)
     {
-        logger().error("Router - Boost system error listening to port %d. Error message", port, e.what());
+        logger().error("Router - Boost system error listening to port %d. Error message: %s", port, e.what());
     } catch (std::exception& e)
     {
         logger().error("Router - Error listening to port %d. Exception message: %s", port, e.what());

@@ -50,14 +50,13 @@ bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work 
 RouterServerSocket::~RouterServerSocket()
 {
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-    socket->close();
-    delete socket;
+    socket.close();
 #endif
     logger().debug("RouterServerSocket[%p] - destroyed. Connection closed.", this);
 }
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-RouterServerSocket::RouterServerSocket()
+RouterServerSocket::RouterServerSocket() : socket(io_service)
 #else
 RouterServerSocket::RouterServerSocket(ISocketHandler &handler): TcpSocket(handler)
 #endif
@@ -67,9 +66,7 @@ RouterServerSocket::RouterServerSocket(ISocketHandler &handler): TcpSocket(handl
     currentState = WAITING_COMMAND;
     logger().debug("RouterServerSocket - CurrentState = %d", currentState);
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
-    socket = new tcp::socket(io_service);
-#else
+#ifndef REPLACE_CSOCKETS_BY_ASIO
     // Enables "line-based" protocol, which will cause onLine() be called
     // everytime the peer send a line
     SetLineProtocol();
@@ -83,7 +80,7 @@ void RouterServerSocket::setMaster(Router *router)
 }
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-tcp::socket* RouterServerSocket::getSocket() 
+tcp::socket& RouterServerSocket::getSocket() 
 {
     return socket;
 }
@@ -101,7 +98,7 @@ void RouterServerSocket::handle_connection(RouterServerSocket* ss)
     {
         try {
         //logger().debug("%p: RouterServerSocket::handle_connection(): Called read_until", ss);
-        boost::asio::read_until(*(ss->getSocket()), b, boost::regex("\n"));
+        boost::asio::read_until(ss->getSocket(), b, boost::regex("\n"));
         //logger().debug("%p: RouterServerSocket::handle_connection(): returned from read_until", ss);
         std::istream is(&b);
         std::string line;
@@ -124,7 +121,7 @@ void RouterServerSocket::handle_connection(RouterServerSocket* ss)
 void RouterServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(*socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
     if (error) {
         logger().error("RouterServerSocket::Send(): Error transfering data.");
     }
