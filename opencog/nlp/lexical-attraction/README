@@ -5,12 +5,12 @@
 
 
 Proof of concept:
--- Deniz Yuret has shown that high-mutual-information word pairs 
-   capture semantic content. This has been verified in the LexAt 
+-- Deniz Yuret has shown that high-mutual-information word pairs
+   capture semantic content. This has been verified in the LexAt
    code, which has a bunch of interesting pairs.
 -- Many of these pairs can and should be considered to be "semes"
    (see "nlp/seme/README")
--- Dekang Lin's DIRT shows how mutual information can be used to 
+-- Dekang Lin's DIRT shows how mutual information can be used to
    discover synonymous phrases.
 -- Hoifung Poon + Pedro Domingos have shown how a very small number
    of relatively simple logical assertions can be used to extract
@@ -19,46 +19,46 @@ Proof of concept:
 
 
 Core idea:
--- Synthesize the above four points. That is, the Yuret work gives 
+-- Synthesize the above four points. That is, the Yuret work gives
    a very basic definition of mutual information (MI) for word pairs.
    Lin shows how a more general notion of MI can be put to effective
    use.  Domingos points out that thinking about logical formulas
    (ungrounded patterns) in general is the correct approach.
 
--- A key point from Domingos is the focus on "ungrounded formulas". 
+-- A key point from Domingos is the focus on "ungrounded formulas".
    Recast in terms of hypergraphs, the idea is to work with "pattern
    templates" -- smaller hypergraphs containing variable nodes. These
    are the hypergraph analogs of (ungrounded) logical formulas. One
-   then looks for pattern matches to these templates -- i.e. for 
-   "groundings" of the templates. Domingos says that the resulting 
+   then looks for pattern matches to these templates -- i.e. for
+   "groundings" of the templates. Domingos says that the resulting
    matches are used to define a partition function, and a probability.
    The idea here is to instead use mutual information to find frequent,
    semantically meaningful patterns.
 
--- A key difficulty with the Domingos approach is it's wedding to 
+-- A key difficulty with the Domingos approach is it's wedding to
    Markov networks, which have difficulty being tractable (i.e. a
    seeming need to compute the partition function).  The work of Poon
-   makes me wonder whether this is strictly necessary: rather, Poon 
-   (indirectly, between the lines) suggests that maybe what is really 
-   needed are the ability to recognize patterns, and to perform 
+   makes me wonder whether this is strictly necessary: rather, Poon
+   (indirectly, between the lines) suggests that maybe what is really
+   needed are the ability to recognize patterns, and to perform
    clustering when these are found.  Poon uses the machinery of
-   Markov nets to provide a measure of when the clustering should be 
+   Markov nets to provide a measure of when the clustering should be
    performed.  The hypothesis here is that perhaps, instead, a simpler
-   measure, such as MI, could serve just as well. 
+   measure, such as MI, could serve just as well.
 
 -- To summarize: look for patterns that have high mutual information.
    Do so hierarchically. Perform clustering to find patterns with
-   synonymous meanings.  
+   synonymous meanings.
 
 
 Implementation:
 -- Look for certain kinds of patterns in the dependency parses as passed
    into OpenCog. Make note of those that have high MI.
 
--- Key stumbling blocks: 
+-- Key stumbling blocks:
    In a dream world, we'd look for any and all possible patterns.
-   In practice, we'd probably only look for a select few. 
-   Step 1: do word-pairs, except this time, using the existing 
+   In practice, we'd probably only look for a select few.
+   Step 1: do word-pairs, except this time, using the existing
    hypergraph representations.
    Step 2: do synonymous phrases
 
@@ -67,18 +67,18 @@ Implementation:
 
 -- Key point:
    Computing the mutual information for a pattern is a time-consuming
-   "global" process. The probability of observing a pattern has to 
+   "global" process. The probability of observing a pattern has to
    divided by the conditional probabilities of observing portions of
-   the pattern. Maintaining a large collection of conditional 
-   probabilities takes a lot of space; computing these when finally 
-   needed requires an (expensive) scan over the entire atomspace. 
+   the pattern. Maintaining a large collection of conditional
+   probabilities takes a lot of space; computing these when finally
+   needed requires an (expensive) scan over the entire atomspace.
    Thus once an MI is computed once, it should be learned "forever".
    That is, once may stop collecting new evidence for the pattern,
    and just take it as a given, known fact.  (Other unrelated mechanisms
    could lead to the active destruction/forgetting of learned pattern.)
 
 -- Stumbling block:
-   Once a high-MI pattern has been identified, it needs to be tagged 
+   Once a high-MI pattern has been identified, it needs to be tagged
    in some way, such that the tag can be a stand-in for the pattern.
    Why? So that hierarchical grouping can be (more easily) discovered.
    This seems to somehow be key.  So: how should this grouping be best
@@ -87,7 +87,7 @@ Implementation:
    Examples: "X borders Y" and "X is next to Y" are synonymous phrases
    that should be discoverable by applying appropriate patter detectors.
    however, the underlying dependency parses are quite different, and so
-   a key part of the seme-abstraction process is to normalize across 
+   a key part of the seme-abstraction process is to normalize across
    these.
 
 Worked Example -- Word Pairs
@@ -100,17 +100,17 @@ the mutual information, and then, applying the results.
 
 Worked Example: Counting
 ------------------------
-The first step for computing the mutual information for word-pairs is 
+The first step for computing the mutual information for word-pairs is
 counting -- we want to count how often certain words are observed
 together.  The primary complication is that the OpenCog representation
 of input text is in terms of word-instances whereas we are interested in
-lemma-pairs.  
+lemma-pairs.
 
 Consider the word pair "bicycle helmet", which we might expect to have
 a high MI. This word pair will typically be observed via the _nn
 (noun-modifier) relation:
 
-      ; _nn (<<helmet>>, <<bicycle>>) 
+      ; _nn (<<helmet>>, <<bicycle>>)
       EvaluationLink (stv 1.0 1.0)
          DefinedLinguisticRelationshipNode "_nn"
          ListLink
@@ -126,16 +126,16 @@ But we are interested in the lemma forms:
          WordInstanceNode "helmet@9a282977-c5b5-452f-b2e4-b4f6f08e39a7"
          WordNode "helmet"
 
-The template pattern to recognize the above word-pair is shown below. 
+The template pattern to recognize the above word-pair is shown below.
 The actual pattern recognition will be done by the query pattern matcher.
 To distinguish this from other uses, we invent a new TemplateLink, which
 derives from VariableScopeLink (http://opencog.org/wiki/VariableScopeLink)
 
-Note the strong typing used here. The strong typing is probably not 
+Note the strong typing used here. The strong typing is probably not
 strictly necessary, but is useful for making sure the pattern template
 doesn't match any accidentally similar hypergraphs.
 
-      TemplateLink 
+      TemplateLink
          ListLink
             TypedVariableLink
                VariableNode "$rel-var"
@@ -166,8 +166,8 @@ doesn't match any accidentally similar hypergraphs.
                   VariableNode "$wi-b"
                   VariableNode "$word-b"
 
-				;; The implicand, if the above pattern is matched.
-            CountLink    ;; should be EvaluationLink, actually ... 
+            ;; The implicand, if the above pattern is matched.
+            CountLink    ;; should be EvaluationLink, actually ...
                DefinedPatternNode "word-pairs"  ; Maybe a DefinedRelationshipNode ??
                ListLink
                   VariableNode "$word-a"
@@ -180,7 +180,7 @@ of the ImplicationLink.  Upon running the the implication, the count
 on the implicand should be incremented. In this example, CountLink
 inherits from EvaluationLink.
 
-(TODO: it might be better to not have a new count-link type, and 
+(TODO: it might be better to not have a new count-link type, and
 instead, have the pattern matcher always perform counting, by using
 a Composite truth value on the implicand, and having a CountTruthValue
 appearing in the composite.  This would allow for defacto counting for
@@ -191,16 +191,16 @@ matcher to find the above pattern, and increment pattern counts.
 
 Example: Computing the mutual information
 -----------------------------------------
-Once some fairly large number of sentences have been input, the 
+Once some fairly large number of sentences have been input, the
 mutual information must be computed. See the section called "Lexical
-Attraction" at the bottom for a definition.  The conditional 
+Attraction" at the bottom for a definition.  The conditional
 probabilities can be obtained by running three different patterns,
 to obtain n(x,*), n(*,y) and n(*,*)
 
 For example, the count n(x,*) for x==bicycle is obtained by matching
 the following:
 
-      TemplateLink 
+      TemplateLink
          TypedVariableLink
             VariableNode "$word-b"
             VariableTypeNode "WordNode"
@@ -227,7 +227,7 @@ kind of thing.  From the linguistic construction _nn, we know that it
 is a kind-of helmet.  We might eventual learn other things about it.
 In order to make other manipulations simpler, and to be able to more
 easily find related patterns, we want to represent this as a single
-node. Provisionally, it seems like the idea of a SemeNode (see 
+node. Provisionally, it seems like the idea of a SemeNode (see
 nlp/seme/README for details) would be the best representation.
 Thus, one might construct something like:
 
@@ -239,15 +239,15 @@ Thus, one might construct something like:
                WordNode "bicycle"
                WordNode "helmet"
 
-... or something like that. This is an incompletely-worked example, 
-because that's not the current focus, right .. ??  Need something 
+... or something like that. This is an incompletely-worked example,
+because that's not the current focus, right .. ??  Need something
 more motivated, e.g. synonymous sentences ... XXX TODO finish me.
 
-Representation points -- 
+Representation points --
 -- need to have some way of driving output, so have the _nn rel
 in place to do this.
 -- The semes are usually nouns or noun phrases.
- 
+
 
 Worked example: DIRT, USP, synonymous phrases
 ---------------------------------------------
@@ -262,16 +262,16 @@ by using a similarity measure btween such pairings.
 DIRT proceeds by starting with a dependency parse of a sentence, and
 then collecting statistics on all possible "paths" in the parse. A
 "path" is a directed graph, starting at the head-word (almost always
-a verb) and moving to its dependents, via chaining of head-to-dependent. 
+a verb) and moving to its dependents, via chaining of head-to-dependent.
 DIRT's "paths" always have arity 2, i.e. they always connect some X to
-some Y, in the form of (X VP Y).  As Lin demonstrates, this works 
+some Y, in the form of (X VP Y).  As Lin demonstrates, this works
 reasonably well.  However, it is "well known" that not all semantic
 relationships have arity 2.
 
 One of the more convincing analysis of the arity of semantic concepts
 is that of Mel'cuk's "Meaning-Test Theory" (MTT), which provides many
-examples of semantic relationship with various different arities. A 
-computational framework for representing expressions with different 
+examples of semantic relationship with various different arities. A
+computational framework for representing expressions with different
 arities is provided by [Poon 2009], which defines "lambda forms" --
 a notation based on lambda calculus that enables something akin to
 Lin's "paths", but of arbitrary arity.  (See the section "USP Notes"
@@ -285,45 +285,45 @@ Consider the example sentence "John threw a ball". The dependency parse
 is "_subj(throw, John) _obj(throw, ball)". The opencog reprsentation
 for this parse is
 
-      ; _subj (<<throw>>, <<John>>) 
+      ; _subj (<<throw>>, <<John>>)
       EvaluationLink (stv 1.0 1.0)
          DefinedLinguisticRelationshipNode "_subj"
          ListLink
             WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
             WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
-      
-      ; _obj (<<throw>>, <<ball>>) 
+
+      ; _obj (<<throw>>, <<ball>>)
       EvaluationLink (stv 1.0 1.0)
          DefinedLinguisticRelationshipNode "_obj"
          ListLink
             WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
             WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
 
-      LemmaLink 
+      LemmaLink
          WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
          WordNode "John"
-      LemmaLink 
+      LemmaLink
          WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
          WordNode "throw"
-      LemmaLink 
+      LemmaLink
          WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
          WordNode "ball"
 
-      WordInstanceLink 
+      WordInstanceLink
          WordInstanceNode "John@0cde1b19-6bc3-4939-ad10-6c028beca3b1"
          ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
-      WordInstanceLink 
+      WordInstanceLink
          WordInstanceNode "threw@cb670df2-2837-4f18-828b-1c06e8c62bc5"
          ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
-      WordInstanceLink 
+      WordInstanceLink
          WordInstanceNode "ball@44f8de2d-c089-4620-b09c-fc0947a96df8"
          ParseNode "sentence@c9d2e919-0682-4d39-9878-39408475f248_parse_0"
- 
+
 Notable in the above are the WordInstanceLinks, which are used to
 confirm that that each word instance belongs to the same parse of the
 same sentence. This will be important below, as otherwise, we risk
 joining together relations sentences that have nothing to do with each
-other. 
+other.
 
 A pattern template to recognize the above construct, and create a "path",
 is shown below.
@@ -356,21 +356,21 @@ is shown below.
                VariableTypeNode "ParseNode"
          ImplicationLink
             AndLink
-					;; The pattern matcher operates more efficiently if
-					;; we first ask for three words belonging to the same
-					;; sentence, and then do the rest of the pattern.
-      			WordInstanceLink 
+               ;; The pattern matcher operates more efficiently if
+               ;; we first ask for three words belonging to the same
+               ;; sentence, and then do the rest of the pattern.
+               WordInstanceLink
                   VariableNode "$wi-head"
                   VariableNode "$parse"
-      			WordInstanceLink 
+               WordInstanceLink
                   VariableNode "$wi-a"
                   VariableNode "$parse"
-      			WordInstanceLink 
+               WordInstanceLink
                   VariableNode "$wi-b"
                   VariableNode "$parse"
 
-					;; The two relations, subj and obj (this matches *any*
-					;; two relations.
+               ;; The two relations, subj and obj (this matches *any*
+               ;; two relations.
                EvaluationLink
                   VariableNode "$rel-l"
                   ListLink
@@ -382,24 +382,98 @@ is shown below.
                      VariableNode "$wi-head"
                      VariableNode "$wi-b"
                LemmaLink
+                  VariableNode "$wi-head"
+                  VariableNode "$word-head"
+               LemmaLink
                   VariableNode "$wi-a"
                   VariableNode "$word-a"
                LemmaLink
                   VariableNode "$wi-b"
                   VariableNode "$word-b"
 
-				;; The implicand, if the above pattern is matched.
-            CountLink    ;; should be EvaluationLink, actually ...
-					Callback xxxx
-					ListLink
+            ;; The implicand, if the above pattern is matched.
+            Implicand ;; See discussion below.
+
+The part preceeding the "Implicand" is the part that needs to be matched
+in order for the implicand to apply. Yes, it is very verbose, for what
+should be a relatively straight-forward pattern specification.
+
+The form of the implicand requires some dicsussion. Ideally, the implicand,
+for the example of "John threw a ball", should be the following:
+
+      EvaluationLink
+         PredicateNode "subj(throw,X) obj(throw,Y)"
+         ListLink
+            WordNode "John"
+            WordNode "ball"
+
+The name of the predicate node above is the string "subj(throw,X)
+obj(throw,Y)". This string looks suggestive, but doesn't actually have
+any meaning -- rather, it is just a unique identifier for this
+predicate. Its constructed in this way simply so that when other
+sentences are input, if they happen to have the same structure, then
+they will use the same name for the predicate node. This string could
+be hash -- all that is important is that this hash be unique, and
+reproducible for the given relations.
+
+The problem is that OpenCog does not provide any simple facilities for
+creating this hash.  Thus, there are several alternative possibilitites.
+One is to use a callback into scheme code to create this link. so, for
+example, the Implicand would be:
+
+      ExecutionLink
+         GroundedSchemaNode "scm:make-rel-path"
+         ListLink
+            VariableNode "$rel-l"
+            VariableNode "$rel-r"
+            VariableNode "$word-head"
+            VariableNode "$word-a"
+            VariableNode "$word-b"
+
+and the scheme callback would create the string and the final
+EvaluationLink:
+
+      (define (make-rel-path rel-l rel-r word-head word-a word-b)
+         (define pred-name-str
+            (string-concat   ;; create a string by concatenation
+               (cog-name rel-l) "(" (cog-name word-head) ", X)"
+               (cog-name rel-r) "(" (cog-name word-head) ", Y)"
+            )
+         )
+
+         ;; Create an evaluation link, and predicate noee with
+         ;; the computed name string
+         (EvaluationLink
+            (PredicateNode pred-name-str)
+            (ListLink word-a word-b)
+         )
+      )
+
+
+
+
+            LambdaLink
+               ListLink
                   VariableNode "$word-a"
                   VariableNode "$word-b"
+               AndLink
+                  EvaluationLink
+                     VariableNode "$rel-l"
+                     ListLink
+                        VariableNode "$word-head"
+                        VariableNode "$word-a"
+                  EvaluationLink
+                     VariableNode "$rel-r"
+                     ListLink
+                        VariableNode "$word-head"
+                        VariableNode "$word-b"
 
 
-Yes, the above is painfully long/verbose.
+Yes, the above is painfully long/verbose.  T
 
 
-   
+
+
 
 
 
@@ -445,9 +519,9 @@ probabilities, mutual information and entropy.
 
 Consider first word-pairs:
 
-	WordPairLink  ; CountTruthValue stores count
-		WordNode "red"
-		WordNode "balloon"
+   WordPairLink  ; CountTruthValue stores count
+      WordNode "red"
+      WordNode "balloon"
 
 To determine the probability P(left,right), one needs only the count
 on the WordPairLink, since P(left,right) = N(left,right) / N(*,*)
@@ -465,17 +539,17 @@ tagged with part-of-speech. To generalize this, one considers word
 lemmas (word roots or word stems), tagged with part-of-speech, and
 maybe tagged with tense, number, etc.
 
-	FeatureLink                      ; should this be PartOfSpeechLink?
-		WordNode "refer"
-		DefinedLinguisticConceptNode "verb"   ; part of speech tag
+   FeatureLink                      ; should this be PartOfSpeechLink?
+      WordNode "refer"
+      DefinedLinguisticConceptNode "verb"   ; part of speech tag
 
-	FeatureLink
-		WordNode "refer"
-		DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
+   FeatureLink
+      WordNode "refer"
+      DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
 
-	FeatureLink
-		WordNode "refer"
-		DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+   FeatureLink
+      WordNode "refer"
+      DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
 
 
 The above should be gathered together into a SetLink, as the relative
@@ -483,21 +557,21 @@ order is not important.
 
 Thus, pairs of words might be gathered together as:
 
-	CountLink  ; holds CountTruthValue for counting
-		SetLink
-			FeatureLink
-				WordNode "refer"
-				DefinedLinguisticConceptNode "verb"   ; part of speech tag
-			FeatureLink
-				WordNode "refer"
-				DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
-			FeatureLink
-				WordNode "refer"
-				DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
-		SetLink
-			FeatureLink
-				WordNode "to"
-				DefinedLinguisticConceptNode "prep"   ; part of speech tag
+   CountLink  ; holds CountTruthValue for counting
+      SetLink
+         FeatureLink
+            WordNode "refer"
+            DefinedLinguisticConceptNode "verb"   ; part of speech tag
+         FeatureLink
+            WordNode "refer"
+            DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
+         FeatureLink
+            WordNode "refer"
+            DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+      SetLink
+         FeatureLink
+            WordNode "to"
+            DefinedLinguisticConceptNode "prep"   ; part of speech tag
 
 
 Of some interest is the connection between grammatical usage/construction,
@@ -614,7 +688,7 @@ See for example, Wikipedia "mutual information" or [Ash, Chapter 1.5]
                      USP Notes
                      ---------
               Linas Vepstas November 2009
-            
+
 Notes about the paper "Unsupervised Semantic Learning", by Hoifung Poon
 and Pedro Domingos.  Notes are intended to lead to a possible
 implementation within OpenCog, maybe.
@@ -629,7 +703,7 @@ Utah borders Idaho
 
 Dependency parse:
 -----------------
-_subj(border, Utah) & _obj(border, Idaho)  
+_subj(border, Utah) & _obj(border, Idaho)
 
 
 QLF "Quasi-Logical Form":
@@ -661,14 +735,14 @@ Lx3.obj(n1, x3)
 Argument type:
 --------------
 A cluster of argument forms. e.g containing dobj and nsubjpass,
-which normalizes for semantic content of distinct syntactic 
+which normalizes for semantic content of distinct syntactic
 presentations. (just like in MTT!)
 
 Semantic cluster:
 -----------------
 Collection of semantically equivalent lambda forms. All lambda
-forms have same arity.  Cluster contains core forms and argument 
-types. 
+forms have same arity.  Cluster contains core forms and argument
+types.
 
 Abstract Lambda Form:
 ---------------------
@@ -676,7 +750,7 @@ Representationn of the semantic cluster as follows:
 Let T(n) stand for core forms, let arity of cluster be k, let
 Ai(n,xi) be the Argument type, then the ALF is
 
-Lx1.Lx2... Lxk.T(n)A1(n,x1)A2(n,x2) ...A(n,xk) 
+Lx1.Lx2... Lxk.T(n)A1(n,x1)A2(n,x2) ...A(n,xk)
 
 Yes, of course binding order is important, that's the point of the
 argument types.
@@ -684,7 +758,7 @@ argument types.
 MLN:
 ----
 Partition QLF Q into parts. Assign each part to a semantic cluster.
-Let L be a partition of Q. Then model joint probability distribution 
+Let L be a partition of Q. Then model joint probability distribution
 given Q and L i.e.  probability Pr(Q,L) of pair (Q,L)
 
 MLN predicates:
@@ -711,7 +785,7 @@ ArgType(p,i,a) & Arg(p,i,p') & In(p', c')
 Number(p,a,n)
 
 (p is member of some cluster c) and (p has some core form f)
-(arg has some arg type) and (arg has some arg form) 
+(arg has some arg type) and (arg has some arg form)
 (arg has some arg type) and (arg is some part) and (part is in a cluster)
 (p has n args of arg type a)
 
@@ -749,7 +823,7 @@ and word statistics. AAAI 1997.
 * Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical
   Attraction'' (1998) PhD Thesis
   http://citeseer.ist.psu.edu/yuret98discovery.html
-* [Lin2001] Dekang Lin and Patrick Pantel, ''DIRT – Discovery of 
+* [Lin2001] Dekang Lin and Patrick Pantel, ''DIRT – Discovery of
   Inference Rules from Text'', KDD01
 
 * [Poon2009] Hoifung Poon, Pedro Domingos, ''Unsupervised Semantic
