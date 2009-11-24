@@ -169,6 +169,8 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
                                this->createAgent(ImportanceDecayAgent::info().id, false));
     importanceDecayAgent->connectSignals(*atomSpace);
 
+    // that agent is no longer used and should probably be removed,
+    // see PetInterfaceUpdaterAgent.h for more explanation
     this->registerAgent(PetInterfaceUpdaterAgent::info().id, &petInterfaceUpdaterAgentFactory);
     petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
                                    this->createAgent(PetInterfaceUpdaterAgent::info().id, false));

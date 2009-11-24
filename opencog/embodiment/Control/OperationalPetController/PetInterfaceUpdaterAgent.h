@@ -33,6 +33,23 @@ namespace OperationalPetController
 
 class OPC;
 
+
+/**
+ * Pet Interface is a tool created for helping debugging and testing OPC.
+ * Two parts composes PetInterface, a C++ and a TCL/TK.
+ * PetInterfaceUpdaterAgent is the C++ part. It collects information about
+ * the OPC and delivers it to a Viewer Interface via network.
+ * The Viewer was coded in TCL/TK. It is a console that can be used to send
+ * commands to and receive data from the OPC. That IP and Port you've mentioned
+ * are used to stablish a communication between the OPC and the Viewer
+ * Interface. However, it is a legacy code. It was only useful during a
+ * period where the Petaverse developers hadn't the Multiverse Proxy/Client.
+ * That tool becomes obsolete and perhaps could be removed from the repository.
+ *
+ * It seems the Viewer TCL script was not included into the repo when
+ * the Petaverse code was merged with the OpenCog one, that's why one cannot
+ * find a second file which contains the term "LASTSELECTEDSCHEMA" for instance.
+ **/
 class PetInterfaceUpdaterAgent : public opencog::Agent
 {
 

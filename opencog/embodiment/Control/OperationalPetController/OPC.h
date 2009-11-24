@@ -255,6 +255,9 @@ public:
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
+
+    // that agent is no longer used and should probably be removed,
+    // see PetInterfaceUpdaterAgent.h for more explanation
     SingletonFactory<PetInterfaceUpdaterAgent, Agent> petInterfaceUpdaterAgentFactory;
 
 }; // class
