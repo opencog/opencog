@@ -24,7 +24,7 @@
 #ifndef LEARNING_AGENT_MODE_HANDLER_H
 #define LEARNING_AGENT_MODE_HANDLER_H
 
-#include <opencog/embodiment/Control/OperationalPetController/BaseAgentModeHandler.h>
+#include "BaseAgentModeHandler.h"
 
 namespace OperationalPetController
 {

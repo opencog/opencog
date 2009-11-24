@@ -23,9 +23,10 @@
 #ifndef BASE_AGENT_MODE_HANDLER
 #define BASE_AGENT_MODE_HANDLER
 
-#include <opencog/embodiment/Control/AgentModeHandler.h>
 #include <opencog/spatial/VisibilityMap.h>
 #include <queue>
+
+#include "../AgentModeHandler.h"
 
 namespace OperationalPetController
 {
