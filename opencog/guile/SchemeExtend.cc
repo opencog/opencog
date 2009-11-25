@@ -72,11 +72,15 @@ void FuncEnviron::do_register(const char * name)
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
+	scm_c_define ("bloort", smob);
+
+	scm_c_eval_string("(define (bingo) (opencog-extension bloort))");
 }
 
 SCM FuncEnviron::do_call(SCM args)
 {
 
+	printf("was called\n");
 	return SCM_EOL;
 }
 
@@ -143,8 +147,7 @@ class MyTestClass
 
 int main ()
 {
-	// SchemeEval &eval = SchemeEval::instance();
-	SchemeEval::instance();
+	SchemeEval &eval = SchemeEval::instance();
 
 	MyTestClass *mtc = new MyTestClass(42);
 
@@ -152,5 +155,9 @@ int main ()
 
 	printf("yo\n");
 
+	std::string rslt = eval.eval("(bingo)");
+	printf("duuude bingo is %d %s\n", eval.eval_error(), rslt.c_str());
+
+	printf("bye\n");
 	return  0;
 }
