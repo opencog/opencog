@@ -229,13 +229,16 @@ Handle opencog::pln::applyRule(const string& ruleName,
 {
     static RuleProvider* rp = new DefaultVariableRuleProvider;
     const Rule* rule = rp->findRule(ruleName);
-    pHandleSeq phs = ASW()->realToFakeHandles(premises);
-    vector<Vertex> vv;
-    copy(phs.begin(), phs.end(), back_inserter(vv));
-    BoundVertex bv = rule->compute(vv);
-    vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
-    // ignore VersionHandle for now
-    return vhp.first;
+    if(rule) {
+        pHandleSeq phs = ASW()->realToFakeHandles(premises);
+        vector<Vertex> vv;
+        copy(phs.begin(), phs.end(), back_inserter(vv));
+        BoundVertex bv = rule->compute(vv);
+        vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
+        // ignore VersionHandle for now
+        return vhp.first;
+    }
+    else return Handle::UNDEFINED;
 }
 
 template <typename T>

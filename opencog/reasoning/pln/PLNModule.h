@@ -117,15 +117,18 @@ void infer(Handle h, int &steps, bool setTarget);
 
 
 /**
- * that function apply a PLN inference rule given its name and its  premises
+ * that function apply a PLN inference rule given its name and its premises
  * to produce the conclusion. The set of rules is taken from
  * DefaultVariableRuleProvider.
+ * If the name rule does not correspond to any declared rules
+ * then the Handle returned is UNDEFINED_HANDLE
  * NOTE: VersionHandle is ignored for now
  *
  * @param rule_name the name of PLN rule to apply
  * @param premises the list of Handle premises
  *
- * @return the Handle of the conclusion.
+ * @return the Handle of the conclusion. Handle::UNDEFINED if no rule
+ *         corresponds to ruleName
  */
 Handle applyRule(const std::string& ruleName, const HandleSeq& premises);
 
