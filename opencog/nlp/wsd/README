@@ -628,6 +628,40 @@ is stored as a similarity link, in the atom space, between the two word
 senses. The caching is performed by class SenseCache. For sentences with
 multiple parses, the use of caching provides a major performance boost.
 
+clean start:
+3294 edges for 36 word pairs (rate=160.967140)
+494 edges for 45 word pairs (rate=560.458623)
+4179 edges for 90 word pairs (rate=1023.431412)
+227 edges for 60 word pairs (rate=172.097597)
+24 edges for 36 word pairs (rate=44.365162)
+37 edges for 54 word pairs (rate=47.401926)
+603 edges for 78 word pairs (rate=55.337474)
+182 edges for 117 word pairs (rate=62.594903)
+32 edges for 21 word pairs (rate=66.643619)
+407 edges for 91 word pairs (rate=102.196214)
+35 edges for 56 word pairs (rate=43.196438)
+38 edges for 28 word pairs (rate=106.432441)
+311 edges for 72 word pairs (rate=351.375108)
+2139 edges for 171 word pairs (rate=110.845516)
+551 edges for 152 word pairs (rate=108.684289)
+1872 edges for 105 word pairs (rate=106.707945)
+5009 edges for 285 word pairs (rate=229.150653)
+2437 edges for 90 word pairs (rate=584.059233)
+2290 edges for 90 word pairs (rate=190.564907)
+1820 edges for 190 word pairs (rate=141.599178)
+4078 edges for 300 word pairs (rate=279.677327)
+5366 edges for 180 word pairs (rate=255.627497)
+3777 edges for 135 word pairs (rate=386.990560)
+
+hour later:
+7983 edges for 143 word pairs (rate=177.777639)
+3566 edges for 253 word pairs (rate=119.823203)
+3494 edges for 78 word pairs (rate=150.161062)
+4288 edges for 156 word pairs (rate=301.568366)
+2244 edges for 78 word pairs (rate=221.805891)
+394 edges for 56 word pairs (rate=648.082810)
+
+
 
 Ideas/TODO
 ----------

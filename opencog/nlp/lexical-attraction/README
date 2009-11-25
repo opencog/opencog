@@ -416,6 +416,11 @@ they will use the same name for the predicate node. This string could
 be hash -- all that is important is that this hash be unique, and
 reproducible for the given relations.
 
+Why do we want the implicand to take this simple form? Because when the
+form is simple, then other pattern matching templates can easily find it,
+and manipulate it.  This allows some of the techniques being generally
+discussed here to be applied hierarchically/recursively.
+
 The problem is that OpenCog does not provide any simple facilities for
 creating this hash.  Thus, there are several alternative possibilitites.
 One is to use a callback into scheme code to create this link. so, for
@@ -449,6 +454,8 @@ EvaluationLink:
          )
       )
 
+This seems workable, but kind of hacky -- calling out to a special
+purpose scheme function just seems hacky/unclean.
 
 
 
@@ -469,7 +476,6 @@ EvaluationLink:
                         VariableNode "$word-b"
 
 
-Yes, the above is painfully long/verbose.  T
 
 
 
