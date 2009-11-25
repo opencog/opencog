@@ -92,6 +92,9 @@ void NetworkServer::stop()
 {
     logger().debug("[NetworkServer] stop");
     _running = false;
+#ifdef REPLACE_CSOCKETS_BY_ASIO
+    io_service.stop();
+#endif
 }
 
 void NetworkServer::run()
@@ -99,7 +102,11 @@ void NetworkServer::run()
     logger().debug("[NetworkServer] run");
     while (_running) {
 #ifdef REPLACE_CSOCKETS_BY_ASIO
-        io_service.run();
+        try {
+            io_service.run();
+        } catch (boost::system::system_error& e) {
+            logger().error("Error in boost::asio io_service::run() => %s", e.what());
+        }
         usleep(500000); // avoids busy wait
 #else
         // we should use a larger value for the select timeout (< 1s prevents
