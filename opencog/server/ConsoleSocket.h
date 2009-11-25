@@ -26,7 +26,6 @@
 #define _OPENCOG_CONSOLE_SOCKET_H
 
 #include <string>
-#include <sstream>
 #include <tr1/memory>
 
 #include <opencog/server/IHasMimeType.h>
@@ -83,7 +82,7 @@ class ConsoleSocket : public TcpSocket,
 private:
 
     Request* _request;
-    std::stringstream _buffer;
+    std::string _buffer;
     SocketHolder *holder;
     GenericShell *_shell;
 

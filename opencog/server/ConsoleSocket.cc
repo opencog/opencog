@@ -23,7 +23,6 @@
  */
 
 #include <string>
-#include <sstream>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/ConsoleSocket.h>
@@ -180,27 +179,27 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
     logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
     free(_tmp);
 
-    _buffer.write(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.str().c_str());
-    char lastchars[3];
-    _buffer.seekg((long) _buffer.tellp() - 3L);
-    _buffer.read(lastchars, 3);
-    logger().debug("[ConsoleSocket] last 3 chars: %x, %x, %x", lastchars[0], lastchars[1], lastchars[2]);
-    if (_buffer.good()) {
-        if ((lastchars[0] == 0x4 && lastchars[1] == 0xd && lastchars[2] == 0xa) ||
-            (lastchars[1] == 0x4 && lastchars[2] == 0xa)) {
-
-            logger().debug("[ConsoleSocket] found EOT; dispatching");
-            // found the EOT pattern. dispatch the request and reset
-            // the socket's line protocol flag
-            _request->addParameter(_buffer.str());
-            CogServer& cogserver = static_cast<CogServer&>(server());
-            cogserver.pushRequest(_request);
-            SetLineProtocol(true);
-        }
-    } else {
-        logger().error("unable to retrieve last 3 chars (buffer contents=[%s])", _buffer.str().c_str());
-        return;
+    _buffer.append(buf, len);
+    logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());
+    size_t buffer_len = _buffer.length();
+    bool rawDataEnd = false;
+    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa)) {
+        if (_buffer.at(buffer_len-2) == 0x4) {
+            rawDataEnd = true;
+        } else if (buffer_len > 2 && 
+                   (_buffer.at(buffer_len-2) == 0xd) && 
+                   (_buffer.at(buffer_len-3) == 0x4)) {
+            rawDataEnd = true;
+        } 
+    }
+    if (rawDataEnd) {
+        logger().debug("[ConsoleSocket] found EOT; dispatching");
+        // found the EOT pattern. dispatch the request and reset
+        // the socket's line protocol flag
+        _request->addParameter(_buffer);
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        cogserver.pushRequest(_request);
+        SetLineProtocol(true);
     }
 }
 
