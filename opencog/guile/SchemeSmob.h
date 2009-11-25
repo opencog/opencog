@@ -36,9 +36,10 @@ class SchemeSmob
 	
 		enum {
 			COG_HANDLE = 1,
-			COG_TV,  // truth values
-			COG_VH,  // version handles
-			COG_AV,  // attention values
+			COG_TV,     // truth values
+			COG_VH,     // version handles
+			COG_AV,     // attention values
+			COG_EXTEND, // callbacks into C++ code.
 		};
 	
 		static bool is_inited;

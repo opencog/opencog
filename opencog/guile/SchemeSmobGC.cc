@@ -25,6 +25,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 		case COG_TV: // Nothing to do here ...
 		case COG_VH: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
+		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
@@ -74,6 +75,9 @@ size_t SchemeSmob::free_misc(SCM node)
 			delete vh;
 			return 0;
 
+		case COG_EXTEND:
+			return 0;
+
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
 			        "don't know how to free this type: %d\n",
@@ -98,6 +102,9 @@ std::string SchemeSmob::misc_to_string(SCM node)
 
 		case COG_VH:
 			return vh_to_string((VersionHandle *) SCM_SMOB_DATA(node));
+
+		case COG_EXTEND:
+			return "#<opencog extension>\n";
 
 		default:
 			return "#<unknown opencog type>\n";
