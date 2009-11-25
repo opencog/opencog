@@ -26,8 +26,20 @@ using namespace opencog;
 
 /* ============================================================== */
 /**
- * Convert SCM to atom pointer
+ * Verify that SCM arg is an actual opencog Handle; returning Handle
+ *
+ * This routine is meant for validating arguments passed into
+ * guile-wrapped C++ code.
+ *
+ * This routine takes an SCM arg and a string subriutine name. It 
+ * verifies that the arg is actually a handle (and not, for example, 
+ * an int, string, etc.)  If its not a handle, it throws an SCM error,
+ * using the subroutine name in the error message.  (Such an error is 
+ * caught by the shell, and printed as a stack trace at the shell 
+ * prompt).  If the arg is a handle, then the actual opencog handle
+ * is returned.
  */
+
 Handle SchemeSmob::verify_handle (SCM satom, const char * subrname)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
