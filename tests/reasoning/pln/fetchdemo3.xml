@@ -26,7 +26,7 @@
                 <Element class="PredicateNode" name="+++"/>
             </EvaluationLink>
         </ImplicationLink>
-        <ForallLink strength="1.000000" confidence="0.000000">
+        <ForAllLink strength="1.000000" confidence="0.000000">
             <ListLink strength="1.000000" confidence="0.000000">
                 <Element class="VariableNode" name="$a"/>
                 <Element class="VariableNode" name="$c"/>
@@ -47,7 +47,7 @@
                     </AndLink>
                 </ImplicationLink>
             </ImplicationLink>
-        </ForallLink>
+        </ForAllLink>
         <ImplicationLink strength="0.800000" confidence="0.999000">
             <AndLink strength="1.000000" confidence="0.000000">
                 <EvaluationLink strength="1.000000" confidence="0.000000">
@@ -140,7 +140,7 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

@@ -6,7 +6,7 @@
     <ConceptNode strength="1.000000" confidence="0.000000" name="toy"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="found_under"/>
     <ConceptNode strength="1.000000" confidence="0.000000" name="red_bucket_6"/>
-    <ForallLink strength="1.000000" confidence="0.833000">
+    <ForAllLink strength="1.000000" confidence="0.833000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$t"/>
         </ListLink>
@@ -23,11 +23,11 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

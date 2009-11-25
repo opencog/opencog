@@ -25,7 +25,7 @@
         </EvaluationLink>
     </ImplicationLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$obj"/>
-    <ForallLink strength="1.000000" confidence="0.800000">
+    <ForAllLink strength="1.000000" confidence="0.800000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$obj"/>
         </ListLink>
@@ -48,12 +48,12 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="just_done"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$10000"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="do"/>
-    <ForallLink strength="1.000000" confidence="0.999000">
+    <ForAllLink strength="1.000000" confidence="0.999000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$10000"/>
         </ListLink>
@@ -63,7 +63,7 @@
                 <Element class="VariableNode" name="$10000"/>
             </ListLink>
         </EvaluationLink>
-    </ForallLink>
+    </ForAllLink>
     <FWVariableNode strength="1.000000" confidence="0.000000" name="$1"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="can_do"/>
     <ImplicationLink strength="1.000000" confidence="0.999000">
@@ -204,7 +204,7 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

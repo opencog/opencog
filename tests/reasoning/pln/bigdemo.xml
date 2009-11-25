@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <list>
-    <ForallLink strength="1.000000" confidence="0.999000">
+    <ForAllLink strength="1.000000" confidence="0.999000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X011"/>
             <Element class="VariableNode" name="X010"/>
@@ -38,7 +38,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="0.920000" confidence="0.000000" name="R1"/>
     <ConceptNode strength="1.000000" confidence="0.000000" name="X1"/>
     <EvaluationLink strength="0.870000" confidence="0.000000">
@@ -50,7 +50,7 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X007"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="R000"/>
     <ConceptNode strength="1.000000" confidence="0.000000" name="reflexiveRelation"/>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X007"/>
             <Element class="VariableNode" name="R000"/>
@@ -67,7 +67,7 @@
                 <Element class="ConceptNode" name="reflexiveRelation"/>
             </InheritanceLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ExtensionalInheritanceLink strength="0.990000" confidence="0.990000">
         <Element class="ConceptNode" name="Osama"/>
         <Element class="ConceptNode" name="AlQaeda"/>
@@ -135,7 +135,7 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X005"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="T000"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="atTime"/>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X003"/>
             <Element class="VariableNode" name="X005"/>
@@ -172,11 +172,11 @@
                 </EvaluationLink>
             </AndLink>
         </EquivalenceLink>
-    </ForallLink>
+    </ForAllLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAD"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="X008"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAE"/>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$AAAAAAAAD"/>
             <Element class="VariableNode" name="X008"/>
@@ -204,7 +204,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="1.000000" confidence="0.000000" name="x014"/>
     <AndLink strength="1.000000" confidence="0.000000">
         <EvaluationLink strength="1.000000" confidence="0.000000">
@@ -261,7 +261,7 @@
     </EvaluationLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="X001"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="test3"/>
-    <ForallLink strength="0.250000" confidence="0.990000">
+    <ForAllLink strength="0.250000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X001"/>
         </ListLink>
@@ -279,7 +279,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="test2"/>
     <ImplicationLink strength="1.000000" confidence="0.999000">
         <EvaluationLink strength="1.000000" confidence="0.250000">
@@ -302,7 +302,7 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAA"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="X002"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="friendOf"/>
-    <ForallLink strength="0.250000" confidence="0.990000">
+    <ForAllLink strength="0.250000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$AAAAAAAAA"/>
             <Element class="VariableNode" name="X002"/>
@@ -326,10 +326,10 @@
                 <Element class="ConceptNode" name="terrorist"/>
             </InheritanceLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAB"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$AAAAAAAAC"/>
-    <ForallLink strength="0.250000" confidence="0.990000">
+    <ForAllLink strength="0.250000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$AAAAAAAAB"/>
             <Element class="VariableNode" name="$AAAAAAAAC"/>
@@ -350,7 +350,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="1.000000" confidence="0.000000" name="Britney2"/>
     <ConceptNode strength="1.000000" confidence="0.000000" name="Osama2"/>
     <EvaluationLink strength="0.800000" confidence="0.200000">
@@ -364,7 +364,7 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X004"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="X006"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="wasKilled"/>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X004"/>
             <Element class="VariableNode" name="X006"/>
@@ -390,11 +390,11 @@
                 </ListLink>
             </EvaluationLink>
         </EquivalenceLink>
-    </ForallLink>
+    </ForAllLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$KILLER"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$KILLED"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="isDead"/>
-    <ForallLink strength="1.000000" confidence="0.000000">
+    <ForAllLink strength="1.000000" confidence="0.000000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$KILLER"/>
             <Element class="VariableNode" name="$KILLED"/>
@@ -414,7 +414,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="killerOf"/>
     <InheritanceLink strength="0.900000" confidence="0.000000">
         <EvaluationLink strength="0.800000" confidence="0.000000">
@@ -441,7 +441,7 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ScholemLink" value="ScholemLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>

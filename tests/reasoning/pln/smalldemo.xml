@@ -88,7 +88,7 @@
     <VariableNode strength="1.000000" confidence="0.000000" name="X008"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="R000"/>
     <ConceptNode strength="1.000000" confidence="0.000000" name="symmetricRelation"/>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X007"/>
             <Element class="VariableNode" name="X008"/>
@@ -116,7 +116,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <PredicateNode strength="1.000000" confidence="0.000000" name="test1"/>
     <EvaluationLink strength="1.000000" confidence="0.999000">
         <Element class="PredicateNode" name="test1"/>
@@ -216,7 +216,7 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

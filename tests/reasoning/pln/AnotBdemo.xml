@@ -42,7 +42,7 @@
     </AndLink>
     <VariableNode strength="1.000000" confidence="0.000000" name="$t"/>
     <VariableNode strength="1.000000" confidence="0.000000" name="$b"/>
-    <ForallLink strength="1.000000" confidence="0.952000">
+    <ForAllLink strength="1.000000" confidence="0.952000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="$t"/>
             <Element class="VariableNode" name="$b"/>
@@ -73,7 +73,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___"/>
     <ConceptNode strength="1.000000" confidence="0.167000" name="red_bucket_6"/>
     <ConceptNode strength="1.000000" confidence="0.167000" name="toy_6"/>
@@ -224,7 +224,7 @@
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
         <tag name="AndLink" value="AndLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

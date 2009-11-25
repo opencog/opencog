@@ -1,3 +1,4 @@
+(ConceptNode "killer" (stv 0.050000001 0.99900001))
 (ConceptNode "terrorist" (stv 0.0099999998 0.99900001))
 (ConceptNode "___PLN___")
 (ConceptNode "Osama" (stv 0.001 0.99900001))
@@ -8,7 +9,6 @@
 (ConceptNode "Judea" (stv 9.9999997e-06 0.99900001))
 (ConceptNode "Muhammad" (stv 9.9999997e-06 0.99900001))
 (ConceptNode "AlQaeda" (stv 9.9999997e-05 0.99900001))
-(ConceptNode "killer" (stv 0.050000001 0.99900001))
 (InheritanceLink (stv 0.98000002 0.99000001) (ConceptNode "Osama" (stv 0.001 0.99900001))
     (ConceptNode "terrorist" (stv 0.0099999998 0.99900001)))
 (ExtensionalInheritanceLink (stv 0.99000001 0.99000001) (ConceptNode "Muhammad" (stv 9.9999997e-06 0.99900001))

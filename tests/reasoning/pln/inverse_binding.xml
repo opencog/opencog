@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <list>
-    <ForallLink strength="0.990000" confidence="0.990000">
+    <ForAllLink strength="0.990000" confidence="0.990000">
         <ListLink strength="1.000000" confidence="0.000000">
             <Element class="VariableNode" name="X007"/>
             <Element class="VariableNode" name="X008"/>
@@ -21,7 +21,7 @@
                 </ListLink>
             </EvaluationLink>
         </ImplicationLink>
-    </ForallLink>
+    </ForAllLink>
     <ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___"/>
     <ConceptNode strength="0.001000" confidence="0.999000" name="Osama"/>
     <ConceptNode strength="0.000010" confidence="0.999000" name="Abu"/>
@@ -46,7 +46,7 @@
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>

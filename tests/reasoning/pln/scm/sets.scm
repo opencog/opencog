@@ -1,1 +1,0 @@
-(ConceptNode "___PLN___")

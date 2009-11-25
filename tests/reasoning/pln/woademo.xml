@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <list>
     <ListLink strength="1.000000" confidence="0.000000">
-        <ForallLink strength="0.900000" confidence="0.999000">
+        <ForAllLink strength="0.900000" confidence="0.999000">
             <ListLink strength="1.000000" confidence="0.000000">
                 <Element class="VariableNode" name="$2"/>
                 <Element class="VariableNode" name="$3"/>
@@ -20,8 +20,8 @@
                     </ListLink>
                 </EvaluationLink>
             </ImplicationLink>
-        </ForallLink>
-        <ForallLink strength="0.800000" confidence="0.999000">
+        </ForAllLink>
+        <ForAllLink strength="0.800000" confidence="0.999000">
             <ListLink strength="1.000000" confidence="0.000000">
                 <Element class="VariableNode" name="$1"/>
             </ListLink>
@@ -37,7 +37,7 @@
                     <Element class="VariableNode" name="$1"/>
                 </SimultaneousAndLink>
             </ImplicationLink>
-        </ForallLink>
+        </ForAllLink>
         <Element class="ConceptNode" name="B1"/>
         <Element class="ConceptNode" name="blockobject"/>
         <InheritanceLink strength="0.999000" confidence="0.900000">
@@ -62,7 +62,7 @@
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="ListLink" value="ListLink"/>
-        <tag name="ForallLink" value="ForallLink"/>
+        <tag name="ForAllLink" value="ForallLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
         <tag name="VariableNode" value="VariableNode"/>
         <tag name="EvaluationLink" value="EvaluationLink"/>
