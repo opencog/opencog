@@ -697,6 +697,23 @@ ten hours later:
 These number suggest that the current "caching" mechanism is a loosing
 strategy. Looking at the code, its not hard to see why.
 
+But wait -- shows not over: after 12 hours:
+1104 edges for 99 word pairs (rate=157.804099)
+1128 edges for 55 word pairs (rate=79.791207)
+2578 edges for 117 word pairs (rate=451.047206)
+2312 edges for 195 word pairs (rate=185.579256)
+1683 edges for 78 word pairs (rate=202.813602)
+2263 edges for 195 word pairs (rate=114.505580)
+8368 edges for 312 word pairs (rate=242.270232)
+3498 edges for 216 word pairs (rate=726.549312)
+7389 edges for 276 word pairs (rate=136.556129)
+1734 edges for 99 word pairs (rate=2574.969632)
+1600 edges for 77 word pairs (rate=940.313595)
+729 edges for 55 word pairs (rate=378.761704)
+300 edges for 21 word pairs (rate=340.650119)
+
+wtf ... these rates are higher than ever.. and are a fantastic speedup!
+
 
 Ideas/TODO
 ----------
