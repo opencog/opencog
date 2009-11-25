@@ -169,12 +169,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
                                this->createAgent(ImportanceDecayAgent::info().id, false));
     importanceDecayAgent->connectSignals(*atomSpace);
 
-    // that agent is no longer used and should probably be removed,
-    // see PetInterfaceUpdaterAgent.h for more explanation
-    this->registerAgent(PetInterfaceUpdaterAgent::info().id, &petInterfaceUpdaterAgentFactory);
-    petInterfaceUpdaterAgent = static_cast<PetInterfaceUpdaterAgent*>(
-                                   this->createAgent(PetInterfaceUpdaterAgent::info().id, false));
-
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
@@ -193,13 +187,6 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
         // TODO: Create a config parameter to control this frequency
         importanceDecayAgent->setFrequency(15);
         this->startAgent(importanceDecayAgent);
-    }
-
-    // local map 2D interface
-    if (config().get_bool("PET_INTERFACE_ENABLED")) {
-//        PetInterfaceUpdaterTask::startGUI();
-//        petInterfaceUpdaterAgent->setFrequency(config().get_int("PET_INTERFACE_UPDATE_PERIOD"));
-//        this->startAgent(petInterfaceUpdaterAgent);
     }
 
     // TODO: This should be done only after NetworkElement is initialized
@@ -251,7 +238,6 @@ OPC::~OPC()
     delete (procedureInterpreterAgent);
     delete (importanceDecayAgent);
     delete (actionSelectionAgent);
-    delete (petInterfaceUpdaterAgent);
 
 #ifndef DELETE_ATOMSPACE 
     // TODO: It takes too much time to delete atomspace. So, atomspace removal

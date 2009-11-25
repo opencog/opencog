@@ -39,7 +39,6 @@
 #include "ProcedureInterpreterAgent.h"
 #include "ActionSelectionAgent.h"
 #include "ImportanceDecayAgent.h"
-#include "PetInterfaceUpdaterAgent.h"
 
 #include "RuleEngine.h"
 
@@ -113,7 +112,6 @@ private:
     ProcedureInterpreterAgent* procedureInterpreterAgent;
     ImportanceDecayAgent* importanceDecayAgent;
     ActionSelectionAgent* actionSelectionAgent;
-    PetInterfaceUpdaterAgent* petInterfaceUpdaterAgent;
 
     RuleEngine* ruleEngine;
 
@@ -255,10 +253,6 @@ public:
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
-
-    // that agent is no longer used and should probably be removed,
-    // see PetInterfaceUpdaterAgent.h for more explanation
-    SingletonFactory<PetInterfaceUpdaterAgent, Agent> petInterfaceUpdaterAgentFactory;
 
 }; // class
 }  // namespace

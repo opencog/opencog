@@ -15,8 +15,6 @@ LINK_LIBRARIES(#PatternUTest
 	query
 	server
 	${Boost_SIGNALS_LIBRARY}
-	${CSOCKETS_LIBRARIES}
-	${OPENSSL_LIBRARIES}
 )
 
 ADD_CXXTEST(PatternUTest)

@@ -7,7 +7,6 @@ ADD_LIBRARY (OpcLib
     ImportanceDecayAgent
     ActionSelectionAgent
     SleepAgent
-    PetInterfaceUpdaterAgent
     MockOpcHCTest
     HCTestAgent
     RuleEngine

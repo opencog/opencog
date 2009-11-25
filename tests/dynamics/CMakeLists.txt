@@ -17,8 +17,6 @@ LINK_LIBRARIES (
         attention
 	${Boost_SIGNALS_LIBRARY}
 	${GSL_LIBRARIES}
-	${CSOCKETS_LIBRARIES}
-	${OPENSSL_LIBRARIES}
 )
 
 ADD_CXXTEST(ForgettingAgentUTest)

@@ -41,9 +41,6 @@ $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
 $binDirH/opencog/embodiment/RuleValidation/Processor/ruleProcessor \
-$binDirH/opencog/embodiment/PetaverseProxySimulator/pvpSimulator \
-$binDirH/opencog/embodiment/AGISimSim/server/AGISimSimServer \
-$pdh/opencog/embodiment/AGISimSim/server/simconfig.def \
 ./killpb.csh \
 ./cleanup.csh \
 ./pb.csh \
@@ -64,9 +61,6 @@ $pdh/opencog/embodiment/pet_traits_princess.lua \
 $pdh/opencog/embodiment/pet_traits_sleepy.lua \
 $pdh/opencog/embodiment/RuleValidation/VirtualWorldData/VirtualWorld.xsd \
 $pdh/opencog/embodiment/RuleValidation/Processor/validation_core.lua \
-$pdh/opencog/embodiment/PetaverseProxySimulator/pvpsim.conf \
-$pdh/opencog/embodiment/PetaverseProxySimulator/PVPSimulatorInterface.tcl \
-$pdh/opencog/embodiment/Control/OperationalPetController/PetInterface.tcl \
 ./SPCTools.py \
 $pdh/opencog/embodiment/frames2relex.rules \
 ]
@@ -85,12 +79,6 @@ $pdh/opencog/embodiment/scm/language-comprehension.scm \
 $pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
 $pdh/opencog/embodiment/scm/command-resolution-rules.scm \
 $pdh/opencog/embodiment/scm/question-answering.scm \
-]
-
-set flistAGI [list \
-$pdh/opencog/embodiment/AGISimSim/server/data/simworld.def \
-$pdh/opencog/embodiment/AGISimSim/server/data/sl_script_case01.def \
-$pdh/opencog/embodiment/AGISimSim/server/data/sl_script.def \
 ]
 
 if {$type_dist == "dev"} {
@@ -120,10 +108,6 @@ exec mkdir -p $distDir/data
 
 foreach file $flist {
     exec cp -r $file $distDir
-}
-
-foreach file $flistAGI {
-    exec cp -r $file $distDir/data
 }
 
 foreach file $flistconfig {

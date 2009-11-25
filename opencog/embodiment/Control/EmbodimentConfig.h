@@ -83,8 +83,6 @@ protected:
             // OPC settings
             "UNKNOWN_PET_OWNER",            "no_owner_id",
             "UNKNOWN_PET_NAME",             "no_name",
-            "PET_INTERFACE_ENABLED",        "false",
-            "PET_INTERFACE_UPDATE_PERIOD",  "10", // in cycles
             "NAVIGATION_ALGORITHM",         "tangentbug", // options: tangentbug, astar or hpa
             "HPA_MAXIMUM_CLUSTERS",         "16",
 

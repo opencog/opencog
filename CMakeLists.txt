@@ -58,9 +58,6 @@ ELSE (WIN32)
 	SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
 ENDIF (WIN32)
 
-FIND_PACKAGE(CSockets REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
-
 # hypertable requires boost iostreams
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
