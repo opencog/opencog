@@ -13,6 +13,11 @@ namespace opencog {
 
 class FuncEnviron
 {
+	private:
+		static bool is_inited;
+		static void init(void);
+		static SCM do_call(SCM);
+
 	public:
 		void do_register(const char *);
 		virtual SCM invoke (SCM) = 0;
@@ -49,13 +54,31 @@ inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 
 using namespace opencog;
 
+bool FuncEnviron::is_inited = false;
+
+#define C(X) ((SCM (*) ()) X)
+
+void FuncEnviron::init(void)
+{
+	if (is_inited) return;
+	is_inited = true;
+	scm_c_define_gsubr("opencog-extension", 1,1,0, C(do_call));
+}
+
+
 void FuncEnviron::do_register(const char * name)
 {
+	init();
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
 }
 
+SCM FuncEnviron::do_call(SCM args)
+{
+
+	return SCM_EOL;
+}
 
 #if 0
 struct FuncEnv
@@ -89,7 +112,6 @@ SCM do_call (SCM env, SCM args)
 
 void init (void)
 {
-	scm_c_define_gsubr("opencog-extension", 1,1,0, C(do_call));
 }
 
 void SchemeExtend::declare(const char * name, H_V func, void *user_data)
@@ -121,12 +143,11 @@ class MyTestClass
 
 int main ()
 {
-	SchemeEval &eval = SchemeEval::instance();
+	// SchemeEval &eval = SchemeEval::instance();
+	SchemeEval::instance();
 
-	printf("yo\n");
 	MyTestClass *mtc = new MyTestClass(42);
 
-	printf("yo\n");
 	declare("bingo", &MyTestClass::my_func, mtc);
 
 	printf("yo\n");

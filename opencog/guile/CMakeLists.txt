@@ -18,7 +18,7 @@ TARGET_LINK_LIBRARIES(smob
 	wsd
 )
 
-ADD_EXECUTABLE(ext
+ADD_EXECUTABLE(extyy
 	SchemeExtend.cc
 )
 TARGET_LINK_LIBRARIES(extyy
