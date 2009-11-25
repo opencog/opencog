@@ -31,11 +31,6 @@ boost       -- a C++ utilities package -
                Debian/Ubuntu package libboost-dev
                Version 1.35 or greater is required for embodiment
 
-C++ Sockets -- a cross-platform C++ TCP/IP sockets wrapper 
-               http://www.alhem.net/Sockets/
-               (Not originally available in Debian/Ubuntu; get 
-               csockets-dev from https://launchpad.net/~dhart/+archive/ppa)
-
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
                Debian/Ubuntu package libexpat1-dev
@@ -51,9 +46,6 @@ guile       -- Embedded scheme interperter
 unixODBC    -- Generic SQL Database client access libraries
                http://www.unixodbc.org/
                Debian/Ubuntu packages unixodbc-dev
-
-openssl     -- SSL sockets library 
-               Debian/Ubuntu package libssl-dev
 
 libgsl      -- The GNU Scientific Library
                Debian/Ubuntu package libgsl0-dev
