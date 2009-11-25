@@ -18,6 +18,7 @@
 #include "MihalceaEdge.h"
 
 #include <stdio.h>
+#include <sys/time.h>
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -80,8 +81,12 @@ void MihalceaEdge::annotate_parse(Handle h)
 
 	// At this point, "words" contains all of the relex-participating
 	// words in the parse. Loop over word-pairs, and annotate them.
+#ifdef DEBUG
 	word_pair_count = 0;
 	edge_count = 0;
+	struct timeval start;
+	gettimeofday(&start, NULL);
+#endif
 	std::set<Handle>::const_iterator f;
 	for (f = words.begin(); f != words.end(); ++f)
 	{
@@ -93,8 +98,13 @@ void MihalceaEdge::annotate_parse(Handle h)
 		}
 	}
 #ifdef DEBUG
-	printf("; MihalceaEdge::annotate_parse added %d edges for %d word pairs\n",
-		edge_count, word_pair_count);
+	struct timeval finish, elapsed;
+	gettimeofday(&finish, NULL);
+	timersub(&finish, &start, &elapsed);
+	double secs = elapsed.tv_sec + 1.0e-6 * elapsed.tv_usec;
+	double rate = edge_count / secs;
+	printf("; MihalceaEdge::annotate_parse added %d edges for %d word pairs (rate=%f)\n",
+		edge_count, word_pair_count, rate);
 #endif
 }
 
@@ -123,8 +133,12 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 	// At this point, "pa_words" contains all of the relex-participating
 	// words in parse ha, and "words" contains those of parse hb.
 	// Loop over word-pairs, and annotate them.
+#ifdef DEBUG
 	word_pair_count = 0;
 	edge_count = 0;
+	struct timeval start;
+	gettimeofday(&start, NULL);
+#endif
 	std::set<Handle>::const_iterator ia;
 	for (ia = pa_words.begin(); ia != pa_words.end(); ia++)
 	{
@@ -135,8 +149,13 @@ void MihalceaEdge::annotate_parse_pair(Handle ha, Handle hb)
 		}
 	}
 #ifdef DEBUG
-	printf ("; annotate_parse_pair: added %d edges for %d word pairs\n",
-		edge_count, word_pair_count);
+	struct timeval finish, elapsed;
+	gettimeofday(&finish, NULL);
+	timersub(&finish, &start, &elapsed);
+	double secs = elapsed.tv_sec + 1.0e-6 * elapsed.tv_usec;
+	double rate = edge_count / secs;
+	printf("; annotate_parse_pair added %d edges for %d word pairs (rate=%f)\n",
+		edge_count, word_pair_count, rate);
 #endif
 }
 
