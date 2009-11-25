@@ -6,21 +6,58 @@
  * Copyright (C) 2009 Linas Vepstas
  */
 
+#include <opencog/atomspace/Handle.h>
+#include <libguile.h>
+
+namespace opencog {
+
+class FuncEnviron
+{
+	public:
+		void do_register(const char *);
+		virtual SCM invoke (SCM) = 0;
+};
+
+template<class T>
+class FuncEnv : public FuncEnviron
+{
+	virtual SCM invoke (SCM args)
+	{
+		return SCM_EOL;
+	}
+	public:
+		Handle (T::*method)(Handle);
+		T* that;
+};
+
 template<class T>
 inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 {
+	FuncEnv<T> *fet = new FuncEnv<T>;
+	fet->do_register(name);
+	fet->method = cb;
+	fet->that = data;
 }
 
-
-class SchemeExtend
-{
-	private:
-	public:
-		typedef Handle (*H_V)(const HandleSeq &);
-		void declare (const char *, H_V); 
 };
 
 
+// ======================================================================
+
+#include "SchemeEval.h"
+#include "SchemeSmob.h"
+
+using namespace opencog;
+
+void FuncEnviron::do_register(const char * name)
+{
+	SCM smob;
+	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
+	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
+}
+
+
+#if 0
 struct FuncEnv
 {
 	funcptr
@@ -66,4 +103,33 @@ void SchemeExtend::declare(const char * name, H_V func, void *user_data)
 	SCM_NEWSMOB (smob, cog_misc_tag, fe);
 	SCM_SET_SMOB_FLAGS(smob, COG_EXTEND);
 	
+}
+#endif 
+
+class MyTestClass
+{
+	private:
+		int id;
+	public:
+		MyTestClass(int _id) { id = _id; }
+		Handle my_func(Handle h)
+		{
+			printf("hello world %d\n", id);
+			return Handle::UNDEFINED;
+		}
+};
+
+int main ()
+{
+	SchemeEval &eval = SchemeEval::instance();
+
+	printf("yo\n");
+	MyTestClass *mtc = new MyTestClass(42);
+
+	printf("yo\n");
+	declare("bingo", &MyTestClass::my_func, mtc);
+
+	printf("yo\n");
+
+	return  0;
 }

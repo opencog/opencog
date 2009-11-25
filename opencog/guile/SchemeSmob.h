@@ -32,6 +32,7 @@ class Atom;
 class SchemeSmob
 {
 		friend class SchemeEval;
+		friend class FuncEnviron;
 	
 	private:
 	

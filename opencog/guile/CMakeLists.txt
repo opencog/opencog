@@ -18,6 +18,17 @@ TARGET_LINK_LIBRARIES(smob
 	wsd
 )
 
+ADD_EXECUTABLE(ext
+	SchemeExtend.cc
+)
+TARGET_LINK_LIBRARIES(extyy
+	smob
+	atomspace
+	pln
+	server
+)
+
+
 INSTALL (TARGETS smob
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
