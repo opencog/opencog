@@ -18,6 +18,7 @@
 
 #include <libguile.h>
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
 #include <opencog/atomspace/AttentionValue.h>

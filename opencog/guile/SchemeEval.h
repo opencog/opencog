@@ -12,7 +12,7 @@
 #include <string>
 #include <pthread.h>
 #include <libguile.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 
@@ -99,7 +99,7 @@ class SchemeEval
 
 #else /* HAVE_GUILE */
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 
