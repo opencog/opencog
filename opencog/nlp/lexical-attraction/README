@@ -455,25 +455,9 @@ EvaluationLink:
       )
 
 This seems workable, but kind of hacky -- calling out to a special
-purpose scheme function just seems hacky/unclean.
-
-
-
-            LambdaLink
-               ListLink
-                  VariableNode "$word-a"
-                  VariableNode "$word-b"
-               AndLink
-                  EvaluationLink
-                     VariableNode "$rel-l"
-                     ListLink
-                        VariableNode "$word-head"
-                        VariableNode "$word-a"
-                  EvaluationLink
-                     VariableNode "$rel-r"
-                     ListLink
-                        VariableNode "$word-head"
-                        VariableNode "$word-b"
+purpose scheme function just seems hacky/unclean. However, this appears
+to be the best solution at this time, after a discussion on the mailing
+list.
 
 
 
@@ -803,6 +787,39 @@ MAP Semantic parse
 ------------------
 MAP=="Maximum a posteriori"
 Most likely parse according to the weighting.
+
+=======================================================================
+
+                   A LambdaLink Proposal
+                   ---------------------
+                       November 2009
+
+Various algorithms within OpenCog might be simplified if there was a 
+lambda, in the sense of lambda calculus. Here's a proposal for what this
+might look like:
+
+      LambdaLink
+         ListLink
+            VariableNode "$word-a"
+            VariableNode "$word-b"
+         AndLink
+            EvaluationLink
+               VariableNode "$rel-l"
+               ListLink
+                  VariableNode "$word-head"
+                  VariableNode "$word-a"
+            EvaluationLink
+               VariableNode "$rel-r"
+               ListLink
+                  VariableNode "$word-head"
+                  VariableNode "$word-b"
+
+Syntactically, the above is nothing more nor less than an extension of
+the VariableScopeLink -- see http://opencog.org/wiki/VariableScopeLink
+
+Another way to think of a LambdaLink is as a generalization of
+EvaluationLink, but with the first and second args reversed -- i.e. the
+ListLink appearing first, not last.
 
 
 =======================================================================
