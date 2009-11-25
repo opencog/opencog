@@ -459,6 +459,13 @@ purpose scheme function just seems hacky/unclean. However, this appears
 to be the best solution at this time, after a discussion on the mailing
 list.
 
+The above counts paths only of length 1+1, starting from the head-word.
+Pattern templates for paths of other lengths would need to be written.
+
+Clustering
+----------
+Lin [Lin2001] reports parsing a 1GByte text, and obtaining 7M "paths"
+of which 231K are unique.
 
 
 
