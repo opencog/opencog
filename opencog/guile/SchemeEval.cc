@@ -151,28 +151,12 @@ void SchemeEval::thread_unlock(void)
 	long cnt = (long) pthread_getspecific(ser_key);
 	cnt --;
 	pthread_setspecific(ser_key, (const void *) cnt);
-	if (0 >= cnt) {
+	if (0 >= cnt)
+	{
 		pthread_mutex_unlock(&serialize_lock);
 	}
 }
 #endif
-
-bool SchemeEval::register_function(SchemeEval::SchemeFunction* function)
-{
-	if ( function == NULL || function->getFunctionPointer( ) == NULL ) {
-		logger().error("%s: Cannot register a new function (invalid pointer)",
-					   __FUNCTION__ );
-		return false;
-	} // if
-
-	scm_c_define_gsubr( function->getName( ).c_str( ),
-						function->getNumberOfRequiredArguments( ),
-						function->getNumberOfOptionalArguments( ),
-						function->getNumberOfRestArguments( ),
-						function->getFunctionPointer( )
-						);
-	return true;
-}
 
 SchemeEval::SchemeEval(void)
 {
@@ -216,19 +200,21 @@ SchemeEval::~SchemeEval()
 
 std::string SchemeEval::prt(SCM node)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node)) {
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	{
 		return SchemeSmob::handle_to_string(node);
 	}
-
-	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node)) {
+	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
+	{
 		return SchemeSmob::misc_to_string(node);
 	}
-
-	else if (scm_is_eq(node, SCM_UNSPECIFIED)) {
+	else if (scm_is_eq(node, SCM_UNSPECIFIED))
+	{
 		return "";
 	}
 #if CUSTOM_PRINTING_WHY_DO_WE_HAVE_THIS_DELETE_ME
-	else if (scm_is_pair(node))	{
+	else if (scm_is_pair(node))
+	{
 		std::string str = "(";
 		SCM node_list = node;
 		const char * sp = "";
@@ -242,14 +228,16 @@ std::string SchemeEval::prt(SCM node)
 		while (scm_is_pair(node_list));
 
 		// Print the rest -- the CDR part
-		if (!scm_is_null(node_list)) {
+		if (!scm_is_null(node_list))
+		{
 			str += " . ";
 			str += prt (node_list);
 		}
 		str += ")";
 		return str;
 	}
-	else if (scm_is_true(scm_symbol_p(node))) {
+	else if (scm_is_true(scm_symbol_p(node)))
+	{
 		node = scm_symbol_to_string(node);
 		char * str = scm_to_locale_string(node);
 		// std::string rv = "'";  // print the symbol escape
@@ -258,7 +246,8 @@ std::string SchemeEval::prt(SCM node)
 		free(str);
 		return rv;
 	}
-	else if (scm_is_true(scm_string_p(node))) {
+	else if (scm_is_true(scm_string_p(node)))
+	{
 		char * str = scm_to_locale_string(node);
 		std::string rv = "\"";
 		rv += str;
@@ -266,24 +255,30 @@ std::string SchemeEval::prt(SCM node)
 		free(str);
 		return rv;
 	}
-	else if (scm_is_number(node)) {
+	else if (scm_is_number(node))
+	{
 #define NUMBUFSZ 60
 		char buff[NUMBUFSZ];
-		if (scm_is_signed_integer(node, INT_MIN, INT_MAX)) {
+		if (scm_is_signed_integer(node, INT_MIN, INT_MAX))
+		{
 			snprintf (buff, NUMBUFSZ, "%ld", (long) scm_to_long(node));
 		}
-		else if (scm_is_unsigned_integer(node, 0, UINT_MAX)) {
+		else if (scm_is_unsigned_integer(node, 0, UINT_MAX))
+		{
 			snprintf (buff, NUMBUFSZ, "%lu", (unsigned long) scm_to_ulong(node));
 		}
-		else if (scm_is_real(node)) {
+		else if (scm_is_real(node))
+		{
 			snprintf (buff, NUMBUFSZ, "%g", scm_to_double(node));
 		}
-		else if (scm_is_complex(node)) {
+		else if (scm_is_complex(node))
+		{
 			snprintf (buff, NUMBUFSZ, "%g +i %g",
 					  scm_c_real_part(node),
 					  scm_c_imag_part(node));
 		}
-		else if (scm_is_rational(node)){
+		else if (scm_is_rational(node))
+		{
 			std::string rv;
 			rv = prt(scm_numerator(node));
 			rv += "/";
@@ -292,28 +287,34 @@ std::string SchemeEval::prt(SCM node)
 		}
 		return buff;
 	}
-	else if (scm_is_true(scm_char_p(node))) {
+	else if (scm_is_true(scm_char_p(node)))
+	{
 		std::string rv;
 		rv = (char) scm_to_char(node);
 		return rv;
 	}
-	else if (scm_is_true(scm_boolean_p(node))) {
+	else if (scm_is_true(scm_boolean_p(node)))
+	{
 		if (scm_to_bool(node)) return "#t";
 		return "#f";
 	}
-	else if (SCM_NULL_OR_NIL_P(node)) {
+	else if (SCM_NULL_OR_NIL_P(node))
+	{
 		// scm_is_null(x) is true when x is SCM_EOL
 		// SCM_NILP(x) is true when x is SCM_ELISP_NIL
 		return "()";
 	}
-	else if (scm_is_eq(node, SCM_UNDEFINED)) {
+	else if (scm_is_eq(node, SCM_UNDEFINED))
+	{
 		return "undefined";
 	}
-	else if (scm_is_eq(node, SCM_EOF_VAL)) {
+	else if (scm_is_eq(node, SCM_EOF_VAL))
+	{
 		return "eof";
 	}
 #endif
-	else {
+	else
+	{
 		// Let SCM display do the rest of the work.
 		SCM port = scm_open_output_string();
 		scm_display (node, port);
@@ -358,7 +359,9 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	SCM re = scm_symbol_to_string(tag);
 	char * restr = scm_to_locale_string(re);
 	pending_input = false;
-	if (0 == strcmp(restr, "read-error")) {
+
+	if (0 == strcmp(restr, "read-error"))
+	{
 		pending_input = true;
 		free(restr);
 		return SCM_EOL;
@@ -366,7 +369,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 
 	// Check for a simple flow-control directive: i.e. just return to
 	// the C code from anywhere withing the scheme code.
-	if (0 == strcmp(restr, "cog-yield")) {
+	if (0 == strcmp(restr, "cog-yield"))
+	{
 		free(restr);
 		return SCM_CAR(throw_args);
 	}
@@ -379,7 +383,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	error_string_port = scm_open_output_string();
 	SCM port = error_string_port;
 
-	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1)) {
+	if (scm_is_true(scm_list_p(throw_args)) && (scm_ilength(throw_args) >= 1))
+	{
 		long nargs = scm_ilength(throw_args);
 		SCM subr	= SCM_CAR (throw_args);
 		SCM message = SCM_EOL;
@@ -392,7 +397,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		if (nargs >= 4)
 			rest	= SCM_CADDDR (throw_args);
 
-		if (scm_is_true (captured_stack)) {
+		if (scm_is_true (captured_stack))
+		{
 			SCM highlights;
 
 			if (scm_is_eq (tag, scm_arg_type_key) ||
@@ -409,7 +415,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		}
 		scm_display_error (captured_stack, port, subr, message, parts, rest);
 	}
-	else {
+	else
+	{
 		scm_puts ("ERROR: thow args are unexpectedly short!\n", port);
 	}
 	scm_puts("ABORT: ", port);
@@ -478,11 +485,13 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 	/* Avoid a string buffer copy if there is no pending input */
 	const char *expr_str;
-	if (pending_input) {
+	if (pending_input)
+	{
 		input_line += expr;
 		expr_str = input_line.c_str();
 	}
-	else {
+	else
+	{
 		expr_str = expr.c_str();
 		newin = true;
 	}
@@ -491,15 +500,16 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-						  (scm_t_catch_body) scm_c_eval_string,
-						  (void *) expr_str,
-						  SchemeEval::catch_handler_wrapper, this,
-						  SchemeEval::preunwind_handler_wrapper, this);
+	                      (scm_t_catch_body) scm_c_eval_string,
+	                      (void *) expr_str,
+	                      SchemeEval::catch_handler_wrapper, this,
+	                      SchemeEval::preunwind_handler_wrapper, this);
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
 	 * to true. */
-	if (pending_input) {
+	if (pending_input)
+	{
 		/* Save input for later */
 		if (newin) input_line += expr;
 		return "";
@@ -507,7 +517,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	pending_input = false;
 	input_line = "";
 
-	if (caught_error) {
+	if (caught_error)
+	{
 		std::string rv;
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
@@ -522,7 +533,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 		rv += "\n";
 		return rv;
 	}
-	else {
+	else
+	{
 		std::string rv;
 		// First, we get the contents of the output port,
 		// and pass that on.
@@ -600,7 +612,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 						  SchemeEval::catch_handler_wrapper, this,
 						  SchemeEval::preunwind_handler_wrapper, this);
 
-	if (caught_error) {
+	if (caught_error)
+	{
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
 		scm_close_port(error_string_port);
@@ -623,10 +636,12 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 	}
 
 	// Get the contents of the output port, and log it
-	if (logger().isInfoEnabled()) {
+	if (logger().isInfoEnabled())
+	{
 		SCM out = scm_get_output_string(outport);
 		char * str = scm_to_locale_string(out);
-		if (str && *str) {
+		if (str && *str)
+		{
 			logger().info("%s: Output: %s\n"
 						  "Was generated by expr: %s\n",
 						  __FUNCTION__, str, prt(sexpr).c_str());
@@ -688,12 +703,13 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-						  (scm_t_catch_body) scm_c_eval_string,
-						  (void *) expr.c_str(),
-						  SchemeEval::catch_handler_wrapper, this,
-						  SchemeEval::preunwind_handler_wrapper, this);
+	                      (scm_t_catch_body) scm_c_eval_string,
+	                      (void *) expr.c_str(),
+	                      SchemeEval::catch_handler_wrapper, this,
+	                      SchemeEval::preunwind_handler_wrapper, this);
 
-	if (caught_error) {
+	if (caught_error)
+	{
 		rc = scm_get_output_string(error_string_port);
 		char * str = scm_to_locale_string(rc);
 		scm_close_port(error_string_port);
@@ -716,13 +732,14 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	}
 
 	// Get the contents of the output port, and log it
-	if (logger().isInfoEnabled()) {
+	if (logger().isInfoEnabled())
+	{
 		SCM out = scm_get_output_string(outport);
 		char * str = scm_to_locale_string(out);
-		if (str && *str) {
-			logger().info("%s: Output: %s\n"
-						  "Was generated by expr: %s\n",
-						  __FUNCTION__, str, expr.c_str());
+		if (str && *str)
+		{
+			logger().info("%s: Output: %s\nWas generated by expr: %s\n",
+			              __FUNCTION__, str, expr.c_str());
 		}
 		free(str);
 	}
@@ -800,13 +817,13 @@ std::string SchemeEval::apply_generic(const std::string &func, Handle varargs)
 
 void * SchemeEval::c_wrap_apply_scm(void * p)
 {
-	logger().debug( "%s: calling wrap", __FUNCTION__ );
+	logger().debug( "%s: calling wrap", __FUNCTION__);
 
 	SchemeEval *self = (SchemeEval *) p;
 	SCM genericAnswer = self->do_apply_scm(*self->pexpr, self->hargs);
-	logger().debug( "%s: done", __FUNCTION__ );
+	logger().debug( "%s: done", __FUNCTION__);
 	self->answer = SchemeSmob::to_string(genericAnswer);
-	logger().debug( "%s: answer: %s",__FUNCTION__, self->answer.c_str( ) );
+	logger().debug( "%s: answer: %s",__FUNCTION__, self->answer.c_str());
 
 	return self;
 }

@@ -32,15 +32,15 @@ using namespace OperationalPetController;
 using namespace opencog;
 
 
-class ComputeSpatialRelations : public SchemeEval::SchemeFunction {
+class ComputeSpatialRelations : public SchemeFunction {
 public:
     
     ComputeSpatialRelations( Control::PetInterface& agent ) :
-        SchemeEval::SchemeFunction::SchemeFunction( 
+        SchemeFunction( 
             "cog-emb-compute-spatial-relations", 3, 0, 1 ) { localAgent = &agent; }
 
-    virtual SchemeEval::SchemeFunction::FunctionPointer getFunctionPointer( void ) {
-        return (SchemeEval::SchemeFunction::FunctionPointer)&ComputeSpatialRelations::execute;
+    virtual FunctionPointer getFunctionPointer( void ) {
+        return (SchemeFunction::FunctionPointer)&ComputeSpatialRelations::execute;
     }
 
 private:
@@ -231,7 +231,12 @@ void LanguageComprehension::init( void )
     if ( !initialized ) {
         
         this->spatialRelationsEvaluatorCaller = new ComputeSpatialRelations( this->agent );
-        SchemeEval::instance( ).register_function( this->spatialRelationsEvaluatorCaller );
+        scm_c_define_gsubr( this->spatialRelationsEvaluatorCaller->getName( ).c_str( ),
+                  this->spatialRelationsEvaluatorCaller->getNumberOfRequiredArguments( ),
+                  this->spatialRelationsEvaluatorCaller->getNumberOfOptionalArguments( ),
+                  this->spatialRelationsEvaluatorCaller->getNumberOfRestArguments( ),
+                  this->spatialRelationsEvaluatorCaller->getFunctionPointer( )
+                  );
 
         initialized = true;
         std::stringstream script;

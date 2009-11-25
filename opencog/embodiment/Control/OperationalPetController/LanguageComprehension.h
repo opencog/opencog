@@ -34,6 +34,50 @@
 
 namespace OperationalPetController
 {
+
+    /**
+     * This abstract class can be extended to create custom
+     * commands that can be called inside a Scheme script.
+     * i.e.
+     * one can define a class like
+     * class Foo : public SchemeFunction {
+     *   public:
+     *      Foo( void ) : SchemeFunction::SchemeFunction( "foo", 2, 0, 0 ) { }
+     *
+     *      virtual SchemeFunction::FunctionPointer getFunctionPointer( void ) {
+     *           return (SchemeFunction::FunctionPointer)&FOO::execute;
+     *      }
+     *   private:
+     *      static SCM execute( SCM arg1, SCM arg2 ) {
+     *           // foo code goes here
+     *      }
+     * };
+     * 
+     * then register the new function calling:
+     * Foo *foo = new Foo();
+     * ...
+    * 
+     */
+    class SchemeFunction {
+    public:
+        typedef SCM (*FunctionPointer)( );
+
+        SchemeFunction(const std::string& name, int requiredArgs, int optionalArgs, int restArgs ) :
+            name( name ), requiredArgs( requiredArgs ), optionalArgs( optionalArgs ),
+            restArgs( restArgs ) { }
+
+        inline const std::string& getName( void ) const { return this->name; }
+        inline int getNumberOfRequiredArguments( void ) const { return this->requiredArgs; }
+        inline int getNumberOfOptionalArguments( void ) const { return this->optionalArgs; }
+        inline int getNumberOfRestArguments( void ) const { return this->restArgs; }
+
+        virtual FunctionPointer getFunctionPointer( void ) = 0;
+
+    protected:
+        std::string name;
+        int requiredArgs, optionalArgs, restArgs;
+    };
+
     class LanguageComprehension 
     {
     public: 
@@ -63,7 +107,7 @@ namespace OperationalPetController
         FramesToRelexRuleEngine framesToRelexRuleEngine;
         NLGenClient *nlgenClient;
 
-        SchemeEval::SchemeFunction* spatialRelationsEvaluatorCaller;
+        SchemeFunction* spatialRelationsEvaluatorCaller;
 
     private:
 
