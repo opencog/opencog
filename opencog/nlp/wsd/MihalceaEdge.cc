@@ -243,8 +243,11 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 	printf ("; Second word sense: %s\n", fn.c_str());
 #endif
 
+#ifdef USE_LOCAL_CACHE
 	// Get the similarity between the two word senses out of the
-	// cache (if it exists).
+	// cache (if it exists). XXX This appears to be a loosing strategy,
+	// See the README file for details.  The core problem is that the
+	// cache is using the atomspace in a very inefficient way. XXX
 	SimpleTruthValue stv(0.5,0.5);
 	stv = sense_cache.similarity(first_word_sense, second_word_sense_h);
 	if (stv == TruthValue::DEFAULT_TV())
@@ -254,6 +257,9 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 		stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
 		sense_cache.set_similarity(first_word_sense, second_word_sense_h, stv);
 	}
+#else
+	const SimpleTruthValue &stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
+#endif
 
 	// Skip making edges between utterly unrelated nodes.
 	if (stv.getMean() < 0.01) return false;

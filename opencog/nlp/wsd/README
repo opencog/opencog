@@ -672,6 +672,30 @@ two hours later:
 1238 edges for 66 word pairs (rate=104.637787)
 476 edges for 91 word pairs (rate=37.023434)
 6492 edges for 253 word pairs (rate=94.560790)
+1453 edges for 135 word pairs (rate=196.339518)
+2119 edges for 231 word pairs (rate=57.912276)
+1824 edges for 144 word pairs (rate=109.158918)
+3072 edges for 156 word pairs (rate=62.409254)
+2607 edges for 78 word pairs (rate=65.946862)
+
+
+ten hours later:
+377 edges for 28 word pairs (rate=76.804571)
+197 edges for 21 word pairs (rate=82.990628)
+691 edges for 28 word pairs (rate=58.645770)
+1669 edges for 264 word pairs (rate=53.167052)
+1779 edges for 171 word pairs (rate=84.579619)
+1851 edges for 117 word pairs (rate=111.031172)
+1711 edges for 78 word pairs (rate=64.673862)
+1159 edges for 120 word pairs (rate=67.343033)
+1774 edges for 45 word pairs (rate=105.078328)
+7269 edges for 136 word pairs (rate=91.874337)
+3206 edges for 182 word pairs (rate=79.418685)
+2645 edges for 140 word pairs (rate=88.427971)
+1506 edges for 45 word pairs (rate=110.503189)
+
+These number suggest that the current "caching" mechanism is a loosing
+strategy. Looking at the code, its not hard to see why.
 
 
 Ideas/TODO
