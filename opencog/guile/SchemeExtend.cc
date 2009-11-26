@@ -17,6 +17,7 @@ class FuncEnviron
 		static bool is_inited;
 		static void init(void);
 		static SCM do_call(SCM);
+		static FuncEnviron *verify_fe(SCM, const char *);
 
 	public:
 		void do_register(const char *);
@@ -28,6 +29,7 @@ class FuncEnv : public FuncEnviron
 {
 	virtual SCM invoke (SCM args)
 	{
+		printf("duuude invoked \n");
 		return SCM_EOL;
 	}
 	public:
@@ -72,65 +74,40 @@ void FuncEnviron::do_register(const char * name)
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
-	scm_c_define ("bloort", smob);
 
-	scm_c_eval_string("(define (bingo) (opencog-extension bloort))");
+#define BUFLEN 512
+	char buff[BUFLEN];
+	snprintf(buff, BUFLEN, "cog-ext-%p", this);
+	scm_c_define (buff, smob);
+
+	snprintf(buff, BUFLEN, "(define (%s) (opencog-extension cog-ext-%p))", name, this);
+	scm_c_eval_string(buff);
 }
 
 SCM FuncEnviron::do_call(SCM args)
 {
-
-	printf("was called\n");
-	return SCM_EOL;
+	FuncEnviron *fe = verify_fe(args, "opencog-extension");
+	
+	printf("do_call was called fe=%p\n", fe);
+	SCM rc = fe->invoke(SCM_EOL);
+	return rc;
 }
 
-#if 0
-struct FuncEnv
-{
-	funcptr
-	const char *name;
-	void * that;	
-};
-
-FuncEnv * verify_fe(SCM sfe, const char *subrname)
+FuncEnviron * FuncEnviron::verify_fe(SCM sfe, const char *subrname)
 {
 	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sfe))
 		scm_wrong_type_arg_msg(subrname, 2, sfe, "opencog primitive function");
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sfe);
-	if (COG_EXTEND != misctype)
+	if (SchemeSmob::COG_EXTEND != misctype)
 		scm_wrong_type_arg_msg(subrname, 2, sfe, "opencog primitive function");
 
-	FuncEnv * fe = (FuncEnv *) SCM_SMOB_DATA(sfe);
+	FuncEnviron * fe = (FuncEnviron *) SCM_SMOB_DATA(sfe);
 	return fe;
 }
 
-SCM do_call (SCM env, SCM args)
-{
-	FuncEnv *fe = verify_fe(env, xxxx);
-
-	fe->funcptr(args);
-
-	return SCM_XXX;
-}
-
-void init (void)
-{
-}
-
-void SchemeExtend::declare(const char * name, H_V func, void *user_data)
-{
-	FuncEnv *fe = new FuncEnv;
-	fe->name = name;
-	fe->funcptr = func;
-	fe->that;
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, fe);
-	SCM_SET_SMOB_FLAGS(smob, COG_EXTEND);
-	
-}
-#endif 
+// ===============================================================
+// Example code
 
 class MyTestClass
 {
