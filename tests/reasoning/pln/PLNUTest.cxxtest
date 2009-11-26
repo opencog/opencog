@@ -232,6 +232,7 @@ private:
         // Get config settings from config file.
         // config().set("PLN_LOG_LEVEL","2");
         // config().set("PLN_PRINT_REAL_ATOMS","true");
+        config().set("PLN_RECORD_TRAILS","true");
 
         testFitnessEvaluator = BEST;
         currentDebugLevel = -4;
@@ -291,7 +292,7 @@ private:
         fflush(stdout);
         //currentDebugLevel=-4;
 
-        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider()));
+        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
         uint s_i=0; // Expansion phase #
         pHandle eh=PHANDLE_UNDEFINED;
         TruthValue* etv = NULL;
@@ -526,7 +527,7 @@ private:
 //        meta target(new vtree(fakeHandle));
 
         Btr<BackInferenceTreeRootT> state(new BITNodeRoot(target,
-            new DefaultVariableRuleProvider()));
+            new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
         std::cout << "BITNodeRoot init ok" << std::endl;
         
         // Do weird loop
