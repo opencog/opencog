@@ -33,6 +33,7 @@ class SchemeSmob
 {
 		friend class SchemeEval;
 		friend class FuncEnviron;
+		template <typename TT> friend class FuncEnv;
 	
 	private:
 	

@@ -7,6 +7,7 @@
  */
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
 
 namespace opencog {
@@ -20,7 +21,7 @@ class FuncEnviron
 		static FuncEnviron *verify_fe(SCM, const char *);
 
 	public:
-		void do_register(const char *, const char *);
+		void do_register(const char *, int);
 		virtual SCM invoke (SCM) = 0;
 };
 
@@ -31,11 +32,26 @@ class FuncEnv : public FuncEnviron
 		Handle (T::*method)(Handle);
 		T* that;
 		const char *scheme_name;
+		enum 
+		{
+			H_H,
+		} signature;
 
 		virtual SCM invoke (SCM args)
 		{
-			(that->*method)(Handle::UNDEFINED);
-			return SCM_EOL;
+			SCM rc = SCM_EOL;
+			switch (signature)
+			{
+				case H_H:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle rh = (that->*method)(h);
+					break;
+				}
+				default:
+					printf ("Error! Unsupported signature: %d\n", signature);
+			}
+			return rc;
 		}
 	public:
 		FuncEnv(const char *name, Handle (T::*cb)(Handle), T *data)
@@ -43,7 +59,8 @@ class FuncEnv : public FuncEnviron
 			that = data;
 			method = cb;
 			scheme_name = name;
-			do_register(name, "H_H");
+			signature = H_H;
+			do_register(name, 1);
 		}
 };
 
@@ -80,7 +97,7 @@ void FuncEnviron::init(void)
 }
 
 
-void FuncEnviron::do_register(const char *name, const char *signature)
+void FuncEnviron::do_register(const char *name, int nargs)
 {
 	init();
 
@@ -95,9 +112,6 @@ void FuncEnviron::do_register(const char *name, const char *signature)
 	char buff[BUFLEN];
 	snprintf(buff, BUFLEN, "cog-ext-%p", this);
 	scm_c_define (buff, smob);
-
-	// The signature tells us how many argumenets there will be.
-	int nargs = strlen(signature) - 2;
 
 	std::string wrapper = "(define (";
 	wrapper += name;
