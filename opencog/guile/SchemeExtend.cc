@@ -46,6 +46,7 @@ class FuncEnv : public FuncEnviron
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					Handle rh = (that->*method)(h);
+					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				default:
@@ -157,7 +158,7 @@ FuncEnviron * FuncEnviron::verify_fe(SCM sfe, const char *subrname)
 }
 
 // ===============================================================
-// Example code
+// Example code showing how to use the scheme-to-C++ API.
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
@@ -173,13 +174,12 @@ class MyTestClass
 			Handle hlist = Handle::UNDEFINED;
 			Atom *a = TLB::getAtom(h);
 			Node *n = dynamic_cast<Node *>(a);
-			printf("hello world %p %p\n", a, n);
 			if (n)
 			{
 				printf("Info: received the node: %s\n", n->getName().c_str());
 				CogServer& cogserver = static_cast<CogServer&>(server());
 				AtomSpace *as = cogserver.getAtomSpace();
-				Handle hlist = as->addLink(LIST_LINK, h);
+				hlist = as->addLink(LIST_LINK, h);
 			}
 			return hlist;
 		}
@@ -192,21 +192,26 @@ int main ()
 	// AtomSpace *as = cogserver.getAtomSpace();
 	cogserver.getAtomSpace();
 
+	// Do this early, so that the scheme system is initialized.
 	SchemeEval &eval = SchemeEval::instance();
 
+	// Create some class, and assoicate one of its members with
+	// a scheme function, named "bingo"
 	MyTestClass *mtc = new MyTestClass();
-
 	declare("bingo", &MyTestClass::my_func, mtc);
 
-	printf("yo\n");
-
+	// Now, call bingo, with a reasonable argument. Since 
+	// MyTestClass::my_func is expecting a handle, we better pass
+	// bingo a handle.
 	eval.eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
 	std::string rslt = eval.eval("(bingo nnn)");
 	if (eval.eval_error())
 	{
-		printf("Error: failed evaluation: %s\n", rslt.c_str());
+		printf("Error: failed evaluation\n");
 	}
 
-	printf("bye\n");
+	// Print the result of calling MyTestClass::my_func
+	printf("Info: returned %s\n", rslt.c_str());
+	printf("Info: we are done, bye!\n");
 	return  0;
 }
