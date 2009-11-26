@@ -9,9 +9,6 @@ TARGET_LINK_LIBRARIES(PetUTest
 	comboreduct
 	util 
 	pthread 
-	ssl
-	crypto 
-	dl
 	${Boost_DATE_TIME_LIBRARY}
 	${XERCESC_LIBRARIES}
 	${OPENCOG_LIBRARIES}

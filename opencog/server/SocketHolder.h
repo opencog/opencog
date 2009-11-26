@@ -24,9 +24,7 @@
 #include <pthread.h>
 
 #define REPLACE_CSOCKETS_BY_ASIO
-#ifdef REPLACE_CSOCKETS_BY_ASIO
-//#include <opencog/server/ServerSocket.h>
-#else
+#ifndef REPLACE_CSOCKETS_BY_ASIO
 #include <Sockets/TcpSocket.h>
 #endif
 #include <opencog/shell/GenericShell.h>

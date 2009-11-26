@@ -25,9 +25,6 @@ TARGET_LINK_LIBRARIES (learningServer
     util
     comboreduct
     pthread
-    ssl
-    crypto
-    dl
     Filter
     FitnessEstimator
     Procedure
@@ -45,9 +42,6 @@ TARGET_LINK_LIBRARIES (LSMocky
     comboreduct
     PetComboVocabulary
     pthread
-    ssl
-    crypto
-    dl
     behavior
     Procedure
     RewritingRules

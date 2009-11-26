@@ -30,9 +30,6 @@
 #include <tr1/memory>
 #include <tr1/functional>
 
-#include <Sockets/SocketHandler.h>
-#include <Sockets/ListenSocket.h>
-
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>

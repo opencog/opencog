@@ -32,9 +32,6 @@
 
 #include <pthread.h>
 
-#include <Sockets/Mutex.h>
-#include <Sockets/Lock.h>
-
 #include <opencog/server/Agent.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/util/Logger.h>

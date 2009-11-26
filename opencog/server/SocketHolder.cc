@@ -23,9 +23,11 @@
 #include "IRPCSocket.h"
 #include "SocketHolder.h"
 
+#ifndef REPLACE_CSOCKETS_BY_ASIO
 #include <Sockets/Lock.h>
 #include <Sockets/ISocketHandler.h>
 #include <Sockets/Socket.h>
+#endif
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>

@@ -24,10 +24,6 @@
 
 #include "Request.h"
 
-#include <Sockets/Lock.h>
-#include <Sockets/ISocketHandler.h>
-#include <Sockets/Socket.h>
-
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRPCSocket.h>
 #include <opencog/util/Logger.h>

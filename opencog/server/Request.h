@@ -30,7 +30,6 @@
 #include <string>
 #include <list>
 
-#include <Sockets/TcpSocket.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/SocketHolder.h>
 

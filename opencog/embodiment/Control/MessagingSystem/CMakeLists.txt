@@ -30,9 +30,6 @@ TARGET_LINK_LIBRARIES (MessagingSystem
 	Control 
 	util
 	pthread 
-	ssl 
-	crypto 
-	dl 
 	xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_DATE_TIME_LIBRARY}
