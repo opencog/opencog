@@ -1,10 +1,15 @@
 /*
- * SchemeExtend.cc
+ * SchemeExtend.h
  *
  * Allow C++ code to be invoked from scheme.
  *
  * Copyright (C) 2009 Linas Vepstas
  */
+
+#ifdef HAVE_GUILE
+
+#ifndef _OPENCOG_SCHEME_EXTEND_H
+#define _OPENCOG_SCHEME_EXTEND_H
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -17,11 +22,14 @@ class FuncEnviron
 	private:
 		static bool is_inited;
 		static void init(void);
+
 		static SCM do_call(SCM, SCM);
 		static FuncEnviron *verify_fe(SCM, const char *);
 
-	public:
+	protected:
 		void do_register(const char *, int);
+	public:
+		virtual ~FuncEnviron();
 		virtual SCM invoke (SCM) = 0;
 };
 
@@ -68,7 +76,6 @@ class FuncEnv : public FuncEnviron
 template<class T>
 inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 {
-	// FuncEnv<T> *fet = new FuncEnv<T>(name, cb, data);
 	new FuncEnv<T>(name, cb, data);
 
 	// XXX fet is never freed -- we need to have it floating around forever, 
@@ -78,9 +85,20 @@ inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 
 };
 
+#endif // _OPENCOG_SCHEME_EXTEND_H
+
+#endif // HAVE_GUILE
 
 // ======================================================================
+/*
+ * SchemeExtend.cc
+ *
+ * Allow C++ code to be invoked from scheme.
+ *
+ * Copyright (C) 2009 Linas Vepstas
+ */
 
+// #include "SchemeExtend.h"
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
 
@@ -97,6 +115,7 @@ void FuncEnviron::init(void)
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
 }
 
+FuncEnviron::~FuncEnviron() {}
 
 void FuncEnviron::do_register(const char *name, int nargs)
 {
@@ -107,7 +126,7 @@ void FuncEnviron::do_register(const char *name, int nargs)
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
 
-	// We need to give the smab a unique name. Using addr of this is 
+	// We need to give the smob a unique name. Using addr of this is 
 	// sufficient for this purpose.
 #define BUFLEN 40
 	char buff[BUFLEN];
@@ -133,7 +152,7 @@ void FuncEnviron::do_register(const char *name, int nargs)
 	}
 	wrapper += ")))";
 	scm_c_eval_string(wrapper.c_str());
-printf("duuude defined %s\n", wrapper.c_str());
+	// printf("Debug: do_regsiter %s\n", wrapper.c_str());
 }
 
 SCM FuncEnviron::do_call(SCM sfe, SCM arglist)
@@ -166,9 +185,17 @@ FuncEnviron * FuncEnviron::verify_fe(SCM sfe, const char *subrname)
 #include <opencog/server/CogServer.h>
 
 
+// Some example class
 class MyTestClass
 {
+	private:
+		int id;  // some value in the instance
 	public:
+
+		MyTestClass(int _id) { id = _id; }
+
+		// An example method -- accepts a handle, and wraps it 
+		// with a ListLink.
 		Handle my_func(Handle h)
 		{
 			Handle hlist = Handle::UNDEFINED;
@@ -176,10 +203,14 @@ class MyTestClass
 			Node *n = dynamic_cast<Node *>(a);
 			if (n)
 			{
-				printf("Info: received the node: %s\n", n->getName().c_str());
+				printf("Info: my_func instance %d received the node: %s\n", id, n->getName().c_str());
 				CogServer& cogserver = static_cast<CogServer&>(server());
 				AtomSpace *as = cogserver.getAtomSpace();
 				hlist = as->addLink(LIST_LINK, h);
+			}
+			else
+			{
+				printf("Warning: my_func instance %d called with invalid handle\n", id);
 			}
 			return hlist;
 		}
@@ -195,9 +226,11 @@ int main ()
 	// Do this early, so that the scheme system is initialized.
 	SchemeEval &eval = SchemeEval::instance();
 
-	// Create some class, and assoicate one of its members with
-	// a scheme function, named "bingo"
-	MyTestClass *mtc = new MyTestClass();
+	printf("\nInfo: Start creating a scheme call into C++\n");
+
+	// Create the example class, and define a scheme function,
+	// named "bingo", that will call one of its methods
+	MyTestClass *mtc = new MyTestClass(42);
 	declare("bingo", &MyTestClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since 
@@ -211,7 +244,7 @@ int main ()
 	}
 
 	// Print the result of calling MyTestClass::my_func
-	printf("Info: returned %s\n", rslt.c_str());
-	printf("Info: we are done, bye!\n");
+	printf("Info: Result of scheme evaluation is %s", rslt.c_str());
+	printf("Info: We are done, bye!\n");
 	return  0;
 }
