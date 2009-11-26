@@ -29,7 +29,7 @@ class FuncEnv : public FuncEnviron
 {
 	virtual SCM invoke (SCM args)
 	{
-		printf("duuude invoked \n");
+		(that->*method)(Handle::UNDEFINED);
 		return SCM_EOL;
 	}
 	public:
@@ -86,9 +86,8 @@ void FuncEnviron::do_register(const char * name)
 
 SCM FuncEnviron::do_call(SCM args)
 {
+	// XXX do general args ... 
 	FuncEnviron *fe = verify_fe(args, "opencog-extension");
-	
-	printf("do_call was called fe=%p\n", fe);
 	SCM rc = fe->invoke(SCM_EOL);
 	return rc;
 }
@@ -109,31 +108,53 @@ FuncEnviron * FuncEnviron::verify_fe(SCM sfe, const char *subrname)
 // ===============================================================
 // Example code
 
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/server/CogServer.h>
+
+
 class MyTestClass
 {
-	private:
-		int id;
 	public:
-		MyTestClass(int _id) { id = _id; }
 		Handle my_func(Handle h)
 		{
-			printf("hello world %d\n", id);
-			return Handle::UNDEFINED;
+			Handle hlist = Handle::UNDEFINED;
+			Atom *a = TLB::getAtom(h);
+			Node *n = dynamic_cast<Node *>(a);
+			printf("hello world %p %p\n", a, n);
+			if (n)
+			{
+				printf("Info: received the node: %s\n", n->getName().c_str());
+				CogServer& cogserver = static_cast<CogServer&>(server());
+				AtomSpace *as = cogserver.getAtomSpace();
+				Handle hlist = as->addLink(LIST_LINK, h);
+			}
+			return hlist;
 		}
 };
 
 int main ()
 {
+	// Need to access the atomspace to get it to initialize itself.
+	CogServer& cogserver = static_cast<CogServer&>(server());
+	// AtomSpace *as = cogserver.getAtomSpace();
+	cogserver.getAtomSpace();
+
 	SchemeEval &eval = SchemeEval::instance();
 
-	MyTestClass *mtc = new MyTestClass(42);
+	MyTestClass *mtc = new MyTestClass();
 
 	declare("bingo", &MyTestClass::my_func, mtc);
 
 	printf("yo\n");
 
-	std::string rslt = eval.eval("(bingo)");
-	printf("duuude bingo is %d %s\n", eval.eval_error(), rslt.c_str());
+	eval.eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
+	std::string rslt = eval.eval("(bingo nnn)");
+	if (eval.eval_error())
+	{
+		printf("Error: failed evaluation: %s\n", rslt.c_str());
+	}
 
 	printf("bye\n");
 	return  0;
