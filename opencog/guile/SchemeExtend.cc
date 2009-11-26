@@ -16,34 +16,46 @@ class FuncEnviron
 	private:
 		static bool is_inited;
 		static void init(void);
-		static SCM do_call(SCM);
+		static SCM do_call(SCM, SCM);
 		static FuncEnviron *verify_fe(SCM, const char *);
 
 	public:
-		void do_register(const char *);
+		void do_register(const char *, const char *);
 		virtual SCM invoke (SCM) = 0;
 };
 
 template<class T>
 class FuncEnv : public FuncEnviron
 {
-	virtual SCM invoke (SCM args)
-	{
-		(that->*method)(Handle::UNDEFINED);
-		return SCM_EOL;
-	}
-	public:
+	private:
 		Handle (T::*method)(Handle);
 		T* that;
+		const char *scheme_name;
+
+		virtual SCM invoke (SCM args)
+		{
+			(that->*method)(Handle::UNDEFINED);
+			return SCM_EOL;
+		}
+	public:
+		FuncEnv(const char *name, Handle (T::*cb)(Handle), T *data)
+		{
+			that = data;
+			method = cb;
+			scheme_name = name;
+			do_register(name, "H_H");
+		}
 };
 
 template<class T>
 inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 {
-	FuncEnv<T> *fet = new FuncEnv<T>;
-	fet->do_register(name);
-	fet->method = cb;
-	fet->that = data;
+	// FuncEnv<T> *fet = new FuncEnv<T>(name, cb, data);
+	new FuncEnv<T>(name, cb, data);
+
+	// XXX fet is never freed -- we need to have it floating around forever, 
+	// so that it holds the callback method. Well, I guess maybe we could
+	// have the smob hang on to it, and free it with the smob_free .. ?!  XXX
 }
 
 };
@@ -64,31 +76,56 @@ void FuncEnviron::init(void)
 {
 	if (is_inited) return;
 	is_inited = true;
-	scm_c_define_gsubr("opencog-extension", 1,1,0, C(do_call));
+	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
 }
 
 
-void FuncEnviron::do_register(const char * name)
+void FuncEnviron::do_register(const char *name, const char *signature)
 {
 	init();
+
+	// The smob will hold a pointer to "this" -- the FuncEnviron
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
 
-#define BUFLEN 512
+	// We need to give the smab a unique name. Using addr of this is 
+	// sufficient for this purpose.
+#define BUFLEN 40
 	char buff[BUFLEN];
 	snprintf(buff, BUFLEN, "cog-ext-%p", this);
 	scm_c_define (buff, smob);
 
-	snprintf(buff, BUFLEN, "(define (%s) (opencog-extension cog-ext-%p))", name, this);
-	scm_c_eval_string(buff);
+	// The signature tells us how many argumenets there will be.
+	int nargs = strlen(signature) - 2;
+
+	std::string wrapper = "(define (";
+	wrapper += name;
+	for (int i=0; i<nargs; i++)
+	{
+		wrapper += " ";
+		char arg = 'a' + i;
+		wrapper += arg;
+	}
+	wrapper += ") (opencog-extension ";
+	wrapper += buff;
+	wrapper += " (list";
+	for (int i=0; i<nargs; i++)
+	{
+		wrapper += " ";
+		char arg = 'a' + i;
+		wrapper += arg;
+	}
+	wrapper += ")))";
+	scm_c_eval_string(wrapper.c_str());
+printf("duuude defined %s\n", wrapper.c_str());
 }
 
-SCM FuncEnviron::do_call(SCM args)
+SCM FuncEnviron::do_call(SCM sfe, SCM arglist)
 {
-	// XXX do general args ... 
-	FuncEnviron *fe = verify_fe(args, "opencog-extension");
-	SCM rc = fe->invoke(SCM_EOL);
+	// First, get the environ.
+	FuncEnviron *fe = verify_fe(sfe, "opencog-extension");
+	SCM rc = fe->invoke(arglist);
 	return rc;
 }
 
