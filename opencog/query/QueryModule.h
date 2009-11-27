@@ -8,12 +8,16 @@
 #ifndef _OPENCOG_QUERY_MODULE_H
 #define _OPENCOG_QUERY_MODULE_H
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/server/Module.h>
 
 namespace opencog {
 
 class QueryModule : public Module
 {
+	private:
+		Handle do_varscope(Handle);
+		Handle do_implication(Handle);
    public:
       QueryModule(void);
       virtual ~QueryModule();
