@@ -12,6 +12,8 @@
 #ifndef _OPENCOG_SCHEME_PRIMITIVE_H
 #define _OPENCOG_SCHEME_PRIMITIVE_H
 
+#include <string>
+
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
@@ -45,6 +47,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		{
 			bool (T::*b_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
+			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -52,8 +55,9 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum 
 		{
 			B_HI,  // return boolean, take handle and int
-			H_H,  // return handle, take handle
-			V_V  // return void, take void
+			H_H,   // return handle, take handle
+			H_SQ,  // return handle, take string and HandleSeq
+			V_V    // return void, take void
 		} signature;
 
 		virtual SCM invoke (SCM args)
@@ -76,6 +80,31 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case H_SQ:
+				{
+					// First argument is a string
+					char *lstr = scm_to_locale_string(scm_car(args));
+					std::string str = lstr;
+					free(lstr);
+
+					// Second arg is a list of Handles
+					SCM list = scm_cadr(args);
+					if (!scm_is_pair(list))
+					{
+						scm_wrong_type_arg_msg(scheme_name, 2, list, "list of atom handles");
+					}
+					HandleSeq seq;
+					while (scm_is_pair(list))
+					{
+						Handle h = SchemeSmob::verify_handle(scm_car(list), scheme_name);
+						seq.push_back(h);
+						list = SCM_CDR(list);
+					}
+
+					Handle rh = (that->*method.h_sq)(str, seq);
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
 				case V_V:
 				{
 					(that->*method.v_v)();
@@ -90,22 +119,31 @@ class SchemePrimitive : public PrimitiveEnviron
 		virtual const char *get_name(void) { return scheme_name; }
 		virtual size_t get_size(void) { return sizeof (*this); }
 	public:
-		SchemePrimitive(const char *name, bool (T::*cb)(Handle, int), T *data)
-		{
-			that = data;
-			method.b_hi = cb;
-			scheme_name = name;
-			signature = B_HI;
-			do_register(name, 2); // cb has 2 args
-		}
-		SchemePrimitive(const char *name, Handle (T::*cb)(Handle), T *data)
-		{
-			that = data;
-			method.h_h = cb;
-			scheme_name = name;
-			signature = H_H;
-			do_register(name, 1); // cb has 1 arg
-		}
+
+#define DECLARE_CONSTR_1(SIG, LSIG, RET_TYPE, ARG_TYPE) \
+	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG_TYPE), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(name, 1); /* cb has 1 arg */ \
+	}
+
+#define DECLARE_CONSTR_2(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE) \
+	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(name, 2); /* cb has 2 args */ \
+	}
+
+		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
+		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
+		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
+
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
 		{
 			that = data;
@@ -125,16 +163,19 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG), T *data
 	new SchemePrimitive<T>(name, cb, data); \
 }
 
+#define DECLARE_DECLARE_2(RET,ARG1,ARG2) \
+template<class T> \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T *data) \
+{ \
+	/* Note: this is freed automatically by scheme garbage collection */ \
+	/* when it is no longer needed. */ \
+	new SchemePrimitive<T>(name, cb, data); \
+}
+
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(void, void)
-
-template<class T>
-inline void define_scheme_primitive(const char *name, bool (T::*cb)(Handle, int), T *data)
-{
-	// Note: this is freed automatically by scheme garbage collection
-	// when it is no longer needed. 
-	new SchemePrimitive<T>(name, cb, data);
-}
+DECLARE_DECLARE_2(bool, Handle, int)
+DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 
 
 }
