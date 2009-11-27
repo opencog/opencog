@@ -6,7 +6,7 @@ TARGET_LINK_LIBRARIES(PetUTest
 	PAI 
 	MessagingSystem 
 	Control 
-        comboreduct
+	comboreduct
 	util 
 	pthread 
 	ssl
@@ -15,7 +15,7 @@ TARGET_LINK_LIBRARIES(PetUTest
 	${Boost_DATE_TIME_LIBRARY}
 	${XERCESC_LIBRARIES}
 	${OPENCOG_LIBRARIES}
-        ${Boost_THREAD_LIBRARY} 
+	${Boost_THREAD_LIBRARY} 
 )
 
 IF(WIN32)
@@ -27,12 +27,12 @@ TARGET_LINK_LIBRARIES(HttpRequestTest
 	pthread 
 	ssl
 	crypto 
-        dl 
-        ${CSOCKETS_LIBRARIES}
+	dl 
+	${CSOCKETS_LIBRARIES}
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(HttpRequestTest winmm)
+	TARGET_LINK_LIBRARIES(HttpRequestTest winmm)
 ENDIF(WIN32)
 
 
@@ -45,6 +45,6 @@ TARGET_LINK_LIBRARIES(LanguageComprehensionUTest
 )
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
+	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
 ENDIF(WIN32)
 
