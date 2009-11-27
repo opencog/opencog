@@ -598,13 +598,13 @@ interface.
          guile> (define (prt-atom h) (display h) #f)
          guile> (cog-map-type prt-atom 'ConceptNode)
 
-=== cog-ad-hoc command parameters ===
-      The cog-ad-hoc command is actually a command dispatcher for
-      a grab-bag of partial, incomplete, poorly-thought-out or 
-      developement interfaces.  Its an easy way to attach new C++
-      code while pondering a more appropriate long-term solution.
+=== Ad Hoc commands ===
+      There are a number of scheme primitive functions defined which
+      call into C++ code in assorted opencog modules. The C++ programmer
+      may define such primitive by using the "define_scheme_primitive"
+      function in "opencog/guile/SchemePrimitive.h".  
 
-      Currently-implemented commands are:
+      Currently-implemented primtives are:
       do-wsd                -- run word-sense disambiguation
       do-varscope handle    -- run forward-chainer on handle.
                                handle must be an VariableScopeLink.
@@ -617,6 +617,7 @@ interface.
                                storage.
       fetch-incoming-set    -- fetch the incoming set of the atom from 
                                SQL storage. The fetch is recursive.
+      pln-bc                -- perform PLN back-chaining.
 
 
 = Flow control =
@@ -717,8 +718,13 @@ The above form is used by the [[ExecutionLink]] to embed scheme callouts
 into hypergraphs.
 
 === Calling C++ from scheme ===
-The best way to do this is to use the SchemePrimitive infrastructure
-to do this.  The example program PrimitiveExample.cc shows how.
+The C++ programmer may define new scheme primitive functions by using 
+the "define_scheme_primitive" function in "opencog/guile/SchemePrimitive.h".  
+This function expects a string that will be the scheme name, a C++ method,
+and a pointer to a C++ object instance.  Unusual C++ signatures may require
+extending SchemePrimitive.h, but this should not be hard.
+
+The example program PrimitiveExample.cc shows how.
 
 ===Calling scheme from Hypergraphs===
 The [[ExecutionLink]], whem used with the [[GroundedSchemaNode]], allows
