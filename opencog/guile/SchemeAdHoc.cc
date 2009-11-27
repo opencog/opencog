@@ -26,35 +26,6 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 {
 	std::string cmdname = decode_string (command, "cog-ad-hoc", "string command name");
 
-	// Store the single atom to the backing store hanging off the atom-space
-	if (0 == cmdname.compare("store-atom")) {
-		// XXX we should also allow opt-args to be a list of handles
-		Handle h = verify_handle(optargs, "cog-ad-hoc store-atom");
-
-		AtomSpace *as = &atomspace();
-		as->storeAtom(h);
-		return SCM_BOOL_T;
-	}
-
-	if (0 == cmdname.compare("fetch-atom")) {
-		// XXX we should also allow opt-args to be a list of handles
-		Handle h = verify_handle(optargs, "cog-ad-hoc fetch-atom");
-
-		AtomSpace *as = &atomspace();
-		h = as->fetchAtom(h);
-		return handle_to_scm(h);
-	}
-
-	if (0 == cmdname.compare("fetch-incoming-set")) {
-		// XXX we should also allow opt-args to be a list of handles
-		Handle h = verify_handle(optargs, "cog-ad-hoc fetch-incoming-set");
-
-		// The "true" flag here means "fetch resursive".
-		AtomSpace *as = &atomspace();
-		h = as->fetchIncomingSet(h, true);
-		return handle_to_scm(h);
-	}
-
 #if REVIVE_OLD_C_CODE_FOR_SENTENCE_PATTERN_MATCH
 	// As of September 2009, this code is "obsolete", in that all sentence
 	// pattern matching is now done via scheme, and not C++. This makes
