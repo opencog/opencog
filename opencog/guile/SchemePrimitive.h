@@ -21,6 +21,7 @@ namespace opencog {
 class PrimitiveEnviron
 {
 	friend class SchemeEval;
+	friend class SchemeSmob;
 	private:
 		static bool is_inited;
 		static void init(void);
@@ -31,9 +32,9 @@ class PrimitiveEnviron
 	protected:
 		void do_register(const char *, int);
 		virtual SCM invoke (SCM) = 0;
-	public:
-		virtual ~PrimitiveEnviron();
 		virtual const char *get_name(void) = 0;
+		virtual size_t get_size(void) = 0;
+		virtual ~PrimitiveEnviron();
 };
 
 template<class T>
@@ -85,6 +86,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			}
 			return rc;
 		}
+	protected:
+		virtual const char *get_name(void) { return scheme_name; }
+		virtual size_t get_size(void) { return sizeof (*this); }
 	public:
 		SchemePrimitive(const char *name, bool (T::*cb)(Handle, int), T *data)
 		{
@@ -110,7 +114,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			signature = V_V;
 			do_register(name, 0); // cb has 0 args
 		}
-		virtual const char *get_name(void) { return scheme_name; }
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \

@@ -151,7 +151,7 @@ void PLNModule::init()
 
 
     // Define a scheme wrapper -- the scheme function bln-bc will
-    // call the pln_bc method
+    // call the pln_bc method.
     PLNbc *bc = new PLNbc();  // mem leak here ... 
     declare ("pln-bc", &PLNbc::pln_bc, bc);
 

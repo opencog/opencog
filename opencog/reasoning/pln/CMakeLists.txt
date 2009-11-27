@@ -73,6 +73,7 @@ INCLUDE_DIRECTORIES (
 IF (XMLRPC_FOUND AND CURL_FOUND) # Otherwise none of the code which uses ubigraph will be compiled
 TARGET_LINK_LIBRARIES(pln
     atomspace
+    smob
     xml
     util
     #${Boost_SIGNALS_LIBRARY}
@@ -81,6 +82,7 @@ TARGET_LINK_LIBRARIES(pln
 ELSE (XMLRPC_FOUND AND CURL_FOUND)
 TARGET_LINK_LIBRARIES(pln
     atomspace
+    smob
     xml
     util
     #${Boost_SIGNALS_LIBRARY}

@@ -80,7 +80,7 @@ size_t SchemeSmob::free_misc(SCM node)
 			PrimitiveEnviron *pe;
 			pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
 			scm_gc_unregister_collectable_memory (pe,
-			                  sizeof(*pe), "opencog primitive environ");
+			                  pe->get_size(), "opencog primitive environ");
 			delete pe;
 			return 0;
 

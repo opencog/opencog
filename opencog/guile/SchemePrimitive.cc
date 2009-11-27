@@ -31,8 +31,11 @@ PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
+	// Force initialization of the guile subsystem.
+	SchemeEval::instance();
+
 	// Scheme garbage collection will be managing the lifecycle 
-	scm_gc_register_collectable_memory (this, sizeof(*this), 
+	scm_gc_register_collectable_memory (this, get_size(),
 	                                    "opencog primitive environ");
 
 	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
