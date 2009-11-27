@@ -13,6 +13,8 @@
 
 using namespace opencog;
 
+DECLARE_MODULE(QueryModule);
+
 QueryModule::QueryModule(void)
 {
 	define_scheme_primitive("do-implication", &QueryModule::do_implication, this);
