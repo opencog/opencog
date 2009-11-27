@@ -12,9 +12,7 @@
 
 #include <opencog/server/CogServer.h>
 
-#include <opencog/nlp/wsd/WordSenseProcessor.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/reasoning/pln/PLNModule.h>
 
 #include "SchemeSmob.h"
 
@@ -29,13 +27,6 @@ using namespace opencog;
 SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 {
 	std::string cmdname = decode_string (command, "cog-ad-hoc", "string command name");
-
-	if (0 == cmdname.compare("do-wsd")) {
-		WordSenseProcessor wsp;
-		wsp.use_threads(false);
-		wsp.run_no_delay(&cogserver()); // XXX What an ugly interface. Alas.
-		return SCM_BOOL_T;
-	}
 
 	// Run implication, assuming that the argument is a handle to
 	// an ImplicationLink. XXX DEPRECATED: Use varscope below!

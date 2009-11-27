@@ -18,6 +18,7 @@
 #include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/wsd/MihalceaLabel.h>
 #include <opencog/server/CogServer.h>
 
@@ -37,6 +38,8 @@ WordSenseProcessor::WordSenseProcessor(void)
 	do_use_threads = true;
 	cnt = 0;
 	wsd = new Mihalcea();
+
+	declare("run-wsd", &WordSenseProcessor::run_wsd, this);
 }
 
 WordSenseProcessor::~WordSenseProcessor()
@@ -49,6 +52,12 @@ WordSenseProcessor::~WordSenseProcessor()
 void WordSenseProcessor::use_threads(bool use)
 {
 	do_use_threads = use;
+}
+
+void WordSenseProcessor::run_wsd(void)
+{
+	do_use_threads = false;
+	run_no_delay(&cogserver());
 }
 // ----------------------------------------
 

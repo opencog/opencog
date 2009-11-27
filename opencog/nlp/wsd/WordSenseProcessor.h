@@ -39,6 +39,8 @@ class WordSenseProcessor
 
 		Mihalcea *wsd;
 
+		void run_wsd(void);
+
 	public:
 
 		WordSenseProcessor(void);

@@ -40,7 +40,7 @@
 			(load-cff-data fullname)
 			(system (string-join (list "echo done cff: \"" filename "\"")))
 			(system "date")
-			(cog-ad-hoc "do-wsd")
+			(run-wsd)
 			(system (string-join (list "echo done wsd: \"" filename "\"")))
 			(system "date")
 			(ldj-process)

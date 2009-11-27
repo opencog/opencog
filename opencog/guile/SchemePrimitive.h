@@ -42,15 +42,17 @@ class SchemePrimitive : public PrimitiveEnviron
 	private:
 		union
 		{
-			Handle (T::*h_h)(Handle);
 			bool (T::*b_hi)(Handle, int);
+			Handle (T::*h_h)(Handle);
+			void (T::*v_v)(void);
 		} method;
 		T* that;
 		const char *scheme_name;
 		enum 
 		{
+			B_HI,  // return boolean, take handle and int
 			H_H,  // return handle, take handle
-			B_HI  // return boolean, take handle and int
+			V_V  // return void, take void
 		} signature;
 
 		virtual SCM invoke (SCM args)
@@ -58,13 +60,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			SCM rc = SCM_EOL;
 			switch (signature)
 			{
-				case H_H:
-				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					Handle rh = (that->*method.h_h)(h);
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
 				case B_HI:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
@@ -73,12 +68,32 @@ class SchemePrimitive : public PrimitiveEnviron
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
 					break;
 				}
+				case H_H:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle rh = (that->*method.h_h)(h);
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case V_V:
+				{
+					(that->*method.v_v)();
+					break;
+				}
 				default:
 					printf ("Error! Unsupported signature: %d\n", signature);
 			}
 			return rc;
 		}
 	public:
+		SchemePrimitive(const char *name, bool (T::*cb)(Handle, int), T *data)
+		{
+			that = data;
+			method.b_hi = cb;
+			scheme_name = name;
+			signature = B_HI;
+			do_register(name, 2); // cb has 2 args
+		}
 		SchemePrimitive(const char *name, Handle (T::*cb)(Handle), T *data)
 		{
 			that = data;
@@ -87,29 +102,37 @@ class SchemePrimitive : public PrimitiveEnviron
 			signature = H_H;
 			do_register(name, 1); // cb has 1 arg
 		}
-		SchemePrimitive(const char *name, bool (T::*cb)(Handle, int), T *data)
+		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
 		{
 			that = data;
-			method.b_hi = cb;
+			method.v_v = cb;
 			scheme_name = name;
-			signature = B_HI;
-			do_register(name, 2); // cb has 2 arg
+			signature = V_V;
+			do_register(name, 0); // cb has 0 args
 		}
 		virtual const char *get_name(void) { return scheme_name; }
 };
 
+#define DECLARE_DECLARE_1(RET,ARG) \
+template<class T> \
+inline void declare(const char *name, RET (T::*cb)(ARG), T *data) \
+{ \
+	/* Note: this is freed automatically by scheme garbage collection */ \
+	/* when it is no longer needed. */ \
+	new SchemePrimitive<T>(name, cb, data); \
+}
+
+DECLARE_DECLARE_1(Handle, Handle)
+DECLARE_DECLARE_1(void, void)
+
 template<class T>
-inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
+inline void declare(const char *name, bool (T::*cb)(Handle, int), T *data)
 {
 	// Note: this is freed automatically by scheme garbage collection
 	// when it is no longer needed. 
 	new SchemePrimitive<T>(name, cb, data);
 }
-template<class T>
-inline void declare(const char *name, bool (T::*cb)(Handle, int), T *data)
-{
-	new SchemePrimitive<T>(name, cb, data);
-}
+
 
 }
 
