@@ -65,6 +65,7 @@ private:
 
     void setParameters(const std::string* params);
 
+    bool pln_bc(Handle h, int steps);
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -114,11 +115,6 @@ namespace pln {
  * used with the 'pln' cogserver command.
  */
 void infer(Handle h, int &steps, bool setTarget);
-
-class PLNbc {
-    public:
-        bool pln_bc(Handle h, int steps);
-};
 
 /**
  * that function apply a PLN inference rule given its name and its premises
