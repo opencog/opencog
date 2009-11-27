@@ -118,7 +118,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 #define DECLARE_DECLARE_1(RET,ARG) \
 template<class T> \
-inline void declare(const char *name, RET (T::*cb)(ARG), T *data) \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG), T *data) \
 { \
 	/* Note: this is freed automatically by scheme garbage collection */ \
 	/* when it is no longer needed. */ \
@@ -129,7 +129,7 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(void, void)
 
 template<class T>
-inline void declare(const char *name, bool (T::*cb)(Handle, int), T *data)
+inline void define_scheme_primitive(const char *name, bool (T::*cb)(Handle, int), T *data)
 {
 	// Note: this is freed automatically by scheme garbage collection
 	// when it is no longer needed. 

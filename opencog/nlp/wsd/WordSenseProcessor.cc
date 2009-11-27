@@ -41,7 +41,7 @@ WordSenseProcessor::WordSenseProcessor(void)
 	cnt = 0;
 	wsd = new Mihalcea();
 
-	declare("run-wsd", &WordSenseProcessor::run_wsd, this);
+	define_scheme_primitive("run-wsd", &WordSenseProcessor::run_wsd, this);
 }
 
 WordSenseProcessor::~WordSenseProcessor()

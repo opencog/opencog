@@ -63,7 +63,7 @@ int main ()
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
 	MyTestClass *mtc = new MyTestClass(42);
-	declare("bingo", &MyTestClass::my_func, mtc);
+	define_scheme_primitive("bingo", &MyTestClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since 
 	// MyTestClass::my_func is expecting a handle, we better pass
@@ -83,7 +83,6 @@ int main ()
 
 /*
 todo
--- make wsd into a module, so that run-wsd gets defined.
 -- update README
 -- add nil's signature
 -- kill AdHoc.cc
