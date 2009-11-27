@@ -80,11 +80,9 @@ class SchemePrimitive : public PrimitiveEnviron
 template<class T>
 inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 {
+	// Note: this is freed automatically by scheme garbage collection
+	// when it is no longer needed. 
 	new SchemePrimitive<T>(name, cb, data);
-
-	// XXX fet is never freed -- we need to have it floating around forever, 
-	// so that it holds the callback method. Well, I guess maybe we could
-	// have the smob hang on to it, and free it with the smob_free .. ?!  XXX
 }
 
 };

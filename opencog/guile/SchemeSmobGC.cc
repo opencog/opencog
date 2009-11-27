@@ -77,6 +77,11 @@ size_t SchemeSmob::free_misc(SCM node)
 			return 0;
 
 		case COG_EXTEND:
+			PrimitiveEnviron *pe;
+			pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (pe,
+			                  sizeof(*pe), "opencog primitive environ");
+			delete pe;
 			return 0;
 
 		default:
@@ -107,6 +112,7 @@ std::string SchemeSmob::misc_to_string(SCM node)
 		case COG_EXTEND:
 		{
 			// return "#<opencog extension>\n";
+			// Hmm. Is this really the right thing to return ?? I'm not sure .. 
 			PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
 			return pe->get_name();
 		}

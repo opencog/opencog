@@ -31,6 +31,10 @@ PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
+	// Scheme garbage collection will be managing the lifecycle 
+	scm_gc_register_collectable_memory (this, sizeof(*this), 
+	                                    "opencog primitive environ");
+
 	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
