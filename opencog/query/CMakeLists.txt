@@ -1,12 +1,13 @@
-INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/util
-)
+#INCLUDE_DIRECTORIES(
+#	${OPENCOG_SOURCE_DIR}/src/atomspace
+#	${OPENCOG_SOURCE_DIR}/src/util
+#)
 
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
+	QueryModule.cc
 )
 
 ADD_DEPENDENCIES(query opencog_atom_types)
@@ -22,5 +23,6 @@ INSTALL (FILES
 	PatternMatch.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
+	QueryModule.h
 	DESTINATION "include/opencog/query"
 )
