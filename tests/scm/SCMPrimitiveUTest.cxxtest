@@ -118,7 +118,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
 	MyExampleClass *mtc = new MyExampleClass(42);
-	declare("bingo", &MyExampleClass::my_func, mtc);
+	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since 
 	// MyExampleClass::my_func is expecting a handle, we better pass
