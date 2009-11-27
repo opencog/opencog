@@ -110,14 +110,20 @@ public:
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-        
+
+        // Hmm. Need to explicitly load the modules defined by the
+        // config file above. In particular, need the libquery.so so
+        // that do-varscope, used below, is defined in guile.  Need
+        // to do this before the new config below, which wipes out 
+        // the old config. 
+        CogServer& cogserver = static_cast<CogServer&>(server());
+        cogserver.loadModules();
+        this->atomSpace = cogserver.getAtomSpace();
+
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
         //set the frames2relex file to be load by the FramesToRelexRuleEngine
         config().set("FRAMES_2_RELEX_RULES_FILE", OPENCOG_SOURCE_DIR"/opencog/embodiment/frames2relex.rules");
-
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	this->atomSpace = cogserver.getAtomSpace();
 
         this->sender = new LSMessageSenderMock();
 
