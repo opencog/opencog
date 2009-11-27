@@ -101,19 +101,13 @@
        (VariableNode "$colorValue")
        (VariableNode "$colorWordNode")
        )
-      
-       (EvaluationLink
-        (GroundedPredicateNode "scm:inLatestSentence")
-        (ListLink
-         (VariableNode "$framePredicateNode")
-         )
-        )
-       
-       )
+             
+      )
      ; ImplicationLink output
      (ExecutionLink      
       (GroundedSchemaNode "scm:filterByColor")
       (ListLink
+       (VariableNode "$framePredicateNode")
        (VariableNode "$entityValue")
        (VariableNode "$entityWordNode")
        (VariableNode "$colorWordNode")
@@ -200,18 +194,12 @@
        (VariableNode "$objectWordNode")
        )
 
-      (EvaluationLink
-       (GroundedPredicateNode "scm:inLatestSentence")
-       (ListLink
-        (VariableNode "$framePredicateNode")
-        )
-       )
-
       )
      
      (ExecutionLink
       (GroundedSchemaNode "scm:filterByDimension")
       (ListLink
+       (VariableNode "$framePredicateNode")
        (VariableNode "$objectValue")
        (VariableNode "$objectWordNode")
        (VariableNode "$dimensionWordNode")
@@ -320,19 +308,13 @@
        (VariableNode "$groundValue") 
        (VariableNode "$groundWordNode") 
        )
-
-      (EvaluationLink
-       (GroundedPredicateNode "scm:inLatestSentence")
-       (ListLink
-        (VariableNode "$framePredicateNode")
-        )
-       )
       
       )
 
      (ExecutionLink
-      (GroundedPredicateNode "scm:filterByDistance")
+      (GroundedSchemaNode "scm:filterByDistance")
       (ListLink
+       (VariableNode "$framePredicateNode")
        (VariableNode "$figureValue")
        (VariableNode "$figureWordNode") 
        (VariableNode "$groundValue")

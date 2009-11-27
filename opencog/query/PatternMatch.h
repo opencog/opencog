@@ -45,7 +45,6 @@ class PatternMatch
 		Handle do_imply(Handle, PatternMatchCallback *, std::vector<Handle> *);
 		Handle do_varscope(Handle, DefaultPatternMatchCB *);
 
-                bool isGroundedPredicateNodeTrue( Handle, const std::map<Handle, Handle>& );
 	public:
 		PatternMatch(void);
 		void set_atomspace(AtomSpace *as)

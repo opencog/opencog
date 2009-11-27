@@ -28,127 +28,141 @@
 
 ; This function retrieves all the semeNodes related to the given WordInstanceNode
 ; that matches the given dimension using size predicates defined into the application
-(define (filterByDimension wordInstanceNode wordNode dimensionWordNode)
+(define (filterByDimension framePredicateNode wordInstanceNode wordNode dimensionWordNode)
   (let ((tv '())
         (semeNodes '())
         (dimension (cog-name dimensionWordNode))
         )
-    (map
-     (lambda (semeNode)
-       ; retrieve the is_small EvalLink
-       (set! tv
-             (cog-tv
-              (EvaluationLink
-               (PredicateNode "is_small")
-               (ListLink
-                (get-real-node semeNode)
-                )
-               )
-              )
+    (if (inLatestSentence framePredicateNode)
+        (begin
+          (map
+           (lambda (semeNode)
+            ; retrieve the is_small EvalLink
+             (let ((tv (cog-tv
+                        (EvaluationLink
+                         (PredicateNode "is_small")
+                         (ListLink
+                          (get-real-node semeNode)
+                          )
+                         )
+                        )
+                       ))
+               (if (not (null? tv))
+                   (begin
+                     ; now check the link TruthValue
+                     (if (or (and
+                              (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
+                              (equal? dimension "small")
+                              )
+                             (and
+                              (= (assoc-ref (cog-tv->alist tv) 'mean) 0)
+                              (equal? dimension "large")
+                              )
+                             )
+                         (set! semeNodes (append semeNodes (list semeNode) ) )
+                         )                      
+                     )
+                   )
+               )             
              )
-       ; now check the link TruthValue
-       (if (or (and
-                (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
-                (equal? dimension "small")
-                )
-               (and
-                (= (assoc-ref (cog-tv->alist tv) 'mean) 0)
-                (equal? dimension "large")
-                )
-               )
-           (set! semeNodes (append semeNodes (list semeNode) ) )
+           (get-seme-nodes wordNode)
            )
-       )
-     (get-seme-nodes wordNode)
-     )
-
-    (ListLink 
-     (append (list wordInstanceNode ) semeNodes )     
-     )
-
+          (ListLink 
+           (append (list wordInstanceNode ) semeNodes )     
+           )
+          )
+        '() ; return null if it isn't a predicate of the latest sentence
+        )
     )
-
-)
+  )
 
 ; This function retrieves all the semeNodes related to the given WordInstanceNode
 ; that matches the given relationType using distance predicates defined into the application
-(define (filterByDistance figureWIN figureWN groundWIN groundWN relationTypeCN)
+(define (filterByDistance framePredicateNode figureWIN figureWN groundWIN groundWN relationTypeCN)
   (let ((tv '())
         (predicateNode '())
         (semeNodes '())
-        (relation (cog-name relationTypeCN))
+        (relation (cog-name relationTypeCN))        
         )
-    (map
-     (lambda (figureSemeNode)
-
-       (map
-        (lambda (groundSemeNode)
-          (cond ((equal? "#near" relation)
-                 (set! predicateNode (PredicateNode "near"))
-                 )
-                ((equal? "#next" relation)
-                 (set! predicateNode (PredicateNode "next"))
-                 )
-                )
-          (set! tv 
-                (cog-tv
-                 (EvaluationLink
-                  predicateNode
-                  (ListLink
-                   (get-real-node figureSemeNode)
-                   (get-real-node groundSemeNode)
-                   )
-                  )
-                 )
-                )
-          (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
-              (set! semeNodes (append semeNodes (list figureSemeNode) ) )
-              )
+    (cond ((equal? "#near" relation)
+           (set! predicateNode (PredicateNode "near"))
+           )
+          ((equal? "#next" relation)
+           (set! predicateNode (PredicateNode "next"))
+           )
           )
-        (get-seme-nodes groundWN)
-        )       
-       )
-     (get-seme-nodes figureWN)
-     )
-    (ListLink 
-     (append (list figureWIN ) semeNodes )     
-     )
+    (if (and (not (null? predicateNode)) (inLatestSentence framePredicateNode))
+        (begin    
+          (map
+           (lambda (figureSemeNode)
+             
+             (map
+              (lambda (groundSemeNode)
+                (let ((tv (cog-tv
+                           (EvaluationLink
+                            predicateNode
+                            (ListLink
+                             (get-real-node figureSemeNode)
+                             (get-real-node groundSemeNode)
+                             )
+                            )
+                           )
+                          ))
+                  (if (and (not (null? tv)) (> (assoc-ref (cog-tv->alist tv) 'mean) 0))
+                      (set! semeNodes (append semeNodes (list figureSemeNode) ) )
+                      )
+                  )
+                )          
+              (get-seme-nodes groundWN)
+              )
+             )
+           (get-seme-nodes figureWN)
+           )
 
-    )  
+          (ListLink 
+           (append (list figureWIN ) semeNodes )     
+           )
+          )
+        '() ; return null if it isn't a predicate of the latest sentence
+        )
+    )
   )
 
 ; This function retrieves all the semeNodes related to the given WordInstanceNode
 ; that matches the given color using color predicates defined into the application
-(define (filterByColor wordInstanceNode wordNode colorWordNode)
+(define (filterByColor framePredicateNode wordInstanceNode wordNode colorWordNode)
   (let ((tv '())
         (semeNodes '())
         (color (cog-name colorWordNode))
         )
-
-    (map
-     (lambda (semeNode)
-       (let ((evalLink (EvaluationLink
-                        (PredicateNode "color")
-                        (ListLink
-                         (get-real-node semeNode)
-                         (ConceptNode color)
+    (if (inLatestSentence framePredicateNode)
+        (begin
+          (map
+           (lambda (semeNode)
+             (let ((tv (cog-tv
+                        (EvaluationLink
+                         (PredicateNode "color")
+                         (ListLink
+                          (get-real-node semeNode)
+                          (ConceptNode color)
+                          )
                          )
-                        ) ) )
-         (cond ((not (null? evalLink))
-                (set! tv (cog-tv evalLink ))
-                (if (> (assoc-ref (cog-tv->alist tv) 'mean) 0)
-                    (set! semeNodes (append semeNodes (list semeNode) ) )
-                    )
-                ))
-         )
-       )
-     (get-seme-nodes wordNode)
-     )
-
-    (ListLink 
-     (append (list wordInstanceNode ) semeNodes )
-     )
-
+                        )
+                       ))
+               
+               (if (and (not (null? tv)) (> (assoc-ref (cog-tv->alist tv) 'mean) 0))
+                   (set! semeNodes (append semeNodes (list semeNode) ) )
+                   )               
+               )
+             )
+           (get-seme-nodes wordNode)
+           )          
+          (ListLink 
+           (append (list wordInstanceNode ) semeNodes )
+           )
+          )
+        '() ; return null if it isn't a predicate of the latest sentence
+        )
     )
   )
 
@@ -158,23 +172,30 @@
 ; the ConceptNode #you or the agent seme node, determining if the 
 ; given message was sent or not to the agent
 (define (wasAddressedToMe messageTarget )
-  (if (or (equal? messageTarget (ConceptNode "#you"))
-          (cog-link 'ReferenceLink messageTarget agentSemeNode ) )
-      (stv 1 1)
-      (stv 0 0)
-      )
+  (or (equal? messageTarget (ConceptNode "#you"))
+      (cog-link 'ReferenceLink messageTarget agentSemeNode ))
 )
 
 ; This function check if a given PredicateNode belongs to the most recent
 ; parsed sentence
 (define (inLatestSentence predicateNode )
   (if (member predicateNode (get-latest-frame-predicates))
-      (stv 1 1)
-      (stv 0 0)
-      )  
+      #t
+      #f
+      )
+  )
+
+
+(define (createActionCommand framePredicateNode agentNode actionNode arguments )
+  (if (and (inLatestSentence framePredicateNode) (wasAddressedToMe agentNode))
+      (ExecutionLink (stv 1 1)
+       actionNode
+       arguments
+       )
+      '()
+      )
 )
 
- 
 ;;; Helper functions
 
 ; Call some method to prepare instance of frames

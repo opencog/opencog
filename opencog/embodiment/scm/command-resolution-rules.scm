@@ -121,27 +121,18 @@
       (VariableNode "$targetRealNode")
       (VariableNode "$targetEntitySemeNode")
       )
-     
-     
-     (EvaluationLink
-      (GroundedPredicateNode "scm:inLatestSentence")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       )
-      )
-     (EvaluationLink
-      (GroundedPredicateNode "scm:wasAddressedToMe")
-      (ListLink
-       (VariableNode "$agent")
-       )
-      )
-
+         
      )
     
     (ExecutionLink
-     (GroundedSchemaNode "goto_object_and_grabit")
+     (GroundedSchemaNode "scm:createActionCommand")
      (ListLink
-      (VariableNode "$targetRealNode")
+      (VariableNode "$framePredicateNode")
+      (VariableNode "$agent")
+      (GroundedSchemaNode "goto_object_and_grabit")
+      (ListLink
+       (VariableNode "$targetRealNode")
+       )
       )
      )   
 
@@ -248,25 +239,17 @@
       (VariableNode "$targetRealNode")
       (VariableNode "$targetThemeSemeNode")
       )
-          
-    
-     (EvaluationLink
-      (GroundedPredicateNode "scm:inLatestSentence")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       )
-      )
-     (EvaluationLink
-      (GroundedPredicateNode "scm:wasAddressedToMe")
-      (ListLink
-       (VariableNode "$source")
-       )
-      )
+              
      )
     
     (ExecutionLink
-     (GroundedSchemaNode "drop")
-     (ListLink)
+     (GroundedSchemaNode "scm:createActionCommand")
+     (ListLink
+      (VariableNode "$framePredicateNode")
+      (VariableNode "$source")      
+      (GroundedSchemaNode "drop")
+      (ListLink)
+      )
      )
            
     ) ; ImplicationLink
@@ -358,28 +341,19 @@
       (VariableNode "$goalSemeNode")
       )
 
-
-     (EvaluationLink
-      (GroundedPredicateNode "scm:inLatestSentence")
-      (ListLink
-       (VariableNode "$framePredicateNode")
-       )
-      )
-     
-     (EvaluationLink
-      (GroundedPredicateNode "scm:wasAddressedToMe")
-      (ListLink
-       (VariableNode "$agent")
-       )
-      )
-
      )
     (ExecutionLink
-     (GroundedSchemaNode "walkto_obj")
+     (GroundedSchemaNode "scm:createActionCommand")
      (ListLink
-      (VariableNode "$goalRealNode")
+      (VariableNode "$framePredicateNode")
+      (VariableNode "$agent")
+      (GroundedSchemaNode "walkto_obj")
+      (ListLink
+       (VariableNode "$goalRealNode")
+       )
       )
      )
+
     )
    )
   )
