@@ -218,7 +218,7 @@
 	(for-each
 		(lambda (rule) 
 			(cog-delete ; need to delete the returned ListLink
-				(cog-ad-hoc "do-varscope" rule)
+				(do-varscope rule)
 			)
 		)
 		rule-list
@@ -388,7 +388,7 @@
 
 		; The do-varscope returns a ListLink. We need to nuke
 		; that, as otherwise it will only cause trouble later.
-		(let ((rslt (cog-ad-hoc "do-varscope" quest)))
+		(let ((rslt (do-varscope quest)))
 (dbg-display "q-apply result is\n")
 (display rslt)
 (end-dbg-display)
@@ -585,7 +585,7 @@
 		)
 		(if (not (null? trip-semes))
 			(let* ((ftrip (car trip-semes))
-					(ans (cog-ad-hoc "do-varscope" (make-simple-chain ftrip)))
+					(ans (do-varscope (make-simple-chain ftrip)))
 				)
 (dbg-display "duude question-deduct trip-semes are:\n")
 (display trip-semes)

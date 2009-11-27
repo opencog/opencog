@@ -71,7 +71,7 @@
 	; First, create all of the preposition phrases that we'll need.
 	(for-each
 		(lambda (rule)
-			(cog-ad-hoc "do-varscope" rule)
+			(do-varscope rule)
 		)
 		prep-rule-list ; this list defined by the /triples/prep-rules.scm file
 	)
@@ -79,7 +79,7 @@
 	; Now, create the actual triples
 	(for-each
 		(lambda (rule)
-			(attach-triples (cog-ad-hoc "do-varscope" rule))
+			(attach-triples (do-varscope rule))
 		)
 		triple-rule-list ; this list defined by the /triples/rules.scm file
 	)
@@ -115,7 +115,7 @@
 	; Apply the truth-asserton rules
 	(for-each
 		(lambda (rule)
-			(drule (cog-ad-hoc "do-varscope" rule))
+			(drule (do-varscope rule))
 		)
 		truth-assertion-list ; this list defined by the /triples/rules.scm file
 	)

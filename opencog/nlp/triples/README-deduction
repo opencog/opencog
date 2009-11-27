@@ -62,4 +62,4 @@ Wish to prove:
 )
 
 
-(cog-ad-hoc "do-varscope" q)
+(do-varscope q)

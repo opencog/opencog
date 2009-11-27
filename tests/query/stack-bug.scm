@@ -144,5 +144,5 @@
 )
 
 ; Running the implication should return only one answer!
-; (cog-ad-hoc "do-varscope" (impy))
+; (do-varscope (impy))
 

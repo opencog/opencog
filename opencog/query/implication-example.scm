@@ -15,7 +15,7 @@ scm
 ; The expected result, after running the below, is that the following
 ; should be printed:
 ;
-; guile> (cog-ad-hoc "do-implication" x)
+; guile> (do-implication x)
 ; (ListLink (EvaluationLink (PredicateNode "make_from")
 ;     (ListLink (ConceptNode "pottery")
 ;            (ConceptNode "clay"))))
@@ -71,4 +71,4 @@ scm
 	)
 )
 
-(cog-ad-hoc "do-implication" x)
+(do-implication x)

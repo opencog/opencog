@@ -643,7 +643,7 @@
 ; store it in the database.
 ;
 (define (xxxprocess-rule rule)
-	(define triple-list (cog-outgoing-set (cog-ad-hoc "do-implication" rule)))
+	(define triple-list (cog-outgoing-set (do-implication rule)))
 
 	; Increment count by 1 on each result.
 	(for-each (lambda (atom) (cog-atom-incr atom 1)) triple-list)

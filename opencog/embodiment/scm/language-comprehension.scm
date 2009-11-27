@@ -1603,7 +1603,7 @@
                         ) ; let*
                  )) ; cond
           )
-        (cog-outgoing-set (cog-ad-hoc "do-varscope" rule ) )
+        (cog-outgoing-set (do-varscope rule ) )
         )
 
        )
@@ -1659,7 +1659,7 @@
               (set! commands (append commands (list candidateCommand )) )
               )
           )
-        (cog-outgoing-set (cog-ad-hoc "do-varscope" rule ) )
+        (cog-outgoing-set (do-varscope rule ) )
         )
               
        )

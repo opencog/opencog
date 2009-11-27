@@ -27,7 +27,7 @@
 )
 
 
-(cog-ad-hoc "do-varscope" human-implies-animal)
+(do-varscope human-implies-animal)
 
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 #f)
     (DefinedFrameNode "#Ingestion")
@@ -57,7 +57,7 @@
    )
 )
 
-(cog-ad-hoc "do-varscope" v)
+(do-varscope v)
 
 (define v2
    (VariableScopeLink
@@ -75,7 +75,7 @@
    )
 )
 
-(cog-ad-hoc "do-varscope" v2)
+(do-varscope v2)
 
 (define x
   (ImplicationLink
@@ -87,7 +87,7 @@
   )
 )
 
-(cog-ad-hoc  "do-implication" x)
+(do-implication x)
 
 
 ;; Example of implication with a constant term in it.
