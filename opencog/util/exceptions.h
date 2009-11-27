@@ -293,7 +293,7 @@ public:
 
 
 /**
- * Exception to be called when an assertion fails to pass a casset function.
+ * Exception to be called when an assertion fails to pass a cassert function.
  */
 class AssertionException
 {

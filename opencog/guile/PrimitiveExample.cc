@@ -46,6 +46,12 @@ class MyTestClass
 			}
 			return hlist;
 		}
+
+		Handle my_other_func(Handle h)
+		{
+			throw (RuntimeException(TRACE_INFO, "I threw an exception %d", id));
+			return Handle::UNDEFINED;
+		}
 };
 
 int main ()
@@ -77,16 +83,24 @@ int main ()
 
 	// Print the result of calling MyTestClass::my_func
 	printf("Info: Result of scheme evaluation is %s", rslt.c_str());
-	printf("Info: We are done, bye!\n");
+
+	// Now try throwing an exception.
+	define_scheme_primitive("whoops", &MyTestClass::my_other_func, mtc);
+
+	rslt = eval.eval("(whoops nnn)");
+	if (!eval.eval_error())
+	{
+		printf("XXX ERROR XXX: an error should have been thrown, but wasn't!\n");
+	}
+
+	// Print the result of calling MyTestClass::my_func
+	printf("Info: Intentional throw gave the following output:\n%s", rslt.c_str());
+
+	printf("\nInfo: We are done, bye!\n");
 	return  0;
 }
 
 /*
 todo
--- update README
--- add nil's signature
--- kill AdHoc.cc
 -- publish new README on wiki.
--- catch OPENCOG_ASSERT per nill, and print at shell prompt.
-
 */

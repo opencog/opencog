@@ -7,6 +7,9 @@
  * Copyright (C) 2009 Linas Vepstas
  */
 
+#include <exception>
+#include <opencog/util/exceptions.h>
+
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
@@ -76,7 +79,30 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 {
 	// First, get the environ.
 	PrimitiveEnviron *fe = verify_pe(sfe, "opencog-extension");
-	SCM rc = fe->invoke(arglist);
+
+	SCM rc = SCM_EOL;
+
+	// If the C++ code throws any exceptions, and no one else
+	// has caught them, then we have to catch them, and print 
+	// an error message to the shell.
+	try
+	{
+		rc = fe->invoke(arglist);
+	}
+	catch (const StandardException &ex)
+	{
+		const char *msg = ex.getMessage();
+		scm_misc_error(fe->get_name(), msg, arglist);
+	}
+	catch (const AssertionException &ex)
+	{
+		scm_misc_error(fe->get_name(), "opencog cassert", arglist);
+	}
+	catch (std::exception &ex)
+	{
+		const char *msg = ex.what();
+		scm_misc_error(fe->get_name(), msg, arglist);
+	}
 	return rc;
 }
 
