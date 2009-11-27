@@ -2,6 +2,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeAdHoc.cc
 	SchemeEval.cc
 	SchemeExec.cc
+	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
 	SchemeSmobAV.cc
@@ -18,10 +19,10 @@ TARGET_LINK_LIBRARIES(smob
 	wsd
 )
 
-ADD_EXECUTABLE(extyy
-	SchemeExtend.cc
+ADD_EXECUTABLE(PrimitiveExample
+	PrimitiveExample.cc
 )
-TARGET_LINK_LIBRARIES(extyy
+TARGET_LINK_LIBRARIES(PrimitiveExample
 	smob
 	atomspace
 	pln
@@ -35,6 +36,7 @@ INSTALL (TARGETS smob
 
 INSTALL (FILES
 	SchemeEval.h
+	SchemePrimitive.h
 	SchemeSmob.h
 	DESTINATION "include/opencog/guile"
 )
