@@ -714,6 +714,15 @@ But wait -- shows not over: after 12 hours:
 
 wtf ... these rates are higher than ever.. and are a fantastic speedup!
 
+after 24 hours:
+258 edges for 56 word pairs (rate=79.132317)
+1405 edges for 260 word pairs (rate=58.772474)
+2362 edges for 190 word pairs (rate=66.941334)
+818 edges for 182 word pairs (rate=225.214808)
+8480 edges for 325 word pairs (rate=91.553765)
+922 edges for 72 word pairs (rate=929.476711)
+465 edges for 66 word pairs (rate=268.935519)
+
 
 Ideas/TODO
 ----------

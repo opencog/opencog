@@ -32,8 +32,8 @@ class Atom;
 class SchemeSmob
 {
 		friend class SchemeEval;
-		friend class FuncEnviron;
-		template <typename TT> friend class FuncEnv;
+		friend class PrimitiveEnviron;
+		template <typename TT> friend class SchemePrimitive;
 	
 	private:
 	

@@ -8,8 +8,8 @@
 
 #ifdef HAVE_GUILE
 
-#ifndef _OPENCOG_SCHEME_EXTEND_H
-#define _OPENCOG_SCHEME_EXTEND_H
+#ifndef _OPENCOG_SCHEME_PRIMITIVE_H
+#define _OPENCOG_SCHEME_PRIMITIVE_H
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -17,24 +17,24 @@
 
 namespace opencog {
 
-class FuncEnviron
+class PrimitiveEnviron
 {
 	private:
 		static bool is_inited;
 		static void init(void);
 
 		static SCM do_call(SCM, SCM);
-		static FuncEnviron *verify_fe(SCM, const char *);
+		static PrimitiveEnviron *verify_pe(SCM, const char *);
 
 	protected:
 		void do_register(const char *, int);
 	public:
-		virtual ~FuncEnviron();
+		virtual ~PrimitiveEnviron();
 		virtual SCM invoke (SCM) = 0;
 };
 
 template<class T>
-class FuncEnv : public FuncEnviron
+class SchemePrimitive : public PrimitiveEnviron
 {
 	private:
 		Handle (T::*method)(Handle);
@@ -63,7 +63,7 @@ class FuncEnv : public FuncEnviron
 			return rc;
 		}
 	public:
-		FuncEnv(const char *name, Handle (T::*cb)(Handle), T *data)
+		SchemePrimitive(const char *name, Handle (T::*cb)(Handle), T *data)
 		{
 			that = data;
 			method = cb;
@@ -76,7 +76,7 @@ class FuncEnv : public FuncEnviron
 template<class T>
 inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 {
-	new FuncEnv<T>(name, cb, data);
+	new SchemePrimitive<T>(name, cb, data);
 
 	// XXX fet is never freed -- we need to have it floating around forever, 
 	// so that it holds the callback method. Well, I guess maybe we could
@@ -85,7 +85,7 @@ inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 
 };
 
-#endif // _OPENCOG_SCHEME_EXTEND_H
+#endif // _OPENCOG_SCHEME_PRIMITIVE_H
 
 #endif // HAVE_GUILE
 
@@ -104,24 +104,24 @@ inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 
 using namespace opencog;
 
-bool FuncEnviron::is_inited = false;
+bool PrimitiveEnviron::is_inited = false;
 
 #define C(X) ((SCM (*) ()) X)
 
-void FuncEnviron::init(void)
+void PrimitiveEnviron::init(void)
 {
 	if (is_inited) return;
 	is_inited = true;
 	scm_c_define_gsubr("opencog-extension", 2,0,0, C(do_call));
 }
 
-FuncEnviron::~FuncEnviron() {}
+PrimitiveEnviron::~PrimitiveEnviron() {}
 
-void FuncEnviron::do_register(const char *name, int nargs)
+void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
 	init();
 
-	// The smob will hold a pointer to "this" -- the FuncEnviron
+	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
 	SCM_SET_SMOB_FLAGS(smob, SchemeSmob::COG_EXTEND);
@@ -155,25 +155,25 @@ void FuncEnviron::do_register(const char *name, int nargs)
 	// printf("Debug: do_regsiter %s\n", wrapper.c_str());
 }
 
-SCM FuncEnviron::do_call(SCM sfe, SCM arglist)
+SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 {
 	// First, get the environ.
-	FuncEnviron *fe = verify_fe(sfe, "opencog-extension");
+	PrimitiveEnviron *fe = verify_pe(sfe, "opencog-extension");
 	SCM rc = fe->invoke(arglist);
 	return rc;
 }
 
-FuncEnviron * FuncEnviron::verify_fe(SCM sfe, const char *subrname)
+PrimitiveEnviron * PrimitiveEnviron::verify_pe(SCM spe, const char *subrname)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sfe))
-		scm_wrong_type_arg_msg(subrname, 2, sfe, "opencog primitive function");
+	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, spe))
+		scm_wrong_type_arg_msg(subrname, 2, spe, "opencog primitive function");
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(sfe);
+	scm_t_bits misctype = SCM_SMOB_FLAGS(spe);
 	if (SchemeSmob::COG_EXTEND != misctype)
-		scm_wrong_type_arg_msg(subrname, 2, sfe, "opencog primitive function");
+		scm_wrong_type_arg_msg(subrname, 2, spe, "opencog primitive function");
 
-	FuncEnviron * fe = (FuncEnviron *) SCM_SMOB_DATA(sfe);
-	return fe;
+	PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(spe);
+	return pe;
 }
 
 // ===============================================================
@@ -248,3 +248,15 @@ int main ()
 	printf("Info: We are done, bye!\n");
 	return  0;
 }
+
+/*
+todo
+-- rename classes/files
+-- create example
+-- update README
+-- create test case
+-- add nil's signature
+-- get smob_free to do the freeing
+-- port pln-bc over to this
+
+*/
