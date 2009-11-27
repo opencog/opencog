@@ -1,6 +1,7 @@
 
                        Overview
                        --------
+                     November 2009
 
 The CogServer provides a simple network shell server interface to the 
 various functions in the opencog system.
@@ -33,21 +34,24 @@ lib/opencog.conf file, and adding the module name to the list therein.
 
 Loadable modules will typically need to expose new commands. There are
 three ways of doing this: by using DECLARE_CMD_REQUEST (to define a small
-handful of commands), by using the GenericShell class (to get a generic
-evaluator), or by wrapping the commands with scheme (in SchemeAdHoc.cc) 
-and exposing them via the scheme shell.
+handful of commands), by using the GenericShell class (to build a custom
+shell command evaluator), or by defined scheme functions that call C++
+object methods (using SchemePrimitive.h), thus allowing the new functions
+to be invoked from the scheme shell.  
 
-When only a small number of new commands are needed, then the 
-DECLARE_CMD_REQUEST macro provides the simplest, easiest interface to
-add these commands. However, if the module requires a large number of
-commands, or if these commands have a complex syntax, then the GenericShell
-should be used.  The GenericShell bypasses OpenCog's command processor, 
-and passes input data over to a generic "eval()" method, which is then free
-to interprete the input in any way.
+The last option is the easiest to use, and provides the most powerful
+interface.  This is because a scheme function, once defined, can be used
+both interactively, at the scheme shell prompt, and also within preloaded 
+scheme scripts, to perform various actions on server startup or during
+server operation. An example of defining new scheme primitives can be 
+found in "opencog/guile/PrimitiveExample.cc".
 
-In either case, it will typically be handy for the scheme interface to
-have access to the new module functions, and so providing a scheme
-wrapper is probably a good idea, in any case.
+In certain rare cases, a module my wish to expose an extrenely large
+number of functions, or an alternative scripting system (e.g. python
+or lua, or other language). In this case, the GenericShell provides
+at least some basic support.  The GenericShell bypasses OpenCog's command
+processor, and passes input data over to a generic "eval()" method, which
+is then free to interprete the input in any way.
 
 ToDo/Bugs:
 ----------
@@ -56,9 +60,6 @@ ToDo/Bugs:
   poll, yet they also must minimize cpu overhead, to avoid blocking 
   the command-line processor.   Heavy cpu use must be done in its
   own threads.
-
-* The load-file.c will load a scheme file on startup; however, the
-  way it uses file paths is unsatisfactory.  This needs to be fixed.
 
 * Need to document how module loading actually works.
 
