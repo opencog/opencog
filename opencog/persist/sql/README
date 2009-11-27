@@ -281,7 +281,7 @@ Open a shell:
     opencog> scm
     Entering scheme shell; use ^D or a single . on a line by itself to exit.
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
-    guile> (cog-ad-hoc "store-atom" x)
+    guile> (store-atom x)
     #t
 
 The above will have caused a single atom to be stored in the database.

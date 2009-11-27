@@ -651,6 +651,6 @@
 	; (system "echo Done running one implication\n")
 
 	; Store each resultant atom.
-	(for-each (lambda (atom) (cog-ad-hoc "store-atom" atom)) triple-list)
+	(for-each (lambda (atom) (store-atom atom)) triple-list)
 )
 

@@ -1,7 +1,8 @@
 ;
 ; persistence.scm
 ;
-; Utilities related to atom persistence
+; Utilities related to atom persistence.
+; The libpersist.so module must be loaded, in order for these to work.
 ;
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -15,7 +16,7 @@
 	(define (do-store atom)
 		(let ((iset (cog-incoming-set atom)))
 			(if (null? iset)
-				(cog-ad-hoc "store-atom" atom)
+				(store-atom atom)
 				(for-each do-store iset)
 			)
 		)
@@ -31,12 +32,12 @@
 
 (define (load-referers atom)
 	(if (not (null? atom))
-		; The cog-ad-hoc function for this is defined to perform
+		; The fetch-incoming-set function for this is defined to perform
 		; a recursive fetch.
 		; We do an extra recursion here, in case we were passed a list.
 		(if (pair? atom)
 			(for-each load-referers atom)
-			(cog-ad-hoc "fetch-incoming-set" atom)
+			(fetch-incoming-set atom)
 		)
 	)
 )
