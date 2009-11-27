@@ -406,7 +406,13 @@ public:
         
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), ball4, petNode );
         AtomSpaceUtil::setPredicateValue( *this->atomSpace, "next", SimpleTruthValue( 0.6, 1.0), petNode, ball4 );
- 
+
+        { // create a dump of the map
+            std::ofstream file("testMapDump.txt");
+            file << Spatial::LocalSpaceMap2D::toString( this->atomSpace->getSpaceServer( ).getLatestMap( ) );
+            file.close();
+        } // end block
+            
        
     }
 
@@ -598,7 +604,7 @@ public:
         }
 
 
-        // testing: grab the white ball
+        // testing: grab the ball near the tree
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->solveLatestSentenceReference( );
