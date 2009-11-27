@@ -35,7 +35,7 @@ SchemeEval* SchemeEval::singletonInstance = 0;
 void SchemeEval::init(void)
 {
 	SchemeSmob::init();
-	SchemePrimitive::init();
+	PrimitiveEnviron::init();
 
 	saved_outport = scm_current_output_port();
 	// scm_gc_protect_object(saved_outport);

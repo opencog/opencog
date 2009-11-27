@@ -12,6 +12,7 @@
 
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/VersionHandle.h>
+#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -104,8 +105,11 @@ std::string SchemeSmob::misc_to_string(SCM node)
 			return vh_to_string((VersionHandle *) SCM_SMOB_DATA(node));
 
 		case COG_EXTEND:
-			return "#<opencog extension>\n";
-
+		{
+			// return "#<opencog extension>\n";
+			PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
+			return pe->get_name();
+		}
 		default:
 			return "#<unknown opencog type>\n";
 	}
