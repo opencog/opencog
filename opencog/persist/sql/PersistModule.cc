@@ -25,9 +25,10 @@
 #include "PersistModule.h"
 #include "AtomStorage.h"
 
-#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
+#include <opencog/guile/SchemePrimitive.h>
+#include <opencog/server/CogServer.h>
 
 using namespace opencog;
 
@@ -92,6 +93,10 @@ PersistModule::PersistModule(void) : store(NULL)
 	do_load_register();
 	do_open_register();
 	do_store_register();
+
+	define_scheme_primitive("fetch-atom", &PersistModule::fetch_atom, this);
+	define_scheme_primitive("fetch-incoming-set", &PersistModule::fetch_incoming_set, this);
+	define_scheme_primitive("store-atom", &PersistModule::store_atom, this);
 }
 
 PersistModule::~PersistModule()
@@ -177,3 +182,29 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 
 	return "database store started";
 }
+
+Handle PersistModule::fetch_atom(Handle h)
+{
+	AtomSpace *as = &atomspace();
+	h = as->fetchAtom(h);
+	return h;
+}
+
+Handle PersistModule::fetch_incoming_set(Handle h)
+{
+	AtomSpace *as = &atomspace();
+	// The "true" flag here means "fetch resursive".
+	h = as->fetchIncomingSet(h, true);
+	return h;
+}
+
+/**
+ * Store the single atom to the backing store hanging off the atom-space
+ */
+Handle PersistModule::store_atom(Handle h)
+{
+	AtomSpace *as = &atomspace();
+	as->storeAtom(h);
+	return h;
+}
+
