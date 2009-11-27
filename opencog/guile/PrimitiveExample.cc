@@ -100,7 +100,3 @@ int main ()
 	return  0;
 }
 
-/*
-todo
--- publish new README on wiki.
-*/
