@@ -1,9 +1,8 @@
 /*
  * PrimitiveExample.cc
  *
-// Example code showing how to use the scheme-to-C++ API.
- * Allow C++ code to be invoked from scheme -- 
- * by defining a scheme primitive function.
+ * Example code showing how declare a C++ method so that it can 
+ * be called from scheme.
  *
  * Copyright (C) 2009 Linas Vepstas
  */
@@ -84,12 +83,11 @@ int main ()
 
 /*
 todo
--- rename classes/files
--- create example
 -- update README
 -- create test case
 -- add nil's signature
--- get smob_free to do the freeing
 -- port pln-bc over to this
+-- kill AdHoc.cc
+-- publish new README on wiki.
 
 */

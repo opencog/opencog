@@ -717,15 +717,8 @@ The above form is used by the [[ExecutionLink]] to embed scheme callouts
 into hypergraphs.
 
 === Calling C++ from scheme ===
-Basically, there two ways to do this: 
-create a formal API or provide an ad-hoc extension. Creating a formal API
-without some general experimentation and experience is discouraged -- it
-takes more work, its more complex, and the first stab at it will likely 
-need changes. Instead, try using the 'ad-hoc' mechanism. 
-
-Calls to miscellaneous C++ functions can be implemented by modifying 
-the <tt>opencog/guile/SchemeAdHoc.cc</tt> file.  Its easy: just add 
-a new command name, and the code to execute.
+The best way to do this is to use the SchemePrimitive infrastructure
+to do this.  The example program PrimitiveExample.cc shows how.
 
 ===Calling scheme from Hypergraphs===
 The [[ExecutionLink]], whem used with the [[GroundedSchemaNode]], allows
