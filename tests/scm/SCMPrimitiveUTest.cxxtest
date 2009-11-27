@@ -1,5 +1,5 @@
 /*
- * tests/scm/SCMPrimitive.cxxtest
+ * tests/scm/SCMPrimitiveUTest.cxxtest
  *
  * Make sure the scheme primtive extension code works
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
@@ -32,7 +32,7 @@
 
 using namespace opencog;
 
-class SCMPrimitive :  public CxxTest::TestSuite
+class SCMPrimitiveUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -40,7 +40,7 @@ class SCMPrimitive :  public CxxTest::TestSuite
 
 	public:
 
-	SCMPrimitive(void) 
+	SCMPrimitiveUTest(void) 
 	{
 		try
 		{
@@ -55,7 +55,7 @@ class SCMPrimitive :  public CxxTest::TestSuite
 		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 	}
 
-	~SCMPrimitive()
+	~SCMPrimitiveUTest()
 	{
 		// erase the log file if no assertions failed
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -100,7 +100,7 @@ class MyExampleClass
 /*
  * This is called once before each test, for each test (!!)
  */
-void SCMPrimitive::setUp(void)
+void SCMPrimitiveUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
@@ -111,7 +111,7 @@ void SCMPrimitive::setUp(void)
 
 // ============================================================
 
-void SCMPrimitive::test_H_H(void)
+void SCMPrimitiveUTest::test_H_H(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -123,14 +123,14 @@ void SCMPrimitive::test_H_H(void)
 	// Now, call bingo, with a reasonable argument. Since 
 	// MyExampleClass::my_func is expecting a handle, we better pass
 	// bingo a handle.
-	eval.eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
-	std::string rslt = eval.eval("(bingo nnn)");
+	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
+	std::string rslt = eval->eval("(define yyy (bingo nnn))");
 
-	bool eval_err = eval.eval_error())
+	bool eval_err = eval->eval_error();
 	TSM_ASSERT ("Evaluation errror defining node", !eval_err);
 
 	// Print the result of calling MyExampleClass::my_func
-	printf("Info: Result of scheme evaluation is %s", rslt.c_str());
+	logger().debug("Info: Result of scheme evaluation is %s", rslt.c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
