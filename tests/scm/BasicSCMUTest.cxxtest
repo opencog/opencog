@@ -1,5 +1,5 @@
 /*
- * tests/persist/BasicSCMUTest.cxxtest
+ * tests/scm/BasicSCMUTest.cxxtest
  *
  * Most basic, simplest sniff test, verifies that atoms can be created.
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
