@@ -124,13 +124,24 @@ void SCMPrimitiveUTest::test_H_H(void)
 	// MyExampleClass::my_func is expecting a handle, we better pass
 	// bingo a handle.
 	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
-	std::string rslt = eval->eval("(define yyy (bingo nnn))");
+	eval->eval("(define yyy (bingo nnn))");
 
 	bool eval_err = eval->eval_error();
 	TSM_ASSERT ("Evaluation errror defining node", !eval_err);
 
-	// Print the result of calling MyExampleClass::my_func
-	logger().debug("Info: Result of scheme evaluation is %s", rslt.c_str());
+	// Now verify that the returned yyy is a ListLink which wraps the input node.
+	Handle nnn = eval->eval_h("nnn");
+	Handle yyy = eval->eval_h("yyy");
+	TSM_ASSERT ("undefined node handle ", TLB::isValidHandle(nnn));
+	TSM_ASSERT ("undefined list handle ", TLB::isValidHandle(yyy));
+
+	Atom * a = TLB::getAtom(yyy);
+	Link * l = dynamic_cast<Link *>(a);
+	TSM_ASSERT ("Null link ", NULL != l);
+
+	const std::vector<Handle>& oset = l->getOutgoingSet();
+
+	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
