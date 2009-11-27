@@ -115,6 +115,10 @@ namespace pln {
  */
 void infer(Handle h, int &steps, bool setTarget);
 
+class PLNbc {
+    public:
+        bool pln_bc(Handle h, int steps);
+};
 
 /**
  * that function apply a PLN inference rule given its name and its premises

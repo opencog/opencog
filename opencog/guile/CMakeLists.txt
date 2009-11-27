@@ -14,7 +14,6 @@ ADD_LIBRARY (smob SHARED
 
 TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
-	pln
 	query
 	wsd
 )
@@ -25,7 +24,6 @@ ADD_EXECUTABLE(PrimitiveExample
 TARGET_LINK_LIBRARIES(PrimitiveExample
 	smob
 	atomspace
-	pln
 	server
 )
 

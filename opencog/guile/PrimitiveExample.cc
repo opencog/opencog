@@ -85,8 +85,8 @@ int main ()
 todo
 -- update README
 -- add nil's signature
--- port pln-bc over to this
 -- kill AdHoc.cc
 -- publish new README on wiki.
+-- catch OPENCOG_ASSERT per nill, and print at shell prompt.
 
 */

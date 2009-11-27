@@ -153,7 +153,6 @@ void SchemeSmob::register_procs(void)
 
 	// ad-hoc commands
 	scm_c_define_gsubr("cog-ad-hoc",            1, 1, 0, C(ss_ad_hoc));
-	scm_c_define_gsubr("pln-bc",                2, 0, 0, C(pln_bc));
 }
 
 #endif

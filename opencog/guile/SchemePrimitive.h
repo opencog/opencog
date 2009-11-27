@@ -50,7 +50,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum 
 		{
 			H_H,  // return handle, take handle
-			B_HI, // return boolean, take handle and int
+			B_HI  // return boolean, take handle and int
 		} signature;
 
 		virtual SCM invoke (SCM args)
@@ -111,8 +111,7 @@ inline void declare(const char *name, bool (T::*cb)(Handle, int), T *data)
 	new SchemePrimitive<T>(name, cb, data);
 }
 
-
-};
+}
 
 #endif // _OPENCOG_SCHEME_PRIMITIVE_H
 

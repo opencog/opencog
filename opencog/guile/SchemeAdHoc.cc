@@ -123,33 +123,5 @@ SCM SchemeSmob::ss_ad_hoc(SCM command, SCM optargs)
 	return SCM_BOOL_F;
 }
 
-/* ============================================================== */
-/**
- * Specify the target Atom for PLN backward chaining inference.
- * Creates a new BIT for that Atom.
- * Runs ssteps steps of searching through the BIT.
- * Currently you can also use the cogserver commands on the resulting
- * BIT.
- */
-SCM SchemeSmob::pln_bc (SCM starget, SCM ssteps)
-{
-	Handle h = verify_handle(starget, "pln-bc");
-	int steps = scm_to_int(ssteps);
-
-	Atom *a = TLB::getAtom(h);
-	// We need to make a copy. Wish I could do this on stack ...
-	TruthValue *t = a->getTruthValue().clone();
-
-	opencog::pln::infer(h, steps, true);
-
-	// Return true only if the truth value changed,
-	// else return false.
-	SCM rc = SCM_BOOL_T;
-	if (*t == a->getTruthValue()) rc = SCM_BOOL_F;
-	delete t;
-
-	return rc;
-}
-
 #endif
 /* ===================== END OF FILE ============================ */

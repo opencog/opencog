@@ -32,6 +32,7 @@
 #include "AtomSpaceWrapper.h"
 #include "BackInferenceTreeNode.h"
 
+#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
@@ -148,6 +149,12 @@ void PLNModule::init()
     asw->allowFWVarsInAtomSpace = 
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
+
+    // Define a scheme wrapper -- the scheme function bln-bc will
+    // call the pln_bc method
+    PLNbc *bc = new PLNbc();  // mem leak here ... 
+    declare ("pln-bc", &PLNbc::pln_bc, bc);
+
     // no longer done at module load - it would be inappropriate
     // for contexts other than testing PLN
     /*initTests();*
@@ -222,6 +229,28 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
         Bstate = Bstate_;
         state = state_;
     }
+}
+
+/**
+ * Specify the target Atom for PLN backward chaining inference.
+ * Creates a new BIT for that Atom.
+ * Runs ssteps steps of searching through the BIT.
+ * Currently you can also use the cogserver commands on the resulting
+ * BIT.
+ */
+bool opencog::pln::PLNbc::pln_bc(Handle h, int steps)
+{
+    Atom *a = TLB::getAtom(h);
+    // We need to make a copy. Wish I could do this on stack ...
+    TruthValue *t = a->getTruthValue().clone();
+
+    opencog::pln::infer(h, steps, true);
+
+    // Return true only if the truth value changed, else return false.
+    bool rc = (*t != a->getTruthValue());
+
+    delete t;
+    return rc;
 }
 
 Handle opencog::pln::applyRule(const string& ruleName,
