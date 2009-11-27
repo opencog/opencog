@@ -145,14 +145,14 @@ class SchemeSmob
 		static AttentionValue * verify_av(SCM, const char *);
 		static std::vector<Handle> decode_handle_list (SCM, const char *);
 	
+		static void init(void);
+		SchemeSmob(void);
 	public:
-		// Helper functions
+		// Helper functions XXX why are these public ??
 		static SCM handle_to_scm(Handle);
 		static Handle scm_to_handle(SCM);
 	
-		static void init(void);
-		SchemeSmob(void);
-	
+		// Utility printing functions
 		static std::string to_string(Handle);
 		static std::string av_to_string(const AttentionValue *);
 		static std::string tv_to_string(const TruthValue *);

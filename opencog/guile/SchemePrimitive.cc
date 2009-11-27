@@ -17,6 +17,9 @@ bool PrimitiveEnviron::is_inited = false;
 
 #define C(X) ((SCM (*) ()) X)
 
+/**
+ * initialization code -- XXX not thread-safe
+ */
 void PrimitiveEnviron::init(void)
 {
 	if (is_inited) return;
@@ -28,8 +31,6 @@ PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
-	init();
-
 	// The smob will hold a pointer to "this" -- the PrimitiveEnviron
 	SCM smob;
 	SCM_NEWSMOB (smob, SchemeSmob::cog_misc_tag, this);
