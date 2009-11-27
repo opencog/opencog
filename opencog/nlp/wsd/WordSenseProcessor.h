@@ -12,12 +12,13 @@
 #define _OPENCOG_WORD_SENSE_PROCESSOR_H
 
 #include <pthread.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/nlp/wsd/Mihalcea.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/server/Module.h>
 
 namespace opencog {
 
-class WordSenseProcessor 
+class WordSenseProcessor :public Module
 {
 	private:
 
@@ -45,6 +46,7 @@ class WordSenseProcessor
 
 		WordSenseProcessor(void);
 		virtual ~WordSenseProcessor();
+		const char * id(void);
 		virtual void init(void);
 		virtual void run(CogServer *server);
 		virtual void run_no_delay(CogServer *server);

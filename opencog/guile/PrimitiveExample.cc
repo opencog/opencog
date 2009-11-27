@@ -83,6 +83,7 @@ int main ()
 
 /*
 todo
+-- make wsd into a module, so that run-wsd gets defined.
 -- update README
 -- add nil's signature
 -- kill AdHoc.cc

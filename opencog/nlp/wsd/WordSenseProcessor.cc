@@ -4,8 +4,8 @@
  * Top-level word-sense disambiguation entry point.
  *
  * XXX Currently, this is very crude scaffolding to interface
- * to the opencog server. It needs to be replaced/expanded as
- * appropriate.
+ * to the opencog server. There's stuff in here that is no longer used.
+ * It needs to be scrapped/replaced/expanded as appropriate.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
@@ -25,6 +25,8 @@
 #include "WordSenseProcessor.h"
 
 using namespace opencog;
+
+DECLARE_MODULE(WordSenseProcessor);
 
 void WordSenseProcessor::init(void)
 {
