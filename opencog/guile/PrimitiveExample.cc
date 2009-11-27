@@ -84,7 +84,6 @@ int main ()
 /*
 todo
 -- update README
--- create test case
 -- add nil's signature
 -- port pln-bc over to this
 -- kill AdHoc.cc

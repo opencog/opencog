@@ -40,12 +40,17 @@ template<class T>
 class SchemePrimitive : public PrimitiveEnviron
 {
 	private:
-		Handle (T::*method)(Handle);
+		union
+		{
+			Handle (T::*h_h)(Handle);
+			bool (T::*b_hi)(Handle, int);
+		} method;
 		T* that;
 		const char *scheme_name;
 		enum 
 		{
-			H_H,
+			H_H,  // return handle, take handle
+			B_HI, // return boolean, take handle and int
 		} signature;
 
 		virtual SCM invoke (SCM args)
@@ -56,8 +61,16 @@ class SchemePrimitive : public PrimitiveEnviron
 				case H_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					Handle rh = (that->*method)(h);
+					Handle rh = (that->*method.h_h)(h);
 					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case B_HI:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					int i = scm_to_int(scm_cadr(args));
+					bool b = (that->*method.b_hi)(h, i);
+					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
 					break;
 				}
 				default:
@@ -69,10 +82,18 @@ class SchemePrimitive : public PrimitiveEnviron
 		SchemePrimitive(const char *name, Handle (T::*cb)(Handle), T *data)
 		{
 			that = data;
-			method = cb;
+			method.h_h = cb;
 			scheme_name = name;
 			signature = H_H;
-			do_register(name, 1);
+			do_register(name, 1); // cb has 1 arg
+		}
+		SchemePrimitive(const char *name, bool (T::*cb)(Handle, int), T *data)
+		{
+			that = data;
+			method.b_hi = cb;
+			scheme_name = name;
+			signature = B_HI;
+			do_register(name, 2); // cb has 2 arg
 		}
 		virtual const char *get_name(void) { return scheme_name; }
 };
@@ -84,6 +105,12 @@ inline void declare(const char *name, Handle (T::*cb)(Handle), T *data)
 	// when it is no longer needed. 
 	new SchemePrimitive<T>(name, cb, data);
 }
+template<class T>
+inline void declare(const char *name, bool (T::*cb)(Handle, int), T *data)
+{
+	new SchemePrimitive<T>(name, cb, data);
+}
+
 
 };
 
