@@ -16,10 +16,8 @@
 (define (list-files dir)
 
 	(define (isfile? file)
-		(if (eq? 'regular (stat:type (stat 
-				(string-join (list dir file) "/"))))
-			#t
-			#f
+		(eq? 'regular (stat:type (stat 
+				(string-join (list dir file) "/")))
 		)
 	)
 
