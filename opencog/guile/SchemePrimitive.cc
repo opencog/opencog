@@ -21,7 +21,8 @@ bool PrimitiveEnviron::is_inited = false;
 #define C(X) ((SCM (*) ()) X)
 
 /**
- * initialization code -- XXX not thread-safe
+ * initialization code -- This is currently called under a 
+ * lock, from SchemeEval::init()
  */
 void PrimitiveEnviron::init(void)
 {
@@ -37,6 +38,30 @@ void PrimitiveEnviron::do_register(const char *name, int nargs)
 	// Force initialization of the guile subsystem.
 	SchemeEval::instance();
 
+	// Now enter guile mode, and do the actual work there.
+	tmp_name = name;
+	tmp_nargs = nargs;
+	scm_with_guile(c_wrap_register, this);
+}
+
+void *PrimitiveEnviron::c_wrap_register(void *p)
+{
+	PrimitiveEnviron *self = (PrimitiveEnviron *) p;
+	self->really_do_register(self->tmp_name, self->tmp_nargs);
+}
+
+/**
+ * Create a new smob that will store a pointer to "this", which, in 
+ * turn, holds a pointer to the C++ instance and the C++ method to be
+ * invoked, when its called from scheme.  The evaluation of the scheme
+ * function will actually end up calling "opencog-extension", which
+ * passes this smob to do_call(). It will be do_call that then calls
+ * the actual C++ function.
+ *
+ * Note that this method must be called in "guile mode".
+ */
+void PrimitiveEnviron::really_do_register(const char *name, int nargs)
+{
 	// Scheme garbage collection will be managing the lifecycle 
 	scm_gc_register_collectable_memory (this, get_size(),
 	                                    "opencog primitive environ");

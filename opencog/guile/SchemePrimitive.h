@@ -28,6 +28,11 @@ class PrimitiveEnviron
 		static bool is_inited;
 		static void init(void);
 
+		static void * c_wrap_register(void *);
+		void really_do_register(const char *, int);
+		const char *tmp_name;
+		int tmp_nargs;
+
 		static SCM do_call(SCM, SCM);
 		static PrimitiveEnviron *verify_pe(SCM, const char *);
 
