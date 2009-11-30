@@ -111,13 +111,10 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        // Hmm. Need to explicitly load the modules defined by the
-        // config file above. In particular, need the libquery.so so
-        // that do-varscope, used below, is defined in guile.  Need
-        // to do this before the new config below, which wipes out 
-        // the old config. 
         CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.loadModules();
+        cogserver.loadModule( "libquery.so" );
+        cogserver.loadModule( "libscheme-shell.so" );
+        
         this->atomSpace = cogserver.getAtomSpace();
 
         config(EmbodimentConfig::embodimentCreateInstance, true);
