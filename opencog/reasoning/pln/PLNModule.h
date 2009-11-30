@@ -65,7 +65,19 @@ private:
 
     void setParameters(const std::string* params);
 
+    /**
+     * That method is used to wrapped in a scheme function.
+     * It calls infer, returns true if the TV conclusion has changed
+     * false otherwise.
+     */
     bool pln_bc(Handle h, int steps);
+
+    /**
+     * That method is used to wrapped in a scheme function.
+     * It calls applyRule
+     */
+    Handle pln_ar(const std::string& ruleName, const HandleSeq& premises);
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
