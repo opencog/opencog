@@ -231,7 +231,7 @@ public:
 
     void testIntensionalInheritanceRule() {
         IntensionalInheritanceRule iir(_asw);
-        const vector<Vertex> vv = list_of(_lion_h)(_tiger_h);
+        const vector<Vertex> vv = list_of(_tiger_h)(_lion_h);
         BoundVertex bv = iir.compute(vv);
         pHandle res_h = _v2h(bv.GetValue());
         const TruthValue& res_tv = _asw->getTV(res_h);
@@ -239,8 +239,8 @@ public:
         count_t res_c = res_tv.getCount();
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
 
-        // calculate the expected mean of IntensionalInheritance Lion Tiger
-        strength_t expected_intinh_lion_tiger_s =
+        // calculate the expected mean of IntensionalInheritance Tiger Lion
+        strength_t expected_intinh_tiger_lion_s =
             (f(mammal_lion_ASSOC_s, mammal_tiger_ASSOC_s)
              + f(carnivor_lion_ASSOC_s, carnivor_tiger_ASSOC_s)
              + f(striped_lion_ASSOC_s, striped_tiger_ASSOC_s)
@@ -248,11 +248,11 @@ public:
              + f(facingExtincion_lion_ASSOC_s, facingExtincion_tiger_ASSOC_s)
              )
             /
-            (mammal_lion_ASSOC_s + carnivor_lion_ASSOC_s + striped_lion_ASSOC_s
-             + predator_lion_ASSOC_s + facingExtincion_lion_ASSOC_s);
+            (mammal_tiger_ASSOC_s + carnivor_tiger_ASSOC_s + striped_tiger_ASSOC_s
+             + predator_tiger_ASSOC_s + facingExtincion_tiger_ASSOC_s);
         
         // check that the mean and count of the expected and result are equal
-        TS_ASSERT(isApproxEq(expected_intinh_lion_tiger_s, res_s));
+        TS_ASSERT(isApproxEq(expected_intinh_tiger_lion_s, res_s));
         TS_ASSERT(isApproxEq(properties, res_c));
     }
 };

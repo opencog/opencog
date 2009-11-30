@@ -8,9 +8,11 @@
 ; define concepts
 (define lion (ConceptNode "Lion"))
 (define tiger (ConceptNode "Tiger"))
+; define properties
 (define mammal (ConceptNode "Mammal"))
 (define carnivor (ConceptNode "Carnivor"))
 (define striped (ConceptNode "Striped"))
+(define predator (ConceptNode "Predator"))
 (define facingExtincion (ConceptNode "FacingExtincion"))
 ; define default count
 (define dc 1)
