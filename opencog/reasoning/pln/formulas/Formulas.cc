@@ -189,6 +189,8 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
     DebugPTLBodyFor_Link1Node2;
 
     float n2 = std::min(nAB, nA);
+
+    // sB is used for P(B|NOT A), so it must assumes that B and NOT A are independent
     float s2 = ((n2 + nB) > 0)
                ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
                    / std::max((n2 + nB), 0.00001f))
@@ -403,6 +405,8 @@ TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_atom2;
 
+    // Note that sB corresponds to sAB
+    // DefaultNodeProbability is supposed to replace the unknown P(B|NOT A)
     float sC = sA * sB + DefaultNodeProbability * (1 - sA);
     float nC = nA;
 
