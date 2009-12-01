@@ -1525,9 +1525,9 @@
 ; The output of this function is a list of WordInstanceNodes (nouns and pronouns)
 ; and one SemeNode for each WordInstanceNode that was chosen by the Reference resolution
 ; process
-(define (solve-reference)
+(define (resolve-reference)
   (let ((objects '())
-        (solvedReferences '())
+        (resolvedReferences '())
         (anaphoricSemeNodeStrength '())
         (groundedRulesCounter '())
         )    
@@ -1624,13 +1624,13 @@
        (let ((semeNode (get-nearest-candidate (cdr instance) ))
              (win (car instance))             
              )
-         (set! solvedReferences (append solvedReferences (list (ReferenceLink (stv 1 1) semeNode win))))
+         (set! resolvedReferences (append resolvedReferences (list (ReferenceLink (stv 1 1) semeNode win))))
          )       
        )
      objects
       )
     
-    solvedReferences
+    resolvedReferences
     
     )
   
@@ -1641,7 +1641,7 @@
 ; transformed into a grounded command. This function is responsible
 ; to to that work. It identifies the presence of Frames instance
 ; in the most recent parsed sentence and tries to recognize given commands
-(define (solve-command)
+(define (resolve-command)
   (let ((commands '() ))
     ; set the truth value of the latests eval links to false
     (map

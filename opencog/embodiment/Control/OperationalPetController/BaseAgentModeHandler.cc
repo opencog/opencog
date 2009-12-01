@@ -54,16 +54,16 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
     } else if ( name == "evaluateSentence" ) {
         logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
         logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
-        this->agent->getLanguageTool( ).solveLatestSentenceReference( );
+        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
         logger().debug("BaseAgentModeHandler - Reference resolution done");
         logger().debug("BaseAgentModeHandler - Starting latest sentence command resolution" );
-        this->agent->getLanguageTool( ).solveLatestSentenceCommand( );
+        this->agent->getLanguageTool( ).resolveLatestSentenceCommand( );
         logger().debug("BaseAgentModeHandler - Command resolution done");
 
     } else if ( name == "answerQuestion") {
         logger().debug("BaseAgentModeHandler - Answering a question" );
         logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
-        this->agent->getLanguageTool( ).solveLatestSentenceReference( );
+        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
         logger().debug("BaseAgentModeHandler - Starting question answering" );
         this->agent->getLanguageTool( ).answerLatestQuestion( );
         logger().debug("BaseAgentModeHandler - Question answering done");

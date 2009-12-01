@@ -445,12 +445,12 @@ public:
     {
  
         // first call it without sentence to parse
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         // testing: grab the red ball
         int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence1.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         {
             HandleSeq semeNodeBind;
             semeNodeBind.push_back( this->atomSpace->getHandle( SEME_NODE, ballId3 ) );
@@ -465,7 +465,7 @@ public:
             // and the ball 3 was chosen as the correct ball
             TS_ASSERT( response.size( ) == 1 );
         }
-        this->language->solveLatestSentenceCommand( );
+        this->language->resolveLatestSentenceCommand( );
         {
             HandleSeq arguments(1);
             arguments[0] = this->atomSpace->addNode( ACCESSORY_NODE, ballId3);
@@ -482,7 +482,7 @@ public:
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence2.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
 
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         
         {
             HandleSeq semeNodeBind;
@@ -518,7 +518,7 @@ public:
         // testing: drop it
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence3.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );        
+        this->language->resolveLatestSentenceReference( );        
         { // checking anaphora resolution
             
             HandleSeq semeNodeBind;
@@ -534,7 +534,7 @@ public:
             // and the ball 3 was chosen as the correct 'it' and 'ball'
             TS_ASSERT( response.size( ) == 3 );
         } // end block        
-        this->language->solveLatestSentenceCommand( );
+        this->language->resolveLatestSentenceCommand( );
         {
             HandleSeq arguments;
             HandleSeq command(2);
@@ -549,7 +549,7 @@ public:
         // testing: go to the red ball
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence4.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         { // checking anaphora resolution
             
             HandleSeq semeNodeBind;
@@ -565,7 +565,7 @@ public:
             // and the ball 3 was chosen as the correct 'it' and 'ball'
             TS_ASSERT( response.size( ) == 4 );
         } // end block        
-        this->language->solveLatestSentenceCommand( );        
+        this->language->resolveLatestSentenceCommand( );        
         {
             HandleSeq arguments(1);
             arguments[0] = this->atomSpace->addNode( ACCESSORY_NODE, ballId3);
@@ -581,7 +581,7 @@ public:
         // testing: grab the white ball
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence5.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         { // checking anaphora resolution
             
             HandleSeq semeNodeBind;
@@ -597,7 +597,7 @@ public:
             // and the ball 6 was chosen as the correct 'ball' for both parses
             TS_ASSERT( response.size( ) == 2 );
         } // end block        
-        this->language->solveLatestSentenceCommand( );
+        this->language->resolveLatestSentenceCommand( );
         {
 
             HandleSeq arguments(1);
@@ -615,8 +615,8 @@ public:
         // testing: grab the ball near the tree
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
-        this->language->solveLatestSentenceCommand( );
+        this->language->resolveLatestSentenceReference( );
+        this->language->resolveLatestSentenceCommand( );
         {
             HandleSeq arguments(1);
             arguments[0] = this->atomSpace->addNode( ACCESSORY_NODE, "4");
@@ -684,7 +684,7 @@ public:
         
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
@@ -695,7 +695,7 @@ public:
 
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
@@ -704,7 +704,7 @@ public:
         
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question8.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
@@ -713,7 +713,7 @@ public:
 
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question9.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
@@ -722,7 +722,7 @@ public:
     
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question10.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             this->atomSpace->getHandle( PET_NODE, petId ) ) )
@@ -732,7 +732,7 @@ public:
 
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question11.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
-        this->language->solveLatestSentenceReference( );
+        this->language->resolveLatestSentenceReference( );
         this->language->answerLatestQuestion( );
         this->language->answerLatestQuestion( ); // repeat to force the spatial relations re-processing
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
@@ -772,8 +772,8 @@ public:
         rc = load_scm_file( OPENCOG_SOURCE_DIR"/opencog/embodiment/scm/question-answering.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         
-        lang.solveLatestSentenceReference( );
-        lang.solveLatestSentenceCommand( );
+        lang.resolveLatestSentenceReference( );
+        lang.resolveLatestSentenceCommand( );
         lang.answerLatestQuestion( );
         
         delete pet;

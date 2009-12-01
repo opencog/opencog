@@ -41,11 +41,11 @@ namespace OperationalPetController
         
         virtual ~LanguageComprehension( void );        
 
-        void solveLatestSentenceReference( void );
+        void resolveLatestSentenceReference( void );
 
         void answerLatestQuestion( void );
 
-        void solveLatestSentenceCommand( void );
+        void resolveLatestSentenceCommand( void );
 
         std::string resolveFrames2Relex( );
 

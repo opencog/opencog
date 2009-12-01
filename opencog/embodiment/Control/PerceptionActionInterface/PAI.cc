@@ -1035,7 +1035,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         std::string answer = SchemeEval::instance().eval( parsedSentenceText );
         logger().debug( "PAI::%s - loading atoms", __FUNCTION__ );
         if ( SchemeEval::instance().eval_error() ) {
-            logger().error( "PAI::%s - An error occurred while trying to solve reference: %s",
+            logger().error( "PAI::%s - An error occurred while trying to resolve reference: %s",
                             __FUNCTION__, answer.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );

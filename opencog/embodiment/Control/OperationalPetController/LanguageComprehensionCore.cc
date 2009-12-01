@@ -71,14 +71,14 @@ void LanguageComprehension::init( void )
     } // if
 }
 
-void LanguageComprehension::solveLatestSentenceReference( void )
+void LanguageComprehension::resolveLatestSentenceReference( void )
 {
     init();
 
-    std::string answer = SchemeEval::instance().eval( "(solve-reference)");    
-    logger().info( "LanguageComprehension::%s - (solve-reference) answer: %s", __FUNCTION__, answer.c_str() );
+    std::string answer = SchemeEval::instance().eval( "(resolve-reference)");    
+    logger().info( "LanguageComprehension::%s - (resolve-reference) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - An error occurred while trying to solve reference: %s",
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );    
@@ -91,7 +91,7 @@ void LanguageComprehension::answerLatestQuestion( void )
     std::string answer = SchemeEval::instance().eval( "(answer-question)");    
     logger().info( "LanguageComprehension::%s - (answer-question) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - An error occurred while trying to solve reference: %s",
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );
@@ -159,14 +159,14 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     return elements;
 }
 
-void LanguageComprehension::solveLatestSentenceCommand( void )
+void LanguageComprehension::resolveLatestSentenceCommand( void )
 {
     init();
 
-    std::string answer = SchemeEval::instance().eval( "(solve-command)");
-    logger().info( "LanguageComprehension::%s - (solve-command) answer: %s", __FUNCTION__, answer.c_str() );
+    std::string answer = SchemeEval::instance().eval( "(resolve-command)");
+    logger().info( "LanguageComprehension::%s - (resolve-command) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - An error occurred while trying to solve command: %s",
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve command: %s",
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );
