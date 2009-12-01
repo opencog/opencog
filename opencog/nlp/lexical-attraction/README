@@ -471,7 +471,41 @@ of which 231K are unique.
 
 
 
+=======================================================================
 
+Big picture:
+
+Four features of language: [Sin2004]
+-- ambituity -- many senses per word
+-- variation -- many ways of saying the same thing
+-- terminology -- labelling features e.g. tense, etc. or lack of 
+   labels: e.g "What kind of things can be rife? And where are they 
+   likely to occur?" this clas has no label.
+-- Incompletelness -- not just a lack of terms for lexical categories
+   (e.g. things that are rife) but even larer structures: "Its about
+   as useful as a ..." there's no namee for "..." and you can't even
+   hope to list the membership of "..."
+
+Solutions:
+-- ambiguity disappears when context is examined. (WSD)
+-- The number of meanings is explosively large when collocations are 
+   considered  (i.e. distinct collocations have narrow meanings)
+   (example: "saved out skin")
+-- Terminology problems are due to separation between grammar and lexis.
+   (focus on structure, without sense, focus on sense, w/o structure.)
+
+-- P1 -- "The lexical item is best described maximially, not minimally"
+   i.e. provide enough context for full disambiguation.
+-- P2 -- (a strong hypothesis) -- each word sense is *unique* once 
+   enough context has been provided
+
+-- P3 "Lexical meaning is created at two levels: the general meaing 
+   of the lexical item, and the modulation of the meaning by selections
+   of individual words".
+
+
+[Sin2004] "New evidence, new priorities, new attitudes" in J. Sinclair, (ed)
+(2004) How to use corpora in language teaching, Amsterdam: John Benjamins
 
 
 =======================================================================

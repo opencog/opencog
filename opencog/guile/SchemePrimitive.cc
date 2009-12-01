@@ -75,7 +75,7 @@ void PrimitiveEnviron::really_do_register(const char *name, int nargs)
 	// sufficient for this purpose.
 #define BUFLEN 40
 	char buff[BUFLEN];
-	snprintf(buff, BUFLEN, "cog-ext-%p", this);
+	snprintf(buff, BUFLEN, "cog-prim-%p", this);
 	scm_c_define (buff, smob);
 
 	std::string wrapper = "(define (";
