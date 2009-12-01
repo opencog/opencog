@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.cc
+ * opencog/embodiment/Control/OperationalPetController/LanguageComprehensionCore.cc
  *
  * Copyright (C) 2009 Novamente LLC
  * All Rights Reserved
@@ -23,238 +23,50 @@
 
 #include <opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <boost/regex.hpp>
-#include <opencog/guile/SchemeSmob.h>
 
 using namespace OperationalPetController;
 using namespace opencog;
 
-
-class ComputeSpatialRelations : public SchemeFunction {
-public:
-    
-    ComputeSpatialRelations( Control::PetInterface& agent ) :
-        SchemeFunction( 
-            "cog-emb-compute-spatial-relations", 3, 0, 1 ) { localAgent = &agent; }
-
-    virtual FunctionPointer getFunctionPointer( void ) {
-        return (SchemeFunction::FunctionPointer)&ComputeSpatialRelations::execute;
-    }
-
-private:
-    
-    static SCM execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode ) {
-        opencog::AtomSpace& atomSpace = localAgent->getAtomSpace( );
-        HandleSeq resultingFrames;
-        if ( scm_is_null(objectObserver) ) {
-            logger().error( "ComputeSpatialRelations::%s - Invalid null observer reference",
-                            __FUNCTION__ );
-            return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
-        } // if
-        if ( scm_is_null(groundSemeNode) ) {
-            logger().error( "ComputeSpatialRelations::%s - Invalid null reference ground object",
-                            __FUNCTION__ );
-            return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
-        } // if
-        if ( scm_is_null(figureSemeNode) ) {
-            logger().error( "ComputeSpatialRelations::%s - Invalid null reference figure object",
-                            __FUNCTION__ );
-            return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
-        } // if
-
-        Handle observer = SchemeSmob::scm_to_handle(objectObserver);
-        Handle objectA = SchemeSmob::scm_to_handle(figureSemeNode);
-        Handle objectB = SchemeSmob::scm_to_handle(groundSemeNode);
-        Handle objectC = (scm_is_pair(ground2SemeNode) && !scm_is_null(SCM_CAR(ground2SemeNode)) ) ? 
-            SchemeSmob::scm_to_handle(SCM_CAR(ground2SemeNode)) : Handle::UNDEFINED;
-                
-        const SpaceServer::SpaceMap& spaceMap = 
-            atomSpace.getSpaceServer( ).getLatestMap( );
-
-        double besideDistance = spaceMap.getNextDistance( );
-        
-        {
-            std::stringstream msg;
-            msg << "observer[" << TLB::getAtom( observer )->toString( ) << "] ";
-            msg << "objectA[" << TLB::getAtom( objectA )->toString( ) << "] ";
-            msg << "objectB[" << TLB::getAtom( objectB )->toString( ) << "] ";
-            if ( objectC != Handle::UNDEFINED ) {
-                msg << "objectC[" << atomSpace.getName( objectC ) << "] ";
-            } // if            
-            logger().debug( "ComputeSpatialRelations::%s - Computing spatial relations for '%s'",
-                            __FUNCTION__, msg.str( ).c_str( ) );
-        }
-
-
-        std::vector<std::string> entitiesA;
-        std::vector<std::string> entitiesB;
-        std::vector<std::string> entitiesC;
-
-        if ( atomSpace.getType( objectA ) == VARIABLE_NODE ) {
-            spaceMap.getAllObjects( std::back_inserter( entitiesA ) );
-        } else {
-            HandleSeq incoming = atomSpace.getIncoming( objectA );
-            unsigned int i;
-            for( i = 0; i < incoming.size( ); ++i ) {
-                Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-                if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                    entitiesA.push_back( atomSpace.getName( firstElement ) );
-                } // if
-            } // for            
-        } // else
-
-        if ( atomSpace.getType( objectB ) == VARIABLE_NODE ) {
-            spaceMap.getAllObjects( std::back_inserter( entitiesB ) );
-        } else {
-            HandleSeq incoming = atomSpace.getIncoming( objectB );
-            unsigned int i;
-            for( i = 0; i < incoming.size( ); ++i ) {
-                Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-                if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                    entitiesB.push_back( atomSpace.getName( firstElement ) );
-                } // if
-            } // for
-        } // else
-
-        if ( objectC != Handle::UNDEFINED ) {
-            if ( atomSpace.getType( objectC ) == VARIABLE_NODE ) {
-                spaceMap.getAllObjects( std::back_inserter( entitiesC ) );
-            } else {
-                HandleSeq incoming = atomSpace.getIncoming( objectC );
-                unsigned int i;
-                for( i = 0; i < incoming.size( ); ++i ) {
-                    Handle firstElement = atomSpace.getOutgoing(incoming[i], 0 );
-                    if ( atomSpace.inheritsType( atomSpace.getType(firstElement), OBJECT_NODE ) ) {
-                        entitiesC.push_back( atomSpace.getName( firstElement ) );
-                    } // if
-                } // for
-            } // else            
-        } // if
-
-        logger().debug( "ComputeSpatialRelations::%s - %d candidates for objectA. %d candidates for objectB. %d candidates for objectC",
-                        __FUNCTION__, entitiesA.size( ), entitiesB.size( ), entitiesC.size( ) );
-
-        try {
-            const Spatial::EntityPtr& observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
-            
-            unsigned int i, j, k;
-            for( i = 0; i < entitiesA.size( ); ++i ) {
-                const Spatial::EntityPtr& entityA = spaceMap.getEntity( entitiesA[i] );
-                for( j = 0; j < entitiesB.size( ); ++j ) {
-                    if ( entitiesA[i] == entitiesB[j] ) {
-                        continue;
-                    } // if
-                    const Spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
-                    if ( entitiesC.size( ) > 0 ) {
-                        for( k = 0; k < entitiesC.size( ); ++k ) {
-                            if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
-                                continue;
-                            } // if
-                            const Spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
-                            createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                               spaceMap.computeSpatialRelations( observerEntity->getPosition( ), besideDistance, *entityA, *entityB, *entityC ),
-                                  entitiesA[i], entitiesB[j], entitiesC[k] );
-                        } // for
-                    } else {
-                            createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                               spaceMap.computeSpatialRelations( observerEntity->getPosition( ), besideDistance, *entityA, *entityB ),
-                                  entitiesA[i], entitiesB[j], "" );                        
-                    } // else
-                } // for
-            } // for
-        } catch( const opencog::NotFoundException& ex ) {
-            logger().error( "LanguageComprehension::%s - %s", __FUNCTION__, ex.getMessage( ) );
-            return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
-        } // if
-        
-        return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );        
-    }
-
-    static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
-        const std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>& relations,
-           const std::string& objectA, const std::string& objectB, const std::string& objectC ) {
-
-        std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>::const_iterator it;
-        for( it = relations.begin( ); it != relations.end( ); ++it ) {
-            std::string relationName = Spatial::LocalSpaceMap2D::spatialRelationToString( *it );
-
-            std::map<std::string, Handle> elements;
-            elements["Figure"] = atomSpace.getHandle( SEME_NODE, objectA );
-            elements["Ground"] = atomSpace.getHandle( SEME_NODE, objectB );
-            elements["Relation_type"] = atomSpace.addNode( CONCEPT_NODE, relationName );
-
-            std::stringstream instanceName;
-            instanceName << objectA;
-            instanceName << "_";
-            instanceName << objectB;
-
-            if ( *it == Spatial::LocalSpaceMap2D::BETWEEN ) {
-                elements["Ground_2"] = atomSpace.getHandle( SEME_NODE, objectC );
-                instanceName << "_";
-                instanceName << objectC;
-            } // if            
-
-            instanceName << "_" << relationName;
-            resultingFrames.push_back(
-               AtomSpaceUtil::setPredicateFrameFromHandles(
-                  atomSpace, "#Locative_relation", instanceName.str( ), 
-                      elements, SimpleTruthValue(1.0, 1.0), false ) );
-        } // for
-
-    }
-
-    static Control::PetInterface* localAgent;
-
-};
-
-Control::PetInterface* ComputeSpatialRelations::localAgent = NULL;
-
 LanguageComprehension::LanguageComprehension( Control::PetInterface& agent ) : 
-    agent( agent ), spatialRelationsEvaluatorCaller( NULL )
+    agent( agent ), nlgenClient( NULL ), initialized( false )
 {
 }
 
 LanguageComprehension::~LanguageComprehension( void )
 {
-    delete nlgenClient;
-    if ( this->spatialRelationsEvaluatorCaller != NULL ) {
-        delete this->spatialRelationsEvaluatorCaller;
-        this->spatialRelationsEvaluatorCaller = NULL;
+    if ( nlgenClient != NULL ) {
+        delete nlgenClient;
+        nlgenClient = NULL;
     } // if
 }
 
 void LanguageComprehension::init( void )
 {
-    static bool initialized = false;
     if ( !initialized ) {
-        
-        this->spatialRelationsEvaluatorCaller = new ComputeSpatialRelations( this->agent );
-        scm_c_define_gsubr( this->spatialRelationsEvaluatorCaller->getName( ).c_str( ),
-                  this->spatialRelationsEvaluatorCaller->getNumberOfRequiredArguments( ),
-                  this->spatialRelationsEvaluatorCaller->getNumberOfOptionalArguments( ),
-                  this->spatialRelationsEvaluatorCaller->getNumberOfRestArguments( ),
-                  this->spatialRelationsEvaluatorCaller->getFunctionPointer( )
-                  );
-
         initialized = true;
+        
         std::stringstream script;
         script << "(define agentSemeNode (SemeNode \"";
         script << agent.getPetId( ) << "\") )" << std::endl;
         std::string answer = SchemeEval::instance().eval( script.str( ) );
-        
         if ( SchemeEval::instance().eval_error() ) {
             logger().error( "LanguageComprehension::%s - An error occurred while trying to setup the agent seme node: %s",
                             __FUNCTION__, answer.c_str( ) );
         } // if
-        
         SchemeEval::instance().clear_pending( );
 
+        loadFrames( );
+
+        LanguageComprehension::localAgent = &this->agent;
+        scm_c_define_gsubr("cog-emb-compute-spatial-relations", 3, 0, 1, 
+                           (SCM (*)())&LanguageComprehension::execute );
+                
         this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
         this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
 
-        nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);
+        nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);      
 
     } // if
 }
@@ -401,6 +213,8 @@ void LanguageComprehension::solveLatestSentenceCommand( void )
 
 std::string LanguageComprehension::resolveFrames2Relex( )
 {
+    init( );
+
     std::vector < std::pair<std::string, Handle> > handles; 
     std::set< std::string > pre_conditions;
 
@@ -509,7 +323,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
 
 std::string LanguageComprehension::resolveRelex2Sentence( const std::string& relexInput ) 
 {
-    
+    init( );
     //connect to the NLGen server and try to get the sentence from the relex
     //content
     std::string nlgen_sentence = nlgenClient->send(relexInput);
@@ -543,3 +357,4 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
     return nlgen_sentence;
     
 }
+

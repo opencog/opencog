@@ -320,6 +320,9 @@ protected:
             "VISUAL_DEBUGGER_HOST",         "localhost",
             "VISUAL_DEBUGGER_PORT",         "6000",
 
+            "FRAMES_FILE",                  "frames.list",
+            "FRAMES_INHERITANCE_FILE",      "framesInheritance.list",
+
             //used as halting condition by reset
             "",                             ""
         };

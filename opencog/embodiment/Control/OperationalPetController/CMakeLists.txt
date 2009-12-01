@@ -17,7 +17,8 @@ ADD_LIBRARY (OpcLib
     ScavengerHuntAgentModeHandler
     DefaultAgentModeHandler
     LearningAgentModeHandler
-    LanguageComprehension
+    LanguageComprehensionCore
+    LanguageComprehensionFrames
     FramesToRelexRuleEngine
     NLGenClient
     OutputRelex
