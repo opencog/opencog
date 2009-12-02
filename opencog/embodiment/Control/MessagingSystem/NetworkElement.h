@@ -41,11 +41,8 @@
 
 #define REPLACE_CSOCKETS_BY_ASIO
 
-#define USE_BOOST_ASIO
-#ifdef USE_BOOST_ASIO
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
-#endif
 
 namespace MessagingSystem
 {
@@ -129,12 +126,8 @@ private:
     int routerPort;
 
     char threadArgs[256]; // used to pass arguments to static method called by listener thread
-#ifdef USE_BOOST_ASIO
     boost::asio::io_service io_service;
     tcp::socket* sock;
-#else
-    int sock;
-#endif
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
     static std::vector<ServerSocket*> serverSockets;

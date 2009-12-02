@@ -40,9 +40,7 @@
 #include "RouterServerSocket.h"
 #include "NetworkElementCommon.h"
 
-#ifdef USE_BOOST_ASIO
 #include <boost/lexical_cast.hpp>
-#endif
 
 using namespace MessagingSystem;
 using namespace opencog;
@@ -294,15 +292,9 @@ const std::string &Router::getIPAddress(const std::string &id)
     return ip;
 }
 
-#ifdef USE_BOOST_ASIO    
 tcp::socket* Router::getControlSocket(const std::string &id)
 {
     tcp::socket* sock = NULL;
-#else
-int Router::getControlSocket(const std::string &id)
-{
-    int sock = -1;
-#endif
     Id2SocketMap::iterator it = controlSockets.find(id);
     if (it != controlSockets.end()) {
         sock = it->second;
@@ -311,15 +303,9 @@ int Router::getControlSocket(const std::string &id)
     return sock;
 }
 
-#ifdef USE_BOOST_ASIO    
 tcp::socket* Router::getDataSocket(const std::string &id)
 {
     tcp::socket* sock = NULL;
-#else
-int Router::getDataSocket(const std::string &id)
-{
-    int sock = -1;
-#endif
     Id2SocketMap::iterator it = dataSockets.find(id);
     if (it != dataSockets.end()) {
         sock = it->second;
@@ -333,18 +319,11 @@ void Router::closeControlSocket(const std::string &id)
     logger().debug("Closing control socket for element '%s'.", id.c_str());
     Id2SocketMap::iterator it = controlSockets.find(id);
     if (it != controlSockets.end()) {
-#ifdef USE_BOOST_ASIO    
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
         controlSockets.erase(id);
         logger().debug("Closed control socket for element '%s'.", id.c_str());
-#else
-        int sock = it->second;
-        close(sock);
-        controlSockets.erase(id);
-        logger().debug("Closed control socket: '%d'.", sock);
-#endif
     }
 }
 
@@ -353,18 +332,11 @@ void Router::closeDataSocket(const std::string &id)
     logger().debug("Closing data socket for element '%s'.", id.c_str());
     Id2SocketMap::iterator it = dataSockets.find(id);
     if (it != dataSockets.end()) {
-#ifdef USE_BOOST_ASIO    
         tcp::socket* sock = it->second;
         sock->close();
         delete sock;
         dataSockets.erase(id);
         logger().debug("Closed data socket for element '%s'.", id.c_str());
-#else
-        int sock = it->second;
-        close(sock);
-        dataSockets.erase(id);
-        logger().debug("Closed data socket: '%d'.", sock);
-#endif
     }
 }
 
@@ -598,7 +570,6 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         }
     } // if
 
-#ifdef USE_BOOST_ASIO
     tcp::socket* sock = NULL;
     std::string ipAddr = getIPAddress(ne_id);
     int port = getPortNumber(ne_id);
@@ -621,25 +592,6 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         if (sock != NULL) delete sock;
         sock = NULL;
     }
-#else
-    int sock;
-    if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
-    } // if
-
-    logger().debug("Router - controlSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock);
-
-    int on = 1; // Keep connection alive
-    if ( setsockopt ( sock, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
-    struct timeval tv;
-    tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
-    if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval)) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#endif
 
     std::string ipAddr = getIPAddress(ne_id);
     int port = getPortNumber(ne_id);
@@ -686,7 +638,6 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         }
     } // if
 
-#ifdef USE_BOOST_ASIO
     tcp::socket* sock = NULL;
     std::string ipAddr = getIPAddress(ne_id);
     int port = getPortNumber(ne_id);
@@ -709,24 +660,6 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         if (sock != NULL) delete sock;
         sock = NULL;
     }
-#else
-    int sock;
-    if ( (sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
-    } // if
-
-    logger().debug("Router - dataSocketConnection(%s): created new socket: %d.", ne_id.c_str(), sock);
-    int on = 1; // keep connection alive
-    if ( setsockopt ( sock, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
-    struct timeval tv;
-    tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
-    if ( setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval)) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#endif
 
     std::string ipAddr = getIPAddress(ne_id);
     int port = getPortNumber(ne_id);
@@ -790,7 +723,6 @@ bool Router::sendNotification(const NotificationData& data)
             break;
         }
 
-#ifdef USE_BOOST_ASIO
         logger().debug("Router - Sending notification (socket = %p) '%s'.", data.sock, cmd.c_str());
  
         boost::system::error_code error;
@@ -799,15 +731,6 @@ bool Router::sendNotification(const NotificationData& data)
             logger().error("Router - sendNotification. Error transfering data");
             return false;
         }
-#else
-        logger().debug("Router - Sending notification (socket = %d) '%s'.", data.sock, cmd.c_str());
-
-        unsigned int sentBytes = 0;
-        if ( ( sentBytes = send(data.sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-            logger().error("Router - sendNotification. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
-            return false;
-        }
-#endif
 
         if (noAckMessages) {
             return true;
@@ -815,13 +738,8 @@ bool Router::sendNotification(const NotificationData& data)
 
 #define BUFFER_SIZE 256
         char response[BUFFER_SIZE];
-#ifdef USE_BOOST_ASIO
         size_t receivedBytes = data.sock->read_some(boost::asio::buffer(response), error);
         if (error && error != boost::asio::error::eof) {
-#else
-        int receivedBytes = 0;
-        if ( (receivedBytes = recv(data.sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
-#endif
             logger().error("Router - sendNotification. Invalid response. recv returned %d ", receivedBytes );
             return false;
         }

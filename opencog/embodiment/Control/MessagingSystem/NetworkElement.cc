@@ -34,13 +34,6 @@
 #include <Sockets/SocketHandler.h>
 #endif
 
-#ifndef USE_BOOST_ASIO
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#endif
-
 //for the random generator initilization
 #include <cmath>
 #include <ctime>
@@ -60,10 +53,8 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
-#ifdef USE_BOOST_ASIO
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
-#endif
 
 
 using namespace MessagingSystem;
@@ -91,14 +82,10 @@ NetworkElement::~NetworkElement()
         NetworkElement::stopListenerThread();
     }
 
-#ifdef USE_BOOST_ASIO
     if (this->sock != NULL) {
         this->sock->close();
         delete this->sock;
     }
-#else
-    if (this->sock != -1) close(this->sock);
-#endif
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
     foreach(ServerSocket* ss, serverSockets) {
@@ -114,12 +101,7 @@ NetworkElement::~NetworkElement()
 
 NetworkElement::NetworkElement()
 {
-#ifdef USE_BOOST_ASIO
     this->sock = NULL;
-#else
-    // Linux Sockets was used because C++ Sockets has a bug to create persistent socket connections
-    this->sock = -1;
-#endif
     this->subclass_initialized = false;
     pthread_mutex_init(&socketAccessLock, NULL);
     pthread_mutex_init(&tickLock, NULL);
@@ -128,11 +110,7 @@ NetworkElement::NetworkElement()
 
 NetworkElement::NetworkElement(const std::string &myId, const std::string &ip, int portNumber)
 {
-#ifdef USE_BOOST_ASIO
     this->sock = NULL;
-#else
-    this->sock = -1;
-#endif
     this->subclass_initialized = false;
     initialize(myId, ip, portNumber);
 }
@@ -330,18 +308,11 @@ void NetworkElement::unavailableElement(const std::string &id)
     // Handles special case where Router sends unavailable notification about itself,
     // which means it asks for handshake in a new connection
     if (id == this->routerID) {
-#ifdef USE_BOOST_ASIO
         if (this->sock != NULL) {
             this->sock->close();
             delete this->sock;
             this->sock = NULL;
         }
-#else
-        if (this->sock != -1) {
-            close(this->sock);
-            this->sock = -1;
-        }
-#endif
         handshakeWithRouter();
     } else {
         markAsUnavailableElement(id);
@@ -544,17 +515,12 @@ void NetworkElement::stopListenerThread()
 
 bool NetworkElement::connectToRouter(void)
 {
-#ifdef USE_BOOST_ASIO
     if ( this->sock != NULL ) {
-#else
-    if ( this->sock != -1 ) {
-#endif
         logger().debug(
                      "NetworkElement - connectToRouter. Connection already established" );
         return true;
     } // if
 
-#ifdef USE_BOOST_ASIO
     sock = NULL;
     try {
         tcp::resolver resolver(io_service);
@@ -574,41 +540,6 @@ bool NetworkElement::connectToRouter(void)
         if (sock != NULL) delete sock;
             sock = NULL;
     }
-#else
-    if ( (this->sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot create a socket" );
-    } // if
-
-    int on = 1; // keep connection alive
-    if ( setsockopt ( this->sock, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#if 0 // TODO: This did not worked very well (got weird behaviors). This must be reviewed and fine tuned later.
-    struct timeval tv;
-    tv.tv_sec = 30;  // 30 Secs Timeout for receiving operation
-    if ( setsockopt( this->sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval)) == -1 ) {
-        throw opencog::NetworkException( TRACE_INFO, "Cannot setup socket parameters" );
-    } // if
-#endif
-
-
-    sockaddr_in client;
-    client.sin_family = AF_INET;                  /* Internet/IP */
-    client.sin_addr.s_addr = inet_addr(this->routerIP.c_str());  /* IP address */
-    client.sin_port = htons(this->routerPort);       /* server port */
-
-    if ( connect(this->sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-        logger().debug(
-                     "NetworkElement - connectToRouter. Connection established. ip=%s, port=%d",
-                     this->routerIP.c_str(), this->routerPort );
-        return true;
-    } // if
-
-    logger().error(
-                 "NetworkElement - connectToRouter. Unable to connect to router. ip=%s, port=%d",
-                 this->routerIP.c_str(), this->routerPort );
-    this->sock = -1;
-#endif
     markAsUnavailableElement(this->routerID);
     return false;
 }
@@ -633,23 +564,12 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
         sentText += "\n";
     } // if
 
-#ifdef USE_BOOST_ASIO
     boost::system::error_code error;
     boost::asio::write(*sock, boost::asio::buffer(sentText), boost::asio::transfer_all(), error);
     if (error) {
         logger().debug("NetworkElement - sendMessageToRouter (socket = %p) Error transfering data.", sock);
         return NetworkElementCommon::FAILED_MESSAGE;
     }
-#else
-    unsigned int sentBytes = 0;
-    if ( ( sentBytes = send(this->sock, sentText.c_str(), sentText.length(), 0) ) != sentText.length() ) {
-        logger().error("NetworkElement - sendMessageToRouter. Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, sentText.length() );
-        close(this->sock);
-        this->sock = -1;
-        pthread_mutex_unlock(&socketAccessLock);
-        return NetworkElementCommon::FAILED_MESSAGE;
-    } // if
-#endif
 
     if (noAckMessages) {
         pthread_mutex_unlock(&socketAccessLock);
@@ -658,19 +578,11 @@ std::string NetworkElement::sendMessageToRouter( const std::string& message )
 
 #define BUFFER_SIZE 256
     char buffer[BUFFER_SIZE];
-#ifdef USE_BOOST_ASIO
     size_t receivedBytes = sock->read_some(boost::asio::buffer(buffer), error);
     if (error && error != boost::asio::error::eof) {
         logger().error("NetworkElement - sendMessageToRouter. Error receiving data. %d bytes received", receivedBytes );
         this->sock->close();
         this->sock = NULL;
-#else
-    int receivedBytes = 0;
-    if ( (receivedBytes = recv(this->sock, buffer, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
-        logger().error("NetworkElement - sendMessageToRouter. Invalid response. %d bytes received", receivedBytes );
-        close(this->sock);
-        this->sock = -1;
-#endif
         pthread_mutex_unlock(&socketAccessLock);
         return NetworkElementCommon::FAILED_MESSAGE;
     } // if

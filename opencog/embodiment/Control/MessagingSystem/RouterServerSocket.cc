@@ -205,11 +205,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
     if (!master->dataSocketConnection(id)) {
         return;
     }
-#ifdef USE_BOOST_ASIO
     tcp::socket* sock = master->getDataSocket(id);
-#else
-    int sock = master->getDataSocket(id);
-#endif
 
     while (limit != 0 && !master->getMessageCentral()->isQueueEmpty(id)) {
 
@@ -223,11 +219,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         cmd.assign(s);
         cmd.append("\n");
         unsigned int sentBytes = 0;
-#ifdef USE_BOOST_ASIO
         if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) { 
-#else
-        if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-#endif
             logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
             master->closeDataSocket(id);
             master->closeControlSocket(id);
@@ -243,11 +235,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
             line.insert(0, "d");
             line.append("\n");
             sentBytes = 0;
-#ifdef USE_BOOST_ASIO
             if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(line.c_str(), line.length())) ) != line.length() ) { 
-#else
-            if ( ( sentBytes = send(sock, line.c_str(), line.length(), 0) ) != line.length() ) {
-#endif
                 logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, line.length() );
                 master->closeDataSocket(id);
                 master->closeControlSocket(id);
@@ -264,11 +252,7 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
     }
     cmd.assign("cNO_MORE_MESSAGES\n");
     unsigned int sentBytes = 0;
-#ifdef USE_BOOST_ASIO
     if ( ( sentBytes = boost::asio::write(*sock, boost::asio::buffer(cmd.c_str(), cmd.length())) ) != cmd.length() ) {
-#else
-    if ( ( sentBytes = send(sock, cmd.c_str(), cmd.length(), 0) ) != cmd.length() ) {
-#endif
         logger().error("RouterServerSocket -  Mismatch in number of sent bytes. %d was sent, but should be %d", sentBytes, cmd.length() );
         master->closeControlSocket(id);
         master->closeDataSocket(id);
@@ -281,14 +265,9 @@ void RouterServerSocket::sendRequestedMessages(const std::string &id, int limit)
         logger().debug("RouterServerSocket - Waiting OK (after sending message).");
 #define BUFFER_SIZE 256
         char response[BUFFER_SIZE];
-#ifdef USE_BOOST_ASIO
         boost::system::error_code error;
         size_t receivedBytes = sock->read_some(boost::asio::buffer(response), error);
         if (error && error != boost::asio::error::eof) {
-#else
-        int receivedBytes = 0;
-        if ( (receivedBytes = recv(sock, response, BUFFER_SIZE - 1, 0 ) ) <= 0 ) {
-#endif
             logger().error("RouterServerSocket - Invalid response. recv returned %d ", receivedBytes );
             master->closeDataSocket(id);
             master->closeControlSocket(id);
