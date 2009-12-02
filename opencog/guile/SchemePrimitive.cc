@@ -48,6 +48,7 @@ void *PrimitiveEnviron::c_wrap_register(void *p)
 {
 	PrimitiveEnviron *self = (PrimitiveEnviron *) p;
 	self->really_do_register(self->tmp_name, self->tmp_nargs);
+	return NULL;
 }
 
 /**
