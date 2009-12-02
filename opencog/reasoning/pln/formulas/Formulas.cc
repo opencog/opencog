@@ -190,7 +190,8 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
 
     float n2 = std::min(nAB, nA);
 
-    // sB is used for P(B|NOT A), so it must assumes that B and NOT A are independent
+    // sB is used for P(B|NOT A)
+    // so it must assume that B and NOT A are independent
     float s2 = ((n2 + nB) > 0)
                ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
                    / std::max((n2 + nB), 0.00001f))

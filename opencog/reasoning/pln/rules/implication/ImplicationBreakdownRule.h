@@ -24,16 +24,29 @@
 
 namespace opencog { namespace pln {
 
-/** (x->A) => A. */
+/** (A->B) => B. */
 class ImplicationBreakdownRule : public Rule
 {
 public:
 	NO_DIRECT_PRODUCTION;
-
+    
 	ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
-	bool validate2				(MPs& args) const { return true; }
+    
+    /**
+     * Similar to StrictImplicationBreakdownRule but does not
+     * explicitly uses A in the premises.
+     * A is still used in the computation but it is fetched by selecting
+     * a first outgoing of A->B
+     *
+     * @param premiseArray vector of premises, here the sole element (A->B)
+     * @param CX TODO
+     *
+     * @return the BoundVertex of the conclusion, A
+     */
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const;
+	bool validate2(MPs& args) const { return true; }
 };
 
 }} // namespace opencog { namespace pln {

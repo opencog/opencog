@@ -24,7 +24,7 @@
 
 namespace opencog { namespace pln {
 
-/// (x, x->A) => A.
+/// (A->B, A) => B.
 class StrictImplicationBreakdownRule : public Rule
 {
 public:
@@ -32,6 +32,12 @@ public:
     
     StrictImplicationBreakdownRule(iAtomSpaceWrapper *_destTable);
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    /**
+     * @param premiseArray a vector of premises, (A->B, A)
+     * @param CX not sure of that one
+     *
+     * @return the BoundVertex of the conclusion, A
+     */
     BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
     bool validate2(MPs& args) const { return true; }
     
