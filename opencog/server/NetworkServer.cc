@@ -38,9 +38,6 @@ using namespace opencog;
 
 NetworkServer::NetworkServer()
     : _running(false), _thread(0)
-#ifndef REPLACE_CSOCKETS_BY_ASIO
-      , _shandler(_mutex)
-#endif
 {
     logger().debug("[NetworkServer] constructor");
 }
@@ -89,49 +86,29 @@ void NetworkServer::stop()
 {
     logger().debug("[NetworkServer] stop");
     _running = false;
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     io_service.stop();
-#endif
 }
 
 void NetworkServer::run()
 {
     logger().debug("[NetworkServer] run");
     while (_running) {
-#ifdef REPLACE_CSOCKETS_BY_ASIO
         try {
             io_service.run();
         } catch (boost::system::system_error& e) {
             logger().error("Error in boost::asio io_service::run() => %s", e.what());
         }
         usleep(500000); // avoids busy wait
-#else
-        // we should use a larger value for the select timeout (< 1s prevents
-        // the server from saving energy because we wake up too often)
-        // however, the current implementations of the SocketHandler class
-        // only checks for the detach/close/connect events *after* the
-        // select timeout expires; so if we use a larger timeout some of the
-        // server events will be issued after a long delay
-        _shandler.Select(0, 200000);
-#endif
     }
     logger().debug("[NetworkServer] end of run");
 }
 
 namespace opencog {
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 struct equal_to_port : public std::binary_function<const SocketPort*, const unsigned short &, bool>
 {
     bool operator()(const SocketPort* sock, const unsigned short &port) {
         SocketPort* s = const_cast<SocketPort*>(sock);
         return ((s->getPort()) == port);
-#else
-struct equal_to_port : public std::binary_function<const Socket*, const unsigned short &, bool>
-{
-    bool operator()(const Socket* sock, const unsigned short &port) {
-        Socket* s = const_cast<Socket*>(sock);
-        return ((s->GetPort()) == port);
-#endif
     }
 };
 }
@@ -139,11 +116,7 @@ struct equal_to_port : public std::binary_function<const Socket*, const unsigned
 bool NetworkServer::removeListener(const unsigned short port)
 {
     logger().debug("[NetworkServer] removing listener bound to port %d", port);
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     std::vector<SocketPort*>::iterator l = 
-#else
-    std::vector<Socket*>::iterator l = 
-#endif
         std::find_if(_listeners.begin(), _listeners.end(),
                      std::tr1::bind(equal_to_port(), std::tr1::placeholders::_1, port));
     if (l == _listeners.end()) {

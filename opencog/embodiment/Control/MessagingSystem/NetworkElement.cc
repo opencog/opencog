@@ -27,12 +27,7 @@
 #include <signal.h>
 
 #include "ServerSocket.h"
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <opencog/util/foreach.h>
-#else
-#include <Sockets/ListenSocket.h>
-#include <Sockets/SocketHandler.h>
-#endif
 
 //for the random generator initilization
 #include <cmath>
@@ -59,18 +54,14 @@
 
 using namespace MessagingSystem;
 using namespace opencog;
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 using boost::asio::ip::tcp;
-#endif
 
 unsigned sleep(unsigned seconds);
 
 // static definition
 bool NetworkElement::stopListenerThreadFlag = false;
 bool NetworkElement::socketListenerIsReady = false;
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 std::vector<ServerSocket*> NetworkElement::serverSockets;
-#endif
 
 // Public interface
 
@@ -87,11 +78,9 @@ NetworkElement::~NetworkElement()
         delete this->sock;
     }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     foreach(ServerSocket* ss, serverSockets) {
         delete ss;
     }
-#endif
 
     pthread_mutex_destroy(&messageQueueLock);
     pthread_mutex_destroy(&tickLock);
@@ -420,7 +409,6 @@ void *NetworkElement::portListener(void *arg)
 
     logger().info("NetworkElement - Binding to port %d.", port);
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     try
     {
         boost::asio::io_service io_service;
@@ -441,28 +429,6 @@ void *NetworkElement::portListener(void *arg)
     {
         logger().error("NetworkElement - Error listening to port %d. Exception message: %s", port, e.what());
     }
-#else
-    SocketHandler socketHandler;
-    ListenSocket<ServerSocket> listenSocket(socketHandler);
-
-    if (listenSocket.Bind(port)) {
-        throw opencog::NetworkException(TRACE_INFO, "NetworkElement - Cannot bind to port %d.", port);
-    }
-
-    socketHandler.Add(&listenSocket);
-    socketHandler.Select(0, 200);
-
-    logger().debug("Port listener ready.");
-    socketListenerIsReady = true;
-
-    while (!stopListenerThreadFlag) {
-        if (socketHandler.GetCount() == 0) {
-            throw opencog::NetworkException(TRACE_INFO,
-                                            "NetworkElement - Bind to port %d is broken.", port);
-        }
-        socketHandler.Select(0, 200);
-    }
-#endif
 
     logger().debug("Port listener finished.");
     return NULL;

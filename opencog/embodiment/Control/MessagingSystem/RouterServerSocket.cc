@@ -30,12 +30,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <boost/bind.hpp>
-#else
-#include <Sockets/SocketHandler.h>
-#include <Sockets/StdoutLog.h>
-#endif
 
 #include <sstream>
 #include <string.h>
@@ -49,29 +44,15 @@ bool no_msg_arrival_notification = false; // TEST: unfortunately it didn't work 
 
 RouterServerSocket::~RouterServerSocket()
 {
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     socket.close();
-#endif
     logger().debug("RouterServerSocket[%p] - destroyed. Connection closed.", this);
 }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 RouterServerSocket::RouterServerSocket() : socket(io_service)
-#else
-RouterServerSocket::RouterServerSocket(ISocketHandler &handler): TcpSocket(handler)
-#endif
 {
-
     logger().debug("RouterServerSocket[%p] - Serving connection", this);
     currentState = WAITING_COMMAND;
     logger().debug("RouterServerSocket - CurrentState = %d", currentState);
-
-#ifndef REPLACE_CSOCKETS_BY_ASIO
-    // Enables "line-based" protocol, which will cause onLine() be called
-    // everytime the peer send a line
-    SetLineProtocol();
-    SetSoKeepalive(); // trying to never close connection
-#endif
 }
 
 void RouterServerSocket::setMaster(Router *router)
@@ -79,7 +60,6 @@ void RouterServerSocket::setMaster(Router *router)
     master = router;
 }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 tcp::socket& RouterServerSocket::getSocket() 
 {
     return socket;
@@ -126,7 +106,6 @@ void RouterServerSocket::Send(const std::string& cmd)
         logger().error("RouterServerSocket::Send(): Error transfering data.");
     }
 }
-#endif
 
 void RouterServerSocket::sendAnswer(const std::string &msg)
 {

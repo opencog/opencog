@@ -24,12 +24,7 @@
 
 #include "Router.h"
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <opencog/util/foreach.h>
-#else
-#include <Sockets/SocketHandler.h>
-#include <Sockets/ListenSocket.h>
-#endif
 
 #include <opencog/embodiment/Control/LoggerFactory.h>
 #include <fstream>
@@ -44,11 +39,9 @@
 
 using namespace MessagingSystem;
 using namespace opencog;
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 using boost::asio::ip::tcp;
 
 std::vector<RouterServerSocket*> Router::serverSockets;
-#endif
 bool Router::stopListenerThreadFlag = false;
 
 Router::~Router()
@@ -57,11 +50,9 @@ Router::~Router()
         Router::stopListenerThread();
     }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     foreach(RouterServerSocket* rss, serverSockets) {
         delete rss;
     }
-#endif
 
 }
 
@@ -109,7 +100,6 @@ void *Router::portListener(void *arg)
 
     logger().info("Router - Binding to port %d.", port);
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     try
     {
         boost::asio::io_service io_service;
@@ -129,27 +119,6 @@ void *Router::portListener(void *arg)
     {
         logger().error("Router - Error listening to port %d. Exception message: %s", port, e.what());
     }
-#else
-    SocketHandler socketHandler;
-    ListenSocket<RouterServerSocket> listenSocket(socketHandler);
-
-    if (listenSocket.Bind(port)) {
-        throw opencog::NetworkException(TRACE_INFO, "Router - Cannot bind to port %d.", port);
-    }
-
-    socketHandler.Add(&listenSocket);
-    socketHandler.Select(0, 200);
-
-    logger().debug("Port listener ready.");
-
-    while (!stopListenerThreadFlag) {
-        if (socketHandler.GetCount() == 0) {
-            throw opencog::NetworkException(TRACE_INFO,
-                                            "Router - Bind to port %d is broken.", port);
-        }
-        socketHandler.Select(0, 200);
-    }
-#endif
 
     logger().debug("Port listener finished.");
     return NULL;

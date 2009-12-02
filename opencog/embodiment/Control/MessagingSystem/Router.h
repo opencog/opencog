@@ -40,7 +40,6 @@
 #include "Message.h"
 #include <pthread.h>
 
-#define REPLACE_CSOCKETS_BY_ASIO
 
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
@@ -48,9 +47,7 @@ using boost::asio::ip::tcp;
 namespace MessagingSystem
 {
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     class RouterServerSocket;
-#endif
 
 enum NotificationType {
     MESSAGE,
@@ -205,9 +202,7 @@ private:
     Id2SocketMap controlSockets;
     Id2SocketMap dataSockets;
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     static std::vector<RouterServerSocket*> serverSockets;
-#endif
 
     /**
      * Control the run() function main loop. Once set false, the Router will

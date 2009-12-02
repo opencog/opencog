@@ -31,14 +31,7 @@
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRPCSocket.h>
 #include <opencog/shell/GenericShell.h>
-
-#define REPLACE_CSOCKETS_BY_ASIO
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <opencog/server/ServerSocket.h>
-#else
-#include <Sockets/TcpSocket.h>
-#include <Sockets/ISocketHandler.h>
-#endif
 
 namespace opencog
 {
@@ -47,34 +40,26 @@ class Request;
 
 
 /**
- * This class implements the server socket that handles the primary
- * interface of the cogserver: the plain text command line. It is
- * implemented using the callback-based API of the TcpSocket class
- * (from Alhem's Sockets library).
+ * This class implements the ServerSocket that handles the primary
+ * interface of the cogserver: the plain text command line. 
  *
- * The ConsoleSocket uses the 'Detach()' method and the 'OnDetached()'
- * callback to support multiple simultaneous clients. This is done by
- * creating a separate thread and dispatching the client socket for
- * each client that connects to the server socket.
-
- * We enhance the default callback API with another callback method,
- * provided by the IRPCSocket interface: 'OnRequestCompleted()'.
- * This callback signals the server socket that request processing has 
- * finished (so that the we may synchronously send the command prompt 
- * to the client but process the request 'asynchronously' on the 
- * cogserver's main thread).
+ * There may be multiple instances of ConsoleSocket to support multiple 
+ * simultaneous clients. This is done by creating a separate thread and 
+ * dispatching a client socket for each client that connects to the 
+ * server socket.
+ *
+ * We provide a callback method from the IRPCSocket interface: 
+ * 'OnRequestCompleted()'. This callback signals the server socket 
+ * that request processing has finished (so that the we may 
+ * synchronously send the command prompt to the client but process the 
+ * request 'asynchronously' on the cogserver's main thread.
  *
  * As required by the Request abstract class, the ConsoleSocket class
  * also implements the IHasMimeType interface, defining its mime-type
  * as 'text/plain'.
  *
  */
-#ifdef REPLACE_CSOCKETS_BY_ASIO
-// TODO: Rewrite the comment above according with this change
 class ConsoleSocket : public ServerSocket,
-#else
-class ConsoleSocket : public TcpSocket,
-#endif
                       public IHasMimeType,
                       public IRPCSocket
 {
@@ -90,34 +75,14 @@ public:
     /** ConsoleSocket's constructor. Defines the socket's mime-type as
      *  'text/plain' and the enables the Socket's 'line protocol'
      */
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     ConsoleSocket(boost::asio::io_service& _io_service);
-#else
-    // (see Alhem's Socket library docs for more info).
-    ConsoleSocket(ISocketHandler &handler);
-#endif
 
     /** ConsoleSocket's destructor. */
     ~ConsoleSocket();
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     /** Connection callback: called whenever a new connection arrives
      */
     void OnConnection(void);
-#else
-    /** Accept callback: called whenever a new connection arrives. It
-     *  basically call the 'Detach()' method to dispatch the client socket
-     *  to a (new) separate thread.
-     */
-    void OnAccept          (void);
-
-    /** OnDetached callback: called from the client ConsoleSocket
-     *  instance, right after the new thread is setup and ready. We
-     *  just send the command prompt string (configuration paramter
-     *  "PROMPT") to the client.
-     */
-    void OnDetached        (void);
-#endif
 
     /** OnLine callback: called when a new command/request is revieved
      *  from the client. It parses the command line by spliting it into
@@ -164,11 +129,9 @@ public:
      */
     void SetShell(GenericShell *);
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     /** Gets the tcp socket 
      */
     tcp::socket& getSocket(void);
-#endif
 
 }; // class
 

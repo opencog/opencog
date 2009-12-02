@@ -25,9 +25,7 @@
 #include "ServerSocket.h"
 #include <string.h>
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <boost/bind.hpp>
-#endif
 
 using namespace MessagingSystem;
 using namespace opencog;
@@ -36,26 +34,13 @@ NetworkElement *ServerSocket::master = NULL;
 
 ServerSocket::~ServerSocket()
 {
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     socket.close();
-#endif
     logger().debug("ServerSocket destroyed - Connection closed.");
 }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 ServerSocket::ServerSocket() : socket(io_service)
-#else
-ServerSocket::ServerSocket(ISocketHandler &handler): TcpSocket(handler)
-#endif
 {
-
     logger().debug("ServerSocket - Serving connection.");
-#ifndef REPLACE_CSOCKETS_BY_ASIO
-    // Enables "line-based" protocol, which will cause onLine() be called
-    // everytime the peer send a line
-    SetLineProtocol();
-    SetSoKeepalive(); // trying to never close connection
-#endif
 
     currentState = DOING_NOTHING;
     currentMessage.assign("");
@@ -66,7 +51,6 @@ void ServerSocket::setMaster(NetworkElement *ne)
     master = ne;
 }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 tcp::socket& ServerSocket::getSocket() 
 {
     return socket;
@@ -113,7 +97,6 @@ void ServerSocket::Send(const std::string& cmd)
         logger().error("ServerSocket::Send(): Error transfering data.");
     }
 }
-#endif
 
 void ServerSocket::OnLine(const std::string& line)
 {

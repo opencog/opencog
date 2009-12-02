@@ -33,14 +33,9 @@
 
 using namespace opencog;
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 ConsoleSocket::ConsoleSocket(boost::asio::io_service& _io_service) : 
     ServerSocket(_io_service),
     IHasMimeType("text/plain")
-#else
-ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
-    : TcpSocket(handler), IHasMimeType("text/plain")
-#endif
 {
     SetLineProtocol(true);
     _shell = NULL;
@@ -55,33 +50,16 @@ ConsoleSocket::~ConsoleSocket()
     if (_shell) _shell->socketClosed();
 }
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
     if (!isClosed()) Send(config()["PROMPT"]);
 }
+
 tcp::socket& ConsoleSocket::getSocket()
 {
     return ServerSocket::getSocket();
 }
-#else
-void ConsoleSocket::OnAccept()
-{
-    logger().debug("[ConsoleSocket] OnAccept");
-    if (Detach() == false) {
-        logger().error("Unable to detach socket.");
-        return;
-    }
-}
-
-void ConsoleSocket::OnDetached()
-{
-    logger().debug("[ConsoleSocket] OnDetached");
-    Send(config()["PROMPT"]);
-    SetNonblocking(true);
-}
-#endif
 
 void ConsoleSocket::OnLine(const std::string& line)
 {

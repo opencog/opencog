@@ -39,17 +39,13 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
-#define REPLACE_CSOCKETS_BY_ASIO
-
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
 
 namespace MessagingSystem
 {
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     class ServerSocket;
-#endif
 
 /**
  * The basic class of communications layer is a NetworkElement (NE). The idea here is that every entity
@@ -129,9 +125,7 @@ private:
     boost::asio::io_service io_service;
     tcp::socket* sock;
 
-#ifdef REPLACE_CSOCKETS_BY_ASIO
     static std::vector<ServerSocket*> serverSockets;
-#endif
 
     /**
      * Used to hold the ids of the NetworkElements that are currently
