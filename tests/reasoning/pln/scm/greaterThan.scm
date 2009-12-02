@@ -1,4 +1,4 @@
-; example to proof a > c using than if x > y and y > z then x > z
+; example to proof a ~> c using than if x ~> y and y ~> z then x ~> z
 ; axiom
 (define agt (PredicateNode "AboutGreaterThan"))
 (define x (VariableNode "x"))
@@ -14,7 +14,7 @@
             (ListLink y z))
         )
     (EvaluationLink
-        gt
+        agt
         (ListLink x z)
         )
     )
@@ -22,5 +22,13 @@
 (define a (ConceptNode "a"))
 (define b (ConceptNode "b"))
 (define c (ConceptNode "c"))
-(EvaluationLink (stv 1 1) agt (ListLink a b))
+(define ant (EvaluationLink (stv .5 1) agt (ListLink a b)))
 (EvaluationLink (stv 1 1) agt (ListLink b c))
+; intermediate rule (for start)
+(define impl
+  (ImplicationLink (stv 0.5 1)
+      (AndLink
+           (EvaluationLink agt (ListLink a b))
+           (EvaluationLink agt (ListLink b c))
+           )
+      (EvaluationLink agt (ListLink a c))))
