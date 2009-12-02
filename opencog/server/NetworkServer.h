@@ -114,7 +114,7 @@ public:
      */
     template<class _Socket>
     bool addListener(const unsigned int port) {
-        logger().debug("adding listener to socket %d", port);
+        logger().debug("adding listener to port %d", port);
         ListenSocket<_Socket>* lsocket = new ListenSocket<_Socket>(_shandler);
         try {
             // we throw an exception ourselves because csockets may
@@ -127,6 +127,7 @@ public:
         }
         _shandler.Add(lsocket);
         _listeners.push_back(lsocket);
+        printf("Listening on port %d", port);
         return true;
     }
 
