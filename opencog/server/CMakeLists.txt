@@ -38,6 +38,7 @@ SET(SERVER_LINK_LIBS
 	xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
+        dl
 )
 
 IF (GUILE_FOUND)
