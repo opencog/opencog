@@ -593,28 +593,6 @@ bool Router::controlSocketConnection(const std::string& ne_id)
         sock = NULL;
     }
 
-    std::string ipAddr = getIPAddress(ne_id);
-    int port = getPortNumber(ne_id);
-
-    sockaddr_in client;
-    client.sin_family = AF_INET;                  /* Internet/IP */
-    client.sin_addr.s_addr = inet_addr(ipAddr.c_str());  /* IP address */
-    client.sin_port = htons(port);       /* server port */
-
-    if ( connect(sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-        logger().debug(
-                     "Router - controlSocketConnection(%s). Connection established. ip=%s, port=%d",
-                     ne_id.c_str(), ipAddr.c_str(), port);
-        controlSockets[ne_id] = sock;
-
-        return true;
-    } // if
-
-    logger().error(
-                 "Router - controlSocketConnection. Unable to connect to element %s. ip=%s, port=%d",
-                 ne_id.c_str(), ipAddr.c_str(), port);
-#endif
-
     closeControlSocket(ne_id);
     closeDataSocket(ne_id);
     markElementUnavailable(ne_id);
@@ -660,28 +638,6 @@ bool Router::dataSocketConnection(const std::string& ne_id)
         if (sock != NULL) delete sock;
         sock = NULL;
     }
-
-    std::string ipAddr = getIPAddress(ne_id);
-    int port = getPortNumber(ne_id);
-
-    sockaddr_in client;
-    client.sin_family = AF_INET;                  /* Internet/IP */
-    client.sin_addr.s_addr = inet_addr(ipAddr.c_str());  /* IP address */
-    client.sin_port = htons(port);       /* server port */
-
-    if ( connect(sock, (sockaddr *) &client, sizeof(client)) >= 0 ) {
-        logger().debug(
-                     "Router - dataSocketConnection(%s). Connection established. ip=%s, port=%d",
-                     ne_id.c_str(), ipAddr.c_str(), port);
-        dataSockets[ne_id] = sock;
-
-        return true;
-    } // if
-
-    logger().error(
-                 "Router - dataSocketConnection. Unable to connect to element %s. ip=%s, port=%d",
-                 ne_id.c_str(), ipAddr.c_str(), port);
-#endif
 
     closeDataSocket(ne_id);
     closeControlSocket(ne_id);
