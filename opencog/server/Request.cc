@@ -31,23 +31,22 @@
 
 using namespace opencog;
 
-Request::Request() : _holder(NULL)
+Request::Request() : _socket(NULL)
 {
 }
 
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    if (_holder) _holder->AtomicInc(-1);
+    if (_socket) _socket->OnRequestComplete();
 }
 
-void Request::setSocketHolder(SocketHolder* h)
+void Request::setSocket(ConsoleSocket* s)
 {
-    logger().debug("[Request] setting socket: %p", h);
-    if (NULL == _holder) {
-        _holder = h;
-        _holder->AtomicInc(+1);
-        _mimeType = _holder->mimeType();
+    logger().debug("[Request] setting socket: %p", s);
+    if (NULL == _socket) {
+        _socket = s;
+        _mimeType = _socket->mimeType();
     } else
         throw RuntimeException(TRACE_INFO,
             "Bad idea to try to set the socket more than once.");
@@ -55,8 +54,7 @@ void Request::setSocketHolder(SocketHolder* h)
 
 void Request::send(const std::string& msg) const
 {
-    // logger().debug("[Request] send\n");
-    if (_holder) _holder->send(msg);
+    if (_socket) _socket->Send(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

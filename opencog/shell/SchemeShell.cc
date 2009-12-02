@@ -51,17 +51,17 @@ SchemeShell::SchemeShell(void)
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
 	evaluator = NULL;
-	holder = NULL;
+	socket = NULL;
 	self_destruct = false;
 }
 
 SchemeShell::~SchemeShell()
 {
-	if (holder)
+	if (socket)
 	{
-		holder->SetShell(NULL);
-		holder->AtomicInc(-1);
-		holder = NULL;
+		socket->SetShell(NULL);
+        socket->OnRequestComplete();
+		socket = NULL;
 	}
 	// Don't delete, its currently set to a singleton instance.
 	//	if (evaluator) delete evaluator;
@@ -70,17 +70,16 @@ SchemeShell::~SchemeShell()
 /**
  * Register this shell with the console.
  */
-void SchemeShell::set_holder(SocketHolder *h)
+void SchemeShell::set_socket(ConsoleSocket *s)
 {
-	if (holder)
+	if (socket)
 	{
-		holder->SetShell(NULL);
-		holder->AtomicInc(-1);
+		socket->SetShell(NULL);
+        socket->OnRequestComplete();
 	}
 
-	holder = h;
-	holder->AtomicInc(+1);
-	holder->SetShell(this);
+	socket = s;
+	socket->SetShell(this);
 
 	//	if (!evaluator) evaluator = new SchemeEval();
 	//	Someone did this singleton instance crapola because 
@@ -142,28 +141,27 @@ const std::string& SchemeShell::get_prompt(void)
 
 /* ============================================================== */
 
-void SchemeShell::eval(const std::string &expr, SocketHolder *h)
+void SchemeShell::eval(const std::string &expr, ConsoleSocket *s)
 {
 	// XXX A subtle but important point: the way that socket handling
 	// works in OpenCog is that socket-listen/accept happens in one
 	// thread, while socket receive is in another. In particular, the
 	// constructor for this class runs in a *different* thread than 
 	// this method does.
-	if (NULL == holder)
+	if (NULL == socket)
 	{
-		holder = h;
-		holder->AtomicInc(+1);
+		socket = s;
 	}
 	const std::string &retstr = do_eval(expr);
 	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
 	//
-	holder->send(retstr);
+	socket->Send(retstr);
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
 	if (self_destruct)
 	{
-		holder->SetShell(NULL);
+		socket->SetShell(NULL);
 		delete this;
 	}
 }

@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/SocketHolder.h>
+#include <opencog/server/ConsoleSocket.h>
 
 namespace opencog {
 
@@ -47,18 +47,18 @@ class SchemeShell : public GenericShell
 		bool show_output;
 		bool show_prompt;
 
-		SocketHolder *holder;
+		ConsoleSocket *socket;
 		std::string do_eval(const std::string &);
 		bool self_destruct;
 
 	protected:
-		void set_holder(SocketHolder *);
+		void set_socket(ConsoleSocket *);
 
 	public:
 		SchemeShell(void);
 		virtual ~SchemeShell();
 
-		virtual void eval(const std::string &, SocketHolder *);
+		virtual void eval(const std::string &, ConsoleSocket *);
 		virtual void socketClosed(void);
 
 		void hush_output(bool);

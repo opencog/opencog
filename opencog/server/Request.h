@@ -31,7 +31,7 @@
 #include <list>
 
 #include <opencog/server/Factory.h>
-#include <opencog/server/SocketHolder.h>
+#include <opencog/server/ConsoleSocket.h>
 
 namespace opencog
 {
@@ -253,7 +253,7 @@ class Request
 
 protected:
 
-    SocketHolder*          _holder;
+    ConsoleSocket*         _socket;
     std::list<std::string> _parameters;
     std::string            _mimeType;
 
@@ -274,8 +274,8 @@ public:
     virtual void send(const std::string& msg) const;
 
     /** Stores the client socket. */
-    virtual void setSocketHolder(SocketHolder*);
-    virtual SocketHolder *getSocketHolder(void) {return _holder; }
+    virtual void setSocket(ConsoleSocket*);
+    virtual ConsoleSocket *getSocket(void) {return _socket; }
 
     /** sets the command's parameter list. */
     virtual void setParameters(const std::list<std::string>& params);

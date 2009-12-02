@@ -44,8 +44,6 @@ ConsoleSocket::ConsoleSocket(ISocketHandler &handler)
 {
     SetLineProtocol(true);
     _shell = NULL;
-    holder = new SocketHolder();
-    holder->setSocket(this);
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -55,8 +53,6 @@ ConsoleSocket::~ConsoleSocket()
     // If there's a shell, let them know that we are going away.
     // This wouldn't be needed if we had garbage collection.
     if (_shell) _shell->socketClosed();
-    holder->setSocket(NULL);
-    holder->AtomicInc(-1);
 }
 
 #ifdef REPLACE_CSOCKETS_BY_ASIO
@@ -95,7 +91,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     // high-speed data feed with as little getting in the way as
     // possible.
     if (_shell) {
-        _shell->eval(line, holder);
+        _shell->eval(line, this);
         return;
     }
 
@@ -130,7 +126,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
-    _request->setSocketHolder(holder);
+    _request->setSocket(this);
     _request->setParameters(params);
 
     if (LineProtocol()) {
@@ -150,7 +146,7 @@ void ConsoleSocket::OnLine(const std::string& line)
        // TODO: Find another way to avoid next line to be handled by cogserver
        // shell when the previous command is for entering scheme (or any other)
        // shell. Perhaps we should create Disable/Enable methods for the
-       // ConsoleSocket (and SocketHolder) so it is disabled here and re-enabled
+       // ConsoleSocket so it is disabled here and re-enabled
        // when the request is executed. 
         cogserver.processRequests();
 #endif

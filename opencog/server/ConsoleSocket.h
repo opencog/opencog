@@ -30,9 +30,9 @@
 
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRPCSocket.h>
-#include <opencog/server/SocketHolder.h>
 #include <opencog/shell/GenericShell.h>
 
+#define REPLACE_CSOCKETS_BY_ASIO
 #ifdef REPLACE_CSOCKETS_BY_ASIO
 #include <opencog/server/ServerSocket.h>
 #else
@@ -83,7 +83,6 @@ private:
 
     Request* _request;
     std::string _buffer;
-    SocketHolder *holder;
     GenericShell *_shell;
 
 public:

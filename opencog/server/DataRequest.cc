@@ -43,10 +43,10 @@ DataRequest::~DataRequest()
 {
 }
 
-void DataRequest::setSocketHolder(SocketHolder* h)
+void DataRequest::setSocket(ConsoleSocket* s)
 {
-    Request::setSocketHolder(h);
-    h->SetLineProtocol(false);
+    Request::setSocket(s);
+    s->SetLineProtocol(false);
 }
 
 bool DataRequest::execute()

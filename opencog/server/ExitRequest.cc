@@ -38,6 +38,6 @@ ExitRequest::~ExitRequest()
 
 bool ExitRequest::execute()
 {
-    _holder->SetCloseAndDelete();
+    _socket->SetCloseAndDelete();
     return true;
 }

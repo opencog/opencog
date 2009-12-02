@@ -27,7 +27,6 @@ ADD_LIBRARY (server SHARED
 	NetworkServer
         ServerSocket
 	ConsoleSocket
-	SocketHolder
 	Agent
 	SystemActivityTable
 	load-file

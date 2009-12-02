@@ -52,8 +52,8 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 {
 	SchemeShell *sh = new SchemeShell();
 
-	SocketHolder *h = req->getSocketHolder();
-	sh->set_holder(h);
+	ConsoleSocket *s = req->getSocket();
+	sh->set_socket(s);
 
 	bool hush = false;
 	if (0 < args.size())

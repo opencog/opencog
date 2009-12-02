@@ -81,16 +81,16 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         try {
             if (ss->LineProtocol()) 
             {
-                logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
+                //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
                 boost::asio::read_until(ss->getSocket(), b, boost::regex("\n"));
-                logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
+                //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
                 std::istream is(&b);
                 std::string line;
                 std::getline(is, line); 
                 if (!line.empty() && line[line.length()-1] == '\r') {
                     line.erase(line.end()-1);
                 }
-                logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
+                //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
                 ss->OnLine(line);
             }
             else {

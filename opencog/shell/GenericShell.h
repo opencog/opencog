@@ -43,7 +43,7 @@
 
 namespace opencog {
 
-class SocketHolder;
+class ConsoleSocket;
 
 class GenericShell 
 {
@@ -56,7 +56,7 @@ class GenericShell
 		GenericShell(void);
 		virtual ~GenericShell() {}
 
-		virtual void eval(const std::string &, SocketHolder *) = 0;
+		virtual void eval(const std::string &, ConsoleSocket *) = 0;
 		virtual void socketClosed(void) = 0;
 };
 
