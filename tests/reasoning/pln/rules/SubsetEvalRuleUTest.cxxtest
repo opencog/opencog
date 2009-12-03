@@ -164,10 +164,11 @@ public:
         strength_t denominator =
             e0_sub_s + e2_sub_s + e4_sub_s + e5_sub_s + e7_sub_s + e8_sub_s;
         strength_t expected_strength = numerator / denominator;
+        count_t expected_count = ne_non_null;
+
         // check strength
         TS_ASSERT(isApproxEq(res_tv.getMean(), expected_strength));
         
-        count_t expected_count = ne_non_null;
         // check count
         TS_ASSERT(isApproxEq(res_tv.getCount(), expected_count));
 

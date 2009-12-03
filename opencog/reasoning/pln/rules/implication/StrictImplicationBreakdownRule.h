@@ -22,6 +22,8 @@
 #ifndef STRICTIMPBREAKDOWNRULE_H
 #define STRICTIMPBREAKDOWNRULE_H
 
+#include "../Rule.h"
+
 namespace opencog { namespace pln {
 
 /// (A->B, A) => B.

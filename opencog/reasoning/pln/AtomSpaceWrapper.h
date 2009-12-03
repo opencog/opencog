@@ -191,7 +191,7 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     std::set<VersionHandle> dummyContexts;
     
     //! This string is the prefix of PLN dummy context root Node
-    std::string rootContext;
+    const std::string rootContext;
 
     // typedef bimap< unordered_set_of< vhpair >, set_of<Handle> > vhmap_t;
     // typedef vhmap_t::value_type vhmap_pair_t;
