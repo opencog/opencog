@@ -98,6 +98,8 @@ public:
     /**
      * Maps an atom to its corresponding handle.
      *
+     * If the atom is not in the TLB an exception is thrown.
+     *
      * @param Atom to be mapped.
      * @return Corresponding handle for the given atom.
      */
@@ -108,7 +110,7 @@ public:
         if (h != Handle::UNDEFINED) return h;
 #ifdef CHECK_MAP_CONSISTENCY
         throw InvalidParamException(TRACE_INFO,
-            "Atom is not in the TLB!");
+                                    "Atom is not in the TLB!");
         return Handle::UNDEFINED;
 #else
         return addAtom(atom);
@@ -120,6 +122,8 @@ public:
 
     /**
      * Adds a new atom to the TLB.
+     *
+     * If the atom has already be added then an exception is thrown.
      *
      * @param Atom to be added.
      * @return Handle of the newly added atom.
@@ -159,6 +163,9 @@ public:
 
     /**
      * Removes an atom from the TLB.
+     *
+     * If the atom has already been removed from or never been in the TLB
+     * then an exception is thrown.
      *
      * @param Atom to be removed.
      * @return Removed atom.
