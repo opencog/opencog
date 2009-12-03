@@ -58,17 +58,17 @@ namespace pln {
     assert(N == 1); \
     assert(TV[0]); \
     TruthValue* linkAB = TV[0]; \
-    float sAB = linkAB->getMean(); \
-    float nAB = linkAB->getCount(); \
+    strength_t sAB = linkAB->getMean(); \
+    count_t nAB = linkAB->getCount(); \
      
 #define PTLFormulaBodyFor_Atom2 \
     assert(N == 2); \
     assert(TV[0]); \
     assert(TV[1]); \
-    float sA = TV[0]->getMean(); \
-    float nA = TV[0]->getCount(); \
-    float sB = TV[1]->getMean(); \
-    float nB = TV[1]->getCount(); \
+    strength_t sA = TV[0]->getMean(); \
+    count_t nA = TV[0]->getCount(); \
+    strength_t sB = TV[1]->getMean(); \
+    count_t nB = TV[1]->getCount(); \
      
 #define PTLFormulaBodyFor_Link1Node2 \
     assert(N == 3); \
@@ -78,12 +78,12 @@ namespace pln {
     TruthValue* linkAB = TV[0]; \
     TruthValue* atomA = TV[1]; \
     TruthValue* atomB = TV[2]; \
-    float sAB = linkAB->getMean(); \
-    float sA = atomA->getMean(); \
-    float sB = atomB->getMean(); \
-    float nAB = linkAB->getCount(); \
-    float nA = atomA->getCount(); \
-    float nB = atomB->getCount();
+    strength_t sAB = linkAB->getMean(); \
+    strength_t sA = atomA->getMean(); \
+    strength_t sB = atomB->getMean(); \
+    count_t nAB = linkAB->getCount(); \
+    count_t nA = atomA->getCount(); \
+    count_t nB = atomB->getCount();
 
 #define PTLFormulaBodyFor_Link2Node2 \
     assert(N == 4); \
@@ -95,14 +95,14 @@ namespace pln {
     TruthValue* linkBA = TV[1]; \
     TruthValue* atomA = TV[2]; \
     TruthValue* atomB = TV[3]; \
-    float sAB = linkAB->getMean(); \
-    float sBA = linkBA->getMean(); \
-    float sA = atomA->getMean(); \
-    float sB = atomB->getMean(); \
-    float nAB = linkAB->getCount(); \
-    float nBA = linkBA->getCount(); \
-    float nA = atomA->getCount(); \
-    float nB = atomB->getCount();
+    strength_t sAB = linkAB->getMean(); \
+    strength_t sBA = linkBA->getMean(); \
+    strength_t sA = atomA->getMean(); \
+    strength_t sB = atomB->getMean(); \
+    count_t nAB = linkAB->getCount(); \
+    count_t nBA = linkBA->getCount(); \
+    count_t nA = atomA->getCount(); \
+    count_t nB = atomB->getCount();
 
 #define PTLFormulaBodyFor_Link2Node3 \
     assert(N == 5); \
@@ -116,16 +116,16 @@ namespace pln {
     TruthValue* atomA = TV[2]; \
     TruthValue* atomB = TV[3]; \
     TruthValue* atomC = TV[4]; \
-    float sA = atomA->getMean(); \
-    float sB = atomB->getMean(); \
-    float sC = atomC->getMean(); \
-    float sAB = linkAB->getMean(); \
-    float sBC = linkBC->getMean(); \
-    float nA = atomA->getCount(); \
-    float nB = atomB->getCount(); \
-    float nC = atomC->getCount(); \
-    float nAB = linkAB->getCount(); \
-    float nBC = linkBC->getCount();
+    strength_t sA = atomA->getMean(); \
+    strength_t sB = atomB->getMean(); \
+    strength_t sC = atomC->getMean(); \
+    strength_t sAB = linkAB->getMean(); \
+    strength_t sBC = linkBC->getMean(); \
+    count_t nA = atomA->getCount(); \
+    count_t nB = atomB->getCount(); \
+    count_t nC = atomC->getCount(); \
+    count_t nAB = linkAB->getCount(); \
+    count_t nBC = linkBC->getCount();
 
 #define DebugPTLBodyFor_Link if (PTLdebug) printf(" A->B:%f\n",  sAB);
 
@@ -167,8 +167,8 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float sBA = sAB * sA / std::max(sB, 0.00001f);
-    float nBA = nAB * nB / std::max(nA, 0.00001f);
+    strength_t sBA = sAB * sA / std::max(sB, 0.00001f);
+    count_t nBA = nAB * nB / std::max(nA, 0.00001f);
 
     return checkTruthValue( new SimpleTruthValue(sBA, nBA) );
 }
@@ -188,14 +188,14 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float n2 = std::min(nAB, nA);
+    count_t n2 = std::min(nAB, nA);
 
     // sB is used for P(B|NOT A)
     // so it must assume that B and NOT A are independent
-    float s2 = ((n2 + nB) > 0)
-               ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
-                   / std::max((n2 + nB), 0.00001f))
-               : sB;
+    strength_t s2 = ((n2 + nB) > 0)
+        ? ( 2 * (sAB * sA * n2   + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
+            / std::max((n2 + nB), 0.00001f))
+        : sB;
 
     if (n2 < nB) {
         s2 = sB;
@@ -216,7 +216,7 @@ TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float s2 = ((sA > 0) ? (sAB / sA) : 0);
+    strength_t s2 = ((sA > 0) ? (sAB / sA) : 0);
 
 
     return checkTruthValue(  new SimpleTruthValue(s2, nAB) );
@@ -258,26 +258,26 @@ TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
     /// Temporary filtering fix to make sure that nAB >= nA
     nA = std::min(nA, nAB);
 
-    float secondDenominator = std::max( (1 - sB), TV_MIN);
-    float thirdDenominator = std::max( nB, TV_MIN);
+    strength_t secondDenominator = std::max( (1 - sB), TV_MIN);
+    count_t thirdDenominator = std::max( nB, TV_MIN);
 
-    float w1 = DEDUCTION_TERM_WEIGHT;
-    float w2 = 2 - w1;
-    float sAC =
+    strength_t w1 = DEDUCTION_TERM_WEIGHT;
+    strength_t w2 = 2 - w1;
+    strength_t sAC =
         w1 * sAB * sBC 
         + w2 * (1 - sAB) * (sC - sB * sBC) / secondDenominator;
 
-    float nAC = IndependenceAssumptionDiscount * nA * nBC / thirdDenominator;
+    count_t nAC = IndependenceAssumptionDiscount * nA * nBC / thirdDenominator;
 
     return checkTruthValue(  new SimpleTruthValue(sAC, nAC) );
 }
 
 //===========================================================================//
-float DeductionGeometryFormula::g(float sA, float sB,
-                                  float sC, float sAB) const
+strength_t DeductionGeometryFormula::g(strength_t sA, strength_t sB,
+                                       strength_t sC, strength_t sAB) const
 {
-    float p1 = std::abs(sA - sB) / std::max(sA + sB, TV_MIN);
-    float p2 =
+    strength_t p1 = std::abs(sA - sB) / std::max(sA + sB, TV_MIN);
+    strength_t p2 =
         1
         - std::min(1 + sB - sAB * sA - sC, sA + sB - sAB * sA)
         + std::max(sB, 1 - sC);
@@ -286,8 +286,8 @@ float DeductionGeometryFormula::g(float sA, float sB,
 }
 
 //===========================================================================//
-float DeductionGeometryFormula::g2(float sA, float sB,
-                                   float sC, float sAB) const
+strength_t DeductionGeometryFormula::g2(strength_t sA, strength_t sB,
+                                        strength_t sC, strength_t sAB) const
 {
     return 1.0f;
 }
@@ -304,9 +304,9 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
     TruthValue* baTV[] = { linkAB, atomA, atomB };
     TruthValue* linkBA = InversionFormula::simpleCompute(baTV, 3);
 
-    float sBA = linkBA->getMean();
+    strength_t sBA = linkBA->getMean();
 
-    float sAC =
+    strength_t sAC =
         sAB * sBC
         * (1 + g(sA, sB, sC, sAB)
            * std::max(0.0f, -1 + 1 / std::max(sBA + sBC, TV_MIN)))
@@ -314,7 +314,7 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
         * (1 + g(sA, 1 - sB, sC, sAB)
            * std::max(0.0f, -1 + 1 / std::max(1 - sBA + 1 - sBC,
                                               TV_MIN)));
-    float nAC =
+    strength_t nAC =
         IndependenceAssumptionGeometryDiscount * nA * nBC
         / std::max(nB, TV_MIN);
 
@@ -337,14 +337,14 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_Atom2;
 
-    float wA = nA / std::max(nA + nB, TV_MIN);
-    float wB = nB / std::max(nA + nB, TV_MIN);
+    strength_t wA = nA / std::max(nA + nB, TV_MIN);
+    count_t wB = nB / std::max(nA + nB, TV_MIN);
 
-    float c_strength = REVISION_STRENGTH_DEPENDENCY;
-    float c_count = REVISION_COUNT_DEPENDENCY;
+    strength_t c_strength = REVISION_STRENGTH_DEPENDENCY;
+    count_t c_count = REVISION_COUNT_DEPENDENCY;
 
-    float s3 = (wA * sA + wB * sB - c_strength * sA * sB);
-    float n3 = std::max(nA, nB) + c_count * std::min(nA, nB);
+    strength_t s3 = (wA * sA + wB * sB - c_strength * sA * sB);
+    count_t n3 = std::max(nA, nB) + c_count * std::min(nA, nB);
 
     return checkTruthValue( new SimpleTruthValue(s3, n3) );
 }
@@ -358,10 +358,10 @@ TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link2Node2;
     DebugPTLBodyFor_Link2Node2;
 
-    float sABsim =
+    strength_t sABsim =
         1 / ( ( 1 + sA / std::max(sB, TV_MIN)) / std::max(sAB - 1, TV_MIN));
 
-    float nABsim = nAB + nBA - sAB * nA;
+    count_t nABsim = nAB + nBA - sAB * nA;
 
     return checkTruthValue( new SimpleTruthValue(sABsim, nABsim) );
 }
@@ -374,10 +374,10 @@ TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
 
-    float sABinh =
+    strength_t sABinh =
         (1 + sB / std::max(sA, TV_MIN)) * sAB / (1 + std::max(sAB, TV_MIN));
 
-    float nABinh =  (nAB + sAB * nA) * nA / std::max( nA + nB, TV_MIN );
+    count_t nABinh =  (nAB + sAB * nA) * nA / std::max( nA + nB, TV_MIN );
 
     return checkTruthValue( new SimpleTruthValue(sABinh, nABinh) );
 }
@@ -391,8 +391,8 @@ TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
 
-    float sA = sAB;
-    float nA = nAB;
+    strength_t sA = sAB;
+    count_t nA = nAB;
 
     return checkTruthValue( new SimpleTruthValue(sA, nA) );
 }
@@ -408,8 +408,8 @@ TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
 
     // Note that sB corresponds to sAB
     // DefaultNodeProbability is supposed to replace the unknown P(B|NOT A)
-    float sC = sA * sB + DefaultNodeProbability * (1 - sA);
-    float nC = nA;
+    strength_t sC = sA * sB + DefaultNodeProbability * (1 - sA);
+    count_t nC = nA;
 
     return checkTruthValue( new SimpleTruthValue(sC, nC) );
 }
@@ -454,8 +454,8 @@ TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
 
-    float sABinh = sAB;
-    float nABinh = nAB * MembershipToExtensionalInheritanceCountDiscountFactor;
+    strength_t sABinh = sAB;
+    count_t nABinh = nAB * MembershipToExtensionalInheritanceCountDiscountFactor;
 
     return checkTruthValue( new SimpleTruthValue(sABinh, nABinh) );
 }
@@ -498,8 +498,8 @@ TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
 
-    float sABint = sAB;
-    float nABint = nAB * ExtensionToIntensionCountDiscountFactor;
+    strength_t sABint = sAB;
+    count_t nABint = nAB * ExtensionToIntensionCountDiscountFactor;
 
     return checkTruthValue( new SimpleTruthValue(sABint, nABint) );
 }
@@ -512,8 +512,8 @@ TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
 
-    float sABint = sAB;
-    float nABint = nAB * IntensionToExtensionCountDiscountFactor;
+    strength_t sABint = sAB;
+    count_t nABint = nAB * IntensionToExtensionCountDiscountFactor;
 
     return checkTruthValue( new SimpleTruthValue(sABint, nABint) );
 }
@@ -544,8 +544,8 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
     /* End of Indefinite Formulas */
 
 
-    float sTot = 1.0f;
-    float conTot = 1.0f;
+    strength_t sTot = 1.0f;
+    count_t conTot = 1.0f;
 
     for (int i = 0; i < N; i++) {
         printf("%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
@@ -553,8 +553,8 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
         conTot *= TV[i]->getConfidence();
     }
 
-    float sAND = sTot;
-    float nAND = SimpleTruthValue::confidenceToCount(conTot);
+    strength_t sAND = sTot;
+    count_t nAND = SimpleTruthValue::confidenceToCount(conTot);
     //float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     //KKK * conTot / (1 - conTot); /// The standard count=>confidence formula!
 
@@ -577,8 +577,8 @@ TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_Atom2;
 
-    float sAND = sA * sB;
-    float nAND = nB;
+    strength_t sAND = sA * sB;
+    count_t nAND = nB;
 
     return checkTruthValue( new SimpleTruthValue(sAND, nAND) );
 }
@@ -589,10 +589,10 @@ TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
     printf("OldAND...\n");
 
 
-    float mean = TV[0]->getMean() * TV[1]->getMean();
-    float count1 = TV[0]->getCount();
-    float count2 = TV[1]->getCount();
-    float count = count1 > count2 ? count2 : count1;
+    strength_t mean = TV[0]->getMean() * TV[1]->getMean();
+    count_t count1 = TV[0]->getCount();
+    count_t count2 = TV[1]->getCount();
+    count_t count = count1 > count2 ? count2 : count1;
 
     TruthValue* retTV = new SimpleTruthValue(mean, count);
 
@@ -630,19 +630,19 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
         }
     }
 
-    float sTot = 0.0f;
-    float nTot = 0.0f;
+    strength_t sTot = 0.0f;
+    count_t nTot = 0.0f;
 
     for (int i = 0; i < 2; i++)
         sTot += TV[i]->getMean();
 
-    float sA = TV[0]->getMean();
-    float sB = TV[1]->getMean();
-    float nA = TV[0]->getCount();
-    float nB = TV[1]->getCount();
+    strength_t sA = TV[0]->getMean();
+    strength_t sB = TV[1]->getMean();
+    count_t nA = TV[0]->getCount();
+    count_t nB = TV[1]->getCount();
 
-    float A = sA * nB;
-    float B = sB * nA;
+    count_t A = sA * nB;
+    count_t B = sB * nA;
 
     nTot = nA + nB - (A + B) / 2;
 
@@ -665,8 +665,8 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
 
     assert(level1N*(level1N + 1) / 2 == N);
 
-    float sTot = 0.0f;
-    float nTot = 0.0f;
+    strength_t sTot = 0.0f;
+    count_t nTot = 0.0f;
 
     long ptr = 0;
 
@@ -690,20 +690,20 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
         nTot = 0.0f;
         //LOG(0, "OR RULE WRONG NR OF ARGS");
     } else {
-        float sA = TV[0]->getMean();
-        float sB = TV[1]->getMean();
-        float nA = TV[0]->getCount();
-        float nB = TV[1]->getCount();
+        strength_t sA = TV[0]->getMean();
+        strength_t sB = TV[1]->getMean();
+        count_t nA = TV[0]->getCount();
+        count_t nB = TV[1]->getCount();
 
-        float A = sA * nB;
-        float B = sB * nA;
+        count_t A = sA * nB;
+        count_t B = sB * nA;
 
         nTot = nA + nB - (A + B) / 2;
     }
 
-    float sOR = sTot;
-    float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
-    float nOR = nTot  * KKK;
+    strength_t sOR = sTot;
+    count_t KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    count_t nOR = nTot  * KKK;
 
 //  printf(" = %f\n", sAND);
 
@@ -718,8 +718,8 @@ TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
 
-    float sNOT = 1 - sAB;
-    float nNOT = nAB;
+    strength_t sNOT = 1 - sAB;
+    count_t nNOT = nAB;
 
     return checkTruthValue( new SimpleTruthValue(sNOT, nNOT) );
 }
@@ -748,10 +748,10 @@ TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     printf("OldOR...\n");
 
-    float mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
-    float count1 = TV[0]->getCount();
-    float count2 = TV[1]->getCount();
-    float count = count1 > count2 ? count2 : count1;
+    strength_t mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
+    count_t count1 = TV[0]->getCount();
+    count_t count2 = TV[1]->getCount();
+    count_t count = count1 > count2 ? count2 : count1;
 
     TruthValue* retTV = new SimpleTruthValue(mean, count);
 
@@ -811,13 +811,13 @@ TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) printf("For all...\n");
 
-    float sForAll = 1.0f;
-    float nForAll = 0.0f;
-    float wForAll = 0.0f;
+    strength_t sForAll = 1.0f;
+    count_t nForAll = 0.0f;
+    count_t wForAll = 0.0f;
 
     for (int i = 0; i < N; i++) {
-        float n_i = TV[i]->getCount();
-        float w_i = sqrt(n_i);
+        count_t n_i = TV[i]->getCount();
+        count_t w_i = sqrt(n_i);
         nForAll += n_i;
         wForAll += w_i;
         sForAll += (TV[i]->getMean() * w_i);
@@ -830,11 +830,11 @@ TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,
                                               int N, long U) const
 {
-    float sForAll = 0.0f;
-    float nForAll = 0.0f;
+    strength_t sForAll = 0.0f;
+    count_t nForAll = 0.0f;
 
     for (int i = 0; i < N; i++) {
-        float n_i = TV[i]->getCount();
+        count_t n_i = TV[i]->getCount();
         nForAll += n_i;
         sForAll += (TV[i]->getMean() * n_i);
     }
@@ -881,12 +881,12 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
 
     //float s2 = ((sA>0) ? (sAB / sA) : 0);
 
-    float k = 800;
+    count_t k = 800;
     float d1 = nA / (nA + k);
     float c_PAT = 0.75;
 
-    float n3 = c_PAT * nB * d1 * sA;
-    float s3 = sB;
+    count_t n3 = c_PAT * nB * d1 * sA;
+    strength_t s3 = sB;
 
     return checkTruthValue(  new SimpleTruthValue(s3, n3) );
 }

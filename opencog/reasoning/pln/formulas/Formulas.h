@@ -231,9 +231,11 @@ public:
 class DeductionGeometryFormula : public Formula<5>, public InversionFormula
 {
 private:
-    float g(float sA, float sB, float sC, float sAB) const;
-    //float g2(TruthValue* A, TruthValue* B ,TruthValue* C)
-    float g2(float sA, float sB, float sC, float sAB) const;
+    strength_t g(strength_t sA, strength_t sB,
+                 strength_t sC, strength_t sAB) const;
+    //strength_t g2(TruthValue* A, TruthValue* B ,TruthValue* C)
+    strength_t g2(strength_t sA, strength_t sB,
+                  strength_t sC, strength_t sAB) const;
 public:
     TruthValue* simpleCompute(TruthValue** TV,int N, long U = DefaultU) const;
 };

@@ -25,6 +25,7 @@
 #include <opencog/reasoning/pln/rules/auxiliary/SubsetEvalRule.h>
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
 #include <opencog/util/foreach.h>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/assign/list_of.hpp>
 
@@ -85,15 +86,15 @@ public:
         //instantiate the atom space wrapper
         _asw = static_cast<AtomSpaceWrapper*>(ASW(_as));
 
-	cout << "AFTER GETTING ATOMSPACE INSTANCE" << endl;
+        cout << "AFTER GETTING ATOMSPACE INSTANCE" << endl;
         _as->print();
 
         //add the 2 concept nodes sub and super to compute Subset(sub super)
         _sub_h = _asw->addNode(CONCEPT_NODE, "sub", TruthValue::DEFAULT_TV());
 
-	cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
+        cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
 
-	cout << "AFTER ADDING sub" << endl;
+        cout << "AFTER ADDING sub" << endl;
 
         _as->print();
 
@@ -142,17 +143,17 @@ public:
 
         cout << "_asw->vhmapToString(): " << _asw->vhmapToString() << endl;
 
-	cout << "AFTER ADDING ALL ATOMS" << endl;
+        cout << "AFTER ADDING ALL ATOMS" << endl;
         _as->print();
 
-	cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
+        cout << "CHECK NAME of sub: " << _asw->getName(_sub_h) << endl;
 
     }
 
-    void testSubsetEvalRuleUTest() {
+    void testSubsetEvalRule() {
+        // calculate result using SubsetEvalRule
         SubsetEvalRule sser(_asw);
-        const vector<Vertex> vv = list_of(_sub_h)(_super_h);
-        BoundVertex bv = sser.compute(vv);
+        BoundVertex bv = sser.compute(list_of(_sub_h)(_super_h));
         pHandle res_h = _v2h(bv.GetValue());
         const TruthValue& res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
