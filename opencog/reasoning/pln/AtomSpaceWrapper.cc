@@ -983,7 +983,7 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
     if (fresh) {
         // See if atom exists already
         //const HandleSeq outgoing;
-        Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
+        const Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
         if (nnn) {
             const Node& node = (const Node&) atom;
             result = as->getHandle(node.getType(), node.getName());

@@ -59,8 +59,8 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
     printer.print(outh->begin(), 4);
     
-    ret.push_back(BBvtree(new BoundVTree(
-                                         mva((pHandle)IMPLICATION_LINK, vtree(myvar),*outh))));
+    ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK,
+                                             vtree(myvar),*outh))));
     cprintf(4,"Need:\n");
     ret.push_back(BBvtree(new BoundVTree(myvar)));
     printer.print(ret[0]->begin(), 4);
