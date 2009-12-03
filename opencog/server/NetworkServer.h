@@ -113,6 +113,7 @@ public:
         SocketListener<_Socket>* sl = new SocketListener<_Socket>(io_service, port);
         //TODO: Error handling (what if bind does not work?)
         _listeners.push_back(sl);
+        printf("Listening on port %d\n", port);
         return true;
     }
 
