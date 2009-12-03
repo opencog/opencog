@@ -98,6 +98,12 @@ public:
     /**
      * Maps an atom to its corresponding handle.
      *
+     * WARNING: that method will not work on an atom that has been
+     * constructed using Node or Link constructor but not registered
+     * (using TLB::addAtom, AtomSpace::addAtom, etc), even if it
+     * corresponds to an existing atom. That is because
+     * this method relies on atom->handle.
+     *
      * @param Atom to be mapped.
      * @return Corresponding handle for the given atom.
      */
