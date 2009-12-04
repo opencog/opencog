@@ -35,17 +35,17 @@ my $sk = WordNet::SenseKey->new($wn);
 
 # ----------------------------------------------------------
 my $selectup = $dbh->prepare(
-	'SELECT (count) FROM ' . $djs_tablename . ' WHERE ' . 
+	'SELECT (count, obscnt) FROM ' . $djs_tablename . ' WHERE ' . 
 	'inflected_word = ? AND disjunct = ? AND word_sense = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 my $insertup = $dbh->prepare(
 	'INSERT INTO ' . $djs_tablename . ' ' .
-	'(inflected_word, disjunct, word_sense, count) VALUES (?,?,?,?)')
+	'(inflected_word, disjunct, word_sense, count, obscnt) VALUES (?,?,?,?,?)')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 my $updateup = $dbh->prepare(
-	'UPDATE ' . $djs_tablename . ' SET count = ? WHERE ' .
+	'UPDATE ' . $djs_tablename . ' SET count = ? , obscnt = ? WHERE ' .
 	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
@@ -54,24 +54,25 @@ my $updated = 0;
 
 sub update_record
 {
-	my ($sense, $infword, $disjunct, $count) = @_;
+	my ($sense, $infword, $disjunct, $count, $obscnt) = @_;
 
-	# print "duuude update $sense, $infword, $disjunct, $count\n";
+	# print "duuude update $sense, $infword, $disjunct, $count, $obscnt\n";
 	$selectup->execute($infword, $disjunct, $sense)
 		 or die "Couldn't execute statement: " . $selectup->errstr;
 
 	if ($selectup->rows == 0)
 	{
-		$insertup->execute($infword, $disjunct, $sense, $count);
+		$insertup->execute($infword, $disjunct, $sense, $count, $obscnt);
 		$inserted ++;
 		return;
 	}
 
 	# update the current count
-	my ($curr_cnt) = $selectup->fetchrow_array();
+	my ($curr_cnt, $curr_obs) = $selectup->fetchrow_array();
 	$count += $curr_cnt;
+	$obscnt += $curr_obs;
 
-	$updateup->execute($count, $sense, $infword, $disjunct);
+	$updateup->execute($count, $obscnt, $sense, $infword, $disjunct);
 	$updated ++;
 }
 
@@ -100,7 +101,7 @@ for (my $i=0; $i<$select->rows; $i++)
 	{
 		print "So far, examined=$examined updated=$updated inserted=$inserted\n";
 	}
-	my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
+	my ($sense, $infword, $disjunct, $count, $obscnt, $lp) = $select->fetchrow_array();
 
 	# Extract the lemma form from the sense key, and from the word.
 	$sense =~ m/([\w\.]+)%(\d+)/;
@@ -115,7 +116,7 @@ for (my $i=0; $i<$select->rows; $i++)
 
 	if ($pos =~ /5/)
 	{
-		print "Don't know what to do! $sense $infword $count\n";
+		print "Don't know what to do! $sense $infword $count $obscnt\n";
 		next;
 	}
 
@@ -161,7 +162,7 @@ for (my $i=0; $i<$select->rows; $i++)
 
 	# That's it -- we've got a canonical sense. Now update the 
 	# database with the new count, and delete the old record.
-	update_record ($canon_sense, $infword, $disjunct, $count);
+	update_record ($canon_sense, $infword, $disjunct, $count, $obscnt);
 	$delete->execute($sense, $infword, $disjunct);
 }
 
