@@ -76,6 +76,7 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         
         std::vector<std::string> tokens;
         boost::split( tokens, arguments[0], boost::is_any_of(" ") );
+        boost::to_lower(tokens[0]);
         
         if (tokens[0] == "save_map") {
             this->agent->saveSpaceMapFile();
@@ -100,4 +101,5 @@ void BaseAgentModeHandler::update( void )
         logger().debug("BaseAgentModeHandler - Sending requested command to be evaluated. Command %s, # of arguments %d, remaining requests %d",
                        commandName.c_str( ), arguments.size( ), this->commandsQueue.size() );
     } // if
+  
 }

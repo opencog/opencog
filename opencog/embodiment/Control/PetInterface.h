@@ -35,7 +35,9 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "AgentModeHandler.h"
+#include <opencog/embodiment/Control/AgentModeHandler.h>
+
+#include <fstream>
 
 using namespace opencog;
 
@@ -169,13 +171,15 @@ public:
         fileName << getPetId();
         fileName << "_";
         fileName << mapCounter;
-        fileName << ".bin";
+        fileName << ".txt";
         SpaceServer::SpaceMap& map = (SpaceServer::SpaceMap&) sm;
+        
+        std::ofstream saveFile( fileName.str( ).c_str( ) );
+        saveFile << SpaceServer::SpaceMap::toString( map );
+        saveFile.close( );
 
-        FILE* saveFile = fopen( fileName.str( ).c_str( ), "w+b" );
-        map.save( saveFile );
-        fclose( saveFile );
         ++mapCounter;
+        
     }
 
 };
