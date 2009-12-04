@@ -36,6 +36,14 @@
 ;; (define db-debug-conn
 ;; 	(dbi-open "postgresql" "linas:asdf:lexat:tcp:localhost:5432"))
 
+;; Provide the names of the tables that hold the actual data.
+;;
+;; (define inflected-tablename "InflectMarginal")
+;; (define disjuncts-tablename "Disjuncts")
+
+(define inflected-tablename "NewInflectMarginal")
+(define disjuncts-tablename "NewDisjuncts")
+
 ;; --------------------------------------------------------------------
 ;;
 ;; Sum up the total number of words observed; and return that total.
@@ -47,7 +55,9 @@
 	(define row-count 0)
 	(define word-count 0)
 
-	(dbi-query db-select-conn "SELECT count FROM InflectMarginal;")
+	(dbi-query db-select-conn 
+		(string-append "SELECT count FROM " inflected-tablename ";")
+	)
 	(set! row (dbi-get_row db-select-conn))
 	(while (not (equal? row #f))
 		(set! row-count (+ row-count 1))
@@ -92,7 +102,8 @@
 				(sprob (number->string lprob))
 			)
 		(dbi-query db-update-conn 
-			(string-append "UPDATE InflectMarginal SET log_probability = "
+			(string-append "UPDATE " inflected-tablename 
+				" SET log_probability = "
 				sprob " WHERE inflected_word = $$" word "$$"
 			)
 		)
@@ -115,7 +126,9 @@
 	(define tot (marginal-tot-inflected))
 
 	(dbi-query db-select-conn 
-		"SELECT inflected_word, count FROM InflectMarginal;"
+		(string-append 
+			"SELECT inflected_word, count FROM " inflected-tablename ";"
+		)
 	)
 
 	; Loop over all words in the database.
@@ -165,8 +178,9 @@
 	; some of the database entries contain back-slashes, which are
 	; not escapes.  Treating them as escapes leads to big trouble.
 	(dbi-query db-disjunct-conn 
-		(string-append "SELECT count, disjunct FROM Disjuncts "
-			"WHERE inflected_word = $$" word "$$"
+		(string-append "SELECT count, disjunct FROM "
+			disjuncts-tablename
+			" WHERE inflected_word = $$" word "$$"
 		)
 	)
 	(set! drow (dbi-get_row db-disjunct-conn))
@@ -178,7 +192,9 @@
 				(sdprob (number->string dprob))
 			)
 			(dbi-query db-update-conn 
-				(string-append "UPDATE Disjuncts SET log_cond_probability = "
+				(string-append "UPDATE "
+					disjuncts-tablename
+					" SET log_cond_probability = "
 					sdprob " WHERE inflected_word = $$" word 
 					"$$ AND disjunct = '" dj "'"
 				)
@@ -204,7 +220,9 @@
 	(define srow #f)
 
 	(dbi-query db-select-conn 
-		"SELECT inflected_word, count FROM InflectMarginal;"
+		(string-append 
+			"SELECT inflected_word, count FROM " inflected-tablename ";"
+		)
 	)
 
 	; Loop over all words in the database.
