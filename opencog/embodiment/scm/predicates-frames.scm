@@ -82,6 +82,12 @@
    (ConceptNode "Object")
 )
 
+; Object <- Unknown
+(InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
+   (ConceptNode "Unknown")
+   (ConceptNode "Object")
+)
+
 ; StaticObject <- Structure
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
    (ConceptNode "Structure")
@@ -122,22 +128,4 @@
 (InheritanceLink (stv 1.0 1.0) (cog-new-av 0 1 #f) 
    (ConceptNode "Avatar")
    (ConceptNode "Agent")
-)
-
-; #Color:Color
-(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
-   (DefinedFrameNode "#Color")
-   (DefinedFrameElementNode "#Color:Color")
-)
-  
-; #Color:Entity
-(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
-   (DefinedFrameNode "#Color")
-   (DefinedFrameElementNode "#Color:Entity")
-)
-
-; #Answer:Message
-(FrameElementLink (stv 1.0 1.0) (cog-new-av 0 1 #f)
-   (DefinedFrameNode "#Answer")
-   (DefinedFrameElementNode "#Answer:Message")
 )
