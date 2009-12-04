@@ -6,6 +6,8 @@
  *
  * This version uses the native C progamming interfaces supplied by 
  * Princeton, as a part of the Wordnet project. 
+ *
+ * Copyright (C) 2008 Linas Vepstas
  */
 
 #include <wn.h>
