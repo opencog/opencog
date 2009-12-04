@@ -1,4 +1,4 @@
-#! /usr/bin/guile
+#! /usr/bin/env guile
 !#
 ;
 ; compute-mi.scm

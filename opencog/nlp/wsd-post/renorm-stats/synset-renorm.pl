@@ -7,7 +7,7 @@
 # failed to realize that multiple senses might belong to the same
 # synset.  ... which still needs to be fixed.
 #
-# Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+# Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 #
 
 use utf8;
@@ -24,6 +24,10 @@ use DBI;
 my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
    or die "Couldn't connect to database: " . DBI->errstr;
 
+# Specify the table-name to be cleaned up.
+# my $djs_tablename = "DisjunctSenses";
+my $djs_tablename = "NewDisjunctSenses";
+
 # ----------------------------------------------------------
 my $wn_dictionary_location = "/usr/share/wordnet";
 my $wn = WordNet::QueryData->new($wn_dictionary_location);
@@ -31,17 +35,17 @@ my $sk = WordNet::SenseKey->new($wn);
 
 # ----------------------------------------------------------
 my $selectup = $dbh->prepare(
-	'SELECT (count) FROM DisjunctSenses WHERE ' . 
+	'SELECT (count) FROM ' . $djs_tablename . ' WHERE ' . 
 	'inflected_word = ? AND disjunct = ? AND word_sense = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 my $insertup = $dbh->prepare(
-	'INSERT INTO DisjunctSenses ' .
+	'INSERT INTO ' . $djs_tablename . ' ' .
 	'(inflected_word, disjunct, word_sense, count) VALUES (?,?,?,?)')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 my $updateup = $dbh->prepare(
-	'UPDATE DisjunctSenses SET count = ? WHERE ' .
+	'UPDATE ' . $djs_tablename . ' SET count = ? WHERE ' .
 	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
@@ -74,19 +78,19 @@ sub update_record
 # ----------------------------------------------------------
 
 my $delete = $dbh->prepare(
-	'DELETE FROM DisjunctSenses WHERE ' . 
+	'DELETE FROM ' . $djs_tablename . ' WHERE ' . 
 	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
-my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0;')
+my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . ' WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
-print "Starting to renormalize synsets in the DisjunctSenses table\n";
+print "Starting to renormalize synsets in the ' . $djs_tablename . ' table\n";
 
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
-print "Will examine $select->rows rows in the DisjunctSenses table\n"
+print "Will examine $select->rows rows in the ' . $djs_tablename . ' table\n"
 
 my $examined = 0;
 for (my $i=0; $i<$select->rows; $i++)
