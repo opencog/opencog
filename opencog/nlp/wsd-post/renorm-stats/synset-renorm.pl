@@ -35,7 +35,7 @@ my $sk = WordNet::SenseKey->new($wn);
 
 # ----------------------------------------------------------
 my $selectup = $dbh->prepare(
-	'SELECT (count, obscnt) FROM ' . $djs_tablename . ' WHERE ' . 
+	'SELECT count, obscnt FROM ' . $djs_tablename . ' WHERE ' . 
 	'inflected_word = ? AND disjunct = ? AND word_sense = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
@@ -68,7 +68,9 @@ sub update_record
 	}
 
 	# update the current count
-	my ($curr_cnt, $curr_obs) = $selectup->fetchrow_array();
+	my @arr = $selectup->fetchrow_array();
+	# print "duuude arr @arr\n";
+	my ($curr_cnt, $curr_obs) = @arr;
 	$count += $curr_cnt;
 	$obscnt += $curr_obs;
 
@@ -86,12 +88,12 @@ my $delete = $dbh->prepare(
 my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . ' WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
-print "Starting to renormalize synsets in the ' . $djs_tablename . ' table\n";
+print "Starting to renormalize synsets in the $djs_tablename table\n";
 
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
-print "Will examine $select->rows rows in the ' . $djs_tablename . ' table\n"
+print "Will examine $select->rows rows in the $djs_tablename table\n";
 
 my $examined = 0;
 for (my $i=0; $i<$select->rows; $i++)
