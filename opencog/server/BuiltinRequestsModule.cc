@@ -42,6 +42,7 @@ BuiltinRequestsModule::BuiltinRequestsModule()
     cogserver.registerRequest(DataRequest::info().id,         &dataFactory); 
     cogserver.registerRequest(HelpRequest::info().id,         &helpFactory); 
     cogserver.registerRequest(ExitRequest::info().id,         &exitFactory); 
+    cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory); 
     cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory); 
     cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
@@ -57,6 +58,7 @@ BuiltinRequestsModule::~BuiltinRequestsModule()
     cogserver.unregisterRequest(DataRequest::info().id);
     cogserver.unregisterRequest(HelpRequest::info().id);
     cogserver.unregisterRequest(ExitRequest::info().id);
+    cogserver.unregisterRequest(SleepRequest::info().id);
     cogserver.unregisterRequest(ShutdownRequest::info().id);
     cogserver.unregisterRequest(LoadModuleRequest::info().id);
     cogserver.unregisterRequest(UnloadModuleRequest::info().id);

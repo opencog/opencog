@@ -82,6 +82,9 @@ namespace opencog
  *            presented as a list of strings.
  * cmd_sum:   A short string to be printed as a command summary.
  * cmd_desc:  A long string describing the command in detail.
+ * shell_cmd: A boolean value that indicates the command is for entering a
+ *            shell.
+ *
  *
  * Example usage:
  *
@@ -120,13 +123,16 @@ namespace opencog
  *
  * See also: persist/PersistModule.cc as a working real-life example.
  */
-#define DECLARE_CMD_REQUEST(mod_type,cmd_str,do_cmd,cmd_sum,cmd_desc) \
+#define DECLARE_CMD_REQUEST(mod_type,cmd_str,do_cmd,                  \
+                            cmd_sum,cmd_desc,shell_cmd)               \
                                                                       \
    class do_cmd##Request : public Request {                           \
       public:                                                         \
           static inline const RequestClassInfo& info(void) {          \
               static const RequestClassInfo _cci(cmd_str,             \
-                                              cmd_sum, cmd_desc);     \
+                                                 cmd_sum,             \
+                                                 cmd_desc,            \
+                                                 shell_cmd);          \
               return _cci;                                            \
     }                                                                 \
     do_cmd##Request(void) {};                                         \
@@ -146,6 +152,9 @@ namespace opencog
         if (_mimeType == "text/plain")                                \
             send(oss.str());                                          \
         return true;                                                  \
+    }                                                                 \
+    virtual bool isShell(void) {                                      \
+        return info().is_shell;                                       \
     }                                                                 \
 };                                                                    \
                                                                       \
@@ -177,14 +186,16 @@ struct RequestClassInfo : public ClassInfo
 {
     std::string description;
     std::string help;
+    bool is_shell;
 
     RequestClassInfo() {};
-    RequestClassInfo(const char* i, const char *d, const char* h)
-        : ClassInfo(i), description(d), help(h) {};
+    RequestClassInfo(const char* i, const char *d, const char* h, bool s = false)
+        : ClassInfo(i), description(d), help(h), is_shell(s) {};
     RequestClassInfo(const std::string& i, 
                      const std::string& d,
-                     const std::string& h)
-        : ClassInfo(i), description(d), help(h) {};
+                     const std::string& h, 
+                     bool s = false)
+        : ClassInfo(i), description(d), help(h), is_shell(s) {};
 };
 
 /**
@@ -269,6 +280,9 @@ public:
      *  the actual request's behavior. Retuns 'true' if the command completed
      *  successfully and 'false' otherwise. */
     virtual bool execute(void) = 0;
+
+    /** Abstract method for telling if the Request if for entering a shell*/
+    virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
     virtual void send(const std::string& msg) const;

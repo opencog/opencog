@@ -44,7 +44,8 @@ private:
     DECLARE_CMD_REQUEST(DottyModule, "dotty", do_dotty, 
        "Dumps a (very big) dotty file of the atomspace.", 
        "Usage: dotty\n\n"
-       "Dotty, also known as GraphViz, is a graph visualization package.");
+       "Dotty, also known as GraphViz, is a graph visualization package.", 
+       false);
 
 public:
 

@@ -51,6 +51,7 @@ public:
     HelpRequest();
     virtual ~HelpRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

@@ -42,7 +42,7 @@ public:
         static const RequestClassInfo _cci(
             "shutdown",
             "shut down the cogserver",
-            "shutdown"
+            "shutdown" 
         );
         return _cci;
     }
@@ -50,6 +50,7 @@ public:
     ShutdownRequest();
     virtual ~ShutdownRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

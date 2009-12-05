@@ -42,7 +42,8 @@ class SchemeShellModule : public Module
 			"Enter the scheme interpreter shell. This shell provides a rich\n"
 			"and easy-to-use envirnoment for creating, deleting and manipulating\n"
 			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
-			"interactive scheme shell, based on the GNU Guile extension language.")
+			"interactive scheme shell, based on the GNU Guile extension language.", 
+            true)
 
 	public:
 		SchemeShellModule(void);

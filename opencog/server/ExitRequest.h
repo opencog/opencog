@@ -51,6 +51,7 @@ public:
     ExitRequest();
     virtual ~ExitRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

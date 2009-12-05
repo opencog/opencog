@@ -44,7 +44,8 @@ public:
         static const RequestClassInfo _cci(
             "data",
             "loads inline xml data into the atomspace",
-            "data<CR><inline xml><Ctrl-D><CR>"
+            "data<CR><inline xml><Ctrl-D><CR>",
+            true
         );
         return _cci;
     }
@@ -54,6 +55,7 @@ public:
 
     virtual void setSocket(ConsoleSocket*);
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

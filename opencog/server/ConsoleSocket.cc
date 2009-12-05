@@ -128,6 +128,7 @@ void ConsoleSocket::OnLine(const std::string& line)
        // when the request is executed. 
         cogserver.processRequests();
 #endif
+        if (_request->isShell()) cogserver.processRequests();
     } else {
         // reset input buffer
         _buffer.clear();

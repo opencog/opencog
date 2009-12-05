@@ -7,6 +7,7 @@ ADD_LIBRARY (builtinreqs SHARED
 	Request
 	DataRequest
 	ExitRequest
+	SleepRequest
 	HelpRequest
 	LoadRequest
 	SaveRequest

@@ -42,7 +42,7 @@ public:
         static const RequestClassInfo _cci(
             "load",
             "load the contents of a xml file",
-            "load <filename>"
+            "load <filename>" 
         );
         return _cci;
     }
@@ -50,6 +50,7 @@ public:
     LoadRequest();
     virtual ~LoadRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

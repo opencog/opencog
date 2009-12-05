@@ -65,6 +65,7 @@ public:
     ListRequest();
     virtual ~ListRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

@@ -44,7 +44,7 @@ public:
         static const RequestClassInfo _cci(
             "unloadmodule",
             "unload an opencog module",
-            "unload <module>"
+            "unload <module>" 
         );
         return _cci;
     }
@@ -52,6 +52,7 @@ public:
     UnloadModuleRequest();
     virtual ~UnloadModuleRequest();
     virtual bool execute(void);
+    virtual bool isShell(void) {return info().is_shell;}
 };
 
 } // namespace 

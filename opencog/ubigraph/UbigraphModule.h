@@ -47,20 +47,23 @@ private:
     DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph", do_ubigraph, 
         "Start Ubigraph",
         "Usage: ubigraph [--with-incoming, --with-compact] [IP:port]\n\n"
-        "test the ubigraph prototype"
+        "test the ubigraph prototype",
+        false
     )
 
     DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph-update-sti", do_ubigraphUpdate, 
         "update node size in ubigraph based on STI",
         "Usage: ubigraph-update-sti\n\n"
         "Update the nodes, this is a test function for visual demos.\n"
-        "The size of all nodes reflect their relative STI values."
+        "The size of all nodes reflect their relative STI values.", 
+        false
     )
 
     DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph-random-sti", do_ubigraphRandomSTI, 
         "randomly assign STI",
         "Usage: ubigraph-random-sti\n"
-        "Temp function, sets STI of node.\n"
+        "Temp function, sets STI of node.\n",
+        false
     )
 
     Ubigrapher g;
