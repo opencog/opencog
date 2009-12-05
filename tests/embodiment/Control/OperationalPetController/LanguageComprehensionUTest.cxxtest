@@ -814,6 +814,7 @@ public:
 
     void testSpatialRelationsExtractor( void ) 
     {
+#ifdef HAVE_GUILE
         std::stringstream command;
         command << "(cog-emb-compute-spatial-relations ";
         command << "   (AvatarNode \"" << petOwnerId << "\")";
@@ -836,10 +837,12 @@ public:
             TS_ASSERT_EQUALS( values["Figure"], this->atomSpace->getHandle( SEME_NODE, petId ) )
             TS_ASSERT_EQUALS( values["Ground"], this->atomSpace->getHandle( SEME_NODE, treeId1 ) )
         } // if        
+#endif
     }
 
-    void testSpatialRelationsEvaluator( void ) {
-        
+    void testSpatialRelationsEvaluator( void )
+    {
+#ifdef HAVE_GUILE
         std::stringstream command;
         command << "(cog-emb-compute-spatial-relations ";
         command << "   (AvatarNode \"" << petOwnerId << "\")";
@@ -863,12 +866,11 @@ public:
             TS_ASSERT_EQUALS( values["Figure"], this->atomSpace->getHandle( SEME_NODE, petId ) )
             TS_ASSERT_EQUALS( values["Ground"], this->atomSpace->getHandle( SEME_NODE, treeId1 ) )
         } // if
-        
+#endif
     }
 
     void testFramePredicates()
     {
-        
         Handle petH   = atomSpace->addNode( SEME_NODE, petId);
         Handle ownerH = atomSpace->addNode( SEME_NODE, petOwnerId);
         Handle stickH = atomSpace->addNode( SEME_NODE, stickId);
