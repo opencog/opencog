@@ -20,6 +20,10 @@ use warnings;
 my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 	or die "Couldn't connect to database: " . DBI->errstr;
 
+# Table on which to perform data analysis.
+# my $dj_tablename = "Disjuncts";
+my $dj_tablename = "NewDisjuncts";
+
 #--------------------------------------------------------------------
 
 sub show_ent
@@ -31,7 +35,7 @@ sub show_ent
 	my $i=0;
 	for ($i=0; $i<$nbins; $i++) { $bins[$i] = 0; }
 	
-	my $select = $dbh->prepare('SELECT entropy FROM Disjuncts WHERE entropy >= 0.0;' )
+	my $select = $dbh->prepare('SELECT entropy FROM ' . $dj_tablename . ' WHERE entropy >= 0.0;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	$select->execute()

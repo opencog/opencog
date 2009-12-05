@@ -166,3 +166,5 @@ ordinary guile interpreter.
 
  * file-stats.pl: collect miscellaneous word-count statistcics about
    a collection of CFF files.
+
+ * stats-entropy.pl: data analysis script for bin-counting the entropy.
