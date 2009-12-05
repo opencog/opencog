@@ -467,6 +467,65 @@ Clustering
 Lin [Lin2001] reports parsing a 1GByte text, and obtaining 7M "paths"
 of which 231K are unique.
 
+Clustering requires some sort of similarity measure, to determine how 
+"similar" two things are, or how similar a thing is to an existing 
+cluster. Poon, etal [Poon 2009] consider measures that maximize entropy,
+Lin [Lin2001] considers a measure based on set overlap.
+
+For example, consider first whether two different right-hand words of a
+collection of word-pairs are similar or not. Define S1 to be the set of
+all words w for which mi(w, w1) > 0.  Define S2 analogously as the set
+of all words w for which mi(w, w2) > 0.  Finally, define I12 to be the
+intersection of S1 and S2.  Then similarity might be defined as a measure
+of set overlap:
+
+                  sum_w_in_I12 [ mi (w, w1) + mi(w, w2) ]
+  sim(w1, w2) = --------------------------------------------
+                [sum_w_in_S1 mi(w, w1)] + [sum_w_in_S@ mi(w, w2)]
+
+Criticism: this would make more sense mathematically if mi was a true
+measure-theoretic measure. Suggest exploring actual measures that might
+be derived from mi. 
+
+The above similarity measure generalizes in a straight-forward way to 
+any graph having shared/common subgraphs.
+
+Computing the above, in a general way, within opencog, needs to make use
+of pattern reco, again.
+
+Suppose, for example, word-pairs were linked as follows:
+
+   ;; mi stored in a composite TV
+   PredicateLink (CompositeTruthValue (VersionHandle (Node "MI") (stv 42)))
+       RelationshipNode "word-pair"
+       ListLink
+           WordNode "bicycle"
+           WordNode "tire"
+
+Then we need to do the following:
+
+   TemplateLink
+       ListLink
+           TypedVariableLink
+               VariableNode "$left-word"
+               VariableTypeNode "WordNode"
+       ImplicationLink
+           AndLink
+               PredicateLink
+                   RelationshipNode "word-pair"
+                   ListLink
+                       VariableNode "$left-word"
+                       WordNode "tire"
+           xxx
+               GroundedSchemaNode "scm:
+
+where the scheme 
+
+need to increment a partial-sum on the predicate link.
+
+
+XXX problem: bad MI scores because "tire" has multiple meanings ... 
+
 
 
 
