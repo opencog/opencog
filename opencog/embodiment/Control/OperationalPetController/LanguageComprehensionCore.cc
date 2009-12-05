@@ -47,6 +47,7 @@ void LanguageComprehension::init( void )
     if ( !initialized ) {
         initialized = true;
         
+#ifdef HAVE_GUILE
         std::stringstream script;
         script << "(define agentSemeNode (SemeNode \"";
         script << agent.getPetId( ) << "\") )" << std::endl;
@@ -62,6 +63,7 @@ void LanguageComprehension::init( void )
         LanguageComprehension::localAgent = &this->agent;
         scm_c_define_gsubr("cog-emb-compute-spatial-relations", 3, 0, 1, 
                            (SCM (*)())&LanguageComprehension::execute );
+#endif
                 
         this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
         this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
@@ -75,6 +77,7 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
 {
     init();
 
+#ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(resolve-reference)");    
     logger().info( "LanguageComprehension::%s - (resolve-reference) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
@@ -82,12 +85,14 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );    
+#endif
 }
 
 void LanguageComprehension::answerLatestQuestion( void )
 {
     init();
 
+#ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(answer-question)");    
     logger().info( "LanguageComprehension::%s - (answer-question) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
@@ -114,6 +119,7 @@ void LanguageComprehension::answerLatestQuestion( void )
         AtomSpaceUtil::setPredicateValue( agent.getAtomSpace( ), "has_something_to_say", TruthValue::TRUE_TV( ),
                                           AtomSpaceUtil::getAgentHandle( agent.getAtomSpace( ), agent.getPetId( ) ) ); 
     } // if
+#endif
 
 }
 
@@ -163,6 +169,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 {
     init();
 
+#ifdef HAVE_GUILE
     std::string answer = SchemeEval::instance().eval( "(resolve-command)");
     logger().info( "LanguageComprehension::%s - (resolve-command) answer: %s", __FUNCTION__, answer.c_str() );
     if ( SchemeEval::instance().eval_error() ) {
@@ -170,7 +177,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
                         __FUNCTION__, answer.c_str( ) );
     } // if
     SchemeEval::instance().clear_pending( );
-
+#endif
     
     opencog::AtomSpace& as = agent.getAtomSpace( );
     HandleSeq elements = getActivePredicateArguments( "latestAvatarRequestedCommands" );

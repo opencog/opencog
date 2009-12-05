@@ -57,8 +57,10 @@ namespace OperationalPetController
         void init(void);
         void loadFrames(void);
 
+#ifdef HAVE_GUILE
         /** The static elements below will be replaced by a SchemePrimitive soon **/
         static SCM execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode );
+#endif
         static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
                                                        const std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>& relations,
                                                        const std::string& objectA, const std::string& objectB, const std::string& objectC );

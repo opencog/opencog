@@ -32,6 +32,7 @@ using namespace opencog;
 
 Control::PetInterface* LanguageComprehension::localAgent = NULL;
 
+#ifdef HAVE_GUILE
 SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode ) {
     opencog::AtomSpace& atomSpace = localAgent->getAtomSpace( );
     HandleSeq resultingFrames;
@@ -158,6 +159,7 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
         
     return SchemeSmob::handle_to_scm( atomSpace.addLink( LIST_LINK, resultingFrames ) );
 }
+#endif
 
 void LanguageComprehension::createFrameInstancesFromRelations( 
     AtomSpace& atomSpace, HandleSeq& resultingFrames,
