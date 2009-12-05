@@ -17,8 +17,10 @@ DECLARE_MODULE(QueryModule);
 
 QueryModule::QueryModule(void)
 {
+#ifdef HAVE_GUILE
 	define_scheme_primitive("do-implication", &QueryModule::do_implication, this);
 	define_scheme_primitive("do-varscope", &QueryModule::do_varscope, this);
+#endif
 }
 QueryModule::~QueryModule()
 {

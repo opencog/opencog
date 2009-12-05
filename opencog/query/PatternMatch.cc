@@ -220,6 +220,8 @@ Handle Instantiator::execution_link()
 		SchemeEval &applier = SchemeEval::instance();
 		Handle h = applier.apply(schema.substr(4), oset[1]);
 		return h;
+#else
+		return Handle::UNDEFINED;
 #endif /* HAVE_GUILE */
 	}
 	else
@@ -228,7 +230,6 @@ Handle Instantiator::execution_link()
 		// execution-link handler will be able to process it.
 		return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
 	}
-
 }
 
 bool Instantiator::walk_tree(Handle expr)
