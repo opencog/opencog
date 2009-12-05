@@ -35,8 +35,13 @@ sub show_ent
 	my $i=0;
 	for ($i=0; $i<$nbins; $i++) { $bins[$i] = 0; }
 	
-	my $select = $dbh->prepare('SELECT entropy FROM ' . $dj_tablename . ' WHERE entropy >= 0.0 AND
-obscnt > 3;' )
+	# We are going to reject any sense observations for which the 
+	# count seemse to be too small. Basically, if there were N different
+	# senses that were observed with a word-disjunct pair, then we want 
+	# to have seen at least 4*N observations. This discards a *huge*
+	# number of observations.
+	my $select = $dbh->prepare('SELECT entropy FROM ' . $dj_tablename . 
+		' WHERE entropy >= 0.0 AND sense_obscnt > 4 * senses_observed;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	$select->execute()
