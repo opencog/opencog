@@ -19,15 +19,17 @@ IF(WIN32)
     TARGET_LINK_LIBRARIES(PetUTest winmm)
 ENDIF(WIN32)
 
-ADD_CXXTEST(LanguageComprehensionUTest)
-TARGET_LINK_LIBRARIES(LanguageComprehensionUTest 
-  OpcLib
-  behavior
-  ${XERCESC_LIBRARIES}
-  ${Boost_THREAD_LIBRARY}
-)
-
-IF(WIN32)
-	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
-ENDIF(WIN32)
+IF (GUILE_FOUND)
+	ADD_CXXTEST(LanguageComprehensionUTest)
+	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest 
+		OpcLib
+		behavior
+		${XERCESC_LIBRARIES}
+		${Boost_THREAD_LIBRARY}
+	)
+	
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
+	ENDIF(WIN32)
+ENDIF (GUILE_FOUND)
 
