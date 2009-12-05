@@ -34,6 +34,7 @@ sub compute_prob
 	my %wdj_freq = ();
 	my %wdj_entropy = ();
 	my %wdj_count = ();
+	my %wdj_obscnt = ();
 
 	my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . ' WHERE count > 0.0 ORDER BY count DESC;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
@@ -48,13 +49,14 @@ sub compute_prob
 	print "Will look at $nr rows in $djs_tablename \n";
 	for (my $i=0; $i<$select->rows; $i++)
 	{
-		my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
+		my ($sense, $infword, $disjunct, $count, $obscnt, $lp) = $select->fetchrow_array();
 		$items ++;
 		$tot_count += $count;
 
 		my $pair = $infword . "%%%" . $disjunct;
 		$wdj_freq{$pair} += $count;
 		$wdj_count{$pair} ++;
+		$wdj_obscnt{$pair} += $obscnt;
 	}
 	print "Total count is $tot_count for $items items\n";
 
@@ -69,7 +71,7 @@ sub compute_prob
 	
 	for (my $i=0; $i<$select->rows; $i++)
 	{
-		my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
+		my ($sense, $infword, $disjunct, $count, $obscnt, $lp) = $select->fetchrow_array();
 		my $pair = $infword . "%%%" . $disjunct;
 		my $tot = $wdj_freq{$pair};
 		my $prob = $count / $tot;
@@ -86,7 +88,9 @@ sub compute_prob
 
 	# Now update the entropies and the sense-counts.
 	my $ups = $dbh->prepare(
-		'UPDATE ' . $dj_tablename . ' SET entropy = ?, senses_observed = ? WHERE inflected_word = ? AND disjunct = ?');
+		'UPDATE ' . $dj_tablename . 
+		' SET entropy = ?, senses_observed = ?, sense_count = ?, sense_obscnt = ? ' .
+		' WHERE inflected_word = ? AND disjunct = ?');
 	
 	my $djcnt = 0;
 	my $sncnt = 0;
@@ -96,14 +100,16 @@ sub compute_prob
 	{
 		my ($infword, $disjunct) = split(/%%%/, $pair);
 		my $entropy = $wdj_entropy{$pair};
-		my $sense_count = $wdj_count{$pair};
+		my $senses_count = $wdj_count{$pair};
+		my $s_count = $wdj_freq{$pair};
+		my $s_obscnt = $wdj_obscnt{$pair};
 
 		$djcnt ++;
-		$sncnt += $sense_count;
+		$sncnt += $senses_count;
 		$encnt += $entropy;
-		$bins[$sense_count] ++;
+		$bins[$senses_count] ++;
 
-		$ups->execute($entropy, $sense_count, $infword, $disjunct)
+		$ups->execute($entropy, $senses_count, $s_count, $s_obscnt, $infword, $disjunct)
 			or die "Couldn't execute statement: " . $update->errstr;
 	}
 

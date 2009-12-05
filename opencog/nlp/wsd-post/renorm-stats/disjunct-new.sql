@@ -39,8 +39,8 @@ CREATE TABLE NewDisjuncts (
 	obscnt INT,
 	log_probability FLOAT,
 	log_cond_probability FLOAT,
-   sense_count FLOAT,
-   sense_obscnt INT,
+	sense_count FLOAT,
+	sense_obscnt INT,
 	senses_observed INT,
 	entropy FLOAT
 );
