@@ -94,12 +94,14 @@ PersistModule::PersistModule(void) : store(NULL)
 	do_open_register();
 	do_store_register();
 
+#ifdef HAVE_GUILE
 	// XXX These probably should be declared by the atom-space directly,
 	// instead of being declared here ... but I guess this is an OK
 	// home for now.
 	define_scheme_primitive("fetch-atom", &PersistModule::fetch_atom, this);
 	define_scheme_primitive("fetch-incoming-set", &PersistModule::fetch_incoming_set, this);
 	define_scheme_primitive("store-atom", &PersistModule::store_atom, this);
+#endif
 }
 
 PersistModule::~PersistModule()
