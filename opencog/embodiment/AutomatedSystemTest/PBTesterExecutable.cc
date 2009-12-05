@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
 
     // Open/read the data file passed as argument
     if (argc < 2) {
-        printf("Wrong number of arguments:\nExpected: %s <Gold Standard Filename>\n", argv[0]);
+        printf("Wrong number of arguments:\nUsage: %s <Gold Standard Filename>\n", argv[0]);
+        exit(-1);
     }
     const char* filename = argv[1];
 

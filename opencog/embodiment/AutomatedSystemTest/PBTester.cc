@@ -38,6 +38,8 @@ using namespace AutomatedSystemTest;
 using namespace MessagingSystem;
 using namespace opencog;
 
+static const bool EXIT_ON_FAILURE = false;
+
 opencog::BaseServer* PBTester::createInstance()
 {
     return new PBTester;
@@ -84,19 +86,15 @@ bool PBTester::processNextMessage(MessagingSystem::Message *message)
     if (expectedMessages.empty()) {
         // TODO: implement a timeout to wait for the message be read
         logger().error("Received message when there is no expected message! Unexpected message: \n%s\n", message->getPlainTextRepresentation());
-        exit(-1);
+        failed = true;
+        if (EXIT_ON_FAILURE) exit(-1);
     } else {
         Message* expectedMessage = expectedMessages[0];
         if (strcmp(expectedMessage->getPlainTextRepresentation(),
                    message->getPlainTextRepresentation())) {
             logger().error("Received message does not match the expected one!\nReceived:\n'%s'\nExpected:\n'%s'\n", message->getPlainTextRepresentation(), expectedMessage->getPlainTextRepresentation());
-            //   failed = true;
-            expectedMessages.erase(expectedMessages.begin());
-            receivedTimeMessages.erase(receivedTimeMessages.begin());
-
-            delete expectedMessage;
-
-            exit(-1);
+            failed = true;
+            if (EXIT_ON_FAILURE) exit(-1);
         }
         expectedMessages.erase(expectedMessages.begin());
         receivedTimeMessages.erase(receivedTimeMessages.begin());
@@ -131,8 +129,8 @@ void PBTester::notifyEndOfGoldStdFile()
         logger().error("Did not received any message.");
         failed = true;
     }
-    std::string msgCmd = "UNLOAD_PET Fido";
 #if 0
+    std::string msgCmd = "UNLOAD_PET Fido";
     MessagingSystem::StringMessage msg(config().get("PROXY_ID"),
                                        config().get("SPAWNER_ID"), msgCmd);
     sendMessage(msg);
