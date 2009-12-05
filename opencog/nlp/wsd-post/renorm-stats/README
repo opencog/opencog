@@ -164,7 +164,11 @@ ordinary guile interpreter.
    script merely totals up the counts, and computes the various
    probabilities.
 
+ * disjunct-new.sql -- a copy of the table definitions from lexat.
+
  * file-stats.pl: collect miscellaneous word-count statistcics about
    a collection of CFF files.
 
  * stats-entropy.pl: data analysis script for bin-counting the entropy.
+
+ 
