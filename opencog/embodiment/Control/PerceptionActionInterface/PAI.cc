@@ -1030,6 +1030,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         XERCES_CPP_NAMESPACE::XMLString::trim(parsedSentenceText);
     } // if
 
+#ifdef HAVE_GUILE
     if(parsedSentenceText != NULL){
         logger().debug("Running eval of scheme instructions");
         std::string answer = SchemeEval::instance().eval( parsedSentenceText );
@@ -1039,8 +1040,8 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
                             __FUNCTION__, answer.c_str( ) );
         } // if
         SchemeEval::instance().clear_pending( );
-        
     }    
+#endif
 
     // Add the perceptions into AtomSpace
 
