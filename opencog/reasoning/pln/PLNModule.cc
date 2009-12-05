@@ -150,6 +150,7 @@ void PLNModule::init()
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
 
+#ifdef GUILE_FOUND
     // Define a scheme wrapper -- the scheme function pln-bc will
     // call the pln_bc method.
     define_scheme_primitive("pln-bc", &PLNModule::pln_bc, this);
@@ -157,6 +158,7 @@ void PLNModule::init()
     // Define a scheme wrapper -- the scheme function pln-ar will
     // call the pln_ar method.
     define_scheme_primitive("pln-ar", &PLNModule::pln_ar, this);
+#endif 
 
     // no longer done at module load - it would be inappropriate
     // for contexts other than testing PLN
