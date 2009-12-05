@@ -5,7 +5,7 @@
 # Compute various probabilities and marginal probabilites for the
 # wordsense-word-disjunct dataset.
 # 
-# Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+# Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 #
 
 #--------------------------------------------------------------------
@@ -21,6 +21,12 @@ use warnings;
 my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 	or die "Couldn't connect to database: " . DBI->errstr;
 
+# Specify the table-name to be cleaned up.
+# my $djs_tablename = "DisjunctSenses";
+# my $dj_tablename = "Disjuncts";
+my $djs_tablename = "NewDisjunctSenses";
+my $dj_tablename = "NewDisjuncts";
+
 #--------------------------------------------------------------------
 
 sub compute_prob
@@ -29,7 +35,7 @@ sub compute_prob
 	my %wdj_entropy = ();
 	my %wdj_count = ();
 
-	my $select = $dbh->prepare('SELECT * FROM DisjunctSenses WHERE count > 0.0 ORDER BY count DESC;' )
+	my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . ' WHERE count > 0.0 ORDER BY count DESC;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	$select->execute()
@@ -39,7 +45,7 @@ sub compute_prob
 	my $tot_count = 0.0;
 	my $items = 0;
 	my $nr = $select->rows;
-	print "Will look at $nr rows in DisjunctSenses\n";
+	print "Will look at $nr rows in $djs_tablename \n";
 	for (my $i=0; $i<$select->rows; $i++)
 	{
 		my ($sense, $infword, $disjunct, $count, $lp) = $select->fetchrow_array();
@@ -54,7 +60,7 @@ sub compute_prob
 
 	# Next, compute and store the marginal probabilites
 	my $update = $dbh->prepare(
-		'UPDATE DisjunctSenses SET log_cond_probability = ? WHERE word_sense = ? AND inflected_word = ? AND disjunct = ?')
+		'UPDATE ' . $djs_tablename . ' SET log_cond_probability = ? WHERE word_sense = ? AND inflected_word = ? AND disjunct = ?')
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	my $olog_2 = -1.0/log(2.0);
@@ -80,7 +86,7 @@ sub compute_prob
 
 	# Now update the entropies and the sense-counts.
 	my $ups = $dbh->prepare(
-		'UPDATE Disjuncts SET entropy = ?, senses_observed = ? WHERE inflected_word = ? AND disjunct = ?');
+		'UPDATE ' . $dj_tablename . ' SET entropy = ?, senses_observed = ? WHERE inflected_word = ? AND disjunct = ?');
 	
 	my $djcnt = 0;
 	my $sncnt = 0;
