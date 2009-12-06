@@ -102,6 +102,10 @@ void BasicSCMUTest::setUp(void)
 {
 	CogServer& cogserver = static_cast<CogServer&>(server());
 	as = cogserver.getAtomSpace();
+
+	// Proper UTF-8 behaviour requires the right locale.
+	eval.eval("(setlocale LC_ALL \"\")");
+	eval.clear_pending();
 }
 
 // ============================================================
