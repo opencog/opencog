@@ -25,6 +25,8 @@
  */
 
 #include <getopt.h>
+#include <langinfo.h>
+#include <locale.h>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
@@ -74,11 +76,27 @@ static void usage(const char* progname)
 
 int main(int argc, char *argv[])
 {
+    // Get the locale from the environment... 
+    // Perhaps we should someday get it from the config file ???
+    setlocale(LC_ALL, "");
+
+    // Check to make sure the current locale is UTF8; if its not,
+    // then force-set this to the english utf8 locale 
+    const char * codeset = nl_langinfo(CODESET);
+    if (!strstr(codeset, "UTF") && !strstr(codeset, "utf"))
+    {
+       fprintf(stderr,
+           "%s: Warning: locale %s was not UTF-8; force-setting to en_US.UTF-8\n",
+            argv[0], codeset);
+       setlocale(LC_CTYPE, "en_US.UTF-8");
+    }
+
     static const char *optString = "c:D:h";
     int c = 0;
     vector<string> configFiles;
     vector< pair<string,string> > configPairs;
     string progname = argv[0];
+
     // parse command line
     while (1) {
         c = getopt (argc, argv, optString);
@@ -115,6 +133,7 @@ int main(int argc, char *argv[])
         }
 
     }
+
     if (configFiles.size() == 0) {
         cerr << "Searching for config in default locations..." << endl;
         // search for configuration file on default locations
