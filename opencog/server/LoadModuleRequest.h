@@ -41,8 +41,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "loadmodule",
-            "load an opencog module; give the module filename as the argument",
-            "loadmodule <module>"
+            "Load an opencog module",
+            "Usage: loadmodule <module>\n\n"
+            "Load the named opencog module"
         );
         return _cci;
     }

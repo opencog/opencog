@@ -52,8 +52,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "list",
-            "list the atom currently at the atomtable",
-            "list [[-h <handle>] | [-n <name>] [[-t|-T] <type]] where:\n"
+            "List atoms in the atomtable",
+            "Usage: list [[-h <handle>] | [-n <name>] [[-t|-T] <type>]]\n\n"
+            "List atoms in the atomtable. Optional flags are:\n"
             "   -h <handle>: list the atom identified by the specified handle\n"
             "   -n <name>:   list the nodes identified by the specified name\n"
             "   -t <name>:   list the nodes of the specified type\n"

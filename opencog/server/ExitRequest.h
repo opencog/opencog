@@ -42,8 +42,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "exit",
-            "closes connection and exit",
-            "exit"
+            "Close the shell connection",
+            "Usage: exit\n\n"
+            "Close the shell TCP/IP connection."
         );
         return _cci;
     }

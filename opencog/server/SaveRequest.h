@@ -41,8 +41,10 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "save",
-            "save the AtomSpace to an XML file",
-            "save <filename>"
+            "Save the AtomSpace to an NMXML file",
+            "Usage: save <filename>\n\n"
+            "Save the entire contents of the AtomSpace to a file,\n"
+            "written in the NMXML data format."
         );
         return _cci;
     }

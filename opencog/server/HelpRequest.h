@@ -42,8 +42,10 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "help",
-            "list the available commands or print the help for a specific command",
-            "help [<command>]"
+            "List the available commands or print the help for a specific command",
+            "Usage: help [<command>]\n\n"
+            "If no command is specified, then print a menu of commands.\n"
+            "Otherwise, print verbose help for the indicated command."
         );
         return _cci;
     }

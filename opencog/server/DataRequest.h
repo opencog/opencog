@@ -43,8 +43,12 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "data",
-            "loads inline xml data into the atomspace",
-            "data<CR><inline xml><Ctrl-D><CR>",
+            "Load inline xml data into the atomspace",
+            "Usage: data<CRLF><inline xml><CRLF><Ctrl-D><CRLF>\n\n"
+            "Load inline NMXML data. The command must be followed by a\n"
+            "carriage-return-linefeed (CRLF), then the XML data. The end\n"
+            "of the data is indicated by a single ASCI EOT character (^D)\n"
+            "on a line by itself.",
             true
         );
         return _cci;

@@ -43,8 +43,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "unloadmodule",
-            "unload an opencog module",
-            "unload <module>" 
+            "Unload an opencog module",
+            "Usage: unload <module>\n\n" 
+            "Unload the indicated module."
         );
         return _cci;
     }

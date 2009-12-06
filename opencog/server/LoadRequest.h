@@ -41,8 +41,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "load",
-            "load the contents of a xml file",
-            "load <filename>" 
+            "Load the contents of an NMXML file",
+            "Usage: load <filename>\n\n" 
+            "Load the contents of the NMXML file <filename>."
         );
         return _cci;
     }

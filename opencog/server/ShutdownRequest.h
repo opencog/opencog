@@ -41,8 +41,9 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "shutdown",
-            "shut down the cogserver",
-            "shutdown" 
+            "Shut down the cogserver",
+            "Usage: shutdown\n\n"
+            "Halt the cogserver in an  orderly fashion"
         );
         return _cci;
     }

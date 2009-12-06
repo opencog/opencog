@@ -42,8 +42,8 @@ public:
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
             "sleep",
-            "sleep for the number of given seconds (default: 5 seconds)",
-            "Usage: sleep [num seconds]\n\n"
+            "Sleep for the number of given seconds (default: 5 seconds)",
+            "Usage: sleep [<num seconds>]\n\n"
             "Busy-sleep for the number of given seconds (default: 5 seconds)"
         );
         return _cci;
