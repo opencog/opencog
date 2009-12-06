@@ -43,7 +43,8 @@ public:
         static const RequestClassInfo _cci(
             "sleep",
             "sleep for the number of given seconds (default: 5 seconds)",
-            "sleep"
+            "Usage: sleep [num seconds]\n\n"
+            "Busy-sleep for the number of given seconds (default: 5 seconds)"
         );
         return _cci;
     }

@@ -38,12 +38,20 @@ SleepRequest::~SleepRequest()
 
 bool SleepRequest::execute()
 {
+    int seconds = 5;
     if (_parameters.size() > 0) {
-        int seconds = atoi(_parameters.begin()->c_str()); 
-        usleep(seconds*1000000);
-    } else {
-        // default
-        usleep(5000000);
+        seconds = atoi(_parameters.begin()->c_str()); 
     }
+
+    // Use a busy-spinloop instead of a hard uninterruptible sleep.
+    // This way, the OS will schedule use every time through the loop.
+    for (int i =0; i<seconds *1000; i++) {
+        usleep(1000);
+    }
+
+    char buff[120];
+    snprintf(buff, 120, "Finished sleeping %d seconds\n", seconds);
+    send (buff);
+
     return true;
 }
