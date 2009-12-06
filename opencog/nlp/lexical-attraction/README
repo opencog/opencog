@@ -495,33 +495,78 @@ of pattern reco, again.
 
 Suppose, for example, word-pairs were linked as follows:
 
-   ;; mi stored in a composite TV
-   PredicateLink (CompositeTruthValue (VersionHandle (Node "MI") (stv 42)))
+   ;; mi stored in strength of truth value ...?  or some 
+   ;; normalized version of mi ... 
+   PredicateLink 
        RelationshipNode "word-pair"
        ListLink
            WordNode "bicycle"
            WordNode "tire"
 
-Then we need to do the following:
+Then for example, sum_w_in_S1 mi(w, w1) with w1='tire' could be computed
+by running the pattern matcher on the following:
 
-   TemplateLink
+   VariableScopeLink
        ListLink
            TypedVariableLink
                VariableNode "$left-word"
                VariableTypeNode "WordNode"
        ImplicationLink
+           ;; The IF clause
+           PredicateLink
+               RelationshipNode "word-pair"
+               ListLink
+                   VariableNode "$left-word"
+                   WordNode "tire"
+
+           ;; the THEN clause
+           ExecutionLink
+               GroundedSchemaNode "scm:incr-count"
+               PredicateLink
+                   RelationshipNode "word-pair"
+                   ListLink
+                       DefinedCountNode "*"
+                       WordNode "tire"
+
+where the scheme function "scm:incr-count" increments the count on the
+CountTruthValue of the argument passed in --  in this case, the 
+PredicateLink.  Notice the wild-card '*' to indicate that a sum was
+taken.
+
+Computing the interseted sum is slightly harder. So, to obtain
+sum_w_in_I12 [ mi (w, w1) + mi(w, w2) ] for w1=tire, w2=wheel, one 
+should run the following pattern:
+
+   VariableScopeLink
+       ListLink
+           TypedVariableLink
+               VariableNode "$left-word"
+               VariableTypeNode "WordNode"
+       ImplicationLink
+           ;; The IF clause
            AndLink
                PredicateLink
                    RelationshipNode "word-pair"
                    ListLink
                        VariableNode "$left-word"
                        WordNode "tire"
-           xxx
-               GroundedSchemaNode "scm:
+               PredicateLink
+                   RelationshipNode "word-pair"
+                   ListLink
+                       VariableNode "$left-word"
+                       WordNode "wheel"
 
-where the scheme 
+           ;; the THEN clause
+           ExecutionLink
+               GroundedSchemaNode "scm:incr-count"
+               PredicateLink
+                   RelationshipNode "left-word-pair-inter"
+                   ListLink
+                       DefinedCountNode "*"
+                       WordNode "tire"
+                       WordNode "wheel" xxxxxxxxxxxwrong  how to rep this ... 
 
-need to increment a partial-sum on the predicate link.
+
 
 
 XXX problem: bad MI scores because "tire" has multiple meanings ... 
