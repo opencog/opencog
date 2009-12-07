@@ -224,12 +224,22 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     //    return i;
     //}
 
-    //! Add a tree of non real atoms to AtomSpace.
-    //! @param v of atoms to add.
-    //! @param vi iterator to start adding atoms from
-    //! @param tvn what truth value they should be given
-    //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param managed some kind of mechanism to manage memory
+    /**
+     * Add a tree of non real atoms to AtomSpace.
+     * @param v of atoms to add.
+     * @param vi iterator to start adding atoms from
+     * @param tvn what truth value they should be given
+     * @param tvn what truth value they should be given
+     * @param fresh allows atoms to be added with the same name/outgoing set.
+     *              If fresh == false and the atom already exist then the new
+     *              truth value is merged (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
+     * @param managed some kind of mechanism to manage memory.
+     *                @note that it is basically never used throughout the code
+     *                except in LocalATW which is disabled.
+     *                Maybe it could simply be removed.
+     */
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
                     bool fresh, bool managed);
 
@@ -283,8 +293,18 @@ protected:
      * nodes. This can be ensured by using the appropriate addNodeDC or
      * addNodeDC classes.
      * @param tvn what truth value they should be given
-     * @param fresh allows atoms to be added with the same name/outgoing set
-     * @param managed some kind of mechanism to manage memory
+     * @param fresh allows atoms to be added with the same name/outgoing set.
+     *              If fresh == false and the atom already exist then the new
+     *              truth value is merged (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
+     * @param managed some kind of mechanism to manage memory.
+     *                @note that it is basically never used throughout the code
+     *                except in LocalATW which is disabled.
+     *                Maybe it could simply be removed.
+     * @param @todo add comment
+     * 
+     * @return The handle of the atom added
      */
     pHandle addAtomDC(Atom &a, bool fresh, bool managed,
                       HandleSeq contexts = HandleSeq());
