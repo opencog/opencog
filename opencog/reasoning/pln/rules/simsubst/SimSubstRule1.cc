@@ -28,9 +28,10 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
+// Issue: Makes a real link with children in a vtree.
+
 namespace opencog { namespace pln {
 
-#if 0
 Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
 /** For simplicity (but sacrificing applicability),
@@ -39,7 +40,7 @@ Links are assumed not inheritable either.
     */
     
     if (outh->begin().number_of_children() != 2
-        ||  inheritsType(nm->getType(v2h(*outh->begin())), FW_VARIABLE_NODE))
+        ||  GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 /*  puts("X1");
@@ -65,7 +66,7 @@ Links are assumed not inheritable either.
         BBvtree templated_atom1(new BoundVTree(*outh));
         *i = old_i;     
         
-        BBvtree inhPattern1(new BoundVTree(mva((Handle)INHERITANCE_LINK,
+        BBvtree inhPattern1(new BoundVTree(mva((pHandle)INHERITANCE_LINK,
             mva(child), mva(*i))));
         
         MPs ret1;
@@ -91,8 +92,8 @@ Links are assumed not inheritable either.
 
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
-    Handle h0 = v2h(h[0]);
-    Handle h1 = v2h(h[1]);
+    pHandle h0 = boost::get<pHandle>(h[0]);
+    pHandle h1 = boost::get<pHandle>(h[1]);
     
     const int N = h.size();
     assert(2==N);
@@ -105,19 +106,18 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
     //assert(ret.hs[1].real == nm->getOutgoing(h[1])[0]);
 
-    vector<Handle> hs = asw->getOutgoing(h0);
+    vector<pHandle> hs = nm->getOutgoing(h0);
 
     /// subst hs[0] to hs[1] (child => parent):
     ret.hs[0]->substitute(atom(hs[1]), atom(hs[0]));
 
 //printAtomTree(ret,0,0);
     
-/*  meta ret(new Tree<Vertex>(mva(nm->getType(v2h(h[0])),
-        mva(nm->getOutgoing(v2h(h[1]))[0]),
-        mva(nm->getOutgoing(v2h(h[0]))[1])));*/
+/*  meta ret(new Tree<Vertex>(mva(nm->getType(boost::get<pHandle>(h[0])),
+        mva(nm->getOutgoing(boost::get<pHandle>(h[1]))[0]),
+        mva(nm->getOutgoing(boost::get<pHandle>(h[0]))[1])));*/
     
 	return BBvtree(new BoundVTree(ret.makeHandletree(asw)));
 }
-#endif
 
 }} // namespace opencog { namespace pln {

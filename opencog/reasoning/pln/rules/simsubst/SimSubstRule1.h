@@ -33,22 +33,24 @@ public:
 	SimSubstRule1(AtomSpaceWrapper *_asw)
 	: GenericRule<InhSubstFormula>(_asw, false, "SimSubstRule")
 	{
-		inputFilter.push_back(meta(new tree<Vertex>(mva((Handle)INHERITANCE_LINK,
-			mva((Handle)ATOM),
-			mva((Handle)ATOM)))));
-		inputFilter.push_back(meta(new tree<Vertex>(mva((Handle)ATOM))));
+		inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)INHERITANCE_LINK,
+			mva((pHandle)ATOM),
+			mva((pHandle)ATOM)))));
+		inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 	TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const
 	{
+	    AtomSpaceWrapper *nm = GET_ASW;
+	
 		TruthValue** tvs = new TruthValue*[1];
 
 		const int N = (int)premiseArray.size();
 		assert(N==2);
 
-		tvs[0] = (TruthValue*) &(asw->getTV(v2h(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(asw->getTV(v2h(premiseArray[1])));
+		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[1])));
 
 		return tvs;
 	}
