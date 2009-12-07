@@ -112,23 +112,17 @@ void ConsoleSocket::OnLine(const std::string& line)
         // if it hasn't disabled the line protocol
         cogserver.pushRequest(_request);
 
-        // Force a drain of all outstanding requests. This is because
-        // any one of the requests could be a request to enter shell mode,
-        // in which case, we *must* enter shell mode before handling any
-        // additional input from the socket (since that input is almost
-        // surely intended for the shell, and not for the cogserver).
-#if 0 
-       // Welter's comment: Calling this method here is causing concurrency problems 
-       // since this runs in a separate thread (for socket handler) instead of main 
-       // thread (where server loop runs).
-       // TODO: Find another way to avoid next line to be handled by cogserver
-       // shell when the previous command is for entering scheme (or any other)
-       // shell. Perhaps we should create Disable/Enable methods for the
-       // ConsoleSocket so it is disabled here and re-enabled
-       // when the request is executed. 
-        cogserver.processRequests();
-#endif
-        if (_request->isShell()) cogserver.processRequests();
+        if (_request->isShell()) {
+            // Force a drain of this request, because we *must* enter shell mode
+            // before handling any additional input from the socket (since the
+            // next input is almost surely intended for the new shell, not for
+            // the cogserver one).
+            // NOTE: Calling this method for other kind of request may cause
+            // cogserver to crash due to concurrency issues, since this runs in
+            // a separate thread (for socket handler) instead of the main thread
+            // (where the server loop runs).
+            cogserver.processRequests();
+        }
     } else {
         // reset input buffer
         _buffer.clear();
