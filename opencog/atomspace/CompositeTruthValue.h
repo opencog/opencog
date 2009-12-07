@@ -107,8 +107,12 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
     static CompositeTruthValue* fromString(const char*)
         throw (InvalidParamException);
+    
+    // returns the mean of the primary TruthValue
     strength_t getMean() const;
+    // returns the count of the primary TruthValue
     count_t getCount() const;
+    // returns the confidence of the primary TruthValue
     confidence_t getConfidence() const;
 
     float toFloat() const;
