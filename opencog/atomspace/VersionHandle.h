@@ -37,13 +37,15 @@ enum IndicatorType {HYPOTHETICAL = 1, CONTEXTUAL, UNKNOWN};
 struct VersionHandle
 {
     IndicatorType indicator;
+    // substantive is a Handle corresponding to the context or hypothesis
+    // (i.e.it would be the first argument of the context of hypothetical link)
     Handle substantive;
 
     // Default constructor, gets a NULL_VERSION_HANDLE.
     VersionHandle();
 
-    // subs represents the context or hypothesis, not the atom to make the 
-    // handle for
+    // subs represents the context or hypothesis,
+    // not the atom to make the  handle for
     VersionHandle(IndicatorType ind, Handle subs);
     VersionHandle( const VersionHandle& other );
 
