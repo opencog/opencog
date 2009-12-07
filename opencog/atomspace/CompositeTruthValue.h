@@ -117,7 +117,7 @@ public:
      */
     count_t getCount() const;
     /**
-     * return the confidence of the primary TruthValue
+     * @return the confidence of the primary TruthValue
      */
     confidence_t getConfidence() const;
 
