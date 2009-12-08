@@ -51,6 +51,7 @@ static const char* DEFAULT_CONFIG_PATHS[] =
 #ifndef WIN32
     "/etc",
 #endif // !WIN32
+    "../lib",
     NULL
 };
 
