@@ -353,6 +353,9 @@ private:
                     printf("s: %f max: %f\n", etv->getMean(),
                             t->maxTV->getMean());
                 }
+                
+                std::cout << "Inference trail: " << std::endl;
+                state->printTrail(eh);
 
                 passed = (
                     eh != PHANDLE_UNDEFINED &&
@@ -592,6 +595,9 @@ private:
                     printf("s: %f max: %f\n", etv->getMean(),
                             maxTV->getMean());
                 }
+                
+                std::cout << "Inference trail: " << std::endl;
+                std::cout << state->printTrail(eh);
 
                 passed = (
                     eh != PHANDLE_UNDEFINED &&
@@ -1052,6 +1058,7 @@ public:
             200,0);
     }
 
+    //! Involves friendOf being a symmetricRelation
     void testBasicSpawning()
     {
         for (int i = 0; i < 5; i++) {
