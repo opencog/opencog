@@ -40,7 +40,7 @@ public:
      * a first outgoing of A->B
      *
      * @param premiseArray vector of premises, here the sole element (A->B)
-     * @param CX TODO
+     * @param CX Context to use for rule computation. Currently unused.
      *
      * @return the BoundVertex of the conclusion, A
      */

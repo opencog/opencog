@@ -160,6 +160,14 @@ public:
      * Merge this TV object with the given TV object argument.
      * It always returns a new TV object with the result of the merge,
      * even if it is equals to one of the merged TV objects.
+     *
+     * Currently tv1.merge(tv2) works as follows:
+     * If tv1 and tv2 are not CompositeTruthValue then
+     * the resulting TV is, either tv1 or tv2, the one with the highest
+     * confidence.
+     * If tv1 is a CompositeTruthValue see CompositeTruthValue::merge.
+     * If tv2 is a CompositeTruthValue but not tv1,
+     * then tv2.CompositeTruthValue::merge(tv1) is called.
      */
     virtual TruthValue* merge(const TruthValue&) const;
 

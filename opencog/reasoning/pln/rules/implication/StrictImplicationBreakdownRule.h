@@ -36,7 +36,7 @@ public:
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     /**
      * @param premiseArray a vector of premises, (A->B, A)
-     * @param CX not sure of that one
+     * @param CX Context to use for rule computation. Currently unused.
      *
      * @return the BoundVertex of the conclusion, A
      */

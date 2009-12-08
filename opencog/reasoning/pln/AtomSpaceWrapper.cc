@@ -1466,7 +1466,7 @@ std::string AtomSpaceWrapper::vhmapToString() const {
 std::string AtomSpaceWrapper::pHandleToString(pHandle ph) const {
     vhpair hvh = fakeToRealHandle(ph);
     Handle h = hvh.first;
-    Atom* a = TLB::getAtom(h);
+    const Atom* a = TLB::getAtom(h);
     VersionHandle vh = hvh.second;
     std::stringstream ss;
     ss << "(Handle = " << h << "; Atom = " << a->toString()

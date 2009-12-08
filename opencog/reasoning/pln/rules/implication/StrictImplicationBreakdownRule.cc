@@ -148,11 +148,9 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     
     assert (!(GET_ASW->inheritsType(T, NODE)));
     
-    ret = destTable->addLink(T, new_args,
-                             *retTV,
-                             RuleResultFreshness);   
+    ret = destTable->addLink(T, new_args, *retTV, RuleResultFreshness);
     
-    delete retTV;                    
+    delete retTV;
     
     printer.print(ret, 3);
     

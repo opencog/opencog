@@ -527,7 +527,12 @@ public:
     }
 
     /**
-     * DEPRECATED! 
+     * DEPRECATED! This is a legacy code left-over from when one could
+     * have non-real atoms, i.e. those whose handles were
+     * less than 500, and indicated types, not atoms.
+     * Instead of using that method, one should use
+     * addNode or addLink should be used (which is a bit faster too).
+     *
      * Add an atom an optional TruthValue object to the Atom Table
      * This is a deprecated function; do not use it in new code,
      * if at all possible.
