@@ -98,7 +98,7 @@ public:
      *
      * Currently tv1.merge(tv2) works as follows:
      * The resulting primaryTV is the primaryTV (of either tv1 or tv2) that has 
-     * highest confidence.
+     * the highest confidence.
      * The resulting versionedTVs are the union of the versionedTVs of tv1 and
      * tv2, and for each versionedTV that is both in tv1 and tv2, then only
      * the one with the highest confidence is retained.
