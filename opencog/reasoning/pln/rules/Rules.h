@@ -88,7 +88,7 @@
 
 //#include "auxiliary/VarInstantiationRule.h"
 
-//#include "simsubst/SimSubstRule1.h"
+#include "simsubst/SimSubstRule1.h"
 //#include "simsubst/SimSubstRule2.h"
 
 #include "unify/BaseCrispUnificationRule.h"
