@@ -1269,7 +1269,7 @@ void BITNode::expandNextLevel()
         tlog(2, "Target is FW_VARIABLE_NODE! Intended? Dunno.\n");
     tlog(-2, " %d children exist already\n", children.size());
 
-    // Remove this BITNode from the roots execution pool
+    // Remove this BITNode from the root's execution pool
     root->exec_pool.remove_if(bind2nd(std::equal_to<BITNode*>(), this));
 
     if (!Expanded) {
