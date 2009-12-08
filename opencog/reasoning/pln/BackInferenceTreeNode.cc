@@ -1892,8 +1892,16 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
     map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
+        string name;
+        
+        if (find(rp->begin(), rp->end(), rule->second) == rp->end()) {
+            name = "<!!! INVALID RULE !!!>";
+        } else {
+            name = rule->second->getName();
+        }
+    
         ss << repeatc(' ', level*3) << "[" << h << "] was produced by applying ";
-        ss << rule->second->name << " to:\n";
+        ss << name << " to:\n";
 
         map<pHandle,vector<pHandle> >::const_iterator h_it = haxx::inferred_from.find(h);
         assert (h_it != haxx::inferred_from.end());
