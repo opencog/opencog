@@ -30,7 +30,7 @@ class ImplicationBreakdownRule : public Rule
 public:
 	NO_DIRECT_PRODUCTION;
     
-	ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable);
+	ImplicationBreakdownRule(AtomSpaceWrapper *_asw);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     
     /**

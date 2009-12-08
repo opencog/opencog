@@ -64,9 +64,8 @@ combined, no conflict will be found!
 
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-    if (nm->inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        nm->inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0
@@ -76,7 +75,7 @@ Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrid
     printer.print(outh->begin());
 #endif
 
-    Btr< std::set<Btr<ModifiedBoundVTree> > > varforms = FindMatchingUniversals(outh, destTable);
+    Btr< std::set<Btr<ModifiedBoundVTree> > > varforms = FindMatchingUniversals(outh, asw);
     
 ///return Rule::setOfMPs();
 
@@ -130,8 +129,8 @@ printer.print(rootAtom->begin(),3);
             for (vtree::post_order_iterator pit = tRes.begin_post(); pit!=tRes.end_post(); pit++)
 			{
                 vtree pit_vtree(pit);
-                if ( (nm->isType(_v2h(*pit))
-                    || nm->inheritsType(nm->getType(_v2h(*pit)), FW_VARIABLE_NODE))
+                if ( (asw->isType(_v2h(*pit))
+                    || asw->inheritsType(asw->getType(_v2h(*pit)), FW_VARIABLE_NODE))
                     && _v2h(*pit) != (pHandle)LIST_LINK
 					&& !STLhas(arg_targets, pit_vtree) )
                 {
@@ -144,9 +143,8 @@ printer.print(rootAtom->begin(),3);
 
         ret1.push_back(rootAtom);
 
-        for_each(   ret1.begin(),
-                ret1.end(),
-                boost::bind(&bind_Bvtree, _1, *i->bindings));
+        for_each(ret1.begin(), ret1.end(),
+                 boost::bind(&bind_Bvtree, _1, *i->bindings));
 
 /*MPs::iterator m = ret1.begin();
 for(; m != ret1.end(); m++)

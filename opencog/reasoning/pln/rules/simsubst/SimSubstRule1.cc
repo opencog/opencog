@@ -52,7 +52,7 @@ Links are assumed not inheritable either.
 //  set<atom> child_nodes;
 //  find_child_nodes(outh, child_nodes);
     
-    Vertex child = CreateVar(destTable);
+    Vertex child = CreateVar(asw);
     
     for(tree<Vertex>::pre_order_iterator i = outh->begin(); i != outh->end(); i++)
 //  for (set<atom>::iterator i = child_nodes.begin(); i != child_nodes.end(); i++)
@@ -91,14 +91,12 @@ Links are assumed not inheritable either.
 
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-
     Handle h0 = v2h(h[0]);
     Handle h1 = v2h(h[1]);
     
     const int N = h.size();
     assert(2==N);
-    assert(nm->getType(h0) == INHERITANCE_LINK);
+    assert(asw->getType(h0) == INHERITANCE_LINK);
     
     // ( any, Inh(a,b) )
     
@@ -107,7 +105,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
     //assert(ret.hs[1].real == nm->getOutgoing(h[1])[0]);
 
-    vector<Handle> hs = nm->getOutgoing(h0);
+    vector<Handle> hs = asw->getOutgoing(h0);
 
     /// subst hs[0] to hs[1] (child => parent):
     ret.hs[0]->substitute(atom(hs[1]), atom(hs[0]));
@@ -118,7 +116,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
         mva(nm->getOutgoing(v2h(h[1]))[0]),
         mva(nm->getOutgoing(v2h(h[0]))[1])));*/
     
-	return BBvtree(new BoundVTree(ret.makeHandletree(destTable)));
+	return BBvtree(new BoundVTree(ret.makeHandletree(asw)));
 }
 #endif
 

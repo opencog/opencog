@@ -36,12 +36,12 @@ float max(float a, float b);
 /** Create a new FWVAR node with the given name.
  * @relates AtomSpaceWrapper
  */
-Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
+Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname);
 
 /** Create a new FWVAR node and generate the name.
  * @relates AtomSpaceWrapper
  */
-Vertex CreateVar(iAtomSpaceWrapper* atw);
+Vertex CreateVar(iAtomSpaceWrapper* asw);
 
 Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);
 

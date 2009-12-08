@@ -2,7 +2,9 @@ std::map<int, Btr<vtree > > tests;
 
 void initTests()
 {
-    AtomSpaceWrapper* atw = GET_ASW;
+    // apparently unused
+    //AtomSpaceWrapper* asw = GET_ASW;
+
     int testi = 0;
     tests.clear();
 /*  tests[31] = Btr<vtree > (new vtree(

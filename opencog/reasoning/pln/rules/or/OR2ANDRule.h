@@ -26,8 +26,8 @@ namespace opencog { namespace pln {
 
 class OR2ANDRule : public Rule
 {
-	OR2ANDRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable)
+	OR2ANDRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(OrLink))));
 	}

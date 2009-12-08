@@ -22,7 +22,8 @@
 #ifndef GENERICRULE_H
 #define GENERICRULE_H
 
-using namespace opencog;
+#include "Rule.h"
+
 namespace opencog { namespace pln {
 
 template<typename FormulaType>
@@ -52,9 +53,9 @@ public:
                                        int* newN) const = 0;
 
     /// Always a composer
-    GenericRule(iAtomSpaceWrapper *_destTable,
-                bool _FreeInputArity, std::string _name = "")
-        : Rule(_destTable, _FreeInputArity, true, _name) { }
+    GenericRule(AtomSpaceWrapper *_asw, bool _FreeInputArity,
+                std::string _name = "")
+        : Rule(_asw, _FreeInputArity, true, _name) { }
 
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED) const {
@@ -88,9 +89,7 @@ public:
         printf("Res freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
-        pHandle ret = destTable->addAtom(*i2oType(premiseArray),
-                                         *retTV,
-                                         true);
+        pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, true);
 //   false);
 
         delete retTV;

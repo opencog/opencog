@@ -30,8 +30,8 @@
 
 namespace opencog { namespace pln {
 
-ImplicationBreakdownRule::ImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
-: Rule(_destTable,false,true,"ImplicationBreakdown")
+ImplicationBreakdownRule::ImplicationBreakdownRule(AtomSpaceWrapper *_asw)
+  : Rule(_asw,false,true,"ImplicationBreakdown")
 {
 		inputFilter.push_back(meta(
                 new tree<Vertex>(
@@ -49,11 +49,11 @@ Rule::setOfMPs ImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideI
 {
         ///haxx:: (restricts internal implications
 
-//      if (inheritsType(nm->getType(v2h(*outh->begin())), IMPLICATION_LINK))
+//      if (inheritsType(asw->getType(v2h(*outh->begin())), IMPLICATION_LINK))
 //          return Rule::setOfMPs();
 
         MPs ret;
-        Vertex myvar = CreateVar(destTable);
+        Vertex myvar = CreateVar(asw);
 
         // Joel: Wrapped up myvar in vtree to fit functions
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK, 
@@ -72,35 +72,33 @@ BoundVertex ImplicationBreakdownRule::compute(const std::vector<Vertex>& premise
 
 //printTree(premiseArray[0],0,1);
 
-        std::vector<pHandle> args = GET_ASW->getOutgoing(_v2h(premiseArray[0]));
-        Type T = GET_ASW->getType(args[1]);
-        std::string pname = GET_ASW->getName(args[1]);
+        std::vector<pHandle> args = asw->getOutgoing(_v2h(premiseArray[0]));
+        Type T = asw->getType(args[1]);
+        std::string pname = asw->getName(args[1]);
 
         TruthValue* tvs[] = {
-            (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[0]))),
-            (TruthValue*) &(GET_ASW->getTV(args[0])),
-            (TruthValue*) &(GET_ASW->getTV(args[1]))
+            (TruthValue*) &(asw->getTV(_v2h(premiseArray[0]))),
+            (TruthValue*) &(asw->getTV(args[0])),
+            (TruthValue*) &(asw->getTV(args[1]))
         };
         
         TruthValue* retTV =
             ImplicationBreakdownFormula().compute(tvs, 3);
 
-        std::vector<pHandle> new_args = GET_ASW->getOutgoing(args[1]);
+        std::vector<pHandle> new_args = asw->getOutgoing(args[1]);
 
         pHandle ret=PHANDLE_UNDEFINED;
 
         /*if (inheritsType(T, NODE))
-            ret = destTable->addNode(T, pname,
+            ret = asw->addNode(T, pname,
                     *retTV,
 //                  true);          
                     false);
         else*/
     
-        assert (!(GET_ASW->inheritsType(T, NODE)));
+        assert (!(asw->inheritsType(T, NODE)));
 
-        ret = destTable->addLink(T, new_args,
-                    *retTV,
-                    RuleResultFreshness);   
+        ret = asw->addLink(T, new_args, *retTV, RuleResultFreshness);
 
         delete retTV;
 

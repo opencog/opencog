@@ -30,8 +30,8 @@ namespace opencog { namespace pln {
 class SimSubstRule1 : public GenericRule<InhSubstFormula>
 {
 public:
-	SimSubstRule1(iAtomSpaceWrapper *_destTable)
-	: GenericRule<InhSubstFormula>(_destTable, false, "SimSubstRule")
+	SimSubstRule1(AtomSpaceWrapper *_asw)
+	: GenericRule<InhSubstFormula>(_asw, false, "SimSubstRule")
 	{
 		inputFilter.push_back(meta(new tree<Vertex>(mva((Handle)INHERITANCE_LINK,
 			mva((Handle)ATOM),
@@ -47,13 +47,13 @@ public:
 		const int N = (int)premiseArray.size();
 		assert(N==2);
 
-		tvs[0] = (TruthValue*) &(nm->getTV(v2h(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(nm->getTV(v2h(premiseArray[1])));
+		tvs[0] = (TruthValue*) &(asw->getTV(v2h(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(asw->getTV(v2h(premiseArray[1])));
 
 		return tvs;
 	}
 
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 
 	virtual meta i2oType(const vector<Vertex>& h) const;
 };

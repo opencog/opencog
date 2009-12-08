@@ -60,7 +60,7 @@ printAtomTree(outh,0,1);
         /// Add the pseudo atom which determines the TOPOLOGY of the desired result
 
         boost::shared_ptr<atom> pseudoAtom(new atom(HYPOTHETICAL_LINK, 1, new atom(outh)));
-        Handle h = pseudoAtom->attach(destTable);
+        Handle h = pseudoAtom->attach(asw);
         ret->push_back(pseudoAtom);
 
             TruthValue *tv = getTruthValue(h);

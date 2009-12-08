@@ -44,18 +44,17 @@ protected:
 	}
 
 public:
-	Inh2SimRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<Inh2SimFormula>(_destTable, false)
+	Inh2SimRule(AtomSpaceWrapper *_asw)
+	: GenericRule<Inh2SimFormula>(_asw, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(INHERITANCE_LINK))));
 	}
 	virtual bool valid(Handle* premiseArray, const int n) const
 	{
-		AtomSpaceWrapper *nm = GET_ASW;
 		return (linkInherits(InclusionLink, IMPLICATION_LINK)
 			|| linkInherits(InclusionLink,INHERITANCE_LINK))
-			&& (nm->getOutgoing(premiseArray[0],0) == nm->getOutgoingng(premiseArray[1],1)
-			&& nm->getOutgoing(premiseArray[0],1) == nm->getOutgoing(premiseArray[1],0));
+			&& (asw->getOutgoing(premiseArray[0],0) == asw->getOutgoingng(premiseArray[1],1)
+			&& asw->getOutgoing(premiseArray[0],1) == asw->getOutgoing(premiseArray[1],0));
 	}
 
 	virtual atom i2oType(Handle* h, const int n) const

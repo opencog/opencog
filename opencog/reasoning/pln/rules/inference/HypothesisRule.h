@@ -34,9 +34,9 @@ protected:
 		return premiseArray[0];
 	}
 public:
-	bool validate2				(MPs& args) const { return true; }
-	HypothesisRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable, false, false, "Hypothesis")
+	bool validate2(MPs& args) const { return true; }
+	HypothesisRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw, false, false, "Hypothesis")
 	{
 		//inputFilter.push_back(new atom(result));
 	}

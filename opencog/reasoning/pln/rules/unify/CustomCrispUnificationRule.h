@@ -32,14 +32,17 @@ protected:
 	pHandle hForAllLink;
 
 public:
-	CustomCrispUnificationRule(pHandle _hForAllLink, iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,false,false,"CustomCrispUnificationRule"), hForAllLink(_hForAllLink)
+	CustomCrispUnificationRule(pHandle _hForAllLink,
+                               AtomSpaceWrapper *_asw)
+        : Rule(_asw,false,false,"CustomCrispUnificationRule"),
+        hForAllLink(_hForAllLink)
 	{
 		inputFilter.push_back(
                 meta(new tree<Vertex>(mva((pHandle)ATOM))));
 	}
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const
 	{
         // Assumedly, this assert(0) is because a CustomCrispUnification rule
         // only makes sense when the variables within the ForAllLink are bound.

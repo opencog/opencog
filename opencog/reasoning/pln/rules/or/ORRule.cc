@@ -30,8 +30,8 @@
 
 namespace opencog { namespace pln {
 
-ORRule::ORRule(iAtomSpaceWrapper *_destTable)
-: GenericRule<ORFormula>(_destTable, true, "OR Rule")
+ORRule::ORRule(AtomSpaceWrapper *_asw)
+: GenericRule<ORFormula>(_asw, true, "OR Rule")
 {
 }
 
@@ -39,7 +39,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
         tree<Vertex>::iterator top = outh->begin();
         
-        if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*top)), OR_LINK) ||
+        if (!asw->inheritsType(asw->getType(_v2h(*top)), OR_LINK) ||
             top.number_of_children() > 2)
             return Rule::setOfMPs();
 
@@ -73,7 +73,7 @@ cprintf(3, "ORRule::formatTVarray...");
         int i = 0, ii=0;
         for (i = 0; i < N; i++)
         {
-            tvs[ii++] = (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[i])));
+            tvs[ii++] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[i])));
 cprintf(4,"TV Arg: %s -\n", tvs[i]->toString().c_str());
         }
         
@@ -86,7 +86,7 @@ cprintf(4,"Look up ANDLINK for args #%d,%d\n", i,j);
                 TableGather comb(mva((pHandle)AND_LINK,
                                     mva(premiseArray[i]),
                                     mva(premiseArray[j])
-                                ), destTable);
+                                ), asw);
 cprintf(4,"Look up %s\n", (comb.empty() ? "success." : "fails."));
                 tvs[ii++] = 
                                 (!comb.empty()

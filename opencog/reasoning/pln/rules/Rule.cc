@@ -32,13 +32,12 @@ using namespace std;
 namespace opencog {
 namespace pln {
 
-Rule::Rule(opencog::pln::iAtomSpaceWrapper *_destTable,
+Rule::Rule(opencog::pln::AtomSpaceWrapper *_asw,
            bool _freeInputArity,
            bool _composer,
            std::string _name)
   : RULE_INPUT_ARITY_MAX(15), freeInputArity(_freeInputArity),
-    destTable(_destTable),
-    composer(_composer), priority(10.0f), name(_name) 
+    asw(_asw), composer(_composer), priority(10.0f), name(_name) 
 { }
 
 Rule::Rule() : RULE_INPUT_ARITY_MAX(15) { }
@@ -54,18 +53,17 @@ Rule::~Rule()
 BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
 {
     bindingsT h_b;
-    AtomSpaceWrapper *nm = GET_ASW;
     foreach(const BoundVertex& bv, h)
     {
-        if (nm->isType(_v2h(bv.value)))
+        if (asw->isType(_v2h(bv.value)))
         {
             puts("!isReal");
             printf("%u\n", _v2h(bv.value)); 
             NMPrinter(NMP_ALL)(_v2h(bv.value), -10);
         }
 
-        assert(!nm->isType(_v2h(bv.value)));
-        assert(nm->getType(_v2h(bv.value)) != FW_VARIABLE_NODE);
+        assert(!asw->isType(_v2h(bv.value)));
+        assert(asw->getType(_v2h(bv.value)) != FW_VARIABLE_NODE);
     }
     
     vector<Vertex> rule_args(h.size());

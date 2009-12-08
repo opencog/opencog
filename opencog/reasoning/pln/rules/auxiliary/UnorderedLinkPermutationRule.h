@@ -29,13 +29,13 @@ namespace opencog { namespace pln {
 class UnorderedLinkPermutationRule : public GenericRule<Permutation??>
 {
 public:
-	UnorderedLinkPermutationRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<Permutation?>(_destTable, false, "UnorderedLinkPermutationRule")
+	UnorderedLinkPermutationRule(AtomSpaceWrapper *_asw)
+	: GenericRule<Permutation?>(_asw, false, "UnorderedLinkPermutationRule")
 	{ }
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	virtual meta i2oType(const vector<Vertex>& h) const;
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 };
 #endif
 

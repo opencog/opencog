@@ -674,8 +674,8 @@ struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
 #define hasFW_VAR(vt) (getFW_VAR(vt) != (vt).end())
 
 /// VariableNodes not memory-managed.
-Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname);
-Vertex CreateVar(iAtomSpaceWrapper* atw);
+Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname);
+Vertex CreateVar(iAtomSpaceWrapper* asw);
 
 const char* Type2Name(Type t);
 std::string condensed_form(const atom& a);
@@ -733,7 +733,7 @@ void removeRecursionFromMap(T mbegin, T mend)
 }
 
 //probably deprecated
-#define NewNode(_T, _NAME) mva(atw->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
+#define NewNode(_T, _NAME) mva(GET_ASW->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
 #define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
 
 template<typename T1, typename T2>

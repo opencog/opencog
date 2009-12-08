@@ -34,8 +34,8 @@ protected:
     ANDBreakdownFormula formula;
     
 public:
-    ANDBreakdownRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,true,true,"")
+    ANDBreakdownRule(iAtomSpaceWrapper *_asw)
+	: Rule(_asw,true,true,"")
     {
         name = "ANDBreakdownRule/" + i2str(N);
 	
@@ -66,7 +66,7 @@ public:
 	
         for (int i = 1; i < N; i++)
             andlink->append_child(andlink->begin(),
-                                  BoundVTree(CreateVar(destTable)).begin());
+                                  BoundVTree(CreateVar(asw)).begin());
         
         ret.push_back(andlink);
         ret.push_back(BBvtree(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK,*outh))));
@@ -80,16 +80,15 @@ public:
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = NULL) const
     {
-	AtomSpaceWrapper *nm = GET_ASW;
-	std::vector<pHandle> hs = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+        std::vector<pHandle> hs = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
         
-	assert(premiseArray.size() == 2);
-	assert(hs.size() == N);
-	assert(nm->getArity(boost::get<pHandle>(premiseArray[1])) == 1);	  	  
+        assert(premiseArray.size() == 2);
+        assert(hs.size() == N);
+        assert(asw->getArity(boost::get<pHandle>(premiseArray[1])) == 1);	  	  
         
-	atom topological_model(nm->getOutgoing(boost::get<pHandle>(premiseArray[1]))[0]);
+        atom topological_model(asw->getOutgoing(boost::get<pHandle>(premiseArray[1]))[0]);
         
-	for (uint i = 0; i < hs.size(); i++)
+        for (uint i = 0; i < hs.size(); i++)
             if (atom(hs[i]) == topological_model)
                 return BoundVertex(hs[i]);
         
@@ -100,15 +99,15 @@ public:
           printTree(hs[i],0,0);*/
 	
 	//LOG(0, "ANDBREAKDOWN: NO TOPOLOGICAL MODEL FOUND!");
-	assert(0);
+        assert(0);
         
-	return Vertex((Handle)NULL);
+        return Vertex((Handle)NULL);
 	
-        /*	std::vector<Handle> hs = nm->getOutgoing(premiseArray[0]);
+        /*	std::vector<Handle> hs = asw->getOutgoing(premiseArray[0]);
 
 	assert(premiseArray.size() == 2);
 	assert(hs.size() == N);
-	assert(nm->getArity(premiseArray[1]) == 1);
+	assert(asw->getArity(premiseArray[1]) == 1);
 	  
 	tree<Vertex>::iterator top0 = premiseArray[0].begin();
 

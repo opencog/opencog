@@ -28,8 +28,8 @@ namespace opencog { namespace pln {
 class StrictCrispUnificationRule : public BaseCrispUnificationRule
 {
 public:
-	StrictCrispUnificationRule(iAtomSpaceWrapper *_destTable)
-	: BaseCrispUnificationRule(_destTable) {}
+	StrictCrispUnificationRule(AtomSpaceWrapper *_asw)
+        : BaseCrispUnificationRule(_asw) {}
 	bool validate2				(MPs& args) const { return true; }		
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 };

@@ -41,15 +41,15 @@ bool UnificationRuleResultFreshness = true; //false;
 
 Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 {
-    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Btr<std::set<BoundVertex > >();
 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME|NMP_NODE_TYPE_NAME);
     printer.print(vtree(outh->begin()));
 
     cprintf(3,"FindMatchingUniversals...\n");
-    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, hForAllLink, destTable);
+    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, hForAllLink, asw);
     cprintf(3,"FindMatchingUniversals OK!\n");
 
     if (!i) return Btr<std::set<BoundVertex > >();
@@ -70,12 +70,12 @@ Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction
 
     BBvtree rootAtom(new BoundVTree(*i, pre_binds));
     bind_Bvtree(rootAtom, *i->bindings);
-    pHandle topologicalStub = destTable->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
+    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
 
-    pHandle ret_h = destTable->addLink(  GET_ASW->getType(topologicalStub),
-                                GET_ASW->getOutgoing(topologicalStub),
-                                GET_ASW->getTV(i->original_handle),
-                                UnificationRuleResultFreshness);    
+    pHandle ret_h = asw->addLink(asw->getType(topologicalStub),
+                                 asw->getOutgoing(topologicalStub),
+                                 asw->getTV(i->original_handle),
+                                 UnificationRuleResultFreshness);    
     
     ret->insert(BoundVertex(ret_h, pre_binds));
 

@@ -63,11 +63,10 @@ namespace haxx
 		{
 printf("dovar3: Next candidate...");
 			atom target(unsubsted_target); //'target' will experiece substs
-			AtomSpaceWrapper *nm = GET_ASW;
-			if (nm->getArity(candidates[i]) < 2)
+			if (asw->getArity(candidates[i]) < 2)
 				continue;
 
-			atom ForAll_candidate(nm->getOutgoing(candidates[i],1));
+			atom ForAll_candidate(asw->getOutgoing(candidates[i],1));
 ///LOG(4, "dovar3: candidate[i]:");
 ///printAtomTree(ForAll_candidate,0,4);
 
@@ -142,7 +141,7 @@ printf("dovar3: substitutableTo:");
 				{
 				
 /*					unsubsted_ForAll_candidate.T = FORALL_LINK;
-					unsubsted_ForAll_candidate.hs[0] = atom(nm->getOutgoing(candidates[i],0));				
+					unsubsted_ForAll_candidate.hs[0] = atom(asw->getOutgoing(candidates[i],0));				
 					
 					/// This will return a description of ForAllLink which !exists.
 					unsubsted_ForAll_candidate.hs[1] = unsubsted_target;
@@ -201,9 +200,8 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-	AtomSpaceWrapper *nm = GET_ASW;
-	if (inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-		inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+	if (inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+		inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();
 	
 	set<atom, lessatom_ignoreVarNameDifferences> varforms;
@@ -211,7 +209,7 @@ Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInput
 	/// Gather hints:
 printf("VariableMPforms...");
 //printAtomTree(outh, 0,0);
-	//((AtomSpaceWrapper*)(destTable))->VariableMPforms(atom(*outh,outh->begin()), varforms, outh.forbiddenBindings);
+	//asw->VariableMPforms(atom(*outh,outh->begin()), varforms, outh.forbiddenBindings);
 	
 	set<subst> unused_forbiddenBindings;
 	
@@ -246,7 +244,7 @@ printf("Root atom:\n");
 		printAtomTree(*rootAtom,0,3);
 printf("Partial CrispU args:\n");
 
-/*		vtree root_children(rootAtom->hs[0].makeHandletree(destTable));
+/*		vtree root_children(rootAtom->hs[0].makeHandletree(asw));
 		for (vtree::sibling_iterator p = root_children.begin(root_children.begin());
 									p != root_children.end(root_children.begin());
 									p++)
@@ -266,7 +264,7 @@ printf("Partial CrispU args:\n");
 
 				new_h->detach();
 
-				ret1.push_back(BBvtree(new BoundVTree(new_h->makeHandletree(destTable))));
+				ret1.push_back(BBvtree(new BoundVTree(new_h->makeHandletree(asw))));
 
 				printAtomTree(*new_h,0,3);
 			}
@@ -274,7 +272,7 @@ printf("Partial CrispU args:\n");
         
 		rootAtom->detach();
 
-		ret1.push_back(BBvtree(new BoundVTree(rootAtom->makeHandletree(destTable))));
+		ret1.push_back(BBvtree(new BoundVTree(rootAtom->makeHandletree(asw))));
 
         // Debug printing
         MPs::iterator m = ret1.begin();

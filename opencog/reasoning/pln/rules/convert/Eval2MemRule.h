@@ -27,8 +27,8 @@ namespace opencog { namespace pln {
 class Eval2MemRule : public GenericRule<TautologyFormula>
 {
 public:
-	Eval2MemRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<TautologyFormula>(_destTable, false)
+	Eval2MemRule(AtomSpaceWrapper *_asw)
+	: GenericRule<TautologyFormula>(_asw, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
 	}

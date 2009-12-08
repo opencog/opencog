@@ -33,11 +33,11 @@ class ANDPartitionRule : public Rule
 	SymmetricANDFormula fN;
 
 public:
-	ANDPartitionRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,true,true,"ANDPartitionRule")
+	ANDPartitionRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw,true,true,"ANDPartitionRule")
 	{ }
 	
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;

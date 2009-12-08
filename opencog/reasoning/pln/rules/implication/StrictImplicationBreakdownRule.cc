@@ -30,8 +30,8 @@
 
 namespace opencog { namespace pln {
 
-StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(iAtomSpaceWrapper *_destTable)
-  : Rule(_destTable,false,true,"ModusPonensRule")
+StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(AtomSpaceWrapper *_asw)
+  : Rule(_asw,false,true,"ModusPonensRule")
 {
     inputFilter.push_back(meta(
                                new tree<Vertex>(
@@ -53,7 +53,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
     //          return Rule::setOfMPs();
     
     MPs ret;
-    Vertex myvar = CreateVar(destTable);
+    Vertex myvar = CreateVar(asw);
     
     cprintf(4,"\n\nTo produce\n");
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
@@ -75,7 +75,6 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 
 BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
     assert(validate(premiseArray));
     
     //printTree(premiseArray[0],0,1);
@@ -86,7 +85,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     for (uint i=0;i<premiseArray.size();i++)
         printer.print(_v2h(premiseArray[i]), 3);
     
-    //  vtree   vt1(make_vtree(nm->getOutgoing(v2h(premiseArray[0]),0))),
+    //  vtree   vt1(make_vtree(asw->getOutgoing(v2h(premiseArray[0]),0))),
     //          vt2(make_vtree(v2h(premiseArray[1])));
     
     vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
@@ -104,13 +103,13 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     
 #if 0
     
-    if (make_vtree(nm->getOutgoing(v2h(premiseArray[0]),0))
+    if (make_vtree(asw->getOutgoing(v2h(premiseArray[0]),0))
         != make_vtree(v2h(premiseArray[1])))
         {
             cprintf(0,"StrictImplicationBreakdownRule args fail:\n");
 #if 0
             printTree(v2h(premiseArray[0]),0,0);
-            printTree(nm->getOutgoing(v2h(premiseArray[0]),0),0,0);
+            printTree(asw->getOutgoing(v2h(premiseArray[0]),0),0,0);
             printTree(v2h(premiseArray[1]),0,0);
             
             //      rawPrint(premiseArray[0], premiseArray[0].begin(), 0);
@@ -118,7 +117,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
             rawPrint(vt2, vt2.begin(), 0);
 #else 
             printer.print(v2h(premiseArray[0]), -10);
-            printer.print(nm->getOutgoing(v2h(premiseArray[0]),0), -10);
+            printer.print(asw->getOutgoing(v2h(premiseArray[0]),0), -10);
             printer.print(v2h(premiseArray[1]), -10);
             
             //        printer.print(premiseArray[0].begin());
@@ -129,26 +128,26 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
         }
 #endif
     
-    std::vector<pHandle> args = GET_ASW->getOutgoing(_v2h(premiseArray[0]));
-    Type T = GET_ASW->getType(args[1]);
-    std::string pname = nm->getName(args[1]);
+    std::vector<pHandle> args = asw->getOutgoing(_v2h(premiseArray[0]));
+    Type T = asw->getType(args[1]);
+    std::string pname = asw->getName(args[1]);
     
     TruthValue* tvs[] = {
-        (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[0]))),
-        (TruthValue*) &(GET_ASW->getTV(_v2h(premiseArray[1]))),
-        (TruthValue*) &(GET_ASW->getTV(args[1]))
+        (TruthValue*) &(asw->getTV(_v2h(premiseArray[0]))),
+        (TruthValue*) &(asw->getTV(_v2h(premiseArray[1]))),
+        (TruthValue*) &(asw->getTV(args[1]))
     };
     
     TruthValue* retTV =
         ImplicationBreakdownFormula().compute(tvs, 3);
     
-    std::vector<pHandle> new_args = nm->getOutgoing(args[1]);
+    std::vector<pHandle> new_args = asw->getOutgoing(args[1]);
     
     pHandle ret=PHANDLE_UNDEFINED;
     
-    assert (!(GET_ASW->inheritsType(T, NODE)));
+    assert (!(asw->inheritsType(T, NODE)));
     
-    ret = destTable->addLink(T, new_args, *retTV, RuleResultFreshness);
+    ret = asw->addLink(T, new_args, *retTV, RuleResultFreshness);
     
     delete retTV;
     

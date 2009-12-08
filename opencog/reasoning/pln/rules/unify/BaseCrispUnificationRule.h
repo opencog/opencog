@@ -29,8 +29,8 @@ class BaseCrispUnificationRule : public Rule
 protected:
 public:
 
-	BaseCrispUnificationRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,true,true,"CrispUnificationRule")
+	BaseCrispUnificationRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw,true,true,"CrispUnificationRule")
 	{
 
 		inputFilter.push_back(meta(
@@ -48,7 +48,8 @@ public:
 		which affect the Arg #2!
 	*/
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const;
 
 	NO_DIRECT_PRODUCTION;
 };

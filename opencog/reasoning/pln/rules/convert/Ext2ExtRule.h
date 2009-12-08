@@ -59,18 +59,17 @@ public:
 		assert(n == 1);
 		LINKTYPE_ASSERT(premiseArray[0], IN_LINK_TYPE);
 
-		AtomSpaceWrapper *nm = GET_ASW;
-		std::vector<Handle> in_args = nm->getOutgoing(premiseArray[0]);
+		std::vector<Handle> in_args = asw->getOutgoing(premiseArray[0]);
 
-		const TruthValue& retTV = nm->getTV(premiseArray[0]);
+		const TruthValue& retTV = asw->getTV(premiseArray[0]);
 
 		std::vector<Handle> out_args;
 		out_args.push_back(SatisfyingSet(in_args[0]));
 		out_args.push_back(SatisfyingSet(in_args[1]));
 		
-		Handle p = destTable->addLink(OUT_LINK_TYPE, out_args,
-				retTV,
-				RuleResultFreshness);	
+		Handle p = asw->addLink(OUT_LINK_TYPE, out_args,
+                                retTV,
+                                RuleResultFreshness);
 		
 		return ret;
 	}

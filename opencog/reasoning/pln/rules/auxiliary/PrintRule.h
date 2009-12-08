@@ -27,8 +27,8 @@ namespace opencog { namespace pln {
 class PrintRule : public Rule
 {
 public:
-	PrintRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,false,true,"PrintRule")
+	PrintRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw,false,true,"PrintRule")
 	{
 		inputFilter.push_back(meta(
 				new tree<Vertex>(mva((Handle)ATOM))));

@@ -25,6 +25,7 @@
 #include <opencog/atomspace/TruthValue.h>
 #include "../PLN.h"
 #include "../PLNUtils.h"
+#include "../AtomSpaceWrapper.h"
 
 const TruthValue& getTV(pHandle); 
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
@@ -77,7 +78,7 @@ protected:
     bool freeInputArity;
 
     //! Atom table interface
-    iAtomSpaceWrapper* destTable;
+    AtomSpaceWrapper* asw;
 
     //! Whether the the Rule is a Composer.
     //! If it is a Composer then it needs premises to derive the truth value
@@ -109,12 +110,12 @@ protected:
 
 public:
     /** Rule constructor
-     * @param _destTable Pointer to the AtomTable interface.
+     * @param _asw Pointer to the AtomSpace interface.
      * @param _freeInputArity Are the number of arguments predetermined?
      * @param _composer Whether the rule has premises.
      * @param _name The name of the rule.
      */
-    Rule(iAtomSpaceWrapper *_destTable,
+    Rule(AtomSpaceWrapper *_asw,
          bool _freeInputArity,
          bool _composer,
          std::string _name = "");
@@ -176,15 +177,16 @@ public:
      * @param args The vertices to check validity for.
      * @return Whether the provided vertices fit the rule requirements or not.
      */
-    virtual bool validate2 (MPs& args) const=0;
+    virtual bool validate2(MPs& args) const=0;
 
     /** Only perform compute if arguments are valid. ???
      *
      * @param h The vertices to compute the rule for
-     * @param CX ???
+     * @param CX Context to use for rule computation. Currently unused.
      * @return The result of the rule being computed.
      */
-    BoundVertex computeIfValid (const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex computeIfValid (const std::vector<Vertex>& h,
+                                pHandle CX = PHANDLE_UNDEFINED) const;
 
     //Handle compute(Handle h1) const;
     //Handle compute(Handle h1, Handle h2) const;

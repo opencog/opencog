@@ -30,8 +30,8 @@
 
 namespace opencog { namespace pln {
 
-ImplicationTailExpansionRule::ImplicationTailExpansionRule(iAtomSpaceWrapper *_destTable)
-: Rule(_destTable, false, true, "ImplicationTailExpansionRule")
+ImplicationTailExpansionRule::ImplicationTailExpansionRule(AtomSpaceWrapper *_asw)
+: Rule(_asw, false, true, "ImplicationTailExpansionRule")
 {
     inputFilter.push_back(meta(
         new tree<Vertex>(mva((pHandle)
@@ -51,8 +51,7 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(iAtomSpaceWrapper *_d
 
 Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-    if (!(nm->inheritsType(nm->getType(_v2h(*outh->begin())), IMPLICATION_LINK)))
+    if (!(asw->inheritsType(asw->getType(_v2h(*outh->begin())), IMPLICATION_LINK)))
         return Rule::setOfMPs();
         
     tree<Vertex>::sibling_iterator hs1 = outh->begin(outh->begin());
@@ -64,7 +63,7 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
     
     if (hs0  == outh->end(outh->begin()) ||
         hs11 == outh->end(hs1) ||
-        !(nm->inheritsType(nm->getType(_v2h(*hs1)), AND_LINK)) )
+        !(asw->inheritsType(asw->getType(_v2h(*hs1)), AND_LINK)) )
         return Rule::setOfMPs();
 
     /// A => (B&C)
@@ -86,24 +85,22 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
 
 BoundVertex ImplicationTailExpansionRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-
 /*  for (int i=0;i<premiseArray.size();i++)
         printTree(v2h(premiseArray[i]),0,0);
     getc(stdin);getc(stdin);*/
     
     vtree res(mva((pHandle)IMPLICATION_LINK,
-        mva(nm->getOutgoing(_v2h(premiseArray[0]))[0]),
+        mva(asw->getOutgoing(_v2h(premiseArray[0]))[0]),
         mva((pHandle)AND_LINK,
-            mva(nm->getOutgoing(_v2h(premiseArray[0]))[1]),
-            mva(nm->getOutgoing(_v2h(premiseArray[1]))[1])
+            mva(asw->getOutgoing(_v2h(premiseArray[0]))[1]),
+            mva(asw->getOutgoing(_v2h(premiseArray[1]))[1])
         )
     ));
         
     /*for (int i=0;i<premiseArray.size();i++)
         res.append_child(res.begin(), premiseArray[i]*/
     
-    return Vertex(destTable->addAtom(res, GET_ASW->getTV(_v2h(SimpleANDRule<2>(destTable).compute(premiseArray,CX).value)),true,true));
+    return Vertex(asw->addAtom(res, asw->getTV(_v2h(SimpleANDRule<2>(asw).compute(premiseArray,CX).value)),true,true));
 }
 
 }} // namespace opencog { namespace pln {

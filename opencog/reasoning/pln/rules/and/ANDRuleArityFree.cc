@@ -85,7 +85,7 @@ BoundVertex ArityFreeANDRule::compute(Handle A, Handle B, Handle CX)  const //ve
             SAB.push_back(ImpLinks[1]);
             SAB.push_back(EvaLinks[1]);
             
-            return destTable->addLink(  EVALUATION_LINK, SAB,
+            return asw->addLink(  EVALUATION_LINK, SAB,
                 t,
                                 RuleResultFreshness);   
 
@@ -97,7 +97,7 @@ BoundVertex ArityFreeANDRule::compute(Handle A, Handle B, Handle CX)  const //ve
             SAB.push_back(A);
             SAB.push_back(B);
             
-            return destTable->addLink(  AND_LINK, SAB,
+            return asw->addLink(  AND_LINK, SAB,
                 t,
                                 RuleResultFreshness);   
 
@@ -120,7 +120,7 @@ BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 
         t = fN.compute(tvs, nodes.size());
         
-        Handle h = destTable->addLink(  AND_LINK, nodes,
+        Handle h = asw->addLink(  AND_LINK, nodes,
             t,
                                 RuleResultFreshness);   
         

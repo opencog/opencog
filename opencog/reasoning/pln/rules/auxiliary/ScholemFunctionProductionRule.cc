@@ -53,7 +53,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
 {
     boost::shared_ptr<std::set<BoundVertex > > ret;
 
-    if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
+    if (!asw->inheritsType(asw->getType(_v2h(*outh->begin())), SCHOLEM_LINK))
         return ret;
 
     //assert(outh->begin().number_of_children() == 2);
@@ -71,27 +71,27 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
 
 //  assert(!inheritsType(nm->getType(v2h(*child1)), VARIABLE_NODE));
 //  assert(!inheritsType(nm->getType(v2h(*child2)), VARIABLE_NODE));
-    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*child1)), VARIABLE_NODE)) {
+    if (asw->inheritsType(asw->getType(_v2h(*child1)), VARIABLE_NODE)) {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child1 problem.");
         printer.print(_v2h(*child1), 2);
     }
 
-    if (GET_ASW->inheritsType(GET_ASW->getType(_v2h(*child2)), VARIABLE_NODE)) {
+    if (asw->inheritsType(asw->getType(_v2h(*child2)), VARIABLE_NODE)) {
         printer.print(outh->begin(), 2);
         LOG(2, "ScholemFunctionProductionRule::attemptDirectProduction(meta outh) child2 problem.");
         printer.print(_v2h(*child2), 2);
     }
 
-    *child2 = CreateVar(destTable);
+    *child2 = CreateVar(asw);
 
-    TableGather s(old_subst, static_cast<AtomSpaceWrapper*>(destTable));
+    TableGather s(old_subst, asw);
 
     if (s.empty()) {
         ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
-        ret->insert(BoundVertex(Vertex(destTable->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
-                                       TruthValue::TRUE_TV(),
-                                       false, false))));
+        ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
+                                                    TruthValue::TRUE_TV(),
+                                                    false, false))));
         return ret;
     }
     /// This Rule shouldn't be used to produce EXISTING Scholem function mappings!
@@ -102,7 +102,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
     /*  map<string, map<Handle, Handle> >::iterator f = haxx::scholemFunctions.find(outh.name);
         if (f != scholemFunctions.end())
         {
-            Handle arg1 = outh.hs[0].attach(destTable);
+            Handle arg1 = outh.hs[0].attach(asw);
 
             map<Handle, Handle> old_subst = f->second.find(arg1);
 
@@ -113,7 +113,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
             }
             else
             {
-                f->second[arg1] = outh.hs[1].attach(destTable);
+                f->second[arg1] = outh.hs[1].attach(asw);
             }
         }
         else

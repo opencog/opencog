@@ -33,10 +33,10 @@ class ORPartitionRule : public Rule
 	ORRule* regularOR;
 public:
 
-	ORPartitionRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable, true, true, "ORPartitionRule") 
+	ORPartitionRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw, true, true, "ORPartitionRule") 
 	{
-		regularOR = new ORRule(_destTable);
+		regularOR = new ORRule(_asw);
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	bool validate2				(MPs& args) const { return true; }

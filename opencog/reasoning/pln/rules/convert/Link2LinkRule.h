@@ -22,6 +22,11 @@
 #ifndef LINK2LINKRULE_H
 #define LINK2LINKRULE_H
 
+#include "../GenericRule.h"
+#include "../RuleFunctions.h"
+#include "../../utils/NMPrinter.h"
+#include "../../formulas/Formulas.h"
+
 namespace opencog { namespace pln {
 
 // TODELETE
@@ -38,11 +43,11 @@ protected:
 //	mutable std::vector<Type> ti;
 
 public:
-	bool validate2				(Rule::MPs& args) const { return true; }
-	//Link2LinkRule(iAtomSpaceWrapper *_destTable)
-	//: GenericRule<FormulaType>(_destTable,false,"")
-	Link2LinkRule(iAtomSpaceWrapper *_destTable, Type src, Type dest)
-	: GenericRule<FormulaType>(_destTable,false,""), SRC_LINK(src), DEST_LINK(dest)
+	bool validate2(Rule::MPs& args) const { return true; }
+	//Link2LinkRule(AtomSpaceWrapper *_asw)
+	//: GenericRule<FormulaType>(_asw,false,"")
+    Link2LinkRule(AtomSpaceWrapper *_asw, Type src, Type dest)
+        : GenericRule<FormulaType>(_asw,false,""), SRC_LINK(src), DEST_LINK(dest)
 	{
 		GenericRule<FormulaType>::name = "Link2Link(" +
          std::string(Type2Name(SRC_LINK)) + "=>" +
@@ -55,31 +60,33 @@ public:
 			)));
 	}
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		if (!GET_ASW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
-			return Rule::setOfMPs();
+    {
+        if (!GET_ASW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
+            return Rule::setOfMPs();
+        
+        Rule::MPs ret;
+        
+        BBvtree ret_m(new BoundVTree(*outh));
+        *ret_m->begin() = Vertex((pHandle)SRC_LINK);
+        ret.push_back(ret_m);
+        
+        overrideInputFilter = true;
+        
+        return makeSingletonSet(ret);
+    }
 
-		Rule::MPs ret;
+	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
+                                       int* newN) const
+    {
+        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
+        
+        assert(premiseArray.size()==1);
+        
+        tvs[0] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
+        
+        return tvs;
+    }
 
-		BBvtree ret_m(new BoundVTree(*outh));
-		*ret_m->begin() = Vertex((pHandle)SRC_LINK);
-		ret.push_back(ret_m);
-		
-		overrideInputFilter = true;
-
-		return makeSingletonSet(ret);
-	}
-
-	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
-	{
-		TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
-
-		assert(premiseArray.size()==1);
-
-		tvs[0] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
-
-		return tvs;
-	}
 
 	virtual meta i2oType(const std::vector<Vertex>& h) const
 	{

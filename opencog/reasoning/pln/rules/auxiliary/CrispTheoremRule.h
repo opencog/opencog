@@ -30,11 +30,11 @@ public:
 	static std::map<vtree, std::vector<vtree> ,less_vtree> thms;
 	NO_DIRECT_PRODUCTION;
 
-	CrispTheoremRule(iAtomSpaceWrapper *_destTable);
+	CrispTheoremRule(AtomSpaceWrapper *_asw);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
 
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 };
 
 }} // namespace opencog { namespace pln {

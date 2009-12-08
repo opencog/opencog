@@ -61,12 +61,12 @@ float max(float a, float b) { return ((a>b)?a:b); }
 
 extern int varcount;
 
-Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
+Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
 {
     // Use the AtomSpaceWrapper to create a new node representing
     // the variable and called varname, don't try to replace it
     // if it already exists
-    pHandle ret = atw->addNode(FW_VARIABLE_NODE,varname,
+    pHandle ret = asw->addNode(FW_VARIABLE_NODE,varname,
         TruthValue::TRIVIAL_TV(),false,false);
     
     cprintf(4, "CreateVar: added fwvar node %s [%u]\n", varname.c_str(), ret);
@@ -74,10 +74,10 @@ Vertex CreateVar(iAtomSpaceWrapper* atw, std::string varname)
     return Vertex(ret);
 }
 
-Vertex CreateVar(iAtomSpaceWrapper* atw)
+Vertex CreateVar(iAtomSpaceWrapper* asw)
 { 
     // create a variable node with a name as a generated 10 char string
-    return CreateVar(atw, "$"+GetRandomString(10));
+    return CreateVar(asw, "$"+GetRandomString(10));
 }
 
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
@@ -164,20 +164,20 @@ bool UnprovableType(Type T)
 }
 
 template<Type T>
-pHandle Join(pHandle* h, int N, AtomSpaceWrapper& atw)
+pHandle Join(pHandle* h, int N, AtomSpaceWrapper& asw)
 {
     vector<pHandle> hs;
     for (int i = 0; i < N; i++)
         hs.push_back(h[i]);
 
-    return atw.addLink(T, hs, TruthValue::TRUE_TV(), false);
+    return asw.addLink(T, hs, TruthValue::TRUE_TV(), false);
 }
 
-template<Type T, typename ATW>
-pHandle Join(pHandle h1, pHandle h2, ATW& atw)
+template<Type T, typename ASW>
+pHandle Join(pHandle h1, pHandle h2, ASW& asw)
 {
     pHandle h[] = { h1, h2 };
-    return Join<T>(h, 2, atw);
+    return Join<T>(h, 2, asw);
 }
 
 void insertAllANDCombinations(set<atom, lessatom_ignoreVarNameDifferences> head, vector<atom> tail, set<atom, lessatom_ignoreVarNameDifferences>& AND_combinations)
@@ -248,12 +248,12 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityFreeFormula<TruthValue,
+pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT, const ArityFreeFormula<TruthValue,
              TruthValue*>& fN, pHandle* premiseArray, const int n, pHandle CX)
 {
         TruthValue** tvs = new TruthValue*[n];
         for (int i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(GET_ASW->getTV(premiseArray[i]));
+            tvs[i] = (TruthValue*) &(asw->getTV(premiseArray[i]));
             //tvs[i] = (TruthValue*) destTable->getTruthValue(premiseArray[i]);
 //puts("Computing formula");
         TruthValue* retTV = fN.compute(tvs, n);
@@ -262,7 +262,7 @@ pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable, Type linkT, const ArityF
         for (int j = 0; j < n; j++)
             outgoing.push_back(premiseArray[j]);
 //puts("Adding link");
-        pHandle ret = destTable->addLink(linkT, outgoing,
+        pHandle ret = asw->addLink(linkT, outgoing,
             *retTV,
             RuleResultFreshness);   
 
@@ -395,15 +395,15 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
   */
 
 #ifdef DISABLED_FOR_NOW
-//! @todo Update to tree<Vertex> && new rule storage (not ATW)
-Handle Ass(iAtomSpaceWrapper *destTable, Handle h, vector<Handle>& ret)
+//! @todo Update to tree<Vertex> && new rule storage (not ASW)
+Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
 {
     TableGather g(mva((Handle)INHERITANCE_LINK,
-        mva(CreateVar(destTable)),
+        mva(CreateVar(asw)),
         mva(h)));
     TableGather reverseg(mva((Handle)INHERITANCE_LINK,
         mva(h),
-        mva(CreateVar(destTable))));
+        mva(CreateVar(asw))));
 
     for(vector<Handle>::iterator i = reverseg.begin(); i != reverseg.end(); i++)
     {

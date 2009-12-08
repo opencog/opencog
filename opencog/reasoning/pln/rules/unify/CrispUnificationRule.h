@@ -28,8 +28,8 @@ class CrispUnificationRule : public BaseCrispUnificationRule
 {
 public:
 
-	CrispUnificationRule(iAtomSpaceWrapper *_destTable)
-	: BaseCrispUnificationRule(_destTable) {}
+	CrispUnificationRule(AtomSpaceWrapper *_asw)
+        : BaseCrispUnificationRule(_asw) {}
 		
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
@@ -42,7 +42,7 @@ public:
 	*/
 
 //	BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const;
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 
 	NO_DIRECT_PRODUCTION;
 };

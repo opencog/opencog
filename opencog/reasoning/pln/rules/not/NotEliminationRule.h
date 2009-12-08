@@ -31,7 +31,7 @@ namespace opencog { namespace pln {
  */
 class NotEliminationRule : public Rule
 {
-	NotEliminationRule(iAtomSpaceWrapper *_destTable); 
+	NotEliminationRule(AtomSpaceWrapper *_asw); 
 };
 
 }} // namespace opencog { namespace pln {

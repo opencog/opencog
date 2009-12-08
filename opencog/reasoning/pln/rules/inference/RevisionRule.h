@@ -27,8 +27,8 @@ namespace opencog { namespace pln {
 class RevisionRule : public GenericRule<RevisionFormula>
 {
 public:
-	RevisionRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<RevisionFormula>(_destTable, false)
+	RevisionRule(AtomSpaceWrapper *_asw)
+	: GenericRule<RevisionFormula>(_asw, false)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(ANY, 0)));
 	}
@@ -46,12 +46,11 @@ public:
 
 	virtual bool valid(Handle* premiseArray, const int n) const
 	{
-		a1 = destTable->getType(premiseArray[0]);
-		a2 = destTable->getType(premiseArray[1]);
+		a1 = asw->getType(premiseArray[0]);
+		a2 = asw->getType(premiseArray[1]);
 
-		AtomSpaceWrapper *nm = GET_ASW;
 		return	a1 == a2 &&
-				nm->getOutgoing(premiseArray[0]) == nm->getOutgoing(premiseArray[1]);
+				asw->getOutgoing(premiseArray[0]) == asw->getOutgoing(premiseArray[1]);
 	}
 
 	virtual atom i2oType(Handle* h, const int n) const
@@ -69,7 +68,7 @@ protected:
 	void SortTVs(Handle* premiseArray, const int n, TruthValue*** retTVs, int* retn) const
 	{
 	    for (int i = 0; i < n; i++)
-			(*retTVs)[i] = (TruthValue*) GET_ASW->getTV(premiseArray[i]);
+			(*retTVs)[i] = (TruthValue*) asw->getTV(premiseArray[i]);
 
 		*retn = n;
 	}
@@ -90,7 +89,7 @@ protected:
 	}
 	virtual std::vector<Handle> ProductLinkSequence(Handle* premiseArray) const
 	{
-		return GET_ASW->getOutgoing(premiseArray[0]);
+		return asw->getOutgoing(premiseArray[0]);
 	}
 };
 

@@ -33,9 +33,9 @@ class QuantifierRule : public Rule
 public:
     bool validate2(MPs& args) const { return true; }
     
-    QuantifierRule(iAtomSpaceWrapper *_destTable,
+    QuantifierRule(AtomSpaceWrapper *_asw,
                    const pHandle& _domain, Type outLinkType)
-	: Rule(_destTable, false, true, "QuantifierRule"), 
+	: Rule(_asw, false, true, "QuantifierRule"), 
           domain(_domain), OUTPUT_LINK_TYPE(outLinkType) {
         inputFilter.push_back(meta(
                                    new tree<Vertex>(
@@ -58,16 +58,16 @@ public:
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
         int i;
         for (i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[i])));
+            tvs[i] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[i])));
         
         TruthValue* retTV = formula.compute(tvs, n);	
         
         delete[] tvs;
         
         //haxx::
-        pHandle ret = destTable->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
-                                         *retTV,
-                                         RuleResultFreshness);	
+        pHandle ret = asw->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
+                                   *retTV,
+                                   RuleResultFreshness);	
         //				false);
         
         delete retTV;

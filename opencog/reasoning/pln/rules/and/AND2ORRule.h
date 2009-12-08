@@ -25,8 +25,8 @@
 namespace opencog { namespace pln {
 class AND2ORRule : public Rule
 {
-    AND2ORRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable, false, true, "AND2ORRule")
+    AND2ORRule(iAtomSpaceWrapper *_asw)
+	: Rule(_asw, false, true, "AND2ORRule")
     {
         inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N,
                                                  1, new atom(AndLink))));

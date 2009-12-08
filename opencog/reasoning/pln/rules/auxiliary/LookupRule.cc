@@ -32,14 +32,13 @@
 namespace opencog { namespace pln {
 
 unsigned long now_interval_len = 50000;
-bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
+bool ExpandEvaluationLinks(vtree& target, AtomSpaceWrapper* asw)
 {
-    AtomSpaceWrapper *nm = GET_ASW;
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)
-        if (nm->inheritsType(nm->getType(_v2h(*i)), CONCEPT_NODE)) {
-            std::string name = nm->getName(_v2h(*i));
+        if (asw->inheritsType(asw->getType(_v2h(*i)), CONCEPT_NODE)) {
+            std::string name = asw->getName(_v2h(*i));
             if (name == "!whileago" || name == "!now") {
 #ifndef WIN32
                 /*  timeval currentTime;
@@ -56,18 +55,16 @@ bool ExpandEvaluationLinks(vtree& target, iAtomSpaceWrapper* destTable)
                 sprintf(end_stamp_s, "%ld", now_stamp);
 
                 if (name == "!whileago")
-                    target.replace(i,
-                                   Vertex(destTable->addNode(NUMBER_NODE,
-                                                             begin_stamp_s,
-                                                             TruthValue::TRUE_TV(),
-                                                             false)));
+                    target.replace(i, Vertex(asw->addNode(NUMBER_NODE,
+                                                          begin_stamp_s,
+                                                          TruthValue::TRUE_TV(),
+                                                          false)));
                 //              target.replace(i, Vertex(NewNode(NUMBER_NODE, begin_stamp_s)));
                 if (name == "!now")
-                    target.replace(i,
-                                   Vertex(destTable->addNode(NUMBER_NODE,
-                                                             end_stamp_s,
-                                                             TruthValue::TRUE_TV(),
-                                                             false)));
+                    target.replace(i, Vertex(asw->addNode(NUMBER_NODE,
+                                                          end_stamp_s,
+                                                          TruthValue::TRUE_TV(),
+                                                          false)));
 //              target.replace(i, Vertex(NewNode(NUMBER_NODE, end_stamp_s)));
 
                 is_changed = true;
@@ -81,16 +78,16 @@ Btr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
 {
     vtree target(*outh);
     
-    Btr<std::set<BoundVertex> > ret(new TableGather(target, static_cast<AtomSpaceWrapper*>(destTable)));
+    Btr<std::set<BoundVertex> > ret(new TableGather(target, asw));
     
-    if (ExpandEvaluationLinks(target, destTable)) {
-        TableGather dynamic_lookup(target, static_cast<AtomSpaceWrapper*>(destTable));
+    if (ExpandEvaluationLinks(target, asw)) {
+        TableGather dynamic_lookup(target, asw);
         copy(dynamic_lookup.begin(), dynamic_lookup.end(),
              inserter(*ret, ret->begin()));
         
         //      puts("Lookup macros!");
         //      NMPrinter()(NMPrintable(target), -3);
-        Btr<std::set<BoundVertex> > ret(new TableGather(target, static_cast<AtomSpaceWrapper*>(destTable)));
+        Btr<std::set<BoundVertex> > ret(new TableGather(target, asw));
         
         /*foreach(const BoundVertex& bv, *ret)
         {

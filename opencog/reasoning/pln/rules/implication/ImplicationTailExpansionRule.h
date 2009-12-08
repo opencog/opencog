@@ -29,11 +29,12 @@ class ImplicationTailExpansionRule : public Rule
 public:
 	NO_DIRECT_PRODUCTION;
 
-	ImplicationTailExpansionRule(iAtomSpaceWrapper *_destTable);
+	ImplicationTailExpansionRule(AtomSpaceWrapper *_asw);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const;
 
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 };
 
 }} // namespace opencog { namespace pln {

@@ -38,11 +38,11 @@ protected:
         return Vertex(PHANDLE_UNDEFINED);
     }
 public:
-    ScholemFunctionProductionRule(iAtomSpaceWrapper *_destTable)
-            : Rule(_destTable, false, false, "ScholemFunctionProductionRule") {
+    ScholemFunctionProductionRule(AtomSpaceWrapper *_asw)
+        : Rule(_asw, false, false, "ScholemFunctionProductionRule") {
         //inputFilter.push_back(new atom(result));
     }
-    bool validate2    (MPs& args) const {
+    bool validate2(MPs& args) const {
         return true;
     }
 

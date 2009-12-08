@@ -200,9 +200,9 @@ public:
     
     ~GenericRule2() {}
     /// Always a Composer
-    GenericRule2(iAtomSpaceWrapper *_destTable,
+    GenericRule2(AtomSpaceWrapper *_asw,
                  bool _FreeInputArity, string _name = "")
-	: Rule(_destTable, _FreeInputArity, true, _name) {	}
+        : Rule(_asw, _FreeInputArity, true, _name) {}
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
                         Handle CX = Handle::UNDEFINED) const
@@ -237,11 +237,11 @@ protected:
     }
     
 public:
-    InversionRule2(iAtomSpaceWrapper *_destTable)
-	: GenericRule2/*<InversionFormula>*/ (_destTable, false, "InversionRule")
+    InversionRule2(AtomSpaceWrapper *_asw)
+	: GenericRule2/*<InversionFormula>*/ (_asw, false, "InversionRule")
     {
     }
-    bool validate2				(MPs& args) const { return true; }
+    bool validate2(MPs& args) const { return true; }
     
     virtual meta i2oType(const std::vector<Vertex>& h) const
     {
@@ -253,7 +253,7 @@ public:
         
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
-    iAtomSpaceWrapper* parent = ASW();
+    AtomSpaceWrapper* parent = GET_ASW;
     //AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
     //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
     //AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);

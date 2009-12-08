@@ -296,7 +296,7 @@ T input(T& a, std::list<std::string>& args)
 
 std::string PLNModule::runCommand(std::list<std::string> args)
 {
-    AtomSpaceWrapper* atw = GET_ASW;
+    AtomSpaceWrapper* asw = GET_ASW;
     // All commands/strings in requiresRoot need for the state
     // BITNodeRoot to be non-NULL
     static const char* requiresRoot[] = {
@@ -467,10 +467,10 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 ss << "error: expected xml input filename\n";
                 return ss.str();
             }
-            atw->reset();
-            atw->archiveTheorems = true;
-            axioms_ok = atw->loadAxioms(temps);
-            atw->archiveTheorems = false;
+            asw->reset();
+            asw->archiveTheorems = true;
+            axioms_ok = asw->loadAxioms(temps);
+            asw->archiveTheorems = false;
             ss << (axioms_ok ? "Input file was loaded."
                     : "Input file was corrupt or missing.") << endl;
             ss << " Next you MUST (re)load a target atom with the "

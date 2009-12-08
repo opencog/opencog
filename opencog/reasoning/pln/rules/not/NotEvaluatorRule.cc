@@ -30,8 +30,8 @@
 
 namespace opencog { namespace pln {
 
-NotEvaluatorRule::NotEvaluatorRule( opencog::pln::iAtomSpaceWrapper *_destTable )
-: GenericRule<opencog::pln::NotFormula>(_destTable, true, "NotEvaluatorRule")
+NotEvaluatorRule::NotEvaluatorRule( opencog::pln::AtomSpaceWrapper *_asw )
+: GenericRule<opencog::pln::NotFormula>(_asw, true, "NotEvaluatorRule")
 {
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)NOT_LINK,
                                                     mva((pHandle)ATOM)))
@@ -50,7 +50,7 @@ meta NotEvaluatorRule::i2oType(const std::vector<Vertex>& h) const
 Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
                                               bool& overrideInputFilter) const
 {
-    if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), NOT_LINK))
+    if (!asw->inheritsType(asw->getType(_v2h(*outh->begin())), NOT_LINK))
         return Rule::setOfMPs();
 
     //! @todo why not?

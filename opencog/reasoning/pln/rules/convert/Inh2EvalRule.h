@@ -31,8 +31,8 @@ protected:
 
 public:
 	bool validate2(Rule::MPs& args) const { return true; }
-	Inh2EvalRule(iAtomSpaceWrapper *_destTable)
-	: GenericRule<TautologyFormula>(_destTable,false,"")
+	Inh2EvalRule(AtomSpaceWrapper *_asw)
+	: GenericRule<TautologyFormula>(_asw,false,"")
 	{
 		GenericRule<FormulaType>::name = "Inh2Eval";
 		GenericRule<FormulaType>::inputFilter.push_back(meta(

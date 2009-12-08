@@ -65,9 +65,9 @@ RuleApp::~RuleApp() {
     foreach(VtreeProvider* vtp, args)
         delete vtp;
 }
-RuleApp::RuleApp(//iAtomSpaceWrapper *_destTable,
+RuleApp::RuleApp(//AtomSpaceWrapper *_asw,
                  Rule *_root_rule)
-    :	Rule(_root_rule->destTable, false, true, "Inference Pathway"),
+    :	Rule(_root_rule->asw, false, true, "Inference Pathway"),
         result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
 { 
     if (!_root_rule->hasFreeInputArity())

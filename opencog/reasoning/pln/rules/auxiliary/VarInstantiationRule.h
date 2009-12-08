@@ -32,8 +32,8 @@ class VarInstantiationRule :	public Sim2InhRule<MEMBER_LINK>, //public Eval2MemR
 /*protected:
 	Sim2InhFormula formula;*/
 public:
-	VarInstantiationRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable)
+	VarInstantiationRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw)
 	{
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
 		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(VARIABLE_NODE))));
@@ -68,13 +68,12 @@ public:
 	LINKTYPE_ASSERT(premiseArray[3], SIMILARITY_LINK);
 	LINKTYPE_ASSERT(premiseArray[4], EVALUATION_LINK);
 
-	AtomSpaceWrapper *nm = GET_ASW;
-	HandleSeq PforB = nm->getOutgoing(premiseArray[4]);
+	HandleSeq PforB = asw->getOutgoing(premiseArray[4]);
 	Handle hP = PforB[0];
 
 	Handle hC = SatisfyingSet(hP);
 	Handle hA = (premiseArray[2]);
-	Handle hB = (nm->getOutgoing(premiseArray[3])[1]); //2nd of sim(A,B) std::vector
+	Handle hB = (asw->getOutgoing(premiseArray[3])[1]); //2nd of sim(A,B) std::vector
 
 	Handle inhAB = Sim2InhRule<InheritanceLinkType>::compute(&premiseArray[3], 1);
 	//Handle inhBP = Eval2MemRule::compute(&premiseArray[0], 1);
@@ -95,11 +94,11 @@ public:
 	retlist.push_back(premiseArray[0]); //P
 	retlist.push_back(hA);
 
-	const TruthValue& retTV = GET_ASW->getTV(eval1);
+	const TruthValue& retTV = asw->getTV(eval1);
 
-	Handle ret = destTable->addLink(EVALUATION_LINK, retlist,
-				retTV,
-				RuleResultFreshness);	
+	Handle ret = asw->addLink(EVALUATION_LINK, retlist,
+                              retTV,
+                              RuleResultFreshness);	
 
 	//! @todo Delete the resulting dummy 'eval1' node!
 

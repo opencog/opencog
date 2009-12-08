@@ -32,22 +32,20 @@ namespace opencog { namespace pln {
 
 Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-
     //return Rule::setOfMPs();
     
     ///// Temporarily disabled due to strange bugs!
     
     tree<Vertex>::iterator top = outh->begin();
 
-        if (! (nm->inheritsType(nm->getType(_v2h(*top)), AND_LINK)) ||
+        if (! (asw->inheritsType(asw->getType(_v2h(*top)), AND_LINK)) ||
             top.number_of_children() <= 2)  
             return Rule::setOfMPs();
 
         /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
 
         for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
-            if (nm->inheritsType(nm->getType(_v2h(*j)), AND_LINK))
+            if (asw->inheritsType(asw->getType(_v2h(*j)), AND_LINK))
                 return Rule::setOfMPs();
 
         MPs ret;
@@ -61,7 +59,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
         /// Smart lookup begins
 
-        Btr<std::set<pHandle> > sANDLink_set = destTable->getHandleSet(AND_LINK,"");
+        Btr<std::set<pHandle> > sANDLink_set = asw->getHandleSet(AND_LINK,"");
         std::vector<pHandle> ANDLink_set(sANDLink_set->size());
         std::copy(sANDLink_set->begin(), sANDLink_set->end(), ANDLink_set.begin());
 
@@ -76,7 +74,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
                 for (uint s=0; s < max_subset.size(); s++)
                     query_set.erase(*max_subset[s]);
 
-				ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(destTable))));
+				ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(asw))));
 
                 continue;
             }
@@ -86,7 +84,7 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         /// Add the remaining ones.
 
 		for (std::set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
-			ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(destTable))));
+			ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(asw))));
 
         overrideInputFilter = true;
 
@@ -96,12 +94,11 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
 /*boost::shared_ptr<set<BoundVertex > > ANDRule::attemptDirectProduction(meta outh);
 {
-    return attemptDirectANDProduction(destTable, outh, this);
+    return attemptDirectANDProduction(asw, outh, this);
 }*/
 
 BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
     const int n = premiseArray.size();
   try
   {     
@@ -141,8 +138,8 @@ LOG(4, "ANDRule::computeCC");
     {
         std::vector<pHandle> inc2;
 
-        if (nm->isSubType(*i, AND_LINK))
-            inc2 = nm->getOutgoing(*i);
+        if (asw->isSubType(*i, AND_LINK))
+            inc2 = asw->getOutgoing(*i);
         else
             inc2.push_back(*i);
 
@@ -162,10 +159,10 @@ LOG(4, "Q ANDRule::compute");
         std::set<pHandle> Di;
         for (std::set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
         {
-            std::vector<pHandle> inc2; // = nm->getOutgoing(*i);
+            std::vector<pHandle> inc2; // = asw->getOutgoing(*i);
 
-            if (nm->isSubType(*i, AND_LINK))
-                inc2 = nm->getOutgoing(*i);
+            if (asw->isSubType(*i, AND_LINK))
+                inc2 = asw->getOutgoing(*i);
             else
                 inc2.push_back(*i);
 
@@ -189,7 +186,7 @@ LOG(4, "ANDRule:: getLargestIntersection");
         while (getLargestIntersection(Di, premises, largest_intersection))
         {
 cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
-            const std::vector<pHandle> new_elem2 = nm->getOutgoing(largest_intersection);
+            const std::vector<pHandle> new_elem2 = asw->getOutgoing(largest_intersection);
 
 #ifdef WIN32            
             for (std::vector<pHandle>::const_iterator k = new_elem2.begin(); k != new_elem2.end();)
@@ -226,12 +223,12 @@ cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());
 LOG(4, "ANDRule:: getLargestIntersection OK!");
         TruthValue** tvs = new TruthValue*[1 + DiSubsets.size()];
         
-        tvs[0] = (TruthValue*) &(GET_ASW->getTV(*i));
+        tvs[0] = (TruthValue*) &(asw->getTV(*i));
     
         int h=0;
         std::set<pHandle>::const_iterator ss;
         for (h = 0, ss = DiSubsets.begin(); ss != DiSubsets.end(); ss++, h++)
-            tvs[h+1] = (TruthValue*) &(GET_ASW->getTV(*ss));
+            tvs[h+1] = (TruthValue*) &(asw->getTV(*ss));
 LOG(4, "R ANDRule::compute");
 
 /*      if (DiSubsets.size()>0)
@@ -240,8 +237,8 @@ LOG(4, "R ANDRule::compute");
             for (set<Handle>::const_iterator z=DiSubsets.begin();z != DiSubsets.end(); z++)
             {
                 printf("(");
-                for (int y=0; y < nm->getOutgoing(*z).size(); y++)
-                    printf("%s ", nm->getName(nm->getOutgoing(*z)[y]).c_str());
+                for (int y=0; y < asw->getOutgoing(*z).size(); y++)
+                    printf("%s ", asw->getName(asw->getOutgoing(*z)[y]).c_str());
                 printf(")");
             }
             printf("\n");
@@ -270,9 +267,8 @@ LOG(4, "33 ANDRule::compute");
     for (std::set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
         outgoing.push_back(*c);
 LOG(4, "44 ANDRule::compute");
-    pHandle ret = destTable->addLink(AND_LINK, outgoing,
-                    *retTV,
-                    RuleResultFreshness);   
+    pHandle ret = asw->addLink(AND_LINK, outgoing, *retTV,
+                               RuleResultFreshness);   
     
 LOG(4, "55 ANDRule::compute");
     delete[] partialTVs;

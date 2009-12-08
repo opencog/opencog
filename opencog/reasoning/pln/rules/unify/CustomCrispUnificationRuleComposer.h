@@ -29,8 +29,9 @@ class CustomCrispUnificationRuleComposer : public BaseCrispUnificationRule
 	pHandle ForallLink;
 public:
 
-	CustomCrispUnificationRuleComposer(pHandle _ForallLink, iAtomSpaceWrapper *_destTable)
-	: BaseCrispUnificationRule(_destTable), ForallLink(_ForallLink) {}
+	CustomCrispUnificationRuleComposer(pHandle _ForallLink,
+                                       AtomSpaceWrapper *_asw)
+        : BaseCrispUnificationRule(_asw), ForallLink(_ForallLink) {}
 
 	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 

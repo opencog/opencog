@@ -26,8 +26,8 @@ namespace opencog { namespace pln {
 
 class Exist2ForAllRule : public Rule
 {
-	Exist2ForAllRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable)
+	Exist2ForAllRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw)
 	{
 		inputFilter.push_back(new atom(__INSTANCEOF_N, ExistLink));
 	}

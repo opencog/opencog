@@ -26,16 +26,18 @@ using namespace opencog;
 namespace opencog { namespace pln {
 
 const bool RuleResultFreshness = true;
-pHandle UnorderedCcompute(iAtomSpaceWrapper *destTable,
-					Type linkT, const ArityFreeFormula<TruthValue,
-			       TruthValue*>& fN, pHandle* premiseArray, const int n, pHandle CX=PHANDLE_UNDEFINED);
+pHandle UnorderedCcompute(AtomSpaceWrapper *asw,
+                          Type linkT, const ArityFreeFormula<TruthValue,
+                                                             TruthValue*>& fN,
+                          pHandle* premiseArray,
+                          const int n, pHandle CX=PHANDLE_UNDEFINED);
 
 template<int N>
 class SimpleANDRule : public ArityFreeANDRule
 {
 public:
-	SimpleANDRule(iAtomSpaceWrapper *_destTable)
-	: ArityFreeANDRule(_destTable)
+	SimpleANDRule(AtomSpaceWrapper *_asw)
+	: ArityFreeANDRule(_asw)
 	{
 		name = "Simple AND Rule";
 		for (int i = 0; i < N; i++)
@@ -47,7 +49,7 @@ public:
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
-		if (!GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), AND_LINK)
+		if (!asw->inheritsType(asw->getType(boost::get<pHandle>(*outh->begin())), AND_LINK)
 			|| outh->begin().number_of_children() != N)
 			return Rule::setOfMPs();
 		
@@ -81,9 +83,10 @@ public:
 	*/
 		//currentDebugLevel = 3;
 		pHandle ret = ((N>1)
-			      ? UnorderedCcompute(destTable, AND_LINK, fN, hs,n,CX)
-			      : destTable->addLink(AND_LINK, dummy_outgoing, GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])),
-				RuleResultFreshness));
+			      ? UnorderedCcompute(asw, AND_LINK, fN, hs,n,CX)
+			      : asw->addLink(AND_LINK, dummy_outgoing,
+                                 asw->getTV(boost::get<pHandle>(premiseArray[0])),
+                                 RuleResultFreshness));
 		    delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());

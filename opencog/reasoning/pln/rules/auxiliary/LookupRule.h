@@ -41,8 +41,8 @@ protected:
     }
 public:
     bool validate2(MPs& args) const { return true; }
-    LookupRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable, false, false, "Lookup")
+    LookupRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw, false, false, "Lookup")
     {
         //inputFilter.push_back(new atom(result));
     }

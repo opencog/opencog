@@ -33,18 +33,21 @@ class DeductionRule : public GenericRule<DeductionFormula>
     //DeductionFormula f;
     Type InclusionLink;
 
+    // I don't understand why it is need but without that it does not compile
+    AtomSpaceWrapper* asw;
+
     meta i2oType(const std::vector<Vertex>& h) const
     {
         assert(h.size()==2);
-        AtomSpaceWrapper *nm = GET_ASW;	
-        assert(nm->getArity(boost::get<pHandle>(h[0]))==2);
-        assert(nm->getArity(boost::get<pHandle>(h[1]))==2);
-        assert(nm->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
-        assert(nm->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
+
+        assert(asw->getArity(boost::get<pHandle>(h[0]))==2);
+        assert(asw->getArity(boost::get<pHandle>(h[1]))==2);
+        assert(asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
+        assert(asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
         return meta(new tree<Vertex>(mva((pHandle)InclusionLink, 
-                                         vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[0]),0))),
-                                         vtree(Vertex(nm->getOutgoing(boost::get<pHandle>(h[1]),1)))
+                                         vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
+                                         vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
                                          )));
     }
     bool validate2 (Rule::MPs& args) const
@@ -70,22 +73,23 @@ class DeductionRule : public GenericRule<DeductionFormula>
                 assert(equal(nodesAB[1], nodesBC[0]));
             }
         
-        AtomSpaceWrapper *nm = GET_ASW;
-        tvs[0] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[0])));
-        tvs[1] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[1])));
-        tvs[2] = (TruthValue*) &(nm->getTV(nodesAB[0]));
-        tvs[3] = (TruthValue*) &(nm->getTV(nodesAB[1])); //== nodesBC[0]);
-        tvs[4] = (TruthValue*) &(nm->getTV(nodesBC[1]));
+        tvs[0] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[0])));
+        tvs[1] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[1])));
+        tvs[2] = (TruthValue*) &(asw->getTV(nodesAB[0]));
+        tvs[3] = (TruthValue*) &(asw->getTV(nodesAB[1])); //== nodesBC[0]);
+        tvs[4] = (TruthValue*) &(asw->getTV(nodesBC[1]));
         
         return tvs;
     }
 
 public:
     
-    //DeductionRule(iAtomSpaceWrapper *_destTable)
-    //: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule")
-    DeductionRule(iAtomSpaceWrapper *_destTable, Type linkType)
-	: GenericRule<DeductionFormula>(_destTable,false,"DeductionRule"), InclusionLink(linkType) 
+    //DeductionRule(iAtomSpaceWrapper *_asw)
+    //: GenericRule<DeductionFormula>(_asw,false,"DeductionRule")
+    DeductionRule(AtomSpaceWrapper *_asw, Type linkType)
+	: GenericRule<DeductionFormula>(_asw,false,"DeductionRule"),
+        InclusionLink(linkType),
+        asw(_asw) // I don't understand why it is needed, asw is already defined in Rule...
     {
         //! @todo should use real variable for the other input.
 	
@@ -104,14 +108,14 @@ public:
     }
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
-        if ( !GET_ASW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if ( !asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
         
         Rule::MPs ret;
         
         tree<Vertex>::iterator top0 = outh->begin();
 	
-        Vertex var = CreateVar(GenericRule<DeductionFormula>::destTable);
+        Vertex var = CreateVar(asw);
 	
         ret.push_back(BBvtree(new BoundVTree(mva((pHandle)InclusionLink,
                                                  tree<Vertex>(outh->begin(top0)),

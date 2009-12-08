@@ -876,11 +876,10 @@ public:
         AtomSpaceWrapper *atw = GET_ASW;
         //typedef InversionRule RuleT1;
         //typedef DeductionRule RuleT2;
-        iAtomSpaceWrapper* parent = ASW();
 
     //  DefaultVariableRuleProvider rp;
-        InversionRule *invR = new InversionRule(parent, INHERITANCE_LINK);
-        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK);
+        InversionRule *invR = new InversionRule(atw, INHERITANCE_LINK);
+        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(atw, INHERITANCE_LINK);
 
         printf("v0\n");
         vtree v0(mva((pHandle)INHERITANCE_LINK,
@@ -899,13 +898,13 @@ public:
 
         printf("h0\n");
         pHandle h0 = atw->addAtom(v0, 
-                SimpleTruthValue(0.40f, getCount(0.80f)));
+                                  SimpleTruthValue(0.40f, getCount(0.80f)));
         printf("h1\n");
         pHandle h1 = atw->addAtom(v1,
-                SimpleTruthValue(0.60f, getCount(0.90f)));
+                                  SimpleTruthValue(0.60f, getCount(0.90f)));
         printf("h2\n");
         pHandle h2 = atw->addAtom(v2,
-                SimpleTruthValue(0.98f, getCount(0.95f)));
+                                  SimpleTruthValue(0.98f, getCount(0.95f)));
 
         RuleApp* top    = new RuleApp(deduR);
         RuleApp* child1a= new RuleApp(deduR);

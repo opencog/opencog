@@ -44,18 +44,18 @@ BoundVertex BaseCrispUnificationRule::compute(const std::vector<Vertex>& premise
         printer.print(_v2h(premiseArray[i]), 4);
 #endif
     
-    assert(GET_ASW->getType(_v2h(premiseArray[0])) == FORALL_LINK);
-    assert(GET_ASW->getType(_v2h(premiseArray[n-1])) == HYPOTHETICAL_LINK);
+    assert(asw->getType(_v2h(premiseArray[0])) == FORALL_LINK);
+    assert(asw->getType(_v2h(premiseArray[n-1])) == HYPOTHETICAL_LINK);
 
-    pHandle topologicalStub = GET_ASW->getOutgoing(_v2h(premiseArray[n-1]))[0];
+    pHandle topologicalStub = asw->getOutgoing(_v2h(premiseArray[n-1]))[0];
 
-    const TruthValue& tv = GET_ASW->getTV(_v2h(premiseArray[0]));
+    const TruthValue& tv = asw->getTV(_v2h(premiseArray[0]));
     
     
-    pHandle ret= destTable->addLink( GET_ASW->getType(topologicalStub),
-                                GET_ASW->getOutgoing(topologicalStub),
-                                tv,
-                                RuleResultFreshness);   
+    pHandle ret= asw->addLink(asw->getType(topologicalStub),
+                              asw->getOutgoing(topologicalStub),
+                              tv,
+                              RuleResultFreshness);   
 
     return Vertex(ret);
 }

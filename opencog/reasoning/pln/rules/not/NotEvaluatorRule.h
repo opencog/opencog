@@ -43,14 +43,14 @@ protected:
         //! @todo create the TrivialTV to use here
 #endif
         tvs[1] = (TruthValue*) 
-            & (GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
+            & (asw->getTV(boost::get<pHandle>(premiseArray[0])));
         return tvs;
     }
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
 public:
-    NotEvaluatorRule(iAtomSpaceWrapper *_destTable);
+    NotEvaluatorRule(AtomSpaceWrapper *_asw);
     meta i2oType(const std::vector<Vertex>& h) const;
 
     bool validate2(MPs& args) const {

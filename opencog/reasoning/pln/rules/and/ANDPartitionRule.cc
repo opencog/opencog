@@ -43,7 +43,7 @@ BoundVertex ANDPartitionRule::compute(const std::vector<Vertex>& premiseArray, p
         transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 //          Concat<DropVertexBindings, GetHandle, BoundVertex, Handle>());
 
-        BoundVertex ret = Vertex(UnorderedCcompute(destTable, AND_LINK, fN, hs,N,CX));
+        BoundVertex ret = Vertex(UnorderedCcompute(asw, AND_LINK, fN, hs,N,CX));
         delete[] hs;
         return ret;
 }

@@ -32,9 +32,8 @@ namespace opencog { namespace pln {
 
 Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-    if (nm->inheritsType(nm->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        nm->inheritsType(nm->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
+        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0
@@ -44,7 +43,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
     printer.print(vtree(outh->begin()));
 #endif
 
-    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, destTable);
+    Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, ForallLink, asw);
 
     if (!i)
         return Rule::setOfMPs();
@@ -64,9 +63,7 @@ Rule::setOfMPs CustomCrispUnificationRuleComposer::o2iMetaExtra(meta outh, bool&
 
     ret1.push_back(rootAtom);
 
-    for_each(ret1.begin(),
-                ret1.end(),
-                boost::bind(&bind_Bvtree, _1, *i->bindings));
+    for_each(ret1.begin(), ret1.end(), boost::bind(&bind_Bvtree, _1, *i->bindings));
 
     ret.insert(ret1);
 

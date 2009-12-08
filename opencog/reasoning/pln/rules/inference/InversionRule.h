@@ -36,19 +36,18 @@ protected:
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[3];
 
         assert(premiseArray.size() == 1);
-        AtomSpaceWrapper *nm = GET_ASW;
-        pHandleSeq nodes = nm->getOutgoing(boost::get<pHandle>(premiseArray[0]));
+        pHandleSeq nodes = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
 
-        tvs[0] = (TruthValue*) & (nm->getTV(boost::get<pHandle>(premiseArray[0])));
-        tvs[1] = (TruthValue*) & (nm->getTV(nodes[0]));
-        tvs[2] = (TruthValue*) & (nm->getTV(nodes[1]));
+        tvs[0] = (TruthValue*) & (asw->getTV(boost::get<pHandle>(premiseArray[0])));
+        tvs[1] = (TruthValue*) & (asw->getTV(nodes[0]));
+        tvs[2] = (TruthValue*) & (asw->getTV(nodes[1]));
 
         return tvs;
     }
     std::vector<BoundVertex> r;
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-        if (!GET_ASW->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
+        if (!asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
             return Rule::setOfMPs();
 
         Rule::MPs ret;
@@ -64,18 +63,19 @@ protected:
     }
 
 public:
-    //InversionRule(iAtomSpaceWrapper *_destTable)
-            //: GenericRule<InversionFormula> (_destTable, false, "InversionRule") {
-    InversionRule(iAtomSpaceWrapper *_destTable, Type linkType)
-            : GenericRule<InversionFormula> (_destTable, false, "InversionRule"), InclusionLink(linkType) {
+    //InversionRule(iAtomSpaceWrapper *_asw)
+            //: GenericRule<InversionFormula> (_asw, false, "InversionRule") {
+    InversionRule(AtomSpaceWrapper *_asw, Type linkType)
+        : GenericRule<InversionFormula> (_asw, false, "InversionRule"),
+          InclusionLink(linkType) {
         inputFilter.push_back(meta(
-                                  new tree<Vertex>(
-                                      mva((pHandle)InclusionLink,
-                                          mva((pHandle)ATOM),
-                                          mva((pHandle)ATOM))
-                                  )));
+                                   new tree<Vertex>(
+                                                    mva((pHandle)InclusionLink,
+                                                        mva((pHandle)ATOM),
+                                                        mva((pHandle)ATOM))
+                                                    )));
     }
-    bool validate2    (MPs& args) const {
+    bool validate2(MPs& args) const {
         return true;
     }
 
@@ -87,9 +87,9 @@ public:
         cprintf(1,"INV New order:\n");
         printTree(child(boost::get<Handle>(h[0]),1),0,1);
         printTree(child(boost::get<Handle>(h[0]),0),0,1);*/
-        return meta(new tree<Vertex>(mva((pHandle)GET_ASW->getType(h0),
-                                         mva(GET_ASW->getOutgoing(h0, 1)),
-                                         mva(GET_ASW->getOutgoing(h0, 0))
+        return meta(new tree<Vertex>(mva((pHandle)asw->getType(h0),
+                                         mva(asw->getOutgoing(h0, 1)),
+                                         mva(asw->getOutgoing(h0, 0))
                                         )));
     }
     NO_DIRECT_PRODUCTION;

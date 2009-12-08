@@ -36,26 +36,29 @@ boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProductio
 {
     std::set<BoundVertex>* ret = new std::set<BoundVertex>;
     
-    Type t = GET_ASW->getTypeV(*outh);
-    bool hyp_link = GET_ASW->inheritsType(t, HYPOTHETICAL_LINK);
+    Type t = asw->getTypeV(*outh);
+    bool hyp_link = asw->inheritsType(t, HYPOTHETICAL_LINK);
 
 	if (HYPRULE_MAKES_ZERO_CONFIDENCE_ATOMS || hyp_link)
         if (!hasFW_VAR(*outh))
         {
- 			 cprintf(4,"HYP0:\n");
-             NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-             printer.print(outh->begin(), 4);
-
-            ret->insert(BoundVertex(destTable->addAtom(*outh, TruthValue::TRIVIAL_TV(), false, true)));
-
-			 cprintf(4,"HYP:\n");
-             printer.print(_v2h(ret->begin()->value), 4);
+            cprintf(4,"HYP0:\n");
+            NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+            printer.print(outh->begin(), 4);
+            
+            ret->insert(BoundVertex(asw->addAtom(*outh,
+                                                 TruthValue::TRIVIAL_TV(),
+                                                 false, true)));
+            
+            cprintf(4,"HYP:\n");
+            printer.print(_v2h(ret->begin()->value), 4);
 		}
 
     return boost::shared_ptr<std::set<BoundVertex> >(ret);
 }
 
-Rule::setOfMPs HypothesisRule:: o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs HypothesisRule:: o2iMetaExtra(meta outh,
+                                             bool& overrideInputFilter) const
 {
     assert(0);
     return Rule::setOfMPs();

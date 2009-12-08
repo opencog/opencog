@@ -32,8 +32,8 @@ namespace opencog { namespace pln {
 class ArityFreeANDRule : public Rule
 {
 protected:
-	ArityFreeANDRule(iAtomSpaceWrapper *_destTable)
-	: Rule(_destTable,true,true,"")
+	ArityFreeANDRule(AtomSpaceWrapper *_asw)
+	: Rule(_asw,true,true,"")
 	{}
 	SymmetricANDFormula fN;
 	AsymmetricANDFormula f2;

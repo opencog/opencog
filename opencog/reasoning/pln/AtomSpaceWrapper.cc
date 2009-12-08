@@ -151,7 +151,7 @@ void AtomSpaceWrapper::HandleEntry2HandleSet(
     }
 }
 
-bool AtomSpaceWrapper::inheritsType(Type T1, Type T2)
+bool AtomSpaceWrapper::inheritsType(Type T1, Type T2) const
 {
     return classserver().isA(T1, T2);
 }
