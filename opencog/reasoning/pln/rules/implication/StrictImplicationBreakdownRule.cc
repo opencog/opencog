@@ -85,11 +85,8 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     for (uint i=0;i<premiseArray.size();i++)
         printer.print(_v2h(premiseArray[i]), 3);
     
-    //  vtree   vt1(make_vtree(asw->getOutgoing(v2h(premiseArray[0]),0))),
-    //          vt2(make_vtree(v2h(premiseArray[1])));
-    
-    vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
-        vt2(make_vtree(_v2h(premiseArray[1])));
+    //vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
+    //    vt2(make_vtree(_v2h(premiseArray[1])));
     
     /** haxx:: \todo Temporarily disabled!
         This check does not hold if one of the args
@@ -127,33 +124,41 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
             assert(0);
         }
 #endif
-    
-    std::vector<pHandle> args = asw->getOutgoing(_v2h(premiseArray[0]));
-    Type T = asw->getType(args[1]);
-    std::string pname = asw->getName(args[1]);
+
+    pHandle implication = _v2h(premiseArray[0]);
+    pHandle antecedant = _v2h(premiseArray[1]);
+    pHandle conclusion = asw->getOutgoing(implication, 1);
     
     TruthValue* tvs[] = {
-        (TruthValue*) &(asw->getTV(_v2h(premiseArray[0]))),
-        (TruthValue*) &(asw->getTV(_v2h(premiseArray[1]))),
-        (TruthValue*) &(asw->getTV(args[1]))
-    };
+        (TruthValue*) &(asw->getTV(implication)),
+        (TruthValue*) &(asw->getTV(antecedant)),
+        (TruthValue*) &(asw->getTV(conclusion))
+        };
+    
+    std::vector<pHandle> args = asw->getOutgoing(implication);
+    Type T = asw->getType(conclusion);
+    std::string pname = asw->getName(conclusion);
     
     TruthValue* retTV =
         ImplicationBreakdownFormula().compute(tvs, 3);
     
-    std::vector<pHandle> new_args = asw->getOutgoing(args[1]);
+    // update the TV of the conclusion
+    //asw->updateTV(conclusion, *retTV, RuleResultFreshness);
     
+    // TODO
+
+    std::vector<pHandle> new_args = asw->getOutgoing(conclusion);
     pHandle ret=PHANDLE_UNDEFINED;
-    
-    assert (!(asw->inheritsType(T, NODE)));
-    
     ret = asw->addLink(T, new_args, *retTV, RuleResultFreshness);
-    
+
     delete retTV;
     
-    printer.print(ret, 3);
+    printer.print(conclusion, 3);
     
     return Vertex(ret);
+//     printer.print(ret, 3);
+    
+//     return Vertex(ret);
 }
         
 }} // namespace opencog { namespace pln {
