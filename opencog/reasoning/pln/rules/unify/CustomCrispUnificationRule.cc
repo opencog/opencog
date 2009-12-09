@@ -70,7 +70,7 @@ Btr<std::set<BoundVertex > > CustomCrispUnificationRule::attemptDirectProduction
 
     BBvtree rootAtom(new BoundVTree(*i, pre_binds));
     bind_Bvtree(rootAtom, *i->bindings);
-    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false, true);
+    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false);
 
     pHandle ret_h = asw->addLink(asw->getType(topologicalStub),
                                  asw->getOutgoing(topologicalStub),

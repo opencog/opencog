@@ -91,7 +91,7 @@ boost::shared_ptr<std::set<BoundVertex > > ScholemFunctionProductionRule::attemp
         ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
         ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
                                                     TruthValue::TRUE_TV(),
-                                                    false, false))));
+                                                    false))));
         return ret;
     }
     /// This Rule shouldn't be used to produce EXISTING Scholem function mappings!

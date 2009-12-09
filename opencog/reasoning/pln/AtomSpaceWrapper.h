@@ -235,15 +235,10 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
      *              truth value is merged (via TruthValue::merge) with the old.
      *              Otherwise (fresh == true) then a new dummy context
      *              is associated to that new truth value.
-     * @param managed some kind of mechanism to manage memory.
-     *                @note that it is basically never used throughout the code
-     *                except in LocalATW which is disabled.
-     *                Maybe it could simply be removed.
-     *
      * @return The pHandle corresponding to the added atom
      */
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
-                    bool fresh, bool managed);
+                    bool fresh);
 
     //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int
     //      i = 0) const;
@@ -284,10 +279,10 @@ protected:
 
     //! Add Link via dummy contexts method
     pHandle addLinkDC(Type t, const pHandleSeq& hs, const TruthValue& tvn,
-                      bool fresh, bool managed);
+                      bool fresh);
     //! Add Node via dummy contexts method
     pHandle addNodeDC(Type t, const std::string& name, const TruthValue& tvn,
-                      bool fresh, bool managed);
+                      bool fresh);
 
     /** Add concrete atom using dummy contexts if it already exists
      * 
@@ -300,19 +295,15 @@ protected:
      *              truth value is merged (via TruthValue::merge) with the old.
      *              Otherwise (fresh == true) then a new dummy context
      *              is associated to that new truth value.
-     * @param managed some kind of mechanism to manage memory.
-     *                @note that it is basically never used throughout the code
-     *                except in LocalATW which is disabled.
-     *                Maybe it could simply be removed.
      * @param context @todo add comment
      * 
      * @return The handle of the atom added.
      */
-    pHandle addAtomDC(Atom &a, bool fresh, bool managed,
+    pHandle addAtomDC(Atom &a, bool fresh,
                       HandleSeq contexts = HandleSeq());
 
     pHandle directAddLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                          bool fresh,bool managed);
+                          bool fresh);
 
 public:
 
@@ -429,59 +420,47 @@ public:
      *              (via TruthValue::merge) with the old.
      *              Otherwise (fresh == true) then a new dummy context
      *              is associated to that new truth value.
-     * @param managed some kind of mechanism to manage memory.
-     *                @note that it is basically never used throughout the code
-     *                except in LocalATW which is disabled.
-     *                Maybe it could simply be removed.
-     *
      * @return the pHandle corresponding to the atom added
      */
-    pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
-                    bool managed=true);
+    pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false);
 
     //! Add link, pure virtual
     //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param managed some kind of mechanism to manage memory
     virtual pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                            bool fresh=false, bool managed=true)=0;
+                            bool fresh=false)=0;
 
     // helper methods for addLink
-    inline pHandle addLink(Type t, pHandle ha,
-                           const TruthValue& tvn,
-                           bool fresh=false, bool managed=true)
+    inline pHandle addLink(Type t, pHandle ha, const TruthValue& tvn,
+                           bool fresh=false)
     {
         pHandleSeq oset;
         oset.push_back(ha);
-        return addLink(t, oset, tvn, fresh, managed);
+        return addLink(t, oset, tvn, fresh);
     }
     inline pHandle addLink(Type t, pHandle ha, pHandle hb,
-                           const TruthValue& tvn,
-                           bool fresh=false, bool managed=true)
+                           const TruthValue& tvn, bool fresh=false)
     {
         pHandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
-        return addLink(t, oset, tvn, fresh, managed);
+        return addLink(t, oset, tvn, fresh);
     }
     inline pHandle addLink(Type t, pHandle ha, pHandle hb, pHandle hc,
-                           const TruthValue& tvn,
-                           bool fresh=false, bool managed=true)
+                           const TruthValue& tvn, bool fresh=false)
     {
         pHandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
-        return addLink(t, oset, tvn, fresh, managed);
+        return addLink(t, oset, tvn, fresh);
     }
 
     //! Add node, pure virtual
     //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param managed some kind of mechanism to manage memory
     virtual pHandle addNode(Type T, const std::string& name,
-                            const TruthValue& tvn, bool fresh=false,
-                            bool managed=true)=0;
+                            const TruthValue& tvn, bool fresh=false)=0;
 
     //! Remove Atom
     virtual bool removeAtom(pHandle h);
@@ -495,7 +474,7 @@ public:
     //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
     //! fresh set to true
     //! @note that this method seems rather useless and is not used anywhere
-    pHandle freshened(pHandle h, bool managed);
+    pHandle freshened(pHandle h);
 
     //! Whether the handle h has high enough TruthValue to be consider a binary True.
     //! @todo move to TruthValue classes
@@ -615,9 +594,9 @@ public:
     virtual ~FIMATW() {}
 
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                    bool fresh, bool managed=true);
+                    bool fresh);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-                    bool fresh, bool managed=true);
+                    bool fresh);
 // TODELETE:
 //  FIMATW(combo::NMCore* core) : AtomSpaceWrapper(core), next_free_pat_id(30001) {}
 };
@@ -650,9 +629,9 @@ public:
     }
     
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+            bool fresh);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-            bool fresh, bool managed=true);
+            bool fresh);
 
     // TODELETE:
     //Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
@@ -674,9 +653,9 @@ public:
     }
     
     pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                    bool fresh, bool managed=true);
+                    bool fresh);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-                    bool fresh, bool managed=true);
+                    bool fresh);
     //Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
 
 };

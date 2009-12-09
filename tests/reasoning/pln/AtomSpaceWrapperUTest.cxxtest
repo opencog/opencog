@@ -65,31 +65,18 @@ public:
     void testAtomIdentity() {
         // Test node identity works
         pHandle h1 = asw->addNode(CONCEPT_NODE, "x",
-                SimpleTruthValue(0.001f,1.0f), false, false);
+                SimpleTruthValue(0.001f,1.0f), false);
         pHandle h2 = asw->addNode(CONCEPT_NODE, "x",
-                SimpleTruthValue(0.001f,1.0f), false, false);
+                SimpleTruthValue(0.001f,1.0f), false);
         TS_ASSERT(h1 == h2);
         
-        // Test with managed == true
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "x2",
-                SimpleTruthValue(0.001f,1.0f), false, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "x2",
-                SimpleTruthValue(0.001f,1.0f), false, true);
-        TS_ASSERT(h3 == h4);
-
         // Test FW node identity works
-        pHandle h5 = asw->addNode(FW_VARIABLE_NODE, "filler",
-                SimpleTruthValue(0.001f,1.0f), false, false);
-        pHandle h6 = asw->addNode(FW_VARIABLE_NODE, "filler",
-                SimpleTruthValue(0.001f,1.0f), false, false);
-        TS_ASSERT(h5 == h6);
+        pHandle h3 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false);
+        pHandle h4 = asw->addNode(FW_VARIABLE_NODE, "filler",
+                SimpleTruthValue(0.001f,1.0f), false);
+        TS_ASSERT(h3 == h4);
         
-        // Test FW with managed == true
-        pHandle h7 = asw->addNode(FW_VARIABLE_NODE, "filler2",
-                SimpleTruthValue(0.001f,1.0f), false, true);
-        pHandle h8 = asw->addNode(FW_VARIABLE_NODE, "filler2",
-                SimpleTruthValue(0.001f,1.0f), false, true);
-        TS_ASSERT(h7 == h8);
     }
 
     void testAddDuplicateNode() {
@@ -98,15 +85,15 @@ public:
         pHandle h1 = asw->addNode(CONCEPT_NODE, "test1", tv);
         pHandle h2 = asw->addNode(CONCEPT_NODE, "test2", tv);
 
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true);
 
         TS_ASSERT(h1 != h3);
         TS_ASSERT(h1 != h4);
 
         // Check that more than just one lot of duplicates can be stored
-        pHandle h5 = asw->addNode(CONCEPT_NODE, "test1", tv, true, true);
-        pHandle h6 = asw->addNode(CONCEPT_NODE, "test2", tv, true, true);
+        pHandle h5 = asw->addNode(CONCEPT_NODE, "test1", tv, true);
+        pHandle h6 = asw->addNode(CONCEPT_NODE, "test2", tv, true);
     
         TS_ASSERT(h5 != h3);
         TS_ASSERT(h6 != h4);
@@ -175,13 +162,13 @@ public:
 
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true, true);
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true);
 
         outgoing.clear();
         outgoing.push_back(h1);
         outgoing.push_back(h4);
-        pHandle l2 = asw->addLink(LINK, outgoing, tv, true, true);
+        pHandle l2 = asw->addLink(LINK, outgoing, tv, true);
 
         pHandleSeq pOutgoing = asw->getOutgoing(l2);
         TS_ASSERT(outgoing.size() == pOutgoing.size());
@@ -221,13 +208,13 @@ public:
 
         pHandle l1 = asw->addLink(LINK, outgoing, tv);
 
-        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true, true);
-        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true, true);
+        pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv2, true);
+        pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv2, true);
 
         outgoing.clear();
         outgoing.push_back(h3);
         outgoing.push_back(h4);
-        pHandle l2 = asw->addLink(LINK, outgoing, tv, true, true);
+        pHandle l2 = asw->addLink(LINK, outgoing, tv, true);
 
         pHandleSeq pOutgoing = asw->getOutgoing(l2);
         TS_ASSERT(outgoing.size() == pOutgoing.size());

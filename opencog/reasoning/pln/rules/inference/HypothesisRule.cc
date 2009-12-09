@@ -48,7 +48,7 @@ boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProductio
             
             ret->insert(BoundVertex(asw->addAtom(*outh,
                                                  TruthValue::TRIVIAL_TV(),
-                                                 false, true)));
+                                                 false)));
             
             cprintf(4,"HYP:\n");
             printer.print(_v2h(ret->begin()->value), 4);

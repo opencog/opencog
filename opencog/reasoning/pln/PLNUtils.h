@@ -733,7 +733,7 @@ void removeRecursionFromMap(T mbegin, T mend)
 }
 
 //probably deprecated
-#define NewNode(_T, _NAME) mva(GET_ASW->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
+#define NewNode(_T, _NAME) mva(GET_ASW->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false))
 #define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
 
 template<typename T1, typename T2>

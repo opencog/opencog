@@ -299,7 +299,7 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
 //  cprintf(0,"CrispTheoremRule::compute... TV ok\n");
     
     TruthValue* tv = (use_AND_rule?SymmetricANDFormula().compute(tvs,real_args):tvs[0]->clone());
-    pHandle ret_h = asw->addAtom(res, *tv, true,true);
+    pHandle ret_h = asw->addAtom(res, *tv, true);
     delete tv;
     
 	cprintf(3,"CrispTheoremRule::compute produced:\n");

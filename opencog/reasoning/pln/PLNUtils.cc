@@ -652,16 +652,16 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", tLong);
-                                            pHandle tNode = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle tNode = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false);
                                             pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(tNode);
-                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false, true);
+                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false);
+                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atTime", TruthValue::NULL_TV(), false);
                                             pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true);
                                             if (itr->bindings) {
                                                 insert(BoundVertex(evalLink, itr->bindings));
                                             } else {
@@ -703,19 +703,19 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
                                             // Creates the link and adds it to the result
                                             char tNodeName[100];
                                             sprintf(tNodeName, "%lu", t1Long);
-                                            pHandle t1Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle t1Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false);
                                             sprintf(tNodeName, "%lu", t2Long);
-                                            pHandle t2Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false, true);
+                                            pHandle t2Node = asw->addNode(NUMBER_NODE, tNodeName, TruthValue::NULL_TV(), false);
                                             pHandleSeq listLinkOutgoing;
                                             listLinkOutgoing.push_back(matchingHandle);
                                             listLinkOutgoing.push_back(t1Node);
                                             listLinkOutgoing.push_back(t2Node);
-                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false, true);
-                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false, true);
+                                            pHandle listLink = asw->addLink(LIST_LINK, listLinkOutgoing, TruthValue::NULL_TV(), false);
+                                            pHandle atTimePredNode = asw->addNode(PREDICATE_NODE, "atInterval", TruthValue::NULL_TV(), false);
                                             pHandleSeq evalLinkOutgoing;
                                             evalLinkOutgoing.push_back(atTimePredNode);
                                             evalLinkOutgoing.push_back(listLink);
-                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true, true);
+                                            pHandle evalLink = asw->addLink(EVALUATION_LINK, evalLinkOutgoing, SimpleTruthValue(1.0f, SimpleTruthValue::confidenceToCount(1.0f)), true);
 
                                             cprintf(1, "Created new atInterval link:\n");
                                             printTree(evalLink, 0, 1);

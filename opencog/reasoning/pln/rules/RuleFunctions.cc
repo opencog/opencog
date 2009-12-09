@@ -67,7 +67,7 @@ Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
     // the variable and called varname, don't try to replace it
     // if it already exists
     pHandle ret = asw->addNode(FW_VARIABLE_NODE,varname,
-        TruthValue::TRIVIAL_TV(),false,false);
+                               TruthValue::TRIVIAL_TV(),false);
     
     cprintf(4, "CreateVar: added fwvar node %s [%u]\n", varname.c_str(), ret);
     varcount++;

@@ -568,10 +568,7 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
         SimpleTruthValue tv(percentage/100.0f, 1);
 
         if (elems.size() == 1)
-            addNode(CONCEPT_NODE, elems[0],
-                tv,
-                false,
-                false);
+            addNode(CONCEPT_NODE, elems[0], tv, false);
         else if (!elems.empty())
         {
             pHandleSeq hs;
@@ -582,7 +579,7 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
                
             assert (hs.size()>1);
 
-            addLink(AND_LINK, hs, tv, false, false);
+            addLink(AND_LINK, hs, tv, false);
         }
     }
 
@@ -752,7 +749,7 @@ bool AtomSpaceWrapper::containsNegation(pHandle ANDlink, pHandle h)
     return hasFalsum(hs);
 }
 
-pHandle AtomSpaceWrapper::freshened(pHandle h, bool managed)
+pHandle AtomSpaceWrapper::freshened(pHandle h)
 {
     Type T = getType(h);
     pHandleSeq hs = getOutgoing(h);
@@ -760,13 +757,13 @@ pHandle AtomSpaceWrapper::freshened(pHandle h, bool managed)
     const TruthValue& tv = getTV(h);
 
     if (inheritsType(T, NODE))
-        return addNode(T, name, tv, true,managed);
+        return addNode(T, name, tv, true);
     else
     {
         for (unsigned int i = 0; i < hs.size(); i++)
-            hs[i] = freshened(hs[i], managed);
+            hs[i] = freshened(hs[i]);
 
-        return addLink(T, hs, tv, true, managed);
+        return addLink(T, hs, tv, true);
     }
 }
 
@@ -785,14 +782,13 @@ pHandle AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
 
 // change to
 // Handle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed, Handle associateWith)
-pHandle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed)
+pHandle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh)
 {
-    return addAtom(a,a.begin(),tvn,fresh,managed);
+    return addAtom(a,a.begin(),tvn,fresh);
 }
 
 pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
-                                  const TruthValue& tvn, bool fresh,
-                                  bool managed)
+                                  const TruthValue& tvn, bool fresh)
 {
     cprintf(3,"Handle AtomSpaceWrapper::addAtom...");
     rawPrint(a,it,3);
@@ -816,7 +812,7 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
         pHandle *h_ptr = boost::get<pHandle>(&*i);
 
         pHandle added = (h_ptr != NULL && !isType(*h_ptr)) ?
-            (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false, managed);
+            (*h_ptr) : addAtom(a, i, TruthValue::TRIVIAL_TV(), false);
         handles.push_back(added);
     }
 
@@ -828,12 +824,11 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
     //    LOG(1, "Contexts are different, implement me!\n");
     //}
     // Provide new context to addLink function
-    return addLink(head_type, handles, tvn, fresh, managed);
+    return addLink(head_type, handles, tvn, fresh);
 }
 
 pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs,
-                                        const TruthValue& tvn,
-                                        bool fresh,bool managed)
+                                        const TruthValue& tvn, bool fresh)
 {
     if (tvn.isNullTv())
     {
@@ -855,7 +850,7 @@ pHandle AtomSpaceWrapper::directAddLink(Type T, const pHandleSeq& hs,
         haxx::childOf.insert(hpair(hs[1], hs[0]));*/
     }
 
-    ret = addLinkDC( T, hs,  tvn, fresh, managed);
+    ret = addLinkDC( T, hs,  tvn, fresh);
 
     if (inheritsType(T, LINK) && !arity && T != FORALL_LINK) {
         // Link with no connections?
@@ -950,8 +945,7 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
 
 
 pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
-                                    const TruthValue& tvn,
-                                    bool fresh, bool managed)
+                                    const TruthValue& tvn, bool fresh)
 {
     pHandle ret;
     HandleSeq hsReal;
@@ -972,21 +966,19 @@ pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
  
     // Construct a Link then use addAtomDC
     Link l(t,hsReal,tvn);
-    ret = addAtomDC(l, fresh, managed, contexts);
+    ret = addAtomDC(l, fresh, contexts);
     return ret;
 }
 
 pHandle AtomSpaceWrapper::addNodeDC(Type t, const string& name,
-                                    const TruthValue& tvn,
-                                    bool fresh, bool managed)
+                                    const TruthValue& tvn, bool fresh)
 {
     // Construct a Node then use addAtomDC
     Node n(t, name, tvn);
-    return addAtomDC(n, fresh, managed);
+    return addAtomDC(n, fresh);
 }
 
-pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh,
-                                    bool managed, HandleSeq contexts)
+pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 {
     AtomSpace *as = atomspace;
     Handle result;
@@ -1525,8 +1517,7 @@ NormalizingATW::NormalizingATW(AtomSpace *a): FIMATW(a)
 
 //#define BL 2
 pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
-                                const TruthValue& tvn,
-                                bool fresh, bool managed)
+                                const TruthValue& tvn, bool fresh)
 {
     AtomSpace *a = atomspace;
     pHandle ret= PHANDLE_UNDEFINED;
@@ -1565,7 +1556,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         HandleSeq NOTarg;
         NOTarg.push_back(hs[0]);
         
-        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh, managed);
+        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == IMPLICATION_LINK          //Accidentally similar to da above
             && hs.size()==2
@@ -1575,7 +1566,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         HandleSeq NOTarg;
         NOTarg.push_back(hs[0]);
 
-        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh, managed);
+        ret = addLink(NOT_LINK, NOTarg, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == IMPLICATION_LINK
         && !hs.empty()
@@ -1594,10 +1585,10 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
             new_hs.push_back(hs[0]);
             new_hs.push_back(hs2[i]);
             
-            imps.push_back( addLink(T, new_hs, tvn,fresh,managed) );
+            imps.push_back( addLink(T, new_hs, tvn, fresh) );
         }
         
-        ret = addLink(AND_LINK,imps,TruthValue::TRUE_TV(),fresh,managed);
+        ret = addLink(AND_LINK, imps, TruthValue::TRUE_TV(), fresh);
     }
     else
 #endif
@@ -1628,20 +1619,20 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 
         HandleSeq imps1, imps2;
         imps1.push_back(addLink(AND_LINK, AND_args, TruthValue::TRUE_TV(),
-                    fresh,managed));
+                    fresh));
         imps1.push_back(c);
 
         imps2.push_back(addLink(NOT_LINK, NOTa_args, TruthValue::TRUE_TV(),
-                    fresh,managed));
+                    fresh));
         imps2.push_back(c);
         
         HandleSeq new_hs;
         new_hs.push_back(addLink(IMPLICATION_LINK, imps1, TruthValue::TRUE_TV(),
-                    fresh,managed));
+                    fresh));
         new_hs.push_back(addLink(IMPLICATION_LINK, imps2, TruthValue::TRUE_TV(),
-                    fresh,managed));
+                    fresh));
         
-        ret = addLink(AND_LINK,new_hs,TruthValue::TRUE_TV(),fresh,managed);
+        ret = addLink(AND_LINK,new_hs,TruthValue::TRUE_TV(),fresh);
     }
 #endif
 /*  else if (T == AND_LINK
@@ -1660,12 +1651,12 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         TruthValue *impTV = ImplicationConstructionFormula().compute(tvs,3);
 
         HandleSeq new_hs;
-        new_hs.push_back(addLink(T,hs,tvn,fresh,managed));
-        new_hs.push_back(addLink(IMPLICATION_LINK,hs,impTV,fresh,managed));
+        new_hs.push_back(addLink(T,hs,tvn,fresh));
+        new_hs.push_back(addLink(IMPLICATION_LINK,hs,impTV,fresh));
         
         cprintf(0,"EEE %d\n",nm->getType(new_hs[1]));
         
-        ret = addLink(AND_LINK, new_hs, TruthValue::TRUE_TV(), fresh,managed);
+        ret = addLink(AND_LINK, new_hs, TruthValue::TRUE_TV(), fresh);
 
         LOG(0, "Adding AND-reformed:");
         printTree(ret, 0, 0);
@@ -1718,7 +1709,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
                 new_args.push_back(hs[ii]);
         }
 
-        ret = addLink(AND_LINK, new_args, tvn, fresh,managed);
+        ret = addLink(AND_LINK, new_args, tvn, fresh);
 #if P_DEBUG
         LOG(4, "Adding AND-reformed:");
         printTree(ret, 0, 4);
@@ -1740,7 +1731,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         LOG(BL, "&(..., A, ..., ~A, ...) => Falsum");
 
         if (hasFalsum(hs))
-            ret = addNode(FALSE_LINK, "FALSE", tvn, fresh,managed);
+            ret = addNode(FALSE_LINK, "FALSE", tvn, fresh);
         else
         {
             LOG(BL, "AND(A,B,A) <---> AND(A,B)");
@@ -1752,7 +1743,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
             {
                 LOG(5, "CHANGES FROM AND(A,B,A) <---> AND(A,B)");
 
-                ret = addLink(AND_LINK, hs, tvn, fresh,managed);
+                ret = addLink(AND_LINK, hs, tvn, fresh);
     
 //printTree(ret,0,5);
     
@@ -1779,9 +1770,9 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         HandleSeq new_args;
         new_args.push_back(IMP_args[0]);
         new_args.push_back(addLink(NOT_LINK, not_arg,TruthValue::TRUE_TV(),
-                    fresh,managed));
+                    fresh));
 
-        ret = addLink(AND_LINK, new_args, tvn, fresh,managed);
+        ret = addLink(AND_LINK, new_args, tvn, fresh);
     }
     else if (T == NOT_LINK
             && !hs.empty()
@@ -1803,15 +1794,15 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
             not_arg.push_back(and_args[i]);
 
             new_imp_args.push_back(addLink(AND_LINK, new_and_args,
-                        TruthValue::TRUE_TV(), fresh, managed));
+                        TruthValue::TRUE_TV(), fresh));
             new_imp_args.push_back(addLink(NOT_LINK, not_arg,
-                        TruthValue::TRUE_TV(), fresh,managed));
+                        TruthValue::TRUE_TV(), fresh));
         
             imps.push_back( addLink(IMPLICATION_LINK, new_imp_args,
-                        TruthValue::TRUE_TV(), fresh,managed) );
+                        TruthValue::TRUE_TV(), fresh) );
         }
         
-        ret = addLink(AND_LINK, imps, TruthValue::TRUE_TV(), fresh,managed);
+        ret = addLink(AND_LINK, imps, TruthValue::TRUE_TV(), fresh);
     } 
 #endif
 /*  else if (T == IMPLICATION_LINK
@@ -1833,11 +1824,11 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 
         HandleSeq new_imp_args;
         new_imp_args.push_back(addLink(AND_LINK, new_and_args,
-            TruthValue::TRUE_TV(), fresh,managed));
+            TruthValue::TRUE_TV(), fresh));
         new_imp_args.push_back(tail);
         
         ret = addLink(IMPLICATION_LINK, new_imp_args, TruthValue::TRUE_TV(),
-            fresh,managed);
+            fresh);
 
 //      printTree(ret);
     }*/
@@ -1878,7 +1869,7 @@ for (int a1=0;a1<old_and_args.size(); a1++)
         
         new_and_args1.push_back(internal_imp_args[1]);
         new_and_args2.push_back(addLink(NOT_LINK, not_arg,
-                    TruthValue::TRUE_TV(), fresh,managed));
+                    TruthValue::TRUE_TV(), fresh));
 
 #if P_DEBUG
 int a;
@@ -1889,10 +1880,10 @@ for (a=0;a<new_and_args1.size(); a++)
 
         HandleSeq new_imp_args1, new_imp_args2;
         new_imp_args1.push_back(addLink(AND_LINK, new_and_args1,
-                    TruthValue::TRUE_TV(), fresh,managed));
+                    TruthValue::TRUE_TV(), fresh));
         new_imp_args1.push_back(tail);
         new_imp_args2.push_back(addLink(AND_LINK, new_and_args2,
-                    TruthValue::TRUE_TV(), fresh,managed));
+                    TruthValue::TRUE_TV(), fresh));
         new_imp_args2.push_back(tail);
 
 #if P_DEBUG
@@ -1909,12 +1900,12 @@ for (a=0;a<new_imp_args2.size(); a++)
 
         HandleSeq new_main_and_args;
         new_main_and_args.push_back(addLink(IMPLICATION_LINK, new_imp_args1,
-                    TruthValue::TRUE_TV(), fresh,managed));
+                    TruthValue::TRUE_TV(), fresh));
         new_main_and_args.push_back(addLink(IMPLICATION_LINK, new_imp_args2,
-                    TruthValue::TRUE_TV(), fresh,managed));
+                    TruthValue::TRUE_TV(), fresh));
         
         ret = addLink(AND_LINK, new_main_and_args, TruthValue::TRUE_TV(),
-                fresh,managed);
+                fresh);
 
 #if P_DEBUG
 LOG(1, "Collapsed:");
@@ -1950,15 +1941,15 @@ printTree(ret,0,1);
 
         ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget1,
             tvn,
-            true,managed));
+            true));
 
         ANDargs.push_back( addLink(IMPLICATION_LINK, ImpTarget2,
             tvn,
-            true,managed));
+            true));
 
 //      reverse(ANDargs.begin(), ANDargs.end());
 
-        ret = addLink(AND_LINK, ANDargs, TruthValue::TRUE_TV(), fresh,managed);
+        ret = addLink(AND_LINK, ANDargs, TruthValue::TRUE_TV(), fresh);
     }
     else if (T == FORALL_LINK
             && hs.size() == 2
@@ -1979,18 +1970,17 @@ printTree(ret,0,1);
             // Probably no longer required... but actually, this freshens
             // all the variables for the forall link... such that each link has
             // it's own variable nodes.
-            fora_hs.push_back(hs[0]);//freshened(hs[0],managed));
+            fora_hs.push_back(hs[0]);//freshened(hs[0]));
             fora_hs.push_back(getOutgoing(hs[1],i));
 
             // fresh parameter should probably be set as true, since above
             // freshened links/nodes will not have any links from them yet.
-            fa_list.push_back( addLink(FORALL_LINK, fora_hs, tvn,
-                        fresh, managed) );
+            fa_list.push_back( addLink(FORALL_LINK, fora_hs, tvn, fresh) );
         }
 
         assert(fa_list.size() == AND_arity);
 
-        ret = addLink(LIST_LINK, fa_list, TruthValue::TRUE_TV(), fresh,managed);
+        ret = addLink(LIST_LINK, fa_list, TruthValue::TRUE_TV(), fresh);
 
 //printTree(ret,0,0);
     }
@@ -2005,13 +1995,13 @@ printTree(ret,0,1);
         {
             HandleSeq not_arg;
             not_arg.push_back(hs[i]);
-            and_args.push_back(addLink(NOT_LINK, not_arg,TruthValue::TRUE_TV(),fresh,managed));
+            and_args.push_back(addLink(NOT_LINK, not_arg,TruthValue::TRUE_TV(),fresh));
         }
     
         HandleSeq not_arg;
-        not_arg.push_back(addLink(AND_LINK, and_args, tvn, fresh,managed));
+        not_arg.push_back(addLink(AND_LINK, and_args, tvn, fresh));
 
-        ret = addLink(NOT_LINK, not_arg,TruthValue::TRUE_TV(),fresh,managed);
+        ret = addLink(NOT_LINK, not_arg,TruthValue::TRUE_TV(),fresh);
     }
 /*  else if (T==FORALL_LINK && hs.size()==2)
     {
@@ -2023,10 +2013,10 @@ ok_forall=true;
     {
         HandleSeq emptys, forall_args;
 
-        forall_args.push_back( addLink(LIST_LINK, emptys, TruthValue::TRUE_TV(), false,managed) );
-        forall_args.push_back( addLink(T, hs, tvn, fresh,managed) );
+        forall_args.push_back( addLink(LIST_LINK, emptys, TruthValue::TRUE_TV(), false) );
+        forall_args.push_back( addLink(T, hs, tvn, fresh) );
 
-        ret = addLink(FORALL_LINK, forall_args, TruthValue::TRUE_TV(), fresh,managed);
+        ret = addLink(FORALL_LINK, forall_args, TruthValue::TRUE_TV(), fresh);
     }*/
 #endif
     if (ret==PHANDLE_UNDEFINED)
@@ -2044,8 +2034,8 @@ ok_forall=true;
 
         LOG(5, "Adding to Core...");
 
-        ret = FIMATW::addLink(T,hs,tvn,fresh,managed);
-        //ret = a->addLink(T,hs,tvn,fresh,managed);
+        ret = FIMATW::addLink(T,hs,tvn,fresh);
+        //ret = a->addLink(T,hs,tvn,fresh);
 
         LOG(5, "Added.");
 
@@ -2057,10 +2047,10 @@ ok_forall=true;
     return ret;
 }
 
-pHandle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn,bool fresh,bool managed)
+pHandle NormalizingATW::addNode(Type T, const string& name, const TruthValue& tvn,bool fresh)
 {
     //Handle ret = a->addNode(T, name, tvn, fresh);
-    pHandle ret = FIMATW::addNode(T, name, tvn, fresh,managed);
+    pHandle ret = FIMATW::addNode(T, name, tvn, fresh);
     return ret;
 }
 
@@ -2252,7 +2242,7 @@ LOG(4,"Node add ok.");
 /*********************************
          FIMATW methods
 *********************************/
-pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh,bool managed)
+pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool fresh)
 {
     // The method should be, AFAIK, identical to the one in DirectATW, unless
     // FIM is actually in use.
@@ -2267,7 +2257,7 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
     const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f);
     const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv; 
 
-    pHandle ret = addNode( T, name, mod_tvn, fresh,managed);
+    pHandle ret = addNode( T, name, mod_tvn, fresh);
 #else
     
     LOG(3,"FIMATW::addNode");
@@ -2282,7 +2272,7 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
 
     Node node(T, name, tvn);
     LOG(3,"FIMATW: addAtomDC"); 
-    pHandle ret = addAtomDC(node, fresh, managed);
+    pHandle ret = addAtomDC(node, fresh);
 
 #if HANDLE_MANAGEMENT_HACK
     LOG(3,"FIMATW: addAtomDC OK, checking for Handle release needed");      
@@ -2313,9 +2303,9 @@ pHandle FIMATW::addNode(Type T, const string& name, const TruthValue& tvn, bool 
     return ret;
 }
 
-pHandle FIMATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn, bool fresh,bool managed)
+pHandle FIMATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn, bool fresh)
 {
-    pHandle ret = directAddLink(T, hs, tvn, fresh,managed);  
+    pHandle ret = directAddLink(T, hs, tvn, fresh);  
 
 #if 0
     if (PLN_CONFIG_FIM)
@@ -2339,13 +2329,13 @@ pHandle FIMATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn, boo
 DirectATW::DirectATW(AtomSpace *a) : AtomSpaceWrapper(a) { }
 
 pHandle DirectATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-        bool fresh, bool managed)
+        bool fresh)
 {
-    return directAddLink(T, hs, tvn, fresh,managed);
+    return directAddLink(T, hs, tvn, fresh);
 }
 
 pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
-        bool fresh, bool managed)
+        bool fresh)
 {
     AtomSpace *as = atomspace;
     assert(!tvn.isNullTv());
@@ -2359,7 +2349,7 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
     const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f); 
     const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv;
 
-    return as->addNode( T, name, mod_tvn, fresh, managed );
+    return as->addNode( T, name, mod_tvn, fresh);
 #else
     LOG(3, "DirectATW::addNode");
         
@@ -2371,7 +2361,7 @@ pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
     }
     Node node( T,  name,  tvn);
     //! @todo add related context
-    pHandle ret = addAtomDC(node, fresh, managed);
+    pHandle ret = addAtomDC(node, fresh);
     LOG(3, "Add ok.");
     
     if (inheritsType(T, FW_VARIABLE_NODE))
