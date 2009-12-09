@@ -43,14 +43,14 @@ using std::min;
 using std::max;
 
 // TV of A
-const strength_t A_s = 0.7;
-const count_t A_n = 10;
+const strength_t A_s = 0.9;
+const count_t A_n = 100;
 // initial truth value of B, will be changed after applying implication rule
 const strength_t init_B_s = 0.2;
 const count_t init_B_n = 5;
 // TV of A->B
-const strength_t AB_s = 0.8;
-const count_t AB_n = 20;
+const strength_t AB_s = 0.9;
+const count_t AB_n = 100;
 
 class StrictImplicationBreakdownRuleUTest : public CxxTest::TestSuite {
 private:
@@ -101,6 +101,9 @@ public:
             2 * (AB_s * A_s * n2 + init_B_s * (1 - A_s) * init_B_n)
             / (n2 + init_B_n);
         count_t expected_n = max(n2, init_B_n);
+
+        cout << "expected_s: " << expected_s << endl;
+        cout << "expected_n: " << expected_n << endl;
 
         // check strength
         TS_ASSERT(isApproxEq(res_tv.getMean(), expected_s));
