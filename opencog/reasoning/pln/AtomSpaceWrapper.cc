@@ -749,24 +749,6 @@ bool AtomSpaceWrapper::containsNegation(pHandle ANDlink, pHandle h)
     return hasFalsum(hs);
 }
 
-pHandle AtomSpaceWrapper::freshened(pHandle h)
-{
-    Type T = getType(h);
-    pHandleSeq hs = getOutgoing(h);
-    string name = getName(h);
-    const TruthValue& tv = getTV(h);
-
-    if (inheritsType(T, NODE))
-        return addNode(T, name, tv, true);
-    else
-    {
-        for (unsigned int i = 0; i < hs.size(); i++)
-            hs[i] = freshened(hs[i]);
-
-        return addLink(T, hs, tv, true);
-    }
-}
-
 pHandle AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
 {
     OC_ASSERT(!isType(ph),

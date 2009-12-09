@@ -471,11 +471,6 @@ public:
     //! get a number of high STI handles
     pHandleSeq getImportantHandles(int number);
 
-    //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
-    //! fresh set to true
-    //! @note that this method seems rather useless and is not used anywhere
-    pHandle freshened(pHandle h);
-
     //! Whether the handle h has high enough TruthValue to be consider a binary True.
     //! @todo move to TruthValue classes
     bool binaryTrue(pHandle h);
