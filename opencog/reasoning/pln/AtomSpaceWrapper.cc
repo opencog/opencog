@@ -771,7 +771,7 @@ pHandle AtomSpaceWrapper::freshened(pHandle h, bool managed)
     }
 }
 
-void AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
+pHandle AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
 {
     OC_ASSERT(!isType(ph),
               "%s does not correspond to real atom",
@@ -779,9 +779,9 @@ void AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
 
     Type ty = getType(ph);
     if (inheritsType(ty, NODE))
-        addNode(ty, getName(ph), tv, fresh);
+        return addNode(ty, getName(ph), tv, fresh);
     else
-        addLink(ty, getOutgoing(ph), tv, fresh);
+        return addLink(ty, getOutgoing(ph), tv, fresh);
 }
 
 // change to

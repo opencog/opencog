@@ -239,6 +239,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
      *                @note that it is basically never used throughout the code
      *                except in LocalATW which is disabled.
      *                Maybe it could simply be removed.
+     *
+     * @return The pHandle corresponding to the added atom
      */
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
                     bool fresh, bool managed);
@@ -304,7 +306,7 @@ protected:
      *                Maybe it could simply be removed.
      * @param context @todo add comment
      * 
-     * @return The handle of the atom added
+     * @return The handle of the atom added.
      */
     pHandle addAtomDC(Atom &a, bool fresh, bool managed,
                       HandleSeq contexts = HandleSeq());
@@ -411,13 +413,29 @@ public:
      *              (via TruthValue::merge) with the old.
      *              Otherwise (fresh == true) then a new dummy context
      *              is associated to that new truth value.
+     *
+     * @return The pHandle updated. Note that it is note necessarily
+     *         equal to h because it associate automatically
+     *         a new dummy context to it, which gets translated a different
+     *         pHandle.
      */
-    void updateTV(pHandle h, const TruthValue& tv, bool fresh);
+    pHandle updateTV(pHandle h, const TruthValue& tv, bool fresh);
 
-    //! Add atom from tree vertex
-    //! @param tvn what truth value they should be given
-    //! @param fresh allows atoms to be added with the same name/outgoing set
-    //! @param managed some kind of mechanism to manage memory
+    /**
+     * Add atom from tree vertex
+     * @param tvn what truth value they should be given
+     * @param fresh allows atoms to be added with the same name/outgoing set
+     * @param       If fresh == false then the new truth value is merged
+     *              (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
+     * @param managed some kind of mechanism to manage memory.
+     *                @note that it is basically never used throughout the code
+     *                except in LocalATW which is disabled.
+     *                Maybe it could simply be removed.
+     *
+     * @return the pHandle corresponding to the atom added
+     */
     pHandle addAtom(tree<Vertex>&, const TruthValue& tvn, bool fresh=false,
                     bool managed=true);
 

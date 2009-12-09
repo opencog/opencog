@@ -135,30 +135,21 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
         (TruthValue*) &(asw->getTV(conclusion))
         };
     
-    std::vector<pHandle> args = asw->getOutgoing(implication);
-    Type T = asw->getType(conclusion);
-    std::string pname = asw->getName(conclusion);
-    
     TruthValue* retTV =
         ImplicationBreakdownFormula().compute(tvs, 3);
     
-    // update the TV of the conclusion
-    //asw->updateTV(conclusion, *retTV, RuleResultFreshness);
+    // update the TV of the conclusion.
+    // Note that ret is different than conclusion, that is because a dummy
+    // context is added and this is translated into a different resulting
+    // pHandle (but of course they both correspond to the same atom).
+    // See AtomSpaceWrapper.h for more info
+    pHandle ret = asw->updateTV(conclusion, *retTV, RuleResultFreshness);
     
-    // TODO
-
-    std::vector<pHandle> new_args = asw->getOutgoing(conclusion);
-    pHandle ret=PHANDLE_UNDEFINED;
-    ret = asw->addLink(T, new_args, *retTV, RuleResultFreshness);
-
     delete retTV;
     
-    printer.print(conclusion, 3);
+    printer.print(ret, 3);
     
     return Vertex(ret);
-//     printer.print(ret, 3);
-    
-//     return Vertex(ret);
 }
         
 }} // namespace opencog { namespace pln {

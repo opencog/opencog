@@ -89,23 +89,22 @@ public:
         // calculate result using StrictImplicationBreakdownRule
         StrictImplicationBreakdownRule sibr(_asw);
         
-        /* TODO
         BoundVertex bv = sibr.compute(list_of(_AB_h)(_A_h));
-        // res_h should actually be _B_h
         pHandle res_h = _v2h(bv.GetValue());
+
         const TruthValue& res_tv = _asw->getTV(res_h);
         cout << "res = " << _asw->pHandleToString(res_h) << endl;
+
         // build the TV result manually
         count_t n2 = std::min(AB_n, A_n);
         strength_t expected_s =
             2 * (AB_s * A_s * n2 + init_B_s * (1 - A_s) * init_B_n)
             / (n2 + init_B_n);
         count_t expected_n = max(n2, init_B_n);
+
         // check strength
         TS_ASSERT(isApproxEq(res_tv.getMean(), expected_s));
         // check count
         TS_ASSERT(isApproxEq(res_tv.getCount(), expected_n));
-        */
-        TS_ASSERT(true);
     }
 };
