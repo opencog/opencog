@@ -167,7 +167,7 @@ bool SenseRank::start_sense(Handle word_sense_h,
 	// Make sure that this sense is connected to others by sense-pair
 	// edges.  Under rare circumstances, it might not be -- for example,
 	// the result of thining may have left the sense disconnected.  This
-	// sense would not have been culled by teh sweep routine, since it
+	// sense would not have been culled by the sweep routine, since it
 	// was connected before the thining.  Bascially, if we find one of
 	// these, we ignore it.
 	next_sense = Handle::UNDEFINED;

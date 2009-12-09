@@ -481,7 +481,7 @@ of set overlap:
 
                   sum_w_in_I12 [ mi (w, w1) + mi(w, w2) ]
   sim(w1, w2) = --------------------------------------------
-                [sum_w_in_S1 mi(w, w1)] + [sum_w_in_S@ mi(w, w2)]
+                [sum_w_in_S1 mi(w, w1)] + [sum_w_in_S2 mi(w, w2)]
 
 Criticism: this would make more sense mathematically if mi was a true
 measure-theoretic measure. Suggest exploring actual measures that might
@@ -495,8 +495,7 @@ of pattern reco, again.
 
 Suppose, for example, word-pairs were linked as follows:
 
-   ;; mi stored in strength of truth value ...?  or some 
-   ;; normalized version of mi ... 
+   ;; mi stored in strength of truth value, in the form of the "MI Metric"
    PredicateLink 
        RelationshipNode "word-pair"
        ListLink
@@ -533,7 +532,7 @@ CountTruthValue of the argument passed in --  in this case, the
 PredicateLink.  Notice the wild-card '*' to indicate that a sum was
 taken.
 
-Computing the interseted sum is slightly harder. So, to obtain
+Computing the intersected sum is slightly harder. So, to obtain
 sum_w_in_I12 [ mi (w, w1) + mi(w, w2) ] for w1=tire, w2=wheel, one 
 should run the following pattern:
 
@@ -570,7 +569,6 @@ should run the following pattern:
 
 
 XXX problem: bad MI scores because "tire" has multiple meanings ... 
-
 
 
 
@@ -771,15 +769,15 @@ usage.
                         ------------------
                      Linas Vepstas June 2008
 
-This directory contains a prototype implementation of Yuret's "lexical
-attraction" algorithm for the discovery of syntactic links between
-words in a sentence [Yuret 1998]. The goal of this algorithm is to
-provide a score for ranking the output of the link-grammar parser.
+This section provides a quick review of Yuret's defininition of 
+"lexical attraction" [Yur1998]. 
 
-The stuff discussed below has been implemented in Java, as a part of
-the LexAt package, aka the statistical-relex package, available on
-the launchpad site.  It has been used to fish out a large number of
-MI values for word pairs.  Many of these are quite interesting.
+An implementation of the Yuret "lexical attraction" algorithm has been
+implemented in Java, as a part of the LexAt (aka "statistical relex")
+package on the LaunchPad (canonical/ubuntu) website.  It is used for 
+providing a parse-ranking score for link-grammar parses.  It has also 
+been used to fish out a large number of MI values for word pairs.  Many
+of these are quite interesting.
 
 
 Data Structures
@@ -814,9 +812,51 @@ this usage, while in a certain sense is correct, is also in conflict
 with the common definition of mutual information as the expectation
 value of LA; that is, as:
 
-  MI(x,y) = E[LA(x,y)] = p(x,y) LA(x,y)
+  MI(X,Y) = E[LA(x,y)] = sum_{x \in X, y \in Y}  p(x,y) LA(x,y)
 
 See for example, Wikipedia "mutual information" or [Ash, Chapter 1.5]
+
+Note in particular that MI is non-negative, but LA can be negative.
+
+Large positive LA corresponds to words that are seen together more often
+than seen apart -- e.g. "Northern Ireland".  Large negative LA corresponds
+to words that are infrequently, or never seen together: e.g. "a books"
+the mismatch of the determiner "a" with the plural "books" means this
+will be seen rarely, only as a typo -- so that p(x,y) is extremely small.  
+
+
+                    Mutual Information Metric
+                    -------------------------
+
+Define (per [WP-MI], [Kra2003]) a mutual-information metric as
+
+    d(X,Y) = H(X,Y) - I(X,Y)
+
+and 
+    D(X,Y) = d(X,Y) / H(X,Y)
+
+Then D(X,Y) is a "universal metric", and is 0 <= D(X,Y) <= 1
+
+Here, H(X,Y) = H(X) + H(Y) - I(X,Y) is the mutual entropy.
+
+The "obvious" redefinition of this to the context of LA on word pairs 
+is:
+  I(X,Y) --> LA(x,y) = log p(x,y) - log p(x,*) - log p(*,y)
+  H(X,Y) -->  h(x,y) = -log p(x,y)
+
+  D(X,Y) --> 2 - log (p(x,*) p(*,y)) / log p(x,y)
+
+but this redefinition/extension does not have the deisred properties.
+
+However, S(x,y) = sqrt(log (p(x,*) p(*,y))) / log p(x,y)
+does seem to have S=1 for hi LA, and S=0 for low LA ... ??
+
+[WP-MI] Wikipedia- Mutual Information
+        http://en.wikipedia.org/wiki/Mutual_information
+
+[Kra2003] Alexander Kraskov, Harald Stögbauer, Ralph G. Andrzejak, and 
+        Peter Grassberger, "Hierarchical Clustering Based on Mutual 
+        Information", (2003) ArXiv q-bio/0311039
 
 =======================================================================
 
@@ -988,8 +1028,8 @@ E. Charniak, 1997. Statistical parsing with a context-free grammar
 and word statistics. AAAI 1997.
 
 * Robert B. Ash, ''Information Theory'' (1965) Dover publications.
-* Deniz Yuret, ''Discovery of Linguistic Relations Using Lexical
-  Attraction'' (1998) PhD Thesis
+* [Yur1998] Deniz Yuret, ''Discovery of Linguistic Relations Using
+  Lexical Attraction'' (1998) PhD Thesis
   http://citeseer.ist.psu.edu/yuret98discovery.html
 * [Lin2001] Dekang Lin and Patrick Pantel, ''DIRT – Discovery of
   Inference Rules from Text'', KDD01
