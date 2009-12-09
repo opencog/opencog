@@ -771,6 +771,19 @@ pHandle AtomSpaceWrapper::freshened(pHandle h, bool managed)
     }
 }
 
+void AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
+{
+    OC_ASSERT(!isType(ph),
+              "%s does not correspond to real atom",
+              pHandleToString(ph).c_str());
+
+    Type ty = getType(h);
+    if (inheritsType(ty, NODE))
+        addNode(ty, getName(h), tv, fresh);
+    else
+        addLink(ty, getOutgoing(h), tv, fresh);
+}
+
 // change to
 // Handle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed, Handle associateWith)
 pHandle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed)

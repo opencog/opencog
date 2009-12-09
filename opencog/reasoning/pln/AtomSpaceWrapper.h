@@ -292,7 +292,7 @@ protected:
      * @note Contexts should have actual handles for links, or be empty for
      * nodes. This can be ensured by using the appropriate addNodeDC or
      * addNodeDC classes.
-     * @param tvn what truth value they should be given
+     * @param a Atom to be added
      * @param fresh allows atoms to be added with the same name/outgoing set.
      *              If fresh == false and the atom already exist then the new
      *              truth value is merged (via TruthValue::merge) with the old.
@@ -302,7 +302,7 @@ protected:
      *                @note that it is basically never used throughout the code
      *                except in LocalATW which is disabled.
      *                Maybe it could simply be removed.
-     * @param @todo add comment
+     * @param context @todo add comment
      * 
      * @return The handle of the atom added
      */
@@ -401,6 +401,19 @@ public:
     //! Load other axioms from given xml filename and optionally replace?
     bool loadOther(const std::string& path, bool replaceOld);
 
+    /**
+     * Update the TruthValue of a given pHandle. If the given handle
+     * does not point an atom (UNDEFINED or Type) then an OC_ASSERT is raised.
+     *
+     * @param h Handle to apply the update on
+     * @param tv TruthValue to update
+     * @param fresh If fresh == false then the new truth value is merged
+     *              (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
+     */
+    void updateTV(pHandle h, const TruthValue& tv, bool fresh);
+
     //! Add atom from tree vertex
     //! @param tvn what truth value they should be given
     //! @param fresh allows atoms to be added with the same name/outgoing set
@@ -463,6 +476,7 @@ public:
 
     //! Adds handle h and linked nodes (if h is a link) to AtomSpace again with
     //! fresh set to true
+    //! @note that this method seems rather useless and is not used anywhere
     pHandle freshened(pHandle h, bool managed);
 
     //! Whether the handle h has high enough TruthValue to be consider a binary True.
