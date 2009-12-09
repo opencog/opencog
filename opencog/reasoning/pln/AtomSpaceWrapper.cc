@@ -777,11 +777,11 @@ void AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
               "%s does not correspond to real atom",
               pHandleToString(ph).c_str());
 
-    Type ty = getType(h);
+    Type ty = getType(ph);
     if (inheritsType(ty, NODE))
-        addNode(ty, getName(h), tv, fresh);
+        addNode(ty, getName(ph), tv, fresh);
     else
-        addLink(ty, getOutgoing(h), tv, fresh);
+        addLink(ty, getOutgoing(ph), tv, fresh);
 }
 
 // change to
