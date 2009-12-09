@@ -390,12 +390,11 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h,
         //return realToFakeHandles(s1, NULL_VERSION_HANDLE);
 }
 
-const TruthValue& AtomSpaceWrapper::getTV(pHandle h)
+const TruthValue& AtomSpaceWrapper::getTV(pHandle h) const
 {
-    AtomSpace* a = atomspace;
     if (h != PHANDLE_UNDEFINED) {
         vhpair r = fakeToRealHandle(h);
-        return a->getTV(r.first,r.second);
+        return atomspace->getTV(r.first,r.second);
     } else {
         return TruthValue::TRIVIAL_TV();
     }
@@ -1483,7 +1482,9 @@ std::string AtomSpaceWrapper::pHandleToString(pHandle ph) const {
     VersionHandle vh = hvh.second;
     std::stringstream ss;
     ss << "(Handle = " << h << "; Atom = " << a->toString()
-       << "; VersionHandle = " << vh;
+       << "; VersionHandle = " << vh 
+       << "; VersionedTV = " << getTV(ph).toString()
+       << ")";
     return ss.str();
 }
 

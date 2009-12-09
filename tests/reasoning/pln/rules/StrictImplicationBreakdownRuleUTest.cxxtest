@@ -98,7 +98,7 @@ public:
         // build the TV result manually
         count_t n2 = std::min(AB_n, A_n);
         strength_t expected_s =
-            2 * (AB_s * A_s * n2 + init_B_s * (1 - A_s) * init_B_n)
+            (AB_s * A_s * n2 + init_B_s * (1 - A_s) * init_B_n)
             / (n2 + init_B_n);
         count_t expected_n = max(n2, init_B_n);
 

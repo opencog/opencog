@@ -192,9 +192,12 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
 
     // sB is used for P(B|NOT A)
     // so it must assume that B and NOT A are independent
+    // @todo, we should make the formula look more general with sB
+    // being possibly P(B|NOT A), and the caller of that formula
+    // would the one deciding what is the assumption
     strength_t s2 = ((n2 + nB) > 0)
-        ? ( 2 * (sAB * sA * n2 + sB * (1 - sA) * nB) //((sAB * sA * n2 + sB*nB)
-            / std::max((n2 + nB), 0.00001f))
+        ? ( (sAB * sA * n2 + sB * (1 - sA) * nB)
+            / std::max((n2 + nB), 0.00001f) )
         : sB;
 
     if (n2 < nB) {
