@@ -245,6 +245,9 @@ public:
 
     /**
      * Returns a string representation of the link.
+     * Note that the TV is only represented by its
+     * mean and count so if it is a compositeTV only
+     * the primaryTV is printed.
      *
      * @return A string representation of the link.
      */
