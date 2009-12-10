@@ -55,8 +55,9 @@ typedef std::pair<std::string, atom> subst;
 struct lessatom;
 struct less_subst;
 
-/** atom structure
- * Also called a MetaPredicate or MP in the rules.
+/** atom structure. An obsolete mess from before vtree.
+ * Also called a MetaPredicate or MP in the rules. But not anymore, because
+ * MP is now based on vtree.
  *
  * @todo remove need for the atom class in the unification methods.
  */

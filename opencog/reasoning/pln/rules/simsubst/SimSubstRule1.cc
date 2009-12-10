@@ -28,7 +28,8 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-// Issue: Makes a real link with children in a vtree.
+// Issue: Makes a real link with children in a vtree. --JaredW
+// Issue: i2oType is ambiguous? --JaredW
 
 namespace opencog { namespace pln {
 
@@ -55,6 +56,13 @@ Links are assumed not inheritable either.
     
     Vertex child = CreateVar(asw);
     
+    // Should it use different variables for each MPs (MP vector)? -- JaredW
+    
+    // Makes weird stuff like inheriting from EvaluationLink (with no args) -- JaredW
+    // Seems to allow replacing _any_ part of the vtree. Must check that it actually produces
+    // the result you need!
+    // The input _should_ be: an inheritance from any part of the output atom,
+    // and a version of the output atom that has that atom in it.
     for(tree<Vertex>::pre_order_iterator i = outh->begin(); i != outh->end(); i++)
 //  for (set<atom>::iterator i = child_nodes.begin(); i != child_nodes.end(); i++)
     {       
@@ -90,6 +98,7 @@ Links are assumed not inheritable either.
     return ret;
 }
 
+/// Should really use vtree. Make/find a substitute method for vtree.
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
     pHandle h0 = boost::get<pHandle>(h[0]);
@@ -109,7 +118,8 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     vector<pHandle> hs = nm->getOutgoing(h0);
 
     /// subst hs[0] to hs[1] (child => parent):
-    ret.hs[0]->substitute(atom(hs[1]), atom(hs[0]));
+    //ret.hs[0]->substitute(atom(hs[1]), atom(hs[0]));
+    ret.substitute(atom(hs[1]), atom(hs[0]));
 
 //printAtomTree(ret,0,0);
     
@@ -118,6 +128,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
         mva(nm->getOutgoing(boost::get<pHandle>(h[0]))[1])));*/
     
 	return BBvtree(new BoundVTree(ret.makeHandletree(asw)));
+    // this is the line that crashes the BIT. It should be making a normal vtree out of it (or just using a normal vtree)
 }
 
 }} // namespace opencog { namespace pln {
