@@ -93,17 +93,21 @@ void Ubigrapher::init(std::string server, int port)
 
 void Ubigrapher::watchSignals()
 {
-    if (!isConnected() && !listening) {
-        c_add = space->addAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleAddSignal, this,
-                    std::tr1::placeholders::_1));
-        c_remove = space->removeAtomSignal().connect(
-                std::tr1::bind(&Ubigrapher::handleRemoveSignal, this,
-                    std::tr1::placeholders::_1));
-        assert(c_add.connected() && c_remove.connected());
-        listening = true;
+    if (isConnected()) {
+        if (!listening) {
+            c_add = space->addAtomSignal().connect(
+                    std::tr1::bind(&Ubigrapher::handleAddSignal, this,
+                        std::tr1::placeholders::_1));
+            c_remove = space->removeAtomSignal().connect(
+                    std::tr1::bind(&Ubigrapher::handleRemoveSignal, this,
+                        std::tr1::placeholders::_1));
+            assert(c_add.connected() && c_remove.connected());
+            listening = true;
+        } else {
+            logger().error("[Ubigrapher] Couldn't watch signals, already watching!");
+        }
     } else {
-        logger().error("[Ubigrapher] Couldn't watch signals, already watching!");
+        logger().error("[Ubigrapher] Not connected, so won't watch signals!");
     }
 }
 
