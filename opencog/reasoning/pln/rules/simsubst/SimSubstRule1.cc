@@ -28,7 +28,9 @@
 #include "../../PLNatom.h"
 #include "../../BackInferenceTreeNode.h"
 
-// Issue: Makes a real link with children in a vtree. --JaredW
+#include <algorithm>
+
+// Issue: Makes a real link with children in a vtree. -- JaredW
 // Issue: i2oType is ambiguous? --JaredW
 
 namespace opencog { namespace pln {
@@ -39,6 +41,8 @@ Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter)
 FW_VARs cannot be replaced with children structs.
 Links are assumed not inheritable either.
     */
+    
+    // I'm not sure if any of that is true -- JaredW
     
     if (outh->begin().number_of_children() != 2
         ||  GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), FW_VARIABLE_NODE))
@@ -61,7 +65,8 @@ Links are assumed not inheritable either.
     // Makes weird stuff like inheriting from EvaluationLink (with no args) -- JaredW
     // Seems to allow replacing _any_ part of the vtree. Must check that it actually produces
     // the result you need!
-    // The input _should_ be: an inheritance from any part of the output atom,
+    
+    // The input is: an inheritance from any part of the output atom,
     // and a version of the output atom that has that atom in it.
     for(tree<Vertex>::pre_order_iterator i = outh->begin(); i != outh->end(); i++)
 //  for (set<atom>::iterator i = child_nodes.begin(); i != child_nodes.end(); i++)
@@ -98,7 +103,8 @@ Links are assumed not inheritable either.
     return ret;
 }
 
-/// Should really use vtree. Make/find a substitute method for vtree.
+/// fixme This presumably puts a real link with children into a vtree, which is wrong.
+/// The problem may even be in the BIT itself.
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
     pHandle h0 = boost::get<pHandle>(h[0]);
@@ -110,7 +116,33 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
     // ( any, Inh(a,b) )
     
+    // Make a vtree out of h1
+    meta h1_mp = meta(new vtree(h[1]));
+    
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME, 
+              NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION, 
+              NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE,
+			  3);
+    printer.print(h1_mp->begin());
+    
+    // Make it virtual (to get the structure of the link, not just the handle)
+    meta ret = ForceAllLinksVirtual(h1_mp);
+    
+    printer.print(ret->begin());
+    
+    vector<pHandle> hs = nm->getOutgoing(h0);
+    
+    // the InhLink (h[0]) is real when this method is called
+    // @todo if the child is a link, it will be real. This is OK.
 
+    /// @todo What if child has a different structure to parent?
+    std::replace(ret->begin(), ret->end(), Vertex(hs[0]), Vertex(hs[1]));
+
+    printer.print(ret->begin());
+
+    return ret;
+
+#if 0
     atom ret(h1);
     
     //assert(ret.hs[1].real == nm->getOutgoing(h[1])[0]);
@@ -129,6 +161,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
 	return BBvtree(new BoundVTree(ret.makeHandletree(asw)));
     // this is the line that crashes the BIT. It should be making a normal vtree out of it (or just using a normal vtree)
+#endif
 }
 
 }} // namespace opencog { namespace pln {
