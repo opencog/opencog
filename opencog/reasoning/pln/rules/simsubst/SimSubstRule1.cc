@@ -130,7 +130,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
     printer.print(ret->begin());
     
-    vector<pHandle> hs = nm->getOutgoing(h0);
+    vector<pHandle> hs = asw->getOutgoing(h0);
     
     // the InhLink (h[0]) is real when this method is called
     // @todo if the child is a link, it will be real. This is OK.
@@ -147,7 +147,7 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     
     //assert(ret.hs[1].real == nm->getOutgoing(h[1])[0]);
 
-    vector<pHandle> hs = nm->getOutgoing(h0);
+    vector<pHandle> hs = asw->getOutgoing(h0);
 
     /// subst hs[0] to hs[1] (child => parent):
     //ret.hs[0]->substitute(atom(hs[1]), atom(hs[0]));
