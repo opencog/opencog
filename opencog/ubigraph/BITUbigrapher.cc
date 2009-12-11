@@ -27,6 +27,7 @@
 
 #ifdef USE_BITUBIGRAPHER
 
+#include <limits.h>
 #include <ctype.h>
 #include <sstream>
 #include <unistd.h>
@@ -76,7 +77,8 @@ void BITUbigrapher::drawRoot ( BITNode* root )
 {
     cout << "drawRoot" << endl;
 
-    int root_id = ( int ) root;
+    //int root_id = ( int ) root;
+    int root_id = ( int ) (((long)root) % INT_MAX); //! @todo haxx:: use a map of BITNodes to ids, or something.
     int status = ubigraph_new_vertex_w_id ( root_id );
     if ( status )
         logger().error ( "Drawing BITNodeRoot: Status was %d", status );
@@ -109,7 +111,7 @@ void BITUbigrapher::drawBITNodeFitness(int node_id, float fitness)
 
     std::ostringstream ost;
     ost << size;
-    ubigraph_set_vertex_attribute(node_id, "size", ost.str().c_str());
+    //ubigraph_set_vertex_attribute(node_id, "size", ost.str().c_str());
 }
 
 void BITUbigrapher::drawBITNodeLabel(BITNode * node, int node_id)
@@ -140,7 +142,8 @@ void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode>
     //logger().fine("Drawing BITNode with %d args", children.size());
     cout << "Drawing BITNode with " << children.size() << " args" << endl;
 
-    int node_id = ( int ) node;
+    //int node_id = ( int ) node;
+    int node_id = ( int ) (((long)node) % INT_MAX);
 
     // For some reason the fitness doesn't work on the BITNodeRoot
     if (node->root != node) {
@@ -175,7 +178,8 @@ void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode>
             // for each of its children
             foreach ( const ParametrizedBITNode& child, children[i] ) {
                 // Display and attach them
-                int child_id = ( int ) ( child.prover );
+                //int child_id = ( int ) ( child.prover );
+                int child_id = ( int ) (((long)child.prover) % INT_MAX);
                 status = ubigraph_new_vertex_w_id ( child_id );
                 if ( status )
                     logger().error ( "Drawing BITNode child: Status was %d", status );

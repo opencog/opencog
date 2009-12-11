@@ -52,6 +52,8 @@ class PLNUTest;
 
 namespace opencog {
 
+//#define USE_BITUBIGRAPHER
+
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
 #endif
@@ -235,7 +237,7 @@ class BITNode
     // Let unit tests inspect BITNode state
     friend class ::BITNodeUTest;
     friend class ::PLNUTest;
-#if USE_BITUBIGRAPHER
+#ifdef USE_BITUBIGRAPHER
     friend class opencog::BITUbigrapher;
 #endif
 

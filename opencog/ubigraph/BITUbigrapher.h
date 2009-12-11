@@ -26,19 +26,22 @@
 #ifndef _OPENCOG_BITUBIGRAPHER
 #define _OPENCOG_BITUBIGRAPHER
 
-//#define USE_BITUBIGRAPHER
+// NOTE: USE_BITUBIGRAPHER is defined (or not) in BackInferenceTreeNode.h, not here
+// (So that this file can include that one, not the other way round.)
+
 // (haxx::) currently makes a BITNodeRoot automatically use a BITUbigrapher.
-// Being in the ubigraph directory, the code is disabled if Ubigraphclient
-// isn't found; it should have an option for attaching it to a particular BIT
+// It should have an option for attaching it to a particular BIT
 // (or at least be automatically used by any BITNodeRoot, but be disabled by
 // default, as now).
 
-#ifdef USE_BITUBIGRAPHER
+//#ifdef USE_BITUBIGRAPHER
 
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h> // BackInferenceTreeNode.h breaks otherwise
 #include <opencog/reasoning/pln/BackInferenceTreeNode.h>
+
+#ifdef USE_BITUBIGRAPHER
 
 #include <set>
 #include <vector>
