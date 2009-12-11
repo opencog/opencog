@@ -1598,7 +1598,7 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         bool foodBowl=false;
         bool waterBowl=false;
 
-        std::string entityClass="";
+        std::string entityClass="unknown";
         std::map<std::string, float> colors;
         std::string material="";
         std::string texture="";
@@ -1743,10 +1743,12 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
         XERCES_CPP_NAMESPACE::XMLString::transcode(TYPE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
         char* entityType = XERCES_CPP_NAMESPACE::XMLString::transcode(entityElement->getAttribute(tag));
 
+        Handle typeNode = Handle::UNDEFINED;
+
 //     logger().info("PAI - processMapInfo(): entityType=%s", entityType);
         if (entityType && strlen(entityType)) {
             objectNode = AtomSpaceUtil::addNode(atomSpace, getSLObjectNodeType(entityType), internalEntityId.c_str());
-            Handle typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType);
+            typeNode = AtomSpaceUtil::addNode(atomSpace, NODE, entityType);
             HandleSeq inheritanceLinkOutgoing;
             inheritanceLinkOutgoing.push_back(objectNode);
             inheritanceLinkOutgoing.push_back(typeNode);
@@ -1855,8 +1857,47 @@ void PAI::processMapInfo(XERCES_CPP_NAMESPACE::DOMElement * element, HandleSeq &
             addInheritanceLink(std::string("water_bowl"), objectNode, waterBowl);
 
             
-            Handle objSemeNode = atomSpace.addNode( SEME_NODE, internalEntityId);
-            Handle objWordNode = atomSpace.addNode( WORD_NODE, entityClass);
+            Handle objSemeNode = atomSpace.addNode( SEME_NODE, internalEntityId, SimpleTruthValue( 1, 1 ) );            
+            Handle objWordNode = atomSpace.addNode( WORD_NODE, entityClass );
+            Handle objClassNode = atomSpace.addNode( CONCEPT_NODE, entityClass, SimpleTruthValue( 1, 1 ) );
+
+            { // each seme node must inherit from its class
+                // first normalize the type name to make it
+                // compatible with the classes defined at opencog/scm/predicates-frames.scm
+                std::string typeName = entityType;
+                boost::to_lower(typeName);
+                typeName[0] = std::toupper(typeName[0]);
+                
+                // now create the inheritance link
+                Handle objectType = atomSpace.addNode( CONCEPT_NODE, typeName, SimpleTruthValue( 1, 1 ) );
+                HandleSeq inheritance(2);
+                inheritance[0] = objSemeNode;
+                inheritance[1] = objectType;
+                
+                Handle link = atomSpace.addLink( INHERITANCE_LINK, 
+                    inheritance, SimpleTruthValue( 1, 1 ) );
+                atomSpace.setLTI( link, 1 );
+
+                HandleSeq classReference(2);
+                classReference[0] = objClassNode;
+                classReference[1] = objSemeNode;
+
+
+                Handle referenceLink = 
+                    atomSpace.addLink( REFERENCE_LINK, classReference, TruthValue::TRUE_TV( ) );
+                atomSpace.setLTI( referenceLink, 1 );
+
+                // finally create a frame for representing this object
+                std::map<std::string, Handle> elements;
+                elements["Entity"] = objSemeNode;
+                elements["Name"] = objClassNode;
+                elements["Type"] = objectType;
+                AtomSpaceUtil::setPredicateFrameFromHandles( 
+                    atomSpace, "#Entity", internalEntityId + "_entity",
+                        elements, TruthValue::TRUE_TV() );
+            } // end block
+            
+            
 
             //connect the acessory node to the seme node
             HandleSeq referenceLinkOutgoing1;
