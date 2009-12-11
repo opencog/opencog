@@ -110,13 +110,7 @@ double Entity::distanceTo( const Entity& entity,
         // get the most left point of A and most right point of B
         ++pointCounterA[pointHashA[XMIN]];
         ++pointCounterB[pointHashB[XMAX]];
-    } else {
-        // get both most left and most right points of A and B
-        ++pointCounterA[pointHashA[XMIN]];
-        ++pointCounterA[pointHashA[XMAX]];
-        ++pointCounterB[pointHashB[XMIN]];
-        ++pointCounterB[pointHashB[XMAX]];        
-    } 
+    }
     if ( ( localStatus.relations[LimitRelation::Y] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
         ++pointCounterA[pointHashA[YMAX]];
@@ -125,13 +119,7 @@ double Entity::distanceTo( const Entity& entity,
         // get the most left point of A and most right point of B
         ++pointCounterA[pointHashA[YMIN]];
         ++pointCounterB[pointHashB[YMAX]];
-    } else {
-        // get both most left and most right points of A and B
-        ++pointCounterA[pointHashA[YMIN]];
-        ++pointCounterA[pointHashA[YMAX]];
-        ++pointCounterB[pointHashB[YMIN]];
-        ++pointCounterB[pointHashB[YMAX]]; 
-    } 
+    }
 
     if ( ( localStatus.relations[LimitRelation::Z] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
@@ -141,13 +129,12 @@ double Entity::distanceTo( const Entity& entity,
         // get the most left point of A and most right point of B
         ++pointCounterA[pointHashA[ZMIN]];
         ++pointCounterB[pointHashB[ZMAX]];
-    } else {
-        // get both most left and most right points of A and B
-        ++pointCounterA[pointHashA[ZMIN]];
-        ++pointCounterA[pointHashA[ZMAX]];
-        ++pointCounterB[pointHashB[ZMIN]];
-        ++pointCounterB[pointHashB[ZMAX]];        
-    } 
+    }
+
+    // If objects contains each other in all dimensions, the distance is zero
+    if (pointCounterA.empty()) {
+        return 0.0;
+    }
 
     
     std::list<const Math::Vector3*> pointsInA;
@@ -242,9 +229,7 @@ double Entity::distanceTo( const Entity& entity,
                 boost::hash_combine( seed, (*it2)->pointB.y );
                 boost::hash_combine( seed, (*it2)->pointB.z );
 
-                unsigned int& counter = segmentsInA[ seed ];
-
-                //unsigned int& counter = segmentsInB[ *it2 ];
+                unsigned int& counter = segmentsInB[ seed ];
                 ++counter;
                 if ( counter > currentSegmentBStrength ) {
                     currentSegmentBStrength = counter;
