@@ -6,6 +6,7 @@ ADD_LIBRARY (OpcLib
     ProcedureInterpreterAgent
     ImportanceDecayAgent
     ActionSelectionAgent
+    EntityExperienceAgent
     SleepAgent
     MockOpcHCTest
     HCTestAgent

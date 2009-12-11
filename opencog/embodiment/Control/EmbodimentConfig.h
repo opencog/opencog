@@ -197,6 +197,7 @@ protected:
             "COMBO_INTERPRETER_ENABLED",    "true",
             "SCHEMA_GOAL_MINING_ENABLED",   "true",
             "PROCEDURE_INTERPRETER_ENABLED","true",
+            "ENTITY_EXPERIENCE_ENABLED",    "true",
 
             //true for disabled, false for enabled
             "DISABLE_LOG_OF_PVP_MESSAGES",  "true",
@@ -322,6 +323,10 @@ protected:
 
             "FRAMES_FILE",                  "frames.list",
             "FRAMES_INHERITANCE_FILE",      "framesInheritance.list",
+
+
+            "IMPORTANCE_DECAY_CYCLE_PERIOD",      "15",
+            "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD", "1",
 
             //used as halting condition by reset
             "",                             ""

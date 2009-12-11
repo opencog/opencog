@@ -36,9 +36,11 @@
 #include "Pet.h"
 #include "PetMessageSender.h"
 #include "PVPActionPlanSender.h"
-#include "ProcedureInterpreterAgent.h"
-#include "ActionSelectionAgent.h"
-#include "ImportanceDecayAgent.h"
+
+#include <opencog/embodiment/Control/OperationalPetController/ProcedureInterpreterAgent.h>
+#include <opencog/embodiment/Control/OperationalPetController/ActionSelectionAgent.h>
+#include <opencog/embodiment/Control/OperationalPetController/ImportanceDecayAgent.h>
+#include <opencog/embodiment/Control/OperationalPetController/EntityExperienceAgent.h>
 
 #include "RuleEngine.h"
 
@@ -112,6 +114,7 @@ private:
     ProcedureInterpreterAgent* procedureInterpreterAgent;
     ImportanceDecayAgent* importanceDecayAgent;
     ActionSelectionAgent* actionSelectionAgent;
+    EntityExperienceAgent* entityExperienceAgent;
 
     RuleEngine* ruleEngine;
 
@@ -253,6 +256,7 @@ public:
     SingletonFactory<ProcedureInterpreterAgent, Agent> procedureInterpreterAgentFactory;
     SingletonFactory<ImportanceDecayAgent, Agent> importanceDecayAgentFactory;
     SingletonFactory<ActionSelectionAgent, Agent> actionSelectionAgentFactory;
+    SingletonFactory<EntityExperienceAgent, Agent> entityExperienceAgentFactory;
 
 }; // class
 }  // namespace

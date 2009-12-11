@@ -169,6 +169,10 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
                                this->createAgent(ImportanceDecayAgent::info().id, false));
     importanceDecayAgent->connectSignals(*atomSpace);
 
+    this->registerAgent(EntityExperienceAgent::info().id, &entityExperienceAgentFactory);
+    entityExperienceAgent = static_cast<EntityExperienceAgent*>(
+                               this->createAgent(EntityExperienceAgent::info().id, false));
+
     if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         this->startAgent(procedureInterpreterAgent);
     }
@@ -184,9 +188,14 @@ void OPC::init(const std::string & myId, const std::string & ip, int portNumber,
     }
 
     if (config().get_bool("IMPORTANCE_DECAY_ENABLED")) {
-        // TODO: Create a config parameter to control this frequency
-        importanceDecayAgent->setFrequency(15);
+        importanceDecayAgent->setFrequency( 
+            config().get_int("IMPORTANCE_DECAY_CYCLE_PERIOD"));
         this->startAgent(importanceDecayAgent);
+    }
+    if (config().get_bool("ENTITY_EXPERIENCE_ENABLED")) {
+        this->entityExperienceAgent->setFrequency(
+           config().get_int( "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD" ) );
+        this->startAgent(entityExperienceAgent);
     }
 
     // TODO: This should be done only after NetworkElement is initialized
