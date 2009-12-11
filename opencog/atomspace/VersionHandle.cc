@@ -84,7 +84,7 @@ std::size_t opencog::hash_value(VersionHandle const& b)
 {
     std::size_t seed = 0; 
     boost::hash_combine(seed,b.indicator);
-    boost::hash_combine(seed,std::tr1::hash<Handle>()(b.substantive));
+    boost::hash_combine(seed,boost::hash<Handle>()(b.substantive));
     return seed;
 }
 

@@ -32,7 +32,7 @@
 #include <sstream>
 #include <vector>
 
-#include <tr1/unordered_set>
+#include <boost/unordered_set.hpp>
 
 namespace opencog
 {
@@ -102,7 +102,7 @@ public:
 
 typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
-typedef std::tr1::unordered_set<Handle, std::tr1::hash<opencog::Handle> > UnorderedHandleSet;
+typedef boost::unordered_set<Handle, boost::hash<opencog::Handle> > UnorderedHandleSet;
 
 static inline std::string operator+ (const char *lhs, Handle h)
 {
@@ -119,16 +119,12 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
+inline std::size_t hash_value(Handle const& h)
+{
+    return static_cast<std::size_t>(h.value());
+}
+
 } // namespace opencog
-
-namespace std { namespace tr1 {
-    template<>
-    struct hash<opencog::Handle> : public std::unary_function<const opencog::Handle&, std::size_t> {
-        std::size_t operator()(const opencog::Handle& h) const
-        { return static_cast<std::size_t>(h.value()); }
-    };
-}} //namespace std::tr1
-
 
 namespace std { 
 inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h) {

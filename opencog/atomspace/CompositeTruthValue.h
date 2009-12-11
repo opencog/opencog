@@ -31,25 +31,15 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
 
-#ifdef __APPLE__
-#include <ext/hash_map>
-using __gnu_cxx::hash_map;
-#endif
+#include <boost/unordered_map.hpp>
 
 namespace opencog
 {
 
-#ifdef __APPLE__
-typedef hash_map<VersionHandle,
-                 TruthValue*, 
-                 hashVersionHandle,
-                 eqVersionHandle> VersionedTruthValueMap;
-#else
-typedef std::tr1::unordered_map<VersionHandle, 
+typedef boost::unordered_map<VersionHandle, 
                                 TruthValue*,
                                 hashVersionHandle,
                                 eqVersionHandle> VersionedTruthValueMap;
-#endif /* __APPLE__ */
 
 class Atom;
 class CompositeRenumber;

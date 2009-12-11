@@ -50,7 +50,7 @@ public:
 
     unsigned long lastTimestamp;
 
-    std::tr1::unordered_set<std::string, boost::hash<std::string> > processedEntities;
+    boost::unordered_set<std::string, boost::hash<std::string> > processedEntities;
         
 
     

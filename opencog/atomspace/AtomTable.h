@@ -62,7 +62,7 @@ struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*,
 {
     bool operator()(const Atom* const& __x, const Atom* const& __y) const;
 };
-typedef std::tr1::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
+typedef boost::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
 
 class SavingLoading;
 

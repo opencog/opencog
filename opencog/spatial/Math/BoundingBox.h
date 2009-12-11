@@ -27,7 +27,6 @@
 #include <vector>
 #include <list>
 #include <map>
-
 #include <boost/functional/hash.hpp>
 
 #include "Vector3.h"

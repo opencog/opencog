@@ -32,8 +32,8 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
@@ -114,7 +114,7 @@ public:
         NUMBER_OF_PROPERTIES
     };
 
-    typedef std::tr1::unordered_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
+    typedef boost::unordered_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
 
     /**
      * Comparator class used to measure the distance between two objects
@@ -333,7 +333,7 @@ protected:
 
 }; // Entity
 
- typedef std::tr1::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
+ typedef boost::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
 
 } // Spatial
 

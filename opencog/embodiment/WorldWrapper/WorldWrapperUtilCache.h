@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <tr1/unordered_map>
+#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 
 #define CACHE_MISS -9999.0f
@@ -125,7 +125,7 @@ class WorldWrapperUtilCache
 public:
 
     // typedefs
-    typedef std::tr1::unordered_map < WorldWrapper::predicate, float,
+    typedef boost::unordered_map < WorldWrapper::predicate, float,
     boost::hash<WorldWrapper::predicate> > cacheMap;
     typedef cacheMap::iterator cacheMapIt;
 

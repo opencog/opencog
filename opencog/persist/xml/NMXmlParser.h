@@ -66,7 +66,7 @@ public:
      * the parsing (when only Nodes are read) to be used in the second
      * pass (to resolve references in Links).
      */
-    static std::tr1::unordered_map<const std::string, Handle, hash<std::string>, std::equal_to<std::string> > hypHandles;
+    static boost::unordered_map<const std::string, Handle, boost::hash<std::string>, std::equal_to<std::string> > hypHandles;
 
     /**
      * A special default (Simple) TruthValue object for any atom loaded from a XML doc,

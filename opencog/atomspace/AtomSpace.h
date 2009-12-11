@@ -31,7 +31,6 @@
 #include <list>
 #include <set>
 #include <vector>
-#include <tr1/unordered_map>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>

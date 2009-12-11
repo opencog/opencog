@@ -51,7 +51,7 @@ class SavingLoading
 
 private:
 
-    typedef std::tr1::unordered_map<std::string, SavableRepository*> RepositoryHash;
+    typedef boost::unordered_map<std::string, SavableRepository*> RepositoryHash;
 
     /**
      * Stores the SavableRepositories actually loaded with Novamente.

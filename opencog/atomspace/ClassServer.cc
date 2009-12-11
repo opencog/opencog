@@ -135,7 +135,7 @@ bool ClassServer::isDefined(const std::string& typeName)
 
 Type ClassServer::getType(const std::string& typeName)
 {
-    std::tr1::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
+    boost::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
     }
@@ -145,7 +145,7 @@ Type ClassServer::getType(const std::string& typeName)
 const std::string& ClassServer::getTypeName(Type type)
 {
     static std::string nullString = "";
-    std::tr1::unordered_map<Type, const std::string*>::iterator it;
+    boost::unordered_map<Type, const std::string*>::iterator it;
     if ((it = code2NameMap.find(type)) != code2NameMap.end())
         return *(it->second);
     return nullString;

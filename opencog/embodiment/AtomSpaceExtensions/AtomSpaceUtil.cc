@@ -1965,7 +1965,7 @@ std::map<Handle, Handle> AtomSpaceUtil::latestAvatarActionDone;
 std::map<Handle, Handle> AtomSpaceUtil::latestPetActionPredicate;
 std::map<Handle, std::map<Handle, Handle> > AtomSpaceUtil::latestSpatialPredicate;
 std::map<Handle, Handle> AtomSpaceUtil::latestSchemaPredicate;
-std::tr1::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;
+boost::unordered_map<std::string, HandleSeq> AtomSpaceUtil::frameElementsCache;
 Handle AtomSpaceUtil::latestIsExemplarAvatar = Handle::UNDEFINED;
 
 void AtomSpaceUtil::updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,
@@ -2070,7 +2070,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
     if ( frameNode != Handle::UNDEFINED ) {
 
 
-        std::tr1::unordered_map<std::string, HandleSeq>::const_iterator it =
+        boost::unordered_map<std::string, HandleSeq>::const_iterator it =
             frameElementsCache.find( frameName );
         
         if ( it != frameElementsCache.end( ) ) {

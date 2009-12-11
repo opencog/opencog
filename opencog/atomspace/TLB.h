@@ -39,7 +39,7 @@
 #define CHECK_MAP_CONSISTENCY
 
 #ifdef USE_TLB_MAP
-#include <tr1/unordered_map>
+#include <boost/unordered_map.hpp>
 #endif
 
 #include <opencog/atomspace/Atom.h>
@@ -63,7 +63,7 @@ class TLB
 private:
 
 #ifdef USE_TLB_MAP
-    static std::tr1::unordered_map<Handle, const Atom*, std::tr1::hash<opencog::Handle> > handle_map;
+    static boost::unordered_map<Handle, const Atom*, boost::hash<opencog::Handle> > handle_map;
 #endif
 
     /**
@@ -86,7 +86,7 @@ public:
     static inline Atom* getAtom(const Handle& handle)
     {
 #ifdef USE_TLB_MAP
-        std::tr1::unordered_map<Handle, const Atom*>::iterator it = handle_map.find(handle);
+        boost::unordered_map<Handle, const Atom*>::iterator it = handle_map.find(handle);
         if (it == handle_map.end()) return NULL;
         else return const_cast<Atom*>(it->second);
 #else

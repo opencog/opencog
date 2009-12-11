@@ -91,6 +91,9 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             double nearDistance = spaceMap.getNearDistance( );
             double nextDistance = spaceMap.getNextDistance( );
             
+            logger().debug( "NearPredicateUpdater::%s - nearDistance '%f'",
+                    __FUNCTION__, nearDistance );
+
             setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0 : 0.0f );
             setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f );
 

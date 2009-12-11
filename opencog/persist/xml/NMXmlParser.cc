@@ -54,7 +54,7 @@
 
 using namespace opencog;
 
-std::tr1::unordered_map<const std::string, Handle, hash<std::string>, std::equal_to<std::string> > NMXmlParser::hypHandles;
+boost::unordered_map<const std::string, Handle, boost::hash<std::string>, std::equal_to<std::string> > NMXmlParser::hypHandles;
 bool NMXmlParser::fresh = true;
 bool NMXmlParser::freshLinks = false;
 

@@ -91,7 +91,7 @@ private:
     static std::map<Handle, Handle> latestPetActionPredicate;
     static std::map<Handle, std::map<Handle, Handle> > latestSpatialPredicate;
     static std::map<Handle, Handle> latestSchemaPredicate;
-    static std::tr1::unordered_map<std::string, HandleSeq> frameElementsCache;
+    static boost::unordered_map<std::string, HandleSeq> frameElementsCache;
     static Handle latestIsExemplarAvatar;
 
     static void updateGenericLatestInfoMap(std::map<Handle, Handle>& infoMap,

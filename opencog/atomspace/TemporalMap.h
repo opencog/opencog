@@ -30,10 +30,7 @@
 
 #include <opencog/atomspace/Temporal.h>
 
-#ifdef __APPLE__
-#include <ext/hash_map>
-using __gnu_cxx::hash_map;
-#endif
+#include <boost/unordered_map.hpp>
 
 namespace opencog
 {
@@ -63,11 +60,7 @@ private:
     /**
      * Defines the hash_map that will be used.
      */
-    #ifdef __APPLE__
-    typedef hash_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
-    #else
-    typedef std::tr1::unordered_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
-    #endif
+    typedef boost::unordered_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
 
 public:
 
