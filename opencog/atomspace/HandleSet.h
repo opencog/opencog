@@ -42,11 +42,7 @@ private:
     /**
      * Defines a hash set used to store handles.
      */
-    #ifdef __APPLE__
-    typedef hash_set<Handle, hashHandle, eqHandle> InternalHandleSet;
-    #else
     typedef UnorderedHandleSet InternalHandleSet;
-    #endif
 
 public:
 
