@@ -24,6 +24,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "../../PLNUtils.h"
+
 namespace opencog { namespace pln {
 
 const bool RuleResultFreshness = true;
