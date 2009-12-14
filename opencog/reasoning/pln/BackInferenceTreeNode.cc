@@ -1153,7 +1153,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
                 if (etv.getConfidence() > minConfidenceForAbort)
                     return *eval_res_vector_set.begin();
                 else 
-                    tlog(0,"TV conf too low: %f\n", etv.getConfidence());
+                    tlog(0,"TV conf too low to stop now: %f\n", etv.getConfidence());
             }
         }
         tlog(0, "infer(): one step ok\n");
