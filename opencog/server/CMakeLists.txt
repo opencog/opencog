@@ -17,16 +17,18 @@ ADD_LIBRARY (builtinreqs SHARED
 	UnloadModuleRequest
 )
 
-TARGET_LINK_LIBRARIES(builtinreqs
-	xml
-)
+IF (EXPAT_FOUND)
+	TARGET_LINK_LIBRARIES(builtinreqs
+		xml
+	)
+ENDIF (EXPAT_FOUND)
 
 ADD_LIBRARY (server SHARED
 	BaseServer
 	CogServer
 	Request
 	NetworkServer
-        ServerSocket
+	ServerSocket
 	ConsoleSocket
 	Agent
 	SystemActivityTable
@@ -36,11 +38,14 @@ ADD_LIBRARY (server SHARED
 SET(SERVER_LINK_LIBS 
 	util
 	atomspace
-	xml
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
-        dl
+	dl
 )
+
+IF (EXPAT_FOUND)
+	SET(SERVER_LINK_LIBS xml ${SERVER_LINK_LIBS})
+ENDIF (EXPAT_FOUND)
 
 IF (GUILE_FOUND)
 	SET(SERVER_LINK_LIBS smob ${SERVER_LINK_LIBS})
