@@ -35,14 +35,14 @@
 
 namespace opencog { namespace pln {
 
+// the problem might be the output of this (or the FWVars getting substituted in tryClone)
 Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
 /** For simplicity (but sacrificing applicability),
 FW_VARs cannot be replaced with children structs.
 Links are assumed not inheritable either.
-    */
-    
-    // I'm not sure if any of that is true -- JaredW
+    */    
+    // That prevents an assert error in BITNode::tryClone() -- JaredW
     
     if (outh->begin().number_of_children() != 2
         ||  GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), FW_VARIABLE_NODE))
@@ -60,12 +60,6 @@ Links are assumed not inheritable either.
     
     Vertex child = CreateVar(asw);
     
-    // Should it use different variables for each MPs (MP vector)? -- JaredW
-    
-    // Makes weird stuff like inheriting from EvaluationLink (with no args) -- JaredW
-    // Seems to allow replacing _any_ part of the vtree. Must check that it actually produces
-    // the result you need!
-    
     // The input is: an inheritance from any part of the output atom,
     // and a version of the output atom that has that atom in it.
     for(tree<Vertex>::pre_order_iterator i = outh->begin(); i != outh->end(); i++)
@@ -74,6 +68,10 @@ Links are assumed not inheritable either.
 /*      puts("-");
         printAtomTree(outh,0,0);
 */
+        // if this vertex is a link type, skip it
+        if ( asw->inheritsType(asw->getType(_v2h(*i)), LINK) )
+            continue;
+
         Vertex old_i = *i;
         *i = child;
         BBvtree templated_atom1(new BoundVTree(*outh));
@@ -94,6 +92,9 @@ Links are assumed not inheritable either.
         rawPrint(*inhPattern1,0,0);
         puts("-");*/
         
+        ForceAllLinksVirtual(inhPattern1);
+        ForceAllLinksVirtual(templated_atom1);
+        
         overrideInputFilter = true;
         
         ret.insert(ret1);
@@ -103,8 +104,6 @@ Links are assumed not inheritable either.
     return ret;
 }
 
-/// fixme This presumably puts a real link with children into a vtree, which is wrong.
-/// The problem may even be in the BIT itself.
 meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
 {
     pHandle h0 = boost::get<pHandle>(h[0]);
