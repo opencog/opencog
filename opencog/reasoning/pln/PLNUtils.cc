@@ -1857,15 +1857,6 @@ bool ttsubstitutableTo(pHandle from, pHandle to,
 /**
  Whether one can produce 'to' from 'from' by some variable substitutions.
 */
-
-void foo2()
-{
-    pHandle from, to;
-    map<string, pHandle> bindings;
-
-    ttsubstitutableTo<string, getNameOp, map<string, pHandle>::iterator>(from, to, bindings, getNameOp());
-}
-
 bool substitutableTo(pHandle from, pHandle to,
                      map<string, pHandle>& bindings)
 {
