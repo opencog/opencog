@@ -22,7 +22,8 @@
 #ifndef SIMPLEANDRULE_H
 #define SIMPLEANDRULE_H
 
-using namespace opencog;
+#include <boost/lexical_cast.hpp>
+
 namespace opencog { namespace pln {
 
 const bool RuleResultFreshness = true;
@@ -39,13 +40,13 @@ public:
 	SimpleANDRule(AtomSpaceWrapper *_asw)
 	: ArityFreeANDRule(_asw)
 	{
-		name = "Simple AND Rule";
+		name = "SimpleANDRule" + boost::lexical_cast<std::string>(N);
 		for (int i = 0; i < N; i++)
 			inputFilter.push_back(meta(
 				new tree<Vertex>(mva((pHandle)ATOM))
 			));
 	}
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 	{
