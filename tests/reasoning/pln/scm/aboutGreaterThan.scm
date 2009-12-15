@@ -22,13 +22,11 @@
 (define a (ConceptNode "a"))
 (define b (ConceptNode "b"))
 (define c (ConceptNode "c"))
-(define ant (EvaluationLink (stv .5 1) agt (ListLink a b)))
-(EvaluationLink (stv 1 1) agt (ListLink b c))
+(define a_agt_b (EvaluationLink (stv .5 1) agt (ListLink a b)))
+(define b_agt_c (EvaluationLink (stv .5 1) agt (ListLink b c)))
+(define a_agt_c (EvaluationLink agt (ListLink a c)))
 ; intermediate rule (for start)
 (define impl
   (ImplicationLink (stv 0.5 1)
-      (AndLink
-           (EvaluationLink agt (ListLink a b))
-           (EvaluationLink agt (ListLink b c))
-           )
-      (EvaluationLink agt (ListLink a c))))
+      (AndLink a_agt_b b_agt_c)
+      a_agt_c))

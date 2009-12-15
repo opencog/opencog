@@ -548,7 +548,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
 
 
     strength_t sTot = 1.0f;
-    count_t conTot = 1.0f;
+    confidence_t conTot = 1.0f;
 
     for (int i = 0; i < N; i++) {
         printf("%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
