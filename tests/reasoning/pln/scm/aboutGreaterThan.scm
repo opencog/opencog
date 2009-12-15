@@ -30,3 +30,9 @@
   (ImplicationLink (stv 0.5 1)
       (AndLink a_agt_b b_agt_c)
       a_agt_c))
+;
+; Inference
+; csn stands from conclusion of step n
+;
+(define cs1 (SimpleANDRule a_agt_b b_agt_c))
+(define target (ModusPonensRule impl cs1))
