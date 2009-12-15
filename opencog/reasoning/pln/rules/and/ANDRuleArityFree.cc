@@ -133,15 +133,17 @@ BoundVertex ArityFreeANDRule::computeSymmetric(vector<Handle> nodes, Handle CX)
 }
 */
 
-void ArityFreeANDRule::DistinguishNodes(const std::vector<Vertex>& premiseArray, std::set<pHandle>& ANDlinks, std::set<pHandle>& nodes) const
+void ArityFreeANDRule::DistinguishNodes(const std::vector<Vertex>& premiseArray,
+                                        std::set<pHandle>& ANDlinks,
+                                        std::set<pHandle>& nodes) const
 {
-      const int n = premiseArray.size();
+    const int n = premiseArray.size();
       
     for (int pi = 0; pi < n; pi++)
         ((((Type)_v2h(premiseArray[pi])) == AND_LINK)
-            ? ANDlinks
-            : nodes
-            ).insert(_v2h(premiseArray[pi]));
+         ? ANDlinks
+         : nodes
+         ).insert(_v2h(premiseArray[pi]));
 }
 
 }} // namespace opencog { namespace pln {

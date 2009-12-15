@@ -22,6 +22,8 @@
 #ifndef ANDRULEARITYFREERULE_H
 #define ANDRULEARITYFREERULE_H
 
+#include "../../formulas/Formulas.h"
+
 namespace opencog { namespace pln {
 
 /**
@@ -38,14 +40,29 @@ protected:
 	SymmetricANDFormula fN;
 	AsymmetricANDFormula f2;
 public:
-	bool validate2				(MPs& args) const { return true; }
+	bool validate2(MPs& args) const { return true; }
 
 	bool asymmetric(Handle* A, Handle* B) const;
 	//Handle compute(Handle A, Handle B, Handle CX = NULL)  const; //std::vector<Handle> vh)
-	BoundVertex computeSymmetric(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
-	void DistinguishNodes(const std::vector<Vertex>& premiseArray, std::set<pHandle>& ANDlinks, std::set<pHandle>& nodes) const;
+	
+    BoundVertex computeSymmetric(const std::vector<Vertex>& premiseArray,
+                                 pHandle CX = PHANDLE_UNDEFINED) const;
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const=0;
+    /**
+     * partition premiseArray into atoms of type AND_LINK and others.
+     * AND_LINK atoms are inserted in ANDLinks and the others are inserted
+     * in nodes. Prior insertion neither ANDLinks not nodes are emptied.
+     *
+     * @param premiseArray The sequence of premises
+     * @param ANDLinks will contain the set of premises of type AND_LINK
+     * @param nodes will contain the set of premises of any type but AND_LINK
+     */
+	void DistinguishNodes(const std::vector<Vertex>& premiseArray,
+                          std::set<pHandle>& ANDlinks,
+                          std::set<pHandle>& nodes) const;
+
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED) const=0;
 };
 
 }} // namespace opencog { namespace pln {

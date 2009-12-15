@@ -25,6 +25,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../../PLNUtils.h"
+#include "ANDRuleArityFree.h"
 
 namespace opencog { namespace pln {
 
@@ -84,13 +85,15 @@ public:
 		return makeSingletonSet(ret);
 	}
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX=PHANDLE_UNDEFINED) const
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX=PHANDLE_UNDEFINED) const
 	{
 		pHandle *hs = new pHandle[premiseArray.size()];
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 		const int n = (int)premiseArray.size();
-		pHandleSeq dummy_outgoing;
-		dummy_outgoing.push_back(boost::get<pHandle>(premiseArray[0]));
+		pHandleSeq dummy_outgoing(boost::get<pHandle>(premiseArray[0]));
+        const TruthValue& dummy_tv 
+            = asw->getTV(boost::get<pHandle>(premiseArray[0]));
 
 		//printf("ANDRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
 
@@ -100,10 +103,9 @@ public:
 	*/
 		//currentDebugLevel = 3;
 		pHandle ret = ((N>1)
-			      ? UnorderedCcompute(asw, AND_LINK, fN, hs,n,CX)
-			      : asw->addLink(AND_LINK, dummy_outgoing,
-                                 asw->getTV(boost::get<pHandle>(premiseArray[0])),
-                                 RuleResultFreshness));
+                       ? UnorderedCcompute(asw, AND_LINK, fN, hs,n,CX)
+                       : asw->addLink(AND_LINK, dummy_outgoing, dummy_tv,
+                                      RuleResultFreshness));
 		    delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());

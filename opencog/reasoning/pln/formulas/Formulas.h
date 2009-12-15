@@ -349,7 +349,8 @@ public:
 };
 
 /**
- * 
+ * TV.strength = Prod_i TV[i].strength
+ * TV.confidence = Prod_i TV[i].confidence
  */ 
 class SymmetricANDFormula : public Formula<AND_MAX_ARITY>
 {
