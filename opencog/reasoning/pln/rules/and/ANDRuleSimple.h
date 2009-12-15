@@ -32,7 +32,7 @@ const bool RuleResultFreshness = true;
 /**
  * Add a link of type linkT connected to a given atom sequence (premiseArray)
  * with a TV calculated by fN.
- * Note that the implementation of method is in RuleFunctions.cc (why?)
+ * Note that the implementation of that function is in RuleFunctions.cc (why?)
  *
  * @param asw The AtomSpaceWrapper used for adding the link
  * @param linkT The type of the link to add
