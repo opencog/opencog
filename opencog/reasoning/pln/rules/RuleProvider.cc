@@ -152,7 +152,10 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AddRule(new Ext2IntRule(parent, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
     
     AddRule(new HypothesisRule(parent), 30.0f);
-    //	AddRule(new SimSubstRule1(parent), 5.0f);
+    // general -> specific
+    AddRule(new SimSubstRule1(parent, true), 5.0f);
+    // specific -> general
+    AddRule(new SimSubstRule1(parent, false), 5.0f);
     
     /* The rest of the Rules have rarely or never been used. Some of them just won't work. */
     

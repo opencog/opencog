@@ -25,13 +25,28 @@
 namespace opencog { namespace pln {
 
 /**
- * Left side stays constant, RHS is substed
+ * Left side stays constant, RHS is substed.
+ 
+ 
+1) Inh A B
+2) C (any atom that contains/is A)
+
+Output:
+C but with B instead of A.
+
  */
 class SimSubstRule1 : public GenericRule<InhSubstFormula>
 {
+protected:
+    /** Whether to generalize, i.e. go in the specific->general direction.
+    If false, it goes in the specific->general direction (i.e. the result contains
+    A instead of B.
+    */
+    bool generalize;
 public:
-	SimSubstRule1(AtomSpaceWrapper *_asw)
-	: GenericRule<InhSubstFormula>(_asw, false, "SimSubstRule")
+	SimSubstRule1(AtomSpaceWrapper *_asw, bool _generalize = true)
+	: GenericRule<InhSubstFormula>(_asw, false, "SimSubstRule"),
+	  generalize(_generalize)
 	{
 		inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)INHERITANCE_LINK,
 			mva((pHandle)ATOM),

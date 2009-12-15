@@ -72,13 +72,20 @@ Links are assumed not inheritable either.
         if ( asw->inheritsType(asw->getType(_v2h(*i)), LINK) )
             continue;
 
+        // Put the FW_VAR (child) into the templated atom
         Vertex old_i = *i;
         *i = child;
         BBvtree templated_atom1(new BoundVTree(*outh));
         *i = old_i;     
         
-        BBvtree inhPattern1(new BoundVTree(mva((pHandle)INHERITANCE_LINK,
-            mva(child), mva(*i))));
+        // Put the FW_VAR into an InheritanceLink
+        BBvtree inhPattern1;
+        if (generalize)
+            inhPattern1 = BBvtree(new BoundVTree(mva((pHandle)INHERITANCE_LINK,
+                mva(child), mva(*i))));
+        else
+            inhPattern1 = BBvtree(new BoundVTree(mva((pHandle)INHERITANCE_LINK,
+                mva(*i), mva(child))));
         
         MPs ret1;
         ret1.push_back(inhPattern1);
@@ -135,7 +142,10 @@ meta SimSubstRule1::i2oType(const vector<Vertex>& h) const
     // @todo if the child is a link, it will be real. This is OK.
 
     /// @todo What if child has a different structure to parent?
-    std::replace(ret->begin(), ret->end(), Vertex(hs[0]), Vertex(hs[1]));
+    if (generalize)
+        std::replace(ret->begin(), ret->end(), Vertex(hs[0]), Vertex(hs[1]));
+    else
+        std::replace(ret->begin(), ret->end(), Vertex(hs[1]), Vertex(hs[0]));
 
     printer.print(ret->begin());
 
