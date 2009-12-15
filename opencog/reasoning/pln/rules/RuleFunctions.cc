@@ -248,30 +248,30 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
     return ret;
 }
 
-pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT, const ArityFreeFormula<TruthValue,
-             TruthValue*>& fN, pHandle* premiseArray, const int n, pHandle CX)
+pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
+                          const ArityFreeFormula<TruthValue, TruthValue*>& fN,
+                          pHandle* premiseArray, const int n, pHandle CX)
 {
-        TruthValue** tvs = new TruthValue*[n];
-        for (int i = 0; i < n; i++)
-            tvs[i] = (TruthValue*) &(asw->getTV(premiseArray[i]));
-            //tvs[i] = (TruthValue*) destTable->getTruthValue(premiseArray[i]);
-//puts("Computing formula");
-        TruthValue* retTV = fN.compute(tvs, n);
-//puts("Creating outset");
-        pHandleSeq outgoing;
-        for (int j = 0; j < n; j++)
-            outgoing.push_back(premiseArray[j]);
-//puts("Adding link");
-        pHandle ret = asw->addLink(linkT, outgoing,
-            *retTV,
-            RuleResultFreshness);   
+    // tvs is to contain the TVs of the premises from premiseArray
+    TruthValue** tvs = new TruthValue*[n];
+    for (int i = 0; i < n; i++)
+        tvs[i] = (TruthValue*) &(asw->getTV(premiseArray[i]));
 
-        /// Release
-        
-        delete[] tvs;
-        delete retTV;
+    // compute TV result
+    TruthValue* retTV = fN.compute(tvs, n);
 
-        return ret;
+    // copy premiseArray into outgoing
+    pHandleSeq outgoing(premiseArray, premiseArray + n);
+
+    // add link
+    pHandle ret = asw->addLink(linkT, outgoing, *retTV, RuleResultFreshness);   
+
+    /// Release
+
+    delete[] tvs;
+    delete retTV;
+    
+    return ret;
 }
     
 Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, Type OutLinkType)

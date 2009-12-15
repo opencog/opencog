@@ -29,6 +29,20 @@
 namespace opencog { namespace pln {
 
 const bool RuleResultFreshness = true;
+/**
+ * Add a link of type linkT connected to a given atom sequence (premiseArray)
+ * with a TV calculated by fN.
+ * Note that the implementation of method is in RuleFunctions.cc (why?)
+ *
+ * @param asw The AtomSpaceWrapper used for adding the link
+ * @param linkT The type of the link to add
+ * @param premiseArray The sequence of premises
+ * @param n the number of premises (size of premiseArray
+ * @param CX Context to use for rule computation. Currently unused.
+ *
+ * @return The pHandle pointing to the added link of type linkT with premises
+ *         as outgoing atoms
+ */
 pHandle UnorderedCcompute(AtomSpaceWrapper *asw,
                           Type linkT, const ArityFreeFormula<TruthValue,
                                                              TruthValue*>& fN,
