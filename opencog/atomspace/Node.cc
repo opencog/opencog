@@ -89,11 +89,11 @@ std::string Node::toString() const
     if (name == "")
         tmpname = "#" + TLB::getHandle(this);
     //activation here at 0: can be replace with LTI
-    snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%f,%f)",
+    snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%s)",
              classserver().getTypeName(type).c_str(), tmpname.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
-             getTruthValue().getMean(), getTruthValue().getConfidence());
+             getTruthValue().toString().c_str());
     return buf;
 }
 
