@@ -14,8 +14,8 @@
 (define striped (ConceptNode "Striped"))
 (define predator (ConceptNode "Predator"))
 (define facingExtincion (ConceptNode "FacingExtincion"))
-; define default count
-(define dc 1)
+; define default confidence
+(define dc 0.5)
 ; Properties of Lion
 (SubsetLink (stv 1 dc) lion mammal)
 (SubsetLink (stv 1 dc) lion carnivor)

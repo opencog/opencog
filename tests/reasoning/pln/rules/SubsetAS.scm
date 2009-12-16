@@ -11,8 +11,8 @@
 (define e7 (Node "e7"))
 (define e8 (Node "e8"))
 (define e9 (Node "e9"))
-; define default count
-(define dc 1)
+; define default confidence
+(define dc 0.5)
 ; define member links of sub
 (MemberLink (stv 0.1 dc) e0 sub)
 (MemberLink (stv 0.5 dc) e2 sub)

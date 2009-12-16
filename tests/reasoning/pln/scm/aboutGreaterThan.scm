@@ -4,7 +4,7 @@
 (define x (VariableNode "x"))
 (define y (VariableNode "y"))
 (define z (VariableNode "z"))
-(ImplicationLink (stv 0.8 1)
+(ImplicationLink (stv 0.8 0.9)
     (AndLink
         (EvaluationLink
             agt
@@ -22,12 +22,12 @@
 (define a (ConceptNode "a"))
 (define b (ConceptNode "b"))
 (define c (ConceptNode "c"))
-(define a_agt_b (EvaluationLink (stv .5 1) agt (ListLink a b)))
-(define b_agt_c (EvaluationLink (stv .5 1) agt (ListLink b c)))
+(define a_agt_b (EvaluationLink (stv .5 0.8) agt (ListLink a b)))
+(define b_agt_c (EvaluationLink (stv .5 0.7) agt (ListLink b c)))
 (define a_agt_c (EvaluationLink agt (ListLink a c)))
 ; intermediate rule (for start)
 (define impl
-  (ImplicationLink (stv 0.5 1)
+  (ImplicationLink (stv 0.8 0.9)
       (AndLink a_agt_b b_agt_c)
       a_agt_c))
 ;

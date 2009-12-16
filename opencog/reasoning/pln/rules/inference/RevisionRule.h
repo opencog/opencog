@@ -22,6 +22,8 @@
 #ifndef REVISIONRULE_H
 #define REVISIONRULE_H
 
+#include "../../formulas/Formulas.h"
+
 namespace opencog { namespace pln {
 
 class RevisionRule : public GenericRule<RevisionFormula>
