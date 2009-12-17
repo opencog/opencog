@@ -50,7 +50,7 @@ Rule::setOfMPs ScholemFunctionProductionRule::o2iMetaExtra(meta outh, bool& over
 */
 
 boost::shared_ptr<std::set<BoundVertex > >
-ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh)
+ScholemFunctionProductionRule::attemptDirectProduction(meta outh)
 {
     boost::shared_ptr<std::set<BoundVertex > > ret;
 
@@ -92,7 +92,7 @@ ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh)
         ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
         ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
                                                     TruthValue::TRUE_TV(),
-                                                    fresh))));
+                                                    false))));
         return ret;
     }
     /// This Rule shouldn't be used to produce EXISTING Scholem function mappings!

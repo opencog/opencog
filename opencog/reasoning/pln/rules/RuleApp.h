@@ -162,8 +162,7 @@ public:
     bool validate2(MPs& _args) const { return true; }
 
     //NO_DIRECT_PRODUCTION; 
-    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = true)
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh)
     { 
         return Btr<std::set<BoundVertex> >(); 
     }

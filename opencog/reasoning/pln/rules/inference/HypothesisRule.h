@@ -42,8 +42,7 @@ public:
     {
         //inputFilter.push_back(new atom(result));
     }
-    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = false);
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

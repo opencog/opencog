@@ -55,8 +55,7 @@ public:
 
     bool validate2(MPs& args) const { return true; }
 
-    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
-                                                         bool fresh = true);
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
 };
 
 }} // namespace opencog { namespace pln {

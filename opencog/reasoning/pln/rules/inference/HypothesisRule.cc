@@ -32,7 +32,7 @@
 
 namespace opencog { namespace pln {
 
-boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh, bool fresh)
+boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProduction(meta outh)
 {
     std::set<BoundVertex>* ret = new std::set<BoundVertex>;
     
@@ -48,7 +48,7 @@ boost::shared_ptr<std::set<BoundVertex> > HypothesisRule::attemptDirectProductio
             
             ret->insert(BoundVertex(asw->addAtom(*outh,
                                                  TruthValue::TRIVIAL_TV(),
-                                                 fresh)));
+                                                 false)));
             
             cprintf(4,"HYP:\n");
             printer.print(_v2h(ret->begin()->value), 4);

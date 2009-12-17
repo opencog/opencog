@@ -74,8 +74,7 @@ bool ExpandEvaluationLinks(vtree& target, AtomSpaceWrapper* asw)
     return is_changed;
 }
         
-Btr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh,
-                                                                bool fresh)
+Btr<std::set<BoundVertex> > LookupRule::attemptDirectProduction(meta outh)
 {
     vtree target(*outh);
     
