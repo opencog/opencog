@@ -511,9 +511,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // emit add atom signal
     _addAtomSignal(handle);
-    if (logger().isDebugEnabled()) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
+    //if (logger().isDebugEnabled()) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
 
-    logger().fine("[AtomTable] add: %p", handle.value());
+    //logger().fine("[AtomTable] add: %p", handle.value());
 
     return handle;
 }
