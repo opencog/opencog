@@ -53,6 +53,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			bool (T::*b_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
+			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -62,6 +63,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			B_HI,  // return boolean, take handle and int
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
+			S_S,   // return string, take string
 			V_V    // return void, take void
 		} signature;
 
@@ -110,6 +112,16 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case S_S:
+				{
+					char *lstr = scm_to_locale_string(scm_car(args));
+					std::string str = lstr;
+					free(lstr);
+
+					const std::string &rs = (that->*method.s_s)(str);
+					rc = scm_from_locale_string(rs.c_str());
+					break;
+				}
 				case V_V:
 				{
 					(that->*method.v_v)();
@@ -145,8 +157,11 @@ class SchemePrimitive : public PrimitiveEnviron
 		do_register(name, 2); /* cb has 2 args */ \
 	}
 
+		// Declare and define the constructors for this class. They all have
+		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
+		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
@@ -178,6 +193,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T
 }
 
 DECLARE_DECLARE_1(Handle, Handle)
+DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
