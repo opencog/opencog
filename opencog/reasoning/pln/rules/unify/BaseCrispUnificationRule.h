@@ -28,30 +28,31 @@ class BaseCrispUnificationRule : public Rule
 {
 protected:
 public:
-
-	BaseCrispUnificationRule(AtomSpaceWrapper *_asw)
+    
+    BaseCrispUnificationRule(AtomSpaceWrapper *_asw)
 	: Rule(_asw,true,true,"CrispUnificationRule")
-	{
+    {
+        
+        inputFilter.push_back(meta(
+                                   new tree<Vertex>(mva((pHandle)ATOM))));
+        inputFilter.push_back(meta(
+                                   new tree<Vertex>(mva((pHandle)HYPOTHETICAL_LINK))
+                                   ));
+    }
+    
+    /**
+       Arg #1: ForAll formula
+       Arg #2: TopologicalLink of the desired result
+       Args #3-N: each of the atoms in the outgoingset of the ForAll's parent link.
+       These args won't be used in forward computation, but they may cause substitutions
+       which affect the Arg #2!
+    */
+    
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
 
-		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((pHandle)ATOM))));
-		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((pHandle)HYPOTHETICAL_LINK))
-			));
-	}
-
-	/**
-		Arg #1: ForAll formula
-		Arg #2: TopologicalLink of the desired result
-		Args #3-N: each of the atoms in the outgoingset of the ForAll's parent link.
-		These args won't be used in forward computation, but they may cause substitutions
-		which affect the Arg #2!
-	*/
-
-	BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
-
-	NO_DIRECT_PRODUCTION;
+    NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {

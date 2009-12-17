@@ -250,7 +250,8 @@ set<vector<C> >* newCreatePermutations(vector<C> seed)
 
 pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
                           const ArityFreeFormula<TruthValue, TruthValue*>& fN,
-                          pHandle* premiseArray, const int n, pHandle CX)
+                          pHandle* premiseArray, const int n, pHandle CX,
+                          bool fresh)
 {
     // tvs is to contain the TVs of the premises from premiseArray
     TruthValue** tvs = new TruthValue*[n];
@@ -264,7 +265,7 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
     pHandleSeq outgoing(premiseArray, premiseArray + n);
 
     // add link
-    pHandle ret = asw->addLink(linkT, outgoing, *retTV, RuleResultFreshness);   
+    pHandle ret = asw->addLink(linkT, outgoing, *retTV, fresh);
 
     /// Release
 

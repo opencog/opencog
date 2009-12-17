@@ -29,7 +29,7 @@
 
 const TruthValue& getTV(pHandle); 
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
-    attemptDirectProduction(meta outh) { \
+    attemptDirectProduction(meta outh, bool fresh = false) {  \
         return Btr<std::set<BoundVertex> >(); \
     }
 
@@ -142,23 +142,32 @@ public:
      *
      * @param h The vertices to compute on.
      * @param CX Context to use for rule computation. Currently unused.
+     * @param fresh allows atoms to be added with the same name/outgoing set.
+     *              If fresh == false and the atom already exist then the new
+     *              truth value is merged (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
      * @todo A future implementation may include 'bool ordered_already'
      * parameter to speed up.
      */
     virtual BoundVertex compute(const std::vector<Vertex>& h,
-                                pHandle CX = PHANDLE_UNDEFINED) const=0;
+                                pHandle CX = PHANDLE_UNDEFINED,
+                                bool fresh = true) const=0;
 
     //! A computation method on BoundVertex
     //! @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
     BoundVertex compute(const std::vector<BoundVertex>& h,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
 
     //! Try to call rule as a direct producer (Generator)
-    virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
+    virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h,
+                                                                bool fresh = true)=0;
 
     //! Just calls compute()
     BoundVertex operator() (const std::vector<Vertex> h,
-                            pHandle CX = PHANDLE_UNDEFINED) const
+                            pHandle CX = PHANDLE_UNDEFINED,
+                            bool fresh = true) const
         { return compute(h,CX); }
 
     /** Check validity.
@@ -186,7 +195,8 @@ public:
      * @return The result of the rule being computed.
      */
     BoundVertex computeIfValid (const std::vector<Vertex>& h,
-                                pHandle CX = PHANDLE_UNDEFINED) const;
+                                pHandle CX = PHANDLE_UNDEFINED,
+                                bool fresh = true) const;
 
     //Handle compute(Handle h1) const;
     //Handle compute(Handle h1, Handle h2) const;

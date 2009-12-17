@@ -50,7 +50,8 @@ Rule::~Rule()
         delete i->second;*/
 }
 
-BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
+BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX,
+                          bool fresh) const
 {
     bindingsT h_b;
     foreach(const BoundVertex& bv, h)
@@ -88,7 +89,7 @@ BoundVertex Rule::compute(const vector<BoundVertex>& h, pHandle CX) const
         }
     }
 
-    return BoundVertex(compute(rule_args, CX), bindings_of_all_args);
+    return BoundVertex(compute(rule_args, CX, fresh), bindings_of_all_args);
 }
 
 bool Rule::validate(const vector<Vertex>& h) const
@@ -144,10 +145,11 @@ bool Rule::validate(const vector<Vertex>& h) const
     return true;
 }
 
-BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX) const
+BoundVertex Rule::computeIfValid(const vector<Vertex>& h, pHandle CX,
+                                 bool fresh) const
 {
     if (validate(h))
-        return compute(h,CX);
+        return compute(h,CX, fresh);
     else
         return Vertex((pHandle) PHANDLE_UNDEFINED);
 }

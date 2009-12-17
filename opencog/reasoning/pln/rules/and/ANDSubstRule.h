@@ -27,15 +27,17 @@ namespace opencog { namespace pln {
 class ANDSubstRule : public Rule
 {
 protected:
-	ANDSubstRule(AtomSpaceWrapper *_asw)
-	: Rule(_asw,true,true,"ANDSubstRule")
-	{}
+    ANDSubstRule(AtomSpaceWrapper *_asw)
+        : Rule(_asw,true,true,"ANDSubstRule")
+    {}
 public:
-	bool validate2(MPs& args) const { return true; }
+    bool validate2(MPs& args) const { return true; }
 
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = Handle::UNDEFINED) const;
-	NO_DIRECT_PRODUCTION;
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        Handle CX = Handle::UNDEFINED,
+                        bool fresh = true) const;
+    NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {

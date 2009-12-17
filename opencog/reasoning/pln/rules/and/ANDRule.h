@@ -36,7 +36,8 @@ public:
 	//Btr<set<BoundVertex > > attemptDirectProduction(meta outh);
 
 	BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
+                            pHandle CX = PHANDLE_UNDEFINED,
+                            bool fresh = true) const;
 	
 	///! Direct production was used here before. @todo Check whether this should be resumed!
 	NO_DIRECT_PRODUCTION;

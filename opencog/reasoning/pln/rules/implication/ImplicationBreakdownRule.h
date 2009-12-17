@@ -28,10 +28,10 @@ namespace opencog { namespace pln {
 class ImplicationBreakdownRule : public Rule
 {
 public:
-	NO_DIRECT_PRODUCTION;
+    NO_DIRECT_PRODUCTION;
     
-	ImplicationBreakdownRule(AtomSpaceWrapper *_asw);
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    ImplicationBreakdownRule(AtomSpaceWrapper *_asw);
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     
     /**
      * Similar to StrictImplicationBreakdownRule but does not
@@ -44,9 +44,10 @@ public:
      *
      * @return the BoundVertex of the conclusion, A
      */
-	BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
-	bool validate2(MPs& args) const { return true; }
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
+    bool validate2(MPs& args) const { return true; }
 };
 
 }} // namespace opencog { namespace pln {

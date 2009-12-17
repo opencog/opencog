@@ -162,7 +162,8 @@ public:
     bool validate2(MPs& _args) const { return true; }
 
     //NO_DIRECT_PRODUCTION; 
-    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh)
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
+                                                         bool fresh = true)
     { 
         return Btr<std::set<BoundVertex> >(); 
     }
@@ -171,21 +172,25 @@ public:
     /// This method aborts with assert failure if the RuleApp is called
     /// with a wrong nr of args.
     BoundVertex compute(const std::vector<Vertex>& h,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
     
     /// Use this when you know that all the args have already been Bound.
     /// The result is cached so the performance is unproblematic.
-    BoundVertex compute(pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex compute(pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
     //{
     //	vector<VtreeProvider*> dummy_vp;
     //	return compute(dummy_vp.end(), dummy_vp.end(), CX);
     //}
     
     template<typename IterT>
-    BoundVertex compute(IterT begin, IterT end, pHandle CX = PHANDLE_UNDEFINED) const
+    BoundVertex compute(IterT begin, IterT end,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const
     {
         IterT next_unused_arg;
-        BoundVertex ret = compute(begin, end, next_unused_arg, CX);
+        BoundVertex ret = compute(begin, end, next_unused_arg, CX, fresh);
         assert(next_unused_arg == end); // We don't allow args to remain unused ultimately.
         return ret;
     }
@@ -194,7 +199,9 @@ public:
     /// that points to the first argument, of the given ones, which was not used.
     /// Note: An argument is not used if that same arg is already bound to a value.
     template<typename IterT, typename IterT2>
-    BoundVertex compute(IterT begin, IterT end, IterT2& nextUnusedArg, pHandle CX = PHANDLE_UNDEFINED) const
+    BoundVertex compute(IterT begin, IterT end, IterT2& nextUnusedArg,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const
     {
         std::vector<BoundVertex> bound_args;
         
@@ -215,63 +222,59 @@ public:
         nextUnusedArg = begin;
         
         for (std::vector<VtreeProvider*>::iterator ai = args.begin();
-             ai != args.end();
-             ++ai)
-            {
-                BoundVertex bv;
-                RuleApp* ra;
+             ai != args.end(); ++ai) {
+            BoundVertex bv;
+            RuleApp* ra;
                 
-                if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
-                    //A bound a arg is a RuleApp
-                    bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX);
-                else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != NULL)
-                    //A bound arg has type VtreeProviderWrapper
-                    bv = *((*ai)->getVtree().begin());
-                else  //A bound arg not found
-                    {
-                        if (nextUnusedArg == end) //No more caller-supplied args available
+            if ((ra = dynamic_cast<RuleApp*>(*ai)) != NULL)
+                //A bound a arg is a RuleApp
+                bv = ra->compute(nextUnusedArg, end, nextUnusedArg, CX, fresh);
+            else if (dynamic_cast<VtreeProviderWrapper*>(*ai) != NULL)
+                //A bound arg has type VtreeProviderWrapper
+                bv = *((*ai)->getVtree().begin());
+            else { //A bound arg not found
+                if (nextUnusedArg == end) //No more caller-supplied args available
 #if FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
-                            assert(0); //Not implemented yet
+                    assert(0); //Not implemented yet
 #else
+                {
+                    if (!root_rule->hasFreeInputArity())
                         {
-                            if (!root_rule->hasFreeInputArity())
-                                {
-                                    result = BoundVertex(PHANDLE_UNDEFINED);
-                                    goto out;
-                                }
-                            else // If no more arg information, and free input arity.
-                                {
-                                    break;
-                                }
+                            result = BoundVertex(PHANDLE_UNDEFINED);
+                            goto out;
                         }
+                    else // If no more arg information, and free input arity.
+                        {
+                            break;
+                        }
+                }
 #endif
                         
-                        bv = *(*(nextUnusedArg++))->getVtree().begin();
-                    }
+                bv = *(*(nextUnusedArg++))->getVtree().begin();
+            }
                 
 #if !FORMULA_CAN_COMPUTE_WITH_EMPTY_ARGS
-                if (bv.value == Vertex(PHANDLE_UNDEFINED))
-                    {
-                        nextUnusedArg = end;
-                        result = BoundVertex(PHANDLE_UNDEFINED);
-                        goto out;
-                    }
+            if (bv.value == Vertex(PHANDLE_UNDEFINED))
+                {
+                    nextUnusedArg = end;
+                    result = BoundVertex(PHANDLE_UNDEFINED);
+                    goto out;
+                }
 #endif
                 
-                //assert(v2h(bv.value)->isReal());
-                assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
+            //assert(v2h(bv.value)->isReal());
+            assert(!GET_ASW->isType(boost::get<pHandle>(bv.value)));
                 
-                bound_args.push_back(bv);
-            }
+            bound_args.push_back(bv);
+        }
         
-        result = root_rule->compute(bound_args);
+        result = root_rule->compute(bound_args, fresh);
         
         /// This used to be below out, but when args are empty so is
         ///result.value and isReal is false
         assert(!GET_ASW->isType(boost::get<pHandle>(result.value)));
     out:
-        
-        
+                
         return result;
     }
 };

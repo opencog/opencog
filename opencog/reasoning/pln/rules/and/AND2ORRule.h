@@ -51,7 +51,8 @@ class AND2ORRule : public Rule
     }
 
     BoundVertex compute(const vector<Vertex>& premiseArray,
-                        Handle CX = NULL) const
+                        Handle CX = NULL,
+                        bool fresh = true) const
     {
         assert(n==1);
         return AND2ORLink(premiseArray[0]);

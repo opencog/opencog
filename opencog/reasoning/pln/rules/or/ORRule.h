@@ -22,6 +22,8 @@
 #ifndef ORRULE_H
 #define ORRULE_H
 
+#include "../GenericRule.h"
+
 namespace opencog { namespace pln {
 
 class ORRule : public GenericRule<ORFormula>
@@ -33,7 +35,7 @@ public:
 	NO_DIRECT_PRODUCTION;
 	
 	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
-                                       int* newN) const;
+                                           int* newN) const;
 public:
 	bool validate2(MPs& args) const { return true; }
 

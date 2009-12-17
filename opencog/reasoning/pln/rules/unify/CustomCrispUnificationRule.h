@@ -29,33 +29,34 @@ class CustomCrispUnificationRule : public Rule
 protected:
     /** The ForAllLink that this rule has been instantiated for.
      */
-	pHandle hForAllLink;
+    pHandle hForAllLink;
 
 public:
-	CustomCrispUnificationRule(pHandle _hForAllLink,
+    CustomCrispUnificationRule(pHandle _hForAllLink,
                                AtomSpaceWrapper *_asw)
         : Rule(_asw,false,false,"CustomCrispUnificationRule"),
-        hForAllLink(_hForAllLink)
-	{
-		inputFilter.push_back(
-                meta(new tree<Vertex>(mva((pHandle)ATOM))));
-	}
+          hForAllLink(_hForAllLink)
+    {
+        inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
+    }
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const
-	{
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const
+    {
         // Assumedly, this assert(0) is because a CustomCrispUnification rule
         // only makes sense when the variables within the ForAllLink are bound.
-		assert(0);
-		return Vertex(PHANDLE_UNDEFINED);
-	}
+        assert(0);
+        return Vertex(PHANDLE_UNDEFINED);
+    }
 
-	setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{ return Rule::setOfMPs(); }
+    setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    { return Rule::setOfMPs(); }
 
-	bool validate2(MPs& args) const { return true; }
+    bool validate2(MPs& args) const { return true; }
 
-	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
+                                                         bool fresh = true);
 };
 
 }} // namespace opencog { namespace pln {

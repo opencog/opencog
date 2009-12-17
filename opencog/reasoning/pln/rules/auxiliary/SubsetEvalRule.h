@@ -50,7 +50,8 @@ public:
                                int* newN) const;
     
     BoundVertex compute(const vector<Vertex>& premiseArray,
-                        pHandle CX = NULL) const;
+                        pHandle CX = NULL,
+                        bool fresh = true) const;
 
     //TODO: note sure it is enough
     bool validate2(MPs& args) const {

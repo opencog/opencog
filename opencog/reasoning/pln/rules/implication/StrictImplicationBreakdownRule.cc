@@ -73,7 +73,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
     return makeSingletonSet(ret);
 }
 
-BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX, bool fresh) const
 {
     assert(validate(premiseArray));
     
@@ -143,7 +143,7 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     // context is added and this is translated into a different resulting
     // pHandle (but of course they both correspond to the same atom).
     // See AtomSpaceWrapper.h for more info
-    pHandle ret = asw->updateTV(conclusion, *retTV, RuleResultFreshness);
+    pHandle ret = asw->updateTV(conclusion, *retTV, fresh);
     
     delete retTV;
     

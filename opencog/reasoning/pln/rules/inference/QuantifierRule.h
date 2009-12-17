@@ -52,7 +52,8 @@ public:
     //Domain should be inferred instead from the premis ConceptNodes!!!
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const
     {
         const int n = (int)premiseArray.size();
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[n];
@@ -67,7 +68,7 @@ public:
         //haxx::
         pHandle ret = asw->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
                                    *retTV,
-                                   RuleResultFreshness);	
+                                   fresh);	
         //				false);
         
         delete retTV;

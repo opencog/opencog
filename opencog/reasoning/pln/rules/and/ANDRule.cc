@@ -38,43 +38,43 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     
     tree<Vertex>::iterator top = outh->begin();
 
-        if (! (asw->inheritsType(asw->getType(_v2h(*top)), AND_LINK)) ||
-            top.number_of_children() <= 2)  
+    if (! (asw->inheritsType(asw->getType(_v2h(*top)), AND_LINK)) ||
+        top.number_of_children() <= 2)  
+        return Rule::setOfMPs();
+
+    /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
+
+    for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
+        if (asw->inheritsType(asw->getType(_v2h(*j)), AND_LINK))
             return Rule::setOfMPs();
 
-        /// This Rule cannot produce nested ANDLinks. Try SimpleANDRule instead.
+    MPs ret;
 
-        for (tree<Vertex>::sibling_iterator j = outh->begin(top); j != outh->end(top); j++)
-            if (asw->inheritsType(asw->getType(_v2h(*j)), AND_LINK))
-                return Rule::setOfMPs();
-
-        MPs ret;
-
-        std::set<atom,lessatom> query_set;
-        for (tree<Vertex>::sibling_iterator i = outh->begin(top); i != outh->end(top); i++)
+    std::set<atom,lessatom> query_set;
+    for (tree<Vertex>::sibling_iterator i = outh->begin(top); i != outh->end(top); i++)
         {
             tree<Vertex> t_tmp(i);
             query_set.insert(atom(t_tmp, t_tmp.begin()));
         }
 
-        /// Smart lookup begins
+    /// Smart lookup begins
 
-        Btr<std::set<pHandle> > sANDLink_set = asw->getHandleSet(AND_LINK,"");
-        std::vector<pHandle> ANDLink_set(sANDLink_set->size());
-        std::copy(sANDLink_set->begin(), sANDLink_set->end(), ANDLink_set.begin());
+    Btr<std::set<pHandle> > sANDLink_set = asw->getHandleSet(AND_LINK,"");
+    std::vector<pHandle> ANDLink_set(sANDLink_set->size());
+    std::copy(sANDLink_set->begin(), sANDLink_set->end(), ANDLink_set.begin());
 
-        while (1)
+    while (1)
         {
             std::vector<Btr<atom> > max_subset;
-
+            
             getLargestIntersection2(query_set, ANDLink_set, max_subset);
-
+            
             if (max_subset.size() > 1)
             {
                 for (uint s=0; s < max_subset.size(); s++)
                     query_set.erase(*max_subset[s]);
 
-				ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(asw))));
+                ret.push_back(BBvtree(new BoundVTree(atom(AND_LINK, max_subset).makeHandletree(asw))));
 
                 continue;
             }
@@ -83,13 +83,13 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 
         /// Add the remaining ones.
 
-		for (std::set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
-			ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(asw))));
-
-        overrideInputFilter = true;
-
+    for (std::set<atom, lessatom>::iterator i = query_set.begin(); i != query_set.end(); i++)
+        ret.push_back(BBvtree(new BoundVTree(i->makeHandletree(asw))));
+    
+    overrideInputFilter = true;
+    
         
-        return makeSingletonSet(ret);
+    return makeSingletonSet(ret);
 }
 
 /*boost::shared_ptr<set<BoundVertex > > ANDRule::attemptDirectProduction(meta outh);
@@ -97,96 +97,98 @@ Rule::setOfMPs ANDRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     return attemptDirectANDProduction(asw, outh, this);
 }*/
 
-BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray,
+                             pHandle CX,
+                             bool fresh) const
 {
     const int n = premiseArray.size();
-  try
-  {     
-    for (int i=0; i < n; i++)
-        if (!_v2h(&premiseArray[i]))
-            return Vertex(PHANDLE_UNDEFINED);
+    try
+        {     
+            for (int i=0; i < n; i++)
+                if (!_v2h(&premiseArray[i]))
+                    return Vertex(PHANDLE_UNDEFINED);
 
     // The items in the the premiseArray are divided into ANDLinks and nodes.
     // Then, the nodes are combined into a single ANDlink by symmetric AND formula,
     // and added to the list of ANDlinks.
     
-    int p=0;
+            int p=0;
     
     
-LOG(3, "ANDRule::compute");
+            LOG(3, "ANDRule::compute");
 
-    std::set<pHandle> premises, nodes;
-    DistinguishNodes(premiseArray, premises, nodes);
-LOG(4, "ANDRule::compute");
+            std::set<pHandle> premises, nodes;
+            DistinguishNodes(premiseArray, premises, nodes);
+            LOG(4, "ANDRule::compute");
 //  if (!nodes.empty())
 //      premises.push_back( computeSymmetric(nodes) );
 
-    for (std::set<pHandle>::iterator j = nodes.begin(); j != nodes.end(); j++) //Nodes included also separately.
-    {
-        premises.insert(*j);
-    }
-LOG(4, "ANDRule::compute");
-    TruthValue **partialTVs = new TruthValue*[premises.size()];
+            for (std::set<pHandle>::iterator j = nodes.begin(); j != nodes.end(); j++) //Nodes included also separately.
+                {
+                    premises.insert(*j);
+                }
+            LOG(4, "ANDRule::compute");
+            TruthValue **partialTVs = new TruthValue*[premises.size()];
 
-    std::set<pHandle>::const_iterator i;
-    std::set<pHandle> conjunct;
-    std::set<TruthValue*> TVowner;
+            std::set<pHandle>::const_iterator i;
+            std::set<pHandle> conjunct;
+            std::set<TruthValue*> TVowner;
 
     /// Create the set of elements in the result conjunction
-LOG(4, "ANDRule::computeCC");
-    for (i = premises.begin(); i != premises.end(); i++)
-    {
-        std::vector<pHandle> inc2;
-
-        if (asw->isSubType(*i, AND_LINK))
-            inc2 = asw->getOutgoing(*i);
-        else
-            inc2.push_back(*i);
-
-        const std::vector<pHandle>* inc = &inc2;
-        
-        for (std::vector<pHandle>::const_iterator j = inc->begin(); j != inc->end(); j++)
-            if (conjunct.find(*j) == conjunct.end())
-                conjunct.insert(*j);
-    }
-LOG(4, "22 ANDRule::compute");
-    /// Loop thru the premises, creating the partialTVs.
-
-    for (p=0, i = premises.begin(); i != premises.end(); i++, p++)
-    {
-LOG(4, "Q ANDRule::compute");
-    /// Put into Di all the elements of the result conjunct not present in the premise #i
-        std::set<pHandle> Di;
-        for (std::set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
-        {
-            std::vector<pHandle> inc2; // = asw->getOutgoing(*i);
-
-            if (asw->isSubType(*i, AND_LINK))
-                inc2 = asw->getOutgoing(*i);
-            else
-                inc2.push_back(*i);
-
-            std::vector<pHandle>* inc = &inc2;
-            if (!vectorHas<pHandle>(*inc, *j))
-                Di.insert(*j);
-        }
-LOG(4, "W ANDRule::compute");
-        int Dis = Di.size();
-    
-        std::set<pHandle> DiSubsets;
-        pHandle largest_intersection;
-
-LOG(4,"ANDRule::compute:");
-
-NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-for (std::set<pHandle>::const_iterator di = Di.begin(); di != Di.end(); di++)
-    printer.print(*di, 4);
-        
-LOG(4, "ANDRule:: getLargestIntersection");
-        while (getLargestIntersection(Di, premises, largest_intersection))
-        {
-cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
-            const std::vector<pHandle> new_elem2 = asw->getOutgoing(largest_intersection);
+            LOG(4, "ANDRule::computeCC");
+            for (i = premises.begin(); i != premises.end(); i++)
+                {
+                    std::vector<pHandle> inc2;
+                    
+                    if (asw->isSubType(*i, AND_LINK))
+                        inc2 = asw->getOutgoing(*i);
+                    else
+                        inc2.push_back(*i);
+                    
+                    const std::vector<pHandle>* inc = &inc2;
+                    
+                    for (std::vector<pHandle>::const_iterator j = inc->begin(); j != inc->end(); j++)
+                        if (conjunct.find(*j) == conjunct.end())
+                            conjunct.insert(*j);
+                }
+            LOG(4, "22 ANDRule::compute");
+            /// Loop thru the premises, creating the partialTVs.
+            
+            for (p=0, i = premises.begin(); i != premises.end(); i++, p++)
+                {
+                    LOG(4, "Q ANDRule::compute");
+                    /// Put into Di all the elements of the result conjunct not present in the premise #i
+                    std::set<pHandle> Di;
+                    for (std::set<pHandle>::const_iterator j = conjunct.begin(); j != conjunct.end(); j++)
+                        {
+                            std::vector<pHandle> inc2; // = asw->getOutgoing(*i);
+                            
+                            if (asw->isSubType(*i, AND_LINK))
+                                inc2 = asw->getOutgoing(*i);
+                            else
+                                inc2.push_back(*i);
+                            
+                            std::vector<pHandle>* inc = &inc2;
+                            if (!vectorHas<pHandle>(*inc, *j))
+                                Di.insert(*j);
+                        }
+                    LOG(4, "W ANDRule::compute");
+                    int Dis = Di.size();
+                    
+                    std::set<pHandle> DiSubsets;
+                    pHandle largest_intersection;
+                    
+                    LOG(4,"ANDRule::compute:");
+                    
+                    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+                    for (std::set<pHandle>::const_iterator di = Di.begin(); di != Di.end(); di++)
+                        printer.print(*di, 4);
+                    
+                    LOG(4, "ANDRule:: getLargestIntersection");
+                    while (getLargestIntersection(Di, premises, largest_intersection))
+                        {
+                            cprintf(4,"Y ANDRule::compute Di size = %u\n", (uint) Di.size());          
+                            const std::vector<pHandle> new_elem2 = asw->getOutgoing(largest_intersection);
 
 #ifdef WIN32            
             for (std::vector<pHandle>::const_iterator k = new_elem2.begin(); k != new_elem2.end();)
@@ -267,8 +269,7 @@ LOG(4, "33 ANDRule::compute");
     for (std::set<pHandle>::const_iterator c = conjunct.begin(); c != conjunct.end(); c++)
         outgoing.push_back(*c);
 LOG(4, "44 ANDRule::compute");
-    pHandle ret = asw->addLink(AND_LINK, outgoing, *retTV,
-                               RuleResultFreshness);   
+    pHandle ret = asw->addLink(AND_LINK, outgoing, *retTV, fresh);
     
 LOG(4, "55 ANDRule::compute");
     delete[] partialTVs;

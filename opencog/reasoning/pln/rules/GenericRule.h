@@ -58,7 +58,8 @@ public:
         : Rule(_asw, _FreeInputArity, true, _name) { }
 
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const {
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const {
         const int n = (const int) premiseArray.size();
 
         printf("<Generic rule args> ");
@@ -82,7 +83,7 @@ public:
         }
 
         printf("Computing TV... \n");
-        TruthValue* retTV = formula.compute(tvs, TVN);
+        TruthValue* retTV = formula.compute(tvs, TVN, fresh);
         printf("TV computation ok\n");
 
         delete[] tvs;

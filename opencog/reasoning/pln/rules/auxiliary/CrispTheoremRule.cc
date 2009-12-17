@@ -256,7 +256,8 @@ bool htemp=false;
 
 
 BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
-                                      pHandle CX) const
+                                      pHandle CX,
+                                      bool fresh) const
 {
     /*vtree res(mva((Handle)IMPLICATION_LINK,
         mva(nm->getOutgoing(v2h(premiseArray[0]))[0]),
@@ -298,8 +299,10 @@ BoundVertex CrispTheoremRule::compute(const vector<Vertex>& premiseArray,
     
 //  cprintf(0,"CrispTheoremRule::compute... TV ok\n");
     
-    TruthValue* tv = (use_AND_rule?SymmetricANDFormula().compute(tvs,real_args):tvs[0]->clone());
-    pHandle ret_h = asw->addAtom(res, *tv, true);
+    TruthValue* tv = (use_AND_rule?
+                      SymmetricANDFormula().compute(tvs, real_args, fresh)
+                      : tvs[0]->clone());
+    pHandle ret_h = asw->addAtom(res, *tv, fresh);
     delete tv;
     
 	cprintf(3,"CrispTheoremRule::compute produced:\n");

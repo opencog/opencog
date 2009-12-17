@@ -27,20 +27,23 @@ namespace opencog { namespace pln {
 class HypothesisRule : public Rule
 {
 protected:
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const
-	{
-		return premiseArray[0];
-	}
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const
+    {
+        return premiseArray[0];
+    }
 public:
-	bool validate2(MPs& args) const { return true; }
-	HypothesisRule(AtomSpaceWrapper *_asw)
+    bool validate2(MPs& args) const { return true; }
+    HypothesisRule(AtomSpaceWrapper *_asw)
 	: Rule(_asw, false, false, "Hypothesis")
-	{
-		//inputFilter.push_back(new atom(result));
-	}
-	Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh);
+    {
+        //inputFilter.push_back(new atom(result));
+    }
+    Btr<std::set<BoundVertex > > attemptDirectProduction(meta outh,
+                                                         bool fresh = false);
 };
 
 }} // namespace opencog { namespace pln {

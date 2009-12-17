@@ -56,13 +56,14 @@ Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilte
         return makeSingletonSet(ret);*/
 }
 
-BoundVertex ORPartitionRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex ORPartitionRule::compute(const std::vector<Vertex>& premiseArray,
+                                     pHandle CX, bool fresh) const
 {
 /*  Handle *hs = new Handle[premiseArray.size()];
     transform(premiseArray.begin(), premiseArray.end(), hs[0], DropVertexBindings()); //mem_fun(
     const int n = premiseArray.size();*/
 
-    BoundVertex ret = regularOR->compute(premiseArray,CX);
+    BoundVertex ret = regularOR->compute(premiseArray, CX, fresh);
 //  delete[] hs;
     return ret;
 }

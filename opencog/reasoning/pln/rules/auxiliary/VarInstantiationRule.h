@@ -32,35 +32,34 @@ class VarInstantiationRule :	public Sim2InhRule<MEMBER_LINK>, //public Eval2MemR
 /*protected:
 	Sim2InhFormula formula;*/
 public:
-	VarInstantiationRule(AtomSpaceWrapper *_asw)
+    VarInstantiationRule(AtomSpaceWrapper *_asw)
 	: Rule(_asw)
-	{
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(VARIABLE_NODE))));
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(CONCEPT_NODE))));
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(SIMILARITY_LINK))));
-		inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
-	}
-	virtual atom i2oType(Handle* h, const int n) const
-	{
-		return atom(EVALUATION_LINK, 2,
-						new atom(h[0]),
-						new atom(h[2]));
-	}
+    {
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(VARIABLE_NODE))));
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(CONCEPT_NODE))));
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(SIMILARITY_LINK))));
+        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EVALUATION_LINK))));
+    }
+    virtual atom i2oType(Handle* h, const int n) const
+    {
+        return atom(EVALUATION_LINK, 2, new atom(h[0]), new atom(h[2]));
+    }
 
 public:
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		return Rule::setOfMPs(); //No support (yet)
-/*		if (!inheritsType(out, ProductLinkType()))
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        return Rule::setOfMPs(); //No support (yet)
+        /*		if (!inheritsType(out, ProductLinkType()))
 			return Rule::setOfMPs();
-		MPs ret;
-		ret.insert(new atom(atomWithNewType(outh, LinkType)));
-		return ret;*/
-	}
+                        MPs ret;
+                        ret.insert(new atom(atomWithNewType(outh, LinkType)));
+                        return ret;*/
+    }
 
-  BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
-  {
+    BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL,
+                        bool fresh = true) const
+    {
 	assert(n == 5);
 	LINKTYPE_ASSERT(premiseArray[0], EVALUATION_LINK);
 	LINKTYPE_ASSERT(premiseArray[1], VARIABLE_NODE);
@@ -70,11 +69,11 @@ public:
 
 	HandleSeq PforB = asw->getOutgoing(premiseArray[4]);
 	Handle hP = PforB[0];
-
+        
 	Handle hC = SatisfyingSet(hP);
 	Handle hA = (premiseArray[2]);
 	Handle hB = (asw->getOutgoing(premiseArray[3])[1]); //2nd of sim(A,B) std::vector
-
+        
 	Handle inhAB = Sim2InhRule<InheritanceLinkType>::compute(&premiseArray[3], 1);
 	//Handle inhBP = Eval2MemRule::compute(&premiseArray[0], 1);
 	Handle BsP [] = { hB, hC };
@@ -96,14 +95,12 @@ public:
 
 	const TruthValue& retTV = asw->getTV(eval1);
 
-	Handle ret = asw->addLink(EVALUATION_LINK, retlist,
-                              retTV,
-                              RuleResultFreshness);	
+	Handle ret = asw->addLink(EVALUATION_LINK, retlist, retTV, fresh);	
 
 	//! @todo Delete the resulting dummy 'eval1' node!
 
 	return ret;
-  }
+    }
 };
 
 }} // namespace opencog { namespace pln {

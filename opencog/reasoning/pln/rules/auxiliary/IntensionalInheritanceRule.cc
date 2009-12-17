@@ -62,7 +62,7 @@ meta IntensionalInheritanceRule::i2oType(const vector<Vertex>& h_vec) const
 }
 
 BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArray,
-                                                pHandle CX) const
+                                                pHandle CX, bool fresh) const
 {
     OC_ASSERT(premiseArray.size() == 2);
 
@@ -76,11 +76,12 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     pHandle super_ASSOC_h = CreateConceptASSOC(_asw, super_h);
 
     const vector<Vertex> ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
-    BoundVertex bv = _sser.compute(ASSOC_vv);
+    BoundVertex bv = _sser.compute(ASSOC_vv, fresh);
     pHandle subset_ASSOC_h = _v2h(bv.GetValue());
 
     pHandle ret = _asw->addAtom(*i2oType(premiseArray),
-                                _asw->getTV(subset_ASSOC_h), true);
+                                _asw->getTV(subset_ASSOC_h),
+                                fresh);
     return BoundVertex(ret);
 }
 

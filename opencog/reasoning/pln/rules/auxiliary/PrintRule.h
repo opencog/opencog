@@ -27,27 +27,29 @@ namespace opencog { namespace pln {
 class PrintRule : public Rule
 {
 public:
-	PrintRule(AtomSpaceWrapper *_asw)
+    PrintRule(AtomSpaceWrapper *_asw)
 	: Rule(_asw,false,true,"PrintRule")
-	{
-		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)ATOM))));
-		inputFilter.push_back(meta(
-				new tree<Vertex>(mva((Handle)ATOM))));
-	}
+    {
+        inputFilter.push_back(meta(
+                                   new tree<Vertex>(mva((Handle)ATOM))));
+        inputFilter.push_back(meta(
+                                   new tree<Vertex>(mva((Handle)ATOM))));
+    }
+    
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        return Rule::setOfMPs();
+    }
+    
+    NO_DIRECT_PRODUCTION;
 
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
-	{
-		return Rule::setOfMPs();
-	}
-
-	NO_DIRECT_PRODUCTION;
-
-  BoundVertex compute(const vector<Vertex>& premiseArray, Handle CX = NULL) const
-  {
-  	for (int i = 0; i < premiseArray.size(); i++)
-  		printTree(premiseArray[i], 0, 0);
-  }
+    BoundVertex compute(const vector<Vertex>& premiseArray,
+                        Handle CX = NULL,
+                        bool fresh = true) const
+    {
+        for (int i = 0; i < premiseArray.size(); i++)
+            printTree(premiseArray[i], 0, 0);
+    }
 };
 #endif
 

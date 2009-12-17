@@ -42,23 +42,24 @@ const vtree& RuleApp::getVtree() const
 	return vt_result;
 }*/
 
-BoundVertex RuleApp::compute(const vector<Vertex>& h, pHandle CX) const
+BoundVertex RuleApp::compute(const vector<Vertex>& h, pHandle CX,
+                             bool fresh) const
 {
     vector<VtreeProvider*>::iterator next_unused_arg;
     
     vector<VtreeProvider*> vs;
     Vertices_TO_VtreeProviders(h, back_inserter(vs));
     
-    BoundVertex ret = compute(vs.begin(), vs.end(), next_unused_arg, CX);
+    BoundVertex ret = compute(vs.begin(), vs.end(), next_unused_arg, CX, fresh);
     assert(next_unused_arg == vs.end()); // We don't allow args to remain unused ultimately.
     
     return ret;
 }
 
-BoundVertex RuleApp::compute(pHandle CX) const
+BoundVertex RuleApp::compute(pHandle CX, bool fresh) const
 {
     vector<VtreeProvider*> dummy_vp;
-    return compute(dummy_vp.end(), dummy_vp.end(), CX);
+    return compute(dummy_vp.end(), dummy_vp.end(), CX, fresh);
 }
 
 RuleApp::~RuleApp() {

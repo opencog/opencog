@@ -29,7 +29,6 @@
 
 namespace opencog { namespace pln {
 
-const bool RuleResultFreshness = true;
 /**
  * Add a link of type linkT connected to a given atom sequence (premiseArray)
  * with a TV calculated by fN.
@@ -48,7 +47,8 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw,
                           Type linkT, const ArityFreeFormula<TruthValue,
                                                              TruthValue*>& fN,
                           pHandle* premiseArray,
-                          const int n, pHandle CX=PHANDLE_UNDEFINED);
+                          const int n, pHandle CX=PHANDLE_UNDEFINED,
+                          bool fresh = true);
 
 template<int N>
 class SimpleANDRule : public ArityFreeANDRule
@@ -86,7 +86,8 @@ public:
 	}
 
 	BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX=PHANDLE_UNDEFINED) const
+                            pHandle CX=PHANDLE_UNDEFINED,
+                            bool fresh = true) const
 	{
 		pHandle *hs = new pHandle[premiseArray.size()];
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
@@ -103,9 +104,10 @@ public:
 	*/
 		//currentDebugLevel = 3;
 		pHandle ret = ((N>1)
-                       ? UnorderedCcompute(asw, AND_LINK, fN, hs,n,CX)
-                       : asw->addLink(AND_LINK, dummy_outgoing, dummy_tv,
-                                      RuleResultFreshness));
+                               ? UnorderedCcompute(asw, AND_LINK, fN,
+                                                   hs, n, CX, fresh)
+                       : asw->addLink(AND_LINK, dummy_outgoing,
+                                      dummy_tv, fresh));
 		    delete[] hs;
 
 		      //		printf("=> ANDRUle: %s:\n", ret, getTruthValue(ret)->toString().c_str());

@@ -22,6 +22,8 @@
 #ifndef ORPARTITIONRULE_H
 #define ORPARTITIONRULE_H
 
+#include "ORRule.h"
+
 namespace opencog { namespace pln {
 
 /** @class ORPartitionRule
@@ -30,20 +32,22 @@ namespace opencog { namespace pln {
 
 class ORPartitionRule : public Rule
 {
-	ORRule* regularOR;
+    ORRule* regularOR;
 public:
 
-	ORPartitionRule(AtomSpaceWrapper *_asw)
-	: Rule(_asw, true, true, "ORPartitionRule") 
-	{
-		regularOR = new ORRule(_asw);
-	}
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	bool validate2				(MPs& args) const { return true; }
+    ORPartitionRule(AtomSpaceWrapper *_asw)
+        : Rule(_asw, true, true, "ORPartitionRule") 
+    {
+        regularOR = new ORRule(_asw);
+    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
+    bool validate2(MPs& args) const { return true; }
 	
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
 	
-	NO_DIRECT_PRODUCTION;
+    NO_DIRECT_PRODUCTION;
 };
 
 }} // namespace opencog { namespace pln {

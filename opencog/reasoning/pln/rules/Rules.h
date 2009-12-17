@@ -106,8 +106,6 @@
 #define USE_ALL_AVAILABLE_INFORMATION_FOR_AND_RULE_COMPUTATION 1
 #define MAX_ARITY_FOR_PERMUTATION 5
 
-//const bool RuleResultFreshness = true;
-
 /** 
  * The basic problem of an individual is distinguishing between <i>who he
  * "really" is</i> and the "identity" (mental image and related ingrained

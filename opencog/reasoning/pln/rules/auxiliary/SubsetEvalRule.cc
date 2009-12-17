@@ -140,7 +140,8 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
 
 
 BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
-                                    pHandle CX) const
+                                    pHandle CX,
+                                    bool fresh) const
 {
     int N;
 
@@ -154,7 +155,7 @@ BoundVertex SubsetEvalRule::compute(const vector<Vertex>& premiseArray,
 
     delete tvs;
 
-    pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, true);
+    pHandle ret = _asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
     return BoundVertex(ret);
 }
 

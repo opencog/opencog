@@ -489,7 +489,11 @@ bool substitutableTo(atom& from, atom& to,
 const float MIN_CONFIDENCE = 0.0000001f;
 
 /// index arg is not used
-
+/**
+ * @todo sometimes addAtom is used with fresh = false and sometimes with
+ * fresh = true, it is not clear why, maybe a bug. Once this is clear maybe
+ * that function should take in argument fresh.
+ */
 void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
                          const Type VarT, int index)
 {

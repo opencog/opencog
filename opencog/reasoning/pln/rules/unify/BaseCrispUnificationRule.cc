@@ -30,7 +30,7 @@
 
 namespace opencog { namespace pln {
 
-BoundVertex BaseCrispUnificationRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX) const
+BoundVertex BaseCrispUnificationRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX, bool fresh) const
 {
     const int n = premiseArray.size();
     
@@ -54,8 +54,7 @@ BoundVertex BaseCrispUnificationRule::compute(const std::vector<Vertex>& premise
     
     pHandle ret= asw->addLink(asw->getType(topologicalStub),
                               asw->getOutgoing(topologicalStub),
-                              tv,
-                              RuleResultFreshness);   
+                              tv, fresh);   
 
     return Vertex(ret);
 }

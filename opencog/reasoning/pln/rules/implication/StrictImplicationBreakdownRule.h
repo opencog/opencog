@@ -37,11 +37,17 @@ public:
     /**
      * @param premiseArray a vector of premises, (A->B, A)
      * @param CX Context to use for rule computation. Currently unused.
+     * @param fresh allows atoms to be added with the same name/outgoing set.
+     *              If fresh == false and the atom already exist then the new
+     *              truth value is merged (via TruthValue::merge) with the old.
+     *              Otherwise (fresh == true) then a new dummy context
+     *              is associated to that new truth value.
      *
      * @return the BoundVertex of the conclusion, A
      */
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        pHandle CX = PHANDLE_UNDEFINED) const;
+                        pHandle CX = PHANDLE_UNDEFINED,
+                        bool fresh = true) const;
     bool validate2(MPs& args) const { return true; }
     
 };

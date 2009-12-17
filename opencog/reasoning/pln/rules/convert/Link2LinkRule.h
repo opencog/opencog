@@ -43,23 +43,23 @@ protected:
 //	mutable std::vector<Type> ti;
 
 public:
-	bool validate2(Rule::MPs& args) const { return true; }
-	//Link2LinkRule(AtomSpaceWrapper *_asw)
-	//: GenericRule<FormulaType>(_asw,false,"")
+    bool validate2(Rule::MPs& args) const { return true; }
+    //Link2LinkRule(AtomSpaceWrapper *_asw)
+    //: GenericRule<FormulaType>(_asw,false,"")
     Link2LinkRule(AtomSpaceWrapper *_asw, Type src, Type dest)
         : GenericRule<FormulaType>(_asw,false,""), SRC_LINK(src), DEST_LINK(dest)
-	{
-		GenericRule<FormulaType>::name = "Link2Link(" +
-         std::string(Type2Name(SRC_LINK)) + "=>" +
-         std::string(Type2Name(DEST_LINK)) +")";
-		GenericRule<FormulaType>::inputFilter.push_back(meta(
-			new tree<Vertex>(
-				mva((pHandle)SRC_LINK,
-					mva((pHandle)ATOM),
-					mva((pHandle)ATOM))
-			)));
-	}
-	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+    {
+        GenericRule<FormulaType>::name = "Link2Link(" +
+            std::string(Type2Name(SRC_LINK)) + "=>" +
+            std::string(Type2Name(DEST_LINK)) +")";
+        GenericRule<FormulaType>::inputFilter.push_back(meta(
+                                                             new tree<Vertex>(
+                                                                              mva((pHandle)SRC_LINK,
+                                                                                  mva((pHandle)ATOM),
+                                                                                  mva((pHandle)ATOM))
+                                                                              )));
+    }
+    Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
         if (!GET_ASW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
             return Rule::setOfMPs();
@@ -74,8 +74,8 @@ public:
         
         return makeSingletonSet(ret);
     }
-
-	virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
+    
+    virtual TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                        int* newN) const
     {
         TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
@@ -88,25 +88,25 @@ public:
     }
 
 
-	virtual meta i2oType(const std::vector<Vertex>& h) const
-	{
-		assert(1==h.size());
-
-		meta ret = atomWithNewType(h[0], DEST_LINK);
+    virtual meta i2oType(const std::vector<Vertex>& h) const
+    {
+        assert(1==h.size());
+        
+        meta ret = atomWithNewType(h[0], DEST_LINK);
         cprintf(3,"i2otype() outputs: ");
 #if 0
         rawPrint(*ret, ret->begin(), 3);
 #else
         NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME, 
-                      NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION, 
-                      NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE,
-					  3);
+                          NM_PRINTER_DEFAULT_TRUTH_VALUE_PRECISION, 
+                          NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE,
+                          3);
         printer.print(ret->begin());
 #endif
-
-		return ret;
-	}
-	NO_DIRECT_PRODUCTION;
+        
+        return ret;
+    }
+    NO_DIRECT_PRODUCTION;
 };
 
 /*

@@ -32,7 +32,9 @@ public:
 
 	CrispTheoremRule(AtomSpaceWrapper *_asw);
 	Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
-	BoundVertex compute(const std::vector<Vertex>& premiseArray, pHandle CX = PHANDLE_UNDEFINED) const;
+	BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                            pHandle CX = PHANDLE_UNDEFINED,
+                            bool fresh = true) const;
 
 	bool validate2(MPs& args) const { return true; }
 };

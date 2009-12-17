@@ -78,7 +78,9 @@ public:
     
     NO_DIRECT_PRODUCTION;
     
-    BoundVertex compute(const std::vector<Vertex>& premiseArray, Handle CX = NULL) const
+    BoundVertex compute(const std::vector<Vertex>& premiseArray,
+                        Handle CX = NULL,
+                        bool fresh = true) const
     {
         std::vector<pHandle> hs = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
         
