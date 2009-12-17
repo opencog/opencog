@@ -18,6 +18,7 @@ ADD_EXECUTABLE(hypertable-test test.cc)
 
 TARGET_LINK_LIBRARIES(hypertable-test
     atomspace
+    server
 
     ${HYPERTABLE_LIBRARIES}
     hypertabledb
