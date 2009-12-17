@@ -46,6 +46,8 @@ namespace OperationalPetController
         void answerLatestQuestion( void );
 
         void resolveLatestSentenceCommand( void );
+        
+        void storeFact( void );
 
         std::string resolveFrames2Relex( );
 

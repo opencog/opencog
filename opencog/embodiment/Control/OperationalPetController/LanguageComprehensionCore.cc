@@ -365,3 +365,18 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
     
 }
 
+void LanguageComprehension::storeFact( void )
+{
+    init();
+
+#ifdef HAVE_GUILE
+    std::string answer = SchemeEval::instance().eval( "(store-fact)");    
+    logger().info( "LanguageComprehension::%s - (store-fact) answer: %s", __FUNCTION__, answer.c_str() );
+    if ( SchemeEval::instance().eval_error() ) {
+        logger().error( "LanguageComprehension::%s - An error occurred while trying to store a new fact: %s",
+                        __FUNCTION__, answer.c_str( ) );
+    } // if
+    SchemeEval::instance().clear_pending( );    
+#endif
+
+}

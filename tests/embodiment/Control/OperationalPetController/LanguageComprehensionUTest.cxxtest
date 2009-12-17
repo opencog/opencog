@@ -612,22 +612,27 @@ public:
         }
 
 
-        // testing: grab the ball near the tree
-        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence6.scm");
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->resolveLatestSentenceCommand( );
-        {
-            HandleSeq arguments(1);
-            arguments[0] = this->atomSpace->addNode( ACCESSORY_NODE, "4");
-            HandleSeq command(2);
-            command[0] = this->atomSpace->addNode( GROUNDED_SCHEMA_NODE, "goto_object_and_grabit");
-            command[1] = this->atomSpace->getHandle( LIST_LINK, arguments );
-            
-            Handle execLink = this->atomSpace->getHandle( EXECUTION_LINK, command );
-            TS_ASSERT( this->atomSpace->getTV( execLink ).getMean( ) > 0 );
-            TS_ASSERT( execLink != Handle::UNDEFINED );
-        }
+        this->language->storeFact( );
+        Handle colorFrame = this->atomSpace->getHandle( PREDICATE_NODE, 
+            "G_green@fba0ea8f-ce96-4c3e-b1a3-0dbe4e70bbcb_Color");
+        Handle attributesFrame = this->atomSpace->getHandle( PREDICATE_NODE, 
+            "G_green@fba0ea8f-ce96-4c3e-b1a3-0dbe4e70bbcb_Attributes");
+
+        TS_ASSERT( colorFrame != Handle::UNDEFINED )
+        TS_ASSERT( attributesFrame != Handle::UNDEFINED )
+
+        rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-sentence8.scm");
+        TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
+        this->language->resolveLatestSentenceReference( );
+        this->language->storeFact( );       
+        
+        TS_ASSERT( this->atomSpace->getIncoming( colorFrame ).size( ) == 0 )
+        TS_ASSERT( this->atomSpace->getIncoming( attributesFrame ).size( ) == 0 )        
+
 
     } 
 

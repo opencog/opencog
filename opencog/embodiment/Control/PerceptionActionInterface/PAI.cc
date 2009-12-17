@@ -1128,6 +1128,9 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
 
 
     if ( std::string( contentType ) == "FACT" ) {
+        petInterface.getCurrentModeHandler( ).handleCommand( "storeFact", std::vector<std::string>() );
+
+    } else if ( std::string( contentType ) == "COMMAND" ) {
         petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
 
     } else if ( std::string( contentType ) == "QUESTION" ) {

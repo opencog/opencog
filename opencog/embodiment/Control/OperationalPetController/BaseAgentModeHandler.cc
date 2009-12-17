@@ -51,6 +51,15 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         logger().debug("BaseAgentModeHandler - Scheduling command" );
         this->commandsQueue.push( arguments );
 
+    } else if ( name == "storeFact" ) {
+        logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
+        logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
+        this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
+        logger().debug("BaseAgentModeHandler - Reference resolution done");
+        logger().debug("BaseAgentModeHandler - Starting storing a new fact" );
+        this->agent->getLanguageTool( ).storeFact( );
+        logger().debug("BaseAgentModeHandler - Fact stored" );
+        
     } else if ( name == "evaluateSentence" ) {
         logger().debug("BaseAgentModeHandler - Evaluating a new parsed sentence" );
         logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );

@@ -246,7 +246,6 @@
   (let ((removed? #f))
     (if (and (not (null? predicateNode)) (equal? (cog-type predicateNode) 'PredicateNode))
         (begin         
-
     
           (map
            (lambda (elementLink)
@@ -273,7 +272,7 @@
                  )
                 )               
                )
-             ; then disconnect the frame element from the frame instance
+             ; disconnect the frame element from the frame instance
              (cog-delete elementLink)
              )
            (cog-filter-incoming
@@ -281,7 +280,7 @@
             predicateNode
             )
            )
-         ; finally remove the inheritance link
+         ; finally remove the inheritance link and the instance node
           (map
            (lambda (inheritance)
              (cog-delete inheritance)
@@ -291,7 +290,7 @@
             'InheritanceLink
             predicateNode
             )
-           )
+           )          
         )
         )
     removed?
@@ -982,10 +981,16 @@
 (define (get-frame-elements frameType)
   (let ((elements '())
         (frameNode (DefinedFrameNode frameType))
+        (elementNames '())
         )
     (map
      (lambda (link)
-       (set! elements (append elements (gdr link)))
+       (let* ((element (car (gdr link)))
+              (elementName (get-frame-element-name (cog-name element)))
+              )
+         (set! elements (append elements (list element)))
+         (set! elementNames (append elementNames (list elementName)))
+         )
        )
      (cog-get-link
       'FrameElementLink
@@ -998,7 +1003,19 @@
      (lambda (link)
        (let ((parent (car (gdr link))))
          (if (and (equal? 'DefinedFrameNode (cog-type parent)) (not (equal? parent frameNode)) )
-             (set! elements (append elements (get-frame-elements (cog-name parent))))
+             (map
+              (lambda (parentElement)
+                (let ((elementName (get-frame-element-name (cog-name parentElement))))
+                  (if (not (member elementName elementNames))
+                      (begin
+                        (set! elements (append elements (list parentElement)))
+                        (set! elementNames (append elementNames (list elementName)))
+                        )
+                      )
+                  )
+                )
+              (get-frame-elements (cog-name parent))
+               )
              )
          )
        )
@@ -1386,7 +1403,7 @@
      (get-frame-instance-elements-predicates predicateNode)
      )
     ; sort by the candidate tv mean strength. strongest first.
-    (sort candidates (lambda (x y) (> (assoc-ref elementsStrength x) (assoc-ref elementsStrength y))) )
+    (sort candidates (lambda (x y) (> (assoc-ref elementsStrength x) (assoc-ref elementsStrength y))) )    
     )
   )
 
@@ -1514,6 +1531,59 @@
     )
   )
 
+
+(define (instantiate-frame type instanceName elements)
+  (let ((frameElements '())
+        (frameElementsNodes '())
+        (isFrameInstance? #f)
+        )
+    (map
+     (lambda (elementType)
+       (let ((elementName (get-frame-element-name (cog-name elementType))))
+         (set! frameElements (append frameElements (list elementName)))
+         (set! frameElementsNodes (append frameElementsNodes (list (cons elementName elementType))))
+         )
+       )
+     (get-frame-elements type)
+     )
+    
+    (map
+     (lambda (element)
+       (let ((name (car element))
+             (value (cdr element)))
+
+         (if (member name frameElements)                            
+             (let ((elementPredicateNode (PredicateNode (string-append instanceName "_" name ))))
+               (InheritanceLink (stv 1 1) (cog-new-av 0 1 #f)
+                elementPredicateNode
+                (assoc-ref frameElementsNodes name)
+                )
+               (FrameElementLink (stv 1 1) (cog-new-av 0 1 #f)
+                (PredicateNode instanceName)
+                elementPredicateNode
+                )
+               (EvaluationLink (stv 1 1) (cog-new-av 0 1 #f)
+                elementPredicateNode
+                value
+                )               
+               (set! isFrameInstance? #t)
+               ) ; let
+             ) ; if
+
+         ) ; let
+       ) ; lambda
+     elements
+     )
+
+    (if isFrameInstance?
+        (InheritanceLink (stv 1 1) (cog-new-av 0 1 #f)
+         (PredicateNode instanceName)
+         (DefinedFrameNode type)         
+         )
+        '()
+        )    
+    )
+  )
 
 ;;; Core functions
 
@@ -1763,3 +1833,64 @@
      ) ; let
   )
 
+; A fact is a set of Frames which describes something.
+; It can be used as knownledge by the agent to answer
+; questions or in any reasoning process.
+; Basically, this function find a grounded frame instance
+; for each Frame that composes the parsed sentence
+; and set their av and tv values
+(define (store-fact)
+  (map
+   (lambda (parse)
+     (let ((negation? #f)
+           (incomingPredicates 
+            (get-latest-frame-predicates 
+             (get-latest-word-instance-nodes parse))))
+       
+       (map
+        (lambda (predicate)
+          (if (equal? (get-frame-instance-type predicate) "#Negation" )
+              (set! negation? #t)
+              )
+          )
+        incomingPredicates
+        )
+       (if negation?
+           (map
+            (lambda (groundedPredicate)
+              (remove-frame-instance groundedPredicate)
+              )
+            (find-grounded-frame-instances-predicates incomingPredicates)
+            )
+
+           (map
+            (lambda (predicate)
+              (if (null? (match-frame predicate))
+                  (let ((elements '()))
+                    ; there is no grounded frame, so create a new one
+                    (map
+                     (lambda (elementPredicate)
+                       (set! elements (append elements
+                         (list (cons
+                                (get-frame-element-name (get-frame-instance-element-type elementPredicate))
+                                (get-grounded-element-value
+                                 (get-frame-instance-element-value elementPredicate)
+                                 )))))
+                       )
+                     (get-frame-instance-elements-predicates predicate)
+                     )
+                    (instantiate-frame (get-frame-instance-type predicate) 
+                                       (string-append "G_" (cog-name predicate)) elements )
+                    ) ; let
+                )
+              )
+            incomingPredicates
+            ) ; map
+
+           ) ; if
+       )
+     )
+   (get-latest-parses)
+   )
+
+  )
