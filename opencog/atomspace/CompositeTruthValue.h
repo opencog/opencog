@@ -138,7 +138,7 @@ public:
     std::string toString() const;
     TruthValueType getType() const;
 
-    /*
+    /**
      * Sets the primary or a versioned TV in this CTV object.
      * @param TruthValue object to be set. If it is a NULL_TV(), a 
      *        default tv will be created internally.

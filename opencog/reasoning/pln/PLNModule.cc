@@ -275,7 +275,6 @@ Handle opencog::pln::applyRule(const string& ruleName,
         copy(phs.begin(), phs.end(), back_inserter(vv));
         BoundVertex bv = rule->compute(vv);
         vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
-        // ignore VersionHandle for now
         return vhp.first;
     }
     else return Handle::UNDEFINED;

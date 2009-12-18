@@ -134,7 +134,6 @@ void infer(Handle h, int &steps, bool setTarget);
  * DefaultVariableRuleProvider.
  * If the name rule does not correspond to any declared rules
  * then the Handle returned is UNDEFINED_HANDLE
- * NOTE: VersionHandle is ignored for now
  *
  * @param rule_name the name of PLN rule to apply
  * @param premises the list of Handle premises
