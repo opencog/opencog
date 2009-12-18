@@ -27,6 +27,7 @@
 #include "Node.h"
 
 #include <stdio.h>
+#include <boost/functional/hash.hpp>
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -110,5 +111,5 @@ bool Node::operator!=(const Atom& other) const
 
 size_t Node::hashCode() const
 {
-    return getType() ^ hash<std::string>()(name);
+    return getType() ^ boost::hash<std::string>()(name);
 }

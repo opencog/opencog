@@ -24,8 +24,6 @@
 #ifndef _SPATIAL_SUPERENTITY_H_
 #define _SPATIAL_SUPERENTITY_H_
 
-#include <ext/hash_map>
-
 #include <list>
 
 #include "Entity.h"
@@ -35,6 +33,8 @@
 #include <opencog/util/exceptions.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace Spatial
 {
@@ -104,7 +104,7 @@ public:
     }; // SubEntity
 
     typedef boost::shared_ptr<SubEntity> SubEntityPtr;
-    typedef __gnu_cxx::hash_map<long, SubEntityPtr, __gnu_cxx::hash<long> > LongSubEntityPtrHashMap;
+    typedef boost::unordered_map<long, SubEntityPtr, boost::hash<long> > LongSubEntityPtrHashMap;
 
     /**
      * Create a super entity. If the parameters are entities that did not intersect

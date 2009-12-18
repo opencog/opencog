@@ -29,7 +29,6 @@
 #include <ctype.h>
 #include <limits.h>
 #include <unistd.h>
-#include <tr1/functional>
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/Link.h>
@@ -38,7 +37,6 @@
 #include <opencog/server/CogServer.h>
 
 using namespace std;
-using namespace std::tr1::placeholders;
 
 extern "C" {
     #include "UbigraphAPI.h"
@@ -96,11 +94,9 @@ void Ubigrapher::watchSignals()
     if (isConnected()) {
         if (!listening) {
             c_add = space->addAtomSignal().connect(
-                    std::tr1::bind(&Ubigrapher::handleAddSignal, this,
-                        std::tr1::placeholders::_1));
+                    boost::bind(&Ubigrapher::handleAddSignal, this, _1));
             c_remove = space->removeAtomSignal().connect(
-                    std::tr1::bind(&Ubigrapher::handleRemoveSignal, this,
-                        std::tr1::placeholders::_1));
+                    boost::bind(&Ubigrapher::handleRemoveSignal, this, _1));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
         } else {

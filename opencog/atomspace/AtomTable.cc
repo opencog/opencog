@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <pthread.h>
+#include <boost/bind.hpp>
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -57,7 +58,9 @@ AtomTable::AtomTable(bool dsa)
 #endif
 
     //connect signals
-    addedTypeConnection = classserver().addTypeSignal().connect(std::tr1::bind(&AtomTable::typeAdded, this, std::tr1::placeholders::_1));
+    addedTypeConnection =
+        classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
+                    this, _1));
 
 }
 

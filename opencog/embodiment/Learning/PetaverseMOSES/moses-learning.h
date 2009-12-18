@@ -32,6 +32,7 @@
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
+#include <boost/unordered_set.hpp>
 
 #define ESTIMATOR_CACHE_SIZE 500000
 
@@ -45,7 +46,7 @@ namespace moses
 typedef FitnessEstimator::NoSpaceLifeFitnessEstimator FE;
 typedef FitnessEstimator::DistortedComboSizeOrder Comp;
 
-typedef opencog::hash_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
+typedef boost::unordered_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
 typedef combo_tree_hash_set::iterator combo_tree_hash_set_it;
 
 typedef enum {

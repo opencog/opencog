@@ -33,6 +33,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <fstream>
+#include <map>
 
 #define HUGE_DISTANCE 999999.9
 

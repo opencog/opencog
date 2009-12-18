@@ -26,14 +26,14 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/util/foreach.h>
-#include <opencog/util/hash_set.h>
-#include <opencog/util/hash_map.h>
 
-#include <map>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "Math/Triangle.h"
 #include "Math/LineSegment.h"
@@ -49,7 +49,7 @@ typedef std::string ObjectID;
 typedef std::pair<Distance, Distance> Point;
 typedef std::pair<unsigned int, unsigned int> GridPoint;
 
-typedef opencog::hash_set<GridPoint, boost::hash<GridPoint> > GridSet;
+typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;
 
 struct c_str_compare {
     bool operator()(const char* s1, const char* s2) const {
@@ -57,8 +57,8 @@ struct c_str_compare {
     }
 };
 typedef std::set<const char*, c_str_compare> ObjectIDSet;
-typedef opencog::hash_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
-typedef opencog::hash_map<long, std::vector<GridPoint>, boost::hash<long> > LongGridPointVectorHashMap;
+typedef boost::unordered_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
+typedef boost::unordered_map<long, std::vector<GridPoint>, boost::hash<long> > LongGridPointVectorHashMap;
 
 /**
  * Represents the object geometry

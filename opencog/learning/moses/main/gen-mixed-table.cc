@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
         		std::vector<variant<bool, contin_t> >::const_iterator il = vt.begin();
 
 	        	//get the position of each variable in the list of arguments	
-    	    	opencog::hash_map<int, int> arg_idx_map=mt.get_arg_idx_map();
+    	    	boost::unordered_map<int, int> arg_idx_map=mt.get_arg_idx_map();
         		//variable to keep track of each boolean variable
         		int bool_arg_count;
 	        	bool is_output;

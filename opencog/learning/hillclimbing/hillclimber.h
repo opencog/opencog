@@ -29,7 +29,6 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/numeric.h>
-#include <opencog/util/hash_set.h>
 #include <opencog/util/RandGen.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
@@ -39,6 +38,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <boost/unordered_set.hpp>
 
 //uncomment those 2 lines if want cache
 //don't forget to comment COUNT_NUMBER_OF_FITNESS as well
@@ -77,7 +77,7 @@ struct hillclimber {
     typedef combo_tree::sibling_iterator sib_it;
     typedef combo_tree::iterator pre_it;
 
-    typedef hash_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
+    typedef boost::unordered_set<combo_tree, boost::hash<combo_tree> > combo_tree_hash_set;
     typedef combo_tree_hash_set::iterator combo_tree_hash_set_it;
     typedef combo_tree_hash_set::const_iterator combo_tree_hash_set_const_it;
 

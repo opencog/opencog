@@ -24,9 +24,8 @@
 #define _OPENCOG_LRU_CACHE_H
 
 #include <list>
-#include <functional>
+#include <boost/unordered_map.hpp>
 #include "hashing.h"
-#include "hash_map.h"
 #include "exceptions.h"
 #include "oc_assert.h"
 
@@ -44,7 +43,7 @@ namespace opencog {
     typedef typename std::equal_to<argument_type> Equals;
     typedef typename std::list<argument_type> list;
     typedef typename list::iterator list_iter;
-    typedef opencog::hash_map<list_iter,result_type,
+    typedef boost::unordered_map<list_iter,result_type,
                               opencog::deref_hash<list_iter,Hash>,
                               opencog::deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
@@ -103,7 +102,7 @@ namespace opencog {
     typedef typename F::result_type result_type;
     typedef typename std::list<argument_type> list;
     typedef typename list::iterator list_iter;
-    typedef opencog::hash_map<list_iter,result_type,
+    typedef boost::unordered_map<list_iter,result_type,
 			       opencog::deref_hash<list_iter,Hash>,
 			       opencog::deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;

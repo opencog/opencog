@@ -27,7 +27,6 @@
 
 #include <opencog/util/tree.h>
 #include <opencog/util/numeric.h>
-#include <opencog/util/hash_map.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/RandGen.h>
@@ -39,6 +38,7 @@
 #include "variable_unifier.h"
 
 #include <exception>
+#include <boost/unordered_map.hpp>
 
 #define COEF_SAMPLE_COUNT 20.0 //involved in the formula that counts
 //the number of trials needed to check a formula
@@ -74,7 +74,7 @@ struct Evaluator {
 
 inline boost::variant<vertex, combo_tree::iterator>& binding(int idx)
 {
-    static opencog::hash_map<int, boost::variant<vertex, combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
+    static boost::unordered_map<int, boost::variant<vertex, combo_tree::iterator> > map; //to support lazy evaluation, can also bind to a subtree
     return map[idx];
 }
 
@@ -627,7 +627,7 @@ class mixed_table
     int _contin_arg_count; //number of contin arguments
     int _bool_arg_count; //number of boolean arguments
 
-    opencog::hash_map<int, int> _arg_map; //link the argument index with the
+    boost::unordered_map<int, int> _arg_map; //link the argument index with the
     //boolean or contin index, that is
     //for instance if the inputs are
     //(bool, contin, contin, bool, bool)
@@ -698,7 +698,7 @@ public:
         return _vt;
     }
 
-    opencog::hash_map<int, int> & get_arg_idx_map()  {
+    boost::unordered_map<int, int> & get_arg_idx_map()  {
 		return _arg_map;
     }
 
@@ -752,7 +752,7 @@ class mixed_action_table
     int _contin_arg_count; //number of contin arguments
     int _action_arg_count; //number of action_result arguments
 
-    opencog::hash_map<int, int> _arg_map; //link the argument index with the
+    boost::unordered_map<int, int> _arg_map; //link the argument index with the
     //boolean, action_result or contin
     //index, that is
     //for instance if the inputs are

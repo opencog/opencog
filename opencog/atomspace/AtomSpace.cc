@@ -31,7 +31,6 @@
 #include <list>
 
 #include <stdlib.h>
-#include <tr1/functional>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
@@ -53,7 +52,6 @@ using std::cout;
 using std::endl;
 using std::min;
 using std::max;
-using namespace std::tr1::placeholders;
 using namespace opencog;
 
 // ====================================================================
@@ -75,8 +73,8 @@ AtomSpace::AtomSpace(void) :
     attentionalFocusBoundary = 1;
 
     //connect signals
-    addedAtomConnection = addAtomSignal().connect(std::tr1::bind(&AtomSpace::atomAdded, this, std::tr1::placeholders::_1));
-    removedAtomConnection = removeAtomSignal().connect(std::tr1::bind(&AtomSpace::atomRemoved, this, std::tr1::placeholders::_1));
+    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpace::atomAdded, this, _1));
+    removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpace::atomRemoved, this, _1));
 
 }
 

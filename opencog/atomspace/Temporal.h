@@ -27,6 +27,7 @@
 #define _OPENCOG_TEMPORAL_H
 
 #include <string>
+#include <boost/functional/hash.hpp>
 
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
@@ -169,7 +170,7 @@ private:
 
 struct hashTemporal {
     int operator()(Temporal* tl) const {
-        int hashCode =  hash<unsigned long>()(tl->getA());
+        int hashCode =  boost::hash<unsigned long>()(tl->getA());
         return(hashCode);
     }
 };

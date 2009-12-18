@@ -28,7 +28,6 @@
 
 #include <opencog/util/tree.h>
 #include <opencog/util/numeric.h>
-#include <opencog/util/hash_map.h>
 #include <opencog/util/exceptions.h>
 
 #include <opencog/comboreduct/crutil/exception.h>

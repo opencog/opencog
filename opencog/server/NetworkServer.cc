@@ -26,9 +26,7 @@
 
 #include "NetworkServer.h"
 
-#include <algorithm>
-#include <tr1/memory>
-#include <tr1/functional>
+#include <boost/bind.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -118,7 +116,7 @@ bool NetworkServer::removeListener(const unsigned short port)
     logger().debug("[NetworkServer] removing listener bound to port %d", port);
     std::vector<SocketPort*>::iterator l = 
         std::find_if(_listeners.begin(), _listeners.end(),
-                     std::tr1::bind(equal_to_port(), std::tr1::placeholders::_1, port));
+                     boost::bind(equal_to_port(), _1, port));
     if (l == _listeners.end()) {
         logger().warn("unable to remove listener from port %d", port);
         return false;

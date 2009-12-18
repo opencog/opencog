@@ -30,9 +30,7 @@
 #include "ClassServer.h"
 
 #include <exception>
-#include <functional>
-#include <tr1/functional>
-#include <algorithm>
+#include <boost/bind.hpp>
 
 #include "atom_types.h"
 #include "types.h"
@@ -41,7 +39,6 @@
 #include "atom_types.definitions"
 
 using namespace opencog;
-using namespace std::tr1::placeholders;
 
 ClassServer::ClassServer(void)
 {
@@ -80,10 +77,10 @@ Type ClassServer::addType(Type parent, const std::string& name)
     recursiveMap.resize(nTypes);
 
     std::for_each(inheritanceMap.begin(), inheritanceMap.end(),
-          std::tr1::bind(&std::vector<bool>::resize, _1, nTypes, false));
+          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
 
     std::for_each(recursiveMap.begin(), recursiveMap.end(),
-          std::tr1::bind(&std::vector<bool>::resize, _1, nTypes, false));
+          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
 
     inheritanceMap[type][type]   = true;
     inheritanceMap[parent][type] = true;

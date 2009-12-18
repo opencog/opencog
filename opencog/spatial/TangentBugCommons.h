@@ -26,14 +26,14 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/numeric.h>
-#include <opencog/util/hash_set.h>
-#include <opencog/util/hash_map.h>
 
 #include <cstdio>
 #include <set>
 #include <string>
 #include <iostream>
 #include <boost/functional/hash.hpp>
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace Spatial
 {
@@ -44,8 +44,8 @@ class Point;
 typedef unsigned int coord;
 typedef std::pair<coord, coord> point_2d; // Parent class of Point
 
-typedef opencog::hash_set<int> int_set;
-typedef opencog::hash_map<point_2d, int_set, boost::hash<point_2d> > point_map;
+typedef boost::unordered_set<int> int_set;
+typedef boost::unordered_map<point_2d, int_set, boost::hash<point_2d> > point_map;
 
 /**
  * Ray class

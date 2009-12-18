@@ -36,6 +36,8 @@
 #include "EntityRelevanceFilter.h"
 
 #include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 //enable optimization of the algo based on is_moving
 #define ISMOVING_OPTIMIZE
@@ -85,13 +87,13 @@ class EntropyFilter
     typedef vertex_set::const_iterator vertex_set_const_it;
 
     //typedef std::map<std::string, bool> definite_object_bool_map;
-    typedef opencog::hash_map<std::string, bool, boost::hash<std::string> >
+    typedef boost::unordered_map<std::string, bool, boost::hash<std::string> >
     definite_object_bool_map;
     typedef definite_object_bool_map::iterator definite_object_bool_map_it;
     typedef definite_object_bool_map::const_iterator
     definite_object_bool_map_const_it;
 
-    typedef opencog::hash_set<std::string, boost::hash<std::string> >
+    typedef boost::unordered_set<std::string, boost::hash<std::string> >
     definite_object_hash_set;
     typedef definite_object_hash_set::iterator definite_object_hash_set_it;
     typedef definite_object_hash_set::const_iterator

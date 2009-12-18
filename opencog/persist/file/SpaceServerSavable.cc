@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include <tr1/functional>
 
 using namespace opencog;
 

@@ -29,8 +29,8 @@
 #include <numeric>
 #include <map>
 #include <boost/bind.hpp>
+#include <boost/unordered_map.hpp>
 
-#include <opencog/util/hash_map.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/tree.h>
 
@@ -96,7 +96,7 @@ namespace reduct {
     typedef typename tree::sibling_iterator sib_it;
     typedef std::map<sib_it,int,
 		     opencog::lexicographic_subtree_order<T> > Item2Int;
-    typedef opencog::hash_map<int,tree> Int2Item;
+    typedef boost::unordered_map<int,tree> Int2Item;
 
     nf add_cnf(sib_it,sib_it);
     nf add_dnf(sib_it,sib_it);

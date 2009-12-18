@@ -39,7 +39,7 @@ ImportanceDecayAgent::ImportanceDecayAgent()
 
 void ImportanceDecayAgent::connectSignals(AtomSpace& as)
 {
-    mergedAtomConnection = as.mergeAtomSignal().connect(std::tr1::bind(&ImportanceDecayAgent::atomMerged, this, std::tr1::placeholders::_1));
+    mergedAtomConnection = as.mergeAtomSignal().connect(boost::bind(&ImportanceDecayAgent::atomMerged, this, _1));
 }
 
 void ImportanceDecayAgent::run(opencog::CogServer *server)

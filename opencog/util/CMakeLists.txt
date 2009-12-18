@@ -52,8 +52,6 @@ INSTALL (FILES
 	functional.h
 	oc_assert.h
 	hashing.h
-	hash_map.h
-	hash_set.h
 	lazy_normal_selector.h
 	lazy_random_selector.h
 	lazy_selector.h

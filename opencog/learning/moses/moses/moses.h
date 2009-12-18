@@ -30,12 +30,14 @@
 #include <opencog/util/lru_cache.h>
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/hash_set.h>
 
 #include <opencog/learning/moses/eda/instance_set.h>
 
 #include "representation.h"
 #include "scoring.h"
+
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 
 #define EVALUATED_ALL_AVAILABLE 1234567
 
@@ -186,7 +188,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        opencog::hash_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
+        boost::unordered_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
         foreach(const eda::scored_instance<combo_tree_score>& inst, deme) {
 
 #ifdef DEBUG_INFO
@@ -338,7 +340,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        opencog::hash_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
+        boost::unordered_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
 
 
         int i = 0;
@@ -435,7 +437,7 @@ protected:
     combo_tree_score _best_score;
     std::vector<combo_tree> _best_trees;
 
-    opencog::hash_set<combo_tree, boost::hash<combo_tree> > _visited_exemplars;
+    boost::unordered_set<combo_tree, boost::hash<combo_tree> > _visited_exemplars;
 
     // introduced for time-slicing version
     representation* _rep;

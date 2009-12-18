@@ -28,25 +28,14 @@
 #ifdef WIN32
 
 #pragma warning(disable:4290)
-#include <unordered_set>
-#include <unordered_map>
-#include <functional>
-#include <algorithm>
 
 #define strcasecmp _stricmp
 #define snprintf _snprintf
-
-#else // WIN32
-
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
-#include <tr1/functional>
 
 #endif // WIN32
 
 #include <stdio.h>
 #include <string.h>
-//#include <assert.h>
 #include <string>
 
 namespace opencog
@@ -89,12 +78,6 @@ double             rint(double nr);
 int                __dup2(int, int);
 unsigned long long atoll(const char *str);
 unsigned int       sleep(unsigned seconds);
-
-using std::hash;
-
-#else // !WIN32
-
-using std::tr1::hash;
 
 #endif // WIN32!
 

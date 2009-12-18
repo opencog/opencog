@@ -24,15 +24,10 @@
 
 #include "Agent.h"
 
-#include <algorithm>
-#include <tr1/memory>
-#include <tr1/functional>
-
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 
 using namespace opencog;
-using namespace std::tr1::placeholders;
 
 Agent::Agent(const unsigned int f) : _frequency(f)
 {
@@ -48,7 +43,7 @@ Agent::Agent(const unsigned int f) : _frequency(f)
     totalStimulus = 0;
 
     conn = server().getAtomSpace()->removeAtomSignal().connect(
-            std::tr1::bind(&Agent::atomRemoved, this, std::tr1::placeholders::_1));
+            boost::bind(&Agent::atomRemoved, this, _1));
 }
 
 Agent::~Agent()

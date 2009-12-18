@@ -26,9 +26,6 @@
 
 #include "CogServer.h"
 
-#include <tr1/memory>
-#include <tr1/functional>
-
 #include <time.h>
 #ifdef WIN32
 #include <winsock2.h>
@@ -299,7 +296,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // place agents with classinfo().id == id at the end of the container
     std::vector<Agent*>::iterator last = 
         std::partition(agents.begin(), agents.end(),
-                       std::tr1::bind(equal_to_id(), std::tr1::placeholders::_1, id));
+                       boost::bind(equal_to_id(), _1, id));
 
     // save the agents that should be deleted on a temporary container
     std::vector<Agent*> to_delete(last, agents.end());

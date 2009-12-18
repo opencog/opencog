@@ -92,11 +92,9 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
     if (watch) {
         if (!watchingAtomSpace) {
             c_add = atomspace->addAtomSignal().connect(
-                    std::tr1::bind(&AtomSpaceWrapper::handleAddSignal, this,
-                        std::tr1::placeholders::_1));
+                    boost::bind(&AtomSpaceWrapper::handleAddSignal, this, _1));
             c_remove = atomspace->removeAtomSignal().connect(
-                    std::tr1::bind(&AtomSpaceWrapper::handleRemoveSignal, this,
-                        std::tr1::placeholders::_1));
+                    boost::bind(&AtomSpaceWrapper::handleRemoveSignal, this, _1));
             assert(c_add.connected() && c_remove.connected());
             watchingAtomSpace = true;
             logger().info("[ASW] Watching AtomSpace.");

@@ -57,7 +57,6 @@
 #include <boost/numeric/conversion/cast.hpp>  
 
 #include <stdlib.h>
-#include <tr1/functional>
 
 #define MORE_DEBUG_INFO 1
 
