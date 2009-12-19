@@ -29,6 +29,7 @@ class MihalceaLabel
 		void fetch_senses(Handle);
 		bool have_sense(Atom *);
 		bool pull_pos(Handle);
+		Handle no_sense;
 
 		Atom * word_instance;
 		int total_words;
@@ -37,7 +38,7 @@ class MihalceaLabel
 	public:
 		MihalceaLabel(void);
 		~MihalceaLabel();
-		void set_atom_space(AtomSpace *as) {atom_space = as;}
+		void set_atom_space(AtomSpace *);
 
 		void annotate_sentence(Handle);
 		void annotate_parse(Handle);

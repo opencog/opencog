@@ -35,6 +35,12 @@ MihalceaLabel::~MihalceaLabel()
 	atom_space = NULL;
 }
 
+void MihalceaLabel::set_atom_space(AtomSpace *as)
+{
+	atom_space = as;
+	no_sense = atom_space->addNode(WORD_SENSE_NODE, "#UNKNOWN SENSE");
+}
+
 /**
  * Anotate every word in every parse of the sentence with every possible
  * word sense for that word. The argument handle is presumed to identify
@@ -154,11 +160,16 @@ bool MihalceaLabel::pull_pos(Handle sense_h)
 
 /**
  * fetch_senses -- fetch all word-senses for lemma from persistent storage.
+ *
  * Given a lemma, check to see if there are any WordSenseLinks on it.
  * If there some, then assume that all senses have been loaded, and 
  * do nothing.  But it theere aren't any senses, then pull them from
  * the persistent store. Be sure to pull the POS tags as well. These
  * are linked via a PartOfSpeechLink to the word-sense.
+ *
+ * Some things, like proper names, will not have any senses. Avoid 
+ * repeated lookups of these by tagging them with a single, unknown 
+ * sense.
  */
 void MihalceaLabel::fetch_senses(Handle lemma_h)
 {
@@ -170,6 +181,13 @@ void MihalceaLabel::fetch_senses(Handle lemma_h)
 
 	// Also pull the POS tags.
 	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);
+
+	// If we now have senses, we are done.
+	rc = foreach_incoming_atom (lemma_h, &MihalceaLabel::have_sense, this);
+	if (rc) return;
+
+	// Add a bogus sense.
+	atom_space->addLink(WORD_SENSE_LINK, lemma_h, no_sense);
 }
 
 /* ============================== END OF FILE ====================== */
