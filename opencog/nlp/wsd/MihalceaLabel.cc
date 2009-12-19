@@ -106,7 +106,9 @@ bool MihalceaLabel::annotate_word(Handle h)
 #endif
 
 	// Pull in word senses from the persistent store, if needed.
+#ifdef USE_DYNAMIC_SENSE_LOADING
 	fetch_senses(lemma_h);
+#endif
 
 	// Loop over all word senses with this part-of-speech.
 	foreach_dict_word_sense_pos(lemma_h, word_inst_pos,
