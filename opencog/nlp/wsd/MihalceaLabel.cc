@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
+#include <opencog/atomspace/Foreach.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
@@ -98,7 +99,10 @@ bool MihalceaLabel::annotate_word(Handle h)
 	printf(";\thas word-dict %s\n",  n->toString().c_str());
 #endif
 
-	// loop over all word senses with this part-of-speech.
+	// Pull in word senses from the persistent store, if needed.
+	fetch_senses(lemma_h);
+
+	// Loop over all word senses with this part-of-speech.
 	foreach_dict_word_sense_pos(lemma_h, word_inst_pos,
 	                        &MihalceaLabel::annotate_word_sense, this);
 	return false;
@@ -132,6 +136,40 @@ bool MihalceaLabel::annotate_word_sense(Handle h)
 	atom_space->addLink(INHERITANCE_LINK, out, ctv);
 
 	return false;
+}
+
+// ==================================================================
+
+bool MihalceaLabel::have_sense(Atom *a)
+{
+	if (a->getType() == WORD_SENSE_LINK) return true;
+	return false;
+}
+
+bool MihalceaLabel::pull_pos(Handle sense_h)
+{
+	atom_space->fetchIncomingSet(sense_h, false);
+	return false;
+}
+
+/**
+ * fetch_senses -- fetch all word-senses for lemma from persistent storage.
+ * Given a lemma, check to see if there are any WordSenseLinks on it.
+ * If there some, then assume that all senses have been loaded, and 
+ * do nothing.  But it theere aren't any senses, then pull them from
+ * the persistent store. Be sure to pull the POS tags as well. These
+ * are linked via a PartOfSpeechLink to the word-sense.
+ */
+void MihalceaLabel::fetch_senses(Handle lemma_h)
+{
+	bool rc = foreach_incoming_atom (lemma_h, &MihalceaLabel::have_sense, this);
+   if (rc) return;
+
+	// If we are here, we need to pull senses from the database.
+	atom_space->fetchIncomingSet(lemma_h, false);
+
+	// Also pull the POS tags.
+	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);
 }
 
 /* ============================== END OF FILE ====================== */

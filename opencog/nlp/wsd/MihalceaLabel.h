@@ -26,6 +26,10 @@ class MihalceaLabel
 		bool annotate_word(Handle);
 		bool annotate_word_sense(Handle);
 
+		void fetch_senses(Handle);
+		bool have_sense(Atom *);
+		bool pull_pos(Handle);
+
 		Atom * word_instance;
 		int total_words;
 		int total_labels;
