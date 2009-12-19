@@ -154,6 +154,9 @@ class PrivateUseOnlyPOSFilter
 			FollowLink fl;
 			Atom *a = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
 			Node *n = dynamic_cast<Node *>(a);
+
+			// The 'no-sense' special-case sense will not have a pos.
+			if (NULL == n) return false;
 			std::string sense_pos = n->getName();
 
 			// If there's no POS match, skip this sense.
