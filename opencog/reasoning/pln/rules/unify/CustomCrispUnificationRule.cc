@@ -37,10 +37,8 @@ namespace haxx
 
 namespace opencog { namespace pln {
 
-bool UnificationRuleResultFreshness = true; //false;
-
 Btr<std::set<BoundVertex > >
-CustomCrispUnificationRule::attemptDirectProduction(meta outh)
+CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
 {
     if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
         asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
@@ -75,8 +73,7 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh)
 
     pHandle ret_h = asw->addLink(asw->getType(topologicalStub),
                                  asw->getOutgoing(topologicalStub),
-                                 asw->getTV(i->original_handle),
-                                 UnificationRuleResultFreshness);    
+                                 asw->getTV(i->original_handle), fresh);    
     
     ret->insert(BoundVertex(ret_h, pre_binds));
 

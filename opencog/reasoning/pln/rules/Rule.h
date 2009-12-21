@@ -29,7 +29,7 @@
 
 const TruthValue& getTV(pHandle); 
 #define NO_DIRECT_PRODUCTION Btr<std::set<BoundVertex > > \
-    attemptDirectProduction(meta outh) {  \
+    attemptDirectProduction(meta outh, bool fresh = false) {  \
         return Btr<std::set<BoundVertex> >(); \
     }
 
@@ -161,7 +161,8 @@ public:
                         bool fresh = true) const;
 
     //! Try to call rule as a direct producer (Generator)
-    virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h)=0;
+    virtual Btr<std::set<BoundVertex> > attemptDirectProduction(meta h,
+                                                                bool fresh = true)=0;
 
     //! Just calls compute()
     BoundVertex operator() (const std::vector<Vertex> h,
