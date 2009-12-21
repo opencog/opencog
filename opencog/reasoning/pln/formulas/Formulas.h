@@ -490,7 +490,8 @@ protected:
 =============================================================================*/ 
 
 /**
- * Compute the FORALL formula as follows
+ * Compute the FORALL formula as follows (it is a heuristic and seems not
+ * mathematically justified, and therefore could probably be improved)
  * TV->count = Sum_i TV[i]->count
  * TV->mean = Sum_i (TV[i]->mean * sqrt(TV[i]->count)) / total_weight
  * where total_weight = Sum_i sqrt(TV[i]->count)
