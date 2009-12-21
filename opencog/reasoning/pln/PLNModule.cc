@@ -273,7 +273,7 @@ Handle opencog::pln::applyRule(const string& ruleName,
         pHandleSeq phs = ASW()->realToFakeHandles(premises);
         vector<Vertex> vv;
         copy(phs.begin(), phs.end(), back_inserter(vv));
-        BoundVertex bv = rule->compute(vv);
+        BoundVertex bv = rule->compute(vv, PHANDLE_UNDEFINED, false);
         vhpair vhp = ASW()->fakeToRealHandle(_v2h(bv.GetValue()));
         return vhp.first;
     }
