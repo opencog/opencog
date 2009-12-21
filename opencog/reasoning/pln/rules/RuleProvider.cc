@@ -80,27 +80,27 @@ VariableRuleProvider::~VariableRuleProvider(void)
 /*
 void VariableRuleProvider::CreateCustomCrispUnificationRules()
 {
-iAtomSpaceWrapper* parent = ASW();
+iAtomSpaceWrapper* asw = ASW();
 	
 }
 */
 DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 {
     
-    AtomSpaceWrapper* parent = ASW();
+    AtomSpaceWrapper* asw = ASW();
     
-    Btr<std::set<pHandle> > ForAll_handles = parent->getHandleSet(FORALL_LINK, "");
+    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
     
     foreach(pHandle fah, *ForAll_handles)
-        AddRule(new CustomCrispUnificationRule(fah, parent), 7.5f);
+        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
     
     cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
     
-    AddRule(new LookupRule(parent), 20.0f);
+    AddRule(new LookupRule(asw), 20.0f);
 
 /// StrictCrispUnification always requires Hypothesis, too!	
-//	AddRule(new StrictCrispUnificationRule(parent), 7.5f);
-//	AddRule(new CrispUnificationRule(parent), 7.5f); ///Alternative implementation
+//	AddRule(new StrictCrispUnificationRule(asw), 7.5f);
+//	AddRule(new CrispUnificationRule(asw), 7.5f); ///Alternative implementation
 
     float ANDEvaluatorPriority = 10.0f;
 /// haxx:: \todo ANDRule sometimes confuses the order of atoms in the 
@@ -109,80 +109,80 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
 /// AND(b,a). This is not acceptable because all PLN code assumes that the ANDLinks
 /// are ordered properly. This is especially necessary when ANDLinks are used
 /// as SequentialANDLinks, but there is another basic cause for it, too.
-//	AddRule(new ANDRule(parent), ANDEvaluatorPriority);
+//	AddRule(new ANDRule(asw), ANDEvaluatorPriority);
 
-    AddRule(new ORRule(parent), 10.0f);
+    AddRule(new ORRule(asw), 10.0f);
     
-    AddRule(new SimpleANDRule<1>(parent), ANDEvaluatorPriority - 1.0f);
-    AddRule(new SimpleANDRule<2>(parent), ANDEvaluatorPriority - 1.1f);
-    AddRule(new SimpleANDRule<3>(parent), ANDEvaluatorPriority - 1.2f);
-    //	AddRule(new SimpleANDRule<4>(parent), ANDEvaluatorPriority - 1.3f);
-    //	AddRule(new SimpleANDRule<5>(parent), ANDEvaluatorPriority - 1.4f);
+    AddRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
+    AddRule(new SimpleANDRule<2>(asw), ANDEvaluatorPriority - 1.1f);
+    AddRule(new SimpleANDRule<3>(asw), ANDEvaluatorPriority - 1.2f);
+    //	AddRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
+    //	AddRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
     
-    AddRule(new ANDPartitionRule(parent), 10.0f);
-    AddRule(new NotEvaluatorRule(parent), 10.0f);
+    AddRule(new ANDPartitionRule(asw), 10.0f);
+    AddRule(new NotEvaluatorRule(asw), 10.0f);
     
-    AddRule(new ScholemFunctionProductionRule(parent), 20.0f);
+    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
     
-    AddRule(new SubsetEvalRule(parent), 10.0f);
+    AddRule(new SubsetEvalRule(asw), 10.0f);
 
-    AddRule(new IntensionalInheritanceRule(parent), 10.f);
+    AddRule(new IntensionalInheritanceRule(asw), 10.f);
 
-    //	AddRule(new FORALLRule(parent,NULL), 5.0f);
-    //	AddRule( new PLNPredicateRule(parent,NULL), 5.0f);
+    //	AddRule(new FORALLRule(asw,NULL), 5.0f);
+    //	AddRule( new PLNPredicateRule(asw,NULL), 5.0f);
     
-    //	AddRule(new ImplicationBreakdownRule(parent), 9.0f);
-    AddRule(new StrictImplicationBreakdownRule(parent), 9.0f);
+    //	AddRule(new ImplicationBreakdownRule(asw), 9.0f);
+    AddRule(new StrictImplicationBreakdownRule(asw), 9.0f);
     
-    //	AddRule(new ImplicationTailExpansionRule(parent), 10.0f);
-    //	AddRule(new ImplicationConstructionRule(parent), 10.0f);
-//	AddRule(new InversionRule<IMPLICATION_LINK>(parent), 7.0f);
-    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, IMPLICATION_LINK), 8.0f);
-    //AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-    AddRule(new InversionRule(parent, INHERITANCE_LINK), 7.0f);
-    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, INHERITANCE_LINK), 8.0f);
+    //	AddRule(new ImplicationTailExpansionRule(asw), 10.0f);
+    //	AddRule(new ImplicationConstructionRule(asw), 10.0f);
+//	AddRule(new InversionRule<IMPLICATION_LINK>(asw), 7.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(asw), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, IMPLICATION_LINK), 8.0f);
+    //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
+    AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     
-    //	AddRule(new ORPartitionRule(parent), 10.0f);
-    AddRule(new CrispTheoremRule(parent), 10.0f);
+    //	AddRule(new ORPartitionRule(asw), 10.0f);
+    AddRule(new CrispTheoremRule(asw), 10.0f);
     
-    AddRule(new Int2ExtRule(parent, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Int2ExtRule(parent, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
-    AddRule(new Ext2IntRule(parent, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Ext2IntRule(parent, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
+    AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
+    AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+    AddRule(new Ext2IntRule(asw, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
     
-    AddRule(new HypothesisRule(parent), 30.0f);
+    AddRule(new HypothesisRule(asw), 30.0f);
     // general -> specific
-//    AddRule(new SimSubstRule1(parent, true), 5.0f);
+//    AddRule(new SimSubstRule1(asw, true), 5.0f);
     // specific -> general
-//    AddRule(new SimSubstRule1(parent, false), 5.0f);
+//    AddRule(new SimSubstRule1(asw, false), 5.0f);
     
     /* The rest of the Rules have rarely or never been used. Some of them just won't work. */
     
-    /*	AddRule(new UnorderedLinkPermutationRule(parent), 10.0f);
-	AddRule(new VariableInstantiationRule(parent), 10.0f);
-	AddRule(new NOTEliminationRule(parent), 10.0f
-	AddRule(new Equi2ImplRule(parent), 10.0f
-	AddRule(new Equi2Sim(parent), 10.0f;
-	AddRule(new Inh2SimRule(parent), 10.0f;
-	AddRule(new Sim2InhRule(parent), 10.0f;
+    /*	AddRule(new UnorderedLinkPermutationRule(asw), 10.0f);
+	AddRule(new VariableInstantiationRule(asw), 10.0f);
+	AddRule(new NOTEliminationRule(asw), 10.0f
+	AddRule(new Equi2ImplRule(asw), 10.0f
+	AddRule(new Equi2Sim(asw), 10.0f;
+	AddRule(new Inh2SimRule(asw), 10.0f;
+	AddRule(new Sim2InhRule(asw), 10.0f;
 
-	AddRule(new RevisionRule(parent);	
-	AddRule(new MetaPredicateExecutionRule(parent);
-	AddRule(new SubSetEvalRule<CONCEPT_NODE>(parent)
-	AddRule(new Equi2SimRule(parent);
-	AddRule(new Mem2InhRule(parent);
-	AddRule(new Inh2ImpRule(parent);
-	AddRule(new Imp2InhRule(parent);
-	AddRule(new Mem2EvalRule(parent);
-	AddRule(new Inh2EvalRule(parent);
+	AddRule(new RevisionRule(asw);	
+	AddRule(new MetaPredicateExecutionRule(asw);
+	AddRule(new SubSetEvalRule<CONCEPT_NODE>(asw)
+	AddRule(new Equi2SimRule(asw);
+	AddRule(new Mem2InhRule(asw);
+	AddRule(new Inh2ImpRule(asw);
+	AddRule(new Imp2InhRule(asw);
+	AddRule(new Mem2EvalRule(asw);
+	AddRule(new Inh2EvalRule(asw);
 
-	AddRule(new ExtImpl2SubsetRule(parent);
-	AddRule(new ExtEqui2ExtSimRule(parent);
-	AddRule(new TautologyRule(parent);
-	AddRule(new OR2ANDRule(parent);
-	AddRule(new Exist2ForAllRule(parent);
-	AddRule(new ExistRule(parent);
+	AddRule(new ExtImpl2SubsetRule(asw);
+	AddRule(new ExtEqui2ExtSimRule(asw);
+	AddRule(new TautologyRule(asw);
+	AddRule(new OR2ANDRule(asw);
+	AddRule(new Exist2ForAllRule(asw);
+	AddRule(new ExistRule(asw);
 */
 }
 
@@ -256,11 +256,11 @@ public:
         
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
-    AtomSpaceWrapper* parent = GET_ASW;
-    //AddRule(new InversionRule<INHERITANCE_LINK>(parent), 7.0f);
-    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(parent), 8.0f);
-    //AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(parent), 8.0f);
-    AddRule(new DeductionRule<DeductionSimpleFormula>(parent, ASSOCIATIVE_LINK), 8.0f);
+    AtomSpaceWrapper* asw = GET_ASW;
+    //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(asw), 8.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, INHERITANCE_LINK>(asw), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
     reset();
 }
 
