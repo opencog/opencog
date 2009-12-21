@@ -22,6 +22,9 @@
 #ifndef QUANTIFIERRULE_H
 #define QUANTIFIERRULE_H
 
+#include "../Rule.h"
+#include "../../formulas/Formulas.h"
+
 namespace opencog { namespace pln {
 
 template<typename FormulaType>
@@ -67,9 +70,7 @@ public:
         
         //haxx::
         pHandle ret = asw->addLink(OUTPUT_LINK_TYPE, pHandleSeq(),
-                                   *retTV,
-                                   fresh);	
-        //				false);
+                                   *retTV, fresh);	
         
         delete retTV;
         

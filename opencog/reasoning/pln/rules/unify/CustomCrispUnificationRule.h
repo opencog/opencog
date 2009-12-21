@@ -32,10 +32,8 @@ protected:
     pHandle hForAllLink;
 
 public:
-    CustomCrispUnificationRule(pHandle _hForAllLink,
-                               AtomSpaceWrapper *_asw)
-        : Rule(_asw,false,false,"CustomCrispUnificationRule"),
-          hForAllLink(_hForAllLink)
+    CustomCrispUnificationRule(pHandle _hForAllLink, AtomSpaceWrapper *_asw)
+        : Rule(_asw,false,false,"CustomCrispUnificationRule"), hForAllLink(_hForAllLink)
     {
         inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
     }

@@ -208,7 +208,9 @@ public:
 };
 
 /**
- * 
+ * NotFormula takes 2 TVs and returns the negation of the second TV, I don't know why...
+ * TV->mean = 1 - TV[1]->mean
+ * TV->count = TV[1]->count
  */ 
 class NotFormula : public Formula<2>
 {
@@ -488,7 +490,10 @@ protected:
 =============================================================================*/ 
 
 /**
- *
+ * Compute the FORALL formula as follows
+ * TV->count = Sum_i TV[i]->count
+ * TV->mean = Sum_i (TV[i]->mean * sqrt(TV[i]->count)) / total_weight
+ * where total_weight = Sum_i sqrt(TV[i]->count)
  */
 class FORALLFormula : public Formula<FORALL_MAX_ARITY>
 {
