@@ -131,7 +131,7 @@ public:
      */
     static std::vector<unsigned long> *buildSeparatorsVector(const std::vector<ElementaryBehaviorDescription> &entries);
 
-    int hashCode();
+    size_t hashCode();
 
     std::string toString() const;
 

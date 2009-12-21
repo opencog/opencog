@@ -187,19 +187,28 @@ const std::vector<ElementaryBehaviorDescription> &CompositeBehaviorDescription::
     return entries;
 }
 
-int CompositeBehaviorDescription::hashCode()
+size_t CompositeBehaviorDescription::hashCode()
 {
 
     if (hashCodeWarning) {
         fprintf(stderr, "Warning: contents of CompositeBehaviorDescription has changed between two calls of hashCode(). previous hashCode may be misuses by hashtables.\n");
     }
 
-    int answer = 0;
+    size_t answer = 0;
 
+    //printf("hashCode = 0");
     for (unsigned int i = 0; i < entries.size(); i++) {
         answer += TLB::getAtom(entries[i].handle)->hashCode();
-        answer += entries[i].temporal.getLowerBound() + entries[i].temporal.getUpperBound();
+        //printf(" => %u", answer);
+        // The line bellow was added to make hash code a bit stronger (CBDUTest
+        // was failing because hash colisions happened without this line)
+        answer += (answer << 10); 
+        //printf(" => %u", answer);
+        answer += boost::hash<unsigned int>()(entries[i].temporal.getLowerBound()
+                + entries[i].temporal.getUpperBound());
+        //printf(" => %u", answer);
     }
+    //printf("\n");
 
     hashCodeComputed = true;
     return answer;

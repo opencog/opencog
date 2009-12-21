@@ -84,7 +84,7 @@ void rec_build_model(It tgt_from, It tgt_to, int lower, int upper, int maxDepth)
             }
         }
 
-        hash_map<int, vector<It> > max_scoring_by_source;
+        boost::unordered_map<int, vector<It> > max_scoring_by_source;
         for (It target = vfrom;target != vto;++target) {
             max_score = negative_infinity;
             for (It source = vfrom;source != target;++source) {

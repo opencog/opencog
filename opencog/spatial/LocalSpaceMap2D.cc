@@ -909,6 +909,11 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<Spatial::GridPoint>& po
 void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle )
 {
 
+    // TODO: Rely on hash code of the ID as primary key for internal structures
+    // (entities, gridPoints, etc) may fail eventually, since hash value
+    // colision may happen eventually for different IDs. We should review this
+    // by using simpler types for IDs (Atom Handles, for example) and replacing
+    // idHash by these simpler IDs in these internal structures.
     long idHash = boost::hash<std::string>()( id );
     EntityPtr entity( new StaticEntity( idHash, id, Math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), Math::Dimension3( metadata.width, metadata.height, metadata.length ), Math::Quaternion( Math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
     entity->setProperty( Entity::OBSTACLE, isObstacle );

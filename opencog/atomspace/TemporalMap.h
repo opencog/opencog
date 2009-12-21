@@ -38,8 +38,7 @@ namespace opencog
 class TemporalMapIterator;
 
 /**
- * Hashtable based in Temporal* keys and (void *) elements. This is an Adapter
- * to stl's HashMap.
+ * Hashtable based in Temporal* keys and (void *) elements. 
  */
 class TemporalMap
 {
@@ -58,7 +57,7 @@ private:
     static const int DEFAULT_SIZE = 100;
 
     /**
-     * Defines the hash_map that will be used.
+     * Defines the type of the hash map to be used.
      */
     typedef boost::unordered_map<Temporal*, void *, hashTemporal, equalTemporal> InternalHashMap;
 
