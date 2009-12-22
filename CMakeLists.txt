@@ -61,8 +61,8 @@ ENDIF (WIN32)
 # hypertable requires boost iostreams
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.35 COMPONENTS date_time filesystem iostreams regex serialization signals thread REQUIRED)
-FIND_PACKAGE(Boost 1.35 COMPONENTS python program_options)
+FIND_PACKAGE(Boost 1.37 COMPONENTS date_time filesystem iostreams regex serialization signals thread REQUIRED)
+FIND_PACKAGE(Boost 1.37 COMPONENTS python program_options)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
