@@ -250,15 +250,12 @@ struct ModifiedVTree : public vtree {
             : original_handle(PHANDLE_UNDEFINED) {}
 
     ModifiedVTree(const vtree& rhs, pHandle _original_handle = PHANDLE_UNDEFINED)
-            : original_handle(_original_handle) {
-        (*(vtree*)this) = rhs;
-    }
+        : vtree(rhs), original_handle(_original_handle) {}
 };
 
 struct ModifiedBoundVTree : public ModifiedVTree {
-    ModifiedBoundVTree(const ModifiedVTree& rhs) {
-        (*(ModifiedVTree*)this) = rhs;
-    }
+    ModifiedBoundVTree(const ModifiedVTree& rhs)
+        : ModifiedVTree(rhs) {}
 
     Btr<bindingsVTreeT> bindings;
 };
@@ -275,14 +272,11 @@ public:
     BoundVTree(const vtree::iterator_base& i) : vtree(i) {}
     BoundVTree(const Vertex& v) : vtree(v) {}
 
-    BoundVTree(const ModifiedVTree& rhs) {
-        (*(ModifiedVTree*)this) = rhs;
-    }
+    BoundVTree(const ModifiedVTree& rhs)
+        : vtree(rhs) {}
 
     BoundVTree(const vtree& rhs, Btr<bindingsT> _bindings = Btr<bindingsT>())
-            : bindings(_bindings) {
-        (*(vtree*)this) = rhs;
-    }
+        : vtree(rhs), bindings(_bindings) {}
 
     BoundVTree* Clone() const {
         return new BoundVTree(*this, this->bindings);
