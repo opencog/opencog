@@ -23,6 +23,7 @@
 #define ANDRULEARITYFREERULE_H
 
 #include "../../formulas/Formulas.h"
+#include "../Rule.h"
 
 namespace opencog { namespace pln {
 

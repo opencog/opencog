@@ -22,6 +22,10 @@
 #ifndef CUSTOMCRISPUNIONRULE_H
 #define CUSTOMCRISPUNIONRULE_H
 
+#include <boost/lexical_cast.hpp>
+
+#include "../Rule.h"
+
 namespace opencog { namespace pln {
 
 class CustomCrispUnificationRule : public Rule
@@ -33,8 +37,11 @@ protected:
 
 public:
     CustomCrispUnificationRule(pHandle _hForAllLink, AtomSpaceWrapper *_asw)
-        : Rule(_asw,false,false,"CustomCrispUnificationRule"), hForAllLink(_hForAllLink)
+        : Rule(_asw,false,false,"CustomCrispUnificationRule"),
+        hForAllLink(_hForAllLink)
     {
+        //append the pHandle of the FOEALL_LINK so that the rule name is unique
+        name += boost::lexical_cast<std::string>(hForAllLink); 
         inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
     }
 
