@@ -36,7 +36,7 @@ float max(float a, float b);
 /** Create a new FWVAR node with the given name.
  * @relates AtomSpaceWrapper
  */
-Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname);
+Vertex CreateVar(iAtomSpaceWrapper* asw, const std::string& varname);
 
 /** Create a new FWVAR node and generate the name.
  * @relates AtomSpaceWrapper

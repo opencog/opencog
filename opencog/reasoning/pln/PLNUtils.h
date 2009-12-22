@@ -668,10 +668,6 @@ struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
 
 #define hasFW_VAR(vt) (getFW_VAR(vt) != (vt).end())
 
-/// VariableNodes not memory-managed.
-Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname);
-Vertex CreateVar(iAtomSpaceWrapper* asw);
-
 const char* Type2Name(Type t);
 std::string condensed_form(const atom& a);
 

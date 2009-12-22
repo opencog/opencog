@@ -59,7 +59,7 @@ namespace opencog { namespace pln {
 float max(float a, float b) { return ((a>b)?a:b); }
 #endif
 
-Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
+Vertex CreateVar(iAtomSpaceWrapper* asw, const std::string& varname)
 {
     // Use the AtomSpaceWrapper to create a new node representing
     // the variable and called varname, don't try to replace it
