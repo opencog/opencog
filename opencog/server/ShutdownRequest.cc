@@ -42,7 +42,7 @@ bool ShutdownRequest::execute()
 {
     std::ostringstream oss;
     if (_mimeType == "text/plain")
-        oss << "Shuting down cogserver" << std::endl;
+        oss << "Shutting down cogserver" << std::endl;
     send(oss.str());
 
     CogServer& cogserver = static_cast<CogServer&>(server());
