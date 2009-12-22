@@ -22,6 +22,8 @@
 #ifndef BASECRISPUNIONRULE_H
 #define BASECRISPUNIONRULE_H
 
+#include "../Rule.h"
+
 namespace opencog { namespace pln {
 
 class BaseCrispUnificationRule : public Rule
