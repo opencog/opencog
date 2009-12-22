@@ -222,7 +222,7 @@ BoundingBox& BoundingBox::operator=( const BoundingBox & bb )
 
 const std::list<LineSegment*>& BoundingBox::getEdges( const Vector3& corner ) const throw(opencog::NotFoundException)
 {
-    std::tr1::unordered_map<Vector3, std::list<LineSegment*>, BoundingBox::Vector3Hash >::const_iterator it = 
+    std::map<Vector3, std::list<LineSegment*> >::const_iterator it = 
         this->cornerEdges.find( corner );
     
     if ( it != this->cornerEdges.end( ) ) {

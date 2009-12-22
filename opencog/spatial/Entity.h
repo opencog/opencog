@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
 
@@ -72,8 +73,8 @@ public:
         const Entity* entityA;
         const Entity* entityB;
 
-        std::vector<const Math::Vector3*> limitsA;
-        std::vector<const Math::Vector3*> limitsB;
+        std::vector<std::set<Math::Vector3> > limitsA;
+        std::vector<std::set<Math::Vector3> > limitsB;
         std::vector<unsigned int> relations;
     }; 
 

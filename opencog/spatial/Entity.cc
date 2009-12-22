@@ -68,190 +68,155 @@ double Entity::distanceTo( const Entity& entity,
         *status = localStatus;
     } // if
     
-    
-    std::tr1::unordered_map<unsigned int, size_t > pointHashA;
-    std::tr1::unordered_map<unsigned int, size_t > pointHashB;
+    std::list<unsigned int> bordersOfA;
+    std::list<unsigned int> bordersOfB;
 
-    std::tr1::unordered_map<size_t, const Math::Vector3* > hashPointA;
-    std::tr1::unordered_map<size_t, const Math::Vector3* > hashPointB;
-
-    std::tr1::unordered_map<size_t, unsigned int > pointCounterA;
-    std::tr1::unordered_map<size_t, unsigned int > pointCounterB;
-    {
-        unsigned int i;
-        for( i = 0; i < localStatus.limitsA.size( ); ++i ) {
-            size_t seed = 0;
-            boost::hash_combine(seed, localStatus.limitsA[i]->x );
-            boost::hash_combine(seed, localStatus.limitsA[i]->y );
-            boost::hash_combine(seed, localStatus.limitsA[i]->z );
-            pointHashA[i] = seed;
-            hashPointA[seed] = localStatus.limitsA[i];
-            //pointCounterA[seed] = 0;
-            opencog::logger().fine( "Entity::%s - LimitA seed[%ul] index[%d] point[%s]", 
-                            __FUNCTION__, seed, i, localStatus.limitsA[i]->toString( ).c_str( ) );
-
-            seed = 0;
-            boost::hash_combine(seed, localStatus.limitsB[i]->x );
-            boost::hash_combine(seed, localStatus.limitsB[i]->y );
-            boost::hash_combine(seed, localStatus.limitsB[i]->z );
-            pointHashB[i] = seed;
-            hashPointB[seed] = localStatus.limitsB[i];
-            //pointCounterB[seed] = 0;
-            opencog::logger().fine( "Entity::%s - LimitB seed[%ul] index[%d] point[%s]", 
-                            __FUNCTION__, seed, i, localStatus.limitsB[i]->toString( ).c_str( ) );
-        } // for
-    }
-    
+    bool completelyOverlap = true;
     if ( ( localStatus.relations[LimitRelation::X] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
-        ++pointCounterA[pointHashA[XMAX]];
-        ++pointCounterB[pointHashB[XMIN]];
+        bordersOfA.push_back( XMAX );
+        bordersOfB.push_back( XMIN );
+        completelyOverlap = false;
     } else if ( ( localStatus.relations[LimitRelation::X] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
-        ++pointCounterA[pointHashA[XMIN]];
-        ++pointCounterB[pointHashB[XMAX]];
+        bordersOfA.push_back( XMIN );
+        bordersOfB.push_back( XMAX );
+        completelyOverlap = false;
     }
     if ( ( localStatus.relations[LimitRelation::Y] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
-        ++pointCounterA[pointHashA[YMAX]];
-        ++pointCounterB[pointHashB[YMIN]];
+        bordersOfA.push_back( YMAX );
+        bordersOfB.push_back( YMIN );
+        completelyOverlap = false;
     } else if ( ( localStatus.relations[LimitRelation::Y] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
-        ++pointCounterA[pointHashA[YMIN]];
-        ++pointCounterB[pointHashB[YMAX]];
+        bordersOfA.push_back( YMIN );
+        bordersOfB.push_back( YMAX );
+        completelyOverlap = false;
     }
 
     if ( ( localStatus.relations[LimitRelation::Z] & (1|4|16) ) > 0 ) {
         // get the most right point of A and most left point of B
-        ++pointCounterA[pointHashA[ZMAX]];
-        ++pointCounterB[pointHashB[ZMIN]];
+        bordersOfA.push_back( ZMAX );
+        bordersOfB.push_back( ZMIN );
+        completelyOverlap = false;
     } else if ( ( localStatus.relations[LimitRelation::Z] & (2|8|32) ) > 0 ) {
         // get the most left point of A and most right point of B
-        ++pointCounterA[pointHashA[ZMIN]];
-        ++pointCounterB[pointHashB[ZMAX]];
+        bordersOfA.push_back( ZMIN );
+        bordersOfB.push_back( ZMAX );
+        completelyOverlap = false;
     }
 
     // If objects contains each other in all dimensions, the distance is zero
-    if (pointCounterA.empty()) {
+    if ( completelyOverlap ) {
         return 0.0;
     }
-
     
-    std::list<const Math::Vector3*> pointsInA;
-    std::list<const Math::Vector3*> pointsInB;
-    { // get nearest points
-        //std::tr1::unordered_map<const Math::Vector3*, unsigned int, boost::hash<const Math::Vector3*> >::const_iterator it;
-        std::tr1::unordered_map<size_t, unsigned int >::const_iterator it;
+    std::set<Math::Vector3> entityPointsA, entityPointsB;
+    { // get the points in object which has a greatest score
+        std::list<unsigned int>::const_iterator it;
+        std::map<Math::Vector3, unsigned int> pointCounterA, pointCounterB;
+
         unsigned int counter = 0;
-        for( it = pointCounterA.begin( ); it != pointCounterA.end( ); ++it ) {
-            if ( it->second > counter ) {
-                pointsInA.clear( );
-                counter = it->second;
-                pointsInA.push_back( hashPointA[it->first] );
-            } else if ( it->second == counter ) {
-                pointsInA.push_back( hashPointA[it->first] );
-            } // else if
-            if ( hashPointA[it->first] == NULL ) {
-                opencog::logger().error( "Entity::%s - Invalid limit pointA seed[%ul]",
-                            __FUNCTION__, it->first );                
-            } // if
+        for( it = bordersOfA.begin( ); it != bordersOfA.end( ); ++it ) {
+            std::set<Math::Vector3>::const_iterator itPoints;
+            for( itPoints = localStatus.limitsA[*it].begin( );
+                 itPoints != localStatus.limitsA[*it].end( ); ++itPoints ) {
+                unsigned int& counterA = pointCounterA[*itPoints];
+                ++counterA;
+                if ( counterA > counter ) {
+                    counter = counterA;
+                    entityPointsA.clear( );
+                    entityPointsA.insert(*itPoints);
+                } else if ( counterA == counter ) {
+                    entityPointsA.insert(*itPoints);
+                } // else if 
+            } // for
         } // for
-        
+
         counter = 0;
-        for( it = pointCounterB.begin( ); it != pointCounterB.end( ); ++it ) {
-            if ( it->second > counter ) {
-                pointsInB.clear( );
-                counter = it->second;
-                pointsInB.push_back( hashPointB[it->first] );
-            } else if ( it->second == counter ) {
-                pointsInB.push_back( hashPointB[it->first] );
-            } // else if
-            if ( hashPointB[it->first] == NULL ) {
-                opencog::logger().error( "Entity::%s - Invalid limit pointB seed[%ul]",
-                            __FUNCTION__, it->first );                
-            } // if
-        } // for
+        for( it = bordersOfB.begin( ); it != bordersOfB.end( ); ++it ) {
+            std::set<Math::Vector3>::const_iterator itPoints;
+            for( itPoints = localStatus.limitsB[*it].begin( ); 
+                 itPoints != localStatus.limitsB[*it].end( ); ++itPoints ) {
+                unsigned int& counterB = pointCounterB[*itPoints];
+                ++counterB;
+                if ( counterB > counter ) {
+                    counter = counterB;
+                    entityPointsB.clear( );
+                    entityPointsB.insert(*itPoints);
+                } else if ( counterB == counter ) {
+                    entityPointsB.insert(*itPoints);
+                } // else if 
+
+            } // for
+        } // for        
     } // end block
 
+    std::map<Math::LineSegment, unsigned int > segmentsInACounter;
+    std::map<Math::LineSegment, unsigned int > segmentsInBCounter;
 
-    
-
-    std::tr1::unordered_map<unsigned int, unsigned int > segmentsInA;
-    std::tr1::unordered_map<unsigned int, unsigned int > segmentsInB;
-    //std::vector<unsigned int> segmentsInA;
-    //std::vector<unsigned int> segmentsInB;
-
-
-    Math::LineSegment* chosenSegmentA = NULL;
-    Math::LineSegment* chosenSegmentB = NULL;
+    std::set<Math::LineSegment> segmentsInA;
+    std::set<Math::LineSegment> segmentsInB;
     unsigned int currentSegmentAStrength = 0;
     unsigned int currentSegmentBStrength = 0;
     { // get nearest segments
-        std::list<const Math::Vector3*>::const_iterator it;
-        for( it = pointsInA.begin( ); it != pointsInA.end( ); ++it ) {
-            //std::cout << "PIA : " << (*it)->toString( ) << std::endl;
-            const std::list<Math::LineSegment*>& nearestEdges = bb1.getEdges( **it );
+        std::set<Math::Vector3>::const_iterator itPoints;
+        for( itPoints = entityPointsA.begin( ); itPoints != entityPointsA.end( ); ++itPoints ) {
+            const std::list<Math::LineSegment*>& nearestEdges = bb1.getEdges( *itPoints );
             std::list<Math::LineSegment*>::const_iterator it2;
             for( it2 = nearestEdges.begin( ); it2 != nearestEdges.end( ); ++it2 ) {
-                //if ( segmentsInA.find( *it2 ) == segmentsInA.end( ) ) {
-                //    segmentsInA[ *it2 ] = 0;
-                //} // if
-                size_t seed = 0;
-                boost::hash_combine( seed, (*it2)->pointA.x );
-                boost::hash_combine( seed, (*it2)->pointA.y );
-                boost::hash_combine( seed, (*it2)->pointA.z );
-                boost::hash_combine( seed, (*it2)->pointB.x );
-                boost::hash_combine( seed, (*it2)->pointB.y );
-                boost::hash_combine( seed, (*it2)->pointB.z );
-
-                unsigned int& counter = segmentsInA[ seed ];
+                if ( segmentsInACounter.find( **it2 ) == segmentsInACounter.end( ) ) {
+                    segmentsInACounter[ **it2 ] = 0;
+                } // if
+                unsigned int& counter = segmentsInACounter[ **it2 ];
                 ++counter;
                 if ( counter > currentSegmentAStrength ) {
+                    segmentsInA.clear( );
                     currentSegmentAStrength = counter;
-                    chosenSegmentA = *it2;
-                } // if
-            } // for            
+                    segmentsInA.insert(**it2);
+                } else if ( counter == currentSegmentAStrength ) {
+                    segmentsInA.insert(**it2);
+                } // else if
+            } // for
         } // for
 
-        for( it = pointsInB.begin( ); it != pointsInB.end( ); ++it ) {
-            //std::cout << "PIB : " << (*it)->toString( ) << std::endl;
-            const std::list<Math::LineSegment*>& nearestEdges = bb2.getEdges( **it );
+        for( itPoints = entityPointsB.begin( ); itPoints != entityPointsB.end( ); ++itPoints ) {
+            const std::list<Math::LineSegment*>& nearestEdges = bb2.getEdges( *itPoints );
             std::list<Math::LineSegment*>::const_iterator it2;
             for( it2 = nearestEdges.begin( ); it2 != nearestEdges.end( ); ++it2 ) {
-                //if ( segmentsInB.find( *it2 ) == segmentsInB.end( ) ) {
-                //    segmentsInB[ *it2 ] = 0;
-                //} // if
-                size_t seed = 0;
-                boost::hash_combine( seed, (*it2)->pointA.x );
-                boost::hash_combine( seed, (*it2)->pointA.y );
-                boost::hash_combine( seed, (*it2)->pointA.z );
-                boost::hash_combine( seed, (*it2)->pointB.x );
-                boost::hash_combine( seed, (*it2)->pointB.y );
-                boost::hash_combine( seed, (*it2)->pointB.z );
-
-                unsigned int& counter = segmentsInB[ seed ];
+                if ( segmentsInBCounter.find( **it2 ) == segmentsInBCounter.end( ) ) {
+                    segmentsInBCounter[ **it2 ] = 0;
+                } // if
+                
+                unsigned int& counter = segmentsInBCounter[ **it2 ];
                 ++counter;
                 if ( counter > currentSegmentBStrength ) {
+                    segmentsInB.clear( );
                     currentSegmentBStrength = counter;
-                    chosenSegmentB = *it2;
-                } // if
-            } // for            
+                    segmentsInB.insert( **it2 );
+                } else if ( counter == currentSegmentBStrength ) {
+                    segmentsInB.insert( **it2 );
+                } // else if
+            } // for
         } // for
     } // end block
+    
+    const Math::LineSegment& chosenSegmentA = *segmentsInA.begin( );
+    const Math::LineSegment& chosenSegmentB = *segmentsInB.begin( );
 
     // only if the objects intersects in all three axis they can be tested to
     // be inside another
     if ( ( localStatus.relations[LimitRelation::X] & (1|2) ) == 0 && 
          ( localStatus.relations[LimitRelation::Y] & (1|2) ) == 0 && 
          ( localStatus.relations[LimitRelation::Z] & (1|2) ) == 0 ) {
-        if ( bb1.isInside( chosenSegmentB->pointA ) || bb1.isInside( chosenSegmentB->pointB ) ||
-             bb2.isInside( chosenSegmentA->pointA ) || bb2.isInside( chosenSegmentA->pointB ) ) {
+        if ( bb1.isInside( chosenSegmentB.pointA ) || bb1.isInside( chosenSegmentB.pointB ) ||
+             bb2.isInside( chosenSegmentA.pointA ) || bb2.isInside( chosenSegmentA.pointB ) ) {
             return 0.0;
         } // if
     } // if
 
-    return chosenSegmentA->distanceTo( *chosenSegmentB, pointInA, pointInB );
-
+    return chosenSegmentA.distanceTo( chosenSegmentB, pointInA, pointInB );
 }
 
 void Entity::setProperty( Entity::PROPERTY property, PropertyValueType value )

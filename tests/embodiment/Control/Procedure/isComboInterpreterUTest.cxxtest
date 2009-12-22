@@ -595,14 +595,14 @@ public :
         str += PAIUtils::getInternalId("milk ");
         str += PAIUtils::getInternalId("meat");
         str += ")";
-        runProcedureInCombo(str, id::logical_true);
+        runProcedureInCombo(str, id::logical_false);
 
         // oposite
         str.assign("near(");
         str += PAIUtils::getInternalId("meat ");
         str += PAIUtils::getInternalId("milk");
         str += ")";
-        runProcedureInCombo(str, id::logical_true);
+        runProcedureInCombo(str, id::logical_false);
 
         // not near
         str.assign("near(");
@@ -652,20 +652,20 @@ public :
         string str("is_proportional_next(");
         str += PAIUtils::getInternalId("milk ");
         str += PAIUtils::getInternalId("meat ");
-        str += "3 0.98)";
+        str += "3 0.93)";
         runProcedureInCombo(str, id::logical_true);
 
         // oposite
         str.assign("is_proportional_next(");
         str += PAIUtils::getInternalId("meat ");
         str += PAIUtils::getInternalId("milk ");
-        str += "4 0.98)";
+        str += "4 0.93)";
         runProcedureInCombo(str, id::logical_true);
 
         str.assign("is_proportional_next(");
         str += PAIUtils::getInternalId("meat ");
         str += PAIUtils::getInternalId("milk ");
-        str += "2 0.9870)";
+        str += "2 0.93878)";
         runProcedureInCombo(str, id::logical_true);
 
         str.assign("is_proportional_next(");

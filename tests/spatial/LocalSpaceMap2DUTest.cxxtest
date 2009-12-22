@@ -34,6 +34,7 @@
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/spatial/TB_ASSERT.h>
 #include <opencog/spatial/StaticEntity.h>
+#include <opencog/spatial/MovableEntity.h>
 
 #include <boost/date_time.hpp>
 #include <boost/thread.hpp>
@@ -549,18 +550,31 @@ public:
         StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(5, 0, 0), Math::Dimension3(3, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
 
 
-        StaticEntityPtr e5( new StaticEntity( 5, "e5", Math::Vector3(5, 0, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        StaticEntityPtr e6( new StaticEntity( 6, "e6", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        MovableEntityPtr e5( new MovableEntity( 5, "e5", Math::Vector3(5, 0, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        MovableEntityPtr e6( new MovableEntity( 6, "e6", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
         StaticEntityPtr e7( new StaticEntity( 7, "e7", Math::Vector3(10, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
         StaticEntityPtr e8( new StaticEntity( 8, "e8", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
 
         TS_ASSERT_EQUALS( e1->distanceTo(*e2), 0.0f );
         TS_ASSERT_EQUALS( e1->distanceTo(*e3), 0.0f );
-        TS_ASSERT_EQUALS( e1->distanceTo(*e4), 0.0f );
+        TS_ASSERT_EQUALS( e1->distanceTo(*e4), 0.0f );       
 
-        TS_ASSERT( ( e5->distanceTo(*e6) - 35.128338 ) < 0.01 );
-        TS_ASSERT( ( e5->distanceTo(*e7) - 35.196857 ) < 0.01 );
-        TS_ASSERT( ( e5->distanceTo(*e8) - 34.818203 ) < 0.01 );
+        TS_ASSERT( ( e5->distanceTo(*e7) - 33.7765 ) < 0.01 );
+        TS_ASSERT( ( e5->distanceTo(*e8) - 32.83 ) < 0.01 );
+
+        TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
+
+        e6->setPosition( Math::Vector3( 0, -35, 0 ) );
+        e6->update( );
+        TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
+
+        e5->setPosition( Math::Vector3( -5, 0, 0 ) );
+        e5->update( );
+        TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
+
+        e5->setPosition( Math::Vector3( -5, 0, -1 ) );
+        e5->update( );
+        TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.1 );
         
     }
 

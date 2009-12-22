@@ -195,12 +195,15 @@ public:
         return pointA + ( direction * len );
     }
 
-    virtual inline LineSegment& operator=( const LineSegment& segment ) {
+    inline LineSegment& operator=( const LineSegment& segment ) {
         this->pointA = segment.pointA;
         this->pointB = segment.pointB;
         return *this;
     }
 
+    inline bool operator<( const LineSegment& segment ) const {
+        return ( pointA < segment.pointA || ( !(segment.pointA < pointA ) && pointB < segment.pointB ) );
+    }
 
 };
 

@@ -293,14 +293,16 @@ public:
     that the ones of the vector it is compared against.
     */
     inline bool operator < ( const Vector3& vector ) const {
-        return ( x < vector.x && y < vector.y && z < vector.z );
+        return ( x < vector.x || ( !(vector.x < x) && y < vector.y ) ||
+                 ( !(vector.x < x) && !(vector.y < y ) && z < vector.z ));
     }
 
     /** Returns true if the vector's scalar components are all smaller
     that the ones of the vector it is compared against.
     */
     inline bool operator > ( const Vector3& vector ) const {
-        return ( x > vector.x && y > vector.y && z > vector.z );
+        return ( x > vector.x || ( !(vector.x > x) && y > vector.y ) ||
+                 ( !(vector.x > x) && !(vector.y > y ) && z > vector.z ));
     }
 
     /** Sets this vector's components to the minimum of its own and the

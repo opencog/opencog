@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <list>
-#include <tr1/unordered_map>
+#include <map>
 
 #include <boost/functional/hash.hpp>
 
@@ -143,7 +143,7 @@ private:
     Entity* entity;
     std::vector<SquareFace> squareFaces;
     std::vector<LineSegment> edges;
-    std::tr1::unordered_map<Vector3, std::list<LineSegment*>, Vector3Hash > cornerEdges;
+    std::map<Vector3, std::list<LineSegment*> > cornerEdges;
     std::vector<Vector3> corners;
 
 }; // BoundingBox

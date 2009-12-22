@@ -42,6 +42,29 @@ using namespace opencog;
 const double LocalSpaceMap2D::NEXT_FACTOR = 0.1;
 const double LocalSpaceMap2D::NEAR_FACTOR = 0.003125;
 
+/**
+ * Helper classes used to compare two points
+ * by using an specific axis
+ */
+class SortByAxisX {
+public:
+    inline bool operator()( const Math::Vector3& p1, const Math::Vector3& p2 ) const {
+        return p1.x < p2.x;
+    } // if
+};
+class SortByAxisY {
+public:
+    inline bool operator()( const Math::Vector3& p1, const Math::Vector3& p2 ) const {
+        return p1.y < p2.y;
+    } // if
+};
+class SortByAxisZ {
+public:
+    inline bool operator()( const Math::Vector3& p1, const Math::Vector3& p2 ) const {
+        return p1.z < p2.z;
+    } // if
+};
+
 bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity )
 {
     bool merged = false;
@@ -1166,112 +1189,191 @@ Entity::LimitRelation LocalSpaceMap2D::computeObjectsLimits(
     
     const std::vector<Math::Vector3>& corners1 = bb1.getAllCorners( );
     const std::vector<Math::Vector3>& corners2 = bb2.getAllCorners( );
-    
-    static double min = std::numeric_limits<double>::max( );
-    static double max = -min;
-    
-    double xMinA = min; double xMaxA = max; 
-    double yMinA = min; double yMaxA = max; 
-    double zMinA = min; double zMaxA = max;
 
-    double xMinB = min; double xMaxB = max; 
-    double yMinB = min; double yMaxB = max; 
-    double zMinB = min; double zMaxB = max;
+    // tolerance is used to determine if a coord
+    // sufficiently near another to be considered relevant
+    // for the algorithm
+    double tolerance = 0.01;
 
+    std::multiset<Math::Vector3, SortByAxisX > sortedByXInA;
+    std::multiset<Math::Vector3, SortByAxisY > sortedByYInA;
+    std::multiset<Math::Vector3, SortByAxisZ > sortedByZInA;
+
+    std::multiset<Math::Vector3, SortByAxisX > sortedByXInB;
+    std::multiset<Math::Vector3, SortByAxisY > sortedByYInB;
+    std::multiset<Math::Vector3, SortByAxisZ > sortedByZInB;
+    // sort all corners of both objects by X, Y and Z
     unsigned int i;
     for( i = 0; i < corners1.size( ); ++i ) {
-        if ( corners1[i].x < xMinA ) {
-            xMinA = corners1[i].x;
-            status.limitsA[Entity::XMIN] = &corners1[i];
-        } // if
-        if ( corners1[i].x > xMaxA ) {
-            xMaxA = corners1[i].x;
-            status.limitsA[Entity::XMAX] = &corners1[i];
-        } // if
+        sortedByXInA.insert( corners1[i] );
+        sortedByYInA.insert( corners1[i] );
+        sortedByZInA.insert( corners1[i] );
 
-        if ( corners1[i].y < yMinA ) {
-            yMinA = corners1[i].y;
-            status.limitsA[Entity::YMIN] = &corners1[i];
-        } //if        
-        if ( corners1[i].y > yMaxA ) {
-            yMaxA = corners1[i].y;
-            status.limitsA[Entity::YMAX] = &corners1[i];
-        } // if
-
-        if ( corners1[i].z < zMinA ) {
-            zMinA = corners1[i].z;
-            status.limitsA[Entity::ZMIN] = &corners1[i];
-        } // if
-        if ( corners1[i].z > zMaxA ) {
-            zMaxA = corners1[i].z;
-            status.limitsA[Entity::ZMAX] = &corners1[i];
-        } // if
-
-
-
-        if ( corners2[i].x < xMinB ) {
-            xMinB = corners2[i].x;
-            status.limitsB[Entity::XMIN] = &corners2[i];
-        } // if
-        if ( corners2[i].x > xMaxB ) {
-            xMaxB = corners2[i].x;
-            status.limitsB[Entity::XMAX] = &corners2[i];
-        } // if
-
-        if ( corners2[i].y < yMinB ) {
-            yMinB = corners2[i].y;
-            status.limitsB[Entity::YMIN] = &corners2[i];
-        } //if        
-        if ( corners2[i].y > yMaxB ) {
-            yMaxB = corners2[i].y;
-            status.limitsB[Entity::YMAX] = &corners2[i];
-        } // if
-
-        if ( corners2[i].z < zMinB ) {
-            zMinB = corners2[i].z;
-            status.limitsB[Entity::ZMIN] = &corners2[i];
-        } // if
-        if ( corners2[i].z > zMaxB ) {
-            zMaxB = corners2[i].z;
-            status.limitsB[Entity::ZMAX] = &corners2[i];
-        } // if
+        sortedByXInB.insert( corners2[i] );
+        sortedByYInB.insert( corners2[i] );
+        sortedByZInB.insert( corners2[i] );
     } // for
     
-    status.relations[Entity::LimitRelation::X] = (xMaxA < xMinB ) ? 1 : 
-        ( xMaxB < xMinA ) ? 2 : 
-        ( xMinA < xMinB && xMaxA < xMaxB ) ? 4 : 
-        ( xMinB < xMinA && xMaxB < xMaxA ) ? 8 : 
-        ( xMaxA == xMinB ) ? 16 :
-        ( xMaxB == xMinA ) ? 32 :
-        ( xMinA == xMinB && xMaxA == xMaxB ) ? 64 : // perfect overlap
-        ( xMinA > xMinB && xMaxA < xMaxB ) ? 128 : // non perfect B overlaps A
-        ( xMinB > xMinA && xMaxB < xMaxA ) ? 256 : // non perfect A overlaps B
-        ( (xMinA == xMinB && xMaxA < xMaxB) || (xMinA > xMinB && xMaxA == xMaxB ) ) ? 512 : 1024;
+    std::multiset<Math::Vector3, SortByAxisX >::const_iterator
+        itFrontXA, itFrontXB, itFrontYA, itFrontYB, itFrontZA, itFrontZB;
+    std::multiset<Math::Vector3, SortByAxisX >::const_reverse_iterator
+        itBackXA, itBackXB, itBackYA, itBackYB, itBackZA, itBackZB;
 
-    status.relations[Entity::LimitRelation::Y] = (yMaxA < yMinB ) ? 1 : 
-        ( yMaxB < yMinA ) ? 2 : 
-        ( yMinA < yMinB && yMaxA < yMaxB ) ? 4 : 
-        ( yMinB < yMinA && yMaxB < yMaxA ) ? 8 : 
-        ( yMaxA == yMinB ) ? 16 :
-        ( yMaxB == yMinA ) ? 32 :
-        ( yMinA == yMinB && yMaxA == yMaxB ) ? 64 : // perfect overlap
-        ( yMinA > yMinB && yMaxA < yMaxB ) ? 128 : // non perfect B overlaps A
-        ( yMinB > yMinA && yMaxB < yMaxA ) ? 256 : // non perfect A overlaps B
-        ( (yMinA == yMinB && yMaxA < yMaxB) || (yMinA > yMinB && yMaxA == yMaxB ) ) ? 512 : 1024;
+    // build a bunch of iterators that will be used to navigate
+    // throught the sorted points
+    itFrontXA = sortedByXInA.begin( ); itBackXA = sortedByXInA.rbegin( );
+    itFrontYA = sortedByYInA.begin( ); itBackYA = sortedByYInA.rbegin( );
+    itFrontZA = sortedByZInA.begin( ); itBackZA = sortedByZInA.rbegin( );
+
+    itFrontXB = sortedByXInB.begin( ); itBackXB = sortedByXInB.rbegin( );
+    itFrontYB = sortedByYInB.begin( ); itBackYB = sortedByYInB.rbegin( );
+    itFrontZB = sortedByZInB.begin( ); itBackZB = sortedByZInB.rbegin( );
+
+    Math::Vector3 minA(itFrontXA->x, itFrontYA->y, itFrontZA->z );
+    Math::Vector3 maxA(itBackXA->x, itBackYA->y, itBackZA->z);
+
+    Math::Vector3 minB(itFrontXB->x, itFrontYB->y, itFrontZB->z );
+    Math::Vector3 maxB(itBackXB->x, itBackYB->y, itBackZB->z);
+
+    // prepare a cache that will store the points sorted
+    // by the insertion ordering
+    std::vector<std::list<Math::Vector3> > validPoints[2];
+    validPoints[0].resize(6); validPoints[1].resize(6); 
+    
+    // get the first and the last point of the sorted sets.
+    // these points will be considered the min and max ones
+    status.limitsA[Entity::XMIN].insert( *itFrontXA );
+    validPoints[0][Entity::XMIN].push_back( *itFrontXA++ );
+    status.limitsA[Entity::XMAX].insert( *itBackXA );
+    validPoints[0][Entity::XMAX].push_back( *itBackXA++ );
+    status.limitsA[Entity::YMIN].insert( *itFrontYA );  
+    validPoints[0][Entity::YMIN].push_back( *itFrontYA++ );
+    status.limitsA[Entity::YMAX].insert( *itBackYA );   
+    validPoints[0][Entity::YMAX].push_back( *itBackYA++ ); 
+    status.limitsA[Entity::ZMIN].insert( *itFrontZA );  
+    validPoints[0][Entity::ZMIN].push_back( *itFrontZA++ );
+    status.limitsA[Entity::ZMAX].insert( *itBackZA ); 
+    validPoints[0][Entity::ZMAX].push_back( *itBackZA++ ); 
+
+    status.limitsB[Entity::XMIN].insert( *itFrontXB );
+    validPoints[1][Entity::XMIN].push_back( *itFrontXB++ );
+    status.limitsB[Entity::XMAX].insert( *itBackXB );
+    validPoints[1][Entity::XMAX].push_back( *itBackXB++ );
+    status.limitsB[Entity::YMIN].insert( *itFrontYB );  
+    validPoints[1][Entity::YMIN].push_back( *itFrontYB++ );
+    status.limitsB[Entity::YMAX].insert( *itBackYB );   
+    validPoints[1][Entity::YMAX].push_back( *itBackYB++ ); 
+    status.limitsB[Entity::ZMIN].insert( *itFrontZB );  
+    validPoints[1][Entity::ZMIN].push_back( *itFrontZB++ );
+    status.limitsB[Entity::ZMAX].insert( *itBackZB ); 
+    validPoints[1][Entity::ZMAX].push_back( *itBackZB++ );
+
+    // there are 6 types of limits. we will use a vector
+    // of status to manage the set points of each limit
+    // for both objects
+    std::vector<bool> elementStatus(12);
+    std::fill( elementStatus.begin( ), elementStatus.end( ), true );
+
+    // now, traverse the sorted points sets and collect 
+    // each point that is sufficiently near of the
+    // latest cached point (using tolerance). This step
+    // will build a set of the points that belongs to a
+    // specific limit (XMIN, ZMAX, etc).
+    unsigned int counter = 12;
+    while( counter > 0 && itFrontXA != sortedByXInA.end( ) ) {        
+        int objectId = 0;
+        int axisId = 0;
+        unsigned int i;
+        for( i = 0; i < 12; ++i ) {
+            if ( !elementStatus[i] ) {
+                continue;
+            } // if
+
+            std::vector<std::set<Math::Vector3> >* limits = NULL;
+            double coordA = 0, coordB = 0;
+            Math::Vector3 referencePoint[3];
+            Math::Vector3 point;
+            bool min = (i%2) == 0;
+            unsigned int coordId = (i%6);
+
+            if ( objectId == 0 ) {
+                limits = &status.limitsA;
+                referencePoint[0] = min ? *itFrontXA : *itBackXA;
+                referencePoint[1] = min ? *itFrontYA : *itBackYA;
+                referencePoint[2] = min ? *itFrontZA : *itBackZA;
+            } else {
+                limits = &status.limitsB;
+                referencePoint[0] = min ? *itFrontXB : *itBackXB;
+                referencePoint[1] = min ? *itFrontYB : *itBackYB;
+                referencePoint[2] = min ? *itFrontZB : *itBackZB;
+            } // else
+
+            point = referencePoint[axisId];
+            if ( axisId == 0 ) {
+                coordA = std::max(validPoints[objectId][coordId].back( ).x, point.x);
+                coordB = std::min(validPoints[objectId][coordId].back( ).x, point.x);
+            } else if ( axisId == 1 ) {
+                coordA = std::max(validPoints[objectId][coordId].back( ).y, point.y);
+                coordB = std::min(validPoints[objectId][coordId].back( ).y, point.y);
+            } else {
+                coordA = std::max(validPoints[objectId][coordId].back( ).z, point.z);
+                coordB = std::min(validPoints[objectId][coordId].back( ).z, point.z);
+            } // else
+            
+            if ( std::abs(coordA - coordB) < tolerance ) {
+                (*limits)[coordId].insert( point );
+                validPoints[objectId][coordId].push_back( point );
+            } else {
+                elementStatus[i] = false;
+                --counter;
+            } // else
+
+            axisId += ((i+1)%2 == 0 ) ? 1 : 0;
+            if (coordId+1 == 6) {
+                objectId = 1;
+                axisId = 0;
+            } // if
+        } // else
+
+        ++itFrontXA; ++itBackXA; ++itFrontXB; ++itBackXB;
+        ++itFrontYA; ++itBackYA; ++itFrontYB; ++itBackYB;
+        ++itFrontZA; ++itBackZA; ++itFrontZB; ++itBackZB;
+    } // while
+    // finally, classify the relation between the given objects
+    // by using an algebra based on Region connection calculus (RCC)
+    status.relations[Entity::LimitRelation::X] = (maxA.x < minB.x ) ? 1 : 
+        ( maxB.x < minA.x ) ? 2 : 
+        ( minA.x < minB.x && maxA.x < maxB.x ) ? 4 : 
+        ( minB.x < minA.x && maxB.x < maxA.x ) ? 8 : 
+        ( maxA.x == minB.x ) ? 16 :
+        ( maxB.x == minA.x ) ? 32 :
+        ( minA.x == minB.x && maxA.x == maxB.x ) ? 64 : // perfect overlap
+        ( minA.x > minB.x && maxA.x < maxB.x ) ? 128 : // non perfect B overlaps A
+        ( minB.x > minA.x && maxB.x < maxA.x ) ? 256 : // non perfect A overlaps B
+        ( (minA.x == minB.x && maxA.x < maxB.x) || (minA.x > minB.x && maxA.x == maxB.x ) ) ? 512 : 1024;
+
+    status.relations[Entity::LimitRelation::Y] = (maxA.y < minB.y ) ? 1 : 
+        ( maxB.y < minA.y ) ? 2 : 
+        ( minA.y < minB.y && maxA.y < maxB.y ) ? 4 : 
+        ( minB.y < minA.y && maxB.y < maxA.y ) ? 8 : 
+        ( maxA.y == minB.y ) ? 16 :
+        ( maxB.y == minA.y ) ? 32 :
+        ( minA.y == minB.y && maxA.y == maxB.y ) ? 64 : // perfect overlap
+        ( minA.y > minB.y && maxA.y < maxB.y ) ? 128 : // non perfect B overlaps A
+        ( minB.y > minA.y && maxB.y < maxA.y ) ? 256 : // non perfect A overlaps B
+        ( (minA.y == minB.y && maxA.y < maxB.y) || (minA.y > minB.y && maxA.y == maxB.y ) ) ? 512 : 1024;
 
 
-    status.relations[Entity::LimitRelation::Z] = (zMaxA < zMinB ) ? 1 : 
-        ( zMaxB < zMinA ) ? 2 : 
-        ( zMinA < zMinB && zMaxA < zMaxB ) ? 4 : 
-        ( zMinB < zMinA && zMaxB < zMaxA ) ? 8 : 
-        ( zMaxA == zMinB ) ? 16 :
-        ( zMaxB == zMinA ) ? 32 :
-        ( zMinA == zMinB && zMaxA == zMaxB ) ? 64 : // perfect overlap
-        ( zMinA > zMinB && zMaxA < zMaxB ) ? 128 : // non perfect B overlaps A
-        ( zMinB > zMinA && zMaxB < zMaxA ) ? 256 : // non perfect A overlaps B
-        ( (zMinA == zMinB && zMaxA < zMaxB) || (zMinA > zMinB && zMaxA == zMaxB ) ) ? 512 : 1024;
-
-
+    status.relations[Entity::LimitRelation::Z] = (maxA.z < minB.z ) ? 1 : 
+        ( maxB.z < minA.z ) ? 2 : 
+        ( minA.z < minB.z && maxA.z < maxB.z ) ? 4 : 
+        ( minB.z < minA.z && maxB.z < maxA.z ) ? 8 : 
+        ( maxA.z == minB.z ) ? 16 :
+        ( maxB.z == minA.z ) ? 32 :
+        ( minA.z == minB.z && maxA.z == maxB.z ) ? 64 : // perfect overlap
+        ( minA.z > minB.z && maxA.z < maxB.z ) ? 128 : // non perfect B overlaps A
+        ( minB.z > minA.z && maxB.z < maxA.z ) ? 256 : // non perfect A overlaps B
+        ( (minA.z == minB.z && maxA.z < maxB.z) || (minA.z > minB.z && maxA.z == maxB.z ) ) ? 512 : 1024;
     return status;
 }
 
