@@ -96,7 +96,8 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        _handles.push_back(as->getHandle(type, name.c_str()));
+        as->getHandleSet
+            (std::back_inserter(_handles), type, name.c_str(), subtypes);
     } else if (name != "") {     // filter by name
         as->getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
     } else if (type != NOTYPE) { // filter by type
