@@ -59,6 +59,7 @@ namespace opencog { namespace pln {
 float max(float a, float b) { return ((a>b)?a:b); }
 #endif
 
+// @todo this variable seems useless
 extern int varcount;
 
 Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
@@ -66,8 +67,8 @@ Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
     // Use the AtomSpaceWrapper to create a new node representing
     // the variable and called varname, don't try to replace it
     // if it already exists
-    pHandle ret = asw->addNode(FW_VARIABLE_NODE,varname,
-                               TruthValue::TRIVIAL_TV(),false);
+    pHandle ret = asw->addNode(FW_VARIABLE_NODE, varname,
+                               TruthValue::TRIVIAL_TV(), false);
     
     cprintf(4, "CreateVar: added fwvar node %s [%u]\n", varname.c_str(), ret);
     varcount++;
@@ -479,34 +480,36 @@ struct returnor  : public std::unary_function<T,T>
     T operator()(const T& _arg) const { return ret; }
 };
 
+/**
+ * Unary operator to converter a given source into a given destination
+ * provided by the constructor of the operator struct
+ */
 template<typename T>
-struct converter  : public std::binary_function<T,T,void> 
+struct converter  : public std::unary_function<T,void> 
 {
     T src, dest;
     converter(const T& _src, const T& _dest) : src(_src), dest(_dest) {}
     void operator()(T& _arg) {
         if (_arg == src)
-            _arg = dest; }
+            _arg = dest; 
+    }
 };
 
-Btr<vtree> convert_all_var2fwvar(vtree vt_const, iAtomSpaceWrapper* table)
+Btr<vtree> convert_all_var2fwvar(const vtree& vt, iAtomSpaceWrapper* table)
 {
-    AtomSpaceWrapper *nm = GET_ASW;
-
-    Btr<vtree> ret(new vtree(vt_const));
+    Btr<vtree> ret(new vtree(vt));
 /// USE THIS IF YOU WISH TO CONVERT VARIABLE_NODEs to FW_VARIABLE_NODEs!
     vtree::iterator vit = ret->begin();
 
-    while(  (vit =  std::find_if(ret->begin(), ret->end(),
-                                bind(std::equal_to<Type>(),
+    while( (vit = std::find_if(ret->begin(), ret->end(),
+                               bind(std::equal_to<Type>(),
                                     bind(getTypeVFun, _1),
-                                    (Type)(int)VARIABLE_NODE
-                                )
-                            )
-                ) != ret->end())
+                                    VARIABLE_NODE)
+                               )
+            ) != ret->end())
     {
         Vertex new_var = CreateVar(table);
-        std::for_each(ret->begin(), ret->end(), converter<Vertex>(*vit, new_var));
+        for_each(ret->begin(), ret->end(), converter<Vertex>(*vit, new_var));
 #if 0
         printTree(v2h(*vit),0,4);
         rawPrint(*ret, ret->begin(), 4);
