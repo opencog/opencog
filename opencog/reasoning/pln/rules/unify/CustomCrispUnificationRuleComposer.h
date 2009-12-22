@@ -22,6 +22,8 @@
 #ifndef CUSTOMCRISPUNIONCOMPOSERRULE_H
 #define CUSTOMCRISPUNIONCOMPOSERRULE_H
 
+#include "BaseCrispUnificationRule.h"
+
 namespace opencog { namespace pln {
 
 class CustomCrispUnificationRuleComposer : public BaseCrispUnificationRule
