@@ -601,7 +601,9 @@ bool consistent_bindingsVTreeT(TM& b1, bindContainerIterT b2start, bindContainer
     return true;
 }
 
-void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m, map<pHandle, vtree>::iterator rstart, map<pHandle, vtree>::iterator rend)
+void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m,
+                                                  map<pHandle, vtree>::iterator rstart,
+                                                  map<pHandle, vtree>::iterator rend)
 {
     if (consistent_bindingsVTreeT<Vertex>(m, rstart, rend))
         m.insert(rstart, rend);
@@ -611,7 +613,9 @@ void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m, map<pH
 
 Btr<set<pHandle> > ForAll_handles;
 
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, iAtomSpaceWrapper* table)
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
+                                              pHandle ForAllLink,
+                                              iAtomSpaceWrapper* table)
 {
     cprintf(4,"FindMatchingUniversal...");
     
@@ -619,8 +623,8 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, i
         convertToModifiedVTree(
                             ForAllLink,
                             convert_all_var2fwvar(
-                                make_vtree(getOutgoingFun()(ForAllLink, 1)),
-                                table));
+                                     make_vtree(getOutgoingFun()(ForAllLink, 1)),
+                                     table));
 
     Btr<bindingsVTreeT> bindsInUniversal    (new bindingsVTreeT),
                                 bindsInTarget       (new bindingsVTreeT);

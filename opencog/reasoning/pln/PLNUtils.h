@@ -249,7 +249,8 @@ struct ModifiedVTree : public vtree {
     ModifiedVTree()
             : original_handle(PHANDLE_UNDEFINED) {}
 
-    ModifiedVTree(const vtree& rhs, pHandle _original_handle = PHANDLE_UNDEFINED)
+    ModifiedVTree(const vtree& rhs,
+                  pHandle _original_handle = PHANDLE_UNDEFINED)
         : vtree(rhs), original_handle(_original_handle) {}
 };
 
@@ -674,8 +675,15 @@ Vertex CreateVar(iAtomSpaceWrapper* asw);
 const char* Type2Name(Type t);
 std::string condensed_form(const atom& a);
 
-Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target, iAtomSpaceWrapper* table);
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target, pHandle ForAllLink, iAtomSpaceWrapper* table);
+/**
+ * The implementation of FindMatchingUniversals and FindMatchingUniversal
+ * are in the file RuleFunctions.cc
+ */
+Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target,
+                                                                 iAtomSpaceWrapper* table);
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
+                                              pHandle ForAllLink,
+                                              iAtomSpaceWrapper* table);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
 meta bind_vtree(vtree &targ, const std::map<pHandle, pHandle>& binds);
