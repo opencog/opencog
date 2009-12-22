@@ -59,9 +59,6 @@ namespace opencog { namespace pln {
 float max(float a, float b) { return ((a>b)?a:b); }
 #endif
 
-// @todo this variable seems useless
-extern int varcount;
-
 Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
 {
     // Use the AtomSpaceWrapper to create a new node representing
@@ -71,7 +68,6 @@ Vertex CreateVar(iAtomSpaceWrapper* asw, std::string varname)
                                TruthValue::TRIVIAL_TV(), false);
     
     cprintf(4, "CreateVar: added fwvar node %s [%u]\n", varname.c_str(), ret);
-    varcount++;
     return Vertex(ret);
 }
 

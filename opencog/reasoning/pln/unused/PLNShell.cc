@@ -176,7 +176,6 @@ namespace opencog { namespace pln
 {
     extern bool RECORD_TRAILS;
 
-//    int varcount=0;
     int addlinks=0;
     int gethandles=0;   
 }}
