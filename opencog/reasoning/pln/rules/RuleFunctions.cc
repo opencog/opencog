@@ -444,14 +444,6 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
 void pr2(std::pair<pHandle, vtree> i);
 void pr(std::pair<pHandle, pHandle> i);
 
-template<typename T>
-struct returnor  : public std::unary_function<T,T> 
-{
-    const T& ret;
-    returnor(const T& _ret) : ret(_ret) {}
-    T operator()(const T& _arg) const { return ret; }
-};
-
 /**
  * Unary operator to converter a given source into a given destination
  * provided by the constructor of the operator struct
