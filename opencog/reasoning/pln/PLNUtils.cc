@@ -224,7 +224,7 @@ bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw,
         return false;
     }
 
-    if (!((*rtop) == (*ltop))) {
+    if (!(*rtop == *ltop)) {
         pHandle *ph_ltop = boost::get<pHandle>(&*ltop);
         pHandle *ph_rtop = boost::get<pHandle>(&*rtop);
 
