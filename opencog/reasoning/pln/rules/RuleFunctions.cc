@@ -614,25 +614,25 @@ Btr<set<pHandle> > ForAll_handles;
 
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
                                               pHandle ForAllLink,
-                                              iAtomSpaceWrapper* table)
+                                              AtomSpaceWrapper* asw)
 {
     cprintf(4,"FindMatchingUniversal...");
     
-    Btr<ModifiedVTree> candidate = 
-        convertToModifiedVTree(
-                            ForAllLink,
-                            convert_all_var2fwvar(
-                                     make_vtree(getOutgoingFun()(ForAllLink, 1)),
-                                     table));
+    Btr<ModifiedVTree> candidate =
+        convertToModifiedVTree(ForAllLink, 
+                               convert_all_var2fwvar
+                               (make_vtree(asw->getOutgoing(ForAllLink, 1)),
+                                asw));
 
-    Btr<bindingsVTreeT> bindsInUniversal    (new bindingsVTreeT),
-                                bindsInTarget       (new bindingsVTreeT);
+    Btr<bindingsVTreeT> bindsInUniversal(new bindingsVTreeT),
+                        bindsInTarget(new bindingsVTreeT);
 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
     printer.print(candidate->begin(), 4);
     printer.print(target->begin(), 4);
 
-    if (!unifiesTo(*candidate, *target, *bindsInUniversal, *bindsInTarget, true)) //, VARIABLE_NODE))
+    if (!unifiesTo(*candidate, *target,
+                   *bindsInUniversal, *bindsInTarget, true)) //, VARIABLE_NODE))
         return Btr<ModifiedBoundVTree>();
 
     printer.print(candidate->begin(), 4);
@@ -650,7 +650,9 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     BoundUniversal->bindings.reset(new bindingsVTreeT);
 
     Btr<bindingsVTreeT> bindsCombined(new bindingsVTreeT(*bindsInUniversal));
-    insert_with_consistency_check_bindingsVTreeT(*bindsCombined, bindsInTarget->begin(), bindsInTarget->end());
+    insert_with_consistency_check_bindingsVTreeT(*bindsCombined,
+                                                 bindsInTarget->begin(),
+                                                 bindsInTarget->end());
 
     ///Remove FW_VAR => FW_VAR mappings. WARNING! Potentially goes to infinite loop.
     removeRecursionFromMap<bindingsVTreeT::iterator, vtree::iterator>(bindsCombined->begin(), bindsCombined->end());
@@ -662,16 +664,15 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     /// Previously:
     /// Combined bindings are applied to the candidate
     for(vtree::iterator v = BoundUniversal->begin();
-    v!= BoundUniversal->end();)
-    {
-    bindingsVTreeT::iterator it = bindsCombined->find(v2h(*v));
-    if (it != bindsCombined->end())
-    {
-    BoundUniversal->replace(v, it->second.begin());
-    v = BoundUniversal->begin();
-    }
-    else
-    ++v;
+        v!= BoundUniversal->end();) {
+        bindingsVTreeT::iterator it = bindsCombined->find(v2h(*v));
+        if (it != bindsCombined->end())
+            {
+                BoundUniversal->replace(v, it->second.begin());
+                v = BoundUniversal->begin();
+            }
+        else
+            ++v;
     }
 #endif
 
@@ -683,10 +684,9 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     /// to the variables that occurred in target are relevant and will hence be included.
 
     for (bindingsVTreeT::iterator it = bindsCombined->begin();
-    it!= bindsCombined->end();
-    it++)
-    if (STLhas(*bindsInTarget, it->first))
-    (*BoundUniversal->bindings)[it->first] = it->second;
+         it!= bindsCombined->end(); it++)
+        if (STLhas(*bindsInTarget, it->first))
+            (*BoundUniversal->bindings)[it->first] = it->second;
 #endif
 
     /// Now:
@@ -701,17 +701,19 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     return BoundUniversal;
 }
 
-Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target, iAtomSpaceWrapper* table)
+Btr< set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(meta target,
+                                                            AtomSpaceWrapper* asw)
 {
     DeclareBtr(set<Btr<ModifiedBoundVTree> >, ret);
 
     if (!ForAll_handles) {
-        ForAll_handles = table->getHandleSet(FORALL_LINK, "");
+        ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
         puts("Recreated ForAll_handles");
     }
 
     foreach(pHandle h, *ForAll_handles) {
-        Btr<ModifiedBoundVTree> BoundUniversal = FindMatchingUniversal(target, h, table);
+        Btr<ModifiedBoundVTree> BoundUniversal = FindMatchingUniversal(target,
+                                                                       h, asw);
         if (BoundUniversal)
             ret->insert(BoundUniversal);
     }

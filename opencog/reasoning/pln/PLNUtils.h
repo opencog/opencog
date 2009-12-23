@@ -654,7 +654,10 @@ bool deref_equal(T a, T b)
 }
 
 struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
+    getOutgoingFun(AtomSpaceWrapper* _asw) : asw(_asw) {}
     pHandle operator()(pHandle h, int i);
+private:
+    AtomSpaceWrapper* asw;
 };
 
 #define getTypeFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getType), GET_ASW)
@@ -676,10 +679,10 @@ std::string condensed_form(const atom& a);
  * are in the file RuleFunctions.cc
  */
 Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target,
-                                                                 iAtomSpaceWrapper* table);
+                                                                 AtomSpaceWrapper* asw);
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
                                               pHandle ForAllLink,
-                                              iAtomSpaceWrapper* table);
+                                              AtomSpaceWrapper* asw);
 
 void bind(BoundVTree& bbvt, hpair new_bind);
 meta bind_vtree(vtree &targ, const std::map<pHandle, pHandle>& binds);

@@ -276,7 +276,7 @@ string make_subst_buf(const BoundVertex& a);
 
 pHandle getOutgoingFun::operator()(pHandle h, int i)
 {
-    return GET_ASW->getOutgoing(h, i);
+   return asw->getOutgoing(h, i);
 }
 
 bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
