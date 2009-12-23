@@ -54,6 +54,17 @@ bool UnprovableType(Type T);
 Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
                                           Type OutLinkType,
                                           AtomSpaceWrapper* asw);
+
+/**
+ * FindMatchingUniversals retrieves all FORALL_LINK,
+ * put then in the global variable ForAll_handles and then run
+ * FindMatchingUniversal on each of them
+ */
+Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target,
+                                                                 AtomSpaceWrapper* asw);
+Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
+                                              pHandle ForAllLink,
+                                              AtomSpaceWrapper* asw);
 	
 Handle AND2ORLink(Handle& andL, Type _ANDLinkType, Type _OR_LINK);
 Handle OR2ANDLink(Handle& andL);

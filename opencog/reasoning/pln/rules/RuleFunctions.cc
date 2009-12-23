@@ -536,9 +536,7 @@ bool stlhasi(const T& c, const T2& k)
 template<typename T1, typename bindContainerIterT, typename TM>
 bool consistent_bindingsVTreeT(TM& b1, bindContainerIterT b2start, bindContainerIterT b2end)
 {
-    for (bindContainerIterT b = b2start;
-        b!= b2end;
-        b++)
+    for (bindContainerIterT b = b2start; b!= b2end; b++)
     {
         bindContainerIterT bit;
 

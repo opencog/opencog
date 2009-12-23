@@ -674,16 +674,6 @@ private:
 const char* Type2Name(Type t);
 std::string condensed_form(const atom& a);
 
-/**
- * The implementation of FindMatchingUniversals and FindMatchingUniversal
- * are in the file RuleFunctions.cc
- */
-Btr< std::set<Btr<ModifiedBoundVTree> > > FindMatchingUniversals(Btr<vtree> target,
-                                                                 AtomSpaceWrapper* asw);
-Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
-                                              pHandle ForAllLink,
-                                              AtomSpaceWrapper* asw);
-
 void bind(BoundVTree& bbvt, hpair new_bind);
 meta bind_vtree(vtree &targ, const std::map<pHandle, pHandle>& binds);
 void bind_Bvtree(meta arg, const bindingsVTreeT& binds);
