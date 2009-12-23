@@ -51,7 +51,9 @@ BBvtree atomWithNewType(const Vertex& v, Type T, AtomSpaceWrapper* asw);
 
 bool UnprovableType(Type T);
 
-Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, Type OutLinkType);
+Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
+                                          Type OutLinkType,
+                                          AtomSpaceWrapper* asw);
 	
 Handle AND2ORLink(Handle& andL, Type _ANDLinkType, Type _OR_LINK);
 Handle OR2ANDLink(Handle& andL);

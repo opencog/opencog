@@ -32,11 +32,11 @@ namespace opencog { namespace pln {
 
 Rule::setOfMPs ORPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-        return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, OR_LINK);
+    return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, OR_LINK, asw);
         
 /*      if (!inheritsType(nm->getType(v2h(*outh->begin())), OR_LINK) ||
-            outh->begin().number_of_children() <= 2)
-            return Rule::setOfMPs();
+        outh->begin().number_of_children() <= 2)
+        return Rule::setOfMPs();
 
 ** @todo Update to BoundVTree. I no longer remember how this was supposed to work!
         MPs ret;

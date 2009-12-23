@@ -32,23 +32,23 @@ namespace opencog { namespace pln {
 
 Rule::setOfMPs ANDPartitionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-        return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, AND_LINK);
+    return PartitionRule_o2iMetaExtra(outh, overrideInputFilter, AND_LINK, asw);
 }
 
 BoundVertex ANDPartitionRule::compute(const std::vector<Vertex>& premiseArray,
                                       pHandle CX,
                                       bool fresh) const
 {
-        const int N = (int)premiseArray.size();
-        pHandle *hs = new pHandle[N];
+    const int N = (int)premiseArray.size();
+    pHandle *hs = new pHandle[N];
         
-        transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
-//          Concat<DropVertexBindings, GetHandle, BoundVertex, Handle>());
+    transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
+    //          Concat<DropVertexBindings, GetHandle, BoundVertex, Handle>());
 
-        BoundVertex ret = Vertex(UnorderedCcompute(asw, AND_LINK, fN,
+    BoundVertex ret = Vertex(UnorderedCcompute(asw, AND_LINK, fN,
                                                    hs, N, CX, fresh));
-        delete[] hs;
-        return ret;
+    delete[] hs;
+    return ret;
 }
 
 }} // namespace opencog { namespace pln {

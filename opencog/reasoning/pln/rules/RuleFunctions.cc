@@ -87,7 +87,7 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 // Redundant, hopefully:
 BBvtree atomWithNewType(pHandle h, Type T, AtomSpaceWrapper* asw)
 {
-    assert(GET_ASW->inheritsType(T, LINK));
+    assert(asw->inheritsType(T, LINK));
     vector<pHandle> children = asw->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
     foreach(pHandle c, children)
@@ -160,10 +160,7 @@ bool UnprovableType(Type T)
 template<Type T>
 pHandle Join(pHandle* h, int N, AtomSpaceWrapper& asw)
 {
-    vector<pHandle> hs;
-    for (int i = 0; i < N; i++)
-        hs.push_back(h[i]);
-
+    vector<pHandle> hs(h, h+N);
     return asw.addLink(T, hs, TruthValue::TRUE_TV(), false);
 }
 
@@ -269,12 +266,14 @@ pHandle UnorderedCcompute(AtomSpaceWrapper *asw, Type linkT,
     return ret;
 }
     
-Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter, Type OutLinkType)
+Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
+                                          Type OutLinkType,
+                                          AtomSpaceWrapper* asw)
 {
         const int N = outh->begin().number_of_children();
         
-        if (!GET_ASW->inheritsType(GET_ASW->getType(_v2h(*outh->begin())), OutLinkType) ||
-            N <= MAX_ARITY_FOR_PERMUTATION)
+        if (!asw->inheritsType(asw->getType(_v2h(*outh->begin())), OutLinkType)
+            || N <= MAX_ARITY_FOR_PERMUTATION)
             return Rule::setOfMPs();
 
         Rule::MPs ret;
