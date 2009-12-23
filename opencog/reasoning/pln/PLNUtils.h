@@ -133,13 +133,18 @@ FitnessEvaluatorT getFitnessEvaluator(std::string name);
 
 pHandle _v2h(const Vertex& v);
 
-// Check whether things are equivalent?
-bool unifiesTo(const vtree& lhs, const vtree& rhs,
-        std::map<pHandle, vtree>& Lbindings, std::map<pHandle, vtree>& Rbindings,
-        bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
+struct AtomSpaceWrapper;
 
-bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-        std::map<pHandle, pHandle>& bindings);
+// Check whether things are equivalent?
+bool unifiesTo(AtomSpaceWrapper* asw,
+               const vtree& lhs, const vtree& rhs,
+               std::map<pHandle, vtree>& Lbindings,
+               std::map<pHandle, vtree>& Rbindings,
+               bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
+
+bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw,
+                                 const vtree & lhs_t, const vtree & rhs_t,
+                                 std::map<pHandle, pHandle>& bindings);
 
 typedef Btr< std::vector<Vertex> > VertexVector;
 typedef Btr< std::set<Vertex> > VertexSet;
@@ -429,8 +434,6 @@ void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m,
 
 
 typedef std::pair<std::string, pHandle> hsubst;
-struct iAtomSpaceWrapper;
-struct AtomSpaceWrapper;
 
 bool within(float a, float b, float diff);
 bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs);

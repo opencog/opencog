@@ -94,12 +94,12 @@ break_inner:
 
 Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    set<MPs> ret;   
-bool htemp=false;
+    set<MPs> ret;
+    bool htemp=false;
     
 /*  for (map<vtree, vector<vtree> ,less_vtree>::iterator thm=thms.begin(); thm != thms.end(); thm++)
     {
-        rawPrint(thm->first
+    rawPrint(thm->first
     }*/
 
     for (map<vtree, vector<vtree> ,less_vtree>::iterator thm=thms.begin(); thm != thms.end(); thm++)
@@ -133,11 +133,11 @@ bool htemp=false;
         }
         //foreach(Vertex v, thm->first)
         for(vtree::iterator v  = thm->first.begin(); v != thm->first.end(); v++)
-                if (asw->getType(_v2h(*v)) == FW_VARIABLE_NODE)
-                {
-                    vars.insert(_v2h(*v));   
-                    count1++;
-                }
+            if (asw->getType(_v2h(*v)) == FW_VARIABLE_NODE)
+            {
+                vars.insert(_v2h(*v));   
+                count1++;
+            }
                         
         /// Rename the vars
         
@@ -146,12 +146,12 @@ bool htemp=false;
         foreach(pHandle h, vars)
             newPreBinds[h] = _v2h(CreateVar(asw));
                 
-		 cprintf(4,"Bindings are:\n");
+        cprintf(4,"Bindings are:\n");
                 
-         foreach(hpair hp, newPreBinds)
+        foreach(hpair hp, newPreBinds)
 			cprintf(4, "%s => %s\n", asw->getName(hp.first).c_str(),
                     asw->getName(hp.second).c_str());
-		 cprintf(4,"<<< Bindings\n");
+        cprintf(4,"<<< Bindings\n");
                 
         /// Replace the old vars with renamed counterparts
                 
@@ -171,45 +171,45 @@ bool htemp=false;
             }
 
         //foreach(Vertex& v, thm_target)
-            for(vtree::iterator v  = thm_target.begin(); v != thm_target.end(); v++)
+        for(vtree::iterator v  = thm_target.begin(); v != thm_target.end(); v++)
+        {
+            bindingsT::iterator bit = newPreBinds.find(_v2h(*v));
+            if (bit != newPreBinds.end())
             {
-                bindingsT::iterator bit = newPreBinds.find(_v2h(*v));
-                if (bit != newPreBinds.end())
-                {
-                    *v = Vertex(bit->second);
-                    count2++;
-                }
+                *v = Vertex(bit->second);
+                count2++;
             }
-		 cprintf(4,"From,to\n");
+        }
+        cprintf(4,"From,to\n");
             
-         vtree tmp2(thm->first);
+        vtree tmp2(thm->first);
 
-		 NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
-         printer.print(tmp2.begin(),4);
-         tmp2 = thm_target;
-         printer.print(tmp2.begin(),4);
+        NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+        printer.print(tmp2.begin(),4);
+        tmp2 = thm_target;
+        printer.print(tmp2.begin(),4);
         
-         cprintf(4,"counts: %ld %ld\n", count1, count2);
+        cprintf(4,"counts: %ld %ld\n", count1, count2);
         
-         cprintf(4,"Unifies to %u:\n",_v2h(*outh->begin()));
-
-         printer.print(outh->begin(), 4);
+        cprintf(4,"Unifies to %u:\n",_v2h(*outh->begin()));
+        
+        printer.print(outh->begin(), 4);
 
 /// haxx:: warning!
 /// should have different binds for left and right!!!
 
-        if (unifiesTo(thm_target, *outh, binds, binds, true))
+        if (unifiesTo(asw, thm_target, *outh, binds, binds, true))
         {
-             cprintf(4,"Unifies!\n");
-             vtree tmp(thm_target);
+            cprintf(4,"Unifies!\n");
+            vtree tmp(thm_target);
 
-             printer.print(tmp.begin(), 4);
+            printer.print(tmp.begin(), 4);
             
-             for (map<pHandle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
-             {
+            for (map<pHandle, vtree>::iterator ii=binds.begin(); ii!=binds.end(); ii++)
+            {
                 cprintf(4,"%u=>\n", ii->first);
                 printer.print(ii->second.begin(), 4);
-             }
+            }
 
  
             MPs new_thm_args;
@@ -242,8 +242,8 @@ bool htemp=false;
             const_cast<MPsIn*>(&inputFilter)->clear();
             for (uint i = 0; i < new_thm_args.size(); i++)
                 const_cast<MPsIn*>(&inputFilter)->push_back(meta(
-                    new tree<Vertex>(mva(
-                    (pHandle)ATOM))));
+                                                                 new tree<Vertex>(mva(
+                                                                                      (pHandle)ATOM))));
         }
 
     }

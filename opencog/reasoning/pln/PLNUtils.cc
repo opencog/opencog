@@ -193,24 +193,28 @@ string repeatc(const char c, const int count)
 
 namespace opencog {
 namespace pln {
-bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-                                 vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
+bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw, 
+                                 const vtree & lhs_t, const vtree & rhs_t,
+                                 vtree::sibling_iterator ltop,
+                                 vtree::sibling_iterator rtop,
                                  map<pHandle, pHandle>& bindings);
 
 
-bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
+bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw, 
+                                 const vtree & lhs_t, const vtree & rhs_t,
                                  map<pHandle, pHandle>& bindings)
 {
 // bindings.clear();
-    return unifiesWithVariableChangeTo(lhs_t, rhs_t, lhs_t.begin(), rhs_t.begin(), bindings);
+    return unifiesWithVariableChangeTo(asw, lhs_t, rhs_t,
+                                       lhs_t.begin(), rhs_t.begin(), bindings);
 }
 
-bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
-                                 vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
+bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw, 
+                                 const vtree & lhs_t, const vtree & rhs_t,
+                                 vtree::sibling_iterator ltop,
+                                 vtree::sibling_iterator rtop,
                                  map<pHandle, pHandle>& bindings)
 {
-    AtomSpaceWrapper* asw = GET_ASW;
-
     if (lhs_t.empty() && rhs_t.empty()) {
         cprintf(4, "unify: Both sides empty!\n");
         return true;
@@ -259,7 +263,8 @@ bool unifiesWithVariableChangeTo(const vtree & lhs_t, const vtree & rhs_t,
         return false;
 
     while (lit != lhs_t.end(ltop))
-        if (!unifiesWithVariableChangeTo(lhs_t, rhs_t, lit++, rit++, bindings))
+        if (!unifiesWithVariableChangeTo(asw, lhs_t, rhs_t,
+                                         lit++, rit++, bindings))
             return false;
 
     return true;
@@ -2305,15 +2310,14 @@ bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b)
            < 0.00000001f;
 }
 
-bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
+bool unifiesTo( AtomSpaceWrapper* asw,
+                const vtree & lhs_t, const vtree & rhs_t,
                 vtree::sibling_iterator ltop, vtree::sibling_iterator rtop,
                 map<pHandle, vtree>& Lbindings,
                 map<pHandle, vtree>& Rbindings,
                 bool allow_rhs_binding,
                 Type VarType)
 {
-    AtomSpaceWrapper* asw = GET_ASW;
-
 //cprintf(0,"U: %d %d\n",
     if (lhs_t.empty() && rhs_t.empty()) {
         cprintf(4, "unifiesTo: Both sides empty!\n");
@@ -2340,8 +2344,10 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
             if (!asw->isType(*ph_ltop) && !lhs_is_node) {
                 vtree ltop_as_tree(opencog::pln::make_vtree(*ph_ltop));
 
-                return unifiesTo(ltop_as_tree, rhs_t,
-                                 ltop_as_tree.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
+                return unifiesTo(asw, ltop_as_tree, rhs_t,
+                                 ltop_as_tree.begin(),
+                                 rtop, Lbindings, Rbindings,
+                                 allow_rhs_binding, VarType);
             }
 
             map<pHandle, vtree>::const_iterator s = Lbindings.find(*ph_ltop);
@@ -2355,8 +2361,10 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                     if (!asw->isType(*ph_rtop) && !rhs_is_node) {
                         vtree rtop_as_tree(opencog::pln::make_vtree(*ph_rtop));
 
-                        return unifiesTo(lhs_t, rtop_as_tree,
-                                         rtop, rtop_as_tree.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
+                        return unifiesTo(asw, lhs_t, rtop_as_tree,
+                                         rtop, rtop_as_tree.begin(),
+                                         Lbindings, Rbindings,
+                                         allow_rhs_binding, VarType);
                     }
 
                     map<pHandle, vtree>::const_iterator s = Rbindings.find(*ph_rtop);
@@ -2376,12 +2384,16 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
                             return false;
                     } else { // A binding found from RHS
                         cprintf(4, "Binding ph_rtop\n");
-                        return unifiesTo(lhs_t, s->second, ltop, s->second.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
+                        return unifiesTo(asw, lhs_t, s->second, ltop,
+                                         s->second.begin(), Lbindings,
+                                         Rbindings, allow_rhs_binding, VarType);
                     }
                 }
             } else { // A binding found from LHS
                 cprintf(4, "Binding ph_ltop\n");
-                return unifiesTo(s->second, rhs_t, s->second.begin(), rtop, Lbindings, Rbindings, allow_rhs_binding, VarType);
+                return unifiesTo(asw, s->second, rhs_t, s->second.begin(),
+                                 rtop, Lbindings, Rbindings,
+                                 allow_rhs_binding, VarType);
             }
         }
 
@@ -2397,7 +2409,8 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
         return false;
 
     while (lit != lhs_t.end(ltop))
-        if (!unifiesTo(lhs_t, rhs_t, lit++, rit++, Lbindings, Rbindings, allow_rhs_binding, VarType))
+        if (!unifiesTo(asw, lhs_t, rhs_t, lit++, rit++,
+                       Lbindings, Rbindings, allow_rhs_binding, VarType))
             return false;
 
     return true;
@@ -2524,9 +2537,13 @@ cprintf(4,"FW_VAR");
     bool allow_rhs_binding,
     Type VarType);*/
 
-bool unifiesTo(const vtree& lhs, const vtree& rhs, map<pHandle, vtree>& Lbindings, map<pHandle, vtree>& Rbindings, bool allow_rhs_binding, Type VarType)
+bool unifiesTo(AtomSpaceWrapper* asw, const vtree& lhs, const vtree& rhs,
+               map<pHandle, vtree>& Lbindings, map<pHandle, vtree>& Rbindings,
+               bool allow_rhs_binding, Type VarType)
 {
-    return unifiesTo(lhs, rhs, lhs.begin(), rhs.begin(), Lbindings, Rbindings, allow_rhs_binding, VarType);
+    return unifiesTo(asw, 
+                     lhs, rhs, lhs.begin(), rhs.begin(), Lbindings, Rbindings,
+                     allow_rhs_binding, VarType);
 }
 
 }} // ~namespace opencog::pln

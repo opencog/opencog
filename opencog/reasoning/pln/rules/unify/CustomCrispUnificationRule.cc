@@ -47,9 +47,9 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME|NMP_NODE_TYPE_NAME);
     printer.print(vtree(outh->begin()));
 
-    cprintf(3,"FindMatchingUniversals...\n");
+    cprintf(3,"FindMatchingUniversal...\n");
     Btr<ModifiedBoundVTree> i = FindMatchingUniversal(outh, hForAllLink, asw);
-    cprintf(3,"FindMatchingUniversals OK!\n");
+    cprintf(3,"FindMatchingUniversal OK!\n");
 
     if (!i) return Btr<std::set<BoundVertex > >();
 

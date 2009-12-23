@@ -1227,6 +1227,7 @@ public:
         cout << "Testing unification" << endl;
 
         TS_ASSERT( unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(CONCEPT_NODE, "Osama"),
                             NewNode(CONCEPT_NODE, "terrorist")),
@@ -1236,6 +1237,7 @@ public:
                         bindings));
 
         TS_ASSERT(!unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(CONCEPT_NODE, "Osama"),
                             NewNode(CONCEPT_NODE, "terrorist")),
@@ -1245,6 +1247,7 @@ public:
                         bindings));
 
         TS_ASSERT(!unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(CONCEPT_NODE, "Osama"),
                             NewNode(CONCEPT_NODE, "terrorist")),
@@ -1254,6 +1257,7 @@ public:
                         bindings));
 
         TS_ASSERT( unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(FW_VARIABLE_NODE, "1"),
                             NewNode(CONCEPT_NODE, "terrorist")),
@@ -1263,6 +1267,7 @@ public:
                         bindings));
 
         TS_ASSERT(!unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(FW_VARIABLE_NODE, "1"),
                             NewNode(CONCEPT_NODE, "terrorist")),
@@ -1271,6 +1276,7 @@ public:
                             NewNode(CONCEPT_NODE, "terrorist_DIFF")),
                         bindings));
         TS_ASSERT(!unifiesWithVariableChangeTo(
+                        GET_ASW,
                         mva((pHandle)AND_LINK,
                             NewNode(FW_VARIABLE_NODE, "1"),
                             NewNode(CONCEPT_NODE, "terrorist")),

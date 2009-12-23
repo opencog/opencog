@@ -796,7 +796,8 @@ void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindin
 
             uint i=0;
             for(; i<bit->args.size(); i++)
-                if (!unifiesWithVariableChangeTo(*new_node->args[i], *bit->args[i], template_binds))
+                if (!unifiesWithVariableChangeTo(GET_ASW, *new_node->args[i],
+                                                 *bit->args[i], template_binds))
                     break;
 
             if (i==bit->args.size())
@@ -1698,7 +1699,7 @@ bool BITNodeFitnessCompare::operator()(BITNode* lhs, BITNode* rhs) const
 
 /* Action */
 string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
-        vtree& do_template, pHandleSeq& plan) const
+                                 vtree& do_template, pHandleSeq& plan) const
 {
     AtomSpaceWrapper *asw = GET_ASW;
     map<pHandle, vtree> bindings;
@@ -1711,8 +1712,8 @@ string BITNodeRoot::extract_plan(pHandle h, unsigned int level,
     map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end()) {
         foreach(pHandle arg_h, haxx::inferred_from[h]) {
-            if (unifiesTo(do_template, make_vtree(arg_h),
-                        bindings, bindings, true)) {
+            if (unifiesTo(GET_ASW, do_template, make_vtree(arg_h),
+                          bindings, bindings, true)) {
                 ss << "Satisfies do_template:" << endl; 
                 ss << printTree(arg_h,level+1,0);
                 plan.push_back(arg_h);
