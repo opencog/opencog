@@ -33,7 +33,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
     //DeductionFormula f;
     Type InclusionLink;
 
-    // I don't understand why it is need but without that it does not compile
+    // @togo I don't understand why it is need but without that it does not compile
     AtomSpaceWrapper* asw;
 
     meta i2oType(const std::vector<Vertex>& h) const
@@ -89,7 +89,7 @@ public:
     DeductionRule(AtomSpaceWrapper *_asw, Type linkType)
 	: GenericRule<DeductionFormula>(_asw,false,"DeductionRule"),
         InclusionLink(linkType),
-        asw(_asw) // I don't understand why it is needed, asw is already defined in Rule...
+        asw(_asw) // @todo I don't understand why it is needed, asw is already defined in Rule...
     {
         //! @todo should use real variable for the other input.
 	

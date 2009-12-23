@@ -45,9 +45,9 @@ Vertex CreateVar(iAtomSpaceWrapper* asw);
 
 Rule::setOfMPs makeSingletonSet(Btr<Rule::MPs> mp);
 
-BBvtree atomWithNewType(Handle h, Type T);
-BBvtree atomWithNewType(const tree<Vertex>& v, Type T);
-BBvtree atomWithNewType(const Vertex& v, Type T);	
+BBvtree atomWithNewType(Handle h, Type T, AtomSpaceWrapper* asw);
+BBvtree atomWithNewType(const tree<Vertex>& v, Type T, AtomSpaceWrapper* asw);
+BBvtree atomWithNewType(const Vertex& v, Type T, AtomSpaceWrapper* asw);	
 
 bool UnprovableType(Type T);
 

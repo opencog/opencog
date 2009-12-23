@@ -64,7 +64,7 @@ public:
         
         assert(premiseArray.size()==1);
         
-        tvs[0] = &(nm->getTV(boost::get<Handle>(premiseArray[0])));
+        tvs[0] = &(asw->getTV(boost::get<Handle>(premiseArray[0])));
         
         return tvs;
     }
@@ -73,7 +73,7 @@ public:
     {
         assert(1==h.size());
         
-        meta ret = atomWithNewType(h[0], DEST_LINK);
+        meta ret = atomWithNewType(h[0], DEST_LINK, asw);
         cprintf(3,"i2otype() outputs: ");
 #if 0
         rawPrint(*ret, ret->begin(), 3);

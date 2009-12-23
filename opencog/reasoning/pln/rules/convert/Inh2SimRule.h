@@ -61,12 +61,13 @@ public:
     {
         assert(1==n);
         
-        return atomWithNewType(h[0], SIMILARITY_LINK);
+        return atomWithNewType(h[0], SIMILARITY_LINK, asw);
     }
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
         Btr<MPs> ret(new MPs);
-        ret->push_back(Btr<atom>(new atomWithNewType(outh, INHERITANCE_LINK)));
+        ret->push_back(Btr<atom>(new atomWithNewType(outh, INHERITANCE_LINK,
+                                                     asw)));
         return makeSingletonSet(ret);
     }
 };

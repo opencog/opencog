@@ -41,7 +41,7 @@ class OR2ANDRule : public Rule
 	{
 		assert(1==n);
 
-		return atomWithNewType(h[0], AND_LINK);
+		return atomWithNewType(h[0], AND_LINK, asw);
 	}
 	virtual bool valid(Handle* h, const int n) const
 	{

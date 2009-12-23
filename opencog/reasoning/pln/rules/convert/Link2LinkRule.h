@@ -39,6 +39,10 @@ class Link2LinkRule : public GenericRule<FormulaType>
 {
     Type SRC_LINK;
     Type DEST_LINK;
+
+    // @todo I don't understand why it is need but without that it does not compile
+    AtomSpaceWrapper* asw;
+
 protected:
 //	mutable std::vector<Type> ti;
 
@@ -47,7 +51,10 @@ public:
     //Link2LinkRule(AtomSpaceWrapper *_asw)
     //: GenericRule<FormulaType>(_asw,false,"")
     Link2LinkRule(AtomSpaceWrapper *_asw, Type src, Type dest)
-        : GenericRule<FormulaType>(_asw,false,""), SRC_LINK(src), DEST_LINK(dest)
+        : GenericRule<FormulaType>(_asw, false,""),
+        SRC_LINK(src), DEST_LINK(dest),
+        asw(_asw) // @todo I don't understand why it is needed, asw is already defined in Rule...
+
     {
         GenericRule<FormulaType>::name = "Link2Link(" +
             std::string(Type2Name(SRC_LINK)) + "=>" +
@@ -61,7 +68,8 @@ public:
     }
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
-        if (!GET_ASW->inheritsType((Type)boost::get<pHandle>(*outh->begin()), DEST_LINK))
+        if (!asw->inheritsType((Type)boost::get<pHandle>(*outh->begin()),
+                               DEST_LINK))
             return Rule::setOfMPs();
         
         Rule::MPs ret;
@@ -82,7 +90,7 @@ public:
         
         assert(premiseArray.size()==1);
         
-        tvs[0] = (TruthValue*) &(GET_ASW->getTV(boost::get<pHandle>(premiseArray[0])));
+        tvs[0] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[0])));
         
         return tvs;
     }
@@ -92,7 +100,7 @@ public:
     {
         assert(1==h.size());
         
-        meta ret = atomWithNewType(h[0], DEST_LINK);
+        meta ret = atomWithNewType(h[0], DEST_LINK, asw);
         cprintf(3,"i2otype() outputs: ");
 #if 0
         rawPrint(*ret, ret->begin(), 3);

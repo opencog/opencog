@@ -22,6 +22,8 @@
 #ifndef NOTEVALUATORRULE_H
 #define NOTEVALUATORRULE_H
 
+#include "../GenericRule.h"
+
 namespace opencog { namespace pln {
 
 class NotEvaluatorRule : public GenericRule<NotFormula>

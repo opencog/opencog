@@ -85,11 +85,10 @@ Rule::setOfMPs makeSingletonSet(Rule::MPs& mp)
 }
 
 // Redundant, hopefully:
-BBvtree atomWithNewType(pHandle h, Type T)
+BBvtree atomWithNewType(pHandle h, Type T, AtomSpaceWrapper* asw)
 {
     assert(GET_ASW->inheritsType(T, LINK));
-    AtomSpaceWrapper *nm = GET_ASW;
-    vector<pHandle> children = nm->getOutgoing(h);
+    vector<pHandle> children = asw->getOutgoing(h);
     BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
     foreach(pHandle c, children)
     {
@@ -99,12 +98,11 @@ BBvtree atomWithNewType(pHandle h, Type T)
     return ret_m;
 }
     
-BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
+BBvtree atomWithNewType(const tree<Vertex>& v, Type T, AtomSpaceWrapper* asw)
 {
     pHandle *ph = boost::get<pHandle>(&*v.begin());
 //! @todo just call the overloaded Vertex version below
-    AtomSpaceWrapper *nm = GET_ASW;
-    if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
+    if (!ph || asw->isType(*ph)) //Virtual: just replace the root node
     {
     
         BBvtree ret_m(new BoundVTree(v));
@@ -113,9 +111,9 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(GET_ASW->inheritsType(T, LINK));
+        assert(asw->inheritsType(T, LINK));
 
-        vector<pHandle> children = nm->getOutgoing(*ph);
+        vector<pHandle> children = asw->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
         foreach(pHandle c, children)
         {
@@ -126,11 +124,10 @@ BBvtree atomWithNewType(const tree<Vertex>& v, Type T)
     }   
 }
 
-BBvtree atomWithNewType(const Vertex& v, Type T)
+BBvtree atomWithNewType(const Vertex& v, Type T, AtomSpaceWrapper* asw)
 {
     const pHandle *ph = boost::get<pHandle>(&v);
-    AtomSpaceWrapper *nm = GET_ASW;
-    if (!ph || nm->isType(*ph)) //Virtual: just replace the root node
+    if (!ph || asw->isType(*ph)) //Virtual: just replace the root node
     {
     
         BBvtree ret_m(new BoundVTree(v));
@@ -139,9 +136,9 @@ BBvtree atomWithNewType(const Vertex& v, Type T)
     }
     else //Real: construct a new tree from T root and v's outgoing set.
     {
-        assert(GET_ASW->inheritsType(T, LINK));
+        assert(asw->inheritsType(T, LINK));
 
-        vector<pHandle> children = nm->getOutgoing(*ph);
+        vector<pHandle> children = asw->getOutgoing(*ph);
         BBvtree ret_m(new BoundVTree(mva((pHandle)T)));
         foreach(pHandle c, children)
         {

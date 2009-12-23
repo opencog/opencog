@@ -32,11 +32,10 @@ namespace opencog { namespace pln {
 
 class IntensionalInheritanceRule : public Rule
 {
-    AtomSpaceWrapper* _asw;
-    SubsetEvalRule _sser;
+    SubsetEvalRule sser;
 
 public:
-    IntensionalInheritanceRule(AtomSpaceWrapper* asw);
+    IntensionalInheritanceRule(AtomSpaceWrapper* _asw);
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 

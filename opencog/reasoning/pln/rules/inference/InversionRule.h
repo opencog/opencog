@@ -51,7 +51,7 @@ protected:
             return Rule::setOfMPs();
 
         Rule::MPs ret;
-        ret.push_back(atomWithNewType(*outh, InclusionLink));
+        ret.push_back(atomWithNewType(*outh, InclusionLink, asw));
         tree<Vertex>::sibling_iterator top = ret[0]->begin();
         tree<Vertex>::sibling_iterator right = ret[0]->begin(top);
         tree<Vertex>::sibling_iterator left = right++;

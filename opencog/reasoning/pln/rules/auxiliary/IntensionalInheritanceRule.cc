@@ -30,15 +30,14 @@ namespace opencog { namespace pln {
 
 using boost::assign::list_of;
 
-IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* asw)
-    : Rule(asw, false, false, "IntensionalInheritanceRule"),
-      _asw(asw), _sser(asw)
+IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw)
+    : Rule(_asw, false, false, "IntensionalInheritanceRule"), sser(_asw)
 {
 }
 
 Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
-    if(!_asw->inheritsType((Type)_v2h(*outh->begin()),
-                           INTENSIONAL_INHERITANCE_LINK))
+    if(!asw->inheritsType((Type)_v2h(*outh->begin()),
+                          INTENSIONAL_INHERITANCE_LINK))
         return setOfMPs();
 
     tree<Vertex>::iterator head_it = outh->begin();
@@ -69,19 +68,19 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     pHandle sub_h = _v2h(premiseArray[0]);
     pHandle super_h = _v2h(premiseArray[1]);
 
-    OC_ASSERT(_asw->isSubType(sub_h, CONCEPT_NODE));
-    OC_ASSERT(_asw->isSubType(super_h, CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(sub_h, CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(super_h, CONCEPT_NODE));
 
-    pHandle sub_ASSOC_h = CreateConceptASSOC(_asw, sub_h);
-    pHandle super_ASSOC_h = CreateConceptASSOC(_asw, super_h);
+    pHandle sub_ASSOC_h = CreateConceptASSOC(asw, sub_h);
+    pHandle super_ASSOC_h = CreateConceptASSOC(asw, super_h);
 
     const vector<Vertex> ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
-    BoundVertex bv = _sser.compute(ASSOC_vv, fresh);
+    BoundVertex bv = sser.compute(ASSOC_vv, fresh);
     pHandle subset_ASSOC_h = _v2h(bv.GetValue());
 
-    pHandle ret = _asw->addAtom(*i2oType(premiseArray),
-                                _asw->getTV(subset_ASSOC_h),
-                                fresh);
+    pHandle ret = asw->addAtom(*i2oType(premiseArray), 
+                               asw->getTV(subset_ASSOC_h),
+                               fresh);
     return BoundVertex(ret);
 }
 

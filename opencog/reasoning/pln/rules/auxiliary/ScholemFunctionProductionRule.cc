@@ -90,7 +90,9 @@ ScholemFunctionProductionRule::attemptDirectProduction(meta outh, bool fresh)
 
     if (s.empty()) {
         ret = boost::shared_ptr<std::set<BoundVertex > >(new std::set<BoundVertex>);
-        ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh, SCHOLEM_LINK),
+        ret->insert(BoundVertex(Vertex(asw->addAtom(*atomWithNewType(*outh,
+                                                                     SCHOLEM_LINK,
+                                                                     asw),
                                                     TruthValue::TRUE_TV(),
                                                     fresh))));
         return ret;

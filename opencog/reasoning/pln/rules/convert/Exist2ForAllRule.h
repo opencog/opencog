@@ -42,7 +42,7 @@ class Exist2ForAllRule : public Rule
     virtual atom i2oType(Handle* h, const int n) const
     {
         assert(n==1);
-        return atomWithNewType(h[0], FORALL_LINK);
+        return atomWithNewType(h[0], FORALL_LINK, asw);
     }
     virtual bool valid(Handle* h, const int n) const
     {

@@ -41,7 +41,7 @@ public:
     virtual atom i2oType(Handle* h, const int n) const
     {
         assert(n==1);
-        return atomWithNewType(h[0], OutputInheritanceLink);
+        return atomWithNewType(h[0], OutputInheritanceLink, asw);
     }
     Rule::setOfMPs o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const
     {
