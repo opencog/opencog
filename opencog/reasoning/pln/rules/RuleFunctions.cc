@@ -444,26 +444,6 @@ Handle Ass(AtomSpaceWrapper *asw, Handle h, vector<Handle>& ret)
 void pr2(std::pair<pHandle, vtree> i);
 void pr(std::pair<pHandle, pHandle> i);
 
-template <class InputIterator,
-                        class OutputIterator,
-                        class UnaryOperation,
-                        class UnaryPredicate>
-OutputIterator transform_if(InputIterator first,
-                                        InputIterator last,
-                                        OutputIterator result,
-                                        UnaryOperation op,
-                                        UnaryPredicate test)
-{
-        while (first != last) {
-                if (test(*first))
-                        *result++ = op(*first);
-                     else
-                                *result++ = *first;
-                ++first;
-        }
-        return result;
-}
-
 template<typename T>
 struct returnor  : public std::unary_function<T,T> 
 {
