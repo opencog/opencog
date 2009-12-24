@@ -117,11 +117,13 @@ unsigned int ClassServer::getNumberOfClasses()
 
 bool ClassServer::isA_non_recursive(Type type, Type parent)
 {
+    if ((type >= nTypes) || (parent >= nTypes)) return false;
     return inheritanceMap[parent][type];
 }
 
 bool ClassServer::isA(Type type, Type parent)
 {
+    if ((type >= nTypes) || (parent >= nTypes)) return false;
     return recursiveMap[parent][type];
 }
 
