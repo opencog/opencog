@@ -34,7 +34,6 @@ LINK_LIBRARIES (
     server
     util
     pln
-    xml
 #    ${Boost_SIGNALS_LIBRARY}
     ${GSL_LIBRARIES}
     ${EXPAT_LIBRARIES}
