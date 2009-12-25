@@ -44,6 +44,7 @@
 #include <boost/variant.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 
 // AtomSpace
 #include <opencog/server/CogServer.h>
@@ -111,9 +112,7 @@ void ReasoningLog(int l, std::string m);
 
 static inline std::string i2str(int d)
 {
-    char temp[20];
-    sprintf(temp, "%d", d);
-    return temp;
+    return boost::lexical_cast<std::string>(d);
 }
 
 /// Convert a boost::variant into a Handle
