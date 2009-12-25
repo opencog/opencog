@@ -22,7 +22,8 @@
 #ifndef ANDBREAKDOWNRULE_H
 #define ANDBREAKDOWNRULE_H
 
-using namespace opencog;
+#include "../Rule.h"
+#include "../../formulas/Formulas.h"
 
 namespace opencog { namespace pln {
 
@@ -34,7 +35,7 @@ protected:
     ANDBreakdownFormula formula;
     
 public:
-    ANDBreakdownRule(iAtomSpaceWrapper *_asw)
+    ANDBreakdownRule(AtomSpaceWrapper *_asw)
 	: Rule(_asw,true,true,"")
     {
         name = "ANDBreakdownRule/" + i2str(N);
