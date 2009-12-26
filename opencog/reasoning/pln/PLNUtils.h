@@ -649,12 +649,6 @@ void convertTo(const std::set<BoundVertex>& args, Handle*& ret);
 void convertTo(const VertexSet& args, Handle*& ret);
 void convertTo(const std::vector<Handle>& args, Handle*& ret);
 
-template<typename T>
-bool deref_equal(T a, T b)
-{
-    return *a == *b;
-}
-
 struct getOutgoingFun : public std::binary_function<pHandle, int, pHandle> {
     getOutgoingFun(AtomSpaceWrapper* _asw) : asw(_asw) {}
     pHandle operator()(pHandle h, int i);
