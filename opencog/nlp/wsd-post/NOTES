@@ -1,0 +1,32 @@
+
+
+progress:
+
+date             disj      disj2     disj10    sense    sens2   sens10
+10 Dec 2009:    503111    237087      34033    196553   22418    3279
+17 Dec 2009:    734153    349749      53935    293867   37741    5741
+27 Dec 2009:   1004866    478178      76896    406303   54342    9167
+
+where:
+disj, disj2, disj10 are:
+select count(*) from newdisjuncts;
+select count(*) from newdisjuncts where obscnt > 2;
+select count(*) from newdisjuncts where obscnt > 10;
+
+sense, sen2, sens10 are:
+select count(*) from newdisjunctsenses;
+select count(*) from newdisjunctsenses where obscnt > 2;
+select count(*) from newdisjunctsenses where obscnt > 10;
+
+
+The below require a recompute of mis avgs.
+xxxxxxxxxxxxxxxxxx
+select count(*) from newdisjuncts where sense_obscnt > 4*senses_observed;
+2218
+
+select count(*) from newdisjuncts where sense_obscnt > 3*senses_observed;
+3545
+
+select count(*) from newdisjuncts where sense_obscnt > 2*senses_observed;
+5734
+
