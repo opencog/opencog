@@ -287,25 +287,12 @@ public:
 typedef Btr<BoundVTree> BBvtree;
 
 template<typename TransformerT>
-Btr<vtree> tree_transform(vtree& vt_const, TransformerT transformer)
+Btr<vtree> tree_transform(const vtree& vt_const, TransformerT transformer)
 {
     Btr<vtree> ret(new vtree(vt_const));
-    for (vtree::iterator v = ret->begin(); v != ret->end(); v++)
-        *v = transformer(*v);
-// for_each(ret->begin(), ret->end(), _1 = transformer(_1));
-
+    std::transform(vt_const.begin(), vt_const.end(), ret->begin(), transformer);
     return ret;
 }
-
-/*Btr<vtree> tree_transform(vtree& vt_const, TransformerT transformer)
-{
- Btr<vtree> ret(new vtree(vt_const));
- //foreach(Vertex& v, *ret)
-//  v = transformer(v);
- for_each(v.begin(), v.end(), _1 = transformer(_1));
-
- return ret;
-}*/
 
 // It doesn't look like mbegin and mend are used here...
 // Check if they are used by external methods. ???
