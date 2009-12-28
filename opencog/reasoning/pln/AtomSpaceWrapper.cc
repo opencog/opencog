@@ -1191,6 +1191,8 @@ pHandleSeq AtomSpaceWrapper::getImportantHandles(int number)
 unsigned int USize(const set<Handle>& triples, const set<Handle>& doubles,
                    const set<Handle>& singles)
 {
+    // in the following tuple2 and tuple3 (now removed)
+    // should rather be replaced by their boost equivalent
     map<Handle, tuple3<Handle> > triple_contents;
     map<Handle, tuple2<Handle> > double_contents;
     

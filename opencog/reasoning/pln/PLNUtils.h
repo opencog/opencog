@@ -189,16 +189,6 @@ public:
 };
 
 template<typename T>
-struct tuple2 {
-    tuple2() : t1(0), t2(0) {} T t1; T t2;
-};
-
-template<typename T>
-struct tuple3 : public tuple2<T> {
-    tuple3() : t3(0) {} T t3;
-};
-
-template<typename T>
 std::vector<T*> NewCartesianProduct1( std::vector<T*>& lhs, const std::vector<T>& rhs, int dim)
 {
     std::vector<T*> ret;
