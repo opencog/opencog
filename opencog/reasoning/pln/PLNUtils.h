@@ -294,12 +294,22 @@ Btr<vtree> tree_transform(const vtree& vt_const, TransformerT transformer)
     return ret;
 }
 
-// It doesn't look like mbegin and mend are used here...
-// Check if they are used by external methods. ???
+/**
+ * constructed given a mapping (by reference) with same domain and codomain.
+ * The operator takes a key in input, if that key is associated to a value
+ * in the mapping the value is returned, otherwise the key is returned.
+ *
+ * @todo: this class seems useless (only used in commented code.
+ * Its name is bad (mapper is hardly self explanatory).
+ * And mbegin and mend is simply not used
+ * I suggest to remove it in case mapper is not used anywhere,
+ * which needs to be evaluated based on how consisten_bindingsVTreeT code
+ * should work.
+ */
 template<typename T2, typename T>
 struct mapper {
     T mbegin, mend;
-    std::map<T2, T2> m;
+    std::map<T2, T2>& m;
 
     mapper(std::map<T2, T2>& _m, T _mbegin, T _mend)
             : mbegin(_mbegin), mend(_mend), m(_m) {}
