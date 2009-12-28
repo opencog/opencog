@@ -457,8 +457,8 @@ struct weak_atom {
 
 typedef weak_atom<Vertex> BoundVertex;
 typedef std::set<Vertex> BasicVertexSet;
-typedef std::vector<opencog::pln::BoundVertex> BV_Vector;
-typedef std::set<opencog::pln::BoundVertex> BV_Set;
+typedef std::vector<BoundVertex> BV_Vector;
+typedef std::set<BoundVertex> BV_Set;
 
 
 /**
@@ -481,18 +481,6 @@ typedef TableGather::iterator TableGatherIt;
 typedef TableGather::const_iterator TableGatherConstIt;
 
 bool getLargestIntersection(const std::set<pHandle>& keyelem_set, const std::set<pHandle>& link_set, pHandle& result);
-
-template<typename T>
-bool vectorHas(std::vector<T> box, T key)
-{
-    for (uint i = 0; i < box.size(); i++)
-        if (box[i] == key)
-            return true;
-    return false;
-}
-
-/*template<typename T>
-void swap(T* a, T* b) { T temp = *a; *a = *b; *b = temp; }*/
 
 std::string printTree(pHandle h, int level = 0, int LogLevel = 5);
 std::string GetRandomString(int size);

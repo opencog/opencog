@@ -169,7 +169,7 @@ BoundVertex ANDRule::compute(const std::vector<Vertex>& premiseArray,
                                 inc2.push_back(*i);
                             
                             std::vector<pHandle>* inc = &inc2;
-                            if (!vectorHas<pHandle>(*inc, *j))
+                            if (!STLhas2(*inc, *j))
                                 Di.insert(*j);
                         }
                     LOG(4, "W ANDRule::compute");
