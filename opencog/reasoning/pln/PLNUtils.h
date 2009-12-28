@@ -342,14 +342,8 @@ which must be found consistent when these guys are combined!
 template<typename T>
 Btr<std::map<Vertex, Vertex> > toVertexMap(T mbegin, T mend)
 {
-    Btr<std::map<Vertex, Vertex> > ret(new std::map<Vertex, Vertex>);
-    for (T next = mbegin; next != mend; ++next) {
-//  (*ret)[Vertex(next->first)];
-//  Vertex vv(next->second);
-//  (*ret)[Vertex(next->first)] = Vertex(Handle::UNDEFINED);
-        (*ret)[Vertex(next->first)] = Vertex(next->second);
-    }
-
+    Btr<std::map<Vertex, Vertex> >
+        ret(new std::map<Vertex, Vertex>(mbegin, mend));
     return ret;
 }
 
