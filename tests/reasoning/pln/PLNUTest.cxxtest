@@ -355,11 +355,11 @@ private:
                             t->maxTV->getConfidence());
                     printf("s: %f max: %f\n", etv->getMean(),
                             t->maxTV->getMean());
+
+                    std::cout << "Inference trail: " << std::endl;
+                    state->printTrail(eh);
                 }
                 
-                std::cout << "Inference trail: " << std::endl;
-                state->printTrail(eh);
-
                 passed = (
                     eh != PHANDLE_UNDEFINED &&
                     etv &&
@@ -597,10 +597,10 @@ private:
                             maxTV->getConfidence());
                     printf("s: %f max: %f\n", etv->getMean(),
                             maxTV->getMean());
+
+                    std::cout << "Inference trail: " << std::endl;
+                    std::cout << state->printTrail(eh);
                 }
-                
-                std::cout << "Inference trail: " << std::endl;
-                std::cout << state->printTrail(eh);
 
                 passed = (
                     eh != PHANDLE_UNDEFINED &&
