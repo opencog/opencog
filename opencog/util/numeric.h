@@ -36,8 +36,6 @@
 
 #define PI 3.141592653589793
 #define EXPONENTIAL 2.71828182845905
-#define EPSILON 1e-6 //error when comparing 2 floats
-#define PROB_EPSILON 1e-127 //error when comparing 2 probabilities
 
 #ifndef isnan
 #define isnan(x) ((x) != (x))
@@ -64,6 +62,9 @@ namespace opencog
 using __gnu_cxx::power;
 using __gnu_cxx::iota;
 #endif
+
+const double EPSILON = 1e-6; // default error when comparing 2 floats
+const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 
 // absolute_value_order
 //   codes the following order, for T == int, -1,1,-2,2,-3,3,...
@@ -225,7 +226,13 @@ FloatT logsum(size_t n)
     return sums[n];
 }
 
-//compare 2 FloatT with precision epsilon
+// returns true iff abs(x - y) <= epsilon
+template<typename FloatT> bool isWithin(FloatT x, FloatT y, FloatT epsilon) {
+    return std::abs(x - y) <= epsilon;
+}
+
+// compare 2 FloatT with precision epsilon,
+// note that, unlike isWithin, the precision adapts with the scale of x and y
 template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon) {
     FloatT diff = std::abs(x - y);
     FloatT amp = std::abs(x + y);
@@ -234,13 +241,14 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon) {
     else return diff <= epsilon;    
 }
 
-//compare 2 FloatT with precision EPSILON
+// compare 2 FloatT with precision EPSILON
+// note that, unlike isWithin, the precision adapts with the scale of x and y
 template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 {
     return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
 }
 
-//compute the binary entropy of probability p
+// compute the binary entropy of probability p
 template<typename FloatT> FloatT binaryEntropy(FloatT p)
 {
     OC_ASSERT(p >= 0 && p <= 1,
@@ -254,7 +262,7 @@ template<typename FloatT> FloatT binaryEntropy(FloatT p)
     return res;
 }
 
-//compute the smallest divisor of n
+// compute the smallest divisor of n
 template<typename IntT> IntT smallest_divisor(IntT n) {
     OC_ASSERT(n > 0, "n must be supperior than 0");
     if(n<3)

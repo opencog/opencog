@@ -87,6 +87,9 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 #endif
 #endif
 
+const strength_t EPSILON_S = 0.001;
+const confidence_t EPSILON_C = 0.001;
+
 namespace test
 {
     extern FILE *logfile;
@@ -941,8 +944,8 @@ public:
         assert(res1a.value == res1b.value);
 
         const TruthValue& tvB = atw->getTV(_v2h(res1a.value));
-        assert(within(tvB.getMean(), tvA.getMean(), 0.001));
-        assert(within(tvB.getConfidence(), tvA.getConfidence(), 0.001));
+        assert(isApproxEq(tvB.getMean(), tvA.getMean(), EPSILON_S));
+        assert(isApproxEq(tvB.getConfidence(), tvA.getConfidence(), EPSILON_C));
 
         RuleApp* top2 = new RuleApp(invR);
         top2->Bind(0, topb);
@@ -950,12 +953,12 @@ public:
         top3->Bind(0, top2);
 
         const TruthValue& tv2 = atw->getTV(_v2h(top2->compute().value));
-        assert(!within(tvB.getMean(), tv2.getMean(), 0.001));
-    //  assert(!within(tvB.getConfidence(), tv2.getConfidence(), 0.001));
+        assert(!isApproxEq(tvB.getMean(), tv2.getMean(), EPSILON_S));
+    //  assert(!isApproxEq(tvB.getConfidence(), tv2.getConfidence(), EPSILON_C));
 
         const TruthValue& tv3 = atw->getTV(_v2h(top3->compute().value));
-        assert( within(tvB.getMean(), tv3.getMean(), 0.001));
-        assert( within(tvB.getConfidence(), tv3.getConfidence(), 0.001));
+        assert(isApproxEq(tvB.getMean(), tv3.getMean(), EPSILON_S));
+        assert(isApproxEq(tvB.getConfidence(), tv3.getConfidence(), EPSILON_C));
 
 
         vector<VtreeProvider*> args;
@@ -972,8 +975,8 @@ public:
 
         assert(resC.value == res1b.value);
         const TruthValue& tvC = atw->getTV(_v2h(resC.value));
-        assert( within(tvB.getMean(), tvC.getMean(), 0.001));
-        assert( within(tvB.getConfidence(), tvC.getConfidence(), 0.001));
+        assert(isApproxEq(tvB.getMean(), tvC.getMean(), EPSILON_S));
+        assert(isApproxEq(tvB.getConfidence(), tvC.getConfidence(), EPSILON_C));
 
 
         RuleApp* topd   = new RuleApp(deduR);
@@ -985,8 +988,8 @@ public:
 
         assert(resD.value == res1b.value);
         const TruthValue& tvD = atw->getTV(_v2h(resD.value));
-        assert( within(tvB.getMean(), tvD.getMean(), 0.001));
-        assert( within(tvB.getConfidence(), tvD.getConfidence(), 0.001));
+        assert(isApproxEq(tvB.getMean(), tvD.getMean(), EPSILON_S));
+        assert(isApproxEq(tvB.getConfidence(), tvD.getConfidence(), EPSILON_C));
         printf("finish MacroRuleTest\n");
     }
 

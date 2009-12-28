@@ -292,14 +292,6 @@ bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
     return true;
 }
 
-bool within(float a, float b, float diff)
-{
-    float d = (a - b);
-    if (d < 0)
-        d = -d;
-    return (d <= diff);
-}
-
 //Ok, I got too excited with these conv
 
 void convertTo(const VertexVector& args, auto_ptr<Handle>& ret)

@@ -415,7 +415,6 @@ void insert_with_consistency_check_bindingsVTreeT(std::map<pHandle, vtree>& m,
 
 typedef std::pair<std::string, pHandle> hsubst;
 
-bool within(float a, float b, float diff);
 bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs);
 
 template<typename ATOM_REPRESENTATION_T>
