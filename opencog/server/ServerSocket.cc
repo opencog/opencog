@@ -107,6 +107,8 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         } catch (boost::system::system_error& e) {
             if (ss->isClosed()) {
                 break;
+            } else if (e.code() == boost::asio::error::eof) {
+                break;
             } else {
                 logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
             }
