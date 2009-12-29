@@ -56,7 +56,7 @@ void NodeIndex::removeHandle(Handle h)
 Handle NodeIndex::getHandle(Type t, const char *name) const
 {
 	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
-            "Index out of bounds for atom type (t = %lu)", t);
+	       "Index out of bounds for atom type (t = %lu)", t);
 	const NameIndex &ni = idx[t];
 	return ni.get(name);
 }
@@ -83,7 +83,7 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 			if (classserver().isA(s, type))
 			{
 				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
-                        "Index out of bounds for atom type (s = %lu)", s);
+				          "Index out of bounds for atom type (s = %lu)", s);
 				const NameIndex &ni = idx[s];
 				Handle h = ni.get(name);
 				if (TLB::isValidHandle(h))
@@ -94,7 +94,9 @@ HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass
 	}
 	else
 	{
-		return new HandleEntry(getHandle(type, name));
+		Handle h = getHandle(type, name); 
+		if (TLB::isValidHandle(h)) return new HandleEntry(h);
+		return NULL;
 	}
 }
 
