@@ -86,6 +86,18 @@ SDL_gfx     -- Simple DirectMedia Layer extension
                http://www.ferzkopp.net/joomla/content/view/19/14/
                Debian/Ubuntu package libsdl-gfx1.2-dev
 
+xmlrpc      -- XML-RPC support
+               Optional package
+               Required by opencog/ubigraph
+               http://www.xmlrpc.com
+               Debian/Ubuntu package libxmlrpc-c-dev
+
+curl        -- cURL groks URLs
+               Optional package
+               Required by opencog/ubigraph
+               http://curl.haxx.se/
+               Debian/Ubuntu package libcurl4-gnutls-dev
+
 To build opencog:
 -----------------
 Peform the following steps at the shell prompt:
