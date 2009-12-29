@@ -599,7 +599,7 @@ private:
                             maxTV->getMean());
 
                     std::cout << "Inference trail: " << std::endl;
-                    std::cout << state->printTrail(eh);
+                    state->printTrail(eh);
                 }
 
                 passed = (
