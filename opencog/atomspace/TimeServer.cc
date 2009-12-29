@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-int TimeServer::timeServerEntrys = 0;
+int TimeServer::timeServerEntries = 0;
 // USED TO SEEK MEMORY LEAK
 //std::set<Temporal> TimeServer::temporalSet;
 
@@ -51,8 +51,8 @@ TimeServer::~TimeServer()
 void TimeServer::add(Handle h, const Temporal& t)
 {
     // USED TO SEEK MEMORY LEAK
-    //++timeServerEntrys;
-    //cout << "Total timeServerEntrys: " << timeServerEntrys << endl;
+    //++timeServerEntries;
+    //cout << "Total timeServerEntries: " << timeServerEntries << endl;
 
     //if(temporalSet.find(t) == temporalSet.end()){
     //   temporalSet.insert(t);

@@ -37,9 +37,9 @@ class TimeServerSavable;
 /**
  * This class is used to associate temporal information (timestamps or timelags) to
  * atom handles. 
- *
- * TODO: Depending on the use cases, this class would have a better performance
- *       if we use a sortedTemporalList in inverse cronological order.
+ * All information added to this object should also be present in the
+ * corresponding AtomSpace hypergraph in the following way: 
+ *     AtTimeLink ( TimeNode "<timestamp or timelag>", Handle ) 
  */
 class TimeServer
 {
@@ -52,7 +52,7 @@ class TimeServer
 
 public:
 
-    static int timeServerEntrys;
+    static int timeServerEntries;
 
     // USED TO SEEK MEMORY LEAK
     //static std::set<Temporal> temporalSet;
