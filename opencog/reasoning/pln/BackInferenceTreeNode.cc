@@ -1922,6 +1922,20 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
     return ss.str();
 }
 
+string BITNodeRoot::printTrail(pHandle h) const
+{
+    stringstream ss;
+    AtomSpaceWrapper* asw = ASW();
+    if (asw->isValidPHandle(h)) {
+        ss << printTree(h,0,0);
+        ss << printTrail(h,0);
+        cout << ss.str();
+    } else {
+        ss << "Unknown pHandle " << h << endl;
+    }
+    return ss.str();
+}
+
 string BITNode::printArgs() const
 {
     stringstream ss;
@@ -1952,20 +1966,6 @@ string BITNode::printFitnessPool()
             ss << (*i)->tlog( 0, "fitness: %f / C:%d / P:%d\n", (*i)->fitness(),
                     (*i)->children.size(), (*i)->parents.size() );
         }
-    }
-    return ss.str();
-}
-
-string BITNodeRoot::printTrail(pHandle h) const
-{
-    stringstream ss;
-    AtomSpaceWrapper* asw = ASW();
-    if (asw->isValidPHandle(h)) {
-        ss << printTree(h,0,0);
-        ss << printTrail(h,0);
-        cout << ss.str();
-    } else {
-        ss << "Unknown pHandle " << h << endl;
     }
     return ss.str();
 }
