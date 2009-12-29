@@ -40,11 +40,14 @@ it. It's internal ListLink must be there but its contents are not used.
 
 ForAll(List, Implication(And(A1,A2,...,An)), Pat1)<tv1>
 
-will be converted to RewritingRules of the form "if you need to produce Pat1,
+will be converted to RewritingRules* of the form "if you need to produce Pat1,
 then it's sufficient to produce A1,A2,...,An. The conversion is only made
 if tv1.confidence>=0.99 (ANDFormula will eventually be applied to produced
 atoms to forward-compute the TV). This approach should only be used for
 purely Boolean rewriting, i.e. Boolean theorems.
+
+(* actually there is only one CrispTheoremRule/RewritingRule instance, and a
+static list of theorems to be used by it.)
 
 Skolemization (conversion of premises with variables to be encompassed by a
 ForAll quantifier) is requred of axioms. Results of inference currently don't

@@ -94,7 +94,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
     
-    cprintf(-1, "Added %u CrispUnificationRules.\n", (unsigned int) size());
+    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
     
     AddRule(new LookupRule(asw), 20.0f);
 
