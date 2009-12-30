@@ -40,6 +40,8 @@ class TimeServerSavable;
  * All information added to this object should also be present in the
  * corresponding AtomSpace hypergraph in the following way: 
  *     AtTimeLink ( TimeNode "<timestamp or timelag>", Handle ) 
+ * 
+ * See also http://www.opencog.org/wiki/TimeServer
  */
 class TimeServer
 {

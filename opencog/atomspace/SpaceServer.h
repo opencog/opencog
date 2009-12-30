@@ -51,6 +51,9 @@ namespace opencog
 
 class SpaceServerSavable;
 
+/**
+ * See http://opencog.org/wiki/SpaceServer
+ */
 class SpaceServer 
 {
     friend class SpaceServerSavable;
@@ -146,7 +149,7 @@ public:
     bool isMapPersistent(Handle spaceMapHandle) const;
 
     /**
-     * Adds or updates into the space map with the given hangle, the
+     * Adds or updates into the space map with the given handle, the
      * object with the given id and spatial properties.
      * @return true if any property of the object has changed (or it's 
      *          a new object). False, otherwise.
@@ -161,7 +164,7 @@ public:
     // SpaceServer (in LearningServer, for instance).
     void add(Handle spaceMapHandle, SpaceMap * spaceMap);
 
-    // Removes the objectNode from the map
+    // Removes the object from the map
     void remove(bool keepPreviousMap, 
                 Handle spaceMapHandle, const std::string& objectId);
 
@@ -171,7 +174,12 @@ public:
      */
     void removeObject(const std::string& objectId);
 
+    // Sets the agent radius needed to define which grid cells are free for 
+    // navigation purposes
     void setAgentRadius(double radius);
+
+    // Sets the boundaries of the map and the number of grid points it will have
+    // in each dimension.:w
     void setMapBoundaries(double xMin, double xMax, double yMin, double yMax,
                           unsigned int xDim, unsigned int yDim);
 

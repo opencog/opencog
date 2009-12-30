@@ -164,6 +164,18 @@ public:
 
     /**
      * Constructor
+     * Creates an empty map with the given dimensions of the rectangle this map
+     * represents.
+     * xMin: the lower x coordinate of the rectangle
+     * xMax: the upper x coordinate of the rectangle
+     * xDim: the dimension (in number of grid cells it is divided) of the x side
+     *       of the rectangle.
+     * yMin: the lower y coordinate of the rectangle
+     * yMax: the upper y coordinate of the rectangle
+     * yDim: the dimension (in number of grid cells it is divided) of the y side
+     *       of the rectangle.
+     * radius: the radius of the agent which uses this map (for navigation
+     * purposes).
      */
     LocalSpaceMap2D(Distance xMin, Distance xMax, unsigned int xDim,
                     Distance yMin, Distance yMax, unsigned int yDim,
@@ -221,6 +233,7 @@ public:
     bool isObstacle(const Spatial::ObjectID& id) const;
     bool isNonObstacle(const Spatial::ObjectID& id) const;
 
+    // Gets the grid points occupied by the object with the given id
     const std::vector<Spatial::GridPoint>& getObjectPoints(const Spatial::ObjectID& id) const throw(opencog::NotFoundException);
 
     /*
