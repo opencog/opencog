@@ -9,7 +9,7 @@ add_library(util_py SHARED
 )
 
 target_link_libraries(util_py
-    ${Boost_LIBRARIES}
+    ${Boost_PYTHON_LIBRARY}
     util
 )
 
