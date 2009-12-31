@@ -273,7 +273,7 @@ public:
     /** Returns the class metadata from request class 'id'. */
     virtual const RequestClassInfo& requestInfo(const std::string& id) const;
 
-    /** Adds request 'a' to the end of the requests queue. */
+    /** Adds request to the end of the requests queue. */
     virtual void pushRequest(Request* request);
 
     /** Removes and returns the first request from the requests queue. */

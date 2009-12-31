@@ -193,7 +193,8 @@ void CogServer::processRequests(void)
     Request* request;
     while ((request = popRequest()) != NULL) {
         request->execute();
-        delete request;
+        if (request->cleanUp) delete request;
+        else request->complete = true;
     }
     pthread_mutex_unlock(&processRequestsLock);
 }

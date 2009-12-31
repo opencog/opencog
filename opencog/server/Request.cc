@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-Request::Request() : _requestResult(NULL)
+Request::Request() : _requestResult(NULL), cleanUp(true), complete(false)
 {
 }
 

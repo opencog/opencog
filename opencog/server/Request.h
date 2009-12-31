@@ -296,6 +296,11 @@ public:
     /** adds a parameter to the commands parameter list. */
     virtual void addParameter(const std::string& param);
 
+    /** Whether CogServer should delete request once executed */
+    bool cleanUp;
+
+    /** Whether CogServer has processed this request */
+    bool complete;
 };
 
 } // namespace 
