@@ -36,18 +36,10 @@
 namespace opencog
 {
 
-static const char* html_header = "HTTP/1.1 200 OK\r\n"
-    "content-Type: text/html\r\n\r\n"
-    "<html><body>";
-
-static const char* html_footer = "</html></body>\r\n";
-
 class RESTModule : public Module
 {
 
 private:
-
-    static const unsigned int DEFAULT_PORT = 17034;
 
     unsigned short _port;
 
@@ -65,6 +57,14 @@ private:
     Factory<GetAtomRequest, Request> getAtomFactory;
 
 public:
+
+    static const unsigned int DEFAULT_PORT = 17034;
+    static const char* DEFAULT_SERVER_ADDRESS;
+
+    //! @todo create a function to generate header
+    static const char* html_header;
+    static const char* html_refresh_header;
+    static const char* html_footer;
 
     static inline const char* id() {
         static const char* _id = "opencog::RESTModule";

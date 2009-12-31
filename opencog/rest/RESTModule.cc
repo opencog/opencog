@@ -38,26 +38,38 @@ using namespace opencog;
 RESTModule *rest_mod;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                   { return RESTModule::id(); }
-extern "C" Module*     opencog_module_load()                 {
+extern "C" const char* opencog_module_id()   { return RESTModule::id(); }
+extern "C" Module*     opencog_module_load() {
     rest_mod = new RESTModule();
     return rest_mod;
 }
 extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
-RESTModule::RESTModule() : _port(DEFAULT_PORT)
+const char* RESTModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
+
+//! @todo create a function to generate header
+const char* RESTModule::html_header = "HTTP/1.1 200 OK\r\n"
+    "content-Type: text/html\r\n\r\n"
+    "<html><body>";
+
+const char* RESTModule::html_refresh_header = "HTTP/1.1 200 OK\r\n"
+    "content-Type: text/html\r\n\r\n"
+    "<html><head><META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\"></head><body>";
+
+const char* RESTModule::html_footer = "</html></body>\r\n";
+
+RESTModule::RESTModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {
     logger().debug("[RESTModule] constructor");
 
     if (config().has("REST_PORT"))
         _port = config().get_int("REST_PORT");
+    if (config().has("REST_SERVER"))
+        serverAddress = config().get("REST_SERVER");
 
     // Register all requests with CogServer
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory); 
-    serverAddress = "http://localhost";
-    if (config().has("REST_SERVER"))
-        serverAddress = config().get("REST_SERVER");
 
     timeout = 100;
 
@@ -144,7 +156,21 @@ void viewAtomPage( struct mg_connection *conn,
     std::string serverAdd("http://localhost:17034");
     serverAdd += PATH_PREFIX;
     
-    result << html_header;
+    // Check for refresh option
+    //! @todo make refresh time specifiable on the page.
+    bool refresh;
+    std::list<std::string>::const_iterator it;
+    for (it = params.begin(); it != params.end(); ++it) {
+        if (*it == "refresh=1" or *it == "refresh=true") {
+            refresh = true;
+            break;
+        }
+    }
+    if (refresh)
+        result << RESTModule::html_refresh_header;
+    else
+        result << RESTModule::html_header;
+
     result << gar->getHTML(serverAdd).c_str();
     char buffer[512];
     for (uint i = 0; i < result.str().size(); i+=512) {
@@ -158,7 +184,10 @@ void viewAtomPage( struct mg_connection *conn,
     result.str("");
     result << "\r\n\r\n<small>You requested the url: %s<br/> With query string:"
         "%s</small>";
-    result << html_footer;
+    if (refresh) {
+        result << "<br/><small>Page will refresh every 5 seconds</small>";
+    }
+    result << RESTModule::html_footer;
     mg_printf(conn, result.str().c_str(), ri->uri, ri->query_string);
 
     // Clean up
