@@ -5,6 +5,7 @@
 ADD_LIBRARY (rest SHARED
     RESTModule
     GetAtomRequest
+    #    AddAtomRequest
     mongoose
     #RequestMapper
     #SimpleAtomSpaceMapper

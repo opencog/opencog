@@ -104,7 +104,22 @@ void RESTModule::setupURIs()
 {
     //boost::function<mg_callback_t> f;
     //f = boost::bind(&RESTModule::viewAtomPage, *rest_mod, _1);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewAtomPage, NULL);
+}
+
+void RESTModule::return400(mg_connection* conn, const std::string& message)
+{
+    mg_printf(conn, "HTTP/1.1 400 %s\r\n", message.c_str());
+}
+
+void RESTModule::return404(mg_connection* conn)
+{
+    mg_printf(conn, "HTTP/1.1 404 Not found.\r\n");
+}
+
+void RESTModule::return500(mg_connection* conn, const std::string& message)
+{
+    mg_printf(conn, "HTTP/1.1 500 %s\r\n", message.c_str());
 }
 
 std::list<std::string> splitQueryString(char* query) {
@@ -193,20 +208,5 @@ void viewAtomPage( struct mg_connection *conn,
     // Clean up
     delete request;
     
-}
-
-void RESTModule::return400(mg_connection* conn, const std::string& message)
-{
-    mg_printf(conn, "HTTP/1.1 400 %s\r\n", message.c_str());
-}
-
-void RESTModule::return404(mg_connection* conn)
-{
-    mg_printf(conn, "HTTP/1.1 404 Not found.\r\n");
-}
-
-void RESTModule::return500(mg_connection* conn, const std::string& message)
-{
-    mg_printf(conn, "HTTP/1.1 500 %s\r\n", message.c_str());
 }
 

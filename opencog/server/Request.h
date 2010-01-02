@@ -187,15 +187,19 @@ struct RequestClassInfo : public ClassInfo
     std::string description;
     std::string help;
     bool is_shell;
+    /** Whether default shell should be hidden from help */
+    bool hidden;
 
     RequestClassInfo() {};
-    RequestClassInfo(const char* i, const char *d, const char* h, bool s = false)
-        : ClassInfo(i), description(d), help(h), is_shell(s) {};
+    RequestClassInfo(const char* i, const char *d, const char* h,
+            bool s = false, bool hide = false)
+        : ClassInfo(i), description(d), help(h), is_shell(s), hidden(hide) {};
     RequestClassInfo(const std::string& i, 
                      const std::string& d,
                      const std::string& h, 
-                     bool s = false)
-        : ClassInfo(i), description(d), help(h), is_shell(s) {};
+                     bool s = false,
+                     bool hide = false)
+        : ClassInfo(i), description(d), help(h), is_shell(s), hidden(hide) {};
 };
 
 /**

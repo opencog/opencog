@@ -52,7 +52,8 @@ public:
             "Get details for a particular atom referred by handle\n"
             "   <handle>: list the atom identified by the specified handle\n"
             "   <name>:   name of atom\n"
-            "   <type>:   type of atom\n"
+            "   <type>:   type of atom\n",
+            false, true // not shell, is hidden
         );
         return _cci;
     }

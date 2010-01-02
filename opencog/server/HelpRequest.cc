@@ -57,9 +57,12 @@ bool HelpRequest::execute()
 
         oss << "Available commands:" << std::endl;
         for (it = commands.begin(); it != commands.end(); ++it) {
+            // Skip hidden commands
+            if (cogserver.requestInfo(*it).hidden) continue;
             std::string cmdname(*it);
             cmdname.append(":");
-            oss << "  " << std::setw(maxl+2) << std::left << cmdname << cogserver.requestInfo(*it).description << std::endl;
+            oss << "  " << std::setw(maxl+2) << std::left << cmdname
+                << cogserver.requestInfo(*it).description << std::endl;
         }
     } else if (_parameters.size() == 1) {
         const RequestClassInfo& cci = cogserver.requestInfo(_parameters.front());
