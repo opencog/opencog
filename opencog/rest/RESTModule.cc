@@ -106,6 +106,8 @@ void makeRequest( struct mg_connection *conn,
 
 void RESTModule::setupURIs()
 {
+    // Support both "atom/UUID" and "atom?handle=UUID"
+    mg_set_uri_callback(ctx, PATH_PREFIX "/atom/*", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/request/*", makeRequest, NULL);
@@ -154,6 +156,16 @@ void viewAtomPage( struct mg_connection *conn,
 {
     std::list<std::string> params = splitQueryString(ri->query_string);
     CogServer& cogserver = static_cast<CogServer&>(server());
+
+    // Get handle UUID from URL if it exists
+    boost::regex reg("atom/([^/]*)");
+    boost::cmatch m;
+    if (boost::regex_search(ri->uri,m,reg)) {
+        std::string handleUUID(m[1].first, m[1].second);
+        handleUUID = "handle=" + handleUUID;
+        params.push_back(handleUUID);
+    }
+
     Request* request = cogserver.createRequest("get-atom");
     if (request == NULL) {
         RESTModule::return500( conn, std::string("unknown request"));
