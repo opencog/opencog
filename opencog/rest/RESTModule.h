@@ -31,8 +31,9 @@
 #include "mongoose.h"
 #include <opencog/rest/GetAtomRequest.h>
 #include <opencog/rest/GetListRequest.h>
+#include <opencog/rest/ServerRequestWrapper.h>
 
-#define PATH_PREFIX "/rest/0.1"
+#define PATH_PREFIX "/rest/0.2"
 
 namespace opencog
 {
@@ -82,6 +83,8 @@ public:
     static void return404(mg_connection* conn);
     static void return500(mg_connection* conn, const std::string& message);
 
+    // Class which wraps requests registered with and destined for CogServer
+    ServerRequestWrapper requestWrapper;
 
 }; // class
 

@@ -30,6 +30,7 @@
 
 #include <sstream>
 #include <boost/bind.hpp>
+#include <boost/mem_fn.hpp>
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -100,13 +101,14 @@ void viewAtomPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
 void viewListPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
+void makeRequest( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
 
 void RESTModule::setupURIs()
 {
-    //boost::function<mg_callback_t> f;
-    //f = boost::bind(&RESTModule::viewAtomPage, *rest_mod, _1);
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
+    mg_set_uri_callback(ctx, PATH_PREFIX "/request/*", makeRequest, NULL);
 }
 
 void RESTModule::return400(mg_connection* conn, const std::string& message)
@@ -277,4 +279,10 @@ void viewListPage( struct mg_connection *conn,
     // Clean up
     delete request;
     
+}
+
+void makeRequest ( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data)
+{
+    rest_mod->requestWrapper.handleRequest(conn, ri, data);
 }

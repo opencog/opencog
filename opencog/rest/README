@@ -1,0 +1,65 @@
+A RESTful interface to OpenCog
+===================================================
+
+This module implements a REST interface for OpenCog. To run it, simply load
+the module via the shell:
+
+opencog> loadmodule path/to/librest.so
+
+Or place it in the CogServer config file.
+
+MODULES = module1.so, module2.so, path/to/librest.so
+
+== Interface ==
+
+All commands are accessed under the path prefix "/rest/0.2/" (Gama implemented a
+different REST interface under 0.1, which is incompatible with the
+current network code). By default the HTTP server runs on all interfaces
+and http://localhost:17034 (the port number has 34 or 17 doubled on the end to
+remembered easily) but should be configurable to run on other interfaces and
+ports (TODO).
+
+All requests that can be normally carried out via the OpenCog shell
+are accessable by POST request at /rest/0.2/request/*.
+
+For example, to start an agent one makes a POST request:
+
+$ curl http://localhost:17034/rest/0.2/request/agent-start?param="opencog::BackChainingAgent"
+Successfully started agents
+
+Note that the normal shell requests use a variety of parameter formats. However,
+traditionally the query string of HTTP requests use field=value pairs. So one
+needs to use the "param" field tp specify the parameters of requests.
+
+For example, the PLN sub-command "infer" can optionally take the number of
+steps to run. However, this would be represented by a post request as shown:
+
+http://localhost:17034/rest/0.2/request/
+
+=== Navigating the AtomSpace ===
+
+More usefully are the command requests specifically developed for the REST
+interface. These HTML/CSS styled output to allow you to navigate the atoms
+in the AtomSpace.
+
+== Implementation ==
+
+Gama implemented such an interface a while ago, but it relied on the Http
+sockets of the CSockets library and this has since been removed from
+OpenCog's dependencies.
+
+Instead, this implementation uses the Mongoose embeddable http server:
+
+http://code.google.com/p/mongoose/
+
+The code has been included in the OpenCog code base due to it being so
+light weight. It is distributed under the MIT license).
+
+== TODO ==
+
+* Allow configuration to be specified in opencog config file.
+* Pagination of get-list results.
+* CSS styling of table to make things look pretty.
+* Generate graph with SVG or HTML5 canvas for neighbouring atoms of the
+currently viewed atom (when using get-atom).
+
