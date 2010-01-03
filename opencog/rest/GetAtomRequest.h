@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LIST_REQUEST_H
-#define _OPENCOG_LIST_REQUEST_H
+#ifndef _OPENCOG_GET_ATOM_REQUEST_H
+#define _OPENCOG_GET_ATOM_REQUEST_H
 
 #include <sstream>
 #include <string>
@@ -48,11 +48,9 @@ public:
         static const RequestClassInfo _cci(
             "get-atom",
             "Get details for a particular atom referred by handle",
-            "Usage: get-atom h=<handle> name=<name> type=<type>\n\n"
+            "Usage: get-atom handle=<handle>\n\n"
             "Get details for a particular atom referred by handle\n"
-            "   <handle>: list the atom identified by the specified handle\n"
-            "   <name>:   name of atom\n"
-            "   <type>:   type of atom\n",
+            "   <handle>: list the atom identified by the specified handle\n",
             false, true // not shell, is hidden
         );
         return _cci;
@@ -63,9 +61,9 @@ public:
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
     std::string getHTML(std::string);
-    void makeOutput(std::vector<Handle> hs);
+    void makeOutput(Handle h);
 };
 
 } // namespace 
 
-#endif // _OPENCOG_LIST_REQUEST_H
+#endif // _OPENCOG_GET_ATOM_REQUEST_H

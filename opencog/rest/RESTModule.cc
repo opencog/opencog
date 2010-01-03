@@ -70,6 +70,7 @@ RESTModule::RESTModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADD
     // Register all requests with CogServer
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory); 
+    cogserver.registerRequest(GetListRequest::info().id, &getListFactory); 
 
     timeout = 100;
 
@@ -97,14 +98,15 @@ void RESTModule::init()
 
 void viewAtomPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
-void viewTypePage( struct mg_connection *conn,
+void viewListPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
 
 void RESTModule::setupURIs()
 {
     //boost::function<mg_callback_t> f;
     //f = boost::bind(&RESTModule::viewAtomPage, *rest_mod, _1);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
 }
 
 void RESTModule::return400(mg_connection* conn, const std::string& message)
@@ -173,7 +175,7 @@ void viewAtomPage( struct mg_connection *conn,
     
     // Check for refresh option
     //! @todo make refresh time specifiable on the page.
-    bool refresh;
+    bool refresh = false;
     std::list<std::string>::const_iterator it;
     for (it = params.begin(); it != params.end(); ++it) {
         if (*it == "refresh=1" or *it == "refresh=true") {
@@ -187,12 +189,13 @@ void viewAtomPage( struct mg_connection *conn,
         result << RESTModule::html_header;
 
     result << gar->getHTML(serverAdd).c_str();
+//mg_printf(conn, result.str().c_str());
     char buffer[512];
-    for (uint i = 0; i < result.str().size(); i+=512) {
+    for (uint i = 0; i < result.str().size(); i+=511) {
         memset(buffer,'\0',512);
-        result.str().copy(buffer,512,i);
-        if (i+512 > result.str().size())
-            buffer[(result.str().size() % 512) + 1] = '\0';
+        result.str().copy(buffer,511,i);
+        if (i+511 > result.str().size())
+            buffer[(result.str().size() % 511) + 1] = '\0';
         mg_printf(conn, buffer);
     }
         
@@ -210,3 +213,68 @@ void viewAtomPage( struct mg_connection *conn,
     
 }
 
+void viewListPage( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data)
+{
+    std::list<std::string> params = splitQueryString(ri->query_string);
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    Request* request = cogserver.createRequest("get-list");
+    if (request == NULL) {
+        RESTModule::return500( conn, std::string("unknown request"));
+        return;
+    }
+    // Prevent CogServer from deleting this request
+    // after it executes so we can find details about it.
+    request->cleanUp = false;
+    request->setParameters(params);
+    cogserver.pushRequest(request);
+    
+    for (;;) {
+        //! @todo - implement time out (requires lock on the request cleanUp variable
+        if (request->complete) break;
+    }
+    GetListRequest *glr = dynamic_cast<GetListRequest *>(request);
+
+    std::stringstream result;
+    std::string serverAdd("http://localhost:17034");
+    serverAdd += PATH_PREFIX;
+    
+    // Check for refresh option
+    //! @todo make refresh time specifiable on the page.
+    bool refresh = false;
+    std::list<std::string>::const_iterator it;
+    for (it = params.begin(); it != params.end(); ++it) {
+        if (*it == "refresh=1" or *it == "refresh=true") {
+            refresh = true;
+            break;
+        }
+    }
+    if (refresh)
+        result << RESTModule::html_refresh_header;
+    else
+        result << RESTModule::html_header;
+
+    result << glr->getHTML(serverAdd).c_str();
+//mg_printf(conn, result.str().c_str());
+    char buffer[512];
+    for (uint i = 0; i < result.str().size(); i+=511) {
+        memset(buffer,'\0',512);
+        result.str().copy(buffer,511,i);
+        if (i+511 > result.str().size())
+            buffer[(result.str().size() % 511) + 1] = '\0';
+        mg_printf(conn, buffer);
+    }
+        
+    result.str("");
+    result << "\r\n\r\n<small>You requested the url: %s<br/> With query string:"
+        "%s</small>";
+    if (refresh) {
+        result << "<br/><small>Page will refresh every 5 seconds</small>";
+    }
+    result << RESTModule::html_footer;
+    mg_printf(conn, result.str().c_str(), ri->uri, ri->query_string);
+
+    // Clean up
+    delete request;
+    
+}

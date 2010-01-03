@@ -30,6 +30,7 @@
 
 #include "mongoose.h"
 #include <opencog/rest/GetAtomRequest.h>
+#include <opencog/rest/GetListRequest.h>
 
 #define PATH_PREFIX "/rest/0.1"
 
@@ -55,6 +56,7 @@ private:
     // Register AtomSpace API requests. We can't directly access the AtomSpace
     // due to the REST Http server running in it's own set of threads.
     Factory<GetAtomRequest, Request> getAtomFactory;
+    Factory<GetListRequest, Request> getListFactory;
 
 public:
 
