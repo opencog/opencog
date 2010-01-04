@@ -29,7 +29,7 @@ cxxtest     -- a test framework
 boost       -- a C++ utilities package -
                http://www.boost.org/
                Debian/Ubuntu package libboost-dev
-               Version 1.35 or greater is required for embodiment
+               Version 1.37 or greater is required for embodiment
 
 expat       -- an XML parsing library - 
                http://www.jclark.com/xml/expat.html (version 1.2)
