@@ -1,10 +1,10 @@
 /*
- * opencog/server/GetAtomRequest.cc
+ * opencog/rest/GetAtomRequest.cc
  *
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
- * Written by Gustavo Gama <gama@vettalabs.com>
+ * Written by Joel Pitt <joel@fruitionnz.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
