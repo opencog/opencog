@@ -109,7 +109,7 @@ bool ListRequest::execute()
     return true;
 }
 
-void ListRequest::sendOutput() const
+void ListRequest::sendOutput()
 {
     std::ostringstream oss;
 
@@ -124,7 +124,7 @@ void ListRequest::sendOutput() const
     send(oss.str());
 }
 
-void ListRequest::sendError() const
+void ListRequest::sendError()
 {
     if (_mimeType != "text/plain")
         throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s", _mimeType.c_str());

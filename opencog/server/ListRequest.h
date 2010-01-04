@@ -43,8 +43,8 @@ protected:
     std::vector<Handle> _handles;
     std::ostringstream  _error;
 
-    void sendOutput(void) const;
-    void sendError (void) const;
+    void sendOutput(void);
+    void sendError (void);
     bool syntaxError(void);
 
 public:

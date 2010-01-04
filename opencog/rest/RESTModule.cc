@@ -183,6 +183,7 @@ void viewAtomPage( struct mg_connection *conn,
     }
     GetAtomRequest *gar = dynamic_cast<GetAtomRequest *>(request);
 
+    //! @todo replace with configured server
     std::stringstream result;
     std::string serverAdd("http://localhost:17034");
     serverAdd += PATH_PREFIX;

@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-Request::Request() : _requestResult(NULL), cleanUp(true), complete(false)
-{
+Request::Request() : _requestResult(NULL), _mimeType("text/plain"),
+    cleanUp(true), complete(false) {
 }
 
 Request::~Request()
@@ -50,7 +50,7 @@ void Request::setRequestResult(RequestResult* rr)
             "Bad idea to try to set the RequestResult more than once.");
 }
 
-void Request::send(const std::string& msg) const
+void Request::send(const std::string& msg)
 {
     if (_requestResult) _requestResult->SendResult(msg);
 }

@@ -1,10 +1,10 @@
 /*
- * opencog/server/ServerRequestWrapper.cc
+ * opencog/rest/ServerRequestWrapper.cc
  *
- * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
  *
- * Written by Gustavo Gama <gama@vettalabs.com>
+ * Written by Joel Pitt <joel@fruitionnz.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,6 +32,8 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 
+#include "RESTModule.h"
+
 using namespace opencog;
 
 ServerRequestWrapper::ServerRequestWrapper()
@@ -58,23 +60,50 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
             mg_printf(conn, "unknown request %s\n", requestName.c_str());
             return;
         }
-        /// HMMMMM - seems we need to make a fake ConsoleSocket to pass
-        /// to the Requests otherwise we can't get their output
+        request->cleanUp = false;
+        // Ensure it isn't a shell request or anything else that will break
+        const RequestClassInfo& cci = cogserver.requestInfo(requestName);
+        if (cci.is_shell || cci.hidden) {
+            mg_printf(conn, "Request not callable via REST: %s\n", requestName.c_str());
+            return;
+        }
+
+        // Deal with parameters if they exist
+        char* var_data;
+        std::list<std::string> params;
+        var_data = mg_get_var(conn, "params");
+        if (var_data) {
+            boost::split(params, var_data, boost::is_any_of(" "));
+            mg_free(var_data);
+        }
+        request->setParameters(params);
+
+        cogserver.pushRequest(request);
+
+        for (;;) if (request->complete) break;
+
+        //! @todo replace with configured server
+        std::stringstream result;
+        std::string serverAdd("http://localhost:17034");
+        serverAdd += PATH_PREFIX;
+
+        result << RESTModule::html_header;
+        result << "Result of running request '" << requestName << "':<br/>";
+        result << "<pre>";
+
+        // Escape angle brackets
+        std::string noanglebrackets = request->_output.str();
+        boost::replace_all(noanglebrackets, "<", "&lt;");
+        boost::replace_all(noanglebrackets, ">", "&gt;");
+        result << noanglebrackets;
+
+        result << "</pre>";
+        result << RESTModule::html_footer;
+        mg_printf(conn, result.str().c_str());
+
     } else {
         mg_printf(conn, "URL malformed? %s\n", ri->uri);
     }
-
-
-    mg_printf(conn, "%s\n", ri->uri);
-    mg_printf(conn, "%s\n", ri->query_string);
-    mg_printf(conn, "%d\n", ri->post_data_len);
-    mg_printf(conn, "%s\n", ri->post_data);
-    //   not found
-
-    //
-    //const RequestClassInfo& cci = cogserver.requestInfo(_parameters.front());
-    //    if (cci.help != "")
-    //        oss << cci.help << std::endl;
 
 }
 

@@ -28,6 +28,7 @@
 #define _OPENCOG_REQUEST_H
 
 #include <string>
+#include <sstream>
 #include <list>
 
 #include <opencog/server/Factory.h>
@@ -288,7 +289,7 @@ public:
     virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
-    virtual void send(const std::string& msg) const;
+    virtual void send(const std::string& msg);
 
     /** Stores the RequestResult that makes interface with the requesting client. */
     virtual void setRequestResult(RequestResult*);
@@ -305,6 +306,11 @@ public:
 
     /** Whether CogServer has processed this request */
     bool complete;
+
+    /** If the request isn't assigned a ConsoleSocket then send() will
+      * just add the string to _output.
+      */
+    std::ostringstream     _output;
 };
 
 } // namespace 
