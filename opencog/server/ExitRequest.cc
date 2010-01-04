@@ -38,7 +38,9 @@ ExitRequest::~ExitRequest()
 
 bool ExitRequest::execute()
 {
-    _requestResult->Exit();
-    _requestResult = NULL;
+    if (_requestResult) {
+        _requestResult->Exit();
+        _requestResult = NULL;
+    }
     return true;
 }
