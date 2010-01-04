@@ -87,7 +87,8 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
         std::string serverAdd("http://localhost:17034");
         serverAdd += PATH_PREFIX;
 
-        result << RESTModule::html_header;
+        result << RESTModule::open_html_header;
+        result << RESTModule::close_html_header;
         result << "Result of running request '" << requestName << "':<br/>";
         result << "<pre>";
 

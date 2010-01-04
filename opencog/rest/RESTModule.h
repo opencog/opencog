@@ -65,7 +65,8 @@ public:
     static const char* DEFAULT_SERVER_ADDRESS;
 
     //! @todo create a function to generate header
-    static const char* html_header;
+    static const char* open_html_header;
+    static const char* close_html_header;
     static const char* html_refresh_header;
     static const char* html_footer;
 

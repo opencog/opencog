@@ -49,15 +49,15 @@ extern "C" void        opencog_module_unload(Module* module) { delete module; }
 const char* RESTModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
 
 //! @todo create a function to generate header
-const char* RESTModule::html_header = "HTTP/1.1 200 OK\r\n"
+const char* RESTModule::open_html_header = "HTTP/1.1 200 OK\r\n"
     "content-Type: text/html\r\n\r\n"
-    "<html><body>";
+    "<html><head>";
+const char* RESTModule::close_html_header = "</head><body>";
 
-const char* RESTModule::html_refresh_header = "HTTP/1.1 200 OK\r\n"
-    "content-Type: text/html\r\n\r\n"
-    "<html><head><META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\"></head><body>";
+const char* RESTModule::html_refresh_header = 
+    "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">";
 
-const char* RESTModule::html_footer = "</html></body>\r\n";
+const char* RESTModule::html_footer = "</body></html>\r\n";
 
 RESTModule::RESTModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {
@@ -109,6 +109,7 @@ void RESTModule::setupURIs()
     // Support both "atom/UUID" and "atom?handle=UUID"
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom/*", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, "/atom", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/list/*", viewListPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/request/*", makeRequest, NULL);
@@ -199,10 +200,11 @@ void viewAtomPage( struct mg_connection *conn,
             break;
         }
     }
+    result << RESTModule::open_html_header;
     if (refresh)
         result << RESTModule::html_refresh_header;
-    else
-        result << RESTModule::html_header;
+    result << gar->getHTMLHeader();
+    result << RESTModule::close_html_header;
 
     result << gar->getHTML(serverAdd).c_str();
 //mg_printf(conn, result.str().c_str());
@@ -216,7 +218,7 @@ void viewAtomPage( struct mg_connection *conn,
     }
         
     result.str("");
-    result << "\r\n\r\n<small>You requested the url: %s<br/> With query string:"
+    result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
         "%s</small>";
     if (refresh) {
         result << "<br/><small>Page will refresh every 5 seconds</small>";
@@ -274,10 +276,10 @@ void viewListPage( struct mg_connection *conn,
             break;
         }
     }
+    result << RESTModule::open_html_header;
     if (refresh)
         result << RESTModule::html_refresh_header;
-    else
-        result << RESTModule::html_header;
+    result << RESTModule::close_html_header;
 
     result << glr->getHTML(serverAdd).c_str();
 //mg_printf(conn, result.str().c_str());

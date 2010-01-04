@@ -61,7 +61,9 @@ public:
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
     std::string getHTML(std::string);
+    std::string getHTMLHeader();
     void makeOutput(Handle h);
+    void generateProcessingGraph(Handle h);
 };
 
 } // namespace 
