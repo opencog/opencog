@@ -24,23 +24,52 @@ are accessable by POST request at /rest/0.2/request/*.
 
 For example, to start an agent one makes a POST request:
 
-$ curl http://localhost:17034/rest/0.2/request/agent-start?param="opencog::BackChainingAgent"
+$ curl http://localhost:17034/rest/0.2/request/agent-start?param=opencog::BackChainingAgent
 Successfully started agents
 
 Note that the normal shell requests use a variety of parameter formats. However,
 traditionally the query string of HTTP requests use field=value pairs. So one
-needs to use the "param" field tp specify the parameters of requests.
+needs to use the "params" field to specify the parameters of requests.
 
 For example, the PLN sub-command "infer" can optionally take the number of
 steps to run. However, this would be represented by a post request as shown:
 
-http://localhost:17034/rest/0.2/request/
+http://localhost:17034/rest/0.2/request/pln?params=infer%205
+
+The params value contains the %20 character, which translate to a space.
+In some webbrowsers you may be able to enter the URL with spaces and it'll
+automatically replace them with %20.
 
 === Navigating the AtomSpace ===
 
 More usefully are the command requests specifically developed for the REST
 interface. These HTML/CSS styled output to allow you to navigate the atoms
 in the AtomSpace.
+
+* Individual atoms:
+
+http://localhost:17034/rest/0.2/atom?handle=UUID
+http://localhost:17034/rest/0.2/atom/UUID
+
+Replace "UUID" by the UUID of the atom you are after.
+
+* List of atoms for a given type:
+
+http://localhost:17034/rest/0.2/list?type=ConceptNode
+http://localhost:17034/rest/0.2/list/ConceptNode
+
+Replace ConceptNode by whatever atom type you like.
+
+Other options for this command:
+
+"refresh=1" will make the page refresh every 5 seconds.
+"name=N" display all atoms with name N.
+"handle=UUID" display the atom referred to by UUID in the list. This can be used
+    multiple times.
+"subtype=1" will show subtypes of whatever type is requested.
+"order=X" order the list by STI (X=STI), LTI (X=LTI), TV strength (X=tv.s),
+    or TV confidence (X=tv.c).
+"ascend=1" ... used with order. Reverses the direction of the ordering.
 
 == Implementation ==
 
@@ -58,6 +87,7 @@ light weight. It is distributed under the MIT license).
 == TODO ==
 
 * Allow configuration to be specified in opencog config file.
+* get-list options for listing by name prefix.
 * Pagination of get-list results.
 * CSS styling of table to make things look pretty.
 * Generate graph with SVG or HTML5 canvas for neighbouring atoms of the

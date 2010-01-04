@@ -110,6 +110,7 @@ void RESTModule::setupURIs()
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom/*", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
+    mg_set_uri_callback(ctx, PATH_PREFIX "/list/*", viewListPage, NULL);
     mg_set_uri_callback(ctx, PATH_PREFIX "/request/*", makeRequest, NULL);
 }
 
@@ -238,6 +239,15 @@ void viewListPage( struct mg_connection *conn,
         RESTModule::return500( conn, std::string("unknown request"));
         return;
     }
+    // Get list parameters from URL if they exist
+    boost::regex reg("list/([^/]*)");
+    boost::cmatch m;
+    if (boost::regex_search(ri->uri,m,reg)) {
+        std::string typeName(m[1].first, m[1].second);
+        typeName = "type=" + typeName;
+        params.push_back(typeName);
+    }
+
     // Prevent CogServer from deleting this request
     // after it executes so we can find details about it.
     request->cleanUp = false;
