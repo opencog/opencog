@@ -44,6 +44,12 @@ class SchemeShellModule : public Module
 			"OpenCog atoms and truth values. It provides a full R5RS-compliant\n"
 			"interactive scheme shell, based on the GNU Guile extension language.", 
             true)
+        
+		DECLARE_CMD_REQUEST(SchemeShellModule, "scm-eval", do_eval,
+			"Run some scheme code",
+			"Usage: scm-eval <scheme code>\n\n"
+			"Evaluate the specified Scheme code. It does not need to be quoted.", 
+			false)
 
 	public:
 		SchemeShellModule(void);
