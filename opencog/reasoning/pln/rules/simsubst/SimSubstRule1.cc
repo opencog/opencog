@@ -45,7 +45,7 @@ Links are assumed not inheritable either.
     // That prevents an assert error in BITNode::tryClone() -- JaredW
     
     if (outh->begin().number_of_children() != 2
-        ||  GET_ASW->inheritsType(GET_ASW->getType(boost::get<pHandle>(*outh->begin())), FW_VARIABLE_NODE))
+        ||  asw->isSubType(boost::get<pHandle>(*outh->begin()), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 /*  puts("X1");
@@ -69,7 +69,7 @@ Links are assumed not inheritable either.
         printAtomTree(outh,0,0);
 */
         // if this vertex is a link type, skip it
-        if ( asw->inheritsType(asw->getType(_v2h(*i)), LINK) )
+        if ( asw->isSubType(_v2h(*i), LINK) )
             continue;
 
         // Put the FW_VAR (child) into the templated atom

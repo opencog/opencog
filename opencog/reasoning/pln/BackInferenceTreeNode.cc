@@ -470,15 +470,15 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 
         setTarget(_target, _pre_bindings);
 
-        if (asw->inheritsType(asw->getType(_v2h(*bound_target->begin())), LINK)
-              && (
-                 (!asw->isType(_v2h(*bound_target->begin())) &&
+        if (asw->isSubType(_v2h(*bound_target->begin()), LINK)
+            && (
+                (!asw->isType(_v2h(*bound_target->begin())) &&
                  !asw->getArity(_v2h(*bound_target->begin())))
                 ||
-                 (asw->isType(_v2h(*bound_target->begin())) &&
+                (asw->isType(_v2h(*bound_target->begin())) &&
                  !bound_target->number_of_children(bound_target->begin()))
-                 )
-           ) {
+                )
+            ) {
             rawPrint(*bound_target, bound_target->begin(),-10);
             assert(0);
         }
@@ -1381,7 +1381,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                 foreach(VtreeProvider* ra, rule_args)
                 {
                     pHandle h = _v2h(*ra->getVtree().begin());
-                    if (!asw->inheritsType(asw->getType(h), HYPOTHETICAL_LINK) &&
+                    if (!asw->isSubType(h, HYPOTHETICAL_LINK) &&
                         asw->getTV(h).getConfidence() < MIN_CONFIDENCE_FOR_RULE_APPLICATION)
                         goto next_args;
                 }

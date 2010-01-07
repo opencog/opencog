@@ -64,8 +64,8 @@ combined, no conflict will be found!
 
 Rule::setOfMPs StrictCrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->isSubType(_v2h(*outh->begin()), FORALL_LINK) ||
+        asw->isSubType(_v2h(*outh->begin()), FW_VARIABLE_NODE))
         return Rule::setOfMPs();
 
 #if 0
@@ -130,7 +130,7 @@ printer.print(rootAtom->begin(),3);
 			{
                 vtree pit_vtree(pit);
                 if ( (asw->isType(_v2h(*pit))
-                    || asw->inheritsType(asw->getType(_v2h(*pit)), FW_VARIABLE_NODE))
+                    || asw->isSubType(_v2h(*pit), FW_VARIABLE_NODE))
                     && _v2h(*pit) != (pHandle)LIST_LINK
 					&& !STLhas(arg_targets, pit_vtree) )
                 {

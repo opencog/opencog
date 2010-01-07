@@ -200,8 +200,8 @@ void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifference
 
 Rule::setOfMPs CrispUnificationRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-	if (inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-		inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+	if (asw->isSubType(_v2h(*outh->begin()), FORALL_LINK) ||
+		asw->isSubType(_v2h(*outh->begin()), FW_VARIABLE_NODE))
 		return Rule::setOfMPs();
 	
 	set<atom, lessatom_ignoreVarNameDifferences> varforms;

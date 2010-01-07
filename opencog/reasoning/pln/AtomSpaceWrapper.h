@@ -531,6 +531,8 @@ public:
     bool isEmptyLink(pHandle h);
     bool hasFalsum(pHandleSeq hs);
     bool containsNegation(pHandle ANDlink, pHandle h);
+
+    //! return the type of the root of _target
     Type getTypeV(const tree<Vertex>& _target) const;
 
     bool allowFWVarsInAtomSpace;

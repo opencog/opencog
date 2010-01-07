@@ -49,7 +49,7 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 {
     ///haxx:: (restricts internal implications
     
-    //      if (inheritsType(nm->getType(v2h(*outh->begin())), IMPLICATION_LINK))
+    //      if (asw->isSubType(v2h(*outh->begin()), IMPLICATION_LINK))
     //          return Rule::setOfMPs();
     
     MPs ret;

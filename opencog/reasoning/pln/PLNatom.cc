@@ -102,7 +102,7 @@ bool echo=false;
         switch(T)
         {
         case __INSTANCEOF_N:
-            unnormed_ret = GET_ASW->inheritsType(GET_ASW->getType(h), hs[0]->T);
+            unnormed_ret = GET_ASW->isSubType(h, hs[0]->T);
             
             break;
             
@@ -115,7 +115,7 @@ bool echo=false;
         
         if (!unnormed_ret && normal_form)
         {
-            if (GET_ASW->inheritsType(GET_ASW->getType(h), FORALL_LINK))
+            if (GET_ASW->isSubType(h, FORALL_LINK))
                 return (*this)(GET_ASW->getOutgoing(h)[1]);
             else if (GET_ASW->inheritsType(hs[0]->T, FORALL_LINK))
                 return ( *((MetaPredicate*)hs[1].get()) )(h);
@@ -621,7 +621,7 @@ tree<Vertex> atom::makeHandletree(iAtomSpaceWrapper* table, bool fullVirtual) co
     tree<Vertex> ret;
     pHandle top = PHANDLE_UNDEFINED;
     
-    if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ASW->inheritsType(GET_ASW->getType(handle), FW_VARIABLE_NODE)))
+    if (handle != PHANDLE_UNDEFINED && (!fullVirtual || GET_ASW->isSubType(handle, FW_VARIABLE_NODE)))
         top = handle;
     else
         top = (GET_ASW->inheritsType(T, NODE)
@@ -707,7 +707,7 @@ atom::atom(const tree<Vertex>& a, tree<Vertex>::iterator parent_node, bool root)
         {   
             Btr<atom> b(new atom);
             
-            if (s.number_of_children() > 0 && !GET_ASW->inheritsType(GET_ASW->getType(_v2h(*s)), NODE) )
+            if (s.number_of_children() > 0 && !GET_ASW->isSubType(_v2h(*s), NODE) )
                 b = Btr<atom>(new atom(a, s, false)); //a.child(s, 0), &this->hs);
 
             b->T = GET_ASW->getType(_v2h(*s));

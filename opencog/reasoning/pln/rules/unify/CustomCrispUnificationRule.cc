@@ -40,8 +40,8 @@ namespace opencog { namespace pln {
 Btr<std::set<BoundVertex > >
 CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
 {
-    if (asw->inheritsType(asw->getType(_v2h(*outh->begin())), FORALL_LINK) ||
-        asw->inheritsType(asw->getType(_v2h(*outh->begin())), FW_VARIABLE_NODE))
+    if (asw->isSubType(_v2h(*outh->begin()), FORALL_LINK) ||
+        asw->isSubType(_v2h(*outh->begin()), FW_VARIABLE_NODE))
         return Btr<std::set<BoundVertex > >();
 
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME|NMP_NODE_TYPE_NAME);

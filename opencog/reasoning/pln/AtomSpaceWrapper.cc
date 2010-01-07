@@ -713,7 +713,7 @@ bool AtomSpaceWrapper::symmetricLink(Type T)
 
 bool AtomSpaceWrapper::isEmptyLink(pHandle h)
 {
-    return !inheritsType(getType(h), NODE)
+    return !isSubType(h, NODE)
             && getArity(h) == 0;
 }
 
@@ -723,12 +723,12 @@ bool AtomSpaceWrapper::hasFalsum(pHandleSeq hs)
     {
         const pHandle key = *ii;
 
-        if (inheritsType(getType(key), FALSE_LINK) ) //Explicit falsum
+        if (isSubType(key, FALSE_LINK) ) //Explicit falsum
             return true;
 
         for (pHandleSeq::const_iterator jj = hs.begin(); jj != hs.end();jj++) {
             if (jj != ii) {
-                if (inheritsType(getType(*jj), NOT_LINK) ) //Contradiction
+                if (isSubType(*jj, NOT_LINK) ) //Contradiction
                 {
                     pHandle notter = getOutgoing(*jj)[0];
                     if (notter == key)
@@ -1523,7 +1523,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 #if 0
     if (T == IMPLICATION_LINK
         && hs.size()==2
-        && inheritsType(a->getType(hs[0]), FALSE_LINK))
+        && isSubType(hs[0], FALSE_LINK))
     {
         assert(hs.size()==2 || hs.empty());
         
@@ -1531,7 +1531,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
     else if (T == IMPLICATION_LINK
         && hs.size()==2
-        && inheritsType(a->getType(hs[1]), FALSE_LINK))
+        && isSubType(hs[1], FALSE_LINK))
     {
         assert(hs.size()==2 || hs.empty());
 
@@ -1542,7 +1542,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
     else if (T == IMPLICATION_LINK          //Accidentally similar to da above
             && hs.size()==2
-            && inheritsType(a->getType(hs[0]), AND_LINK)
+            && isSubType(hs[0], AND_LINK)
             && containsNegation(hs[0], hs[1]))
     {
         HandleSeq NOTarg;
@@ -1552,7 +1552,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
     else if (T == IMPLICATION_LINK
         && !hs.empty()
-        && inheritsType(a->getType(hs[1]), AND_LINK))
+        && isSubType(hs[1], AND_LINK))
     {
         assert(hs.size()==2 || hs.empty());
 
@@ -1577,7 +1577,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 #if 0
     if (T == IMPLICATION_LINK
         && !hs.empty()
-        && inheritsType(a->getType(hs[0]), IMPLICATION_LINK))
+        && isSubType(hs[0], IMPLICATION_LINK))
     {
         assert(hs.size()==2 || hs.empty());
 
@@ -1648,7 +1648,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 #if 0
     else if (T == NOT_LINK
             && !hs.empty()
-            && inheritsType(a->getType(hs[0]), NOT_LINK)
+            && isSubType(hs[0], NOT_LINK)
             && tvn.getMean() > 0.989
             && binaryTrue(hs[0]) )
     {
@@ -1679,7 +1679,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
         {
 //          printTree(hs[ii],0,4);
 
-            if (inheritsType(a->getType(hs[ii]), AND_LINK)
+            if (isSubType(hs[ii], AND_LINK)
                 && binaryTrue(hs[ii]))
             {
                 HandleSeq args1 = a->getOutgoing(hs[ii]);
@@ -1739,7 +1739,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
     else if (T == NOT_LINK
             && !hs.empty()
-            && inheritsType(a->getType(hs[0]), IMPLICATION_LINK))
+            && isSubType(hs[0], IMPLICATION_LINK))
     {
         LOG(BL, "~(A=>B) <---> ~(B | ~A) <---> &(A,~B)");
 
@@ -1758,7 +1758,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
     }
     else if (T == NOT_LINK
             && !hs.empty()
-            && inheritsType(a->getType(hs[0]), AND_LINK))
+            && isSubType(hs[0], AND_LINK))
     {
         LOG(BL, "Cut -AND(B,C,...) into AND(B=>-C, C=>-B, ...)");
         
@@ -1791,7 +1791,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
             && hs.size()==2
             && tvn.getMean() > 0.989
             && binaryTrue(hs[1])
-            && inheritsType(a->getType(hs[1]), IMPLICATION_LINK))
+            && isSubType(hs[1], IMPLICATION_LINK))
     {
         LOG(0, "(A=>(B=>C)) --->    ((A&B) => C)");
 //exit(0);
@@ -1818,7 +1818,7 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
 #if 0
     else if (T == IMPLICATION_LINK
             && !hs.empty()
-            && inheritsType(a->getType(hs[0]), AND_LINK)
+            && isSubType(hs[0], AND_LINK)
             && getFirstIndexOfType(a->getOutgoing(hs[0]), IMPLICATION_LINK)
                 >= 0)
     {
@@ -1935,7 +1935,7 @@ printTree(ret,0,1);
     }
     else if (T == FORALL_LINK
             && hs.size() == 2
-            && inheritsType(getType(hs[1]), AND_LINK)
+            && isSubType(hs[1], AND_LINK)
             && binaryTrue(hs[1])
             && getArity(hs[1]) > 1)
     {

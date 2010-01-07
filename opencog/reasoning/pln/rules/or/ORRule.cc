@@ -39,7 +39,7 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
         tree<Vertex>::iterator top = outh->begin();
         
-        if (!asw->inheritsType(asw->getType(_v2h(*top)), OR_LINK) ||
+        if (!asw->isSubType(_v2h(*top), OR_LINK) ||
             top.number_of_children() > 2)
             return Rule::setOfMPs();
 

@@ -272,7 +272,7 @@ Rule::setOfMPs PartitionRule_o2iMetaExtra(meta outh, bool& overrideInputFilter,
 {
         const int N = outh->begin().number_of_children();
         
-        if (!asw->inheritsType(asw->getType(_v2h(*outh->begin())), OutLinkType)
+        if (!asw->isSubType(_v2h(*outh->begin()), OutLinkType)
             || N <= MAX_ARITY_FOR_PERMUTATION)
             return Rule::setOfMPs();
 
@@ -317,7 +317,7 @@ boost::shared_ptr<set<BoundVertex > > attemptDirectANDProduction(iAtomSpaceWrapp
                                         const meta& outh,
                                         ArityFreeANDRule* rule)
     {
-        if (!inheritsType(nm->getType(v2h(*outh->begin())), AND_LINK))
+        if (!isSubType(v2h(*outh->begin()), AND_LINK))
             return Rule::setOfMPs();
 
         tree<Vertex>::iterator top = outh->begin();

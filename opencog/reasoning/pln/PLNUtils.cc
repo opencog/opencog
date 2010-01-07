@@ -234,14 +234,14 @@ bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw,
         if (asw->isType(*ph_ltop) || asw->isType(*ph_rtop))
             return false;
 
-        bool lhs_is_node = asw->inheritsType(asw->getType(*ph_ltop), NODE);
-        bool lhs_is_var  = lhs_is_node && asw->inheritsType(asw->getType(*ph_ltop), FW_VARIABLE_NODE);
+        bool lhs_is_node = asw->isSubType(*ph_ltop, NODE);
+        bool lhs_is_var  = lhs_is_node && asw->isSubType(*ph_ltop, FW_VARIABLE_NODE);
 
         if (!lhs_is_var)
             return false;
 
-        bool rhs_is_node = asw->inheritsType(asw->getType(*ph_rtop), NODE);
-        bool rhs_is_var  = rhs_is_node && asw->inheritsType(asw->getType(*ph_rtop), FW_VARIABLE_NODE);
+        bool rhs_is_node = asw->isSubType(*ph_rtop, NODE);
+        bool rhs_is_var  = rhs_is_node && asw->isSubType(*ph_rtop, FW_VARIABLE_NODE);
 
         if (!rhs_is_var)
             return false;
@@ -2055,7 +2055,7 @@ void BoundVTree::createMyStdTree()
 
     for (vtree::pre_order_iterator i = my_std_tree.begin(); i != my_std_tree.end(); i++) {
         pHandle *plh = boost::get<pHandle>(&*i);
-        if (plh && ((long)plh) > 220 +::haxx::STD_VARS && asw->inheritsType(asw->getType(*plh), FW_VARIABLE_NODE)) {
+        if (plh && ((long)plh) > 220 +::haxx::STD_VARS && asw->isSubType(*plh, FW_VARIABLE_NODE)) {
             bindingsT::iterator old_mapping = varmap.find(*plh);
             if (old_mapping != varmap.end()) {
                 *i = Vertex(old_mapping->second);
@@ -2094,8 +2094,8 @@ bool equalVariableStructure(const vtree& lhs, const vtree& rhs)
         /// != operator is not supported by Vertex.
         if (!(*li == *ri)) {
             if (!plh || !prh
-                    || !asw->inheritsType(asw->getType(*plh), FW_VARIABLE_NODE)
-                    || !asw->inheritsType(asw->getType(*prh), FW_VARIABLE_NODE))
+                    || !asw->isSubType(*plh, FW_VARIABLE_NODE)
+                    || !asw->isSubType(*prh, FW_VARIABLE_NODE))
                 return false;
             bindingsT::iterator old_mapping = varmap.find(*plh);
             if (old_mapping != varmap.end()) {
@@ -2122,7 +2122,7 @@ void ForceVirtual(meta _target, vtree::iterator& vit)
     AtomSpaceWrapper* asw = GET_ASW;
 
     pHandle *ph = boost::get<pHandle>(&(*vit));
-    if (ph && !asw->isType(*ph) && !asw->inheritsType(asw->getType(*ph), NODE)) {
+    if (ph && !asw->isType(*ph) && !asw->isSubType(*ph, NODE)) {
         // A real link cannot have children in a vtree! That'd screw everything up.
         assert(!_target->number_of_children(vit));
 
@@ -2238,8 +2238,8 @@ void pr(std::pair<pHandle, pHandle> i)
 {
     AtomSpaceWrapper* asw = GET_ASW;
 
-    string s1 = asw->inheritsType(asw->getType(i.first), NODE) ? asw->getName(i.first) : i2str(i.first);
-    string s2 = asw->inheritsType(asw->getType(i.second), NODE) ? asw->getName(i.second) : i2str(i.second);
+    string s1 = asw->isSubType(i.first, NODE) ? asw->getName(i.first) : i2str(i.first);
+    string s2 = asw->isSubType(i.second, NODE) ? asw->getName(i.second) : i2str(i.second);
 
     cout << s1 << " => " << s2 << "\n";
 // cout << (int)i.first << " => " << (int)i.second << "\n";
@@ -2327,11 +2327,11 @@ bool unifiesTo( AtomSpaceWrapper* asw,
         pHandle *ph_rtop = boost::get<pHandle>(&*rtop);
 
         if (ph_ltop) {
-            bool lhs_is_node = asw->inheritsType(asw->getType(*ph_ltop), NODE);
+            bool lhs_is_node = asw->isSubType(*ph_ltop, NODE);
 
             /// haxx::
 
-            bool lhs_is_var  = lhs_is_node && ( asw->inheritsType(asw->getType(*ph_ltop), VarType) || asw->inheritsType(asw->getType(*ph_ltop), FW_VARIABLE_NODE));
+            bool lhs_is_var  = lhs_is_node && ( asw->isSubType(*ph_ltop, VarType) || asw->isSubType(*ph_ltop, FW_VARIABLE_NODE));
 
             if (!asw->isType(*ph_ltop) && !lhs_is_node) {
                 vtree ltop_as_tree(opencog::pln::make_vtree(*ph_ltop));
@@ -2347,8 +2347,8 @@ bool unifiesTo( AtomSpaceWrapper* asw,
             if (s == Lbindings.end() &&
                     (s = Rbindings.find(*ph_ltop)) == Rbindings.end()) {
                 if (ph_rtop) {
-                    bool rhs_is_node = asw->inheritsType(asw->getType(*ph_rtop), NODE);
-                    bool rhs_is_var  = rhs_is_node && ( asw->inheritsType(asw->getType(*ph_rtop), VarType)  || asw->inheritsType(asw->getType(*ph_rtop), FW_VARIABLE_NODE));
+                    bool rhs_is_node = asw->isSubType(*ph_rtop, NODE);
+                    bool rhs_is_var  = rhs_is_node && ( asw->isSubType(*ph_rtop, VarType)  || asw->isSubType(*ph_rtop, FW_VARIABLE_NODE));
 
                     if (!asw->isType(*ph_rtop) && !rhs_is_node) {
                         vtree rtop_as_tree(opencog::pln::make_vtree(*ph_rtop));
@@ -2438,11 +2438,11 @@ bool unifiesTo( const vtree & lhs_t, const vtree & rhs_t,
   if (ph_ltop)
   A
   {
-   bool is_node = asw->inheritsType(asw->getType(*ph_ltop),NODE);
+   bool is_node = asw->isSubType(*ph_ltop,NODE);
 
    /// haxx::
 
-   bool is_var  = is_node && ( asw->inheritsType(asw->getType(*ph_ltop), VarType) || asw->inheritsType(asw->getType(*ph_ltop), FW_VARIABLE_NODE));
+   bool is_var  = is_node && ( asw->isSubType(*ph_ltop, VarType) || asw->isSubType(*ph_ltop, FW_VARIABLE_NODE));
 
    if (asw->isReal(*ph_ltop) && !is_node)
    {
@@ -2473,8 +2473,8 @@ cprintf(4,"FW_VAR");
   Handle *ph_rtop = v2h(&*rtop);
   if (ph_rtop)
   {
-   bool is_node = asw->inheritsType(asw->getType(*ph_rtop),NODE);
-   bool is_var  = is_node && ( asw->inheritsType(asw->getType(*ph_rtop),VarType)  || asw->inheritsType(asw->getType(*ph_rtop), FW_VARIABLE_NODE));
+   bool is_node = asw->isSubType(*ph_rtop,NODE);
+   bool is_var  = is_node && ( asw->isSubType(*ph_rtop,VarType)  || asw->isSubType(*ph_rtop, FW_VARIABLE_NODE));
 
    if (asw->isReal(*ph_rtop) && !is_node)
    {

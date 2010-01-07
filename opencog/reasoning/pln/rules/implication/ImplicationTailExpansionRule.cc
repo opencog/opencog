@@ -51,7 +51,7 @@ ImplicationTailExpansionRule::ImplicationTailExpansionRule(AtomSpaceWrapper *_as
 
 Rule::setOfMPs ImplicationTailExpansionRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
-    if (!(asw->inheritsType(asw->getType(_v2h(*outh->begin())), IMPLICATION_LINK)))
+    if (!(asw->isSubType(_v2h(*outh->begin()), IMPLICATION_LINK)))
         return Rule::setOfMPs();
         
     tree<Vertex>::sibling_iterator hs1 = outh->begin(outh->begin());
@@ -63,7 +63,7 @@ cprintf(0,"T:%d\n", (Type)_v2h(*hs1));
     
     if (hs0  == outh->end(outh->begin()) ||
         hs11 == outh->end(hs1) ||
-        !(asw->inheritsType(asw->getType(_v2h(*hs1)), AND_LINK)) )
+        !(asw->isSubType(_v2h(*hs1), AND_LINK)) )
         return Rule::setOfMPs();
 
     /// A => (B&C)
