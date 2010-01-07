@@ -452,6 +452,7 @@ struct weak_atom {
     bool operator<(const weak_atom<ATOM_REPRESENTATION_T>& rhs) const {
         return value < rhs.value;
     }
+    /// this method is used nowhere and where reading it is seems buggy
     void apply_bindings();
 };
 
