@@ -584,6 +584,8 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
 {
     cprintf(4,"FindMatchingUniversal...");
     
+    // candidate is a ModifiedVTree containing
+    // the body of the ForAll with all its variables replaced by FW_VAR
     Btr<ModifiedVTree> candidate =
         convertToModifiedVTree(ForAllLink, 
                                convert_all_var2fwvar
@@ -593,14 +595,17 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     Btr<bindingsVTreeT> bindsInUniversal(new bindingsVTreeT),
                         bindsInTarget(new bindingsVTreeT);
 
+    // debug print
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
     printer.print(candidate->begin(), 4);
     printer.print(target->begin(), 4);
+    // ~debug print
 
     if (!unifiesTo(asw, *candidate, *target,
                    *bindsInUniversal, *bindsInTarget, true)) //, VARIABLE_NODE))
         return Btr<ModifiedBoundVTree>();
 
+    // debug print
     printer.print(candidate->begin(), 4);
     printer.print(candidate->original_handle, 4);
 
@@ -608,6 +613,7 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     for_each(bindsInUniversal->begin(), bindsInUniversal->end(), pr2);
     cprintf(4,"target binds:");
     for_each(bindsInTarget->begin(), bindsInTarget->end(), pr2);
+    // ~debug print
 
     Btr<ModifiedBoundVTree> BoundUniversal(new ModifiedBoundVTree(*candidate));
     /// bindsInTarget will later become constraints/pre-bindings of the new BIN.
@@ -623,8 +629,10 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     ///Remove FW_VAR => FW_VAR mappings. WARNING! Potentially goes to infinite loop.
     removeRecursionFromMap<bindingsVTreeT::iterator, vtree::iterator>(bindsCombined->begin(), bindsCombined->end());
 
+    // debug print
     cprintf(4,"\ncombined binds:");
     for_each(bindsCombined->begin(), bindsCombined->end(), pr2);
+    // ~debug print
 
 #if PREVIOUS_IMPLEMENTATION
     /// Previously:
@@ -642,7 +650,9 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
     }
 #endif
 
+    // debug print
     printer.print(BoundUniversal->begin(), 4);
+    // ~debug print
 
 #if PREVIOUS_IMPLEMENTATION
     /// Previously:
@@ -661,8 +671,11 @@ Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
 
     BoundUniversal->bindings = bindsCombined;
 
+    // debug print
     cprintf(4,"\nresult binds:");
-    for_each(BoundUniversal->bindings->begin(), BoundUniversal->bindings->end(), pr2);
+    for_each(BoundUniversal->bindings->begin(), BoundUniversal->bindings->end(),
+             pr2);
+    // ~debug print
 
     return BoundUniversal;
 }
