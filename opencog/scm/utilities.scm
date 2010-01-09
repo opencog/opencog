@@ -96,6 +96,27 @@
 	)
 )
 
+; --------------------------------------------------------------------
+; delete-type -- delete all atoms of type 'atom-type'
+;
+; If any atoms of that type have incoming links, those links will be
+; deleted, and so on recursively.
+(define (delete-type atom-type)
+    (cog-map-type
+        (lambda (x) (cog-delete-recursive x) #f)
+        atom-type
+    )
+)
+
+; --------------------------------------------------------------------
+; clear -- delete all atoms in the atomspace
+(define (clear)
+    (for-each 
+		delete-type
+		(cog-get-types)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ;
 ; cog-get-atoms atom-type
