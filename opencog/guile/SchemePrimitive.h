@@ -51,6 +51,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		union
 		{
 			bool (T::*b_hi)(Handle, int);
+			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			const std::string& (T::*s_s)(const std::string&);
@@ -61,6 +62,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum 
 		{
 			B_HI,  // return boolean, take handle and int
+			H_HI,  // return handle, take handle and int
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
 			S_S,   // return string, take string
@@ -78,6 +80,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					int i = scm_to_int(scm_cadr(args));
 					bool b = (that->*method.b_hi)(h, i);
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
+					break;
+				}
+				case H_HI:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					int i = scm_to_int(scm_cadr(args));
+					Handle rh = (that->*method.h_hi)(h,i);
+					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case H_H:
@@ -160,6 +170,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
+		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
@@ -196,6 +207,7 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
+DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 
 

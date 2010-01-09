@@ -67,10 +67,10 @@ private:
 
     /**
      * That method is used to wrapped in a scheme function.
-     * It calls infer, returns true if the TV conclusion has changed
-     * false otherwise.
+     * It calls infer, returns the Handle of the resulting atom if the
+     * inference is successful, or the undefined Handle otherwise.
      */
-    bool pln_bc(Handle h, int steps);
+    Handle pln_bc(Handle h, int steps);
 
     /**
      * That method is used to wrapped in a scheme function.
@@ -125,8 +125,9 @@ namespace pln {
  * number of steps performed
  * @param setTarget If true, the BIT created here will be/replace the one
  * used with the 'pln' cogserver command.
+ * @return The (normal) handle of the result.
  */
-void infer(Handle h, int &steps, bool setTarget);
+Handle infer(Handle h, int &steps, bool setTarget);
 
 /**
  * that function apply a PLN inference rule given its name and its premises

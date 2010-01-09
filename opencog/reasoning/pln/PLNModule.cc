@@ -179,23 +179,13 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
 /**
  * Specify the target Atom for PLN backward chaining inference.
  * Creates a new BIT for that Atom.
- * Runs ssteps steps of searching through the BIT.
+ * Runs steps steps of searching through the BIT.
  * Currently you can also use the cogserver commands on the resulting
  * BIT.
  */
-bool PLNModule::pln_bc(Handle h, int steps)
+Handle PLNModule::pln_bc(Handle h, int steps)
 {
-    Atom *a = TLB::getAtom(h);
-    // We need to make a copy. Wish I could do this on stack ...
-    TruthValue *t = a->getTruthValue().clone();
-
-    opencog::pln::infer(h, steps, true);
-
-    // Return true only if the truth value changed, else return false.
-    bool rc = (*t != a->getTruthValue());
-
-    delete t;
-    return rc;
+    return infer(h, steps, true);
 }
 
 Handle PLNModule::pln_ar(const std::string& ruleName,
@@ -219,7 +209,7 @@ void opencog::pln::setTarget(Handle h) {
 }
 #endif
 
-void opencog::pln::infer(Handle h, int &steps, bool setTarget)
+Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
 {
     // Used by this function, and, if setTarget is true, assigned to the
     // corresponding state variables used by the PLN commands.
@@ -255,13 +245,28 @@ void opencog::pln::infer(Handle h, int &steps, bool setTarget)
         state_ = Bstate_.get();
     }
 
-    state_->infer(steps, 0.000001f, 1.00f); //, 0.000001f, 0.01f);
+    set<VtreeProvider*> result;
+    pHandle eh;
+    vhpair vhp;
+    Handle ret = Handle::UNDEFINED;
+
+    result = state_->infer(steps, 0.000001f, 1.00f); //, 0.000001f, 0.01f);
     state_->printResults();
+
+    eh = (result.empty() ? PHANDLE_UNDEFINED :
+                 _v2h(*(*result.rbegin())->getVtree().begin()));
+
+    if (eh != PHANDLE_UNDEFINED ) {
+        vhp = ASW()->fakeToRealHandle(eh);
+        ret = vhp.first;
+    }
 
     if (setTarget) {
         Bstate = Bstate_;
         state = state_;
     }
+    
+    return ret;
 }
 
 Handle opencog::pln::applyRule(const string& ruleName,
