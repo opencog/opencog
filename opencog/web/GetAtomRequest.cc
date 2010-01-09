@@ -192,9 +192,9 @@ void GetAtomRequest::generateProcessingGraph(Handle h)
 std::string GetAtomRequest::getHTMLHeader()
 {
     std::ostringstream oss;
-    oss << "<script language=\"javascript\" src=\"processing.js\">"
+    oss << "<script language=\"javascript\" src=\"../processing.js\">"
         "</script>" << std::endl;
-    oss << "<script language=\"javascript\" src=\"init.js\">"
+    oss << "<script language=\"javascript\" src=\"../init.js\">"
         "</script>" << std::endl;
     return oss.str();
 }

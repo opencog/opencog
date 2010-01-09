@@ -1,5 +1,5 @@
 /*
- * opencog/rest/RESTModule.h
+ * opencog/rest/WebModule.h
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,23 +22,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_REST_MODULE_H
-#define _OPENCOG_REST_MODULE_H
+#ifndef _OPENCOG_WEB_MODULE_H
+#define _OPENCOG_WEB_MODULE_H
 
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
 #include "mongoose.h"
-#include <opencog/rest/GetAtomRequest.h>
-#include <opencog/rest/GetListRequest.h>
-#include <opencog/rest/ServerRequestWrapper.h>
+#include <opencog/web/GetAtomRequest.h>
+#include <opencog/web/GetListRequest.h>
+#include <opencog/web/ServerRequestWrapper.h>
 
-#define PATH_PREFIX "/rest/0.2"
+#define REST_PATH_PREFIX "/rest/0.2"
+#define UI_PATH_PREFIX "/opencog"
 
 namespace opencog
 {
 
-class RESTModule : public Module
+class WebModule : public Module
 {
 
 private:
@@ -55,10 +56,12 @@ private:
     std::string serverAddress;
 
     // Register AtomSpace API requests. We can't directly access the AtomSpace
-    // due to the REST Http server running in it's own set of threads.
+    // due to the Web Http server running in it's own set of threads.
     Factory<GetAtomRequest, Request> getAtomFactory;
     Factory<GetListRequest, Request> getListFactory;
 
+    void setupURIsForREST();
+    void setupURIsForUI();
 public:
 
     static const unsigned int DEFAULT_PORT = 17034;
@@ -71,12 +74,12 @@ public:
     static const char* html_footer;
 
     static inline const char* id() {
-        static const char* _id = "opencog::RESTModule";
+        static const char* _id = "opencog::WebModule";
         return _id;
     }
 
-    RESTModule();
-    virtual ~RESTModule();
+    WebModule();
+    virtual ~WebModule();
     virtual void init  (void);
     
     void setupURIs();
@@ -91,4 +94,4 @@ public:
 
 }  // namespace
 
-#endif // _OPENCOG_REST_MODULE_H
+#endif // _OPENCOG_WEB_MODULE_H

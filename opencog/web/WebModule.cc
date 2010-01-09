@@ -1,5 +1,5 @@
 /*
- * opencog/rest/RESTModule.cc
+ * opencog/rest/WebModule.cc
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RESTModule.h"
+#include "WebModule.h"
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
@@ -33,40 +33,41 @@
 #include <boost/mem_fn.hpp>
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace opencog;
 
-RESTModule *rest_mod;
+WebModule *rest_mod;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()   { return RESTModule::id(); }
+extern "C" const char* opencog_module_id()   { return WebModule::id(); }
 extern "C" Module*     opencog_module_load() {
-    rest_mod = new RESTModule();
+    rest_mod = new WebModule();
     return rest_mod;
 }
 extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
-const char* RESTModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
+const char* WebModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
 
 //! @todo create a function to generate header
-const char* RESTModule::open_html_header = "HTTP/1.1 200 OK\r\n"
+const char* WebModule::open_html_header = "HTTP/1.1 200 OK\r\n"
     "content-Type: text/html\r\n\r\n"
     "<html><head>";
-const char* RESTModule::close_html_header = "</head><body>";
+const char* WebModule::close_html_header = "</head><body>";
 
-const char* RESTModule::html_refresh_header = 
+const char* WebModule::html_refresh_header = 
     "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">";
 
-const char* RESTModule::html_footer = "</body></html>\r\n";
+const char* WebModule::html_footer = "</body></html>\r\n";
 
-RESTModule::RESTModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
+WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {
-    logger().debug("[RESTModule] constructor");
+    logger().debug("[WebModule] constructor");
 
-    if (config().has("REST_PORT"))
-        _port = config().get_int("REST_PORT");
-    if (config().has("REST_SERVER"))
-        serverAddress = config().get("REST_SERVER");
+    if (config().has("Web_PORT"))
+        _port = config().get_int("Web_PORT");
+    if (config().has("Web_SERVER"))
+        serverAddress = config().get("Web_SERVER");
 
     // Register all requests with CogServer
     CogServer& cogserver = static_cast<CogServer&>(server());
@@ -77,22 +78,47 @@ RESTModule::RESTModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADD
 
 }
 
-RESTModule::~RESTModule()
+WebModule::~WebModule()
 {
     rest_mod = NULL;
-    logger().debug("[RESTModule] destructor");
+    logger().debug("[WebModule] destructor");
     //CogServer& cogserver = static_cast<CogServer&>(server());
     mg_stop(ctx);
 }
 
-void RESTModule::init()
+static const char* DEFAULT_WEB_PATH[] =
 {
-    logger().debug("[RESTModule] init");
+    DATADIR,
+    "../opencog/web", // For running from bin dir that's in root of src
+#ifndef WIN32
+    "/usr/share/opencog/www",
+    "/usr/local/share/opencog/www",
+#endif // !WIN32
+    NULL
+};
+
+void WebModule::init()
+{
+    logger().debug("[WebModule] init");
     // Set the port that the embedded mongoose webserver will listen on.
     std::stringstream port_str;
     port_str << _port;
     ctx = mg_start();
     mg_set_option(ctx, "ports", port_str.str().c_str());
+    // Turn on admin page
+    //mg_set_option(ctx, "admin_uri", "/admin/");
+    // Find and then set path for web resource files
+    int i = 0;
+    for (; DEFAULT_WEB_PATH[i] != NULL; ++i) {
+        boost::filesystem::path webPath(DEFAULT_WEB_PATH[i]);
+        webPath /= "processing.js";
+        if (boost::filesystem::exists(webPath)) {
+            break;
+        }
+    }
+    mg_set_option(ctx, "root", DEFAULT_WEB_PATH[i]);
+    // Turn off directory listing
+    mg_set_option(ctx, "dir_list", "no");
     // Set up the urls
     setupURIs();
 }
@@ -104,28 +130,50 @@ void viewListPage( struct mg_connection *conn,
 void makeRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
 
-void RESTModule::setupURIs()
+void WebModule::setupURIs()
 {
-    // Support both "atom/UUID" and "atom?handle=UUID"
-    mg_set_uri_callback(ctx, PATH_PREFIX "/atom/*", viewAtomPage, NULL);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/atom", viewAtomPage, NULL);
-    mg_set_uri_callback(ctx, "/atom", viewAtomPage, NULL);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/list", viewListPage, NULL);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/list/*", viewListPage, NULL);
-    mg_set_uri_callback(ctx, PATH_PREFIX "/request/*", makeRequest, NULL);
+    setupURIsForREST();
+    setupURIsForUI();
 }
 
-void RESTModule::return400(mg_connection* conn, const std::string& message)
+void WebModule::setupURIsForUI()
+{
+    // Support both "atom/UUID" and "atom?handle=UUID"
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/atom/*", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/atom", viewAtomPage, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list", viewListPage, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list/*", viewListPage, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/request/*", makeRequest, NULL);
+}
+
+void WebModule::setupURIsForREST()
+{
+    static char rest_str[] = "rest";
+    // atom/type/* support GET atoms of type.
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/type/*", viewListPage,
+            rest_str);
+    // atom/ support GET/PUT/POST == get info/create/create
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/", viewListPage,
+            rest_str);
+    // atom/* support GET, get atom info
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/*", viewAtomPage,
+            rest_str);
+    // server/request/request_name, POST
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/server/request/*", makeRequest,
+            rest_str);
+}
+
+void WebModule::return400(mg_connection* conn, const std::string& message)
 {
     mg_printf(conn, "HTTP/1.1 400 %s\r\n", message.c_str());
 }
 
-void RESTModule::return404(mg_connection* conn)
+void WebModule::return404(mg_connection* conn)
 {
     mg_printf(conn, "HTTP/1.1 404 Not found.\r\n");
 }
 
-void RESTModule::return500(mg_connection* conn, const std::string& message)
+void WebModule::return500(mg_connection* conn, const std::string& message)
 {
     mg_printf(conn, "HTTP/1.1 500 %s\r\n", message.c_str());
 }
@@ -170,7 +218,7 @@ void viewAtomPage( struct mg_connection *conn,
 
     Request* request = cogserver.createRequest("get-atom");
     if (request == NULL) {
-        RESTModule::return500( conn, std::string("unknown request"));
+        WebModule::return500( conn, std::string("unknown request"));
         return;
     }
     // Prevent CogServer from deleting this request
@@ -188,7 +236,7 @@ void viewAtomPage( struct mg_connection *conn,
     //! @todo replace with configured server
     std::stringstream result;
     std::string serverAdd("http://localhost:17034");
-    serverAdd += PATH_PREFIX;
+    serverAdd += UI_PATH_PREFIX;
     
     // Check for refresh option
     //! @todo make refresh time specifiable on the page.
@@ -200,11 +248,11 @@ void viewAtomPage( struct mg_connection *conn,
             break;
         }
     }
-    result << RESTModule::open_html_header;
+    result << WebModule::open_html_header;
     if (refresh)
-        result << RESTModule::html_refresh_header;
+        result << WebModule::html_refresh_header;
     result << gar->getHTMLHeader();
-    result << RESTModule::close_html_header;
+    result << WebModule::close_html_header;
 
     result << gar->getHTML(serverAdd).c_str();
 //mg_printf(conn, result.str().c_str());
@@ -223,7 +271,7 @@ void viewAtomPage( struct mg_connection *conn,
     if (refresh) {
         result << "<br/><small>Page will refresh every 5 seconds</small>";
     }
-    result << RESTModule::html_footer;
+    result << WebModule::html_footer;
     mg_printf(conn, result.str().c_str(), ri->uri, ri->query_string);
 
     // Clean up
@@ -238,7 +286,7 @@ void viewListPage( struct mg_connection *conn,
     CogServer& cogserver = static_cast<CogServer&>(server());
     Request* request = cogserver.createRequest("get-list");
     if (request == NULL) {
-        RESTModule::return500( conn, std::string("unknown request"));
+        WebModule::return500( conn, std::string("unknown request"));
         return;
     }
     // Get list parameters from URL if they exist
@@ -264,7 +312,7 @@ void viewListPage( struct mg_connection *conn,
 
     std::stringstream result;
     std::string serverAdd("http://localhost:17034");
-    serverAdd += PATH_PREFIX;
+    serverAdd += UI_PATH_PREFIX;
     
     // Check for refresh option
     //! @todo make refresh time specifiable on the page.
@@ -276,10 +324,10 @@ void viewListPage( struct mg_connection *conn,
             break;
         }
     }
-    result << RESTModule::open_html_header;
+    result << WebModule::open_html_header;
     if (refresh)
-        result << RESTModule::html_refresh_header;
-    result << RESTModule::close_html_header;
+        result << WebModule::html_refresh_header;
+    result << WebModule::close_html_header;
 
     result << glr->getHTML(serverAdd).c_str();
 //mg_printf(conn, result.str().c_str());
@@ -298,7 +346,7 @@ void viewListPage( struct mg_connection *conn,
     if (refresh) {
         result << "<br/><small>Page will refresh every 5 seconds</small>";
     }
-    result << RESTModule::html_footer;
+    result << WebModule::html_footer;
     mg_printf(conn, result.str().c_str(), ri->uri, ri->query_string);
 
     // Clean up
@@ -308,6 +356,6 @@ void viewListPage( struct mg_connection *conn,
 
 void makeRequest ( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
-{
-    rest_mod->requestWrapper.handleRequest(conn, ri, data);
-}
+{ rest_mod->requestWrapper.handleRequest(conn, ri, data); }
+
+

@@ -32,7 +32,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 
-#include "RESTModule.h"
+#include "WebModule.h"
 
 using namespace opencog;
 
@@ -84,11 +84,9 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
 
         //! @todo replace with configured server
         std::stringstream result;
-        std::string serverAdd("http://localhost:17034");
-        serverAdd += PATH_PREFIX;
 
-        result << RESTModule::open_html_header;
-        result << RESTModule::close_html_header;
+        result << WebModule::open_html_header;
+        result << WebModule::close_html_header;
         result << "Result of running request '" << requestName << "':<br/>";
         result << "<pre>";
 
@@ -99,7 +97,7 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
         result << noanglebrackets;
 
         result << "</pre>";
-        result << RESTModule::html_footer;
+        result << WebModule::html_footer;
         mg_printf(conn, result.str().c_str());
 
     } else {

@@ -2,8 +2,8 @@
 ##${GUILE_INCLUDE_DIRS}
 #)
 
-ADD_LIBRARY (rest SHARED
-    RESTModule
+ADD_LIBRARY (ocweb SHARED
+    WebModule
     GetAtomRequest
     GetListRequest
     ServerRequestWrapper
@@ -14,8 +14,14 @@ ADD_LIBRARY (rest SHARED
     #NavigationMapper
 )
 
-TARGET_LINK_LIBRARIES(rest
+TARGET_LINK_LIBRARIES(ocweb
     server
+)
+
+INSTALL(FILES
+    init.js
+    processing.js
+    DESTINATION "${DATADIR}/www"
 )
 
 # TODO: take mongoose flags from Makefile for individual platforms. These are
