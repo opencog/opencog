@@ -42,7 +42,9 @@ Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter)
 FW_VARs cannot be replaced with children structs.
 Links are assumed not inheritable either.
     */    
-    // That prevents an assert error in BITNode::tryClone() -- JaredW
+    // Skipping links prevents an assert error in BITNode::tryClone();
+    // skipping FW_VARS is required to avoid trying to replace FW_VARS already
+    // created by this Rule, and/or a crash. -- JaredW
     
     if (outh->begin().number_of_children() != 2
         ||  asw->isSubType(boost::get<pHandle>(*outh->begin()), FW_VARIABLE_NODE))
@@ -68,8 +70,9 @@ Links are assumed not inheritable either.
 /*      puts("-");
         printAtomTree(outh,0,0);
 */
-        // if this vertex is a link type, skip it
-        if ( asw->isSubType(_v2h(*i), LINK) )
+        // if this vertex is a link type or FW_VAR, skip it
+        if ( asw->isSubType(_v2h(*i), LINK) || asw->isSubType(_v2h(*i),
+             FW_VARIABLE_NODE))
             continue;
 
         // Put the FW_VAR (child) into the templated atom
