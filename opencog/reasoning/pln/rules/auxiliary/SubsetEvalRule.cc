@@ -38,7 +38,7 @@ const strength_t MIN_MEMBERS_STRENGTH = 0.000001;
 const strength_t MIN_MEMBERS_COUNT = 1;
 
 SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
-    : Rule(asw, false, false, "SubsetEvalRule"), _asw(asw)
+    : Rule(asw, false, true, "SubsetEvalRule"), _asw(asw)
 {
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
@@ -47,6 +47,8 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
 
 Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
                                             bool& overrideInputFilter) const {
+    std::cout << "SubsetEvalRule::o2iMetaExtra" << std::endl;
+
     if(!_asw->inheritsType((Type)_v2h(*outh->begin()), SUBSET_LINK))
         return setOfMPs();
 
