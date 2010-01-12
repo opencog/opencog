@@ -433,7 +433,7 @@ void BITNode::create()
     tlog(-1, "New BITnode was created to prove:\n");
     rawPrint(*bound_target, bound_target->begin(),-1);
 
-    tlog(-1, "This new InferenceState needs %d args:\n", args.size());
+    tlog(-1, "This new BITnode needs %d args:\n", args.size());
     for (uint i = 0; i < args.size(); i++)
         rawPrint(*args[i],args[i]->begin(),-1);
 
@@ -969,7 +969,7 @@ bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bind
         }
         else
         {
-            tlog(-2, "Indirect producer expanding: %s\n", new_rule->name.c_str());
+            tlog(-2, "Expanding Composer: %s\n", new_rule->name.c_str());
             rawPrint(*_target, _target->begin(), 2);
 
             if (!obeysSubtreePolicy(new_rule, _target))
