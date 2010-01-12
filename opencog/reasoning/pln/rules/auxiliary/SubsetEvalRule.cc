@@ -47,8 +47,6 @@ SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
 
 Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
                                             bool& overrideInputFilter) const {
-    std::cout << "SubsetEvalRule::o2iMetaExtra" << std::endl;
-
     if(!_asw->inheritsType((Type)_v2h(*outh->begin()), SUBSET_LINK))
         return setOfMPs();
 

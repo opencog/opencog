@@ -31,8 +31,10 @@ namespace opencog { namespace pln {
 using boost::assign::list_of;
 
 IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw)
-    : Rule(_asw, false, false, "IntensionalInheritanceRule"), sser(_asw)
+    : Rule(_asw, false, true, "IntensionalInheritanceRule"), sser(_asw)
 {
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
 }
 
 Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {

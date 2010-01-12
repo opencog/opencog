@@ -5,9 +5,9 @@
 ; as well as NOT Lion (resp. NOT Tiger) and the same properties.
 ; It is used to test IntensionalInhertianceRule
 ;
-; define concepts
-(define lion (ConceptNode "Lion"))
-(define tiger (ConceptNode "Tiger"))
+; define concepts. Note that PLN ignores atoms with (0,0) truth values.
+(define lion (ConceptNode "Lion" (stv 0.5 0.999)))
+(define tiger (ConceptNode "Tiger" (stv 0.5 0.999)))
 ; define properties
 (define mammal (ConceptNode "Mammal"))
 (define carnivor (ConceptNode "Carnivor"))
@@ -40,3 +40,5 @@
 (SubsetLink (stv 0.15 dc) (NotLink tiger) striped)
 (SubsetLink (stv 0.3 dc) (NotLink tiger) predator)
 (SubsetLink (stv 0.37 dc) (NotLink tiger) facingExtincion)
+
+
