@@ -48,19 +48,18 @@ public:
 
     TruthValue** formatTVarray(const std::vector<Vertex>& premises,
                                int* newN) const;
-    
+
     BoundVertex compute(const vector<Vertex>& premiseArray,
                         pHandle CX = NULL,
                         bool fresh = true) const;
 
-    //TODO: note sure it is enough
     bool validate2(MPs& args) const {
         return true;
     }
 
     NO_DIRECT_PRODUCTION;
 };
- 
+
 
 }} // namespace opencog { namespace pln {
 #endif // SUBSETEVALRULE_H

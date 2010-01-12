@@ -40,6 +40,8 @@ const strength_t MIN_MEMBERS_COUNT = 1;
 SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw)
     : Rule(asw, false, false, "SubsetEvalRule"), _asw(asw)
 {
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
 }
 
 
@@ -53,7 +55,7 @@ Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
     Rule::MPs ret;
     ret.push_back(BBvtree(new BoundVTree(outh->begin(head_it))));
     ret.push_back(BBvtree(new BoundVTree(outh->last_child(head_it))));
-            
+
     overrideInputFilter = true;
 
     return makeSingletonSet(ret);
@@ -62,7 +64,7 @@ Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
 meta SubsetEvalRule::i2oType(const vector<Vertex>& h_vec) const
 {
     OC_ASSERT(h_vec.size()==2);
-    return meta(new tree<Vertex>(mva((pHandle)SUBSET_LINK, 
+    return meta(new tree<Vertex>(mva((pHandle)SUBSET_LINK,
                                      vtree(h_vec[0]),
                                      vtree(h_vec[1])
                                      )));
@@ -106,7 +108,7 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
             used.insert(*h_ml_super_cit);
         }
     }
-    
+
     foreach(const pHandle& h_ml_super, mlSetSuper) {
         //std::cout << _asw->pHandleToString(h_ml_super) << std::endl;
         if (!STLhas(used, h_ml_super)) {
@@ -134,7 +136,7 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
 
     std::copy(tvsSub.begin(), tvsSub.end(), tvs);
     std::copy(tvsSuper.begin(), tvsSuper.end(), tvs + N);
-    
+
     return tvs;
 }
 
