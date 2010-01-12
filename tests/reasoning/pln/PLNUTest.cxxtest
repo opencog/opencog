@@ -756,6 +756,7 @@ public:
                 "../",
                 "../../",
                 "../../../",
+                "../../../..",
                 NULL
         };
         cogserver().loadSCMModules(paths);

@@ -537,8 +537,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 #ifdef HAVE_GUILE
     std::vector<std::string>::const_iterator it;
-    for (it = scm_modules.begin();
-         it != scm_modules.end(); ++it)
+    for (it = scm_modules.begin(); it != scm_modules.end(); ++it)
     {
         int rc = 2;
         const char * mod = (*it).c_str();
