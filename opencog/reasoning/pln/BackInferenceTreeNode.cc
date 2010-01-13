@@ -470,16 +470,15 @@ rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 
         setTarget(_target, _pre_bindings);
 
-        if (asw->isSubType(_v2h(*bound_target->begin()), LINK)
-            && (
-                (!asw->isType(_v2h(*bound_target->begin())) &&
-                 !asw->getArity(_v2h(*bound_target->begin())))
-                ||
-                (asw->isType(_v2h(*bound_target->begin())) &&
-                 !bound_target->number_of_children(bound_target->begin()))
+        vtree::iterator rbt_it = bound_target->begin();
+        bool rbt_isType = asw->isType(_v2h(*rbt_it));
+
+        if (asw->isSubType(_v2h(*rbt_it), LINK)
+            && ((!rbt_isType && !asw->getArity(_v2h(*rbt_it)))
+                || (rbt_isType && !bound_target->number_of_children(rbt_it))
                 )
             ) {
-            rawPrint(*bound_target, bound_target->begin(),-10);
+            rawPrint(*bound_target, rbt_it, -10);
             assert(0);
         }
 
