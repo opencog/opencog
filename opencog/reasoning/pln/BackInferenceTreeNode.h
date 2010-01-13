@@ -77,6 +77,11 @@ public:
 
 struct BITNodeFitnessCompare : public std::binary_function<BITNode*, BITNode*, bool>
 {
+    /**
+     * If lhs and rsh and almost equal (that is their differences is below
+     * a certain epsilon) then it returns lhs > rsh
+     * otherwise it returns lhs->fitness() > rhs->fitness()
+     */
     bool operator()(BITNode* lhs, BITNode* rhs) const;
 };
 
