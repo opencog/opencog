@@ -234,6 +234,8 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
         
         Btr<vtree> target_(new vtree(fakeHandle));
         
+        // The BIT uses real Links as a cue that it has already found the link,
+        // so it is necessary to make them virtual
         Btr<vtree> target = ForceAllLinksVirtual(target_);
 
         bool recordingTrails = config().get_bool("PLN_RECORD_TRAILS");
