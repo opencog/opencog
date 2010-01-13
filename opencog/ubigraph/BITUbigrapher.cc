@@ -171,9 +171,10 @@ void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode>
             status = ubigraph_new_edge ( node_id, arg_id );
             if ( status == -1 ) {
                 logger().error ( "Attaching arg: Status was %d", status );
+            } else {
+                ubigraph_set_edge_attribute ( status, "oriented", "true" );
+                ubigraph_set_edge_attribute ( status, "arrow", "true" );
             }
-            ubigraph_set_edge_attribute ( status, "oriented", "true" );
-            ubigraph_set_edge_attribute ( status, "arrow", "true" );
 
             // for each of its children
             foreach ( const ParametrizedBITNode& child, children[i] ) {
