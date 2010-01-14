@@ -35,7 +35,7 @@ using std::set;
 namespace opencog { namespace pln {
 
 CrispTheoremRule::CrispTheoremRule(AtomSpaceWrapper *_asw)
-: Rule(_asw, true, true, "RewritingRule")
+: Rule(_asw, true, true, "CrispTheoremRule")
 {
     // SHOULD NOT BE USED FOR FORWARD INFERENCE!
     // ... but why not? (Joel)
