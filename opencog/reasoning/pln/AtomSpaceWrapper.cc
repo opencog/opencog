@@ -871,7 +871,7 @@ void AtomSpaceWrapper::makeCrispTheorems() {
     LOG(4,"Rebuilding list of crisp theorems");
     CrispTheoremRule::thms.clear();
     LOG(4,"Cleared list of crisp theorems");
-    if (archiveTheorems) {    
+    if (archiveTheorems) {
         Btr<set<pHandle> > links = getHandleSet(IMPLICATION_LINK, "");
         foreach(pHandle h, *links)
         {

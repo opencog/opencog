@@ -52,7 +52,7 @@ public:
         return Rule::setOfMPs(); //No support (yet)
     }
     
-    //Domain should be inferred instead from the premis ConceptNodes!!!
+    //Domain should be inferred instead from the premise ConceptNodes!!!
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
                         pHandle CX = PHANDLE_UNDEFINED,

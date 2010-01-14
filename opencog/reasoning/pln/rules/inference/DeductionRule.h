@@ -33,7 +33,8 @@ class DeductionRule : public GenericRule<DeductionFormula>
     //DeductionFormula f;
     Type InclusionLink;
 
-    // @togo I don't understand why it is need but without that it does not compile
+    //! @todo I don't understand why it is needed but without this it does not
+    //! compile
     AtomSpaceWrapper* asw;
 
     meta i2oType(const std::vector<Vertex>& h) const
@@ -45,7 +46,7 @@ class DeductionRule : public GenericRule<DeductionFormula>
         assert(asw->getOutgoing(boost::get<pHandle>(h[0]),0) != PHANDLE_UNDEFINED);
         assert(asw->getOutgoing(boost::get<pHandle>(h[1]),1) != PHANDLE_UNDEFINED);
 	
-        return meta(new tree<Vertex>(mva((pHandle)InclusionLink, 
+        return meta(new vtree(mva((pHandle)InclusionLink, 
                                          vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[0]),0))),
                                          vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
                                          )));
