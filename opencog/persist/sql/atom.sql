@@ -50,6 +50,8 @@ CREATE TABLE Edges (
 	dst_uuid  INT,
 	pos INT
 );
+CREATE INDEX inidx ON Edges(src_uuid);
+CREATE INDEX outidx ON Edges(dst_uuid);
 
 -- -----------------------------------------------------------
 -- Table associating type names to stored integer values. The list of

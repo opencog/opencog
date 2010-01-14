@@ -60,7 +60,7 @@ class AtomStorage
 		void do_store_single_atom(const Atom *, Handle, int);
 
 		std::string oset_to_string(const std::vector<Handle>&, int);
-		void storeOutgoing(Atom *, Handle);
+		void storeOutgoing(const Atom *, Handle);
 		void getOutgoing(std::vector<Handle> &, Handle);
 		bool store_cb(const Atom *);
 		unsigned long load_count;

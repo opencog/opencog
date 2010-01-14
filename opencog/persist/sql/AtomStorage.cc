@@ -173,7 +173,7 @@ class AtomStorage::Response
 			// printf ("%s = %s\n", colname, colvalue);
 			if (!strcmp(colname, "dst_uuid"))
 			{
-				dst = strtoul(colvalue, (char **) NULL, 10);
+				dst = Handle(strtoul(colvalue, (char **) NULL, 10));
 			}
 			else if (!strcmp(colname, "pos"))
 			{
@@ -313,7 +313,7 @@ class AtomStorage::Outgoing
  * Handle h must be the handle for the atom; its passed as an arg to
  * avoid having to look it up.
  */
-void AtomStorage::storeOutgoing(Atom *atom, Handle h)
+void AtomStorage::storeOutgoing(const Atom *atom, Handle h)
 {
 	Outgoing out(db_conn, h);
 
