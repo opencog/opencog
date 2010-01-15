@@ -141,6 +141,9 @@ bool unifiesTo(AtomSpaceWrapper* asw,
                std::map<pHandle, vtree>& Rbindings,
                bool allow_rhs_binding, Type VarType = FW_VARIABLE_NODE);
 
+//! Check whether lhs_t and rhs_t are the same, allowing different names for
+//! FWVariableNodes. Does not allow actually substituting an FWVariable with a
+//! normal Atom.
 bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw,
                                  const vtree & lhs_t, const vtree & rhs_t,
                                  std::map<pHandle, pHandle>& bindings);
@@ -544,9 +547,6 @@ template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
 struct atom;
-
-//! @todo Not defined anywhere, but probably should be implemented.
-//void unifiesWithVariableChangeTo_TEST();
 
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
