@@ -86,6 +86,7 @@ fully populated; this makes it hard to leave some atoms on disk while
 others are in RAM.  These issues need to be resolved for *any* persistent
 back-end, and are not specific to this one.
 
+See also: the UUID collision issue, discussed below.
 
 Caveats:
 --------
@@ -505,6 +506,49 @@ does *not* occur when the data is piped in more slowly,i.e. at the same
 rate that opencog processes it. Alternately, the problem may be a memory
 leak in CSockets; I think this is the true culprit, but that's not yet
 clear.
+
+
+UUID Collision
+--------------
+Suppose a database contains atoms with uuids from 1 to 1000.  Suppose a
+user starts opencog, creates 250 atoms (thus using uuids from 1 to 251),
+and then opens the database.  Unless the atoms that the user created
+are *identical* to those with uuids 1..251 in the DB, then there will
+be a uuid clash with the current design.
+
+There are several possible solutions:
+
+A) Do nothing. (i.e. keep things the way they are today.)
+
+B) Compare range of uuids currently issued in atomspace to the range in
+   the DB. If the ranges overlap, then print error and disallow opening
+   of the DB.  For above scenario, 1..251 overlaps 1..1000 so there's
+   an error and nothing is loaded.
+
+C) Get max uuid used in atomspace, and call this the "uuid thunk".  
+   When loading an atom from the DB, add this thunk to the UUID from
+   the DB, and load the resulting atom into atomspace.  When storing
+   atoms into the DB, subtract this thunk.  For above example, the 
+   thunk is 251 so the DB atoms get mapped to the range 251 to 1251 in
+   atomspace.
+
+I'm about to argue that A is best :-)
+
+But first: Note that, in the above, "DB" can mean "persistant store" 
+(file or sql or other) OR some other remote, running instance of 
+opencog with whom we are sharing atoms.
+
+The problem with both B and C is that they fail if one wants to use two 
+different DB's containing some of the same atoms.  So, for example, if
+one loaded a list of 251 words from a file (the 1..251 range) and then 
+opened a DB having the same 251 words with the same uuids appearing as 
+a subrange of the 1..1000, then both B & C would fail.
+
+The problem with A is that uuid clashes can occur.
+
+My gut instinct is that B & C are too clever for their own pants, and
+will only be regretted later on. By contrast, A is simple and can be
+managed as long as one has some fore-thought and planning.
 
 
 TODO
