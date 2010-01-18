@@ -41,14 +41,14 @@ bool RequestWrap::execute(void)
 
 // For the non-pure virtual functions..
 
-void RequestWrap::send(const std::string& msg) const
+void RequestWrap::send(const std::string& msg)
 {
     if (override o = this->get_override("send"))
         o(msg);
 
     Request::send(msg);
 }
-void RequestWrap::default_send(const std::string& msg) const
+void RequestWrap::default_send(const std::string& msg)
 {
     this->Request::send(msg);
 }
