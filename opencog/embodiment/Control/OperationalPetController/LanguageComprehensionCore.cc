@@ -107,7 +107,34 @@ void LanguageComprehension::answerLatestQuestion( void )
     if ( answer == "#truth-query" ) {
         // yes/no question
         HandleSeq elements = getActivePredicateArguments( "latestQuestionFrames" );
-        finalSentence = ( elements.size( ) > 0 ? "Yes" : "No" );
+        if ( elements.size( ) > 0 ) {
+            finalSentence = "Yes";
+        } else {
+            opencog::AtomSpace& as = agent.getAtomSpace( );
+            HandleSeq link(2);
+            link[0] = as.addNode( PREDICATE_NODE, "unknownTerm" );
+            link[1] = Handle::UNDEFINED;
+            
+            Type types[] = {PREDICATE_NODE, LIST_LINK };
+            HandleSeq evalLinks;
+            as.getHandleSet( back_inserter(evalLinks),
+                             link, &types[0], NULL, 2, EVALUATION_LINK, false );
+            bool unknownTermFound = false;
+            unsigned int i;
+            for (i = 0; i < evalLinks.size( ); ++i ) {
+                if ( as.getTV( evalLinks[i] ).isNullTv( ) || as.getTV( evalLinks[i] ).getMean( ) == 0 ) {
+                    continue;                    
+                } // if
+                as.setTV( evalLinks[i], TruthValue::FALSE_TV() );
+                unknownTermFound = true;
+            } // for
+
+            if ( unknownTermFound ) {
+                finalSentence = "Could you be more specific, please?";
+            } else {
+                finalSentence = "No";
+            } // else            
+        } // else
     } else {
         std::string relations = resolveFrames2Relex( );
         // call nlgen using relations

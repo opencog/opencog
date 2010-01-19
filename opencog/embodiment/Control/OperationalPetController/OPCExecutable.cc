@@ -69,11 +69,17 @@ int main(int argc, char *argv[])
         
         server(OPC::createInstance);
         OPC& opc = static_cast<OPC&>(server());
+        // Open database *before* loading modules, since the modules
+        // might create atoms, and we can't have that happen until 
+        // storage is open, as otherwise, there will be handle conflicts.
+        opc.openDatabase();
+
         opc.init(argv[1], "127.0.0.1", portNumber, 
                 PerceptionActionInterface::PAIUtils::getInternalId(argv[1]), 
                 PerceptionActionInterface::PAIUtils::getInternalId(argv[2]), 
                 argv[3], argv[4]);
         
+
         // Load modules specified in config
         opc.loadModules(); 
         const char* config_path[] = {"."};

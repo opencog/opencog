@@ -65,7 +65,7 @@
                    )
                )             
              )
-           (get-seme-nodes wordNode)
+           (get-seme-nodes-using-ontology wordNode)
            )
           (ListLink 
            (append (list wordInstanceNode ) semeNodes )     
@@ -113,10 +113,10 @@
                       )
                   )
                 )          
-              (get-seme-nodes groundWN)
+              (get-seme-nodes-using-ontology groundWN)
               )
              )
-           (get-seme-nodes figureWN)
+           (get-seme-nodes-using-ontology figureWN)
            )
 
           (ListLink 
@@ -155,7 +155,7 @@
                    )               
                )
              )
-           (get-seme-nodes wordNode)
+           (get-seme-nodes-using-ontology wordNode)
            )          
           (ListLink 
            (append (list wordInstanceNode ) semeNodes )
@@ -504,23 +504,18 @@
 ; Each WordNode can have many SemeNodes attached
 ; to it by a ReferenceLink. This function retrieves
 ; all the SemeNodes attached to a given WordNode
+(define word-node-seme-nodes-cache '())
 (define (get-seme-nodes wordNode)
   ; ReferenceLink
   ;    SemeNode
   ;    WordNode  
-  (let ((validSemeNodes (list)))
-    (map
-     (lambda (refLink)
-       (set! validSemeNodes (append validSemeNodes (list (gar refLink) ) ) )
-       )     
-     (cog-get-link
-      'ReferenceLink
-      'SemeNode
-      wordNode
-      )
+  (fold 
+   (lambda (refLink result)
+     (append result (list (gar refLink) ))
      )
-    validSemeNodes
-    )
+   '()
+   (cog-get-link 'ReferenceLink 'SemeNode wordNode)
+   )
   )
 
 ; Each SemeNode is connected to a node that represents
@@ -608,7 +603,7 @@
              (set! semeNodes (append semeNodes (list (cons strength (list (gar (car groundedSemeNode)) ) ) )))
              (let ((wordNode (get-word-node noun ) ) ) ; else
                (if (not (null? wordNode))
-                   (set! semeNodes (append semeNodes (list (cons strength (get-seme-nodes wordNode)) ) ))
+                   (set! semeNodes (append semeNodes (list (cons strength (get-seme-nodes-using-ontology wordNode)) ) ))
                    ) ; if
                ); let
              ) ; if
@@ -1601,6 +1596,7 @@
         (anaphoricSemeNodeStrength '())
         (groundedRulesCounter '())
         )    
+    (set! word-node-seme-nodes-cache '())
     ; first retrieve all objects, from the latest sentence, to be evaluated
     (map 
      (lambda (win)
@@ -1893,4 +1889,376 @@
    (get-latest-parses)
    )
 
+  )
+
+; Helper functions that receives a list of SenseNodeLinks
+; and return a list containing the SenseNodes positioned
+; at the index 0 in each link
+(define (create-sense-node-list links)
+  (if (null? links)
+      '()
+      (cons (gadr (car links)) (create-sense-node-list (cdr links)))
+      )
+  )
+
+; This function retrieves the current elapsed time in seconds
+; It works in two ways. If nothing is passed as argument
+; it will return the current time. But if another tick was
+; given, it will return the difference between the current
+; and the given one
+(define (get-tick . t)
+  (let* ((now (gettimeofday))
+         (seconds (+ (car now) (/ (cdr now) 1000000.0))))
+    (if (null? t)
+        seconds
+        (- seconds (car t))
+        )
+    )
+  )
+
+; Given a list of WordNodes, it returns a list with two elements
+; 1) an association list with a pair (SenseNode WordNode)
+; 2) a SenseNode list
+(define (get-word-sense-map wordNodes)
+   (fold
+    (lambda (wordNode result)
+      (fetch-incoming-set wordNode)
+      (let ((innerMap
+             (fold
+              (lambda (link elements)
+                (list
+                 (append (car elements) (list (cons (gadr link) wordNode)))
+                 (append (cadr elements) (list (gadr link)))
+                 )
+                )
+              (list '() '())
+              (cog-get-link 'WordSenseLink 'WordSenseNode wordNode)
+              )
+             ))
+        (list
+         (append (car result) (car innerMap))
+         (append (cadr result) (cadr innerMap))
+         )
+        )
+      )
+    (list '() '())
+    wordNodes
+    )
+   )  
+
+; This function makes use of the WordNet ontology
+; to determine if a at least one word node of the given
+; word nodes list is a child of the given parent word node.
+; This function traverses the WordNet ontology, by following
+; the InheritanceLinks and executes inferences of isA type
+; to check the parentage
+; It also has a timeout counter that will stop the current
+; evaluation to avoid performance issues.
+(define (check-parentage parentWordNode wordNodes)
+  (define expandedNodes '())
+  (define inspectedNodes '())
+  (define timeout 5) ; measured in seconds
+  (define startTime (get-tick))
+  (define candidateSenseNodes '())
+
+  (define (create-parent-sense-node-list links referenceNode)
+    (if (null? links)
+        '()
+        (let ((parent (gadr (car links))))
+          (if (not (equal? parent referenceNode))
+              (cons parent (create-parent-sense-node-list (cdr links) referenceNode))
+              (create-parent-sense-node-list (cdr links) referenceNode)
+              )
+          )
+        )
+    )
+
+  (define (inspect-sense-nodes senseNodes)
+    (if (or (null? senseNodes) (> (get-tick startTime) timeout))
+        #f
+        (if (member (car senseNodes) candidateSenseNodes)
+            #t
+            (inspect-sense-nodes (cdr senseNodes))
+            )
+        )
+    )
+
+  (define (inspect-sense-nodes-hierarchy senseNodes)
+    (if (or (null? senseNodes) (> (get-tick startTime) timeout))
+        #f
+        (let ((senseNode (car senseNodes)))
+          (if (member senseNode inspectedNodes)
+              (inspect-sense-nodes-hierarchy (cdr senseNodes))
+              (begin
+                (set! inspectedNodes (append inspectedNodes (list senseNode)))
+                (cond ((not (member senseNode expandedNodes))
+                       (fetch-incoming-set senseNode)
+                       (set! expandedNodes (append expandedNodes (list senseNode)))
+                       )) ; cond
+ 
+                (let* ((links (cog-get-link 'InheritanceLink 'WordSenseNode senseNode))
+                       (parents (create-parent-sense-node-list links senseNode)))
+                  (if (inspect-sense-nodes parents)
+                      senseNode
+                      (inspect-sense-nodes-hierarchy (append (cdr senseNodes) parents))
+                      )
+                  )                
+                )
+              )
+          )
+        )
+    )
+   
+  (cons
+   (if (member parentWordNode wordNodes)
+       parentWordNode
+       (begin
+         (fetch-incoming-set parentWordNode)
+         (set! expandedNodes (append expandedNodes (list parentWordNode)))
+         (set! candidateSenseNodes 
+               (create-sense-node-list
+                (cog-get-link 'WordSenseLink 'WordNode parentWordNode)
+                )
+               )
+
+         (if (null? candidateSenseNodes)
+             #f
+             ; get all sense nodes related to the given wordnodes
+             (let* ((wordSenseMap (get-word-sense-map wordNodes))
+                    (chosenSenseNode (inspect-sense-nodes-hierarchy (cadr wordSenseMap)))
+                    )
+               (if chosenSenseNode
+                   (assoc-ref (car wordSenseMap) chosenSenseNode)
+                   #f
+                   )
+               ) ; let*
+             ) ; if
+         ) ; begin
+       )
+   (get-tick startTime)
+   )
+  )
+
+
+; This function will execute a part-whole inference to check
+; if one object is part of another one.
+; Given a list of word nodes, that represents whole objects,
+; this functions tries to figure out if the given part word node
+; belongs to at least one whole word node.
+; It uses the relation meronym/holonym of the WordNet to do
+; the work. If the whole nodes doesn't match the current part,
+; their parents will be evaluated and so one until the current
+; inheritance level reaches the maxLevel (control variable).
+; It also has a timeout counter that will stop the current
+; evaluation to avoid performance issues.
+(define (check-part-whole partWordNode wholeWordNodes)
+  (define expandedNodes '())
+  (define timeout 8) ; measured in seconds
+  (define maxLevel 1) ; maximum inheritance levels
+  (define startTime (get-tick))
+
+  (define candidateSenseNodes '())
+  (define wordSenseMap '())
+
+  (define (get-holonyms senseNode)
+    (cond ((not (member senseNode expandedNodes))
+           (fetch-incoming-set senseNode)
+           (set! expandedNodes (append expandedNodes (list senseNode)))
+           ))
+    (fold
+     (lambda (link result)
+       (let ((holonym (gadr link)))
+         (if (not (equal? holonym senseNode))
+             (cons holonym result)
+             result
+             )
+         )
+       )
+     '()
+     (cog-filter-incoming 'HolonymLink senseNode)
+     )
+    )
+
+  (define (get-parents senseNode)
+    (cond ((not (member senseNode expandedNodes))
+           (fetch-incoming-set senseNode)
+           (set! expandedNodes (append expandedNodes (list senseNode)))
+           ))
+    (fold
+     (lambda (link result)
+       (let ((parent (gadr link)))
+         (if (not (equal? parent senseNode))
+             (begin
+               (if (not (assoc-ref wordSenseMap parent))
+                   (set! wordSenseMap 
+                         (append wordSenseMap 
+                                 (list 
+                                  (cons parent
+                                        (assoc-ref wordSenseMap senseNode)))))
+                   )
+               (cons parent result)
+               )
+             result             
+             )
+         )
+       )
+     '()
+     (cog-filter-incoming 'InheritanceLink senseNode)
+     )
+    )
+
+
+  (define (inspect-sense-nodes-by-level senseNodes level)
+    (let ((answer (inspect-sense-nodes senseNodes)))
+      (if answer
+          answer        
+          (if (< level maxLevel)
+              (begin
+                (set! candidateSenseNodes 
+                      ;;; Warning: this code block can take several
+                      ;;; seconds to be processed. Perhaps a good
+                      ;;; way of optimizing it is to create a 
+                      ;;; variant of fetch-incoming-set function
+                      ;;; that receives a list of atoms and buid
+                      ;;; just one sql to retrieve all incoming
+                      ;;; set in one operation
+                      (delete-duplicates
+                       (fold
+                        (lambda (senseNode result)
+                          (append result (get-parents senseNode))
+                          )
+                        '()
+                        candidateSenseNodes
+                        )
+                       )
+                      )
+                (inspect-sense-nodes-by-level senseNodes (+ level 1))
+                )
+              #f
+              )
+          )
+      )
+    )
+  
+  (define (inspect-sense-nodes senseNodes)
+    (if (null? senseNodes)
+        #f
+        (let ((senseNode (car senseNodes)))
+          (cond ((not (member senseNode expandedNodes))
+                (fetch-incoming-set senseNode)
+                (set! expandedNodes (append expandedNodes (list senseNode)))
+                ))
+          (if (> (get-tick startTime) timeout)
+              #f
+              (let ((answer (find (lambda (x) (member x candidateSenseNodes))
+                                  (get-holonyms senseNode))))
+                (if answer
+                    answer
+                    (inspect-sense-nodes (cdr senseNodes))
+                    )
+                )                
+              ) ; if
+          )      
+        )
+    )
+    
+  (cons
+   (if (member partWordNode wholeWordNodes)
+       #f
+       (begin
+         (fetch-incoming-set partWordNode)        
+         
+         (if (> (get-tick startTime) timeout)
+             #f
+             (begin
+               (set! wordSenseMap (get-word-sense-map wholeWordNodes))
+               (set! candidateSenseNodes (delete-duplicates (cadr wordSenseMap)))
+               (set! wordSenseMap (car wordSenseMap))
+ 
+
+               (let ((senseNode
+                      (inspect-sense-nodes-by-level
+                       (create-sense-node-list 
+                        (cog-filter-incoming 'WordSenseLink partWordNode)) 0)
+                      ))
+                 (if senseNode
+                     (assoc-ref wordSenseMap senseNode)
+                     #f
+                     )
+                 ) ; let
+               )
+             )
+         )
+       )
+   (get-tick startTime)
+   )
+  
+  )
+
+
+; This return all the SemeNode associated with a given
+; WordNode. If none SemeNodes was found, so it will
+; use the WordNet ontology to infer the meaning of the
+; given WordNode. Perhaps the given WordNode refers to
+; some SemeNode which really exists inside the agent's
+; mind, but it is an abstraction. So, using the WordNet
+; ontology is possible to determine if the mentioned
+; WordNode refers or not the an existing SemeNode.
+(define (get-seme-nodes-using-ontology wordNode)
+  (define useWordNet #f) ; if true will use the WordNet ontology
+
+  (if (assoc-ref word-node-seme-nodes-cache wordNode)
+      (assoc-ref word-node-seme-nodes-cache wordNode)
+      (let ((semeNodes (get-seme-nodes wordNode)))
+        (if (or (not (null? semeNodes)) (not useWordNet))
+            semeNodes        
+            (let ((nodes
+                   (delete-duplicates
+                    (fold 
+                     (lambda (semeNode result)
+                       (let ((link (cog-get-link 'ReferenceLink 'WordNode semeNode)))
+                         (if (not (null? link))
+                             (cons (gadr (car link)) result)
+                             result
+                             )
+                         )
+                       )
+                     '()
+                     (cog-get-atoms 'SemeNode)
+                     )
+                    )
+                   ))            
+              (let ((parentCheck (check-parentage wordNode nodes)))
+                (if (car parentCheck)
+                    (let ((result (get-seme-nodes (car parentCheck))))
+                      (set! word-node-seme-nodes-cache
+                            (append word-node-seme-nodes-cache 
+                                    (list (cons wordNode result))))
+                      result                      
+                      )
+                    (let ((partCheck (check-part-whole wordNode nodes)))
+                      (if (car partCheck)
+                          (let ((result (get-seme-nodes (car partCheck))))
+                            (set! word-node-seme-nodes-cache 
+                                  (append word-node-seme-nodes-cache 
+                                          (list (cons wordNode result))))
+                            result
+                            )
+                          (begin
+                            (EvaluationLink (stv 1 1)
+                             (PredicateNode "unknownTerm")
+                             (ListLink
+                              wordNode
+                              )
+                             )
+                            '()
+                            )
+                          )
+                      )
+                    )
+                ) ; let
+              ) ; let
+            )
+        )
+      )
   )
