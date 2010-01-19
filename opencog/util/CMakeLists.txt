@@ -4,6 +4,12 @@ ELSE (WIN32)
 	SET(WIN32_GETOPT_FILES)
 ENDIF (WIN32)
 
+IF (APPLE)
+    SET(APPLE_STRNDUP_FILES strndup strnlen)
+ELSE (APPLE)
+    SET(APPLE_STRNDUP_FILES)
+ENDIF (APPLE)
+
 # XXX FIXME -- setting util as a shared library breaks the build,
 # since it requires a link to libatomspace, which hasn't been built yet.
 # This is because misc.cc references Handles.  Similar problem with 
@@ -34,10 +40,12 @@ ADD_LIBRARY(util
 	StringTokenizer
 	tree
 	${WIN32_GETOPT_FILES}
+    ${APPLE_STRNDUP_FILES}
 )
 
 TARGET_LINK_LIBRARIES(util
 	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	${Boost_REGEX_LIBRARY}
 )
 

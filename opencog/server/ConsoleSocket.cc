@@ -144,9 +144,11 @@ void ConsoleSocket::OnLine(const std::string& line)
  */
 void ConsoleSocket::OnRawData(const char *buf, size_t len)
 {
+#ifndef __APPLE__
     char* _tmp = strndup(buf, len); 
     logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
     free(_tmp);
+#endif
 
     _buffer.append(buf, len);
     logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());

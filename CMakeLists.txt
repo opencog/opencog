@@ -55,13 +55,13 @@ IF (WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 ELSE (WIN32)
 	LINK_LIBRARIES(pthread)
-	SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
+	#SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
 ENDIF (WIN32)
 
 # hypertable requires boost iostreams
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.37 COMPONENTS date_time filesystem iostreams regex serialization signals thread REQUIRED)
+FIND_PACKAGE(Boost 1.37 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED)
 FIND_PACKAGE(Boost 1.37 COMPONENTS python program_options)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
