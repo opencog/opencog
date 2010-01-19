@@ -27,6 +27,7 @@
 #ifndef _OPENCOG_HDEMO_OPTIONS_H
 #define _OPENCOG_HDEMO_OPTIONS_H
 
+#include <sys/types.h>
 #include <fstream>
 
 #include <opencog/atomspace/AttentionValue.h>

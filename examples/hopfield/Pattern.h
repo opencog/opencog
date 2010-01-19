@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <sys/types.h>
+
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/util/RandGen.h>
 
@@ -31,6 +33,7 @@ namespace opencog
 {
 
 extern RandGen* patternRng;
+
 
 class Pattern : public std::vector< int >
 {

@@ -40,8 +40,8 @@ IF(COMMAND cmake_policy)
       CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
-ADD_EXECUTABLE (tangentbug TangentBugTestExec.cc)
-TARGET_LINK_LIBRARIES(tangentbug
+ADD_EXECUTABLE (tangentbug_test TangentBugTestExec.cc)
+TARGET_LINK_LIBRARIES(tangentbug_test
     SpaceMap
     TangentBug
     util
