@@ -19,6 +19,7 @@
  */
 
 #include <opencog/util/Config.h>
+#include <exception>
 
 #include "opencog/reasoning/pln/PLN.h"
 #include "opencog/reasoning/pln/BackInferenceTreeNode.h"
@@ -60,7 +61,12 @@ public:
         cout << "BITNodeUTest: Making RuleProvider" << endl;
         RuleProvider *rp = new DefaultVariableRuleProvider();
         cout << "BITNodeUTest: Making BITNodeRoot" << endl;
+        try {
         root = new BITNodeRoot(fakeTarget, rp);
+        } catch (exception &e) {
+            cout << e.what();
+
+        }
         cout << "BITNodeUTest: setup complete." << endl;
     }
     

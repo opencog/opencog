@@ -8,9 +8,10 @@ ADD_SUBDIRECTORY (atomspace)
 ADD_SUBDIRECTORY (dynamics)
 ADD_SUBDIRECTORY (server)
 
-IF (NOT WIN32)
-	ADD_SUBDIRECTORY(modules)
-ENDIF (NOT WIN32)
+# There is nothing in this directory?
+#IF (NOT WIN32)
+#ADD_SUBDIRECTORY(modules)
+#ENDIF (NOT WIN32)
 
 # Extension language support
 IF (GUILE_FOUND)
@@ -19,6 +20,8 @@ IF (GUILE_FOUND)
 	ADD_SUBDIRECTORY (shell)
 ENDIF (GUILE_FOUND)
 
+# Python bindings currently don't compile because of clash with
+# Node class in python lib.
 IF (NOT APPLE AND Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND)
 	ADD_SUBDIRECTORY (python)
 ENDIF (NOT APPLE AND Boost_PYTHON_FOUND AND PYTHONLIBS_FOUND)

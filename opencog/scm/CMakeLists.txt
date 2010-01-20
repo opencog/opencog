@@ -5,4 +5,5 @@ INSTALL (FILES
 	utilities.scm
 	DESTINATION "${DATADIR}/scm"
 )
-ADD_SUBDIRECTORY (wires)
+# No CMakeLists.txt in dir:
+#ADD_SUBDIRECTORY (wires)

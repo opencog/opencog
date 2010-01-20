@@ -8,12 +8,6 @@ ADD_LIBRARY (savable SHARED
 	TemporalTableFile.cc
 )
 
-#IF(APPLE)
-#    TARGET_LINK_LIBRARIES (savable
-##        atomspace
-#    )
-#ENDIF(APPLE)
-
 INSTALL (FILES
 	SavableRepository.h
 	SavingLoading.h

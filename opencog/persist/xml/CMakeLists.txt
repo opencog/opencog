@@ -14,8 +14,6 @@ INCLUDE_DIRECTORIES (
 )
 
 TARGET_LINK_LIBRARIES(xml
-	util
-	atomspace
 	${EXPAT_LIBRARIES}
 )
 
