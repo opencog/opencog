@@ -28,8 +28,7 @@
 #include <string>
 #include <tr1/memory>
 
-#include <opencog/server/IHasMimeType.h>
-#include <opencog/server/IRPCSocket.h>
+#include <opencog/server/RequestResult.h>
 #include <opencog/shell/GenericShell.h>
 #include <opencog/server/ServerSocket.h>
 
@@ -60,8 +59,7 @@ class Request;
  *
  */
 class ConsoleSocket : public ServerSocket,
-                      public IHasMimeType,
-                      public IRPCSocket
+                      public RequestResult
 {
 
 private:
@@ -123,6 +121,18 @@ public:
      *  "PROMPT") to the client.
      */
     void OnRequestComplete ();
+
+    /** Called when this is assigned to a DataRequest
+     */ 
+    void SetDataRequest();
+
+    /** Sends a request result to the client
+      */
+    void SendResult(const std::string& res);
+
+    /** Called when a Request exits the connection
+     */ 
+    void Exit();
 
     /** SetShell: Declare an alternate shell, that will perform all
      *  command line processing.

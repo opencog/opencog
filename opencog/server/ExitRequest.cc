@@ -38,7 +38,7 @@ ExitRequest::~ExitRequest()
 
 bool ExitRequest::execute()
 {
-    _socket->SetCloseAndDelete();
-    _socket = NULL;
+    _requestResult->Exit();
+    _requestResult = NULL;
     return true;
 }

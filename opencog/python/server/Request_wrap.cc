@@ -16,12 +16,12 @@ void init_Request_py()
         .def("send",
             &Request::send,
             &RequestWrap::default_send)
-        .def("setSocket",
-            &Request::setSocket,
-            &RequestWrap::default_setSocket)
-        .def("getSocket",
-            &Request::getSocket,
-            &RequestWrap::default_getSocket,
+        .def("setRequestResult",
+            &Request::setRequestResult,
+            &RequestWrap::default_setRequestResult)
+        .def("getRequestResult",
+            &Request::getRequestResult,
+            &RequestWrap::default_getRequestResult,
             return_value_policy<manage_new_object>())
         .def("setParameters",
             &Request::setParameters,
@@ -53,28 +53,28 @@ void RequestWrap::default_send(const std::string& msg) const
     this->Request::send(msg);
 }
 
-void RequestWrap::setSocket(ConsoleSocket *h)
+void RequestWrap::setRequestResult(RequestResult *rr)
 {
-    if (override o = this->get_override("setSocket"))
-        o(h);
+    if (override o = this->get_override("setRequestResult"))
+        o(rr);
 
-    Request::setSocket(h);
+    Request::setRequestResult(rr);
 }
-void RequestWrap::default_setSocket(ConsoleSocket *h)
+void RequestWrap::default_setRequestResult(RequestResult *rr)
 {
-    this->Request::setSocket(h);
+    this->Request::setRequestResult(rr);
 }
 
-ConsoleSocket *RequestWrap::getSocket(void)
+RequestResult *RequestWrap::getRequestResult(void)
 {
-    if (override o = this->get_override("getSocket"))
+    if (override o = this->get_override("getRequestResult"))
         return o();
 
-    return Request::getSocket();
+    return Request::getRequestResult();
 }
-ConsoleSocket *RequestWrap::default_getSocket()
+RequestResult *RequestWrap::default_getRequestResult()
 {
-    return this->Request::getSocket();
+    return this->Request::getRequestResult();
 }
 
 void RequestWrap::setParameters(const std::list<std::string>& params)

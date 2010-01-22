@@ -30,8 +30,6 @@
 
 #include <pthread.h>
 
-#include <opencog/server/ConsoleSocket.h>
-
 #include <opencog/server/SocketListener.h>
 
 #include <opencog/util/Logger.h>

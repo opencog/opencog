@@ -26,10 +26,10 @@ struct RequestWrap : Request, wrapper<Request>
 
     void send(const std::string& msg) const;
     void default_send(const std::string& msg) const;
-    void setSocket(ConsoleSocket*);
-    void default_setSocket(ConsoleSocket*);
-    ConsoleSocket *getSocket(void);
-    ConsoleSocket *default_getSocket(void);
+    void setRequestResult(RequestResult*);
+    void default_setRequestResult(RequestResult*);
+    RequestResult *getRequestResult(void);
+    RequestResult *default_getRequestResult(void);
     void setParameters(const std::list<std::string>& params);
     void default_setParameters(const std::list<std::string>& params);
     void addParameter(const std::string& param);

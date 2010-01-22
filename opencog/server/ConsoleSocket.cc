@@ -35,7 +35,7 @@ using namespace opencog;
 
 ConsoleSocket::ConsoleSocket(boost::asio::io_service& _io_service) : 
     ServerSocket(_io_service),
-    IHasMimeType("text/plain")
+    RequestResult("text/plain")
 {
     SetLineProtocol(true);
     _shell = NULL;
@@ -104,7 +104,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
-    _request->setSocket(this);
+    _request->setRequestResult(this);
     _request->setParameters(params);
 
     if (LineProtocol()) {
@@ -176,6 +176,23 @@ void ConsoleSocket::OnRequestComplete()
 {
     logger().debug("[ConsoleSocket] OnRequestComplete");
     Send(config()["PROMPT"]);
+}
+
+void ConsoleSocket::SetDataRequest()
+{
+    logger().debug("[ConsoleSocket] SetDataRequest");
+    SetLineProtocol(false);
+}
+
+void ConsoleSocket::Exit()
+{
+    logger().debug("[ConsoleSocket] ExecuteExitRequest");
+    SetCloseAndDelete();
+}
+
+void ConsoleSocket::SendResult(const std::string& res)
+{
+    Send(res);
 }
 
 void ConsoleSocket::SetShell(GenericShell *g)

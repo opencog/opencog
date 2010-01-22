@@ -30,7 +30,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/server/RequestResult.h>
 
 namespace opencog
 {
@@ -57,7 +57,7 @@ public:
     DataRequest();
     virtual ~DataRequest();
 
-    virtual void setSocket(ConsoleSocket*);
+    virtual void setRequestResult(RequestResult*);
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
 };

@@ -43,10 +43,10 @@ DataRequest::~DataRequest()
 {
 }
 
-void DataRequest::setSocket(ConsoleSocket* s)
+void DataRequest::setRequestResult(RequestResult* rr)
 {
-    Request::setSocket(s);
-    s->SetLineProtocol(false);
+    Request::setRequestResult(rr);
+    rr->SetDataRequest();
 }
 
 bool DataRequest::execute()

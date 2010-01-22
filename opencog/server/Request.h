@@ -31,7 +31,7 @@
 #include <list>
 
 #include <opencog/server/Factory.h>
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/server/RequestResult.h>
 
 namespace opencog
 {
@@ -200,9 +200,8 @@ struct RequestClassInfo : public ClassInfo
 
 /**
  * This class defines the base abstract class that should be extended
- * by all opencog requests. It handles the underlying network socket
- * and provides common members used by most requests, such as the list
- * of request parameters.
+ * by all opencog requests. It provides common members used by most requests,
+ * such as the list of request parameters.
  *
  * A typical derived request only has to override/implement two methods:
  * 'info' and 'execute'.
@@ -264,7 +263,7 @@ class Request
 
 protected:
 
-    ConsoleSocket*         _socket;
+    RequestResult*         _requestResult;
     std::list<std::string> _parameters;
     std::string            _mimeType;
 
@@ -287,9 +286,9 @@ public:
     /** Send the command output back to the client. */
     virtual void send(const std::string& msg) const;
 
-    /** Stores the client socket. */
-    virtual void setSocket(ConsoleSocket*);
-    virtual ConsoleSocket *getSocket(void) {return _socket; }
+    /** Stores the RequestResult that makes interface with the requesting client. */
+    virtual void setRequestResult(RequestResult*);
+    virtual RequestResult *getRequestResult(void) {return _requestResult; }
 
     /** sets the command's parameter list. */
     virtual void setParameters(const std::list<std::string>& params);

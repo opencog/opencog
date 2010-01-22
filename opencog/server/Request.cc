@@ -24,37 +24,35 @@
 
 #include "Request.h"
 
-#include <opencog/server/IHasMimeType.h>
-#include <opencog/server/IRPCSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
 using namespace opencog;
 
-Request::Request() : _socket(NULL)
+Request::Request() : _requestResult(NULL)
 {
 }
 
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    if (_socket) _socket->OnRequestComplete();
+    if (_requestResult) _requestResult->OnRequestComplete();
 }
 
-void Request::setSocket(ConsoleSocket* s)
+void Request::setRequestResult(RequestResult* rr)
 {
-    logger().debug("[Request] setting socket: %p", s);
-    if (NULL == _socket) {
-        _socket = s;
-        _mimeType = _socket->mimeType();
+    logger().debug("[Request] setting requestResult: %p", rr);
+    if (NULL == _requestResult) {
+        _requestResult = rr;
+        _mimeType = _requestResult->mimeType();
     } else
         throw RuntimeException(TRACE_INFO,
-            "Bad idea to try to set the socket more than once.");
+            "Bad idea to try to set the RequestResult more than once.");
 }
 
 void Request::send(const std::string& msg) const
 {
-    if (_socket) _socket->Send(msg);
+    if (_requestResult) _requestResult->SendResult(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

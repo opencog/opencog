@@ -161,7 +161,6 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *s)
 	// this instance ever again. So stop hogging space, and self-destruct.
 	if (self_destruct)
 	{
-		socket->SetShell(NULL);
 		delete this;
 	}
 }
