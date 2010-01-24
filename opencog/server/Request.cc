@@ -50,7 +50,7 @@ void Request::setRequestResult(RequestResult* rr)
             "Bad idea to try to set the RequestResult more than once.");
 }
 
-void Request::send(const std::string& msg)
+void Request::send(const std::string& msg) const
 {
     if (_requestResult) _requestResult->SendResult(msg);
 }

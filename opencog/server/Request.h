@@ -289,7 +289,7 @@ public:
     virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
-    virtual void send(const std::string& msg);
+    virtual void send(const std::string& msg) const;
 
     /** Stores the RequestResult that makes interface with the requesting client. */
     virtual void setRequestResult(RequestResult*);
