@@ -385,7 +385,24 @@ int BITNode::totalChildren() const
 
 BITNodeRoot::~BITNodeRoot() {
     delete rp;
-    foreach(BITNode* b, used_nodes) delete b;
+    foreach(BITNode* b, nodes) delete b;
+
+#if 0
+    // Attempt to use the varOwner map to delete FWVars
+    
+    //    std::map<Vertex, std::set<BITNode*> > varOwner;
+    std::map<Vertex, std::set<BITNode*> >::const_iterator var;
+    for (var = varOwner.begin(); var != varOwner.end(); var++) {
+        // var->first
+        // _v2h
+        pHandle h = _v2h(var->first);
+        // Why are some of them not valid pHandles?
+        if (GET_ASW->isValidPHandle(h)) {
+            std::cout << "Deleting " << h << std::endl;
+            GET_ASW->removeAtom(_v2h(var->first));
+        }
+    }
+#endif
 }
 
 BITNode::~BITNode() {
@@ -886,7 +903,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 root->BITNodeTemplates.insert(new_node);
         }
 
-        root->used_nodes.insert(new_node);
+        root->nodes.insert(new_node);
 
         new_node->create();
 
