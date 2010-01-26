@@ -616,7 +616,7 @@ public:
     // The list of all BITNodes (except the root variable scoper I think).
     // Updated in BITNode::createChild; used to delete all BITNodes in the
     // BITNodeRoot destructor.
-    std::set<BITNode*> used_nodes;
+    std::set<BITNode*> nodes;
 
     // The class assumes ownership of the RuleProvider
     BITNodeRoot(meta _target, RuleProvider* _rp,
