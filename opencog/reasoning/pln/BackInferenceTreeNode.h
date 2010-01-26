@@ -680,6 +680,9 @@ protected:
     typedef std::list<BITNode*> exec_poolT;
     exec_poolT exec_pool;
 
+    // A map of which FWVariableNode is owned by which BITNode(s).
+    // Cloning a BITNode when a result is found for one argument would result in
+    // remaining FWVars being owned by both BITNodes.
     std::map<Vertex, std::set<BITNode*> > varOwner;
 
     std::map<Rule*, float> priority;
