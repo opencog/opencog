@@ -201,12 +201,15 @@ string BITNodeRoot::printParents(BITNode* b)
     return ss.str();
 }
 
+unsigned int BITNodeRoot::getTreeDepth() const { return treeDepth; }
+
 void BITNodeRoot::setRecordingTrails(bool x) { recordingTrails = x; }
 bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         FitnessEvaluatorT _fe)
-: inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0)
+: inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
+treeDepth(0)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     haxx::DirectProducerCache.clear();
@@ -387,7 +390,7 @@ BITNodeRoot::~BITNodeRoot() {
     delete rp;
     foreach(BITNode* b, nodes) delete b;
 
-#if 0
+#if 1
     // Attempt to use the varOwner map to delete FWVars
     
     //    std::map<Vertex, std::set<BITNode*> > varOwner;
@@ -462,6 +465,12 @@ void BITNode::create()
     }
     eval_results.insert(eval_results.begin(), args.size(), set<VtreeProvider*>());
     assert(rule || children.size() == 1);
+    
+    if (depth > getBITRoot().getTreeDepth()) {
+        //tlog(5, "BIT has reached depth: %d", depth);
+        std::cout << "BIT has reached depth: " << depth << std::endl;
+        getBITRoot().setTreeDepth(depth);
+    }
 }
 
 BITNode::BITNode( BITNodeRoot* _root,
@@ -1773,6 +1782,9 @@ string BITNode::loopCheck() const
     }
     return ss.str();
 }
+
+void BITNodeRoot::setTreeDepth(const unsigned int newDepth) { treeDepth =
+newDepth; }
 
 #if 0
 void test_pool_policy()

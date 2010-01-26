@@ -28,7 +28,7 @@
  * @author Ari A. Heljakka
  * @author Joel Pitt
  * @author Jared Wigmore
- * @date 2006-2009
+ * @date 2006-2010
  *
  */
 #ifndef BACK_INFERENCE_TREE_NODE
@@ -670,6 +670,7 @@ public:
     std::string printParents(BITNode* b);
 
     int getExecPoolSize() const;
+    unsigned int getTreeDepth() const;
     void setRecordingTrails(bool x=true);
     bool getRecordingTrails() const;
 
@@ -690,7 +691,7 @@ protected:
     Rule::MPs dummy_args;
 
     bool recordingTrails;
-    
+
     /** Records which BITNodes use one another.
      * List is maintained in order to know which BITNodes directly
      * or indirectly use (ie. Have as a subtree, with possibly some
@@ -698,7 +699,7 @@ protected:
      * prevent circularity: a BITNode cannot indirectly or directly use itself.
      * 
      * @note This should eventually be moved to a BITNodeCache (which doesn't
-     * exist yet.
+     * exist yet).
      */
     std::map<BITNode*, std::set<BITNode*> > users;
 
@@ -725,6 +726,10 @@ protected:
                         
     /// Basically a helper function for the public printTrail(pHandle)
     std::string printTrail(pHandle h, unsigned int level) const;
+
+    void setTreeDepth(const unsigned int newDepth);
+    // The current depth of the tree (i.e. the depth of the lowest BITNode)
+    unsigned int treeDepth;
 
     friend class BITNode;
 };
