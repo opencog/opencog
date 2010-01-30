@@ -43,7 +43,8 @@
 #include <opencog/ubigraph/BITUbigrapher.h>
 #endif // USE_BITUBIGRAPHER
 
-int haxxUsedProofResources = 0;
+// todelete: wasn't updated, or used (to any effect)
+//int haxxUsedProofResources = 0;
 float temperature = 0.01;
 
 namespace test
@@ -2001,6 +2002,8 @@ string BITNode::printFitnessPool()
 
 static bool bigcounter = true;
 
+// haxxUsedProofResources wasn't being printed, even before I commented out???
+// -- JaredW
 string BITNode::tlog(int debugLevel, const char *format, ...) const
 {
     stringstream ss;
@@ -2012,7 +2015,7 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
 
     ss << (bigcounter? (++test::bigcount) : depth) << " "
         << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
-        << haxxUsedProofResources << " [" << (long)this << "-"
+        /*<< haxxUsedProofResources*/ << " [" << (long)this << "-"
         << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
 
     char buf[5000];
