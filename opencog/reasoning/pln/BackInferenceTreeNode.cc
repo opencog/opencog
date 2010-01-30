@@ -2013,7 +2013,7 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
     //    ss << "Debug feature." << endl;
     //}
 
-    ss << (bigcounter? (++test::bigcount) : depth) << " "
+    ss << (bigcounter? (++test::bigcount) : depth) << " Pool="
         << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
         /*<< haxxUsedProofResources*/ << " [" << (long)this << "-"
         << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
