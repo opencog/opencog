@@ -390,8 +390,9 @@ BITNodeRoot::~BITNodeRoot() {
     delete rp;
     foreach(BITNode* b, nodes) delete b;
 
-#if 1
+#if 0
     // Attempt to use the varOwner map to delete FWVars
+    // Had numerous complexities/issues, probably resolveable.
     
     //    std::map<Vertex, std::set<BITNode*> > varOwner;
     std::map<Vertex, std::set<BITNode*> >::const_iterator var;

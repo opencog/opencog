@@ -434,7 +434,7 @@ private:
 
             cout << endl << "Exec pool size: " << state->exec_pool.size();
             cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                    "/" << allTestsInferenceNodes << endl;
+                    " (" << allTestsInferenceNodes << " in all tests)" << endl;
         }
         else
             INstats.push_back(0);
@@ -678,7 +678,7 @@ private:
 
             cout << endl << "Exec pool size: " << state->exec_pool.size();
             cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                    "/" << allTestsInferenceNodes << endl;
+                    " (" << allTestsInferenceNodes << " in all tests)" << endl;
         }
         else
             INstats.push_back(0);
