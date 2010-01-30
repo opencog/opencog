@@ -457,7 +457,7 @@ private:
     }
 
     //! @todo Replace with an existing method, after tweaking various things to
-    // make it suitable.
+    //! make it suitable.
     static SimpleTruthValue* parseSTV(const char* tvStr) {
         float mean, conf;
         sscanf(tvStr, "[%f,%f]", &mean, &conf);
@@ -480,7 +480,7 @@ private:
         //std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";        
         std::string axiomsFile = std::string(PLN_TEST_DIR"scm/")+test["LOAD"]+".scm";
         
-        initAxiomSet(axiomsFile); // TODO use scm in initAxiomSet
+        initAxiomSet(axiomsFile);
         
         std::string targetScheme = test["TARGET"];
         std::cout << "Target: " << targetScheme << std::endl;
