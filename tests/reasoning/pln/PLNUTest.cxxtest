@@ -120,7 +120,8 @@ vector<vector<int> > INstatsV;
 vector<int> INstats;
 static int allTestsInferenceNodes=0;
 
-bool foo42=false;
+// Make the debug level high during infer steps (only)
+//bool foo42=false;
 
 /**
  * The tests load in various xml axiom sets and run until the target with a
