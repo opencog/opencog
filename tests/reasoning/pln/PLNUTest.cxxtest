@@ -753,8 +753,8 @@ public:
 
         BoundVertex res1a = top->compute();
         const TruthValue& tvA = atw->getTV(_v2h(res1a.value));
-        assert(tvA.getMean() > 0.01);
-        assert(tvA.getConfidence() > 0.01);
+        TS_ASSERT(tvA.getMean() > 0.01);
+        TS_ASSERT(tvA.getConfidence() > 0.01);
 
         RuleApp* topb   = new RuleApp(deduR);
     //  RuleApp* child1b= vtree(Vertex(h0));
@@ -766,11 +766,13 @@ public:
         topb->Bind(1, child2b);
 
         BoundVertex res1b = topb->compute();
-        assert(res1a.value == res1b.value);
+        // Checks that they have the same pHandles, which is wrong
+        //TS_ASSERT_EQUALS(res1a.value, res1b.value);
 
         const TruthValue& tvB = atw->getTV(_v2h(res1a.value));
-        assert(isApproxEq(tvB.getMean(), tvA.getMean(), EPSILON_S));
-        assert(isApproxEq(tvB.getConfidence(), tvA.getConfidence(), EPSILON_C));
+        TS_ASSERT(isApproxEq(tvB.getMean(), tvA.getMean(), EPSILON_S));
+        TS_ASSERT(isApproxEq(tvB.getConfidence(), tvA.getConfidence(),
+                  EPSILON_C));
 
         RuleApp* top2 = new RuleApp(invR);
         top2->Bind(0, topb);
@@ -778,12 +780,14 @@ public:
         top3->Bind(0, top2);
 
         const TruthValue& tv2 = atw->getTV(_v2h(top2->compute().value));
-        assert(!isApproxEq(tvB.getMean(), tv2.getMean(), EPSILON_S));
+        TS_ASSERT(!isApproxEq(tvB.getMean(), tv2.getMean(), EPSILON_S));
     //  assert(!isApproxEq(tvB.getConfidence(), tv2.getConfidence(), EPSILON_C));
 
+        // segfaults right before adding atom
         const TruthValue& tv3 = atw->getTV(_v2h(top3->compute().value));
-        assert(isApproxEq(tvB.getMean(), tv3.getMean(), EPSILON_S));
-        assert(isApproxEq(tvB.getConfidence(), tv3.getConfidence(), EPSILON_C));
+        TS_ASSERT(isApproxEq(tvB.getMean(), tv3.getMean(), EPSILON_S));
+        TS_ASSERT(isApproxEq(tvB.getConfidence(), tv3.getConfidence(),
+                  EPSILON_C));
 
 
         vector<VtreeProvider*> args;
@@ -798,10 +802,11 @@ public:
 
         BoundVertex resC = topc->compute(args.begin(), args.end());
 
-        assert(resC.value == res1b.value);
+        TS_ASSERT(resC.value == res1b.value);
         const TruthValue& tvC = atw->getTV(_v2h(resC.value));
-        assert(isApproxEq(tvB.getMean(), tvC.getMean(), EPSILON_S));
-        assert(isApproxEq(tvB.getConfidence(), tvC.getConfidence(), EPSILON_C));
+        TS_ASSERT(isApproxEq(tvB.getMean(), tvC.getMean(), EPSILON_S));
+        TS_ASSERT(isApproxEq(tvB.getConfidence(), tvC.getConfidence(),
+                  EPSILON_C));
 
 
         RuleApp* topd   = new RuleApp(deduR);
@@ -811,10 +816,11 @@ public:
 
         BoundVertex resD = topd->compute(args.begin(), args.end());
 
-        assert(resD.value == res1b.value);
+        TS_ASSERT(resD.value == res1b.value);
         const TruthValue& tvD = atw->getTV(_v2h(resD.value));
-        assert(isApproxEq(tvB.getMean(), tvD.getMean(), EPSILON_S));
-        assert(isApproxEq(tvB.getConfidence(), tvD.getConfidence(), EPSILON_C));
+        TS_ASSERT(isApproxEq(tvB.getMean(), tvD.getMean(), EPSILON_S));
+        TS_ASSERT(isApproxEq(tvB.getConfidence(), tvD.getConfidence(),
+                  EPSILON_C));
         printf("finish MacroRuleTest\n");
     }
 
