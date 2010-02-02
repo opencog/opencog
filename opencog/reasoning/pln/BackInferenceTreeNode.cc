@@ -43,7 +43,7 @@
 #include <opencog/ubigraph/BITUbigrapher.h>
 #endif // USE_BITUBIGRAPHER
 
-// todelete: wasn't updated, or used (to any effect)
+// TODELETE: wasn't updated, or used (to any effect)
 //int haxxUsedProofResources = 0;
 float temperature = 0.01;
 
@@ -1546,9 +1546,9 @@ float BITNode::fitness() const
 
 //tlog(3,"fitness(): %f %f %f %f %f\n",my_bdrum, -depth, _bdrum, -1.0f*_bdrum,-depth -_bdrum);  
     
-    return  -1.0f*SOLUTION_SPACE_WEIGHT * my_solution_space()
+    return  -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
             -1.0f*DEPTH_WEIGHT          * depth
-            -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
+            -1.0f*SOLUTION_SPACE_WEIGHT * my_solution_space()
             +1.0f*RULE_PRIORITY_WEIGHT  * (rule ? rule->getPriority() : 0);
     
 /*  \todo Use arity in the spirit of the following:
