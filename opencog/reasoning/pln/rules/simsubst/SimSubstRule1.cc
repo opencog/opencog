@@ -30,13 +30,10 @@
 
 #include <algorithm>
 
-// Issue: Makes a real link with children in a vtree. -- JaredW
-// Issue: i2oType is ambiguous? --JaredW
-
 namespace opencog { namespace pln {
 
-// the problem might be the output of this (or the FWVars getting substituted in tryClone)
-Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
+Rule::setOfMPs SimSubstRule1::o2iMetaExtra(meta outh, bool& overrideInputFilter)
+const
 {
 /** For simplicity (but sacrificing applicability),
 FW_VARs cannot be replaced with children structs.
@@ -45,9 +42,23 @@ Links are assumed not inheritable either.
     // Skipping links prevents an assert error in BITNode::tryClone();
     // skipping FW_VARS is required to avoid trying to replace FW_VARS already
     // created by this Rule, and/or a crash. -- JaredW
-    
+
+    // There are two extra restrictions I added to make the BIT search
+    // efficient enough:
+    // Also skip targets that are InheritanceLinks or similar; whether they
+    // are an actual target or the child of another SSR1 BITNode, they can
+    // be handled better via Deduction. This is also for inference-control
+    // efficiency.
+
+    // Also, only substitute ConceptNodes, not PredicateNodes (a heuristic;
+    // Inheritance between other types of Nodes isn't necessarily used)
+
+    pHandle top = _v2h(*outh->begin()); // Top of the target vtree
+
     if (outh->begin().number_of_children() != 2
-        ||  asw->isSubType(boost::get<pHandle>(*outh->begin()), FW_VARIABLE_NODE))
+        ||  asw->isSubType(top, FW_VARIABLE_NODE)
+        ||  asw->isSubType(top, INHERITANCE_LINK)
+        ||  asw->isSubType(top, IMPLICATION_LINK))
         return Rule::setOfMPs();
 
 /*  puts("X1");
@@ -71,8 +82,10 @@ Links are assumed not inheritable either.
         printAtomTree(outh,0,0);
 */
         // if this vertex is a link type or FW_VAR, skip it
-        if ( asw->isSubType(_v2h(*i), LINK) || asw->isSubType(_v2h(*i),
-             FW_VARIABLE_NODE))
+        /*if ( asw->isSubType(_v2h(*i), LINK) || asw->isSubType(_v2h(*i),
+             FW_VARIABLE_NODE)*/
+        // Only substitute ConceptNodes
+        if (!asw->isSubType(_v2h(*i), CONCEPT_NODE))
             continue;
 
         // Put the FW_VAR (child) into the templated atom
