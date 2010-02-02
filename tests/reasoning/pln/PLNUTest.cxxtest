@@ -181,9 +181,9 @@ private:
         testTVChecksWork();
         testRandomTVsTooHigh();
         testSymmetricRelationFails();
-        testInverseBinding();
+//        testInverseBinding();
         testBasicSpawning();
-        testMultipleRootsSpawning();
+/*        testMultipleRootsSpawning();
         testGeneralizationForVariableScopeLink();
         testGeneralizationForForAllLink();
         testInheritanceOsamaAbu();
@@ -191,8 +191,8 @@ private:
         testAnotBdemo();
         testFetchDemo5();
         testFetchDemo5_alt();
-        testWoaDemo();        
-        
+        testWoaDemo();*/
+
         INstatsV.push_back(INstats);
     }
     
@@ -674,6 +674,9 @@ public:
         }
     }
 
+    // A meta-level test that can run all of the tests multiple times;
+    // necessary if you use a non-deterministic heuristic for the BIT
+    // search.
     void testHeuristic() {
         if (testFitnessEvaluator == BEST)
         return;
@@ -866,21 +869,6 @@ public:
                     10,0);
         }
     }
-    
-    void testInverseBinding()
-    {
-        puts("\nInverse Binding test\n");
-        initAxiomSet(PLN_TEST_DIR"scm/inverse_binding.scm");
-        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                        NewNode(PREDICATE_NODE, "Possible"),
-                        mva((pHandle)LIST_LINK,
-                            NewNode(FW_VARIABLE_NODE, "$elmerist")
-                        )
-                    )),
-            new SimpleTruthValue(0.01f, getCount(0.01f)),
-            new SimpleTruthValue(1.0f, getCount(1.0f)),
-            200,0);
-    }
 
     //! Involves friendOf being a symmetricRelation
     void testBasicSpawning()
@@ -900,145 +888,7 @@ public:
                 100,0);
         }
     }
-    
-    void testMultipleRootsSpawning()
-    {
-        printf("\nTest for multiple roots spawning.\n");
-        /// Test for multiple roots spawning
-        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
-        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                        NewNode(PREDICATE_NODE, "killed"),
-                        mva((pHandle)LIST_LINK,
-                                    NewNode(FW_VARIABLE_NODE, "$killeri"),
-                                    NewNode(CONCEPT_NODE, "Osama")
-                                )
-                )),
-                new SimpleTruthValue(0.5f, getCount(0.5f)),
-                new SimpleTruthValue(0.999f, getCount(0.999f)),
-            10,0);
-    }
 
-    void testGeneralizationForVariableScopeLink()
-    {
-        printf("\nTest Generalization for VARIABLE_SCOPE_LINK.\n");
-        /// Test Generalization for VARIABLE_SCOPE_LINK
-        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
-        maketest(makemeta(mva((pHandle)VARIABLE_SCOPE_LINK,
-                    mva((pHandle)LIST_LINK), //empty dummy
-                    mva((pHandle)INHERITANCE_LINK,
-                        NewNode(FW_VARIABLE_NODE, "$i"),
-                        NewNode(CONCEPT_NODE, "terrorist")
-                ))),
-                new SimpleTruthValue(0.9f, getCount(0.02f)),
-                new SimpleTruthValue(0.999f, getCount(0.999f)),
-                10,0);
-    }
-    
-    void testGeneralizationForForAllLink()
-    {
-        printf("\nTest Generalization for FORALL_LINK.\n");
-        /// Test Generalization for FORALL_LINK
-        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
-        maketest(makemeta(mva((pHandle)FORALL_LINK,
-                    mva((pHandle)LIST_LINK), //empty dummy
-                    mva((pHandle)INHERITANCE_LINK,
-                        NewNode(FW_VARIABLE_NODE, "$i"),
-                        NewNode(CONCEPT_NODE, "terrorist")
-                ))),
-                new SimpleTruthValue(0.9f, getCount(0.9f)),
-                new SimpleTruthValue(0.999f, getCount(0.999f)),
-                15,0);
-    }
-
-    void testInheritanceOsamaAbu()
-    {
-        printf("\nTest inheritance Osama/Abu.\n");
-        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
-        maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
-                              NewNode(CONCEPT_NODE, "Osama"),
-                              NewNode(CONCEPT_NODE, "Abu")
-                              )),
-                 new SimpleTruthValue(0.0001f, getCount(0.90f)),
-                 new SimpleTruthValue(0.999f, getCount(1.01f)),
-                 40,0);
-    }
-    
-    void testInheritanceMuhummadTerrorist()
-    {
-        printf("\nTest inheritance Muhummad->Terrorist.\n");
-        initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
-// Takes a tad too long with bigdemo (but tested, and it works now)
-//        initAxiomSet(PLN_TEST_DIR"scm/bigdemo.scm");
-        maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
-                    NewNode(CONCEPT_NODE, "Muhammad"),
-                    NewNode(CONCEPT_NODE, "terrorist")
-            )),
-            new SimpleTruthValue(0.01f, getCount(0.20f)),
-            new SimpleTruthValue(1.01f, getCount(1.01f)),
-            460,0);
-    }
-
-    void testAnotBdemo()
-    {    
-        initAxiomSet(PLN_TEST_DIR"scm/AnotBdemo.scm");
-        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                    NewNode(PREDICATE_NODE, "found_under"),
-                        mva((pHandle)LIST_LINK,
-                            NewNode(CONCEPT_NODE, "toy_6"),
-                            NewNode(FW_VARIABLE_NODE, "$1")
-                        )
-                )),
-                new SimpleTruthValue(0.01f, getCount(0.01f)),
-                new SimpleTruthValue(1.01f, getCount(1.01f)),
-                10000,0);
-    }
-
-    void testFetchDemo5()
-    {    
-        initAxiomSet(PLN_TEST_DIR"scm/fetchdemo5.scm");
-        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                        NewNode(PREDICATE_NODE, "+++")
-                    )
-                ),
-                new SimpleTruthValue(0.01f, getCount(0.01f)),
-                new SimpleTruthValue(1.01f, getCount(0.94f)),
-                200,0);
-    }
-
-    void testFetchDemo5_alt()
-    {
-        printf("\nTest fetch demo.\n");
-        initAxiomSet(PLN_TEST_DIR"scm/fetchdemo5.scm");
-        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                            NewNode(PREDICATE_NODE, "just_done"),
-                            mva((pHandle)LIST_LINK,
-                                mva((pHandle)EVALUATION_LINK,
-                                    NewNode(SCHEMA_NODE, "give"),
-                                    mva((pHandle)LIST_LINK,
-                                        NewNode(CONCEPT_NODE, "ball"),
-                                        NewNode(CONCEPT_NODE, "teacher")
-                                    )
-                                )                                       
-                            )
-                        )
-                ),
-                new SimpleTruthValue(0.01f, getCount(0.01f)),
-                new SimpleTruthValue(1.01f, getCount(1.01f)),
-                200,0);
-    }
-
-    void testWoaDemo()
-    {    
-        initAxiomSet(PLN_TEST_DIR"scm/woademo.scm");
-        maketest(makemeta(mva((pHandle)SIMULTANEOUS_AND_LINK,
-                            NewNode(WORD_NODE, "blockword"),
-                            NewNode(FW_VARIABLE_NODE, "$blockword_associatee")
-                        )),
-                new SimpleTruthValue(0.01f, getCount(0.01f)),
-                new SimpleTruthValue(1.01f, getCount(1.01f)),
-                500,0);
-    }
-    
     void DISABLEtestFingerPrint(vtree& v)
     {
         BoundVTree bvt(v);

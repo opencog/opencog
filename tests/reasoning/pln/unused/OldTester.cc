@@ -1,3 +1,5 @@
+// This was a previous version of Tester.cc; the more recent version of
+// Tester.cc became PLNUTest.cxxtest.
 #include "Rules.h"
 #include "PLNEvaluator.h"
 #include "HandleEntry.h"
