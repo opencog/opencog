@@ -818,6 +818,8 @@ public:
         printf("finish MacroRuleTest\n");
     }
 
+    //! The failure tests do still work (but are disabled because they make
+    //! PLNUTest fail!)
     void testTVChecksWork() {
         /// The test which is supposed to fail
         if(RUN_FAILURE_TESTS) {
