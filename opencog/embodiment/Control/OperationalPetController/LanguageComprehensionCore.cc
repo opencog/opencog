@@ -68,7 +68,8 @@ void LanguageComprehension::init( void )
         this->nlgen_server_port = config().get_int("NLGEN_SERVER_PORT");
         this->nlgen_server_host = config().get("NLGEN_SERVER_HOST");
 
-        nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);      
+        nlgenClient = new NLGenClient(this->nlgen_server_host, this->nlgen_server_port);
+        loadDialogControllers( );
 
     } // if
 }
@@ -88,71 +89,8 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
 #endif
 }
 
-void LanguageComprehension::answerLatestQuestion( void )
+HandleSeq LanguageComprehension::getActivePredicateArguments( opencog::AtomSpace& as, const std::string& predicateName ) 
 {
-    init();
-
-#ifdef HAVE_GUILE
-    std::string answer = SchemeEval::instance().eval( "(answer-question)");    
-    logger().info( "LanguageComprehension::%s - (answer-question) answer: %s", __FUNCTION__, answer.c_str() );
-    if ( SchemeEval::instance().eval_error() ) {
-        logger().error( "LanguageComprehension::%s - An error occurred while trying to resolve reference: %s",
-                        __FUNCTION__, answer.c_str( ) );
-    } // if
-    SchemeEval::instance().clear_pending( );
-
-    boost::trim(answer);
-
-    std::string finalSentence;
-    if ( answer == "#truth-query" ) {
-        // yes/no question
-        HandleSeq elements = getActivePredicateArguments( "latestQuestionFrames" );
-        if ( elements.size( ) > 0 ) {
-            finalSentence = "Yes";
-        } else {
-            opencog::AtomSpace& as = agent.getAtomSpace( );
-            HandleSeq link(2);
-            link[0] = as.addNode( PREDICATE_NODE, "unknownTerm" );
-            link[1] = Handle::UNDEFINED;
-            
-            Type types[] = {PREDICATE_NODE, LIST_LINK };
-            HandleSeq evalLinks;
-            as.getHandleSet( back_inserter(evalLinks),
-                             link, &types[0], NULL, 2, EVALUATION_LINK, false );
-            bool unknownTermFound = false;
-            unsigned int i;
-            for (i = 0; i < evalLinks.size( ); ++i ) {
-                if ( as.getTV( evalLinks[i] ).isNullTv( ) || as.getTV( evalLinks[i] ).getMean( ) == 0 ) {
-                    continue;                    
-                } // if
-                as.setTV( evalLinks[i], TruthValue::FALSE_TV() );
-                unknownTermFound = true;
-            } // for
-
-            if ( unknownTermFound ) {
-                finalSentence = "Could you be more specific, please?";
-            } else {
-                finalSentence = "No";
-            } // else            
-        } // else
-    } else {
-        std::string relations = resolveFrames2Relex( );
-        // call nlgen using relations
-        finalSentence = relations;
-    } // else
-
-    if ( finalSentence.length( ) > 0 ) {
-        agent.getCurrentModeHandler( ).setProperty( "customMessage", finalSentence );
-        AtomSpaceUtil::setPredicateValue( agent.getAtomSpace( ), "has_something_to_say", TruthValue::TRUE_TV( ),
-                                          AtomSpaceUtil::getAgentHandle( agent.getAtomSpace( ), agent.getPetId( ) ) ); 
-    } // if
-#endif
-
-}
-
-HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string& predicateName ) 
-{
-    opencog::AtomSpace& as = agent.getAtomSpace( );
     HandleSeq commands(2);
     commands[0] = as.addNode( PREDICATE_NODE, predicateName );
     commands[1] = Handle::UNDEFINED;
@@ -207,7 +145,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 #endif
     
     opencog::AtomSpace& as = agent.getAtomSpace( );
-    HandleSeq elements = getActivePredicateArguments( "latestAvatarRequestedCommands" );
+    HandleSeq elements = getActivePredicateArguments( as, "latestAvatarRequestedCommands" );
 
     unsigned int i;
     for( i = 0; i < elements.size( ); ++i ) {
@@ -245,6 +183,16 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 
 }
 
+void LanguageComprehension::answerLatestQuestion( void )
+{
+    opencog::AtomSpace& as = agent.getAtomSpace( );
+    Handle agentHandle = AtomSpaceUtil::getAgentHandle( as, agent.getPetId( ) );
+    
+    AtomSpaceUtil::setPredicateValue( as,
+        "hasQuestionToAnswer", TruthValue::TRUE_TV( ), agentHandle );
+                                      
+}
+
 std::string LanguageComprehension::resolveFrames2Relex( )
 {
     init( );
@@ -255,7 +203,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     std::map<std::string, unsigned int> frame_elements_count;
 
     opencog::AtomSpace& as = agent.getAtomSpace( );
-    HandleSeq elements = getActivePredicateArguments( "latestQuestionFrames" );
+    HandleSeq elements = getActivePredicateArguments( as, "latestQuestionFrames" );
 
     if ( elements.size( ) == 0 ) {
         // there is no question to answer

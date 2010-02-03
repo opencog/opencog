@@ -25,6 +25,7 @@
 #define LANGUAGECOMPREHENSION_H
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/PetInterface.h>
 #include <opencog/embodiment/Control/OperationalPetController/OutputRelex.h>
 #include <opencog/embodiment/Control/OperationalPetController/FramesToRelexRuleEngine.h>
@@ -32,28 +33,73 @@
 
 #include <opencog/guile/SchemeEval.h>
 
+#include <boost/thread.hpp>
+
 namespace OperationalPetController
 {
     class LanguageComprehension 
     {
     public: 
+        class DialogController 
+        {
+        public:
+            DialogController( const std::string& name, LanguageComprehension* langComp ) : 
+                name( name ), langComp(langComp), agent( &langComp->getAgent( ) ),
+                    processingAnswer(false) 
+            { 
+                this->agentHandle = 
+                    AtomSpaceUtil::getAgentHandle( agent->getAtomSpace( ), agent->getPetId( ) );
+
+            }
+
+            virtual ~DialogController( void ) { }
+
+            const std::string& getName( void ) const {
+                return this->name;
+            }
+
+            inline bool isProcessingAnswer( void ) const {
+                return this->processingAnswer;
+            }
+
+            virtual void update( long elapsedTime, bool wait ) = 0;
+
+        protected:
+            std::string name;
+            LanguageComprehension* langComp;
+            Control::PetInterface* agent;
+            static boost::mutex lock;
+            bool processingAnswer;
+            Handle agentHandle;
+        };
+
         LanguageComprehension( Control::PetInterface& agent );
         
         virtual ~LanguageComprehension( void );        
 
         void resolveLatestSentenceReference( void );
 
-        void answerLatestQuestion( void );
-
         void resolveLatestSentenceCommand( void );
+
+        void answerLatestQuestion( void );
         
         void storeFact( void );
 
         std::string resolveFrames2Relex( );
+        
+        static HandleSeq getActivePredicateArguments( opencog::AtomSpace& as, const std::string& predicateName );
+
+        DialogController* createDialogController( const std::string& name );
+
+        inline Control::PetInterface& getAgent( void )
+        {
+            return this->agent;
+        }
+
+        void updateDialogControllers( long elapsedTime, bool wait = true );
 
     protected:
 
-        HandleSeq getActivePredicateArguments( const std::string& predicateName );
         std::string resolveRelex2Sentence( const std::string& relexInput );
 
         void init(void);
@@ -75,13 +121,14 @@ namespace OperationalPetController
         NLGenClient *nlgenClient;
         bool initialized;
 
+        /** Dialog Controllers methods **/
+        void addDialogController( DialogController* dialogController );
+        void loadDialogControllers( void );
+        
+        std::list<DialogController* > dialogControllers;
+                                 
     };
 
 };
-
-
-
-
-
 
 #endif // LANGUAGECOMPREHENSION_H

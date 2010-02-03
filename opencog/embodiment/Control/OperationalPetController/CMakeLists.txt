@@ -20,6 +20,7 @@ ADD_LIBRARY (OpcLib
     LearningAgentModeHandler
     LanguageComprehensionCore
     LanguageComprehensionFrames
+    LanguageComprehensionDialogController
     FramesToRelexRuleEngine
     NLGenClient
     OutputRelex

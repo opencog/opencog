@@ -1059,6 +1059,8 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
 
+    petInterface.getCurrentModeHandler( ).setProperty( "latestHeardSentence", sentenceText );
+
     Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
 
     HandleSeq schemaListLinkOutgoing;

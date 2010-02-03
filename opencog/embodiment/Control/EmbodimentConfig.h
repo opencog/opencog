@@ -327,6 +327,16 @@ protected:
 
             "IMPORTANCE_DECAY_CYCLE_PERIOD",      "15",
             "ENTITY_EXPERIENCE_MOMENT_CYCLE_PERIOD", "1",
+            
+            "DIALOG_CONTROLLERS",           "QuestionAnswering",
+            "MEGAHAL_SERVER_HOST",          "localhost",
+            "MEGAHAL_SERVER_PORT",          "6001",
+
+            "ALICEBOT_SERVER_HOST",         "localhost",
+            "ALICEBOT_SERVER_PORT",         "6002",
+
+            "RAMONA_SERVER_HOST",           "localhost",
+            "RAMONA_SERVER_PORT",           "6003",
 
             //used as halting condition by reset
             "",                             ""

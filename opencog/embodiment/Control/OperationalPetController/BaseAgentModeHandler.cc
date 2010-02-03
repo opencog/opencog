@@ -110,5 +110,7 @@ void BaseAgentModeHandler::update( void )
         logger().debug("BaseAgentModeHandler - Sending requested command to be evaluated. Command %s, # of arguments %d, remaining requests %d",
                        commandName.c_str( ), arguments.size( ), this->commandsQueue.size() );
     } // if
-  
+
+    this->agent->getLanguageTool( ).updateDialogControllers( 
+       this->agent->getPai( ).getLatestSimWorldTimestamp( ), false );
 }
