@@ -706,7 +706,7 @@ public:
     
     // Tries to combine several RuleApps into a "macro rule", which takes one
     // argument but applies several different rules
-    void DISABLEtestMacroRuleTest()
+    void testMacroRuleTest()
     {
         AtomSpaceWrapper *atw = GET_ASW;
         //typedef InversionRule RuleT1;
@@ -783,8 +783,8 @@ public:
         TS_ASSERT(!isApproxEq(tvB.getMean(), tv2.getMean(), EPSILON_S));
     //  assert(!isApproxEq(tvB.getConfidence(), tv2.getConfidence(), EPSILON_C));
 
-        // segfaults right before adding atom
         const TruthValue& tv3 = atw->getTV(_v2h(top3->compute().value));
+        // segfaults in this next line
         TS_ASSERT(isApproxEq(tvB.getMean(), tv3.getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB.getConfidence(), tv3.getConfidence(),
                   EPSILON_C));
