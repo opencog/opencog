@@ -1,6 +1,6 @@
 ;scm
 ;
-; smalldemo.scm -- identical to smalldemo.xml
+; smalldemo.scm -- Linas's handmade, modified copy of smalldemo.xml
 ;
 (EvaluationLink (stv 0.8 0.4)
     (PredicateNode "friendOf")
