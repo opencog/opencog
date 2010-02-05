@@ -53,6 +53,10 @@ ADD_LIBRARY(comboreduct SHARED
 
 )
 
+TARGET_LINK_LIBRARIES (comboreduct
+    util
+)
+
 #install library
 #INSTALL(TARGETS 
 #        ${PROJECT_NAME}
