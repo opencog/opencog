@@ -976,52 +976,8 @@ public:
 #if 0
 void runPLNTestsOnce()
 {
-    AtomSpaceWrapper *atw = GET_ASW;
-    INstats.clear();
-
-    puts("Starting PLN tests. NOTE! 3 first tests are supposed to fail.");
-
-    //MacroRuleTest();
-    puts("Testing atomspacewrapper");
-    atw->testAtomSpaceWrapper();
-
-/*
-    maketest(makemeta(mva(
-            )),
-            new SimpleTruthValue(0.01f, getCount(0.90f)),
-            new SimpleTruthValue(1.01f, getCount(1.01f)),
-            "bigdemo.xml",
-            100);
-*/
-
-/* // Just obsolete - there is no fetchdemo4, and this is done with fetchdemo5
-    maketest(makemeta(mva((Handle)EVALUATION_LINK,
-                        NewNode(PREDICATE_NODE, "just_done"),
-                        mva((Handle)LIST_LINK,
-                            mva((Handle)EVALUATION_LINK,
-                                NewNode(SCHEMA_NODE, "give"),
-                                mva((Handle)LIST_LINK,
-                                    NewNode(CONCEPT_NODE, "ball"),
-                                    NewNode(CONCEPT_NODE, "teacher")
-                                )
-                            )                                       
-                        )
-                    ))),
-            new SimpleTruthValue(0.01f, getCount(0.90f)),
-            new SimpleTruthValue(1.01f, getCount(1.01f)),
-            "fetchdemo4.xml",
-            10,0);
-*/
-
-/*  maketest(makemeta(mva(
-            )),
-            new SimpleTruthValue(0.01f, getCount(0.90f)),
-            new SimpleTruthValue(1.01f, getCount(1.01f)),
-            "bigdemo.xml",
-            100);*/
-
-
-
+// These are some of the targets in TestTargets.h, but telling you the file you
+// need too.
 /*  /// Untested with current PLN implementation:
 
     maketest(makemeta(mva((Handle)EVALUATION_LINK,
