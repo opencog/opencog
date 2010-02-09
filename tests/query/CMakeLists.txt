@@ -29,4 +29,8 @@ IF (GUILE_FOUND)
 	ADD_CXXTEST(ExecutionUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
+	TARGET_LINK_LIBRARIES(VarTypeNotUTest
+		util
+	)
 ENDIF (GUILE_FOUND)
+

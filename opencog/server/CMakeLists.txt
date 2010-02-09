@@ -40,7 +40,6 @@ ADD_LIBRARY (server SHARED
 )
 
 SET(SERVER_LINK_LIBS 
-	util
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -61,11 +60,6 @@ ENDIF (ODBC_FOUND)
 
 TARGET_LINK_LIBRARIES(server ${SERVER_LINK_LIBS})
 
-# to ease testing/debugging modules on the source tree
-# IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty:${OPENCOG_BINARY_DIR}/opencog/ubigraph:${OPENCOG_BINARY_DIR}/opencog/dynamics/attention:${OPENCOG_BINARY_DIR}/opencog/guile:${OPENCOG_BINARY_DIR}/opencog/reasoning/pln:${OPENCOG_BINARY_DIR}/opencog/nlp/wsd:${OPENCOG_BINARY_DIR}/opencog/persist:${OPENCOG_BINARY_DIR}/opencog/query:${OPENCOG_BINARY_DIR}/opencog/server:${OPENCOG_BINARY_DIR}/opencog/shell:${OPENCOG_BINARY_DIR}/opencog/util)
-# ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
-
 ADD_EXECUTABLE(cogserver
 	CogServerMain
 )
@@ -76,6 +70,24 @@ TARGET_LINK_LIBRARIES(cogserver
 	#${Boost_SIGNALS_LIBRARY}
 	${GUILE_LIBRARIES}
 )
+
+# to ease testing/debugging modules on the source tree
+# IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+IF (APPLE)
+    # We should eventually do Apple builds with "packages"
+    # Apples's linker seems not to understand a colon-separated list of
+    # rpaths.
+    SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS
+        "-Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/guile -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/reasoning/pln -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/persist -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/query -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/server -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/shell -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/util -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/web")
+    # doesn't work for some reason...
+    #SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
+    #    ${OPENCOG_BINARY_DIR}/opencog/guile)
+    #SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+ELSE(APPLE)
+    SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
+        -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty:${OPENCOG_BINARY_DIR}/opencog/ubigraph:${OPENCOG_BINARY_DIR}/opencog/dynamics/attention:${OPENCOG_BINARY_DIR}/opencog/guile:${OPENCOG_BINARY_DIR}/opencog/reasoning/pln:${OPENCOG_BINARY_DIR}/opencog/nlp/wsd:${OPENCOG_BINARY_DIR}/opencog/persist:${OPENCOG_BINARY_DIR}/opencog/query:${OPENCOG_BINARY_DIR}/opencog/server:${OPENCOG_BINARY_DIR}/opencog/shell:${OPENCOG_BINARY_DIR}/opencog/util:${OPENCOG_BINARY_DIR}/opencog/web)
+ENDIF (APPLE)
+#ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_DIRECTORIES "${BOOST_LIBRARY_DIRS}")
 IF (WIN32)

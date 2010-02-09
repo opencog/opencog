@@ -24,7 +24,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
     # Vital to do this otherwise unresolved symbals everywhere:
-    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,dynamic_lookup")
+    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
   ELSE (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
     # Linas: Change debug flags to -O2 since I think that 1) -O0 offers

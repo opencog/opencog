@@ -407,7 +407,18 @@ bool CogServer::loadModule(const std::string& filename)
     dlerror();
 
     logger().info("Loading module \"%s\"", filename.c_str());
+#ifdef __APPLE__
+    // Tell dyld to search runpath
+    std::string withRPath("@rpath/");
+    withRPath += filename;
+    // Check to see if so extension is specified, replace with .dylib if it is.
+    if (withRPath.substr(withRPath.size()-3,3) == ".so") {
+        withRPath.replace(withRPath.size()-3,3,".dylib");
+    }
+    void *dynLibrary = dlopen(withRPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+#else
     void *dynLibrary = dlopen(filename.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+#endif
     const char* dlsymError = dlerror();
     if ((dynLibrary == NULL) || (dlsymError)) {
         logger().error("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
