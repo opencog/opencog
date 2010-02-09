@@ -29,8 +29,9 @@
 #include <opencog/server/Request.h>
 
 #include "mongoose.h"
-#include <opencog/web/GetAtomRequest.h>
 #include <opencog/web/GetListRequest.h>
+#include <opencog/web/ListURLHandler.h>
+#include <opencog/web/AtomURLHandler.h>
 #include <opencog/web/ServerRequestWrapper.h>
 
 #define REST_PATH_PREFIX "/rest/0.2"
@@ -53,12 +54,12 @@ private:
     // before giving up.
     int timeout;
 
-    std::string serverAddress;
-
     // Register AtomSpace API requests. We can't directly access the AtomSpace
     // due to the Web Http server running in it's own set of threads.
-    Factory<GetAtomRequest, Request> getAtomFactory;
     Factory<GetListRequest, Request> getListFactory;
+    Factory<GetAtomRequest, Request> getAtomFactory;
+
+    std::string serverAddress;
 
     void setupURIsForREST();
     void setupURIsForUI();
@@ -89,6 +90,18 @@ public:
 
     // Class which wraps requests registered with and destined for CogServer
     ServerRequestWrapper requestWrapper;
+
+    // Class that handles /atom/* requests
+    AtomURLHandler atomURLHandler;
+
+    // Class that handles /list/* requests
+    ListURLHandler listURLHandler;
+
+    // Handle neighborhood requests
+    //NeighborhoodURLHandler neighborhoodURLHandler;
+
+    // Atom URL Handler for human user interface
+    //UIAtomURLHandler uiAtomURLHandler;
 
 }; // class
 

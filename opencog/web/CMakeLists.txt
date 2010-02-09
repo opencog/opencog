@@ -7,6 +7,9 @@ ADD_LIBRARY (ocweb SHARED
     GetAtomRequest
     GetListRequest
     ServerRequestWrapper
+    AtomURLHandler
+    ListURLHandler
+    BaseURLHandler
     #    AddAtomRequest
     mongoose
     #RequestMapper
