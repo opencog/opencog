@@ -183,7 +183,7 @@ ENDIF (NOT LUABIND_FOUND)
 # ENDIF (LINK_GRAMMAR_FOUND)
 
 # XML-RPC, used by the ubigraph module
-FIND_PACKAGE(XMLRPC)
+FIND_PACKAGE(XMLRPC COMPONENTS client)
 IF (NOT XMLRPC_FOUND)
     MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
