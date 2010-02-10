@@ -23,10 +23,16 @@
  */
 
 #include "GetAtomRequest.h"
+#include "BaseURLHandler.h"
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/server/CogServer.h>
 
@@ -59,18 +65,95 @@ bool GetAtomRequest::execute()
             UUID uuid = strtol(keyvalue[1].c_str(), NULL, 0);
             handle = Handle(uuid);
         }
+        // URL handler adds a format parameter to get JSON output.
+        else if (keyvalue[0] == "format") {
+            boost::to_lower(keyvalue[1]);
+            if (keyvalue[1] == "json") output_format = json_format;
+        }
     }
     if (TLB::isInvalidHandle(handle)) {
         _output << "Invalid handle: " << handle.value() << std::endl;
         return false;
     }
-    makeOutput(handle);
+    if (output_format == json_format) json_makeOutput(handle);
+    else html_makeOutput(handle);
     send(_output.str());
     return true;
 }
 
-#define SERVER_PLACEHOLDER "REST_SERVER_ADDRESS"
-void GetAtomRequest::makeOutput(Handle h)
+void GetAtomRequest::json_makeOutput(Handle h)
+{
+    AtomSpace* as = server().getAtomSpace();
+    _output << "{ \"handle\":" << h.value() << "," << std::endl;
+
+    _output << "\"type\":\"" << classserver().getTypeName(as->getType(h)) <<
+        "\"," << std::endl;
+    _output << "\"name\":\"" << as->getName(h) << "\"," << std::endl;
+
+    // Here the outgoing targets string is made
+    HandleSeq outgoing = as->getOutgoing(h);
+    _output << "\"outgoing\":[";
+    for (uint i = 0; i < outgoing.size(); i++) {
+        if (i != 0) _output << ",";
+        _output << outgoing[i].value();
+    }
+    _output << "]," << std::endl;
+
+    // Here the incoming string is made.
+    HandleSeq incoming = as->getIncoming(h);
+    _output << "\"incoming\":[";
+    for (uint i = 0; i < incoming.size(); i++) {
+        if (i != 0) _output << ",";
+        _output << incoming[i].value();
+    }
+    _output << "]," << std::endl;
+    _output << "\"sti\":" << as->getSTI(h) << "," <<std::endl;
+    _output << "\"lti\":" << as->getLTI(h) << "," <<std::endl;
+
+    _output << "\"truthvalue\":" << tvToJSON(as->getTV(h)) << std::endl;
+
+}
+
+std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
+{
+    std::ostringstream jtv;
+    if (tv.getType() == SIMPLE_TRUTH_VALUE) {
+        const SimpleTruthValue* stv = dynamic_cast<const SimpleTruthValue*>(&tv);
+        jtv << "{\"simple\":{";
+        jtv << "\"str\":" << stv->getMean() << ",";
+        jtv << "\"count\":" << stv->getCount() << ",";
+        jtv << "\"conf\":" << stv->getConfidence() << "} }";
+    } else if (tv.getType() == COUNT_TRUTH_VALUE) {
+        const CountTruthValue* ctv = dynamic_cast<const CountTruthValue*>(&tv);
+        jtv << "{\"count\":{";
+        jtv << "\"str\":" << ctv->getMean() << ",";
+        jtv << "\"count\":" << ctv->getCount() << ",";
+        jtv << "\"conf\":" << ctv->getConfidence() << "} }";
+    } else if (tv.getType() == INDEFINITE_TRUTH_VALUE) {
+        const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&tv);
+        jtv << "{\"indefinite\":{";
+        jtv << "\"str\":" << itv->getMean() << ",";
+        jtv << "\"L\":" << itv->getL() << ",";
+        jtv << "\"U\":" << itv->getU() << ",";
+        jtv << "\"conf\":" << itv->getConfidenceLevel() << ",";
+        //jtv << "\"diff\":" << itv->getDiff() << ",";
+        jtv << "\"symmetric\":" << itv->isSymmetric() << "} }";
+    } else if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
+        const CompositeTruthValue* ctv = dynamic_cast<const CompositeTruthValue*>(&tv);
+        jtv << "{\"composite\":";
+        jtv << "{ \"primary\":" <<
+            tvToJSON(ctv->getVersionedTV(NULL_VERSION_HANDLE));
+        for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) {
+            jtv << tvToJSON(ctv->getVersionedTV(ctv->getVersionHandle(i)));
+        }
+    } else {
+        jtv << "{\"unknown\":0}";
+    }
+    return jtv.str();
+
+}
+
+void GetAtomRequest::html_makeOutput(Handle h)
 {
     AtomSpace* as = server().getAtomSpace();
     // Make output from atom objects so we can access and create output from
@@ -146,10 +229,3 @@ void GetAtomRequest::generateProcessingGraph(Handle h)
         "width=\"200px\" height=\"200px\"></canvas></p>\n";
 }
 
-std::string GetAtomRequest::getHTML(std::string server_string) 
-{
-    std::string output = _output.str();
-    boost::replace_all(output, SERVER_PLACEHOLDER,
-            server_string);
-    return output;
-}

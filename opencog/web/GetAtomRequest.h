@@ -30,6 +30,7 @@
 #include <vector>
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
 
 namespace opencog
@@ -40,6 +41,7 @@ class GetAtomRequest : public Request
 
 protected:
 
+    enum { json_format, html_tabular_format } output_format;
     std::ostringstream  _output;
 
 public:
@@ -62,7 +64,9 @@ public:
     virtual bool isShell(void) {return info().is_shell;}
     std::string getHTML(std::string);
     std::string getHTMLHeader();
-    void makeOutput(Handle h);
+    void html_makeOutput(Handle h);
+    void json_makeOutput(Handle h);
+    std::string tvToJSON(const TruthValue& tv);
     void generateProcessingGraph(Handle h);
 };
 

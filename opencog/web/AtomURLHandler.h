@@ -40,6 +40,7 @@ namespace opencog
 class AtomURLHandler : public BaseURLHandler
 {
 
+    bool isJSON;
     bool refreshPage;
     std::string call_url;
     std::string query_string;

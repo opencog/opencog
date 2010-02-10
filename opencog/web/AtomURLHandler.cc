@@ -52,10 +52,31 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
 {
     std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
     CogServer& cogserver = static_cast<CogServer&>(server());
+    Request* request = cogserver.createRequest("get-atom");
+    if (request == NULL) {
+        WebModule::return500( conn, std::string("unknown request"));
+        return;
+    }
     _conn = conn;
     call_url = ri->uri;
     if (ri->query_string) query_string = ri->query_string;
 
+    // If we are passed data, then this is a json request
+    if (data) {
+        isJSON = true;
+        params.push_back(std::string("format=json"));
+    }
+    else {
+        // Check for refresh option
+        //! @todo make refresh time specifiable on the page.
+        std::list<std::string>::const_iterator it;
+        for (it = params.begin(); it != params.end(); ++it) {
+            if (*it == "refresh=1" or *it == "refresh=true") {
+                refreshPage = true;
+                break;
+            }
+        }
+    }
     // Get handle UUID from URL if it exists
     boost::regex reg("atom/([^/]*)");
     boost::cmatch m;
@@ -65,20 +86,6 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
         params.push_back(handleUUID);
     }
 
-    Request* request = cogserver.createRequest("get-atom");
-    if (request == NULL) {
-        WebModule::return500( conn, std::string("unknown request"));
-        return;
-    }
-    // Check for refresh option
-    //! @todo make refresh time specifiable on the page.
-    std::list<std::string>::const_iterator it;
-    for (it = params.begin(); it != params.end(); ++it) {
-        if (*it == "refresh=1" or *it == "refresh=true") {
-            refreshPage = true;
-            break;
-        }
-    }
     request->setRequestResult(this);
     request->setParameters(params);
     cogserver.pushRequest(request);
@@ -101,11 +108,13 @@ void AtomURLHandler::OnRequestComplete()
     std::string serverAdd("http://localhost:17034");
     serverAdd += UI_PATH_PREFIX;
     
-    result << WebModule::open_html_header;
-    if (refreshPage)
-        result << WebModule::html_refresh_header;
-    result << getHTMLHeader();
-    result << WebModule::close_html_header;
+    if (!isJSON) {
+        result << WebModule::open_html_header;
+        if (refreshPage)
+            result << WebModule::html_refresh_header;
+        result << getHTMLHeader();
+        result << WebModule::close_html_header;
+    }
 
     result << replaceURL(serverAdd);
 //mg_printf(conn, result.str().c_str());
@@ -118,15 +127,17 @@ void AtomURLHandler::OnRequestComplete()
         mg_printf(_conn, buffer);
     }
         
-    result.str("");
-    result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
-        "%s</small>";
-    if (refreshPage) {
-        result << "<br/><small>Page will refresh every 5 seconds</small>";
+    if (!isJSON) {
+        result.str("");
+        result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
+            "%s</small>";
+        if (refreshPage) {
+            result << "<br/><small>Page will refresh every 5 seconds</small>";
+        }
+        result << WebModule::html_footer;
+        mg_printf(_conn, result.str().c_str(), call_url.c_str(),
+                query_string.c_str());
     }
-    result << WebModule::html_footer;
-    mg_printf(_conn, result.str().c_str(), call_url.c_str(),
-            query_string.c_str());
     completed = true;
 
 }
