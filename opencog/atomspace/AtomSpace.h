@@ -364,7 +364,7 @@ public:
         Temporal t(startMoment, endMoment);
         std::vector<HandleTemporalPair> pairs;
         Handle spaceMapNode = getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME);
-	    if (spaceMapNode != Handle::UNDEFINED) {
+        if (spaceMapNode != Handle::UNDEFINED) {
             // Gets the first map before the given interval, if any
             getTimeInfo(back_inserter(pairs), spaceMapNode, t, TemporalTable::PREVIOUS_BEFORE_START_OF);
             // Gets all maps inside the given interval, if any
@@ -526,11 +526,7 @@ public:
     }
 
     /**
-     * DEPRECATED! This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink should be used (which is a bit faster too).
+     * DEPRECATED!
      *
      * Add an atom an optional TruthValue object to the Atom Table
      * This is a deprecated function; do not use it in new code,
@@ -539,6 +535,11 @@ public:
      * @param the handle of the Atom to be added
      * @param the TruthValue object to be associated to the added
      *        atom. NULL if the own atom's tv must be used.
+     * @deprecated This is a legacy code left-over from when one could
+     * have non-real atoms, i.e. those whose handles were
+     * less than 500, and indicated types, not atoms.
+     * Instead of using that method, one should use
+     * addNode or addLink should be used (which is a bit faster too).
      */
     Handle addRealAtom(const Atom& atom,
                        const TruthValue& tvn = TruthValue::NULL_TV());
@@ -902,7 +903,8 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const {
 
-        HandleEntry * handleEntry = atomTable.getHandleSet(handles, types, subclasses, arity, type, subclass, vh);
+        HandleEntry * handleEntry = atomTable.getHandleSet(handles, types,
+                subclasses, arity, type, subclass, vh);
         return (toOutputIterator(result, handleEntry));
     }
 
@@ -918,8 +920,10 @@ public:
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type and name.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * NOTE: The matched entries are appended to a container whose
+     * OutputIterator is passed as the first argument.
+     *
+     * Example of call to this method, which would return all entries in TimeServer:
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
      */

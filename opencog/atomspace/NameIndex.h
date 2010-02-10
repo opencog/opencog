@@ -35,12 +35,12 @@ class HandleEntry;
  * Implements an atom name index as an RB-tree (C++ map)
  */
 class NameIndex:
-	public StringIndex
+    public StringIndex
 {
-	public:
-		void insertHandle(Handle);
-		void removeHandle(Handle);
-		HandleEntry* getHandleSet(const char* name) const;
+    public:
+        void insertHandle(Handle);
+        void removeHandle(Handle);
+        HandleEntry* getHandleSet(const char* name) const;
 };
 
 } //namespace opencog

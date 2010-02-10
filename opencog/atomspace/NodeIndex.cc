@@ -29,75 +29,75 @@ using namespace opencog;
 
 NodeIndex::NodeIndex(void)
 {
-	resize();
+    resize();
 }
 
 void NodeIndex::resize()
 {
-	this->idx.resize(classserver().getNumberOfClasses());
+    this->idx.resize(classserver().getNumberOfClasses());
 }
 
 void NodeIndex::insertHandle(Handle h)
 {
-	Atom *a = TLB::getAtom(h);
-	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.insertHandle(h);  // XXX perf optimization if we pass atom not handle!
+    Atom *a = TLB::getAtom(h);
+    Type t = a->getType();
+    NameIndex &ni = idx[t];
+    ni.insertHandle(h);  // XXX perf optimization if we pass atom not handle!
 }
 
 void NodeIndex::removeHandle(Handle h)
 {
-	Atom *a = TLB::getAtom(h);
-	Type t = a->getType();
-	NameIndex &ni = idx[t];
-	ni.removeHandle(h);  // XXX perf optimization if we pass atom not handle!
+    Atom *a = TLB::getAtom(h);
+    Type t = a->getType();
+    NameIndex &ni = idx[t];
+    ni.removeHandle(h);  // XXX perf optimization if we pass atom not handle!
 }
 
 Handle NodeIndex::getHandle(Type t, const char *name) const
 {
-	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
-	       "Index out of bounds for atom type (t = %lu)", t);
-	const NameIndex &ni = idx[t];
-	return ni.get(name);
+    if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+           "Index out of bounds for atom type (t = %lu)", t);
+    const NameIndex &ni = idx[t];
+    return ni.get(name);
 }
 
 void NodeIndex::remove(bool (*filter)(Handle))
 {
-	std::vector<NameIndex>::iterator s;
-	for (s = idx.begin(); s != idx.end(); s++)
-	{
-		s->remove(filter);
-	}
+    std::vector<NameIndex>::iterator s;
+    for (s = idx.begin(); s != idx.end(); s++)
+    {
+        s->remove(filter);
+    }
 }
 
 HandleEntry * NodeIndex::getHandleSet(Type type, const char *name, bool subclass) const
 {
-	if (subclass)
-	{
-		HandleEntry *he = NULL;
-		
-		int max = classserver().getNumberOfClasses();
-		for (Type s = 0; s < max; s++)
-		{
-			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
-			if (classserver().isA(s, type))
-			{
-				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
-				          "Index out of bounds for atom type (s = %lu)", s);
-				const NameIndex &ni = idx[s];
-				Handle h = ni.get(name);
-				if (TLB::isValidHandle(h))
-					he = new HandleEntry(h, he);
-			}
-		}
-		return he;
-	}
-	else
-	{
-		Handle h = getHandle(type, name); 
-		if (TLB::isValidHandle(h)) return new HandleEntry(h);
-		return NULL;
-	}
+    if (subclass)
+    {
+        HandleEntry *he = NULL;
+        
+        int max = classserver().getNumberOfClasses();
+        for (Type s = 0; s < max; s++)
+        {
+            // The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
+            if (classserver().isA(s, type))
+            {
+                if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+                          "Index out of bounds for atom type (s = %lu)", s);
+                const NameIndex &ni = idx[s];
+                Handle h = ni.get(name);
+                if (TLB::isValidHandle(h))
+                    he = new HandleEntry(h, he);
+            }
+        }
+        return he;
+    }
+    else
+    {
+        Handle h = getHandle(type, name); 
+        if (TLB::isValidHandle(h)) return new HandleEntry(h);
+        return NULL;
+    }
 }
 
 // ================================================================
