@@ -65,6 +65,7 @@ bool GetAtomRequest::execute()
         return false;
     }
     makeOutput(handle);
+    send(_output.str());
     return true;
 }
 
@@ -143,16 +144,6 @@ void GetAtomRequest::generateProcessingGraph(Handle h)
     _output << "<p>"
         "</script><canvas datasrc=\"../local_graph.js\" "
         "width=\"200px\" height=\"200px\"></canvas></p>\n";
-}
-
-std::string GetAtomRequest::getHTMLHeader()
-{
-    std::ostringstream oss;
-    oss << "<script language=\"javascript\" src=\"../processing.js\">"
-        "</script>" << std::endl;
-    oss << "<script language=\"javascript\" src=\"../init.js\">"
-        "</script>" << std::endl;
-    return oss.str();
 }
 
 std::string GetAtomRequest::getHTML(std::string server_string) 

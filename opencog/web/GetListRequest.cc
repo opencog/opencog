@@ -23,6 +23,7 @@
  */
 
 #include "GetListRequest.h"
+#include "BaseURLHandler.h"
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -131,6 +132,7 @@ bool GetListRequest::execute()
         boost::split(keyvalue, *it, boost::is_any_of("="));
         if (keyvalue.size() != 2) {
             _output << "Bad syntax" << std::endl;
+            send(_output.str());
             return false;
         }
         if (keyvalue[0] == "handle") { // get by handle
@@ -138,6 +140,7 @@ bool GetListRequest::execute()
             handle = Handle(uuid);
             if (TLB::isInvalidHandle(handle)) {
                 _output << "Invalid handle: " << uuid << std::endl;
+                send(_output.str());
                 return false;
             }
             requestHandles.push_back(handle);
@@ -148,6 +151,7 @@ bool GetListRequest::execute()
             type = classserver().getType(keyvalue[1].c_str());
             if (type == NOTYPE) {
                 _output << "Invalid type: " << keyvalue[1] << std::endl;
+                send(_output.str());
                 return false;
             }
         }
@@ -179,6 +183,7 @@ bool GetListRequest::execute()
     }
     if (order_by != "") sortHandles(_handles, order_by, descending);
     makeOutput(_handles);
+    send(_output.str()); // send output to RequestResult instance
     return true;
 }
 
@@ -201,7 +206,6 @@ void GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
 
 }
 
-#define SERVER_PLACEHOLDER "REST_SERVER_ADDRESS"
 void GetListRequest::makeListHeader()
 {
     std::vector<std::string> params;
@@ -270,6 +274,7 @@ void GetListRequest::makeListHeader()
     tmpstring.str("");
         
     _output << " <th>Outgoing</th> <th>Incoming</th> </tr>" << std::endl; 
+
 }
 
 void GetListRequest::makeOutput(HandleSeq &hs)
@@ -342,12 +347,4 @@ void GetListRequest::makeOutput(HandleSeq &hs)
         _output << "</tr>" << std::endl;
     }
 
-}
-
-std::string GetListRequest::getHTML(std::string server_string) 
-{
-    std::string output = _output.str();
-    boost::replace_all(output, SERVER_PLACEHOLDER,
-            server_string);
-    return output;
 }

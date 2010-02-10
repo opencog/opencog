@@ -31,13 +31,15 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
 
+#include "BaseURLHandler.h"
 #include "mongoose.h"
 
 namespace opencog
 {
 
-class ServerRequestWrapper
+class ServerRequestWrapper : public BaseURLHandler
 {
+    std::string requestName;
 
 public:
 
@@ -45,6 +47,8 @@ public:
     ~ServerRequestWrapper();
     void handleRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
+
+    virtual void OnRequestComplete();
 };
 
 } // namespace 

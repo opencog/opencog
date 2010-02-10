@@ -36,7 +36,7 @@
 
 using namespace opencog;
 
-ServerRequestWrapper::ServerRequestWrapper()
+ServerRequestWrapper::ServerRequestWrapper() : BaseURLHandler("text/plain")
 {
 }
 
@@ -51,16 +51,16 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
     CogServer& cogserver = static_cast<CogServer&>(server());
     boost::regex reg("request/([^/]*)");
     boost::cmatch m;
+    _conn = conn;
 
     if (boost::regex_search(ri->uri,m,reg)) {
-        std::string requestName(m[1].first, m[1].second);
+        requestName = std::string(m[1].first, m[1].second);
         std::list<const char*> commands = cogserver.requestIds();
         Request* request = cogserver.createRequest(requestName.c_str());
         if (request == NULL) {
             mg_printf(conn, "unknown request %s\n", requestName.c_str());
             return;
         }
-        request->cleanUp = false;
         // Ensure it isn't a shell request or anything else that will break
         const RequestClassInfo& cci = cogserver.requestInfo(requestName);
         if (cci.is_shell || cci.hidden) {
@@ -76,33 +76,36 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
             boost::split(params, var_data, boost::is_any_of(" "));
             mg_free(var_data);
         }
+        request->setRequestResult(this);
         request->setParameters(params);
-
         cogserver.pushRequest(request);
-
-        for (;;) if (request->complete) break;
-
-        //! @todo replace with configured server
-        std::stringstream result;
-
-        result << WebModule::open_html_header;
-        result << WebModule::close_html_header;
-        result << "Result of running request '" << requestName << "':<br/>";
-        result << "<pre>";
-
-        // Escape angle brackets
-        std::string noanglebrackets = request->_output.str();
-        boost::replace_all(noanglebrackets, "<", "&lt;");
-        boost::replace_all(noanglebrackets, ">", "&gt;");
-        result << noanglebrackets;
-
-        result << "</pre>";
-        result << WebModule::html_footer;
-        mg_printf(conn, result.str().c_str());
-
     } else {
         mg_printf(conn, "URL malformed? %s\n", ri->uri);
     }
+}
+
+void ServerRequestWrapper::OnRequestComplete() {
+
+    //! @todo replace with configured server
+    std::stringstream result;
+
+    result << WebModule::open_html_header;
+    result << WebModule::close_html_header;
+    result << "Result of running request '" << requestName << "':<br/>";
+    result << "<pre>";
+
+    // Escape angle brackets
+    //! @todo move removal of angle brackets to BaseURLHandler
+    std::string noanglebrackets = request_output.str();
+    boost::replace_all(noanglebrackets, "<", "&lt;");
+    boost::replace_all(noanglebrackets, ">", "&gt;");
+    result << noanglebrackets;
+
+    result << "</pre>";
+    result << WebModule::html_footer;
+    mg_printf(_conn, result.str().c_str());
+
+    completed = true;
 
 }
 

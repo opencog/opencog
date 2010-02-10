@@ -30,6 +30,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestResult.h>
 
 #include "BaseURLHandler.h"
 #include "GetListRequest.h"
@@ -42,6 +43,9 @@ namespace opencog
 class ListURLHandler: public BaseURLHandler
 {
 
+    bool refreshPage;
+    std::string call_url;
+    std::string query_string;
 
 public:
 
@@ -49,6 +53,9 @@ public:
     ~ListURLHandler();
     void handleRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
+
+    virtual void OnRequestComplete();
+
 };
 
 } // namespace 

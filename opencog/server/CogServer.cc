@@ -193,11 +193,7 @@ void CogServer::processRequests(void)
     Request* request;
     while ((request = popRequest()) != NULL) {
         request->execute();
-        // Requests coming through a ConsoleSocket are expected to be deleted.
-        // Other processes that submit requests may want to investigate the
-        // state of the request after execution. e.g. RESTModule
-        if (request->cleanUp) delete request;
-        else request->complete = true;
+        delete request;
     }
     pthread_mutex_unlock(&processRequestsLock);
 }

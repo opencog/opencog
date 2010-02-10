@@ -34,13 +34,15 @@
 #include "BaseURLHandler.h"
 #include "GetAtomRequest.h"
 
-#include "mongoose.h"
-
 namespace opencog
 {
 
 class AtomURLHandler : public BaseURLHandler
 {
+
+    bool refreshPage;
+    std::string call_url;
+    std::string query_string;
 
 public:
 
@@ -48,6 +50,9 @@ public:
     ~AtomURLHandler();
     void handleRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
+
+    virtual void OnRequestComplete();
+    std::string getHTMLHeader();
 };
 
 } // namespace 

@@ -301,6 +301,7 @@ public:
     /** adds a parameter to the commands parameter list. */
     virtual void addParameter(const std::string& param);
 
+#if 0
     /** Whether CogServer should delete request once executed */
     bool cleanUp;
 
@@ -311,6 +312,7 @@ public:
       * just add the string to _output.
       */
     std::ostringstream     _output;
+#endif
 };
 
 } // namespace 

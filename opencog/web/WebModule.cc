@@ -23,6 +23,7 @@
  */
 
 #include "WebModule.h"
+#include "BaseURLHandler.h"
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
@@ -180,14 +181,29 @@ void WebModule::return500(mg_connection* conn, const std::string& message)
 
 void viewAtomPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
-{ rest_mod->atomURLHandler.handleRequest(conn, ri, data); }
+{
+    AtomURLHandler *handler = new AtomURLHandler();
+    handler->handleRequest(conn, ri, data);
+    for (;;) if (handler->completed) break;
+    delete handler;
+}
 
 void viewListPage( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
-{ rest_mod->listURLHandler.handleRequest(conn, ri, data); }
+{
+    ListURLHandler *handler = new ListURLHandler();
+    handler->handleRequest(conn, ri, data);
+    for (;;) if (handler->completed) break;
+    delete handler;
+}
 
 void makeRequest ( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
-{ rest_mod->requestWrapper.handleRequest(conn, ri, data); }
+{ 
+    ServerRequestWrapper *handler = new ServerRequestWrapper();
+    handler->handleRequest(conn, ri, data);
+    for (;;) if (handler->completed) break;
+    delete handler;
+}
 
 

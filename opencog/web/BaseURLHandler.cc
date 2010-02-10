@@ -27,6 +27,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
+#define SERVER_PLACEHOLDER "REST_SERVER_ADDRESS"
 namespace opencog {
     
 std::list<std::string> BaseURLHandler::splitQueryString(char* query) {
@@ -50,6 +51,18 @@ std::map<std::string,std::string> BaseURLHandler::paramsToMap(const std::list<st
         query_map.insert(pair<string,string>(keyAndValue[0], keyAndValue[1]));
     }
     return query_map;
+}
+
+std::string BaseURLHandler::replaceURL(const std::string server_string) 
+{
+    std::string output = request_output.str();
+    boost::replace_all(output, SERVER_PLACEHOLDER,
+            server_string);
+    return output;
+}
+
+void BaseURLHandler::SendResult(const std::string& res) {
+    request_output << res;
 }
 
 } // namespace

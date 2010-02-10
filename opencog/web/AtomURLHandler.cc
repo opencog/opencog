@@ -38,7 +38,8 @@
 
 using namespace opencog;
 
-AtomURLHandler::AtomURLHandler()
+AtomURLHandler::AtomURLHandler() : BaseURLHandler("text/plain"),
+    refreshPage(false)
 {
 }
 
@@ -51,6 +52,9 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
 {
     std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
     CogServer& cogserver = static_cast<CogServer&>(server());
+    _conn = conn;
+    call_url = ri->uri;
+    if (ri->query_string) query_string = ri->query_string;
 
     // Get handle UUID from URL if it exists
     boost::regex reg("atom/([^/]*)");
@@ -66,40 +70,44 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
         WebModule::return500( conn, std::string("unknown request"));
         return;
     }
-    // Prevent CogServer from deleting this request
-    // after it executes so we can find details about it.
-    request->cleanUp = false;
+    // Check for refresh option
+    //! @todo make refresh time specifiable on the page.
+    std::list<std::string>::const_iterator it;
+    for (it = params.begin(); it != params.end(); ++it) {
+        if (*it == "refresh=1" or *it == "refresh=true") {
+            refreshPage = true;
+            break;
+        }
+    }
+    request->setRequestResult(this);
     request->setParameters(params);
     cogserver.pushRequest(request);
-    
-    for (;;) {
-        //! @todo - implement time out (requires lock on the request cleanUp variable
-        if (request->complete) break;
-    }
-    GetAtomRequest *gar = dynamic_cast<GetAtomRequest *>(request);
+}
 
+std::string AtomURLHandler::getHTMLHeader()
+{
+    std::ostringstream oss;
+    oss << "<script language=\"javascript\" src=\"../processing.js\">"
+        "</script>" << std::endl;
+    oss << "<script language=\"javascript\" src=\"../init.js\">"
+        "</script>" << std::endl;
+    return oss.str();
+}
+
+void AtomURLHandler::OnRequestComplete()
+{
     //! @todo replace with configured server
     std::stringstream result;
     std::string serverAdd("http://localhost:17034");
     serverAdd += UI_PATH_PREFIX;
     
-    // Check for refresh option
-    //! @todo make refresh time specifiable on the page.
-    bool refresh = false;
-    std::list<std::string>::const_iterator it;
-    for (it = params.begin(); it != params.end(); ++it) {
-        if (*it == "refresh=1" or *it == "refresh=true") {
-            refresh = true;
-            break;
-        }
-    }
     result << WebModule::open_html_header;
-    if (refresh)
+    if (refreshPage)
         result << WebModule::html_refresh_header;
-    result << gar->getHTMLHeader();
+    result << getHTMLHeader();
     result << WebModule::close_html_header;
 
-    result << gar->getHTML(serverAdd).c_str();
+    result << replaceURL(serverAdd);
 //mg_printf(conn, result.str().c_str());
     char buffer[512];
     for (uint i = 0; i < result.str().size(); i+=511) {
@@ -107,20 +115,19 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
         result.str().copy(buffer,511,i);
         if (i+511 > result.str().size())
             buffer[(result.str().size() % 511) + 1] = '\0';
-        mg_printf(conn, buffer);
+        mg_printf(_conn, buffer);
     }
         
     result.str("");
     result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
         "%s</small>";
-    if (refresh) {
+    if (refreshPage) {
         result << "<br/><small>Page will refresh every 5 seconds</small>";
     }
     result << WebModule::html_footer;
-    mg_printf(conn, result.str().c_str(), ri->uri, ri->query_string);
+    mg_printf(_conn, result.str().c_str(), call_url.c_str(),
+            query_string.c_str());
+    completed = true;
 
-    // Clean up
-    delete request;
-    
 }
 

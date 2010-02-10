@@ -29,18 +29,25 @@
 #include <string>
 #include <map>
 #include <list>
+#include <sstream>
+
+#include <opencog/server/RequestResult.h>
 
 #include "mongoose.h"
 
+#define SERVER_PLACEHOLDER "REST_SERVER_ADDRESS"
 namespace opencog
 {
 
-class BaseURLHandler
+class BaseURLHandler : public RequestResult
 {
 
+protected:
+    std::ostringstream request_output;
+    struct mg_connection *_conn;
 public:
 
-    BaseURLHandler() {};
+    BaseURLHandler(const std::string& mimeType) : RequestResult(mimeType), completed(false) {};
     ~BaseURLHandler() {};
     virtual void handleRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data) = 0;
@@ -48,6 +55,21 @@ public:
     static std::list<std::string> splitQueryString(char* query);
     static std::map<std::string,std::string> paramsToMap (
             const std::list<std::string>& params);
+    std::string replaceURL(const std::string server_string);
+
+    // Interface for RequestResult follows:
+
+    // Only needed by very specific requests:
+    virtual void SetDataRequest() {};
+    virtual void Exit() {};
+
+    /** receive data from a Request */
+    virtual void SendResult(const std::string& res);
+    /** called when a Request has finished. */
+    virtual void OnRequestComplete() = 0;
+    // ----
+    bool completed;
+
 };
 
 } // namespace 
