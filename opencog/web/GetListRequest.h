@@ -35,10 +35,12 @@
 namespace opencog
 {
 
+#define GETLIST_MAXIMUM_RESULTS 50
 class GetListRequest : public Request
 {
 
 protected:
+    enum { json_format, html_tabular_format } output_format;
 
     std::ostringstream  _output;
     std::string order_by;
@@ -47,6 +49,7 @@ protected:
     Type type;
     bool subtypes;
     HandleSeq requestHandles;
+    int maximum, skip;
 
 public:
 
@@ -69,9 +72,15 @@ public:
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
     void sortHandles(HandleSeq& hs, std::string order_by, bool descend = true);
-    void makeListHeader();
-    void makeOutput(HandleSeq& hs);
-    std::string getHTML(std::string);
+
+    void html_makeListHeader(unsigned int total_results);
+    void html_makeOutput(HandleSeq& hs);
+
+    void json_makeOutput(HandleSeq& hs);
+
+    void sendError(std::string s);
+
+    //std::string getHTML(std::string);
 };
 
 

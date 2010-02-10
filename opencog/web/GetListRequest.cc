@@ -33,6 +33,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace opencog;
 
@@ -110,7 +111,7 @@ bool getListSortByTVConfidencePredicate (bool descending,
 
 
 GetListRequest::GetListRequest() : order_by(""), descending(true), name(""),
-    type(NOTYPE), subtypes(false)
+    type(NOTYPE), subtypes(false), maximum(GETLIST_MAXIMUM_RESULTS), skip(0)
 {
     
 }
@@ -124,6 +125,7 @@ bool GetListRequest::execute()
 {
     Handle handle = Handle::UNDEFINED;
     HandleSeq _handles;
+    std::ostringstream errbuff;
     AtomSpace* as = server().getAtomSpace();
 
     std::list<std::string>::const_iterator it;
@@ -131,16 +133,16 @@ bool GetListRequest::execute()
         std::vector<std::string> keyvalue;
         boost::split(keyvalue, *it, boost::is_any_of("="));
         if (keyvalue.size() != 2) {
-            _output << "Bad syntax" << std::endl;
-            send(_output.str());
+            errbuff << "Bad syntax";
+            sendError(errbuff.str());
             return false;
         }
         if (keyvalue[0] == "handle") { // get by handle
             UUID uuid = strtol(keyvalue[1].c_str(), NULL, 0);
             handle = Handle(uuid);
             if (TLB::isInvalidHandle(handle)) {
-                _output << "Invalid handle: " << uuid << std::endl;
-                send(_output.str());
+                errbuff << "Invalid handle: " << uuid;
+                sendError(errbuff.str());
                 return false;
             }
             requestHandles.push_back(handle);
@@ -150,8 +152,8 @@ bool GetListRequest::execute()
         } else if (keyvalue[0] == "type") { // filter by type, excluding subtypes
             type = classserver().getType(keyvalue[1].c_str());
             if (type == NOTYPE) {
-                _output << "Invalid type: " << keyvalue[1] << std::endl;
-                send(_output.str());
+                errbuff << "Invalid type: " << keyvalue[1];
+                sendError(errbuff.str());
                 return false;
             }
         }
@@ -164,6 +166,25 @@ bool GetListRequest::execute()
         else if (keyvalue[0] == "order") { // sort list by... 
             order_by = keyvalue[1];
             boost::to_lower(order_by);
+        }
+        else if (keyvalue[0] == "max") { // maximum results to return
+            try {
+                maximum = boost::lexical_cast<int>(keyvalue[1]);
+            } catch (boost::bad_lexical_cast) {
+                errbuff << "Couldn't interpret max parameter";
+                sendError(errbuff.str());
+                return false;
+            }
+        }
+        else if (keyvalue[0] == "skip") { // maximum results to return
+            try {
+                skip = boost::lexical_cast<int>(keyvalue[1]);
+                if (skip < 0) skip = 0;
+            } catch (boost::bad_lexical_cast) {
+                errbuff << "Couldn't interpret skip parameter";
+                sendError(errbuff.str());
+                return false;
+            }
         }
         else if (keyvalue[0] == "ascend") { // sort in the reverse direction
             boost::to_lower(keyvalue[1]);
@@ -182,9 +203,17 @@ bool GetListRequest::execute()
         as->getHandleSet(std::back_inserter(_handles), type, subtypes);
     }
     if (order_by != "") sortHandles(_handles, order_by, descending);
-    makeOutput(_handles);
+    if (output_format == json_format) json_makeOutput(_handles);
+    else html_makeOutput(_handles);
     send(_output.str()); // send output to RequestResult instance
     return true;
+}
+
+void GetListRequest::sendError(std::string err)
+{
+    //! @todo: different responses for different formats json/html
+    _output << err << std::endl;
+    send(_output.str());
 }
 
 void GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
@@ -206,7 +235,7 @@ void GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
 
 }
 
-void GetListRequest::makeListHeader()
+void GetListRequest::html_makeListHeader(unsigned int total_results)
 {
     std::vector<std::string> params;
     std::ostringstream querystring;
@@ -234,11 +263,53 @@ void GetListRequest::makeListHeader()
         params.push_back(tmpstring.str());
         tmpstring.str("");
     }
+    tmpstring << "max=" << maximum;
+    params.push_back(tmpstring.str());
+    tmpstring.str("");
     for (uint i = 0; i < params.size(); i++) {
         if (i > 0) querystring << "&";
         querystring << params[i];
     }
     
+    _output << "<p><small>Viewing atoms " << skip+1 << " to ";
+    if ((uint)skip+maximum < total_results)
+        _output << skip+maximum;
+    else
+        _output << total_results;
+    _output  << " (of " << total_results << ")</small></p>" << std::endl;
+    if (skip > 0) {
+        int lskip = skip-maximum;
+        if (lskip < 0) lskip = 0;
+        _output << "<a href=\"" << querystring.str() << "&skip=0" <<
+            "\">&lArr;" << "</a> ";
+        _output << "<a href=\"" << querystring.str() << "&skip=" << lskip <<
+            "\">&larr;" << "</a> ";
+    } else {
+        _output << "&lArr; &larr; ";
+    }
+    if ((unsigned int)skip+maximum < total_results) {
+        int rskip = skip+maximum;
+        _output << "<a href=\"" << querystring.str() << "&skip=" << rskip <<
+            "\">&rarr;" << "</a> ";
+        _output << "<a href=\"" << querystring.str() << "&skip=" <<
+            total_results-maximum <<
+            "\">&rArr;" << "</a> ";
+    } else {
+        _output << "&rarr; &rArr;";
+    }
+    _output << "<br/>" << std::endl;
+    _output << "<small>Per page: ";
+    int maximums[] = { 10, 20, 50, 100 };
+    for (int m = 0; m < 4; m++) {
+        if (maximums[m] == maximum) {
+            _output << maximums[m] << " ";
+        } else {
+            _output << "<a href=\"" << querystring.str() << "&max=" << maximums[m]
+                << "&skip=" << skip << "\">" << maximums[m] << "</a> ";
+        }
+    }
+    _output << "</small>" << std::endl;
+
     // Make the header for the table
     _output << "<th>Name</th> <th>Type</th> ";
 
@@ -277,17 +348,95 @@ void GetListRequest::makeListHeader()
 
 }
 
-void GetListRequest::makeOutput(HandleSeq &hs)
+void GetListRequest::html_makeOutput(HandleSeq &hs)
 {
     AtomSpace* as = server().getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
     _output << "<table border=\"1\"><tr>";
 
-    makeListHeader();
+    html_makeListHeader(hs.size());
 
     std::vector<Handle>::const_iterator it;
-    for (it = hs.begin(); it != hs.end(); ++it) {
+    int counter=0;
+    for (it = hs.begin(); it != hs.end() && counter < skip+maximum; ++it) {
+        counter++;
+        if (counter <= skip) continue;
+        Handle h = *it;
+        _output << "<tr>" << std::endl;
+        _output << "<td><a href=\"" << SERVER_PLACEHOLDER
+            << "/atom?handle=" << h.value() << "\">"
+            << as->getName(h) << "</a></td>";
+        _output << "<td>" << classserver().getTypeName(as->getType(h)) << "</td> ";
+        AttentionValue::sti_t the_sti = as->getSTI(h) ;
+        AttentionValue::lti_t the_lti = as->getLTI(h) ;
+        //! @todo make the sti/lti color scaled instead of just -ve/+ve
+        if (the_sti > 0)
+            _output << "<td style=\"background-color:#99FF66\">" << the_sti << "</td> ";
+        else
+            _output << "<td style=\"background-color:#99FFFF\">" << the_sti << "</td> ";
+        if (the_lti > 0)
+            _output << "<td style=\"background-color:#99FF66\">" << the_lti << "</td> ";
+        else
+            _output << "<td style=\"background-color:#99FFFF\">" << the_lti << "</td> ";
+        _output << "<td>" << as->getTV(h).toString() << "</td> ";
+
+        // Here the outgoing targets string is made
+        HandleSeq outgoing = as->getOutgoing(h);
+        _output << "<td>";
+        for (uint i = 0; i < outgoing.size(); i++) {
+            Handle ho = outgoing[i];
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
+                classserver().getTypeName(as->getType(ho)) <<
+                "&max=" << maximum << "\">";
+            _output << classserver().getTypeName(as->getType(ho));
+            _output << "</a>:";
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
+                ho.value() << "\">";
+            if (as->getName(ho) == "")
+                _output << "#" + ho.value();
+            else
+                _output << as->getName(ho);
+            _output << "</a><br/>";
+        }
+        _output << "</td>";
+
+        // Here the incoming string is made.
+        HandleSeq incoming = as->getIncoming(h);
+        _output << "<td>";
+        for (uint i = 0; i < incoming.size(); i++) {
+            Handle ho = incoming[i];
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
+                classserver().getTypeName(as->getType(ho)) <<
+                "&max=" << maximum << "\">";
+            _output << classserver().getTypeName(as->getType(ho));
+            _output << "</a>:";
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
+                ho.value() << "\">";
+            if (as->getName(ho) == "")
+                _output << "#" << ho.value();
+            else
+                _output << as->getName(ho) << ":";
+            _output << "</a><br/>";
+        }
+        _output << "</td>";
+        _output << "</tr>" << std::endl;
+    }
+
+}
+
+void GetListRequest::json_makeOutput(HandleSeq &hs)
+{
+    AtomSpace* as = server().getAtomSpace();
+    // Make output from atom objects so we can access and create output from
+    // them
+    _output << "<table border=\"1\"><tr>";
+
+    std::vector<Handle>::const_iterator it;
+    int counter=0;
+    for (it = hs.begin(); it != hs.end() && counter < skip+maximum; ++it) {
+        counter++;
+        if (counter <= skip) continue;
         Handle h = *it;
         _output << "<tr>" << std::endl;
         _output << "<td><a href=\"" << SERVER_PLACEHOLDER

@@ -36,7 +36,8 @@
 
 using namespace opencog;
 
-ListURLHandler::ListURLHandler() : BaseURLHandler("text/plain")
+ListURLHandler::ListURLHandler() : BaseURLHandler("text/plain"),
+    refreshPage(false)
 {
 }
 
