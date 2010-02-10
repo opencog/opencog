@@ -21,6 +21,7 @@
 #include "ForwardChainer.h"
 #include "AtomSpaceWrapper.h"
 #include "utils/NMPrinter.h"
+#include "rules/Rules.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
@@ -204,7 +205,20 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
             // select arity (exponentially biased to smaller sizes?)
             for (unsigned int i = 0; i < r->getInputFilter().size(); i++) {
                 if (i != rp.getSeedIndex()) {
-                    args[i] = PHANDLE_UNDEFINED; // default value so that printing it later won't crash!!!
+                    // Use lookup rule to get a matching atom.
+                    // Btr<std::set<BoundVertex> > attemptDirectProduction(meta h
+                    LookupRule lookup(GET_ASW);
+                    Btr<std::set<BoundVertex> > matches;
+                    
+                    matches = lookup.attemptDirectProduction(r->getInputFilter()[i]);
+                    
+                    if (matches->size() == 0) {
+                        // then it's hopeless, so return or something
+                    } else {
+                        BoundVertex arg = *(matches->begin()); // or pick one at random etc 
+                        args[i] = arg.GetValue();
+                    }
+/*                    args[i] = PHANDLE_UNDEFINED; // default value so that printing it later won't crash!!!
                     // random selection
                     //! @todo sort based on strength and exponential random select
                     pHandle randArg;
@@ -217,7 +231,7 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
                         boost::get<pHandle>(args[i]);
                     } else {
                         argumentAttempts = 0;
-                    }
+                    }*/
                 }
             }
             cout << "FWDCHAIN checking if arguments ";
