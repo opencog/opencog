@@ -42,6 +42,9 @@
 #include <sstream>
 
 #include "TestTargets.h"
+#include "ForwardChainer.h"
+
+#include <opencog/adaptors/tulip/TulipWriter.h>
 
 using namespace opencog;
 using namespace opencog::pln;
@@ -285,6 +288,104 @@ Handle opencog::pln::applyRule(const string& ruleName,
         return vhp.first;
     }
     else return Handle::UNDEFINED;
+}
+
+//! Used by forward chainer 
+struct compareStrength {
+    // Warning, uses fake atomspace handles in comparison
+    bool operator()(const pHandle& a, const pHandle& b) {
+        return GET_ASW->getTV(a).getConfidence() >
+            GET_ASW->getTV(b).getConfidence();
+    }
+};
+
+void fw_beta (void) {
+  AtomSpaceWrapper *atw = GET_ASW;
+
+//  atw->reset();
+
+  //ForwardChainerRuleProvider *rp=new ForwardChainerRuleProvider();
+  const SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
+#if 0
+  pHandle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);
+  pHandle h2=atw->addNode (CONCEPT_NODE,string("Mortal"),tv,true);
+  pHandle h3=atw->addNode (CONCEPT_NODE,string("Socrates"),tv,true);
+  std::vector<pHandle> p1(2),p2(2);
+  p1[0]=h1; p1[1]=h2;
+  p2[0]=h3; p2[1]=h1;
+  pHandle L1=atw->addLink(ASSOCIATIVE_LINK,p1,tv,true);
+  pHandle L2=atw->addLink(ASSOCIATIVE_LINK,p2,tv,true);
+#endif
+
+  ForwardChainer fw;
+
+  // Load data from xml wordpairs file
+//  atw->reset();
+//  bool axioms_ok = atw->loadAxioms(std::string("wordpairs.xml"));
+//  if (!axioms_ok) {
+//      cout << "load failed" <<endl;
+//      exit(1);
+//  }
+//  // Remove the dummy list link (added because the xml loader is silly)
+//  Btr<set<pHandle> > ll = atw->getHandleSet(LIST_LINK, "", false);
+//  foreach(pHandle l, *ll) {
+//      atw->removeAtom(l);
+//  }
+
+
+  cout << "FWBETA Adding handles to seed stack" << endl;
+  //fw.seedStack.push_back(L1);
+  //fw.seedStack.push_back(L2);
+  //
+// Push all links to seed stack in order of strength
+// . get links
+    Btr<set<pHandle> > linksSet = atw->getHandleSet(LINK, "", true);
+    pHandleSeq links;
+    copy(linksSet->begin(), linksSet->end(), back_inserter(links));
+// . sort links based on strength
+    std::sort(links.begin(), links.end(), compareStrength());
+// . add in order
+    foreach(pHandle l, links) {
+        fw.seedStack.push_back(l);
+    }
+// Change prob of non seed stack selection to zero
+//! @todo make set method so it will normalise probabilities.
+  fw.probGlobal = 0.0f;
+  fw.probStack = 1.0f;
+
+  cout << "FWBETA adding to seed stack finished" << endl;
+  pHandleSeq results = fw.fwdChainStack(10000);
+  //opencog::logger().info("Finish chaining on seed stack");
+  cout << "FWBETA Chaining on seed stack finished, results:" << endl;
+/*  NMPrinter np;
+  foreach (pHandle h, results) {
+      np(h);
+  }*/
+  cout << "Removing results that just repeat existing links" << endl;
+  int totalSize = results.size();
+  pHandleSeq::iterator i,j;
+  for (i = results.begin(); i != results.end(); i++) {
+      vhpair v = atw->fakeToRealHandle(*i);
+      if (! (v.second == NULL_VERSION_HANDLE)) {
+          j = i;
+          i--;
+          results.erase(j);
+      }
+  }
+  
+  //HandleSeq results_realHandles = 
+  
+  cout << "Removed " << totalSize - results.size() << " results that just " <<
+      "repeat existing links, " << results.size() << " results left." << endl;
+      
+  Type t = SET_LINK;
+  //pHandle setLink = atw->addLinkDC(t, results, tv, false, false);
+  //Handle setLink = atomspace().addLink(t, results, tv);
+
+  TulipWriter tlp(std::string("fwd_chain_result.tlp"));
+  //tlp.write(PHANDLE_UNDEFINED,-1,atw->fakeToRealHandle(setLink).first);
+  
+  
 }
 
 template <typename T>
@@ -553,6 +654,9 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                 using_root = true;
             }
         }*/
+        else if (c == "fc") {
+            fw_beta();
+        }
         else if (c == "help") {
             ss << usageInfo;
         }

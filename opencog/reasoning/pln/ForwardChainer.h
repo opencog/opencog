@@ -36,7 +36,6 @@ const static float FWD_CHAIN_PROB_GLOBAL = 0.3f;
 const static int FWD_CHAIN_MAX_FILL = 50;
 
 //! Classes that manages forward chaining
-//! @warning all Handles are PLN fake handles
 class ForwardChainer {
 private:
 
@@ -82,6 +81,7 @@ public:
     pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
     //! Get a random handle from the seed stack or global atomspace
+    //! Rejects handles that are in the vector args
     pHandle getRandomArgument(const std::vector< Vertex > &args);
     static RandGen* rng;
     RandGen* getRNG();

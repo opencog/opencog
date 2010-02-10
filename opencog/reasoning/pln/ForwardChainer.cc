@@ -120,19 +120,25 @@ pHandleSeq ForwardChainer::getLocalLink(pHandle lh, const std::vector< Vertex > 
         cout << "error: lh is not the source." <<endl;
         return choices;
     }
+    
+    Btr<std::set<pHandle> > inhs = atw->getHandleSet(ATOM, "", true);
+
+    // It should be crashing because of DeductionRule getting invalid input
+    // (though it crashed when it had this anyway...).
+    
     // if lh is a link:
-    if (atw->isSubType(lh,LINK)) {
-        cout << "lh is a link" <<endl;
-        pHandle junction = atw->getOutgoing(lh,1);
+//    if (atw->isSubType(lh,LINK)) {
+//        cout << "lh is a link" <<endl;
+//        pHandle junction = atw->getOutgoing(lh,1);
         // Only one outgoing if the link is asymmetric?
-        pHandleSeq inhs = atw->getIncoming(junction);
+//        pHandleSeq inhs = atw->getIncoming(junction);
         // foreach incoming
-        foreach (pHandle inh, inhs) {
-            if (inh != lh && atw->getOutgoing(inh,0) == junction) {
+        foreach (pHandle inh, *inhs) {
+//            if (inh != lh && atw->getOutgoing(inh,0) == junction) {
                 // add to vector
                 choices.push_back(inh);
-            }
-        }
+//            }
+//        }
     }
     return choices;
 }
@@ -147,7 +153,8 @@ void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
         } else {
             cout << ", ";
         }
-        cout << boost::get<Handle>(v).value();
+        //cout << boost::get<Handle>(v).value();
+        cout << v;
     }
     cout << " >";
 }
@@ -181,6 +188,9 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
         cout << "FWDCHAIN Trying rule " << r->name << endl;
         cleanArgs.resize(filterSize);
         cleanArgs[rp.getSeedIndex()] = s;
+        
+        boost::get<pHandle>(cleanArgs[rp.getSeedIndex()]);
+        
         pHandleSeq choices = getLocalLink(s,cleanArgs);
         do {
             vector<Vertex> args(cleanArgs);
@@ -194,6 +204,7 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
             // select arity (exponentially biased to smaller sizes?)
             for (unsigned int i = 0; i < r->getInputFilter().size(); i++) {
                 if (i != rp.getSeedIndex()) {
+                    args[i] = PHANDLE_UNDEFINED; // default value so that printing it later won't crash!!!
                     // random selection
                     //! @todo sort based on strength and exponential random select
                     pHandle randArg;
@@ -202,6 +213,8 @@ pHandleSeq ForwardChainer::fwdChainSeed(const pHandle s, int maxRuleApps)
                         randArg = choices[index];
                         choices.erase(choices.begin() + index);
                         args[i] = randArg;
+                        
+                        boost::get<pHandle>(args[i]);
                     } else {
                         argumentAttempts = 0;
                     }
@@ -262,6 +275,10 @@ pHandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
         seedStack.pop_front();
         //opencog::logger().info("Forward chaining on seed %u", seed);
         cout << "FWDCHAIN Forward chaining on seed " << seed << endl;
+        if (!GET_ASW->isValidPHandle(seed)) {
+            cout << "somehow not a valid pHandle. yawn" << std::endl;
+            break;
+        }
         np.print(seed);
         pHandleSeq hs = fwdChainSeed(seed, 1);
         copy(hs.begin(), hs.end(), back_inserter(results));
