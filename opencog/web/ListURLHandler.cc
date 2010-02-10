@@ -37,7 +37,7 @@
 using namespace opencog;
 
 ListURLHandler::ListURLHandler() : BaseURLHandler("text/plain"),
-    refreshPage(false)
+    refreshPage(false), isJSON(false)
 {
 }
 
@@ -58,21 +58,36 @@ void ListURLHandler::handleRequest( struct mg_connection *conn,
     _conn = conn;
     call_url = ri->uri;
     if (ri->query_string) query_string = ri->query_string;
+
+    // If we are passed data, then this is a json request
+    if (data) {
+        isJSON = true;
+        params.push_back(std::string("format=json"));
+    }
+    else {
+        // Check for refresh option
+        //! @todo make refresh time specifiable on the page.
+        std::list<std::string>::const_iterator it;
+        for (it = params.begin(); it != params.end(); ++it) {
+            if (*it == "refresh=1" or *it == "refresh=true") {
+                refreshPage = true;
+                break;
+            }
+        }
+    }
     // Get list parameters from URL if they exist
     boost::regex reg("list/([^/]*)");
     boost::cmatch m;
     if (boost::regex_search(ri->uri,m,reg)) {
         std::string typeName(m[1].first, m[1].second);
-        typeName = "type=" + typeName;
-        params.push_back(typeName);
-    }
-    // Check for refresh option
-    //! @todo make refresh time specifiable on the page.
-    std::list<std::string>::const_iterator it;
-    for (it = params.begin(); it != params.end(); ++it) {
-        if (*it == "refresh=1" or *it == "refresh=true") {
-            refreshPage = true;
-            break;
+        if (typeName == "") {
+            typeName = "type=Atom";
+            params.push_back(typeName);
+            typeName = "subtype=true";
+            params.push_back(typeName);
+        } else {
+            typeName = "type=" + typeName;
+            params.push_back(typeName);
         }
     }
 
@@ -88,10 +103,12 @@ void ListURLHandler::OnRequestComplete()
     serverAdd += UI_PATH_PREFIX;
     std::cout << request_output;
     
-    result << WebModule::open_html_header;
-    if (refreshPage)
-        result << WebModule::html_refresh_header;
-    result << WebModule::close_html_header;
+    if (!isJSON) {
+        result << WebModule::open_html_header;
+        if (refreshPage)
+            result << WebModule::html_refresh_header;
+        result << WebModule::close_html_header;
+    }
 
     result << replaceURL(serverAdd);
 //mg_printf(conn, result.str().c_str());
@@ -103,16 +120,18 @@ void ListURLHandler::OnRequestComplete()
             buffer[(result.str().size() % 511) + 1] = '\0';
         mg_printf(_conn, buffer);
     }
-        
-    result.str("");
-    result << "\r\n\r\n<small>You requested the url: %s<br/> With query string:"
-        "%s</small>";
-    if (refreshPage) {
-        result << "<br/><small>Page will refresh every 5 seconds</small>";
-    }
-    result << WebModule::html_footer;
-    mg_printf(_conn, result.str().c_str(), call_url.c_str(),
+
+    if (!isJSON) {
+        result.str("");
+        result << "\r\n\r\n<small>You requested the url: %s<br/> With query string:"
+            "%s</small>";
+        if (refreshPage) {
+            result << "<br/><small>Page will refresh every 5 seconds</small>";
+        }
+        result << WebModule::html_footer;
+        mg_printf(_conn, result.str().c_str(), call_url.c_str(),
             query_string.c_str());
+    }
 
     completed=true;
 }

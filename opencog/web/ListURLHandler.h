@@ -44,6 +44,7 @@ class ListURLHandler: public BaseURLHandler
 {
 
     bool refreshPage;
+    bool isJSON;
     std::string call_url;
     std::string query_string;
 

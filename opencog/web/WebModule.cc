@@ -151,11 +151,9 @@ void WebModule::setupURIsForREST()
 {
     static char rest_str[] = "rest";
     // atom/type/* support GET atoms of type.
-    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/type/*", viewListPage,
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/list/*", viewListPage,
             rest_str);
     // atom/ support GET/PUT/POST == get info/create/create
-    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/", viewListPage,
-            rest_str);
     // atom/* support GET, get atom info
     mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/*", viewAtomPage,
             rest_str);

@@ -192,6 +192,11 @@ bool GetListRequest::execute()
                 descending = false;
             }
         }
+        // URL handler adds a format parameter to get JSON output.
+        else if (keyvalue[0] == "format") {
+            boost::to_lower(keyvalue[1]);
+            if (keyvalue[1] == "json") output_format = json_format;
+        }
         //! @todo deal with refresh and unknown parameters
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
@@ -427,73 +432,29 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
 
 void GetListRequest::json_makeOutput(HandleSeq &hs)
 {
-    AtomSpace* as = server().getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
-    _output << "<table border=\"1\"><tr>";
+    _output << "{ \"complete\":";
+    if (hs.size() > (unsigned int)maximum)
+        _output << "false," << std::endl;
+    else
+        _output << "true," << std::endl;
+    _output << "\"skipped\":" << skip << "," << std::endl;
+    _output << "\"total\":" << hs.size() << "," << std::endl;
+    _output << "\"result\": [ ";
 
     std::vector<Handle>::const_iterator it;
     int counter=0;
+    bool first = true;
     for (it = hs.begin(); it != hs.end() && counter < skip+maximum; ++it) {
         counter++;
         if (counter <= skip) continue;
         Handle h = *it;
-        _output << "<tr>" << std::endl;
-        _output << "<td><a href=\"" << SERVER_PLACEHOLDER
-            << "/atom?handle=" << h.value() << "\">"
-            << as->getName(h) << "</a></td>";
-        _output << "<td>" << classserver().getTypeName(as->getType(h)) << "</td> ";
-        AttentionValue::sti_t the_sti = as->getSTI(h) ;
-        AttentionValue::lti_t the_lti = as->getLTI(h) ;
-        //! @todo make the sti/lti color scaled instead of just -ve/+ve
-        if (the_sti > 0)
-            _output << "<td style=\"background-color:#99FF66\">" << the_sti << "</td> ";
-        else
-            _output << "<td style=\"background-color:#99FFFF\">" << the_sti << "</td> ";
-        if (the_lti > 0)
-            _output << "<td style=\"background-color:#99FF66\">" << the_lti << "</td> ";
-        else
-            _output << "<td style=\"background-color:#99FFFF\">" << the_lti << "</td> ";
-        _output << "<td>" << as->getTV(h).toString() << "</td> ";
-
-        // Here the outgoing targets string is made
-        HandleSeq outgoing = as->getOutgoing(h);
-        _output << "<td>";
-        for (uint i = 0; i < outgoing.size(); i++) {
-            Handle ho = outgoing[i];
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
-                classserver().getTypeName(as->getType(ho)) << "\">";
-            _output << classserver().getTypeName(as->getType(ho));
-            _output << "</a>:";
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
-                ho.value() << "\">";
-            if (as->getName(ho) == "")
-                _output << "#" + ho.value();
-            else
-                _output << as->getName(ho);
-            _output << "</a><br/>";
-        }
-        _output << "</td>";
-
-        // Here the incoming string is made.
-        HandleSeq incoming = as->getIncoming(h);
-        _output << "<td>";
-        for (uint i = 0; i < incoming.size(); i++) {
-            Handle ho = incoming[i];
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
-                classserver().getTypeName(as->getType(ho)) << "\">";
-            _output << classserver().getTypeName(as->getType(ho));
-            _output << "</a>:";
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
-                ho.value() << "\">";
-            if (as->getName(ho) == "")
-                _output << "#" << ho.value();
-            else
-                _output << as->getName(ho) << ":";
-            _output << "</a><br/>";
-        }
-        _output << "</td>";
-        _output << "</tr>" << std::endl;
+        if (!first) _output << ", ";
+        else first = false;
+        _output << h.value();
     }
+    _output << " ]" << std::endl << 
+        "}" << std::endl;
 
 }
