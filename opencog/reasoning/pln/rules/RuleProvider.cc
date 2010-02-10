@@ -258,9 +258,9 @@ public:
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
     AtomSpaceWrapper* asw = GET_ASW;
-    AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
-    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, IMPLICATION_LINK), 8.0f);
-    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
+    //AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula>(asw, IMPLICATION_LINK), 8.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
     reset();
 }
