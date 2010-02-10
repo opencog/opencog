@@ -70,7 +70,9 @@ public:
         }
         printf(" </Generic rule args>\n");
 
+        std::cout << "validate()" << std::endl;
         assert(validate(premiseArray));
+        std::cout << "/ validate()" << std::endl;
 
         printf("formatTVarray...\n");
         int TVN = formula.TVN;
@@ -87,7 +89,7 @@ public:
         printf("TV computation ok\n");
 
         delete[] tvs;
-        printf("Res freed.\n");
+        printf("tvs[] freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
         pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, true);

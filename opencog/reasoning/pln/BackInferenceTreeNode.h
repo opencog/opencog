@@ -156,7 +156,7 @@ public:
  *
  * -# BITNodeRoot.executionPool.insert(root)
  * -# currentBITNode = getFittest(root.executionPool)
- * -# root.executionPool = currentBITNode.expand()
+ * -# root.executionPool += currentBITNode.expand()
  * -# if (not sufficient(root.getResults())): goto #2
  *
  * where...
@@ -416,7 +416,7 @@ protected:
 
         if ((ph = boost::get<pHandle>(&new_result.value)) && *ph == PHANDLE_UNDEFINED)
         {
-            puts("Rule returned NULL! Args were:\n");
+            puts("Rule returned PHANDLE_UNDEFINED! Args were:\n");
 
             for_each(rule_args_begin, rule_args_end,
                 boost::bind<void>(
@@ -482,7 +482,7 @@ protected:
     
     /// Add the new result from a Generator, and spawn new subtrees when necessary
     /// according to the variable bindings that accompany the new result.
-    /// I.e. it produces clones of this node, with vars replaced by results.
+    /// I.e. it produces clones of this node (or higher ones), with vars replaced by results.
     /// They get put into the expansion pool.
     void addDirectResult(Btr<std::set<BoundVertex> > directResult, spawn_mode spawning);
 

@@ -863,7 +863,8 @@ void createCombinations( const VectorT& head,
 
 void removeRecursion(std::vector<Btr<opencog::pln::BoundVertex> >& multi_input_vector);
 
-
+// input: a vector where each set is one possibility
+// output: a set where each vector is one (ordered) combination of possibilities
 template<typename VectorT, typename InputIterT, typename OutputIterT>
 void expandVectorSet( InputIterT multi_input_vector_begin,
                       InputIterT multi_input_vector_end,

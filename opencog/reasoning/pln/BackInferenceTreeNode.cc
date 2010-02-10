@@ -1364,6 +1364,9 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
     {
         vector<Btr<set<VtreeProvider*> > > child_results;
 
+        // Fill in child_results:
+        // arg_i will only contain this result
+        // other slots will contain their existing result(s) (if any)
         for (uint i=0;i<args.size();i++)
         {
             child_results.push_back(Btr<set<VtreeProvider*> >(new set<VtreeProvider*>));
@@ -1378,6 +1381,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                     removeRecursionFromHandleHandleMap(bv.bindings); */
         }
 
+        // Set of possible {vectors of args for each slot}?
         set<vector<VtreeProvider*> > argVectorSet;
         // Commented this out, this seems to do nothing... -- Joel
         //int s1 = argVectorSet.empty() ? 0 : argVectorSet.begin()->size();
@@ -1444,7 +1448,7 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                         }                       
                     }
                 }
-next_args:;
+next_args:; //! @todo replace goto!
                 //! @todo memory leak! Segfaults if we try to free this memory.. not sure why.
                 //! Probably because the destructor deletes rule arguments?
                 // delete ruleApp;
