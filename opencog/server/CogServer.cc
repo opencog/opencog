@@ -546,9 +546,6 @@ void CogServer::loadSCMModules(const char* config_paths[])
     // Load scheme modules specified in the config file
     std::vector<std::string> scm_modules;
     tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
-	std::cout << (void*) &(config()) << std::endl;
-    std::cout << config()["SCM_PRELOAD"] << std::endl;
-    std::cout << scm_modules.size() << std::endl;
 #ifdef HAVE_GUILE
     std::vector<std::string>::const_iterator it;
     for (it = scm_modules.begin(); it != scm_modules.end(); ++it)

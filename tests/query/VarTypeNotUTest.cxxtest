@@ -88,8 +88,6 @@ void VarTypeNot::setUp(void)
 	config().set("SCM_PRELOAD",
 		"opencog/scm/type_constructors.scm, "
 		"tests/query/vartype-bug.scm");
-	std::cout << config().get("SCM_PRELOAD") << std::endl;
-	std::cout << (void*) &(config())<< std::endl;
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...

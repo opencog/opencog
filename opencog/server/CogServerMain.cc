@@ -156,8 +156,6 @@ int main(int argc, char *argv[])
     BOOST_FOREACH (string configFile, configFiles) {
         try {
             config().load(configFile.c_str(), false);
-            std::cout << (void*) &(config()) << std::endl;
-            std::cout << config()["MODULES"] << std::endl;
             fprintf(stderr, "loaded configuration from file \"%s\"\n", configFile.c_str());
             break;
         } catch (RuntimeException &e) {
