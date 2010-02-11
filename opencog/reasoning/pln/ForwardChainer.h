@@ -80,12 +80,25 @@ public:
     //! @return return Handles that were created
     pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
+    //! forward chain with the next Rule
+    pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS);
+
     //! Get a random handle from the seed stack or global atomspace
     //! Rejects handles that are in the vector args
     pHandle getRandomArgument(const std::vector< Vertex > &args);
     static RandGen* rng;
     RandGen* getRNG();
 
+    /// Should be recursive.
+    //! Look up an atom to match the given target.
+    //! Currently uses LookupRule; could evaluate ForAllLinks etc too (via the relevant rule).
+    //! This would provide one way to actually choose the substitutions when using ForAlls.
+    std::set<BoundVertex> getMatching(const vtree target);
+    
+    //! Find a series of atoms to match the given filter.
+    
+    
+    //! Just get any arg. previously enforced suitability for deduction rule 
     pHandleSeq getLocalLink(pHandle lh, const std::vector< Vertex > &args);
     void printVertexVectorHandles(std::vector< Vertex > hs);
 };
