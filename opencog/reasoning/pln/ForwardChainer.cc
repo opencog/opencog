@@ -464,7 +464,7 @@ void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         
         args->push_back(bv);
         
-        findAllArgs(filter, args, current_arg+1, bindings);
+        findAllArgs(filter, args, current_arg+1, new_bindings);
 
     } else {
 
