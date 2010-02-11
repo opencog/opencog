@@ -30,6 +30,7 @@
 
 #include "mongoose.h"
 #include <opencog/web/GetListRequest.h>
+#include <opencog/web/CreateAtomRequest.h>
 #include <opencog/web/ListURLHandler.h>
 #include <opencog/web/AtomURLHandler.h>
 #include <opencog/web/ServerRequestWrapper.h>
@@ -58,6 +59,7 @@ private:
     // due to the Web Http server running in it's own set of threads.
     Factory<GetListRequest, Request> getListFactory;
     Factory<GetAtomRequest, Request> getAtomFactory;
+    Factory<CreateAtomRequest, Request> createAtomFactory;
 
     std::string serverAddress;
 
@@ -86,6 +88,7 @@ public:
     void setupURIs();
     static void return400(mg_connection* conn, const std::string& message);
     static void return404(mg_connection* conn);
+    static void return405(mg_connection* conn);
     static void return500(mg_connection* conn, const std::string& message);
 
     // Class which wraps requests registered with and destined for CogServer

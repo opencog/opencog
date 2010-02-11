@@ -301,18 +301,6 @@ public:
     /** adds a parameter to the commands parameter list. */
     virtual void addParameter(const std::string& param);
 
-#if 0
-    /** Whether CogServer should delete request once executed */
-    bool cleanUp;
-
-    /** Whether CogServer has processed this request */
-    bool complete;
-
-    /** If the request isn't assigned a ConsoleSocket then send() will
-      * just add the string to _output.
-      */
-    std::ostringstream     _output;
-#endif
 };
 
 } // namespace 

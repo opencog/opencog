@@ -73,6 +73,7 @@ bool GetAtomRequest::execute()
     }
     if (TLB::isInvalidHandle(handle)) {
         _output << "Invalid handle: " << handle.value() << std::endl;
+        send(_output.str());
         return false;
     }
     if (output_format == json_format) json_makeOutput(handle);
@@ -127,8 +128,8 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         const CountTruthValue* ctv = dynamic_cast<const CountTruthValue*>(&tv);
         jtv << "{\"count\":{";
         jtv << "\"str\":" << ctv->getMean() << ",";
-        jtv << "\"count\":" << ctv->getCount() << ",";
-        jtv << "\"conf\":" << ctv->getConfidence() << "} }";
+        jtv << "\"conf\":" << ctv->getConfidence() << ",";
+        jtv << "\"count\":" << ctv->getCount() << "} }";
     } else if (tv.getType() == INDEFINITE_TRUTH_VALUE) {
         const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&tv);
         jtv << "{\"indefinite\":{";
@@ -144,8 +145,13 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         jtv << "{ \"primary\":" <<
             tvToJSON(ctv->getVersionedTV(NULL_VERSION_HANDLE));
         for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) {
+            VersionHandle vh = ctv->getVersionHandle(i);
+            jtv << "\"" << VersionHandle::indicatorToStr(vh.indicator) << "\":" << std::endl;
+            jtv << "[" << vh.substantive << ",";
             jtv << tvToJSON(ctv->getVersionedTV(ctv->getVersionHandle(i)));
+            jtv << "]";
         }
+        jtv << "}}";
     } else {
         jtv << "{\"unknown\":0}";
     }

@@ -44,12 +44,19 @@ class AtomURLHandler : public BaseURLHandler
     bool refreshPage;
     std::string call_url;
     std::string query_string;
+    std::string method;
 
 public:
 
     AtomURLHandler();
     ~AtomURLHandler();
     void handleRequest( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
+    void handleGET( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
+    void handlePOST( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
+    void handlePUT( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
 
     virtual void OnRequestComplete();

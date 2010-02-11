@@ -5,12 +5,12 @@
 ADD_LIBRARY (ocweb SHARED
     WebModule
     GetAtomRequest
+    CreateAtomRequest
     GetListRequest
     ServerRequestWrapper
     AtomURLHandler
     ListURLHandler
     BaseURLHandler
-    #    AddAtomRequest
     mongoose
     #RequestMapper
     #SimpleAtomSpaceMapper
@@ -20,6 +20,7 @@ ADD_LIBRARY (ocweb SHARED
 TARGET_LINK_LIBRARIES(ocweb
     util
     server
+    json_spirit
 )
 
 INSTALL(FILES
@@ -28,6 +29,8 @@ INSTALL(FILES
     local_graph.js
     DESTINATION "${DATADIR}/www"
 )
+
+ADD_SUBDIRECTORY(json_spirit)
 
 # TODO: take mongoose flags from Makefile for individual platforms. These are
 # just for linux:

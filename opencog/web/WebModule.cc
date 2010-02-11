@@ -74,6 +74,7 @@ WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRE
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory); 
     cogserver.registerRequest(GetListRequest::info().id, &getListFactory); 
+    cogserver.registerRequest(CreateAtomRequest::info().id, &createAtomFactory); 
 
     timeout = 100;
 
@@ -157,6 +158,8 @@ void WebModule::setupURIsForREST()
     // atom/* support GET, get atom info
     mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom/*", viewAtomPage,
             rest_str);
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/atom", viewAtomPage,
+            rest_str);
     // server/request/request_name, POST
     mg_set_uri_callback(ctx, REST_PATH_PREFIX "/server/request/*", makeRequest,
             rest_str);
@@ -170,6 +173,11 @@ void WebModule::return400(mg_connection* conn, const std::string& message)
 void WebModule::return404(mg_connection* conn)
 {
     mg_printf(conn, "HTTP/1.1 404 Not found.\r\n");
+}
+
+void WebModule::return405(mg_connection* conn)
+{
+    mg_printf(conn, "HTTP/1.1 404 Method Not Allowed.\r\n");
 }
 
 void WebModule::return500(mg_connection* conn, const std::string& message)
