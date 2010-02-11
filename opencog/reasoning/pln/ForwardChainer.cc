@@ -311,4 +311,29 @@ pHandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
 
 }
 
+pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS)
+{
+    // Get the next Rule (no restrictions)
+    // Find the possible vector(s) of arguments for it
+    // For each such vector:
+        // find a vector of Atoms that matches it
+        // check for validity (~redundant)
+        // do the rule computation etc
+}
+
+std::set<BoundVertex> getMatching(const vtree target)
+{
+    // Just look it up via LookupRule
+}
+
+vector<BoundVertex>& args findAllArgs(std::vector<BBvtree> filter)
+{
+    
+}
+
+void findAllArgs(std::vector<BBvtree> filter, vector<BoundVertex>& args, uint current_arg)
+{
+    
+}
+
 }} // namespace opencog::pln

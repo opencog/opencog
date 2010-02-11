@@ -89,14 +89,15 @@ public:
     static RandGen* rng;
     RandGen* getRNG();
 
-    /// Should be recursive.
     //! Look up an atom to match the given target.
     //! Currently uses LookupRule; could evaluate ForAllLinks etc too (via the relevant rule).
     //! This would provide one way to actually choose the substitutions when using ForAlls.
     std::set<BoundVertex> getMatching(const vtree target);
-    
+
     //! Find a series of atoms to match the given filter.
+    // vector<BoundVertex>& args findAllArgs(std::vector<BBvtree> filter);
     
+    // void findAllArgs(std::vector<BBvtree> filter, vector<BoundVertex>& args, uint current_arg);
     
     //! Just get any arg. previously enforced suitability for deduction rule 
     pHandleSeq getLocalLink(pHandle lh, const std::vector< Vertex > &args);
