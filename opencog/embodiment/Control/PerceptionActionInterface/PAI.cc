@@ -1058,10 +1058,13 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     sentence += sentenceText;
     //logger().debug("sentence = '%s'\n", sentence.c_str());
 
-
-    petInterface.getCurrentModeHandler( ).setProperty( "latestHeardSentence", sentenceText );
-
     Handle sentenceNode = AtomSpaceUtil::addNode(atomSpace, SENTENCE_NODE, sentence.c_str());
+
+    if ( petInterface.getPetId( ) == internalPetId ) {
+        AtomSpaceUtil::setPredicateValue( atomSpace, "heard_sentence",
+            TruthValue::TRUE_TV( ), sentenceNode );
+    } // if
+
 
     HandleSeq schemaListLinkOutgoing;
     schemaListLinkOutgoing.push_back(agentNode);
@@ -1129,20 +1132,28 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
     AtomSpaceUtil::updateLatestAvatarSayActionDone(atomSpace, atTimeLink, agentNode);
 
 
+    std::vector<std::string> arguments;
+    arguments.push_back( sentenceText );
+
     if ( std::string( contentType ) == "FACT" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "storeFact", std::vector<std::string>() );
+
+        petInterface.getCurrentModeHandler( ).handleCommand( "storeFact", arguments );
 
     } else if ( std::string( contentType ) == "COMMAND" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", std::vector<std::string>() );
+        petInterface.getCurrentModeHandler( ).handleCommand( "evaluateSentence", arguments );
 
     } else if ( std::string( contentType ) == "QUESTION" ) {
-        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", std::vector<std::string>() );
+        AtomSpaceUtil::setPredicateValue( atomSpace,
+            "is_question", TruthValue::TRUE_TV( ), sentenceNode );
+        AtomSpaceUtil::setPredicateValue( atomSpace,
+            "was_answered", TruthValue::FALSE_TV( ), sentenceNode );
+        
+        petInterface.getCurrentModeHandler( ).handleCommand( "answerQuestion", arguments );
 
     } else if ( std::string( contentType ) == "SPECIFIC_COMMAND" ) {
         if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
-            std::vector<std::string> arguments;        
+
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
-            arguments.push_back( sentenceText );
             boost::to_upper(arguments[0]);
             
             arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
