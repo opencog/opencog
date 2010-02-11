@@ -350,7 +350,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
             //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
             cout << " are valid? " <<endl;
     
-            bool foundArguments = false;// = r->validate(args);
+            bool foundArguments = true;// = r->validate(args);
     
             if (!foundArguments)
                 cout << "FWDCHAIN no" << endl;
@@ -396,12 +396,16 @@ Btr<vector<BoundVertex> > ForwardChainer::findAllArgs(std::vector<BBvtree> filte
 {
     Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
     
-    findAllArgs(filter, args, 0);
+    //Btr<bindingsT> bindings(new BindingsT());
+    Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
+    
+    findAllArgs(filter, args, 0, bindings);
     
     return args;
 }
 
-void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args, uint current_arg)
+void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
+                                 uint current_arg, Btr<bindingsT> bindings)
 {
     if (current_arg >= filter.size())
         return;
@@ -416,7 +420,8 @@ void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     //Btr<bindingsT> bindings(NULL); // should be a parameter to this method.
     
     //meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
-    meta virtualized_target(meta(new vtree(*f)));
+    meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
+    //meta virtualized_target(meta(new vtree(*f)));
     ForceAllLinksVirtual(virtualized_target);
     
     Btr<std::set<BoundVertex> > choices;    
@@ -442,12 +447,27 @@ void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         //args[i] = randArg;
         
         //boost::get<pHandle>(args[i]);
+
+        NMPrinter np;
+        std::cout << "Using atom: " << std::endl;
+        np.print(_v2h(bv.GetValue()));
+
+        // Separate bindings before and after applying this, in case backtracking is necessary
+        Btr<bindingsT> new_bindings(new std::map<pHandle, pHandle>);
+        
+        // Pass down all the bindings so far, plus any for this slot.
+        foreach(hpair hp, *bindings)
+            new_bindings->insert(hp);
+        foreach(hpair hp, *bv.bindings)
+            new_bindings->insert(hp);
+        
+        
+        args->push_back(bv);
+        
+        findAllArgs(filter, args, current_arg+1, bindings);
+
     } else {
 
-    
-    args->push_back(bv);
-    
-    findAllArgs(filter, args, current_arg+1);
     }
 }
 
