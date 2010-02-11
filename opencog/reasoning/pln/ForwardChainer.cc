@@ -311,7 +311,25 @@ pHandleSeq ForwardChainer::fwdChainStack(int maxRuleApps)
 
 }
 
-pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS)
+// Possibly should be elsewhere.
+// Finds an input filter that has all the constraints, including between arguments.
+// inputFilter doesn't include those constraints.
+// Sometimes there is more than one input filter available (e.g. for SimSubstRule)
+std::set<std::vector<BBvtree> > getFilters(Rule * r)
+{
+    //meta i2oType(const std::vector<Vertex>& h) const
+    
+    //! @todo extend this for other rules (probably separately for each one)
+    // generic target for this rule
+    meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
+                                         vtree(CreateVar(GET_ASW)),
+                                         vtree(CreateVar(GET_ASW))
+                                         )));
+    
+    return r->o2iMeta(generic_target);
+}
+
+pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
 {
     // Get the next Rule (no restrictions)
     // Find the possible vector(s) of arguments for it
@@ -321,17 +339,17 @@ pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS)
         // do the rule computation etc
 }
 
-std::set<BoundVertex> getMatching(const vtree target)
+std::set<BoundVertex> ForwardChainer::getMatching(const vtree target)
 {
     // Just look it up via LookupRule
 }
 
-vector<BoundVertex>& args findAllArgs(std::vector<BBvtree> filter)
+vector<BoundVertex>& ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
 {
     
 }
 
-void findAllArgs(std::vector<BBvtree> filter, vector<BoundVertex>& args, uint current_arg)
+void findAllArgs(std::vector<BBvtree> filter, std::vector<BoundVertex>& args, uint current_arg)
 {
     
 }

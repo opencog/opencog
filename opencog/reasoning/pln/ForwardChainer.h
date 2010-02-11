@@ -95,9 +95,9 @@ public:
     std::set<BoundVertex> getMatching(const vtree target);
 
     //! Find a series of atoms to match the given filter.
-    // vector<BoundVertex>& args findAllArgs(std::vector<BBvtree> filter);
+    std::vector<BoundVertex>& findAllArgs(std::vector<BBvtree> filter);
     
-    // void findAllArgs(std::vector<BBvtree> filter, vector<BoundVertex>& args, uint current_arg);
+    void findAllArgs(std::vector<BBvtree> filter, std::vector<BoundVertex>& args, uint current_arg);
     
     //! Just get any arg. previously enforced suitability for deduction rule 
     pHandleSeq getLocalLink(pHandle lh, const std::vector< Vertex > &args);
