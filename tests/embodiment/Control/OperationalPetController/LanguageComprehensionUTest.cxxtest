@@ -127,9 +127,7 @@ public:
         config().set( "FRAMES_FILE",  OPENCOG_SOURCE_DIR"/opencog/embodiment/frames.list" );
         config().set( "FRAMES_INHERITANCE_FILE", OPENCOG_SOURCE_DIR"/opencog/embodiment/framesInheritance.list" );
 
-        config().set( "DIALOG_CONTROLLERS", "MegaHal, QuestionAnswering" );
-        config().set( "MEGAHAL_SERVER_HOST", "0.0.0.0" );
-        config().set( "MEGAHAL_SERVER_PORT", "10000" );
+        config().set( "DIALOG_CONTROLLERS", "QuestionAnswering" );
 
         this->sender = new LSMessageSenderMock();
 
@@ -691,11 +689,12 @@ public:
 
         Handle agentHandle = this->atomSpace->getHandle( PET_NODE, petId );
 
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "are you angry?" );
+        setHeardSentence( "are you angry?" );
+
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question6.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
         this->language->updateDialogControllers( 0 );
@@ -707,75 +706,75 @@ public:
         AtomSpaceUtil::setPredicateValue( *atomSpace, "has_something_to_say", TruthValue::FALSE_TV(), 
             agentHandle );
 
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "are you hungry?" );
+        setHeardSentence( "are you hungry?" );
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
+        this->language->updateDialogControllers( 1 );
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "No" )
 
         
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "are you proud?" );
+        setHeardSentence( "are you proud?" );
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question8.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
+        this->language->updateDialogControllers( 2 );
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )
         
 
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "what color is the ball?" );
+        setHeardSentence( "what color is the ball?" );
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question9.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
+        this->language->updateDialogControllers( 3 );
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) != "" )
         logger().debug("Question 9 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
     
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "what color is the stick?" );
+        setHeardSentence( "what color is the stick?" );
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question10.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
+        this->language->updateDialogControllers( 4 );
 
         TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         //TS_ASSERT( pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ) == "Yes" )    
         logger().debug("Question 10 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
 
-        this->pet->getCurrentModeHandler( ).setProperty( "latestHeardSentence", "what is behind the tree?" );
+        setHeardSentence( "what is behind the tree?" );
         rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/relex-question11.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
         this->language->resolveLatestSentenceReference( );
-        this->language->answerLatestQuestion( );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
-        this->language->answerLatestQuestion( ); // repeat to force the spatial relations re-processing
+        this->language->updateDialogControllers( 5 );
+
         AtomSpaceUtil::setPredicateValue( *atomSpace, 
             "has_something_to_say", TruthValue::FALSE_TV( ), agentHandle );
-        this->language->updateDialogControllers( 0 );
-        TS_ASSERT( AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
+        this->language->updateDialogControllers( 6 );
+        TS_ASSERT( !AtomSpaceUtil::isPredicateTrue( *atomSpace, "has_something_to_say", 
             agentHandle ) )
         logger().debug("Question 11 Answer: %s",pet->getCurrentModeHandler( ).getPropertyValue( "customMessage" ).c_str());
     
@@ -814,7 +813,7 @@ public:
         
         lang.resolveLatestSentenceReference( );
         lang.resolveLatestSentenceCommand( );
-        lang.answerLatestQuestion( );
+
         
         delete pet;
     */
@@ -1069,6 +1068,23 @@ public:
                 AtomSpaceUtil::getFrameInstanceElementsValues( *atomSpace, isNearFrameInstance2 );
             TS_ASSERT( storedElements.size( ) == 0 )
         }
+    }
+
+    void setHeardSentence( const std::string& sentence, bool isQuestion = true )
+    {
+        std::stringstream finalSentence;
+        finalSentence << "to:" << this->pet->getPetId( );
+        finalSentence << ": " << sentence;
+        Handle sentenceNode = 
+            AtomSpaceUtil::addNode( *this->atomSpace, SENTENCE_NODE, finalSentence.str( ) );
+
+        AtomSpaceUtil::setPredicateValue( *this->atomSpace, "heard_sentence",
+            TruthValue::TRUE_TV( ), sentenceNode );
+
+        if ( isQuestion ) {
+            AtomSpaceUtil::setPredicateValue( *this->atomSpace, "is_question",
+                TruthValue::TRUE_TV( ), sentenceNode );
+        } // if
     }
 
 

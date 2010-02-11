@@ -1770,15 +1770,15 @@
           (lambda (predicate)
             (if (string=? (get-frame-instance-type predicate) "#Questioning")
                 (begin
-                  (set! question? #t)
-                  (set! questionParse? #t)
-                  (set! questionType
-                        (cog-name
-                         (get-frame-instance-element-value
-                          (get-frame-instance-element-predicate predicate "Manner")
-                          )
-                         )
-                        )
+                  (let ((manner (get-frame-instance-element-value
+                                 (get-frame-instance-element-predicate predicate "Manner")
+                                 )))
+                    (cond ((not (null? manner))                        
+                           (set! questionType (cog-name manner))
+                           (set! question? #t)
+                           (set! questionParse? #t)
+                           ))
+                    )
                   )
                 (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
                     (set! questionFrames (append questionFrames (list predicate)))
@@ -2262,3 +2262,47 @@
         )
       )
   )
+
+(define (choose-sentence)
+
+  (define (get-valid-sentences links)    
+    (if (not (null? links))
+        (let* ((link (car links))
+               (tv (cog-tv link)))
+          (if (and (not (null? tv)) (> (assoc-ref (cog-tv->alist tv) 'mean) 0))
+              (begin
+                (cog-set-tv! link (stv 0 0))
+                (fold 
+                 (lambda (node result)
+                   (append result (list (cog-name node)))
+                   )
+                 '()
+                 (gdr link)
+                 )
+                )
+              (get-valid-sentences (cdr links))
+              )
+          )
+        #f
+        )
+    )  
+  
+  (let ((sentences
+         (get-valid-sentences
+          (cog-get-link
+           'ListLink
+           'SentenceNode
+           (AnchorNode "# Possible Sentences")              
+           )
+          )
+         
+         ))
+    ; demo rule: return the first sentence
+    (if sentences
+        (car sentences)
+          sentences
+          )
+    )
+  
+  )
+  

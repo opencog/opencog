@@ -73,10 +73,8 @@ void BaseAgentModeHandler::handleCommand( const std::string& name, const std::ve
         logger().debug("BaseAgentModeHandler - Answering a question" );
         logger().debug("BaseAgentModeHandler - Starting latest sentence reference resolution" );
         this->agent->getLanguageTool( ).resolveLatestSentenceReference( );
-        logger().debug("BaseAgentModeHandler - Starting question answering" );
-        this->agent->getLanguageTool( ).answerLatestQuestion( );
-        logger().debug("BaseAgentModeHandler - Question answering done");
-
+        logger().debug("BaseAgentModeHandler - Reference resolution done");
+        
     } else if ( name == "instruction" ) {
         if ( arguments.size( ) != 3 ) {
             logger().debug("BaseAgentModeHandler::%s - Invalid instruction number of arguments: %d", __FUNCTION__, arguments.size( ) );
@@ -111,6 +109,8 @@ void BaseAgentModeHandler::update( void )
                        commandName.c_str( ), arguments.size( ), this->commandsQueue.size() );
     } // if
 
+    // TODO: to avoid multithread problems with AtomSpace, do not call
+    // updateDialogControllers with wait option equals to false
     this->agent->getLanguageTool( ).updateDialogControllers( 
-       this->agent->getPai( ).getLatestSimWorldTimestamp( ), false );
+       this->agent->getPai( ).getLatestSimWorldTimestamp( ) );
 }

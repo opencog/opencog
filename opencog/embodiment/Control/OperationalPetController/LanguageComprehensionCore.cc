@@ -89,8 +89,9 @@ void LanguageComprehension::resolveLatestSentenceReference( void )
 #endif
 }
 
-HandleSeq LanguageComprehension::getActivePredicateArguments( opencog::AtomSpace& as, const std::string& predicateName ) 
+HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string& predicateName ) 
 {
+    opencog::AtomSpace& as = this->agent.getAtomSpace( );
     HandleSeq commands(2);
     commands[0] = as.addNode( PREDICATE_NODE, predicateName );
     commands[1] = Handle::UNDEFINED;
@@ -145,7 +146,7 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 #endif
     
     opencog::AtomSpace& as = agent.getAtomSpace( );
-    HandleSeq elements = getActivePredicateArguments( as, "latestAvatarRequestedCommands" );
+    HandleSeq elements = getActivePredicateArguments( "latestAvatarRequestedCommands" );
 
     unsigned int i;
     for( i = 0; i < elements.size( ); ++i ) {
@@ -183,16 +184,6 @@ void LanguageComprehension::resolveLatestSentenceCommand( void )
 
 }
 
-void LanguageComprehension::answerLatestQuestion( void )
-{
-    opencog::AtomSpace& as = agent.getAtomSpace( );
-    Handle agentHandle = AtomSpaceUtil::getAgentHandle( as, agent.getPetId( ) );
-    
-    AtomSpaceUtil::setPredicateValue( as,
-        "hasQuestionToAnswer", TruthValue::TRUE_TV( ), agentHandle );
-                                      
-}
-
 std::string LanguageComprehension::resolveFrames2Relex( )
 {
     init( );
@@ -203,13 +194,13 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     std::map<std::string, unsigned int> frame_elements_count;
 
     opencog::AtomSpace& as = agent.getAtomSpace( );
-    HandleSeq elements = getActivePredicateArguments( as, "latestQuestionFrames" );
+    HandleSeq elements = getActivePredicateArguments( "latestQuestionFrames" );
 
     if ( elements.size( ) == 0 ) {
         // there is no question to answer
         logger().debug( "LanguageComprehension::%s - elements size of the answer is 0. 'I don't know' answer will be reported.",
                         __FUNCTION__ );
-        return "I don't know.";
+        return "";
     } // if
 
     unsigned int j;
@@ -297,7 +288,7 @@ std::string LanguageComprehension::resolveFrames2Relex( )
     std::string text = output_relex->getOutput( as, handles );
     if( text.empty() ){
         logger().error("LanguageComprehension::%s - Output Relex returned an empty string.",__FUNCTION__);
-        return "";
+        return "...";
     }
 
     return resolveRelex2Sentence( text );
@@ -325,7 +316,7 @@ std::string LanguageComprehension::resolveRelex2Sentence( const std::string& rel
             std::string msg = matches[2];
             logger().debug("LanguageComprehension::%s - NLGen Sentence returned an ERROR message with code %s and message %s",__FUNCTION__, code.c_str(), msg.c_str());
             if( code == "1"){
-                return "I don't know!";
+                return ""; // I don't know
             }else if( code == "2" ){
                 return "I know the answer, but I don't know how to say it.";
             }
@@ -354,4 +345,68 @@ void LanguageComprehension::storeFact( void )
     SchemeEval::instance().clear_pending( );    
 #endif
 
+}
+
+HandleSeq LanguageComprehension::getHeardSentencePredicates( void )
+{
+    AtomSpace& atomSpace = agent.getAtomSpace( );
+    Handle agentHandle = AtomSpaceUtil::getAgentHandle( atomSpace, agent.getPetId( ) );
+
+    HandleSeq heardSentences;
+    
+    Handle node = atomSpace.getHandle( PREDICATE_NODE, "heard_sentence" );
+    if ( node == Handle::UNDEFINED ) {
+        return heardSentences;
+    } // if
+    HandleSeq incoming = atomSpace.getIncoming( node );
+    unsigned int i;
+    for( i = 0; i < incoming.size( ); ++i ) {
+        if ( atomSpace.getType( incoming[i] ) != EVALUATION_LINK ||
+             atomSpace.getTV( incoming[i] ).isNullTv( ) || 
+             atomSpace.getTV( incoming[i] ).getMean( ) == 0 ||
+             atomSpace.getArity( incoming[i] ) != 2 ||
+             atomSpace.getOutgoing( incoming[i], 1 ) == node ) {
+            continue;
+        } // if
+        Handle listLink = atomSpace.getOutgoing( incoming[i], 1 );
+        Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+        if ( atomSpace.getType( sentenceNode ) != SENTENCE_NODE ) {
+            continue;
+        } // if
+        // "to:agentId: sentencetexthere"
+        std::string nodeName = atomSpace.getName( sentenceNode );
+        static const boost::regex pattern( "^to:[^:]+:\\s.+$");
+        if ( !boost::regex_match( nodeName, pattern ) ) {
+            logger().error( "LanguageComprehension::%s - Invalid sentence node '%s'. "
+                            "Should be in format 'to:agentId: sentencetext'",
+                            __FUNCTION__, nodeName.c_str( ) );
+        } // if
+        heardSentences.push_back( incoming[i] );
+    } // for
+    
+    return heardSentences;
+}
+
+std::string LanguageComprehension::getTextFromSentencePredicate( Handle evalLink )
+{
+    opencog::AtomSpace& atomSpace = agent.getAtomSpace( );    
+    Handle predicateNode = atomSpace.getHandle( PREDICATE_NODE, "heard_sentence" );
+    if ( evalLink == Handle::UNDEFINED ||
+         predicateNode == Handle::UNDEFINED ||
+         atomSpace.getType( evalLink ) != EVALUATION_LINK || 
+         atomSpace.getArity( evalLink ) != 2 ||
+         atomSpace.getOutgoing( evalLink, 0 ) != predicateNode ) {
+        return "";
+    } // if
+    Handle listLink = atomSpace.getOutgoing( evalLink, 1 );
+    Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
+
+    std::string nodeName = atomSpace.getName( sentenceNode );
+    static const boost::regex pattern( "^to:[^:]+:\\s(.+)$");
+    boost::smatch matchResults;
+    if ( !boost::regex_match( nodeName, matchResults, pattern ) ) {
+        return "";
+    } // if
+    std::string text( matchResults[1].first, matchResults[1].second );
+    return text;
 }

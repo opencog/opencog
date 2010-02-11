@@ -1,7 +1,7 @@
 /*
  * opencog/embodiment/Control/OperationalPetController/LanguageComprehension.h
  *
- * Copyright (C) 2009 Novamente LLC
+ * Copyright (C) 2009-2010 Novamente LLC
  * All Rights Reserved
  * Author(s): Samir Araujo
  *
@@ -33,19 +33,49 @@
 
 #include <opencog/guile/SchemeEval.h>
 
-#include <boost/thread.hpp>
-
 namespace OperationalPetController
 {
+
+    /**
+     * LanguageComprehension is an OPC module responsible
+     * for the management of dialogs between agents
+     */
     class LanguageComprehension 
     {
     public: 
+        
+        /**
+         * A DialogController is an element that can
+         * produce sentences for a dialog session.
+         * A Sentence might be just an answer for a given 
+         * question or an spontaneous speech.
+         */
         class DialogController 
         {
         public:
+
+            /**
+             * Result is a helper plain data object
+             * used to hold the information returned by
+             * un update step of the DialogController
+             */
+            class Result 
+            {
+            public:
+                Result( void ) : 
+                    sentence(""), questionAnswering(false), 
+                        heardSentence(""), status(false) { }
+
+                virtual ~Result( void ) { }
+                
+                std::string sentence;
+                bool questionAnswering;
+                std::string heardSentence;
+                bool status;
+            };
+
             DialogController( const std::string& name, LanguageComprehension* langComp ) : 
-                name( name ), langComp(langComp), agent( &langComp->getAgent( ) ),
-                    processingAnswer(false) 
+                name( name ), langComp(langComp), agent( &langComp->getAgent( ) )
             { 
                 this->agentHandle = 
                     AtomSpaceUtil::getAgentHandle( agent->getAtomSpace( ), agent->getPetId( ) );
@@ -54,52 +84,120 @@ namespace OperationalPetController
 
             virtual ~DialogController( void ) { }
 
-            const std::string& getName( void ) const {
+            inline const std::string& getName( void ) const {
                 return this->name;
             }
 
-            inline bool isProcessingAnswer( void ) const {
-                return this->processingAnswer;
-            }
-
-            virtual void update( long elapsedTime, bool wait ) = 0;
+            /**
+             * It must be implemented by the concrete DialogController
+             *
+             * @param elapsedTime The current system timestamp (reference: PAI)
+             * @return Result the resulting information after processing the DC
+             */
+            virtual Result processSentence( long elapsedTime ) = 0;
 
         protected:
             std::string name;
             LanguageComprehension* langComp;
             Control::PetInterface* agent;
-            static boost::mutex lock;
-            bool processingAnswer;
             Handle agentHandle;
         };
 
         LanguageComprehension( Control::PetInterface& agent );
         
         virtual ~LanguageComprehension( void );        
-
+        
         void resolveLatestSentenceReference( void );
 
         void resolveLatestSentenceCommand( void );
-
-        void answerLatestQuestion( void );
         
+        /**
+         * Store a new fact, extracted from a sentence
+         * sent by a trusty agent
+         */
         void storeFact( void );
 
+        /**
+         * Given a list of Frames, stored as a Predicate into the AtomTable,
+         * this method will try to convert them into RelEx format and then
+         * will call relex2Sentence to try to retrieve an English sentence
+         * 
+         * @return An English sentence translated from the Frames list
+         */
         std::string resolveFrames2Relex( );
         
-        static HandleSeq getActivePredicateArguments( opencog::AtomSpace& as, const std::string& predicateName );
+        /**
+         * This is a helper function that retrieves the list of all
+         * arguments of predicate, given its name
+         *
+         * @param predicateName The predicate name whose its arguments are desired.
+         * @return A HandleSeq containing the arguments handles
+         */
+        HandleSeq getActivePredicateArguments( const std::string& predicateName );
 
+        /**
+         * A Factory Method that, given a DC name, instantiate a specific
+         * Dialog Controller and return a memory pointer of it.
+         *
+         * @param name The name of the Dialog Controller
+         */
         DialogController* createDialogController( const std::string& name );
 
+        /**
+         * Getter for the agent interface
+         */
         inline Control::PetInterface& getAgent( void )
         {
             return this->agent;
         }
 
-        void updateDialogControllers( long elapsedTime, bool wait = true );
+        /**
+         * Responsible for updating all Dialog Controllers at 
+         * each cycle
+         *
+         * @param elapsedTime The current system timestamp (reference: PAI)
+         */
+        void updateDialogControllers( long elapsedTime );
+
+        /**
+         * When an angent talk with other one a sentence is heard
+         * by the listener. This methods returns a HandleSeq 
+         * containing the most recent heard sentences in predicate format
+         * i.e.
+         * EvaluationLink
+         *    PredicateNode "heard_sentence"
+         *    ListLink
+         *       SentenceNode "to:id_0001: What is your name?"
+         *
+         * @return HandleSeq containing the EvaluationLinks of the predicates
+         */
+        HandleSeq getHeardSentencePredicates( void );
+
+        /**
+         * Giving a predicate that contains just a simple SentenceNode
+         * as argument, this method returns the text of the sentence.
+         * i.e
+         * EvaluationLink
+         *    PredicateNode "heard_sentence"
+         *    ListLink
+         *       SentenceNode "to:id_0001: What is your name?"
+         *
+         * and the answer will be string(What is your name?)
+         *
+         * @param Handle EvaluationLink of the Predicate
+         * @return a string containing the text of the sentence
+         */
+        std::string getTextFromSentencePredicate( Handle evalLink );
 
     protected:
 
+        /**
+         * This method converts a string containing a sentence formated
+         * in Relex to English, by using NLGen.
+         *
+         * @param relexInput A sentence formated in relex
+         * @return An English version of the given sentence
+         */
         std::string resolveRelex2Sentence( const std::string& relexInput );
 
         void init(void);
@@ -122,11 +220,19 @@ namespace OperationalPetController
         bool initialized;
 
         /** Dialog Controllers methods **/
+
+        /**
+         * Register a new Dialog Controller
+         */
         void addDialogController( DialogController* dialogController );
+        /**
+         * Read from the config file which DCs must be loaded
+         * and register them
+         */
         void loadDialogControllers( void );
-        
+
         std::list<DialogController* > dialogControllers;
-                                 
+        
     };
 
 };
