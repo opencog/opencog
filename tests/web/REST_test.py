@@ -40,7 +40,6 @@ class TestPostAtom(unittest.TestCase):
 #data = urllib.urlencode(values)
 #        print data
         req = urllib2.Request(rest_url + 'atom/',data)
-        import pdb; pdb.set_trace()
         response = urllib2.urlopen(req).read()
         result = json.loads(response)
         
@@ -52,4 +51,5 @@ if __name__ == "__main__":
     del sys.argv[1]
     unittest.main()
     kill_server()
+    sys.exit(0)
 
