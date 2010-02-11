@@ -314,9 +314,10 @@ Rule* ForwardChainerRuleProvider::findHighestPriorityRule()
 
 unsigned int ForwardChainerRuleProvider::getSeedIndex() { return seedIndex; }
 
+// no longer used in new version.
 Rule* ForwardChainerRuleProvider::nextRule()
 {
-    // 1. check seed is set, check if current has a Rule, if so
+/*    // 1. check seed is set, check if current has a Rule, if so
     // add it to invalidRules, set to NULL.
     if (seed == PHANDLE_UNDEFINED) {
         opencog::logger().warn("No seed set, so can't return an appropriate Rule via nextRule.");
@@ -350,6 +351,7 @@ Rule* ForwardChainerRuleProvider::nextRule()
         }
     }
     return r;
+    */
 }
 
 }}

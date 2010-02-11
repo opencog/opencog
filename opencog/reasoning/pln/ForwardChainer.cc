@@ -332,11 +332,46 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
 pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
 {
     // Get the next Rule (no restrictions)
+    foreach(Rule *r, *root->rp) { // to avoid needing a nextRule method.
+    
     // Find the possible vector(s) of arguments for it
+    std::set<std::vector<BBvtree> > filters(getFilters(r));
+    
     // For each such vector:
+    foreach(std::vector<BBvtree> f, filters) {
         // find a vector of Atoms that matches it
+        vector<BoundVertex>& findAllArgs(filter);
         // check for validity (~redundant)
-        // do the rule computation etc
+        
+        cout << "FWDCHAIN arguments ";
+        printVertexVectorHandles(args);
+        cout << " are valid? " <<endl;
+        if (argumentAttempts > 0)
+            foundArguments = r->validate(args);
+        if (!foundArguments)
+            cout << "FWDCHAIN no" << endl;
+        else {
+            cout << "FWDCHAIN yes!" << endl;
+        
+            // do the rule computation etc
+            
+            Vertex V=((r->compute(cleanArgs)).GetValue());
+            out=boost::get<pHandle>(V);
+            const TruthValue& tv=GET_ASW->getTV(out);
+            //cout<<printTV(out)<<'\n';
+    
+            if (!tv.isNullTv() && tv.getCount() > minConfidence) {
+                maxRuleApps--;
+                results.push_back(out);
+                cout<<"Output\n";
+                NMPrinter np;
+                np.print(out);
+            } else {
+                // Remove atom if not satisfactory
+                //GET_ASW->removeAtom(_v2h(V));
+            }
+        }
+    }
 }
 
 std::set<BoundVertex> ForwardChainer::getMatching(const vtree target)
