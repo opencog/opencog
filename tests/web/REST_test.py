@@ -11,7 +11,7 @@ import json
 import urllib2
 import urllib
 
-#server_exe = sys.argv[1]
+server_exe = sys.argv[1]
 server_process=None
 
 rest_url = 'http://localhost:17034/rest/0.2/'
