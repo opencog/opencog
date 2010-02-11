@@ -72,7 +72,7 @@ static void usage(const char* progname)
     std::cerr << "Usage: " << progname << " [[-c <config-file>]..] [[-DOPTION=\"VALUE\"]..]\n\n";
     std::cerr << "Each config file is loaded sequentially, with the values in \n"
         << " later files overwriting earlier. Then each singular option overrides \n" 
-        << " options in config files. ";
+        << " options in config files. " << std::endl;
 }
 
 int main(int argc, char *argv[])

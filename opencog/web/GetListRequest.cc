@@ -110,7 +110,8 @@ bool getListSortByTVConfidencePredicate (bool descending,
 }
 
 
-GetListRequest::GetListRequest() : order_by(""), descending(true), name(""),
+GetListRequest::GetListRequest() : output_format(html_tabular_format), 
+    order_by(""), descending(true), name(""),
     type(NOTYPE), subtypes(false), maximum(GETLIST_MAXIMUM_RESULTS), skip(0)
 {
     
