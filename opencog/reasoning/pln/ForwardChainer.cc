@@ -331,62 +331,126 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
 
 pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
 {
+    pHandleSeq results;
+    
     // Get the next Rule (no restrictions)
-    foreach(Rule *r, *root->rp) { // to avoid needing a nextRule method.
+    foreach(Rule *r, rp) { // to avoid needing a nextRule method.
     
-    // Find the possible vector(s) of arguments for it
-    std::set<std::vector<BBvtree> > filters(getFilters(r));
-    
-    // For each such vector:
-    foreach(std::vector<BBvtree> f, filters) {
-        // find a vector of Atoms that matches it
-        vector<BoundVertex>& findAllArgs(filter);
-        // check for validity (~redundant)
+        // Find the possible vector(s) of arguments for it
+        std::set<std::vector<BBvtree> > filters(getFilters(r));
         
-        cout << "FWDCHAIN arguments ";
-        printVertexVectorHandles(args);
-        cout << " are valid? " <<endl;
-        if (argumentAttempts > 0)
-            foundArguments = r->validate(args);
-        if (!foundArguments)
-            cout << "FWDCHAIN no" << endl;
-        else {
-            cout << "FWDCHAIN yes!" << endl;
-        
-            // do the rule computation etc
+        // For each such vector:
+        foreach(std::vector<BBvtree> f, filters) {
+            // find a vector of Atoms that matches it
+            Btr<vector<BoundVertex> > args;
+            args = findAllArgs(f);
+            // check for validity (~redundant)
             
-            Vertex V=((r->compute(cleanArgs)).GetValue());
-            out=boost::get<pHandle>(V);
-            const TruthValue& tv=GET_ASW->getTV(out);
-            //cout<<printTV(out)<<'\n';
+            cout << "FWDCHAIN arguments ";
+            //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
+            cout << " are valid? " <<endl;
     
-            if (!tv.isNullTv() && tv.getCount() > minConfidence) {
-                maxRuleApps--;
-                results.push_back(out);
-                cout<<"Output\n";
-                NMPrinter np;
-                np.print(out);
-            } else {
-                // Remove atom if not satisfactory
-                //GET_ASW->removeAtom(_v2h(V));
+            bool foundArguments = false;// = r->validate(args);
+    
+            if (!foundArguments)
+                cout << "FWDCHAIN no" << endl;
+            else {
+                cout << "FWDCHAIN yes!" << endl;
+            
+                // do the rule computation etc
+                
+                Vertex V=((r->compute(*args)).GetValue());
+                pHandle out=boost::get<pHandle>(V);
+                const TruthValue& tv=GET_ASW->getTV(out);
+                //cout<<printTV(out)<<'\n';
+        
+                if (!tv.isNullTv() && tv.getCount() > minConfidence) {
+                    maxRuleApps--;
+                    //results.push_back(out);
+                    cout<<"Output\n";
+                    NMPrinter np;
+                    np.print(out);
+                } else {
+                    // Remove atom if not satisfactory
+                    //GET_ASW->removeAtom(_v2h(V));
+                }
             }
         }
     }
+    
+    return results;
 }
 
-std::set<BoundVertex> ForwardChainer::getMatching(const vtree target)
+Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
     // Just look it up via LookupRule
+    LookupRule lookup(GET_ASW);
+    Btr<std::set<BoundVertex> > matches;
+                    
+    matches = lookup.attemptDirectProduction(target);
+    
+    return matches;
 }
 
-vector<BoundVertex>& ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
+Btr<vector<BoundVertex> > ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
 {
+    Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
     
+    findAllArgs(filter, args, 0);
+    
+    return args;
 }
 
-void findAllArgs(std::vector<BBvtree> filter, std::vector<BoundVertex>& args, uint current_arg)
+void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args, uint current_arg)
 {
+    if (current_arg >= filter.size())
+        return;
     
+    std::cout << "arg #" << current_arg << std::endl;
+    
+    BoundVertex bv;
+    
+    BBvtree f;
+    f = filter[current_arg];
+    // TODO also subst in any FWVar bindings so far
+    //Btr<bindingsT> bindings(NULL); // should be a parameter to this method.
+    
+    //meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
+    meta virtualized_target(meta(new vtree(*f)));
+    ForceAllLinksVirtual(virtualized_target);
+    
+    Btr<std::set<BoundVertex> > choices;    
+    choices = getMatching(virtualized_target);
+    
+    // pick one of the candidates at random to be the bv
+    
+    std::cout << "choices size: " << choices->size() << std::endl;
+    // random selection
+    //! @todo sort based on strength and exponential random select
+    //pHandle randArg;
+    if (choices->size() > 0) {
+        //! @todo low efficiency
+        std::vector<BoundVertex> ordered_choices(choices->size());
+        std::copy(choices->begin(), choices->end(), ordered_choices.begin());        
+        
+        int index = (int) (getRNG()->randfloat() * ordered_choices.size() );
+        //randArg = choices[index];
+        
+        bv = ordered_choices[index];
+        
+        //choices.erase(choices.begin() + index);
+        //args[i] = randArg;
+        
+        //boost::get<pHandle>(args[i]);
+    } else {
+
+    
+    args->push_back(bv);
+    
+    findAllArgs(filter, args, current_arg+1);
+    }
 }
 
 }} // namespace opencog::pln
+
+
