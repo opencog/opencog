@@ -220,9 +220,10 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable was not found; hypertable support will not be built.\nTo over-ride, make sure HYPERTABLE_LIBRARIES and HYPERTABLE_INCLUDE_DIRS are set.")
 ENDIF (HYPERTABLE_FOUND)
 
+# Needed for testing
+FIND_PACKAGE(PythonInterp)
 IF (Boost_PYTHON_FOUND)
   # find python destination dir for python bindings
-  FIND_PACKAGE(PythonInterp)
   FIND_PACKAGE(PythonLibs)
 
   IF (PYTHONLIBS_FOUND)

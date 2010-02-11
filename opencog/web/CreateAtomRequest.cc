@@ -66,7 +66,7 @@ bool CreateAtomRequest::execute()
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;
-    TruthValue* tv;
+    TruthValue* tv = NULL;
     Value json_top;
     read( data, json_top);
     const Object &json_obj = json_top.get_obj();
