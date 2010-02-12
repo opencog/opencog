@@ -184,5 +184,16 @@ public:
         TableGather table3(t3, asw);
         displayTableAndBindings(table3);
         TS_ASSERT(table3.find(BoundVertex(h)) == table3.end());        
+        
+        
+        vtree t100;
+        t100 = t3;
+        
+        Vertex v;
+        v = *(t3.begin());
+        
+        BoundVertex bv(v, new std::map<pHandle, pHandle>);
+        
+        BoundVertex bv2 = bv;
     }
 };

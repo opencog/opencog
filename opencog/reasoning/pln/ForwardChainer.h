@@ -97,7 +97,8 @@ public:
     //! Find a series of atoms to match the given filter.
     Btr<std::vector<BoundVertex> > findAllArgs(std::vector<BBvtree> filter);
     
-    void findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
+    // returns true if and only if all args from this point on bound successfully
+    bool findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
                                  uint current_arg, Btr<bindingsT> bindings);
 
     

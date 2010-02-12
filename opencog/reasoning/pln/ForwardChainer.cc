@@ -404,11 +404,11 @@ Btr<vector<BoundVertex> > ForwardChainer::findAllArgs(std::vector<BBvtree> filte
     return args;
 }
 
-void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
+bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
                                  uint current_arg, Btr<bindingsT> bindings)
 {
     if (current_arg >= filter.size())
-        return;
+        return true;
     
     std::cout << "arg #" << current_arg << std::endl;
     
@@ -433,25 +433,46 @@ void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     // random selection
     //! @todo sort based on strength and exponential random select
     //pHandle randArg;
-    if (choices->size() > 0) {
-        //! @todo low efficiency
-        std::vector<BoundVertex> ordered_choices(choices->size());
-        std::copy(choices->begin(), choices->end(), ordered_choices.begin());        
-        
+    if (choices->size() < 0) {
+        std::cout << "backtracking" << std::endl;
+        return false;
+    }
+    
+    //std::cout << "choices: " << (*choices) << std::endl;
+
+    foreach (BoundVertex tmp, *choices)
+        std::cout << tmp.GetValue().which() << std::endl;
+
+
+    // Alternative: is there some OpenCog library function to randomly select an item from a set?
+    std::vector<BoundVertex> ordered_choices;
+//    std::copy(choices->begin(), choices->end(), ordered_choices.begin());
+    foreach (BoundVertex tmp, *choices) {
+        std::cout << _v2h(tmp.GetValue()) << std::endl;
+        ordered_choices.push_back(tmp);
+    }
+
+    std::cout << "1";
+
+    while (choices->size() > 0) {        
         int index = (int) (getRNG()->randfloat() * ordered_choices.size() );
         //randArg = choices[index];
-        
+    
+        std::cout << "2";
+            
         bv = ordered_choices[index];
+        ordered_choices.erase(ordered_choices.begin() + index);
         
         //choices.erase(choices.begin() + index);
         //args[i] = randArg;
         
         //boost::get<pHandle>(args[i]);
-
+    
+        std::cout << "arg #" << current_arg << std::endl;
         NMPrinter np;
         std::cout << "Using atom: " << std::endl;
         np.print(_v2h(bv.GetValue()));
-
+    
         // Separate bindings before and after applying this, in case backtracking is necessary
         Btr<bindingsT> new_bindings(new std::map<pHandle, pHandle>);
         
@@ -462,13 +483,18 @@ void ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
             new_bindings->insert(hp);
         
         
+        //(*args)[current_arg] = bv;
         args->push_back(bv);
         
-        findAllArgs(filter, args, current_arg+1, new_bindings);
-
-    } else {
-
+        // Whether the rest of the slots are successfully filled, when we use bv for this slot
+        bool rest_filled = findAllArgs(filter, args, current_arg+1, new_bindings);
+        if (rest_filled)
+            return true; 
     }
+    
+    std::cout << "backtracking" << std::endl;
+    args-> pop_back();
+    return false;
 }
 
 }} // namespace opencog::pln
