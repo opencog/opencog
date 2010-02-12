@@ -356,6 +356,7 @@ void fw_beta (void) {
   cout << "FWBETA adding to seed stack finished" << endl;
   //pHandleSeq results = fw.fwdChainStack(10000);
   pHandleSeq results = fw.fwdChain(FWD_CHAIN_MAX_APPS);
+  //pHandleSeq results = fw.fwdChain(10000);
   //opencog::logger().info("Finish chaining on seed stack");
   cout << "FWBETA Chaining on seed stack finished, results:" << endl;
 /*  NMPrinter np;

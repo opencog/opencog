@@ -333,46 +333,49 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
 {
     pHandleSeq results;
     
-    // Get the next Rule (no restrictions)
-    foreach(Rule *r, rp) { // to avoid needing a nextRule method.
+    while (maxRuleApps > 0) {
     
-        // Find the possible vector(s) of arguments for it
-        std::set<std::vector<BBvtree> > filters(getFilters(r));
+        // Get the next Rule (no restrictions)
+        foreach(Rule *r, rp) { // to avoid needing a nextRule method.
         
-        // For each such vector:
-        foreach(std::vector<BBvtree> f, filters) {
-            // find a vector of Atoms that matches it
-            Btr<vector<BoundVertex> > args;
-            args = findAllArgs(f);
-            // check for validity (~redundant)
+            // Find the possible vector(s) of arguments for it
+            std::set<std::vector<BBvtree> > filters(getFilters(r));
             
-            cout << "FWDCHAIN arguments ";
-            //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
-            cout << " are valid? " <<endl;
-    
-            bool foundArguments = !args->empty();//true;// = r->validate(args);
-    
-            if (!foundArguments)
-                cout << "FWDCHAIN no" << endl;
-            else {
-                cout << "FWDCHAIN yes!" << endl;
-            
-                // do the rule computation etc
+            // For each such vector:
+            foreach(std::vector<BBvtree> f, filters) {
+                // find a vector of Atoms that matches it
+                Btr<vector<BoundVertex> > args;
+                args = findAllArgs(f);
+                // check for validity (~redundant)
                 
-                Vertex V=((r->compute(*args)).GetValue());
-                pHandle out=boost::get<pHandle>(V);
-                const TruthValue& tv=GET_ASW->getTV(out);
-                //cout<<printTV(out)<<'\n';
+                cout << "FWDCHAIN arguments ";
+                //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
+                cout << " are valid? " <<endl;
         
-                if (!tv.isNullTv() && tv.getCount() > minConfidence) {
-                    maxRuleApps--;
-                    //results.push_back(out);
-                    cout<<"Output\n";
-                    NMPrinter np;
-                    np.print(out);
-                } else {
-                    // Remove atom if not satisfactory
-                    //GET_ASW->removeAtom(_v2h(V));
+                bool foundArguments = !args->empty();//true;// = r->validate(args);
+        
+                if (!foundArguments)
+                    cout << "FWDCHAIN no" << endl;
+                else {
+                    cout << "FWDCHAIN yes!" << endl;
+                
+                    // do the rule computation etc
+                    
+                    Vertex V=((r->compute(*args)).GetValue());
+                    pHandle out=boost::get<pHandle>(V);
+                    const TruthValue& tv=GET_ASW->getTV(out);
+                    //cout<<printTV(out)<<'\n';
+            
+                    if (!tv.isNullTv() && tv.getCount() > minConfidence) {
+                        maxRuleApps--;
+                        //results.push_back(out);
+                        cout<<"Output\n";
+                        NMPrinter np;
+                        np.print(out);
+                    } else {
+                        // Remove atom if not satisfactory
+                        //GET_ASW->removeAtom(_v2h(V));
+                    }
                 }
             }
         }
@@ -441,15 +444,15 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     
     //std::cout << "choices: " << (*choices) << std::endl;
 
-    foreach (BoundVertex tmp, *choices)
-        std::cout << tmp.GetValue().which() << std::endl;
+//    foreach (BoundVertex tmp, *choices)
+//        std::cout << tmp.GetValue().which() << std::endl;
 
 
     // Alternative: is there some OpenCog library function to randomly select an item from a set?
     std::vector<BoundVertex> ordered_choices;
 //    std::copy(choices->begin(), choices->end(), ordered_choices.begin());
     foreach (BoundVertex tmp, *choices) {
-        std::cout << _v2h(tmp.GetValue()) << std::endl;
+        //std::cout << _v2h(tmp.GetValue()) << std::endl;
         ordered_choices.push_back(tmp);
     }
 
