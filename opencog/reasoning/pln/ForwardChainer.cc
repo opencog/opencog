@@ -350,7 +350,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
             //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
             cout << " are valid? " <<endl;
     
-            bool foundArguments = true;// = r->validate(args);
+            bool foundArguments = !args->empty();//true;// = r->validate(args);
     
             if (!foundArguments)
                 cout << "FWDCHAIN no" << endl;
@@ -399,9 +399,9 @@ Btr<vector<BoundVertex> > ForwardChainer::findAllArgs(std::vector<BBvtree> filte
     //Btr<bindingsT> bindings(new BindingsT());
     Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
     
-    findAllArgs(filter, args, 0, bindings);
-    
-    return args;
+    bool match = findAllArgs(filter, args, 0, bindings);
+
+    return args;       
 }
 
 bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
@@ -420,7 +420,8 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     //Btr<bindingsT> bindings(NULL); // should be a parameter to this method.
     
     //meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
-    meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
+    //meta virtualized_target(bindings ? bind_vtree(*f,*bindings) : meta(new vtree(*f)));
+    meta virtualized_target(bind_vtree(*f,*bindings));
     //meta virtualized_target(meta(new vtree(*f)));
     ForceAllLinksVirtual(virtualized_target);
     
@@ -433,7 +434,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     // random selection
     //! @todo sort based on strength and exponential random select
     //pHandle randArg;
-    if (choices->size() < 0) {
+    if (choices->size() == 0) {
         std::cout << "backtracking" << std::endl;
         return false;
     }
@@ -454,7 +455,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
     std::cout << "1";
 
-    while (choices->size() > 0) {        
+    while (ordered_choices.size() > 0) {        
         int index = (int) (getRNG()->randfloat() * ordered_choices.size() );
         //randArg = choices[index];
     
@@ -490,10 +491,14 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         bool rest_filled = findAllArgs(filter, args, current_arg+1, new_bindings);
         if (rest_filled)
             return true; 
+        
+        args-> pop_back();
+//        else // tacky code to prevent more than one try
+//            break;
     }
     
     std::cout << "backtracking" << std::endl;
-    args-> pop_back();
+    
     return false;
 }
 
