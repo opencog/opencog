@@ -326,6 +326,27 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
 //                                         vtree(CreateVar(GET_ASW))
 //                                         )));
 
+    std::vector<meta> inputFilter(r->getInputFilter());
+    
+    // convert them to BoundVertex instances.
+    // This should all probably be refactored.
+    
+    Btr<std::vector<BBvtree> > filter(new std::vector<BBvtree>);
+    
+    //std::copy(inputFilter.begin(), inputFilter.end(), filter->begin());
+    
+    foreach(meta item, inputFilter) {
+        BBvtree Btr_bound_item(new BoundVTree(*item)); // not bound yet, it just means it can be bound
+        filter->push_back(Btr_bound_item);
+    }
+    
+    //return makeSingletonSet(filter);
+    
+    Rule::setOfMPs ret;
+    ret.insert(*filter);
+    return ret;
+    
+
     meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
                                          mva((pHandle)ATOM),
                                          mva((pHandle)ATOM)
