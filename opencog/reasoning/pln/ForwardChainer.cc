@@ -371,7 +371,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
             cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
-            std::set<std::vector<BBvtree> > filters(getFilters(r));
+            std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
             
             // For each such vector:
             foreach(std::vector<BBvtree> f, filters) {

@@ -108,6 +108,8 @@ protected:
     virtual setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const=0;
     // virtual MPs* o2iMetaExtra(const atom& outh, bool& overrideInputFilter) const=0;
 
+    virtual meta targetTemplate() const { return meta( (vtree*)NULL); }
+
 public:
     /** Rule constructor
      * @param _asw Pointer to the AtomSpace interface.
@@ -219,6 +221,8 @@ public:
 
     //! Get the inputFilter for this Rule.
     MPsIn& getInputFilter() { return inputFilter; }
+
+    setOfMPs fullInputFilter();
 
     //! Does the Rule have unfixed input arity?
     bool hasFreeInputArity() const { return freeInputArity; }

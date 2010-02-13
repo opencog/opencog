@@ -203,6 +203,33 @@ Rule::setOfMPs Rule::o2iMeta(meta outh) const
     return ret;
 }
 
+Rule::setOfMPs Rule::fullInputFilter()
+{
+    meta genericTarget(targetTemplate());
+    
+    if (genericTarget) {
+        return o2iMeta(genericTarget);
+    } else {
+        // convert the inputFilter member to BoundVertex instances.
+        std::vector<meta> inputFilter(getInputFilter());
+        
+        //Btr<std::vector<BBvtree> > filter(new std::vector<BBvtree>);
+        std::vector<BBvtree> filter;
+        
+        foreach(meta item, inputFilter) {
+                        
+            BBvtree Btr_bound_item(new BoundVTree(*item)); // not bound yet, it just means it can be bound
+            filter.push_back(Btr_bound_item);
+        }
+        
+        //return makeSingletonSet(filter);
+        
+        Rule::setOfMPs ret;
+        ret.insert(filter);
+        return ret;
+    }
+}
+
 void Rule::CloneArgs(const Rule::MPs& src, Rule::MPs& dest)
 {
     foreach(const BBvtree& bbvt, src)
