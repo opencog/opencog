@@ -51,10 +51,12 @@ class DeductionRule : public GenericRule<DeductionFormula>
                                          vtree(Vertex(asw->getOutgoing(boost::get<pHandle>(h[1]),1)))
                                          )));
     }
+    
     bool validate2 (Rule::MPs& args) const
     {
         return (args.size() == 2 && !(*args[0] == *args[1]));
     }
+    
     TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray,
                                int* newN) const
     {
@@ -107,6 +109,7 @@ public:
                                                                                        mva((pHandle)ATOM)))
                                                                   ));		
     }
+    
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
         if ( !asw->inheritsType((Type)_v2h(*outh->begin()), InclusionLink))
@@ -129,6 +132,14 @@ public:
         overrideInputFilter = true;
         
         return makeSingletonSet(ret);
+    }
+   
+    meta targetTemplate() const
+    {
+        return(meta(new vtree(mva((pHandle)InclusionLink, 
+                                         mva((pHandle)ATOM),
+                                         mva((pHandle)ATOM)
+                                         ))));
     }
     
     NO_DIRECT_PRODUCTION;

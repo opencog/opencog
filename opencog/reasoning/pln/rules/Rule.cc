@@ -203,7 +203,7 @@ Rule::setOfMPs Rule::o2iMeta(meta outh) const
     return ret;
 }
 
-Rule::setOfMPs Rule::fullInputFilter()
+Rule::setOfMPs Rule::fullInputFilter() const
 {
     meta genericTarget(targetTemplate());
     
@@ -211,7 +211,6 @@ Rule::setOfMPs Rule::fullInputFilter()
         return o2iMeta(genericTarget);
     } else {
         // convert the inputFilter member to BoundVertex instances.
-        std::vector<meta> inputFilter(getInputFilter());
         
         //Btr<std::vector<BBvtree> > filter(new std::vector<BBvtree>);
         std::vector<BBvtree> filter;
