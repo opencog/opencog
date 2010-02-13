@@ -208,7 +208,13 @@ bool GetListRequest::execute()
     } else if (type != NOTYPE) { // filter by type
         as->getHandleSet(std::back_inserter(_handles), type, subtypes);
     }
-    if (order_by != "") sortHandles(_handles, order_by, descending);
+    if (order_by != "") {
+        bool sortResult = sortHandles(_handles, order_by, descending);
+        if (!sortResult) {
+            send(_output.str()); 
+            return false;
+        }
+    }
     if (output_format == json_format) json_makeOutput(_handles);
     else html_makeOutput(_handles);
     send(_output.str()); // send output to RequestResult instance
@@ -222,7 +228,7 @@ void GetListRequest::sendError(std::string err)
     send(_output.str());
 }
 
-void GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
+bool GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
         bool descend)
 {
     if (order_by == "lti") {
@@ -237,7 +243,11 @@ void GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
     } else if (order_by == "tv.c") {
         std::sort(hs.begin(), hs.end(),
                 boost::bind(getListSortByTVConfidencePredicate, descend, _1, _2));
+    } else {
+        _output << "unknown sort order" << std::endl;
+        return false;
     }
+    return true;
 
 }
 
@@ -260,7 +270,7 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
         tmpstring.str("");
     }
     if (subtypes) {
-        tmpstring << "subtypes=1";
+        tmpstring << "subtype=1";
         params.push_back(tmpstring.str());
         tmpstring.str("");
     }
@@ -269,37 +279,41 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
         params.push_back(tmpstring.str());
         tmpstring.str("");
     }
-    tmpstring << "max=" << maximum;
-    params.push_back(tmpstring.str());
-    tmpstring.str("");
     for (uint i = 0; i < params.size(); i++) {
         if (i > 0) querystring << "&";
         querystring << params[i];
     }
     
+    std::ostringstream orderstr;
+    if (order_by != "") {
+        orderstr << "&order=" << order_by;
+        if (!descending) orderstr << "ascend=1";
+    }
     _output << "<p><small>Viewing atoms " << skip+1 << " to ";
     if ((uint)skip+maximum < total_results)
         _output << skip+maximum;
     else
         _output << total_results;
     _output  << " (of " << total_results << ")</small></p>" << std::endl;
+    std::ostringstream maxstring;
+    maxstring << "&max=" << maximum;
     if (skip > 0) {
         int lskip = skip-maximum;
         if (lskip < 0) lskip = 0;
         _output << "<a href=\"" << querystring.str() << "&skip=0" <<
-            "\">&lArr;" << "</a> ";
+            maxstring.str() << orderstr.str() << "\">&lArr;" << "</a> ";
         _output << "<a href=\"" << querystring.str() << "&skip=" << lskip <<
-            "\">&larr;" << "</a> ";
+            maxstring.str() << orderstr.str() << "\">&larr;" << "</a> ";
     } else {
         _output << "&lArr; &larr; ";
     }
     if ((unsigned int)skip+maximum < total_results) {
         int rskip = skip+maximum;
         _output << "<a href=\"" << querystring.str() << "&skip=" << rskip <<
-            "\">&rarr;" << "</a> ";
+            maxstring.str() << orderstr.str() << "\">&rarr;" << "</a> ";
         _output << "<a href=\"" << querystring.str() << "&skip=" <<
             total_results-maximum <<
-            "\">&rArr;" << "</a> ";
+            maxstring.str() << orderstr.str() << "\">&rArr;" << "</a> ";
     } else {
         _output << "&rarr; &rArr;";
     }
@@ -310,7 +324,7 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
         if (maximums[m] == maximum) {
             _output << maximums[m] << " ";
         } else {
-            _output << "<a href=\"" << querystring.str() << "&max=" << maximums[m]
+            _output << "<a href=\"" << querystring.str() << orderstr.str() << "&max=" << maximums[m]
                 << "&skip=" << skip << "\">" << maximums[m] << "</a> ";
         }
     }
@@ -320,33 +334,34 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
     _output << "<th>Name</th> <th>Type</th> ";
 
     // STI
-    tmpstring << querystring.str() << "&order=STI";
+    tmpstring << querystring.str() << maxstring.str() << "&order=STI";
     _output << "<th>STI [<a href=\"" << tmpstring.str() << "\">&uarr</a>";
     tmpstring.str("");
-    tmpstring << querystring.str() << "&order=STI&ascend=1";
+    tmpstring << querystring.str() << maxstring.str() << "&order=STI&ascend=1";
     _output << "<a href=\"" << tmpstring.str() << "\">&darr</a>]</th>";
     tmpstring.str("");
     
     // LTI
-    tmpstring << querystring.str() << "&order=LTI";
+    tmpstring << querystring.str() << maxstring.str() << "&order=LTI";
     _output << "<th>LTI [<a href=\"" << tmpstring.str() << "\">&uarr</a>";
     tmpstring.str("");
-    tmpstring << querystring.str() << "&order=LTI&ascend=1";
+    tmpstring << querystring.str() << maxstring.str() << "&order=LTI&ascend=1";
     _output << "<a href=\"" << tmpstring.str() << "\">&darr</a>]</th>";
     tmpstring.str("");
 
     // TV.s
-    tmpstring << querystring.str() << "&order=TV.s";
+    tmpstring << querystring.str() << maxstring.str() << "&order=TV.s";
     _output << "<th>TruthValue [S: <a href=\"" << tmpstring.str() <<
         "\">&uarr</a>";
     tmpstring.str("");
-    tmpstring << querystring.str() << "&order=TV.s&ascend=1";
+    tmpstring << querystring.str() << maxstring.str() << "&order=TV.s&ascend=1";
     _output << "<a href=\"" << tmpstring.str() << "\">&darr</a>";
     tmpstring.str("");
-    tmpstring << querystring.str() << "&order=TV.c";
+    // TV.c
+    tmpstring << querystring.str() << maxstring.str() << "&order=TV.c";
     _output << " conf: <a href=\"" << tmpstring.str() << "\">&uarr</a>";
     tmpstring.str("");
-    tmpstring << querystring.str() << "&order=TV.c&ascend=1";
+    tmpstring << querystring.str() << maxstring.str() << "&order=TV.c&ascend=1";
     _output << "<a href=\"" << tmpstring.str() << "\">&darr</a>]</th>";
     tmpstring.str("");
         

@@ -149,7 +149,6 @@ class TestPostAtom(unittest.TestCase):
             data_copy = ''.join(data_copy)
             req = urllib2.Request(rest_url + 'atom/',data_copy)
             response = urllib2.urlopen(req).read()
-            print response
             try:
                 result = json.loads(response)
             except ValueError:

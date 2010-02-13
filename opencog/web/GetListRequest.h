@@ -71,7 +71,7 @@ public:
     virtual ~GetListRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
-    void sortHandles(HandleSeq& hs, std::string order_by, bool descend = true);
+    bool sortHandles(HandleSeq& hs, std::string order_by, bool descend = true);
 
     void html_makeListHeader(unsigned int total_results);
     void html_makeOutput(HandleSeq& hs);

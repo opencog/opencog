@@ -143,8 +143,8 @@ void WebModule::setupURIsForUI()
     // Support both "atom/UUID" and "atom?handle=UUID"
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/atom/*", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/atom", viewAtomPage, NULL);
-    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list", viewListPage, NULL);
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list/*", viewListPage, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list", viewListPage, NULL);
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/request/*", makeRequest, NULL);
 }
 
@@ -153,6 +153,8 @@ void WebModule::setupURIsForREST()
     static char rest_str[] = "rest";
     // atom/type/* support GET atoms of type.
     mg_set_uri_callback(ctx, REST_PATH_PREFIX "/list/*", viewListPage,
+            rest_str);
+    mg_set_uri_callback(ctx, REST_PATH_PREFIX "/list", viewListPage,
             rest_str);
     // atom/ support GET/PUT/POST == get info/create/create
     // atom/* support GET, get atom info
