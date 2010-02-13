@@ -287,7 +287,7 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
     std::ostringstream orderstr;
     if (order_by != "") {
         orderstr << "&order=" << order_by;
-        if (!descending) orderstr << "ascend=1";
+        if (!descending) orderstr << "&ascend=1";
     }
     _output << "<p><small>Viewing atoms " << skip+1 << " to ";
     if ((uint)skip+maximum < total_results)
