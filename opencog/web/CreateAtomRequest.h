@@ -71,6 +71,7 @@ public:
     void generateProcessingGraph(Handle h);
     void setRequestResult(RequestResult* rr);
     bool assertJSONTVCorrect(std::string expected, std::string actual);
+    bool assertJsonMapContains(const json_spirit::Object& o, std::vector<std::string> keys);
 };
 
 } // namespace 
