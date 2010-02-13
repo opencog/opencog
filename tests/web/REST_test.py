@@ -12,6 +12,8 @@ import urllib2
 import urllib
 
 server_exe = sys.argv[1]
+opencog_conf = sys.argv[2]
+del sys.argv[1:3]
 server_process=None
 
 base_url = 'http://localhost:17034/'
@@ -28,19 +30,20 @@ def spawn_server():
 
 def kill_server():
     print "Killing server"
-    req = urllib2.Request(base_url + '/opencog/request/shutdown')
-    response = urllib2.urlopen(req).read()
-    stdout,stderr = server_process.communicate()
+    server_process.terminate()
+    #req = urllib2.Request(base_url + '/opencog/request/shutdown')
+    #response = urllib2.urlopen(req).read()
+    #stdout,stderr = server_process.communicate()
     print "Server killed"
 
 class TestPostAtom(unittest.TestCase):
-    
+
     def setUp(self):
-        spawn_server()
+        pass
 
     def tearDown(self):
-        kill_server()
-    
+        pass
+        
     def testPostSuccess(self):
         data = '{ "type":"ConceptNode", "name":"a test for the times", "truthvalue": {"simple": {"str":0.5, "count":10}}}'
         req = urllib2.Request(rest_url + 'atom/',data)
@@ -60,7 +63,13 @@ class TestPostAtom(unittest.TestCase):
         self.assertEqual(result["result"], "merged")
 
 if __name__ == "__main__":
-    del sys.argv[1]
     print "Starting REST interface test"
-    unittest.main()
+    spawn_server()
+    # unittest.main is stupid and has sys.exit hardcoded. python 2.7 has an
+    # option to disable it, but most people still use 2.6 or earlier.
+    try:
+        unittest.main()
+    except SystemExit:
+        print('caught exit')
+        kill_server()
 

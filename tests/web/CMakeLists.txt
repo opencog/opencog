@@ -2,6 +2,7 @@
 IF(PYTHONINTERP_FOUND)
 ADD_TEST(RESTfulTest ${PYTHON_EXECUTABLE}
     ${CMAKE_SOURCE_DIR}/tests/web/REST_test.py
-    ${PROJECT_BINARY_DIR}/opencog/server/cogserver)
+    ${PROJECT_BINARY_DIR}/opencog/server/cogserver
+    ${PROJECT_SOURCE_DIR}/lib/opencog.conf)
 ENDIF(PYTHONINTERP_FOUND)
 
