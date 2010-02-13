@@ -56,6 +56,15 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         return makeSingletonSet(ret);
 }
 
+// TODO support other numbers of OR arguments besides 2
+meta ORRule::targetTemplate() const
+{
+    return(meta(new vtree(mva((pHandle)OR_LINK, 
+                                     mva((pHandle)ATOM),
+                                     mva((pHandle)ATOM)
+                                     ))));
+}
+
 #define USE_INCLUSION_EXCLUSION_IN_OR_RULE 0
 TruthValue** ORRule::formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
 {
