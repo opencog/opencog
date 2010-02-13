@@ -274,9 +274,10 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     
 ////    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
     
-    AddRule(new SubsetEvalRule(asw), 10.0f);
+    // FC: Broken due to TableGather not handling Node Type vertexes
+////    AddRule(new SubsetEvalRule(asw), 10.0f);
 
-    AddRule(new IntensionalInheritanceRule(asw), 10.f);
+////    AddRule(new IntensionalInheritanceRule(asw), 10.f);
 
     //  AddRule(new FORALLRule(asw,NULL), 5.0f);
     //  AddRule( new PLNPredicateRule(asw,NULL), 5.0f);
