@@ -321,10 +321,19 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
     
     //! @todo extend this for other rules (probably separately for each one)
     // generic target for this rule
+//    meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
+//                                         vtree(CreateVar(GET_ASW)),
+//                                         vtree(CreateVar(GET_ASW))
+//                                         )));
+
     meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
-                                         vtree(CreateVar(GET_ASW)),
-                                         vtree(CreateVar(GET_ASW))
+                                         mva((pHandle)ATOM),
+                                         mva((pHandle)ATOM)
                                          )));
+
+    cout << "getFilters";
+    rawPrint(generic_target->begin(),-5);
+//    cout << rawPrint(*generic_target,generic_target->begin(),0);
     
     return r->o2iMeta(generic_target);
 }
@@ -334,9 +343,11 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
     pHandleSeq results;
     
     while (maxRuleApps > 0) {
+        cout << "steps remaining: " << maxRuleApps << endl;
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, rp) { // to avoid needing a nextRule method.
+            cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(getFilters(r));
@@ -389,6 +400,9 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     // Just look it up via LookupRule
     LookupRule lookup(GET_ASW);
     Btr<std::set<BoundVertex> > matches;
+    
+    std::cout << "getMatching: target: ";
+    rawPrint(target->begin(),-5);
                     
     matches = lookup.attemptDirectProduction(target);
     
@@ -429,7 +443,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     ForceAllLinksVirtual(virtualized_target);
     
     Btr<std::set<BoundVertex> > choices;    
-    choices = getMatching(virtualized_target);
+    choices = getMatching(virtualized_target); // bad_get during LookupRule... (if you use non-FWVars for that thing)
     
     // pick one of the candidates at random to be the bv
     
