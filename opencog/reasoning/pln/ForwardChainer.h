@@ -82,7 +82,7 @@ public:
     pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
     //! forward chain with the next Rule
-    pHandleSeq fwdChain(int maxRuleApps);
+    pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS, meta target = meta((vtree*)NULL));
 
     //! Get a random handle from the seed stack or global atomspace
     //! Rejects handles that are in the vector args
