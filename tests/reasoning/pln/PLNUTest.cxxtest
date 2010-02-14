@@ -26,6 +26,7 @@
 
 #include "opencog/reasoning/pln/AtomSpaceWrapper.h"
 #include "opencog/reasoning/pln/BackInferenceTreeNode.h"
+#include "opencog/reasoning/pln/ForwardChainer.h"
 
 #include "opencog/reasoning/pln/rules/RuleApp.h"
 
@@ -172,6 +173,10 @@ private:
     
     float temperature;
     static const int temperaturesN = 7; //3*5;
+    
+    // Setting this false makes the Scheme targets get tested using forward chaining.
+    // This is set false during testSCMTargetsFC.
+    bool TESTING_BACKWARD_CHAINING;
 
     // Only runs some tests relevant to testing heuristic functions
     void runPLNTestsOnce() {
@@ -243,6 +248,8 @@ private:
         //testFitnessEvaluator = BEST;
         //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+        
+        TESTING_BACKWARD_CHAINING = true;
     }
 
     // Now uses SCM. Won't search any alternative locations for the file.
@@ -299,7 +306,12 @@ private:
         fflush(stdout);
         //currentDebugLevel=-4;
 
-        Btr<BackInferenceTreeRootT> state(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
+        Btr<BackInferenceTreeRootT> state;
+        ForwardChainer fc;
+
+        if (TESTING_BACKWARD_CHAINING) {
+            state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
+        }
         uint s_i=0; // Expansion phase #
         pHandle eh=PHANDLE_UNDEFINED;
         TruthValue* etv = NULL;
@@ -324,7 +336,12 @@ private:
                     //currentDebugLevel=4;
                 
                 int expansions = expansions_per_run;
-                eres = state->infer(expansions, 0.000001f, 0.01f);      
+                if (TESTING_BACKWARD_CHAINING) {
+                    eres = state->infer(expansions, 0.000001f, 0.01f);
+                } else {
+                    eh = fc.fwdChainToTarget(expansions, (t->target));
+                    //if (!results.empty()) eh = results[0];
+                }
                 
                 if (expansions > 0)
                     cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
@@ -337,8 +354,9 @@ private:
 
                 //currentDebugLevel=-4;
 
-                eh = (eres.empty() ? PHANDLE_UNDEFINED :
-                        _v2h(*(*eres.rbegin())->getVtree().begin()));
+                if (TESTING_BACKWARD_CHAINING) 
+                    eh = (eres.empty() ? PHANDLE_UNDEFINED :
+                            _v2h(*(*eres.rbegin())->getVtree().begin()));                
 
                 if (eh != PHANDLE_UNDEFINED )
                     etv = atw->getTV(eh).clone();
@@ -486,7 +504,10 @@ private:
         initAxiomSet(axiomsFile);
         
         std::string targetScheme = test["TARGET"];
-        std::cout << "Target: " << targetScheme << std::endl;
+        if (TESTING_BACKWARD_CHAINING)
+            std::cout << "Back-chaining target: " << targetScheme << std::endl;
+        else
+            std::cout << "Forward-chaining target: " << targetScheme << std::endl;
         
         // get target atom
         SchemeEval& eval = SchemeEval::instance();        
@@ -673,6 +694,14 @@ public:
             std::cerr << "Unknown exception during SCM targets" << std::endl;
             throw;
         }
+    }
+    
+    void testSCMTargetsFC() {
+        bool tmp = TESTING_BACKWARD_CHAINING;
+        
+        TESTING_BACKWARD_CHAINING = false;
+        testSCMTargets();
+        TESTING_BACKWARD_CHAINING = tmp;
     }
 
     // A meta-level test that can run all of the tests multiple times;

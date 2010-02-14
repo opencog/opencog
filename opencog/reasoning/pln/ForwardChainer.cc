@@ -66,11 +66,11 @@ int ForwardChainer::fillStack(int number, bool random)
     return number - newSeeds.size();
 }
 
-Handle ForwardChainer::fwdChainToTarget(Handle target, int maxRuleApps)
+pHandle ForwardChainer::fwdChainToTarget(int& maxRuleApps, meta target)
 {
     //! @todo Do some intelligent stuff here until the target is reached.
     // although maybe not... isn't this just what backward chaining does?
-    return Handle::UNDEFINED;
+    return PHANDLE_UNDEFINED;
 }
 
 // Static/Shared random number generator
@@ -359,7 +359,7 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
     return r->o2iMeta(generic_target);
 }
 
-pHandleSeq ForwardChainer::fwdChain(int maxRuleApps/* = FWD_CHAIN_MAX_APPS*/)
+pHandleSeq ForwardChainer::fwdChain(int maxRuleApps)
 {
     pHandleSeq results;
     

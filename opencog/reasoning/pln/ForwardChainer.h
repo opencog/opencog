@@ -69,11 +69,12 @@ public:
     //! @return return Handles that were created
     pHandleSeq fwdChainSeed(pHandle h, int maxRuleApps = 1);
 
-    //! Chain to specific target
+    //! Chain to specific target. Only useful for testing.
     //! @param target Handle
     //! @param maximum number of rule applications before ending
     //! @param whether target was reached
-    Handle fwdChainToTarget(Handle target = Handle::UNDEFINED, int maxRuleApps = FWD_CHAIN_MAX_APPS);
+    //Handle fwdChainToTarget(Handle target = Handle::UNDEFINED, int maxRuleApps = FWD_CHAIN_MAX_APPS);
+    pHandle fwdChainToTarget(int& maxRuleApps, meta target);
 
     //! Chain till (current) entire stack has been processed
     //! @param maximum number of rule applications before ending
@@ -81,7 +82,7 @@ public:
     pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
 
     //! forward chain with the next Rule
-    pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS);
+    pHandleSeq fwdChain(int maxRuleApps);
 
     //! Get a random handle from the seed stack or global atomspace
     //! Rejects handles that are in the vector args
