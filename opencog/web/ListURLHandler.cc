@@ -2,6 +2,7 @@
  * opencog/rest/ListURLHandler.cc
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Joel Pitt
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@fruitionnz.com>

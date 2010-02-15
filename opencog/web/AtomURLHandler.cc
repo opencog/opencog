@@ -2,6 +2,7 @@
  * opencog/rest/AtomURLHandler.cc
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Joel Pitt
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -94,12 +95,17 @@ void AtomURLHandler::handlePOSTUpdate( struct mg_connection *conn,
     // check that no other parameters are given!
     if (params.size() > 0) {
         // Check that the only query string option is a handle
-        if (params.size() > 1 || !handleInQuery) {
+        if (!handleInQuery || params.size() > 1) {
             mg_printf(_conn, "{\"error\":\"unknown query string\"}");
             completed = true;
             return;
         }
+    } else {
+        std::string handleParam;
+        handleParam = "handle=" + h;
+        params.push_front(handleParam);
     }
+
     std::string json_str;
     if (ri->post_data_len > 0) {
         json_str = std::string(ri->post_data, ri->post_data_len);
@@ -201,7 +207,7 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
             return;
         }
         h = Handle(uuid);
-        handleInQuery = true;
+        handleInURL = true;
     } else if (boost::regex_search(query_string.c_str(),m2,atomInQuery)) {// Search query string too
         std::string handleStr(m2[1].first, m2[1].second);
         try {
@@ -213,7 +219,7 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
             return;
         }
         h = Handle(uuid);
-        handleInURL = true;
+        handleInQuery = true;
     }
 
     method = ri->request_method;

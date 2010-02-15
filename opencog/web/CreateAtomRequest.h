@@ -2,6 +2,7 @@
  * opencog/rest/CreateAtomRequest.h
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Joel Pitt
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -57,7 +58,7 @@ public:
             "     \"outgoing\": [ UUID1, UUID2 ... ], \n"
             "     \"truthvalue\": {\"simple|composite|count|indefinite\":\n"
             "          [truthvalue details] } \n",
-            true, false // not shell, is hidden
+            true, false
         );
         return _cci;
     }
@@ -67,11 +68,8 @@ public:
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
     void json_makeOutput(Handle h, bool exists);
-    TruthValue* JSONToTV(const json_spirit::Value&);
     void generateProcessingGraph(Handle h);
     void setRequestResult(RequestResult* rr);
-    bool assertJSONTVCorrect(std::string expected, std::string actual);
-    bool assertJsonMapContains(const json_spirit::Object& o, std::vector<std::string> keys);
 };
 
 } // namespace 

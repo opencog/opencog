@@ -2,6 +2,7 @@
  * opencog/rest/WebModule.h
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
+ * Copyright (C) 2010 by Joel Pitt
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -31,6 +32,7 @@
 #include "mongoose.h"
 #include <opencog/web/GetListRequest.h>
 #include <opencog/web/CreateAtomRequest.h>
+#include <opencog/web/UpdateAtomRequest.h>
 #include <opencog/web/ListURLHandler.h>
 #include <opencog/web/AtomURLHandler.h>
 #include <opencog/web/ServerRequestWrapper.h>
@@ -60,6 +62,7 @@ private:
     Factory<GetListRequest, Request> getListFactory;
     Factory<GetAtomRequest, Request> getAtomFactory;
     Factory<CreateAtomRequest, Request> createAtomFactory;
+    Factory<UpdateAtomRequest, Request> updateAtomFactory;
 
     std::string serverAddress;
 

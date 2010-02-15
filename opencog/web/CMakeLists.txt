@@ -5,17 +5,20 @@
 ADD_LIBRARY (ocweb SHARED
     WebModule
     GetAtomRequest
+    JsonUtil
     CreateAtomRequest
+    UpdateAtomRequest
     GetListRequest
     ServerRequestWrapper
+    BaseURLHandler
     AtomURLHandler
     ListURLHandler
-    BaseURLHandler
     mongoose
     #RequestMapper
     #SimpleAtomSpaceMapper
     #NavigationMapper
 )
+
 
 TARGET_LINK_LIBRARIES(ocweb
     util
