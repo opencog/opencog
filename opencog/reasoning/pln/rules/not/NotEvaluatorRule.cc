@@ -54,7 +54,7 @@ Rule::setOfMPs NotEvaluatorRule::o2iMetaExtra(meta outh,
         return Rule::setOfMPs();
 
     //! @todo why not?
-    LOG(-10, "SHOULD NOT BE HERE!"); assert(0);
+//    LOG(-10, "SHOULD NOT BE HERE!"); assert(0);
     MPs ret;
 
     assert(outh->begin().number_of_children() == 1);
