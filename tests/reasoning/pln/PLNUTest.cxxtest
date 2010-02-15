@@ -709,7 +709,7 @@ public:
         }
     }
     
-    void testSCMTargetsFC() {
+    void DISABLEtestSCMTargetsFC() {
         bool tmp = TESTING_BACKWARD_CHAINING;
         
         TESTING_BACKWARD_CHAINING = false;
