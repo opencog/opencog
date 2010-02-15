@@ -42,12 +42,13 @@ using namespace opencog;
 using namespace json_spirit;
 
 UpdateAtomRequest::UpdateAtomRequest() : sti_mod(sti_none), lti_mod(lti_none),
-    tv_mod(tv_none)
+    tv_mod(tv_none), tv(NULL)
 {
 }
 
 UpdateAtomRequest::~UpdateAtomRequest()
 {
+    if (tv) delete tv;
     logger().debug("[UpdateAtomRequest] destructor");
 }
 
@@ -95,7 +96,6 @@ bool UpdateAtomRequest::execute()
     // in case later changes parsed are invalid.
     AttentionValue::sti_t sti_x;
     AttentionValue::lti_t lti_x;
-    TruthValue* tv = NULL;
     try {
         read( json_data, json_top);
         const Object &json_obj = json_top.get_obj();
@@ -109,6 +109,7 @@ bool UpdateAtomRequest::execute()
                 if (sti_mod != 0) {
                     _output << "{\"error\":\"multiple STI changes\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 std::string suffix = name.substr(3);
                 if (suffix == "") {
@@ -122,6 +123,7 @@ bool UpdateAtomRequest::execute()
                 } else {
                     _output << "{\"error\":\"unknown STI modifier\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 sti_x = value.get_int();
             } else if (name.substr(0,3) == "lti") {
@@ -129,6 +131,7 @@ bool UpdateAtomRequest::execute()
                 if (lti_mod != 0) {
                     _output << "{\"error\":\"multiple LTI changes\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 std::string suffix = name.substr(3);
                 if (suffix == "") {
@@ -142,6 +145,7 @@ bool UpdateAtomRequest::execute()
                 } else {
                     _output << "{\"error\":\"unknown LTI modifier\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 lti_x = value.get_int();
             } else if (name.substr(0,2) == "tv") {
@@ -149,6 +153,7 @@ bool UpdateAtomRequest::execute()
                 if (tv_mod != 0) {
                     _output << "{\"error\":\"multiple TV changes\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 std::string suffix = name.substr(2);
                 if (suffix == "") {
@@ -158,6 +163,7 @@ bool UpdateAtomRequest::execute()
                 } else {
                     _output << "{\"error\":\"unknown TV modifier\"}" << std::endl;
                     send(_output.str());
+                    return false;
                 }
                 tv = JSONToTV(value, _output);
                 // Null TV returned on error and usually they'll be
@@ -169,11 +175,14 @@ bool UpdateAtomRequest::execute()
                     send(_output.str());
                     return false;
                 }
+            } else {
+                _output << "{\"error\":\"invalid property\"}" << std::endl;
+                send(_output.str());
+                return false;
             }
         }
     } catch (std::runtime_error e) {
         // json spirit probably borked at parsing bad javascript
-        if (tv) delete tv;
         if (_output.str().size() == 0) {
             _output << "{\"error\":\"parsing json\"}" << std::endl;
             send(_output.str());
@@ -184,7 +193,6 @@ bool UpdateAtomRequest::execute()
     doSTIChanges(as, h, sti_x);
     doLTIChanges(as, h, lti_x);
     doTVChanges(as, h, tv);
-    if (tv) delete tv;
 
     _output << "{\"result\":\"success\"}" << std::endl;
     send(_output.str());
