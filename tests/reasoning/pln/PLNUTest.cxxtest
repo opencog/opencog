@@ -378,8 +378,10 @@ private:
                     printf("s: %f max: %f\n", etv->getMean(),
                             t->maxTV->getMean());
 
-                    std::cout << "Inference trail: " << std::endl;
-                    state->printTrail(eh);
+                    if (TESTING_BACKWARD_CHAINING) { // FC doesn't support trails currently
+                        std::cout << "Inference trail: " << std::endl;
+                        state->printTrail(eh);
+                    }
                 }
                 
                 passed = (
@@ -441,26 +443,28 @@ private:
             (etv?etv->toString().c_str():"(null TV)"));
         }
 
-        printf("Test results: [");
-        foreach(VtreeProvider* bv, eres) {
-            const TruthValue& tv = atw->getTV(vt2h(*bv));
-            if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                printf("%d ", vt2h(*bv));
+        if (TESTING_BACKWARD_CHAINING) {
+            printf("Test results: [");
+            
+            foreach(VtreeProvider* bv, eres) {
+                const TruthValue& tv = atw->getTV(vt2h(*bv));
+                if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
+                    printf("%d ", vt2h(*bv));
+            }
+            printf("]\n");
+    
+            if (passed) {
+                allTestsInferenceNodes += state->inferenceNodes;
+    
+                INstats.push_back(state->inferenceNodes);
+    
+                cout << endl << "Exec pool size: " << state->exec_pool.size();
+                cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+                        " (" << allTestsInferenceNodes << " in all tests)" << endl;
+            }
+            else
+                INstats.push_back(0);
         }
-        printf("]\n");
-
-        if (passed) {
-            allTestsInferenceNodes += state->inferenceNodes;
-
-            INstats.push_back(state->inferenceNodes);
-
-            cout << endl << "Exec pool size: " << state->exec_pool.size();
-            cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                    " (" << allTestsInferenceNodes << " in all tests)" << endl;
-        }
-        else
-            INstats.push_back(0);
-
 /*      if (etv) {
             string stv(etv->toString());
             puts(stv.c_str());

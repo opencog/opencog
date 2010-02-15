@@ -403,7 +403,17 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
             
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
                         maxRuleApps--;
-                        //results.push_back(out);
+                        if (target) { // Match it against the target
+                            // Adapted from in Rule::validate
+                            typedef weak_atom< meta > vertex_wrapper;
+                            vertex_wrapper mp(target);
+                            
+                            if (mp(out)) {
+                                results.push_back(out);
+                                return results;
+                            }
+                        } else
+                            results.push_back(out);
                         cout<<"Output\n";
                         NMPrinter np;
                         np.print(out);
