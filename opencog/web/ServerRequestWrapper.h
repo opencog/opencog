@@ -40,6 +40,7 @@ namespace opencog
 class ServerRequestWrapper : public BaseURLHandler
 {
     std::string requestName;
+    bool isJSON;
 
 public:
 

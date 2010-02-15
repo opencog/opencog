@@ -36,7 +36,8 @@
 
 using namespace opencog;
 
-ServerRequestWrapper::ServerRequestWrapper() : BaseURLHandler("text/plain")
+ServerRequestWrapper::ServerRequestWrapper() : BaseURLHandler("text/plain"),
+    isJSON(false)
 {
 }
 
@@ -47,24 +48,37 @@ ServerRequestWrapper::~ServerRequestWrapper()
 void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
 {
-    std::ostringstream oss;
     CogServer& cogserver = static_cast<CogServer&>(server());
     boost::regex reg("request/([^/]*)");
     boost::cmatch m;
     _conn = conn;
 
+    // If we are passed data, then this is a json request
+    if (data) {
+        isJSON = true;
+    }
     if (boost::regex_search(ri->uri,m,reg)) {
         requestName = std::string(m[1].first, m[1].second);
         std::list<const char*> commands = cogserver.requestIds();
         Request* request = cogserver.createRequest(requestName.c_str());
         if (request == NULL) {
-            mg_printf(conn, "unknown request %s\n", requestName.c_str());
+            if (isJSON)
+                request_output << "{\"error\":\"unknown request\"}" << std::endl;
+            else
+                request_output << "unknown request " << requestName << std::endl;
+            mg_printf(conn, request_output.str().c_str());
+            completed = true;
             return;
         }
         // Ensure it isn't a shell request or anything else that will break
         const RequestClassInfo& cci = cogserver.requestInfo(requestName);
         if (cci.is_shell || cci.hidden) {
-            mg_printf(conn, "Request not callable via REST: %s\n", requestName.c_str());
+            if (isJSON)
+                request_output << "{\"error\":\"request not callable via REST\"}" << std::endl;
+            else
+                request_output << "Request not callable via REST: " << requestName << std::endl;
+            mg_printf(conn, request_output.str().c_str());
+            completed = true;
             return;
         }
 
@@ -80,7 +94,13 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
         request->setParameters(params);
         cogserver.pushRequest(request);
     } else {
-        mg_printf(conn, "URL malformed? %s\n", ri->uri);
+        if (isJSON)
+            request_output << "{\"error\":\"url malformed\"}" << std::endl;
+        else
+            request_output << "URL malformed?" << requestName << std::endl;
+        mg_printf(conn, request_output.str().c_str());
+        completed = true;
+        return;
     }
 }
 
@@ -89,20 +109,30 @@ void ServerRequestWrapper::OnRequestComplete() {
     //! @todo replace with configured server
     std::stringstream result;
 
-    result << WebModule::open_html_header;
-    result << WebModule::close_html_header;
-    result << "Result of running request '" << requestName << "':<br/>";
-    result << "<pre>";
+    if (isJSON) {
+        std::string nodoublequotes = request_output.str();
+        boost::replace_all(nodoublequotes, "\"", "\'");
+        result.str("");
+        result << "{\"result\":\"";
+        result << nodoublequotes;
+        result << "\"}" << std::endl;
+    } else {
+        result << WebModule::open_html_header;
+        result << WebModule::close_html_header;
+        result << "Result of running request '" << requestName << "':<br/>";
+        result << "<pre>";
 
-    // Escape angle brackets
-    //! @todo move removal of angle brackets to BaseURLHandler
-    std::string noanglebrackets = request_output.str();
-    boost::replace_all(noanglebrackets, "<", "&lt;");
-    boost::replace_all(noanglebrackets, ">", "&gt;");
-    result << noanglebrackets;
+        // Escape angle brackets
+        //! @todo move removal of angle brackets to BaseURLHandler
+        std::string noanglebrackets = request_output.str();
+        boost::replace_all(noanglebrackets, "<", "&lt;");
+        boost::replace_all(noanglebrackets, ">", "&gt;");
+        result.str("");
+        result << noanglebrackets;
 
-    result << "</pre>";
-    result << WebModule::html_footer;
+        result << "</pre>";
+        result << WebModule::html_footer;
+    }
     mg_printf(_conn, result.str().c_str());
 
     completed = true;
