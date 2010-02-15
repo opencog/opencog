@@ -135,7 +135,8 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     pHandleSeq results;
     
     while (maxRuleApps > 0) {
-        //cout << "steps remaining: " << maxRuleApps << endl;
+        //cout << "steps remaining: " << maxRuleApps << endl;        
+        bool appliedRule = false;
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, rp) { // to avoid needing a nextRule method.
@@ -171,6 +172,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
             
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
                         maxRuleApps--;
+                        appliedRule = true;
                         if (target) { // Match it against the target
                             // Adapted from in Rule::validate
                             typedef weak_atom< meta > vertex_wrapper;
@@ -192,6 +194,9 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                 }
             }
         }
+        // If it iterated through all Rules and couldn't find any suitable
+        // input in the AtomSpace. Exit to prevent an infinite loop!
+        if (!appliedRule) return results;
     }
     
     return results;

@@ -532,7 +532,7 @@ private:
         // Make sure FC doesn't take too long / only test it on simpler tests.
         // It takes disproportionately long once the AtomSpace gets large, due
         // to the indexes probably. 
-        if (!TESTING_BACKWARD_CHAINING && maxSteps > 500) {
+        if (!TESTING_BACKWARD_CHAINING && maxSteps > 201) {
             std::cout << "Skipping test due to time constraints" << std::endl;
             return; //minEvalsOfFittestBIT = 500;
         }
