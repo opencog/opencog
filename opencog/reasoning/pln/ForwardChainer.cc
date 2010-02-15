@@ -69,7 +69,7 @@ int ForwardChainer::fillStack(int number, bool random)
 pHandle ForwardChainer::fwdChainToTarget(int& maxRuleApps, meta target)
 {
     // Should usually only be one (or none).
-    pHandleSeq results = fwdChain(maxRuleApps);
+    pHandleSeq results = fwdChain(maxRuleApps, target);
     if (results.empty())
         return PHANDLE_UNDEFINED;
     else
@@ -355,8 +355,8 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
                                          mva((pHandle)ATOM)
                                          )));
 
-    cout << "getFilters";
-    rawPrint(generic_target->begin(),-5);
+    //cout << "getFilters";
+    rawPrint(generic_target->begin(), 2);
 //    cout << rawPrint(*generic_target,generic_target->begin(),0);
     
     return r->o2iMeta(generic_target);
@@ -367,11 +367,11 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     pHandleSeq results;
     
     while (maxRuleApps > 0) {
-        cout << "steps remaining: " << maxRuleApps << endl;
+        //cout << "steps remaining: " << maxRuleApps << endl;
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, rp) { // to avoid needing a nextRule method.
-            cout << "Using " << r->getName() << endl;
+            //cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
@@ -383,16 +383,16 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                 args = findAllArgs(f);
                 // check for validity (~redundant)
                 
-                cout << "FWDCHAIN arguments ";
+                //cout << "FWDCHAIN arguments ";
                 //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
-                cout << " are valid? " <<endl;
+                //cout << " are valid? " <<endl;
         
                 bool foundArguments = !args->empty();//true;// = r->validate(args);
         
-                if (!foundArguments)
-                    cout << "FWDCHAIN no" << endl;
-                else {
-                    cout << "FWDCHAIN yes!" << endl;
+                if (!foundArguments) {
+                    //cout << "FWDCHAIN args not valid" << endl;
+                } else {
+                    //cout << "FWDCHAIN args valid" << endl;
                 
                     // do the rule computation etc
                     
@@ -414,7 +414,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                             }
                         } else
                             results.push_back(out);
-                        cout<<"Output\n";
+                        //cout<<"Output\n";
                         NMPrinter np;
                         np.print(out);
                     } else {
@@ -435,8 +435,8 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     LookupRule lookup(GET_ASW);
     Btr<std::set<BoundVertex> > matches;
     
-    std::cout << "getMatching: target: ";
-    rawPrint(target->begin(),-5);
+//    std::cout << "getMatching: target: ";
+    rawPrint(target->begin(), 5);
                     
     matches = lookup.attemptDirectProduction(target);
     
@@ -461,7 +461,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     if (current_arg >= filter.size())
         return true;
     
-    std::cout << "arg #" << current_arg << std::endl;
+//    std::cout << "arg #" << current_arg << std::endl;
     
     BoundVertex bv;
     
@@ -481,12 +481,12 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     
     // pick one of the candidates at random to be the bv
     
-    std::cout << "choices size: " << choices->size() << std::endl;
+//    std::cout << "choices size: " << choices->size() << std::endl;
     // random selection
     //! @todo sort based on strength and exponential random select
     //pHandle randArg;
     if (choices->size() == 0) {
-        std::cout << "backtracking" << std::endl;
+//        std::cout << "backtracking" << std::endl;
         return false;
     }
     
@@ -504,13 +504,9 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         ordered_choices.push_back(tmp);
     }
 
-    std::cout << "1";
-
     while (ordered_choices.size() > 0) {        
         int index = (int) (getRNG()->randfloat() * ordered_choices.size() );
         //randArg = choices[index];
-    
-        std::cout << "2";
             
         bv = ordered_choices[index];
         ordered_choices.erase(ordered_choices.begin() + index);
@@ -520,9 +516,9 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         
         //boost::get<pHandle>(args[i]);
     
-        std::cout << "arg #" << current_arg << std::endl;
+//        std::cout << "arg #" << current_arg << std::endl;
         NMPrinter np;
-        std::cout << "Using atom: " << std::endl;
+//        std::cout << "Using atom: " << std::endl;
         np.print(_v2h(bv.GetValue()));
     
         // Separate bindings before and after applying this, in case backtracking is necessary
@@ -548,7 +544,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 //            break;
     }
     
-    std::cout << "backtracking" << std::endl;
+//    std::cout << "backtracking" << std::endl;
     
     return false;
 }
