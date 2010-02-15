@@ -1,31 +1,119 @@
-A RESTful interface to OpenCog
-===================================================
+Taken from the wiki page: http://www.opencog.org/wiki/Web_Interface
 
-This module implements a REST interface for OpenCog. To run it, simply load
+The ''ocweb'' module implements a HTTP server that provides both a web GUI for navigating the AtomSpace and a REST API. To run it, simply load
 the module via the shell:
 
-opencog> loadmodule path/to/librest.so
+ opencog> loadmodule path/to/librest.so
 
 Or place it in the CogServer config file.
 
-MODULES = module1.so, module2.so, path/to/librest.so
+ MODULES = module1.so, module2.so, path/to/libocweb.so
 
-== Interface ==
+The default opencog.conf file already loads the ''ocweb'' module if it's compiled.
+
+== REST interface ==
 
 All commands are accessed under the path prefix "/rest/0.2/" (Gama implemented a
-different REST interface under 0.1, which is incompatible with the
-current network code). By default the HTTP server runs on all interfaces
-and http://localhost:17034 (the port number has 34 or 17 doubled on the end to
-remembered easily) but should be configurable to run on other interfaces and
-ports (TODO).
+different REST interface under 0.1, which is incompatible with the current API - 0.2 will revised to 1.0 once a stable URL tree is confirmed. The plan is to continue to support older APIs if they are widely used). By default the HTTP server runs on all interfaces and on http://localhost:17034 but should be configurable to run on other interfaces and ports (TODO). In the rest of this document we will assume the default localhost URL and port.
+
+Results are JSON objects. Parameters are sent to the API either on the HTTP query string or as a JSON object via a POST method.
+
+=== Navigating the AtomSpace ===
+
+The primary use of the REST interface will probably to allow external apps to manipulate the AtomSpace. Any of these methods can return
+
+<source lang="javascript">
+{"error": "... error details" }
+</source>
+
+If something odd happens. The exact errors returned isn't currently formally defined, but should allow the caller to determine where things went wrong.
+
+==== Get information about individual atoms ====
+
+ GET http://localhost:17034/rest/0.2/atom?handle=UUID 
+ GET http://localhost:17034/rest/0.2/atom/UUID
+
+Replace "UUID" by the UUID of the atom you are after. This returns a json object that looks like:
+
+<source lang="javascript">
+ { "handle" : UUID,
+   "type": TYPENAME,
+   "name": NAME,
+   "outgoing": [ UUID1, UUID2 ... ], "incoming": [...],
+   "sti": STI, "lti":LTI,
+   "truthvalue": {"simple|composite|count|indefinite": [truthvalue details]}
+ }
+</source>
+
+See [[Web Interface#JSON Atom Format][below]] for more detail about representing Atoms in JSON notation.
+
+==== Create a new atom ====
+
+ POST http://localhost:17034/rest/0.2/atom/
+
+with POST data that looks like:
+
+<source lang="javascript">
+ { "type": TYPENAME, "name": NAME,
+ "outgoing": [ UUID1, UUID2 ... ],
+ "truthvalue": {"simple|composite|count|indefinite": [truthvalue details]}
+ }
+</source>
+
+This will return one of: 
+
+<source lang="javascript">
+ { "result": "created", "handle": UUID }
+ { "result": "merged", "handle": UUID }
+</source>
+
+depending on whether a matching atom already existed within the AtomSpace.
+
+==== Update an atom ====
+
+TODO
+
+==== Query for atoms of type/name ===
+
+ GET http://localhost:17034/rest/0.2/list?type=ConceptNode
+ GET http://localhost:17034/rest/0.2/list/ConceptNode
+
+Replace ConceptNode by whatever [[atom type]] you like. This returns a json object like:
+
+<source lang="javascript">
+{ "complete":false,
+"skipped":0,
+"total":57,
+"result": [ 26, 55, 24, 53, 22 ]
+}
+</source>
+
+The values are:
+* "complete" - whether this is the complete result set for the query.
+* "skipped" - how many earlier handles were skipped over (for iteratively calling further atoms).
+* "total" - total potential results available.
+* "result" - a list of atom Handles for those that match the query.
+
+Other options for this command that can be added to the query string:
+* "refresh=1" will make the page refresh every 5 seconds.
+* "name=N" display all atoms with name N.
+* "handle=UUID" display the atom referred to by UUID in the list. This can be used multiple times.
+* "subtype=1" will show subtypes of whatever type is requested.
+* "order=X" order the list by STI (X=sti), LTI (X=lti), TV strength (X=tv.s), or TV confidence (X=tv.c).
+* "ascend=1" ... used with order. Reverses the direction of the ordering.
+
+=== Calling server requests (TODO) ===
 
 All requests that can be normally carried out via the OpenCog shell
-are accessable by POST request at /rest/0.2/request/*.
+are accessible by POST request at http://localhost:17034/rest/0.2/request/*.
 
 For example, to start an agent one makes a POST request:
 
-$ curl http://localhost:17034/rest/0.2/request/agent-start?param=opencog::BackChainingAgent
-Successfully started agents
+ $ curl http://localhost:17034/rest/0.2/request/agent-start?params=opencog::BackChainingAgent
+
+<source lang="javascript">
+{ "result": "Successfully started agents" }
+</source>
 
 Note that the normal shell requests use a variety of parameter formats. However,
 traditionally the query string of HTTP requests use field=value pairs. So one
@@ -40,36 +128,23 @@ The params value contains the %20 character, which translate to a space.
 In some webbrowsers you may be able to enter the URL with spaces and it'll
 automatically replace them with %20.
 
-=== Navigating the AtomSpace ===
+Alternatively, you can also send JSON objects corresponding to the request:
 
-More usefully are the command requests specifically developed for the REST
-interface. These HTML/CSS styled output to allow you to navigate the atoms
-in the AtomSpace.
+ $ curl http://localhost:17034/rest/0.2/request/agent-start \
+   -d "{ "params": "infer 5" }
 
-* Individual atoms:
+<source lang="javascript">
+{ "result": "..." }
+</source>
 
-http://localhost:17034/rest/0.2/atom?handle=UUID
-http://localhost:17034/rest/0.2/atom/UUID
+== Web UI ==
 
-Replace "UUID" by the UUID of the atom you are after.
-
-* List of atoms for a given type:
-
-http://localhost:17034/rest/0.2/list?type=ConceptNode
-http://localhost:17034/rest/0.2/list/ConceptNode
-
-Replace ConceptNode by whatever atom type you like.
-
-Other options for this command:
-
-"refresh=1" will make the page refresh every 5 seconds.
-"name=N" display all atoms with name N.
-"handle=UUID" display the atom referred to by UUID in the list. This can be used
-    multiple times.
-"subtype=1" will show subtypes of whatever type is requested.
-"order=X" order the list by STI (X=STI), LTI (X=LTI), TV strength (X=tv.s),
-    or TV confidence (X=tv.c).
-"ascend=1" ... used with order. Reverses the direction of the ordering.
+The Web UI provides a human friendly interface to navigate the AtomSpace in web browser. Eventually there will be a home page that direct links to various parts of the UI, but currently there are only table based layouts at URLs that follow these formats:
+ 
+ http://localhost:17034/opencog/atom?handle=UUID 
+ http://localhost:17034/opencog/atom/UUID
+ http://localhost:17034/opencog/list/
+ http://localhost:17034/opencog/list/ConceptNode
 
 == Implementation ==
 
@@ -77,12 +152,10 @@ Gama implemented such an interface a while ago, but it relied on the Http
 sockets of the CSockets library and this has since been removed from
 OpenCog's dependencies.
 
-Instead, this implementation uses the Mongoose embeddable http server:
+Instead, this implementation uses the [
+http://code.google.com/p/mongoose/ Mongoose] embeddable http server.
 
-http://code.google.com/p/mongoose/
-
-The code has been included in the OpenCog code base due to it being so
-light weight. It is distributed under the MIT license).
+The code has been included in the OpenCog code base due to it being very light weight. It is distributed under the MIT license.
 
 == TODO ==
 
@@ -90,6 +163,5 @@ light weight. It is distributed under the MIT license).
 * get-list options for listing by name prefix.
 * Pagination of get-list results.
 * CSS styling of table to make things look pretty.
-* Generate graph with SVG or HTML5 canvas for neighbouring atoms of the
-currently viewed atom (when using get-atom).
+* Generate graph with SVG or HTML5 canvas for neighbouring atoms of the currently viewed atom (when using get-atom).
 
