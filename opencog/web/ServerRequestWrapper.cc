@@ -34,7 +34,10 @@
 
 #include "WebModule.h"
 
+#include <opencog/web/json_spirit/json_spirit.h>
+
 using namespace opencog;
+using namespace json_spirit;
 
 ServerRequestWrapper::ServerRequestWrapper() : BaseURLHandler("text/plain"),
     isJSON(false)
@@ -89,6 +92,39 @@ void ServerRequestWrapper::handleRequest( struct mg_connection *conn,
         if (var_data) {
             boost::split(params, var_data, boost::is_any_of(" "));
             mg_free(var_data);
+        } else if (isJSON) {
+            std::string json_str;
+            if (ri->post_data_len > 0) {
+                json_str = std::string(ri->post_data, ri->post_data_len);
+                Value json_top;
+                try {
+                    read( json_str, json_top);
+                    const Object &json_obj = json_top.get_obj();
+                    if (json_obj.size() != 1) {
+                        request_output << "{\"error\":\"incorrect size for json\"}" << std::endl;
+                        mg_printf(conn, request_output.str().c_str());
+                        completed = true;
+                        return;
+                    }
+                    const Pair& pair = json_obj[0];
+                    const std::string& name = pair.name_;
+                    const Value&  value = pair.value_;
+                    if (name == "params") {
+                        params.push_back(value.get_str());
+                    } else {
+                        request_output << "{\"error\":\"expected 'params' key\"}" << std::endl;
+                        mg_printf(conn, request_output.str().c_str());
+                        completed = true;
+                        return;
+                    }
+                } catch (std::runtime_error e) {
+                    // json spirit probably borked at parsing bad javascript
+                    request_output << "{\"error\":\"parsing json\"}" << std::endl;
+                    mg_printf(conn, request_output.str().c_str());
+                    completed = true;
+                    return;
+                }
+            }
         }
         request->setRequestResult(this);
         request->setParameters(params);
