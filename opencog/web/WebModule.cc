@@ -76,7 +76,7 @@ WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRE
     cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory); 
     cogserver.registerRequest(GetListRequest::info().id, &getListFactory); 
     cogserver.registerRequest(CreateAtomRequest::info().id, &createAtomFactory); 
-    cogserver.registerRequest(UpdateAtomRequest::info().id, &createAtomFactory); 
+    cogserver.registerRequest(UpdateAtomRequest::info().id, &updateAtomFactory); 
 
     timeout = 100;
 
