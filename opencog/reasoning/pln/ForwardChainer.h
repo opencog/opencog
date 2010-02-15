@@ -58,17 +58,6 @@ public:
     //! specific information?
     //float probContext
 
-    //! Fill the seedStack with most important (high STI) atoms
-    //! @param max number of handles to put in stack
-    //! @param randomly add atoms instead of using importance
-    //! @return actual number of handles put in stack
-    int fillStack(int number = FWD_CHAIN_MAX_FILL, bool random = false);
-
-    //! Chain from a single seed Handle
-    //! @param maximum number of rule applications before ending
-    //! @return return Handles that were created
-    pHandleSeq fwdChainSeed(pHandle h, int maxRuleApps = 1);
-
     //! Chain to specific target. Only useful for testing.
     //! @param target Handle
     //! @param maximum number of rule applications before ending
@@ -76,17 +65,9 @@ public:
     //Handle fwdChainToTarget(Handle target = Handle::UNDEFINED, int maxRuleApps = FWD_CHAIN_MAX_APPS);
     pHandle fwdChainToTarget(int& maxRuleApps, meta target);
 
-    //! Chain till (current) entire stack has been processed
-    //! @param maximum number of rule applications before ending
-    //! @return return Handles that were created
-    pHandleSeq fwdChainStack(int maxRuleApps = FWD_CHAIN_MAX_APPS);
-
     //! forward chain with the next Rule
     pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS, meta target = meta((vtree*)NULL));
 
-    //! Get a random handle from the seed stack or global atomspace
-    //! Rejects handles that are in the vector args
-    pHandle getRandomArgument(const std::vector< Vertex > &args);
     static RandGen* rng;
     RandGen* getRNG();
 
@@ -102,9 +83,6 @@ public:
     bool findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
                                  uint current_arg, Btr<bindingsT> bindings);
 
-    
-    //! Just get any arg. previously enforced suitability for deduction rule 
-    pHandleSeq getLocalLink(pHandle lh, const std::vector< Vertex > &args);
     void printVertexVectorHandles(std::vector< Vertex > hs);
 };
 
