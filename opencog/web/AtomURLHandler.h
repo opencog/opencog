@@ -29,6 +29,7 @@
 #include <string>
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/server/Request.h>
 
 #include "BaseURLHandler.h"
@@ -45,6 +46,9 @@ class AtomURLHandler : public BaseURLHandler
     std::string call_url;
     std::string query_string;
     std::string method;
+    bool handleInQuery;
+    bool handleInURL;
+    Handle h;
 
 public:
 
@@ -54,9 +58,13 @@ public:
         const struct mg_request_info *ri, void *data);
     void handleGET( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
-    void handlePOST( struct mg_connection *conn,
+    void handlePOSTUpdate( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
+    void handlePOSTCreate( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
     void handlePUT( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data);
+    void handleDELETE( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data);
 
     virtual void OnRequestComplete();

@@ -78,17 +78,19 @@ void ListURLHandler::handleRequest( struct mg_connection *conn,
     // Get list parameters from URL if they exist
     boost::regex reg("list/([^/]*)");
     boost::cmatch m;
+    bool hasHandle;
     if (boost::regex_search(ri->uri,m,reg)) {
         std::string typeName(m[1].first, m[1].second);
-        if (typeName == "") {
-            typeName = "type=Atom";
-            params.push_back(typeName);
-            typeName = "subtype=true";
-            params.push_back(typeName);
-        } else {
-            typeName = "type=" + typeName;
-            params.push_back(typeName);
-        }
+        typeName = "type=" + typeName;
+        params.push_back(typeName);
+        hasHandle = true;
+    }
+    if (!hasHandle) {
+        std::string p;
+        p = "type=Atom";
+        params.push_back(p);
+        p = "subtype=true";
+        params.push_back(p);
     }
 
     request->setRequestResult(this);

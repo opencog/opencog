@@ -27,8 +27,10 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 
@@ -46,7 +48,8 @@ using namespace opencog;
 using namespace json_spirit;
 
 AtomURLHandler::AtomURLHandler() : BaseURLHandler("text/plain"),
-    refreshPage(false)
+    refreshPage(false), handleInQuery(false), handleInURL(false),
+    h(Handle::UNDEFINED)
 {
 }
 
@@ -54,7 +57,7 @@ AtomURLHandler::~AtomURLHandler()
 {
 }
 
-void AtomURLHandler::handlePOST( struct mg_connection *conn,
+void AtomURLHandler::handlePOSTCreate( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
 {
     std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
@@ -81,9 +84,56 @@ void AtomURLHandler::handlePOST( struct mg_connection *conn,
     cogserver.pushRequest(request);
 }
 
+void AtomURLHandler::handlePOSTUpdate( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data)
+{
+    std::string handleUUID;
+    std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
+    CogServer& cogserver = static_cast<CogServer&>(server());
+
+    // check that no other parameters are given!
+    if (params.size() > 0) {
+        // Check that the only query string option is a handle
+        if (params.size() > 1 || !handleInQuery) {
+            mg_printf(_conn, "{\"error\":\"unknown query string\"}");
+            completed = true;
+            return;
+        }
+    }
+    std::string json_str;
+    if (ri->post_data_len > 0) {
+        json_str = std::string(ri->post_data, ri->post_data_len);
+        params.push_back(json_str);
+    } else {
+        mg_printf(_conn, "{\"error\":\"no_data\"}");
+        completed = true;
+        return;
+    }
+
+    // TODO create update request
+    Request* request = cogserver.createRequest("update-atom-json");
+    if (request == NULL) {
+        WebModule::return500( conn, std::string("unknown request"));
+        completed = true;
+        return;
+    }
+    request->setRequestResult(this);
+    request->setParameters(params);
+    cogserver.pushRequest(request);
+}
+
 void AtomURLHandler::handlePUT( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
 {
+    WebModule::return405( conn);
+    completed = true;
+    return;
+}
+
+void AtomURLHandler::handleDELETE( struct mg_connection *conn,
+        const struct mg_request_info *ri, void *data)
+{
+    // TODO implement me
     WebModule::return405( conn);
     completed = true;
     return;
@@ -116,12 +166,10 @@ void AtomURLHandler::handleGET( struct mg_connection *conn,
             }
         }
     }
-    // Get handle UUID from URL if it exists
-    boost::regex reg("atom/([^/]*)");
-    boost::cmatch m;
-    if (boost::regex_search(ri->uri,m,reg)) {
-        std::string handleUUID(m[1].first, m[1].second);
-        handleUUID = "handle=" + handleUUID;
+    // Take handle UUID from URL if it exists and create parameter
+    if (handleInURL && !handleInQuery) {
+        std::string handleUUID;
+        handleUUID = "handle=" + h;
         params.push_back(handleUUID);
     }
 
@@ -137,15 +185,55 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
     call_url = ri->uri;
     if (ri->query_string) query_string = ri->query_string;
 
-    //request_output << query_string << std::endl;
-    //request_output << ri->request_method << std::endl;
+    // Check if this request is to a specific handle
+    boost::regex atomInURL("atom/([^/]+)");
+    boost::regex atomInQuery("handle=([^&]+)");
+    boost::cmatch m1, m2;
+    UUID uuid;
+    if (boost::regex_search(ri->uri,m1,atomInURL)) {
+        std::string handleStr(m1[1].first, m1[1].second);
+        try {
+            uuid = boost::lexical_cast<UUID>(handleStr);
+        } catch (const boost::bad_lexical_cast&) {
+            mg_printf(_conn, "{\"error\":\"error parsing handle %s in URL\"}\n",
+                    handleStr.c_str());
+            completed = true;
+            return;
+        }
+        h = Handle(uuid);
+        handleInQuery = true;
+    } else if (boost::regex_search(query_string.c_str(),m2,atomInQuery)) {// Search query string too
+        std::string handleStr(m2[1].first, m2[1].second);
+        try {
+            uuid = boost::lexical_cast<UUID>(handleStr);
+        } catch (const boost::bad_lexical_cast&) {
+            mg_printf(_conn, "{\"error\":\"error parsing handle %s in query string\"}\n",
+                    handleStr.c_str());
+            completed = true;
+            return;
+        }
+        h = Handle(uuid);
+        handleInURL = true;
+    }
+
     method = ri->request_method;
     if (method == "GET")
         handleGET(conn, ri, data);
-    else if (method == "POST")
-        handlePOST(conn, ri, data);
-    else if (method == "PUT")
-        handlePOST(conn, ri, data);
+    else if (method == "POST") {
+        if (handleInQuery || handleInURL) 
+            handlePOSTUpdate(conn, ri, data);
+        else
+            handlePOSTCreate(conn, ri, data);
+    } else if (method == "PUT") {
+        // Does nothing but returns unsupported method
+        handlePUT(conn, ri, data);
+    } else if (method == "DELETE") {
+        // TODO support deletion of atoms
+        if (handleInQuery || handleInURL) 
+            handleDELETE(conn, ri, data);
+
+    }
+
 }
 
 std::string AtomURLHandler::getHTMLHeader()
