@@ -700,7 +700,7 @@ public:
         }
     }
     
-    void testSCMTargetsFC() {
+    void DISABLEtestSCMTargetsFC() {
         bool tmp = TESTING_BACKWARD_CHAINING;
         
         TESTING_BACKWARD_CHAINING = false;
@@ -739,7 +739,7 @@ public:
     
     // Tries to combine several RuleApps into a "macro rule", which takes one
     // argument but applies several different rules
-    void testMacroRuleTest()
+    void DISABLEtestMacroRuleTest()
     {
         AtomSpaceWrapper *atw = GET_ASW;
         //typedef InversionRule RuleT1;
