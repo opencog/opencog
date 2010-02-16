@@ -7,6 +7,7 @@ import time
 import subprocess
 import unittest
 import json
+import pdb
 
 import urllib2
 import urllib
@@ -46,8 +47,28 @@ class TestPostAtom(unittest.TestCase):
         
     def testPostSuccess(self):
         """ Just test a very basic add """
-        data = '{ "type":"ConceptNode", "name":"testPostSuccess", "truthvalue": {"simple": {"str":0.5, "count":10}}}'
+        data = '{ "type":"ConceptNode", "name":"testPostSuccess1", "truthvalue": {"simple": {"str":0.5, "count":10}}}'
         req = urllib2.Request(rest_url + 'atom/',data)
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+        h1 = result["handle"]
+
+        data = '{ "type":"ConceptNode", "name":"testPostSuccess2", "truthvalue": {"simple": {"str":0.5, "count":10}}}'
+        req = urllib2.Request(rest_url + 'atom/',data)
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+        h2 = result["handle"]
+
+        # Test creating a link
+        data = { "type":"InheritanceLink",
+            "outgoing": [h1,h2],
+            "truthvalue": {"simple": {"str":0.5,
+                "count":10}}}
+        req = urllib2.Request(rest_url + 'atom/',json.dumps(data))
         response = urllib2.urlopen(req).read()
         result = json.loads(response)
         self.assertTrue("result" in result)
@@ -112,9 +133,10 @@ class TestPostAtom(unittest.TestCase):
         self.assertTrue("result" in result)
         self.assertEqual(result["result"], "created")
 
-    def testPostTVRobustness(self):
+    def long_testPostTVRobustness(self):
         """ Test that bad json TV syntax fails gracefully, i.e. doesn't kill the
             server!
+            Disable by default because it takes ~40 seconds to run
         """
         data = """{ "type":"ConceptNode",
             "name":"SimpleTVMutations",
@@ -122,16 +144,21 @@ class TestPostAtom(unittest.TestCase):
             {"simple": {"str":0.5, "count":10}}
         }"""
         import random
+        import datetime
+        print datetime.datetime.now()
+        count=0
         r = random.Random()
-        for i in range(0,40):
+        for i in range(0,len(data)):
+            count+=1
             data_copy = list(data)
-            data_copy[r.randint(0,len(data)-1)] = ' '
+            data_copy[i] = ' '
             data_copy = ''.join(data_copy)
             req = urllib2.Request(rest_url + 'atom/',data_copy)
             response = urllib2.urlopen(req).read()
             try:
                 result = json.loads(response)
             except ValueError:
+                print '---'
                 print response
             self.assertEqual(server_process.returncode, None)
 
@@ -143,17 +170,72 @@ class TestPostAtom(unittest.TestCase):
                 "HYPOTHETICAL":[2, {"simple": {"str":0.5, "count":10}}] }
             }
         }"""
-        for i in range(0,40):
+        for i in range(data.find("composite"),len(data)):
+            count+=1
             data_copy = list(data)
-            data_copy[r.randint(0,len(data)-1)] = ' '
+            data_copy[i] = ' '
             data_copy = ''.join(data_copy)
             req = urllib2.Request(rest_url + 'atom/',data_copy)
             response = urllib2.urlopen(req).read()
             try:
                 result = json.loads(response)
             except ValueError:
+                print '---'
                 print response
             self.assertEqual(server_process.returncode, None)
+
+        print count
+        print datetime.datetime.now()
+
+    def notestUpdate(self):
+        """ Test that update methods work """
+        data = { "type":"ConceptNode",
+            "name":"To be updated",
+            "truthvalue":
+            {"simple": {"str":0.5, "count":10}}
+        }
+        req = urllib2.Request(rest_url + 'atom/',json.dumps(data))
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+
+        data = { "type":"ConceptNode",
+            "name":"CountTV",
+            "truthvalue":
+            {"count": {"str":0.5, "count":10, "conf":0.5}}
+        }
+        req = urllib2.Request(rest_url + 'atom/',json.dumps(data))
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+
+        data = { "type":"ConceptNode",
+            "name":"IndefiniteTV",
+            "truthvalue":
+            {"indefinite": {"l":0.5, "u":0.7, "conf":0.2}}
+        }
+        req = urllib2.Request(rest_url + 'atom/',json.dumps(data))
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+
+        data = { "type":"ConceptNode",
+            "name":"CompositeTV",
+            "truthvalue":
+            {"composite": {"primary": { "simple": {"str":0.5, "count":10}},
+                "CONTEXTUAL":[1, {"simple": {"str":0.5, "count":10}}] }
+            }
+        }
+        req = urllib2.Request(rest_url + 'atom/',json.dumps(data))
+        response = urllib2.urlopen(req).read()
+        result = json.loads(response)
+        self.assertTrue("result" in result)
+        self.assertEqual(result["result"], "created")
+
+
 
 
 if __name__ == "__main__":

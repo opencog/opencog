@@ -155,7 +155,10 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
                 if (vharray.size() != 2) continue;
                 Handle context = Handle(vharray[0].get_uint64());
                 ctxt_tv = JSONToTV(vharray[1], _output);
-                if (ctxt_tv == NULL) continue;
+                if (ctxt_tv == NULL) {
+                    delete ctv;
+                    return NULL;
+                }
                 IndicatorType indicator =
                     VersionHandle::strToIndicator(indicatorStr.c_str());
                 ctv->setVersionedTV(*ctxt_tv,VersionHandle(indicator,context));
