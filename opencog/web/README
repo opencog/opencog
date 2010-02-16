@@ -3,7 +3,7 @@ Taken from the wiki page: http://www.opencog.org/wiki/Web_Interface
 The ''ocweb'' module implements a HTTP server that provides both a web GUI for navigating the AtomSpace and a REST API. To run it, simply load
 the module via the shell:
 
- opencog> loadmodule path/to/librest.so
+ opencog> loadmodule path/to/libocweb.so
 
 Or place it in the CogServer config file.
 
@@ -45,7 +45,7 @@ Replace "UUID" by the UUID of the atom you are after. This returns a json object
  }
 </source>
 
-See [[Web Interface#JSON Atom Format][below]] for more detail about representing Atoms in JSON notation.
+See [[Web Interface#JSON Atom Format]] for more detail about representing Atoms in JSON notation.
 
 ==== Create a new atom ====
 
@@ -71,9 +71,52 @@ depending on whether a matching atom already existed within the AtomSpace.
 
 ==== Update an atom ====
 
-TODO
+POST request to specific existing handle:
 
-==== Query for atoms of type/name ===
+ http://localhost:17034/rest/0.2/atom/UUID
+ http://localhost:17034/rest/0.2/atom?handle=UUID
+
+with post data that has a JSON object that is the same format as returned by a GET. With the except with only the fields to be updated included. Note that UUID, outgoing/incoming set, type, name are not changeable once an atom is in the AtomSpace. Therefore, the only fields that can be updated are STI/LTI/truthvalue. Examples follow.
+
+Change STI of handle 1 to 10: 
+
+ POST to http://localhost:17034/rest/0.2/atom?handle=1
+<source lang="javascript">
+{ "sti" :10 }
+</source>
+
+Change LTI and Truthvalue of handle 1:
+
+ POST to http://localhost:17034/rest/0.2/atom?handle=1
+<source lang="javascript">
+{ "lti" :-10,
+  "truthvalue" : {"simple": {"str":0.5, "count":10 }
+}
+</source>
+
+Additionally, there are more utility fields for incremental updates.
+
+<source lang="javascript">
+{ "sti_add" :10 }
+{ "sti_subtract" :10 }
+{ "sti_merge" :10 }
+{ "lti_add" :10 }
+{ "lti_subtract" :10 }
+{ "lti_merge" :10 }
+{ "tv_merge": {...} }
+</source>
+
+For adding, subtracting, and taking an average of passed STI/LTI and whatever the current value is. Also for merging instead of replacing a truth value.
+
+If successful in updating the atom, then
+
+<source lang="javascript">
+{ "result": "success" }
+{ "result": "invalid handle" }   // if the handle doesn't exist
+{ "result": "invalid property" } // if the property is malformed/unknown
+</source>
+
+==== Query for atoms of type/name ====
 
  GET http://localhost:17034/rest/0.2/list?type=ConceptNode
  GET http://localhost:17034/rest/0.2/list/ConceptNode
@@ -102,7 +145,7 @@ Other options for this command that can be added to the query string:
 * "order=X" order the list by STI (X=sti), LTI (X=lti), TV strength (X=tv.s), or TV confidence (X=tv.c).
 * "ascend=1" ... used with order. Reverses the direction of the ordering.
 
-=== Calling server requests (TODO) ===
+=== Calling server requests ===
 
 All requests that can be normally carried out via the OpenCog shell
 are accessible by POST request at http://localhost:17034/rest/0.2/request/*.
@@ -137,14 +180,48 @@ Alternatively, you can also send JSON objects corresponding to the request:
 { "result": "..." }
 </source>
 
+=== JSON Atom Format ===
+
+The format for atoms returned by GET queries is 
+
+<source lang="javascript">
+{ "handle" : UUID,
+   "type": TYPENAME,
+   "name": NAME,
+   "outgoing": [ UUID1, UUID2 ... ], "incoming": [...],
+   "sti": STI, "lti":LTI,
+   "truthvalue": {"simple|composite|count|indefinite": [truthvalue details]}
+ }
+</source>
+
+Truthvalues are represented by:
+
+<source lang="javascript">
+{"count": {"str":0.5, "count":10, "conf":0.5}}
+{"indefinite": {"l":0.5, "u":0.7, "conf":0.2}}
+{"simple": {"str":0.5, "count":10}}
+{"composite": {   "primary": {},
+               "contextual|hypothetical": [ UUID , {TV} ]}
+</source>
+
+e.g.
+
+<source lang="javascript">
+{"composite": {
+   "primary": { "simple": {"str":0.5, "count":10} },
+   "contextual": [ 2313, {"simple": {"str":0.8, "count":11}} ]
+}
+</source>
+
 == Web UI ==
 
 The Web UI provides a human friendly interface to navigate the AtomSpace in web browser. Eventually there will be a home page that direct links to various parts of the UI, but currently there are only table based layouts at URLs that follow these formats:
  
  http://localhost:17034/opencog/atom?handle=UUID 
  http://localhost:17034/opencog/atom/UUID
- http://localhost:17034/opencog/list/
+ http://localhost:17034/opencog/list
  http://localhost:17034/opencog/list/ConceptNode
+ http://localhost:17034/opencog/server/request/help
 
 == Implementation ==
 
@@ -152,13 +229,14 @@ Gama implemented such an interface a while ago, but it relied on the Http
 sockets of the CSockets library and this has since been removed from
 OpenCog's dependencies.
 
-Instead, this implementation uses the [
-http://code.google.com/p/mongoose/ Mongoose] embeddable http server.
+Instead, this implementation uses the [http://code.google.com/p/mongoose/ Mongoose] embeddable http server.
 
 The code has been included in the OpenCog code base due to it being very light weight. It is distributed under the MIT license.
 
 == TODO ==
 
+* home page for OpenCog, including version of software, compiled stuff, links to other interfaces.
+* configuration page - interface to config() object.
 * Allow configuration to be specified in opencog config file.
 * get-list options for listing by name prefix.
 * Pagination of get-list results.

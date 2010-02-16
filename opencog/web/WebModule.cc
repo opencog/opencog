@@ -147,7 +147,7 @@ void WebModule::setupURIsForUI()
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/atom", viewAtomPage, NULL);
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list/*", viewListPage, NULL);
     mg_set_uri_callback(ctx, UI_PATH_PREFIX "/list", viewListPage, NULL);
-    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/request/*", makeRequest, NULL);
+    mg_set_uri_callback(ctx, UI_PATH_PREFIX "/server/request/*", makeRequest, NULL);
 }
 
 void WebModule::setupURIsForREST()
