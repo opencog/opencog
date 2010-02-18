@@ -147,9 +147,9 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AddRule(new CrispTheoremRule(asw), 10.0f);
     
     AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
+    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Ext2IntRule(asw, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
+    AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
     
     AddRule(new HypothesisRule(asw), 30.0f);
     // general -> specific
@@ -301,9 +301,9 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 ////    AddRule(new CrispTheoremRule(asw), 10.0f);
     
     AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK), 10.0f);
+    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
-    AddRule(new Ext2IntRule(asw, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK), 10.0f);
+    AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
     
     
     reset();

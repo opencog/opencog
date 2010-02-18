@@ -118,13 +118,13 @@ public:
 };
 
 /*
-typedef  Link2LinkRule<Mem2InhFormula, MEMBER_LINK, EXTENSIONAL_INHERITANCE_LINK> Mem2InhRule;
+typedef  Link2LinkRule<Mem2InhFormula, MEMBER_LINK, SUBSET_LINK> Mem2InhRule;
 typedef  Link2LinkRule<Int2ExtFormula, IMPLICATION_LINK, MIXED_IMPLICATION_LINK>				IntImp2ExtRule;
 //typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, MIXED_INHERITANCE_LINK>				IntInh2ExtRule;
-typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, EXTENSIONAL_INHERITANCE_LINK>				IntInh2ExtRule;
+typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, SUBSET_LINK>				IntInh2ExtRule;
 typedef  Link2LinkRule<Ext2IntFormula, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK> ExtImp2IntRule;
-typedef  Link2LinkRule<Ext2IntFormula, EXTENSIONAL_INHERITANCE_LINK, INHERITANCE_LINK> ExtInh2IntRule;
-//typedef  Link2LinkRule<Ext2IntFormula, EXTENSIONAL_INHERITANCE_LINK, MIXED_INHERITANCE_LINK> ExtInh2IntRule;
+typedef  Link2LinkRule<Ext2IntFormula, SUBSET_LINK, INHERITANCE_LINK> ExtInh2IntRule;
+//typedef  Link2LinkRule<Ext2IntFormula, SUBSET_LINK, MIXED_INHERITANCE_LINK> ExtInh2IntRule;
 typedef  Link2LinkRule<Inh2ImpFormula, INHERITANCE_LINK, IMPLICATION_LINK>					Inh2ImpRule;
 typedef  Link2LinkRule<Imp2InhFormula, IMPLICATION_LINK, INHERITANCE_LINK>					Imp2InhRule;
 typedef  Link2LinkRule<Mem2EvalFormula, MEMBER_LINK, EVALUATION_LINK> Mem2EvalRule;

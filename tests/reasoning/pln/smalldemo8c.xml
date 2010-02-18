@@ -15,17 +15,17 @@
         <Element class="ConceptNode" name="Osama"/>
         <Element class="ConceptNode" name="terrorist"/>
     </InheritanceLink>
-    <ExtensionalInheritanceLink strength="0.990000" confidence="0.990000">
+    <SubsetLink strength="0.990000" confidence="0.990000">
         <Element class="ConceptNode" name="Muhammad"/>
         <Element class="ConceptNode" name="AlQaeda"/>
-    </ExtensionalInheritanceLink>
-    <ExtensionalInheritanceLink strength="0.990000" confidence="0.990000">
+    </SubsetLink>
+    <SubsetLink strength="0.990000" confidence="0.990000">
         <Element class="ConceptNode" name="Osama"/>
         <Element class="ConceptNode" name="AlQaeda"/>
-    </ExtensionalInheritanceLink>
+    </SubsetLink>
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="InheritanceLink" value="InheritanceLink"/>
-        <tag name="ExtensionalInheritanceLink" value="ExtensionalInheritanceLink"/>
+        <tag name="SubsetLink" value="SubsetLink"/>
     </tagdescription>
 </list>
