@@ -78,6 +78,7 @@ void Ubigrapher::init(std::string server, int port)
     serverIP = server;
     serverPort = port;
     connected = false;
+    listening = false;
     os << "http://" << serverIP << ":" << serverPort << "/RPC2";
     serverString = os.str();
     logger().info("Ubigrapher will connect to " + serverString);
