@@ -380,6 +380,9 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
 }
 bool Ubigrapher::addVertex(Handle h)
 {
+	// Policy: don't display PLN's FWVariableNodes, because it's annoying
+	if (space->inheritsType(space->getType(h), FW_VARIABLE_NODE)) return false;
+
     if (!isConnected()) return false;
     Atom *a = TLB::getAtom(h);
     bool isNode = space->isNode(a->getType());
