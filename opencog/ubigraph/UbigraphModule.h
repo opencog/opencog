@@ -46,7 +46,7 @@ private:
 
     DECLARE_CMD_REQUEST(UbigraphModule, "ubigraph", do_ubigraph, 
         "Start Ubigraph",
-        "Usage: ubigraph [--with-incoming, --with-compact] [IP:port]\n\n"
+        "Usage: ubigraph [--with-incoming, --compact] [IP:port]\n\n"
         "test the ubigraph prototype",
         false
     )

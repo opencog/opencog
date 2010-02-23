@@ -296,6 +296,7 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
     // This next one is just for the wordpairs demo.
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
     
     //  AddRule(new ORPartitionRule(asw), 10.0f);
 ////    AddRule(new CrispTheoremRule(asw), 10.0f);
