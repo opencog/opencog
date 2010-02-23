@@ -165,7 +165,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                 
                     // do the rule computation etc
                     
-                    Vertex V=((r->compute(*args)).GetValue());
+                    Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
                     const TruthValue& tv=GET_ASW->getTV(out);
                     //cout<<printTV(out)<<'\n';
@@ -250,7 +250,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     ForceAllLinksVirtual(virtualized_target);
     
     Btr<std::set<BoundVertex> > choices;    
-    choices = getMatching(virtualized_target); // bad_get during LookupRule... (if you use non-FWVars for that thing)
+    choices = getMatching(virtualized_target);
     
     // pick one of the candidates at random to be the bv
     
