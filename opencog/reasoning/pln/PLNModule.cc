@@ -332,7 +332,7 @@ void fw_beta (void) {
 //      atw->removeAtom(l);
 //  }
 
-
+#if 0
   cout << "FWBETA Adding handles to seed stack" << endl;
   //fw.seedStack.push_back(L1);
   //fw.seedStack.push_back(L2);
@@ -354,15 +354,17 @@ void fw_beta (void) {
   fw.probStack = 1.0f;
 
   cout << "FWBETA adding to seed stack finished" << endl;
+#endif
+  cout << "FWBETA Starting chaining:" << endl;
   //pHandleSeq results = fw.fwdChainStack(10000);
   pHandleSeq results = fw.fwdChain(FWD_CHAIN_MAX_APPS);
   //pHandleSeq results = fw.fwdChain(10000);
   //opencog::logger().info("Finish chaining on seed stack");
-  cout << "FWBETA Chaining on seed stack finished, results:" << endl;
-/*  NMPrinter np;
+  cout << "FWBETA Chaining finished, results:" << endl;
+  NMPrinter np;
   foreach (pHandle h, results) {
       np(h);
-  }*/
+  }
   cout << "Removing results that just repeat existing links" << endl;
   int totalSize = results.size();
   pHandleSeq::iterator i,j;
