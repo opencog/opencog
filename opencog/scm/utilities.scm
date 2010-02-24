@@ -117,6 +117,14 @@
 	)
 )
 
+(define (count-all)
+ (define cnt 0)
+ (define (ink a) (set! cnt (+ cnt 1)) #f)
+ (define (cnt-type x) (cog-map-type ink x)) 
+ (map cnt-type (cog-get-types))
+ cnt
+)
+
 ; -----------------------------------------------------------------------
 ;
 ; cog-get-atoms atom-type
