@@ -1,10 +1,10 @@
 ###############################################################################
-Instalation and dependency resolution for OpenSUSE 11.0 users
+Instalation and dependency resolution for OpenSUSE 11.2 users
 ###############################################################################
 
 Opencog depends on the following packages:
 
-   gcc-c++ make cmake openssl-devel boost-devel gsl-devel
+   gcc-c++ make cmake libopenssl-devel boost-devel gsl-devel
 
 -------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ They may be downloaded and installed using the following commands:
 
    wget http://downloads.sourceforge.net/cxxtest/cxxtest-3.10.1-1.noarch.rpm
 
-   wget http://download.opensuse.org/repositories/home:/darix/openSUSE_10.3/i586/csockets-2.2.5-1.1.i586.rpm
+   wget http://download.opensuse.org/repositories/home:/darix/openSUSE_Factory/i586/csockets-2.2.5-1.1.i586.rpm
 
    sudo rpm -Uhv cxxtest-3.10.1-1.noarch.rpm csockets-2.2.5-1.1.i586.rpm
    
