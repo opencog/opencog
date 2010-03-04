@@ -49,6 +49,11 @@
 //! @todo For PLN testing. Maybe move it to another file used by this module and PLNUTest
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/load-file.h>
+//! @todo For PLN testing. Maybe move it to another file used by this module and PLNUTest
+#include <boost/filesystem.hpp>
+using namespace boost::filesystem;
+
+
 
 using namespace opencog;
 using namespace opencog::pln;
@@ -345,15 +350,35 @@ static SimpleTruthValue* parseSTV(const char* tvStr) {
 
 
 //! @todo tacky hack implementation (refactor if it works)
-void runSCMTarget(const char* conf_file)
+void runSCMTarget(const char* test_name)
 {
 #ifdef HAVE_GUILE
 	//!@ todo haxx
 	FitnessEvaluatorT testFitnessEvaluator = BEST;
 
+	// Find the path to the test file with that name.
+	//!@ todo haxx
+	std::string testDir = "../tests/reasoning/pln/targets/";
+	std::string tmp = test_name + std::string("_test.conf");
+	path conf_filename(tmp);
+	std::string conf_file;
+
+    for (recursive_directory_iterator end, dir(testDir);
+          dir != end; ++dir) {
+        //if (!is_directory(dir->status()) && dir->path() == conf_filename)
+    	std::cout << dir->filename() << " " << conf_filename.filename() << std::endl;
+    	//! @todo sigh. why doesn't this work?
+    	//if (equivalent(dir->path(), conf_filename))
+    	if (dir->path().filename() == conf_filename.filename())
+            conf_file = dir->path().file_string();
+    }
+
+    //! @todo
+    if (conf_file.empty()) return;
+
     Config test;
     std::cout << conf_file << std::endl;
-    test.load(conf_file);
+    test.load(conf_file.c_str());
     //std::cout << test.to_string() << std::endl;
 
     std::cout << test["COMMENT"] << std::endl;
