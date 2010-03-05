@@ -97,8 +97,8 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
  
     std::vector<std::string> agents;
 
-    if (agents.size() == 0)
-        return "Error: No agents to stop specified";
+    if (args.size() == 0)
+        return "Error: No agents to start specified";
 
     for (std::list<std::string>::const_iterator it = args.begin();
          it != args.end(); ++it) {
@@ -128,7 +128,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
  
     std::vector<std::string> agents;
 
-    if (agents.size() == 0)
+    if (args.size() == 0)
         return "Error: No agents to stop specified";
             
     for (std::list<std::string>::const_iterator it = args.begin();
