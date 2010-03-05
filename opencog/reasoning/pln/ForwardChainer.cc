@@ -219,6 +219,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     return results;
 }
 
+//!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
 Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
     // Just look it up via LookupRule
