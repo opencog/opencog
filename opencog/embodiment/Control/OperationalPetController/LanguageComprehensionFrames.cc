@@ -142,12 +142,12 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                         } // if
                         const Spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
                         createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                            spaceMap.computeSpatialRelations( observerEntity->getPosition( ), besideDistance, *entityA, *entityB, *entityC ),
+                            entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC ),
                                 entitiesA[i], entitiesB[j], entitiesC[k] );
                     } // for
                 } else {
                     createFrameInstancesFromRelations( atomSpace, resultingFrames,
-                        spaceMap.computeSpatialRelations( observerEntity->getPosition( ), besideDistance, *entityA, *entityB ),
+                        entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB ),
                             entitiesA[i], entitiesB[j], "" );                        
                 } // else
             } // for
@@ -163,12 +163,12 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
 
 void LanguageComprehension::createFrameInstancesFromRelations( 
     AtomSpace& atomSpace, HandleSeq& resultingFrames,
-        const std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>& relations,
+        const std::list<Spatial::Entity::SPATIAL_RELATION>& relations,
             const std::string& objectA, const std::string& objectB, const std::string& objectC ) {
 
-    std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>::const_iterator it;
+    std::list<Spatial::Entity::SPATIAL_RELATION>::const_iterator it;
     for( it = relations.begin( ); it != relations.end( ); ++it ) {
-        std::string relationName = Spatial::LocalSpaceMap2D::spatialRelationToString( *it );
+        std::string relationName = Spatial::Entity::spatialRelationToString( *it );
 
         std::map<std::string, Handle> elements;
         elements["Figure"] = atomSpace.getHandle( SEME_NODE, objectA );
@@ -180,7 +180,7 @@ void LanguageComprehension::createFrameInstancesFromRelations(
         instanceName << "_";
         instanceName << objectB;
 
-        if ( *it == Spatial::LocalSpaceMap2D::BETWEEN ) {
+        if ( *it == Spatial::Entity::BETWEEN ) {
             elements["Ground_2"] = atomSpace.getHandle( SEME_NODE, objectC );
             instanceName << "_";
             instanceName << objectC;

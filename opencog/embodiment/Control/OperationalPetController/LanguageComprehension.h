@@ -208,7 +208,7 @@ namespace OperationalPetController
         static SCM execute(SCM objectObserver, SCM figureSemeNode, SCM groundSemeNode, SCM ground2SemeNode );
 #endif
         static void createFrameInstancesFromRelations( AtomSpace& atomSpace, HandleSeq& resultingFrames,
-                                                       const std::list<Spatial::LocalSpaceMap2D::SPATIAL_RELATION>& relations,
+                                                       const std::list<Spatial::Entity::SPATIAL_RELATION>& relations,
                                                        const std::string& objectA, const std::string& objectB, const std::string& objectC );
         static Control::PetInterface* localAgent;
         

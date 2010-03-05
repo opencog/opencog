@@ -144,23 +144,6 @@ public:
     static const double NEAR_FACTOR;
 
 
-    enum SPATIAL_RELATION {
-        LEFT_OF = 0,
-        RIGHT_OF,
-        ABOVE,
-        BELOW,
-        BEHIND,
-        IN_FRONT_OF,
-        BESIDE,
-        NEAR,
-        FAR_,
-        TOUCHING,
-        BETWEEN,
-        INSIDE,
-        OUTSIDE,
-        
-        TOTAL_RELATIONS
-    };
 
     /**
      * Constructor
@@ -509,109 +492,6 @@ public:
     inline const std::list<SuperEntityPtr>& getSuperEntities( void ) const {
         return this->superEntities;
     }
-
-
-    /**
-     * This method computes the limits of two objects.
-     * The limits are the points of the objects located
-     * at its extremities on each of X,Y,Z axis
-     *
-     * Here are the possible types of limits
-     **********************
-     * 1) |--A--|
-     *            |--B--|
-     **********************
-     * 2)         |--A--|
-     *    |--B--|
-     **********************
-     * 4) |--A--|     
-     *        |--B--|
-     **********************
-     * 8)     |--A--|
-     *    |--B--|
-     **********************
-     *16) |--A--|
-     *          |--B--|
-     **********************
-     *32)       |--A--|
-     *    |--B--|      
-     **********************
-     *64) |--A--|
-     *    |--B--|     
-     *  
-     **********************
-     *128)  |--A--|
-     *    |----B----|
-     **********************
-     *256)|----A----|
-     *      |--B--|
-     **********************      
-     *512)|--A--|
-     *    |----B----|
-     *
-     *        |--A--|
-     *    |----B----|
-     **********************
-     *1024)|----A----|
-     *     |--B--|
-     *
-     *     |----A----|
-     *         |--B--|
-     *+++++++++++++++++++++
-     * Note that the number of the limit is
-     * the code used to classify the limits relation between
-     * the objects. 
-     *
-     * i.e. a returning vector with the following configuration: 
-     *      relations[0] = 1024 relations[1] = 16 relations[2] = 16
-     * means that in the X axis the relation 1024 was found and in the Y and Z axis
-     * the relation is 16
-     *
-     * @param entityA The first entity which will have its limits computed
-     * @param entityB The second entity which will have its limits computed
-     * @param limitsA The Points that limits the object A 
-     * @param limitsB The Points that limits the object B
-     * @return std::vector<unsigned int> A vector containing the codes of the relations in each three Axis
-     */
-    static Entity::LimitRelation computeObjectsLimits( const Entity& entityA, const Entity& entityB );
-
-    /**
-     * Extract the spatial relations between two objects
-     * 
-     * @param observationPoint The position of the observer
-     * @param besideDistance A distance used as threshold for considering an object beside or not another
-     * @param entityA The entity used as reference
-     * @param entityB The entity that relates with the reference one
-     * @return std::list<SPATIAL_RELATION> a list of all Spatial relations between entityA and entityB
-     */
-    static std::list<SPATIAL_RELATION> computeSpatialRelations( const Math::Vector3& observerPosition, double besideDistance,
-         const Entity& entityA, const Entity& entityB );
-
-    /**
-     * Extract the spatial relations that are common
-     * to all the three entities. i.e. 
-     * if B is near A and C is near A
-     * so NEAR will compose the final relations list
-     * but if C is right of A and B is left of A
-     * so nor left of neither right of will compose
-     * the final relations list.
-     * The final list can also contains the relation BETWEEN
-     * what states that A is between B and C
-     *
-     * @param observationPoint The position of the observer
-     * @param besideDistance A distance used as threshold for considering an object beside or not another
-     * @param entityA The entity used as reference
-     * @param entityB The entity that relates with the reference one
-     * @param entityC A second entity that relates with the reference one
-     * @return std::list<SPATIAL_RELATION> a list of all Spatial relations between entityA and entityB
-     */
-    static std::list<SPATIAL_RELATION> computeSpatialRelations( const Math::Vector3& observerPosition, double besideDistance,
-         const Entity& entityA, const Entity& entityB, const Entity& entityC );
-
-    /**
-     * Return a string description of the relation
-     */
-    static std::string spatialRelationToString( SPATIAL_RELATION relation );
 
     static std::string toString( const LocalSpaceMap2D& map );
     static LocalSpaceMap2D* fromString( const std::string& map );

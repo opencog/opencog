@@ -36,6 +36,7 @@
 #include <opencog/spatial/StaticEntity.h>
 #include <opencog/spatial/MovableEntity.h>
 
+
 #include <boost/date_time.hpp>
 #include <boost/thread.hpp>
 
@@ -662,18 +663,22 @@ public:
         StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(0, 35, 5), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
         StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(0, 35, 5), Math::Dimension3(4, 4, 4 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
 
+        MovableEntityPtr observer( new MovableEntity( 5, "observer", 
+            Math::Vector3(15, 35, 0), Math::Dimension3(1, 4, 1 ), 
+                Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+
 
         double besideDistance = ( xMax - xMin ) * LocalSpaceMap2D::NEXT_FACTOR;
 
 
         { // IN_FRONT_OF
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 35, 0 ), besideDistance, *e1, *e2 );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::IN_FRONT_OF ) {
+                if ( *it == Entity::IN_FRONT_OF ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -682,13 +687,17 @@ public:
 
 
         { // RIGHT_OF
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e1, *e2 );
+            observer->setPosition( Math::Vector3( 5, -35, 0 ) );
+            observer->setOrientation( Math::Quaternion( Math::Vector3::Z_UNIT, 90 ) );
+            observer->update( );
+
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::RIGHT_OF ) {
+                if ( *it == Entity::RIGHT_OF ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -696,13 +705,13 @@ public:
         } // end block
 
         { // LEFT_OF
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e2, *e1 );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e2->computeSpatialRelations( *observer, besideDistance, *e1 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::LEFT_OF ) {
+                if ( *it == Entity::LEFT_OF ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -710,13 +719,13 @@ public:
         } // end block
 
         { // BELOW
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e2, *e3 );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e2->computeSpatialRelations( *observer, besideDistance, *e3 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::BELOW ) {
+                if ( *it == Entity::BELOW ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -724,13 +733,13 @@ public:
         } // end block
 
         { // ABOVE
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 5, 0, 0 ), besideDistance, *e3, *e2 );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e3->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::ABOVE ) {
+                if ( *it == Entity::ABOVE ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -739,13 +748,16 @@ public:
 
 
         { // IN_FRONT_OF
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 20, 40, 0 ), besideDistance, *e1, *e2 );
+            observer->setPosition( Math::Vector3( 20, 40, 0 ) );
+            observer->update( );
+
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::IN_FRONT_OF ) {
+                if ( *it == Entity::IN_FRONT_OF ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -753,13 +765,15 @@ public:
         } // end block
 
         { // BEHIND
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( -20, 40, 0 ), besideDistance, *e1, *e2 );
+            observer->setPosition( Math::Vector3( -20, 40, 0 ) );
+            observer->update( );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e1->computeSpatialRelations( *observer, besideDistance, *e2 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::BEHIND ) {
+                if ( *it == Entity::BEHIND ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -767,13 +781,14 @@ public:
         }
 
         { // INSIDE
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 0, 0, 0 ), besideDistance, *e3, *e4 );
+            observer->setPosition( Math::Vector3( 0, 0, 0 ) );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e3->computeSpatialRelations( *observer, besideDistance, *e4 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::INSIDE ) {
+                if ( *it == Entity::INSIDE ) {
                     hasRelation = true;
                 } // if
             } // for
@@ -781,13 +796,13 @@ public:
         } // end block
 
         { // OUTSIDE
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION> relations = 
-                LocalSpaceMap2D::computeSpatialRelations( Math::Vector3( 0, 0, 0 ), besideDistance, *e4, *e3 );
+            std::list<Entity::SPATIAL_RELATION> relations = 
+                e4->computeSpatialRelations( *observer, besideDistance, *e3 );
             
-            std::list<LocalSpaceMap2D::SPATIAL_RELATION>::iterator it;
+            std::list<Entity::SPATIAL_RELATION>::iterator it;
             bool hasRelation = false;
             for( it = relations.begin( ); it != relations.end( ); ++it ) {
-                if ( *it == LocalSpaceMap2D::OUTSIDE ) {
+                if ( *it == Entity::OUTSIDE ) {
                     hasRelation = true;
                 } // if
             } // for
