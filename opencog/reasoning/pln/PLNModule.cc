@@ -126,6 +126,7 @@ PLNModule::PLNModule() : Module()
     setParameters(DEFAULT());
     do_pln_register();  
     cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
+    cogserver().registerAgent(ForwardChainingAgent::info().id, &forwardChainingFactory);
 }
 
 void PLNModule::setParameters(const std::string* params) {
@@ -140,6 +141,7 @@ PLNModule::~PLNModule() {
     logger().info("[PLNModule] destructor");
     do_pln_unregister();
     cogserver().unregisterAgent(BackChainingAgent::info().id);
+    cogserver().unregisterAgent(ForwardChainingAgent::info().id);
 }
 
 // state variables for running multiple PLNShell commands.

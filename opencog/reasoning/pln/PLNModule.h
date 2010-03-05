@@ -34,6 +34,7 @@
 
 #include "BackInferenceTreeNode.h"
 #include "BackChainingAgent.h"
+#include "ForwardChainingAgent.h"
 #include "FitnessEvaluator.h"
 
 namespace opencog {
@@ -49,6 +50,7 @@ private:
         "Run a PLN command",usageInfo, false); 
 
     Factory<BackChainingAgent, Agent> backChainingFactory;
+    Factory<ForwardChainingAgent, Agent> forwardChainingFactory;
 
     const std::string* DEFAULT()
     {

@@ -14,6 +14,7 @@ ADD_LIBRARY (pln SHARED
 #	Tester.cc
 	ForwardChainer.cc
 	BackChainingAgent
+	ForwardChainingAgent
 # Formulas:
 	formulas/Formulas.cc
 	formulas/FormulasIndefinite.cc
@@ -103,6 +104,7 @@ INSTALL (FILES
 	BackInferenceTreeNode.h
 	TestTargets.h
 	BackChainingAgent.h
+	ForwardChainingAgent.h
 	rules/Rule.h
 	rules/implication/ImplicationRedundantExpansionRule.h
 	rules/implication/ImplicationBreakdownRule.h
