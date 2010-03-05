@@ -51,21 +51,7 @@ void ForwardChainingAgent::run(CogServer *server) {
 	foreach (pHandle h, results) {
 	  np(h);
 	}
-	cout << "Removing results that just repeat existing links" << endl;
-	int totalSize = results.size();
-	pHandleSeq::iterator i,j;
-	for (i = results.begin(); i != results.end(); i++) {
-	  vhpair v = GET_ASW->fakeToRealHandle(*i);
-	  if (! (v.second == NULL_VERSION_HANDLE)) {
-		  j = i;
-		  i--;
-		  results.erase(j);
-	  }
-	}
-
-	//HandleSeq results_realHandles =
-
-	cout << "Removed " << totalSize - results.size() << " results that just " <<
-	  "repeat existing links, " << results.size() << " results left." << endl;
+	cout << results.size() << " results" << endl;
 }
+
 }

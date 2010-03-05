@@ -169,8 +169,16 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     pHandle out=boost::get<pHandle>(V);
                     const TruthValue& tv=GET_ASW->getTV(out);
                     //cout<<printTV(out)<<'\n';
-            
+
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
+						// If the TV is a repeat, delete it.
+                    	// Ideally the chainer would now try another argument vector for this Rule
+                    	// (until it uses them up).
+						vhpair v = GET_ASW->fakeToRealHandle(out);
+						if (! (v.second == NULL_VERSION_HANDLE)) {
+							GET_ASW->removeAtom(out);
+							continue;
+						}
                         maxRuleApps--;
                         appliedRule = true;
                         if (target) { // Match it against the target

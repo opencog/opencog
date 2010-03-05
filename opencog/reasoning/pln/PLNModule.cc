@@ -522,6 +522,7 @@ void fw_beta (void) {
   foreach (pHandle h, results) {
       np(h);
   }
+#ifdef NOW_REDUNDANT
   cout << "Removing results that just repeat existing links" << endl;
   int totalSize = results.size();
   pHandleSeq::iterator i,j;
@@ -533,17 +534,19 @@ void fw_beta (void) {
           results.erase(j);
       }
   }
-  
+
   //HandleSeq results_realHandles = 
   
   cout << "Removed " << totalSize - results.size() << " results that just " <<
       "repeat existing links, " << results.size() << " results left." << endl;
-      
+#endif
+  cout << results.size() << " results" << endl;
+
   Type t = SET_LINK;
   //pHandle setLink = atw->addLinkDC(t, results, tv, false, false);
   //Handle setLink = atomspace().addLink(t, results, tv);
 
-  TulipWriter tlp(std::string("fwd_chain_result.tlp"));
+  //TulipWriter tlp(std::string("fwd_chain_result.tlp"));
   //tlp.write(PHANDLE_UNDEFINED,-1,atw->fakeToRealHandle(setLink).first);
   
   
