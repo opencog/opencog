@@ -32,6 +32,6 @@ int load_scm_file (const char * filename);
 static inline int load_scm_file (const char *) { return 0; }
 #endif /* HAVE_GUILE */
 
-};
+}
 
 #endif /* OPENCOG_SERVER_LOAD_FILE_H */
