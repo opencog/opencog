@@ -287,12 +287,12 @@ bool AtomSpaceUtil::getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
         try {
             //const SpaceServer::ObjectMetadata&
             //    md1 = sm.getMetaData(atomSpace.getName(obj1));
-            const Spatial::EntityPtr& entity1 = sm.getEntity( atomSpace.getName(obj1) );
+            const spatial::EntityPtr& entity1 = sm.getEntity( atomSpace.getName(obj1) );
             //SpaceServer::SpaceMapPoint obj1Center( entity1.getPosition( ).x, entity1.getPosition( ).y );
             //const SpaceServer::ObjectMetadata&
             //    md2 = sm.getMetaData(atomSpace.getName(obj2));
 
-            const Spatial::EntityPtr& entity2 = sm.getEntity( atomSpace.getName(obj2) );
+            const spatial::EntityPtr& entity2 = sm.getEntity( atomSpace.getName(obj2) );
             //SpaceServer::SpaceMapPoint obj2Center( entity2.getPosition( ).x, entity2.getPosition( ).y );
 
             //std::cout << "MD1 X : " << md1.centerX << " Y : " << md1.centerY
@@ -437,8 +437,8 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
         //check if has moved
         //const SpaceServer::ObjectMetadata& md1 = sm1.getMetaData(obj_str);
         //const SpaceServer::ObjectMetadata& md2 = sm2.getMetaData(obj_str);
-        const Spatial::EntityPtr& entity1 = sm1.getEntity( obj_str );
-        const Spatial::EntityPtr& entity2 = sm2.getEntity( obj_str );
+        const spatial::EntityPtr& entity1 = sm1.getEntity( obj_str );
+        const spatial::EntityPtr& entity2 = sm2.getEntity( obj_str );
         //return md1==md2;
         return ( *entity1 == entity2 );
     } else if (!insm1 && !insm2)
@@ -1848,7 +1848,7 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(const AtomSpace& atomSpace,
                             agentModeNode ) ).toFloat());
 }
 
-Spatial::Math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
+spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
 {
     // look for a velocity predicate at 2 RuleEngine cycles before the current cycle
     std::vector<HandleTemporalPair> timestamps;
@@ -1870,12 +1870,12 @@ Spatial::Math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpa
                 continue;
             } // if
             // a velocity node was found to the given target
-            return Spatial::Math::Vector3( atof( atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str() ),  // x
+            return spatial::math::Vector3( atof( atomSpace.getName(atomSpace.getOutgoing(listLink, 1)).c_str() ),  // x
                                            atof( atomSpace.getName(atomSpace.getOutgoing(listLink, 2)).c_str() ),  // y
                                            atof( atomSpace.getName(atomSpace.getOutgoing(listLink, 3)).c_str() )); // z
         } // if
     } // for
-    return Spatial::Math::Vector3( 0, 0, 0 );
+    return spatial::math::Vector3( 0, 0, 0 );
 }
 
 Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,

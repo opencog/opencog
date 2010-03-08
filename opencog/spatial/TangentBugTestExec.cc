@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LocalSpaceMap2DUtil.h"
-#include "TangentBug.h"
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
+#include <opencog/spatial/TangentBug.h>
 #include <list>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -32,12 +32,13 @@
 #include <ncurses.h>
 #endif
 
+using namespace std;
+
+using namespace opencog;
+using namespace opencog::spatial;
+
 int main(int argc, char * argv[])
 {
-    using namespace Spatial;
-    using namespace TangentBugBits;
-    using namespace std;
-
     int seed;
     if (argc > 1)
         try {
@@ -54,9 +55,9 @@ int main(int argc, char * argv[])
         seed = time(NULL);
 
     cout << "Random seed is " << seed << endl;
-    opencog::MT19937RandGen rng(seed);
+    MT19937RandGen rng(seed);
 
-    //typedef LocalSpaceMap2D<Handle, double, hashHandle, Spatial::ObjMetaData > LSM;
+    //typedef LocalSpaceMap2D<Handle, double, hashHandle, spatial::ObjMetaData > LSM;
     typedef LocalSpaceMap2D LSM;
     typedef TangentBug TB;
 
@@ -71,7 +72,7 @@ int main(int argc, char * argv[])
 
     // Randomly generate a map:
     populateRandom(rng, lsm, 20, tb.getCenter());
-    //populateRandom<Handle,double,hashHandle,Spatial::ObjMetaData>(lsm, 20, tb.getCenter());
+    //populateRandom<Handle,double,hashHandle,spatial::ObjMetaData>(lsm, 20, tb.getCenter());
     tb.place_pet_randomly(tb.getCenter());
     tb.place_goal_randomly(tb.getCenter());
 

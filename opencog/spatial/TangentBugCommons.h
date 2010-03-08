@@ -35,121 +35,112 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 
-namespace Spatial
+namespace opencog
 {
-namespace TangentBugBits {
+    namespace spatial
+    {
 
-class Point;
-//typedef int obstacle_id;
-typedef unsigned int coord;
-typedef std::pair<coord, coord> point_2d; // Parent class of Point
+        class TBPoint;
+        //typedef int obstacle_id;
+        typedef unsigned int coord;
+        typedef std::pair<coord, coord> point_2d; // Parent class of Point
 
-typedef boost::unordered_set<int> int_set;
-typedef boost::unordered_map<point_2d, int_set, boost::hash<point_2d> > point_map;
+        typedef boost::unordered_set<int> int_set;
+        typedef boost::unordered_map<point_2d, int_set, boost::hash<point_2d> > point_map;
 
-/**
- * Ray class
- */
-class Ray
-{
+        /**
+         * Ray class
+         */
+        class TBRay
+        {
 
-public:
+        public:
 
-    double x, y;
+            double x, y;
 
-    Ray();
-    Ray(const Ray& other);
-    Ray(double _x, double _y);
-    ~Ray();
+            TBRay();
+            TBRay(const TBRay& other);
+            TBRay(double _x, double _y);
+            ~TBRay();
 
-    double length() const;
+            double length() const;
 
-    Ray& operator=(const Ray& rhs);
-    Ray operator-(const Ray& rhs) const;
-    Ray operator*(double scalar) const;
-    Ray operator/(double scalar) const;
-    bool operator==(const Ray& rhs) const;
+            TBRay& operator=(const TBRay& rhs);
+            TBRay operator-(const TBRay& rhs) const;
+            TBRay operator*(double scalar) const;
+            TBRay operator/(double scalar) const;
+            bool operator==(const TBRay& rhs) const;
 
-    // Dot product
-    double operator*(const Ray& other) const;
+            // Dot product
+            double operator*(const TBRay& other) const;
 
-    Ray normalise() const;
-    Ray normalize() const;
+            TBRay normalise() const;
+            TBRay normalize() const;
 
-    friend class Spatial::TangentBugBits::Point;
-    friend std::ostream& operator<<(std::ostream& out, const Ray& ray);
+            friend class TBPoint;
+            friend std::ostream& operator<<(std::ostream& out, const TBRay& ray);
 
-}; // Ray class
+        }; // TBRay class
 
-/**
- * TangentBugBits::Point class
- */
-struct Point : public Spatial::TangentBugBits::point_2d {
+        /**
+         * TBPoint class
+         */
+        struct TBPoint : public point_2d {
 
-    Point();
-    Point(const point_2d& other);
-    Point(coord x, coord y);
-    ~Point();
+            TBPoint();
+            TBPoint(const point_2d& other);
+            TBPoint(coord x, coord y);
+            ~TBPoint();
 
-    // Rounds to nearest point.
-    Point operator+(const Ray& ray) const;
-    Ray operator-(const Point& other) const;
-    Point& operator=(const Point& rhs);
+            // Rounds to nearest point.
+            TBPoint operator+(const TBRay& ray) const;
+            TBRay operator-(const TBPoint& other) const;
+            TBPoint& operator=(const TBPoint& rhs);
 
-    friend std::ostream& operator<<(std::ostream& out, const Point& pt);
+            friend std::ostream& operator<<(std::ostream& out, const TBPoint& pt);
 
-}; // TangentBugBits::Point class
+        }; // TBPoint class
 
-/**
- * TangentBugBits::look_info struct
- */
-struct look_info {
+        /**
+         * TangentBugBits::look_info struct
+         */
+        struct look_info {
 
-    Point last_point_before_hit;
-    Point last_point;
-    bool collided;
+            TBPoint last_point_before_hit;
+            TBPoint last_point;
+            bool collided;
 
-    // We need to keep the original direction that was looked down. After all,
-    // to if we merely stored points p1 and p2, we would later have to
-    // construct the ray p2-p1. But this would not be the same exact direction
-    // as the original ray, and this new ray might pass through occupied
-    // points that the old ray did not. That way lies madness, especially when
-    // you try to shorten the ray (p2-p1) and this new, shortened ray ends up
-    // inside an occupied point.
-    Ray orig_direction;
+            // We need to keep the original direction that was looked down. After all,
+            // to if we merely stored points p1 and p2, we would later have to
+            // construct the ray p2-p1. But this would not be the same exact direction
+            // as the original ray, and this new ray might pass through occupied
+            // points that the old ray did not. That way lies madness, especially when
+            // you try to shorten the ray (p2-p1) and this new, shortened ray ends up
+            // inside an occupied point.
+            TBRay orig_direction;
 
-    look_info();
-    look_info(const Point& look_from, const Point& look_to = Point());
+            look_info();
+            look_info(const TBPoint& look_from, const TBPoint& look_to = TBPoint());
 
-}; // TangentBugBits::look_info struct
+        }; // TangentBugBits::look_info struct
 
-inline std::ostream& operator<<(std::ostream& out, const Ray& r)
-{
-    static size_t maxlen = 30;
-    char s[maxlen];
-    snprintf(s, maxlen, "(%0.5f,%0.5f)", r.x, r.y);
-    out << s;
-    return out;
-}
+        inline std::ostream& operator<<(std::ostream& out, const TBRay& r)
+        {
+            static size_t maxlen = 30;
+            char s[maxlen];
+            snprintf(s, maxlen, "(%0.5f,%0.5f)", r.x, r.y);
+            out << s;
+            return out;
+        }
 
-inline std::ostream& operator<<(std::ostream& out, const Point& pt)
-{
-    out << "(" << pt.first << "," << pt.second << ")";
-    return out;
-}
+        inline std::ostream& operator<<(std::ostream& out, const TBPoint& pt)
+        {
+            out << "(" << pt.first << "," << pt.second << ")";
+            return out;
+        }
 
-// Random int from a gaussian distribution. Neg numbers are clipped to 0
-/*        static unsigned int pos_gaussian_rand(unsigned int std_dev, coord mean){
-            int random = mean +
-                static_cast<coord>(std_dev *
-                        std::sqrt(-2 * std::log(rng.randDoubleOneExcluded())) *
-                        std::cos(2 * PI * rng.randDoubleOneExcluded()));
-
-            return (random >= 0 ? (unsigned) random : 0);
-        }*/
-
-} // namespace TangentBugBits
-} // namespace Spatial
+    } // spatial
+} // opencog
 
 #endif
 

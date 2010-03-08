@@ -32,12 +32,13 @@
 
 #include <opencog/spatial/LocalSpaceMap2D.h>
 #include <opencog/spatial/HPASearch.h>
-#include <opencog/spatial/Math/Dimension3.h>
+#include <opencog/spatial/math/Dimension3.h>
 
-using namespace Spatial;
-using namespace Spatial::Math;
-using namespace opencog;
 using namespace std;
+
+using namespace opencog;
+using namespace opencog::spatial;
+using namespace opencog::spatial::math;
 
 static opencog::MT19937RandGen rng(0);
 

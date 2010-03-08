@@ -38,8 +38,7 @@
 #include <opencog/spatial/MapExplorer.h>
 #include <opencog/spatial/MapExplorerServer.h>
 
-using namespace Spatial;
-
+using namespace opencog;
 using namespace opencog::spatial;
 
 MapTools::MapTools( unsigned int videoMode ) :
@@ -70,7 +69,7 @@ MapTools::MapTools( unsigned int videoMode ) :
 
 int MapTools::runLocalMode( const std::string& fileName ) 
 {
-    Spatial::LocalSpaceMap2D* map = NULL;
+    spatial::LocalSpaceMap2D* map = NULL;
     std::ifstream file( fileName.c_str( ) );
     if ( !file.good( ) ) {
         std::cerr << "Cannot open file '" << fileName << "'" << std::endl;
@@ -80,7 +79,7 @@ int MapTools::runLocalMode( const std::string& fileName )
     std::stringstream text;
     text << file.rdbuf( );
     file.close( );
-    map = Spatial::LocalSpaceMap2D::fromString( text.str( ) );
+    map = spatial::LocalSpaceMap2D::fromString( text.str( ) );
     
     try {
         MapExplorer explorer( map, windowWidth, windowHeight, fullScreen );
@@ -112,7 +111,7 @@ int MapTools::runRemoteMode( const std::string& host, const std::string& port, b
         } // if
         
         MapExplorer* explorer = NULL;
-        Spatial::LocalSpaceMap2D* oldMap = NULL;
+        spatial::LocalSpaceMap2D* oldMap = NULL;
         bool running = true;
         while( running && !externalInterruption ) {
 
@@ -128,7 +127,7 @@ int MapTools::runRemoteMode( const std::string& host, const std::string& port, b
                     throw boost::system::system_error(error); // Some other error.
                 } // else if
                 
-                Spatial::LocalSpaceMap2D* incomingMap = Spatial::LocalSpaceMap2D::fromString( buffer );  
+                spatial::LocalSpaceMap2D* incomingMap = spatial::LocalSpaceMap2D::fromString( buffer );  
                 if ( explorer == NULL ) {
                     explorer = new MapExplorer( incomingMap, windowWidth, windowHeight, fullScreen );
                     explorer->start( );
@@ -192,7 +191,7 @@ int MapTools::runServerMode( const std::string& host, const std::string& port,
         return 1;
     } // if
     
-    std::vector<Spatial::LocalSpaceMap2D*> maps( mapFileNames.size( ) );
+    std::vector<spatial::LocalSpaceMap2D*> maps( mapFileNames.size( ) );
     unsigned int i;
     for( i = 0; i < mapFileNames.size( ); ++i ) {
         std::ifstream file( mapFileNames[i].c_str( ) );
@@ -204,7 +203,7 @@ int MapTools::runServerMode( const std::string& host, const std::string& port,
         std::stringstream text;
         text << file.rdbuf( );
         file.close( );
-        maps[i] = Spatial::LocalSpaceMap2D::fromString( text.str( ) );
+        maps[i] = spatial::LocalSpaceMap2D::fromString( text.str( ) );
     } // for
 
     std::cout << "Number of successfully loaded maps: " << maps.size( ) << std::endl;

@@ -21,17 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MovableEntity.h"
+#include <opencog/spatial/MovableEntity.h>
 
-using namespace Spatial;
+using namespace opencog;
+using namespace opencog::spatial;
 
-void MovableEntity::rotate( const Math::Quaternion& rotation )
+void MovableEntity::rotate( const math::Quaternion& rotation )
 {
     this->needUpdate = true;
     this->orientation *= rotation;
 }
 
-void MovableEntity::setPosition( const Math::Vector3& position)
+void MovableEntity::setPosition( const math::Vector3& position)
 {
     if ( this->position == position ) {
         return;
@@ -40,7 +41,7 @@ void MovableEntity::setPosition( const Math::Vector3& position)
     this->position = position;
 }
 
-void MovableEntity::setOrientation(const Math::Quaternion& orientation)
+void MovableEntity::setOrientation(const math::Quaternion& orientation)
 {
     if ( this->orientation == orientation ) {
         return;

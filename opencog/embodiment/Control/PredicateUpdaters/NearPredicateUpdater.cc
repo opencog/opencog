@@ -61,7 +61,7 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     } // if
     processedEntities.insert( entityAId );
 
-    const Spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
+    const spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
     
     bool mapContainsEntity = spaceMap.containsObject( entityAId );
 
@@ -78,12 +78,12 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
             setPredicate( object, entityBHandle, "near", 0.0f );
             setPredicate( object, entityBHandle, "next", 0.0f );
         } else {
-            const Spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
+            const spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
             double distance = entityA->distanceTo( *entityB );
             logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );
 
-            Spatial::Math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
-            Spatial::Math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
+            spatial::math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
+            spatial::math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
             
             double mapDiagonal = ( maxCorner - minCorner ).length( );
 

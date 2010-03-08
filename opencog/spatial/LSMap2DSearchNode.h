@@ -30,54 +30,57 @@
 #ifndef _SPATIAL_LSMAP2DSEARCHNODE_H_
 #define _SPATIAL_LSMAP2DSEARCHNODE_H_
 
-#include "stlastar.h"
-#include "LocalSpaceMap2D.h"
+#include <opencog/spatial/stlastar.h>
+#include <opencog/spatial/LocalSpaceMap2D.h>
 
 
-namespace Spatial
+namespace opencog
 {
+    namespace spatial
+    {
 
-//typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
-//typedef LocalSpaceMap2D<> Map;
+        //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
+        //typedef LocalSpaceMap2D<> Map;
 
-class LSMap2DSearchNode
-{
+        class LSMap2DSearchNode
+        {
 
-public:
+        public:
 
-    unsigned int x;  // the (x,y) grid positions of the node
-    unsigned int y;
+            unsigned int x;  // the (x,y) grid positions of the node
+            unsigned int y;
 
-    //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
-    typedef LocalSpaceMap2D Map;
+            //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
+            typedef LocalSpaceMap2D Map;
 
-    LSMap2DSearchNode();
-    LSMap2DSearchNode(unsigned int px, unsigned int py);
-    LSMap2DSearchNode(Spatial::GridPoint);
+            LSMap2DSearchNode();
+            LSMap2DSearchNode(unsigned int px, unsigned int py);
+            LSMap2DSearchNode(GridPoint);
 
-    static void setMap(Map *map);
-    float GoalDistanceEstimate(const LSMap2DSearchNode &nodeGoal);
-    bool IsGoal(const LSMap2DSearchNode &nodeGoal );
-    bool GetSuccessors(AStarSearch<LSMap2DSearchNode> *astarsearch, LSMap2DSearchNode *parent_node );
-    float GetCost(const LSMap2DSearchNode &successor);
-    bool IsSameState(const LSMap2DSearchNode &rhs);
-    bool isLegal(unsigned int x, unsigned int);
-    bool isLegal();
-    static void setHeuristic(int h);
-    void PrintNodeInfo();
+            static void setMap(Map *map);
+            float GoalDistanceEstimate(const LSMap2DSearchNode &nodeGoal);
+            bool IsGoal(const LSMap2DSearchNode &nodeGoal );
+            bool GetSuccessors(AStarSearch<LSMap2DSearchNode> *astarsearch, LSMap2DSearchNode *parent_node );
+            float GetCost(const LSMap2DSearchNode &successor);
+            bool IsSameState(const LSMap2DSearchNode &rhs);
+            bool isLegal(unsigned int x, unsigned int);
+            bool isLegal();
+            static void setHeuristic(int h);
+            void PrintNodeInfo();
 
-    enum {
-        MANHATTAN,
-        DIAGONAL
-    };
-    static int heuristic;
+            enum {
+                MANHATTAN,
+                DIAGONAL
+            };
+            static int heuristic;
 
-//private:
-    static Map *map;
+            //private:
+            static Map *map;
 
-}; //class
+        }; //class
 
-}  //namespace Spacial
+    } // spatial
+} // opencog
 
 
 #endif // _SPATIAL_LSMAP2DSEARCHNODE_H_

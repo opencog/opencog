@@ -190,7 +190,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
 //    logger().fine("SpaceServer::add After contains");
     if (mapContainsObject) {
         //const SpaceServer::ObjectMetadata& oldMetadata = map->getMetaData(objectId);
-        const Spatial::EntityPtr& oldEntity = map->getEntity( objectId );
+        const spatial::EntityPtr& oldEntity = map->getEntity( objectId );
         SpaceServer::ObjectMetadata oldMetadata( oldEntity->getPosition( ).x,
                                                  oldEntity->getPosition( ).y,
                                                  oldEntity->getPosition( ).z,

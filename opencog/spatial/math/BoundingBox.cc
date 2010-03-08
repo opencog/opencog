@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/BoundingBox.cc
+ * opencog/spatial/math/BoundingBox.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,11 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BoundingBox.h"
+#include <opencog/spatial/math/BoundingBox.h>
 #include <opencog/spatial/Entity.h>
 #include <limits>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 BoundingBox::BoundingBox( Entity* entity )
 {

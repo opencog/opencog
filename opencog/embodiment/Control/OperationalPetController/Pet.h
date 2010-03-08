@@ -326,14 +326,14 @@ public:
      * @see PetInterface::setLatestGotoTarget
      */
     void setLatestGotoTarget(
-            const std::pair<std::string, Spatial::Point>& target ) {
+            const std::pair<std::string, spatial::Point>& target ) {
         this->targetObject = target;
     };
 
     /**
      * @see PetInterface::getLatestGotoTarget
      */
-    const std::pair<std::string, Spatial::Point>& getLatestGotoTarget( void ) {
+    const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) {
         return this->targetObject;
     };
 
@@ -388,7 +388,7 @@ public:
     unsigned long latestPunishmentTimestamp;
 
     // target object used by goto and gonear combo functions
-    std::pair<std::string, Spatial::Point> targetObject;
+    std::pair<std::string, spatial::Point> targetObject;
 
     LanguageComprehension& getLanguageTool( void );
 
@@ -413,7 +413,7 @@ public:
      *
      * @param map Latest LocalSpaceMap
      */
-    void sendMapToVisualDebuggerClients( const Spatial::LocalSpaceMap2D& map );
+    void sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map );
 
 
 }; // class

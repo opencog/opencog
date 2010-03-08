@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/MathCommon.cc
+ * opencog/spatial/math/mathCommon.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,10 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Vector3.h"
-#include "LineSegment.h"
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/math/LineSegment.h>
 
-using namespace::Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 const Vector3 Vector3::ZERO;
 const Vector3 Vector3::X_UNIT( 1, 0, 0 );

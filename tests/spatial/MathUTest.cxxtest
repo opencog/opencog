@@ -25,22 +25,22 @@
 #include <sstream>
 #include <iostream>
 
-#include <opencog/spatial/Math/BoundingBox.h>
-#include <opencog/spatial/Math/Dimension2.h>
-#include <opencog/spatial/Math/Dimension3.h>
-#include <opencog/spatial/Math/Face.h>
-#include <opencog/spatial/Math/Line.h>
-#include <opencog/spatial/Math/LineSegment.h>
-#include <opencog/spatial/Math/Matrix3.h>
-#include <opencog/spatial/Math/Matrix4.h>
-#include <opencog/spatial/Math/Plane.h>
-#include <opencog/spatial/Math/Quaternion.h>
-#include <opencog/spatial/Math/Rectangle.h>
-#include <opencog/spatial/Math/SquareFace.h>
-#include <opencog/spatial/Math/Triangle.h>
-#include <opencog/spatial/Math/Vector2.h>
-#include <opencog/spatial/Math/Vector3.h>
-#include <opencog/spatial/Math/Vector4.h>
+#include <opencog/spatial/math/BoundingBox.h>
+#include <opencog/spatial/math/Dimension2.h>
+#include <opencog/spatial/math/Dimension3.h>
+#include <opencog/spatial/math/Face.h>
+#include <opencog/spatial/math/Line.h>
+#include <opencog/spatial/math/LineSegment.h>
+#include <opencog/spatial/math/Matrix3.h>
+#include <opencog/spatial/math/Matrix4.h>
+#include <opencog/spatial/math/Plane.h>
+#include <opencog/spatial/math/Quaternion.h>
+#include <opencog/spatial/math/Rectangle.h>
+#include <opencog/spatial/math/SquareFace.h>
+#include <opencog/spatial/math/Triangle.h>
+#include <opencog/spatial/math/Vector2.h>
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/math/Vector4.h>
 
 #include <opencog/spatial/StaticEntity.h>
 #include <opencog/spatial/SuperEntity.h>
@@ -50,8 +50,9 @@
 
 #include <opencog/spatial/LocalSpaceMap2D.h>
 
-using namespace Spatial;
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial;
+using namespace opencog::spatial::math;
 
 class MathUTest : public CxxTest::TestSuite
 {
@@ -61,22 +62,22 @@ public:
 
 
 
-        Math::Vector3 corners[] = { Math::Vector3(  5.0,  0.0, 0.0 ),
-                                    Math::Vector3( 10.0,  0.0, 0.0 ),
-                                    Math::Vector3( 10.0,  0.0, 0.0 ),
-                                    Math::Vector3( 10.0, 10.0, 0.0 ),
-                                    Math::Vector3( 10.0, 10.0, 0.0 ),
-                                    Math::Vector3(  0.0, 10.0, 0.0 ),
-                                    Math::Vector3(  0.0, 10.0, 0.0 ),
-                                    Math::Vector3( -0.0,  5.0, 0.0 ),
-                                    Math::Vector3( -5.0, -5.0, 0.0 ),
-                                    Math::Vector3(  5.0, -5.0, 0.0 ),
-                                    Math::Vector3(  5.0, -5.0, 0.0 ),
-                                    Math::Vector3(  5.0,  0.0, 0.0 ),
-                                    Math::Vector3(  0.0,  5.0, 0.0 ),
-                                    Math::Vector3( -5.0,  5.0, 0.0 ),
-                                    Math::Vector3( -5.0,  5.0, 0.0 ),
-                                    Math::Vector3( -5.0, -5.0, 0.0 ) };
+        math::Vector3 corners[] = { math::Vector3(  5.0,  0.0, 0.0 ),
+                                    math::Vector3( 10.0,  0.0, 0.0 ),
+                                    math::Vector3( 10.0,  0.0, 0.0 ),
+                                    math::Vector3( 10.0, 10.0, 0.0 ),
+                                    math::Vector3( 10.0, 10.0, 0.0 ),
+                                    math::Vector3(  0.0, 10.0, 0.0 ),
+                                    math::Vector3(  0.0, 10.0, 0.0 ),
+                                    math::Vector3( -0.0,  5.0, 0.0 ),
+                                    math::Vector3( -5.0, -5.0, 0.0 ),
+                                    math::Vector3(  5.0, -5.0, 0.0 ),
+                                    math::Vector3(  5.0, -5.0, 0.0 ),
+                                    math::Vector3(  5.0,  0.0, 0.0 ),
+                                    math::Vector3(  0.0,  5.0, 0.0 ),
+                                    math::Vector3( -5.0,  5.0, 0.0 ),
+                                    math::Vector3( -5.0,  5.0, 0.0 ),
+                                    math::Vector3( -5.0, -5.0, 0.0 ) };
 
         EntityPtr petAgent( new PetAgent( 1244094484, "Fido", Vector3(5, 5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
         EntityPtr humanoidAgent( new HumanoidAgent( 1244094484, "Paul", Vector3(3.5, 3.5, 0), Dimension3( 1, 1, 1 ), Quaternion( Vector3::Z_UNIT, 0 ), 0.25 ) );
@@ -99,7 +100,7 @@ public:
         double yMax = 256;
         unsigned int xDim = 1024;
         unsigned int yDim = 1024;
-        Spatial::LocalSpaceMap2D map( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
+        spatial::LocalSpaceMap2D map( xMin, xMax, xDim, yMin, yMax, yDim, petRadius );
 //    try {
         map.addObject( "entity1", ObjectMetaData( 3.0, 3.0, 0.0, 1, 1, 1, 0 ), true );
         map.addObject( "entity2", ObjectMetaData( 20.0, 20.0, 0.0, 1, 1, 1, 0 ), true );
@@ -112,7 +113,7 @@ public:
 
         TS_ASSERT_THROWS_ANYTHING( SuperEntity spe0( petAgent, humanoidAgent ) )
         
-//        std::cout << std::endl << s1->getBoundingBox().getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ).toString() << std::endl;
+//        std::cout << std::endl << s1->getBoundingBox().getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ).toString() << std::endl;
 //        std::cout << s1->getDimension().toString( ) << std::endl;
 //        std::cout << s1->getPosition().toString( ) << std::endl;
 
@@ -121,10 +122,10 @@ public:
 
         spe.removeEntity( s3->getId( ) );
 
-        const std::list<Math::LineSegment>& edges = spe.getEdges( );
+        const std::list<math::LineSegment>& edges = spe.getEdges( );
 
         unsigned int cornersCounter = 0;
-        std::list<Math::LineSegment>::const_iterator it;
+        std::list<math::LineSegment>::const_iterator it;
         for ( it = edges.begin( ); it != edges.end( ); ++it ) {
             //std::cout << it->toString( ) << std::endl;
 //            std::printf( "%.20f %.20f %.20f\n%.20f %.20f %.20f\n", it->pointA.x, it->pointA.y, it->pointA.z, it->pointB.x, it->pointB.y, it->pointB.z );
@@ -132,8 +133,8 @@ public:
 //            std::cout << corners[cornersCounter+1].toString( ) << std::endl;
 //            std::cout << "length to pointA = " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
 //            std::cout << "length to pointB = " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
-            TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
-            TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < Math::LineSegment::TOLERANCE_DISTANCE );
+            TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
+            TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
         } // for
 
 
@@ -184,20 +185,20 @@ public:
 
         float agentFovReach = 2;
 
-        Spatial::Math::Vector3 maximumPoint = front * agentFovReach;
+        spatial::math::Vector3 maximumPoint = front * agentFovReach;
 
-        Spatial::Math::Line limitLine( Quaternion( Spatial::Math::Vector3::Z_UNIT, M_PI / 2).rotate( front ) + maximumPoint,
-                                       Quaternion( Spatial::Math::Vector3::Z_UNIT, -M_PI / 2).rotate( front ) + maximumPoint );
+        spatial::math::Line limitLine( Quaternion( spatial::math::Vector3::Z_UNIT, M_PI / 2).rotate( front ) + maximumPoint,
+                                       Quaternion( spatial::math::Vector3::Z_UNIT, -M_PI / 2).rotate( front ) + maximumPoint );
 
         //std::cout << limitLine.toString( ) << std::endl;
 
         // agent fov will be 160 degrees
-        Spatial::Math::Vector3 leftPoint = Quaternion( Spatial::Math::Vector3::Z_UNIT, 80 * M_PI / 180.0).rotate(front) * agentFovReach;
-        Spatial::Math::Vector3 rightPoint = Quaternion( Spatial::Math::Vector3::Z_UNIT, -80 * M_PI / 180.0).rotate(front) * agentFovReach;
+        spatial::math::Vector3 leftPoint = Quaternion( spatial::math::Vector3::Z_UNIT, 80 * M_PI / 180.0).rotate(front) * agentFovReach;
+        spatial::math::Vector3 rightPoint = Quaternion( spatial::math::Vector3::Z_UNIT, -80 * M_PI / 180.0).rotate(front) * agentFovReach;
 
-        Spatial::Math::Vector3 intersectionPoint;
+        spatial::math::Vector3 intersectionPoint;
 
-        Spatial::Math::LineSegment rightLine( Spatial::Math::Vector3( 0, 0 ), rightPoint );
+        spatial::math::LineSegment rightLine( spatial::math::Vector3( 0, 0 ), rightPoint );
 
         TS_ASSERT( limitLine.intersects( rightLine, &intersectionPoint ) )
 

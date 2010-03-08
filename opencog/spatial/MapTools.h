@@ -27,9 +27,12 @@
 #include <string>
 #include <boost/asio.hpp>
 
-namespace opencog {
-    namespace spatial {
-        class MapTools {
+namespace opencog 
+{
+    namespace spatial 
+    {
+        class MapTools 
+        {
         public:
             
             MapTools( unsigned int videoMode = 4 );
@@ -54,8 +57,8 @@ namespace opencog {
 
             boost::asio::io_service visualDebuggerClientService;
         };
-    };
-};
 
+    }; // spatial
+}; // opencog
 
 #endif // MAPTOOLS

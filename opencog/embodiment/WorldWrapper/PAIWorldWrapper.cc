@@ -129,12 +129,12 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 std::string customWaypoints =
                     _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPath" );
 
-                std::vector<Spatial::Point> actionPlan;
+                std::vector<spatial::Point> actionPlan;
 
                 std::vector<std::string> strWayPoints;
                 boost::algorithm::split( strWayPoints, customWaypoints, boost::algorithm::is_any_of(";") );
 
-                Spatial::Point wayPoint;
+                spatial::Point wayPoint;
                 unsigned int i;
                 for ( i = 0; i < strWayPoints.size( ); ++i ) {
                     std::istringstream parser( strWayPoints[i] );
@@ -146,7 +146,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                         actionPlan.push_back( wayPoint );
                     } else {
                         std::istringstream nextParser( strWayPoints[i+1] );
-                        Spatial::Point nextWaypoint;
+                        spatial::Point nextWaypoint;
                         nextParser >> nextWaypoint.first;
                         nextParser >> nextWaypoint.second;
 
@@ -156,7 +156,7 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                 } // for
 
                 // register seeking object
-                _pai.getPetInterface( ).setLatestGotoTarget( std::pair<std::string, Spatial::Point>( target, wayPoint ) );
+                _pai.getPetInterface( ).setLatestGotoTarget( std::pair<std::string, spatial::Point>( target, wayPoint ) );
 
                 if ( _hasPlanFailed || !createWalkPlanAction( actionPlan, false, Handle::UNDEFINED, walkSpeed ) ) {
                     if (_hasPlanFailed) {
@@ -218,18 +218,18 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
                     target = _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customObject" );
                 } // if
 
-                const Spatial::EntityPtr& entity = sm.getEntity( target );
+                const spatial::EntityPtr& entity = sm.getEntity( target );
 
                 // 3,0% of the maximum world horizontal distance
                 float distanceFromGoal = fabs( sm.xMax( ) - sm.xMin( ) ) * 0.025;
 
                 // get the object's direction vector (where it's face is pointing)
-                Spatial::Math::Vector3 direction( entity->getDirection( ) );
+                spatial::math::Vector3 direction( entity->getDirection( ) );
 
-                Spatial::Point position = sm.getNearFreePointAtDistance(
-                                              Spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ),
+                spatial::Point position = sm.getNearFreePointAtDistance(
+                                              spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ),
                                               distanceFromGoal,
-                                              Spatial::Point( direction.x, direction.y )
+                                              spatial::Point( direction.x, direction.y )
                                           );
 
                 logger().debug("PAIWorldWrapper - gonear_obj(%s) calculated position(%f, %f) target orientation(%s) target location(%s) distance from target(%f)", target.c_str( ), position.first, position.second, entity->getOrientation( ).toString( ).c_str( ), entity->getPosition( ).toString( ).c_str( ), distanceFromGoal );
@@ -284,22 +284,22 @@ throw (opencog::ComboException, opencog::AssertionException, std::bad_exception)
             //const std::string& targetId = as.getName( targetHandle );
 
             //const SpaceServer::ObjectMetadata& md = sm.getMetaData( targetId );
-            const Spatial::EntityPtr& entity = sm.getEntity( target );
+            const spatial::EntityPtr& entity = sm.getEntity( target );
 
             //SpaceServer::SpaceMapPoint goalLocation =
             //  WorldWrapperUtil::getLocation(sm, as, targetHandle );
 
             // get the object's direction vector (where it's face is pointing)
-            //Spatial::Math::Vector2 correctDirection( std::cos(md.yaw), std::sin(md.yaw) );
-            Spatial::Math::Vector3 direction( entity->getDirection( ) );
+            //spatial::math::Vector2 correctDirection( std::cos(md.yaw), std::sin(md.yaw) );
+            spatial::math::Vector3 direction( entity->getDirection( ) );
 
-            Spatial::Point goalPoint = sm.findFree( Spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ), Spatial::Point( direction.x, direction.y ) );
+            spatial::Point goalPoint = sm.findFree( spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ), spatial::Point( direction.x, direction.y ) );
 
-            //Spatial::Point startPoint( md.centerX, md.centerY );
+            //spatial::Point startPoint( md.centerX, md.centerY );
 
             // register seeking object
             _pai.getPetInterface( ).setLatestGotoTarget(
-                std::pair<std::string, Spatial::Point>( target, Spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ) ) );
+                std::pair<std::string, spatial::Point>( target, spatial::Point( entity->getPosition( ).x, entity->getPosition( ).y ) ) );
 
             if ( !buildGotoPlan( goalPoint, walkSpeed ) ) {
                 if (_hasPlanFailed) {
@@ -545,16 +545,16 @@ combo::vertex PAIWorldWrapper::evalIndefiniteObject(indefinite_object io,
 /**
  * private methods
  */
-void PAIWorldWrapper::clearPlan( std::vector<Spatial::Point>& actions,
-                                 const Spatial::Point& startPoint,
-                                 const Spatial::Point& endPoint )
+void PAIWorldWrapper::clearPlan( std::vector<spatial::Point>& actions,
+                                 const spatial::Point& startPoint,
+                                 const spatial::Point& endPoint )
 {
     const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     double closestDist = SpaceServer::SpaceMap::eucDist( startPoint,
                          endPoint );
-    std::vector<Spatial::Point>::iterator eraseFrom = actions.begin( );
-    std::vector<Spatial::Point>::iterator it;
+    std::vector<spatial::Point>::iterator eraseFrom = actions.begin( );
+    std::vector<spatial::Point>::iterator it;
 
     for ( it = actions.begin(); it != actions.end(); ++it ) {
         double d = SpaceServer::SpaceMap::eucDist(*it, endPoint);
@@ -576,12 +576,12 @@ void PAIWorldWrapper::clearPlan( std::vector<Spatial::Point>& actions,
     actions.erase( eraseFrom, actions.end( ) );
 }
 
-Spatial::Point PAIWorldWrapper::getValidPosition( const Spatial::Point& location )
+spatial::Point PAIWorldWrapper::getValidPosition( const spatial::Point& location )
 {
     const SpaceServer::SpaceMap& spaceMap = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     //make sure that the object location is valid
-    Spatial::Point correctedLocation = location;
+    spatial::Point correctedLocation = location;
     if ( spaceMap.illegal( location ) ) {
         logger().warn(
                      "PAIWorldWrapper - Position (%.2f, %.2f) is invalid (off the grid, near/inside an obstacle).",
@@ -597,7 +597,7 @@ Spatial::Point PAIWorldWrapper::getValidPosition( const Spatial::Point& location
     return correctedLocation;
 }
 
-void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spatial::Point& endPoint, std::vector<Spatial::Point>& actions )
+void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions )
 {
     const std::string pathFindingAlgorithm =
         opencog::config().get("NAVIGATION_ALGORITHM");
@@ -605,11 +605,11 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
     const SpaceServer::SpaceMap& sm = _pai.getAtomSpace().getSpaceServer().getLatestMap();
 
     try {
-        Spatial::Point begin = startPoint;
-        Spatial::Point end = endPoint;
+        spatial::Point begin = startPoint;
+        spatial::Point end = endPoint;
 
-        Spatial::Point correctedAgentLocation = getValidPosition( begin );
-        Spatial::Point correctedEndLocation = getValidPosition( end );
+        spatial::Point correctedAgentLocation = getValidPosition( begin );
+        spatial::Point correctedEndLocation = getValidPosition( end );
 
         if ( correctedAgentLocation != begin ) {
             begin = correctedAgentLocation;
@@ -621,16 +621,16 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
         } // if
 
         if ( pathFindingAlgorithm == "astar") {
-            Spatial::LSMap2DSearchNode petNode = sm.snap(Spatial::Point(begin.first, begin.second));
-            Spatial::LSMap2DSearchNode goalNode = sm.snap(Spatial::Point(end.first, end.second));
+            spatial::LSMap2DSearchNode petNode = sm.snap(spatial::Point(begin.first, begin.second));
+            spatial::LSMap2DSearchNode goalNode = sm.snap(spatial::Point(end.first, end.second));
 
-            Spatial::AStarController AStar;
+            spatial::AStarController AStar;
             SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
             AStar.setMap( map );
             AStar.setStartAndGoalStates(petNode, goalNode);
 
             //finally, run AStar
-            _hasPlanFailed = (AStar.findPath() != Spatial::AStarSearch<Spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
+            _hasPlanFailed = (AStar.findPath() != spatial::AStarSearch<spatial::LSMap2DSearchNode>::SEARCH_STATE_SUCCEEDED);
             actions = AStar.getShortestCalculatedPath( );
 
             logger().debug(
@@ -639,13 +639,13 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
 
             SpaceServer::SpaceMap *map = const_cast<SpaceServer::SpaceMap*>(&sm);
             unsigned int maximumClusters = opencog::config().get_int("HPA_MAXIMUM_CLUSTERS");
-            Spatial::HPASearch search( map, 1, maximumClusters );
+            spatial::HPASearch search( map, 1, maximumClusters );
 
-            _hasPlanFailed = !search.processPath( Spatial::Math::Vector2( begin.first, begin.second ), Spatial::Math::Vector2( end.first, end.second ) );
-            std::vector<Spatial::Math::Vector2> pathPoints = search.getProcessedPath( 1 );
+            _hasPlanFailed = !search.processPath( spatial::math::Vector2( begin.first, begin.second ), spatial::math::Vector2( end.first, end.second ) );
+            std::vector<spatial::math::Vector2> pathPoints = search.getProcessedPath( 1 );
             if ( !_hasPlanFailed ) {
-                foreach( Spatial::Math::Vector2 pathPoint, pathPoints ) {
-                    actions.push_back( Spatial::Point( pathPoint.x, pathPoint.y ) );
+                foreach( spatial::math::Vector2 pathPoint, pathPoints ) {
+                    actions.push_back( spatial::Point( pathPoint.x, pathPoint.y ) );
                 } // foreach
             } // if
 
@@ -653,8 +653,8 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
                          "PAIWorldWrapper - HPASearch result %s.", !_hasPlanFailed ? "true" : "false");
 
         } else {
-            Spatial::TangentBugBits::TangentBug::CalculatedPath calculatedPath;
-            Spatial::TangentBugBits::TangentBug tb(sm, calculatedPath, rng);
+            spatial::TangentBug::CalculatedPath calculatedPath;
+            spatial::TangentBug tb(sm, calculatedPath, rng);
 
             //place the pet and the goal on the map
             tb.place_pet(begin.first, begin.second);
@@ -663,7 +663,7 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
             //finally, run tangent bug
             _hasPlanFailed = !tb.seek_goal();
             if ( !_hasPlanFailed ) {
-                Spatial::TangentBugBits::TangentBug::CalculatedPath::iterator it;
+                spatial::TangentBug::CalculatedPath::iterator it;
                 for ( it = calculatedPath.begin( ); it != calculatedPath.end( ); ++it ) {
                     actions.push_back( boost::get<0>( *it ) );
                 } // for
@@ -678,16 +678,16 @@ void PAIWorldWrapper::getWaypoints( const Spatial::Point& startPoint, const Spat
     } // catch
 }
 
-bool PAIWorldWrapper::buildGotoPlan( const Spatial::Point& position, float customSpeed )
+bool PAIWorldWrapper::buildGotoPlan( const spatial::Point& position, float customSpeed )
 {
 
     const AtomSpace& as = _pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = as.getSpaceServer().getLatestMap();
-    std::vector<Spatial::Point> actions;
+    std::vector<spatial::Point> actions;
 
-    Spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
+    spatial::Point startPoint = WorldWrapperUtil::getLocation(sm, as,
                                 WorldWrapperUtil::selfHandle( as, selfName( ) ) );
-    Spatial::Point endPoint = position;
+    spatial::Point endPoint = position;
 
     getWaypoints( startPoint, endPoint, actions );
 
@@ -700,7 +700,7 @@ bool PAIWorldWrapper::buildGotoPlan( const Spatial::Point& position, float custo
     return false;
 }
 
-bool PAIWorldWrapper::createWalkPlanAction( std::vector<Spatial::Point>& actions, bool useExistingId, Handle toNudge, float customSpeed )
+bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions, bool useExistingId, Handle toNudge, float customSpeed )
 {
 
     if ( actions.empty( ) ) {
@@ -717,7 +717,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<Spatial::Point>& actions
         _planID = _pai.createActionPlan( );
     } // if
 
-    foreach(const Spatial::Point& it_action, actions ) {
+    foreach(const spatial::Point& it_action, actions ) {
         PetAction action;
 
         if (toNudge != Handle::UNDEFINED) {
@@ -763,9 +763,9 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     OC_ASSERT(goalHandle != Handle::UNDEFINED);
     OC_ASSERT(spaceMap.containsObject(goalName));
 
-    Spatial::Point startPoint;
-    Spatial::Point endPoint;
-    Spatial::Point targetCenterPosition;
+    spatial::Point startPoint;
+    spatial::Point endPoint;
+    spatial::Point targetCenterPosition;
 
     try {
         startPoint = WorldWrapperUtil::getLocation(spaceMap, atomSpace,
@@ -792,7 +792,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                  startPoint.first, startPoint.second,  endPoint.first, endPoint.second, goalName.c_str());
     // register seeking object
     _pai.getPetInterface( ).setLatestGotoTarget(
-        std::pair<std::string, Spatial::Point>( goalName, targetCenterPosition ) );
+        std::pair<std::string, spatial::Point>( goalName, targetCenterPosition ) );
 
     return buildGotoPlan( endPoint, walkSpeed );
 }
@@ -1273,7 +1273,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
     build_step:
         //now compute a step in which direction the pet is going
         {
-            Spatial::Point petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(as, selfName()));
+            spatial::Point petLoc = WorldWrapperUtil::getLocation(sm, as, WorldWrapperUtil::selfHandle(as, selfName()));
 
             double stepSize = (sm.diagonalSize()) * STEP_SIZE_PERCENTAGE / 100; // 2% of the width
             double x = (double)petLoc.first + (cos(theta) * stepSize);
@@ -1281,7 +1281,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
             // if not moving to an illegal position, then no problem, go
             // to computer position
-            if (!sm.illegal(Spatial::Point(x, y))) {
+            if (!sm.illegal(spatial::Point(x, y))) {
                 action.addParameter(ActionParameter("target",
                                                     ActionParamType::VECTOR(),
                                                     Vector(x, y, 0.0)));
@@ -1388,13 +1388,13 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
 
         float rotationAngle = 0;
         try {
-            //const Spatial::Object& agentObject = sm.getObject( selfName( ) );
-            const Spatial::EntityPtr& agentEntity = sm.getEntity( selfName( ) );
+            //const spatial::Object& agentObject = sm.getObject( selfName( ) );
+            const spatial::EntityPtr& agentEntity = sm.getEntity( selfName( ) );
             //rotationAngle = agentObject.metaData.yaw;
 
-            //const Spatial::Object& targetObject = sm.getObject( targetObjectName );
+            //const spatial::Object& targetObject = sm.getObject( targetObjectName );
 
-            Spatial::Math::Vector3 targetPosition;
+            spatial::math::Vector3 targetPosition;
             if ( targetObjectName == "custom_position" ) {
                 std::stringstream parser(
                     _pai.getPetInterface( ).getCurrentModeHandler( ).getPropertyValue( "customPosition" )
@@ -1403,15 +1403,15 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
                 parser >> targetPosition.y;
                 parser >> targetPosition.z;
             } else {
-                const Spatial::EntityPtr& targetEntity = sm.getEntity( targetObjectName );
+                const spatial::EntityPtr& targetEntity = sm.getEntity( targetObjectName );
                 targetPosition = targetEntity->getPosition( );
             } // else
 
-            //Spatial::Math::Vector2 agentPosition( agentObject.metaData.centerX, agentObject.metaData.centerY );
-            //Spatial::Math::Vector2 targetPosition( targetObject.metaData.centerX, targetObject.metaData.centerY );
+            //spatial::math::Vector2 agentPosition( agentObject.metaData.centerX, agentObject.metaData.centerY );
+            //spatial::math::Vector2 targetPosition( targetObject.metaData.centerX, targetObject.metaData.centerY );
 
-            //Spatial::Math::Vector2 agentDirection( cos( agentObject.metaData.yaw ), sin( agentObject.metaData.yaw ) );
-            Spatial::Math::Vector3 targetDirection = targetPosition -  agentEntity->getPosition( );
+            //spatial::math::Vector2 agentDirection( cos( agentObject.metaData.yaw ), sin( agentObject.metaData.yaw ) );
+            spatial::math::Vector3 targetDirection = targetPosition -  agentEntity->getPosition( );
 
             rotationAngle = atan2f(targetDirection.y, targetDirection.x);
 

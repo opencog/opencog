@@ -21,16 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HPASearch.h"
+#include <opencog/spatial/HPASearch.h>
 #include <cmath>
 #include <map>
 #include <opencog/util/Logger.h>
-#include "QuadTree.h"
+#include <opencog/spatial/QuadTree.h>
 
 using namespace opencog;
-
-namespace Spatial
-{
+using namespace opencog::spatial;
 
 HPASearch::Level::Level( LocalSpaceMap2D* map, unsigned int level, unsigned int maximumClusters )
 {
@@ -126,10 +124,10 @@ void HPASearch::Level::buildClusters( void )
 
                 for ( j = 0; j < numberOfClusterVertices; ++j ) {
                     unsigned int vertexId = beforeVertexCounter + j;
-                    Math::Vector2 position = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, vertexId );
+                    math::Vector2 position = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, vertexId );
 
                     for ( i = 0; i < nearestEntrances.size( ); ++i ) {
-                        Math::Vector2 entrancePosition = boost::get( HPASearch::VertexPosition( ),
+                        math::Vector2 entrancePosition = boost::get( HPASearch::VertexPosition( ),
                                                          *this->abstractGraph,
                                                          this->graphVertices[ nearestEntrances[ i ] ] );
 
@@ -157,11 +155,11 @@ void HPASearch::Level::buildClusters( void )
 
                         unsigned int vertex1 = this->graphVertices[ nearestEntrances[ i ] ];
                         unsigned int vertex2 = this->graphVertices[ nearestEntrances[ j ] ];
-                        Math::Vector2 position1 = boost::get( HPASearch::VertexPosition( ),
+                        math::Vector2 position1 = boost::get( HPASearch::VertexPosition( ),
                                                               *this->abstractGraph,
                                                               vertex1 );
 
-                        Math::Vector2 position2 = boost::get( HPASearch::VertexPosition( ),
+                        math::Vector2 position2 = boost::get( HPASearch::VertexPosition( ),
                                                               *this->abstractGraph,
                                                               vertex2 );
 
@@ -195,7 +193,7 @@ void HPASearch::Level::buildClusters( void )
         // copy vertices
         unsigned int i;
         for ( i = 0; i < this->vertexCounter; ++i ) {
-            Math::Vector2 realPosition =
+            math::Vector2 realPosition =
                 boost::get( HPASearch::VertexPosition( ), *oldGraph, i );
             boost::put( position, i, realPosition );
         } // if
@@ -225,7 +223,7 @@ void HPASearch::Level::setupVertex( const GridPoint& gridPoint )
         boost::get( HPASearch::VertexPosition( ), *this->abstractGraph );
 
     Point realPosition = map->unsnap( gridPoint );
-    Math::Vector2 cellCenterPosition( realPosition.first, realPosition.second );
+    math::Vector2 cellCenterPosition( realPosition.first, realPosition.second );
     this->graphVertices[ gridPoint ] = vertexCounter;
     boost::put( position, vertexCounter, cellCenterPosition );
     vertexCounter++;
@@ -322,7 +320,7 @@ void HPASearch::Level::buildEntrance( unsigned int row, unsigned int col, bool h
 
 }
 
-GridPoint HPASearch::Level::getNearestEntrance( unsigned int clusterId, const Math::Vector2& position )
+GridPoint HPASearch::Level::getNearestEntrance( unsigned int clusterId, const math::Vector2& position )
 {
     std::vector<GridPoint>& clusterEntrances = this->clusterEntrances[ clusterId ];
 
@@ -330,7 +328,7 @@ GridPoint HPASearch::Level::getNearestEntrance( unsigned int clusterId, const Ma
     unsigned int i;
     float distance = ( map->xMax( ) - map->xMin( ) ) * ( map->yMax( ) - map->yMin( ) );
     for ( i = 0; i < clusterEntrances.size( ); ++i ) {
-        Math::Vector2 entrancePosition = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, this->graphVertices[ clusterEntrances[ i ] ] );
+        math::Vector2 entrancePosition = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, this->graphVertices[ clusterEntrances[ i ] ] );
 
         float candidateDistance = ( entrancePosition - position ).length( );
         if ( candidateDistance < distance ) {
@@ -344,7 +342,7 @@ GridPoint HPASearch::Level::getNearestEntrance( unsigned int clusterId, const Ma
 }
 
 
-GridPoint HPASearch::Level::getNearestVertex( unsigned int clusterId, const Math::Vector2& position )
+GridPoint HPASearch::Level::getNearestVertex( unsigned int clusterId, const math::Vector2& position )
 {
     unsigned int startRange = clustersVertexRange[ clusterId ].first;
     unsigned int numberOfVertices = clustersVertexRange[ clusterId ].second;
@@ -356,7 +354,7 @@ GridPoint HPASearch::Level::getNearestVertex( unsigned int clusterId, const Math
     for ( i = 0; i < numberOfVertices; ++i ) {
         unsigned int vertexId = startRange + i;
 
-        Math::Vector2 vertexPosition =
+        math::Vector2 vertexPosition =
             boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, vertexId );
         float candidateDistance = ( position - vertexPosition ).length( );
         if ( candidateDistance < distance ) {
@@ -369,7 +367,7 @@ GridPoint HPASearch::Level::getNearestVertex( unsigned int clusterId, const Math
     return response;
 }
 
-bool HPASearch::Level::processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint ) throw( opencog::RuntimeException )
+bool HPASearch::Level::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint ) throw( opencog::RuntimeException )
 {
 
     this->processedPath.clear( );
@@ -456,7 +454,7 @@ bool HPASearch::Level::processPath( const Math::Vector2& startPoint, const Math:
 
             bool running = true;
             for ( i = endWaypoint; running ; i = predecessors[ i ] ) {
-                Math::Vector2 wayPoint = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, i );
+                math::Vector2 wayPoint = boost::get( HPASearch::VertexPosition( ), *this->abstractGraph, i );
                 this->processedPath.insert( this->processedPath.begin( ), wayPoint );
                 running = ( predecessors[ i ] != i );
             } // for
@@ -474,7 +472,7 @@ bool HPASearch::Level::processPath( const Math::Vector2& startPoint, const Math:
     return true;
 }
 
-const std::vector<Math::Vector2>& HPASearch::Level::getProcessedPath( void ) const
+const std::vector<math::Vector2>& HPASearch::Level::getProcessedPath( void ) const
 {
     return this->processedPath;
 }
@@ -488,12 +486,12 @@ void HPASearch::Level::smoothPath( void )
 
     float tolerance = 1.0;
 
-    std::vector<Math::Vector2> smoothPath;
+    std::vector<math::Vector2> smoothPath;
 
     logger().info("HPASearch - smoothing path. (%d) points.",
                  this->processedPath.size( ) );
 
-    std::vector<Math::Vector2>::iterator it = this->processedPath.begin( );
+    std::vector<math::Vector2>::iterator it = this->processedPath.begin( );
 
     smoothPath.push_back( *it );
 
@@ -521,7 +519,7 @@ void HPASearch::Level::smoothTriangulate( void )
         return;
     } // if
 
-    std::vector<Math::Vector2> smoothPath;
+    std::vector<math::Vector2> smoothPath;
 
 
     unsigned int i = 0;
@@ -531,13 +529,13 @@ void HPASearch::Level::smoothTriangulate( void )
         bool keepTrying = true;
         for ( j = i + 2; keepTrying && j < this->processedPath.size( ); ++j ) {
 
-            Spatial::GridPoint startPoint( this->map->snap( Spatial::Point
+            spatial::GridPoint startPoint( this->map->snap( spatial::Point
                                            ( this->processedPath[ i ].x, this->processedPath[ i ].y ) ) );
 
-            Spatial::GridPoint endPoint( this->map->snap( Spatial::Point
+            spatial::GridPoint endPoint( this->map->snap( spatial::Point
                                          ( this->processedPath[ j ].x, this->processedPath[ j ].y ) ) );
 
-            Spatial::GridPoint collision;
+            spatial::GridPoint collision;
             bool collided = false;
             rayTrace( startPoint, endPoint, CollisionDetector( this->map, collision, collided ) );
 
@@ -591,16 +589,14 @@ unsigned int HPASearch::getNumberOfLevels( void )
     return this->numberOfLevels;
 }
 
-bool HPASearch::processPath( const Math::Vector2& startPoint, const Math::Vector2& endPoint, unsigned int levelId ) throw( opencog::RuntimeException )
+bool HPASearch::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint, unsigned int levelId ) throw( opencog::RuntimeException )
 {
     bool response = getLevel( levelId )->processPath( startPoint, endPoint );
     logger().info(( "HPASearch - from[" + startPoint.toString( ) + "] to[" + endPoint.toString( ) + "] Result (%d)" ).c_str( ), response ? 1 : 0 );
     return response;
 }
 
-const std::vector<Math::Vector2>& HPASearch::getProcessedPath( unsigned int levelId ) const throw( opencog::RuntimeException )
+const std::vector<math::Vector2>& HPASearch::getProcessedPath( unsigned int levelId ) const throw( opencog::RuntimeException )
 {
     return getLevel( levelId )->getProcessedPath( );
 }
-
-}; // Spatial

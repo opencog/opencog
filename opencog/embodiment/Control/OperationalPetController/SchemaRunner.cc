@@ -127,14 +127,14 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                             strcmp(currentWalkingTargetId.c_str(), arguments[0].c_str()) == 0) {
 
                         // check if the target move, thus replan
-                        std::pair<std::string, Spatial::Point> lastTargetObject = this->opc->getPet( ).getLatestGotoTarget( );
+                        std::pair<std::string, spatial::Point> lastTargetObject = this->opc->getPet( ).getLatestGotoTarget( );
                         const SpaceServer::SpaceMap& spaceMap =
                             this->opc->getAtomSpace()->getSpaceServer( ).getLatestMap( );
                         try {
-                            //const Spatial::Object& targetObject = spaceMap.getObject( lastTargetObject.first );
-                            const Spatial::EntityPtr& targetEntity =
+                            //const spatial::Object& targetObject = spaceMap.getObject( lastTargetObject.first );
+                            const spatial::EntityPtr& targetEntity =
                                 spaceMap.getEntity( lastTargetObject.first );
-                            Spatial::Point targetCenterPosition( targetEntity->getPosition( ).x, targetEntity->getPosition( ).y );//targetObject.metaData.centerX, targetObject.metaData.centerY );
+                            spatial::Point targetCenterPosition( targetEntity->getPosition( ).x, targetEntity->getPosition( ).y );//targetObject.metaData.centerX, targetObject.metaData.centerY );
 
                             if ( lastTargetObject.second == targetCenterPosition ) {
                                 // there is no need to replan walking
@@ -163,7 +163,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                     } // else
 
                     /*
-                      std::pair<std::string, Spatial::Point> targetObject =
+                      std::pair<std::string, spatial::Point> targetObject =
                       this->opc->getPet( ).getLatestGotoTarget( );
 
                       // check if pet is moving to the right position
@@ -171,7 +171,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
                       targetObject.first.length( ) > 0 ) {
 
                       const SpaceServer::SpaceMap& spaceMap = this->opc->getAtomSpace().getSpaceServer().getLatestMap();
-                      Spatial::Point currentTargetPosition = spaceMap.centerOf( targetObject.first );
+                      spatial::Point currentTargetPosition = spaceMap.centerOf( targetObject.first );
                       // verify if the distance between the objects start position and current position
                       // is greater than tolerance
                       double dist = SpaceServer::SpaceMap::eucDist
@@ -292,7 +292,7 @@ bool SchemaRunner::runSchema(const std::string& ruleName,
 
         // if the schema is a walking schema, put the pet in walking mode
         if (allowWalkingCancelation && schemaName.substr( 0, 2 ) == "go") {
-            //          this->opc->getPet( ).setLatestGotoTarget( std::pair<std::string,Spatial::Point>( "", Spatial::Point( 0, 0 ) ) );
+            //          this->opc->getPet( ).setLatestGotoTarget( std::pair<std::string,spatial::Point>( "", spatial::Point( 0, 0 ) ) );
             this->petIsMoving = true;
             this->currentWalkingProcedure = schemaName;
 

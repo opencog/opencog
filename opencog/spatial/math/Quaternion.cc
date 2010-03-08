@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Quaternion.cc
+ * opencog/spatial/math/Quaternion.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,9 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Quaternion.h"
+#include <opencog/spatial/math/Quaternion.h>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 
 Quaternion::Quaternion( void ) : x(0), y(0), z(0), w(1)

@@ -24,40 +24,51 @@
 #ifndef _SPATIAL_AGENT_H_
 #define _SPATIAL_AGENT_H_
 
-#include "MovableEntity.h"
+#include <opencog/spatial/MovableEntity.h>
 
-namespace Spatial
+namespace opencog
 {
+    namespace spatial
+    {
 
-class Agent;
-typedef boost::shared_ptr<Agent> AgentPtr;
+        class Agent;
+        typedef boost::shared_ptr<Agent> AgentPtr;
 
-class Agent : public MovableEntity
-{
-public:
+        class Agent : public MovableEntity
+        {
+        public:
 
-    inline Agent( const Agent& agent ) : MovableEntity( agent.id, agent.name, agent.position, agent.dimension, agent.orientation, agent.expansionRadius ) {
-    }
+            inline Agent( const Agent& agent ) : 
+                MovableEntity( agent.id, agent.name, agent.position, 
+                    agent.dimension, agent.orientation, agent.expansionRadius ) 
+            {
+            }
 
-    inline Agent( long id, const std::string& name, const Math::Vector3& position, const Math::Dimension3& dimension, const Math::Quaternion& orientation, double radius = 0.0 ) : MovableEntity( id, name, position, dimension, orientation, radius ) {
-    }
+            inline Agent( long id, const std::string& name, const math::Vector3& position, 
+                const math::Dimension3& dimension, const math::Quaternion& orientation, 
+                    double radius = 0.0 ) : 
+                        MovableEntity( id, name, position, dimension, orientation, radius ) 
+            {
+            }
+
+            /**
+             * Get a point that indicate the position of the agent's eye
+             * @return
+             */
+            inline math::Vector3 getEyePosition( void ) 
+            {
+                return this->getPosition() + ( getDirection( ) * ( this->getLength() / 2 ) )
+                    + ( math::Vector3::Y_UNIT * (this->getHeight() / 2) );
+            }
+
+            virtual ENTITY_TYPE getType( void ) const = 0;
+
+            virtual EntityPtr clone( void ) const = 0;
 
 
-    /**
-     * Get a point that indicate the position of the agent's eye
-     * @return
-     */
-    Math::Vector3 getEyePosition( void ) {
-        return this->getPosition() + ( getDirection( ) * ( this->getLength() / 2 ) ) + ( Math::Vector3::Y_UNIT * (this->getHeight() / 2) );
-    }
+        }; // Agent
 
-    virtual ENTITY_TYPE getType( void ) const = 0;
-
-    virtual EntityPtr clone( void ) const = 0;
-
-
-}; // Agent
-
-} // Spatial
+    } // spatial
+} // opencog
 
 #endif // _SPATIAL_AGENT_H_

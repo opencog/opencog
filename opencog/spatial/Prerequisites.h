@@ -24,16 +24,19 @@
 #define _SPATIAL_PREREQUISITES_H_
 
 
-namespace Spatial
+namespace opencog
 {
-class LocalSpaceMap2D;
-class HPASearch;
-namespace Math {
-class Dimension2;
-class Dimension3;
-class Vector2;
-}
-}
+    namespace spatial
+    {
+        class LocalSpaceMap2D;
+        class HPASearch;
+        namespace math {
+            class Dimension2;
+            class Dimension3;
+            class Vector2;
+        } // math
+    } // spatial
+} // opencog
 
 #include <opencog/util/exceptions.h>
 #include <string>

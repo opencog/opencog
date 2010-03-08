@@ -25,8 +25,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/StringManipulator.h>
 
-#include "AStarController.h"
-#include "LocalSpaceMap2DUtil.h"
+#include <opencog/spatial/AStarController.h>
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
 
 const unsigned int MAP_WIDTH = 200;
 const unsigned int MAP_HEIGHT = 200;
@@ -35,16 +35,18 @@ const unsigned int NUM_SEARCHES = 5;
 const unsigned int PRINT_MAP = 1;
 const unsigned int PRINT_SOLUTION = 0;
 
-using namespace Spatial;
+
 using namespace std;
+
 using namespace opencog;
+using namespace opencog::spatial;
 
 typedef LocalSpaceMap2D Map;
 //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int>, NoMetaData > Map;
 typedef LSMap2DSearchNode MapSearchNode;
 //typedef void* VoidMetaData;
-//typedef Spatial::GridPoint GridPoint;
-//typedef Spatial::Point Point;
+//typedef spatial::GridPoint GridPoint;
+//typedef spatial::Point Point;
 
 Map* populateRandomMap(RandGen& rng)
 {
@@ -55,7 +57,7 @@ Map* populateRandomMap(RandGen& rng)
 
     cout << "Builing random map objects...\n";
     //populateRandom<unsigned int,double,boost::hash<unsigned int> >(*lmap, OBJECTS,
-    populateRandom(rng, *lmap, OBJECTS, Spatial::GridPoint(0, 0));
+    populateRandom(rng, *lmap, OBJECTS, spatial::GridPoint(0, 0));
     cout << " done.\n";
 
     return lmap;
@@ -85,18 +87,18 @@ void generateRandomStartAndGoal(Map *lmap, LSMap2DSearchNode &nodeStart, LSMap2D
 //so we can print it out with the map
 void addSolutionToMap(AStarController &asc, Map *map, RandGen& rng)
 {
-    vector<Spatial::Point> solution_points = asc.getSolutionPoints();
+    vector<spatial::Point> solution_points = asc.getSolutionPoints();
     //add solution to map
-    Spatial::ObjectMetaData no_meta;
+    spatial::ObjectMetaData no_meta;
 //    map->addNonObstacle(toString(rng.randint()), solution_points.begin(), solution_points.end(), no_meta);
     map->addObject(opencog::toString(rng.randint()), no_meta, false );
 }
 
 
-void printSolution(vector<Spatial::GridPoint> points)
+void printSolution(vector<spatial::GridPoint> points)
 {
     cout << "\nGrid Points Solution: \n";
-    vector<Spatial::GridPoint>::iterator iter;
+    vector<spatial::GridPoint>::iterator iter;
     int stepCount = 0;
     for (iter = points.begin();
             iter != points.end();
@@ -106,10 +108,10 @@ void printSolution(vector<Spatial::GridPoint> points)
     }
 }
 
-void printPointsSolution(vector<Spatial::Point> points)
+void printPointsSolution(vector<spatial::Point> points)
 {
     cout << "\nPoints Solution: \n";
-    vector<Spatial::Point>::iterator iter;
+    vector<spatial::Point>::iterator iter;
     int stepCount = 0;
     for (iter = points.begin();
             iter != points.end();
@@ -187,14 +189,14 @@ int main(int argc, char * argv[])
         }
 
         //get the solution path as grid points
-        vector<Spatial::GridPoint> solutionGridPoints = asc.getSolutionGridPoints();
+        vector<spatial::GridPoint> solutionGridPoints = asc.getSolutionGridPoints();
 
         if (PRINT_SOLUTION) {
             printSolution(solutionGridPoints);
         }
 
         //get the solution path as distance points
-        //vector<Spatial::Point> solutionPoints = asc.getSolutionPoints();
+        //vector<spatial::Point> solutionPoints = asc.getSolutionPoints();
         //printPointsSolution(solutionPoints);
 
         SearchCount ++;
@@ -205,39 +207,3 @@ int main(int argc, char * argv[])
 
     return (SearchResult == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED ? 0 : 1);
 }
-
-
-
-/******
- //old code for testing/comparing goal distance estimate heuristics
- while(SearchCount < NUM_SEARCHES) {
-  generateRandomStartAndGoal(map,nodeStart,nodeEnd);
-
-  //for searching for consecutive paths
-  //if (SearchCount>0) {
-  // nodeStart = nodeEnd;
-  // nodeEnd = getRandomNode(map);
-  //}
-
-  asc.setStartAndGoalStates(nodeStart,nodeEnd);
-
-     //test with manhattan estimate
-     //MapSearchNode::setHeuristic(MapSearchNode::MANHATTAN);
-     unsigned int SearchResult = asc.doSearch();
-     if (PRINT_MAP) {
-      addSolutionToMap(asc.astarsearch, map); //TODO: make param just asc
-     }
-     //SearchResult = 0;
-
-     //test with diagonal estimate
-     //asc.resetSearch(nodeStart,nodeEnd);  //will keep same start and goal nodes
-     //need to create new astar
-     //MapSearchNode::setHeuristic(MapSearchNode::DIAGONAL);
-     //SearchResult = asc.doSearch();
-
-     SearchCount ++;
- }
- if (PRINT_MAP) {
-  mapout(map);
- }
-*/

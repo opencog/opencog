@@ -291,7 +291,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
         } // if
         logger().debug("ScavengerHuntAgentModeHandler - Parsing visibility map signal" );
 
-        Spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
+        spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
         if ( !visibilityMap ) {
             return;
         } // if
@@ -323,7 +323,7 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
             int k;
             for ( j = 0; j < range.size( ); j += 2 ) {
                 for ( k = range[j]; k <= range[j+1]; ++k ) {
-                    const Spatial::VisibilityMap::TilePtr& tile = visibilityMap->getTile( row, k );
+                    const spatial::VisibilityMap::TilePtr& tile = visibilityMap->getTile( row, k );
                     if ( tile ) {
                         tile->setVisibility( true );
                     } else {
@@ -417,11 +417,11 @@ void ScavengerHuntAgentModeHandler::handleCommand( const std::string& name, cons
         visMapName << "_";
         visMapName << visMapCounter++;
         visMapName << ".bin";
-        Spatial::VisibilityMap::saveToFile( visMapName.str( ), *getVisibilityMap( ) );
+        spatial::VisibilityMap::saveToFile( visMapName.str( ), *getVisibilityMap( ) );
     } // else if
 }
 
-Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void )
+spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void )
 {
     if ( this->visibilityMap != NULL ) {
         return this->visibilityMap;
@@ -437,9 +437,9 @@ Spatial::VisibilityMap* ScavengerHuntAgentModeHandler::getVisibilityMap( void )
         static_cast<unsigned int>(opencog::config().get_int( "MAP_XDIM" )) / 4;
 
     const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-    Spatial::Math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
-    Spatial::Math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
-    this->visibilityMap = new Spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
+    spatial::math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
+    spatial::math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
+    this->visibilityMap = new spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
 
     return this->visibilityMap;
 }
@@ -557,7 +557,7 @@ void ScavengerHuntAgentModeHandler::update( void )
                 } else { // can't reach target area
 
                     std::stringstream parser;
-                    Spatial::Math::Vector3 areaCenter =
+                    spatial::math::Vector3 areaCenter =
                         getVisibilityMap( )->getAreaCenter( this->exploringArea, NUMBER_OF_AREAS );
                     parser << areaCenter.x << " " << areaCenter.z;
                     setProperty( "customPosition", parser.str( ) );
@@ -637,9 +637,9 @@ void ScavengerHuntAgentModeHandler::update( void )
 
     case 1321: { // spying an agent
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         try {
-            const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
+            const spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
             if ( agentEntity->distanceTo( *target ) > 4000 ) {
                 setFollowingPosition( );
                 changeState( this->agentState, 1319 ); // go near target
@@ -648,10 +648,10 @@ void ScavengerHuntAgentModeHandler::update( void )
             // search for the target
             this->elapsedTicks = 0;
             std::stringstream targetPosition;
-            Spatial::Math::Vector3 position = agentEntity->getPosition( );
+            spatial::math::Vector3 position = agentEntity->getPosition( );
 
 
-            Spatial::Math::Quaternion rotation( Spatial::Math::Vector3::Z_UNIT, M_PI / 2.0 );
+            spatial::math::Quaternion rotation( spatial::math::Vector3::Z_UNIT, M_PI / 2.0 );
             position += rotation.rotate( agentEntity->getDirection( ) ) * 1000;
 
             logger().debug("ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ) .toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
@@ -664,7 +664,7 @@ void ScavengerHuntAgentModeHandler::update( void )
     break;
     case 1322: {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         try {
             spaceMap.getEntity( getPropertyValue( "spying" ) );
             changeState( this->agentState, 1321 ); // target found, so keep spying
@@ -673,9 +673,9 @@ void ScavengerHuntAgentModeHandler::update( void )
                 this->elapsedTicks = 0;
 
                 std::stringstream targetPosition;
-                Spatial::Math::Vector3 position = agentEntity->getPosition( );
+                spatial::math::Vector3 position = agentEntity->getPosition( );
 
-                Spatial::Math::Quaternion rotation( Spatial::Math::Vector3::Z_UNIT, M_PI / 2.0 );
+                spatial::math::Quaternion rotation( spatial::math::Vector3::Z_UNIT, M_PI / 2.0 );
                 position += rotation.rotate( agentEntity->getDirection( ) ) * 1000;
 
                 logger().debug("ScavengerHuntAgentModeHandler - Trying to look at a 90 degrees right. yaw[%f] dirBefore[%s] dirAfter[%s] agentPosition[%s] finalPosition[%s]", agentEntity->getOrientation( ).getRoll( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getDirection( ).toString( ).c_str( ), agentEntity->getPosition( ).toString( ).c_str( ), position.toString( ).c_str( ) );
@@ -691,8 +691,8 @@ void ScavengerHuntAgentModeHandler::update( void )
         try {
             const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
 
-            const Spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
-            const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+            const spatial::EntityPtr& target = spaceMap.getEntity( getPropertyValue( "spying" ) );
+            const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
             if ( agentEntity->distanceTo( *target ) > 4000 ) {
                 setFollowingPosition( );
@@ -721,14 +721,14 @@ void ScavengerHuntAgentModeHandler::update( void )
     case 1309: { // look at a hidden tile (from a specific area) direction
         if ( this->elapsedTicks > 2 ) { // wait to agent look to tile direction
             std::stringstream tilePosition( getPropertyValue( "customPosition" ) );
-            Spatial::Math::Vector3 position;
+            spatial::math::Vector3 position;
             tilePosition >> position.x >> position.z;
             if ( getVisibilityMap( )->getTile( position )->isVisible( ) ) {
                 this->elapsedTicks = 0;
                 changeState( this->agentState, 1317 ); // restart area exploration
             } else {
                 try {
-                    const Spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTile( getVisibilityMap( )->getTile( position )->getCenter( ), this->exploringArea, NUMBER_OF_AREAS );
+                    const spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTile( getVisibilityMap( )->getTile( position )->getCenter( ), this->exploringArea, NUMBER_OF_AREAS );
                     setProperty( "customPath", computeWalkAroundWaypoints( tile->getCenter( ) ) );
                     changeState( this->agentState, 1313 ); // go nearest to target visible area tile
                 } catch ( opencog::NotFoundException& ex ) {
@@ -746,8 +746,8 @@ void ScavengerHuntAgentModeHandler::update( void )
     case 1315: {
         if ( this->elapsedTicks > 3 ) {
             try {
-                Spatial::Math::Vector3 areaCenter = getVisibilityMap( )->getAreaCenter( this->exploringArea, NUMBER_OF_AREAS );
-                const Spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTileToPosition( areaCenter );
+                spatial::math::Vector3 areaCenter = getVisibilityMap( )->getAreaCenter( this->exploringArea, NUMBER_OF_AREAS );
+                const spatial::VisibilityMap::TilePtr& tile = getVisibilityMap( )->getNearestVisibleTileToPosition( areaCenter );
                 setProperty( "customPath", computeWalkAroundWaypoints( tile->getCenter( ) ) );
                 changeState( this->agentState, 1313 ); // go to the nearest visible tile to target area
             } catch ( opencog::NotFoundException& ex ) {
@@ -757,7 +757,7 @@ void ScavengerHuntAgentModeHandler::update( void )
                 std::stringstream fileName;
                 fileName << "visibilityMap_" << fileCounter << ".bin";
                 ++fileCounter;
-                Spatial::VisibilityMap::saveToFile( fileName.str( ), *getVisibilityMap( ) );
+                spatial::VisibilityMap::saveToFile( fileName.str( ), *getVisibilityMap( ) );
                 changeState( this->agentState, 1317 ); // try to find another solution
             } // catch
         } // if
@@ -800,8 +800,8 @@ bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void
         } // if
 
         try {
-            const Spatial::EntityPtr& obstacle = spaceMap.getEntity( entities[i] );
-            if ( !obstacle->getBooleanProperty( Spatial::Entity::OBSTACLE ) ) {
+            const spatial::EntityPtr& obstacle = spaceMap.getEntity( entities[i] );
+            if ( !obstacle->getBooleanProperty( spatial::Entity::OBSTACLE ) ) {
                 logger().debug("ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea - Entity[%s] is not an obstacle. ignoring...", entities[i].c_str( ) );
                 continue;
             } // if
@@ -831,7 +831,7 @@ bool ScavengerHuntAgentModeHandler::isThereObjectToInspectInsideTargetArea( void
                     spaceMap.getSuperEntityWhichContains( entities[i] )->getSubEntitiesIds( );
                 unsigned int j;
                 for ( j = 0; j < entitiesIds.size( ); ++j ) {
-                    const Spatial::EntityPtr& entity = spaceMap.getEntity( entitiesIds[j] );
+                    const spatial::EntityPtr& entity = spaceMap.getEntity( entitiesIds[j] );
                     std::vector<std::string>::iterator itEntity =
                         std::find( this->exploredObjects.begin( ), this->exploredObjects.end( ), entity->getName( ) );
                     if ( itEntity == this->exploredObjects.end( ) ) {
@@ -857,7 +857,7 @@ bool ScavengerHuntAgentModeHandler::isThereAreaToInspect( void )
 bool ScavengerHuntAgentModeHandler::isThereVisibleTilesInsideTargetArea( void )
 {
     try {
-        const Spatial::VisibilityMap::TilePtr& tile =
+        const spatial::VisibilityMap::TilePtr& tile =
             getVisibilityMap( )->getNextVisibleTile( this->exploringArea, NUMBER_OF_AREAS );
 
         setProperty( "customPath", computeWalkAroundWaypoints( tile->getCenter( ) ) );
@@ -870,7 +870,7 @@ bool ScavengerHuntAgentModeHandler::isThereVisibleTilesInsideTargetArea( void )
 bool ScavengerHuntAgentModeHandler::isThereHiddenTilesInsideTargetArea( void )
 {
     try {
-        const Spatial::VisibilityMap::TilePtr& tile =
+        const spatial::VisibilityMap::TilePtr& tile =
             getVisibilityMap( )->getNextHiddenTile( this->exploringArea, NUMBER_OF_AREAS );
         std::stringstream parser;
         parser << tile->getCenter( ).x << " " << tile->getCenter( ).z;
@@ -891,14 +891,14 @@ bool ScavengerHuntAgentModeHandler::imInsideTargetArea( void )
 
     try {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         bool imInside = getVisibilityMap( )->isInsideArea( *agentEntity, this->exploringArea, NUMBER_OF_AREAS );
         logger().debug("ScavengerHuntAgentModeHandler::imInsideTargetArea - Exploring area[%d] Current Agent position[%s] Inside?[%s]", this->exploringArea, agentEntity->getPosition( ).toString( ).c_str( ), (imInside ? "yes" : "no") );
         return imInside;
     } catch ( opencog::NotFoundException& ex ) {
 
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
         logger().error("ScavengerHuntAgentModeHandler::imInsideTargetArea - AgentPosition[%s] AreaNumber[%d] %s", agentEntity->getPosition( ).toString( ).c_str( ), this->exploringArea, ex.getMessage( ) );
         return false;
     } // catch
@@ -935,10 +935,10 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void )
         std::list<std::string> entities;
         spaceMap.getAllObjects( back_inserter( entities ) );
 
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
-        const Spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
-        const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
+        const spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
+        const spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
 
         std::vector<std::string> treasures;
         std::vector<double> distanceToAgent;
@@ -946,7 +946,7 @@ bool ScavengerHuntAgentModeHandler::treasureWasFound( void )
         std::list<std::string>::iterator it;
         for ( it = entities.begin( ); it != entities.end( ); ++it ) {
 
-            const Spatial::EntityPtr& entity = spaceMap.getEntity( *it );
+            const spatial::EntityPtr& entity = spaceMap.getEntity( *it );
             Handle objectHandle = this->agent->getAtomSpace( ).getHandle( ACCESSORY_NODE, entity->getName( ) );
             if ( objectHandle == Handle::UNDEFINED ) {
                 logger().debug("ScavengerHuntAgentModeHandler - %s is not an accessory", (*it).c_str());
@@ -1019,9 +1019,9 @@ bool ScavengerHuntAgentModeHandler::isAgentNearTreasure( void )
     const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
 
     try {
-        const Spatial::EntityPtr& treasureEntity = spaceMap.getEntity( getPropertyValue( "treasure" ) );
-        const Spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
-        const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
+        const spatial::EntityPtr& treasureEntity = spaceMap.getEntity( getPropertyValue( "treasure" ) );
+        const spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
+        const spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
 
         if ( redBaseEntity->distanceTo( *treasureEntity ) <= 800 || blueBaseEntity->distanceTo( *treasureEntity ) <= 800 ) {
             logger().debug("ScavengerHuntAgentModeHandler::isAgentNearTreasure - Treasure is near a team base" );
@@ -1057,13 +1057,13 @@ bool ScavengerHuntAgentModeHandler::isAgentNearBase( void )
 {
     try {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
         if ( this->myTeamCode == 0 ) {
-            const Spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
+            const spatial::EntityPtr& redBaseEntity = spaceMap.getEntity( redBaseId );
             return ( redBaseEntity->distanceTo( *agentEntity ) <= 800 );
         } else {
-            const Spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
+            const spatial::EntityPtr& blueBaseEntity = spaceMap.getEntity( blueBaseId );
             return ( blueBaseEntity->distanceTo( *agentEntity ) <= 800 );
         } // else
     } catch ( opencog::NotFoundException& ex ) {
@@ -1079,32 +1079,32 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
     try {
         const SpaceServer::SpaceMap& sm = this->agent->getAtomSpace().getSpaceServer( ).getLatestMap( );
 
-        const Spatial::EntityPtr& occluderEntity = sm.getEntity( entityId );
-        const Spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& occluderEntity = sm.getEntity( entityId );
+        const spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );
 
         output << agentEntity->getPosition( ).x << " " << agentEntity->getPosition( ).y << ";";
 
-        std::vector<Spatial::Point> wayPoints;
+        std::vector<spatial::Point> wayPoints;
 
-        Spatial::Point startCorner;
+        spatial::Point startCorner;
         unsigned int startIndex = 0;
         float minDistance = std::numeric_limits<float>::max( );
 
-        //std::vector<Spatial::Math::LineSegment> edges;
-        std::list<Spatial::Math::Vector3> corners;
+        //std::vector<spatial::math::LineSegment> edges;
+        std::list<spatial::math::Vector3> corners;
         unsigned int i;
         if ( sm.belongsToSuperEntity( entityId ) ) {
             corners = sm.getSuperEntityWhichContains( entityId )->getCorners( );
-            //const std::list<Spatial::Math::LineSegment>& superEntityEdges =
+            //const std::list<spatial::math::LineSegment>& superEntityEdges =
             //    sm.getSuperEntityWhichContains( entityId )->getEdges( );
             /*
-            std::list<Spatial::Math::LineSegment>::const_iterator it;
+            std::list<spatial::math::LineSegment>::const_iterator it;
             for( it = superEntityEdges.begin( ); it != superEntityEdges.end( ); ++it ) {
                 edges.push_back( *it );
             } // for
             */
         } else {
-            const std::vector<Spatial::Math::LineSegment>& entityEdges =
+            const std::vector<spatial::math::LineSegment>& entityEdges =
                 occluderEntity->getBoundingBox( ).getAllEdges( );
             for ( i = 0; i < 4; ++i ) {
                 //edges.push_back( entityEdges[i] );
@@ -1112,20 +1112,20 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
             } // for
         } // else
 
-        std::list<Spatial::Math::Vector3>::iterator it;
+        std::list<spatial::math::Vector3>::iterator it;
         i = 0;
         for ( it = corners.begin( ); it != corners.end( ); ++it ) {
 
             //for( i = 0; i < corners.size( ); ++i ) {
 
-            //Spatial::Point corner( edges[i].pointA.x, edges[i].pointA.y );
-            Spatial::Point corner( it->x, it->y );
-            //Spatial::Math::Vector3 direction = edges[i].pointA - occluderEntity->getPosition( );
+            //spatial::Point corner( edges[i].pointA.x, edges[i].pointA.y );
+            spatial::Point corner( it->x, it->y );
+            //spatial::math::Vector3 direction = edges[i].pointA - occluderEntity->getPosition( );
 
-            corner = sm.getNearestFreePoint( corner );//targetPosition = sm.findFree( corner, Spatial::Point( direction.x, direction.y ) );
+            corner = sm.getNearestFreePoint( corner );//targetPosition = sm.findFree( corner, spatial::Point( direction.x, direction.y ) );
 
             wayPoints.push_back( corner );
-            float candidateDistance = ( agentEntity->getPosition( ) - Spatial::Math::Vector3( corner.first, corner.second ) ).length( );
+            float candidateDistance = ( agentEntity->getPosition( ) - spatial::math::Vector3( corner.first, corner.second ) ).length( );
             if ( candidateDistance < minDistance ) {
                 startIndex = i;
                 minDistance = candidateDistance;
@@ -1149,13 +1149,13 @@ std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const std
     return output.str( );
 }
 
-std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const Spatial::Math::Vector3& targetPosition )
+std::string ScavengerHuntAgentModeHandler::computeWalkAroundWaypoints( const spatial::math::Vector3& targetPosition )
 {
     std::stringstream output;
     try {
         const SpaceServer::SpaceMap& sm = this->agent->getAtomSpace().getSpaceServer( ).getLatestMap( );
 
-        const Spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = sm.getEntity( this->agent->getPetId( ) );
 
         output << agentEntity->getPosition( ).x << " " << agentEntity->getPosition( ).y << ";";
         output << targetPosition.x << " " << targetPosition.z;
@@ -1357,8 +1357,8 @@ bool ScavengerHuntAgentModeHandler::isAgentNextTo( const std::string& targetId )
 {
     try {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
-        const Spatial::EntityPtr& targetEntity = spaceMap.getEntity( targetId );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& targetEntity = spaceMap.getEntity( targetId );
 
         if ( agentEntity->distanceTo( *targetEntity ) < 4000 ) {
             return true;
@@ -1386,7 +1386,7 @@ void ScavengerHuntAgentModeHandler::updateStartPositionInCustomPath( void )
     try {
         std::stringstream output;
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
         output << agentEntity->getPosition( ).x << " " << agentEntity->getPosition( ).y << ";";
 
@@ -1406,17 +1406,17 @@ void ScavengerHuntAgentModeHandler::setFollowingPosition( void )
 {
     try {
         const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-        const Spatial::EntityPtr& targetEntity = spaceMap.getEntity( getPropertyValue( "customObject" ) );
-        const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
+        const spatial::EntityPtr& targetEntity = spaceMap.getEntity( getPropertyValue( "customObject" ) );
+        const spatial::EntityPtr& agentEntity = spaceMap.getEntity( this->agent->getPetId( ) );
 
-        Spatial::Point finalPosition( agentEntity->getPosition( ).x, agentEntity->getPosition( ).y );
+        spatial::Point finalPosition( agentEntity->getPosition( ).x, agentEntity->getPosition( ).y );
 
-        Spatial::Math::Vector3 direction = agentEntity->getPosition( ) - targetEntity->getPosition( );
+        spatial::math::Vector3 direction = agentEntity->getPosition( ) - targetEntity->getPosition( );
 
         if ( direction.length( ) > 2000.0 ) {
             direction.normalise( );
-            Spatial::Math::Vector3 position = (direction * 2000.0) + targetEntity->getPosition( );
-            finalPosition = spaceMap.getNearestFreePoint( Spatial::Point( position.x, position.y ) );
+            spatial::math::Vector3 position = (direction * 2000.0) + targetEntity->getPosition( );
+            finalPosition = spaceMap.getNearestFreePoint( spatial::Point( position.x, position.y ) );
         } // if
 
         std::stringstream output;

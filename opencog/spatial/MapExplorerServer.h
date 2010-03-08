@@ -29,8 +29,10 @@
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace opencog {
-    namespace spatial {
+namespace opencog 
+{
+    namespace spatial 
+    {
 
         /**
          * MapExplorer is a tool designed to visualize the state of
@@ -41,7 +43,8 @@ namespace opencog {
          * all the connected clients will receive an updated copy of
          * that.
          */
-        class MapExplorerServer {
+        class MapExplorerServer 
+        {
         public:
             /**
              * This constructor receives a host and a port as arguments
@@ -85,7 +88,7 @@ namespace opencog {
              * 
              * @param map A new LocalSpaceMap
              */
-            void sendMap( const Spatial::LocalSpaceMap2D& map );
+            void sendMap( const spatial::LocalSpaceMap2D& map );
             
         private:
             typedef boost::shared_ptr<boost::asio::ip::tcp::socket> SocketPtr;
@@ -120,7 +123,7 @@ namespace opencog {
             size_t latestMapHash;
             
         };
-    };
-};
+    }; // spatial
+}; // opencog
 
 #endif // MAPEXPLORERSERVER_H

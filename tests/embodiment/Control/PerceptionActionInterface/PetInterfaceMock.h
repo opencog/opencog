@@ -53,13 +53,14 @@ private:
 using namespace behavior;
 using namespace PerceptionActionInterface;
 using namespace opencog;
+using namespace opencog::spatial;
 using namespace std;
 
 
 class PetInterfaceMock: public Control::PetInterface
 {
 
-    std::pair<std::string, Spatial::Point> latestGotoTarget;
+    std::pair<std::string, spatial::Point> latestGotoTarget;
     string pet;
     string petName;
     string ownerId;
@@ -244,10 +245,10 @@ public:
         return true;
     }
     void getHighLTIObjects(HandleSeq& highLTIObjects) {};
-    void setLatestGotoTarget( const std::pair<std::string, Spatial::Point>& target ) {
+    void setLatestGotoTarget( const std::pair<std::string, spatial::Point>& target ) {
         cout << "PetInterfaceMock: setLatestGotoTarget!" << endl;
     }
-    const std::pair<std::string, Spatial::Point>& getLatestGotoTarget( void ) {
+    const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) {
         cout << "PetInterfaceMock: getLatestGotoTarget!" << endl;
         return this->latestGotoTarget;
     }

@@ -42,68 +42,72 @@
  *   asc.setStartAndGoalStates(nodeStart,nodeEnd);
  *    int SearchResult = asc.findPath();
  *
- *    vector<Spatial::GridPoint> solution = asc.getSolutionGridPoints();
+ *    vector<spatial::GridPoint> solution = asc.getSolutionGridPoints();
  *      or
- *    vector<Spatial::Point> solution = asc.getSolutionPoints()
+ *    vector<spatial::Point> solution = asc.getSolutionPoints()
  *
  */
 
 #ifndef _SPATIAL_ASTARCONTROLLER_H_
 #define _SPATIAL_ASTARCONTROLLER_H_
 
-#include "LSMap2DSearchNode.h"
+#include <opencog/spatial/LSMap2DSearchNode.h>
 
 #define MAX_SEARCH_NODES 20000
 #define DEBUG_LISTS 0
 #define DEBUG_LIST_LENGTHS_ONLY 0
 #define DISPLAY_SOLUTION 0
 
-namespace Spatial
+namespace opencog
 {
+    namespace spatial
+    {
 
-class AStarController
-{
+        class AStarController
+        {
 
-    //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
-    typedef LocalSpaceMap2D Map;
-    typedef LSMap2DSearchNode MapSearchNode;
+            //typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
+            typedef LocalSpaceMap2D Map;
+            typedef LSMap2DSearchNode MapSearchNode;
 
-public:
-    AStarSearch<MapSearchNode> *astarsearch;
+        public:
+            AStarSearch<MapSearchNode> *astarsearch;
 
-    AStarController();
-    ~AStarController();
+            AStarController();
+            ~AStarController();
 
-    void setMap(Map *map);
-    void setStartAndGoalStates(MapSearchNode &startNode, MapSearchNode &goalNode);
+            void setMap(Map *map);
+            void setStartAndGoalStates(MapSearchNode &startNode, MapSearchNode &goalNode);
 
-    //Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
-    void resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode);
+            //Create new astarsearch with same start and goal nodes, for testing and comparing different heuristics
+            void resetSearch(MapSearchNode &startNode, MapSearchNode &goalNode);
 
-    /**
-     * Calculates shortest route path
-     * @return int SearchState code (defined in stlastar.h)
-     *   enum {
-     *    SEARCH_STATE_NOT_INITIALISED,
-     *   SEARCH_STATE_SEARCHING,
-     *   SEARCH_STATE_SUCCEEDED,
-     *   SEARCH_STATE_FAILED,
-     *   SEARCH_STATE_OUT_OF_MEMORY,
-     *   SEARCH_STATE_INVALID }
-     */
-    unsigned int findPath();
+            /**
+             * Calculates shortest route path
+             * @return int SearchState code (defined in stlastar.h)
+             *   enum {
+             *    SEARCH_STATE_NOT_INITIALISED,
+             *   SEARCH_STATE_SEARCHING,
+             *   SEARCH_STATE_SUCCEEDED,
+             *   SEARCH_STATE_FAILED,
+             *   SEARCH_STATE_OUT_OF_MEMORY,
+             *   SEARCH_STATE_INVALID }
+             */
+            unsigned int findPath();
 
-    void debugLists(unsigned int SearchSteps);
+            void debugLists(unsigned int SearchSteps);
 
-    //get solution path as vector of grid points
-    vector<Spatial::GridPoint> getSolutionGridPoints();
-    //get solution path as vector of distance points
-    vector<Spatial::Point> getSolutionPoints();
-    vector<Spatial::Point> getShortestCalculatedPath();
+            //get solution path as vector of grid points
+            vector<spatial::GridPoint> getSolutionGridPoints();
+            //get solution path as vector of distance points
+            vector<spatial::Point> getSolutionPoints();
+            vector<spatial::Point> getShortestCalculatedPath();
 
-    //MapSearchNode nodeStart, nodeEnd;
+            //MapSearchNode nodeStart, nodeEnd;
 
-}; //class
-}  //namespace
+        };
+
+    } // spatial
+} // opencog
 
 #endif /*_SPATIAL_ASTARCONTROLLER_H_*/

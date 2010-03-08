@@ -21,14 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LocalSpaceMap2D.h"
+#include <opencog/spatial/LocalSpaceMap2D.h>
 
-#include "TB_ASSERT.h"
+#include <opencog/spatial/TB_ASSERT.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 
-#include "Math/Vector3.h"
-#include "StaticEntity.h"
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/StaticEntity.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -37,8 +37,8 @@
 
 #define HUGE_DISTANCE 999999.9
 
-using namespace Spatial;
 using namespace opencog;
+using namespace opencog::spatial;
 
 const double LocalSpaceMap2D::NEXT_FACTOR = 0.1;
 const double LocalSpaceMap2D::NEAR_FACTOR = 0.003125;
@@ -139,13 +139,13 @@ bool LocalSpaceMap2D::addToSuperEntity( const EntityPtr& entity )
  * Private Functions
  * ----------------------------------------------------------------------------
  */
-bool LocalSpaceMap2D::outsideMap( const std::vector<Spatial::Math::LineSegment>& segments )
+bool LocalSpaceMap2D::outsideMap( const std::vector<spatial::math::LineSegment>& segments )
 {
     bool outside = true;
 
     unsigned int i;
     for ( i = 0; outside && i < segments.size( ); ++i ) {
-        const Math::Vector3& point = segments[i].pointA;
+        const math::Vector3& point = segments[i].pointA;
 
         if ( point.x  >= _xMin && point.x  <= _xMax && point.y >= _yMin && point.y <= _yMax ) {
             outside = false;
@@ -172,9 +172,9 @@ LocalSpaceMap2D::LocalSpaceMap2D(const LocalSpaceMap2D& other)
  * Public Functions
  * ----------------------------------------------------------------------------
  */
-LocalSpaceMap2D::LocalSpaceMap2D(Spatial::Distance xMin, Spatial::Distance xMax, unsigned int xDim,
-                                 Spatial::Distance yMin, Spatial::Distance yMax, unsigned int yDim,
-                                 Spatial::Distance radius) :
+LocalSpaceMap2D::LocalSpaceMap2D(spatial::Distance xMin, spatial::Distance xMax, unsigned int xDim,
+                                 spatial::Distance yMin, spatial::Distance yMax, unsigned int yDim,
+                                 spatial::Distance radius) :
         _xMin(xMin), _xMax(xMax), _xDim(xDim),
         _yMin(yMin), _yMax(yMax), _yDim(yDim),
         _radius(radius)
@@ -259,7 +259,7 @@ void LocalSpaceMap2D::save( FILE* fp ) const
         fwrite(id.c_str(), sizeof(char), length, fp);
 
 
-        Spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
+        spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
                                           it->second->getPosition( ).y,
                                           it->second->getPosition( ).z,
                                           it->second->getLength( ),
@@ -269,7 +269,7 @@ void LocalSpaceMap2D::save( FILE* fp ) const
 
         bool isObstacle = it->second->getBooleanProperty( Entity::OBSTACLE );
 
-        fwrite(&metaData, sizeof(Spatial::ObjectMetaData), 1, fp);
+        fwrite(&metaData, sizeof(spatial::ObjectMetaData), 1, fp);
         fwrite(&isObstacle, sizeof(bool), 1, fp );
     } // for
 }
@@ -288,8 +288,8 @@ void LocalSpaceMap2D::load( FILE* fp )
         fread(id, sizeof(char), length, fp);
         id[length] = '\0';
 
-        Spatial::ObjectMetaData metadata;
-        fread(&metadata, sizeof(Spatial::ObjectMetaData), 1, fp);
+        spatial::ObjectMetaData metadata;
+        fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
 
         bool isObstacle;
         fread(&isObstacle, sizeof(bool), 1, fp);
@@ -300,22 +300,22 @@ void LocalSpaceMap2D::load( FILE* fp )
     } // for
 }
 
-Spatial::Distance LocalSpaceMap2D::xGridWidth() const
+spatial::Distance LocalSpaceMap2D::xGridWidth() const
 {
     return (_xMax -_xMin) / Distance(_xDim);
 }
 
-Spatial::Distance LocalSpaceMap2D::yGridWidth() const
+spatial::Distance LocalSpaceMap2D::yGridWidth() const
 {
     return (_yMax -_yMin) / Distance(_yDim);
 }
 
-Spatial::Distance LocalSpaceMap2D::xMin() const
+spatial::Distance LocalSpaceMap2D::xMin() const
 {
     return _xMin;
 }
 
-Spatial::Distance LocalSpaceMap2D::xMax() const
+spatial::Distance LocalSpaceMap2D::xMax() const
 {
     return _xMax;
 }
@@ -325,12 +325,12 @@ unsigned int LocalSpaceMap2D::xDim() const
     return _xDim;
 }
 
-Spatial::Distance LocalSpaceMap2D::yMin() const
+spatial::Distance LocalSpaceMap2D::yMin() const
 {
     return _yMin;
 }
 
-Spatial::Distance LocalSpaceMap2D::yMax() const
+spatial::Distance LocalSpaceMap2D::yMax() const
 {
     return _yMax;
 }
@@ -340,17 +340,17 @@ unsigned int LocalSpaceMap2D::yDim() const
     return _yDim;
 }
 
-Spatial::Distance LocalSpaceMap2D::diagonalSize() const
+spatial::Distance LocalSpaceMap2D::diagonalSize() const
 {
     return _diagonalSize;
 }
 
-Spatial::Distance LocalSpaceMap2D::radius() const
+spatial::Distance LocalSpaceMap2D::radius() const
 {
     return _radius;
 }
 
-bool LocalSpaceMap2D::illegal(const Spatial::Point& pt) const
+bool LocalSpaceMap2D::illegal(const spatial::Point& pt) const
 {
     if (pt.first < _xMin || pt.first > _xMax || pt.second < _yMin || pt.second > _yMax) {
         logger().fine("LocalSpaceMap - illegal(pt = (%f, %f)): out of the map!", pt.first, pt.second);
@@ -359,7 +359,7 @@ bool LocalSpaceMap2D::illegal(const Spatial::Point& pt) const
     return gridIllegal(snap(pt));
 }
 
-Spatial::Point LocalSpaceMap2D::getNearestFreePoint(const Spatial::Point& pt) const throw (opencog::RuntimeException, std::bad_exception)
+spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) const throw (opencog::RuntimeException, std::bad_exception)
 {
     GridPoint gp = snap(pt);
     if (!gridIllegal(gp)) {
@@ -442,7 +442,7 @@ Spatial::Point LocalSpaceMap2D::getNearestFreePoint(const Spatial::Point& pt) co
     return nearestFreePoint;
 }
 
-bool LocalSpaceMap2D::gridIllegal(const Spatial::GridPoint& gp) const
+bool LocalSpaceMap2D::gridIllegal(const spatial::GridPoint& gp) const
 {
     return gridIllegal(gp.first, gp.second);
 }
@@ -458,9 +458,9 @@ bool LocalSpaceMap2D::gridIllegal(unsigned int i, unsigned int j) const
     return result;
 }
 
-bool LocalSpaceMap2D::gridOccupied(const Spatial::GridPoint& gp) const
+bool LocalSpaceMap2D::gridOccupied(const spatial::GridPoint& gp) const
 {
-    Spatial::GridMap::const_iterator itr = _grid.find(gp);
+    spatial::GridMap::const_iterator itr = _grid.find(gp);
     return (itr != _grid.end() && !(itr->second.empty()));
 }
 
@@ -469,9 +469,9 @@ bool LocalSpaceMap2D::gridOccupied(unsigned int i, unsigned int j) const
     return (gridOccupied(GridPoint(i, j)));
 }
 
-bool LocalSpaceMap2D::gridOccupied_nonObstacle(const Spatial::GridPoint& gp) const
+bool LocalSpaceMap2D::gridOccupied_nonObstacle(const spatial::GridPoint& gp) const
 {
-    Spatial::GridMap::const_iterator itr = _grid_nonObstacle.find(gp);
+    spatial::GridMap::const_iterator itr = _grid_nonObstacle.find(gp);
     return (itr != _grid_nonObstacle.end() && !(itr->second.empty()));
 }
 
@@ -480,7 +480,7 @@ bool LocalSpaceMap2D::gridOccupied_nonObstacle(unsigned int i, unsigned int j) c
     return (gridOccupied_nonObstacle(GridPoint(i, j)));
 }
 
-bool LocalSpaceMap2D::containsObject(const Spatial::ObjectID& id) const
+bool LocalSpaceMap2D::containsObject(const spatial::ObjectID& id) const
 {
     try {
         getEntity( id );
@@ -490,7 +490,7 @@ bool LocalSpaceMap2D::containsObject(const Spatial::ObjectID& id) const
     } // catch
 }
 
-bool LocalSpaceMap2D::isObstacle(const Spatial::ObjectID& id) const
+bool LocalSpaceMap2D::isObstacle(const spatial::ObjectID& id) const
 {
     try {
         return getEntity( id )->getBooleanProperty( Entity::OBSTACLE );
@@ -499,12 +499,12 @@ bool LocalSpaceMap2D::isObstacle(const Spatial::ObjectID& id) const
     } // catch
 }
 
-bool LocalSpaceMap2D::isNonObstacle(const Spatial::ObjectID& id) const
+bool LocalSpaceMap2D::isNonObstacle(const spatial::ObjectID& id) const
 {
     return !isObstacle( id );
 }
 
-const std::vector<Spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const Spatial::ObjectID& id) const  throw(opencog::NotFoundException)
+const std::vector<spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const spatial::ObjectID& id) const  throw(opencog::NotFoundException)
 {
     long idHash = boost::hash<std::string>()( id );
     LongGridPointVectorHashMap::const_iterator it = this->gridPoints.find( idHash );
@@ -514,7 +514,7 @@ const std::vector<Spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const Sp
     return it->second;
 }
 
-Spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const Spatial::Point& referencePoint, const Spatial::ObjectID& objectID ) const throw (opencog::NotFoundException)
+spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const spatial::Point& referencePoint, const spatial::ObjectID& objectID ) const throw (opencog::NotFoundException)
 {
 
     if ( !containsObject( objectID ) ) {
@@ -522,28 +522,28 @@ Spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const Spatial::Point& ref
     } // if
 
     const EntityPtr& entity = getEntity( objectID );
-    const Math::BoundingBox& bb = entity->getBoundingBox( );
+    const math::BoundingBox& bb = entity->getBoundingBox( );
 
-    std::vector<Math::LineSegment> bottomSegments;
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
-
-
+    std::vector<math::LineSegment> bottomSegments;
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
 
-    Math::Vector3 point( referencePoint.first, referencePoint.second );
+
+
+    math::Vector3 point( referencePoint.first, referencePoint.second );
     //const ObjectMetaData& md = getMetaData(objectID);
-    //Math::Vector3 nearestPoint( md.centerX, md.centerY);
-    Math::Vector3 nearestPoint( entity->getPosition( ) );
+    //math::Vector3 nearestPoint( md.centerX, md.centerY);
+    math::Vector3 nearestPoint( entity->getPosition( ) );
 
     double minDistance = std::numeric_limits<double>::max( );
 
-    //const std::vector<Spatial::Math::LineSegment>& segments = it->second.borderSegments;
+    //const std::vector<spatial::math::LineSegment>& segments = it->second.borderSegments;
     for ( unsigned int i = 0; i < bottomSegments.size( ); ++i ) {
-        //Math::Vector3 candidatePoint = getNearestPointInSegment( point, segments[i] );
-        Math::Vector3 candidatePoint = bottomSegments[i].nearestPointInSegment( point );
+        //math::Vector3 candidatePoint = getNearestPointInSegment( point, segments[i] );
+        math::Vector3 candidatePoint = bottomSegments[i].nearestPointInSegment( point );
         double candidateDistance = ( candidatePoint - point ).length( );
 
         if ( candidateDistance < minDistance ) {
@@ -551,7 +551,7 @@ Spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const Spatial::Point& ref
             nearestPoint = candidatePoint;
         } // if
     } // for
-    return Spatial::Point( nearestPoint.x, nearestPoint.y );
+    return spatial::Point( nearestPoint.x, nearestPoint.y );
 }
 
 void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
@@ -560,7 +560,7 @@ void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
     LongEntityPtrHashMap::const_iterator it;
 
     for ( it = otherMap.entities.begin( ); it != otherMap.entities.end( ); ++it ) {
-        Spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
+        spatial::ObjectMetaData metaData( it->second->getPosition( ).x,
                                           it->second->getPosition( ).y,
                                           it->second->getPosition( ).z,
                                           it->second->getLength( ),
@@ -571,7 +571,7 @@ void LocalSpaceMap2D::copyObjects(const LocalSpaceMap2D& otherMap)
     } // for
 }
 
-void LocalSpaceMap2D::removeObject(const Spatial::ObjectID& id)
+void LocalSpaceMap2D::removeObject(const spatial::ObjectID& id)
 {
     logger().fine("LocalSpaceMap2D::removeObject(%s)", id.c_str());
 
@@ -646,9 +646,9 @@ void LocalSpaceMap2D::removeObject(const Spatial::ObjectID& id)
 
 }
 
-Distance LocalSpaceMap2D::minDist(const Spatial::ObjectID& id, const Spatial::Point& p) const
+Distance LocalSpaceMap2D::minDist(const spatial::ObjectID& id, const spatial::Point& p) const
 {
-    std::vector<Spatial::Point> all;
+    std::vector<spatial::Point> all;
     allPoints(id, back_inserter(all));
     if (all.empty()) {
         logger().error(
@@ -660,7 +660,7 @@ Distance LocalSpaceMap2D::minDist(const Spatial::ObjectID& id, const Spatial::Po
     }
     //TB_ASSERT(!all.empty());
     Distance d = eucDist(p, all.front());
-    for (std::vector<Spatial::Point>::const_iterator it = ++all.begin();it != all.end();++it) {
+    for (std::vector<spatial::Point>::const_iterator it = ++all.begin();it != all.end();++it) {
         d = std::min(d, eucDist(p, *it));
     }
     return d;
@@ -671,18 +671,18 @@ bool LocalSpaceMap2D::coordinatesAreOnGrid(unsigned int x, unsigned int y) const
     return (x < _xDim && y < _yDim);
 }
 
-Spatial::Point LocalSpaceMap2D::nearbyPoint(const Spatial::Point& src, const Spatial::ObjectID& id) const
+spatial::Point LocalSpaceMap2D::nearbyPoint(const spatial::Point& src, const spatial::ObjectID& id) const
 {
 
     // getNearestObjectPoint will throw an exception if the object isn't inside the map
-    Spatial::Point closestPoint = getNearestObjectPoint( src, id );
+    spatial::Point closestPoint = getNearestObjectPoint( src, id );
 
     return getNearestFreePoint(closestPoint); //Suggested by Welter
     //return findFree(closestPoint, Point(src.first - closestPoint.first,
     //         src.second - closestPoint.second));
 }
 
-Spatial::Point LocalSpaceMap2D::behindPoint(const Spatial::Point& src, const Spatial::ObjectID& id) const
+spatial::Point LocalSpaceMap2D::behindPoint(const spatial::Point& src, const spatial::ObjectID& id) const
 {
     Point loc = centerOf(id);
 
@@ -693,14 +693,14 @@ Spatial::Point LocalSpaceMap2D::behindPoint(const Spatial::Point& src, const Spa
     return findFree(loc, Point(loc.first - src.first, loc.second - src.second));
 }
 
-Spatial::Point LocalSpaceMap2D::findFree(const Spatial::Point& p, const Spatial::Point& direction) const
+spatial::Point LocalSpaceMap2D::findFree(const spatial::Point& p, const spatial::Point& direction) const
 {
     //normalize the step
-    Spatial::Distance d = 2.0 * eucDist(Point(0, 0), direction) / (xGridWidth() + yGridWidth());
-    Spatial::Point normDirection(direction.first / d, direction.second / d);
-    Spatial::Point result = p;
+    spatial::Distance d = 2.0 * eucDist(Point(0, 0), direction) / (xGridWidth() + yGridWidth());
+    spatial::Point normDirection(direction.first / d, direction.second / d);
+    spatial::Point result = p;
 
-    Spatial::GridPoint g = snap(result);
+    spatial::GridPoint g = snap(result);
     while (gridIllegal(g)) {
         result.first += normDirection.first;
         result.second += normDirection.second;
@@ -714,9 +714,9 @@ Spatial::Point LocalSpaceMap2D::findFree(const Spatial::Point& p, const Spatial:
     return result;
 }
 
-Spatial::Point LocalSpaceMap2D::centerOf(const Spatial::ObjectID& id) const
+spatial::Point LocalSpaceMap2D::centerOf(const spatial::ObjectID& id) const
 {
-    Spatial::Point center(0, 0);
+    spatial::Point center(0, 0);
     try {
         const EntityPtr& entity = getEntity( id );
         center.first = entity->getPosition( ).x;
@@ -727,31 +727,31 @@ Spatial::Point LocalSpaceMap2D::centerOf(const Spatial::ObjectID& id) const
     return center;
 }
 
-Spatial::GridPoint LocalSpaceMap2D::snap(const Spatial::Point& p) const
+spatial::GridPoint LocalSpaceMap2D::snap(const spatial::Point& p) const
 {
-    Spatial::GridPoint gp =
-        Spatial::GridPoint(p.first <= _xMin ? 0 : p.first >= _xMax ? _xDim - 1 :
+    spatial::GridPoint gp =
+        spatial::GridPoint(p.first <= _xMin ? 0 : p.first >= _xMax ? _xDim - 1 :
                            (unsigned int)((p.first - _xMin) / xGridWidth()),
                            p.second <= _yMin ? 0 : p.second >= _yMax ? _yDim - 1 :
                            (unsigned int)((p.second - _yMin) / yGridWidth()));
     return gp;
 }
 
-Spatial::Point LocalSpaceMap2D::unsnap(const Spatial::GridPoint& g) const
+spatial::Point LocalSpaceMap2D::unsnap(const spatial::GridPoint& g) const
 {
-    return Spatial::Point(Spatial::Distance(g.first) * xGridWidth() + _xMin + xGridWidth() / 2,
-                          Spatial::Distance(g.second) * yGridWidth() + _yMin + yGridWidth() / 2);
+    return spatial::Point(spatial::Distance(g.first) * xGridWidth() + _xMin + xGridWidth() / 2,
+                          spatial::Distance(g.second) * yGridWidth() + _yMin + yGridWidth() / 2);
 }
 
-Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point& position, float distance, const Spatial::Point& startDirection ) const throw (opencog::NotFoundException)
+spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const spatial::Point& position, float distance, const spatial::Point& startDirection ) const throw (opencog::NotFoundException)
 {
     // do a raytrace to
     unsigned int step = 5;
-    Math::Quaternion rotationStep( Math::Vector3::Z_UNIT, step * M_PI / 180.0 );
+    math::Quaternion rotationStep( math::Vector3::Z_UNIT, step * M_PI / 180.0 );
 
-    Spatial::Math::Vector3 rayDirection( startDirection.first, startDirection.second );
+    spatial::math::Vector3 rayDirection( startDirection.first, startDirection.second );
     rayDirection.normalise( );
-    Spatial::GridPoint freeGridPoint;
+    spatial::GridPoint freeGridPoint;
     float freeGridPointDistance = 0;
     bool freeGridPointFound = false;
     float minimalDistanceThreshold = (distance * 0.90); // 90% of the distance is enough
@@ -759,13 +759,13 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
     unsigned int i;
     for ( i = 0; i < 360; i += step ) {
 
-        Spatial::Math::Vector3 borderPoint = ( rayDirection * distance ) +
-                                             Spatial::Math::Vector3( position.first, position.second );
+        spatial::math::Vector3 borderPoint = ( rayDirection * distance ) +
+                                             spatial::math::Vector3( position.first, position.second );
 
-        Spatial::Point endPosition( borderPoint.x, borderPoint.y );
+        spatial::Point endPosition( borderPoint.x, borderPoint.y );
 
         // try to find a valid position to start ray tracing
-        Spatial::Point startPosition = findFree( position, Spatial::Point( rayDirection.x, rayDirection.y ) );
+        spatial::Point startPosition = findFree( position, spatial::Point( rayDirection.x, rayDirection.y ) );
 
         logger().debug("LocalSpaceMap2D - rayDirection(%f,%f) target original position(%f, %f) target free position(%f, %f)", rayDirection.x, rayDirection.y, borderPoint.x, borderPoint.y, startPosition.first, startPosition.second );
 
@@ -774,7 +774,7 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
             continue;
         } // if
 
-        Spatial::GridPoint collisionGridPoint;
+        spatial::GridPoint collisionGridPoint;
 
         bool collided = false;
         rayTrace( snap( startPosition ), snap( endPosition ), CollisionDetector( const_cast<LocalSpaceMap2D*>( this ), collisionGridPoint, collided ) );
@@ -814,11 +814,11 @@ Spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const Spatial::Point
 
 }
 
-void LocalSpaceMap2D::calculateSegmentGridPoints( std::vector<Spatial::GridPoint>& points,  const Math::LineSegment& segment )
+void LocalSpaceMap2D::calculateSegmentGridPoints( std::vector<spatial::GridPoint>& points,  const math::LineSegment& segment )
 {
 
-    Spatial::GridPoint startPoint( snap( Spatial::Point( segment.pointA.x, segment.pointA.y ) ) );
-    Spatial::GridPoint endPoint( snap( Spatial::Point( segment.pointB.x, segment.pointB.y ) ) );
+    spatial::GridPoint startPoint( snap( spatial::Point( segment.pointA.x, segment.pointA.y ) ) );
+    spatial::GridPoint endPoint( snap( spatial::Point( segment.pointB.x, segment.pointB.y ) ) );
 
     logger().debug("LocalSpaceMap - Processing segment points grid points: start[%d %d] end[%d %d]", startPoint.first, startPoint.second, endPoint.first, endPoint.second );
 
@@ -826,7 +826,7 @@ void LocalSpaceMap2D::calculateSegmentGridPoints( std::vector<Spatial::GridPoint
 
 }
 
-void LocalSpaceMap2D::calculateObjectPoints( std::vector<Spatial::GridPoint>& points, const std::vector<Math::LineSegment>& segments )
+void LocalSpaceMap2D::calculateObjectPoints( std::vector<spatial::GridPoint>& points, const std::vector<math::LineSegment>& segments )
 {
 
     if ( segments.size( ) != 4 ) {
@@ -842,7 +842,7 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<Spatial::GridPoint>& po
             continue;
         } // if
 
-        std::vector<Spatial::GridPoint> segmentPoints;
+        std::vector<spatial::GridPoint> segmentPoints;
         calculateSegmentGridPoints( segmentPoints, segments[i] );
 
         unsigned int j;
@@ -870,20 +870,20 @@ void LocalSpaceMap2D::calculateObjectPoints( std::vector<Spatial::GridPoint>& po
     for ( it = limits.begin( ); it != limits.end( ); ++it ) {
 
         if ( it->second.first != it->second.second ) {
-            Spatial::Point pointA = unsnap( GridPoint( it->first, it->second.first ) );
-            Spatial::Point pointB = unsnap( GridPoint( it->first, it->second.second ) );
-            Math::LineSegment segment( Math::Vector3( pointA.first, pointA.second ),
-                                       Math::Vector3( pointB.first, pointB.second ) );
+            spatial::Point pointA = unsnap( GridPoint( it->first, it->second.first ) );
+            spatial::Point pointB = unsnap( GridPoint( it->first, it->second.second ) );
+            math::LineSegment segment( math::Vector3( pointA.first, pointA.second ),
+                                       math::Vector3( pointB.first, pointB.second ) );
 
             calculateSegmentGridPoints( points, segment );
         } else {
-            points.push_back( Spatial::GridPoint( it->first, it->second.first ) );
+            points.push_back( spatial::GridPoint( it->first, it->second.first ) );
         } // else
     } // for
 
 }
 
-void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle )
+void LocalSpaceMap2D::addObject( const spatial::ObjectID& id, const spatial::ObjectMetaData& metadata, bool isObstacle )
 {
 
     // TODO: Rely on hash code of the ID as primary key for internal structures
@@ -892,20 +892,20 @@ void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::Obj
     // by using simpler types for IDs (Atom Handles, for example) and replacing
     // idHash by these simpler IDs in these internal structures.
     long idHash = boost::hash<std::string>()( id );
-    EntityPtr entity( new StaticEntity( idHash, id, Math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), Math::Dimension3( metadata.width, metadata.height, metadata.length ), Math::Quaternion( Math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
+    EntityPtr entity( new StaticEntity( idHash, id, math::Vector3( metadata.centerX, metadata.centerY, metadata.centerZ ), math::Dimension3( metadata.width, metadata.height, metadata.length ), math::Quaternion( math::Vector3::Z_UNIT, metadata.yaw ), _radius ) );
     entity->setProperty( Entity::OBSTACLE, isObstacle );
 
     if ( isObstacle ) {
         addToSuperEntity( entity );
     } // if
 
-    const Math::BoundingBox& bb = entity->getBoundingBox( );
+    const math::BoundingBox& bb = entity->getBoundingBox( );
 
-    std::vector<Math::LineSegment> bottomSegments;
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
-    bottomSegments.push_back( Math::LineSegment( bb.getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
+    std::vector<math::LineSegment> bottomSegments;
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
+    bottomSegments.push_back( math::LineSegment( bb.getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
     calculateObjectPoints( gridPoints[idHash], bottomSegments );
     this->entities.insert( LongEntityPtrHashMap::value_type( idHash, entity ) );
@@ -926,12 +926,12 @@ void LocalSpaceMap2D::addObject( const Spatial::ObjectID& id, const Spatial::Obj
 
 }
 
-void LocalSpaceMap2D::updateObject( const Spatial::ObjectID& id, const Spatial::ObjectMetaData& metadata, bool isObstacle )
+void LocalSpaceMap2D::updateObject( const spatial::ObjectID& id, const spatial::ObjectMetaData& metadata, bool isObstacle )
 {
 
     try {
         const EntityPtr& entity = getEntity( id );
-        Spatial::ObjectMetaData metaData( entity->getPosition( ).x,
+        spatial::ObjectMetaData metaData( entity->getPosition( ).x,
                                           entity->getPosition( ).y,
                                           entity->getPosition( ).z,
                                           entity->getLength( ),
@@ -971,7 +971,7 @@ const EntityPtr& LocalSpaceMap2D::getEntity( long id ) const throw (opencog::Not
 }
 
 
-bool LocalSpaceMap2D::belongsToSuperEntity( const Spatial::ObjectID& id ) const
+bool LocalSpaceMap2D::belongsToSuperEntity( const spatial::ObjectID& id ) const
 {
     std::list<SuperEntityPtr>::const_iterator it;
     long idHash = boost::hash<std::string>()( id );
@@ -984,7 +984,7 @@ bool LocalSpaceMap2D::belongsToSuperEntity( const Spatial::ObjectID& id ) const
     return false;
 }
 
-const SuperEntityPtr& LocalSpaceMap2D::getSuperEntityWhichContains( const Spatial::ObjectID& id ) const throw(opencog::NotFoundException)
+const SuperEntityPtr& LocalSpaceMap2D::getSuperEntityWhichContains( const spatial::ObjectID& id ) const throw(opencog::NotFoundException)
 {
     std::list<SuperEntityPtr>::const_iterator it;
     long idHash = boost::hash<std::string>()( id );
@@ -1003,10 +1003,10 @@ const SuperEntityPtr& LocalSpaceMap2D::getSuperEntityWhichContains( const Spatia
  * Struct rec_find
  * -----------------------------------------------------------------------------
  */
-rec_find::rec_find(const Spatial::GridPoint& current,
-                   const Spatial::GridMap& grid,
-                   Spatial::ObjectIDSet& out,
-                   const Spatial::LocalSpaceMap2D& parent) :
+rec_find::rec_find(const spatial::GridPoint& current,
+                   const spatial::GridMap& grid,
+                   spatial::ObjectIDSet& out,
+                   const spatial::LocalSpaceMap2D& parent) :
         _current(current), _g(current), _grid(grid), _out(out), _parent(&parent)
 {
 
@@ -1052,13 +1052,13 @@ void rec_find::check_grid()
     // if there is something in this grid
 
 
-    Spatial::GridMap::const_iterator it = _grid.find(_current);
+    spatial::GridMap::const_iterator it = _grid.find(_current);
 
     if (it != _grid.end())
         std::copy(it->second.begin(), it->second.end(), std::inserter(_out, _out.begin()));
 }
 
-void rec_find::johnnie_walker(Spatial::Distance d)
+void rec_find::johnnie_walker(spatial::Distance d)
 {
 
     check_grid();
@@ -1214,8 +1214,8 @@ LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
     unsigned int i;
     for( i = 0; i < numberOfObjects; ++i ) {
         std::string name;
-        Math::Vector3 position( 0, 0, 0);
-        Math::Dimension3 dimension;
+        math::Vector3 position( 0, 0, 0);
+        math::Dimension3 dimension;
         double orientationX = 0, orientationY = 0, orientationZ = 0, orientationW = 0;
         bool obstacle = false;
         parser >> name 
@@ -1223,8 +1223,8 @@ LocalSpaceMap2D* LocalSpaceMap2D::fromString( const std::string& map )
                >> dimension.length >> dimension.width >> dimension.height
                >> orientationX >> orientationY >> orientationZ >> orientationW
                >> obstacle;
-        Math::Quaternion orientation( orientationX, orientationY, orientationZ, orientationW );
-        Spatial::ObjectMetaData metaData( position.x, 
+        math::Quaternion orientation( orientationX, orientationY, orientationZ, orientationW );
+        spatial::ObjectMetaData metaData( position.x, 
                                           position.y, 
                                           position.z,
                                           dimension.length,

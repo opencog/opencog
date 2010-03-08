@@ -34,7 +34,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SpaceServer.h>
-#include <opencog/spatial/Math/Vector3.h>
+#include <opencog/spatial/math/Vector3.h>
 
 #include "atom_types.h"
 
@@ -755,7 +755,7 @@ public:
      * @param objectID The id of a moving object
      * @return A 3D Vector(x,y,z) indicating the current object velocity
      */
-    static Spatial::Math::Vector3 getMostRecentObjectVelocity( const AtomSpace& atomSpace,
+    static spatial::math::Vector3 getMostRecentObjectVelocity( const AtomSpace& atomSpace,
             const std::string& objectId,
             unsigned long afterTimestamp = 0 );
 

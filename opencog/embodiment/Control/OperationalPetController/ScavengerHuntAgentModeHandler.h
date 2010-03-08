@@ -93,7 +93,7 @@ public:
     void update( void );
 
 protected:
-    Spatial::VisibilityMap* getVisibilityMap( void );
+    spatial::VisibilityMap* getVisibilityMap( void );
 
 
     bool isThereObjectToInspectInsideTargetArea( void );
@@ -129,11 +129,11 @@ protected:
 
 
     std::string computeWalkAroundWaypoints( const std::string& entityId );
-    std::string computeWalkAroundWaypoints( const Spatial::Math::Vector3& targetPosition );
+    std::string computeWalkAroundWaypoints( const spatial::math::Vector3& targetPosition );
 
     const std::string modeName;
     Pet* agent;
-    Spatial::VisibilityMap* visibilityMap;
+    spatial::VisibilityMap* visibilityMap;
     int agentState;
     int previousAgentState;
 

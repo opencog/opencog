@@ -24,9 +24,11 @@
 #ifndef _SPATIAL_HUMANOIDAGENT_H_
 #define _SPATIAL_HUMANOIDAGENT_H_
 
-#include "Agent.h"
+#include <opencog/spatial/Agent.h>
 
-namespace Spatial
+namespace opencog
+{
+namespace spatial
 {
 
 
@@ -40,7 +42,7 @@ public:
     inline HumanoidAgent( const HumanoidAgent& agent ) : Agent( agent.id, agent.name, agent.position, agent.dimension, agent.orientation, agent.expansionRadius ) {
     }
 
-    inline HumanoidAgent( long id, const std::string& name, const Math::Vector3& position, const Math::Dimension3& dimension, const Math::Quaternion& orientation, double radius = 0.0 ) : Agent( id, name, position, dimension, orientation, radius ) {
+    inline HumanoidAgent( long id, const std::string& name, const math::Vector3& position, const math::Dimension3& dimension, const math::Quaternion& orientation, double radius = 0.0 ) : Agent( id, name, position, dimension, orientation, radius ) {
     }
 
     inline ENTITY_TYPE getType( void ) const {
@@ -56,7 +58,8 @@ public:
 
 }; // HumanoidAgent
 
-} // Spatial
+} // spatial
+} // opencog
 
 #endif // _SPATIAL_HUMANOIDAGENT_H_
 

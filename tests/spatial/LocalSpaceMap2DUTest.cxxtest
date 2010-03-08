@@ -40,10 +40,10 @@
 #include <boost/date_time.hpp>
 #include <boost/thread.hpp>
 
-
-using namespace Spatial;
-using namespace opencog;
 using namespace std;
+
+using namespace opencog;
+using namespace opencog::spatial;
 
 class MockObject
 {
@@ -105,8 +105,8 @@ class LocalSpaceMap2DUTest : public CxxTest::TestSuite
 {
 public:
     typedef LocalSpaceMap2D Map;
-    typedef Spatial::Point Point;
-    typedef Spatial::GridPoint GridPoint;
+    typedef spatial::Point Point;
+    typedef spatial::GridPoint GridPoint;
 
     LocalSpaceMap2D* createMockupMap( void ) {
         logger().debug("LocalSpaceMap2DUTest - start creating map..." );
@@ -238,11 +238,11 @@ public:
 
         Point pt((xMin + xMax) / 2, (yMin + yMax) / 2);
 
-        Spatial::ObjectIDSet all_objects;
+        spatial::ObjectIDSet all_objects;
         foo->findAllEntities(opencog::inserter(all_objects));
         TS_ASSERT(! all_objects.empty());
 
-        Spatial::ObjectIDSet objects;
+        spatial::ObjectIDSet objects;
         foo->findEntities(foo->snap(pt), 300,
                           opencog::inserter(objects));
         TS_ASSERT_EQUALS(all_objects, objects);
@@ -336,45 +336,45 @@ public:
     void testFindNextFreePoint( ) {
         LocalSpaceMap2D* map = createMockupMap( );
 
-        Spatial::Point position( -90759.000000, -210804.000000 );
+        spatial::Point position( -90759.000000, -210804.000000 );
         // Attention: generate numbers with at least 8 decimal digits to avoid errors on == operation
-        Spatial::Point targetPoints[] = {
-            Spatial::Point( -94599.00000000, -210804.00000000 ),
-            Spatial::Point( -94522.45312500, -211566.89062500 ),
-            Spatial::Point( -94295.87500000, -212299.35937500 ),
-            Spatial::Point( -93928.28906250, -212972.23437500 ),
-            Spatial::Point( -93434.35156250, -213558.64062500 ),
-            Spatial::Point( -90271.35156250, -214612.90625000 ),
-            Spatial::Point( -90174.51562500, -214599.25000000 ),
-            Spatial::Point( -90410.03125000, -214628.10937500 ),
-            Spatial::Point( -90312.76562500, -214617.98437500 ),
-            Spatial::Point( -89886.53906250, -214543.57812500 ),
-            Spatial::Point( -89160.99218750, -214295.70312500 ),
-            Spatial::Point( -88499.15625000, -213908.62500000 ),
-            Spatial::Point( -87927.40625000, -213397.78125000 ),
-            Spatial::Point( -87468.54687500, -212783.53125000 ),
-            Spatial::Point( -87140.86718750, -212090.35937500 ),
-            Spatial::Point( -86957.42968750, -211345.90625000 ),
-            Spatial::Point( -86925.54687500, -210579.84375000 ),
-            Spatial::Point( -87046.49218750, -209822.71875000 ),
-            Spatial::Point( -87315.44531250, -209104.71875000 ),
-            Spatial::Point( -87721.68750000, -208454.46875000 ),
-            Spatial::Point( -88249.00781250, -207897.87500000 ),
-            Spatial::Point( -88876.39843750, -207457.15625000 ),
-            Spatial::Point( -89578.84375000, -207149.84375000 ),
-            Spatial::Point( -90328.33593750, -206988.21875000 ),
-            Spatial::Point( -91095.00000000, -206978.73437500 ),
-            Spatial::Point( -91848.26562500, -207121.73437500 ),
-            Spatial::Point( -92558.10937500, -207411.53125000 ),
-            Spatial::Point( -93196.21875000, -207836.57812500 ),
-            Spatial::Point( -94482.59375000, -209865.68750000 ),
-            Spatial::Point( -94505.28125000, -209960.81250000 ),
-            Spatial::Point( -94525.53906250, -210056.48437500 ),
-            Spatial::Point( -94585.71875000, -210484.93750000 ),
+        spatial::Point targetPoints[] = {
+            spatial::Point( -94599.00000000, -210804.00000000 ),
+            spatial::Point( -94522.45312500, -211566.89062500 ),
+            spatial::Point( -94295.87500000, -212299.35937500 ),
+            spatial::Point( -93928.28906250, -212972.23437500 ),
+            spatial::Point( -93434.35156250, -213558.64062500 ),
+            spatial::Point( -90271.35156250, -214612.90625000 ),
+            spatial::Point( -90174.51562500, -214599.25000000 ),
+            spatial::Point( -90410.03125000, -214628.10937500 ),
+            spatial::Point( -90312.76562500, -214617.98437500 ),
+            spatial::Point( -89886.53906250, -214543.57812500 ),
+            spatial::Point( -89160.99218750, -214295.70312500 ),
+            spatial::Point( -88499.15625000, -213908.62500000 ),
+            spatial::Point( -87927.40625000, -213397.78125000 ),
+            spatial::Point( -87468.54687500, -212783.53125000 ),
+            spatial::Point( -87140.86718750, -212090.35937500 ),
+            spatial::Point( -86957.42968750, -211345.90625000 ),
+            spatial::Point( -86925.54687500, -210579.84375000 ),
+            spatial::Point( -87046.49218750, -209822.71875000 ),
+            spatial::Point( -87315.44531250, -209104.71875000 ),
+            spatial::Point( -87721.68750000, -208454.46875000 ),
+            spatial::Point( -88249.00781250, -207897.87500000 ),
+            spatial::Point( -88876.39843750, -207457.15625000 ),
+            spatial::Point( -89578.84375000, -207149.84375000 ),
+            spatial::Point( -90328.33593750, -206988.21875000 ),
+            spatial::Point( -91095.00000000, -206978.73437500 ),
+            spatial::Point( -91848.26562500, -207121.73437500 ),
+            spatial::Point( -92558.10937500, -207411.53125000 ),
+            spatial::Point( -93196.21875000, -207836.57812500 ),
+            spatial::Point( -94482.59375000, -209865.68750000 ),
+            spatial::Point( -94505.28125000, -209960.81250000 ),
+            spatial::Point( -94525.53906250, -210056.48437500 ),
+            spatial::Point( -94585.71875000, -210484.93750000 ),
         };
 
         float distance = 3840;
-        Spatial::Point direction( 1, 0 );
+        spatial::Point direction( 1, 0 );
         float angle;
         int pointCounter = 0;
         for ( angle = -M_PI; angle <= M_PI; angle += 0.2 ) {
@@ -382,7 +382,7 @@ public:
             direction.first = std::cos(angle);
             direction.second = std::sin(angle);
 
-            Spatial::Point nearPoint =
+            spatial::Point nearPoint =
                 map->getNearFreePointAtDistance( position, distance, direction );
 
             // TODO: Check these values more carefully (by ploting the found values over the mocky map and check them visually,
@@ -436,9 +436,9 @@ public:
     void testGetNearestFreePoint() {
         LocalSpaceMap2D* map = createMockupMap( );
 
-        Spatial::Point pointInsideObstacle( -85317.0, -225213.0 );
-        Spatial::Point freePoint( -164000.0, -36000 );
-        Spatial::Point pointOutsideMap( 0, 0 );
+        spatial::Point pointInsideObstacle( -85317.0, -225213.0 );
+        spatial::Point freePoint( -164000.0, -36000 );
+        spatial::Point pointOutsideMap( 0, 0 );
 
         TS_ASSERT( map->gridIllegal( map->snap( pointInsideObstacle ) ) );
         TS_ASSERT( !map->gridIllegal( map->snap( freePoint ) ) );
@@ -454,17 +454,17 @@ public:
     void testRayTrace( void ) {
         LocalSpaceMap2D* map = createMockupMap( );
 
-        Spatial::GridPoint startPoint( 5, 5 );
-        std::vector<Spatial::GridPoint> points;
+        spatial::GridPoint startPoint( 5, 5 );
+        std::vector<spatial::GridPoint> points;
 
-        Spatial::GridPoint endPoint( 250, 500 );
-        Spatial::GridPoint collisionPoint;
+        spatial::GridPoint endPoint( 250, 500 );
+        spatial::GridPoint collisionPoint;
 
         bool collided = false;
         rayTrace( startPoint, endPoint, CollisionDetector( map, collisionPoint, collided ) );
 
 //    std::cout << collided << " " << collisionPoint.first << " " << collisionPoint.second << std::endl;
-        TS_ASSERT_EQUALS( Spatial::GridPoint( 84, 165 ), collisionPoint );
+        TS_ASSERT_EQUALS( spatial::GridPoint( 84, 165 ), collisionPoint );
         TS_ASSERT( collided );
 
 
@@ -476,16 +476,16 @@ public:
     }
 
     void testTriangleCollision( ) {
-        Math::Triangle triangles[] = {
-            Math::Triangle( Math::Vector3( -1.0, 0 ), Math::Vector3( 1.0, 0 ), Math::Vector3( 0, 1.0 ) ),
-            Math::Triangle( Math::Vector3( -3.0, -2.0 ), Math::Vector3( 1.0, 5 ), Math::Vector3( -1.0, 7.0 ) )
+        math::Triangle triangles[] = {
+            math::Triangle( math::Vector3( -1.0, 0 ), math::Vector3( 1.0, 0 ), math::Vector3( 0, 1.0 ) ),
+            math::Triangle( math::Vector3( -3.0, -2.0 ), math::Vector3( 1.0, 5 ), math::Vector3( -1.0, 7.0 ) )
         };
 
-        Math::Vector3 points[] = {
-            Math::Vector3( 0, 0 ),
-            Math::Vector3( 0, 0.5 ),
-            Math::Vector3( 0.2, 0.5 ),
-            Math::Vector3( 2.0, 1.5 )
+        math::Vector3 points[] = {
+            math::Vector3( 0, 0 ),
+            math::Vector3( 0, 0.5 ),
+            math::Vector3( 0.2, 0.5 ),
+            math::Vector3( 2.0, 1.5 )
         };
 
         bool expectedResponse[] = {
@@ -495,8 +495,8 @@ public:
             false, false
         };
 
-        unsigned int numberOfTriangles = sizeof(triangles) / sizeof(Math::Triangle);
-        unsigned int numberOfPoints = sizeof(points) / sizeof(Math::Vector3);
+        unsigned int numberOfTriangles = sizeof(triangles) / sizeof(math::Triangle);
+        unsigned int numberOfPoints = sizeof(points) / sizeof(math::Vector3);
 
         unsigned int i, j, k;
         k = 0;
@@ -509,33 +509,33 @@ public:
     }
 
     void testLineIntersection( ) {
-        Math::LineSegment line1( Math::Vector3( -1, 0 ), Math::Vector3( 1, 0 ) );
-        Math::LineSegment line2( Math::Vector3( 0, -1 ), Math::Vector3( 0, 1 ) );
-        Math::LineSegment line3( Math::Vector3( -1, -1 ), Math::Vector3( -1, 1 ) );
-        Math::LineSegment line4( Math::Vector3( -1, -1 ), Math::Vector3( 1, 1 ) );
+        math::LineSegment line1( math::Vector3( -1, 0 ), math::Vector3( 1, 0 ) );
+        math::LineSegment line2( math::Vector3( 0, -1 ), math::Vector3( 0, 1 ) );
+        math::LineSegment line3( math::Vector3( -1, -1 ), math::Vector3( -1, 1 ) );
+        math::LineSegment line4( math::Vector3( -1, -1 ), math::Vector3( 1, 1 ) );
 
-        Math::Vector3 intersectionPoint;
+        math::Vector3 intersectionPoint;
 
         TS_ASSERT( line1.intersects( line2, &intersectionPoint ) )
-        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( 0, 0 ) )
+        TS_ASSERT_EQUALS( intersectionPoint, math::Vector3( 0, 0 ) )
 
         TS_ASSERT( line1.intersects( line3, &intersectionPoint ) )
-        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( -1, 0 ) )
+        TS_ASSERT_EQUALS( intersectionPoint, math::Vector3( -1, 0 ) )
 
         TS_ASSERT( line1.intersects( line4, &intersectionPoint ) );
-        TS_ASSERT_EQUALS( intersectionPoint, Math::Vector3( 0, 0 ) );
+        TS_ASSERT_EQUALS( intersectionPoint, math::Vector3( 0, 0 ) );
 
     }
 
     void testDistanceBetweenSegments( ) {
 
-        Math::LineSegment segment1( Math::Vector3( -1, 0 ), Math::Vector3( 1, 0 ) );
-        Math::LineSegment segment2( Math::Vector3( 0, -1 ), Math::Vector3( 0, 1 ) );
-        Math::LineSegment segment3( Math::Vector3( -1, -1 ), Math::Vector3( -1, 1 ) );
-        Math::LineSegment segment4( Math::Vector3( -1, -1 ), Math::Vector3( 1, 1 ) );
-        Math::LineSegment segment5( Math::Vector3( 1, 1 ), Math::Vector3( 1, -1 ) );
-        Math::LineSegment segment6( Math::Vector3( 2, 2 ), Math::Vector3( 7, 4 ) );
-        Math::LineSegment segment7( Math::Vector3( -2, -2 ), Math::Vector3( -7, -4 ) );
+        math::LineSegment segment1( math::Vector3( -1, 0 ), math::Vector3( 1, 0 ) );
+        math::LineSegment segment2( math::Vector3( 0, -1 ), math::Vector3( 0, 1 ) );
+        math::LineSegment segment3( math::Vector3( -1, -1 ), math::Vector3( -1, 1 ) );
+        math::LineSegment segment4( math::Vector3( -1, -1 ), math::Vector3( 1, 1 ) );
+        math::LineSegment segment5( math::Vector3( 1, 1 ), math::Vector3( 1, -1 ) );
+        math::LineSegment segment6( math::Vector3( 2, 2 ), math::Vector3( 7, 4 ) );
+        math::LineSegment segment7( math::Vector3( -2, -2 ), math::Vector3( -7, -4 ) );
 
         TS_ASSERT_EQUALS( segment1.distanceTo( segment2 ), 0 );
         TS_ASSERT_EQUALS( segment3.distanceTo( segment5 ), 2 );
@@ -545,16 +545,16 @@ public:
 
     void testDistanceBetweenObstacles( ) {
 
-        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(), Math::Dimension3(4, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        StaticEntityPtr e2( new StaticEntity( 2, "e2", Math::Vector3(), Math::Dimension3(2, 1, 8 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(1, 0, 0), Math::Dimension3(4, 1, 8 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(5, 0, 0), Math::Dimension3(3, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", math::Vector3(), math::Dimension3(4, 1, 10 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e2( new StaticEntity( 2, "e2", math::Vector3(), math::Dimension3(2, 1, 8 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e3( new StaticEntity( 3, "e3", math::Vector3(1, 0, 0), math::Dimension3(4, 1, 8 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e4( new StaticEntity( 4, "e4", math::Vector3(5, 0, 0), math::Dimension3(3, 1, 10 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
 
 
-        MovableEntityPtr e5( new MovableEntity( 5, "e5", Math::Vector3(5, 0, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        MovableEntityPtr e6( new MovableEntity( 6, "e6", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
-        StaticEntityPtr e7( new StaticEntity( 7, "e7", Math::Vector3(10, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
-        StaticEntityPtr e8( new StaticEntity( 8, "e8", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        MovableEntityPtr e5( new MovableEntity( 5, "e5", math::Vector3(5, 0, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
+        MovableEntityPtr e6( new MovableEntity( 6, "e6", math::Vector3(0, 35, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e7( new StaticEntity( 7, "e7", math::Vector3(10, 35, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e8( new StaticEntity( 8, "e8", math::Vector3(0, 35, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
 
         TS_ASSERT_EQUALS( e1->distanceTo(*e2), 0.0f );
         TS_ASSERT_EQUALS( e1->distanceTo(*e3), 0.0f );
@@ -565,30 +565,30 @@ public:
 
         TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
 
-        e6->setPosition( Math::Vector3( 0, -35, 0 ) );
+        e6->setPosition( math::Vector3( 0, -35, 0 ) );
         e6->update( );
         TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
 
-        e5->setPosition( Math::Vector3( -5, 0, 0 ) );
+        e5->setPosition( math::Vector3( -5, 0, 0 ) );
         e5->update( );
         TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.01 );
 
-        e5->setPosition( Math::Vector3( -5, 0, -1 ) );
+        e5->setPosition( math::Vector3( -5, 0, -1 ) );
         e5->update( );
         TS_ASSERT( ( e5->distanceTo(*e6) - 33.1361 ) < 0.1 );
         
     }
 
     void testPointInsideObstacle( ) {
-        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(), Math::Dimension3(4, 1, 10 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", math::Vector3(), math::Dimension3(4, 1, 10 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
 
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_RIGHT_BOTTOM ) - Math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::FAR_LEFT_BOTTOM ) - Math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_RIGHT_BOTTOM ) - Math::Vector3( -5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
-        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( Math::BoundingBox::NEAR_LEFT_BOTTOM ) - Math::Vector3( -5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ) - math::Vector3( 5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( math::BoundingBox::FAR_LEFT_BOTTOM ) - math::Vector3( 5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( math::BoundingBox::NEAR_RIGHT_BOTTOM ) - math::Vector3( -5.0, 2.0, -0.5 ) ).length( ) < 0.01 )
+        TS_ASSERT( ( e1->getBoundingBox( ).getCorner( math::BoundingBox::NEAR_LEFT_BOTTOM ) - math::Vector3( -5.0, -2.0, -0.5 ) ).length( ) < 0.01 )
 
-        TS_ASSERT( e1->getBoundingBox( ).isInside( Math::Vector3( 0, 0 ) ) )
-        TS_ASSERT( !e1->getBoundingBox( ).isInside( Math::Vector3( 0, -2.1 ) ) )
+        TS_ASSERT( e1->getBoundingBox( ).isInside( math::Vector3( 0, 0 ) ) )
+        TS_ASSERT( !e1->getBoundingBox( ).isInside( math::Vector3( 0, -2.1 ) ) )
     }
 
 
@@ -630,8 +630,8 @@ public:
         map3->findAllEntities( back_inserter(entities3));
 
         for ( i = 0; i < entities2.size( ); ++i ) {
-            std::vector<Spatial::Point> points2;
-            std::vector<Spatial::Point> points3;
+            std::vector<spatial::Point> points2;
+            std::vector<spatial::Point> points3;
 
             map2->allPoints( entities2[i], back_inserter( points2 ) );
             map3->allPoints( entities2[i], back_inserter( points3 ) );
@@ -655,17 +655,17 @@ public:
     }
     */
 
-    void testSpatialRelations( void )
+    void testspatialRelations( void )
     {
 
-        StaticEntityPtr e1( new StaticEntity( 1, "e1", Math::Vector3(10, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
-        StaticEntityPtr e2( new StaticEntity( 2, "e2", Math::Vector3(0, 35, 0), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
-        StaticEntityPtr e3( new StaticEntity( 3, "e3", Math::Vector3(0, 35, 5), Math::Dimension3(2, 2, 2 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
-        StaticEntityPtr e4( new StaticEntity( 4, "e4", Math::Vector3(0, 35, 5), Math::Dimension3(4, 4, 4 ), Math::Quaternion( Math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e1( new StaticEntity( 1, "e1", math::Vector3(10, 35, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e2( new StaticEntity( 2, "e2", math::Vector3(0, 35, 0), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e3( new StaticEntity( 3, "e3", math::Vector3(0, 35, 5), math::Dimension3(2, 2, 2 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
+        StaticEntityPtr e4( new StaticEntity( 4, "e4", math::Vector3(0, 35, 5), math::Dimension3(4, 4, 4 ), math::Quaternion( math::Vector3::Z_UNIT, 45 ) ) );
 
         MovableEntityPtr observer( new MovableEntity( 5, "observer", 
-            Math::Vector3(15, 35, 0), Math::Dimension3(1, 4, 1 ), 
-                Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) ) );
+            math::Vector3(15, 35, 0), math::Dimension3(1, 4, 1 ), 
+                math::Quaternion( math::Vector3::Z_UNIT, 0 ) ) );
 
 
         double besideDistance = ( xMax - xMin ) * LocalSpaceMap2D::NEXT_FACTOR;
@@ -687,8 +687,8 @@ public:
 
 
         { // RIGHT_OF
-            observer->setPosition( Math::Vector3( 5, -35, 0 ) );
-            observer->setOrientation( Math::Quaternion( Math::Vector3::Z_UNIT, 90 ) );
+            observer->setPosition( math::Vector3( 5, -35, 0 ) );
+            observer->setOrientation( math::Quaternion( math::Vector3::Z_UNIT, 90 ) );
             observer->update( );
 
             std::list<Entity::SPATIAL_RELATION> relations = 
@@ -748,7 +748,7 @@ public:
 
 
         { // IN_FRONT_OF
-            observer->setPosition( Math::Vector3( 20, 40, 0 ) );
+            observer->setPosition( math::Vector3( 20, 40, 0 ) );
             observer->update( );
 
             std::list<Entity::SPATIAL_RELATION> relations = 
@@ -765,7 +765,7 @@ public:
         } // end block
 
         { // BEHIND
-            observer->setPosition( Math::Vector3( -20, 40, 0 ) );
+            observer->setPosition( math::Vector3( -20, 40, 0 ) );
             observer->update( );
             std::list<Entity::SPATIAL_RELATION> relations = 
                 e1->computeSpatialRelations( *observer, besideDistance, *e2 );
@@ -781,7 +781,7 @@ public:
         }
 
         { // INSIDE
-            observer->setPosition( Math::Vector3( 0, 0, 0 ) );
+            observer->setPosition( math::Vector3( 0, 0, 0 ) );
             std::list<Entity::SPATIAL_RELATION> relations = 
                 e3->computeSpatialRelations( *observer, besideDistance, *e4 );
             

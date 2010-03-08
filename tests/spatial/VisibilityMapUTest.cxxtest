@@ -27,8 +27,9 @@
 #include <opencog/spatial/VisibilityMap.h>
 #include <opencog/spatial/StaticEntity.h>
 
-using namespace Spatial;
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial;
+using namespace opencog::spatial::math;
 
 class VisibilityMapUTest : public CxxTest::TestSuite
 {
@@ -129,12 +130,12 @@ public:
 
         try {
             VisibilityMap map2( Vector3( -130000, 0, 190000 ), Vector3( -70000, 0, 250000 ), 1024 );
-            const VisibilityMap::TilePtr& tile = map2.getTile( Spatial::Math::Vector3( -120272, 0, 220816 ) );
+            const VisibilityMap::TilePtr& tile = map2.getTile( spatial::math::Vector3( -120272, 0, 220816 ) );
             TS_ASSERT( tile != NULL )
             //  std::cout << tile->getCenter( ).toString( ) << " " << tile->getRow( ) << " " << tile->getCol( ) << std::endl;
             map2.getTile( 57, 57 )->setVisibility( true );
 
-            //       map2.getNearestVisibleTileToPosition( Spatial::Math::Vector3( -120272, 0, 220816 ) );
+            //       map2.getNearestVisibleTileToPosition( spatial::math::Vector3( -120272, 0, 220816 ) );
 
         } catch ( opencog::NotFoundException& ex ) {
             std::cerr << ex.getMessage( ) << std::endl;
@@ -156,14 +157,14 @@ public:
     void testVisibility( void ) {
         VisibilityMap map2( Vector3( -130000, 0, 190000 ), Vector3( -70000, 0, 250000 ), 1024 );
 
-        StaticEntity e1( 1, "e1", Math::Vector3( -81360.0, 220816.0, 0 ), Math::Dimension3(250, 1800, 250 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) );
-        //    StaticEntity e2( 2, "e2", Math::Vector3( -80336, 203408, 0 ), Math::Dimension3(250, 1800, 250 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) );
+        StaticEntity e1( 1, "e1", math::Vector3( -81360.0, 220816.0, 0 ), math::Dimension3(250, 1800, 250 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) );
+        //    StaticEntity e2( 2, "e2", math::Vector3( -80336, 203408, 0 ), math::Dimension3(250, 1800, 250 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) );
 
         TS_ASSERT( map2.isInsideArea( e1, 5, 9 ) )
 
         //    std::cout << "Center: " << map2.getAreaCenter( 6, 9 ).toString( ) << std::endl;
 
-        //  Spatial::VisibilityMap::Tile* tile = map2.getNextHiddenTile( 6, 9 );
+        //  spatial::VisibilityMap::Tile* tile = map2.getNextHiddenTile( 6, 9 );
 
         //   std::cout << "Tile at area 9: " << tile->getCenter( ).toString( ) << std::endl;
         //    TS_ASSERT( map2.isInsideArea( e2, 0, 9 ) )
@@ -206,7 +207,7 @@ public:
           std::cout << map5.getTile( 105, 21 )->getCenter( ).toString( ) << std::endl;
           std::cout << map5.getTile(  map5.getAreaCenter( 6, 9 ) )->getCenter( ).toString( ) << std::endl;
         */
-        const Spatial::VisibilityMap::TilePtr& tile6 = map5.getNearestVisibleTileToPosition( map5.getAreaCenter( 6, 9 ) );
+        const spatial::VisibilityMap::TilePtr& tile6 = map5.getNearestVisibleTileToPosition( map5.getAreaCenter( 6, 9 ) );
         TS_ASSERT_EQUALS( tile6->getRow( ), map5.getTile( 100, 18 )->getRow( ) )
         TS_ASSERT_EQUALS( tile6->getCol( ), map5.getTile( 100, 18 )->getCol( ) )
 
@@ -215,16 +216,16 @@ public:
         //std::cout << "Next tile: " << map5.getNextVisibleTile( 6, 9 )->getCenter( ).toString( ) << std::endl;
 
         // map5.getNextVisibleTile( 6, 9 )
-        const Spatial::VisibilityMap::TilePtr& tile7 = map5.getTile( map5.getNextVisibleTile( 6, 9 )->getCenter( ) );
+        const spatial::VisibilityMap::TilePtr& tile7 = map5.getTile( map5.getNextVisibleTile( 6, 9 )->getCenter( ) );
         TS_ASSERT_EQUALS( tile7->getRow( ), map5.getTile( 100, 18 )->getRow( ) )
         TS_ASSERT_EQUALS( tile7->getCol( ), map5.getTile( 100, 18 )->getCol( ) )
 
         //std::cout << tile7->getRow( ) << " " << tile7->getCol( ) << std::endl;
 
-        //StaticEntity e2( 2, "e2", Math::Vector3( -80604.0, 229448.0, 0 ), Math::Dimension3(250, 1800, 250 ), Math::Quaternion( Math::Vector3::Z_UNIT, 0 ) );
+        //StaticEntity e2( 2, "e2", math::Vector3( -80604.0, 229448.0, 0 ), math::Dimension3(250, 1800, 250 ), math::Quaternion( math::Vector3::Z_UNIT, 0 ) );
 
-        //const Spatial::VisibilityMap::TilePtr& tile8 = map5.getTile( Math::Vector3( -53396, 0, -43448 ) );
-        //const Spatial::VisibilityMap::TilePtr& tile8 = map5.getTile( Math::Vector3( -80604.0, 0, 229448.0 ) );
+        //const spatial::VisibilityMap::TilePtr& tile8 = map5.getTile( math::Vector3( -53396, 0, -43448 ) );
+        //const spatial::VisibilityMap::TilePtr& tile8 = map5.getTile( math::Vector3( -80604.0, 0, 229448.0 ) );
         //std::cout << tile8->getRow( ) << " " << tile8->getCol( ) << std::endl;
         //TS_ASSERT( map5.isInsideArea( e2, 2, 9 ) )
 

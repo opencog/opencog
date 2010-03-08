@@ -25,29 +25,32 @@
 #define MAPEXPLORER_H
 
 #include <opencog/spatial/LocalSpaceMap2D.h>
-#include <opencog/spatial/Math/Rectangle.h>
+#include <opencog/spatial/math/Rectangle.h>
 
 #include <boost/thread/thread.hpp>
 
 struct SDL_Surface;
 
-namespace opencog {
-    namespace spatial {
+namespace opencog 
+{
+    namespace spatial 
+    {
         /**
          * Map Explorer is a tool useful for debugging purposes.
          * it shows in 3d the current state of a given LocalSpaceMap.
          * The user can extract information about the elements
          * by clicking on it.
          */
-        class MapExplorer {
+        class MapExplorer 
+        {
         public:
-            MapExplorer( Spatial::LocalSpaceMap2D* map, unsigned int screenWidth, 
+            MapExplorer( spatial::LocalSpaceMap2D* map, unsigned int screenWidth, 
                          unsigned int screenHeight, bool fullScreen = false ) 
                 throw(opencog::RuntimeException);
             
             virtual ~MapExplorer( void );
             
-            void updateMap( Spatial::LocalSpaceMap2D* map );
+            void updateMap( spatial::LocalSpaceMap2D* map );
             
             // SDL key/mouse functions
             void keyPressed( int key );
@@ -89,7 +92,8 @@ namespace opencog {
              * Running status checker.
              * @return true if running false otherwise
              */
-            bool isRunning( void ) const {
+            bool isRunning( void ) const 
+            {
                 return this->running;
             }
 
@@ -102,14 +106,14 @@ namespace opencog {
              * @param entity The entity that will be rendered
              * @param color the color used to render the entity
              */
-            void renderEntity( const Spatial::Entity& entity, unsigned int color );
+            void renderEntity( const spatial::Entity& entity, unsigned int color );
 
             /**
              * Render a border of the entity to highlight it
              * 
              * @param entity The entity that will be highlighted
              */
-            void renderEntitySelection( const Spatial::Entity& entity );
+            void renderEntitySelection( const spatial::Entity& entity );
 
             /**
              * Render a given text on a flat quad defined by a given
@@ -125,7 +129,7 @@ namespace opencog {
              * @param repeatTexture If the texture is lesser than the area,
              *                      it can be repeated along it
              */
-            void renderText(const std::string& text, const Spatial::Math::Rectangle& area, 
+            void renderText(const std::string& text, const spatial::math::Rectangle& area, 
                             unsigned int color, unsigned int bgColor, 
                             bool stretchTexture = false, bool repeatTexture = false );
             /**
@@ -157,7 +161,8 @@ namespace opencog {
              * @param color Unsigned int (32 bits) color
              * @return unsigned char a byte containing the red color
              */
-            static unsigned char getRed( unsigned int color ) {
+            static unsigned char getRed( unsigned int color ) 
+            {
                 return (color&0xff000000) >> 24;
             }
             /**
@@ -165,7 +170,8 @@ namespace opencog {
              * @param color Unsigned int (32 bits) color
              * @return unsigned char a byte containing the green color
              */
-            static unsigned char getGreen( unsigned int color ) {
+            static unsigned char getGreen( unsigned int color ) 
+            {
                 return (color&0x00ff0000) >> 16;
             }
             /**
@@ -173,7 +179,8 @@ namespace opencog {
              * @param color Unsigned int (32 bits) color
              * @return unsigned char a byte containing the blue color
              */
-            static unsigned char getBlue( unsigned int color ) {
+            static unsigned char getBlue( unsigned int color ) 
+            {
                 return (color&0x0000ff00)  >> 8;
             }
             /**
@@ -181,7 +188,8 @@ namespace opencog {
              * @param color Unsigned int (32 bits) color
              * @return unsigned char a byte containing the alpha channel
              */
-            static unsigned char getAlpha( unsigned int color ) {
+            static unsigned char getAlpha( unsigned int color ) 
+            {
                 return (color&0x000000ff);
             }
 
@@ -191,7 +199,7 @@ namespace opencog {
              */
             void generateFloorTextures( void );
 
-            Spatial::LocalSpaceMap2D* map;
+            spatial::LocalSpaceMap2D* map;
             bool mapUpdated;
 
             unsigned int screenWidth;
@@ -204,8 +212,8 @@ namespace opencog {
         
             int leftRightDirection;
             int upDownDirection;
-            Spatial::Math::Vector3 cameraTranslation;
-            Spatial::Math::Quaternion cameraOrientation;
+            spatial::math::Vector3 cameraTranslation;
+            spatial::math::Quaternion cameraOrientation;
             bool turbo;
 
             double yRot,zRot;
@@ -233,4 +241,5 @@ namespace opencog {
 
     }; // spatial
 }; // opencog
+
 #endif // MAPEXPLORER_H

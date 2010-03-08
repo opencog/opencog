@@ -31,7 +31,7 @@
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_gfxPrimitives_font.h>
 
-using namespace Spatial;
+using namespace opencog;
 using namespace opencog::spatial;
 
 /**
@@ -114,7 +114,7 @@ void MapExplorer::selectEntity( void )
     } // if    
 }
 
-void MapExplorer::renderText(const std::string& text, const Math::Rectangle& area, 
+void MapExplorer::renderText(const std::string& text, const math::Rectangle& area, 
    unsigned int color, unsigned int bgColor, bool stretchTexture, bool repeatTexture )
 {
     if ( text.length( ) == 0 ) {
@@ -222,10 +222,10 @@ void MapExplorer::renderEntities( void )
         double panelWidth = entity->getWidth( ) / 2;
         double panelHeight = panelWidth / 2;
 
-        Math::Rectangle panel( 
-            Math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y - panelWidth/2.0, lowerZ + panelHeight ),
-            Math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ + panelHeight ),
-            Math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ )
+        math::Rectangle panel( 
+            math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y - panelWidth/2.0, lowerZ + panelHeight ),
+            math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ + panelHeight ),
+            math::Vector3( entity->getPosition( ).x, entity->getPosition( ).y + panelWidth/2.0, lowerZ )
         );
         renderText( entity->getName( ), panel , 0xff0000ff, 0xffffffff, true );
 
@@ -250,7 +250,7 @@ void MapExplorer::renderEntities( void )
 
 void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
 {
-    const std::vector<Math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
+    const std::vector<math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
 
     unsigned char red = getRed(color);
     unsigned char green = getGreen(color);
@@ -258,9 +258,9 @@ void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
     unsigned char alpha = getAlpha(color);
 
     // draw an orientation pointer
-    Math::Vector3 direction = entity.getOrientation( ).rotate( Math::Vector3::X_UNIT );
-    Math::Vector3 arrowStart = entity.getPosition( ) + ( direction * (entity.getLength()/2 + entity.getExpansionRadius( )) );
-    Math::Vector3 arrowEnd = arrowStart + ( direction * entity.getHeight( )/2.0 );
+    math::Vector3 direction = entity.getOrientation( ).rotate( math::Vector3::X_UNIT );
+    math::Vector3 arrowStart = entity.getPosition( ) + ( direction * (entity.getLength()/2 + entity.getExpansionRadius( )) );
+    math::Vector3 arrowEnd = arrowStart + ( direction * entity.getHeight( )/2.0 );
 
     glLineWidth( 50 );
     glBegin( GL_LINES );
@@ -331,7 +331,7 @@ void MapExplorer::renderEntity( const Entity& entity, unsigned int color )
 
 void MapExplorer::renderEntitySelection( const Entity& entity )
 {
-    const std::vector<Math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
+    const std::vector<math::Vector3>& corners = entity.getBoundingBox( ).getAllCorners( );    
 
     // draw the edges of the object if it was selected by the user
     glLineWidth(5);
@@ -399,10 +399,10 @@ void MapExplorer::renderHUD( void ) {
     std::stringstream header;
     header << "help[F1] quit[q] fps[" << this->currentFps << "]";
 
-    Math::Rectangle panel( 
-        Math::Vector3( header.str().length( )* 8, 0 ), 
-        Math::Vector3( 0, 0 ), 
-        Math::Vector3( 0, 10 ) 
+    math::Rectangle panel( 
+        math::Vector3( header.str().length( )* 8, 0 ), 
+        math::Vector3( 0, 0 ), 
+        math::Vector3( 0, 10 ) 
     );
     renderText( header.str( ), panel, 0x000000ff, 0xffffffc4, true ); 
 
@@ -469,10 +469,10 @@ void MapExplorer::renderHUD( void ) {
             double panelWidth = 260;
             double panelHeight = 330;
                 
-            Math::Rectangle panel( 
-                Math::Vector3( this->screenWidth, 0 ), 
-                Math::Vector3( this->screenWidth-panelWidth, 0 ), 
-                Math::Vector3( this->screenWidth-panelWidth, panelHeight )
+            math::Rectangle panel( 
+                math::Vector3( this->screenWidth, 0 ), 
+                math::Vector3( this->screenWidth-panelWidth, 0 ), 
+                math::Vector3( this->screenWidth-panelWidth, panelHeight )
             );
             renderText( info.str( ), panel, 0x000000ff, 0xffffffc4 );
         } // if
@@ -516,10 +516,10 @@ void MapExplorer::renderHUD( void ) {
 
         double horizontalOffset = this->halfScreenWidth - (panelWidth/2.0);
         double verticalOffset = this->halfScreenHeight - (panelHeight/2.0);
-        Math::Rectangle panel( 
-            Math::Vector3( horizontalOffset+panelWidth, verticalOffset ),
-            Math::Vector3( horizontalOffset, verticalOffset ), 
-            Math::Vector3( horizontalOffset, verticalOffset+panelHeight )
+        math::Rectangle panel( 
+            math::Vector3( horizontalOffset+panelWidth, verticalOffset ),
+            math::Vector3( horizontalOffset, verticalOffset ), 
+            math::Vector3( horizontalOffset, verticalOffset+panelHeight )
         );
         renderText( info.str( ), panel, 0x000000ff, 0xffffffc4 );
             

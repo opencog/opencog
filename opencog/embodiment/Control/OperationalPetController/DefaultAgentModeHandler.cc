@@ -32,6 +32,7 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
+using namespace opencog;
 using namespace OperationalPetController;
 
 DefaultAgentModeHandler::DefaultAgentModeHandler( Pet* agent ) :
@@ -53,6 +54,9 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
         boost::split( tokens, arguments[0], boost::is_any_of(" ") );
         
         if ( tokens[0] == "LEARN" ) {
+            logger().debug("DefaultAgentModeHandler::%s - Parsing LEARN instruction[%s]",
+                           __FUNCTION__, arguments[0].c_str( ) );
+
             std::string avatarId = this->agent->getOwnerId( );
             if ( tokens.size( ) == 4 && tokens[2] == "WITH" ) {
                 std::string avatarId = AtomSpaceUtil::getObjIdFromName( this->agent->getAtomSpace(), tokens[3] );
@@ -65,7 +69,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
             } // with
             std::vector<std::string> commandStatement;
             commandStatement.push_back( tokens[1] );
-            long timestamp = boost::lexical_cast<long>( arguments[1] );
+            unsigned long timestamp = boost::lexical_cast<unsigned long>( arguments[1] );
             this->agent->setExemplarAvatarId( avatarId );
             this->agent->startLearning( commandStatement, timestamp );
             return;
@@ -106,7 +110,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
         } // if
         logger().debug("DefaultAgentModeHandler - Parsing visibility map signal" );
 
-        Spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
+        spatial::VisibilityMap* visibilityMap = getVisibilityMap( );
         if ( !visibilityMap ) {
             return;
         } // if
@@ -142,7 +146,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
                 logger().debug("DefaultAgentModeHandler - Setting visibility for tiles range %d - %d", range[j], range[j+1] );
                 for ( k = range[j]; k <= range[j+1]; ++k ) {
                     try {
-                        const Spatial::VisibilityMap::TilePtr& tile = visibilityMap->getTile( row, k );
+                        const spatial::VisibilityMap::TilePtr& tile = visibilityMap->getTile( row, k );
                         logger().debug("DefaultAgentModeHandler - Setting visibility for tile row: %d col: %d", row, k );
                         tile->setVisibility( true );
                     } catch ( opencog::NotFoundException& ex ) {
@@ -160,7 +164,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
         visMapName << "_";
         visMapName << visMapCounter++;
         visMapName << ".bin";
-        Spatial::VisibilityMap::saveToFile( visMapName.str( ), *getVisibilityMap( ) );
+        spatial::VisibilityMap::saveToFile( visMapName.str( ), *getVisibilityMap( ) );
 
     } else if ( this->agent->getType( ) == "humanoid" ) { // WARNING: keep this elseif as the last one before simple else
         if ( name == "receivedOwnerCommand" && arguments[0] == "lets_play_scavenger_hunt" ) {
@@ -176,7 +180,7 @@ void DefaultAgentModeHandler::handleCommand( const std::string& name, const std:
     } // else
 }
 
-Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
+spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
 {
     if ( this->visibilityMap != 0 ) {
         return this->visibilityMap;
@@ -192,9 +196,9 @@ Spatial::VisibilityMap* DefaultAgentModeHandler::getVisibilityMap( void )
         static_cast<unsigned int>(opencog::config().get_int( "MAP_XDIM" )) / 4;
 
     const SpaceServer::SpaceMap& spaceMap = this->agent->getAtomSpace().getSpaceServer().getLatestMap();
-    Spatial::Math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
-    Spatial::Math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
-    this->visibilityMap = new Spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
+    spatial::math::Vector3 minimumExtent( spaceMap.xMin( ), 0, spaceMap.yMin( ) );
+    spatial::math::Vector3 maximumExtent( spaceMap.xMax( ), 0, spaceMap.yMax( ) );
+    this->visibilityMap = new spatial::VisibilityMap( minimumExtent, maximumExtent, numberOfTilesPerSide );
 
     return this->visibilityMap;
 }

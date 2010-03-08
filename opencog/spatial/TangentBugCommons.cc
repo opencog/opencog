@@ -21,137 +21,137 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TangentBugCommons.h"
+#include <opencog/spatial/TangentBugCommons.h>
 
 #include <cmath>
 #include <limits>
 #include <stdio.h>
 
-using namespace Spatial;
-using namespace TangentBugBits;
+using namespace opencog;
+using namespace opencog::spatial;
 
 /**
- * TangentBugBits::Ray class
+ * TBRay class
  */
-Ray::Ray() : x(0), y(0)
+TBRay::TBRay() : x(0), y(0)
 {
 }
 
-Ray::Ray(const Ray& other) : x(other.x), y(other.y)
+TBRay::TBRay(const TBRay& other) : x(other.x), y(other.y)
 {
 }
 
-Ray::Ray(double _x, double _y) : x(_x), y(_y)
+TBRay::TBRay(double _x, double _y) : x(_x), y(_y)
 {
 }
 
-Ray::~Ray()
+TBRay::~TBRay()
 {
 }
 
-double Ray::length() const
+double TBRay::length() const
 {
     return std::sqrt(std::pow(this->x, 2) + std::pow(this->y, 2));
 }
 
-Ray Ray::operator-(const Ray& rhs) const
+TBRay TBRay::operator-(const TBRay& rhs) const
 {
-    return Ray(this->x - rhs.x, this->y - rhs.y);
+    return TBRay(this->x - rhs.x, this->y - rhs.y);
 }
 
-Ray& Ray::operator=(const Ray & rhs)
+TBRay& TBRay::operator=(const TBRay & rhs)
 {
     this -> x = rhs.x;
     this -> y = rhs.y;
     return *this;
 }
 
-bool Ray::operator==(const Ray& rhs) const
+bool TBRay::operator==(const TBRay& rhs) const
 {
     return (this -> x - rhs.x < std::numeric_limits<double>::epsilon() &&
             this -> y - rhs.y < std::numeric_limits<double>::epsilon());
 }
 
-Ray Ray::operator*(double scalar) const
+TBRay TBRay::operator*(double scalar) const
 {
-    return Ray(this->x*scalar, this->y*scalar);
+    return TBRay(this->x*scalar, this->y*scalar);
 }
 
-Ray Ray::operator/(double scalar) const
+TBRay TBRay::operator/(double scalar) const
 {
-    return Ray(this->x / scalar, this->y / scalar);
+    return TBRay(this->x / scalar, this->y / scalar);
 }
 
-double Ray::operator*(const Ray& other) const
+double TBRay::operator*(const TBRay& other) const
 {
     return this->x * other.x + this->y * other.y;
 }
 
-Ray Ray::normalise() const
+TBRay TBRay::normalise() const
 {
     return normalize();
 }
 
-Ray Ray::normalize() const
+TBRay TBRay::normalize() const
 {
     double len = length();
 
-    // Do not divide by 0. If len == Ray(0,0) then return zero ray
-    if (len > Ray(std::numeric_limits<double>::epsilon(),
+    // Do not divide by 0. If len == TBRay(0,0) then return zero ray
+    if (len > TBRay(std::numeric_limits<double>::epsilon(),
                   std::numeric_limits<double>::epsilon()).length()) {
-        return Ray(this->x / len, this->y / len);
+        return TBRay(this->x / len, this->y / len);
     }
-    return Ray(std::numeric_limits<double>::epsilon(),
+    return TBRay(std::numeric_limits<double>::epsilon(),
                std::numeric_limits<double>::epsilon());
 }
 
 /**
- * TangentBugBits::Point class
+ * TBPoint class
  */
-Point::Point()
+TBPoint::TBPoint()
 {
 }
 
-Point::Point(const point_2d& other) : point_2d(other)
+TBPoint::TBPoint(const point_2d& other) : point_2d(other)
 {
 }
 
-Point::Point(coord x, coord y) : point_2d(x, y)
+TBPoint::TBPoint(coord x, coord y) : point_2d(x, y)
 {
 }
 
-Point::~Point()
+TBPoint::~TBPoint()
 {
 }
 
-Point Point::operator+(const Ray& ray) const
+TBPoint TBPoint::operator+(const TBRay& ray) const
 {
     // Though we should only be dealing with unsigned ints, we still need rounding
     // to be the same for pos and neg numbers--we need
-    // Point(0,0) + Ray(-0.6, -0.6) != Point(0,0)
-    return Point((coord) std::floor(first + ray.x + 0.5),
+    // TBPoint(0,0) + TBRay(-0.6, -0.6) != TBPoint(0,0)
+    return TBPoint((coord) std::floor(first + ray.x + 0.5),
                  (coord) std::floor(second + ray.y + 0.5));
 }
 
-Ray Point::operator-(const Point& other) const
+TBRay TBPoint::operator-(const TBPoint& other) const
 {
-    return Ray((signed)(first - other.first), (signed)(second - other.second));
+    return TBRay((signed)(first - other.first), (signed)(second - other.second));
 }
 
-Point& Point::operator=(const Point & rhs)
+TBPoint& TBPoint::operator=(const TBPoint & rhs)
 {
     point_2d::operator=(rhs);
     return *this;
 }
 
 /**
- * TangentBugBits::look_info stuct
+ * look_info stuct
  */
 look_info::look_info() : collided(false)
 {
 }
 
-look_info::look_info(const Point& look_from, const Point& look_to) :
+look_info::look_info(const TBPoint& look_from, const TBPoint& look_to) :
         last_point_before_hit(look_to), last_point(look_to), collided(false)
 {
 }

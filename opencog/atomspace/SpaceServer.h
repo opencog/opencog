@@ -62,9 +62,9 @@ public:
 
     static const char* SPACE_MAP_NODE_NAME;
 
-    typedef Spatial::Point SpaceMapPoint;
-    typedef Spatial::LocalSpaceMap2D SpaceMap;
-    typedef Spatial::ObjectMetaData ObjectMetadata;
+    typedef spatial::Point SpaceMapPoint;
+    typedef spatial::LocalSpaceMap2D SpaceMap;
+    typedef spatial::ObjectMetaData ObjectMetadata;
     typedef std::map<Handle, SpaceMap*> HandleToSpaceMap;
     typedef std::pair<unsigned long, SpaceMap*> TimestampMap;
 

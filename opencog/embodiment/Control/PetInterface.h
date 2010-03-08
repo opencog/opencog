@@ -97,12 +97,12 @@ public:
      * when building a goto plan
      * @param target Object name amn it's position on LocalSpaceMap
      */
-    virtual void setLatestGotoTarget( const std::pair<std::string, Spatial::Point>& target ) = 0;
+    virtual void setLatestGotoTarget( const std::pair<std::string, spatial::Point>& target ) = 0;
     /**
      * Returns the latest object name used by goto_obj or gonear_obj
      * @return Object name and it's position
      */
-    virtual const std::pair<std::string, Spatial::Point>& getLatestGotoTarget( void ) = 0;
+    virtual const std::pair<std::string, spatial::Point>& getLatestGotoTarget( void ) = 0;
 
     /**
      * When an avatar requests the pet to execute a trick, this

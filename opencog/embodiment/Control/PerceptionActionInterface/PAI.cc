@@ -332,6 +332,14 @@ bool PAI::processPVPMessage(const string& pvpMsg, HandleSeq &toUpdateHandles)
             delete document;
             return false;
 
+        } catch (const std::exception& e) {
+            logger().error(
+                         "PAI - Got an std::exception while processing from PVP XML message: %s", e.what( ) );
+
+            delete memBufIS;
+            delete document;
+            return false;
+
         } catch (...) {
             logger().error(
                          "PAI - Got an unknown exception while processing from PVP XML message.");
@@ -1154,8 +1162,7 @@ void PAI::processInstruction(XERCES_CPP_NAMESPACE::DOMElement * element)
         if ( std::string( targetMode ) == petInterface.getCurrentModeHandler( ).getModeName( ) ) {
 
             // ATTENTION: a sentence must be upper case to be handled by the agent mode handlers
-            boost::to_upper(arguments[0]);
-            
+            boost::to_upper(arguments[0]);            
             arguments.push_back( boost::lexical_cast<std::string>( tsValue ) );
             arguments.push_back( internalAvatarId );
             petInterface.getCurrentModeHandler( ).handleCommand( "instruction", arguments );

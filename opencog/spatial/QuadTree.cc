@@ -21,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "QuadTree.h"
+#include <opencog/spatial/QuadTree.h>
 
-namespace Spatial
-{
+using namespace opencog;
+using namespace opencog::spatial;
 
 QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsigned int clusterSideSize, HPASearch::Graph* graph, QuadTree* parentQuad,  GridPoint* currentPosition )
 {
@@ -110,7 +110,7 @@ QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsi
                     boost::get( HPASearch::VertexPosition( ), *graph );
 
                 Point realPosition = level->map->unsnap( this->centerCellPosition );
-                boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
+                boost::put( position, level->vertexCounter, math::Vector2( realPosition.first, realPosition.second ) );
                 this->vertexId = level->vertexCounter;
                 level->graphVertices[ this->centerCellPosition ] = this->vertexId;
                 ++level->vertexCounter;
@@ -128,7 +128,7 @@ QuadTree::QuadTree( HPASearch::Level* level, const GridPoint& cellPosition, unsi
                 boost::get( HPASearch::VertexPosition( ), *graph );
 
             Point realPosition = level->map->unsnap( cellPosition );
-            boost::put( position, level->vertexCounter, Math::Vector2( realPosition.first, realPosition.second ) );
+            boost::put( position, level->vertexCounter, math::Vector2( realPosition.first, realPosition.second ) );
 
             this->vertexId = level->vertexCounter;
             level->graphVertices[ cellPosition ] = this->vertexId;
@@ -205,10 +205,10 @@ void QuadTree::processVertices( const std::vector<unsigned int>& vertices1, cons
 
     for ( i = 0; i < vertices1.size( ); ++i ) {
         for ( j = 0; j < vertices2.size( ); ++j ) {
-            Math::Vector2 position1 =
+            math::Vector2 position1 =
                 boost::get( HPASearch::VertexPosition( ), *this->graph, vertices1[ i ] );
 
-            Math::Vector2 position2 =
+            math::Vector2 position2 =
                 boost::get( HPASearch::VertexPosition( ), *this->graph, vertices2[ j ] );
 
             boost::add_edge( vertices1[ i ], vertices2[ j ], 1, *graph );
@@ -243,4 +243,3 @@ std::vector<unsigned int> QuadTree::getVerticesFrom( POSITION position )
     return response;
 }
 
-}; // Spatial

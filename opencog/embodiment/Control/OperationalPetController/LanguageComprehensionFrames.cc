@@ -29,6 +29,7 @@
 
 using namespace OperationalPetController;
 using namespace opencog;
+using namespace opencog::spatial;
 
 Control::PetInterface* LanguageComprehension::localAgent = NULL;
 
@@ -125,22 +126,22 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
                     __FUNCTION__, entitiesA.size( ), entitiesB.size( ), entitiesC.size( ) );
     
     try {
-        const Spatial::EntityPtr& observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
+        const spatial::EntityPtr& observerEntity = spaceMap.getEntity( atomSpace.getName( observer ) );
         
         unsigned int i, j, k;
         for( i = 0; i < entitiesA.size( ); ++i ) {
-            const Spatial::EntityPtr& entityA = spaceMap.getEntity( entitiesA[i] );
+            const spatial::EntityPtr& entityA = spaceMap.getEntity( entitiesA[i] );
             for( j = 0; j < entitiesB.size( ); ++j ) {
                 if ( entitiesA[i] == entitiesB[j] ) {
                     continue;
                 } // if
-                const Spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
+                const spatial::EntityPtr& entityB = spaceMap.getEntity( entitiesB[j] );
                 if ( entitiesC.size( ) > 0 ) {
                     for( k = 0; k < entitiesC.size( ); ++k ) {
                         if ( entitiesA[i] == entitiesC[k] || entitiesB[j] == entitiesC[k] ) {
                             continue;
                         } // if
-                        const Spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
+                        const spatial::EntityPtr& entityC = spaceMap.getEntity( entitiesC[k] );
                         createFrameInstancesFromRelations( atomSpace, resultingFrames,
                             entityA->computeSpatialRelations( *observerEntity, besideDistance, *entityB, *entityC ),
                                 entitiesA[i], entitiesB[j], entitiesC[k] );
@@ -163,12 +164,12 @@ SCM LanguageComprehension::execute(SCM objectObserver, SCM figureSemeNode, SCM g
 
 void LanguageComprehension::createFrameInstancesFromRelations( 
     AtomSpace& atomSpace, HandleSeq& resultingFrames,
-        const std::list<Spatial::Entity::SPATIAL_RELATION>& relations,
+        const std::list<spatial::Entity::SPATIAL_RELATION>& relations,
             const std::string& objectA, const std::string& objectB, const std::string& objectC ) {
 
-    std::list<Spatial::Entity::SPATIAL_RELATION>::const_iterator it;
+    std::list<spatial::Entity::SPATIAL_RELATION>::const_iterator it;
     for( it = relations.begin( ); it != relations.end( ); ++it ) {
-        std::string relationName = Spatial::Entity::spatialRelationToString( *it );
+        std::string relationName = spatial::Entity::spatialRelationToString( *it );
 
         std::map<std::string, Handle> elements;
         elements["Figure"] = atomSpace.getHandle( SEME_NODE, objectA );
@@ -180,7 +181,7 @@ void LanguageComprehension::createFrameInstancesFromRelations(
         instanceName << "_";
         instanceName << objectB;
 
-        if ( *it == Spatial::Entity::BETWEEN ) {
+        if ( *it == spatial::Entity::BETWEEN ) {
             elements["Ground_2"] = atomSpace.getHandle( SEME_NODE, objectC );
             instanceName << "_";
             instanceName << objectC;

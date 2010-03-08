@@ -31,7 +31,7 @@
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_gfxPrimitives_font.h>
 
-using namespace Spatial;
+using namespace opencog;
 using namespace opencog::spatial;
 
 
@@ -186,12 +186,12 @@ bool MapExplorer::update( long elapsedTime )
 {
     double STEP = turbo ? 180 : 30;
 
-    Math::Vector3 direction( std::cos(zRot/180.0*M_PI), -std::sin(zRot/180.0*M_PI), std::sin(yRot/180.0*M_PI) );
+    math::Vector3 direction( std::cos(zRot/180.0*M_PI), -std::sin(zRot/180.0*M_PI), std::sin(yRot/180.0*M_PI) );
     
     if ( leftRightDirection == -1 ) {
-        this->cameraTranslation += Math::Vector3::Z_UNIT.crossProduct( direction ) * STEP;
+        this->cameraTranslation += math::Vector3::Z_UNIT.crossProduct( direction ) * STEP;
     } else if ( leftRightDirection == 1 ) {
-        this->cameraTranslation -= Math::Vector3::Z_UNIT.crossProduct( direction ) * STEP;
+        this->cameraTranslation -= math::Vector3::Z_UNIT.crossProduct( direction ) * STEP;
     } // else if
     
     if ( upDownDirection == -1 ) {

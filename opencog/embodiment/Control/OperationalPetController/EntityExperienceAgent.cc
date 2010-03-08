@@ -49,7 +49,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
         return;
     } // if
 
-    const Spatial::LocalSpaceMap2D& map = atomSpace->getSpaceServer( ).getLatestMap( );
+    const spatial::LocalSpaceMap2D& map = atomSpace->getSpaceServer( ).getLatestMap( );
 
     HandleSeq semeNodes;
     {

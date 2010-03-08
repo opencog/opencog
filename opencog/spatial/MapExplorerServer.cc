@@ -30,7 +30,7 @@
 #include <boost/functional/hash.hpp>
 
 using namespace opencog::spatial;
-using namespace Spatial;
+using namespace opencog;
 
 MapExplorerServer::MapExplorerServer( const std::string& host, const std::string& port ):
     host(host), port( port ), running( false ), service(NULL), latestMapHash( 0 )
@@ -182,7 +182,7 @@ void MapExplorerServer::clientLoop( SocketPtr socket )
 }
 
 
-void MapExplorerServer::sendMap( const Spatial::LocalSpaceMap2D& map )
+void MapExplorerServer::sendMap( const spatial::LocalSpaceMap2D& map )
 {
     boost::mutex::scoped_lock lock( this->mapMutex );
     this->latestMapString = LocalSpaceMap2D::toString( map );

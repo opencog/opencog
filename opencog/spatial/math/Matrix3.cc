@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Matrix3.cc
+ * opencog/spatial/math/Matrix3.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,10 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Matrix3.h"
+#include <opencog/spatial/math/Matrix3.h>
 #include <sstream>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
+
 
 // All elements of the matrix are 0
 const Matrix3 Matrix3::ZERO;

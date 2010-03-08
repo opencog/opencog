@@ -94,7 +94,7 @@ private:
      * @param petLocation current pet location
      * @return a valid pet location
      */
-    Spatial::Point getValidPosition( const Spatial::Point& location );
+    spatial::Point getValidPosition( const spatial::Point& location );
 
     /**
      * This method will try to makes path even smoother,
@@ -103,9 +103,9 @@ private:
      * @param startPoint Current pet position
      * @param endPoint Goal position
      */
-    void clearPlan( std::vector<Spatial::Point>& actions,
-                    const Spatial::Point& startPoint,
-                    const Spatial::Point& endPoint );
+    void clearPlan( std::vector<spatial::Point>& actions,
+                    const spatial::Point& startPoint,
+                    const spatial::Point& endPoint );
 
     /**
      * Given a start and an end point, return the waypoints necessary to travel between them
@@ -114,7 +114,7 @@ private:
      * @param endPoint End point
      * @param actions Return vector actions
      */
-    void getWaypoints( const Spatial::Point& startPoint, const Spatial::Point& endPoint, std::vector<Spatial::Point>& actions );
+    void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
     /**
      * Uses the current PathPlanner (HPA, Astar, TangentBUG, etc. )
@@ -123,7 +123,7 @@ private:
      * @param position Goal position
      * @return false if path planning has failed and true if successfull
      */
-    bool buildGotoPlan( const Spatial::Point& position, float customSpeed = 0 );
+    bool buildGotoPlan( const spatial::Point& position, float customSpeed = 0 );
 
     /**
      * Create a walk planning action that will be sent to OPC
@@ -133,7 +133,7 @@ private:
      * @param tuNudge nudge actions will be added to walk plan if it is
      *                not null
      */
-    bool createWalkPlanAction( std::vector<Spatial::Point>& actions,
+    bool createWalkPlanAction( std::vector<spatial::Point>& actions,
                                bool useExistingID = false,
                                Handle toNudge = Handle::UNDEFINED,
                                float customSpeed = 0);

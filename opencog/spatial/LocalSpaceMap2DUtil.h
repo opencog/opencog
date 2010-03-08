@@ -35,157 +35,160 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
-#include "Math/Triangle.h"
-#include "Math/LineSegment.h"
-#include "Math/Vector3.h"
+#include <opencog/spatial/math/Triangle.h>
+#include <opencog/spatial/math/LineSegment.h>
+#include <opencog/spatial/math/Vector3.h>
 
-namespace Spatial
+namespace opencog
 {
-class LocalSpaceMap2D;
+    namespace spatial
+    {
+        class LocalSpaceMap2D;
 
-typedef double Distance;
-typedef std::string ObjectID;
+        typedef double Distance;
+        typedef std::string ObjectID;
 
-typedef std::pair<Distance, Distance> Point;
-typedef std::pair<unsigned int, unsigned int> GridPoint;
+        typedef std::pair<Distance, Distance> Point;
+        typedef std::pair<unsigned int, unsigned int> GridPoint;
 
-typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;
+        typedef boost::unordered_set<GridPoint, boost::hash<GridPoint> > GridSet;
 
-struct c_str_compare {
-    bool operator()(const char* s1, const char* s2) const {
-        return strcmp(s1, s2) < 0;
-    }
-};
-typedef std::set<const char*, c_str_compare> ObjectIDSet;
-typedef boost::unordered_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
-typedef boost::unordered_map<long, std::vector<GridPoint>, boost::hash<long> > LongGridPointVectorHashMap;
+        struct c_str_compare {
+            bool operator()(const char* s1, const char* s2) const {
+                return strcmp(s1, s2) < 0;
+            }
+        };
+        typedef std::set<const char*, c_str_compare> ObjectIDSet;
+        typedef boost::unordered_map<GridPoint, ObjectIDSet, boost::hash<GridPoint> > GridMap;
+        typedef boost::unordered_map<long, std::vector<GridPoint>, boost::hash<long> > LongGridPointVectorHashMap;
 
-/**
- * Represents the object geometry
- */
-class ObjectMetaData
-{
-public:
-    double centerX;
-    double centerY;
-    double centerZ;
-    double length;
-    double width;
-    double height;
-    double yaw;
+        /**
+         * Represents the object geometry
+         */
+        class ObjectMetaData
+        {
+        public:
+            double centerX;
+            double centerY;
+            double centerZ;
+            double length;
+            double width;
+            double height;
+            double yaw;
 
-    ObjectMetaData();
-    ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y);
+            ObjectMetaData();
+            ObjectMetaData(double cx, double cy, double cz, double l, double w, double h, double y);
 
-    bool operator==(const ObjectMetaData& rhs) const;
-    bool operator!=(const ObjectMetaData& rhs) const;
+            bool operator==(const ObjectMetaData& rhs) const;
+            bool operator!=(const ObjectMetaData& rhs) const;
 
-};
+        };
 
 
-/**
- * Functor class that collects every grid point on a rayTrace execution
- */
-class GridPointCollector
-{
-public:
-    GridPointCollector( std::vector<Spatial::GridPoint>& gridPoints );
+        /**
+         * Functor class that collects every grid point on a rayTrace execution
+         */
+        class GridPointCollector
+        {
+        public:
+            GridPointCollector( std::vector<spatial::GridPoint>& gridPoints );
 
-    bool operator()( const Spatial::GridPoint& gridPoint );
+            bool operator()( const spatial::GridPoint& gridPoint );
 
-private:
-    std::vector<Spatial::GridPoint>& gridPoints;
-};
+        private:
+            std::vector<spatial::GridPoint>& gridPoints;
+        };
 
-/**
- * Functor class that can be used on rayTrace as Predicate.
- * It stops the execution of the rayTrace method when collided and keep the last
- * free grid point (if not starts at an invalid point)
- */
-class CollisionDetector
-{
-public:
-    CollisionDetector( LocalSpaceMap2D* map, Spatial::GridPoint& collisionPoint, bool& collided );
-    bool operator()( const Spatial::GridPoint& gridPoint );
+        /**
+         * Functor class that can be used on rayTrace as Predicate.
+         * It stops the execution of the rayTrace method when collided and keep the last
+         * free grid point (if not starts at an invalid point)
+         */
+        class CollisionDetector
+        {
+        public:
+            CollisionDetector( LocalSpaceMap2D* map, spatial::GridPoint& collisionPoint, bool& collided );
+            bool operator()( const spatial::GridPoint& gridPoint );
 
-private:
-    LocalSpaceMap2D* map;
-    Spatial::GridPoint& collisionPoint;
-    bool& collided;
-};
+        private:
+            LocalSpaceMap2D* map;
+            spatial::GridPoint& collisionPoint;
+            bool& collided;
+        };
 
-/**
- * Template method that do a ray tracing in a grid space
- *
- * @param startPoint A grid cell point used to start ray tracing
- * @param endPoint A grid cell point used to stop the ray tracing
- * @param predicate A functor object used to handle every point during ray tracing
- */
-template <class Predicate> void rayTrace( const Spatial::GridPoint& startPoint, const Spatial::GridPoint& endPoint, Predicate predicate )
-{
+        /**
+         * Template method that do a ray tracing in a grid space
+         *
+         * @param startPoint A grid cell point used to start ray tracing
+         * @param endPoint A grid cell point used to stop the ray tracing
+         * @param predicate A functor object used to handle every point during ray tracing
+         */
+        template <class Predicate> void rayTrace( const spatial::GridPoint& startPoint, const spatial::GridPoint& endPoint, Predicate predicate )
+            {
 
-    // Bresenham line algorithm
-    int x1 = startPoint.first;
-    int y1 = startPoint.second;
-    int x2 = endPoint.first;
-    int y2 = endPoint.second;
+                // Bresenham line algorithm
+                int x1 = startPoint.first;
+                int y1 = startPoint.second;
+                int x2 = endPoint.first;
+                int y2 = endPoint.second;
 
-    int temp;
+                int temp;
 
-    bool steep = ( abs( y2 - y1) > abs(x2 - x1) );
-    if ( steep ) {
-        //   swap(x0, y0)
-        temp = x1; x1 = y1; y1 = temp;
-        //   swap(x1, y1)
-        temp = x2; x2 = y2; y2 = temp;
-    } // if
-    if ( x1 > x2 ) {
-        //   swap(x0, x1)
-        temp = x1; x1 = x2; x2 = temp;
-        //   swap(y0, y1)
-        temp = y1; y1 = y2; y2 = temp;
-    } // if
+                bool steep = ( abs( y2 - y1) > abs(x2 - x1) );
+                if ( steep ) {
+                    //   swap(x0, y0)
+                    temp = x1; x1 = y1; y1 = temp;
+                    //   swap(x1, y1)
+                    temp = x2; x2 = y2; y2 = temp;
+                } // if
+                if ( x1 > x2 ) {
+                    //   swap(x0, x1)
+                    temp = x1; x1 = x2; x2 = temp;
+                    //   swap(y0, y1)
+                    temp = y1; y1 = y2; y2 = temp;
+                } // if
 
-    int deltax = x2 - x1;
-    int deltay = abs(y2 - y1);
+                int deltax = x2 - x1;
+                int deltay = abs(y2 - y1);
 
-    float error = -deltax / 2;
+                float error = -deltax / 2;
 
-    int ystep = ( y1 < y2 ) ? 1 : -1;
+                int ystep = ( y1 < y2 ) ? 1 : -1;
 
-    int y = y1;
-    int x;
+                int y = y1;
+                int x;
 
-    Spatial::GridPoint currentPosition;
+                spatial::GridPoint currentPosition;
 
-    for ( x = x1; x <= x2; x += 1 ) {
-        if ( steep ) {
-            currentPosition.first = y;
-            currentPosition.second = x;
-        } else {
-            currentPosition.first = x;
-            currentPosition.second = y;
-        } // else
+                for ( x = x1; x <= x2; x += 1 ) {
+                    if ( steep ) {
+                        currentPosition.first = y;
+                        currentPosition.second = x;
+                    } else {
+                        currentPosition.first = x;
+                        currentPosition.second = y;
+                    } // else
 
-        if ( !predicate( currentPosition ) ) {
-            return;
-        } // if
+                    if ( !predicate( currentPosition ) ) {
+                        return;
+                    } // if
 
-        error = error + deltay;
-        if ( error >= 0.5 ) {
-            y = y + ystep;
-            error = error - deltax;
-        } // if
-    } // for
+                    error = error + deltay;
+                    if ( error >= 0.5 ) {
+                        y = y + ystep;
+                        error = error - deltax;
+                    } // if
+                } // for
 
-}
+            }
 
-/**
- * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
- */
-void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
-                    int obstacles, const Spatial::GridPoint& prob_center, int std_dev = 75);
+        /**
+         * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
+         */
+        void populateRandom(opencog::RandGen& rng, spatial::LocalSpaceMap2D& lsm,
+                            int obstacles, const spatial::GridPoint& prob_center, int std_dev = 75);
 
-} // namespace spatial
+    } // spatial
+} // opencog
 
 #endif

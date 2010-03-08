@@ -965,7 +965,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     if (spaceMapHandle != Handle::UNDEFINED) {
         const SpaceServer::SpaceMap& spaceMap =
             atomSpace->getSpaceServer().getMap(spaceMapHandle);
-        Spatial::Point petLoc = WorldWrapperUtil::getLocation(spaceMap,
+        spatial::Point petLoc = WorldWrapperUtil::getLocation(spaceMap,
                 *atomSpace, this->petId);
         spaceMap.findEntities( spaceMap.snap(petLoc), rayOfVicinity,
                 back_inserter(entitiesInVicinity) );
@@ -1136,7 +1136,7 @@ void Pet::stopVisualDebuggerServer( void )
     } // if
 }
 
-void Pet::sendMapToVisualDebuggerClients( const Spatial::LocalSpaceMap2D& map )
+void Pet::sendMapToVisualDebuggerClients( const spatial::LocalSpaceMap2D& map )
 {
     if ( this->visualDebuggerServer != NULL && this->visualDebuggerServer->isRunning( ) ) {
         this->visualDebuggerServer->sendMap( map );

@@ -48,11 +48,11 @@ PetPsychePredicatesUpdater::~PetPsychePredicatesUpdater()
 {
 }
 
-Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Handle agent)
+spatial::math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Handle agent)
 {
     const SpaceServer::SpaceMap& spaceMap = atomSpace.getSpaceServer().getLatestMap( );
 
-    const Spatial::EntityPtr& entity = spaceMap.getEntity( atomSpace.getName(agent) );
+    const spatial::EntityPtr& entity = spaceMap.getEntity( atomSpace.getName(agent) );
 
 
 //  const SpaceServer::ObjectMetadata& agentMetaData =
@@ -60,42 +60,42 @@ Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
     SpaceServer::SpaceMapPoint agentCenter( entity->getPosition( ).x, entity->getPosition( ).y );
 
     // get the object's direction vector (where it's face is pointing)
-    Spatial::Math::Vector3 agentFovDirection = entity->getDirection( );//( std::cos(agentMetaData.yaw), std::sin(agentMetaData.yaw) );
+    spatial::math::Vector3 agentFovDirection = entity->getDirection( );//( std::cos(agentMetaData.yaw), std::sin(agentMetaData.yaw) );
 
     // agent fov will reach 30% of the map width
     float agentFovReach = fabs( spaceMap.xMax( ) - spaceMap.xMin( ) ) * 0.3;
 
-    Spatial::Math::Vector3 maximumPoint = agentFovDirection * agentFovReach;
+    spatial::math::Vector3 maximumPoint = agentFovDirection * agentFovReach;
 
-    Spatial::Math::Line limitLine( Spatial::Math::Quaternion( Spatial::Math::Vector3::Z_UNIT, M_PI / 2).rotate( agentFovDirection ) + maximumPoint, Spatial::Math::Quaternion( Spatial::Math::Vector3::Z_UNIT, -M_PI / 2).rotate( agentFovDirection ) + maximumPoint );
+    spatial::math::Line limitLine( spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, M_PI / 2).rotate( agentFovDirection ) + maximumPoint, spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, -M_PI / 2).rotate( agentFovDirection ) + maximumPoint );
 
     // agent fov will be 160 degrees
-    Spatial::Math::Vector3 leftPoint( Spatial::Math::Quaternion( Spatial::Math::Vector3::Z_UNIT, 80*M_PI / 180 ).rotate( agentFovDirection ) * agentFovReach );
+    spatial::math::Vector3 leftPoint( spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, 80*M_PI / 180 ).rotate( agentFovDirection ) * agentFovReach );
 
-    Spatial::Math::Vector3 rightPoint( Spatial::Math::Quaternion( Spatial::Math::Vector3::Z_UNIT, -80*M_PI / 180 ).rotate( agentFovDirection ) * agentFovReach );
+    spatial::math::Vector3 rightPoint( spatial::math::Quaternion( spatial::math::Vector3::Z_UNIT, -80*M_PI / 180 ).rotate( agentFovDirection ) * agentFovReach );
 
-    Spatial::Math::Vector3 intersectionPoint;
+    spatial::math::Vector3 intersectionPoint;
 
-    Spatial::Math::LineSegment leftLine( Spatial::Math::Vector3( 0, 0 ), leftPoint );
+    spatial::math::LineSegment leftLine( spatial::math::Vector3( 0, 0 ), leftPoint );
     if ( !limitLine.intersects( leftLine, &intersectionPoint ) ) {
         logger().error("PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) leftLine(%s)", limitLine.toString( ).c_str( ), leftLine.toString( ).c_str( ) );
     } // if
     leftPoint = intersectionPoint;
 
-    Spatial::Math::Line rightLine( Spatial::Math::Vector3( 0, 0 ), rightPoint );
+    spatial::math::Line rightLine( spatial::math::Vector3( 0, 0 ), rightPoint );
     if ( !limitLine.intersects( rightLine, &intersectionPoint ) ) {
         logger().error("PetPsychePredicatesUpdater - Lines should intersect limitLine(%s) rightLine(%s) fovDirection(%s) reach(%f) maxPoint(%s)", limitLine.toString( ).c_str( ), rightLine.toString( ).c_str( ), agentFovDirection.toString( ).c_str( ), agentFovReach, maximumPoint.toString( ).c_str( ) );
     } // if
     rightPoint = intersectionPoint;
 
     /*
-    if ( !Spatial::Math::lineIntersection( limitLine, Spatial::Math::LineSegment( Spatial::Math::Vector3( 0,0 ), leftPoint ), intersectionPoint ) ) {
+    if ( !spatial::math::lineIntersection( limitLine, spatial::math::LineSegment( spatial::math::Vector3( 0,0 ), leftPoint ), intersectionPoint ) ) {
       logger().error("PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, leftPoint.x, leftPoint.y );
     } // if
 
 
     leftPoint = intersectionPoint;
-    if ( !lineIntersection( limitLine, Spatial::Math::LineSegment( Spatial::Math::Vector3( 0,0 ), rightPoint ), intersectionPoint ) ) {
+    if ( !lineIntersection( limitLine, spatial::math::LineSegment( spatial::math::Vector3( 0,0 ), rightPoint ), intersectionPoint ) ) {
       logger().error("PetPsychePredicatesUpdater - Line intersection cannot be null lineA(%f,%f - %f, %f) lineB(%f,%f - %f,%f).", limitLine.pointA.x, limitLine.pointA.y, limitLine.pointB.x, limitLine.pointB.y, 0, 0, rightPoint.x, rightPoint.y );
     } // if
     rightPoint = intersectionPoint;
@@ -104,11 +104,11 @@ Spatial::Math::Triangle PetPsychePredicatesUpdater::createFieldOfViewTriangle(Ha
 
 
     // translate the points from 0,0 to the current agent position
-    Spatial::Math::Vector3 agentPosition( agentCenter.first, agentCenter.second );
+    spatial::math::Vector3 agentPosition( agentCenter.first, agentCenter.second );
     leftPoint += agentPosition;
     rightPoint += agentPosition;
 
-    return Spatial::Math::Triangle( agentPosition, leftPoint, rightPoint );
+    return spatial::math::Triangle( agentPosition, leftPoint, rightPoint );
 
 }
 
@@ -152,13 +152,13 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
     // this predicate is needed by learning mode. It means near, but not much
     bool nextOwner = false;
 
-    const Spatial::EntityPtr& agentEntity = spaceMap.getEntity( agentName );
+    const spatial::EntityPtr& agentEntity = spaceMap.getEntity( agentName );
 
     SpaceServer::SpaceMapPoint petCenter( agentEntity->getPosition( ).x, agentEntity->getPosition( ).y );
 
     bool needsArtificialFOV = ( atomSpace.getType(pet) == PET_NODE );
 
-    Spatial::Math::Triangle petFieldOfView;
+    spatial::math::Triangle petFieldOfView;
     if ( needsArtificialFOV ) {
         petFieldOfView = createFieldOfViewTriangle(pet);
     } // if
@@ -174,7 +174,7 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
         std::string elementId = atomSpace.getName( entityHandle );
         //const SpaceServer::ObjectMetadata& elementMetaData =
         //  spaceMap.getMetaData( elementId );
-        const Spatial::EntityPtr& objectEntity = spaceMap.getEntity( elementId );
+        const spatial::EntityPtr& objectEntity = spaceMap.getEntity( elementId );
         SpaceServer::SpaceMapPoint elementCenter( objectEntity->getPosition( ).x, objectEntity->getPosition( ).y );
 
         { // log pet and element positions
@@ -193,18 +193,18 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
         bool isNextEntity = AtomSpaceUtil::isPredicateTrue(atomSpace, "next", entityHandle, pet );
         bool isMoving = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_moving", entityHandle );
 
-        //const Spatial::Object& elementObject = spaceMap.getObject( elementId );
+        //const spatial::Object& elementObject = spaceMap.getObject( elementId );
 
 
-        const Spatial::EntityPtr& elementEntity = spaceMap.getEntity( elementId );
-        const Spatial::Math::BoundingBox& bb = elementEntity->getBoundingBox( );
+        const spatial::EntityPtr& elementEntity = spaceMap.getEntity( elementId );
+        const spatial::math::BoundingBox& bb = elementEntity->getBoundingBox( );
         if ( needsArtificialFOV ) {
 
-            std::vector<Spatial::Math::LineSegment> bottomSegments;
-            bottomSegments.push_back( Spatial::Math::LineSegment( bb.getCorner( Spatial::Math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( Spatial::Math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
-            bottomSegments.push_back( Spatial::Math::LineSegment( bb.getCorner( Spatial::Math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( Spatial::Math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
-            bottomSegments.push_back( Spatial::Math::LineSegment( bb.getCorner( Spatial::Math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( Spatial::Math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
-            bottomSegments.push_back( Spatial::Math::LineSegment( bb.getCorner( Spatial::Math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( Spatial::Math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
+            std::vector<spatial::math::LineSegment> bottomSegments;
+            bottomSegments.push_back( spatial::math::LineSegment( bb.getCorner( spatial::math::BoundingBox::FAR_LEFT_BOTTOM ), bb.getCorner( spatial::math::BoundingBox::FAR_RIGHT_BOTTOM ) ) );
+            bottomSegments.push_back( spatial::math::LineSegment( bb.getCorner( spatial::math::BoundingBox::FAR_RIGHT_BOTTOM ), bb.getCorner( spatial::math::BoundingBox::NEAR_RIGHT_BOTTOM ) ) );
+            bottomSegments.push_back( spatial::math::LineSegment( bb.getCorner( spatial::math::BoundingBox::NEAR_RIGHT_BOTTOM ), bb.getCorner( spatial::math::BoundingBox::NEAR_LEFT_BOTTOM ) ) );
+            bottomSegments.push_back( spatial::math::LineSegment( bb.getCorner( spatial::math::BoundingBox::NEAR_LEFT_BOTTOM ), bb.getCorner( spatial::math::BoundingBox::FAR_LEFT_BOTTOM ) ) );
 
 
             // TODO: change LocalSpaceMap to support object type on addObject
@@ -251,21 +251,21 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             unsigned long timeBetweenTicks = timestamp - this->latestSimWorldTimestamp;
             unsigned long timeDuringAgentLastAction = timeBetweenTicks * 2;
 
-            Spatial::Math::Vector3 velocity3D = AtomSpaceUtil::getMostRecentObjectVelocity(atomSpace, entity,  timestamp - timeDuringAgentLastAction );
-            Spatial::Math::Vector3 velocity( velocity3D.x, velocity3D.y );
+            spatial::math::Vector3 velocity3D = AtomSpaceUtil::getMostRecentObjectVelocity(atomSpace, entity,  timestamp - timeDuringAgentLastAction );
+            spatial::math::Vector3 velocity( velocity3D.x, velocity3D.y );
             velocity.normalise( );
 
             // retrieve pet and target metadata
-            const Spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
-            const Spatial::EntityPtr& targetEntity = map.getEntity( entity );
-            //const Spatial::Object& targetObject = map.getObject( entity );
-            const Spatial::EntityPtr& agentEntity = map.getEntity( atomSpace.getName(pet) );
-            //const Spatial::Object& petObject = map.getObject(atomSpace.getName(pet));
+            const spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
+            const spatial::EntityPtr& targetEntity = map.getEntity( entity );
+            //const spatial::Object& targetObject = map.getObject( entity );
+            const spatial::EntityPtr& agentEntity = map.getEntity( atomSpace.getName(pet) );
+            //const spatial::Object& petObject = map.getObject(atomSpace.getName(pet));
 
             float distance = agentEntity->distanceTo( *targetEntity );
 
             // verify if the target will possibly collide with pet if it continues it's current path
-            Spatial::MovableEntityPtr futureTargetEntity( new Spatial::MovableEntity( targetEntity->getId( ), targetEntity->getName( ),
+            spatial::MovableEntityPtr futureTargetEntity( new spatial::MovableEntity( targetEntity->getId( ), targetEntity->getName( ),
                     ( targetEntity->getPosition( ) + (velocity * distance * 2 ) ),
                     targetEntity->getDimension( ), targetEntity->getOrientation( ),
                     targetEntity->getExpansionRadius( ) ) );
@@ -275,11 +275,11 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
                 isMovingToward = true;
             } // if
 
-            //Spatial::Vector3 futurePosition targetPath( targetCenter, (velocity * distance * 2 ) + petCenter );
+            //spatial::Vector3 futurePosition targetPath( targetCenter, (velocity * distance * 2 ) + petCenter );
 
             /*
-            foreach( const Spatial::Math::LineSegment& segment, petObject.borderSegments ) {
-            if ( Spatial::getDistanceBetweenSegments( segment, targetPath ) < 0.00000001 ) {
+            foreach( const spatial::math::LineSegment& segment, petObject.borderSegments ) {
+            if ( spatial::getDistanceBetweenSegments( segment, targetPath ) < 0.00000001 ) {
               isMovingToward = true;
              } // if
             } // foreach
@@ -296,8 +296,8 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             std::map<std::string, Handle> elements;
             elements["Theme"] = atomSpace.addNode( SEME_NODE, entity );
             
-            const Spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
-            const Spatial::EntityPtr& targetEntity = map.getEntity( entity );
+            const spatial::LocalSpaceMap2D& map = atomSpace.getSpaceServer().getLatestMap();
+            const spatial::EntityPtr& targetEntity = map.getEntity( entity );
             HandleSeq movementDirection;
             movementDirection.push_back( atomSpace.addNode( NUMBER_NODE, 
                 boost::lexical_cast<std::string>(targetEntity->getDirection( ).x ) ) );

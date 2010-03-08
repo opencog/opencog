@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Plane.cc
+ * opencog/spatial/math/Plane.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,11 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Plane.h"
-#include "Vector4.h"
-#include "Matrix3.h"
+#include <opencog/spatial/math/Plane.h>
+#include <opencog/spatial/math/Vector4.h>
+#include <opencog/spatial/math/Matrix3.h>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 Plane::Plane( void ) : normal(), distanceFromOrigo(0)
 {

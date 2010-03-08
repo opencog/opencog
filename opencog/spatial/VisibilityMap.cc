@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VisibilityMap.h"
-#include "Math/Rectangle.h"
+#include <opencog/spatial/VisibilityMap.h>
+#include <opencog/spatial/math/Rectangle.h>
 
 #include <opencog/util/Logger.h>
 #include <iostream>
@@ -30,32 +30,32 @@
 
 #include <boost/scoped_ptr.hpp>
 
-using namespace Spatial;
 using namespace opencog;
+using namespace opencog::spatial;
 
 /// Start Class Tile
-VisibilityMap::Tile::Tile( double x, double y, int row, int col, const Math::Vector3& normal, double tileSideSize ) :
+VisibilityMap::Tile::Tile( double x, double y, int row, int col, const math::Vector3& normal, double tileSideSize ) :
         tileSideSize( tileSideSize ), visible( false ), discoveringTime( 0 ),
         row( row ), col( col ), normal( normal ), center( x, 0, y ) { }
 
-const Math::Vector3& VisibilityMap::Tile::getNormal( void )
+const math::Vector3& VisibilityMap::Tile::getNormal( void )
 {
     return this->normal;
 }
 
-const Math::Vector3& VisibilityMap::Tile::getCenter( void )
+const math::Vector3& VisibilityMap::Tile::getCenter( void )
 {
     return this->center;
 }
 
-std::vector<Math::Vector3> VisibilityMap::Tile::getCorners( void )
+std::vector<math::Vector3> VisibilityMap::Tile::getCorners( void )
 {
-    std::vector<Math::Vector3> corners;
+    std::vector<math::Vector3> corners;
 
-    corners.push_back( Math::Vector3( this->center.x - tileSideSize / 2, 0, this->center.z + tileSideSize / 2 ) );
-    corners.push_back( Math::Vector3( this->center.x + tileSideSize / 2, 0, this->center.z + tileSideSize / 2 ) );
-    corners.push_back( Math::Vector3( this->center.x + tileSideSize / 2, 0, this->center.z - tileSideSize / 2 ) );
-    corners.push_back( Math::Vector3( this->center.x - tileSideSize / 2, 0, this->center.z - tileSideSize / 2 ) );
+    corners.push_back( math::Vector3( this->center.x - tileSideSize / 2, 0, this->center.z + tileSideSize / 2 ) );
+    corners.push_back( math::Vector3( this->center.x + tileSideSize / 2, 0, this->center.z + tileSideSize / 2 ) );
+    corners.push_back( math::Vector3( this->center.x + tileSideSize / 2, 0, this->center.z - tileSideSize / 2 ) );
+    corners.push_back( math::Vector3( this->center.x - tileSideSize / 2, 0, this->center.z - tileSideSize / 2 ) );
 
     return corners;
 }
@@ -128,7 +128,7 @@ bool VisibilityMap::HiddenTileVisitor::operator( )( const VisibilityMap::TilePtr
 }
 
 
-VisibilityMap::NearestTileVisitor::NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::InvalidParamException) :
+VisibilityMap::NearestTileVisitor::NearestTileVisitor( const spatial::math::Vector3& referencePosition, bool visibility, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::InvalidParamException) :
         TileVisitor( areaNumber, numberOfAreas ), referencePosition( referencePosition ),
         visibility( visibility ), currentDistance( std::numeric_limits<double>::max( ) )
 {
@@ -164,7 +164,7 @@ bool VisibilityMap::NearestTileVisitor::operator( )( const VisibilityMap::TilePt
 /// End Class TileVisitor
 
 /// Start Class VisibilityMap
-VisibilityMap::VisibilityMap( const Math::Vector3& minimumExtent, const Math::Vector3& maximumExtent, unsigned int numberOfTiles ) : numberOfTiles( numberOfTiles ), minimumExtent( minimumExtent ), maximumExtent( maximumExtent )
+VisibilityMap::VisibilityMap( const math::Vector3& minimumExtent, const math::Vector3& maximumExtent, unsigned int numberOfTiles ) : numberOfTiles( numberOfTiles ), minimumExtent( minimumExtent ), maximumExtent( maximumExtent )
 {
 
     unsigned int x;
@@ -181,7 +181,7 @@ VisibilityMap::VisibilityMap( const Math::Vector3& minimumExtent, const Math::Ve
             double centerX = minimumExtent.x + (x * tileSideSize) + tileSideSize / 2;
             double centerY = minimumExtent.z + (y * tileSideSize) + tileSideSize / 2;
             ++tilesCounter;
-            rowTiles.push_back( TilePtr( new VisibilityMap::Tile( centerX, centerY, y, x, Math::Vector3( 0, 1, 0 ), this->tileSideSize ) ) );
+            rowTiles.push_back( TilePtr( new VisibilityMap::Tile( centerX, centerY, y, x, math::Vector3( 0, 1, 0 ), this->tileSideSize ) ) );
         } // for
         tiles.push_back( rowTiles );
     } // for
@@ -193,7 +193,7 @@ VisibilityMap::VisibilityMap( const Math::Vector3& minimumExtent, const Math::Ve
     logger().debug("VisibilityMap - #number of tiles per side: %d, tile side size: %f", numberOfTiles, tileSideSize );
 }
 
-const VisibilityMap::TilePtr& VisibilityMap::getTile( const Math::Vector3& position ) const throw( opencog::NotFoundException )
+const VisibilityMap::TilePtr& VisibilityMap::getTile( const math::Vector3& position ) const throw( opencog::NotFoundException )
 {
     if ( position.x >= this->minimumExtent.x &&
             position.x <= this->maximumExtent.x &&
@@ -310,7 +310,7 @@ const VisibilityMap::TilePtr& VisibilityMap::getNextVisibleTile( unsigned int ar
     return tile;
 }
 
-const VisibilityMap::TilePtr&  VisibilityMap::getNearestHiddenTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
+const VisibilityMap::TilePtr&  VisibilityMap::getNearestHiddenTile( const spatial::math::Vector3& referencePosition, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
 {
     NearestTileVisitor* visitor = new NearestTileVisitor( referencePosition, false, areaNumber, numberOfAreas );
     visitTiles( visitor );
@@ -322,7 +322,7 @@ const VisibilityMap::TilePtr&  VisibilityMap::getNearestHiddenTile( const Spatia
     return tile;
 }
 
-const VisibilityMap::TilePtr&  VisibilityMap::getNearestVisibleTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
+const VisibilityMap::TilePtr&  VisibilityMap::getNearestVisibleTile( const spatial::math::Vector3& referencePosition, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
 {
     NearestTileVisitor* visitor = new NearestTileVisitor( referencePosition, true, areaNumber, numberOfAreas );
     visitTiles( visitor );
@@ -334,7 +334,7 @@ const VisibilityMap::TilePtr&  VisibilityMap::getNearestVisibleTile( const Spati
     return tile;
 }
 
-Spatial::Math::Vector3 VisibilityMap::getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
+spatial::math::Vector3 VisibilityMap::getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
 {
     unsigned int areasPerSide = static_cast<unsigned int>( std::sqrt( numberOfAreas ) );
     unsigned int cellsPerAreaSide = this->tiles.size( ) / areasPerSide;
@@ -348,7 +348,7 @@ Spatial::Math::Vector3 VisibilityMap::getAreaCenter( unsigned int areaNumber, un
     return getTile( startRow + middleCell, startCol + middleCell )->getCenter( );
 }
 
-bool VisibilityMap::isInsideArea( const Spatial::Entity& entity, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
+bool VisibilityMap::isInsideArea( const spatial::Entity& entity, unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException)
 {
 
     unsigned int areasPerSide = static_cast<unsigned int>( std::sqrt( numberOfAreas ) );
@@ -370,8 +370,8 @@ bool VisibilityMap::isInsideArea( const Spatial::Entity& entity, unsigned int ar
 
     //std::cout << "TargetPosition: " << entity.getPosition( ).toString( ) << " AreaNumber: " << areaNumber << " NumberOfAreas: " << numberOfAreas << " StartRow: " << startRow << " StartCol: " << startCol << " EndRow: " << endRow << " EndCol: " << endCol << " AreasPerSide: " << areasPerSide << " CellsPerAreaSide: " << cellsPerAreaSide << " NumberOfTiles: " << this->tiles.size( ) << std::endl;
 
-    Spatial::Math::Vector3 center1 = getTile( startRow, startCol )->getCenter( );
-    Spatial::Math::Vector3 center2 = getTile( endRow, endCol )->getCenter( );
+    spatial::math::Vector3 center1 = getTile( startRow, startCol )->getCenter( );
+    spatial::math::Vector3 center2 = getTile( endRow, endCol )->getCenter( );
 
     center1 -= tileSideSize / 2;
     center2 += tileSideSize / 2;
@@ -384,19 +384,19 @@ bool VisibilityMap::isInsideArea( const Spatial::Entity& entity, unsigned int ar
     //  std::cout << entity.getPosition( ).toString( ) << std::endl;
     //  std::cout << std::endl;
 
-    Math::Rectangle boundings( center1, Spatial::Math::Vector3( center2.x, 0, center1.z ), center2 );
-    const std::vector<Math::LineSegment>& corners = entity.getBoundingBox( ).getAllEdges( );
+    math::Rectangle boundings( center1, spatial::math::Vector3( center2.x, 0, center1.z ), center2 );
+    const std::vector<math::LineSegment>& corners = entity.getBoundingBox( ).getAllEdges( );
     // TODO: change default OPC coordinate systems to x, z, y instead of using just x and y
     unsigned int i;
     for ( i = 0; i < 4; ++i ) {
-        if ( boundings.isInside( Math::Vector3( corners[i].pointA.x, 0, corners[i].pointA.y ) ) ) {
+        if ( boundings.isInside( math::Vector3( corners[i].pointA.x, 0, corners[i].pointA.y ) ) ) {
             return true;
         } // if
     } // for
-    return boundings.isInside( Math::Vector3( entity.getPosition( ).x, 0, entity.getPosition( ).y ) );
+    return boundings.isInside( math::Vector3( entity.getPosition( ).x, 0, entity.getPosition( ).y ) );
 }
 
-const VisibilityMap::TilePtr& VisibilityMap::getNearestVisibleTileToPosition( const Spatial::Math::Vector3& referencePosition ) throw (opencog::NotFoundException)
+const VisibilityMap::TilePtr& VisibilityMap::getNearestVisibleTileToPosition( const spatial::math::Vector3& referencePosition ) throw (opencog::NotFoundException)
 {
 
     const TilePtr& tile = getTile( referencePosition );
@@ -506,8 +506,8 @@ VisibilityMapPtr VisibilityMap::loadFromFile( const std::string& fileName ) thro
         throw opencog::NotFoundException( "VisibilityMap::loadFromFile - Cannot open file[%s]", TRACE_INFO, fileName.c_str( ) );
     } // if
 
-    Spatial::Math::Vector3 minExtent;
-    Spatial::Math::Vector3 maxExtent;
+    spatial::math::Vector3 minExtent;
+    spatial::math::Vector3 maxExtent;
     unsigned int tilesSide;
     file >> minExtent.x >> minExtent.y >> minExtent.z;
     file >> maxExtent.x >> maxExtent.y >> maxExtent.z;

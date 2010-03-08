@@ -38,8 +38,8 @@ namespace Procedure
 {
 
 using namespace combo;
-using namespace Spatial;
 using namespace opencog;
+using namespace opencog::spatial;
 using namespace boost::assign;
 using namespace PerceptionActionInterface;
 

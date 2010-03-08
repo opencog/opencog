@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Face.cc
+ * opencog/spatial/math/Face.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,10 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Face.h"
-#include "Matrix3.h"
+#include <opencog/spatial/math/Face.h>
+#include <opencog/spatial/math/Matrix3.h>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 Face::Face( const Vector3& pointA, const Vector3& pointB, const Vector3& pointC ) :
         pointA(pointA), pointB(pointB), pointC(pointC)

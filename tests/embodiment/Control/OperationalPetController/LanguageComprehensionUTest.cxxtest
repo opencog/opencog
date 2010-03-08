@@ -418,7 +418,7 @@ public:
 
         { // create a dump of the map
             std::ofstream file("testMapDump.txt");
-            file << Spatial::LocalSpaceMap2D::toString( this->atomSpace->getSpaceServer( ).getLatestMap( ) );
+            file << spatial::LocalSpaceMap2D::toString( this->atomSpace->getSpaceServer( ).getLatestMap( ) );
             file.close();
         } // end block
             

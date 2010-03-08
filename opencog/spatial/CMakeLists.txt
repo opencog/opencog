@@ -10,14 +10,14 @@ ADD_LIBRARY(SpaceMap
     LocalSpaceMap2DUtil
     LocalSpaceMap2D
     VisibilityMap
-    Math/BoundingBox.cc  
-    Math/MathCommon.cc  
-    Math/Matrix4.cc  
-    Math/Quaternion.cc
-    Math/Face.cc         
-    Math/Matrix3.cc     
-    Math/Plane.cc    
-    Math/Rectangle.cc
+    math/BoundingBox.cc  
+    math/MathCommon.cc  
+    math/Matrix4.cc  
+    math/Quaternion.cc
+    math/Face.cc         
+    math/Matrix3.cc     
+    math/Plane.cc    
+    math/Rectangle.cc
 
     Entity.cc
     SuperEntity.cc
@@ -78,7 +78,6 @@ ADD_EXECUTABLE(MapTools
     MapExplorerRenderer
     MapExplorerSystem
 )
-
 TARGET_LINK_LIBRARIES(MapTools
     SpaceMap
     util

@@ -24,47 +24,59 @@
 #ifndef _SPATIAL_STATICENTITY_H_
 #define _SPATIAL_STATICENTITY_H_
 
-#include "Entity.h"
-namespace Spatial
+#include <opencog/spatial/Entity.h>
+namespace opencog
 {
+    namespace spatial
+    {
 
-class StaticEntity;
+        class StaticEntity;
 
-typedef boost::shared_ptr<StaticEntity> StaticEntityPtr;
+        typedef boost::shared_ptr<StaticEntity> StaticEntityPtr;
 
-class StaticEntity : public Entity
-{
-public:
-    /**
-     * Custom constructor
-     * @param entity
-     */
-    StaticEntity(const StaticEntity& object ) : Entity( object.id, object.name, object.position, object.dimension, object.orientation, object.expansionRadius ) {
-    }
+        class StaticEntity : public Entity
+        {
+        public:
+            /**
+             * Custom constructor
+             * @param entity
+             */
+            StaticEntity(const StaticEntity& object ) : 
+                Entity( object.id, object.name, object.position, 
+                    object.dimension, object.orientation, object.expansionRadius ) 
+            {
+            }
 
-    /**
-     * Custom constructor
-     * @param id
-     * @param name
-     * @param position
-     * @param dimension
-     * @param orientation
-     */
-    StaticEntity(  long id, const std::string& name, const Math::Vector3& position, const Math::Dimension3& dimension, const Math::Quaternion& orientation, double radius = 0.0 ) : Entity( id, name, position, dimension, orientation, radius ) {
-    }
+            /**
+             * Custom constructor
+             * @param id
+             * @param name
+             * @param position
+             * @param dimension
+             * @param orientation
+             */
+            StaticEntity( long id, const std::string& name, const math::Vector3& position, 
+                const math::Dimension3& dimension, const math::Quaternion& orientation, 
+                    double radius = 0.0 ) : 
+                        Entity( id, name, position, dimension, orientation, radius ) 
+            {
+            }
 
-    ENTITY_TYPE getType(void ) const {
-        return Entity::STATIC;
-    }
+            ENTITY_TYPE getType(void ) const 
+            {
+                return Entity::STATIC;
+            }
 
-    virtual inline EntityPtr clone( void ) const {
-        StaticEntityPtr clone( new StaticEntity( *this ) );
-        clone->properties = this->properties;
-        return clone;
-    }
+            virtual inline EntityPtr clone( void ) const 
+            {
+                StaticEntityPtr clone( new StaticEntity( *this ) );
+                clone->properties = this->properties;
+                return clone;
+            }
 
-}; // StaticEntity
-
-} // Spatial
+        }; // StaticEntity
+        
+    } // spatial
+} // opencog
 
 #endif // _SPATIAL_STATICENTITY_H_

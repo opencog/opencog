@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Rectangle.cc
+ * opencog/spatial/math/Rectangle.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,13 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Rectangle.h"
-#include "LineSegment.h"
+#include <opencog/spatial/math/Rectangle.h>
+#include <opencog/spatial/math/LineSegment.h>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
 
 Rectangle::Rectangle( const Rectangle& other ) : leftTopCorner( other.leftTopCorner ), rightTopCorner( other.rightTopCorner ), rightBottomCorner( other.rightBottomCorner )
 {

@@ -24,203 +24,206 @@
 #ifndef _SPATIAL_VISIBILITY_MAP_H_
 #define _SPATIAL_VISIBILITY_MAP_H_
 
-#include "Math/Vector3.h"
-#include "Entity.h"
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/Entity.h>
 #include <opencog/util/exceptions.h>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 
-namespace Spatial
+namespace opencog
 {
-
-/**
- * Visibility map is a class to keep track of the already visible areas.
- * When the agent is exploring new areas, the tiles corresponding to these areas
- * is been marked as visible.
- */
-class VisibilityMap;
-typedef boost::shared_ptr<VisibilityMap> VisibilityMapPtr;
-
-class VisibilityMap
-{
-
-public:
-
-    /**
-     * A tile covers a specific area of the VisibilityMap
-     */
-    class Tile
+    namespace spatial
     {
-    public:
 
-        Tile( double x, double y, int row, int col, const Math::Vector3& normal, double tileSideSize );
+        /**
+         * Visibility map is a class to keep track of the already visible areas.
+         * When the agent is exploring new areas, the tiles corresponding to these areas
+         * is been marked as visible.
+         */
+        class VisibilityMap;
+        typedef boost::shared_ptr<VisibilityMap> VisibilityMapPtr;
 
-        inline virtual ~Tile( void ) { };
+        class VisibilityMap
+        {
 
-        std::vector<Math::Vector3> getCorners( void );
+        public:
 
-        void setVisibility( bool visible );
+            /**
+             * A tile covers a specific area of the VisibilityMap
+             */
+            class Tile
+            {
+            public:
 
-        bool isVisible( void );
+                Tile( double x, double y, int row, int col, const math::Vector3& normal, double tileSideSize );
 
-        const Math::Vector3& getNormal( void );
+                inline virtual ~Tile( void ) { };
 
-        const Math::Vector3& getCenter( void );
+                std::vector<math::Vector3> getCorners( void );
 
-        int getRow( void ) const;
+                void setVisibility( bool visible );
 
-        int getCol( void ) const;
+                bool isVisible( void );
 
-    private:
-        double tileSideSize;
-        bool visible;
-        long discoveringTime;
-        int row;
-        int col;
-        Math::Vector3 normal;
-        Math::Vector3 center;
-    }; // Tile
-    typedef boost::shared_ptr<Tile> TilePtr;
+                const math::Vector3& getNormal( void );
 
+                const math::Vector3& getCenter( void );
 
+                int getRow( void ) const;
 
-    class TileVisitor
-    {
-    public:
+                int getCol( void ) const;
 
-        TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
-
-        inline virtual ~TileVisitor( void ) { };
-
-        // visitor method
-        virtual bool operator( )( const TilePtr& tile ) = 0;
-
-        inline unsigned int getAreaNumber( void ) const {
-            return this->areaNumber;
-        }
-
-        inline unsigned int getNumberOfAreas( void ) const {
-            return this->numberOfAreas;
-        }
-
-        const TilePtr& getLastValidTile( void ) const;
-
-    protected:
-
-        unsigned int areaNumber;
-        unsigned int numberOfAreas;
-        TilePtr lastValidTile;
-    }; // TileVisitor
-
-    class HiddenTileVisitor : public TileVisitor
-    {
-    public:
-        HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
-        virtual ~HiddenTileVisitor( void ) { }
-
-        virtual bool operator( )( const TilePtr& tile );
-    }; // HiddenTileVisitor
-
-    class VisibleTileVisitor : public TileVisitor
-    {
-    public:
-        VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
-        virtual ~VisibleTileVisitor( void ) { }
-
-        virtual bool operator( )( const TilePtr& tile );
-    }; // VisibleTileVisitor
+            private:
+                double tileSideSize;
+                bool visible;
+                long discoveringTime;
+                int row;
+                int col;
+                math::Vector3 normal;
+                math::Vector3 center;
+            }; // Tile
+            typedef boost::shared_ptr<Tile> TilePtr;
 
 
-    class NearestTileVisitor : public TileVisitor
-    {
-    public:
-        // look for nearest tiles to a given referencePosition and which has a given visibility
-        NearestTileVisitor( const Spatial::Math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
-        virtual ~NearestTileVisitor( void ) { }
+            class TileVisitor
+            {
+            public:
 
-        virtual bool operator( )( const TilePtr& tile );
+                TileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
-    private:
-        Spatial::Math::Vector3 referencePosition;
-        bool visibility;
-        double currentDistance;
-    }; // NearestTileVisitor
+                inline virtual ~TileVisitor( void ) { };
 
+                // visitor method
+                virtual bool operator( )( const TilePtr& tile ) = 0;
 
-    const TilePtr& getTile( const Math::Vector3& position ) const throw( opencog::NotFoundException );
+                inline unsigned int getAreaNumber( void ) const {
+                    return this->areaNumber;
+                }
 
-    const TilePtr& getTile( unsigned int row, unsigned int column ) const throw( opencog::NotFoundException );
+                inline unsigned int getNumberOfAreas( void ) const {
+                    return this->numberOfAreas;
+                }
 
+                const TilePtr& getLastValidTile( void ) const;
 
-    /**
-                   row,col(n,n)
-       +-----------+ (maxExtent)
-       |           |
-       |           |
-       |           |
-       |           |
-       |(minExtent)|
-       +-----------+
-    row,col(0,0)
-     */
-    VisibilityMap( const Math::Vector3& minimumExtent, const Math::Vector3& maximumExtent, unsigned int numberOfTiles );
+            protected:
 
-    inline ~VisibilityMap( void ) { };
+                unsigned int areaNumber;
+                unsigned int numberOfAreas;
+                TilePtr lastValidTile;
+            }; // TileVisitor
 
-    void resetTiles( void );
+            class HiddenTileVisitor : public TileVisitor
+            {
+            public:
+                HiddenTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+                virtual ~HiddenTileVisitor( void ) { }
 
-    bool hasHiddenTile( void );
+                virtual bool operator( )( const TilePtr& tile );
+            }; // HiddenTileVisitor
 
-    TilePtr& nextHiddenTile( void );
+            class VisibleTileVisitor : public TileVisitor
+            {
+            public:
+                VisibleTileVisitor( unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
+                virtual ~VisibleTileVisitor( void ) { }
 
-    unsigned int getNumberOfTiles( void ) const;
-
-    double getTileSideSize( void ) const;
-
-    void visitTiles( TileVisitor* visitor );
-
-    inline unsigned int getNumberOfTilesPerRow( void ) const {
-        return this->tiles.size( );
-    };
+                virtual bool operator( )( const TilePtr& tile );
+            }; // VisibleTileVisitor
 
 
-    /**
-     * area number
-     * +-+-+-+
-     * |0|1|2|
-     * +-+-+-+
-     * |3|4|5|
-     * +-+-+-+
-     * |6|7|n|
-     */
-    const TilePtr& getNextHiddenTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
+            class NearestTileVisitor : public TileVisitor
+            {
+            public:
+                // look for nearest tiles to a given referencePosition and which has a given visibility
+                NearestTileVisitor( const spatial::math::Vector3& referencePosition, bool visibility, unsigned int areaNumber = 1, unsigned int numberOfAreas = 1 ) throw (opencog::InvalidParamException);
 
-    const TilePtr& getNextVisibleTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
+                virtual ~NearestTileVisitor( void ) { }
 
-    const TilePtr& getNearestHiddenTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+                virtual bool operator( )( const TilePtr& tile );
 
-    const TilePtr& getNearestVisibleTile( const Spatial::Math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+            private:
+                spatial::math::Vector3 referencePosition;
+                bool visibility;
+                double currentDistance;
+            }; // NearestTileVisitor
 
-    Spatial::Math::Vector3 getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException);
 
-    bool isInsideArea( const Spatial::Entity& entity, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+            const TilePtr& getTile( const math::Vector3& position ) const throw( opencog::NotFoundException );
 
-    const TilePtr& getNearestVisibleTileToPosition( const Spatial::Math::Vector3& referencePosition ) throw (opencog::NotFoundException);
+            const TilePtr& getTile( unsigned int row, unsigned int column ) const throw( opencog::NotFoundException );
 
-    static bool saveToFile( const std::string& fileName, const VisibilityMap& map );
 
-    static VisibilityMapPtr loadFromFile( const std::string& fileName ) throw( opencog::NotFoundException );
+            /**
+               row,col(n,n)
+               +-----------+ (maxExtent)
+               |           |
+               |           |
+               |           |
+               |           |
+               |(minExtent)|
+               +-----------+
+               row,col(0,0)
+            */
+            VisibilityMap( const math::Vector3& minimumExtent, const math::Vector3& maximumExtent, unsigned int numberOfTiles );
 
-private:
-    unsigned int numberOfTiles;
-    double tileSideSize;
-    std::vector< std::vector<TilePtr> > tiles;
-    Math::Vector3 minimumExtent;
-    Math::Vector3 maximumExtent;
-}; // VisibilityMap
+            inline ~VisibilityMap( void ) { };
 
-} // Spatial
+            void resetTiles( void );
+
+            bool hasHiddenTile( void );
+
+            TilePtr& nextHiddenTile( void );
+
+            unsigned int getNumberOfTiles( void ) const;
+
+            double getTileSideSize( void ) const;
+
+            void visitTiles( TileVisitor* visitor );
+
+            inline unsigned int getNumberOfTilesPerRow( void ) const {
+                return this->tiles.size( );
+            };
+
+
+            /**
+             * area number
+             * +-+-+-+
+             * |0|1|2|
+             * +-+-+-+
+             * |3|4|5|
+             * +-+-+-+
+             * |6|7|n|
+             */
+            const TilePtr& getNextHiddenTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
+
+            const TilePtr& getNextVisibleTile( unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException, opencog::InvalidParamException);
+
+            const TilePtr& getNearestHiddenTile( const spatial::math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+
+            const TilePtr& getNearestVisibleTile( const spatial::math::Vector3& referencePosition, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+
+            spatial::math::Vector3 getAreaCenter( unsigned int areaNumber, unsigned int numberOfAreas ) throw (opencog::NotFoundException);
+
+            bool isInsideArea( const spatial::Entity& entity, unsigned int areaNumber = 0, unsigned int numberOfAreas = 1 ) throw (opencog::NotFoundException);
+
+            const TilePtr& getNearestVisibleTileToPosition( const spatial::math::Vector3& referencePosition ) throw (opencog::NotFoundException);
+
+            static bool saveToFile( const std::string& fileName, const VisibilityMap& map );
+
+            static VisibilityMapPtr loadFromFile( const std::string& fileName ) throw( opencog::NotFoundException );
+
+        private:
+            unsigned int numberOfTiles;
+            double tileSideSize;
+            std::vector< std::vector<TilePtr> > tiles;
+            math::Vector3 minimumExtent;
+            math::Vector3 maximumExtent;
+        }; // VisibilityMap
+
+    } // spatial
+} // opencog
 
 #endif // _SPATIAL_VISIBILITY_MAP_H_

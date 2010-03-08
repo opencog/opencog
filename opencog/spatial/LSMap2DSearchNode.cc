@@ -21,31 +21,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LSMap2DSearchNode.h"
+#include <opencog/spatial/LSMap2DSearchNode.h>
 #include <opencog/util/exceptions.h>
 
-using namespace Spatial;
-
-typedef LocalSpaceMap2D Map;
-//typedef LocalSpaceMap2D<unsigned int, double, boost::hash<unsigned int> > Map;
-//typedef Map::GridPoint GridPoint;
-//typedef 2DMap::Point Point;
+using namespace opencog;
+using namespace opencog::spatial;
 
 //for comparing different goal estimate heuristics
 int LSMap2DSearchNode::heuristic = LSMap2DSearchNode::MANHATTAN;
 
 //static class var needs to be defined outside the class declaration
-Map *LSMap2DSearchNode::map;
+LocalSpaceMap2D *LSMap2DSearchNode::map;
 
 LSMap2DSearchNode::LSMap2DSearchNode(): x(0), y(0) {}
 
 LSMap2DSearchNode::LSMap2DSearchNode(unsigned int px, unsigned int py):
         x(px), y(py) {}
 
-LSMap2DSearchNode::LSMap2DSearchNode(Spatial::GridPoint gp):
+LSMap2DSearchNode::LSMap2DSearchNode(spatial::GridPoint gp):
         x(gp.first), y(gp.second) {}
 
-void LSMap2DSearchNode::setMap(Map *map)
+void LSMap2DSearchNode::setMap(LocalSpaceMap2D *map)
 {
     //todo: pass map as pointer? what if changed underneath
     LSMap2DSearchNode::map = map;
@@ -53,7 +49,7 @@ void LSMap2DSearchNode::setMap(Map *map)
 
 bool LSMap2DSearchNode::isLegal(unsigned int x, unsigned int y)
 {
-    Spatial::GridPoint p(x, y);
+    spatial::GridPoint p(x, y);
     return !map->gridIllegal(p);
 }
 

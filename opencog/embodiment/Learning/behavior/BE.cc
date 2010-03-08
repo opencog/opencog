@@ -302,15 +302,15 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                                      "Handle sms_h should not be an 'Handle::UNDEFINED'.");
                     const SpaceServer::SpaceMap& sms = wp->getAtomSpace().getSpaceServer().getMap(sms_h);
                     //sas stands for Subject At Start
-                    const Spatial::EntityPtr& sasEntity = sms.getEntity(subject_id);
+                    const spatial::EntityPtr& sasEntity = sms.getEntity(subject_id);
 
                     //get the position of the nearest object to the subject at the
                     //start of the walk command
                     std::string obj_id_nearest_sas =
-                        sms.findNearestFiltered(Spatial::Point(sasEntity->getPosition( ).x,
+                        sms.findNearestFiltered(spatial::Point(sasEntity->getPosition( ).x,
                                                                sasEntity->getPosition( ).y), pred);
 
-                    const Spatial::EntityPtr& nearestSasEntity = sms.getEntity(obj_id_nearest_sas);
+                    const spatial::EntityPtr& nearestSasEntity = sms.getEntity(obj_id_nearest_sas);
 
                     //check that they are close enough
                     //if so then add that object into the set of objects that cannot be
@@ -334,15 +334,15 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     const SpaceServer::SpaceMap& sm = wp->getAtomSpace().getSpaceServer().getMap(sm_h);
                     std::string obj_id = sm.findNearestFiltered(p_walk_dest, pred);
 
-                    const Spatial::EntityPtr& objectEntity = sm.getEntity(obj_id);
+                    const spatial::EntityPtr& objectEntity = sm.getEntity(obj_id);
 
-                    const Spatial::EntityPtr& subjectEndEntity = sm.getEntity(subject_id);
+                    const spatial::EntityPtr& subjectEndEntity = sm.getEntity(subject_id);
 
                     double dist_subject_end = objectEntity->distanceTo(*subjectEndEntity);
 
 
                     //WARNING : not used because position after a walk command and of walk command destination does not coincide
-                    //double dist = (objectEntity->getPosition() - Spatial::Math::Vector3(p.first, p.second)).length();
+                    //double dist = (objectEntity->getPosition() - spatial::math::Vector3(p.first, p.second)).length();
                     //SpaceServer::SpaceMap::eucDist(p, obj_p);
                     //debug print
                     //std::cout << "NEAREST OBJECT AT THE END OF THE WALK COMMAND ACCORDING WALK DESTINATION : "
@@ -365,8 +365,8 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
                     //if(next_sm_h!=Handle::UNDEFINED) {
                     //const SpaceServer::SpaceMap& next_sm = wp->getAtomSpace().getSpaceServer().getMap(next_sm_h);
 
-                    //const Spatial::EntityPtr& nextObjectEntity = sm.getEntity(obj_id);
-                    //const Spatial::EntityPtr& nextSubjectEndEntity = next_sm.getEntity(subject_id);
+                    //const spatial::EntityPtr& nextObjectEntity = sm.getEntity(obj_id);
+                    //const spatial::EntityPtr& nextSubjectEndEntity = next_sm.getEntity(subject_id);
                     //double next_dist = (nextSubjectEndEntity->getPosition() - nextObjectEntity->getPosition()).length();
                     //std::cout << "NEAREST OBJECT AT THE NEXT MAP : " << obj_id
                     //      << " DIST : " << next_dist << std::endl;
@@ -384,10 +384,10 @@ void BehaviorEncoder::tempUpdateRec(Temporal exemplarInterval)
 
                     //const SpaceServer::ObjectMetadata& instant_next_md_obj = instant_next_sm.getMetaData(obj_id);
                     //SpaceServer::SpaceMapPoint instant_next_obj_p(instant_next_md_obj.centerX, instant_next_md_obj.centerY);
-                    //const Spatial::EntityPtr& instantNextObjectEntity = instant_next_sm.getEntity(obj_id);
+                    //const spatial::EntityPtr& instantNextObjectEntity = instant_next_sm.getEntity(obj_id);
 
                     //const SpaceServer::ObjectMetadata& instant_next_md_subject_end = instant_next_sm.getMetaData(subject_id);
-                    //const Spatial::EntityPtr& instantNextSubjectEndEntity = instant_next_sm.getEntity(subject_id);
+                    //const spatial::EntityPtr& instantNextSubjectEndEntity = instant_next_sm.getEntity(subject_id);
 
                     //SpaceServer::SpaceMapPoint instant_next_subject_end_p(instant_next_md_subject_end.centerX,
                     //       instant_next_md_subject_end.centerY);

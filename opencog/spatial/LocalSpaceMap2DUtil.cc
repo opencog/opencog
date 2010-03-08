@@ -21,45 +21,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LocalSpaceMap2DUtil.h"
-#include "LocalSpaceMap2D.h"
+#include <opencog/spatial/LocalSpaceMap2DUtil.h>
+#include <opencog/spatial/LocalSpaceMap2D.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 
-#include "Math/Vector3.h"
-#include "Math/LineSegment.h"
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/math/LineSegment.h>
 
 #include <limits>
 
-namespace Spatial
-{
+using namespace opencog;
+using namespace opencog::spatial;
 
-
-GridPointCollector::GridPointCollector( std::vector<Spatial::GridPoint>& gridPoints ) :
+GridPointCollector::GridPointCollector( std::vector<spatial::GridPoint>& gridPoints ) :
         gridPoints( gridPoints )
 {
 }
 
-bool GridPointCollector::operator()( const Spatial::GridPoint& gridPoint )
+bool GridPointCollector::operator()( const spatial::GridPoint& gridPoint )
 {
     gridPoints.push_back( gridPoint );
     return true;
 }
 
-CollisionDetector::CollisionDetector( Spatial::LocalSpaceMap2D* map, Spatial::GridPoint& collisionPoint, bool& collided ) :
+CollisionDetector::CollisionDetector( spatial::LocalSpaceMap2D* map, spatial::GridPoint& collisionPoint, bool& collided ) :
         map( map ), collisionPoint( collisionPoint ), collided( collided )
 {
-    collisionPoint = Spatial::GridPoint( 0, 0 );
+    collisionPoint = spatial::GridPoint( 0, 0 );
 };
 
-bool CollisionDetector::operator()( const Spatial::GridPoint& gridPoint )
+bool CollisionDetector::operator()( const spatial::GridPoint& gridPoint )
 {
     collided = map->gridIllegal( gridPoint );
 
     if ( collided ) {
         // set the start point as a collision point when rayTrace starts from a invalid position
-        if ( collisionPoint == Spatial::GridPoint( 0, 0 ) ) {
+        if ( collisionPoint == spatial::GridPoint( 0, 0 ) ) {
             collisionPoint = gridPoint;
         } // if
         return false;
@@ -100,8 +99,8 @@ bool ObjectMetaData::operator!=(const ObjectMetaData& rhs) const
 /**
  * DEPRECATED METHOD - it must be removed as like TangentBugTestExec and AStarTest
  */
-void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
-                    int obstacles, const Spatial::GridPoint& prob_center, int std_dev)
+void opencog::spatial::populateRandom(opencog::RandGen& rng, spatial::LocalSpaceMap2D& lsm,
+                    int obstacles, const spatial::GridPoint& prob_center, int std_dev)
 {
 
     for (int cnt = 0; cnt < obstacles; ++cnt) {
@@ -113,7 +112,7 @@ void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
         unsigned int radius_x = 1 + static_cast<unsigned int>
                                 (20 * rng.randDoubleOneExcluded());
 
-        Spatial::ObjectMetaData metaData;
+        spatial::ObjectMetaData metaData;
         metaData.centerX = center_x;
         metaData.centerY = center_y;
         metaData.centerZ = center_z;
@@ -125,6 +124,3 @@ void populateRandom(opencog::RandGen& rng, Spatial::LocalSpaceMap2D& lsm,
 
     } // for
 }
-
-
-}; // namespace Spatial

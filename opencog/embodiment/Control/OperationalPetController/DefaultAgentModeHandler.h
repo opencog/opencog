@@ -46,12 +46,12 @@ public:
         return this->modeName;
     }
 
-    Spatial::VisibilityMap* getVisibilityMap( void );
+    opencog::spatial::VisibilityMap* getVisibilityMap( void );
 
 protected:
     const std::string modeName;
     Pet* agent;
-    Spatial::VisibilityMap* visibilityMap;
+    opencog::spatial::VisibilityMap* visibilityMap;
 };
 }; // OperationalPetController
 

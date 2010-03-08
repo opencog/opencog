@@ -24,10 +24,10 @@
 #ifndef _SPATIAL_ENTITY_H_
 #define _SPATIAL_ENTITY_H_
 
-#include "Math/Dimension3.h"
-#include "Math/BoundingBox.h"
-#include "Math/Vector3.h"
-#include "Math/Quaternion.h"
+#include <opencog/spatial/math/Dimension3.h>
+#include <opencog/spatial/math/BoundingBox.h>
+#include <opencog/spatial/math/Vector3.h>
+#include <opencog/spatial/math/Quaternion.h>
 
 #include <vector>
 #include <string>
@@ -39,421 +39,449 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 
-
-
-namespace Spatial
+namespace opencog
 {
-
-
-class Entity;
-typedef boost::shared_ptr<Entity> EntityPtr;
-
-/**
- * Each element inside the virtual world is an entity.
- * This is an abstract class used to define all the kinds of entities.
- */
-class Entity
-{
-public:
-
-
-
-    enum SPATIAL_RELATION {
-        LEFT_OF = 0,
-        RIGHT_OF,
-        ABOVE,
-        BELOW,
-        BEHIND,
-        IN_FRONT_OF,
-        BESIDE,
-        NEAR,
-        FAR_,
-        TOUCHING,
-        BETWEEN,
-        INSIDE,
-        OUTSIDE,
-        
-        TOTAL_RELATIONS
-    };
-
-    enum AXIS_LIMITS {
-        XMIN = 0, XMAX,
-        YMIN, YMAX,
-        ZMIN, ZMAX
-    };
-
-    class LimitRelation {
-    public:
-        enum RELATION_AXIS {
-            X = 0,
-            Y,
-            Z
-        };
-        
-    LimitRelation( const Entity* entityA = NULL, const Entity* entityB = NULL ) :
-        entityA( entityA ), entityB( entityB ), limitsA(6), limitsB(6), relations(3) { }
-        
-        virtual ~LimitRelation( void ) { }
-        
-        const Entity* entityA;
-        const Entity* entityB;
-
-        std::vector<std::set<Math::Vector3> > limitsA;
-        std::vector<std::set<Math::Vector3> > limitsB;
-        std::vector<unsigned int> relations;
-    }; 
-
-
-    typedef boost::variant<std::string, int, double, bool> PropertyValueType;
-
-
-    /**
-     * All the types of entities
-     */
-    enum ENTITY_TYPE {
-        STATIC,
-        MOVABLE,
-        HUMANOID_AGENT,
-        PET_AGENT,
-        INVISIBLE
-    };
-
-    /**
-     * Types of properties
-     */
-    enum PROPERTY {
-        TYPE = 0,
-        EDIBLE,
-        DRINKABLE,
-        PET_HOME,
-        FOOD_BOWL,
-        WATER_BOWL,
-        OBSTACLE,
-
-        NUMBER_OF_PROPERTIES
-    };
-
-    typedef boost::unordered_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
-
-    /**
-     * Comparator class used to measure the distance between two objects
-     */
-    class EntityDistanceComparator
+    namespace spatial
     {
-    private:
-        const EntityPtr referenceEntity;
+
+
+        class Entity;
+        typedef boost::shared_ptr<Entity> EntityPtr;
 
         /**
-         * Use a given entity as reference.
-         * The computed distance will be the referenceEntity and a given different entity
-         * @param referenceObject
+         * Each element inside the virtual world is an entity.
+         * This is an abstract class used to define all the kinds of entities.
          */
-        inline EntityDistanceComparator( const EntityPtr& referenceObject ) : referenceEntity( referenceEntity ) {
-        }
-
-        inline virtual ~EntityDistanceComparator( void ) { }
-
-        /*
-         *
-         */
-        inline bool operator()( const EntityPtr& o1, const EntityPtr& o2) const {
-            double distanceToObject1 = referenceEntity->distanceTo(*o1);
-            double distanceToObject2 = referenceEntity->distanceTo(*o2);
-            if ( distanceToObject1 < distanceToObject2 ) {
-                return true;
-            } else {
-                return false;
-            } // else
-        }
-    };
-
-    /**
-     * Simple Copy constructor
-     * @param object
-     */
-    Entity( const EntityPtr& entity );
-
-    /**
-     * Parameterized constructor
-     * @param id
-     * @param name
-     * @param position
-     * @param width
-     * @param height
-     * @param length
-     * @param orientation
-     */
-    Entity( long id, const std::string& name, const Math::Vector3& position, const Math::Dimension3& dimension, const Math::Quaternion& orientation, double radius = 0.0 );
-
-    inline virtual ~Entity( void ) { }
-
-    /**
-     * Returns a vector pointing to the current entity direction (facing to)
-     * @return
-     */
-    Math::Vector3 getDirection( void ) const;
+        class Entity
+        {
+        public:
 
 
-    /**
-     * Getter for entity bounding box
-     * @return
-     */
-    inline const Math::BoundingBox& getBoundingBox( void ) const {
-        return this->boundingBox;
-    }
 
-    /**
-     * Getter for the current entity position
-     * @return
-     */
-    inline const Math::Vector3& getPosition( void ) const {
-        return this->position;
-    }
+            enum SPATIAL_RELATION 
+            {
+                LEFT_OF = 0,
+                RIGHT_OF,
+                ABOVE,
+                BELOW,
+                BEHIND,
+                IN_FRONT_OF,
+                BESIDE,
+                NEAR,
+                FAR_,
+                TOUCHING,
+                BETWEEN,
+                INSIDE,
+                OUTSIDE,
+        
+                TOTAL_RELATIONS
+            };
 
-    /**
-     * Getter for the current entity orientation
-     * @return
-     */
-    inline const Math::Quaternion& getOrientation( void ) const {
-        return this->orientation;
-    }
+            enum AXIS_LIMITS 
+            {
+                XMIN = 0, XMAX,
+                YMIN, YMAX,
+                ZMIN, ZMAX
+            };
 
-    /**
-     * Getter for dimension
-     * @return
-     */
-    inline const Math::Dimension3& getDimension( void ) const {
-        return this->dimension;
-    }
-
-    /**
-     * Return the entity id
-     * @return
-     */
-    inline const long& getId() const {
-        return this->id;
-    }
-
-    /**
-     * Return the entity name
-     * @return
-     */
-    inline const std::string& getName( void ) const {
-        return this->name;
-    }
-
-    /**
-     * Helper method to get the entity width
-     * @return
-     */
-    inline double getWidth( void ) const {
-        return this->dimension.width;
-    }
-
-    /**
-     * Helper method to get the entity height
-     * @return
-     */
-    inline double getHeight(void ) const {
-        return this->dimension.height;
-    }
-
-    /**
-     * Helper method to get the entity length
-     * @return
-     */
-    inline double getLength( void ) const {
-        return this->dimension.length;
-    }
-
-    inline double getExpansionRadius( void ) const {
-        return this->expansionRadius;
-    }
-
-    /**
-     * Setter of the property map
-     * @param property
-     * @param value
-     */
-    void setProperty( PROPERTY property, PropertyValueType value );
-
-    /**
-     * Boolean getter of the property map
-     * @param property
-     * @return
-     */
-    bool getBooleanProperty( PROPERTY property ) const;
-
-    /**
-     * String getter of the property map
-     * @param property
-     * @return
-     */
-    std::string getStringProperty( PROPERTY property ) const;
-
-    /**
-     * Double getter of the property map
-     * @param property
-     * @return
-     */
-    double getDoubleProperty( PROPERTY property ) const;
-
-    /**
-     * Int getter of the property map
-     * @param property
-     * @return
-     */
-    int getIntProperty( PROPERTY property ) const;
-
-    virtual ENTITY_TYPE getType( void ) const = 0;
-
-    virtual EntityPtr clone( void ) const = 0;
-
-    /**
-     * Overloaded operators
-     */
-    bool operator==( const EntityPtr& entity ) const;
-    bool operator!=( const EntityPtr& entity ) const;
-    bool operator==( const Entity& entity ) const;
-    bool operator!=( const Entity& entity ) const;
-
-    bool intersects( const Entity& other ) const;
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    std::string toString( ) const;
-
-    double distanceTo( const Entity& entity, 
-                       Math::Vector3* pointInA = NULL, 
-                       Math::Vector3* pointInB = NULL, 
-                       LimitRelation* = NULL ) const;
+            class LimitRelation 
+            {
+            public:
+                enum RELATION_AXIS 
+                {
+                    X = 0,
+                    Y,
+                    Z
+                };
+        
+                LimitRelation( const Entity* entityA = NULL, const Entity* entityB = NULL ) :
+                    entityA( entityA ), entityB( entityB ), limitsA(6), limitsB(6), relations(3) 
+                { 
+                }
+        
+                virtual ~LimitRelation( void ) { }
+                    
+                const Entity* entityA;
+                const Entity* entityB;
+                
+                std::vector<std::set<math::Vector3> > limitsA;
+                std::vector<std::set<math::Vector3> > limitsB;
+                std::vector<unsigned int> relations;
+            }; 
 
 
-    /**
-     * This method computes the limits of two objects.
-     * The limits are the points of the objects located
-     * at its extremities on each of X,Y,Z axis
-     *
-     * Here are the possible types of limits
-     **********************
-     * 1) |--A--|
-     *            |--B--|
-     **********************
-     * 2)         |--A--|
-     *    |--B--|
-     **********************
-     * 4) |--A--|     
-     *        |--B--|
-     **********************
-     * 8)     |--A--|
-     *    |--B--|
-     **********************
-     *16) |--A--|
-     *          |--B--|
-     **********************
-     *32)       |--A--|
-     *    |--B--|      
-     **********************
-     *64) |--A--|
-     *    |--B--|     
-     *  
-     **********************
-     *128)  |--A--|
-     *    |----B----|
-     **********************
-     *256)|----A----|
-     *      |--B--|
-     **********************      
-     *512)|--A--|
-     *    |----B----|
-     *
-     *        |--A--|
-     *    |----B----|
-     **********************
-     *1024)|----A----|
-     *     |--B--|
-     *
-     *     |----A----|
-     *         |--B--|
-     *+++++++++++++++++++++
-     * Note that the number of the limit is
-     * the code used to classify the limits relation between
-     * the objects. 
-     *
-     * i.e. a returning vector with the following configuration: 
-     *      relations[0] = 1024 relations[1] = 16 relations[2] = 16
-     * means that in the X axis the relation 1024 was found and in the Y and Z axis
-     * the relation is 16
-     *
-     * @param entityB The second entity which will have its limits computed
-     * @return Entity::LimitRelation A vector containing the codes of the relations in each three Axis
-     */
-    LimitRelation computeObjectsLimits( const Entity& entityB ) const;
-
-    /**
-     * Extract the spatial relations between two objects
-     * 
-     * @param observer The observer entity
-     * @param besideDistance A distance used as threshold for considering an object beside or not another
-     * @param entityA The entity used as reference
-     * @param entityB The entity that relates with the reference one
-     * @return std::list<SPATIAL_RELATION> a list of all Spatial relations between entityA and entityB
-     */
-    std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
-         const Entity& entityB ) const;
-
-    /**
-     * Extract the spatial relations that are common
-     * to all the three entities. i.e. 
-     * if B is near A and C is near A
-     * so NEAR will compose the final relations list
-     * but if C is right of A and B is left of A
-     * so nor left of neither right of will compose
-     * the final relations list.
-     * The final list can also contains the relation BETWEEN
-     * what states that A is between B and C
-     *
-     * @param observer The observer entity
-     * @param besideDistance A distance used as threshold for considering an object beside or not another
-     * @param entityB The entity that relates with the reference one
-     * @param entityC A second entity that relates with the reference one
-     * @return std::list<SPATIAL_RELATION> a list of all Spatial relations between entityA and entityB
-     */
-    std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
-         const Entity& entityB, const Entity& entityC ) const;
-
-    /**
-     * Return a string description of the relation
-     */
-    static std::string spatialRelationToString( SPATIAL_RELATION relation );
+            typedef boost::variant<std::string, int, double, bool> PropertyValueType;
 
 
-protected:
-    long id;
-    std::string name;
+            /**
+             * All the types of entities
+             */
+            enum ENTITY_TYPE 
+            {
+                STATIC,
+                MOVABLE,
+                HUMANOID_AGENT,
+                PET_AGENT,
+                INVISIBLE
+            };
 
-    Math::Dimension3 dimension;
+            /**
+             * Types of properties
+             */
+            enum PROPERTY 
+            {
+                TYPE = 0,
+                EDIBLE,
+                DRINKABLE,
+                PET_HOME,
+                FOOD_BOWL,
+                WATER_BOWL,
+                OBSTACLE,
+
+                NUMBER_OF_PROPERTIES
+            };
+
+            typedef boost::unordered_map< PROPERTY, PropertyValueType, boost::hash<PROPERTY> > PropertyHashMap;
+
+            /**
+             * Comparator class used to measure the distance between two objects
+             */
+            class EntityDistanceComparator
+            {
+            private:
+                const EntityPtr referenceEntity;
+
+                /**
+                 * Use a given entity as reference.
+                 * The computed distance will be the referenceEntity and a given different entity
+                 * @param referenceObject
+                 */
+                inline EntityDistanceComparator( const EntityPtr& referenceObject ) : 
+                    referenceEntity( referenceEntity ) 
+                {
+                }
+
+                inline virtual ~EntityDistanceComparator( void ) 
+                { 
+                }
+
+                /*
+                 *
+                 */
+                inline bool operator()( const EntityPtr& o1, const EntityPtr& o2) const 
+                {
+                    double distanceToObject1 = referenceEntity->distanceTo(*o1);
+                    double distanceToObject2 = referenceEntity->distanceTo(*o2);
+                    if ( distanceToObject1 < distanceToObject2 ) {
+                        return true;
+                    } else {
+                        return false;
+                    } // else
+                }
+            };
+
+            /**
+             * Simple Copy constructor
+             * @param object
+             */
+            Entity( const EntityPtr& entity );
+
+            /**
+             * Parameterized constructor
+             * @param id
+             * @param name
+             * @param position
+             * @param width
+             * @param height
+             * @param length
+             * @param orientation
+             */
+            Entity( long id, const std::string& name, const math::Vector3& position, 
+                const math::Dimension3& dimension, const math::Quaternion& orientation, 
+                    double radius = 0.0 );
+
+            inline virtual ~Entity( void ) 
+            { 
+            }
+
+            /**
+             * Returns a vector pointing to the current entity direction (facing to)
+             * @return
+             */
+            math::Vector3 getDirection( void ) const;
 
 
-    // the entity is positioned at a specific point on space
-    Math::Vector3 position;
-    // the entity is oriented to a specific point on space
-    Math::Quaternion orientation;
+            /**
+             * Getter for entity bounding box
+             * @return
+             */
+            inline const math::BoundingBox& getBoundingBox( void ) const 
+            {
+                return this->boundingBox;
+            }
 
-    double expansionRadius;
+            /**
+             * Getter for the current entity position
+             * @return
+             */
+            inline const math::Vector3& getPosition( void ) const 
+            {
+                return this->position;
+            }
 
-    // bounding box dimensions
-    Math::BoundingBox boundingBox;
+            /**
+             * Getter for the current entity orientation
+             * @return
+             */
+            inline const math::Quaternion& getOrientation( void ) const 
+            {
+                return this->orientation;
+            }
+
+            /**
+             * Getter for dimension
+             * @return
+             */
+            inline const math::Dimension3& getDimension( void ) const 
+            {
+                return this->dimension;
+            }
+
+            /**
+             * Return the entity id
+             * @return
+             */
+            inline const long& getId() const 
+            {
+                return this->id;
+            }
+
+            /**
+             * Return the entity name
+             * @return
+             */
+            inline const std::string& getName( void ) const 
+            {
+                return this->name;
+            }
+
+            /**
+             * Helper method to get the entity width
+             * @return
+             */
+            inline double getWidth( void ) const 
+            {
+                return this->dimension.width;
+            }
+
+            /**
+             * Helper method to get the entity height
+             * @return
+             */
+            inline double getHeight(void ) const 
+            {
+                return this->dimension.height;
+            }
+
+            /**
+             * Helper method to get the entity length
+             * @return
+             */
+            inline double getLength( void ) const 
+            {
+                return this->dimension.length;
+            }
+
+            inline double getExpansionRadius( void ) const 
+            {
+                return this->expansionRadius;
+            }
+
+            /**
+             * Setter of the property map
+             * @param property
+             * @param value
+             */
+            void setProperty( PROPERTY property, PropertyValueType value );
+
+            /**
+             * Boolean getter of the property map
+             * @param property
+             * @return
+             */
+            bool getBooleanProperty( PROPERTY property ) const;
+
+            /**
+             * String getter of the property map
+             * @param property
+             * @return
+             */
+            std::string getStringProperty( PROPERTY property ) const;
+
+            /**
+             * Double getter of the property map
+             * @param property
+             * @return
+             */
+            double getDoubleProperty( PROPERTY property ) const;
+
+            /**
+             * Int getter of the property map
+             * @param property
+             * @return
+             */
+            int getIntProperty( PROPERTY property ) const;
+
+            virtual ENTITY_TYPE getType( void ) const = 0;
+
+            virtual EntityPtr clone( void ) const = 0;
+
+            /**
+             * Overloaded operators
+             */
+            bool operator==( const EntityPtr& entity ) const;
+            bool operator!=( const EntityPtr& entity ) const;
+            bool operator==( const Entity& entity ) const;
+            bool operator!=( const Entity& entity ) const;
+
+            bool intersects( const Entity& other ) const;
+
+            /* (non-Javadoc)
+             * @see java.lang.Object#toString()
+             */
+            std::string toString( ) const;
+
+            double distanceTo( const Entity& entity, 
+                               math::Vector3* pointInA = NULL, 
+                               math::Vector3* pointInB = NULL, 
+                               LimitRelation* = NULL ) const;
 
 
-    // properties map
-    PropertyHashMap properties;
+            /**
+             * This method computes the limits of two objects.
+             * The limits are the points of the objects located
+             * at its extremities on each of X,Y,Z axis
+             *
+             * Here are the possible types of limits
+             **********************
+             * 1) |--A--|
+             *            |--B--|
+             **********************
+             * 2)         |--A--|
+             *    |--B--|
+             **********************
+             * 4) |--A--|     
+             *        |--B--|
+             **********************
+             * 8)     |--A--|
+             *    |--B--|
+             **********************
+             *16) |--A--|
+             *          |--B--|
+             **********************
+             *32)       |--A--|
+             *    |--B--|      
+             **********************
+             *64) |--A--|
+             *    |--B--|     
+             *  
+             **********************
+             *128)  |--A--|
+             *    |----B----|
+             **********************
+             *256)|----A----|
+             *      |--B--|
+             **********************      
+             *512)|--A--|
+             *    |----B----|
+             *
+             *        |--A--|
+             *    |----B----|
+             **********************
+             *1024)|----A----|
+             *     |--B--|
+             *
+             *     |----A----|
+             *         |--B--|
+             *+++++++++++++++++++++
+             * Note that the number of the limit is
+             * the code used to classify the limits relation between
+             * the objects. 
+             *
+             * i.e. a returning vector with the following configuration: 
+             *      relations[0] = 1024 relations[1] = 16 relations[2] = 16
+             * means that in the X axis the relation 1024 was found and in the Y and Z axis
+             * the relation is 16
+             *
+             * @param entityB The second entity which will have its limits computed
+             * @return Entity::LimitRelation A vector containing the codes of the relations in each three Axis
+             */
+            LimitRelation computeObjectsLimits( const Entity& entityB ) const;
 
-}; // Entity
+            /**
+             * Extract the spatial relations between two objects
+             * 
+             * @param observer The observer entity
+             * @param besideDistance A distance used as threshold for considering an object beside or not another
+             * @param entityA The entity used as reference
+             * @param entityB The entity that relates with the reference one
+             * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
+             */
+            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
+                                                                 const Entity& entityB ) const;
 
- typedef boost::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
+            /**
+             * Extract the spatial relations that are common
+             * to all the three entities. i.e. 
+             * if B is near A and C is near A
+             * so NEAR will compose the final relations list
+             * but if C is right of A and B is left of A
+             * so nor left of neither right of will compose
+             * the final relations list.
+             * The final list can also contains the relation BETWEEN
+             * what states that A is between B and C
+             *
+             * @param observer The observer entity
+             * @param besideDistance A distance used as threshold for considering an object beside or not another
+             * @param entityB The entity that relates with the reference one
+             * @param entityC A second entity that relates with the reference one
+             * @return std::list<SPATIAL_RELATION> a list of all spatial relations between entityA and entityB
+             */
+            std::list<SPATIAL_RELATION> computeSpatialRelations( const Entity& observer, double besideDistance,
+                                                                 const Entity& entityB, const Entity& entityC ) const;
 
-} // Spatial
+            /**
+             * Return a string description of the relation
+             */
+            static std::string spatialRelationToString( SPATIAL_RELATION relation );
+
+
+        protected:
+            long id;
+            std::string name;
+
+            math::Dimension3 dimension;
+
+
+            // the entity is positioned at a specific point on space
+            math::Vector3 position;
+            // the entity is oriented to a specific point on space
+            math::Quaternion orientation;
+
+            double expansionRadius;
+
+            // bounding box dimensions
+            math::BoundingBox boundingBox;
+
+
+            // properties map
+            PropertyHashMap properties;
+
+        }; // Entity
+
+        typedef boost::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
+
+    } // spatial
+} // opencog
 
 #endif // _SPATIAL_ENTITY_H_

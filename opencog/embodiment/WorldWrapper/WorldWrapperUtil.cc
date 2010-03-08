@@ -2750,7 +2750,7 @@ throw (opencog::InvalidParamException, opencog::AssertionException, std::bad_exc
     }
 
     //const SpaceServer::ObjectMetadata& md = sm.getMetaData(handleName);
-    const Spatial::EntityPtr& entity = sm.getEntity( handleName );
+    const spatial::EntityPtr& entity = sm.getEntity( handleName );
     return SpaceServer::SpaceMapPoint(entity->getPosition( ).x, entity->getPosition( ).y );
 }
 

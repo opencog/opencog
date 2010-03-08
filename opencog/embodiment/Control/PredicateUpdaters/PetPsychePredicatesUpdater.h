@@ -24,8 +24,8 @@
 #ifndef PETPSYCHEPREDICATESUPDATER_H
 #define PETPSYCHEPREDICATESUPDATER_H
 
-#include "BasicPredicateUpdater.h"
-#include <opencog/spatial/Math/Triangle.h>
+#include <opencog/embodiment/Control/PredicateUpdaters/BasicPredicateUpdater.h>
+#include <opencog/spatial/math/Triangle.h>
 
 namespace OperationalPetController
 {
@@ -38,7 +38,7 @@ class PetPsychePredicatesUpdater : public BasicPredicateUpdater
 
 private:
     unsigned long latestSimWorldTimestamp;
-    Spatial::Math::Triangle createFieldOfViewTriangle(Handle agent);
+    spatial::math::Triangle createFieldOfViewTriangle(Handle agent);
 
 public:
 

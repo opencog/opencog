@@ -1,5 +1,5 @@
 /*
- * opencog/spatial/Math/Matrix4.cc
+ * opencog/spatial/math/Matrix4.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,9 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Matrix4.h"
+#include <opencog/spatial/math/Matrix4.h>
 
-using namespace Spatial::Math;
+using namespace opencog;
+using namespace opencog::spatial::math;
+
 
 const Matrix4 Matrix4::ZERO;
 const Matrix4 Matrix4::IDENTITY( 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 );

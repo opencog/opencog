@@ -22,10 +22,11 @@
  */
 
 
-#include "stlastar.h"
-#include "AStarController.h"
+#include <opencog/spatial/stlastar.h>
+#include <opencog/spatial/AStarController.h>
 
-using namespace Spatial;
+using namespace opencog;
+using namespace opencog::spatial;
 
 AStarController::AStarController():
         astarsearch(new AStarSearch<MapSearchNode>(MAX_SEARCH_NODES)) {}
@@ -150,10 +151,10 @@ void AStarController::debugLists(unsigned int SearchSteps)
 }
 
 
-vector<Spatial::GridPoint> AStarController::getSolutionGridPoints()
+vector<GridPoint> AStarController::getSolutionGridPoints()
 {
-    vector<Spatial::GridPoint> solution_points;
-    Spatial::GridPoint gp;
+    vector<GridPoint> solution_points;
+    GridPoint gp;
     MapSearchNode *node = astarsearch->GetSolutionStart();
 
     gp.first = node->x;
@@ -175,10 +176,10 @@ vector<Spatial::GridPoint> AStarController::getSolutionGridPoints()
 }
 
 
-vector<Spatial::Point> AStarController::getSolutionPoints()
+vector<spatial::Point> AStarController::getSolutionPoints()
 {
-    vector<Spatial::Point> solution_points;
-    Spatial::GridPoint gp;
+    vector<spatial::Point> solution_points;
+    spatial::GridPoint gp;
     MapSearchNode *node = astarsearch->GetSolutionStart();
     Map *map = MapSearchNode::map;
 
@@ -200,11 +201,11 @@ vector<Spatial::Point> AStarController::getSolutionPoints()
     return solution_points;
 }
 
-vector<Spatial::Point> AStarController::getShortestCalculatedPath()
+vector<spatial::Point> AStarController::getShortestCalculatedPath()
 {
 
-    vector<Spatial::Point>  calculatedPath = getSolutionPoints();
-    vector<Spatial::Point>  shortestCalculatedPath;
+    vector<spatial::Point>  calculatedPath = getSolutionPoints();
+    vector<spatial::Point>  shortestCalculatedPath;
 
     opencog::logger().info("AStar - Shortening action plan. It has %d elem.",
                           calculatedPath.size());
@@ -212,7 +213,7 @@ vector<Spatial::Point> AStarController::getShortestCalculatedPath()
     if (calculatedPath.size() < 2 )
         return calculatedPath;
 
-    vector<Spatial::Point>::iterator it_point = calculatedPath.begin();
+    vector<spatial::Point>::iterator it_point = calculatedPath.begin();
     shortestCalculatedPath.push_back( *it_point );
     double alpha = (it_point->second - (it_point + 1)->second) / (it_point->first - (it_point + 1)->first);
     it_point++;
