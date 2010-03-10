@@ -162,7 +162,7 @@ public:
     bool hasNext();
 
     /**
-     * Returns the next Hasndle of the iterator and advances.
+     * Returns the next Handle of the iterator and advances.
      *
      * @return Next Handle of the iterator and advances.
      */

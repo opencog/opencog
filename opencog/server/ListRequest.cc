@@ -113,6 +113,9 @@ void ListRequest::sendOutput()
 {
     std::ostringstream oss;
 
+    static_cast<CogServer&>(server()).dimensionalEmbedding().embedAtomSpace(ASSOCIATIVE_LINK);
+    static_cast<CogServer&>(server()).dimensionalEmbedding().logAtomEmbedding(ASSOCIATIVE_LINK);
+
     if (_mimeType == "text/plain") {
         std::vector<Handle>::const_iterator it; 
         for (it = _handles.begin(); it != _handles.end(); ++it) {
