@@ -251,7 +251,10 @@ void PetPsychePredicatesUpdater::update(Handle object, Handle pet, unsigned long
             unsigned long timeBetweenTicks = timestamp - this->latestSimWorldTimestamp;
             unsigned long timeDuringAgentLastAction = timeBetweenTicks * 2;
 
-            spatial::math::Vector3 velocity3D = AtomSpaceUtil::getMostRecentObjectVelocity(atomSpace, entity,  timestamp - timeDuringAgentLastAction );
+            spatial::math::Vector3 velocity3D = 
+                AtomSpaceUtil::getMostRecentObjectVelocity(atomSpace, 
+                    entity,  timestamp - timeDuringAgentLastAction );
+
             spatial::math::Vector3 velocity( velocity3D.x, velocity3D.y );
             velocity.normalise( );
 

@@ -227,7 +227,10 @@ int HandleEntry::nextMatch(Handle** sets, int* sizes, std::vector<int>& cursors)
     for (;;) {
 
         bool fail = false;
-	Handle max = sets[0][cursors[0]];
+	int cursor = cursors[0];
+        if (cursor >= sizes[0]) return -1; // prevents invalid data read
+        Handle* handles = sets[0];
+        Handle max = handles[cursor];
         // Handle max(0); // this is zero, not null (the smallest possible pointer)
         // if current positions stored in cursors is not a match, the largest
         // value pointed by cursors is computed to reposition cursors

@@ -2415,9 +2415,11 @@ Handle PAI::addPhysiologicalFeeling(const char* petID,
     
     // setup the frame for the given physiological feeling
     float value = 0.0f;
-    try {
-        value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
-    } catch ( boost::bad_lexical_cast &ex ) { } // ignore
+    if (feelingParams.size() > 1) {
+        try {
+            value = boost::lexical_cast<float>( atomSpace.getName( feelingParams[1] ) );
+        } catch ( boost::bad_lexical_cast &ex ) { } // ignore
+    } // if
 
 
     std::string feeling = name;

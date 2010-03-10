@@ -61,48 +61,54 @@ void NearPredicateUpdater::update(Handle object, Handle pet, unsigned long times
     } // if
     processedEntities.insert( entityAId );
 
-    const spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
+    try {
+
+        const spatial::EntityPtr& entityA = spaceMap.getEntity( entityAId );
     
-    bool mapContainsEntity = spaceMap.containsObject( entityAId );
+        bool mapContainsEntity = spaceMap.containsObject( entityAId );
 
-    unsigned int i;
-    for( i = 0; i < entities.size( ); ++i ) {        
-        const std::string& entityBId = entities[i];
-        if ( processedEntities.find( entityBId ) != processedEntities.end( ) ) {
-            continue;
-        } // if
-        Handle entityBHandle = getHandle( entityBId );
+        unsigned int i;
+        for( i = 0; i < entities.size( ); ++i ) {        
+            const std::string& entityBId = entities[i];
+            if ( processedEntities.find( entityBId ) != processedEntities.end( ) ) {
+                continue;
+            } // if
+            Handle entityBHandle = getHandle( entityBId );
 
-        if ( !mapContainsEntity ) {
-            logger().debug( "NearPredicateUpdater::%s - Removing predicates from '%s' and '%s'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ) );
-            setPredicate( object, entityBHandle, "near", 0.0f );
-            setPredicate( object, entityBHandle, "next", 0.0f );
-        } else {
-            const spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
-            double distance = entityA->distanceTo( *entityB );
-            logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );
+            if ( !mapContainsEntity ) {
+                logger().debug( "NearPredicateUpdater::%s - Removing predicates from '%s' and '%s'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ) );
+                setPredicate( object, entityBHandle, "near", 0.0f );
+                setPredicate( object, entityBHandle, "next", 0.0f );
+            } else {
+                const spatial::EntityPtr& entityB = spaceMap.getEntity( entityBId );
+                double distance = entityA->distanceTo( *entityB );
+                logger().debug( "NearPredicateUpdater::%s - Adding predicates for '%s' and '%s'. distance '%f'", __FUNCTION__, entityAId.c_str( ), entityBId.c_str( ), distance );
 
-            spatial::math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
-            spatial::math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
+                spatial::math::Vector3 minCorner( spaceMap.xMin( ), spaceMap.yMin( ) );
+                spatial::math::Vector3 maxCorner( spaceMap.xMax( ), spaceMap.yMax( ) );
             
-            double mapDiagonal = ( maxCorner - minCorner ).length( );
+                double mapDiagonal = ( maxCorner - minCorner ).length( );
 
             
-            double nearDistance = spaceMap.getNearDistance( );
-            double nextDistance = spaceMap.getNextDistance( );
+                double nearDistance = spaceMap.getNearDistance( );
+                double nextDistance = spaceMap.getNextDistance( );
             
-            logger().debug( "NearPredicateUpdater::%s - nearDistance '%f'",
-                    __FUNCTION__, nearDistance );
+                logger().debug( "NearPredicateUpdater::%s - nearDistance '%f'",
+                                __FUNCTION__, nearDistance );
 
-            setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0 : 0.0f );
-            setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f );
+                setPredicate( object, entityBHandle, "near", ( distance < nearDistance ) ? 1.0 : 0.0f );
+                setPredicate( object, entityBHandle, "next", ( distance < nextDistance ) ? 1.0 - (distance/nextDistance) : 0.0f );
 
-            SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
-            AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, object, entityBHandle );
-            AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, entityBHandle, object );
+                SimpleTruthValue tv(1.0 - (distance/mapDiagonal), 1);
+                AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, object, entityBHandle );
+                AtomSpaceUtil::setPredicateValue( atomSpace, "proximity", tv, entityBHandle, object );
             
-        } // else
-    } // for
+            } // else
+        } // for
+    } catch( const opencog::NotFoundException& ex ) {
+        logger().error( "NearPredicateUpdater::%s - Entity not found '%s'",
+                        __FUNCTION__, ex.getMessage( ) );
+    } // catch
         
 }
 
