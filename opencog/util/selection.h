@@ -39,6 +39,12 @@ struct tournament_selection {
     int t_size;
     RandGen& rng;
 
+    /**
+     * Selects randomly n_select elements in [from, to( such that each element
+     * is the winner of a random selection of t_size elements in [from, to(
+     * (so there is n_select random selections of t_size element in total)
+     * and append the winners in dst.
+     */
     template<typename In, typename Out>
     void operator()(In from,In to, Out dst, int n_select) const {
         typename std::iterator_traits<In>::difference_type d = distance(from,
