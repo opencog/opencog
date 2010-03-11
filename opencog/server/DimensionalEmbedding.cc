@@ -109,7 +109,8 @@ void DimensionalEmbedding::addPivot(const Handle& h, const Type& linkType){
     }
 }
 
-void DimensionalEmbedding::embedAtomSpace(const Type& linkType){    
+void DimensionalEmbedding::embedAtomSpace(const Type& linkType){
+    clearEmbedding(linkType);
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
