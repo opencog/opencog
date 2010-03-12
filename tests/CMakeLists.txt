@@ -9,7 +9,10 @@ ENDIF (WIN32)
 ADD_DEFINITIONS(-DOPENCOG_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
                 -DOPENCOG_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
-ADD_SUBDIRECTORY (web)
+# Perform tests in component-dependency order, as much as possible.
+# For example, since everything depends on util and config functions,
+# these are tested first. Since most things depend on the atomspace,
+# that is tested next, etc.
 IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (util)
 	ADD_SUBDIRECTORY (atomspace)
@@ -21,6 +24,13 @@ IF (CXXTEST_FOUND)
 
 	ADD_SUBDIRECTORY (query)
 	ADD_SUBDIRECTORY (server)
+ENDIF (CXXTEST_FOUND)
+
+# Rest interfaces assume that the cogserver is working;
+# so run after the cogserver tests.
+ADD_SUBDIRECTORY (web)
+
+IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (dynamics)
 	ADD_SUBDIRECTORY (reasoning)
 	ADD_SUBDIRECTORY (comboreduct)
