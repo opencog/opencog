@@ -12,10 +12,21 @@
 
 
 # Look for the header file
-FIND_PATH(GUILE_INCLUDE_DIR libguile.h /usr/include /usr/local/include /usr/include/libguile /usr/local/include/libguile)
+# Macports for OSX puts things in /opt/local
+FIND_PATH(GUILE_INCLUDE_DIR libguile.h 
+	/usr/include
+	/usr/local/include
+	/usr/include/libguile
+	/usr/local/include/libguile
+	/opt/local/include/guile
+)
 
 # Look for the library
-FIND_LIBRARY(GUILE_LIBRARY NAMES guile PATHS /usr/lib /usr/local/lib)
+FIND_LIBRARY(GUILE_LIBRARY NAMES guile PATHS 
+	/usr/lib
+	/usr/local/lib
+	/opt/local/lib
+)
 
 # Copy the results to the output variables.
 IF(GUILE_INCLUDE_DIR AND GUILE_LIBRARY)
