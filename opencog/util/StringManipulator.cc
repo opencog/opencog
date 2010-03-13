@@ -65,8 +65,9 @@ std::string StringManipulator::clean(const std::string& str) {
     return result;
 }
 
-std::vector<std::string> StringManipulator::split(std::string& str, const std::string& delimiter) {
-    unsigned int cutAt;
+std::vector<std::string> StringManipulator::split(std::string& str, const std::string& delimiter)
+{
+    std::string::size_type cutAt;
     std::vector<std::string> tokens;
 
     while ((cutAt = str.find(delimiter)) != std::string::npos) {
@@ -82,7 +83,8 @@ std::vector<std::string> StringManipulator::split(std::string& str, const std::s
     return tokens;
 }
 
-void StringManipulator::trim(std::string& str) {
+void StringManipulator::trim(std::string& str)
+{
     std::string::size_type pos = str.find_last_not_of(' ');
     if (pos != std::string::npos) {
         str.erase(pos + 1);
