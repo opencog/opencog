@@ -505,7 +505,25 @@ private:
         //std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";        
         std::string axiomsFile = std::string(PLN_TEST_DIR"scm/")+test["LOAD"]+".scm";
         
-        initAxiomSet(axiomsFile);
+        try {
+            initAxiomSet(axiomsFile);
+        } catch (...) {
+            TS_FAIL("Couldn't find file");
+            return;
+        }
+        //// Hack to show atoms in atomspace
+        /*std::vector<Handle> all_atoms;
+        std::vector<Handle>::iterator it;
+        std::back_insert_iterator< std::vector<Handle> > out_hi(all_atoms);
+        server().getAtomSpace()->getHandleSet(out_hi, ATOM, true);
+        std::ostringstream oss;
+
+        for (it = all_atoms.begin(); it != all_atoms.end(); ++it) {
+            Atom* atom = TLB::getAtom(*it);
+            oss << atom->toString() << std::endl;
+        }
+        cout << oss.str();*/
+        ////
         
         std::string targetScheme = test["TARGET"];
         if (TESTING_BACKWARD_CHAINING)
