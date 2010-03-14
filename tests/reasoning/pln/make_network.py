@@ -15,7 +15,7 @@ def link(s1,s2):
 for i in xrange(0, num_nodes):
     print node(i)
 
-for i in xrange(0, num_links_per_node*10):
+for i in xrange(0, num_nodes*num_links_per_node):
     s1 = node(randint(0,num_nodes))
     s2 = node(randint(0,num_nodes))
     if (s1 != s2): # No self-links. That wouldn't make sense, and would break stuff.
