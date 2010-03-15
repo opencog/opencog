@@ -662,23 +662,25 @@ public:
             float minConfidenceForAbort = 1.00f);
 
     /// Manual evaluation. Should not be needed anymore.
-
     Btr<std::set<BoundVertex> > evaluate(std::set<const BITNode*>* chain = NULL) const;
 
-    /// Apply either ForAllRule or VariableScopeRule, depending on the _resultT type.
+    /// Apply either ForAllRule or VariableScopeRule,
+    /// depending on the _resultT type.
     BoundVertex Generalize(Btr<std::set<BoundVertex> >, Type _resultT) const;
 //  BoundVertex Generalize(const std::set<BoundVertex>&, Type _resultT) const;
 
-    /// Extraction of an actionable plan from the proof tree of the atom with pHandle h.
+    /// Extraction of an actionable plan from the proof tree of the atom with
+    /// pHandle h.
     std::string extract_plan(pHandle h) const;
-    std::string extract_plan(pHandle h, unsigned int level, vtree& do_template, pHandleSeq& plan) const;
+    std::string extract_plan(pHandle h, unsigned int level,
+                             vtree& do_template, pHandleSeq& plan) const;
 
     // Statistics
     
 //  std::map<Handle,std::vector<Handle> > inferred_from;
 //  std::map<Handle,Rule*> inferred_with;
     std::map<pHandle,BITNode*> hsource;
-    long inferenceNodes;
+    long inferenceNodes; // counts the number of nodes in the BIT
 
     std::string printTrail(pHandle h) const;
     std::string printUsers(BITNode* b);
@@ -736,8 +738,10 @@ protected:
     bool spawns(const bindingsT& bindings) const;
     void spawn(Btr<bindingsT> bindings);
 
-    BITNode* createChild(int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
-                        BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
+    BITNode* createChild(int my_rule_arg_i, Rule* new_rule,
+                         const Rule::MPs& rule_args, 
+                         BBvtree arg, const bindingsT& bindings,
+                         spawn_mode spawning);
                         
     /// Basically a helper function for the public printTrail(pHandle)
     std::string printTrail(pHandle h, unsigned int level) const;

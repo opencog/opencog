@@ -250,9 +250,11 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
     raw_target = Btr<vtree>(new vtree(target_it));
 
-    // The 1st child corresponds to "root variable scoper", variable-bound clones of which
-    // will be spawned later on. Those clones will then be owned by this Root.
-    // To enable this, the 1st child MUST OWN the variables in the target atom of the root.
+    // The 1st child corresponds to "root variable scoper",
+    // variable-bound clones of which will be spawned later on.
+    // Those clones will then be owned by this Root.
+    // To enable this, the 1st child MUST OWN the variables in the target atom
+    // of the root.
     dummy_args.push_back(Btr<BoundVTree>(new BoundVTree(*raw_target)));
 
 //  rawPrint(*raw_target, raw_target->begin(), -1);
