@@ -110,7 +110,6 @@ INSTALL (FILES
 	Factory.h
 	HelpRequest.h
 	IHasMimeType.h
-	IRPCSocket.h
 	ListRequest.h
 	load-file.h
 	LoadModuleRequest.h
