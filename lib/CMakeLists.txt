@@ -1,7 +1,7 @@
 INSTALL (FILES
 	opencog.conf
 	opencog-chatbot.conf
-	opencog-test.conf
+#	opencog-test.conf
 	opencog-test.conf.example
 	DESTINATION "${CONFDIR}"
 )
@@ -9,7 +9,6 @@ INSTALL (FILES
 # ??? Why do these need to be installed ??? 
 # This list is incomplete, and I suspect it's not needed at all ... 
 INSTALL (FILES
-	FindCSockets.cmake
 	FindCxxtest.cmake
 	FindGuile.cmake
 	FindGSL.cmake
@@ -18,7 +17,8 @@ INSTALL (FILES
 	FindPthreads.cmake
 	FindSTLPort.cmake
 	FindUnixODBC.cmake
-	FindLibUbiGraphClient.cmake
+	# No such cmake file .. ?
+	# FindLibUbiGraphClient.cmake
 	FindLuabind.cmake
 	FindXercesC.cmake
 	OpenCogAtomTypes.cmake
