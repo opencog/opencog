@@ -267,7 +267,7 @@ protected:
     /// each argument.
     std::vector<std::set<VtreeProvider*> > eval_results;
 
-    unsigned int depth;
+    const unsigned int depth;
     BITNodeRoot* root;
 
     bool Expanded;
@@ -300,7 +300,8 @@ protected:
     meta getTarget() const { return bound_target; }
 
     /// Apply an operator to all nodes that have this one as a node
-    template<typename _opT, typename _stateT> bool ApplyUp(_opT _op, _stateT my_state) {
+    template<typename _opT, typename _stateT>
+    bool ApplyUp(_opT _op, _stateT my_state) {
         _op(this);
         foreach(parent_link<BITNode> p, parents)
             p.link->ApplyUp(_op, my_state);
@@ -345,24 +346,29 @@ protected:
     void EvaluateWith(unsigned int arg_i, VtreeProvider* new_result);
     
     /// Creation of child nodes
-    /// Normally arg = args[rule_arg_i], but children with differently-bound targets
-    /// may also be created.
+    /// Normally arg = args[rule_arg_i], but children with differently-bound
+    /// targets may also be created.
     /// == expansion of the BIT.
-    BITNode* createChild(unsigned int my_rule_arg_i, Rule* new_rule, const Rule::MPs& rule_args, 
-                        BBvtree arg, const bindingsT& bindings,spawn_mode spawning);
-    bool createChildren(int rule_arg_i, BBvtree arg, Btr<bindingsT> bindings, spawn_mode);
+    BITNode* createChild(unsigned int my_rule_arg_i, Rule* new_rule,
+                         const Rule::MPs& rule_args, BBvtree arg,
+                         const bindingsT& bindings, spawn_mode spawning);
+    bool createChildren(int rule_arg_i, BBvtree arg,
+                        Btr<bindingsT> bindings, spawn_mode);
     void createChildrenForAllArgs();
 
-    /// Check for whether the target atom can simply be Generated. Here, Generated = "direct"
-    /// Note: Rules come in 2 flavours: Composers and Generators. See PLN implementation docs.
+    /// Check for whether the target atom can simply be Generated.
+    /// Here, Generated = "direct"
+    /// Note: Rules come in 2 flavours: Composers and Generators.
+    /// See PLN implementation docs.
     bool CheckForDirectResults();
-    BITNode* HasChild(int arg_i, Rule* r,  const Rule::MPs& rule_args, meta target, const bindingsT& _pre_bindings) const;
+    BITNode* HasChild(int arg_i, Rule* r, const Rule::MPs& rule_args,
+                      meta target, const bindingsT& _pre_bindings) const;
     BITNode* HasChild(BITNode* new_child, int arg_i) const;
 
     /** Add a new parent BITNode.
      * @returns whether the parent was successfully added.
-     * @note whenever a new BITNode starts to use this one, via some parametrization,
-     * it becomes my parent.
+     * @note whenever a new BITNode starts to use this one,
+     *       via some parametrization, it becomes my parent.
      */
     bool addNewParent(BITNode* parent, int argumentSlot, Btr<bindingsT>
             _bindings = Btr<bindingsT>(new bindingsT));
@@ -480,15 +486,17 @@ protected:
         }
     }
     
-    /// Add the new result from a Generator, and spawn new subtrees when necessary
-    /// according to the variable bindings that accompany the new result.
-    /// I.e. it produces clones of this node (or higher ones), with vars replaced by results.
-    /// They get put into the expansion pool.
-    void addDirectResult(Btr<std::set<BoundVertex> > directResult, spawn_mode spawning);
+    /// Add the new result from a Generator, and spawn new subtrees when
+    /// necessary according to the variable bindings that accompany the new
+    /// result.
+    /// I.e. it produces clones of this node (or higher ones), with vars
+    /// replaced by results. They get put into the expansion pool.
+    void addDirectResult(Btr<std::set<BoundVertex> > directResult,
+                         spawn_mode spawning);
 
     /// Create children and do some (probably obsolete) pre-binding checks.
     bool expandRule(Rule *rule, int target_i, BBvtree arg,
-        Btr<bindingsT> bindings, spawn_mode spawning);
+                    Btr<bindingsT> bindings, spawn_mode spawning);
     
     void clearResults();
     
@@ -507,19 +515,24 @@ protected:
     /// If inserting the rule invocation node in the subtree obeys our policy
     static bool obeysSubtreePolicy(Rule *new_rule, meta arg);
 
-    /// If inserting the rule invocation node in the expansion pool obeys our policy
+    /// If inserting the rule invocation node in the expansion pool obeys
+    /// our policy
     static bool obeysPoolPolicy(Rule *new_rule, meta arg);
 
-    /// Find if we already have a BITNode like this such that we can re-use it by some
-    /// template_bindings which are returned to the caller.
-    void findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const;
+    /// Find if we already have a BITNode like this such that we can re-use it
+    /// by some template_bindings which are returned to the caller.
+    void findTemplateBIT(BITNode* new_node, BITNode*& template_node,
+                         bindingsT& template_binds) const;
 
-    /// Try to clone this BITNode (under its existing parents) with a new binding applied.
-    /// The cloning may fail if the result causes the arguments of the associated Rule to
-    /// go invalid, but I think the check is not really made rigorously here.
+    /// Try to clone this BITNode (under its existing parents) with a new
+    /// binding applied.
+    /// The cloning may fail if the result causes the arguments of the
+    /// associated Rule to go invalid, but I think the check is not really
+    /// made rigorously here.
     void tryClone(hpair binding) const;
 
-    /// Find the fittest BITNode for expansion. \todo This method should be moved to the root class.
+    /// Find the fittest BITNode for expansion.
+    /// \todo This method should be moved to the root class.
     void findFittest(BITNode*& bisse, float& best_fitness);
 
 public:
@@ -544,7 +557,7 @@ public:
 
     /// After construction, the object is comparable to others by
     /// using eq() methods. After Create(), it becomes fully usable.
-    void create();  
+    void create();
 
     /// Use for debugging
     std::string loopCheck() const;
@@ -568,11 +581,13 @@ public:
     BITNode* findNode(BITNode* new_child) const;
 
     /// Look for a node based on certain defining characteristics
-    BITNode* findNode(Rule* new_rule, meta _target, const Rule::MPs& rule_args, const bindingsT& new_bindings) const;
+    BITNode* findNode(Rule* new_rule, meta _target, const Rule::MPs& rule_args,
+                      const bindingsT& new_bindings) const;
 
     /// helpers
     bool eq(BITNode* rhs) const;
-    bool eq(Rule* r,  const Rule::MPs& _args, meta _target, const bindingsT& _pre_bindings) const;
+    bool eq(Rule* r,  const Rule::MPs& _args, meta _target,
+            const bindingsT& _pre_bindings) const;
 
     /// Expand whole tree level. Typically not called externally
     void expandNextLevel();
@@ -667,7 +682,7 @@ public:
 
     std::string printTrail(pHandle h) const;
     std::string printUsers(BITNode* b);
-    std::string printParents(BITNode* b);
+    std::string printParents(BITNode* b) const;
 
     int getExecPoolSize() const;
     unsigned int getTreeDepth() const;

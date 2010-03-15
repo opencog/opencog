@@ -192,7 +192,7 @@ string BITNodeRoot::printUsers(BITNode* b)
     return ss.str();
 }
 
-string BITNodeRoot::printParents(BITNode* b)
+string BITNodeRoot::printParents(BITNode* b) const
 {
     stringstream ss;
     foreach(const parent_link<BITNode>& p, b->parents)
@@ -210,7 +210,7 @@ bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         FitnessEvaluatorT _fe)
 : inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
-treeDepth(0)
+  treeDepth(0)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     haxx::DirectProducerCache.clear();
