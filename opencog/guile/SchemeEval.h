@@ -106,13 +106,23 @@ namespace opencog {
 class SchemeEval
 {
 	public:
-		std::string eval(const std::string &) { return ""; }
-		Handle apply(const std::string&, Handle args) {
+		std::string eval(const std::string &s) { return ""; }
+		Handle eval_h(const std::string &s) { return Handle::UNDEFINED; }
+		Handle apply(const std::string &s, Handle args) {
 			return Handle::UNDEFINED; }
+		std::string apply_generic(const std::string& f, Handle args) {
+			return ""; }
 	
 		bool input_pending(void) { return false; }
 		void clear_pending(void) {}
 		bool eval_error(void) { return false; }
+
+		static SchemeEval& instance(void)
+		{
+			if (!singletonInstance) 
+				singletonInstance = new SchemeEval();
+			return *singletonInstance;
+		}
 };
 
 }
