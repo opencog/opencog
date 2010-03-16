@@ -17,10 +17,18 @@ TARGET_LINK_LIBRARIES(Processor
     util
 )
 
-ADD_EXECUTABLE (ruleProcessor ProcessorExec.cc)
-TARGET_LINK_LIBRARIES (ruleProcessor
+# These libaries will be linked for ruleProcessor
+SET(RULE_LIBS
     Processor
     Procedure
     ImaginaryLife
+    util
 )
+
+IF (GUILE_FOUND)
+   SET(RULE_LIBS smob ${RULE_LIBS})
+ENDIF (GUILE_FOUND)
+
+ADD_EXECUTABLE (ruleProcessor ProcessorExec.cc)
+TARGET_LINK_LIBRARIES (ruleProcessor ${RULE_LIBS})
 
