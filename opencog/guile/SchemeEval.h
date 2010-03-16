@@ -115,7 +115,10 @@ class SchemeEval
 	
 		bool input_pending(void) { return false; }
 		void clear_pending(void) {}
-		bool eval_error(void) { return false; }
+
+		// If guile is not installed, then *every* call to eval_error()
+		// must report that an error occurred! 
+		bool eval_error(void) { return true; }
 
 		static SchemeEval& instance(void)
 		{
