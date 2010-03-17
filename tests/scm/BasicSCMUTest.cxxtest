@@ -163,9 +163,20 @@ void BasicSCMUTest::test_single_atom(void)
 	eval.clear_pending();
 	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
 
-	//TODO check if it is ok
+	// Check basic guile-atomspace integration.
+	eval.eval("(cog-new-node 'Node \"My First Node\")");
+	eval_err = eval.eval_error();
+	eval.clear_pending();
+	TSM_ASSERT("Failed to create the first atom!", !eval_err);
+
+	Type t = classserver().getType("Node");
+	Handle h = as->getHandle(t, "My First Node");
+	TSM_ASSERT("Failed to find handle for first atom", TLB::isValidHandle(h));
+
+	// Load the utility definitions
 	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
+	printf("typedefs now loaded!\n");
 
 	// We should add many more nodes, but I'm feeling lazy ...
 	check_node("Node", "ola amigos", 0.2, 0.3);
