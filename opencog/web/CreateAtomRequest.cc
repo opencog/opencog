@@ -26,6 +26,7 @@
 #include "CreateAtomRequest.h"
 #include "BaseURLHandler.h"
 #include "JsonUtil.h"
+#include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -44,6 +45,7 @@
 
 using namespace opencog;
 using namespace json_spirit;
+using namespace std;
 
 CreateAtomRequest::CreateAtomRequest()
 {
@@ -63,8 +65,8 @@ void CreateAtomRequest::setRequestResult(RequestResult* rr)
 bool CreateAtomRequest::execute()
 {
     std::string& data = _parameters.front();
+    decode(data);
     AtomSpace* as = server().getAtomSpace();
-
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;
@@ -150,6 +152,63 @@ bool CreateAtomRequest::execute()
     }
     return true;
 }
+void CreateAtomRequest::decode(std::string& str) 
+{
+ string str2("%");   
+ string str3("%7B");
+ string str4("+"); 
+ string str5("%22"); 
+ string str6("%3A"); 
+ string str7("%2C");
+ string str8("%5B");
+ string str9("%5D");
+ string str10("%7D");
+ 
+while (str.find(str3)!=string::npos )
+{
+  str.replace(str.find(str3),str3.length(),"{");    
+}
+
+
+while (str.find(str4)!=string::npos )
+{
+  str.replace(str.find(str4),str4.length()," ");    
+}
+
+while (str.find(str5)!=string::npos )
+{
+  str.replace(str.find(str5),str5.length(),"\"");    
+}
+
+while (str.find(str6)!=string::npos )
+{
+  str.replace(str.find(str6),str6.length(),":");    
+}
+ 
+while (str.find(str7)!=string::npos )
+{
+  str.replace(str.find(str7),str7.length(),",");    
+}
+
+while (str.find(str8)!=string::npos )
+{
+  str.replace(str.find(str8),str8.length(),"[");    
+}
+
+
+while (str.find(str9)!=string::npos )
+{
+  str.replace(str.find(str9),str9.length(),"]");    
+}
+
+
+while (str.find(str10)!=string::npos )
+{
+  str.replace(str.find(str10),str10.length(),"}");    
+}
+
+}
+
 
 void CreateAtomRequest::json_makeOutput(Handle h, bool exists)
 {

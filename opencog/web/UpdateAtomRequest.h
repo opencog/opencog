@@ -79,6 +79,7 @@ public:
     void json_makeOutput(Handle h, bool exists);
     void generateProcessingGraph(Handle h);
     void setRequestResult(RequestResult* rr);
+    void decode(std::string &str); 
 };
 
 } // namespace 

@@ -243,3 +243,10 @@ The code has been included in the OpenCog code base due to it being very light w
 * CSS styling of table to make things look pretty.
 * Generate graph with SVG or HTML5 canvas for neighbouring atoms of the currently viewed atom (when using get-atom).
 
+== FEATURES ADDED RECENTLY  ==
+
+You can use the following URL : http://localhost:17034/home.html
+to see the homepage & get the link to the interface available 
+
+Also you can check the external css file in /resources/ab.css & use your own personal CSS as per your convienence 
+

@@ -8,6 +8,11 @@ INSTALL(FILES
     head.html
     intro.html
     viewatom.html
+    addatom.html
+    update.html
+    updatett.html
+    updatesti.html
+    updatelti.html
     Logo.png
     DESTINATION "${DATADIR}/www"
 )
