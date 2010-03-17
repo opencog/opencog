@@ -10,3 +10,6 @@ ADD_LIBRARY (AtomSpaceExtensions
 
 ADD_DEPENDENCIES(AtomSpaceExtensions opencog_atom_types)
 
+TARGET_LINK_LIBRARIES (AtomSpaceExtensions
+    util
+)
