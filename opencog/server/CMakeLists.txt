@@ -78,7 +78,7 @@ IF (APPLE)
     # Apples's linker seems not to understand a colon-separated list of
     # rpaths.
     SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS
-        "-Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/guile -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/reasoning/pln -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/persist -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/query -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/server -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/shell -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/util -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/web")
+        "-Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/guile -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/reasoning/pln -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/query -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/server -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/shell -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/util -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/web")
     # doesn't work for some reason...
     #SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
     #    ${OPENCOG_BINARY_DIR}/opencog/guile)
