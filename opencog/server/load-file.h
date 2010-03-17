@@ -29,7 +29,9 @@ namespace opencog {
 #ifdef HAVE_GUILE
 int load_scm_file (const char * filename);
 #else 
-static inline int load_scm_file (const char *) { return 0; }
+// If there is no guile, then load_scm_file() must always return 
+// an error (i.e. a non-zero return value).
+static inline int load_scm_file (const char *) { return 1; }
 #endif /* HAVE_GUILE */
 
 }
