@@ -83,12 +83,12 @@ WebModule::~WebModule()
 
 static const char* DEFAULT_WEB_PATH[] =
 {
-    DATADIR,
     "../opencog/web", // For running from bin dir that's in root of src
 #ifndef WIN32
     "/usr/share/opencog/www",
     "/usr/local/share/opencog/www",
 #endif // !WIN32
+    DATADIR,
     NULL
 };
 
@@ -106,11 +106,13 @@ void WebModule::init()
     int i = 0;
     for (; DEFAULT_WEB_PATH[i] != NULL; ++i) {
         boost::filesystem::path webPath(DEFAULT_WEB_PATH[i]);
-        webPath /= "processing.js";
+        webPath /= "resources/processing.js";
         if (boost::filesystem::exists(webPath)) {
+            std::cout << webPath << std::endl;
             break;
         }
     }
+    std::cout << i << std::endl;
     mg_set_option(ctx, "root", DEFAULT_WEB_PATH[i]);
     // Turn off directory listing
     mg_set_option(ctx, "dir_list", "no");

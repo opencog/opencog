@@ -27,10 +27,15 @@ TARGET_LINK_LIBRARIES(ocweb
 )
 
 INSTALL(FILES
+    init.js
+    processing.js
+    local_graph.js
+    home.html
     DESTINATION "${DATADIR}/www"
 )
 
 ADD_SUBDIRECTORY(json_spirit)
+ADD_SUBDIRECTORY(resources)
 
 # TODO: take mongoose flags from Makefile for individual platforms. These are
 # just for linux:
