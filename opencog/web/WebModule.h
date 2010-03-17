@@ -73,11 +73,28 @@ public:
     static const unsigned int DEFAULT_PORT = 17034;
     static const char* DEFAULT_SERVER_ADDRESS;
 
-    //! @todo create a function to generate header
-    static const char* open_html_header;
-    static const char* close_html_header;
-    static const char* html_refresh_header;
-    static const char* html_footer;
+    static const char* openHtmlHeader()
+{
+return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
+    "content-Type: text/html\r\n\r\n"
+    "<html><head><link rel=stylesheet type=text/css href=../resources/ab.css>" ));
+
+}
+    static const char* closeHtmlHeader(){
+
+return(const_cast<char *>("</head><body>"));
+
+}
+    static const char* HtmlrefreshHeader(){
+
+return(const_cast<char *>( "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">"));
+
+}
+    static const char* htmlFooter(){
+
+return(const_cast<char *>("</body></html>\r\n"));
+
+}
 
     static inline const char* id() {
         static const char* _id = "opencog::WebModule";

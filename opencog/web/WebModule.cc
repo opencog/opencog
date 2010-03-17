@@ -51,16 +51,7 @@ extern "C" void        opencog_module_unload(Module* module) { delete module; }
 
 const char* WebModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
 
-//! @todo create a function to generate header
-const char* WebModule::open_html_header = "HTTP/1.1 200 OK\r\n"
-    "content-Type: text/html\r\n\r\n"
-    "<html><head>";
-const char* WebModule::close_html_header = "</head><body>";
 
-const char* WebModule::html_refresh_header = 
-    "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">";
-
-const char* WebModule::html_footer = "</body></html>\r\n";
 
 WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {

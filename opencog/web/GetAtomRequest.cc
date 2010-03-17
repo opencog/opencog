@@ -232,7 +232,7 @@ void GetAtomRequest::html_makeOutput(Handle h)
 void GetAtomRequest::generateProcessingGraph(Handle h)
 {
     _output << "<p>"
-        "</script><canvas datasrc=\"../local_graph.js\" "
+        "</script><canvas datasrc=\"../resources/local_graph.js\" "
         "width=\"200px\" height=\"200px\"></canvas></p>\n";
 }
 

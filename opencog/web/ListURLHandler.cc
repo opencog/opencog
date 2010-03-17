@@ -107,10 +107,10 @@ void ListURLHandler::OnRequestComplete()
     std::cout << request_output;
     
     if (!isJSON) {
-        result << WebModule::open_html_header;
+        result << WebModule::openHtmlHeader();
         if (refreshPage)
-            result << WebModule::html_refresh_header;
-        result << WebModule::close_html_header;
+        result << WebModule::HtmlrefreshHeader();
+        result << WebModule::closeHtmlHeader();
     }
 
     result << replaceURL(serverAdd);
@@ -131,7 +131,7 @@ void ListURLHandler::OnRequestComplete()
         if (refreshPage) {
             result << "<br/><small>Page will refresh every 5 seconds</small>";
         }
-        result << WebModule::html_footer;
+        result << WebModule::htmlFooter();
         mg_printf(_conn, result.str().c_str(), call_url.c_str(),
             query_string.c_str());
     }

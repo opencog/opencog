@@ -153,8 +153,8 @@ void ServerRequestWrapper::OnRequestComplete() {
         result << nodoublequotes;
         result << "\"}" << std::endl;
     } else {
-        result << WebModule::open_html_header;
-        result << WebModule::close_html_header;
+        result << WebModule::openHtmlHeader();
+        result << WebModule::closeHtmlHeader();
         result << "Result of running request '" << requestName << "':<br/>";
         result << "<pre>";
 
@@ -167,7 +167,7 @@ void ServerRequestWrapper::OnRequestComplete() {
         result << noanglebrackets;
 
         result << "</pre>";
-        result << WebModule::html_footer;
+        result << WebModule::htmlFooter();
     }
     mg_printf(_conn, result.str().c_str());
 

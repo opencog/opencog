@@ -245,9 +245,9 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
 std::string AtomURLHandler::getHTMLHeader()
 {
     std::ostringstream oss;
-    oss << "<script language=\"javascript\" src=\"../processing.js\">"
+    oss << "<script language=\"javascript\" src=\"../resources/processing.js\">"
         "</script>" << std::endl;
-    oss << "<script language=\"javascript\" src=\"../init.js\">"
+    oss << "<script language=\"javascript\" src=\"../resources/init.js\">"
         "</script>" << std::endl;
     return oss.str();
 }
@@ -261,11 +261,11 @@ void AtomURLHandler::OnRequestComplete()
         serverAdd += UI_PATH_PREFIX;
         
         if (!isJSON) {
-            result << WebModule::open_html_header;
+            result << WebModule::openHtmlHeader();
             if (refreshPage)
-                result << WebModule::html_refresh_header;
+                 result << WebModule::HtmlrefreshHeader();
             result << getHTMLHeader();
-            result << WebModule::close_html_header;
+             result << WebModule::closeHtmlHeader();
         }
 
         result << replaceURL(serverAdd);
@@ -286,7 +286,7 @@ void AtomURLHandler::OnRequestComplete()
             if (refreshPage) {
                 result << "<br/><small>Page will refresh every 5 seconds</small>";
             }
-            result << WebModule::html_footer;
+            result << WebModule::htmlFooter();
             mg_printf(_conn, result.str().c_str(), call_url.c_str(),
                     query_string.c_str());
         }

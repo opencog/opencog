@@ -27,9 +27,6 @@ TARGET_LINK_LIBRARIES(ocweb
 )
 
 INSTALL(FILES
-    init.js
-    processing.js
-    local_graph.js
     DESTINATION "${DATADIR}/www"
 )
 
