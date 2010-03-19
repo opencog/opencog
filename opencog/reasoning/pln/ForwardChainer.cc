@@ -135,7 +135,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     pHandleSeq results;
     
     while (maxRuleApps > 0) {
-        //cout << "steps remaining: " << maxRuleApps << endl;        
+        //cout << "steps remaining: " << maxRuleApps << endl;
         bool appliedRule = false;
     
         // Get the next Rule (no restrictions)
@@ -166,7 +166,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     // do the rule computation etc
                     
                 	//! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
-                	//! which is why I didn't includ it here.
+                	//! which is why I didn't include it here.
                 	if (r->getName() == std::string("DeductionRule")) {
                 		cout << "Deduction sanity check" << endl;
                 		// A->B   B->C   check that those are not the same Link
@@ -186,24 +186,24 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 						vhpair v = GET_ASW->fakeToRealHandle(out);
 						if (! (v.second == NULL_VERSION_HANDLE)) {
 							GET_ASW->removeAtom(out);
-							continue;
+						} else {
+							maxRuleApps--;
+							appliedRule = true;
+							if (target) { // Match it against the target
+								// Adapted from in Rule::validate
+								typedef weak_atom< meta > vertex_wrapper;
+								vertex_wrapper mp(target);
+
+								if (mp(out)) {
+									results.push_back(out);
+									return results;
+								}
+							} else
+								results.push_back(out);
+							//cout<<"Output\n";
+							NMPrinter np;
+							np.print(out);
 						}
-                        maxRuleApps--;
-                        appliedRule = true;
-                        if (target) { // Match it against the target
-                            // Adapted from in Rule::validate
-                            typedef weak_atom< meta > vertex_wrapper;
-                            vertex_wrapper mp(target);
-                            
-                            if (mp(out)) {
-                                results.push_back(out);
-                                return results;
-                            }
-                        } else
-                            results.push_back(out);
-                        //cout<<"Output\n";
-                        NMPrinter np;
-                        np.print(out);
                     } else {
                         // Remove atom if not satisfactory
                         //GET_ASW->removeAtom(_v2h(V));
@@ -213,7 +213,8 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         }
         // If it iterated through all Rules and couldn't find any suitable
         // input in the AtomSpace. Exit to prevent an infinite loop!
-        if (!appliedRule) return results;
+//! @todo Commented out as a hack, so it will keep going (potentially infinitely!) when a Rule fails the post-apply tests
+//        if (!appliedRule) return results;
     }
     
     return results;

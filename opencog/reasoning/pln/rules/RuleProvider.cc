@@ -261,6 +261,7 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     
     float ANDEvaluatorPriority = 10.0f;
 
+#ifdef USE_RULES_BESIDES_DEDUCTION
     AddRule(new ORRule(asw), 10.0f);
     
     AddRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
@@ -293,7 +294,9 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
     AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
     AddRule(new InversionRule(asw, ASSOCIATIVE_LINK), 7.0f);
+#endif
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
+#ifdef USE_RULES_BESIDES_DEDUCTION
     // This next one is just for the wordpairs demo.
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
@@ -305,7 +308,7 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
-    
+#endif
     
     reset();
 }
