@@ -92,7 +92,12 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  * quite small; and assumption 2) limits the search to "nearby", 
  * connected atoms.
  *
- * When assumption 2) fails, you will scrtach your head, thinking
+ * Note that the default implementation of node_match() and link_match()
+ * in this class does satisfy both 1) and 2), so this algo will work 
+ * correctly if these two methods are not overloaded.
+ *
+ * If you overload node_match(), and do so in a way that breaks
+ * assumption 2), then you will scratch your head, thinking
  * "why did my search fail to find this obvious solution?" The answer
  * will be for you to create a new search algo, in a new class, that
  * overloads this one, and does what you want it to.  This class should
