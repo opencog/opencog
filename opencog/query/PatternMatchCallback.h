@@ -137,8 +137,8 @@ class PatternMatchCallback
 		/**
 		 * Called to start search. Must iterate over the portion of the
 		 * atomspace in which the solution will be looked for.  This
-		 * callback can be used to limit how much ot the atomspace is
-		 * search, as well as controlling the initial starting points
+		 * callback can be used to limit how much of the atomspace is
+		 * searched, as well as controlling the initial starting points
 		 * for the search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
