@@ -78,8 +78,8 @@ TruthValue** SubsetEvalRule::formatTVarray(const std::vector<Vertex>& premises,
     pHandle sub_h = _v2h(premises[0]);
     pHandle super_h = _v2h(premises[1]);
 
-    OC_ASSERT(_asw->isSubType(sub_h, CONCEPT_NODE));
-    OC_ASSERT(_asw->isSubType(super_h, CONCEPT_NODE));
+//    OC_ASSERT(_asw->isSubType(sub_h, CONCEPT_NODE));
+//    OC_ASSERT(_asw->isSubType(super_h, CONCEPT_NODE));
 
     pHandleSet used;
 

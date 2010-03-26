@@ -253,14 +253,15 @@ public:
     }
     NO_DIRECT_PRODUCTION;
 };
-        
-        
+
+// Comment this out to switch off Rules besides Deduction on ImplicationLinks.
+#define USE_RULES_BESIDES_DEDUCTION 1
 ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
 {
     AtomSpaceWrapper* asw = GET_ASW;
     
     float ANDEvaluatorPriority = 10.0f;
-
+/*
 #ifdef USE_RULES_BESIDES_DEDUCTION
     AddRule(new ORRule(asw), 10.0f);
     
@@ -274,10 +275,10 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     AddRule(new NotEvaluatorRule(asw), 10.0f);
     
 ////    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
-    
+*/
     // FC: Broken due to TableGather not handling Node Type vertexes
-////    AddRule(new SubsetEvalRule(asw), 10.0f);
-
+    AddRule(new SubsetEvalRule(asw), 10.0f);
+/*
 ////    AddRule(new IntensionalInheritanceRule(asw), 10.f);
 
     //  AddRule(new FORALLRule(asw,NULL), 5.0f);
@@ -308,7 +309,7 @@ ForwardChainerRuleProvider::ForwardChainerRuleProvider(void)
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
-#endif
+#endif*/
     
     reset();
 }
