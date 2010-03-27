@@ -40,6 +40,8 @@ using namespace std;
 using namespace opencog;
 using boost::shared_ptr;
 
+#define STREAMLINE_PHANDLES
+
 // Mind Shadow is an atom cache system but no longer used
 #define USE_MIND_SHADOW 0
 namespace haxx
@@ -84,7 +86,9 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     srand(12345678);
     allowFWVarsInAtomSpace = true;
     archiveTheorems = false;
+#ifndef STREAMLINE_PHANDLES // Just because it crashes at this point.
     setWatchingAtomSpace(true);
+#endif
 }
 
 void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
@@ -284,6 +288,20 @@ bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 
 vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
 {
+#ifdef	STREAMLINE_PHANDLES
+    // Don't map Handles that are Types
+    if (isType(h)) {
+        printf("Cannot convert an atom type (%u) to a real Handle", h);
+        throw RuntimeException(TRACE_INFO, "Cannot convert an atom type (%u) "
+                "to a real Handle", h);
+    }
+
+    Handle realHandle(h - mapOffset);
+    vhpair vh;
+    vh.first = realHandle;
+    vh.second = NULL_VERSION_HANDLE;
+    return vh;
+#else
     // Don't map Handles that are Types
     if (isType(h)) {
         printf("Cannot convert an atom type (%u) to a real Handle", h);
@@ -304,11 +322,15 @@ vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
     } else {
         throw RuntimeException(TRACE_INFO, "Invalid fake handle %u", h);
     }
-
+#endif
 }
 
 pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
 {
+#ifdef STREAMLINE_PHANDLES
+	pHandle fakeHandle = (pHandle) h.value() + mapOffset;
+	return fakeHandle;
+#else
     // check if already exists
     vhmap_reverse_t::const_iterator i = vhmap_reverse.find(vhpair(h,vh));
     if (i != vhmap_reverse.end()) {
@@ -326,10 +348,15 @@ pHandle AtomSpaceWrapper::realToFakeHandle(Handle h, VersionHandle vh)
         vhmap_reverse.insert( vhmap_reverse_pair_t(vhpair(h,vh), fakeHandle) );
         return fakeHandle;
     }
-
+#endif
 }
 
 std::vector< pHandle > AtomSpaceWrapper::realToFakeHandle(const Handle h) {
+#ifdef STREAMLINE_PHANDLES
+    std::vector< pHandle > result;
+    result.push_back(realToFakeHandle(h, NULL_VERSION_HANDLE));
+    return result;
+#else
     std::vector< pHandle > result;
     result.push_back(realToFakeHandle(h, NULL_VERSION_HANDLE));
     if (atomspace->getTV(h).getType() == COMPOSITE_TRUTH_VALUE) {
@@ -344,6 +371,7 @@ std::vector< pHandle > AtomSpaceWrapper::realToFakeHandle(const Handle h) {
         }
     }
     return result;
+#endif
 }
 
 pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
@@ -361,6 +389,9 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const HandleSeq& hs,
 pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h,
                                                const Handle c)
 {
+	bool NotUsed = true;
+	assert(NotUsed);
+
     // c is a context whose outgoing set of contexts matches contexts of each
     // handle in outgoing of real handle h.
     HandleSeq contexts = atomspace->getOutgoing(c);
