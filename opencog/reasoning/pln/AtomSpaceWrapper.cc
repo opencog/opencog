@@ -86,9 +86,7 @@ AtomSpaceWrapper::AtomSpaceWrapper(AtomSpace *a) :
     srand(12345678);
     allowFWVarsInAtomSpace = true;
     archiveTheorems = false;
-#ifndef STREAMLINE_PHANDLES // Just because it crashes at this point.
     setWatchingAtomSpace(true);
-#endif
 }
 
 void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
