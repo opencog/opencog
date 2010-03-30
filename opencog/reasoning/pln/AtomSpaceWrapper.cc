@@ -277,11 +277,16 @@ unsigned int index) const
 
 bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 {
+#ifdef STREAMLINE_PHANDLES
+	// whatever.
+	return true;
+#else
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
         return true;
     }
     return false;
+#endif
 }
 
 vhpair AtomSpaceWrapper::fakeToRealHandle(const pHandle h) const
@@ -997,7 +1002,7 @@ pHandle AtomSpaceWrapper::addNodeDC(Type t, const string& name,
 
 pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 {
-#if 1 // This implementation still gets different behaviour in some cases...
+#if 0 // This implementation still gets different behaviour in some cases...
 //#ifdef STREAMLINE_PHANDLES // This is a sort of "nexus" function, which every Atom-add bottoms out in
 	// DESIGN DECISIONS:
 	// Ignore fresh; also let the AS take care of TVs for now.
@@ -1011,17 +1016,99 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
     if (nnn) {
     	const Node& node = (const Node&) atom;
     	// if the atom doesn't exist already, then just add normally
-    	return realToFakeHandle(as->addNode(node.getType(),
+    	result = as->addNode(node.getType(),
     			node.getName(),
-    			node.getTruthValue()),
-    			NULL_VERSION_HANDLE);
+    			node.getTruthValue());
     } else {
     	const Link& link = (const Link&) atom;
 
     	result = as->addLink(link.getType(), link.getOutgoingSet(),
     			link.getTruthValue());
-    	return realToFakeHandle(result, NULL_VERSION_HANDLE);
     }
+	///
+	// Get any existing TVs
+	const TruthValue& tv = as->getTV(result);
+	if (atom.getTruthValue() != TruthValue::TRIVIAL_TV()) {
+		std::cout << atom.toString() /*<< " " << tv.toString()*/ << std::endl;
+		assert(atom.getTruthValue() == atom.getTruthValue()); // Check that it never is required to make a new TV (or that they're always higher-conf...)
+	}
+	///
+	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+	return fakeHandle;
+#elif STREAMLINE_PHANDLES
+    AtomSpace *as = atomspace;
+    Handle result;
+    pHandle fakeHandle;
+
+	// See if atom exists already
+	//const HandleSeq outgoing;
+	const Node *nnn = dynamic_cast<Node *>((Atom *) & atom);
+	if (nnn) {
+		const Node& node = (const Node&) atom;
+#ifdef NEVER_ALLOW_SECOND_TVS
+		result = as->getHandle(node.getType(), node.getName());
+
+		const TruthValue& tv = as->getTV(result);
+		const TruthValue& atv = atom.getTruthValue();
+		bool noExistingTV = (tv == TruthValue::TRIVIAL_TV() || tv == TruthValue::DEFAULT_TV() || tv == TruthValue::NULL_TV()
+							 || tv.getCount() >= atv.getCount());
+		bool sameTV = (tv != TruthValue::NULL_TV() && tv.getMean() == atv.getMean() && tv.getCount() == atv.getCount());
+		//if (tv != TruthValue::NULL_TV()) std::cout << tv.getMean() << " " << atv.getMean() << " " << tv.getCount() << " " << atv.getCount() << std::endl;
+		if (tv != TruthValue::NULL_TV()) std::cout << tv.toString() << " new: " << atv.toString() << std::endl;
+		if (!noExistingTV && !sameTV) {
+			std::cout << "Existing TV!" << std::endl;
+			std::cout << atom.toString() << " " << atv.toString() << std::endl;
+		}
+		assert(noExistingTV);
+#endif
+
+//		if (TLB::isInvalidHandle(result)) {
+			// if the atom doesn't exist already, then just add normally
+			return realToFakeHandle(as->addNode(node.getType(),
+												node.getName(),
+												node.getTruthValue()),
+									NULL_VERSION_HANDLE);
+//		}
+	} else {
+		const Link& link = (const Link&) atom;
+		//for (int i = 0; i < link.getArity(); i++) {
+		//    outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
+		//}
+		//outgoing = link.getOutgoingSet();
+#ifdef NEVER_ALLOW_SECOND_TVS
+		result = as->getHandle(link.getType(), link.getOutgoingSet());
+
+		const TruthValue& tv = as->getTV(result);
+		const TruthValue& atv = atom.getTruthValue();
+		bool noExistingTV = (tv == TruthValue::TRIVIAL_TV() || tv == TruthValue::DEFAULT_TV() || tv == TruthValue::NULL_TV()
+							 || tv.getCount() >= atv.getCount());
+		bool sameTV = (tv != TruthValue::NULL_TV() && tv.getMean() == atv.getMean() && tv.getCount() == atv.getCount());
+		//if (tv != TruthValue::NULL_TV()) std::cout << tv.getMean() << " " << atv.getMean() << " " << tv.getCount() << " " << atv.getCount() << std::endl;
+		if (tv != TruthValue::NULL_TV()) std::cout << tv.toString() << " new: " << atv.toString() << std::endl;
+		if (!noExistingTV && !sameTV) {
+			std::cout << "Existing TV!" << std::endl;
+			std::cout << atom.toString() << " " << atv.toString() << std::endl;
+		}
+		assert(noExistingTV);
+#endif
+
+//		if (TLB::isInvalidHandle(result)) {
+			result = as->addLink(link.getType(), link.getOutgoingSet(),
+								 link.getTruthValue());
+//		}
+	}
+
+	// Link <handle,vh> to a long int
+	///
+	// Get any existing TVs
+//	const TruthValue& tv = as->getTV(result);
+//	if (atom.getTruthValue() != TruthValue::TRIVIAL_TV()) {
+//		std::cout << atom.toString() /*<< " " << tv.toString()*/ << std::endl;
+//		assert(atom.getTruthValue() == atom.getTruthValue()); // Check that it never is required to make a new TV (or that they're always higher-conf...)
+//	}
+	///
+	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
+	return fakeHandle;
 #else
     AtomSpace *as = atomspace;
     Handle result;
