@@ -135,12 +135,12 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     pHandleSeq results;
     
     while (maxRuleApps > 0) {
-        cout << "steps remaining: " << maxRuleApps << endl;
+        //cout << "steps remaining: " << maxRuleApps << endl;
         bool appliedRule = false;
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, rp) { // to avoid needing a nextRule method.
-            cout << "Using " << r->getName() << endl;
+            //cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
@@ -177,7 +177,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
                     const TruthValue& tv=GET_ASW->getTV(out);
-//                    cout<<printTV(out)<<'\n';
+                    //cout<<printTV(out)<<'\n';
 
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
 						// If the TV is a repeat, delete it.
@@ -214,7 +214,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         // If it iterated through all Rules and couldn't find any suitable
         // input in the AtomSpace. Exit to prevent an infinite loop!
 //! @todo Commented out as a hack, so it will keep going (potentially infinitely!) when a Rule fails the post-apply tests
-        if (!appliedRule) return results;
+//        if (!appliedRule) return results;
     }
     
     return results;
