@@ -58,7 +58,10 @@ Links are assumed not inheritable either.
     if (outh->begin().number_of_children() != 2
         ||  asw->isSubType(top, FW_VARIABLE_NODE)
         ||  asw->isSubType(top, INHERITANCE_LINK)
-        ||  asw->isSubType(top, IMPLICATION_LINK))
+        ||  asw->isSubType(top, SUBSET_LINK)
+        ||  asw->isSubType(top, INTENSIONAL_INHERITANCE_LINK)
+        ||  asw->isSubType(top, IMPLICATION_LINK)
+        ||  asw->isSubType(top, EXTENSIONAL_IMPLICATION_LINK))
         return Rule::setOfMPs();
 
 /*  puts("X1");
