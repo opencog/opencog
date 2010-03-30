@@ -253,9 +253,14 @@ public:
     }
     NO_DIRECT_PRODUCTION;
 };
+<<<<<<< TREE
 
 #define USE_RULES_BESIDES_DEDUCTION
 ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
+=======
+        
+        
+>>>>>>> MERGE-SOURCE
 {
     AtomSpaceWrapper* asw = GET_ASW;
 
@@ -274,11 +279,20 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     // Also not actually used in any of the demos.
     AddRule(new ANDPartitionRule(asw), 10.0f);
     AddRule(new NotEvaluatorRule(asw), 10.0f);
+<<<<<<< TREE
 
     // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
     AddRule(new SubsetEvalRule(asw, ATOM), 10.0f);
 
     AddRule(new IntensionalInheritanceRule(asw, ATOM), 10.f);
+=======
+    
+>>>>>>> MERGE-SOURCE
+<<<<<<< TREE
+=======
+////    AddRule(new SubsetEvalRule(asw), 10.0f);
+
+>>>>>>> MERGE-SOURCE
 
     //  AddRule(new FORALLRule(asw,NULL), 5.0f);
     //  AddRule( new PLNPredicateRule(asw,NULL), 5.0f);
@@ -309,6 +323,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
+<<<<<<< TREE
 #endif
 }
 
@@ -337,6 +352,9 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
 {
 
+=======
+#endif
+>>>>>>> MERGE-SOURCE
 }
 
 }}
