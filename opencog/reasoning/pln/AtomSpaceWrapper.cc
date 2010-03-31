@@ -167,6 +167,16 @@ bool AtomSpaceWrapper::isSubType(pHandle h, Type T)
 
 pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
 {
+#ifdef STREAMLINE_PHANDLES // In case I wasn't handling the version right
+    // Check if link
+    if (!isSubType(h, LINK)) {
+        // Nodes have no outgoing set
+        return pHandleSeq();
+    } else {
+        vhpair v = fakeToRealHandle(h);
+        return realToFakeHandles(atomspace->getOutgoing(v.first));
+    }
+#else
     // Check if link
     if (!isSubType(h, LINK)) {
         // Nodes have no outgoing set
@@ -178,6 +188,7 @@ pHandleSeq AtomSpaceWrapper::getOutgoing(const pHandle h)
         else
             return realToFakeHandles(atomspace->getOutgoing(v.first));
     }
+#endif
 }
 
 pHandle AtomSpaceWrapper::getOutgoing(const pHandle h, const int i)
@@ -198,6 +209,16 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
     pHandleSeq results;
     inLinks = atomspace->getIncoming(v.first);
 
+#ifdef STREAMLINE_PHANDLES
+    foreach (Handle l, inLinks) {
+        // each link incoming can consist of multiple fake handles (not really now)
+        pHandleSeq moreLinks = realToFakeHandle(l);
+        foreach (pHandle ml, moreLinks) {
+            results.push_back(ml);
+        }
+    }
+    return results;
+#else
     // For each link in incoming, check that the context of h is
     // in the right position of the outgoing set of the link
     foreach (Handle l, inLinks) {
@@ -233,6 +254,7 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
 
     }
     return results;
+#endif
 }
 
 /*
@@ -278,8 +300,8 @@ unsigned int index) const
 bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 {
 #ifdef STREAMLINE_PHANDLES
-	// whatever.
-	return true;
+	Atom* result = TLB::getAtom(fakeToRealHandle(h).first);
+	return result;
 #else
     vhmap_t::const_iterator i = vhmap.find(h);
     if (i != vhmap.end()) {
@@ -488,11 +510,12 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // context of the outgoing set. either that or a context that inherits from
     // all the contexts of outgoing set.
     Handle real = atomspace->getHandle(t,outgoingReal);
-
+    
     if (real == Handle::UNDEFINED) {
         return PHANDLE_UNDEFINED;
     }
 
+#ifndef STREAMLINE_PHANDLES
     // Find a a VersionHandle with a context that has the same order of contexts
     // as vhs, otherwise return default
     // (need to clone, because we want to remove any invalid TVs before using)
@@ -522,6 +545,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
             }
         }
     }
+#endif
     return realToFakeHandle(real,NULL_VERSION_HANDLE);
 }
 
@@ -1035,7 +1059,8 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
 	///
 	fakeHandle = realToFakeHandle(result, NULL_VERSION_HANDLE);
 	return fakeHandle;
-#elif STREAMLINE_PHANDLES
+#endif
+#ifdef STREAMLINE_PHANDLES
     AtomSpace *as = atomspace;
     Handle result;
     pHandle fakeHandle;
@@ -1269,6 +1294,13 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
 
 bool AtomSpaceWrapper::removeAtom(pHandle h)
 {
+#ifdef STREAMLINE_PHANDLES
+    AtomSpace *a = atomspace;
+    // remove atom
+    vhpair v = fakeToRealHandle(h);
+	a->removeAtom(v.first);
+    return true;
+#else
     AtomSpace *a = atomspace;
     // remove atom
     vhpair v = fakeToRealHandle(h);
@@ -1305,6 +1337,7 @@ bool AtomSpaceWrapper::removeAtom(pHandle h)
     }
     //! @todo - also remove freed dummy contexts
     return true;
+#endif
 }
 
 
