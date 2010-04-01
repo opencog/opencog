@@ -105,6 +105,8 @@ namespace opencog {
 
 class SchemeEval
 {
+	private:
+		static SchemeEval* singletonInstance;
 	public:
 		std::string eval(const std::string &s) { return ""; }
 		Handle eval_h(const std::string &s) { return Handle::UNDEFINED; }
