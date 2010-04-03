@@ -85,6 +85,8 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
     if (haxx::inferred_from[ret_h].empty()) //comes here often, we want the link only once
         haxx::inferred_from[ret_h].push_back(hForAllLink);
 
+    std::cout << name << " produced " << ret_h << std::endl;
+
     return ret;
 }
 }} // namespace opencog { namespace pln {
