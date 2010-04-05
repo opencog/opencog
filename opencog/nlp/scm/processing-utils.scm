@@ -63,6 +63,7 @@
 			(system (string-join (list "echo Info: send to parser: " sent-txt)))
 			(exec-scm-from-port s)
 			(system (string-join (list "echo Info: close socket to parser" )))
+			(close-port s)
 		)
 	)
 
