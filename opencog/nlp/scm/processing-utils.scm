@@ -62,7 +62,6 @@
 			(display "\n" s) ; must send newline to flush socket
 			(system (string-join (list "echo Info: send to parser: " sent-txt)))
 			(exec-scm-from-port s)
-			(shutdown s 2)
 			(system (string-join (list "echo Info: close socket to parser" )))
 		)
 	)

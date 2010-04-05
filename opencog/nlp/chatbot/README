@@ -39,9 +39,39 @@ change at any time, as I am likely to twiddle, tweak and change it about.
 (Adding reasoning is a difficult but important priority).
 
 Running the chatbot requires three steps:
-1) Running the parser server.
-2) Running the opencog server.
-3) Running the chat-to-opencog bridge.
+1) Setting up your opencog.conf.
+2) Running the parser server.
+3) Running the opencog server.
+4) Running the chat-to-opencog bridge.
+
+Set up opencog.conf:
+--------------------
+The chatbot requires some additional Scheme modules to be loaded into
+opencog before starting the OpenCog Server. Furthermore, these modules
+are to be loaded in a particular order so that there won't be any
+dependency violations.
+Here is the proper order as of writing this:
+
+SCM_PRELOAD           = scm/type_constructors.scm, 
+                        scm/persistence.scm,
+                        scm/utilities.scm,
+                        scm/file-utils.scm, 
+                        scm/debug.scm,
+                        nlp/scm/type-definitions.scm, 
+                        nlp/scm/config.scm, 
+                        nlp/scm/file-utils.scm,
+                        nlp/scm/nlp-utils.scm,
+                        nlp/scm/disjunct-list.scm,
+                        nlp/scm/processing-utils.scm,
+                        nlp/triples/rule-tools.scm,
+                        nlp/triples/prep-rules.scm,
+                        nlp/triples/triples-pipeline.scm,
+                        nlp/seme/seme-process.scm,
+                        nlp/triples/deduction.scm,
+                        nlp/chatbot/chat-interface.scm,
+                        nlp/triples/rules.scm,
+                        nlp/triples/question-pipeline.scm,
+                        reasoning/pln/scm/pln-rules.scm
 
 Run the parser server:
 ----------------------
@@ -324,3 +354,4 @@ http://en.wikipedia.org/wiki/MultiNet
 
 Initial draft: April 2009 Linas Vepstas
 Updated: September 2009 Linas Vepstas
+Updated: April 2010  Vamsi Krishna Davuluri
