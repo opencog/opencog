@@ -105,7 +105,12 @@ void BasicSCMUTest::setUp(void)
 	as = cogserver.getAtomSpace();
 
 	// Proper UTF-8 behaviour requires the right locale.
-	eval.eval("(setlocale LC_ALL \"\")");
+	// Do not use LC_ALL, as otherwise the printing of the numeric
+	// quantities (immediately below) get commas, not decimal points,
+	// in the majority of European locales. Unfortunately, guile number
+	// parsing is not locale dependent...
+	// eval.eval("(setlocale LC_ALL \"\")");
+	eval.eval("(setlocale LC_CTYPE \"\")");
 	eval.clear_pending();
 }
 
