@@ -267,7 +267,12 @@ protected:
     /// each argument.
     std::vector<std::set<VtreeProvider*> > eval_results;
 
-    const unsigned int depth;
+    /// Note that depth is not necessarily const because
+    /// BITNode can be reused at different parts in the BIT
+    /// which are not necessarily at the same depth,
+    /// via for instance the ParametrizedBITNode class, which is a
+    /// wrapper for BITNode, not sure how depth works then though.
+    unsigned int depth;
     BITNodeRoot* root;
 
     bool Expanded;
@@ -694,7 +699,7 @@ public:
     FitnessEvaluatorT fitnessEvaluator;
 
 protected:
-    friend struct not_owned_var;
+
     typedef std::list<BITNode*> exec_poolT;
     exec_poolT exec_pool;
 
