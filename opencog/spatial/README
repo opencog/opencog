@@ -12,7 +12,7 @@ inside the perceived "world".
 
 MapTools
 --------
-This is an tool designed for debugging purpose. It can be used by
+This is a tool designed for debugging purpose. It can be used by
 a developer that want to "see" what the agent is perceiving in real
 time. Each agent contains a MapExplorerServer inside it. A
 MapExplorerServer is a service that capture the latest version of 

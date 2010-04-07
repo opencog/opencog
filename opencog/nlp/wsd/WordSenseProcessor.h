@@ -2,7 +2,7 @@
  * WordSenseProcessor.h
  *
  * Main entry point for word-sense disambiguation. This class inherits
- * from Agent; it scans for new input sentences, and then invokes
+ * from Module; it scans for new input sentences, and then invokes
  * the disambiguation algorithms on it.
  *
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
