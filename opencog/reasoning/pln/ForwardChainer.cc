@@ -140,7 +140,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, composers) { // to avoid needing a nextRule method.
-            //cout << "Using " << r->getName() << endl;
+            cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
@@ -213,8 +213,8 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         }
         // If it iterated through all Rules and couldn't find any suitable
         // input in the AtomSpace. Exit to prevent an infinite loop!
-//! @todo Commented out as a hack, so it will keep going (potentially infinitely!) when a Rule fails the post-apply tests
-//        if (!appliedRule) return results;
+//! @todo Sometimes commented out as a hack, so it will keep going (potentially infinitely!) when a Rule fails the post-apply tests
+        if (!appliedRule) return results;
     }
     
     return results;
@@ -223,14 +223,30 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 //!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
 Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
-    Btr<std::set<BoundVertex> > matches;
+    Btr<std::set<BoundVertex> > matches(new std::set<BoundVertex>);
     
 //    std::cout << "getMatching: target: ";
     rawPrint(target->begin(), 5);
 
     foreach(Rule* g, generators) {
+    	std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
-    	std::copy(gMatches->begin(), gMatches->end(), matches->begin());
+
+    	// The obvious version doesn't work
+    	//std::copy(gMatches->begin(), gMatches->end(), matches->begin());
+    	std::set<BoundVertex>* tmp = gMatches.get();
+    	if (tmp) {
+			foreach (BoundVertex tmp, *gMatches) {
+				matches->insert(tmp);
+			}
+    	}
+
+//    	std::set<BoundVertex>::iterator i;
+//
+//    	for (i = gMatches->begin(); i != gMatches->end(); i++) {
+//
+//    		matches->insert(*i);
+//    	}
     }
     
     return matches;
