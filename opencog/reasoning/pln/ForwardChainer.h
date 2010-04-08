@@ -44,7 +44,8 @@ public:
     ForwardChainer();
     ~ForwardChainer();
 
-    ForwardComposerRuleProvider rp;
+    ForwardComposerRuleProvider composers;
+    ForwardGeneratorRuleProvider generators;
 
     //! Rules that have yet to be attempted for forward chaining on seed handle.
     //! Consists of all rules at the beginning.

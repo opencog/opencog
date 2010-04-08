@@ -9,7 +9,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PUcomposersOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
@@ -139,7 +139,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         bool appliedRule = false;
     
         // Get the next Rule (no restrictions)
-        foreach(Rule *r, rp) { // to avoid needing a nextRule method.
+        foreach(Rule *r, composers) { // to avoid needing a nextRule method.
             //cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
@@ -223,14 +223,15 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 //!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
 Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
-    // Just look it up via LookupRule
-    LookupRule lookup(GET_ASW);
     Btr<std::set<BoundVertex> > matches;
     
 //    std::cout << "getMatching: target: ";
     rawPrint(target->begin(), 5);
-                    
-    matches = lookup.attemptDirectProduction(target);
+
+    foreach(Rule* g, generators) {
+    	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
+    	std::copy(gMatches->begin(), gMatches->end(), matches->begin());
+    }
     
     return matches;
 }
