@@ -734,7 +734,7 @@ void fw_beta (void) {
 
   atw->reset();
 
-  //ForwardChainerRuleProvider *rp=new ForwardChainerRuleProvider();
+  //ForwardComposerRuleProvider *rp=new ForwardComposerRuleProvider();
   SimpleTruthValue tv(0.99,SimpleTruthValue::confidenceToCount(0.99));
 #if 0
   Handle h1=atw->addNode (CONCEPT_NODE,string("Human"),tv,true);

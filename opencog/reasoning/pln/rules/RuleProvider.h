@@ -62,7 +62,7 @@ public:
     virtual ~DefaultVariableRuleProvider(void);
 };
 
-class ForwardChainerRuleProvider : public VariableRuleProvider
+class ForwardComposerRuleProvider : public VariableRuleProvider
 {
 private:
     //! The seed handle
@@ -74,8 +74,8 @@ private:
 
     Rule* findHighestPriorityRule();
 public:
-    ForwardChainerRuleProvider(void);
-    virtual ~ForwardChainerRuleProvider(void);
+    ForwardComposerRuleProvider(void);
+    virtual ~ForwardComposerRuleProvider(void);
 
     //! Rules that have already be attempted.
     std::vector<Rule*> invalidRules;
@@ -95,6 +95,41 @@ public:
     //! returned rule.
     Rule* nextRule();
     
+};
+
+class ForwardGeneratorRuleProvider : public VariableRuleProvider
+{
+private:
+    //! The seed handle
+    pHandle seed;
+    unsigned int seedIndex;
+
+    //! Current rule that's been checked out last by getRule
+    Rule* current;
+
+    Rule* findHighestPriorityRule();
+public:
+    ForwardGeneratorRuleProvider(void);
+    virtual ~ForwardGeneratorRuleProvider(void);
+
+    //! Rules that have already be attempted.
+    std::vector<Rule*> invalidRules;
+
+    //! Set the seed atom, when this changes the seedStack and invalidRules need to
+    //! be reset.
+    void setSeed(pHandle s);
+
+    //! Get the index for the seed in the last Rule provided by nextRule;
+    unsigned int getSeedIndex();
+
+    //! Reset stacks
+    void reset();
+
+    //! Retrieve the next rule that can have the seed atom bound.
+    //! Note: the seed atom may be bindable to more than one spot in the
+    //! returned rule.
+    Rule* nextRule();
+
 };
 
 }} //namespace opencog { namespace pln {
