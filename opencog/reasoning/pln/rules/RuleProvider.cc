@@ -410,12 +410,12 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 //    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
 //    AddRule(new HypothesisRule(asw), 30.0f);
 //
-//    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-//
-//    foreach(pHandle fah, *ForAll_handles)
-//        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
-//
-//    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
+
+    foreach(pHandle fah, *ForAll_handles)
+        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+
+    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
 }
 
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
