@@ -85,14 +85,14 @@ public:
         }
 
         printf("Computing TV... \n");
-        TruthValue* retTV = formula.compute(tvs, TVN, fresh);
+        TruthValue* retTV = formula.compute(tvs, TVN);
         printf("TV computation ok\n");
 
         delete[] tvs;
         printf("tvs[] freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
-        pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, true);
+        pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
 //   false);
 
         delete retTV;
