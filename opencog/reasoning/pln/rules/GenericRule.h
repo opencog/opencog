@@ -85,7 +85,10 @@ public:
         }
 
         printf("Computing TV... \n");
+
+        //! @todo Maybe fill in the Universe size.
         TruthValue* retTV = formula.compute(tvs, TVN);
+
         printf("TV computation ok\n");
 
         delete[] tvs;

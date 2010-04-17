@@ -140,7 +140,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, composers) { // to avoid needing a nextRule method.
-            cout << "Using " << r->getName() << endl;
+            //cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
@@ -229,7 +229,7 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     rawPrint(target->begin(), 5);
 
     foreach(Rule* g, generators) {
-    	std::cout << g->getName();
+    	//std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
     	// The obvious version doesn't work
