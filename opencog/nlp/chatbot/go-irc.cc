@@ -46,12 +46,22 @@ using std::string;
 
 CogitaConfig cc;
 
+/* printf can puke if these fields are NULL */
+void fixup_reply(irc_reply_data* ird)
+{
+	ird->nick = (NULL == ird->nick) ? "" : ird->nick;
+	ird->ident = (NULL == ird->ident) ? "" : ird->ident;
+	ird->host = (NULL == ird->host) ? "" : ird->host;
+	ird->target = (NULL == ird->target) ? "" : ird->target;
+}
+
 /**
  * Join channel shortly after logging into the irc server.
  */
 int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*) data;
+	fixup_reply(ird);
 
 	printf("chatbot got params=%s\n", params);
 	printf("chatbot got motd nick=%s ident=%s host=%s target=%s\n",
@@ -85,6 +95,7 @@ static bool is_nonblank(const char * str)
 int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 {
 	IRC* conn = (IRC*) data;
+	fixup_reply(ird);
 
 	printf("input=%s\n", params);
 	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
@@ -271,6 +282,7 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 int got_kick(const char* params, irc_reply_data* ird, void* data)
 {
+	fixup_reply(ird);
 	printf("got kicked -- input=%s\n", params);
 	printf("nick=%s ident=%s host=%s target=%s\n", ird->nick, ird->ident, ird->host, ird->target);
 	return 0;
