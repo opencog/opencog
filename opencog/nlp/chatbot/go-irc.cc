@@ -49,10 +49,10 @@ CogitaConfig cc;
 /* printf can puke if these fields are NULL */
 void fixup_reply(irc_reply_data* ird)
 {
-	ird->nick = (NULL == ird->nick) ? "" : ird->nick;
-	ird->ident = (NULL == ird->ident) ? "" : ird->ident;
-	ird->host = (NULL == ird->host) ? "" : ird->host;
-	ird->target = (NULL == ird->target) ? "" : ird->target;
+	ird->nick = (NULL == ird->nick) ? (char *) "" : ird->nick;
+	ird->ident = (NULL == ird->ident) ? (char *) "" : ird->ident;
+	ird->host = (NULL == ird->host) ? (char *) "" : ird->host;
+	ird->target = (NULL == ird->target) ? (char *) "" : ird->target;
 }
 
 /**
