@@ -33,6 +33,7 @@ public:
     NO_DIRECT_PRODUCTION;
     
     StrictImplicationBreakdownRule(AtomSpaceWrapper *_asw);
+    meta targetTemplate() const;
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     /**
      * @param premiseArray a vector of premises, (A->B, A)
@@ -49,7 +50,6 @@ public:
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const;
     bool validate2(MPs& args) const { return true; }
-    
 };
 
 }} // namespace opencog { namespace pln {

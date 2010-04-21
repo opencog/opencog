@@ -44,7 +44,13 @@ StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(AtomSpaceWrapper 
                                                 mva((pHandle)ATOM))
                                ));
 }
-        
+
+meta StrictImplicationBreakdownRule::targetTemplate() const
+{
+    return(meta(new vtree(mva((pHandle)ATOM))));
+}
+
+
 Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     ///haxx:: (restricts internal implications
