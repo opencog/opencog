@@ -33,7 +33,9 @@ public:
     NO_DIRECT_PRODUCTION;
     
     StrictImplicationBreakdownRule(AtomSpaceWrapper *_asw);
-    meta targetTemplate() const;
+//    meta targetTemplate() const;
+    Rule::setOfMPs fullInputFilter() const;
+
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
     /**
      * @param premiseArray a vector of premises, (A->B, A)

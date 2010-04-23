@@ -45,11 +45,35 @@ StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(AtomSpaceWrapper 
                                ));
 }
 
-meta StrictImplicationBreakdownRule::targetTemplate() const
-{
-    return(meta(new vtree(mva((pHandle)ATOM))));
-}
+// Won't work since Rule::o2iMeta requires a target to have children
+// (and removing that restriction breaks other things).
+//meta StrictImplicationBreakdownRule::targetTemplate() const
+//{
+//    return(meta(new vtree(mva((pHandle)ATOM))));
+//}
 
+Rule::setOfMPs StrictImplicationBreakdownRule::fullInputFilter() const
+{
+	meta outh(new vtree(mva((pHandle)ATOM)));
+
+    MPs ret;
+    Vertex myvar = CreateVar(asw);
+
+    cprintf(4,"\n\nTo produce\n");
+    NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+    printer.print(outh->begin(), 4);
+
+    ret.push_back(BBvtree(new BoundVTree(mva((pHandle)IMPLICATION_LINK,
+                                             vtree(myvar),*outh))));
+    cprintf(4,"Need:\n");
+    ret.push_back(BBvtree(new BoundVTree(myvar)));
+    printer.print(ret[0]->begin(), 4);
+    printer.print(ret[1]->begin(), 4);
+
+    cprintf(4,"-----\n");
+
+    return makeSingletonSet(ret);
+}
 
 Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
