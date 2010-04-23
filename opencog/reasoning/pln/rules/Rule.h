@@ -222,7 +222,7 @@ public:
     //! Get the inputFilter for this Rule.
     MPsIn& getInputFilter() { return inputFilter; }
 
-    setOfMPs fullInputFilter() const;
+    virtual setOfMPs fullInputFilter() const;
 
     //! Does the Rule have unfixed input arity?
     bool hasFreeInputArity() const { return freeInputArity; }
