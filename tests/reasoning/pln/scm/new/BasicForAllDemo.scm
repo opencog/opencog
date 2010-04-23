@@ -1,33 +1,23 @@
+; Basic ForAll demo using Implication. It has to be with InheritanceRule to prevent ModusPonensRule from triggering.
+
 (define tv (stv 1 0.999))
 
-(define tackily_implied (PredicateNode "tackily_implied" tv))
-(define R (PredicateNode "R" tv))
-(define x001 (VariableNode "x001" tv))
-(define fact_6 (ConceptNode "fact_6" tv))
-(define fact_42 (ConceptNode "fact_42" tv))
+(define A (ConceptNode "A"))
+(define B (ConceptNode "B"))
+(define C (ConceptNode "C"))
+(define x001 (VariableNode "x001"))
 
 (ForAllLink tv (ListLink x001)
-    (EvaluationLink
-        tackily_implied
-        (ListLink x001)
-    )
-)
-
-; tackily use the result, so that FC will know what binding to use
-(ImplicationLink tv
-    (EvaluationLink
-        tackily_implied
-        (ListLink fact_6)
-    )
-    (EvaluationLink
-        R
-        (ListLink fact_42)
+    (InheritanceLink
+        x001
+        B
     )
 )
 
 (define target
-    (EvaluationLink
-        R
-        (ListLink fact_42)
+    (InheritanceLink
+        B
+        C
     )
 )
+
