@@ -14,9 +14,14 @@
     )
 )
 
+(InheritanceLink tv
+    B
+    C
+)
+
 (define target
     (InheritanceLink
-        B
+        A
         C
     )
 )
