@@ -2,10 +2,10 @@
 
 (define tv (stv 1 0.999))
 
-(define A (ConceptNode "A"))
-(define B (ConceptNode "B"))
-(define C (ConceptNode "C"))
-(define x001 (VariableNode "x001"))
+(define A (ConceptNode "A" tv))
+(define B (ConceptNode "B" tv))
+(define C (ConceptNode "C" tv))
+(define x001 (VariableNode "x001" tv))
 
 (ForAllLink tv (ListLink x001)
     (InheritanceLink
