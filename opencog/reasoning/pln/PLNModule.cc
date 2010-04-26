@@ -105,10 +105,10 @@ const char* PLNModule::usageInfo =
     "\n"
     "--- Testing\n"
     " load-axioms <path> - Load XML axiom file in 'path'\n"
-	" load-test <test name> - Load a test, including the dataset and target\n"
+	" test <test name> - Load a test, including the dataset and target\n"
 	" list-tests - List all the tests available\n"
     " test-count         - count the number of pre-defined inference targets (obsolete)\n"
-    " test-target <n>    - Load in a new pre-defined target #n (from TestTargets.h) (obsolete)\n"
+//    " test-target <n>    - Load in a new pre-defined target #n (from TestTargets.h) (obsolete)\n"
     " = <n1> <n1>        - Check if BIT nodes n1 and n2 are equal.\n"
     "\n"
     "--- The following are not recommended unless you know what your doing:\n"
@@ -370,7 +370,7 @@ void runSCMTarget(const char* test_name)
     for (recursive_directory_iterator end, dir(testDir);
           dir != end; ++dir) {
         //if (!is_directory(dir->status()) && dir->path() == conf_filename)
-    	std::cout << dir->filename() << " " << conf_filename.filename() << std::endl;
+//    	std::cout << dir->filename() << " " << conf_filename.filename() << std::endl;
     	//! @todo sigh. why doesn't this work?
     	//if (equivalent(dir->path(), conf_filename))
     	if (dir->path().filename() == conf_filename.filename())
@@ -755,15 +755,16 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         else if (c == "test-count") {
             ss << tests.size() << std::endl;
         }
-        else if (c == "test-target") {
-            input(test_i, args);
-            Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider,
-                        recordingTrails, fitnessEvaluator));
-            state = Bstate.get();
-            ss << "Test target set:" << endl;
-            ss << rawPrint(*tests[test_i],tests[test_i]->begin(),0);
-        }
-        else if (c == "load-test") {
+        // Old test-targets system
+//        else if (c == "test-target") {
+//            input(test_i, args);
+//            Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider,
+//                        recordingTrails, fitnessEvaluator));
+//            state = Bstate.get();
+//            ss << "Test target set:" << endl;
+//            ss << rawPrint(*tests[test_i],tests[test_i]->begin(),0);
+//        }
+        else if (c == "test") {
         	input(temps, args);
         	runSCMTarget(temps.c_str());
         }
