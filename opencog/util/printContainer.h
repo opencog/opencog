@@ -41,8 +41,8 @@ namespace opencog {
     Out& ostreamContainer(Out& out,
                           It from,
                           It to,
-                          const std::string& delimiter = "", 
-                          const std::string& left = "", 
+                          const std::string& delimiter = " ",
+                          const std::string& left = "",
                           const std::string& right = "")
     {
         out << left;
@@ -61,7 +61,7 @@ namespace opencog {
     template<class Out, class Con>
     Out& ostreamContainer(Out& out,
                           const Con& container,
-                          const std::string& delimiter = "", 
+                          const std::string& delimiter = " ",
                           const std::string& left = "", 
                           const std::string& right = "") {
         return ostreamContainer(out, container.begin(), container.end(),
@@ -74,8 +74,8 @@ namespace opencog {
     template<class It>
     void printContainer(It from,
                         It to,
-                        const std::string& delimiter = "",
-                        const std::string& left = "", 
+                        const std::string& delimiter = " ",
+                        const std::string& left = "",
                         const std::string& right = "")
     {
         ostreamContainer(std::cout, from, to,
@@ -84,7 +84,7 @@ namespace opencog {
 
     template<class Con>
     void printContainer(const Con& container,
-                        const std::string& delimiter = "",
+                        const std::string& delimiter = " ",
                         const std::string& left = "", 
                         const std::string& right = "")
     {
