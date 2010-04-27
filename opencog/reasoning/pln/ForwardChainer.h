@@ -53,20 +53,33 @@ public:
 
     //! minimum confidence to accept a result or for using an atom
     float minConfidence;
-    float probStack; 
-    float probGlobal;
+    float probStack; //@todo:??
+    float probGlobal; //@todo:??
     //! In future perhaps support a higher chance for handles that have context
     //! specific information?
     //float probContext
 
+    //! @todo: probably to be removed
     //! Chain to specific target. Only useful for testing.
     //! @param target Handle
     //! @param maximum number of rule applications before ending
     //! @param whether target was reached
     //Handle fwdChainToTarget(Handle target = Handle::UNDEFINED, int maxRuleApps = FWD_CHAIN_MAX_APPS);
-    pHandle fwdChainToTarget(int& maxRuleApps, meta target);
 
-    //! forward chain with the next Rule
+    //! Chain to specific target. Only useful for testing.
+    //!
+    //! @param maxRuleApps number of rule applications before ending
+    //! @param target target to reach (assumed not to be null)
+    //! @return the pHandle of the target if reached, else PHANDLE_UNDEFINED
+    pHandle fwdChainToTarget(int maxRuleApps, meta target);
+
+    //! Apply forward chaining till the target is reached, or if null,
+    //! till the number of rule applications is maxRuleApps.
+    //! 
+    //! @param maxRuleApps number of rule applications before ending
+    //! @param target target to reach (if NULL then no target)
+    //! @return pHandles corresponding to all inferred atoms if meta is NULL
+    //!         if meta is not NULL, then only the target if reached is returned
     pHandleSeq fwdChain(int maxRuleApps = FWD_CHAIN_MAX_APPS, meta target = meta((vtree*)NULL));
 
     static RandGen* rng;

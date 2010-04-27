@@ -48,7 +48,7 @@ class lazy_selector
     struct from{};
     struct to{};
 
-    /* A bidirectional map one-to-many issimulated as a multi_index_container
+    /* A bidirectional map one-to-many is simulated as a multi_index_container
      * of pairs of (unsinged int,unsigned int) with first unique index, 
      * and second non unique index.
      *

@@ -25,6 +25,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/printContainer.h>
 
 #include <boost/variant.hpp>
 #include <time.h>
@@ -47,8 +48,9 @@ ForwardChainer::~ForwardChainer()
 {
 }
 
-pHandle ForwardChainer::fwdChainToTarget(int& maxRuleApps, meta target)
+pHandle ForwardChainer::fwdChainToTarget(int maxRuleApps, meta target)
 {
+    OC_ASSERT(target);
     // Should usually only be one (or none).
     pHandleSeq results = fwdChain(maxRuleApps, target);
     if (results.empty())
@@ -68,18 +70,7 @@ RandGen* ForwardChainer::getRNG() {
 
 void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
 {
-    bool firstPrint = true;
-    cout << "< ";
-    foreach(Vertex v, hs) {
-        if (firstPrint) {
-            firstPrint = false;
-        } else {
-            cout << ", ";
-        }
-        //cout << boost::get<Handle>(v).value();
-        cout << v;
-    }
-    cout << " >";
+    printContainer(hs, ", ", "< ", " >");
 }
 
 // Possibly should be elsewhere.
@@ -165,14 +156,14 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                 
                     // do the rule computation etc
                     
-                	//! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
-                	//! which is why I didn't include it here.
-                	if (r->getName() == std::string("DeductionRule")) {
-                		cout << "Deduction sanity check" << endl;
-                		// A->B   B->C   check that those are not the same Link
-                		bool valid = (args->size() == 2 && !((*args)[0].GetValue() == (*args)[1].GetValue()));
-                		if (!valid) continue;
-                	}
+                    //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
+                    //! which is why I didn't include it here.
+                    if (r->getName() == std::string("DeductionRule")) {
+                        cout << "Deduction sanity check" << endl;
+                        // A->B   B->C   check that those are not the same Link
+                        bool valid = (args->size() == 2 && !((*args)[0].GetValue() == (*args)[1].GetValue()));
+                        if (!valid) continue;
+                    }
 
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
@@ -183,27 +174,27 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 						// If the TV is a repeat, delete it.
                     	// Ideally the chainer would now try another argument vector for this Rule
                     	// (until it uses them up).
-						vhpair v = GET_ASW->fakeToRealHandle(out);
-						if (! (v.second == NULL_VERSION_HANDLE)) {
-							GET_ASW->removeAtom(out);
-						} else {
-							maxRuleApps--;
-							appliedRule = true;
-							if (target) { // Match it against the target
-								// Adapted from in Rule::validate
-								typedef weak_atom< meta > vertex_wrapper;
-								vertex_wrapper mp(target);
+                        vhpair v = GET_ASW->fakeToRealHandle(out);
+                        if (! (v.second == NULL_VERSION_HANDLE)) {
+                            GET_ASW->removeAtom(out);
+                        } else {
+                            maxRuleApps--;
+                            appliedRule = true;
+                            if (target) { // Match it against the target
+                                // Adapted from in Rule::validate
+                                typedef weak_atom< meta > vertex_wrapper;
+                                vertex_wrapper mp(target);
 
-								if (mp(out)) {
-									results.push_back(out);
-									return results;
-								}
-							} else
-								results.push_back(out);
-							//cout<<"Output\n";
-							NMPrinter np;
-							np.print(out);
-						}
+                                if (mp(out)) {
+                                    results.push_back(out);
+                                    return results;
+                                }
+                            } else
+                                results.push_back(out);
+                            //cout<<"Output\n";
+                            NMPrinter np;
+                            np.print(out);
+                        }
                     } else {
                         // Remove atom if not satisfactory
                         //GET_ASW->removeAtom(_v2h(V));
@@ -306,6 +297,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
 
     // Alternative: is there some OpenCog library function to randomly select an item from a set?
+    // @todo: can probably be simplified by using util/lazy_random_selector
     std::vector<BoundVertex> ordered_choices;
 //    std::copy(choices->begin(), choices->end(), ordered_choices.begin());
     foreach (BoundVertex tmp, *choices) {
@@ -314,7 +306,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     }
 
     while (ordered_choices.size() > 0) {        
-        int index = (int) (getRNG()->randfloat() * ordered_choices.size() );
+        int index = getRNG()->randint(ordered_choices.size());
         //randArg = choices[index];
             
         bv = ordered_choices[index];
