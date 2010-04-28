@@ -253,7 +253,7 @@ public:
     }
     NO_DIRECT_PRODUCTION;
 };
-        
+
 #define USE_RULES_BESIDES_DEDUCTION
 ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 {
@@ -272,7 +272,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     
 ////    AddRule(new ANDPartitionRule(asw), 10.0f);
     AddRule(new NotEvaluatorRule(asw), 10.0f);
-    
+
     // FC: Broken due to TableGather not handling Node Type vertexes
 ////    AddRule(new SubsetEvalRule(asw), 10.0f);
 
@@ -283,7 +283,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     
     //  AddRule(new ImplicationBreakdownRule(asw), 9.0f);
     AddRule(new StrictImplicationBreakdownRule(asw), 9.0f);
-    
+
     //  AddRule(new ImplicationTailExpansionRule(asw), 10.0f);
     //  AddRule(new ImplicationConstructionRule(asw), 10.0f);
 //  AddRule(new InversionRule<IMPLICATION_LINK>(asw), 7.0f);
@@ -300,7 +300,8 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     AddRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
     
     //  AddRule(new ORPartitionRule(asw), 10.0f);
-////    AddRule(new CrispTheoremRule(asw), 10.0f);
+////
+    AddRule(new CrispTheoremRule(asw), 10.0f);
     
     AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
@@ -314,90 +315,6 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 ForwardComposerRuleProvider::~ForwardComposerRuleProvider(void)
 {
 
-}
-
-void ForwardComposerRuleProvider::reset()
-{
-    invalidRules.clear();
-    current = NULL;
-}
-
-void ForwardComposerRuleProvider::setSeed(pHandle s)
-{
-    reset();
-    seed = s;
-}
-
-Rule* ForwardComposerRuleProvider::findHighestPriorityRule()
-{
-    // get the highest priority rule that isn't in invalidRules;
-
-    // if invalid and rule provider have the same number, then no more
-    // rules available, return NULL
-    if (invalidRules.size() == size()) {
-        return NULL;
-    }
-
-    float highestPriority = 0.0f;
-    float highestIndex = -1;
-
-    for (unsigned int i=0; i < size(); i++) {
-        if (find(invalidRules.begin(), invalidRules.end(), at(i))
-                != invalidRules.end())
-            continue;
-        float p = at(i)->getPriority();
-        if (p > highestPriority) {
-            highestPriority = p;
-            highestIndex = i;
-        }
-    }
-    if (highestIndex >= 0)
-        return at(highestIndex);
-    else
-        return NULL;
-
-}
-
-unsigned int ForwardComposerRuleProvider::getSeedIndex() { return seedIndex; }
-
-// no longer used in new version.
-Rule* ForwardComposerRuleProvider::nextRule()
-{
-/*    // 1. check seed is set, check if current has a Rule, if so
-    // add it to invalidRules, set to NULL.
-    if (seed == PHANDLE_UNDEFINED) {
-        opencog::logger().warn("No seed set, so can't return an appropriate Rule via nextRule.");
-        return NULL;
-    }
-    if (current) {
-        invalidRules.push_back(current);
-        current = NULL;
-    }
-    
-    // 2. find highest priority rule that isn't in invalid rules
-    Rule *r = findHighestPriorityRule();
-    
-    // 3. check if current seed can fit in rule, otherwise add to
-    // invalid rules and goto 2.
-    typedef weak_atom< meta > vertex_wrapper;
-    bool foundValidArgSlot = false;
-    while (r && !foundValidArgSlot ) {
-        for (unsigned int i = 0; i < r->getInputFilter().size(); i++) {
-            vertex_wrapper mp(r->getInputFilter()[i]);
-            if (mp(seed)) {
-                seedIndex = i;
-                foundValidArgSlot = true;
-                current = r;
-                break;
-            }
-        }
-        if (!foundValidArgSlot) {
-            invalidRules.push_back(r);
-            r = findHighestPriorityRule();
-        }
-    }
-    return r;
-    */
 }
 
 //// Generator RuleProvider
@@ -421,90 +338,6 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
 {
 
-}
-
-void ForwardGeneratorRuleProvider::reset()
-{
-    invalidRules.clear();
-    current = NULL;
-}
-
-void ForwardGeneratorRuleProvider::setSeed(pHandle s)
-{
-    reset();
-    seed = s;
-}
-
-Rule* ForwardGeneratorRuleProvider::findHighestPriorityRule()
-{
-    // get the highest priority rule that isn't in invalidRules;
-
-    // if invalid and rule provider have the same number, then no more
-    // rules available, return NULL
-    if (invalidRules.size() == size()) {
-        return NULL;
-    }
-
-    float highestPriority = 0.0f;
-    float highestIndex = -1;
-
-    for (unsigned int i=0; i < size(); i++) {
-        if (find(invalidRules.begin(), invalidRules.end(), at(i))
-                != invalidRules.end())
-            continue;
-        float p = at(i)->getPriority();
-        if (p > highestPriority) {
-            highestPriority = p;
-            highestIndex = i;
-        }
-    }
-    if (highestIndex >= 0)
-        return at(highestIndex);
-    else
-        return NULL;
-
-}
-
-unsigned int ForwardGeneratorRuleProvider::getSeedIndex() { return seedIndex; }
-
-// no longer used in new version.
-Rule* ForwardGeneratorRuleProvider::nextRule()
-{
-/*    // 1. check seed is set, check if current has a Rule, if so
-    // add it to invalidRules, set to NULL.
-    if (seed == PHANDLE_UNDEFINED) {
-        opencog::logger().warn("No seed set, so can't return an appropriate Rule via nextRule.");
-        return NULL;
-    }
-    if (current) {
-        invalidRules.push_back(current);
-        current = NULL;
-    }
-
-    // 2. find highest priority rule that isn't in invalid rules
-    Rule *r = findHighestPriorityRule();
-
-    // 3. check if current seed can fit in rule, otherwise add to
-    // invalid rules and goto 2.
-    typedef weak_atom< meta > vertex_wrapper;
-    bool foundValidArgSlot = false;
-    while (r && !foundValidArgSlot ) {
-        for (unsigned int i = 0; i < r->getInputFilter().size(); i++) {
-            vertex_wrapper mp(r->getInputFilter()[i]);
-            if (mp(seed)) {
-                seedIndex = i;
-                foundValidArgSlot = true;
-                current = r;
-                break;
-            }
-        }
-        if (!foundValidArgSlot) {
-            invalidRules.push_back(r);
-            r = findHighestPriorityRule();
-        }
-    }
-    return r;
-    */
 }
 
 }}
