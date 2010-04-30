@@ -101,13 +101,6 @@ namespace test
 FitnessEvaluatorT testFitnessEvaluator;
 void initAxiomSet(string premiseFile);
 
-// These are now in PLNUtils.h
-//#define NewNode(_T, _NAME) mva(nm->addNode(_T, _NAME, TruthValue::TRIVIAL_TV(), false,false))
-//#define makemeta(atom_description) meta(new tree<Vertex>(atom_description))
-
-#define maketest(test_description,a,b,c,d) \
-    runPLNTest(Btr<PLNTest>(new PLNTest(test_description,a,b,c,d)))
-
 float getCount(float c)
 { return SimpleTruthValue::confidenceToCount(c); }
 
@@ -147,8 +140,6 @@ struct PLNTest
     {}
 };
 
-void runPLNTest(Btr<PLNTest> t);
-
 const float temperatures[] = {
     0.00005, 0.00007, 10,
     0.0001, 0.0003, 0.0005,
@@ -174,16 +165,12 @@ private:
     float temperature;
     static const int temperaturesN = 7; //3*5;
     
-    // Setting this false makes the Scheme targets get tested using forward chaining.
-    // This is set false during testSCMTargetsFC.
-    bool TESTING_BACKWARD_CHAINING;
-
     // Only runs some tests relevant to testing heuristic functions
     void runPLNTestsOnce() {
         // if you want to disable some of these tests,
         // comment out the content in their implementation
         // (so that they won't be run outside of testHeuristic either)
-        testSCMTargets();
+        testSCMTargetsBC();
         testTVChecksWork();
         testRandomTVsTooHigh();
         testSymmetricRelationFails();
@@ -248,8 +235,6 @@ private:
         //testFitnessEvaluator = BEST;
         //currentDebugLevel = -4;
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
-        
-        TESTING_BACKWARD_CHAINING = true;
     }
 
     // Now uses SCM. Won't search any alternative locations for the file.
@@ -286,8 +271,11 @@ private:
         cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
     }
 
-// Does 1000 runs per expansion phase
-    void runPLNTest(Btr<PLNTest> t)
+    /** Does 1000 runs per expansion phase
+     * @param test_bc is a flag indicating whether to run the test
+     * with the backward chainer (true) or the forward chainer (false)
+     */
+    void runPLNTest(Btr<PLNTest> t, bool test_bc = true)
     {
         AtomSpaceWrapper *atw = GET_ASW;
         stats::Instance().ITN2atom.clear();
@@ -309,7 +297,7 @@ private:
         Btr<BackInferenceTreeRootT> state;
         ForwardChainer fc;
 
-        if (TESTING_BACKWARD_CHAINING) {
+        if (test_bc) {
             state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
         }
         uint s_i=0; // Expansion phase #
@@ -336,7 +324,7 @@ private:
                     //currentDebugLevel=4;
                 
                 int expansions = expansions_per_run;
-                if (TESTING_BACKWARD_CHAINING) {
+                if (test_bc) {
                     eres = state->infer(expansions, 0.000001f, 0.01f);
                 } else {
                     eh = fc.fwdChainToTarget(expansions, (t->target));
@@ -354,7 +342,7 @@ private:
 
                 //currentDebugLevel=-4;
 
-                if (TESTING_BACKWARD_CHAINING) 
+                if (test_bc) 
                     eh = (eres.empty() ? PHANDLE_UNDEFINED :
                             _v2h(*(*eres.rbegin())->getVtree().begin()));                
 
@@ -378,7 +366,7 @@ private:
                     printf("s: %f max: %f\n", etv->getMean(),
                             t->maxTV->getMean());
 
-                    if (TESTING_BACKWARD_CHAINING) { // FC doesn't support trails currently
+                    if (test_bc) { // FC doesn't support trails currently
                         std::cout << "Inference trail: " << std::endl;
                         state->printTrail(eh);
                     }
@@ -443,7 +431,7 @@ private:
             (etv?etv->toString().c_str():"(null TV)"));
         }
 
-        if (TESTING_BACKWARD_CHAINING) {
+        if (test_bc) {
             printf("Test results: [");
             
             foreach(VtreeProvider* bv, eres) {
@@ -481,6 +469,21 @@ private:
         //atw->reset(NULL);
     }
 
+    // helper for runPLNTest
+    void maketest(meta target,
+                  TruthValue* minTV,
+                  TruthValue* maxTV,
+                  uint minEvalsOfFittestBIT,
+                  uint minExhaustiveEvals,
+                  bool test_bc = true) {
+        runPLNTest(Btr<PLNTest>(new PLNTest(target,
+                                            minTV,
+                                            maxTV,
+                                            minEvalsOfFittestBIT,
+                                            minExhaustiveEvals)),
+                   test_bc);
+    }
+    
     //! @todo Replace with an existing method, after tweaking various things to
     //! make it suitable.
     static SimpleTruthValue* parseSTV(const char* tvStr) {
@@ -489,10 +492,15 @@ private:
         return new SimpleTruthValue(mean, getCount(conf));
     }
 
-    // Beware that this will create the target as a hypothetical atom
-    // before running the inference. It does give the virtual version
-    // to the BIT, however.
-    void runSCMTarget(const char* conf_file)
+    /**
+     * Beware that this will create the target as a hypothetical atom
+     * before running the inference. It does give the virtual version
+     * to the BIT, however.
+     *
+     * @param test_bc is a flag indicating whether to run the test
+     * with the backward chainer (true) or the forward chainer (false)
+     */
+    void runSCMTarget(const char* conf_file, bool test_bc = true)
     {
 #ifdef HAVE_GUILE
         Config test;
@@ -526,7 +534,7 @@ private:
         ////
         
         std::string targetScheme = test["TARGET"];
-        if (TESTING_BACKWARD_CHAINING)
+        if (test_bc)
             std::cout << "Back-chaining target: " << targetScheme << std::endl;
         else
             std::cout << "Forward-chaining target: " << targetScheme << std::endl;
@@ -550,7 +558,7 @@ private:
         // Make sure FC doesn't take too long / only test it on simpler tests.
         // It takes disproportionately long once the AtomSpace gets large, due
         // to the indexes probably. 
-//        if (!TESTING_BACKWARD_CHAINING && maxSteps > 201) {
+//        if (!test_bc && maxSteps > 201) {
 //            std::cout << "Skipping test due to time constraints" << std::endl;
 //            return; //minEvalsOfFittestBIT = 500;
 //        }
@@ -571,10 +579,54 @@ private:
                  minTV,
                  maxTV,
                  minEvalsOfFittestBIT,
-                 0); // Alternative (not used) method for limiting test time
+                 0, // Alternative (not used) method for limiting test time
+                 test_bc);
 #endif // HAVE_GUILE
     }
 
+    /**
+     * @param test_bc is a flag indicating whether to run the tests
+     * with the backward chainer (true) or the forward chainer (false)
+     */
+    void runSCMTargets(bool test_bc = true) {
+        // TODO maybe use regex_iterator
+        
+        // This method is the main one for current and future tests.
+        // Also, there are a lot of different errors that can happen.
+        // So, it has/needs somewhat elaborate exception-handling.
+        // This is partly because CXXTest doesn't give you any info
+        // about an exception, just telling you it happened.
+        try {
+            string testDir = PLN_TEST_DIR"targets";
+
+            // TODO apparently there is a way to make iterators only cover
+            // either files or directories. The boost::filesystem
+            // documentation is very obsolete however.
+            for (recursive_directory_iterator end, dir(testDir);
+                  dir != end; ++dir) {
+                if (!is_directory(dir->status()))
+                    runSCMTarget(dir->path().string().c_str(), test_bc);
+            }
+        }
+        catch(std::string s) {
+            std::cerr << "testSCMTargets:" << s;
+            throw s;
+        }
+        catch(StandardException e) {
+            std::cerr << "testSCMTargets:" << e.getMessage();
+            throw e;
+        }
+        catch(PLNexception e)
+        {
+            std::cerr << "testSCMTargets:" << e.what();
+            throw e;
+        }
+        catch(...)
+        {
+            std::cerr << "Unknown exception during SCM targets" << std::endl;
+            throw;
+        }
+    }
 
 public:
 
@@ -686,53 +738,14 @@ public:
     void tearDown()
     {
     }
-    
-    void testSCMTargets () {
-        // TODO maybe use regex_iterator
-        
-        // This method is the main one for current and future tests.
-        // Also, there are a lot of different errors that can happen.
-        // So, it has/needs somewhat elaborate exception-handling.
-        // This is partly because CXXTest doesn't give you any info
-        // about an exception, just telling you it happened.
-        try {
-            string testDir = PLN_TEST_DIR"targets";
 
-            // TODO apparently there is a way to make iterators only cover
-            // either files or directories. The boost::filesystem
-            // documentation is very obsolete however.
-            for (recursive_directory_iterator end, dir(testDir);
-                  dir != end; ++dir) {
-                if (!is_directory(dir->status()))
-                    runSCMTarget(dir->path().string().c_str());
-            }
-        }
-        catch(std::string s) {
-            std::cerr << "testSCMTargets:" << s;
-            throw s;
-        }
-        catch(StandardException e) {
-            std::cerr << "testSCMTargets:" << e.getMessage();
-            throw e;
-        }
-        catch(PLNexception e)
-        {
-            std::cerr << "testSCMTargets:" << e.what();
-            throw e;
-        }
-        catch(...)
-        {
-            std::cerr << "Unknown exception during SCM targets" << std::endl;
-            throw;
-        }
+    // test backward chainerthe targets
+    void testSCMTargetsBC() {
+        runSCMTargets(true);
     }
     
     void testSCMTargetsFC() {
-        bool tmp = TESTING_BACKWARD_CHAINING;
-        
-        TESTING_BACKWARD_CHAINING = false;
-        testSCMTargets();
-        TESTING_BACKWARD_CHAINING = tmp;
+        runSCMTargets(false);
     }
 
     // A meta-level test that can run all of the tests multiple times;
@@ -894,12 +907,14 @@ public:
             puts("\nShould fail. The test for whether TV checks work.\n");
 
             maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
-                            NewNode(CONCEPT_NODE, "AlQaeda"),
-                            NewNode(CONCEPT_NODE, "terrorist")
-                    )),
-                    new SimpleTruthValue(0.95f, getCount(0.90f)),
-                    new SimpleTruthValue(0.999f, getCount(0.999f)),
-                    50,0);
+                                  NewNode(CONCEPT_NODE, "AlQaeda"),
+                                  NewNode(CONCEPT_NODE, "terrorist")
+                                  )),
+                     new SimpleTruthValue(0.95f, getCount(0.90f)),
+                     new SimpleTruthValue(0.999f, getCount(0.999f)),
+                     50,0,
+                     true // it's being test for the backward chainer
+                     );
         }
     }
 
@@ -908,17 +923,17 @@ public:
             initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
-
+            
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                            NewNode(PREDICATE_NODE, "killed"),
-                            mva((pHandle)LIST_LINK,
-                                        NewNode(FW_VARIABLE_NODE, "$killeri"),
-                                        NewNode(CONCEPT_NODE, "Osama")
-                                    )
-                    )),
-                    new SimpleTruthValue(0.5f, getCount(0.5f)),
-                    new SimpleTruthValue(0.51f, getCount(0.51f)),
-                    10,0);
+                                  NewNode(PREDICATE_NODE, "killed"),
+                                  mva((pHandle)LIST_LINK,
+                                      NewNode(FW_VARIABLE_NODE, "$killeri"),
+                                      NewNode(CONCEPT_NODE, "Osama")
+                                      )
+                                  )),
+                     new SimpleTruthValue(0.5f, getCount(0.5f)),
+                     new SimpleTruthValue(0.51f, getCount(0.51f)),
+                     10,0);
         }
     }
 
@@ -927,15 +942,15 @@ public:
             puts("\nShould fail.");
             initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                            NewNode(PREDICATE_NODE, "symmetricRelation"),
-                            mva((pHandle)LIST_LINK,
-                                        NewNode(CONCEPT_NODE, "Amir"),
-                                        NewNode(CONCEPT_NODE, "Osama")
-                                    )
-                    )),
-                    new SimpleTruthValue(0.0f, getCount(0.0f)),
-                    new SimpleTruthValue(0.01f, getCount(0.01f)),
-                    10,0);
+                                  NewNode(PREDICATE_NODE, "symmetricRelation"),
+                                  mva((pHandle)LIST_LINK,
+                                      NewNode(CONCEPT_NODE, "Amir"),
+                                      NewNode(CONCEPT_NODE, "Osama")
+                                      )
+                                  )),
+                     new SimpleTruthValue(0.0f, getCount(0.0f)),
+                     new SimpleTruthValue(0.01f, getCount(0.01f)),
+                     10,0);
         }
     }
 
@@ -947,14 +962,14 @@ public:
             /// Basic spawning test
             initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
-                        NewNode(PREDICATE_NODE, "friendOf"),
-                        mva((pHandle)LIST_LINK,
-                                    NewNode(CONCEPT_NODE, "Britney"),
-                                    NewNode(CONCEPT_NODE, "Amir")
-                                ))),
-                new SimpleTruthValue(0.78f, getCount(0.39f)),
-                new SimpleTruthValue(1.001f, getCount(0.999f)),
-                100,0);
+                                  NewNode(PREDICATE_NODE, "friendOf"),
+                                  mva((pHandle)LIST_LINK,
+                                      NewNode(CONCEPT_NODE, "Britney"),
+                                      NewNode(CONCEPT_NODE, "Amir")
+                                      ))),
+                     new SimpleTruthValue(0.78f, getCount(0.39f)),
+                     new SimpleTruthValue(1.001f, getCount(0.999f)),
+                     100,0);
         }
     }
 
