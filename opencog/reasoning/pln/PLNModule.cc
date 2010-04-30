@@ -387,9 +387,10 @@ void runSCMTarget(const char* test_name)
 
     std::cout << test["COMMENT"] << std::endl;
 
-    //std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";
     //! @todo define this somewhere else.
     std::string PLN_TEST_DIR = "../tests/reasoning/pln/";
+    // scm is now used instead of xml
+    // std::string axiomsFile = PLN_TEST_DIR+"xml/"+test["LOAD"]+".xml";
     std::string axiomsFile = PLN_TEST_DIR+"scm/"+test["LOAD"]+".scm";
 
     initAxiomSet(axiomsFile);

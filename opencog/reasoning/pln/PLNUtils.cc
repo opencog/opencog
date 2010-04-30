@@ -1322,7 +1322,7 @@ pHandleSet constitutedSet(pHandle CP,
     return constitutedSet(memberLinks, asw);
 }
 
-#ifdef DEAD_CODE_DELETE_AT_LIESURE
+#ifdef DEAD_CODE_DELETE_AT_LEISURE
 
 template<typename T>
 struct TypeWrapper {
@@ -1356,7 +1356,7 @@ public:
  bool operator()(const Handle &arg) { cprintf(LOGLEVEL,"Handle [%d]\n",(int)arg); return true; }
 // bool operator()( &arg) { return NonHandleID; }
 };
-#endif /* DEAD_CODE_DELETE_AT_LIESURE */
+#endif /* DEAD_CODE_DELETE_AT_LEISURE */
 
 FitnessEvaluatorT getFitnessEvaluator(string name) {
     // Convert from string to enum
