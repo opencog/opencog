@@ -51,7 +51,7 @@ using namespace std;
 
 using namespace boost::filesystem;
 
-#define RUN_FAILURE_TESTS 0
+#define RUN_FAILURE_TESTS 0 // enable some tests which currently fail
 #define WAIT_KEY_ON_FAILURE 0
 
 // We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
@@ -109,6 +109,7 @@ namespace pln {
     extern unsigned long now_interval_len   ;
 }}
 
+// the following is used for test statistics
 vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
@@ -118,7 +119,7 @@ static int allTestsInferenceNodes=0;
 //bool foo42=false;
 
 /**
- * The tests load in various xml axiom sets and run until the target with a
+ * The tests load in various scm axiom sets and run until the target with a
  * specific confidence minimum has been reached (or max. nr of steps have been
  * exceeded, resulting in failure.)
  */        
@@ -140,6 +141,7 @@ struct PLNTest
     {}
 };
 
+// used for heuristic tests
 const float temperatures[] = {
     0.00005, 0.00007, 10,
     0.0001, 0.0003, 0.0005,
@@ -151,14 +153,14 @@ const float temperatures[] = {
 class PLNUTest :  public CxxTest::TestSuite {
 
 private:
-    AtomSpaceWrapper *atw;
+    AtomSpaceWrapper *asw;
     FILE *f;
 
     // stuff for running tests multiple times,
     // for non-deterministic heuristic functions
     static const int TestRepeats = 1;
     int seed;
-    int tempi;
+    int tempi; // temporature index
     // test repeat #
     int t;
     
@@ -240,25 +242,25 @@ private:
     // Now uses SCM. Won't search any alternative locations for the file.
     void initAxiomSet(string premiseFile)
     {
-        AtomSpaceWrapper *atw = GET_ASW;
-        atw->reset();
-        atw->allowFWVarsInAtomSpace = true;
+        AtomSpaceWrapper *asw = GET_ASW;
+        asw->reset();
+        asw->allowFWVarsInAtomSpace = true;
 
         //cprintf(-2,"loading...\n");     
         std::cout << "loading " << premiseFile << std::endl;
 
 #if 0
-        atw->archiveTheorems = true;
-        bool axioms_ok = atw->loadAxioms(premiseFile);
+        asw->archiveTheorems = true;
+        bool axioms_ok = asw->loadAxioms(premiseFile);
         if (!axioms_ok) throw std::string("failed to load file");
-        atw->archiveTheorems = false;
+        asw->archiveTheorems = false;
 
 #elif HAVE_GUILE
         int rc = load_scm_file(premiseFile.c_str());
 
-        atw->archiveTheorems = true;
-        atw->makeCrispTheorems();
-        atw->archiveTheorems = false;
+        asw->archiveTheorems = true;
+        asw->makeCrispTheorems();
+        asw->archiveTheorems = false;
 
         // The error-checking is after the call to makeCrispTheorems, because
         // if there was an error, then the AS is now empty and makeCrispTheorems
@@ -277,7 +279,7 @@ private:
      */
     void runPLNTest(Btr<PLNTest> t, bool test_bc = true)
     {
-        AtomSpaceWrapper *atw = GET_ASW;
+        AtomSpaceWrapper *asw = GET_ASW;
         stats::Instance().ITN2atom.clear();
 
         //currentDebugLevel=0;
@@ -289,7 +291,7 @@ private:
         test::custom_duration = 0.0;
         start = clock();
         
-        atw->allowFWVarsInAtomSpace = true;
+        asw->allowFWVarsInAtomSpace = true;
         
         fflush(stdout);
         //currentDebugLevel=-4;
@@ -301,8 +303,8 @@ private:
             state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
         }
         uint s_i=0; // Expansion phase #
-        pHandle eh=PHANDLE_UNDEFINED;
-        TruthValue* etv = NULL;
+        pHandle eh=PHANDLE_UNDEFINED; // expected target handle
+        TruthValue* etv = NULL; // expect target handle TV
         bool passed=false;
 
         set<VtreeProvider*> eres;
@@ -347,7 +349,7 @@ private:
                             _v2h(*(*eres.rbegin())->getVtree().begin()));                
 
                 if (eh != PHANDLE_UNDEFINED )
-                    etv = atw->getTV(eh).clone();
+                    etv = asw->getTV(eh).clone();
 //                else
 //                    etv = new SimpleTruthValue(0.0f,0.0f);
 
@@ -397,7 +399,7 @@ private:
             eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
             if (eh) {
                 if (etv != NULL) delete etv;
-                etv = atw->TV(eh).clone();
+                etv = asw->TV(eh).clone();
             }
 
             passed = (eh && etv &&
@@ -435,7 +437,7 @@ private:
             printf("Test results: [");
             
             foreach(VtreeProvider* bv, eres) {
-                const TruthValue& tv = atw->getTV(vt2h(*bv));
+                const TruthValue& tv = asw->getTV(vt2h(*bv));
                 if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
                     printf("%d ", vt2h(*bv));
             }
@@ -466,7 +468,7 @@ private:
             getc(stdin);
 #endif
         if (etv != NULL) delete etv;
-        //atw->reset(NULL);
+        //asw->reset(NULL);
     }
 
     // helper for runPLNTest
@@ -650,7 +652,7 @@ public:
 
             //currentDebugLevel=100;
 
-            atw = GET_ASW;                                  
+            asw = GET_ASW;                                  
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");
@@ -781,37 +783,37 @@ public:
     // argument but applies several different rules
     void DISABLEtestMacroRuleTest()
     {
-        AtomSpaceWrapper *atw = GET_ASW;
+        AtomSpaceWrapper *asw = GET_ASW;
         //typedef InversionRule RuleT1;
         //typedef DeductionRule RuleT2;
 
     //  DefaultVariableRuleProvider rp;
-        InversionRule *invR = new InversionRule(atw, INHERITANCE_LINK);
-        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(atw, INHERITANCE_LINK);
+        InversionRule *invR = new InversionRule(asw, INHERITANCE_LINK);
+        DeductionRule<DeductionSimpleFormula> *deduR = new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK);
 
         printf("v0\n");
         vtree v0(mva((pHandle)INHERITANCE_LINK,
-                        mva(atw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
-                        mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
+                        mva(asw->addNode(CONCEPT_NODE, "Abu", SimpleTruthValue(0.05, 0.01))),
+                        mva(asw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01)))
                         ));
         printf("v1\n");
         vtree v1(mva((pHandle)INHERITANCE_LINK,
-                        mva(atw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
-                        mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
+                        mva(asw->addNode(CONCEPT_NODE, "Osama",  SimpleTruthValue(0.01, 0.01))),
+                        mva(asw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01)))
                         ));
         printf("v2\n");
         vtree v2(mva((pHandle)INHERITANCE_LINK,
-                        mva(atw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
-                        mva(atw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
+                        mva(asw->addNode(CONCEPT_NODE, "AlQaeda",  SimpleTruthValue(0.1, 0.01))),
+                        mva(asw->addNode(CONCEPT_NODE, "terrorist",  SimpleTruthValue(0.2, 0.01)))));
 
         printf("h0\n");
-        pHandle h0 = atw->addAtom(v0, 
+        pHandle h0 = asw->addAtom(v0, 
                                   SimpleTruthValue(0.40f, getCount(0.80f)));
         printf("h1\n");
-        pHandle h1 = atw->addAtom(v1,
+        pHandle h1 = asw->addAtom(v1,
                                   SimpleTruthValue(0.60f, getCount(0.90f)));
         printf("h2\n");
-        pHandle h2 = atw->addAtom(v2,
+        pHandle h2 = asw->addAtom(v2,
                                   SimpleTruthValue(0.98f, getCount(0.95f)));
 
         RuleApp* top    = new RuleApp(deduR);
@@ -825,7 +827,7 @@ public:
         top->Bind(1, new VtreeProviderWrapper(Vertex(h2)));
 
         BoundVertex res1a = top->compute();
-        const TruthValue& tvA = atw->getTV(_v2h(res1a.value));
+        const TruthValue& tvA = asw->getTV(_v2h(res1a.value));
         TS_ASSERT(tvA.getMean() > 0.01);
         TS_ASSERT(tvA.getConfidence() > 0.01);
 
@@ -842,7 +844,7 @@ public:
         // Checks that they have the same pHandles, which is wrong
         //TS_ASSERT_EQUALS(res1a.value, res1b.value);
 
-        const TruthValue& tvB = atw->getTV(_v2h(res1a.value));
+        const TruthValue& tvB = asw->getTV(_v2h(res1a.value));
         TS_ASSERT(isApproxEq(tvB.getMean(), tvA.getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB.getConfidence(), tvA.getConfidence(),
                   EPSILON_C));
@@ -852,11 +854,11 @@ public:
         RuleApp* top3 = new RuleApp(invR);
         top3->Bind(0, top2);
 
-        const TruthValue& tv2 = atw->getTV(_v2h(top2->compute().value));
+        const TruthValue& tv2 = asw->getTV(_v2h(top2->compute().value));
         TS_ASSERT(!isApproxEq(tvB.getMean(), tv2.getMean(), EPSILON_S));
     //  assert(!isApproxEq(tvB.getConfidence(), tv2.getConfidence(), EPSILON_C));
 
-        const TruthValue& tv3 = atw->getTV(_v2h(top3->compute().value));
+        const TruthValue& tv3 = asw->getTV(_v2h(top3->compute().value));
         // segfaults in this next line
         TS_ASSERT(isApproxEq(tvB.getMean(), tv3.getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB.getConfidence(), tv3.getConfidence(),
@@ -876,7 +878,7 @@ public:
         BoundVertex resC = topc->compute(args.begin(), args.end());
 
         TS_ASSERT(resC.value == res1b.value);
-        const TruthValue& tvC = atw->getTV(_v2h(resC.value));
+        const TruthValue& tvC = asw->getTV(_v2h(resC.value));
         TS_ASSERT(isApproxEq(tvB.getMean(), tvC.getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB.getConfidence(), tvC.getConfidence(),
                   EPSILON_C));
@@ -890,7 +892,7 @@ public:
         BoundVertex resD = topd->compute(args.begin(), args.end());
 
         TS_ASSERT(resD.value == res1b.value);
-        const TruthValue& tvD = atw->getTV(_v2h(resD.value));
+        const TruthValue& tvD = asw->getTV(_v2h(resD.value));
         TS_ASSERT(isApproxEq(tvB.getMean(), tvD.getMean(), EPSILON_S));
         TS_ASSERT(isApproxEq(tvB.getConfidence(), tvD.getConfidence(),
                   EPSILON_C));
