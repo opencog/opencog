@@ -30,9 +30,12 @@
 #include <boost/variant.hpp>
 #include <time.h>
 
+#include <algorithm>
+
 using std::vector;
 using std::cout;
 using std::endl;
+using std::set_union;
 
 namespace opencog {
 namespace pln {
@@ -223,21 +226,9 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     	//std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
-    	// The obvious version doesn't work
-    	//std::copy(gMatches->begin(), gMatches->end(), matches->begin());
-    	std::set<BoundVertex>* tmp = gMatches.get();
-    	if (tmp) {
-			foreach (BoundVertex tmp, *gMatches) {
-				matches->insert(tmp);
-			}
-    	}
+    	if (gMatches.get())
+            foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
 
-//    	std::set<BoundVertex>::iterator i;
-//
-//    	for (i = gMatches->begin(); i != gMatches->end(); i++) {
-//
-//    		matches->insert(*i);
-//    	}
     }
     
     return matches;
