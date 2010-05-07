@@ -308,8 +308,6 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
 #endif
-    
-    reset();
 }
 
 ForwardComposerRuleProvider::~ForwardComposerRuleProvider(void)
@@ -321,7 +319,6 @@ ForwardComposerRuleProvider::~ForwardComposerRuleProvider(void)
 ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 {
 	AtomSpaceWrapper* asw = GET_ASW;
-    reset();
 
     AddRule(new LookupRule(asw), 20.0f);
 //    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
