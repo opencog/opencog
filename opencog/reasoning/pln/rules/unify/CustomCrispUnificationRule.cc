@@ -68,14 +68,18 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
     }
 
     BBvtree rootAtom(new BoundVTree(*i, pre_binds));
+//    bind_Bvtree(rootAtom, *i->bindings);
+//    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false);
+//
+//    pHandle ret_h = asw->addLink(asw->getType(topologicalStub),
+//                                 asw->getOutgoing(topologicalStub),
+//                                 asw->getTV(i->original_handle), fresh);
     bind_Bvtree(rootAtom, *i->bindings);
-    pHandle topologicalStub = asw->addAtom(*rootAtom, TruthValue::TRIVIAL_TV(), false);
 
-    pHandle ret_h = asw->addLink(asw->getType(topologicalStub),
-                                 asw->getOutgoing(topologicalStub),
-                                 asw->getTV(i->original_handle), fresh);    
+    pHandle ret_h = asw->addAtom(*rootAtom, asw->getTV(i->original_handle), fresh);
     
     ret->insert(BoundVertex(ret_h, pre_binds));
+//    ret->insert(BoundVertex(ret_h, NULL));
 
 /*  haxx::bitnoderoot->inferred_with[ret_h] = (Rule*)(int)this;
     if (haxx::bitnoderoot->inferred_from[ret_h].empty()) //comes here often, we want the link only once
