@@ -22,6 +22,7 @@
 #include "../PLN.h"
 #include "FormulasIndefinite.h"
 #include "Formulas.h"
+#include "../PLNUtils.h"
 #include <assert.h>
 #include <memory>
 #include <algorithm>
@@ -127,15 +128,15 @@ namespace pln {
     count_t nAB = linkAB->getCount(); \
     count_t nBC = linkBC->getCount();
 
-#define DebugPTLBodyFor_Link if (PTLdebug) printf(" A->B:%f\n",  sAB);
+#define DebugPTLBodyFor_Link if (PTLdebug) cprintf(-3, " A->B:%f\n",  sAB);
 
-#define DebugPTLBodyFor_Link2 if (PTLdebug) printf("sA:%f sB:%f \n", sA, sB);
+#define DebugPTLBodyFor_Link2 if (PTLdebug) cprintf(-3, "sA:%f sB:%f \n", sA, sB);
 
-#define DebugPTLBodyFor_Link1Node2 if (PTLdebug) printf("sA:(%f,%f) sB:(%f,%f) A->B:(%f,%f)\n", sA, nA, sB, nB, sAB, nAB);
+#define DebugPTLBodyFor_Link1Node2 if (PTLdebug) cprintf(-3, "sA:(%f,%f) sB:(%f,%f) A->B:(%f,%f)\n", sA, nA, sB, nB, sAB, nAB);
 
-#define DebugPTLBodyFor_Link2Node2 if (PTLdebug) printf("sA:%f sB:%f   A->B:%f B->C:%f\n", sA, sB, sAB, sBA);
+#define DebugPTLBodyFor_Link2Node2 if (PTLdebug) cprintf(-3, "sA:%f sB:%f   A->B:%f B->C:%f\n", sA, sB, sAB, sBA);
 
-#define DebugPTLBodyFor_Link2Node3 if (PTLdebug) printf("sA:%f sB:%f sC:%f   A->B:%f B->C:%f\n", sA, sB, sC, sAB, sBC);
+#define DebugPTLBodyFor_Link2Node3 if (PTLdebug) cprintf(-3, "sA:%f sB:%f sC:%f   A->B:%f B->C:%f\n", sA, sB, sC, sAB, sBC);
 
 
 
@@ -156,11 +157,11 @@ TruthValue* TautologyFormula::simpleCompute(TruthValue** TV,
 TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
                                             int N, long U) const
 {
-    printf("Invert...\n");
+    cprintf(-3, "Invert...\n");
 
     ///IndefiniteTV check
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteSymmetricBayesFormula\n");
+        cprintf(-3, "IndefiniteSymmetricBayesFormula\n");
         return IndefiniteSymmetricBayesFormula().simpleCompute(TV, N, U);
     }
 
@@ -177,11 +178,11 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
 TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
                                                        int N, long U) const
 {
-    printf("InferenceMindAgent::ImplicationBreakdown\n");
+    cprintf(-3, "InferenceMindAgent::ImplicationBreakdown\n");
 
     ///IndefiniteTV check
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteSymmetricImplicationBreakdown\n");
+        cprintf(-3, "IndefiniteSymmetricImplicationBreakdown\n");
         return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV, N, U);
     }
 
@@ -205,7 +206,7 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
         n2 = nB;
     }
 
-    printf("ImBD: %f %f %f %f %f\n", s2, n2, (sAB * sA * n2 + sB*nB), sA, sB);
+    cprintf(-3, "ImBD: %f %f %f %f %f\n", s2, n2, (sAB * sA * n2 + sB*nB), sA, sB);
 
     return checkTruthValue(  new SimpleTruthValue(s2, n2) );
 }
@@ -214,7 +215,7 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
 TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
                                                           int N, long U) const
 {
-    printf("InferenceMindAgent::ImplicationConstruction\n");
+    cprintf(-3, "InferenceMindAgent::ImplicationConstruction\n");
 
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
@@ -228,7 +229,7 @@ TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("InferenceMindAgent::NotEvaluation\n");
+    cprintf(-3, "InferenceMindAgent::NotEvaluation\n");
 
     PTLFormulaBodyFor_Atom2;
     DebugPTLBodyFor_Link2;
@@ -245,11 +246,11 @@ TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
                                                   int N, long U) const
 {
-    printf("InferenceMindAgent::deduct(handleA, linkType, nodeType)\n");
+    cprintf(-3, "InferenceMindAgent::deduct(handleA, linkType, nodeType)\n");
 
     ///IndefiniteTV check
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteSymmetricDeductionFormula\n");
+        cprintf(-3, "IndefiniteSymmetricDeductionFormula\n");
         return IndefiniteSymmetricDeductionFormula().simpleCompute(TV, N, U);
     }
 
@@ -299,7 +300,7 @@ strength_t DeductionGeometryFormula::g2(strength_t sA, strength_t sB,
 TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
                                                     int N, long U) const
 {
-    printf("Geom: deduct\n");
+    cprintf(-3, "Geom: deduct\n");
 
     PTLFormulaBodyFor_Link2Node3;
     DebugPTLBodyFor_Link2Node3;
@@ -329,11 +330,11 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
 TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
                                            int N, long U) const
 {
-    printf("Revision...\n");
+    cprintf(-3, "Revision...\n");
 
     ///IndefiniteTV check
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteSymmetricRevisionFormula\n");
+        cprintf(-3, "IndefiniteSymmetricRevisionFormula\n");
         return IndefiniteSymmetricRevisionFormula().simpleCompute(TV, N, U);
     }
 
@@ -356,7 +357,7 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
 TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
                                           int N, long U) const
 {
-    printf("Inh2Sim...\n");
+    cprintf(-3, "Inh2Sim...\n");
 
     PTLFormulaBodyFor_Link2Node2;
     DebugPTLBodyFor_Link2Node2;
@@ -372,7 +373,7 @@ TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Sim2Inh...\n");
+    cprintf(-3, "Sim2Inh...\n");
 
     PTLFormulaBodyFor_Link1Node2;
     DebugPTLBodyFor_Link1Node2;
@@ -389,7 +390,7 @@ TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
                                                int N, long U) const
 {
-    printf("ANDbreak...\n");
+    cprintf(-3, "ANDbreak...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -404,7 +405,7 @@ TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
 TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
                                               int N, long U) const
 {
-    printf("Modus Ponens...\n");
+    cprintf(-3, "Modus Ponens...\n");
 
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_atom2;
@@ -420,7 +421,7 @@ TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Inh2Imp...\n");
+    cprintf(-3, "Inh2Imp...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -431,7 +432,7 @@ TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Imp2Inh...\n");
+    cprintf(-3, "Imp2Inh...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -445,11 +446,11 @@ TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Mem2Inh...\n");
+    cprintf(-3, "Mem2Inh...\n");
 
     ///IndefiniteTV check
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteMem2InhFormula\n");
+        cprintf(-3, "IndefiniteMem2InhFormula\n");
         return IndefiniteMem2InhFormula().simpleCompute(TV, N, U);
     }
 
@@ -467,7 +468,7 @@ TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
                                            int N, long U) const
 {
-    printf("Mem2Eval...\n");
+    cprintf(-3, "Mem2Eval...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -482,7 +483,7 @@ TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
 TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
                                            int N, long U) const
 {
-    printf("Eval2Inh...\n");
+    cprintf(-3, "Eval2Inh...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -496,7 +497,7 @@ TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Ext2Int...\n");
+    cprintf(-3, "Ext2Int...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -510,7 +511,7 @@ TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("Int2Ext...\n");
+    cprintf(-3, "Int2Ext...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -525,12 +526,12 @@ TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
                                                int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("Logical AND...\n");
-    printf("SymmetricAND...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND...\n");
+    cprintf(-3, "SymmetricAND...\n");
 
     /* Indefinite Formula */
     if (isAllIndefiniteTruthValueType(TV, N)) {
-        printf("IndefiniteSymmetricANDFormula\n");
+        cprintf(-3, "IndefiniteSymmetricANDFormula\n");
         if (N == 2) {
             return IndefiniteSymmetricANDFormula().simpleCompute(TV, N, U);
         }
@@ -551,7 +552,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
     confidence_t conTot = 1.0f;
 
     for (int i = 0; i < N; i++) {
-        printf("%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
+        cprintf(-3, "%f,%f & ", TV[i]->getMean(), TV[i]->getConfidence());
         sTot *= TV[i]->getMean();
         conTot *= TV[i]->getConfidence();
     }
@@ -561,7 +562,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
     //float KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     //KKK * conTot / (1 - conTot); /// The standard count=>confidence formula!
 
-//  printf(" = %f\n", sAND);
+//  cprintf(-3, " = %f\n", sAND);
 
 //    assert(nTot <= 1.0f);
 
@@ -575,7 +576,7 @@ TruthValue* SymmetricANDFormula::simpleCompute(TruthValue** TV,
 TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
                                                 int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("Logical AND2...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND2...\n");
 
     PTLFormulaBodyFor_Atom2;
     //    DebugPTLBodyFor_Atom2;
@@ -589,7 +590,7 @@ TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("OldAND...\n");
+    cprintf(-3, "OldAND...\n");
 
 
     strength_t mean = TV[0]->getMean() * TV[1]->getMean();
@@ -605,10 +606,10 @@ TruthValue* OldANDFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf( "Logical OR with : ");
+    cprintf(-3,  "Logical OR with : ");
     for (int k = 0;k < N;k++)
-        printf( "#%d:%s ", k, TV[k]->toString().c_str());
-    printf("\n");
+        cprintf(-3,  "#%d:%s ", k, TV[k]->toString().c_str());
+    cprintf(-3, "\n");
 
     auto_ptr<TruthValue> res1, res2;
 
@@ -618,7 +619,7 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
         int N1 = (int)(N / 2);
         int N2 = (int)(N / 2.0 + 0.501);
 
-        printf( "Division: %d - %d\n", N1, N2);
+        cprintf(-3,  "Division: %d - %d\n", N1, N2);
 
         if (N1 == 1) { //Either (>1, >1) or (1, >1).
             TV[1] = simpleCompute(&TV[N1], N2, U);
@@ -649,7 +650,7 @@ TruthValue* ORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 
     nTot = nA + nB - (A + B) / 2;
 
-    printf( "nA=%.4f nB=%.4f nTot=%.4f\n", nA, nB, nTot);
+    cprintf(-3,  "nA=%.4f nB=%.4f nTot=%.4f\n", nA, nB, nTot);
 
     return checkTruthValue( new SimpleTruthValue(sTot, nTot) );
 }
@@ -674,7 +675,7 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
     long ptr = 0;
 
     for (int i = 0; i < level1N; i++) {
-//      printf("%f & ", TV[i]->getMean());
+//      cprintf(-3, "%f & ", TV[i]->getMean());
         sTot += TV[ptr]->getMean();
 //      nTot += TV[ptr]->getCount();
         ptr++;
@@ -708,7 +709,7 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
     count_t KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     count_t nOR = nTot  * KKK;
 
-//  printf(" = %f\n", sAND);
+//  cprintf(-3, " = %f\n", sAND);
 
     return checkTruthValue( new SimpleTruthValue(sOR, nOR) );
 }
@@ -716,7 +717,7 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("Logical NOT...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical NOT...\n");
 
     PTLFormulaBodyFor_Link;
     DebugPTLBodyFor_Link;
@@ -730,7 +731,7 @@ TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* ORFormula2::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("Logical OR...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical OR...\n");
 
     NOTFormula notF;
     TruthValue** NOT_TVs = notF.multiCompute(TV, N, U);
@@ -749,7 +750,7 @@ TruthValue* ORFormula2::simpleCompute(TruthValue** TV, int N, long U) const
 //===========================================================================//
 TruthValue* OldORFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    printf("OldOR...\n");
+    cprintf(-3, "OldOR...\n");
 
     strength_t mean = 1 - ((1 - TV[0]->getMean()) * (1 - TV[1]->getMean()));
     count_t count1 = TV[0]->getCount();
@@ -776,7 +777,7 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
     TruthValue** TVsub = TVs;
     TruthValue** TVsuper = TVsub + Nsub;
 
-    //if (Log::getDefaultLevel() >= 3) printf("SubSetEval...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "SubSetEval...\n");
 
     strength_t fs = 0.0f, s = 0.0f;
 
@@ -812,7 +813,7 @@ strength_t SubsetEvalFormulaMin::f(strength_t a, strength_t b) const
 //===========================================================================//
 TruthValue* FORALLFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("For all...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "For all...\n");
 
     strength_t sForAll = 1.0f;
     count_t nForAll = 0.0f;
@@ -848,7 +849,7 @@ TruthValue* PredicateTVFormula::simpleCompute(TruthValue** TV,
 //===========================================================================//
 TruthValue* EXISTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    //if (Log::getDefaultLevel() >= 3) printf("Exists...\n");
+    //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Exists...\n");
 
     NotFormula notF;
     TruthValue** NOT_TVs = notF.multiCompute(TV, N, U);
@@ -877,7 +878,7 @@ TruthValue* EXISTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
                                            int N, long U) const
 {
-    printf("InferenceMindAgent::InhSubstFormula\n");
+    cprintf(-3, "InferenceMindAgent::InhSubstFormula\n");
 
     PTLFormulaBodyFor_Atom2;
 //    DebugPTLBodyFor_Atom2;
@@ -902,7 +903,7 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
 template<int _TVN>
 TruthValue* Formula<_TVN>::simpleCompute(TruthValue** TV, int N, long U) const
 {
-    //printf("Formula<_TVN>::simpleCompute(N = %d)\n", N);
+    //cprintf(-3, "Formula<_TVN>::simpleCompute(N = %d)\n", N);
     return this->simpleCompute(TV, N, U);
 }
 
@@ -910,7 +911,7 @@ TruthValue* Formula<_TVN>::simpleCompute(TruthValue** TV, int N, long U) const
 template<int _TVN>
 TruthValue** Formula<_TVN>::multiCompute(TruthValue** TV, int N, long U) const
 {
-    //printf("Formula<_TVN>::multiCompute(N = %d)\n", N);
+    //cprintf(-3, "Formula<_TVN>::multiCompute(N = %d)\n", N);
     assert(!(TVN / N));
 
     TruthValue** ret = new TruthValue*[N/TVN];
@@ -926,7 +927,7 @@ TruthValue** Formula<_TVN>::multiCompute(TruthValue** TV, int N, long U) const
 template<int _TVN>
 TruthValue* Formula<_TVN>::compute(TruthValue** TV, int N, long U) const
 {
-    //printf("Formula<_TVN>::compute(N = %d)\n", N);
+    //cprintf(-3, "Formula<_TVN>::compute(N = %d)\n", N);
     TruthValue* result;
     // computation with primary TVS
     TruthValue* primaryResult = this->simpleCompute(TV, N, U);

@@ -62,37 +62,37 @@ public:
                         bool fresh = true) const {
         const int n = (const int) premiseArray.size();
 
-        printf("<Generic rule args> ");
+        cprintf(-3, "<Generic rule args> ");
         for (int j = 0;j < n;j++) {
             const pHandle *ph = boost::get<pHandle>(&premiseArray[j]);
-            printf("[%u] ", *ph);
+            cprintf(-3, "[%u] ", *ph);
             //printTree(premiseArray[j],0,3);
         }
-        printf(" </Generic rule args>\n");
+        cprintf(-3, " </Generic rule args>\n");
 
-        std::cout << "validate()" << std::endl;
+        cprintf(-3, "validate()");
         assert(validate(premiseArray));
-        std::cout << "/ validate()" << std::endl;
+        cprintf(-3, "/ validate()");
 
-        printf("formatTVarray...\n");
+        cprintf(-3, "formatTVarray...\n");
         int TVN = formula.TVN;
         TruthValue** tvs = formatTVarray(premiseArray, &TVN);
-        printf("formatTVarray OK\n");
+        cprintf(-3, "formatTVarray OK\n");
 
         if (!tvs) {
-            printf("Warning only: GenericRule: TV array formatting failure.");
+            cprintf(-3, "Warning only: GenericRule: TV array formatting failure.");
             return Vertex(PHANDLE_UNDEFINED);
         }
 
-        printf("Computing TV... \n");
+        cprintf(-3, "Computing TV... \n");
 
         //! @todo Maybe fill in the Universe size.
         TruthValue* retTV = formula.compute(tvs, TVN);
 
-        printf("TV computation ok\n");
+        cprintf(-3, "TV computation ok\n");
 
         delete[] tvs;
-        printf("tvs[] freed.\n");
+        cprintf(-3, "tvs[] freed.\n");
 
         /// i2otype gives the atom skeleton (tree) w/o TV. addAtom inserts into AtomSpace with TV
         pHandle ret = asw->addAtom(*i2oType(premiseArray), *retTV, fresh);
@@ -100,7 +100,7 @@ public:
 
         delete retTV;
 
-        printf("Atom added.");
+        cprintf(-3, "Atom added.");
 
 //  printTree(ret,0,3);
 

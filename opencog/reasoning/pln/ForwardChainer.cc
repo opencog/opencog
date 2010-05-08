@@ -162,7 +162,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
                     //! which is why I didn't include it here.
                     if (r->getName() == std::string("DeductionRule")) {
-                        cout << "Deduction sanity check" << endl;
+//                        cout << "Deduction sanity check" << endl;
                         // A->B   B->C   check that those are not the same Link
                         bool valid = (args->size() == 2 && !((*args)[0].GetValue() == (*args)[1].GetValue()));
                         if (!valid) continue;
