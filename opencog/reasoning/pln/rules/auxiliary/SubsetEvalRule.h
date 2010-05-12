@@ -35,12 +35,13 @@ using std::vector;
 
 class SubsetEvalRule : public Rule
 {
+    Type ArgType;
     SubsetEvalFormula formula;
     AtomSpaceWrapper* _asw;
 
 public:
     virtual ~SubsetEvalRule() {}
-    SubsetEvalRule(AtomSpaceWrapper *asw);
+    SubsetEvalRule(AtomSpaceWrapper *asw, Type argType);
 
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const;
 
@@ -59,7 +60,6 @@ public:
 
     NO_DIRECT_PRODUCTION;
 };
-
 
 }} // namespace opencog { namespace pln {
 #endif // SUBSETEVALRULE_H
