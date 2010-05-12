@@ -226,8 +226,9 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     	//std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
-    	if (gMatches.get())
+    	if (gMatches.get()) {
             foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
+    	}
 
     }
     
@@ -319,9 +320,11 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         // Pass down all the bindings so far, plus any for this slot.
         foreach(hpair hp, *bindings)
             new_bindings->insert(hp);
-        foreach(hpair hp, *bv.bindings)
-            new_bindings->insert(hp);
-        
+        if (bv.bindings) {
+            foreach(hpair hp, *bv.bindings) {
+                new_bindings->insert(hp);
+            }
+        }
         
         //(*args)[current_arg] = bv;
         args->push_back(bv);
