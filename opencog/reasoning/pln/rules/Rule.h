@@ -156,8 +156,11 @@ public:
                                 pHandle CX = PHANDLE_UNDEFINED,
                                 bool fresh = true) const=0;
 
-    //! A computation method on BoundVertex
-    //! @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
+    /** Perform some checks then run the other version of compute. Note that
+     * this is the method that is actually called by the back and forward
+     * chainers.
+     * @see Rule::compute(const std::vector<Vertex>& h, pHandle CX = PHANDLE_UNDEFINED)
+     */
     BoundVertex compute(const std::vector<BoundVertex>& h,
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const;
