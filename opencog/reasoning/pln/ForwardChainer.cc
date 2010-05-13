@@ -42,9 +42,9 @@ namespace pln {
 
 ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) : asw(_asw)
 {
-    float minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
-    float probStack = FWD_CHAIN_PROB_STACK; 
-    float probGlobal = FWD_CHAIN_PROB_GLOBAL;
+    minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
+    probStack = FWD_CHAIN_PROB_STACK;
+    probGlobal = FWD_CHAIN_PROB_GLOBAL;
 }
 
 ForwardChainer::~ForwardChainer()
