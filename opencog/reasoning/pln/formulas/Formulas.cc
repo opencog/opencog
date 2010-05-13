@@ -771,7 +771,10 @@ TruthValue* SubsetEvalFormula::compute(TruthValue** TVs, int N, long U) const
 {
     OC_ASSERT((N % 2) == 0, "N = %d must be pair", N);
 
-    if (N == 0) return new SimpleTruthValue(0,0);
+    if (N == 0) {
+        cprintf(0, "SubsetEval: No MemberLinks available");
+        return new SimpleTruthValue(0,0);
+    }
 
     int Nsub = N/2;
     int Nsuper = Nsub;
