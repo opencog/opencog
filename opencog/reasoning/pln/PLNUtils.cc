@@ -527,7 +527,7 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
      }
      else
      {*/
-    Btr<set<pHandle> > lookupResults = asw->getHandleSet(T, name);
+    Btr<set<pHandle> > lookupResults = asw->getHandleSet(T, name, true);
 
     cprintf(3, "%u objects matched the type %d.\n", (uint) lookupResults->size(), T);
 
@@ -1276,7 +1276,8 @@ pHandleSet memberLinkSet(pHandle CP,
                          count_t min_membershipCount,
                          AtomSpaceWrapper* asw)
 {
-    OC_ASSERT(asw->isSubType(CP, CONCEPT_NODE));
+// This restriction is no longer made by SubsetEvalRule
+//    OC_ASSERT(asw->isSubType(CP, CONCEPT_NODE));
     
     map<pHandle, float> members;
     pHandleSet ret;
