@@ -31,13 +31,19 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
     // OC_ASSERT(asw->isSubType(c_h, CONCEPT_NODE));
 
     std::string c_name = asw->getName(c_h);
+    //! @todo Since this Atom stores the result, just look it up if this is
+    //! called again.
     std::string c_ASSOC_name = c_name + ASSOC_suffix;
 
     pHandle not_c_h = asw->getHandle(NOT_LINK, c_h);
-    //! @todo this is not acceptable in a real system (or FC at all)
-    OC_ASSERT(not_c_h != PHANDLE_UNDEFINED,
-              "NOT_LINK %s is not defined so we cannot create %s",
-              c_name.c_str(), c_ASSOC_name.c_str());
+//    OC_ASSERT(not_c_h != PHANDLE_UNDEFINED,
+//              "NOT_LINK %s is not defined so we cannot create %s",
+//              c_name.c_str(), c_ASSOC_name.c_str());
+    if (not_c_h == PHANDLE_UNDEFINED) {
+        cprintf(0, "NOT_LINK %s is not defined so we cannot create %s",
+                   c_name.c_str(), c_ASSOC_name.c_str());
+        return PHANDLE_UNDEFINED;
+    }
 
     // create ASSOC_conceptName
     pHandle c_ASSOC_h = asw->addNode(CONCEPT_NODE, c_ASSOC_name,
@@ -53,9 +59,14 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
             pHandle super_h = asw->getOutgoing(subset_h, 1);
             pHandle subset_not_c_h = asw->getHandle(SUBSET_LINK,
                                                     not_c_h, super_h);
-            OC_ASSERT(subset_not_c_h != PHANDLE_UNDEFINED,
-                      "SUBSET_LINK NOT %s %s is not defined",
-                      c_name.c_str(), asw->getName(super_h).c_str());
+//            OC_ASSERT(subset_not_c_h != PHANDLE_UNDEFINED,
+//                      "SUBSET_LINK NOT %s %s is not defined",
+//                      c_name.c_str(), asw->getName(super_h).c_str());
+            if (subset_not_c_h == PHANDLE_UNDEFINED) {
+                cprintf(0, "SUBSET_LINK NOT %s %s is not defined",
+                            c_name.c_str(), asw->getName(super_h).c_str());
+                return PHANDLE_UNDEFINED;
+            }
             SimpleTruthValue subset_not_c_TV = asw->getTV(subset_not_c_h);
             asw->addLink(MEMBER_LINK, super_h, c_ASSOC_h,
                          ASSOC(asw->getTV(subset_h), subset_not_c_TV));

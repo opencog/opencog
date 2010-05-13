@@ -76,13 +76,19 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     pHandle sub_ASSOC_h = CreateConceptASSOC(asw, sub_h);
     pHandle super_ASSOC_h = CreateConceptASSOC(asw, super_h);
 
-    const vector<Vertex> ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
-    BoundVertex bv = sser.compute(ASSOC_vv, fresh);
-    pHandle subset_ASSOC_h = _v2h(bv.GetValue());
+    // Use a 0,0 TV if some of the required Atoms are missing.
+    SimpleTruthValue tv(0, 0);
 
-    pHandle ret = asw->addAtom(*i2oType(premiseArray), 
-                               asw->getTV(subset_ASSOC_h),
-                               fresh);
+    if (sub_ASSOC_h != PHANDLE_UNDEFINED
+        && super_ASSOC_h != PHANDLE_UNDEFINED) {
+
+        const vector<Vertex> ASSOC_vv = list_of(sub_ASSOC_h)(super_ASSOC_h);
+        BoundVertex bv = sser.compute(ASSOC_vv, fresh);
+        pHandle subset_ASSOC_h = _v2h(bv.GetValue());
+
+        tv = asw->getTV(subset_ASSOC_h);
+    }
+    pHandle ret = asw->addAtom(*i2oType(premiseArray), tv, fresh);
     return BoundVertex(ret);
 }
 
