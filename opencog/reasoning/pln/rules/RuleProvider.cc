@@ -126,7 +126,7 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     
     AddRule(new SubsetEvalRule(asw, CONCEPT_NODE), 10.0f);
 
-    AddRule(new IntensionalInheritanceRule(asw), 10.f);
+    AddRule(new IntensionalInheritanceRule(asw, CONCEPT_NODE), 10.f);
 
     //	AddRule(new FORALLRule(asw,NULL), 5.0f);
     //	AddRule( new PLNPredicateRule(asw,NULL), 5.0f);
@@ -273,10 +273,10 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 ////    AddRule(new ANDPartitionRule(asw), 10.0f);
     AddRule(new NotEvaluatorRule(asw), 10.0f);
 
-    // FC: Broken due to TableGather not handling Node Type vertexes
+    // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
     AddRule(new SubsetEvalRule(asw, ATOM), 10.0f);
 
-////    AddRule(new IntensionalInheritanceRule(asw), 10.f);
+    AddRule(new IntensionalInheritanceRule(asw, ATOM), 10.f);
 
     //  AddRule(new FORALLRule(asw,NULL), 5.0f);
     //  AddRule( new PLNPredicateRule(asw,NULL), 5.0f);

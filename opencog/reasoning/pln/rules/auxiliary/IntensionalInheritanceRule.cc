@@ -30,11 +30,11 @@ namespace opencog { namespace pln {
 
 using boost::assign::list_of;
 
-IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw)
-    : Rule(_asw, false, true, "IntensionalInheritanceRule"), sser(_asw, CONCEPT_NODE)
+IntensionalInheritanceRule::IntensionalInheritanceRule(AtomSpaceWrapper* _asw, Type argType)
+    : Rule(_asw, false, true, "IntensionalInheritanceRule"), sser(_asw, argType), ArgType(argType)
 {
-    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
-    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)CONCEPT_NODE))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
+    inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
 }
 
 Rule::setOfMPs IntensionalInheritanceRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const {
@@ -70,8 +70,8 @@ BoundVertex IntensionalInheritanceRule::compute(const vector<Vertex>& premiseArr
     pHandle sub_h = _v2h(premiseArray[0]);
     pHandle super_h = _v2h(premiseArray[1]);
 
-    OC_ASSERT(asw->isSubType(sub_h, CONCEPT_NODE));
-    OC_ASSERT(asw->isSubType(super_h, CONCEPT_NODE));
+    OC_ASSERT(asw->isSubType(sub_h, ArgType));
+    OC_ASSERT(asw->isSubType(super_h, ArgType));
 
     pHandle sub_ASSOC_h = CreateConceptASSOC(asw, sub_h);
     pHandle super_ASSOC_h = CreateConceptASSOC(asw, super_h);

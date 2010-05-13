@@ -26,12 +26,15 @@
 namespace opencog { namespace pln {
 
 pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
-    OC_ASSERT(asw->isSubType(c_h, CONCEPT_NODE));
+    // Not possible now that IntensionalInheritanceRule is generic wrt input
+    // Atom Type.
+    // OC_ASSERT(asw->isSubType(c_h, CONCEPT_NODE));
 
     std::string c_name = asw->getName(c_h);
     std::string c_ASSOC_name = c_name + ASSOC_suffix;
 
     pHandle not_c_h = asw->getHandle(NOT_LINK, c_h);
+    //! @todo this is not acceptable in a real system (or FC at all)
     OC_ASSERT(not_c_h != PHANDLE_UNDEFINED,
               "NOT_LINK %s is not defined so we cannot create %s",
               c_name.c_str(), c_ASSOC_name.c_str());

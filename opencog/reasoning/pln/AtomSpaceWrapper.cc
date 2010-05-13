@@ -454,6 +454,11 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // context of the outgoing set. either that or a context that inherits from
     // all the contexts of outgoing set.
     Handle real = atomspace->getHandle(t,outgoingReal);
+
+    if (real == Handle::UNDEFINED) {
+        return PHANDLE_UNDEFINED;
+    }
+
     // Find a a VersionHandle with a context that has the same order of contexts
     // as vhs, otherwise return default
     // (need to clone, because we want to remove any invalid TVs before using)
