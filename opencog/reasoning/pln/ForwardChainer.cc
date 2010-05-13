@@ -40,7 +40,7 @@ using std::set_union;
 namespace opencog {
 namespace pln {
 
-ForwardChainer::ForwardChainer()
+ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) : asw(_asw)
 {
     float minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     float probStack = FWD_CHAIN_PROB_STACK; 
@@ -222,7 +222,7 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
 {
     Btr<std::set<BoundVertex> > matches(new std::set<BoundVertex>);
     
-//    std::cout << "getMatching: target: ";
+    cprintf(5, "getMatching: target: ");
     rawPrint(target->begin(), 5);
 
     foreach(Rule* g, generators) {
@@ -230,7 +230,21 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
     	if (gMatches.get()) {
-            foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
+            //foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
+
+    	    // Since FC does not always provide adequate restrictions to
+    	    // CCURule, it is necessary to do these checks on its output.
+    	    // They are already done in Rule::compute on BoundVertexes, but
+    	    // this way they will enable skipping problem Atoms rather than
+    	    // causing assertions to fail.
+    	    foreach(BoundVertex bv, *gMatches) {
+                if (!asw->isType(_v2h(bv.value)) &&
+                     asw->getType(_v2h(bv.value)) != FW_VARIABLE_NODE) {
+                    matches->insert(bv);
+                } else {
+                    cprintf(-1, "skipping invalid output from %s\n", g->getName().c_str());
+                }
+    	    }
     	}
 
     }
