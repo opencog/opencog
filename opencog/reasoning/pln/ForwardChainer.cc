@@ -124,6 +124,9 @@ std::set<std::vector<BBvtree> > getFilters(Rule * r)
     return r->o2iMeta(generic_target);
 }
 
+//! @todo Find a good way to stop when it becomes only able to produce repeats.
+//! @todo Possibly add an option for exhaustively applying Rules to all possible
+//! inputs each step.
 pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 {
     pHandleSeq results;
@@ -134,7 +137,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
     
         // Get the next Rule (no restrictions)
         foreach(Rule *r, composers) { // to avoid needing a nextRule method.
-            //cout << "Using " << r->getName() << endl;
+            cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
             std::set<std::vector<BBvtree> > filters(r->fullInputFilter());
@@ -320,7 +323,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         // Pass down all the bindings so far, plus any for this slot.
         foreach(hpair hp, *bindings)
             new_bindings->insert(hp);
-        if (bv.bindings) {
+        if (bv.bindings != NULL) {
             foreach(hpair hp, *bv.bindings) {
                 new_bindings->insert(hp);
             }
