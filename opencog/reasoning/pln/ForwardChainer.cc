@@ -285,7 +285,11 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BB
 bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
                                  uint current_arg, Btr<set<Btr<vector<BoundVertex> > > > all_args, Btr<bindingsT> bindings)
 {
-    bool exhaustive = true;
+    bool exhaustive = false;
+    // Sample about that many combinations with even probability.
+    // Just checking if all_args < maxC' wouldn't be even.
+    int maxCombinations = 100;
+    int maxBranch = pow(maxCombinations, 1.0/filter.size());
 
     if (current_arg >= filter.size()) {
         // We've found a result, save it to all_args.
@@ -346,8 +350,9 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
     bool one_worked = false;
 
-    while (ordered_choices.size() > 0) {
-        int index = exhaustive ? 0
+    //while ((ordered_choices.size() > 0) && (all_args.size() < maxCombinations)) {
+    while ((ordered_choices.size() > 0) && (maxBranch-- > 0)) {
+        int index = false ? 0
                                : getRNG()->randint(ordered_choices.size());
         //randArg = choices[index];
             

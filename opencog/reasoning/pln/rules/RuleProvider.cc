@@ -264,7 +264,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 #ifdef USE_RULES_BESIDES_DEDUCTION
     AddRule(new ORRule(asw), 10.0f);
 
-////    AddRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
+////AddRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
     AddRule(new SimpleANDRule<2>(asw), ANDEvaluatorPriority - 1.1f);
     AddRule(new SimpleANDRule<3>(asw), ANDEvaluatorPriority - 1.2f);
     //  AddRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
@@ -302,7 +302,7 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 
     //  AddRule(new ORPartitionRule(asw), 10.0f);
 
-////    AddRule(new CrispTheoremRule(asw), 10.0f);
+////AddRule(new CrispTheoremRule(asw), 10.0f);
 
     AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
@@ -322,9 +322,9 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 	AtomSpaceWrapper* asw = GET_ASW;
 
     AddRule(new LookupRule(asw), 20.0f);
-//    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
-//    AddRule(new HypothesisRule(asw), 30.0f);
-//
+    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
+    AddRule(new HypothesisRule(asw), 30.0f);
+
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
 
     foreach(pHandle fah, *ForAll_handles)
