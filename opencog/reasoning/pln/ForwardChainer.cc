@@ -163,10 +163,15 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         
                 if (!foundArguments) {
                     //cout << "FWDCHAIN args not valid" << endl;
-                } else {
+                }
+                foreach(args, *all_args) {
+                    if (args->empty()) {
+                        cout << "*args empty. how?" << endl;
+                        continue;
+                    }
                     //cout << "FWDCHAIN args valid" << endl;
                 
-                    args = *(all_args->begin());
+                    //args = *(all_args->begin());
 
                     // do the rule computation etc
                     
@@ -280,8 +285,20 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BB
 bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
                                  uint current_arg, Btr<set<Btr<vector<BoundVertex> > > > all_args, Btr<bindingsT> bindings)
 {
-    if (current_arg >= filter.size())
+    bool exhaustive = true;
+
+    if (current_arg >= filter.size()) {
+        // We've found a result, save it to all_args.
+        // Need to copy args, because this method will change it immediately after.
+        Btr<vector<BoundVertex> > args_copy(new vector<BoundVertex>);
+        //(*args_copy) += (*args);
+        foreach(BoundVertex tmp, *args)
+            args_copy->push_back(tmp);
+        all_args->insert(args_copy);
+        //all_args->insert(args);
+
         return true;
+    }
     
 //    std::cout << "arg #" << current_arg << std::endl;
     
@@ -327,8 +344,11 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         ordered_choices.push_back(tmp);
     }
 
-    while (ordered_choices.size() > 0) {        
-        int index = getRNG()->randint(ordered_choices.size());
+    bool one_worked = false;
+
+    while (ordered_choices.size() > 0) {
+        int index = exhaustive ? 0
+                               : getRNG()->randint(ordered_choices.size());
         //randArg = choices[index];
             
         bv = ordered_choices[index];
@@ -362,8 +382,9 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         // Whether the rest of the slots are successfully filled, when we use bv for this slot
         bool rest_filled = findAllArgs(filter, args, current_arg+1, all_args, new_bindings);
         if (rest_filled) {
-            all_args->insert(args);
-            return true; 
+            one_worked = true;
+            if (!exhaustive)
+                return true;
         }
         
         args-> pop_back();
@@ -373,7 +394,8 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     
 //    std::cout << "backtracking" << std::endl;
     
-    return false;
+    //return false;
+    return one_worked;
 }
 
 }} // namespace opencog::pln
