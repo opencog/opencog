@@ -33,6 +33,7 @@
 #include <algorithm>
 
 using std::vector;
+using std::set;
 using std::cout;
 using std::endl;
 using std::set_union;
@@ -146,20 +147,27 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
             foreach(std::vector<BBvtree> f, filters) {
                 // find a vector of Atoms that matches it
                 Btr<vector<BoundVertex> > args;
-                args = findAllArgs(f);
+
+                Btr<set<Btr<vector<BoundVertex> > > > all_args;
+                //args = findAllArgs(f);
+                all_args = findAllArgs(f);
+                bool foundArguments = !all_args->empty();
+
                 // check for validity (~redundant)
                 
                 //cout << "FWDCHAIN arguments ";
                 //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
                 //cout << " are valid? " <<endl;
         
-                bool foundArguments = !args->empty();//true;// = r->validate(args);
+//                bool foundArguments = !args->empty();//true;// = r->validate(args);
         
                 if (!foundArguments) {
                     //cout << "FWDCHAIN args not valid" << endl;
                 } else {
                     //cout << "FWDCHAIN args valid" << endl;
                 
+                    args = *(all_args->begin());
+
                     // do the rule computation etc
                     
                     //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
@@ -256,20 +264,21 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     return matches;
 }
 
-Btr<vector<BoundVertex> > ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
+Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BBvtree> filter)
 {
     Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
+    Btr<set<Btr<vector<BoundVertex> > > > all_args(new set<Btr<vector<BoundVertex> > >);
     
     //Btr<bindingsT> bindings(new BindingsT());
     Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
     
-    bool match = findAllArgs(filter, args, 0, bindings);
+    bool match = findAllArgs(filter, args, 0, all_args, bindings);
 
-    return args;       
+    return all_args;
 }
 
 bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
-                                 uint current_arg, Btr<bindingsT> bindings)
+                                 uint current_arg, Btr<set<Btr<vector<BoundVertex> > > > all_args, Btr<bindingsT> bindings)
 {
     if (current_arg >= filter.size())
         return true;
@@ -351,9 +360,11 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         args->push_back(bv);
         
         // Whether the rest of the slots are successfully filled, when we use bv for this slot
-        bool rest_filled = findAllArgs(filter, args, current_arg+1, new_bindings);
-        if (rest_filled)
+        bool rest_filled = findAllArgs(filter, args, current_arg+1, all_args, new_bindings);
+        if (rest_filled) {
+            all_args->insert(args);
             return true; 
+        }
         
         args-> pop_back();
 //        else // tacky code to prevent more than one try

@@ -93,11 +93,13 @@ public:
     Btr<std::set<BoundVertex> > getMatching(const meta target);
 
     //! Find a series of atoms to match the given filter.
-    Btr<std::vector<BoundVertex> > findAllArgs(std::vector<BBvtree> filter);
+    Btr<std::set<Btr<std::vector<BoundVertex> > > > findAllArgs(std::vector<BBvtree> filter);
     
     // returns true if and only if all args from this point on bound successfully
     bool findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
-                                 uint current_arg, Btr<bindingsT> bindings);
+                                 uint current_arg,
+                                 Btr<std::set<Btr<std::vector<BoundVertex> > > > all_args,
+                                 Btr<bindingsT> bindings);
 
     void printVertexVectorHandles(std::vector< Vertex > hs);
 };
