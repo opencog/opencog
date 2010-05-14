@@ -181,6 +181,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     	// Ideally the chainer would now try another argument vector for this Rule
                     	// (until it uses them up).
                         vhpair v = GET_ASW->fakeToRealHandle(out);
+                        //! @todo This check will no longer work.
                         if (! (v.second == NULL_VERSION_HANDLE)) {
                             GET_ASW->removeAtom(out);
                         } else {
@@ -238,8 +239,11 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     	    // this way they will enable skipping problem Atoms rather than
     	    // causing assertions to fail.
     	    foreach(BoundVertex bv, *gMatches) {
-                if (!asw->isType(_v2h(bv.value)) &&
-                     asw->getType(_v2h(bv.value)) != FW_VARIABLE_NODE) {
+    	        pHandle ph = _v2h(bv.value);
+    	        //! @todo The first one may be an ASW / contexts issue.
+                if  (ph != PHANDLE_UNDEFINED &&
+                     !asw->isType(ph) &&
+                     asw->getType(ph) != FW_VARIABLE_NODE) {
                     matches->insert(bv);
                 } else {
                     cprintf(-1, "skipping invalid output from %s\n", g->getName().c_str());
