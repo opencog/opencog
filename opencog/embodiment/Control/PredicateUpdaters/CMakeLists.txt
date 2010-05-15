@@ -14,6 +14,7 @@ ADD_LIBRARY (PredicateUpdaters
 SET(CMAKE_BUILD_TYPE Debug)
 
 TARGET_LINK_LIBRARIES (PredicateUpdaters
+    AtomSpaceExtensions
 	${OPENCOG_LIBRARIES}
 )
 
