@@ -436,13 +436,7 @@ IndefiniteTruthValue* IndefiniteRule::conclusion(const pvector& distributions)
 // Methods Implementations
 ConjunctionRule::ConjunctionRule(IndefiniteTruthValue* const& TVa,
                                  IndefiniteTruthValue* const& TVb)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVb);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVb);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVb) {}
 
 IndefiniteTruthValue* ConjunctionRule::solve()
 {
@@ -464,13 +458,7 @@ IndefiniteTruthValue* ConjunctionRule::solve()
 
 ImplicationRule::ImplicationRule(IndefiniteTruthValue* const& TVa,
                                  IndefiniteTruthValue* const& TVab)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVab);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVab);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVab) {}
 
 IndefiniteTruthValue* ImplicationRule::solve()
 {
@@ -560,13 +548,7 @@ IndefiniteTruthValue* ImplicationRule::q_r_conclusion(float l, float u,
 
 RevisionRule::RevisionRule(IndefiniteTruthValue* const& TVa,
                            IndefiniteTruthValue* const& TVb)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVb);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVb);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVb) {}
 
 IndefiniteTruthValue* RevisionRule::solve()
 {
@@ -602,16 +584,7 @@ AbductionRule::AbductionRule(IndefiniteTruthValue* const& TVa,
                              IndefiniteTruthValue* const& TVc,
                              IndefiniteTruthValue* const& TVab,
                              IndefiniteTruthValue* const& TVcb)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVcb, false);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVb);
-    tvset.push_back(TVc);
-    tvset.push_back(TVab);
-    tvset.push_back(TVcb);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVcb, false) {}
 
 IndefiniteTruthValue* AbductionRule::solve()
 {
@@ -648,14 +621,7 @@ IndefiniteTruthValue* AbductionRule::solve()
 BayesRule::BayesRule(IndefiniteTruthValue* const& TVa,
                      IndefiniteTruthValue* const& TVc,
                      IndefiniteTruthValue* const& TVac)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVc, TVac);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVc);
-    tvset.push_back(TVac);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVc, TVac) {}
 
 IndefiniteTruthValue* BayesRule::solve()
 {
@@ -685,16 +651,7 @@ DeductionRule::DeductionRule(IndefiniteTruthValue* const& TVa,
                              IndefiniteTruthValue* const& TVc,
                              IndefiniteTruthValue* const& TVab,
                              IndefiniteTruthValue* const& TVbc)
-{
-    IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVbc, true);
-
-    // Local variables copy
-    tvset.push_back(TVa);
-    tvset.push_back(TVb);
-    tvset.push_back(TVc);
-    tvset.push_back(TVab);
-    tvset.push_back(TVbc);
-}
+    : IndefiniteRule::IndefiniteRule(TVa, TVb, TVc, TVab, TVbc, true) {}
 
 IndefiniteTruthValue* DeductionRule::solve()
 {

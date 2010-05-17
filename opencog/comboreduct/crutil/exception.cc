@@ -42,7 +42,4 @@ combo::vertex EvalException::get_vertex() {
 TypeCheckException::TypeCheckException() {
     _message = "Type check Exception";
 }
-TypeCheckException::TypeCheckException(int arg) : _arg(arg) {
-    TypeCheckException::TypeCheckException();
-}
-
+TypeCheckException::TypeCheckException(int arg) : _arg(arg) {} 
