@@ -368,10 +368,10 @@ private:
                     printf("s: %f max: %f\n", etv->getMean(),
                             t->maxTV->getMean());
 
-                    if (test_bc) { // FC doesn't support trails currently
-                        std::cout << "Inference trail: " << std::endl;
-                        state->printTrail(eh);
-                    }
+                    // This uses the BIT, but the trails are stored using some
+                    // global variables so work in FC.
+                    std::cout << "Inference trail: " << std::endl;
+                    state->printTrail(eh);
                 }
                 
                 passed = (
@@ -560,10 +560,10 @@ private:
         // Make sure FC doesn't take too long / only test it on simpler tests.
         // It takes disproportionately long once the AtomSpace gets large, due
         // to the indexes probably. 
-//        if (!test_bc && maxSteps > 201) {
-//            std::cout << "Skipping test due to time constraints" << std::endl;
-//            return; //minEvalsOfFittestBIT = 500;
-//        }
+        if (!test_bc && maxSteps > 2000) { // 201
+            std::cout << "Skipping test due to time constraints" << std::endl;
+            return; //minEvalsOfFittestBIT = 500;
+        }
         
         uint minEvalsOfFittestBIT = maxSteps/100;
         

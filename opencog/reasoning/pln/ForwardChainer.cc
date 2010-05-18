@@ -38,6 +38,12 @@ using std::cout;
 using std::endl;
 using std::set_union;
 
+namespace haxx
+{
+    extern std::map<pHandle,std::vector<pHandle> > inferred_from;
+    extern std::map<pHandle,opencog::pln::Rule*> inferred_with;
+}
+
 namespace opencog {
 namespace pln {
 
@@ -214,6 +220,12 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                             //cout<<"Output\n";
                             NMPrinter np;
                             np.print(out);
+
+                            // Update the tacky trail mechanism (similar code to in the BIT)
+                            foreach(BoundVertex v, *args) {
+                                haxx::inferred_from[out].push_back(_v2h(v.value));
+                                haxx::inferred_with[out] = r;
+                            }
                         }
                     } else {
                         // Remove atom if not satisfactory
