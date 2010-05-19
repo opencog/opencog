@@ -42,8 +42,8 @@ public:
 
 		assert(N==1);
 
-		tvs[0] = (TruthValue*) &(nm->getTV(v2h(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(nm->getTV(v2h(premiseArray[1])));
+		tvs[0] = (TruthValue*) &(asw->getTV(v2h(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(asw->getTV(v2h(premiseArray[1])));
 
 		return tvs;
 	}
@@ -63,16 +63,16 @@ public:
 
 		//assert(ret.hs[0].real == nm->getOutgoing(h[1])[0]);
 
-		ret.hs[0] = (TruthValue*) atom(nm->getOutgoing(h1)[0]);
+		ret.hs[0] = (TruthValue*) atom(asw->getOutgoing(h1)[0]);
 		
-		vector<Handle> hs = nm->getOutgoing(h0);
+		vector<Handle> hs = asw->getOutgoing(h0);
 		ret.substitute(atom(hs[1]), atom(hs[0])); //  parent for child
 		
 		return meta(new Tree<Vertex>(ret.maketree()));		
 		
 		meta ret(new Tree<Vertex>(mva(getType(v2h(h[0])),
-			mva(nm->getOutgoing(v2h(h[1]))[0]),
-			mva(nm->getOutgoing(v2h(h[0]))[1])));
+			mva(asw->getOutgoing(v2h(h[1]))[0]),
+			mva(asw->getOutgoing(v2h(h[0]))[1])));
 
 		return ret;
 	}

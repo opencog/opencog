@@ -706,7 +706,7 @@ TruthValue* ExcludingORFormula::simpleCompute(TruthValue** TV,
     }
 
     strength_t sOR = sTot;
-    count_t KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
+    confidence_t KKK = IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL;
     count_t nOR = nTot  * KKK;
 
 //  cprintf(-3, " = %f\n", sAND);

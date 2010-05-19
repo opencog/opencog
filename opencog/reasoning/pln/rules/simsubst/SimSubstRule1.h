@@ -22,6 +22,10 @@
 #ifndef SIMSUBS1RULE_H
 #define SIMSUBS1RULE_H
 
+#include "../GenericRule.h"
+#include "../../formulas/Formulas.h"
+
+
 namespace opencog { namespace pln {
 
 /**
@@ -57,15 +61,13 @@ public:
 
 	TruthValue** formatTVarray	(const vector<Vertex>& premiseArray, int* newN) const
 	{
-	    AtomSpaceWrapper *nm = GET_ASW;
-	
 		TruthValue** tvs = new TruthValue*[1];
 
 		const int N = (int)premiseArray.size();
 		assert(N==2);
 
-		tvs[0] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[0])));
-		tvs[1] = (TruthValue*) &(nm->getTV(boost::get<pHandle>(premiseArray[1])));
+		tvs[0] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[0])));
+		tvs[1] = (TruthValue*) &(asw->getTV(boost::get<pHandle>(premiseArray[1])));
 
 		return tvs;
 	}
