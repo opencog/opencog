@@ -47,6 +47,15 @@ namespace haxx
 namespace opencog {
 namespace pln {
 
+//! @todo refactor into PLNUtils or maybe somewhere else.
+void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
+    // Update the tacky trail mechanism (similar code to in the BIT)
+    foreach(BoundVertex v, *args) {
+        haxx::inferred_from[out].push_back(_v2h(v.value));
+        haxx::inferred_with[out] = r;
+    }
+}
+
 ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) : asw(_asw)
 {
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
@@ -206,6 +215,9 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                         } else {
                             maxRuleApps--;
                             appliedRule = true;
+
+                            updateTrail(out, r, args);
+
                             if (target) { // Match it against the target
                                 // Adapted from in Rule::validate
                                 typedef weak_atom< meta > vertex_wrapper;
@@ -213,6 +225,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 
                                 if (mp(out)) {
                                     results.push_back(out);
+
                                     return results;
                                 }
                             } else
@@ -220,12 +233,6 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                             //cout<<"Output\n";
                             NMPrinter np;
                             np.print(out);
-
-                            // Update the tacky trail mechanism (similar code to in the BIT)
-                            foreach(BoundVertex v, *args) {
-                                haxx::inferred_from[out].push_back(_v2h(v.value));
-                                haxx::inferred_with[out] = r;
-                            }
                         }
                     } else {
                         // Remove atom if not satisfactory

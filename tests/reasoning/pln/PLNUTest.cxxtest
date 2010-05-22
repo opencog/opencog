@@ -299,9 +299,10 @@ private:
         Btr<BackInferenceTreeRootT> state;
         ForwardChainer fc;
 
-        if (test_bc) {
+        // Even with FC, we want to have a BIT available so that printTrail can be accessed
+//        if (test_bc) {
             state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
-        }
+//        }
         uint s_i=0; // Expansion phase #
         pHandle eh=PHANDLE_UNDEFINED; // expected target handle
         TruthValue* etv = NULL; // expect target handle TV
