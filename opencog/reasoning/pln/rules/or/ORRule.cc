@@ -56,13 +56,35 @@ Rule::setOfMPs ORRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
         return makeSingletonSet(ret);
 }
 
-// TODO support other numbers of OR arguments besides 2
-meta ORRule::targetTemplate() const
+//// Can't support more than 2 inputs.
+//meta ORRule::targetTemplate() const
+//{
+//    return(meta(new vtree(mva((pHandle)OR_LINK,
+//                                     mva((pHandle)ATOM),
+//                                     mva((pHandle)ATOM)
+//                                     ))));
+//}
+
+//! @todo uses a somewhat tacky approach to support other numbers of OR
+//! arguments besides 2. NOTE: ORRule currently gets an error with >2
+//! arguments anyway.
+Rule::setOfMPs ORRule::fullInputFilter() const
 {
-    return(meta(new vtree(mva((pHandle)OR_LINK, 
-                                     mva((pHandle)ATOM),
-                                     mva((pHandle)ATOM)
-                                     ))));
+    // The possible inputs are {any 2 Atoms}, {any 3 Atoms}, ...
+    int max_arity = 2;
+
+    Rule::setOfMPs ret;
+
+    for (int n = 2; n <= max_arity; n++) {
+        MPs args;
+
+        for (int i = 0; i < n; i++)
+            args.push_back(BBvtree(new BoundVTree(mva((pHandle)ATOM))));
+
+        ret.insert(args);
+    }
+
+    return ret;
 }
 
 #define USE_INCLUSION_EXCLUSION_IN_OR_RULE 0
