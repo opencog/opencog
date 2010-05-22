@@ -1,6 +1,18 @@
 ##############################################################################
-Instalation and dependency resolution for ArchLinux users (7/2009)
-##############################################################################
+Installation and dependency resolution for ArchLinux users
+###############################################################################
+
+There exists a package in the AUR named opencog-bzr found at
+http://aur.archlinux.org/packages.php?ID=35449
+
+To get started with the AUR, please read:
+http://wiki.archlinux.org/index.php/AUR
+
+An AUR helper automates the use of the AUR.
+To use an AUR helper (yaourt) please read:
+http://wiki.archlinux.org/index.php/Yaourt
+
+----------------------------------------------------------
 
 Opencog depends on the following packages:
 
