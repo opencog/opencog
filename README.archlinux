@@ -12,6 +12,10 @@ An AUR helper automates the use of the AUR.
 To use an AUR helper (yaourt) please read:
 http://wiki.archlinux.org/index.php/Yaourt
 
+Note that it's possible you will encounter a linkage error at the end
+OpenCog compiling, this is because the install script uses fakeroot,
+if so just compile it manually and it should work.
+
 ----------------------------------------------------------
 
 Opencog depends on the following packages:
