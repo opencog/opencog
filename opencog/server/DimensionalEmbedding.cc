@@ -33,7 +33,8 @@ using namespace opencog;
 void DimensionalEmbedding::init(CogServer* cogServer){
     this->cogServer=cogServer;
     this->as=cogServer->getAtomSpace();
-            
+
+    //Just for testing purposes
     define_scheme_primitive("embedSpace",
                             &DimensionalEmbedding::embedSimLinks,
                             this);
@@ -49,7 +50,7 @@ void DimensionalEmbedding::embedSimLinks() {
 void DimensionalEmbedding::logSimEmbedding() {
     logAtomEmbedding(SIMILARITY_LINK);
 }
-// Uses a slightly modified version of dijkstra's algorithm
+// Uses a slightly modified version of Dijkstra's algorithm
 double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
                                                    const Handle& targetHandle,
                                                    const Type& linkType)
@@ -115,6 +116,7 @@ void DimensionalEmbedding::embedAtomSpace(const Type& linkType){
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
 
     PivotSeq& pivots = pivotsMap[linkType];
+    if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
     while((pivots.size() < numDimensions) && (!nodes.empty())){
         addPivot(bestChoice, linkType);
