@@ -13,7 +13,7 @@ TARGET_LINK_LIBRARIES(Processor
     ${LUABIND_LIBRARIES}
     ${XERCESC_LIBRARIES}
     VirtualWorldData
-    comboreduct
+    Procedure
     util
 )
 
