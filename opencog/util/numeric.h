@@ -199,8 +199,12 @@ template<typename FloatT> FloatT log2(FloatT x)
     return std::log(x) / std::log(2.0);
 }
 
+// return the smaller power of 2 bits that can encode arity combinations
+// So for instance
+// nbits_to_pack(2) = 1, nbits_to_pack(3) = 2, nbits_to_pack(50) = 8
 inline unsigned int nbits_to_pack(size_t arity)
 {
+    OC_ASSERT(arity>0);
     return next_power_of_two(integer_log2(arity -1) + 1);
 }
 
