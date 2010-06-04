@@ -103,8 +103,8 @@ void randomize(const field_set& fs, instance& inst,
 {
     occam_randomize_onto(fs, inst, rng);
     occam_randomize_contin(fs, inst, rng);
-    uniform_randomize_bits(fs, inst, rng);
     uniform_randomize_disc(fs, inst, rng);
+    uniform_randomize_bits(fs, inst, rng);
 }
 
 }

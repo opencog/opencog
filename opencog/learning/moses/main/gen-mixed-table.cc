@@ -119,7 +119,7 @@ int main(int argc, char ** argv)
     	   	
     	   		//this is to generate also the variables which are not present in the method. I make them of type contin
                 contin_arg_number=arg_number-boolean_arg_number;
-		        nsamples_bool = arg_number_bls;
+		        nsamples_bool = arg_number_bls; //@todo: maybe there is a bug here, it may be pow(2, boolean_arg_number)
         		//generate the mixed table        	
         		mixed_table mt(combo_tr, rands,tr, rng);
         	

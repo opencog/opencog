@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _MOSES_OPTIMIZE_H
-#define _MOSES_OPTIMIZE_H
+#ifndef _MOSES_OPTIMIZATION_H
+#define _MOSES_OPTIMIZATION_H
 
 #include "moses.h"
 #include <opencog/learning/moses/eda/termination.h>
@@ -164,66 +164,67 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
  * @param n    the haming distance contin encode will be midified
  * @param rng  the random generator
  */
- void generate_contin_neighbor(const eda::field_set& fs, eda::instance& inst, 
-                               eda::field_set::contin_iterator it, 
-                               int n, opencog::RandGen& rng)
- {
-     size_t begin = fs.contin_to_raw_idx(it.idx());
-     cout << "idx = " << it.idx() <<endl;
+inline void generate_contin_neighbor(const eda::field_set& fs,
+                                     eda::instance& inst, 
+                                     eda::field_set::contin_iterator it, 
+                                     int n, opencog::RandGen& rng)
+{
+    size_t begin = fs.contin_to_raw_idx(it.idx());
+    cout << "idx = " << it.idx() <<endl;
+    
+    size_t num = fs.get_num_before_stop(inst, it.idx());
+    cout << "num of Left and Right before Stop:" << num << endl;
+    // Here the lazy_random_selector make sure it will generate the different
+    // random number , so we could change the distance one at one time. We need
+    // do it n times.
+    // opencog::lazy_random_selector select(current - begin, rng);
+    eda::disc_t temp_raw;
+    //     opencog::lazy_random_selector select(num + 1, rng);
+    for( int i = 1; i <= n; i++) {
+        // NOTICE: here we let the lazy_random_selector to change dynamiclly,
+        //         but it will generate the same random ,so it needs to be fixed.
+        opencog::lazy_random_selector select(num + 1, rng);
+        size_t r = select();
+        cout << "num = " << num << " r= " << r <<endl;
+        temp_raw = fs.get_raw(inst,begin + r);
+        //FIXME: if the temp_raw is the last non-stop, we could change it to
+        //       *Stop*. But  when the distance greater than 1, maybe it will 
+        //       change the first time and it will change back the second time.
+        //       but the distance won't change. Now,it works for the distance = 1.
 
-     size_t num = fs.get_num_before_stop(inst, it.idx());
-     cout << "num of Left and Right before Stop:" << num << endl;
-     // Here the lazy_random_selector make sure it will generate the different
-     // random number , so we could change the distance one at one time. We need
-     // do it n times.
-     // opencog::lazy_random_selector select(current - begin, rng);
-     eda::disc_t temp_raw;
-     //     opencog::lazy_random_selector select(num + 1, rng);
-     for( int i = 1; i <= n; i++) {
-         // NOTICE: here we let the lazy_random_selector to change dynamiclly,
-         //         but it will generate the same random ,so it needs to be fixed.
-         opencog::lazy_random_selector select(num + 1, rng);
-         size_t r = select();
-         cout << "num = " << num << " r= " << r <<endl;
-         temp_raw = fs.get_raw(inst,begin + r);
-         //FIXME: if the temp_raw is the last non-stop, we could change it to
-         //       *Stop*. But  when the distance greater than 1, maybe it will 
-         //       change the first time and it will change back the second time.
-         //       but the distance won't change. Now,it works for the distance = 1.
 
-
-         if (temp_raw == eda::field_set::contin_spec::Left ) {
-             if( r + 1 == num) {
-                 fs.set_raw(inst, begin + r, rng.randbool() ?
-                            eda::field_set::contin_spec::Right :
-                            eda::field_set::contin_spec::Stop);
-                 if(fs.get_raw(inst, begin + r) == 
-                    eda::field_set::contin_spec::Stop)
-                     num --;
-             } 
-             else             
-                 fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
-         } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
-             if( r + 1 == num) {
-                 fs.set_raw(inst, begin + r, rng.randbool() ?
-                            eda::field_set::contin_spec::Left :
-                            eda::field_set::contin_spec::Stop);
-                 if(fs.get_raw(inst, begin + r) == 
-                    eda::field_set::contin_spec::Stop)
-                     num --;
-             } 
-             else
-                 fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
-         } else {
-             //FIXME: if it is the last 0 ,shall we change it?
-             fs.set_raw(inst, begin + r, rng.randbool() ?
-                        eda::field_set::contin_spec::Left:
-                        eda::field_set::contin_spec::Right);
-             num ++;
-         }
-         cout << "The " << i << " time  generate :" << fs.stream_raw(inst) << endl;
-     }
- }
+        if (temp_raw == eda::field_set::contin_spec::Left ) {
+            if( r + 1 == num) {
+                fs.set_raw(inst, begin + r, rng.randbool() ?
+                           eda::field_set::contin_spec::Right :
+                           eda::field_set::contin_spec::Stop);
+                if(fs.get_raw(inst, begin + r) == 
+                   eda::field_set::contin_spec::Stop)
+                    num --;
+            } 
+            else             
+                fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
+        } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
+            if( r + 1 == num) {
+                fs.set_raw(inst, begin + r, rng.randbool() ?
+                           eda::field_set::contin_spec::Left :
+                           eda::field_set::contin_spec::Stop);
+                if(fs.get_raw(inst, begin + r) == 
+                   eda::field_set::contin_spec::Stop)
+                    num --;
+            } 
+            else
+                fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
+        } else {
+            //FIXME: if it is the last 0 ,shall we change it?
+            fs.set_raw(inst, begin + r, rng.randbool() ?
+                       eda::field_set::contin_spec::Left:
+                       eda::field_set::contin_spec::Right);
+            num ++;
+        }
+        cout << "The " << i << " time  generate :" << fs.stream_raw(inst) << endl;
+    }
+}
 
 /**
  * This procedure samples sample_size instances at distance n from the exemplar
@@ -476,7 +477,7 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
         //save the current version
         current = inst;
         // recursive call, moved for one position
-        vary_n_knobs(fs, inst, n, startinf_index + 1, out);
+        vary_n_knobs(fs, inst, n, starting_index + 1, out);
         // recover after the recursive calls
         inst = current;
         

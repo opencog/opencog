@@ -36,6 +36,11 @@ namespace opencog {
      * For instance if N = {1, 2, 3, 4} then
      * ostreamContainer(std::cout, N.begin(), N.end(), "{", ";", "}")
      * displays "{1;2;3;4}"
+     *
+     * @param empty_rl is a flag indicating whether to print left and
+     *                 right when the container is empty. If true then
+     *                 they are always printed, if false then they
+     *                 printed only when the container is not empty
      */
     template<class Out, class It>
     Out& ostreamContainer(Out& out,
@@ -43,15 +48,18 @@ namespace opencog {
                           It to,
                           const std::string& delimiter = " ",
                           const std::string& left = "",
-                          const std::string& right = "")
+                          const std::string& right = "",
+                          bool empty_lr = true)
     {
-        out << left;
+        if(empty_lr || from!=to)
+            out << left;
         if(from != to) {
             It last = --to;
             std::copy(from, last, std::ostream_iterator<typename It::value_type>(out, delimiter.c_str()));
             out << *last;
         }
-        out << right;
+        if(empty_lr || from!=to)
+            out << right;
         return out;
     }
 
@@ -63,9 +71,11 @@ namespace opencog {
                           const Con& container,
                           const std::string& delimiter = " ",
                           const std::string& left = "", 
-                          const std::string& right = "") {
+                          const std::string& right = "",
+                          bool empty_lr = true)
+    {
         return ostreamContainer(out, container.begin(), container.end(),
-                                delimiter, left, right);
+                                delimiter, left, right, empty_lr);
     }
 
     /**
@@ -76,17 +86,21 @@ namespace opencog {
                         It to,
                         const std::string& delimiter = " ",
                         const std::string& left = "",
-                        const std::string& right = "")
+                        const std::string& right = "",
+                        bool empty_lr = true)
     {
-        ostreamContainer(std::cout, from, to, left, delimiter, right);
+        ostreamContainer(std::cout, from, to,
+                         left, delimiter, right, empty_lr);
     }
     template<class Con>
     void printContainer(const Con& container,
                         const std::string& delimiter = " ",
                         const std::string& left = "", 
-                        const std::string& right = "")
+                        const std::string& right = "",
+                        bool empty_lr = true)
     {
-        ostreamContainer(std::cout, container, left, delimiter, right);
+        ostreamContainer(std::cout, container,
+                         left, delimiter, right, empty_lr);
     }
 
     /**
@@ -97,19 +111,23 @@ namespace opencog {
                                It to,
                                const std::string& delimiter = " ",
                                const std::string& left = "",
-                               const std::string& right = "")
+                               const std::string& right = "",
+                               bool empty_lr = true)
     {
         std::stringstream ss;
-        return ostreamContainer(ss, from, to, left, delimiter, right).str();
+        return ostreamContainer(ss, from, to,
+                                left, delimiter, right, empty_lr).str();
     }
     template<class Con>
     std::string containerToStr(const Con& container,
                                const std::string& delimiter = " ",
                                const std::string& left = "", 
-                               const std::string& right = "")
+                               const std::string& right = "",
+                               bool empty_lr = true)
     {
         std::stringstream ss;
-        return ostreamContainer(ss, container, left, delimiter, right).str();
+        return ostreamContainer(ss, container,
+                                left, delimiter, right, empty_lr).str();
     }
     
 } // ~namespace opencog

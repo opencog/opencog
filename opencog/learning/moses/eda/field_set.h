@@ -91,12 +91,15 @@ struct field_set {
     };
 
     /**
-     * The basic idea is to represent continuous quantities, conceptually, as variable-length
-     * sequences of bits, with a simplicity prior towards shorter sequences. Bit-sequences are
-     * mapped to continuous values using a simple information-theoretic approach.
-     * (i.e. consider representing a value in the range (-1,1) with a uniform prior)
+     * The basic idea is to represent continuous quantities,
+     * conceptually, as variable-length sequences of bits, with a
+     * simplicity prior towards shorter sequences. Bit-sequences are
+     * mapped to continuous values using a simple
+     * information-theoretic approach.  (i.e. consider representing a
+     * value in the range (-1,1) with a uniform prior)
      * 
-     * There is a paper about the how to represent continous quantities , you could find it on
+     * There is a paper about the how to represent continous
+     * quantities , you could find it on
      * http://code.google.com/p/moses/wiki/ModelingAtomSpaces
      */
     struct contin_spec {
@@ -207,12 +210,16 @@ struct field_set {
     field_set(It from, It to) : _nbool(0) {
         typedef std::map<spec, size_t> spec_map;
 
-        spec_map spec_counts; //merge & sort them
+        // identical specs are merged and there are sorted (by the map)
+        // The sorting seems to follows the order of the spec boost::variant.
+        // Also, since disc_spec::operator< is sorting by descending arity,
+        // it is ensured that bit_spec are at the end.
+        spec_map spec_counts;
         while (from != to)
             ++spec_counts[*from++];
 
         foreach(const spec_map::value_type& v, spec_counts)       //build them
-        build_spec(v.first, v.second);
+            build_spec(v.first, v.second);
 
         compute_starts();                 //compute iterator positions
     }
@@ -366,11 +373,20 @@ struct field_set {
     }
 
 protected:
+    
+    // _fields contains in order:
+    // onto fields, contin fields, disc fields (with the boolean ones at last)
+    // which can be gotten through the methods
+    // begin_onto_fields - end_onto_fields
+    // begin_contin_fields - end_contin_fields
+    // begin_disc_fields - end_disc_fields
+    // begin_bit_fields - end_bit_fields
     vector<field> _fields;
+
     vector<disc_spec> _disc;
     vector<contin_spec> _contin;
     vector<onto_spec> _onto;
-    size_t _nbool;
+    size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
     field_iterator _contin_start, _disc_start;
 
     size_t back_offset() const {
@@ -379,7 +395,19 @@ protected:
                _fields.back().minor_offset + _fields.back().width;
     }
 
+    // Build spec s, n times, that is:
+    // Fill the corresponding field in _fields, n times.
+    // Add the spec n times in _onto, _contin or _disc depending on its type.
     void build_spec(const spec& s, size_t n);
+    // Build onto_spec os, n times
+    // Fill the corresponding field, n times.
+    // Add the spec in _onto, n times.
+    void build_onto_spec(const onto_spec& os, size_t n);
+    // Like above but for contin
+    void build_contin_spec(const contin_spec& cs, size_t n);
+    // Like above but for disc, and also,
+    // increment _nbool by n if ds has arity 2 (i.e. only needs one bit).
+    void build_disc_spec(const disc_spec& ds, size_t n);
 
     void compute_starts() {
         _contin_start = _fields.begin();
@@ -733,11 +761,11 @@ protected:
 
     const_disc_iterator begin_disc(const instance& inst) const {
         return const_disc_iterator(*this, distance(_fields.begin(),
-                                   begin_disc_fields()), inst);
+                                                   begin_disc_fields()), inst);
     }
     const_disc_iterator end_disc(const instance& inst) const {
         return const_disc_iterator(*this, distance(_fields.begin(),
-                                   end_disc_fields()), inst);
+                                                   end_disc_fields()), inst);
     }
 
     disc_iterator begin_disc(instance& inst) const {

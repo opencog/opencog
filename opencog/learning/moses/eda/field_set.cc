@@ -26,6 +26,9 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/printContainer.h>
+
+using opencog::ostreamContainer;
 
 namespace eda
 {
@@ -121,30 +124,17 @@ void field_set::set_contin(instance& inst, size_t idx, contin_t target) const
         set_raw(inst, raw_idx + i, contin_spec::Stop);
 }
 
-//note to self: changed this on 4/23 - its confusing that stream and
-//stream_raw give different orderings among the various types of vars - what
-//was I thinking?
+//note to self (Moshe): changed this on 4/23 - its confusing that
+//stream and stream_raw give different orderings among the various
+//types of vars - what was I thinking?
 std::string field_set::stream(const instance& inst) const
 {
     std::stringstream ss;
     ss << "[";
-
-    if (begin_onto(inst) != end_onto(inst))
-        ss << "#";
-    copy(begin_onto(inst), end_onto(inst),
-         std::ostream_iterator<onto_t>(ss, "#"));
-
-    if (begin_contin(inst) != end_contin(inst))
-        ss << "|";
-    copy(begin_contin(inst), end_contin(inst),
-         std::ostream_iterator<contin_t>(ss, "|"));
-
-    if (begin_disc(inst) != end_disc(inst))
-        ss << " ";
-    copy(begin_disc(inst), end_disc(inst), std::ostream_iterator<disc_t>(ss, " "));
-
-    copy(begin_bits(inst), end_bits(inst), std::ostream_iterator<bool>(ss, ""));
-
+    ostreamContainer(ss, begin_onto(inst), end_onto(inst), "#", "#", "", false);
+    ostreamContainer(ss, begin_contin(inst), end_contin(inst), "|", "|", "", false);
+    ostreamContainer(ss, begin_disc(inst), end_disc(inst), " ", " ", "", false);
+    ostreamContainer(ss, begin_bits(inst), end_bits(inst), "", "", "", false);
     ss << "]";
     return ss.str();
 }
@@ -152,53 +142,67 @@ std::string field_set::stream(const instance& inst) const
 std::string field_set::stream_raw(const instance& inst) const
 {
     std::stringstream ss;
-    ss << "[";
-    copy(begin_raw(inst), end_raw(inst), std::ostream_iterator<disc_t>(ss, ""));
-    ss << "]";
+    ostreamContainer(ss, begin_raw(inst), end_raw(inst), "", "[", "]");
     return ss.str();
 }
 
 void field_set::build_spec(const spec& s, size_t n)
 {
-    if (const disc_spec* d = boost::get<disc_spec>(&s)) {
-        arity_t width = opencog::nbits_to_pack(d->arity);
-        size_t base = back_offset();
-        for (size_t idx = 0;idx < n;++idx)
-            _fields.push_back(field(width, (base + idx*width) / bits_per_packed_t,
-                                    (base + idx*width) % bits_per_packed_t));
-        _disc.insert(_disc.end(), n, *d);
-        if (width == 1)
-            _nbool += n;
-    } else if (const contin_spec* c = boost::get<contin_spec>(&s)) {
-        //depth must be 2^n
-        OC_ASSERT(c->depth == opencog::next_power_of_two(c->depth),
-                  "depth must be 2^n and it is %d", 
-                  c->depth); 
-        //all have arity of 3 (left, right, or stop) and hence are 2 wide
-        size_t base = back_offset(), width = 2;
-        dorepeat(n*c->depth) {
+    if (const onto_spec* os = boost::get<onto_spec>(&s)) {
+        build_onto_spec(*os, n);
+    } else if (const contin_spec* cs = boost::get<contin_spec>(&s)) {
+        build_contin_spec(*cs, n);
+    } else if (const disc_spec* ds = boost::get<disc_spec>(&s)) {
+        build_disc_spec(*ds, n);
+    } else {
+        OC_ASSERT(false, "This spec is NULL or unknown");
+    }
+}
+
+void field_set::build_disc_spec(const disc_spec& ds, size_t n)
+{
+    arity_t width = opencog::nbits_to_pack(ds.arity);
+    size_t base = back_offset();
+    for (size_t idx = 0;idx < n;++idx)
+        _fields.push_back(field(width,
+                                (base + idx*width) / bits_per_packed_t,
+                                (base + idx*width) % bits_per_packed_t));
+    _disc.insert(_disc.end(), n, ds);
+    if (width == 1)
+        _nbool += n;
+}
+
+void field_set::build_contin_spec(const contin_spec& cs, size_t n)
+{
+    //depth must be a power of 2
+    OC_ASSERT(cs.depth == opencog::next_power_of_two(cs.depth),
+              "depth must be a power of 2 and it is %d", 
+              cs.depth); 
+    //all have arity of 3 (left, right, or stop) and hence are 2 wide
+    size_t base = back_offset(), width = 2;
+    dorepeat(n*cs.depth) {
+        _fields.push_back(field(width, base / bits_per_packed_t,
+                                base % bits_per_packed_t));
+        base += width;
+    }
+    _contin.insert(_contin.end(), n, cs);
+}
+
+void field_set::build_onto_spec(const onto_spec& os, size_t n)
+{
+    size_t base = back_offset(), width = opencog::nbits_to_pack(os.branching);
+    size_t total_width = size_t((width * os.depth - 1) /
+                                bits_per_packed_t + 1) * bits_per_packed_t;
+        
+    dorepeat(n) {
+        dorepeat(os.depth) {
             _fields.push_back(field(width, base / bits_per_packed_t,
                                     base % bits_per_packed_t));
             base += width;
         }
-        _contin.insert(_contin.end(), n, *c);
-    } else {
-        const onto_spec* o = boost::get<onto_spec>(&s);
-        OC_ASSERT(o, "Null onto_spec pointer error.");
-        size_t base = back_offset(), width = opencog::nbits_to_pack(o->branching);
-        size_t total_width = size_t((width * o->depth - 1) /
-                                    bits_per_packed_t + 1) * bits_per_packed_t;
-        
-        dorepeat(n) {
-            dorepeat(o->depth) {
-                _fields.push_back(field(width, base / bits_per_packed_t,
-                                        base % bits_per_packed_t));
-                base += width;
-            }
-            base += total_width - (o->depth * width); //onto vars must pack evenly
-        }
-        _onto.insert(_onto.end(), n, *o);
+        base += total_width - (os.depth * width); //onto vars must pack evenly
     }
+    _onto.insert(_onto.end(), n, os);
 }
 
 } //~namespace eda

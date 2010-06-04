@@ -1,9 +1,11 @@
 #include <ctime>
 #include <cxxtest/TestSuite.h>
+#include <boost/math/special_functions/binomial.hpp>
 #include "opencog/learning/moses/moses/optimization.h"
 
 using namespace eda;
 using namespace moses;
+using boost::math::binomial_coefficient;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {
 public:
@@ -58,35 +60,19 @@ public:
         // the default center instance as exemplar is set to 0
         eda::instance center_inst(fs.packed_width()); 
         
-        get_sample_size_and_distance(deme, sample_size, max_distance, min_distance, center_inst);
+        get_sample_size_and_distance(deme, sample_size,
+                                     max_distance, min_distance, center_inst);
        
     }
-    
-  
 
-    int factorial(int n) {
-        int answer = 1, current = 1;  
-        while (current <= n) {
-            answer *= current;
-            current++;
-        }
-        return answer; 
+    size_t total_number_of_neighborhood(int distance,
+                                        size_t size, arity_t arity) {
+        return power(arity-1, distance) *
+            (int)binomial_coefficient<float>(size , distance);
     }
-
-    int permutation(int n, int m) {
-        return factorial(n)/(factorial(n-m)*factorial(m));
-    }
-
-
-    size_t total_number_of_neighborhood(int distance, size_t size,  arity_t arity) {
-        return  power(arity-1, distance)  * permutation (size , distance);
-        
-    }
-
 
     void test_sample_from_neighborhood() 
-    {
-        
+    {    
         int rand_seed = clock();
         int distance;
         size_t sample_size,fs_size;
@@ -314,5 +300,6 @@ public:
         eda::instance_set<moses::combo_tree_score>::iterator out = deme.begin();
         moses::vary_n_knobs(deme.fields(), center_inst, dist, 0, out);
         
+        //@todo: add TS_ASSERT
     }
 };
