@@ -78,18 +78,38 @@ namespace opencog {
                         const std::string& left = "",
                         const std::string& right = "")
     {
-        ostreamContainer(std::cout, from, to,
-                         left, delimiter, right);
+        ostreamContainer(std::cout, from, to, left, delimiter, right);
     }
-
     template<class Con>
     void printContainer(const Con& container,
                         const std::string& delimiter = " ",
                         const std::string& left = "", 
                         const std::string& right = "")
     {
-        ostreamContainer(std::cout, container,
-                         left, delimiter, right);
+        ostreamContainer(std::cout, container, left, delimiter, right);
+    }
+
+    /**
+     * like above but returns a string
+     */
+    template<class It>
+    std::string containerToStr(It from,
+                               It to,
+                               const std::string& delimiter = " ",
+                               const std::string& left = "",
+                               const std::string& right = "")
+    {
+        std::stringstream ss;
+        return ostreamContainer(ss, from, to, left, delimiter, right).str();
+    }
+    template<class Con>
+    std::string containerToStr(const Con& container,
+                               const std::string& delimiter = " ",
+                               const std::string& left = "", 
+                               const std::string& right = "")
+    {
+        std::stringstream ss;
+        return ostreamContainer(ss, container, left, delimiter, right).str();
     }
     
 } // ~namespace opencog
