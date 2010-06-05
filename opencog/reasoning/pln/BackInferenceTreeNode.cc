@@ -148,7 +148,8 @@ namespace opencog {
 namespace pln {
 
 //! This cache apparently gives a 30% speed up when active
-const bool USE_GENERATOR_CACHE = false; 
+//! @todo Currently it seems to break FetchDemo5_alt_test.
+const bool USE_GENERATOR_CACHE = false;
 
 const bool DIRECT_RESULTS_SPAWN = true;
 static const float MIN_CONFIDENCE_FOR_RULE_APPLICATION = 0.00001f;
@@ -1435,6 +1436,34 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
                             const VtreeProvider>(rule_args.end()),
                         Btr<bindingsT>(new bindingsT()))) {
 
+                    // Revise TVs.
+                    // NOTE: When this BITNode's result changes, it is necessary
+                    // for the parent node to "re-revise" the new TV into its
+                    // own, so it doesn't revise the obsolete TV with the new one.
+                    // Skipping that for now due to the complexity of keeping track of which
+                    // BITNode/inference path each TV came from.
+                    //! @todo After doing that, refactor this and integrate it into FC
+
+                    RevisionFormula formula;
+                    // Assumes that an Atom's TV is a CompositeTV already
+                    //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
+                    //CompositeTruthValue& all;
+                    pHandle ph = _v2h(next_result.value);
+                    Handle real = asw->fakeToRealHandle(ph).first;
+
+                    // Revise existing primary TV and newly found TV
+                    TruthValue* primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE).clone();
+                    TruthValue* newlyFoundTV = asw->getTV(ph).clone();
+
+                    TruthValue* both[2];
+                    both[0] = primaryTV;
+                    both[1] = newlyFoundTV;
+                    TruthValue* tmp = formula.simpleCompute(both, 2);
+
+                    atomspace().setTV(real, *tmp, NULL_VERSION_HANDLE);
+
+
+                    //! @todo use the primary TV higher up
                     NotifyParentOfResult(ruleApp);
 
                     root->hsource[_v2h(next_result.value)] = const_cast<BITNode*>(this);
