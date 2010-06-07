@@ -261,7 +261,10 @@ struct field_set {
                                  ((packed_t(1) << f.width) - 1) << f.minor_offset);
     }
 
+    // returns a reference of the onto at idx, idx is relative to
+    // onto_iterator
     const onto_t& get_onto(const instance& inst, size_t idx) const;
+    // returns the contin at idx, idx is relative to contin_iterator
     contin_t get_contin(const instance& inst, size_t idx) const;
     void set_contin(instance& inst, size_t idx, contin_t v) const;
 
@@ -346,28 +349,25 @@ struct field_set {
     }
     /**
      *  Get number of non-stop in the contin encode at the idx-th
-     *  contin. For instance, the inst is {LRSSRLLS} of two contin_spec
-     *  with the depth 4. So if the idx = 1, then it will return 3 since
-     *  there are one 'R' and 2 'L's before the 'S'(stop).if the idx = 0,
-     *  then, 2 will be returned.
+     *  contin. For instance, the inst is {LRSSRLLS} of two
+     *  contin_spec with the depth 4. So if the idx = 1, then it will
+     *  return 3 since there are one 'R' and 2 'L's before the
+     *  'S'(stop). if the idx = 0, then, 2 will be returned.
+     *
+     * @param inst the instance to look at
+     * @param idx the index of the contin to look at, idx is relative
+     *            to contin_iterator
      */
     size_t get_num_before_stop(const instance& inst, size_t idx) const
     {
         size_t raw_begin = contin_to_raw_idx(idx);
         size_t raw_end = raw_begin + _contin[idx].depth;
         size_t current = raw_begin;
-        disc_t temp_raw;
-        std::cout << " raw_begin = " << raw_begin << std::endl;
-        std::cout << " raw_end  = " << raw_end << std::endl;
         // get the number of raw code for contin before the first *Stop*
-        for (;current != raw_end;) {
-            temp_raw = get_raw(inst, current);
-            if (temp_raw ==  contin_spec::Left ||
-                temp_raw ==  contin_spec::Right) {
+        while(current != raw_end) {
+            if (get_raw(inst, current) != contin_spec::Stop)
                 ++current;
-            } else if (temp_raw == eda::field_set::contin_spec::Stop) {
-                break;
-            }
+            else break;
         }
         return current - raw_begin;
     }

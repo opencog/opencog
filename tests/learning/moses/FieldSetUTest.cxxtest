@@ -29,8 +29,7 @@ public:
         rv = fs.get_contin(inst, idx);
         TS_ASSERT_EQUALS(v, rv);
         
-        std::cout << "after test: "<< fs.stream(inst) << std::endl;
-        
+        std::cout << "after test: " << fs.stream(inst) << std::endl;        
     }
     
     void test_get_set_raw()
@@ -39,10 +38,10 @@ public:
         instance inst(fs.packed_width());
         opencog::MT19937RandGen rng(1);
         eda::randomize(fs, inst, rng);
-        
+
         size_t idx = 1;
         disc_t rv, v = field_set::contin_spec::Left;
-        
+
         fs.set_raw(inst, idx, v);
         rv = fs.get_raw(inst,idx);
         TS_ASSERT_EQUALS(v, rv);
@@ -54,15 +53,15 @@ public:
         field_set::contin_spec  cs2(0.0, 0.5, 0.5, 4);
         field_set::contin_spec  cs3(0.0, 0.25, 0.05,16);
         field_set::disc_spec    ds1(1);
-        
+
         std::vector<field_set::spec>  v;
         v.push_back(cs1);
         v.push_back(cs2);
         v.push_back(cs3);
         v.push_back(ds1);
-        
+
         opencog::MT19937RandGen rng(1);
-        
+
         field_set fs(v.begin(), v.end());
         instance inst(fs.packed_width());
         randomize(fs,inst,rng);

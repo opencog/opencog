@@ -152,11 +152,16 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
 
 /**
  * It generates the contin neighbor with the haming distance from 
- * the given instance.For examples, if the contin[it.idx()] is encoded
+ * the given instance. For examples, if the contin[it.idx()] is encoded
  * with depth = 4,like (L R S S), so the neighbors with distance = 1 of it
  * are (R R S S), (L L S S),(L R L S),(L S S S) and (L R R S). And we 
  * randomly chose one of them to return.
- * 
+ *
+ * @todo: in order to increase syntactic vs semantics correlation one
+ * may want to not consider contin neighbors which encodes to contin
+ * with too alrge difference from the given instance. So for example
+ * in the example given above we would ignore (R R S S).
+ *
  * @param fs   deme
  * @param inst the instance will be modified is contin encoded with distance
  *             equal to n 
@@ -171,7 +176,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
     cout << "idx = " << it.idx() <<endl;
-    
+
     size_t num = fs.get_num_before_stop(inst, it.idx());
     cout << "num of Left and Right before Stop:" << num << endl;
     // Here the lazy_random_selector make sure it will generate the different
@@ -180,7 +185,7 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
     // opencog::lazy_random_selector select(current - begin, rng);
     eda::disc_t temp_raw;
     //     opencog::lazy_random_selector select(num + 1, rng);
-    for( int i = 1; i <= n; i++) {
+    for(int i = 1; i <= n; i++) {
         // NOTICE: here we let the lazy_random_selector to change dynamiclly,
         //         but it will generate the same random ,so it needs to be fixed.
         opencog::lazy_random_selector select(num + 1, rng);
@@ -227,73 +232,68 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
 }
 
 /**
- * This procedure samples sample_size instances at distance n from the exemplar
- * (i.e., with n non-zero elements in the sequence)
+ * This procedure samples sample_size instances at distance n from the
+ * exemplar. onto fields are ignored for now
  *
- *@param fs   deme
- *@param n    distance
- *@param sample_size  number of instances to be generated
- *@param out  deme where to store the instances
- *@param rng   the random generator
- *@param center_inst the center instance as the exemplar by given
+ * @todo: contin is not taken into account yet.
+ *
+ * @param fs   deme
+ * @param n    distance
+ * @param sample_size  number of instances to be generated
+ * @param out  deme where to store the instances
+ * @param rng   the random generator
+ * @param center_inst the center instance as the exemplar by given
  */
-
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, int n,
-                                 int sample_size, Out out, opencog::RandGen& rng,
-                                 const eda::instance & center_inst )
+void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
+                              unsigned int sample_size, Out out,
+                              opencog::RandGen& rng,
+                              const eda::instance & center_inst )
 {
-    OC_ASSERT( n > 0 && sample_size > 0,
-               "Please Make sure the distance and sample_size should be great than 0");
-    OC_ASSERT( center_inst.size() == fs.packed_width(),
-                     "Please make sure that the center_inst have the same size with the field_set");
+    OC_ASSERT(center_inst.size() == fs.packed_width(),
+              "Please make sure that the center_inst"
+              " have the same size with the field_set");
 
     cout << "bits size: " << fs.n_bits() << endl;
     cout << "disc size: " << fs.n_disc() << endl;
     cout << "contin size:"<< fs.n_contin() << endl;
-   
-    int dim = fs.n_bits() + fs.n_disc() + fs.contin().size();
 
+    unsigned int dim = fs.n_bits() + fs.n_disc() + fs.contin().size();
 
     dorepeat(sample_size) {
 
         eda::instance new_inst(center_inst);
         opencog::lazy_random_selector select(dim, rng);
-       
-        for (int i = 1;i <= n;) {
+
+        for (unsigned int i = 1;i <= n;) {
             size_t r = select();
             eda::field_set::bit_iterator itb = fs.begin_bits(new_inst);
             eda::field_set::disc_iterator itd = fs.begin_disc(new_inst);
             eda::field_set::contin_iterator itc = fs.begin_contin(new_inst);
+            // modify bit
             if (r < fs.n_bits()) {
                 itb += r;
-                /* if (*itb == false) {
-                    *itb = true;
-                    i++;
-                    }*/
                 *itb = !(*itb);
                 i++;
-            } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc())) ) {
+            // modify disc
+            } else if (r >= fs.n_bits() && (r < (fs.n_bits() + fs.n_disc()))) {
                 itd += r - fs.n_bits();
-                /* if (*itd == 0) {
-                    *itd = 1 + rng.randint(itd.arity() - 1);
-                    i++;
-                    }*/
                 int temp = 1 + rng.randint(itd.arity() - 1);
                 if ( *itd == temp)
                     *itd = 0;
                 else
                     *itd = temp;
                 i++;
+            // modify contin
             } else if ( r >= (fs.n_bits() + fs.n_disc())) {
                 //cout << "i = " << i << "  r = " << r << endl;
                 itc += r - fs.n_bits() - fs.n_disc();
+                // @todo: now the distance is 1, choose the distance
+                // of contin possibly different than 1
                 generate_contin_neighbor(fs, new_inst, itc, 1, rng);                
                 i++;
-            }            
-                                    
+            }
         }
-
         *out++ = new_inst;
         // cout << "********** Added instance:" << fs.stream(new_inst) << endl;
     }
@@ -310,12 +310,10 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
  * @param out  deme (where to store the instances)
  */
 template<typename Out>
-void sample_from_neighborhood(const eda::field_set& fs, int n,
-                              int sample_size, Out out, opencog::RandGen& rng)
+void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
+                              unsigned int sample_size, Out out,
+                              opencog::RandGen& rng)
 {
-    OC_ASSERT( n > 0 && sample_size > 0,
-               "Please Make sure the distance and sample_size should be great than 0");
-
     eda::instance inst(fs.packed_width());
 
     // reset all fields (contin and onto fields are ignored)
@@ -343,14 +341,13 @@ void sample_from_neighborhood(const eda::field_set& fs, int n,
  * @param center_inst the center instance as exemplar 
  */
 template<typename Out>
-    void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out, 
-                                      const eda::instance& center_inst )
+void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out out, 
+                                  const eda::instance& center_inst )
 {
-    OC_ASSERT( n > 0, "the distance should be great than 0");
-    OC_ASSERT( center_inst.size() == fs.packed_width(),
-                     " the size of center_instance should be equal to the width of fs");
+    OC_ASSERT(center_inst.size() == fs.packed_width(),
+              " the size of center_instance should be equal to the width of fs");
 
-    eda::instance inst(center_inst);
+    eda::instance inst(center_inst); //@todo: why
 
     vary_n_knobs(fs, inst, n, 0, out);
 }
@@ -367,11 +364,8 @@ template<typename Out>
  * @param out  deme (where to store the instances)
  */
 template<typename Out>
-    void generate_all_in_neighborhood(const eda::field_set& fs, int n, Out out)
-                                     
+void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out out)
 {
-    OC_ASSERT( n > 0, "the distance should be great than 0");
-
     eda::instance inst(fs.packed_width());
 
     // reset all fields (contin and onto fields are ignored)
@@ -400,12 +394,10 @@ template<typename Out>
  *@param out             deme (where to store the instances)
  */
 template<typename Out>
-void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
-                  int starting_index, Out& out)
+void vary_n_knobs(const eda::field_set& fs, eda::instance& inst,
+                  unsigned int n,
+                  unsigned int starting_index, Out& out)
 {
-    if (n < 0)
-        return;
-
     if (n == 0) {
         eda::instance i(inst);
         *out++ = i;
@@ -480,7 +472,6 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
         vary_n_knobs(fs, inst, n, starting_index + 1, out);
         // recover after the recursive calls
         inst = current;
-        
     }    
 }
 
@@ -495,11 +486,9 @@ void vary_n_knobs(const eda::field_set& fs, eda::instance& inst, int n,
  * @param starting_index - position of a field to be varied
  */
 inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
-                                                  int n, int starting_index)
+                                                  unsigned int n,
+                                                  unsigned int starting_index)
 {
-    if (n < 0)
-        return 0;
-
     if (n == 0)
         return 1;
 
@@ -525,7 +514,6 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
             number_of_instances += (itd.arity() - 1) * count_n_changed_knobs_from_index(fs, n - 1, starting_index + 1);
         }
     }
-
     return number_of_instances;
 }
 
@@ -539,7 +527,8 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
  * @param fs  - deme
  * @param n   - distance
  */
-inline long long count_n_changed_knobs(const eda::field_set& fs, int n)
+inline long long count_n_changed_knobs(const eda::field_set& fs,
+                                       unsigned int n)
 {
     return count_n_changed_knobs_from_index(fs, n, 0);
 }
