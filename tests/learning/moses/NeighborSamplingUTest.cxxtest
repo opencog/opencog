@@ -2,7 +2,9 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/math/special_functions/binomial.hpp>
 #include <opencog/learning/moses/eda/field_set.h>
+#include <opencog/learning/moses/eda/instance_set.h>
 #include <opencog/learning/moses/moses/optimization.h>
+
 
 using namespace eda;
 using namespace moses;
@@ -13,9 +15,11 @@ public:
 
     /**
      * measure the hamming distance of any instance of the deme to
-     * center_inst, except center_inst of course
+     * center_inst, except center_inst of course. And count the number
+     * of instances that at distance > 0 from center_inst.
      * 
-     * @param sample_size write the number of such neighbors
+     * @param sample_size write the number of neighbors at 
+     *                    distance > 0 from center_inst
      * @param max_distance the distance maximum of a neighbor from
      *                     center_inst
      * @param min_distance the minimum distance of a neighbor from
@@ -89,7 +93,7 @@ public:
             fs_size = 20;
             arity = 5;
             field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::combo_tree_score>  deme(sample_size,fs);
+            eda::instance_set<moses::combo_tree_score>  deme(100, fs);
 
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
@@ -114,10 +118,10 @@ public:
             fs_size = 15;
             arity = 4;
             field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::combo_tree_score>  deme(sample_size,fs);
-                        
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
+            eda::instance_set<moses::combo_tree_score> 
+                deme(100, center_inst, fs);
           
             // cout<<fs.stream(center_inst)<<endl; 
 
@@ -147,10 +151,9 @@ public:
             fs_size = 2;
             
             field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
-            eda::instance_set<moses::combo_tree_score> deme(sample_size, fs);
-            
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
+            eda::instance_set<moses::combo_tree_score> deme(100, center_inst, fs);
             
             cout << "the initial randomize instance:" << endl
                  << fs.stream_raw(center_inst) << endl;
@@ -176,19 +179,20 @@ public:
      }
 
 
-    void DISABLEtest_generate_all_in_neighborhood() 
+    void test_generate_all_in_neighborhood() 
     {
         {
             int distance = 2;
             arity_t arity = 3;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
-            eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
-
             eda::instance center_inst(fs.packed_width());
             int rand_seed = clock();
             opencog::MT19937RandGen rng(rand_seed);
             eda::randomize(fs, center_inst,rng); 
+            eda::instance_set<moses::combo_tree_score> 
+                deme(1000, center_inst, fs);
+
             // cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
             moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin(), center_inst);
             size_t generated_size = 0;
