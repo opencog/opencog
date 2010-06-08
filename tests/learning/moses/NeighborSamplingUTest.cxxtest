@@ -16,10 +16,8 @@ public:
      * center_inst, except center_inst of course
      * 
      * @param sample_size write the number of such neighbors
-     * 
      * @param max_distance the distance maximum of a neighbor from
      *                     center_inst
-     *
      * @param min_distance the minimum distance of a neighbor from
      *                     center_inst
      */
@@ -40,8 +38,6 @@ public:
         min_distance = fs.packed_width() * bits_per_packed_t;
         foreach(const eda::instance& inst, deme) {             
             int distance = fs.hamming_distance(center_inst, inst);
-            // cout<<"instance:" << fs.stream(inst)<<endl;
-            //cout <<"\t distance:" << distance <<endl;
             if(distance > 0) {
                 if(distance > max_distance)
                     max_distance = distance;
@@ -180,7 +176,7 @@ public:
      }
 
 
-    void test_generate_all_in_neighborhood() 
+    void DISABLEtest_generate_all_in_neighborhood() 
     {
         {
             int distance = 2;
@@ -233,7 +229,7 @@ public:
         }
     }
     
-    void test_generate_contin_neighbor()
+    void DISABLEtest_generate_contin_neighbor()
     {
         int distance = 3;
         int depth = 8;
@@ -255,7 +251,7 @@ public:
         TS_ASSERT(distance == new_dist);        
     }
     
-    void test_vary_n_knobs()
+    void DISABLEtest_vary_n_knobs()
     {
         int distance = 2;
         arity_t arity = 8;
@@ -290,7 +286,7 @@ public:
         TS_ASSERT(generated_min_distance == distance);
     }
     
-    void test_vary_n_knobs_contin()
+    void DISABLEtest_vary_n_knobs_contin()
     {
         int dist  = 2;
         size_t size = 5;
