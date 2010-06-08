@@ -45,7 +45,7 @@ public:
             if(distance > 0) {
                 if(distance > max_distance)
                     max_distance = distance;
-                else if(distance < min_distance)
+                if(distance < min_distance)
                     min_distance = distance;
                 sample_size++;
             }
@@ -156,7 +156,7 @@ public:
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
             
-            cout << "the initial randomize instance:\n"
+            cout << "the initial randomize instance:" << endl
                  << fs.stream_raw(center_inst) << endl;
             
             moses::sample_from_neighborhood(deme.fields(),
@@ -175,12 +175,12 @@ public:
             
             TS_ASSERT(sample_size == sampled_size);
             TS_ASSERT(distance == sampled_max_distance);
-            // TODO TS_ASSERT(distance == sampled_min_distance);
+            TS_ASSERT(distance == sampled_min_distance);
         }
      }
 
 
-    void DISABLEtest_generate_all_in_neighborhood() 
+    void test_generate_all_in_neighborhood() 
     {
         {
             int distance = 2;
@@ -233,7 +233,7 @@ public:
         }
     }
     
-    void DISABLEtest_generate_contin_neighbor()
+    void test_generate_contin_neighbor()
     {
         int distance = 3;
         int depth = 8;
@@ -255,7 +255,7 @@ public:
         TS_ASSERT(distance == new_dist);        
     }
     
-    void DISABLEtest_vary_n_knobs()
+    void test_vary_n_knobs()
     {
         int distance = 2;
         arity_t arity = 8;
@@ -290,7 +290,7 @@ public:
         TS_ASSERT(generated_min_distance == distance);
     }
     
-    void DISABLEtest_vary_n_knobs_contin()
+    void test_vary_n_knobs_contin()
     {
         int dist  = 2;
         size_t size = 5;

@@ -123,9 +123,9 @@ struct field_set {
             return step_size / contin_t(size_t(1) << depth);
         }
 
-        static const disc_t Stop;
-        static const disc_t Left;
-        static const disc_t Right;
+        static const disc_t Stop;  // 0
+        static const disc_t Left;  // 1
+        static const disc_t Right; // 2
     };
     struct contin_stepper {
         contin_stepper(const contin_spec& c_)

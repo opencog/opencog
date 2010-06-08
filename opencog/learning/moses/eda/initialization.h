@@ -33,7 +33,9 @@ namespace eda
 
 using namespace opencog;
 
-//occam randomize a particular contin or onto field
+// occam randomize a particular contin or onto field. Note that it is
+// not strictly occam in the Solomonoff sense because the size is
+// uniformely distributed.
 void occam_randomize_contin(const field_set&, instance&,
                             field_set::const_contin_iterator,
                             RandGen& rng);
