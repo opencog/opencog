@@ -914,8 +914,11 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
             CrispTheoremRule::thms[thm_target].push_back(arg_tree);
         }
         // Used to convert ImplicationLink into a FalseLink,
-        // but this seems to be unnecessary. It was probably to ensure
+        // but this seems to be unnecessary. I used to think it
+        // was probably to ensure
         // it wasn't picked up by the non crisp version of the rule.
+        // Actually these ImplicationLinks aren't processed by ModusPonensRule
+        // anyway, and FalseLinks may not have meant anything anymore. --JaredW
     }
 }
 

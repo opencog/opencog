@@ -24,6 +24,13 @@
 
 namespace opencog { namespace pln {
 
+//! A^B^C... implies Z. May contain variables.
+//! This Rule was not originally documented, but what it does is exactly the
+//! same thing a normal predicate logic chainer does at every step. It appears
+//! that, for some reason, the PLN BC can't do this through a combination of
+//! other Rules that are already available.
+//! It appears to be a tacky temporary Rule, e.g. using FWVars in the input Atoms
+//! rather than ForAll+VariableNodes.
 class CrispTheoremRule : public Rule
 {
 public:

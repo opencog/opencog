@@ -123,10 +123,14 @@ Once I substitute A<tv2> for X, I get
             A<tv2>
         A<tv2>.
 
-But in order to find out tv3, I must also FindTV of
+But in order to find out tv3, the BIT must also find the TV of
         And
             F
             A<tv2>.
+
+StrictImplicationBreakdownRule (aka ModusPonens) solves this problem by
+requiring the antecedent (in this case the AndLink) as a separate argument,
+which will be separately proved by the BIT.
 
 NOTE 5: On Unification
 0. A "simple MP" = an atom A that is not a MP, but will implicitly be considered

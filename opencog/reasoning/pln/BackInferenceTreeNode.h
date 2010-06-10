@@ -290,6 +290,7 @@ protected:
     /// Targets of all atoms above me... obsolete but partially still functions
     vtreeset target_chain;
 
+    /// NOTE: this is no longer used (except for logging).
     /// The direct results stored in this node. This approach is somewhat
     /// clumsy but gets the job done. The direct results that do not need
     /// evaluation. Could be referred to as "generators". One example is

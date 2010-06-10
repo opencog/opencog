@@ -270,7 +270,8 @@ ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
     //  AddRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
     //  AddRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
 
-////
+//// Needs a fullInputFilter method to deal with the variable arity.
+    // Also not actually used in any of the demos.
     AddRule(new ANDPartitionRule(asw), 10.0f);
     AddRule(new NotEvaluatorRule(asw), 10.0f);
 
