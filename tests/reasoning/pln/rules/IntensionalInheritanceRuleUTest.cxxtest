@@ -230,7 +230,7 @@ public:
     }
 
     void testIntensionalInheritanceRule() {
-        IntensionalInheritanceRule iir(_asw);
+        IntensionalInheritanceRule iir(_asw, CONCEPT_NODE);
         const vector<Vertex> vv = list_of(_tiger_h)(_lion_h);
         BoundVertex bv = iir.compute(vv);
         pHandle res_h = _v2h(bv.GetValue());
