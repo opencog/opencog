@@ -1955,11 +1955,20 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
     if (h == PHANDLE_UNDEFINED || asw->isType(h))
         ss << "Error, trying to print trail for NULL / Virtual atom." << endl;
 
+    // Working around a trail _recording_ glitch
+    // (which only happens while there isn't a pHandle->Handle map)
+    if (level > 20) {
+        ss << repeatc(' ', level*3) << "(maximum recursion depth exceeded)\n";
+    	return ss.str();
+    }
+
     map<pHandle,Rule*> ::const_iterator rule = haxx::inferred_with.find(h);
     if (rule != haxx::inferred_with.end())
     {
         string name;
         
+        // Working around a trail _recording_ glitch
+        // (which only happened while there was a pHandle->Handle map)
         if (find(rp->begin(), rp->end(), rule->second) == rp->end()) {
             name = "<!!! INVALID RULE !!!>";
         } else {
@@ -1979,6 +1988,14 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
         foreach(pHandle arg_h, h_it->second)
         {
             ss << nmp.toString(arg_h, -10);
+            
+//            // Working around a trail _recording_ glitch
+//            // (which only happens while there isn't a pHandle->Handle map)
+////            std::cerr << arg_h << " " << h << endl;
+//            if(arg_h == h) {
+//                ss << repeatc(' ', level*3) << "same Atom (glitch)\n";
+//                continue;
+//            }
             ss << printTrail(arg_h, level+1);
         }
     }
