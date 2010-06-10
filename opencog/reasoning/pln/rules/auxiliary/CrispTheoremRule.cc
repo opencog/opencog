@@ -39,6 +39,8 @@ CrispTheoremRule::CrispTheoremRule(AtomSpaceWrapper *_asw)
 {
     // SHOULD NOT BE USED FOR FORWARD INFERENCE!
     // ... but why not? (Joel)
+    // Possibly it only works with an actual target, not a generic one --JaredW
+    // Note that this input filter is completely wrong.
     inputFilter.push_back(meta(
         new tree<Vertex>(mva(
             (pHandle)ATOM))));
