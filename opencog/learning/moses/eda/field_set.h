@@ -106,7 +106,7 @@ struct field_set {
         contin_spec(contin_t m, contin_t ss, contin_t ex, arity_t d)
                 : mean(m), step_size(ss), expansion(ex), depth(d) { }
         contin_t mean, step_size, expansion;
-        arity_t depth;
+        size_t depth;
         bool operator<(const contin_spec& rhs) const { //sort descending by depth
             return depth > rhs.depth;
         }
@@ -126,6 +126,19 @@ struct field_set {
         static const disc_t Stop;  // 0
         static const disc_t Left;  // 1
         static const disc_t Right; // 2
+        // this method returns Left if lr is Right
+        // and Right if lr is Left
+        // otherwise is raises an assert
+        static disc_t switchLR(disc_t lr) {
+            if(lr == Left)
+                return Right;
+            else if(lr == Right)
+                return Left;
+            else { 
+                OC_ASSERT(false);
+                return disc_t(); // to keep the compiler quiet
+            }
+        }
     };
     struct contin_stepper {
         contin_stepper(const contin_spec& c_)
@@ -196,8 +209,8 @@ struct field_set {
     field_set() { }
     //copy ctor
     field_set(const field_set& x)
-        : _fields(x._fields), _disc(x._disc), _contin(x._contin),
-          _onto(x._onto), _nbool(x._nbool) {
+        : _fields(x._fields), _onto(x._onto), _contin(x._contin),
+          _disc(x._disc), _nbool(x._nbool) {
         compute_starts();
     }
     //a single spec, n times
@@ -318,29 +331,48 @@ struct field_set {
         return _fields.end();
     }
 
+    // number of bit discs
     size_t n_bits() const {
         return _nbool;
     }
+    // number of non-onto, non-contin, non-bit discs
     size_t n_disc() const {
         return distance(_disc_start, _fields.end()) - _nbool;
     }
+    // number of discs allocated for contins
     size_t n_contin() const {
         return distance(_contin_start, _disc_start);
     }
+    // number of discs allocated for ontos
     size_t n_onto() const {
         return distance(_fields.begin(), _contin_start);
     }
 
     size_t contin_to_raw_idx(size_t idx) const {
-        // compute the start in _fields - could be faster..
+        // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = distance(_fields.begin(), _contin_start);
         for (vector<contin_spec>::const_iterator it = _contin.begin();
                 it != _contin.begin() + idx;++it)
             raw_idx += it->depth;
         return raw_idx;
     }
+    // it is the exact reverse of contin_to_raw_idx, if the idx does
+    // not correspond to any contin then an OC_ASSERT is raised.
+    size_t raw_to_contin_idx(size_t idx) const {
+        // @todo: compute at the start in _fields - could be faster..
+        size_t begin_contin_idx = n_onto();
+        size_t end_contin_idx = begin_contin_idx + n_contin();
+        OC_ASSERT(idx >= begin_contin_idx && idx < end_contin_idx);
+        int contin_raw_idx = idx - begin_contin_idx;
+        for(size_t i = 0; i < _contin.size(); ++i) {
+            contin_raw_idx -= _contin[i].depth;
+            if(contin_raw_idx < 0) return i;
+        }
+        OC_ASSERT(false, "Impossible case");
+        return size_t(); // to make the compiler quiet
+    }
     size_t onto_to_raw_idx(size_t idx) const {
-        // compute the start in _fields - could be faster..
+        // @todo: compute at the start in _fields - could be faster..
         size_t raw_idx = 0;
         for (vector<onto_spec>::const_iterator it = _onto.begin();
                 it != _onto.begin() + idx;++it)
@@ -382,10 +414,9 @@ protected:
     // begin_disc_fields - end_disc_fields
     // begin_bit_fields - end_bit_fields
     vector<field> _fields;
-
-    vector<disc_spec> _disc;
-    vector<contin_spec> _contin;
     vector<onto_spec> _onto;
+    vector<contin_spec> _contin;
+    vector<disc_spec> _disc; // included bits
     size_t _nbool; // the number of disc_spec that requires only 1 bit to pack
     field_iterator _contin_start, _disc_start;
 
@@ -420,9 +451,9 @@ protected:
 
     template<typename Self, typename Iterator>
     struct bit_iterator_base
-                : boost::random_access_iterator_helper<Self, bool> {
+        : boost::random_access_iterator_helper<Self, bool> {
         typedef std::ptrdiff_t Distance;
-
+        
         Self& operator++() {
             _mask <<= 1;
             if (!_mask) {
@@ -471,244 +502,251 @@ protected:
         bool operator==(const Self& rhs) const {
             return (_it == rhs._it && _mask == rhs._mask);
         }
-      protected:
-          bit_iterator_base(Iterator it, arity_t offset)
-                  : _it(it), _mask(packed_t(1) << offset) { }
-          bit_iterator_base(packed_t mask, Iterator it) : _it(it), _mask(mask) { }
-          bit_iterator_base() : _it(), _mask(0) { }
+    protected:
+        bit_iterator_base(Iterator it, arity_t offset)
+            : _it(it), _mask(packed_t(1) << offset) { }
+        bit_iterator_base(packed_t mask, Iterator it) : _it(it), _mask(mask) { }
+        bit_iterator_base() : _it(), _mask(0) { }
 
-          Iterator _it;
-          packed_t _mask;
-      };
+        Iterator _it;
+        packed_t _mask;
+    };
 
-      template<typename Iterator, typename Value>
-      struct iterator_base
-                  : boost::random_access_iterator_helper<Iterator, Value> {
-          typedef std::ptrdiff_t Distance;
+    template<typename Iterator, typename Value>
+    struct iterator_base
+        : boost::random_access_iterator_helper<Iterator, Value> {
+        typedef std::ptrdiff_t Distance;
 
-          struct reference {
-              reference(const Iterator* it, size_t idx) : _it(it), _idx(idx) { }
+        struct reference {
+            reference(const Iterator* it, size_t idx) : _it(it), _idx(idx) { }
 
-              operator Value() const {
-                  return do_get();
-              }
+            operator Value() const {
+                return do_get();
+            }
 
-              reference& operator=(Value x) {
-                  do_set(x); return *this;
-              }
-              reference& operator=(const reference& rhs) {
-                  do_set(rhs);
-                  return *this;
-              }
+            reference& operator=(Value x) {
+                do_set(x); return *this;
+            }
+            reference& operator=(const reference& rhs) {
+                do_set(rhs);
+                return *this;
+            }
 
-              reference& operator+=(Value x) {
-                  do_set(do_get() + x);   return *this;
-              }
-              reference& operator-=(Value x) {
-                  do_set(do_get() - x); return *this;
-              }
-              reference& operator*=(Value x) {
-                  do_set(do_get()*x);  return *this;
-              }
-              reference& operator/=(Value x) {
-                  do_set(do_get() / x); return *this;
-              }
-          protected:
-              const Iterator* _it;
-              size_t _idx;
+            reference& operator+=(Value x) {
+                do_set(do_get() + x);   return *this;
+            }
+            reference& operator-=(Value x) {
+                do_set(do_get() - x); return *this;
+            }
+            reference& operator*=(Value x) {
+                do_set(do_get()*x);  return *this;
+            }
+            reference& operator/=(Value x) {
+                do_set(do_get() / x); return *this;
+            }
+        protected:
+            const Iterator* _it;
+            size_t _idx;
 
-              Value do_get() const;
-              void do_set(Value x);
-          };
+            Value do_get() const;
+            void do_set(Value x);
+        };
 
-          Iterator& operator++() {
-              ++_idx;
-              return (*((Iterator*)this));
-          }
-          Iterator& operator--() {
-              --_idx;
-              return (*((Iterator*)this));
-          }
-          Iterator& operator+=(Distance n) {
-              _idx += n;
-              return (*((Iterator*)this));
-          }
-          Iterator& operator-=(Distance n) {
-              _idx -= n;
-              return (*((Iterator*)this));
-          }
-          bool operator<(const Iterator& x) const {
-              return (_idx < x._idx);
-          }
-          friend Distance operator-(const Iterator& x, const Iterator& y) {
-              return (x._idx -y._idx);
-          }
+        Iterator& operator++() {
+            ++_idx;
+            return (*((Iterator*)this));
+        }
+        Iterator& operator--() {
+            --_idx;
+            return (*((Iterator*)this));
+        }
+        Iterator& operator+=(Distance n) {
+            _idx += n;
+            return (*((Iterator*)this));
+        }
+        Iterator& operator-=(Distance n) {
+            _idx -= n;
+            return (*((Iterator*)this));
+        }
+        bool operator<(const Iterator& x) const {
+            return (_idx < x._idx);
+        }
+        friend Distance operator-(const Iterator& x, const Iterator& y) {
+            return (x._idx -y._idx);
+        }
 
-          bool operator==(const Iterator& rhs) const {
-              return (_idx == rhs._idx);
-          }
+        bool operator==(const Iterator& rhs) const {
+            return (_idx == rhs._idx);
+        }
 
-          int idx() const {
-              return _idx;
-          }
-      protected:
-          iterator_base(const field_set& fs, size_t idx) : _fs(&fs), _idx(idx) { }
-          iterator_base() : _fs(NULL), _idx(0) { }
+        int idx() const {
+            return _idx;
+        }
+    protected:
+        iterator_base(const field_set& fs, size_t idx) : _fs(&fs), _idx(idx) { }
+        iterator_base() : _fs(NULL), _idx(0) { }
 
-          const field_set* _fs;
-          size_t _idx;
-      };
-  public:
-      struct bit_iterator
-                  : public bit_iterator_base<bit_iterator, instance::iterator> {
-          friend struct field_set;
+        const field_set* _fs;
+        size_t _idx;
+    };
+public:
+    struct bit_iterator
+        : public bit_iterator_base<bit_iterator, instance::iterator> {
+        friend struct field_set;
 
-          struct reference {
-              reference(instance::iterator it, packed_t mask)
-                  : _it(it), _mask(mask) {}
+        struct reference {
+            reference(instance::iterator it, packed_t mask)
+                : _it(it), _mask(mask) {}
 
-              operator bool() const {
-                  return (*_it & _mask) != 0;
-              }
+            operator bool() const {
+                return (*_it & _mask) != 0;
+            }
 
-              bool operator~() const {
-                  return (*_it & _mask) == 0;
-              }
-              reference& flip() {
-                  do_flip(); return *this;
-              }
+            bool operator~() const {
+                return (*_it & _mask) == 0;
+            }
+            reference& flip() {
+                do_flip(); return *this;
+            }
 
-              reference& operator=(bool x) {
-                  do_assign(x); return *this;
-              }
-              reference& operator=(const reference& rhs) {
-                  do_assign(rhs);
-                  return *this;
-              }
+            reference& operator=(bool x) {
+                do_assign(x); return *this;
+            }
+            reference& operator=(const reference& rhs) {
+                do_assign(rhs);
+                return *this;
+            }
 
-              reference& operator|=(bool x) {
-                  if  (x) do_set();   return *this;
-              }
-              reference& operator&=(bool x) {
-                  if (!x) do_reset(); return *this;
-              }
-              reference& operator^=(bool x) {
-                  if  (x) do_flip();  return *this;
-              }
-              reference& operator-=(bool x) {
-                  if  (x) do_reset(); return *this;
-              }
-          protected:
-              instance::iterator _it;
-              packed_t _mask;
+            reference& operator|=(bool x) {
+                if  (x) do_set();   return *this;
+            }
+            reference& operator&=(bool x) {
+                if (!x) do_reset(); return *this;
+            }
+            reference& operator^=(bool x) {
+                if  (x) do_flip();  return *this;
+            }
+            reference& operator-=(bool x) {
+                if  (x) do_reset(); return *this;
+            }
+        protected:
+            instance::iterator _it;
+            packed_t _mask;
 
-              void do_set() {
-                  *_it |= _mask;
-              }
-              void do_reset() {
-                  *_it &= ~_mask;
-              }
-              void do_flip() {
-                  *_it ^= _mask;
-              }
-              void do_assign(bool x) {
-                  x ? do_set() : do_reset();
-              }
-          };
+            void do_set() {
+                *_it |= _mask;
+            }
+            void do_reset() {
+                *_it &= ~_mask;
+            }
+            void do_flip() {
+                *_it ^= _mask;
+            }
+            void do_assign(bool x) {
+                x ? do_set() : do_reset();
+            }
+        };
 
-          reference operator*() const {
-              return reference(_it, _mask);
-          }
-          friend class const_bit_iterator;
+        reference operator*() const {
+            return reference(_it, _mask);
+        }
+        friend class const_bit_iterator;
 
-          bit_iterator() { }
-      protected:
-          bit_iterator(instance::iterator it, arity_t offset)
-              : bit_iterator_base<bit_iterator, instance::iterator>(it, offset)
-          { }
-      };
+        bit_iterator() { }
+    protected:
+        bit_iterator(instance::iterator it, arity_t offset)
+            : bit_iterator_base<bit_iterator, instance::iterator>(it, offset)
+        { }
+    };
 
-      struct const_bit_iterator
-                  : public bit_iterator_base<const_bit_iterator, instance::const_iterator> {
-          friend class field_set;
-          bool operator*() const {
-              return (*_it & _mask) != 0;
-          }
-          const_bit_iterator(const bit_iterator& bi)
-                  : bit_iterator_base < const_bit_iterator,
-                  instance::const_iterator > (bi._mask, bi._it) { }
+    struct const_bit_iterator
+        : public bit_iterator_base<const_bit_iterator, instance::const_iterator> {
+        friend class field_set;
+        bool operator*() const {
+            return (*_it & _mask) != 0;
+        }
+        const_bit_iterator(const bit_iterator& bi)
+            : bit_iterator_base < const_bit_iterator,
+                                  instance::const_iterator > (bi._mask, bi._it) { }
 
-          const_bit_iterator() { }
-      protected:
-          const_bit_iterator(instance::const_iterator it, arity_t offset)
-                  : bit_iterator_base < const_bit_iterator,
-                  instance::const_iterator > (it, offset) { }
-      };
+        const_bit_iterator() { }
+    protected:
+        const_bit_iterator(instance::const_iterator it, arity_t offset)
+            : bit_iterator_base < const_bit_iterator,
+                                  instance::const_iterator > (it, offset) { }
+    };
 
-      struct disc_iterator : public iterator_base<disc_iterator, disc_t> {
-          friend struct field_set;
-          friend struct reference;
+    struct disc_iterator : public iterator_base<disc_iterator, disc_t> {
+        friend struct field_set;
+        friend struct reference;
 
-          reference operator*() const {
-              return reference(this, _idx);
-          }
-          friend class const_disc_iterator;
+        reference operator*() const {
+            return reference(this, _idx);
+        }
+        friend class const_disc_iterator;
 
-          disc_iterator() : _inst(NULL) { }
+        disc_iterator() : _inst(NULL) { }
 
-          //for convenience, but will only work over disc & bool
-          arity_t arity() const {
-              return
-                  _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
-                  _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
-                  _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
-          }
-          void randomize(opencog::RandGen& rng) {
-              _fs->set_raw(*_inst, _idx, rng.randint(arity()));
-          }
-      protected:
-          disc_iterator(const field_set& fs, size_t idx, instance& inst)
-                  : iterator_base<disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
-          instance* _inst;
-      };
+        //for convenience, but will only work over disc & bool
+        arity_t arity() const {
+            return
+                _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
+                _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
+                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
+        }
+        void randomize(opencog::RandGen& rng) {
+            _fs->set_raw(*_inst, _idx, rng.randint(arity()));
+        }
+    protected:
+        disc_iterator(const field_set& fs, size_t idx, instance& inst)
+            : iterator_base<disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
+        instance* _inst;
+    };
 
-      struct const_disc_iterator
-                  : public iterator_base<const_disc_iterator, disc_t> {
-          friend class field_set;
-          disc_t operator*() const {
-              return _fs->get_raw(*_inst, _idx);
-          }
-          const_disc_iterator(const disc_iterator& bi) :
-                  iterator_base<const_disc_iterator, disc_t>(*bi._fs, bi._idx),
-                  _inst(bi._inst) { }
-          const_disc_iterator() : _inst(NULL) { }
-      protected:
-          const_disc_iterator(const field_set& fs, size_t idx, const instance& inst)
-                  : iterator_base<const_disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
-          const instance* _inst;
-      };
+    struct const_disc_iterator
+        : public iterator_base<const_disc_iterator, disc_t> {
+        friend class field_set;
+        disc_t operator*() const {
+            return _fs->get_raw(*_inst, _idx);
+        }
+        const_disc_iterator(const disc_iterator& bi) :
+            iterator_base<const_disc_iterator, disc_t>(*bi._fs, bi._idx),
+            _inst(bi._inst) { }
+        const_disc_iterator() : _inst(NULL) { }
+        //for convenience, but will only work over disc & bool
+        arity_t arity() const {
+            return
+                _idx < _fs->onto().size() ? _fs->onto()[_idx].branching :
+                _idx < _fs->onto().size() + _fs->contin().size() ? 3 :
+                _fs->disc_and_bits()[_idx-_fs->onto().size()-_fs->contin().size()].arity;
+        }
+    protected:
+        const_disc_iterator(const field_set& fs, size_t idx, const instance& inst)
+            : iterator_base<const_disc_iterator, disc_t>(fs, idx), _inst(&inst) { }
+        const instance* _inst;
+    };
 
-      struct contin_iterator : public iterator_base<contin_iterator, contin_t> {
-          friend struct field_set;
-          friend struct reference;
+    struct contin_iterator : public iterator_base<contin_iterator, contin_t> {
+        friend struct field_set;
+        friend struct reference;
 
-          reference operator*() const {
-              return reference(this, _idx);
-          }
-          friend class const_contin_iterator;
+        reference operator*() const {
+            return reference(this, _idx);
+        }
+        friend class const_contin_iterator;
 
-          contin_iterator() : _inst(NULL) { }
-      protected:
-          contin_iterator(const field_set& fs, size_t idx, instance& inst)
-              : iterator_base<contin_iterator, contin_t>(fs, idx), _inst(&inst)
-          { }
-          instance* _inst;
-      };
+        contin_iterator() : _inst(NULL) { }
+    protected:
+        contin_iterator(const field_set& fs, size_t idx, instance& inst)
+            : iterator_base<contin_iterator, contin_t>(fs, idx), _inst(&inst)
+        { }
+        instance* _inst;
+    };
 
 
 
     struct const_contin_iterator
-                : public iterator_base<const_contin_iterator, contin_t> {
+        : public iterator_base<const_contin_iterator, contin_t> {
         friend class field_set;
         contin_t operator*() const {
             return _fs->get_contin(*_inst, _idx);
@@ -735,8 +773,8 @@ protected:
     protected:
         const_onto_iterator(const field_set& fs, size_t idx,
                             const instance& inst)
-                : iterator_base<const_onto_iterator, onto_t>(fs, idx),
-                  _inst(&inst) { }
+            : iterator_base<const_onto_iterator, onto_t>(fs, idx),
+              _inst(&inst) { }
         const instance* _inst;
     };
 
@@ -809,21 +847,6 @@ protected:
     disc_iterator end_raw(instance& inst) const {
         return disc_iterator(*this, _fields.size(), inst);
     }
-
-    /**
-    const_disc_iterator begin_raw_onto(const instance& inst) {
-      return const_disc_iterator(*this,0,inst);
-    }
-    const_disc_iterator end_raw_onto(const instance& inst) {
-      return const_disc_iterator(*this,_fields.size(),inst);
-    }
-    disc_iterator begin_raw(instance& inst) const {
-      return disc_iterator(*this,0,inst);
-    }
-    disc_iterator end_raw(instance& inst) const {
-      return disc_iterator(*this,_fields.size(),inst);
-    }
-    **/
 };
 
 template<>

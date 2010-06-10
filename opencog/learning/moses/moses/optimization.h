@@ -175,74 +175,53 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
                                      int n, opencog::RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
-    cout << "idx = " << it.idx() <<endl;
-
     size_t num = fs.get_num_before_stop(inst, it.idx());
-    cout << "num of Left and Right before Stop:" << num << endl;
-    // Here the lazy_random_selector make sure it will generate the different
-    // random number , so we could change the distance one at one time. We need
-    // do it n times.
-    // opencog::lazy_random_selector select(current - begin, rng);
-    eda::disc_t temp_raw;
-    //     opencog::lazy_random_selector select(num + 1, rng);
-    for(int i = 1; i <= n; i++) {
-        // NOTICE: here we let the lazy_random_selector to change dynamiclly,
-        //         but it will generate the same random ,so it needs to be fixed.
-        opencog::lazy_random_selector select(num + 1, rng);
+    size_t depth = fs.contin()[it.idx()].depth;
+    // a random_selector is used not to pick up twice the same idx.
+    // The max idx coresponds either to the first Stop, or, in case
+    // there is no Stop, the last disc (i.e. either Left or Right)
+    opencog::lazy_random_selector select(std::min(num + 1, depth), rng);
+
+    dorepeat(n) {
         size_t r = select();
-        cout << "num = " << num << " r= " << r <<endl;
-        temp_raw = fs.get_raw(inst,begin + r);
-        //FIXME: if the temp_raw is the last non-stop, we could change it to
-        //       *Stop*. But  when the distance greater than 1, maybe it will 
-        //       change the first time and it will change back the second time.
-        //       but the distance won't change. Now,it works for the distance = 1.
-
-
-        if (temp_raw == eda::field_set::contin_spec::Left ) {
-            if( r + 1 == num) {
-                fs.set_raw(inst, begin + r, rng.randbool() ?
-                           eda::field_set::contin_spec::Right :
-                           eda::field_set::contin_spec::Stop);
-                if(fs.get_raw(inst, begin + r) == 
-                   eda::field_set::contin_spec::Stop)
-                    num --;
-            } 
-            else             
-                fs.set_raw(inst, begin + r , eda::field_set::contin_spec::Right);
-        } else if (temp_raw ==  eda::field_set::contin_spec::Right ) {
-            if( r + 1 == num) {
-                fs.set_raw(inst, begin + r, rng.randbool() ?
-                           eda::field_set::contin_spec::Left :
-                           eda::field_set::contin_spec::Stop);
-                if(fs.get_raw(inst, begin + r) == 
-                   eda::field_set::contin_spec::Stop)
-                    num --;
-            } 
-            else
-                fs.set_raw(inst, begin + r, eda::field_set::contin_spec::Left);
-        } else {
-            //FIXME: if it is the last 0 ,shall we change it?
-            fs.set_raw(inst, begin + r, rng.randbool() ?
-                       eda::field_set::contin_spec::Left:
-                       eda::field_set::contin_spec::Right);
-            num ++;
+        eda::field_set::disc_iterator itr = fs.begin_raw(inst);        
+        itr += begin + r;
+        // case inst at itr is Stop
+        if(*itr == eda::field_set::contin_spec::Stop) {
+            *itr = rng.randbool() ?
+                eda::field_set::contin_spec::Left:
+                eda::field_set::contin_spec::Right;
+            num++;
+            select.reset_range(std::min(num + 1, depth));
+        } 
+        // case inst at itr is Left or Right
+        else {
+            // whether r corresponds to the last Left or Right disc
+            if(r + 1 == num) {
+                if(rng.randbool()) { // Left<->Right
+                    *itr = eda::field_set::contin_spec::switchLR(*itr);
+                } else { // Stop
+                    *itr = eda::field_set::contin_spec::Stop;
+                    num--;
+                    select.reset_range(num);
+                }
+            } else *itr = eda::field_set::contin_spec::switchLR(*itr);
         }
-        cout << "The " << i << " time  generate :" << fs.stream_raw(inst) << endl;
     }
 }
 
 /**
- * This procedure samples sample_size instances at distance n from the
- * exemplar. onto fields are ignored for now
+ * This procedure samples sample_size instances at distance n from an
+ * instance considered as center (for isntance the exemplar). 
  *
- * @todo: contin is not taken into account yet.
+ * @todo: onto fields are ignored for now
  *
- * @param fs   deme
- * @param n    distance
- * @param sample_size  number of instances to be generated
- * @param out  deme where to store the instances
- * @param rng   the random generator
- * @param center_inst the center instance as the exemplar by given
+ * @param fs            deme
+ * @param n             distance
+ * @param sample_size   number of instances to be generated
+ * @param out           deme where to store the instances
+ * @param rng           the random generator
+ * @param center_inst   the center instance
  */
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
@@ -304,10 +283,10 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
  * This procedure samples sample_size instances at distance n from the exemplar
  * (i.e., with n non-zero elements in the sequence)
  *
- * @param fs   deme
- * @param n    distance
+ * @param fs            deme
+ * @param n             distance
  * @param sample_size   number of instances to be generated
- * @param out  deme (where to store the instances)
+ * @param out           deme iterator (where to store the instances)
  */
 template<typename Out>
 void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
@@ -330,26 +309,23 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
 
 
 /**
- * Generates instances at distance n from the exemplar
- * (i.e., with n elements changed from 0 from the exemplar)
+ * Generates instances at distance n from an instance considered as
+ * center (often the exemplar but not necessarily).
  * It calls a recursive function vary_n_knobs which varies
  * instance fields one by one (in all possible ways)
  *
- * @param fs   deme
- * @param n    distance
- * @param out  deme (where to store the instances)
- * @param center_inst the center instance as exemplar 
+ * @param fs            deme
+ * @param n             distance
+ * @param out           deme (where to store the instances)
+ * @param center_inst   the center instance 
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out out, 
-                                  const eda::instance& center_inst )
+void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n,
+                                  Out out, const eda::instance& center_inst )
 {
     OC_ASSERT(center_inst.size() == fs.packed_width(),
-              " the size of center_instance should be equal to the width of fs");
-
-    eda::instance inst(center_inst); //@todo: why
-
-    vary_n_knobs(fs, inst, n, 0, out);
+              "the size of center_instance should be equal to the width of fs");
+    vary_n_knobs(fs, center_inst, n, 0, out);
 }
 
 
@@ -364,7 +340,8 @@ void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out 
  * @param out  deme (where to store the instances)
  */
 template<typename Out>
-void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out out)
+void generate_all_in_neighborhood(const eda::field_set& fs,
+                                  unsigned int n, Out out)
 {
     eda::instance inst(fs.packed_width());
 
@@ -380,160 +357,257 @@ void generate_all_in_neighborhood(const eda::field_set& fs, unsigned int n, Out 
     generate_all_in_neighborhood(fs, n, out, inst);
 }
 
-
 /**
- * Used by the function generate_all_in_neighborhood (only)
- * for generating instances at distance n from the exemplar. It varies
- * all possible n knobs in all possible ways. It varies
- * one instance field (at the changing position starting_index and
- * calls itself for the remaining fields).
+ * Used by the function generate_all_in_neighborhood (only) for
+ * generating instances at distance n from a given instance considered
+ * as center. It varies all possible n knobs in all possible ways. It
+ * varies one instance field (at the changing position starting_index
+ * and calls itself for the remaining fields).
  *
- *@param fs              deme
- *@param n               distance
- *@param starting_index  position of a field to be varied
- *@param out             deme (where to store the instances)
+ * @todo: onto is ignored for the moment.
+ *
+ * @param fs              deme
+ * @param inst            exemplar
+ * @param n               distance
+ * @param starting_index  position of a field to be varied
+ * @param out             deme iterator (where to store the instances)
  */
 template<typename Out>
-void vary_n_knobs(const eda::field_set& fs, eda::instance& inst,
+void vary_n_knobs(const eda::field_set& fs,
+                  const eda::instance& inst,
                   unsigned int n,
-                  unsigned int starting_index, Out& out)
+                  unsigned int starting_index,
+                  Out& out)
 {
-    if (n == 0) {
-        eda::instance i(inst);
-        *out++ = i;
+    if(n == 0) {
+        *out++ = inst;
         return;
     }
 
-    eda::field_set::bit_iterator itb = fs.begin_bits(inst);
-    itb += starting_index;
+    eda::instance tmp_inst = inst;
+    unsigned int begin_contin_idx, begin_disc_idx, begin_bit_idx;
 
-    eda::instance current;
-
-    if (fs.end_bits(inst) - itb > 0)  {
-        // save the current version
-        current = inst;
-        // *itb = false; //comment it since now it will use the given 
-                         //center instance, but not the default false
-        // recursive call, moved for one position
-        vary_n_knobs(fs, inst, n, starting_index + 1, out);
-        // recover after the recursive calls
-        inst = current;
-
-        // save the current version
-        current = inst;
-        //*itb = true;
-        *itb = !(*itb);   // it should changed to the opposite value
-        // recursive call, moved for one position
-        vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
-        // recover after the recursive calls
-        inst = current;
-    } else  {
-        eda::field_set::disc_iterator itd = fs.begin_disc(inst);
-        itd += starting_index - fs.n_bits();
-
-        if (fs.end_disc(inst) - itd > 0)  {
-            // save the current version
-            current = inst;
-            // *itd = 0;     // commented by xiaohui for the given center instance
-                             // but not the default instance value equals to 0
-            //cout << "move forword:\n" << "\t n=" << n <<"\tstarting_index = "
-            //   << starting_index << endl;
-            
+    // ontos
+    if(starting_index < (begin_contin_idx = fs.n_onto())) {
+        // @todo: handle onto
+        vary_n_knobs(fs, tmp_inst, n, starting_index + begin_contin_idx, out);        
+    }
+    // contins
+    else if(starting_index < (begin_disc_idx = begin_contin_idx + fs.n_contin())) {
+        // modify the contin disc pointed by itr and recursive call
+        eda::field_set::contin_iterator itc = fs.begin_contin(tmp_inst);
+        size_t contin_idx = fs.raw_to_contin_idx(starting_index);
+        itc += contin_idx;
+        size_t depth = fs.contin()[itc.idx()].depth;
+        size_t num = fs.get_num_before_stop(tmp_inst, contin_idx);
+        eda::field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
+        itr += starting_index;
+        size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
+        // case tmp_inst at itr is Stop
+        if(*itr == eda::field_set::contin_spec::Stop) {
+            // Assumption [1]: within the same contin, it is the first Stop
+            // recursive call, moved to the next contin (or disc if no more contin)
+            vary_n_knobs(fs, tmp_inst, n,
+                         starting_index + depth - relative_raw_idx, // to fulfill Assumption [1]
+                         out);
+            // modify with Left or Right
+            *itr = eda::field_set::contin_spec::Left;
+            vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out);
+            *itr = eda::field_set::contin_spec::Right;
+            vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out);
+        } 
+        // case tmp_inst at itr is Left or Right
+        else {
             // recursive call, moved for one position
-            vary_n_knobs(fs, inst, n, starting_index + 1, out);
-            // recover after the recursive calls
-            inst = current;
-
-            for (unsigned int i = 1;i <= itd.arity() - 1;i++)  {
-                // save the current version
-                current = inst;
-                // vary all legal values, the neighborhood should 
-                // not equals to itself, so if it is same, set it to 0.
-                if (static_cast<unsigned int>(*itd) == i)
-                    *itd = 0;
-                else
-                    *itd = i;
-                //cout << "change value:\n" << "\t n=" << n <<"\tstarting_index = "
-                //<< starting_index << endl;
-                //cout << "\t\tvalue:" <<fs.stream(inst)<< endl;
-                vary_n_knobs(fs, inst, n - 1, starting_index + 1, out);
-                // recover after the recursive calls
-                inst = current;
+            vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out);
+            // Left<->Right
+            *itr = eda::field_set::contin_spec::switchLR(*itr);
+            vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out);
+            // if the next Stop is not further from itr than the distance n
+            // then turn the remaining discs to Stop
+            unsigned int remRLs = num - relative_raw_idx; // remaining non-Stop
+                                                          // discs including
+                                                          // the current one
+            if(remRLs <= n) {
+                for(; relative_raw_idx < num; num--, itr++) {
+                    // Stop
+                    *itr = eda::field_set::contin_spec::Stop;
+                }
+                vary_n_knobs(fs, tmp_inst, n - remRLs,
+                             starting_index + depth - relative_raw_idx, // to fulfill Assumption [1]
+                             out);
             }
         }
     }
-
-    eda::field_set::contin_iterator itc = fs.begin_contin(inst);
-    itc += starting_index;
-    if (fs.end_contin(inst) - itc > 0) {
-        //save the current version
-        current = inst;
+    // discs
+    else if(starting_index < (begin_bit_idx = begin_disc_idx + fs.n_disc())) {
+        eda::field_set::disc_iterator itd = fs.begin_disc(tmp_inst);
+        itd += starting_index - begin_disc_idx;
+        eda::disc_t tmp_val = *itd;
         // recursive call, moved for one position
-        vary_n_knobs(fs, inst, n, starting_index + 1, out);
-        // recover after the recursive calls
-        inst = current;
-    }    
+        vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out);
+        // modify the disc and recursive call, moved for one position
+        for(unsigned int i = 1; i <= itd.arity() - 1; i++) {
+            // vary all legal values, the neighborhood should 
+            // not equals to itself, so if it is same, set it to 0.
+            if(static_cast<unsigned int>(tmp_val) == i)
+                *itd = 0;
+            else
+                *itd = i;
+            vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out);
+        }
+    }
+    // bits
+    else if(starting_index < begin_bit_idx + fs.n_bits()) {
+        eda::field_set::bit_iterator itb = fs.begin_bits(tmp_inst);
+        itb += starting_index - begin_bit_idx;
+        // recursive call, moved for one position
+        vary_n_knobs(fs, tmp_inst, n, starting_index + 1, out);
+        // modify tmp_inst at itb, changed to the opposite value
+        *itb = !(*itb);
+        // recursive call, moved for one position
+        vary_n_knobs(fs, tmp_inst, n - 1, starting_index + 1, out);
+    }
 }
 
 
 /**
- * Used by the function count_n_changed_knobs (only)
- * for counting instances at distance n from the exemplar. It counts
- * all possible n knobs changed in all possible ways.
+ * Used by the function count_n_changed_knobs (only) for counting
+ * instances at distance n from an instance considered as center
+ * (inst). It counts all possible n knobs changed in all possible
+ * ways.
  * 
- * @param fs             - deme
- * @param n              - distance
- * @param starting_index - position of a field to be varied
+ * @param fs              deme
+ * @param inst            instance to consider the distance from
+ * @param n               distance
+ * @param starting_index  position of a field to be varied
  */
 inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
+                                                  const eda::instance& inst,
                                                   unsigned int n,
                                                   unsigned int starting_index)
 {
-    if (n == 0)
+    if(n == 0)
         return 1;
 
-    eda::instance inst(fs.packed_width());
+    // unsigned int begin_contin_idx, begin_disc_idx, begin_bit_idx;
     long long number_of_instances = 0;
 
-    eda::field_set::bit_iterator itb = fs.begin_bits(inst);
-    itb += starting_index;
+    unsigned int begin_contin_idx = fs.n_onto();
+    unsigned int begin_disc_idx = begin_contin_idx + fs.n_contin();
+    unsigned int begin_bit_idx = begin_disc_idx + fs.n_disc();
 
-    if (fs.end_bits(inst) - itb > 0)  {
-        // recursive call, moved for one position
-        number_of_instances += count_n_changed_knobs_from_index(fs, n, starting_index + 1);
-        // recursive call, moved for one position
-        number_of_instances += count_n_changed_knobs_from_index(fs, n - 1, starting_index + 1);
-    } else  {
-        eda::field_set::disc_iterator itd = fs.begin_disc(inst);
-        itd += starting_index - fs.n_bits();
-
-        if (fs.end_disc(inst) - itd > 0)  {
+    // ontos
+    if(starting_index < begin_contin_idx) {
+        // @todo: handle onto
+        number_of_instances += 
+            count_n_changed_knobs_from_index(fs, inst, n,
+                                             starting_index + begin_contin_idx);
+    }
+    // contins
+    else if(starting_index < begin_disc_idx) {
+        // modify the contin disc pointed by itr and recursive call
+        eda::field_set::const_contin_iterator itc = fs.begin_contin(inst);
+        size_t contin_idx = fs.raw_to_contin_idx(starting_index);
+        itc += contin_idx;
+        size_t depth = fs.contin()[itc.idx()].depth;
+        size_t num = fs.get_num_before_stop(inst, contin_idx);
+        eda::field_set::const_disc_iterator itr = fs.begin_raw(inst);        
+        itr += starting_index;
+        size_t relative_raw_idx = 
+            starting_index - fs.contin_to_raw_idx(contin_idx);
+        // case inst at itr is Stop
+        if(*itr == eda::field_set::contin_spec::Stop) {
+            // Assumption [1]: within the same contin, it is the first
+            // Stop encountered
+            
+            // the remaining Stops to consider
+            int remStop = std::min(depth - relative_raw_idx, n); 
+            for(; remStop >= 0; remStop--) {
+                number_of_instances +=
+                    (1 << remStop) // remStop^2
+                    *
+                    count_n_changed_knobs_from_index(fs, inst, n - remStop,
+                                                     // to fulfill Assumption [1]
+                                                     starting_index + depth 
+                                                     - relative_raw_idx);
+            }
+        } 
+        // case inst at itr is Left or Right
+        else {
             // recursive call, moved for one position
-            number_of_instances += count_n_changed_knobs_from_index(fs, n, starting_index + 1);
-            // vary all legal values of the knob
-            number_of_instances += (itd.arity() - 1) * count_n_changed_knobs_from_index(fs, n - 1, starting_index + 1);
+            number_of_instances += 
+                count_n_changed_knobs_from_index(fs, inst, n, 
+                                                 starting_index + 1);
+            // Left<->Right
+            number_of_instances += 
+                count_n_changed_knobs_from_index(fs, inst, n - 1,
+                                                 starting_index + 1);
+            // if the next Stop is not further from itr than the distance n
+            // then turn the remaining discs to Stop
+            unsigned int remRLs = num - relative_raw_idx; // remaining non-Stop
+                                                          // discs including
+                                                          // the current one
+            if(remRLs <= n) {
+                number_of_instances += 
+                    count_n_changed_knobs_from_index(fs, inst, n - remRLs,
+                                                     // to fulfill Assumption [1]
+                                                     starting_index + depth 
+                                                     - relative_raw_idx);
+            }
         }
+    }
+    // discs
+    else if(starting_index < begin_bit_idx) {
+        eda::field_set::const_disc_iterator itd = fs.begin_disc(inst);
+        itd += starting_index - begin_disc_idx;
+        // recursive call, moved for one position
+        number_of_instances += 
+            count_n_changed_knobs_from_index(fs, inst, n, 
+                                             starting_index + 1);
+        // vary all legal values of the knob
+        number_of_instances += 
+            (itd.arity() - 1) 
+            * count_n_changed_knobs_from_index(fs, inst, n - 1,
+                                               starting_index + 1);
+    }
+    // bits
+    else if(starting_index < begin_bit_idx + fs.n_bits()) {
+        eda::field_set::const_bit_iterator itb = fs.begin_bits(inst);
+        itb += starting_index - begin_bit_idx;
+        number_of_instances += 
+            count_n_changed_knobs_from_index(fs, inst, n, 
+                                             starting_index + 1);
+        // variation of the current bit
+        number_of_instances += 
+            count_n_changed_knobs_from_index(fs, inst, n-1,
+                                             starting_index + 1);
     }
     return number_of_instances;
 }
-
-
 
 /**
  * Counts instances at distance n from the exemplar
  * (i.e., with n elements changed from the exemplar)
  * It calls a recursive function count_n_changed_knobs_from_index
  * 
- * @param fs  - deme
- * @param n   - distance
+ * @param fs   - deme
+ * @param inst - exemplar
+ * @param n    - distance
  */
+inline long long count_n_changed_knobs(const eda::field_set& fs,
+                                       const eda::instance& inst,
+                                       unsigned int n)
+{
+    return count_n_changed_knobs_from_index(fs, inst, n, 0);
+}
+// for backward compaibility, like above but with null instance
 inline long long count_n_changed_knobs(const eda::field_set& fs,
                                        unsigned int n)
 {
-    return count_n_changed_knobs_from_index(fs, n, 0);
+    eda::instance inst(fs.packed_width());
+    return count_n_changed_knobs_from_index(fs, inst, n, 0);
 }
-
-
 
 struct univariate_optimization {
     univariate_optimization(opencog::RandGen& _rng,
@@ -580,7 +654,8 @@ struct univariate_optimization {
                     logger, rng);
         } else { //truncation selection
             OC_ASSERT( false,
-                       "Trunction selection not implemented. Tournament should be used instead.");
+                       "Trunction selection not implemented."
+                       " Tournament should be used instead.");
             return 42;
             /*
             return optimize(deme,n_select,n_generate,args.max_gens,score,

@@ -70,9 +70,35 @@ public:
     // considering 'size' discs of arity 'arity' calculate the number
     // of neighbors at distance 'distance'
     size_t total_number_of_neighbors(int distance,
-                                     size_t size, arity_t arity) {
+                                     size_t size,
+                                     field_set::arity_t arity) {
         return power(arity-1, distance) *
             (int)binomial_coefficient<float>(size , distance);
+    }
+
+    void test_generate_contin_neighbor()
+    {
+        int distance = 3;
+        int depth = 8;
+        int fs_size = 4;
+        int rand_seed = clock();
+        opencog::MT19937RandGen rng(rand_seed);
+        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
+        eda::instance inst(fs.packed_width());
+        eda::randomize(fs, inst, rng);
+        
+        eda::instance new_inst(inst);
+        
+        // choose randomly a contin among the fs_size ones
+        int rnd_idx = rng.randint(fs_size);
+        eda::field_set::contin_iterator it = fs.begin_contin(inst) + rnd_idx;
+        cout << "before generate:" << fs.stream_raw(inst) << endl;
+        moses::generate_contin_neighbor(fs, new_inst, it, distance, rng);
+        cout << "after generate:" << fs.stream_raw(new_inst) << endl;
+        
+        int new_dist = fs.hamming_distance(inst, new_inst);
+        
+        TS_ASSERT(distance == new_dist);        
     }
 
     void test_sample_from_neighborhood() 
@@ -80,7 +106,7 @@ public:
         int rand_seed = clock();
         int distance;
         size_t sample_size,fs_size;
-        arity_t arity ;
+        field_set::arity_t arity ;
         size_t sampled_size;
         int sampled_max_distance;
         int sampled_min_distance;        
@@ -146,8 +172,8 @@ public:
                
         // 3. test the contin_spec
         {
-            distance = 1;
-            sample_size = 1;
+            distance = 2;
+            sample_size = 10;
             fs_size = 2;
             
             field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
@@ -181,42 +207,17 @@ public:
 
     void test_generate_all_in_neighborhood() 
     {
-        {
+        { 
+            // test all neighbors of a null instance, fields are 5
+            // discs of arity 8
+           
             int distance = 2;
-            arity_t arity = 3;
-            size_t size = 5;
-            field_set fs(field_set::disc_spec(arity), size);
-            eda::instance center_inst(fs.packed_width());
-            int rand_seed = clock();
-            opencog::MT19937RandGen rng(rand_seed);
-            eda::randomize(fs, center_inst,rng); 
-            eda::instance_set<moses::combo_tree_score> 
-                deme(1000, center_inst, fs);
-
-            // cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
-            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin(), center_inst);
-            size_t generated_size = 0;
-            int generated_max_distance = 0;
-            int generated_min_distance = 0;
-            get_sample_size_and_distance(deme, generated_size, 
-                                         generated_max_distance, generated_min_distance, center_inst);
-            size_t total_size = total_number_of_neighbors(distance,size, arity);
-            //  cout << generated_size << " " << generated_max_distance
-            //      << " " << generated_min_distance <<endl;
-            // cout << "total_size :" << total_size <<endl;
-            TS_ASSERT(generated_size == total_size);
-            TS_ASSERT(generated_max_distance == distance);
-            TS_ASSERT(generated_min_distance == distance);
-        }
-
-        {
-            int distance = 2;
-            arity_t arity = 8;
+            field_set::arity_t arity = 8;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
             eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
             //    cout << "generate_all_in_neighborhood" << endl;
-            moses::generate_all_in_neighborhood(deme.fields(),distance,deme.begin());
+            moses::generate_all_in_neighborhood(deme.fields(), distance, deme.begin());
             size_t generated_size = 0;
             int generated_max_distance = 0;
             int generated_min_distance = 0;
@@ -231,78 +232,86 @@ public:
             TS_ASSERT(generated_max_distance == distance);
             TS_ASSERT(generated_min_distance == distance);
         }
-    }
-    
-    void DISABLEtest_generate_contin_neighbor()
-    {
-        int distance = 3;
-        int depth = 8;
-        int rand_seed = clock();
-        opencog::MT19937RandGen rng(rand_seed);
-        field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), 4);
-        eda::instance inst(fs.packed_width());
-        eda::randomize(fs, inst, rng);
-        
-        eda::instance new_inst(inst);
-        
-        eda::field_set::contin_iterator it = fs.begin_contin(inst) + rng.randint(4);
-        cout << "before generate:" << fs.stream_raw(inst) << endl;
-        moses::generate_contin_neighbor(fs, new_inst, it, distance, rng);
-        cout << "after generate:" << fs.stream_raw(new_inst) << endl;
-        
-        int new_dist = fs.hamming_distance(inst, new_inst);
-        
-        TS_ASSERT(distance == new_dist);        
-    }
-    
-    void DISABLEtest_vary_n_knobs()
-    {
-        int distance = 2;
-        arity_t arity = 8;
-        size_t size = 5;
-        field_set fs(field_set::disc_spec(arity), size);
-        eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
-        eda::instance center_inst(fs.packed_width());
-        int rand_seed = clock();
-        opencog::MT19937RandGen rng(rand_seed);
-        eda::randomize(fs, center_inst,rng); 
-        cout << "center_inst:\n" << fs.stream(center_inst)  << endl;
-        eda::instance_set<moses::combo_tree_score>::iterator out = deme.begin();
-        moses::vary_n_knobs(deme.fields(), center_inst, distance, 0, out);
-        //cout << "after vary knobs:" << endl;
-        //foreach (eda::instance& inst, deme) {
-        // cout <<fs.stream(inst) << endl;*/
-        //}
-        size_t generated_size = 0;
-        int generated_max_distance = 0;
-        int generated_min_distance = 0;
-        
-        get_sample_size_and_distance(deme, generated_size, 
-                                     generated_max_distance,
-                                     generated_min_distance,
-                                     center_inst);
-        // cout << generated_size << " " << generated_max_distance
-        //  << " " << generated_min_distance <<endl;
-        size_t total_size = total_number_of_neighbors(distance, size, arity);
-        // cout << "total_size :" << total_size <<endl;
-        TS_ASSERT(generated_size == total_size);
-        TS_ASSERT(generated_max_distance == distance);
-        TS_ASSERT(generated_min_distance == distance);
-    }
-    
-    void DISABLEtest_vary_n_knobs_contin()
-    {
-        int dist  = 2;
-        size_t size = 5;
-        field_set fs(field_set::contin_spec(0.0, 0.5, 0.5,4),size);
-        eda::instance_set<moses::combo_tree_score> deme(1000,fs);
-        eda::instance center_inst(fs.packed_width());
-        opencog::MT19937RandGen rng(1);
-        eda::randomize(fs, center_inst, rng);
-        
-        eda::instance_set<moses::combo_tree_score>::iterator out = deme.begin();
-        moses::vary_n_knobs(deme.fields(), center_inst, dist, 0, out);
-        
-        //@todo: add TS_ASSERT
+
+        { 
+            // test all neighbors of a random center instance, fields
+            // are 5 discs of arity 3
+            
+            int distance = 2;
+            field_set::arity_t arity = 3;
+            size_t size = 5;
+            field_set fs(field_set::disc_spec(arity), size);
+            eda::instance center_inst(fs.packed_width());
+            int rand_seed = clock();
+            opencog::MT19937RandGen rng(rand_seed);
+            eda::randomize(fs, center_inst,rng); 
+            eda::instance_set<moses::combo_tree_score> 
+                deme(100, center_inst, fs);
+
+            cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
+
+            moses::generate_all_in_neighborhood(deme.fields(), distance,
+                                                deme.begin(), center_inst);
+
+            foreach(const eda::instance& inst, deme) {
+                cout << "deme instance: " << fs.stream(inst)
+                     << " " << fs.stream_raw(inst) << std::endl;
+            }
+
+            size_t generated_size = 0;
+            int generated_max_distance = 0;
+            int generated_min_distance = 0;
+            get_sample_size_and_distance(deme, generated_size, 
+                                         generated_max_distance,
+                                         generated_min_distance, center_inst);
+            size_t total_size = total_number_of_neighbors(distance,size, arity);
+
+            TS_ASSERT(generated_size == total_size);
+            TS_ASSERT(generated_max_distance == distance);
+            TS_ASSERT(generated_min_distance == distance);
+        }
+
+        { 
+            // test all neighbors of a random center instance, fields
+            // are 2 contins of depth 4
+            
+            int distance = 2;
+            size_t depth = 4;
+            size_t fs_size = 2;
+            field_set fs(field_set::contin_spec(0.0,0.5,0.5,depth), fs_size);
+            eda::instance center_inst(fs.packed_width());
+            int rand_seed = clock();
+            opencog::MT19937RandGen rng(rand_seed);
+            eda::randomize(fs, center_inst, rng); 
+            eda::instance_set<moses::combo_tree_score> 
+                deme(100, center_inst, fs);
+
+            cout << "generate center_inst: " << fs.stream(center_inst) 
+                 << " " << fs.stream_raw(center_inst) <<endl;
+
+            moses::generate_all_in_neighborhood(deme.fields(), distance,
+                                                deme.begin(), center_inst);
+
+            foreach(const eda::instance& inst, deme) {
+                cout << "deme instance: " << fs.stream(inst)
+                     << " " << fs.stream_raw(inst) << std::endl;
+            }
+
+            size_t generated_size = 0;
+            int generated_max_distance = 0;
+            int generated_min_distance = 0;
+            get_sample_size_and_distance(deme, generated_size, 
+                                         generated_max_distance,
+                                         generated_min_distance, center_inst);
+
+            size_t total_size = count_n_changed_knobs(fs, center_inst, distance);
+
+            //  cout << generated_size << " " << generated_max_distance
+            //      << " " << generated_min_distance <<endl;
+            // cout << "total_size :" << total_size <<endl;
+            TS_ASSERT(generated_size == total_size);
+            TS_ASSERT(generated_max_distance == distance);
+            TS_ASSERT(generated_min_distance == distance);
+        }
     }
 };

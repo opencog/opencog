@@ -46,7 +46,7 @@ bool lazy_selector::empty() const {
 }
 
 void lazy_selector::reset_range(unsigned int new_n) {
-    OC_ASSERT(_n < new_n);
+    OC_ASSERT(_l < new_n); // there must be at least a free index
     _n = new_n;
 }
 
@@ -70,8 +70,8 @@ unsigned int lazy_selector::operator()()
 
     uint_one_to_many_map_cit sel_idx_cit = _map.find(sel_idx);
 
-    // if the selected index points to nothing then the result is itself
-    // otherwise it is the pointed index
+    // if the selected index points to nothing then the result is
+    // itself otherwise it is the pointed index
     unsigned int res = sel_idx_cit == _map.end()? sel_idx : sel_idx_cit->second;
     
     // move _l from res so that it is now a free index
