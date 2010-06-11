@@ -117,8 +117,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                    const parameters& pa = parameters()) :
         rng(_rng), type(t), simplify(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa),
-        _n_evals(0), _best_score(worst_possible_score),
-        _rep(NULL), _deme(NULL), scorer(sc, NULL, 0, rng)
+        scorer(sc, NULL, 0, rng), _n_evals(0),
+        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         insert(behavioral_scored_combo_tree
                (base, combo_tree_behavioral_score(behavioral_score(),

@@ -178,11 +178,13 @@ private:
 };
 
 template<typename Scoring>
-count_based_scorer(const Scoring& s,
-                   representation* rep,
-                   int base_count,
-                   opencog::RandGen& _rng)
-    : score_w(s), score(s),_rep(rep), _base_count(base_count), rng(_rng) { 
+struct count_based_scorer : public unary_function<eda::instance, 
+                                                  combo_tree_score> {
+    count_based_scorer(const Scoring& s,
+                       representation* rep,
+                       int base_count,
+                       opencog::RandGen& _rng)
+        : score(s), score_w(s), _base_count(base_count), _rep(rep), rng(_rng) { 
     
     treecache = new opencog::lru_cache< cached_scoring_wrapper<Scoring> >(MOSES_TREE_CACHE_SIZE,score_w);
 }
@@ -197,18 +199,10 @@ count_based_scorer(const Scoring& s,
 #endif
         _rep->transform(inst);
 
+        combo_tree tr;
+
         try {
-            combo_tree tr = _rep->get_clean_exemplar();
-            combo_tree_score ts =
-                combo_tree_score(score(tr),
-                                 -int(_rep->fields().count(inst))
-                                 +_base_count);
-#ifdef DEBUG_INFO
-            std::cout << "OKK " << tr << std::endl;
-            std::cout << "Score:" << ts << std::endl;
-#endif
-            return ts;
-                                            
+            tr = _rep->get_clean_exemplar();
         } catch (...) {
             std::cout << "get_clean_exemplar threw" << std::endl;
             return worst_possible_score;
@@ -220,11 +214,18 @@ count_based_scorer(const Scoring& s,
         // reduct::clean_reduce(tr);
         // reduct::contin_reduce(tr,rng);
 
-        tree_score ts = tree_score((*treecache)(tr),
-
-//        tree_score ts = tree_score(score(tr),
+        combo_tree_score ts = combo_tree_score((*treecache)(tr),
+                                               -int(_rep->fields().count(inst))
+                                               + _base_count);
+        
+//        combo_tree_score ts = combo_tree_score(score(tr),
 //                                   -int(_rep->fields().count(inst))
 //                                   + _base_count);
+#ifdef DEBUG_INFO
+        std::cout << "OKK " << tr << std::endl;
+        std::cout << "Score:" << ts << std::endl;
+#endif
+        return ts;
     }
     
     Scoring score;

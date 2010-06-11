@@ -50,8 +50,8 @@ public:
 class ann_node
 {
 public:
-    ann_node(ann_nodetype type, int _tag = 0, ann_node* _ptr=NULL):
-            activation(0.0), nodetype(type), tag(_tag), memory_ptr(_ptr) { 
+    ann_node(ann_nodetype type, int _tag = 0, ann_node* _ptr=NULL)
+        : memory_ptr(_ptr), activation(0.0), tag(_tag), nodetype(type) { 
         if(_ptr != NULL)
             memory_node=true;
         else
@@ -469,19 +469,19 @@ public:
     int feedforward_depth() {
         
         //reset the node counters
-        for (int x = 0;x < nodes.size();x++)
+        for (unsigned int x = 0;x < nodes.size();x++)
             nodes[x]->counter = 0;
 
         //recursively determine longest feedforward path 
         //through net
-        for (int x = 0;x < inputs.size();x++)
+        for (unsigned int x = 0;x < inputs.size();x++)
             feedforward_depth_recurse(inputs[x]);
 
         //the output counters will contain the longest
         //path to that particular output, we want the
         //maximum of all of these counters
         int max_depth = 0;
-        for (int x = 0;x < outputs.size();x++)
+        for (unsigned int x = 0;x < outputs.size();x++)
             if (outputs[x]->counter > max_depth)
                 max_depth = outputs[x]->counter;
 
@@ -495,7 +495,7 @@ public:
         int depth = n->counter + 1;
 
         //consider all of the outgoing connections
-        for (int x = 0;x < n->out_connections.size();x++) {
+        for (unsigned int x = 0;x < n->out_connections.size();x++) {
             //what is the destination of this particular connection
             ann_node* dest = n->out_connections[x]->dest;
             //what is the longest distance found to the destination node?

@@ -92,71 +92,70 @@ struct AnnPoleFitnessFunction : unary_function<combo_tree, double> {
 //     by Richard Sutton and Charles Anderson.
 int go_cart(ann *net,int max_steps) const
 {
-   float x,			/* cart position, meters */
-         x_dot,			/* cart velocity */
-         theta,			/* pole angle, radians */
-         theta_dot;		/* pole angular velocity */
-   int steps=0,y;
+    float x,			/* cart position, meters */
+        x_dot,			/* cart velocity */
+        theta,			/* pole angle, radians */
+        theta_dot;		/* pole angular velocity */
+    int steps=0,y;
 
-   int random_start=1;
+    int random_start=1;
 
-   double in[5];  //Input loading array
+    double in[5];  //Input loading array
 
-   double out1;
-   double out2;
+    double out1;
+    double out2;
 
 //     double one_degree= 0.0174532;	/* 2pi/360 */
 //     double six_degrees=0.1047192;
-   double twelve_degrees=0.2094384;
+    double twelve_degrees=0.2094384;
 //     double thirty_six_degrees= 0.628329;
 //     double fifty_degrees=0.87266;
 
-   if (random_start) {
-     /*set up random start state*/
-     x = (lrand48()%4800)/1000.0 - 2.4;
-     x_dot = (lrand48()%2000)/1000.0 - 1;
-     theta = (lrand48()%400)/1000.0 - .2;
-     theta_dot = (lrand48()%3000)/1000.0 - 1.5;
+    if (random_start) {
+        /*set up random start state*/
+        x = (lrand48()%4800)/1000.0 - 2.4;
+        x_dot = (lrand48()%2000)/1000.0 - 1;
+        theta = (lrand48()%400)/1000.0 - .2;
+        theta_dot = (lrand48()%3000)/1000.0 - 1.5;
     }
-   else 
-     x = x_dot = theta = theta_dot = 0.0;
+    else 
+        x = x_dot = theta = theta_dot = 0.0;
    
-   /*--- Iterate through the action-learn loop. ---*/
-   while (steps++ < max_steps)
-     {
-       
-       /*-- setup the input layer based on the four iputs --*/
-       //setup_input(net,x,x_dot,theta,theta_dot);
-       in[0]=1.0;  //Bias
-       in[1]=(x + 2.4) / 4.8;;
-       in[2]=(x_dot + .75) / 1.5;
-       in[3]=(theta + twelve_degrees) / .41;
-       in[4]=(theta_dot + 1.0) / 2.0;
-       net->load_inputs(in);
+    /*--- Iterate through the action-learn loop. ---*/
+    while (steps++ < max_steps) {
+        
+        /*-- setup the input layer based on the four iputs --*/
+        //setup_input(net,x,x_dot,theta,theta_dot);
+        in[0]=1.0;  //Bias
+        in[1]=(x + 2.4) / 4.8;;
+        in[2]=(x_dot + .75) / 1.5;
+        in[3]=(theta + twelve_degrees) / .41;
+        in[4]=(theta_dot + 1.0) / 2.0;
+        net->load_inputs(in);
 
-       int depth = net->feedforward_depth();
-       for(int x=0;x<depth;x++)
-           net->propagate();
+        int depth = net->feedforward_depth();
+        dorepeat(depth)
+            net->propagate();
 
-      /*-- decide which way to push via which output unit is greater --*/
-       out1=net->outputs[0]->activation;
-       out2=net->outputs[1]->activation;
+        /*-- decide which way to push via which output unit is greater --*/
+        out1=net->outputs[0]->activation;
+        out2=net->outputs[1]->activation;
        
-       if (out1 > out2)
-	 y = 0;
-       else
-	 y = 1;
+        if (out1 > out2)
+            y = 0;
+        else
+            y = 1;
        
-       /*--- Apply action to the simulated cart-pole ---*/
-       cart_pole(y, &x, &x_dot, &theta, &theta_dot);
+        /*--- Apply action to the simulated cart-pole ---*/
+        cart_pole(y, &x, &x_dot, &theta, &theta_dot);
        
-       /*--- Check for failure.  If so, return steps ---*/
-       if (x < -2.4 || x > 2.4  || theta < -twelve_degrees ||
-	   theta > twelve_degrees) 
-         return steps;             
-     }
+        /*--- Check for failure.  If so, return steps ---*/
+        if (x < -2.4 || x > 2.4  || theta < -twelve_degrees ||
+                                            theta > twelve_degrees) 
+            return steps;             
+    }
    
-   return steps;
+    return steps;
 } 
 
 

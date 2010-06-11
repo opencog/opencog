@@ -454,7 +454,7 @@ inline size_t hash_value(const combo::vertex& v)
     }
     if (const combo::ann_type* a = boost::get<combo::ann_type>(&v)) {
         size_t tmp = c_last;
-        hash_combine(tmp, hash_value(*a->idx));
+        hash_combine(tmp, hash_value(a->idx));
         return tmp;
     }
     OC_ASSERT(false, "A case is missing");
