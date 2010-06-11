@@ -133,7 +133,7 @@ vertex eval_throws(opencog::RandGen& rng,
                                                  pe, vu));
         }
     }
-    //builtin
+    // builtin
     else if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
             //boolean operators
@@ -176,8 +176,10 @@ vertex eval_throws(opencog::RandGen& rng,
                 }
                 return id::logical_false;
 
-                // wild card case
-            } else {
+                
+            }
+            // wild card case
+            else {
                 
                 OC_ASSERT(vu.isOneVariableActiveTMP(),
                                   "the OR wild_card case relies on the fact"
@@ -228,10 +230,9 @@ vertex eval_throws(opencog::RandGen& rng,
                         id::logical_false);
             }
         case id::logical_not : {
-            OC_ASSERT(
-                              it.has_one_child(),
-                              "combo_tree node should have exactly one child"
-                              " (id::logical_not)");
+            OC_ASSERT(it.has_one_child(),
+                      "combo_tree node should have exactly one child"
+                      " (id::logical_not)");
 
             if (vu.empty()) {
                 return negate_vertex(eval_throws(rng, it.begin(), pe, vu));
@@ -258,7 +259,7 @@ vertex eval_throws(opencog::RandGen& rng,
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
             OC_ASSERT(is_boolean(vcond),
-                              "vertex should be a booelan.");
+                      "vertex should be a booelan.");
             ++sib;
             if (vcond == id::logical_true) {
                 return eval_throws(rng, sib, pe, vu);
@@ -267,15 +268,15 @@ vertex eval_throws(opencog::RandGen& rng,
                 return eval_throws(rng, sib, pe, vu);
             }
         }
-        //mixed operators
+        // mixed operators
         case id::contin_if : {
             OC_ASSERT(it.number_of_children() == 3,
-                              "combo_tree node should have exactly three children"
-                              " (id::contin_if)");
+                      "combo_tree node should have exactly three children"
+                      " (id::contin_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
             OC_ASSERT(is_boolean(vcond),
-                              "vertex should be a boolean.");
+                      "vertex should be a boolean.");
             ++sib;
             if (vcond == id::logical_true) {
                 //TODO : check the type of the result
@@ -288,32 +289,32 @@ vertex eval_throws(opencog::RandGen& rng,
         }
         case id::greater_than_zero : {
             OC_ASSERT(it.has_one_child(),
-                              "combo_tree node should have exactly three children"
-                              " (id::greater_than_zero).");
+                      "combo_tree node should have exactly three children"
+                      " (id::greater_than_zero).");
             sib_it sib = it.begin();
             vertex x = eval_throws(rng, sib, pe, vu);
             OC_ASSERT(is_contin(x),
-                              "vertex should be a contin.");
+                      "vertex should be a contin.");
             return bool_to_vertex(0 < get_contin(x));
         }
         case id::impulse : {
             vertex i;
             OC_ASSERT(it.has_one_child(),
-                              "combo_tree node should have exactly one child"
-                              " (id::impulse).");
+                      "combo_tree node should have exactly one child"
+                      " (id::impulse).");
             i = eval_throws(rng, it.begin(), pe, vu);
             OC_ASSERT(is_boolean(i),
-                              "vetex should be a boolean).");
+                      "vetex should be a boolean).");
             return (i == id::logical_true ? 1.0 : 0.0);
         }
-        //continuous operator
+        // continuous operator
         case id::plus : {
             contin_t res = 0;
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
                 OC_ASSERT(is_contin(vres),
-                                  "vertex should be a contin.");
+                          "vertex should be a contin.");
                 res += get_contin(vres);
             }
             return res;
@@ -326,7 +327,7 @@ vertex eval_throws(opencog::RandGen& rng,
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
                 OC_ASSERT(is_contin(vres),
-                                  "vertex should be a contin");
+                          "vertex should be a contin");
                 res *= get_contin(vres);
             }
             return res;
@@ -334,17 +335,17 @@ vertex eval_throws(opencog::RandGen& rng,
         case id::div : {
             contin_t x, y;
             OC_ASSERT(it.number_of_children() == 2,
-                              "combo_tree node should have exactly two children"
-                              " (id::div).");
+                      "combo_tree node should have exactly two children"
+                      " (id::div).");
             sib_it sib = it.begin();
             vertex vx = eval_throws(rng, sib, pe, vu);
             OC_ASSERT(is_contin(vx),
-                              "vertex should be a contin.");
+                      "vertex should be a contin.");
             x = get_contin(vx);
             ++sib;
             vertex vy = eval_throws(rng, sib, pe, vu);
             OC_ASSERT(is_contin(vy),
-                              "vertex should be a contin.");
+                      "vertex should be a contin.");
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
@@ -352,22 +353,22 @@ vertex eval_throws(opencog::RandGen& rng,
         }
         case id::log : {
             OC_ASSERT(it.has_one_child(),
-                              "combo_tree node should have exactly one child"
-                              " (id::log).");
+                      "combo_tree node should have exactly one child"
+                      " (id::log).");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
-                              "vertex should be a contin");
+                      "vertex should be a contin");
             contin_t res = log(get_contin(vx));
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
             return res;
         }
         case id::exp : {
             OC_ASSERT(it.has_one_child(),
-                              "combo_tree node should have exactly one child"
-                              " (id::exp)");
+                      "combo_tree node should have exactly one child"
+                      " (id::exp)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
-                              "vertex should be an contin");
+                      "vertex should be an contin");
             contin_t res = exp(get_contin(vx));
             //this may happen in case the argument is too high, then exp will be infty
             if (isinf(res)) throw EvalException(vertex(res));
@@ -375,52 +376,52 @@ vertex eval_throws(opencog::RandGen& rng,
         }
         case id::sin : {
             OC_ASSERT(it.has_one_child(),
-                              "combo_tree node should have exactly one child"
-                              " (id::sin)");
+                      "combo_tree node should have exactly one child"
+                      " (id::sin)");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
-                              "vertex should be a contin.");
+                      "vertex should be a contin.");
             return sin(get_contin(vx));
         }
         default :
             OC_ASSERT(false,
-                              "That case is not handled");
+                      "That case is not handled");
             return v;
         }
     }
-    //action
+    // action
     else if (is_action(*it) && pe) {
-        OC_ASSERT(pe,
-                          "Non null Evaluator must be provided");
+        OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_action(it, vu);
     }
-    //perception
+    // perception
     else if (is_perception(*it) && pe) {
+        OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_percept(it, vu);
     }
-    //procedure
+    // procedure
     else if (is_procedure_call(*it) && pe) {
+        OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_procedure(it, vu);
     }
-    //indefinite objects are evaluated by the pe
+    // indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
-        OC_ASSERT(pe,
-                          "Non null Evaluator must be provided");
+        OC_ASSERT(pe, "Non null Evaluator must be provided");
         return pe->eval_indefinite_object(*io, vu);
     }
-    //definite objects evaluate to themselves
+    // definite objects evaluate to themselves
     else if (is_definite_object(*it)) {
         OC_ASSERT(it.is_childless(),
-                          "combo_tree node should be childless (definite_object '%s').",
-                          get_definite_object(*it).c_str());
+                  "combo_tree node should be childless (definite_object '%s').",
+                  get_definite_object(*it).c_str());
         return v;
     }
-    //contin
+    // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
         if (isnan(*c) || isinf(*c)) throw EvalException(vertex(*c));
         return v;
     }
-    //action
+    // action symbol
     else if (is_action_symbol(v)) {
         return v;
     } else {

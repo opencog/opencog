@@ -84,7 +84,7 @@ bool bool_evaluate(const State& bindings, iter it)
 
     if (!(*it == id::boolean_if || *it == id::logical_and ||
           *it == id::logical_or || *it == id::logical_not ||
-          *it == id::logical_true || *it == id::logical_false))  {
+          *it == id::logical_true || *it == id::logical_false)) {
         if (get_argument(*it).idx < 0) // negation
             return !bindings[-get_argument(*it).idx-1];
         else

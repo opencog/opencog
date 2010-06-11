@@ -30,12 +30,12 @@ int main(int argc, char ** argv)
         min_randvalue = lexical_cast<double>(argv[3]);
         nsamples = lexical_cast<int>(argv[4]);
     } catch (...) {
+        cerr << "stdin a combo program and it will stdout the contin-table" << endl;
         cerr << "Usage:" << argv[0] << " rand_seed max_randvalue min_randvalue nsamples" << endl;
         exit(1);
     }
 
     while (cin.good()) {
-        cout << "Please input the combo program :" << endl;
         // get the combo_tree from the stream
         cin >> combo_tr;
         if (!cin.good())
