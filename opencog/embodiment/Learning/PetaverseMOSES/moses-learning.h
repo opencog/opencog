@@ -29,6 +29,7 @@
 
 #include <opencog/learning/moses/moses/optimization.h>
 
+#include <opencog/embodiment/Learning/FitnessEstimator/NoSpaceLifeFitnessEstimator.h>
 #include <opencog/embodiment/Learning/FitnessEstimator/DistortedComboSize.h>
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
@@ -117,74 +118,48 @@ private:
     const combo_tree_score max_score;
 
     metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> *metapop;
-
 };
 
-
-
-
-struct petaverse_score {
+struct petaverse_score : public unary_function<combo_tree, score_t> {
     petaverse_score(const FE& fitnessEstimator)
-            : _fitnessEstimator(fitnessEstimator) {
-        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                                                      _fitnessEstimator);
-    }
+            : _fitnessEstimator(fitnessEstimator) {}
 
     petaverse_score(const petaverse_score& ps)
-            : _fitnessEstimator(ps._fitnessEstimator) {
-        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                                                      ps._fitnessEstimator);
-    }
+            : _fitnessEstimator(ps._fitnessEstimator) {}
 
     int operator()(const combo_tree& tr) const {
-        int score = -1000 + (int)(1000 * (*_estimator_cache)(tr));
+        score_t score = _fitnessEstimator(tr);
         std::cout << "scoring " << tr << " score: " << score << endl;
         return score;
     }
-
-    ~petaverse_score() {
-        delete _estimator_cache;
-    }
+    ~petaverse_score() {}
 
 private:
-    opencog::lru_cache<FE>* _estimator_cache;
     const FE& _fitnessEstimator;
 };
 
-
-
-struct petaverse_bscore {
+// @todo: this is not a good behavioral score, it should rather be
+// such that each feature correspond to the dissimilarity of an action
+// in the action sequence to imitate
+struct petaverse_bscore : public unary_function<combo_tree, behavioral_score> {
     petaverse_bscore(const FE& fitnessEstimator)
-            : _fitnessEstimator(fitnessEstimator) {
-        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                                                      _fitnessEstimator);
-    }
+            : _fitnessEstimator(fitnessEstimator) {}
 
     petaverse_bscore(const petaverse_bscore& ps)
-            : _fitnessEstimator(ps._fitnessEstimator) {
-        _estimator_cache = new opencog::lru_cache<FE>(ESTIMATOR_CACHE_SIZE,
-                                                      ps._fitnessEstimator);
-    }
+            : _fitnessEstimator(ps._fitnessEstimator) {}
 
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(2);
-        bs[0] = 1000 - (int)(1000 * (*_estimator_cache)(tr));
+        bs[0] = _fitnessEstimator(tr);
         bs[1] = tr.size();
         return bs;
     }
 
-    ~petaverse_bscore() {
-        delete _estimator_cache;
-    }
-
+    ~petaverse_bscore() {}
 private:
-    opencog::lru_cache<FE>* _estimator_cache;
     const FE& _fitnessEstimator;
 };
 
-
-
 }//~namespace moses
-
 
 #endif

@@ -25,14 +25,13 @@
 #ifndef _MOSES_REPRESENTATION_H
 #define _MOSES_REPRESENTATION_H
 
+#include <boost/utility.hpp>
+
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 
 #include "using.h"
 #include "knob_mapper.h"
-#include <boost/utility.hpp>
-
-
 
 void set_stepsize(double new_ss);
 void set_expansion(double new_ex);

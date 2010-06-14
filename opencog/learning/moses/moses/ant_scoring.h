@@ -30,7 +30,10 @@
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
+#include "types.h"
+
 using namespace combo;
+using moses::score_t;
 
 #define MIN_FITNESS -1.0e10
 
@@ -73,9 +76,7 @@ static const char trail2[ANT_Y][ANT_X+1] = {
     "                                "
 };
 
-
-//struct AntFitnessFunction : unary_function<combo_tree, fitness_t> {
-struct AntFitnessFunction : unary_function<combo_tree, double> {
+struct AntFitnessFunction : unary_function<combo_tree, score_t> {
 
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
@@ -112,7 +113,7 @@ struct AntFitnessFunction : unary_function<combo_tree, double> {
         } while (at_time < _steps);
         //cout << "bot, ok" << endl;
 //    return (fitness_t)sc;
-        return (double)sc;
+        return (score_t)sc;
     }
 
     bool is_turn_left(builtin_action a) const {

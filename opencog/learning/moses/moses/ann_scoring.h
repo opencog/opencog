@@ -39,7 +39,7 @@ using namespace std;
 using namespace moses;
 #define MIN_FITNESS -1.0e10
 
-struct AnnPole2NVFitnessFunction : unary_function<combo_tree, double> {
+struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, contin_t> {
  result_type operator()(argument_type tr) const {
     bool velocity = false;
     if (tr.empty())
@@ -51,14 +51,14 @@ struct AnnPole2NVFitnessFunction : unary_function<combo_tree, double> {
     the_cart = new CartPole(true,velocity);
     the_cart->nmarkov_long=false;
     the_cart->generalization_test=false;
-    double fitness = -100000.0+the_cart->evalNet(&nn);
+    contin_t fitness = -100000.0+the_cart->evalNet(&nn);
     delete the_cart; 
     return fitness;
  }
 
 };
 
-struct AnnPole2FitnessFunction : unary_function<combo_tree, double> {
+struct AnnPole2FitnessFunction : public unary_function<combo_tree, contin_t> {
  result_type operator()(argument_type tr) const {
     bool velocity = true;
     if (tr.empty())
@@ -70,14 +70,14 @@ struct AnnPole2FitnessFunction : unary_function<combo_tree, double> {
     the_cart = new CartPole(true,velocity);
     the_cart->nmarkov_long=false;
     the_cart->generalization_test=false;
-    double fitness = -100000+the_cart->evalNet(&nn);
+    contin_t fitness = -100000+the_cart->evalNet(&nn);
     delete the_cart; 
     return fitness;
  }
 
 };
 
-struct AnnPoleFitnessFunction : unary_function<combo_tree, double> {
+struct AnnPoleFitnessFunction : public unary_function<combo_tree, contin_t> {
  result_type operator()(argument_type tr) const {
     if (tr.empty())
         return MIN_FITNESS;
@@ -100,16 +100,16 @@ int go_cart(ann *net,int max_steps) const
 
     int random_start=1;
 
-    double in[5];  //Input loading array
+    contin_t in[5];  //Input loading array
 
-    double out1;
-    double out2;
+    contin_t out1;
+    contin_t out2;
 
-//     double one_degree= 0.0174532;	/* 2pi/360 */
-//     double six_degrees=0.1047192;
-    double twelve_degrees=0.2094384;
-//     double thirty_six_degrees= 0.628329;
-//     double fifty_degrees=0.87266;
+//     contin_t one_degree= 0.0174532;	/* 2pi/360 */
+//     contin_t six_degrees=0.1047192;
+    contin_t twelve_degrees=0.2094384;
+//     contin_t thirty_six_degrees= 0.628329;
+//     contin_t fifty_degrees=0.87266;
 
     if (random_start) {
         /*set up random start state*/
@@ -203,7 +203,7 @@ void cart_pole(int action, float *x,float *x_dot, float *theta, float *theta_dot
 }
 };
 
-struct AnnFitnessFunction : unary_function<combo_tree, double> {
+struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
 
     typedef combo_tree::iterator pre_it;
     typedef combo_tree::sibling_iterator sib_it;
@@ -215,21 +215,21 @@ struct AnnFitnessFunction : unary_function<combo_tree, double> {
         tree_transform tt;
 
         //xor_problem
-        double inputs[4][3] = { {0.0, 0.0,1.0}, 
+        contin_t inputs[4][3] = { {0.0, 0.0,1.0}, 
                                 {0.0, 1.0,1.0}, 
                                 {1.0, 0.0,1.0},
                                 {1.0, 1.0,1.0}};
-        double outputs[4] = {0.0, 1.0, 1.0, 0.0};
+        contin_t outputs[4] = {0.0, 1.0, 1.0, 0.0};
 
         ann nn = tt.decodify_tree(tr);
         int depth = nn.feedforward_depth();
 
-        double error = 0.0;
+        contin_t error = 0.0;
         for (int pattern = 0;pattern < 4;pattern++) {
             nn.load_inputs(inputs[pattern]);
             for (int x = 0;x < depth;x++)
                 nn.propagate();
-            double diff = outputs[pattern] - nn.outputs[0]->activation;
+            contin_t diff = outputs[pattern] - nn.outputs[0]->activation;
             error += diff * diff;
         }
 
@@ -241,35 +241,35 @@ struct AnnFitnessFunction : unary_function<combo_tree, double> {
 namespace moses
 {
 
-struct ann_pole2nv_score {
-   ann_pole2nv_score() { }
-   double operator()(const combo_tree& tr) const {
-      return p2ff(tr);
-   }
-   AnnPole2NVFitnessFunction p2ff;
+struct ann_pole2nv_score : public unary_function<combo_tree, contin_t> {
+    ann_pole2nv_score() { }
+    contin_t operator()(const combo_tree& tr) const {
+        return p2ff(tr);
+    }
+    AnnPole2NVFitnessFunction p2ff;
 };
 
-struct ann_pole2nv_bscore {
+struct ann_pole2nv_bscore : public unary_function<combo_tree, behavioral_score> {
     ann_pole2nv_bscore( ) { }
-
+    
     behavioral_score operator()(const combo_tree& tr) const {
         behavioral_score bs(2);
         bs[0] = -moses::ann_pole2nv_score()(tr);
         bs[1] = tr.size();
-
+        
         return bs;
     }
 };
 
-struct ann_pole2_score {
+struct ann_pole2_score : public unary_function<combo_tree, contin_t> {
    ann_pole2_score() { }
-   double operator()(const combo_tree& tr) const {
+   contin_t operator()(const combo_tree& tr) const {
       return p2ff(tr);
    }
    AnnPole2FitnessFunction p2ff;
 };
 
-struct ann_pole2_bscore {
+struct ann_pole2_bscore : public unary_function<combo_tree, behavioral_score> {
     ann_pole2_bscore( ) { }
 
     behavioral_score operator()(const combo_tree& tr) const {
@@ -281,15 +281,15 @@ struct ann_pole2_bscore {
     }
 };
 
-struct ann_pole_score {
-   ann_pole_score() { }
-   double operator()(const combo_tree& tr) const {
-      return pff(tr);
-   }
-   AnnPoleFitnessFunction pff;
+struct ann_pole_score  : public unary_function<combo_tree, contin_t> {
+    ann_pole_score() { }
+    contin_t operator()(const combo_tree& tr) const {
+        return pff(tr);
+    }
+    AnnPoleFitnessFunction pff;
 };
 
-struct ann_pole_bscore {
+struct ann_pole_bscore : public unary_function<combo_tree, behavioral_score> {
     ann_pole_bscore( ) { }
 
     behavioral_score operator()(const combo_tree& tr) const {
@@ -301,16 +301,16 @@ struct ann_pole_bscore {
     }
 };
 
-struct ann_score {
+struct ann_score  : public unary_function<combo_tree, contin_t> {
    ann_score() { }
-   double operator()(const combo_tree& tr) const {
+   contin_t operator()(const combo_tree& tr) const {
        return aff(tr);
    }
 
    AnnFitnessFunction aff;
 };
 
-struct ann_bscore {
+struct ann_bscore : public unary_function<combo_tree, behavioral_score> {
     ann_bscore( ) { }
 
     behavioral_score operator()(const combo_tree& tr) const {

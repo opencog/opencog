@@ -26,6 +26,7 @@
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
+#include <opencog/util/printContainer.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include "complexity.h"
@@ -40,7 +41,8 @@ namespace moses {
     typedef opencog::tagged_item<combo::combo_tree,
                                  combo_tree_score> scored_combo_tree;
 
-    typedef std::vector<float> behavioral_score;
+    typedef float bscore_t; // type of a behavioral score feature
+    typedef std::vector<bscore_t> behavioral_score;
 
     typedef opencog::tagged_item<behavioral_score,
                                  combo_tree_score> combo_tree_behavioral_score;
@@ -90,11 +92,9 @@ inline std::ostream& operator<<(std::ostream& out,
     return (out << "[score=" << ts.first << ", complexity=" << -ts.second << "]");
 }
 inline std::ostream& operator<<(std::ostream& out,
-				const moses::combo_tree_behavioral_score& s) {
-    out << "[ ";
-    foreach (float f,s.first)
-        out << f << " ";
-    out << "], " << s.second;
+                                const moses::combo_tree_behavioral_score& s) {
+    opencog::ostreamContainer(out, s.first, " ", "[", "]");
+    out << ", " << s.second;
     return out;
 }
 

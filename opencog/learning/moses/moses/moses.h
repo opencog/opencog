@@ -244,11 +244,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         scorer._rep = &rep;
         scorer._base_count = get_complexity(*exemplar); 
-        _n_evals += optimize(deme, scorer,max_evals-n_evals()); 
+        _n_evals += optimize(deme, scorer, max_evals-n_evals()); 
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        boost::unordered_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
+        boost::unordered_map<combo_tree, 
+                             combo_tree_behavioral_score,
+                             boost::hash<combo_tree> > candidates;
         foreach(const eda::scored_instance<combo_tree_score>& inst, deme) {
 
 #ifdef DEBUG_INFO
@@ -732,11 +734,6 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                  combo_tree_score(max_score, worst_possible_score.second),
                  os, perceptions, actions, op);
 }
-
-
-
-
-
 
 } //~namespace moses
 

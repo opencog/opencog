@@ -49,6 +49,11 @@ typedef float fitness_t;
 
 double information_theoretic_bits(const eda::field_set& fs);
 
+/**
+ * Compute the score of a boolean function in term of hamming distance
+ * of its output and the output of the entire truth table of the
+ * indended function.
+ */
 struct logical_score : public unary_function<combo_tree, int> {
     template<typename Scoring>
     logical_score(const Scoring& score, int a, opencog::RandGen& _rng)
@@ -61,6 +66,11 @@ struct logical_score : public unary_function<combo_tree, int> {
     opencog::RandGen& rng;
 };
 
+/**
+ * Like logical_score but on behaviors (features). Each feature
+ * corresponds to an input tuple, 0 if the output of the candidate
+ * matches the output of the intended function (lower is better).
+ */
 struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Scoring>
     logical_bscore(const Scoring& score, int a, opencog::RandGen& _rng)
@@ -164,18 +174,61 @@ protected:
     opencog::RandGen& rng;
 };
 
-template<typename Scoring>
-struct cached_scoring_wrapper : 
-        public unary_function<combo::combo_tree, fitness_t> {
-    cached_scoring_wrapper(const Scoring& s):
-        score(s) { }
-    fitness_t operator()(const combo::combo_tree& tree)
-    {
-        return score(tree);
-    } 
-private:
-    Scoring score;
-};
+// template<typename Scoring>
+// struct count_based_scorer : public unary_function<eda::instance, 
+//                                                   combo_tree_score> {
+//     count_based_scorer(const Scoring& s,
+//                        representation* rep,
+//                        int base_count,
+//                        opencog::RandGen& _rng)
+//         : score(s), _base_count(base_count), _rep(rep), rng(_rng), 
+//           treecache(MOSES_TREE_CACHE_SIZE, score) {}
+
+//     int get_misses() {
+//         return treecache->get_number_of_evaluations();
+//     }
+    
+//     combo_tree_score operator()(const eda::instance& inst) const {
+// #ifdef DEBUG_INFO
+//         std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;
+// #endif
+//         _rep->transform(inst);
+
+//         combo_tree tr;
+
+//         try {
+//             tr = _rep->get_clean_exemplar();
+//         } catch (...) {
+//             std::cout << "get_clean_exemplar threw" << std::endl;
+//             return worst_possible_score;
+//         }
+
+//         // sequential(clean_reduction(),logical_reduction())(tr,tr.begin());
+//         // std::cout << "OK " << tr << std::endl;
+//         // reduct::clean_and_full_reduce(tr);
+//         // reduct::clean_reduce(tr);
+//         // reduct::contin_reduce(tr,rng);
+
+//         score_t sc = treecache(tr);
+//         // score_t sc = score(tr);
+
+//         combo_tree_score ts = combo_tree_score(sc,
+//                                                - int(_rep->fields().count(inst))
+//                                                + _base_count);        
+// #ifdef DEBUG_INFO
+//         std::cout << "OKK " << tr << std::endl;
+//         std::cout << "Score:" << ts << std::endl;
+// #endif
+//         return ts;
+//     }
+    
+//     Scoring score;
+//     int _base_count;
+//     representation* _rep;
+// protected:
+//     opencog::RandGen& rng;
+//     opencog::lru_cache<cached_scoring_wrapper<Scoring> > treecache;
+// };
 
 template<typename Scoring>
 struct count_based_scorer : public unary_function<eda::instance, 
@@ -184,16 +237,16 @@ struct count_based_scorer : public unary_function<eda::instance,
                        representation* rep,
                        int base_count,
                        opencog::RandGen& _rng)
-        : score(s), score_w(s), _base_count(base_count), _rep(rep), rng(_rng) { 
-    
-    treecache = new opencog::lru_cache< cached_scoring_wrapper<Scoring> >(MOSES_TREE_CACHE_SIZE,score_w);
-}
+        : score(s), _base_count(base_count), _rep(rep), rng(_rng),
+          treecache(MOSES_TREE_CACHE_SIZE, score) {}
 
     int get_misses() {
-        return treecache->get_number_of_evaluations();
+        return treecache.get_number_of_evaluations();
     }
     
     combo_tree_score operator()(const eda::instance& inst) const {
+        OC_ASSERT(_rep);
+
 #ifdef DEBUG_INFO
         std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;
 #endif
@@ -214,8 +267,8 @@ struct count_based_scorer : public unary_function<eda::instance,
         // reduct::clean_reduce(tr);
         // reduct::contin_reduce(tr,rng);
 
-        combo_tree_score ts = combo_tree_score((*treecache)(tr),
-                                               -int(_rep->fields().count(inst))
+        combo_tree_score ts = combo_tree_score(treecache(tr),
+                                               - int(_rep->fields().count(inst))
                                                + _base_count);
         
 //        combo_tree_score ts = combo_tree_score(score(tr),
@@ -229,12 +282,11 @@ struct count_based_scorer : public unary_function<eda::instance,
     }
     
     Scoring score;
-    cached_scoring_wrapper<Scoring> score_w;
     int _base_count;
     representation* _rep;
 protected:
     opencog::RandGen& rng;
-    opencog::lru_cache<cached_scoring_wrapper<Scoring> >* treecache;
+    mutable opencog::lru_cache<Scoring> treecache;
 };
 
 /**

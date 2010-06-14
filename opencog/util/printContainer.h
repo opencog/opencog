@@ -26,6 +26,7 @@
 
 #include <iterator>
 #include <algorithm>
+#include <iostream>
 
 namespace opencog {
     

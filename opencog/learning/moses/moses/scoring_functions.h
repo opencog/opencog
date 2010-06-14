@@ -25,6 +25,7 @@
 #define _MOSES_SCORING_FUNCTIONS_H
 
 #include "using.h"
+#include "ant_scoring.h"
 
 namespace moses
 {
@@ -137,7 +138,7 @@ struct ConfusionMatrix {
     int TP, FP, TN, FN;
 };
 
-struct CaseBasedBoolean : public unary_function<combo_tree, float> {
+struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
     CaseBasedBoolean() { }
 
     CaseBasedBoolean(istream& in) {
@@ -185,15 +186,10 @@ struct CaseBasedBoolean : public unary_function<combo_tree, float> {
     }
 
 
-    fitness_t operator()(const combo_tree& t) const {
-//    fitness_t penalty=fitness_t(-mycomplexity(t.begin()))/2.0f;
-        fitness_t penalty = 0;
-//    complexity_t cmin=get_complexity(t.begin());
-
-        return fitness_t(t.empty() ? NEG_INFINITY :
-                         1.0f*(fitness_t(operator()(t.begin()))+penalty));
+    score_t operator()(const combo_tree& t) const {
+        return score_t(t.empty() ? NEG_INFINITY :
+                       1.0f*operator()(t.begin()));
     }
-
 
     template<typename iter>
     int operator()(iter src) const {
@@ -233,13 +229,13 @@ protected:
     CaseSeq _cases;
 };
 
-struct truth_table_data_score {
+struct truth_table_data_score : public unary_function<combo_tree, score_t> {
     truth_table_data_score(struct CaseBasedBoolean& bc) {
         c = &bc;
     }
 
-    int operator()(const combo_tree& tr) const {
-        return (int)c->operator()(tr);
+    score_t operator()(const combo_tree& tr) const {
+        return c->operator()(tr);
     }
 
 private:
@@ -248,7 +244,7 @@ private:
 
 
 
-struct truth_table_data_bscore {
+struct truth_table_data_bscore : public unary_function<combo_tree, behavioral_score> {
     truth_table_data_bscore(struct CaseBasedBoolean& bc) {
         c = &bc;
     }
@@ -270,29 +266,28 @@ private:
 
 
 
-// ////////////// End of scoring for Passenger-style data ///////////////
+// ////////////// End of scoring for truth table ///////////////
 
 
 
 
-struct interactive_score {
+struct interactive_score : public unary_function<combo_tree, score_t> {
     interactive_score() {  }
 
-    int operator()(const combo_tree& tr) const {
+    score_t operator()(const combo_tree& tr) const {
         cout << "Fitness Function of : " << tr << " enter the score :" << endl;
-        fitness_t score = 0.0;
+        score_t score = 0.0;
         cin >> score;
-        return (int)score;
+        return score;
     }
 };
 
 
-struct interactive_bscore {
+struct interactive_bscore : public unary_function<combo_tree, behavioral_score> {
     interactive_bscore() {  }
 
     behavioral_score  operator()(const combo_tree& tr) const {
         behavioral_score bs(0);
-
         return bs;
     }
 };
@@ -300,19 +295,18 @@ struct interactive_bscore {
 
 
 
-struct ant_score {
-    ant_score() {  }
+struct ant_score : public unary_function<combo_tree, score_t> {
+    ant_score() {}
 
     int operator()(const combo_tree& tr) const {
-        return (int)(-1000 + aff(tr));
+        return -1000 + aff(tr);
     }
 
     AntFitnessFunction aff;
 };
 
-
-
-struct ant_bscore {
+// @todo: it is probability not a good behavioral_score
+struct ant_bscore : public unary_function<combo_tree, behavioral_score> {
     ant_bscore( ) { }
 
     behavioral_score operator()(const combo_tree& tr) const {

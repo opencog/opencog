@@ -20,22 +20,19 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <ctime>
 
 #include <opencog/comboreduct/reduct/reduct.h>
 
 #include <opencog/learning/moses/moses/optimization.h>
 #include <opencog/learning/moses/moses/scoring.h>
 
-#include "moses-learning.h"
-
 #include <opencog/embodiment/Learning/RewritingRules/RewritingRules.h>
 
-#include <ctime>
-
+#include "moses-learning.h"
 
 namespace moses
 {
-
 
 typedef std::set<combo::vertex> operator_set;
 typedef operator_set::iterator operator_set_it;
