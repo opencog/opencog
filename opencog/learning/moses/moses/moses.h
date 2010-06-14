@@ -67,11 +67,10 @@ typedef ordered_programs::iterator ordered_programs_it;
  * 
  * NOTE:
  *   BScoring = behavioral scoring function (output behaviors), we use std::greater
- *   because we are maxumizing
+ *   because we are maximizing
  *      
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-
 struct metapopulation : public set < behavioral_scored_combo_tree,
                                      std::greater<behavioral_scored_combo_tree> > {
     /**
@@ -101,21 +100,21 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     /**
      *  Constuctor for the class metapopulation
      *  
-     * @param _rng the rand number 
-     * @param base the combo tree to be learned
-     * @param t the type of expression to be learned 
-     * @param si the reduct rule for reducting 
-     * @param sc the scoring function for scoring
-     * @param bsc the behavior scoring function
-     * @param opt the optimization should be providing for the learning
-     * @param pa the parameter for selecting the deme 
+     * @param _rng    rand number 
+     * @param base    exemplar used to initialize the metapopulation
+     * @param tt      type of expression to be learned 
+     * @param si      reduct rule for reducting 
+     * @param sc      scoring function for scoring
+     * @param bsc     behavior scoring function
+     * @param opt     optimization should be providing for the learning
+     * @param pa      parameter for selecting the deme 
      */
     metapopulation(opencog::RandGen& _rng, const combo_tree& base,
-                   const combo::type_tree& t, const reduct::rule& si,
+                   const combo::type_tree& tt, const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
-        rng(_rng), type(t), simplify(&si), score(sc),
+        rng(_rng), type(tt), simplify(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa),
         scorer(sc, NULL, 0, rng), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
@@ -151,9 +150,12 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     /**
-     * select the exemplar from the population
+     * Select the exemplar from the population. All candidates with
+     * the best score (if more that one) are distributed according to
+     * a Solomonoff-like distribution (2^{-complexity}) and the
+     * exemplar is selected accordingly.
      * 
-     *@return return the iterator
+     * @return the iterator of the selected exemplar
      */
     const_iterator select_exemplar() const {
         OC_ASSERT(!empty(),
@@ -176,13 +178,15 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         complexity_t sum = 0;
         foreach(complexity_t& p, probs) {
-            p = (1 << (*max_element(probs.begin(), probs.end()) - p)); // Moshe's fix; 18.02.2008.
+            p = (1 << (*max_element(probs.begin(), probs.end()) - p));
             sum += p;
         }
 
         const_iterator exemplar = begin();
-        advance(exemplar, distance(probs.begin(), opencog::roulette_select
-                                   (probs.begin(), probs.end(), sum, rng)));
+        advance(exemplar, distance(probs.begin(),
+                                   opencog::roulette_select(probs.begin(),
+                                                            probs.end(), 
+                                                            sum, rng)));
         return exemplar;
     }
 
@@ -505,7 +509,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     BScoring bscore; //behavioral score
     Optimization optimize;
     parameters params;
-    count_based_scorer<Scoring> scorer;
+    count_based_scorer<Scoring> scorer; // @todo: give to choose
+                                        // others like
+                                        // complexity_based_scorer
     
 protected:
     int _n_evals;

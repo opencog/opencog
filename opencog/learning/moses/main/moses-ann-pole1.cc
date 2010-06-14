@@ -1,24 +1,41 @@
+/** moses-ann-pole1.cc --- 
+ *
+ * Copyright (C) 2010 Joel Lehman
+ *
+ * Author: Joel Lehman
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+#include <iostream>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
 #include <opencog/comboreduct/combo/eval.h>
 
-#include <iostream>
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
-#include <opencog/learning/moses/moses/scoring.h>
-#include <opencog/learning/moses/moses/ann_scoring.h>
-
-#include <opencog/util/mt19937ar.h>
-
-#include <opencog/util/Logger.h>
-
-#include <opencog/learning/moses/moses/representation.h>
+#include "../moses/moses.h"
+#include "../moses/optimization.h"
+#include "../moses/scoring_functions.h"
+#include "../moses/scoring.h"
+#include "../moses/ann_scoring.h"
+#include "../moses/representation.h"
 
 using namespace moses;
 using namespace reduct;
 using namespace boost;
 using namespace std;
 using namespace opencog;
-
 
 int main(int argc, char** argv)
 {

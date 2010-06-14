@@ -61,6 +61,15 @@ struct tournament_selection {
     }
 };
 
+/**
+ * Select randomly an iterator in [from, to( according to the
+ * probability distribution described by the elements (of type ScoreT)
+ * of these iterators (the higher the ScoreT the higher the
+ * probability of being selected).
+ *
+ * Of course to work well the following assumption must hold
+ * sum = sum_{x in [from, to(} *x
+ */
 template<typename It, typename ScoreT>
 It roulette_select(It from, It to, ScoreT sum, RandGen& rng)
 {
