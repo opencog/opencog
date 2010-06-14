@@ -24,19 +24,19 @@
 #ifndef _MOSES_KNOBS_H
 #define _MOSES_KNOBS_H
 
+#include <bitset>
+
 #include <opencog/util/tree.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 #include <opencog/util/based_variant.h>
 
 #include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/combo/complexity.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 #include "using.h"
-#include <opencog/learning/moses/eda/field_set.h>
-#include <bitset>
-
+#include "../eda/field_set.h"
+#include "complexity.h"
 
 namespace moses
 {

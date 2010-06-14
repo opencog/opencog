@@ -38,7 +38,7 @@ const strength_t MIN_MEMBERS_STRENGTH = 0.000001;
 const strength_t MIN_MEMBERS_COUNT = 1;
 
 SubsetEvalRule::SubsetEvalRule(AtomSpaceWrapper* asw, Type argType)
-    : Rule(asw, false, true, "SubsetEvalRule"), _asw(asw), ArgType(argType)
+    : Rule(asw, false, true, "SubsetEvalRule"), ArgType(argType), _asw(asw)
 {
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));
     inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ArgType))));

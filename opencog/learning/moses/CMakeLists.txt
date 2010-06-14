@@ -9,14 +9,15 @@ ADD_LIBRARY (moses SHARED
 	moses/knobs
 	moses/moses
 	moses/representation
+    moses/complexity
 	moses/scoring
 	moses/scoring_functions
 	moses/types
 	moses/using
     moses/pole_balancing
-        eda/field_set
-        eda/initialization
-        eda/local_structure
+    eda/field_set
+    eda/initialization
+    eda/local_structure
 )
 
 TARGET_LINK_LIBRARIES (moses

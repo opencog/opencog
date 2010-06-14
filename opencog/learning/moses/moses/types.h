@@ -28,7 +28,7 @@
 #include <opencog/util/foreach.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/complexity.h>
+#include "complexity.h"
 
 namespace moses {
   

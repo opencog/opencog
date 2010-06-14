@@ -16,7 +16,6 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/procedure_call
 	combo/procedure_repository
 	combo/assumption
-	combo/complexity
 	combo/eval
 	combo/perception
 	combo/perception_eval
