@@ -1,9 +1,13 @@
 #include <ctime>
 #include <cxxtest/TestSuite.h>
+
 #include <boost/math/special_functions/binomial.hpp>
+
+#include <opencog/util/mt19937ar.h>
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/eda/instance_set.h>
-#include <opencog/learning/moses/moses/optimization.h>
+#include <opencog/learning/moses/moses/types.h>
+#include <opencog/learning/moses/moses/neighborhood_sampling.h>
 
 
 using namespace eda;
