@@ -21,20 +21,20 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/comboreduct/reduct/reduct.h>
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/logical_rules.h>
-#include <opencog/comboreduct/reduct/contin_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
-
-#include <opencog/comboreduct/combo/eval.h>
-#include <opencog/comboreduct/combo/type_tree.h>
-
 #include <iostream>
 #include <boost/assign/list_of.hpp>
 
 #include <opencog/util/mt19937ar.h>
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+
+#include "../reduct/reduct.h"
+#include "../reduct/meta_rules.h"
+#include "../reduct/logical_rules.h"
+#include "../reduct/contin_rules.h"
+#include "../reduct/general_rules.h"
+#include "../combo/eval.h"
+#include "../combo/table.h"
+#include "../combo/type_tree.h"
+#include "../ant_combo_vocabulary/ant_combo_vocabulary.h"
 
 using namespace std;
 using namespace ant_combo;

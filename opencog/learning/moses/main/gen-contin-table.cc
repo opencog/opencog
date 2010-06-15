@@ -2,18 +2,18 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <opencog/util/mt19937ar.h>
+
 #include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/combo/table.h>
 #include <opencog/comboreduct/combo/type_tree.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
-
-#include <opencog/util/mt19937ar.h>
 
 using namespace std;
 using namespace boost;
 using namespace combo;
 using namespace opencog;
 using namespace ant_combo;
-
 
 int main(int argc, char ** argv)
 {

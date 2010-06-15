@@ -17,6 +17,7 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/procedure_repository
 	combo/assumption
 	combo/eval
+	combo/table
 	combo/perception
 	combo/perception_eval
 	combo/tree_generation

@@ -1,9 +1,9 @@
 #install header files
 INSTALL(FILES
 
-	action.h
-        action_eval.h
-        action_symbol.h
+    action.h
+    action_eval.h
+    action_symbol.h
 	builtin_action.h
 	message.h
 	action_symbol.h
@@ -14,6 +14,7 @@ INSTALL(FILES
 	assumption.h
 	complexity.h
 	eval.h
+    table.h
 	perception.h
 	perception_eval.h
 	tree_generation.h
@@ -29,4 +30,3 @@ INSTALL(FILES
 
 	"include/${PROJECT_NAME}/combo" 
 )
-

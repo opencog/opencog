@@ -24,18 +24,20 @@
 #ifndef _MOSES_SCORING_H
 #define _MOSES_SCORING_H
 
+#include <iostream>
+#include <fstream>
+
+#include <opencog/util/lru_cache.h>
+
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/combo/table.h>
 #include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/util/lru_cache.h>
+
 #include "using.h"
 #include "representation.h"
 #include "types.h"
 #include "ant_scoring.h"
-
-#include <iostream>
-#include <fstream>
-
 
 namespace moses
 {

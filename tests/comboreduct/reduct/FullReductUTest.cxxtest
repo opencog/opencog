@@ -3,6 +3,7 @@
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/combo/eval.h>
+#include <opencog/comboreduct/combo/table.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
