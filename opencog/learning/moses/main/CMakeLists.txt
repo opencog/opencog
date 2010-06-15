@@ -140,3 +140,10 @@ TARGET_LINK_LIBRARIES (moses-disjunction-SA
         comboreduct
         util
 )
+ADD_EXECUTABLE (moses-exec moses-exec)
+TARGET_LINK_LIBRARIES (moses-exec
+        moses
+        comboreduct
+        util
+        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
+)

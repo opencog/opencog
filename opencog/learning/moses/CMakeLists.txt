@@ -11,6 +11,7 @@ ADD_LIBRARY (moses SHARED
 	moses/representation
     moses/complexity
 	moses/scoring
+    moses/neighborhood_sampling
 	moses/scoring_functions
 	moses/types
 	moses/using

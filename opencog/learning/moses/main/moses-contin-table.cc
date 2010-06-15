@@ -1,3 +1,29 @@
+/** moses-contin-table.cc --- 
+ *
+ * Copyright (C) 2010 Alesis Novik
+ *
+ * Author: Alesis Novik
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <iostream>
+
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
+
 #include <opencog/comboreduct/combo/eval.h>
 
 #include <opencog/learning/moses/moses/moses.h>
@@ -5,16 +31,9 @@
 #include <opencog/learning/moses/moses/scoring_functions.h>
 #include <opencog/learning/moses/moses/scoring.h>
 
-#include <opencog/util/mt19937ar.h>
-
-#include <opencog/util/Logger.h>
-
 using namespace moses;
 using namespace reduct;
 using namespace boost;
-
-#include <iostream>
-
 using namespace std;
 
 int main(int argc,char** argv) { 
@@ -67,7 +86,7 @@ int main(int argc,char** argv) {
 
     metapopulation<contin_score_sqr,contin_bscore,univariate_optimization> 
     metapop(rng,
-            combo_tree(id::plus), // why??
+            combo_tree(id::plus),
             tt,contin_reduction(rng),
             score,
             bscore,
