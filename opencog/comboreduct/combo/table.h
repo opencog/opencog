@@ -146,6 +146,7 @@ public:
     }
 
     contin_t abs_distance(const contin_table& other) const;
+    contin_t sum_squared_error(const contin_table& other) const;
 };
 
 //-------------------------------------------------------------------------

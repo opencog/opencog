@@ -21,8 +21,10 @@
  */
 
 #include "table.h"
+#include <opencog/util/numeric.h>
 
 using namespace combo;
+using opencog::sqr;
 
 truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
@@ -86,5 +88,16 @@ contin_t contin_table::abs_distance(const contin_table& other) const
     contin_t res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
         res += fabs(*x++ -*y++);
+    return res;
+}
+
+contin_t contin_table::sum_squared_error(const contin_table& other) const
+{
+    OC_ASSERT(other.size() == size(),
+              "contin_tables should have the same size.");
+
+    contin_t res = 0;
+    for (const_iterator x = begin(), y = other.begin();x != end();)
+        res += sqr(*x++ -*y++);
     return res;
 }

@@ -284,6 +284,9 @@ template<typename IntT> IntT smallest_divisor(IntT n) {
     }
 }
 
+// calculate the square of x
+template<class T> T sqr(T const& x ) { return x*x; }
+
 } // namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H

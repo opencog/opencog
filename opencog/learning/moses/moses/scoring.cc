@@ -76,13 +76,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
 contin_t contin_score_sqr::operator()(const combo_tree& tr) const
 {
     try {
-        std::cout << "scoring " << tr << std::endl;
-        contin_t dist = target.abs_distance(combo::contin_table(tr,
-                                                                rands,
-                                                                rng));
-        contin_t sc = -dist * dist;
-        std::cout << sc << " X " << tr << std::endl;
-        return sc;
+        return -target.sum_squared_error(combo::contin_table(tr, rands, rng));
     } catch (...) {
         std::cout << "threw" << std::endl;
         return get_score(worst_possible_score);
@@ -100,6 +94,10 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
         *dst++ = fabs((*it1++) - (*it2++));
 
     return bs;
+}
+
+score_t logPDM(score_t sse, unsigned int ds, score_t v) {
+    return (score_t)ds/sqrt(log(2*PI*v)) - sse/(2*v);
 }
 
 /**
