@@ -102,6 +102,41 @@ score_t logPDM(score_t sse, unsigned int ds, score_t v) {
     return (score_t)ds/sqrt(log(2*PI*v)) - sse/(2*v);
 }
 
+score_t occam_contin_score::operator()(const combo_tree& tr) const
+{
+    try {
+        score_t sse = 
+            target.sum_squared_error(combo::contin_table(tr, rands, rng));
+        if(variance > 0) 
+            return logPDM(sse, target.size(), variance)
+                - (score_t)tr.size()*alphabet_size_log; // occam's razor
+        else 
+            return sse; // no occam's razor
+    } catch (...) {
+        stringstream ss;
+        ss << "The following candidate has failed to be evaluated: " << tr;
+        logger().warn(ss.str());
+        return get_score(worst_possible_score);
+    }
+}
+
+behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
+{
+    combo::contin_table ct(tr, rands, rng);
+    behavioral_score bs(target.size());
+    score_t trs = tr.size();
+        
+    behavioral_score::iterator dst = bs.begin();
+    for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
+         it1 != ct.end();)
+        if(variance > 0) 
+            *dst++ = logPDM(sqr((*it1++) - (*it2++)), 1, variance)
+                - trs*alphabet_size_log; // occam's razor
+        else
+            *dst++ = sqr((*it1++) - (*it2++)); // no occam's razor
+    return bs;
+}
+
 /**
  * return true if x dominates y
  *        false if y dominates x

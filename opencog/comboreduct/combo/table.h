@@ -136,7 +136,7 @@ public:
     template<typename Func>
     contin_table(const Func& f, const RndNumTable& rnt) {
         foreach(const contin_vector& v, rnt)
-        push_back(f(v.begin(), v.end()));
+            push_back(f(v.begin(), v.end()));
     }
 
     //equality operator

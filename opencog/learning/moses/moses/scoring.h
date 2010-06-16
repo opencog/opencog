@@ -94,6 +94,11 @@ struct contin_score : public unary_function<combo_tree, score_t> {
                  opencog::RandGen& _rng)
             : target(score, r), rands(r), rng(_rng) { }
 
+    contin_score(const combo::contin_table& t,
+                 const RndNumTable& r,
+                 opencog::RandGen& _rng)
+        : target(t),rands(r),rng(_rng) { }
+
     score_t operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
@@ -157,89 +162,58 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
 */
 score_t logPDM(score_t sse, unsigned int ds, float v);
 
-template<typename ComboTreeSize>
 struct occam_contin_score : public unary_function<combo_tree,score_t> {
     template<typename Scoring>
     occam_contin_score(const Scoring& score,
                        const RndNumTable& r,
-                       const ComboTreeSize& cts,
-                       score_t v,
+                       float v,
                        float alphabet_size,
                        opencog::RandGen& _rng)
-        : target(score,r), rands(r), comboTS(cts), variance(v), rng(_rng) {
+        : target(score,r), rands(r), variance(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
-    
+
     occam_contin_score(const combo::contin_table& t,
                        const RndNumTable& r,
-                       const ComboTreeSize& cts,
-                       score_t v,
+                       float v,
                        float alphabet_size,
                        opencog::RandGen& _rng)
-        : target(t), rands(r), comboTS(cts), variance(v), rng(_rng) {
+        : target(t), rands(r), variance(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
-    
-    score_t operator()(const combo_tree& tr) const
-    {
-        try {
-            contin_t sse = 
-                target.sum_squared_error(combo::contin_table(tr, rands, rng));
-            return logPDM(sse, target.size(), variance)
-                - comboTS(tr)*alphabet_size_log; // occam's razor
-        } catch (...) {
-            std::cout << "threw" << std::endl;
-            return get_score(worst_possible_score);
-        }
-    }
-    
+
+    score_t operator()(const combo_tree& tr) const;
+
     combo::contin_table target;
-    const ComboTreeSize& comboTS;
     RndNumTable rands;
     score_t variance;
     score_t alphabet_size_log;
     opencog::RandGen& rng;
 };
 
-template<typename ComboTreeSize>
 struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
                         const RndNumTable& r,
-                        const ComboTreeSize& cts,
-                        score_t v,
-                        unsigned int alphabet_size,
+                        float v,
+                        float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(score, r), rands(r), comboTS(cts), variance(v), rng(_rng) {
+        : target(score, r), rands(r), variance(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
 
     occam_contin_bscore(const combo::contin_table& t,
                         const RndNumTable& r,
-                        const ComboTreeSize& cts,
-                        score_t v,
-                        unsigned int alphabet_size,
+                        float v,
+                        float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(t), rands(r), comboTS(cts), variance(v), rng(_rng) {
+        : target(t), rands(r), variance(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
 
-    behavioral_score operator()(const combo_tree& tr) const
-    {
-        combo::contin_table ct(tr, rands, rng);
-        behavioral_score bs(target.size());
-        float trs = comboTS(tr);
-        
-        behavioral_score::iterator dst = bs.begin();
-        for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
-             it1 != ct.end();)
-            *dst++ = logPDM(sqr((*it1++) - (*it2++)), 1, variance)
-                - trs*alphabet_size_log; // occam's razor
-        return bs;
-    }
+    behavioral_score operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
-    const ComboTreeSize& comboTS;
     RndNumTable rands;
     score_t variance;
     score_t alphabet_size_log;

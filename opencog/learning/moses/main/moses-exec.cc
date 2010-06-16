@@ -44,12 +44,14 @@ using opencog::logger;
 
 int main(int argc,char** argv) { 
 
+    // program options, see options_description below for their meaning
     unsigned long rand_seed;
     string input_table_file;
     unsigned long max_evals;
     unsigned int max_gens;
     string log_level;
     string log_file;
+    float variance;
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -67,6 +69,8 @@ int main(int argc,char** argv) {
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter")
         ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
          "file name where to write the log")
+        ("variance,v", value<float>(&variance)->default_value(0),
+         "variance of an imaginary Guassian around each candidate's output, this is actually a way to control the Occam's razor bias, 0 or negative means no bias, otherwise the higher v the stronger the Occam's razor bias")
         ;
     
     variables_map vm;
@@ -118,16 +122,23 @@ int main(int argc,char** argv) {
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::contin_type, arity + 1);
 
-    contin_score_sqr score(contintable, inputtable, rng);
-    contin_bscore bscore(contintable, inputtable, rng);
+    int alphabet_size = 8; // this is roughly the number of operators
+                           // in contin formula, it will have to be
+                           // adapted depending on the operators that
+                           // one wants to use
 
-    metapopulation<contin_score_sqr, contin_bscore, univariate_optimization> 
-    metapop(rng,
-            combo_tree(id::plus),
-            tt,contin_reduction(rng),
-            score,
-            bscore,
-            univariate_optimization(rng));
+    occam_contin_score score(contintable, inputtable,
+                             variance, alphabet_size, rng);
+    occam_contin_bscore bscore(contintable, inputtable,
+                               variance, alphabet_size, rng);
+
+    metapopulation<occam_contin_score, occam_contin_bscore, univariate_optimization> 
+        metapop(rng,
+                combo_tree(id::plus),
+                tt,contin_reduction(rng),
+                score,
+                bscore,
+                univariate_optimization(rng));
     
     moses::moses(metapop, max_evals, 0);
 }
