@@ -353,14 +353,14 @@ vertex eval_throws(opencog::RandGen& rng,
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
             return res;
         }
-        case id::log : {
+        case id::abs_log : {
             OC_ASSERT(it.has_one_child(),
                       "combo_tree node should have exactly one child"
                       " (id::log).");
             vertex vx = eval_throws(rng, it.begin(), pe, vu);
             OC_ASSERT(is_contin(vx),
                       "vertex should be a contin");
-            contin_t res = log(get_contin(vx));
+            contin_t res = log(abs(get_contin(vx)));
             if (isnan(res) || isinf(res)) throw EvalException(vertex(res));
             return res;
         }

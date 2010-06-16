@@ -87,20 +87,20 @@ namespace reduct {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
 
-  //log(x)+log(y) -> log(x*y), log(x)-log(y) -> log(x/y)
+  //abs_log(x)+abs_log(y) -> abs_log(x*y), abs_log(x)-abs_log(y) -> abs_log(x/y)
   //or more generally
-  //sum log(x_i) - sum log(y_j) -> log((prod x_i)/(prod y_j))
-  //works only if at least one log(x_i) exists otherwise
-  //there would be a conflict with the rule log(c/x) -> -log((1/c)*x)
-  struct reduce_sum_log : public crule<reduce_sum_log> {
+  //sum abs_log(x_i) - sum abs_log(y_j) -> abs_log((prod x_i)/(prod y_j))
+  //works only if at least one abs_log(x_i) exists otherwise
+  //there would be a conflict with the rule abs_log(c/x) -> -abs_log((1/c)*x)
+  struct reduce_sum_abs_log : public crule<reduce_sum_abs_log> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
   
-  //log(c/x) -> -log(c^1*x)
+  //abs_log(c/x) -> -abs_log(c^1*x)
   //and also
-  //log(exp(x)*y) -> x+log(y)
-  //or more generally log(prod exp(x_i)*prod y_j) -> sum x_i +log(prod y_j)
-  struct reduce_log_div_times : public crule<reduce_log_div_times> {
+  //abs_log(exp(x)*y) -> x+abs_log(y)
+  //or more generally abs_log(prod exp(x_i)*prod y_j) -> sum x_i +abs_log(prod y_j)
+  struct reduce_abs_log_div_times : public crule<reduce_abs_log_div_times> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
 
@@ -114,11 +114,13 @@ namespace reduct {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
   
+  // @todo: That rule is ignored for now, because if translated for
+  // abs_log it may be longer after reduction
   //exp(log(x)+y) -> x*exp(y)
   //or more generally, exp(sum log(x_i) + sum y_j) -> prod x_i * exp(sum y_j)
-  struct reduce_exp_log : public crule<reduce_exp_log> {
-    void operator()(combo_tree& tr,combo_tree::iterator it) const;
-  };
+  // struct reduce_exp_log : public crule<reduce_exp_log> {
+  //   void operator()(combo_tree& tr,combo_tree::iterator it) const;
+  // };
   
   //sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
   //or more generally

@@ -38,12 +38,12 @@ namespace reduct {
 			   downwards(reduce_sin()),
 			   downwards(reduce_invert_constant()),
 
-			   downwards(reduce_log_div_times()),
+			   downwards(reduce_abs_log_div_times()),
 			   downwards(reduce_exp_times()),
 			   downwards(reduce_exp_div()),
-			   downwards(reduce_exp_log()),
+                           //downwards(reduce_exp_log()),
 			   downwards(reduce_times_div()),
-			   downwards(reduce_sum_log()),
+			   downwards(reduce_sum_abs_log()),
 			   
 			   upwards(reorder_commutative()),
 			   downwards(reduce_factorize()),

@@ -63,12 +63,12 @@ namespace reduct {
 		  downwards(reduce_sin()),
 		  downwards(reduce_invert_constant()),
 
-		  downwards(reduce_log_div_times()),
+		  downwards(reduce_abs_log_div_times()),
 		  downwards(reduce_exp_times()),
 		  downwards(reduce_exp_div()),
-		  downwards(reduce_exp_log()),
+		  // downwards(reduce_exp_log()),
 		  downwards(reduce_times_div()),
-		  downwards(reduce_sum_log()),
+		  downwards(reduce_sum_abs_log()),
 
 		  //complex contin
 		  upwards(reorder_commutative()),
@@ -77,7 +77,7 @@ namespace reduct {
 		  downwards(reduce_fraction()),
 
 		  //simple mixed
-		  downwards(reduce_gt_zero_log()),
+		  // downwards(reduce_gt_zero_log()),
 		  downwards(reduce_gt_zero_exp()),
 		  downwards(reduce_gt_zero_minus_exp()),
 		  downwards(reduce_gt_zero_times_const()),
@@ -155,12 +155,12 @@ namespace reduct {
 		  downwards(reduce_sin()),
 		  downwards(reduce_invert_constant()),
 
-		  downwards(reduce_log_div_times()),
+		  downwards(reduce_abs_log_div_times()),
 		  downwards(reduce_exp_times()),
 		  downwards(reduce_exp_div()),
-		  downwards(reduce_exp_log()),
+		  // downwards(reduce_exp_log()),
 		  downwards(reduce_times_div()),
-		  downwards(reduce_sum_log()),
+		  downwards(reduce_sum_abs_log()),
 
 		  //complex contin
 		  upwards(reorder_commutative()),
@@ -169,7 +169,7 @@ namespace reduct {
 		  downwards(reduce_fraction()),
 
 		  //simple mixed
-		  downwards(reduce_gt_zero_log()),
+		  // downwards(reduce_gt_zero_log()),
 		  downwards(reduce_gt_zero_exp()),
 		  downwards(reduce_gt_zero_minus_exp()),
 		  downwards(reduce_gt_zero_times_const()),

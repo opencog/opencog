@@ -67,7 +67,7 @@ namespace builtin_properties {
     { id::times,                "->(arg_list(contin) contin)" },
     { id::div,                  "->(contin contin contin)" },
     { id::exp,                  "->(contin contin)" },
-    { id::log,                  "->(contin contin)" },
+    { id::abs_log,              "->(contin contin)" },
     { id::sin,                  "->(contin contin)" },
     { id::greater_than_zero,    "->(contin boolean)" }, 
     { id::impulse,              "->(boolean contin)" },

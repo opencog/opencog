@@ -484,7 +484,7 @@ void build_knobs::action_cleanup()
 //
 // generalized polys (p1 and p2) can contain:
 //
-// x, sin, log, exp, x*y
+// x, sin, abs_log, exp, x*y
 // (where x & y are any vars)
 //
 // we assume that reduction has already taken place
@@ -596,10 +596,10 @@ void build_knobs::rec_canonize(pre_it it)
 
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
         append_linear_combination(mult_add(it, id::sin));
-        append_linear_combination(mult_add(it, id::log));
+        append_linear_combination(mult_add(it, id::abs_log));
         append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
-    } else if (*it == id::sin || *it == id::log || *it == id::exp) {
+    } else if (*it == id::sin || *it == id::abs_log || *it == id::exp) {
         cout << _exemplar << " | " << combo_tree(it) << endl;
         linear_canonize(it.begin());
     } else {

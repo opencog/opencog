@@ -90,10 +90,10 @@ const rule* select_rule(string rule_ref_str) {
                          "reduce_times_div"))
         ("PTOC", make_pair(new downwards(reduce_plus_times_one_child()),
                            "reduce_plus_times_one_child"))
-        ("SL", make_pair(new downwards(reduce_sum_log()),
-                         "reduce_sum_log"))
-        ("LDT", make_pair(new downwards(reduce_log_div_times()),
-                          "reduce_log_div_times"))
+        ("SL", make_pair(new downwards(reduce_sum_abs_log()),
+                         "reduce_sum_abs_log"))
+        ("LDT", make_pair(new downwards(reduce_abs_log_div_times()),
+                          "reduce_abs_log_div_times"))
         ("ET", make_pair(new downwards(reduce_exp_times()),
                          "reduce_exp_times"))
         ("ED", make_pair(new downwards(reduce_exp_div()),

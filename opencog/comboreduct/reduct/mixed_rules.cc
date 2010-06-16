@@ -154,20 +154,21 @@ namespace reduct {
     }
   }
 
-  //0<log(x) -> 0<-1+x
-  void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::greater_than_zero) {
-      OC_ASSERT(it.has_one_child(),             
-             "combo_tree node should have exactly one child (reduce_gt_zero_log)."); 
-      pre_it it_child = it.begin();
-      if(*it_child==id::log) {
-	OC_ASSERT(it_child.has_one_child(),
-           "combo_tree child node should have exactly one child (reduce_gt_zero_log).");
-	*it_child = id::plus;
-	tr.append_child(it_child, -1.0);
-      }
-    }
-  }
+  // diabled for the moment because it doesn't work anymore with abs_log
+  //0<log(x) -> 0<-1+x  
+  // void reduce_gt_zero_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
+  //   if(*it==id::greater_than_zero) {
+  //     OC_ASSERT(it.has_one_child(),             
+  //            "combo_tree node should have exactly one child (reduce_gt_zero_log)."); 
+  //     pre_it it_child = it.begin();
+  //     if(*it_child==id::log) {
+  //   OC_ASSERT(it_child.has_one_child(),
+  //          "combo_tree child node should have exactly one child (reduce_gt_zero_log).");
+  //   *it_child = id::plus;
+  //   tr.append_child(it_child, -1.0);
+  //     }
+  //   }
+  // }
 
   //0<exp(x) -> true
   void reduce_gt_zero_exp::operator()(combo_tree& tr,combo_tree::iterator it) const {

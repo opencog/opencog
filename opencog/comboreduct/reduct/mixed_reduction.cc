@@ -40,7 +40,7 @@ namespace reduct {
 			   upwards(eval_constants(rng)),
 
 			   //simple mixed
-			   downwards(reduce_gt_zero_log()),
+			   // downwards(reduce_gt_zero_log()),
 			   downwards(reduce_gt_zero_exp()),
 			   downwards(reduce_gt_zero_minus_exp()),
 			   //downwards(reduce_gt_zero_times_const()),//deprecat
@@ -95,7 +95,7 @@ namespace reduct {
 			   upwards(eval_constants(rng)),
 
 			   //simple mixed
-			   downwards(reduce_gt_zero_log()),
+			   // downwards(reduce_gt_zero_log()),
 			   downwards(reduce_gt_zero_exp()),
 			   downwards(reduce_gt_zero_minus_exp()),
 			   //downwards(reduce_gt_zero_times_const()),//deprecat

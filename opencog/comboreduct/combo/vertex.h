@@ -65,7 +65,9 @@ enum builtin {
     logical_and, logical_or, logical_not, logical_true, logical_false,
     contin_if,
     boolean_if,
-    plus, times, div, exp, log, sin,
+    plus, times, div, exp,
+    abs_log, // abs_log(x) = log(abs(x)), to void failure with negative input
+    sin,
     greater_than_zero,
     impulse,
     rand,         //random contin_t in [0,1) FIXME TODO : update reduct rules
@@ -757,8 +759,8 @@ void str_to_vertex(const std::string& str, vertex& v)
         v = id::div;
     else if (str == "ann")
         v = ann_type(0,id::ann);
-    else if (str == "log")
-        v = id::log;
+    else if (str == "abs_log")
+        v = id::abs_log;
     else if (str == "exp")
         v = id::exp;
     else if (str == "sin")

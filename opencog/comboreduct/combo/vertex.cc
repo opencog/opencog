@@ -67,8 +67,8 @@ std::ostream& operator<<(std::ostream& out, const combo::builtin& h)
         return out << "*";
     case id::div:
         return out << "/";
-    case id::log:
-        return out << "log";
+    case id::abs_log:
+        return out << "abs_log";
     case id::exp:
         return out << "exp";
     case id::sin:
