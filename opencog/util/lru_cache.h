@@ -37,15 +37,15 @@ namespace opencog {
 
   template<typename ARG, typename RESULT>
   struct lru_cache_arg_result {
-    typedef ARG argument_type;
-    typedef RESULT result_type;
-    typedef typename boost::hash<argument_type> Hash;
-    typedef typename std::equal_to<argument_type> Equals;
-    typedef typename std::list<argument_type> list;
-    typedef typename list::iterator list_iter;
-    typedef boost::unordered_map<list_iter,result_type,
-                              opencog::deref_hash<list_iter,Hash>,
-                              opencog::deref_equals<list_iter,Equals> > map;
+      typedef ARG argument_type;
+      typedef RESULT result_type;
+      typedef typename boost::hash<argument_type> Hash;
+      typedef typename std::equal_to<argument_type> Equals;
+      typedef typename std::list<argument_type> list;
+      typedef typename list::iterator list_iter;
+      typedef boost::unordered_map<list_iter,result_type,
+                                   opencog::deref_hash<list_iter,Hash>,
+                                   opencog::deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
@@ -57,117 +57,118 @@ namespace opencog {
     //that method not only returns the map_iter corresponding to a
     //input but also places x in front of the lru list if found
     map_iter find(const argument_type& x) {
-      //search for it
-      _lru.push_front(x);
-      map_iter it=_map.find(_lru.begin());
-      _lru.pop_front();
+        //search for it
+        _lru.push_front(x);
+        map_iter it=_map.find(_lru.begin());
+        _lru.pop_front();
 
-      //if we've found it, update lru
-      if (it!=_map.end())
-	_lru.splice(it->first,_lru,_lru.begin());
+        //if we've found it, update lru
+        if (it!=_map.end())
+            _lru.splice(it->first,_lru,_lru.begin());
 
-      return it;
+        return it;
     }
 
     inline bool is_cache_failure(map_iter mi) {
-      return mi == _map.end();
+        return mi == _map.end();
     }
 
     //it is assumed that x is not in the cache
     void insert_new(const argument_type& x, const result_type& y) {
-      _lru.push_front(x);
-      _map.insert(make_pair(_lru.begin(),y)).first;
-      if(full()) {
-	_map.erase(--_lru.end());
-        _lru.pop_back();	
-      }
+        _lru.push_front(x);
+        _map.insert(make_pair(_lru.begin(),y)).first;
+        if(full()) {
+            _map.erase(--_lru.end());
+            _lru.pop_back();	
+        }
     }
     
     void clear() {
-      _map.clear();
-      _lru.clear();
+        _map.clear();
+        _lru.clear();
     }
     
-  protected:
+protected:
     size_type _n;
     mutable map _map;
     mutable list _lru;
-  };
+};
 
-  template<typename F,
-	   typename Hash=boost::hash<typename F::argument_type>,
-	   typename Equals=std::equal_to<typename F::argument_type> >
-  struct lru_cache {
+template<typename F,
+         typename Hash=boost::hash<typename F::argument_type>,
+         typename Equals=std::equal_to<typename F::argument_type> >
+struct lru_cache {
     typedef typename F::argument_type argument_type;
     typedef typename F::result_type result_type;
     typedef typename std::list<argument_type> list;
     typedef typename list::iterator list_iter;
     typedef boost::unordered_map<list_iter,result_type,
-			       opencog::deref_hash<list_iter,Hash>,
-			       opencog::deref_equals<list_iter,Equals> > map;
+                                 opencog::deref_hash<list_iter,Hash>,
+                                 opencog::deref_equals<list_iter,Equals> > map;
     typedef typename map::iterator map_iter;
     typedef typename map::size_type size_type;
   
     lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f)
-	 ,_number_of_evaluations(0) { }
+                                          ,_number_of_evaluations(0) { }
 
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
     
-    result_type operator()(const argument_type& x) {
-      if (empty()) {
-	if (full()) //so a size-0 cache never needs hashing
-	return _f(x);
-	_lru.push_front(x);
-	map_iter it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
-	return it->second;
-      }
+    result_type operator()(const argument_type& x)
+    {
+        if (empty()) {
+            if (full()) //so a size-0 cache never needs hashing
+                return _f(x);
+            _lru.push_front(x);
+            map_iter it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
+            return it->second;
+        }
       
-      //search for it
-      _lru.push_front(x);
-      map_iter it=_map.find(_lru.begin());
+        //search for it
+        _lru.push_front(x);
+        map_iter it=_map.find(_lru.begin());
       
-      //if we've found it, update lru and return
-      if (it!=_map.end()) {
-	_lru.pop_front();
-	_lru.splice(it->first,_lru,_lru.begin());
-	return it->second;
-      }
+        //if we've found it, update lru and return
+        if (it!=_map.end()) {
+            _lru.pop_front();
+            _lru.splice(it->first,_lru,_lru.begin());
+            return it->second;
+        }
       
-      //otherwise, call _f and do an insertion
+        //otherwise, call _f and do an insertion
 #ifdef COUNT_EVALUATION
-      _number_of_evaluations++;
+        _number_of_evaluations++;
 #endif
-      it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
+        it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
       
-      //if full, remove least-recently-used
-      if (_map.size()>_n) {
-	_map.erase(--_lru.end());
-        _lru.pop_back();
-      }
+        //if full, remove least-recently-used
+        if (_map.size()>_n) {
+            _map.erase(--_lru.end());
+            _lru.pop_back();
+        }
       
-      OC_ASSERT(_map.size()<=_n, "lru_cache - _map size greater than _n (%d).", _n);
-      OC_ASSERT(_lru.size()==_map.size(), "lru_cache - _lru size different from _map size.");
+        OC_ASSERT(_map.size()<=_n, "lru_cache - _map size greater than _n (%d).", _n);
+        OC_ASSERT(_lru.size()==_map.size(), "lru_cache - _lru size different from _map size.");
       
-      //return the result
-      return it->second;
+        //return the result
+        return it->second;
     }
     
     unsigned get_number_of_evaluations() { return _number_of_evaluations; }
 
     void clear() {
-      _map.clear();
-      _lru.clear();
+        _map.clear();
+        _lru.clear();
     }
     
-  protected:
+protected:
     size_type _n;
     mutable map _map;
     F _f;
     mutable list _lru;
     
     mutable unsigned _number_of_evaluations;
-  };
+};
   
 } //~namespace opencog
 

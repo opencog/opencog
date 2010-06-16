@@ -152,7 +152,7 @@ struct univariate_optimization {
                    (deme, n_select, n_generate, max_gens_total, score,
                     eda::terminate_if_gte_or_no_improv<combo_tree_score>
                     (combo_tree_score(params.terminate_if_gte,
-                                worst_possible_score.second),
+                                      worst_possible_score.second),
                      max_gens_improv),
                     opencog::tournament_selection(int(params.selection), rng),
                     eda::univariate(), eda::local_structure_probs_learning(),

@@ -52,7 +52,8 @@ RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng,
     }
 }
 
-contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng)
+contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt,
+                           opencog::RandGen& rng)
 {
     for (const_cm_it i = rnt.begin(); i != rnt.end(); ++i) {
         int arg = 1;
@@ -60,9 +61,7 @@ contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt, opencog:
             binding(arg) = *j;
         //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, t);
-        //assumption : res is contin_t
-        OC_ASSERT(is_contin(res),
-                          "vertex isn't contin (contin_table)");
+        OC_ASSERT(is_contin(res), "res must be contin");
         push_back(get_contin(res));
     }
 }

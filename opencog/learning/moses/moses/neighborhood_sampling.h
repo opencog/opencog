@@ -23,6 +23,7 @@
 #define _OPENCOG_NEIGHBORHOOD_SAMPLING_H
 
 #include <iostream>
+#include <algorithm>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/lazy_random_selector.h>

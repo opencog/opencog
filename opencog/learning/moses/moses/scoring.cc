@@ -78,7 +78,9 @@ contin_t contin_score_sqr::operator()(const combo_tree& tr) const
     try {
         return -target.sum_squared_error(combo::contin_table(tr, rands, rng));
     } catch (...) {
-        std::cout << "threw" << std::endl;
+        stringstream ss;
+        ss << "The following candidate has failed to be evaluated: " << tr;
+        logger().warn(ss.str());
         return get_score(worst_possible_score);
     }
 }

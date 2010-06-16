@@ -21,6 +21,7 @@
  */
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
 
 #include <boost/program_options.hpp>
 
@@ -30,10 +31,10 @@
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
 
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/optimization.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include "../moses/moses.h"
+#include "../moses/optimization.h"
+#include "../moses/scoring_functions.h"
+#include "../moses/scoring.h"
 
 using namespace boost::program_options;
 using namespace std;
@@ -46,6 +47,7 @@ int main(int argc,char** argv) {
     unsigned long rand_seed;
     string input_table_file;
     unsigned long max_evals;
+    unsigned int max_gens;
     string log_level;
     string log_file;
     
@@ -55,8 +57,10 @@ int main(int argc,char** argv) {
         ("help", "produce help message")
         ("random-seed,r", value<unsigned long>(&rand_seed)->default_value(1),
          "random seed")
-        ("max-evals,m", value<unsigned long>(&max_evals)->default_value(1000),
+        ("max-evals,m", value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations")
+        ("max-gens,m", value<unsigned int>(&max_gens)->default_value(1000),
+         "maximum number of demes to generate")
         ("input-file,i", value<string>(&input_table_file),
          "input table file")
         ("log-level,l", value<string>(&log_level)->default_value("DEBUG"),
@@ -75,6 +79,8 @@ int main(int argc,char** argv) {
     }
 
     // set log
+    // remove log_file
+    remove(log_file.c_str());
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
     

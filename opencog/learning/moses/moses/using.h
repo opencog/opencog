@@ -37,9 +37,10 @@
 #include <boost/iterator/indirect_iterator.hpp>
 
 #include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/util/Logger.h>
 
 // uncomment this line for debug information to be given during execution
-//#define DEBUG_INFO 
+#define DEBUG_INFO 
 
 namespace moses {
 
@@ -64,6 +65,7 @@ namespace moses {
     using boost::make_permutation_iterator;
     using boost::make_indirect_iterator;
 
+    using opencog::logger;
 } //~namespace moses
 
 #endif

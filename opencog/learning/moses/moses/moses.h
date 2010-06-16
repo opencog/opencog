@@ -161,8 +161,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         OC_ASSERT(!empty(),
                   "Empty metapopulation in function select_exemplar().");
         
-        cout << "METAPOPULATION size : " << size() << endl << endl;
-
         //compute the probs for all candidates
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
@@ -222,11 +220,26 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         iterator exemplar = select_exemplar();
 
         combo_tree tr(exemplar->first);
-        cout << endl << "Current exemplar:" << tr << endl;
-        //clean_and_full_reduce(tr);
-        //cout << "Exemplar after reduction:" << tr << endl;
-        cout << "Exemplar's score: " << score(tr) << endl;
-        cout << "max evals in this expand " << max_evals << endl << endl;
+
+        // Logger
+        logger().debug("Expand with exemplar:");
+        { 
+            stringstream ss; 
+            ss << tr; 
+            logger().debug(ss.str()); 
+        }
+        { 
+            stringstream ss; 
+            ss << "Scored: " << score(tr); 
+            logger().debug(ss.str()); 
+        }
+        {
+            stringstream ss;
+            ss << "Maximum fitness evaluations during that expansion: " 
+               << max_evals;
+            logger().debug(ss.str());
+        }
+        // ~Logger
 
         //do representation-building and create a deme (initially empty)
         representation rep(*simplify, exemplar->first, type,
@@ -267,7 +280,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
             //turn the knobs of rep._exemplar as stored in inst
             rep.transform(inst);
-
+            
             //get the combo_tree associated to inst, cleaned and reduced
             combo_tree tr = rep.get_clean_exemplar();
 
@@ -549,12 +562,9 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals,
            const combo_tree_score& max_score)
 {
-    clock_t start, end;
-    start = clock ();
+    logger().info("MOSES starts");
 
     while (mp.n_evals() < max_evals) {
-        cout << "mp size " << mp.size() << endl;
-
         //run a generation
         if (mp.expand(max_evals - mp.n_evals(), max_score)) {
             //print the generation number and a best solution
@@ -568,11 +578,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
             break;
     }
 
-    end = clock ();
-
-    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC
-         << "seconds" << endl << endl;
-
+    logger().info("MOSES ends");
 }
 
 template<typename Scoring, typename Domination, typename Optimization>
