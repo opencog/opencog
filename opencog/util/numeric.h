@@ -72,7 +72,7 @@ const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 template<typename T>
 struct absolute_value_order {
     bool operator()(T a,T b) const {
-        return (a == -b) ? a < b : abs(a) < abs(b);
+        return (a == -b) ? a < b : std::abs(a) < std::abs(b);
     }
 };
 template<typename T>

@@ -53,6 +53,10 @@ int main(int argc,char** argv) {
     string log_file;
     float variance;
     vector<string> ignore_ops_str;
+    string opt_algo; //optimization algorithm
+    static const string un="un"; // univariate
+    static const string sa="sa"; // simulation annealing
+    static const string hc="hc"; // hillclimbing
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -74,6 +78,8 @@ int main(int argc,char** argv) {
          "variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and abs_log can be ignored")
+        ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
+         "optimization algorithm, current supported algorithms are univariate (un), simulation annealing (sa), hillclimbing (hc)")
         ;
 
     variables_map vm;
@@ -142,10 +148,29 @@ int main(int argc,char** argv) {
     occam_contin_bscore bscore(contintable, inputtable,
                                variance, alphabet_size, rng);
 
-    metapopulation<occam_contin_score, occam_contin_bscore, univariate_optimization> 
-        metapop(rng, combo_tree(id::plus), tt,
-                contin_reduction(rng), score, bscore,
-                univariate_optimization(rng));
-    
-    moses::moses(metapop, max_evals, 0, ignore_ops);
+    if(opt_algo == un) { // univariate
+        metapopulation<occam_contin_score, occam_contin_bscore,
+                       univariate_optimization> 
+            metapop(rng, combo_tree(id::plus), tt,
+                    contin_reduction(rng), score, bscore,
+                    univariate_optimization(rng));
+        moses::moses(metapop, max_evals, 0, ignore_ops);
+    } else if(opt_algo == sa) { // simulation annealing
+        metapopulation<occam_contin_score, occam_contin_bscore,
+                       simulated_annealing> 
+            metapop(rng, combo_tree(id::plus), tt,
+                    contin_reduction(rng), score, bscore,
+                    simulated_annealing(rng));
+        moses::moses(metapop, max_evals, 0, ignore_ops);
+    } else if(opt_algo == hc) { // hillclimbing
+        metapopulation<occam_contin_score, occam_contin_bscore,
+                       iterative_hillclimbing> 
+            metapop(rng, combo_tree(id::plus), tt,
+                    contin_reduction(rng), score, bscore,
+                    iterative_hillclimbing(rng));
+        moses::moses(metapop, max_evals, 0, ignore_ops);
+    } else {
+        std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
+        return 1;
+    }
 }

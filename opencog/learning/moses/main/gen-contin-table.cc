@@ -62,8 +62,8 @@ int main(int argc, char ** argv)
                 cout << contintable[k] << endl;
             }
         } catch (...) {
-            cout << "an exception has been raised perhaps you should try again with a different"
-                 "min_randvalue or max_rand value" << endl;
+            cout << "an exception has been raised perhaps you should try"
+                " again with a different min_randvalue or max_rand value" << endl;
             exit(1);
         }
     }

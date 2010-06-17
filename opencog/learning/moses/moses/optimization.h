@@ -501,11 +501,11 @@ struct simulated_annealing {
      
     typedef score_t energy_t;
  
-    simulated_annealing(opencog::RandGen& _rng,double _init_temp,
-                        double _min_temp, double _temp_step_size,
-                        double _accept_prob_temp_intensity,
-                        double _dist_temp_intensity,
-                        double _fraction_of_remaining,
+    simulated_annealing(opencog::RandGen& _rng, double _init_temp = 30,
+                        double _min_temp = 0, double _temp_step_size = 0.5,
+                        double _accept_prob_temp_intensity = 0.5,
+                        double _dist_temp_intensity = 0.5,
+                        double _fraction_of_remaining = 10,
                         const eda_parameters& p = eda_parameters())
         : rng(_rng), 
           init_temp(_init_temp),
