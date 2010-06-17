@@ -71,7 +71,7 @@ int main(int argc,char** argv) {
         ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
          "file name where to write the log")
         ("variance,v", value<float>(&variance)->default_value(0),
-         "variance of an imaginary Gaussian around each candidate's output, this is actually a way to control the Occam's razor bias, 0 or negative means no bias, otherwise the higher v the stronger the Occam's razor bias")
+         "variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor bias, otherwise the higher v the stronger the Occam's razor")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and abs_log can be ignored")
         ;

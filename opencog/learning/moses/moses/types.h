@@ -41,8 +41,7 @@ namespace moses {
     typedef opencog::tagged_item<combo::combo_tree,
                                  combo_tree_score> scored_combo_tree;
 
-    typedef float bscore_t; // type of a behavioral score feature
-    typedef std::vector<bscore_t> behavioral_score;
+    typedef std::vector<score_t> behavioral_score;
 
     typedef opencog::tagged_item<behavioral_score,
                                  combo_tree_score> combo_tree_behavioral_score;
