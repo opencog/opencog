@@ -338,7 +338,15 @@ bool ImitationLearningAgent::initLearning(int nepc,
                                              *_rng);
         } else if (ILALGO == Control::ImitationLearningAlgo::MOSES) {
             _PIL = new moses::moses_learning(nepc, *_fitnessEstimator,
-                                             _definite_objects, eo,
+                                             _definite_objects,
+                                             // Warning, the following
+                                             // argument denotes the
+                                             // set of operators to
+                                             // ignore, as opposed to
+                                             // eo, but anyway this
+                                             // argument is not used
+                                             // for the moment
+                                             operator_set(),
                                              _atomic_perceptions,
                                              _atomic_actions, *_rng);
         } else OC_ASSERT(false,

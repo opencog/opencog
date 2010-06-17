@@ -59,7 +59,7 @@ representation::representation(const reduct::rule& simplify,
                                const combo_tree& exemplar_,
                                const type_tree& tt,
                                opencog::RandGen& _rng,
-                               const operator_set* os,
+                               const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions)
     : _exemplar(exemplar_), rng(_rng), _simplify(&simplify)
@@ -70,8 +70,9 @@ representation::representation(const reduct::rule& simplify,
 #endif
 
     //build the knobs
-    build_knobs(rng, _exemplar, tt, *this, os, perceptions, actions,stepsize,
-                expansion, depth);
+    build_knobs(rng, _exemplar, tt, *this, ignore_ops,
+                perceptions, actions,
+                stepsize, expansion, depth);
 
     //handle knob merging
 

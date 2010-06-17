@@ -111,7 +111,7 @@ score_t occam_contin_score::operator()(const combo_tree& tr) const
             return logPDM(sse, target.size(), variance)
                 - (score_t)tr.size()*alphabet_size_log; // occam's razor
         else 
-            return sse; // no occam's razor
+            return -sse; // no occam's razor
     } catch (...) {
         stringstream ss;
         ss << "The following candidate has failed to be evaluated: " << tr;
@@ -130,8 +130,8 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
          it1 != ct.end();)
         if(variance > 0) 
-            *dst++ = logPDM(sqr((*it1++) - (*it2++)), 1, variance)
-                - trs*alphabet_size_log; // occam's razor
+            *dst++ = trs*alphabet_size_log // occam's razor
+                - logPDM(sqr((*it1++) - (*it2++)), 1, variance);
         else
             *dst++ = sqr((*it1++) - (*it2++)); // no occam's razor
     return bs;

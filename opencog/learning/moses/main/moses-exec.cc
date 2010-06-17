@@ -52,6 +52,7 @@ int main(int argc,char** argv) {
     string log_level;
     string log_file;
     float variance;
+    vector<string> ignore_ops_str;
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -61,7 +62,7 @@ int main(int argc,char** argv) {
          "random seed")
         ("max-evals,m", value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations")
-        ("max-gens,m", value<unsigned int>(&max_gens)->default_value(1000),
+        ("max-gens,g", value<unsigned int>(&max_gens)->default_value(1000),
          "maximum number of demes to generate")
         ("input-file,i", value<string>(&input_table_file),
          "input table file")
@@ -70,14 +71,16 @@ int main(int argc,char** argv) {
         ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
          "file name where to write the log")
         ("variance,v", value<float>(&variance)->default_value(0),
-         "variance of an imaginary Guassian around each candidate's output, this is actually a way to control the Occam's razor bias, 0 or negative means no bias, otherwise the higher v the stronger the Occam's razor bias")
+         "variance of an imaginary Gaussian around each candidate's output, this is actually a way to control the Occam's razor bias, 0 or negative means no bias, otherwise the higher v the stronger the Occam's razor bias")
+        ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
+         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
         ;
-    
+
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);    
     
-    if (vm.count("help")) {
+    if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
         return 1;
     }
@@ -88,17 +91,10 @@ int main(int argc,char** argv) {
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
     
-    // if (vm.count("input-file")) {
-    //     cout << "Compression level was set to " 
-    //          << vm["compression"].as<int>() << ".\n";
-    // } else {
-    //     cout << "Compression level was not set.\n";
-    // }
-
-
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
 
+    // read the input_table_file file
     ifstream in(input_table_file.c_str());
     contin_table contintable;
     RndNumTable inputtable;
@@ -122,10 +118,24 @@ int main(int argc,char** argv) {
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::contin_type, arity + 1);
 
-    int alphabet_size = 8; // this is roughly the number of operators
-                           // in contin formula, it will have to be
-                           // adapted depending on the operators that
-                           // one wants to use
+    // convert ignore_ops_str to the set of actual operators to ignore
+    vertex_set ignore_ops;
+    foreach(const string& s, ignore_ops_str) {
+        vertex v;
+        if(builtin_str_to_vertex(s, v))
+            ignore_ops.insert(v);
+        else {
+            std::cerr << "error: " << s 
+                      << " is not recognized as combo operator" << std::endl;
+            return 1;
+        }
+    }
+
+    int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
+                                               // number of operators
+                                               // in contin formula,
+                                               // it will have to be
+                                               // adapted
 
     occam_contin_score score(contintable, inputtable,
                              variance, alphabet_size, rng);
@@ -133,12 +143,9 @@ int main(int argc,char** argv) {
                                variance, alphabet_size, rng);
 
     metapopulation<occam_contin_score, occam_contin_bscore, univariate_optimization> 
-        metapop(rng,
-                combo_tree(id::plus),
-                tt,contin_reduction(rng),
-                score,
-                bscore,
+        metapop(rng, combo_tree(id::plus), tt,
+                contin_reduction(rng), score, bscore,
                 univariate_optimization(rng));
     
-    moses::moses(metapop, max_evals, 0);
+    moses::moses(metapop, max_evals, 0, ignore_ops);
 }

@@ -100,17 +100,19 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     /**
      *  Constuctor for the class metapopulation
      *  
-     * @param _rng    rand number 
-     * @param base    exemplar used to initialize the metapopulation
-     * @param tt      type of expression to be learned 
-     * @param si      reduct rule for reducting 
-     * @param sc      scoring function for scoring
-     * @param bsc     behavior scoring function
-     * @param opt     optimization should be providing for the learning
-     * @param pa      parameter for selecting the deme 
+     * @param _rng       rand number 
+     * @param base       exemplar used to initialize the metapopulation
+     * @param tt         type of expression to be learned
+     * @param iops       the set of operators to ignore
+     * @param si         reduct rule for reducting 
+     * @param sc         scoring function for scoring
+     * @param bsc        behavior scoring function
+     * @param opt        optimization should be providing for the learning
+     * @param pa         parameter for selecting the deme 
      */
     metapopulation(opencog::RandGen& _rng, const combo_tree& base,
-                   const combo::type_tree& tt, const reduct::rule& si,
+                   const combo::type_tree& tt,
+                   const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
@@ -197,7 +199,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      *
      * @param max_evals    the max evals
      * @param max_score    the max score
-     * @param os           the operator set
+     * @param ignore_ops   the operator set to ignore
      * @param perceptions  set of perceptions of an interactive agent
      * @param actions      set of actions of an interactive agent
      *
@@ -206,7 +208,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      */
     bool expand(int max_evals,
                 const combo_tree_score& max_score,
-                const operator_set* os = NULL,
+                const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)  {
 
@@ -243,7 +245,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //do representation-building and create a deme (initially empty)
         representation rep(*simplify, exemplar->first, type,
-                           rng, os, perceptions, actions);
+                           rng, ignore_ops, perceptions, actions);
 
         eda::instance_set<combo_tree_score> deme(rep.fields());
 
@@ -331,14 +333,14 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     /**
      * Create the deme
      *
-     * @param os the operator set
-     * @param perceptions a set of perceptions of an interactive agent
-     * @param actions a set of actions of an interactive agent
+     * @param ignore_ops   the operators to ignore
+     * @param perceptions  a set of perceptions of an interactive agent
+     * @param actions      a set of actions of an interactive agent
      *
-     * @return  return true if it creates deme successfully,otherwise false.
+     * @return return true if it creates deme successfully,otherwise false.
      */
 
-    bool create_deme(const operator_set* os = NULL,
+    bool create_deme(const operator_set& ignore_ops = operator_set(),
                      const combo_tree_ns_set* perceptions = NULL,
                      const combo_tree_ns_set* actions = NULL)  {
 
@@ -367,7 +369,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //do representation-building and create a deme (initially empty)
         _rep = new representation(*simplify, _exemplar->first, type,
-                                  rng, os, perceptions, actions);
+                                  rng, ignore_ops, perceptions, actions);
         _deme = new eda::instance_set<combo_tree_score>(_rep->fields());
         // _n_evals = 0;
 
@@ -555,18 +557,19 @@ combo_tree_ns_set;
  * @param mp the metapopulation 
  * @param max_evals the max evaluations
  * @param max_score the max score tree
+ * @param ignore_ops the set of operators to ignore
  */
 
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals,
-           const combo_tree_score& max_score)
+           int max_evals, const combo_tree_score& max_score,
+           const operator_set& ignore_ops = operator_set())
 {
     logger().info("MOSES starts");
 
     while (mp.n_evals() < max_evals) {
         //run a generation
-        if (mp.expand(max_evals - mp.n_evals(), max_score)) {
+        if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops)) {
             //print the generation number and a best solution
             std::cout << "sampled " << mp.n_evals()
                       << " best " << mp.best_score().first
@@ -583,9 +586,11 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, score_t max_score)
+           int max_evals, score_t max_score, 
+           const operator_set& ignore_ops = operator_set())
 {
-    moses(mp, max_evals, combo_tree_score(max_score, worst_possible_score.second));
+    moses(mp, max_evals, combo_tree_score(max_score, worst_possible_score.second),
+          ignore_ops);
 }
 
 /**
@@ -598,7 +603,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param mp the metapopulation
  * @param max_evals the max evlautions
  * @parma max_score the max score, the type is tree_score
- * @param os the operator set
+ * @param ignore_ops the set of operators to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
  * @param op the ordered programs by the fitness
@@ -607,7 +612,7 @@ template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals,
            const combo_tree_score& max_score,
-           const operator_set* os,
+           const operator_set& ignore_ops,
            const combo_tree_ns_set* perceptions,
            const combo_tree_ns_set* actions,
            ordered_programs& op)
@@ -622,7 +627,8 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
         int max_for_generation;
         max_for_generation = max_evals - mp.n_evals();
 
-        if (mp.expand(max_for_generation, max_score, os, perceptions, actions)) {
+        if (mp.expand(max_for_generation, max_score, ignore_ops,
+                      perceptions, actions)) {
             //print the generation number and a best solution
             std::cout << "sampled " << mp.n_evals()
                       << " best " << mp.best_score().first << " "
@@ -642,14 +648,14 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals, score_t max_score,
-           const operator_set* os,
+           const operator_set& ignore_ops,
            const combo_tree_ns_set* perceptions,
            const combo_tree_ns_set* actions,
            ordered_programs& op)
 {
     moses(mp, max_evals,
           combo_tree_score(max_score, worst_possible_score.second),
-          os, perceptions, actions, op);
+          ignore_ops, perceptions, actions, op);
 }
 
 
@@ -664,7 +670,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param mp the metapopulation
  * @param max_evals the max evlautions
  * @parma max_score the max score, the type is score tree
- * @param os the operator set
+ * @param ignore_ops the operator set to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
  * @param op the ordered programs by the fitness
@@ -673,7 +679,7 @@ template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals,
                   const combo_tree_score& max_score,
-                  const operator_set* os,
+                  const operator_set& ignore_ops,
                   const combo_tree_ns_set* perceptions,
                   const combo_tree_ns_set* actions,
                   ordered_programs& op)
@@ -687,7 +693,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
 
     while (mp.n_evals() < max_evals) {
         o = 0;
-        if (mp.create_deme(os, perceptions, actions)) {
+        if (mp.create_deme(ignore_ops, perceptions, actions)) {
             while (o >= 0)
                 o = mp.optimize_deme(max_evals, max_for_slice, max_score);
 
@@ -722,7 +728,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param mp the metapopulation
  * @param max_evals the max evlautions
  * @parma max_score the max score, the type is score_t
- * @param os the operator set
+ * @param ignore_ops the operator set to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
  * @param op the ordered programs by the fitness
@@ -730,7 +736,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals, score_t max_score,
-                  const operator_set* os,
+                  const operator_set& ignore_ops,
                   const combo_tree_ns_set* perceptions,
                   const combo_tree_ns_set* actions,
                   ordered_programs& op)
@@ -738,7 +744,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
     moses_sliced(mp,
                  max_evals,
                  combo_tree_score(max_score, worst_possible_score.second),
-                 os, perceptions, actions, op);
+                 ignore_ops, perceptions, actions, op);
 }
 
 } //~namespace moses

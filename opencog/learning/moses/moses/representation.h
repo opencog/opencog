@@ -56,7 +56,7 @@ struct representation : public knob_mapper, boost::noncopyable {
                    const combo_tree& exemplar_,
                    const combo::type_tree& t,
                    opencog::RandGen& rng,
-                   const operator_set* os = NULL,
+                   const operator_set& ignore_ops = operator_set(),
                    const combo_tree_ns_set* perceptions = NULL,
                    const combo_tree_ns_set* actions = NULL);
 

@@ -54,7 +54,7 @@ struct build_knobs : boost::noncopyable {
     // Optional arguments used only for Petbrain and actions
     build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
                 const combo::type_tree& t, knob_mapper& mapper,
-                const operator_set* os = NULL,
+                const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
                 contin_t step_size = 1.0, contin_t expansion = 1.0,
@@ -72,7 +72,8 @@ protected:
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
 
-    const operator_set* _os;
+    const operator_set& _ignore_ops; //the set of operators to ignore
+                                     //during representation building
     const combo_tree_ns_set* _perceptions;
     const combo_tree_ns_set* _actions;
 
@@ -100,7 +101,12 @@ protected:
     void contin_canonize(combo_tree::iterator);
     void canonize_div(combo_tree::iterator it);
     void add_constant_child(combo_tree::iterator it, contin_t v);
+
+    // make it binary * with second arg a constant
     combo_tree::iterator canonize_times(combo_tree::iterator it);
+
+    // call canonize_times on it and then linear_canonize on its first child
+    void linear_canonize_times(combo_tree::iterator it);
     void linear_canonize(combo_tree::iterator it);
     void rec_canonize(combo_tree::iterator it);
     void append_linear_combination(combo_tree::iterator it);

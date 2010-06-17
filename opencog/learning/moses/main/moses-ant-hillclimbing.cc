@@ -74,7 +74,7 @@ int main(int argc,char** argv) {
 
   opencog::MT19937RandGen rng(rand_seed);
 
-  operator_set os;
+  operator_set ignore_ops;
   combo_tree_ns_set perceptions;
   combo_tree_ns_set actions;
 
@@ -108,10 +108,9 @@ int main(int argc,char** argv) {
 
  metapopulation<ant_score,ant_bscore,sliced_iterative_hillclimbing> 
     metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
-	    scorer,
-	    bscorer,
-            sliced_iterative_hillclimbing(rng));
-  moses::moses_sliced(metapop,max_evals,0,&os,&perceptions,&actions,op);
+            scorer, bscorer, sliced_iterative_hillclimbing(rng));
+  moses::moses_sliced(metapop, max_evals, 0, ignore_ops,
+                      &perceptions, &actions, op);
 
 	
 }

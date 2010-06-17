@@ -158,6 +158,10 @@ typedef boost::variant < builtin,
                          action_symbol,
 			 ann_type > vertex;
 
+typedef std::set<vertex> vertex_set;
+typedef vertex_set::iterator vertex_set_it;
+typedef vertex_set::const_iterator vertex_set_const_it;
+
 typedef std::vector<vertex> argument_list;
 typedef argument_list::iterator argument_list_it;
 typedef argument_list::const_iterator argument_list_const_it;
@@ -732,11 +736,9 @@ inline bool may_have_side_effects(combo_tree::iterator /*it*/)
 
 //input vertex and combo_tree functions
 
-template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
-void str_to_vertex(const std::string& str, vertex& v)
+// return false if the string has no match
+inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
 {
-    OC_ASSERT(!str.empty(), "input to string should not be empty.");
-    //builtin
     if (str == "and" || str == "logical_and")
         v = id::logical_and;
     else if (str == "or" || str == "logical_or")
@@ -751,11 +753,11 @@ void str_to_vertex(const std::string& str, vertex& v)
         v = id::contin_if;
     else if (str == "boolean_if" || str == "boolean_boolean_if")
         v = id::boolean_if;
-    else if (str == "+")
+    else if (str == "+" || str == "plus")
         v = id::plus;
-    else if (str == "*")
+    else if (str == "*" || str == "times")
         v = id::times;
-    else if (str == "/")
+    else if (str == "/" || str == "div")
         v = id::div;
     else if (str == "ann")
         v = ann_type(0,id::ann);
@@ -805,14 +807,27 @@ void str_to_vertex(const std::string& str, vertex& v)
         v = id::return_success;
     else if (str == "repeat_n")
         v = id::repeat_n;
+    else return false;
+    return true;
+}
+
+template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
+void str_to_vertex(const std::string& str, vertex& v)
+{
+    OC_ASSERT(!str.empty(), "input to string should not be empty.");
+    //builtin
+    if(builtin_str_to_vertex(str, v)) {
+        return;
+    }
+    //ann
     else if (str[0] == '#' && str[1]=='N') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_node);
-        }
+    }
     else if (str[0] == '#' && str[1]=='I') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_input);
-        }
+    }
     //argument
     else if (str[0] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(1));

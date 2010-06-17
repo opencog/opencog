@@ -48,12 +48,14 @@ using namespace reduct;
 moses_learning::moses_learning(int nepc,
                                const FE& fitness_estimator,
                                const definite_object_set& dos,
-                               const operator_set& eo,
+                               const operator_set& ignore_ops,
                                const combo_tree_ns_set& perceptions,
                                const combo_tree_ns_set& actions,
                                opencog::RandGen& rng)
-        : _fitness_estimator(fitness_estimator), _comp(dos), _dos(dos), _elementary_operators(eo),
-        _perceptions(perceptions), _actions(actions), _rng(rng), max_score(pair<int, int>(0, 0))
+        : _fitness_estimator(fitness_estimator), _comp(dos), _dos(dos), 
+          _ignore_ops(ignore_ops),
+          _perceptions(perceptions), _actions(actions), 
+          _rng(rng), max_score(pair<int, int>(0, 0))
 {
 
     _nepc = nepc;
@@ -162,7 +164,7 @@ void moses_learning::operator()()
     case HC_BUILD_CANDIDATES:  {
 
         std::cout << "BUILD" << std::endl;
-        if (metapop->create_deme(&_elementary_operators, &_perceptions, &_actions))
+        if (metapop->create_deme(_ignore_ops, &_perceptions, &_actions))
             _hcState = HC_ESTIMATE_CANDIDATES;
         else
             _hcState = HC_IDLE;

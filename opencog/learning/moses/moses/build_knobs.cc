@@ -24,6 +24,7 @@
 #include "build_knobs.h"
 #include <opencog/comboreduct/reduct/meta_rules.h>
 #include <opencog/comboreduct/reduct/general_rules.h>
+#include <opencog/util/printContainer.h>
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
@@ -47,16 +48,16 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
                          combo_tree& exemplar,
                          const combo::type_tree& t,
                          knob_mapper& mapper,
-                         const operator_set* os,
+                         const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
                          const combo_tree_ns_set* actions,
                          contin_t step_size,
                          contin_t expansion,
                          eda::field_set::arity_t depth)
-        : rng(_rng), _exemplar(exemplar), _type(t), _mapper(mapper),
-        _arity(t.begin().number_of_children() - 1),
-        _step_size(step_size), _expansion(expansion), _depth(depth),
-        _os(os), _perceptions(perceptions), _actions(actions)
+    : rng(_rng), _exemplar(exemplar), _type(t), _mapper(mapper),
+      _arity(t.begin().number_of_children() - 1),
+      _step_size(step_size), _expansion(expansion), _depth(depth),
+      _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
     cout << "step size " << step_size << endl;
     cout << "expansion " << expansion << endl;
@@ -74,14 +75,13 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         combo::type_tree(combo::id::ann_type);
     stringstream art_ss; //action_result_type
     art_ss << combo::id::action_result_type;
-    OC_ASSERT(
-                     (((os != NULL || perceptions != NULL || actions != NULL) &&
-                       output_type == action_result_type_tree) ||
-                      output_type == boolean_type_tree ||
-                      output_type == contin_type_tree ||
-                      output_type == ann_type_tree),
-                     "Types differ. Expected '%s', got '%s'",
-                     art_ss.str().c_str(), ss.str().c_str());
+    OC_ASSERT((((perceptions != NULL || actions != NULL) && 
+                output_type == action_result_type_tree) ||
+               output_type == boolean_type_tree ||
+               output_type == contin_type_tree ||
+               output_type == ann_type_tree),
+              "Types differ. Expected '%s', got '%s'",
+              art_ss.str().c_str(), ss.str().c_str());
     if (output_type == boolean_type_tree) {
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
@@ -493,7 +493,8 @@ void build_knobs::action_cleanup()
 void build_knobs::contin_canonize(pre_it it)
 {
     if (*it == id::div) {
-        OC_ASSERT((it.number_of_children() == 2), "id::div built in must have exactly 2 children.");
+        OC_ASSERT((it.number_of_children() == 2),
+                  "id::div built in must have exactly 2 children.");
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
 
         canonize_div(it);
@@ -504,17 +505,26 @@ void build_knobs::contin_canonize(pre_it it)
         _exemplar.move_after(it, pre_it(it.last_child()));
         //handle any divs
         for (sib_it div = _exemplar.partition(it.begin(), it.end(),
-                                              bind(not_equal_to<vertex>(), _1, id::div));
-                div != it.end();)
+                                              bind(not_equal_to<vertex>(), _1,
+                                                   id::div));
+             div != it.end();)
             canonize_div(_exemplar.move_after(it, pre_it(div++)));
         //handle the rest of the children
-        _exemplar.append_child(_exemplar.insert_above(it, id::div), contin_t(1));
-        canonize_div(_exemplar.parent(it));
+
+        if(_ignore_ops.find(id::div) == _ignore_ops.end()) {
+            _exemplar.append_child(_exemplar.insert_above(it, id::div),
+                                   contin_t(1));
+            canonize_div(_exemplar.parent(it));
+        } else 
+            linear_canonize_times(it);
     } else {
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
-        _exemplar.append_child(_exemplar.insert_above(it, id::div), contin_t(1));
-
-        canonize_div(_exemplar.parent(it));
+        if(_ignore_ops.find(id::div) == _ignore_ops.end()) {
+            _exemplar.append_child(_exemplar.insert_above(it, id::div),
+                                   contin_t(1));
+            canonize_div(_exemplar.parent(it));
+        } else
+            linear_canonize_times(it);
     }
 
 #ifdef DEBUG_INFO
@@ -537,8 +547,7 @@ void build_knobs::build_contin(pre_it it)
 
 void build_knobs::canonize_div(pre_it it)
 {
-    canonize_times(it.begin());
-    linear_canonize(it.begin().begin());
+    linear_canonize_times(it.begin());
     linear_canonize(it.last_child());
 }
 
@@ -569,6 +578,11 @@ pre_it build_knobs::canonize_times(pre_it it)
     }
 }
 
+void build_knobs::linear_canonize_times(pre_it it)
+{
+    linear_canonize(canonize_times(it).begin());
+}
+
 void build_knobs::linear_canonize(pre_it it)
 {
     //make it a plus
@@ -589,15 +603,19 @@ void build_knobs::rec_canonize(pre_it it)
             if (!is_contin(*sib)) {
                 sib = canonize_times(sib);
                 rec_canonize(sib.begin());
-                OC_ASSERT((is_contin(*sib.last_child())), "Sibling's last child isn't id::contin.");
+                OC_ASSERT((is_contin(*sib.last_child())),
+                          "Sibling's last child isn't id::contin.");
                 rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
             }
         }
 
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
-        append_linear_combination(mult_add(it, id::sin));
-        append_linear_combination(mult_add(it, id::abs_log));
-        append_linear_combination(mult_add(it, id::exp));
+        if(_ignore_ops.find(id::sin) == _ignore_ops.end())
+            append_linear_combination(mult_add(it, id::sin));
+        if(_ignore_ops.find(id::abs_log) == _ignore_ops.end())
+            append_linear_combination(mult_add(it, id::abs_log));
+        if(_ignore_ops.find(id::exp) == _ignore_ops.end())
+            append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
     } else if (*it == id::sin || *it == id::abs_log || *it == id::exp) {
         cout << _exemplar << " | " << combo_tree(it) << endl;

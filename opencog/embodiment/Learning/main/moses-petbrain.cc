@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
     cout << "build metapop" << endl;
 
-    operator_set os;
+    operator_set ignore_ops;
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;
 
@@ -76,5 +76,6 @@ int main(int argc, char** argv)
     ordered_programs op;
 
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
-    moses::moses(metapop, max_evals, 0, &os, &perceptions, &actions, op);
+    moses::moses(metapop, max_evals, 0, ignore_ops,
+                 &perceptions, &actions, op);
 }

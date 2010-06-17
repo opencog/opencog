@@ -71,7 +71,7 @@ public:
     moses_learning(int nepc,
                    const FE& fitness_estimator,
                    const definite_object_set& dos,
-                   const operator_set& eo,
+                   const operator_set& ignore_ops,
                    const combo_tree_ns_set& perceptions,
                    const combo_tree_ns_set& actions,
                    opencog::RandGen& rng);
@@ -91,7 +91,7 @@ private:
     const FE& _fitness_estimator;
     Comp _comp;
     const definite_object_set& _dos;
-    const std::set<vertex>& _elementary_operators;
+    const operator_set& _ignore_ops;
     const combo_tree_ns_set& _perceptions;
     const combo_tree_ns_set& _actions;
 
