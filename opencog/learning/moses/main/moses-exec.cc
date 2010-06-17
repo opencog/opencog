@@ -73,7 +73,7 @@ int main(int argc,char** argv) {
         ("variance,v", value<float>(&variance)->default_value(0),
          "variance of an imaginary Gaussian around each candidate's output, this is actually a way to control the Occam's razor bias, 0 or negative means no bias, otherwise the higher v the stronger the Occam's razor bias")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
-         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
+         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and abs_log can be ignored")
         ;
 
     variables_map vm;
