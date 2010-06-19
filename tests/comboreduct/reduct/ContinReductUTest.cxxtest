@@ -120,12 +120,12 @@ public:
   }
 
   //test_simplify4 :
-  //abs_log(x)+abs_log(y) -> abs_log(x*y)
-  //abs_log(x)-abs_log(y) -> abs_log(x/y)
-  //abs_log(c/x) -> -abs_log(c^-1*x)
-  //abs_log(exp(x)*y) -> x+abs_log(y)
+  //log(x)+log(y) -> log(x*y)
+  //log(x)-log(y) -> log(x/y)
+  //log(c/x) -> -log(c^-1*x)
+  //log(exp(x)*y) -> x+log(y)
   void test_simplify4() {
-    string tree_str="*(+(abs_log(+(#1 1)) abs_log(+(#2 1))) +(abs_log(+(#3 1)) *(abs_log(+(#4 1)) -1)) abs_log(/(5.0 +(#5 1))) abs_log(*(exp(#6) +(#7 1))))";
+    string tree_str="*(+(log(+(#1 1)) log(+(#2 1))) +(log(+(#3 1)) *(log(+(#4 1)) -1)) log(/(5.0 +(#5 1))) log(*(exp(#6) +(#7 1))))";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -155,10 +155,10 @@ public:
   //test_simplify5 :
   //prod exp(x_i) -> exp(sum x_i)
   //x/exp(y) -> x*exp(-y)
-  // // exp(log(x)+y) -> x*exp(y), this one has been disabled
+  //exp(log(x)+y) -> x*exp(y) (if log is not defined as log(abs(x)))
   //sin(x+c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
   void test_simplify5() {
-    string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(abs_log(+(#7 1)) #8)) sin(+(#9 100.0)))";
+    string tree_str="+(*(exp(#1) exp(#2) #3 exp(#4)) /(#5 exp(#6)) exp(+(log(+(#7 1)) #8)) sin(+(#9 100.0)))";
 
     stringstream ss(tree_str);
     combo_tree tr;
@@ -173,11 +173,18 @@ public:
     try {
       contin_table ct1(tr, rnt, rng);
       size_before=tr.size();
+      std::cout << "before: " << tr << std::endl;
       contin_reduce(tr, rng);
+      std::cout << "after:  " << tr << std::endl;      
       size_after=tr.size();;
       contin_table ct2(tr, rnt, rng);
 
-      TS_ASSERT_LESS_THAN_EQUALS(size_after,size_before);
+// the following TS_ASSERT is not valid if log has the semantics
+// log(abs(x)) because the rule exp(log(x)+y) -> x*exp(y) is not
+// applied
+#ifndef ABS_LOG
+      TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
+#endif
       TS_ASSERT_EQUALS(ct1,ct2);
     }
     catch(EvalException& e) {

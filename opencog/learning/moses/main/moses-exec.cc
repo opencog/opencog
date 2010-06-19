@@ -82,7 +82,7 @@ int main(int argc,char** argv) {
         ("variance,v", value<float>(&variance)->default_value(0),
          "variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
-         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and abs_log can be ignored")
+         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
         ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
          "optimization algorithm, current supported algorithms are univariate (un), simulation annealing (sa), hillclimbing (hc)")
         ("exemplar,e", value<string>(&exemplar_str)->default_value("+"),

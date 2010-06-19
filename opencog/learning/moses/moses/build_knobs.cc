@@ -612,12 +612,12 @@ void build_knobs::rec_canonize(pre_it it)
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
         if(_ignore_ops.find(id::sin) == _ignore_ops.end())
             append_linear_combination(mult_add(it, id::sin));
-        if(_ignore_ops.find(id::abs_log) == _ignore_ops.end())
-            append_linear_combination(mult_add(it, id::abs_log));
+        if(_ignore_ops.find(id::log) == _ignore_ops.end())
+            append_linear_combination(mult_add(it, id::log));
         if(_ignore_ops.find(id::exp) == _ignore_ops.end())
             append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
-    } else if (*it == id::sin || *it == id::abs_log || *it == id::exp) {
+    } else if (*it == id::sin || *it == id::log || *it == id::exp) {
         cout << _exemplar << " | " << combo_tree(it) << endl;
         linear_canonize(it.begin());
     } else {

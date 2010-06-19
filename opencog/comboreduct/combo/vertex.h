@@ -46,6 +46,9 @@
 #include "ann.h"
 //#include "procedure_call.h"
 
+// uncomment that if you want to interpret log(x) as log(abs(x))
+// #define ABS_LOG
+
 namespace combo
 {
 
@@ -66,7 +69,7 @@ enum builtin {
     contin_if,
     boolean_if,
     plus, times, div, exp,
-    abs_log, // abs_log(x) = log(abs(x)), to void failure with negative input
+    log, // if ABS_LOG is enabled then log(x) := log(abs(x))
     sin,
     greater_than_zero,
     impulse,
@@ -761,8 +764,8 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
         v = id::div;
     else if (str == "ann")
         v = ann_type(0,id::ann);
-    else if (str == "abs_log")
-        v = id::abs_log;
+    else if (str == "log")
+        v = id::log;
     else if (str == "exp")
         v = id::exp;
     else if (str == "sin")

@@ -63,12 +63,16 @@ namespace reduct {
 		  downwards(reduce_sin()),
 		  downwards(reduce_invert_constant()),
 
-		  downwards(reduce_abs_log_div_times()),
+		  downwards(reduce_log_div_times()),
 		  downwards(reduce_exp_times()),
 		  downwards(reduce_exp_div()),
-		  // downwards(reduce_exp_log()),
+// the following rules is not valid if log has the semantics log(abs(x))
+// the macro ABS_LOG is defined in file vertex.h
+#ifndef ABS_LOG
+		  downwards(reduce_exp_log()),
+#endif
 		  downwards(reduce_times_div()),
-		  downwards(reduce_sum_abs_log()),
+		  downwards(reduce_sum_log()),
 
 		  //complex contin
 		  upwards(reorder_commutative()),
@@ -155,12 +159,16 @@ namespace reduct {
 		  downwards(reduce_sin()),
 		  downwards(reduce_invert_constant()),
 
-		  downwards(reduce_abs_log_div_times()),
+		  downwards(reduce_log_div_times()),
 		  downwards(reduce_exp_times()),
 		  downwards(reduce_exp_div()),
-		  // downwards(reduce_exp_log()),
+// the following rules is not valid if log has the semantics log(abs(x))
+// the macro ABS_LOG is defined in file vertex.h
+#ifndef ABS_LOG
+		  downwards(reduce_exp_log()),
+#endif
 		  downwards(reduce_times_div()),
-		  downwards(reduce_sum_abs_log()),
+		  downwards(reduce_sum_log()),
 
 		  //complex contin
 		  upwards(reorder_commutative()),
