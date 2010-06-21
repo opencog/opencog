@@ -110,16 +110,13 @@ private:
 
     HCState _hcState;
 
-    combo_tree_hash_set _used_as_center; // @todo: should use
-                                         // metapopulation::_visited_exemplars
-                                         // instead
     combo_tree_hash_set _used_for_owner; 
-    ordered_programs _ordered_best_estimates; //_ordered_neighborhood;
     int _number_of_calls;
 
     const combo_tree_score max_score;
 
-    metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> *metapop;
+    typedef metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> metapop_t;
+    metapop_t *metapop;
 };
 
 struct petaverse_score : public unary_function<combo_tree, score_t> {

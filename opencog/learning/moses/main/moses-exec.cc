@@ -52,6 +52,7 @@ int main(int argc,char** argv) {
     unsigned long rand_seed;
     string input_table_file;
     unsigned long max_evals;
+    long result_count;
     unsigned int max_gens;
     string log_level;
     string log_file;
@@ -71,6 +72,8 @@ int main(int argc,char** argv) {
          "random seed")
         ("max-evals,m", value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations")
+        ("result-count,r", value<long>(&result_count)->default_value(10),
+         "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them")
         ("max-gens,g", value<unsigned int>(&max_gens)->default_value(1000),
          "maximum number of demes to generate")
         ("input-file,i", value<string>(&input_table_file),

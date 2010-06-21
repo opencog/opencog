@@ -163,7 +163,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         OC_ASSERT(!empty(),
                   "Empty metapopulation in function select_exemplar().");
         
-        //compute the probs for all candidates
+        //compute the probs for all candidates with best score
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
         vector<complexity_t> probs;
@@ -173,14 +173,26 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             complexity_t c = get_complexity(*it);
             if (cmin - c > params.selection_max_range)
                 break;
-            probs.push_back(c);
+            // if the corresponding tree is already visited give it
+            // the maximum complexity (actually the min in value since
+            // complexity is negative)
+            const combo_tree& tr = get_tree(*it);
+            if(_visited_exemplars.find(tr) == _visited_exemplars.end())
+                probs.push_back(c);
+            else probs.push_back(max_complexity);
         }
 
         complexity_t sum = 0;
+        complexity_t min_comp = *max_element(probs.begin(), probs.end());
+        // convert complexities into (non-normalized) probabilities
         foreach(complexity_t& p, probs) {
-            p = (1 << (*max_element(probs.begin(), probs.end()) - p));
+            // in case p has the max complexity (already visited) then
+            // the probability is set to null
+            p = (p == max_complexity? 0 : (1 << (min_comp - p)));
             sum += p;
         }
+
+        OC_ASSERT(sum > 0, "This may happen, that means that there is no best candidates that have not been visisted, to fix it one just needs to add some code to explore the second best candidates and so on");
 
         const_iterator exemplar = begin();
         advance(exemplar, distance(probs.begin(),
@@ -255,14 +267,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         eda::instance_set<combo_tree_score> deme(rep.fields());
 
-        //remove the exemplar and mark it so we won't expand it again
-        _visited_exemplars.insert(exemplar->first);
-        erase(exemplar);
-
         //do some optimization according to the scoring function
         scorer._rep = &rep;
         scorer._base_count = get_complexity(*exemplar); 
         _n_evals += optimize(deme, scorer, max_evals); 
+
+        //mark the exemplar so we won't expand it again
+        _visited_exemplars.insert(exemplar->first);
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
@@ -282,7 +293,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                 continue;
 
             //generate the tree coded by inst
-
             //turn the knobs of rep._exemplar as stored in inst
             rep.transform(inst);
             
@@ -433,7 +443,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      *
      * @param op  the ordered programs by the fitness
      */
-    void close_deme(ordered_programs& op) {
+    void close_deme() {
         if (_rep == NULL || _deme == NULL)
             return;
 
@@ -499,21 +509,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         cout << endl << "Number of evals performed: " << n_evals() << endl;
         cout << "Metapopulation size : " << size() << endl << endl;
-
-        // add some elements of the metapopulation to the given list of programs
-        for (const_iterator it = begin();it != end();++it)  {
-            combo_tree tr(get_tree(*it));
-
-            (*simplify)(tr, tr.begin());
-            // reduct::hillclimbing_full_reduce(tr);
-            fitness_t s = get_score(*it);
-
-            ordered_programs_it oi = op.find(s);
-            if (oi == op.end() || ((oi->second).size() > tr.size())) {
-                std::pair<fitness_t, combo_tree> p(s, tr);
-                op.insert(p);
-            }
-        }
 
         delete _deme;
         delete _rep;
@@ -693,15 +688,13 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
     int o;
     int max_for_slice = 20;
 
-    ordered_programs _ordered_best_estimates;
-
     while (mp.n_evals() < max_evals) {
         o = 0;
         if (mp.create_deme(ignore_ops, perceptions, actions)) {
             while (o >= 0)
                 o = mp.optimize_deme(max_evals, max_for_slice, max_score);
 
-            mp.close_deme(_ordered_best_estimates);
+            mp.close_deme();
 
             // ordered_programs_it oi;
             // cout << endl << "--------- BEST CANDIDATES SO FAR: ------------- " << endl;

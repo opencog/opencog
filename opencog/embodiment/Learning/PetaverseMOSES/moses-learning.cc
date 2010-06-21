@@ -143,17 +143,13 @@ void moses_learning::operator()()
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), id::action_result_type, 1);
 
-        _used_as_center.insert(_center);
-        cout << "CENTER " << _center << endl;
-
         if (metapop)
             delete metapop;
 
-        metapop = new metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing>
-        (_rng, _center, tt, action_reduction(),
-         *score,
-         *bscore,
-         sliced_iterative_hillclimbing(_rng));
+        metapop = new metapopulation<petaverse_score, petaverse_bscore,
+                                     sliced_iterative_hillclimbing>
+            (_rng, _center, tt, action_reduction(),
+             *score, *bscore, sliced_iterative_hillclimbing(_rng));
 
         _hcState = HC_BUILD_CANDIDATES;
         start = clock ();
@@ -197,7 +193,7 @@ void moses_learning::operator()()
 
     case HC_FINISH_CANDIDATES:  {
 
-        metapop->close_deme(_ordered_best_estimates);
+        metapop->close_deme();
 
         //print the generation number and a best solution
         std::cout << "sampled " << metapop->n_evals()
@@ -220,24 +216,11 @@ void moses_learning::operator()()
         std::cout << "best program total: " << _best_program_estimated << std::endl;
         std::cout << "best score total: " << _best_fitness_estimated << std::endl;
 
-        ordered_programs_it oi;
-
-        cout << "BEST CANDIDATES SO FAR: " << endl;
-        for (oi = _ordered_best_estimates.begin();oi != _ordered_best_estimates.end();oi++)
-            cout << oi->second << " score: " << oi->first << endl;
-
-        for (combo_tree_hash_set_it i = _used_as_center.begin();i != _used_as_center.end();i++)
-            cout << "center: " <<  *i << endl;
-
-        oi = _ordered_best_estimates.begin();
-        while (oi != _ordered_best_estimates.end() && _used_as_center.find(oi->second) != _used_as_center.end())
-            oi++;
-
-        if (oi == _ordered_best_estimates.end())
+        metapop_t::const_iterator exemplar = metapop->select_exemplar();
+        if(exemplar == metapop->end())
             _hcState = HC_IDLE;
-        else  {
-            // @todo use deme managment instead
-            _center = oi->second;
+        else {
+            _center = exemplar->first;
             _hcState = HC_INIT;
         }
 
@@ -274,30 +257,33 @@ const combo_tree& moses_learning::best_program_estimated()
 const combo_tree& moses_learning::current_program()
 {
     //returns the best program which has never been sent to the owner
-    for (ordered_programs_it oi = _ordered_best_estimates.begin(); oi != _ordered_best_estimates.end(); oi++)  {
-        _current_program = oi->second;
-        if (_used_for_owner.find(_current_program) != _used_for_owner.end())
-            _ordered_best_estimates.erase(oi);
-        else  {
-            _used_for_owner.insert(_current_program);
+    for(metapop_t::const_iterator mci = metapop->begin();
+        mci != metapop->end(); mci++)  {
+        _current_program = get_tree(*mci);
 
-            //DEBUG INFO
-            fitness_t cur_est_fit = oi->first;
-            std::cout << "CURRENT FITNESS : " << cur_est_fit << std::endl;
-            std::cout << "CURRENT PROGRAM : " << _current_program << std::endl;
-            //~DEBUG INFO
+        // if this one has already been sent, check the next one
+        if(_used_for_owner.find(_current_program) != _used_for_owner.end())
+            continue;
 
-            if (cur_est_fit >= _best_fitness_estimated) {
-                _best_fitness_estimated = cur_est_fit;
-                _best_program_estimated = _current_program;
-                //std::cout << "BEST PRO EST : " << _best_program_estimated
-                //    << " FIT EST : " << _best_fitness_estimated << std::endl;
-            }
+        _used_for_owner.insert(_current_program);
 
-            reduct::post_learning_rewrite(_current_program);
-            std::cout << "########################### LS PROGRAM : " << _current_program << std::endl;
-            return _current_program;
+        fitness_t cur_est_fit = get_score(*mci);
+
+        //DEBUG INFO
+        std::cout << "CURRENT FITNESS : " << cur_est_fit << std::endl;
+        std::cout << "CURRENT PROGRAM : " << _current_program << std::endl;
+        //~DEBUG INFO
+        
+        if (cur_est_fit >= _best_fitness_estimated) {
+            _best_fitness_estimated = cur_est_fit;
+            _best_program_estimated = _current_program;
+            //std::cout << "BEST PRO EST : " << _best_program_estimated
+            //    << " FIT EST : " << _best_fitness_estimated << std::endl;
         }
+
+        reduct::post_learning_rewrite(_current_program);
+        std::cout << "########################### LS PROGRAM : " << _current_program << std::endl;
+        return _current_program;
     }
     return _current_program;
 }
@@ -327,9 +313,6 @@ void moses_learning::reset_estimator()
     score = new petaverse_score(_fitness_estimator);
     bscore = new petaverse_bscore(_fitness_estimator);
 
-    _ordered_best_estimates.clear(); //because its content is out of date
-    _used_as_center.clear();
-
     //we get restarted from the best program so far
     _center = (_best_program.empty() ? _best_program_estimated : _best_program);
 
@@ -339,9 +322,4 @@ void moses_learning::reset_estimator()
     _hcState = HC_START_ITERATION;
 }
 
-
-
-
 }//~namespace moses
-
-
