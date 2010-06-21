@@ -49,11 +49,11 @@ typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
     
-typedef std::multimap<fitness_t,
-                      combo_tree,
-                      std::greater<fitness_t> > ordered_programs;
+// typedef std::multimap<fitness_t,
+//                       combo_tree,
+//                       std::greater<fitness_t> > ordered_programs;
 
-typedef ordered_programs::iterator ordered_programs_it;
+// typedef ordered_programs::iterator ordered_programs_it;
 
 
 /**
@@ -605,7 +605,6 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param ignore_ops the set of operators to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
- * @param op the ordered programs by the fitness
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
@@ -613,8 +612,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            const combo_tree_score& max_score,
            const operator_set& ignore_ops,
            const combo_tree_ns_set* perceptions,
-           const combo_tree_ns_set* actions,
-           ordered_programs& op)
+           const combo_tree_ns_set* actions)
 {
     clock_t start, end;
     start = clock ();
@@ -649,12 +647,11 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals, score_t max_score,
            const operator_set& ignore_ops,
            const combo_tree_ns_set* perceptions,
-           const combo_tree_ns_set* actions,
-           ordered_programs& op)
+           const combo_tree_ns_set* actions)
 {
     moses(mp, max_evals,
           combo_tree_score(max_score, worst_possible_score.second),
-          ignore_ops, perceptions, actions, op);
+          ignore_ops, perceptions, actions);
 }
 
 
@@ -672,7 +669,6 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param ignore_ops the operator set to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
- * @param op the ordered programs by the fitness
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
@@ -680,8 +676,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   const combo_tree_score& max_score,
                   const operator_set& ignore_ops,
                   const combo_tree_ns_set* perceptions,
-                  const combo_tree_ns_set* actions,
-                  ordered_programs& op)
+                  const combo_tree_ns_set* actions)
 {
     clock_t start, end;
     start = clock ();
@@ -728,20 +723,18 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
  * @param ignore_ops the operator set to ignore
  * @param perceptions the set of perceptions of the interactive agent
  * @param actions the set of actions of the interactive agent
- * @param op the ordered programs by the fitness
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals, score_t max_score,
                   const operator_set& ignore_ops,
                   const combo_tree_ns_set* perceptions,
-                  const combo_tree_ns_set* actions,
-                  ordered_programs& op)
+                  const combo_tree_ns_set* actions)
 {
     moses_sliced(mp,
                  max_evals,
                  combo_tree_score(max_score, worst_possible_score.second),
-                 ignore_ops, perceptions, actions, op);
+                 ignore_ops, perceptions, actions);
 }
 
 } //~namespace moses

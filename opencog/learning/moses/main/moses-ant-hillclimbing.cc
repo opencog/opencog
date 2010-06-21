@@ -84,8 +84,6 @@ int main(int argc,char** argv) {
 
   perceptions.insert(combo_tree(instance(id::is_food_ahead)));
 
-  ordered_programs op;
-
 /*
   metapopulation<ant_score,ant_bscore,iterative_hillclimbing> 
     metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
@@ -110,7 +108,7 @@ int main(int argc,char** argv) {
     metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
             scorer, bscorer, sliced_iterative_hillclimbing(rng));
   moses::moses_sliced(metapop, max_evals, 0, ignore_ops,
-                      &perceptions, &actions, op);
+                      &perceptions, &actions);
 
 	
 }

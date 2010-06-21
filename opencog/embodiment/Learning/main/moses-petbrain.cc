@@ -73,9 +73,7 @@ int main(int argc, char** argv)
 
     perceptions.insert(combo_tree(instance(id::is_food_ahead)));
 
-    ordered_programs op;
-
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
     moses::moses(metapop, max_evals, 0, ignore_ops,
-                 &perceptions, &actions, op);
+                 &perceptions, &actions);
 }
