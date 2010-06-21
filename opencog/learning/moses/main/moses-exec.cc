@@ -160,27 +160,29 @@ int main(int argc,char** argv) {
                                                // it will have to be
                                                // adapted
 
-    occam_contin_score score(contintable, inputtable,
-                             variance, alphabet_size, rng);
     occam_contin_bscore bscore(contintable, inputtable,
                                variance, alphabet_size, rng);
+    bscore_based_score<occam_contin_bscore> score(bscore);
 
     if(opt_algo == un) { // univariate
-        metapopulation<occam_contin_score, occam_contin_bscore,
+        metapopulation<bscore_based_score<occam_contin_bscore>,
+                       occam_contin_bscore, 
                        univariate_optimization> 
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,
                     univariate_optimization(rng));
         moses::moses(metapop, max_evals, 0, ignore_ops);
     } else if(opt_algo == sa) { // simulation annealing
-        metapopulation<occam_contin_score, occam_contin_bscore,
+        metapopulation<bscore_based_score<occam_contin_bscore>,
+                       occam_contin_bscore,
                        simulated_annealing> 
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,
                     simulated_annealing(rng));
         moses::moses(metapop, max_evals, 0, ignore_ops);
     } else if(opt_algo == hc) { // hillclimbing
-        metapopulation<occam_contin_score, occam_contin_bscore,
+        metapopulation<bscore_based_score<occam_contin_bscore>,
+                       occam_contin_bscore,
                        iterative_hillclimbing> 
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,

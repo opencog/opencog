@@ -98,17 +98,13 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-score_t logPDM(score_t sse, unsigned int ds, score_t v) {
-    return (score_t)ds/sqrt(log(2*PI*v)) - sse/(2*v);
-}
-
 score_t occam_contin_score::operator()(const combo_tree& tr) const
 {
     try {
         score_t sse = 
             target.sum_squared_error(combo::contin_table(tr, rands, rng));
         if(variance > 0) 
-            return logPDM(sse, target.size(), variance)
+            return logPDM(sse, target.size())
                 - (score_t)tr.size()*alphabet_size_log; // occam's razor
         else 
             return -sse; // no occam's razor
@@ -131,7 +127,7 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
          it1 != ct.end();)
         if(variance > 0) 
             *dst++ = trs*alphabet_size_log // occam's razor
-                - logPDM(sqr((*it1++) - (*it2++)), 1, variance);
+                - logPDM(sqr((*it1++) - (*it2++)), 1);
         else
             *dst++ = sqr((*it1++) - (*it2++)); // no occam's razor
     return bs;

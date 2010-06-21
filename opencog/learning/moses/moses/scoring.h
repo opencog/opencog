@@ -160,7 +160,17 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
  * @param v    variance of the Guassian distribution of M's outputs
  * @return     dP(D|M)
 */
-score_t logPDM(score_t sse, unsigned int ds, float v);
+struct LogPDM {
+    LogPDM(float v) : variance(v) {
+        var_term = variance>0 ? 1/sqrt(log(2*PI*variance)) : 0;        
+    }
+    score_t operator()(score_t sse, unsigned int ds) const {
+        return (score_t)ds*var_term - sse/(2*variance);
+    }
+    float variance;
+    score_t var_term; // to speed up computation, precomputes
+                      // 1/sqrt(log(2*PI*variance))
+};
 
 struct occam_contin_score : public unary_function<combo_tree,score_t> {
     template<typename Scoring>
@@ -169,8 +179,8 @@ struct occam_contin_score : public unary_function<combo_tree,score_t> {
                        float v,
                        float alphabet_size,
                        opencog::RandGen& _rng)
-        : target(score,r), rands(r), variance(v), rng(_rng) {
-        alphabet_size_log = log((double)alphabet_size);
+        : target(score,r), rands(r), variance(v), logPDM(v), rng(_rng) {
+        alphabet_size_log = log((double)alphabet_size);    
     }
 
     occam_contin_score(const combo::contin_table& t,
@@ -178,7 +188,7 @@ struct occam_contin_score : public unary_function<combo_tree,score_t> {
                        float v,
                        float alphabet_size,
                        opencog::RandGen& _rng)
-        : target(t), rands(r), variance(v), rng(_rng) {
+        : target(t), rands(r), variance(v), logPDM(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
 
@@ -187,6 +197,7 @@ struct occam_contin_score : public unary_function<combo_tree,score_t> {
     combo::contin_table target;
     RndNumTable rands;
     score_t variance;
+    LogPDM logPDM;
     score_t alphabet_size_log;
     opencog::RandGen& rng;
 };
@@ -198,7 +209,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         float v,
                         float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(score, r), rands(r), variance(v), rng(_rng) {
+        : target(score, r), rands(r), variance(v), logPDM(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
 
@@ -207,7 +218,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         float v,
                         float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(t), rands(r), variance(v), rng(_rng) {
+        : target(t), rands(r), variance(v), logPDM(v), rng(_rng) {
         alphabet_size_log = log((double)alphabet_size);
     }
 
@@ -216,6 +227,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     combo::contin_table target;
     RndNumTable rands;
     score_t variance;
+    LogPDM logPDM;
     score_t alphabet_size_log;
     opencog::RandGen& rng;
 };
@@ -409,6 +421,23 @@ void merge_nondominating(It from, It to, Set& dst)
     }
 }
 
+/**
+ * score calculated based on the behavioral score. Useful to avoid
+ * redundancy of code and computation in case there is a cache over
+ * bscore. The score is calculated as the minus of the sum of the
+ * bscore over all features, that is:
+ * score = - sum_f BScore(f),
+ */
+template<typename BScore>
+struct bscore_based_score : public unary_function<combo_tree, score_t>
+{
+    bscore_based_score(const BScore& bs) : bscore(bs) {}
+    score_t operator()(const combo_tree& tr) const {
+        behavioral_score bs = bscore(tr);
+        return -std::accumulate(bs.begin(), bs.end(), 0);
+    }
+    const BScore& bscore;
+};
 
 } //~namespace moses
 
