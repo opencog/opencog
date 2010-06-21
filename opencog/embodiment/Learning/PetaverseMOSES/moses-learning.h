@@ -110,8 +110,10 @@ private:
 
     HCState _hcState;
 
-    combo_tree_hash_set _used_as_center;
-    combo_tree_hash_set _used_for_owner;
+    combo_tree_hash_set _used_as_center; // @todo: should use
+                                         // metapopulation::_visited_exemplars
+                                         // instead
+    combo_tree_hash_set _used_for_owner; 
     ordered_programs _ordered_best_estimates; //_ordered_neighborhood;
     int _number_of_calls;
 

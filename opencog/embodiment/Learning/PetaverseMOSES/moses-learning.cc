@@ -236,6 +236,7 @@ void moses_learning::operator()()
         if (oi == _ordered_best_estimates.end())
             _hcState = HC_IDLE;
         else  {
+            // @todo use deme managment instead
             _center = oi->second;
             _hcState = HC_INIT;
         }

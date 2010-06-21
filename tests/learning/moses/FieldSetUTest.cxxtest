@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
-#include "opencog/learning/moses/eda/field_set.h"
-#include "opencog/learning/moses/eda/initialization.h"
-#include "opencog/util/mt19937ar.h"
+#include <opencog/learning/moses/eda/field_set.h>
+#include <opencog/learning/moses/eda/initialization.h>
+#include <opencog/util/mt19937ar.h>
 #include <vector>
 using namespace eda;
 

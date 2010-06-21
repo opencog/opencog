@@ -243,23 +243,26 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         }
         // ~Logger
 
+        // DEBUG
+        if(max_evals == 29340) {
+            std::cout << "STOP" << std::endl;
+        }
+        // ~DEBUG
+
         //do representation-building and create a deme (initially empty)
         representation rep(*simplify, exemplar->first, type,
                            rng, ignore_ops, perceptions, actions);
 
         eda::instance_set<combo_tree_score> deme(rep.fields());
 
-        //remove the examplar and mark it so we won't expand it again
+        //remove the exemplar and mark it so we won't expand it again
         _visited_exemplars.insert(exemplar->first);
         erase(exemplar);
 
         //do some optimization according to the scoring function
-        /*_n_evals+=optimize(deme,complexity_based_scorer<Scoring>(score,rep),
-        max_evals);*/
-
         scorer._rep = &rep;
         scorer._base_count = get_complexity(*exemplar); 
-        _n_evals += optimize(deme, scorer, max_evals-n_evals()); 
+        _n_evals += optimize(deme, scorer, max_evals); 
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
@@ -538,11 +541,10 @@ protected:
 
     boost::unordered_set<combo_tree, boost::hash<combo_tree> > _visited_exemplars;
 
-    // introduced for time-slicing version
-    representation* _rep;
-    eda::instance_set<combo_tree_score>* _deme;
-    iterator _exemplar;
-    complexity_t exemplar_complexity;
+    representation* _rep; // representation of the current deme
+    eda::instance_set<combo_tree_score>* _deme; // current deme
+    iterator _exemplar; // exemplar of the current deme
+    complexity_t exemplar_complexity; // exemplar complexity of the current deme
 };
 
 
@@ -574,7 +576,9 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
             std::cout << "sampled " << mp.n_evals()
                       << " best " << mp.best_score().first
                       << " " << mp.best_trees().front() << std::endl;
-        } else // In iterative hillclimbing it is possible (but not likely) that the metapop gets empty and expand return false
+        } else // In iterative hillclimbing it is possible (but not
+               // likely) that the metapop gets empty and expand
+               // return false
             break;
 
         if (mp.best_score() >= max_score || mp.empty())

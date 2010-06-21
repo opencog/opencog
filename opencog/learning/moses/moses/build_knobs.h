@@ -50,7 +50,7 @@ namespace moses
 //need to call a generator method... (dispatched based on type
 
 struct build_knobs : boost::noncopyable {
-//used to be ss = 1.0, expansion = 2, depth = 4
+    //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
                 const combo::type_tree& t, knob_mapper& mapper,

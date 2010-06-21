@@ -563,11 +563,15 @@ void build_knobs::add_constant_child(pre_it it, contin_t v)
 //make it binary * with second arg a constant
 pre_it build_knobs::canonize_times(pre_it it)
 {
-    sib_it sib = (*it != id::times ? it.end() : find_if(it.begin(), it.end(), is_contin));
+    // get contin child of 'it', if 'it' == 'times' and such contin
+    // child exists
+    sib_it sib = (*it != id::times ? 
+                  it.end() : find_if(it.begin(), it.end(), is_contin));
     if (sib == it.end()) {
-        _exemplar.append_child(_exemplar.insert_above(it, id::times),
-                               contin_t(1));
-        return _exemplar.parent(it);
+        pre_it it_times = (*it == id::times?
+                           it : _exemplar.insert_above(it, id::times));
+        _exemplar.append_child(it_times, contin_t(1));
+        return it_times;
     } else if (it.number_of_children() > 2) {
         _exemplar.insert_above(it, id::times);
         _exemplar.move_after(it, pre_it(sib));

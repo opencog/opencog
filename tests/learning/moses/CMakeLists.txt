@@ -18,3 +18,10 @@ TARGET_LINK_LIBRARIES(FieldSetUTest
     comboreduct
     util
 )
+
+ADD_CXXTEST(representationUTest)
+TARGET_LINK_LIBRARIES(representationUTest
+    moses
+    comboreduct
+    util
+)
