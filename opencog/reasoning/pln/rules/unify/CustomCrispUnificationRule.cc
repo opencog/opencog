@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include <opencog/util/platform.h>
 #include "../../PLN.h"
 
@@ -61,6 +62,14 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
 
     foreach(phvt vp, *i->bindings)
     {
+        // Never bind a VariableNode to ATOM. That cannot be used in a real Atom.
+        // This check can't just be done on outh (the target), because that would stop ATOM in
+        // the target from matching to something _valid_ in the ForAllLink.
+        if (std::find(vp.second.begin(), vp.second.end(), Vertex((pHandle)ATOM))
+            != vp.second.end()) {
+            return Btr<std::set<BoundVertex > >();
+        }
+
         (*pre_binds)[vp.first] = make_real(vp.second);
         printer.print(vp.first);
         cprintf(0,"=");
@@ -76,7 +85,8 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
 //                                 asw->getTV(i->original_handle), fresh);
     bind_Bvtree(rootAtom, *i->bindings);
 
-    pHandle ret_h = asw->addAtom(*rootAtom, asw->getTV(i->original_handle), fresh);
+    //pHandle ret_h = asw->addAtom(*rootAtom, asw->getTV(i->original_handle), fresh);
+    pHandle ret_h = asw->addAtom(*rootAtom, asw->getTV(i->original_handle), false);
     
     ret->insert(BoundVertex(ret_h, pre_binds));
 //    ret->insert(BoundVertex(ret_h, NULL));
@@ -90,6 +100,9 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
         haxx::inferred_from[ret_h].push_back(hForAllLink);
 
     std::cout << name << " produced " << ret_h << std::endl;
+
+    // Necessary since this is not the only way of producing the Atom.
+    //reviseVersionedTVs(asw->fakeToRealHandle(_v2h(ret_h)).first);
 
     return ret;
 }
