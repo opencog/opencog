@@ -35,6 +35,7 @@
 
 #include "representation.h"
 #include "scoring.h"
+#include "types.h"
 
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
@@ -112,11 +113,18 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         rng(_rng), type(tt), simplify(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa),
         scorer(sc, NULL, 0, rng), _n_evals(0),
-        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
+        _rep(NULL), _deme(NULL)
     {
+        _best_score = make_pair(score(base),
+                                base.size() // @todo, once scorer is
+                                            // generic it should be
+                                            // replaced by the
+                                            // complexity measure of
+                                            // the scorer
+                                );
+        behavioral_score base_bs = bscore(base);
         insert(behavioral_scored_combo_tree
-               (base, combo_tree_behavioral_score(behavioral_score(),
-                                                  combo_tree_score(_best_score.first, 0))));
+               (base, combo_tree_behavioral_score(base_bs, _best_score)));
     }
 
     ~metapopulation() {
@@ -423,7 +431,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
-            ss << "Metapopulation: " << size() << std::endl;
+            ss << "Metapopulation after merging: " << size() << std::endl;
             ostream_best(ss, -1);
             logger().fine(ss.str());
         }

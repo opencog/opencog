@@ -358,23 +358,9 @@ struct count_based_scorer : public unary_function<eda::instance,
             return worst_possible_score;
         }
 
-        // sequential(clean_reduction(),logical_reduction())(tr,tr.begin());
-        // std::cout << "OK " << tr << std::endl;
-        // reduct::clean_and_full_reduce(tr);
-        // reduct::clean_reduce(tr);
-        // reduct::contin_reduce(tr,rng);
-
         combo_tree_score ts = combo_tree_score(treecache(tr),
                                                - int(_rep->fields().count(inst))
-                                               + _base_count);
-        
-//        combo_tree_score ts = combo_tree_score(score(tr),
-//                                   -int(_rep->fields().count(inst))
-//                                   + _base_count);
-#ifdef DEBUG_INFO
-        std::cout << "OKK " << tr << std::endl;
-        std::cout << "Score:" << ts << std::endl;
-#endif
+                                               + _base_count);        
         return ts;
     }
     
