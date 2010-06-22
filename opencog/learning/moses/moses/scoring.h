@@ -433,8 +433,15 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
 {
     bscore_based_score(const BScore& bs) : bscore(bs) {}
     score_t operator()(const combo_tree& tr) const {
-        behavioral_score bs = bscore(tr);
-        return -std::accumulate(bs.begin(), bs.end(), 0);
+        try {
+            behavioral_score bs = bscore(tr);
+            return -std::accumulate(bs.begin(), bs.end(), 0);
+        } catch (...) {
+            stringstream ss;
+            ss << "The following candidate has failed to be evaluated: " << tr;
+            logger().warn(ss.str());
+            return get_score(worst_possible_score);
+        }
     }
     const BScore& bscore;
 };

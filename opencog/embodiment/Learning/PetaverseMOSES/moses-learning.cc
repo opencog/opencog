@@ -176,7 +176,8 @@ void moses_learning::operator()()
         std::cout << "NEPC : " << _nepc << std::endl;
         std::cout << "MFG : " << max_for_generation << std::endl;
 
-        int o = metapop->optimize_deme(max_for_generation, _nepc, max_score);
+        int o = metapop->optimize_deme(max_for_generation - metapop->n_evals(),
+                                       _nepc, max_score);
         std::cout << "opt returned : " << o << std::endl;
 
         if (o < 0)

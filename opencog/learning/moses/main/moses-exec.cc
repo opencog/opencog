@@ -106,7 +106,7 @@ int main(int argc,char** argv) {
     remove(log_file.c_str());
     logger().setFilename(log_file);
     logger().setLevel(logger().getLevelFromString(log_level));
-    
+    logger().setBackTraceLevel(opencog::Logger::ERROR);
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
 
@@ -172,6 +172,7 @@ int main(int argc,char** argv) {
                     contin_reduction(rng), score, bscore,
                     univariate_optimization(rng));
         moses::moses(metapop, max_evals, 0, ignore_ops);
+        metapop.print_best(result_count);
     } else if(opt_algo == sa) { // simulation annealing
         metapopulation<bscore_based_score<occam_contin_bscore>,
                        occam_contin_bscore,
@@ -180,6 +181,7 @@ int main(int argc,char** argv) {
                     contin_reduction(rng), score, bscore,
                     simulated_annealing(rng));
         moses::moses(metapop, max_evals, 0, ignore_ops);
+        metapop.print_best(result_count);
     } else if(opt_algo == hc) { // hillclimbing
         metapopulation<bscore_based_score<occam_contin_bscore>,
                        occam_contin_bscore,
@@ -188,6 +190,7 @@ int main(int argc,char** argv) {
                     contin_reduction(rng), score, bscore,
                     iterative_hillclimbing(rng));
         moses::moses(metapop, max_evals, 0, ignore_ops);
+        metapop.print_best(result_count);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
         return 1;

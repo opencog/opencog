@@ -49,13 +49,6 @@ typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
     
-// typedef std::multimap<fitness_t,
-//                       combo_tree,
-//                       std::greater<fitness_t> > ordered_programs;
-
-// typedef ordered_programs::iterator ordered_programs_it;
-
-
 /**
  * The metapopulation will store the experession(as scored tree) that were
  * encountered during the learning process(which some of them,dominated by
@@ -209,6 +202,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * and add all unique non-dominated trees in the final deme as
      * potential exemplars for future demes.
      *
+     * @todo max_score is unused, not sure it should be used or
+     * removed
+     *
      * @param max_evals    the max evals
      * @param max_score    the max score
      * @param ignore_ops   the operator set to ignore
@@ -223,30 +219,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)  {
-
-        using namespace reduct;
-
-        // OC_ASSERT(!empty(), "Empty metapopulation in function expand(..).");
-
-        if (empty())
-            return false;
-
-        iterator exemplar = select_exemplar();
-
-        combo_tree tr(exemplar->first);
-
         // Logger
-        logger().debug("Expand with exemplar:");
-        { 
-            stringstream ss; 
-            ss << tr; 
-            logger().debug(ss.str()); 
-        }
-        { 
-            stringstream ss; 
-            ss << "Scored: " << score(tr); 
-            logger().debug(ss.str()); 
-        }
         {
             stringstream ss;
             ss << "Maximum fitness evaluations during that expansion: " 
@@ -255,90 +228,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         }
         // ~Logger
 
-        // DEBUG
-        if(max_evals == 29340) {
-            std::cout << "STOP" << std::endl;
-        }
-        // ~DEBUG
-
-        //do representation-building and create a deme (initially empty)
-        representation rep(*simplify, exemplar->first, type,
-                           rng, ignore_ops, perceptions, actions);
-
-        eda::instance_set<combo_tree_score> deme(rep.fields());
-
-        //do some optimization according to the scoring function
-        scorer._rep = &rep;
-        scorer._base_count = get_complexity(*exemplar); 
-        _n_evals += optimize(deme, scorer, max_evals); 
-
-        //mark the exemplar so we won't expand it again
-        _visited_exemplars.insert(exemplar->first);
-
-        //add (as potential exemplars for future demes) all unique non-dominated
-        //trees in the final deme
-        boost::unordered_map<combo_tree, 
-                             combo_tree_behavioral_score,
-                             boost::hash<combo_tree> > candidates;
-        foreach(const eda::scored_instance<combo_tree_score>& inst, deme) {
-
-#ifdef DEBUG_INFO
-            cout << "Instance: " << inst.second << endl;
-            cout << "Instance score : " << get_score(inst.second) << endl;
-            cout << "Worst score: " << worst_possible_score << endl;
-#endif
-
-            //if its really bad just skip it
-            if (get_score(inst.second) == get_score(worst_possible_score))
-                continue;
-
-            //generate the tree coded by inst
-            //turn the knobs of rep._exemplar as stored in inst
-            rep.transform(inst);
+        if(!create_deme(ignore_ops, perceptions, actions))
+            return false;
             
-            //get the combo_tree associated to inst, cleaned and reduced
-            combo_tree tr = rep.get_clean_exemplar();
+        _n_evals += optimize_deme(max_evals);
 
-#ifdef DEBUG_INFO
-            cout << "Instance explored: " << inst.second << endl;
-            cout << tr << endl;
-#endif
+        close_deme();
 
-            //update the set of potential exemplars
-            if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
-                    candidates.find(tr) == candidates.end()) {
-                candidates.insert(make_pair(tr,
-                                            combo_tree_behavioral_score(bscore(tr),
-                                            inst.second)));
-                // also update the record of the best-seen score & trees
-                if (inst.second >= _best_score) {
-                    if (inst.second > _best_score) {
-                        _best_score = inst.second;
-                        _best_trees.clear();
-                    }
-                    _best_trees.push_back(tr);
-                }
-            }
-        }
-
-#ifdef DEBUG_INFO
-        cout << "Candidates size: " << candidates.size() << endl;
-        cout << "Dc: " << distance(candidates.begin(), candidates.end()) << endl << endl;
-#endif
-
-        merge_nondominating(candidates.begin(), candidates.end(), *this);
-
-        //log some exemplars
-        for (const_iterator it = begin();
-             it != end() && distance(begin(), it) < 3;++it)
-            cout << "exemplar #" << distance(begin(), it)
-                 << " " << get_tree(*it) << " "
-                 << get_score(*it) << " "
-                 << get_complexity(*it) << endl;
-
-        cout << endl << "Number of evals performed: " << n_evals() << endl;
-
-        //in case all candidates can't get a better score than the worst
         //this may happens for instance if the eval fails and throws an exception
         return !empty();
     }
@@ -364,31 +260,29 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         if (empty())
             return false;
-        // OC_ASSERT(!empty(), "Empty metapopulation in function expand(..).");
 
         _exemplar = select_exemplar();
 
-        cout << "Current exemplar:" << (_exemplar->first) << endl;
-
         combo_tree tr(_exemplar->first);
-        //cout << endl << "Current exemplar:" << tr << endl;
-        //clean_and_full_reduce(tr);
-        //cout << "Exemplar after reduction:" << tr << endl;
-        cout << "Exemplar's score: " << score(tr) << endl;
-        cout << "exemplar complexity: " << get_complexity(*_exemplar) << endl;
-        //cout << "Exemplar before going to rep:" << exemplar->first << endl;
 
-        exemplar_complexity = get_complexity(*_exemplar);
+        // Logger
+        logger().debug("Expand with exemplar:");
+        { 
+            stringstream ss; 
+            ss << tr; 
+            logger().debug(ss.str()); 
+        }
+        { 
+            stringstream ss; 
+            ss << "Scored: " << score(tr); 
+            logger().debug(ss.str()); 
+        }
+        // ~Logger
 
         //do representation-building and create a deme (initially empty)
         _rep = new representation(*simplify, _exemplar->first, type,
                                   rng, ignore_ops, perceptions, actions);
         _deme = new eda::instance_set<combo_tree_score>(_rep->fields());
-        // _n_evals = 0;
-
-        //remove the examplar and mark it so we won't expand it again
-        _visited_exemplars.insert(_exemplar->first);
-        erase(_exemplar);
 
         _evals_before_this_deme = n_evals();
 
@@ -396,7 +290,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     /**
-     * Do some optimization according to the scoring function
+     * Do some optimization according to the scoring function.
+     *
+     * sliced version.
      *
      * @param max_evals the max evals
      * @param max_for_slice the max for slice 
@@ -405,22 +301,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * @return return the number of evaluations actually performed,
      *         return -1 if all available is evaluated.
      */
-
     int optimize_deme(int max_evals, int max_for_slice,
                       const combo_tree_score& max_score) {
 
         if (_rep == NULL || _deme == NULL)
             return -1;
 
-        cout << "Max evals in this expand " << max_evals << endl;
-        cout << "Number of evals " << n_evals() << endl;
-        cout << "Max per slice " << max_for_slice << endl;
-
         //do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
         scorer._base_count = exemplar_complexity;
         scorer._rep = _rep;
-        int n = optimize(*_deme,scorer,max_evals - n_evals());
+        int n = optimize(*_deme, scorer, max_evals);
 
         // This is very ugly, but saves the old MOSES' architecture
         // The only return value of the operator is used for two
@@ -437,24 +328,50 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         return n;
     }
 
+    /**
+     * Do some optimization according to the scoring function.
+     *
+     * non-sliced version.
+     *
+     * @todo: there should be no sliced or non-sliced version, instead
+     * the optimization API should be simple and allow slice for any
+     * optimizer
+     *
+     * @param max_evals the max evals
+     * 
+     * @return return the number of evaluations actually performed,
+     */
+    int optimize_deme(int max_evals) {
+        //do some optimization according to the scoring function
+        scorer._rep = _rep;
+        scorer._base_count = get_complexity(*_exemplar); 
+        return optimize(*_deme, scorer, max_evals); 
+    }
 
     /**
      * close deme
-     *
-     * @param op  the ordered programs by the fitness
+     * 1) mark the current deme exemplar to not explore it again,
+     * 2) merge non-dominated candidates in the metapopulation,
+     * 3) delete the deme instance from memory.
      */
     void close_deme() {
         if (_rep == NULL || _deme == NULL)
             return;
 
+        //mark the exemplar so we won't expand it again
+        _visited_exemplars.insert(_exemplar->first);
+
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        boost::unordered_map<combo_tree, combo_tree_behavioral_score, boost::hash<combo_tree> > candidates;
-
+        boost::unordered_map<combo_tree, combo_tree_behavioral_score, 
+                             boost::hash<combo_tree> > candidates;
 
         int i = 0;
 
         foreach(const eda::scored_instance<combo_tree_score>& inst, *_deme) {
+            // this is in case the deme is closed before the entire
+            // deme (or one should understand the current sample of
+            // it) has been explored
             if (i++ == (n_evals() - _evals_before_this_deme))
                 break;
 
@@ -463,7 +380,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                 continue;
 
             //generate the tree coded by inst
-
             //turn the knobs of rep._exemplar as stored in inst
             _rep->transform(inst);
 
@@ -516,6 +432,22 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         _rep = NULL;
     }
 
+    /**
+     * stream out the n best non dominated candidates, if n is
+     * negative stream them all out.
+     */
+    template<typename Out>
+    Out& ostream_best(Out& out, long n) {
+        size_t s = n<0? size() : std::min(n, (long)size());
+        for(const_iterator cit = begin(); s != 0; cit++, s--) {
+            out << get_score(*cit) << " " << get_tree(*cit) << std::endl;
+        }
+        return out;
+    }
+    // like above but using std::cout
+    void print_best(long n) {
+        ostream_best(std::cout, n);
+    }
 
     opencog::RandGen& rng;
     combo::type_tree type;
@@ -531,9 +463,14 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 protected:
     int _n_evals;
     int _evals_before_this_deme;
-    combo_tree_score _best_score;
+
+    // the best score ever
+    combo_tree_score _best_score; 
+
+    // trees with score _best_score
     std::vector<combo_tree> _best_trees;
 
+    // contains the exemplars of demes that have been searched so far
     boost::unordered_set<combo_tree, boost::hash<combo_tree> > _visited_exemplars;
 
     representation* _rep; // representation of the current deme
@@ -547,7 +484,6 @@ typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
 combo_tree_ns_set;
 
-
 /**
  * the main function of MOSES
  *
@@ -555,109 +491,66 @@ combo_tree_ns_set;
  * @param max_evals the max evaluations
  * @param max_score the max score tree
  * @param ignore_ops the set of operators to ignore
+ * @param perceptions the set of perceptions of an optional interactive agent
+ * @param actions the set of actions of an optional interactive agent
  */
-
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals, const combo_tree_score& max_score,
-           const operator_set& ignore_ops = operator_set())
+           const operator_set& ignore_ops = operator_set(),
+           const combo_tree_ns_set* perceptions = NULL,
+           const combo_tree_ns_set* actions = NULL)
 {
     logger().info("MOSES starts");
 
     while (mp.n_evals() < max_evals) {
         //run a generation
-        if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops)) {
-            //print the generation number and a best solution
-            std::cout << "sampled " << mp.n_evals()
-                      << " best " << mp.best_score().first
-                      << " " << mp.best_trees().front() << std::endl;
+        if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
+                      perceptions, actions)) {
         } else // In iterative hillclimbing it is possible (but not
                // likely) that the metapop gets empty and expand
                // return false
             break;
-
         if (mp.best_score() >= max_score || mp.empty())
             break;
     }
 
+    // Logger
+    if(mp.best_trees().empty())
+        logger().info("Only worst scored candidates");
+    else {
+        stringstream ss;
+        ss << "The following candidates have the best score " 
+           << mp.best_score().first;
+        logger().info(ss.str());
+        foreach(const combo_tree& tr, mp.best_trees()) {
+            stringstream ss_tr;
+            ss_tr << tr;
+            logger().info(ss_tr.str());
+        }
+    }
+    // ~Logger
+    
+    // Logger
     logger().info("MOSES ends");
+    // ~Logger
 }
 
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            int max_evals, score_t max_score, 
-           const operator_set& ignore_ops = operator_set())
+           const operator_set& ignore_ops = operator_set(),
+           const combo_tree_ns_set* perceptions = NULL,
+           const combo_tree_ns_set* actions = NULL)
 {
     moses(mp, max_evals, combo_tree_score(max_score, worst_possible_score.second),
-          ignore_ops);
-}
-
-/**
- * @brief The main function of moses
- *
- * Lists of relevant operators, perceptions, and actions may or may not be
- * provided. The initial design assumed fixed lists, this version
- * has a constructor including these parameters, specific for actions
- * 
- * @param mp the metapopulation
- * @param max_evals the max evlautions
- * @parma max_score the max score, the type is tree_score
- * @param ignore_ops the set of operators to ignore
- * @param perceptions the set of perceptions of the interactive agent
- * @param actions the set of actions of the interactive agent
- */
-template<typename Scoring, typename Domination, typename Optimization>
-void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals,
-           const combo_tree_score& max_score,
-           const operator_set& ignore_ops,
-           const combo_tree_ns_set* perceptions,
-           const combo_tree_ns_set* actions)
-{
-    clock_t start, end;
-    start = clock ();
-
-    while (mp.n_evals() < max_evals) {
-        cout << "mp size " << mp.size() << endl;
-
-        //run a generation
-        int max_for_generation;
-        max_for_generation = max_evals - mp.n_evals();
-
-        if (mp.expand(max_for_generation, max_score, ignore_ops,
-                      perceptions, actions)) {
-            //print the generation number and a best solution
-            std::cout << "sampled " << mp.n_evals()
-                      << " best " << mp.best_score().first << " "
-                      << mp.best_trees().front() << std::endl;
-        } else // In iterative hillclimbing it is possible (but not likely) that the metapop gets empty and expand return false
-            break;
-
-        if (mp.best_score() >= max_score || mp.empty())
-            break;
-    }
-
-    end = clock ();
-    cout << endl << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC
-         << "seconds" << endl << endl;
-}
-
-template<typename Scoring, typename Domination, typename Optimization>
-void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, score_t max_score,
-           const operator_set& ignore_ops,
-           const combo_tree_ns_set* perceptions,
-           const combo_tree_ns_set* actions)
-{
-    moses(mp, max_evals,
-          combo_tree_score(max_score, worst_possible_score.second),
           ignore_ops, perceptions, actions);
 }
 
-
-
 /**
  * @brief The sliced version of moses
+ *
+ * It is only used for testing
  *
  * Lists of relevant operators, perceptions, and actions may or may not be
  * provided. The initial design assumed fixed lists, this version
@@ -678,8 +571,6 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   const combo_tree_ns_set* perceptions,
                   const combo_tree_ns_set* actions)
 {
-    clock_t start, end;
-    start = clock ();
     int o;
     int max_for_slice = 20;
 
@@ -691,11 +582,6 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
 
             mp.close_deme();
 
-            // ordered_programs_it oi;
-            // cout << endl << "--------- BEST CANDIDATES SO FAR: ------------- " << endl;
-            // for(oi = _ordered_best_estimates.begin();oi != _ordered_best_estimates.end();oi++)
-            //  cout << oi->second << " score: " << oi->first << endl;
-            // cout << "--------- BEST CANDIDATES SO FAR: ------------- " << endl << endl;
         } else
             break;
     }
@@ -704,9 +590,6 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
     std::cout << "sampled " << mp.n_evals()
               << " best " << mp.best_score().first << endl
               << mp.best_trees().front() << std::endl;
-
-    end = clock ();
-    cout << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl;
 }
 
 
@@ -731,8 +614,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   const combo_tree_ns_set* perceptions,
                   const combo_tree_ns_set* actions)
 {
-    moses_sliced(mp,
-                 max_evals,
+    moses_sliced(mp, max_evals,
                  combo_tree_score(max_score, worst_possible_score.second),
                  ignore_ops, perceptions, actions);
 }

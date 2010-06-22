@@ -120,7 +120,7 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     combo::contin_table ct(tr, rands, rng);
     behavioral_score bs(target.size());
-    score_t trs = tr.size();
+    score_t trs = tr.size(); //@todo replace this with complexity
         
     behavioral_score::iterator dst = bs.begin();
     for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
