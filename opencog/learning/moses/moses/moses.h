@@ -93,15 +93,15 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     /**
      *  Constuctor for the class metapopulation
      *  
-     * @param _rng       rand number 
-     * @param base       exemplar used to initialize the metapopulation
-     * @param tt         type of expression to be learned
-     * @param iops       the set of operators to ignore
-     * @param si         reduct rule for reducting 
-     * @param sc         scoring function for scoring
-     * @param bsc        behavior scoring function
-     * @param opt        optimization should be providing for the learning
-     * @param pa         parameter for selecting the deme 
+     * @param _rng    rand number 
+     * @param base    exemplar used to initialize the metapopulation
+     * @param tt      type of expression to be learned
+     * @param iops    the set of operators to ignore
+     * @param si      reduct rule for reducting 
+     * @param sc      scoring function for scoring
+     * @param bsc     behavior scoring function
+     * @param opt     optimization should be providing for the learning
+     * @param pa      parameter for selecting the deme 
      */
     metapopulation(opencog::RandGen& _rng, const combo_tree& base,
                    const combo::type_tree& tt,
@@ -118,7 +118,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                (base, combo_tree_behavioral_score(behavioral_score(),
                                                   combo_tree_score(_best_score.first, 0))));
     }
-  
+
     ~metapopulation() {
         delete _rep;
         delete _deme;
@@ -363,8 +363,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        boost::unordered_map<combo_tree, combo_tree_behavioral_score, 
-                             boost::hash<combo_tree> > candidates;
+        typedef boost::unordered_map<combo_tree, combo_tree_behavioral_score, 
+                                     boost::hash<combo_tree> > Candidates;
+        Candidates candidates;
 
         int i = 0;
 
@@ -386,11 +387,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             //get the combo_tree associated to inst, cleaned and reduced
             combo_tree tr = _rep->get_clean_exemplar();
 
-#ifdef DEBUG_INFO
-            cout << "Instance explored: " << inst.second << endl;
-            cout << tr << endl;
-#endif
-
             //update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
                 candidates.find(tr) == candidates.end()) {
@@ -408,23 +404,30 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             }
         }
 
-#ifdef DEBUG_INFO
-        cout << "Candidates " << candidates.size() << endl;
-        cout << "DC: " << distance(candidates.begin(), candidates.end()) << endl << endl;
-#endif
+        //Logger
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            stringstream ss;
+            ss << "Candidates (and their bscores) to merge with the metapopulation: "
+               << candidates.size();
+            logger().fine(ss.str());
+            foreach(Candidates::value_type& c, candidates) {
+                stringstream ss_c;
+                ss_c << c.second << " " << c.first;
+                logger().fine(ss_c.str());            
+            }
+        }
+        // ~Logger
 
         merge_nondominating(candidates.begin(), candidates.end(), *this);
 
-        //log some exemplars
-        for (const_iterator it = begin();
-             it != end() && distance(begin(), it) < 3;++it)
-            cout << "exemplar #" << distance(begin(), it)
-                 << " " << get_tree(*it) << " "
-                 << get_score(*it) << " "
-                 << get_complexity(*it) << endl;
-
-        cout << endl << "Number of evals performed: " << n_evals() << endl;
-        cout << "Metapopulation size : " << size() << endl << endl;
+        //Logger
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            stringstream ss;
+            ss << "Metapopulation: " << size() << std::endl;
+            ostream_best(ss, -1);
+            logger().fine(ss.str());
+        }
+        // ~Logger
 
         delete _deme;
         delete _rep;

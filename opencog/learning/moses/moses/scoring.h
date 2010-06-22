@@ -435,7 +435,18 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     score_t operator()(const combo_tree& tr) const {
         try {
             behavioral_score bs = bscore(tr);
-            return -std::accumulate(bs.begin(), bs.end(), 0);
+            score_t res = -std::accumulate(bs.begin(), bs.end(), 0);
+            // Logger
+            if(logger().getLevel() >= opencog::Logger::FINE) {
+                stringstream ss_tr;
+                ss_tr << "Candidate: " << tr;
+                logger().fine(ss_tr.str());
+                stringstream ss_sc;
+                ss_sc << "Scored: " << res;
+                logger().fine(ss_sc.str());                
+            }
+            // ~Logger
+            return res;
         } catch (...) {
             stringstream ss;
             ss << "The following candidate has failed to be evaluated: " << tr;
