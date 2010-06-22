@@ -53,7 +53,7 @@ int main(int argc,char** argv) {
     string input_table_file;
     unsigned long max_evals;
     long result_count;
-    unsigned int max_gens;
+    int max_gens;
     string log_level;
     string log_file;
     float variance;
@@ -74,8 +74,8 @@ int main(int argc,char** argv) {
          "maximum number of fitness function evaluations")
         ("result-count,r", value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them")
-        ("max-gens,g", value<unsigned int>(&max_gens)->default_value(1000),
-         "maximum number of demes to generate")
+        ("max-gens,g", value<int>(&max_gens)->default_value(-1),
+         "maximum number of demes to generate and optimize, negative means no generation limit")
         ("input-file,i", value<string>(&input_table_file),
          "input table file")
         ("log-level,l", value<string>(&log_level)->default_value("DEBUG"),
@@ -171,7 +171,7 @@ int main(int argc,char** argv) {
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,
                     univariate_optimization(rng));
-        moses::moses(metapop, max_evals, 0, ignore_ops);
+        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
         metapop.print_best(result_count);
     } else if(opt_algo == sa) { // simulation annealing
         metapopulation<bscore_based_score<occam_contin_bscore>,
@@ -180,7 +180,7 @@ int main(int argc,char** argv) {
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,
                     simulated_annealing(rng));
-        moses::moses(metapop, max_evals, 0, ignore_ops);
+        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
         metapop.print_best(result_count);
     } else if(opt_algo == hc) { // hillclimbing
         metapopulation<bscore_based_score<occam_contin_bscore>,
@@ -189,7 +189,7 @@ int main(int argc,char** argv) {
             metapop(rng, exemplar, tt,
                     contin_reduction(rng), score, bscore,
                     iterative_hillclimbing(rng));
-        moses::moses(metapop, max_evals, 0, ignore_ops);
+        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
         metapop.print_best(result_count);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;

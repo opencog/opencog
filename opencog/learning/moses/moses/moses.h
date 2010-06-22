@@ -487,23 +487,31 @@ combo_tree_ns_set;
 /**
  * the main function of MOSES
  *
- * @param mp the metapopulation 
- * @param max_evals the max evaluations
- * @param max_score the max score tree
- * @param ignore_ops the set of operators to ignore
+ * @param mp          the metapopulation 
+ * @param max_evals   the max evaluations
+ * @param max_gens    the max number of demes to create and optimize, if
+ *                    negative, then no limit
+ * @param max_score   the max score tree
+ * @param ignore_ops  the set of operators to ignore
  * @param perceptions the set of perceptions of an optional interactive agent
- * @param actions the set of actions of an optional interactive agent
+ * @param actions     the set of actions of an optional interactive agent
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, const combo_tree_score& max_score,
+           int max_evals, int max_gens, const combo_tree_score& max_score,
            const operator_set& ignore_ops = operator_set(),
            const combo_tree_ns_set* perceptions = NULL,
            const combo_tree_ns_set* actions = NULL)
 {
     logger().info("MOSES starts");
+    
+    int gen_idx = 0;
 
-    while (mp.n_evals() < max_evals) {
+    while ((mp.n_evals() < max_evals) && (max_gens != gen_idx++)) {
+        // Logger
+        logger().info("Deme expansion: %i", gen_idx);
+        // ~Logger
+
         //run a generation
         if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
                       perceptions, actions)) {
@@ -538,12 +546,13 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, score_t max_score, 
+           int max_evals, int max_gens, score_t max_score, 
            const operator_set& ignore_ops = operator_set(),
            const combo_tree_ns_set* perceptions = NULL,
            const combo_tree_ns_set* actions = NULL)
 {
-    moses(mp, max_evals, combo_tree_score(max_score, worst_possible_score.second),
+    moses(mp, max_evals, max_gens, 
+          combo_tree_score(max_score, worst_possible_score.second),
           ignore_ops, perceptions, actions);
 }
 
