@@ -339,4 +339,84 @@ ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
 
 }
 
+
+DeductionRuleProvider::DeductionRuleProvider(void) {
+    AtomSpaceWrapper* asw = GET_ASW;
+
+    //  AddRule(new ImplicationBreakdownRule(asw), 9.0f);
+    AddRule(new StrictImplicationBreakdownRule(asw), 9.0f);
+
+    //  AddRule(new ImplicationTailExpansionRule(asw), 10.0f);
+    //  AddRule(new ImplicationConstructionRule(asw), 10.0f);
+//  AddRule(new InversionRule<IMPLICATION_LINK>(asw), 7.0f);
+    //AddRule(new DeductionRule<DeductionSimpleFormula, IMPLICATION_LINK>(asw), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, IMPLICATION_LINK), 8.0f);
+    //AddRule(new InversionRule<INHERITANCE_LINK>(asw), 7.0f);
+    AddRule(new InversionRule(asw, INHERITANCE_LINK), 7.0f);
+    AddRule(new InversionRule(asw, ASSOCIATIVE_LINK), 7.0f);
+
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, INHERITANCE_LINK), 8.0f);
+    // This next one is just for the wordpairs demo.
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, ASSOCIATIVE_LINK), 8.0f);
+    AddRule(new DeductionRule<DeductionSimpleFormula>(asw, SIMILARITY_LINK), 8.0f);
+}
+DeductionRuleProvider::~DeductionRuleProvider(void) {
+
+}
+
+EvaluationRuleProvider::EvaluationRuleProvider(void) {
+    AtomSpaceWrapper* asw = GET_ASW;
+
+    float ANDEvaluatorPriority = 10.0f;
+
+    AddRule(new ORRule(asw), 10.0f);
+
+    AddRule(new SimpleANDRule<1>(asw), ANDEvaluatorPriority - 1.0f);
+    AddRule(new SimpleANDRule<2>(asw), ANDEvaluatorPriority - 1.1f);
+    AddRule(new SimpleANDRule<3>(asw), ANDEvaluatorPriority - 1.2f);
+    //  AddRule(new SimpleANDRule<4>(asw), ANDEvaluatorPriority - 1.3f);
+    //  AddRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
+
+//// Needs a fullInputFilter method to deal with the variable arity.
+    // Also not actually used in any of the demos.
+    AddRule(new ANDPartitionRule(asw), 10.0f);
+    AddRule(new NotEvaluatorRule(asw), 10.0f);
+
+    // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
+    AddRule(new SubsetEvalRule(asw, CONCEPT_NODE), 10.0f);
+
+    AddRule(new IntensionalInheritanceRule(asw, CONCEPT_NODE), 10.f);
+
+    //  AddRule(new FORALLRule(asw,NULL), 5.0f);
+    //  AddRule( new PLNPredicateRule(asw,NULL), 5.0f);
+
+    //  AddRule(new ORPartitionRule(asw), 10.0f);
+
+////AddRule(new CrispTheoremRule(asw), 10.0f);
+
+//// In hybrid FC, these conflict with InversionRule. It asks for an InheritanceLink with no particular arguments.
+    // Subset2Inh looks for
+    // all possible SubsetLinks, then tries to produce SubsetLinks containing those SubsetLinks, etc.
+    // Each of these only takes about 1 step, because the BC doesn't count different exact Atoms as different steps.
+    //AddRule(new Int2ExtRule(asw, IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+////    AddRule(new Int2ExtRule(asw, INHERITANCE_LINK, SUBSET_LINK), 10.0f);
+    //AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
+////    AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
+
+    AddRule(new LookupRule(asw), 20.0f);
+    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
+    AddRule(new HypothesisRule(asw), 30.0f);
+
+    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
+
+    foreach(pHandle fah, *ForAll_handles)
+        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+
+    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+}
+
+EvaluationRuleProvider::~EvaluationRuleProvider(void) {
+
+}
+
 }}

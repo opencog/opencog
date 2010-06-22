@@ -44,8 +44,8 @@ public:
     ForwardChainer(AtomSpaceWrapper* _asw = GET_ASW);
     ~ForwardChainer();
 
-    ForwardComposerRuleProvider composers;
-    ForwardGeneratorRuleProvider generators;
+    RuleProvider* composers;
+    RuleProvider* generators;
 
     AtomSpaceWrapper* asw;
 
@@ -90,10 +90,10 @@ public:
     //! Look up an atom to match the given target.
     //! Currently uses LookupRule; could evaluate ForAllLinks etc too (via the relevant rule).
     //! This would provide one way to actually choose the substitutions when using ForAlls.
-    Btr<std::set<BoundVertex> > getMatching(const meta target);
+    virtual Btr<std::set<BoundVertex> > getMatching(const meta target);
 
     //! Find a series of atoms to match the given filter.
-    Btr<std::set<Btr<std::vector<BoundVertex> > > > findAllArgs(std::vector<BBvtree> filter);
+    virtual Btr<std::set<Btr<std::vector<BoundVertex> > > > findAllArgs(std::vector<BBvtree> filter);
     
     // returns true if and only if all args from this point on bound successfully
     bool findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<BoundVertex> > args,
@@ -102,6 +102,30 @@ public:
                                  Btr<bindingsT> bindings);
 
     void printVertexVectorHandles(std::vector< Vertex > hs);
+};
+
+// ForwardChainer subclass that uses similar inference control to a classical logic FC,
+// i.e. it uses a deduction-ish Rule each step, and evaluates any AND/OR/etc expressions
+// in the ImplicationLink/etc.
+class ForwardChainerClassicIC : public ForwardChainer {
+private:
+
+public:
+    AtomSpaceWrapper* asw;
+
+    ForwardChainerClassicIC(AtomSpaceWrapper* _asw = GET_ASW);
+    ~ForwardChainerClassicIC();
+
+    // Only enable one of the following.
+
+    //! Find a series of atoms to match the given filter.
+    //! Uses a single BIT to fill the whole filter (which should allow extra
+    //! results in the ForAll case, and be more efficient).
+    virtual Btr<std::set<Btr<std::vector<BoundVertex> > > > findAllArgs(std::vector<BBvtree> filter);
+
+    //! Look up an atom to match the given target.
+    //! Uses a BIT.
+    //virtual Btr<std::set<BoundVertex> > getMatching(const meta target);
 };
 
 }} // namespace opencog::pln

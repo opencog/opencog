@@ -19,6 +19,7 @@
  */
 
 #include "ForwardChainer.h"
+#include "BackInferenceTreeNode.h"
 #include "AtomSpaceWrapper.h"
 #include "utils/NMPrinter.h"
 #include "rules/Rules.h"
@@ -56,7 +57,10 @@ void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
     }
 }
 
-ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) : asw(_asw)
+ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) :
+        asw(_asw),
+        composers(new ForwardComposerRuleProvider),
+        generators(new ForwardGeneratorRuleProvider)
 {
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     probStack = FWD_CHAIN_PROB_STACK;
@@ -65,6 +69,8 @@ ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) : asw(_asw)
 
 ForwardChainer::~ForwardChainer()
 {
+    delete composers;
+    delete generators;
 }
 
 pHandle ForwardChainer::fwdChainToTarget(int maxRuleApps, meta target)
@@ -92,54 +98,6 @@ void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
     printContainer(hs, ", ", "< ", " >");
 }
 
-// Possibly should be elsewhere.
-// Finds an input filter that has all the constraints, including between arguments.
-// inputFilter doesn't include those constraints.
-// Sometimes there is more than one input filter available (e.g. for SimSubstRule)
-std::set<std::vector<BBvtree> > getFilters(Rule * r)
-{
-    //meta i2oType(const std::vector<Vertex>& h) const
-    
-    //! @todo extend this for other rules (probably separately for each one)
-    // generic target for this rule
-//    meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
-//                                         vtree(CreateVar(GET_ASW)),
-//                                         vtree(CreateVar(GET_ASW))
-//                                         )));
-
-    std::vector<meta> inputFilter(r->getInputFilter());
-    
-    // convert them to BoundVertex instances.
-    // This should all probably be refactored.
-    
-    Btr<std::vector<BBvtree> > filter(new std::vector<BBvtree>);
-    
-    //std::copy(inputFilter.begin(), inputFilter.end(), filter->begin());
-    
-    foreach(meta item, inputFilter) {
-        BBvtree Btr_bound_item(new BoundVTree(*item)); // not bound yet, it just means it can be bound
-        filter->push_back(Btr_bound_item);
-    }
-    
-    //return makeSingletonSet(filter);
-    
-    Rule::setOfMPs ret;
-    ret.insert(*filter);
-    return ret;
-    
-
-    meta generic_target(new vtree(mva((pHandle)ASSOCIATIVE_LINK, 
-                                         mva((pHandle)ATOM),
-                                         mva((pHandle)ATOM)
-                                         )));
-
-    //cout << "getFilters";
-    rawPrint(generic_target->begin(), 2);
-//    cout << rawPrint(*generic_target,generic_target->begin(),0);
-    
-    return r->o2iMeta(generic_target);
-}
-
 //! @todo Find a good way to stop when it becomes only able to produce repeats.
 //! @todo Possibly add an option for exhaustively applying Rules to all possible
 //! inputs each step.
@@ -152,7 +110,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
         bool appliedRule = false;
     
         // Get the next Rule (no restrictions)
-        foreach(Rule *r, composers) { // to avoid needing a nextRule method.
+        foreach(Rule *r, *composers) { // to avoid needing a nextRule method.
             cout << "Using " << r->getName() << endl;
         
             // Find the possible vector(s) of arguments for it
@@ -258,7 +216,7 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     cprintf(5, "getMatching: target: ");
     rawPrint(target->begin(), 5);
 
-    foreach(Rule* g, generators) {
+    foreach(Rule* g, *generators) {
     	//std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
@@ -422,6 +380,155 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     return one_worked;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+ForwardChainerClassicIC::ForwardChainerClassicIC(AtomSpaceWrapper* _asw) :
+        asw(_asw)
+{
+    minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
+    probStack = FWD_CHAIN_PROB_STACK;
+    probGlobal = FWD_CHAIN_PROB_GLOBAL;
+
+    ForwardChainer::composers = new DeductionRuleProvider;
+    ForwardChainer::generators = new EvaluationRuleProvider;
+}
+
+ForwardChainerClassicIC::~ForwardChainerClassicIC()
+{
+}
+
+////!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
+//Btr<std::set<BoundVertex> > ForwardChainerClassicIC::getMatching(const meta target)
+//{
+//    BITNodeRoot bit(target, new EvaluationRuleProvider);
+//
+//    int maxSteps = 1000;
+//    const set<VtreeProvider*>& results =
+//            bit.infer(maxSteps);
+//
+////    Btr<std::set<BoundVertex> > matches(new std::set<BoundVertex>);
+////
+////    cprintf(5, "getMatching: target: ");
+////    rawPrint(target->begin(), 5);
+////
+////    foreach(Rule* g, *generators) {
+////        //std::cout << g->getName();
+////        Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
+////
+////        if (gMatches.get()) {
+////            //foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
+////
+////            // Since FC does not always provide adequate restrictions to
+////            // CCURule, it is necessary to do these checks on its output.
+////            // They are already done in Rule::compute on BoundVertexes, but
+////            // this way they will enable skipping problem Atoms rather than
+////            // causing assertions to fail.
+////            foreach(BoundVertex bv, *gMatches) {
+////                pHandle ph = _v2h(bv.value);
+////                //! @todo The first one may be an ASW / contexts issue.
+////                if  (ph != PHANDLE_UNDEFINED &&
+////                     !asw->isType(ph) &&
+////                     asw->getType(ph) != FW_VARIABLE_NODE) {
+////                    matches->insert(bv);
+////                } else {
+////                    cprintf(-1, "skipping invalid output from %s\n", g->getName().c_str());
+////                }
+////            }
+////        }
+////
+////    }
+////
+////    return matches;
+//    Btr<std::set<BoundVertex> > ret;
+//    //ret.reset(new std::set<BoundVertex>(results));
+//    ret.reset(new std::set<BoundVertex>);
+//
+////    for (VTreeProvider* v, results) {
+////        vtree& vt = v->getVtree();
+////        BoundVertex bv(vt, )
+////        ret->insert(v->)
+////    }
+//
+//    foreach(VtreeProvider* vtp, results) {
+//        ret->insert(BoundVertex(*vtp->getVtree().begin()));
+//    }
+//
+//    //VtreeProviders_TO_BoundVertices(results, ret->begin());
+//
+//    return ret;
+//}
+
+Btr<set<Btr<vector<BoundVertex> > > > ForwardChainerClassicIC::findAllArgs(std::vector<BBvtree> filter)
+{
+    // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
+    // Can't make an ANDLink of 1 item, because SimpleANDRule<1> crashes.
+
+//    meta AND(
+//        new vtree(
+//             mva((pHandle)AND_LINK)
+//             )
+//    );
+//
+    meta AND(new vtree);
+
+    bool multiple = filter.size() > 1;
+
+    if (multiple) {
+        AND->set_head((pHandle)AND_LINK);
+
+    //    meta AND(mva((pHandle)AND_LINK));
+
+        for (unsigned int i = 0; i < filter.size(); i++)
+        {
+            //vtree arg(*filter[i]);
+            AND->append_child(AND->begin(), filter[i]->begin());
+        }
+    }
+
+    // filter[0] is technically also a meta, i.e. Boost shared pointer to vtree.
+    // Since BoundVTree is a subclass of vtree.
+    BITNodeRoot bit(multiple ? AND : filter[0],
+            new EvaluationRuleProvider);
+
+    int maxSteps = 1000*filter.size();
+    const set<VtreeProvider*>& results =
+            bit.infer(maxSteps);
+
+    //bit.printResults();
+
+    Btr<set<Btr<vector<BoundVertex> > > > ret(new set<Btr<vector<BoundVertex> > >);
+
+    foreach (VtreeProvider * vpt, results) {
+        Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
+
+        const vtree& tmp = vpt->getVtree();
+        if (!multiple) {
+            next->push_back(BoundVertex(*tmp.begin()));
+        } else {
+            vtree::iterator top = tmp.begin();
+
+            for (vtree::sibling_iterator i =tmp.begin(top);
+                                        i!=tmp.end(top); i++) {
+                next->push_back(BoundVertex(*i));
+            }
+        }
+
+        ret->insert(next);
+    }
+
+    return ret;
+
+    //    Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
+//    Btr<set<Btr<vector<BoundVertex> > > > all_args(new set<Btr<vector<BoundVertex> > >);
+//
+//    //Btr<bindingsT> bindings(new BindingsT());
+//    Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
+//
+//    bool match = findAllArgs(filter, args, 0, all_args, bindings);
+//
+//    return all_args;
+}
+
+
+
 }} // namespace opencog::pln
-
-

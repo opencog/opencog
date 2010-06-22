@@ -76,5 +76,19 @@ public:
     virtual ~ForwardGeneratorRuleProvider(void);
 };
 
+class DeductionRuleProvider : public VariableRuleProvider
+{
+public:
+    DeductionRuleProvider(void);
+    virtual ~DeductionRuleProvider(void);
+};
+
+class EvaluationRuleProvider : public VariableRuleProvider
+{
+public:
+    EvaluationRuleProvider(void);
+    virtual ~EvaluationRuleProvider(void);
+};
+
 }} //namespace opencog { namespace pln {
 #endif
