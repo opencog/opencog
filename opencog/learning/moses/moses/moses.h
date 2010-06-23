@@ -188,7 +188,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * a Solomonoff-like distribution (2^{-complexity}) and the
      * exemplar is selected accordingly.
      * 
-     * @return the iterator of the selected exemplar
+     * @return the iterator of the selected exemplar, if no such
+     *         exemplar exists then return end()
      */
     const_iterator select_exemplar() const {
         OC_ASSERT(!empty(),
@@ -198,9 +199,20 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
         vector<complexity_t> probs;
+        // set to true when a potential exemplar to be selected is
+        // found
+        bool exist_exemplar = false;
 
-        for (const_iterator it = begin();
-             it != end() && get_score(*it) == score;++it) {
+        for (const_iterator it = begin(); it != end(); ++it) {
+            // if no exemplar has been found for that score then look
+            // at the next lower score
+            if(get_score(*it) != score) {
+                if(!exist_exemplar) {
+                    score = get_score(*it);
+                }
+                else break;
+            }
+
             complexity_t c = get_complexity(*it);
             if (cmin - c > params.selection_max_range)
                 break;
@@ -208,9 +220,15 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             // the maximum complexity (actually the min in value since
             // complexity is negative)
             const combo_tree& tr = get_tree(*it);
-            if(_visited_exemplars.find(tr) == _visited_exemplars.end())
+            if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(c);
-            else probs.push_back(max_complexity);
+                exist_exemplar = true;
+            }
+            else probs.push_back(max_complexity);            
+        }
+        
+        if(!exist_exemplar) {
+            return end(); // there is no exemplar to select
         }
 
         complexity_t sum = 0;
@@ -223,7 +241,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             sum += p;
         }
 
-        OC_ASSERT(sum > 0, "This may happen, that means that there is no best candidates that have not been visisted, to fix it one just needs to add some code to explore the second best candidates and so on");
+        OC_ASSERT(sum > 0, "There is an internal bug, please fix it");
 
         const_iterator exemplar = begin();
         advance(exemplar, distance(probs.begin(),
@@ -300,6 +318,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             return false;
 
         _exemplar = select_exemplar();
+        if(_exemplar == end())
+            return false;
 
         combo_tree tr(_exemplar->first);
 
