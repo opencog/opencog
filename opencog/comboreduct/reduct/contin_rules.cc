@@ -472,8 +472,9 @@ namespace reduct {
                             // assumed by the reduct engine)
                             // we do that long-cut
                             *it = *tr_cr;
-                            tr.replace(it.begin(), it.end(),
-                                       tr_cr.begin(), tr_cr.end());
+                            if(!tr_cr.is_childless())
+                                tr.replace(it.begin(), it.end(),
+                                           tr_cr.begin(), tr_cr.end());
                         }
                     }
                 }
