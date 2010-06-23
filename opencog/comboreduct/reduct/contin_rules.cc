@@ -442,6 +442,45 @@ namespace reduct {
     }
   }
 
+    void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const {
+        if(*it == id::times && it.number_of_children() >= 2) {
+            sib_it plus_it = std::find(it.begin(), it.end(), vertex(id::plus));
+            if(plus_it != it.end()) {
+                unsigned int idx = 0;
+                for(sib_it fac_it = it.begin();
+                    fac_it != it.end(); fac_it++, idx++) {
+                    if(*fac_it != id::plus) { // found a factor to distribute
+                        combo_tree tr_copy(it);
+                        unsigned int size_before_reduct = tr_copy.size();
+                        pre_it tr_cr(tr_copy.begin()); //copy root
+                        sib_it fac_copy_it = tr_copy.child(tr_cr, idx);
+                        // distribute fac_copy_it
+                        sib_it plus_ci = std::find(tr_cr.begin(), tr_cr.end(),
+                                                   vertex(id::plus));
+                        for(sib_it child = plus_ci.begin();
+                            child != plus_ci.end(); child++) {
+                            if(*child != id::times)
+                            child = tr_copy.insert_above(child, id::times);
+                            tr_copy.replace(tr_copy.append_child(child, vertex()),
+                                            fac_copy_it);
+                        }
+                        tr_copy.erase(fac_copy_it);
+                        (*_reduction)(tr_copy);
+                        unsigned int size_after_reduct = tr_copy.size();
+                        if(size_after_reduct < size_before_reduct) {
+                            // in order to not change 'it' (which is
+                            // assumed by the reduct engine)
+                            // we do that long-cut
+                            *it = *tr_cr;
+                            tr.replace(it.begin(), it.end(),
+                                       tr_cr.begin(), tr_cr.end());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
   //x/c -> 1/c * x
   //x/(c*y) -> 1/c *x/y
   //x/0 -> 1 DELETED BECAUSE NO PROTECTION ANYMORE

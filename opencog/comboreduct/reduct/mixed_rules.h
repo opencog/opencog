@@ -48,11 +48,12 @@ namespace reduct {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
 
-  // diabled for the moment because it doesn't work anymore with abs_log
+#ifndef ABS_LOG
   //0<log(x) -> 0<-1+x
-  // struct reduce_gt_zero_log : public crule<reduce_gt_zero_log> {
-  //   void operator()(combo_tree& tr,combo_tree::iterator it) const;
-  // };
+  struct reduce_gt_zero_log : public crule<reduce_gt_zero_log> {
+    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+  };
+#endif
 
   //0<exp(x) -> true
   struct reduce_gt_zero_exp : public crule<reduce_gt_zero_exp> {

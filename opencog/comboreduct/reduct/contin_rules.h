@@ -58,6 +58,33 @@ namespace reduct {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
   };
 
+  // *(+(X1 ... Xn) Y), distribute Y in +(X1 ... Xn)
+  // then reduce +(*(X1 Y) ... *(Xn Y)) and keep it if shorter
+  // For instance *(+(*(+(#1 #2 1) -1) 1) -1):
+  // 1) distribute
+  // +(*(+(#1 #2 1) -1 -1) *(1 -1))
+  // 2) reduce (without factorizing the root to avoid infinite loop)
+  // +(*(+(#1 #2 1) 1) -1)
+  // +(+(#1 #2 1) -1)
+  // +(#1 #2 1 -1)
+  // +(#1 #2)
+  //
+  // It assumes that there is only one child starting with + but
+  // possibly several children with non-plus, that is 
+  // *(+(X1 ... Xn) Y1 .. Ym)
+  // tries all possible distributions of Yi, such as
+  // *(+(*(X1 Yi) ... *(Xn Yi)) Y1 ... Yi-1 Yi+1 ... Ym)
+  //
+  // @todo maybe one needs to consider subset of Y1 to Ym to be
+  // complete
+  struct reduce_distribute : public crule<reduce_distribute> {
+    reduce_distribute(const rule& r) : _reduction(&r) { }    
+    void operator()(combo_tree& tr,combo_tree::iterator it) const;
+  protected:
+    const rule* _reduction;
+  };
+
+
   //x/c -> 1/c * x
   //x/(c*y) -> 1/c *x/y
   //x/0 -> 1 DELETED BECAUSE NO PROTECTION ANYMORE
