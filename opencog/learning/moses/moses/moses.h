@@ -91,11 +91,31 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         double scoring_epsilon;
     };
 
+    // init the metapopulation with the following set of exemplars
+    void init(const std::vector<combo_tree>& exemplars) {
+        metapop_candidates candidates;
+        foreach(const combo_tree& base, exemplars) {
+            combo_tree_score base_sc =
+                make_pair(score(base),
+                          base.size() // @todo, once scorer is generic
+                                      // it should be replaced by the
+                                      // complexity measure of the
+                                      // scorer
+                                    );
+            if(base_sc > _best_score)
+                _best_score = base_sc;
+            candidates.insert(make_pair(base,
+                                        combo_tree_behavioral_score
+                                        (bscore(base), base_sc)));
+        }
+        merge_nondominating(candidates.begin(), candidates.end(), *this);
+    }
+
     /**
      *  Constuctor for the class metapopulation
      *  
      * @param _rng    rand number 
-     * @param base    exemplar used to initialize the metapopulation
+     * @param bases   exemplars used to initialize the metapopulation
      * @param tt      type of expression to be learned
      * @param iops    the set of operators to ignore
      * @param si      reduct rule for reducting 
@@ -104,7 +124,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * @param opt     optimization should be providing for the learning
      * @param pa      parameter for selecting the deme 
      */
-    metapopulation(opencog::RandGen& _rng, const combo_tree& base,
+    metapopulation(opencog::RandGen& _rng,
+                   const std::vector<combo_tree>& bases,
                    const combo::type_tree& tt,
                    const reduct::rule& si,
                    const Scoring& sc, const BScoring& bsc,
@@ -113,18 +134,26 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         rng(_rng), type(tt), simplify(&si), score(sc),
         bscore(bsc), optimize(opt), params(pa),
         scorer(sc, NULL, 0, rng), _n_evals(0),
-        _rep(NULL), _deme(NULL)
+        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
-        _best_score = make_pair(score(base),
-                                base.size() // @todo, once scorer is
-                                            // generic it should be
-                                            // replaced by the
-                                            // complexity measure of
-                                            // the scorer
-                                );
-        behavioral_score base_bs = bscore(base);
-        insert(behavioral_scored_combo_tree
-               (base, combo_tree_behavioral_score(base_bs, _best_score)));
+        init(bases);
+    }
+
+    // like above but using a single base
+    metapopulation(opencog::RandGen& _rng,
+                   const combo_tree& base,
+                   const combo::type_tree& tt,
+                   const reduct::rule& si,
+                   const Scoring& sc, const BScoring& bsc,
+                   const Optimization& opt = Optimization(),
+                   const parameters& pa = parameters()) :
+        rng(_rng), type(tt), simplify(&si), score(sc),
+        bscore(bsc), optimize(opt), params(pa),
+        scorer(sc, NULL, 0, rng), _n_evals(0),
+        _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
+    {
+        std::vector<combo_tree> bases(1, base);
+        init(bases);
     }
 
     ~metapopulation() {
@@ -371,9 +400,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
-        typedef boost::unordered_map<combo_tree, combo_tree_behavioral_score, 
-                                     boost::hash<combo_tree> > Candidates;
-        Candidates candidates;
+        metapop_candidates candidates;
 
         int i = 0;
 
@@ -418,10 +445,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             ss << "Candidates (and their bscores) to merge with the metapopulation: "
                << candidates.size();
             logger().fine(ss.str());
-            foreach(Candidates::value_type& c, candidates) {
+            foreach(metapop_candidates::value_type& c, candidates) {
                 stringstream ss_c;
                 ss_c << c.second << " " << c.first;
-                logger().fine(ss_c.str());            
+                logger().fine(ss_c.str());
             }
         }
         // ~Logger
@@ -567,10 +594,26 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
           ignore_ops, perceptions, actions);
 }
 
+// ignore the max_gens, for backward compatibility
+template<typename Scoring, typename Domination, typename Optimization>
+void moses(metapopulation<Scoring, Domination, Optimization>& mp,
+           int max_evals, score_t max_score, 
+           const operator_set& ignore_ops = operator_set(),
+           const combo_tree_ns_set* perceptions = NULL,
+           const combo_tree_ns_set* actions = NULL)
+{
+    moses(mp, max_evals, -1, 
+          combo_tree_score(max_score, worst_possible_score.second),
+          ignore_ops, perceptions, actions);
+}
+
 /**
  * @brief The sliced version of moses
  *
  * It is only used for testing
+ * 
+ * @todo should be removed once slice and non-slice MOSES are totally
+ * factorized
  *
  * Lists of relevant operators, perceptions, and actions may or may not be
  * provided. The initial design assumed fixed lists, this version

@@ -24,6 +24,8 @@
 #ifndef _MOSES_TYPES_H
 #define _MOSES_TYPES_H
 
+#include <boost/unordered_map.hpp>
+
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
 #include <opencog/util/printContainer.h>
@@ -47,6 +49,9 @@ namespace moses {
                                  combo_tree_score> combo_tree_behavioral_score;
     typedef opencog::tagged_item<combo::combo_tree,
                                  combo_tree_behavioral_score> behavioral_scored_combo_tree;
+
+    typedef boost::unordered_map<combo::combo_tree, combo_tree_behavioral_score, 
+                                 boost::hash<combo::combo_tree> > metapop_candidates;
   
     extern const combo_tree_score worst_possible_score;
 

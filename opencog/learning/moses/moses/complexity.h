@@ -1,5 +1,5 @@
 /*
- * opencog/comboreduct/combo/complexity.h
+ * opencog/learning/moses/moses/complexity.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved

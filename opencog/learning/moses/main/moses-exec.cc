@@ -62,7 +62,7 @@ int main(int argc,char** argv) {
     static const string un="un"; // univariate
     static const string sa="sa"; // simulation annealing
     static const string hc="hc"; // hillclimbing
-    string exemplar_str;
+    vector<string> exemplars_str;
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -88,8 +88,8 @@ int main(int argc,char** argv) {
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
         ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
          "optimization algorithm, current supported algorithms are univariate (un), simulation annealing (sa), hillclimbing (hc)")
-        ("exemplar,e", value<string>(&exemplar_str)->default_value("+"),
-         "start the search with a given exemplar")
+        ("exemplar,e", value<vector<string> >(&exemplars_str),
+         "start the search with a given exemplar, can be used several times")
         ;
 
     variables_map vm;
@@ -147,11 +147,20 @@ int main(int argc,char** argv) {
         }
     }
 
-    // set the initial exemplar
-    combo_tree exemplar;
-    stringstream ss;
-    ss << exemplar_str;
-    ss >> exemplar;
+    // hack: should be replaced by a prototype inference to determine
+    // the initial exemplar if none is given
+    if(exemplars_str.empty())
+        exemplars_str.push_back("+");
+
+    // set the initial exemplars
+    vector<combo_tree> exemplars;
+    foreach(const string& exemplar_str, exemplars_str) {
+        stringstream ss;
+        combo_tree exemplar;
+        ss << exemplar_str;
+        ss >> exemplar;
+        exemplars.push_back(exemplar);
+    }
 
     // set alphabet size
     int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
@@ -168,7 +177,7 @@ int main(int argc,char** argv) {
         metapopulation<bscore_based_score<occam_contin_bscore>,
                        occam_contin_bscore, 
                        univariate_optimization> 
-            metapop(rng, exemplar, tt,
+            metapop(rng, exemplars, tt,
                     contin_reduction(rng), score, bscore,
                     univariate_optimization(rng));
         moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
@@ -177,7 +186,7 @@ int main(int argc,char** argv) {
         metapopulation<bscore_based_score<occam_contin_bscore>,
                        occam_contin_bscore,
                        simulated_annealing> 
-            metapop(rng, exemplar, tt,
+            metapop(rng, exemplars, tt,
                     contin_reduction(rng), score, bscore,
                     simulated_annealing(rng));
         moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
@@ -186,7 +195,7 @@ int main(int argc,char** argv) {
         metapopulation<bscore_based_score<occam_contin_bscore>,
                        occam_contin_bscore,
                        iterative_hillclimbing> 
-            metapop(rng, exemplar, tt,
+            metapop(rng, exemplars, tt,
                     contin_reduction(rng), score, bscore,
                     iterative_hillclimbing(rng));
         moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);

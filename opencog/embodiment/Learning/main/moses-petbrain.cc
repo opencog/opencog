@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     interactive_bscore bscorer;
 
     metapopulation<interactive_score, interactive_bscore, iterative_hillclimbing>
-    metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
+        metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
             scorer, bscorer, iterative_hillclimbing(rng));
 
     cout << "build metapop" << endl;

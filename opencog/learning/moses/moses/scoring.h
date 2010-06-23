@@ -382,7 +382,7 @@ tribool dominates(const behavioral_score& x, const behavioral_score& y);
 
 /**
  * For all candidates c in [from, to), insert c in dst iff 
- * no element of dst dominates c
+ * no element of dst dominates c.
  */
 //this may turn out to be too slow...
 template<typename It, typename Set>
