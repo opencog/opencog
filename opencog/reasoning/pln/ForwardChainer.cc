@@ -491,25 +491,55 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainerClassicIC::findAllArgs(std::
             new EvaluationRuleProvider);
 
     int maxSteps = 1000*filter.size();
-    const set<VtreeProvider*>& results =
-            bit.infer(maxSteps);
+    //const set<VtreeProvider*>& results =
+    bit.infer(maxSteps);
 
-    //bit.printResults();
+    //! @todo Get the BIT to return results properly
+    //! For now just using a workaround.
+
+    bit.printResults();
 
     Btr<set<Btr<vector<BoundVertex> > > > ret(new set<Btr<vector<BoundVertex> > >);
 
-    foreach (VtreeProvider * vpt, results) {
+    if (bit.getEvalResults().size()) {
+        cout << bit.getEvalResults()[0].size() << endl;
+
+        //results = bit.getEvalResults()[0];
+    } else {
+        return ret;
+    }
+
+    std::cout << "results";
+
+    //foreach (VtreeProvider * vpt, results) {
+    foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
         Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
+
+        std::cout << "result";
 
         const vtree& tmp = vpt->getVtree();
         if (!multiple) {
+            std::cout << "single";
+
             next->push_back(BoundVertex(*tmp.begin()));
         } else {
             vtree::iterator top = tmp.begin();
 
-            for (vtree::sibling_iterator i =tmp.begin(top);
-                                        i!=tmp.end(top); i++) {
-                next->push_back(BoundVertex(*i));
+            std::cout << "multiple: ";
+            NMPrinter np;
+            np.print(top,-5);
+
+
+//            //np.print(top.begin(),-5);
+//            //for (vtree::sibling_iterator i = tmp.begin(top); i!=tmp.end(top); i++) {
+//            for (vtree::sibling_iterator i = top; i!=tmp.end(); i++) {
+//                next->push_back(BoundVertex(*i));
+//                np.print(i,-5);
+//            }
+
+            foreach (pHandle ph, asw->getOutgoing(_v2h(*top))) {
+                next->push_back(BoundVertex(ph));
+                np.print(ph,-5);
             }
         }
 
