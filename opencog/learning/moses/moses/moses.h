@@ -102,11 +102,12 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                                       // complexity measure of the
                                       // scorer
                                     );
-            if(base_sc > _best_score)
-                _best_score = base_sc;
             candidates.insert(make_pair(base,
                                         combo_tree_behavioral_score
                                         (bscore(base), base_sc)));
+
+            // update the record of the best-seen score & trees
+            update_best(base, base_sc);
         }
         merge_nondominating(candidates.begin(), candidates.end(), *this);
     }
@@ -429,13 +430,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                                             combo_tree_behavioral_score
                                             (bscore(tr), inst.second)));
                 // also update the record of the best-seen score & trees
-                if (inst.second >= _best_score) {
-                    if (inst.second > _best_score) {
-                        _best_score = inst.second;
-                        _best_trees.clear();
-                    }
-                    _best_trees.push_back(tr);
-                }
+                update_best(tr, inst.second);
             }
         }
 
@@ -468,6 +463,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         delete _rep;
         _deme = NULL;
         _rep = NULL;
+    }
+
+    // update the record of the best-seen score & trees
+    void update_best(const combo_tree& tr, const combo_tree_score& tr_sc) {
+        if (tr_sc >= _best_score) {
+            if (tr_sc > _best_score) {
+                _best_score = tr_sc;
+                _best_trees.clear();
+            }
+            _best_trees.push_back(tr);
+        }
     }
 
     /**
