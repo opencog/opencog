@@ -76,64 +76,6 @@ struct simple_symbolic_regression {
 
 // ///////////////////// Scoring for truth table data /////////////////////////
 
-
-template<typename State, typename iter>
-bool bool_evaluate(const State& bindings, iter it)
-{
-    using namespace id;
-    typedef typename iter::sibling_iterator sib_it;
-
-    if (!(*it == id::boolean_if || *it == id::logical_and ||
-          *it == id::logical_or || *it == id::logical_not ||
-          *it == id::logical_true || *it == id::logical_false)) {
-        if (get_argument(*it).idx < 0) // negation
-            return !bindings[-get_argument(*it).idx-1];
-        else
-            return bindings[get_argument(*it).idx-1];
-    }
-
-    if (*it == id::boolean_if)
-        return (bool_evaluate(bindings, it.begin()) ?
-                bool_evaluate(bindings, ++it.begin()) :
-                bool_evaluate(bindings, --it.end()));
-
-    if (it.begin() == it.end())
-        return (*it == id::logical_or || *it == id::logical_true);
-
-    if (*it == id::logical_or) {
-        for (sib_it sib = it.begin();sib != it.end();++sib)
-            if (bool_evaluate(bindings, sib))
-                return true;
-        return false;
-    }
-    if (*it == id::logical_and) {
-        for (sib_it sib = it.begin();sib != it.end();++sib)
-            if (!bool_evaluate(bindings, sib))
-                return false;
-        return true;
-    }
-    if (*it == id::logical_not) {
-        return !bool_evaluate(bindings, it.begin());
-    }
-
-    if (*it == id::logical_true)
-        return true;
-    if (*it == id::logical_false)
-        return false;
-
-    std::cout << "can't find " << *it << std::endl;
-    assert(false);
-    return false;
-}
-
-
-template<typename State, typename iter>
-bool bool_evaluate(const State& bindings, const combo_tree& tr)
-{
-    return bool_evaluate(bindings, tr.begin());
-}
-
-
 struct ConfusionMatrix {
     int TP, FP, TN, FN;
 };
@@ -168,7 +110,18 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
         // cout << "#cases: " << _cases.size() << " arity " << arity() << endl;
     }
 
-    ConfusionMatrix ComputeConfusionMatrix(const combo_tree& t) const {
+    bool bool_evaluate(const vector<bool>& bindings, const combo_tree& tr) const
+    {
+        static opencog::MT19937RandGen rng(0); // this is not useful anyway,
+                                               // remove once rng has a
+                                               // factory and is optional
+        for(unsigned int i = 0; i < bindings.size(); i++) {
+            binding(i+1) = bool_to_vertex(bindings[i]);
+        }
+        return vertex_to_bool(eval_throws(rng, tr));
+    }
+
+    ConfusionMatrix ComputeConfusionMatrix(const combo_tree& tr) const {
         ConfusionMatrix cm;
         cm.TP = 0;
         cm.FP = 0;
@@ -176,7 +129,7 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
         cm.FN = 0;
 
         for (CaseSeq::const_iterator c = _cases.begin();c != _cases.end();++c) {
-            if (bool_evaluate(*c, t.begin()))
+            if (bool_evaluate(*c, tr))
                 (*c)[arity()] ? cm.TP++ : cm.FP++;
             else
                 (*c)[arity()] ? cm.FN++ : cm.TN++;
@@ -185,35 +138,19 @@ struct CaseBasedBoolean : public unary_function<combo_tree, score_t> {
         return cm;
     }
 
-
-    score_t operator()(const combo_tree& t) const {
-        return score_t(t.empty() ? NEG_INFINITY :
-                       1.0f*operator()(t.begin()));
-    }
-
-    template<typename iter>
-    int operator()(iter src) const {
-        //cout << "cbb" << endl;
-
-        int f=0;
-
-        // cout << "case:" << endl;
-        // for (int k=1;k<=arity();k++)
-        //   cout << "#" << k;
-        // cout << endl;
-
+    score_t operator()(const combo_tree& tr) const {
+        score_t f=0;
         for (CaseSeq::const_iterator c = _cases.begin();c != _cases.end();++c) {
-            f -= (bool_evaluate(*c, src) != (*c)[arity()]);
+            f -= (bool_evaluate(*c, tr) != (*c)[arity()]);
         }
         return f;
     }
 
-
-    void compute_behavior(const combo_tree& t, behavioral_score& bs) const {
+    void compute_behavior(const combo_tree& tr, behavioral_score& bs) const {
         int i = 0;
         for (CaseSeq::const_iterator c = _cases.begin();
              c != _cases.end();++c, ++i)
-            bs[i] = (bool_evaluate(*c, t.begin()) != (*c)[arity()]);
+            bs[i] = (bool_evaluate(*c, tr) != (*c)[arity()]);
     }
 
 
