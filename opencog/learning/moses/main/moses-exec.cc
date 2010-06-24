@@ -19,32 +19,21 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
+#include "moses-exec.h"
 
-#include <boost/program_options.hpp>
-
-#include <opencog/util/mt19937ar.h>
-#include <opencog/util/Logger.h>
-
-#include <opencog/comboreduct/combo/eval.h>
-#include <opencog/comboreduct/combo/table.h>
-
-// for operator>> to combo 
-#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h> 
-
-#include "../moses/moses.h"
-#include "../moses/optimization.h"
-#include "../moses/scoring_functions.h"
-#include "../moses/scoring.h"
-
-using namespace boost::program_options;
-using namespace std;
-using namespace moses;
-using namespace reduct;
-using opencog::logger;
-using namespace ant_combo;
+/**
+ * check the first element of the data file, if it is "0" or "1" then
+ * it is boolean, otherwise it is contin. It is not 100% reliable of
+ * course and should be improved.
+ */
+type_node infer_type_from_data_file(string file) {
+    ifstream in(file.c_str());
+    string str;
+    in >> str;
+    if(str == "0" || str == "1")
+        return id::boolean_type;
+    else return id::contin_type;
+}
 
 int main(int argc,char** argv) { 
 
@@ -59,9 +48,6 @@ int main(int argc,char** argv) {
     float variance;
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
-    static const string un="un"; // univariate
-    static const string sa="sa"; // simulation annealing
-    static const string hc="hc"; // hillclimbing
     vector<string> exemplars_str;
     
     // Declare the supported options.
@@ -123,10 +109,19 @@ int main(int argc,char** argv) {
         }
     }
 
-    // hack: should be replaced by a prototype inference to determine
-    // the initial exemplar if none is given
-    if(exemplars_str.empty())
-        exemplars_str.push_back("+");
+    if(exemplars_str.empty()) {
+        type_node inferred_type = infer_type_from_data_file(input_table_file);
+        switch(inferred_type) {
+        case id::boolean_type : exemplars_str.push_back("and");
+            break;
+        case id::contin_type : exemplars_str.push_back("+");
+            break;
+        default:
+            std::cerr << "Type " << inferred_type << " is not supported yet"
+                      << std::endl;
+            exit(1);
+        }
+    }
 
     // set the initial exemplars
     vector<combo_tree> exemplars;
@@ -138,70 +133,68 @@ int main(int argc,char** argv) {
         exemplars.push_back(exemplar);
     }
 
-    // read the input_table_file file
-    ifstream in(input_table_file.c_str());
-    contin_table contintable;
-    RndNumTable inputtable;
-    contin_vector input_vec;
-    contin_t input;
-    char check;
-    while (!in.eof()) {
-        in>>input;
-        check = in.get();
-        if (check == '\n') {
-            contintable.push_back(input);
-            inputtable.push_back(input_vec);
-            input_vec.clear();
-        }
-        else {
-            input_vec.push_back(input);
-        }
+    type_node output_type = 
+        *(get_output_type_tree(*exemplars.begin()->begin()).begin());
+
+    if(output_type == id::boolean_type) {
+        // read the input_table_file file
+        ifstream in(input_table_file.c_str());
+        CaseBasedBoolean bc(in);
+        unsigned int arity = bc.arity();
+        
+        type_tree tt(id::lambda_type);
+        tt.append_children(tt.begin(), output_type, arity + 1);
+
+        truth_table_data_score  score(bc);
+        truth_table_data_bscore bscore(bc);
+        
+        metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+                              score, bscore, opt_algo,
+                              max_evals, max_gens, ignore_ops, result_count);
     }
-    unsigned int arity = inputtable[0].size();
+    else if(output_type == id::contin_type) {
 
-    type_tree tt(id::lambda_type);
-    tt.append_children(tt.begin(), id::contin_type, arity + 1);
+        // read the input_table_file file
+        ifstream in(input_table_file.c_str());
+        contin_table contintable;
+        RndNumTable inputtable;
+        contin_vector input_vec;
+        contin_t input;
+        char check;
+        while (!in.eof()) {
+            in>>input;
+            check = in.get();
+            if (check == '\n') {
+                contintable.push_back(input);
+                inputtable.push_back(input_vec);
+                input_vec.clear();
+            }
+            else {
+                input_vec.push_back(input);
+            }
+        }
+        unsigned int arity = inputtable[0].size();
+        
+        type_tree tt(id::lambda_type);
+        tt.append_children(tt.begin(), output_type, arity + 1);
 
-    // set alphabet size
-    int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
-                                               // number of operators
-                                               // in contin formula,
-                                               // it will have to be
-                                               // adapted
+        // set alphabet size
+        int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
+                                                   // number of operators
+                                                   // in contin formula,
+                                                   // it will have to be
+                                                   // adapted
 
-    occam_contin_bscore bscore(contintable, inputtable,
-                               variance, alphabet_size, rng);
-    bscore_based_score<occam_contin_bscore> score(bscore);
+        occam_contin_bscore bscore(contintable, inputtable,
+                                   variance, alphabet_size, rng);
+        bscore_based_score<occam_contin_bscore> score(bscore);
 
-    if(opt_algo == un) { // univariate
-        metapopulation<bscore_based_score<occam_contin_bscore>,
-                       occam_contin_bscore, 
-                       univariate_optimization> 
-            metapop(rng, exemplars, tt,
-                    contin_reduction(rng), score, bscore,
-                    univariate_optimization(rng));
-        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
-        metapop.print_best(result_count);
-    } else if(opt_algo == sa) { // simulation annealing
-        metapopulation<bscore_based_score<occam_contin_bscore>,
-                       occam_contin_bscore,
-                       simulated_annealing> 
-            metapop(rng, exemplars, tt,
-                    contin_reduction(rng), score, bscore,
-                    simulated_annealing(rng));
-        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
-        metapop.print_best(result_count);
-    } else if(opt_algo == hc) { // hillclimbing
-        metapopulation<bscore_based_score<occam_contin_bscore>,
-                       occam_contin_bscore,
-                       iterative_hillclimbing> 
-            metapop(rng, exemplars, tt,
-                    contin_reduction(rng), score, bscore,
-                    iterative_hillclimbing(rng));
-        moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
-        metapop.print_best(result_count);
+        metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
+                              score, bscore, opt_algo,
+                              max_evals, max_gens, ignore_ops, result_count);
     } else {
-        std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
-        return 1;
+        std::cerr << "Type " << output_type 
+                  << " unhandled for the moment" << std::endl;
+        return 1;        
     }
 }
