@@ -275,14 +275,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)  {
-        // Logger
-        {
-            stringstream ss;
-            ss << "Maximum fitness evaluations during that expansion: " 
-               << max_evals;
-            logger().debug(ss.str());
-        }
-        // ~Logger
 
         if(!create_deme(ignore_ops, perceptions, actions))
             return false;
@@ -318,8 +310,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             return false;
 
         _exemplar = select_exemplar();
-        if(_exemplar == end())
+        if(_exemplar == end()) {
+            logger().info("There is no more exemplar in the meta population that has not been visited");
             return false;
+        }
 
         combo_tree tr(_exemplar->first);
 
@@ -400,7 +394,15 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * @return return the number of evaluations actually performed,
      */
     int optimize_deme(int max_evals) {
-        //do some optimization according to the scoring function
+        // Logger
+        {
+            stringstream ss;
+            ss << "Optimize deme, maximum evaluations during that expansion: " 
+               << max_evals;
+            logger().debug(ss.str());
+        }
+        // ~Logger
+
         scorer._rep = _rep;
         scorer._base_count = get_complexity(*_exemplar); 
         return optimize(*_deme, scorer, max_evals); 
@@ -416,6 +418,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         if (_rep == NULL || _deme == NULL)
             return;
 
+        int eval_during_this_deme = n_evals() - _evals_before_this_deme;
+
+        // Logger
+        {
+            stringstream ss;
+            ss << "Close deme, number of evaluations during this optimization: " 
+               << eval_during_this_deme;
+            logger().debug(ss.str());
+        }
+        // ~Logger
+
         //mark the exemplar so we won't expand it again
         _visited_exemplars.insert(_exemplar->first);
 
@@ -429,7 +442,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             // this is in case the deme is closed before the entire
             // deme (or one should understand the current sample of
             // it) has been explored
-            if (i++ == (n_evals() - _evals_before_this_deme))
+            if (i++ == eval_during_this_deme)
                 break;
 
             //if its really bad just skip it

@@ -29,10 +29,27 @@
 namespace combo
 {
 
-//------------------------------------------------------------------------
-// Truth table
-//------------------------------------------------------------------------
+/////////////////
+// Truth table //
+/////////////////
 
+/**
+ * complete truth table, it contains only the outputs, the inputs are
+ * assumed to me ordered in the conventional way, for instance if
+ * there are 2 inputs, the output is ordered as follows:
+ *
+ * +--+--+--------------+
+ * |#1|#2|Output        |
+ * +--+--+--------------+
+ * |F |F |truth_table[0]|
+ * +--+--+--------------+
+ * |T |F |truth_table[1]|
+ * +--+--+--------------+
+ * |F |T |truth_table[2]|
+ * +--+--+--------------+
+ * |T |T |truth_table[3]|
+ * +--+--+--------------+
+ */
 class truth_table : public std::vector<bool>
 {
 public:
@@ -94,9 +111,10 @@ protected:
     }
 };
 
-//-------------------------------------------------------------------------
-// contin table
-//-------------------------------------------------------------------------
+
+//////////////////
+// contin table //
+//////////////////
 
 //shorthands used by class RndNumTable and contin_table
 typedef std::vector<contin_t> contin_vector;

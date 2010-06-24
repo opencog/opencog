@@ -54,6 +54,42 @@ typedef float fitness_t;
 double information_theoretic_bits(const eda::field_set& fs);
 
 /**
+ * score calculated based on the behavioral score. Useful to avoid
+ * redundancy of code and computation in case there is a cache over
+ * bscore. The score is calculated as the minus of the sum of the
+ * bscore over all features, that is:
+ * score = - sum_f BScore(f),
+ */
+template<typename BScore>
+struct bscore_based_score : public unary_function<combo_tree, score_t>
+{
+    bscore_based_score(const BScore& bs) : bscore(bs) {}
+    score_t operator()(const combo_tree& tr) const {
+        try {
+            behavioral_score bs = bscore(tr);
+            score_t res = -std::accumulate(bs.begin(), bs.end(), 0);
+            // Logger
+            if(logger().getLevel() >= opencog::Logger::FINE) {
+                stringstream ss_tr;
+                ss_tr << "Candidate: " << tr;
+                logger().fine(ss_tr.str());
+                stringstream ss_sc;
+                ss_sc << "Scored: " << res;
+                logger().fine(ss_sc.str());                
+            }
+            // ~Logger
+            return res;
+        } catch (...) {
+            stringstream ss;
+            ss << "The following candidate has failed to be evaluated: " << tr;
+            logger().warn(ss.str());
+            return get_score(worst_possible_score);
+        }
+    }
+    const BScore& bscore;
+};
+
+/**
  * Compute the score of a boolean function in term of hamming distance
  * of its output and the output of the entire truth table of the
  * indended function.
@@ -232,6 +268,41 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     opencog::RandGen& rng;
 };
 
+/**
+ * like occam_contin_bscore but for boolean. The Occam's razor is
+ * probably useful is the data are noisy.
+ */
+// @todo
+// struct occam_boolean_bscore : public unary_function<combo_tree, behavioral_score> {
+//     template<typename Scoring>
+//     occam_boolean_bscore(const Scoring& score,
+//                          const RndNumTable& r,
+//                          float v,
+//                          float alphabet_size,
+//                          opencog::RandGen& _rng)
+//         : target(score, r), rands(r), variance(v), logPDM(v), rng(_rng) {
+//         alphabet_size_log = log((double)alphabet_size);
+//     }
+
+//     occam_contin_bscore(const combo::contin_table& t,
+//                         const RndNumTable& r,
+//                         float v,
+//                         float alphabet_size,
+//                         opencog::RandGen& _rng)
+//         : target(t), rands(r), variance(v), logPDM(v), rng(_rng) {
+//         alphabet_size_log = log((double)alphabet_size);
+//     }
+
+//     behavioral_score operator()(const combo_tree& tr) const;
+
+//     combo::contin_table target;
+//     RndNumTable rands;
+//     score_t variance;
+//     LogPDM logPDM;
+//     score_t alphabet_size_log;
+//     opencog::RandGen& rng;
+// };
+
 template<typename Scoring>
 struct complexity_based_scorer : public unary_function<eda::instance,
                                                        combo_tree_score> {
@@ -344,9 +415,12 @@ struct count_based_scorer : public unary_function<eda::instance,
     combo_tree_score operator()(const eda::instance& inst) const {
         OC_ASSERT(_rep);
 
-#ifdef DEBUG_INFO
-        std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;
-#endif
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            stringstream ss;
+            ss << "Evaluate instance: " << _rep->fields().stream(inst);
+            logger().fine(ss.str());
+        }
+
         _rep->transform(inst);
 
         combo_tree tr;
@@ -406,42 +480,6 @@ void merge_nondominating(It from, It to, Set& dst)
             dst.insert(*from);
     }
 }
-
-/**
- * score calculated based on the behavioral score. Useful to avoid
- * redundancy of code and computation in case there is a cache over
- * bscore. The score is calculated as the minus of the sum of the
- * bscore over all features, that is:
- * score = - sum_f BScore(f),
- */
-template<typename BScore>
-struct bscore_based_score : public unary_function<combo_tree, score_t>
-{
-    bscore_based_score(const BScore& bs) : bscore(bs) {}
-    score_t operator()(const combo_tree& tr) const {
-        try {
-            behavioral_score bs = bscore(tr);
-            score_t res = -std::accumulate(bs.begin(), bs.end(), 0);
-            // Logger
-            if(logger().getLevel() >= opencog::Logger::FINE) {
-                stringstream ss_tr;
-                ss_tr << "Candidate: " << tr;
-                logger().fine(ss_tr.str());
-                stringstream ss_sc;
-                ss_sc << "Scored: " << res;
-                logger().fine(ss_sc.str());                
-            }
-            // ~Logger
-            return res;
-        } catch (...) {
-            stringstream ss;
-            ss << "The following candidate has failed to be evaluated: " << tr;
-            logger().warn(ss.str());
-            return get_score(worst_possible_score);
-        }
-    }
-    const BScore& bscore;
-};
 
 } //~namespace moses
 

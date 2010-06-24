@@ -110,30 +110,6 @@ int main(int argc,char** argv) {
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
 
-    // read the input_table_file file
-    ifstream in(input_table_file.c_str());
-    contin_table contintable;
-    RndNumTable inputtable;
-    contin_vector input_vec;
-    contin_t input;
-    char check;
-    while (!in.eof()) {
-        in>>input;
-        check = in.get();
-        if (check == '\n') {
-            contintable.push_back(input);
-            inputtable.push_back(input_vec);
-            input_vec.clear();
-        }
-        else {
-            input_vec.push_back(input);
-        }
-    }
-    unsigned int arity = inputtable[0].size();
-
-    type_tree tt(id::lambda_type);
-    tt.append_children(tt.begin(), id::contin_type, arity + 1);
-
     // convert ignore_ops_str to the set of actual operators to ignore
     vertex_set ignore_ops;
     foreach(const string& s, ignore_ops_str) {
@@ -161,6 +137,30 @@ int main(int argc,char** argv) {
         ss >> exemplar;
         exemplars.push_back(exemplar);
     }
+
+    // read the input_table_file file
+    ifstream in(input_table_file.c_str());
+    contin_table contintable;
+    RndNumTable inputtable;
+    contin_vector input_vec;
+    contin_t input;
+    char check;
+    while (!in.eof()) {
+        in>>input;
+        check = in.get();
+        if (check == '\n') {
+            contintable.push_back(input);
+            inputtable.push_back(input_vec);
+            input_vec.clear();
+        }
+        else {
+            input_vec.push_back(input);
+        }
+    }
+    unsigned int arity = inputtable[0].size();
+
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(), id::contin_type, arity + 1);
 
     // set alphabet size
     int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
