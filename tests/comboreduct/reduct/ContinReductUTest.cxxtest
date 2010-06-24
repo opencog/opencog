@@ -193,7 +193,7 @@ public:
   }
 
   //test_simplify6 :
-  // test the distribute rule (to be implemented)
+  // test the distribute rule
   // *(+(*(+(#1 #2 1) -1) 1) -1) should reduce to +(#1 #2)
   void test_simplify6() {
     string tree_str="*(+(*(+(#1 #2 1) -1) 1) -1)";
@@ -221,10 +221,38 @@ public:
     TS_ASSERT_EQUALS(ct1,ct2);
   }
   //test_simplify7 :
-  // test the distribute rule (to be implemented)
+  // test the distribute rule
   // +(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1) should reduce to +(#1 #2)
   void test_simplify7() {
     string tree_str="+(*(+(*(+(#1 #2) 2) 1.5) 0.5) -1)";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    int size_before,size_after;
+
+    contin_table ct1(tr, rnt, rng);
+    size_before=tr.size();
+    std::cout << "before: " << tr << std::endl;
+    contin_reduce(tr, rng);
+    std::cout << "after:  " << tr << std::endl;      
+    size_after=tr.size();
+    contin_table ct2(tr, rnt, rng);
+
+    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
+    TS_ASSERT_EQUALS(ct1,ct2);
+  }
+
+  //test_simplify8 :
+  // test the distribute rule
+  void test_simplify8() {
+    string tree_str="*(+(#3 *(2 +(*(+(#1 1)) 1))) #1 4)";
 
     stringstream ss(tree_str);
     combo_tree tr;

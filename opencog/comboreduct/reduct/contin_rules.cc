@@ -460,7 +460,7 @@ namespace reduct {
                         for(sib_it child = plus_ci.begin();
                             child != plus_ci.end(); child++) {
                             if(*child != id::times)
-                            child = tr_copy.insert_above(child, id::times);
+                                child = tr_copy.insert_above(child, id::times);
                             tr_copy.replace(tr_copy.append_child(child, vertex()),
                                             fac_copy_it);
                         }
@@ -475,6 +475,9 @@ namespace reduct {
                             if(!tr_cr.is_childless())
                                 tr.replace(it.begin(), it.end(),
                                            tr_cr.begin(), tr_cr.end());
+                            return; //@todo: maybe the other
+                                    //combinations should be tried out
+                                    //to be complete
                         }
                     }
                 }
