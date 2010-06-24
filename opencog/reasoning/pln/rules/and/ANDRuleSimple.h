@@ -92,9 +92,10 @@ public:
 		pHandle *hs = new pHandle[premiseArray.size()];
 		transform(premiseArray.begin(), premiseArray.end(), &hs[0], GetHandle()); //mem_fun(
 		const int n = (int)premiseArray.size();
-		pHandleSeq dummy_outgoing(boost::get<pHandle>(premiseArray[0]));
+		pHandle first = hs[0];
+		pHandleSeq dummy_outgoing; dummy_outgoing.push_back(first);
         const TruthValue& dummy_tv 
-            = asw->getTV(boost::get<pHandle>(premiseArray[0]));
+            = asw->getTV(first);
 
 		//printf("ANDRUle: [%d: %d] %s =>\n", N, v2h(premiseArray[0]), getTruthValue(v2h(premiseArray[0]))->toString().c_str());
 
