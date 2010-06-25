@@ -28,19 +28,6 @@
 namespace moses
 {
 
-double information_theoretic_bits(const eda::field_set& fs)
-{
-    double res = 0;
-    foreach(const eda::field_set::disc_spec& d, fs.disc_and_bits())
-    res += log2(double(d.arity));
-    foreach(const eda::field_set::contin_spec& c, fs.contin())
-    res += log2(3.0) * double(c.depth);
-    foreach(const eda::field_set::onto_spec& o, fs.onto())
-    res += log2(double(o.branching)) * double(o.depth);
-    //std::cout << "itb = " << res << std::endl;
-    return res;
-}
-
 int logical_score::operator()(const combo_tree& tr) const
 {
     // std::cout << "scoring " << tr << " " << arity << " "

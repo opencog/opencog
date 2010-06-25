@@ -147,8 +147,10 @@ struct lru_cache {
             _lru.pop_back();
         }
       
-        OC_ASSERT(_map.size()<=_n, "lru_cache - _map size greater than _n (%d).", _n);
-        OC_ASSERT(_lru.size()==_map.size(), "lru_cache - _lru size different from _map size.");
+        OC_ASSERT(_map.size()<=_n,
+                  "lru_cache - _map size greater than _n (%d).", _n);
+        OC_ASSERT(_lru.size()==_map.size(),
+                  "lru_cache - _lru size different from _map size.");
       
         //return the result
         return it->second;

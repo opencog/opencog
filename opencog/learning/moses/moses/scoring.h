@@ -51,8 +51,6 @@ typedef float fitness_t;
 //LRU additions (maybe use IS_FE_LRU_CACHE flag)
 #define MOSES_TREE_CACHE_SIZE 1000000
 
-double information_theoretic_bits(const eda::field_set& fs);
-
 /**
  * score calculated based on the behavioral score. Useful to avoid
  * redundancy of code and computation in case there is a cache over

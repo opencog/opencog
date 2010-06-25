@@ -41,12 +41,26 @@
 #define FRACTION_OF_REMAINING     10
 #define MINIMUM_DEME_SIZE         50
 #define MAX_EVALS_PER_SLICE       10
-#define INIT_TEMPERATURE          30
-#define MIN_TEMPERATURE           0
 #define TEMP_STEPSIZE             0.5
 
 namespace moses
 {
+
+double information_theoretic_bits(const eda::field_set& fs)
+{
+    double res = 0;
+    foreach(const eda::field_set::disc_spec& d, fs.disc_and_bits())
+        res += log2(double(d.arity));
+    foreach(const eda::field_set::contin_spec& c, fs.contin()) {
+        // number of possible contins with depth d is 2^(d+1)-1 because
+        // after a Stop only Stop is allowed so it is not 3^d
+        unsigned int contin_count = (1 << (c.depth + 1)) - 1;
+        res += log2(double(contin_count));
+    }
+    foreach(const eda::field_set::onto_spec& o, fs.onto())
+        res += log2(double(o.branching)) * double(o.depth);
+    return res;
+}
 
 struct eda_parameters {
     eda_parameters() :
@@ -93,7 +107,7 @@ struct eda_parameters {
                             window_size_len*information_theoretic_bits(fs))));
     }
 
-    //term_total*n
+    //term_total*N
     inline int max_gens_total(const eda::field_set& fs) {
         return int(ceil(term_total*information_theoretic_bits(fs)));
     }
@@ -516,7 +530,8 @@ struct simulated_annealing {
           fraction_of_remaining(_fraction_of_remaining),
           params(p) {}
       
-    double accept_probability(energy_t energy_new, energy_t energy_old, double temperature)
+    double accept_probability(energy_t energy_new, energy_t energy_old,
+                              double temperature)
     {
         if (energy_new < energy_old)
             return 1.0;
@@ -535,21 +550,28 @@ struct simulated_annealing {
     {
         energy_t instance_energy;
  
-        // here let the energy to be the reverse of the score,
-        // that because the better instance has the lower energy
-        // but higher score.
-        // NOTICE: it may use some other methods to present
-        // the energy.
+        // here let the energy be the reverse of the score, that
+        // because the better instance has the lower energy but higher
+        // score.
+        //
+        // NOTICE: it may use some other methods to present the
+        // energy.
         instance_energy = (energy_t)(- get_score(inst.second));
         return instance_energy;
     }
-      
-    int dist_temp(double current_temp)
+    
+    /**
+     * This method calculate the distance of the jump according to the
+     * temporature. The higher the temperature the higher the
+     * distance.
+     */
+    unsigned int dist_temp(double current_temp)
     {
-        return (int)( ((current_temp - min_temp)/(init_temp - min_temp)) *
-                      (MAX_DISTANCE_FROM_EXEMPLAR - 1)+ 1 );
+        return (unsigned int)( ((current_temp - min_temp)/(init_temp - min_temp))
+                               *
+                               (MAX_DISTANCE_FROM_EXEMPLAR - 1) + 1 );
     }
-        
+
     template<typename Scoring>
     int operator()(eda::instance_set<combo_tree_score>& deme,
                    const Scoring& score, int max_evals) {
@@ -648,11 +670,12 @@ struct simulated_annealing {
                                          rng, center_instance);
                     
                 // score all new instances in the deme
-                transform(deme.begin() + current_number_of_instances , deme.end(),
+                transform(deme.begin() + current_number_of_instances, deme.end(),
                           deme.begin_scores() + current_number_of_instances,
                           score);
                       
-                eda::scored_instance<combo_tree_score>& current_scored_instance = deme[current_number_of_instances];
+                eda::scored_instance<combo_tree_score>& current_scored_instance
+                    = deme[current_number_of_instances];
                 eda::instance& current_instance = current_scored_instance.first;
                     
                 current_instance_energy = energy(current_scored_instance);
@@ -660,7 +683,8 @@ struct simulated_annealing {
                 // check if the current instance in the deme is better than
                 // the center_instance                                        
                 actual_accept_prob = accept_prob_temp_intensity *
-                    accept_probability(current_instance_energy, center_instance_energy, current_temp);
+                    accept_probability(current_instance_energy,
+                                       center_instance_energy, current_temp);
                       
                 if ( actual_accept_prob >= rng.randdouble()) {
                     center_instance_energy = current_instance_energy;
@@ -675,14 +699,14 @@ struct simulated_annealing {
                 cout <<"-----------------------------------------------" <<endl;
                   
                 current_temp = cooling_schedule( step * temp_step_size );
-                distance = max(1, (int)dist_temp_intensity * dist_temp(current_temp));
+                distance = max(1, (int)(dist_temp_intensity
+                                        * dist_temp(current_temp)));
                 step ++;
                   
-            }while(distance <= number_of_fields &&
-                   current_number_of_instances < max_number_of_instances &&
-                   current_temp >= min_temp);
+            } while(distance <= number_of_fields &&
+                    current_number_of_instances < max_number_of_instances &&
+                    current_temp >= min_temp);
         }
-          
         return current_number_of_instances;
     }
       
