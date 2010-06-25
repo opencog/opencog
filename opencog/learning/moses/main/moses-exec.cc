@@ -156,6 +156,16 @@ int main(int argc,char** argv) {
 
         // read the input_table_file file
         ifstream in(input_table_file.c_str());
+        if(!in.is_open()) {
+            if(input_table_file.empty()) {
+                std::cerr << "the input file is empty" << std::endl;
+                std::cerr << "To indicate the file to open use the option -i or --input-file" << std::endl;
+            } else {
+                std::cerr << "Could not open " 
+                          << input_table_file << std::endl;
+            }
+            exit(1);
+        }
         contin_table contintable;
         RndNumTable inputtable;
         contin_vector input_vec;
