@@ -193,6 +193,54 @@ string repeatc(const char c, const int count)
 
 namespace opencog {
 namespace pln {
+
+void reviseVersionedTVs(Handle h) {
+#if MULTIPLE_TVS_WITHOUT_PHANDLE_MAP_WORKS
+    // Revise TVs.
+    // NOTE: When a BITNode's result changes, it is necessary
+    // for the parent node to "re-revise" the new TV into its
+    // own, so it doesn't revise the obsolete TV with the new one.
+    // Skipping that for now due to the complexity of keeping track of which
+    // BITNode/inference path each TV came from.
+    //! @todo After doing that, refactor this and integrate it into FC
+
+    RevisionFormula rev;
+    // Assumes that an Atom's TV is a CompositeTV already (which is correct)
+    //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
+    //CompositeTruthValue& all;
+
+    //                    // Revise existing primary TV and newly found TV
+    //                    TruthValue* primaryTV = atomspace().getTV(real, NULL_VERSION_HANDLE).clone();
+    //                    TruthValue* newlyFoundTV = asw->getTV(ph).clone();
+    //
+    //                    TruthValue* both[2];
+    //                    both[0] = primaryTV;
+    //                    both[1] = newlyFoundTV;
+    //                    TruthValue* tmp = formula.simpleCompute(both, 2);
+    //
+    //                    atomspace().setTV(real, *tmp, NULL_VERSION_HANDLE);
+
+    // Revise all TVs with each other.
+    // Note that a formula's simpleCompute method allocates a new
+    // TV on the stack each time, which makes the following more complicated.
+    //SimpleTruthValue* revisedTV = new SimpleTruthValue(TruthValue::DEFAULT_TV());
+    SimpleTruthValue revisedTV(TruthValue::DEFAULT_TV());
+    CompositeTruthValue& all = (CompositeTruthValue&) atomspace().getTV(h);
+    for (int i = 0; i < all.getNumberOfVersionedTVs(); i++) {
+        TruthValue* both[2];
+        // Have to clone due to const issues. arrggh.
+        both[0] = revisedTV.clone();
+        both[1] = all.getVersionedTV(all.getVersionHandle(i)).clone();
+        TruthValue* tmp = rev.simpleCompute(both, 2);
+
+        revisedTV = *tmp;
+        delete tmp;
+    }
+    atomspace().setTV(h, revisedTV, NULL_VERSION_HANDLE);
+#endif
+}
+
+
 bool unifiesWithVariableChangeTo(AtomSpaceWrapper* asw, 
                                  const vtree & lhs_t, const vtree & rhs_t,
                                  vtree::sibling_iterator ltop,
@@ -1556,20 +1604,20 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
 
             cprintf(4, "Request rhs handle ok %d\n", rhs_h);
 
-            if (!forbiddenBindings)
-                cprintf(4, "No forbiddenBindings\n");
+//            if (!forbiddenBindings)
+//                cprintf(4, "No forbiddenBindings\n");
 
-            if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h))) {
+//            if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h))) {
                 LOG(4, "New subst: " + lhs_name + " for:");
 //printTree(rhs_h,0,3);
 
                 bindings[lhs] = rhs_h;
 
                 *restart = true;
-            } else {
-                cprintf(3, "Subst was forbidden\n");
-                return false;
-            }
+//            } else {
+//                cprintf(3, "Subst was forbidden\n");
+//                return false;
+//            }
         } else
             return false;
     }
