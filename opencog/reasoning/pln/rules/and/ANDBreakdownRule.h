@@ -28,6 +28,8 @@
 namespace opencog { namespace pln {
 
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
+
+/// Produces A given an ANDLink containing A (and N other Atoms)
 template<int N>
 class ANDBreakdownRule : public Rule
 {
@@ -55,7 +57,7 @@ public:
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
         /// And parameters aren't ordered. Therefore, the order in which we feed them
-        /// here is irrelavent. But we need a hypothetical parameter that will later reming
+        /// here is irrelavent. But we need a hypothetical parameter that will later remind
         /// which kind of atom we need to produce.
         
         MPs ret;

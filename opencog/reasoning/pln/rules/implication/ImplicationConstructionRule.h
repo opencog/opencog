@@ -25,6 +25,8 @@
 namespace opencog { namespace pln {
 {
 
+// Produces (Implication A B) given (And A B)
+
 #if 0
 class ImplicationConstructionRule : public GenericRule<Implication>
 {
