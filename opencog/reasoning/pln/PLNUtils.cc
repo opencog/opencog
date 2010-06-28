@@ -609,7 +609,7 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
 
         if (_MP.size() <= 1
                 || (opencog::pln::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
-                                             *tentative_bindings, NULL, NULL, VarT))
+                                             *tentative_bindings, NULL, VarT))
            ) {
             LOG(3, "Was valid search result by unification.");
 
@@ -835,7 +835,6 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
 
     bool restart;
     //bindingsT bindings;
-    set<hsubst>* forbiddenBindings = NULL;
     bindings.reset(new bindingsT);
 
     atom rhs(h);
@@ -843,7 +842,6 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
     do {
         ok = opencog::pln::MPunify1(*value, value->begin(),
                                     rhs, *bindings, //bindings,
-                                    &forbiddenBindings,
                                     &restart, FW_VARIABLE_NODE);
     } while (restart);
 
@@ -1440,7 +1438,6 @@ pHandle _v2h(const Vertex& v) {
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
                    bindingsT& bindings,
-                   set<hsubst>** forbiddenBindings,
                    bool* restart, const Type VarT)
 {
     AtomSpaceWrapper* asw = GET_ASW;
@@ -1489,20 +1486,12 @@ bool MPunifyHandle(pHandle lhs,
 
                 cprintf(4, "Request rhs handle ok %d\n", rhs_h);
 
-                if (!forbiddenBindings)
-                    cprintf(4, "No forbiddenBindings\n");
-
-                if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h))) {
-                    LOG(4, "MPunifyHandle: New subst: " + lhs_name + " for:");
+                LOG(4, "MPunifyHandle: New subst: " + lhs_name + " for:");
 //printTree(rhs_h,0,3);
 
-                    bindings[lhs] = rhs_h;
+                bindings[lhs] = rhs_h;
 
-                    *restart = true;
-                } else {
-                    cprintf(4, "Subst was forbidden\n");
-                    return false;
-                }
+                *restart = true;
             } else
                 return false;
         } else {
@@ -1522,7 +1511,7 @@ bool MPunifyHandle(pHandle lhs,
 
         for (uint i = 0; i < lhs_arity; i++) {
             LOG(4, "MPunifyHandle: next arg...");
-            if (!opencog::pln::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, forbiddenBindings, restart, VarT))
+            if (!opencog::pln::MPunifyHandle(lhs_out[i], *rhs.hs[i], bindings, restart, VarT))
                 return false;
 
             LOG(4, "MPunifyHandle: Unify1 was success!");
@@ -1539,7 +1528,6 @@ bool MPunifyHandle(pHandle lhs,
 bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
               const atom& rhs,
               bindingsT& bindings,
-              set<hsubst>** forbiddenBindings,
               bool* restart, const Type VarT)
 {
     AtomSpaceWrapper* asw = GET_ASW;
@@ -1591,11 +1579,11 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
         (lhs_is_node && rhs.name != lhs_name) ||
         // If lhs is a real atom, check whether lhs and rhs cannot be unified
         (!asw->isType(lhs) && !MPunifyHandle(lhs, rhs, bindings,
-                                             forbiddenBindings, restart, VarT)) ||
+                                             restart, VarT)) ||
         // If lhs isn't a real atom, check whether lhs and rhs cannot be unified
         // based on the atoms pointed to by rhs.
         (asw->isType(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
-                                            bindings, forbiddenBindings, restart, VarT))) {
+                                            bindings, restart, VarT))) {
         LOG(4, "Difference found.");
 
         if (asw->inheritsType(lhs_T, VarT)) {
@@ -1612,20 +1600,12 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
 
             cprintf(4, "Request rhs handle ok %d\n", rhs_h);
 
-//            if (!forbiddenBindings)
-//                cprintf(4, "No forbiddenBindings\n");
-
-//            if (!forbiddenBindings || !STLhas(**forbiddenBindings, hsubst(lhs_name, rhs_h))) {
-                LOG(4, "New subst: " + lhs_name + " for:");
+            LOG(4, "New subst: " + lhs_name + " for:");
 //printTree(rhs_h,0,3);
 
-                bindings[lhs] = rhs_h;
+            bindings[lhs] = rhs_h;
 
-                *restart = true;
-//            } else {
-//                cprintf(3, "Subst was forbidden\n");
-//                return false;
-//            }
+            *restart = true;
         } else
             return false;
     }
@@ -1636,7 +1616,6 @@ bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
 bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
                    const vector<Btr<atom> >& rhsv,
                    bindingsT& bindings,
-                   set<hsubst>** forbiddenBindings,
                    bool* restart, const Type VarT)
 {
     bool isroot = (NULL == restart);
@@ -1657,7 +1636,7 @@ bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
             c != lhs_t.end(lhs_top);c++, i++) {
         LOG(4, "UnifyVector: next arg...");
 
-        if (!MPunify1(lhs_t, c, *rhsv[i], bindings, forbiddenBindings, restart, VarT))
+        if (!MPunify1(lhs_t, c, *rhsv[i], bindings, restart, VarT))
             return false;
 
         LOG(4, "UnifyVector: Unify1 was success!");
@@ -1667,7 +1646,7 @@ bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
             if (!isroot) //If called from within MPunify1
                 return true;
             else
-                return MPunifyVector(lhs_t, lhs_top, rhsv, bindings, forbiddenBindings, NULL, VarT);
+                return MPunifyVector(lhs_t, lhs_top, rhsv, bindings, NULL, VarT);
         }
     }
 

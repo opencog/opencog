@@ -551,19 +551,16 @@ struct atom;
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
                    bindingsT& bindings,
-                   std::set<hsubst>** forbiddenBindings = NULL,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
                    const std::vector<Btr<atom> >& rhsv,
                    bindingsT& bindings,
-                   std::set<hsubst>** forbiddenBindings = NULL,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
               const atom& rhs,
               bindingsT& bindings,
-              std::set<hsubst>** forbiddenBindings = NULL,
               bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
 template<typename OP1, typename OP2, typename ArgT, typename RetT>
