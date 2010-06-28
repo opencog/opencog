@@ -51,10 +51,11 @@ namespace test
 {
     long bigcount=0;
 
+    //! @todo Use boost date_time.
     double custom_duration = 0.0;
-    clock_t custom_start, custom_finish;
+    clock_t custom_start, custom_finish; // Not used.
     //! How long it takes to virtualise the target during BITNode::expandRule
-    time_t custom_start2, custom_finish2;
+    clock_t custom_start2, custom_finish2;
     double custom_duration2 = 0.0;
 
     const bool LOG_WITH_NODE_ID = true;
@@ -1011,18 +1012,17 @@ bool BITNode::expandRule(Rule *new_rule, int target_i, BBvtree _target, Btr<bind
 
             /// Different argument vectors of the same rule (eg. ForAllRule) may have different bindings.
 
-            time( &test::custom_start2 );
+            test::custom_start2 = clock();
 
             meta virtualized_target(bindings ? bind_vtree(*_target,*bindings) : meta(new vtree(*_target)));
             ForceAllLinksVirtual(virtualized_target);
 
-            time( &test::custom_finish2 );
-            test::custom_duration2 += difftime( test::custom_finish2,
-                                                test::custom_start2 );
+            test::custom_finish2 = clock();
+            test::custom_duration2 = (double)(test::custom_finish2 - test::custom_start2) / CLOCKS_PER_SEC;
 
             set<Rule::MPs> target_v_set = new_rule->o2iMeta(virtualized_target);
             
-test::custom_duration += (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
+            test::custom_duration += (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
                         
             if (target_v_set.empty())
             {
