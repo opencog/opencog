@@ -441,7 +441,7 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
             // Stop encountered
             
             // the remaining Stops to consider
-            int remStop = std::min(depth - relative_raw_idx, n); 
+            int remStop = std::min((unsigned int)depth - relative_raw_idx, n); 
             for(; remStop >= 0; remStop--) {
                 number_of_instances +=
                     (1 << remStop) // remStop^2
