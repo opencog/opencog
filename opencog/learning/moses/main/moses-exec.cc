@@ -145,8 +145,8 @@ int main(int argc,char** argv) {
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), output_type, arity + 1);
 
-        truth_table_data_score  score(bc);
         truth_table_data_bscore bscore(bc);
+        bscore_based_score<truth_table_data_bscore>  score(bc);
         
         metapop_moses_results(rng, exemplars, tt, logical_reduction(),
                               score, bscore, opt_algo,

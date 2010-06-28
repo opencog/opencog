@@ -318,10 +318,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         combo_tree tr(_exemplar->first);
 
         // Logger
-        logger().debug("Expand with exemplar:");
         { 
             stringstream ss; 
-            ss << tr; 
+            ss << "Expand with exemplar:" << tr; 
             logger().debug(ss.str()); 
         }
         { 

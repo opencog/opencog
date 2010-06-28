@@ -46,7 +46,7 @@
 namespace moses
 {
 
-double information_theoretic_bits(const eda::field_set& fs)
+inline double information_theoretic_bits(const eda::field_set& fs)
 {
     double res = 0;
     foreach(const eda::field_set::disc_spec& d, fs.disc_and_bits())
@@ -64,10 +64,12 @@ double information_theoretic_bits(const eda::field_set& fs)
 
 struct eda_parameters {
     eda_parameters() :
-        term_total(1),         //optimization is teriminated after term_total*n
-        term_improv(1),        //generations, or term_improv*sqrt(N/w) consecutive
-        //generations with no improvement (w=windowsize)
-        
+        // optimization is teriminated after term_total*n generations,
+        // or term_improv*sqrt(n/w) consecutive generations with no
+        // improvement (w=windowsize)
+        term_total(1),
+        term_improv(1),
+
 //was 20...
         pop_size_ratio(200),     //populations are sized at N = popsize_ratio*n^1.05
         //where n is problem size in info-t bits
@@ -107,11 +109,11 @@ struct eda_parameters {
                             window_size_len*information_theoretic_bits(fs))));
     }
 
-    //term_total*N
+    //term_total*n
     inline int max_gens_total(const eda::field_set& fs) {
         return int(ceil(term_total*information_theoretic_bits(fs)));
     }
-    //term_improv*sqrt(N/w)
+    //term_improv*sqrt(n/w)
     inline int max_gens_improv(const eda::field_set& fs) {
         return int(ceil(term_improv*
                         sqrt(information_theoretic_bits(fs) /
@@ -583,13 +585,6 @@ struct simulated_annealing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
           
-        // for debug
-        cout << "In SA :" << endl;
-        cout << "\tmax_evals = " << max_evals << endl
-             << "\tmax_gens_total = " << max_gens_total << endl
-             << "\tpop_size = " << pop_size << endl
-             << "\tmax_number_of_instances = " << max_number_of_instances << endl;
- 
         // NOTICE : ignored the contin and onto type here, it will be added 
         // in the later reversion(2009/08/05)
         int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
@@ -607,10 +602,11 @@ struct simulated_annealing {
         eda::scored_instance<combo_tree_score> scored_exemplar = exemplar;
         score_t exemplar_score = score(scored_exemplar).first;
           
-        // NOTICE: in the optimize, we always wanna the max_score. But in the SA, the best
-        // candidate is the one which has the lowest energy.So, the energy should be reverse 
-        // to the score of a candidate. 
-        // instead of 0 here should be max_score, but this value is not passed as an argument
+        // NOTICE: in the optimize, we always wanna the max_score. But
+        // in the SA, the best candidate is the one which has the
+        // lowest energy. So, the energy should be reverse to the
+        // score of a candidate. instead of 0 here should be
+        // max_score, but this value is not passed as an argument
         if ( exemplar_score == 0) {
             deme.resize(1);
             *(deme.begin()++) = exemplar;
@@ -622,47 +618,17 @@ struct simulated_annealing {
             energy_t center_instance_energy = energy(scored_exemplar);
               
             do {
-                  
-                cout << "distance in this iteration: " << distance << endl;
-                cout << "current_temp :" << current_temp << endl;
-                // the numeber of all neighbours at the distance d
-                long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
-                cout << "Number of possible instances:"
-                     << total_number_of_neighbours << endl;
-                /*
-                  long long number_of_new_instances;
-                  number_of_new_instances = (max_number_of_instances - current_number_of_instances) /FRACTION_OF_REMAINING;
-                  if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                  number_of_new_instances = (max_number_of_instances - current_number_of_instances);
-                  
-                  // sample the neighborhoods of the center_instances
-                  if (number_of_new_instances < total_number_of_neighbours) {
-                  // resize the deme so it can take new instances
-                  deme.resize(current_number_of_instances + number_of_new_instances);
-                  // sample 'number_of_new_instances' instances on the distance 'distance' from the center_instance
-                  sample_from_neighborhood(deme.fields(), distance, number_of_new_instances,
-                  deme.begin() + current_number_of_instances,
-                  rng, center_instance);
-                  } else {
-                  number_of_new_instances = total_number_of_neighbours;
-                  // resize the deme so it can take new intances
-                  deme.resize(current_number_of_instances + number_of_new_instances);
-                  // add all instances on the distance 'distance' from the center_instance
-                  generate_all_in_neighborhood(deme.fields(), distance, 
-                  deme.begin() + current_number_of_instances,
-                  center_instance);
-                  }
-                  
-                  cout << "New size:" << current_number_of_instances + number_of_new_instances << endl;
-                */
+                // the number of all neighbours at the distance d
+                long long total_number_of_neighbours = 
+                    count_n_changed_knobs(deme.fields(), distance);
  
                 // score all new instances in the deme
-                long long number_of_new_instances = 1;
+                long long number_of_new_instances = 1; //@todo:
+                                                       //possibly
+                                                       //change that
                 energy_t current_instance_energy;
                 double actual_accept_prob;
  
-                //     for ( int i = 0 ; i < total_number_of_neighbours; i++ ) {
-                      
                 // sample one neighbour of the center_instance from distance
                 deme.resize(current_number_of_instances + number_of_new_instances);
                 sample_from_neighborhood(deme.fields(), distance, number_of_new_instances,
@@ -692,16 +658,15 @@ struct simulated_annealing {
                 }
                       
                 current_number_of_instances += number_of_new_instances;
-                //  }
                   
                 cout <<"\tThe  instance:" << deme.fields().stream(center_instance) <<endl;
                 cout <<"\tthe energy is:" << center_instance_energy << endl;
                 cout <<"-----------------------------------------------" <<endl;
                   
-                current_temp = cooling_schedule( step * temp_step_size );
+                current_temp = cooling_schedule(step * temp_step_size);
                 distance = max(1, (int)(dist_temp_intensity
                                         * dist_temp(current_temp)));
-                step ++;
+                step++;
                   
             } while(distance <= number_of_fields &&
                     current_number_of_instances < max_number_of_instances &&
