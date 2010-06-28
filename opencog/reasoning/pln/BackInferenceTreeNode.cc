@@ -52,8 +52,9 @@ namespace test
     long bigcount=0;
 
     //! @todo Use boost date_time.
+    //! How long TableGather::gather takes.
     double custom_duration = 0.0;
-    clock_t custom_start, custom_finish; // Not used.
+    clock_t custom_start, custom_finish;
     //! How long it takes to virtualise the target during BITNode::expandRule
     clock_t custom_start2, custom_finish2;
     double custom_duration2 = 0.0;

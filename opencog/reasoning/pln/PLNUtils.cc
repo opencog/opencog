@@ -56,6 +56,11 @@ namespace haxx {
 pHandle VarTypes[STD_VARS];
 }
 
+namespace test {
+    extern double custom_duration;
+    extern clock_t custom_start, custom_finish;
+}
+
 ///! Legacy log system from Novamente, @todo replace
 int currentDebugLevel = NORMAL;
 
@@ -530,7 +535,6 @@ bool substitutableTo(atom& from, atom& to,
     return true;
 }
 
-
 const float MIN_CONFIDENCE = 0.0000001f;
 
 /// index arg is not used
@@ -542,6 +546,8 @@ const float MIN_CONFIDENCE = 0.0000001f;
 void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
                          const Type VarT, int index)
 {
+    test::custom_start = clock();
+
     LOG(3, "BEGIN GATHER for:");
     rawPrint(_MP, _MP.begin(), 3);
 
@@ -786,6 +792,8 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
         }
     }
 #endif
+    test::custom_finish = clock();
+    test::custom_duration = (double)(test::custom_finish - test::custom_start) / CLOCKS_PER_SEC;
 }
 
 TableGather::TableGather(tree<Vertex>& _MP, AtomSpaceWrapper* asw,
