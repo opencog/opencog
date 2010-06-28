@@ -543,7 +543,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 			int steps;
 			input(steps, args);
 
-			ForwardChainer fw;
+			ForwardChainerClassicIC fw;
 			cout << "FC Starting chaining:" << endl;
 			//pHandleSeq results = fw.fwdChainStack(10000);
 			pHandleSeq results = fw.fwdChain(steps); // FWD_CHAIN_MAX_APPS);
@@ -552,7 +552,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 			cout << "FC Chaining finished, results:" << endl;
 			NMPrinter np;
 			foreach (pHandle h, results) {
-			  np(h);
+			  np(h,-5);
 			}
 			cout << results.size() << " results" << endl;
         }
