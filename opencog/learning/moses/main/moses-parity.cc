@@ -66,9 +66,9 @@ int main(int argc,char** argv) {
 */ 
 
   metapopulation<logical_score,logical_bscore,iterative_hillclimbing> 
-    metapop(rng, combo_tree(id::logical_and),tt,logical_reduction(),
+      metapop(rng, combo_tree(id::logical_and),tt,logical_reduction(), true,
 	    logical_score(scorer,arity,rng),
-	    logical_bscore(scorer,arity,rng),
+              logical_bscore(scorer,arity,rng), true,
 	    iterative_hillclimbing(rng));
 
   moses::moses(metapop,max_evals,0);

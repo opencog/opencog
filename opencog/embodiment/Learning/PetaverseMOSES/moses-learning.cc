@@ -148,8 +148,8 @@ void moses_learning::operator()()
 
         metapop = new metapopulation<petaverse_score, petaverse_bscore,
                                      sliced_iterative_hillclimbing>
-            (_rng, _center, tt, action_reduction(),
-             *score, *bscore, sliced_iterative_hillclimbing(_rng));
+            (_rng, _center, tt, action_reduction(), true,
+             *score, *bscore, true, sliced_iterative_hillclimbing(_rng));
 
         _hcState = HC_BUILD_CANDIDATES;
         start = clock ();

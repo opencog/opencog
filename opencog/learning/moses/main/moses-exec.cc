@@ -49,6 +49,10 @@ int main(int argc,char** argv) {
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
     vector<string> exemplars_str;
+    bool reduce_all;
+    bool count_base; // true if the scorer is count based, otherwise
+                     // complexity based
+    unsigned long cache_size;
     
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -76,6 +80,12 @@ int main(int argc,char** argv) {
          "optimization algorithm, current supported algorithms are univariate (un), simulation annealing (sa), hillclimbing (hc)")
         ("exemplar,e", value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times")
+        ("reduce-all,d", value<bool>(&reduce_all)->default_value(true),
+         "reduce all candidates before being evaluated, can be valuable if the cache is enabled")
+        ("count-based-scorer,u", value<bool>(&count_base)->default_value(true),
+         "if 1 then a count based scorer is used (faster), otherwise, if 0, a complexity based scorer is used (more accurate)")
+        ("cache-size,s", value<unsigned long>(&cache_size)->default_value(1000000),
+         "cache size, so that identical candidates are not re-evaluated, 0 means no cache")
         ;
 
     variables_map vm;
@@ -146,11 +156,19 @@ int main(int argc,char** argv) {
         tt.append_children(tt.begin(), output_type, arity + 1);
 
         truth_table_data_bscore bscore(bc);
-        bscore_based_score<truth_table_data_bscore>  score(bc);
-        
-        metapop_moses_results(rng, exemplars, tt, logical_reduction(),
-                              score, bscore, opt_algo,
-                              max_evals, max_gens, ignore_ops, result_count);
+        bscore_based_score<truth_table_data_bscore> score(bc);
+        if(cache_size>0) {
+            opencog::lru_cache<bscore_based_score<truth_table_data_bscore> >
+                cache_score(cache_size, score);
+            metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+                                  reduce_all, cache_score, bscore, count_base,
+                                  opt_algo,
+                                  max_evals, max_gens, ignore_ops, result_count);
+        } else {
+            metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+                                  reduce_all, score, bscore, count_base, opt_algo,
+                                  max_evals, max_gens, ignore_ops, result_count);
+        }
     }
     else if(output_type == id::contin_type) {
 
@@ -198,10 +216,18 @@ int main(int argc,char** argv) {
         occam_contin_bscore bscore(contintable, inputtable,
                                    variance, alphabet_size, rng);
         bscore_based_score<occam_contin_bscore> score(bscore);
-
-        metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
-                              score, bscore, opt_algo,
-                              max_evals, max_gens, ignore_ops, result_count);
+        if(cache_size>0) {
+            opencog::lru_cache<bscore_based_score<occam_contin_bscore> >
+                cache_score(cache_size, score);
+            metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
+                                  reduce_all, cache_score, bscore, count_base,
+                                  opt_algo,
+                                  max_evals, max_gens, ignore_ops, result_count);
+        } else {
+            metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
+                                  reduce_all, score, bscore, count_base, opt_algo,
+                                  max_evals, max_gens, ignore_ops, result_count);
+        }
     } else {
         std::cerr << "Type " << output_type 
                   << " unhandled for the moment" << std::endl;

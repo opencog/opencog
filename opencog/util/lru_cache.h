@@ -114,7 +114,7 @@ struct lru_cache {
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
     
-    result_type operator()(const argument_type& x)
+    result_type operator()(const argument_type& x) const
     {
         if (empty()) {
             if (full()) //so a size-0 cache never needs hashing

@@ -31,15 +31,16 @@
 #include <limits>
 
 namespace combo {
-  typedef int complexity_t ;  //note: complexity is negative with zero being
-                              //the best - this allows for simple ordering
+    typedef int complexity_t ;  //note: complexity is negative with zero being
+                                //the best - this allows for simple ordering
   
-  // the max_complexity corresponds to the min value of complexity_t
-  // since complexity is negative
-  static complexity_t max_complexity = std::numeric_limits<complexity_t>::min();
+    // the max_complexity corresponds to the min value of complexity_t
+    // since complexity is negative
+    static complexity_t max_complexity = std::numeric_limits<complexity_t>::min();
 
-  complexity_t complexity(combo_tree::iterator);
-
+    complexity_t complexity(combo_tree::iterator);
+    
+    complexity_t complexity(const combo_tree&);
 } //~namespace combo
 
 #endif

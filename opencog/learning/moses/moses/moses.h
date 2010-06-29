@@ -95,13 +95,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     void init(const std::vector<combo_tree>& exemplars) {
         metapop_candidates candidates;
         foreach(const combo_tree& base, exemplars) {
-            combo_tree_score base_sc =
-                make_pair(score(base),
-                          base.size() // @todo, once scorer is generic
-                                      // it should be replaced by the
-                                      // complexity measure of the
-                                      // scorer
-                                    );
+            combo_tree_score base_sc = make_pair(score(base), complexity(base));
             candidates.insert(make_pair(base,
                                         combo_tree_behavioral_score
                                         (bscore(base), base_sc)));
@@ -118,23 +112,24 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      * @param _rng    rand number 
      * @param bases   exemplars used to initialize the metapopulation
      * @param tt      type of expression to be learned
-     * @param iops    the set of operators to ignore
-     * @param si      reduct rule for reducting 
+     * @param si      reduct rule for reducting
+     * @param ra      if true then all candidates are reduced before evaluation
      * @param sc      scoring function for scoring
      * @param bsc     behavior scoring function
+     * @param countbs if true the scorer is count based, otherwise it is
+     *                complexity based
      * @param opt     optimization should be providing for the learning
      * @param pa      parameter for selecting the deme 
      */
     metapopulation(opencog::RandGen& _rng,
                    const std::vector<combo_tree>& bases,
                    const combo::type_tree& tt,
-                   const reduct::rule& si,
-                   const Scoring& sc, const BScoring& bsc,
+                   const reduct::rule& si, bool ra,
+                   const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
-        rng(_rng), type(tt), simplify(&si), score(sc),
-        bscore(bsc), optimize(opt), params(pa),
-        scorer(sc, NULL, 0, rng), _n_evals(0),
+        rng(_rng), type(tt), simplify(&si), reduce_all(ra), score(sc),
+        bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
@@ -144,13 +139,12 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     metapopulation(opencog::RandGen& _rng,
                    const combo_tree& base,
                    const combo::type_tree& tt,
-                   const reduct::rule& si,
-                   const Scoring& sc, const BScoring& bsc,
+                   const reduct::rule& si, bool ra,
+                   const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
-        rng(_rng), type(tt), simplify(&si), score(sc),
-        bscore(bsc), optimize(opt), params(pa),
-        scorer(sc, NULL, 0, rng), _n_evals(0),
+        rng(_rng), type(tt), simplify(&si), reduce_all(ra), score(sc),
+        bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
@@ -382,9 +376,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
-        scorer._base_count = exemplar_complexity;
-        scorer._rep = _rep;
-        int n = optimize(*_deme, scorer, max_evals);
+        int n;
+        if(count_base) { // count_based_scorer
+            complexity_t cex = get_complexity(*_exemplar);
+            count_based_scorer<Scoring> scorer = 
+                count_based_scorer<Scoring>(score, *_rep, cex, reduce_all, rng);
+            n = optimize(*_deme, scorer, max_evals);
+        } else { // complexity_based_scorer
+            complexity_based_scorer<Scoring> scorer =
+                complexity_based_scorer<Scoring>(score, *_rep, reduce_all, rng);
+            n = optimize(*_deme, scorer, max_evals);                
+        }
 
         // This is very ugly, but saves the old MOSES' architecture
         // The only return value of the operator is used for two
@@ -425,9 +427,16 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         }
         // ~Logger
 
-        scorer._rep = _rep;
-        scorer._base_count = get_complexity(*_exemplar); 
-        return optimize(*_deme, scorer, max_evals); 
+        if(count_base) { // count_based_scorer
+            complexity_t cex = get_complexity(*_exemplar);
+            count_based_scorer<Scoring> scorer = 
+                count_based_scorer<Scoring>(score, *_rep, cex, reduce_all, rng);
+            return optimize(*_deme, scorer, max_evals);
+        } else { // complexity_based_scorer
+            complexity_based_scorer<Scoring> scorer =
+                complexity_based_scorer<Scoring>(score, *_rep, reduce_all, rng);
+            return optimize(*_deme, scorer, max_evals);
+        }
     }
 
     /**
@@ -477,7 +486,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             _rep->transform(inst);
 
             //get the combo_tree associated to inst, cleaned and reduced
-            combo_tree tr = _rep->get_clean_exemplar();
+            combo_tree tr = _rep->get_clean_exemplar(true);
 
             //update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
@@ -552,14 +561,14 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     opencog::RandGen& rng;
     combo::type_tree type;
     const reduct::rule* simplify;
+    bool reduce_all; // whether all candidates are reduced before evaluation
     Scoring score;
-    BScoring bscore; //behavioral score
+    BScoring bscore; // behavioral score
+    bool count_base; // if true then the scorer is count based,
+                     // otherwise it is complexity based
     Optimization optimize;
     parameters params;
-    count_based_scorer<Scoring> scorer; // @todo: give to choose
-                                        // others like
-                                        // complexity_based_scorer
-    
+
 protected:
     int _n_evals;
     int _evals_before_this_deme;
@@ -576,7 +585,6 @@ protected:
     representation* _rep; // representation of the current deme
     eda::instance_set<combo_tree_score>* _deme; // current deme
     iterator _exemplar; // exemplar of the current deme
-    complexity_t exemplar_complexity; // exemplar complexity of the current deme
 };
 
 

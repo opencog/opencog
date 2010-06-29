@@ -56,9 +56,9 @@ int main(int argc,char** argv) {
   tt.append_children(tt.begin(),id::boolean_type,arity+1);
 
   metapopulation<logical_score,logical_bscore,iterative_hillclimbing> 
-      metapop(rng,combo_tree(id::logical_and),tt,logical_reduction(),
+      metapop(rng,combo_tree(id::logical_and),tt,logical_reduction(), true,
               logical_score(scorer,arity,rng),
-              logical_bscore(scorer,arity,rng),
+              logical_bscore(scorer,arity,rng), true,
               iterative_hillclimbing(rng));
 
   /* metapopulation<logical_score, logical_bscore, simulated_annealing>

@@ -69,7 +69,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             // Logger
             if(logger().getLevel() >= opencog::Logger::FINE) {
                 stringstream ss_tr;
-                ss_tr << "Candidate: " << tr;
+                ss_tr << "bscore_based_score - Candidate: " << tr;
                 logger().fine(ss_tr.str());
                 stringstream ss_sc;
                 ss_sc << "Scored: " << res;
@@ -268,7 +268,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 
 /**
  * like occam_contin_bscore but for boolean. The Occam's razor is
- * probably useful is the data are noisy.
+ * probably useful if the data are noisy.
  */
 // @todo
 // struct occam_boolean_bscore : public unary_function<combo_tree, behavioral_score> {
@@ -306,138 +306,80 @@ struct complexity_based_scorer : public unary_function<eda::instance,
                                                        combo_tree_score> {
     complexity_based_scorer(const Scoring& s,
                             representation& rep,
+                            bool reduce,
                             opencog::RandGen& _rng)
-            : score(s), _rep(&rep), rng(_rng) { }
+            : score(s), _rep(rep), rng(_rng) { }
 
     combo_tree_score operator()(const eda::instance& inst) const {
         using namespace reduct;
 
-        //cout << "top, got " << _rep->fields().stream(inst) << endl;
-        _rep->transform(inst);
-        combo_tree tr = _rep->exemplar();
+        _rep.transform(inst);
 
-        //reduct::apply_rule(reduct::downwards(reduct::remove_null_vertices()),tr);
-        //if simplification of all trees is enabled, we should instead do
-        //apply_rule(downwards(remove_null_vertices()),tr);
-        //clean_and_full_reduce(tr);
-        clean_and_full_reduce(tr, rng);
-
-        //to maybe speed this up, we can score directly on the exemplar,
-        //and have complexity(tr) ignore the null vertices
-
-        return combo_tree_score(score(tr), complexity(tr.begin()));
+        try {
+            combo_tree tr = _rep.get_clean_exemplar(_reduce);
+            return combo_tree_score(score(tr), complexity(tr.begin()));
+        } catch (...) {
+            stringstream ss;
+            ss << "The following instance has failed to be evaluated: " 
+               << _rep.fields().stream(inst);
+            logger().warn(ss.str());
+            return worst_possible_score;
+        }
     }
 
-    Scoring score;
 protected:
-    representation* _rep;
+    Scoring score;
+    representation& _rep;
+    bool _reduce; // whether the exemplar is reduced before being
+                  // evaluated, this may be advantagous if Scoring is
+                  // also a cache
     opencog::RandGen& rng;
 };
-
-// template<typename Scoring>
-// struct count_based_scorer : public unary_function<eda::instance, 
-//                                                   combo_tree_score> {
-//     count_based_scorer(const Scoring& s,
-//                        representation* rep,
-//                        int base_count,
-//                        opencog::RandGen& _rng)
-//         : score(s), _base_count(base_count), _rep(rep), rng(_rng), 
-//           treecache(MOSES_TREE_CACHE_SIZE, score) {}
-
-//     int get_misses() {
-//         return treecache->get_number_of_evaluations();
-//     }
-    
-//     combo_tree_score operator()(const eda::instance& inst) const {
-// #ifdef DEBUG_INFO
-//         std::cout << "transforming " << _rep->fields().stream(inst) << std::endl;
-// #endif
-//         _rep->transform(inst);
-
-//         combo_tree tr;
-
-//         try {
-//             tr = _rep->get_clean_exemplar();
-//         } catch (...) {
-//             std::cout << "get_clean_exemplar threw" << std::endl;
-//             return worst_possible_score;
-//         }
-
-//         // sequential(clean_reduction(),logical_reduction())(tr,tr.begin());
-//         // std::cout << "OK " << tr << std::endl;
-//         // reduct::clean_and_full_reduce(tr);
-//         // reduct::clean_reduce(tr);
-//         // reduct::contin_reduce(tr,rng);
-
-//         score_t sc = treecache(tr);
-//         // score_t sc = score(tr);
-
-//         combo_tree_score ts = combo_tree_score(sc,
-//                                                - int(_rep->fields().count(inst))
-//                                                + _base_count);        
-// #ifdef DEBUG_INFO
-//         std::cout << "OKK " << tr << std::endl;
-//         std::cout << "Score:" << ts << std::endl;
-// #endif
-//         return ts;
-//     }
-    
-//     Scoring score;
-//     int _base_count;
-//     representation* _rep;
-// protected:
-//     opencog::RandGen& rng;
-//     opencog::lru_cache<cached_scoring_wrapper<Scoring> > treecache;
-// };
 
 template<typename Scoring>
 struct count_based_scorer : public unary_function<eda::instance, 
                                                   combo_tree_score> {
     count_based_scorer(const Scoring& s,
-                       representation* rep,
+                       representation& rep,
                        int base_count,
+                       bool reduce,
                        opencog::RandGen& _rng)
-        : score(s), _base_count(base_count), _rep(rep), rng(_rng),
-          treecache(MOSES_TREE_CACHE_SIZE, score) {}
+        : score(s), _base_count(base_count), _rep(rep), _reduce(reduce),
+          rng(_rng) {}
 
-    int get_misses() {
-        return treecache.get_number_of_evaluations();
-    }
-    
     combo_tree_score operator()(const eda::instance& inst) const {
-        OC_ASSERT(_rep);
-
         // Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
-            ss << "Evaluate instance: " << _rep->fields().stream(inst);
+            ss << "count_based_scorer - Evaluate instance: " 
+               << _rep.fields().stream(inst);
             logger().fine(ss.str());
         }
         // ~Logger
 
-        _rep->transform(inst);
-
-        combo_tree tr;
+        _rep.transform(inst);
 
         try {
-            tr = _rep->get_clean_exemplar();
+            return combo_tree_score(score(_rep.get_clean_exemplar(_reduce)), 
+                                    - int(_rep.fields().count(inst))
+                                    + _base_count);
         } catch (...) {
-            std::cout << "get_clean_exemplar threw" << std::endl;
+            stringstream ss;
+            ss << "The following instance has failed to be evaluated: " 
+               << _rep.fields().stream(inst);
+            logger().warn(ss.str());
             return worst_possible_score;
         }
-
-        combo_tree_score ts = combo_tree_score(treecache(tr),
-                                               - int(_rep->fields().count(inst))
-                                               + _base_count);        
-        return ts;
     }
     
+protected:
     Scoring score;
     int _base_count;
-    representation* _rep;
-protected:
+    representation& _rep;
+    bool _reduce; // whether the exemplar is reduced before being
+                  // evaluated, this may be advantagous if Scoring is
+                  // also a cache
     opencog::RandGen& rng;
-    mutable opencog::lru_cache<Scoring> treecache;
 };
 
 /**

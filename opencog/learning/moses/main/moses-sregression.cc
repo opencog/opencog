@@ -68,9 +68,10 @@ int main(int argc,char** argv) {
     
     metapopulation<contin_score,contin_bscore,univariate_optimization> 
         metapop(rng, combo_tree(id::plus),
-                tt,contin_reduction(rng),
+                tt,contin_reduction(rng), true,
                 contin_score(simple_symbolic_regression(order),rands, rng),
                 contin_bscore(simple_symbolic_regression(order),rands, rng),
+                true,
                 univariate_optimization(rng));
     
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous

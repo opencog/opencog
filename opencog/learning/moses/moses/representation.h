@@ -68,9 +68,10 @@ struct representation : public knob_mapper, boost::noncopyable {
      * returns a clean and reduced version of the current exemplar
      * (usually after turning some of its knobs)
      *
-     * @return It returns a copy of _exemplar, cleaned and reduced
+     * @param reduce whether the combo_tree is reduced before it is returned
+     * @return returns a copy of _exemplar, cleaned and reduced
      */
-    combo_tree get_clean_exemplar();
+    combo_tree get_clean_exemplar(bool reduce);
 
     const field_set& fields() const {
         return _fields;

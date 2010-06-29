@@ -31,6 +31,7 @@
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/lru_cache.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -65,15 +66,17 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si,
+                           bool reduce_all,
                            const Scoring& sc,
                            const BScoring& bsc,
+                           bool count_base,
                            const Optimization& opt,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
                            long result_count) {
     metapopulation<Scoring, BScoring, Optimization> 
-        metapop(rng, bases, tt, si, sc, bsc, opt);
+        metapop(rng, bases, tt, si, reduce_all, sc, bsc, count_base, opt);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
     metapop.print_best(result_count);
 }
@@ -86,23 +89,28 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si,
+                           bool reduce_all,
                            const Scoring& sc,
                            const BScoring& bsc,
+                           bool count_base,
                            const string& opt_algo,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
                            long result_count) {
     if(opt_algo == un) { // univariate
-        metapop_moses_results(rng, bases, tt, si, sc, bsc,
+        metapop_moses_results(rng, bases, tt, si, reduce_all, 
+                              sc, bsc, count_base,
                               univariate_optimization(rng),
                               max_evals, max_gens, ignore_ops, result_count);
     } else if(opt_algo == sa) { // simulation annealing
-        metapop_moses_results(rng, bases, tt, si, sc, bsc,
+        metapop_moses_results(rng, bases, tt, si, reduce_all, 
+                              sc, bsc, count_base,
                               simulated_annealing(rng),
                               max_evals, max_gens, ignore_ops, result_count);
     } else if(opt_algo == hc) { // hillclimbing
-        metapop_moses_results(rng, bases, tt, si, sc, bsc,
+        metapop_moses_results(rng, bases, tt, si, reduce_all,
+                              sc, bsc, count_base,
                               iterative_hillclimbing(rng),
                               max_evals, max_gens, ignore_ops, result_count);
     } else {

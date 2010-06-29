@@ -125,14 +125,14 @@ void representation::clear_exemplar()
 }
 
 
-combo_tree representation::get_clean_exemplar()
+combo_tree representation::get_clean_exemplar(bool reduce)
 {
     using namespace reduct;
 
     combo_tree result = exemplar();
 
     clean_reduce(result); //remove null vertices
-    (*_simplify)(result, result.begin()); //reduce
+    if(reduce) (*_simplify)(result, result.begin()); //reduce
 
     return result;
 }

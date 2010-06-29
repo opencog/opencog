@@ -28,20 +28,20 @@
 
 namespace combo {
 
-  // for a Boolean formula, the complexity is the # of literals
+// for a Boolean formula, the complexity is the # of literals
 
-  complexity_t complexity(combo_tree::iterator it) {
+complexity_t complexity(combo_tree::iterator it) {
     if (*it==id::logical_true || *it==id::logical_false || *it==id::null_vertex)
-      return 0;
+        return 0;
 
     if (is_argument(*it))
-      return -1;
+        return -1;
 
     if (is_builtin_action(*it)) // PJ
-      return -1;
+        return -1;
 
     if (*it==id::logical_not)
-      return complexity(it.begin());
+        return complexity(it.begin());
 
 //    OC_ASSERT(*it==id::logical_and || *it==id::logical_or, 
 //            "combo_tree node should be of logical types 'id::logical_and' or 'id::logical_or'.");
@@ -49,8 +49,12 @@ namespace combo {
 
     int c=0;
     for (combo_tree::sibling_iterator sib=it.begin();sib!=it.end();++sib)
-      c+=complexity(sib);
+        c+=complexity(sib);
     return c;
-  }
+}
+
+complexity_t complexity(const combo_tree& tr) {
+    return complexity(tr.begin());
+}
 
 } //~namespace combo

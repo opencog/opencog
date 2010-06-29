@@ -25,7 +25,6 @@
 #define _MOSES_LEARNING_H
 
 #include <opencog/util/tree.h>
-#include <opencog/util/lru_cache.h>
 
 #include <opencog/learning/moses/moses/optimization.h>
 
@@ -34,8 +33,6 @@
 #include <opencog/embodiment/Learning/ImitationLearningAPI/PetaverseImitationLearning.h>
 
 #include <boost/unordered_set.hpp>
-
-#define ESTIMATOR_CACHE_SIZE 500000
 
 #define MIN_FITNESS -1.0e10
 #define INIT_FITNESS 0.0 //supposed to be the average, neither good nor bad

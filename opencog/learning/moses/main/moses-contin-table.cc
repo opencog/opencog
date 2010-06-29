@@ -85,12 +85,8 @@ int main(int argc,char** argv) {
     contin_bscore bscore(contintable, inputtable, rng);
 
     metapopulation<contin_score_sqr,contin_bscore,univariate_optimization> 
-    metapop(rng,
-            combo_tree(id::plus),
-            tt,contin_reduction(rng),
-            score,
-            bscore,
-            univariate_optimization(rng));
+        metapop(rng, combo_tree(id::plus), tt,contin_reduction(rng), true,
+                score, bscore, true, univariate_optimization(rng));
     
     moses::moses(metapop,max_evals,0);
 }

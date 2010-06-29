@@ -105,8 +105,8 @@ int main(int argc,char** argv) {
 
 
  metapopulation<ant_score,ant_bscore,sliced_iterative_hillclimbing> 
-    metapop(rng,combo_tree(id::sequential_and),tt,action_reduction(),
-            scorer, bscorer, sliced_iterative_hillclimbing(rng));
+     metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(), true,
+             scorer, bscorer, true, sliced_iterative_hillclimbing(rng));
   moses::moses_sliced(metapop, max_evals, 0, ignore_ops,
                       &perceptions, &actions);
 
