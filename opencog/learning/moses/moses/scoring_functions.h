@@ -167,6 +167,7 @@ protected:
 };
 
 struct truth_table_data_score : public unary_function<combo_tree, score_t> {
+    truth_table_data_score(const truth_table_data_score& score) : c(score.c) {}
     truth_table_data_score(struct CaseBasedBoolean& bc) {
         c = &bc;
     }

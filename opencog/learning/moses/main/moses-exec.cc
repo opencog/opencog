@@ -155,16 +155,21 @@ int main(int argc,char** argv) {
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), output_type, arity + 1);
 
-        truth_table_data_bscore bscore(bc);
-        bscore_based_score<truth_table_data_bscore> score(bc);
+        typedef truth_table_data_bscore BScore;
+        typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef bscore_based_score<BScoreCache> Score;
+        typedef opencog::lru_cache<Score> ScoreCache;
+        BScore bscore(bc);
         if(cache_size>0) {
-            opencog::lru_cache<bscore_based_score<truth_table_data_bscore> >
-                cache_score(cache_size, score);
+            BScoreCache bscore_cache(cache_size, bscore);
+            Score score(bscore_cache);
+            ScoreCache score_cache(cache_size, score);
             metapop_moses_results(rng, exemplars, tt, logical_reduction(),
-                                  reduce_all, cache_score, bscore, count_base,
-                                  opt_algo,
+                                  reduce_all, score_cache, bscore_cache,
+                                  count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
         } else {
+            bscore_based_score<BScore> score(bscore);
             metapop_moses_results(rng, exemplars, tt, logical_reduction(),
                                   reduce_all, score, bscore, count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
@@ -202,7 +207,7 @@ int main(int argc,char** argv) {
             }
         }
         unsigned int arity = inputtable[0].size();
-        
+
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), output_type, arity + 1);
 
@@ -213,17 +218,21 @@ int main(int argc,char** argv) {
                                                    // it will have to be
                                                    // adapted
 
-        occam_contin_bscore bscore(contintable, inputtable,
-                                   variance, alphabet_size, rng);
-        bscore_based_score<occam_contin_bscore> score(bscore);
+        typedef occam_contin_bscore BScore;
+        typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef bscore_based_score<BScoreCache> Score;
+        typedef opencog::lru_cache<Score> ScoreCache;
+        BScore bscore(contintable, inputtable, variance, alphabet_size, rng);
         if(cache_size>0) {
-            opencog::lru_cache<bscore_based_score<occam_contin_bscore> >
-                cache_score(cache_size, score);
+            BScoreCache bscore_cache(cache_size, bscore);
+            Score score(bscore_cache);
+            ScoreCache score_cache(cache_size, score);
             metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
-                                  reduce_all, cache_score, bscore, count_base,
-                                  opt_algo,
+                                  reduce_all, score_cache, bscore_cache,
+                                  count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
         } else {
+            bscore_based_score<BScore> score(bscore);
             metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
                                   reduce_all, score, bscore, count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
