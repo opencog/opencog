@@ -304,4 +304,32 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
   }
+
+  //test_simplify10 :
+  // factorize/distribute test
+  void test_simplify10() {
+    string tree_str="+(*(+(*(+(#1 1) 0.9375) -0.9375) #1) 2.9375)";
+
+    stringstream ss(tree_str);
+    combo_tree tr;
+    ss >> tr;
+
+    int a = arity(tr);
+    int s = sample_count(a);
+
+    RndNumTable rnt(s, a, rng);
+
+    int size_before,size_after;
+
+    contin_table ct1(tr, rnt, rng);
+    size_before=tr.size();
+    std::cout << "before: " << tr << std::endl;
+    contin_reduce(tr, rng);
+    std::cout << "after:  " << tr << std::endl;      
+    size_after=tr.size();
+    contin_table ct2(tr, rnt, rng);
+
+    TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
+    TS_ASSERT_EQUALS(ct1,ct2);
+  }
 };

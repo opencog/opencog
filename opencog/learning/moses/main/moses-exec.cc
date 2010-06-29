@@ -58,7 +58,7 @@ int main(int argc,char** argv) {
          "random seed")
         ("max-evals,m", value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations")
-        ("result-count,r", value<long>(&result_count)->default_value(10),
+        ("result-count,c", value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them")
         ("max-gens,g", value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit")

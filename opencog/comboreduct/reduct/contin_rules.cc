@@ -467,7 +467,7 @@ namespace reduct {
                         tr_copy.erase(fac_copy_it);
                         (*_reduction)(tr_copy);
                         unsigned int size_after_reduct = tr_copy.size();
-                        if(size_after_reduct < size_before_reduct) {
+                        if(size_after_reduct <= size_before_reduct) {
                             // in order to not change 'it' (which is
                             // assumed by the reduct engine)
                             // we do that long-cut
