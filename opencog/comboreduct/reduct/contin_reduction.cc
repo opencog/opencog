@@ -27,61 +27,45 @@
 #include "contin_rules.h"
 
 namespace reduct {
-  const rule& contin_reduction(opencog::RandGen& rng) {
-    static iterative r_without_reduce_factorize =
-      iterative(sequential(downwards(level()),
-			   upwards(eval_constants(rng)),
-			       
-			   downwards(reduce_plus_times_one_child()),
-			   downwards(reduce_plus_zero()),
-			   downwards(reduce_times_one_zero()),
-			   downwards(reduce_sin()),
-			   downwards(reduce_invert_constant()),
-
-			   downwards(reduce_log_div_times()),
-			   downwards(reduce_exp_times()),
-			   downwards(reduce_exp_div()),
+const rule& contin_reduction(opencog::RandGen& rng) {
+    // rules that do not involve factorizing or distributing
+    static sequential seq_without_factorize_distribute =
+        sequential(downwards(level()),
+                   upwards(eval_constants(rng)),
+                           
+                   downwards(reduce_plus_times_one_child()),
+                   downwards(reduce_plus_zero()),
+                   downwards(reduce_times_one_zero()),
+                   downwards(reduce_sin()),
+                   downwards(reduce_invert_constant()),
+                           
+                   downwards(reduce_log_div_times()),
+                   downwards(reduce_exp_times()),
+                   downwards(reduce_exp_div()),
 // the following rules is not valid if log has the semantics log(abs(x))
 // the macro ABS_LOG is defined in file vertex.h
 #ifndef ABS_LOG
-               downwards(reduce_exp_log()),
+                   downwards(reduce_exp_log()),
 #endif
-			   downwards(reduce_times_div()),
-			   downwards(reduce_sum_log()),
-			   
-			   upwards(reorder_commutative()),
-                           //downwards(reduce_factorize()),
-                           //downwards(reduce_factorize_fraction()),
-			   downwards(reduce_fraction())));
+                   downwards(reduce_times_div()),
+                   downwards(reduce_sum_log()),
+                   
+                   upwards(reorder_commutative()),
+                   //downwards(reduce_factorize()),
+                   //downwards(reduce_factorize_fraction()),
+                   downwards(reduce_fraction()));
 
-    static iterative r =
-      iterative(sequential(downwards(level()),
-			   upwards(eval_constants(rng)),
-			       
-			   downwards(reduce_plus_times_one_child()),
-			   downwards(reduce_plus_zero()),
-			   downwards(reduce_times_one_zero()),
-			   downwards(reduce_sin()),
-			   downwards(reduce_invert_constant()),
+    static iterative iter_without_factorize_distribute =
+        iterative(seq_without_factorize_distribute);
 
-			   downwards(reduce_log_div_times()),
-			   downwards(reduce_exp_times()),
-			   downwards(reduce_exp_div()),
-// the following rules is not valid if log has the semantics log(abs(x))
-// the macro ABS_LOG is defined in file vertex.h
-#ifndef ABS_LOG
-               downwards(reduce_exp_log()),
-#endif
-			   downwards(reduce_times_div()),
-			   downwards(reduce_sum_log()),
-			   
-			   upwards(reorder_commutative()),
-			   downwards(reduce_factorize()),
-			   downwards(reduce_factorize_fraction()),
-               downwards(reduce_fraction()),
-               // complexe rule            
-               downwards(reduce_distribute(r_without_reduce_factorize))
-                           ));
-    return r;
+    static iterative res =
+        iterative(sequential(seq_without_factorize_distribute,
+                             downwards(reduce_factorize()),
+                             downwards(reduce_factorize_fraction()),
+                             seq_without_factorize_distribute,
+                             // complexe rule            
+                             downwards(reduce_distribute(iter_without_factorize_distribute))
+                             ));
+    return res;
   }
 } //~namespace reduct

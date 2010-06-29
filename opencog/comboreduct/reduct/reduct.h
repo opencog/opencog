@@ -31,88 +31,96 @@
 
 namespace reduct {
 
-  using namespace combo;
-
-  struct rule {
-    virtual ~rule() { }
+using namespace combo;
+    
+struct rule {
+    rule(std::string _name) : name(_name) {}
+    virtual ~rule() {}
     virtual void operator()(combo_tree&,combo_tree::iterator) const=0;
     virtual rule* clone() const=0;
-
+        
     void operator()(combo_tree& tr) const { 
-      if (!tr.empty())
-	(*this)(tr,tr.begin());
+        if (!tr.empty())
+            (*this)(tr,tr.begin());
     }
-  };
-  reduct::rule* new_clone(const reduct::rule& r);
 
-  template<typename T>
-  struct crule : public rule {
+    std::string get_name() const {
+        return name;
+    }
+protected:
+    std::string name;
+};
+reduct::rule* new_clone(const reduct::rule& r);
+
+template<typename T>
+struct crule : public rule {
+    crule(std::string _name) : rule(_name) {}
     rule* clone() const { return new T(*((T*)this)); }
-  };
+};
 
-  const rule& ann_reduction();
-  const rule& logical_reduction();
-  const rule& contin_reduction(opencog::RandGen& rng);
-  const rule& mixed_reduction(opencog::RandGen& rng);
-  const rule& full_reduction(opencog::RandGen& rng);
-  const rule& action_reduction();
-  const rule& perception_reduction();
+const rule& ann_reduction();
+const rule& logical_reduction();
+const rule& contin_reduction(opencog::RandGen& rng);
+const rule& mixed_reduction(opencog::RandGen& rng);
+const rule& full_reduction(opencog::RandGen& rng);
+const rule& action_reduction();
+const rule& perception_reduction();
 
-  const rule& clean_reduction();
-  //const rule& clean_and_full_reduction();
+const rule& clean_reduction();
+//const rule& clean_and_full_reduction();
 
-  inline void logical_reduce(combo_tree& tr,combo_tree::iterator it) {
+inline void logical_reduce(combo_tree& tr,combo_tree::iterator it) {
     logical_reduction()(tr,it);
-  }
-  inline void logical_reduce(combo_tree& tr) { logical_reduction()(tr); }
+}
+inline void logical_reduce(combo_tree& tr) { logical_reduction()(tr); }
 
-  inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
+inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     contin_reduction(rng)(tr,it);
-  }
-  inline void contin_reduce(combo_tree& tr, opencog::RandGen& rng) { contin_reduction(rng)(tr); }
+}
+inline void contin_reduce(combo_tree& tr, opencog::RandGen& rng) { contin_reduction(rng)(tr); }
 
-  inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
+inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     mixed_reduction(rng)(tr,it);
-  }
-  inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng) { mixed_reduction(rng)(tr); }
+}
+inline void mixed_reduce(combo_tree& tr, opencog::RandGen& rng) { mixed_reduction(rng)(tr); }
 
-  inline void full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
+inline void full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     full_reduction(rng)(tr,it);
-  }
-  inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
+}
+inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
 
-  /**
-   * clean_reduce removes null vertices
-   */
-  inline void clean_reduce(combo_tree& tr,combo_tree::iterator it) {
+/**
+ * clean_reduce removes null vertices
+ */
+inline void clean_reduce(combo_tree& tr,combo_tree::iterator it) {
     clean_reduction()(tr,it);
-  }
-  inline void clean_reduce(combo_tree& tr) { clean_reduction()(tr); }
+}
+inline void clean_reduce(combo_tree& tr) { clean_reduction()(tr); }
 
-  inline void clean_and_full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
+inline void clean_and_full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     //clean_and_full_reduction()(tr,it);
     clean_reduce(tr,it);
     full_reduce(tr,it,rng);
-  }
-  inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng) { 
+}
+inline void clean_and_full_reduce(combo_tree& tr, opencog::RandGen& rng) { 
     //clean_and_full_reduction()(tr,tr.begin()); 
     clean_reduce(tr);
     full_reduce(tr,rng);
-  }
+}
 
-  //action
-  inline void action_reduce(combo_tree& tr, combo_tree::iterator it) {
+//action
+inline void action_reduce(combo_tree& tr, combo_tree::iterator it) {
     action_reduction()(tr,it);
-  }
+}
 
-  inline void action_reduce(combo_tree& tr) { action_reduction()(tr); }
+inline void action_reduce(combo_tree& tr) { action_reduction()(tr); }
 
-  //perception
-  inline void perception_reduce(combo_tree& tr, combo_tree::iterator it) {
+//perception
+inline void perception_reduce(combo_tree& tr, combo_tree::iterator it) {
     perception_reduction()(tr,it);
-  }
+}
 
-  inline void perception_reduce(combo_tree& tr) { perception_reduction()(tr); }
+inline void perception_reduce(combo_tree& tr) { perception_reduction()(tr); }
   
 } //~namespace reduct
 

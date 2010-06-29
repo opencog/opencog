@@ -65,7 +65,7 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
     score_t operator()(const combo_tree& tr) const {
         try {
             behavioral_score bs = bscore(tr);
-            score_t res = -std::accumulate(bs.begin(), bs.end(), 0);
+            score_t res = -std::accumulate(bs.begin(), bs.end(), 0.0);
             // Logger
             if(logger().getLevel() >= opencog::Logger::FINE) {
                 stringstream ss_tr;
@@ -325,12 +325,6 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         //to maybe speed this up, we can score directly on the exemplar,
         //and have complexity(tr) ignore the null vertices
 
-#ifdef DEBUG_INFO
-        std::cout << "scoring " << tr << endl;
-        /*std::cout << "scoring " << tr << " -> " << score(tr)
-        << " " << complexity(tr.begin()) << std::endl;*/
-#endif
-
         return combo_tree_score(score(tr), complexity(tr.begin()));
     }
 
@@ -413,11 +407,13 @@ struct count_based_scorer : public unary_function<eda::instance,
     combo_tree_score operator()(const eda::instance& inst) const {
         OC_ASSERT(_rep);
 
+        // Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
             ss << "Evaluate instance: " << _rep->fields().stream(inst);
             logger().fine(ss.str());
         }
+        // ~Logger
 
         _rep->transform(inst);
 

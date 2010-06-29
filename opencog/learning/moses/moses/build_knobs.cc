@@ -59,12 +59,7 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
-    cout << "step size " << step_size << endl;
-    cout << "expansion " << expansion << endl;
-    cout << "depth " << depth << endl;
     type_tree output_type = combo::type_tree_output_type_tree(_type);
-    stringstream ss;
-    ss << output_type;
     combo::type_tree action_result_type_tree =
         combo::type_tree(combo::id::action_result_type);
     combo::type_tree boolean_type_tree =
@@ -73,6 +68,9 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         combo::type_tree(combo::id::contin_type);
     combo::type_tree ann_type_tree =
         combo::type_tree(combo::id::ann_type);
+    // OC_ASSERT
+    stringstream ss;
+    ss << output_type;
     stringstream art_ss; //action_result_type
     art_ss << combo::id::action_result_type;
     OC_ASSERT((((perceptions != NULL || actions != NULL) && 
@@ -82,6 +80,7 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
                output_type == ann_type_tree),
               "Types differ. Expected '%s', got '%s'",
               art_ss.str().c_str(), ss.str().c_str());
+    // ~OC_ASSERT
     if (output_type == boolean_type_tree) {
         logical_canonize(_exemplar.begin());
         build_logical(_exemplar.begin());
@@ -97,12 +96,10 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
         build_contin(_exemplar.begin());
     } else {
         OC_ASSERT(output_type == contin_type_tree,
-                         "Types differ. Expected 'combo::id::contin_type', got '%s'",
-                         ss.str().c_str());
+                  "Types differ. Expected 'combo::id::contin_type', got '%s'",
+                  ss.str().c_str());
 
-        cout << "BK" << endl;
         contin_canonize(_exemplar.begin());
-        cout << "BK" << endl;
         build_contin(_exemplar.begin());
     }
 }
@@ -607,12 +604,11 @@ void build_knobs::rec_canonize(pre_it it)
             if (!is_contin(*sib)) {
                 sib = canonize_times(sib);
                 rec_canonize(sib.begin());
-                OC_ASSERT((is_contin(*sib.last_child())),
+                OC_ASSERT(is_contin(*sib.last_child()),
                           "Sibling's last child isn't id::contin.");
                 rec_canonize(_exemplar.insert_above(sib.last_child(), id::plus));
             }
         }
-
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
         if(_ignore_ops.find(id::sin) == _ignore_ops.end())
             append_linear_combination(mult_add(it, id::sin));
@@ -624,8 +620,13 @@ void build_knobs::rec_canonize(pre_it it)
     } else if (*it == id::sin || *it == id::log || *it == id::exp) {
         cout << _exemplar << " | " << combo_tree(it) << endl;
         linear_canonize(it.begin());
+    } else if (*it == id::times) {
+        // @todo: think about that case...
+        cout << "I (Nil) must think for that one" << std::endl;
     } else {
-        OC_ASSERT(is_argument(*it), "Node not an buitin, but either an argument.");
+        stringstream ss;
+        ss << *it << " not a buitin, neither an argument";
+        OC_ASSERT(is_argument(*it), ss.str());
     }
 }
 

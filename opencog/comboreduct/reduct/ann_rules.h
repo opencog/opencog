@@ -212,18 +212,19 @@ struct tree_transform {
 
 namespace reduct {
 
-  //ann reduction rule
-  struct ann_rule : public crule<ann_rule> {
+//ann reduction rule
+struct ann_rule : public crule<ann_rule> {
+    ann_rule() : crule<ann_rule>::crule("ann_rule") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const
     {
-      tree_transform trans;
-      ann net = trans.decodify_tree(tr);
-      net.reduce();
-      combo_tree new_tr = trans.encode_ann(net);
-      tr.clear();
-      tr.insert_subtree(tr.begin(),new_tr.begin());
+        tree_transform trans;
+        ann net = trans.decodify_tree(tr);
+        net.reduce();
+        combo_tree new_tr = trans.encode_ann(net);
+        tr.clear();
+        tr.insert_subtree(tr.begin(),new_tr.begin());
     }
-  };
+};
 
 } //~namespace reduct
 

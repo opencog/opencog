@@ -89,7 +89,12 @@ namespace moses {
         return get_score(st.second);
     }
 
-}
+    template<typename Out>
+    Out& ostream_behavioral_score(Out& out, const behavioral_score bs) {
+        return opencog::ostreamContainer(out, bs, " ", "[", "]");
+    }
+
+} // ~namespace moses
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::combo_tree_score& ts) {
@@ -97,7 +102,7 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 inline std::ostream& operator<<(std::ostream& out,
                                 const moses::combo_tree_behavioral_score& s) {
-    opencog::ostreamContainer(out, s.first, " ", "[", "]");
+    moses::ostream_behavioral_score(out, s.first);
     out << ", " << s.second;
     return out;
 }

@@ -281,7 +281,29 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             
         _n_evals += optimize_deme(max_evals);
 
+        // Logger
+        stringstream ss;
+        ss << "Total number of evaluations so far: " << _n_evals;
+        logger().info(ss.str());
+        // ~Logger
+
         close_deme();
+
+        // Logger, best candidates (with the maximum score) so far
+        if(best_trees().empty())
+            logger().info("Only worst scored candidates");
+        else {
+            stringstream ss;
+            ss << "The following candidate(s) have the best score " 
+               << best_score().first;
+            logger().info(ss.str());
+            foreach(const combo_tree& tr, best_trees()) {
+                stringstream ss_tr;
+                ss_tr << tr;
+                logger().info(ss_tr.str());
+            }
+        }
+        // ~Logger
 
         //this may happens for instance if the eval fails and throws an exception
         return !empty();
@@ -320,7 +342,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         // Logger
         { 
             stringstream ss; 
-            ss << "Expand with exemplar:" << tr; 
+            ss << "Expand with exemplar: " << tr; 
             logger().debug(ss.str()); 
         }
         { 
@@ -395,8 +417,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     int optimize_deme(int max_evals) {
         // Logger
         {
+            logger().debug("Optimize deme");
             stringstream ss;
-            ss << "Optimize deme, maximum evaluations during that expansion: " 
+            ss << "Maximum evaluations during that expansion: " 
                << max_evals;
             logger().debug(ss.str());
         }
@@ -421,8 +444,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         // Logger
         {
+            logger().debug("Close deme");
             stringstream ss;
-            ss << "Close deme, number of evaluations during this optimization: " 
+            ss << "Number of evaluations during this optimization: " 
                << eval_during_this_deme;
             logger().debug(ss.str());
         }
@@ -579,8 +603,9 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            const combo_tree_ns_set* perceptions = NULL,
            const combo_tree_ns_set* actions = NULL)
 {
+    // Logger
     logger().info("MOSES starts");
-    
+    // ~Logger
     int gen_idx = 0;
 
     while ((mp.n_evals() < max_evals) && (max_gens != gen_idx++)) {
@@ -597,24 +622,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
             break;
         if (mp.best_score() >= max_score || mp.empty())
             break;
-    }
-
-    // Logger
-    if(mp.best_trees().empty())
-        logger().info("Only worst scored candidates");
-    else {
-        stringstream ss;
-        ss << "The following candidates have the best score " 
-           << mp.best_score().first;
-        logger().info(ss.str());
-        foreach(const combo_tree& tr, mp.best_trees()) {
-            stringstream ss_tr;
-            ss_tr << tr;
-            logger().info(ss_tr.str());
-        }
-    }
-    // ~Logger
-    
+    }    
     // Logger
     logger().info("MOSES ends");
     // ~Logger

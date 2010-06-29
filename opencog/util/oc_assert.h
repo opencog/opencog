@@ -50,6 +50,11 @@ namespace opencog {
 void cassert(const char * trace,  bool condition, const char * msg, ...);
 
 /**
+ * cassert with a string instead of const char* and vaargs
+ */
+void cassert(const char* trace, bool condition, const std::string& msg);
+
+/**
  * cassert without message. Just trace information
  */
 void cassert(const char * trace, bool condition);

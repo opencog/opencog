@@ -46,6 +46,10 @@ void opencog::cassert(const char * trace, bool condition, const char *fmt, ...)
     throw ex;
 }
 
+void opencog::cassert(const char* trace, bool condition, const std::string& msg) {
+    opencog::cassert(trace, condition, msg.c_str());
+}
+
 void opencog::cassert(const char * trace, bool condition)
 {
 

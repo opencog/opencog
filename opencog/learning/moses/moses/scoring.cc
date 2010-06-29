@@ -110,13 +110,23 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     score_t trs = tr.size(); //@todo replace this with complexity
         
     behavioral_score::iterator dst = bs.begin();
-    for (combo::contin_table::const_iterator it1 = ct.begin(), it2 = target.begin();
-         it1 != ct.end();)
+    for(combo::contin_table::const_iterator it1 = ct.begin(), 
+             it2 = target.begin(); it1 != ct.end();)
         if(variance > 0) 
             *dst++ = trs*alphabet_size_log // occam's razor
                 - logPDM(sqr((*it1++) - (*it2++)), 1);
         else
             *dst++ = sqr((*it1++) - (*it2++)); // no occam's razor
+    // Logger
+    if(logger().getLevel() >= opencog::Logger::FINE) {
+        stringstream ss_tr;
+        ss_tr << "Candidate: " << tr;
+        logger().fine(ss_tr.str());
+        stringstream ss_bsc;
+        ostream_behavioral_score(ss_bsc, bs);
+        logger().fine(ss_bsc.str());
+    }
+    // ~Logger
     return bs;
 }
 

@@ -55,11 +55,15 @@ void substitute_condition_init_instant(combo_tree& tr, combo_tree::iterator it,
 //action_boolean_if(false A B) -> B
 //action_boolean_if(C A A) -> A
 struct reduce_action_if : public crule<reduce_action_if> {
+    reduce_action_if() : 
+          crule<reduce_action_if>::crule("reduce_action_if") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //action_action_if(A B B) -> and_seq(exec_seq(A) B)
 struct reduce_action_action_if : public crule<reduce_action_action_if> {
+    reduce_action_action_if() : 
+        crule<reduce_action_action_if>::crule("reduce_action_action_if") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -67,12 +71,16 @@ struct reduce_action_action_if : public crule<reduce_action_action_if> {
 //T_action_if(action_success A B) -> A
 //with T in {action, boolean, contin}
 struct reduce_const_cond_action_if: public crule<reduce_const_cond_action_if> {
+    reduce_const_cond_action_if() :
+        crule<reduce_const_cond_action_if>::crule("reduce_const_cond_action_if") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //action_boolean_if(not(A) B C) -> action_boolean_if(A C B)
-struct reduce_not_cond_action_boolean_if: public
-            crule<reduce_not_cond_action_boolean_if> {
+struct reduce_not_cond_action_boolean_if:
+        public crule<reduce_not_cond_action_boolean_if> {
+    reduce_not_cond_action_boolean_if() :
+        crule<reduce_not_cond_action_boolean_if>::crule("reduce_not_cond_action_boolean_if") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -83,6 +91,8 @@ struct reduce_not_cond_action_boolean_if: public
 //exec_seq(A action_failure B) -> exec_seq(A B)
 //exec_seq(A action_success C) -> exec_seq(A B)
 struct reduce_const_action_seq : public crule<reduce_const_action_seq> {
+    reduce_const_action_seq () :
+        crule<reduce_const_action_seq>::crule("reduce_const_action_seq") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -90,24 +100,30 @@ struct reduce_const_action_seq : public crule<reduce_const_action_seq> {
 //or_seq() -> action_failure
 //exec_seq() -> action_success
 struct reduce_empty_arg_seq : public crule<reduce_empty_arg_seq> {
+    reduce_empty_arg_seq () :
+        crule<reduce_empty_arg_seq>::crule("reduce_empty_arg_seq") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //action_not(action_not(A)) -> A
 struct reduce_double_action_not : public crule<reduce_double_action_not> {
+    reduce_double_action_not () :
+        crule<reduce_double_action_not>::crule("reduce_double_action_not") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 
 //and_seq(A B action_while(B)) -> and_seq(A action_while(B))
-struct reduce_repeat_out_action_while : public
-            crule<reduce_repeat_out_action_while> {
+struct reduce_repeat_out_action_while : public crule<reduce_repeat_out_action_while> {
+    reduce_repeat_out_action_while () :
+        crule<reduce_repeat_out_action_while>::crule("reduce_repeat_out_action_while") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //action_while(and_seq(A A)) -> action_while(A)
 struct reduce_repeat_in_action_while : public
             crule<reduce_repeat_in_action_while> {
+    reduce_repeat_in_action_while() : crule<reduce_repeat_in_action_while>::crule("reduce_repeat_in_action_while") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -117,6 +133,7 @@ struct reduce_repeat_in_action_while : public
 //action_boolean_if condition
 struct reduce_action_boolean_if_sub_cond : public
             crule<reduce_action_boolean_if_sub_cond> {
+    reduce_action_boolean_if_sub_cond() : crule<reduce_action_boolean_if_sub_cond>::crule("reduce_action_boolean_if_sub_cond") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -126,6 +143,7 @@ struct reduce_action_boolean_if_sub_cond : public
 //C within boolean_while condition.
 struct reduce_boolean_while_sub_cond : public
             crule<reduce_boolean_while_sub_cond> {
+    reduce_boolean_while_sub_cond() : crule<reduce_boolean_while_sub_cond>::crule("reduce_boolean_while_sub_cond") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -136,6 +154,7 @@ struct reduce_boolean_while_sub_cond : public
 //action_action_if(A B C) -> and_seq(A B) iff get_action_result(A)==true
 struct reduce_action_action_if_always_succeeds :
             public crule<reduce_action_action_if_always_succeeds> {
+    reduce_action_action_if_always_succeeds() : crule<reduce_action_action_if_always_succeeds>::crule("reduce_action_action_if_always_succeeds") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -148,6 +167,7 @@ struct reduce_action_action_if_always_fails :
 //action_while(A) -> A iff get_action_result(A)==false
 struct reduce_action_while_always_fails :
             public crule<reduce_action_while_always_fails> {
+    reduce_action_while_always_fails() : crule<reduce_action_while_always_fails>::crule("reduce_action_while_always_fails") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -155,6 +175,7 @@ struct reduce_action_while_always_fails :
 //boolean_while(C A) -> A iff eval(C)==true and get_action_result(A)==false
 struct reduce_boolean_while_depend_condition :
             public crule<reduce_boolean_while_depend_condition> {
+    reduce_boolean_while_depend_condition() : crule<reduce_boolean_while_depend_condition>::crule("reduce_boolean_while_depend_condition") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -163,6 +184,7 @@ struct reduce_boolean_while_depend_condition :
 //and get_action_result(An)==false
 struct reduce_sequential_and_always_fails :
             public crule<reduce_sequential_and_always_fails> {
+    reduce_sequential_and_always_fails() : crule<reduce_sequential_and_always_fails>::crule("reduce_sequential_and_always_fails") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -171,6 +193,7 @@ struct reduce_sequential_and_always_fails :
 //and get_action_result(An)==true
 struct reduce_sequential_or_always_succeeds :
             public crule<reduce_sequential_or_always_succeeds> {
+    reduce_sequential_or_always_succeeds() : crule<reduce_sequential_or_always_succeeds>::crule("reduce_sequential_or_always_succeeds") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -180,12 +203,14 @@ struct reduce_sequential_or_always_succeeds :
 
 //reduce 2 consecutive actions to 1 action
 struct reduce_idempotent : public crule<reduce_idempotent> {
+    reduce_idempotent() : crule<reduce_idempotent>::crule("reduce_idempotent") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //reduce 2 consecutive opposite actions A1 A2
 //that is A1 is the reversal of A2
 struct reduce_opposite : public crule<reduce_opposite> {
+    reduce_opposite() : crule<reduce_opposite>::crule("reduce_opposite") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -194,6 +219,7 @@ struct reduce_opposite : public crule<reduce_opposite> {
 //are denoted additive by is_additive(action,int i);
 //the argument that are not denoted additive must be equal
 struct reduce_additive : public crule<reduce_additive> {
+    reduce_additive() : crule<reduce_additive>::crule("reduce_additive") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -201,6 +227,7 @@ struct reduce_additive : public crule<reduce_additive> {
 //replace action by action_success if exists 0 in one of its argument
 //neutral
 struct reduce_zero_neutral : public crule<reduce_zero_neutral> {
+    reduce_zero_neutral() : crule<reduce_zero_neutral>::crule("reduce_zero_neutral") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -213,6 +240,7 @@ struct reduce_zero_neutral : public crule<reduce_zero_neutral> {
 //action_with_modular_argument(m) -> action_with_modular_argument(reduced(m))
 //for example, dummy_modular_action(6.28,-20)-> dummy_modular_action(0,-10)
 struct reduce_modular_argument : public crule<reduce_modular_argument> {
+    reduce_modular_argument() : crule<reduce_modular_argument>::crule("reduce_modular_argument") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
 
@@ -230,14 +258,12 @@ struct reduce_modular_argument : public crule<reduce_modular_argument> {
 // and_seq(or_seq(grab bark) drop bark)-> and_seq(or_seq(grab bark) drop bark)
 // and_seq(or_seq(bark bark) drop bark)-> and_seq(or_seq(bark bark) action_success bark)
 struct preconditions_check : public crule<preconditions_check> {
+    preconditions_check() : crule<preconditions_check>::crule("preconditions_check") {}
     void operator() (combo_tree& tr, combo_tree::iterator it) const;
 };
 
 //auxilary function for the preconditions check
 bool reduce_free_post_action (builtin_action pre_a, builtin_action post_a, bool free_pre_action_before, combo_tree& tr, combo_tree::iterator it);
-
-
-
 
 }
 

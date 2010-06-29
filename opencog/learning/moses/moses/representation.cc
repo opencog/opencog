@@ -64,10 +64,13 @@ representation::representation(const reduct::rule& simplify,
                                const combo_tree_ns_set* actions)
     : _exemplar(exemplar_), rng(_rng), _simplify(&simplify)
 {
-
-#ifdef DEBUG_INFO
-    std::cout << "Start building from exemplar: " << _exemplar << std::endl;
-#endif
+    // Logger
+    {
+        stringstream ss;
+        ss << "Representation building from exemplar: " << _exemplar;
+        logger().debug(ss.str());
+    }
+    // ~Logger
 
     //build the knobs
     build_knobs(rng, _exemplar, tt, *this, ignore_ops,
