@@ -548,8 +548,7 @@ std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
 bool MPunify(vtree lhs_t,
              vtree::iterator lhs_ti,
-             const vtree& rhs,
-             vtree::iterator rhs_ti,
+             const pHandle rhs,
              bindingsT& bindings,
              bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 

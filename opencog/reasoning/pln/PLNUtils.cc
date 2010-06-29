@@ -602,8 +602,8 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
         }
 
 //        atom fetched_a(*i);
-        meta fetched(new vtree(*i));
-        ForceAllLinksVirtual(fetched);
+//        meta fetched(new vtree(*i));
+//        ForceAllLinksVirtual(fetched);
 
         bindingsT* tentative_bindings = new bindingsT;
 
@@ -612,7 +612,9 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
         if (_MP.size() <= 1
 //                || (opencog::pln::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
 //                                             *tentative_bindings, NULL, VarT))
-                || (MPunify(_MP, _MP.begin(), *fetched, fetched->begin(),
+//                || (MPunify(_MP, _MP.begin(), *fetched, fetched->begin(),
+//                                         *tentative_bindings, NULL, VarT))
+                || (MPunify(_MP, _MP.begin(), *i,
                                          *tentative_bindings, NULL, VarT))
            ) {
             LOG(3, "Was valid search result by unification.");
@@ -843,11 +845,16 @@ bool weak_atom<Btr<tree<Vertex> > >::operator()(pHandle h)
 
     atom rhs(h);
     bool ok = false;
-    do {
-        ok = opencog::pln::MPunify1(*value, value->begin(),
-                                    rhs, *bindings, //bindings,
-                                    &restart, FW_VARIABLE_NODE);
-    } while (restart);
+//    do {
+//        ok = opencog::pln::MPunify1(*value, value->begin(),
+//                                    rhs, *bindings, //bindings,
+//                                    &restart, FW_VARIABLE_NODE);
+//    } while (restart);
+
+    //! @todo Figure out whether the restart parameter is necessary or not
+    ok = MPunify(*value, value->begin(),
+            h, *bindings,
+            &restart, FW_VARIABLE_NODE);
 
     return ok;
 
@@ -1442,16 +1449,19 @@ pHandle _v2h(const Vertex& v) {
 bool equal_ignoreVarNameDifferences(pHandle l, pHandle r) {
     AtomSpaceWrapper* asw = GET_ASW;
 
-    return ((asw->getType(l) == FW_VARIABLE_NODE &&
-            asw->getType(r) == FW_VARIABLE_NODE) ||
-            l == r); // This check might not be correct.
-            //(asw->getType(l) == asw->getType(r) && asw->getName(l) == asw->getName(r)));
+//    return ((asw->getType(l) == FW_VARIABLE_NODE &&
+//            asw->getType(r) == FW_VARIABLE_NODE) ||
+//            l == r); // This check might not be correct.
+//            //(asw->getType(l) == asw->getType(r) && asw->getName(l) == asw->getName(r)));
+
+    //! @todo implement it here. This is just to ensure consistency with the existing implementation
+    //! (by using it).
+    return equal_atom_ignoreVarNameDifferences(atom(l), atom(r));
 }
 
 bool MPunify(vtree lhs_t,
              vtree::iterator lhs_ti,
-             const vtree& rhs_t,
-             vtree::iterator rhs_ti,
+             const pHandle rhs_h,
              bindingsT& bindings,
              bool* restart, const Type VarT)
 {
@@ -1464,13 +1474,13 @@ bool MPunify(vtree lhs_t,
 
     pHandle lhs_h = _v2h(*lhs_ti);
     Type lhs_T = asw->getType(lhs_h);
-    pHandle rhs_h = _v2h(*rhs_ti);
+//    pHandle rhs_h = _v2h(*rhs_ti);
     Type rhs_T = asw->getType(rhs_h);
 
-//    vtree::iterator tmp = rhs_ti;
-//    tmp++;
-    vtree rhs_subtree(rhs_t.subtree(rhs_ti, rhs_t.next_sibling(rhs_ti)));
-    pHandle rhs_real = asw->isType(rhs_h) ? rhs_h : make_real(rhs_subtree);
+////    vtree::iterator tmp = rhs_ti;
+////    tmp++;
+//    vtree rhs_subtree(rhs_t.subtree(rhs_ti, rhs_t.next_sibling(rhs_ti)));
+//    pHandle rhs_real = asw->isType(rhs_h) ? rhs_h : make_real(rhs_subtree);
 
 
 
@@ -1504,48 +1514,53 @@ bool MPunify(vtree lhs_t,
                 }
                 assert(lhs.name != s->second.name);*/
             LOG(4, "MPunify: Existing binding.");
-            //return equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
-            //            bindings.clear();
-            return equal_ignoreVarNameDifferences(s->second, rhs_real);
+//            //return equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
+//            //            bindings.clear();
+//            return equal_ignoreVarNameDifferences(s->second, rhs_real);
+            return equal_ignoreVarNameDifferences(s->second, rhs_h); // Handle vars matching to vars?
         } else {
             LOG(4, "MPunify: NO existing binding.");
         }
+    } else { // Check for differences if it's not a var.
+        // Check whether the node matches (or the first level of the link)
+        if ( // Check whether not the same type (todo: support subtypes also)
+            rhs_T != lhs_T ||
+            // If a node, then check if the names are different
+            (lhs_is_node && asw->getName(lhs_h) != asw->getName(rhs_h))) // Make sure to deal with two links, possibly one real and one virtual...
+            {
+            // difference found.
+            // ...
+            LOG(4, "Difference found.");
+            bindings.clear();
+            return false;
+        }
     }
-
-    // Check whether the node matches (or the first level of the link)
-    if ( // Check whether not the same type (todo: support subtypes also)
-        rhs_T != lhs_T ||
-        // If a node, then check if the names are different
-        (lhs_is_node && asw->getName(lhs_h) != lhs_name)) // Make sure to deal with two links, possibly one real and one virtual...
-        {
-        // difference found.
-        // ...
-        LOG(4, "Difference found.");
-        bindings.clear();
-        return false;
-    }
-
     // If it's a link, check recursively.
     // (Unless the query (LHS) link is virtual and has no children, in which
     // case any RHS Link of the right type will match)
+    pHandleSeq rhs_o = asw->getOutgoing(rhs_h);
+    unsigned int rhs_arity = asw->getArity(rhs_h);
     bool type_and_childless = (asw->isType(lhs_h) && lhs_ti.number_of_children() == 0);
     if (asw->inheritsType(lhs_T, LINK) && !type_and_childless) {
         // Check if number of children matches
-        if (lhs_ti.number_of_children() != rhs_ti.number_of_children()) {
+        //if (lhs_ti.number_of_children() != rhs_ti.number_of_children()) {
+        if (lhs_ti.number_of_children() != rhs_arity) {
             bindings.clear();
             cprintf(4, "Unify: arity diff, returning (%d / %u)\n", lhs_ti.number_of_children(),
-                    (uint) rhs_ti.number_of_children());
+                    (uint) rhs_arity);
             return false;
         }
 
+        int i = 0;
         vtree::sibling_iterator c_l, c_r;
-        for (c_l = lhs_t.begin(lhs_ti), c_r = rhs_t.begin(rhs_ti);
+        for (c_l = lhs_t.begin(lhs_ti);// c_r = rhs_t.begin(rhs_ti);
              c_l != lhs_t.end(lhs_ti);
-             c_l++, c_r++) {
+             c_l++, i++) { //c_r++) {
             LOG(4, "Unify: next arg...");
 
             if (!MPunify(lhs_t, c_l,
-                    rhs_t, c_r,
+                    //rhs_t, c_r,
+                    rhs_o[i],
                     bindings, restart, VarT)) {
                 bindings.clear();
                 return false;
@@ -1559,7 +1574,8 @@ bool MPunify(vtree lhs_t,
         LOG(4, "MPunifyHandle: New subst: " + lhs_name + " for:");
         //printTree(rhs_h,0,3);
 
-        bindings[lhs_h] = rhs_real;
+        //bindings[lhs_h] = rhs_real;
+        bindings[lhs_h] = rhs_h;
     }
 
 
