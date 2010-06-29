@@ -601,15 +601,19 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
             continue;
         }
 
-        atom fetched_a(*i);
+//        atom fetched_a(*i);
+        meta fetched(new vtree(*i));
+        ForceAllLinksVirtual(fetched);
 
         bindingsT* tentative_bindings = new bindingsT;
 
         cprintf(4, "Call unifyvector...\n");
 
         if (_MP.size() <= 1
-                || (opencog::pln::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
-                                             *tentative_bindings, NULL, VarT))
+//                || (opencog::pln::MPunifyVector(_MP, _MP.begin(), fetched_a.hs,
+//                                             *tentative_bindings, NULL, VarT))
+                || (MPunify(_MP, _MP.begin(), *fetched, fetched->begin(),
+                                         *tentative_bindings, NULL, VarT))
            ) {
             LOG(3, "Was valid search result by unification.");
 
@@ -1434,6 +1438,142 @@ pHandle _v2h(const Vertex& v) {
         return (pHandle) 0;
     */
 }
+
+bool equal_ignoreVarNameDifferences(pHandle l, pHandle r) {
+    AtomSpaceWrapper* asw = GET_ASW;
+
+    return ((asw->getType(l) == FW_VARIABLE_NODE &&
+            asw->getType(r) == FW_VARIABLE_NODE) ||
+            l == r); // This check might not be correct.
+            //(asw->getType(l) == asw->getType(r) && asw->getName(l) == asw->getName(r)));
+}
+
+bool MPunify(vtree lhs_t,
+             vtree::iterator lhs_ti,
+             const vtree& rhs_t,
+             vtree::iterator rhs_ti,
+             bindingsT& bindings,
+             bool* restart, const Type VarT)
+{
+    // unify lhs_ti with rhs_ti, then recurse on all their child nodes.
+    // whether it's a node/link and real/virtual.
+    // If it's a node, check for matching.
+    // If it's a link, check for matching at this level and then recurse.
+
+    AtomSpaceWrapper* asw = GET_ASW;
+
+    pHandle lhs_h = _v2h(*lhs_ti);
+    Type lhs_T = asw->getType(lhs_h);
+    pHandle rhs_h = _v2h(*rhs_ti);
+    Type rhs_T = asw->getType(rhs_h);
+
+//    vtree::iterator tmp = rhs_ti;
+//    tmp++;
+    vtree rhs_subtree(rhs_t.subtree(rhs_ti, rhs_t.next_sibling(rhs_ti)));
+    pHandle rhs_real = asw->isType(rhs_h) ? rhs_h : make_real(rhs_subtree);
+
+
+
+    LOG(4, "MPunify:");
+
+    bool lhs_is_node = asw->inheritsType(lhs_T, NODE);
+
+    //*restart = false; //We would not be here if restart was really pending.
+
+    // By definition: FW_VARs only allowed on left side!
+    if (rhs_T == VarT)
+        return false;
+
+    if (lhs_T == ATOM)
+        return true;
+
+    LOG(4, "Unify1:");
+    NMPrinter()(lhs_ti, 3);
+
+    string lhs_name(lhs_is_node ? asw->getName(lhs_h) : "");
+
+    // Check if lhs is a VarT and has a binding already.
+    if (asw->inheritsType(lhs_T, VarT)) {
+        bindingsT::const_iterator s = bindings.find(lhs_h);
+
+        if (s != bindings.end()) {
+            /*    if (lhs->getName() == s->second.name)
+                {
+                 printAtomTree(lhs,0,3);
+                 printAtomTree(s->second,0,3);
+                }
+                assert(lhs.name != s->second.name);*/
+            LOG(4, "MPunify: Existing binding.");
+            //return equal_atom_ignoreVarNameDifferences(atom(s->second), rhs);
+            //            bindings.clear();
+            return equal_ignoreVarNameDifferences(s->second, rhs_real);
+        } else {
+            LOG(4, "MPunify: NO existing binding.");
+        }
+    }
+
+    // Check whether the node matches (or the first level of the link)
+    if ( // Check whether not the same type (todo: support subtypes also)
+        rhs_T != lhs_T ||
+        // If a node, then check if the names are different
+        (lhs_is_node && asw->getName(lhs_h) != lhs_name)) // Make sure to deal with two links, possibly one real and one virtual...
+        {
+        // difference found.
+        // ...
+        LOG(4, "Difference found.");
+        bindings.clear();
+        return false;
+    }
+
+    // If it's a link, check recursively.
+    // (Unless the query (LHS) link is virtual and has no children, in which
+    // case any RHS Link of the right type will match)
+    bool type_and_childless = (asw->isType(lhs_h) && lhs_ti.number_of_children() == 0);
+    if (asw->inheritsType(lhs_T, LINK) && !type_and_childless) {
+        // Check if number of children matches
+        if (lhs_ti.number_of_children() != rhs_ti.number_of_children()) {
+            bindings.clear();
+            cprintf(4, "Unify: arity diff, returning (%d / %u)\n", lhs_ti.number_of_children(),
+                    (uint) rhs_ti.number_of_children());
+            return false;
+        }
+
+        vtree::sibling_iterator c_l, c_r;
+        for (c_l = lhs_t.begin(lhs_ti), c_r = rhs_t.begin(rhs_ti);
+             c_l != lhs_t.end(lhs_ti);
+             c_l++, c_r++) {
+            LOG(4, "Unify: next arg...");
+
+            if (!MPunify(lhs_t, c_l,
+                    rhs_t, c_r,
+                    bindings, restart, VarT)) {
+                bindings.clear();
+                return false;
+            }
+        }
+    }
+
+    // At this point, the node/link and any children have matched successfully.
+    // If lhs is a VarT, then add this substitution.
+    if (asw->inheritsType(lhs_T, VarT)) {
+        LOG(4, "MPunifyHandle: New subst: " + lhs_name + " for:");
+        //printTree(rhs_h,0,3);
+
+        bindings[lhs_h] = rhs_real;
+    }
+
+
+    return true;
+
+        // If lhs is a real atom, check whether lhs and rhs cannot be unified
+//        (!asw->isType(lhs) && !MPunifyHandle(lhs, rhs, bindings,
+//                                             restart, VarT)) ||
+//        // If lhs isn't a real atom, check whether lhs and rhs cannot be unified
+//        // based on the atoms pointed to by rhs.
+//        (asw->isType(lhs) && !MPunifyVector(lhs_t, lhs_ti, rhs.hs,
+//                                            bindings, restart, VarT))) {
+}
+
 
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,

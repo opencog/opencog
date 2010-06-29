@@ -546,18 +546,28 @@ pHandleSet constitutedSet(const pHandleSet& memberLinks,
 template<typename T>
 std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix);
 
+bool MPunify(vtree lhs_t,
+             vtree::iterator lhs_ti,
+             const vtree& rhs,
+             vtree::iterator rhs_ti,
+             bindingsT& bindings,
+             bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
+
 struct atom;
 
+// rhs is a real Handle
 bool MPunifyHandle(pHandle lhs,
                    const atom& rhs,
                    bindingsT& bindings,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
+// rhs is a vector of atoms (i.e. an outgoing set). The atoms can be real handles or virtual
 bool MPunifyVector(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_top,
                    const std::vector<Btr<atom> >& rhsv,
                    bindingsT& bindings,
                    bool* restart = NULL, const Type VarT = FW_VARIABLE_NODE);
 
+// rhs is an atom containing a real handle or virtual stuff.
 bool MPunify1(tree<Vertex>& lhs_t, tree<Vertex>::iterator lhs_ti,
               const atom& rhs,
               bindingsT& bindings,

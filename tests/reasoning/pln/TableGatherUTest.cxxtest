@@ -21,6 +21,7 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/Config.h>
 
 #include <opencog/reasoning/pln/PLN.h>
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
@@ -40,6 +41,16 @@ private:
 public:
 
     TableGatherUTest() {
+        try
+        {
+            config().load("pln-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+        currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
+
         logger().info("Initializing PLN test env...");
 
         // This access is required to initialise CogServer.
@@ -111,8 +122,10 @@ public:
         TS_ASSERT(table2.find(weak_atom<Vertex>(l4_h)) == table2.end());
 
         //check table3
-        TS_ASSERT(table3.find(weak_atom<Vertex>(l1_h)) == table3.end());
-        TS_ASSERT(table3.find(weak_atom<Vertex>(l2_h)) == table3.end());
+        // The first two used to be ==, but TableGather was deliberately changed
+        // to allow subtypes of Links.
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l1_h)) != table3.end());
+        TS_ASSERT(table3.find(weak_atom<Vertex>(l2_h)) != table3.end());
         TS_ASSERT(table3.find(weak_atom<Vertex>(l3_h)) != table3.end());
         TS_ASSERT(table3.find(weak_atom<Vertex>(l4_h)) != table3.end());
 
@@ -125,9 +138,10 @@ public:
     
     void displayTableAndBindings(TableGather& table) {
         cout << "test table: " << table.toString() << endl;
+        cout << table.size() << endl;
         foreach(BoundVertex bv, table) {
             // Loglevel -5 so it will certainly display. This is in a tacky fragment of the PLN log system, that works backward 
-            printSubsts(bv, -5);
+            printSubsts(bv, currentDebugLevel);
         }
     }
     
