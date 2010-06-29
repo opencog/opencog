@@ -82,8 +82,8 @@ int main(int argc,char** argv) {
          "start the search with a given exemplar, can be used several times")
         ("reduce-all,d", value<bool>(&reduce_all)->default_value(true),
          "reduce all candidates before being evaluated, can be valuable if the cache is enabled")
-        ("count-based-scorer,u", value<bool>(&count_base)->default_value(true),
-         "if 1 then a count based scorer is used (faster), otherwise, if 0, a complexity based scorer is used (more accurate)")
+        ("count-based-scorer,u", value<bool>(&count_base)->default_value(false),
+         "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used")
         ("cache-size,s", value<unsigned long>(&cache_size)->default_value(1000000),
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache")
         ;
