@@ -136,9 +136,11 @@ public:
    
     meta targetTemplate() const
     {
+        // Using FWVars rather than ATOM is potentially less efficient, but
+        // required for ForAll unification to match it (CustomCrispUnificationRule)
         return(meta(new vtree(mva((pHandle)InclusionLink, 
-                                         mva((pHandle)ATOM),
-                                         mva((pHandle)ATOM)
+                                         vtree(CreateVar(asw)),
+                                         vtree(CreateVar(asw))
                                          ))));
     }
     

@@ -54,10 +54,13 @@ StrictImplicationBreakdownRule::StrictImplicationBreakdownRule(AtomSpaceWrapper 
 
 Rule::setOfMPs StrictImplicationBreakdownRule::fullInputFilter() const
 {
-	meta outh(new vtree(mva((pHandle)ATOM)));
+	//meta outh(new vtree(mva((pHandle)ATOM)));
 
     MPs ret;
     Vertex myvar = CreateVar(asw);
+
+    // It is necessary to use an FWVar rather than ATOM so that CCURule will match it.
+    meta outh(new vtree(CreateVar(asw)));
 
     cprintf(4,"\n\nTo produce\n");
     NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);

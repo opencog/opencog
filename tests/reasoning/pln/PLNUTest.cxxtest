@@ -297,7 +297,8 @@ private:
         //currentDebugLevel=-4;
 
         Btr<BackInferenceTreeRootT> state;
-        ForwardChainer fc;
+        //ForwardChainer fc;
+        ForwardChainerClassicIC fc;
 
         // Even with FC, we want to have a BIT available so that printTrail can be accessed
 //        if (test_bc) {
@@ -310,7 +311,11 @@ private:
 
         set<VtreeProvider*> eres;
 
-        t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+        if (test_bc)
+            t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
+        else
+            // 12 is the maximum depth the BIT reaches, and each "step" of FC now does one level
+            t->minEvalsOfFittestBIT = 12;
 
         const int expansions_per_run = 1000;
 
@@ -558,14 +563,14 @@ private:
         // Set parameters
         uint maxSteps = test.get_int("MAX_STEPS");
 
-        // Make sure FC doesn't take too long / only test it on simpler tests.
-        // It takes disproportionately long once the AtomSpace gets large, due
-        // to the indexes probably. 
-        if (!test_bc && maxSteps > 2000) { // 201
-            std::cout << "Skipping test due to time constraints" << std::endl;
-            return; //minEvalsOfFittestBIT = 500;
-        }
-        
+//        // Make sure FC doesn't take too long / only test it on simpler tests.
+//        // It takes disproportionately long once the AtomSpace gets large, due
+//        // to the indexes probably.
+//        if (!test_bc && maxSteps > 2000) { // 201
+//            std::cout << "Skipping test due to time constraints" << std::endl;
+//            return; //minEvalsOfFittestBIT = 500;
+//        }
+
         uint minEvalsOfFittestBIT = maxSteps/100;
         
         // Changed because we don't want to have to specify the count
@@ -975,6 +980,23 @@ public:
                      new SimpleTruthValue(1.001f, getCount(0.999f)),
                      100,0);
         }
+    }
+
+    // Test that targets with childless links or ATOM still match.
+    void DISABLEtestFORALL() {
+        initAxiomSet(PLN_TEST_DIR"scm/new/BasicForAllDemo_AND.scm");
+        maketest(makemeta(mva((pHandle)EVALUATION_LINK,
+                //NewNode(PREDICATE_NODE, "friendOf"),
+                //mva((pHandle)ATOM),
+                //NewNode(PREDICATE_NODE, "is_axiom"),
+                NewNode(FW_VARIABLE_NODE, "R001"),
+                mva((pHandle)LIST_LINK,
+                    //mva((pHandle)ATOM)
+                    NewNode(CONCEPT_NODE, "fact_6")
+                    ))),
+                 new SimpleTruthValue(0.0f, getCount(0.0f)),
+                 new SimpleTruthValue(0.01f, getCount(0.01f)),
+                 10,0);
     }
 
     void DISABLEtestFingerPrint(vtree& v)

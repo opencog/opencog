@@ -213,7 +213,7 @@ bool BITNodeRoot::getRecordingTrails() const { return recordingTrails; }
 BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
         FitnessEvaluatorT _fe)
 : inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
-  treeDepth(0)
+  treeDepth(0), loosePoolPolicy(false)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     haxx::DirectProducerCache.clear();
@@ -794,25 +794,27 @@ bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 
 // Filter
 
-bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target)
+bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     if (asw->inheritsType(asw->getTypeV(*_target), FW_VARIABLE_NODE))
         return false;
 
-    /// This rejects all atoms that contain a link with >1 vars directly below it.
-    /// \todo Goes over far more child atoms than necessary. Should be made smarter.
-    for(vtree::post_order_iterator node = _target->begin_post(); node != _target->end_post(); ++node)
-    {
-        if (count_if(_target->begin(node), _target->end(node),
-                     bind(std::equal_to<Type>(),
-                          bind(getTypeFun, bind(&_v2h, _1)),
-                          (Type)FW_VARIABLE_NODE ))
-            > 1)
+    if (!loosePoolPolicy) {
+        /// This rejects all atoms that contain a link with >1 vars directly below it.
+        /// \todo Goes over far more child atoms than necessary. Should be made smarter.
+        for(vtree::post_order_iterator node = _target->begin_post(); node != _target->end_post(); ++node)
         {
-            cprintf(-1, "Dis-obeys pool policy:\n");
-            rawPrint(*_target, _target->begin(), -1);
-            return false;
+            if (count_if(_target->begin(node), _target->end(node),
+                         bind(std::equal_to<Type>(),
+                              bind(getTypeFun, bind(&_v2h, _1)),
+                              (Type)FW_VARIABLE_NODE ))
+                > 1)
+            {
+                cprintf(-1, "Dis-obeys pool policy:\n");
+                rawPrint(*_target, _target->begin(), -1);
+                return false;
+            }
         }
     }
 
@@ -925,7 +927,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
 
         tlog(2, "Created new BIT child [%ld]\n", (long)new_node);
 
-        if (obeysPoolPolicy(new_rule, _target))
+        if (obeysPoolPolicy(new_rule, _target, root->loosePoolPolicy))
         {
             root->exec_pool.push_back(new_node);
             root->exec_pool_sorted = false;
@@ -1165,7 +1167,7 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
 
     // These are not supposed to propagate higher than variableScoper
     //assert(eval_results.empty());
-    while(resources)
+    while(resources && !exec_pool.empty())
     {
         tlog(0, "Resources left %d\n", resources);
 

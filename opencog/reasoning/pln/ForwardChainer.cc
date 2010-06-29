@@ -161,6 +161,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     pHandle out=boost::get<pHandle>(V);
                     const TruthValue& tv=GET_ASW->getTV(out);
                     //cout<<printTV(out)<<'\n';
+                    NMPrinter().print(out,-5);
 
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
 						// If the TV is a repeat, delete it.
@@ -397,7 +398,7 @@ ForwardChainerClassicIC::~ForwardChainerClassicIC()
 {
 }
 
-////!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
+//!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
 //Btr<std::set<BoundVertex> > ForwardChainerClassicIC::getMatching(const meta target)
 //{
 //    BITNodeRoot bit(target, new EvaluationRuleProvider);
@@ -489,6 +490,8 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainerClassicIC::findAllArgs(std::
     // Since BoundVTree is a subclass of vtree.
     BITNodeRoot bit(multiple ? AND : filter[0],
             new EvaluationRuleProvider);
+    // Enables it to handle Deduction/MP combined with ForAll unification.
+    bit.setLoosePoolPolicy(true);
 
     int maxSteps = 1000*filter.size();
     //const set<VtreeProvider*>& results =

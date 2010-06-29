@@ -523,7 +523,7 @@ protected:
 
     /// If inserting the rule invocation node in the expansion pool obeys
     /// our policy
-    static bool obeysPoolPolicy(Rule *new_rule, meta arg);
+    static bool obeysPoolPolicy(Rule *new_rule, meta arg, bool loosePoolPolicy = false);
 
     /// Find if we already have a BITNode like this such that we can re-use it
     /// by some template_bindings which are returned to the caller.
@@ -694,6 +694,10 @@ public:
 
     int getExecPoolSize() const;
     unsigned int getTreeDepth() const;
+    // Used by FC. If true, loosen the pool policy to allow multiple FWVars in an expression.
+    // This seems to break some tests in BC, but makes FC support more cases of ForAll unification
+    // for input into DeductionRule and ModusPonens.
+    void setLoosePoolPolicy(bool x) { loosePoolPolicy = x; }
     void setRecordingTrails(bool x=true);
     bool getRecordingTrails() const;
 
@@ -755,6 +759,8 @@ protected:
     void setTreeDepth(const unsigned int newDepth);
     // The current depth of the tree (i.e. the depth of the lowest BITNode)
     unsigned int treeDepth;
+
+    bool loosePoolPolicy;
 
     friend class BITNode;
 };
