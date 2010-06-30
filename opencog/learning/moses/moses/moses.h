@@ -312,7 +312,6 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      *
      * @return return true if it creates deme successfully,otherwise false.
      */
-
     bool create_deme(const operator_set& ignore_ops = operator_set(),
                      const combo_tree_ns_set* perceptions = NULL,
                      const combo_tree_ns_set* actions = NULL)  {
@@ -349,6 +348,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         //do representation-building and create a deme (initially empty)
         _rep = new representation(*simplify, _exemplar->first, type,
                                   rng, ignore_ops, perceptions, actions);
+        // create an empty deme
         _deme = new eda::instance_set<combo_tree_score>(_rep->fields());
 
         _evals_before_this_deme = n_evals();

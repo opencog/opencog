@@ -77,6 +77,15 @@ representation::representation(const reduct::rule& simplify,
                 perceptions, actions,
                 stepsize, expansion, depth);
 
+    // Logger
+    {
+        stringstream ss;
+        ss << "Created prototype: ";
+        ostream_prototype(ss);
+        logger().debug(ss.str());
+    }
+    // ~Logger
+    
     //handle knob merging
 
     //convert the knobs into a field specification
@@ -86,8 +95,6 @@ representation::representation(const reduct::rule& simplify,
     foreach(const contin_map::value_type& v, contin)
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
-
-    std::cout << "#knobs " << disc.size() << " + " << contin.size() << std::endl;
 }
 
 void representation::transform(const instance& inst)

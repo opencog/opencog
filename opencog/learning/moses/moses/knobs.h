@@ -57,7 +57,9 @@ using namespace ant_combo;
 //from the tree (while setting it to 0 would return to the original tree).
 
 struct knob_base {
-    knob_base(combo_tree& tr) : _tr(&tr) { }
+    knob_base(combo_tree& tr, combo_tree::iterator log)
+        : _tr(&tr), _loc(log) {}
+    knob_base(combo_tree& tr) : _tr(&tr), _loc(tr.end()) {}
     virtual ~knob_base() { }
 
     //is the feature nonzero by default? i.e., is it present in the exemplar?
@@ -66,13 +68,19 @@ struct knob_base {
     //return the exemplar to its state before the knob was created (deleting
     //any null vertices if present)
     virtual void clear_exemplar() = 0;
+
+    combo_tree::iterator get_loc() const { return _loc; }
 protected:
     combo_tree* _tr;
+    combo_tree::iterator _loc; // location of the knob in the combo_tree
 };
 
 struct disc_knob_base : public knob_base {
-    disc_knob_base(combo_tree& tr) : knob_base(tr) { }
-    virtual ~disc_knob_base() { }
+    disc_knob_base(combo_tree& tr, combo_tree::iterator tgt) 
+        : knob_base(tr, tgt) {}
+    disc_knob_base(combo_tree& tr) 
+        : knob_base(tr) {}
+    virtual ~disc_knob_base() {}
 
     virtual void turn(int) = 0;
     virtual void disallow(int) = 0;
@@ -86,36 +94,48 @@ struct disc_knob_base : public knob_base {
 
     //expected complexity based on whatever the knob is currently turned to
     virtual int complexity_bound() const = 0;
+
+    virtual std::string toStr() const = 0;
 };
 
 struct contin_knob : public knob_base {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
                 eda::field_set::arity_t depth)
-        : knob_base(tr), _tgt(tgt), _spec(combo::get_contin(*tgt),
-                                          step_size, expansion, depth) { }
+        : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
+                                    step_size, expansion, depth) { }
 
     bool in_exemplar() const {
         return true;
     }
+
+    // @todo: it does not go back to the initiale state
     void clear_exemplar() { }
 
     void turn(eda::contin_t x) {
-        *_tgt = x;
+        *_loc = x;
     }
 
     //create a spec describing the space spanned by the knob
     const eda::field_set::contin_spec& spec() const {
         return _spec;
     }
+
+    std::string toStr() const {
+        stringstream ss;
+        ss << "[" << *_loc << "]";
+        return ss.str();
+    }
 protected:
-    combo_tree::iterator _tgt;
     eda::field_set::contin_spec _spec;
 };
 
 template<int MaxArity>
 struct knob_with_arity : public disc_knob_base {
-    knob_with_arity(combo_tree& tr) : disc_knob_base(tr), _default(0) { }
+    knob_with_arity(combo_tree& tr, combo_tree::iterator tgt) 
+        : disc_knob_base(tr, tgt), _default(0) {}
+    knob_with_arity(combo_tree& tr) 
+        : disc_knob_base(tr), _default(0) {}
 
     void disallow(int idx) {
         _disallowed[idx] = true;
@@ -152,18 +172,17 @@ struct logical_subtree_knob : public knob_with_arity<3> {
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
-            : knob_with_arity<3>(tr), _current(absent), _loc(tr.end()) {
-
+        : knob_with_arity<3>(tr), _current(absent), _loc(tr.end()) {
+        typedef combo_tree::sibling_iterator sib_it;
+        typedef combo_tree::pre_order_iterator pre_it;
         //compute the negation of the subtree
         combo_tree negated_subtree(subtree);
         negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
         reduct::logical_reduce(negated_subtree);
 
-        for (combo_tree::sibling_iterator sib = tgt.begin();
-             sib != tgt.end();++sib) {
-            if (_tr->equal_subtree(combo_tree::iterator(sib), subtree) ||
-                _tr->equal_subtree(combo_tree::iterator(sib),
-                                   negated_subtree.begin())) {
+        for (sib_it sib = tgt.begin(); sib != tgt.end();++sib) {
+            if (_tr->equal_subtree(pre_it(sib), subtree) ||
+                _tr->equal_subtree(pre_it(sib), negated_subtree.begin())) {
                 _loc = sib;
                 _current = present;
                 _default = present;
@@ -218,7 +237,12 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     eda::field_set::disc_spec spec() const {
         return eda::field_set::disc_spec(arity());
     }
-
+    
+    std::string toStr() const {
+        stringstream ss;
+        ss << "[" << *_loc << " TODO ]";
+        return ss.str();
+    }
 protected:
     int _current;
     combo_tree::iterator _loc;
@@ -285,6 +309,11 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
         return eda::field_set::disc_spec(arity());
     }
 
+    std::string toStr() const {
+        stringstream ss;
+        ss << "[" << *_loc << " TODO ]";
+        return ss.str();
+    }
 protected:
     int _current;
     combo_tree::iterator _loc;
@@ -361,6 +390,11 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
         return eda::field_set::disc_spec(arity());
     }
 
+    std::string toStr() const {
+        stringstream ss;
+        ss << "[" << *_loc << " TODO ]";
+        return ss.str();
+    }
 protected:
     int _current;
     combo_tree::iterator _loc;
@@ -415,17 +449,21 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
         return eda::field_set::disc_spec(arity());
     }
 
+    std::string toStr() const {
+        stringstream ss;
+        ss << "[" << *_loc << " TODO ]";
+        return ss.str();
+    }
 protected:
     int _current;
     combo_tree::iterator _loc;
     combo_tree t;
-
 };
 
-
-
-typedef opencog::based_variant < boost::variant<logical_subtree_knob, action_subtree_knob, simple_action_subtree_knob>,
-disc_knob_base > disc_knob;
+typedef opencog::based_variant < boost::variant<logical_subtree_knob,
+                                                action_subtree_knob,
+                                                simple_action_subtree_knob>,
+                                 disc_knob_base > disc_knob;
 } //~namespace moses
 
 #endif

@@ -81,6 +81,37 @@ struct representation : public knob_mapper, boost::noncopyable {
         return _exemplar;
     }
 
+    /**
+     * Output the prototype of the exemplar (works correctly only when
+     * the exemplar is yet unchanged).
+     */
+    template<typename Out>
+    Out& ostream_prototype(Out& out, combo_tree::iterator it) const {
+        typedef combo_tree::sibling_iterator sib_it;
+        if(is_contin(*it)) { // contin
+                contin_map::const_iterator c_cit = find_contin_knob(it);
+                out << (c_cit == contin.end() ? *it : c_cit->second.toStr());
+        } else { // disc
+            disc_map::const_iterator d_cit = find_disc_knob(it);
+            out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
+        }
+        // recursive call on children
+        if(!it.is_childless()) {
+            out << "(";
+            for(sib_it sib = it.begin(); sib != it.end();) {
+                ostream_prototype(out, sib);
+                if(++sib != it.end()) out << " ";
+            }
+            out << ")";
+        }
+        return out;
+    }
+
+    // like above but on the _exemplar
+    template<typename Out>
+    Out& ostream_prototype(Out& out) const {
+        return ostream_prototype(out, _exemplar.begin());
+    }
 protected:
     combo_tree _exemplar;
     field_set _fields;

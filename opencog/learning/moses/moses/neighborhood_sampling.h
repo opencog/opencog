@@ -51,22 +51,19 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out,
 
         eda::randomize(fs, inst, rng);
 
-        //bias towards zero
+        //bias towards the exemplar instance
         for (eda::field_set::bit_iterator it = fs.begin_bits(inst);
-                it != fs.end_bits(inst);++it)
-            if (rng.randint(2) == 0)
+             it != fs.end_bits(inst);++it)
+            if (rng.randbool())
                 *it = false;
         for (eda::field_set::disc_iterator it = fs.begin_disc(inst);
-                it != fs.end_disc(inst);++it)
-            if (rng.randint(2) == 0)
+             it != fs.end_disc(inst);++it)
+            if (rng.randbool())
                 *it = 0;
 
         //add it
         *out++ = inst;
     }
-    //foo42
-    //caching not yet integrated
-    //note: NOT YET USING RTR
 }
 
 /**
