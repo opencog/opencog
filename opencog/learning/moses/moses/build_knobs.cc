@@ -597,7 +597,7 @@ void build_knobs::linear_canonize(pre_it it)
 
 void build_knobs::rec_canonize(pre_it it)
 {
-    cout << "X " << _exemplar << " | " << combo_tree(it) << endl;
+    // cout << "X " << _exemplar << " | " << combo_tree(it) << endl;
     //recurse on whatever's already present, and create a multiplicand for it
     if (*it == id::plus) {
         for (sib_it sib = it.begin();sib != it.end();++sib) {

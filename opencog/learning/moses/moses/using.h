@@ -40,7 +40,7 @@
 #include <opencog/util/Logger.h>
 
 // uncomment this line for debug information to be given during execution
-#define DEBUG_INFO 
+// #define DEBUG_INFO 
 
 namespace moses {
 

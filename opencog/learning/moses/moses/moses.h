@@ -454,10 +454,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         // Logger
         {
             logger().debug("Close deme");
-            stringstream ss;
-            ss << "Number of evaluations during this optimization: " 
-               << eval_during_this_deme;
-            logger().debug(ss.str());
+            logger().debug("Number of evaluations during this optimization: %d",
+                           eval_during_this_deme);
         }
         // ~Logger
 
@@ -469,6 +467,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         metapop_candidates candidates;
 
         int i = 0;
+
+        // Logger
+        logger().debug("Compute the behavioral score of all candidates");
+        // ~Logger
 
         foreach(const eda::scored_instance<combo_tree_score>& inst, *_deme) {
             // this is in case the deme is closed before the entire
@@ -501,16 +503,19 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
-            stringstream ss;
-            ss << "Candidates (and their bscores) to merge with the metapopulation: "
-               << candidates.size();
-            logger().fine(ss.str());
+            logger().fine("Candidates (and their bscores) to merge with"
+                          " the metapopulation: %u", candidates.size());
             foreach(metapop_candidates::value_type& c, candidates) {
                 stringstream ss_c;
                 ss_c << c.second << " " << c.first;
                 logger().fine(ss_c.str());
             }
         }
+        // ~Logger
+
+        // Logger
+        logger().debug("Merge all non-dominated candidates with"
+                       " the metapopulation");
         // ~Logger
 
         merge_nondominating(candidates.begin(), candidates.end(), *this);

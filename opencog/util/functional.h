@@ -185,6 +185,7 @@ struct nullary_function {
     typedef ResultType result_type;
 };
 
+//0-ary function that returns t
 template<typename T>
 struct const_function {
     const_function(const T& t) : _t(t) { }

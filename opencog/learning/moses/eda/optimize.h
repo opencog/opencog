@@ -26,10 +26,12 @@
 
 #include "instance_set.h"
 #include <opencog/util/foreach.h>
+#include <opencog/util/Logger.h>
 
 namespace eda {
     
     using namespace std;
+    using opencog::logger;
   
     //return # of evaluations actually performed
     template <typename ScoreT,
@@ -51,33 +53,34 @@ namespace eda {
                  LoggingPolicy& write_log, 
                  opencog::RandGen& rng) 
     {
+        // Logger
+        logger().debug("Probabilistic Learning Optimization");
+        // ~Logger
+
         typedef typename StructureLearningPolicy::model_type model_type;
         
-        cout << "top " << current.size() << endl;
-        cout << "top " << distance(current.begin_scores(),
-                                   current.end_scores()) << endl;
-        
         //compute scores of the initial instance set
+        logger().debug("Evaluate the initial population (%u individuals)",
+                       current.size());
         transform(current.begin(),current.end(),current.begin_scores(),score);
-        cout << "topd" << endl;
         
         //main loop
         int gen=0;
-        for (;gen<max_gens && !termination_criterion(current.begin(),
-                                                     current.end());++gen) {
-            
-            cout << "PPtop" << endl;
+        for (;gen<max_gens 
+                 && !termination_criterion(current.begin(), current.end());
+             ++gen) {
             
             //do logging of instance_set and scores
             write_log(current.begin(),current.end(),current.fields(),gen);
             
             //select promising instances
+            logger().debug("Select %d promising instances for model building",
+                           n_select);
             std::vector<scored_instance<ScoreT> > promising(n_select);
             select(current.begin(),current.end(),promising.begin(),n_select);
             
-            cout << "PPmid" << endl;
-            
             //initialize the model
+            logger().debug("Build probabilistic model");
             model_type model(current.fields(),promising.begin(),
                              promising.end(), rng);
             
@@ -87,16 +90,15 @@ namespace eda {
             learn_probs(current.fields(),promising.begin(),
                         promising.end(),model);
             
-            //create new instances and integrate them into the current instance set,
-            //replacing existing instances
-            
+            //create new instances and integrate them into the current
+            //instance set, replacing existing instances
+            logger().debug("Sample, evaluate and replace %d new candidates"
+                           " according to that model", n_generate);
             replace(begin_generator(bind(score_instance<ScoringPolicy>,
                                          bind(model),score)),
                     end_generator(bind(score_instance<ScoringPolicy>,
                                        bind(model),score),n_generate),
                     current.begin(),current.end());      
-            
-            cout << "PPbot" << endl;
         }
 
         //log the final result
