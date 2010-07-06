@@ -95,6 +95,16 @@ representation::representation(const reduct::rule& simplify,
     foreach(const contin_map::value_type& v, contin)
         tmp.insert(v.first);
     _fields = field_set(tmp.begin(), tmp.end());
+
+    set_exemplar_inst();
+
+    // Logger
+    {
+        stringstream ss;
+        ss << "Exemplar instance: " << _fields.stream(_exemplar_inst);
+        logger().debug(ss.str());
+    }
+    // ~Logger    
 }
 
 void representation::transform(const instance& inst)
@@ -142,6 +152,32 @@ combo_tree representation::get_clean_exemplar(bool reduce)
     if(reduce) (*_simplify)(result, result.begin()); //reduce
 
     return result;
+}
+
+void representation::set_exemplar_inst() {
+    OC_ASSERT(_exemplar_inst.empty(),
+              "Should be called only once,"
+              " therefore _exemplar_inst should be empty");
+    _exemplar_inst.resize(_fields.packed_width());
+
+    // @todo: onto
+    // bit
+    for(field_set::bit_iterator it = _fields.begin_bits(_exemplar_inst);
+        it != _fields.end_bits(_exemplar_inst); ++it)
+        *it = false;
+    // disc
+    for(field_set::disc_iterator it = _fields.begin_disc(_exemplar_inst);
+        it != _fields.end_disc(_exemplar_inst); ++it)
+        *it = 0;
+    // contin
+    contin_map_cit c_cit = contin.begin();
+    for(field_set::contin_iterator it = _fields.begin_contin(_exemplar_inst);
+        it != _fields.end_contin(_exemplar_inst); ++it, ++c_cit) {
+        // this should actually set the contin knob to Stop ...
+        // because the mean of the associated contin field is
+        // equal to the initial contin value
+        *it = get_contin(*c_cit->second.get_loc());
+    }
 }
 
 } //~namespace moses

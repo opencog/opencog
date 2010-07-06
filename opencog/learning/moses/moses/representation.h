@@ -80,6 +80,10 @@ struct representation : public knob_mapper, boost::noncopyable {
     const combo_tree& exemplar() const {
         return _exemplar;
     }
+    
+    const instance& exemplar_inst() const {
+        return _exemplar_inst;
+    }
 
     /**
      * Output the prototype of the exemplar (works correctly only when
@@ -113,7 +117,13 @@ struct representation : public knob_mapper, boost::noncopyable {
         return ostream_prototype(out, _exemplar.begin());
     }
 protected:
+    void set_exemplar_inst();
+
     combo_tree _exemplar;
+    instance _exemplar_inst; //instance corresponding to the exemplar
+                             //@todo: it is not sure whether we need
+                             //that because it is assumed that the
+                             //instance of the exemplar is null
     field_set _fields;
     opencog::RandGen& rng;
     const reduct::rule* _simplify;

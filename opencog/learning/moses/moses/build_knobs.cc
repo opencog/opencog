@@ -537,6 +537,9 @@ void build_knobs::build_contin(pre_it it)
     end.skip_children();
     for (++end;it != end;++it)
         if (is_contin(*it)) {
+            // DEBUG
+            cout << get_contin(*it) << std::endl;
+            // ~DEBUG
             contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
             _mapper.contin.insert(make_pair(kb.spec(), kb));
         }

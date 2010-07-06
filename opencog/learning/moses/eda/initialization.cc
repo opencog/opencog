@@ -22,24 +22,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "initialization.h"
+#include "../moses/neighborhood_sampling.h"
 
 namespace eda
 {
 
 void occam_randomize_contin(const field_set& fs, instance& inst,
-                            field_set::const_contin_iterator it,
+                            field_set::contin_iterator it,
                             RandGen& rng)
 {
-    size_t begin = fs.contin_to_raw_idx(it.idx());
-    size_t end = begin + fs.contin()[it.idx()].depth;
-    size_t middle = begin + rng.randint(end - begin + 1);
-
-    for (;begin != middle;++begin)
-        fs.set_raw(inst, begin, rng.randbool() ?
-                   field_set::contin_spec::Left
-                   : field_set::contin_spec::Right);
-    for (;begin != end;++begin)
-        fs.set_raw(inst, begin, field_set::contin_spec::Stop);
+    unsigned int n = rng.randint(fs.contin()[it.idx()].depth);
+    moses::generate_contin_neighbor(fs, inst, it, n, rng);
 }
 
 //tree should be roughly balanced for this to be effective - otherwise there
@@ -77,8 +70,8 @@ void occam_randomize_onto(const field_set& fs, instance& inst,
 void occam_randomize_contin(const field_set& fs, instance& inst,
                             RandGen& rng)
 {
-    for (field_set::const_contin_iterator it = fs.begin_contin(inst);
-            it != fs.end_contin(inst);++it)
+    for (field_set::contin_iterator it = fs.begin_contin(inst);
+         it != fs.end_contin(inst);++it)
         occam_randomize_contin(fs, inst, it, rng);
 }
 

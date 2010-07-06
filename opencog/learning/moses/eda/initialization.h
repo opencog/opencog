@@ -37,7 +37,7 @@ using namespace opencog;
 // not strictly occam in the Solomonoff sense because the size is
 // uniformely distributed.
 void occam_randomize_contin(const field_set&, instance&,
-                            field_set::const_contin_iterator,
+                            field_set::contin_iterator,
                             RandGen& rng);
 void occam_randomize_onto(const field_set&, instance&,
                           field_set::const_onto_iterator,

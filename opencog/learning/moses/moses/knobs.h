@@ -69,7 +69,9 @@ struct knob_base {
     //any null vertices if present)
     virtual void clear_exemplar() = 0;
 
-    combo_tree::iterator get_loc() const { return _loc; }
+    combo_tree::iterator get_loc() const {
+        return _loc; 
+    }
 protected:
     combo_tree* _tr;
     combo_tree::iterator _loc; // location of the knob in the combo_tree

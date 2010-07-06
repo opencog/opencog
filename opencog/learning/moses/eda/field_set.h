@@ -108,7 +108,13 @@ struct field_set {
         contin_t mean, step_size, expansion;
         size_t depth;
         bool operator<(const contin_spec& rhs) const { //sort descending by depth
-            return depth > rhs.depth;
+            return (depth > rhs.depth
+                    || (depth == rhs.depth 
+                        && (expansion > rhs.expansion
+                            || (expansion == rhs.expansion
+                                && (step_size > rhs.step_size
+                                    || (step_size == rhs.step_size
+                                        && mean > rhs.mean))))));
         }
         bool operator==(const contin_spec& rhs) const { //don't know why this is needed
             return (mean == rhs.mean &&
@@ -184,6 +190,8 @@ struct field_set {
         onto_spec(const onto_tree& t)
                 : tr(&t), depth(t.max_depth(t.begin())),
                 branching(opencog::next_power_of_two(1 + t.max_branching(t.begin()))) { }
+        // @todo: could be a source of bug if such order is not total
+        // as it's gonna make problems with field_set(from, to)
         bool operator<(const onto_spec& rhs) const { //sort descending by size
             return (depth*branching > rhs.depth*rhs.branching);
         }
@@ -231,7 +239,7 @@ struct field_set {
         while (from != to)
             ++spec_counts[*from++];
 
-        foreach(const spec_map::value_type& v, spec_counts)       //build them
+        foreach(const spec_map::value_type& v, spec_counts) //build them
             build_spec(v.first, v.second);
 
         compute_starts();                 //compute iterator positions
