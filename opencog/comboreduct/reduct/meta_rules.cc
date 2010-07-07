@@ -25,6 +25,9 @@
 #include <opencog/util/foreach.h>
 #include <opencog/comboreduct/combo/assumption.h>
 
+// uncomment if you want to have a trace of the rules
+#define META_RULE_DEBUG
+
 namespace reduct {
 
 void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
@@ -37,18 +40,19 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     
     if (input==unknown_type_tree)
         for(;it!=end;++it) {
-            // debug
-            // std::cout << this->get_name() << " " << r->get_name() 
-            //           << " " << tr << " " << combo_tree(it) << std::endl;
-            // ~debug
+#ifdef META_RULE_DEBUG
+            std::cout << this->get_name() << " " << r->get_name() 
+                      << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
             (*r)(tr,it);
         }
     else
         for(;it!=end;++it) {
             // debug
-            // std::cout << this->get_name() << " " << r->get_name() 
-            //           << " " << tr << " " << combo_tree(it) << std::endl;
-            // ~debug
+#ifdef META_RULE_DEBUG
+            std::cout << this->get_name() << " " << r->get_name() 
+                      << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
             if(//combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
                //&& 
                //@todo: checking that it inherits would be better
@@ -65,20 +69,20 @@ void upwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     at.descend_all();
     
     for (;at!=end;++at) {
-        // debug
-        // std::cout << this->get_name() << " " << r->get_name() 
-        //           << " " << tr << " " << combo_tree(it) << std::endl;
-        // ~debug
+#ifdef META_RULE_DEBUG
+        std::cout << this->get_name() << " " << r->get_name() 
+                  << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
         (*r)(tr,at);
     }
 }
     
 void sequential::operator()(combo_tree& tr,combo_tree::iterator it) const {
     foreach (const rule& r,rules) {
-        // debug
-        // std::cout << this->get_name() << " " << r.get_name() 
-        //           << " " << tr << " " << combo_tree(it) << std::endl;
-        // ~debug
+#ifdef META_RULE_DEBUG
+        std::cout << this->get_name() << " " << r.get_name() 
+                  << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
         r(tr,it);
     }
 }
@@ -87,10 +91,10 @@ void iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
     combo_tree tmp;
     do {
         tmp=combo_tree(it);
-        // debug
-        // std::cout << this->get_name() << " " << tmp << " " << r->get_name() 
-        //           << " " << tr << " " << combo_tree(it) << std::endl;
-        // ~debug
+#ifdef META_RULE_DEBUG
+        std::cout << this->get_name() << " " << tmp << " " << r->get_name() 
+                  << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
         (*r)(tr,it);
     } while (!tr.equal_subtree(it,tmp.begin()));
 }
@@ -99,10 +103,10 @@ void assum_iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
     combo_tree tmp;
     do {
         tmp = tr;
-        // debug
-        // std::cout << this->get_name() << " " << tmp << " " << r->get_name() 
-        //           << " " << tr << " " << combo_tree(it) << std::endl;
-        // ~debug
+#ifdef META_RULE_DEBUG
+        std::cout << this->get_name() << " " << tmp << " " << r->get_name() 
+                  << " " << tr << " " << combo_tree(it) << std::endl;
+#endif
         (*r)(tr,it);
     } while(tr!=tmp || !equal_assumptions(tmp, tr));
 }

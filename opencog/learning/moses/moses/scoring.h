@@ -267,35 +267,25 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
 };
 
 /**
- * like occam_contin_bscore but for boolean. The Occam's razor is
- * probably useful if the data are noisy.
+ * like occam_contin_bscore but for boolean, instead of considering a
+ * variance the probability p that one datum is wrong is used.
  */
-// @todo
+// TODO
 // struct occam_boolean_bscore : public unary_function<combo_tree, behavioral_score> {
 //     template<typename Scoring>
-//     occam_boolean_bscore(const Scoring& score,
-//                          const RndNumTable& r,
-//                          float v,
-//                          float alphabet_size,
-//                          opencog::RandGen& _rng)
-//         : target(score, r), rands(r), variance(v), logPDM(v), rng(_rng) {
-//         alphabet_size_log = log((double)alphabet_size);
-//     }
-
-//     occam_contin_bscore(const combo::contin_table& t,
-//                         const RndNumTable& r,
-//                         float v,
+//     occam_contin_bscore(const CaseBasedBoolean& bc,
+//                         float p,
 //                         float alphabet_size,
 //                         opencog::RandGen& _rng)
 //         : target(t), rands(r), variance(v), logPDM(v), rng(_rng) {
+//         OC_ASSERT(p<1);
 //         alphabet_size_log = log((double)alphabet_size);
 //     }
 
 //     behavioral_score operator()(const combo_tree& tr) const;
 
-//     combo::contin_table target;
-//     RndNumTable rands;
-//     score_t variance;
+//     const CaseBasedBoolean& target;
+//     score_t prob; // probability that one datum is wrong
 //     LogPDM logPDM;
 //     score_t alphabet_size_log;
 //     opencog::RandGen& rng;

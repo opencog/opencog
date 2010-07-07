@@ -32,7 +32,15 @@ type_node infer_type_from_data_file(string file) {
     in >> str;
     if(str == "0" || str == "1")
         return id::boolean_type;
-    else return id::contin_type;
+    else {
+        try {
+            lexical_cast<contin_t>(str);
+            return id::contin_type;
+        }
+        catch(...) {
+            return id::ill_formed_type;
+        }
+    }
 }
 
 int main(int argc,char** argv) { 
@@ -122,10 +130,15 @@ int main(int argc,char** argv) {
     if(exemplars_str.empty()) {
         type_node inferred_type = infer_type_from_data_file(input_table_file);
         switch(inferred_type) {
-        case id::boolean_type : exemplars_str.push_back("and");
+        case id::boolean_type: exemplars_str.push_back("and");
             break;
-        case id::contin_type : exemplars_str.push_back("+");
+        case id::contin_type: exemplars_str.push_back("+");
             break;
+        case id::ill_formed_type:
+            std::cerr << "The data type of the table "
+                      << input_table_file << " is not recognized"
+                      << std::endl;
+            exit(1);
         default:
             std::cerr << "Type " << inferred_type << " is not supported yet"
                       << std::endl;

@@ -121,6 +121,9 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     if(logger().getLevel() >= opencog::Logger::FINE) {
         stringstream ss_tr;
         ss_tr << "Candidate: " << tr;
+        if(ss_tr.str() == "Candidate: +(*(+(*(+(*(+(#1 1) #1 -0.375) -0.5) +(#1 1.75)) 0.5) #1) 7.5) ") {
+            std::cout << "HERE!" << std::endl;
+        }
         logger().fine(ss_tr.str());
         stringstream ss_bsc;
         ostream_behavioral_score(ss_bsc, bs);
@@ -129,6 +132,34 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     // ~Logger
     return bs;
 }
+
+// TODO
+// behavioral_score occam_boolean_bscore::operator()(const combo_tree& tr) const
+// {
+//     combo::contin_table ct(tr, rands, rng);
+//     behavioral_score bs(target.size());
+//     score_t trs = tr.size(); //@todo replace this with complexity
+        
+//     behavioral_score::iterator dst = bs.begin();
+//     for(combo::contin_table::const_iterator it1 = ct.begin(), 
+//              it2 = target.begin(); it1 != ct.end();)
+//         if(variance > 0) 
+//             *dst++ = trs*alphabet_size_log // occam's razor
+//                 - logPDM(sqr((*it1++) - (*it2++)), 1);
+//         else
+//             *dst++ = sqr((*it1++) - (*it2++)); // no occam's razor
+//     // Logger
+//     if(logger().getLevel() >= opencog::Logger::FINE) {
+//         stringstream ss_tr;
+//         ss_tr << "Candidate: " << tr;
+//         logger().fine(ss_tr.str());
+//         stringstream ss_bsc;
+//         ostream_behavioral_score(ss_bsc, bs);
+//         logger().fine(ss_bsc.str());
+//     }
+//     // ~Logger
+//     return bs;
+// }
 
 /**
  * return true if x dominates y
