@@ -38,6 +38,20 @@ truth_table::hamming_distance(const truth_table& other) const
     return res;
 }
 
+partial_truth_table::partial_truth_table(const combo_tree& tr,
+                                         const truth_table_inputs& tti,
+                                         opencog::RandGen& rng) {
+    for (bm_cit i = tti.begin(); i != tti.end(); ++i) {
+        int arg = 1;
+        for (bv_cit j = i->begin(); j != i->end(); ++j, ++arg)
+            binding(arg) = bool_to_vertex(*j);
+        //assumption : all inputs of t are contin_t
+        vertex res = eval_throws(rng, tr);
+        OC_ASSERT(is_boolean(res), "res must be boolean");
+        push_back(vertex_to_bool(res));
+    }
+}
+
 contin_table_inputs::contin_table_inputs(int sample_count, int arity,
                                          opencog::RandGen& rng, 
                                          double max_randvalue,
@@ -59,7 +73,7 @@ contin_table::contin_table(const combo_tree& t, const contin_table_inputs& cti,
 {
     for (const_cm_it i = cti.begin(); i != cti.end(); ++i) {
         int arg = 1;
-        for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j, ++arg)
+        for (const_cv_it j = i->begin(); j != i->end(); ++j, ++arg)
             binding(arg) = *j;
         //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, t);

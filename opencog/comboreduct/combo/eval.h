@@ -162,10 +162,9 @@ vertex eval_throws(opencog::RandGen& rng,
                 }
             }
 
-            OC_ASSERT(vu.empty()
-                              || vu.isOneVariableActiveTMP(),
-                              "Since it returns logical_true from that point"
-                              " there should be at least one active variable");
+            OC_ASSERT(vu.empty() || vu.isOneVariableActiveTMP(),
+                      "Since it returns logical_true from that point"
+                      " there should be at least one active variable");
 
             return id::logical_true;
         case id::logical_or :
@@ -176,9 +175,7 @@ vertex eval_throws(opencog::RandGen& rng,
                         return id::logical_true;
                     }
                 }
-                return id::logical_false;
-
-                
+                return id::logical_false;                
             }
             // wild card case
             else {
@@ -315,8 +312,7 @@ vertex eval_throws(opencog::RandGen& rng,
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                OC_ASSERT(is_contin(vres),
-                          "vertex should be a contin.");
+                OC_ASSERT(is_contin(vres), "vertex should be a contin.");
                 res += get_contin(vres);
             }
             return res;
@@ -328,8 +324,7 @@ vertex eval_throws(opencog::RandGen& rng,
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 vertex vres = eval_throws(rng, sib, pe, vu);
-                OC_ASSERT(is_contin(vres),
-                          "vertex should be a contin");
+                OC_ASSERT(is_contin(vres), "vertex should be a contin");
                 res *= get_contin(vres);
             }
             return res;

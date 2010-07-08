@@ -148,8 +148,6 @@ combo_tree representation::get_clean_exemplar(bool reduce)
 
     combo_tree result = exemplar();
 
-    std::cout << "TR: " << result << std::endl;
-
     clean_reduce(result); //remove null vertices
     if(reduce) (*_simplify)(result, result.begin()); //reduce
 

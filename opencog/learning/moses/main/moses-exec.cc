@@ -54,6 +54,7 @@ int main(int argc,char** argv) {
     string log_level;
     string log_file;
     float variance;
+    float prob;
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
     vector<string> exemplars_str;
@@ -81,7 +82,9 @@ int main(int argc,char** argv) {
         ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
          "file name where to write the log")
         ("variance,v", value<float>(&variance)->default_value(0),
-         "variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor")
+         "in the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor")
+        ("prob,p", value<float>(&prob)->default_value(0),
+         "in the case of boolean regression. probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, uot of the range )1,0( means no Occam's razor, otherwise the greater Occam's occurs when the probability of being wrong is 0.5")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
         ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
@@ -174,8 +177,8 @@ int main(int argc,char** argv) {
 
     if(output_type == id::boolean_type) {
         // read input_table_file file
-        truth_table_inputs booltable;
-        partial_truth_table inputtable;
+        truth_table_inputs inputtable;
+        partial_truth_table booltable;
         istreamTable<truth_table_inputs, partial_truth_table, bool>(in,
                                                                     inputtable,
                                                                     booltable);
@@ -184,11 +187,14 @@ int main(int argc,char** argv) {
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), output_type, arity + 1);
 
+        // set alphabet size
+        int alphabet_size = 3 + arity - ignore_ops.size();
+
         typedef occam_truth_table_bscore BScore;
         typedef opencog::lru_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
         typedef opencog::lru_cache<Score> ScoreCache;
-        BScore bscore(bc);
+        BScore bscore(booltable, inputtable, prob, alphabet_size, rng);
         if(cache_size>0) {
             BScoreCache bscore_cache(cache_size, bscore);
             Score score(bscore_cache);
@@ -205,8 +211,9 @@ int main(int argc,char** argv) {
         }
     }
     else if(output_type == id::contin_type) {
-        contin_table contintable;
+        // read input_table_file file
         contin_table_inputs inputtable;
+        contin_table contintable;
         istreamTable<contin_table_inputs, contin_table, contin_t>(in,
                                                                   inputtable,
                                                                   contintable);
@@ -216,11 +223,11 @@ int main(int argc,char** argv) {
         tt.append_children(tt.begin(), output_type, arity + 1);
 
         // set alphabet size
-        int alphabet_size = 8 - ignore_ops.size(); // 8 is roughly the
-                                                   // number of operators
-                                                   // in contin formula,
-                                                   // it will have to be
-                                                   // adapted
+        int alphabet_size = 8 + arity - ignore_ops.size(); // 8 is roughly the
+                                                           // number of operators
+                                                           // in contin formula,
+                                                           // it will have to be
+                                                           // adapted
 
         typedef occam_contin_bscore BScore;
         typedef opencog::lru_cache<BScore> BScoreCache;

@@ -154,7 +154,11 @@ typedef bool_matrix truth_table_inputs;
 /**
  * partial_truth_table, column of result of a corresponding truth_table_inputs
  */
-typedef bool_vector partial_truth_table;
+struct partial_truth_table : public bool_vector {
+    partial_truth_table() {}
+    partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
+                        opencog::RandGen& rng);
+};
 
 
 //////////////////
@@ -211,8 +215,6 @@ public:
 
     contin_t abs_distance(const contin_table& other) const;
     contin_t sum_squared_error(const contin_table& other) const;
-private:
-    contin_table_inputs* cti;
 };
 
 

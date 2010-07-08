@@ -345,7 +345,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs rnt(s, a, rng);
 
     int size_before,size_after;
 

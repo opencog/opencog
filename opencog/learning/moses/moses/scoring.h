@@ -48,9 +48,6 @@ using opencog::sqr;
  
 typedef float fitness_t;
 
-//LRU additions (maybe use IS_FE_LRU_CACHE flag)
-#define MOSES_TREE_CACHE_SIZE 1000000
-
 /**
  * score calculated based on the behavioral score. Useful to avoid
  * redundancy of code and computation in case there is a cache over
@@ -244,7 +241,8 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         float alphabet_size,
                         opencog::RandGen& _rng)
         : target(score, r), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log = log((double)alphabet_size);
+        alphabet_size_log_scaled_down = 
+            log((double)alphabet_size) / (double)cti.size();
     }
 
     occam_contin_bscore(const combo::contin_table& t,
@@ -253,7 +251,8 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         float alphabet_size,
                         opencog::RandGen& _rng)
         : target(t), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log = log((double)alphabet_size);
+        alphabet_size_log_scaled_down = 
+            log((double)alphabet_size) / (double)cti.size();
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -262,7 +261,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     contin_table_inputs cti;
     score_t variance;
     LogPDM logPDM;
-    score_t alphabet_size_log;
+    score_t alphabet_size_log_scaled_down;
     opencog::RandGen& rng;
 };
 
@@ -270,24 +269,33 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
  * like occam_contin_bscore but for boolean, instead of considering a
  * variance the probability p that one datum is wrong is used.
  */
-// struct occam_truth_table_bscore 
-//     : public unary_function<combo_tree, behavioral_score> {
-//     occam_truth_table_bscore(const combo::partial_truth_table& t,
-//                              const truth_table_inputs& r,
-//                              float p,
-//                              float alphabet_size,
-//                              opencog::RandGen& _rng)
-//         alphabet_size_log = log((double)alphabet_size);
-//     }
+struct occam_truth_table_bscore 
+    : public unary_function<combo_tree, behavioral_score> {
+    occam_truth_table_bscore(const partial_truth_table& t,
+                             const truth_table_inputs& i,
+                             float p,
+                             float alphabet_size,
+                             opencog::RandGen& _rng) 
+        : target(t), tti(i), rng(_rng) {
+        occam = p > 0 && p < 1;
+        if(occam) {
+            log_p = log(p);
+            log_cp = log(1-p);
+        }
+        alphabet_size_log_scaled_down = 
+            log((double)alphabet_size) / (double)tti.size();
+    }
 
-//     behavioral_score operator()(const combo_tree& tr) const;
+    behavioral_score operator()(const combo_tree& tr) const;
 
-//     const CaseBasedBoolean& target;
-//     score_t prob; // probability that one datum is wrong
-//     LogPDM logPDM;
-//     score_t alphabet_size_log;
-//     opencog::RandGen& rng;
-// };
+    const partial_truth_table& target;
+    const truth_table_inputs& tti;
+    bool occam; // if true the Occam's razor is taken into account
+    score_t log_p; // log probability that one datum is wrong
+    score_t log_cp; // log probability that one datum is right
+    score_t alphabet_size_log_scaled_down;
+    opencog::RandGen& rng;
+};
 
 template<typename Scoring>
 struct complexity_based_scorer : public unary_function<eda::instance,

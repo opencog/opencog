@@ -26,7 +26,7 @@
 #include <opencog/comboreduct/combo/assumption.h>
 
 // uncomment if you want to have a trace of the rules
-#define META_RULE_DEBUG
+// #define META_RULE_DEBUG
 
 namespace reduct {
 
