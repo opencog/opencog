@@ -50,24 +50,24 @@ int main()
         int s = sample_count(a);//return always 5, for the moment
 
         //produce random inputs
-        RndNumTable rnt(s, a, rng);
+        contin_table_inputs cti(s, a, rng);
 
         try {
 
-            //print rnt, for debugging
-            cout << "Rnd matrix :" << endl << rnt;
+            //print cti, for debugging
+            cout << "Rnd matrix :" << endl << cti;
 
 
-            //evalutate tr over rnt and fill ct1
-            contin_table ct1(tr, rnt, rng);
+            //evalutate tr over cti and fill ct1
+            contin_table ct1(tr, cti, rng);
 
             //print the tree before reduction, for debugging
             cout << "Before : " << tr << endl;
 
             contin_reduce(tr, rng);
 
-            //evaluate tr over rnt and fill ct2
-            contin_table ct2(tr, rnt, rng);
+            //evaluate tr over cti and fill ct2
+            contin_table ct2(tr, cti, rng);
 
             cout << "After  : " << tr << endl;
             if (ct1 != ct2) {

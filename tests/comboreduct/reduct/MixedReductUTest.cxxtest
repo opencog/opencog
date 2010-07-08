@@ -39,15 +39,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -80,15 +80,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -120,15 +120,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -157,15 +157,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -197,15 +197,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -233,15 +233,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -272,15 +272,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -312,15 +312,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -351,15 +351,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -387,15 +387,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -423,15 +423,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -459,15 +459,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -495,15 +495,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -531,15 +531,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);
@@ -567,15 +567,15 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    RndNumTable rnt(s, ca, rng);
+    contin_table_inputs cti(s, ca, rng);
 
     int size_before, size_after;
     try {
-      mixed_table mt1(tr, rnt, tr_type, rng);
+      mixed_table mt1(tr, cti, tr_type, rng);
       size_before=tr.size();
       mixed_reduce(tr, rng);
       size_after=tr.size();
-      mixed_table mt2(tr, rnt, tr_type, rng);
+      mixed_table mt2(tr, cti, tr_type, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(mt1,mt2);

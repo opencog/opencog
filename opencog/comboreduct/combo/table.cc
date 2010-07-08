@@ -38,8 +38,10 @@ truth_table::hamming_distance(const truth_table& other) const
     return res;
 }
 
-RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng, 
-                         double max_randvalue , double min_randvalue )
+contin_table_inputs::contin_table_inputs(int sample_count, int arity,
+                                         opencog::RandGen& rng, 
+                                         double max_randvalue,
+                                         double min_randvalue)
 {
     //populate the matrix
     for (int i = 0; i < sample_count; ++i) {
@@ -52,10 +54,10 @@ RndNumTable::RndNumTable(int sample_count, int arity, opencog::RandGen& rng,
     }
 }
 
-contin_table::contin_table(const combo_tree& t, const RndNumTable& rnt,
+contin_table::contin_table(const combo_tree& t, const contin_table_inputs& cti,
                            opencog::RandGen& rng)
 {
-    for (const_cm_it i = rnt.begin(); i != rnt.end(); ++i) {
+    for (const_cm_it i = cti.begin(); i != cti.end(); ++i) {
         int arg = 1;
         for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j, ++arg)
             binding(arg) = *j;
@@ -77,7 +79,6 @@ bool contin_table::operator==(const contin_table& ct) const
         return true;
     } else return false;
 }
-
 
 contin_t contin_table::abs_distance(const contin_table& other) const
 {

@@ -62,13 +62,13 @@ int main()
         int s = sample_count(ca);
 
         //produce random inputs
-        RndNumTable rnt(s, ca, rng);
-        //print rnt, for debugging
-        cout << "Rnd matrix :" << endl << rnt;
+        contin_table_inputs cti(s, ca, rng);
+        //print cti, for debugging
+        cout << "Rnd matrix :" << endl << cti;
 
         try {
-            //evalutate tr over rnt and fill mt1
-            mixed_table mt1(tr, rnt, tr_type, rng);
+            //evalutate tr over cti and fill mt1
+            mixed_table mt1(tr, cti, tr_type, rng);
             //print mt1, for debugging
             cout << "MT1" << endl << mt1 << endl;
 
@@ -77,8 +77,8 @@ int main()
 
             full_reduce(tr, rng);
 
-            //evaluate tr over rnt and fill mt2
-            mixed_table mt2(tr, rnt, tr_type, rng);
+            //evaluate tr over cti and fill mt2
+            mixed_table mt2(tr, cti, tr_type, rng);
             //print mt2, for debugging
             cout << "MT2" << endl << mt2 << endl;
 

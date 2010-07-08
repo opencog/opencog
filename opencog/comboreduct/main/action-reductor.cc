@@ -119,13 +119,13 @@ int main()
         int s = sample_count(ca);
 
         //produce random inputs
-        RndNumTable rnt(s, ca, rng);
-        //print rnt, for debugging
-        cout << "Rnd matrix :" << endl << rnt;
+        contin_table_inputs cti(s, ca, rng);
+        //print cti, for debugging
+        cout << "Rnd matrix :" << endl << cti;
 
         try {
-            //evalutate tr over rnt and fill mat1
-            mixed_action_table mat1(tr, rnt, tr_type, rng);
+            //evalutate tr over cti and fill mat1
+            mixed_action_table mat1(tr, cti, tr_type, rng);
             //print mat1, for debugging
             cout << "MAT1" << endl << mat1 << endl;
 
@@ -134,8 +134,8 @@ int main()
 
             action_reduce(tr);
 
-            //evaluate tr over rnt and fill mat2
-            mixed_action_table mat2(tr, rnt, tr_type, rng);
+            //evaluate tr over cti and fill mat2
+            mixed_action_table mat2(tr, cti, tr_type, rng);
             //print mat2, for debugging
             cout << "MAT2" << endl << mat2 << endl;
 

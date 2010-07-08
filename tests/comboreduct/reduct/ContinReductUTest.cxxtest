@@ -36,16 +36,16 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
     try {
       
-      contin_table ct1(tr, rnt, rng); 
+      contin_table ct1(tr, cti, rng); 
       size_before=tr.size();
       contin_reduce(tr, rng);
       size_after=tr.size();
-      contin_table ct2(tr, rnt, rng);
+      contin_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -69,15 +69,15 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, rnt, rng);
+      contin_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, rng);
       size_after=tr.size();
-      contin_table ct2(tr, rnt, rng);
+      contin_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -101,15 +101,15 @@ public:
     int a = arity(tr);
     int s = sample_count(a);//return always 5, for the moment
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, rnt, rng);
+      contin_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, rng);
       size_after=tr.size();
-      contin_table ct2(tr, rnt, rng);
+      contin_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -134,15 +134,15 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, rnt, rng);
+      contin_table ct1(tr, cti, rng);
       size_before=tr.size();
       contin_reduce(tr, rng);
       size_after=tr.size();
-      contin_table ct2(tr, rnt, rng);
+      contin_table ct2(tr, cti, rng);
 
       TS_ASSERT_LESS_THAN(size_after,size_before);
       TS_ASSERT_EQUALS(ct1,ct2);
@@ -167,17 +167,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
     try {
-      contin_table ct1(tr, rnt, rng);
+      contin_table ct1(tr, cti, rng);
       size_before=tr.size();
       std::cout << "before: " << tr << std::endl;
       contin_reduce(tr, rng);
       std::cout << "after:  " << tr << std::endl;      
       size_after=tr.size();
-      contin_table ct2(tr, rnt, rng);
+      contin_table ct2(tr, cti, rng);
 
 // the following TS_ASSERT is not valid if log has the semantics
 // log(abs(x)) because the rule exp(log(x)+y) -> x*exp(y) is not
@@ -205,17 +205,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -233,17 +233,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -261,17 +261,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -289,17 +289,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);
@@ -317,17 +317,17 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    RndNumTable rnt(s, a, rng);
+    contin_table_inputs cti(s, a, rng);
 
     int size_before,size_after;
 
-    contin_table ct1(tr, rnt, rng);
+    contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
     contin_reduce(tr, rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
-    contin_table ct2(tr, rnt, rng);
+    contin_table ct2(tr, cti, rng);
 
     TS_ASSERT_LESS_THAN_EQUALS(size_after, size_before);
     TS_ASSERT_EQUALS(ct1,ct2);

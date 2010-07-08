@@ -24,7 +24,11 @@
 #ifndef _OPENCOG_TABLE_H
 #define _OPENCOG_TABLE_H
 
+#include <opencog/util/printContainer.h>
+
 #include "eval.h"
+
+using opencog::ostreamContainer;
 
 namespace combo
 {
@@ -35,7 +39,7 @@ namespace combo
 
 /**
  * complete truth table, it contains only the outputs, the inputs are
- * assumed to me ordered in the conventional way, for instance if
+ * assumed to be ordered in the conventional way, for instance if
  * there are 2 inputs, the output is ordered as follows:
  *
  * +--+--+--------------+
@@ -125,22 +129,22 @@ typedef contin_matrix::iterator cm_it;
 typedef contin_matrix::const_iterator const_cm_it;
 
 /*
-  class RndNumTable
+  class contin_table_inputs
     matrix of randomly generated contin_t of sample_count rows and arity columns
 */
-class RndNumTable : public contin_matrix
+class contin_table_inputs : public contin_matrix
 {
 public:
     //constructor
-    RndNumTable() {}
-    RndNumTable(int sample_count, int arity, opencog::RandGen& rng,
-                double max_randvalue = 1.0, double min_randvalue = -1.0);
+    contin_table_inputs() {}
+    contin_table_inputs(int sample_count, int arity, opencog::RandGen& rng,
+                        double max_randvalue = 1.0, double min_randvalue = -1.0);
 };
 
 /*
   class contin_table
     contains sample_count evaluations obtained by evaluating t, a tree, over
-    a RndNumTable rnt.
+    a RndNumTable cti.
     assumption : t has only contin inputs and output
 */
 class contin_table : public contin_vector   //a column of results
@@ -150,10 +154,10 @@ public:
 
     //constructors
     contin_table() { }
-    contin_table(const combo_tree& t, const RndNumTable& rnt, opencog::RandGen& rng);
+    contin_table(const combo_tree& t, const contin_table_inputs& cti, opencog::RandGen& rng);
     template<typename Func>
-    contin_table(const Func& f, const RndNumTable& rnt) {
-        foreach(const contin_vector& v, rnt)
+    contin_table(const Func& f, const contin_table_inputs& cti) {
+        foreach(const contin_vector& v, cti)
             push_back(f(v.begin(), v.end()));
     }
 
@@ -177,12 +181,12 @@ class mixed_table
     typedef type_tree::iterator type_pre_it;
     typedef type_tree::sibling_iterator type_sib_it;
     //Vector of bool or contin, depending on the output type of combo_tree
-    //size = 2^|boolean inputs| * _rnt.size()
-    //each slice of rnt.size() corresponds to a particular boolean input
+    //size = 2^|boolean inputs| * _cti.size()
+    //each slice of cti.size() corresponds to a particular boolean input
     //all possible boolean inputs are enumerated in lexico order as for
     //truth_table
-    //each element in a slice of rnt.size() corresponds to the result of
-    //a particular contin input, all obtained from rnt
+    //each element in a slice of cti.size() corresponds to the result of
+    //a particular contin input, all obtained from cti
     std::vector<variant<bool, contin_t> > _vt;
     //NOTE : can be a bit optimized by using
     //variant<std::vector<bool>,std::vector<contin_t> > _vt;
@@ -202,7 +206,7 @@ class mixed_table
     type_tree _prototype;
     type_node _output_type;
 
-    RndNumTable _rnt;
+    contin_table_inputs _cti;
 
     //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count
     //_arg_map, _bool_arg, _contin_arg and _output_type
@@ -235,9 +239,9 @@ class mixed_table
 public:
     //constructors
     mixed_table() {}
-    mixed_table(const combo_tree& tr, const RndNumTable& rnt,
+    mixed_table(const combo_tree& tr, const contin_table_inputs& cti,
                 const type_tree& prototype, opencog::RandGen& rng) {
-        _rnt = rnt;
+        _cti = cti;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
             set_prototype(inferred_proto);
@@ -248,7 +252,7 @@ public:
         for (unsigned long int i = 0; i < bool_table_size; ++i) {
             for (int bai = 0; bai < _bool_arg_count; ++bai) //bool arg index
                 binding(_bool_arg[bai] + 1) = bool_to_vertex((i >> bai) % 2);
-            for (const_cm_it si = rnt.begin(); si != rnt.end(); ++si) {
+            for (const_cm_it si = cti.begin(); si != cti.end(); ++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
                     binding(_contin_arg[cai] + 1) = *j;
@@ -301,12 +305,12 @@ class mixed_action_table
     typedef type_tree::iterator type_pre_it;
     typedef type_tree::sibling_iterator type_sib_it;
     //Vector of bool or contin, depending on the output type of combo_tree
-    //size = 2^|boolean+action_result inputs| * _rnt.size()
-    //each slice of rnt.size() corresponds to a particular
+    //size = 2^|boolean+action_result inputs| * _cti.size()
+    //each slice of cti.size() corresponds to a particular
     //boolean+action_result input, all possible boolean+action_result inputs
     //are enumerated in lexico order as for truth_table
-    //each element in a slice of rnt.size() corresponds to the result of
-    //a particular contin input, all obtained from rnt
+    //each element in a slice of cti.size() corresponds to the result of
+    //a particular contin input, all obtained from cti
     std::vector<variant<bool, contin_t> > _vt;
     //NOTE : can be a bit optimized by using
     //variant<std::vector<bool>,std::vector<contin_t> > _vt;
@@ -329,7 +333,7 @@ class mixed_action_table
     type_tree _prototype;
     type_node _output_type;
 
-    RndNumTable _rnt;
+    contin_table_inputs _cti;
 
     //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count,
     //_action_arg_count, _arg_map, _bool_arg, _contin_arg, action_arg
@@ -368,9 +372,9 @@ class mixed_action_table
 public:
     //constructors
     mixed_action_table() {}
-    mixed_action_table(const combo_tree& tr, const RndNumTable& rnt,
+    mixed_action_table(const combo_tree& tr, const contin_table_inputs& cti,
                        const type_tree& prototype, opencog::RandGen& rng) {
-        _rnt = rnt;
+        _cti = cti;
         if (prototype.empty()) {
             type_tree inferred_proto = infer_type_tree(tr);
             set_prototype(inferred_proto);
@@ -390,7 +394,7 @@ public:
                 binding(arg_idx) = (arg_val ? id::action_success : id::action_failure);
             }
             //contin populate
-            for (const_cm_it si = rnt.begin();si != rnt.end();++si) {
+            for (const_cm_it si = cti.begin();si != cti.end();++si) {
                 int cai = 0; //contin arg index
                 for (const_cv_it j = (*si).begin(); j != (*si).end(); ++j, ++cai)
                     binding(_contin_arg[cai] + 1) = *j;
@@ -436,36 +440,29 @@ public:
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::truth_table& tt)
 {
-    for (std::vector<bool>::const_iterator it = tt.begin();it != tt.end();++it)
-        out << *it << " ";
-    return out;
+    return ostreamContainer(out, tt);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::contin_matrix& cm)
 {
-    for (combo::const_cm_it i = cm.begin(); i != cm.end(); ++i) {
-        for (combo::const_cv_it j = (*i).begin(); j != (*i).end(); ++j) {
-            out << *j << '\t';
-        }
-        out << std::endl;
+    for(combo::const_cm_it i = cm.begin(); i != cm.end(); ++i) {
+        ostreamContainer(out, *i, "\t");
     }
     return out;
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::RndNumTable& rnt)
+                                const combo::contin_table_inputs& cti)
 {
-    out << static_cast<combo::contin_matrix>(rnt);
+    out << static_cast<combo::contin_matrix>(cti);
     return out;
 }
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::contin_table& ct)
 {
-    for (combo::const_cv_it it = ct.begin(); it != ct.end(); ++it)
-        out << *it << " ";
-    return out;
+    return ostreamContainer(out, ct);
 }
 
 inline std::ostream& operator<<(std::ostream& out,

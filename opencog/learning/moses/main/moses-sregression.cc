@@ -62,7 +62,7 @@ int main(int argc,char** argv) {
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(),id::contin_type,2);
     
-    RndNumTable rands(nsamples,arity,rng);
+    contin_table_inputs rands(nsamples,arity,rng);
     
     cout << rands << endl;
     

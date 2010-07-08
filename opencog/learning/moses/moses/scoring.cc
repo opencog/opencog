@@ -51,7 +51,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
 {
     try {
         std::cout << "scoring " << tr << std::endl;
-        contin_t sc = -target.abs_distance(combo::contin_table(tr, rands, rng));
+        contin_t sc = -target.abs_distance(combo::contin_table(tr, cti, rng));
         std::cout << sc << " X " << tr << std::endl;
         return sc;
     } catch (...) {
@@ -63,7 +63,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
 contin_t contin_score_sqr::operator()(const combo_tree& tr) const
 {
     try {
-        return -target.sum_squared_error(combo::contin_table(tr, rands, rng));
+        return -target.sum_squared_error(combo::contin_table(tr, cti, rng));
     } catch (...) {
         stringstream ss;
         ss << "The following candidate has failed to be evaluated: " << tr;
@@ -74,7 +74,7 @@ contin_t contin_score_sqr::operator()(const combo_tree& tr) const
 
 behavioral_score contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_table ct(tr, rands, rng);
+    combo::contin_table ct(tr, cti, rng);
     behavioral_score bs(target.size());
 
     behavioral_score::iterator dst = bs.begin();
@@ -89,7 +89,7 @@ score_t occam_contin_score::operator()(const combo_tree& tr) const
 {
     try {
         score_t sse = 
-            target.sum_squared_error(combo::contin_table(tr, rands, rng));
+            target.sum_squared_error(combo::contin_table(tr, cti, rng));
         if(variance > 0) 
             return logPDM(sse, target.size())
                 - (score_t)tr.size()*alphabet_size_log; // occam's razor
@@ -105,7 +105,7 @@ score_t occam_contin_score::operator()(const combo_tree& tr) const
 
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
-    combo::contin_table ct(tr, rands, rng);
+    combo::contin_table ct(tr, cti, rng);
     behavioral_score bs(target.size());
     score_t trs = tr.size(); //@todo replace this with complexity
         

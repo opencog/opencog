@@ -48,14 +48,14 @@ int main(int argc, char ** argv)
         // generate the RandNumber for the given the max_randvalue and min_randvalue
         MT19937RandGen rng(rand_seed);
         size_t arg_number = arg_type_list.size();
-        RndNumTable rands(nsamples, arg_number, rng, max_randvalue, min_randvalue);
+        contin_table_inputs cti(nsamples, arg_number, rng, max_randvalue, min_randvalue);
 
         try {
-            contin_table contintable(combo_tr, rands, rng);
+            contin_table contintable(combo_tr, cti, rng);
 
             // output the contin-table
             int k = 0;
-            for (const_cm_it i = rands.begin(); i != rands.end(); ++i, ++ k) {
+            for (const_cm_it i = cti.begin(); i != cti.end(); ++i, ++ k) {
                 for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j) {
                     cout << (*j) << " ";
                 }

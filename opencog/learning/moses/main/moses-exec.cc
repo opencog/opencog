@@ -203,7 +203,7 @@ int main(int argc,char** argv) {
             exit(1);
         }
         contin_table contintable;
-        RndNumTable inputtable;
+        contin_table_inputs inputtable;
         contin_vector input_vec;
         contin_t input;
         char check;
