@@ -37,6 +37,14 @@ namespace combo
 // Truth table //
 /////////////////
 
+//shorthands used by class contin_table_inputs and contin_table
+typedef std::vector<bool> bool_vector;
+typedef bool_vector::iterator bv_it;
+typedef bool_vector::const_iterator bv_cit;
+typedef std::vector<bool_vector> bool_matrix;
+typedef bool_matrix::iterator bm_it;
+typedef bool_matrix::const_iterator bm_cit;
+
 /**
  * complete truth table, it contains only the outputs, the inputs are
  * assumed to be ordered in the conventional way, for instance if
@@ -54,10 +62,10 @@ namespace combo
  * |T |T |truth_table[3]|
  * +--+--+--------------+
  */
-class truth_table : public std::vector<bool>
+class truth_table : public bool_vector
 {
 public:
-    typedef std::vector<bool> super;
+    typedef bool_vector super;
 
     truth_table() { }
     template<typename It>
@@ -79,7 +87,7 @@ public:
         : super(opencog::power(2, arity)) {
         iterator it = begin();
         for (int i = 0;it != end();++i, ++it) {
-            std::vector<bool> v(arity);
+            bool_vector v(arity);
             for (int j = 0;j < arity;++j)
                 v[j] = (i >> j) % 2;
             (*it) = f(v.begin(), v.end());
@@ -115,12 +123,45 @@ protected:
     }
 };
 
+/**
+ * template to fill an input table (IT)
+ * and output table (OT) of type T
+ */
+template<typename IT, typename OT, typename T>
+std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
+    std::vector<T> input_vec;
+    T input;
+    while (!in.eof()) {
+        in>>input;
+        if(in.get() == '\n') {
+            output_table.push_back(input);
+            table_inputs.push_back(input_vec);
+            input_vec.clear();
+        }
+        else {
+            input_vec.push_back(input);
+        }
+    }
+    return in;
+}
+
+/**
+ * truth_table_inputs, matrix of booleans, each row corresponds to a
+ * possible vector input
+ */
+typedef bool_matrix truth_table_inputs;
+
+/**
+ * partial_truth_table, column of result of a corresponding truth_table_inputs
+ */
+typedef bool_vector partial_truth_table;
+
 
 //////////////////
 // contin table //
 //////////////////
 
-//shorthands used by class RndNumTable and contin_table
+//shorthands used by class contin_table_inputs and contin_table
 typedef std::vector<contin_t> contin_vector;
 typedef contin_vector::iterator cv_it;
 typedef contin_vector::const_iterator const_cv_it;
@@ -153,8 +194,9 @@ public:
     //typedef contin_vector super;
 
     //constructors
-    contin_table() { }
-    contin_table(const combo_tree& t, const contin_table_inputs& cti, opencog::RandGen& rng);
+    contin_table() {}
+    contin_table(const combo_tree& t, const contin_table_inputs& cti,
+                 opencog::RandGen& rng);
     template<typename Func>
     contin_table(const Func& f, const contin_table_inputs& cti) {
         foreach(const contin_vector& v, cti)
@@ -169,6 +211,8 @@ public:
 
     contin_t abs_distance(const contin_table& other) const;
     contin_t sum_squared_error(const contin_table& other) const;
+private:
+    contin_table_inputs* cti;
 };
 
 

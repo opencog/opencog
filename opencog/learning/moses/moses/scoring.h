@@ -270,15 +270,13 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
  * like occam_contin_bscore but for boolean, instead of considering a
  * variance the probability p that one datum is wrong is used.
  */
-// TODO
-// struct occam_boolean_bscore : public unary_function<combo_tree, behavioral_score> {
-//     template<typename Scoring>
-//     occam_contin_bscore(const CaseBasedBoolean& bc,
-//                         float p,
-//                         float alphabet_size,
-//                         opencog::RandGen& _rng)
-//         : target(t), rands(r), variance(v), logPDM(v), rng(_rng) {
-//         OC_ASSERT(p<1);
+// struct occam_truth_table_bscore 
+//     : public unary_function<combo_tree, behavioral_score> {
+//     occam_truth_table_bscore(const combo::partial_truth_table& t,
+//                              const truth_table_inputs& r,
+//                              float p,
+//                              float alphabet_size,
+//                              opencog::RandGen& _rng)
 //         alphabet_size_log = log((double)alphabet_size);
 //     }
 

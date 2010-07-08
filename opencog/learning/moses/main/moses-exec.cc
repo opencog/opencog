@@ -159,16 +159,32 @@ int main(int argc,char** argv) {
     type_node output_type = 
         *(get_output_type_tree(*exemplars.begin()->begin()).begin());
 
+    // open input_table_file file
+    ifstream in(input_table_file.c_str());
+    if(!in.is_open()) {
+        if(input_table_file.empty()) {
+            std::cerr << "the input file is empty" << std::endl;
+            std::cerr << "To indicate the file to open use the option -i or --input-file" << std::endl;
+        } else {
+            std::cerr << "Could not open " 
+                      << input_table_file << std::endl;
+        }
+        exit(1);
+    }
+
     if(output_type == id::boolean_type) {
-        // read the input_table_file file
-        ifstream in(input_table_file.c_str());
-        CaseBasedBoolean bc(in);
-        unsigned int arity = bc.arity();
+        // read input_table_file file
+        truth_table_inputs booltable;
+        partial_truth_table inputtable;
+        istreamTable<truth_table_inputs, partial_truth_table, bool>(in,
+                                                                    inputtable,
+                                                                    booltable);
+        unsigned int arity = inputtable[0].size();
         
         type_tree tt(id::lambda_type);
         tt.append_children(tt.begin(), output_type, arity + 1);
 
-        typedef truth_table_data_bscore BScore;
+        typedef occam_truth_table_bscore BScore;
         typedef opencog::lru_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
         typedef opencog::lru_cache<Score> ScoreCache;
@@ -189,36 +205,11 @@ int main(int argc,char** argv) {
         }
     }
     else if(output_type == id::contin_type) {
-
-        // read the input_table_file file
-        ifstream in(input_table_file.c_str());
-        if(!in.is_open()) {
-            if(input_table_file.empty()) {
-                std::cerr << "the input file is empty" << std::endl;
-                std::cerr << "To indicate the file to open use the option -i or --input-file" << std::endl;
-            } else {
-                std::cerr << "Could not open " 
-                          << input_table_file << std::endl;
-            }
-            exit(1);
-        }
         contin_table contintable;
         contin_table_inputs inputtable;
-        contin_vector input_vec;
-        contin_t input;
-        char check;
-        while (!in.eof()) {
-            in>>input;
-            check = in.get();
-            if (check == '\n') {
-                contintable.push_back(input);
-                inputtable.push_back(input_vec);
-                input_vec.clear();
-            }
-            else {
-                input_vec.push_back(input);
-            }
-        }
+        istreamTable<contin_table_inputs, contin_table, contin_t>(in,
+                                                                  inputtable,
+                                                                  contintable);
         unsigned int arity = inputtable[0].size();
 
         type_tree tt(id::lambda_type);
