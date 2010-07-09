@@ -68,7 +68,7 @@ int main(int argc,char** argv) {
     
     metapopulation<contin_score,contin_bscore,univariate_optimization> 
         metapop(rng, combo_tree(id::plus),
-                tt,contin_reduction(rng), true,
+                tt,contin_reduction(vertex_set(), rng), true,
                 contin_score(simple_symbolic_regression(order),rands, rng),
                 contin_bscore(simple_symbolic_regression(order),rands, rng),
                 true,

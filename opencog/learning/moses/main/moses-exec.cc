@@ -238,13 +238,15 @@ int main(int argc,char** argv) {
             BScoreCache bscore_cache(cache_size, bscore);
             Score score(bscore_cache);
             ScoreCache score_cache(cache_size, score);
-            metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
+            metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
                                   reduce_all, score_cache, bscore_cache,
                                   count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
         } else {
             bscore_based_score<BScore> score(bscore);
-            metapop_moses_results(rng, exemplars, tt, contin_reduction(rng),
+            metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
                                   reduce_all, score, bscore, count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops, result_count);
         }

@@ -65,7 +65,12 @@ typedef procedure_call_set::const_iterator procedure_call_const_it;
 namespace id {
 enum builtin {
     null_vertex = 0,
-    logical_and, logical_or, logical_not, logical_true, logical_false,
+    logical_true, logical_false, // contants are put first to be in
+                                 // sync with
+                                 // lexicographic_subtree_order, it is
+                                 // not mandatory but it should make
+                                 // the reduct engine a bit faster
+    logical_and, logical_or, logical_not, 
     contin_if,
     boolean_if,
     plus, times, div, exp,
@@ -147,10 +152,13 @@ public:
 
 typedef double contin_t;
 
-typedef boost::variant < builtin,
+// contants are put first to be in sync with
+// lexicographic_subtree_order, it is not mandatory but it should make
+// the reduct engine a bit faster
+typedef boost::variant < contin_t,
+                         builtin,
                          wild_card,
                          argument,
-                         contin_t,
                          action,
                          builtin_action,
                          perception,

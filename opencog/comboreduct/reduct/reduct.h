@@ -60,7 +60,10 @@ struct crule : public rule {
 
 const rule& ann_reduction();
 const rule& logical_reduction();
-const rule& contin_reduction(opencog::RandGen& rng);
+
+// ignore_ops is the set of operator to ignore
+const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);
+
 const rule& mixed_reduction(opencog::RandGen& rng);
 const rule& full_reduction(opencog::RandGen& rng);
 const rule& action_reduction();
@@ -74,10 +77,10 @@ inline void logical_reduce(combo_tree& tr,combo_tree::iterator it) {
 }
 inline void logical_reduce(combo_tree& tr) { logical_reduction()(tr); }
 
-inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
-    contin_reduction(rng)(tr,it);
+inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, const vertex_set& ignore_ops, opencog::RandGen& rng) {
+    contin_reduction(ignore_ops, rng)(tr,it);
 }
-inline void contin_reduce(combo_tree& tr, opencog::RandGen& rng) { contin_reduction(rng)(tr); }
+inline void contin_reduce(combo_tree& tr, const vertex_set& ignore_ops, opencog::RandGen& rng) { contin_reduction(ignore_ops, rng)(tr); }
 
 inline void mixed_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen& rng) {
     mixed_reduction(rng)(tr,it);
@@ -121,7 +124,27 @@ inline void perception_reduce(combo_tree& tr, combo_tree::iterator it) {
 }
 
 inline void perception_reduce(combo_tree& tr) { perception_reduction()(tr); }
-  
+
+// helper to replace a subtree by another subtree (belonging to the
+// same or another tree without changing the iterator of the new tree,
+// this is because the reduct engine assumes that the rules do not
+// change the iterator they take in argument. That is dst is not
+// changed (expect possibly it's content of course).
+// tr is the tree containing dst iterator
+inline void replace_without_changing_it(combo_tree& tr,
+                                        combo_tree::iterator dst,
+                                        combo_tree::iterator src) {
+    *dst = *src;
+    if(src.is_childless())
+        tr.erase_children(dst);
+    else {
+        // it is assumed (for now) that dst and src have the same
+        // number of children
+        tr.replace(dst.begin(), dst.end(), src.begin(), src.end());
+    }    
+}
+
+
 } //~namespace reduct
 
 #endif

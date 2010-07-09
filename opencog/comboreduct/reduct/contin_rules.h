@@ -56,7 +56,7 @@ struct reduce_factorize_fraction : public crule<reduce_factorize_fraction> {
 //when sevelar choices are possible the chosen one :
 //1)is the one that shorten the most the expression
 //2)if not unique, the lowest one according to the index order
-//Note : if x is numerator under div, it works too
+//Note : if x is a numerator of div, it works too
 struct reduce_factorize : public crule<reduce_factorize> {
     reduce_factorize() : crule<reduce_factorize>::crule("reduce_factorize") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;

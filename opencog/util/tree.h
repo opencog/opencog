@@ -3102,59 +3102,59 @@ namespace opencog {
     dst.erase(dst.begin());
   }
 
-  //not really lexicographic, but a valid ordering
-  //this can be changed if it's important...
-  template<typename T,typename compare=std::less<T> >
-  struct lexicographic_subtree_order {
+//not really lexicographic, but a valid ordering
+//this can be changed if it's important...
+template<typename T,typename compare=std::less<T> >
+struct lexicographic_subtree_order {
     lexicographic_subtree_order() { }
     lexicographic_subtree_order(const compare& comp_) : comp(comp_) { }
-
+    
     compare comp;
-
+    
     template<typename iter>
     bool operator()(const opencog::tree<T>& tr1,iter it2) const {
-      return (cmp(iter(tr1.begin()),it2)>0);
+        return (cmp(iter(tr1.begin()),it2)>0);
     }
 
     template<typename iter>
     bool operator()(const iter& it1,const opencog::tree<T>& tr2) const {
-      return (cmp(it1,iter(tr2.begin()))>0);
+        return (cmp(it1,iter(tr2.begin()))>0);
     }
 
     bool operator()(const opencog::tree<T>& tr1,
-		    const opencog::tree<T>& tr2) const {
-      return (cmp(tr1.begin(),tr2.begin())>0);
+                    const opencog::tree<T>& tr2) const {
+        return (cmp(tr1.begin(),tr2.begin())>0);
     }
 
     template<typename iter>
     bool operator()(const iter& it1,const iter& it2) const {
-      return (cmp(it1,it2)>0);
+        return (cmp(it1,it2)>0);
     }
 
     template<typename iter>
     int cmp(const iter& it1,const iter& it2) const {
-      typedef typename iter::sibling_iterator sib_it;
+        typedef typename iter::sibling_iterator sib_it;
 
-      if (*it1<*it2)
-        return 1;
-      else if (*it2<*it1)
-        return -1;
+        if (*it1<*it2)
+            return 1;
+        else if (*it2<*it1)
+            return -1;
 
-      sib_it sib1=it1.begin(),sib2=it2.begin();
-      while (true) {
-	if (sib1==it1.end()) {
-	  if (sib2==it2.end())
-	    return 0;
-	  return 1;
-	} else if (sib2==it2.end()) {
-	  return -1;
-	}
-        int res=cmp(sib1++,sib2++);
-        if (res)
-          return res;
-      }
+        sib_it sib1=it1.begin(),sib2=it2.begin();
+        while (true) {
+            if (sib1==it1.end()) {
+                if (sib2==it2.end())
+                    return 0;
+                return 1;
+            } else if (sib2==it2.end()) {
+                return -1;
+            }
+            int res=cmp(sib1++,sib2++);
+            if (res)
+                return res;
+        }
     }
-  };
+};
 
   //if size(tr1)!=size(tr2) then tr1 < tr2
   //otherwise lexicographic_subtree_order

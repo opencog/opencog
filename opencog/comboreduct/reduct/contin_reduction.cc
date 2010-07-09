@@ -27,7 +27,8 @@
 #include "contin_rules.h"
 
 namespace reduct {
-const rule& contin_reduction(opencog::RandGen& rng) {
+const rule& contin_reduction(const combo::vertex_set& ignore_ops, 
+                             opencog::RandGen& rng) {
     // rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
         sequential(downwards(level()),
@@ -36,34 +37,47 @@ const rule& contin_reduction(opencog::RandGen& rng) {
                    downwards(reduce_plus_times_one_child()),
                    downwards(reduce_plus_zero()),
                    downwards(reduce_times_one_zero()),
-                   downwards(reduce_sin()),
-                   downwards(reduce_invert_constant()),
-                           
-                   downwards(reduce_log_div_times()),
-                   downwards(reduce_exp_times()),
-                   downwards(reduce_exp_div()),
+                   when(downwards(reduce_sin()),
+                        ignore_ops.find(id::sin) == ignore_ops.end()),
+                   when(downwards(reduce_invert_constant()),
+                        ignore_ops.find(id::div) == ignore_ops.end()),
+                   when(downwards(reduce_log_div_times()),
+                        ignore_ops.find(id::log) == ignore_ops.end()),
+                   when(downwards(reduce_exp_times()),
+                        ignore_ops.find(id::exp) == ignore_ops.end()),
+                   when(downwards(reduce_exp_div()),
+                        ignore_ops.find(id::exp) == ignore_ops.end()
+                        && ignore_ops.find(id::div) == ignore_ops.end()),
 // the following rules is not valid if log has the semantics log(abs(x))
 // the macro ABS_LOG is defined in file vertex.h
 #ifndef ABS_LOG
-                   downwards(reduce_exp_log()),
+                   when(downwards(reduce_exp_log()),
+                        ignore_ops.find(id::sin) == ignore_ops.end()
+                        && ignore_ops.find(id::log) == ignore_ops.end()),
 #endif
-                   downwards(reduce_times_div()),
-                   downwards(reduce_sum_log()),
+                   when(downwards(reduce_times_div()), 
+                        ignore_ops.find(id::div) == ignore_ops.end()),
+                   when(downwards(reduce_sum_log()),
+                        ignore_ops.find(id::log) == ignore_ops.end()),
                    
                    upwards(reorder_commutative()),
-                   //downwards(reduce_factorize()),
-                   //downwards(reduce_factorize_fraction()),
-                   downwards(reduce_fraction()));
+                   when(downwards(reduce_fraction()),
+                        ignore_ops.find(id::div) == ignore_ops.end())
+                   );
 
     static iterative iter_without_factorize_distribute =
         iterative(seq_without_factorize_distribute);
 
+    static sequential complete_factorize = 
+        sequential(downwards(reduce_factorize()),
+                   when(downwards(reduce_factorize_fraction()),
+                        ignore_ops.find(id::div) == ignore_ops.end()),
+                   seq_without_factorize_distribute);
+
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
-                             downwards(reduce_factorize()),
-                             downwards(reduce_factorize_fraction()),
-                             seq_without_factorize_distribute,
-                             // complexe rule            
+                             ignore_size_increase(complete_factorize),
+                             // complexe rule
                              downwards(reduce_distribute(iter_without_factorize_distribute))
                              ));
     return res;

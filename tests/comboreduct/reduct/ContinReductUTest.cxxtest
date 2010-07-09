@@ -43,7 +43,7 @@ public:
       
       contin_table ct1(tr, cti, rng); 
       size_before=tr.size();
-      contin_reduce(tr, rng);
+      contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
       contin_table ct2(tr, cti, rng);
 
@@ -75,7 +75,7 @@ public:
     try {
       contin_table ct1(tr, cti, rng);
       size_before=tr.size();
-      contin_reduce(tr, rng);
+      contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
       contin_table ct2(tr, cti, rng);
 
@@ -107,7 +107,7 @@ public:
     try {
       contin_table ct1(tr, cti, rng);
       size_before=tr.size();
-      contin_reduce(tr, rng);
+      contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
       contin_table ct2(tr, cti, rng);
 
@@ -140,7 +140,7 @@ public:
     try {
       contin_table ct1(tr, cti, rng);
       size_before=tr.size();
-      contin_reduce(tr, rng);
+      contin_reduce(tr, vertex_set(), rng);
       size_after=tr.size();
       contin_table ct2(tr, cti, rng);
 
@@ -174,7 +174,7 @@ public:
       contin_table ct1(tr, cti, rng);
       size_before=tr.size();
       std::cout << "before: " << tr << std::endl;
-      contin_reduce(tr, rng);
+      contin_reduce(tr, vertex_set(), rng);
       std::cout << "after:  " << tr << std::endl;      
       size_after=tr.size();
       contin_table ct2(tr, cti, rng);
@@ -212,7 +212,7 @@ public:
     contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, cti, rng);
@@ -240,7 +240,7 @@ public:
     contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, cti, rng);
@@ -268,7 +268,7 @@ public:
     contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, cti, rng);
@@ -296,7 +296,7 @@ public:
     contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, cti, rng);
@@ -324,7 +324,7 @@ public:
     contin_table ct1(tr, cti, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, cti, rng);
@@ -335,7 +335,7 @@ public:
 
   //test_simplify11 :
   // factorize/distribute test
-  void DISABLEtest_simplify11() {
+  void test_simplify11() {
     string tree_str="*(+(*(#1 +(2.75 *(#1 -2))) 1) #1 +(0.5 *(#1 0.5)))";
 
     stringstream ss(tree_str);
@@ -352,7 +352,7 @@ public:
     contin_table ct1(tr, rnt, rng);
     size_before=tr.size();
     std::cout << "before: " << tr << std::endl;
-    contin_reduce(tr, rng);
+    contin_reduce(tr, vertex_set(), rng);
     std::cout << "after:  " << tr << std::endl;      
     size_after=tr.size();
     contin_table ct2(tr, rnt, rng);

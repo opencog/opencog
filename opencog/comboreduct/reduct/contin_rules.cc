@@ -248,16 +248,16 @@ void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator i
 //when sevelar choices are possible the chosen one :
 //1)is the one that shorten the most the expression
 //2)if not unique, the lowest one according to the index order
-//Note : if x is numerator under div, it works too
+//Note : if x is a numerator of div, it works too
 void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const {
     //equiv_subtrees is a set of equal subtrees
-    //the first element of the pair contains the size of one examplar
+    //the first element of the pair contains the size of one exemplar
     //the second element contains a vector of all iterators corresponding
-    //to equal subtrees to the examplar excluding the examplar.
+    //to equal subtrees to the exemplar excluding the exemplar.
     typedef std::vector<pre_it> pre_it_vector;
     typedef pre_it_vector::iterator pre_it_vector_it;
     typedef std::pair<int, pre_it_vector> equiv_subtrees;
-    //associated an examplar subtree to its size and
+    //associated an exemplar subtree to its size and
     //and all equal subtrees
     typedef std::map<pre_it, equiv_subtrees,
                      opencog::lexicographic_subtree_order<vertex>
@@ -265,8 +265,7 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
     typedef subtree_partition::iterator subtree_partition_it;
     if(*it==id::plus) {
         subtree_partition sp;
-        OC_ASSERT(!it.is_childless(),
-                  "combo_tree node should not be childless (reduce_factorize)." );
+        OC_ASSERT(!it.is_childless(), "combo_tree node should not be childless");
         pre_it chosen_factor = tr.end();
         int reduced_size = 0; //size reduced when the factor is chosen_factor
         //------------------------------------
@@ -275,13 +274,8 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
         //------------------------------------
         for(sib_it plus_child = it.begin(); plus_child != it.end();
             ++plus_child) {
-            pre_it pos; //position where to look at to find potential factor
-            if(*plus_child==id::div) {
-                OC_ASSERT(plus_child.number_of_children()==2, 
-                          "combo_tree child node should have exactly two children (reduce_factorize)." );
-                pos = tr.child(plus_child, 0);
-            }
-            else pos = plus_child;
+            //pos = position where to look at to find potential factor
+            pre_it pos = *plus_child==id::div? tr.child(plus_child, 0):plus_child;
             if(*pos==id::times) {
                 for(sib_it times_child = pos.begin();
                     times_child != pos.end(); ++times_child) {
@@ -292,13 +286,11 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
                         continue;
                     
                     subtree_partition_it spit = sp.find(pf);
-                    if(spit == sp.end()) {
-                        pre_it_vector ev;
-                        equiv_subtrees es(tr.subtree_size(pf), ev);
-                        std::pair<pre_it, equiv_subtrees> p(pf, es);
-                        sp.insert(p);
+                    if(spit == sp.end()) { // new potential factor
+                        equiv_subtrees es(tr.subtree_size(pf), pre_it_vector());
+                        sp.insert(make_pair(pf, es));
                     }
-                    else {
+                    else { // existing potential factor
                         pre_it key = spit->first;
                         equiv_subtrees& es = spit->second;
                         int es_subtree_size = es.first;
@@ -310,7 +302,7 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
                         //check that it is not the same parent to avoid factorizing x*x
                         pre_it last_it_parent = tr.parent(last_it);
                         OC_ASSERT(tr.is_valid(last_it_parent), 
-                                  "last combo_tree node is invalid (reduce_factorize).");
+                                  "last combo_tree node is invalid");
                         if(last_it_parent != pos) {
                             //potential reduced size
                             es_vec.push_back(pf);
@@ -331,13 +323,11 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
                     break;
                 
                 subtree_partition_it spit = sp.find(pf);
-                if(spit == sp.end()) {
-                    pre_it_vector ev;
-                    equiv_subtrees es(tr.subtree_size(pf), ev);
-                    std::pair<pre_it, equiv_subtrees> p(pf, es);
-                    sp.insert(p);
+                if(spit == sp.end()) { // new potential factor
+                    equiv_subtrees es(tr.subtree_size(pf), pre_it_vector());
+                    sp.insert(make_pair(pf, es));
                 }
-                else {
+                else { // existing potential factor
                     equiv_subtrees& es = spit->second;
                     int es_subtree_size = es.first;
                     pre_it_vector& es_vec = es.second;
@@ -409,7 +399,7 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
                     pre_it factor_parent = tr.parent(factor);
                     tr.erase(factor);
                     OC_ASSERT(tr.is_valid(factor_parent),
-                              "factor parent node is invalid (reduce_factorize).");
+                              "factor parent node is invalid");
                     pre_it fp_parent = tr.parent(factor_parent);
                     pre_it factor_div = tr.end(); //position of div if factor is under
                     //determine factor_div
@@ -468,13 +458,7 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
                     (*_reduction)(tr_copy);
                     unsigned int size_after_reduct = tr_copy.size();
                     if(size_after_reduct <= size_before_reduct) {
-                        // in order to not change 'it' (which is
-                        // assumed by the reduct engine)
-                        // we do that long-cut
-                        *it = *tr_cr;
-                        if(!tr_cr.is_childless())
-                            tr.replace(it.begin(), it.end(),
-                                       tr_cr.begin(), tr_cr.end());
+                        replace_without_changing_it(tr, it, tr_cr);
                         return; //@todo: maybe the other
                         //combinations should be tried out
                         //to be complete

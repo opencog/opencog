@@ -53,7 +53,8 @@ public:
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
         vertex_set ignore_ops = list_of(id::div)(id::exp)(id::log)(id::sin);
-        representation rep(contin_reduction(rng), tr, tt, rng, ignore_ops);
+        representation rep(contin_reduction(ignore_ops, rng), tr, tt,
+                           rng, ignore_ops);
 
         // @todo define a test
         TS_ASSERT(true);
