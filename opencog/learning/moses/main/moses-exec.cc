@@ -197,9 +197,11 @@ int main(int argc,char** argv) {
         int alphabet_size = 3 + arity - ignore_ops.size();
 
         typedef occam_truth_table_bscore BScore;
-        typedef opencog::lru_cache<BScore> BScoreCache;
+        // typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef opencog::simple_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
-        typedef opencog::lru_cache<Score> ScoreCache;
+        // typedef opencog::lru_cache<Score> ScoreCache;
+        typedef opencog::simple_cache<Score> ScoreCache;        
         BScore bscore(booltable, inputtable, prob, alphabet_size, rng);
         if(cache_size>0) {
             BScoreCache bscore_cache(cache_size, bscore);
@@ -238,9 +240,11 @@ int main(int argc,char** argv) {
                                                            // adapted
 
         typedef occam_contin_bscore BScore;
-        typedef opencog::lru_cache<BScore> BScoreCache;
+        // typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef opencog::simple_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
-        typedef opencog::lru_cache<Score> ScoreCache;
+        // typedef opencog::lru_cache<Score> ScoreCache;
+        typedef opencog::simple_cache<Score> ScoreCache;
         BScore bscore(contintable, inputtable, variance, alphabet_size, rng);
         if(cache_size>0) {
             BScoreCache bscore_cache(cache_size, bscore);

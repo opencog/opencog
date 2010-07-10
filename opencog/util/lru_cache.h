@@ -109,19 +109,26 @@ struct lru_cache {
     typedef typename map::size_type size_type;
   
     lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f)
-                                          ,_number_of_evaluations(0) { }
+                                          ,_cache_failures(0) {}
 
     bool full() const { return _map.size()==_n; }
     bool empty() const { return _map.empty(); }
-    
+
+    //@todo if f raises an exception then the cache we have updated
+    //_lru without updating _map which will later result in an
+    //assertion failure, perhaps the code should be modified so that
+    //it works even in case of failure of execution of f
     result_type operator()(const argument_type& x) const
     {
         if (empty()) {
             if (full()) //so a size-0 cache never needs hashing
                 return _f(x);
             _lru.push_front(x);
+#ifdef COUNT_CACHE_FAILURES
+            _cache_failures++;
+#endif            
             map_iter it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
-            return it->second;
+        return it->second;
         }
       
         //search for it
@@ -136,8 +143,9 @@ struct lru_cache {
         }
       
         //otherwise, call _f and do an insertion
-#ifdef COUNT_EVALUATION
-        _number_of_evaluations++;
+
+#ifdef COUNT_CACHE_FAILURES
+        _cache_failures++;
 #endif
         it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
       
@@ -156,7 +164,7 @@ struct lru_cache {
         return it->second;
     }
     
-    unsigned get_number_of_evaluations() { return _number_of_evaluations; }
+    unsigned get_cache_failures() const { return _cache_failures; }
 
     void clear() {
         _map.clear();
@@ -167,9 +175,68 @@ protected:
     size_type _n;
     mutable map _map;
     F _f;
-    mutable list _lru;
+    mutable list _lru; // this list is only here so that we know what
+                       // is the last used element to remove it from
+                       // the cache when it gets full
     
-    mutable unsigned _number_of_evaluations;
+    mutable unsigned _cache_failures;
+};
+
+/**
+ * this is a very simple case to compare with the performance of the
+ * lru_cache, when it is full it doesn't cache anymore. It also has
+ * the advantage of not having inconsistant btw _lru and _map when _f
+ * raises an exception.
+ */
+template<typename F,
+         typename Hash=boost::hash<typename F::argument_type>,
+         typename Equals=std::equal_to<typename F::argument_type> >
+struct simple_cache {
+    typedef typename F::argument_type argument_type;
+    typedef typename F::result_type result_type;
+    typedef boost::unordered_map<argument_type, result_type, Hash, Equals> map;
+    typedef typename map::iterator map_iter;
+    typedef typename map::size_type size_type;
+  
+    simple_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f),
+                                               _cache_failures(0) {}
+
+    bool full() const { return _map.size()==_n; }
+    bool empty() const { return _map.empty(); }
+
+    result_type operator()(const argument_type& x) const
+    {
+        // search for x
+        map_iter it=_map.find(x);
+
+        if(it!=_map.end()) //if we've found return
+            return it->second;
+        else if(_n > _map.size()) { // otherwise insert in _map then return
+#ifdef COUNT_CACHE_FAILURES
+            _cache_failures++;
+#endif            
+            map_iter it=_map.insert(make_pair(x,_f(x))).first;
+            return it->second;
+        } else { // the cache is full so the value is return simply
+#ifdef COUNT_CACHE_FAILURES
+            _cache_failures++;
+#endif            
+            return _f(x);
+        }
+    }
+    
+    void clear() {
+        _map.clear();
+    }
+    
+protected:
+    size_type _n;
+    mutable map _map;
+    F _f;
+
+    unsigned get_cache_failures() const { return _cache_failures; }
+
+    mutable unsigned _cache_failures;
 };
   
 } //~namespace opencog

@@ -74,10 +74,17 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
             }
             // ~Logger
             return res;
-        } catch (...) {
-            stringstream ss;
-            ss << "The following candidate has failed to be evaluated: " << tr;
-            logger().warn(ss.str());
+        } catch (EvalException& ee) {
+            // Logger
+            stringstream ss1;
+            ss1 << "The following candidate: " << tr;
+            logger().warn(ss1.str());
+            stringstream ss2;
+            ss2 << "has failed to be evaluated,"
+                << " raising the following exception: "
+                << ee.get_message() << " " << ee.get_vertex();
+            logger().warn(ss2.str());
+            // ~Logger
             return get_score(worst_possible_score);
         }
     }
@@ -323,13 +330,13 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         try {
             combo_tree tr = _rep.get_clean_exemplar(_reduce);
             return combo_tree_score(score(tr), complexity(tr.begin()));
-        } catch (...) {
-            stringstream ss;
-            ss << "The following instance has failed to be evaluated: " 
-               << _rep.fields().stream(inst);
-            logger().warn(ss.str());
-            return worst_possible_score;
-        }
+         } catch (...) {
+             stringstream ss;
+             ss << "The following instance has failed to be evaluated: " 
+                << _rep.fields().stream(inst);
+             logger().warn(ss.str());
+             return worst_possible_score;
+         }
     }
 
 protected:
@@ -368,13 +375,13 @@ struct count_based_scorer : public unary_function<eda::instance,
             return combo_tree_score(score(_rep.get_clean_exemplar(_reduce)), 
                                     - int(_rep.fields().count(inst))
                                     + _base_count);
-        } catch (...) {
-            stringstream ss;
-            ss << "The following instance has failed to be evaluated: " 
-               << _rep.fields().stream(inst);
-            logger().warn(ss.str());
-            return worst_possible_score;
-        }
+        } catch(...) {
+             stringstream ss;
+             ss << "The following instance has failed to be evaluated: " 
+                << _rep.fields().stream(inst);
+             logger().warn(ss.str());
+             return worst_possible_score;
+         }
     }
     
 protected:
