@@ -63,6 +63,13 @@ namespace moses {
         return bst.first;
     }
 
+    inline const combo_tree_score& get_combo_tree_score(const combo_tree_behavioral_score& ctbs) {
+        return ctbs.second;
+    }
+    inline const combo_tree_score& get_combo_tree_score(const behavioral_scored_combo_tree& bsct) {
+        return get_combo_tree_score(bsct.second);
+    }
+
     inline complexity_t get_complexity(const combo_tree_score& ts) { 
         return ts.second; 
     }
@@ -89,8 +96,15 @@ namespace moses {
         return get_score(st.second);
     }
 
+    inline const behavioral_score& get_bscore(const combo_tree_behavioral_score& ts) { 
+        return ts.first;
+    }
+    inline const behavioral_score& get_bscore(const behavioral_scored_combo_tree& bst) { 
+        return get_bscore(bst.second);
+    }
+
     template<typename Out>
-    Out& ostream_behavioral_score(Out& out, const behavioral_score bs) {
+    Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
         return opencog::ostreamContainer(out, bs, " ", "[", "]");
     }
 

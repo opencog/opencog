@@ -50,6 +50,8 @@ int main(int argc,char** argv) {
     string input_table_file;
     unsigned long max_evals;
     long result_count;
+    bool output_bscore;
+    bool output_complexity;
     int max_gens;
     string log_level;
     string log_file;
@@ -73,6 +75,10 @@ int main(int argc,char** argv) {
          "maximum number of fitness function evaluations")
         ("result-count,c", value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them")
+        ("output-complexity,x", value<bool>(&output_complexity)->default_value(false),
+         "if 1, outputs the complexity before each candidate (at the right of the score)")
+        ("output-bscore,t", value<bool>(&output_bscore)->default_value(false),
+         "if 1, outputs the bscore below each candidate")
         ("max-gens,g", value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit")
         ("input-file,i", value<string>(&input_table_file),
@@ -202,12 +208,14 @@ int main(int argc,char** argv) {
             metapop_moses_results(rng, exemplars, tt, logical_reduction(),
                                   reduce_all, score_cache, bscore_cache,
                                   count_base, opt_algo,
-                                  max_evals, max_gens, ignore_ops, result_count);
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity, output_bscore);
         } else {
             bscore_based_score<BScore> score(bscore);
             metapop_moses_results(rng, exemplars, tt, logical_reduction(),
                                   reduce_all, score, bscore, count_base, opt_algo,
-                                  max_evals, max_gens, ignore_ops, result_count);
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity, output_bscore);
         }
     }
     else if(output_type == id::contin_type) {
@@ -242,13 +250,15 @@ int main(int argc,char** argv) {
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, score_cache, bscore_cache,
                                   count_base, opt_algo,
-                                  max_evals, max_gens, ignore_ops, result_count);
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity, output_bscore);
         } else {
             bscore_based_score<BScore> score(bscore);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, score, bscore, count_base, opt_algo,
-                                  max_evals, max_gens, ignore_ops, result_count);
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity, output_bscore);
         }
     } else {
         std::cerr << "Type " << output_type 

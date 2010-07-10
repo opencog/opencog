@@ -488,6 +488,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             _rep->transform(inst);
 
             //get the combo_tree associated to inst, cleaned and reduced
+            //@todo: here the canidate is possibly reduced for the second time
+            // this could probability be avoid with some clever cache or alike
             combo_tree tr = _rep->get_clean_exemplar(true);
 
             //update the set of potential exemplars
@@ -547,20 +549,35 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     /**
-     * stream out the n best non dominated candidates, if n is
-     * negative stream them all out.
+     * stream out the n best non dominated candidates along with their
+     * scores (optionally complexity and bscore), if n is negative
+     * stream them all out.
      */
     template<typename Out>
-    Out& ostream_best(Out& out, long n) {
+    Out& ostream_best(Out& out, long n,
+                      bool output_complexity = false,
+                      bool output_bscore = false) {
         size_t s = n<0? size() : std::min(n, (long)size());
         for(const_iterator cit = begin(); s != 0; cit++, s--) {
-            out << get_score(*cit) << " " << get_tree(*cit) << std::endl;
+            out << get_score(*cit) << " ";
+
+            if(output_complexity)
+                out << get_complexity(*cit) << " ";
+
+            out << get_tree(*cit) << std::endl;
+
+            if(output_bscore) {
+                ostream_behavioral_score(out, get_bscore(*cit));
+                out << std::endl;
+            }
         }
         return out;
     }
     // like above but using std::cout
-    void print_best(long n) {
-        ostream_best(std::cout, n);
+    void print_best(long n,
+                    bool output_complexity = false,
+                    bool output_bscore = false) {
+        ostream_best(std::cout, n, output_complexity, output_bscore);
     }
 
     opencog::RandGen& rng;

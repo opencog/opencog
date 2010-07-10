@@ -149,7 +149,18 @@ combo_tree representation::get_clean_exemplar(bool reduce)
     combo_tree result = exemplar();
 
     clean_reduce(result); //remove null vertices
-    if(reduce) (*_simplify)(result, result.begin()); //reduce
+
+    if(reduce) { //reduce
+        // Logger
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            stringstream ss;
+            ss << "Reduce candidate: " 
+               << result;
+            logger().fine(ss.str());
+        }
+        // ~Logger
+        (*_simplify)(result, result.begin()); 
+    }
 
     return result;
 }

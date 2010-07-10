@@ -304,7 +304,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
                             representation& rep,
                             bool reduce,
                             opencog::RandGen& _rng)
-            : score(s), _rep(rep), rng(_rng) { }
+        : score(s), _rep(rep), _reduce(reduce), rng(_rng) { }
 
     combo_tree_score operator()(const eda::instance& inst) const {
         using namespace reduct;
@@ -312,7 +312,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
         // Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
-            ss << "count_based_scorer - Evaluate instance: " 
+            ss << "complexity_based_scorer - Evaluate instance: " 
                << _rep.fields().stream(inst);
             logger().fine(ss.str());
         }

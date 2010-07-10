@@ -76,11 +76,14 @@ void metapop_moses_results(opencog::RandGen& rng,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
-                           long result_count) {
+                           long result_count,
+                           bool output_complexity,
+                           bool output_bscore) {
     metapopulation<Scoring, BScoring, Optimization> 
         metapop(rng, bases, tt, si, reduce_all, sc, bsc, count_base, opt);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
-    metapop.print_best(result_count);
+    metapop.print_best(result_count, output_complexity, output_bscore);
+
 }
 
 /**
@@ -99,22 +102,27 @@ void metapop_moses_results(opencog::RandGen& rng,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
-                           long result_count) {
+                           long result_count,
+                           bool output_complexity,
+                           bool output_bscore) {
     if(opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si, reduce_all, 
                               sc, bsc, count_base,
                               univariate_optimization(rng),
-                              max_evals, max_gens, ignore_ops, result_count);
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity, output_bscore);
     } else if(opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si, reduce_all, 
                               sc, bsc, count_base,
                               simulated_annealing(rng),
-                              max_evals, max_gens, ignore_ops, result_count);
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity, output_bscore);
     } else if(opt_algo == hc) { // hillclimbing
         metapop_moses_results(rng, bases, tt, si, reduce_all,
                               sc, bsc, count_base,
                               iterative_hillclimbing(rng),
-                              max_evals, max_gens, ignore_ops, result_count);
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity, output_bscore);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
         exit(1);

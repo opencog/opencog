@@ -33,7 +33,7 @@ inline void log_candidate_bscore(const combo_tree& tr,
                                  const behavioral_score& bs) {
     if(logger().getLevel() >= opencog::Logger::FINE) {
         stringstream ss_tr;
-        ss_tr << "Candidate: " << tr;
+        ss_tr << "Evaluate candidate: " << tr;
         logger().fine(ss_tr.str());
         stringstream ss_bsc;
         ostream_behavioral_score(ss_bsc, bs);
