@@ -521,7 +521,8 @@ struct simulated_annealing {
                         double _min_temp = 0, double _temp_step_size = 0.5,
                         double _accept_prob_temp_intensity = 0.5,
                         double _dist_temp_intensity = 0.5,
-                        double _fraction_of_remaining = 10,
+                        double _fraction_of_remaining = 10.0,
+                        double _min_energy = 0.0,
                         const eda_parameters& p = eda_parameters())
         : rng(_rng), 
           init_temp(_init_temp),
@@ -530,6 +531,7 @@ struct simulated_annealing {
           accept_prob_temp_intensity(_accept_prob_temp_intensity),
           dist_temp_intensity(_dist_temp_intensity),
           fraction_of_remaining(_fraction_of_remaining),
+          min_energy(_min_energy),
           params(p) {}
       
     double accept_probability(energy_t energy_new, energy_t energy_old,
@@ -538,273 +540,135 @@ struct simulated_annealing {
         if (energy_new < energy_old)
             return 1.0;
         else
-            return std::exp(-(energy_new - energy_old)/(temperature));
+            return std::exp((energy_old - energy_new) / temperature);
     }
       
     double cooling_schedule(double t)
     { 
-        OC_ASSERT( t > 0, "t should greater than 0");
+        OC_ASSERT(t > 0, "t should greater than 0");
         //return (double) init_temp / std::log(1.0 + t); 
         return (double) init_temp / (1.0 + t);
     }
       
     energy_t energy(const eda::scored_instance<combo_tree_score>& inst)
     {
-        energy_t instance_energy;
- 
         // here let the energy be the reverse of the score, that
         // because the better instance has the lower energy but higher
         // score.
         //
         // NOTICE: it may use some other methods to present the
         // energy.
-        instance_energy = (energy_t)(- get_score(inst.second));
-        return instance_energy;
+        return -get_score(inst.second);
     }
     
     /**
      * This method calculate the distance of the jump according to the
-     * temporature. The higher the temperature the higher the
-     * distance.
+     * temperature. The higher the temperature the higher the
+     * distance.  @todo: it may be better to have the distance
+     * decreasing exponentially instead of linearly
      */
     unsigned int dist_temp(double current_temp)
     {
         return (unsigned int)( ((current_temp - min_temp)/(init_temp - min_temp))
                                *
-                               (MAX_DISTANCE_FROM_EXEMPLAR - 1) + 1 );
+                               (max_distance - 1) + 1 );
     }
 
     template<typename Scoring>
     int operator()(eda::instance_set<combo_tree_score>& deme,
                    const Scoring& score, int max_evals) {
+
+        const eda::field_set& fields = deme.fields();
+        //max_distance = fields.n_bits() + fields.n_disc()
+        //    + fields.n_contin() + fields.n_onto();
+        max_distance = MAX_DISTANCE_FROM_EXEMPLAR;
+        // @todo this should be adapted for SA
         int pop_size = params.pop_size(deme.fields());
-        int max_gens_total = params.max_gens_total(deme.fields());
- 
-        long long current_number_of_instances = 0;
-        int max_number_of_instances = max_gens_total * pop_size;
+        // int max_gens_total = params.max_gens_total(deme.fields());
+        // int max_number_of_instances = max_gens_total * pop_size;
+        int max_number_of_instances = pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
-          
-        // NOTICE : ignored the contin and onto type here, it will be added 
-        // in the later reversion(2009/08/05)
-        int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
-        eda::instance exemplar(deme.fields().packed_width());
- 
-        //TODO(xiaohui):  initialize the exemplar
-        // set to 0 all fields (contin and onto fields are ignored) to represent the exemplar
-        for (eda::field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
-             it != deme.fields().end_bits(exemplar); ++it)
-            *it = false;
-        for (eda::field_set::disc_iterator it = deme.fields().begin_disc(exemplar);
-             it != deme.fields().end_disc(exemplar); ++it)
-            *it = 0;
-                   
-        eda::scored_instance<combo_tree_score> scored_exemplar = exemplar;
-        score_t exemplar_score = score(scored_exemplar).first;
-          
-        // NOTICE: in the optimize, we always wanna the max_score. But
-        // in the SA, the best candidate is the one which has the
-        // lowest energy. So, the energy should be reverse to the
-        // score of a candidate. instead of 0 here should be
-        // max_score, but this value is not passed as an argument
-        if ( exemplar_score == 0) {
-            deme.resize(1);
-            *(deme.begin()++) = exemplar;
-        } else {
-            int step = 1;
-            int distance = MAX_DISTANCE_FROM_EXEMPLAR;
-            double current_temp = init_temp;
-            eda::instance center_instance(exemplar);
-            energy_t center_instance_energy = energy(scored_exemplar);
-              
-            do {
-                // the number of all neighbours at the distance d
-                long long total_number_of_neighbours = 
-                    count_n_changed_knobs(deme.fields(), distance);
- 
-                // score all new instances in the deme
-                long long number_of_new_instances = 1; //@todo:
-                                                       //possibly
-                                                       //change that
-                energy_t current_instance_energy;
-                double actual_accept_prob;
- 
-                // sample one neighbour of the center_instance from distance
-                deme.resize(current_number_of_instances + number_of_new_instances);
-                sample_from_neighborhood(deme.fields(), distance, number_of_new_instances,
-                                         deme.begin() + current_number_of_instances,
-                                         rng, center_instance);
+
+        long long current_number_of_instances = 0;
+
+        int step = 1;
+        // it is assumed that the exemplar instance is null
+        eda::instance center_instance(fields.packed_width());
+        // score the exemplar, note that this could be avoided as the
+        // exemplar has already been scored, but that means the
+        // optimization API has to be upgraded, and obviously scoring
+        // one candidate doesn't cost much compared to the entire
+        // optimization
+        eda::scored_instance<combo_tree_score> scored_exemplar = 
+            eda::score_instance(center_instance, score);
+        energy_t center_instance_energy = energy(scored_exemplar);
+        double current_temp = init_temp;
+        do {
+            unsigned int current_distance = 
+                max(1, (int)(dist_temp_intensity * dist_temp(current_temp)));
+
+            // score all new instances in the deme
+            long long number_of_new_instances = 1; //@todo: possibly change that
+
+            // sample one neighbour (for now) of the center_instance
+            // from distance.
+            // @todo: one may experiment with changing the distance of
+            // the contin as well.
+            deme.resize(current_number_of_instances + number_of_new_instances);
+            sample_from_neighborhood(deme.fields(), current_distance,
+                                     number_of_new_instances,
+                                     deme.begin() + current_number_of_instances,
+                                     rng, center_instance);
                     
-                // score all new instances in the deme
-                transform(deme.begin() + current_number_of_instances, deme.end(),
-                          deme.begin_scores() + current_number_of_instances,
-                          score);
+            // score all new instances in the deme (1 for now)
+            transform(deme.begin() + current_number_of_instances, deme.end(),
+                      deme.begin_scores() + current_number_of_instances,
+                      score);
                       
-                eda::scored_instance<combo_tree_score>& current_scored_instance
-                    = deme[current_number_of_instances];
-                eda::instance& current_instance = current_scored_instance.first;
-                    
-                current_instance_energy = energy(current_scored_instance);
+            eda::scored_instance<combo_tree_score>& current_scored_instance =
+                deme[current_number_of_instances];
+            eda::instance& current_instance = current_scored_instance.first;
+            energy_t current_instance_energy = energy(current_scored_instance);
                                           
-                // check if the current instance in the deme is better than
-                // the center_instance                                        
-                actual_accept_prob = accept_prob_temp_intensity *
-                    accept_probability(current_instance_energy,
-                                       center_instance_energy, current_temp);
+            // check if the current instance in the deme is better than
+            // the center_instance                                        
+            double actual_accept_prob = accept_prob_temp_intensity *
+                accept_probability(current_instance_energy,
+                                   center_instance_energy, current_temp);
                       
-                if ( actual_accept_prob >= rng.randdouble()) {
-                    center_instance_energy = current_instance_energy;
-                    center_instance = current_instance;
-                }
-                      
-                current_number_of_instances += number_of_new_instances;
-                  
-                cout <<"\tThe  instance:" << deme.fields().stream(center_instance) <<endl;
-                cout <<"\tthe energy is:" << center_instance_energy << endl;
-                cout <<"-----------------------------------------------" <<endl;
-                  
-                current_temp = cooling_schedule(step * temp_step_size);
-                distance = max(1, (int)(dist_temp_intensity
-                                        * dist_temp(current_temp)));
-                step++;
-                  
-            } while(distance <= number_of_fields &&
-                    current_number_of_instances < max_number_of_instances &&
-                    current_temp >= min_temp);
-        }
+            if (actual_accept_prob >= rng.randdouble()) {
+                center_instance_energy = current_instance_energy;
+                center_instance = current_instance;
+            }
+
+            current_number_of_instances += number_of_new_instances;
+
+            // DEBUG
+            // cout <<"Instance: " << deme.fields().stream(center_instance) <<endl;
+            // cout <<"Energy: " << center_instance_energy << endl;
+            // cout <<"-----------------------------------------------" <<endl;
+            // ~DEBUG
+
+            current_temp = cooling_schedule((double)step * temp_step_size);
+            step++;
+        } while(current_number_of_instances < max_number_of_instances &&
+                current_temp >= min_temp &&
+                center_instance_energy > min_energy);
+        
         return current_number_of_instances;
     }
       
-      
-      /*
-      template<typename Scoring>
-      int operator()(eda::instance_set<tree_score>& deme,
-                     const Scoring& score, int max_evals) {
-          int pop_size = params.pop_size(deme.fields());
-          int max_gens_total = params.max_gens_total(deme.fields());
- 
-          long long current_number_of_instances = 0;
-          int max_number_of_instances = max_gens_total * pop_size;
-          if (max_number_of_instances > max_evals)
-              max_number_of_instances = max_evals;
- 
-          int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
-          eda::instance exemplar(deme.fields().packed_width());
- 
-          //TODO(xiaohui): add the initialize the exemplar
-                   
-          eda::scored_instance<tree_score> scored_exemplar = exemplar;
-          score_t exemplar_score = score(scored_exemplar).first;
-          
-          // NOTICE: in the optimize, we always wanna the max_score. But in the SA, the best
-          // candidate is the one which has the lowest energy.So, the energy should be reverse 
-          // to the score of a candidate. 
-          // instead of 0 here should be max_score, but this value is not passed as an argument
-          if ( exemplar_score == 0) {
-              deme.resize(1);
-              *(deme.begin()++) = exemplar;
-          } else {
-              
-              int distance = 1;
-              int step = 0;
-              bool bImprovement_made = false;
-              energy_t new_center_energy;
-              current_temperature = INIT_TEMPERATURE;
-              eda::instance center_instance(exemplar);
-              energy_t center_instance_energy = energy(center_instance);
-              
-              do {
-                  
-                  cout << "distance in this iteration: " << distance << endl;
-                  // the numeber of all neighbours at the distance d
-                  long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
-                  cout << "Number of possible instances:"
-                       << total_number_of_neighbours << endl;
- 
-                  long long number_of_new_instances;
-                  number_of_new_instances = (max_number_of_instances - current_number_of_instances) /FRACTION_OF_REMAINING;
-                  if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                      number_of_new_instances = (max_number_of_instances - current_number_of_instances);
-                  
-                  // sample the neighborhoods of the center_instances
-                  if (number_of_new_instances < total_number_of_neighbours) {
-                      // resize the deme so it can take new instances
-                      deme.resize(current_number_of_instances + number_of_new_instances);
-                      // sample 'number_of_new_instances' instances on the distance 'distance' from the center_instance
-                      sample_from_neighborhood(deme.fields(), distance, number_of_new_instances,
-                                               deme.begin() + current_number_of_instances,
-                                               rng, center_instance);
-                  } else {
-                      number_of_new_instances = total_number_of_neighbours;
-                      // resize the deme so it can take new intances
-                      deme.resize(current_number_of_instances + number_of_new_instances);
-                      // add all instances on the distance 'distance' from the center_instance
-                      generate_all_in_neighborhood(deme.fields(), distance, 
-                                                    deme.begin() + current_number_of_instances,
-                                                    center_instance);
-                  }
-                  
-                  cout << "New size:" << current_number_of_instances + number_of_new_instances << endl;
-                  
-                  // score all new instances in the deme
-                  transform(deme.begin() + current_number_of_instances, deme.end(),
-                            deme.begin_scores() + current_number_of_instances,
-                            score);
-                  new_center_energy = center_instance_energy;
-                  
-                  // check if there is an instance in the deme better than
-                  // the center_instance
-                  energy_t lower_energy = energy(deme[current_number_of_instances]);
-                  eda::instance lower_energy_instance(deme[current_number_of_instances].first);
-                  for (int i = current_number_of_instances + 1; 
-                       deme.begin() + i != deme.end(); i++) {
-                      
-                      const eda::scored_instance<tree_score>& inst = deme[i];
- 
-                      if(energy(inst) < lower_energy) {
-                          lower_energy = energy(inst);   
-                          lower_energy_instance = inst.first;
-                      }
-                  }
- 
-                  bImprovement_made = lower_energy > new_center_energy;                       
-                  current_temperature = cooling_schedule( step*TEMP_STEPSIZE );
-                  if (accept_probability(lower_energy, new_center_energy, current_temperature)
-                      >= rng.randdouble()) {
-                      new_center_energy = lower_energy;
-                      center_instance = lower_energy_instance;
-                  }
- 
-                  cout <<endl << "Improvement,new best energy:" << new_center_energy <<endl;
-                  cout <<"Found instance:" << deme.fields().stream(center_instance) <<endl;
-                  cout <<"-----------------------------------------------" <<endl;
- 
-                  step++;
-                  current_number_of_instances += number_of_new_instances;
-              }while(!bImprovement_made &&
-                     distance <= number_of_fields &&
-                     distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
-                     current_number_of_instances < max_number_of_instances &&
-                     current_temperature >= MIN_TEMPERATURE);
-          }
-          
-          return current_number_of_instances;
-          } */
-    
     opencog::RandGen& rng;
     double init_temp;
     double min_temp;
+    unsigned int max_distance;
     double temp_step_size;
     double accept_prob_temp_intensity;
     double dist_temp_intensity;
     double fraction_of_remaining;
+    double min_energy;
     eda_parameters params;
-      
- 
-      /* double current_temperature;
-      eda::scored_instance<tree_score> energy_center_inst;    
-      energy_t new_center_energy;*/
- 
 };
 
 } //~namespace moses

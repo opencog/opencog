@@ -42,11 +42,10 @@ lazy_selector::lazy_selector(unsigned int n)
 }
 
 bool lazy_selector::empty() const {
-    return _l == _n;
+    return _l >= _n;
 }
 
 void lazy_selector::reset_range(unsigned int new_n) {
-    OC_ASSERT(_l < new_n); // there must be at least a free index
     _n = new_n;
 }
 
