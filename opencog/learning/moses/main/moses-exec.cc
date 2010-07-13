@@ -90,7 +90,7 @@ int main(int argc,char** argv) {
         ("variance,v", value<float>(&variance)->default_value(0),
          "in the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor")
         ("prob,p", value<float>(&prob)->default_value(0),
-         "in the case of boolean regression. probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, uot of the range )1,0( means no Occam's razor, otherwise the greater Occam's occurs when the probability of being wrong is 0.5")
+         "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor")
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored")
         ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
