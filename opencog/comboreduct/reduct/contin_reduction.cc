@@ -76,9 +76,12 @@ const rule& contin_reduction(const combo::vertex_set& ignore_ops,
 
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
-                             ignore_size_increase(complete_factorize),
-                             // complexe rule
-                             downwards(reduce_distribute(iter_without_factorize_distribute))
+                             complete_factorize,
+                             downwards(reduce_distribute(iter_without_factorize_distribute)),
+                             // we factorize again to be sure not to
+                             // enter in an infinite
+                             // factorize/distribute loop
+                             complete_factorize
                              ));
     return res;
   }
