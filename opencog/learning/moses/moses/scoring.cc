@@ -99,58 +99,41 @@ behavioral_score contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
-score_t occam_contin_score::operator()(const combo_tree& tr) const
-{
-    try {
-        score_t sse = 
-            target.sum_squared_error(combo::contin_table(tr, cti, rng));
-        if(variance > 0) 
-            return logPDM(sse, target.size())
-                - (score_t)tr.size()*alphabet_size_log; // occam's razor
-        else 
-            return -sse; // no occam's razor
-    } catch (...) {
-        stringstream ss;
-        ss << "The following candidate has failed to be evaluated: " << tr;
-        logger().warn(ss.str());
-        return get_score(worst_possible_score);
-    }
-}
-
 behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
 {
     combo::contin_table ct(tr, cti, rng);
-    behavioral_score bs(target.size());
-    score_t trs = tr.size(); //@todo replace this with complexity
+    behavioral_score bs(target.size() + (occam?1:0));
         
     behavioral_score::iterator dst = bs.begin();
     for(combo::contin_table::const_iterator it1 = ct.begin(), 
-            it2 = target.begin(); it1 != ct.end(); it1++, it2++)
-        if(variance > 0) 
-            *dst++ = trs*alphabet_size_log_scaled_down // occam's razor
-                - logPDM(sqr(*it1 - *it2), 1);
-        else
-            *dst++ = sqr(*it1 - *it2); // no occam's razor
+            it2 = target.begin(); it1 != ct.end(); it1++, it2++) {
+        *dst++ = sqr(*it1 - *it2);
+    }
+    // add the Occam's razor feature
+    if(occam)
+        *dst = complexity(tr) * complexity_coef;
+
     // Logger
     log_candidate_bscore(tr, bs);
     // ~Logger
+
     return bs;
 }
 
 behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) const
 {
     partial_truth_table ptt(tr, tti, rng);
-    behavioral_score bs(target.size());
-    score_t trs = tr.size(); //@todo replace this with complexity
+    behavioral_score bs(target.size() + (occam?1:0));
         
     behavioral_score::iterator dst = bs.begin();
     for(partial_truth_table::const_iterator it1 = ptt.begin(), 
-            it2 = target.begin(); it1 != ptt.end(); it1++, it2++)
-        if(occam) 
-            *dst++ = trs*alphabet_size_log_scaled_down // occam's razor
-                - (*it1 == *it2 ? log_p : log_cp);
-        else
-            *dst++ = (*it1 == *it2 ? 0.0 : 1.0); // no occam's razor
+            it2 = target.begin(); it1 != ptt.end(); it1++, it2++) {
+        *dst++ = (*it1 == *it2 ? 0.0 : 1.0);
+    }
+    // add the Occam's razor feature
+    if(occam)
+        *dst = complexity(tr) * complexity_coef;
+
     // Logger
     log_candidate_bscore(tr, bs);
     // ~Logger

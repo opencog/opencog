@@ -183,98 +183,79 @@ struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
 };
 
 /**
- * Calculate the log of the density probability dP(D|M), given the sum
- * squared error of D vs M.
- * D represents the data, for instance a contin_table.
- * M represent the model, i.e. a Combo program.
- * Assuming M's outputs describe Guassians of mean M(x) and variance v, 
- * dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
- * = Sum_{x\in D} log((2*Pi*v)^(-1/2)) + log(exp(-(M(x)-D(x))^2/(2*v)))
- * = Sum_{x\in D} log((2*Pi*v)^(-1/2)) -(M(x)-D(x))^2/(2*v)
- * = |D|*log((2*Pi*v)^(-1/2)) -1/(2*v)*Sum_{x\in D} (M(x)-D(x))^2
+ * the occam_contin_bscore is based on the following thread
+ * http://groups.google.com/group/opencog-developers/browse_thread/thread/a4771ecf63d38df?hl=en&pli=1
  *
- * @param sse  sum squared error
- * @param ds   |D|
- * @param v    variance of the Guassian distribution of M's outputs
- * @return     dP(D|M)
-*/
-struct LogPDM {
-    LogPDM(float v) : variance(v) {
-        var_term = variance>0 ? 1/sqrt(log(2*PI*variance)) : 0;        
-    }
-    score_t operator()(score_t sse, unsigned int ds) const {
-        return (score_t)ds*var_term - sse/(2*variance);
-    }
-    float variance;
-    score_t var_term; // to speed up computation, precomputes
-                      // 1/sqrt(log(2*PI*variance))
-};
-
-struct occam_contin_score : public unary_function<combo_tree,score_t> {
-    template<typename Scoring>
-    occam_contin_score(const Scoring& score,
-                       const contin_table_inputs& r,
-                       float v,
-                       float alphabet_size,
-                       opencog::RandGen& _rng)
-        : target(score,r), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log = log((double)alphabet_size);    
-    }
-
-    occam_contin_score(const combo::contin_table& t,
-                       const contin_table_inputs& r,
-                       float v,
-                       float alphabet_size,
-                       opencog::RandGen& _rng)
-        : target(t), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log = log((double)alphabet_size);
-    }
-
-    score_t operator()(const combo_tree& tr) const;
-
-    combo::contin_table target;
-    contin_table_inputs cti;
-    score_t variance;
-    LogPDM logPDM;
-    score_t alphabet_size_log;
-    opencog::RandGen& rng;
-};
-
+ * Here's a summary:
+ *
+ * According to Bayes
+ * dP(M|D) = dP(D|M) * P(M) / P(D)
+ *
+ * Now let's consider the log likelihood of M knowing D, since D is
+ * constant we can ignore P(D), so:
+ * LL(M) = log(dP(D|M)) + log(P(M))
+ * 
+ * Assume the output of M on input x has a Guassian noise of mean M(x)
+ * and variance v, so dP(D|M) (the density probability)
+ * dP(D|M) = Prod_{x\in D} (2*Pi*v)^(-1/2) exp(-(M(x)-D(x))^2/(2*v))
+ *
+ * Assume
+ * P(M) = |A|^-|M|
+ * where |A| is the alphabet size.
+ *
+ * After simplication we can get the following log-likelihood of dP(M|D)
+ * -|M|*log(|A|)*2*v - Sum_{x\in D} (M(x)-D(x))^2
+ *
+ * Each datum corresponds to a feature of the bscore.
+ *
+ * |M|*log(|A|)*2*v corresponds to an additional feature when v > 0
+ */
 struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Scoring>
     occam_contin_bscore(const Scoring& score,
                         const contin_table_inputs& r,
-                        float v,
+                        float variance,
                         float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(score, r), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log_scaled_down = 
-            log((double)alphabet_size) / (double)cti.size();
+        : target(score, r), cti(r), rng(_rng) {
+        occam = variance > 0;
+        if(occam)
+            complexity_coef = - log((double)alphabet_size) * 2 * variance;
     }
 
     occam_contin_bscore(const combo::contin_table& t,
                         const contin_table_inputs& r,
-                        float v,
+                        float variance,
                         float alphabet_size,
                         opencog::RandGen& _rng)
-        : target(t), cti(r), variance(v), logPDM(v), rng(_rng) {
-        alphabet_size_log_scaled_down = 
-            log((double)alphabet_size) / (double)cti.size();
+        : target(t), cti(r), rng(_rng) {
+        occam = variance > 0;
+        if(occam)
+            complexity_coef = - log((double)alphabet_size) * 2 * variance;
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
     contin_table_inputs cti;
-    score_t variance;
-    LogPDM logPDM;
-    score_t alphabet_size_log_scaled_down;
+    bool occam;
+    score_t complexity_coef;
     opencog::RandGen& rng;
 };
 
 /**
  * like occam_contin_bscore but for boolean, instead of considering a
  * variance the probability p that one datum is wrong is used.
+ *
+ * The details are in this thread
+ * http://groups.google.com/group/opencog/browse_thread/thread/b7704419e082c6f1?hl=en
+ *
+ * Briefly after reduction of
+ * LL(M) = -|M|*log(|A|) + Sum_{x\in D1} log(p) + Sum_{x\in D2} log(1-p)
+ *
+ * one gets the following log-likelihood
+ * |M|*log|A|/log(p/(1-p)) - |D1|
+ * with p<0.5 and |D1| the number of outputs that match
  */
 struct occam_truth_table_bscore 
     : public unary_function<combo_tree, behavioral_score> {
@@ -284,13 +265,9 @@ struct occam_truth_table_bscore
                              float alphabet_size,
                              opencog::RandGen& _rng) 
         : target(t), tti(i), rng(_rng) {
-        occam = p > 0 && p < 1;
-        if(occam) {
-            log_p = log(p);
-            log_cp = log(1-p);
-        }
-        alphabet_size_log_scaled_down = 
-            log((double)alphabet_size) / (double)tti.size();
+        occam = p > 0 && p < 0.5;
+        if(occam)
+            complexity_coef = log((double)alphabet_size) / log(p/(1-p));
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -298,9 +275,7 @@ struct occam_truth_table_bscore
     const partial_truth_table& target;
     const truth_table_inputs& tti;
     bool occam; // if true the Occam's razor is taken into account
-    score_t log_p; // log probability that one datum is wrong
-    score_t log_cp; // log probability that one datum is right
-    score_t alphabet_size_log_scaled_down;
+    score_t complexity_coef;
     opencog::RandGen& rng;
 };
 
