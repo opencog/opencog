@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/random.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -66,7 +67,7 @@ int main(int argc, char ** argv)
             // output the truth-table depend on the partial_probility
             for ( size_t i = 0 ; i < sample_number; ++i) {
 
-                bool is_output = output_rng.biased_randbool(partial_probility);
+                bool is_output = biased_randbool(partial_probility, rng);
 
                 if (is_output) {
                     for ( size_t j = 0; j < arg_number; ++j) {

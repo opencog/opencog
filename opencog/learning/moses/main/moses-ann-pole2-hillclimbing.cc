@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
     moses::moses(metapop_pole2, 10000, 100000);
 
-    combo_tree best = metapop_pole2.best_trees().front();
+    combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);
     
     cout << "Best network: " << endl;

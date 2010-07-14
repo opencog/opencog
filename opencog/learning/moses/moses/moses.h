@@ -67,6 +67,10 @@ typedef std::set<combo::combo_tree,
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public set < behavioral_scored_combo_tree,
                                      std::greater<behavioral_scored_combo_tree> > {
+
+    typedef boost::unordered_set<combo_tree,
+                                 boost::hash<combo_tree> > combo_tree_hash_set;
+
     /**
      * the parameter to decide how to select the deme from the population
      */
@@ -96,12 +100,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         metapop_candidates candidates;
         foreach(const combo_tree& base, exemplars) {
             combo_tree_score base_sc = make_pair(score(base), complexity(base));
-            candidates.insert(make_pair(base,
-                                        combo_tree_behavioral_score
-                                        (bscore(base), base_sc)));
+            behavioral_scored_combo_tree base_bsc = 
+                make_pair(base, 
+                          combo_tree_behavioral_score(bscore(base), base_sc));
+            candidates.insert(base_bsc);
 
             // update the record of the best-seen score & trees
-            update_best(base, base_sc);
+            update_best_candidates(base_bsc);
         }
         merge_nondominating(candidates.begin(), candidates.end(), *this);
     }
@@ -170,10 +175,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     /**
-     * return the best tree
+     * return the best candidates (with _best_score)
      */
-    const std::vector<combo_tree>& best_trees() const {
-        return _best_trees;
+    const metapop_candidates& best_candidates() const {
+        return _best_candidates;
+    }
+
+    /**
+     * return the best combo tree (shortest best candidate)
+     */
+    const combo_tree& best_tree() const {
+        return _best_candidates.begin()->first;
     }
 
     /**
@@ -192,6 +204,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         //compute the probs for all candidates with best score
         score_t score = get_score(*begin());
         complexity_t cmin = get_complexity(*begin());
+
         vector<complexity_t> probs;
         // set to true when a potential exemplar to be selected is
         // found
@@ -208,17 +221,17 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             }
 
             complexity_t c = get_complexity(*it);
-            if (cmin - c > params.selection_max_range)
+
+            // this to not consider too complex exemplar
+            if (cmin - c > params.selection_max_range) 
                 break;
-            // if the corresponding tree is already visited give it
-            // the maximum complexity (actually the min in value since
-            // complexity is negative)
             const combo_tree& tr = get_tree(*it);
             if(_visited_exemplars.find(tr) == _visited_exemplars.end()) {
                 probs.push_back(c);
                 exist_exemplar = true;
-            }
-            else probs.push_back(max_complexity);            
+            } else // hack: if the tree is visited then put a complexity positive
+                   // so we know it must be ignored
+                probs.push_back(1);
         }
         
         if(!exist_exemplar) {
@@ -226,12 +239,12 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         }
 
         complexity_t sum = 0;
-        complexity_t min_comp = *max_element(probs.begin(), probs.end());
+        complexity_t max_comp = *min_element(probs.begin(), probs.end());
         // convert complexities into (non-normalized) probabilities
         foreach(complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p == max_complexity? 0 : (1 << (min_comp - p)));
+            p = (p > 0? 0 : (1 << (p - max_comp)));
             sum += p;
         }
 
@@ -284,16 +297,16 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         close_deme();
 
         // Logger, best candidates (with the maximum score) so far
-        if(best_trees().empty())
+        if(best_candidates().empty())
             logger().info("Only worst scored candidates");
         else {
             stringstream ss;
             ss << "The following candidate(s) have the best score " 
                << best_score().first;
             logger().info(ss.str());
-            foreach(const combo_tree& tr, best_trees()) {
+            foreach(const behavioral_scored_combo_tree& cand, best_candidates()) {
                 stringstream ss_tr;
-                ss_tr << tr;
+                ss_tr << get_tree(cand);
                 logger().info(ss_tr.str());
             }
         }
@@ -495,11 +508,13 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             //update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
                 candidates.find(tr) == candidates.end()) {
-                candidates.insert(make_pair(tr,
-                                            combo_tree_behavioral_score
-                                            (bscore(tr), inst.second)));
+                behavioral_scored_combo_tree candidate = 
+                    make_pair(tr, combo_tree_behavioral_score(bscore(tr),
+                                                              inst.second));
+                candidates.insert(candidate);
+
                 // also update the record of the best-seen score & trees
-                update_best(tr, inst.second);
+                update_best_candidates(candidate);
             }
         }
 
@@ -538,13 +553,14 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     // update the record of the best-seen score & trees
-    void update_best(const combo_tree& tr, const combo_tree_score& tr_sc) {
-        if (tr_sc >= _best_score) {
-            if (tr_sc > _best_score) {
-                _best_score = tr_sc;
-                _best_trees.clear();
+    void update_best_candidates(const behavioral_scored_combo_tree& candidate) {
+        const combo_tree_score& sc = get_combo_tree_score(candidate);
+        if (sc >= _best_score) {
+            if (sc > _best_score) {
+                _best_score = sc;
+                _best_candidates.clear();
             }
-            _best_trees.push_back(tr);
+            _best_candidates.insert(candidate);
         }
     }
 
@@ -599,10 +615,10 @@ protected:
     combo_tree_score _best_score; 
 
     // trees with score _best_score
-    std::vector<combo_tree> _best_trees;
+    metapop_candidates _best_candidates;
 
     // contains the exemplars of demes that have been searched so far
-    boost::unordered_set<combo_tree, boost::hash<combo_tree> > _visited_exemplars;
+    combo_tree_hash_set _visited_exemplars;
 
     representation* _rep; // representation of the current deme
     eda::instance_set<combo_tree_score>* _deme; // current deme
@@ -728,7 +744,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
     // print the best solution
     std::cout << "sampled " << mp.n_evals()
               << " best " << mp.best_score().first << endl
-              << mp.best_trees().front() << std::endl;
+              << mp.best_tree() << std::endl;
 }
 
 

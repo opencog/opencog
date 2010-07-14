@@ -59,7 +59,3 @@ int main(int argc,char** argv) {
   cout << "Accuracy:  " << (float)(cm.TP+cm.TN)/(cm.FP+cm.TP+cm.TN+cm.FN) << endl;
 
 }
-
-
-
-

@@ -125,10 +125,6 @@ public:
 
     //random boolean
     bool randbool();
-
-    //linear biased random bool, b in [0,1]
-    //when b tends to 1 the result tends to be true
-    bool biased_randbool(float b);
 };
 
 }

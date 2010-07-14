@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/random.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -18,20 +19,22 @@ using namespace ant_combo;
 int main(int argc, char ** argv)
 {
     int rand_seed, nsamples;
-    double  max_randvalue, min_randvalue;
+    double  max_randvalue, min_randvalue, variance;
     combo_tree combo_tr;
     type_tree tr;
     argument_type_list arg_type_list;
     try {
-        if (argc != 5)
+        if (argc != 6)
             throw "foo";
         rand_seed = lexical_cast<int>(argv[1]);
         max_randvalue = lexical_cast<double>(argv[2]);
         min_randvalue = lexical_cast<double>(argv[3]);
         nsamples = lexical_cast<int>(argv[4]);
+        variance = lexical_cast<double>(argv[5]);
     } catch (...) {
         cerr << "stdin a combo program and it will stdout the contin-table" << endl;
-        cerr << "Usage:" << argv[0] << " rand_seed max_randvalue min_randvalue nsamples" << endl;
+        cerr << "Usage:" << argv[0] << " rand_seed max_randvalue min_randvalue nsamples variance" << endl;
+        cerr << "variance corresponds to a noise of the output" << endl;
         exit(1);
     }
 
@@ -59,7 +62,8 @@ int main(int argc, char ** argv)
                 for (const_cv_it j = (*i).begin(); j != (*i).end(); ++j) {
                     cout << (*j) << " ";
                 }
-                cout << contintable[k] << endl;
+                cout << gaussian_rand(std::sqrt(variance), contintable[k], rng)
+                     << endl;
             }
         } catch (...) {
             cout << "an exception has been raised perhaps you should try"

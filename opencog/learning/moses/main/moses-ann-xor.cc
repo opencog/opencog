@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 
     //transform the best combo tree into an ANN
     tree_transform trans; 
-    combo_tree best = metapop.best_trees().front();
+    combo_tree best = metapop.best_tree();
     ann bestnet = trans.decodify_tree(best);
     
     

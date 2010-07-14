@@ -199,7 +199,7 @@ void moses_learning::operator()()
         //print the generation number and a best solution
         std::cout << "sampled " << metapop->n_evals()
                   << " best " << metapop->best_score().first << " "
-                  << metapop->best_trees().front() << std::endl;
+                  << metapop->best_tree() << std::endl;
 
         end = clock ();
         cout << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl;
@@ -208,10 +208,10 @@ void moses_learning::operator()()
 
         if (metapop->best_score().first >= _best_fitness_estimated) {
             _best_fitness_estimated = metapop->best_score().first;
-            _best_program_estimated = metapop->best_trees().front();
+            _best_program_estimated = metapop->best_tree();
         }
 
-        std::cout << "best program in this iter: " << metapop->best_trees().front() << std::endl;
+        std::cout << "best program in this iter: " << metapop->best_tree() << std::endl;
         std::cout << "best score for this prog: " << metapop->best_score().first << std::endl;
 
         std::cout << "best program total: " << _best_program_estimated << std::endl;

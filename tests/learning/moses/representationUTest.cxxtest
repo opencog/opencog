@@ -59,4 +59,15 @@ public:
         // @todo define a test
         TS_ASSERT(true);
     }
+
+    void test_boolean_rep() {
+        opencog::MT19937RandGen rng(1);
+        string tr_str = "or(and(or(#1 #2) or(#1 #3) or(#2 #3)) and(#1 #3))";
+        combo_tree tr = totree(tr_str);
+        type_tree tt = infer_type_tree(tr);
+        representation rep(logical_reduction(), tr, tt, rng, vertex_set());
+
+        // @todo define a test
+        TS_ASSERT(true);
+    }
 };

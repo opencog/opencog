@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/random.h>
 
 #include <opencog/comboreduct/combo/eval.h>
 #include <opencog/comboreduct/combo/table.h>
@@ -75,7 +76,6 @@ int main(int argc, char ** argv)
 		
         // generate the RandNumber for the given the max_radvalue and min_randvalue
         MT19937RandGen rng(rand_seed);   
-        MT19937RandGen output_rng(rand_seed);     
         contin_table_inputs rands(nsamples_contin, contin_arg_number, rng, max_randvalue, min_randvalue);
 
 		try{
@@ -87,7 +87,7 @@ int main(int argc, char ** argv)
 	
     	        	// output the truth-table
         		   	for ( int i = 0 ; i < nsamples_bool; ++i) {
-	               	 bool is_output = output_rng.biased_randbool(partial_probability);
+	               	 bool is_output = biased_randbool(partial_probability, rng);
 
     	            	if (is_output) {
         	        		    for ( size_t j = 0; j < arg_number; ++j) {
@@ -135,7 +135,7 @@ int main(int argc, char ** argv)
 	        	bool is_output;
     	    	if(partial_probability >=0 && partial_probability<=1){        	
         			for ( int j = 0 ; j < nsamples_bool; ++j) {
-        				is_output= output_rng.biased_randbool(partial_probability);                	         		    		
+        				is_output= biased_randbool(partial_probability, rng);
         				for (combo::const_cm_it i = rands.begin(); i != rands.end(); ++i) {
         				
 	        				bool_arg_count=j;        			       			

@@ -201,20 +201,13 @@ struct iterative_hillclimbing {
                            const eda_parameters& p = eda_parameters())
         : rng(_rng), params(p) {}
 
-
     //return # of evaluations actually performed
     template<typename Scoring>
     int operator()(eda::instance_set<combo_tree_score>& deme,
                    const Scoring& score, int max_evals) {
-        int pop_size = params.pop_size(deme.fields());
-        int max_gens_total = params.max_gens_total(deme.fields());
-        // int max_gens_improv=params.max_gens_improv(deme.fields());
-
-        cout << "bits size: " << deme.fields().n_bits() << endl;
-        cout << "disc size: " << deme.fields().n_disc() << endl;
-        // cout << "pop size: " << pop_size << endl;
-        // cout << "max gen total: " << max_gens_total << endl;
-        // cout << "max gen improv: " << max_gens_improv << endl;
+        const eda::field_set& fields = deme.fields();
+        int pop_size = params.pop_size(fields);
+        int max_gens_total = params.max_gens_total(fields);
 
         long long current_number_of_instances = 0;
 
@@ -223,103 +216,93 @@ struct iterative_hillclimbing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        int number_of_fields = deme.fields().n_bits() + deme.fields().n_disc();
-        eda::instance exemplar(deme.fields().packed_width());
+        int number_of_fields = fields.n_bits() + fields.n_disc()
+            + fields.n_contin() + fields.n_onto();
 
-        // set to 0 all fields (contin and onto fields are ignored) to represent the exemplar
-        for (eda::field_set::bit_iterator it = deme.fields().begin_bits(exemplar);
-                it != deme.fields().end_bits(exemplar); ++it)
-            *it = false;
-        for (eda::field_set::disc_iterator it = deme.fields().begin_disc(exemplar);
-                it != deme.fields().end_disc(exemplar); ++it)
-            *it = 0;
+        // it is assumed that the exemplar instance is null
+        eda::instance exemplar(fields.packed_width());
 
-        eda::scored_instance<combo_tree_score> scored_exemplar = exemplar;
+        // score the exemplar, note that this could be avoided as the
+        // exemplar has already been scored, but that means the
+        // optimization API has to be upgraded, and obviously scoring
+        // one candidate doesn't cost much compared to the entire
+        // optimization
+        eda::scored_instance<combo_tree_score> scored_exemplar = 
+            eda::score_instance(exemplar, score);
         score_t exemplar_score = score(scored_exemplar).first;
-        // cout << "Exemplar:" <<deme.fields().stream(scored_exemplar) << " Score:" << exemplar_score << endl;
 
-        // more precisely, instead of 0 there should be max_score, but this value is not passed as an argument
-        if (exemplar_score == 0) {
-            // found a perfect solution
-            deme.resize(1);
-            *(deme.begin()++) = exemplar;
-        } else {
+        int distance = 1;
+        bool bImprovement_made = false;
+        score_t best_score;
+        do {
+            // the number of all neighbours at the distance d
+            long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
 
-            int distance = 1;
-            bool bImprovement_made = false;
-            score_t best_score;
+            long long number_of_new_instances;
 
-            do {
-                cout << "Distance in this iteration:" << distance << endl;
+            number_of_new_instances = 
+                (max_number_of_instances - current_number_of_instances)
+                / FRACTION_OF_REMAINING;
 
-                // the number of all neighbours at the distance d
-                long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
-                cout << "Number of possible instances:"
-                     << total_number_of_neighbours << endl;
+            if (number_of_new_instances  < MINIMUM_DEME_SIZE)
+                number_of_new_instances =
+                    (max_number_of_instances - current_number_of_instances);
 
-                long long number_of_new_instances;
+            if (number_of_new_instances < total_number_of_neighbours) {
+                //resize the deme so it can take new instances
+                deme.resize(current_number_of_instances + number_of_new_instances);
+                //sample 'number_of_new_instances' instances on the
+                //distance 'distance' from the exemplar
+                sample_from_neighborhood(deme.fields(), distance,
+                                         number_of_new_instances,
+                                         deme.begin() + current_number_of_instances, rng);
+            } else {
+                number_of_new_instances = total_number_of_neighbours;
+                //resize the deme so it can take new instances
+                deme.resize(current_number_of_instances + number_of_new_instances);
+                //add all instances on the distance 'distance' from
+                //the exemplar
+                generate_all_in_neighborhood(deme.fields(), distance,
+                                             deme.begin() + current_number_of_instances);
+            }
+            
+            // score all new instances in the deme
+            transform(deme.begin() + current_number_of_instances, deme.end(),
+                      deme.begin_scores() + current_number_of_instances, score);
 
-                number_of_new_instances = (max_number_of_instances - current_number_of_instances) / FRACTION_OF_REMAINING;
-                if (number_of_new_instances  < MINIMUM_DEME_SIZE)
-                    number_of_new_instances = (max_number_of_instances - current_number_of_instances);
+            best_score = exemplar_score;
+            // check if there is an instance in the deme better than the exemplar
+            //foreach(const eda::scored_instance<combo_tree_score>& inst,deme) {
+            for (int i = current_number_of_instances;
+                 deme.begin() + i != deme.end(); i++) {
 
-                if (number_of_new_instances < total_number_of_neighbours) {
-                    //resize the deme so it can take new instances
-                    deme.resize(current_number_of_instances + number_of_new_instances);
-                    //sample 'number_of_new_instances' instances on the distance 'distance' from the exemplar
-                    sample_from_neighborhood(deme.fields(), distance, number_of_new_instances, deme.begin() + current_number_of_instances, rng);
-                } else {
-                    number_of_new_instances = total_number_of_neighbours;
-                    //resize the deme so it can take new instances
-                    deme.resize(current_number_of_instances + number_of_new_instances);
-                    //add all instances on the distance 'distance' from the exemplar
-                    generate_all_in_neighborhood(deme.fields(), distance, deme.begin() + current_number_of_instances);
+                //score(deme.begin()+i,deme.begin_scores()+i);
+                //transform(deme.begin()+current_number_of_instances,deme.end(),deme.begin_scores()+current_number_of_instances,score);
+
+                const eda::scored_instance<combo_tree_score>& inst = deme[i];
+
+                if (get_score(inst.second) > best_score) {
+                    best_score = get_score(inst.second);
+                    bImprovement_made = true;
+
+                    // cout << endl << "Improvement, new best score:" << inst.second << "(distance: " << distance << ", old score: " << exemplar_score << ")" << endl;
+                    // cout << "Found instance:" << deme.fields().stream(inst) << endl;
+                    // cout << "Score:" << get_score(inst.second) << endl;
+                    // cout << "--------------------------------------" << endl;
+                    //  break;
                 }
+            }
 
-                cout << "New size:" << current_number_of_instances + number_of_new_instances << endl;
+            current_number_of_instances += number_of_new_instances;
+            distance++;
 
-                // score all new instances in the deme
-                transform(deme.begin() + current_number_of_instances, 
-                          deme.end(),
-                          deme.begin_scores() + current_number_of_instances,
-                          score);
-
-                best_score = exemplar_score;
-                // check if there is an instance in the deme better than the exemplar
-                //foreach(const eda::scored_instance<combo_tree_score>& inst,deme) {
-                for (int i = current_number_of_instances;deme.begin() + i != deme.end();i++) {
-
-                    //score(deme.begin()+i,deme.begin_scores()+i);
-                    //transform(deme.begin()+current_number_of_instances,deme.end(),deme.begin_scores()+current_number_of_instances,score);
-
-                    const eda::scored_instance<combo_tree_score>& inst = deme[i];
-
-                    if (get_score(inst.second) > best_score) {
-                        best_score = get_score(inst.second);
-                        bImprovement_made = true;
-
-                        cout << endl << "Improvement, new best score:" << inst.second << "(distance: " << distance << ", old score: " << exemplar_score << ")" << endl;
-                        cout << "Found instance:" << deme.fields().stream(inst) << endl;
-                        cout << "Score:" << get_score(inst.second) << endl;
-                        cout << "--------------------------------------" << endl;
-                        //  break;
-                    }
-                }
-
-                current_number_of_instances += number_of_new_instances;
-                distance++;
-
-            } while (!bImprovement_made &&
-                     distance <= number_of_fields &&
-                     distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
-                     current_number_of_instances < max_number_of_instances);
-
-        }
-
-        // cout << "poop" << endl;
-        // cout << "mm " << candidates.size() << endl;
-        // cout << "zz " << distance(candidates.begin(),candidates.end()) << endl;
-
+        } while (!bImprovement_made &&
+                 distance <= number_of_fields &&
+                 distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
+                 current_number_of_instances < max_number_of_instances &&
+                 best_score < 0.0 // @todo: should be using some max_score var
+                 );
+        
         return current_number_of_instances;
     }
 
@@ -579,11 +562,10 @@ struct simulated_annealing {
                    const Scoring& score, int max_evals) {
 
         const eda::field_set& fields = deme.fields();
-        //max_distance = fields.n_bits() + fields.n_disc()
-        //    + fields.n_contin() + fields.n_onto();
         max_distance = MAX_DISTANCE_FROM_EXEMPLAR;
+
         // @todo this should be adapted for SA
-        int pop_size = params.pop_size(deme.fields());
+        int pop_size = params.pop_size(fields);
         // int max_gens_total = params.max_gens_total(deme.fields());
         // int max_number_of_instances = max_gens_total * pop_size;
         int max_number_of_instances = pop_size;
@@ -593,8 +575,10 @@ struct simulated_annealing {
         long long current_number_of_instances = 0;
 
         int step = 1;
+
         // it is assumed that the exemplar instance is null
         eda::instance center_instance(fields.packed_width());
+
         // score the exemplar, note that this could be avoided as the
         // exemplar has already been scored, but that means the
         // optimization API has to be upgraded, and obviously scoring
@@ -616,7 +600,7 @@ struct simulated_annealing {
             // @todo: one may experiment with changing the distance of
             // the contin as well.
             deme.resize(current_number_of_instances + number_of_new_instances);
-            sample_from_neighborhood(deme.fields(), current_distance,
+            sample_from_neighborhood(fields, current_distance,
                                      number_of_new_instances,
                                      deme.begin() + current_number_of_instances,
                                      rng, center_instance);
@@ -645,7 +629,7 @@ struct simulated_annealing {
             current_number_of_instances += number_of_new_instances;
 
             // DEBUG
-            // cout <<"Instance: " << deme.fields().stream(center_instance) <<endl;
+            // cout <<"Instance: " << fields.stream(center_instance) <<endl;
             // cout <<"Energy: " << center_instance_energy << endl;
             // cout <<"-----------------------------------------------" <<endl;
             // ~DEBUG

@@ -486,7 +486,7 @@ private:
 
         ordered_neighborhood_it oni;
         do {
-            //generate 2 guassian numbers with variance 1 and mean 0
+            //generate 2 gaussian numbers with variance 1 and mean 0
             double x1, x2, w, y1, y2, y;
             do {
                 x1 = 2.0 * rng.randdouble() - 1.0;

@@ -33,6 +33,7 @@
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/random.h>
 #include <opencog/util/StringManipulator.h>
 
 #include "RuleEngine.h"
@@ -1527,7 +1528,7 @@ void RuleEngine::processNextAction( void )
             //Note that this matters only if it is not the last
             //candidate so that at least one candidate is choosen
             bool take_candidate_into_account
-            = (it == it_chosen || rng->biased_randbool(bias));
+                = (it == it_chosen || biased_randbool(bias, *rng));
 
             //std::cout << "TAKE CANDIDATE INTO ACCOUNT: "
             //        << take_candidate_into_account << std::endl;

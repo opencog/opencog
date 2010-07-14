@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
     //change best combo tree back into ANN
     tree_transform trans; 
-    combo_tree best = metapop_pole2.best_trees().front();
+    combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);
     
     //show best network

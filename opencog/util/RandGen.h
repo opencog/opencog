@@ -61,24 +61,8 @@ public:
 
     //random boolean
     virtual bool randbool() = 0;
-
-    //linear biased random boolean, with b in [0,1]
-    virtual bool biased_randbool(float b)=0;
 };
 
-//choose uniformly randomly an element of the set s
-//WARNING : it is assumed that s is non-empty
-template<typename T> T randset(const std::set<T>& s, RandGen& rng)
-{
-    OC_ASSERT(!s.empty(), "numeric - std::set should be empty.");
-    int chosen_int = rng.randint(s.size());
-    typename std::set<T>::const_iterator s_it = s.begin();
-    //can be optimized maybe
-    for (int si = 0; si < chosen_int; si++)
-        ++s_it;
-    return *s_it;
-}
-
-}
+} // ~namespace opencog
 
 #endif // _OPENCOG_RAND_GEN_H

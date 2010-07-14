@@ -35,6 +35,7 @@ ADD_LIBRARY(util
 	lru_cache
 	misc
 	mt19937ar
+    random
 	platform
 	StringManipulator
 	StringTokenizer
@@ -68,6 +69,7 @@ INSTALL (FILES
 	lru_cache.h
 	misc.h
 	mt19937ar.h
+    random.h
 	numeric.h
 	platform.h
 	RandGen.h
