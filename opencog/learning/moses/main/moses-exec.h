@@ -53,6 +53,14 @@ using namespace reduct;
 using opencog::logger;
 using namespace ant_combo;
 
+// problems
+static const string it="it"; // regression based on input table
+static const string fu="fu"; // regression based on function (combo) to learn
+static const string pa="pa"; // even parity
+static const string dj="dj"; // disjunction
+static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
+
+// optimization algorithms
 static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing

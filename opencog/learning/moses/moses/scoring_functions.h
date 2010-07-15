@@ -65,8 +65,6 @@ struct simple_symbolic_regression {
     contin_t operator()(It from,It to) const {
         contin_t res = 0;
         dorepeat(order) res = (res + contin_t(1)) * (*from);
-        cout << "simple_symbolic_regression: "
-             << "f(" << *from << ")_" << order << "=" << res << endl;
         return res;
     }
 };
