@@ -26,6 +26,9 @@
 #include "general_rules.h"
 #include "contin_rules.h"
 
+// Note: the rule names are useful when debugging the reduct engine
+// (uncomment META_RULE_DEBUG in meta_rules.cc)
+
 namespace reduct {
 const rule& contin_reduction(const combo::vertex_set& ignore_ops, 
                              opencog::RandGen& rng) {
@@ -62,26 +65,35 @@ const rule& contin_reduction(const combo::vertex_set& ignore_ops,
                    
                    upwards(reorder_commutative()),
                    when(downwards(reduce_fraction()),
-                        ignore_ops.find(id::div) == ignore_ops.end())
+                        ignore_ops.find(id::div) == ignore_ops.end()),
+                   "seq_without_factorize_distribute"
                    );
 
     static iterative iter_without_factorize_distribute =
-        iterative(seq_without_factorize_distribute);
+        iterative(seq_without_factorize_distribute,
+                  "iter_without_factorize_distribute");
 
     static sequential complete_factorize = 
         sequential(downwards(reduce_factorize()),
                    when(downwards(reduce_factorize_fraction()),
                         ignore_ops.find(id::div) == ignore_ops.end()),
-                   seq_without_factorize_distribute);
+                   seq_without_factorize_distribute,
+                   "complete_factorize");
+    
+    static downwards complete_distribute =
+        downwards(reduce_distribute(iter_without_factorize_distribute));
 
     static iterative res =
         iterative(sequential(seq_without_factorize_distribute,
                              complete_factorize,
-                             downwards(reduce_distribute(iter_without_factorize_distribute)),
-                             // we factorize again to be sure not to
-                             // enter in an infinite
-                             // factorize/distribute loop
-                             complete_factorize
+                             ignore_size_increase(sequential(complete_distribute,
+                                                             // we factorize
+                                                             // again to be sure
+                                                             // not to enter in
+                                                             // an infinite
+                                                             // factorize/distribute
+                                                             // loop
+                                                             complete_factorize))
                              ));
     return res;
   }
