@@ -48,6 +48,7 @@ int main(int argc,char** argv) {
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
     string input_table_file;
+    unsigned int nsamples;
     unsigned long max_evals;
     long result_count;
     bool output_bscore;
@@ -83,6 +84,8 @@ int main(int argc,char** argv) {
          "maximum number of demes to generate and optimize, negative means no generation limit")
         ("input-file,i", value<string>(&input_table_file),
          "input table file")
+        ("nsamples,b", value<unsigned int>(&nsamples)->default_value(100),
+         "number of samples from the input table, function or problem. In case an input table is provided (option -i) which contains less than or equal to nsamples then all samples of the input table are used, otherwise they are randomly selected to get down to nsamples")
         ("log-level,l", value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter")
         ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
@@ -188,6 +191,7 @@ int main(int argc,char** argv) {
         istreamTable<truth_table_inputs, partial_truth_table, bool>(in,
                                                                     inputtable,
                                                                     booltable);
+        subsampleTable(inputtable, booltable, nsamples, rng);
         unsigned int arity = inputtable[0].size();
         
         type_tree tt(id::lambda_type);
@@ -227,6 +231,7 @@ int main(int argc,char** argv) {
         istreamTable<contin_table_inputs, contin_table, contin_t>(in,
                                                                   inputtable,
                                                                   contintable);
+        subsampleTable(inputtable, contintable, nsamples, rng);
         unsigned int arity = inputtable[0].size();
 
         type_tree tt(id::lambda_type);

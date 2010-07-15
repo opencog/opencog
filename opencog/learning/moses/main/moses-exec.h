@@ -53,7 +53,6 @@ using namespace reduct;
 using opencog::logger;
 using namespace ant_combo;
 
-
 static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing

@@ -24,14 +24,15 @@
 #ifndef _OPENCOG_TABLE_H
 #define _OPENCOG_TABLE_H
 
+#include <opencog/util/RandGen.h>
 #include <opencog/util/printContainer.h>
-
+#include <opencog/util/dorepeat.h>
 #include "eval.h"
-
-using opencog::ostreamContainer;
 
 namespace combo
 {
+
+using opencog::RandGen;
 
 /////////////////
 // Truth table //
@@ -143,6 +144,24 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
         }
     }
     return in;
+}
+
+/**
+ * template to subsample input and output tables, after subsampling
+ * the table have size min(nsamples, *table.size())
+ */
+template<typename IT, typename OT>
+void subsampleTable(IT& table_inputs, OT& output_table,
+                    unsigned int nsamples, RandGen& rng) {
+    OC_ASSERT(table_inputs.size() == output_table.size());
+    if(nsamples < output_table.size()) {
+        unsigned int nremove = output_table.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(output_table.size());
+            table_inputs.erase(table_inputs.begin()+ridx);
+            output_table.erase(output_table.begin()+ridx);
+        }
+    }
 }
 
 /**
@@ -486,14 +505,14 @@ public:
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::truth_table& tt)
 {
-    return ostreamContainer(out, tt);
+    return opencog::ostreamContainer(out, tt);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::contin_matrix& cm)
 {
     for(combo::const_cm_it i = cm.begin(); i != cm.end(); ++i) {
-        ostreamContainer(out, *i, "\t");
+        opencog::ostreamContainer(out, *i, "\t");
     }
     return out;
 }
@@ -508,7 +527,7 @@ inline std::ostream& operator<<(std::ostream& out,
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::contin_table& ct)
 {
-    return ostreamContainer(out, ct);
+    return opencog::ostreamContainer(out, ct);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
