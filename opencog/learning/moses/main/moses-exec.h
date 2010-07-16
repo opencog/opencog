@@ -93,7 +93,6 @@ void metapop_moses_results(opencog::RandGen& rng,
         metapop(rng, bases, tt, si, reduce_all, sc, bsc, count_base, opt);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
     metapop.print_best(result_count, output_complexity, output_bscore);
-
 }
 
 /**
