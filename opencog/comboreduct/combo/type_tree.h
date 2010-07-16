@@ -354,6 +354,14 @@ arity_t infer_arity(const combo_tree& tr);
 //for instance if tr==+(#1 #5) it returns 5
 arity_t explicit_arity(const combo_tree& tr);
 
+// helpers to defined type_trees
+
+// given a type (of both inputs and output) define a type tree as a
+// function with arity iotype inputs and iotype output
+// for instance declare_function(type_tree(id::boolean_type, 4)) returns
+// ->(boolean boolean boolean boolean boolean)
+type_tree declare_function(type_tree iotype, arity_t arity);
+
 } //~namespace combo
 
 std::ostream& operator<<(std::ostream&, const combo::type_node&);

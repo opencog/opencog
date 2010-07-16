@@ -97,9 +97,9 @@ struct bscore_based_score : public unary_function<combo_tree, score_t>
  * indended function.
  */
 struct logical_score : public unary_function<combo_tree, int> {
-    template<typename Scoring>
-    logical_score(const Scoring& score, int a, opencog::RandGen& _rng)
-            : target(score, a, _rng), arity(a), rng(_rng) { }
+    template<typename Func>
+    logical_score(const Func& func, int a, opencog::RandGen& _rng)
+            : target(func, a, _rng), arity(a), rng(_rng) { }
 
     int operator()(const combo_tree& tr) const;
 
@@ -114,9 +114,11 @@ struct logical_score : public unary_function<combo_tree, int> {
  * matches the output of the intended function (lower is better).
  */
 struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
-    template<typename Scoring>
-    logical_bscore(const Scoring& score, int a, opencog::RandGen& _rng)
-            : target(score, a, _rng), arity(a), rng(_rng) { }
+    template<typename Func>
+    logical_bscore(const Func& func, int a, opencog::RandGen& _rng)
+            : target(func, a, _rng), arity(a), rng(_rng) { }
+    logical_bscore(const combo_tree& tr, int a, opencog::RandGen& _rng)
+            : target(tr, a, _rng), arity(a), rng(_rng) { }
 
     behavioral_score operator()(const combo_tree& tr) const;
 
@@ -126,11 +128,11 @@ struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
 };
 
 struct contin_score : public unary_function<combo_tree, score_t> {
-    template<typename Scoring>
-    contin_score(const Scoring& score,
+    template<typename Func>
+    contin_score(const Func& func,
                  const contin_table_inputs& r,
                  opencog::RandGen& _rng)
-            : target(score, r), cti(r), rng(_rng) { }
+            : target(func, r), cti(r), rng(_rng) { }
 
     contin_score(const combo::contin_table& t,
                  const contin_table_inputs& r,
@@ -145,11 +147,11 @@ struct contin_score : public unary_function<combo_tree, score_t> {
 };
 
 struct contin_score_sqr : public unary_function<combo_tree,score_t> {
-    template<typename Scoring>
-    contin_score_sqr(const Scoring& score,
+    template<typename Func>
+    contin_score_sqr(const Func& func,
                      const contin_table_inputs& r,
                      opencog::RandGen& _rng)
-        : target(score,r),cti(r),rng(_rng) { }
+        : target(func,r),cti(r),rng(_rng) { }
     
     contin_score_sqr(const combo::contin_table& t,
                      const contin_table_inputs& r,
@@ -164,11 +166,11 @@ struct contin_score_sqr : public unary_function<combo_tree,score_t> {
 };
 
 struct contin_bscore : public unary_function<combo_tree, behavioral_score> {
-    template<typename Scoring>
-    contin_bscore(const Scoring& score,
+    template<typename Func>
+    contin_bscore(const Func& func,
                   const contin_table_inputs& r,
                   opencog::RandGen& _rng)
-        : target(score, r), cti(r), rng(_rng) { }
+        : target(func, r), cti(r), rng(_rng) { }
 
     contin_bscore(const combo::contin_table& t,
                   const contin_table_inputs& r,

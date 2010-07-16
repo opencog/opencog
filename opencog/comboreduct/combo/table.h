@@ -163,6 +163,20 @@ void subsampleTable(IT& table_inputs, OT& output_table,
         }
     }
 }
+/**
+ * like above but subsample only the input table
+ */
+template<typename IT>
+void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
+    if(nsamples < table_inputs.size()) {
+        unsigned int nremove = table_inputs.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(table_inputs.size());
+            table_inputs.erase(table_inputs.begin()+ridx);
+        }
+    }
+}
+
 
 /**
  * truth_table_inputs, matrix of booleans, each row corresponds to a

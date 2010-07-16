@@ -1168,6 +1168,16 @@ arity_t explicit_arity(const combo_tree& tr)
     return res;
 }
 
+type_tree declare_function(type_tree iotype, arity_t arity)
+{
+    type_tree res(id::lambda_type);
+    type_tree::iterator root = res.begin();
+    res.append_children(root, arity+1);
+    for(type_tree::sibling_iterator sib = root.begin(); sib!= root.end(); sib++)
+        res.replace(sib, iotype.begin());
+    return res;
+}
+
 }//~namespace combo
 
 

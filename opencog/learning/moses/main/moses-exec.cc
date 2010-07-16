@@ -61,12 +61,32 @@ combo_tree type_to_exemplar(type_node type) {
     return combo_tree();
 }
 
+/**
+ * determine the alphabet size given the type_tree of the problem and
+ * the of operator that are ignored
+ */
+int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
+    arity_t arity = type_tree_arity(tt);
+    type_node output_type = *type_tree_output_type_tree(tt).begin();
+    if(output_type == id::boolean_type) {
+        return 3 + arity;
+    } else if(output_type == id::contin_type) {
+        // set alphabet size, 8 is roughly the number of operators
+        // in contin formula, it will have to be adapted
+        return 8 + arity - ignore_ops.size();
+    } else {
+        std::cerr << "type " << tt << "not supported yet" << std::endl;
+        exit(1);
+    }
+}
+
 int main(int argc,char** argv) { 
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
     string input_table_file;
     string problem;
+    string combo_str;
     unsigned int problem_size;
     int nsamples;
     float min_rand_input;
@@ -107,7 +127,9 @@ int main(int argc,char** argv) {
         ("input-file,i", value<string>(&input_table_file),
          "input table file, the maximum number of samples is the number of rows in the file.")
         ("problem,h", value<string>(&problem)->default_value("it"),
-         string("problem to solve, supported problems are regression based on input table (").append(it).append("), regression based on function (").append(fu).append("), even parity (").append(pa).append("), disjunction (").append("dj").append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").append(").").c_str())
+         string("problem to solve, supported problems are regression based on input table (").append(it).append("), regression based on combo program (").append(cp).append("), even parity (").append(pa).append("), disjunction (").append("dj").append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").append(").").c_str())
+        ("combo-program,y", value<string>(&combo_str),
+         string("combo program to learn, use when the problem ").append(cp).append(" is selected (option -h).").c_str())
         ("problem-size,k", value<unsigned int>(&problem_size)->default_value(5),
          string("for even parity (").append(pa).append(") and disjunction (").append(dj).append(") the problem size corresponds to the arity, for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).append(") the problem size corresponds to the order o.").c_str())
         ("nsamples,b", value<int>(&nsamples)->default_value(-1),
@@ -195,7 +217,8 @@ int main(int argc,char** argv) {
         if(!in.is_open()) {
             if(input_table_file.empty()) {
                 std::cerr << "the input file is empty" << std::endl;
-                std::cerr << "To indicate the file to open use the option -i or --input-file" << std::endl;
+                std::cerr << "To indicate the file to open use the option"
+                          << " -i or --input-file" << std::endl;
             } else {
                 std::cerr << "Could not open " 
                           << input_table_file << std::endl;
@@ -213,24 +236,14 @@ int main(int argc,char** argv) {
                 subsampleTable(inputtable, booltable, nsamples, rng);
             unsigned int arity = inputtable[0].size();
         
-            type_tree tt(id::lambda_type);
-            tt.append_children(tt.begin(), output_type, arity + 1);
+            type_tree tt = declare_function(type_tree(output_type), arity);
 
-            // set alphabet size
-            int alphabet_size = 3 + arity - ignore_ops.size();
+            int as = alphabet_size(tt, ignore_ops);
 
-            typedef occam_truth_table_bscore BScore;
-            // typedef opencog::lru_cache<BScore> BScoreCache;
-            typedef opencog::simple_cache<BScore> BScoreCache;
-            typedef bscore_based_score<BScoreCache> Score;
-            // typedef opencog::lru_cache<Score> ScoreCache;
-            typedef opencog::simple_cache<Score> ScoreCache;        
-            BScore bscore(booltable, inputtable, prob, alphabet_size, rng);
-            BScoreCache bscore_cache(cache_size, bscore);
-            Score score(bscore_cache);
-            ScoreCache score_cache(cache_size, score);
+            occam_truth_table_bscore bscore(booltable, inputtable,
+                                            prob, as, rng);
             metapop_moses_results(rng, exemplars, tt, logical_reduction(),
-                                  reduce_all, score_cache, bscore_cache,
+                                  reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops,
                                   result_count, output_complexity, output_bscore);
@@ -243,28 +256,22 @@ int main(int argc,char** argv) {
                          contin_table, contin_t>(in, inputtable, contintable);
             if(nsamples>0)
                 subsampleTable(inputtable, contintable, nsamples, rng);
+
             unsigned int arity = inputtable[0].size();
+            type_tree tt = declare_function(type_tree(output_type), arity);
+            int as = alphabet_size(tt, ignore_ops);
 
-            type_tree tt(id::lambda_type);
-            tt.append_children(tt.begin(), output_type, arity + 1);
+            // if no exemplar has been provided in option use the default
+            // contin_type exemplar (+)
+            if(exemplars.empty()) {            
+                exemplars.push_back(type_to_exemplar(id::contin_type));
+            }
 
-            // set alphabet size, 8 is roughly the number of operators
-            // in contin formula, it will have to be adapted
-            int alphabet_size = 8 + arity - ignore_ops.size();
-
-            typedef occam_contin_bscore BScore;
-            // typedef opencog::lru_cache<BScore> BScoreCache;
-            typedef opencog::simple_cache<BScore> BScoreCache;
-            typedef bscore_based_score<BScoreCache> Score;
-            // typedef opencog::lru_cache<Score> ScoreCache;
-            typedef opencog::simple_cache<Score> ScoreCache;
-            BScore bscore(contintable, inputtable, variance, alphabet_size, rng);
-            BScoreCache bscore_cache(cache_size, bscore);
-            Score score(bscore_cache);
-            ScoreCache score_cache(cache_size, score);
+            occam_contin_bscore bscore(contintable, inputtable,
+                                       variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
-                                  reduce_all, score_cache, bscore_cache,
+                                  reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops,
                                   result_count, output_complexity,
@@ -274,15 +281,109 @@ int main(int argc,char** argv) {
                       << " unhandled for the moment" << std::endl;
             return 1;
         }
-    } else if(problem == fu) { // regression based on function
-        //TODO
+    } else if(problem == cp) { // regression based on combo program
+        if(combo_str.empty()) {
+            std::cerr << "You must specify which combo tree to learn (option -y)"
+                      << std::endl;
+            return 1;
+        }
+        // get the combo_tree and infer its type
+        stringstream ss;
+        combo_tree tr;
+        ss << combo_str;
+        ss >> tr;
+        type_tree tt = infer_type_tree(tr);
+
+        if(is_well_formed(tt)) {
+            type_node output_type = *type_tree_output_type_tree(tt).begin();
+            arity_t arity = type_tree_arity(tt);
+            // if no exemplar has been provided in option use the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(type_to_exemplar(output_type));
+            }
+            if(output_type == id::boolean_type) {
+                // @todo: Occam's razor and nsamples is not taken into account
+                logical_bscore bscore(tr, arity, rng);
+                metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+                                      reduce_all, bscore, cache_size,
+                                      count_base, opt_algo,
+                                      max_evals, max_gens, ignore_ops,
+                                      result_count, output_complexity,
+                                      output_bscore);                
+            }
+            else if (output_type == id::contin_type) {
+                // @todo: introduce some noise optionally
+                if(nsamples<=0)
+                    nsamples = default_nsamples;
+                
+                contin_table_inputs inputtable(nsamples, arity, rng,
+                                               max_rand_input, min_rand_input);
+                contin_table table_outputs(tr, inputtable, rng);
+
+                int as = alphabet_size(tt, ignore_ops);
+
+                occam_contin_bscore bscore(table_outputs, inputtable,
+                                           variance, as, rng);
+                metapop_moses_results(rng, exemplars, tt,
+                                      contin_reduction(ignore_ops, rng),
+                                      reduce_all, bscore, cache_size,
+                                      count_base, opt_algo,
+                                      max_evals, max_gens, ignore_ops,
+                                      result_count, output_complexity,
+                                      output_bscore);
+            } else {
+                std::cerr << "type " << tt
+                          << " currently not suppoerted" << std::endl;
+                return 1;
+            }
+        }
+        else {
+            std::cerr << "apparently the combo tree " 
+                      << tr << "is not well formed" << std::endl;
+            return 1;
+        }
     } else if(problem == pa) { // even parity
-        //TODO
+        // @todo: for the moment occam's razor and partial truth table are ignored
+        unsigned int arity = problem_size;
+        even_parity func;
+
+        // if no exemplar has been provided in option use the default
+        // contin_type exemplar (and)
+        if(exemplars.empty()) {
+            exemplars.push_back(type_to_exemplar(id::boolean_type));
+        }
+
+        type_tree tt = declare_function(type_tree(id::boolean_type), arity);
+        logical_bscore bscore(func, arity, rng);
+        metapop_moses_results(rng, exemplars, tt,
+                              logical_reduction(),
+                              reduce_all, bscore, cache_size,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity,
+                              output_bscore);        
     } else if(problem == dj) { // disjunction
-        //TODO
+        // @todo: for the moment occam's razor and partial truth table are ignored
+        unsigned int arity = problem_size;
+        disjunction func;
+
+        // if no exemplar has been provided in option use the default
+        // contin_type exemplar (and)
+        if(exemplars.empty()) {            
+            exemplars.push_back(type_to_exemplar(id::boolean_type));
+        }
+
+        type_tree tt = declare_function(type_tree(id::boolean_type), arity);
+        logical_bscore bscore(func, arity, rng);
+        metapop_moses_results(rng, exemplars, tt,
+                              logical_reduction(),
+                              reduce_all, bscore, cache_size,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity,
+                              output_bscore);        
     } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
         unsigned int arity = 1;
-        unsigned int default_nsamples = 20;
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (+)
@@ -290,30 +391,18 @@ int main(int argc,char** argv) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
         
-        type_tree tt(id::lambda_type);
-        tt.append_children(tt.begin(), id::contin_type, arity+1);
+        type_tree tt = declare_function(type_tree(id::contin_type), arity);
 
         contin_table_inputs rands((nsamples>0? nsamples : default_nsamples),
                                   arity, rng);
 
-        // set alphabet size, 8 is roughly the number of operators
-        // in contin formula, it will have to be adapted
-        int alphabet_size = 8 + arity - ignore_ops.size();
+        int as = alphabet_size(tt, ignore_ops);
 
-        typedef occam_contin_bscore BScore;
-        // typedef opencog::lru_cache<BScore> BScoreCache;
-        typedef opencog::simple_cache<BScore> BScoreCache;
-        typedef bscore_based_score<BScoreCache> Score;
-        // typedef opencog::lru_cache<Score> ScoreCache;
-        typedef opencog::simple_cache<Score> ScoreCache;
-        BScore bscore(simple_symbolic_regression(problem_size),
-                      rands, variance, alphabet_size, rng);
-        BScoreCache bscore_cache(cache_size, bscore);
-        Score score(bscore_cache);
-        ScoreCache score_cache(cache_size, score);
+        occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
+                                   rands, variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
-                              reduce_all, score_cache, bscore_cache,
+                              reduce_all, bscore, cache_size,
                               count_base, opt_algo,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,

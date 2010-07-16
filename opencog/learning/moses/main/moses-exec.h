@@ -53,9 +53,12 @@ using namespace reduct;
 using opencog::logger;
 using namespace ant_combo;
 
+// default number of samples to describe a problem
+static const unsigned int default_nsamples = 20;
+
 // problems
 static const string it="it"; // regression based on input table
-static const string fu="fu"; // regression based on function (combo) to learn
+static const string cp="cp"; // regression based on combo program to learn
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
 static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
@@ -70,14 +73,14 @@ static const string hc="hc"; // hillclimbing
  * 2) run moses
  * 3) print the results
  */
-template<typename Scoring, typename BScoring, typename Optimization>
+template<typename Score, typename BScore, typename Optimization>
 void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si,
                            bool reduce_all,
-                           const Scoring& sc,
-                           const BScoring& bsc,
+                           const Score& sc,
+                           const BScore& bsc,
                            bool count_base,
                            const Optimization& opt,
                            int max_evals,
@@ -86,7 +89,7 @@ void metapop_moses_results(opencog::RandGen& rng,
                            long result_count,
                            bool output_complexity,
                            bool output_bscore) {
-    metapopulation<Scoring, BScoring, Optimization> 
+    metapopulation<Score, BScore, Optimization> 
         metapop(rng, bases, tt, si, reduce_all, sc, bsc, count_base, opt);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
     metapop.print_best(result_count, output_complexity, output_bscore);
@@ -96,14 +99,14 @@ void metapop_moses_results(opencog::RandGen& rng,
 /**
  * like above but takes the algo type instead of the algo template
  */
-template<typename Scoring, typename BScoring>
+template<typename Score, typename BScore>
 void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
                            const reduct::rule& si,
                            bool reduce_all,
-                           const Scoring& sc,
-                           const BScoring& bsc,
+                           const Score& sc,
+                           const BScore& bsc,
                            bool count_base,
                            const string& opt_algo,
                            int max_evals,
@@ -133,6 +136,51 @@ void metapop_moses_results(opencog::RandGen& rng,
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
         exit(1);
+    }
+}
+
+/**
+ * like above but assumes that the score is bscore based
+ */
+template<typename BScore>
+void metapop_moses_results(opencog::RandGen& rng,
+                           const std::vector<combo_tree>& bases,
+                           const combo::type_tree& tt,
+                           const reduct::rule& si,
+                           bool reduce_all,
+                           const BScore& bsc,
+                           unsigned long cache_size,
+                           bool count_base,
+                           const string& opt_algo,
+                           int max_evals,
+                           int max_gens,
+                           const vertex_set& ignore_ops,
+                           long result_count,
+                           bool output_complexity,
+                           bool output_bscore) {
+    if(cache_size > 0) {
+        // until lry_cache is fixed (can handle expection half-way),
+        // simple_cache is used
+        // typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef opencog::simple_cache<BScore> BScoreCache;
+        typedef bscore_based_score<BScoreCache> Score;
+        // typedef opencog::lru_cache<Score> ScoreCache;
+        typedef opencog::simple_cache<Score> ScoreCache;        
+        BScoreCache bscore_cache(cache_size, bsc);
+        Score score(bscore_cache);
+        ScoreCache score_cache(cache_size, score);
+        metapop_moses_results(rng, bases, tt, si,
+                              reduce_all, score_cache, bscore_cache,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity, output_bscore);
+    } else {
+        bscore_based_score<BScore> score(bsc);
+        metapop_moses_results(rng, bases, tt, si,
+                              reduce_all, score, bsc,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity, output_bscore);
     }
 }
 
