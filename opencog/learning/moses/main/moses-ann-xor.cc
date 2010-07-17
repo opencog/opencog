@@ -99,6 +99,3 @@ int main(int argc, char** argv)
     //write out the best score (to be used in parameter sweep)
     cout << metapop.best_score().first << endl;
 }
-
-
-
