@@ -43,19 +43,21 @@ int main(int argc, char** argv)
         exit(1);
     }
     
-    //read in the seed combo tree from stdin
+    // read in the seed combo tree from stdin
+    // a default seed is provided in file xor_tree
     combo_tree tr;
     cin >> tr; 
     
     opencog::MT19937RandGen rng(seed);
 
-    //this will let expansion know that we are
-    //dealing with an ANN
+    // this will let representation building know that we are dealing
+    // with an ANN, what it says is that the type of combo_tree to
+    // evolve are ANN generators (no input, output an ANN)
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(), id::ann_type, 1);
 
 
-    //XOR TASK
+    // binary XOR task
     ann_score score;
     ann_bscore bscore;
 
@@ -76,10 +78,10 @@ int main(int argc, char** argv)
     
     
     //look at xor outputs
-    double inputs[4][3] = { {0.0, 0.0,1.0}, 
-                                {0.0, 1.0,1.0}, 
-                                {1.0, 0.0,1.0},
-                                {1.0, 1.0,1.0}};
+    double inputs[4][3] = { {0.0, 0.0, 1.0}, 
+                            {0.0, 1.0, 1.0}, 
+                            {1.0, 0.0, 1.0},
+                            {1.0, 1.0, 1.0}};
     
     int depth = bestnet.feedforward_depth();
     

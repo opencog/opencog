@@ -8,7 +8,12 @@
 #include <fstream>
 #include <stdlib.h>
 #include <math.h>
+
+#include <opencog/util/printContainer.h>
+
 using namespace std;
+
+using opencog::printContainer;
 
 //anns are composed of nodes and connections
 class ann;
@@ -27,7 +32,7 @@ typedef vector<ann_connection*>::iterator ann_connection_it;
 //different node types
 enum ann_nodetype { nodetype_input, nodetype_hidden, nodetype_output };
 
-//a connecion is simply a weight between two nodes
+//a connection is simply a weight between two nodes
 class ann_connection
 {
 public:
@@ -97,8 +102,9 @@ public:
     }
 
     friend ostream& operator<<(ostream& os, const ann_node* n) {
-        if (n->nodetype == nodetype_input) os << "input" << endl;
-        else if (n->nodetype == nodetype_hidden) os << "hidden" << endl;
+        os << n->id << ":";
+        if (n->nodetype == nodetype_input) os << "input";
+        else if (n->nodetype == nodetype_hidden) os << "hidden";
         else if (n->nodetype == nodetype_output) os << "output";
         return os;
     }
@@ -139,7 +145,9 @@ public:
         while(dirty)
         {
            dirty = false; 
-           //remove impact-less connections
+           // remove impact-less connections. @todo: the code can be
+           // both simpler and more efficient by having
+           // remove_connection return the next iterator
            for (iter = connections.begin();iter != connections.end(); iter++)
            {
               if((*iter)->weight != 0.0)
@@ -150,20 +158,22 @@ public:
               if (iter==connections.end())
                  break;
            }
-    
+
            //remove disconnected hidden neurons
            ann_node_it node_iter;
            for (node_iter = hidden.begin(); node_iter != hidden.end(); 
                    node_iter++)
            {
-              //if there are no outgoing connections
-              //this neuron has no impact
-              if((*node_iter)->out_connections.size()==0)
-              {
-                remove_node(*node_iter);
-                node_iter = hidden.begin();
-                dirty=true;
-              }
+               //if there are no outgoing connections
+               //this neuron has no impact
+               if((*node_iter)->out_connections.size()==0)
+               {
+                   remove_node(*node_iter);
+                   node_iter = hidden.begin();
+                   dirty=true;
+                   if (node_iter==hidden.end())
+                       break;
+               }
            }
         }
        
@@ -520,30 +530,22 @@ public:
     
     void remove_from_vec(ann_node* n, vector<ann_node*> & l)
     {
-     ann_node_it loc;
-     for(loc=l.begin();loc!=l.end();loc++)
-         if (*loc==n)
-             break;
-     if(loc!=l.end())
-         l.erase(loc);
+        ann_node_it loc = find(l.begin(), l.end(), n);
+        if(loc!=l.end())
+            l.erase(loc);
     }
 
     void remove_from_vec(ann_connection* c, vector<ann_connection*>& l)
     {
-     ann_connection_it loc;
-     
-     for(loc=l.begin();loc!=l.end();loc++)
-         if (*loc==c)
-             break;
-
-     if(loc!=l.end())
-         l.erase(loc);
+        ann_connection_it loc = find(l.begin(), l.end(), c);
+        if(loc!=l.end())
+            l.erase(loc);
     } 
-
+    
     void delete_connections(vector<ann_connection*>& c)
     { 
         ann_connection_it iter;
-        for(iter=c.begin(); iter!= c.end(); iter++)
+        for(iter=c.begin(); iter!= c.end();)
         {
             remove_connection(*iter);
             iter=c.begin();
@@ -565,11 +567,11 @@ public:
 
     bool remove_connection(ann_connection* conn)
     {
-     remove_from_vec(conn,connections);
-     remove_from_vec(conn,conn->source->out_connections);
-     remove_from_vec(conn,conn->dest->in_connections);
-     delete conn;
-     return true;   
+        remove_from_vec(conn,connections);
+        remove_from_vec(conn,conn->source->out_connections);
+        remove_from_vec(conn,conn->dest->in_connections);
+        delete conn;
+        return true;   
     }
 
     //add a new node to the ANN

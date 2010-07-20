@@ -47,12 +47,10 @@ struct AnnPole2NVFitnessFunction : public unary_function<combo_tree, contin_t> {
     tree_transform tt;
     ann nn = tt.decodify_tree(tr);
 
-    CartPole *the_cart;
-    the_cart = new CartPole(true,velocity);
-    the_cart->nmarkov_long=false;
-    the_cart->generalization_test=false;
-    contin_t fitness = -100000.0+the_cart->evalNet(&nn);
-    delete the_cart; 
+    CartPole the_cart(true,velocity);
+    the_cart.nmarkov_long=false;
+    the_cart.generalization_test=false;
+    contin_t fitness = -100000.0+the_cart.evalNet(&nn);
     return fitness;
  }
 
@@ -66,12 +64,10 @@ struct AnnPole2FitnessFunction : public unary_function<combo_tree, contin_t> {
     tree_transform tt;
     ann nn = tt.decodify_tree(tr);
 
-    CartPole *the_cart;
-    the_cart = new CartPole(true,velocity);
-    the_cart->nmarkov_long=false;
-    the_cart->generalization_test=false;
-    contin_t fitness = -100000+the_cart->evalNet(&nn);
-    delete the_cart; 
+    CartPole the_cart(true,velocity);
+    the_cart.nmarkov_long=false;
+    the_cart.generalization_test=false;
+    contin_t fitness = -100000+the_cart.evalNet(&nn);
     return fitness;
  }
 
@@ -214,11 +210,13 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
 
         tree_transform tt;
 
-        //xor_problem
-        contin_t inputs[4][3] = { {0.0, 0.0,1.0}, 
-                                {0.0, 1.0,1.0}, 
-                                {1.0, 0.0,1.0},
-                                {1.0, 1.0,1.0}};
+        // binary xor_problem. The third input is always 1.0, this is
+        // "to potentially supply a constant 'bias' to influence the
+        // behavior of other neurons" (Joel Lehman)
+        contin_t inputs[4][3] = { {0.0, 0.0, 1.0}, 
+                                  {0.0, 1.0, 1.0}, 
+                                  {1.0, 0.0, 1.0},
+                                  {1.0, 1.0, 1.0}};
         contin_t outputs[4] = {0.0, 1.0, 1.0, 0.0};
 
         ann nn = tt.decodify_tree(tr);

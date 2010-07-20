@@ -91,7 +91,7 @@ namespace opencog {
                         bool empty_lr = true)
     {
         ostreamContainer(std::cout, from, to,
-                         left, delimiter, right, empty_lr);
+                         delimiter, left, right, empty_lr);
     }
     template<class Con>
     void printContainer(const Con& container,
@@ -101,7 +101,7 @@ namespace opencog {
                         bool empty_lr = true)
     {
         ostreamContainer(std::cout, container,
-                         left, delimiter, right, empty_lr);
+                         delimiter, left, right, empty_lr);
     }
 
     /**
@@ -117,7 +117,7 @@ namespace opencog {
     {
         std::stringstream ss;
         return ostreamContainer(ss, from, to,
-                                left, delimiter, right, empty_lr).str();
+                                delimiter, left, right, empty_lr).str();
     }
     template<class Con>
     std::string containerToStr(const Con& container,
@@ -128,7 +128,7 @@ namespace opencog {
     {
         std::stringstream ss;
         return ostreamContainer(ss, container,
-                                left, delimiter, right, empty_lr).str();
+                                delimiter, left, right, empty_lr).str();
     }
     
 } // ~namespace opencog

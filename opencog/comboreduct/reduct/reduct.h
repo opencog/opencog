@@ -38,7 +38,7 @@ struct rule {
     virtual ~rule() {}
     virtual void operator()(combo_tree&,combo_tree::iterator) const=0;
     virtual rule* clone() const=0;
-        
+
     void operator()(combo_tree& tr) const { 
         if (!tr.empty())
             (*this)(tr,tr.begin());

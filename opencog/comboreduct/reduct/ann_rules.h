@@ -50,6 +50,8 @@ struct tree_transform {
        
         combo_tree tr(ann_type(tag,id));
         
+        std::cout << "NEW TR: " << tr << std::endl;
+
         //only expand a node once
         //that is, one instance of the node
         //will have all of its connections
@@ -76,11 +78,21 @@ struct tree_transform {
             //to the memory node (which we do not want to expand)
             bool been_visited = node->memory_ptr->visited;
             node->memory_ptr->visited=true;
-            tr.insert_subtree(tr.begin().begin(),
-                    encode_node(the_ann,node->memory_ptr).begin());
+
+            std::cout << "TR: " << tr << std::endl;
+
+            combo_tree encoded_tr = encode_node(the_ann,node->memory_ptr);
+
+            std::cout << "ENCODED TR: " << encoded_tr << std::endl;
+
+            if(tr.begin().is_childless())
+                tr.replace(tr.append_child(tr.begin()), encoded_tr.begin());
+            else tr.insert_subtree(tr.begin().begin(), encoded_tr.begin());
             node->memory_ptr->visited=been_visited;
-            //cout << tr << endl;
-            //cout << "DONE WITH MEMORY NODE.." << endl;
+
+            cout << tr << endl;
+            cout << "DONE WITH MEMORY NODE.." << endl;
+
             return tr;
         }
 
@@ -91,9 +103,19 @@ struct tree_transform {
                 cons != node->in_connections.end();
                 cons++)
         {
-            tr.insert_subtree(tr.begin().begin(),encode_node(the_ann,
-                        (*cons)->source).begin());
+            std::cout << "TR 1: " << tr << std::endl;
+
+            //tr.replace(tr.append_child(tr.begin()),
+            //           encode_node(the_ann, (*cons)->source).begin());
+
+            combo_tree tmp = encode_node(the_ann, (*cons)->source);
+
+            std::cout << "TMP: " << tmp << std::endl;
+
+            tr.insert_subtree(tr.begin().begin(), tmp.begin());
+            std::cout << "TR 2: " << tr << std::endl;
             tr.insert_after(tr.begin().last_child(),(*cons)->weight);
+            std::cout << "TR 3: " << tr << std::endl;
         }
         return tr;
     }
@@ -112,8 +134,20 @@ struct tree_transform {
                 node_it++)
         {
             combo_tree str = encode_node(the_ann,*node_it);
-            tr.insert_subtree(tr.begin().begin(),str.begin());
+
+            std::cout << "STR: " << str << std::endl;
+
+            std::cout << "TR BEFORE:  " << tr << std::endl;
+
+            if(tr.begin().is_childless())
+                tr.replace(tr.append_child(tr.begin()), str.begin());
+            else tr.insert_subtree(tr.begin().begin(),str.begin());
+
+            std::cout << "TR AFTER:  " << tr << std::endl;
         }
+
+        std::cout << "TR FINAL: " << tr << std::endl;
+
         return tr;
     }
 
@@ -213,6 +247,7 @@ struct tree_transform {
 namespace reduct {
 
 //ann reduction rule
+// WARNING: this rule should only be used alone, not combined with meta_rules
 struct ann_rule : public crule<ann_rule> {
     ann_rule() : crule<ann_rule>::crule("ann_rule") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const
@@ -220,9 +255,7 @@ struct ann_rule : public crule<ann_rule> {
         tree_transform trans;
         ann net = trans.decodify_tree(tr);
         net.reduce();
-        combo_tree new_tr = trans.encode_ann(net);
-        tr.clear();
-        tr.insert_subtree(tr.begin(),new_tr.begin());
+        tr = trans.encode_ann(net);
     }
 };
 
