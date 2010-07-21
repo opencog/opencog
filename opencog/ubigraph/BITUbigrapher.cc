@@ -156,6 +156,10 @@ void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot) {
 
 void BITUbigrapher::drawBITNode ( BITNode* node)
 {
+    if (node->rule && !node->iscomposer()) {
+        return;
+    }
+
     logger().fine("Drawing BITNode with %d arg slots", node->children.size());
     //cout << "Drawing BITNode with " << children.size() << " args" << endl;
 
@@ -222,6 +226,21 @@ void BITUbigrapher::hideBITNode(BITNode* node) {
 
     //ubigraph_set_vertex_attribute(node_id, "visible", "false");
     ubigraph_remove_vertex(node_id);
+}
+
+void BITUbigrapher::foundResult(BITNode* node) {
+    int node_id = findBITNodeID(node);
+
+    // In case it was a generator and wasn't drawn previously.
+    drawBITNode(node);
+
+    ubigraph_set_vertex_attribute(node_id, "color", "#ff0000");
+
+    foreach(parent_link<BITNode> p, node->parents) {
+        unsigned int arg_id = findBITNodeID(p.link) + p.parent_arg_i + 1;
+        //ubigraph_set_vertex_attribute(arg_id, "color", "#884400");
+        ubigraph_set_vertex_attribute(arg_id, "color", "#880000");
+    }
 }
 
 void BITUbigrapher::graph()

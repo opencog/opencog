@@ -716,6 +716,10 @@ void BITNode::addDirectResult(Btr<set<BoundVertex> > directResult, spawn_mode sp
             direct_results->insert(bv);
     }
 
+#ifdef USE_BITUBIGRAPHER
+    haxx::BITUSingleton->foundResult(this);
+#endif // USE_BITUBIGRAPHER
+
     // Check whether we need to update the Best Direct Result Under Me
     bool bdrum_changed = false;
     foreach(BoundVertex bv, *directResult)
@@ -1416,6 +1420,11 @@ void BITNode::EvaluateWith(unsigned int arg_i, VtreeProvider* new_result)
             if (!a->empty() && (rule->hasFreeInputArity() 
                                 || a->size() >= rule->getInputFilter().size()))
             {
+#ifdef USE_BITUBIGRAPHER
+                // Calls it multiple times, but no problem.
+                haxx::BITUSingleton->foundResult(this);
+#endif // USE_BITUBIGRAPHER
+
                 /// Arg vector size excession prohibited.
 
                 const vector<VtreeProvider*>& rule_args = *a;
@@ -1503,13 +1512,18 @@ next_args:; //! @todo replace goto!
     {
         tlog(-3, "Target produced!\n");
 
-        if (this != root && root)
+        if (this != root && root) // i.e. if this is the root variable scoper (or a clone of it)
         {
             foreach(const set<VtreeProvider*>& eval_res_set, eval_results)
                 foreach(const parent_link<BITNode>& p, parents)
                     p.link->eval_results[0].insert(eval_res_set.begin(), eval_res_set.end());
         }
-            
+
+#ifdef USE_BITUBIGRAPHER
+                // Calls it multiple times, but no problem.
+                haxx::BITUSingleton->foundResult(this);
+#endif // USE_BITUBIGRAPHER
+
 /*      foreach(const set<VtreeProvider>& eval_res_set, GetEvalResults())
             foreach(const BoundVertex& eval_res, eval_res_set)
                 printTree(v2h(eval_res.value),0,-3);

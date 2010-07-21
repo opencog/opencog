@@ -84,6 +84,8 @@ public:
     // todo: graph() would show it again, which is wrong.
     void hideBITNode(BITNode* node);
 
+    void foundResult(BITNode* node);
+
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
 };
