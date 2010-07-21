@@ -30,6 +30,10 @@
 
 using namespace opencog;
 
+void DimensionalEmbedding::run(CogServer* cogServer){
+    //logger().info("Running DimEmbed Agent");
+}
+
 void DimensionalEmbedding::init(CogServer* cogServer){
     this->cogServer=cogServer;
     this->as=cogServer->getAtomSpace();
@@ -41,7 +45,6 @@ void DimensionalEmbedding::init(CogServer* cogServer){
     define_scheme_primitive("logEmbedding",
                             &DimensionalEmbedding::logSimEmbedding,
                             this);
-
 }
 
 void DimensionalEmbedding::embedSimLinks() {
@@ -50,6 +53,7 @@ void DimensionalEmbedding::embedSimLinks() {
 void DimensionalEmbedding::logSimEmbedding() {
     logAtomEmbedding(SIMILARITY_LINK);
 }
+
 // Uses a slightly modified version of Dijkstra's algorithm
 double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
                                                    const Handle& targetHandle,

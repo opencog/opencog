@@ -36,7 +36,6 @@ ADD_LIBRARY (server SHARED
 	ConsoleSocket
 	Agent
 	SystemActivityTable
-	DimensionalEmbedding
 	load-file
 )
 
@@ -107,7 +106,6 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	DataRequest.h
-	DimensionalEmbedding.h
 	ExitRequest.h
 	Factory.h
 	HelpRequest.h

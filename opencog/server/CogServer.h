@@ -42,7 +42,6 @@
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Registry.h>
-#include <opencog/server/DimensionalEmbedding.h>
 
 namespace opencog
 {
@@ -128,8 +127,6 @@ protected:
 
     SystemActivityTable _systemActivityTable;
 
-    DimensionalEmbedding _dimensionalEmbedding;
-
 public:
     /** CogServer's constructor. Initializes the mutex, atomspace and cycleCount
      *  variables*/
@@ -189,9 +186,6 @@ public:
 
     /** Returns a reference to the system activity table instance */
     virtual SystemActivityTable& systemActivityTable(void);
-
-    /** Returns a reference to the dimensional embedding instance */
-    virtual DimensionalEmbedding& dimensionalEmbedding(void);
 
     /**** Module API ****/
     /** Loads a dynamic library/module. Takes the filename of the library (.so

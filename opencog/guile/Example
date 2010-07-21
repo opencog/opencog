@@ -2,7 +2,7 @@
                    Example Usage
                    -------------
 
-Below follow some examples for using scheme to inpute data into Opencog.
+Below follow some examples for using scheme to input data into Opencog.
 The scheme shell itself is reachable through the opencog shell.
 Thus:
 -- start the opencog server

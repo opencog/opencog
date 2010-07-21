@@ -29,6 +29,8 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/server/Agent.h>
+#include <opencog/server/Factory.h>
 
 namespace opencog
 {
@@ -37,7 +39,7 @@ namespace opencog
      * This class implements the dimensional embedding technique as described
      * on http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
      */
-    class DimensionalEmbedding {
+    class DimensionalEmbedding : public opencog::Agent {
     private:
         typedef std::map<Handle, std::vector<double> > AtomEmbedding;
         typedef std::vector<Handle> PivotSeq;
@@ -70,6 +72,14 @@ namespace opencog
                                      const Handle& targetHandle,
                                      const Type& linkType);
     public:
+        virtual const ClassInfo& classinfo() const { return info(); }
+        static const ClassInfo& info() {
+            static const ClassInfo _ci("DimensionalEmbedding");
+            return _ci;
+        }
+
+        void run (CogServer* server);
+
         DimensionalEmbedding() : numDimensions(50) { }
         ~DimensionalEmbedding() { };
 

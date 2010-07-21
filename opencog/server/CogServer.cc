@@ -48,7 +48,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
-#include <opencog/server/DimensionalEmbedding.h>
 
 #ifdef HAVE_SQL_STORAGE
 #include <opencog/persist/sql/PersistModule.h>
@@ -106,7 +105,6 @@ CogServer::CogServer() : cycleCount(1)
     delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
-    _dimensionalEmbedding.init(this);
 
     pthread_mutex_init(&messageQueueLock, NULL);
     pthread_mutex_init(&processRequestsLock, NULL);
@@ -138,11 +136,6 @@ void CogServer::disableNetworkServer()
 SystemActivityTable& CogServer::systemActivityTable()
 {
     return _systemActivityTable;
-}
-
-DimensionalEmbedding& CogServer::dimensionalEmbedding()
-{
-    return _dimensionalEmbedding;
 }
 
 void CogServer::serverLoop()
