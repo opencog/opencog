@@ -92,6 +92,8 @@ inline void full_reduce(combo_tree& tr,combo_tree::iterator it, opencog::RandGen
 }
 inline void full_reduce(combo_tree& tr, opencog::RandGen& rng) { full_reduction(rng)(tr); }
 
+inline void ann_reduce(combo_tree& tr) {ann_reduction()(tr); }
+
 /**
  * clean_reduce removes null vertices
  */

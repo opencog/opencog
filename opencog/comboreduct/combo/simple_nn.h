@@ -1,5 +1,28 @@
-#ifndef SIMPLEANN
-#define SIMPLEANN
+/** simple_nn.h --- 
+ *
+ * Copyright (C) 2010 Joel Lehman
+ *
+ * Author: Joel Lehman
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
+#ifndef _OPENCOG_SIMPLE_NN_H
+#define _OPENCOG_SIMPLE_NN_H
 
 #include <vector>
 #include <utility>
@@ -56,19 +79,16 @@ class ann_node
 {
 public:
     ann_node(ann_nodetype type, int _tag = 0, ann_node* _ptr=NULL)
-        : memory_ptr(_ptr), activation(0.0), tag(_tag), nodetype(type) { 
-        if(_ptr != NULL)
-            memory_node=true;
-        else
-            memory_node=false;
-    }
+        : memory_ptr(_ptr), activation(0.0), tag(_tag), nodetype(type) {}
 
     bool visited; //used for constructing combotrees
     int counter; //used for determining network depth
     int id; //internal identifier
     double sort_val; //used for sorting nodes    
-    bool memory_node; //is this a memory node 
-    ann_node* memory_ptr; //what hidden node will feed this input
+    ann_node* memory_ptr; //what hidden node will feed this input,
+                          //when NULL there is no such node. Obviously
+                          //it is assume that only input nodes have
+                          //non null memory_ptr
   
     //connections
     vector<ann_connection*> out_connections;
@@ -115,8 +135,6 @@ public:
 class ann
 {
 public:
-    //how many nodes are in the ANN? 
-    int node_count;
 
     //complete list of nodes
     vector<ann_node*> nodes;
@@ -130,7 +148,7 @@ public:
     //a list of all the connections
     vector<ann_connection*> connections;
 
-    ann(): node_count(0) { }
+    ann() {}
 
     ~ann() {
         ann_node_it iter;
@@ -228,7 +246,7 @@ public:
         
         for(nit=inputs.begin();nit!=inputs.end();nit++)
         {
-            if((*nit)->memory_node)
+            if((*nit)->memory_ptr)
             {
                 int n1 = (*nit)->memory_ptr->tag;
                 int n2 = (*nit)->tag;
@@ -270,7 +288,6 @@ public:
         //connect the new node to all outputs
         for(iter=outputs.begin();iter!=outputs.end();iter++)
         {
-            cout << "adding connection from new node to output " << endl;
             add_connection(new_hidden,(*iter),0.0);
         }
 
@@ -279,30 +296,26 @@ public:
         while(!connected)
         {
 
-        //selectively connect the node from inputs
-        int add_chance = 100;
-        for(iter=inputs.begin();iter!=inputs.end();iter++)
-        {
-            cout << "considering adding connection from input to new hidden" << endl;
-            if (rand()%100 < add_chance)
+            //selectively connect the node from inputs
+            int add_chance = 100;
+            for(iter=inputs.begin();iter!=inputs.end();iter++)
             {
-                connected=true;
-                add_connection((*iter),new_hidden,0.0);
-                cout << "adding connection from input to new hidden" << endl;
+                if (rand()%100 < add_chance) 
+                {
+                    connected=true;
+                    add_connection((*iter),new_hidden,0.0);
+                }
             }
-        }
 
-        //connect all hidden nodes to the new hidden node
-        for(iter=hidden.begin();iter!=hidden.end();iter++)
-        {
-            if (rand()%100 < add_chance)
+            //connect all hidden nodes to the new hidden node
+            for(iter=hidden.begin();iter!=hidden.end();iter++)
             {
-            connected=true;
-            add_connection((*iter),new_hidden,0.0);
-            cout << "adding connection from hidden to new hidden" << endl;
-
+                if (rand()%100 < add_chance)
+                {
+                    connected=true;
+                    add_connection((*iter),new_hidden,0.0);
+                }
             }
-        }
         }
         add_node(new_hidden);
         return true;
@@ -318,17 +331,14 @@ public:
         ann_node_it in_iter;
         vector<ann_node*> possible;
         
-        cout << "Adding memory node..."  << endl;
-
         //see if there are any viable hidden nodes that are
         //not already being used to feed a memory input
         for (iter = hidden.begin(); iter !=hidden.end();iter++)
         {
             bool memory=false;
-            cout << "Checking for unmemorized hidden nodes..." << endl;
             for(in_iter = inputs.begin();in_iter!= inputs.end(); in_iter++)
             {
-                if(!(*in_iter)->memory_node)
+                if(!(*in_iter)->memory_ptr)
                     continue;
                 if((*in_iter)->memory_ptr == (*iter)) {
                     memory=true;
@@ -338,7 +348,6 @@ public:
             
             if (!memory)
             {
-                cout << "Potential node found..." << endl;
                 possible.push_back(*iter);
             }
         }
@@ -346,7 +355,6 @@ public:
         //if no valid nodes, return failure
         if(possible.size() == 0 )
         {
-            cout << "No eligble hidden nodes to feed into memory input" <<endl;
             return false;
         }
 
@@ -380,7 +388,6 @@ public:
             }
         }
         add_node(new_input);
-        cout << "New input added..." << endl;
         return true;
     }
 
@@ -404,8 +411,7 @@ public:
 
     //return the node with a given tag
     ann_node* find_tag(int t) {
-        ann_node_it iter;
-        for (iter = nodes.begin();iter != nodes.end();iter++)
+        for(ann_node_it iter = nodes.begin(); iter != nodes.end(); iter++)
             if ((*iter)->tag == t)
                 return *iter;
         return NULL;
@@ -431,7 +437,7 @@ public:
         
         for (unsigned int x = 0;x < inputs.size();x++)
         {
-            if(!inputs[x]->memory_node)
+            if(!inputs[x]->memory_ptr)
                 inputs[x]->activation = vals[counter++];
             else
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
@@ -441,7 +447,7 @@ public:
     void load_inputs(vector<double>& vals) {
         unsigned int counter = 0;
         for (unsigned int x = 0;x < inputs.size();x++) {
-            if(!inputs[x]->memory_node)
+            if(!inputs[x]->memory_ptr)
                 inputs[x]->activation = vals[counter++];
             else
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
@@ -544,8 +550,7 @@ public:
     
     void delete_connections(vector<ann_connection*>& c)
     { 
-        ann_connection_it iter;
-        for(iter=c.begin(); iter!= c.end();)
+        for(ann_connection_it iter=c.begin(); iter!= c.end();)
         {
             remove_connection(*iter);
             iter=c.begin();
@@ -557,13 +562,25 @@ public:
         //first delete all the connections
         delete_connections(node->out_connections);
         delete_connections(node->in_connections);
+        //remove it from all vectors
         remove_from_vec(node,nodes);
         remove_from_vec(node,inputs);
         remove_from_vec(node,hidden);
-        remove_from_vec(node,outputs);        
+        remove_from_vec(node,outputs);
+        //set n->memory_ptr = NULL for all nodes using it
+        remove_from_memory_ptr(node);
         delete node;
         return true;
     }  
+
+    //set n->memory_ptr = NULL for all input nodes using n
+    void remove_from_memory_ptr(ann_node* n)
+    {
+        for(ann_node_it it=inputs.begin(); it!=inputs.end(); it++) {
+            if((*it)->memory_ptr == n)
+                (*it)->memory_ptr = NULL;
+        }
+    }
 
     bool remove_connection(ann_connection* conn)
     {
@@ -576,8 +593,6 @@ public:
 
     //add a new node to the ANN
     void add_node(ann_node* newnode) {
-        newnode->id = node_count;
-        node_count++;
         nodes.push_back(newnode);
 
         if (newnode->nodetype == nodetype_input)
@@ -604,4 +619,4 @@ public:
     }
 };
 
-#endif
+#endif // _OPENCOG_SIMPLE_NN_H

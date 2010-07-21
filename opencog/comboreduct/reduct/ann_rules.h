@@ -37,8 +37,7 @@ struct tree_transform {
 
     tree_transform() { }
 
-    combo_tree encode_node(ann &the_ann,ann_node* node) const {
-      
+    combo_tree encode_node(ann& the_ann, ann_node* node) const {
         int tag = node->tag;
         
         ann_id id;
@@ -47,11 +46,9 @@ struct tree_transform {
             id=id::ann_input;
         else
             id=id::ann_node;
-       
-        combo_tree tr(ann_type(tag,id));
-        
-        std::cout << "NEW TR: " << tr << std::endl;
 
+        combo_tree tr(ann_type(tag, id));
+        
         //only expand a node once
         //that is, one instance of the node
         //will have all of its connections
@@ -70,7 +67,7 @@ struct tree_transform {
         if(node->nodetype == nodetype_input)
         {
             //if its not a memory input, then we are done
-            if(!node->memory_node)
+            if(!node->memory_ptr)
                 return tr;
 
             //cout << "HANDLING A MEMORY NODE..." << endl;
@@ -79,97 +76,61 @@ struct tree_transform {
             bool been_visited = node->memory_ptr->visited;
             node->memory_ptr->visited=true;
 
-            std::cout << "TR: " << tr << std::endl;
+            combo_tree encoded_tr = encode_node(the_ann, node->memory_ptr);
 
-            combo_tree encoded_tr = encode_node(the_ann,node->memory_ptr);
-
-            std::cout << "ENCODED TR: " << encoded_tr << std::endl;
-
-            if(tr.begin().is_childless())
-                tr.replace(tr.append_child(tr.begin()), encoded_tr.begin());
-            else tr.insert_subtree(tr.begin().begin(), encoded_tr.begin());
+            tr.insert_subtree(tr.begin().begin(), encoded_tr.begin());
             node->memory_ptr->visited=been_visited;
-
-            cout << tr << endl;
-            cout << "DONE WITH MEMORY NODE.." << endl;
 
             return tr;
         }
 
         //now handle hidden nodes, which require a little more finesse
         //because now we must handle their connections
-        ann_connection_it cons;
-        for(cons = node->in_connections.begin();
-                cons != node->in_connections.end();
-                cons++)
+        for(ann_connection_it cons = node->in_connections.begin();
+            cons != node->in_connections.end(); cons++)
         {
-            std::cout << "TR 1: " << tr << std::endl;
-
-            //tr.replace(tr.append_child(tr.begin()),
-            //           encode_node(the_ann, (*cons)->source).begin());
-
             combo_tree tmp = encode_node(the_ann, (*cons)->source);
 
-            std::cout << "TMP: " << tmp << std::endl;
-
             tr.insert_subtree(tr.begin().begin(), tmp.begin());
-            std::cout << "TR 2: " << tr << std::endl;
             tr.insert_after(tr.begin().last_child(),(*cons)->weight);
-            std::cout << "TR 3: " << tr << std::endl;
         }
         return tr;
     }
 
-    combo_tree encode_ann(ann &the_ann) const {
+    combo_tree encode_ann(ann& the_ann) const {
         //head node is ann
-        combo_tree tr(ann_type(0,id::ann)); 
+        combo_tree tr(ann_type(0, id::ann)); 
 
         the_ann.reset_visited();
 
         //now we want to add each of the output nodes
         //to the tree
-        ann_node_it node_it;
-        for (node_it = the_ann.outputs.begin(); 
-                node_it != the_ann.outputs.end();
-                node_it++)
+        for(ann_node_it node_it = the_ann.outputs.begin(); 
+            node_it != the_ann.outputs.end(); node_it++)
         {
-            combo_tree str = encode_node(the_ann,*node_it);
-
-            std::cout << "STR: " << str << std::endl;
-
-            std::cout << "TR BEFORE:  " << tr << std::endl;
-
-            if(tr.begin().is_childless())
-                tr.replace(tr.append_child(tr.begin()), str.begin());
-            else tr.insert_subtree(tr.begin().begin(),str.begin());
-
-            std::cout << "TR AFTER:  " << tr << std::endl;
+            combo_tree str = encode_node(the_ann, *node_it);
+            tr.insert_subtree(tr.begin().begin(),str.begin());
         }
-
-        std::cout << "TR FINAL: " << tr << std::endl;
-
         return tr;
     }
 
-    ann decodify_tree(combo_tree tr) const {
-        ann new_ann = ann();
+    ann decodify_tree(const combo_tree& tr) const {
+        OC_ASSERT(!tr.empty());
+
+        ann new_ann;
 
         sib_it it = tr.begin();
 
-        if (get_ann_type(*it).id != id::ann) {
-            cout << "root node should be ann" << endl;
-        }
+        OC_ASSERT(get_ann_type(*it).id == id::ann);
 
         for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
             //add all of the output nodes
-            if (get_ann_type(*sib).id != id::ann_node) {
-                cout << "child of ann should be output nodes" << endl;
-            }
+            OC_ASSERT(get_ann_type(*sib).id == id::ann_node);
 
-            ann_node* newnode = new ann_node(nodetype_output, get_ann_type(*sib).idx);
+            ann_node* newnode = new ann_node(nodetype_output, 
+                                             get_ann_type(*sib).idx);
             new_ann.add_node(newnode);
 
-            //cout << "looking at subtree..." << endl;
             decodify_subtree(new_ann, newnode, sib);
         }
         return new_ann;
@@ -205,7 +166,6 @@ struct tree_transform {
                      mem_ptr = decodify_node(nn,sib.begin());
                      //cout << "DECODIFYING COMPLETE..." << endl; 
 
-                    node->memory_node=true;
                     node->memory_ptr = mem_ptr;
                 }
          }
@@ -225,7 +185,7 @@ struct tree_transform {
                 break;
             
             //see if this node has already been referenced & created
-            ann_node* node = decodify_node(nn,sib);
+            ann_node* node = decodify_node(nn, sib);
             sources.push_back(node);
 
             //recurse on hidden nodes
@@ -237,8 +197,7 @@ struct tree_transform {
         //now add weights
         for ( ; sib != it.end(); ++sib) {
             //cout << "adding weight " << *sib << endl;
-            nn.add_connection(sources[count], dest_node,
-                              boost::get<combo::contin_t>(*sib));
+            nn.add_connection(sources[count], dest_node, get_contin(*sib));
             count--;
         }
     }

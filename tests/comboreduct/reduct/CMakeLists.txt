@@ -33,3 +33,9 @@ TARGET_LINK_LIBRARIES(MixedReductUTest
 #	comboreduct
 #   util
 #)
+
+ADD_CXXTEST(ANNReductUTest)
+TARGET_LINK_LIBRARIES(ANNReductUTest
+	comboreduct
+    util
+)
