@@ -65,8 +65,8 @@ typedef std::set<combo::combo_tree,
  *      
  */
 template<typename Scoring, typename BScoring, typename Optimization>
-struct metapopulation : public set < behavioral_scored_combo_tree,
-                                     std::greater<behavioral_scored_combo_tree> > {
+struct metapopulation : public set < bscored_combo_tree,
+                                     std::greater<bscored_combo_tree> > {
 
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
@@ -99,10 +99,10 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     void init(const std::vector<combo_tree>& exemplars) {
         metapop_candidates candidates;
         foreach(const combo_tree& base, exemplars) {
-            combo_tree_score base_sc = make_pair(score(base), complexity(base));
-            behavioral_scored_combo_tree base_bsc = 
+            composite_score base_sc = make_pair(score(base), complexity(base));
+            bscored_combo_tree base_bsc = 
                 make_pair(base, 
-                          combo_tree_behavioral_score(bscore(base), base_sc));
+                          composite_behavioral_score(bscore(base), base_sc));
             candidates.insert(base_bsc);
 
             // update the record of the best-seen score & trees
@@ -170,7 +170,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     /**
      * return the best score
      */
-    const combo_tree_score& best_score() const {
+    const composite_score& best_score() const {
         return _best_score;
     }
 
@@ -278,7 +278,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      *
      */
     bool expand(int max_evals,
-                const combo_tree_score& max_score,
+                const composite_score& max_score,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)  {
@@ -304,7 +304,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             ss << "The following candidate(s) have the best score " 
                << best_score().first;
             logger().info(ss.str());
-            foreach(const behavioral_scored_combo_tree& cand, best_candidates()) {
+            foreach(const bscored_combo_tree& cand, best_candidates()) {
                 stringstream ss_tr;
                 ss_tr << get_tree(cand);
                 logger().info(ss_tr.str());
@@ -362,7 +362,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         _rep = new representation(*simplify, _exemplar->first, type,
                                   rng, ignore_ops, perceptions, actions);
         // create an empty deme
-        _deme = new eda::instance_set<combo_tree_score>(_rep->fields());
+        _deme = new eda::instance_set<composite_score>(_rep->fields());
 
         _evals_before_this_deme = n_evals();
 
@@ -382,7 +382,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
      *         return -1 if all available is evaluated.
      */
     int optimize_deme(int max_evals, int max_for_slice,
-                      const combo_tree_score& max_score) {
+                      const composite_score& max_score) {
 
         if (_rep == NULL || _deme == NULL)
             return -1;
@@ -485,7 +485,7 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
         logger().debug("Compute the behavioral score of all candidates");
         // ~Logger
 
-        foreach(const eda::scored_instance<combo_tree_score>& inst, *_deme) {
+        foreach(const eda::scored_instance<composite_score>& inst, *_deme) {
             // this is in case the deme is closed before the entire
             // deme (or one should understand the current sample of
             // it) has been explored
@@ -508,9 +508,9 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
             //update the set of potential exemplars
             if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
                 candidates.find(tr) == candidates.end()) {
-                behavioral_scored_combo_tree candidate = 
-                    make_pair(tr, combo_tree_behavioral_score(bscore(tr),
-                                                              inst.second));
+                bscored_combo_tree candidate = 
+                    make_pair(tr, composite_behavioral_score(bscore(tr),
+                                                             inst.second));
                 candidates.insert(candidate);
 
                 // also update the record of the best-seen score & trees
@@ -553,8 +553,8 @@ struct metapopulation : public set < behavioral_scored_combo_tree,
     }
 
     // update the record of the best-seen score & trees
-    void update_best_candidates(const behavioral_scored_combo_tree& candidate) {
-        const combo_tree_score& sc = get_combo_tree_score(candidate);
+    void update_best_candidates(const bscored_combo_tree& candidate) {
+        const composite_score& sc = get_composite_score(candidate);
         if (sc >= _best_score) {
             if (sc > _best_score) {
                 _best_score = sc;
@@ -612,7 +612,7 @@ protected:
     int _evals_before_this_deme;
 
     // the best score ever
-    combo_tree_score _best_score; 
+    composite_score _best_score; 
 
     // trees with score _best_score
     metapop_candidates _best_candidates;
@@ -621,7 +621,7 @@ protected:
     combo_tree_hash_set _visited_exemplars;
 
     representation* _rep; // representation of the current deme
-    eda::instance_set<combo_tree_score>* _deme; // current deme
+    eda::instance_set<composite_score>* _deme; // current deme
     iterator _exemplar; // exemplar of the current deme
 };
 
@@ -644,7 +644,7 @@ combo_tree_ns_set;
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, int max_gens, const combo_tree_score& max_score,
+           int max_evals, int max_gens, const composite_score& max_score,
            const operator_set& ignore_ops = operator_set(),
            const combo_tree_ns_set* perceptions = NULL,
            const combo_tree_ns_set* actions = NULL)
@@ -682,7 +682,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            const combo_tree_ns_set* actions = NULL)
 {
     moses(mp, max_evals, max_gens, 
-          combo_tree_score(max_score, worst_possible_score.second),
+          composite_score(max_score, worst_possible_score.second),
           ignore_ops, perceptions, actions);
 }
 
@@ -695,7 +695,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
            const combo_tree_ns_set* actions = NULL)
 {
     moses(mp, max_evals, -1, 
-          combo_tree_score(max_score, worst_possible_score.second),
+          composite_score(max_score, worst_possible_score.second),
           ignore_ops, perceptions, actions);
 }
 
@@ -721,7 +721,7 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   int max_evals,
-                  const combo_tree_score& max_score,
+                  const composite_score& max_score,
                   const operator_set& ignore_ops,
                   const combo_tree_ns_set* perceptions,
                   const combo_tree_ns_set* actions)
@@ -770,7 +770,7 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
                   const combo_tree_ns_set* actions)
 {
     moses_sliced(mp, max_evals,
-                 combo_tree_score(max_score, worst_possible_score.second),
+                 composite_score(max_score, worst_possible_score.second),
                  ignore_ops, perceptions, actions);
 }
 

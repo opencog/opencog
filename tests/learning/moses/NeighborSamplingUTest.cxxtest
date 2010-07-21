@@ -123,7 +123,7 @@ public:
             fs_size = 20;
             arity = 5;
             field_set fs(field_set::disc_spec(arity), fs_size);
-            eda::instance_set<moses::combo_tree_score>  deme(100, fs);
+            eda::instance_set<moses::composite_score>  deme(100, fs);
 
             moses::sample_from_neighborhood(deme.fields(),
                                             distance,
@@ -150,7 +150,7 @@ public:
             field_set fs(field_set::disc_spec(arity), fs_size);
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
-            eda::instance_set<moses::combo_tree_score> 
+            eda::instance_set<moses::composite_score> 
                 deme(100, center_inst, fs);
           
             // cout<<fs.stream(center_inst)<<endl; 
@@ -183,7 +183,7 @@ public:
             field_set fs(field_set::contin_spec(0.0, 0.5, 0.5, 4), fs_size);
             eda::instance center_inst(fs.packed_width());
             eda::randomize(fs, center_inst, rng);
-            eda::instance_set<moses::combo_tree_score> deme(100, center_inst, fs);
+            eda::instance_set<moses::composite_score> deme(100, center_inst, fs);
             
             cout << "the initial randomize instance:" << endl
                  << fs.stream_raw(center_inst) << endl;
@@ -219,7 +219,7 @@ public:
             field_set::arity_t arity = 8;
             size_t size = 5;
             field_set fs(field_set::disc_spec(arity), size);
-            eda::instance_set<moses::combo_tree_score>  deme(1000,fs);
+            eda::instance_set<moses::composite_score>  deme(1000,fs);
             //    cout << "generate_all_in_neighborhood" << endl;
             moses::generate_all_in_neighborhood(deme.fields(), distance, deme.begin());
             size_t generated_size = 0;
@@ -249,7 +249,7 @@ public:
             int rand_seed = clock();
             opencog::MT19937RandGen rng(rand_seed);
             eda::randomize(fs, center_inst,rng); 
-            eda::instance_set<moses::combo_tree_score> 
+            eda::instance_set<moses::composite_score> 
                 deme(100, center_inst, fs);
 
             cout << "generate center_inst:" << fs.stream(center_inst) <<endl;
@@ -287,7 +287,7 @@ public:
             int rand_seed = clock();
             opencog::MT19937RandGen rng(rand_seed);
             eda::randomize(fs, center_inst, rng); 
-            eda::instance_set<moses::combo_tree_score> 
+            eda::instance_set<moses::composite_score> 
                 deme(100, center_inst, fs);
 
             cout << "generate center_inst: " << fs.stream(center_inst) 

@@ -140,7 +140,7 @@ struct univariate_optimization {
 
     //return # of evaluations actually performed
     template<typename Scoring>
-    int operator()(eda::instance_set<combo_tree_score>& deme,
+    int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
         int pop_size = params.pop_size(deme.fields());
         int max_gens_total = params.max_gens_total(deme.fields());
@@ -166,8 +166,8 @@ struct univariate_optimization {
             eda::cout_log_best_and_gen logger;
             return eda::optimize
                    (deme, n_select, n_generate, max_gens_total, score,
-                    eda::terminate_if_gte_or_no_improv<combo_tree_score>
-                    (combo_tree_score(params.terminate_if_gte,
+                    eda::terminate_if_gte_or_no_improv<composite_score>
+                    (composite_score(params.terminate_if_gte,
                                       worst_possible_score.second),
                      max_gens_improv),
                     opencog::tournament_selection(int(params.selection), rng),
@@ -203,7 +203,7 @@ struct iterative_hillclimbing {
 
     //return # of evaluations actually performed
     template<typename Scoring>
-    int operator()(eda::instance_set<combo_tree_score>& deme,
+    int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
         const eda::field_set& fields = deme.fields();
         int pop_size = params.pop_size(fields);
@@ -227,7 +227,7 @@ struct iterative_hillclimbing {
         // optimization API has to be upgraded, and obviously scoring
         // one candidate doesn't cost much compared to the entire
         // optimization
-        eda::scored_instance<combo_tree_score> scored_exemplar = 
+        eda::scored_instance<composite_score> scored_exemplar = 
             eda::score_instance(exemplar, score);
         score_t exemplar_score = score(scored_exemplar).first;
 
@@ -272,14 +272,14 @@ struct iterative_hillclimbing {
 
             best_score = exemplar_score;
             // check if there is an instance in the deme better than the exemplar
-            //foreach(const eda::scored_instance<combo_tree_score>& inst,deme) {
+            //foreach(const eda::scored_instance<composite_score>& inst,deme) {
             for (int i = current_number_of_instances;
                  deme.begin() + i != deme.end(); i++) {
 
                 //score(deme.begin()+i,deme.begin_scores()+i);
                 //transform(deme.begin()+current_number_of_instances,deme.end(),deme.begin_scores()+current_number_of_instances,score);
 
-                const eda::scored_instance<combo_tree_score>& inst = deme[i];
+                const eda::scored_instance<composite_score>& inst = deme[i];
 
                 if (get_score(inst.second) > best_score) {
                     best_score = get_score(inst.second);
@@ -334,7 +334,7 @@ struct sliced_iterative_hillclimbing {
     //it is rather ugly and it is a temporary hack till the API of MOSES
     //is better
     template<typename Scoring>
-    int operator()(eda::instance_set<combo_tree_score>& deme,
+    int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
         switch (m_state) {
 
@@ -358,7 +358,7 @@ struct sliced_iterative_hillclimbing {
                     it != deme.fields().end_disc(exemplar); ++it)
                 *it = 0;
 
-            eda::scored_instance<combo_tree_score> scored_exemplar = exemplar;
+            eda::scored_instance<composite_score> scored_exemplar = exemplar;
             exemplar_score = score(scored_exemplar).first;
             // cout << "Exemplar:" <<deme.fields().stream(scored_exemplar) << " Score:" << exemplar_score << endl;
 
@@ -441,7 +441,7 @@ struct sliced_iterative_hillclimbing {
 
                 *(deme.begin_scores() + current_number_of_instances) = score(*(deme.begin() + current_number_of_instances));
 
-                const eda::scored_instance<combo_tree_score>& inst = deme[current_number_of_instances];
+                const eda::scored_instance<composite_score>& inst = deme[current_number_of_instances];
 
                 if (get_score(inst.second) > best_score) {
 
@@ -533,7 +533,7 @@ struct simulated_annealing {
         return (double) init_temp / (1.0 + t);
     }
       
-    energy_t energy(const eda::scored_instance<combo_tree_score>& inst)
+    energy_t energy(const eda::scored_instance<composite_score>& inst)
     {
         // here let the energy be the reverse of the score, that
         // because the better instance has the lower energy but higher
@@ -558,7 +558,7 @@ struct simulated_annealing {
     }
 
     template<typename Scoring>
-    int operator()(eda::instance_set<combo_tree_score>& deme,
+    int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
 
         const eda::field_set& fields = deme.fields();
@@ -584,7 +584,7 @@ struct simulated_annealing {
         // optimization API has to be upgraded, and obviously scoring
         // one candidate doesn't cost much compared to the entire
         // optimization
-        eda::scored_instance<combo_tree_score> scored_exemplar = 
+        eda::scored_instance<composite_score> scored_exemplar = 
             eda::score_instance(center_instance, score);
         energy_t center_instance_energy = energy(scored_exemplar);
         double current_temp = init_temp;
@@ -610,7 +610,7 @@ struct simulated_annealing {
                       deme.begin_scores() + current_number_of_instances,
                       score);
                       
-            eda::scored_instance<combo_tree_score>& current_scored_instance =
+            eda::scored_instance<composite_score>& current_scored_instance =
                 deme[current_number_of_instances];
             eda::instance& current_instance = current_scored_instance.first;
             energy_t current_instance_energy = energy(current_scored_instance);

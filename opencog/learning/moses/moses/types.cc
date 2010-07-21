@@ -22,11 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "types.h"
+#include "complexity.h"
 
 namespace moses {
 
-    const combo_tree_score worst_possible_score=
+    const composite_score worst_possible_score=
         std::make_pair(-(std::numeric_limits<score_t>::max()-score_t(1)),
-                       -(std::numeric_limits<complexity_t>::max()-complexity_t(1)));
-    
+                       max_complexity);
+
 } //~namespace moses

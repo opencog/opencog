@@ -197,7 +197,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     }
 
     int complexity_bound() const {
-        return (_current == absent ? 0 : combo::complexity(_loc));
+        return (_current == absent ? 0 : complexity(_loc));
     }
 
     void clear_exemplar() {
@@ -275,7 +275,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
 
     int complexity_bound() const {
-        return combo::complexity(_loc);
+        return complexity(_loc);
     }
 
     void clear_exemplar() {
@@ -343,7 +343,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
     }
 
     int complexity_bound() const {
-        return combo::complexity(_loc);
+        return complexity(_loc);
     }
 
     void clear_exemplar() {
@@ -418,7 +418,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
     }
 
     int complexity_bound() const {
-        return (_current == absent ? 0 : combo::complexity(_loc));
+        return (_current == absent ? 0 : complexity(_loc));
     }
 
     void clear_exemplar() {

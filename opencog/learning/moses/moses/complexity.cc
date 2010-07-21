@@ -26,7 +26,9 @@
 #include "complexity.h"
 #include "using.h"
 
-namespace combo {
+namespace moses {
+
+using namespace combo;
 
 // for a Boolean formula, the complexity is the # of literals
 

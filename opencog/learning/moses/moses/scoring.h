@@ -283,14 +283,14 @@ struct occam_truth_table_bscore
 
 template<typename Scoring>
 struct complexity_based_scorer : public unary_function<eda::instance,
-                                                       combo_tree_score> {
+                                                       composite_score> {
     complexity_based_scorer(const Scoring& s,
                             representation& rep,
                             bool reduce,
                             opencog::RandGen& _rng)
         : score(s), _rep(rep), _reduce(reduce), rng(_rng) { }
 
-    combo_tree_score operator()(const eda::instance& inst) const {
+    composite_score operator()(const eda::instance& inst) const {
         using namespace reduct;
 
         // Logger
@@ -306,7 +306,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
 
         try {
             combo_tree tr = _rep.get_clean_exemplar(_reduce);
-            return combo_tree_score(score(tr), complexity(tr.begin()));
+            return composite_score(score(tr), complexity(tr.begin()));
          } catch (...) {
              stringstream ss;
              ss << "The following instance has failed to be evaluated: " 
@@ -327,7 +327,7 @@ protected:
 
 template<typename Scoring>
 struct count_based_scorer : public unary_function<eda::instance, 
-                                                  combo_tree_score> {
+                                                  composite_score> {
     count_based_scorer(const Scoring& s,
                        representation& rep,
                        int base_count,
@@ -336,7 +336,7 @@ struct count_based_scorer : public unary_function<eda::instance,
         : score(s), _base_count(base_count), _rep(rep), _reduce(reduce),
           rng(_rng) {}
 
-    combo_tree_score operator()(const eda::instance& inst) const {
+    composite_score operator()(const eda::instance& inst) const {
         // Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
@@ -349,9 +349,9 @@ struct count_based_scorer : public unary_function<eda::instance,
         _rep.transform(inst);
 
         try {
-            return combo_tree_score(score(_rep.get_clean_exemplar(_reduce)), 
-                                    - int(_rep.fields().count(inst))
-                                    + _base_count);
+            return composite_score(score(_rep.get_clean_exemplar(_reduce)), 
+                                   - int(_rep.fields().count(inst))
+                                   + _base_count);
         } catch(...) {
              stringstream ss;
              ss << "The following instance has failed to be evaluated: " 
