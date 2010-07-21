@@ -243,6 +243,22 @@ void BITUbigrapher::foundResult(BITNode* node) {
     }
 }
 
+void BITUbigrapher::markClone(BITNode* existing, BITNode* clone) {
+    int existing_id = findBITNodeID(existing);
+    int clone_id = findBITNodeID(clone);
+
+    unsigned int link_id = existing_id + 10;
+
+    int status = ubigraph_new_edge_w_id( link_id, existing_id, clone_id );
+    if ( status == -1 ) {
+        logger().error ( "Attaching to clone: Status was %d", status );
+    } else {
+        ubigraph_set_edge_attribute ( link_id, "strength", "0" );
+        ubigraph_set_edge_attribute ( link_id, "arrow", "true" );
+        ubigraph_set_edge_attribute ( link_id, "stroke", "dashed" );
+    }
+}
+
 void BITUbigrapher::graph()
 {
     ubigraph_clear();

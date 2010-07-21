@@ -1138,6 +1138,10 @@ void BITNode::tryClone(hpair binding) const
                                                     new_target,
                                                     single_bind,
                                                     NO_SIBLING_SPAWNING); //Last arg probably redundant now
+
+#ifdef USE_BITUBIGRAPHER
+            haxx::BITUSingleton->markClone((BITNode*)this, new_node);
+#endif // USE_BITUBIGRAPHER
         }
     }
 }

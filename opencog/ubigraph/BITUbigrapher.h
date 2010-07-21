@@ -86,6 +86,8 @@ public:
 
     void foundResult(BITNode* node);
 
+    void markClone(BITNode* existing, BITNode* clone);
+
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
 };
