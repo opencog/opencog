@@ -198,11 +198,19 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
             logger().error ( "Drawing arg: Status was %d", status );
         else {
             //        int arg_id = ubigraph_new_vertex();
-            ostringstream oss;
-            oss << "#" << i;
-            //cout << oss.str() << endl;
-            //ubigraph_set_vertex_attribute ( arg_id, "label", toString ( i ).c_str() );
-            ubigraph_set_vertex_attribute ( arg_id, "label", oss.str().c_str() );
+            if (false) { // display the arg# as text
+                ostringstream oss;
+                oss << "#" << i;
+                //cout << oss.str() << endl;
+                //ubigraph_set_vertex_attribute ( arg_id, "label", toString ( i ).c_str() );
+                ubigraph_set_vertex_attribute ( arg_id, "label", oss.str().c_str() );
+            } else {
+                // give them different shapes instead, to reduce clutter
+                string shape;
+                shape = (i == 0) ? "cube" : "dodecahedron";
+                ubigraph_set_vertex_attribute( arg_id, "shape", shape.c_str());
+            }
+
             status = ubigraph_new_edge ( node_id, arg_id );
             if ( status == -1 ) {
                 logger().error ( "Attaching arg: Status was %d", status );
