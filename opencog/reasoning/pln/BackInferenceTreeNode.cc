@@ -283,7 +283,8 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 #ifdef USE_BITUBIGRAPHER
     haxx::BITUSingleton = new BITUbigrapher;
     haxx::BITUSingleton->drawRoot(this);
-    haxx::BITUSingleton->drawBITNode(this, children);
+    haxx::BITUSingleton->drawBITNode(this);
+    haxx::BITUSingleton->drawBITNode(root_variable_scoper);
 #endif
 }
 
@@ -478,6 +479,10 @@ void BITNode::create()
         std::cout << "BIT has reached depth: " << depth << std::endl;
         getBITRoot().setTreeDepth(depth);
     }
+
+#ifdef USE_BITUBIGRAPHER
+    haxx::BITUSingleton->drawBITNode(this);
+#endif
 }
 
 BITNode::BITNode( BITNodeRoot* _root,
@@ -1310,11 +1315,12 @@ void BITNode::expandNextLevel()
         CheckForDirectResults();
         createChildrenForAllArgs();
         Expanded = true;
-#ifdef USE_BITUBIGRAPHER
-        haxx::BITUSingleton->drawBITNode(this, children);
-#endif
+//#ifdef USE_BITUBIGRAPHER
+//        haxx::BITUSingleton->drawBITNode(this);
+//#endif
     }
-    else {
+    else { // Is this just a tacky thing for exhaustive evaluation?
+        assert(0);
         for (uint i = 0; i < args.size(); i++) {   
             foreach(const ParametrizedBITNode& bisse, children[i])
                 bisse.prover->expandNextLevel();
@@ -1582,7 +1588,7 @@ float BITNode::fitness() const
     const float SOLUTION_SPACE_WEIGHT = 0.01f;
     const float RULE_PRIORITY_WEIGHT = 0.0001f;
 
-//tlog(3,"fitness(): %f %f %f %f %f\n",my_bdrum, -depth, _bdrum, -1.0f*_bdrum,-depth -_bdrum);  
+//    tlog(0,"fitness(): %f %f %f %f\n", -my_bdrum, -(float)depth, my_solution_space(), (rule ? rule->getPriority() : 0));
     
     return  -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
             -1.0f*DEPTH_WEIGHT          * depth

@@ -131,19 +131,40 @@ void BITUbigrapher::drawBITNodeLabel(BITNode * node, int node_id)
     }
 }
 
+int BITUbigrapher::findBITNodeID(BITNode* node) {
+    int node_id = ( int ) (((long)node) % INT_MAX);
+    return node_id;
+}
+
+void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot) {
+    unsigned int arg_id = parent_id + slot + 1;
+
+    int status = ubigraph_new_edge ( arg_id, child_id );
+    if ( status == -1 ) {
+        logger().error ( "Attaching to parent: Status was %d", status );
+    } else {
+        ubigraph_set_edge_attribute ( status, "oriented", "true" );
+        ubigraph_set_edge_attribute ( status, "arrow", "true" );
+    }
+}
+
 // Actually just draws the args and children, doesn't draw the node itself.
 // children is a vector of arguments, each having a set of ParametrizedBITNode's
 // ParametrizedBITNode is not a subclass of BITNode, it is a wrapper (i.e. they have a BITNode as a member).
 
 // Sometimes it draws a node at the top (because its parent hasn't been established yet. Possibly because of the BITNode cloning). Might need to call the function from more places in the BITNode/BITNodeRoot code.
 
-void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode> > children )
+void BITUbigrapher::drawBITNode ( BITNode* node)
 {
-    //logger().fine("Drawing BITNode with %d args", children.size());
-    cout << "Drawing BITNode with " << children.size() << " args" << endl;
+    logger().fine("Drawing BITNode with %d arg slots", node->children.size());
+    //cout << "Drawing BITNode with " << children.size() << " args" << endl;
 
     //int node_id = ( int ) node;
-    int node_id = ( int ) (((long)node) % INT_MAX);
+    int node_id = findBITNodeID(node);
+
+    int status = ubigraph_new_vertex_w_id ( node_id );
+    if ( status )
+        logger().error ( "Drawing BITNode child: Status was %d", status );
 
     // For some reason the fitness doesn't work on the BITNodeRoot
     if (node->root != node) {
@@ -151,10 +172,20 @@ void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode>
 
         drawBITNodeFitness(node_id, node->fitness());
         drawBITNodeLabel(node, node_id);
+
+        ubigraph_set_vertex_attribute ( node_id, "shape", "sphere" );
+        ubigraph_set_vertex_attribute ( node_id, "color", "#00ff00" );
     }
 
+    // Do this even if it failed, because it'll be attaching this child node to a different parent node than before
+
+    // Should be the child number!
+    //ubigraph_set_vertex_attribute(child_id, "label", toString(i).c_str());
+
+
     // Remember that this draws BITNodes, and the children are actually ParametrizedBITNodes referring to (often shared) BITNodes
-    for (unsigned int i = 0; i < children.size(); i++ ) {
+    // Draw vertexes for each arg slot
+    for (unsigned int i = 0; i < node->children.size(); i++ ) {
         cout << "Drawing BITNode arg #" << i << endl;
         // Display and attach that arg
         unsigned int arg_id = node_id + i + 1; // haxx:: since a BITNode takes up a lot more than a few bytes presumably
@@ -175,37 +206,15 @@ void BITUbigrapher::drawBITNode ( BITNode* node, vector<set<ParametrizedBITNode>
                 ubigraph_set_edge_attribute ( status, "oriented", "true" );
                 ubigraph_set_edge_attribute ( status, "arrow", "true" );
             }
-
-            // for each of its children
-            foreach ( const ParametrizedBITNode& child, children[i] ) {
-                // Display and attach them
-                //int child_id = ( int ) ( child.prover );
-                int child_id = ( int ) (((long)child.prover) % INT_MAX);
-                status = ubigraph_new_vertex_w_id ( child_id );
-                if ( status )
-                    logger().error ( "Drawing BITNode child: Status was %d", status );
-
-                // Do this even if it failed, because it'll be attaching this child node to a different parent node than before
-
-                // Should be the child number!
-                //ubigraph_set_vertex_attribute(child_id, "label", toString(i).c_str());
-                ubigraph_set_vertex_attribute ( child_id, "shape", "sphere" );
-                ubigraph_set_vertex_attribute ( child_id, "color", "#00ff00" );
-
-                cout << "child-node fitness: " << child.prover->fitness() << endl;
-                drawBITNodeFitness(child_id, child.prover->fitness());
-                drawBITNodeLabel(child.prover, child_id);
-
-                status = ubigraph_new_edge ( arg_id, child_id );
-                if ( status == -1 ) {
-                    logger().error ( "Attaching child: Status was %d", status );
-                } else {
-                    ubigraph_set_edge_attribute ( status, "oriented", "true" );
-                    ubigraph_set_edge_attribute ( status, "arrow", "true" );
-                }
-            }
         }
     }
+
+    // Attach this BITNode to its parent(s).
+    foreach(parent_link<BITNode> p, node->parents) {
+        drawBITLink(findBITNodeID(p.link), node_id, p.parent_arg_i);
+    }
+
+    return;
 }
 
 void BITUbigrapher::graph()

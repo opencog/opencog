@@ -73,8 +73,13 @@ public:
 
     void drawBITNodeLabel(BITNode * node, int node_id);
 
-    void drawBITNode(BITNode* node, std::vector<std::set<ParametrizedBITNode> >
-                     children);
+//    void drawBITNode(BITNode* node, std::vector<std::set<ParametrizedBITNode> >
+//                     children);
+    void drawBITNode(BITNode* node);
+
+    void drawBITLink(int parent_id, int child_id, int slot);
+
+    int findBITNodeID(BITNode* node);
 
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
