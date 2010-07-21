@@ -1293,6 +1293,11 @@ bool BITNode::CheckForDirectResults()
     else
     {
         tlog(3,"No direct child results generated.\n");
+
+#ifdef USE_BITUBIGRAPHER
+        haxx::BITUSingleton->hideBITNode(this);
+#endif // USE_BITUBIGRAPHER
+
         return false;           
     }
 }

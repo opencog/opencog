@@ -217,6 +217,13 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
     return;
 }
 
+void BITUbigrapher::hideBITNode(BITNode* node) {
+    int node_id = findBITNodeID(node);
+
+    //ubigraph_set_vertex_attribute(node_id, "visible", "false");
+    ubigraph_remove_vertex(node_id);
+}
+
 void BITUbigrapher::graph()
 {
     ubigraph_clear();

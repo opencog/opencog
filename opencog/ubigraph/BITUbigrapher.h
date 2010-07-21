@@ -81,6 +81,9 @@ public:
 
     int findBITNodeID(BITNode* node);
 
+    // todo: graph() would show it again, which is wrong.
+    void hideBITNode(BITNode* node);
+
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();
 };
