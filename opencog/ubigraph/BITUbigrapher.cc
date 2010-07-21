@@ -75,7 +75,7 @@ void BITUbigrapher::setStyles() {}
 
 void BITUbigrapher::drawRoot ( BITNode* root )
 {
-    cout << "drawRoot" << endl;
+    //cout << "drawRoot" << endl;
 
     //int root_id = ( int ) root;
     int root_id = ( int ) (((long)root) % INT_MAX); //! @todo haxx:: use a map of BITNodes to ids, or something.
@@ -93,13 +93,13 @@ void BITUbigrapher::drawBITNodeFitness(int node_id, float fitness)
     // Since the exact value would be too precise to visualize;
     // also C++ modulus doesn't work on floats
     int approx_fitness = (int) fitness;
-    cout << "approx fitness: " << approx_fitness << endl;
+    //cout << "approx fitness: " << approx_fitness << endl;
     float norm_fitness; // A form of normalized fitness
     norm_fitness = (approx_fitness % 100) / 10.0f + 10;
 //        cout << "norm_fitness (before scaling): " << norm_fitness << endl;
 //        norm_fitness /= 10;
 
-    cout << "Normalized fitness: " << norm_fitness << endl;
+    //cout << "Normalized fitness: " << norm_fitness << endl;
 
     // The ubigraph size of the vertex for this node
     double size;
@@ -172,7 +172,7 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
 
     // For some reason the fitness doesn't work on the BITNodeRoot
     if (node->root != node) {
-        cout << "node fitness: " << node->fitness() << endl;
+        //cout << "node fitness: " << node->fitness() << endl;
 
         drawBITNodeFitness(node_id, node->fitness());
         drawBITNodeLabel(node, node_id);
@@ -190,7 +190,7 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
     // Remember that this draws BITNodes, and the children are actually ParametrizedBITNodes referring to (often shared) BITNodes
     // Draw vertexes for each arg slot
     for (unsigned int i = 0; i < node->children.size(); i++ ) {
-        cout << "Drawing BITNode arg #" << i << endl;
+        //cout << "Drawing BITNode arg #" << i << endl;
         // Display and attach that arg
         unsigned int arg_id = node_id + i + 1; // haxx:: since a BITNode takes up a lot more than a few bytes presumably
         int status = ubigraph_new_vertex_w_id ( arg_id ); // TODO use a different id system
@@ -200,7 +200,7 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
             //        int arg_id = ubigraph_new_vertex();
             ostringstream oss;
             oss << "#" << i;
-            cout << oss.str() << endl;
+            //cout << oss.str() << endl;
             //ubigraph_set_vertex_attribute ( arg_id, "label", toString ( i ).c_str() );
             ubigraph_set_vertex_attribute ( arg_id, "label", oss.str().c_str() );
             status = ubigraph_new_edge ( node_id, arg_id );
