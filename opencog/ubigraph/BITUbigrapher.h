@@ -75,7 +75,8 @@ public:
 
 //    void drawBITNode(BITNode* node, std::vector<std::set<ParametrizedBITNode> >
 //                     children);
-    void drawBITNode(BITNode* node);
+    // ruleNumber: 0 == BITNodeRoot, 1 == root variable scoper, otherwise the index of the Rule in the RuleProvider
+    void drawBITNode(BITNode* node, int ruleNumber = 0);
 
     void drawBITLink(int parent_id, int child_id, int slot);
 

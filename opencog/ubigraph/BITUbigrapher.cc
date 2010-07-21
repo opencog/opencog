@@ -145,6 +145,7 @@ void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot) {
     } else {
         ubigraph_set_edge_attribute ( status, "oriented", "true" );
         ubigraph_set_edge_attribute ( status, "arrow", "true" );
+        //ubigraph_set_edge_attribute ( status, "strength", "0.5" );
     }
 }
 
@@ -154,7 +155,7 @@ void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot) {
 
 // Sometimes it draws a node at the top (because its parent hasn't been established yet. Possibly because of the BITNode cloning). Might need to call the function from more places in the BITNode/BITNodeRoot code.
 
-void BITUbigrapher::drawBITNode ( BITNode* node)
+void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
 {
     if (node->rule && !node->iscomposer()) {
         return;
@@ -175,10 +176,15 @@ void BITUbigrapher::drawBITNode ( BITNode* node)
         //cout << "node fitness: " << node->fitness() << endl;
 
         drawBITNodeFitness(node_id, node->fitness());
-        drawBITNodeLabel(node, node_id);
+        if (false) { // Draw labels with the initials of the Rule. More intuitive but gets cluttered in Ubigraph.
+            drawBITNodeLabel(node, node_id);
+
+            ubigraph_set_vertex_attribute ( node_id, "color", "#00ff00" );
+        } else {
+            ubigraph_set_vertex_attribute ( node_id, "color", i2str(ruleNumber).c_str());
+        }
 
         ubigraph_set_vertex_attribute ( node_id, "shape", "sphere" );
-        ubigraph_set_vertex_attribute ( node_id, "color", "#00ff00" );
     }
 
     // Do this even if it failed, because it'll be attaching this child node to a different parent node than before

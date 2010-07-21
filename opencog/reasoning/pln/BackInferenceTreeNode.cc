@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 
 #include "rules/RuleProvider.h"
 #include "rules/Rules.h"
@@ -481,7 +482,9 @@ void BITNode::create()
     }
 
 #ifdef USE_BITUBIGRAPHER
-    haxx::BITUSingleton->drawBITNode(this);
+    RuleProvider * rp = this->root->rp;
+    int ruleNumber = 2 + std::find(rp->begin(), rp->end(), rule) - rp->begin();
+    haxx::BITUSingleton->drawBITNode(this, ruleNumber);
 #endif
 }
 
