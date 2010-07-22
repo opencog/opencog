@@ -30,21 +30,23 @@
 
 using namespace opencog;
 
-void DimensionalEmbedding::run(CogServer* cogServer){
-    //logger().info("Running DimEmbed Agent");
-}
-
-void DimensionalEmbedding::init(CogServer* cogServer){
-    this->cogServer=cogServer;
-    this->as=cogServer->getAtomSpace();
-
-    //Just for testing purposes
+DimensionalEmbedding::DimensionalEmbedding() {
+    numDimensions=50;
+    CogServer& cogServer = static_cast<CogServer&>(server());
+    this->as=cogServer.getAtomSpace();    
+#ifdef HAVE_GUILE
+    //Scheme functions for testing
     define_scheme_primitive("embedSpace",
                             &DimensionalEmbedding::embedSimLinks,
                             this);
     define_scheme_primitive("logEmbedding",
                             &DimensionalEmbedding::logSimEmbedding,
                             this);
+#endif
+}
+
+void DimensionalEmbedding::run(CogServer* cogServer){
+    logger().info("Running DimEmbed Agent");
 }
 
 void DimensionalEmbedding::embedSimLinks() {

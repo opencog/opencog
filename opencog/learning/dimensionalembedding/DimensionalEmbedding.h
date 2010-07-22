@@ -28,7 +28,6 @@
 #include <map>
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/Factory.h>
 
@@ -46,8 +45,7 @@ namespace opencog
         typedef std::map<Type, PivotSeq> PivotMap;
         typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
 
-        AtomSpace *as;
-        CogServer *cogServer;
+        AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
         size_t numDimensions;//Number of pivot atoms
@@ -80,10 +78,8 @@ namespace opencog
 
         void run (CogServer* server);
 
-        DimensionalEmbedding() : numDimensions(50) { }
+        DimensionalEmbedding();
         ~DimensionalEmbedding() { };
-
-        void init(CogServer *cogServer);
 
         /**
          * Embeds and prints similarity links.

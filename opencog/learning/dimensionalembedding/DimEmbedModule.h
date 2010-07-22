@@ -39,12 +39,6 @@ namespace opencog
     private:
         Factory<DimensionalEmbedding, Agent> dimEmbedFactory;
     public:
-        /*
-        static inline const char* id() {
-            static const char* _id = "opencog::DimEmbedModule";
-            return _id;
-        }
-        */
         const char* id();
 
         DimEmbedModule();

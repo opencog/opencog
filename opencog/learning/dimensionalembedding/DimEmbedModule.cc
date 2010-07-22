@@ -29,7 +29,6 @@ using namespace opencog;
 
 DECLARE_MODULE(DimEmbedModule);
 
-
 DimEmbedModule::DimEmbedModule() {
     CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerAgent(DimensionalEmbedding::info().id, &dimEmbedFactory);
@@ -41,6 +40,6 @@ DimEmbedModule::~DimEmbedModule() {
     cogserver.unregisterAgent(DimensionalEmbedding::info().id);
 }
 
-void DimEmbedModule::init() {
+void DimEmbedModule::init() {    
     logger().info("DimEmbed init");
-    }
+}
