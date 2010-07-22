@@ -465,32 +465,21 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.
     //! @todo Streamline this code now.
 
-//    meta AND(
-//        new vtree(
-//             mva((pHandle)AND_LINK)
-//             )
-//    );
-//
-    meta AND(new vtree);
+    meta AND(
+        new vtree(
+             mva((pHandle)AND_LINK)
+             )
+    );
 
-    bool multiple = filter.size() > 1;
-
-    if (multiple) {
-        AND->set_head((pHandle)AND_LINK);
-
-    //    meta AND(mva((pHandle)AND_LINK));
-
-        for (unsigned int i = 0; i < filter.size(); i++)
-        {
-            //vtree arg(*filter[i]);
-            AND->append_child(AND->begin(), filter[i]->begin());
-        }
+    for (unsigned int i = 0; i < filter.size(); i++)
+    {
+        //vtree arg(*filter[i]);
+        AND->append_child(AND->begin(), filter[i]->begin());
     }
 
     // filter[0] is technically also a meta, i.e. Boost shared pointer to vtree.
     // Since BoundVTree is a subclass of vtree.
-    BITNodeRoot bit(multiple ? AND : filter[0],
-            new EvaluationRuleProvider);
+    BITNodeRoot bit(AND, new EvaluationRuleProvider);
     // Enables it to handle Deduction/MP combined with ForAll unification.
     bit.setLoosePoolPolicy(true);
 
@@ -513,26 +502,15 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
         return ret;
     }
 
-    std::cout << "results";
-
     //foreach (VtreeProvider * vpt, results) {
     foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
         Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
 
-        std::cout << "result";
-
         const vtree& tmp = vpt->getVtree();
-        if (!multiple) {
-            std::cout << "single";
+        vtree::iterator top = tmp.begin();
 
-            next->push_back(BoundVertex(*tmp.begin()));
-        } else {
-            vtree::iterator top = tmp.begin();
-
-            std::cout << "multiple: ";
-            NMPrinter np;
-            np.print(top,-5);
-
+        NMPrinter np;
+        np.print(top,-5);
 
 //            //np.print(top.begin(),-5);
 //            //for (vtree::sibling_iterator i = tmp.begin(top); i!=tmp.end(top); i++) {
@@ -541,26 +519,15 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
 //                np.print(i,-5);
 //            }
 
-            foreach (pHandle ph, asw->getOutgoing(_v2h(*top))) {
-                next->push_back(BoundVertex(ph));
-                np.print(ph,-5);
-            }
+        foreach (pHandle ph, asw->getOutgoing(_v2h(*top))) {
+            next->push_back(BoundVertex(ph));
+            np.print(ph,-5);
         }
 
         ret->insert(next);
     }
 
     return ret;
-
-    //    Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
-//    Btr<set<Btr<vector<BoundVertex> > > > all_args(new set<Btr<vector<BoundVertex> > >);
-//
-//    //Btr<bindingsT> bindings(new BindingsT());
-//    Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
-//
-//    bool match = findAllArgs(filter, args, 0, all_args, bindings);
-//
-//    return all_args;
 }
 
 
