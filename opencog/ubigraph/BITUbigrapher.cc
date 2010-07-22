@@ -176,16 +176,16 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
         //cout << "node fitness: " << node->fitness() << endl;
 
         drawBITNodeFitness(node_id, node->fitness());
-        if (false) { // Draw labels with the initials of the Rule. More intuitive but gets cluttered in Ubigraph.
-            drawBITNodeLabel(node, node_id);
+        //ubigraph_set_vertex_attribute ( node_id, "color", "#00ff00" );
+        ubigraph_set_vertex_attribute ( node_id, "color", i2str(ruleNumber).c_str());
 
-            ubigraph_set_vertex_attribute ( node_id, "color", "#00ff00" );
-        } else {
-            ubigraph_set_vertex_attribute ( node_id, "color", i2str(ruleNumber).c_str());
-        }
-
+        // Display the label as well (they can be switched off in Ubigraph, so might as well).
+        drawBITNodeLabel(node, node_id);
         ubigraph_set_vertex_attribute ( node_id, "shape", "sphere" );
     }
+
+    // Callback
+    ubigraph_set_vertex_attribute( node_id, "callback_left_doubleclick", "http://localhost:17034/rest/0.2/atom/");
 
     // Do this even if it failed, because it'll be attaching this child node to a different parent node than before
 
