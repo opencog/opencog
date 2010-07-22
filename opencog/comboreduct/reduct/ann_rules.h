@@ -28,6 +28,7 @@
 
 #include <opencog/comboreduct/combo/simple_nn.h>
 #include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/util/RandGen.h>
 
 using namespace combo;
 typedef combo_tree::sibling_iterator sib_it;
@@ -35,7 +36,7 @@ typedef combo_tree::iterator pre_it;
 
 struct tree_transform {
 
-    tree_transform() { }
+    tree_transform() {}
 
     combo_tree encode_node(ann& the_ann, ann_node* node) const {
         int tag = node->tag;

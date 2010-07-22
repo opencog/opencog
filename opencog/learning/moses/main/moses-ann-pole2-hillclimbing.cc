@@ -55,6 +55,9 @@ int main(int argc, char** argv)
     cout << "Best network: " << endl;
     cout << &bestnet << endl;
     bestnet.write_dot("best_nn.dot");    
+
+    //for parameter sweet
+    cout << metapop_pole2.best_score().first << endl;
 }
 
 

@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         set_stepsize(1.25); //lexical_cast<double>(argv[3]));
         set_expansion(1.5); //lexical_cast<double>(argv[4]));
         set_depth(4) ; //exical_cast<int>(argv[5]));
-        reduce = false;
+        reduce = true;
     } catch (...) {
         cerr << "usage: " << argv[0] << " maxevals seed" << endl;
         exit(1);

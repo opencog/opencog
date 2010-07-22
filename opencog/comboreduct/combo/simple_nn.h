@@ -33,10 +33,12 @@
 #include <math.h>
 
 #include <opencog/util/printContainer.h>
+#include <opencog/util/RandGen.h>
 
 using namespace std;
 
 using opencog::printContainer;
+using opencog::RandGen;
 
 //anns are composed of nodes and connections
 class ann;
@@ -85,10 +87,14 @@ public:
     int counter; //used for determining network depth
     int id; //internal identifier
     double sort_val; //used for sorting nodes    
-    ann_node* memory_ptr; //what hidden node will feed this input,
-                          //when NULL there is no such node. Obviously
-                          //it is assume that only input nodes have
-                          //non null memory_ptr
+    ann_node* memory_ptr; // what hidden node will feed this input,
+                          // when NULL there is no such
+                          // node. Obviously it is assume that only
+                          // input nodes can have non null memory_ptr
+    bool memory_neurone; // true if it is used as input of a memory
+                         // neurone, that is another neurone n points
+                         // to it via n.memory_ptr. Only hidden node
+                         // can have this attribute true
   
     //connections
     vector<ann_connection*> out_connections;
@@ -102,7 +108,7 @@ public:
     int tag;
     //what kind of node is this
     ann_nodetype nodetype;
-    
+
     void calculate_sort_value(void)
     {
         ann_connection_it it;        
@@ -182,9 +188,11 @@ public:
            for (node_iter = hidden.begin(); node_iter != hidden.end(); 
                    node_iter++)
            {
-               //if there are no outgoing connections
-               //this neuron has no impact
-               if((*node_iter)->out_connections.size()==0)
+               //if there are no outgoing connections and it is not
+               //used as input of a memory neurone, then this neuron
+               //has no impact
+               if((*node_iter)->out_connections.size()==0 
+                  && !(*node_iter)->memory_neurone)
                {
                    remove_node(*node_iter);
                    node_iter = hidden.begin();
@@ -359,8 +367,9 @@ public:
         }
 
         //select eligble hidden node
-        int selected = rand() % possible.size();
+        int selected = rand() % possible.size(); // @todo:replace this by RandGen
         ann_node *hidden_neuron = possible[selected];
+        hidden_neuron->memory_neurone = true;
 
         //increment tag for new neuron
         int tag = biggest_tag() + 2;
@@ -372,20 +381,20 @@ public:
         bool connected=false;
         while(!connected)
         {
-        int add_chance = 100;
-        for(iter=hidden.begin();iter!=hidden.end();iter++)
-            if (rand()%100 < add_chance)
-            {
-                connected=true;
-                add_connection(new_input,(*iter),0.0);
-            }
+            int add_chance = 100;
+            for(iter=hidden.begin();iter!=hidden.end();iter++)
+                if (rand()%100 < add_chance)
+                {
+                    connected=true;
+                    add_connection(new_input,(*iter),0.0);
+                }
 
-        for(iter=outputs.begin();iter!=outputs.end();iter++)
-            if (rand()%100 < add_chance)
-            {
-                connected=true;
-                add_connection(new_input,(*iter),0.0);
-            }
+            for(iter=outputs.begin();iter!=outputs.end();iter++)
+                if (rand()%100 < add_chance)
+                {
+                    connected=true;
+                    add_connection(new_input,(*iter),0.0);
+                }
         }
         add_node(new_input);
         return true;
@@ -437,20 +446,20 @@ public:
         
         for (unsigned int x = 0;x < inputs.size();x++)
         {
-            if(!inputs[x]->memory_ptr)
-                inputs[x]->activation = vals[counter++];
-            else
+            if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
+            else
+                inputs[x]->activation = vals[counter++];
         }
     }
 
     void load_inputs(vector<double>& vals) {
         unsigned int counter = 0;
         for (unsigned int x = 0;x < inputs.size();x++) {
-            if(!inputs[x]->memory_ptr)
-                inputs[x]->activation = vals[counter++];
-            else
+            if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
+            else
+                inputs[x]->activation = vals[counter++];
         }
     }
 
@@ -567,7 +576,7 @@ public:
         remove_from_vec(node,inputs);
         remove_from_vec(node,hidden);
         remove_from_vec(node,outputs);
-        //set n->memory_ptr = NULL for all nodes using it
+        //set n->memory_ptr = NULL for all input nodes using it
         remove_from_memory_ptr(node);
         delete node;
         return true;
