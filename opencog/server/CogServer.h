@@ -128,6 +128,7 @@ protected:
     SystemActivityTable _systemActivityTable;
 
 public:
+
     /** CogServer's constructor. Initializes the mutex, atomspace and cycleCount
      *  variables*/
     CogServer(void);
