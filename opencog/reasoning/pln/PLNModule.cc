@@ -264,6 +264,8 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
         state_ = Bstate_.get();
     }
 
+//    state_->setLoosePoolPolicy(true);
+
     set<VtreeProvider*> result;
     pHandle eh;
     vhpair vhp;
@@ -543,7 +545,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 			int steps;
 			input(steps, args);
 
-			ForwardChainerClassicIC fw;
+			HybridForwardChainer fw;
 			cout << "FC Starting chaining:" << endl;
 			//pHandleSeq results = fw.fwdChainStack(10000);
 			pHandleSeq results = fw.fwdChain(steps); // FWD_CHAIN_MAX_APPS);

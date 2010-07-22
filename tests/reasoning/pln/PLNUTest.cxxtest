@@ -298,7 +298,7 @@ private:
 
         Btr<BackInferenceTreeRootT> state;
         //ForwardChainer fc;
-        ForwardChainerClassicIC fc;
+        HybridForwardChainer fc;
 
         // Even with FC, we want to have a BIT available so that printTrail can be accessed
 //        if (test_bc) {
@@ -753,8 +753,8 @@ public:
     }
     
     // test forward chainer on all targets defined as conf file
-    void DISABLEtestSCMTargetsFC() {
-        runSCMTargets(false);
+    void testSCMTargetsFC() {
+        //runSCMTargets(false);
     }
 
     // A meta-level test that can run all of the tests multiple times;

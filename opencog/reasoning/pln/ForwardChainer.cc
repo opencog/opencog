@@ -383,7 +383,7 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ForwardChainerClassicIC::ForwardChainerClassicIC(AtomSpaceWrapper* _asw) :
+HybridForwardChainer::HybridForwardChainer(AtomSpaceWrapper* _asw) :
         asw(_asw)
 {
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
@@ -394,12 +394,12 @@ ForwardChainerClassicIC::ForwardChainerClassicIC(AtomSpaceWrapper* _asw) :
     ForwardChainer::generators = new EvaluationRuleProvider;
 }
 
-ForwardChainerClassicIC::~ForwardChainerClassicIC()
+HybridForwardChainer::~HybridForwardChainer()
 {
 }
 
 //!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
-//Btr<std::set<BoundVertex> > ForwardChainerClassicIC::getMatching(const meta target)
+//Btr<std::set<BoundVertex> > HybridForwardChainer::getMatching(const meta target)
 //{
 //    BITNodeRoot bit(target, new EvaluationRuleProvider);
 //
@@ -459,7 +459,7 @@ ForwardChainerClassicIC::~ForwardChainerClassicIC()
 //    return ret;
 //}
 
-Btr<set<Btr<vector<BoundVertex> > > > ForwardChainerClassicIC::findAllArgs(std::vector<BBvtree> filter)
+Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vector<BBvtree> filter)
 {
     // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
     // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.

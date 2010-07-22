@@ -36,6 +36,7 @@ const static float FWD_CHAIN_PROB_GLOBAL = 0.3f;
 const static int FWD_CHAIN_MAX_FILL = 50;
 
 //! Forward chainer base class. Uses an obsolete approach that was not general and had an inappropriate combinatorial explosion.
+//! See the more advanced HybridForwardChainer class. It still uses the fwdChain method here, which is the entry point for FC.
 class ForwardChainer {
 private:
 
@@ -111,14 +112,14 @@ public:
 // It would call the BC to find all ImplicationLinks, and also the antecedent (A here).
 // The BC will return all ImplicationLinks where the antecedent is known already. The resulting
 // conclusions may be useful in future FC steps.
-class ForwardChainerClassicIC : public ForwardChainer {
+class HybridForwardChainer : public ForwardChainer {
 private:
 
 public:
     AtomSpaceWrapper* asw;
 
-    ForwardChainerClassicIC(AtomSpaceWrapper* _asw = GET_ASW);
-    ~ForwardChainerClassicIC();
+    HybridForwardChainer(AtomSpaceWrapper* _asw = GET_ASW);
+    ~HybridForwardChainer();
 
     // Only enable one of the following.
 
