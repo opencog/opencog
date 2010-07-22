@@ -462,7 +462,8 @@ ForwardChainerClassicIC::~ForwardChainerClassicIC()
 Btr<set<Btr<vector<BoundVertex> > > > ForwardChainerClassicIC::findAllArgs(std::vector<BBvtree> filter)
 {
     // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
-    // Can't make an ANDLink of 1 item, because SimpleANDRule<1> crashes.
+    // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.
+    //! @todo Streamline this code now.
 
 //    meta AND(
 //        new vtree(

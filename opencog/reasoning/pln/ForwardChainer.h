@@ -35,7 +35,7 @@ const static float FWD_CHAIN_PROB_STACK = 0.7f;
 const static float FWD_CHAIN_PROB_GLOBAL = 0.3f;
 const static int FWD_CHAIN_MAX_FILL = 50;
 
-//! Classes that manages forward chaining
+//! Forward chainer base class. Uses an obsolete approach that was not general and had an inappropriate combinatorial explosion.
 class ForwardChainer {
 private:
 
@@ -106,7 +106,11 @@ public:
 
 // ForwardChainer subclass that uses similar inference control to a classical logic FC,
 // i.e. it uses a deduction-ish Rule each step, and evaluates any AND/OR/etc expressions
-// in the ImplicationLink/etc.
+// in the ImplicationLink/etc. It uses the backward chainer to evaluate the expressions.
+// Example step: applying ModusPonens on an ImplicationLink (produces B given A and {A implies B}).
+// It would call the BC to find all ImplicationLinks, and also the antecedent (A here).
+// The BC will return all ImplicationLinks where the antecedent is known already. The resulting
+// conclusions may be useful in future FC steps.
 class ForwardChainerClassicIC : public ForwardChainer {
 private:
 
@@ -119,8 +123,9 @@ public:
     // Only enable one of the following.
 
     //! Find a series of atoms to match the given filter.
-    //! Uses a single BIT to fill the whole filter (which should allow extra
-    //! results in the ForAll case, and be more efficient).
+    //! Uses a single BIT (backward chaining search tree) to fill the whole filter (which should allow extra
+    //! results in the ForAll case, and be more efficient). The BIT is configured to only use evaluation-ish
+    //! Rules and not deduction-ish Rules.
     virtual Btr<std::set<Btr<std::vector<BoundVertex> > > > findAllArgs(std::vector<BBvtree> filter);
 
     //! Look up an atom to match the given target.
