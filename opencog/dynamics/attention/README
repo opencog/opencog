@@ -74,7 +74,7 @@ in the Attentional focus. They can have any Arity.
 
 Asymmetric Hebbian links are ordered, and represent an asymmetric correlation
 between the connected atoms. If the source atom is in the Attentional focus the
-link indicates that the target atom should also be the the the focus, however
+link indicates that the target atom should also be the focus, however
 the reverse is NOT true.
 
 === Inverse Hebbian links ===
