@@ -21,7 +21,43 @@
  */
 #include "moses-exec.h"
 
+/**
+ * Display error message about unspecified combo tree and exit
+ */
+void unspecified_combo_exit() {
+    std::cerr << "error: you must specify which combo tree to learn (option -y)"
+              << std::endl;
+    exit(1);
+}
 
+/**
+ * Display error message about unsupported type and exit
+ */
+void unsupported_type_exit(const type_tree& tt) {
+    std::cerr << "error: type " << tt << " currently not supported" << std::endl;
+    exit(1);
+}
+void unsupported_type_exit(type_node type) {
+    unsupported_type_exit(type_tree(type));
+}
+
+/**
+ * Display error message about ill formed combo tree and exit
+ */
+void illformed_exit(const combo_tree& tr) {
+    std::cerr << "error: apparently the combo tree " 
+              << tr << "is not well formed" << std::endl;
+    exit(1);
+}
+
+/**
+ * Display error message about unsupported problem and exit
+ */
+void unsupported_problem_exit(const string& problem) {
+    std::cerr << "error: problem " << problem 
+              << " unsupported for the moment" << std::endl;
+    exit(1);
+}
 
 ifstream* open_table_file(string file) {
     ifstream* in = new ifstream(file.c_str());
@@ -72,10 +108,25 @@ combo_tree type_to_exemplar(type_node type) {
                   << " possible to infer it from the input table." << std::endl;
         exit(1);
     default:
-        std::cerr << "Type " << type << " is not supported yet" << std::endl;
-        exit(1);
+        unsupported_type_exit(type);
     }
     return combo_tree();
+}
+
+combo_tree ann_exemplar(arity_t arity) {
+    combo_tree ann_tr(ann_type(0, id::ann));
+    // ann root
+    combo_tree::iterator root_node = ann_tr.begin();
+    // output node
+    combo_tree::iterator output_node =
+        ann_tr.append_child(root_node, ann_type(1, id::ann_node));
+    // input nodes
+    for(arity_t i = 0; i <= arity; i++) 
+        ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
+    // input nodes' weights
+    ann_tr.append_children(output_node, 0.0, arity + 1);
+    
+    return ann_tr;
 }
 
 /**
@@ -95,10 +146,11 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
     } else if(output_type == id::ann_type) {
         return 2 + arity*arity; // to account for hidden neurones, very roughly
     } else {
-        std::cerr << "type " << tt << "not supported yet" << std::endl;
-        exit(1);
+        unsupported_type_exit(tt);
+        return 0;
     }
 }
+
 
 int main(int argc,char** argv) { 
 
@@ -165,7 +217,7 @@ int main(int argc,char** argv) {
          append(") the problem size corresponds to the order o.").c_str())
         ("nsamples,b", value<int>(&nsamples)->default_value(-1),
          "number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored.")
-        ("min-rand-input,q", value<float>(&min_rand_input)->default_value(-1),
+        ("min-rand-input,q", value<float>(&min_rand_input)->default_value(0),
          "min of an input value chosen randomly, only used when the problem takes continuous inputs")
         ("max-rand-input,w", value<float>(&max_rand_input)->default_value(1),
          "max of an input value chosen randomly, only used when the problem takes continuous inputs")
@@ -180,7 +232,10 @@ int main(int argc,char** argv) {
         ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored.")
         ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
-         string("optimization algorithm, supported algorithms are univariate (").append(un).append("), simulation annealing (").append(sa).append("), hillclimbing (").append(hc).append(").").c_str())
+         string("optimization algorithm, supported algorithms are"
+                " univariate (").append(un).
+         append("), simulation annealing (").append(sa).
+         append("), hillclimbing (").append(hc).append(").").c_str())
         ("exemplar,e", value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times.")
         ("reduce-all,d", value<bool>(&reduce_all)->default_value(true),
@@ -296,9 +351,7 @@ int main(int argc,char** argv) {
                                   result_count, output_complexity,
                                   output_bscore);
         } else {
-            std::cerr << "Type " << output_type 
-                      << " unhandled for the moment" << std::endl;
-            return 1;
+            unsupported_type_exit(output_type);
         }
     } else if(problem == ann_it) { // regression based on input table using ann
         auto_ptr<ifstream> in(open_table_file(input_table_file));
@@ -310,23 +363,9 @@ int main(int argc,char** argv) {
 
         unsigned int arity = inputtable[0].size();
 
-        // if no exemplar has been provided in option try to infer it
+        // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
-            combo_tree ann_tr(ann_type(0, id::ann));
-            // ann root
-            combo_tree::iterator root_node = ann_tr.begin();
-            // output node
-            combo_tree::iterator output_node =
-                ann_tr.append_child(root_node, ann_type(1, id::ann_node));
-            // input nodes
-            for(unsigned int i = 0; i <= arity; i++) 
-                ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
-            // input nodes' weights
-            ann_tr.append_children(output_node, 0.0, arity + 1);
-            
-            std::cout << ann_tr << std::endl;
-
-            exemplars.push_back(ann_tr);
+            exemplars.push_back(ann_exemplar(arity));
         }
 
         // subsample the table
@@ -347,11 +386,8 @@ int main(int argc,char** argv) {
                               result_count, output_complexity,
                               output_bscore);
     } else if(problem == cp) { // regression based on combo program
-        if(combo_str.empty()) {
-            std::cerr << "You must specify which combo tree to learn (option -y)"
-                      << std::endl;
-            return 1;
-        }
+        if(combo_str.empty())
+            unspecified_combo_exit();
         // get the combo_tree and infer its type
         stringstream ss;
         combo_tree tr;
@@ -397,16 +433,51 @@ int main(int argc,char** argv) {
                                       result_count, output_complexity,
                                       output_bscore);
             } else {
-                std::cerr << "type " << tt
-                          << " currently not suppoerted" << std::endl;
-                return 1;
+                unsupported_type_exit(tt);
             }
         }
         else {
-            std::cerr << "apparently the combo tree " 
-                      << tr << "is not well formed" << std::endl;
-            return 1;
+            illformed_exit(tr);
         }
+    } else if(problem == ann_cp) { // regression based on combo program using ann
+        if(combo_str.empty())
+            unspecified_combo_exit();
+        // get the combo_tree and infer its type
+        stringstream ss;
+        combo_tree tr;
+        ss << combo_str;
+        ss >> tr;
+        type_tree problem_tt = infer_type_tree(tr);
+
+        if(is_well_formed(problem_tt)) {
+            arity_t arity = type_tree_arity(problem_tt);
+            // if no exemplar has been provided in option use the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(ann_exemplar(arity));
+            }
+
+            // @todo: introduce some noise optionally
+            if(nsamples<=0)
+                nsamples = default_nsamples;
+
+            contin_table_inputs inputtable(nsamples, arity, rng,
+                                               max_rand_input, min_rand_input);
+            contin_table table_outputs(tr, inputtable, rng);
+            
+            type_tree tt = declare_function(type_tree(id::ann_type), 0);
+
+            int as = alphabet_size(tt, ignore_ops);
+            
+            occam_contin_bscore bscore(table_outputs, inputtable,
+                                       variance, as, rng);
+            metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
+                                  reduce_all, bscore, cache_size,
+                                  count_base, opt_algo,
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity,
+                                  output_bscore);
+        } else illformed_exit(tr);
     } else if(problem == pa) { // even parity
         // @todo: for the moment occam's razor and partial truth table are ignored
         unsigned int arity = problem_size;
@@ -472,9 +543,5 @@ int main(int argc,char** argv) {
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);
-    } else {
-        std::cerr << "Problem " << problem 
-                  << " unsupported for the moment" << std::endl;
-        return 1;
-    }
+    } else unsupported_problem_exit(problem);
 }
