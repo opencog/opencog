@@ -27,6 +27,7 @@ ADD_LIBRARY(comboreduct SHARED
 	combo/using
 	combo/variable_unifier
     combo/simple_nn
+    combo/convert_ann_combo
 
 	reduct/action_reduction
 	reduct/action_rules

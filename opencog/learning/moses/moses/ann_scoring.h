@@ -224,7 +224,7 @@ struct AnnFitnessFunction : public unary_function<combo_tree, contin_t> {
         contin_t error = 0.0;
         for (int pattern = 0;pattern < 4;pattern++) {
             nn.load_inputs(inputs[pattern]);
-            for (int x = 0;x < depth;x++)
+            dorepeat(depth)
                 nn.propagate();
             contin_t diff = outputs[pattern] - nn.outputs[0]->activation;
             error += diff * diff;

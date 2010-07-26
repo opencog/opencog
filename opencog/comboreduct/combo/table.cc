@@ -19,9 +19,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 #include "table.h"
+
 #include <opencog/util/numeric.h>
+
+#include "ann.h"
+#include "simple_nn.h"
+#include "convert_ann_combo.h"
 
 using namespace combo;
 using opencog::sqr;
@@ -68,17 +72,36 @@ contin_table_inputs::contin_table_inputs(int sample_count, int arity,
     }
 }
 
-contin_table::contin_table(const combo_tree& t, const contin_table_inputs& cti,
+contin_table::contin_table(const combo_tree& tr, const contin_table_inputs& cti,
                            opencog::RandGen& rng)
 {
-    for (const_cm_it i = cti.begin(); i != cti.end(); ++i) {
-        int arg = 1;
-        for (const_cv_it j = i->begin(); j != i->end(); ++j, ++arg)
-            binding(arg) = *j;
-        //assumption : all inputs of t are contin_t
-        vertex res = eval_throws(rng, t);
-        OC_ASSERT(is_contin(res), "res must be contin");
-        push_back(get_contin(res));
+    OC_ASSERT(!tr.empty());
+    if(is_ann_type(*tr.begin())) { 
+        // we treat ANN differently because they must be decoded
+        // before being evaluated. Also note that if there are memory
+        // neurones then the state of the network is evolving at each
+        // input, so the order with contin_table_inputs does matter
+        ann net = tree_transform().decodify_tree(tr);
+        int depth = net.feedforward_depth();
+        for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {
+            contin_vector tmp(*i);
+            tmp.push_back(1.0); // net uses that in case the function
+                                // to learn needs some kind of offset
+            net.load_inputs(tmp);
+            dorepeat(depth)
+                net.propagate();
+            push_back(net.outputs[0]->activation);
+        }
+    } else {
+        for (const_cm_it i = cti.begin(); i != cti.end(); ++i) {
+            int arg = 1;
+            for (const_cv_it j = i->begin(); j != i->end(); ++j, ++arg)
+                binding(arg) = *j;
+            // assumption : all inputs and output of tr are contin_t
+            // this assumption can be verified using infer_type_tree
+            vertex res = eval_throws(rng, tr);
+            push_back(get_contin(res));
+        }
     }
 }
 

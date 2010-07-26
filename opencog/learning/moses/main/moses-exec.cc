@@ -21,15 +21,32 @@
  */
 #include "moses-exec.h"
 
+
+
+ifstream* open_table_file(string file) {
+    ifstream* in = new ifstream(file.c_str());
+    if(!in->is_open()) {
+        if(file.empty()) {
+            std::cerr << "the input file is empty" << std::endl;
+            std::cerr << "To indicate the file to open use the option"
+                      << " -i or --input-file" << std::endl;
+        } else {
+            std::cerr << "Could not open " << file << std::endl;
+        }
+        exit(1);
+    }
+    return in;
+}
+
 /**
  * check the first element of the data file, if it is "0" or "1" then
  * it is boolean, otherwise it is contin. It is not 100% reliable of
  * course and should be improved.
  */
 type_node infer_type_from_data_file(string file) {
-    ifstream in(file.c_str());
+    auto_ptr<ifstream> in(open_table_file(file));
     string str;
-    in >> str;
+    *in >> str;
     if(str == "0" || str == "1")
         return id::boolean_type;
     else {
@@ -65,6 +82,7 @@ combo_tree type_to_exemplar(type_node type) {
  * determine the alphabet size given the type_tree of the problem and
  * the of operator that are ignored
  */
+
 int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
     arity_t arity = type_tree_arity(tt);
     type_node output_type = *type_tree_output_type_tree(tt).begin();
@@ -74,6 +92,8 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
         // set alphabet size, 8 is roughly the number of operators
         // in contin formula, it will have to be adapted
         return 8 + arity - ignore_ops.size();
+    } else if(output_type == id::ann_type) {
+        return 2 + arity*arity; // to account for hidden neurones, very roughly
     } else {
         std::cerr << "type " << tt << "not supported yet" << std::endl;
         exit(1);
@@ -127,11 +147,22 @@ int main(int argc,char** argv) {
         ("input-file,i", value<string>(&input_table_file),
          "input table file, the maximum number of samples is the number of rows in the file.")
         ("problem,h", value<string>(&problem)->default_value("it"),
-         string("problem to solve, supported problems are regression based on input table (").append(it).append("), regression based on combo program (").append(cp).append("), even parity (").append(pa).append("), disjunction (").append("dj").append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").append(").").c_str())
+         string("problem to solve, supported problems are"
+                " regression based on input table (").append(it).
+         append(", regression based on input table using ann (").append(ann_it).
+         append("), regression based on combo program (").append(cp).
+         append("), even parity (").append(pa).
+         append("), disjunction (").append(dj).
+         append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
+         append(").").c_str())
         ("combo-program,y", value<string>(&combo_str),
          string("combo program to learn, use when the problem ").append(cp).append(" is selected (option -h).").c_str())
         ("problem-size,k", value<unsigned int>(&problem_size)->default_value(5),
-         string("for even parity (").append(pa).append(") and disjunction (").append(dj).append(") the problem size corresponds to the arity, for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).append(") the problem size corresponds to the order o.").c_str())
+         string("for even parity (").append(pa).
+         append(") and disjunction (").append(dj).
+         append(") the problem size corresponds to the arity,"
+                " for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
+         append(") the problem size corresponds to the order o.").c_str())
         ("nsamples,b", value<int>(&nsamples)->default_value(-1),
          "number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored.")
         ("min-rand-input,q", value<float>(&min_rand_input)->default_value(-1),
@@ -212,26 +243,14 @@ int main(int argc,char** argv) {
         type_node output_type = 
             *(get_output_type_tree(*exemplars.begin()->begin()).begin());
 
-        // open input_table_file file
-        ifstream in(input_table_file.c_str());
-        if(!in.is_open()) {
-            if(input_table_file.empty()) {
-                std::cerr << "the input file is empty" << std::endl;
-                std::cerr << "To indicate the file to open use the option"
-                          << " -i or --input-file" << std::endl;
-            } else {
-                std::cerr << "Could not open " 
-                          << input_table_file << std::endl;
-            }
-            exit(1);
-        }
+        auto_ptr<ifstream> in(open_table_file(input_table_file));
 
         if(output_type == id::boolean_type) {
             // read input_table_file file
             truth_table_inputs inputtable;
             partial_truth_table booltable;
             istreamTable<truth_table_inputs,
-                         partial_truth_table, bool>(in, inputtable, booltable);
+                         partial_truth_table, bool>(*in, inputtable, booltable);
             if(nsamples>0)
                 subsampleTable(inputtable, booltable, nsamples, rng);
             unsigned int arity = inputtable[0].size();
@@ -253,7 +272,7 @@ int main(int argc,char** argv) {
             contin_table_inputs inputtable;
             contin_table contintable;
             istreamTable<contin_table_inputs,
-                         contin_table, contin_t>(in, inputtable, contintable);
+                         contin_table, contin_t>(*in, inputtable, contintable);
             if(nsamples>0)
                 subsampleTable(inputtable, contintable, nsamples, rng);
 
@@ -281,6 +300,52 @@ int main(int argc,char** argv) {
                       << " unhandled for the moment" << std::endl;
             return 1;
         }
+    } else if(problem == ann_it) { // regression based on input table using ann
+        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        contin_table_inputs inputtable;
+        contin_table contintable;
+        // read input_table_file file
+        istreamTable<contin_table_inputs,
+                     contin_table, contin_t>(*in, inputtable, contintable);
+
+        unsigned int arity = inputtable[0].size();
+
+        // if no exemplar has been provided in option try to infer it
+        if(exemplars.empty()) {
+            combo_tree ann_tr(ann_type(0, id::ann));
+            // ann root
+            combo_tree::iterator root_node = ann_tr.begin();
+            // output node
+            combo_tree::iterator output_node =
+                ann_tr.append_child(root_node, ann_type(1, id::ann_node));
+            // input nodes
+            for(unsigned int i = 0; i <= arity; i++) 
+                ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
+            // input nodes' weights
+            ann_tr.append_children(output_node, 0.0, arity + 1);
+            
+            std::cout << ann_tr << std::endl;
+
+            exemplars.push_back(ann_tr);
+        }
+
+        // subsample the table
+        if(nsamples>0)
+            subsampleTable(inputtable, contintable, nsamples, rng);
+
+        type_tree tt = declare_function(type_tree(id::ann_type), 0);
+        
+        int as = alphabet_size(tt, ignore_ops);
+
+        occam_contin_bscore bscore(contintable, inputtable,
+                                   variance, as, rng);
+        metapop_moses_results(rng, exemplars, tt,
+                              ann_reduction(),
+                              reduce_all, bscore, cache_size,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity,
+                              output_bscore);
     } else if(problem == cp) { // regression based on combo program
         if(combo_str.empty()) {
             std::cerr << "You must specify which combo tree to learn (option -y)"

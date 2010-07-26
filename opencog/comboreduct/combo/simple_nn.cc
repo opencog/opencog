@@ -20,6 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "simple_nn.h"
+
+namespace combo {
+
 bool compare_connection::operator() (ann_connection* lhs, ann_connection* rhs) {
   return lhs->source->sort_val < rhs->source->sort_val; 
 }
+
+} // ~namespace combo

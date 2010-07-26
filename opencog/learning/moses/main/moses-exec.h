@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <stdio.h>
 
 #include <boost/program_options.hpp>
@@ -58,6 +59,7 @@ static const unsigned int default_nsamples = 20;
 
 // problems
 static const string it="it"; // regression based on input table
+static const string ann_it="ann-it"; // regression based on input table using ann
 static const string cp="cp"; // regression based on combo program to learn
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction

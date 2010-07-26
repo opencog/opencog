@@ -35,6 +35,10 @@
 #include <opencog/util/printContainer.h>
 #include <opencog/util/RandGen.h>
 
+#include "vertex.h"
+
+namespace combo {
+
 using namespace std;
 
 using opencog::printContainer;
@@ -44,6 +48,9 @@ using opencog::RandGen;
 class ann;
 class ann_node;
 class ann_connection;
+
+typedef combo_tree::sibling_iterator sib_it;
+typedef combo_tree::iterator pre_it;
 
 struct compare_connection
 {
@@ -443,9 +450,7 @@ public:
     //are connected to
     void load_inputs(double* vals) {
         unsigned int counter=0;
-        
-        for (unsigned int x = 0;x < inputs.size();x++)
-        {
+        for (unsigned int x = 0;x < inputs.size();x++) {
             if(inputs[x]->memory_ptr)
                 inputs[x]->activation = inputs[x]->memory_ptr->activation;
             else
@@ -453,7 +458,7 @@ public:
         }
     }
 
-    void load_inputs(vector<double>& vals) {
+    void load_inputs(const vector<double>& vals) {
         unsigned int counter = 0;
         for (unsigned int x = 0;x < inputs.size();x++) {
             if(inputs[x]->memory_ptr)
@@ -627,5 +632,7 @@ public:
         return os;
     }
 };
+
+} // ~namespace combo
 
 #endif // _OPENCOG_SIMPLE_NN_H

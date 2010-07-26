@@ -1,5 +1,7 @@
 #include "pole_balancing.h"
 
+using namespace combo;
+
 CartPole::CartPole(bool randomize,bool velocity)
 {
     maxFitness = 100000;

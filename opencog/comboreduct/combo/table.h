@@ -232,7 +232,7 @@ public:
 
     //constructors
     contin_table() {}
-    contin_table(const combo_tree& t, const contin_table_inputs& cti,
+    contin_table(const combo_tree& tr, const contin_table_inputs& cti,
                  opencog::RandGen& rng);
     template<typename Func>
     contin_table(const Func& f, const contin_table_inputs& cti) {

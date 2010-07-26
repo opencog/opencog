@@ -167,7 +167,7 @@ typedef boost::variant < contin_t,
                          message,
                          procedure_call,
                          action_symbol,
-			 ann_type > vertex;
+                         ann_type > vertex;
 
 typedef std::set<vertex> vertex_set;
 typedef vertex_set::iterator vertex_set_it;
@@ -182,6 +182,7 @@ typedef argument_list_list::const_iterator argument_list_list_const_it;
 
 } //~namespace combo
 
+std::ostream& operator<<(std::ostream&, const combo::ann_type&);
 std::ostream& operator<<(std::ostream&, const combo::builtin&);
 std::ostream& operator<<(std::ostream&, const combo::wild_card&);
 std::ostream& operator<<(std::ostream&, const combo::argument&);

@@ -28,8 +28,8 @@
 
 std::ostream& operator<<(std::ostream& out, const combo::ann_type& h)
 {
-   using namespace combo;
-   switch (h.id) {
+    using namespace combo;
+    switch (h.id) {
     case id::ann:
         return out << "ann";
     case id::ann_input:

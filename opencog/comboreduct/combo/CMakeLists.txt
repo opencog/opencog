@@ -25,6 +25,8 @@ INSTALL(FILES
 	variable_unifier.h	
 	operator_base.h
 	common_def.h
+    simple_nn.h
+    converter_ann_combo_tree.h
 
 	DESTINATION
 

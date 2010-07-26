@@ -49,6 +49,7 @@ public:
         return idx != rhs.idx;
     }
 };
-}
+
+} // ~namespace combo
 
 #endif // _OPENCOG_ANN_H

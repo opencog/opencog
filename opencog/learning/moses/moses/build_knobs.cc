@@ -622,7 +622,7 @@ void build_knobs::rec_canonize(pre_it it)
         linear_canonize(it.begin());
     } else if (*it == id::times) {
         // @todo: think about that case...
-        cout << "I (Nil) must think for that one" << std::endl;
+        cerr << "I (Nil) must think for that one" << std::endl;
     } else {
         stringstream ss;
         ss << *it << " not a buitin, neither an argument";

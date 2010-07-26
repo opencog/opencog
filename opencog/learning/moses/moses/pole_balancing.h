@@ -8,7 +8,7 @@ public:
     CartPole(bool randomize,bool velocity);
     virtual void simplifyTask();  
     virtual void nextTask();
-    virtual double evalNet(ann *net);
+    virtual double evalNet(combo::ann *net);
     double maxFitness;
     bool MARKOV;
 

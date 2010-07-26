@@ -426,7 +426,8 @@ vertex eval_throws(opencog::RandGen& rng,
     else if (is_action_symbol(v)) {
         return v;
     } else {
-        std::cerr << "unrecognized expression " << combo_tree(it) << std::endl;
+        // @todo: strangely this cannot compile
+        // std::cerr << "unrecognized expression " << combo_tree(it) << std::endl;
         throw EvalException(*it);
         return v;
     }
