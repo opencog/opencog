@@ -58,9 +58,9 @@ void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
 }
 
 ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) :
-        asw(_asw),
         composers(new ForwardComposerRuleProvider),
-        generators(new ForwardGeneratorRuleProvider)
+        generators(new ForwardGeneratorRuleProvider),
+        asw(_asw)
 {
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     probStack = FWD_CHAIN_PROB_STACK;
