@@ -26,6 +26,7 @@
 #include <opencog/util/Logger.h>
 #include <string>
 #include <numeric>
+#include <cmath>
 #include <opencog/guile/SchemePrimitive.h>
 
 using namespace opencog;
@@ -102,6 +103,28 @@ double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
     return 0; //no path found, return 0
 }
 
+
+std::vector<double> DimensionalEmbedding::getEmbedVector(const Handle& h,
+                                                         const Type& l) {
+    return ((atomMaps.find(l))->second).find(h)->second;
+}
+
+double DimensionalEmbedding::euclidDist(const Handle& h1,
+                                        const Handle& h2,
+                                        const Type& l) {
+    double distance;
+    std::vector<double> v1=getEmbedVector(h1,l);
+    std::vector<double> v2=getEmbedVector(h2,l);
+    std::vector<double>::iterator it1=v1.begin();
+    std::vector<double>::iterator it2=v2.begin();
+    //Calculate euclidean distance between v1 and v2
+    for(; it1 < v1.end(); it1++) {
+        distance+=std::pow((*it1 - *it2), 2);
+    }
+    distance=std::sqrt(distance);
+    return distance;
+}
+
 void DimensionalEmbedding::addPivot(const Handle& h, const Type& linkType){
     pivotsMap[linkType].push_back(h);
 
@@ -124,6 +147,7 @@ void DimensionalEmbedding::embedAtomSpace(const Type& linkType){
     PivotSeq& pivots = pivotsMap[linkType];
     if(nodes.empty()) return;
     Handle bestChoice = nodes.back();
+    
     while((pivots.size() < numDimensions) && (!nodes.empty())){
         addPivot(bestChoice, linkType);
         //logger().info("Pivot %d picked", pivots.size());

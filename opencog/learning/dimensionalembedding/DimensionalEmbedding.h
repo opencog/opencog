@@ -35,8 +35,11 @@ namespace opencog
 {
     class CogServer;
     /**
-     * This class implements the dimensional embedding technique as described
-     * on http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
+     * The DimensionalEmbedding class  implements the dimensional embedding
+     * technique as described on
+     * http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
+     *
+     * @todo Add support for non-symmetric links
      */
     class DimensionalEmbedding : public opencog::Agent {
     private:
@@ -48,27 +51,68 @@ namespace opencog
         AtomSpace* as;
         AtomEmbedMap atomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
-        size_t numDimensions;//Number of pivot atoms
+        unsigned int numDimensions;//Number of pivot atoms
         
         /**
          * Adds h as a pivot and adds the distances from each node to
          * the pivot to the appropriate atomEmbedding.
+         *
+         * @param h Handle to be added as a pivot
+         * @param linkType Type of link for which h should be added as a pivot
          */
         void addPivot(const Handle& h, const Type& linkType);
 
-        /** clears the AtomEmbedMap and PivotMap for linkType */
+        /**
+         * Clears the AtomEmbedMap and PivotMap for linkType
+         *
+         * @param linkType Type of link for which the embedding should be
+         * cleared.
+         */
         void clearEmbedding(const Type& linkType);
 
         /**
          * Returns the highest weight path between the handles following
          * links of type linkType, where path weight is the product of
-         * (tv.strength*tv.confidence) of the links. Path weight will
-         * always be between 0 and 1. Returns 0 if no path exists.
+         * (tv.strength*tv.confidence) of the links in the path. ie if
+         * (l1, l2,...ln) are the links in the path, then the path weight is
+         * defined as
+         * (l1.tv.strength*l1.tv.confidence)*(l2.tv.strength*l2.tv.confidence)*
+         * ...(ln.tv.strength*ln.tv.confidence).
+         *
+         * Path weight will always be between 0 and 1. Returns 0 if no path
+         * exists and 1 if startHandle == targetHandle.
+         *
          * Uses a modified version of Dijkstra's algorithm.
-         */   
+         *
+         * @param startHandle The starting handle for pathfinding
+         * @param targetHandle The target handle for pathfinding
+         * @param linkType The type of link to follow in pathfinding
+         *
+         * @return The highest weight path from startHandle to targetHandle
+         * following only links of type linkType, where path weight is defined
+         * above.
+         */
         double findHighestWeightPath(const Handle& startHandle,
                                      const Handle& targetHandle,
                                      const Type& linkType);
+
+        /**
+         * Returns a vector of doubles corresponding to the handle h's
+         * embedding of link type l
+         *
+         * @param h The handle whose embedding vector is returned
+         * @param l The link type for which h's embedding vector is wanted
+         *
+         * @return A vector of doubles corresponding to handle h's distance
+         * from each of the pivots.
+         */
+        std::vector<double> getEmbedVector(const Handle& h, const Type& l);
+
+        /**
+         * Returns the distance between handles h1 and h2 for the embedding of
+         * link type l
+         */
+        double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
     public:
         virtual const ClassInfo& classinfo() const { return info(); }
         static const ClassInfo& info() {
@@ -93,6 +137,9 @@ namespace opencog
          * and registers it with the AtomEmbedMap. If an AtomEmbedding
          * already exists for the supplied link type it will replace
          * it.
+         *
+         * @param linkType The type of link for which a dimensional embedding
+         * is wanted.
          */
         void embedAtomSpace(const Type& linkType);
 
@@ -103,7 +150,12 @@ namespace opencog
          */
         void logAtomEmbedding(const Type& linkType);
 
-        /** adds node to the appropriate AtomEmbedding in the AtomEmbedMap */
+        /**
+         * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
+         *
+         * @param h Handle of node to be embedded.
+         * @param linkType Type of link to use to embed h
+         */
         void addNode(const Handle& h, const Type& linkType);
 
         /** updates the given atom (recalculates its distance from pivots) */
