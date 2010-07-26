@@ -1,3 +1,5 @@
+; includes  TESTAlQaeda
+
 (ConceptNode "R1" (stv 0.92000002 0))
 (ConceptNode "X1" (stv 1 0))
 (ConceptNode "x014" (stv 1 0))
