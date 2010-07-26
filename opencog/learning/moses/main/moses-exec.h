@@ -60,11 +60,14 @@ static const unsigned int default_nsamples = 20;
 // problems
 static const string it="it"; // regression based on input table
 static const string cp="cp"; // regression based on combo program to learn
-static const string ann_it="ann-it"; // regression based on input table using ann
-static const string ann_cp="ann-cp"; // regression based on combo program using ann
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
 static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
+static const string ann_it="ann-it"; // regression based on input table using ann
+static const string ann_cp="ann-cp"; // regression based on combo program using ann
+static const string ann_xor="ann-xor"; // binary-xor problem using ann
+static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
+static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
 // optimization algorithms
 static const string un="un"; // univariate

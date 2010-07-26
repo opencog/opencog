@@ -353,38 +353,6 @@ int main(int argc,char** argv) {
         } else {
             unsupported_type_exit(output_type);
         }
-    } else if(problem == ann_it) { // regression based on input table using ann
-        auto_ptr<ifstream> in(open_table_file(input_table_file));
-        contin_table_inputs inputtable;
-        contin_table contintable;
-        // read input_table_file file
-        istreamTable<contin_table_inputs,
-                     contin_table, contin_t>(*in, inputtable, contintable);
-
-        unsigned int arity = inputtable[0].size();
-
-        // if no exemplar has been provided in option insert the default one
-        if(exemplars.empty()) {
-            exemplars.push_back(ann_exemplar(arity));
-        }
-
-        // subsample the table
-        if(nsamples>0)
-            subsampleTable(inputtable, contintable, nsamples, rng);
-
-        type_tree tt = declare_function(type_tree(id::ann_type), 0);
-        
-        int as = alphabet_size(tt, ignore_ops);
-
-        occam_contin_bscore bscore(contintable, inputtable,
-                                   variance, as, rng);
-        metapop_moses_results(rng, exemplars, tt,
-                              ann_reduction(),
-                              reduce_all, bscore, cache_size,
-                              count_base, opt_algo,
-                              max_evals, max_gens, ignore_ops,
-                              result_count, output_complexity,
-                              output_bscore);
     } else if(problem == cp) { // regression based on combo program
         if(combo_str.empty())
             unspecified_combo_exit();
@@ -439,45 +407,6 @@ int main(int argc,char** argv) {
         else {
             illformed_exit(tr);
         }
-    } else if(problem == ann_cp) { // regression based on combo program using ann
-        if(combo_str.empty())
-            unspecified_combo_exit();
-        // get the combo_tree and infer its type
-        stringstream ss;
-        combo_tree tr;
-        ss << combo_str;
-        ss >> tr;
-        type_tree problem_tt = infer_type_tree(tr);
-
-        if(is_well_formed(problem_tt)) {
-            arity_t arity = type_tree_arity(problem_tt);
-            // if no exemplar has been provided in option use the default one
-            if(exemplars.empty()) {
-                exemplars.push_back(ann_exemplar(arity));
-            }
-
-            // @todo: introduce some noise optionally
-            if(nsamples<=0)
-                nsamples = default_nsamples;
-
-            contin_table_inputs inputtable(nsamples, arity, rng,
-                                               max_rand_input, min_rand_input);
-            contin_table table_outputs(tr, inputtable, rng);
-            
-            type_tree tt = declare_function(type_tree(id::ann_type), 0);
-
-            int as = alphabet_size(tt, ignore_ops);
-            
-            occam_contin_bscore bscore(table_outputs, inputtable,
-                                       variance, as, rng);
-            metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng),
-                                  reduce_all, bscore, cache_size,
-                                  count_base, opt_algo,
-                                  max_evals, max_gens, ignore_ops,
-                                  result_count, output_complexity,
-                                  output_bscore);
-        } else illformed_exit(tr);
     } else if(problem == pa) { // even parity
         // @todo: for the moment occam's razor and partial truth table are ignored
         unsigned int arity = problem_size;
@@ -543,5 +472,80 @@ int main(int argc,char** argv) {
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);
-    } else unsupported_problem_exit(problem);
+    //////////////////
+    // ANN problems //
+    //////////////////
+    } else if(problem == ann_it) { // regression based on input table using ann
+        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        contin_table_inputs inputtable;
+        contin_table contintable;
+        // read input_table_file file
+        istreamTable<contin_table_inputs,
+                     contin_table, contin_t>(*in, inputtable, contintable);
+
+        unsigned int arity = inputtable[0].size();
+
+        // if no exemplar has been provided in option insert the default one
+        if(exemplars.empty()) {
+            exemplars.push_back(ann_exemplar(arity));
+        }
+
+        // subsample the table
+        if(nsamples>0)
+            subsampleTable(inputtable, contintable, nsamples, rng);
+
+        type_tree tt = declare_function(type_tree(id::ann_type), 0);
+        
+        int as = alphabet_size(tt, ignore_ops);
+
+        occam_contin_bscore bscore(contintable, inputtable,
+                                   variance, as, rng);
+        metapop_moses_results(rng, exemplars, tt,
+                              ann_reduction(),
+                              reduce_all, bscore, cache_size,
+                              count_base, opt_algo,
+                              max_evals, max_gens, ignore_ops,
+                              result_count, output_complexity,
+                              output_bscore);
+    } else if(problem == ann_cp) { // regression based on combo program using ann
+        if(combo_str.empty())
+            unspecified_combo_exit();
+        // get the combo_tree and infer its type
+        stringstream ss;
+        combo_tree tr;
+        ss << combo_str;
+        ss >> tr;
+        type_tree problem_tt = infer_type_tree(tr);
+
+        if(is_well_formed(problem_tt)) {
+            arity_t arity = type_tree_arity(problem_tt);
+            // if no exemplar has been provided in option use the default one
+            if(exemplars.empty()) {
+                exemplars.push_back(ann_exemplar(arity));
+            }
+
+            // @todo: introduce some noise optionally
+            if(nsamples<=0)
+                nsamples = default_nsamples;
+
+            contin_table_inputs inputtable(nsamples, arity, rng,
+                                               max_rand_input, min_rand_input);
+            contin_table table_outputs(tr, inputtable, rng);
+            
+            type_tree tt = declare_function(type_tree(id::ann_type), 0);
+
+            int as = alphabet_size(tt, ignore_ops);
+            
+            occam_contin_bscore bscore(table_outputs, inputtable,
+                                       variance, as, rng);
+            metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
+                                  reduce_all, bscore, cache_size,
+                                  count_base, opt_algo,
+                                  max_evals, max_gens, ignore_ops,
+                                  result_count, output_complexity,
+                                  output_bscore);
+        } else illformed_exit(tr);
+    }
+    else unsupported_problem_exit(problem);
 }
