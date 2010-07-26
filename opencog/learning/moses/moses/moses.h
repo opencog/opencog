@@ -51,18 +51,20 @@ typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
     
 /**
- * The metapopulation will store the experession(as scored tree) that were
- * encountered during the learning process(which some of them,dominated by
- * exsiting ones,might be skipped as non-promising)
+ * The metapopulation will store the expressions (as scored trees)
+ * that were encountered during the learning process (which some of
+ * them, dominated by exsiting ones, might be skipped as
+ * non-promising)
  * 
- * The metapopulation is updated in iterations. In each iteration, one of its
- * elements is selected as an exemplar. The exemplar is then used for building a
- * new deme (that will, firther, extend the metapopulation)
+ * The metapopulation is updated in iterations. In each iteration, one
+ * of its elements is selected as an exemplar. The exemplar is then
+ * used for building a new deme (that will, further, extend the
+ * metapopulation)
  * 
  * NOTE:
  *   BScoring = behavioral scoring function (output behaviors), we use std::greater
  *   because we are maximizing
- *      
+ *
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public set < bscored_combo_tree,

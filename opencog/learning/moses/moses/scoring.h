@@ -388,7 +388,6 @@ template<typename It, typename Set>
 void merge_nondominating(It from, It to, Set& dst)
 {
     for (;from != to;++from) {
-        // std::cout << "ook " << std::distance(from,to) << std::endl; // PJ
         bool nondominated = true;
         for (typename Set::iterator it = dst.begin();it != dst.end();) {
             tribool dom = dominates(from->second, it->second);

@@ -73,6 +73,11 @@ struct representation : public knob_mapper, boost::noncopyable {
      */
     combo_tree get_clean_exemplar(bool reduce);
 
+    // return _simplify
+    const reduct::rule* get_simplify() const {
+        return _simplify;
+    }
+
     const field_set& fields() const {
         return _fields;
     }

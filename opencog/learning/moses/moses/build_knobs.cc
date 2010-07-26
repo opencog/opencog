@@ -47,14 +47,14 @@ using opencog::from_one;
 build_knobs::build_knobs(opencog::RandGen& _rng,
                          combo_tree& exemplar,
                          const combo::type_tree& t,
-                         knob_mapper& mapper,
+                         representation& rep,
                          const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
                          const combo_tree_ns_set* actions,
                          contin_t step_size,
                          contin_t expansion,
                          eda::field_set::arity_t depth)
-    : rng(_rng), _exemplar(exemplar), _type(t), _mapper(mapper),
+    : rng(_rng), _exemplar(exemplar), _type(t), _rep(rep),
       _arity(t.begin().number_of_children() - 1),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
@@ -201,7 +201,7 @@ void build_knobs::logical_probe(const combo_tree& tr, pre_it it,
 {
     logical_subtree_knob kb(_exemplar, it, tr.begin());
     if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(it, kb))
-        _mapper.disc.insert(make_pair(kb.spec(), kb));
+        _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
 
@@ -265,7 +265,8 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
         /**/
 
         // cout << "doing " << tmp << endl;
-        clean_and_full_reduce(tmp, rng);
+        clean_reduce(tmp);
+        (*_rep.get_simplify())(tmp, tmp.begin());
         // cout << "reduced: ===================>" << tmp << endl;
 
         // cout << initial_c << " vs. " << complexity(tmp.begin()) << endl;
@@ -442,7 +443,7 @@ void build_knobs::simple_action_probe(pre_it it, bool add_if_in_exemplar)
 #endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(it,kb) PJ*/)
-        _mapper.disc.insert(make_pair(kb.spec(), kb));
+        _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
 
@@ -455,7 +456,7 @@ void build_knobs::action_probe(vector<combo_tree>& perms, pre_it it,
 #endif
 
     if ((add_if_in_exemplar || !kb.in_exemplar()) /*&& disc_probe(it,kb) PJ*/)
-        _mapper.disc.insert(make_pair(kb.spec(), kb));
+        _rep.disc.insert(make_pair(kb.spec(), kb));
 }
 
 
@@ -538,7 +539,7 @@ void build_knobs::build_contin(pre_it it)
     for (++end;it != end;++it)
         if (is_contin(*it)) {
             contin_knob kb(_exemplar, it, _step_size, _expansion, _depth);
-            _mapper.contin.insert(make_pair(kb.spec(), kb));
+            _rep.contin.insert(make_pair(kb.spec(), kb));
         }
 }
 

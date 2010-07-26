@@ -25,7 +25,7 @@
 #define _MOSES_BUILD_KNOBS_H
 
 #include <boost/utility.hpp>
-#include "knob_mapper.h"
+#include "representation.h"
 #include "using.h"
 #include <opencog/learning/moses/eda/field_set.h>
 
@@ -53,7 +53,7 @@ struct build_knobs : boost::noncopyable {
     //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
-                const combo::type_tree& t, knob_mapper& mapper,
+                const combo::type_tree& t, representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
@@ -67,7 +67,7 @@ protected:
     opencog::RandGen& rng;
     combo_tree& _exemplar;
     combo::type_tree _type;
-    knob_mapper& _mapper;
+    representation& _rep;
     int _arity;
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
