@@ -32,7 +32,7 @@ const rule& logical_reduction() {
     using namespace combo;
     static sequential r=
         sequential(downwards(reduce_nots(),id::boolean_type),
-                   upwards(remove_dangling_junctors()),
+                   
                    iterative(sequential(upwards(eval_logical_identities()),
                                         downwards(level()),
                                         downwards(insert_ands(),

@@ -49,15 +49,15 @@ namespace trees {
 
     template<typename Selector,typename T,typename iterator>
     void build(const Selector& sel,int dp,opencog::tree<T>& tr,iterator it) const {
-      if (dp==1) {
-	tr.replace(it,sel.select(0));
-      } else {
-	int arity(sel.select_arity(MIN_ARITY));
-	it=tr.replace(it,sel.select(arity));
-	--dp;
-	for (int i=0;i<arity;++i)
-	  build(sel,dp,tr,tr.append_child(it));
-      }
+        if (dp==1) {
+            tr.replace(it,sel.select(0));
+        } else {
+            int arity(sel.select_arity(MIN_ARITY));
+            it=tr.replace(it,sel.select(arity));
+            --dp;
+            for (int i=0;i<arity;++i)
+                build(sel,dp,tr,tr.append_child(it));
+        }
     }
   };
 

@@ -360,7 +360,8 @@ arity_t explicit_arity(const combo_tree& tr);
 // function with arity iotype inputs and iotype output
 // for instance declare_function(type_tree(id::boolean_type, 4)) returns
 // ->(boolean boolean boolean boolean boolean)
-type_tree declare_function(type_tree iotype, arity_t arity);
+type_tree declare_function(const type_tree& iotype, arity_t arity);
+type_tree declare_function(type_node iotype, arity_t arity);
 
 } //~namespace combo
 

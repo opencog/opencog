@@ -49,14 +49,14 @@ namespace reduct {
     }
   }
 
-  void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if (*it==id::logical_and || *it==id::logical_or)
-      for (sib_it sib=it.begin();sib!=it.end();)
-	if ((*sib==id::logical_and || *sib==id::logical_or) && sib.is_childless())
-	  tr.erase(sib++);
-	else
-	  ++sib;
-  }
+void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const {
+    for(sib_it sib=it.begin();sib!=it.end();)
+        if((*sib==id::logical_and || *sib==id::logical_or || *sib==id::logical_not)
+           && sib.is_childless())
+            tr.erase(sib++);
+        else
+            ++sib;
+}
 
   //and(true X)->X, or(true X)->true
   //and(false X)->false, or(false X)->X

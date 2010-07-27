@@ -24,11 +24,13 @@
 #include "reduct.h"
 #include "meta_rules.h"
 #include "general_rules.h"
+#include "logical_rules.h"
 
 namespace reduct {
 
 const rule& clean_reduction() {
-    static downwards r=downwards(remove_null_vertices());
+    static sequential r= sequential(downwards(remove_null_vertices()),
+                                    upwards(remove_dangling_junctors()));
     return r;
 }
 

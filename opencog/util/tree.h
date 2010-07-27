@@ -3210,27 +3210,29 @@ struct lexicographic_subtree_order {
 
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const opencog::tree<T>& tr) {
-  for (typename opencog::tree<T>::iterator it=tr.begin();it!=tr.end();++it) {
-    out << opencog::subtree_to_string(it);
-    it.skip_children();
-    out << " ";
-  }
-  return out;
+    for (typename opencog::tree<T>::iterator it=tr.begin();it!=tr.end();++it) {
+        out << opencog::subtree_to_string(it);
+        it.skip_children();
+        out << " ";
+    }
+    return out;
 }
 
 
 template<typename T>
 std::istream& operator>>(std::istream& in,opencog::tree<T>& tr) throw (opencog::InconsistenceException, std::bad_exception){
-  opencog::tree<std::string> tmp;
-  in >> tmp;
-  try {
-    opencog::tree_convert(tmp,tr);
-  } catch (boost::bad_lexical_cast&) {
-    std::stringstream stream (std::stringstream::out);
-    stream << "Bad node data in tree '" << tr << "'" << std::endl;
-    throw opencog::InconsistenceException(TRACE_INFO, "tree - %s.", stream.str().c_str());
-  }
-  return  in;
+    opencog::tree<std::string> tmp;
+    in >> tmp;
+    try {
+        opencog::tree_convert(tmp,tr);
+    } catch (boost::bad_lexical_cast&) {
+        std::stringstream stream (std::stringstream::out);
+        stream << "Bad node data in tree '" << tr << "'" << std::endl;
+        throw opencog::InconsistenceException(TRACE_INFO,
+                                              "tree - %s.",
+                                              stream.str().c_str());
+    }
+    return  in;
 }
 
 #endif

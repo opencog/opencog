@@ -154,7 +154,7 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
     foreach(const combo_tree& tr, perms)
-    logical_probe(tr, it, add_if_in_exemplar);
+        logical_probe(tr, it, add_if_in_exemplar);
 }
 
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
@@ -264,9 +264,10 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
         complexity_t initial_c = _c;//+kb.complexity_bound();
         /**/
 
-        // cout << "doing " << tmp << endl;
+        // cout << "doing: " << tmp << endl;
         clean_reduce(tmp);
-        (*_rep.get_simplify())(tmp, tmp.begin());
+        // cout << "clean: " << tmp << endl;
+        (*_rep._simplify)(tmp, tmp.begin());
         // cout << "reduced: ===================>" << tmp << endl;
 
         // cout << initial_c << " vs. " << complexity(tmp.begin()) << endl;

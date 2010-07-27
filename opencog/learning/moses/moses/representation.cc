@@ -159,6 +159,13 @@ combo_tree representation::get_clean_exemplar(bool reduce)
             logger().fine(ss.str());
         }
         // ~Logger
+
+        stringstream ss_tr;
+        ss_tr << result;
+        if(ss_tr.str() == "and(or(and(or(and(or(and(not(#1)) #3) or(not(#2)) or) and(#3) and) or(and(or(not(#2)) #3) and(not(#1))) or(and(#2) not(#3) and) or) and(or(and(#1) #2) or(#3)) and(or(and(#1) #3) or(#2)) and) or) ") {
+            std::cout << "EUREKA" << std::endl;
+        }
+
         (*_simplify)(result, result.begin()); 
     }
 

@@ -310,7 +310,7 @@ int main(int argc,char** argv) {
                 subsampleTable(inputtable, booltable, nsamples, rng);
             unsigned int arity = inputtable[0].size();
         
-            type_tree tt = declare_function(type_tree(output_type), arity);
+            type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);
 
@@ -332,7 +332,7 @@ int main(int argc,char** argv) {
                 subsampleTable(inputtable, contintable, nsamples, rng);
 
             unsigned int arity = inputtable[0].size();
-            type_tree tt = declare_function(type_tree(output_type), arity);
+            type_tree tt = declare_function(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
 
             // if no exemplar has been provided in option use the default
@@ -418,7 +418,7 @@ int main(int argc,char** argv) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = declare_function(type_tree(id::boolean_type), arity);
+        type_tree tt = declare_function(id::boolean_type, arity);
         logical_bscore bscore(func, arity, rng);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(),
@@ -438,7 +438,7 @@ int main(int argc,char** argv) {
             exemplars.push_back(type_to_exemplar(id::boolean_type));
         }
 
-        type_tree tt = declare_function(type_tree(id::boolean_type), arity);
+        type_tree tt = declare_function(id::boolean_type, arity);
         logical_bscore bscore(func, arity, rng);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(),
@@ -456,7 +456,7 @@ int main(int argc,char** argv) {
             exemplars.push_back(type_to_exemplar(id::contin_type));
         }
         
-        type_tree tt = declare_function(type_tree(id::contin_type), arity);
+        type_tree tt = declare_function(id::contin_type, arity);
 
         contin_table_inputs rands((nsamples>0? nsamples : default_nsamples),
                                   arity, rng);
@@ -494,7 +494,7 @@ int main(int argc,char** argv) {
         if(nsamples>0)
             subsampleTable(inputtable, contintable, nsamples, rng);
 
-        type_tree tt = declare_function(type_tree(id::ann_type), 0);
+        type_tree tt = declare_function(id::ann_type, 0);
         
         int as = alphabet_size(tt, ignore_ops);
 
@@ -532,7 +532,7 @@ int main(int argc,char** argv) {
                                                max_rand_input, min_rand_input);
             contin_table table_outputs(tr, inputtable, rng);
             
-            type_tree tt = declare_function(type_tree(id::ann_type), 0);
+            type_tree tt = declare_function(id::ann_type, 0);
 
             int as = alphabet_size(tt, ignore_ops);
             
