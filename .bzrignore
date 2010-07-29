@@ -2,6 +2,7 @@
 opencog.log
 
 # misc binaries
+bin
 opencog/server/cogserver
 opencog/atomspace/type-definer
 opencog/persist/sniff
@@ -65,6 +66,10 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
+
+# quilt
+.pc
+patches
 
 #Embodiment installation dir
 dist
