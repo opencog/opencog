@@ -44,12 +44,35 @@ class PrimitiveEnviron
 		virtual ~PrimitiveEnviron();
 };
 
+//! SchemePrimitive -- template class used for defining a new primitve
+//!
+//! This template may be used to wrap a C++ object in such a way that it
+//! can be invoked from scheme code.  The file "PrimitiveExample.cc"
+//! provides a detailed example of how to do this, and how to invoke the
+//! resulting primitive.
+//!
+//! This template has a handful of pre-defined signatures. If you cannot
+//! find the signature that you need, you will need to extend this
+//! template a bit to add the needed signature. This shouldn't be hard;
+//! just work from the existing examples; please keep things in
+//! alphabetical order.
+//
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
 {
 	private:
 		union
 		{
+			// signature naming convention:
+			// b == bool
+			// h == handle
+			// q == HandleSeq
+			// s == string
+			// v == void
+			// Extend the above, if required.
+
+			// Below is the list of currently supported signatures.
+			// Extend as needed.
 			bool (T::*b_hi)(Handle, int);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
