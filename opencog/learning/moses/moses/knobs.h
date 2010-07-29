@@ -175,7 +175,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
-        : knob_with_arity<3>(tr), _current(absent), _loc(tr.end()) {
+        : knob_with_arity<3>(tr, tr.end()), _current(absent) {
         typedef combo_tree::sibling_iterator sib_it;
         typedef combo_tree::pre_order_iterator pre_it;
         //compute the negation of the subtree
@@ -189,14 +189,12 @@ struct logical_subtree_knob : public knob_with_arity<3> {
                 _loc = sib;
                 _current = present;
                 _default = present;
-                std::cout << "IN LOOP: " << toStr() << std::endl;
                 return;
             }
         }
 
         _loc = _tr->append_child(tgt, id::null_vertex);
         _tr->append_child(_loc, subtree);
-        std::cout << "OUT LOOP: " << toStr() << std::endl;
     }
 
     int complexity_bound() const {
@@ -254,7 +252,6 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     }
 protected:
     int _current;
-    combo_tree::iterator _loc;
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
     string locStr() const {
@@ -292,8 +289,8 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                         vector<combo_tree>& perms)
-        : knob_with_arity<MAX_PERM_ACTIONS>(tr),
-          _current(0), _loc(tr.end()), _perms(perms) {
+        : knob_with_arity<MAX_PERM_ACTIONS>(tr, tr.end()),
+          _current(0),  _perms(perms) {
 
         OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
 
@@ -349,7 +346,6 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
     }
 protected:
     int _current;
-    combo_tree::iterator _loc;
     const vector<combo_tree> _perms;
 };
 
@@ -364,7 +360,7 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
 
     ant_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                             combo_tree::iterator subtree)
-            : knob_with_arity<4>(tr), _current(none), _loc(tr.end()) {
+        : knob_with_arity<4>(tr, tr.end()), _current(none) {
 
         _default = none;
         _current = _default;
@@ -430,7 +426,6 @@ struct ant_action_subtree_knob : public knob_with_arity<4> {
     }
 protected:
     int _current;
-    combo_tree::iterator _loc;
 };
 
 
@@ -440,9 +435,7 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
     static const int absent = 1;
 
     simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt)
-            : knob_with_arity<2>(tr), _loc(tgt) {
-
-        t = combo_tree(tgt);
+        : knob_with_arity<2>(tr, tgt) {
 
         _current = present;
         _default = present;
@@ -489,8 +482,6 @@ struct simple_action_subtree_knob : public knob_with_arity<2> {
     }
 protected:
     int _current;
-    combo_tree::iterator _loc;
-    combo_tree t;
 };
 
 typedef opencog::based_variant < boost::variant<logical_subtree_knob,

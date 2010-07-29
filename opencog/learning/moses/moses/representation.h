@@ -103,14 +103,17 @@ struct representation : public knob_mapper, boost::noncopyable {
         } else { // disc
             disc_map::const_iterator d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
-            std::cout << (d_cit == disc.end() ? *it : d_cit->second->toStr()) << std::endl;
-            std::cout << (d_cit == disc.end()) << std::endl;
         }
-        // recursive call on children
+        // if null_vertex then print its child instead
+        if(*it == id::null_vertex) {
+            OC_ASSERT(it.has_one_child());
+            it = it.begin();
+        }
+        // recursive call on children            
         if(!it.is_childless()) {
             out << "(";
             for(sib_it sib = it.begin(); sib != it.end();) {
-                ostream_prototype(out, sib);
+                ostream_prototype(out, sib);            
                 if(++sib != it.end()) out << " ";
             }
             out << ")";
