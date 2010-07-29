@@ -22,9 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "DimensionalEmbedding.h"
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
-#include <string>
 #include <numeric>
 #include <cmath>
 #include <opencog/guile/SchemePrimitive.h>
@@ -43,6 +41,11 @@ DimensionalEmbedding::DimensionalEmbedding() {
     define_scheme_primitive("logEmbedding",
                             &DimensionalEmbedding::logSimEmbedding,
                             this);
+    /*
+    define_scheme_primitive("euclidDist",
+                            &DimensionalEmbedding::euclidDistSim,
+                            this);
+    */
 #endif
 }
 
@@ -56,19 +59,22 @@ void DimensionalEmbedding::embedSimLinks() {
 void DimensionalEmbedding::logSimEmbedding() {
     logAtomEmbedding(SIMILARITY_LINK);
 }
-
+/*
+Handle DimensionalEmbedding::euclidDistSim(const Handle& h1, const Handle& h2) {
+    euclidDist(h1, h2, SIMILARITY_LINK);
+}
+*/
+    
 // Uses a slightly modified version of Dijkstra's algorithm
 double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
                                                    const Handle& targetHandle,
                                                    const Type& linkType)
 {
-    if(startHandle == targetHandle) return 1;
     typedef std::map<Handle, double> NodeMap;
     NodeMap nodeMap;
     nodeMap[startHandle]=1;
 
     HandleSet visitedNodes;
-    visitedNodes.add(startHandle);
     while(!nodeMap.empty()) {
         std::pair<Handle, double> bestNode = std::make_pair(startHandle, -1);
 
@@ -76,6 +82,9 @@ double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
         for(NodeMap::iterator it=nodeMap.begin(); it!=nodeMap.end(); ++it){
             if(it->second > bestNode.second) bestNode=(*it);
         }
+        visitedNodes.add(bestNode.first);
+        //Check whether we've reached the targetHandle
+        if(bestNode.first==targetHandle) return bestNode.second;
         //Look at all of the links connected to the bestNode
         HandleSeq newLinks = as->getIncoming(bestNode.first);
         for(HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
@@ -90,13 +99,13 @@ double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
                 if(visitedNodes.contains(*it2)) continue;
 
                 const TruthValue& linkTV = as->getTV(*it);
-                nodeMap[*it2]=
-                    bestNode.second*(linkTV.getMean()*linkTV.getConfidence());
-                visitedNodes.add(*it2);
-                //Check whether we've reached the targetHandle
-                if ((*it2)==targetHandle) return nodeMap[*it2];
+                //If this path is better than the currently known one, save it
+                double pathWeight
+                    = bestNode.second*(linkTV.getMean()*linkTV.getConfidence());
+                if(nodeMap[*it2] < pathWeight) {
+                    nodeMap[*it2] = pathWeight;
+                }
             }
-            
         }  
         nodeMap.erase(bestNode.first);
     }

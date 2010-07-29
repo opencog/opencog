@@ -29,11 +29,10 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
+#include <opencog/server/CogServer.h>
 
 namespace opencog
 {
-    class CogServer;
     /**
      * The DimensionalEmbedding class  implements the dimensional embedding
      * technique as described on
@@ -131,7 +130,8 @@ namespace opencog
          */
         void embedSimLinks();
         void logSimEmbedding();
-
+        //double euclidDistSim(const Handle& h1, const Handle& h2);
+        
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
          * and registers it with the AtomEmbedMap. If an AtomEmbedding
@@ -142,7 +142,7 @@ namespace opencog
          * is wanted.
          */
         void embedAtomSpace(const Type& linkType);
-
+        
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
