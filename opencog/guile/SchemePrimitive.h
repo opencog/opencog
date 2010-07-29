@@ -66,8 +66,10 @@ class SchemePrimitive : public PrimitiveEnviron
 			// signature naming convention:
 			// b == bool
 			// h == handle
+			// i == int
 			// q == HandleSeq
 			// s == string
+			// t == Type
 			// v == void
 			// Extend the above, if required.
 
@@ -78,6 +80,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			const std::string& (T::*s_s)(const std::string&);
+			void (T::*v_t)(const Type&);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -89,6 +92,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
 			S_S,   // return string, take string
+            V_T,   // return void, take Type
 			V_V    // return void, take void
 		} signature;
 
@@ -155,6 +159,17 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_locale_string(rs.c_str());
 					break;
 				}
+				case V_T:
+				{
+					//Assuming that the type is input as a string or symbol, eg
+					//'SIMILARITY_LINK
+					char *lstr = scm_to_locale_string(scm_car(args));
+					Type t = classserver().getType(str);
+					free(lstr);
+					
+					(that->*method.v_t)(t);
+					break;
+				}
 				case V_V:
 				{
 					(that->*method.v_v)();
@@ -197,6 +212,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
+		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
 
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
 		{
@@ -228,6 +244,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T
 
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
+DECLARE_DECLARE_1(void, const Type&)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)

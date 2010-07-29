@@ -36,7 +36,7 @@ DimensionalEmbedding::DimensionalEmbedding() {
 #ifdef HAVE_GUILE
     //Scheme functions for testing
     define_scheme_primitive("embedSpace",
-                            &DimensionalEmbedding::embedSimLinks,
+                            &DimensionalEmbedding::embedAtomSpace,
                             this);
     define_scheme_primitive("logEmbedding",
                             &DimensionalEmbedding::logSimEmbedding,
