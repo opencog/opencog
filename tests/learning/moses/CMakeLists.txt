@@ -5,12 +5,16 @@ TARGET_LINK_LIBRARIES(KnobTurningUTest
     util
 )
 
-ADD_CXXTEST(NeighborSamplingUTest)
-TARGET_LINK_LIBRARIES(NeighborSamplingUTest
-    moses
-    comboreduct
-    util
-)
+# requires boost::math; don't build if not found.
+IF(Boost_MATH_C99_FOUND)
+	ADD_CXXTEST(NeighborSamplingUTest)
+	TARGET_LINK_LIBRARIES(NeighborSamplingUTest
+    	moses
+    	comboreduct
+    	util
+	)
+ENDIF(Boost_MATH_C99_FOUND)
+
 
 ADD_CXXTEST(FieldSetUTest)
 TARGET_LINK_LIBRARIES(FieldSetUTest

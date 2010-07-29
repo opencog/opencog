@@ -62,17 +62,29 @@ ELSE (WIN32)
 	ENDIF (NOT APPLE)
 ENDIF (WIN32)
 
-# hypertable requires boost iostreams
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
+
+# Required boost packages
+# hypertable requires boost iostreams
 FIND_PACKAGE(Boost 1.37 COMPONENTS date_time filesystem iostreams regex serialization signals system thread REQUIRED)
-FIND_PACKAGE(Boost 1.37 COMPONENTS python program_options)
+
+# Optional boost packages; can build without these.
+# Arghhh. Except cmake is treating these as required, not optional. #$%**&
+FIND_PACKAGE(Boost 1.37 COMPONENTS python program_options QUIET)
+FIND_PACKAGE(Boost 1.37 COMPONENTS math_c99 QUIET)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
 ELSE(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")  
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
+
+IF(Boost_MATH_C99_FOUND)
+  MESSAGE(STATUS "Found Boost::math")
+ELSE(Boost_MATH_C99_FOUND)
+  MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")  
+ENDIF(Boost_MATH_C99_FOUND)
 
 FIND_PACKAGE(OpenGL)
 
