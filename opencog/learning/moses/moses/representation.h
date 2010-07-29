@@ -74,9 +74,9 @@ struct representation : public knob_mapper, boost::noncopyable {
     combo_tree get_clean_exemplar(bool reduce);
 
     // return _simplify
-    // const reduct::rule* get_simplify() const {
-    //     return _simplify;
-    // }
+    const reduct::rule* get_simplify() const {
+        return _simplify;
+    }
 
     const field_set& fields() const {
         return _fields;
@@ -103,6 +103,8 @@ struct representation : public knob_mapper, boost::noncopyable {
         } else { // disc
             disc_map::const_iterator d_cit = find_disc_knob(it);
             out << (d_cit == disc.end() ? *it : d_cit->second->toStr());
+            std::cout << (d_cit == disc.end() ? *it : d_cit->second->toStr()) << std::endl;
+            std::cout << (d_cit == disc.end()) << std::endl;
         }
         // recursive call on children
         if(!it.is_childless()) {
@@ -122,8 +124,6 @@ struct representation : public knob_mapper, boost::noncopyable {
         return ostream_prototype(out, _exemplar.begin());
     }
 
-    const reduct::rule* _simplify;
-
 protected:
     void set_exemplar_inst();
 
@@ -134,6 +134,7 @@ protected:
                              //instance of the exemplar is null
     field_set _fields;
     opencog::RandGen& rng;
+    const reduct::rule* _simplify;
 };
 
 } //~namespace moses

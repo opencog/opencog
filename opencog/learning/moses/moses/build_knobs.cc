@@ -46,7 +46,7 @@ using opencog::from_one;
 
 build_knobs::build_knobs(opencog::RandGen& _rng,
                          combo_tree& exemplar,
-                         const combo::type_tree& t,
+                         const combo::type_tree& tt,
                          representation& rep,
                          const operator_set& ignore_ops,
                          const combo_tree_ns_set* perceptions,
@@ -54,8 +54,8 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
                          contin_t step_size,
                          contin_t expansion,
                          eda::field_set::arity_t depth)
-    : rng(_rng), _exemplar(exemplar), _type(t), _rep(rep),
-      _arity(t.begin().number_of_children() - 1),
+    : rng(_rng), _exemplar(exemplar), _type(tt), _rep(rep),
+      _arity(tt.begin().number_of_children() - 1),
       _step_size(step_size), _expansion(expansion), _depth(depth),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
@@ -267,7 +267,7 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
         // cout << "doing: " << tmp << endl;
         clean_reduce(tmp);
         // cout << "clean: " << tmp << endl;
-        (*_rep._simplify)(tmp, tmp.begin());
+        (*_rep.get_simplify())(tmp, tmp.begin());
         // cout << "reduced: ===================>" << tmp << endl;
 
         // cout << initial_c << " vs. " << complexity(tmp.begin()) << endl;

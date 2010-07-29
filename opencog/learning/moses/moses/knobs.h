@@ -171,6 +171,7 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     static const int absent = 0;
     static const int present = 1;
     static const int negated = 2;
+    static const std::map<int, string> pos_str;
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                          combo_tree::iterator subtree)
@@ -188,12 +189,14 @@ struct logical_subtree_knob : public knob_with_arity<3> {
                 _loc = sib;
                 _current = present;
                 _default = present;
+                std::cout << "IN LOOP: " << toStr() << std::endl;
                 return;
             }
         }
 
         _loc = _tr->append_child(tgt, id::null_vertex);
         _tr->append_child(_loc, subtree);
+        std::cout << "OUT LOOP: " << toStr() << std::endl;
     }
 
     int complexity_bound() const {
@@ -216,7 +219,8 @@ struct logical_subtree_knob : public knob_with_arity<3> {
 
         switch (idx) {
         case absent:
-            //flag subtree to be ignored with a null_vertex, replace negation if present
+            // flag subtree to be ignored with a null_vertex, replace
+            // negation if present
             if (_current == negated)
                 *_loc = id::null_vertex;
             else
@@ -240,16 +244,44 @@ struct logical_subtree_knob : public knob_with_arity<3> {
         return eda::field_set::disc_spec(arity());
     }
     
-    std::string toStr() const {
+    string toStr() const {
         stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
+        ss << "[";
+        for(int i = 0; i < 3; i++)
+            ss << posStr(i) << (i < 2? " " : "");
+        ss << "]";
         return ss.str();
     }
 protected:
     int _current;
     combo_tree::iterator _loc;
+private:
+    // return << *_loc or << *_loc.begin() if it is null_vertex
+    string locStr() const {
+        OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
+                  "if _loc is null_vertex then it must have only one child");
+        stringstream ss;
+        ss << (*_loc == id::null_vertex? *_loc.begin() : *_loc);
+        return ss.str();
+    }
+    // return the name of the position, if it is the current one then the name
+    // is put in parenthesis
+    string posStr(int pos) const {
+        stringstream ss;
+        switch(pos) {
+        case absent:
+            ss << "nil";
+            break;
+        case present:
+            ss << locStr();
+            break;
+        case negated:
+            ss << "!" << locStr();
+            break;
+        }
+        return pos == _current? string("(") + ss.str() + ")" : ss.str();
+    }
 };
-
 
 #define MAX_PERM_ACTIONS 128
 
@@ -260,10 +292,10 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
                         vector<combo_tree>& perms)
-        : knob_with_arity<MAX_PERM_ACTIONS>(tr), _current(0), _loc(tr.end()), _perms(perms) {
+        : knob_with_arity<MAX_PERM_ACTIONS>(tr),
+          _current(0), _loc(tr.end()), _perms(perms) {
 
-        OC_ASSERT(((int)_perms.size() < MAX_PERM_ACTIONS),
-                         "Too many perms.");
+        OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
 
         for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;i++)
             disallow(i);
@@ -288,8 +320,7 @@ struct action_subtree_knob : public knob_with_arity<MAX_PERM_ACTIONS> {
 
     void turn(int idx) {
         idx = map_idx(idx);
-        OC_ASSERT((idx <= (int)_perms.size()),
-                         "Index too big.");
+        OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
 
         if (idx == _current) //already set, nothing to
             return;

@@ -53,7 +53,7 @@ struct build_knobs : boost::noncopyable {
     //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions
     build_knobs(opencog::RandGen& rng, combo_tree& exemplar,
-                const combo::type_tree& t, representation& rep,
+                const combo::type_tree& tt, representation& rep,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL,
@@ -68,7 +68,7 @@ protected:
     combo_tree& _exemplar;
     combo::type_tree _type;
     representation& _rep;
-    int _arity;
+    combo::arity_t _arity; // number of arguments of the combo program
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
 
@@ -80,6 +80,15 @@ protected:
     void logical_canonize(combo_tree::iterator);
     void add_logical_knobs(combo_tree::iterator it,
                            bool add_if_in_exemplar = true);
+
+    /**
+     * fill perms with a set of combinations (subtrees).
+     * 
+     * For now the combinations (2*_arity) are all positive literals
+     * and _arity pairs of j(#i #j) where j is either 'and' or 'or'
+     * such that j != *it, #i is a positive literal choosen randomly
+     * and #j is a positive or negative literal choosen randomly.
+     */
     void sample_logical_perms(combo_tree::iterator it, vector<combo_tree>& perms);
     void logical_probe(const combo_tree& tr, combo_tree::iterator it,
                        bool add_if_in_exemplar);

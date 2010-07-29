@@ -66,7 +66,7 @@ struct knob_mapper {
             if(c_cit->second.get_loc() == it)
                 return c_cit;
         }
-        return contin.end();        
+        return contin.end();
     }
 };
 
