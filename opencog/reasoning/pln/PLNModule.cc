@@ -58,7 +58,8 @@
 
 using namespace opencog;
 using namespace opencog::pln;
-using namespace opencog::pln::test;
+//using namespace opencog::pln::test;
+using namespace test;
 
 using std::string;
 using std::set;
@@ -546,7 +547,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 //        }
         else if (c == "test") {
         	input(temps, args);
-        	runSCMTarget(temps);
+        	findSCMTarget(temps);
         }
         else if (c == "=") { input(h, args); input(h2, args); 
 /*          cprintf(0, ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ? "EQ\n" : "IN-EQ\n"); */

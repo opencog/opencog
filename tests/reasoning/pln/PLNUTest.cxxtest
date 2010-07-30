@@ -20,6 +20,7 @@
  */
 
 #include "opencog/reasoning/pln/PLN.h"
+#include "opencog/reasoning/pln/Testing.h"
 #include "opencog/reasoning/pln/rules/Rules.h"
 
 #define BackInferenceTreeRootT BITNodeRoot
@@ -43,6 +44,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/load-file.h>
 
+using namespace test;
 using namespace opencog::pln;
 using namespace opencog;
 using namespace std;
@@ -98,48 +100,24 @@ namespace test
     extern double custom_duration2;
 }
 
-FitnessEvaluatorT testFitnessEvaluator;
-void initAxiomSet(string premiseFile);
-
-float getCount(float c)
-{ return SimpleTruthValue::confidenceToCount(c); }
+//float getCount(float c)
+//{ return SimpleTruthValue::confidenceToCount(c); }
 
 namespace opencog {
 namespace pln {
     extern unsigned long now_interval_len   ;
 }}
 
-// the following is used for test statistics
-vector< vector<vector<int> > >  INstatsVT;
-vector<vector<int> > INstatsV;
-vector<int> INstats;
-static int allTestsInferenceNodes=0;
+namespace test {
+    extern int allTestsInferenceNodes;
+    extern vector< vector<vector<int> > >  INstatsVT;
+    extern vector<vector<int> > INstatsV;
+    extern vector<int> INstats;
+    extern FitnessEvaluatorT testFitnessEvaluator;
+}
 
 // Make the debug level high during infer steps (only)
 //bool foo42=false;
-
-/**
- * The tests load in various scm axiom sets and run until the target with a
- * specific confidence minimum has been reached (or max. nr of steps have been
- * exceeded, resulting in failure.)
- */        
-struct PLNTest
-{
-    meta target;
-    TruthValue* minTV, *maxTV;
-
-    uint minEvalsOfFittestBIT; //Divided by ten
-    uint minExhaustiveEvals; //Use either this one or the prev one
-    PLNTest(meta _target,
-            TruthValue* _minTV,
-            TruthValue* _maxTV,
-            uint _minEvalsOfFittestBIT,
-            uint _minExhaustiveEvals)
-        : target(_target), minTV(_minTV), maxTV(_maxTV),
-          minEvalsOfFittestBIT(_minEvalsOfFittestBIT),
-          minExhaustiveEvals(_minExhaustiveEvals)
-    {}
-};
 
 // used for heuristic tests
 const float temperatures[] = {
@@ -239,244 +217,6 @@ private:
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
     }
 
-    // Now uses SCM. Won't search any alternative locations for the file.
-    void initAxiomSet(string premiseFile)
-    {
-        AtomSpaceWrapper *asw = GET_ASW;
-        asw->reset();
-        asw->allowFWVarsInAtomSpace = true;
-
-        //cprintf(-2,"loading...\n");     
-        std::cout << "loading " << premiseFile << std::endl;
-
-#if 0
-        asw->archiveTheorems = true;
-        bool axioms_ok = asw->loadAxioms(premiseFile);
-        if (!axioms_ok) throw std::string("failed to load file");
-        asw->archiveTheorems = false;
-
-#elif HAVE_GUILE
-        int rc = load_scm_file(premiseFile.c_str());
-
-        asw->archiveTheorems = true;
-        asw->makeCrispTheorems();
-        asw->archiveTheorems = false;
-
-        // The error-checking is after the call to makeCrispTheorems, because
-        // if there was an error, then the AS is now empty and makeCrispTheorems
-        // will (correctly) record that there are none.
-        if (rc) throw std::string("failed to load file");
-#else
-        throw std::string("Not allowed to use XML or SCM!");
-#endif
-        
-        cprintf(-2,"%s loaded. Next test: ", premiseFile.c_str());
-    }
-
-    /** Does 1000 runs per expansion phase
-     * @param test_bc is a flag indicating whether to run the test
-     * with the backward chainer (true) or the forward chainer (false)
-     */
-    void runPLNTest(Btr<PLNTest> t, bool test_bc = true)
-    {
-        AtomSpaceWrapper *asw = GET_ASW;
-        stats::Instance().ITN2atom.clear();
-
-        //currentDebugLevel=0;
-        rawPrint(*t->target, t->target->begin(), -2);
-        
-        clock_t start, finish;
-        double duration;
-
-        test::custom_duration = 0.0;
-        start = clock();
-        
-        asw->allowFWVarsInAtomSpace = true;
-        
-        fflush(stdout);
-        //currentDebugLevel=-4;
-
-        Btr<BackInferenceTreeRootT> state;
-        //ForwardChainer fc;
-        HybridForwardChainer fc;
-
-        // Even with FC, we want to have a BIT available so that printTrail can be accessed
-//        if (test_bc) {
-            state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
-//        }
-        uint s_i=0; // Expansion phase #
-        pHandle eh=PHANDLE_UNDEFINED; // expected target handle
-        TruthValue* etv = NULL; // expect target handle TV
-        bool passed=false;
-
-        set<VtreeProvider*> eres;
-
-        if (test_bc)
-            t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
-        else
-            // 12 is the maximum depth the BIT reaches, and each "step" of FC now does one level
-            t->minEvalsOfFittestBIT = 12;
-
-        const int expansions_per_run = 1000;
-
-        if (t->minEvalsOfFittestBIT > 0) {
-            do {
-/*              for (int k=0;k<expansions_per_run;k++)
-                    state->expandFittest();
-                
-                eres = state->evaluate();*/
-
-                cprintf(-3, "\n    Evaluating...\n");
-                
-                //if (foo42)
-                    //currentDebugLevel=4;
-                
-                int expansions = expansions_per_run;
-                if (test_bc) {
-                    eres = state->infer(expansions, 0.000001f, 0.01f);
-                } else {
-                    eh = fc.fwdChainToTarget(expansions, (t->target));
-                    //if (!results.empty()) eh = results[0];
-                }
-                
-                if (expansions > 0)
-                    cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
-                            "beginning of the cycle).\n", expansions,
-                            expansions_per_run);
-                else
-                    cprintf(2, "Failed for now... Saved $%d / $%d (from the "
-                            "beginning of the cycle).\n", expansions,
-                            expansions_per_run);
-
-                //currentDebugLevel=-4;
-
-                if (test_bc) 
-                    eh = (eres.empty() ? PHANDLE_UNDEFINED :
-                            _v2h(*(*eres.rbegin())->getVtree().begin()));                
-
-                if (eh != PHANDLE_UNDEFINED )
-                    etv = asw->getTV(eh).clone();
-//                else
-//                    etv = new SimpleTruthValue(0.0f,0.0f);
-
-               /* float c1=t->minTV->getConfidence();
-                float c2=t->maxTV->getConfidence();
-                float m1=t->minTV->getMean();
-                float m2=t->maxTV->getMean(); */
-
-                if (etv) {
-                    printf("c: %f min: %f\n", etv->getConfidence(),
-                            t->minTV->getConfidence());
-                    printf("s: %f min: %f\n", etv->getMean(),
-                            t->minTV->getMean());
-                    printf("c: %f max: %f\n", etv->getConfidence(),
-                            t->maxTV->getConfidence());
-                    printf("s: %f max: %f\n", etv->getMean(),
-                            t->maxTV->getMean());
-
-                    // This uses the BIT, but the trails are stored using some
-                    // global variables so work in FC.
-                    std::cout << "Inference trail: " << std::endl;
-                    state->printTrail(eh);
-                }
-                
-                passed = (
-                    eh != PHANDLE_UNDEFINED &&
-                    etv &&
-                    etv->getConfidence() >= t->minTV->getConfidence() &&
-                    etv->getMean()       >= t->minTV->getMean() &&
-                    etv->getConfidence() <= t->maxTV->getConfidence() &&
-                    etv->getMean()       <= t->maxTV->getMean()
-                );
-        
-                cprintf(-4, "TEST Expansion phase %d over.\n", s_i);
-            }
-            while ((++s_i)*expansions_per_run < t->minEvalsOfFittestBIT
-                    && !passed);
-        }
-        else if (t->minExhaustiveEvals > 0) {
-            assert(0);
-            /// This should be updated to reflect the new BITNode interface
-            /*
-            for (uint L=0;L<t->minExhaustiveEvals;L++)
-                state->expandNextLevel();
-
-            eres = state->evaluate();
-            eh = (eres.empty() ? NULL : v2h(eres.rbegin()->value));
-            if (eh) {
-                if (etv != NULL) delete etv;
-                etv = asw->TV(eh).clone();
-            }
-
-            passed = (eh && etv &&
-                etv->getConfidence() > t->minTV->getConfidence() &&
-                etv->getMean()          > t->minTV->getMean()
-                );*/
-        }
-        else
-            puts("ERROR IN TEST SETTINGS");
-
-        if (passed) {
-            printf("\n"
-                   "**********************************************\n"
-                   "passed: %s.\n"
-                   "**********************************************\n",
-                (etv?etv->toString().c_str():"(null TV)"));
-
-            finish = clock();
-            duration = (double)(finish - start) / CLOCKS_PER_SEC;
-            printf( "Test took %2.2f seconds TOTAL.\n", duration );
-
-            printf( "Custom test time was %3.3f seconds.\n",
-                    test::custom_duration );
-            printf( "Custom test time was %3.3f seconds.\n",
-                    test::custom_duration2 );
-        }
-        else {
-            printf("\n**********************************************\n"
-                   "FAILED: %s!\n"
-                   "**********************************************\n",
-            (etv?etv->toString().c_str():"(null TV)"));
-        }
-
-        if (test_bc) {
-            printf("Test results: [");
-            
-            foreach(VtreeProvider* bv, eres) {
-                const TruthValue& tv = asw->getTV(vt2h(*bv));
-                if (!tv.isNullTv() && tv.getConfidence()>0.0001f)
-                    printf("%d ", vt2h(*bv));
-            }
-            printf("]\n");
-    
-            if (passed) {
-                allTestsInferenceNodes += state->inferenceNodes;
-    
-                INstats.push_back(state->inferenceNodes);
-    
-                cout << endl << "Exec pool size: " << state->exec_pool.size();
-                cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                        " (" << allTestsInferenceNodes << " in all tests)" << endl;
-            }
-            else
-                INstats.push_back(0);
-        }
-/*      if (etv) {
-            string stv(etv->toString());
-            puts(stv.c_str());
-        }*/
-
-        //stats::Instance().print(stats::triviality_filterT());
-
-        TS_ASSERT(passed);
-#if WAIT_KEY_ON_FAILURE
-        if (!passed)
-            getc(stdin);
-#endif
-        if (etv != NULL) delete etv;
-        //asw->reset(NULL);
-    }
-
     // helper for runPLNTest
     void maketest(meta target,
                   TruthValue* minTV,
@@ -484,158 +224,15 @@ private:
                   uint minEvalsOfFittestBIT,
                   uint minExhaustiveEvals,
                   bool test_bc = true) {
-        runPLNTest(Btr<PLNTest>(new PLNTest(target,
+        Btr<PLNTest> t = Btr<PLNTest>(new PLNTest(target,
                                             minTV,
                                             maxTV,
                                             minEvalsOfFittestBIT,
-                                            minExhaustiveEvals)),
-                   test_bc);
+                                            minExhaustiveEvals)
+                                            );
+        runPLNTest(t, test_bc);
     }
     
-    //! @todo Replace with an existing method, after tweaking various things to
-    //! make it suitable.
-    static SimpleTruthValue* parseSTV(const char* tvStr) {
-        float mean, conf;
-        sscanf(tvStr, "[%f,%f]", &mean, &conf);
-        return new SimpleTruthValue(mean, getCount(conf));
-    }
-
-    /**
-     * Beware that this will create the target as a hypothetical atom
-     * before running the inference. It does give the virtual version
-     * to the BIT, however.
-     *
-     * @param test_bc is a flag indicating whether to run the test
-     * with the backward chainer (true) or the forward chainer (false)
-     */
-    void runSCMTarget(const char* conf_file, bool test_bc = true)
-    {
-#ifdef HAVE_GUILE
-        Config test;
-        std::cout << conf_file << std::endl;
-        test.load(conf_file);
-        //std::cout << test.to_string() << std::endl;
-        
-        std::cout << test["COMMENT"] << std::endl;
-
-        //std::string axiomsFile = std::string(PLN_TEST_DIR)+test["LOAD"]+".xml";        
-        std::string axiomsFile = std::string(PLN_TEST_DIR"scm/")+test["LOAD"]+".scm";
-        
-        try {
-            initAxiomSet(axiomsFile);
-        } catch (...) {
-            TS_FAIL("Couldn't find file");
-            return;
-        }
-        //// Hack to show atoms in atomspace
-        /*std::vector<Handle> all_atoms;
-        std::vector<Handle>::iterator it;
-        std::back_insert_iterator< std::vector<Handle> > out_hi(all_atoms);
-        server().getAtomSpace()->getHandleSet(out_hi, ATOM, true);
-        std::ostringstream oss;
-
-        for (it = all_atoms.begin(); it != all_atoms.end(); ++it) {
-            Atom* atom = TLB::getAtom(*it);
-            oss << atom->toString() << std::endl;
-        }
-        cout << oss.str();*/
-        ////
-        
-        std::string targetScheme = test["TARGET"];
-        if (test_bc)
-            std::cout << "Back-chaining target: " << targetScheme << std::endl;
-        else
-            std::cout << "Forward-chaining target: " << targetScheme << std::endl;
-        
-        // get target atom
-        SchemeEval& eval = SchemeEval::instance();        
-        Handle h = eval.eval_h(targetScheme);
-
-        pHandleSeq fakeHandles =
-            ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
-        pHandle fakeHandle = fakeHandles[0];
-        //meta target(new vtree(fakeHandle));
-        
-        meta target_(new vtree(fakeHandle));
-        
-        meta target = ForceAllLinksVirtual(target_);
-        
-        // Set parameters
-        uint maxSteps = test.get_int("MAX_STEPS");
-
-//        // Make sure FC doesn't take too long / only test it on simpler tests.
-//        // It takes disproportionately long once the AtomSpace gets large, due
-//        // to the indexes probably.
-//        if (!test_bc && maxSteps > 2000) { // 201
-//            std::cout << "Skipping test due to time constraints" << std::endl;
-//            return; //minEvalsOfFittestBIT = 500;
-//        }
-
-        uint minEvalsOfFittestBIT = maxSteps/100;
-        
-        // Changed because we don't want to have to specify the count
-        // as well, in the test's .conf file
-        //TruthValue* minTV = SimpleTruthValue::fromString(test["MIN_TV"].c_str());
-        //TruthValue* maxTV = SimpleTruthValue::fromString(test["MAX_TV"].c_str());
-        TruthValue* minTV = parseSTV(test["MIN_TV"].c_str());
-        TruthValue* maxTV = parseSTV(test["MAX_TV"].c_str());
-
-        std::cout << "Loaded parameters of test OK" << std::endl;
-
-        // Run the test using runPLNTest (via the maketest macro)
-        maketest(target,
-                 minTV,
-                 maxTV,
-                 minEvalsOfFittestBIT,
-                 0, // Alternative (not used) method for limiting test time
-                 test_bc);
-#endif // HAVE_GUILE
-    }
-
-    /**
-     * @param test_bc is a flag indicating whether to run the tests
-     * with the backward chainer (true) or the forward chainer (false)
-     */
-    void runSCMTargets(bool test_bc = true) {
-        // TODO maybe use regex_iterator
-        
-        // This method is the main one for current and future tests.
-        // Also, there are a lot of different errors that can happen.
-        // So, it has/needs somewhat elaborate exception-handling.
-        // This is partly because CXXTest doesn't give you any info
-        // about an exception, just telling you it happened.
-        try {
-            string testDir = PLN_TEST_DIR"targets";
-
-            // TODO apparently there is a way to make iterators only cover
-            // either files or directories. The boost::filesystem
-            // documentation is very obsolete however.
-            for (recursive_directory_iterator end, dir(testDir);
-                  dir != end; ++dir) {
-                if (!is_directory(dir->status()))
-                    runSCMTarget(dir->path().string().c_str(), test_bc);
-            }
-        }
-        catch(std::string s) {
-            std::cerr << "testSCMTargets:" << s;
-            throw s;
-        }
-        catch(StandardException e) {
-            std::cerr << "testSCMTargets:" << e.getMessage();
-            throw e;
-        }
-        catch(PLNexception e)
-        {
-            std::cerr << "testSCMTargets:" << e.what();
-            throw e;
-        }
-        catch(...)
-        {
-            std::cerr << "Unknown exception during SCM targets" << std::endl;
-            throw;
-        }
-    }
-
 public:
 
     static PLNUTest* createSuite() { return new PLNUTest(); }
@@ -749,12 +346,12 @@ public:
 
     // test backward chainer on all targets defined as conf file
     void testSCMTargetsBC() {
-        runSCMTargets(true);
+        runSCMTargets(PLN_TEST_DIR, true);
     }
     
     // test forward chainer on all targets defined as conf file
-    void testSCMTargetsFC() {
-        //runSCMTargets(false);
+    void DISABLEtestSCMTargetsFC() {
+        runSCMTargets(PLN_TEST_DIR, false);
     }
 
     // A meta-level test that can run all of the tests multiple times;
