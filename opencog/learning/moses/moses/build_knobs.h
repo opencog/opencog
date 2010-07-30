@@ -49,6 +49,7 @@ namespace moses
 
 //need to call a generator method... (dispatched based on type
 
+// build knobs on a reduced combo tree
 struct build_knobs : boost::noncopyable {
     //used to be ss = 1.0, expansion = 2, depth = 4
     // Optional arguments used only for Petbrain and actions

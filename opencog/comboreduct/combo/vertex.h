@@ -186,6 +186,8 @@ std::ostream& operator<<(std::ostream&, const combo::ann_type&);
 std::ostream& operator<<(std::ostream&, const combo::builtin&);
 std::ostream& operator<<(std::ostream&, const combo::wild_card&);
 std::ostream& operator<<(std::ostream&, const combo::argument&);
+// output argument #n when positive, !#n when negative 
+std::ostream& ostream_abbreviate_literal(std::ostream&, const combo::argument&);
 std::ostream& operator<<(std::ostream&, const combo::vertex&);
 
 //builtin == vertex
@@ -845,6 +847,10 @@ void str_to_vertex(const std::string& str, vertex& v)
         int arg = boost::lexical_cast<int>(str.substr(1));
         OC_ASSERT(arg != 0, "arg value should be different from zero.");
         v = argument(arg);
+    } else if (str[0] == '!' && str[1] == '#') {
+        int arg = boost::lexical_cast<int>(str.substr(2));
+        OC_ASSERT(arg != 0, "arg value should be different from zero.");
+        v = argument(-arg);
     }
     //constant
     else {

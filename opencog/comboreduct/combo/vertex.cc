@@ -26,6 +26,9 @@
 #include <boost/lexical_cast.hpp>
 #include "procedure_call.h"
 
+// uncomment this to output a negative literal !#n instead of not(#n)
+// #define ABBREVIATE_NEGATIVE_LITERAL
+
 std::ostream& operator<<(std::ostream& out, const combo::ann_type& h)
 {
     using namespace combo;
@@ -95,11 +98,23 @@ std::ostream& operator<<(std::ostream& out, const combo::wild_card& w)
     }
 }
 
+std::ostream& ostream_abbreviate_literal(std::ostream& out,
+                                         const combo::argument& a) {
+    if(a.is_negated()) {
+        return out << "!#" << -a.idx;
+    }
+    return out << "#" << a.idx;
+}
+
 std::ostream& operator<<(std::ostream& out, const combo::argument& a)
 {
-    if (a.is_negated())
+#ifdef ABBREVIATE_NEGATIVE_LITERAL
+    return ostream_abbreviate_literal(out, a);
+#else
+    if (a.is_negated())        
         return out << "not(#" << -a.idx << ")";
     return out << "#" << a.idx;
+#endif
 }
 
 std::ostream& operator<<(std::ostream& out, const combo::vertex& v)

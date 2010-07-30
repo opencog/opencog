@@ -245,8 +245,8 @@ struct logical_subtree_knob : public knob_with_arity<3> {
     string toStr() const {
         stringstream ss;
         ss << "[";
-        for(int i = 0; i < 3; i++)
-            ss << posStr(i) << (i < 2? " " : "");
+        for(int i = 0; i < arity(); i++)
+            ss << posStr(map_idx(i)) << (i < arity()-1? " " : "");
         ss << "]";
         return ss.str();
     }
@@ -254,16 +254,28 @@ protected:
     int _current;
 private:
     // return << *_loc or << *_loc.begin() if it is null_vertex
-    string locStr() const {
+    // if *_loc is a negative literal returns !#n
+    // if negated is true a copy of the literal is negated before being printed
+    string locStr(bool negated = false) const {
         OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
                   "if _loc is null_vertex then it must have only one child");
         stringstream ss;
-        ss << (*_loc == id::null_vertex? *_loc.begin() : *_loc);
+        combo_tree::iterator it;
+        if(*_loc == id::null_vertex)
+            it = _loc.begin();
+        else it = _loc;
+        if(is_argument(*it)) {
+            argument arg = get_argument(*it);
+            if(negated) arg.negate();
+            ostream_abbreviate_literal(ss, arg);
+        } else {
+            ss << (negated? "!" : "") << *it;
+        }
         return ss.str();
     }
-    // return the name of the position, if it is the current one then the name
-    // is put in parenthesis
-    string posStr(int pos) const {
+    // return the name of the position, if it is the current one and
+    // tag_current is true then the name is put in parenthesis
+    string posStr(int pos, bool tag_current = false) const {
         stringstream ss;
         switch(pos) {
         case absent:
@@ -273,10 +285,11 @@ private:
             ss << locStr();
             break;
         case negated:
-            ss << "!" << locStr();
+            ss << locStr(true);
             break;
         }
-        return pos == _current? string("(") + ss.str() + ")" : ss.str();
+        return pos == _current && tag_current?
+            string("(") + ss.str() + ")" : ss.str();
     }
 };
 

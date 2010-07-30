@@ -108,6 +108,9 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
 
 void build_knobs::build_logical(pre_it it)
 {
+    OC_ASSERT(*it != id::logical_not,
+              "the tree is supposed to be in normal form thus have no logical_not");
+
     add_logical_knobs(it);
 
     if (*it == id::logical_and) {
@@ -149,6 +152,7 @@ void build_knobs::logical_canonize(pre_it it)
         _exemplar.insert_above(it, id::logical_and);
 }
 
+
 void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 {
     vector<combo_tree> perms;
@@ -161,7 +165,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     //all n literals
     foreach(int i, from_one(_arity))
-    perms.push_back(combo_tree(argument(i)));
+        perms.push_back(combo_tree(argument(i)));
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
@@ -195,13 +199,13 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 #endif
 }
 
-
-void build_knobs::logical_probe(const combo_tree& tr, pre_it it,
+void build_knobs::logical_probe(const combo_tree& subtree, pre_it it,
                                 bool add_if_in_exemplar)
 {
-    logical_subtree_knob kb(_exemplar, it, tr.begin());
-    if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(it, kb))
+    logical_subtree_knob kb(_exemplar, it, subtree.begin());
+    if ((add_if_in_exemplar || !kb.in_exemplar()) && disc_probe(it, kb)) {
         _rep.disc.insert(make_pair(kb.spec(), kb));
+    }
 }
 
 
@@ -264,34 +268,17 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
         complexity_t initial_c = _c;//+kb.complexity_bound();
         /**/
 
-        // cout << "doing: " << tmp << endl;
+        // cout << "doing  : " << tmp << endl;
         clean_reduce(tmp);
-        // cout << "clean: " << tmp << endl;
+        // cout << "clean  : " << tmp << endl;
         (*_rep.get_simplify())(tmp, tmp.begin());
-        // cout << "reduced: ===================>" << tmp << endl;
+        // cout << "reduced: " << tmp << endl;
 
-        // cout << initial_c << " vs. " << complexity(tmp.begin()) << endl;
-        //note that complexity is negative, with -inf being highest, 0 lowest
-
+        // Note that complexity is negative, with -inf being highest,
+        // 0 lowest, which is why this conditional is taken if tmp is
+        // simpler after reduction
         if (initial_c < complexity(tmp.begin())) {
-            combo_tree XX(_exemplar);
-            clean_reduce(XX);
-
-            //apply_rule(downwards(remove_null_vertices()),XX,XX.begin());
-
-            combo_tree YY(tmp);
-            clean_reduce(YY);
-
-            // cout << "disallowing " << XX << " -> " << tmp << endl;
             to_disallow.push_back(idx);
-        } else {
-            combo_tree XX(_exemplar);
-            clean_reduce(XX);
-
-            combo_tree YY(tmp);
-            clean_reduce(YY);
-
-            // cout << "allowing " << XX << " -> " << YY << endl;
         }
     }
     kb.turn(0);
@@ -299,7 +286,7 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
     //if some settings aren't disallowed, make a knob
     if (int(to_disallow.size()) < kb.arity() - 1) {
         foreach (int idx, to_disallow)
-        kb.disallow(idx);
+            kb.disallow(idx);
         return true;
     } else {
         kb.clear_exemplar();
