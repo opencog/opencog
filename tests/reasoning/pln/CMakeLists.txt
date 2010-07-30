@@ -52,11 +52,12 @@ ADD_CXXTEST(TableGatherUTest)
 ADD_CXXTEST(BITNodeUTest)
 ADD_CXXTEST(ASSOCUTest)
 
-# At this point, PLNUTest requires libexpat, and will fail without it, since axioms 
-# are loaded from XML files. See AtomSpaceWrapper.cc for details.
-IF (EXPAT_FOUND)
+# At this point, PLNUTest requires libexpat or the Scheme subsystem since axioms 
+# are loaded from files.
+IF (EXPAT_FOUND OR GUILE_FOUND)
 	ADD_CXXTEST(PLNUTest)
-ENDIF (EXPAT_FOUND)
+	ADD_CXXTEST(ForwardChainingUTest)
+ENDIF (EXPAT_FOUND OR GUILE_FOUND)
 
 ADD_SUBDIRECTORY(formulas)
 ADD_SUBDIRECTORY(rules)

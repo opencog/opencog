@@ -217,22 +217,6 @@ private:
         currentDebugLevel = config().get_int("PLN_LOG_LEVEL");
     }
 
-    // helper for runPLNTest
-    void maketest(meta target,
-                  TruthValue* minTV,
-                  TruthValue* maxTV,
-                  uint minEvalsOfFittestBIT,
-                  uint minExhaustiveEvals,
-                  bool test_bc = true) {
-        Btr<PLNTest> t = Btr<PLNTest>(new PLNTest(target,
-                                            minTV,
-                                            maxTV,
-                                            minEvalsOfFittestBIT,
-                                            minExhaustiveEvals)
-                                            );
-        runPLNTest(t, test_bc);
-    }
-    
 public:
 
     static PLNUTest* createSuite() { return new PLNUTest(); }
@@ -349,10 +333,10 @@ public:
         runSCMTargets(PLN_TEST_DIR, true);
     }
     
-    // test forward chainer on all targets defined as conf file
-    void DISABLEtestSCMTargetsFC() {
-        runSCMTargets(PLN_TEST_DIR, false);
-    }
+//    // test forward chainer on all targets defined as conf file
+//    void DISABLEtestSCMTargetsFC() {
+//        runSCMTargets(PLN_TEST_DIR, false);
+//    }
 
     // A meta-level test that can run all of the tests multiple times;
     // necessary if you use a non-deterministic heuristic for the BIT

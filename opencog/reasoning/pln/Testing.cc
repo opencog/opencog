@@ -273,6 +273,7 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
         t->minEvalsOfFittestBIT = 12;
 
     const int expansions_per_run = 1000;
+    int total_expansions = 0;
 
     if (t->minEvalsOfFittestBIT > 0) {
         do {
@@ -293,6 +294,8 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
                 eh = fc.fwdChainToTarget(expansions, (t->target));
                 //if (!results.empty()) eh = results[0];
             }
+
+            total_expansions = expansions_per_run - expansions;
 
             if (expansions > 0)
                 cprintf(-3, "Succeeded. Saved $%d / $%d (from the "
@@ -409,6 +412,7 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 
             INstats.push_back(state->inferenceNodes);
 
+            cout << "Total expansion steps: " << total_expansions;
             //! @todo
             //cout << endl << "Exec pool size: " << state->exec_pool.size();
             cout << endl << "InferenceNodes: " << state->inferenceNodes <<
@@ -432,6 +436,22 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 #endif
     if (etv != NULL) delete etv;
     //asw->reset(NULL);
+}
+
+// helper for runPLNTest
+void maketest(meta target,
+              TruthValue* minTV,
+              TruthValue* maxTV,
+              uint minEvalsOfFittestBIT,
+              uint minExhaustiveEvals,
+              bool test_bc) {
+    Btr<PLNTest> t = Btr<PLNTest>(new PLNTest(target,
+                                        minTV,
+                                        maxTV,
+                                        minEvalsOfFittestBIT,
+                                        minExhaustiveEvals)
+                                        );
+    runPLNTest(t, test_bc);
 }
 
 }//}}
