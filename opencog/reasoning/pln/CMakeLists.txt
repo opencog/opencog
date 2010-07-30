@@ -12,6 +12,7 @@ ADD_LIBRARY (pln SHARED
 #	PLNShell.cc
 	PLNGlobals.cc
 #	Tester.cc
+        Testing.cc
 	ForwardChainer.cc
 	BackChainingAgent
 	ForwardChainingAgent
