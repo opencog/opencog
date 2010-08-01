@@ -229,11 +229,7 @@ Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc) {
     else return setupSCMTarget(conf_file, test_bc);
 }
 
-/** Does 1000 runs per expansion phase
- * @param test_bc is a flag indicating whether to run the test
- * with the backward chainer (true) or the forward chainer (false)
- */
-void runPLNTest(Btr<PLNTest> t, bool test_bc)
+bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 {
     AtomSpaceWrapper *asw = GET_ASW;
     stats::Instance().ITN2atom.clear();
@@ -430,7 +426,6 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     //stats::Instance().print(stats::triviality_filterT());
 
-    //! @todo maybe set up something custom.
 //    TS_ASSERT(passed);
 #if WAIT_KEY_ON_FAILURE
     if (!passed)
@@ -438,10 +433,11 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 #endif
     if (etv != NULL) delete etv;
     //asw->reset(NULL);
+    return passed;
 }
 
 // helper for runPLNTest
-void maketest(meta target,
+bool maketest(meta target,
               TruthValue* minTV,
               TruthValue* maxTV,
               uint minEvalsOfFittestBIT,
@@ -453,7 +449,7 @@ void maketest(meta target,
                                         minEvalsOfFittestBIT,
                                         minExhaustiveEvals)
                                         );
-    runPLNTest(t, test_bc);
+    return runPLNTest(t, test_bc);
 }
 
 }//}}

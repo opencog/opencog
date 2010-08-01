@@ -32,13 +32,18 @@ struct PLNTest
 float getCount(float c);
 
 void initAxiomSet(std::string premiseFile);
-void runPLNTest(Btr<PLNTest> t, bool test_bc = true);
+/** Does 1000 runs per expansion phase
+ * @param test_bc is a flag indicating whether to run the test
+ * with the backward chainer (true) or the forward chainer (false).
+ * @return whether the test passed or not.
+ */
+bool runPLNTest(Btr<PLNTest> t, bool test_bc = true);
 //! @todo This next function doesn't need to have test_bc
 Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc = true);
 Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc = true);
 void runSCMTargets(std::string testDir, bool test_bc = true);
 
-void maketest(meta target,
+bool maketest(meta target,
               TruthValue* minTV,
               TruthValue* maxTV,
               uint minEvalsOfFittestBIT,

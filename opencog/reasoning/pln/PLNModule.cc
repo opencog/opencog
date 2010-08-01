@@ -401,7 +401,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 			int steps;
 			input(steps, args);
 
-			ForwardChainerClassicIC fw;
+			HybridForwardChainer fw;
 			cout << "FC Starting chaining:" << endl;
 			//pHandleSeq results = fw.fwdChainStack(10000);
 			pHandleSeq results = fw.fwdChain(steps); // FWD_CHAIN_MAX_APPS);

@@ -53,7 +53,7 @@ using namespace std;
 
 using namespace boost::filesystem;
 
-#define RUN_FAILURE_TESTS 0 // enable some tests which currently fail
+#define RUN_FAILURE_TESTS 1 // enable some tests which are supposed to fail.
 #define WAIT_KEY_ON_FAILURE 0
 
 // We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
@@ -280,9 +280,8 @@ public:
 
         INstats.clear();
 
-        if(RUN_FAILURE_TESTS)
-            puts("NOTE! 3 first tests are supposed to fail.");
-            
+//        if(RUN_FAILURE_TESTS)
+//            puts("NOTE! 3 first tests are supposed to fail.");
     }
     
     ~PLNUTest()
@@ -496,6 +495,7 @@ public:
 
             puts("\nShould fail. The test for whether TV checks work.\n");
 
+            TS_ASSERT(!
             maketest(makemeta(mva((pHandle)INHERITANCE_LINK,
                                   NewNode(CONCEPT_NODE, "AlQaeda"),
                                   NewNode(CONCEPT_NODE, "terrorist")
@@ -504,7 +504,7 @@ public:
                      new SimpleTruthValue(0.999f, getCount(0.999f)),
                      50,0,
                      true // it's being test for the backward chainer
-                     );
+                     ));
         }
     }
 
@@ -514,6 +514,7 @@ public:
 
             puts("\nShould fail. The test for whether random TVs come out too high:\n");
             
+            TS_ASSERT(!
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                                   NewNode(PREDICATE_NODE, "killed"),
                                   mva((pHandle)LIST_LINK,
@@ -523,7 +524,7 @@ public:
                                   )),
                      new SimpleTruthValue(0.5f, getCount(0.5f)),
                      new SimpleTruthValue(0.51f, getCount(0.51f)),
-                     10,0);
+                     10,0));
         }
     }
 
@@ -531,6 +532,8 @@ public:
         if(RUN_FAILURE_TESTS) {
             puts("\nShould fail.");
             initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
+
+            TS_ASSERT(!
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                                   NewNode(PREDICATE_NODE, "symmetricRelation"),
                                   mva((pHandle)LIST_LINK,
@@ -540,7 +543,7 @@ public:
                                   )),
                      new SimpleTruthValue(0.0f, getCount(0.0f)),
                      new SimpleTruthValue(0.01f, getCount(0.01f)),
-                     10,0);
+                     10,0));
         }
     }
 
@@ -551,6 +554,8 @@ public:
             printf("\nBasic spawning test %d\n", i);
             /// Basic spawning test
             initAxiomSet(PLN_TEST_DIR"scm/smalldemo.scm");
+
+            TS_ASSERT(
             maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                                   NewNode(PREDICATE_NODE, "friendOf"),
                                   mva((pHandle)LIST_LINK,
@@ -559,13 +564,15 @@ public:
                                       ))),
                      new SimpleTruthValue(0.78f, getCount(0.39f)),
                      new SimpleTruthValue(1.001f, getCount(0.999f)),
-                     100,0);
+                     100,0));
         }
     }
 
     // Test that targets with childless links or ATOM still match.
     void DISABLEtestFORALL() {
         initAxiomSet(PLN_TEST_DIR"scm/new/BasicForAllDemo_AND.scm");
+
+        TS_ASSERT(
         maketest(makemeta(mva((pHandle)EVALUATION_LINK,
                 //NewNode(PREDICATE_NODE, "friendOf"),
                 //mva((pHandle)ATOM),
@@ -577,7 +584,7 @@ public:
                     ))),
                  new SimpleTruthValue(0.0f, getCount(0.0f)),
                  new SimpleTruthValue(0.01f, getCount(0.01f)),
-                 10,0);
+                 10,0));
     }
 
     void DISABLEtestFingerPrint(vtree& v)
