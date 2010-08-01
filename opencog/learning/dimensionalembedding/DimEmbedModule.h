@@ -25,10 +25,11 @@
 #ifndef _OPENCOG_DIM_EMBED_MODULE_H
 #define _OPENCOG_DIM_EMBED_MODULE_H
 
-#include <opencog/learning/dimensionalembedding/DimensionalEmbedding.h>
-#include <opencog/server/Factory.h>
+#include <vector>
+#include <map>
+#include <string>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Module.h>
-#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
 
 namespace opencog
@@ -37,13 +38,126 @@ namespace opencog
     class DimEmbedModule : public Module
     {
     private:
-        Factory<DimensionalEmbedding, Agent> dimEmbedFactory;
+        typedef std::map<Handle, std::vector<double> > AtomEmbedding;
+        typedef std::vector<Handle> PivotSeq;
+        typedef std::map<Type, PivotSeq> PivotMap;
+        typedef std::map<Type, AtomEmbedding> AtomEmbedMap;
+
+        AtomSpace* as;
+        AtomEmbedMap atomMaps;
+        PivotMap pivotsMap;//Pivot atoms which act as the basis
+        unsigned int numDimensions;//Number of pivot atoms
+        
+        /**
+         * Adds h as a pivot and adds the distances from each node to
+         * the pivot to the appropriate atomEmbedding.
+         *
+         * @param h Handle to be added as a pivot
+         * @param linkType Type of link for which h should be added as a pivot
+         */
+        void addPivot(const Handle& h, const Type& linkType);
+
+        /**
+         * Clears the AtomEmbedMap and PivotMap for linkType
+         *
+         * @param linkType Type of link for which the embedding should be
+         * cleared.
+         */
+        void clearEmbedding(const Type& linkType);
+
+        /**
+         * Returns the highest weight path between the handles following
+         * links of type linkType, where path weight is the product of
+         * (tv.strength*tv.confidence) of the links in the path. ie if
+         * (l1, l2,...ln) are the links in the path, then the path weight is
+         * defined as
+         * (l1.tv.strength*l1.tv.confidence)*(l2.tv.strength*l2.tv.confidence)*
+         * ...(ln.tv.strength*ln.tv.confidence).
+         *
+         * Path weight will always be between 0 and 1. Returns 0 if no path
+         * exists and 1 if startHandle == targetHandle.
+         *
+         * Uses a modified version of Dijkstra's algorithm.
+         *
+         * @param startHandle The starting handle for pathfinding
+         * @param targetHandle The target handle for pathfinding
+         * @param linkType The type of link to follow in pathfinding
+         *
+         * @return The highest weight path from startHandle to targetHandle
+         * following only links of type linkType, where path weight is defined
+         * above.
+         */
+        double findHighestWeightPath(const Handle& startHandle,
+                                     const Handle& targetHandle,
+                                     const Type& linkType);
+
+        /**
+         * Returns a vector of doubles corresponding to the handle h's
+         * embedding of link type l. Throws an exception if no embedding
+         * exists yet for type l. Calculates the vector if an embedding exists
+         * (ie pivots are picked) but handle h has not been calculated yet.
+         *
+         * @param h The handle whose embedding vector is returned
+         * @param l The link type for which h's embedding vector is wanted
+         *
+         * @return A vector of doubles corresponding to handle h's distance
+         * from each of the pivots.
+         */
+        std::vector<double> getEmbedVector(const Handle& h, const Type& l);
+
+        /**
+         * Returns the distance between handles h1 and h2 for the embedding of
+         * link type l.
+         *
+         * ie if the embedding vectors for h1 and h2 for type l is given by
+         * h1: (a1, b1, ..., n1) and
+         * h2: (a2, b2, ..., n2)
+         * Then their distance for link type l is
+         * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
+         */
+        double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
     public:
         const char* id();
 
         DimEmbedModule();
         virtual ~DimEmbedModule();
         virtual void init();
+        
+                /**
+         * Creates an AtomEmbedding of the atomspace using linkType
+         * and registers it with the AtomEmbedMap. If an AtomEmbedding
+         * already exists for the supplied link type it will replace
+         * it.
+         *
+         * @param linkType The type of link for which a dimensional embedding
+         * is wanted.
+         */
+        void embedAtomSpace(const Type& linkType);
+        
+        /**
+         * Logs a string representation of of the (Handle,vector<Double>)
+         * pairs for linkType. This will have as many entries as there are nodes
+         * in the atomspace (unless nodes have been added since the embedding.
+         * Just used for testing/debugging.
+         */
+        void logAtomEmbedding(const Type& linkType);
+
+        /**
+         * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
+         *
+         * @param h Handle of node to be embedded.
+         * @param linkType Type of link to use to embed h
+         * @return The embedding vector (a vector of doubles between 0 and 1)
+         */
+        std::vector<double> addNode(const Handle& h, const Type& linkType);
+
+        /**
+         * Returns true if a dimensional embedding exists for linkType l
+         */
+        bool isEmbedded(const Type& linkType);
+        
+        /** updates the given atom (recalculates its distance from pivots) */
+        //void updateAtom(const Handle& h, const Type& linkType);
     }; // class
 } //namespace
 

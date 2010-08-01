@@ -1,6 +1,5 @@
 ADD_LIBRARY (dimensionalembedding SHARED
 	DimEmbedModule
-	DimensionalEmbedding
 )
 
 INCLUDE_DIRECTORIES (
