@@ -97,7 +97,9 @@ namespace opencog
 
         /**
          * Returns a vector of doubles corresponding to the handle h's
-         * embedding of link type l
+         * embedding of link type l. Throws an exception if no embedding
+         * exists yet for type l. Calculates the vector if an embedding exists
+         * (ie pivots are picked) but handle h has not been calculated yet.
          *
          * @param h The handle whose embedding vector is returned
          * @param l The link type for which h's embedding vector is wanted
@@ -109,7 +111,13 @@ namespace opencog
 
         /**
          * Returns the distance between handles h1 and h2 for the embedding of
-         * link type l
+         * link type l.
+         *
+         * ie if the embedding vectors for h1 and h2 for type l is given by
+         * h1: (a1, b1, ..., n1) and
+         * h2: (a2, b2, ..., n2)
+         * Then their distance for link type l is
+         * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
          */
         double euclidDist(const Handle& h1, const Handle& h2, const Type& l);
     public:
@@ -123,14 +131,6 @@ namespace opencog
 
         DimensionalEmbedding();
         ~DimensionalEmbedding() { };
-
-        /**
-         * Embeds and prints similarity links.
-         * Just used for scheme for testing
-         */
-        void embedSimLinks();
-        void logSimEmbedding();
-        //double euclidDistSim(const Handle& h1, const Handle& h2);
         
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
@@ -156,8 +156,13 @@ namespace opencog
          * @param h Handle of node to be embedded.
          * @param linkType Type of link to use to embed h
          */
-        void addNode(const Handle& h, const Type& linkType);
+        std::vector<double> addNode(const Handle& h, const Type& linkType);
 
+        /**
+         * Returns true if a dimensional embedding exists for linkType l
+         */
+        bool isEmbedded(const Type& linkType);
+        
         /** updates the given atom (recalculates its distance from pivots) */
         //void updateAtom(const Handle& h, const Type& linkType);
     };

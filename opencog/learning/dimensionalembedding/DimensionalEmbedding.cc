@@ -26,50 +26,43 @@
 #include <numeric>
 #include <cmath>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 
 DimensionalEmbedding::DimensionalEmbedding() {
-    numDimensions=50;
+    numDimensions=5;
     CogServer& cogServer = static_cast<CogServer&>(server());
     this->as=cogServer.getAtomSpace();    
 #ifdef HAVE_GUILE
-    //Scheme functions for testing
+    //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
                             &DimensionalEmbedding::embedAtomSpace,
                             this);
     define_scheme_primitive("logEmbedding",
-                            &DimensionalEmbedding::logSimEmbedding,
+                            &DimensionalEmbedding::logAtomEmbedding,
                             this);
-    /*
     define_scheme_primitive("euclidDist",
-                            &DimensionalEmbedding::euclidDistSim,
+                            &DimensionalEmbedding::euclidDist,
                             this);
-    */
 #endif
 }
 
 void DimensionalEmbedding::run(CogServer* cogServer){
-    logger().info("Running DimEmbed Agent");
+    //logger().info("Running DimEmbed Agent");
 }
-
-void DimensionalEmbedding::embedSimLinks() {
-    embedAtomSpace(SIMILARITY_LINK);
-}
-void DimensionalEmbedding::logSimEmbedding() {
-    logAtomEmbedding(SIMILARITY_LINK);
-}
-/*
-Handle DimensionalEmbedding::euclidDistSim(const Handle& h1, const Handle& h2) {
-    euclidDist(h1, h2, SIMILARITY_LINK);
-}
-*/
     
 // Uses a slightly modified version of Dijkstra's algorithm
 double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
                                                    const Handle& targetHandle,
                                                    const Type& linkType)
 {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+                                                                    
     typedef std::map<Handle, double> NodeMap;
     NodeMap nodeMap;
     nodeMap[startHandle]=1;
@@ -112,29 +105,57 @@ double DimensionalEmbedding::findHighestWeightPath(const Handle& startHandle,
     return 0; //no path found, return 0
 }
 
-
 std::vector<double> DimensionalEmbedding::getEmbedVector(const Handle& h,
                                                          const Type& l) {
-    return ((atomMaps.find(l))->second).find(h)->second;
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+ 
+    if(!isEmbedded(l)) {
+        const char* tName = classserver().getTypeName(l).c_str();
+        logger().error("No embedding exists for type %s", tName);
+        throw std::string("No embedding exists for type %s", tName);
+    }
+    AtomEmbedding aE = (atomMaps.find(l))->second;
+    AtomEmbedding::iterator aEit = aE.find(h);
+    //an embedding exists, but h has not been added yet
+    if(aEit==aE.end()) {
+        return addNode(h,l);
+    } else {
+        return aEit->second;
+    }
 }
 
 double DimensionalEmbedding::euclidDist(const Handle& h1,
                                         const Handle& h2,
                                         const Type& l) {
+    if(!classserver().isLink(l))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(l).c_str());
+ 
     double distance;
     std::vector<double> v1=getEmbedVector(h1,l);
     std::vector<double> v2=getEmbedVector(h2,l);
     std::vector<double>::iterator it1=v1.begin();
     std::vector<double>::iterator it2=v2.begin();
+
     //Calculate euclidean distance between v1 and v2
     for(; it1 < v1.end(); it1++) {
         distance+=std::pow((*it1 - *it2), 2);
+        it2++;
     }
-    distance=std::sqrt(distance);
+    distance=sqrt(distance);
     return distance;
 }
 
-void DimensionalEmbedding::addPivot(const Handle& h, const Type& linkType){
+void DimensionalEmbedding::addPivot(const Handle& h, const Type& linkType){   
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+ 
     pivotsMap[linkType].push_back(h);
 
     //update atomEmbedding for this linkType to include this pivot in its
@@ -148,7 +169,12 @@ void DimensionalEmbedding::addPivot(const Handle& h, const Type& linkType){
     }
 }
 
-void DimensionalEmbedding::embedAtomSpace(const Type& linkType){
+void DimensionalEmbedding::embedAtomSpace(const Type& linkType){   
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+ 
     clearEmbedding(linkType);
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
@@ -184,7 +210,14 @@ void DimensionalEmbedding::embedAtomSpace(const Type& linkType){
     //logger().info("Embedding done");
 }
 
-void DimensionalEmbedding::addNode(const Handle& h, const Type& linkType){
+std::vector<double> DimensionalEmbedding::addNode(const Handle& h,
+                                                  const Type& linkType){
+    
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+    
     PivotSeq& pivots=pivotsMap[linkType];
     std::vector<double> embeddingVector;
     //The i'th entry of the handle's embeddingVector is the value of the
@@ -193,14 +226,20 @@ void DimensionalEmbedding::addNode(const Handle& h, const Type& linkType){
         embeddingVector.push_back(findHighestWeightPath(h, *it, linkType));
     }
     atomMaps[linkType][h]=embeddingVector;
+    return embeddingVector;
 }
 
 void DimensionalEmbedding::clearEmbedding(const Type& linkType){
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+
     atomMaps.erase(linkType);
     pivotsMap.erase(linkType);
 }
 
-void DimensionalEmbedding::logAtomEmbedding(const Type& linkType){
+void DimensionalEmbedding::logAtomEmbedding(const Type& linkType) {
     AtomEmbedding atomEmbedding=atomMaps[linkType];
     PivotSeq pivots = pivotsMap[linkType];
 
@@ -226,4 +265,17 @@ void DimensionalEmbedding::logAtomEmbedding(const Type& linkType){
     }
     logger().info(oss.str());
     return;
+}
+
+bool DimensionalEmbedding::isEmbedded(const Type& linkType) {
+    if(!classserver().isLink(linkType))
+        throw InvalidParamException(TRACE_INFO,
+            "DimensionalEmbedding requires link type, not %s",
+            classserver().getTypeName(linkType).c_str());
+    
+    AtomEmbedMap::iterator aEMit = atomMaps.find(linkType);
+    if(aEMit==atomMaps.end()) {
+        return false;
+    }
+    return true;
 }

@@ -17,6 +17,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
+#include <opencog/atomspace/ClassServer.h>
 
 namespace opencog {
 
@@ -65,6 +66,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		{
 			// signature naming convention:
 			// b == bool
+			// d == double
 			// h == handle
 			// i == int
 			// q == HandleSeq
@@ -76,6 +78,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// Below is the list of currently supported signatures.
 			// Extend as needed.
 			bool (T::*b_hi)(Handle, int);
+			double (T::*d_hht)(const Handle&, const Handle&, const Type&);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
@@ -88,6 +91,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum 
 		{
 			B_HI,  // return boolean, take handle and int
+			D_HHT, // return double, take handle, handle, and int
 			H_HI,  // return handle, take handle and int
 			H_H,   // return handle, take handle
 			H_SQ,  // return handle, take string and HandleSeq
@@ -107,6 +111,23 @@ class SchemePrimitive : public PrimitiveEnviron
 					int i = scm_to_int(scm_cadr(args));
 					bool b = (that->*method.b_hi)(h, i);
 					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
+					break;
+				}
+				case D_HHT:
+				{
+					Handle h1 = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					Handle h2 = SchemeSmob::verify_handle(scm_cadr(args), scheme_name);
+					SCM input = scm_caddr(args);
+					//Assuming that the type is input as a string or symbol, eg
+					//(f 'SimilarityLink) or (f "SimilarityLink")
+					if (scm_is_true(scm_symbol_p(input)))
+						input = scm_symbol_to_string(input);
+					char *lstr = scm_to_locale_string(input);
+					Type t = classserver().getType(lstr);
+					free(lstr);
+					
+					double d = (that->*method.d_hht)(h1,h2,t);
+					rc = scm_from_double(d);
 					break;
 				}
 				case H_HI:
@@ -161,10 +182,14 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_T:
 				{
+					SCM input = scm_car(args);
 					//Assuming that the type is input as a string or symbol, eg
-					//'SIMILARITY_LINK
-					char *lstr = scm_to_locale_string(scm_car(args));
-					Type t = classserver().getType(str);
+					//(f 'SimilarityLink) or (f "SimilarityLink")
+					if (scm_is_true(scm_symbol_p(input)))
+						input = scm_symbol_to_string(input);
+					
+					char *lstr = scm_to_locale_string(input);
+					Type t = classserver().getType(lstr);
 					free(lstr);
 					
 					(that->*method.v_t)(t);
@@ -204,10 +229,21 @@ class SchemePrimitive : public PrimitiveEnviron
 		signature = SIG; \
 		do_register(name, 2); /* cb has 2 args */ \
 	}
+	
+#define DECLARE_CONSTR_3(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE) \
+	SchemePrimitive(const char *name, RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(name, 3); /* cb has 3 args */ \
+	}
 
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
+		DECLARE_CONSTR_3(D_HHT, d_hht, double, const Handle&, const Handle&, const Type&)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
@@ -242,6 +278,15 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T
 	new SchemePrimitive<T>(name, cb, data); \
 }
 
+#define DECLARE_DECLARE_3(RET,ARG1,ARG2,ARG3) \
+template<class T> \
+inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3), T *data) \
+{ \
+	/* Note: this is freed automatically by scheme garbage collection */ \
+	/* when it is no longer needed. */ \
+	new SchemePrimitive<T>(name, cb, data); \
+}
+
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, const Type&)
@@ -249,6 +294,7 @@ DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
 
 
 }
