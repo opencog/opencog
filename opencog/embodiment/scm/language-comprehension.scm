@@ -1334,6 +1334,7 @@
               (elementTypeNode (get-frame-element-node frameType elementName ))
               (elementsCandidates '())
              )
+             
          ; check if the element has a Variable as its value
          (if (equal? 'VariableNode (cog-type value))
              ; ok, it has a variable and must be matched against a stored frame
@@ -1401,6 +1402,8 @@
     (sort candidates (lambda (x y) (> (assoc-ref elementsStrength x) (assoc-ref elementsStrength y))) )    
     )
   )
+
+; NOTE: This function is not used! (It probably should be)
 
 ; When a Frame instance with VariableNodes in its elements
 ; is used in a PatternMatching process to find a grounded Frame Instance,
@@ -1503,28 +1506,29 @@
 (define (find-grounded-frame-instances-predicates . framesPredicates)
   (let ((finalFrames '()))
     (map ; ok it is a question, so handle it
-	; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
-	  ;questionFrames
-     (lambda (predicate)
-       (frame-preprocessor predicate)
-       (if (not (frame-instance-contains-variable? predicate))
-           (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
-             (if (not (null? groundedFrameInstance))                                    
-                 (set! finalFrames (append finalFrames (list groundedFrameInstance )))                   
-                 )
-             ) ; let
-           (let ((groundedFrameInstances (match-frame predicate)))
-             (if (not (null? groundedFrameInstances))
-                 (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
-                 )
-             ) ; let
-           ) ; if
-       ) ; lambda
-     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
-     )
+         ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
+         ;questionFrames
+      (lambda (predicate)
+       
+        (frame-preprocessor predicate)
+        (if (not (frame-instance-contains-variable? predicate))
+          (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
+            (if (not (null? groundedFrameInstance))                                    
+              (set! finalFrames (append finalFrames (list groundedFrameInstance )))                   
+            )
+          ) ; let
+          (let ((groundedFrameInstances (match-frame predicate)))
+            (if (not (null? groundedFrameInstances))
+              (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
+            ) ; if
+          ) ; let
+        ) ; if
+      ) ; lambda
+      (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
+    ) ; if
     finalFrames
-    )
-  )
+  ) ; let
+)
 
 
 (define (instantiate-frame type instanceName elements)
@@ -1684,7 +1688,7 @@
     ; if there is no anaphoric suggestion, the objects list will remains the same
     (set! objects (filter-by-strength objects anaphoricSemeNodeStrength ) )
     
-    ; now apply the latest filter, the distance
+    ; now apply the last filter, the distance
     (map
      (lambda (instance)
        (let ((semeNode (get-nearest-candidate (cdr instance) ))
@@ -1759,6 +1763,7 @@
         (question? #f)
         (questionType '())
         )
+        
     (map
      (lambda (parse)
        (let ((incomingPredicates (get-latest-frame-predicates (get-latest-word-instance-nodes parse)))
@@ -1821,9 +1826,9 @@
               )
              )
 
-          questionType
+          questionType ; Return the question type...
           )
-        '()
+        '() ; ... or else nothing.
         ) ; if
   
      ) ; let
@@ -2263,6 +2268,8 @@
       )
   )
 
+; Called by C++ (updateDialogControllers). Chooses a sentence to say (that has
+; already been stored in the AtomSpace by other processing).
 (define (choose-sentence)
 
   (define (get-valid-sentences links)    
