@@ -41,6 +41,9 @@ vector<int> INstats;
 int allTestsInferenceNodes=0;
 int allTestsExpansions=0;
 
+int tests_passed=0;
+int tests_total=0;
+
 float getCount(float c)
 { return SimpleTruthValue::confidenceToCount(c); }
 
@@ -203,6 +206,13 @@ void runSCMTargets(string testDir, bool test_bc) {
     {
         std::cerr << "Unknown exception during SCM targets" << std::endl;
         throw;
+    }
+
+    if (tests_passed==tests_total) {
+        cout << "Passed all " << tests_total << " tests!" << endl;
+    } else {
+        cout << "Failed " << (tests_total - tests_passed) << " out of "
+             << tests_total << " tests." << endl;
     }
 }
 
@@ -405,6 +415,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         printf("]\n");
 
         if (passed) {
+            tests_passed++;
+
             allTestsInferenceNodes += state->inferenceNodes;
             allTestsExpansions += total_expansions;
 
@@ -419,6 +431,8 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         else
             INstats.push_back(0);
     }
+
+    tests_total++;
 /*      if (etv) {
         string stv(etv->toString());
         puts(stv.c_str());
