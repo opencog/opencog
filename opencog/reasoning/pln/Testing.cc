@@ -39,6 +39,7 @@ vector< vector<vector<int> > >  INstatsVT;
 vector<vector<int> > INstatsV;
 vector<int> INstats;
 int allTestsInferenceNodes=0;
+int allTestsExpansions=0;
 
 float getCount(float c)
 { return SimpleTruthValue::confidenceToCount(c); }
@@ -253,7 +254,7 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     Btr<BackInferenceTreeRootT> state;
     //ForwardChainer fc;
-    ForwardChainerClassicIC fc;
+    HybridForwardChainer fc;
 
     // Even with FC, we want to have a BIT available so that printTrail can be accessed
 //        if (test_bc) {
@@ -409,12 +410,13 @@ void runPLNTest(Btr<PLNTest> t, bool test_bc)
 
         if (passed) {
             allTestsInferenceNodes += state->inferenceNodes;
+            allTestsExpansions += total_expansions;
 
             INstats.push_back(state->inferenceNodes);
 
-            cout << "Total expansion steps: " << total_expansions;
-            //! @todo
-            //cout << endl << "Exec pool size: " << state->exec_pool.size();
+            cout << "Total expansion steps: " << total_expansions <<
+                    "(" << allTestsExpansions << " in all tests)";
+            cout << endl << "Exec pool size: " << state->getExecPoolSize();
             cout << endl << "InferenceNodes: " << state->inferenceNodes <<
                     " (" << allTestsInferenceNodes << " in all tests)" << endl;
         }

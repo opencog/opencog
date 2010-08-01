@@ -38,4 +38,11 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc = true);
 Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc = true);
 void runSCMTargets(std::string testDir, bool test_bc = true);
 
+void maketest(meta target,
+              TruthValue* minTV,
+              TruthValue* maxTV,
+              uint minEvalsOfFittestBIT,
+              uint minExhaustiveEvals,
+              bool test_bc = true);
+
 }//}}
