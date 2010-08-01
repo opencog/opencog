@@ -248,13 +248,21 @@ void DimensionalEmbedding::logAtomEmbedding(const Type& linkType) {
     oss << "PIVOTS:" << std::endl;
     for(PivotSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
         Atom* atom = TLB::getAtom(*it);
-        oss << atom->toShortString() << std::endl;
+        if(atom==NULL) {
+            oss << "[PIVOT'S BEEN DELETED]" << std::endl;
+        } else {
+            oss << atom->toShortString() << std::endl;
+        }
     }
     oss << "Node Embeddings:" << std::endl;
     AtomEmbedding::const_iterator it;
     for(it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
         Atom* atom = TLB::getAtom(it->first);
-        oss << atom->toShortString() << " : (";
+        if(atom==NULL) {
+            oss << "[NODE'S BEEN DELETED]" << " : (";
+        } else {
+            oss << atom->toShortString() << " : (";
+        }
         std::vector<double> embedVector = it->second;
         for(std::vector<double>::const_iterator it2=embedVector.begin();
             it2!=embedVector.end();
@@ -272,7 +280,8 @@ bool DimensionalEmbedding::isEmbedded(const Type& linkType) {
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
-    
+
+    //See if atomMaps holds an embedding for linkType
     AtomEmbedMap::iterator aEMit = atomMaps.find(linkType);
     if(aEMit==atomMaps.end()) {
         return false;

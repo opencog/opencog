@@ -38,7 +38,8 @@ namespace opencog
      * technique as described on
      * http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
      *
-     * @todo Add support for non-symmetric links
+     * @todo Add support for non-symmetric links.
+     * @bug Can fail if a node is deleted after embedding (esp. a pivot node)
      */
     class DimensionalEmbedding : public opencog::Agent {
     private:
@@ -146,7 +147,8 @@ namespace opencog
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
          * pairs for linkType. This will have as many entries as there are nodes
-         * in the atomspace. Just used for testing/debugging.
+         * in the atomspace (unless nodes have been added since the embedding.
+         * Just used for testing/debugging.
          */
         void logAtomEmbedding(const Type& linkType);
 
@@ -155,6 +157,7 @@ namespace opencog
          *
          * @param h Handle of node to be embedded.
          * @param linkType Type of link to use to embed h
+         * @return The embedding vector (a vector of doubles between 0 and 1)
          */
         std::vector<double> addNode(const Handle& h, const Type& linkType);
 
