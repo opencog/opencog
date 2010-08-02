@@ -1500,32 +1500,124 @@
   )
 
 
+; Just a prototype for now.
+(define (build-query predicateNode)
+  (let ((variableCounter 1)
+	(variablesDeclaration '())
+	(elementsDeclaration '())
+        (frameType (get-frame-instance-type predicateNode))
+	)
+    (map
+     (lambda (predicate)
+       (let* ((value (get-frame-instance-element-value predicate))
+	      (groundedValue (get-grounded-element-value value))
+              (variable? (and value (equal? 'VariableNode (cog-type value))))
+              (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
+	     )
+         (set! variablesDeclaration (append variablesDeclaration (list
+	    (TypedVariableLink
+             (FWVariableNode (string-append "$var" (number->string variableCounter)))
+             (VariableTypeNode "PredicateNode")
+             ) 
+            )))
+         (if variable?
+             (begin
+               (set! groundedValue value)
+               (set! variablesDeclaration (append variablesDeclaration (list
+                  (TypedVariableLink
+                   value
+                   (ListLink
+                    (VariableTypeNode "SemeNode")
+                    (VariableTypeNode "ConceptNode")
+                    )
+                   )
+                  )))
+               ) ; begin
+             ) ; if
+         
+         (set! elementsDeclaration (append elementsDeclaration (list
+	    (AndLink ; Nested AndLink because of PLN's current limitations
+	     (FrameElementLink
+	      (FWVariableNode "$var0")
+	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+	      )
+	     (InheritanceLink
+	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+	      elementNode
+	      )
+	     (EvaluationLink
+	      (FWVariableNode (string-append "$var" (number->string variableCounter) ))
+	      groundedValue
+	     )
+	    )
+            ) ) )
+	 (set! variableCounter (+ variableCounter 1))
+	 ) ; let
+       ) ; lambda
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+
+;    (VariableScopeLink
+;     (ListLink
+;      variablesDeclaration
+;      (TypedVariableLink
+;       (Node "$var0")
+;       (VariableTypeNode "PredicateNode")
+;       )
+;     )
+;     (ImplicationLink
+      (AndLink
+       elementsDeclaration
+       (InheritanceLink
+	(FWVariableNode "$var0")
+	(DefinedFrameNode (get-frame-instance-type predicateNode))
+	)
+      )
+;     )
+
+    ) ; let
+)
+
+
 ; This function receives as argument a list of PredicateNodes that
 ; represents instances of Frames and returns a list of PredicateNodes
 ; that is grounded versions of the given ones
-(define (find-grounded-frame-instances-predicates . framesPredicates)
-  (let ((finalFrames '()))
+(define (find-grounded-frame-instances-predicates framesPredicates use-pln)
+(let (;(use-pln #t)
+  
+      (finalFrames '()))
     (map ; ok it is a question, so handle it
          ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
          ;questionFrames
       (lambda (predicate)
        
         (frame-preprocessor predicate)
-        (if (not (frame-instance-contains-variable? predicate))
-          (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
-            (if (not (null? groundedFrameInstance))                                    
-              (set! finalFrames (append finalFrames (list groundedFrameInstance )))                   
-            )
-          ) ; let
-          (let ((groundedFrameInstances (match-frame predicate)))
-            (if (not (null? groundedFrameInstances))
+        (if use-pln
+          ; assumption: can't reuse variables in different frame elements (easy to fix if necessary)
+          
+          (let ( (groundedFrameInstance (pln-bc (build-query predicate) 200)) )
+            (if (not (equal? (cog-handle groundedFrameInstance) 18446744073709551615))
               (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
-            ) ; if
-          ) ; let
-        ) ; if
+            )
+          )
+          
+          ; not using PLN
+          (if (not (frame-instance-contains-variable? predicate))
+            (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
+              (if (not (null? groundedFrameInstance))                                    
+                (set! finalFrames (append finalFrames (list groundedFrameInstance )))                   
+              )
+            ) ; let
+            (let ((groundedFrameInstances (match-frame predicate)))
+              (if (not (null? groundedFrameInstances))
+                (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
+              ) ; if
+            ) ; let
+          ) ; if
+        )
       ) ; lambda
-      (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
-    ) ; if
+    (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
+    ) ; map
     finalFrames
   ) ; let
 )
@@ -1795,7 +1887,7 @@
 
          (if questionParse?
              (let* ((numberOfIncomingPredicates (length questionFrames))
-                    (groundedPredicates (find-grounded-frame-instances-predicates questionFrames))
+                    (groundedPredicates (find-grounded-frame-instances-predicates questionFrames #t))
                     (numberOfGroundedPredicates (length groundedPredicates))
                     (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
                     )
@@ -1861,7 +1953,7 @@
             (lambda (groundedPredicate)
               (remove-frame-instance groundedPredicate)
               )
-            (find-grounded-frame-instances-predicates incomingPredicates)
+            (find-grounded-frame-instances-predicates incomingPredicates #f)
             )
 
            (map
