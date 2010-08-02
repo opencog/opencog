@@ -166,7 +166,7 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
  * @param test_bc is a flag indicating whether to run the tests
  * with the backward chainer (true) or the forward chainer (false)
  */
-void runSCMTargets(string testDir, bool test_bc) {
+bool runSCMTargets(string testDir, bool test_bc) {
     // TODO maybe use regex_iterator
 
     testDir+= "targets/";
@@ -208,11 +208,14 @@ void runSCMTargets(string testDir, bool test_bc) {
         throw;
     }
 
+    //! @todo May get some interference from other uses of runPLNTest in PLNUTest.cxxtest.
     if (tests_passed==tests_total) {
         cout << "Passed all " << tests_total << " tests!" << endl;
+        return true;
     } else {
         cout << "Failed " << (tests_total - tests_passed) << " out of "
              << tests_total << " tests." << endl;
+        return false;
     }
 }
 

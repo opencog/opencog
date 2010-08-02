@@ -41,7 +41,12 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc = true);
 //! @todo This next function doesn't need to have test_bc
 Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc = true);
 Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc = true);
-void runSCMTargets(std::string testDir, bool test_bc = true);
+/** Test all Scheme targets (i.e. in *_test.conf files).
+ * @param The directory containing the tests.
+ * @param Whether to test with the backward chainer (true) or the forward chainer (false).
+ * @return Whether all of the tests passed (true) or not (false).
+ */
+bool runSCMTargets(std::string testDir, bool test_bc = true);
 
 bool maketest(meta target,
               TruthValue* minTV,

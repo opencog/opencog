@@ -178,7 +178,7 @@ public:
     
     // test forward chainer on all targets defined as conf file
     void testSCMTargetsFC() {
-        runSCMTargets(PLN_TEST_DIR, false);
+        TS_ASSERT(runSCMTargets(PLN_TEST_DIR, false));
     }
 
 };

@@ -327,11 +327,6 @@ public:
     {
     }
 
-    // test backward chainer on all targets defined as conf file
-    void testSCMTargetsBC() {
-        runSCMTargets(PLN_TEST_DIR, true);
-    }
-    
 //    // test forward chainer on all targets defined as conf file
 //    void DISABLEtestSCMTargetsFC() {
 //        runSCMTargets(PLN_TEST_DIR, false);
@@ -659,6 +654,10 @@ public:
                         bindings));
     }
 
+    // test backward chainer on all targets defined as conf file
+    void testSCMTargetsBC() {
+        TS_ASSERT(runSCMTargets(PLN_TEST_DIR, true));
+    }
 };
 
 // this has basically been reduced to a repository of commented out tests
