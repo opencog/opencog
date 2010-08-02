@@ -1,5 +1,5 @@
 /*
- * opencog/server/DimEmbedModule.h
+ * opencog/learning/dimensionalembedding/DimEmbedModule.h
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -34,7 +34,14 @@
 
 namespace opencog
 {
-    
+    /**
+     * The DimEmbedModule class  implements the dimensional embedding
+     * technique as described on
+     * http://www.opencog.org/wiki/OpenCogPrime:DimensionalEmbedding
+     *
+     * @todo Add support for non-symmetric links.
+     * @bug Can fail if a node is deleted after embedding (esp. a pivot node)
+     */
     class DimEmbedModule : public Module
     {
     private:
@@ -86,6 +93,9 @@ namespace opencog
          * @return The highest weight path from startHandle to targetHandle
          * following only links of type linkType, where path weight is defined
          * above.
+         *
+         * @todo implement some kind of threshold or limit (as an optional 4th 
+         * parameter) after which two nodes are considered unconnected.
          */
         double findHighestWeightPath(const Handle& startHandle,
                                      const Handle& targetHandle,
@@ -123,7 +133,7 @@ namespace opencog
         virtual ~DimEmbedModule();
         virtual void init();
         
-                /**
+        /**
          * Creates an AtomEmbedding of the atomspace using linkType
          * and registers it with the AtomEmbedMap. If an AtomEmbedding
          * already exists for the supplied link type it will replace
@@ -131,6 +141,10 @@ namespace opencog
          *
          * @param linkType The type of link for which a dimensional embedding
          * is wanted.
+         *
+         * @todo improve pivot-picking technique: currently pivots are just
+         * picked as the farthest from the current pivots, but connectedness
+         * should be incorporated to avoid picking pivots with no links
          */
         void embedAtomSpace(const Type& linkType);
         

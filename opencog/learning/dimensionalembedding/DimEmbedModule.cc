@@ -1,5 +1,5 @@
 /*
- * opencog/server/DimEmbedModule.h
+ * opencog/learning/dimensionalembedding/DimEmbedModule.cc
  *
  * Copyright (C) 2010 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -146,6 +146,7 @@ double DimEmbedModule::euclidDist(const Handle& h1,
     double distance;
     std::vector<double> v1=getEmbedVector(h1,l);
     std::vector<double> v2=getEmbedVector(h2,l);
+    assert(v1.size()==v2.size());
     std::vector<double>::iterator it1=v1.begin();
     std::vector<double>::iterator it2=v2.begin();
 
@@ -171,8 +172,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType){
     HandleSeq nodes;
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
     for(HandleSeq::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-        std::vector<double>& embedVector=atomMaps[linkType][*it];
-        embedVector.push_back
+        atomMaps[linkType][*it].push_back
             (findHighestWeightPath(*it, h, linkType));
     }
 }
