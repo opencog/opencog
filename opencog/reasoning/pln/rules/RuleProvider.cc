@@ -322,16 +322,16 @@ ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 {
 	AtomSpaceWrapper* asw = GET_ASW;
 
-    AddRule(new LookupRule(asw), 20.0f);
-    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
-    AddRule(new HypothesisRule(asw), 30.0f);
-
     Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
 
     foreach(pHandle fah, *ForAll_handles)
         AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
 
     cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
+
+    AddRule(new LookupRule(asw), 20.0f);
+    AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
+    AddRule(new HypothesisRule(asw), 30.0f);
 }
 
 ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
@@ -368,6 +368,13 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
     AtomSpaceWrapper* asw = GET_ASW;
 
     float ANDEvaluatorPriority = 10.0f;
+
+    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
+
+    foreach(pHandle fah, *ForAll_handles)
+        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
+
+    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
 
     AddRule(new ORRule(asw), 10.0f);
 
@@ -406,13 +413,6 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
     AddRule(new LookupRule(asw), 20.0f);
     AddRule(new ScholemFunctionProductionRule(asw), 20.0f);
     AddRule(new HypothesisRule(asw), 30.0f);
-
-    Btr<std::set<pHandle> > ForAll_handles = asw->getHandleSet(FORALL_LINK, "");
-
-    foreach(pHandle fah, *ForAll_handles)
-        AddRule(new CustomCrispUnificationRule(fah, asw), 7.5f);
-
-    cprintf(-1, "Added %u CustomCrispUnificationRules.\n", (unsigned int) size());
 }
 
 EvaluationRuleProvider::~EvaluationRuleProvider(void) {
