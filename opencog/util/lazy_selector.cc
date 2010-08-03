@@ -28,13 +28,19 @@
 #include "foreach.h"
 #include <iostream>
 #include <iterator>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <boost/bind.hpp>
+#include <boost/iterator/counting_iterator.hpp>
 
 namespace opencog
 {
 
 using std::make_pair;
-using std::cout;
-using std::ostream_iterator;
+using std::count_if;
+using boost::counting_iterator;
+using boost::bind;
 
 lazy_selector::lazy_selector(unsigned int n) 
     : _n(n), _l(0) {
@@ -43,6 +49,12 @@ lazy_selector::lazy_selector(unsigned int n)
 
 bool lazy_selector::empty() const {
     return _l >= _n;
+}
+
+unsigned int lazy_selector::count_n_free() const {
+    return count_if(counting_iterator<unsigned int>(0),
+                    counting_iterator<unsigned int>(_n), 
+                    bind(&lazy_selector::is_free, this, _1));
 }
 
 void lazy_selector::reset_range(unsigned int new_n) {

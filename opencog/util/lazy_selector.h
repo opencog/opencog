@@ -81,10 +81,12 @@ public:
     virtual ~lazy_selector() {}
     bool empty() const;
 
+    // returns the number of elements < _n that can still be chosen
+    unsigned int count_n_free() const;
+
     // returns the selected number (never twice the same)
     unsigned int operator()();
 
-    // warning : it assumes that the new size is higher than the previous one
     void reset_range(unsigned int new_n);
 
     virtual unsigned int select() = 0; // a method that choses an int in [0,_n)

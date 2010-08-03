@@ -86,23 +86,23 @@ void generate_initial_sample(const eda::field_set& fs, int n, Out out, Out end,
  * @param inst the instance will be modified is contin encoded with distance
  *             equal to n 
  * @param it   the contin iterator of the instance
- * @param n    the haming distance contin encode will be midified
+ * @param n    the haming distance contin encode will be modified
  * @param rng  the random generator
  */
 inline void generate_contin_neighbor(const eda::field_set& fs,
                                      eda::instance& inst, 
                                      eda::field_set::contin_iterator it, 
-                                     int n, opencog::RandGen& rng)
+                                     unsigned int n, opencog::RandGen& rng)
 {
     size_t begin = fs.contin_to_raw_idx(it.idx());
-    size_t num = fs.get_num_before_stop(inst, it.idx());
+    size_t num = fs.count_n_before_stop(inst, it.idx());
     size_t depth = fs.contin()[it.idx()].depth;
     // a random_selector is used not to pick up twice the same idx.
     // The max idx coresponds either to the first Stop, or, in case
     // there is no Stop, the last disc (i.e. either Left or Right)
     opencog::lazy_random_selector select(std::min(num + 1, depth), rng);
 
-    dorepeat(n) {
+    for(unsigned int i = n; i > 0; i--) {
         size_t r = select();
         eda::field_set::disc_iterator itr = fs.begin_raw(inst);        
         itr += begin + r;
@@ -117,15 +117,14 @@ inline void generate_contin_neighbor(const eda::field_set& fs,
         // case inst at itr is Left or Right
         else {
             // whether r corresponds to the last Left or Right disc
-            if(r + 1 == num) {
-                if(rng.randbool()) { // Left<->Right
-                    *itr = eda::field_set::contin_spec::switchLR(*itr);
-                } else { // Stop
-                    *itr = eda::field_set::contin_spec::Stop;
-                    num--;
-                    select.reset_range(num);
-                }
-            } else *itr = eda::field_set::contin_spec::switchLR(*itr);
+            bool before_stop = r + 1 == num;
+            // whether we allow to turn it to stop
+            bool can_be_stop = i <= select.count_n_free();
+            if(before_stop && can_be_stop && rng.randbool()) {
+                *itr = eda::field_set::contin_spec::Stop;
+                select.reset_range(--num);
+            } else 
+                *itr = eda::field_set::contin_spec::switchLR(*itr);
         }
     }
 }
@@ -329,7 +328,7 @@ Out vary_n_knobs(const eda::field_set& fs,
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
         size_t depth = fs.contin()[itc.idx()].depth;
-        size_t num = fs.get_num_before_stop(tmp_inst, contin_idx);
+        size_t num = fs.count_n_before_stop(tmp_inst, contin_idx);
         eda::field_set::disc_iterator itr = fs.begin_raw(tmp_inst);        
         itr += starting_index;
         size_t relative_raw_idx = starting_index - fs.contin_to_raw_idx(contin_idx);
@@ -446,7 +445,7 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
         size_t depth = fs.contin()[itc.idx()].depth;
-        size_t num = fs.get_num_before_stop(inst, contin_idx);
+        size_t num = fs.count_n_before_stop(inst, contin_idx);
         eda::field_set::const_disc_iterator itr = fs.begin_raw(inst);        
         itr += starting_index;
         size_t relative_raw_idx = 

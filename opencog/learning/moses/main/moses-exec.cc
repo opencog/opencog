@@ -201,7 +201,7 @@ int main(int argc,char** argv) {
         ("problem,h", value<string>(&problem)->default_value("it"),
          string("problem to solve, supported problems are"
                 " regression based on input table (").append(it).
-         append(", regression based on input table using ann (").append(ann_it).
+         append("), regression based on input table using ann (").append(ann_it).
          append("), regression based on combo program (").append(cp).
          append("), even parity (").append(pa).
          append("), disjunction (").append(dj).

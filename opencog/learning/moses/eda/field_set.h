@@ -399,7 +399,7 @@ struct field_set {
      * @param idx the index of the contin to look at, idx is relative
      *            to contin_iterator
      */
-    size_t get_num_before_stop(const instance& inst, size_t idx) const
+    size_t count_n_before_stop(const instance& inst, size_t idx) const
     {
         size_t raw_begin = contin_to_raw_idx(idx);
         size_t raw_end = raw_begin + _contin[idx].depth;
