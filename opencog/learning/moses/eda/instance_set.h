@@ -87,7 +87,7 @@ struct instance_set : public vector<scored_instance<ScoreT> > {
         return const_instance_iterator(this->end());
     }
 protected:
-    field_set _fields;
+    const field_set& _fields;
 };
 
 } //~namespace eda

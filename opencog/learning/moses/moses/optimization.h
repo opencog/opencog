@@ -160,7 +160,8 @@ struct univariate_optimization {
         //create the initial sample
         //generate the initial sample to populate the deme
         deme.resize(pop_size);
-        generate_initial_sample(deme.fields(), pop_size, deme.begin(), rng);
+        generate_initial_sample(deme.fields(), pop_size, deme.begin(),
+                                deme.end(), rng);
 
         if (params.is_tournament_selection()) {
             eda::cout_log_best_and_gen logger;
@@ -255,7 +256,7 @@ struct iterative_hillclimbing {
                 //distance 'distance' from the exemplar
                 sample_from_neighborhood(deme.fields(), distance,
                                          number_of_new_instances,
-                                         deme.begin() + current_number_of_instances, rng);
+                                         deme.begin() + current_number_of_instances, deme.end(), rng);
             } else {
                 number_of_new_instances = total_number_of_neighbours;
                 //resize the deme so it can take new instances
@@ -263,7 +264,7 @@ struct iterative_hillclimbing {
                 //add all instances on the distance 'distance' from
                 //the exemplar
                 generate_all_in_neighborhood(deme.fields(), distance,
-                                             deme.begin() + current_number_of_instances);
+                                             deme.begin() + current_number_of_instances, deme.end());
             }
             
             // score all new instances in the deme
@@ -408,13 +409,13 @@ struct sliced_iterative_hillclimbing {
                 //resize the deme so it can take new instances
                 deme.resize(current_number_of_instances + number_of_new_instances);
                 //sample 'number_of_new_instances' instances on the distance 'distance' from the exemplar
-                sample_from_neighborhood(deme.fields(), distance, number_of_new_instances, deme.begin() + current_number_of_instances, rng);
+                sample_from_neighborhood(deme.fields(), distance, number_of_new_instances, deme.begin() + current_number_of_instances, deme.end(), rng);
             } else {
                 number_of_new_instances = total_number_of_neighbours;
                 //resize the deme so it can take new instances
                 deme.resize(current_number_of_instances + number_of_new_instances);
                 //add all instances on the distance 'distance' from the exemplar
-                generate_all_in_neighborhood(deme.fields(), distance, deme.begin() + current_number_of_instances);
+                generate_all_in_neighborhood(deme.fields(), distance, deme.begin() + current_number_of_instances, deme.end());
             }
 
             target_size = current_number_of_instances + number_of_new_instances;
@@ -603,6 +604,7 @@ struct simulated_annealing {
             sample_from_neighborhood(fields, current_distance,
                                      number_of_new_instances,
                                      deme.begin() + current_number_of_instances,
+                                     deme.end(),
                                      rng, center_instance);
                     
             // score all new instances in the deme (1 for now)

@@ -47,6 +47,24 @@ public:
         TS_ASSERT_EQUALS(v, rv);
     }
 
+    void test_get_set_bits()
+    {
+        field_set fs(field_set::disc_spec(2), 40);
+        instance inst(fs.packed_width());
+
+        std::cout << "bits : " << fs.stream(inst) << std::endl;
+
+        size_t idx = 35;
+        disc_t rv(1), v(1);
+
+        fs.set_raw(inst, idx, v);
+        rv = fs.get_raw(inst,idx);
+
+        std::cout << "bits : " << fs.stream(inst) << std::endl;
+
+        TS_ASSERT_EQUALS(v, rv);
+    }
+
     void test_build_spec()
     {
         field_set::contin_spec  cs1(0.0, 0.5, 0.5, 8);

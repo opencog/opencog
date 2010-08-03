@@ -159,10 +159,7 @@ combo_tree representation::get_clean_exemplar(bool reduce)
             logger().fine(ss.str());
         }
         // ~Logger
-
-        stringstream ss_tr;
-        ss_tr << result;
-        (*_simplify)(result, result.begin()); 
+        (*_simplify)(result); 
     }
 
     return result;

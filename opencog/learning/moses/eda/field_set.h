@@ -27,6 +27,7 @@
 #include "eda.h"
 #include <map>
 #include <opencog/util/RandGen.h>
+#include <opencog/util/dorepeat.h>
 
 namespace eda
 {
@@ -482,20 +483,16 @@ protected:
         Self& operator+=(Distance n) {
             if (n < 0)
                 return (*this) -= (-n);
-            Distance tmp = (n / bits_per_packed_t);
-            _it += tmp;
-            n -= tmp;
-            while (n-- > 0) //could be faster...
+            _it += n / bits_per_packed_t;
+            dorepeat(n % bits_per_packed_t) //could be faster...
                 ++(*this);
             return (*((Self*)this));
         }
         Self& operator-=(Distance n) {
             if (n < 0)
-                return (*this) += (-n);
-            Distance tmp = (n / bits_per_packed_t);
-            _it -= tmp;
-            n -= tmp;
-            while (n-- > 0) //could be faster...
+                return (*this) += (-n); 
+            _it -= n / bits_per_packed_t;
+            dorepeat(n % bits_per_packed_t) //could be faster...
                 --(*this);
             return (*((Self*)this));
         }
@@ -516,8 +513,9 @@ protected:
         bit_iterator_base(packed_t mask, Iterator it) : _it(it), _mask(mask) { }
         bit_iterator_base() : _it(), _mask(0) { }
 
-        Iterator _it;
-        packed_t _mask;
+        Iterator _it; // instance iterator
+        packed_t _mask; // mask over the packed_t pointed by _it,
+                        // i.e. the data of interest
     };
 
     template<typename Iterator, typename Value>

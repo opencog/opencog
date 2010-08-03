@@ -101,10 +101,13 @@ struct metapopulation : public set < bscored_combo_tree,
     void init(const std::vector<combo_tree>& exemplars) {
         metapop_candidates candidates;
         foreach(const combo_tree& base, exemplars) {
-            composite_score base_sc = make_pair(score(base), complexity(base));
+            combo_tree si_base(base);
+            (*simplify)(si_base);
+            composite_score base_sc = make_pair(score(si_base),
+                                                complexity(si_base));
             bscored_combo_tree base_bsc = 
-                make_pair(base, 
-                          composite_behavioral_score(bscore(base), base_sc));
+                make_pair(si_base, 
+                          composite_behavioral_score(bscore(si_base), base_sc));
             candidates.insert(base_bsc);
 
             // update the record of the best-seen score & trees
