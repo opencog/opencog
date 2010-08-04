@@ -880,44 +880,45 @@ namespace reduct {
     }
   }
   
-  //look up the assumptions and replace by true is present or false
-  //if not(assum) present
-  void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
+// look up the assumptions and replace by true if present or false
+// if not(assum) present
+void reduce_from_assumptions::operator()(combo_tree& tr,combo_tree::iterator it) const {
     if((get_output_type_tree(*it)==type_tree(id::boolean_type)
-	&& *it!=id::logical_true && *it!=id::logical_false)
+        && *it!=id::logical_true && *it!=id::logical_false)
        || is_argument(*it)) {
-      sib_it assum = tr.next_sibling(tr.begin());
-      if(tr.is_valid(assum)) {
-	for(; assum != tr.end(); ++assum) {
-	  if(implies(tr, pre_it(assum), it)) {
-	    *it = id::logical_true;
-	    tr.erase_children(it);
-	    return;
-	  }
-	  else if(*assum==id::logical_not) {
-	    OC_ASSERT(assum.has_one_child(),
-               "combo_tree node should have exactly one child (reduce_from_assumptions - assum).");
-	    if(implies(tr, it, pre_it(assum.begin()))) {
-	      *it = id::logical_false;
-	      tr.erase_children(it);
-	      return;
-	    }
-	  }
-	  else if(is_argument(*assum) && is_argument(*it)) {
-	    argument assum_arg = get_argument(*assum);
-	    assum_arg.negate();
-	    //don't need to treat the case when same idx because
-	    //already treated in the beginning of the function
-	    if(assum_arg.idx == get_argument(*it).idx) {
-	      *it = id::logical_false;
-	      tr.erase_children(it);
-	      return;
-	    }
-	  }
-	}
-      }
+        sib_it assum = tr.next_sibling(tr.begin());
+        if(tr.is_valid(assum)) {
+            for(; assum != tr.end(); ++assum) {
+                if(implies(tr, pre_it(assum), it)) {
+                    *it = id::logical_true;
+                    tr.erase_children(it);
+                    return;
+                }
+                else if(*assum==id::logical_not) {
+                    OC_ASSERT(assum.has_one_child(),
+                              "combo_tree node should have exactly one child"
+                              " (reduce_from_assumptions - assum).");
+                    if(implies(tr, it, pre_it(assum.begin()))) {
+                        *it = id::logical_false;
+                        tr.erase_children(it);
+                        return;
+                    }
+                }
+                else if(is_argument(*assum) && is_argument(*it)) {
+                    argument assum_arg = get_argument(*assum);
+                    assum_arg.negate();
+                    //don't need to treat the case when same idx because
+                    //already treated in the beginning of the function
+                    if(assum_arg.idx == get_argument(*it).idx) {
+                        *it = id::logical_false;
+                        tr.erase_children(it);
+                        return;
+                    }
+                }
+            }
+        }
     }
-  }
+}
 
   //if(x y z) -> if(NOT(x) z y)  if |NOT(x)|<|x|
   void reduce_contin_if_not::operator()(combo_tree& tr,combo_tree::iterator it) const {

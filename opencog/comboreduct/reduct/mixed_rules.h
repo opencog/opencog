@@ -176,7 +176,7 @@ struct reduce_junction_gt_zero_sum_constant
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-//look up the assumptions and replace by true is present or false
+//look up the assumptions and replace by true if present or false
 //if not(assum) present
 struct reduce_from_assumptions : public crule<reduce_from_assumptions> {
     reduce_from_assumptions(const rule& r) : crule<reduce_from_assumptions>::crule("reduce_from_assumptions"), _reduction(&r) { }    
