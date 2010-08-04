@@ -25,12 +25,13 @@
 #include "meta_rules.h"
 #include "general_rules.h"
 #include "logical_rules.h"
+#include "mixed_rules.h"
 
 namespace reduct {
 
 const rule& logical_reduction() {
     using namespace combo;
-    static sequential r=
+    static sequential simple =
         sequential(downwards(reduce_nots(),id::boolean_type),
                    
                    iterative(sequential(upwards(eval_logical_identities()),
@@ -42,8 +43,20 @@ const rule& logical_reduction() {
                                                   id::boolean_type),
                                         downwards(reduce_ors(),
                                                   id::boolean_type))),
-                   downwards(remove_unary_junctors(),id::boolean_type));
-    return r;
+                   downwards(remove_unary_junctors(),id::boolean_type),
+                   "simple");
+
+    static iterative complex;
+
+    complex = 
+        iterative(sequential(simple,
+                             downwards(reduce_from_assumptions(complex)),
+                             downwards(reduce_and_assumptions(complex)),
+                             downwards(reduce_or_assumptions(complex))
+                             ),
+                  "complex");
+
+    return complex;
 }
 
 } //~namespace reduct

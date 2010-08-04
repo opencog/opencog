@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/Logger.h>
 
 #include "../reduct/reduct.h"
 #include "../combo/eval.h"
@@ -37,6 +38,7 @@ using namespace opencog;
 
 int main()
 {
+    logger().setPrintErrorLevelStdout();
 
     MT19937RandGen rng(0);
 

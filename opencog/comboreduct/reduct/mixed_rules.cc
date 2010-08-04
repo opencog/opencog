@@ -696,189 +696,192 @@ namespace reduct {
     }
   }
 
-  //implies
-  //takes a tree and 2 iterators and tells if it1 implies it2
-  //for instance x implies x, because x==x
-  //if x!=y for instance x==2<z implies y==3<z
-  bool reduce_from_assumptions::implies(const combo_tree& tr,
-					combo_tree::iterator it1,
-					combo_tree::iterator it2) const {
+// implies takes a tree and 2 iterators and tells if it1 implies it2
+// for instance x implies x, because x==x if x!=y for instance x==2<z
+// implies y==3<z
+bool reduce_from_assumptions::implies(const combo_tree& tr,
+                                      combo_tree::iterator it1,
+                                      combo_tree::iterator it2) const {
     //if there are syntactly equal clearly it1 implies it2
     if(tr.equal_subtree(it1, it2))
-      return true;
+        return true;
     //otherwise deal with inequalities
     else {
-      pre_it ine1_child; //child of inequality ot it1
-      bool is_strict1 = true; //= true just to get rid of stupid C++ warning
-      pre_it ine2_child; //child of inequality of it2
-      bool is_strict2 = true; //= true just to get rid of stupid C++ warning
-      //determine if ine1_child is a strict inequality
-      if(*it1==id::greater_than_zero) {
-	OC_ASSERT(it1.has_one_child(),
-            "combo_tree node should have exactly one child (reduce_from_assumptions - it1).");
-	ine1_child = it1.begin();
-	is_strict1 = true;
-      }
-      //determine if ine1_child is a non-strict inequality
-      else if(*it1==id::logical_not) {
-	OC_ASSERT(it1.has_one_child(),
-           "combo_tree node should have exactly one child (reduce_from_assumptions - it1).");
-	pre_it it1_child = it1.begin();
-	if(*it1_child==id::greater_than_zero) {
-	  OC_ASSERT(it1_child.has_one_child(),
-              "combo_tree child node should have exactly one child (reduce_from_assumptions - it1).");
-	  ine1_child = it1_child.begin();
-	  is_strict1 = false;
-	}
-      }
-      //determine if ine2_child is a strict inequality
-      if(*it2==id::greater_than_zero) {
-	OC_ASSERT(it2.has_one_child(),
-           "combo_tree node should have exactly one child (reduce_from_assumptions - it2).");
-	ine2_child = it2.begin();
-	is_strict2 = true;
-      }
-      //determine if ine2_child is a non-strict inequality
-      else if(*it2==id::logical_not) {
-	OC_ASSERT(it2.has_one_child(),
-           "combo_tree node should have exactly one child (reduce_from_assumptions - it2).");
-	pre_it it2_child = it2.begin();
-	if(*it2_child==id::greater_than_zero) {
-	  OC_ASSERT(it2_child.has_one_child(),
-            "combo_tree child node should have exactly one child (reduce_from_assumptions - it2).");
-	  ine2_child = it2_child.begin();
-	  is_strict2 = false;
-	}
-      }
-      //check is it1 and it2 are both inequalities
-      if(tr.is_valid(ine1_child) && tr.is_valid(ine2_child)) {
-	contin_t c1 = 0.0;
-	contin_t c2 = 0.0;
-	//tr1 will contain the non constant terms of inequality 1
-	combo_tree tr1 = tr.subtree(ine1_child, tr.next_sibling(ine1_child));
-	pre_it tr1_it = tr1.begin();
-	//tr2 will contain the non constant terms of inequality 2
-	combo_tree tr2 = tr.subtree(ine2_child, tr.next_sibling(ine2_child));
-	pre_it tr2_it = tr2.begin();
+        pre_it ine1_child; //child of inequality ot it1
+        bool is_strict1 = true; //= true just to get rid of stupid C++ warning
+        pre_it ine2_child; //child of inequality of it2
+        bool is_strict2 = true; //= true just to get rid of stupid C++ warning
+        //determine if ine1_child is a strict inequality
+        if(*it1==id::greater_than_zero) {
+            OC_ASSERT(it1.has_one_child(),
+                      "combo_tree node should have exactly one child");
+            ine1_child = it1.begin();
+            is_strict1 = true;
+        }
+        //determine if ine1_child is a non-strict inequality
+        else if(*it1==id::logical_not) {
+            OC_ASSERT(it1.has_one_child(),
+                      "combo_tree node should have exactly one child");
+            pre_it it1_child = it1.begin();
+            if(*it1_child==id::greater_than_zero) {
+                OC_ASSERT(it1_child.has_one_child(),
+                          "combo_tree child node should have exactly one child");
+                ine1_child = it1_child.begin();
+                is_strict1 = false;
+            }
+        }
+        //determine if ine2_child is a strict inequality
+        if(*it2==id::greater_than_zero) {
+            OC_ASSERT(it2.has_one_child(),
+                      "combo_tree node should have exactly one child");
+            ine2_child = it2.begin();
+            is_strict2 = true;
+        }
+        //determine if ine2_child is a non-strict inequality
+        else if(*it2==id::logical_not) {
+            OC_ASSERT(it2.has_one_child(),
+                      "combo_tree node should have exactly one child");
+            pre_it it2_child = it2.begin();
+            if(*it2_child==id::greater_than_zero) {
+                OC_ASSERT(it2_child.has_one_child(),
+                          "combo_tree child node should have exactly one child");
+                ine2_child = it2_child.begin();
+                is_strict2 = false;
+            }
+        }
+        //check is it1 and it2 are both inequalities
+        if(tr.is_valid(ine1_child) && tr.is_valid(ine2_child)) {
+            contin_t c1 = 0.0;
+            contin_t c2 = 0.0;
+            //tr1 will contain the non constant terms of inequality 1
+            combo_tree tr1 = tr.subtree(ine1_child, tr.next_sibling(ine1_child));
+            pre_it tr1_it = tr1.begin();
+            //tr2 will contain the non constant terms of inequality 2
+            combo_tree tr2 = tr.subtree(ine2_child, tr.next_sibling(ine2_child));
+            pre_it tr2_it = tr2.begin();
 
-	//the idea is that all constant under + will be take off from and 
-	//tr1 and tr2 then tr1 and tr2 will be compared if there are equal
-	//(but previously non strict equality will be multiplied
-	//by -1 because non strict inequality is represented using not(0<...) )
-	//because of this possible multiplication tr1 and tr2 will be first
-	//reduced.
+            //the idea is that all constant under + will be take off from and 
+            //tr1 and tr2 then tr1 and tr2 will be compared if there are equal
+            //(but previously non strict equality will be multiplied
+            //by -1 because non strict inequality is represented using not(0<...) )
+            //because of this possible multiplication tr1 and tr2 will be first
+            //reduced.
 
-	//take off constant terms from tr1 and put in c1
-	//if non strict c1 is inverted because non strict are represented
-	//with not(0<...)
-	if(*tr1_it==id::plus) {
-	  for(sib_it sib1 = tr1_it.begin(); sib1 != tr1_it.end();) {
-	    if(is_contin(*sib1)) {
-	      c1 = c1 + (is_strict1? 1.0 : -1.0) * get_contin(*sib1);
-	      sib1 = tr1.erase(sib1);
-	    }
-	    else ++sib1;
-	  }
-	}
-	//check if tr1 under the form -1*(x1+..+xn+c) and take off c
-	else if(*tr1_it==id::times && tr1_it.number_of_children()==2) {
-	  pre_it child0 = tr1.child(pre_it(tr1_it), 0);
-	  pre_it child1 = tr1.child(pre_it(tr1_it), 1);
-	  //check if -1 in first child
-	  if(is_contin(*child0) && get_contin(*child0)==-1.0) {
-	    //take off c
-	    if(*child1==id::plus) {
-	      for(sib_it s1p = child1.begin(); s1p != child1.end();)
-		if(is_contin(*s1p)) {
-		  //this time c is not inverted if non strict because already
-		  //inverted with -1*...
-		  c1 = c1 + (is_strict1? -1.0 : 1.0) * get_contin(*s1p);
-		  s1p = tr1.erase(s1p);
-		}
-	        else ++s1p;
-	    }
-	  }
-	  //check if -1 in the second child
-	  else if(is_contin(*child1) && get_contin(*child1)==-1.0) {
-	    //take off c
-	    if(*child0==id::plus) {
-	      for(sib_it s1p = child0.begin(); s1p != child0.end();)
-		if(is_contin(*s1p)) {
-		  //this time c is not inverted if non strict because already
-		  //inverted with -1*...
-		  c1 = c1 + (is_strict1? -1.0 : 1.0) * get_contin(*s1p);
-		  s1p = tr1.erase(s1p);
-		}
-	        else ++s1p;
-	    }
-	  }
-	}
-	if(!is_strict1) //multiply tr1 by -1
-	  tr1.append_child(tr1.wrap(tr1_it, id::times), -1.0);
-	
-	//take off constant terms from tr2 and put in c2
-	//if non strict c2 is inverted because non strict are represented
-	//with not(0<...)
-	if(*tr2_it==id::plus) {
-	  for(sib_it sib2 = tr2_it.begin(); sib2 != tr2_it.end();) {
-	    if(is_contin(*sib2)) {
-	      c2 = c2 + (is_strict2? 1.0 : -1.0) * get_contin(*sib2);
-	      sib2 = tr2.erase(sib2);
-	    }
-	    else ++sib2;
-	  }
-	}
-	//check if tr2 under the form -1*(x1+..+xn+c) and take off c
-	else if(*tr2_it==id::times && tr2_it.number_of_children()==2) {
-	  pre_it child0 = tr2.child(pre_it(tr2_it), 0);
-	  pre_it child1 = tr2.child(pre_it(tr2_it), 1);
-	  //check if -1 in first child
-	  if(is_contin(*child0) && get_contin(*child0)==-1.0) {
-	    //take off c
-	    if(*child1==id::plus) {
-	      for(sib_it s2p = child1.begin(); s2p != child1.end();)
-		if(is_contin(*s2p)) {
-		  //this time c is not inverted if non strict because already
-		  //inverted with -1*...
-		  c2 = c2 + (is_strict2? -1.0 : 1.0) * get_contin(*s2p);
-		  s2p = tr2.erase(s2p);
-		}
-	        else ++s2p;
-	    }
-	  }
-	  //check if -1 in the second child
-	  else if(is_contin(*child1) && get_contin(*child1)==-1.0) {
-	    //take off c
-	    if(*child0==id::plus) {
-	      for(sib_it s2p = child0.begin(); s2p != child0.end();)
-		if(is_contin(*s2p)) {
-		  //this time c is not inverted if non strict because already
-		  //inverted with -1*...
-		  c2 = c2 + (is_strict2? -1.0 : 1.0) * get_contin(*s2p);
-		  s2p = tr2.erase(s2p);
-		}
-	        else ++s2p;
-	    }
-	  }
-	}
-	if(!is_strict2) //multiply tr1 by -1
-	  tr1.append_child(tr2.wrap(tr2_it, id::times), -1.0);
+            //take off constant terms from tr1 and put in c1
+            //if non strict c1 is inverted because non strict are represented
+            //with not(0<...)
+            if(*tr1_it==id::plus) {
+                for(sib_it sib1 = tr1_it.begin(); sib1 != tr1_it.end();) {
+                    if(is_contin(*sib1)) {
+                        c1 = c1 + (is_strict1? 1.0 : -1.0) * get_contin(*sib1);
+                        sib1 = tr1.erase(sib1);
+                    }
+                    else ++sib1;
+                }
+            }
+            //check if tr1 under the form -1*(x1+..+xn+c) and take off c
+            else if(*tr1_it==id::times && tr1_it.number_of_children()==2) {
+                pre_it child0 = tr1.child(pre_it(tr1_it), 0);
+                pre_it child1 = tr1.child(pre_it(tr1_it), 1);
+                //check if -1 in first child
+                if(is_contin(*child0) && get_contin(*child0)==-1.0) {
+                    //take off c
+                    if(*child1==id::plus) {
+                        for(sib_it s1p = child1.begin(); s1p != child1.end();)
+                            if(is_contin(*s1p)) {
+                                //this time c is not inverted if non
+                                //strict because already inverted with
+                                //-1*...
+                                c1 = c1 + (is_strict1? -1.0 : 1.0) * get_contin(*s1p);
+                                s1p = tr1.erase(s1p);
+                            }
+                            else ++s1p;
+                    }
+                }
+                //check if -1 in the second child
+                else if(is_contin(*child1) && get_contin(*child1)==-1.0) {
+                    //take off c
+                    if(*child0==id::plus) {
+                        for(sib_it s1p = child0.begin(); s1p != child0.end();)
+                            if(is_contin(*s1p)) {
+                                //this time c is not inverted if non
+                                //strict because already inverted with
+                                //-1*...
+                                c1 = c1 + (is_strict1? -1.0 : 1.0) * get_contin(*s1p);
+                                s1p = tr1.erase(s1p);
+                            }
+                            else ++s1p;
+                    }
+                }
+            }
+            if(!is_strict1) //multiply tr1 by -1
+                tr1.append_child(tr1.wrap(tr1_it, id::times), -1.0);
+            
+            //take off constant terms from tr2 and put in c2
+            //if non strict c2 is inverted because non strict are represented
+            //with not(0<...)
+            if(*tr2_it==id::plus) {
+                for(sib_it sib2 = tr2_it.begin(); sib2 != tr2_it.end();) {
+                    if(is_contin(*sib2)) {
+                        c2 = c2 + (is_strict2? 1.0 : -1.0) * get_contin(*sib2);
+                        sib2 = tr2.erase(sib2);
+                    }
+                    else ++sib2;
+                }
+            }
+            //check if tr2 under the form -1*(x1+..+xn+c) and take off c
+            else if(*tr2_it==id::times && tr2_it.number_of_children()==2) {
+                pre_it child0 = tr2.child(pre_it(tr2_it), 0);
+                pre_it child1 = tr2.child(pre_it(tr2_it), 1);
+                //check if -1 in first child
+                if(is_contin(*child0) && get_contin(*child0)==-1.0) {
+                    //take off c
+                    if(*child1==id::plus) {
+                        for(sib_it s2p = child1.begin(); s2p != child1.end();)
+                            if(is_contin(*s2p)) {
+                                //this time c is not inverted if non
+                                //strict because already inverted with
+                                //-1*...
+                                c2 = c2 + (is_strict2? -1.0 : 1.0) * get_contin(*s2p);
+                                s2p = tr2.erase(s2p);
+                            }
+                            else ++s2p;
+                    }
+                }
+                //check if -1 in the second child
+                else if(is_contin(*child1) && get_contin(*child1)==-1.0) {
+                    //take off c
+                    if(*child0==id::plus) {
+                        for(sib_it s2p = child0.begin(); s2p != child0.end();)
+                            if(is_contin(*s2p)) {
+                                //this time c is not inverted if non
+                                //strict because already inverted with
+                                //-1*...
+                                c2 = c2 + (is_strict2? -1.0 : 1.0) * get_contin(*s2p);
+                                s2p = tr2.erase(s2p);
+                            }
+                            else ++s2p;
+                    }
+                }
+            }
+            if(!is_strict2) //multiply tr1 by -1
+                tr1.append_child(tr2.wrap(tr2_it, id::times), -1.0);
+            
+            //reduce tr1 and tr2 and compare is equal
+            (*_reduction)(tr1);
+            (*_reduction)(tr2);
 
-	//reduce tr1 and tr2 and compare is equal
-	(*_reduction)(tr1);
-	(*_reduction)(tr2);
-
-	if(tr1==tr2) {
-	  if(!is_strict1 && is_strict2)
-	    return c1 < c2;
-	  else return c1 <= c2;
-	}
-	else return false;
-      }
-      //no equality, no inequalities
-      else return false;
+            if(tr1==tr2) {
+                if(!is_strict1 && is_strict2)
+                    return c1 < c2;
+                else return c1 <= c2;
+            }
+            else return false;
+        }
+        //no equality, no inequalities
+        else return false;
     }
-  }
+}
   
 // look up the assumptions and replace by true if present or false
 // if not(assum) present

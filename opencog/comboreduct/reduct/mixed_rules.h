@@ -176,8 +176,10 @@ struct reduce_junction_gt_zero_sum_constant
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-//look up the assumptions and replace by true if present or false
-//if not(assum) present
+// look up the assumptions and replace by true if present (or implies)
+// or false if not(assum) is present (or implies to be false). The
+// rule given in argument is used by reduce_from_assumptions::implies
+// and can be fully recursive (I guess?).
 struct reduce_from_assumptions : public crule<reduce_from_assumptions> {
     reduce_from_assumptions(const rule& r) : crule<reduce_from_assumptions>::crule("reduce_from_assumptions"), _reduction(&r) { }    
     void operator()(combo_tree& tr,combo_tree::iterator it) const;

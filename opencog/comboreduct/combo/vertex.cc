@@ -27,7 +27,7 @@
 #include "procedure_call.h"
 
 // uncomment this to output a negative literal !#n instead of not(#n)
-// #define ABBREVIATE_NEGATIVE_LITERAL
+#define ABBREVIATE_NEGATIVE_LITERAL
 
 std::ostream& operator<<(std::ostream& out, const combo::ann_type& h)
 {

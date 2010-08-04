@@ -111,8 +111,9 @@ struct reduce_ands : public crule<reduce_ands> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-//reduction to enf - note that reduce nots and eval_logical_identities and 
-//level should be called first to ensure proper reduction
+// reduction to enf - note that reduce nots and
+// eval_logical_identities and level should be called first to ensure
+// proper reduction
 struct subtree_to_enf : public crule<subtree_to_enf> {
     subtree_to_enf() : crule<subtree_to_enf>::crule("subtree_to_enf") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const { reduce_to_enf(tr,it); }
@@ -143,10 +144,15 @@ protected:
         
         template<typename Out>
         void build_subtree_sets_upwards(up_it up,Out dom_out,Out cmd_out) const {
+            std::cout << "tr: " << tr << std::endl;
+
             static const type_tree boolean_type_tree = type_tree(id::boolean_type);
             
             for (up_it p=tr.parent(up);
                  p!=tr.end_upwards() && is_logical_operator(*p);++p) {
+                
+                std::cout << "*p: " << combo_tree(*p) << std::endl;
+
                 if (*p==id::logical_and) {
                     for (sib_it sib=p.begin();sib!=p.end();++sib)
                         if (sib!=up)
