@@ -55,14 +55,16 @@ void set_depth(int new_depth)
 namespace moses
 {
 
-representation::representation(const reduct::rule& simplify,
+representation::representation(const reduct::rule& simplify_candidate,
+                               const reduct::rule& simplify_knob_building,
                                const combo_tree& exemplar_,
                                const type_tree& tt,
                                opencog::RandGen& _rng,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions)
-    : _exemplar(exemplar_), rng(_rng), _simplify(&simplify)
+    : _exemplar(exemplar_), rng(_rng), _simplify_candidate(&simplify_candidate),
+      _simplify_knob_building(&simplify_knob_building)
 {
     // Logger
     {
@@ -159,7 +161,7 @@ combo_tree representation::get_clean_exemplar(bool reduce)
             logger().fine(ss.str());
         }
         // ~Logger
-        (*_simplify)(result); 
+        (*get_simplify_candidate())(result); 
     }
 
     return result;

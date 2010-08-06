@@ -257,8 +257,7 @@ vertex eval_throws(opencog::RandGen& rng,
                               " (id::boolean_if)");
             sib_it sib = it.begin();
             vertex vcond = eval_throws(rng, sib, pe, vu);
-            OC_ASSERT(is_boolean(vcond),
-                      "vertex should be a booelan.");
+            OC_ASSERT(is_boolean(vcond), "vertex should be a booelan.");
             ++sib;
             if (vcond == id::logical_true) {
                 return eval_throws(rng, sib, pe, vu);
@@ -464,13 +463,13 @@ vertex eval_throws(opencog::RandGen& rng, const opencog::tree<T>& tr)
 
 //return the arity of a tree
 template<typename T>
-int arity(const opencog::tree<T>& tr)
+arity_t arity(const opencog::tree<T>& tr)
 {
-    int a = 0;
+    arity_t a = 0;
     for (typename opencog::tree<T>::iterator it = tr.begin();
          it != tr.end(); ++it)
         if (is_argument(*it))
-            a = std::max(a, std::abs(get_argument(*it).idx));
+            a = std::max(a, (arity_t)std::abs(get_argument(*it).idx));
     return a;
 }
 
@@ -480,7 +479,7 @@ int arity(const opencog::tree<T>& tr)
   tree. (Note : could take the two trees to checking and according to their arity
   structure, whatever, find an appropriate number.)
 */
-inline int sample_count(int arity)
+inline int sample_count(arity_t arity)
 {
     if (arity == 0)
         return 1;

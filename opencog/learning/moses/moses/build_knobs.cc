@@ -271,7 +271,9 @@ bool build_knobs::disc_probe(pre_it parent, disc_knob_base& kb)
         // cout << "doing  : " << tmp << endl;
         clean_reduce(tmp);
         // cout << "clean  : " << tmp << endl;
-        (*_rep.get_simplify())(tmp, tmp.begin());
+
+        (*_rep.get_simplify_knob_building())(tmp);
+
         // cout << "reduced: " << tmp << endl;
 
         // Note that complexity is negative, with -inf being highest,

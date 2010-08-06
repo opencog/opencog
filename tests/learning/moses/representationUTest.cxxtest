@@ -62,40 +62,60 @@ public:
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
         vertex_set ignore_ops = list_of(id::div)(id::exp)(id::log)(id::sin);
-        representation rep(contin_reduction(ignore_ops, rng), tr, tt,
+        representation rep(contin_reduction(ignore_ops, rng),
+                           contin_reduction(ignore_ops, rng), tr, tt,
                            rng, ignore_ops);
 
-        // @todo define a test
-        TS_ASSERT(true);
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
     void test_boolean_rep1() {
         string tr_str = "and";
         combo_tree tr = totree(tr_str);
         type_tree tt = declare_function(id::boolean_type, 3);
-        representation rep(logical_reduction(), tr, tt, rng, vertex_set());
+        representation rep(logical_reduction(2), logical_reduction(2),
+                           tr, tt, rng, vertex_set());
 
-        // @todo define a test
-        TS_ASSERT(true);
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
     void test_boolean_rep2() {
         string tr_str = "or(and(or(#1 #2) or(#1 #3) or(#2 #3)) and(#1 #3))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(), tr, tt, rng, vertex_set());
+        representation rep(logical_reduction(2), logical_reduction(2), 
+                           tr, tt, rng, vertex_set());
 
-        // @todo define a test
-        TS_ASSERT(true);
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 
     void test_boolean_rep3() {
+        string tr_str = "or(and(!#1 !#2 !#3) and(#1 #2) and(#1 #3) and(#2 #3))";
+        combo_tree tr = totree(tr_str);
+        type_tree tt = infer_type_tree(tr);
+        representation rep(logical_reduction(2), logical_reduction(2), 
+                           tr, tt, rng, vertex_set());
+
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
+    }
+
+    void test_boolean_rep4() {
         string tr_str = "or(and(or(and(or(!#1 #3) !#2) #3) or(and(!#2 #3) !#1) or(#2 !#3)) and(or(#1 #2) #3) and(or(#1 #3) #2))";
         combo_tree tr = totree(tr_str);
         type_tree tt = infer_type_tree(tr);
-        representation rep(logical_reduction(), tr, tt, rng, vertex_set());
+        representation rep(logical_reduction(2), logical_reduction(2), 
+                           tr, tt, rng, vertex_set());
 
-        // @todo define a test
-        TS_ASSERT(true);
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
+    }
+
+    void test_boolean_rep5() {
+        string tr_str = "or(and(!#2 !#3 or(#3 !#2) or(!#1 #3)) and(#3 #2) and(#3 #1) and(#1 #2 or(#3 #1)))";
+        combo_tree tr = totree(tr_str);
+        type_tree tt = infer_type_tree(tr);
+        representation rep(logical_reduction(2), logical_reduction(2), 
+                           tr, tt, rng, vertex_set());
+
+        TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
     }
 };

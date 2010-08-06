@@ -72,24 +72,24 @@ public:
     template<typename It>
     truth_table(It from, It to) : super(from, to) { }
     template<typename T>
-    truth_table(const opencog::tree<T>& t, int arity, opencog::RandGen& rng)
+    truth_table(const opencog::tree<T>& tr, arity_t arity, opencog::RandGen& rng)
             : super(opencog::power(2, arity)) {
-        populate(t, arity, rng);
+        populate(tr, arity, rng);
     }
     template<typename T>
-    truth_table(const opencog::tree<T>& t, opencog::RandGen& rng) {
-        int a = arity(t);
+    truth_table(const opencog::tree<T>& tr, opencog::RandGen& rng) {
+        arity_t a = arity(tr);
         this->resize(opencog::power(2, a));
-        populate(t, a, rng);
+        populate(tr, a, rng);
     }
 
     template<typename Func>
-    truth_table(const Func& f, int arity, opencog::RandGen& rng)
+    truth_table(const Func& f, arity_t arity, opencog::RandGen& rng)
         : super(opencog::power(2, arity)) {
         iterator it = begin();
-        for (int i = 0;it != end();++i, ++it) {
+        for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(arity);
-            for (int j = 0;j < arity;++j)
+            for (arity_t j = 0;j < arity;++j)
                 v[j] = (i >> j) % 2;
             (*it) = f(v.begin(), v.end());
         }

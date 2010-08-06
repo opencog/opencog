@@ -29,34 +29,58 @@
 
 namespace reduct {
 
-const rule& logical_reduction() {
+// effort 0
+const rule& logical_reduction(int effort) {
     using namespace combo;
-    static sequential simple =
-        sequential(downwards(reduce_nots(),id::boolean_type),
-                   
+
+    // extra_simple
+    static downwards extra_simple = downwards(reduce_nots(), id::boolean_type,
+                                              "extra_simple");
+
+    // simple
+    static sequential simple = 
+        sequential(downwards(reduce_nots(), id::boolean_type),
                    iterative(sequential(upwards(eval_logical_identities()),
                                         downwards(level()),
-                                        downwards(insert_ands(),
-                                                  id::boolean_type),
-                                        subtree_to_enf(),
-                                        downwards(reduce_ands(),
-                                                  id::boolean_type),
-                                        downwards(reduce_ors(),
-                                                  id::boolean_type))),
-                   downwards(remove_unary_junctors(),id::boolean_type),
+                                        downwards(reduce_ands(), id::boolean_type),
+                                        downwards(reduce_ors(), id::boolean_type))
+                             ),
                    "simple");
 
-    static iterative complex;
+    // medium
+    static sequential pre_subtree_to_enf = 
+        sequential(upwards(eval_logical_identities()),
+                   downwards(level()),
+                   downwards(insert_ands(), id::boolean_type));
 
-    complex = 
-        iterative(sequential(simple,
-                             downwards(reduce_from_assumptions(complex)),
-                             downwards(reduce_and_assumptions(complex)),
-                             downwards(reduce_or_assumptions(complex))
-                             ),
-                  "complex");
+    static sequential post_subtree_to_enf =
+        sequential(downwards(reduce_ands(), id::boolean_type),
+                   downwards(reduce_ors(), id::boolean_type));
 
-    return complex;
+    static sequential medium =
+        sequential(downwards(reduce_nots(),id::boolean_type),
+                   
+                   iterative(sequential(pre_subtree_to_enf,
+                                        subtree_to_enf(),
+                                        post_subtree_to_enf)),
+                   downwards(remove_unary_junctors(),id::boolean_type),
+                   "medium");
+
+    // complexe
+    static iterative complexe = 
+        iterative(sequential(medium,
+                             reduce_remove_subtree_equal_tt()),
+                  "complexe");
+
+    switch(effort) {
+    case 0: return extra_simple;
+    case 1: return simple;
+    case 2: return medium;
+    case 3: return complexe;
+    default: std::cerr << "error: no such effort in logical_reduction("
+                       << effort << ")" << std::endl;
+        exit(1);
+    }
 }
 
 } //~namespace reduct

@@ -44,9 +44,10 @@ int main(int argc,char** argv) {
         if (!cin.good())
             break;
         
-        logical_reduce(tr);
+        logical_reduce(2, tr);
         
-        representation rep(logical_reduction(), tr, infer_type_tree(tr), rng);
+        representation rep(logical_reduction(2), logical_reduction(2),
+                           tr, infer_type_tree(tr), rng);
     
         /*combo_tree tmp(rep.exemplar());
           

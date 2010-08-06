@@ -29,9 +29,8 @@
 #include "exceptions.h"
 #include "oc_assert.h"
 
-//define this in case you want to count the number of evaluations
-//that is when the function call isn't yet in the cache
-#define COUNT_EVALUATION
+// define this in case you want to count the number of cache failures
+#define COUNT_CACHE_FAILURES
 
 namespace opencog {
 
@@ -209,7 +208,7 @@ struct simple_cache {
         // search for x
         map_iter it=_map.find(x);
 
-        if(it!=_map.end()) //if we've found return
+        if(it != _map.end()) //if we've found return
             return it->second;
         else if(_n > _map.size()) { // otherwise insert in _map then return
 #ifdef COUNT_CACHE_FAILURES
@@ -229,12 +228,12 @@ struct simple_cache {
         _map.clear();
     }
     
+    unsigned get_cache_failures() const { return _cache_failures; }
+
 protected:
     size_type _n;
     mutable map _map;
     F _f;
-
-    unsigned get_cache_failures() const { return _cache_failures; }
 
     mutable unsigned _cache_failures;
 };

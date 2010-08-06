@@ -81,7 +81,7 @@ protected:
     const rule* _reduction;
 };
 
-//reduce or(x_1 x_2 x_3 ...) by reducing assuming not(and(not(x_1)...))
+//reduce or(x_1 x_2 x_3 ...) by reducing to not(and(not(x_1)...))
 //using the reduce_and_assumptions
 struct reduce_or_assumptions : public crule<reduce_or_assumptions> {
     reduce_or_assumptions(const rule& r) : crule<reduce_or_assumptions>::crule("reduce_or_assumptions"), _reduction(&r) { }
@@ -144,15 +144,10 @@ protected:
         
         template<typename Out>
         void build_subtree_sets_upwards(up_it up,Out dom_out,Out cmd_out) const {
-            std::cout << "tr: " << tr << std::endl;
-
             static const type_tree boolean_type_tree = type_tree(id::boolean_type);
             
             for (up_it p=tr.parent(up);
                  p!=tr.end_upwards() && is_logical_operator(*p);++p) {
-                
-                std::cout << "*p: " << combo_tree(*p) << std::endl;
-
                 if (*p==id::logical_and) {
                     for (sib_it sib=p.begin();sib!=p.end();++sib)
                         if (sib!=up)
@@ -202,6 +197,15 @@ protected:
             }
         };
     };
+};
+
+// (suggested by Moshe) check if the truth table is the same after
+// removal of any subtree
+struct reduce_remove_subtree_equal_tt 
+    : public crule<reduce_remove_subtree_equal_tt> { 
+    reduce_remove_subtree_equal_tt()
+        : crule<reduce_remove_subtree_equal_tt>::crule("reduce_remove_subtree_equal_tt") {}
+    void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
 } //~namespace reduct

@@ -40,6 +40,8 @@ int main()
 {
     logger().setPrintErrorLevelStdout();
 
+    const int effort = 3; // effort allocated for reduction (3 is max)
+
     MT19937RandGen rng(0);
 
     combo_tree tr;
@@ -49,7 +51,7 @@ int main()
             break;
         truth_table tt1(tr, rng);
         //cout << "AR" << endl;
-        logical_reduce(tr);
+        logical_reduce(effort, tr);
         //cout << "RA" << endl;
         truth_table tt2(tr, integer_log2(tt1.size()), rng);
         cout << tr << endl;

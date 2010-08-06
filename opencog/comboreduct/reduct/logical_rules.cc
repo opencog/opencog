@@ -24,8 +24,10 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/foreach.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/comboreduct/combo/assumption.h>
 #include "logical_rules.h"
+#include "../combo/table.h"
 
 namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
@@ -629,6 +631,25 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
         }
     }
     return Keep;
+}
+
+void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
+                                                combo_tree::iterator it) const {
+    opencog::RandGen* rng = NULL; // dummy rng, it is not used anyway
+    arity_t a = arity(tr);
+    truth_table tr_tt(tr, a, *rng);
+    for(pre_it pit = it.begin(); pit != it.end();) {
+        pit = tr.insert_above(pit, id::null_vertex);
+        combo_tree amputated_tr(tr);
+        clean_reduce(amputated_tr);
+        truth_table amputated_tr_tt(amputated_tr, a, *rng);
+        if(tr_tt == amputated_tr_tt) // amputate tr
+            pit = tr.erase(pit);
+        else { // remove only the previously added null_vertex
+            pit = tr.erase(tr.flatten(pit));
+            pit++;
+        }
+    }
 }
 
 } //~namespace reduct

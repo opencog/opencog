@@ -317,7 +317,7 @@ struct complexity_based_scorer : public unary_function<eda::instance,
     }
 
 protected:
-    Scoring score;
+    const Scoring& score;
     representation& _rep;
     bool _reduce; // whether the exemplar is reduced before being
                   // evaluated, this may be advantagous if Scoring is
@@ -362,7 +362,7 @@ struct count_based_scorer : public unary_function<eda::instance,
     }
     
 protected:
-    Scoring score;
+    const Scoring& score;
     int _base_count;
     representation& _rep;
     bool _reduce; // whether the exemplar is reduced before being

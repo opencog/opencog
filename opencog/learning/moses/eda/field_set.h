@@ -253,6 +253,9 @@ struct field_set {
     size_t packed_width() const {
         return _fields.empty() ? 0 : _fields.back().major_offset + 1;
     }
+    bool empty() const {
+        return _fields.empty();
+    }
     size_t raw_size() const {
         return _fields.size();
     }

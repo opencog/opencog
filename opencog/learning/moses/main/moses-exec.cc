@@ -133,7 +133,6 @@ combo_tree ann_exemplar(arity_t arity) {
  * determine the alphabet size given the type_tree of the problem and
  * the of operator that are ignored
  */
-
 int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
     arity_t arity = type_tree_arity(tt);
     type_node output_type = *type_tree_output_type_tree(tt).begin();
@@ -175,6 +174,8 @@ int main(int argc,char** argv) {
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
     vector<string> exemplars_str;
+    int reduct_candidate_effort;
+    int reduct_knob_building_effort;
     bool reduce_all;
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
@@ -239,7 +240,13 @@ int main(int argc,char** argv) {
         ("exemplar,e", value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times.")
         ("reduce-all,d", value<bool>(&reduce_all)->default_value(true),
-         "reduce all candidates before being evaluated, can be valuable if the cache is enabled.")
+         "reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not evaluate multiple time equivalent candidates.")
+        ("reduct-candidate-effort,E",
+         value<int>(&reduct_candidate_effort)->default_value(2),
+         "effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.")
+        ("reduct-knob-building-effort,B",
+         value<int>(&reduct_knob_building_effort)->default_value(2),
+         "effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.")
         ("count-based-scorer,u", value<bool>(&count_base)->default_value(false),
          "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.")
         ("cache-size,s", value<unsigned long>(&cache_size)->default_value(1000000),
@@ -316,7 +323,9 @@ int main(int argc,char** argv) {
 
             occam_truth_table_bscore bscore(booltable, inputtable,
                                             prob, as, rng);
-            metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+            metapop_moses_results(rng, exemplars, tt,
+                                  logical_reduction(reduct_candidate_effort),
+                                  logical_reduction(reduct_knob_building_effort),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
                                   max_evals, max_gens, ignore_ops,
@@ -344,6 +353,7 @@ int main(int argc,char** argv) {
             occam_contin_bscore bscore(contintable, inputtable,
                                        variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
@@ -373,7 +383,9 @@ int main(int argc,char** argv) {
             if(output_type == id::boolean_type) {
                 // @todo: Occam's razor and nsamples is not taken into account
                 logical_bscore bscore(tr, arity, rng);
-                metapop_moses_results(rng, exemplars, tt, logical_reduction(),
+                metapop_moses_results(rng, exemplars, tt,
+                                      logical_reduction(reduct_candidate_effort),
+                                      logical_reduction(reduct_knob_building_effort),
                                       reduce_all, bscore, cache_size,
                                       count_base, opt_algo,
                                       max_evals, max_gens, ignore_ops,
@@ -394,6 +406,7 @@ int main(int argc,char** argv) {
                 occam_contin_bscore bscore(table_outputs, inputtable,
                                            variance, as, rng);
                 metapop_moses_results(rng, exemplars, tt,
+                                      contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
                                       reduce_all, bscore, cache_size,
                                       count_base, opt_algo,
@@ -421,7 +434,8 @@ int main(int argc,char** argv) {
         type_tree tt = declare_function(id::boolean_type, arity);
         logical_bscore bscore(func, arity, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              logical_reduction(),
+                              logical_reduction(reduct_candidate_effort),
+                              logical_reduction(reduct_knob_building_effort),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
                               max_evals, max_gens, ignore_ops,
@@ -441,7 +455,8 @@ int main(int argc,char** argv) {
         type_tree tt = declare_function(id::boolean_type, arity);
         logical_bscore bscore(func, arity, rng);
         metapop_moses_results(rng, exemplars, tt,
-                              logical_reduction(),
+                              logical_reduction(reduct_candidate_effort),
+                              logical_reduction(reduct_knob_building_effort),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
                               max_evals, max_gens, ignore_ops,
@@ -466,6 +481,7 @@ int main(int argc,char** argv) {
         occam_contin_bscore bscore(simple_symbolic_regression(problem_size),
                                    rands, variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
+                              contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
@@ -501,6 +517,7 @@ int main(int argc,char** argv) {
         occam_contin_bscore bscore(contintable, inputtable,
                                    variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
+                              ann_reduction(),
                               ann_reduction(),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
@@ -539,6 +556,7 @@ int main(int argc,char** argv) {
             occam_contin_bscore bscore(table_outputs, inputtable,
                                        variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,

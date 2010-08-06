@@ -83,7 +83,8 @@ template<typename Score, typename BScore, typename Optimization>
 void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
-                           const reduct::rule& si,
+                           const reduct::rule& si_ca,
+                           const reduct::rule& si_kb,
                            bool reduce_all,
                            const Score& sc,
                            const BScore& bsc,
@@ -96,7 +97,8 @@ void metapop_moses_results(opencog::RandGen& rng,
                            bool output_complexity,
                            bool output_bscore) {
     metapopulation<Score, BScore, Optimization> 
-        metapop(rng, bases, tt, si, reduce_all, sc, bsc, count_base, opt);
+        metapop(rng, bases, tt, si_ca, si_kb, reduce_all,
+                sc, bsc, count_base, opt);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
     metapop.print_best(result_count, output_complexity, output_bscore);
 }
@@ -108,7 +110,8 @@ template<typename Score, typename BScore>
 void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
-                           const reduct::rule& si,
+                           const reduct::rule& si_ca,
+                           const reduct::rule& si_kb,
                            bool reduce_all,
                            const Score& sc,
                            const BScore& bsc,
@@ -121,19 +124,19 @@ void metapop_moses_results(opencog::RandGen& rng,
                            bool output_complexity,
                            bool output_bscore) {
     if(opt_algo == un) { // univariate
-        metapop_moses_results(rng, bases, tt, si, reduce_all, 
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all, 
                               sc, bsc, count_base,
                               univariate_optimization(rng),
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     } else if(opt_algo == sa) { // simulation annealing
-        metapop_moses_results(rng, bases, tt, si, reduce_all, 
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all, 
                               sc, bsc, count_base,
                               simulated_annealing(rng),
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     } else if(opt_algo == hc) { // hillclimbing
-        metapop_moses_results(rng, bases, tt, si, reduce_all,
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all,
                               sc, bsc, count_base,
                               iterative_hillclimbing(rng),
                               max_evals, max_gens, ignore_ops,
@@ -151,7 +154,8 @@ template<typename BScore>
 void metapop_moses_results(opencog::RandGen& rng,
                            const std::vector<combo_tree>& bases,
                            const combo::type_tree& tt,
-                           const reduct::rule& si,
+                           const reduct::rule& si_ca,
+                           const reduct::rule& si_kb,
                            bool reduce_all,
                            const BScore& bsc,
                            unsigned long cache_size,
@@ -174,14 +178,18 @@ void metapop_moses_results(opencog::RandGen& rng,
         BScoreCache bscore_cache(cache_size, bsc);
         Score score(bscore_cache);
         ScoreCache score_cache(cache_size, score);
-        metapop_moses_results(rng, bases, tt, si,
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               reduce_all, score_cache, bscore_cache,
                               count_base, opt_algo,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
+        // log the number of cache failures
+        logger().info("Number of cache failures for score: %u and bscore: %u",
+                      score_cache.get_cache_failures(),
+                      bscore_cache.get_cache_failures());
     } else {
         bscore_based_score<BScore> score(bsc);
-        metapop_moses_results(rng, bases, tt, si,
+        metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               reduce_all, score, bsc,
                               count_base, opt_algo,
                               max_evals, max_gens, ignore_ops,

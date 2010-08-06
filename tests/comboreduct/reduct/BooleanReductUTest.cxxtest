@@ -27,7 +27,7 @@ class BooleanReductUTest : public CxxTest::TestSuite {
         
         truth_table tt1(tr, rng);
         size_before=tr.size();
-        logical_reduce(tr);
+        logical_reduce(3, tr);
         size_after=tr.size();
         truth_table tt2(tr,integer_log2(tt1.size()),rng);
         
@@ -48,17 +48,11 @@ public:
     void test_simplify4() {
         test_simplify_tree_str("or(and(not(#1) #3 or(#3 not(#1)) or(not(#1) and(#2 #1) and(#3 #2))) and(#3 #1) and(not(#3) or(#3 #1) not(or(#3 not(#1))) not(or(#2 #1))))");
     }
-    void DISABLEtest_simplify5() {
-        test_simplify_tree_str("and(or(and(or(and(or(not(#1) and(#3)) not(not(#3) and(#2 not(#1)))) and(#3) #1) or(and(not(#2) or(#3)) not(#1)) or(and(#2) not(#3))) and(or(and(#1) #2) or(#3)) and(or(and(#1) #3) or(#2))))");
+    void test_simplify5() {
+        test_simplify_tree_str("or(and(or(not(#1) not(#2)) #3) and(or(not(#1) #3) not(#2)))");
     }
-
-// and(or(and(or(and(or(not(#1 null_vertex(#2) null_ve
-// rtex(#3) null_vertex(and(#2 #1)) null_vertex(and(#3 not(#2))) null_vertex(and(#3 #1))) and(#3 null_verte
-// x(or(#2 not(#1))) null_vertex(or(#2 #1)))) not(#2 null_vertex(#1) null_vertex(#3) null_vertex(and(#2 #1)
-// ) null_vertex(and(#3 #2)) null_vertex(and(#2 not(#1)))) or(null_vertex(and(#3 not(#1))))) and(#3 null_ve
-// rtex(#1) null_vertex(#2)) null_vertex(#1) null_vertex(and(#2 #1))) or(and(not(#2) or(#3)) not(#1)) or(an
-// d(#2) not(#3)) null_vertex(or(#2 #1))) and(or(and(#1) #2) or(#3)) and(or(and(#1) #3) or(#2)) null_vertex
-// (#1) null_vertex(and(#3 not(#2))) null_vertex(and(#3 not(#1))) null_vertex(and(#3 #2))) null_vertex(#1) 
-// null_vertex(or(#3 #2)))
+    void test_simplify6() {
+        test_simplify_tree_str("and(or(and(or(not(#1) #3) not(#2)) and(not(#1) #3)) or(not(#2) #3))");
+    }
 
 };

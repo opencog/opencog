@@ -102,7 +102,7 @@ struct metapopulation : public set < bscored_combo_tree,
         metapop_candidates candidates;
         foreach(const combo_tree& base, exemplars) {
             combo_tree si_base(base);
-            (*simplify)(si_base);
+            (*simplify_candidate)(si_base);
             composite_score base_sc = make_pair(score(si_base),
                                                 complexity(si_base));
             bscored_combo_tree base_bsc = 
@@ -134,18 +134,22 @@ struct metapopulation : public set < bscored_combo_tree,
     metapopulation(opencog::RandGen& _rng,
                    const std::vector<combo_tree>& bases,
                    const combo::type_tree& tt,
-                   const reduct::rule& si, bool ra,
+                   const reduct::rule& si_ca,
+                   const reduct::rule& si_kb, bool ra,
                    const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
-        rng(_rng), type(tt), simplify(&si), reduce_all(ra), score(sc),
+        rng(_rng), type(tt), simplify_candidate(&si_ca),
+        simplify_knob_building(&si_kb), reduce_all(ra), score(sc),
         bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
     }
 
-    // like above but using a single base
+    // like above but using a single base, and a single reduction rule
+    // this constructor is used for back compatibility and should be
+    // eventually removed
     metapopulation(opencog::RandGen& _rng,
                    const combo_tree& base,
                    const combo::type_tree& tt,
@@ -153,7 +157,8 @@ struct metapopulation : public set < bscored_combo_tree,
                    const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
                    const parameters& pa = parameters()) :
-        rng(_rng), type(tt), simplify(&si), reduce_all(ra), score(sc),
+        rng(_rng), type(tt), simplify_candidate(&si),
+        simplify_knob_building(&si), reduce_all(ra), score(sc),
         bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
@@ -293,15 +298,13 @@ struct metapopulation : public set < bscored_combo_tree,
             
         _n_evals += optimize_deme(max_evals);
 
+        close_deme();
+
         // Logger
         stringstream ss;
         ss << "Total number of evaluations so far: " << _n_evals;
         logger().info(ss.str());
-        // ~Logger
-
-        close_deme();
-
-        // Logger, best candidates (with the maximum score) so far
+        // best candidates (with the maximum score) so far
         if(best_candidates().empty())
             logger().info("Only worst scored candidates");
         else {
@@ -342,30 +345,49 @@ struct metapopulation : public set < bscored_combo_tree,
         if (empty())
             return false;
 
-        _exemplar = select_exemplar();
-        if(_exemplar == end()) {
-            logger().info("There is no more exemplar in the meta population that has not been visited");
-            return false;
-        }
+        do { // attempt to create a non-empty representation
+            _exemplar = select_exemplar();
+            if(_exemplar == end()) {
+                // Logger
+                logger().info("There is no more exemplar in the"
+                              " meta population that has not been visited");
+                // ~Logger
+                return false;
+            }
 
-        combo_tree tr(_exemplar->first);
+            combo_tree tr(_exemplar->first);
 
-        // Logger
-        { 
-            stringstream ss; 
-            ss << "Expand with exemplar: " << tr; 
-            logger().debug(ss.str()); 
-        }
-        { 
-            stringstream ss; 
-            ss << "Scored: " << score(tr); 
-            logger().debug(ss.str()); 
-        }
-        // ~Logger
+            // Logger
+            { 
+                stringstream ss; 
+                ss << "Attempt to expand with exemplar: " << tr; 
+                logger().debug(ss.str()); 
+            }
+            { 
+                stringstream ss; 
+                ss << "Scored: " << score(tr); 
+                logger().debug(ss.str()); 
+            }
+            // ~Logger
 
-        //do representation-building and create a deme (initially empty)
-        _rep = new representation(*simplify, _exemplar->first, type,
-                                  rng, ignore_ops, perceptions, actions);
+            //do representation-building and create a deme (initially empty)
+            _rep = new representation(*simplify_candidate,
+                                      *simplify_knob_building,
+                                      _exemplar->first, type,
+                                      rng, ignore_ops, perceptions, actions);
+
+            // if the representation is empty try another exemplar
+            if(_rep->fields().empty()) {
+                delete(_rep);
+                _rep = NULL;
+                _visited_exemplars.insert(_exemplar->first);
+                // Logger
+                logger().debug("The representation is empty, perhaps the reduct"
+                               " effort for knob building is too high");
+                // ~Logger
+            }
+        } while(!_rep);
+
         // create an empty deme
         _deme = new eda::instance_set<composite_score>(_rep->fields());
 
@@ -472,7 +494,7 @@ struct metapopulation : public set < bscored_combo_tree,
         // Logger
         {
             logger().debug("Close deme");
-            logger().debug("Number of evaluations during this optimization: %d",
+            logger().debug("Actual number of evaluations during that expansion: %d",
                            eval_during_this_deme);
         }
         // ~Logger
@@ -603,10 +625,11 @@ struct metapopulation : public set < bscored_combo_tree,
 
     opencog::RandGen& rng;
     combo::type_tree type;
-    const reduct::rule* simplify;
+    const reduct::rule* simplify_candidate; // to simplify candidates
+    const reduct::rule* simplify_knob_building; // during knob building
     bool reduce_all; // whether all candidates are reduced before evaluation
-    Scoring score;
-    BScoring bscore; // behavioral score
+    const Scoring& score;
+    const BScoring& bscore; // behavioral score
     bool count_base; // if true then the scorer is count based,
                      // otherwise it is complexity based
     Optimization optimize;
@@ -627,7 +650,7 @@ protected:
 
     representation* _rep; // representation of the current deme
     eda::instance_set<composite_score>* _deme; // current deme
-    iterator _exemplar; // exemplar of the current deme
+    const_iterator _exemplar; // exemplar of the current deme
 };
 
 

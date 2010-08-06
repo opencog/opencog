@@ -52,7 +52,8 @@ struct representation : public knob_mapper, boost::noncopyable {
 
 
     // Optional arguments are used only for actions/Petbrain
-    representation(const reduct::rule& simplify,
+    representation(const reduct::rule& simplify_candidate,
+                   const reduct::rule& simplify_knob_building,
                    const combo_tree& exemplar_,
                    const combo::type_tree& t,
                    opencog::RandGen& rng,
@@ -73,9 +74,13 @@ struct representation : public knob_mapper, boost::noncopyable {
      */
     combo_tree get_clean_exemplar(bool reduce);
 
-    // return _simplify
-    const reduct::rule* get_simplify() const {
-        return _simplify;
+    // return _simplify_candidate
+    const reduct::rule* get_simplify_candidate() const {
+        return _simplify_candidate;
+    }
+    // return _simplify_knob_building
+    const reduct::rule* get_simplify_knob_building() const {
+        return _simplify_knob_building;
     }
 
     const field_set& fields() const {
@@ -137,7 +142,10 @@ protected:
                              //instance of the exemplar is null
     field_set _fields;
     opencog::RandGen& rng;
-    const reduct::rule* _simplify;
+    const reduct::rule* _simplify_candidate; // used to simplify candidates
+    const reduct::rule* _simplify_knob_building; // used to simplify
+                                                 // during knob
+                                                 // building
 };
 
 } //~namespace moses

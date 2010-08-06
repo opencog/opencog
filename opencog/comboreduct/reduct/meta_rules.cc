@@ -27,54 +27,58 @@
 #include <opencog/comboreduct/combo/assumption.h>
 
 // uncomment if you want to have a trace of the rules
-#define META_RULE_DEBUG
+// #define META_RULE_DEBUG
 
 namespace reduct {
 
 #ifdef META_RULE_DEBUG
+
 static int tab = 0;
 void printTab() { dorepeat(tab) { std::cout << "   "; } }
 
 #define INC_TAB tab++;
 #define DEC_TAB tab--;
-
 #define PRINT_DEBUG_WHEN printTab(); \
     std::cout << this->get_name() << " " << (cond?"true ":"false ") \
               << r->get_name() << " " << combo_tree(it) << std::endl;
-
 #define PRINT_DEBUG_STANDARD printTab(); \
     std::cout << this->get_name() << " " << r->get_name() \
-              << " " << combo_tree(it) << std::endl; \
-    std::cout << "TR: " << tr << std::endl;
-
+              << " " << combo_tree(it) << std::endl;
 #define PRINT_DEBUG_STANDARD_REF printTab(); \
     std::cout << this->get_name() << " " << r.get_name() \
-              << " " << combo_tree(it) << std::endl; \
-    std::cout << "TR: " << tr << std::endl;
+              << " " << combo_tree(it) << std::endl;
 
-#endif
+#else // META_RULE_DEBUG
+
+#define INC_TAB ;
+#define DEC_TAB ;
+#define PRINT_DEBUG_WHEN ;
+#define PRINT_DEBUG_STANDARD ;
+#define PRINT_DEBUG_STANDARD_REF ;
+
+#endif // META_RULE_DEBUG
 
 void when::operator()(combo_tree& tr, combo_tree::iterator it) const {
-    INC_TAB;
-    PRINT_DEBUG_WHEN;
+    INC_TAB
+    PRINT_DEBUG_WHEN
     if(cond)
         (*r)(tr,it);
-    DEC_TAB;
+    DEC_TAB
 }
 
 void ignore_size_increase::operator()(combo_tree& tr, combo_tree::iterator it) const {
-    INC_TAB;
-    PRINT_DEBUG_STANDARD;
+    INC_TAB
+    PRINT_DEBUG_STANDARD
     combo_tree tmp(it);
     (*r)(tr,it);
     if(tmp.size() < combo_tree(it).size()) { // ignore the size increase
         replace_without_changing_it(tr, it, tmp.begin());
     }
-    DEC_TAB;
+    DEC_TAB
 }
 
 void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    INC_TAB;
+    INC_TAB
     combo_tree::iterator end=it;  
     end.skip_children();
     ++end;
@@ -84,12 +88,12 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
     
     if (input==unknown_type_tree)
         for(;it!=end;++it) {
-            PRINT_DEBUG_STANDARD;
+            PRINT_DEBUG_STANDARD
             (*r)(tr,it);
         }
     else
         for(;it!=end;++it) {
-            PRINT_DEBUG_STANDARD;
+            PRINT_DEBUG_STANDARD
             if(//combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
                //&& 
                //@todo: checking that it inherits would be better
@@ -97,52 +101,52 @@ void downwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
                combo::get_output_type_tree(*it)==type_tree(output))
                 (*r)(tr,it);
         }
-    DEC_TAB;
+    DEC_TAB
 }
 
 //apply rule from the leaves of the subtree rooted by it to it
 void upwards::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    INC_TAB;
+    INC_TAB
     combo_tree::post_order_iterator at=it,end=it;
     ++end;
     at.descend_all();
     
     for (;at!=end;++at) {
-        PRINT_DEBUG_STANDARD;
+        PRINT_DEBUG_STANDARD
         (*r)(tr,at);
     }
-    DEC_TAB;
+    DEC_TAB
 }
     
 void sequential::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    INC_TAB;
+    INC_TAB
     foreach (const rule& r,rules) {
-        PRINT_DEBUG_STANDARD_REF;
+        PRINT_DEBUG_STANDARD_REF
         r(tr,it);
     }
-    DEC_TAB;
+    DEC_TAB
 }
 
 void iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    INC_TAB;
+    INC_TAB
     combo_tree tmp;
     do {
         tmp=combo_tree(it);
-        PRINT_DEBUG_STANDARD;
+        PRINT_DEBUG_STANDARD
         (*r)(tr,it);
     } while (!tr.equal_subtree(it,tmp.begin()));
-    DEC_TAB;
+    DEC_TAB
 }
     
 void assum_iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    INC_TAB;
+    INC_TAB
     combo_tree tmp;
     do {
         tmp = tr;
-        PRINT_DEBUG_STANDARD;
+        PRINT_DEBUG_STANDARD
         (*r)(tr,it);
     } while(tr!=tmp || !equal_assumptions(tmp, tr));
-    DEC_TAB;
+    DEC_TAB
 }
 
 } //~namespace reduct

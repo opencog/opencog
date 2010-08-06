@@ -59,7 +59,7 @@ struct crule : public rule {
 };
 
 const rule& ann_reduction();
-const rule& logical_reduction();
+const rule& logical_reduction(int effort);
 
 // ignore_ops is the set of operator to ignore
 const rule& contin_reduction(const vertex_set& ignore_ops, opencog::RandGen& rng);
@@ -72,10 +72,12 @@ const rule& perception_reduction();
 const rule& clean_reduction();
 //const rule& clean_and_full_reduction();
 
-inline void logical_reduce(combo_tree& tr,combo_tree::iterator it) {
-    logical_reduction()(tr,it);
+inline void logical_reduce(int effort, combo_tree& tr,combo_tree::iterator it) {
+    logical_reduction(effort)(tr,it);
 }
-inline void logical_reduce(combo_tree& tr) { logical_reduction()(tr); }
+inline void logical_reduce(int effort, combo_tree& tr) {
+    logical_reduction(effort)(tr);
+}
 
 inline void contin_reduce(combo_tree& tr,combo_tree::iterator it, const vertex_set& ignore_ops, opencog::RandGen& rng) {
     contin_reduction(ignore_ops, rng)(tr,it);
