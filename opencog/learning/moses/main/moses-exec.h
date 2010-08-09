@@ -90,6 +90,7 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const BScore& bsc,
                            bool count_base,
                            const Optimization& opt,
+                           const metapop_parameters& meta_param,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
@@ -98,7 +99,7 @@ void metapop_moses_results(opencog::RandGen& rng,
                            bool output_bscore) {
     metapopulation<Score, BScore, Optimization> 
         metapop(rng, bases, tt, si_ca, si_kb, reduce_all,
-                sc, bsc, count_base, opt);
+                sc, bsc, count_base, opt, meta_param);
     moses::moses(metapop, max_evals, max_gens, 0, ignore_ops);
     metapop.print_best(result_count, output_complexity, output_bscore);
 }
@@ -117,6 +118,8 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const BScore& bsc,
                            bool count_base,
                            const string& opt_algo,
+                           const eda_parameters& eda_param,
+                           const metapop_parameters& meta_param,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
@@ -126,20 +129,20 @@ void metapop_moses_results(opencog::RandGen& rng,
     if(opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all, 
                               sc, bsc, count_base,
-                              univariate_optimization(rng),
-                              max_evals, max_gens, ignore_ops,
+                              univariate_optimization(rng, eda_param),
+                              meta_param, max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     } else if(opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all, 
                               sc, bsc, count_base,
-                              simulated_annealing(rng),
-                              max_evals, max_gens, ignore_ops,
+                              simulated_annealing(rng, eda_param),
+                              meta_param, max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     } else if(opt_algo == hc) { // hillclimbing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, reduce_all,
                               sc, bsc, count_base,
-                              iterative_hillclimbing(rng),
-                              max_evals, max_gens, ignore_ops,
+                              iterative_hillclimbing(rng, eda_param),
+                              meta_param, max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo << ". Supported algorithms are un (for univariate), sa (for simulation annealing) and hc (for hillclimbing)" << std::endl;
@@ -161,6 +164,8 @@ void metapop_moses_results(opencog::RandGen& rng,
                            unsigned long cache_size,
                            bool count_base,
                            const string& opt_algo,
+                           const eda_parameters& eda_param,
+                           const metapop_parameters& meta_param,
                            int max_evals,
                            int max_gens,
                            const vertex_set& ignore_ops,
@@ -180,7 +185,7 @@ void metapop_moses_results(opencog::RandGen& rng,
         ScoreCache score_cache(cache_size, score);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               reduce_all, score_cache, bscore_cache,
-                              count_base, opt_algo,
+                              count_base, opt_algo, eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
         // log the number of cache failures
@@ -191,7 +196,7 @@ void metapop_moses_results(opencog::RandGen& rng,
         bscore_based_score<BScore> score(bsc);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               reduce_all, score, bsc,
-                              count_base, opt_algo,
+                              count_base, opt_algo, eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity, output_bscore);
     }

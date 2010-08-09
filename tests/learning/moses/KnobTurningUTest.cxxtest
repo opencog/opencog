@@ -44,10 +44,10 @@ public:
 
   void check(combo_tree tr,string str) {
     clean_reduce(tr);
-    logical_reduce(tr);
+    logical_reduce(2, tr);
 
     combo_tree xx=totree(str);
-    logical_reduce(xx);
+    logical_reduce(2, xx);
 
     TS_ASSERT(tr==xx);
   }
@@ -69,7 +69,7 @@ public:
       res22="and(#1 not(#2) not(#3))";
     
     combo_tree tr=totree(tree_str);
-    reduct::logical_reduce(tr);
+    reduct::logical_reduce(2, tr);
 
     combo_tree t1(argument(1)),t2(argument(2)),t3(argument(3));
     logical_subtree_knob 

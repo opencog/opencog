@@ -49,6 +49,25 @@ namespace moses
 typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
+
+/**
+ * the parameter to decide how to select the deme from the population
+ */
+struct metapop_parameters {
+    metapop_parameters(bool _revisit = false) :
+        // when doing selection of examplars according to 2^-n,
+        // where n is complexity, only examplars with
+        // p>=2^-selection_max_range will be considered
+        selection_max_range(11),
+        
+        // when true then visited exemplars can be revisited
+        revisit(_revisit)
+    { }
+    
+    double selection_max_range;
+    bool revisit;
+};
+
     
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -72,30 +91,6 @@ struct metapopulation : public set < bscored_combo_tree,
 
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
-
-    /**
-     * the parameter to decide how to select the deme from the population
-     */
-    struct parameters {
-        parameters() :
-            local_cache(false),      // are instance scores cached at the deme level?
-            global_cache(false),     // at the global (program) level across demes?
-            simplify_all(false),     // are all programs generated simplified?
-            
-            selection_max_range(11), // when doing selection of examplars according to
-            //2^-n, where n is complexity, only examplars with
-            //p>=2^-selection_max_range will be considered
-
-           scoring_epsilon(0.01)    // scores are considered equal when within epsilon
-        { }
-
-        bool local_cache;
-        bool global_cache;
-        bool simplify_all;
-
-        double selection_max_range;
-        double scoring_epsilon;
-    };
 
     // init the metapopulation with the following set of exemplars
     void init(const std::vector<combo_tree>& exemplars) {
@@ -138,7 +133,7 @@ struct metapopulation : public set < bscored_combo_tree,
                    const reduct::rule& si_kb, bool ra,
                    const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
-                   const parameters& pa = parameters()) :
+                   const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si_ca),
         simplify_knob_building(&si_kb), reduce_all(ra), score(sc),
         bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
@@ -156,7 +151,7 @@ struct metapopulation : public set < bscored_combo_tree,
                    const reduct::rule& si, bool ra,
                    const Scoring& sc, const BScoring& bsc, bool countbs,
                    const Optimization& opt = Optimization(),
-                   const parameters& pa = parameters()) :
+                   const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si),
         simplify_knob_building(&si), reduce_all(ra), score(sc),
         bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
@@ -352,7 +347,20 @@ struct metapopulation : public set < bscored_combo_tree,
                 logger().info("There is no more exemplar in the"
                               " meta population that has not been visited");
                 // ~Logger
-                return false;
+                if(params.revisit) {
+                    _visited_exemplars.clear();
+                    // Logger
+                    logger().info("All visited exemplar has been untagged"
+                                  " and can be visited again");
+                    // ~Logger
+                    continue;
+                } else {
+                    // Logger
+                    logger().info("To revisit already visited exemplar you may"
+                                " use option --revisit or -R");
+                    // ~Logger
+                    return false;
+                }
             }
 
             combo_tree tr(_exemplar->first);
@@ -633,7 +641,7 @@ struct metapopulation : public set < bscored_combo_tree,
     bool count_base; // if true then the scorer is count based,
                      // otherwise it is complexity based
     Optimization optimize;
-    parameters params;
+    metapop_parameters params;
 
 protected:
     int _n_evals;
@@ -647,7 +655,7 @@ protected:
 
     // contains the exemplars of demes that have been searched so far
     combo_tree_hash_set _visited_exemplars;
-
+    
     representation* _rep; // representation of the current deme
     eda::instance_set<composite_score>* _deme; // current deme
     const_iterator _exemplar; // exemplar of the current deme

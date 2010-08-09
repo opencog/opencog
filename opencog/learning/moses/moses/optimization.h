@@ -63,7 +63,7 @@ inline double information_theoretic_bits(const eda::field_set& fs)
 }
 
 struct eda_parameters {
-    eda_parameters() :
+    eda_parameters(double _pop_size_ratio = 200) :
         // optimization is teriminated after term_total*n generations,
         // or term_improv*sqrt(n/w) consecutive generations with no
         // improvement (w=windowsize)
@@ -71,8 +71,9 @@ struct eda_parameters {
         term_improv(1),
 
 //was 20...
-        pop_size_ratio(200),     //populations are sized at N = popsize_ratio*n^1.05
-        //where n is problem size in info-t bits
+        pop_size_ratio(_pop_size_ratio), //populations are sized at
+                                         //N = popsize_ratio*n^1.05
+                                         //where n is problem size in info-t bits
         
         window_size_pop(0.05), //window size for RTR is
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
@@ -501,13 +502,14 @@ struct simulated_annealing {
      
     typedef score_t energy_t;
  
-    simulated_annealing(opencog::RandGen& _rng, double _init_temp = 30,
+    simulated_annealing(opencog::RandGen& _rng,
+                        const eda_parameters& p = eda_parameters(),
+                        double _init_temp = 30,
                         double _min_temp = 0, double _temp_step_size = 0.5,
                         double _accept_prob_temp_intensity = 0.5,
                         double _dist_temp_intensity = 0.5,
                         double _fraction_of_remaining = 10.0,
-                        double _min_energy = 0.0,
-                        const eda_parameters& p = eda_parameters())
+                        double _min_energy = 0.0)
         : rng(_rng), 
           init_temp(_init_temp),
           min_temp(_min_temp),

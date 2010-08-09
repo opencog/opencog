@@ -180,7 +180,10 @@ int main(int argc,char** argv) {
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
     unsigned long cache_size;
-    
+    bool revisit;
+    // eda_param
+    double pop_size_ratio;
+
     // Declare the supported options.
     options_description desc("Allowed options");
     desc.add_options()
@@ -251,11 +254,17 @@ int main(int argc,char** argv) {
          "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.")
         ("cache-size,s", value<unsigned long>(&cache_size)->default_value(1000000),
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache.")
+        ("revisit,R", "revisit visited examplars when all have been visited")
+        ("pop-size-ratio,P", value<double>(&pop_size_ratio)->default_value(200),
+         "the higher the more effort is spent on a deme")
         ;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);    
+
+    // set flags
+    revisit = vm.count("revisit") > 0;
     
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
@@ -294,6 +303,12 @@ int main(int argc,char** argv) {
         exemplars.push_back(exemplar);
     }
 
+    // set metapopulation parameters
+    metapop_parameters meta_param(revisit);
+
+    // set eda_parameters
+    eda_parameters eda_param(pop_size_ratio);
+
     if(problem == it) { // regression based on input table
         
         // if no exemplar has been provided in option try to infer it
@@ -328,6 +343,7 @@ int main(int argc,char** argv) {
                                   logical_reduction(reduct_knob_building_effort),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
+                                  eda_param, meta_param,
                                   max_evals, max_gens, ignore_ops,
                                   result_count, output_complexity, output_bscore);
         }
@@ -357,6 +373,7 @@ int main(int argc,char** argv) {
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
+                                  eda_param, meta_param,
                                   max_evals, max_gens, ignore_ops,
                                   result_count, output_complexity,
                                   output_bscore);
@@ -388,6 +405,7 @@ int main(int argc,char** argv) {
                                       logical_reduction(reduct_knob_building_effort),
                                       reduce_all, bscore, cache_size,
                                       count_base, opt_algo,
+                                      eda_param, meta_param,
                                       max_evals, max_gens, ignore_ops,
                                       result_count, output_complexity,
                                       output_bscore);                
@@ -410,6 +428,7 @@ int main(int argc,char** argv) {
                                       contin_reduction(ignore_ops, rng),
                                       reduce_all, bscore, cache_size,
                                       count_base, opt_algo,
+                                      eda_param, meta_param,
                                       max_evals, max_gens, ignore_ops,
                                       result_count, output_complexity,
                                       output_bscore);
@@ -438,6 +457,7 @@ int main(int argc,char** argv) {
                               logical_reduction(reduct_knob_building_effort),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
+                              eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);        
@@ -459,6 +479,7 @@ int main(int argc,char** argv) {
                               logical_reduction(reduct_knob_building_effort),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
+                              eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);        
@@ -485,6 +506,7 @@ int main(int argc,char** argv) {
                               contin_reduction(ignore_ops, rng),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
+                              eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);
@@ -521,6 +543,7 @@ int main(int argc,char** argv) {
                               ann_reduction(),
                               reduce_all, bscore, cache_size,
                               count_base, opt_algo,
+                              eda_param, meta_param,
                               max_evals, max_gens, ignore_ops,
                               result_count, output_complexity,
                               output_bscore);
@@ -560,6 +583,7 @@ int main(int argc,char** argv) {
                                   contin_reduction(ignore_ops, rng),
                                   reduce_all, bscore, cache_size,
                                   count_base, opt_algo,
+                                  eda_param, meta_param,
                                   max_evals, max_gens, ignore_ops,
                                   result_count, output_complexity,
                                   output_bscore);
