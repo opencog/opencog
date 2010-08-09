@@ -2160,7 +2160,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                                      boost::algorithm::is_any_of(":") );
             
             OC_ASSERT(elementNameParts.size( ) == 2,
-                      "The name of a Frame element must be #FrameName:FrameElementName, but '%' was given",
+                      "The name of a Frame element must be #FrameName:FrameElementName, but '%s' was given",
                       atomSpace.getName( frameElementsHandles[i] ).c_str( ) );
             
             // only add a new element if it wasn't yet defined (overloading)

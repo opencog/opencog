@@ -100,7 +100,7 @@ HandleSeq LanguageComprehension::getActivePredicateArguments( const std::string&
     HandleSeq evalLinks;
     as.getHandleSet( back_inserter(evalLinks),
                      commands, &types[0], NULL, 2, EVALUATION_LINK, false );
-    logger().debug( "LanguageComprehension::%s - # of detected predicates '%s': %d", 
+    logger().debug( "LanguageComprehension::%s - # of EvalLinks for '%s': %d",
                     __FUNCTION__, predicateName.c_str( ), evalLinks.size( ) );
 
     HandleSeq elements;
