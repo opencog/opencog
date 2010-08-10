@@ -329,7 +329,7 @@ int main(int argc,char** argv) {
          value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.")
         (string(log_file_dep_opt_opt_name).append(",").append(log_file_dep_opt_opt_ab).c_str(),
-         "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log")
+         "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than 255 characters.")
         (string(log_file_opt_name).append(",").append(log_file_opt_ab).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
          string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt_name).append(".").c_str())
