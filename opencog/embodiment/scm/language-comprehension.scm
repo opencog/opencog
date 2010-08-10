@@ -1499,9 +1499,53 @@
     ) ; let
   )
 
+; Prototype. Converts all frame instances from the messy format into the elegant format. Seems to be essential for
+; PLN to be able to handle it with reasonable efficiency.
+(define convert-frames
+    (VariableScopeLink
+     (ListLink
+      (TypedVariableLink
+       (VariableNode "$frameInstance")
+       (VariableTypeNode "PredicateNode")
+      )
+      (VariableNode "$frameElementInstance")
+;      (VariableNode "$frame")
+      (VariableNode "$frameElement")
+      (VariableNode "$value")
+     )
+     (ImplicationLink
+      (AndLink
+;            (InheritanceLink
+;	        (VariableNode "$frameInstance")
+;	        (VariableNode "$frame")
+;            )
+	    (FrameElementLink
+             (VariableNode "$frameInstance")
+             (VariableNode "$frameElementInstance")
+             )
+            (InheritanceLink
+             (VariableNode "$frameElementInstance")
+             (VariableNode "$frameElement")
+             )
+            (EvaluationLink
+             (VariableNode "$frameElementInstance")
+             (VariableNode "$value")
+            )
+      )
+      (EvaluationLink (PredicateNode "frame")
+        (ListLink
+            (VariableNode "$frameInstance")
+            (VariableNode "$frameElement")
+            (VariableNode "$value")
+        )
+      )
+     ) ; Implication
+    ) ; VarScope
+)
 
-; Just a prototype for now.
-(define (build-query predicateNode)
+
+; Just a prototype for now. Uses a possibly-obsolete approach. For every Frame element, looks up an InheritanceLink, FrameElementLink and EvaluationLink.
+(define (build-query_alt predicateNode)
   (let ((variableCounter 1)
 	(variablesDeclaration '())
 	(elementsDeclaration '())
@@ -1578,12 +1622,87 @@
     ) ; let
 )
 
+; Just a prototype for now. Takes a Frame instance, and Produces a query for PLN, to look up all matching Frame instances (including all of their Frame elements).
+(define (build-query predicateNode)
+  (let ((variableCounter 1)
+	(variablesDeclaration '())
+	(elementsDeclaration '())
+        (frameType (get-frame-instance-type predicateNode))
+	)
+    (map
+     (lambda (predicate)
+       (let* ((value (get-frame-instance-element-value predicate))
+	      (groundedValue (get-grounded-element-value value))
+              (variable? (and value (equal? 'VariableNode (cog-type value))))
+              (elementNode (get-frame-element-node frameType (get-frame-element-name (get-frame-instance-element-type predicate) )))
+	     )
+         (set! variablesDeclaration (append variablesDeclaration (list
+	    (TypedVariableLink
+             (FWVariableNode (string-append "$var" (number->string variableCounter)))
+             (VariableTypeNode "PredicateNode")
+             ) 
+            )))
+         (if variable?
+             (begin
+               (set! groundedValue value)
+               (set! variablesDeclaration (append variablesDeclaration (list
+                  (TypedVariableLink
+                   value
+                   (ListLink
+                    (VariableTypeNode "SemeNode")
+                    (VariableTypeNode "ConceptNode")
+                    )
+                   )
+                  )))
+               ) ; begin
+             ) ; if
+         
+         (set! elementsDeclaration (append elementsDeclaration (list
+            (EvaluationLink (PredicateNode "frame")
+                (ListLink
+                    (FWVariableNode "$var0") ; FrameInstance
+                    (DefinedFrameElementNode (get-frame-instance-element-type predicate)) ; FrameElement
+                    groundedValue ; Value
+                )
+            )
+         ) ) )
+	 (set! variableCounter (+ variableCounter 1))
+	 ) ; let
+       ) ; lambda
+     (get-frame-instance-elements-predicates predicateNode)
+     )
+
+;    (VariableScopeLink
+;     (ListLink
+;      variablesDeclaration
+;      (TypedVariableLink
+;       (Node "$var0")
+;       (VariableTypeNode "PredicateNode")
+;       )
+;     )
+;     (ImplicationLink
+
+;      (AndLink
+;       elementsDeclaration
+;       (InheritanceLink
+;	(FWVariableNode "$var0")
+;	(DefinedFrameNode (get-frame-instance-type predicateNode))
+;	)
+;      )
+      (AndLink
+          elementsDeclaration
+      )
+;     )
+
+    ) ; let
+)
+
 
 ; This function receives as argument a list of PredicateNodes that
 ; represents instances of Frames and returns a list of PredicateNodes
 ; that is grounded versions of the given ones
-(define (find-grounded-frame-instances-predicates framesPredicates use-pln)
-(let (;(use-pln #t)
+(define (find-grounded-frame-instances-predicates framesPredicates)
+(let (
   
       (finalFrames '()))
     (map ; ok it is a question, so handle it
@@ -1592,16 +1711,6 @@
       (lambda (predicate)
        
         (frame-preprocessor predicate)
-        (if use-pln
-          ; assumption: can't reuse variables in different frame elements (easy to fix if necessary)
-          
-          (let ( (groundedFrameInstance (pln-bc (build-query predicate) 200)) )
-            (if (not (equal? (cog-handle groundedFrameInstance) 18446744073709551615))
-              (set! finalFrames (append finalFrames (list (car groundedFrameInstances ))))
-            )
-          )
-          
-          ; not using PLN
           (if (not (frame-instance-contains-variable? predicate))
             (let ((groundedFrameInstance (get-grounded-frame-instance-predicate predicate)))
               (if (not (null? groundedFrameInstance))                                    
@@ -1614,9 +1723,42 @@
               ) ; if
             ) ; let
           ) ; if
-        )
       ) ; lambda
     (if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
+    ) ; map
+    finalFrames
+  ) ; let
+)
+
+; This function receives as argument a list of PredicateNodes that
+; represents instances of Frames and returns a list of Frame instances that match.
+; Uses PLN. This is an alternative to the find-grounded-frame-instances-predicates and match-frame.
+(define (find-grounded-frame framesPredicates)
+  (let (
+  
+      (finalFrames '()))
+    (map ; ok it is a question, so handle it
+         ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
+         ;questionFrames
+      (lambda (predicate)
+       
+        (frame-preprocessor predicate)
+        (begin
+                (do-varscope convert-frames)
+                (let* ( ( tmp (pln-bc (build-query predicate) 200000) )  ; An AndLink
+                     )
+                  (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating UNDEFINED_HANDLE as valid handle)
+                    (let* (
+                          ( groundedFrameInstance (gar (car (gdr (gar tmp)))) ) ; This extracts the frame instance (*gasp*)
+                         )
+                         (set! finalFrames (append finalFrames (list groundedFrameInstance )))
+                    )
+                  )
+                )
+        )
+      ) ; lambda
+    ;(if (list? (car framesPredicates)) (car framesPredicates) framesPredicates) 
+     framesPredicates
     ) ; map
     finalFrames
   ) ; let
@@ -1854,6 +1996,8 @@
   (let ((chosenAnswer '())
         (question? #f)
         (questionType '())
+        
+        (use-pln #t)
         )
         
     (map
@@ -1879,27 +2023,26 @@
                   )
                 (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
                     (set! questionFrames (append questionFrames (list predicate)))
-                    )
                 )
             )
-          incomingPredicates
           )
+          incomingPredicates
+         )
 
+        ; TODO restore old version of the following, as an option (e.g. if PLN turns out to be much less efficient, we should use the old version first)
+         
          (if questionParse?
-             (let* ((numberOfIncomingPredicates (length questionFrames))
-                    (groundedPredicates (find-grounded-frame-instances-predicates questionFrames #t))
-                    (numberOfGroundedPredicates (length groundedPredicates))
-                    (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
-                    )
-               (if (and (> numberOfIncomingPredicates 0) (= balance 0) (or (null? chosenAnswer) (> numberOfGroundedPredicates (car chosenAnswer))))
-                   (set! chosenAnswer (cons numberOfGroundedPredicates groundedPredicates))
-                   )
+             (let* ( (groundedPredicates (find-grounded-frame questionFrames) ) )
+               (if (> (length groundedPredicates) 0) 
+                   (set! chosenAnswer groundedPredicates)
                )
              )
          )
-       )
+  
+       ) ; let
+     ) ; lambda
      (get-latest-parses)
-     )
+    ) ; map
 
      (if question?
          (begin
@@ -1907,24 +2050,24 @@
           (map
            (lambda (evalLink)
              (cog-set-tv! evalLink (stv 0 0))
-             )
-           (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
            )
+           (cog-get-link 'EvaluationLink 'ListLink (PredicateNode "latestQuestionFrames"))
+          )
           ; then create a new one
           (EvaluationLink (stv 1 1)
              (PredicateNode "latestQuestionFrames")
              (ListLink
-              (if (not (null? chosenAnswer) ) (cdr chosenAnswer) '() )
-              )
+              (if (not (null? chosenAnswer) ) chosenAnswer '() )
              )
+          ) ; map
 
           questionType ; Return the question type...
-          )
-        '() ; ... or else nothing.
-        ) ; if
+         ) ; begin/end block.
+         '() ; ... or else nothing.
+     ) ; if
   
-     ) ; let
-  )
+  ) ; let
+)
 
 ; A fact is a set of Frames which describes something.
 ; It can be used as knownledge by the agent to answer
@@ -1953,7 +2096,7 @@
             (lambda (groundedPredicate)
               (remove-frame-instance groundedPredicate)
               )
-            (find-grounded-frame-instances-predicates incomingPredicates #f)
+            (find-grounded-frame-instances-predicates incomingPredicates)
             )
 
            (map
