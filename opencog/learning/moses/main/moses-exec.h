@@ -74,6 +74,43 @@ static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing
 
+// used to convert program option argument to string.
+// @todo: very ugly, it is likely something better can be done using
+// boost::program_options API
+template<typename T>
+bool to_string(const variable_value& vv, string& str)
+{
+    if(vv.value().type() == typeid(T)) {
+        str = lexical_cast<string>(vv.as<T>());
+        return true;
+    }
+    return false;
+}
+string to_string(const variable_value& vv)
+{
+    string res;
+    if(to_string<int>(vv, res))
+        return res;
+    else if(to_string<unsigned int>(vv, res))
+        return res;
+    else if(to_string<long>(vv, res))
+        return res;
+    else if(to_string<unsigned long>(vv, res))
+        return res;
+    else if(to_string<float>(vv, res))
+        return res;
+    else if(to_string<double>(vv, res))
+        return res;
+    else if(to_string<bool>(vv, res))
+        return res;
+    else if(to_string<string>(vv, res))
+        return res;
+    else {
+        std::cerr << "type not handled yet" << std::endl;
+        return res;
+    }
+}
+
 /**
  * 1) create a metapopulation
  * 2) run moses

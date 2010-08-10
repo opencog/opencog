@@ -155,54 +155,149 @@ int main(int argc,char** argv) {
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
+    static const string rand_seed_opt_name = "random-seed";
+    static const string rand_seed_opt_ab = "r";
+
     string input_table_file;
+    static const string input_table_file_opt_name = "input-file";
+    static const string input_table_file_opt_ab = "i";
+
     string problem;
+    static const string problem_opt_name = "problem";
+    static const string problem_opt_ab = "H";
+
     string combo_str;
+    static const string combo_str_opt_name = "combo-program";
+    static const string combo_str_opt_ab = "y";
+
     unsigned int problem_size;
+    static const string problem_size_opt_name = "problem-size";
+    static const string problem_size_opt_ab = "k";
+
     int nsamples;
+    static const string nsamples_opt_name = "nsamples";
+    static const string nsamples_opt_ab = "b";
+
     float min_rand_input;
+    static const string min_rand_input_opt_name = "min-rand-input";
+    static const string min_rand_input_opt_ab = "q";
+
     float max_rand_input;
+    static const string max_rand_input_opt_name = "max-rand-input";
+    static const string max_rand_input_opt_ab = "w";
+
     unsigned long max_evals;
+    static const string max_evals_opt_name = "max-evals";
+    static const string max_evals_opt_ab = "m";
+
     long result_count;
+    static const string result_count_opt_name = "result-count";
+    static const string result_count_opt_ab = "c";
+
     bool output_bscore;
+    static const string output_bscore_opt_name = "output-bscore";
+    static const string output_bscore_opt_ab = "t";
+
     bool output_complexity;
+    static const string output_complexity_opt_name = "output-complexity";
+    static const string output_complexity_opt_ab = "x";
+
     int max_gens;
+    static const string max_gens_opt_name = "max-gens";
+    static const string max_gens_opt_ab = "g";
+
     string log_level;
+    static const string log_level_opt_name = "log-level";
+    static const string log_level_opt_ab = "l";
+
     string log_file;
+    static const string log_file_opt_name = "log-file";
+    static const string log_file_opt_ab = "f";
+    static const string default_log_file_prefix = "moses";
+    static const string default_log_file_suffix = "log";
+    static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
+
+    bool log_file_dep_opt;
+    static const string log_file_dep_opt_opt_name = "log-file-dep-opt";
+    static const string log_file_dep_opt_opt_ab = "L";
+
     float variance;
+    static const string variance_opt_name = "variance";
+    static const string variance_opt_ab = "v";
+
     float prob;
+    static const string prob_opt_name = "probability";
+    static const string prob_opt_ab = "p";
+
     vector<string> ignore_ops_str;
+    static const string ignore_ops_str_opt_name = "ignore-operator";
+    static const string ignore_ops_str_opt_ab = "n";
+
     string opt_algo; //optimization algorithm
+    static const string opt_algo_opt_name = "opt-algo";
+    static const string opt_algo_opt_ab = "a";
+
     vector<string> exemplars_str;
+    static const string exemplars_str_opt_name = "exemplar";
+    static const string exemplars_str_opt_ab = "e";
+
     int reduct_candidate_effort;
+    static const string reduct_candidate_effort_opt_name = "reduct-candidate-effort";
+    static const string reduct_candidate_effort_opt_ab = "E";
+
     int reduct_knob_building_effort;
+    static const string reduct_knob_building_effort_opt_name = "reduct-knob-building-effort";
+    static const string reduct_knob_building_effort_opt_ab = "B";
+
     bool reduce_all;
+    static const string reduce_all_opt_name = "reduce-all";
+    static const string reduce_all_opt_ab = "d";
+
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
+    static const string count_base_opt_name = "count-based-scorer";
+    static const string count_base_opt_ab = "u";
+
     unsigned long cache_size;
+    static const string cache_size_opt_name = "cache-size";
+    static const string cache_size_opt_ab = "s";
+
     bool revisit;
+    static const string revisit_opt_name = "revisit";
+    static const string revisit_opt_ab = "R";
+
     // eda_param
     double pop_size_ratio;
+    static const string pop_size_ratio_opt_name = "pop-size-ratio";
+    static const string pop_size_ratio_opt_ab = "P";
 
     // Declare the supported options.
     options_description desc("Allowed options");
     desc.add_options()
-        ("help", "produce help message.")
-        ("random-seed,r", value<unsigned long>(&rand_seed)->default_value(1),
+        ("help,h", "produce help message.")
+        (string(rand_seed_opt_name).append(",").append(rand_seed_opt_ab).c_str(),
+         value<unsigned long>(&rand_seed)->default_value(1),
          "random seed.")
-        ("max-evals,m", value<unsigned long>(&max_evals)->default_value(10000),
+        (string(max_evals_opt_name).append(",").append(max_evals_opt_ab).c_str(),
+         value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations.")
-        ("result-count,c", value<long>(&result_count)->default_value(10),
+        (string(result_count_opt_name).append(",").append(result_count_opt_ab).c_str(),
+         value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them.")
-        ("output-complexity,x", value<bool>(&output_complexity)->default_value(false),
+        (string(output_complexity_opt_name).append(",").append(output_complexity_opt_ab).c_str(),
+         value<bool>(&output_complexity)->default_value(false),
          "if 1, outputs the complexity before each candidate (at the right of the score).")
-        ("output-bscore,t", value<bool>(&output_bscore)->default_value(false),
+        (string(output_bscore_opt_name).append(",").append(output_bscore_opt_ab).c_str(),
+         value<bool>(&output_bscore)->default_value(false),
          "if 1, outputs the bscore below each candidate.")
-        ("max-gens,g", value<int>(&max_gens)->default_value(-1),
+        (string(max_gens_opt_name).append(",").append(max_gens_opt_ab).c_str(),
+         value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit.")
-        ("input-file,i", value<string>(&input_table_file),
+        (string(input_table_file_opt_name).append(",").append(input_table_file_opt_ab).c_str(),
+         value<string>(&input_table_file),
          "input table file, the maximum number of samples is the number of rows in the file.")
-        ("problem,h", value<string>(&problem)->default_value("it"),
+        (string(problem_opt_name).append(",").append(problem_opt_ab).c_str(),
+         value<string>(&problem)->default_value("it"),
          string("problem to solve, supported problems are"
                 " regression based on input table (").append(it).
          append("), regression based on input table using ann (").append(ann_it).
@@ -211,60 +306,80 @@ int main(int argc,char** argv) {
          append("), disjunction (").append(dj).
          append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").").c_str())
-        ("combo-program,y", value<string>(&combo_str),
+        (string(combo_str_opt_name).append(",").append(combo_str_opt_ab).c_str(),
+         value<string>(&combo_str),
          string("combo program to learn, use when the problem ").append(cp).append(" is selected (option -h).").c_str())
-        ("problem-size,k", value<unsigned int>(&problem_size)->default_value(5),
+        (string(problem_size_opt_name).append(",").append(problem_size_opt_ab).c_str(),
+         value<unsigned int>(&problem_size)->default_value(5),
          string("for even parity (").append(pa).
          append(") and disjunction (").append(dj).
          append(") the problem size corresponds to the arity,"
                 " for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
          append(") the problem size corresponds to the order o.").c_str())
-        ("nsamples,b", value<int>(&nsamples)->default_value(-1),
+        (string(nsamples_opt_name).append(",").append(nsamples_opt_ab).c_str(),
+         value<int>(&nsamples)->default_value(-1),
          "number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored.")
-        ("min-rand-input,q", value<float>(&min_rand_input)->default_value(0),
+        (string(min_rand_input_opt_name).append(",").append(min_rand_input_opt_ab).c_str(),
+         value<float>(&min_rand_input)->default_value(0),
          "min of an input value chosen randomly, only used when the problem takes continuous inputs")
-        ("max-rand-input,w", value<float>(&max_rand_input)->default_value(1),
+        (string(max_rand_input_opt_name).append(",").append(max_rand_input_opt_ab).c_str(),
+         value<float>(&max_rand_input)->default_value(1),
          "max of an input value chosen randomly, only used when the problem takes continuous inputs")
-        ("log-level,l", value<string>(&log_level)->default_value("DEBUG"),
+        (string(log_level_opt_name).append(",").append(log_level_opt_ab).c_str(),
+         value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.")
-        ("log-file,f", value<string>(&log_file)->default_value("moses.log"),
-         "file name where to write the log.")
-        ("variance,v", value<float>(&variance)->default_value(0),
+        (string(log_file_dep_opt_opt_name).append(",").append(log_file_dep_opt_opt_ab).c_str(),
+         "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log")
+        (string(log_file_opt_name).append(",").append(log_file_opt_ab).c_str(),
+         value<string>(&log_file)->default_value(default_log_file),
+         string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt_name).append(".").c_str())
+        (string(variance_opt_name).append(",").append(variance_opt_ab).c_str(),
+         value<float>(&variance)->default_value(0),
          "in the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor.")
-        ("probability,p", value<float>(&prob)->default_value(0),
+        (string(prob_opt_name).append(",").append(prob_opt_ab).c_str(),
+         value<float>(&prob)->default_value(0),
          "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.")
-        ("ignore-operator,n", value<vector<string> >(&ignore_ops_str),
+        (string(ignore_ops_str_opt_name).append(",").append(ignore_ops_str_opt_ab).c_str(),
+         value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored.")
-        ("opt-alg,a", value<string>(&opt_algo)->default_value(un),
+        (string(opt_algo_opt_name).append(",").append(opt_algo_opt_ab).c_str(),
+         value<string>(&opt_algo)->default_value(un),
          string("optimization algorithm, supported algorithms are"
                 " univariate (").append(un).
          append("), simulation annealing (").append(sa).
          append("), hillclimbing (").append(hc).append(").").c_str())
-        ("exemplar,e", value<vector<string> >(&exemplars_str),
+        (string(exemplars_str_opt_name).append(",").append(exemplars_str_opt_ab).c_str(),
+         value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times.")
-        ("reduce-all,d", value<bool>(&reduce_all)->default_value(true),
+        (string(reduce_all_opt_name).append(",").append(reduce_all_opt_ab).c_str(),
+         value<bool>(&reduce_all)->default_value(true),
          "reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not evaluate multiple time equivalent candidates.")
-        ("reduct-candidate-effort,E",
+        (string(reduct_candidate_effort_opt_name).append(",").append(reduct_candidate_effort_opt_ab).c_str(),         
          value<int>(&reduct_candidate_effort)->default_value(2),
          "effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.")
-        ("reduct-knob-building-effort,B",
+        (string(reduct_knob_building_effort_opt_name).append(",").append(reduct_knob_building_effort_opt_ab).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.")
-        ("count-based-scorer,u", value<bool>(&count_base)->default_value(false),
+        (string(count_base_opt_name).append(",").append(count_base_opt_ab).c_str(),
+         value<bool>(&count_base)->default_value(false),
          "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.")
-        ("cache-size,s", value<unsigned long>(&cache_size)->default_value(1000000),
+        (string(cache_size_opt_name).append(",").append(cache_size_opt_ab).c_str(),
+         value<unsigned long>(&cache_size)->default_value(1000000),
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache.")
-        ("revisit,R", "revisit visited examplars when all have been visited")
-        ("pop-size-ratio,P", value<double>(&pop_size_ratio)->default_value(200),
+        (string(revisit_opt_name).append(",").append(revisit_opt_ab).c_str(),
+         "revisit visited examplars when all have been visited")
+        (string(pop_size_ratio_opt_name).append(",").append(pop_size_ratio_opt_ab).c_str(),
+         value<double>(&pop_size_ratio)->default_value(200),
          "the higher the more effort is spent on a deme")
         ;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
-    notify(vm);    
+    notify(vm);
 
     // set flags
-    revisit = vm.count("revisit") > 0;
+    revisit = vm.count(revisit_opt_name) > 0;
+    log_file_dep_opt = vm.count(log_file_dep_opt_opt_name) > 0 && log_file == default_log_file;
     
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
@@ -272,6 +387,17 @@ int main(int argc,char** argv) {
     }
 
     // set log
+    if(log_file_dep_opt) {
+        // determine the name of the log depending on the program options
+        log_file = default_log_file_prefix;
+        for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++)
+            // we ignore the option log_file_dep_opt and any default one
+            if(it->first != log_file_dep_opt_opt_name && !it->second.defaulted()
+               // this is because OSs usually do not handle file name above 255 chars
+               && log_file.size() < 255)
+                log_file += string("_") + it->first + "_" + to_string(it->second);
+        log_file += string(".") + default_log_file_suffix;
+    }
     // remove log_file
     remove(log_file.c_str());
     logger().setFilename(log_file);
