@@ -1644,16 +1644,7 @@
             )))
          (if variable?
              (begin
-               (set! groundedValue value)
-               (set! variablesDeclaration (append variablesDeclaration (list
-                  (TypedVariableLink
-                   value
-                   (ListLink
-                    (VariableTypeNode "SemeNode")
-                    (VariableTypeNode "ConceptNode")
-                    )
-                   )
-                  )))
+               (set! groundedValue (FWVariableNode (string-append "$var" (number->string variableCounter))))
                ) ; begin
              ) ; if
          
@@ -1745,7 +1736,7 @@
         (frame-preprocessor predicate)
         (begin
                 (do-varscope convert-frames)
-                (let* ( ( tmp (pln-bc (build-query predicate) 200000) )  ; An AndLink
+                (let* ( ( tmp (pln-bc (build-query predicate) 20000) )  ; An AndLink
                      )
                   (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating UNDEFINED_HANDLE as valid handle)
                     (let* (
