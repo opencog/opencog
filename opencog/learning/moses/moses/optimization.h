@@ -565,7 +565,7 @@ struct simulated_annealing {
                    const Scoring& score, int max_evals) {
 
         const eda::field_set& fields = deme.fields();
-        max_distance = MAX_DISTANCE_FROM_EXEMPLAR;
+        max_distance = fields.raw_size();
 
         // @todo this should be adapted for SA
         int pop_size = params.pop_size(fields);
