@@ -463,7 +463,6 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
 {
     // Make an ANDLink containing the arguments, and give it to the BC. Then convert each result into an arg-vector.
     // Used to not be able to make an ANDLink with 1 argument, because SimpleANDRule-1 crashed.
-    //! @todo Streamline this code now.
 
     meta AND(
         new vtree(
