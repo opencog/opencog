@@ -49,8 +49,7 @@ public:
                         pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const
     {
-        // Assumedly, this assert(0) is because a CustomCrispUnification rule
-        // only makes sense when the variables within the ForAllLink are bound.
+        // Only for use as a Generator, so doesn't need a compute method.
         assert(0);
         return Vertex(PHANDLE_UNDEFINED);
     }
