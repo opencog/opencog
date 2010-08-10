@@ -34,7 +34,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     # Linas: Change debug flags to -O2 since I think that 1) -O0 offers
     # no debugging advantage that I'm aware of, and 2) -g does not hurt
     # performance in any way that I'm aware of.
-    SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector")
+    SET(CMAKE_C_FLAGS_DEBUG "-O2 -g -fstack-protector")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
   ENDIF (APPLE)
   
