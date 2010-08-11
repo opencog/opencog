@@ -7,6 +7,7 @@ ADD_LIBRARY (moses SHARED
 	moses/build_knobs
 	moses/knob_mapper
 	moses/knobs
+    moses/metapopulation
 	moses/moses
 	moses/representation
     moses/complexity

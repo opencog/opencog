@@ -5,6 +5,7 @@ INSTALL(FILES
     build_knobs.h
     knob_mapper.h
     knobs.h
+    metapopulation.h
     moses.h
     optimization.h
     representation.h

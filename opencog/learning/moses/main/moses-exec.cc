@@ -266,6 +266,10 @@ int main(int argc,char** argv) {
     static const string revisit_opt_name = "revisit";
     static const string revisit_opt_ab = "R";
 
+    unsigned int jobs;
+    static const string jobs_opt_name = "jobs";
+    static const string jobs_opt_ab = "j";
+
     // eda_param
     double pop_size_ratio;
     static const string pop_size_ratio_opt_name = "pop-size-ratio";
@@ -368,6 +372,9 @@ int main(int argc,char** argv) {
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache.")
         (string(revisit_opt_name).append(",").append(revisit_opt_ab).c_str(),
          "revisit visited examplars when all have been visited")
+        (string(jobs_opt_name).append(",").append(jobs_opt_ab).c_str(),
+         value<unsigned int>(&jobs)->default_value(1),
+         "number of jobs allocated for deme optimization")
         (string(pop_size_ratio_opt_name).append(",").append(pop_size_ratio_opt_ab).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "the higher the more effort is spent on a deme")
