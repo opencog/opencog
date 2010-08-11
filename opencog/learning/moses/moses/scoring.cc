@@ -48,11 +48,11 @@ int logical_score::operator()(const combo_tree& tr) const
     //   << target << " " << combo::truth_table(tr,arity) << " "
     //   << (target.hamming_distance(combo::truth_table(tr,arity))) << std::endl; // PJ
 
-    return -int(target.hamming_distance(combo::truth_table(tr, arity, rng)));
+    return -int(target.hamming_distance(combo::truth_table(tr, arity)));
 }
 behavioral_score logical_bscore::operator()(const combo_tree& tr) const
 {
-    combo::truth_table tt(tr, arity, rng);
+    combo::truth_table tt(tr, arity);
     behavioral_score bs(target.size());
 
     std::transform(tt.begin(), tt.end(), target.begin(), bs.begin(),

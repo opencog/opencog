@@ -525,7 +525,7 @@ int main(int argc,char** argv) {
             }
             if(output_type == id::boolean_type) {
                 // @todo: Occam's razor and nsamples is not taken into account
-                logical_bscore bscore(tr, arity, rng);
+                logical_bscore bscore(tr, arity);
                 metapop_moses_results(rng, exemplars, tt,
                                       logical_reduction(reduct_candidate_effort),
                                       logical_reduction(reduct_knob_building_effort),
@@ -577,7 +577,7 @@ int main(int argc,char** argv) {
         }
 
         type_tree tt = declare_function(id::boolean_type, arity);
-        logical_bscore bscore(func, arity, rng);
+        logical_bscore bscore(func, arity);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
@@ -599,7 +599,7 @@ int main(int argc,char** argv) {
         }
 
         type_tree tt = declare_function(id::boolean_type, arity);
-        logical_bscore bscore(func, arity, rng);
+        logical_bscore bscore(func, arity);
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),

@@ -62,7 +62,7 @@ int main(int argc, char ** argv)
         cout << "The number of args:" << arg_number << endl;
         try {
             //  generate the entire truth-table
-            truth_table truthtable(combo_tr, rng);
+            truth_table truthtable(combo_tr);
 
             // output the truth-table depend on the partial_probility
             for ( size_t i = 0 ; i < sample_number; ++i) {

@@ -115,16 +115,15 @@ struct logical_score : public unary_function<combo_tree, int> {
  */
 struct logical_bscore : public unary_function<combo_tree, behavioral_score> {
     template<typename Func>
-    logical_bscore(const Func& func, int a, opencog::RandGen& _rng)
-            : target(func, a, _rng), arity(a), rng(_rng) { }
-    logical_bscore(const combo_tree& tr, int a, opencog::RandGen& _rng)
-            : target(tr, a, _rng), arity(a), rng(_rng) { }
+    logical_bscore(const Func& func, int a)
+            : target(func, a), arity(a) {}
+    logical_bscore(const combo_tree& tr, int a)
+            : target(tr, a), arity(a) {}
 
     behavioral_score operator()(const combo_tree& tr) const;
 
     combo::truth_table target;
     int arity;
-    opencog::RandGen& rng;
 };
 
 struct contin_score : public unary_function<combo_tree, score_t> {

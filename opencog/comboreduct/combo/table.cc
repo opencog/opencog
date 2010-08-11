@@ -34,12 +34,23 @@ truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
 {
     OC_ASSERT(other.size() == size(),
-                      "truth_tables size should be the same.");
+              "truth_tables size should be the same.");
 
     size_type res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
         res += (*x++ != *y++);
     return res;
+}
+
+bool truth_table::same_truth_table(const combo_tree& tr) const {
+    const_iterator cit = begin();
+    for (int i = 0; cit != end(); ++i, ++cit) {
+        for (int j = 0; j < _arity; ++j)
+            binding(j + 1) = bool_to_vertex((i >> j) % 2);
+        if(*cit != vertex_to_bool(eval(*_rng, tr)))
+            return false;
+    }
+    return true;
 }
 
 partial_truth_table::partial_truth_table(const combo_tree& tr,

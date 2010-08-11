@@ -42,18 +42,16 @@ int main()
 
     const int effort = 3; // effort allocated for reduction (3 is max)
 
-    MT19937RandGen rng(0);
-
     combo_tree tr;
     while (cin.good()) {
         cin >> tr;
         if (!cin.good())
             break;
-        truth_table tt1(tr, rng);
+        truth_table tt1(tr);
         //cout << "AR" << endl;
         logical_reduce(effort, tr);
         //cout << "RA" << endl;
-        truth_table tt2(tr, integer_log2(tt1.size()), rng);
+        truth_table tt2(tr, integer_log2(tt1.size()));
         cout << tr << endl;
         //cout << "checking tt" << endl;
         if (tt1 != tt2) {

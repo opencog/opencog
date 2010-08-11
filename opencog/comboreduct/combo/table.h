@@ -68,28 +68,29 @@ class truth_table : public bool_vector
 public:
     typedef bool_vector super;
 
-    truth_table() { }
+    truth_table() : _rng(NULL) { }
     template<typename It>
-    truth_table(It from, It to) : super(from, to) { }
+    truth_table(It from, It to) : super(from, to), _rng(NULL) { }
     template<typename T>
-    truth_table(const opencog::tree<T>& tr, arity_t arity, opencog::RandGen& rng)
-            : super(opencog::power(2, arity)) {
-        populate(tr, arity, rng);
+    truth_table(const opencog::tree<T>& tr, arity_t arity)
+        : super(opencog::power(2, arity)), _arity(arity), _rng(NULL) {
+        populate(tr);
     }
     template<typename T>
-    truth_table(const opencog::tree<T>& tr, opencog::RandGen& rng) {
-        arity_t a = arity(tr);
-        this->resize(opencog::power(2, a));
-        populate(tr, a, rng);
+    truth_table(const opencog::tree<T>& tr) {
+        _arity = arity(tr);
+        _rng = NULL;
+        this->resize(opencog::power(2, _arity));
+        populate(tr);
     }
 
     template<typename Func>
-    truth_table(const Func& f, arity_t arity, opencog::RandGen& rng)
-        : super(opencog::power(2, arity)) {
+    truth_table(const Func& f, arity_t arity)
+        : super(opencog::power(2, arity)), _arity(arity), _rng(NULL) {
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
-            bool_vector v(arity);
-            for (arity_t j = 0;j < arity;++j)
+            bool_vector v(_arity);
+            for (arity_t j = 0;j < _arity;++j)
                 v[j] = (i >> j) % 2;
             (*it) = f(v.begin(), v.end());
         }
@@ -111,17 +112,25 @@ public:
     }
 
     size_type hamming_distance(const truth_table& other) const;
+
+    /**
+     * compute the truth table of tr and compare it to self. This
+     * method is optimized so that if there are not equal it can be
+     * detected before calculating the entire table.
+     */
+    bool same_truth_table(const combo_tree& tr) const;
 protected:
     template<typename T>
-    void populate(const opencog::tree<T>& tr,
-                  int arity, opencog::RandGen& rng) {
+    void populate(const opencog::tree<T>& tr) {
         iterator it = begin();
-        for (int i = 0;it != end();++i, ++it) {
-            for (int j = 0;j < arity;++j)
+        for (int i = 0; it != end(); ++i, ++it) {
+            for (int j = 0; j < _arity; ++j)
                 binding(j + 1) = bool_to_vertex((i >> j) % 2);
-            (*it) = (eval(rng, tr) == id::logical_true);
+            (*it) = (eval(*_rng, tr) == id::logical_true);
         }
     }
+    arity_t _arity;
+    RandGen* _rng; // _rng is dummy and not used anyway
 };
 
 /**

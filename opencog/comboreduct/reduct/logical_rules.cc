@@ -635,15 +635,12 @@ subtree_to_enf::reduce_to_enf::reduce_or(sib_it current,
 
 void reduce_remove_subtree_equal_tt::operator()(combo_tree& tr,
                                                 combo_tree::iterator it) const {
-    opencog::RandGen* rng = NULL; // dummy rng, it is not used anyway
-    arity_t a = arity(tr);
-    truth_table tr_tt(tr, a, *rng);
+    truth_table tr_tt(tr);
     for(pre_it pit = it.begin(); pit != it.end();) {
         pit = tr.insert_above(pit, id::null_vertex);
         combo_tree amputated_tr(tr);
         clean_reduce(amputated_tr);
-        truth_table amputated_tr_tt(amputated_tr, a, *rng);
-        if(tr_tt == amputated_tr_tt) // amputate tr
+        if(tr_tt.same_truth_table(amputated_tr)) // amputate tr
             pit = tr.erase(pit);
         else { // remove only the previously added null_vertex
             pit = tr.erase(tr.flatten(pit));
