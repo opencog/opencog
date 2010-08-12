@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "moses-exec.h"
+#include "moses_options_names.h"
 
 /**
  * Display error message about unspecified combo tree and exit
@@ -155,129 +156,37 @@ int main(int argc,char** argv) {
 
     // program options, see options_description below for their meaning
     unsigned long rand_seed;
-    static const string rand_seed_opt_name = "random-seed";
-    static const string rand_seed_opt_ab = "r";
-
     string input_table_file;
-    static const string input_table_file_opt_name = "input-file";
-    static const string input_table_file_opt_ab = "i";
-
     string problem;
-    static const string problem_opt_name = "problem";
-    static const string problem_opt_ab = "H";
-
     string combo_str;
-    static const string combo_str_opt_name = "combo-program";
-    static const string combo_str_opt_ab = "y";
-
     unsigned int problem_size;
-    static const string problem_size_opt_name = "problem-size";
-    static const string problem_size_opt_ab = "k";
-
     int nsamples;
-    static const string nsamples_opt_name = "nsamples";
-    static const string nsamples_opt_ab = "b";
-
     float min_rand_input;
-    static const string min_rand_input_opt_name = "min-rand-input";
-    static const string min_rand_input_opt_ab = "q";
-
     float max_rand_input;
-    static const string max_rand_input_opt_name = "max-rand-input";
-    static const string max_rand_input_opt_ab = "w";
-
     unsigned long max_evals;
-    static const string max_evals_opt_name = "max-evals";
-    static const string max_evals_opt_ab = "m";
-
     long result_count;
-    static const string result_count_opt_name = "result-count";
-    static const string result_count_opt_ab = "c";
-
     bool output_bscore;
-    static const string output_bscore_opt_name = "output-bscore";
-    static const string output_bscore_opt_ab = "t";
-
     bool output_complexity;
-    static const string output_complexity_opt_name = "output-complexity";
-    static const string output_complexity_opt_ab = "x";
-
     bool output_eval_number;
-    static const string output_eval_number_opt_name = "output-eval-number";
-    static const string output_eval_number_opt_ab = "V";
-
     int max_gens;
-    static const string max_gens_opt_name = "max-gens";
-    static const string max_gens_opt_ab = "g";
-
     string log_level;
-    static const string log_level_opt_name = "log-level";
-    static const string log_level_opt_ab = "l";
-
     string log_file;
-    static const string log_file_opt_name = "log-file";
-    static const string log_file_opt_ab = "f";
-    static const string default_log_file_prefix = "moses";
-    static const string default_log_file_suffix = "log";
-    static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
-
     bool log_file_dep_opt;
-    static const string log_file_dep_opt_opt_name = "log-file-dep-opt";
-    static const string log_file_dep_opt_opt_ab = "L";
-
     float variance;
-    static const string variance_opt_name = "variance";
-    static const string variance_opt_ab = "v";
-
     float prob;
-    static const string prob_opt_name = "probability";
-    static const string prob_opt_ab = "p";
-
     vector<string> ignore_ops_str;
-    static const string ignore_ops_str_opt_name = "ignore-operator";
-    static const string ignore_ops_str_opt_ab = "n";
-
     string opt_algo; //optimization algorithm
-    static const string opt_algo_opt_name = "opt-algo";
-    static const string opt_algo_opt_ab = "a";
-
     vector<string> exemplars_str;
-    static const string exemplars_str_opt_name = "exemplar";
-    static const string exemplars_str_opt_ab = "e";
-
     int reduct_candidate_effort;
-    static const string reduct_candidate_effort_opt_name = "reduct-candidate-effort";
-    static const string reduct_candidate_effort_opt_ab = "E";
-
     int reduct_knob_building_effort;
-    static const string reduct_knob_building_effort_opt_name = "reduct-knob-building-effort";
-    static const string reduct_knob_building_effort_opt_ab = "B";
-
     bool reduce_all;
-    static const string reduce_all_opt_name = "reduce-all";
-    static const string reduce_all_opt_ab = "d";
-
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
-    static const string count_base_opt_name = "count-based-scorer";
-    static const string count_base_opt_ab = "u";
-
     unsigned long cache_size;
-    static const string cache_size_opt_name = "cache-size";
-    static const string cache_size_opt_ab = "s";
-
     bool revisit;
-    static const string revisit_opt_name = "revisit";
-    static const string revisit_opt_ab = "R";
-
     unsigned int jobs;
-    static const string jobs_opt_name = "jobs";
-    static const string jobs_opt_ab = "j";
-
     // eda_param
     double pop_size_ratio;
-    static const string pop_size_ratio_opt_name = "pop-size-ratio";
-    static const string pop_size_ratio_opt_ab = "P";
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -393,7 +302,8 @@ int main(int argc,char** argv) {
 
     // set flags
     revisit = vm.count(revisit_opt_name) > 0;
-    log_file_dep_opt = vm.count(log_file_dep_opt_opt_name) > 0 && log_file == default_log_file;
+    log_file_dep_opt = 
+        vm.count(log_file_dep_opt_opt_name) > 0 && log_file == default_log_file;
     
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";

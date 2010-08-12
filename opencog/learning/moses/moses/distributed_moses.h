@@ -25,9 +25,11 @@
 #define _OPENCOG_DISTRIBUTED_MOSES_H
 
 #include <stdio.h>
+#include <stropts.h>
 
 #include <boost/program_options.hpp>
 
+#include "../main/moses_options_names.h"
 #include "metapopulation.h"
 #include "moses.h"
 
@@ -36,22 +38,78 @@ namespace moses
 
 using namespace boost::program_options;
 
-string build_command_line(const variables_map& vm, const combo_tree& tr, unsigned int eval)
-{
-    return "./moses-exec -H pa -m 100000 -k 3 -E 3";
+/**
+ * generate a command line that launches moses-exec with exemplar base
+ * 'tr' keeping all initial options, but running over one generation
+ * and returning the adequate information to merge the result with the
+ * metapopulation
+ */
+string build_command_line(const variables_map& vm, 
+                          const combo_tree& tr, unsigned int max_evals) {
+    string res("./moses-exec");
+    // replicate initial command's options, except:
+    // exemplar, output options, jobs and max_evals
+    for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
+        if(it->first != exemplars_str_opt_name
+           && it->first != exemplars_str_opt_name
+           && it->first != output_bscore_opt_name
+           && it->first != output_complexity_opt_name
+           && it->first != output_eval_number_opt_name
+           && it->first != jobs_opt_name
+           && it->first != max_evals_opt_name
+           && !it->second.defaulted()) {
+            res += string(" --") + it->first + " " + to_string(it->second);
+        }
+    }
+    // add exemplar option
+    stringstream ss;
+    ss << tr;
+    res += string(" -") + exemplars_str_opt_ab + " \"" + ss.str() + "\"";
+    // add output options
+    res += string(" -") + output_bscore_opt_ab + " 1";
+    res += string(" -") + output_complexity_opt_ab + " 1";
+    res += string(" -") + output_eval_number_opt_ab + " 1";    
+    // add number of evals option
+    res += string(" -") + max_evals_opt_ab + " " 
+        + boost::lexical_cast<string>(max_evals);
+    
+    OC_ASSERT(res.size() < 255,
+              "It is unlikely the OS support such a long name %s, the only thing"
+              " to do is upgrade the code so that it can express this command"
+              " in less than 255 chars", res.c_str());
+
+    std::cout << res << std::endl;
+
+    return res;
+}
+
+void parse_result() {
+    // TODO
+}
+
+// run the given command, returns in stdout stream and fill pid with
+// its PID.
+// Works only under linux or other UNIX
+FILE* run_command(string command, int& pid) {
+    // launch the command
+    FILE* fp = popen(command.c_str(), "r");
+    // get its PID
+    FILE* fp_pid = popen("pgrep -n moses-exec", "r");
+    fscanf(fp_pid, "%u", &pid);
+    return fp;
+}
+
+// check if a process is running, works only under linux or other UNIX
+bool pid_running(int pid) {
+    string path("/proc/");
+    path += boost::lexical_cast<string>(pid);
+    return access(path.c_str(), F_OK) != -1;
 }
 
 /**
  * the main function of Distributed MOSES
  *
  * @param mp          the metapopulation 
- * @param max_evals   the max evaluations
- * @param max_gens    the max number of demes to create and optimize, if
- *                    negative, then no limit
- * @param max_score   the max score tree
- * @param ignore_ops  the set of operators to ignore
- * @param perceptions the set of perceptions of an optional interactive agent
- * @param actions     the set of actions of an optional interactive agent
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
@@ -62,22 +120,29 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("Distributed MOSES starts");
     // ~Logger
 
-    int gen_idx = 0;
+    // int gen_idx = 0;
 
     //    while ((mp.n_evals() < max_evals) && (max_gens != gen_idx++)) {
     const combo_tree exemplar(get_tree(*mp.select_exemplar()));
 
     string command_line = build_command_line(vm, exemplar,
                                              pa.max_evals - mp.n_evals());
-
-    FILE* res_fp = popen(command_line.c_str(), "r");
     
-    char line[4096];
+    int pid;
+    FILE* fp = run_command(command_line, pid);
 
-    while ( fgets( line, sizeof line, res_fp)) {
+    std::cout << pid << std::endl;
+
+    while(pid_running(pid)) {
+        sleep(1);
+        std::cout << "STILL RUNNING" << std::endl;
+    }
+
+    char line[4096];
+    while ( fgets( line, sizeof line, fp)) {
         printf("%s", line);
     }
-    pclose(res_fp);
+    pclose(fp);
         
         //run a generation
         // if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
