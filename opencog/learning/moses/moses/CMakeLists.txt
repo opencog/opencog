@@ -7,6 +7,7 @@ INSTALL(FILES
     knobs.h
     metapopulation.h
     moses.h
+    distributed_moses.h
     optimization.h
     representation.h
     scoring.h

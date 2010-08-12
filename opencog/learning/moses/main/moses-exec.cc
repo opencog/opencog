@@ -202,6 +202,10 @@ int main(int argc,char** argv) {
     static const string output_complexity_opt_name = "output-complexity";
     static const string output_complexity_opt_ab = "x";
 
+    bool output_eval_number;
+    static const string output_eval_number_opt_name = "output-eval-number";
+    static const string output_eval_number_opt_ab = "V";
+
     int max_gens;
     static const string max_gens_opt_name = "max-gens";
     static const string max_gens_opt_ab = "g";
@@ -294,6 +298,9 @@ int main(int argc,char** argv) {
         (string(output_bscore_opt_name).append(",").append(output_bscore_opt_ab).c_str(),
          value<bool>(&output_bscore)->default_value(false),
          "if 1, outputs the bscore below each candidate.")
+        (string(output_eval_number_opt_name).append(",").append(output_eval_number_opt_ab).c_str(),
+         value<bool>(&output_eval_number)->default_value(false),
+         "if 1, outputs the actual number of evaluations.")
         (string(max_gens_opt_name).append(",").append(max_gens_opt_ab).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit.")
@@ -400,7 +407,8 @@ int main(int argc,char** argv) {
         for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++)
             // we ignore the option log_file_dep_opt and any default one
             if(it->first != log_file_dep_opt_opt_name && !it->second.defaulted()
-               // this is because OSs usually do not handle file name above 255 chars
+               // this is because OSs usually do not handle file name
+               // above 255 chars
                && log_file.size() < 255)
                 log_file += string("_") + it->first + "_" + to_string(it->second);
         log_file += string(".") + default_log_file_suffix;
@@ -437,10 +445,20 @@ int main(int argc,char** argv) {
     }
 
     // set metapopulation parameters
-    metapop_parameters meta_param(revisit);
+    metapop_parameters meta_param(reduce_all, count_base, revisit);
 
     // set eda_parameters
     eda_parameters eda_param(pop_size_ratio);
+
+    // set moses_parameters
+    moses_parameters moses_param(max_evals, max_gens,
+                                 0 /*@todo: max_score*/,
+                                 ignore_ops);
+
+    // set metapop_moses_results_parameters
+    metapop_moses_results_parameters mmr_pa(result_count, output_complexity,
+                                            output_bscore, output_eval_number,
+                                            jobs);
 
     if(problem == it) { // regression based on input table
         
@@ -474,11 +492,9 @@ int main(int argc,char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
-                                  reduce_all, bscore, cache_size,
-                                  count_base, opt_algo,
-                                  eda_param, meta_param,
-                                  max_evals, max_gens, ignore_ops,
-                                  result_count, output_complexity, output_bscore);
+                                  bscore, cache_size, opt_algo,
+                                  eda_param, meta_param, moses_param,
+                                  vm, mmr_pa);
         }
         else if(output_type == id::contin_type) {
             // read input_table_file file
@@ -504,12 +520,9 @@ int main(int argc,char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
-                                  reduce_all, bscore, cache_size,
-                                  count_base, opt_algo,
-                                  eda_param, meta_param,
-                                  max_evals, max_gens, ignore_ops,
-                                  result_count, output_complexity,
-                                  output_bscore);
+                                  bscore, cache_size, opt_algo,
+                                  eda_param, meta_param, moses_param,
+                                  vm, mmr_pa);
         } else {
             unsupported_type_exit(output_type);
         }
@@ -536,12 +549,9 @@ int main(int argc,char** argv) {
                 metapop_moses_results(rng, exemplars, tt,
                                       logical_reduction(reduct_candidate_effort),
                                       logical_reduction(reduct_knob_building_effort),
-                                      reduce_all, bscore, cache_size,
-                                      count_base, opt_algo,
-                                      eda_param, meta_param,
-                                      max_evals, max_gens, ignore_ops,
-                                      result_count, output_complexity,
-                                      output_bscore);                
+                                      bscore, cache_size, opt_algo,
+                                      eda_param, meta_param, moses_param,
+                                      vm, mmr_pa);                
             }
             else if (output_type == id::contin_type) {
                 // @todo: introduce some noise optionally
@@ -559,12 +569,9 @@ int main(int argc,char** argv) {
                 metapop_moses_results(rng, exemplars, tt,
                                       contin_reduction(ignore_ops, rng),
                                       contin_reduction(ignore_ops, rng),
-                                      reduce_all, bscore, cache_size,
-                                      count_base, opt_algo,
-                                      eda_param, meta_param,
-                                      max_evals, max_gens, ignore_ops,
-                                      result_count, output_complexity,
-                                      output_bscore);
+                                      bscore, cache_size, opt_algo,
+                                      eda_param, meta_param, moses_param,
+                                      vm, mmr_pa);
             } else {
                 unsupported_type_exit(tt);
             }
@@ -588,12 +595,9 @@ int main(int argc,char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
-                              reduce_all, bscore, cache_size,
-                              count_base, opt_algo,
-                              eda_param, meta_param,
-                              max_evals, max_gens, ignore_ops,
-                              result_count, output_complexity,
-                              output_bscore);        
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
     } else if(problem == dj) { // disjunction
         // @todo: for the moment occam's razor and partial truth table are ignored
         unsigned int arity = problem_size;
@@ -610,12 +614,9 @@ int main(int argc,char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
-                              reduce_all, bscore, cache_size,
-                              count_base, opt_algo,
-                              eda_param, meta_param,
-                              max_evals, max_gens, ignore_ops,
-                              result_count, output_complexity,
-                              output_bscore);        
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
     } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
         unsigned int arity = 1;
 
@@ -637,12 +638,9 @@ int main(int argc,char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
-                              reduce_all, bscore, cache_size,
-                              count_base, opt_algo,
-                              eda_param, meta_param,
-                              max_evals, max_gens, ignore_ops,
-                              result_count, output_complexity,
-                              output_bscore);
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
     //////////////////
     // ANN problems //
     //////////////////
@@ -674,12 +672,9 @@ int main(int argc,char** argv) {
         metapop_moses_results(rng, exemplars, tt,
                               ann_reduction(),
                               ann_reduction(),
-                              reduce_all, bscore, cache_size,
-                              count_base, opt_algo,
-                              eda_param, meta_param,
-                              max_evals, max_gens, ignore_ops,
-                              result_count, output_complexity,
-                              output_bscore);
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
     } else if(problem == ann_cp) { // regression based on combo program using ann
         if(combo_str.empty())
             unspecified_combo_exit();
@@ -714,12 +709,9 @@ int main(int argc,char** argv) {
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
-                                  reduce_all, bscore, cache_size,
-                                  count_base, opt_algo,
-                                  eda_param, meta_param,
-                                  max_evals, max_gens, ignore_ops,
-                                  result_count, output_complexity,
-                                  output_bscore);
+                                  bscore, cache_size, opt_algo,
+                                  eda_param, meta_param, moses_param,
+                                  vm, mmr_pa);
         } else illformed_exit(tr);
     }
     else unsupported_problem_exit(problem);

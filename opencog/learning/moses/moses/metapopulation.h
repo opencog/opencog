@@ -48,20 +48,27 @@ typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
 
 /**
- * the parameter to decide how to select the deme from the population
+ * parameters to decide how to select the deme from the population
  */
 struct metapop_parameters {
-    metapop_parameters(bool _revisit = false) :
-        // when doing selection of examplars according to 2^-n,
-        // where n is complexity, only examplars with
-        // p>=2^-selection_max_range will be considered
+    metapop_parameters(bool _reduce_all = true, bool _countbs = true,
+                       bool _revisit = false) :
         selection_max_range(11),
-        
-        // when true then visited exemplars can be revisited
+        reduce_all(_reduce_all),
+        count_base(_countbs),
         revisit(_revisit)
     { }
     
+    // when doing selection of examplars according to 2^-n, where n is
+    // complexity, only examplars with p>=2^-selection_max_range will
+    // be considered
     double selection_max_range;
+    // if true then all candidates are reduced before evaluation
+    bool reduce_all;
+    // if true the scorer is count based, otherwise it is complexity
+    // based
+    bool count_base;
+    // when true then visited exemplars can be revisited
     bool revisit;
 };
 
@@ -115,11 +122,8 @@ struct metapopulation : public set < bscored_combo_tree,
      * @param bases   exemplars used to initialize the metapopulation
      * @param tt      type of expression to be learned
      * @param si      reduct rule for reducting
-     * @param ra      if true then all candidates are reduced before evaluation
      * @param sc      scoring function for scoring
      * @param bsc     behavior scoring function
-     * @param countbs if true the scorer is count based, otherwise it is
-     *                complexity based
      * @param opt     optimization should be providing for the learning
      * @param pa      parameter for selecting the deme 
      */
@@ -127,13 +131,13 @@ struct metapopulation : public set < bscored_combo_tree,
                    const std::vector<combo_tree>& bases,
                    const combo::type_tree& tt,
                    const reduct::rule& si_ca,
-                   const reduct::rule& si_kb, bool ra,
-                   const Scoring& sc, const BScoring& bsc, bool countbs,
+                   const reduct::rule& si_kb,
+                   const Scoring& sc, const BScoring& bsc,
                    const Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si_ca),
-        simplify_knob_building(&si_kb), reduce_all(ra), score(sc),
-        bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
+        simplify_knob_building(&si_kb), score(sc),
+        bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         init(bases);
@@ -145,13 +149,13 @@ struct metapopulation : public set < bscored_combo_tree,
     metapopulation(opencog::RandGen& _rng,
                    const combo_tree& base,
                    const combo::type_tree& tt,
-                   const reduct::rule& si, bool ra,
-                   const Scoring& sc, const BScoring& bsc, bool countbs,
+                   const reduct::rule& si,
+                   const Scoring& sc, const BScoring& bsc,
                    const Optimization& opt = Optimization(),
                    const metapop_parameters& pa = metapop_parameters()) :
         rng(_rng), type(tt), simplify_candidate(&si),
-        simplify_knob_building(&si), reduce_all(ra), score(sc),
-        bscore(bsc), count_base(countbs), optimize(opt), params(pa), _n_evals(0),
+        simplify_knob_building(&si), score(sc),
+        bscore(bsc), optimize(opt), params(pa), _n_evals(0),
         _best_score(worst_possible_score), _rep(NULL), _deme(NULL)
     {
         std::vector<combo_tree> bases(1, base);
@@ -170,10 +174,17 @@ struct metapopulation : public set < bscored_combo_tree,
     }
 
     /**
+     * return the best composite score
+     */
+    const composite_score& best_composite_score() const {
+        return _best_score;
+    }
+
+    /**
      * return the best score
      */
-    const composite_score& best_score() const {
-        return _best_score;
+    score_t best_score() const {
+        return get_score(_best_score);
     }
 
     /**
@@ -267,11 +278,7 @@ struct metapopulation : public set < bscored_combo_tree,
      * and add all unique non-dominated trees in the final deme as
      * potential exemplars for future demes.
      *
-     * @todo max_score is unused, not sure it should be used or
-     * removed
-     *
      * @param max_evals    the max evals
-     * @param max_score    the max score
      * @param ignore_ops   the operator set to ignore
      * @param perceptions  set of perceptions of an interactive agent
      * @param actions      set of actions of an interactive agent
@@ -280,7 +287,6 @@ struct metapopulation : public set < bscored_combo_tree,
      *
      */
     bool expand(int max_evals,
-                const composite_score& max_score,
                 const operator_set& ignore_ops = operator_set(),
                 const combo_tree_ns_set* perceptions = NULL,
                 const combo_tree_ns_set* actions = NULL)  {
@@ -301,7 +307,7 @@ struct metapopulation : public set < bscored_combo_tree,
         else {
             stringstream ss;
             ss << "The following candidate(s) have the best score " 
-               << best_score().first;
+               << best_score();
             logger().info(ss.str());
             foreach(const bscored_combo_tree& cand, best_candidates()) {
                 stringstream ss_tr;
@@ -359,7 +365,7 @@ struct metapopulation : public set < bscored_combo_tree,
                 }
             }
 
-            combo_tree tr(_exemplar->first);
+            combo_tree tr(get_tree(*_exemplar));
 
             // Logger
             { 
@@ -384,7 +390,7 @@ struct metapopulation : public set < bscored_combo_tree,
             if(_rep->fields().empty()) {
                 delete(_rep);
                 _rep = NULL;
-                _visited_exemplars.insert(_exemplar->first);
+                _visited_exemplars.insert(get_tree(*_exemplar));
                 // Logger
                 logger().debug("The representation is empty, perhaps the reduct"
                                " effort for knob building is too high");
@@ -413,7 +419,7 @@ struct metapopulation : public set < bscored_combo_tree,
      *         return -1 if all available is evaluated.
      */
     int optimize_deme(int max_evals, int max_for_slice,
-                      const composite_score& max_score) {
+                      score_t max_score) {
 
         if (_rep == NULL || _deme == NULL)
             return -1;
@@ -421,14 +427,14 @@ struct metapopulation : public set < bscored_combo_tree,
         //do some optimization according to the scoring function
         optimize.set_evals_per_slice(max_for_slice);
         int n;
-        if(count_base) { // count_based_scorer
+        if(params.count_base) { // count_based_scorer
             complexity_t cex = get_complexity(*_exemplar);
             count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, reduce_all, rng);
+                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all, rng);
             n = optimize(*_deme, scorer, max_evals);
         } else { // complexity_based_scorer
             complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, reduce_all, rng);
+                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all, rng);
             n = optimize(*_deme, scorer, max_evals);                
         }
 
@@ -471,14 +477,14 @@ struct metapopulation : public set < bscored_combo_tree,
         }
         // ~Logger
 
-        if(count_base) { // count_based_scorer
+        if(params.count_base) { // count_based_scorer
             complexity_t cex = get_complexity(*_exemplar);
             count_based_scorer<Scoring> scorer = 
-                count_based_scorer<Scoring>(score, *_rep, cex, reduce_all, rng);
+                count_based_scorer<Scoring>(score, *_rep, cex, params.reduce_all, rng);
             return optimize(*_deme, scorer, max_evals);
         } else { // complexity_based_scorer
             complexity_based_scorer<Scoring> scorer =
-                complexity_based_scorer<Scoring>(score, *_rep, reduce_all, rng);
+                complexity_based_scorer<Scoring>(score, *_rep, params.reduce_all, rng);
             return optimize(*_deme, scorer, max_evals);
         }
     }
@@ -504,7 +510,7 @@ struct metapopulation : public set < bscored_combo_tree,
         // ~Logger
 
         //mark the exemplar so we won't expand it again
-        _visited_exemplars.insert(_exemplar->first);
+        _visited_exemplars.insert(get_tree(*_exemplar));
 
         //add (as potential exemplars for future demes) all unique non-dominated
         //trees in the final deme
@@ -631,11 +637,8 @@ struct metapopulation : public set < bscored_combo_tree,
     combo::type_tree type;
     const reduct::rule* simplify_candidate; // to simplify candidates
     const reduct::rule* simplify_knob_building; // during knob building
-    bool reduce_all; // whether all candidates are reduced before evaluation
     const Scoring& score;
     const BScoring& bscore; // behavioral score
-    bool count_base; // if true then the scorer is count based,
-                     // otherwise it is complexity based
     Optimization optimize;
     metapop_parameters params;
 
@@ -657,5 +660,6 @@ protected:
     const_iterator _exemplar; // exemplar of the current deme
 };
 
+} // ~namespace moses
 
 #endif // _OPENCOG_METAPOPULATION_H

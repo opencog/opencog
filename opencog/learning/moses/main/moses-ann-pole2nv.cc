@@ -59,10 +59,10 @@ int main(int argc, char** argv)
     ann_pole2nv_score p2_score;
     ann_pole2nv_bscore p2_bscore; 
     metapopulation<ann_pole2nv_score, ann_pole2nv_bscore, univariate_optimization>
-        metapop_pole2(rng, tr, tt, *si, true, p2_score, p2_bscore, true,
+        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore,
                       univariate_optimization(rng));
-
-    moses::moses(metapop_pole2, max_evals, 100000);
+    moses_parameters moses_param(max_evals);
+    moses::moses(metapop_pole2, moses_param);
 
     //change best combo tree back into ANN
     tree_transform trans; 

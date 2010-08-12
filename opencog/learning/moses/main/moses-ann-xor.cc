@@ -66,10 +66,10 @@ int main(int argc, char** argv)
         si = &(clean_reduction());
 
     metapopulation<ann_score, ann_bscore, univariate_optimization>
-        metapop(rng, tr, tt, *si, true, score, bscore, true,
+        metapop(rng, tr, tt, *si, score, bscore,
                 univariate_optimization(rng));
-    
-    moses::moses(metapop, max_evals, 0.0);
+    moses_parameters moses_param(max_evals);
+    moses::moses(metapop, moses_param);
 
     //transform the best combo tree into an ANN
     tree_transform trans; 
@@ -99,5 +99,5 @@ int main(int argc, char** argv)
     bestnet.write_dot("best_nn.dot");
        
     //write out the best score (to be used in parameter sweep)
-    cout << metapop.best_score().first << endl;
+    cout << metapop.best_score() << endl;
 }

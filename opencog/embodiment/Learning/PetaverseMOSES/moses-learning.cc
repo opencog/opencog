@@ -55,7 +55,7 @@ moses_learning::moses_learning(int nepc,
         : _fitness_estimator(fitness_estimator), _comp(dos), _dos(dos), 
           _ignore_ops(ignore_ops),
           _perceptions(perceptions), _actions(actions), 
-          _rng(rng), max_score(pair<int, int>(0, 0))
+          _rng(rng), max_score(0)
 {
 
     _nepc = nepc;
@@ -148,8 +148,8 @@ void moses_learning::operator()()
 
         metapop = new metapopulation<petaverse_score, petaverse_bscore,
                                      sliced_iterative_hillclimbing>
-            (_rng, _center, tt, action_reduction(), true,
-             *score, *bscore, true, sliced_iterative_hillclimbing(_rng));
+            (_rng, _center, tt, action_reduction(),
+             *score, *bscore, sliced_iterative_hillclimbing(_rng));
 
         _hcState = HC_BUILD_CANDIDATES;
         start = clock ();
@@ -198,7 +198,7 @@ void moses_learning::operator()()
 
         //print the generation number and a best solution
         std::cout << "sampled " << metapop->n_evals()
-                  << " best " << metapop->best_score().first << " "
+                  << " best " << metapop->best_score() << " "
                   << metapop->best_tree() << std::endl;
 
         end = clock ();
@@ -206,13 +206,13 @@ void moses_learning::operator()()
 
         std::cout << "sampled " << metapop->n_evals() << std::endl;;
 
-        if (metapop->best_score().first >= _best_fitness_estimated) {
-            _best_fitness_estimated = metapop->best_score().first;
+        if (metapop->best_score() >= _best_fitness_estimated) {
+            _best_fitness_estimated = metapop->best_score();
             _best_program_estimated = metapop->best_tree();
         }
 
         std::cout << "best program in this iter: " << metapop->best_tree() << std::endl;
-        std::cout << "best score for this prog: " << metapop->best_score().first << std::endl;
+        std::cout << "best score for this prog: " << metapop->best_score() << std::endl;
 
         std::cout << "best program total: " << _best_program_estimated << std::endl;
         std::cout << "best score total: " << _best_fitness_estimated << std::endl;

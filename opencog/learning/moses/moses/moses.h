@@ -26,47 +26,71 @@
 
 #include "metapopulation.h"
 
+namespace moses
+{
+
 typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree, opencog::size_tree_order<combo::vertex> >
 combo_tree_ns_set;
 
+static const operator_set empty_ignore_ops = operator_set();
+
+/**
+ * parameters to decide how to run moses
+ */
+struct moses_parameters {
+    moses_parameters(int _max_evals = 10000,
+                     int _max_gens = -1,
+                     score_t _max_score = 0,
+                     const operator_set _ignore_ops = empty_ignore_ops,
+                     const combo_tree_ns_set* _perceptions = NULL,
+                     const combo_tree_ns_set* _actions = NULL) 
+        : max_evals(_max_evals), max_gens(_max_gens), max_score(_max_score),
+          ignore_ops(_ignore_ops), perceptions(_perceptions),
+          actions(_actions) {}
+    // total maximun number of evals
+    int max_evals;
+    // the max number of demes to create and optimize, if negative,
+    // then no limit
+    int max_gens;
+    // the max score
+    score_t max_score;
+    // the set of operators to ignore
+    const operator_set& ignore_ops;
+    // the set of perceptions of an optional interactive agent
+    const combo_tree_ns_set* perceptions;
+    // the set of actions of an optional interactive agent
+    const combo_tree_ns_set* actions;
+};
+
 /**
  * the main function of MOSES
  *
- * @param mp          the metapopulation 
- * @param max_evals   the max evaluations
- * @param max_gens    the max number of demes to create and optimize, if
- *                    negative, then no limit
- * @param max_score   the max score tree
- * @param ignore_ops  the set of operators to ignore
- * @param perceptions the set of perceptions of an optional interactive agent
- * @param actions     the set of actions of an optional interactive agent
+ * @param mp the metapopulation 
+ * @param pa the parameters to run moses
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
-           int max_evals, int max_gens, const composite_score& max_score,
-           const operator_set& ignore_ops = operator_set(),
-           const combo_tree_ns_set* perceptions = NULL,
-           const combo_tree_ns_set* actions = NULL)
+           const moses_parameters& pa = moses_parameters())
 {
     // Logger
     logger().info("MOSES starts");
     // ~Logger
     int gen_idx = 0;
 
-    while ((mp.n_evals() < max_evals) && (max_gens != gen_idx++)) {
+    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx++)) {
         // Logger
         logger().info("Deme expansion: %i", gen_idx);
         // ~Logger
 
         //run a generation
-        if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
-                      perceptions, actions)) {
+        if (mp.expand(pa.max_evals - mp.n_evals(), pa.ignore_ops,
+                      pa.perceptions, pa.actions)) {
         } else // In iterative hillclimbing it is possible (but not
                // likely) that the metapop gets empty and expand
                // return false
             break;
-        if (mp.best_score() >= max_score || mp.empty())
+        if (mp.best_score() >= pa.max_score || mp.empty())
             break;
     }    
     // Logger
@@ -74,31 +98,6 @@ void moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // ~Logger
 }
 
-
-template<typename Scoring, typename Domination, typename Optimization>
-void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, int max_gens, score_t max_score, 
-           const operator_set& ignore_ops = operator_set(),
-           const combo_tree_ns_set* perceptions = NULL,
-           const combo_tree_ns_set* actions = NULL)
-{
-    moses(mp, max_evals, max_gens, 
-          composite_score(max_score, worst_possible_score.second),
-          ignore_ops, perceptions, actions);
-}
-
-// ignore the max_gens, for backward compatibility
-template<typename Scoring, typename Domination, typename Optimization>
-void moses(metapopulation<Scoring, Domination, Optimization>& mp,
-           int max_evals, score_t max_score, 
-           const operator_set& ignore_ops = operator_set(),
-           const combo_tree_ns_set* perceptions = NULL,
-           const combo_tree_ns_set* actions = NULL)
-{
-    moses(mp, max_evals, -1, 
-          composite_score(max_score, worst_possible_score.second),
-          ignore_ops, perceptions, actions);
-}
 
 /**
  * @brief The sliced version of moses
@@ -113,28 +112,20 @@ void moses(metapopulation<Scoring, Domination, Optimization>& mp,
  * has a constructor including these parameters, specific for actions
  * 
  * @param mp the metapopulation
- * @param max_evals the max evlautions
- * @parma max_score the max score, the type is score tree
- * @param ignore_ops the operator set to ignore
- * @param perceptions the set of perceptions of the interactive agent
- * @param actions the set of actions of the interactive agent
+ * @param pa the parameters to run moses
  */
 template<typename Scoring, typename Domination, typename Optimization>
 void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
-                  int max_evals,
-                  const composite_score& max_score,
-                  const operator_set& ignore_ops,
-                  const combo_tree_ns_set* perceptions,
-                  const combo_tree_ns_set* actions)
+                  const moses_parameters& pa)
 {
     int o;
     int max_for_slice = 20;
 
-    while (mp.n_evals() < max_evals) {
+    while (mp.n_evals() < pa.max_evals) {
         o = 0;
-        if (mp.create_deme(ignore_ops, perceptions, actions)) {
+        if (mp.create_deme(pa.ignore_ops, pa.perceptions, pa.actions)) {
             while (o >= 0)
-                o = mp.optimize_deme(max_evals, max_for_slice, max_score);
+                o = mp.optimize_deme(pa.max_evals, max_for_slice, pa.max_score);
 
             mp.close_deme();
 
@@ -144,36 +135,10 @@ void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
 
     // print the best solution
     std::cout << "sampled " << mp.n_evals()
-              << " best " << mp.best_score().first << endl
+              << " best " << mp.best_score() << endl
               << mp.best_tree() << std::endl;
 }
 
-
-/**
- * @brief The sliced version of moses
- *
- * Lists of relevant operators, perceptions, and actions may or may not be
- * provided. The initial design assumed fixed lists, this version
- * has a constructor including these parameters, specific for actions
- * 
- * @param mp the metapopulation
- * @param max_evals the max evlautions
- * @parma max_score the max score, the type is score_t
- * @param ignore_ops the operator set to ignore
- * @param perceptions the set of perceptions of the interactive agent
- * @param actions the set of actions of the interactive agent
- */
-template<typename Scoring, typename Domination, typename Optimization>
-void moses_sliced(metapopulation<Scoring, Domination, Optimization>& mp,
-                  int max_evals, score_t max_score,
-                  const operator_set& ignore_ops,
-                  const combo_tree_ns_set* perceptions,
-                  const combo_tree_ns_set* actions)
-{
-    moses_sliced(mp, max_evals,
-                 composite_score(max_score, worst_possible_score.second),
-                 ignore_ops, perceptions, actions);
-}
 
 } //~namespace moses
 

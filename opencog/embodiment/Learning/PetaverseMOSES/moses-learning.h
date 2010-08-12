@@ -110,7 +110,7 @@ private:
     combo_tree_hash_set _used_for_owner; 
     int _number_of_calls;
 
-    const composite_score max_score;
+    const score_t max_score;
 
     typedef metapopulation<petaverse_score, petaverse_bscore, sliced_iterative_hillclimbing> metapop_t;
     metapop_t *metapop;

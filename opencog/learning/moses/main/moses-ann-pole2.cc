@@ -79,11 +79,12 @@ int main(int argc, char** argv)
     
     ann_pole2_score p2_score;
     ann_pole2_bscore p2_bscore; 
+
     metapopulation<ann_pole2_score, ann_pole2_bscore, univariate_optimization>
-        metapop_pole2(rng, tr, tt, *si, true, p2_score, p2_bscore, true,
+        metapop_pole2(rng, tr, tt, *si, p2_score, p2_bscore,
                       univariate_optimization(rng));
 
-    moses::moses(metapop_pole2, max_evals, 100000);
+    moses::moses(metapop_pole2);
 
     //change best combo tree back into ANN
     tree_transform trans; 
@@ -97,7 +98,7 @@ int main(int argc, char** argv)
     bestnet.write_dot("best_nn.dot"); 
 
     //for parameter sweet
-    cout << metapop_pole2.best_score().first << endl;
+    cout << metapop_pole2.best_score() << endl;
 }
 
 

@@ -41,13 +41,14 @@ int main(int argc, char** argv)
 
     //DOUBLE MARKOVIAN POLE TASK`
     ann_pole2_score p2_score;
-    ann_pole2_bscore p2_bscore; 
+    ann_pole2_bscore p2_bscore;
+
     metapopulation<ann_pole2_score, ann_pole2_bscore, iterative_hillclimbing>
-        metapop_pole2(rng, tr, tt, clean_reduction(), true,
-                      p2_score, p2_bscore, true,
+        metapop_pole2(rng, tr, tt, clean_reduction(),
+                      p2_score, p2_bscore,
                       iterative_hillclimbing(rng));
 
-    moses::moses(metapop_pole2, 10000, 100000);
+    moses::moses(metapop_pole2);
 
     combo_tree best = metapop_pole2.best_tree();
     ann bestnet = trans.decodify_tree(best);
@@ -57,7 +58,7 @@ int main(int argc, char** argv)
     bestnet.write_dot("best_nn.dot");    
 
     //for parameter sweet
-    cout << metapop_pole2.best_score().first << endl;
+    cout << metapop_pole2.best_score() << endl;
 }
 
 

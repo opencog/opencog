@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     metapopulation<interactive_score, interactive_bscore, iterative_hillclimbing>
         metapop(rng, combo_tree(id::sequential_and), tt, action_reduction(),
-                true, scorer, bscorer, true, iterative_hillclimbing(rng));
+                scorer, bscorer, iterative_hillclimbing(rng));
 
     cout << "build metapop" << endl;
 
@@ -73,7 +73,10 @@ int main(int argc, char** argv)
 
     perceptions.insert(combo_tree(instance(id::is_food_ahead)));
 
+
+    moses_parameters moses_param(max_evals, -1, 0,
+                                 ignore_ops, &perceptions, &actions);
+
     //had to put namespace moses otherwise gcc-4.1 complains that it is ambiguous
-    moses::moses(metapop, max_evals, 0, ignore_ops,
-                 &perceptions, &actions);
+    moses::moses(metapop, moses_param);
 }

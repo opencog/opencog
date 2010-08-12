@@ -9,6 +9,7 @@ ADD_LIBRARY (moses SHARED
 	moses/knobs
     moses/metapopulation
 	moses/moses
+    moses/distributed_moses
 	moses/representation
     moses/complexity
 	moses/scoring
