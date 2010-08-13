@@ -28,7 +28,7 @@
 
 #include <opencog/util/functional.h>
 #include <opencog/util/foreach.h>
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include "complexity.h"

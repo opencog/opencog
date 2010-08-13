@@ -27,7 +27,11 @@
 #include <stdio.h>
 #include <stropts.h>
 
+#include <ext/stdio_filebuf.h>
+
 #include <boost/program_options.hpp>
+
+#include <opencog/util/iostreamContainer.h>
 
 #include "../main/moses_options_names.h"
 #include "metapopulation.h"
@@ -83,14 +87,40 @@ string build_command_line(const variables_map& vm,
     return res;
 }
 
-void parse_result() {
-    // TODO
-}
+/**
+ * read the istream, add the candidates, fill max_evals
+ */
+void parse_result(istream& in, metapop_candidates& candidates, int& max_evals) {
+    while(!in.eof()) {
+        string s;
+        in >> s;
+        if(s == string(number_of_evals_str).append(":")) {
+            in >> max_evals;
+        } else {
+            // read score
+            score_t score = boost::lexical_cast<score_t>(s);
+            // read complexity
+            complexity_t complexity;
+            in >> complexity;
+            // read candidate
+            combo_tree tr;
+            in >> tr;
+            // read bscore
+            behavioral_score bscore;
+            opencog::istreamContainer(in, std::back_inserter(bscore), "[", "]");
+            // insert read element in candidates
+            candidates.insert(std::make_pair(tr,
+                                             std::make_pair(bscore,
+                                                            make_pair(score,
+                                                                      complexity))));
+        }
+    }
+};
 
 // run the given command, returns in stdout stream and fill pid with
 // its PID.
 // Works only under linux or other UNIX
-FILE* run_command(string command, int& pid) {
+FILE* launch_command(string command, int& pid) {
     // launch the command
     FILE* fp = popen(command.c_str(), "r");
     // get its PID
@@ -129,7 +159,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                                              pa.max_evals - mp.n_evals());
     
     int pid;
-    FILE* fp = run_command(command_line, pid);
+    FILE* fp = launch_command(command_line, pid);
 
     std::cout << pid << std::endl;
 
@@ -138,10 +168,16 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         std::cout << "STILL RUNNING" << std::endl;
     }
 
-    char line[4096];
-    while ( fgets( line, sizeof line, fp)) {
-        printf("%s", line);
+    // build istream from fp
+    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
+    istream sp(&pipe_buf);
+
+    while(!sp.eof()) {
+        string s;
+        sp >> s;
+        std::cout << s;
     }
+
     pclose(fp);
         
         //run a generation

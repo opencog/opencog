@@ -26,7 +26,7 @@
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 
 using opencog::ostreamContainer;
 

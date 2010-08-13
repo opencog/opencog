@@ -27,6 +27,16 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <ctype.h>
+
+#include <boost/lexical_cast.hpp>
+
+#include "foreach.h"
+#include "oc_assert.h"
+
+/**
+ * functions to read, write, print or convert to string generic containers
+ */
 
 namespace opencog {
     
@@ -35,7 +45,7 @@ namespace opencog {
      * 'delimiter', opening with 'left' and closing with 'right'.
      *
      * For instance if N = {1, 2, 3, 4} then
-     * ostreamContainer(std::cout, N.begin(), N.end(), "{", ";", "}")
+     * ostreamContainer(std::cout, N.begin(), N.end(), ";", "{", "}")
      * displays "{1;2;3;4}"
      *
      * @param empty_rl is a flag indicating whether to print left and
@@ -129,6 +139,80 @@ namespace opencog {
         std::stringstream ss;
         return ostreamContainer(ss, container,
                                 delimiter, left, right, empty_lr).str();
+    }
+
+    // used by istreamContainer
+    inline bool exists_white_space(const std::string& str) {
+        foreach(const char& c, str) if(isspace(c)) return true;
+        return false;
+    }
+    inline bool all_white_space(const std::string& str) {
+        foreach(const char& c, str) if(!isspace(c)) return false;
+        return true;
+    }
+
+    /**
+     * used by istreamContainer to check that the provided delimiter,
+     * left or right are well formed, that is do not
+     * containwhite-space and non-white-space characters in the same
+     * string
+     */
+    inline bool in_well_form(const std::string& str) {
+        return exists_white_space(str) && !all_white_space(str);
+    }
+
+    /**
+     * stream all elements in 'in' and put them in the container.
+     * For instance 
+     * std::stringstream ss("[ 1 2 3 4 ] 5");
+     * std::vector<int> nums;
+     * istreamContainer(ss, back_inserter(nums), [", "]");
+     * inserts 1 to 4 in nums.
+     * @note it is assumed the delimiter is a white-space
+     * @todo upgrade that function to work with any delimiter
+     *
+     * @param in        istream
+     * @param out       container out iterator
+     * @param left      left string expected
+     * @param right     right string expected
+     *
+     * @note left or right should not contain white-space and
+     * non-white-space characters in the same string, for instance ",
+     * ." is forbiden.
+     *
+     * In case things or in are not as expected an OC_ASSERT is
+     * raised.
+     * @todo it may be more appropriate to throw an expection rather
+     * than raising an OC_ASSERT
+     */
+    template<class In, class OutIt>
+    In& istreamContainer(In& in,
+                         OutIt out,
+                         const std::string& left = "",
+                         const std::string& right = "")
+    {
+        typedef typename OutIt::container_type::value_type T;
+
+        OC_ASSERT(in_well_form(left));
+        OC_ASSERT(in_well_form(right));
+
+        std::string s;
+        if(!all_white_space(left)) { // move to the next token
+            in >> s;
+        }
+        bool found_right = false;
+        while(!in.eof() && !found_right) {
+            in >> s;
+            try {
+                *out++ = boost::lexical_cast<T>(s);
+            }
+            catch(boost::bad_lexical_cast &)
+            {
+                found_right = !all_white_space(right) && s == right;
+                OC_ASSERT(found_right);
+            }
+        }
+        return in;
     }
     
 } // ~namespace opencog

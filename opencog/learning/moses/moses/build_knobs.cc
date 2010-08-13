@@ -24,7 +24,7 @@
 #include "build_knobs.h"
 #include <opencog/comboreduct/reduct/meta_rules.h>
 #include <opencog/comboreduct/reduct/general_rules.h>
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>

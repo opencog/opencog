@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 #include <boost/assign/list_of.hpp>
 
 using opencog::ostreamContainer;

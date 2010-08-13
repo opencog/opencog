@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 #include <opencog/util/RandGen.h>
 
 #include "vertex.h"

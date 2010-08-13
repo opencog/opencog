@@ -25,7 +25,7 @@
 #define _OPENCOG_TABLE_H
 
 #include <opencog/util/RandGen.h>
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
 #include "eval.h"
 

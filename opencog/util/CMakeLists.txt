@@ -39,7 +39,7 @@ ADD_LIBRARY(util
 	platform
 	StringManipulator
 	StringTokenizer
-    printContainer
+    iostreamContainer
 	tree
 	${WIN32_GETOPT_FILES}
     ${APPLE_STRNDUP_FILES}
@@ -77,7 +77,7 @@ INSTALL (FILES
 	selection.h
 	StringManipulator.h
 	StringTokenizer.h
-    printContainer.h
+    iostreamContainer.h
 	tree.h
 	DESTINATION "include/opencog/util"
 )

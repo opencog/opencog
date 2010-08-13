@@ -26,7 +26,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/util/printContainer.h>
+#include <opencog/util/iostreamContainer.h>
 
 #include <boost/variant.hpp>
 #include <time.h>
