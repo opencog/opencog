@@ -109,9 +109,8 @@ struct metapopulation : public set < bscored_combo_tree,
                           composite_behavioral_score(bscore(si_base), base_sc));
             candidates.insert(base_bsc);
 
-            // update the record of the best-seen score & trees
-            update_best_candidates(base_bsc);
         }
+        update_best_candidates(candidates);
         merge_nondominating(candidates.begin(), candidates.end(), *this);
     }
 
@@ -550,10 +549,10 @@ struct metapopulation : public set < bscored_combo_tree,
                                                              inst.second));
                 candidates.insert(candidate);
 
-                // also update the record of the best-seen score & trees
-                update_best_candidates(candidate);
             }
         }
+        // update the record of the best-seen score & trees
+        update_best_candidates(candidates);
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
@@ -590,14 +589,16 @@ struct metapopulation : public set < bscored_combo_tree,
     }
 
     // update the record of the best-seen score & trees
-    void update_best_candidates(const bscored_combo_tree& candidate) {
-        const composite_score& sc = get_composite_score(candidate);
-        if (sc >= _best_score) {
-            if (sc > _best_score) {
-                _best_score = sc;
-                _best_candidates.clear();
+    void update_best_candidates(const metapop_candidates& candidates) {
+        foreach(const bscored_combo_tree& candidate, candidates) {
+            const composite_score& sc = get_composite_score(candidate);
+            if (sc >= _best_score) {
+                if (sc > _best_score) {
+                    _best_score = sc;
+                    _best_candidates.clear();
+                }
+                _best_candidates.insert(candidate);
             }
-            _best_candidates.insert(candidate);
         }
     }
 

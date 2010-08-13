@@ -158,7 +158,7 @@ namespace opencog {
      * string
      */
     inline bool in_well_form(const std::string& str) {
-        return exists_white_space(str) && !all_white_space(str);
+        return !exists_white_space(str) || all_white_space(str);
     }
 
     /**
@@ -208,7 +208,14 @@ namespace opencog {
             }
             catch(boost::bad_lexical_cast &)
             {
-                found_right = !all_white_space(right) && s == right;
+                // check if right is not appended to the last element
+                int appended_pos = s.size() - right.size();
+                bool found_appended_right = appended_pos > 0
+                    && s.rfind(right) == (size_t)appended_pos;
+                if(found_appended_right)
+                    *out++ = boost::lexical_cast<T>(s.substr(0, appended_pos));
+                found_right = found_appended_right
+                    || (!all_white_space(right) && s == right);
                 OC_ASSERT(found_right);
             }
         }

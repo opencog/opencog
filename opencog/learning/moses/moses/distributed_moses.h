@@ -90,12 +90,14 @@ string build_command_line(const variables_map& vm,
 /**
  * read the istream, add the candidates, fill max_evals
  */
-void parse_result(istream& in, metapop_candidates& candidates, int& max_evals) {
+void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
     while(!in.eof()) {
         string s;
         in >> s;
-        if(s == string(number_of_evals_str).append(":")) {
-            in >> max_evals;
+        if(s.empty())
+            continue;
+        else if(s == string(number_of_evals_str).append(":")) {
+            in >> evals;
         } else {
             // read score
             score_t score = boost::lexical_cast<score_t>(s);
@@ -161,34 +163,34 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     int pid;
     FILE* fp = launch_command(command_line, pid);
 
-    std::cout << pid << std::endl;
-
+    // wait till completion
     while(pid_running(pid)) {
         sleep(1);
-        std::cout << "STILL RUNNING" << std::endl;
     }
 
     // build istream from fp
     __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
     istream sp(&pipe_buf);
 
-    while(!sp.eof()) {
-        string s;
-        sp >> s;
-        std::cout << s;
-    }
-
+    // parse the result
+    metapop_candidates candidates;
+    int evals;
+    parse_result(sp, candidates, evals);
     pclose(fp);
+
+    // update best and merge
+    mp.update_best_candidates(candidates);
+    merge_nondominating(candidates.begin(), candidates.end(), mp);
         
-        //run a generation
-        // if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
-        //               perceptions, actions)) {
-        // } else // In iterative hillclimbing it is possible (but not
-        //        // likely) that the metapop gets empty and expand
-        //        // return false
-        //     break;
-        // if (mp.best_score() >= max_score || mp.empty())
-        //     break;
+    //run a generation
+    // if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
+    //               perceptions, actions)) {
+    // } else // In iterative hillclimbing it is possible (but not
+    //        // likely) that the metapop gets empty and expand
+    //        // return false
+    //     break;
+    // if (mp.best_score() >= max_score || mp.empty())
+    //     break;
     //    }    
     // Logger
     logger().info("Distributed MOSES ends");

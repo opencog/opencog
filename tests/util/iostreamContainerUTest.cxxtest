@@ -1,8 +1,8 @@
 /** printContainerUTest.cxxtest --- 
  *
- * Copyright (C) 2010 Nil Geisweiller
+ * Copyright (C) 2010 Novamente LLC
  *
- * Author: Nil Geisweiller <nilg@nilg-laptop>
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,7 +24,7 @@
 #include <boost/assign/list_of.hpp>
 
 using opencog::ostreamContainer;
-using opencog::printContainer;
+using opencog::istreamContainer;
 
 using std::stringstream;
 using std::string;
@@ -41,9 +41,15 @@ public:
         _N = list_of(1)(2)(3)(4);
     }
 
-    void testOStreamContainer() {
+    void test_ostreamContainer() {
         stringstream ss;
         ostreamContainer(ss, _N, ";", "{", "}");
         TS_ASSERT_EQUALS(string("{1;2;3;4}"), ss.str());
+    }
+    void test_istreamContainer() {
+        std::vector<int> N;
+        stringstream ss("[ 1 2 3 4 ] 5");
+        istreamContainer(ss, std::back_inserter(N), "[", "]");
+        TS_ASSERT_EQUALS(_N, N);
     }
 };
