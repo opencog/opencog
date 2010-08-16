@@ -62,6 +62,7 @@ string build_command_line(const variables_map& vm,
            && it->first != jobs_opt.first
            && it->first != max_evals_opt.first
            && it->first != max_gens_opt.first
+           && it->first != result_count_opt.first
            && !it->second.defaulted()) {
             res += string(" --") + it->first + " " + to_string(it->second);
         }
@@ -81,6 +82,8 @@ string build_command_line(const variables_map& vm,
     res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
     res += string(" -") + log_file_dep_opt_opt.second;
+    // add option to return all results
+    res += string(" -") + result_count_opt.second + " -1";
 
     // it seems ok so far, there is probably a limit but it is above 255
     // OC_ASSERT(res.size() < 255,
