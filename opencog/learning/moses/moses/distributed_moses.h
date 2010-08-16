@@ -54,14 +54,14 @@ string build_command_line(const variables_map& vm,
     // replicate initial command's options, except:
     // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
-        if(it->first != exemplars_str_opt_name
-           && it->first != exemplars_str_opt_name
-           && it->first != output_bscore_opt_name
-           && it->first != output_complexity_opt_name
-           && it->first != output_eval_number_opt_name
-           && it->first != jobs_opt_name
-           && it->first != max_evals_opt_name
-           && it->first != max_gens_opt_name
+        if(it->first != exemplars_str_opt.first
+           && it->first != exemplars_str_opt.first
+           && it->first != output_bscore_opt.first
+           && it->first != output_complexity_opt.first
+           && it->first != output_eval_number_opt.first
+           && it->first != jobs_opt.first
+           && it->first != max_evals_opt.first
+           && it->first != max_gens_opt.first
            && !it->second.defaulted()) {
             res += string(" --") + it->first + " " + to_string(it->second);
         }
@@ -69,18 +69,18 @@ string build_command_line(const variables_map& vm,
     // add exemplar option
     stringstream ss;
     ss << tr;
-    res += string(" -") + exemplars_str_opt_ab + " \"" + ss.str() + "\"";
+    res += string(" -") + exemplars_str_opt.second + " \"" + ss.str() + "\"";
     // add output options
-    res += string(" -") + output_bscore_opt_ab + " 1";
-    res += string(" -") + output_complexity_opt_ab + " 1";
-    res += string(" -") + output_eval_number_opt_ab + " 1";    
+    res += string(" -") + output_bscore_opt.second + " 1";
+    res += string(" -") + output_complexity_opt.second + " 1";
+    res += string(" -") + output_eval_number_opt.second + " 1";    
     // add number of evals option
-    res += string(" -") + max_evals_opt_ab + " " 
+    res += string(" -") + max_evals_opt.second + " " 
         + boost::lexical_cast<string>(max_evals);
     // add one generation option
-    res += string(" -") + max_gens_opt_ab + " 1";
+    res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
-    res += string(" -") + log_file_dep_opt_opt_ab;
+    res += string(" -") + log_file_dep_opt_opt.second;
     
     OC_ASSERT(res.size() < 255,
               "It is unlikely the OS support such a long name %s, the only thing"

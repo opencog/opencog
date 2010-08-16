@@ -33,99 +33,39 @@
 static const string number_of_evals_str = "#evals";
 
 // program option names and abbreviations
-static const string rand_seed_opt_name = "random-seed";
-static const string rand_seed_opt_ab = "r";
-
-static const string input_table_file_opt_name = "input-file";
-static const string input_table_file_opt_ab = "i";
-
-static const string problem_opt_name = "problem";
-static const string problem_opt_ab = "H";
-
-static const string combo_str_opt_name = "combo-program";
-static const string combo_str_opt_ab = "y";
-
-static const string problem_size_opt_name = "problem-size";
-static const string problem_size_opt_ab = "k";
-
-static const string nsamples_opt_name = "nsamples";
-static const string nsamples_opt_ab = "b";
-
-static const string min_rand_input_opt_name = "min-rand-input";
-static const string min_rand_input_opt_ab = "q";
-
-static const string max_rand_input_opt_name = "max-rand-input";
-static const string max_rand_input_opt_ab = "w";
-
-static const string max_evals_opt_name = "max-evals";
-static const string max_evals_opt_ab = "m";
-
-static const string result_count_opt_name = "result-count";
-static const string result_count_opt_ab = "c";
-
-static const string output_bscore_opt_name = "output-bscore";
-static const string output_bscore_opt_ab = "t";
-
-static const string output_complexity_opt_name = "output-complexity";
-static const string output_complexity_opt_ab = "x";
-
-static const string output_eval_number_opt_name = "output-eval-number";
-static const string output_eval_number_opt_ab = "V";
-
-static const string max_gens_opt_name = "max-gens";
-static const string max_gens_opt_ab = "g";
-
-static const string log_level_opt_name = "log-level";
-static const string log_level_opt_ab = "l";
-
-static const string log_file_opt_name = "log-file";
-static const string log_file_opt_ab = "f";
+static const pair<string, string> rand_seed_opt("random-seed", "r");
+static const pair<string, string> input_table_file_opt("input-file", "i");
+static const pair<string, string> problem_opt("problem", "H");
+static const pair<string, string> combo_str_opt("combo-program", "y");
+static const pair<string, string> problem_size_opt("problem-size", "k");
+static const pair<string, string> nsamples_opt("nsamples", "b");
+static const pair<string, string> min_rand_input_opt("min-rand-input", "q");
+static const pair<string, string> max_rand_input_opt("max-rand-input", "w");
+static const pair<string, string> max_evals_opt("max-evals", "m");
+static const pair<string, string> result_count_opt("result-count", "c");
+static const pair<string, string> output_bscore_opt("output-bscore", "t");
+static const pair<string, string> output_complexity_opt("output-complexity", "x");
+static const pair<string, string> output_eval_number_opt("output-eval-number", "V");
+static const pair<string, string> max_gens_opt("max-gens", "g");
+static const pair<string, string> log_level_opt("log-level", "l");
+static const pair<string, string> log_file_opt("log-file", "f");
 static const string default_log_file_prefix = "moses";
 static const string default_log_file_suffix = "log";
 static const string default_log_file = default_log_file_prefix + "." + default_log_file_suffix;
-
-static const string log_file_dep_opt_opt_name = "log-file-dep-opt";
-static const string log_file_dep_opt_opt_ab = "L";
-
-static const string variance_opt_name = "variance";
-static const string variance_opt_ab = "v";
-
-static const string prob_opt_name = "probability";
-static const string prob_opt_ab = "p";
-
-static const string ignore_ops_str_opt_name = "ignore-operator";
-static const string ignore_ops_str_opt_ab = "n";
-
-static const string opt_algo_opt_name = "opt-algo";
-static const string opt_algo_opt_ab = "a";
-
-static const string exemplars_str_opt_name = "exemplar";
-static const string exemplars_str_opt_ab = "e";
-
-static const string reduct_candidate_effort_opt_name = "reduct-candidate-effort";
-static const string reduct_candidate_effort_opt_ab = "E";
-
-static const string reduct_knob_building_effort_opt_name = "reduct-knob-building-effort";
-static const string reduct_knob_building_effort_opt_ab = "B";
-
-static const string reduce_all_opt_name = "reduce-all";
-static const string reduce_all_opt_ab = "d";
-
-
-static const string count_base_opt_name = "count-based-scorer";
-static const string count_base_opt_ab = "u";
-
-static const string cache_size_opt_name = "cache-size";
-static const string cache_size_opt_ab = "s";
-
-static const string revisit_opt_name = "revisit";
-static const string revisit_opt_ab = "R";
-
-static const string jobs_opt_name = "jobs";
-static const string jobs_opt_ab = "j";
-
-static const string pop_size_ratio_opt_name = "pop-size-ratio";
-static const string pop_size_ratio_opt_ab = "P";
+static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
+static const pair<string, string> variance_opt("variance", "v");
+static const pair<string, string> prob_opt("probability", "p");
+static const pair<string, string> ignore_ops_str_opt("ignore-operator", "n");
+static const pair<string, string> opt_algo_opt("opt-algo", "a");
+static const pair<string, string> exemplars_str_opt("exemplar", "e");
+static const pair<string, string> reduct_candidate_effort_opt("reduct-candidate-effort", "E");
+static const pair<string, string> reduct_knob_building_effort_opt("reduct-knob-building-effort", "B");
+static const pair<string, string> reduce_all_opt("reduce-all", "d");
+static const pair<string, string> count_base_opt("count-based-scorer", "u");
+static const pair<string, string> cache_size_opt("cache-size", "s");
+static const pair<string, string> revisit_opt("revisit", "R");
+static const pair<string, string> jobs_opt("jobs", "j");
+static const pair<string, string> pop_size_ratio_opt("pop-size-ratio", "P");
 
 // used to convert program option argument to string.
 // @todo: ugly, it is likely something better can be done using

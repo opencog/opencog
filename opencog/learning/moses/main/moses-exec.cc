@@ -192,31 +192,31 @@ int main(int argc,char** argv) {
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message.")
-        (string(rand_seed_opt_name).append(",").append(rand_seed_opt_ab).c_str(),
+        (string(rand_seed_opt.first).append(",").append(rand_seed_opt.second).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "random seed.")
-        (string(max_evals_opt_name).append(",").append(max_evals_opt_ab).c_str(),
+        (string(max_evals_opt.first).append(",").append(max_evals_opt.second).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations.")
-        (string(result_count_opt_name).append(",").append(result_count_opt_ab).c_str(),
+        (string(result_count_opt.first).append(",").append(result_count_opt.second).c_str(),
          value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them.")
-        (string(output_complexity_opt_name).append(",").append(output_complexity_opt_ab).c_str(),
+        (string(output_complexity_opt.first).append(",").append(output_complexity_opt.second).c_str(),
          value<bool>(&output_complexity)->default_value(false),
          "if 1, outputs the complexity before each candidate (at the right of the score).")
-        (string(output_bscore_opt_name).append(",").append(output_bscore_opt_ab).c_str(),
+        (string(output_bscore_opt.first).append(",").append(output_bscore_opt.second).c_str(),
          value<bool>(&output_bscore)->default_value(false),
          "if 1, outputs the bscore below each candidate.")
-        (string(output_eval_number_opt_name).append(",").append(output_eval_number_opt_ab).c_str(),
+        (string(output_eval_number_opt.first).append(",").append(output_eval_number_opt.second).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
          "if 1, outputs the actual number of evaluations.")
-        (string(max_gens_opt_name).append(",").append(max_gens_opt_ab).c_str(),
+        (string(max_gens_opt.first).append(",").append(max_gens_opt.second).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit.")
-        (string(input_table_file_opt_name).append(",").append(input_table_file_opt_ab).c_str(),
+        (string(input_table_file_opt.first).append(",").append(input_table_file_opt.second).c_str(),
          value<string>(&input_table_file),
          "input table file, the maximum number of samples is the number of rows in the file.")
-        (string(problem_opt_name).append(",").append(problem_opt_ab).c_str(),
+        (string(problem_opt.first).append(",").append(problem_opt.second).c_str(),
          value<string>(&problem)->default_value("it"),
          string("problem to solve, supported problems are"
                 " regression based on input table (").append(it).
@@ -226,72 +226,72 @@ int main(int argc,char** argv) {
          append("), disjunction (").append(dj).
          append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").").c_str())
-        (string(combo_str_opt_name).append(",").append(combo_str_opt_ab).c_str(),
+        (string(combo_str_opt.first).append(",").append(combo_str_opt.second).c_str(),
          value<string>(&combo_str),
          string("combo program to learn, use when the problem ").append(cp).append(" is selected (option -h).").c_str())
-        (string(problem_size_opt_name).append(",").append(problem_size_opt_ab).c_str(),
+        (string(problem_size_opt.first).append(",").append(problem_size_opt.second).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
          string("for even parity (").append(pa).
          append(") and disjunction (").append(dj).
          append(") the problem size corresponds to the arity,"
                 " for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
          append(") the problem size corresponds to the order o.").c_str())
-        (string(nsamples_opt_name).append(",").append(nsamples_opt_ab).c_str(),
+        (string(nsamples_opt.first).append(",").append(nsamples_opt.second).c_str(),
          value<int>(&nsamples)->default_value(-1),
          "number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored.")
-        (string(min_rand_input_opt_name).append(",").append(min_rand_input_opt_ab).c_str(),
+        (string(min_rand_input_opt.first).append(",").append(min_rand_input_opt.second).c_str(),
          value<float>(&min_rand_input)->default_value(0),
          "min of an input value chosen randomly, only used when the problem takes continuous inputs")
-        (string(max_rand_input_opt_name).append(",").append(max_rand_input_opt_ab).c_str(),
+        (string(max_rand_input_opt.first).append(",").append(max_rand_input_opt.second).c_str(),
          value<float>(&max_rand_input)->default_value(1),
          "max of an input value chosen randomly, only used when the problem takes continuous inputs")
-        (string(log_level_opt_name).append(",").append(log_level_opt_ab).c_str(),
+        (string(log_level_opt.first).append(",").append(log_level_opt.second).c_str(),
          value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.")
-        (string(log_file_dep_opt_opt_name).append(",").append(log_file_dep_opt_opt_ab).c_str(),
+        (string(log_file_dep_opt_opt.first).append(",").append(log_file_dep_opt_opt.second).c_str(),
          "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than 255 characters.")
-        (string(log_file_opt_name).append(",").append(log_file_opt_ab).c_str(),
+        (string(log_file_opt.first).append(",").append(log_file_opt.second).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
-         string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt_name).append(".").c_str())
-        (string(variance_opt_name).append(",").append(variance_opt_ab).c_str(),
+         string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt.first).append(".").c_str())
+        (string(variance_opt.first).append(",").append(variance_opt.second).c_str(),
          value<float>(&variance)->default_value(0),
          "in the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor.")
-        (string(prob_opt_name).append(",").append(prob_opt_ab).c_str(),
+        (string(prob_opt.first).append(",").append(prob_opt.second).c_str(),
          value<float>(&prob)->default_value(0),
          "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.")
-        (string(ignore_ops_str_opt_name).append(",").append(ignore_ops_str_opt_ab).c_str(),
+        (string(ignore_ops_str_opt.first).append(",").append(ignore_ops_str_opt.second).c_str(),
          value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored.")
-        (string(opt_algo_opt_name).append(",").append(opt_algo_opt_ab).c_str(),
+        (string(opt_algo_opt.first).append(",").append(opt_algo_opt.second).c_str(),
          value<string>(&opt_algo)->default_value(un),
          string("optimization algorithm, supported algorithms are"
                 " univariate (").append(un).
          append("), simulation annealing (").append(sa).
          append("), hillclimbing (").append(hc).append(").").c_str())
-        (string(exemplars_str_opt_name).append(",").append(exemplars_str_opt_ab).c_str(),
+        (string(exemplars_str_opt.first).append(",").append(exemplars_str_opt.second).c_str(),
          value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times.")
-        (string(reduce_all_opt_name).append(",").append(reduce_all_opt_ab).c_str(),
+        (string(reduce_all_opt.first).append(",").append(reduce_all_opt.second).c_str(),
          value<bool>(&reduce_all)->default_value(true),
          "reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not evaluate multiple time equivalent candidates.")
-        (string(reduct_candidate_effort_opt_name).append(",").append(reduct_candidate_effort_opt_ab).c_str(),         
+        (string(reduct_candidate_effort_opt.first).append(",").append(reduct_candidate_effort_opt.second).c_str(),         
          value<int>(&reduct_candidate_effort)->default_value(2),
          "effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.")
-        (string(reduct_knob_building_effort_opt_name).append(",").append(reduct_knob_building_effort_opt_ab).c_str(),
+        (string(reduct_knob_building_effort_opt.first).append(",").append(reduct_knob_building_effort_opt.second).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.")
-        (string(count_base_opt_name).append(",").append(count_base_opt_ab).c_str(),
+        (string(count_base_opt.first).append(",").append(count_base_opt.second).c_str(),
          value<bool>(&count_base)->default_value(false),
          "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.")
-        (string(cache_size_opt_name).append(",").append(cache_size_opt_ab).c_str(),
+        (string(cache_size_opt.first).append(",").append(cache_size_opt.second).c_str(),
          value<unsigned long>(&cache_size)->default_value(1000000),
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache.")
-        (string(revisit_opt_name).append(",").append(revisit_opt_ab).c_str(),
+        (string(revisit_opt.first).append(",").append(revisit_opt.second).c_str(),
          "revisit visited examplars when all have been visited")
-        (string(jobs_opt_name).append(",").append(jobs_opt_ab).c_str(),
+        (string(jobs_opt.first).append(",").append(jobs_opt.second).c_str(),
          value<unsigned int>(&jobs)->default_value(1),
          "number of jobs allocated for deme optimization")
-        (string(pop_size_ratio_opt_name).append(",").append(pop_size_ratio_opt_ab).c_str(),
+        (string(pop_size_ratio_opt.first).append(",").append(pop_size_ratio_opt.second).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "the higher the more effort is spent on a deme")
         ;
@@ -301,9 +301,9 @@ int main(int argc,char** argv) {
     notify(vm);
 
     // set flags
-    revisit = vm.count(revisit_opt_name) > 0;
+    revisit = vm.count(revisit_opt.first) > 0;
     log_file_dep_opt = 
-        vm.count(log_file_dep_opt_opt_name) > 0 && log_file == default_log_file;
+        vm.count(log_file_dep_opt_opt.first) > 0 && log_file == default_log_file;
     
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
@@ -316,11 +316,15 @@ int main(int argc,char** argv) {
         log_file = default_log_file_prefix;
         for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++)
             // we ignore the option log_file_dep_opt and any default one
-            if(it->first != log_file_dep_opt_opt_name && !it->second.defaulted()
-               // this is because OSs usually do not handle file name
-               // above 255 chars
-               && log_file.size() < 255) {
-                log_file += string("_") + it->first + "_" + to_string(it->second);
+            if(it->first != log_file_dep_opt_opt.first && !it->second.defaulted()) {
+                string str = string("_") + it->first + "_" + to_string(it->second);
+                // this is because OSs usually do not handle file name
+                // above 255 chars
+                unsigned int expected_max_size =
+                    log_file.size()+str.size()+default_log_file_suffix.size()+1;
+                if(expected_max_size < 255) {
+                    log_file += str;
+                }
             }
         log_file += string(".") + default_log_file_suffix;
     }
