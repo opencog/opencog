@@ -33,7 +33,7 @@
 
 #include <opencog/util/iostreamContainer.h>
 
-#include "../main/moses_options_names.h"
+#include "../main/moses_exec_def.h"
 #include "metapopulation.h"
 #include "moses.h"
 
@@ -49,8 +49,14 @@ using namespace boost::program_options;
  * metapopulation
  */
 string build_command_line(const variables_map& vm, 
-                          const combo_tree& tr, unsigned int max_evals) {
-    string res("./moses-exec");
+                          const combo_tree& tr,
+                          const string& host_name,
+                          unsigned int max_evals) {
+    string res;
+    if(host_name == localhost)
+        res = "moses-exec";
+    else
+        res = string("ssh ") + host_name + " moses-exec";
     // replicate initial command's options, except:
     // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
@@ -146,6 +152,32 @@ bool pid_running(int pid) {
     return access(path.c_str(), F_OK) != -1;
 }
 
+// map the FILE of the output of the process and its PID
+typedef std::map<FILE*, int> proc_map;
+// map the name of host and its proc_map
+typedef std::map<string, proc_map> host_proc_map;
+
+host_proc_map init(const jobs_t& jobs)
+{
+    host_proc_map hpm;
+    foreach(const jobs_t::value_type job, jobs) {
+        hpm.insert(make_pair(job.first, proc_map()));
+    }
+    return hpm;
+}
+
+host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& jobs)
+{
+    host_proc_map::iterator hpm_it = hpm.begin();
+    for(jobs_t::const_iterator jit = jobs.begin(); jit != jobs.end();
+        jit++, hpm_it++) {
+        OC_ASSERT(jit->first == hpm_it->first);
+        if(hpm_it->second.size() < jit->second)
+            break;
+    }
+    return hpm_it;
+}
+
 /**
  * the main function of Distributed MOSES
  *
@@ -153,7 +185,7 @@ bool pid_running(int pid) {
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
-                       const variables_map& vm, unsigned int jobs,
+                       const variables_map& vm, const jobs_t& jobs,
                        const moses_parameters& pa = moses_parameters())
 {
     // Logger
@@ -161,22 +193,24 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     // ~Logger
 
     typedef typename metapopulation<Scoring, BScoring, Optimization>::const_iterator mp_cit;
-    typedef std::map<FILE*, int> proc_map;
-    proc_map pm;
 
     int gen_idx = 0;
+
+    host_proc_map hpm = init(jobs);
 
     while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx) 
            && (mp.best_score() < pa.max_score)) {
         // if there exists free resource, launch a process
-        if(pm.size() < jobs) {
+        host_proc_map::iterator hpm_it = find_free_resource(hpm, jobs);
+        if(hpm_it != hpm.end()) {
             mp_cit exemplar = mp.select_exemplar();
             if(exemplar != mp.end()) {
                 const combo_tree& tr = get_tree(*mp.select_exemplar());
                 mp.visited().insert(tr);
 
                 string command_line =
-                    build_command_line(vm, tr, pa.max_evals - mp.n_evals());
+                    build_command_line(vm, tr, hpm_it->first,
+                                       pa.max_evals - mp.n_evals());
 
                 int pid;
                 FILE* fp = launch_command(command_line, pid);
@@ -187,42 +221,44 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 logger().info("corresponding to PID = %d", pid);
                 // ~Logger
 
-                pm.insert(make_pair(fp, pid));
+                hpm_it->second.insert(make_pair(fp, pid));
                 gen_idx++;
             }
         }
 
         // check for result and merge if so
-        for(proc_map::iterator cit = pm.begin(); cit != pm.end();) {
-            if(!pid_running(cit->second)) { // result is ready
-                FILE* fp = cit->first;
-                // build istream from fp
-                __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
-                istream sp(&pipe_buf);
+        foreach(host_proc_map::value_type& hpmv, hpm) {
+            for(proc_map::iterator it = hpmv.second.begin(); it != hpmv.second.end();) {
+                if(!pid_running(it->second)) { // result is ready
+                    FILE* fp = it->first;
+                    // build istream from fp
+                    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
+                    istream sp(&pipe_buf);
                 
-                // parse the result
-                metapop_candidates candidates;
-                int evals;
-                parse_result(sp, candidates, evals);
-                mp.n_evals() += evals;
+                    // parse the result
+                    metapop_candidates candidates;
+                    int evals;
+                    parse_result(sp, candidates, evals);
+                    mp.n_evals() += evals;
 
-                // update best and merge
-                // Logger
-                logger().info("Merge %u candidates from PID %d"
-                              " with the metapopulation",
-                              candidates.size(), cit->second);
-                // ~Logger
-                mp.update_best_candidates(candidates);
-                merge_nondominating(candidates.begin(), candidates.end(), mp);
+                    // update best and merge
+                    // Logger
+                    logger().info("Merge %u candidates from PID %d"
+                                  " with the metapopulation",
+                                  candidates.size(), it->second);
+                    // ~Logger
+                    mp.update_best_candidates(candidates);
+                    merge_nondominating(candidates.begin(), candidates.end(), mp);
 
-                // close file and remove proc info from pm
-                pclose(fp);
-                proc_map::iterator next_cit(cit);
-                next_cit++;
-                pm.erase(cit);
-                cit = next_cit;
+                    // close file and remove proc info from pm
+                    pclose(fp);
+                    proc_map::iterator next_it(it);
+                    next_it++;
+                    hpmv.second.erase(it);
+                    it = next_it;
+                }
+                else it++;
             }
-            else cit++;
         }
 
         // wait for a second to not take all resources

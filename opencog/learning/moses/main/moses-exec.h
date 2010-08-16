@@ -46,6 +46,7 @@
 #include "../moses/optimization.h"
 #include "../moses/scoring_functions.h"
 #include "../moses/scoring.h"
+#include "moses_exec_def.h"
 
 using namespace boost::program_options;
 using boost::lexical_cast;
@@ -75,13 +76,12 @@ static const string un="un"; // univariate
 static const string sa="sa"; // simulation annealing
 static const string hc="hc"; // hillclimbing
 
-
 struct metapop_moses_results_parameters {
     metapop_moses_results_parameters(long _result_count,
                                      bool _output_complexity,
                                      bool _output_bscore,
                                      bool _output_eval_number,
-                                     unsigned int _jobs) : 
+                                     const jobs_t& _jobs) : 
         result_count(_result_count), output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         jobs(_jobs) {}
@@ -89,7 +89,7 @@ struct metapop_moses_results_parameters {
     bool output_complexity;
     bool output_bscore;
     bool output_eval_number;
-    unsigned int jobs;
+    const jobs_t& jobs;
 };
 
 /**
@@ -114,9 +114,9 @@ void metapop_moses_results(opencog::RandGen& rng,
     metapopulation<Score, BScore, Optimization> 
         metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_param);
     // run moses
-    if(pa.jobs > 1) {
-        moses::distributed_moses(metapop, vm, pa.jobs, moses_param);
-    } else moses::moses(metapop, moses_param);
+    if(pa.jobs.empty()) {
+        moses::moses(metapop, moses_param);
+    } else moses::distributed_moses(metapop, vm, pa.jobs, moses_param);
     // print result
     metapop.print_best(pa.result_count, pa.output_complexity, pa.output_bscore);
     if(pa.output_eval_number)

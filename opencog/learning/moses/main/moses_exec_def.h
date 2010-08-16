@@ -1,4 +1,4 @@
-/** moses_options_names.h --- 
+/** moses_exec_def.h --- 
  *
  * Copyright (C) 2010 Novamente LLC
  *
@@ -21,13 +21,16 @@
  */
 
 
-#ifndef _OPENCOG_MOSES_OPTIONS_NAMES_H
-#define _OPENCOG_MOSES_OPTIONS_NAMES_H
+#ifndef _OPENCOG_MOSES_EXEC_DEF_H
+#define _OPENCOG_MOSES_EXEC_DEF_H
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <opencog/util/iostreamContainer.h>
+
+// a map btw host name and number of jobs allocated
+typedef std::map<string, unsigned int> jobs_t;
 
 // number of evals string
 static const string number_of_evals_str = "#evals";
@@ -65,6 +68,8 @@ static const pair<string, string> count_base_opt("count-based-scorer", "u");
 static const pair<string, string> cache_size_opt("cache-size", "s");
 static const pair<string, string> revisit_opt("revisit", "R");
 static const pair<string, string> jobs_opt("jobs", "j");
+static const string job_seperator(":");
+static const string localhost("localhost");
 static const pair<string, string> pop_size_ratio_opt("pop-size-ratio", "P");
 
 // used to convert program option argument to string.
@@ -96,5 +101,7 @@ string to_string(const boost::program_options::variable_value& vv)
         std::cerr << "type not handled yet" << std::endl;
     return res;
 }
+
+
 
 #endif // _OPENCOG_MOSES_OPTIONS_NAMES_H

@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "moses-exec.h"
-#include "moses_options_names.h"
 
 /**
  * Display error message about unspecified combo tree and exit
@@ -184,7 +183,7 @@ int main(int argc,char** argv) {
                      // complexity based
     unsigned long cache_size;
     bool revisit;
-    unsigned int jobs;
+    vector<string> jobs_str;
     // eda_param
     double pop_size_ratio;
 
@@ -289,8 +288,8 @@ int main(int argc,char** argv) {
         (string(revisit_opt.first).append(",").append(revisit_opt.second).c_str(),
          "revisit visited examplars when all have been visited")
         (string(jobs_opt.first).append(",").append(jobs_opt.second).c_str(),
-         value<unsigned int>(&jobs)->default_value(1),
-         "number of jobs allocated for deme optimization")
+         value<vector<string> >(&jobs_str),
+         string("number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.").c_str())
         (string(pop_size_ratio_opt.first).append(",").append(pop_size_ratio_opt.second).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "the higher the more effort is spent on a deme")
@@ -357,6 +356,19 @@ int main(int argc,char** argv) {
         ss << exemplar_str;
         ss >> exemplar;
         exemplars.push_back(exemplar);
+    }
+
+    // fill jobs
+    jobs_t jobs;
+    foreach(const string& js, jobs_str) {
+        size_t pos = js.find(job_seperator);
+        if(pos != string::npos) {
+            unsigned int nj = boost::lexical_cast<unsigned int>(js.substr(0, pos));
+            string host_name = js.substr(pos + 1);
+            jobs.insert(make_pair(host_name, nj));
+        } else {
+            jobs.insert(make_pair(localhost, boost::lexical_cast<unsigned int>(js)));
+        }
     }
 
     // set metapopulation parameters
