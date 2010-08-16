@@ -133,7 +133,8 @@ FILE* launch_command(string command, int& pid) {
     FILE* fp = popen(command.c_str(), "r");
     // get its PID
     FILE* fp_pid = popen("pgrep -n moses-exec", "r");
-    fscanf(fp_pid, "%u", &pid);
+    int count_matches = fscanf(fp_pid, "%u", &pid);
+    OC_ASSERT(count_matches == 1);
     return fp;
 }
 
@@ -204,6 +205,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 mp.n_evals() += evals;
 
                 // update best and merge
+                // Logger
+                logger().info("Merge %u candidates from PID %d"
+                              " with the metapopulation",
+                              candidates.size(), cit->second);
+                // ~Logger
                 mp.update_best_candidates(candidates);
                 merge_nondominating(candidates.begin(), candidates.end(), mp);
 
