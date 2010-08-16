@@ -27,6 +27,8 @@
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <opencog/util/iostreamContainer.h>
+
 // number of evals string
 static const string number_of_evals_str = "#evals";
 
@@ -126,7 +128,7 @@ static const string pop_size_ratio_opt_name = "pop-size-ratio";
 static const string pop_size_ratio_opt_ab = "P";
 
 // used to convert program option argument to string.
-// @todo: very ugly, it is likely something better can be done using
+// @todo: ugly, it is likely something better can be done using
 // boost::program_options API
 template<typename T>
 bool to_string(const boost::program_options::variable_value& vv, string& str)
@@ -134,32 +136,25 @@ bool to_string(const boost::program_options::variable_value& vv, string& str)
     if(vv.value().type() == typeid(T)) {
         str = boost::lexical_cast<string>(vv.as<T>());
         return true;
+    } else if(vv.value().type() == typeid(std::vector<T>)) {
+        str = opencog::containerToStr(vv.as<std::vector<T> >(), "_");
+        return true;
     }
     return false;
 }
 string to_string(const boost::program_options::variable_value& vv)
 {
     string res;
-    if(to_string<int>(vv, res))
-        return res;
-    else if(to_string<unsigned int>(vv, res))
-        return res;
-    else if(to_string<long>(vv, res))
-        return res;
-    else if(to_string<unsigned long>(vv, res))
-        return res;
-    else if(to_string<float>(vv, res))
-        return res;
-    else if(to_string<double>(vv, res))
-        return res;
-    else if(to_string<bool>(vv, res))
-        return res;
-    else if(to_string<string>(vv, res))
-        return res;
-    else {
+    if(!(to_string<int>(vv, res)
+         || to_string<unsigned int>(vv, res)
+         || to_string<long>(vv, res)
+         || to_string<unsigned long>(vv, res)
+         || to_string<float>(vv, res)
+         || to_string<double>(vv, res)
+         || to_string<bool>(vv, res)
+         || to_string<string>(vv, res)))
         std::cerr << "type not handled yet" << std::endl;
-        return res;
-    }
+    return res;
 }
 
 #endif // _OPENCOG_MOSES_OPTIONS_NAMES_H

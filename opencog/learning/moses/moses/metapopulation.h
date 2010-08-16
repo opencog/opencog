@@ -168,7 +168,10 @@ struct metapopulation : public set < bscored_combo_tree,
     /**
      * return the n_evals
      */
-    int n_evals() const {
+    const int& n_evals() const {
+        return _n_evals;
+    }
+    int& n_evals() {
         return _n_evals;
     }
 
@@ -198,6 +201,13 @@ struct metapopulation : public set < bscored_combo_tree,
      */
     const combo_tree& best_tree() const {
         return _best_candidates.begin()->first;
+    }
+
+    const combo_tree_hash_set& visited() const {
+        return _visited_exemplars;
+    }
+    combo_tree_hash_set& visited() {
+        return _visited_exemplars;
     }
 
     /**

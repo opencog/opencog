@@ -52,7 +52,7 @@ string build_command_line(const variables_map& vm,
                           const combo_tree& tr, unsigned int max_evals) {
     string res("./moses-exec");
     // replicate initial command's options, except:
-    // exemplar, output options, jobs and max_evals
+    // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
         if(it->first != exemplars_str_opt_name
            && it->first != exemplars_str_opt_name
@@ -61,6 +61,7 @@ string build_command_line(const variables_map& vm,
            && it->first != output_eval_number_opt_name
            && it->first != jobs_opt_name
            && it->first != max_evals_opt_name
+           && it->first != max_gens_opt_name
            && !it->second.defaulted()) {
             res += string(" --") + it->first + " " + to_string(it->second);
         }
@@ -76,6 +77,10 @@ string build_command_line(const variables_map& vm,
     // add number of evals option
     res += string(" -") + max_evals_opt_ab + " " 
         + boost::lexical_cast<string>(max_evals);
+    // add one generation option
+    res += string(" -") + max_gens_opt_ab + " 1";
+    // add log option determined name option
+    res += string(" -") + log_file_dep_opt_opt_ab;
     
     OC_ASSERT(res.size() < 255,
               "It is unlikely the OS support such a long name %s, the only thing"
@@ -152,46 +157,71 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
     logger().info("Distributed MOSES starts");
     // ~Logger
 
-    // int gen_idx = 0;
+    typedef typename metapopulation<Scoring, BScoring, Optimization>::const_iterator mp_cit;
+    typedef std::map<FILE*, int> proc_map;
+    proc_map pm;
 
-    //    while ((mp.n_evals() < max_evals) && (max_gens != gen_idx++)) {
-    const combo_tree exemplar(get_tree(*mp.select_exemplar()));
+    int gen_idx = 0;
 
-    string command_line = build_command_line(vm, exemplar,
-                                             pa.max_evals - mp.n_evals());
-    
-    int pid;
-    FILE* fp = launch_command(command_line, pid);
+    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx)) {
+        // if there exists free resource, launch a process
+        if(pm.size() < jobs) {
+            mp_cit exemplar = mp.select_exemplar();
+            if(exemplar != mp.end()) {
+                const combo_tree& tr = get_tree(*mp.select_exemplar());
+                mp.visited().insert(tr);
 
-    // wait till completion
-    while(pid_running(pid)) {
+                string command_line =
+                    build_command_line(vm, tr, pa.max_evals - mp.n_evals());
+
+                int pid;
+                FILE* fp = launch_command(command_line, pid);
+
+                // Logger
+                logger().info("Generation: %d", gen_idx);
+                logger().info("Launch command: '%s'", command_line.c_str());
+                logger().info("corresponding to PID = %d", pid);
+                // ~Logger
+
+                pm.insert(make_pair(fp, pid));
+                gen_idx++;
+            }
+        }
+
+        // check for result and merge if so
+        for(proc_map::iterator cit = pm.begin(); cit != pm.end();) {
+            if(!pid_running(cit->second)) { // result is ready
+                FILE* fp = cit->first;
+                // build istream from fp
+                __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
+                istream sp(&pipe_buf);
+                
+                // parse the result
+                metapop_candidates candidates;
+                int evals;
+                parse_result(sp, candidates, evals);
+                mp.n_evals() += evals;
+
+                // update best and merge
+                mp.update_best_candidates(candidates);
+                merge_nondominating(candidates.begin(), candidates.end(), mp);
+
+                // close file and remove proc info from pm
+                pclose(fp);
+                proc_map::iterator next_cit(cit);
+                next_cit++;
+                pm.erase(cit);
+                cit = next_cit;
+            }
+            else cit++;
+        }
+
+        // wait for a second to not take all resources
         sleep(1);
+
+        if (mp.best_score() >= pa.max_score || mp.empty())
+            break;
     }
-
-    // build istream from fp
-    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
-    istream sp(&pipe_buf);
-
-    // parse the result
-    metapop_candidates candidates;
-    int evals;
-    parse_result(sp, candidates, evals);
-    pclose(fp);
-
-    // update best and merge
-    mp.update_best_candidates(candidates);
-    merge_nondominating(candidates.begin(), candidates.end(), mp);
-        
-    //run a generation
-    // if (mp.expand(max_evals - mp.n_evals(), max_score, ignore_ops,
-    //               perceptions, actions)) {
-    // } else // In iterative hillclimbing it is possible (but not
-    //        // likely) that the metapop gets empty and expand
-    //        // return false
-    //     break;
-    // if (mp.best_score() >= max_score || mp.empty())
-    //     break;
-    //    }    
     // Logger
     logger().info("Distributed MOSES ends");
     // ~Logger

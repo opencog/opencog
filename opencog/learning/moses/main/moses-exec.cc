@@ -319,8 +319,9 @@ int main(int argc,char** argv) {
             if(it->first != log_file_dep_opt_opt_name && !it->second.defaulted()
                // this is because OSs usually do not handle file name
                // above 255 chars
-               && log_file.size() < 255)
+               && log_file.size() < 255) {
                 log_file += string("_") + it->first + "_" + to_string(it->second);
+            }
         log_file += string(".") + default_log_file_suffix;
     }
     // remove log_file
