@@ -91,8 +91,6 @@ string build_command_line(const variables_map& vm,
     //           " to do is upgrade the code so that it can express this command"
     //           " in less than 255 chars", res.c_str());
 
-    std::cout << res << std::endl;
-
     return res;
 }
 
@@ -168,7 +166,8 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     int gen_idx = 0;
 
-    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx)) {
+    while ((mp.n_evals() < pa.max_evals) && (pa.max_gens != gen_idx) 
+           && (mp.best_score() < pa.max_score)) {
         // if there exists free resource, launch a process
         if(pm.size() < jobs) {
             mp_cit exemplar = mp.select_exemplar();
@@ -228,9 +227,6 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
         // wait for a second to not take all resources
         sleep(1);
-
-        if (mp.best_score() >= pa.max_score || mp.empty())
-            break;
     }
     // Logger
     logger().info("Distributed MOSES ends");
