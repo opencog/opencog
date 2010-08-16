@@ -81,11 +81,12 @@ string build_command_line(const variables_map& vm,
     res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
     res += string(" -") + log_file_dep_opt_opt.second;
-    
-    OC_ASSERT(res.size() < 255,
-              "It is unlikely the OS support such a long name %s, the only thing"
-              " to do is upgrade the code so that it can express this command"
-              " in less than 255 chars", res.c_str());
+
+    // it seems ok so far, there is probably a limit but it is above 255
+    // OC_ASSERT(res.size() < 255,
+    //           "It is unlikely the OS support such a long name %s, the only thing"
+    //           " to do is upgrade the code so that it can express this command"
+    //           " in less than 255 chars", res.c_str());
 
     std::cout << res << std::endl;
 
