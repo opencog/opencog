@@ -24,5 +24,5 @@ INSTALL (FILES
     UbigraphModule.h
     Ubigrapher.h
     BITUbigrapher.h
-    DESTINATION "include/opencog/ubigraph"
+    DESTINATION "include/${PROJECT_NAME}/ubigraph"
 )

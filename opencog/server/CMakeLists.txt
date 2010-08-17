@@ -122,5 +122,5 @@ INSTALL (FILES
 	Request.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
-	DESTINATION "include/opencog/server"
+	DESTINATION "include/${PROJECT_NAME}/server"
 )

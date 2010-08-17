@@ -29,5 +29,5 @@ INSTALL (FILES
 	FrameQuery.h
 	SentenceQuery.h
 	WordRelQuery.h
-	DESTINATION "include/opencog/nlp/question"
+	DESTINATION "include/${PROJECT_NAME}/nlp/question"
 )

@@ -12,7 +12,6 @@ INSTALL(FILES
 	procedure_call.h
 	procedure_repository.h
 	assumption.h
-	complexity.h
 	eval.h
     table.h
 	perception.h
@@ -26,7 +25,7 @@ INSTALL(FILES
 	operator_base.h
 	common_def.h
     simple_nn.h
-    converter_ann_combo_tree.h
+    convert_ann_combo.h
 
 	DESTINATION
 

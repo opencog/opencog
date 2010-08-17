@@ -53,5 +53,5 @@ INSTALL (FILES
 	SenseSimilarity.h
 	Sweep.h
 	WordSenseProcessor.h
-	DESTINATION "include/opencog/nlp/wsd"
+	DESTINATION "include/${PROJECT_NAME}/nlp/wsd"
 )

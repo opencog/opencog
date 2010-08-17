@@ -4,7 +4,7 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
-PROJECT(OPENCOG)
+PROJECT(opencog)
 
 ################################
 #uncomment to be in Release mode

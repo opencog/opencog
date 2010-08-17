@@ -33,5 +33,5 @@ INSTALL (FILES
 	SchemeEval.h
 	SchemePrimitive.h
 	SchemeSmob.h
-	DESTINATION "include/opencog/guile"
+	DESTINATION "include/${PROJECT_NAME}/guile"
 )

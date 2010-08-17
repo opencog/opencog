@@ -110,3 +110,6 @@ TARGET_LINK_LIBRARIES (moses-exec
         util
         ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
+
+# install moses-exec
+INSTALL(TARGETS moses-exec RUNTIME DESTINATION bin)

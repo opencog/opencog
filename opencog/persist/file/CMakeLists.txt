@@ -11,5 +11,5 @@ ADD_LIBRARY (savable SHARED
 INSTALL (FILES
 	SavableRepository.h
 	SavingLoading.h
-	DESTINATION "include/opencog/persist/file"
+	DESTINATION "include/${PROJECT_NAME}/persist/file"
 )

@@ -38,5 +38,5 @@ INSTALL (FILES
 	ImportanceDiffusionAgent.h
 	ImportanceUpdatingAgent.h
 	STIDecayingAgent.h
-	DESTINATION "include/opencog/dynamics/attention"
+	DESTINATION "include/${PROJECT_NAME}/dynamics/attention"
 )

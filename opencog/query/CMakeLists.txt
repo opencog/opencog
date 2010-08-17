@@ -24,5 +24,5 @@ INSTALL (FILES
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	QueryModule.h
-	DESTINATION "include/opencog/query"
+	DESTINATION "include/${PROJECT_NAME}/query"
 )

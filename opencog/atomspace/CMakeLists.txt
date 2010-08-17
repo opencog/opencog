@@ -115,5 +115,5 @@ INSTALL (FILES
 	md5.h
 	types.h
 	utils.h
-	DESTINATION "include/opencog/atomspace"
+	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

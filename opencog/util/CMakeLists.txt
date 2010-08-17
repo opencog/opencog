@@ -51,7 +51,7 @@ TARGET_LINK_LIBRARIES(util
 	${Boost_REGEX_LIBRARY}
 )
 
-INSTALL (FILES
+INSTALL(FILES
 	algorithm.h
 	based_variant.h
 	Config.h
@@ -79,5 +79,8 @@ INSTALL (FILES
 	StringTokenizer.h
     iostreamContainer.h
 	tree.h
-	DESTINATION "include/opencog/util"
+	DESTINATION "include/${PROJECT_NAME}/util"
 )
+
+# is it useful to install since it is static ?
+#INSTALL(TARGETS util ARCHIVE DESTINATION lib)

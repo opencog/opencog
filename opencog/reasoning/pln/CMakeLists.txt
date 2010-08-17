@@ -173,5 +173,5 @@ INSTALL (FILES
 	iAtomSpaceWrapper.h
 	PLNEvaluator.h
 #	PLNShell.h
-	DESTINATION "include/opencog/reasoning/pln"
+	DESTINATION "include/${PROJECT_NAME}/reasoning/pln"
 )

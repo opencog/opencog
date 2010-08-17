@@ -19,6 +19,6 @@ INSTALL (FILES
    GenericShell.h
    SchemeShell.h
    SchemeShellModule.h
-	DESTINATION "include/opencog/shell"
+	DESTINATION "include/${PROJECT_NAME}/shell"
 )
 
