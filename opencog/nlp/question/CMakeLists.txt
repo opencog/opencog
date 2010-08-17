@@ -4,10 +4,10 @@
 # build file around for a little while, as a point of reference.
 
 INCLUDE_DIRECTORIES(
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/query
-	${OPENCOG_SOURCE_DIR}/src/server
-	${OPENCOG_SOURCE_DIR}/src/util
+	${PROJECT_SOURCE_DIR}/src/atomspace
+	${PROJECT_SOURCE_DIR}/src/query
+	${PROJECT_SOURCE_DIR}/src/server
+	${PROJECT_SOURCE_DIR}/src/util
 )
 
 # Runtime types supplied by libnlp-types

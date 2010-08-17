@@ -78,14 +78,14 @@ IF (APPLE)
     # Apples's linker seems not to understand a colon-separated list of
     # rpaths.
     SET_TARGET_PROPERTIES(cogserver PROPERTIES LINK_FLAGS
-        "-Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/guile -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/reasoning/pln -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/query -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/server -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/shell -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/util -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/web")
+        "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/reasoning/pln -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/util -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web")
     # doesn't work for some reason...
     #SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
-    #    ${OPENCOG_BINARY_DIR}/opencog/guile)
+    #    ${PROJECT_BINARY_DIR}/opencog/guile)
     #SET_TARGET_PROPERTIES(cogserver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 ELSE(APPLE)
     SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-        -Wl,-rpath,${OPENCOG_BINARY_DIR}/opencog/dotty:${OPENCOG_BINARY_DIR}/opencog/ubigraph:${OPENCOG_BINARY_DIR}/opencog/dynamics/attention:${OPENCOG_BINARY_DIR}/opencog/guile:${OPENCOG_BINARY_DIR}/opencog/reasoning/pln:${OPENCOG_BINARY_DIR}/opencog/nlp/wsd:${OPENCOG_BINARY_DIR}/opencog/persist:${OPENCOG_BINARY_DIR}/opencog/query:${OPENCOG_BINARY_DIR}/opencog/server:${OPENCOG_BINARY_DIR}/opencog/shell:${OPENCOG_BINARY_DIR}/opencog/util:${OPENCOG_BINARY_DIR}/opencog/web)
+        -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty:${PROJECT_BINARY_DIR}/opencog/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/reasoning/pln:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web)
 ENDIF (APPLE)
 #ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 

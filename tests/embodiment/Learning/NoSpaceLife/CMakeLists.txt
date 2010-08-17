@@ -4,6 +4,6 @@ TARGET_LINK_LIBRARIES(NoSpaceLifeUTest
 	ImaginaryLife
         comboreduct
         util
-	${OPENCOG_LIBRARIES}
+	${PROJECT_LIBRARIES}
 )
 

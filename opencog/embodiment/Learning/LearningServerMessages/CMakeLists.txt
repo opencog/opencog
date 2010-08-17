@@ -15,5 +15,5 @@ TARGET_LINK_LIBRARIES (LearningServerMessages
     xml
     AtomSpaceExtensions
     atomspace
-    ${OPENCOG_LIBRARIES}
+    ${PROJECT_LIBRARIES}
 )

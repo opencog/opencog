@@ -27,10 +27,10 @@
 #include <iostream>
 #include <fstream>
 
-// We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
+// We must use the PROJECT_SOURCE_DIR var supplied by the CMake script to
 // ensure we find the file whether or not we're building using a separate build
 // dir
-#define ATOM_TABLE_TEST_XML_FILE OPENCOG_SOURCE_DIR"/tests/atomspace/atom_table_utest.xml"
+#define ATOM_TABLE_TEST_XML_FILE PROJECT_SOURCE_DIR"/tests/atomspace/atom_table_utest.xml"
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -362,7 +362,7 @@ public:
     }
 
     void testPrint() {
-        const char *filename = OPENCOG_BINARY_DIR"/tests/atomspace/AtomTableUTest.log";
+        const char *filename = PROJECT_BINARY_DIR"/tests/atomspace/AtomTableUTest.log";
         std::ofstream out(filename);
 
         out << "All Atoms:" << endl;

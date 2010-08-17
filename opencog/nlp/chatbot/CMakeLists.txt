@@ -10,7 +10,7 @@ ADD_EXECUTABLE(cogita
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/util
+	${PROJECT_BINARY_DIR}/opencog/util
 )
 
 ADD_DEPENDENCIES(cogita utils)

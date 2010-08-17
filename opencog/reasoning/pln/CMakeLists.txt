@@ -66,10 +66,10 @@ ADD_LIBRARY (pln SHARED
 )
 
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/util
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/xml
-	${OPENCOG_SOURCE_DIR}/src/server
+	${PROJECT_SOURCE_DIR}/src/util
+	${PROJECT_SOURCE_DIR}/src/atomspace
+	${PROJECT_SOURCE_DIR}/src/xml
+	${PROJECT_SOURCE_DIR}/src/server
 )
 
 SET(PLN_LINK_LIBS

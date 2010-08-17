@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(LearnMessageUTest
     util
     Filter
     AtomSpaceExtensions
-    ${OPENCOG_LIBRARIES}
+    ${PROJECT_LIBRARIES}
 )
 
 IF(WIN32)

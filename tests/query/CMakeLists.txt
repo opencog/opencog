@@ -1,13 +1,13 @@
 INCLUDE_DIRECTORIES (
-	${OPENCOG_SOURCE_DIR}/src/atomspace
-	${OPENCOG_SOURCE_DIR}/src/query
-	${OPENCOG_SOURCE_DIR}/src/util
+	${PROJECT_SOURCE_DIR}/src/atomspace
+	${PROJECT_SOURCE_DIR}/src/query
+	${PROJECT_SOURCE_DIR}/src/util
 )
 
 LINK_DIRECTORIES(
-	${OPENCOG_BINARY_DIR}/src/atomspace
-	${OPENCOG_BINARY_DIR}/src/query
-	${OPENCOG_BINARY_DIR}/src/util
+	${PROJECT_BINARY_DIR}/src/atomspace
+	${PROJECT_BINARY_DIR}/src/query
+	${PROJECT_BINARY_DIR}/src/util
 )
 
 LINK_LIBRARIES(#PatternUTest

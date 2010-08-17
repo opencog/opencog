@@ -179,7 +179,7 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", TLB::isValidHandle(h));
 
 	// Load the utility definitions
-	int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+	int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
 	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
 	printf("typedefs now loaded!\n");
 

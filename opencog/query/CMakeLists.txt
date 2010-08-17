@@ -1,6 +1,6 @@
 #INCLUDE_DIRECTORIES(
-#	${OPENCOG_SOURCE_DIR}/src/atomspace
-#	${OPENCOG_SOURCE_DIR}/src/util
+#	${PROJECT_SOURCE_DIR}/src/atomspace
+#	${PROJECT_SOURCE_DIR}/src/util
 #)
 
 ADD_LIBRARY(query SHARED

@@ -2,10 +2,10 @@
 ADD_DEFINITIONS(-DNDEBUG)
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/atomspace
-	${OPENCOG_BINARY_DIR}/opencog/xml
-	${OPENCOG_BINARY_DIR}/opencog/server
-	${OPENCOG_BINARY_DIR}/opencog/dynamics/attention
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/xml
+	${PROJECT_BINARY_DIR}/opencog/server
+	${PROJECT_BINARY_DIR}/opencog/dynamics/attention
 )
 
 INCLUDE_DIRECTORIES (
@@ -14,7 +14,7 @@ INCLUDE_DIRECTORIES (
 
 IF (XMLRPC_FOUND AND CURL_FOUND)
     SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
-    SET (OPENCOG_UBI_LIB ubigraph
+    SET (PROJECT_UBI_LIB ubigraph
         ${XMLRPC_LIBRARIES}
         )
 ENDIF (XMLRPC_FOUND AND CURL_FOUND)
@@ -36,5 +36,5 @@ TARGET_LINK_LIBRARIES (hopfield
 	attention
 	${Boost_SIGNALS_LIBRARY}
 	${EXPAT_LIBRARIES}
-    ${OPENCOG_UBI_LIB}
+    ${PROJECT_UBI_LIB}
 )

@@ -56,10 +56,10 @@ using namespace boost::filesystem;
 #define RUN_FAILURE_TESTS 1 // enable some tests which are supposed to fail.
 #define WAIT_KEY_ON_FAILURE 0
 
-// We must use the OPENCOG_SOURCE_DIR var supplied by the CMake script to
+// We must use the PROJECT_SOURCE_DIR var supplied by the CMake script to
 // ensure we find the files whether or not we're building using a separate build
 // dir
-#define PLN_TEST_DIR OPENCOG_SOURCE_DIR"/tests/reasoning/pln/"
+#define PLN_TEST_DIR PROJECT_SOURCE_DIR"/tests/reasoning/pln/"
 
 #if 0
 #include <windows.h>

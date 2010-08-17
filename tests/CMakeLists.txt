@@ -6,8 +6,8 @@ IF (WIN32)
                    -D_CRT_SECURE_NO_WARNINGS)
 ENDIF (WIN32)
 
-ADD_DEFINITIONS(-DOPENCOG_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-                -DOPENCOG_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
+ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
+                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
 # Perform tests in component-dependency order, as much as possible.
 # For example, since everything depends on util and config functions,

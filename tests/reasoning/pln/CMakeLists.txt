@@ -6,25 +6,25 @@ ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # It is now usual to use the system OpenCog header files so this is unnecessary
 INCLUDE_DIRECTORIES (
-    ${OPENCOG_SOURCE_DIR}/src/util
-    ${OPENCOG_SOURCE_DIR}/src/atomspace
-    ${OPENCOG_SOURCE_DIR}/src/xml
-    ${OPENCOG_SOURCE_DIR}/src/server
-#    ${OPENCOG_SOURCE_DIR}/src/guile
-#    ${OPENCOG_SOURCE_DIR}/src/adaptors/tulip
-#    ${OPENCOG_SOURCE_DIR}/src/nlp/wsd
-#    ${OPENCOG_SOURCE_DIR}/src/persist
-#    ${OPENCOG_SOURCE_DIR}/src/query
-    ${OPENCOG_SOURCE_DIR}/src/reasoning
+    ${PROJECT_SOURCE_DIR}/src/util
+    ${PROJECT_SOURCE_DIR}/src/atomspace
+    ${PROJECT_SOURCE_DIR}/src/xml
+    ${PROJECT_SOURCE_DIR}/src/server
+#    ${PROJECT_SOURCE_DIR}/src/guile
+#    ${PROJECT_SOURCE_DIR}/src/adaptors/tulip
+#    ${PROJECT_SOURCE_DIR}/src/nlp/wsd
+#    ${PROJECT_SOURCE_DIR}/src/persist
+#    ${PROJECT_SOURCE_DIR}/src/query
+    ${PROJECT_SOURCE_DIR}/src/reasoning
     ${IODBC_INCLUDE_DIRS}
     ${GSL_INCLUDE_DIR}
 )
 
 LINK_DIRECTORIES (
-	${OPENCOG_BINARY_DIR}/opencog/atomspace
-	${OPENCOG_BINARY_DIR}/opencog/server
-	${OPENCOG_BINARY_DIR}/opencog/reasoning/pln
-	${OPENCOG_BINARY_DIR}/opencog/util
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/server
+	${PROJECT_BINARY_DIR}/opencog/reasoning/pln
+	${PROJECT_BINARY_DIR}/opencog/util
 #	/opt/boost_1_38_0/lib
 	${Boost_SIGNALS_LIBRARY}
 )

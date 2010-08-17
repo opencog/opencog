@@ -14,7 +14,7 @@ TARGET_LINK_LIBRARIES(processPVPMessage
 	PredicateUpdaters 
 	PAI
 	behavior
-	${OPENCOG_LIBRARIES}
+	${PROJECT_LIBRARIES}
 )
 
 ADD_CXXTEST(ActionPlanUTest)

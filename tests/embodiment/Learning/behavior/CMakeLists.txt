@@ -5,7 +5,7 @@ LINK_LIBRARIES (
 	comboreduct
 	behavior
         util
-	${OPENCOG_LIBRARIES}	
+	${PROJECT_LIBRARIES}	
 )
 
 ADD_CXXTEST(BehaviorDescriptionMatcherUTest)

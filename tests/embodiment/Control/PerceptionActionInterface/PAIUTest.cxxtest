@@ -1504,13 +1504,13 @@ public:
         }
 
         //set the scheme typesdefs path 
-        config().set("SCHEME_TYPEDEFS_PATH",OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+        config().set("SCHEME_TYPEDEFS_PATH",PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
 
         CogServer& cogserver = static_cast<CogServer&>(server());
         //AtomSpace atomSpace;
         AtomSpace *atomSpace = cogserver.getAtomSpace();
 
-        int rc = load_scm_file(OPENCOG_SOURCE_DIR"/tests/scm/typedefs.scm");
+        int rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         TSM_ASSERT_EQUALS("Failed to load type definition utilities", 0, rc);
 
         OKActionPlanSender sender(sentActionPlans);
