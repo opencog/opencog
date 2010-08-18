@@ -24,7 +24,8 @@ def spawn_server():
     global server_process
     print "Spawning server"
     server_process = subprocess.Popen([server_exe, '-c',
-            '../../../lib/opencog.conf'], stdout=sys.stdout)
+            opencog_conf], stdout=sys.stdout)
+            #'../../../lib/opencog.conf'], stdout=sys.stdout)
 #stderr=subprocess.PIPE, stdout=subprocess.PIPE) #, '-DLOG_TO_STDOUT=TRUE'])
     time.sleep(1) # Allow modules time to load
     print "Server spawned with pid %d" % (server_process.pid,)
