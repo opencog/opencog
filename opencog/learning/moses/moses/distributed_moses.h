@@ -25,7 +25,7 @@
 #define _OPENCOG_DISTRIBUTED_MOSES_H
 
 #include <stdio.h>
-#include <stropts.h>
+//#include <stropts.h>
 
 #include <ext/stdio_filebuf.h>
 
