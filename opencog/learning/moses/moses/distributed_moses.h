@@ -135,7 +135,11 @@ proc_map::value_type launch_cmd(string cmd) {
 #ifdef USE_POPEN
     FILE* fp = popen(cmd.c_str(), "r");
 #else
-    system(cmd.c_str());
+    int res = system(cmd.c_str());
+    if(res != 0) {
+        std::cerr << "the execution of " << cmd << "has failed" << std::endl;
+        exit(1);        
+    }
     FILE* fp = fopen(tempfile, "r");
 #endif
 
