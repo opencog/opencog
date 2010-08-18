@@ -74,7 +74,7 @@ string build_cmdline(const variables_map& vm,
     if(host_name == localhost)
         res = "moses-exec";
     else
-        res = string("ssh ") + host_name + " moses-exec";
+        res = string("ssh ") + host_name + " 'moses-exec";
     // replicate initial command's options, except:
     // exemplar, output options, jobs, max_evals, max_gens and log_file_dep_opt
     for(variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
@@ -108,6 +108,10 @@ string build_cmdline(const variables_map& vm,
     res += string(" -") + log_file_dep_opt_opt.second;
     // add option to return all results
     res += string(" -") + result_count_opt.second + " -1";
+
+    if(host_name != localhost) {
+        res += "'";
+    }
 
     // it seems ok so far, apparently the limit is 4096 not 255
     // OC_ASSERT(res.size() < 255,
@@ -144,7 +148,8 @@ proc_map::value_type launch_cmd(string cmd) {
 #endif
 
     // get its PID
-    FILE* fp_pid = popen("pgrep -n moses-exec", "r");
+    string exec_name = cmd.substr(0, cmd.find(" "));
+    FILE* fp_pid = popen(string("pgrep -n ").append(exec_name).c_str(), "r");
     int pid;
     int count_matches = fscanf(fp_pid, "%u", &pid);
     OC_ASSERT(count_matches == 1);
@@ -306,7 +311,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                 // Logger
                 logger().info("Generation: %d", gen_idx);
-                logger().info("Launch command: '%s'", cmdline.c_str());
+                logger().info("Launch command: %s", cmdline.c_str());
                 logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
 
