@@ -25,7 +25,7 @@
 #define _OPENCOG_DISTRIBUTED_MOSES_H
 
 #include <stdio.h>
-//#include <stropts.h>
+#include <stdlib.h>
 
 #include <ext/stdio_filebuf.h>
 
@@ -37,10 +37,28 @@
 #include "metapopulation.h"
 #include "moses.h"
 
+// uncomment to use popen() instead of system()
+// #define USE_POPEN
+
 namespace moses
 {
 
 using namespace boost::program_options;
+
+// map the PID to the FILE of the output of the process and its command line
+typedef std::pair<string, FILE*> string_file;
+typedef std::map<int, string_file> proc_map;
+int get_pid(const proc_map::value_type& pmv) {
+    return pmv.first;
+}
+string get_cmd(const proc_map::value_type& pmv) {
+    return pmv.second.first;
+}
+FILE* get_file(const proc_map::value_type& pmv) {
+    return pmv.second.second;
+}
+// map the name of host and its proc_map
+typedef std::map<string, proc_map> host_proc_map;
 
 /**
  * generate a command line that launches moses-exec with exemplar base
@@ -48,10 +66,10 @@ using namespace boost::program_options;
  * and returning the adequate information to merge the result with the
  * metapopulation
  */
-string build_command_line(const variables_map& vm, 
-                          const combo_tree& tr,
-                          const string& host_name,
-                          unsigned int max_evals) {
+string build_cmdline(const variables_map& vm, 
+                     const combo_tree& tr,
+                     const string& host_name,
+                     unsigned int max_evals) {
     string res;
     if(host_name == localhost)
         res = "moses-exec";
@@ -91,7 +109,7 @@ string build_command_line(const variables_map& vm,
     // add option to return all results
     res += string(" -") + result_count_opt.second + " -1";
 
-    // it seems ok so far, there is probably a limit but it is above 255
+    // it seems ok so far, apparently the limit is 4096 not 255
     // OC_ASSERT(res.size() < 255,
     //           "It is unlikely the OS support such a long name %s, the only thing"
     //           " to do is upgrade the code so that it can express this command"
@@ -100,10 +118,89 @@ string build_command_line(const variables_map& vm,
     return res;
 }
 
+// run the given command and return its corresponding proc_map
+proc_map::value_type launch_cmd(string cmd) {
+#ifndef USE_POPEN
+    // append " > tempfile&" to cmd
+    char tempfile[] = "/tmp/moses-execXXXXXX";
+    int fd = mkstemp(tempfile);
+    if(fd == -1) {
+        std::cerr << "could not create temporary file" << std::endl;
+        exit(1);
+    }
+    cmd += string(" > ") + string(tempfile) + string("&");
+#endif
+
+    // launch the command
+#ifdef USE_POPEN
+    FILE* fp = popen(cmd.c_str(), "r");
+#else
+    system(cmd.c_str());
+    FILE* fp = fopen(tempfile, "r");
+#endif
+
+    // get its PID
+    FILE* fp_pid = popen("pgrep -n moses-exec", "r");
+    int pid;
+    int count_matches = fscanf(fp_pid, "%u", &pid);
+    OC_ASSERT(count_matches == 1);
+    return make_pair(pid, make_pair(cmd, fp));
+}
+
+// check if a process is running, works only under linux or other UNIX
+bool is_running(const proc_map::value_type& pmv) {
+#ifdef USE_POPEN
+    string path("/proc/");
+    path += boost::lexical_cast<string>(get_pid(pmv));
+    bool pid_file = access(path.c_str(), F_OK) != -1;
+    if(pid_file) { // double check that it is the right PID by
+                   // comparing the initial command line with the
+                   // current one
+        // path += "/cmdline";
+        // ifstream clf;
+        // sleep(10);
+        // clf.open(path.c_str());
+        // clf.seekg(0, ios::end);
+        // int length = clf.tellg();
+        // std::cout << length << std::endl;
+        // clf.seekg(0, ios::beg);
+        // char* cmdline = new char[length];
+        // clf.read(cmdline, length);
+        // for(int i = 0; i < length; i++) {
+        //     char c = cmdline[i];
+        //     cmdline[i] = (c == 0? 32 : c);
+        // }
+        // clf.close();
+        // std::cout << cmdline << std::endl;
+        // std::cout << "original|" << get_cmd(pmv) << "|" << std::endl;
+        // // std::cout << "fromproc|" << cls << "|" << std::endl;        
+        // // return get_cmd(pmv) == cls;
+        return true;
+    }
+    return false;
+#else
+    // check if the file is still empty
+    FILE* fp = get_file(pmv);
+    if(fseek(fp, 0, SEEK_END)) {
+        std::cerr << "Error while seeking to end of file" << std::endl;
+        exit(1);
+    }
+    int length = ftell(fp);
+    if (length < 0) {
+        std::cerr << "Error while reading file position" << std::endl;
+        exit(1);
+    }
+    return length == 0;
+#endif
+}
+
 /**
  * read the istream, add the candidates, fill max_evals
  */
 void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
+#ifndef USE_POPEN
+    in.seekg(0);
+#endif
     while(!in.eof()) {
         string s;
         in >> s;
@@ -131,31 +228,19 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
         }
     }
 };
-
-// run the given command, returns in stdout stream and fill pid with
-// its PID.
-// Works only under linux or other UNIX
-FILE* launch_command(string command, int& pid) {
-    // launch the command
-    FILE* fp = popen(command.c_str(), "r");
-    // get its PID
-    FILE* fp_pid = popen("pgrep -n moses-exec", "r");
-    int count_matches = fscanf(fp_pid, "%u", &pid);
-    OC_ASSERT(count_matches == 1);
-    return fp;
+// like above but uses a proc_map::value_type instead of istream
+void parse_result(const proc_map::value_type& pmv, 
+                  metapop_candidates& candidates, int& evals) {
+    FILE* fp = get_file(pmv);
+    // build istream from fp
+    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
+    istream sp(&pipe_buf);
+    // parse result
+    parse_result(sp, candidates, evals);
+    // close fp
+    pclose(fp);
 }
 
-// check if a process is running, works only under linux or other UNIX
-bool pid_running(int pid) {
-    string path("/proc/");
-    path += boost::lexical_cast<string>(pid);
-    return access(path.c_str(), F_OK) != -1;
-}
-
-// map the FILE of the output of the process and its PID
-typedef std::map<FILE*, int> proc_map;
-// map the name of host and its proc_map
-typedef std::map<string, proc_map> host_proc_map;
 
 host_proc_map init(const jobs_t& jobs)
 {
@@ -208,50 +293,48 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 const combo_tree& tr = get_tree(*mp.select_exemplar());
                 mp.visited().insert(tr);
 
-                string command_line =
-                    build_command_line(vm, tr, hpm_it->first,
-                                       pa.max_evals - mp.n_evals());
+                string cmdline =
+                    build_cmdline(vm, tr, hpm_it->first,
+                                  pa.max_evals - mp.n_evals());
 
-                int pid;
-                FILE* fp = launch_command(command_line, pid);
+                proc_map::value_type pmv(launch_cmd(cmdline));
+                hpm_it->second.insert(pmv);
 
                 // Logger
                 logger().info("Generation: %d", gen_idx);
-                logger().info("Launch command: '%s'", command_line.c_str());
-                logger().info("corresponding to PID = %d", pid);
+                logger().info("Launch command: '%s'", cmdline.c_str());
+                logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
 
-                hpm_it->second.insert(make_pair(fp, pid));
                 gen_idx++;
             }
         }
 
-        // check for result and merge if so
+        // check for results and merge if necessary
         foreach(host_proc_map::value_type& hpmv, hpm) {
-            for(proc_map::iterator it = hpmv.second.begin(); it != hpmv.second.end();) {
-                if(!pid_running(it->second)) { // result is ready
-                    FILE* fp = it->first;
-                    // build istream from fp
-                    __gnu_cxx::stdio_filebuf<char> pipe_buf(fp, ios_base::in);
-                    istream sp(&pipe_buf);
-                
+            for(proc_map::iterator it = hpmv.second.begin();
+                it != hpmv.second.end();) {
+                if(!is_running(*it)) { // result is ready
                     // parse the result
                     metapop_candidates candidates;
                     int evals;
-                    parse_result(sp, candidates, evals);
+                    parse_result(*it, candidates, evals);
                     mp.n_evals() += evals;
 
                     // update best and merge
                     // Logger
                     logger().info("Merge %u candidates from PID %d"
                                   " with the metapopulation",
-                                  candidates.size(), it->second);
+                                  candidates.size(), get_pid(*it));
                     // ~Logger
                     mp.update_best_candidates(candidates);
                     merge_nondominating(candidates.begin(), candidates.end(), mp);
 
-                    // close file and remove proc info from pm
-                    pclose(fp);
+                    // Logger
+                    logger().info("Number of evaluations so far: %d", mp.n_evals());
+                    // ~Logger
+
+                    // remove proc info from pm
                     proc_map::iterator next_it(it);
                     next_it++;
                     hpmv.second.erase(it);
