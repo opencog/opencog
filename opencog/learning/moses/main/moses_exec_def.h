@@ -36,6 +36,7 @@ typedef std::map<string, unsigned int> jobs_t;
 static const string number_of_evals_str = "#evals";
 
 // program option names and abbreviations
+// for their meanings see options_description in moses-exec.cc
 static const pair<string, string> rand_seed_opt("random-seed", "r");
 static const pair<string, string> input_table_file_opt("input-file", "i");
 static const pair<string, string> problem_opt("problem", "H");
@@ -71,6 +72,11 @@ static const pair<string, string> jobs_opt("jobs", "j");
 static const string job_seperator(":");
 static const string localhost("localhost");
 static const pair<string, string> pop_size_ratio_opt("pop-size-ratio", "P");
+static const pair<string, string> max_candidates_opt("max-candidates", "M");
+
+string opt_desc_str(const pair<string, string>& opt) {
+    return string(opt.first).append(",").append(opt.second);
+}
 
 // used to convert program option argument to string.
 // @todo: ugly, it is likely something better can be done using

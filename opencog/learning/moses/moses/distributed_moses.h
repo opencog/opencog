@@ -336,11 +336,13 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                                   " with the metapopulation",
                                   candidates.size(), get_pid(*it));
                     // ~Logger
+
                     mp.update_best_candidates(candidates);
                     merge_nondominating(candidates.begin(), candidates.end(), mp);
 
                     // Logger
-                    logger().info("Number of evaluations so far: %d", mp.n_evals());
+                    logger().info("Number of evaluations so far: %d",
+                                  mp.n_evals());
                     // ~Logger
 
                     // remove proc info from pm

@@ -193,7 +193,7 @@ void metapop_moses_results(opencog::RandGen& rng,
                               score_cache, bscore_cache, opt_algo,
                               eda_param, meta_param, moses_param, vm, pa);
         // log the number of cache failures
-        logger().info("Number of cache failures for score: %u and bscore: %u",
+        logger().info("Number of cache failures for score = %u and bscore = %u",
                       score_cache.get_cache_failures(),
                       bscore_cache.get_cache_failures());
     } else {

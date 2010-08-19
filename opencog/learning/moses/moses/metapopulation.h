@@ -48,12 +48,15 @@ typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
 
 /**
- * parameters to decide how to select the deme from the population
+ * parameters about deme management
  */
 struct metapop_parameters {
-    metapop_parameters(bool _reduce_all = true, bool _countbs = true,
+    metapop_parameters(int _max_candidates = -1,
+                       bool _reduce_all = true,
+                       bool _countbs = true,
                        bool _revisit = false) :
         selection_max_range(11),
+        max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         count_base(_countbs),
         revisit(_revisit)
@@ -63,6 +66,9 @@ struct metapop_parameters {
     // complexity, only examplars with p>=2^-selection_max_range will
     // be considered
     double selection_max_range;
+    // the max number of candidates considered to be added to the
+    // metapopulation, if negative then all candidates are considered
+    int max_candidates;
     // if true then all candidates are reduced before evaluation
     bool reduce_all;
     // if true the scorer is count based, otherwise it is complexity
@@ -528,37 +534,50 @@ struct metapopulation : public set < bscored_combo_tree,
         int i = 0;
 
         // Logger
-        logger().debug("Compute the behavioral score of all candidates");
+        logger().debug("Sort the deme");
+        // ~Logger
+
+        // sort the deme according to composite_score (descending order)
+        std::sort(_deme->begin(), _deme->end(),
+                  std::greater<eda::scored_instance<composite_score> >());
+
+        // Logger
+        logger().debug("Compute the behavioral score of all candidates to insert");
         // ~Logger
 
         foreach(const eda::scored_instance<composite_score>& inst, *_deme) {
             // this is in case the deme is closed before the entire
-            // deme (or one should understand the current sample of
-            // it) has been explored
+            // deme (or rather the current sample of it) has been
+            // explored
             if (i++ == eval_during_this_deme)
                 break;
 
-            //if its really bad just skip it
+            // if it's really bad just skip it and all that follow
             if (get_score(inst.second) == get_score(worst_possible_score))
-                continue;
+                break;
 
-            //generate the tree coded by inst
-            //turn the knobs of rep._exemplar as stored in inst
+            // generate the tree coded by inst
+            // turn the knobs of rep._exemplar as stored in inst
             _rep->transform(inst);
 
-            //get the combo_tree associated to inst, cleaned and reduced
-            //@todo: here the canidate is possibly reduced for the second time
-            // this could probability be avoid with some clever cache or alike
+            // get the combo_tree associated to inst, cleaned and reduced
+            // @todo: here the canidate is possibly reduced for the second time
+            // this could probability be avoid with some clever cache or something
             combo_tree tr = _rep->get_clean_exemplar(true);
 
-            //update the set of potential exemplars
-            if (_visited_exemplars.find(tr) == _visited_exemplars.end() &&
-                candidates.find(tr) == candidates.end()) {
-                bscored_combo_tree candidate = 
-                    make_pair(tr, composite_behavioral_score(bscore(tr),
-                                                             inst.second));
-                candidates.insert(candidate);
+            // update the set of potential exemplars
+            if (_visited_exemplars.find(tr) == _visited_exemplars.end()
+                && candidates.find(tr) == candidates.end()) {
 
+                // only add up to max_candidates
+                if(params.max_candidates < 0
+                   || (int)candidates.size() < params.max_candidates) {
+                    bscored_combo_tree candidate = 
+                        make_pair(tr, composite_behavioral_score(bscore(tr),
+                                                                 inst.second));
+                    candidates.insert(candidate);
+                } else 
+                    break;
             }
         }
         // update the record of the best-seen score & trees
@@ -568,7 +587,7 @@ struct metapopulation : public set < bscored_combo_tree,
         if(logger().getLevel() >= opencog::Logger::FINE) {
             logger().fine("Candidates (and their bscores) to merge with"
                           " the metapopulation: %u", candidates.size());
-            foreach(metapop_candidates::value_type& c, candidates) {
+            foreach(const metapop_candidates::value_type& c, candidates) {
                 stringstream ss_c;
                 ss_c << c.second << " " << c.first;
                 logger().fine(ss_c.str());

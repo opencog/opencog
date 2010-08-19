@@ -178,12 +178,14 @@ int main(int argc,char** argv) {
     vector<string> exemplars_str;
     int reduct_candidate_effort;
     int reduct_knob_building_effort;
+    unsigned long cache_size;
+    vector<string> jobs_str;
+    // metapop_param
+    int max_candidates;
     bool reduce_all;
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
-    unsigned long cache_size;
     bool revisit;
-    vector<string> jobs_str;
     // eda_param
     double pop_size_ratio;
 
@@ -191,31 +193,31 @@ int main(int argc,char** argv) {
     options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message.")
-        (string(rand_seed_opt.first).append(",").append(rand_seed_opt.second).c_str(),
+        (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
          "random seed.")
-        (string(max_evals_opt.first).append(",").append(max_evals_opt.second).c_str(),
+        (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
          "maximum number of fitness function evaluations.")
-        (string(result_count_opt.first).append(",").append(result_count_opt.second).c_str(),
+        (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
          "the number of non-dominated best results to return ordered according to their score, if negative then returns all of them.")
-        (string(output_complexity_opt.first).append(",").append(output_complexity_opt.second).c_str(),
+        (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
          "if 1, outputs the complexity before each candidate (at the right of the score).")
-        (string(output_bscore_opt.first).append(",").append(output_bscore_opt.second).c_str(),
+        (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
          "if 1, outputs the bscore below each candidate.")
-        (string(output_eval_number_opt.first).append(",").append(output_eval_number_opt.second).c_str(),
+        (opt_desc_str(output_eval_number_opt).c_str(),
          value<bool>(&output_eval_number)->default_value(false),
          "if 1, outputs the actual number of evaluations.")
-        (string(max_gens_opt.first).append(",").append(max_gens_opt.second).c_str(),
+        (opt_desc_str(max_gens_opt).c_str(),
          value<int>(&max_gens)->default_value(-1),
          "maximum number of demes to generate and optimize, negative means no generation limit.")
-        (string(input_table_file_opt.first).append(",").append(input_table_file_opt.second).c_str(),
+        (opt_desc_str(input_table_file_opt).c_str(),
          value<string>(&input_table_file),
          "input table file, the maximum number of samples is the number of rows in the file.")
-        (string(problem_opt.first).append(",").append(problem_opt.second).c_str(),
+        (opt_desc_str(problem_opt).c_str(),
          value<string>(&problem)->default_value("it"),
          string("problem to solve, supported problems are"
                 " regression based on input table (").append(it).
@@ -225,72 +227,75 @@ int main(int argc,char** argv) {
          append("), disjunction (").append(dj).
          append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").").c_str())
-        (string(combo_str_opt.first).append(",").append(combo_str_opt.second).c_str(),
+        (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          string("combo program to learn, use when the problem ").append(cp).append(" is selected (option -h).").c_str())
-        (string(problem_size_opt.first).append(",").append(problem_size_opt.second).c_str(),
+        (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
          string("for even parity (").append(pa).
          append(") and disjunction (").append(dj).
          append(") the problem size corresponds to the arity,"
                 " for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
          append(") the problem size corresponds to the order o.").c_str())
-        (string(nsamples_opt.first).append(",").append(nsamples_opt.second).c_str(),
+        (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
          "number of samples to describ the problem. If nsample is negative, null or larger than the maximum number of samples allowed it is ignored.")
-        (string(min_rand_input_opt.first).append(",").append(min_rand_input_opt.second).c_str(),
+        (opt_desc_str(min_rand_input_opt).c_str(),
          value<float>(&min_rand_input)->default_value(0),
          "min of an input value chosen randomly, only used when the problem takes continuous inputs")
-        (string(max_rand_input_opt.first).append(",").append(max_rand_input_opt.second).c_str(),
+        (opt_desc_str(max_rand_input_opt).c_str(),
          value<float>(&max_rand_input)->default_value(1),
          "max of an input value chosen randomly, only used when the problem takes continuous inputs")
-        (string(log_level_opt.first).append(",").append(log_level_opt.second).c_str(),
+        (opt_desc_str(log_level_opt).c_str(),
          value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.")
-        (string(log_file_dep_opt_opt.first).append(",").append(log_file_dep_opt_opt.second).c_str(),
+        (opt_desc_str(log_file_dep_opt_opt).c_str(),
          "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than 255 characters.")
-        (string(log_file_opt.first).append(",").append(log_file_opt.second).c_str(),
+        (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
          string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt.first).append(".").c_str())
-        (string(variance_opt.first).append(",").append(variance_opt.second).c_str(),
+        (opt_desc_str(variance_opt).c_str(),
          value<float>(&variance)->default_value(0),
          "in the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor.")
-        (string(prob_opt.first).append(",").append(prob_opt.second).c_str(),
+        (opt_desc_str(prob_opt).c_str(),
          value<float>(&prob)->default_value(0),
          "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.")
-        (string(ignore_ops_str_opt.first).append(",").append(ignore_ops_str_opt.second).c_str(),
+        (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
          "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored.")
-        (string(opt_algo_opt.first).append(",").append(opt_algo_opt.second).c_str(),
+        (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(un),
          string("optimization algorithm, supported algorithms are"
                 " univariate (").append(un).
          append("), simulation annealing (").append(sa).
          append("), hillclimbing (").append(hc).append(").").c_str())
-        (string(exemplars_str_opt.first).append(",").append(exemplars_str_opt.second).c_str(),
+        (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string> >(&exemplars_str),
          "start the search with a given exemplar, can be used several times.")
-        (string(reduce_all_opt.first).append(",").append(reduce_all_opt.second).c_str(),
+        (opt_desc_str(max_candidates_opt).c_str(),
+         value<int>(&max_candidates)->default_value(-1),
+         "maximum number of considered candidates to be added to the metapopulation after optimizing deme")
+        (opt_desc_str(reduce_all_opt).c_str(),
          value<bool>(&reduce_all)->default_value(true),
          "reduce all candidates before being evaluated, otherwise there are only reduced before being added to the metapopulation. This option can be valuable if the cache is enabled to not evaluate multiple time equivalent candidates.")
-        (string(reduct_candidate_effort_opt.first).append(",").append(reduct_candidate_effort_opt.second).c_str(),         
+        (opt_desc_str(reduct_candidate_effort_opt).c_str(),         
          value<int>(&reduct_candidate_effort)->default_value(2),
          "effort allocated for reduction of candidates, 0-3, 0 means minimum effort, 3 means maximum effort.")
-        (string(reduct_knob_building_effort_opt.first).append(",").append(reduct_knob_building_effort_opt.second).c_str(),
+        (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
          value<int>(&reduct_knob_building_effort)->default_value(2),
          "effort allocated for reduction during knob building, 0-3, 0 means minimum effort, 3 means maximum effort. The bigger the effort the lower the dimension of the deme.")
-        (string(count_base_opt.first).append(",").append(count_base_opt.second).c_str(),
+        (opt_desc_str(count_base_opt).c_str(),
          value<bool>(&count_base)->default_value(false),
          "if 1 then a count based scorer is used, otherwise, if 0, a complexity based scorer is used.")
-        (string(cache_size_opt.first).append(",").append(cache_size_opt.second).c_str(),
+        (opt_desc_str(cache_size_opt).c_str(),
          value<unsigned long>(&cache_size)->default_value(1000000),
          "cache size, so that identical candidates are not re-evaluated, 0 means no cache.")
-        (string(revisit_opt.first).append(",").append(revisit_opt.second).c_str(),
+        (opt_desc_str(revisit_opt).c_str(),
          "revisit visited examplars when all have been visited")
-        (string(jobs_opt.first).append(",").append(jobs_opt.second).c_str(),
+        (opt_desc_str(jobs_opt).c_str(),
          value<vector<string> >(&jobs_str),
          string("number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.").c_str())
-        (string(pop_size_ratio_opt.first).append(",").append(pop_size_ratio_opt.second).c_str(),
+        (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "the higher the more effort is spent on a deme")
         ;
@@ -372,7 +377,7 @@ int main(int argc,char** argv) {
     }
 
     // set metapopulation parameters
-    metapop_parameters meta_param(reduce_all, count_base, revisit);
+    metapop_parameters meta_param(max_candidates, reduce_all, count_base, revisit);
 
     // set eda_parameters
     eda_parameters eda_param(pop_size_ratio);
