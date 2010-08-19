@@ -326,18 +326,18 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 // ~Logger
 
                 gen_idx++;
-            }
-        } else if(all_resources_free(hpm)) { // can't find any
+            } else if(all_resources_free(hpm)) { // can't find any
                                              // available exemplar and
                                              // there is no hope that
                                              // one will come
-            // Logger
-            logger().info("There is no more exempalr in the metapopulation"
-                          " that has not been visited and"
-                          " no more results from other process are expected."
-                          " This is a blockage situation, several options"
-                          " can be used to prevent that, see moses-exec -h");
-            break;
+                // Logger
+                logger().info("There is no more exempalr in the metapopulation"
+                              " that has not been visited and"
+                              " no more results from other process are expected."
+                              " This is a blockage situation, several options"
+                              " can be used to prevent that, see moses-exec -h");
+                break;
+            }
         }   
 
         // check for results and merge if necessary
