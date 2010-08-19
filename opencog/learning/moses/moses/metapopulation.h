@@ -54,12 +54,14 @@ struct metapop_parameters {
     metapop_parameters(int _max_candidates = -1,
                        bool _reduce_all = true,
                        bool _countbs = true,
-                       bool _revisit = false) :
+                       bool _revisit = false,
+                       bool _ignore_bscore = false) :
         selection_max_range(11),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         count_base(_countbs),
-        revisit(_revisit)
+        revisit(_revisit),
+        ignore_bscore(_ignore_bscore)
     { }
     
     // when doing selection of examplars according to 2^-n, where n is
@@ -76,6 +78,8 @@ struct metapop_parameters {
     bool count_base;
     // when true then visited exemplars can be revisited
     bool revisit;
+    //ignore the behavioral score when merging candidates in the population
+    bool ignore_bscore;
 };
 
     
@@ -117,7 +121,10 @@ struct metapopulation : public set < bscored_combo_tree,
 
         }
         update_best_candidates(candidates);
-        merge_nondominating(candidates.begin(), candidates.end(), *this);
+        if(params.ignore_bscore)
+            insert(candidates.begin(), candidates.end());
+        else
+            merge_nondominating(candidates.begin(), candidates.end(), *this);
     }
 
     /**
@@ -582,12 +589,19 @@ struct metapopulation : public set < bscored_combo_tree,
         }
         // ~Logger
 
-        // Logger
-        logger().debug("Merge all non-dominated candidates with"
-                       " the metapopulation");
-        // ~Logger
-
-        merge_nondominating(candidates.begin(), candidates.end(), *this);
+        if(params.ignore_bscore) {
+            // Logger
+            logger().debug("Merge candidates with the metapopulation");
+            // ~Logger            
+            insert(candidates.begin(), candidates.end());
+        }
+        else {
+            // Logger
+            logger().debug("Merge all non-dominated candidates with"
+                           " the metapopulation");
+            // ~Logger
+            merge_nondominating(candidates.begin(), candidates.end(), *this);
+        }
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {

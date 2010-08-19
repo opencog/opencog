@@ -331,7 +331,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                                              // there is no hope that
                                              // one will come
                 // Logger
-                logger().info("There is no more exempalr in the metapopulation"
+                logger().info("There is no more exemplar in the metapopulation"
                               " that has not been visited and"
                               " no more results from other process are expected."
                               " This is a blockage situation, several options"
@@ -364,7 +364,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     mp.log_best_candidates();
                     // ~Logger
 
-                    merge_nondominating(candidates.begin(), candidates.end(), mp);
+                    if(mp.params.ignore_bscore)
+                        mp.insert(candidates.begin(), candidates.end());
+                    else
+                        merge_nondominating(candidates.begin(), candidates.end(),
+                                            mp);
 
                     // Logger
                     logger().info("Number of evaluations so far: %d",

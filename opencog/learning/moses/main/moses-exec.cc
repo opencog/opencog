@@ -186,6 +186,7 @@ int main(int argc,char** argv) {
     bool count_base; // true if the scorer is count based, otherwise
                      // complexity based
     bool revisit;
+    bool ignore_bscore;
     // eda_param
     double pop_size_ratio;
 
@@ -297,7 +298,10 @@ int main(int argc,char** argv) {
          string("number of jobs allocated for deme optimization. Jobs can be executed on a remote machine as well, in such case the notation -j N:REMOTE_HOST is used. For instance one can enter the options -j 4 -j 16").append(job_seperator).append("my_server.org (or -j 16").append(job_seperator).append("user@my_server.org if wishes to run the remote jobs under a different user name), meaning that 4 jobs are allocated on the local machine and 16 jobs are allocated on my_server.org. The assumption is that moses-exec must be on the remote machine and is located in a directory included in the PATH environment variable. Beware that a lot of log files are gonna be generated when using this option.").c_str())
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
-         "the higher the more effort is spent on a deme")
+         "the higher the more effort is spent on a deme.")
+        (opt_desc_str(ignore_bscore_opt).c_str(),
+         value<bool>(&ignore_bscore)->default_value(false),
+         "ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates would lead to the solution faster.")
         ;
 
     variables_map vm;
@@ -377,7 +381,8 @@ int main(int argc,char** argv) {
     }
 
     // set metapopulation parameters
-    metapop_parameters meta_param(max_candidates, reduce_all, count_base, revisit);
+    metapop_parameters meta_param(max_candidates, reduce_all,
+                                  count_base, revisit, ignore_bscore);
 
     // set eda_parameters
     eda_parameters eda_param(pop_size_ratio);
