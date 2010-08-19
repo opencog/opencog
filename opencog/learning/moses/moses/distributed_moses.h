@@ -338,6 +338,11 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // ~Logger
 
                     mp.update_best_candidates(candidates);
+
+                    // Logger
+                    mp.log_best_candidates();
+                    // ~Logger
+
                     merge_nondominating(candidates.begin(), candidates.end(), mp);
 
                     // Logger

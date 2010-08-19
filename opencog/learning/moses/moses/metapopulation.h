@@ -316,20 +316,7 @@ struct metapopulation : public set < bscored_combo_tree,
         stringstream ss;
         ss << "Total number of evaluations so far: " << _n_evals;
         logger().info(ss.str());
-        // best candidates (with the maximum score) so far
-        if(best_candidates().empty())
-            logger().info("Only worst scored candidates");
-        else {
-            stringstream ss;
-            ss << "The following candidate(s) have the best score " 
-               << best_score();
-            logger().info(ss.str());
-            foreach(const bscored_combo_tree& cand, best_candidates()) {
-                stringstream ss_tr;
-                ss_tr << get_tree(cand);
-                logger().info(ss_tr.str());
-            }
-        }
+        log_best_candidates();
         // ~Logger
 
         //this may happens for instance if the eval fails and throws an exception
@@ -627,6 +614,23 @@ struct metapopulation : public set < bscored_combo_tree,
                     _best_candidates.clear();
                 }
                 _best_candidates.insert(candidate);
+            }
+        }
+    }
+
+    // log the best candidates
+    void log_best_candidates() const {
+        if(best_candidates().empty())
+            logger().info("Only worst scored candidates");
+        else {
+            stringstream ss;
+            ss << "The following candidate(s) have the best score " 
+               << best_score();
+            logger().info(ss.str());
+            foreach(const bscored_combo_tree& cand, best_candidates()) {
+                stringstream ss_tr;
+                ss_tr << get_tree(cand);
+                logger().info(ss_tr.str());
             }
         }
     }
