@@ -272,6 +272,16 @@ host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& job
     return hpm_it;
 }
 
+// return true iff all resources are completely free, i.e. no more
+// candidates are expected to be merged
+bool all_resources_free(const host_proc_map& hpm) {
+    foreach(const host_proc_map::value_type& hpmv, hpm) {
+        if(!hpmv.second.empty())
+            return false;
+    }
+    return true;
+}
+
 /**
  * the main function of Distributed MOSES
  *
@@ -317,7 +327,18 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                 gen_idx++;
             }
-        }
+        } else if(all_resources_free(hpm)) { // can't find any
+                                             // available exemplar and
+                                             // there is no hope that
+                                             // one will come
+            // Logger
+            logger().info("There is no more exempalr in the metapopulation"
+                          " that has not been visited and"
+                          " no more results from other process are expected."
+                          " This is a blockage situation, several options"
+                          " can be used to prevent that, see moses-exec -h");
+            break;
+        }   
 
         // check for results and merge if necessary
         foreach(host_proc_map::value_type& hpmv, hpm) {

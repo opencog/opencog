@@ -349,7 +349,7 @@ struct metapopulation : public set < bscored_combo_tree,
             if(_exemplar == end()) {
                 // Logger
                 logger().info("There is no more exemplar in the"
-                              " meta population that has not been visited");
+                              " metapopulation that has not been visited");
                 // ~Logger
                 if(params.revisit) {
                     _visited_exemplars.clear();
