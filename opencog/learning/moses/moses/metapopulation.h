@@ -551,7 +551,7 @@ struct metapopulation : public set < bscored_combo_tree,
                   std::greater<eda::scored_instance<composite_score> >());
 
         // Logger
-        logger().debug("Compute the behavioral score of all candidates to insert");
+        logger().debug("Compute the behavioral score of all candidates to merge");
         // ~Logger
 
         foreach(const eda::scored_instance<composite_score>& inst, *_deme) {

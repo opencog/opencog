@@ -401,6 +401,8 @@ void merge_nondominating(It from, It to, Set& dst, const TrSet& ignore,
                 } else {
                     ++it;
                 }
+            } else {
+                ++it;
             }
         }
         if (nondominated)
