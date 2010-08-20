@@ -187,6 +187,7 @@ int main(int argc,char** argv) {
                      // complexity based
     bool revisit;
     bool ignore_bscore;
+    bool ignore_bscore_visited;
     // eda_param
     double pop_size_ratio;
 
@@ -302,6 +303,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(ignore_bscore_opt).c_str(),
          value<bool>(&ignore_bscore)->default_value(false),
          "ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates would lead to the solution faster.")
+        (opt_desc_str(ignore_bscore_visited_opt).c_str(),
+         value<bool>(&ignore_bscore_visited)->default_value(true),
+         "when testing dominance for merging a candidate to the metapopulation, visited candidates are ignored, that if a candidate is only dominated by visited candidates it is still added to the metapopulation. Of course if ignore-bscore is enabled this option has no effect.")
         ;
 
     variables_map vm;
@@ -382,7 +386,8 @@ int main(int argc,char** argv) {
 
     // set metapopulation parameters
     metapop_parameters meta_param(max_candidates, reduce_all,
-                                  count_base, revisit, ignore_bscore);
+                                  count_base, revisit, ignore_bscore,
+                                  ignore_bscore_visited);
 
     // set eda_parameters
     eda_parameters eda_param(pop_size_ratio);

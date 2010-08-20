@@ -55,13 +55,15 @@ struct metapop_parameters {
                        bool _reduce_all = true,
                        bool _countbs = true,
                        bool _revisit = false,
-                       bool _ignore_bscore = false) :
+                       bool _ignore_bscore = false,
+                       bool _ignore_bscore_visited = true) :
         selection_max_range(11),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         count_base(_countbs),
         revisit(_revisit),
-        ignore_bscore(_ignore_bscore)
+        ignore_bscore(_ignore_bscore),
+        ignore_bscore_visited(_ignore_bscore_visited)
     { }
     
     // when doing selection of examplars according to 2^-n, where n is
@@ -78,8 +80,13 @@ struct metapop_parameters {
     bool count_base;
     // when true then visited exemplars can be revisited
     bool revisit;
-    //ignore the behavioral score when merging candidates in the population
+    // ignore the behavioral score when merging candidates in the population
     bool ignore_bscore;
+    // when testing dominance for merging a candidate to the
+    // metapopulation, visited candidates are ignored, that if a
+    // candidate is only dominated by visited candidates it is still
+    // added to the metapopulation
+    bool ignore_bscore_visited;
 };
 
     
@@ -121,10 +128,8 @@ struct metapopulation : public set < bscored_combo_tree,
 
         }
         update_best_candidates(candidates);
-        if(params.ignore_bscore)
-            insert(candidates.begin(), candidates.end());
-        else
-            merge_nondominating(candidates.begin(), candidates.end(), *this);
+        merge_candidates(candidates, params.ignore_bscore,
+                         _visited_exemplars, params.ignore_bscore_visited);
     }
 
     /**
@@ -293,6 +298,16 @@ struct metapopulation : public set < bscored_combo_tree,
         return exemplar;
     }
 
+    void merge_candidates(const metapop_candidates& candidates,
+                          bool ignore_bscore,
+                          const combo_tree_hash_set& tr_ignore,
+                          bool ignore_bscore_visited) {
+        if(ignore_bscore)
+            insert(candidates.begin(), candidates.end());
+        else
+            merge_nondominating(candidates.begin(), candidates.end(), *this,
+                                tr_ignore, ignore_bscore_visited);
+    }
 
     /**
      * expand do representation-building and create a deme first, and
@@ -589,19 +604,12 @@ struct metapopulation : public set < bscored_combo_tree,
         }
         // ~Logger
 
-        if(params.ignore_bscore) {
-            // Logger
-            logger().debug("Merge candidates with the metapopulation");
-            // ~Logger            
-            insert(candidates.begin(), candidates.end());
-        }
-        else {
-            // Logger
-            logger().debug("Merge all non-dominated candidates with"
-                           " the metapopulation");
-            // ~Logger
-            merge_nondominating(candidates.begin(), candidates.end(), *this);
-        }
+        // Logger
+        logger().debug("Merge candidates with the metapopulation");
+        // ~Logger            
+
+        merge_candidates(candidates, params.ignore_bscore,
+                         _visited_exemplars, params.ignore_bscore_visited);
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
