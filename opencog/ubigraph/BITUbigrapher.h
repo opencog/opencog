@@ -78,16 +78,21 @@ public:
     // ruleNumber: 0 == BITNodeRoot, 1 == root variable scoper, otherwise the index of the Rule in the RuleProvider
     void drawBITNode(BITNode* node, int ruleNumber = 0);
 
-    void drawBITLink(int parent_id, int child_id, int slot);
+    // reusing_template should be false normally, but true if parent is reusing child via the BITNode template system
+    void drawBITLink(int parent_id, int child_id, int slot, bool reusing_template = false);
 
     int findBITNodeID(BITNode* node);
 
+    // todo: these should have consistent, event-driven-style names.
     // todo: graph() would show it again, which is wrong.
     void hideBITNode(BITNode* node);
 
     void foundResult(BITNode* node);
 
     void markClone(BITNode* existing, BITNode* clone);
+
+    // indicate that parent reused child.
+    void markReuse(BITNode* parent, BITNode* child, int slot);
 
     //! Redraw the ubigraph, based on how the BIT is now.
     void graph();

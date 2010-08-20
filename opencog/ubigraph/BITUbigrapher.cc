@@ -136,16 +136,24 @@ int BITUbigrapher::findBITNodeID(BITNode* node) {
     return node_id;
 }
 
-void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot) {
+void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot, bool reusing_template) {
     unsigned int arg_id = parent_id + slot + 1;
 
     int status = ubigraph_new_edge ( arg_id, child_id );
     if ( status == -1 ) {
         logger().error ( "Attaching to parent: Status was %d", status );
     } else {
-        ubigraph_set_edge_attribute ( status, "oriented", "true" );
-        ubigraph_set_edge_attribute ( status, "arrow", "true" );
-        //ubigraph_set_edge_attribute ( status, "strength", "0.5" );
+        if (!reusing_template) {
+            ubigraph_set_edge_attribute ( status, "oriented", "true" );
+            ubigraph_set_edge_attribute ( status, "arrow", "true" );
+            //ubigraph_set_edge_attribute ( status, "strength", "0.5" );
+        } else {
+            ubigraph_set_edge_attribute ( status, "oriented", "true" );
+            ubigraph_set_edge_attribute( status, "stroke", "dashed");
+            ubigraph_set_edge_attribute( status, "color", "#ff0000");
+            ubigraph_set_edge_attribute ( status, "arrow", "true" );
+            //ubigraph_set_edge_attribute ( status, "strength", "0" );
+        }
     }
 }
 
@@ -271,6 +279,11 @@ void BITUbigrapher::markClone(BITNode* existing, BITNode* clone) {
         ubigraph_set_edge_attribute ( link_id, "arrow", "true" );
         ubigraph_set_edge_attribute ( link_id, "stroke", "dashed" );
     }
+}
+
+void BITUbigrapher::markReuse(BITNode* parent, BITNode* child, int slot) {
+    //cout << "reuse " << findBITNodeID(parent) << " " << findBITNodeID(child) << " " << slot << endl;
+    drawBITLink(findBITNodeID(parent), findBITNodeID(child), slot, true);
 }
 
 void BITUbigrapher::graph()

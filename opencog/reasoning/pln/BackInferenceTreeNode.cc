@@ -927,6 +927,10 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
                 children[target_i].insert(ParametrizedBITNode(template_node, template_binds));
                 template_node->addNewParent(this, target_i, template_binds);
 
+#ifdef USE_BITUBIGRAPHER
+            haxx::BITUSingleton->markReuse((BITNode*)this, template_node, target_i);
+#endif // USE_BITUBIGRAPHER
+
                 return template_node;
             }
             else
