@@ -1,8 +1,7 @@
-SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Debug)
 IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated -Wno-unused-variable")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
-
 
 # It is now usual to use the system OpenCog header files so this is unnecessary
 INCLUDE_DIRECTORIES (
