@@ -7,9 +7,13 @@ ENDIF (COMMAND CMAKE_POLICY)
 PROJECT(opencog)
 
 ################################
-#uncomment to be in Release mode
+# uncomment to be in Release mode
 ################################
 #SET(CMAKE_BUILD_TYPE Release)
+##
+# uncomment to be in coverage testing mode
+SET(CMAKE_BUILD_TYPE Coverage)
+#
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Debug)
@@ -23,7 +27,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
     SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-    # Vital to do this otherwise unresolved symbals everywhere:
+    # Vital to do this otherwise unresolved symbols everywhere:
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
   ELSE (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
@@ -46,6 +50,14 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 
   SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
   SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+
+  # Options for generating gcov code coverage output
+  SET(CMAKE_C_FLAGS_COVERAGE "-O0 -g -fprofile-arcs -ftest-coverage -fno-inline")
+  SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_C_FLAGS_COVERAGE} -fno-default-inline")
+  # Might be needed for some combinations of ln and gcc
+  IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  LINK_LIBRARIES(gcov)
+  ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # check dependencies
@@ -298,12 +310,30 @@ ADD_SUBDIRECTORY(lib)
 
 ADD_CUSTOM_TARGET(tests)
 ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
-ADD_CUSTOM_TARGET(test
-	DEPENDS tests
-	WORKING_DIRECTORY tests
-	COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-	COMMENT "Running tests..."
-)
+IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    # doing coverage stuff while running tests if this is the Coverage build
+    ADD_CUSTOM_TARGET(test
+        # TODO lcov should be found by cmake first
+        # TODO set it up so that we can pick to run coverage per test, or
+        # combined across all tests (the latter is MUCH faster). Use a define?
+        # There is coverage specific stuff in AddCxxTest.cmake now...
+        DEPENDS tests
+        WORKING_DIRECTORY tests
+        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+        # This script combines the coverage analysis of each test,
+        # then creates html in tests/lcov
+        COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+        COMMENT "Running tests with coverage..."
+    )
+ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    # If this is a build with coverage enabled then test normally
+    ADD_CUSTOM_TARGET(test
+        DEPENDS tests
+        WORKING_DIRECTORY tests
+        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+        COMMENT "Running tests..."
+    )
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 IF (NOT WIN32)
