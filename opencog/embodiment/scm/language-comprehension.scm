@@ -2185,12 +2185,31 @@
 ; to check the parentage
 ; It also has a timeout counter that will stop the current
 ; evaluation to avoid performance issues.
+; The performance issues are mostly due to loading stuff from the database
+; and, in some cases, the high number of word senses for a word.
 (define (check-parentage parentWordNode wordNodes)
   (define expandedNodes '())
   (define inspectedNodes '())
-  (define timeout 5) ; measured in seconds
+  ; It seems to need more than 5 seconds though...
+  (define timeout 5) ; measured in seconds.
   (define startTime (get-tick))
   (define candidateSenseNodes '())
+
+  ; It's possible to make InheritanceLinks for every INdirect hypernym as well
+  ; as the direct ones. e.g. using Linas's forward chainer. If you do so,
+  ; set this to false so you don't need to do the recursion within this
+  ; function.
+  (define recursive #t)
+
+  ; Fetching the Atoms from the database is a/the major overhead for this function.
+  ; This wrapper only fetches the incoming set if it hasn't been already. That's only
+  ; relevant in repeat calls to check-parentage.
+  (define (maybe-fetch atom)
+    (if (= 0 (length (cog-incoming-set atom)))
+      (fetch-incoming-set atom)
+      (cog-handle atom)
+    )
+  )
 
   (define (create-parent-sense-node-list links referenceNode)
     (if (null? links)
@@ -2204,6 +2223,8 @@
         )
     )
 
+  ; Checks whether any of senseNodes is a member of candidateSenseNodes.
+  ; candidateSenseNodes are the senses of the parentWordNode.
   (define (inspect-sense-nodes senseNodes)
     (if (or (null? senseNodes) (> (get-tick startTime) timeout))
         #f
@@ -2223,7 +2244,7 @@
               (begin
                 (set! inspectedNodes (append inspectedNodes (list senseNode)))
                 (cond ((not (member senseNode expandedNodes))
-                       (fetch-incoming-set senseNode)
+                       (maybe-fetch senseNode)
                        (set! expandedNodes (append expandedNodes (list senseNode)))
                        )) ; cond
  
@@ -2231,20 +2252,23 @@
                        (parents (create-parent-sense-node-list links senseNode)))
                   (if (inspect-sense-nodes parents)
                       senseNode
-                      (inspect-sense-nodes-hierarchy (append (cdr senseNodes) parents))
+                      (if recursive
+                        (inspect-sense-nodes-hierarchy (append (cdr senseNodes) parents))
+                        (inspect-sense-nodes-hierarchy (append (cdr senseNodes)))
                       )
-                  )                
-                )
+                  )
+                )                
               )
           )
         )
     )
-   
+  )
+    
   (cons
    (if (member parentWordNode wordNodes)
        parentWordNode
        (begin
-         (fetch-incoming-set parentWordNode)
+         (maybe-fetch parentWordNode)
          (set! expandedNodes (append expandedNodes (list parentWordNode)))
          (set! candidateSenseNodes 
                (create-sense-node-list
