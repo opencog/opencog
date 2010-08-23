@@ -140,38 +140,4 @@ behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) cons
     return bs;
 }
 
-/**
- * return true if x dominates y
- *        false if y dominates x
- *        indeterminate otherwise
- */
-tribool dominates(const behavioral_score& x, const behavioral_score& y)
-{
-    //everything dominates an empty vector
-    if (x.empty()) {
-        if (y.empty())
-            return indeterminate;
-        return false;
-    } else if (y.empty()) {
-        return true;
-    }
-
-    tribool res = indeterminate;
-    for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
-            xit != x.end();++xit, ++yit) {
-        if (*xit < *yit) { //individual elements are assumed to represent error
-            if (!res)
-                return indeterminate;
-            else
-                res = true;
-        } else if (*yit < *xit) {
-            if (res)
-                return indeterminate;
-            else
-                res = false;
-        }
-    }
-    return res;
-}
-
 } //~namespace moses

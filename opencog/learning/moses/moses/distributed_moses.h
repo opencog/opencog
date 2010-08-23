@@ -365,7 +365,6 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // ~Logger
 
                     mp.merge_candidates(candidates, mp.params.ignore_bscore,
-                                        mp.visited(),
                                         mp.params.ignore_bscore_visited);
 
                     // Logger

@@ -370,45 +370,6 @@ protected:
     opencog::RandGen& rng;
 };
 
-/**
- * return true if x dominates y
- *        false if y dominates x
- *        indeterminate otherwise
- */
-tribool dominates(const behavioral_score& x, const behavioral_score& y);
-
-
-/**
- * For all candidates c in [from, to), insert c in dst iff 
- * no element of (dst - ignore) dominates c.
- */
-//this may turn out to be too slow...
-template<typename It, typename Set, typename TrSet>
-void merge_nondominating(It from, It to, Set& dst, const TrSet& ignore,
-                         bool ignore_bscore_visited)
-{
-    for (;from != to;++from) {
-        bool nondominated = true;
-        for (typename Set::iterator it = dst.begin();it != dst.end();) {
-            if(!ignore_bscore_visited ||
-               find(ignore.begin(), ignore.end(), get_tree(*it)) == ignore.end()) {
-                tribool dom = dominates(from->second, it->second);
-                if (dom) {
-                    dst.erase(it++);
-                } else if (!dom) {
-                    nondominated = false;
-                    break;
-                } else {
-                    ++it;
-                }
-            } else {
-                ++it;
-            }
-        }
-        if (nondominated)
-            dst.insert(*from);
-    }
-}
 
 } //~namespace moses
 

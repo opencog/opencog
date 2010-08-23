@@ -128,8 +128,7 @@ struct metapopulation : public set < bscored_combo_tree,
 
         }
         update_best_candidates(candidates);
-        merge_candidates(candidates, params.ignore_bscore,
-                         _visited_exemplars, params.ignore_bscore_visited);
+        merge_candidates(candidates, params.ignore_bscore, params.ignore_bscore_visited);
     }
 
     /**
@@ -299,14 +298,12 @@ struct metapopulation : public set < bscored_combo_tree,
     }
 
     void merge_candidates(const metapop_candidates& candidates,
-                          bool ignore_bscore,
-                          const combo_tree_hash_set& tr_ignore,
-                          bool ignore_bscore_visited) {
+                          bool ignore_bscore, bool ignore_bscore_visited) {
         if(ignore_bscore)
             insert(candidates.begin(), candidates.end());
         else
             merge_nondominating(candidates.begin(), candidates.end(), *this,
-                                tr_ignore, ignore_bscore_visited);
+                                ignore_bscore_visited);
     }
 
     /**
@@ -608,8 +605,7 @@ struct metapopulation : public set < bscored_combo_tree,
         logger().debug("Merge candidates with the metapopulation");
         // ~Logger            
 
-        merge_candidates(candidates, params.ignore_bscore,
-                         _visited_exemplars, params.ignore_bscore_visited);
+        merge_candidates(candidates, params.ignore_bscore, params.ignore_bscore_visited);
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
@@ -624,6 +620,72 @@ struct metapopulation : public set < bscored_combo_tree,
         delete _rep;
         _deme = NULL;
         _rep = NULL;
+    }
+
+    /**
+     * return true if x dominates y
+     *        false if y dominates x
+     *        indeterminate otherwise
+     */
+    tribool dominates(const behavioral_score& x, const behavioral_score& y)
+    {
+        //everything dominates an empty vector
+        if (x.empty()) {
+            if (y.empty())
+                return indeterminate;
+            return false;
+        } else if (y.empty()) {
+            return true;
+        }
+        
+        tribool res = indeterminate;
+        for (behavioral_score::const_iterator xit = x.begin(), yit = y.begin();
+             xit != x.end();++xit, ++yit) {
+            if (*xit < *yit) { //individual elements are assumed to represent error
+                if (!res)
+                    return indeterminate;
+                else
+                    res = true;
+            } else if (*yit < *xit) {
+                if (res)
+                    return indeterminate;
+                else
+                    res = false;
+            }
+        }
+        return res;
+    }
+
+    /**
+     * For all candidates c in [from, to), insert c in dst iff 
+     * no element of (dst - _visited_exemplars) dominates c.
+     */
+    //this may turn out to be too slow...
+    template<typename It, typename Set>
+    void merge_nondominating(It from, It to, Set& dst, bool ignore_bscore_visited)
+    {
+        const combo_tree_hash_set& ignore = _visited_exemplars;
+        for (;from != to;++from) {
+            bool nondominated = true;
+            for (typename Set::iterator it = dst.begin();it != dst.end();) {
+                if(!ignore_bscore_visited ||
+                   std::find(ignore.begin(), ignore.end(), get_tree(*it)) == ignore.end()) {
+                    tribool dom = dominates(from->second, it->second);
+                    if (dom) {
+                        dst.erase(it++);
+                    } else if (!dom) {
+                        nondominated = false;
+                        break;
+                    } else {
+                        ++it;
+                    }
+                } else {
+                    ++it;
+                }
+            }
+            if (nondominated)
+                dst.insert(*from);
+        }
     }
 
     // update the record of the best-seen score & trees
