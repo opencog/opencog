@@ -29,7 +29,6 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 
-//jladd
 #include <opencog/learning/moses/moses/scoring.h>
 #include <opencog/learning/moses/moses/ann_scoring.h>
 
@@ -480,6 +479,9 @@ void build_knobs::action_cleanup()
 // if there are multiple divisors, they will be transformed into separate terms
 void build_knobs::contin_canonize(pre_it it)
 {
+    if (is_contin(*it) && get_contin(*it) == 0) {
+        *it = id::plus;
+    }
     if (*it == id::div) {
         OC_ASSERT((it.number_of_children() == 2),
                   "id::div built in must have exactly 2 children.");
