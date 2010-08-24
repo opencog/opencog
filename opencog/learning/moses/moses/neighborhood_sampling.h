@@ -155,7 +155,7 @@ void sample_from_neighborhood(const eda::field_set& fs, unsigned int n,
               "Please make sure that the center_inst"
               " have the same size with the field_set");
 
-    unsigned int dim = fs.n_bits() + fs.n_disc() + fs.contin().size();
+    unsigned int dim = fs.dim_size();
 
     OC_ASSERT(n <= dim,
               "the sampling distance %u"

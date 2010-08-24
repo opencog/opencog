@@ -259,6 +259,11 @@ struct field_set {
     size_t raw_size() const {
         return _fields.size();
     }
+    // dimension size, number of actual knobs to consider, as onto and
+    // contin may take severak raw knobs
+    size_t dim_size() const {
+        return n_bits() + n_disc() + contin().size() + onto().size();
+    }
 
     //counts the number of nonzero (raw) settings in an instance
     size_t count(const instance& inst) const {
