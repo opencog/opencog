@@ -88,7 +88,9 @@ string build_cmdline(const variables_map& vm,
            && it->first != max_gens_opt.first
            && it->first != result_count_opt.first
            && !it->second.defaulted()) {
-            res += string(" --") + it->first + " " + to_string(it->second);
+            string opt_name(" --");
+            opt_name += it->first + " ";
+            res += opt_name + to_string(it->second, opt_name);
         }
     }
     // add exemplar option
