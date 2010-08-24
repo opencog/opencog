@@ -366,8 +366,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     mp.log_best_candidates();
                     // ~Logger
 
-                    mp.merge_candidates(candidates, mp.params.ignore_bscore,
-                                        mp.params.ignore_bscore_visited);
+                    mp.merge_candidates(candidates);
 
                     // Logger
                     logger().info("Number of evaluations so far: %d",

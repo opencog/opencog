@@ -89,6 +89,34 @@ struct metapop_parameters {
     bool ignore_bscore_visited;
 };
 
+/**
+ * greater_than operator for bscored_combo_tree.  The order is as
+ * follow 1 the score matter, then complexity, then the combo_tree
+ * itself. This is done (formerly replacing
+ * std::greater<bscored_combo_tree>) so that candidates of same score
+ * and same complexity can be added in the metapopulation.
+ */
+struct bscored_combo_tree_greater : public binary_function<bscored_combo_tree,
+                                                           bscored_combo_tree,
+                                                           bool> {
+    bool operator()(const bscored_combo_tree& bs_tr1,
+                    const bscored_combo_tree& bs_tr2) const {
+        score_t sc1 = get_score(bs_tr1);
+        score_t sc2 = get_score(bs_tr2);
+        if(sc1 > sc2)
+            return true;
+        if(sc1 < sc2)
+            return false;
+        complexity_t c1 = get_complexity(bs_tr1);
+        complexity_t c2 = get_complexity(bs_tr2);
+        if(c1 > c2)
+            return true;
+        if(c1 < c2)
+            return false;
+        return opencog::size_tree_order<combo::vertex>()(get_tree(bs_tr1),
+                                                         get_tree(bs_tr2));
+    }
+};
     
 /**
  * The metapopulation will store the expressions (as scored trees)
@@ -108,7 +136,8 @@ struct metapop_parameters {
  */
 template<typename Scoring, typename BScoring, typename Optimization>
 struct metapopulation : public set < bscored_combo_tree,
-                                     std::greater<bscored_combo_tree> > {
+                                     bscored_combo_tree_greater > {
+//                                     std::greater<bscored_combo_tree> > {
 
     typedef boost::unordered_set<combo_tree,
                                  boost::hash<combo_tree> > combo_tree_hash_set;
@@ -128,7 +157,7 @@ struct metapopulation : public set < bscored_combo_tree,
 
         }
         update_best_candidates(candidates);
-        merge_candidates(candidates, params.ignore_bscore, params.ignore_bscore_visited);
+        merge_candidates(candidates);
     }
 
     /**
@@ -297,13 +326,11 @@ struct metapopulation : public set < bscored_combo_tree,
         return exemplar;
     }
 
-    void merge_candidates(const metapop_candidates& candidates,
-                          bool ignore_bscore, bool ignore_bscore_visited) {
-        if(ignore_bscore)
+    void merge_candidates(const metapop_candidates& candidates) {
+        if(params.ignore_bscore)
             insert(candidates.begin(), candidates.end());
         else
-            merge_nondominating(candidates.begin(), candidates.end(), *this,
-                                ignore_bscore_visited);
+            merge_nondominating(candidates.begin(), candidates.end());
     }
 
     /**
@@ -602,10 +629,11 @@ struct metapopulation : public set < bscored_combo_tree,
         // ~Logger
 
         // Logger
-        logger().debug("Merge candidates with the metapopulation");
+        logger().debug("Merge %u candidates with the metapopulation",
+                       candidates.size());
         // ~Logger            
 
-        merge_candidates(candidates, params.ignore_bscore, params.ignore_bscore_visited);
+        merge_candidates(candidates);
 
         //Logger
         if(logger().getLevel() >= opencog::Logger::FINE) {
@@ -614,6 +642,10 @@ struct metapopulation : public set < bscored_combo_tree,
             ostream_best(ss, -1);
             logger().fine(ss.str());
         }
+        // ~Logger
+
+        // Logger
+        logger().debug("Metapopulation size is %u", size());
         // ~Logger
 
         delete _deme;
@@ -661,30 +693,31 @@ struct metapopulation : public set < bscored_combo_tree,
      * no element of (dst - _visited_exemplars) dominates c.
      */
     //this may turn out to be too slow...
-    template<typename It, typename Set>
-    void merge_nondominating(It from, It to, Set& dst, bool ignore_bscore_visited)
+    template<typename It>
+    void merge_nondominating(It from, It to)
     {
         const combo_tree_hash_set& ignore = _visited_exemplars;
         for (;from != to;++from) {
             bool nondominated = true;
-            for (typename Set::iterator it = dst.begin();it != dst.end();) {
-                if(!ignore_bscore_visited ||
-                   std::find(ignore.begin(), ignore.end(), get_tree(*it)) == ignore.end()) {
-                    tribool dom = dominates(from->second, it->second);
-                    if (dom) {
-                        dst.erase(it++);
-                    } else if (!dom) {
-                        nondominated = false;
-                        break;
-                    } else {
-                        ++it;
-                    }
+            for (iterator it = begin(); it != end();) {
+                tribool dom = dominates(from->second, it->second);
+                if (dom) {
+                    erase(it++);
+                } else if (!dom && 
+                           (!params.ignore_bscore_visited
+                            || std::find(ignore.begin(), ignore.end(),
+                                         get_tree(*it)) == ignore.end())) {
+                    nondominated = false;
+                    break;
                 } else {
                     ++it;
                 }
             }
-            if (nondominated)
-                dst.insert(*from);
+            if (nondominated) {
+//                std::cout << from-> first << " " << from->second << std::endl;
+                insert(*from);
+//                print_best();
+            }
         }
     }
 
@@ -745,7 +778,7 @@ struct metapopulation : public set < bscored_combo_tree,
         return out;
     }
     // like above but using std::cout
-    void print_best(long n,
+    void print_best(long n = -1,
                     bool output_complexity = false,
                     bool output_bscore = false) {
         ostream_best(std::cout, n, output_complexity, output_bscore);
