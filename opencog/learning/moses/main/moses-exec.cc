@@ -408,14 +408,19 @@ int main(int argc,char** argv) {
 
     if(problem == it) { // regression based on input table
         
-        // if no exemplar has been provided in option try to infer it
+        // try to infer the type of the input table
+        type_node inferred_type = infer_type_from_data_file(input_table_file);
         if(exemplars.empty()) {            
-            type_node inferred_type = infer_type_from_data_file(input_table_file);
             exemplars.push_back(type_to_exemplar(inferred_type));
         }
 
         type_node output_type = 
             *(get_output_type_tree(*exemplars.begin()->begin()).begin());
+        if(output_type == id::unknown_type) {
+            output_type = inferred_type;
+        }
+
+        OC_ASSERT(output_type == inferred_type);
 
         auto_ptr<ifstream> in(open_table_file(input_table_file));
 

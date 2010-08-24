@@ -85,7 +85,7 @@ string opt_desc_str(const pair<string, string>& opt) {
 // boost::program_options API
 template<typename T>
 bool to_string(const boost::program_options::variable_value& vv, string& str,
-               string seperator = "_")
+               string seperator)
 {
     if(vv.value().type() == typeid(T)) {
         str = boost::lexical_cast<string>(vv.as<T>());
