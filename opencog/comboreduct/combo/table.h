@@ -135,8 +135,8 @@ protected:
 
 /**
  * template to fill an input table (IT) and output table (OT) of type
- * T. Note that a '\n' must be placed right after the last number,
- * including of the last line.
+ * T. Note that a '\n' (or '\r' '\n' for DOS format) must be placed
+ * right after the last number, including for the last line.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
@@ -154,6 +154,8 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
         if(str.size()) {
             input = boost::lexical_cast<T>(str);
             char next_c = in.get();
+            if(next_c == '\r') // DOS format
+                next_c = in.get();
             if(next_c == '\n') {
                 output_table.push_back(input);
                 table_inputs.push_back(input_vec);
