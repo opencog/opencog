@@ -134,22 +134,34 @@ protected:
 };
 
 /**
- * template to fill an input table (IT)
- * and output table (OT) of type T
+ * template to fill an input table (IT) and output table (OT) of type
+ * T. Note that a '\n' must be placed right after the last number,
+ * including of the last line.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
     std::vector<T> input_vec;
     T input;
     while (!in.eof()) {
-        in>>input;
-        if(in.get() == '\n') {
-            output_table.push_back(input);
-            table_inputs.push_back(input_vec);
-            input_vec.clear();
+        std::string str;
+        in >> str;
+
+        // remove non ASCII char
+        while(str.size() && (unsigned char)str[0] > 127) {
+            str = str.substr(1);
         }
-        else {
-            input_vec.push_back(input);
+
+        if(str.size()) {
+            input = boost::lexical_cast<T>(str);
+            char next_c = in.get();
+            if(next_c == '\n') {
+                output_table.push_back(input);
+                table_inputs.push_back(input_vec);
+                input_vec.clear();
+            }
+            else {
+                input_vec.push_back(input);
+            }
         }
     }
     return in;

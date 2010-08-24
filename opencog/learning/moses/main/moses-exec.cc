@@ -83,6 +83,10 @@ type_node infer_type_from_data_file(string file) {
     auto_ptr<ifstream> in(open_table_file(file));
     string str;
     *in >> str;
+    // remove non ASCII char
+    while(str.size() && (unsigned char)str[0] > 127) {
+        str = str.substr(1);
+    }
     if(str == "0" || str == "1")
         return id::boolean_type;
     else {
