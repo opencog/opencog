@@ -12,7 +12,7 @@ PROJECT(opencog)
 #SET(CMAKE_BUILD_TYPE Release)
 ##
 # uncomment to be in coverage testing mode
-SET(CMAKE_BUILD_TYPE Coverage)
+#SET(CMAKE_BUILD_TYPE Coverage)
 #
 
 IF (CMAKE_BUILD_TYPE STREQUAL "")
