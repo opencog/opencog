@@ -27,11 +27,11 @@ TARGET_LINK_LIBRARIES(ocweb
 )
 
 INSTALL(FILES
-    init.js
-    processing.js
-    local_graph.js
-    home.html
-    DESTINATION "${DATADIR}/www"
+#    resources/init.js
+#    resources/processing.js
+#    resources/local_graph.js
+    resources/home.html
+    DESTINATION "${DATADIR}/www/"
 )
 
 ADD_SUBDIRECTORY(json_spirit)

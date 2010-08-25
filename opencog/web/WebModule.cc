@@ -84,11 +84,11 @@ WebModule::~WebModule()
 static const char* DEFAULT_WEB_PATH[] =
 {
     "../opencog/web", // For running from bin dir that's in root of src
+    DATADIR"/www",
 #ifndef WIN32
     "/usr/share/opencog/www",
     "/usr/local/share/opencog/www",
 #endif // !WIN32
-    DATADIR,
     NULL
 };
 

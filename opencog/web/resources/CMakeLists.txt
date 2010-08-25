@@ -14,6 +14,6 @@ INSTALL(FILES
     updatesti.html
     updatelti.html
     Logo.png
-    DESTINATION "${DATADIR}/www"
+    DESTINATION "${DATADIR}/www/resources"
 )
 
