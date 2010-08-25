@@ -369,6 +369,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     mp.merge_candidates(candidates);
 
                     // Logger
+                    logger().info("Metapopulation size is %u", mp.size());
                     logger().info("Number of evaluations so far: %d",
                                   mp.n_evals());
                     // ~Logger
