@@ -30,7 +30,7 @@ INSTALL(FILES
 #    resources/init.js
 #    resources/processing.js
 #    resources/local_graph.js
-    resources/home.html
+    index.html
     DESTINATION "${DATADIR}/www/"
 )
 
