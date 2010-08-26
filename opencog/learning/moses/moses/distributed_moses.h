@@ -322,7 +322,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 hpm_it->second.insert(pmv);
 
                 // Logger
-                logger().info("Generation: %d", gen_idx);
+                logger().info("Generation: %d", gen_idx + 1);
                 logger().info("Launch command: %s", cmdline.c_str());
                 logger().info("corresponding to PID = %d", get_pid(pmv));
                 // ~Logger
