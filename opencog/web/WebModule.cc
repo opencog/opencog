@@ -187,7 +187,7 @@ void viewAtomPage( struct mg_connection *conn,
 {
     AtomURLHandler *handler = new AtomURLHandler();
     handler->handleRequest(conn, ri, data);
-    for (;;) if (handler->completed) break;
+    while (!handler->completed) {usleep(50);};
     delete handler;
 }
 
@@ -196,7 +196,7 @@ void viewListPage( struct mg_connection *conn,
 {
     ListURLHandler *handler = new ListURLHandler();
     handler->handleRequest(conn, ri, data);
-    for (;;) if (handler->completed) break;
+    while (!handler->completed) {usleep(50);};
     delete handler;
 }
 
@@ -205,7 +205,7 @@ void makeRequest ( struct mg_connection *conn,
 { 
     ServerRequestWrapper *handler = new ServerRequestWrapper();
     handler->handleRequest(conn, ri, data);
-    for (;;) if (handler->completed) break;
+    while (!handler->completed) {usleep(50);};
     delete handler;
 }
 
