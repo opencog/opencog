@@ -46,10 +46,16 @@ public:
         ostreamContainer(ss, _N, ";", "{", "}");
         TS_ASSERT_EQUALS(string("{1;2;3;4}"), ss.str());
     }
-    void test_istreamContainer() {
+    void test_istreamContainer1() {
         std::vector<int> N;
         stringstream ss("[1 2 3 4] 5");
         istreamContainer(ss, std::back_inserter(N), "[", "]");
+        TS_ASSERT_EQUALS(_N, N);
+    }
+    void test_istreamContainer2() {
+        std::vector<int> N;
+        stringstream ss("1 2 3 4");
+        istreamContainer(ss, std::back_inserter(N));
         TS_ASSERT_EQUALS(_N, N);
     }
 };

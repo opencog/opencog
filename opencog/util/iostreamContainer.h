@@ -200,11 +200,11 @@ namespace opencog {
 
         std::string s;
         in >> s;
+
         OC_ASSERT(s.substr(0, left.size()) == left);
         s = s.substr(left.size());
 
-        bool found_right = false;
-        while(!in.eof() && !found_right) {
+        while(!in.eof()) {
             try {
                 *out++ = boost::lexical_cast<T>(s);
             }
@@ -212,13 +212,10 @@ namespace opencog {
             {
                 // check if right is not appended to the last element
                 int appended_pos = s.size() - right.size();
-                bool found_appended_right = appended_pos > 0
-                    && s.rfind(right) == (size_t)appended_pos;
-                if(found_appended_right)
-                    *out++ = boost::lexical_cast<T>(s.substr(0, appended_pos));
-                found_right = found_appended_right
-                    || (!all_white_space(right) && s == right);
-                OC_ASSERT(found_right);
+                OC_ASSERT(appended_pos > 0
+                          && s.rfind(right) == (size_t)appended_pos);
+                *out++ = boost::lexical_cast<T>(s.substr(0, appended_pos));
+                break;
             }
             in >> s;
         }
