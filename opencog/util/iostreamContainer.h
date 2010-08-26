@@ -65,9 +65,11 @@ namespace opencog {
         if(empty_lr || from!=to)
             out << left;
         if(from != to) {
-            It last = --to;
-            std::copy(from, last, std::ostream_iterator<typename It::value_type>(out, delimiter.c_str()));
-            out << *last;
+            while(from != to) {
+                out << *from;
+                if(++from != to)
+                    out << delimiter;
+            }
         }
         if(empty_lr || from!=to)
             out << right;

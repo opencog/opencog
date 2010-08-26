@@ -30,7 +30,8 @@
 namespace moses
 {
 
-//even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)x2 is even
+// even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)xn is even
+// where n is the arity of even_parity
 struct even_parity {
     template<typename It>
     bool operator()(It from,It to) const {
