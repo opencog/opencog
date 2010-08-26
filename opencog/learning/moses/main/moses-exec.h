@@ -118,7 +118,7 @@ void metapop_moses_results(opencog::RandGen& rng,
         moses::moses(metapop, moses_param);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_param);
     // print result
-    metapop.print_best(pa.result_count, pa.output_complexity, pa.output_bscore);
+    metapop.print(pa.result_count, pa.output_complexity, pa.output_bscore);
     if(pa.output_eval_number)
         std::cout << number_of_evals_str << ": " << metapop.n_evals() << std::endl;
 }

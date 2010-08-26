@@ -338,6 +338,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                               " no more results from other process are expected."
                               " This is a blockage situation, several options"
                               " can be used to prevent that, see moses-exec -h");
+                // ~Logger
                 break;
             }
         }   
@@ -358,6 +359,14 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     logger().info("Merge %u candidates from PID %d"
                                   " with the metapopulation",
                                   candidates.size(), get_pid(*it));
+                    if(logger().getLevel() >= opencog::Logger::FINE) {
+                        logger().fine("Candidates with their bscores to merge with"
+                                      " the metapopulation:");
+                        stringstream ss;
+                        logger().fine(mp.ostream(ss, candidates.begin(),
+                                                 candidates.end(),
+                                                 -1, true, true).str());
+                    }
                     // ~Logger
 
                     mp.update_best_candidates(candidates);
@@ -370,7 +379,12 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
                     // Logger
                     logger().info("Metapopulation size is %u", mp.size());
-                    logger().info("Number of evaluations so far: %d",
+                    if(logger().getLevel() >= opencog::Logger::FINE) {
+                        stringstream ss;
+                        ss << "Metapopulation after merging: " << std::endl;
+                        logger().fine(mp.ostream(ss, -1, true, true).str());
+                    }
+                    logger().fine("Number of evaluations so far: %d",
                                   mp.n_evals());
                     // ~Logger
 

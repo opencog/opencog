@@ -621,35 +621,26 @@ struct metapopulation : public set < bscored_combo_tree,
         update_best_candidates(candidates);
 
         //Logger
-        if(logger().getLevel() >= opencog::Logger::FINE) {
-            logger().fine("Candidates (and their bscores) to merge with"
-                          " the metapopulation: %u", candidates.size());
-            foreach(const metapop_candidates::value_type& c, candidates) {
-                stringstream ss_c;
-                ss_c << c.second << " " << c.first;
-                logger().fine(ss_c.str());
-            }
-        }
-        // ~Logger
-
-        // Logger
         logger().debug("Merge %u candidates with the metapopulation",
                        candidates.size());
-        // ~Logger            
+        if(logger().getLevel() >= opencog::Logger::FINE) {
+            logger().fine("Candidates with their bscores to merge with"
+                          " the metapopulation:");
+            stringstream ss;
+            logger().fine(ostream(ss, candidates.begin(), candidates.end(),
+                                  -1, true, true).str());
+        }
+        // ~Logger
 
         merge_candidates(candidates);
 
         //Logger
+        logger().debug("Metapopulation size is %u", size());
         if(logger().getLevel() >= opencog::Logger::FINE) {
             stringstream ss;
-            ss << "Metapopulation after merging: " << size() << std::endl;
-            ostream_best(ss, -1);
-            logger().fine(ss.str());
+            ss << "Metapopulation after merging:" << std::endl;
+            logger().fine(ostream(ss, -1, true, true).str());
         }
-        // ~Logger
-
-        // Logger
-        logger().debug("Metapopulation size is %u", size());
         // ~Logger
 
         delete _deme;
@@ -761,31 +752,36 @@ struct metapopulation : public set < bscored_combo_tree,
      * scores (optionally complexity and bscore), if n is negative
      * stream them all out.
      */
-    template<typename Out>
-    Out& ostream_best(Out& out, long n,
-                      bool output_complexity = false,
-                      bool output_bscore = false) {
-        size_t s = n<0? size() : std::min(n, (long)size());
-        for(const_iterator cit = begin(); s != 0; cit++, s--) {
-            out << get_score(*cit) << " ";
-
+    template<typename Out, typename In>
+    Out& ostream(Out& out, In from, In to, long n = -1,
+                 bool output_complexity = false,
+                 bool output_bscore = false) {
+        for(; from != to && n != 0; from++, n--) {
+            const bscored_combo_tree& bsc_tr = *from;
+            out << get_score(bsc_tr) << " ";
             if(output_complexity)
-                out << get_complexity(*cit) << " ";
-
-            out << get_tree(*cit) << std::endl;
-
+                out << get_complexity(bsc_tr) << " ";
+            out << get_tree(bsc_tr) << std::endl;
             if(output_bscore) {
-                ostream_behavioral_score(out, get_bscore(*cit));
+                ostream_behavioral_score(out, get_bscore(bsc_tr));
                 out << std::endl;
             }
         }
         return out;
     }
+    // like above but assumes that from = begin() and to = end()
+    template<typename Out>
+    Out& ostream(Out& out, long n = -1,
+                 bool output_complexity = false,
+                 bool output_bscore = false) {
+        return ostream(out, begin(), end(),
+                       n, output_complexity, output_bscore);
+    }
     // like above but using std::cout
-    void print_best(long n = -1,
-                    bool output_complexity = false,
-                    bool output_bscore = false) {
-        ostream_best(std::cout, n, output_complexity, output_bscore);
+    void print(long n = -1,
+               bool output_complexity = false,
+               bool output_bscore = false) {
+        ostream(std::cout, n, output_complexity, output_bscore);
     }
 
     opencog::RandGen& rng;

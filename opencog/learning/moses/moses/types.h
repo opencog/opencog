@@ -78,7 +78,7 @@ namespace moses {
     inline complexity_t get_complexity(const bscored_combo_tree& bst) { 
         return get_complexity(bst.second);
     }
-    inline complexity_t get_complexity(const scored_combo_tree& st) { 
+   inline complexity_t get_complexity(const scored_combo_tree& st) { 
         return get_complexity(st.second);
     }
 
@@ -91,7 +91,7 @@ namespace moses {
     inline score_t get_score(const bscored_combo_tree& bst) { 
         return get_score(bst.second);
     }
-    inline score_t get_score(const scored_combo_tree& st) { 
+   inline score_t get_score(const scored_combo_tree& st) { 
         return get_score(st.second);
     }
 
