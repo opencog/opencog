@@ -605,9 +605,13 @@ struct metapopulation : public set < bscored_combo_tree,
                 // only add up to max_candidates
                 if(params.max_candidates < 0
                    || (int)candidates.size() < params.max_candidates) {
+                    // recompute the complexity if the candidate has
+                    // not been previously reduced or is count_based
+                    composite_score csc = params.reduce_all && !params.count_base?
+                        inst.second : make_pair(get_score(inst.second),
+                                                complexity(tr));
                     bscored_combo_tree candidate = 
-                        make_pair(tr, composite_behavioral_score(bscore(tr),
-                                                                 inst.second));
+                        make_pair(tr, composite_behavioral_score(bscore(tr), csc));
                     candidates.insert(candidate);
                 } else 
                     break;
