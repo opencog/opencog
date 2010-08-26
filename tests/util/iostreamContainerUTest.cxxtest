@@ -48,7 +48,7 @@ public:
     }
     void test_istreamContainer() {
         std::vector<int> N;
-        stringstream ss("[ 1 2 3 4 ] 5");
+        stringstream ss("[1 2 3 4] 5");
         istreamContainer(ss, std::back_inserter(N), "[", "]");
         TS_ASSERT_EQUALS(_N, N);
     }

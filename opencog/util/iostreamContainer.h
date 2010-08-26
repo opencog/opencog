@@ -166,7 +166,7 @@ namespace opencog {
     /**
      * stream all elements in 'in' and put them in the container.
      * For instance 
-     * std::stringstream ss("[ 1 2 3 4 ] 5");
+     * std::stringstream ss("[1 2 3 4] 5");
      * std::vector<int> nums;
      * istreamContainer(ss, back_inserter(nums), [", "]");
      * inserts 1 to 4 in nums.
@@ -179,8 +179,8 @@ namespace opencog {
      * @param right     right string expected
      *
      * @note left or right should not contain white-space and
-     * non-white-space characters in the same string, for instance ",
-     * ." is forbiden.
+     * non-white-space characters in the same string, for instance
+     * ", ." is forbiden.
      *
      * In case things or in are not as expected an OC_ASSERT is
      * raised.
@@ -199,12 +199,12 @@ namespace opencog {
         OC_ASSERT(in_well_form(right));
 
         std::string s;
-        if(!all_white_space(left)) { // move to the next token
-            in >> s;
-        }
+        in >> s;
+        OC_ASSERT(s.substr(0, left.size()) == left);
+        s = s.substr(left.size());
+
         bool found_right = false;
         while(!in.eof() && !found_right) {
-            in >> s;
             try {
                 *out++ = boost::lexical_cast<T>(s);
             }
@@ -220,6 +220,7 @@ namespace opencog {
                     || (!all_white_space(right) && s == right);
                 OC_ASSERT(found_right);
             }
+            in >> s;
         }
         return in;
     }
