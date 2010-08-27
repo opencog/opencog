@@ -1367,18 +1367,20 @@ void BITNode::expandNextLevel()
 //        haxx::BITUSingleton->drawBITNode(this);
 //#endif
     }
-    else { // Is this just a tacky thing for exhaustive evaluation?
-        assert(0);
-        for (uint i = 0; i < args.size(); i++) {   
-            foreach(const ParametrizedBITNode& bisse, children[i])
-                bisse.prover->expandNextLevel();
-
-            if (children[i].empty()) {
-                tlog(1,"Arg %d proof failure.\n",i);        
-                break;
-            }           
-        }       
-    }
+    // This next code was weird, and never gets called by the code. (Only if
+    // the user uses the bit-expand command on a BITNode that has already been
+    // expanded.
+    //    else { // Is this just a tacky thing for exhaustive evaluation?
+//        for (uint i = 0; i < args.size(); i++) {
+//            foreach(const ParametrizedBITNode& bisse, children[i])
+//                bisse.prover->expandNextLevel();
+//
+//            if (children[i].empty()) {
+//                tlog(1,"Arg %d proof failure.\n",i);
+//                break;
+//            }
+//        }
+//    }
 }
 
 /* Algorithm: Evaluation */
