@@ -179,8 +179,9 @@ namespace opencog {
      * @param right     right string expected
      *
      * @note left or right should not contain white-space and
-     * non-white-space characters in the same string, for instance
-     * ", ." is forbiden.
+     * non-white-space characters in the same string, for instance ",
+     * ." is forbiden.  The other assumption is that the string
+     * contains at least one element.
      *
      * In case things or in are not as expected an OC_ASSERT is
      * raised.
@@ -200,11 +201,12 @@ namespace opencog {
 
         std::string s;
         in >> s;
-
         OC_ASSERT(s.substr(0, left.size()) == left);
         s = s.substr(left.size());
+        *out++ = boost::lexical_cast<T>(s);
 
         while(!in.eof()) {
+            in >> s;
             try {
                 *out++ = boost::lexical_cast<T>(s);
             }
@@ -217,7 +219,6 @@ namespace opencog {
                 *out++ = boost::lexical_cast<T>(s.substr(0, appended_pos));
                 break;
             }
-            in >> s;
         }
         return in;
     }

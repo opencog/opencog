@@ -102,7 +102,6 @@ void moses_learning::operator()()
 {
     std::cout << " ########################### OPERATOR : CASE: " << _hcState << std::endl;
     using namespace reduct;
-    clock_t start, end;
     int max_for_generation;
 
     switch (_hcState) {
@@ -152,7 +151,6 @@ void moses_learning::operator()()
              *score, *bscore, sliced_iterative_hillclimbing(_rng));
 
         _hcState = HC_BUILD_CANDIDATES;
-        start = clock ();
         break;
     }
     // ------------------------------------------------------------------------
@@ -200,9 +198,6 @@ void moses_learning::operator()()
         std::cout << "sampled " << metapop->n_evals()
                   << " best " << metapop->best_score() << " "
                   << metapop->best_tree() << std::endl;
-
-        end = clock ();
-        cout << "Time elapsed  ======================== " << (end - start) / CLOCKS_PER_SEC << "seconds" << endl;
 
         std::cout << "sampled " << metapop->n_evals() << std::endl;;
 
