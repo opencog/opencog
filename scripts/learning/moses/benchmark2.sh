@@ -4,7 +4,7 @@ SUPER=0 # super reductor
 IGN_BSC=0 # ignore bscore
 IGN_MOSHE=0 # ignore Moshe's tweak to ignore visisted candidates in
             # nondomination calculation
-for i in `seq 1 1`;
+for i in `seq 1 100`;
 do
     echo "Iteration $i"
     EVALS_STR=`moses-exec -H pa -k3 -a hc -r"$i" -V1 -m 500000 -P20 | grep "#evals:"`
