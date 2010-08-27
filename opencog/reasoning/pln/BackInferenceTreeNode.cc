@@ -71,6 +71,29 @@ namespace haxx
     //! @todo This data must persist even if the BITNodeRoot is deleted.
     std::map<pHandle,std::vector<pHandle> > inferred_from;
     std::map<pHandle,Rule*> inferred_with;
+
+    //! @todo Should be in a BITNode repository class. Not stored in a specific
+    //! BIT so you can use multiple BITs.
+    std::map<BITNodeID, BITNode*> BITNodeIDMap;
+    BITNodeID currentHighestID = 1; // 0 means the current BITNodeRoot.
+
+    BITNodeID registerBITNode(BITNode* newBITNode) {
+        BITNodeID newID = currentHighestID++;
+        newBITNode->id = newID;
+        BITNodeIDMap[newID] = newBITNode;
+        return newID;
+    }
+    void unregisterBITNode(BITNode* newBITNode) {
+        BITNodeIDMap.erase(newBITNode->id);
+    }
+    BITNode* getBITNode(BITNodeID id) {
+        std::map<BITNodeID, BITNode*>::iterator it = BITNodeIDMap.find(id);
+        if (it != BITNodeIDMap.end())
+            return it->second;
+        else {
+            throw InvalidParamException(TRACE_INFO, "Invalid BITNode ID %i", id);
+        }
+    }
 }
 
 //! ARI: okay to delete design namespace?
@@ -184,6 +207,7 @@ BITNode::BITNode()
 direct_results(Btr<set<BoundVertex> >(new set<BoundVertex>))
 
 {
+    haxx::registerBITNode(this);
 }
 
 string BITNodeRoot::printUsers(BITNode* b)
@@ -216,6 +240,8 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 : inferenceNodes(0), exec_pool_sorted(false), rp(_rp), post_generalize_type(0),
   treeDepth(0), loosePoolPolicy(false)
 {
+    haxx::registerBITNode(this);
+
     AtomSpaceWrapper *asw = GET_ASW;
     haxx::DirectProducerCache.clear();
     
@@ -502,11 +528,13 @@ BITNode::BITNode( BITNodeRoot* _root,
 : raw_target(_target), depth(_depth), root(_root), Expanded(false),
 rule(_rule), my_bdrum(0.0f), target_chain(_target_chain), args(_args)
 {
+    haxx::registerBITNode(this);
+
     AtomSpaceWrapper *asw = GET_ASW;
     if (_parent)
         addNewParent(_parent, _parent_arg_i);
 
-    try {         
+    try {
         assert(!parents.empty() || !root);
 
         setTarget(_target, _pre_bindings);
@@ -2107,7 +2135,7 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
 
     ss << (bigcounter? (++test::bigcount) : depth) << " Pool="
         << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
-        /*<< haxxUsedProofResources*/ << " [" << (long)this << "-"
+        /*<< haxxUsedProofResources*/ << " [" << id << "-"
         << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
 
     char buf[5000];

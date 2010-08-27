@@ -50,6 +50,15 @@
 class BITNodeUTest;
 class PLNUTest;
 
+
+typedef unsigned int BITNodeID;
+
+namespace opencog{namespace pln{ class BITNode;}}
+namespace haxx {
+    BITNode* getBITNode(BITNodeID id);
+}
+
+
 namespace opencog {
 
 //#define USE_BITUBIGRAPHER
@@ -546,6 +555,9 @@ public:
     /// associated with this node. Contains the BITNodes, as opposed to the
     /// results as in direct_results
     std::vector<std::set<ParametrizedBITNode> > children;
+
+    /// The ID (serial number) of this BITNode.
+    BITNodeID id;
 
     BITNode();
     BITNode(BITNodeRoot* _root,

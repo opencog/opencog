@@ -77,7 +77,7 @@ const char* PLNModule::usageInfo =
     "Run the specified PLN command.\n"
     "( NOTE THE DIFFERENCE BETWEEN ARG TYPES:\n"
     "- some commands take PLN Handles, these are different from AtomSpace Handles!\n"
-    "- some take BITNode pointers. )\n"
+    "- some take BITNode IDs. )\n"
     "\n"
     "---\n"
     " log <[-5..5]> - Set log level (0 = normal log level).\n"
@@ -330,6 +330,21 @@ T input(T& a, std::list<std::string>& args)
     return a;
 }
 
+/// Get the corresponding BITNode, or if id == 0, get the current BITNodeRoot.
+/// (Or actually, its first root variable scoper).
+BITNode* getBITOrScoper(BITNodeID id) {
+    BITNode* bitnode;
+    if (id == 0) bitnode = (BITNode*)state->children[0].begin()->prover;
+    else bitnode = haxx::getBITNode(id);
+    return bitnode;
+}
+BITNode* getBITOrRoot(BITNodeID id) {
+    BITNode* bitnode;
+    if (id == 0) bitnode = (BITNode*)state;
+    else bitnode = haxx::getBITNode(id);
+    return bitnode;
+}
+
 std::string PLNModule::runCommand(std::list<std::string> args)
 {
     AtomSpaceWrapper* asw = GET_ASW;
@@ -364,6 +379,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         boost::shared_ptr<set<pHandle> > ts;
         Vertex v;
         Handle eh=Handle::UNDEFINED;
+        BITNode* bitnode;
 
         // Command string
         string c;
@@ -452,47 +468,46 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         // BIT commands
         else if (c == "bit") {
             input(h, args);
-            if (h == 0) h = (long) state->children[0].begin()->prover;
-            ss << ((BITNodeRoot*)h)->print(); 
+//            if (h == 0) h = (long) state->children[0].begin()->prover;
+//           ss << ((BITNodeRoot*)h)->print();
+            ss << getBITOrScoper(h)->print();
         }
         else if (c == "bit-expand") {
             input(h, args);
-            if (h == 0) h = (long) state;
-            ((BITNodeRoot*)h)->expandNextLevel();
+            getBITOrRoot(h)->expandNextLevel();
             ss << "Expanded BIT node " << h << ", pool size now = " <<
                 state->getExecPoolSize() << endl;
         }
         else if (c == "bit-results") {
             input(h, args);
-            if (h == 0) h = (long) state;
-            ss << ((BITNodeRoot*)h)->printResults();
+            ss << getBITOrRoot(h)->printResults();
 /*          foreach(const set<BoundVertex>& eval_res_set, ((BITNodeRoot*)h)->GetEvalResults())
             foreach(const BoundVertex& eval_res, eval_res_set)
                 printTree(v2h(eval_res.value),0,-10);*/
         }
         else if (c == "bit-parents") {
             input(h, args);
-            if (h == 0) h = (long)state;
+            bitnode = getBITOrRoot(h);
             ss << "Parents of " << (long) h << ":" << endl;
-            ss << ((BITNode*)h)->getBITRoot().printParents((BITNode*)h);
-            //foreach(const parent_link<BITNode>& p, ((BITNode*)h)->getParents()) {
+            ss << bitnode->getBITRoot().printParents(bitnode);
+            //foreach(const parent_link<BITNode>& p, (bitnode->getParents()) {
             //    ss << "User Node = " << (ulong) p.link << endl;
             //}
             // Use print_parents when it's changed to return a string
         }
         else if (c == "bit-rule-args") {
             input(h, args);
-            if (h == 0) h = (long)state;
-            ss << ((BITNodeRoot*)h)->printArgs();
+            bitnode = getBITOrRoot(h);
+            ss << bitnode->printArgs();
         }
         else if (c == "bit-rule-target") { input(h, args);
-            if (h == 0) h = (long)state;
+            bitnode = getBITOrRoot(h);
             ss << "Target:\n";
-            ss << ((BITNodeRoot*)h)->printTarget();
+            ss << bitnode->printTarget();
             ss << "Results:\n";
-            ss << ((BITNodeRoot*)h)->printResults();
+            ss << bitnode->printResults();
             ss << "Parent arg# "
-               << ((BITNodeRoot*)h)->getParents().begin()->parent_arg_i
+               << bitnode->getParents().begin()->parent_arg_i
                << endl;
         }
         //! @todo work this out?
@@ -549,9 +564,12 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         	input(temps, args);
         	findSCMTarget(temps);
         }
-        else if (c == "=") { input(h, args); input(h2, args); 
+        // How does this work? Comparing two BITNodeRoots?
+        else if (c == "=") { input(h, args); input(h2, args);
+            BITNodeRoot* bit1 = dynamic_cast<BITNodeRoot*>(getBITOrRoot(h));
+            BITNodeRoot* bit2 = dynamic_cast<BITNodeRoot*>(getBITOrRoot(h));
 /*          cprintf(0, ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ? "EQ\n" : "IN-EQ\n"); */
-            ss << ( ((BITNodeRoot*)h)->eq((BITNodeRoot*)h2) ?
+            ss << ( bit1->eq(bit2) ?
                 "EQ" : "IN-EQ" ) << std::endl;
         }
         // Not recommended
@@ -615,8 +633,15 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         }
     } catch( std::exception& e )
     {
-        cout << endl << "Exception: "
+        ss << endl << "Exception: "
              << e.what() << endl;
+        cout << ss.str();
+    }
+    catch( StandardException& e )
+    {
+        ss << endl << "Exception: "
+             << e.getMessage() << endl;
+        cout << ss.str();
     }
     return ss.str();
 }
