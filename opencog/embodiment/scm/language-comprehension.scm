@@ -1511,7 +1511,13 @@
       (VariableNode "$frameElementInstance")
 ;      (VariableNode "$frame")
       (VariableNode "$frameElement")
-      (VariableNode "$value")
+      (TypedVariableLink
+       (VariableNode "$value")
+       (ListLink
+        (VariableTypeNode "ConceptNode")
+        (VariableTypeNode "SemeNode")
+       )
+      )
      )
      (ImplicationLink
       (AndLink
@@ -1543,6 +1549,49 @@
     ) ; VarScope
 )
 
+(define frames-to-inh
+    (VariableScopeLink
+     (ListLink
+      (TypedVariableLink
+       (VariableNode "$frameInstance")
+       (VariableTypeNode "PredicateNode")
+      )
+      (TypedVariableLink
+       (VariableNode "$entity")
+       (ListLink
+        (VariableTypeNode "ConceptNode")
+        (VariableTypeNode "SemeNode")
+       )
+      )
+      (TypedVariableLink
+       (VariableNode "$attribute")
+       (ListLink
+        (VariableTypeNode "ConceptNode")
+        (VariableTypeNode "SemeNode")
+       )
+      )
+     )
+     (ImplicationLink
+      (AndLink
+       (EvaluationLink (PredicateNode "frame")
+         (ListLink
+             (VariableNode "$frameInstance")
+             (DefinedFrameElementNode "#Attributes:Entity")
+             (VariableNode "$entity")
+         )
+       )
+       (EvaluationLink (PredicateNode "frame")
+         (ListLink
+             (VariableNode "$frameInstance")
+             (DefinedFrameElementNode "#Attributes:Attribute")
+             (VariableNode "$attribute")
+         )
+       )
+      ) ; And
+      (InheritanceLink (VariableNode "$entity") (VariableNode "$attribute"))
+     ) ; Implication
+    ) ; VarScope
+)
 
 ; Just a prototype for now. Uses a possibly-obsolete approach. For every Frame element, looks up an InheritanceLink, FrameElementLink and EvaluationLink.
 (define (build-query_alt predicateNode)
@@ -1736,7 +1785,8 @@
         (frame-preprocessor predicate)
         (begin
                 (do-varscope convert-frames)
-                (let* ( ( tmp (pln-bc (build-query predicate) 20000) )  ; An AndLink
+                (do-varscope frames-to-inh)
+                (let* ( ( tmp (pln-bc (build-query predicate) 2000) )  ; An AndLink
                      )
                   (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating UNDEFINED_HANDLE as valid handle)
                     (let* (
@@ -1755,7 +1805,7 @@
   ) ; let
 )
 
-
+; Used by store-fact to make a new frame instance (with ConceptNodes instead of WordInstanceNodes)
 (define (instantiate-frame type instanceName elements)
   (let ((frameElements '())
         (frameElementsNodes '())
@@ -2065,7 +2115,8 @@
 ; questions or in any reasoning process.
 ; Basically, this function find a grounded frame instance
 ; for each Frame that composes the parsed sentence
-; and set their av and tv values
+; and set their av and tv values. It also replaces WordInstanceNodes
+; with their normalised form.
 (define (store-fact)
   (map
    (lambda (parse)
@@ -2103,24 +2154,24 @@
                                 (get-grounded-element-value
                                  (get-frame-instance-element-value elementPredicate)
                                  )))))
-                       )
-                     (get-frame-instance-elements-predicates predicate)
                      )
-                    (instantiate-frame (get-frame-instance-type predicate) 
-                                       (string-append "G_" (cog-name predicate)) elements )
-                    ) ; let
-                )
-              )
-            incomingPredicates
-            ) ; map
+                     (get-frame-instance-elements-predicates predicate)
+                   )
+                   (instantiate-frame (get-frame-instance-type predicate) 
+                                      (string-append "G_" (cog-name predicate)) elements ) 
+                 ) ; let
+               )
+             )
+             incomingPredicates
+           ) ; map
 
-           ) ; if
-       )
-     )
+       ) ; if
+     ) ; let
+   ) ; lambda
    (get-latest-parses)
-   )
+  ) ; map
 
-  )
+)
 
 ; Helper functions that receives a list of SenseNodeLinks
 ; and return a list containing the SenseNodes positioned
