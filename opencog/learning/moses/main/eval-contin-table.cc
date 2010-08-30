@@ -25,16 +25,19 @@
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <opencog/learning/moses/moses/moses.h>
-#include <opencog/learning/moses/moses/scoring_functions.h>
+#include <opencog/util/iostreamContainer.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/util/numeric.h>
+
+#include <opencog/comboreduct/combo/table.h>
 
 //ant_combo_vocabulary is used only for the boolean core vocabulary
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
 
 using namespace boost::program_options;
 using boost::lexical_cast;
-using namespace moses;
 using namespace ant_combo;
+using namespace opencog;
 
 int main(int argc,char** argv) { 
 
@@ -42,6 +45,7 @@ int main(int argc,char** argv) {
     unsigned long rand_seed;
     string input_table_file;
     string combo_program_str;
+    bool verbose;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -52,16 +56,20 @@ int main(int argc,char** argv) {
         ("input-table,i", value<string>(&input_table_file), "input table file")
         ("combo-program,c", value<string>(&combo_program_str),
          "combo program to evaluate against the input table")
+        ("verbose,V", "print not only the Root mean square error but the table with inputs, target outputs and testing outputs, and there squared error")
         ;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
 
-    if (vm.count("help") || argc == 1) {
+    if(vm.count("help") || argc == 1) {
         cout << desc << "\n";
         return 1;
     }
+
+    // set variables
+    verbose = vm.count("verbose");
 
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
@@ -71,6 +79,7 @@ int main(int argc,char** argv) {
     contin_table ct;
     istreamTable<contin_table_inputs,
                  contin_table, contin_t>(input_table_file, it, ct);
+    size_t arity = it[0].size();
 
     // read combo program
     combo_tree tr;
@@ -79,6 +88,25 @@ int main(int argc,char** argv) {
 
     // evaluated tr over input table
     contin_table ct_tr = contin_table(tr, it, rng);
+
+    if(verbose) {
+        // print info column
+        for(size_t arg = 1; arg < arity+1; arg++)
+            std::cout << "#" << arg << "\t";
+        std::cout << "target\t" << "result\t"
+                  << "sqr_error\t" << "abs_error" << std::endl;
+        // print data
+        contin_table_inputs::const_iterator it_cit = it.begin();
+        contin_table::const_iterator ct_cit = ct.begin();
+        contin_table::const_iterator ct_tr_cit = ct_tr.begin();
+        for(; it_cit != it.end(); it_cit++, ct_cit++, ct_tr_cit++) {
+            contin_t tar(*ct_cit), res(*ct_tr_cit);
+            printContainer(*it_cit, "\t", "", "\t");
+            std::cout << tar << "\t" << res << "\t"
+                      << sqr(tar - res) << "\t"
+                      << std::abs(tar - res) << std::endl;
+        }
+    }
 
     cout << "Root mean square error = "
          << ct.root_mean_square_error(ct_tr) << endl;
