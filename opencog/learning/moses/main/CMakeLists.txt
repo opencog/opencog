@@ -117,5 +117,5 @@ TARGET_LINK_LIBRARIES (moses-exec
         ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
-# install moses-exec
-INSTALL(TARGETS moses-exec RUNTIME DESTINATION bin)
+# install moses-exec, eval-contin-table
+INSTALL(TARGETS moses-exec eval-contin-table RUNTIME DESTINATION bin)

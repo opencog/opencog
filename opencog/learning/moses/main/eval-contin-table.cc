@@ -51,7 +51,17 @@ int main(int argc,char** argv) {
          "random seed.")
         ("input-table,i", value<string>(&input_table_file), "input table file")
         ("combo-program,c", value<string>(&combo_program_str),
-         "combo program to evaluate against the input table");
+         "combo program to evaluate against the input table")
+        ;
+
+    variables_map vm;
+    store(parse_command_line(argc, argv, desc), vm);
+    notify(vm);
+
+    if (vm.count("help") || argc == 1) {
+        cout << desc << "\n";
+        return 1;
+    }
 
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
