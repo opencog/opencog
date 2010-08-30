@@ -136,12 +136,17 @@ protected:
 /**
  * template to fill an input table (IT) and output table (OT) of type
  * T. Note that a '\n' (or '\r' '\n' for DOS format) must be placed
- * right after the last number, including for the last line.
+ * right after the last number, including for the last line.  It is
+ * assumed that each row have the same number of columns, if not the
+ * case an assert is raised.
  */
 template<typename IT, typename OT, typename T>
 std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
     std::vector<T> input_vec;
     T input;
+    bool arity_det = false; // flag to indicate that th arity has been
+                            // determined
+    arity_t arity; // arity according to the first row, used for check
     while (!in.eof()) {
         std::string str;
         in >> str;
@@ -159,6 +164,16 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
             if(next_c == '\n') {
                 output_table.push_back(input);
                 table_inputs.push_back(input_vec);
+                if(arity_det) {
+                    OC_ASSERT(arity == (arity_t)input_vec.size(),
+                              "The row %u has %u columns while the first row"
+                              " has %d columns, all rows should have the same"
+                              " number of columns",
+                              output_table.size(), input_vec.size(), arity);
+                } else {
+                    arity = input_vec.size();
+                    arity_det = true;
+                }
                 input_vec.clear();
             }
             else {
