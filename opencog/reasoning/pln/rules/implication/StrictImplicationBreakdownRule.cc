@@ -81,9 +81,11 @@ Rule::setOfMPs StrictImplicationBreakdownRule::fullInputFilter() const
 Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilter) const
 {
     ///haxx:: (restricts internal implications
+    // - Leave it on for now, because it is not necessary (currently) and it makes
+    // everything faster.
     
-    //      if (asw->isSubType(v2h(*outh->begin()), IMPLICATION_LINK))
-    //          return Rule::setOfMPs();
+    if (asw->isSubType(_v2h(*outh->begin()), IMPLICATION_LINK))
+        return Rule::setOfMPs();
     
     MPs ret;
     Vertex myvar = CreateVar(asw);
