@@ -77,9 +77,15 @@ TARGET_LINK_LIBRARIES (moses-ant-hillclimbing
 
 ADD_EXECUTABLE (eval-truth-table eval-truth-table)
 TARGET_LINK_LIBRARIES (eval-truth-table
-	moses
         comboreduct
         util
+)
+
+ADD_EXECUTABLE (eval-contin-table eval-contin-table)
+TARGET_LINK_LIBRARIES (eval-contin-table
+        comboreduct
+        util
+        ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
 
 ADD_EXECUTABLE (gen-contin-table gen-contin-table)

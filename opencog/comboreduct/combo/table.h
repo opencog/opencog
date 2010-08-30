@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_TABLE_H
 #define _OPENCOG_TABLE_H
 
+#include <fstream>
+
 #include <opencog/util/RandGen.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/dorepeat.h>
@@ -183,6 +185,18 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
     }
     return in;
 }
+/**
+ * like above but take an string (file name) instead of istream. If
+ * the file name is not correct then an OC_ASSERT is raised.
+ */
+template<typename IT, typename OT, typename T>
+void istreamTable(const std::string& file_name,
+                  IT& table_inputs, OT& output_table) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    istreamTable<IT, OT, T>(in, table_inputs, output_table);
+}
 
 /**
  * template to subsample input and output tables, after subsampling
@@ -283,9 +297,14 @@ public:
     bool operator!=(const contin_table& ct) const {
         return !operator==(ct);
     }
-
+    // total of the absolute distance of each value
     contin_t abs_distance(const contin_table& other) const;
+    // total of the squared error of each value
     contin_t sum_squared_error(const contin_table& other) const;
+    // mean of the squared error of each value
+    contin_t mean_squared_error(const contin_table& other) const;
+    // sqrt of mean_squared_error
+    contin_t root_mean_square_error(const contin_table& other) const;
 };
 
 

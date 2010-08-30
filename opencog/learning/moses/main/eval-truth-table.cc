@@ -4,7 +4,7 @@
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
  *
- * Written by Moshe Looks
+ * Written by Predrag Janicic
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

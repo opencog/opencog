@@ -149,3 +149,17 @@ contin_t contin_table::sum_squared_error(const contin_table& other) const
         res += sqr(*x++ -*y++);
     return res;
 }
+
+contin_t contin_table::mean_squared_error(const contin_table& other) const
+{
+    OC_ASSERT(other.size() == size() && size() > 0,
+              "contin_tables should have the same size > 0.");
+    return sum_squared_error(other) / (contin_t)other.size();
+}
+
+contin_t contin_table::root_mean_square_error(const contin_table& other) const
+{
+    OC_ASSERT(other.size() == size() && size() > 0,
+              "contin_tables should have the same size > 0.");
+    return sqrt(mean_squared_error(other));
+}
