@@ -53,7 +53,7 @@ using namespace std;
 
 using namespace boost::filesystem;
 
-#define RUN_FAILURE_TESTS 1 // enable some tests which are supposed to fail.
+#define RUN_FAILURE_TESTS 0 // enable some tests which are supposed to fail.
 #define WAIT_KEY_ON_FAILURE 0
 
 // We must use the PROJECT_SOURCE_DIR var supplied by the CMake script to
