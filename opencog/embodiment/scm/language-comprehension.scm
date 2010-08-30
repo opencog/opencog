@@ -1538,13 +1538,21 @@
              (VariableNode "$value")
             )
       )
-      (EvaluationLink (PredicateNode "frame")
+;      (EvaluationLink (PredicateNode "frame")
+;        (ListLink
+;            (VariableNode "$frameInstance")
+;            (VariableNode "$frameElement")
+;            (VariableNode "$value")
+;        )
+;      )
+      ; Even better format.
+      (EvaluationLink (VariableNode "$frameElement")
         (ListLink
             (VariableNode "$frameInstance")
-            (VariableNode "$frameElement")
             (VariableNode "$value")
         )
       )
+
      ) ; Implication
     ) ; VarScope
 )
@@ -1573,17 +1581,15 @@
      )
      (ImplicationLink
       (AndLink
-       (EvaluationLink (PredicateNode "frame")
+       (EvaluationLink (DefinedFrameElementNode "#Attributes:Entity")
          (ListLink
-             (VariableNode "$frameInstance")
-             (DefinedFrameElementNode "#Attributes:Entity")
+             (VariableNode "$frameInstance")             
              (VariableNode "$entity")
          )
        )
-       (EvaluationLink (PredicateNode "frame")
+       (EvaluationLink (DefinedFrameElementNode "#Attributes:Attribute")
          (ListLink
              (VariableNode "$frameInstance")
-             (DefinedFrameElementNode "#Attributes:Attribute")
              (VariableNode "$attribute")
          )
        )
@@ -1698,10 +1704,9 @@
              ) ; if
          
          (set! elementsDeclaration (append elementsDeclaration (list
-            (EvaluationLink (PredicateNode "frame")
+            (EvaluationLink (DefinedFrameElementNode (get-frame-instance-element-type predicate)) ; FrameElement
                 (ListLink
                     (FWVariableNode "$var0") ; FrameInstance
-                    (DefinedFrameElementNode (get-frame-instance-element-type predicate)) ; FrameElement
                     groundedValue ; Value
                 )
             )
