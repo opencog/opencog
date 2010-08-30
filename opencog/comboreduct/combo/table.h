@@ -148,7 +148,7 @@ std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table)
     T input;
     bool arity_det = false; // flag to indicate that th arity has been
                             // determined
-    arity_t arity; // arity according to the first row, used for check
+    arity_t arity = -1; // arity according to the first row, used for check
     while (!in.eof()) {
         std::string str;
         in >> str;
