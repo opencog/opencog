@@ -1745,11 +1745,10 @@
 
 ; This function receives as argument a list of PredicateNodes that
 ; represents instances of Frames and returns a list of PredicateNodes
-; that is grounded versions of the given ones
+; that is grounded versions of the given ones. This is part of the "old" approach,
+; which looked up Atoms directly rather than using PLN. Still leaving it available for now.
 (define (find-grounded-frame-instances-predicates framesPredicates)
-(let (
-  
-      (finalFrames '()))
+(let ((finalFrames '()))
     (map ; ok it is a question, so handle it
          ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
          ;questionFrames
@@ -1777,15 +1776,15 @@
 
 ; This function receives as argument a list of PredicateNodes that
 ; represents instances of Frames and returns a list of Frame instances that match.
-; Uses PLN. This is an alternative to the find-grounded-frame-instances-predicates and match-frame.
+; Uses PLN. This is an alternative to the find-grounded-frame-instances-predicates and match-frame methods.
 (define (find-grounded-frame framesPredicates)
-  (let (
-  
-      (finalFrames '()))
+  (let ((finalFrames '()))
     (map ; ok it is a question, so handle it
          ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
          ;questionFrames
       (lambda (predicate)
+       
+;        (display framesPredicates)
        
         (frame-preprocessor predicate)
         (begin
@@ -2075,15 +2074,36 @@
           incomingPredicates
          )
 
-        ; TODO restore old version of the following, as an option (e.g. if PLN turns out to be much less efficient, we should use the old version first)
-         
-         (if questionParse?
-             (let* ( (groundedPredicates (find-grounded-frame questionFrames) ) )
-               (if (> (length groundedPredicates) 0) 
-                   (set! chosenAnswer groundedPredicates)
+
+         (if  use-pln
+           (if questionParse?
+               (let* ( (groundedPredicates (find-grounded-frame questionFrames) ) )
+                 (if (> (length groundedPredicates) 0) 
+                     (set! chosenAnswer groundedPredicates)
+                 )
                )
+           )
+         ; else use the old version
+           (begin 
+             (if questionParse?
+                 (let* ((numberOfIncomingPredicates (length questionFrames))
+                        (groundedPredicates (find-grounded-frame-instances-predicates questionFrames))
+                        (numberOfGroundedPredicates (length groundedPredicates))
+                        (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
+                        )
+                   (if (and (> numberOfIncomingPredicates 0) (= balance 0) (or (null? chosenAnswer) (> numberOfGroundedPredicates (car chosenAnswer))))
+                       (set! chosenAnswer (cons numberOfGroundedPredicates groundedPredicates))
+                   )
+                 )
              )
-         )
+           
+             ; Make it just the actual frame instances, consistent with the PLN version above.
+             (if (not (null? chosenAnswer) )
+               (set! chosenAnswer (cdr chosenAnswer))
+             )
+           )
+         ) ; if
+       
   
        ) ; let
      ) ; lambda
