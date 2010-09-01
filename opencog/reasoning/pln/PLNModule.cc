@@ -205,6 +205,8 @@ std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
  */
 Handle PLNModule::pln_bc(Handle h, int steps)
 {
+    std::cout << "pln_bc" << h << endl;
+
     return infer(h, steps, true);
 }
 
@@ -272,7 +274,9 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
     vhpair vhp;
     Handle ret = Handle::UNDEFINED;
 
-    result = state_->infer(steps, 0.000001f, 1.00f); //, 0.000001f, 0.01f);
+    state_->setLoosePoolPolicy(true);
+
+    result = state_->infer(steps, 0.000001f, 0.01f); //, 0.000001f, 1.00f);
     state_->printResults();
 
     eh = (result.empty() ? PHANDLE_UNDEFINED :
