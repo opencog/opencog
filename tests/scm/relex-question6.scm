@@ -132,7 +132,7 @@
 ; Attributes:Attribute(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,truth-query)
 ; Questioning:Message(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a)
 ; Entity:Entity(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,you@1d9ee2aa-e164-40ab-99b1-cf92b30593ae)
-; Emotion_directed:State(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,you@1d9ee2aa-e164-40ab-99b1-cf92b30593ae)
+; Emotion_directed:State(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a)
 ; Emotion_directed:Experiencer(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,you@1d9ee2aa-e164-40ab-99b1-cf92b30593ae)
 ; Questioning:Manner(angry@e31e64c0-b5f2-4ab1-8e24-d44903916a6a,truth-query)
 ; New Frame Format Output
