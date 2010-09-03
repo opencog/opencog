@@ -56,6 +56,7 @@ build_knobs::build_knobs(opencog::RandGen& _rng,
     : rng(_rng), _exemplar(exemplar), _type(tt), _rep(rep),
       _arity(tt.begin().number_of_children() - 1),
       _step_size(step_size), _expansion(expansion), _depth(depth),
+      _perm_ratio(0),
       _ignore_ops(ignore_ops), _perceptions(perceptions), _actions(actions)
 {
     type_tree output_type = combo::type_tree_output_type_tree(_type);
@@ -137,6 +138,10 @@ void build_knobs::build_logical(pre_it it)
     }
 }
 
+bool build_knobs::permit_ops(const vertex& v)
+{
+    return _ignore_ops.find(v) == _ignore_ops.end();
+}
 
 void build_knobs::logical_canonize(pre_it it)
 {
@@ -163,13 +168,19 @@ void build_knobs::add_logical_knobs(pre_it it, bool add_if_in_exemplar)
 void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
 {
     //all n literals
-    foreach(int i, from_one(_arity))
-        perms.push_back(combo_tree(argument(i)));
+    foreach(int i, from_one(_arity)) {
+        vertex arg = argument(i);
+        if(permit_ops(arg))
+            perms.push_back(combo_tree(arg));
+    }
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    opencog::lazy_random_selector select(_arity*(_arity - 1), rng);
-    dorepeat(_arity) {
+    unsigned int max_pairs = _arity*(_arity - 1);
+    opencog::lazy_random_selector select(max_pairs, rng);
+    unsigned int n_pairs =
+        _arity + static_cast<unsigned int>(_perm_ratio * (max_pairs - _arity));
+    dorepeat(n_pairs) {
         //while (!select.empty()) {
         combo_tree v(*it == id::logical_and ? id::logical_or : id::logical_and);
         int x = select();
@@ -178,23 +189,28 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         if (b == a)
             b = _arity - 1;
 
-        if (b < a) {
-            v.append_child(v.begin(), argument(1 + a));
-            v.append_child(v.begin(), argument(1 + b));
-        } else {
-            v.append_child(v.begin(), argument(1 + b));
-            v.append_child(v.begin(), argument(-(1 + a)));
-        }
+        argument arg_b(1 + b);
+        argument arg_a(1 + a);
 
-        perms.push_back(v);
+        if(permit_ops(arg_a) && permit_ops(arg_b)) {
+            if (b < a) {
+                v.append_child(v.begin(), arg_b);
+                v.append_child(v.begin(), arg_a);
+            } else {
+                arg_a.negate();
+                v.append_child(v.begin(), arg_a);
+                v.append_child(v.begin(), arg_b);
+            }
+            perms.push_back(v);
+        }
     }
 
 #ifdef DEBUG_INFO
-    cout << "---------------------------------" << endl;
-    cout << endl << "Perms: " << endl;
+    cerr << "---------------------------------" << endl;
+    cerr << endl << "Perms: " << endl;
     foreach(const combo_tree& tr, perms)
-    cout << tr << endl;
-    cout << "---------------------------------" << endl;
+        cerr << tr << endl;
+    cerr << "---------------------------------" << endl;
 #endif
 }
 
@@ -501,7 +517,7 @@ void build_knobs::contin_canonize(pre_it it)
             canonize_div(_exemplar.move_after(it, pre_it(div++)));
         //handle the rest of the children
 
-        if(_ignore_ops.find(id::div) == _ignore_ops.end()) {
+        if(permit_ops(id::div)) {
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
                                    contin_t(1));
             canonize_div(_exemplar.parent(it));
@@ -509,7 +525,7 @@ void build_knobs::contin_canonize(pre_it it)
             linear_canonize_times(it);
     } else {
         _exemplar.append_child(_exemplar.insert_above(it, id::plus), contin_t(0));
-        if(_ignore_ops.find(id::div) == _ignore_ops.end()) {
+        if(permit_ops(id::div)) {
             _exemplar.append_child(_exemplar.insert_above(it, id::div),
                                    contin_t(1));
             canonize_div(_exemplar.parent(it));
@@ -603,11 +619,11 @@ void build_knobs::rec_canonize(pre_it it)
             }
         }
         //add the basic elements: sin, log, exp, and any variables (#1, ..., #n)
-        if(_ignore_ops.find(id::sin) == _ignore_ops.end())
+        if(permit_ops(id::sin))
             append_linear_combination(mult_add(it, id::sin));
-        if(_ignore_ops.find(id::log) == _ignore_ops.end())
+        if(permit_ops(id::log))
             append_linear_combination(mult_add(it, id::log));
-        if(_ignore_ops.find(id::exp) == _ignore_ops.end())
+        if(permit_ops(id::exp))
             append_linear_combination(mult_add(it, id::exp));
         append_linear_combination(it);
     } else if (*it == id::sin || *it == id::log || *it == id::exp) {
@@ -627,15 +643,19 @@ void build_knobs::append_linear_combination(pre_it it)
 {
     if (*it != id::plus)
         it = _exemplar.append_child(it, id::plus);
-    foreach(int idx, from_one(_arity))
-    mult_add(it, argument(idx));
+    foreach(int idx, from_one(_arity)) {
+        vertex arg = argument(idx);
+        if(permit_ops(arg))
+            mult_add(it, arg);
+    }
 }
 
 pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 {
-    return --_exemplar.append_child
-           (_exemplar.insert_above
-            (_exemplar.append_child(it, v), id::times), contin_t(0));
+    pre_it times_it = _exemplar.insert_above(_exemplar.append_child(it,
+                                                                    contin_t(0)),
+                                             id::times);
+    return --_exemplar.append_child(times_it, v);
 }
 
 static int get_max_id(sib_it it, int max_id = 0)

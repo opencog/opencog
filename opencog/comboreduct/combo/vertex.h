@@ -825,78 +825,98 @@ inline bool builtin_str_to_vertex(const std::string& str, vertex& v)
     return true;
 }
 
-template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
-void str_to_vertex(const std::string& str, vertex& v)
+// return false if str has no ann matches
+inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 {
-    OC_ASSERT(!str.empty(), "input to string should not be empty.");
-    //builtin
-    if(builtin_str_to_vertex(str, v)) {
-        return;
-    }
-    //ann
-    else if (str[0] == '#' && str[1]=='N') {
+    if (str[0] == '#' && str[1]=='N') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_node);
     }
     else if (str[0] == '#' && str[1]=='I') {
         int arg = boost::lexical_cast<int>(str.substr(2));
         v=ann_type(arg,id::ann_input);
-    }
-    //argument
-    else if (str[0] == '#') {
+    } else return false;
+    return true;
+}
+
+// return false if str has no argument matches
+inline bool argument_str_to_vertex(const std::string& str, vertex& v)
+{
+    if (str[0] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(1));
-        OC_ASSERT(arg != 0, "arg value should be different from zero.");
+        OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(arg);
     } else if (str[0] == '!' && str[1] == '#') {
         int arg = boost::lexical_cast<int>(str.substr(2));
-        OC_ASSERT(arg != 0, "arg value should be different from zero.");
+        OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(-arg);
+    } else return false;
+    return true;
+}
+
+// return false if no contin matches
+inline bool contin_str_to_vertex(const std::string& str, vertex& v)
+{
+    try {
+        v = boost::lexical_cast<contin_t>(str);
+    } catch (boost::bad_lexical_cast&) {
+        return false;
     }
-    //constant
+    return true;
+}
+
+// return false if no message matches
+inline bool message_str_to_vertex(const std::string& str, vertex& v)
+{
+    if(str.find(message::prefix()) == 0) { //it starts with message:
+        std::string m_str = str.substr(message::prefix().size());
+        //check that the first and the last character are \"
+        //and take them off
+        if (m_str.find('\"') == 0 && m_str.rfind('\"') == m_str.size() - 1) {
+            m_str.erase(m_str.begin());
+            m_str.erase(--m_str.end());
+            message m(m_str);
+            v = m;
+        } else {
+            std::cerr << "WARNING : " << "You probably forgot to place your message between doubles quotes in " << str << std::endl;
+            return false;
+        }
+    } else return false;
+    return true;
+}
+
+template<class BUILTIN_ACTION, class PERCEPTION, class ACTION_SYMBOL, class INDEFINITE_OBJECT>
+void str_to_vertex(const std::string& str, vertex& v)
+{
+    OC_ASSERT(!str.empty(), "input to string should not be empty.");
+    // builtin, ann, argument, constant and message
+    // the order may matter
+    if(builtin_str_to_vertex(str, v)
+       || ann_str_to_vertex(str, v)
+       || argument_str_to_vertex(str, v)
+       || contin_str_to_vertex(str, v)
+       || message_str_to_vertex(str, v)) {
+        return;
+    }
+    // builtin_action
+    else if (builtin_action ba = BUILTIN_ACTION::instance(str)) {
+        v = ba;
+    }
+    // perception
+    else if (perception p = PERCEPTION::instance(str)) {
+        v = p;
+    }
+    // action symbol
+    else if (action_symbol as = ACTION_SYMBOL::instance(str)) {
+        v = as;
+    }
+    // indefinite_object
+    else if (indefinite_object i = INDEFINITE_OBJECT::instance(str)) {
+        v = i;
+    }
+    // then should be definite object
     else {
-        try {
-            v = boost::lexical_cast<contin_t>(str);
-        }
-
-        //builtin_action, perception, definite_object, message
-        //action_symbol, indefinite_object
-
-        catch (boost::bad_lexical_cast&) {
-            //check of message
-            if (str.find(message::prefix()) == 0) { //it starts with message:
-                std::string m_str = str.substr(message::prefix().size());
-                //check that the first and the last character are \"
-                //and take them off
-                if (m_str.find('\"') == 0 && m_str.rfind('\"') == m_str.size() - 1) {
-                    m_str.erase(m_str.begin());
-                    m_str.erase(--m_str.end());
-                    message m(m_str);
-                    v = m;
-                } else {
-                    std::cout << "WARNING : " << "You probably forgot to place your message between doubles quotes in " << str << std::endl;
-                }
-            }
-            //check for builtin_action
-            else if (builtin_action ba = BUILTIN_ACTION::instance(str)) {
-                v = ba;
-            }
-            //check for perception
-            else if (perception p = PERCEPTION::instance(str)) {
-                v = p;
-            }
-            //check for action symbol
-            else if (action_symbol as = ACTION_SYMBOL::instance(str)) {
-                v = as;
-            }
-            //check for indefinite_object
-            else if (indefinite_object i = INDEFINITE_OBJECT::instance(str)) {
-                v = i;
-            }
-            //then should be definite object
-            else {
-                v = str;
-            }
-        }
+        v = str;
     }
 }
 

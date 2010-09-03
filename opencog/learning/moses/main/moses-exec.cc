@@ -268,7 +268,7 @@ int main(int argc,char** argv) {
          "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.")
         (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
-         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp and log can be ignored.")
+         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp, log and variables (#n) can be ignored. You may need to put variables under double quotes.")
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(un),
          string("optimization algorithm, supported algorithms are"
@@ -356,7 +356,7 @@ int main(int argc,char** argv) {
     vertex_set ignore_ops;
     foreach(const string& s, ignore_ops_str) {
         vertex v;
-        if(builtin_str_to_vertex(s, v))
+        if(builtin_str_to_vertex(s, v) || argument_str_to_vertex(s, v))
             ignore_ops.insert(v);
         else {
             std::cerr << "error: " << s 

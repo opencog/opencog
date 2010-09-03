@@ -73,10 +73,18 @@ protected:
     contin_t _step_size, _expansion;
     eda::field_set::arity_t _depth;
 
+    // perm_ratio ranges from 0 to 1 and defines the number of perms
+    // to consider, 0 means _arity positive literals and _arity pairs
+    // of literals, 1 means _arity positive literals and
+    // _arity*(_arity-1) pairs of literals
+    float _perm_ratio;
     const operator_set& _ignore_ops; //the set of operators to ignore
                                      //during representation building
     const combo_tree_ns_set* _perceptions;
     const combo_tree_ns_set* _actions;
+
+    // return true if the following operator is permitted for knob building
+    bool permit_ops(const vertex& v);
 
     void logical_canonize(combo_tree::iterator);
     void add_logical_knobs(combo_tree::iterator it,
