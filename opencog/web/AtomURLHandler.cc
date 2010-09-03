@@ -48,7 +48,7 @@
 using namespace opencog;
 using namespace json_spirit;
 
-AtomURLHandler::AtomURLHandler() : BaseURLHandler("text/plain"),
+AtomURLHandler::AtomURLHandler() : isJSON(false),BaseURLHandler("text/plain"),
     refreshPage(false), handleInQuery(false), handleInURL(false),
     h(Handle::UNDEFINED)
 {
@@ -245,10 +245,15 @@ void AtomURLHandler::handleRequest( struct mg_connection *conn,
 std::string AtomURLHandler::getHTMLHeader()
 {
     std::ostringstream oss;
-    oss << "<script language=\"javascript\" src=\"../resources/processing.js\">"
+    oss << "<script language=\"javascript\" src=\"/resources/processing-0.9.7.js\">"
         "</script>" << std::endl;
-    oss << "<script language=\"javascript\" src=\"../resources/init.js\">"
+    oss << "<script language=\"javascript\" src=\"/resources/jquery-1.4.2.js\">"
         "</script>" << std::endl;
+    oss << "<script language=\"javascript\">"
+        "handle=\"" << h << "\";"
+        "</script>" << std::endl;
+    //oss << "<script language=\"javascript\" src=\"../resources/init.js\">"
+        //"</script>" << std::endl;
     return oss.str();
 }
 
@@ -266,6 +271,8 @@ void AtomURLHandler::OnRequestComplete()
                  result << WebModule::HtmlrefreshHeader();
             result << getHTMLHeader();
              result << WebModule::closeHtmlHeader();
+        } else {
+            result << WebModule::jsonHeader();
         }
 
         result << replaceURL(serverAdd);

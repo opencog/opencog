@@ -408,12 +408,12 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
         _output << "<td>";
         for (uint i = 0; i < outgoing.size(); i++) {
             Handle ho = outgoing[i];
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list/" <<
                 classserver().getTypeName(as->getType(ho)) <<
-                "&max=" << maximum << "\">";
+                "?max=" << maximum << "\">";
             _output << classserver().getTypeName(as->getType(ho));
             _output << "</a>:";
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom/" <<
                 ho.value() << "\">";
             if (as->getName(ho) == "")
                 _output << "#" + ho.value();
@@ -428,12 +428,12 @@ void GetListRequest::html_makeOutput(HandleSeq &hs)
         _output << "<td>";
         for (uint i = 0; i < incoming.size(); i++) {
             Handle ho = incoming[i];
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list?type=" <<
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/list/" <<
                 classserver().getTypeName(as->getType(ho)) <<
-                "&max=" << maximum << "\">";
+                "?max=" << maximum << "\">";
             _output << classserver().getTypeName(as->getType(ho));
             _output << "</a>:";
-            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom?handle=" <<
+            _output << "<a href=\"" << SERVER_PLACEHOLDER << "/atom/" <<
                 ho.value() << "\">";
             if (as->getName(ho) == "")
                 _output << "#" << ho.value();

@@ -111,6 +111,8 @@ void ListURLHandler::OnRequestComplete()
         if (refreshPage)
         result << WebModule::HtmlrefreshHeader();
         result << WebModule::closeHtmlHeader();
+    } else {
+        result << WebModule::jsonHeader();
     }
 
     result << replaceURL(serverAdd);

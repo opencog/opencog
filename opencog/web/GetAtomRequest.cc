@@ -43,6 +43,7 @@ using namespace opencog;
 
 GetAtomRequest::GetAtomRequest()
 {
+    output_format = html_tabular_format;
 }
 
 GetAtomRequest::~GetAtomRequest()
@@ -86,11 +87,11 @@ bool GetAtomRequest::execute()
 void GetAtomRequest::json_makeOutput(Handle h)
 {
     AtomSpace* as = server().getAtomSpace();
-    _output << "{ \"handle\":" << h.value() << "," << std::endl;
+    _output << "{\"handle\":" << h.value() << ",";// << std::endl;
 
     _output << "\"type\":\"" << classserver().getTypeName(as->getType(h)) <<
-        "\"," << std::endl;
-    _output << "\"name\":\"" << as->getName(h) << "\"," << std::endl;
+        "\",";// << std::endl;
+    _output << "\"name\":\"" << as->getName(h) << "\",";// << std::endl;
 
     // Here the outgoing targets string is made
     HandleSeq outgoing = as->getOutgoing(h);
@@ -99,7 +100,7 @@ void GetAtomRequest::json_makeOutput(Handle h)
         if (i != 0) _output << ",";
         _output << outgoing[i].value();
     }
-    _output << "]," << std::endl;
+    _output << "],";// << std::endl;
 
     // Here the incoming string is made.
     HandleSeq incoming = as->getIncoming(h);
@@ -108,11 +109,12 @@ void GetAtomRequest::json_makeOutput(Handle h)
         if (i != 0) _output << ",";
         _output << incoming[i].value();
     }
-    _output << "]," << std::endl;
-    _output << "\"sti\":" << as->getSTI(h) << "," <<std::endl;
-    _output << "\"lti\":" << as->getLTI(h) << "," <<std::endl;
+    _output << "],"; // << std::endl;
+    _output << "\"sti\":" << as->getSTI(h) << ",";// <<std::endl;
+    _output << "\"lti\":" << as->getLTI(h) << ",";// <<std::endl;
 
-    _output << "\"truthvalue\":" << tvToJSON(as->getTV(h)) << std::endl;
+    _output << "\"truthvalue\":" << tvToJSON(as->getTV(h));// << std::endl;
+    _output << "}";
 
 }
 
@@ -124,13 +126,13 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         jtv << "{\"simple\":{";
         jtv << "\"str\":" << stv->getMean() << ",";
         jtv << "\"count\":" << stv->getCount() << ",";
-        jtv << "\"conf\":" << stv->getConfidence() << "} }";
+        jtv << "\"conf\":" << stv->getConfidence() << "}}";
     } else if (tv.getType() == COUNT_TRUTH_VALUE) {
         const CountTruthValue* ctv = dynamic_cast<const CountTruthValue*>(&tv);
         jtv << "{\"count\":{";
         jtv << "\"str\":" << ctv->getMean() << ",";
         jtv << "\"conf\":" << ctv->getConfidence() << ",";
-        jtv << "\"count\":" << ctv->getCount() << "} }";
+        jtv << "\"count\":" << ctv->getCount() << "}}";
     } else if (tv.getType() == INDEFINITE_TRUTH_VALUE) {
         const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&tv);
         jtv << "{\"indefinite\":{";
@@ -139,11 +141,11 @@ std::string GetAtomRequest::tvToJSON(const TruthValue &tv)
         jtv << "\"U\":" << itv->getU() << ",";
         jtv << "\"conf\":" << itv->getConfidenceLevel() << ",";
         //jtv << "\"diff\":" << itv->getDiff() << ",";
-        jtv << "\"symmetric\":" << itv->isSymmetric() << "} }";
+        jtv << "\"symmetric\":" << itv->isSymmetric() << "}}";
     } else if (tv.getType() == COMPOSITE_TRUTH_VALUE) {
         const CompositeTruthValue* ctv = dynamic_cast<const CompositeTruthValue*>(&tv);
         jtv << "{\"composite\":";
-        jtv << "{ \"primary\":" <<
+        jtv << "{\"primary\":" <<
             tvToJSON(ctv->getVersionedTV(NULL_VERSION_HANDLE));
         for (int i = 0; i < ctv->getNumberOfVersionedTVs(); i++) {
             VersionHandle vh = ctv->getVersionHandle(i);
@@ -232,7 +234,7 @@ void GetAtomRequest::html_makeOutput(Handle h)
 void GetAtomRequest::generateProcessingGraph(Handle h)
 {
     _output << "<p>"
-        "</script><canvas datasrc=\"../resources/local_graph.js\" "
+        "</script><canvas datasrc=\"/resources/processhg.pjs\" "
         "width=\"200px\" height=\"200px\"></canvas></p>\n";
 }
 

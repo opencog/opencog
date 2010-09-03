@@ -73,11 +73,16 @@ public:
     static const unsigned int DEFAULT_PORT = 17034;
     static const char* DEFAULT_SERVER_ADDRESS;
 
+    static const char* jsonHeader()
+{
+return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
+    "content-Type: application/json\r\n\r\n"));
+}
     static const char* openHtmlHeader()
 {
 return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
     "content-Type: text/html\r\n\r\n"
-    "<html><head><link rel=stylesheet type=text/css href=../resources/ab.css>" ));
+    "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"/resources/ab.css\">" ));
 
 }
     static const char* closeHtmlHeader(){
