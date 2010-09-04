@@ -249,12 +249,12 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 			{
 				if (column_labels[i])
 				{
-					delete column_labels[i];
+					delete[] column_labels[i];
 				}
 			}
-			delete column_labels;
+			delete[] column_labels;
 		}
-		if (column_datatype) delete column_datatype;
+		if (column_datatype) delete[] column_datatype;
 
 		if (values)
 		{
@@ -262,12 +262,12 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 			{
 				if (values[i])
 				{
-					delete values[i];
+					delete[] values[i];
 				}
 			}
-			delete values;
+			delete[] values;
 		}
-		if (vsizes) delete vsizes;
+		if (vsizes) delete[] vsizes;
 
 		column_labels = new char*[new_ncols];
 		column_datatype = new int[new_ncols];
@@ -368,19 +368,19 @@ ODBCRecordSet::~ODBCRecordSet()
 
 	for (i=0; i<arrsize; i++)
 	{
-		delete column_labels[i];
-		delete values[i];
+		delete[] column_labels[i];
+		delete[] values[i];
 	}
-	delete column_labels;
+	delete[] column_labels;
 	column_labels = NULL;
 
-	delete column_datatype;
+	delete[] column_datatype;
 	column_datatype = NULL;
 
-	delete values;
+	delete[] values;
 	values = NULL;
 
-	delete vsizes;
+	delete[] vsizes;
 	vsizes = NULL;
 }
 
