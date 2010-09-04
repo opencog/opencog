@@ -10,9 +10,10 @@ float kinetic_energy = 0.1; /* just some value above threshold to begin */
 float kinetic_threshold = 0.02;
 float timestep = 1.0;
 float damping = 0.95;
-var nodes = new Array();
-var links = new Array();
-boolean ready = false;
+int max_depth = 4;
+var nodes = new Object;
+var links = new Object;
+boolean ready = true;
 
 int selected=-1;
 
@@ -20,35 +21,37 @@ void lnPrinted(){
     console.log( ln );
 }
 
-void add_link(data,textStatus,XMLHttpRequest,depth) {
+void add_link(data,textStatus,XMLHttpRequest,depth,source) {
     
-    if (depth > 2) return;
+    if (depth > max_depth) return;
     // link
     // add outgoing links
     console.log( "Loading link " + data.handle );
-    links[data.handle] = new Link(data);
     for (var i = 0;i<data.outgoing.length;i++)
     {
         node_uuid = data.outgoing[i];
-        if (!(node_uuid in nodes)) {
+        if (!(node_uuid in nodes) && node_uuid != source) {
             $.ajax({url:"/rest/0.2/atom/"+data.outgoing[i],
-                dataType:"json",success:add_node});
+                dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
+                    add_node(d,textStatus,XMLHttpRequest,depth+1,data.handle);
+                    links[data.handle] = new Link(data);
+                    kinetic_energy = kinetic_threshold+1;
+                } });
             //nodes[node_uuid] = new Node(node_uuid);
 
         }
     }
-    kinetic_energy = kinetic_threshold+1;
 }
 
-void add_node(data,textStatus,XMLHttpRequest,depth) {
-    if (depth > 2) return;
+void add_node(data,textStatus,XMLHttpRequest,depth,source) {
     nodes[data.handle] = new Node(data.handle);
+    if (depth > max_depth) return;
     for (var i = 0;i<data.incoming.length;i++)
     {
         link_uuid = data.incoming[i];
-        if (!(link_uuid in links)) {
+        if (!(link_uuid in links) && link_uuid != source) {
             $.ajax({url:"/rest/0.2/atom/"+data.incoming[i],
-                dataType:"json",success:add_link});
+                dataType:"json",success:function (d,textStatus,XMLHttpRequest) { add_link(d,textStatus,XMLHttpRequest,depth+1,data.handle)}});
         }
     }
 
@@ -58,9 +61,9 @@ void add_root(data,textStatus,XMLHttpRequest) {
     console.log( "Loading focus " + data.handle );
     // Handle adding root node and retrieving incoming/outgoing links
     if (data.outgoing.length > 0) {
-        add_link(data,textStatus,XMLHttpRequest,0);
+        add_link(data,textStatus,XMLHttpRequest,0,undefined);
     } else {
-        add_node(data,textStatus,XMLHttpRequest,0);
+        add_node(data,textStatus,XMLHttpRequest,0,undefined);
         nodes[data.handle].x = width/2;
         nodes[data.handle].y = height/2;
         nodes[data.handle].pinned = true;
@@ -68,7 +71,6 @@ void add_root(data,textStatus,XMLHttpRequest) {
 
     }
     current_atom=data.handle;
-    ready = true;
     kinetic_energy = kinetic_threshold+1;
 }
 
@@ -114,8 +116,12 @@ void draw() {
   }
   for (var i in links)
   {
-     line(links[i].outgoing[0].x,links[i].outgoing[0].y,
-	links[i].outgoing[1].x,links[i].outgoing[1].y);
+    /*if (links[i].outgoing[0] == undefined || links[i].outgoing[1] == undefined) {
+        continue;
+    }*/
+      if (current_atom == i) { stroke(255,0,0); }
+      line(links[i].outgoing[0].x,links[i].outgoing[0].y, links[i].outgoing[1].x,links[i].outgoing[1].y);
+      stroke(0);
   }
 
   for (var i in nodes)
@@ -160,7 +166,9 @@ void mousePressed() {
 
 void mouseReleased() {
     if (selected != -1 && drag_time < 5) {
-	nodes[selected].pinned=!nodes[selected].pinned;
+        window.location = '/opencog/atom/' + selected;
+        return;
+	//nodes[selected].pinned=!nodes[selected].pinned;
     }
     selected = -1;
     kinetic_energy = kinetic_threshold+1;
