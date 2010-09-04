@@ -107,6 +107,19 @@ aside, nav, article, figure {
 }
 /***** Layout *****/
 .body {margin: 0 auto; width: 80%;}
+.body
+{
+margin: 0 auto;
+width: 80%; /* because IE can't handle min-width */
+}
+
+html>body .body
+{
+margin: 0 auto;
+width: 80%;
+min-width: 800px;
+} 
+
 img.right figure.right {float: right; margin: 0 0 2em 2em;}
 img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 /*
@@ -123,7 +136,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     color: #000305;
     display: block;
     font-weight: bold;
-    margin: 0 0 .2em .2em;
+    /*margin: 0 0 .2em .2em;*/
     text-decoration: none;
     width: 427px;
 }
@@ -134,8 +147,12 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 }
 
 #banner h1 strong {font-size: 0.36em; font-weight: normal;}
-#banner h1 #logo {
+#logo {
     float: left;
+    width: 100px;
+}
+#logo img {
+    width: 100px;
 }
 /* Main Nav */
 #banner nav {
@@ -180,3 +197,12 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 	-webkit-border-bottom-left-radius: 5px;
 }
 
+/* Graph viewer */
+#viewer div {
+    width:600px;
+    height:300px;
+    border: solid;
+}
+/*#viewer canvas {
+    width: 100%;
+}*/
