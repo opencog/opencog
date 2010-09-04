@@ -55,7 +55,7 @@ class ODBCConnection
 		               const char * authentication);
 		~ODBCConnection();
 
-		bool connected(void);
+		bool connected(void) const;
 
 		ODBCRecordSet *exec(const char * buff);
 };

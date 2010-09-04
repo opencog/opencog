@@ -160,7 +160,7 @@ ODBCConnection::~ODBCConnection()
 	}
 }
 
-bool ODBCConnection::connected (void)
+bool ODBCConnection::connected (void) const
 {
 	return is_connected;
 }
