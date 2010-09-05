@@ -70,7 +70,7 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
     float beta = alpha; float diff;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
-    float* args = new float[2];
+    float args[2];
     vector <float*> distributionA, distributionB;
 
     // Alocate distributionA and distributionB
@@ -142,7 +142,7 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
     float beta = alpha; float diff;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
-    float* args = new float[2];
+    float args[2];
     vector <float*> distributionA, distributionC, distributionAC;
 
     // check if first order distribution is ready
@@ -231,7 +231,7 @@ void Sampler::generateSample(IndefiniteTruthValue* const& TVa,
     float alpha = IndefiniteTruthValue::DEFAULT_K * 0.5;
     float beta = alpha; float diff;
     float default_k = IndefiniteTruthValue::DEFAULT_K;
-    float* args = new float[2];
+    float args[2];
     bool check = false;
     vector <float*> distributionA, distributionB,
     distributionC, distributionAB, distributionCB_BC;
