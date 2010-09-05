@@ -84,7 +84,7 @@ cite {}
 q {}
 
 /* Tables */
-table {margin: .5em auto 1.5em auto; width: 98%;}
+table {margin: .5em auto .5em auto; width: 100%;}
 
 	/* Thead */
 	thead th {padding: .5em .4em; text-align: left;}
@@ -106,18 +106,20 @@ aside, nav, article, figure {
 	display: block;
 }
 /***** Layout *****/
-.body {margin: 0 auto; width: 80%;}
-.body
+#maincolumn {margin: 0 auto; width: 80%;}
+#maincolumn 
 {
 margin: 0 auto;
 width: 80%; /* because IE can't handle min-width */
+float:left;
 }
 
-html>body .body
+html>body #maincolumn
 {
 margin: 0 auto;
 width: 80%;
 min-width: 800px;
+float:left;
 } 
 
 img.right figure.right {float: right; margin: 0 0 2em 2em;}
@@ -198,11 +200,108 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 }
 
 /* Graph viewer */
-#viewer div {
-    width:600px;
-    height:300px;
+#viewer {
+    width: 100%;
+    height: 306px;
+    overflow: hidden;
+}
+#viewer div#visualview {
+    float: left;
+    width: 600px;
+    height: 300px;
     border: solid;
 }
+#viewer div#atominfo {
+    float: left;
+    border: solid;
+    border-left: none;
+    min-width: 198px;
+    width: 198px;
+    height:300px;
+}
+#atominfo ol {
+    list-style: none;
+    margin: 0.1em;
+    font-style: italic;
+}
+#atominfo ol span {
+    font-style: normal;
+}
+
+/*#viewer #viewbox {
+    display:block;
+    clear:both;
+    min-width: 800px;
+}
+
+#list {
+    float:left;
+}*/
 /*#viewer canvas {
     width: 100%;
 }*/
+#atomlist {
+    border-collapse: collapse; 
+    border-spacing:0; 
+    border: 1px solid #1F7CFF; 
+    font: 90%  Trebuchet MS , Tahoma, Arial, Helvetica, sans-serif;
+}
+#atomlist caption { 
+   padding: 0 .4em .4em; 
+   text-align: left; 
+   font-size: 110%; 
+   font-weight: bold; 
+   text-transform: uppercase; 
+   color: #453827; 
+   background: transparent;
+} 	
+#atomlist thead {
+    background: #000000;
+}
+#atomlist td,
+#atomlist th { 
+ padding: .3em; 
+ font-size: 0.9em; 
+ color: #666;
+} 
+
+#atomlist thead th,
+#atomlist tfoot th,
+#atomlist tfoot td { 
+ text-align: left; 
+ font-weight: bold; 
+ font-size: 100%; 
+ color: #FFF;
+} 
+
+#atomlist tbody th,
+#atomlist thead th,
+#atomlist tbody td { 
+ vertical-align: top; 
+ text-align: left;
+} 
+
+#atomlist tbody tr:focus td,
+#atomlist tbody tr:focus th { 
+    color: #fff;
+} 
+#atomlist tbody tr:hover td,
+#atomlist tbody tr:hover th {
+    background-color: #E5E5CB;
+} 
+
+#atomlist tbody tr th a:hover {
+   color:#c00; 
+   border-right:0.8em solid #fff; 
+} 
+#atomlist tbody tr.odd th a:hover { 
+   color:#c00; 
+   border-right:0.8em solid #eee; 
+} 
+#atomlist tbody td a:hover { 
+   color:#c00; 
+   font-weight:normal; 
+   text-decoration:none; 
+} 
+#atomlist tr.odd{ 
+}

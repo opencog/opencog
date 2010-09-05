@@ -14,64 +14,74 @@ int max_depth = 4;
 var nodes = new Object;
 var links = new Object;
 boolean ready = true;
+float mass_multiplier = 10;
 
 int selected=-1;
+//int hover_node=-1;
 
 void lnPrinted(){
     console.log( ln );
 }
 
-void add_link(data,textStatus,XMLHttpRequest,depth,source) {
-    
+void add_atom(data,textStatus,XMLHttpRequest,depth,source) {
     if (depth > max_depth) return;
-    // link
-    // add outgoing links
-    console.log( "Loading link " + data.handle );
-    for (var i = 0;i<data.outgoing.length;i++)
+    // add links as Nodes, then just iterate through ALL outgoing sets of
+    // Node as each element in the outgoing sets corresponds to exactly one
+    console.log( "Loading atom " + data.handle );
+    nodes[data.handle] = new Node(data);
+    // add nodes in outgoing - this means the atom is a link
+    for (var i in data.outgoing)
     {
         node_uuid = data.outgoing[i];
         if (!(node_uuid in nodes) && node_uuid != source) {
             $.ajax({url:"/rest/0.2/atom/"+data.outgoing[i],
                 dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
-                    add_node(d,textStatus,XMLHttpRequest,depth+1,data.handle);
-                    links[data.handle] = new Link(data);
+                    add_atom(d,textStatus,XMLHttpRequest,depth+1,data.handle);
                     kinetic_energy = kinetic_threshold+1;
                 } });
-            //nodes[node_uuid] = new Node(node_uuid);
-
         }
     }
+    // nodes or links can have incoming links
+    for (var i in data.incoming)
+    {
+        link_uuid = data.incoming[i];
+        if (!(link_uuid in nodes) && link_uuid != source) {
+            $.ajax({url:"/rest/0.2/atom/"+data.incoming[i],
+                dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
+                    add_atom(d,textStatus,XMLHttpRequest,depth+1,data.handle)
+                } });
+        }
+    }
+    //if (!(data.handle in nodes)) { nodes[data.handle] = new Node(data); }
 }
 
-void add_node(data,textStatus,XMLHttpRequest,depth,source) {
-    nodes[data.handle] = new Node(data.handle);
+/*void add_node(data,textStatus,XMLHttpRequest,depth,source) {
+    nodes[data.handle] = new Node(data);
     if (depth > max_depth) return;
     for (var i = 0;i<data.incoming.length;i++)
     {
         link_uuid = data.incoming[i];
         if (!(link_uuid in links) && link_uuid != source) {
             $.ajax({url:"/rest/0.2/atom/"+data.incoming[i],
-                dataType:"json",success:function (d,textStatus,XMLHttpRequest) { add_link(d,textStatus,XMLHttpRequest,depth+1,data.handle)}});
+                dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
+                    add_link(d,textStatus,XMLHttpRequest,depth+1,data.handle)
+                } });
         }
     }
 
-}
+}*/
 
 void add_root(data,textStatus,XMLHttpRequest) {
     console.log( "Loading focus " + data.handle );
     // Handle adding root node and retrieving incoming/outgoing links
-    if (data.outgoing.length > 0) {
-        add_link(data,textStatus,XMLHttpRequest,0,undefined);
-    } else {
-        add_node(data,textStatus,XMLHttpRequest,0,undefined);
-        nodes[data.handle].x = width/2;
-        nodes[data.handle].y = height/2;
-        nodes[data.handle].pinned = true;
-        nodes[data.handle].mass = 4;
-
-    }
+    add_atom(data,textStatus,XMLHttpRequest,0,undefined);
+    nodes[data.handle].x = width/2;
+    nodes[data.handle].y = height/2;
+    nodes[data.handle].pinned = true;
+    nodes[data.handle].mass = 4;
     current_atom=data.handle;
     kinetic_energy = kinetic_threshold+1;
+    setAtomInfo(current_atom);
 }
 
 void setup() {
@@ -114,61 +124,69 @@ void draw() {
       update();
       //println(kinetic_energy);
   }
-  for (var i in links)
+  for (var i in nodes)
   {
-    /*if (links[i].outgoing[0] == undefined || links[i].outgoing[1] == undefined) {
-        continue;
-    }*/
-      if (current_atom == i) { stroke(255,0,0); }
-      line(links[i].outgoing[0].x,links[i].outgoing[0].y, links[i].outgoing[1].x,links[i].outgoing[1].y);
-      stroke(0);
+      l = nodes[i];
+      for (j in l.outgoing) {
+          if (current_atom == i) { stroke(255,0,0); }
+          n = l.outgoing[j];
+          if (nodes[n] == undefined) continue; // sometimes happens if not finished loading
+          line(l.x,l.y, nodes[n].x,nodes[n].y);
+          stroke(0);
+      }
   }
 
   for (var i in nodes)
   {
       n = nodes[i];
-      if (n.pinned) {
-	  fill(255,0,0);
-	  ellipse(n.x, n.y, n.mass*5,n.mass*5);
+      if (n.outgoing.length > 0) {
+          fill(128);
+      } else if (current_atom == i) {
+          fill(#1F7CFF);
+      } else if (selected == i) {
+          fill(#2F8CFF);
+      } else if (n.pinned == i) {
+          fill(255,0,0);
       } else {
-	  fill(255);
-	  ellipse(n.x, n.y, n.mass*5,n.mass*5);
+          fill(255);
       }
+	  ellipse(n.x, n.y, n.mass*mass_multiplier,n.mass*mass_multiplier);
   }
   fill(255);
   text("Pin and drag nodes with left click",10,height-18);
 
 }
 
-void mousePressed() {
-    nearest = -1;
-    nearest_dist = width*height;
-    /* find nearest node */
-    for (var i in nodes)
-    {
-        dx = nodes[i].x - mouseX;
-        dy = nodes[i].y - mouseY;
-        dist = sqrt(dx*dx + dy*dy);
-        if (dist < nearest_dist) {
-            nearest_dist = dist;
-            nearest = i;
-        }
+/*void mouseMoved() {
+    var near = findNearest(mouseX, mouseY);
+    if (near.distance < nodes[near.index].mass*mass_multiplier) {
+        // update info using jquery
+        hover_node = near.index;
+        println ("hover node " + hover_node);
+        $('#atomuuid').html(nodes[near.index].handle);
     }
-    /* radius * 1.5 */
-    if (nearest_dist < nodes[nearest].mass*5) {
-        selected = nearest;
+}
+*/
+
+void mousePressed() {
+    var near = findNearest(mouseX,mouseY);
+    println("nearest" + near.toSource());
+    var magnet = 1.5;
+    if (near.distance < nodes[near.index].mass*mass_multiplier*magnet) {
+        setAtomInfo(near.index);
+        selected = near.index;
         nodes[selected].x = mouseX;
         nodes[selected].y = mouseY;
-        //println ("selected node: " + nodes[nearest].handle);
+        //println ("selected node: " + nodes[near.index].handle);
     }
     drag_time = 0;
 }
 
 void mouseReleased() {
     if (selected != -1 && drag_time < 5) {
-        window.location = '/opencog/atom/' + selected;
-        return;
-	//nodes[selected].pinned=!nodes[selected].pinned;
+        //window.location = '/opencog/atom/' + selected;
+        //return;
+	    //nodes[selected].pinned=!nodes[selected].pinned;
     }
     selected = -1;
     kinetic_energy = kinetic_threshold+1;
@@ -185,7 +203,7 @@ void mouseDragged() {
 }
 
 float repulsion(Node n1, Node n2) {
-    repulse = 0.04 * (n1.mass + n2.mass);
+    repulse = 0.15 * (n1.mass + n2.mass);
     dx = (n1.x - n2.x);
     dy = (n1.y - n2.y);
     dist = sqrt(dx*dx + dy*dy);
@@ -208,10 +226,10 @@ float attraction(Node n, Link l) {
     return a;
 }
 
-float spring(Node n, Link l) {
+float spring(Node n, Node l) {
     float attract = .05;
-    n1 = l.outgoing[0]; n2 = l.outgoing[1];
-    float ideal_dist = n1.mass * 10 + n2.mass * 10;
+    n1 = n; n2 = l;
+    float ideal_dist = n1.mass * 20 + n2.mass * 20;
     dx = (n1.x - n2.x);
     dy = (n1.y - n2.y);
     dist = sqrt(dx*dx + dy*dy);
@@ -234,23 +252,42 @@ void update() {
     for (var i in nodes) {
         n = nodes[i];
         if (selected == i || n.pinned) continue;
+        if (n.outgoing.length == 2) {
+            // TODO: if outgoing is two then just place node
+            // midway between endpoints
+            x = nodes[n.outgoing[0]];
+            y = nodes[n.outgoing[1]];
+            if (x == undefined || x == undefined) continue;
+            n.x = (x.x + y.x) / 2;
+            n.y = (x.y + y.y) / 2;
+            continue;
+        }
         net_force = [ 0.0, 0.0 ];
-        /* Electro static repulsion */
         for (var j in nodes) {
+            /* Electro static repulsion */
             if(j == i) continue;
             r = repulsion(n,nodes[j]);
             net_force[0] += r[0];
             net_force[1] += r[1];
         }
+
         /* Spring ideal length */
-        for (var j in links) {
-            l = links[j];
-            if (l.outgoing[0] == n || l.outgoing[1] == n) {
+        for (j in n.outgoing) {
+            l = n.outgoing[j];
             //a = attraction(n, l);
-            a = spring(n, l);
+            if (nodes[l] == undefined) continue;
+            a = spring(n, nodes[l]);
             net_force[0] += a[0];
             net_force[1] += a[1];
-            }
+        }
+        /* Spring ideal length */
+        for (j in n.incoming) {
+            l = n.incoming[j];
+            //a = attraction(n, l);
+            if (nodes[l] == undefined) continue;
+            a = spring(n,nodes[l]);
+            net_force[0] += a[0];
+            net_force[1] += a[1];
         }
         /* limit maximum force applied */
         net_force[0] = constrain(net_force[0],-3,3);
@@ -287,49 +324,79 @@ void update() {
 class Node {
     int handle;
     int x,y;
-    float mass;
+    float mass = 1.0;
     float vx = 0.0, vy = 0.0;
-    boolean pinned;
-    Node(int h) {
-	handle = h;
-	x = random(width);
-	y = random(height);
-	mass=1.0;
-	pinned = false;
+    boolean pinned = false;
+    String type;
+    String name;
+    int sti, lti;
+    var incoming;
+    var outgoing;
+    var tv;
+    boolean is_oc_link;
+
+    Node(var data) {
+        handle = data.handle;
+        name = data.name;
+        x = random(width);
+        y = random(height);
+        type = data.type;
+        sti = data.sti;
+        lti = data.lti;
+        incoming = data.incoming;
+        outgoing = data.outgoing;
+        tv = data.truthvalue;
     }
 
     float energy() {
 	/* v^2 * mass */
-	return (this.vx*this.vx + this.vy*this.vy)*this.mass
+        return (this.vx*this.vx + this.vy*this.vy)*this.mass
     }
 
     String toString() {
-	String s = "Node " + this.handle + " v=" + this.vx +","+ this.vy;
-	return s;
-
+        String s = "Node " + this.handle + " v=" + this.vx +","+ this.vy;
+        return s;
     }
 }
 
 class Link {
     int handle;
-    Node[] outgoing;
+    var outgoing = new Array();
+    int owner; // handle of the "node" that owns this link
 
     Link(Node n1, Node n2){
-	outgoing = new Nodes[2];
-	outgoing[0] = n1;
-	outgoing[1] = n2;
-
+        outgoing[0] = n1;
+        outgoing[1] = n2;
     }
 
+}
 
-    Link(var data)
+var findNearest = function (mousex, mousey) {
+    var result = new Object;
+    var nearest = -1;
+    var nearest_dist = width*height;
+    /* find nearest node */
+    for (var i in nodes)
     {
-        handle = data.handle;
-        outgoing = new Nodes[data.outgoing.length];
-        for (var i = 0;i<data.outgoing.length;i++)
-        {
-            node_uuid = data.outgoing[i];
-            outgoing[i] = nodes[node_uuid];
+        dx = nodes[i].x - mousex;
+        dy = nodes[i].y - mousey;
+        distance = sqrt(dx*dx + dy*dy);
+        if (distance < nearest_dist) {
+            nearest_dist = distance;
+            nearest = i;
         }
     }
+    result.index = nearest;
+    result.distance = nearest_dist;
+    return result;
 }
+
+var setAtomInfo = function (h) {
+    $('#atomuuid').html(nodes[h].handle);
+    $('#atomtype').html(nodes[h].type);
+    $('#atomname').html(nodes[h].name);
+    $('#atomsti').html(nodes[h].sti);
+    $('#atomlti').html(nodes[h].lti);
+    $('#atomtv').html(nodes[h].tv.toSource());
+}
+

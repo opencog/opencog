@@ -43,30 +43,57 @@
 
 <body id="index" class="home">
     <div id="logo"><img alt="" align="left" src="resources/Logo.png" border="0"></div>
-<header id="banner" class="body">
-    <div id="header">
-	<h1><a href="#">OpenCog</a></h1>
-    </div>
-	<nav><ul>
-		<li class="active"><a href="#">atomspace</a></li>
-		<li><a href="config.html">config</a></li>
+    <div id="maincolumn">
+        <header id="banner" class="body">
+        <div id="header">
+        <h1><a href="#">OpenCog</a></h1>
+        </div>
+        <nav><ul>
+            <li class="active"><a href="#">atomspace</a></li>
+            <li><a href="config.html">config</a></li>
 
-        <li><a href="http://wiki.opencog.org/w/">wiki</a></li>
-		<li><a href="http://opencog.org">opencog.org</a></li>
-	</ul></nav>
-</header><!-- /#banner -->
-<section id="options" class="body">
-<div id="optionlist">
-Here all the options for controlling what is listed goes. e.g. types of atoms,
-or potentially having scm format pattern matcher queries.
-</div>
-</section>
-<section id="viewer" class="body">
-<div> <canvas datasrc="resources/processhg.pjs" width="600" height="300"></canvas> </div>
-</section>
-<section id="list" class="body">
-<div>Javascript to load entries from rest into table</div>
-</section>
+            <li><a href="http://wiki.opencog.org/w/">wiki</a></li>
+            <li><a href="http://opencog.org">opencog.org</a></li>
+        </ul></nav>
+        </header><!-- /#banner -->
+        <section id="options" class="body">
+        <div id="optionlist">
+        Here all the options for controlling what is listed goes. e.g. types of atoms,
+        or potentially having scm format pattern matcher queries.
+        </div>
+        </section>
+        <section id="viewer" class="body">
+        <div id="viewbox">
+            <div id="visualview"> <canvas datasrc="resources/processhg.pjs" width="600" height="300"></canvas> </div>
+            <div id="atominfo"><ol>
+                <li>UUID: <span id="atomuuid"></span> </li>
+                <li>Atom type: <span id="atomtype"></span> </li>
+                <li>Name: <span id="atomname"></span> </li>
+                <li>TruthValue: <span id="atomtv"></span> </li>
+                <li>STI: <span id="atomsti"></span> </li>
+                <li>LTI: <span id="atomlti"></span> </li>
+            </ol></div>
+        </div>
+        </section>
+        <!--<section id="list" class="body">
+        <div>
+        <table id="atomlist">
+            <thead><tr>
+                    <th>UUID</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Incoming</th>
+                    <th>Outgoing</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </section>-->
+    </div>
 </body>
 </html>
 
