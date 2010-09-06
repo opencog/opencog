@@ -338,13 +338,23 @@ T input(T& a, std::list<std::string>& args)
 /// (Or actually, its first root variable scoper).
 BITNode* getBITOrScoper(BITNodeID id) {
     BITNode* bitnode;
-    if (id == 0) bitnode = (BITNode*)state->children[0].begin()->prover;
+    if (id == 0) {
+        if (state)
+            bitnode = (BITNode*)state->children[0].begin()->prover;
+        else
+            throw InvalidParamException(TRACE_INFO, "No current BIT");
+    }
     else bitnode = haxx::getBITNode(id);
     return bitnode;
 }
 BITNode* getBITOrRoot(BITNodeID id) {
     BITNode* bitnode;
-    if (id == 0) bitnode = (BITNode*)state;
+    if (id == 0) {
+        if (state)
+            bitnode = (BITNode*)state;
+        else
+            throw InvalidParamException(TRACE_INFO, "No current BIT");
+    }
     else bitnode = haxx::getBITNode(id);
     return bitnode;
 }
