@@ -62,6 +62,11 @@ public:
     //! specific information?
     //float probContext
 
+    //! Store the results from the last level of the inference (and on the next step, you need to use at least
+    //! one of them in each inference. This (more-or-less) avoids rerunning inferences.
+    Btr<pHandleSet> lastLevelResults;
+    Btr<pHandleSet> thisLevelResults;
+
     //! @todo: probably to be removed
     //! Chain to specific target. Only useful for testing.
     //! @param target Handle

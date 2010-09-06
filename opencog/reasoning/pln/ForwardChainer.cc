@@ -65,6 +65,8 @@ ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) :
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     probStack = FWD_CHAIN_PROB_STACK;
     probGlobal = FWD_CHAIN_PROB_GLOBAL;
+
+    cout << lastLevelResults << endl;
 }
 
 ForwardChainer::~ForwardChainer()
@@ -98,6 +100,15 @@ void ForwardChainer::printVertexVectorHandles(std::vector< Vertex > hs)
     printContainer(hs, ", ", "< ", " >");
 }
 
+bool containsAtLeastOneOf(Btr<pHandleSet> lastLevelResults, Btr<vector<BoundVertex> > args) {
+    foreach(BoundVertex bv, *args) {
+        if (STLhas(*lastLevelResults,_v2h(bv.GetValue()))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 //! @todo Find a good way to stop when it becomes only able to produce repeats.
 //! @todo Possibly add an option for exhaustively applying Rules to all possible
 //! inputs each step.
@@ -105,10 +116,15 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 {
     pHandleSeq results;
     
+    int level = 0;
+
     while (maxRuleApps > 0) {
+        cout << "Level " << ++level << endl;
         //cout << "steps remaining: " << maxRuleApps << endl;
         bool appliedRule = false;
     
+        thisLevelResults.reset(new pHandleSet);
+
         // Get the next Rule (no restrictions)
         foreach(Rule *r, *composers) { // to avoid needing a nextRule method.
             cout << "Using " << r->getName() << endl;
@@ -142,6 +158,12 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                         cout << "*args empty. how?" << endl;
                         continue;
                     }
+                    // Check that they include at least 1 result from the previous level (except on the first level).
+                    if   (lastLevelResults &&
+                          !containsAtLeastOneOf(lastLevelResults, args)) {
+                        //cout << "Used already" << endl;
+                        continue;
+                    }
                     //cout << "FWDCHAIN args valid" << endl;
                 
                     //args = *(all_args->begin());
@@ -170,10 +192,13 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                         vhpair v = GET_ASW->fakeToRealHandle(out);
                         //! @todo This check will no longer work.
                         if (! (v.second == NULL_VERSION_HANDLE)) {
+                            cout << "redundant Atom!" << endl;
                             GET_ASW->removeAtom(out);
                         } else {
                             maxRuleApps--;
                             appliedRule = true;
+
+                            thisLevelResults->insert(out);
 
                             updateTrail(out, r, args);
 
@@ -196,10 +221,14 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     } else {
                         // Remove atom if not satisfactory
                         //GET_ASW->removeAtom(_v2h(V));
-                    }
-                }
-            }
-        }
+                        cout << "Not satisfactory TV" << endl;
+                    } // if good TV
+                } // every combination of args
+            } // every input filter allowed for this Rule
+        } // every Rule
+
+        lastLevelResults = thisLevelResults;
+
         // If it iterated through all Rules and couldn't find any suitable
         // input in the AtomSpace. Exit to prevent an infinite loop!
 //! @todo Sometimes commented out as a hack, so it will keep going (potentially infinitely!) when a Rule fails the post-apply tests
@@ -489,7 +518,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     //! @todo Get the BIT to return results properly
     //! For now just using a workaround.
 
-    bit.printResults();
+    //bit.printResults();
 
     Btr<set<Btr<vector<BoundVertex> > > > ret(new set<Btr<vector<BoundVertex> > >);
 
@@ -509,7 +538,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
         vtree::iterator top = tmp.begin();
 
         NMPrinter np;
-        np.print(top,-5);
+        //np.print(top,-5);
 
 //            //np.print(top.begin(),-5);
 //            //for (vtree::sibling_iterator i = tmp.begin(top); i!=tmp.end(top); i++) {
@@ -520,7 +549,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
 
         foreach (pHandle ph, asw->getOutgoing(_v2h(*top))) {
             next->push_back(BoundVertex(ph));
-            np.print(ph,-5);
+            //np.print(ph,-5);
         }
 
         ret->insert(next);
