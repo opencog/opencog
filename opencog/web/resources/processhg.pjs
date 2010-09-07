@@ -13,14 +13,14 @@ float kinetic_threshold = 0.02;
 
 float timestep = 1.0;
 float damping = 0.95;
-int max_depth = 3;
+int max_depth = 2;
 
 boolean ready = true;
 float mass_multiplier = 10;
 
 int selected=-1;
 
-//int hover_node=-1;
+int hover_node=-1;
 
 // function so that processing println logs to firefox js console
 void lnPrinted(){ console.log( ln ); }
@@ -90,7 +90,7 @@ void add_root(data,textStatus,XMLHttpRequest) {
     nodes[data.handle].x = width/2;
     nodes[data.handle].y = height/2;
     //nodes[data.handle].pinned = true;
-    nodes[data.handle].mass = 4;
+    nodes[data.handle].mass = 3;
     current_atom=data.handle;
     kinetic_energy = kinetic_threshold+1;
     setAtomInfo(current_atom);
@@ -139,19 +139,41 @@ void draw() {
   for (var i in nodes)
   {
       l = nodes[i];
-      for (j in l.outgoing) {
-          if (current_atom == i) { stroke(#1F7CFF); }
-          n = l.outgoing[j];
-          if (nodes[n] == undefined) continue; // sometimes happens if not finished loading
-          line(l.x,l.y, nodes[n].x,nodes[n].y);
-          stroke(0);
+      if (l.outgoing.length > 0) {
+          for (var j=0; j < l.outgoing.length; j++) {
+              if (current_atom == i) { stroke(#1F7CFF); }
+              n = l.outgoing[j];
+              if (nodes[n] == undefined) continue; // sometimes happens if not finished loading
+              line(l.x,l.y, nodes[n].x,nodes[n].y);
+              var dx = nodes[n].x-l.x;
+              var dy = nodes[n].y-l.y;
+              if (j > 0) {
+                  // Draw arrows towards non-source nodes
+                  // TODO: these should only be drawn for directed links
+                  stroke(0);
+                  fill(255);
+                  pushMatrix();
+                  translate(nodes[n].x,nodes[n].y);
+                  angle=atan2(dy,dx);
+                  rotate(-PI/2.0 + angle);
+                  radius = nodes[n].mass*mass_multiplier;
+                  translate(0,-radius/2.0);
+                  triangle(0,0,-5,-5,5,-5);
+                  //triangle(10,0,23,45,0,23);
+                  //rect(-5,0,10,10);
+                  popMatrix();
+              }
+              stroke(0);
+          }
       }
   }
 
   for (var i in nodes)
   {
       n = nodes[i];
-      if (current_atom == i) {
+      if (hover_node == i) {
+          fill(255,0,0);
+      } else if (current_atom == i) {
           fill(#1F7CFF);
       }else if (n.outgoing.length > 0) {
           fill(128);
@@ -169,15 +191,17 @@ void draw() {
 
 }
 
-/*void mouseMoved() {
+void mouseMoved() {
     // Example method for showing details of the atom the cursor is over
     var near = findNearest(mouseX, mouseY);
     if (near.distance < nodes[near.index].mass*mass_multiplier) {
         // update info using jquery
         hover_node = near.index;
-        setAtomInfo(near.index);
+        //setAtomInfo(near.index);
+    } else {
+        hover_node = -1;
     }
-}*/
+}
 
 void mousePressed() {
     var near = findNearest(mouseX,mouseY);
@@ -221,11 +245,15 @@ void mouseDragged() {
 }
 
 float repulsion(Node n1, Node n2) {
-    repulse = 0.15 * (n1.mass + n2.mass);
-    dx = (n1.x - n2.x);
-    dy = (n1.y - n2.y);
-    dist = sqrt(dx*dx + dy*dy);
-    float[] r = { repulse * (1.0 / dx),repulse * (1.0 / dy)};
+    var repulse = 0.15 * (n1.mass + n2.mass);
+    var dx = (n1.x - n2.x);
+    var dy = (n1.y - n2.y);
+    var distance = sqrt(dx*dx + dy*dy);
+    var angle = atan2(dy,dx);
+    diff = repulse * (1.0 / distance);
+    dx = diff * cos(angle);
+    dy = diff * sin(angle);
+    float[] r = { dx, dy};
     return r
 }
 
@@ -234,7 +262,7 @@ float attraction(Node n, Link l) {
     n1 = l.outgoing[0]; n2 = l.outgoing[1];
     dx = (n1.x - n2.x) / width;
     dy = (n1.y - n2.y) / height;
-    dist = sqrt(dx*dx + dy*dy);
+    distance = sqrt(dx*dx + dy*dy);
     inverse=-1;
     if (n2 == n) { inverse=1; }
     float[] a = {inverse * attract * (dx*dx),inverse * attract * (dy*dy)};
@@ -246,13 +274,13 @@ float attraction(Node n, Link l) {
 
 float spring(Node n, Node l) {
     float attract = .05;
-    n1 = n; n2 = l;
+    var n1 = n; var n2 = l;
     float ideal_dist = n1.mass * 20 + n2.mass * 20;
-    dx = (n1.x - n2.x);
-    dy = (n1.y - n2.y);
-    dist = sqrt(dx*dx + dy*dy);
-    diff = dist - ideal_dist;
-    angle = atan2(dy,dx);
+    var dx = (n1.x - n2.x);
+    var dy = (n1.y - n2.y);
+    var distance = sqrt(dx*dx + dy*dy);
+    var diff = distance - ideal_dist;
+    var angle = atan2(dy,dx);
     dx = diff * cos(angle);
     dy = diff * sin(angle);
     if (n2 != n) { dx = -dx; dy = -dy; }
@@ -296,14 +324,14 @@ void update() {
         }
         net_force = [ 0.0, 0.0 ];
         for (var j in nodes) {
-            /* Electro static repulsion */
+            // Electro static repulsion
             if(j == i) continue;
             r = repulsion(n,nodes[j]);
             net_force[0] += r[0];
             net_force[1] += r[1];
         }
 
-        /* Spring ideal length */
+        // Spring ideal length
         for (j in n.outgoing) {
             l = n.outgoing[j];
             //a = attraction(n, l);
@@ -312,7 +340,7 @@ void update() {
             net_force[0] += a[0];
             net_force[1] += a[1];
         }
-        /* Spring ideal length */
+        // Spring ideal length
         for (j in n.incoming) {
             l = n.incoming[j];
             //a = attraction(n, l);
