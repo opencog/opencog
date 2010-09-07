@@ -201,7 +201,9 @@ namespace opencog {
 
         std::string s;
         in >> s;
-        OC_ASSERT(s.substr(0, left.size()) == left);
+        OC_ASSERT(s.substr(0, left.size()) == left,
+                  "left = %s is not a substring of s = %s",
+                  left.c_str(), s.c_str());
         s = s.substr(left.size());
         *out++ = boost::lexical_cast<T>(s);
 
