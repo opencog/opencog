@@ -212,11 +212,11 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     border: solid;
 }
 #viewer div#atominfo {
-    float: left;
+/*    float: left;*/
     border: solid;
     border-left: none;
     min-width: 198px;
-    width: 198px;
+/* width: 198px; */
     height:300px;
 }
 #atominfo ol {

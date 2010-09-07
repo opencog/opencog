@@ -98,11 +98,11 @@ void add_root(data,textStatus,XMLHttpRequest) {
 
 void setup() {
   size(600, 300);
-  //random_graph(20,0.5);
   PFont fontA = loadFont("Arial");
   textFont(fontA, 16);
   $.ajax({url:"/rest/0.2/atom/"+handle,
     dataType:"json",success:add_root});
+  //random_graph(20,0.9);
 
 }
 
@@ -111,8 +111,14 @@ void random_graph(int N, float connectedness) {
   // not designed to work with new hypergraph data
   if (N > max_links) N = max_links;
   for (int i=0; i < N ; i++) {
-      nodes[i] = new Node(i);
-      nodes[i].mass = random(1,3);
+    var data = {"handle": i,
+            "outgoing": [],
+            "incoming": [],
+            "name": "test",
+            "truthvalue": "", "sti":0, "lti":0, "type":"Node"
+    };
+    nodes[i] = new Node(data);
+    //nodes[i].mass = random(1,3);
   }
   //cur_nodes = N;
   int n_links = N*connectedness;
@@ -121,12 +127,20 @@ void random_graph(int N, float connectedness) {
       Node n1,n2;
       n1 = nodes[(int)random(N)];
       n2 = n1;
-      while (n2 == n1) {
-	  n2 = nodes[(int)random(N)];
-      }
-      links[i] = new Link(n1,n2);
+      while (n2 == n1) { n2 = nodes[(int)random(N)]; }
+      var data = {"handle": N+i,
+              "outgoing": [n1.handle,n2.handle],
+              "incoming": [],
+              "name": "test",
+            "truthvalue": "", "sti":0, "lti":0, "type":"Link"
+          };
+      nodes[N+i] = new Node(data);
+      n1.incoming.push(N+i);
+      n2.incoming.push(N+i);
   }
   //cur_links = n_links;
+  current_atom=0;
+  kinetic_energy = kinetic_threshold+1;
 }
 
 void draw() {
@@ -179,7 +193,7 @@ void draw() {
           fill(128);
       } else if (selected == i) {
           fill(#2F8CFF);
-      } else if (n.pinned == i) {
+      } else if (n.pinned) {
           fill(255,0,0);
       } else {
           fill(255);
@@ -205,7 +219,7 @@ void mouseMoved() {
 
 void mousePressed() {
     var near = findNearest(mouseX,mouseY);
-    println("nearest" + near.toSource());
+    //println("nearest" + near.toSource());
     var magnet = 1.5;
     if (near.distance < nodes[near.index].mass*mass_multiplier*magnet) {
         setAtomInfo(near.index);
@@ -245,7 +259,7 @@ void mouseDragged() {
 }
 
 float repulsion(Node n1, Node n2) {
-    var repulse = 0.15 * (n1.mass + n2.mass);
+    var repulse = 0.25 * (n1.mass + n2.mass);
     var dx = (n1.x - n2.x);
     var dy = (n1.y - n2.y);
     var distance = sqrt(dx*dx + dy*dy);
@@ -275,7 +289,7 @@ float attraction(Node n, Link l) {
 float spring(Node n, Node l) {
     float attract = .05;
     var n1 = n; var n2 = l;
-    float ideal_dist = n1.mass * 20 + n2.mass * 20;
+    float ideal_dist = 20.0 / n1.mass + 20.0 / n2.mass;
     var dx = (n1.x - n2.x);
     var dy = (n1.y - n2.y);
     var distance = sqrt(dx*dx + dy*dy);
@@ -350,24 +364,28 @@ void update() {
             net_force[1] += a[1];
         }
         /* limit maximum force applied */
-        net_force[0] = constrain(net_force[0],-3,3);
-        net_force[1] = constrain(net_force[1],-3,3);
+        //net_force[0] = constrain(net_force[0],-3,3);
+        //net_force[1] = constrain(net_force[1],-3,3);
         /* prevent leaving view */
-        if (n.x > width) {
+        var border = 10
+        if (n.x > width-border) {
             net_force[0] = -0.1;
         }
-        if (n.x < 0) {
+        if (n.x < 0 + border) {
             net_force[0] = 0.1;
         }
-        if (n.y > height) {
+        if (n.y > height - border) {
             net_force[1] = -0.1;
         }
-        if (n.y < 0) {
+        if (n.y < 0 + border) {
             net_force[1] = 0.1;
         }
         /* change velocity */
         n.vx = (n.vx + (timestep * net_force[0])) * damping;
         n.vy = (n.vy + (timestep * net_force[1])) * damping;
+        /* limit maximum speed */
+        //n.vx = constrain(n.vx,-3,3);
+        //n.vy = constrain(n.vy,-3,3);
         /*float v = sqrt(n.vx*n.vx + n.vy*n.vy);
         if (v > 5) {
             println ("large velocity: " + i + " v=" + v);
@@ -393,7 +411,6 @@ class Node {
     var incoming;
     var outgoing;
     var tv;
-    boolean is_oc_link;
 
     Node(var data) {
         handle = data.handle;
@@ -459,6 +476,14 @@ var setAtomInfo = function (h) {
     $('#atomname').html(nodes[h].name);
     $('#atomsti').html(nodes[h].sti);
     $('#atomlti').html(nodes[h].lti);
-    $('#atomtv').html(nodes[h].tv.toSource());
+    $('#atomtv').html(tvToString(nodes[h].tv));
 }
 
+var tvToString = function (tv) {
+    var result = "";
+    if (tv.hasOwnProperty("simple")) {
+        result += "SimpleTV [strength: " + tv.simple.str;
+        result += " confidence: " + tv.simple.conf + "]";
+    }
+    return result;
+}
