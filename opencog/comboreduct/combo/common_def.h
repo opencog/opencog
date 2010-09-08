@@ -26,7 +26,7 @@
 
 namespace combo {
 
-  typedef char arity_t;
+  typedef int arity_t;
 
 }
 

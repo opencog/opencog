@@ -48,7 +48,7 @@ namespace combo {
     //WARNING : we assume the argument is necessarily an action and therefor
     //never has a negative index
     if(is_argument(*it)) {
-      int idx=get_argument(*it).idx;
+      arity_t idx=get_argument(*it).idx;
       //assumption : when idx is negative the argument is necessary boolean
       OC_ASSERT(idx > 0, "argument is necessarily an action and therefore never has a neg idx.");
       if (const vertex* v=boost::get<const vertex>(&binding(idx)))

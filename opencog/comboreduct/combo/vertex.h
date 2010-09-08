@@ -111,11 +111,10 @@ typedef id::wild_card wild_card;
 class argument
 {
 public:
-    explicit argument(int i) : idx(i) {
-        OC_ASSERT(idx != 0,
-                         "idx should be different fro zero.");
+    explicit argument(arity_t i) : idx(i) {
+        OC_ASSERT(idx != 0, "idx should be different fro zero.");
     }
-    int idx;
+    arity_t idx;
 
     void negate() {
         idx = -idx;
@@ -127,11 +126,11 @@ public:
         static opencog::absolute_value_order<int> comp;
         return comp(idx, rhs.idx);
     }
-    int abs_idx() const {
+    arity_t abs_idx() const {
         return idx < 0 ? -idx : idx;
     }
     //returns 0 for argument of idx 1, 1 for idx 2, and so on
-    int abs_idx_from_zero() const {
+    arity_t abs_idx_from_zero() const {
         return (idx < 0 ? -idx : idx) - 1;
     }
     //check if idx is in the possible range given arity a
@@ -843,11 +842,11 @@ inline bool ann_str_to_vertex(const std::string& str, vertex& v)
 inline bool argument_str_to_vertex(const std::string& str, vertex& v)
 {
     if (str[0] == '#') {
-        int arg = boost::lexical_cast<int>(str.substr(1));
+        arity_t arg = boost::lexical_cast<arity_t>(str.substr(1));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(arg);
     } else if (str[0] == '!' && str[1] == '#') {
-        int arg = boost::lexical_cast<int>(str.substr(2));
+        arity_t arg = boost::lexical_cast<arity_t>(str.substr(2));
         OC_ASSERT(arg != 0, "arg value should be different than zero.");
         v = argument(-arg);
     } else return false;
