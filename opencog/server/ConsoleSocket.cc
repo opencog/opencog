@@ -117,7 +117,7 @@ void ConsoleSocket::OnLine(const std::string& line)
             // before handling any additional input from the socket (since the
             // next input is almost surely intended for the new shell, not for
             // the cogserver one).
-            // NOTE: Calling this method for other kind of request may cause
+            // NOTE: Calling this method for other kinds of requests may cause
             // cogserver to crash due to concurrency issues, since this runs in
             // a separate thread (for socket handler) instead of the main thread
             // (where the server loop runs).
