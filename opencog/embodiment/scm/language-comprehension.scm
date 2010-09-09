@@ -1403,7 +1403,7 @@
     )
   )
 
-; NOTE: This function is not used! (It probably should be)
+; NOTE: This function is not used; and is obsoleted by match-frame above, which uses PLN rather than Linas's query code.
 
 ; When a Frame instance with VariableNodes in its elements
 ; is used in a PatternMatching process to find a grounded Frame Instance,
@@ -1516,6 +1516,8 @@
        (ListLink
         (VariableTypeNode "ConceptNode")
         (VariableTypeNode "SemeNode")
+        ; Do it on the raw WordInstanceNode version (ungrounded version) too. Needed by frames-to-implication.
+        (VariableTypeNode "WordInstanceNode")
        )
       )
      )
@@ -1597,6 +1599,158 @@
       (InheritanceLink (VariableNode "$entity") (VariableNode "$attribute"))
      ) ; Implication
     ) ; VarScope
+)
+
+(define (find-frame-elements-new-eval-links frameInstance)
+    (let ( (generalFrameTemplate
+               (EvaluationLink (VariableNode "$frameElement")
+                 (ListLink                     
+                     frameInstance
+                     (VariableNode "$value")
+                 )
+               )
+           )
+         (variables
+          (ListLink
+               (TypedVariableLink
+                (VariableNode "$value")
+                (ListLink
+                 (VariableTypeNode "ConceptNode")
+                 (VariableTypeNode "SemeNode")
+                )
+               )
+               (VariableNode "$frameElement")
+          )
+         )
+         )
+         (lookup-atoms variables generalFrameTemplate)
+    )
+)
+
+; Lookup the query atom (can contain variables).
+(define (lookup-atoms variables query)
+    (let ((implication
+         (VariableScopeLink
+            variables
+            (ImplicationLink
+                query
+                query
+            )
+         )
+         ))
+         
+         ; do-varscope returns a ListLink of results, so get the list not the ListLink
+         (cog-outgoing-set (do-varscope implication))
+     )
+)
+
+; TODO: this function really shouldn't have to be this long.
+(define (find-frame-instance-for-word-instance wordInstance)
+    ; given:
+    ; (WordInstanceNode eats@c19cfa35-0d75-4762-ae96-f960745d777f)
+    ; find:
+    ; (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion)
+    ; and without including:
+    ; (PredicateNode eats@c19cfa35-0d75-4762-ae96-f960745d777f_Ingestion_Ingestor)
+    
+    ; We want it to find the grounded version of the frame instance, which starts with G_
+    
+    ; (InheritanceLink PredicateNode DefinedFrameNode)
+    (define variables
+        (ListLink
+            (TypedVariableLink (VariableNode "frameInstance") (VariableTypeNode "PredicateNode"))
+            (TypedVariableLink (VariableNode "frame") (VariableTypeNode "DefinedFrameNode"))
+        )
+    )
+    (define result '())
+    (let
+        ((all-frame-instances
+            (lookup-atoms variables
+                (InheritanceLink (VariableNode "frameInstance") (VariableNode "frame")))
+        ))
+
+        (map
+            (lambda (instanceLink)
+                (let* ((instance (gar instanceLink))
+                      (instanceFullName (cog-name instance))
+                      )
+                      (if (string=? "G_" (substring instanceFullName 0 2))
+                          (let* ( (instanceRestName (substring instanceFullName 2) )
+                              (underscoreIndex (list-index (lambda (char) (char=? char #\_)) (string->list instanceRestName) ))
+                              (correspondingWordNodeName (substring instanceRestName 0 underscoreIndex))
+                              )
+                              (if (and
+                                      (string=? correspondingWordNodeName (cog-name wordInstance))
+                                      ; Reuse this ~hack for now, to make sure it's only one.
+                                      (not (member (get-frame-instance-type instance) invalid-question-frames))
+                                  )
+                                  (set! result instance)
+                              )
+                          ) ; let*
+                      )
+                )
+            )
+            all-frame-instances
+        )
+    )
+    
+    result
+)
+
+; Called by the postcondition of frames-to-implication. Creates an ImplicationLink between (all elements of) two frames.
+; The premise will later be an and/or/whatever link possibly containing multiple things. Same with the conclusion.
+; Both of them should be a WordInstanceNode so that this method can find the right frames to connect.
+(define (convert-frame-to-implication premise conclusion)
+    (ImplicationLink (stv 1 1)
+        (AndLink
+            (find-frame-elements-new-eval-links (find-frame-instance-for-word-instance premise)))
+        (AndLink
+            (find-frame-elements-new-eval-links (find-frame-instance-for-word-instance conclusion)))
+    )
+)
+
+; This format will only support one premise and conclusion. Though the Frames output simply has separate Frame instances
+; when there are multiple conclusions, so this rule will simply be triggered multiple times.
+(define frames-to-implication
+    (VariableScopeLink
+     (ListLink
+      (TypedVariableLink
+       (VariableNode "$frameInstance")
+       (VariableTypeNode "PredicateNode")
+      )
+      (TypedVariableLink
+       (VariableNode "$premise")
+       (VariableTypeNode "WordInstanceNode")
+      )
+      (TypedVariableLink
+       (VariableNode "$conclusion")
+       (VariableTypeNode "WordInstanceNode")
+      )
+     )
+     (ImplicationLink
+      (AndLink
+       (EvaluationLink (DefinedFrameElementNode "#Contingency:Determinant")
+         (ListLink
+             (VariableNode "$frameInstance")             
+             (VariableNode "$premise")
+         )
+       )
+       (EvaluationLink (DefinedFrameElementNode "#Contingency:Outcome")
+          (ListLink
+              (VariableNode "$frameInstance")             
+              (VariableNode "$conclusion")
+          )
+       )
+      ) ; AND
+      (ExecutionLink
+          (GroundedSchemaNode "scm:convert-frame-to-implication")
+          (ListLink
+              (VariableNode "$premise")
+              (VariableNode "$conclusion")
+          )
+      )    
+     ) ; Implication
+    ) ; VariableScope
 )
 
 ; Just a prototype for now. Uses a possibly-obsolete approach. For every Frame element, looks up an InheritanceLink, FrameElementLink and EvaluationLink.
@@ -1783,13 +1937,13 @@
          ; start by creating new frames with SemeNodes as element values instead of nouns/pronouns WINs
          ;questionFrames
       (lambda (predicate)
-       
-;        (display framesPredicates)
-       
         (frame-preprocessor predicate)
         (begin
                 (do-varscope convert-frames)
                 (do-varscope frames-to-inh)
+                ; Convert any Contingency frames into ImplicationLinks.
+                (do-varscope frames-to-implication)
+
                 (let* ( ( tmp (pln-bc (build-query predicate) 2000) )  ; An AndLink
                      )
                   (if (not (equal? (cog-handle tmp) 18446744073709551615)) ; workaround for a bug in cog-atom (treating UNDEFINED_HANDLE as valid handle)
@@ -1977,7 +2131,7 @@
          )       
        )
      objects
-      )
+     )
     
     resolvedReferences
     
@@ -2036,7 +2190,7 @@
 ; The matching starts by getting all parses of the sentence that 
 ; represent the questions. Each parse has a list of frames.
 ; The parse which matches a greater number of frames will be chosen
-; as the question answer. 
+; as the question answer.
 (define (answer-question)
   (let ((chosenAnswer '())
         (question? #f)
@@ -2047,18 +2201,23 @@
         
     (map
      (lambda (parse)
-       (let ((incomingPredicates (get-latest-frame-predicates (get-latest-word-instance-nodes parse)))
+       ; Use unique-list because sometimes the Frames include bogus extra copies of the same frame element+value
+       (let ((incomingPredicates (unique-list (get-latest-frame-predicates (get-latest-word-instance-nodes parse))) )
              (questionParse? #f)
              (questionFrames '())
              )
 
+         ; Note: question frames aren't grounded at this point. get-grounded-element-value is used by the matching functions
+         ; before doing the lookup (or PLN inference). store-fact also does this for statement sentences.
+         ; i.e. at this point it's all WordInstanceNodes rather than ConceptNodes and SemeNodes.
          (map
           (lambda (predicate)
             (if (string=? (get-frame-instance-type predicate) "#Questioning")
                 (begin
                   (let ((manner (get-frame-instance-element-value
                                  (get-frame-instance-element-predicate predicate "Manner")
-                                 )))
+                                 ))
+                                 )
                     (cond ((not (null? manner))                        
                            (set! questionType (cog-name manner))
                            (set! question? #t)
@@ -2066,7 +2225,13 @@
                            ))
                     )
                   )
-                (if (not (member (get-frame-instance-type predicate) invalid-question-frames))
+                (if (and (not (member (get-frame-instance-type predicate) invalid-question-frames))
+                         ; Get rid of the possibly bogus Attributes:Attribute(be@..., truth-query) FEs, which seem incorrect -- JaredW
+                         (or (null? (get-frame-instance-element-value (get-frame-instance-element-predicate predicate "Attribute")))
+                             (not (equal? 'ConceptNode (cog-type (get-frame-instance-element-value (get-frame-instance-element-predicate predicate "Attribute"))) ))
+                             (not (equal? "#truth-query" (get-frame-instance-element-value (get-frame-instance-element-predicate predicate "Attribute"))) )
+                         )
+                    )
                     (set! questionFrames (append questionFrames (list predicate)))
                 )
             )
@@ -2074,7 +2239,7 @@
           incomingPredicates
          )
 
-
+         ; todo: various ways of cleaning up the following code.
          (if  use-pln
            (if questionParse?
                (let* ( (groundedPredicates (find-grounded-frame questionFrames) ) )
@@ -2091,7 +2256,9 @@
                         (numberOfGroundedPredicates (length groundedPredicates))
                         (balance (- numberOfIncomingPredicates numberOfGroundedPredicates))
                         )
-                   (if (and (> numberOfIncomingPredicates 0) (= balance 0) (or (null? chosenAnswer) (> numberOfGroundedPredicates (car chosenAnswer))))
+;                   (if (and (> numberOfIncomingPredicates 0) (= balance 0) (or (null? chosenAnswer) (> numberOfGroundedPredicates (car chosenAnswer))))
+                   ; Change by JaredW: only accept if _all_ frames are matched.
+                   (if (and (> numberOfIncomingPredicates 0) (= balance 0))
                        (set! chosenAnswer (cons numberOfGroundedPredicates groundedPredicates))
                    )
                  )
