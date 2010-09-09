@@ -269,6 +269,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 //        if (test_bc) {
         state.reset(new BITNodeRoot(t->target, new DefaultVariableRuleProvider(), config().get_bool("PLN_RECORD_TRAILS"), testFitnessEvaluator));
 //        }
+
     uint s_i=0; // Expansion phase #
     pHandle eh=PHANDLE_UNDEFINED; // expected target handle
     TruthValue* etv = NULL; // expect target handle TV
@@ -417,23 +418,24 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
         }
         printf("]\n");
 
-        if (passed) {
-            tests_passed++;
-
-            allTestsInferenceNodes += state->inferenceNodes;
-            allTestsExpansions += total_expansions;
-
-            INstats.push_back(state->inferenceNodes);
-
-            cout << "Total expansion steps: " << total_expansions <<
-                    "(" << allTestsExpansions << " in all tests)";
-            cout << endl << "Exec pool size: " << state->getExecPoolSize();
-            cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                    " (" << allTestsInferenceNodes << " in all tests)" << endl;
-        }
-        else
-            INstats.push_back(0);
     }
+
+    if (passed) {
+        tests_passed++;
+
+        allTestsInferenceNodes += state->inferenceNodes;
+        allTestsExpansions += total_expansions;
+
+        INstats.push_back(state->inferenceNodes);
+
+        cout << "Total expansion steps: " << total_expansions <<
+                "(" << allTestsExpansions << " in all tests)";
+        cout << endl << "Exec pool size: " << state->getExecPoolSize();
+        cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+                " (" << allTestsInferenceNodes << " in all tests)" << endl;
+    }
+    else
+        INstats.push_back(0);
 
     tests_total++;
 /*      if (etv) {
