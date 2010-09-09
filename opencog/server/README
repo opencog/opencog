@@ -67,4 +67,9 @@ ToDo/Bugs:
   MindAgents can be loaded directly (and the CogServer will load the
   appropriate module(s) first).
 
+* Need to create classes to handle the specia commands ctrl-D (0x04)
+  and ctrl-C (0xff 0xf4 0xff 0xfd  0x06) which is a sequence of telent
+  commands and also to handle "quit" as a synonym for "exit".
+  The ctrl-C and etc can be handled just like any other command... 
+
 
