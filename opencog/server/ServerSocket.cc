@@ -2,6 +2,7 @@
  * opencog/server/ServerSocket.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2010 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Welter Luigi <welter@vettalabs.com>
@@ -71,6 +72,47 @@ bool ServerSocket::LineProtocol()
     return lineProtocol;
 }
 
+typedef boost::asio::buffers_iterator<
+    boost::asio::streambuf::const_buffers_type> bitter;
+
+// Some random RFC 854 characters
+#define IAC 0xff  // Telnet Interpret As Command
+#define IP 0xf4   // Telnet IP Interrupt Process
+#define AO 0xf5   // Telnet AO Abort Output
+#define EL 0xf8   // Telnet EL Erase Line
+#define WILL 0xfb // Telnet WILL
+#define DO 0xfd   // Telnet DO
+#define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
+
+
+// Goal: if the user types in a ctrl-C or a ctrl-D, we want to 
+// react immediately to this. A ctrl-D is just the ascii char 0x4
+// while the ctrl-C is wrapped in a telnet "interpret as command"
+// IAC byte secquence.  Basically, we want to forward all IAC 
+// sequences immediately, as well as the ctrl-D. 
+//
+// Currently not implemented, but could be: support for the arrow
+// keys, which generate the sequence 0x1b 0x5c A B C or D.
+//
+std::pair<bitter, bool>
+match_eol_or_escape(bitter begin, bitter end)
+{
+    bool telnet_mode = false;
+    bitter i = begin;
+    while (i != end)
+    {
+        unsigned char c = *i++;
+        if (IAC == c) telnet_mode = true;
+        if (('\n' == c) ||
+            (0x04 == c) || // ASCII EOT End of Transmission (ctrl-D)
+            (telnet_mode && (c <= 0xf0)))
+        {
+            return std::make_pair(i, true);
+        }
+    }
+    return std::make_pair(i, false);
+}
+
 void ServerSocket::handle_connection(ServerSocket* ss)
 {
     logger().debug("ServerSocket::handle_connection()");
@@ -82,7 +124,7 @@ void ServerSocket::handle_connection(ServerSocket* ss)
             if (ss->LineProtocol()) 
             {
                 //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
-                boost::asio::read_until(ss->getSocket(), b, boost::regex("\n"));
+                boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
                 //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
                 std::istream is(&b);
                 std::string line;
