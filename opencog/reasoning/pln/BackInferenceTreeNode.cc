@@ -836,10 +836,47 @@ bool BITNode::obeysSubtreePolicy(Rule *new_rule, meta _target)
 
 bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy)
 {
+    // For ModusPonens. It requires ($1 -> B), ($1). With this restriction, it will always
+    // find the ImplicationLinks first, and then search for suitable precedents.
     AtomSpaceWrapper *asw = GET_ASW;
     if (asw->inheritsType(asw->getTypeV(*_target), FW_VARIABLE_NODE))
         return false;
 
+//    cout << __FUNCTION__ << endl;
+//    cout << classserver().getTypeName(_v2h(_target->begin())) << endl;
+//    cout << _target->begin().number_of_children() << endl;
+//    cout << _v2h(*_target->begin()) << endl;
+//    cout << _v2h(*(_target->begin()->last_child())) << endl;
+
+
+    /// The BC subtrees for DeductionRule end up including subgoals like
+    /// (Inh $1 $2), i.e. with two FWVars. That's too open-ended (and also redundant
+    /// with the other subtrees). It results in an extra BITNode being spawned for every
+    /// InheritanceLink in the system (I presume). -- JaredW
+    //if ((asw->isType(_target->begin()))// vtree().number_of_children())
+
+//    if (!loosePoolPolicy) {
+//        if (depth != 2) {
+//            vtree::iterator i = _target->begin();
+//            Vertex v = *i;
+//            pHandle type = _v2h(v);
+//            if     (asw->isSubType(type, IMPLICATION_LINK) ||
+//                    asw->isSubType(type, INHERITANCE_LINK)) {
+//                assert(_target->begin().number_of_children() == 2);
+//
+//                tree<Vertex>::sibling_iterator i = _target->begin(_target->begin());
+//                if   (asw->isSubType(_v2h(*i), FW_VARIABLE_NODE) &&
+//                      asw->isSubType(_v2h(*++i), FW_VARIABLE_NODE)) {
+//                    cprintf(-1, "Dis-obeys pool policy:\n");
+//                    rawPrint(*_target, _target->begin(), -1);
+//                    return false;
+//                }
+//            }
+//        }
+//    }
+    // Seems to be more restrictive than necessary, and prevents doing
+    // e.g. EvalLinks for relations with two variables. Made by Ari I think; I left it here
+    // for easy comparison/testing with/of the above.
     if (!loosePoolPolicy) {
         /// This rejects all atoms that contain a link with >1 vars directly below it.
         /// \todo Goes over far more child atoms than necessary. Should be made smarter.
@@ -856,6 +893,26 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy
                 return false;
             }
         }
+    }
+
+    // This method is only called on new nodes (i.e. with exactly one parent established).
+    // Policy to avoid some redundancy:
+    // MP's children cannot be more MP's (because you can always get the same result from
+    // the same premises using DeductionRule, which is also faster because DeductionRule
+    // effectively uses a bidirectional search).
+    // The exception is when the MP child is proving the ImplicationLink for the MP parent.
+    // In other words, only exclude MP children for the second argument.
+    assert (getParents().size() == 1);
+    bool hasAcceptableParent = false;
+    if (rule && rule->getName() == "ModusPonensRule") {
+        parent_link<BITNode> parentlink = *getParents().begin();
+
+        if (parentlink.parent_arg_i == 1 &&
+                parentlink.link->rule && parentlink.link->rule->getName() == "ModusPonensRule" ) {
+            cout << "Skipping redundant use of MPRule" << endl;
+            return false;
+        }
+
     }
 
     return true;
@@ -971,10 +1028,16 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
 
         tlog(2, "Created new BIT child [%ld]\n", (long)new_node);
 
-        if (obeysPoolPolicy(new_rule, _target, root->loosePoolPolicy))
+        if (new_node->obeysPoolPolicy(new_rule, _target, root->loosePoolPolicy))
         {
             root->exec_pool.push_back(new_node);
             root->exec_pool_sorted = false;
+        } else {
+            // Hide any BITNode that doesn't obey the pool policy.
+            //! @todo Why is it kept at all?
+#ifdef USE_BITUBIGRAPHER
+            haxx::BITUSingleton->hideBITNode((BITNode*)new_node);
+#endif // USE_BITUBIGRAPHER
         }
 
         children[target_i].insert(ParametrizedBITNode(new_node, Btr<bindingsT>(new bindingsT)));
@@ -1966,7 +2029,7 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
             ss << repeatc(' ', depth*3) << rule->name << endl;
             //prlog(loglevel, ss.str().c_str());
         } else {
-            ss << repeatc(' ', depth*3) << rule->name << " ([" << (long)this
+            ss << repeatc(' ', depth*3) << rule->name << " ([" << id //(long)this
                 << "])" << endl;
             ss << repeatc(' ', (depth+1)*3) << "[ ";
             if (direct_results) {

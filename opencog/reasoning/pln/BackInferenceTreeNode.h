@@ -61,7 +61,7 @@ namespace haxx {
 
 namespace opencog {
 
-//#define USE_BITUBIGRAPHER
+#define USE_BITUBIGRAPHER
 
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
@@ -532,7 +532,7 @@ protected:
 
     /// If inserting the rule invocation node in the expansion pool obeys
     /// our policy
-    static bool obeysPoolPolicy(Rule *new_rule, meta arg, bool loosePoolPolicy = false);
+    /*static */bool obeysPoolPolicy(Rule *new_rule, meta arg, bool loosePoolPolicy = false);
 
     /// Find if we already have a BITNode like this such that we can re-use it
     /// by some template_bindings which are returned to the caller.
