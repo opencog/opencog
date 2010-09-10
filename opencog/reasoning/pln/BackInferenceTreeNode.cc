@@ -1701,7 +1701,7 @@ int BITNode::number_of_free_variables_in_target() const
 
 float BITNode::my_solution_space() const
 {
-    return counted_number_of_free_variables_in_target - getTarget()->size()*100.0f;
+    return counted_number_of_free_variables_in_target;// - getTarget()->size()*100.0f;
 }
 
 float BITNode::fitness() const
