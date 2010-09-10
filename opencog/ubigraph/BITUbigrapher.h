@@ -85,6 +85,7 @@ public:
 
     // todo: these should have consistent, event-driven-style names.
     // todo: graph() would show it again, which is wrong.
+    /// Hide a BITNode (either a Generator or a BITNode which disobeyed pool policy)
     void hideBITNode(BITNode* node);
 
     void foundResult(BITNode* node);

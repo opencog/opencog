@@ -248,6 +248,17 @@ void BITUbigrapher::hideBITNode(BITNode* node) {
 
     //ubigraph_set_vertex_attribute(node_id, "visible", "false");
     ubigraph_remove_vertex(node_id);
+
+    // Semi-redundant code to remove the arg vertexes (and thus the edges) below it:
+
+    for (unsigned int i = 0; i < node->children.size(); i++ ) {
+        //cout << "Drawing BITNode arg #" << i << endl;
+        // Display and attach that arg
+        unsigned int arg_id = node_id + i + 1; // haxx:: since a BITNode takes up a lot more than a few bytes presumably
+        int status = ubigraph_remove_vertex( arg_id ); // TODO use a different id system
+        if ( status )
+            logger().error ( "Drawing arg: Status was %d", status );
+    }
 }
 
 void BITUbigrapher::foundResult(BITNode* node) {
