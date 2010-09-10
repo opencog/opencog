@@ -423,19 +423,22 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (passed) {
         tests_passed++;
 
-        allTestsInferenceNodes += state->inferenceNodes;
-        allTestsExpansions += total_expansions;
-
-        INstats.push_back(state->inferenceNodes);
-
-        cout << "Total expansion steps: " << total_expansions <<
-                "(" << allTestsExpansions << " in all tests)";
-        cout << endl << "Exec pool size: " << state->getExecPoolSize();
-        cout << endl << "InferenceNodes: " << state->inferenceNodes <<
-                " (" << allTestsInferenceNodes << " in all tests)" << endl;
     }
     else
         INstats.push_back(0);
+
+    //! @todo Decide whether this stuff should only be done if it passes (like before)
+    allTestsInferenceNodes += state->inferenceNodes;
+    allTestsExpansions += total_expansions;
+
+    INstats.push_back(state->inferenceNodes);
+
+    cout << "Total expansion steps: " << total_expansions <<
+            "(" << allTestsExpansions << " in all tests)";
+    cout << endl << "Exec pool size: " << state->getExecPoolSize();
+    cout << endl << "InferenceNodes: " << state->inferenceNodes <<
+            " (" << allTestsInferenceNodes << " in all tests)" << endl;
+
 
     tests_total++;
 /*      if (etv) {
