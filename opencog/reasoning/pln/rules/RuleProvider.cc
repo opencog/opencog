@@ -120,6 +120,9 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     //	AddRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
     
 //    AddRule(new ANDPartitionRule(asw), 10.0f);
+//    AddRule(new ANDBreakdownRule<2>(asw), 10.0f);
+//    AddRule(new ANDBreakdownRule<3>(asw), 10.0f);
+
     AddRule(new NotEvaluatorRule(asw), 10.0f);
     
     AddRule(new ScholemFunctionProductionRule(asw), 20.0f);

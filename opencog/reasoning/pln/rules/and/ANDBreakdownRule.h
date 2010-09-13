@@ -30,6 +30,7 @@ namespace opencog { namespace pln {
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
 /// Produces A given an ANDLink containing A (and N other Atoms)
+/// You want multiple copies of this Rule, for different N.
 template<int N>
 class ANDBreakdownRule : public Rule
 {
@@ -43,13 +44,13 @@ public:
         name = "ANDBreakdownRule/" + i2str(N);
 	
         inputFilter.push_back(meta(
-                                   new tree<Vertex>(mva((Handle)AND_LINK,
-                                                        mva((Handle)ATOM),
-                                                        mva((Handle)ATOM)))));
+                                   new tree<Vertex>(mva((pHandle)AND_LINK,
+                                                        mva((pHandle)ATOM),
+                                                        mva((pHandle)ATOM)))));
         inputFilter.push_back(meta(
-                                   new tree<Vertex>(mva((Handle)HYPOTHETICAL_LINK,
-                                                        mva((Handle)ATOM),
-                                                        mva((Handle)ATOM)))));
+                                   new tree<Vertex>(mva((pHandle)HYPOTHETICAL_LINK,
+                                                        mva((pHandle)ATOM),
+                                                        mva((pHandle)ATOM)))));
     }
     
     bool validate2(MPs& args) const { return true; }
@@ -60,10 +61,16 @@ public:
         /// here is irrelavent. But we need a hypothetical parameter that will later remind
         /// which kind of atom we need to produce.
         
+        ///haxx:: (would also ignore nested ANDLinks)
+        // Mainly to decrease the combinatorial explosion by not producing infinite
+        // series of ANDBDRules within the BIT.
+        if (asw->isSubType(_v2h(*outh->begin()), AND_LINK))
+            return Rule::setOfMPs();
+
         MPs ret;
         BBvtree andlink(new BoundVTree);
         
-        andlink->set_head(Vertex((Handle)AND_LINK));
+        andlink->set_head(Vertex((pHandle)AND_LINK));
 	
         andlink->append_child(andlink->begin(), outh->begin());
 	
@@ -72,7 +79,7 @@ public:
                                   BoundVTree(CreateVar(asw)).begin());
         
         ret.push_back(andlink);
-        ret.push_back(BBvtree(new BoundVTree(mva((Handle)HYPOTHETICAL_LINK,*outh))));
+        ret.push_back(BBvtree(new BoundVTree(mva((pHandle)HYPOTHETICAL_LINK,*outh))));
 	
         overrideInputFilter = true;	
 	
@@ -82,7 +89,7 @@ public:
     NO_DIRECT_PRODUCTION;
     
     BoundVertex compute(const std::vector<Vertex>& premiseArray,
-                        Handle CX = NULL,
+                        pHandle CX = PHANDLE_UNDEFINED,
                         bool fresh = true) const
     {
         std::vector<pHandle> hs = asw->getOutgoing(boost::get<pHandle>(premiseArray[0]));
@@ -106,7 +113,7 @@ public:
 	//LOG(0, "ANDBREAKDOWN: NO TOPOLOGICAL MODEL FOUND!");
         assert(0);
         
-        return Vertex((Handle)NULL);
+        return Vertex((pHandle)PHANDLE_UNDEFINED);
 	
         /*	std::vector<Handle> hs = asw->getOutgoing(premiseArray[0]);
 
