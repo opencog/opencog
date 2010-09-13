@@ -46,7 +46,9 @@ Rule::setOfMPs ANDBreakdownRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
     ///haxx:: (would also ignore nested ANDLinks)
     // Mainly to decrease the combinatorial explosion by not producing infinite
     // series of ANDBDRules within the BIT.
-    if (asw->isSubType(_v2h(*outh->begin()), AND_LINK))
+    if (asw->isSubType(_v2h(*outh->begin()), AND_LINK) ||
+        // this one should probably be done more generally (for most rules)
+        asw->isSubType(_v2h(*outh->begin()), HYPOTHETICAL_LINK))
         return Rule::setOfMPs();
 
     MPs ret;
