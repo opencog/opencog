@@ -95,7 +95,6 @@ BoundVertex ANDBreakdownRule::compute(const std::vector<Vertex>& premiseArray,
             atomspace().setTV(realHandle, *resultTV);
             //asw->addAtom(mva(hs[i]), *tv, false);
 
-            delete[] &tvs;
             delete resultTV;
 
             return BoundVertex(a);
