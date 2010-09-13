@@ -54,7 +54,7 @@ inline double information_theoretic_bits(const eda::field_set& fs)
     foreach(const eda::field_set::contin_spec& c, fs.contin()) {
         // number of possible contins with depth d is 2^(d+1)-1 because
         // after a Stop only Stop is allowed which is why it is not 3^d
-        unsigned int contin_count = (1 << (c.depth + 1)) - 1;
+        unsigned int contin_count = pow2(c.depth + 1) - 1;
         res += log2(double(contin_count));
     }
     foreach(const eda::field_set::onto_spec& o, fs.onto())
@@ -214,7 +214,8 @@ struct iterative_hillclimbing {
         long long current_number_of_instances = 0;
 
         //adjust parameters based on the maximal # of evaluations allowed
-        int max_number_of_instances = max_gens_total * pop_size;
+        long long max_number_of_instances =
+            (long long)max_gens_total * (long long)pop_size;
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 

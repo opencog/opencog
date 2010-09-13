@@ -74,7 +74,7 @@ contin_t contin_score::operator()(const combo_tree& tr) const
     }
 }
 
-contin_t contin_score_sqr::operator()(const combo_tree& tr) const
+contin_t contin_score_sq::operator()(const combo_tree& tr) const
 {
     try {
         return -target.sum_squared_error(combo::contin_table(tr, cti, rng));
@@ -107,7 +107,7 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     behavioral_score::iterator dst = bs.begin();
     for(combo::contin_table::const_iterator it1 = ct.begin(), 
             it2 = target.begin(); it1 != ct.end(); it1++, it2++) {
-        *dst++ = sqr(*it1 - *it2);
+        *dst++ = sq(*it1 - *it2);
     }
     // add the Occam's razor feature
     if(occam)

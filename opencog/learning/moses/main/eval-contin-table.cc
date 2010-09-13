@@ -103,7 +103,7 @@ int main(int argc,char** argv) {
             contin_t tar(*ct_cit), res(*ct_tr_cit);
             printContainer(*it_cit, "\t", "", "\t");
             std::cout << tar << "\t" << res << "\t"
-                      << sqr(tar - res) << "\t"
+                      << sq(tar - res) << "\t"
                       << std::abs(tar - res) << std::endl;
         }
     }

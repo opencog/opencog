@@ -28,7 +28,7 @@
 #include "convert_ann_combo.h"
 
 using namespace combo;
-using opencog::sqr;
+using opencog::sq;
 
 truth_table::size_type
 truth_table::hamming_distance(const truth_table& other) const
@@ -146,7 +146,7 @@ contin_t contin_table::sum_squared_error(const contin_table& other) const
 
     contin_t res = 0;
     for (const_iterator x = begin(), y = other.begin();x != end();)
-        res += sqr(*x++ -*y++);
+        res += sq(*x++ -*y++);
     return res;
 }
 

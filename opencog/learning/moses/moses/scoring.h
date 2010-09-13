@@ -42,7 +42,7 @@
 namespace moses
 {
 
-using opencog::sqr;
+using opencog::sq;
 
 #define NEG_INFINITY INT_MIN
  
@@ -145,16 +145,16 @@ struct contin_score : public unary_function<combo_tree, score_t> {
     opencog::RandGen& rng;
 };
 
-struct contin_score_sqr : public unary_function<combo_tree,score_t> {
+struct contin_score_sq : public unary_function<combo_tree,score_t> {
     template<typename Func>
-    contin_score_sqr(const Func& func,
-                     const contin_table_inputs& r,
-                     opencog::RandGen& _rng)
+    contin_score_sq(const Func& func,
+                    const contin_table_inputs& r,
+                    opencog::RandGen& _rng)
         : target(func,r),cti(r),rng(_rng) { }
     
-    contin_score_sqr(const combo::contin_table& t,
-                     const contin_table_inputs& r,
-                     opencog::RandGen& _rng)
+    contin_score_sq(const combo::contin_table& t,
+                    const contin_table_inputs& r,
+                    opencog::RandGen& _rng)
         : target(t),cti(r),rng(_rng) { }
     
     score_t operator()(const combo_tree& tr) const;

@@ -285,7 +285,14 @@ template<typename IntT> IntT smallest_divisor(IntT n) {
 }
 
 // calculate the square of x
-template<class T> T sqr(T const& x ) { return x*x; }
+template<typename T> T sq(T x) { return x*x; }
+
+// return x^2
+template<typename OutInt> OutInt pow2(unsigned int x) {
+    OC_ASSERT(8*sizeof(OutInt) > x);
+    return static_cast<OutInt>(1) << x;
+}
+inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
 
 } // namespace opencog
 

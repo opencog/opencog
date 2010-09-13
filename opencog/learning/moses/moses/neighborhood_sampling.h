@@ -34,6 +34,8 @@
 namespace moses
 {
 
+using opencog::pow2;
+
 /**
  * This procedure generat the initial deme randomly
  *
@@ -301,10 +303,10 @@ void generate_all_in_neighborhood(const eda::field_set& fs,
  */
 template<typename Out>
 Out vary_n_knobs(const eda::field_set& fs,
-                  const eda::instance& inst,
-                  unsigned int n,
-                  unsigned int starting_index,
-                  Out out, Out end)
+                 const eda::instance& inst,
+                 unsigned int n,
+                 unsigned int starting_index,
+                 Out out, Out end)
 {
     if(n == 0) {
         OC_ASSERT(out != end);  // to avoid invalid memory write
@@ -421,8 +423,14 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
                                                   unsigned int n,
                                                   unsigned int starting_index)
 {
-    if(n == 0)
+    std::cout << "fs raw size = " << fs.raw_size() << std::endl;
+
+    std::cout << "n = " << n << " starting_index = " << starting_index << std::endl;
+
+    if(n == 0) {
+        std::cout << "base case number_of_instances = " << 1 << std::endl;
         return 1;
+    }
 
     // unsigned int begin_contin_idx, begin_disc_idx, begin_bit_idx;
     long long number_of_instances = 0;
@@ -459,8 +467,7 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
             int remStop = std::min(depth - relative_raw_idx, (size_t)n); 
             for(; remStop >= 0; remStop--) {
                 number_of_instances +=
-                    (1 << remStop) // remStop^2
-                    *
+                    pow2<long long>(remStop) *
                     count_n_changed_knobs_from_index(fs, inst, n - remStop,
                                                      // to fulfill Assumption [1]
                                                      starting_index + depth 
@@ -517,6 +524,7 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
             count_n_changed_knobs_from_index(fs, inst, n-1,
                                              starting_index + 1);
     }
+    std::cout << "rec case number_of_instances = " << number_of_instances << std::endl;
     return number_of_instances;
 }
 
@@ -543,6 +551,6 @@ inline long long count_n_changed_knobs(const eda::field_set& fs,
     return count_n_changed_knobs_from_index(fs, inst, n, 0);
 }
 
-} // ~spacename moses
+} // ~namespace moses
 
 #endif // _OPENCOG_NEIGHBORHOOD_SAMPLING_H
