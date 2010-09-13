@@ -101,8 +101,24 @@ public:
         atom topological_model(asw->getOutgoing(boost::get<pHandle>(premiseArray[1]))[0]);
         
         for (uint i = 0; i < hs.size(); i++)
-            if (atom(hs[i]) == topological_model)
-                return BoundVertex(hs[i]);
+            if (atom(hs[i]) == topological_model) {
+                pHandle a = hs[i];
+                TruthValue* resultTV;
+                TruthValue* tvs[1];
+
+                tvs[0] = asw->getTV(_v2h(premiseArray[0])).clone();
+                resultTV = formula.compute(tvs, 1);
+
+                //! @todo More pHandles messiness.
+                Handle realHandle = asw->fakeToRealHandle(a).first;
+                atomspace().setTV(realHandle, *resultTV);
+                //asw->addAtom(mva(hs[i]), *tv, false);
+
+                delete[] &tvs;
+                delete resultTV;
+
+                return BoundVertex(a);
+            }
         
 	/*LOG(0,"Topo model was:");
           printAtomTree(topological_model,0,0);
