@@ -24,6 +24,9 @@
 
 #include <iostream>
 #include <algorithm>
+#include <limits>
+
+#include <boost/math/special_functions/binomial.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/lazy_random_selector.h>
@@ -35,6 +38,8 @@ namespace moses
 {
 
 using opencog::pow2;
+using boost::math::binomial_coefficient;
+using std::numeric_limits;
 
 /**
  * This procedure generat the initial deme randomly
@@ -417,85 +422,69 @@ Out vary_n_knobs(const eda::field_set& fs,
  * @param inst            instance to consider the distance from
  * @param n               distance
  * @param starting_index  position of a field to be varied
+ * @param max_count       stop counting when above this value, that is
+ *                        because this function can be computationally expensive.
  */
 inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
                                                   const eda::instance& inst,
                                                   unsigned int n,
-                                                  unsigned int starting_index)
+                                                  unsigned int starting_index,
+                                                  long long max_count
+                                                  = numeric_limits<long long>::max())
 {
-    std::cout << "fs raw size = " << fs.raw_size() << std::endl;
-
-    std::cout << "n = " << n << " starting_index = " << starting_index << std::endl;
-
-    if(n == 0) {
-        std::cout << "base case number_of_instances = " << 1 << std::endl;
+    if(n == 0)
         return 1;
-    }
 
-    // unsigned int begin_contin_idx, begin_disc_idx, begin_bit_idx;
     long long number_of_instances = 0;
 
     unsigned int begin_contin_idx = fs.n_onto();
     unsigned int begin_disc_idx = begin_contin_idx + fs.n_contin();
     unsigned int begin_bit_idx = begin_disc_idx + fs.n_disc();
+    unsigned int end_bit_idx = begin_bit_idx + fs.n_bits();
 
     // ontos
     if(starting_index < begin_contin_idx) {
         // @todo: handle onto
-        number_of_instances += 
+        number_of_instances = 
             count_n_changed_knobs_from_index(fs, inst, n,
-                                             starting_index + begin_contin_idx);
+                                             starting_index + begin_contin_idx,
+                                             max_count);
     }
     // contins
     else if(starting_index < begin_disc_idx) {
-        // modify the contin disc pointed by itr and recursive call
         eda::field_set::const_contin_iterator itc = fs.begin_contin(inst);
         size_t contin_idx = fs.raw_to_contin_idx(starting_index);
         itc += contin_idx;
-        size_t depth = fs.contin()[itc.idx()].depth;
-        size_t num = fs.count_n_before_stop(inst, contin_idx);
-        eda::field_set::const_disc_iterator itr = fs.begin_raw(inst);        
-        itr += starting_index;
-        size_t relative_raw_idx = 
-            starting_index - fs.contin_to_raw_idx(contin_idx);
-        // case inst at itr is Stop
-        if(*itr == eda::field_set::contin_spec::Stop) {
-            // Assumption [1]: within the same contin, it is the first
-            // Stop encountered
-            
-            // the remaining Stops to consider
-            int remStop = std::min(depth - relative_raw_idx, (size_t)n); 
-            for(; remStop >= 0; remStop--) {
-                number_of_instances +=
-                    pow2<long long>(remStop) *
-                    count_n_changed_knobs_from_index(fs, inst, n - remStop,
-                                                     // to fulfill Assumption [1]
-                                                     starting_index + depth 
-                                                     - relative_raw_idx);
-            }
-        } 
-        // case inst at itr is Left or Right
-        else {
-            // recursive call, moved for one position
-            number_of_instances += 
-                count_n_changed_knobs_from_index(fs, inst, n, 
-                                                 starting_index + 1);
-            // Left<->Right
-            number_of_instances += 
-                count_n_changed_knobs_from_index(fs, inst, n - 1,
-                                                 starting_index + 1);
-            // if the next Stop is not further from itr than the distance n
-            // then turn the remaining discs to Stop
-            unsigned int remRLs = num - relative_raw_idx; // remaining non-Stop
-                                                          // discs including
-                                                          // the current one
-            if(remRLs <= n) {
-                number_of_instances += 
-                    count_n_changed_knobs_from_index(fs, inst, n - remRLs,
-                                                     // to fulfill Assumption [1]
-                                                     starting_index + depth 
-                                                     - relative_raw_idx);
-            }
+        int depth = fs.contin()[itc.idx()].depth;
+        int num = fs.count_n_before_stop(inst, contin_idx);
+        // it restricts the starting_index to be at the start of each
+        // contin, otherwise should not be needed anyway
+        OC_ASSERT(starting_index - fs.contin_to_raw_idx(contin_idx) == 0);
+        // calculate number_of_instances for each possible distance i
+        // of the current contin
+        for(int i = 0; i <= min((int)n, depth); i++) {
+            // number of instances for that contin, at distance i
+            unsigned int cni = 0;
+            // count combinations when Left or Right are switched and
+            // added after Stop, where j represents the number of
+            // Left or Right added after Stop
+            for(int j = max(0, i-num); j <= min(i, depth-num); j++)
+                cni += (unsigned int)binomial_coefficient<double>(num, i-j)
+                    * pow2(j);
+            // count combinations when Left or Right are switched and
+            // removed before Stop, where j represents the number of
+            // removed Left or Right before Stop
+            if(i <= num)
+                for(int j = 1; j <= min(i, num); j++)
+                    cni += (unsigned int)binomial_coefficient<double>(num-j, i-j);
+            // recursive call
+            number_of_instances +=
+                cni * count_n_changed_knobs_from_index(fs, inst, n-i,
+                                                       starting_index + depth,
+                                                       max_count);
+            // stop prematurely if above max_count
+            if(number_of_instances > max_count)
+                return number_of_instances;
         }
     }
     // discs
@@ -503,28 +492,26 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
         eda::field_set::const_disc_iterator itd = fs.begin_disc(inst);
         itd += starting_index - begin_disc_idx;
         // recursive call, moved for one position
-        number_of_instances += 
+        number_of_instances = 
             count_n_changed_knobs_from_index(fs, inst, n, 
-                                             starting_index + 1);
-        // vary all legal values of the knob
+                                             starting_index + 1, max_count);
+        // stop prematurely if above max_count
+        if(number_of_instances > max_count)
+            return number_of_instances;
+        // count all legal values of the knob
         number_of_instances += 
             (itd.arity() - 1) 
             * count_n_changed_knobs_from_index(fs, inst, n - 1,
-                                               starting_index + 1);
+                                               starting_index + 1, max_count);
     }
     // bits
-    else if(starting_index < begin_bit_idx + fs.n_bits()) {
-        eda::field_set::const_bit_iterator itb = fs.begin_bits(inst);
-        itb += starting_index - begin_bit_idx;
-        number_of_instances += 
-            count_n_changed_knobs_from_index(fs, inst, n, 
-                                             starting_index + 1);
-        // variation of the current bit
-        number_of_instances += 
-            count_n_changed_knobs_from_index(fs, inst, n-1,
-                                             starting_index + 1);
+    else if(starting_index < end_bit_idx) {
+        // since bits have the same arity (2) and are the last there
+        // is no need for recursive call
+        unsigned int rb = end_bit_idx - starting_index;
+        if(n <= rb)
+            number_of_instances = (long long)binomial_coefficient<double>(rb , n);
     }
-    std::cout << "rec case number_of_instances = " << number_of_instances << std::endl;
     return number_of_instances;
 }
 
@@ -533,22 +520,28 @@ inline long long count_n_changed_knobs_from_index(const eda::field_set& fs,
  * (i.e., with n elements changed from the exemplar)
  * It calls a recursive function count_n_changed_knobs_from_index
  * 
- * @param fs   - deme
- * @param inst - exemplar
- * @param n    - distance
+ * @param fs              deme
+ * @param inst            exemplar
+ * @param n               distance
+ * @param max_count       stop counting when above this value, that is
+ *                        because this function can be computationally expensive.
  */
 inline long long count_n_changed_knobs(const eda::field_set& fs,
                                        const eda::instance& inst,
-                                       unsigned int n)
+                                       unsigned int n,
+                                       long long max_count 
+                                       = numeric_limits<long long>::max())
 {
-    return count_n_changed_knobs_from_index(fs, inst, n, 0);
+    return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 // for backward compatibility, like above but with null instance
 inline long long count_n_changed_knobs(const eda::field_set& fs,
-                                       unsigned int n)
+                                       unsigned int n,
+                                       long long max_count
+                                       = numeric_limits<long long>::max())
 {
     eda::instance inst(fs.packed_width());
-    return count_n_changed_knobs_from_index(fs, inst, n, 0);
+    return count_n_changed_knobs_from_index(fs, inst, n, 0, max_count);
 }
 
 } // ~namespace moses

@@ -1,8 +1,6 @@
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 
-#include <boost/math/special_functions/binomial.hpp>
-
 #include <opencog/util/mt19937ar.h>
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/eda/instance_set.h>
@@ -12,7 +10,6 @@
 
 using namespace eda;
 using namespace moses;
-using boost::math::binomial_coefficient;
 
 class NeighborSamplingUTest : public CxxTest::TestSuite {
 public:
@@ -78,17 +75,6 @@ public:
                                      max_distance, min_distance, center_inst);
        
     }
-
-    // NOTE: this may be used in the future if test case is added to test
-    // count_n_changed_knobs, till then it is useless
-    // considering 'size' discs of arity 'arity' calculate the number
-    // of neighbors at distance 'distance'
-    // size_t total_number_of_neighbors(int distance,
-    //                                  size_t size,
-    //                                  field_set::arity_t arity) {
-    //     return power(arity-1, distance) *
-    //         (int)binomial_coefficient<float>(size , distance);
-    // }
 
     void test_generate_contin_neighbor()
     {
@@ -273,7 +259,7 @@ public:
 
     void test_generate_all_in_neighborhood3() 
     { 
-        // test all neighbors of a random center instance, fields
+        // test all neighbors of a null center instance, fields
         // are 2 contins of depth 4            
         unsigned int distance = 2;
         size_t depth = 4;

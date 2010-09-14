@@ -238,9 +238,6 @@ struct iterative_hillclimbing {
         bool bImprovement_made = false;
         score_t best_score;
         do {
-            // the number of all neighbours at the distance d
-            long long total_number_of_neighbours = count_n_changed_knobs(deme.fields(), distance);
-
             long long number_of_new_instances;
 
             number_of_new_instances = 
@@ -250,6 +247,12 @@ struct iterative_hillclimbing {
             if (number_of_new_instances  < MINIMUM_DEME_SIZE)
                 number_of_new_instances =
                     (max_number_of_instances - current_number_of_instances);
+
+            // the number of all neighbours at the distance d (stops
+            // counting when above number_of_new_instances)
+            long long total_number_of_neighbours =
+                count_n_changed_knobs(deme.fields(), distance,
+                                      number_of_new_instances);
 
             if (number_of_new_instances < total_number_of_neighbours) {
                 //resize the deme so it can take new instances
@@ -313,6 +316,8 @@ struct iterative_hillclimbing {
     eda_parameters params;
 };
 
+// @todo: redo the code entriely from iterative_hillclimbing to take
+// the improvements into account
 struct sliced_iterative_hillclimbing {
 
     typedef enum {
