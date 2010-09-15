@@ -34,7 +34,12 @@ const rule& contin_reduction(const combo::vertex_set& ignore_ops,
                              opencog::RandGen& rng) {
     // rules that do not involve factorizing or distributing
     static sequential seq_without_factorize_distribute =
-        sequential(downwards(level()),
+        sequential(// these 2 ones below are added first because the
+                   // representation building puts lots of 0*#n
+                   downwards(reduce_times_one_zero()), 
+                   downwards(reduce_plus_zero()),
+
+                   downwards(level()),
                    upwards(eval_constants(rng)),
                            
                    downwards(reduce_plus_times_one_child()),

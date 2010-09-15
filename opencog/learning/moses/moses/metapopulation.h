@@ -55,15 +55,13 @@ struct metapop_parameters {
                        bool _reduce_all = true,
                        bool _countbs = true,
                        bool _revisit = false,
-                       bool _ignore_bscore = false,
-                       bool _ignore_bscore_visited = true) :
+                       bool _ignore_bscore = false) :
         selection_max_range(11),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         count_base(_countbs),
         revisit(_revisit),
-        ignore_bscore(_ignore_bscore),
-        ignore_bscore_visited(_ignore_bscore_visited)
+        ignore_bscore(_ignore_bscore)
     { }
     
     // when doing selection of examplars according to 2^-n, where n is
@@ -82,11 +80,6 @@ struct metapop_parameters {
     bool revisit;
     // ignore the behavioral score when merging candidates in the population
     bool ignore_bscore;
-    // when testing dominance for merging a candidate to the
-    // metapopulation, visited candidates are ignored, that if a
-    // candidate is only dominated by visited candidates it is still
-    // added to the metapopulation
-    bool ignore_bscore_visited;
 };
 
 /**
@@ -689,30 +682,22 @@ struct metapopulation : public set < bscored_combo_tree,
      */
     //this may turn out to be too slow...
     template<typename It>
-    void merge_nondominating(It from, It to)
-    {
-        const combo_tree_hash_set& ignore = _visited_exemplars;
-        for (;from != to;++from) {
+    void merge_nondominating(It from, It to) {
+        for(;from != to;++from) {
             bool nondominated = true;
-            for (iterator it = begin(); it != end();) {
+            for(iterator it = begin(); it != end();) {
                 tribool dom = dominates(from->second, it->second);
                 if (dom) {
                     erase(it++);
-                } else if (!dom && 
-                           (!params.ignore_bscore_visited
-                            || std::find(ignore.begin(), ignore.end(),
-                                         get_tree(*it)) == ignore.end())) {
+                } else if (!dom) {
                     nondominated = false;
                     break;
                 } else {
                     ++it;
                 }
             }
-            if (nondominated) {
-//                std::cout << from-> first << " " << from->second << std::endl;
+            if (nondominated)
                 insert(*from);
-//                print_best();
-            }
         }
     }
 
