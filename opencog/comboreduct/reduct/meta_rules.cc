@@ -34,18 +34,18 @@ namespace reduct {
 #ifdef META_RULE_DEBUG
 
 static int tab = 0;
-void printTab() { dorepeat(tab) { std::cout << "   "; } }
+void printTab() { dorepeat(tab) { std::cerr << "   "; } }
 
 #define INC_TAB tab++;
 #define DEC_TAB tab--;
 #define PRINT_DEBUG_WHEN printTab(); \
-    std::cout << this->get_name() << " " << (cond?"true ":"false ") \
+    std::cerr << this->get_name() << " " << (cond?"true ":"false ") \
               << r->get_name() << " " << combo_tree(it) << std::endl;
 #define PRINT_DEBUG_STANDARD printTab(); \
-    std::cout << this->get_name() << " " << r->get_name() \
+    std::cerr << this->get_name() << " " << r->get_name() \
               << " " << combo_tree(it) << std::endl;
 #define PRINT_DEBUG_STANDARD_REF printTab(); \
-    std::cout << this->get_name() << " " << r.get_name() \
+    std::cerr << this->get_name() << " " << r.get_name() \
               << " " << combo_tree(it) << std::endl;
 
 #else // META_RULE_DEBUG

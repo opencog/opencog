@@ -29,6 +29,7 @@
 #include <vector>
 #include <cstdlib>
 #include <climits>
+#include <limits>
 #include <numeric>
 #include <set>
 
@@ -58,6 +59,9 @@
 
 namespace opencog
 {
+
+using std::numeric_limits;
+
 #ifndef WIN32
 //this needs to be changed for non-gcc
 using __gnu_cxx::power;
@@ -289,10 +293,11 @@ template<typename T> T sq(T x) { return x*x; }
 
 // return x^2
 template<typename OutInt> OutInt pow2(unsigned int x) {
-    OC_ASSERT(8*sizeof(OutInt) > x);
+    OC_ASSERT(8*sizeof(OutInt) - numeric_limits<OutInt>::is_signed?1:0 > x);
     return static_cast<OutInt>(1) << x;
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
+inline int pow2(int x) { return pow2<int>(x); }
 
 } // namespace opencog
 
