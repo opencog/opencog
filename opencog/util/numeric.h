@@ -297,7 +297,6 @@ template<typename OutInt> OutInt pow2(unsigned int x) {
     return static_cast<OutInt>(1) << x;
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
-inline int pow2(int x) { return pow2<int>(x); }
 
 } // namespace opencog
 
