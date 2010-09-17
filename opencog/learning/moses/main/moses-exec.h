@@ -30,6 +30,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/assign/list_of.hpp>
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/Logger.h>
@@ -50,6 +51,7 @@
 
 using namespace boost::program_options;
 using boost::lexical_cast;
+using boost::assign::list_of;
 using namespace std;
 using namespace moses;
 using namespace reduct;

@@ -59,6 +59,7 @@ static const string default_log_file = default_log_file_prefix + "." + default_l
 static const pair<string, string> log_file_dep_opt_opt("log-file-dep-opt", "L");
 static const pair<string, string> variance_opt("variance", "v");
 static const pair<string, string> prob_opt("probability", "p");
+static const pair<string, string> include_only_ops_str_opt("include-only-operator", "N");
 static const pair<string, string> ignore_ops_str_opt("ignore-operator", "n");
 static const pair<string, string> opt_algo_opt("opt-algo", "a");
 static const pair<string, string> exemplars_str_opt("exemplar", "e");

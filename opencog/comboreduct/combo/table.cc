@@ -27,7 +27,8 @@
 #include "simple_nn.h"
 #include "convert_ann_combo.h"
 
-using namespace combo;
+namespace combo {
+
 using opencog::sq;
 
 truth_table::size_type
@@ -56,9 +57,9 @@ bool truth_table::same_truth_table(const combo_tree& tr) const {
 partial_truth_table::partial_truth_table(const combo_tree& tr,
                                          const truth_table_inputs& tti,
                                          opencog::RandGen& rng) {
-    for (bm_cit i = tti.begin(); i != tti.end(); ++i) {
+    for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
         int arg = 1;
-        for (bv_cit j = i->begin(); j != i->end(); ++j, ++arg)
+        for(bv_cit j = i->begin(); j != i->end(); ++j, ++arg)
             binding(arg) = bool_to_vertex(*j);
         //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, tr);
@@ -76,10 +77,27 @@ contin_table_inputs::contin_table_inputs(int sample_count, int arity,
     for (int i = 0; i < sample_count; ++i) {
         contin_vector cv;
         for (int j = 0; j < arity; ++j)
-        //   cv.push_back(rng.randdouble()*2.0 - 1.0); //TODO : rescale wrt
-        cv.push_back((max_randvalue - min_randvalue) * rng.randdouble() + min_randvalue); 
+        cv.push_back((max_randvalue - min_randvalue) 
+                     * rng.randdouble() + min_randvalue); 
         // input interval
         push_back(cv);
+    }
+}
+
+void contin_table_inputs::set_binding(const contin_vector& inputs) const {
+    for(set<arity_t>::const_iterator cit = arguments.begin();
+        cit != arguments.end(); cit++)
+        binding(*cit) = inputs[*cit];
+}
+
+arity_t contin_table_inputs::get_arity() const {
+    return begin()->size();
+}
+
+void contin_table_inputs::set_ignore_inputs(const vertex_set& ignore_args) {
+    for(arity_t arg = 1; arg <= get_arity(); arg++) {
+        if(ignore_args.find(argument(arg)) == ignore_args.end())
+            arguments.insert(arg);
     }
 }
 
@@ -104,10 +122,8 @@ contin_table::contin_table(const combo_tree& tr, const contin_table_inputs& cti,
             push_back(net.outputs[0]->activation);
         }
     } else {
-        for (const_cm_it i = cti.begin(); i != cti.end(); ++i) {
-            int arg = 1;
-            for (const_cv_it j = i->begin(); j != i->end(); ++j, ++arg)
-                binding(arg) = *j;
+        for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {
+            cti.set_binding(*i);
             // assumption : all inputs and output of tr are contin_t
             // this assumption can be verified using infer_type_tree
             vertex res = eval_throws(rng, tr);
@@ -163,3 +179,26 @@ contin_t contin_table::root_mean_square_error(const contin_table& other) const
               "contin_tables should have the same size > 0.");
     return sqrt(mean_squared_error(other));
 }
+
+bool checkCarriageReturn(std::istream& in) {
+    char next_c = in.get();
+    if(next_c == '\r') // DOS format
+        next_c = in.get();
+    if(next_c == '\n')
+        return true;
+    return false;
+}
+
+arity_t istreamArity(std::istream& in) {
+    arity_t arity = -1;
+    while(!in.eof()) {
+        arity++;
+        std::string str;
+        in >> str;
+        if(checkCarriageReturn(in))
+            return arity;
+    }
+    return arity;
+}
+
+} // ~namespace combo

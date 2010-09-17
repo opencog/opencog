@@ -135,100 +135,6 @@ protected:
     RandGen* _rng; // _rng is dummy and not used anyway
 };
 
-/**
- * template to fill an input table (IT) and output table (OT) of type
- * T. Note that a '\n' (or '\r' '\n' for DOS format) must be placed
- * right after the last number, including for the last line.  It is
- * assumed that each row have the same number of columns, if not the
- * case an assert is raised.
- */
-template<typename IT, typename OT, typename T>
-std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
-    std::vector<T> input_vec;
-    T input;
-    bool arity_det = false; // flag to indicate that th arity has been
-                            // determined
-    arity_t arity = -1; // arity according to the first row, used for check
-    while (!in.eof()) {
-        std::string str;
-        in >> str;
-
-        // remove non ASCII char
-        while(str.size() && (unsigned char)str[0] > 127) {
-            str = str.substr(1);
-        }
-
-        if(str.size()) {
-            input = boost::lexical_cast<T>(str);
-            char next_c = in.get();
-            if(next_c == '\r') // DOS format
-                next_c = in.get();
-            if(next_c == '\n') {
-                output_table.push_back(input);
-                table_inputs.push_back(input_vec);
-                if(arity_det) {
-                    OC_ASSERT(arity == (arity_t)input_vec.size(),
-                              "The row %u has %u columns while the first row"
-                              " has %d columns, all rows should have the same"
-                              " number of columns",
-                              output_table.size(), input_vec.size(), arity);
-                } else {
-                    arity = input_vec.size();
-                    arity_det = true;
-                }
-                input_vec.clear();
-            }
-            else {
-                input_vec.push_back(input);
-            }
-        }
-    }
-    return in;
-}
-/**
- * like above but take an string (file name) instead of istream. If
- * the file name is not correct then an OC_ASSERT is raised.
- */
-template<typename IT, typename OT, typename T>
-void istreamTable(const std::string& file_name,
-                  IT& table_inputs, OT& output_table) {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    std::ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-    istreamTable<IT, OT, T>(in, table_inputs, output_table);
-}
-
-/**
- * template to subsample input and output tables, after subsampling
- * the table have size min(nsamples, *table.size())
- */
-template<typename IT, typename OT>
-void subsampleTable(IT& table_inputs, OT& output_table,
-                    unsigned int nsamples, RandGen& rng) {
-    OC_ASSERT(table_inputs.size() == output_table.size());
-    if(nsamples < output_table.size()) {
-        unsigned int nremove = output_table.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(output_table.size());
-            table_inputs.erase(table_inputs.begin()+ridx);
-            output_table.erase(output_table.begin()+ridx);
-        }
-    }
-}
-/**
- * like above but subsample only the input table
- */
-template<typename IT>
-void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
-    if(nsamples < table_inputs.size()) {
-        unsigned int nremove = table_inputs.size() - nsamples;
-        dorepeat(nremove) {
-            unsigned int ridx = rng.randint(table_inputs.size());
-            table_inputs.erase(table_inputs.begin()+ridx);
-        }
-    }
-}
-
 
 /**
  * truth_table_inputs, matrix of booleans, each row corresponds to a
@@ -265,10 +171,17 @@ typedef contin_matrix::const_iterator const_cm_it;
 class contin_table_inputs : public contin_matrix
 {
 public:
-    //constructor
+    // constructors
     contin_table_inputs() {}
     contin_table_inputs(int sample_count, int arity, opencog::RandGen& rng,
                         double max_randvalue = 1.0, double min_randvalue = -1.0);
+    // set binding prior calling the combo evaluation, ignoring inputs
+    // to be ignored
+    void set_binding(const contin_vector& args) const;
+    arity_t get_arity() const;
+    void set_ignore_inputs(const vertex_set& ignore_args);
+private:
+    std::set<arity_t> arguments; // the set of arguments to consider
 };
 
 /*
@@ -571,7 +484,114 @@ public:
     }
 };
 
-} //~namespace combo
+//////////////////
+// istreamTable //
+//////////////////
+
+/**
+ * Return true if the next chars in 'in' correspond to carriage return
+ * (support UNIX and DOS format) and advance in of the checked chars.
+ */
+bool checkCarriageReturn(std::istream& in);
+ 
+/**
+ * Return the arity of the table provided in istream (by counting the
+ * number of elements of the first line).
+ */
+arity_t istreamArity(std::istream& in);
+
+/**
+ * template to fill an input table (IT) and output table (OT) of type
+ * T. Note that a '\n' (or '\r' '\n' for DOS format) must be placed
+ * right after the last number, including for the last line.  It is
+ * assumed that each row have the same number of columns, if not the
+ * case an assert is raised.
+ */
+template<typename IT, typename OT, typename T>
+std::istream& istreamTable(std::istream& in, IT& table_inputs, OT& output_table) {
+    std::vector<T> input_vec;
+    T input;
+    bool arity_det = false; // flag to indicate that th arity has been
+                            // determined
+    arity_t arity = -1; // arity according to the first row, used for check
+    while (!in.eof()) {
+        std::string str;
+        in >> str;
+
+        // remove non ASCII char
+        while(str.size() && (unsigned char)str[0] > 127) {
+            str = str.substr(1);
+        }
+
+        if(str.size()) {
+            input = boost::lexical_cast<T>(str);
+            if(checkCarriageReturn(in)) {
+                output_table.push_back(input);
+                table_inputs.push_back(input_vec);
+                if(arity_det) {
+                    OC_ASSERT(arity == (arity_t)input_vec.size(),
+                              "The row %u has %u columns while the first row"
+                              " has %d columns, all rows should have the same"
+                              " number of columns",
+                              output_table.size(), input_vec.size(), arity);
+                } else {
+                    arity = input_vec.size();
+                    arity_det = true;
+                }
+                input_vec.clear();
+            }
+            else {
+                input_vec.push_back(input);
+            }
+        }
+    }
+    return in;
+}
+/**
+ * like above but take an string (file name) instead of istream. If
+ * the file name is not correct then an OC_ASSERT is raised.
+ */
+template<typename IT, typename OT, typename T>
+void istreamTable(const std::string& file_name,
+                  IT& table_inputs, OT& output_table) {
+    OC_ASSERT(!file_name.empty(), "the file name is empty");
+    std::ifstream in(file_name.c_str());
+    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+    istreamTable<IT, OT, T>(in, table_inputs, output_table);
+}
+
+/**
+ * template to subsample input and output tables, after subsampling
+ * the table have size min(nsamples, *table.size())
+ */
+template<typename IT, typename OT>
+void subsampleTable(IT& table_inputs, OT& output_table,
+                    unsigned int nsamples, RandGen& rng) {
+    OC_ASSERT(table_inputs.size() == output_table.size());
+    if(nsamples < output_table.size()) {
+        unsigned int nremove = output_table.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(output_table.size());
+            table_inputs.erase(table_inputs.begin()+ridx);
+            output_table.erase(output_table.begin()+ridx);
+        }
+    }
+}
+/**
+ * like above but subsample only the input table
+ */
+template<typename IT>
+void subsampleTable(IT& table_inputs, unsigned int nsamples, RandGen& rng) {
+    if(nsamples < table_inputs.size()) {
+        unsigned int nremove = table_inputs.size() - nsamples;
+        dorepeat(nremove) {
+            unsigned int ridx = rng.randint(table_inputs.size());
+            table_inputs.erase(table_inputs.begin()+ridx);
+        }
+    }
+}
+
+} // ~namespace combo
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const combo::truth_table& tt)

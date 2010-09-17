@@ -219,8 +219,7 @@ struct iterative_hillclimbing {
         if (max_number_of_instances > max_evals)
             max_number_of_instances = max_evals;
 
-        int number_of_fields = fields.n_bits() + fields.n_disc()
-            + fields.n_contin() + fields.n_onto();
+        int number_of_fields = fields.dim_size();
 
         // it is assumed that the exemplar instance is null
         eda::instance exemplar(fields.packed_width());

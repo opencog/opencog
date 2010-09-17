@@ -59,7 +59,17 @@ void unsupported_problem_exit(const string& problem) {
     exit(1);
 }
 
-ifstream* open_table_file(string file) {
+/**
+ * Display error message about not recognized combo operator and exist
+ */
+void not_recognized_combo_operator(const string& ops_str) {
+    std::cerr << "error: " << ops_str
+              << " is not recognized as combo operator" << std::endl;
+    exit(1);
+}
+
+
+ifstream* open_table_file(const string& file) {
     ifstream* in = new ifstream(file.c_str());
     if(!in->is_open()) {
         if(file.empty()) {
@@ -154,6 +164,44 @@ int alphabet_size(const type_tree& tt, const vertex_set ignore_ops) {
     }
 }
 
+// combo_tree
+combo_tree str_to_combo_tree(const string& combo_str) {
+    stringstream ss;
+    combo_tree tr;
+    ss << combo_str;
+    ss >> tr;
+    return tr;
+}
+
+// infer the arity of the problem
+arity_t infer_arity(const string& problem,                    
+                    unsigned int problem_size,
+                    const string& input_table_file,
+                    const string& combo_str) {
+    if(problem == it || problem == ann_it) {
+        auto_ptr<ifstream> in(open_table_file(input_table_file));
+        return istreamArity(*in);
+    } else if(problem == cp || problem == ann_cp) {
+        if(combo_str.empty())
+            unspecified_combo_exit();
+        // get the combo_tree and infer its type
+        combo_tree tr = str_to_combo_tree(combo_str);
+        type_tree tt = infer_type_tree(tr);
+        if(is_well_formed(tt)) {
+            return type_tree_arity(tt);
+        } else {
+            illformed_exit(tr);
+            return -1;
+        }
+    } else if(problem == pa || problem == dj) {
+        return problem_size;
+    } else if(problem == sr) {
+        return 1;
+    } else {
+        unsupported_problem_exit(problem);
+        return -1;
+    }
+}
 
 int main(int argc,char** argv) { 
 
@@ -177,6 +225,7 @@ int main(int argc,char** argv) {
     bool log_file_dep_opt;
     float variance;
     float prob;
+    vector<string> include_only_ops_str;
     vector<string> ignore_ops_str;
     string opt_algo; //optimization algorithm
     vector<string> exemplars_str;
@@ -266,9 +315,12 @@ int main(int argc,char** argv) {
         (opt_desc_str(prob_opt).c_str(),
          value<float>(&prob)->default_value(0),
          "in the case of boolean regression, probability that an output datum is wrong (returns false while it should return true or the other way around), useful if the data are noisy or to control an Occam's razor bias, only values 0 < p < 0.5 are meaningful, out of this range it means no Occam's razor, otherwise the greater p the greater the Occam's razor.")
+        (opt_desc_str(include_only_ops_str_opt).c_str(),
+         value<vector<string> >(&include_only_ops_str),
+         "include only the operator in the solution, can be used several times, for moment only plus, times, div, sin, exp, log and variables (#n) are supported. Note that variables and operators are decoralated (including only some operators still include all variables and including only some variables still include all operators). You may need to put variables under double quotes. This option does not work with ANN.")
         (opt_desc_str(ignore_ops_str_opt).c_str(),
          value<vector<string> >(&ignore_ops_str),
-         "ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp, log and variables (#n) can be ignored. You may need to put variables under double quotes.")
+         string("ignore the following operator in the program solution, can be used several times, for moment only div, sin, exp, log and variables (#n) can be ignored. You may need to put variables under double quotes. This option has the priority over ").append(include_only_ops_str_opt.first).append(". That is if an operator must both be included and ignored, it is ignored. This option does not work with ANN.").c_str())
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(un),
          string("optimization algorithm, supported algorithms are"
@@ -352,27 +404,47 @@ int main(int argc,char** argv) {
     // init random generator
     opencog::MT19937RandGen rng(rand_seed);
 
-    // convert ignore_ops_str to the set of actual operators to ignore
+    // infer arity
+    arity_t arity = infer_arity(problem, problem_size, input_table_file, combo_str);
+
+    // convert include_only_ops_str to the set of actual operators to
+    // ignore
     vertex_set ignore_ops;
+    if(vm.count(include_only_ops_str_opt.first.c_str())) {
+        bool ignore_arguments = false;
+        bool ignore_operators = false;
+        foreach(const string& s, include_only_ops_str) {
+            vertex v;
+            if(builtin_str_to_vertex(s, v)) {
+                if(!ignore_operators) {
+                    ignore_ops =
+                        list_of(id::plus)(id::times)(id::div)(id::exp)(id::log)(id::sin);
+                    ignore_operators = true;
+                }
+                ignore_ops.erase(v);
+            } else if(argument_str_to_vertex(s, v)) {
+                if(!ignore_arguments) {
+                    for(arity_t arg = 1; arg <= arity; arg++)
+                        ignore_ops.insert(argument(arg));
+                    ignore_arguments = true;
+                }
+                ignore_ops.erase(v);
+            } else not_recognized_combo_operator(s);
+        }
+    }
+
+    // convert ignore_ops_str to the set of actual operators to ignore
     foreach(const string& s, ignore_ops_str) {
         vertex v;
         if(builtin_str_to_vertex(s, v) || argument_str_to_vertex(s, v))
             ignore_ops.insert(v);
-        else {
-            std::cerr << "error: " << s 
-                      << " is not recognized as combo operator" << std::endl;
-            return 1;
-        }
+        else not_recognized_combo_operator(s);
     }
 
     // set the initial exemplars
     vector<combo_tree> exemplars;
     foreach(const string& exemplar_str, exemplars_str) {
-        stringstream ss;
-        combo_tree exemplar;
-        ss << exemplar_str;
-        ss >> exemplar;
-        exemplars.push_back(exemplar);
+        exemplars.push_back(str_to_combo_tree(exemplar_str));
     }
 
     // fill jobs
@@ -432,7 +504,6 @@ int main(int argc,char** argv) {
                          partial_truth_table, bool>(*in, inputtable, booltable);
             if(nsamples>0)
                 subsampleTable(inputtable, booltable, nsamples, rng);
-            unsigned int arity = inputtable[0].size();
         
             type_tree tt = declare_function(output_type, arity);
 
@@ -453,10 +524,10 @@ int main(int argc,char** argv) {
             contin_table contintable;
             istreamTable<contin_table_inputs,
                          contin_table, contin_t>(*in, inputtable, contintable);
+            inputtable.set_ignore_inputs(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(inputtable, contintable, nsamples, rng);
 
-            unsigned int arity = inputtable[0].size();
             type_tree tt = declare_function(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
 
@@ -478,61 +549,50 @@ int main(int argc,char** argv) {
             unsupported_type_exit(output_type);
         }
     } else if(problem == cp) { // regression based on combo program
-        if(combo_str.empty())
-            unspecified_combo_exit();
         // get the combo_tree and infer its type
-        stringstream ss;
-        combo_tree tr;
-        ss << combo_str;
-        ss >> tr;
+        combo_tree tr = str_to_combo_tree(combo_str);
         type_tree tt = infer_type_tree(tr);
 
-        if(is_well_formed(tt)) {
-            type_node output_type = *type_tree_output_type_tree(tt).begin();
-            arity_t arity = type_tree_arity(tt);
-            // if no exemplar has been provided in option use the default one
-            if(exemplars.empty()) {
-                exemplars.push_back(type_to_exemplar(output_type));
-            }
-            if(output_type == id::boolean_type) {
-                // @todo: Occam's razor and nsamples is not taken into account
-                logical_bscore bscore(tr, arity);
-                metapop_moses_results(rng, exemplars, tt,
-                                      logical_reduction(reduct_candidate_effort),
-                                      logical_reduction(reduct_knob_building_effort),
-                                      bscore, cache_size, opt_algo,
-                                      eda_param, meta_param, moses_param,
-                                      vm, mmr_pa);                
-            }
-            else if (output_type == id::contin_type) {
-                // @todo: introduce some noise optionally
-                if(nsamples<=0)
-                    nsamples = default_nsamples;
-                
-                contin_table_inputs inputtable(nsamples, arity, rng,
-                                               max_rand_input, min_rand_input);
-                contin_table table_outputs(tr, inputtable, rng);
-
-                int as = alphabet_size(tt, ignore_ops);
-
-                occam_contin_bscore bscore(table_outputs, inputtable,
-                                           variance, as, rng);
-                metapop_moses_results(rng, exemplars, tt,
-                                      contin_reduction(ignore_ops, rng),
-                                      contin_reduction(ignore_ops, rng),
-                                      bscore, cache_size, opt_algo,
-                                      eda_param, meta_param, moses_param,
-                                      vm, mmr_pa);
-            } else {
-                unsupported_type_exit(tt);
-            }
+        type_node output_type = *type_tree_output_type_tree(tt).begin();
+        // if no exemplar has been provided in option use the default one
+        if(exemplars.empty()) {
+            exemplars.push_back(type_to_exemplar(output_type));
         }
-        else {
-            illformed_exit(tr);
+        if(output_type == id::boolean_type) {
+            // @todo: Occam's razor and nsamples is not taken into account
+            logical_bscore bscore(tr, arity);
+            metapop_moses_results(rng, exemplars, tt,
+                                  logical_reduction(reduct_candidate_effort),
+                                  logical_reduction(reduct_knob_building_effort),
+                                  bscore, cache_size, opt_algo,
+                                  eda_param, meta_param, moses_param,
+                                  vm, mmr_pa);                
+        }
+        else if (output_type == id::contin_type) {
+            // @todo: introduce some noise optionally
+            if(nsamples<=0)
+                nsamples = default_nsamples;
+            
+            contin_table_inputs inputtable(nsamples, arity, rng,
+                                           max_rand_input, min_rand_input);
+            inputtable.set_ignore_inputs(ignore_ops); // to speed up binding
+            contin_table table_outputs(tr, inputtable, rng);
+            
+            int as = alphabet_size(tt, ignore_ops);
+            
+            occam_contin_bscore bscore(table_outputs, inputtable,
+                                       variance, as, rng);
+            metapop_moses_results(rng, exemplars, tt,
+                                  contin_reduction(ignore_ops, rng),
+                                  contin_reduction(ignore_ops, rng),
+                                  bscore, cache_size, opt_algo,
+                                  eda_param, meta_param, moses_param,
+                                  vm, mmr_pa);
+        } else {
+            unsupported_type_exit(tt);
         }
     } else if(problem == pa) { // even parity
         // @todo: for the moment occam's razor and partial truth table are ignored
-        unsigned int arity = problem_size;
         even_parity func;
 
         // if no exemplar has been provided in option use the default
@@ -551,7 +611,6 @@ int main(int argc,char** argv) {
                               vm, mmr_pa);
     } else if(problem == dj) { // disjunction
         // @todo: for the moment occam's razor and partial truth table are ignored
-        unsigned int arity = problem_size;
         disjunction func;
 
         // if no exemplar has been provided in option use the default
@@ -569,8 +628,6 @@ int main(int argc,char** argv) {
                               eda_param, meta_param, moses_param,
                               vm, mmr_pa);
     } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
-        unsigned int arity = 1;
-
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (+)
         if(exemplars.empty()) {            
@@ -602,9 +659,6 @@ int main(int argc,char** argv) {
         // read input_table_file file
         istreamTable<contin_table_inputs,
                      contin_table, contin_t>(*in, inputtable, contintable);
-
-        unsigned int arity = inputtable[0].size();
-
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));
@@ -627,43 +681,34 @@ int main(int argc,char** argv) {
                               eda_param, meta_param, moses_param,
                               vm, mmr_pa);
     } else if(problem == ann_cp) { // regression based on combo program using ann
-        if(combo_str.empty())
-            unspecified_combo_exit();
         // get the combo_tree and infer its type
-        stringstream ss;
-        combo_tree tr;
-        ss << combo_str;
-        ss >> tr;
-        type_tree problem_tt = infer_type_tree(tr);
+        combo_tree tr = str_to_combo_tree(combo_str);
 
-        if(is_well_formed(problem_tt)) {
-            arity_t arity = type_tree_arity(problem_tt);
-            // if no exemplar has been provided in option use the default one
-            if(exemplars.empty()) {
-                exemplars.push_back(ann_exemplar(arity));
-            }
-
-            // @todo: introduce some noise optionally
-            if(nsamples<=0)
-                nsamples = default_nsamples;
-
-            contin_table_inputs inputtable(nsamples, arity, rng,
-                                               max_rand_input, min_rand_input);
-            contin_table table_outputs(tr, inputtable, rng);
-            
-            type_tree tt = declare_function(id::ann_type, 0);
-
-            int as = alphabet_size(tt, ignore_ops);
-            
-            occam_contin_bscore bscore(table_outputs, inputtable,
-                                       variance, as, rng);
-            metapop_moses_results(rng, exemplars, tt,
-                                  contin_reduction(ignore_ops, rng),
-                                  contin_reduction(ignore_ops, rng),
-                                  bscore, cache_size, opt_algo,
-                                  eda_param, meta_param, moses_param,
-                                  vm, mmr_pa);
-        } else illformed_exit(tr);
+        // if no exemplar has been provided in option use the default one
+        if(exemplars.empty()) {
+            exemplars.push_back(ann_exemplar(arity));
+        }
+        
+        // @todo: introduce some noise optionally
+        if(nsamples<=0)
+            nsamples = default_nsamples;
+        
+        contin_table_inputs inputtable(nsamples, arity, rng,
+                                       max_rand_input, min_rand_input);
+        contin_table table_outputs(tr, inputtable, rng);
+        
+        type_tree tt = declare_function(id::ann_type, 0);
+        
+        int as = alphabet_size(tt, ignore_ops);
+        
+        occam_contin_bscore bscore(table_outputs, inputtable,
+                                   variance, as, rng);
+        metapop_moses_results(rng, exemplars, tt,
+                              contin_reduction(ignore_ops, rng),
+                              contin_reduction(ignore_ops, rng),
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
     }
     else unsupported_problem_exit(problem);
 }
