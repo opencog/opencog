@@ -351,14 +351,18 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // parse the result
                     metapop_candidates candidates;
                     int evals;
+
+                    // Logger
+                    logger().info("Parsing results from PID %d", get_pid(*it));
+                    // ~Logger
+
                     parse_result(*it, candidates, evals);
                     mp.n_evals() += evals;
 
                     // update best and merge
                     // Logger
-                    logger().info("Merge %u candidates from PID %d"
-                                  " with the metapopulation",
-                                  candidates.size(), get_pid(*it));
+                    logger().info("Merge %u candidates with the metapopulation",
+                                  candidates.size());
                     if(logger().getLevel() >= opencog::Logger::FINE) {
                         logger().fine("Candidates with their bscores to merge with"
                                       " the metapopulation:");
