@@ -60,11 +60,11 @@ public:
     
     virtual TruthValue** formatTVarray(const vector<Vertex>& premiseArray, int* newN) const
     {
-        TruthValue** tvs = new SimpleTruthValue*[1];
+        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
         
         assert(premiseArray.size()==1);
         
-        tvs[0] = &(asw->getTV(boost::get<Handle>(premiseArray[0])));
+        tvs[0] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[0])));
         
         return tvs;
     }

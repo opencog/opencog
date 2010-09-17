@@ -30,16 +30,4 @@
 
 namespace opencog { namespace pln {
 
-#if 0
-Handle Equi2ImpRule::compute(const vector<Vertex>& premiseArray, Handle CX) const
-{
-    const int n = premiseArray.size();
-    assert(n==1);
-    
-    pair<Handle, Handle> p = Equi2ImpLink(premiseArray[0]);
-    
-    return Join<AND_LINK>(p.first, p.second);
-}
-#endif
-
 }} // namespace opencog { namespace pln {

@@ -24,44 +24,67 @@
 
 namespace opencog { namespace pln {
 
-class Equi2ImpRule : public Rule
+class Equi2ImpRule : public GenericRule<TautologyFormula>
 {
+public:
     /// "A<=>B" => "AND(A=>B, B=>A)"
-    Equi2ImpRule(iAtomSpaceWrapper *_asw)
-        : Rule(_asw)
+    Equi2ImpRule(AtomSpaceWrapper *_asw)
+        : GenericRule<TautologyFormula>(_asw, false, "Equi2ImpRule")
     {
-        inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EQUIVALENCE_LINK))));
+        //inputFilter.push_back(Btr<atom>(new atom(__INSTANCEOF_N, 1, new atom(EQUIVALENCE_LINK))));
+        inputFilter.push_back(meta(new vtree(
+                mva((pHandle)EQUIVALENCE_LINK,
+                    mva((pHandle)ATOM),
+                    mva((pHandle)ATOM))
+                )));
+
     }
     Rule::setOfMPs o2iMetaExtra(meta outh, bool& overrideInputFilter) const
     {
-        Btr<MPs> ret(new MPs);
-        ret->push_back(Btr<atom>(neBoundVertexWithNewType(outh, EQUIVALENCE_LINK)));
+        if (!asw->inheritsType((Type)boost::get<pHandle>(*outh->begin()),
+                               AND_LINK))
+            return Rule::setOfMPs();
+
+        Rule::MPs ret;
+
+        BBvtree ret_m(new BoundVTree(*outh));
+        *ret_m->begin() = Vertex((pHandle)EQUIVALENCE_LINK);
+        ret.push_back(ret_m);
+
+        overrideInputFilter = true;
+
         return makeSingletonSet(ret);
     }
     
-    virtual atom i2oType(Handle* h, const int n) const
+    meta i2oType(const std::vector<Vertex>& hs) const
     {
-        assert(1 == n);
+        assert(1==hs.size());
+
+        Vertex A = asw->getOutgoing(_v2h(hs[0]))[0];
+        Vertex B = asw->getOutgoing(_v2h(hs[0]))[1];
         
-        return atom(AND_LINK, 2,
-                    new atom(IMPLICATION_LINK, 2,
-                             new atom(child(h[0], 0)),
-                             new atom(child(h[0], 1))),
-                    new atom(IMPLICATION_LINK, 2,
-                             new atom(child(h[0], 1)),
-                             new atom(child(h[0], 0)))
-                    );
-    }
-    virtual bool valid(Handle* h, const int n) const
-    {
-        assert(n==1);
-        
-        return isSubType(h[0], EQUIVALENCE_LINK);
+        return meta(new vtree(mva((pHandle)AND_LINK,
+                        mva((pHandle)IMPLICATION_LINK,
+                                vtree(A),
+                                vtree(B)),
+                        mva((pHandle)IMPLICATION_LINK,
+                                vtree(B),
+                                vtree(A))
+                                )));
     }
     
-    BoundVertex compute(const vector<Vertex>& premiseArray,
-                        Handle CX = NULL,
-                        bool fresh = true) const;
+    TruthValue** formatTVarray(const std::vector<Vertex>& premiseArray, int* newN) const
+    {
+        TruthValue** tvs = (TruthValue**)new SimpleTruthValue*[1];
+
+        assert(premiseArray.size()==1);
+
+        tvs[0] = (TruthValue*) &(asw->getTV(_v2h(premiseArray[0])));
+
+        return tvs;
+    }
+
+    bool validate2(Rule::MPs& args) const { return true; }
 };
 
 }} // namespace opencog { namespace pln {
