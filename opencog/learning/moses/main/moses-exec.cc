@@ -21,6 +21,8 @@
  */
 #include "moses-exec.h"
 
+const unsigned int max_filename_size = 255;
+
 /**
  * Display error message about unspecified combo tree and exit
  */
@@ -305,7 +307,7 @@ int main(int argc,char** argv) {
          value<string>(&log_level)->default_value("DEBUG"),
          "log level, possible levels are NONE, ERROR, WARN, INFO, DEBUG, FINE. Case does not matter.")
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
-         "the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than 255 characters.")
+         string("the name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than ").append(lexical_cast<string>(max_filename_size)).append(" characters.").c_str())
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
          string("file name where to write the log. This option overwrite ").append(log_file_dep_opt_opt.first).append(".").c_str())
@@ -390,11 +392,14 @@ int main(int argc,char** argv) {
                 // above 255 chars
                 unsigned int expected_max_size =
                     log_file.size()+str.size()+default_log_file_suffix.size()+1;
-                if(expected_max_size < 255) {
+                if(expected_max_size < max_filename_size) {
                     log_file += str;
                 }
             }
         log_file += string(".") + default_log_file_suffix;
+        // replace / by d because unix file name cannot have / in it
+        replace(log_file.begin(), log_file.end(), '/', 'd');
+        OC_ASSERT(log_file.size() <= max_filename_size);
     }
     // remove log_file
     remove(log_file.c_str());

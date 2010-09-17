@@ -86,29 +86,29 @@ string opt_desc_str(const pair<string, string>& opt) {
 // boost::program_options API
 template<typename T>
 bool to_string(const boost::program_options::variable_value& vv, string& str,
-               string seperator)
+               string separator)
 {
     if(vv.value().type() == typeid(T)) {
         str = boost::lexical_cast<string>(vv.as<T>());
         return true;
     } else if(vv.value().type() == typeid(std::vector<T>)) {
-        str = opencog::containerToStr(vv.as<std::vector<T> >(), seperator.c_str());
+        str = opencog::containerToStr(vv.as<std::vector<T> >(), separator.c_str());
         return true;
     }
     return false;
 }
 string to_string(const boost::program_options::variable_value& vv,
-                 string seperator = "_")
+                 string separator = "_")
 {
     string res;
-    if(!(to_string<int>(vv, res, seperator)
-         || to_string<unsigned int>(vv, res, seperator)
-         || to_string<long>(vv, res, seperator)
-         || to_string<unsigned long>(vv, res, seperator)
-         || to_string<float>(vv, res, seperator)
-         || to_string<double>(vv, res, seperator)
-         || to_string<bool>(vv, res, seperator)
-         || to_string<string>(vv, res, seperator)))
+    if(!(to_string<int>(vv, res, separator)
+         || to_string<unsigned int>(vv, res, separator)
+         || to_string<long>(vv, res, separator)
+         || to_string<unsigned long>(vv, res, separator)
+         || to_string<float>(vv, res, separator)
+         || to_string<double>(vv, res, separator)
+         || to_string<bool>(vv, res, separator)
+         || to_string<string>(vv, res, separator)))
         std::cerr << "type not handled yet" << std::endl;
     return res;
 }
