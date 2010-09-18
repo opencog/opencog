@@ -280,7 +280,7 @@ void BITUbigrapher::markClone(BITNode* existing, BITNode* clone) {
     int existing_id = findBITNodeID(existing);
     int clone_id = findBITNodeID(clone);
 
-    unsigned int link_id = existing_id + 10;
+    unsigned int link_id = clone_id + 10;
 
     int status = ubigraph_new_edge_w_id( link_id, existing_id, clone_id );
     if ( status == -1 ) {
