@@ -65,7 +65,7 @@
 //#include "not/NotEliminationRule.h"
 
 #include "convert/Link2LinkRule.h"
-//#include "convert/Equi2ImpRule.h"
+#include "convert/Equi2ImpRule.h"
 //#include "convert/Eval2MemRule.h"
 //#include "convert/Exist2ForAllRule.h"
 //#include "convert/Ext2ExtRule.h"

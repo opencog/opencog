@@ -120,8 +120,8 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     //	AddRule(new SimpleANDRule<5>(asw), ANDEvaluatorPriority - 1.4f);
     
 //    AddRule(new ANDPartitionRule(asw), 10.0f);
-//    AddRule(new ANDBreakdownRule<2>(asw), 10.0f);
-//    AddRule(new ANDBreakdownRule<3>(asw), 10.0f);
+//    AddRule(new ANDBreakdownRule(asw, 2), 10.0f);
+//    AddRule(new ANDBreakdownRule(asw, 3), 10.0f);
 
     AddRule(new NotEvaluatorRule(asw), 10.0f);
     
@@ -154,6 +154,8 @@ DefaultVariableRuleProvider::DefaultVariableRuleProvider(void)
     AddRule(new Ext2IntRule(asw, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK), 10.0f);
     AddRule(new Ext2IntRule(asw, SUBSET_LINK, INHERITANCE_LINK), 10.0f);
     
+    AddRule(new Equi2ImpRule(asw), 10.0f);
+
     AddRule(new HypothesisRule(asw), 30.0f);
     // general -> specific
     //AddRule(new SimSubstRule1(asw, false), -10000000.0f);
