@@ -200,6 +200,20 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
     // Should be the child number!
     //ubigraph_set_vertex_attribute(child_id, "label", toString(i).c_str());
 
+//    drawArgSlots(node);
+
+    // Attach this BITNode to its parent(s).
+    foreach(parent_link<BITNode> p, node->parents) {
+        drawArgSlots(p.link); // Gets called too many times, but means you don't have to see the slots until necessary
+        drawBITLink(findBITNodeID(p.link), node_id, p.parent_arg_i);
+    }
+
+    return;
+}
+
+void BITUbigrapher::drawArgSlots(BITNode* node) {
+    //int node_id = ( int ) node;
+    int node_id = findBITNodeID(node);
 
     // Remember that this draws BITNodes, and the children are actually ParametrizedBITNodes referring to (often shared) BITNodes
     // Draw vertexes for each arg slot
@@ -235,12 +249,6 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
         }
     }
 
-    // Attach this BITNode to its parent(s).
-    foreach(parent_link<BITNode> p, node->parents) {
-        drawBITLink(findBITNodeID(p.link), node_id, p.parent_arg_i);
-    }
-
-    return;
 }
 
 void BITUbigrapher::hideBITNode(BITNode* node) {

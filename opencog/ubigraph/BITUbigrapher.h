@@ -78,6 +78,8 @@ public:
     // ruleNumber: 0 == BITNodeRoot, 1 == root variable scoper, otherwise the index of the Rule in the RuleProvider
     void drawBITNode(BITNode* node, int ruleNumber = 0);
 
+    void drawArgSlots(BITNode* node);
+
     // reusing_template should be false normally, but true if parent is reusing child via the BITNode template system
     void drawBITLink(int parent_id, int child_id, int slot, bool reusing_template = false);
 
