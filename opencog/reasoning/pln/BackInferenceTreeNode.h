@@ -61,7 +61,7 @@ namespace haxx {
 
 namespace opencog {
 
-#define USE_BITUBIGRAPHER
+//#define USE_BITUBIGRAPHER
 
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
@@ -227,11 +227,11 @@ public:
  * \endcode
  * 
  *
- *
+ * The following two todos suggest approaches that aren't quite right -- JaredW
  * @todo Allow forward chaining using BIT... by accepting a wildcard target, and
  * only accepting results with reasonable confidence.
  *
- * @todo Tackle revision
+ * @todo Tackle revision.
  * - first make sub-BITs shared between BIT grounded by a root.
  * - at the end of infer() - revise the TVs within the BIT.
  * - when a result is computed for a subtree, mark it as revised.
@@ -524,7 +524,20 @@ protected:
     void ForceTargetVirtual(spawn_mode spawning);
     
     /// Fitness-for-being-selected-for-expansion-next.
-    /// The higher the better
+    /// The higher the better.
+    ///
+    /// JaredW: How the fitness works:
+    /// The search is a breadth-first search in order of Rule priority.
+    /// When a BITNode gets a result, no further BITNodes will be expanded below it.
+    /// Within the breadth-first search, try out subgoals with a smaller solution space first.
+    /// (In other words, with less FWVars == with less possible matches.)
+    /// bdrum represents the best confidence of a result _above_ this BITNode.
+    /// I've tested all of these criteria to be useful, and removed useless/harmful
+    /// bits (see the target size in my_solution_space).
+    /// I think the current search order will
+    /// never try out a path when there is a better path available, but breadth-first is still not
+    /// ideal, especially in that you can never use it to skip a path (i.e. it can't be combined with
+    /// inference control based on Atom STI or previous inference statistics).
     float fitness() const;
     
     /// If inserting the rule invocation node in the subtree obeys our policy
