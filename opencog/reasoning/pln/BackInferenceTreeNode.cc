@@ -1073,7 +1073,7 @@ void BITNodeRoot::spawn(Btr<bindingsT> bindings)
     foreach(hpair raw_pair, *bindings) //for $x=>A
         foreach(BITNode* bitn, varOwner[raw_pair.first])
             clone_binds[bitn].insert(raw_pair);
-    /// clone_binds now has BITNode owns the variable as a key
+    /// clone_binds now has the BITNode which owns the variable as a key
     /// and a mapping from that variable to the binding.
     
     typedef pair<BITNode*, bindingsT> o2bT;
@@ -1713,7 +1713,10 @@ float BITNode::fitness() const
 
 //    tlog(0,"fitness(): %f %f %f %f\n", -my_bdrum, -(float)depth, my_solution_space(), (rule ? rule->getPriority() : 0));
     
-    return  -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
+    // At the top is an optional change to always run Generators first
+    // (more like traditional logic, and necessary if you use softmax)
+    return  //1000000*(!rule || !rule->isComposer())
+            -1.0f*CONFIDENCE_WEIGHT     * my_bdrum
             -1.0f*DEPTH_WEIGHT          * depth
             -1.0f*SOLUTION_SPACE_WEIGHT * my_solution_space()
             +1.0f*RULE_PRIORITY_WEIGHT  * (rule ? rule->getPriority() : 0);
@@ -2038,6 +2041,8 @@ string BITNode::print(int loglevel, bool compact, Btr<set<BITNode*> > usedBITNod
             }
             ss << "]\n";
         }
+    } else if (root != this) {
+        ss << "root variable scoper" << endl;
     } else {
         ss << "root" << endl;
     }
@@ -2198,10 +2203,15 @@ string BITNode::tlog(int debugLevel, const char *format, ...) const
     //    ss << "Debug feature." << endl;
     //}
 
+    string name;
+    if (rule) name = rule->name;
+    else if (root != this) name = string("SCOPER");
+    else name = string("ROOT");
+
     ss << (bigcounter? (++test::bigcount) : depth) << " Pool="
         << (unsigned int) root->exec_pool.size() << "/" << root->inferenceNodes
         /*<< haxxUsedProofResources*/ << " [" << id << "-"
-        << (rule ? (rule->name.c_str()) : "ROOT") << "] ";
+        << name << "] ";
 
     char buf[5000];
     va_list ap;
