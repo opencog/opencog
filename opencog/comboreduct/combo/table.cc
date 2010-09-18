@@ -85,9 +85,14 @@ contin_table_inputs::contin_table_inputs(int sample_count, int arity,
 }
 
 void contin_table_inputs::set_binding(const contin_vector& inputs) const {
-    for(set<arity_t>::const_iterator cit = arguments.begin();
-        cit != arguments.end(); cit++)
-        binding(*cit) = inputs[*cit];
+    if(arguments.empty()) {
+        for(arity_t arg = 1; arg < (arity_t)inputs.size(); arg++)
+            binding(arg) = inputs[arg - 1];
+    } else {
+        for(set<arity_t>::const_iterator cit = arguments.begin();
+            cit != arguments.end(); cit++)
+            binding(*cit) = inputs[*cit - 1];
+    }
 }
 
 arity_t contin_table_inputs::get_arity() const {
@@ -99,6 +104,7 @@ void contin_table_inputs::set_ignore_inputs(const vertex_set& ignore_args) {
         if(ignore_args.find(argument(arg)) == ignore_args.end())
             arguments.insert(arg);
     }
+    OC_ASSERT(!arguments.empty(), "You cannot ignore all arguments");
 }
 
 contin_table::contin_table(const combo_tree& tr, const contin_table_inputs& cti,

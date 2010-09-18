@@ -179,9 +179,13 @@ public:
     // to be ignored
     void set_binding(const contin_vector& args) const;
     arity_t get_arity() const;
+    // set the input to consider, if none are (all are ignored) an
+    // assert is raised
     void set_ignore_inputs(const vertex_set& ignore_args);
 private:
-    std::set<arity_t> arguments; // the set of arguments to consider
+    std::set<arity_t> arguments; // the set of arguments to consider,
+                                 // if empty then all arguments are
+                                 // considered
 };
 
 /*
