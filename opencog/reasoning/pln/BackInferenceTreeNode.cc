@@ -900,6 +900,8 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy
         }
     }
 
+    // Woops, decreases generality (e.g. MP->NotEvaluator->MP).
+    // There's still a role for something like this.
     // This method is only called on new nodes (i.e. with exactly one parent established).
     // Policy to avoid some redundancy:
     // MP's children cannot be more MP's (because you can always get the same result from
@@ -907,18 +909,18 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy
     // effectively uses a bidirectional search).
     // The exception is when the MP child is proving the ImplicationLink for the MP parent.
     // In other words, only exclude MP children for the second argument.
-    assert (getParents().size() == 1);
-    bool hasAcceptableParent = false;
-    if (rule && rule->getName() == "ModusPonensRule") {
-        parent_link<BITNode> parentlink = *getParents().begin();
-
-        if (parentlink.parent_arg_i == 1 &&
-                parentlink.link->rule && parentlink.link->rule->getName() == "ModusPonensRule" ) {
-            cout << "Skipping redundant use of MPRule" << endl;
-            return false;
-        }
-
-    }
+//    assert (getParents().size() == 1);
+//    bool hasAcceptableParent = false;
+//    if (rule && rule->getName() == "ModusPonensRule") {
+//        parent_link<BITNode> parentlink = *getParents().begin();
+//
+//        if (parentlink.parent_arg_i == 1 &&
+//                parentlink.link->rule && parentlink.link->rule->getName() == "ModusPonensRule" ) {
+//            cout << "Skipping redundant use of MPRule" << endl;
+//            return false;
+//        }
+//
+//    }
 
     return true;
 }
