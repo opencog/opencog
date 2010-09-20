@@ -40,6 +40,7 @@
 
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h> // BackInferenceTreeNode.h breaks otherwise
 #include <opencog/reasoning/pln/BackInferenceTreeNode.h>
+//#include "Ubigrapher.h"
 
 #ifdef USE_BITUBIGRAPHER
 
@@ -56,16 +57,21 @@ namespace opencog
  *
  * \url http://http://ubietylab.net/ubigraph/
  */
-class BITUbigrapher
+class BITUbigrapher// : public Ubigrapher
 {
-
-private:
 protected:
     //! Initialise the various styles
     virtual void setStyles();
+
 public:
     BITUbigrapher();
     virtual ~BITUbigrapher() {}
+
+    void init();
+
+    bool isConnected();
+
+    bool connected;
 
     void drawRoot(BITNode* root);
 

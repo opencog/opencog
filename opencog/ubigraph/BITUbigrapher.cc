@@ -65,16 +65,34 @@ string to_string ( T arg )
     return ss.str();
 }
 
-BITUbigrapher::BITUbigrapher()
+BITUbigrapher::BITUbigrapher()// : Ubigrapher()
 {
-    ubigraph_clear();
-    setStyles();
+}
+
+void BITUbigrapher::init() {
+    connected = false;
+
+    if (ubigraph_clear() == UBIGRAPH_SUCCESS) {
+        connected = true;
+
+        cout << "Connected to Ubigraph, will visualize the BIT" << endl;
+
+        setStyles();
+    } else {
+        cout << "Did not connect to Ubigraph, will not visualize the BIT" << endl;
+    }
 }
 
 void BITUbigrapher::setStyles() {}
 
+bool BITUbigrapher::isConnected() {
+    return connected;
+}
+
 void BITUbigrapher::drawRoot ( BITNode* root )
 {
+    if (!isConnected()) return;
+
     //cout << "drawRoot" << endl;
 
     //int root_id = ( int ) root;
@@ -90,6 +108,8 @@ void BITUbigrapher::drawRoot ( BITNode* root )
 // Uses Node ids that are 32-bit ints (required by ubigraph)
 void BITUbigrapher::drawBITNodeFitness(int node_id, float fitness)
 {
+    if (!isConnected()) return;
+
     // Since the exact value would be too precise to visualize;
     // also C++ modulus doesn't work on floats
     int approx_fitness = (int) fitness;
@@ -116,6 +136,8 @@ void BITUbigrapher::drawBITNodeFitness(int node_id, float fitness)
 
 void BITUbigrapher::drawBITNodeLabel(BITNode * node, int node_id)
 {
+    if (!isConnected()) return;
+
     // The BITNodeRoot and (I think) the root variable scoper don't have a rule
     if (node->rule != NULL) {
         //ostringstream label;
@@ -137,6 +159,8 @@ int BITUbigrapher::findBITNodeID(BITNode* node) {
 }
 
 void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot, bool reusing_template) {
+    if (!isConnected()) return;
+
     unsigned int arg_id = parent_id + slot + 1;
 
     int status = ubigraph_new_edge ( arg_id, child_id );
@@ -165,6 +189,8 @@ void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot, bool reus
 
 void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
 {
+    if (!isConnected()) return;
+
     if (node->rule && !node->iscomposer()) {
         return;
     }
@@ -252,6 +278,8 @@ void BITUbigrapher::drawArgSlots(BITNode* node) {
 }
 
 void BITUbigrapher::hideBITNode(BITNode* node) {
+    if (!isConnected()) return;
+
     int node_id = findBITNodeID(node);
 
     //ubigraph_set_vertex_attribute(node_id, "visible", "false");
@@ -270,6 +298,8 @@ void BITUbigrapher::hideBITNode(BITNode* node) {
 }
 
 void BITUbigrapher::foundResult(BITNode* node) {
+    if (!isConnected()) return;
+
     int node_id = findBITNodeID(node);
 
     // In case it was a generator and wasn't drawn previously.
@@ -285,6 +315,8 @@ void BITUbigrapher::foundResult(BITNode* node) {
 }
 
 void BITUbigrapher::markClone(BITNode* existing, BITNode* clone) {
+    if (!isConnected()) return;
+
     int existing_id = findBITNodeID(existing);
     int clone_id = findBITNodeID(clone);
 
@@ -301,6 +333,8 @@ void BITUbigrapher::markClone(BITNode* existing, BITNode* clone) {
 }
 
 void BITUbigrapher::markReuse(BITNode* parent, BITNode* child, int slot) {
+    if (!isConnected()) return;
+
     //cout << "reuse " << findBITNodeID(parent) << " " << findBITNodeID(child) << " " << slot << endl;
     drawBITLink(findBITNodeID(parent), findBITNodeID(child), slot, true);
 }

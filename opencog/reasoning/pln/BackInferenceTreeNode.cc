@@ -309,6 +309,7 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
 #ifdef USE_BITUBIGRAPHER
     haxx::BITUSingleton = new BITUbigrapher;
+    haxx::BITUSingleton->init();
     haxx::BITUSingleton->drawRoot(this);
     haxx::BITUSingleton->drawBITNode(this);
     haxx::BITUSingleton->drawBITNode(root_variable_scoper);
@@ -508,9 +509,13 @@ void BITNode::create()
     }
 
 #ifdef USE_BITUBIGRAPHER
-    RuleProvider * rp = this->root->rp;
-    int ruleNumber = 2 + std::find(rp->begin(), rp->end(), rule) - rp->begin();
-    haxx::BITUSingleton->drawBITNode(this, ruleNumber);
+    // We don't want to run this on the scoper, because the BITviz hasn't been initialised yet
+    // and the root hasn't been drawn.
+    if (rule) {
+        RuleProvider * rp = this->root->rp;
+        int ruleNumber = 2 + std::find(rp->begin(), rp->end(), rule) - rp->begin();
+        haxx::BITUSingleton->drawBITNode(this, ruleNumber);
+    }
 #endif
 }
 
@@ -1720,6 +1725,10 @@ float BITNode::fitness() const
             -1.0f*DEPTH_WEIGHT          * depth
             -1.0f*SOLUTION_SPACE_WEIGHT * my_solution_space()
             +1.0f*RULE_PRIORITY_WEIGHT  * (rule ? rule->getPriority() : 0);
+
+//    if (!rule) return 1000000;
+//    return rule->getPriority() / (missing_arity+1) /  depth
+//            - my_bdrum;
     
 /*  \todo Use arity in the spirit of the following:
 
