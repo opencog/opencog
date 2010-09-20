@@ -13,7 +13,11 @@ import urllib2
 import urllib
 
 server_exe = sys.argv[1]
-opencog_conf = sys.argv[2]
+if len(sys.argv) > 2: opencog_conf = sys.argv[2]
+else: 
+    opencog_conf = '../lib/opencog-test.conf'
+if not os.path.isfile(opencog_conf):
+    opencog_conf = '../lib/opencog.conf'
 del sys.argv[1:3]
 server_process=None
 
@@ -25,8 +29,6 @@ def spawn_server():
     print "Spawning server"
     server_process = subprocess.Popen([server_exe, '-c',
             opencog_conf], stdout=sys.stdout)
-            #'../../../lib/opencog.conf'], stdout=sys.stdout)
-#stderr=subprocess.PIPE, stdout=subprocess.PIPE) #, '-DLOG_TO_STDOUT=TRUE'])
     time.sleep(1) # Allow modules time to load
     print "Server spawned with pid %d" % (server_process.pid,)
 
