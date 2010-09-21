@@ -719,8 +719,6 @@ public:
         AtomSpaceUtil::setPredicateValue( *atomSpace, "has_something_to_say", TruthValue::FALSE_TV(), 
             agentHandle );
 
-        string tmp; cin >> tmp;
-
         setHeardSentence( "are you hungry?" );
         rc = load_scm_file(PROJECT_SOURCE_DIR"/tests/scm/relex-question7.scm");
         TSM_ASSERT_EQUALS("Failed to load scheme file", 0, rc);
