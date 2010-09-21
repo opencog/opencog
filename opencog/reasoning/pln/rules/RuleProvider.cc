@@ -384,7 +384,7 @@ EvaluationRuleProvider::EvaluationRuleProvider(void) {
 
 //// Needs a fullInputFilter method to deal with the variable arity.
     // Also not actually used in any of the demos.
-    AddRule(new ANDPartitionRule(asw), 10.0f);
+//    AddRule(new ANDPartitionRule(asw), 10.0f);
     AddRule(new NotEvaluatorRule(asw), 10.0f);
 
     // FC: Have to use ATOM due to TableGather not handling Node Type vertexes
