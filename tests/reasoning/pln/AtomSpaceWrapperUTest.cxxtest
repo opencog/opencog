@@ -32,6 +32,8 @@ using namespace std;
 //already defined in AtomSpaceWrapper.h
 //#define GET_ASW ((AtomSpaceWrapper*) ASW())
 
+#define ONE_PHANDLE_PER_ATOM
+
 /// @todo Check truth values and other functions in the AtomSpaceWrapper
 class AtomSpaceWrapperUTest :  public CxxTest::TestSuite {
 private:
@@ -88,15 +90,19 @@ public:
         pHandle h3 = asw->addNode(CONCEPT_NODE, "test1", tv, true);
         pHandle h4 = asw->addNode(CONCEPT_NODE, "test2", tv, true);
 
+#ifndef ONE_PHANDLE_PER_ATOM
         TS_ASSERT(h1 != h3);
+#endif
         TS_ASSERT(h1 != h4);
 
         // Check that more than just one lot of duplicates can be stored
         pHandle h5 = asw->addNode(CONCEPT_NODE, "test1", tv, true);
         pHandle h6 = asw->addNode(CONCEPT_NODE, "test2", tv, true);
-    
+
+#ifndef ONE_PHANDLE_PER_ATOM
         TS_ASSERT(h5 != h3);
         TS_ASSERT(h6 != h4);
+#endif
     }
 
     void testAddLinkWithNullVersionHandle() {
@@ -191,7 +197,9 @@ public:
         vhFromLink = asw->fakeToRealHandle(l1);
         TS_ASSERT(vhFromLink.second == NULL_VERSION_HANDLE);
         vhFromLink = asw->fakeToRealHandle(l2);
+#ifndef ONE_PHANDLE_PER_ATOM
         TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
+#endif
         
         // check the returned truth values
     }
@@ -234,7 +242,9 @@ public:
 
         // Check link
         vhFromLink = asw->fakeToRealHandle(l2);
+#ifndef ONE_PHANDLE_PER_ATOM
         TS_ASSERT(vhFromLink.second != NULL_VERSION_HANDLE);
+#endif
         // check the returned truth values
     }
 
