@@ -61,7 +61,7 @@ namespace haxx {
 
 namespace opencog {
 
-#define USE_BITUBIGRAPHER
+//#define USE_BITUBIGRAPHER
 
 #ifdef USE_BITUBIGRAPHER
 class BITUbigrapher;
