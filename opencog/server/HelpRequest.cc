@@ -63,23 +63,17 @@ bool HelpRequest::execute()
             // Skip hidden commands
             if (cogserver.requestInfo(*it).hidden) continue;
             std::string cmdname(*it);
-            if (config().get_bool("ANSI_ENABLED")) {
-                size_t cmd_length = strlen(cmdname.c_str());
-                cmdname.insert(0,GREEN);
-                cmdname.insert(0,BRIGHT);
-                cmdname.append(COLOR_OFF);
-                //cmdname.append(GREEN);
-                ansi_green(cmdname);
-                cmdname.append(":");
-                cmdname.append(COLOR_OFF);
-                size_t ansi_code_length = strlen(cmdname.c_str()) - cmd_length;
-                oss << "  " << std::setw(maxl+ansi_code_length+2) << std::left << cmdname
-                    << cogserver.requestInfo(*it).description << std::endl;
-            } else {
-                cmdname.append(":");
-                oss << "  " << std::setw(maxl+2) << std::left << cmdname
-                    << cogserver.requestInfo(*it).description << std::endl;
-            }
+            std::string ansi_cmdname;
+            ansi_green(ansi_cmdname); ansi_bright(ansi_cmdname);
+            ansi_cmdname.append(cmdname);
+            ansi_off(ansi_cmdname);
+            ansi_green(ansi_cmdname);
+            ansi_cmdname.append(":");
+            ansi_off(ansi_cmdname);
+            size_t cmd_length = strlen(cmdname.c_str());
+            size_t ansi_code_length = strlen(ansi_cmdname.c_str()) - cmd_length;
+            oss << "  " << std::setw(maxl+ansi_code_length+2) << std::left << ansi_cmdname
+                << cogserver.requestInfo(*it).description << std::endl;
         }
     } else if (_parameters.size() == 1) {
         const RequestClassInfo& cci = cogserver.requestInfo(_parameters.front());
