@@ -75,24 +75,63 @@
             </ol></div>
         </div>
         </section>
-        <!--<section id="list" class="body">
+        <section id="list" class="body">
+        <script language="javascript">
+            var tvToString = function (tv) {
+                var result = "";
+                if (tv.hasOwnProperty("simple")) {
+                    result += "SimpleTV [strength: " + tv.simple.str;
+                    result += " confidence: " + tv.simple.conf + "]";
+                }
+                return result;
+            }
+            var list_atom_details = function (d) {
+                $('.atom-entry'+d["handle"]).append('<td>' + d['type'] + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' + d['name'] + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' +
+                    tvToString(d['truthvalue']) + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' + d['sti'] + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' + d['lti'] + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' + d['incoming'] + '</td>');
+                $('.atom-entry'+d["handle"]).append('<td>' + d['outgoing'] + '</td>');
+            }
+            var list_atom = function (d) {
+                for (var atom in d['result']) {
+                    h = d['result'][atom]
+                    $('.atom-entry:last').after('<tr class="atom-entry'+h+'"><td>'
+                            + h + '</td></tr>');
+                    $.ajax({url:"/rest/0.2/atom/"+h,
+                        dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
+                            list_atom_details(d);
+                        } });
+                }
+
+            }
+            $.ajax({url:"/rest/0.2/list",
+                dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
+                    list_atom(d);
+                } });
+        </script>
         <div>
         <table id="atomlist">
             <thead><tr>
                     <th>UUID</th>
                     <th>Type</th>
                     <th>Name</th>
+                    <th>TV</th>
+                    <th>STI</th>
+                    <th>LTI</th>
                     <th>Incoming</th>
                     <th>Outgoing</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
+                <tr class='atom-entry'>
                 </tr>
             </tbody>
         </table>
         </div>
-        </section>-->
+        </section>
     </div>
 </body>
 </html>
