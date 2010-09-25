@@ -30,6 +30,9 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 
+#include <opencog/util/Config.h>
+#include <opencog/util/ansi.h>
+
 using namespace opencog;
 
 HelpRequest::HelpRequest()
@@ -60,9 +63,22 @@ bool HelpRequest::execute()
             // Skip hidden commands
             if (cogserver.requestInfo(*it).hidden) continue;
             std::string cmdname(*it);
-            cmdname.append(":");
-            oss << "  " << std::setw(maxl+2) << std::left << cmdname
-                << cogserver.requestInfo(*it).description << std::endl;
+            if (config().get_bool("ANSI_ENABLED")) {
+                size_t cmd_length = strlen(cmdname.c_str());
+                cmdname.insert(0,GREEN);
+                cmdname.insert(0,BRIGHT);
+                cmdname.append(COLOR_OFF);
+                cmdname.append(GREEN);
+                cmdname.append(":");
+                cmdname.append(COLOR_OFF);
+                size_t ansi_code_length = strlen(cmdname.c_str()) - cmd_length;
+                oss << "  " << std::setw(maxl+ansi_code_length+2) << std::left << cmdname
+                    << cogserver.requestInfo(*it).description << std::endl;
+            } else {
+                cmdname.append(":");
+                oss << "  " << std::setw(maxl+2) << std::left << cmdname
+                    << cogserver.requestInfo(*it).description << std::endl;
+            }
         }
     } else if (_parameters.size() == 1) {
         const RequestClassInfo& cci = cogserver.requestInfo(_parameters.front());

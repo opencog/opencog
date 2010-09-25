@@ -47,6 +47,7 @@ protected:
             "SERVER_PORT",           "17001",
             "LOG_FILE",              "opencog_server.log",
             "LOG_LEVEL",             "info",
+            "ANSI_ENABLED",          "false",
             "BACK_TRACE_LOG_LEVEL",  "warn",
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
