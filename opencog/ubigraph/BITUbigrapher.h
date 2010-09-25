@@ -73,7 +73,7 @@ public:
 
     bool connected;
 
-    void drawRoot(BITNode* root);
+//    void drawRoot(BITNode* root);
 
     void drawBITNodeFitness(int node_id, float fitness);
 

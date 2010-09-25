@@ -89,21 +89,21 @@ bool BITUbigrapher::isConnected() {
     return connected;
 }
 
-void BITUbigrapher::drawRoot ( BITNode* root )
-{
-    if (!isConnected()) return;
-
-    //cout << "drawRoot" << endl;
-
-    //int root_id = ( int ) root;
-    int root_id = ( int ) (((long)root) % INT_MAX); //! @todo haxx:: use a map of BITNodes to ids, or something.
-    int status = ubigraph_new_vertex_w_id ( root_id );
-    if ( status )
-        logger().error ( "Drawing BITNodeRoot: Status was %d", status );
-    ubigraph_set_vertex_attribute ( root_id, "shape", "sphere" );
-    ubigraph_set_vertex_attribute ( root_id, "color", "#ff0000" );
-    //ubigraph_change_vertex_style(id, _____Style);
-}
+//void BITUbigrapher::drawRoot ( BITNode* root )
+//{
+//    if (!isConnected()) return;
+//
+//    //cout << "drawRoot" << endl;
+//
+//    //int root_id = ( int ) root;
+//    int root_id = ( int ) (((long)root) % INT_MAX); //! @todo haxx:: use a map of BITNodes to ids, or something.
+//    int status = ubigraph_new_vertex_w_id ( root_id );
+//    if ( status )
+//        logger().error ( "Drawing BITNodeRoot: Status was %d", status );
+//    ubigraph_set_vertex_attribute ( root_id, "shape", "sphere" );
+//    ubigraph_set_vertex_attribute ( root_id, "color", "#ff0000" );
+//    //ubigraph_change_vertex_style(id, _____Style);
+//}
 
 // Uses Node ids that are 32-bit ints (required by ubigraph)
 void BITUbigrapher::drawBITNodeFitness(int node_id, float fitness)
@@ -185,17 +185,18 @@ void BITUbigrapher::drawBITLink(int parent_id, int child_id, int slot, bool reus
 // children is a vector of arguments, each having a set of ParametrizedBITNode's
 // ParametrizedBITNode is not a subclass of BITNode, it is a wrapper (i.e. they have a BITNode as a member).
 
-// Sometimes it draws a node at the top (because its parent hasn't been established yet. Possibly because of the BITNode cloning). Might need to call the function from more places in the BITNode/BITNodeRoot code.
+// [fixed] Sometimes it draws a node at the top (because its parent hasn't been established yet. Possibly because of the BITNode cloning). Might need to call the function from more places in the BITNode/BITNodeRoot code.
 
 void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
 {
     if (!isConnected()) return;
 
+    // Optional: don't draw Generators.
     if (node->rule && !node->iscomposer()) {
         return;
     }
 
-    logger().fine("Drawing BITNode with %d arg slots", node->children.size());
+    logger().info("Drawing BITNode with %d arg slots", node->children.size());
     //cout << "Drawing BITNode with " << children.size() << " args" << endl;
 
     //int node_id = ( int ) node;
@@ -216,6 +217,9 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
         // Display the label as well (they can be switched off in Ubigraph, so might as well).
         drawBITNodeLabel(node, node_id);
         ubigraph_set_vertex_attribute ( node_id, "shape", "sphere" );
+    } else {
+        ubigraph_set_vertex_attribute ( node_id, "shape", "sphere" );
+        ubigraph_set_vertex_attribute ( node_id, "color", "#0000ff" );
     }
 
     // Callback
@@ -226,11 +230,11 @@ void BITUbigrapher::drawBITNode ( BITNode* node, int ruleNumber)
     // Should be the child number!
     //ubigraph_set_vertex_attribute(child_id, "label", toString(i).c_str());
 
-//    drawArgSlots(node);
+    drawArgSlots(node);
 
     // Attach this BITNode to its parent(s).
     foreach(parent_link<BITNode> p, node->parents) {
-        drawArgSlots(p.link); // Gets called too many times, but means you don't have to see the slots until necessary
+        //drawArgSlots(p.link); // Gets called too many times, but means you don't have to see the slots until necessary
         drawBITLink(findBITNodeID(p.link), node_id, p.parent_arg_i);
     }
 
@@ -289,7 +293,7 @@ void BITUbigrapher::hideBITNode(BITNode* node) {
 
     for (unsigned int i = 0; i < node->children.size(); i++ ) {
         //cout << "Drawing BITNode arg #" << i << endl;
-        // Display and attach that arg
+        // Remove that arg
         unsigned int arg_id = node_id + i + 1; // haxx:: since a BITNode takes up a lot more than a few bytes presumably
         int status = ubigraph_remove_vertex( arg_id ); // TODO use a different id system
         if ( status )

@@ -289,6 +289,14 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
 //  rawPrint(*raw_target, raw_target->begin(), -1);
     children.push_back(set<ParametrizedBITNode>());
+
+#ifdef USE_BITUBIGRAPHER
+    haxx::BITUSingleton = new BITUbigrapher;
+    haxx::BITUSingleton->init();
+    //haxx::BITUSingleton->drawRoot(this);
+    haxx::BITUSingleton->drawBITNode(this);
+#endif
+
     cprintf(3, "scoper...\n");
     BITNode* root_variable_scoper = createChild(0, NULL, dummy_args,
             Btr<BoundVTree>(new BoundVTree(make_vtree(NODE))),
@@ -306,14 +314,6 @@ BITNodeRoot::BITNodeRoot(meta _target, RuleProvider* _rp, bool _rTrails,
 
     eval_results.push_back(set<VtreeProvider*>());
     cprintf(3, "Root ok\n");
-
-#ifdef USE_BITUBIGRAPHER
-    haxx::BITUSingleton = new BITUbigrapher;
-    haxx::BITUSingleton->init();
-    haxx::BITUSingleton->drawRoot(this);
-    haxx::BITUSingleton->drawBITNode(this);
-    haxx::BITUSingleton->drawBITNode(root_variable_scoper);
-#endif
 }
 
 /// The complexity here results from bindings and virtuality.
@@ -509,13 +509,10 @@ void BITNode::create()
     }
 
 #ifdef USE_BITUBIGRAPHER
-    // We don't want to run this on the scoper, because the BITviz hasn't been initialised yet
-    // and the root hasn't been drawn.
-    if (rule) {
-        RuleProvider * rp = this->root->rp;
-        int ruleNumber = 2 + std::find(rp->begin(), rp->end(), rule) - rp->begin();
-        haxx::BITUSingleton->drawBITNode(this, ruleNumber);
-    }
+    RuleProvider * rp = this->root->rp;
+    int ruleNumber = (!rule) ? 1 : // (one of the) root variable scopers
+            (2 + std::find(rp->begin(), rp->end(), rule) - rp->begin());
+    haxx::BITUSingleton->drawBITNode(this, ruleNumber);
 #endif
 }
 

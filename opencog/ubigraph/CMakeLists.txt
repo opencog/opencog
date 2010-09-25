@@ -1,3 +1,5 @@
+SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+
 ADD_LIBRARY (ubigraph SHARED
     UbigraphModule
     Ubigrapher
