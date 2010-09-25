@@ -82,7 +82,7 @@ const char* PLNModule::usageInfo =
     "---\n"
     " log <[-5..5]> - Set log level (0 = normal log level).\n"
     " record-trails - Switch the recording of inference trails ON/OFF (default: ON)\n"
-    " infer <s>     - Infer (backchaining) until result found with conf > 0.01 OR 's' inference steps\n"
+    " bc|infer <s>  - Infer (backchaining) until result found with conf > 0.01 OR 's' inference steps\n"
     "                 have been taken.\n"
 	" fc <s>        - Forward chain until 's' inference steps have been taken.\n"
     " atom <h>      - print the atom with PLN Handle h\n"
@@ -419,7 +419,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             ss << "Recording trails now " << (recordingTrails?"ON":"OFF") << endl;
             state->setRecordingTrails(false);
         }
-        else if (c == "infer") {
+        else if (c == "bc" || c == "infer") {
             // Give max nr of steps that we can take.
             input(h, args);
             j = (long) h;
