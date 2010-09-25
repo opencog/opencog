@@ -19,6 +19,7 @@ ENDIF (APPLE)
 #
 # ADD_LIBRARY(util SHARED
 ADD_LIBRARY(util 
+    ansi
 	algorithm
 	based_variant
 	Config
@@ -52,6 +53,7 @@ TARGET_LINK_LIBRARIES(util
 )
 
 INSTALL(FILES
+    ansi.h
 	algorithm.h
 	based_variant.h
 	Config.h

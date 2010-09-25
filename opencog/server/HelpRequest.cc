@@ -68,7 +68,8 @@ bool HelpRequest::execute()
                 cmdname.insert(0,GREEN);
                 cmdname.insert(0,BRIGHT);
                 cmdname.append(COLOR_OFF);
-                cmdname.append(GREEN);
+                //cmdname.append(GREEN);
+                ansi_green(cmdname);
                 cmdname.append(":");
                 cmdname.append(COLOR_OFF);
                 size_t ansi_code_length = strlen(cmdname.c_str()) - cmd_length;
