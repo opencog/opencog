@@ -98,8 +98,8 @@
             var list_atom = function (d) {
                 for (var atom in d['result']) {
                     h = d['result'][atom]
-                    $('.atom-entry:last').after('<tr class="atom-entry'+h+'"><td>'
-                            + h + '</td></tr>');
+                    $('.atom-entry:last').after('<tr class="atom-entry'+h+'"><td>' +
+                            '<a href="#" onclick="current_atom=h;">'+ h + '</a></td></tr>');
                     $.ajax({url:"/rest/0.2/atom/"+h,
                         dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
                             list_atom_details(d);
