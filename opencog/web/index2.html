@@ -63,8 +63,9 @@
         </div>
         </section>
         <section id="viewer" class="body">
+        <script language="javascript" src="resources/processhg.js"></script>
         <div id="viewbox">
-            <div id="visualview"> <canvas datasrc="resources/processhg.pjs" width="600" height="300"></canvas> </div>
+            <div id="visualview"> <canvas id="graphview" width="600" height="300"></canvas> </div>
             <div id="atominfo"><ol>
                 <li>UUID: <span id="atomuuid"></span> </li>
                 <li>Atom type: <span id="atomtype"></span> </li>
@@ -99,12 +100,21 @@
                 for (var atom in d['result']) {
                     h = d['result'][atom]
                     $('.atom-entry:last').after('<tr class="atom-entry'+h+'"><td>' +
-                            '<a href="#" onclick="current_atom=h;">'+ h + '</a></td></tr>');
+                            /*'<a href="#" onclick="g.current_atom=' + h +';">'+ h + '</a></td></tr>');*/
+                            '<a href="#">'+ h + '</a></td></tr>');
                     $.ajax({url:"/rest/0.2/atom/"+h,
                         dataType:"json",success:function (d,textStatus,XMLHttpRequest) {
                             list_atom_details(d);
                         } });
                 }
+                $('#atomlist td a').bind('click',function(ev) {
+                    /* TODO: reset view and load */
+                    ev.preventDefault();
+                    g.nodes[g.current_atom].mass = 1;
+                    g.current_atom = parseInt($(this).html());
+                    g.nodes[g.current_atom].mass = 3;
+                    g.kinetic_energy = g.kinetic_threshold+1;
+                });
 
             }
             $.ajax({url:"/rest/0.2/list",
