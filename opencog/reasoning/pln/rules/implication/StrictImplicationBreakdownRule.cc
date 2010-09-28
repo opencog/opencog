@@ -110,18 +110,37 @@ Rule::setOfMPs StrictImplicationBreakdownRule::o2iMetaExtra(meta outh, bool& ove
 
 BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& premiseArray, pHandle CX, bool fresh) const
 {
+    cprintf(3,"StrictImplicationBreakdownRule::compute:\n");
+
+    // In FC, the input sometimes comes in in the wrong order (shit, ANDLinks are now asymmetric)
+    // validate didn't seem to mind...
     assert(validate(premiseArray));
+//    const uint n = premiseArray.size();
+//    std::cout << n << std::endl;
+//    if (n != inputFilter.size())
+//        cprintf(0,"Rule::validate FALSE. Input vector size: %d\n", n);
+//    typedef weak_atom< meta > vertex_wrapper;
+//    for (uint i = 0; i < n; i++) {
+//        vertex_wrapper mp(inputFilter[i]);
+//        pHandle h2 = _v2h(premiseArray[i]);
+//
+//        cprintf(0,"StrictImplicationBreakdownRule validate FALSE. Input vector:\n");
+//        NMPrinter printer(NMP_HANDLE|NMP_TYPE_NAME);
+//        for (uint j=0;j<n;j++)
+//            printer.print(_v2h(premiseArray[j]));
+//        cprintf(0,"/Input vector\n");
+//
+//        assert (mp(h2));
+//    }
     
     //printTree(premiseArray[0],0,1);
-    
-    cprintf(3,"StrictImplicationBreakdownRule::compute:");
     
     NMPrinter printer(NMP_ALL);
     for (uint i=0;i<premiseArray.size();i++)
         printer.print(_v2h(premiseArray[i]), 3);
     
-    //vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
-    //    vt2(make_vtree(_v2h(premiseArray[1])));
+    vtree   vt1(make_vtree(_v2h(premiseArray[0]))),
+        vt2(make_vtree(_v2h(premiseArray[1])));
     
     /** haxx:: \todo Temporarily disabled!
         This check does not hold if one of the args
@@ -135,22 +154,22 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     
 #if 0
     
-    if (make_vtree(asw->getOutgoing(v2h(premiseArray[0]),0))
-        != make_vtree(v2h(premiseArray[1])))
+    if (make_vtree(asw->getOutgoing(_v2h(premiseArray[0]),0))
+        != make_vtree(_v2h(premiseArray[1])))
         {
             cprintf(0,"StrictImplicationBreakdownRule args fail:\n");
 #if 0
-            printTree(v2h(premiseArray[0]),0,0);
-            printTree(asw->getOutgoing(v2h(premiseArray[0]),0),0,0);
-            printTree(v2h(premiseArray[1]),0,0);
+            printTree(_v2h(premiseArray[0]),0,0);
+            printTree(asw->getOutgoing(_v2h(premiseArray[0]),0),0,0);
+            printTree(_v2h(premiseArray[1]),0,0);
             
             //      rawPrint(premiseArray[0], premiseArray[0].begin(), 0);
             rawPrint(vt1, vt1.begin(), 0);
             rawPrint(vt2, vt2.begin(), 0);
 #else 
-            printer.print(v2h(premiseArray[0]), -10);
-            printer.print(asw->getOutgoing(v2h(premiseArray[0]),0), -10);
-            printer.print(v2h(premiseArray[1]), -10);
+            printer.print(_v2h(premiseArray[0]), -10);
+            printer.print(asw->getOutgoing(_v2h(premiseArray[0]),0), -10);
+            printer.print(_v2h(premiseArray[1]), -10);
             
             //        printer.print(premiseArray[0].begin());
             printer.print(vt1.begin(), -10);
@@ -163,6 +182,10 @@ BoundVertex StrictImplicationBreakdownRule::compute(const std::vector<Vertex>& p
     pHandle implication = _v2h(premiseArray[0]);
     pHandle antecedant = _v2h(premiseArray[1]);
     pHandle conclusion = asw->getOutgoing(implication, 1);
+    if (conclusion == PHANDLE_UNDEFINED) {
+        printTree(implication,0,0);
+        assert(false);
+    }
     
     TruthValue* tvs[] = {
         (TruthValue*) &(asw->getTV(implication)),
