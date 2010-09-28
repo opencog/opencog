@@ -66,7 +66,7 @@ static const string it="it"; // regression based on input table
 static const string cp="cp"; // regression based on combo program to learn
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
-static const string mp="mp"; // multiplex
+static const string mux="mux"; // multiplex
 static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
 static const string ann_it="ann-it"; // regression based on input table using ann
 static const string ann_cp="ann-cp"; // regression based on combo program using ann

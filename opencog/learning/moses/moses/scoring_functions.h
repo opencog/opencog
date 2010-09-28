@@ -59,9 +59,8 @@ struct disjunction {
     }
 };
 
-// multiplex(a1, ..., an, d1, ..., dm) = true iff m = 2^n and for all
-// i in [1, m], di = 1 if i is the address of the string bit described
-// by a1, ..., an, di = 0 otherwise.
+// multiplex(a1, ..., an, d1, ..., dm) = 1 iff m = 2^n and di = 1 if i
+// is the address of the string bit described by a1, ..., an.
 struct multiplex {
     multiplex(unsigned int n) : arity(n) { }
     unsigned int arity;
@@ -74,13 +73,8 @@ struct multiplex {
         for(unsigned int i = 0; i < arity; ++i)
             if(*from++)
                 addr += pow2(i);
-        // check that it is correct
-        It addr_it = from+addr;
-        for(; from != to; from++) {
-            if(*from && from != addr_it)
-                return false;
-        }
-        return *addr_it;
+        // return the input corresonding to that address
+        return *(from+addr);
     }
 };
 

@@ -199,7 +199,7 @@ arity_t infer_arity(const string& problem,
             illformed_exit(tr);
             return -1;
         }
-    } else if(problem == pa || problem == dj || problem == mp) {
+    } else if(problem == pa || problem == dj || problem == mux) {
         return problem_size;
     } else if(problem == sr) {
         return 1;
@@ -297,7 +297,7 @@ int main(int argc,char** argv) {
          append("), regression based on combo program (").append(cp).
          append("), even parity (").append(pa).
          append("), disjunction (").append(dj).
-         append("), multiplex (").append(mp).
+         append("), multiplex (").append(mux).
          append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").\n").c_str())
         (opt_desc_str(combo_str_opt).c_str(),
@@ -307,9 +307,9 @@ int main(int argc,char** argv) {
          value<unsigned int>(&problem_size)->default_value(5),
          string("For even parity (").append(pa).
          append("), disjunction (").append(dj).
-         append(") and multiplex (").append(mp).
+         append(") and multiplex (").append(mux).
          append(") the problem size corresponds to the arity.").
-         append(" Note that for multiplex (").append(mp).
+         append(" Note that for multiplex (").append(mux).
          append(") the problem size must be equal to n+2^n.").
          append(" For regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
          append(") the problem size corresponds to the order o.\n").c_str())
@@ -647,7 +647,7 @@ int main(int argc,char** argv) {
                               bscore, cache_size, opt_algo,
                               eda_param, meta_param, moses_param,
                               vm, mmr_pa);
-    } else if(problem == mp) { // multiplex
+    } else if(problem == mux) { // multiplex
         // @todo: for the moment occam's razor and partial truth table are ignored
         multiplex func(multiplex_arity(arity));
 
