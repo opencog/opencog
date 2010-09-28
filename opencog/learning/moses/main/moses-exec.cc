@@ -21,6 +21,10 @@
  */
 #include "moses-exec.h"
 
+#include <opencog/util/numeric.h>
+
+using opencog::integer_log2;
+
 const unsigned int max_filename_size = 255;
 
 /**
@@ -195,7 +199,7 @@ arity_t infer_arity(const string& problem,
             illformed_exit(tr);
             return -1;
         }
-    } else if(problem == pa || problem == dj) {
+    } else if(problem == pa || problem == dj || problem == mp) {
         return problem_size;
     } else if(problem == sr) {
         return 1;
@@ -203,6 +207,18 @@ arity_t infer_arity(const string& problem,
         unsupported_problem_exit(problem);
         return -1;
     }
+}
+
+// returns n such that a = n+2^n
+arity_t multiplex_arity(arity_t a) {
+    for(unsigned int n = 1; n <= integer_log2(a); n++)
+        if(n+pow2(n) == (unsigned int)a)
+            return n;
+    // not found, exit
+    std::cerr << "error: for multiplex the arity " << a 
+              << " must be equal to n+2^n, but there is no such n" << std::endl;
+    exit(1);
+    return -1;
 }
 
 int main(int argc,char** argv) { 
@@ -281,6 +297,7 @@ int main(int argc,char** argv) {
          append("), regression based on combo program (").append(cp).
          append("), even parity (").append(pa).
          append("), disjunction (").append(dj).
+         append("), multiplex (").append(mp).
          append("), regression of f(x)_o = sum_{i={1,o}} x^i (").append("sr").
          append(").\n").c_str())
         (opt_desc_str(combo_str_opt).c_str(),
@@ -289,9 +306,12 @@ int main(int argc,char** argv) {
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
          string("For even parity (").append(pa).
-         append(") and disjunction (").append(dj).
-         append(") the problem size corresponds to the arity,"
-                " for regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
+         append("), disjunction (").append(dj).
+         append(") and multiplex (").append(mp).
+         append(") the problem size corresponds to the arity.").
+         append(" Note that for multiplex (").append(mp).
+         append(") the problem size must be equal to n+2^n.").
+         append(" For regression of f(x)_o = sum_{i={1,o}} x^i (").append(sr).
          append(") the problem size corresponds to the order o.\n").c_str())
         (opt_desc_str(nsamples_opt).c_str(),
          value<int>(&nsamples)->default_value(-1),
@@ -612,6 +632,24 @@ int main(int argc,char** argv) {
     } else if(problem == dj) { // disjunction
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
+
+        // if no exemplar has been provided in option use the default
+        // contin_type exemplar (and)
+        if(exemplars.empty()) {            
+            exemplars.push_back(type_to_exemplar(id::boolean_type));
+        }
+
+        type_tree tt = declare_function(id::boolean_type, arity);
+        logical_bscore bscore(func, arity);
+        metapop_moses_results(rng, exemplars, tt,
+                              logical_reduction(reduct_candidate_effort),
+                              logical_reduction(reduct_knob_building_effort),
+                              bscore, cache_size, opt_algo,
+                              eda_param, meta_param, moses_param,
+                              vm, mmr_pa);
+    } else if(problem == mp) { // multiplex
+        // @todo: for the moment occam's razor and partial truth table are ignored
+        multiplex func(multiplex_arity(arity));
 
         // if no exemplar has been provided in option use the default
         // contin_type exemplar (and)

@@ -30,9 +30,13 @@
 namespace moses
 {
 
+using opencog::pow2;
+
 // even_parity(x1, ..., xn) = true iff (int)x1 + ... + (int)xn is even
 // where n is the arity of even_parity
 struct even_parity {
+    // [from, to( corresponds to the sequence of inputs of the
+    // function, the result corresponds to its output
     template<typename It>
     bool operator()(It from,It to) const {
         bool parity = true;
@@ -42,8 +46,10 @@ struct even_parity {
     }
 };
 
-//disjunction(x1, ..., xn) = true iff there exists i such that xi is true
+// disjunction(x1, ..., xn) = true iff there exists i such that xi is true
 struct disjunction {
+    // [from, to( corresponds to the sequence of inputs of the
+    // function, the result corresponds to its output
     template<typename It>
     bool operator()(It from,It to) const {
         while (from != to)
@@ -52,6 +58,32 @@ struct disjunction {
         return false;
     }
 };
+
+// multiplex(a1, ..., an, d1, ..., dm) = true iff m = 2^n and for all
+// i in [1, m], di = 1 if i is the address of the string bit described
+// by a1, ..., an, di = 0 otherwise.
+struct multiplex {
+    multiplex(unsigned int n) : arity(n) { }
+    unsigned int arity;
+    // [from, to( corresponds to the sequence of inputs of the
+    // function, the result corresponds to its output
+    template<typename It>
+    bool operator()(It from, It to) const {
+        // calculate address
+        unsigned int addr = 0;
+        for(unsigned int i = 0; i < arity; ++i)
+            if(*from++)
+                addr += pow2(i);
+        // check that it is correct
+        It addr_it = from+addr;
+        for(; from != to; from++) {
+            if(*from && from != addr_it)
+                return false;
+        }
+        return *addr_it;
+    }
+};
+
 
 //simple function : f(x)_o = sum_{i={1,o}} x^i
 //that is for instance:
