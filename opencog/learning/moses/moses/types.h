@@ -78,7 +78,7 @@ namespace moses {
     inline complexity_t get_complexity(const bscored_combo_tree& bst) { 
         return get_complexity(bst.second);
     }
-   inline complexity_t get_complexity(const scored_combo_tree& st) { 
+    inline complexity_t get_complexity(const scored_combo_tree& st) { 
         return get_complexity(st.second);
     }
 
@@ -91,7 +91,7 @@ namespace moses {
     inline score_t get_score(const bscored_combo_tree& bst) { 
         return get_score(bst.second);
     }
-   inline score_t get_score(const scored_combo_tree& st) { 
+    inline score_t get_score(const scored_combo_tree& st) { 
         return get_score(st.second);
     }
 
@@ -102,9 +102,29 @@ namespace moses {
         return get_bscore(bst.second);
     }
 
+    // ostream functions
     template<typename Out>
     Out& ostream_behavioral_score(Out& out, const behavioral_score& bs) {
         return opencog::ostreamContainer(out, bs, " ", "[", "]");
+    }
+
+    /**
+     * stream out a candidate along with their scores (optionally
+     * complexity and bscore).
+     */
+    template<typename Out>
+    Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
+                                    bool output_complexity = false,
+                                    bool output_bscore = false) {
+        out << get_score(candidate) << " ";
+        if(output_complexity)
+            out << get_complexity(candidate) << " ";
+        out << get_tree(candidate) << std::endl;
+        if(output_bscore) {
+            ostream_behavioral_score(out, get_bscore(candidate));
+            out << std::endl;
+        }
+        return out;
     }
 
 } // ~namespace moses

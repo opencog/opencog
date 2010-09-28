@@ -232,10 +232,17 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
             behavioral_score bscore;
             opencog::istreamContainer(in, std::back_inserter(bscore), "[", "]");
             // insert read element in candidates
-            candidates.insert(std::make_pair(tr,
-                                             std::make_pair(bscore,
-                                                            make_pair(score,
-                                                                      complexity))));
+            bscored_combo_tree candidate =
+                make_pair(tr, make_pair(bscore, make_pair(score, complexity)));
+            candidates.insert(candidate);
+            // Logger
+            if(logger().getLevel() >= opencog::Logger::FINE) {
+                logger().fine("Parsed candidate:");
+                stringstream ss;
+                logger().fine(ostream_bscored_combo_tree(ss, candidate,
+                                                         true, true).str());
+            }
+            // ~Logger
         }
     }
 };

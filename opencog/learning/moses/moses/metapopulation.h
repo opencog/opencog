@@ -742,15 +742,8 @@ struct metapopulation : public set < bscored_combo_tree,
                  bool output_complexity = false,
                  bool output_bscore = false) {
         for(; from != to && n != 0; from++, n--) {
-            const bscored_combo_tree& bsc_tr = *from;
-            out << get_score(bsc_tr) << " ";
-            if(output_complexity)
-                out << get_complexity(bsc_tr) << " ";
-            out << get_tree(bsc_tr) << std::endl;
-            if(output_bscore) {
-                ostream_behavioral_score(out, get_bscore(bsc_tr));
-                out << std::endl;
-            }
+            ostream_bscored_combo_tree(out, *from,
+                                       output_complexity, output_bscore);
         }
         return out;
     }
