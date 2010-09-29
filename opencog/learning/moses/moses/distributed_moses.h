@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include <ext/stdio_filebuf.h>
 
@@ -237,8 +238,7 @@ void parse_result(const proc_map::value_type& pmv,
 }
 
 
-host_proc_map init(const jobs_t& jobs)
-{
+host_proc_map init(const jobs_t& jobs) {
     host_proc_map hpm;
     foreach(const jobs_t::value_type job, jobs) {
         hpm.insert(make_pair(job.first, proc_map()));
@@ -246,8 +246,20 @@ host_proc_map init(const jobs_t& jobs)
     return hpm;
 }
 
-host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& jobs)
-{
+// kill all processes in pm
+void killall(const proc_map& pm) {
+    foreach(const proc_map::value_type& pmv, pm)
+        if(is_running(pmv))
+            kill(get_pid(pmv), 15); // send a TERM signal
+}
+
+// kill all processes in hpm
+void killall(const host_proc_map& hpm) {
+    foreach(const host_proc_map::value_type& hpmv, hpm)
+        killall(hpmv.second);
+}
+
+host_proc_map::iterator find_free_resource(host_proc_map& hpm, const jobs_t& jobs) {
     host_proc_map::iterator hpm_it = hpm.begin();
     for(jobs_t::const_iterator jit = jobs.begin(); jit != jobs.end();
         jit++, hpm_it++) {
@@ -389,6 +401,10 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
         // wait for a second to not take all resources
         sleep(1);
     }
+
+    // kill all children processes
+    killall(hpm);
+
     // Logger
     logger().info("Distributed MOSES ends");
     // ~Logger
