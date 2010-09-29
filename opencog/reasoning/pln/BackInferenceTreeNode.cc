@@ -1630,6 +1630,7 @@ next_args:; //! @todo replace goto!
 #ifdef USE_BITUBIGRAPHER
                 // Calls it multiple times, but no problem.
                 haxx::BITUSingleton->foundResult(this);
+                haxx::BITUSingleton->foundResult(root);
 #endif // USE_BITUBIGRAPHER
 
 /*      foreach(const set<VtreeProvider>& eval_res_set, GetEvalResults())
@@ -2127,7 +2128,12 @@ string BITNodeRoot::printTrail(pHandle h, unsigned int level) const
         assert (h_it != haxx::inferred_from.end());
 
 //        NMPrinter nmp(NMP_ALL, 0,
-        NMPrinter nmp(NMP_DEFAULT | NMP_HANDLE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
+//        NMPrinter nmp(NMP_DEFAULT | NMP_HANDLE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
+//                NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
+//                level+1);
+
+        NMPrinter nmp(NMP_BRACKETED | NMP_TYPE_NAME | NMP_NODE_NAME |
+                NMP_HANDLE | NMP_NO_TV_WITH_NO_CONFIDENCE, 0,
                 NM_PRINTER_DEFAULT_INDENTATION_TAB_SIZE, 0,
                 level+1);
 

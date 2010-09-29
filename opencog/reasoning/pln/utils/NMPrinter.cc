@@ -224,7 +224,7 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
         pHandle newH = atw->getOutgoing(h, 0);
         printHandle(out, newH, indentationLevel);
     } else {
-        if (!(printOptions & NMP_BRACKETED)) printSpaces(out, indentationLevel);
+        /*if (!(printOptions & NMP_BRACKETED))*/ printSpaces(out, indentationLevel);
         if (isNode) {
             char* nodeName = strdup(atw->getName(h).c_str());
             if (printOptions & NMP_NODE_NAME) { 
@@ -243,9 +243,12 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
             }
         } else {
             if (printOptions & NMP_TYPE_NAME) {
-                const char* typeStr = classserver().getTypeName(type).c_str();
+                string typeStr = classserver().getTypeName(type);
+                // Get rid of the "Link" at the end, to make it more compact.
+                typeStr = typeStr.substr(0, typeStr.length()-4);
+
                 out << typeStr;
-                if (printToFile) fprintf(logFile, "%s", typeStr);
+                if (printToFile) fprintf(logFile, "%s", typeStr.c_str());
             }
         }        
         if (printOptions & NMP_TYPE_ID) {
@@ -298,7 +301,10 @@ void NMPrinter::printHandle(std::ostream& out, pHandle h, int indentationLevel) 
                     if (printToFile) fprintf(logFile, ",");
                 }
                 pHandle newH = atw->getOutgoing(h, i);
-                printHandle(out, newH, indentationLevel+1);
+                if ((printOptions & NMP_BRACKETED))
+                    printHandle(out, newH, 0);
+                else
+                    printHandle(out, newH, indentationLevel+1);
             }
             if (printOptions & NMP_BRACKETED) {
                 out << ")";
