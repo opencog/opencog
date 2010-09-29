@@ -170,6 +170,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
     // TODO maybe use regex_iterator
 
     testDir+= "targets/";
+    //if (!test_bc) testDir += "both";
 
     // This method is the main one for current and future tests.
     // Also, there are a lot of different errors that can happen.
@@ -280,10 +281,10 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     if (test_bc)
         t->minEvalsOfFittestBIT *= 100; //Minimum "resolution"
     else
-        // 12 is the maximum depth the BIT reaches, and each "step" of FC now does one level
-        t->minEvalsOfFittestBIT = 12;
+        // 12 is the maximum depth the BIT reaches (for now), and each "step" of FC now does one level
+        t->minEvalsOfFittestBIT = 7;
 
-    const int expansions_per_run = 1000;
+    const int expansions_per_run = test_bc ? 1000 : 1;
     int total_expansions = 0;
 
     if (t->minEvalsOfFittestBIT > 0) {
@@ -391,15 +392,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                "passed: %s.\n"
                "**********************************************\n",
             (etv?etv->toString().c_str():"(null TV)"));
-
-        finish = clock();
-        duration = (double)(finish - start) / CLOCKS_PER_SEC;
-        printf( "Test took %2.2f seconds TOTAL.\n", duration );
-
-        printf( "Custom test time was %3.3f seconds.\n",
-                test::custom_duration );
-        printf( "Custom test time was %3.3f seconds.\n",
-                test::custom_duration2 );
     }
     else {
         printf("\n**********************************************\n"
@@ -407,6 +399,16 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
                "**********************************************\n",
         (etv?etv->toString().c_str():"(null TV)"));
     }
+
+    // Still want to show this on failed tests
+    finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+    printf( "Test took %2.2f seconds TOTAL.\n", duration );
+
+    printf( "Custom test time was %3.3f seconds.\n",
+            test::custom_duration );
+    printf( "Custom test time was %3.3f seconds.\n",
+            test::custom_duration2 );
 
     if (test_bc) {
         printf("Test results: [");
@@ -455,6 +457,7 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 #endif
     if (etv != NULL) delete etv;
     //asw->reset(NULL);
+//    sleep(10);
     return passed;
 }
 
