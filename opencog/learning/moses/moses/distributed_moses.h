@@ -200,6 +200,9 @@ bool is_running(const proc_map::value_type& pmv) {
     if (length < 0) {
         std::cerr << "Error while reading file position" << std::endl;
         exit(1);
+    } else if(length > 0) {
+        // wait for the file to not beeing written anymore
+        flockfile(fp);
     }
     return length == 0;
 #endif
