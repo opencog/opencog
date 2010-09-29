@@ -30,6 +30,7 @@
 #include <ext/stdio_filebuf.h>
 
 #include <boost/program_options.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <opencog/util/iostreamContainer.h>
 
@@ -37,25 +38,28 @@
 #include "metapopulation.h"
 #include "moses.h"
 
-// uncomment to use popen() instead of system()
-// #define USE_POPEN
-
 namespace moses
 {
 
 using namespace boost::program_options;
+using boost::tuple;
+using boost::make_tuple;
 
-// map the PID to the FILE of the output of the process and its command line
-typedef std::pair<string, FILE*> string_file;
-typedef std::map<int, string_file> proc_map;
+// map the PID to the command line (cmd), the temporary file name
+// (tmp), and the FILE of the output of the process (file)
+typedef tuple<string, string, FILE*> cmd_tmp_file;
+typedef std::map<int, cmd_tmp_file> proc_map;
 int get_pid(const proc_map::value_type& pmv) {
     return pmv.first;
 }
 string get_cmd(const proc_map::value_type& pmv) {
-    return pmv.second.first;
+    return pmv.second.get<0>();
+}
+string get_tmp(const proc_map::value_type& pmv) {
+    return pmv.second.get<1>();
 }
 FILE* get_file(const proc_map::value_type& pmv) {
-    return pmv.second.second;
+    return pmv.second.get<2>();
 }
 // map the name of host and its proc_map
 typedef std::map<string, proc_map> host_proc_map;
@@ -115,18 +119,11 @@ string build_cmdline(const variables_map& vm,
         res += "'";
     }
 
-    // it seems ok so far, apparently the limit is 4096 not 255
-    // OC_ASSERT(res.size() < 255,
-    //           "It is unlikely the OS support such a long name %s, the only thing"
-    //           " to do is upgrade the code so that it can express this command"
-    //           " in less than 255 chars", res.c_str());
-
     return res;
 }
 
 // run the given command and return its corresponding proc_map
 proc_map::value_type launch_cmd(string cmd) {
-#ifndef USE_POPEN
     // append " > tempfile&" to cmd
     char tempfile[] = "/tmp/moses-execXXXXXX";
     int fd = mkstemp(tempfile);
@@ -134,20 +131,16 @@ proc_map::value_type launch_cmd(string cmd) {
         std::cerr << "could not create temporary file" << std::endl;
         exit(1);
     }
-    cmd += string(" > ") + string(tempfile) + string("&");
-#endif
+    string tmp(tempfile);
+    cmd += string(" > ") + tmp + "&";
 
     // launch the command
-#ifdef USE_POPEN
-    FILE* fp = popen(cmd.c_str(), "r");
-#else
     int res = system(cmd.c_str());
     if(res != 0) {
         std::cerr << "the execution of " << cmd << "has failed" << std::endl;
         exit(1);        
     }
     FILE* fp = fopen(tempfile, "r");
-#endif
 
     // get its PID
     string exec_name = cmd.substr(0, cmd.find(" "));
@@ -155,41 +148,26 @@ proc_map::value_type launch_cmd(string cmd) {
     int pid;
     int count_matches = fscanf(fp_pid, "%u", &pid);
     OC_ASSERT(count_matches == 1);
-    return make_pair(pid, make_pair(cmd, fp));
+
+    // make the proc_map
+    return make_pair(pid, make_tuple(cmd, tmp, fp));
 }
 
-// check if a process is running, works only under linux or other UNIX
-bool is_running(const proc_map::value_type& pmv) {
-#ifdef USE_POPEN
-    string path("/proc/");
-    path += boost::lexical_cast<string>(get_pid(pmv));
-    bool pid_file = access(path.c_str(), F_OK) != -1;
-    if(pid_file) { // double check that it is the right PID by
-                   // comparing the initial command line with the
-                   // current one
-        // path += "/cmdline";
-        // ifstream clf;
-        // sleep(10);
-        // clf.open(path.c_str());
-        // clf.seekg(0, ios::end);
-        // int length = clf.tellg();
-        // std::cout << length << std::endl;
-        // clf.seekg(0, ios::beg);
-        // char* cmdline = new char[length];
-        // clf.read(cmdline, length);
-        // for(int i = 0; i < length; i++) {
-        //     char c = cmdline[i];
-        //     cmdline[i] = (c == 0? 32 : c);
-        // }
-        // clf.close();
-        // std::cout << cmdline << std::endl;
-        // std::cout << "original|" << get_cmd(pmv) << "|" << std::endl;
-        // // std::cout << "fromproc|" << cls << "|" << std::endl;        
-        // // return get_cmd(pmv) == cls;
-        return true;
+// check if a file is being used by process of PID pid 
+    bool is_being_written(const string& file_name, int pid) {
+    FILE* fp = popen(string("fuser ").append(file_name).append(" 2> /dev/null").c_str(), "r");
+    while(!feof(fp)) {
+        int p;
+        int count_matches = fscanf(fp, "%u", &p);
+        OC_ASSERT(count_matches == 1);
+        if(pid == p)
+            return true;
     }
     return false;
-#else
+}
+
+// check if a process is running
+bool is_running(const proc_map::value_type& pmv) {
     // check if the file is still empty
     FILE* fp = get_file(pmv);
     if(fseek(fp, 0, SEEK_END)) {
@@ -200,21 +178,17 @@ bool is_running(const proc_map::value_type& pmv) {
     if (length < 0) {
         std::cerr << "Error while reading file position" << std::endl;
         exit(1);
-    } else if(length > 0) {
-        // wait for the file to not beeing written anymore
-        flockfile(fp);
+    } else if(length == 0) {
+        return true;
     }
-    return length == 0;
-#endif
+    return is_being_written(get_tmp(pmv), get_pid(pmv));
 }
 
 /**
  * read the istream, add the candidates, fill max_evals
  */
 void parse_result(istream& in, metapop_candidates& candidates, int& evals) {
-#ifndef USE_POPEN
     in.seekg(0);
-#endif
     while(!in.eof()) {
         string s;
         in >> s;
