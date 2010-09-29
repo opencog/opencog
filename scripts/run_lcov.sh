@@ -11,7 +11,7 @@ mkdir -p coverage
 rm coverage/$name.info
 
 # is run in the BUILDDIR/tests directory so .. is the root
-lcov --directory .. --zerocounter
+lcov --directory . --zerocounter
 # run test
 $dir/$name
 ret_val=$?
