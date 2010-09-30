@@ -170,7 +170,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
     // TODO maybe use regex_iterator
 
     testDir+= "targets/";
-    //if (!test_bc) testDir += "both";
+    if (!test_bc) testDir += "both";
 
     // This method is the main one for current and future tests.
     // Also, there are a lot of different errors that can happen.
@@ -424,7 +424,6 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 
     if (passed) {
         tests_passed++;
-
     }
     else
         INstats.push_back(0);
@@ -449,6 +448,9 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     }*/
 
     //stats::Instance().print(stats::triviality_filterT());
+
+    cout << "So far, failed " << (tests_total - tests_passed) << " out of "
+         << tests_total << " tests." << endl;
 
 //    TS_ASSERT(passed);
 #if WAIT_KEY_ON_FAILURE
