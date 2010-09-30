@@ -322,7 +322,8 @@ IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
         COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
         # This script combines the coverage analysis of each test,
         # then creates html in tests/lcov
-        COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+        # Note: this should now be run separately...
+        #COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
         COMMENT "Running tests with coverage..."
     )
 ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
