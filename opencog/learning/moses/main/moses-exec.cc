@@ -329,7 +329,7 @@ int main(int argc,char** argv) {
          string("The name of the log is determined by the options, for instance if moses-exec is called with -r 123 -H pa the log name is moses_random-seed_123_problem_pa.log. Note that the name will be truncated in order not to be longer than ").append(lexical_cast<string>(max_filename_size)).append(" characters.\n").c_str())
         (opt_desc_str(log_file_opt).c_str(),
          value<string>(&log_file)->default_value(default_log_file),
-         string("File name where to write the log. This option overwrites ").append(log_file_dep_opt_opt.first).append(".\n").c_str())
+         string("File name where to write the log. This option is overwritten by ").append(log_file_dep_opt_opt.first).append(".\n").c_str())
         (opt_desc_str(variance_opt).c_str(),
          value<float>(&variance)->default_value(0),
          "In the case of contin regression. variance of an assumed Gaussian around each candidate's output, useful if the data are noisy or to control an Occam's razor bias, 0 or negative means no Occam's razor, otherwise the higher v the stronger the Occam's razor.\n")
@@ -388,8 +388,7 @@ int main(int argc,char** argv) {
 
     // set flags
     revisit = vm.count(revisit_opt.first) > 0;
-    log_file_dep_opt = 
-        vm.count(log_file_dep_opt_opt.first) > 0 && log_file == default_log_file;
+    log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
     
     if (vm.count("help") || argc == 1) {
         cout << desc << "\n";
