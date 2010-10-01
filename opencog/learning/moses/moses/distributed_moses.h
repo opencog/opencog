@@ -254,16 +254,27 @@ host_proc_map init(const jobs_t& jobs) {
     return hpm;
 }
 
+// remove it from proc_map and return the iterator pointing to the
+// next process
+proc_map::iterator remove_proc(proc_map& pm,  proc_map::iterator it) {
+    proc_map::iterator next_it(it);
+    next_it++;
+    pm.erase(it);
+    return next_it;
+}
+
 // kill all processes in pm
-void killall(const proc_map& pm) {
-    foreach(const proc_map::value_type& pmv, pm)
-        if(is_running(pmv))
-            kill(get_pid(pmv), 15); // send a TERM signal
+void killall(proc_map& pm) {
+    for(proc_map::iterator it = pm.begin(); it != pm.end();) {
+        if(is_running(*it))
+            kill(get_pid(*it), 15); // send a TERM signal
+        it = remove_proc(pm, it);
+    }
 }
 
 // kill all processes in hpm
-void killall(const host_proc_map& hpm) {
-    foreach(const host_proc_map::value_type& hpmv, hpm)
+void killall(host_proc_map& hpm) {
+    foreach(host_proc_map::value_type& hpmv, hpm)
         killall(hpmv.second);
 }
 
@@ -397,10 +408,7 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                     // ~Logger
 
                     // remove proc info from pm
-                    proc_map::iterator next_it(it);
-                    next_it++;
-                    hpmv.second.erase(it);
-                    it = next_it;
+                    it = remove_proc(hpmv.second, it);
                 }
                 else it++;
             }
@@ -416,6 +424,8 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
 
     // kill all children processes
     killall(hpm);
+
+    OC_ASSERT(running_proc_count(hpm) == 0);
 
     // Logger
     logger().info("Distributed MOSES ends");
