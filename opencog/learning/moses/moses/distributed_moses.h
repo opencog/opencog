@@ -65,6 +65,14 @@ FILE* get_file(const proc_map::value_type& pmv) {
 // map the name of host and its proc_map
 typedef std::map<string, proc_map> host_proc_map;
 
+// number of running processes
+unsigned int running_proc_count(const host_proc_map& hpm) {
+    unsigned int acc = 0;
+    foreach(const host_proc_map::value_type& hpmv, hpm)
+        acc += hpmv.second.size();
+    return acc;
+}
+
 /**
  * generate a command line that launches moses-exec with exemplar base
  * 'tr' keeping all initial options, but running over one generation
@@ -397,6 +405,10 @@ void distributed_moses(metapopulation<Scoring, BScoring, Optimization>& mp,
                 else it++;
             }
         }
+
+        // Logger
+        logger().debug("Running processes: %u", running_proc_count(hpm));
+        // ~Logger
 
         // wait for a second to not take all resources
         sleep(1);
