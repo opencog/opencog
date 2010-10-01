@@ -26,6 +26,7 @@
 
 #include <opencog/util/selection.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/numeric.h>
 
 #include <opencog/learning/moses/eda/instance_set.h>
 
@@ -43,6 +44,8 @@
 namespace moses
 {
 
+using opencog::pow2;
+
 typedef std::set<combo::vertex> operator_set;
 typedef std::set<combo::combo_tree,
                  opencog::size_tree_order<combo::vertex> > combo_tree_ns_set;
@@ -56,7 +59,7 @@ struct metapop_parameters {
                        bool _countbs = true,
                        bool _revisit = false,
                        bool _ignore_bscore = false) :
-        selection_max_range(11),
+        selection_max_range(28),
         max_candidates(_max_candidates),
         reduce_all(_reduce_all),
         count_base(_countbs),
@@ -259,8 +262,7 @@ struct metapopulation : public set < bscored_combo_tree,
      *         exemplar exists then return end()
      */
     const_iterator select_exemplar() const {
-        OC_ASSERT(!empty(),
-                  "Empty metapopulation in function select_exemplar().");
+        OC_ASSERT(!empty(), "Empty metapopulation in select_exemplar().");
         
         //compute the probs for all candidates with best score
         score_t score = get_score(*begin());
@@ -271,12 +273,13 @@ struct metapopulation : public set < bscored_combo_tree,
         // found
         bool exist_exemplar = false;
 
-        for (const_iterator it = begin(); it != end(); ++it) {
+        for(const_iterator it = begin(); it != end(); ++it) {
             // if no exemplar has been found for that score then look
             // at the next lower score
             if(get_score(*it) != score) {
                 if(!exist_exemplar) {
                     score = get_score(*it);
+                    cmin = get_complexity(*it);
                 }
                 else break;
             }
@@ -305,7 +308,7 @@ struct metapopulation : public set < bscored_combo_tree,
         foreach(complexity_t& p, probs) {
             // in case p has the max complexity (already visited) then
             // the probability is set to null
-            p = (p > 0? 0 : (1 << (p - max_comp)));
+            p = (p > 0? 0 : pow2(p - max_comp));
             sum += p;
         }
 
