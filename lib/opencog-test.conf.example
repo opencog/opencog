@@ -6,7 +6,7 @@
 # Of particular importance is the test database name and login credentials.
 #
 SERVER_PORT           = 17001
-LOG_FILE              = /tmp/opencog-test.log
+LOG_FILE              = opencog-test.log
 
 LOG_LEVEL             = debug
 LOG_TO_STDOUT         = true
