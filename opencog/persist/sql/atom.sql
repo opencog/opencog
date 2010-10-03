@@ -8,6 +8,7 @@ CREATE TABLE Atoms (
 	-- must be unique, and must be non-null. ergo, primary key.
 	uuid	INT PRIMARY KEY,
 
+	-- Atom type, e.g. Link, Node, etc.
 	type  SMALLINT,
 
 	-- maps to TruthValue ID
@@ -19,7 +20,8 @@ CREATE TABLE Atoms (
 	stv_confidence FLOAT,
 	stv_count FLOAT,
 
-	-- distance from this link to farthest Node.
+	-- distance from this link to farthest Node in the outgoing
+	-- set of this atom. 
 	-- height of Nodes is by definition zero.
 	-- height of Links containing only nodes is one, etc.
 	height SMALLINT,
