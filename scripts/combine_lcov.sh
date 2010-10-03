@@ -8,13 +8,18 @@ ifiles=""
 for f in ${BASEDIR}/coverage/*.info; do
     ifiles="$ifiles -a $f"
 done
+echo "Combining all lcov .info files into single file"
 lcov --directory ${BASEDIR} $ifiles --output-file ${BASEDIR}/coverage/alltemp.info
+echo "Removing coverage info for non-OpenCog files"
 lcov --directory ${BASEDIR} --remove ${BASEDIR}/coverage/alltemp.info /usr/include/\* --output-file ${BASEDIR}/coverage/all.info
 rm ${BASEDIR}/coverage/alltemp.info
 
+echo "Creating lcov html summary"
 genhtml -s -o ${BASEDIR}/lcov --demangle-cpp --num-spaces 4 --title "OpenCog Coverage Analysis" ${BASEDIR}/coverage/all.info
+echo "Moving coverage files to ${BASEDIR}/coverage/old"
 mkdir -p ${BASEDIR}/coverage/old
 for f in ${BASEDIR}/coverage/*.info; do
     mv $f ${BASEDIR}/coverage/old
 done
+echo "All done!"
 
