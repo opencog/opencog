@@ -11,7 +11,12 @@ done
 echo "Combining all lcov .info files into single file"
 lcov --directory ${BASEDIR} $ifiles --output-file ${BASEDIR}/coverage/alltemp.info
 echo "Removing coverage info for non-OpenCog files"
-lcov --directory ${BASEDIR} --remove ${BASEDIR}/coverage/alltemp.info /usr/include/\* --output-file ${BASEDIR}/coverage/all.info
+# Get the name of the current dir
+BIN_DIR=${PWD##*/}
+lcov --directory ${BASEDIR} --output-file ${BASEDIR}/coverage/all.info 
+    --remove ${BASEDIR}/coverage/alltemp.info 
+        /usr/include/\* \
+        ${BIN_DIR}/tests/\*
 rm ${BASEDIR}/coverage/alltemp.info
 
 echo "Creating lcov html summary"
