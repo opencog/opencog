@@ -29,9 +29,6 @@
 #include "exceptions.h"
 #include "oc_assert.h"
 
-// define this in case you want to count the number of cache failures
-#define COUNT_CACHE_FAILURES
-
 namespace opencog {
 
   template<typename ARG, typename RESULT>
@@ -110,24 +107,17 @@ struct lru_cache {
     lru_cache(size_type n,const F& f=F()) : _n(n),_map(n+1),_f(f)
                                           ,_cache_failures(0) {}
 
-    bool full() const { return _map.size()==_n; }
-    bool empty() const { return _map.empty(); }
+    inline bool full() const { return _map.size()==_n; }
+    inline bool empty() const { return _map.empty(); }
 
-    //@todo if f raises an exception then the cache we have updated
-    //_lru without updating _map which will later result in an
-    //assertion failure, perhaps the code should be modified so that
-    //it works even in case of failure of execution of f
     result_type operator()(const argument_type& x) const
     {
         if (empty()) {
             if (full()) //so a size-0 cache never needs hashing
-                return _f(x);
+                return _f(x); // note that cache failures are not counted
             _lru.push_front(x);
-#ifdef COUNT_CACHE_FAILURES
-            _cache_failures++;
-#endif            
-            map_iter it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
-        return it->second;
+            map_iter it=_map.insert(make_pair(_lru.begin(),call_f(x))).first;
+            return it->second;
         }
       
         //search for it
@@ -142,11 +132,7 @@ struct lru_cache {
         }
       
         //otherwise, call _f and do an insertion
-
-#ifdef COUNT_CACHE_FAILURES
-        _cache_failures++;
-#endif
-        it=_map.insert(make_pair(_lru.begin(),_f(x))).first;
+        it=_map.insert(make_pair(_lru.begin(), call_f(x))).first;
       
         //if full, remove least-recently-used
         if (_map.size()>_n) {
@@ -154,9 +140,9 @@ struct lru_cache {
             _lru.pop_back();
         }
       
-        OC_ASSERT(_map.size()<=_n,
+        OC_ASSERT(_map.size() <= _n,
                   "lru_cache - _map size greater than _n (%d).", _n);
-        OC_ASSERT(_lru.size()==_map.size(),
+        OC_ASSERT(_lru.size() == _map.size(),
                   "lru_cache - _lru size different from _map size.");
       
         //return the result
@@ -179,6 +165,16 @@ protected:
                        // the cache when it gets full
     
     mutable unsigned _cache_failures;
+
+    inline result_type call_f(const argument_type& x) const {
+        _cache_failures++;
+        try {
+            return _f(x);
+        } catch(...) {
+            _lru.pop_front(); // remove x, previously inserted in _lru
+            throw;
+        }
+    }
 };
 
 /**
@@ -211,15 +207,11 @@ struct simple_cache {
         if(it != _map.end()) //if we've found return
             return it->second;
         else if(_n > _map.size()) { // otherwise insert in _map then return
-#ifdef COUNT_CACHE_FAILURES
             _cache_failures++;
-#endif            
             map_iter it=_map.insert(make_pair(x,_f(x))).first;
             return it->second;
         } else { // the cache is full so the value is return simply
-#ifdef COUNT_CACHE_FAILURES
             _cache_failures++;
-#endif            
             return _f(x);
         }
     }
