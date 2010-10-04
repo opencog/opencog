@@ -63,14 +63,14 @@ inline double information_theoretic_bits(const eda::field_set& fs)
 }
 
 struct eda_parameters {
-    eda_parameters(double _pop_size_ratio = 200) :
+    eda_parameters(double _pop_size_ratio = 200 /*was 20*/,
+                   double _terminate_if_gte = 0) :
         // optimization is teriminated after term_total*n generations,
         // or term_improv*sqrt(n/w) consecutive generations with no
         // improvement (w=windowsize)
         term_total(1),
         term_improv(1),
 
-//was 20...
         pop_size_ratio(_pop_size_ratio), //populations are sized at
                                          //N = popsize_ratio*n^1.05
                                          //where n is problem size in info-t bits
@@ -79,7 +79,7 @@ struct eda_parameters {
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
         
         selection(2),          //if <=1, truncation selection ratio,
-        //if >1, tournament selection size (should be int)
+                               //if >1, tournament selection size (should be int)
         selection_ratio(1),    //ratio of population size selected for modeling
         
         replacement_ratio(0.5),//ratio of population size sampled and integrated
@@ -87,7 +87,9 @@ struct eda_parameters {
         
         model_complexity(1),   //model parsimony term log(N)*model_complexity
         
-        terminate_if_gte(0)    //optimization is terminated if best score is >= this
+        terminate_if_gte(_terminate_if_gte)  //optimization is
+                                             //terminated if best
+                                             //score is >= this
     { }
 
     bool is_tournament_selection() {
@@ -305,8 +307,7 @@ struct iterative_hillclimbing {
                  distance <= number_of_fields &&
                  distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
                  current_number_of_instances < max_number_of_instances &&
-                 best_score < 0.0 // @todo: should be using some max_score var
-                 );
+                 best_score < params.terminate_if_gte);
         
         return current_number_of_instances;
     }
@@ -513,8 +514,7 @@ struct simulated_annealing {
                         double _min_temp = 0, double _temp_step_size = 0.5,
                         double _accept_prob_temp_intensity = 0.5,
                         double _dist_temp_intensity = 0.5,
-                        double _fraction_of_remaining = 10.0,
-                        double _min_energy = 0.0)
+                        double _fraction_of_remaining = 10.0)
         : rng(_rng), 
           init_temp(_init_temp),
           min_temp(_min_temp),
@@ -522,7 +522,6 @@ struct simulated_annealing {
           accept_prob_temp_intensity(_accept_prob_temp_intensity),
           dist_temp_intensity(_dist_temp_intensity),
           fraction_of_remaining(_fraction_of_remaining),
-          min_energy(_min_energy),
           params(p) {}
       
     double accept_probability(energy_t energy_new, energy_t energy_old,
@@ -540,8 +539,8 @@ struct simulated_annealing {
         //return (double) init_temp / std::log(1.0 + t); 
         return (double) init_temp / (1.0 + t);
     }
-      
-    energy_t energy(const eda::scored_instance<composite_score>& inst)
+    
+    energy_t energy(score_t sc)
     {
         // here let the energy be the reverse of the score, that
         // because the better instance has the lower energy but higher
@@ -549,7 +548,11 @@ struct simulated_annealing {
         //
         // NOTICE: it may use some other methods to present the
         // energy.
-        return -get_score(inst.second);
+        return -sc;
+    }
+    energy_t energy(const eda::scored_instance<composite_score>& inst)
+    {
+        return energy(get_score(inst.second));
     }
     
     /**
@@ -647,7 +650,7 @@ struct simulated_annealing {
             step++;
         } while(current_number_of_instances < max_number_of_instances &&
                 current_temp >= min_temp &&
-                center_instance_energy > min_energy);
+                center_instance_energy > energy(params.terminate_if_gte));
         
         return current_number_of_instances;
     }
@@ -660,7 +663,6 @@ struct simulated_annealing {
     double accept_prob_temp_intensity;
     double dist_temp_intensity;
     double fraction_of_remaining;
-    double min_energy;
     eda_parameters params;
 };
 

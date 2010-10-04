@@ -260,6 +260,7 @@ int main(int argc,char** argv) {
     bool ignore_bscore;
     // eda_param
     double pop_size_ratio;
+    double max_score;
 
     // Declare the supported options.
     options_description desc("Allowed options");
@@ -377,6 +378,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(pop_size_ratio_opt).c_str(),
          value<double>(&pop_size_ratio)->default_value(200),
          "The higher the more effort is spent on a deme.\n")
+        (opt_desc_str(max_score_opt).c_str(),
+         value<double>(&max_score)->default_value(0),
+         "The max score to reach, once reached MOSES halts.\n")
         (opt_desc_str(ignore_bscore_opt).c_str(),
          value<bool>(&ignore_bscore)->default_value(false),
          "Ignore the behavioral score when merging candidates in the population. This option is useful either when the problem has no obvious behavioral score, or it happens that dominated candidates worth keeping.\n")
@@ -485,12 +489,10 @@ int main(int argc,char** argv) {
                                   count_base, revisit, ignore_bscore);
 
     // set eda_parameters
-    eda_parameters eda_param(pop_size_ratio);
+    eda_parameters eda_param(pop_size_ratio, max_score);
 
     // set moses_parameters
-    moses_parameters moses_param(max_evals, max_gens,
-                                 0 /*@todo: max_score*/,
-                                 ignore_ops);
+    moses_parameters moses_param(max_evals, max_gens, max_score, ignore_ops);
 
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count, output_complexity,
