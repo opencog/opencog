@@ -230,9 +230,8 @@ vertex eval_throws(opencog::RandGen& rng,
             }
         case id::logical_not : {
             OC_ASSERT(it.has_one_child(),
-                      "combo_tree node should have exactly one child"
-                      " (id::logical_not)");
-
+                      "logical_not should have exactly one child,"
+                      " instead it has %u", it.number_of_children());
             if (vu.empty()) {
                 return negate_vertex(eval_throws(rng, it.begin(), pe, vu));
             }

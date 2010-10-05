@@ -53,7 +53,8 @@ void remove_unary_junctors::operator()(combo_tree& tr,combo_tree::iterator it) c
 
 void remove_dangling_junctors::operator()(combo_tree& tr,combo_tree::iterator it) const {
     for(sib_it sib=it.begin();sib!=it.end();)
-        if((*sib==id::logical_and || *sib==id::logical_or) && sib.is_childless())
+        if((*sib==id::logical_and || *sib==id::logical_or || *sib==id::logical_not)
+           && sib.is_childless())
             tr.erase(sib++);
         else
             ++sib;

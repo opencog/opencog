@@ -45,9 +45,9 @@ struct remove_unary_junctors : public crule<remove_unary_junctors> {
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
-// remove operators 'and', 'or' that have no argument
-// note that this rule does not preserve semantics
-// it is used so that logical formulae exibit more diversity
+// remove operators 'and', 'or' and 'not' that have no argument. Note
+// that this rule does not preserve semantics it is used so that
+// logical formulae exibit more diversity
 struct remove_dangling_junctors : public crule<remove_dangling_junctors> {
     remove_dangling_junctors() : crule<remove_dangling_junctors>::crule("remove_dangling_junctors") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
