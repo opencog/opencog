@@ -539,7 +539,7 @@ public:
      * have non-real atoms, i.e. those whose handles were
      * less than 500, and indicated types, not atoms.
      * Instead of using that method, one should use
-     * addNode or addLink should be used (which is a bit faster too).
+     * addNode or addLink (which is a bit faster too).
      */
     Handle addRealAtom(const Atom& atom,
                        const TruthValue& tvn = TruthValue::NULL_TV());
