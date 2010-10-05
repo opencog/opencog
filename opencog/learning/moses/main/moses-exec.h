@@ -182,9 +182,11 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(cache_size > 0) {
-        typedef opencog::lru_cache<BScore> BScoreCache;
+        // typedef opencog::lru_cache<BScore> BScoreCache;
+        typedef opencog::prr_cache<BScore> BScoreCache;
         typedef bscore_based_score<BScoreCache> Score;
-        typedef opencog::lru_cache<Score> ScoreCache;
+        // typedef opencog::lru_cache<Score> ScoreCache;
+        typedef opencog::prr_cache<Score> ScoreCache;
         BScoreCache bscore_cache(cache_size, bsc);
         Score score(bscore_cache);
         ScoreCache score_cache(cache_size, score);
