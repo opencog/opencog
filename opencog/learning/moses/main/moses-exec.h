@@ -109,17 +109,17 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const Score& sc,
                            const BScore& bsc,
                            const Optimization& opt,
-                           const metapop_parameters& meta_param,
-                           const moses_parameters& moses_param,
+                           const metapop_parameters& meta_params,
+                           const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     // instantiate metapop
     metapopulation<Score, BScore, Optimization> 
-        metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_param);
+        metapop(rng, bases, tt, si_ca, si_kb, sc, bsc, opt, meta_params);
     // run moses
     if(pa.jobs.empty()) {
-        moses::moses(metapop, moses_param);
-    } else moses::distributed_moses(metapop, vm, pa.jobs, moses_param);
+        moses::moses(metapop, moses_params);
+    } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
     // print result
     metapop.print(pa.result_count, pa.output_complexity, pa.output_bscore);
     if(pa.output_eval_number)
@@ -138,23 +138,23 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const Score& sc,
                            const BScore& bsc,
                            const string& opt_algo,
-                           const eda_parameters& eda_param,
-                           const metapop_parameters& meta_param,
-                           const moses_parameters& moses_param,
+                           const optim_parameters& opt_params,
+                           const metapop_parameters& meta_params,
+                           const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(opt_algo == un) { // univariate
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              univariate_optimization(rng, eda_param),
-                              meta_param, moses_param, vm, pa);
+                              univariate_optimization(rng, opt_params),
+                              meta_params, moses_params, vm, pa);
     } else if(opt_algo == sa) { // simulation annealing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              simulated_annealing(rng, eda_param),
-                              meta_param, moses_param, vm, pa);
+                              simulated_annealing(rng, opt_params),
+                              meta_params, moses_params, vm, pa);
     } else if(opt_algo == hc) { // hillclimbing
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, sc, bsc,
-                              iterative_hillclimbing(rng, eda_param),
-                              meta_param, moses_param, vm, pa);
+                              iterative_hillclimbing(rng, opt_params),
+                              meta_params, moses_params, vm, pa);
     } else {
         std::cerr << "Unknown optimization algo " << opt_algo 
                   << ". Supported algorithms are un (for univariate),"
@@ -176,9 +176,9 @@ void metapop_moses_results(opencog::RandGen& rng,
                            const BScore& bsc,
                            unsigned long cache_size,
                            const string& opt_algo,
-                           const eda_parameters& eda_param,
-                           const metapop_parameters& meta_param,
-                           const moses_parameters& moses_param,
+                           const optim_parameters& opt_params,
+                           const metapop_parameters& meta_params,
+                           const moses_parameters& moses_params,
                            const variables_map& vm,
                            const metapop_moses_results_parameters& pa) {
     if(cache_size > 0) {
@@ -192,7 +192,7 @@ void metapop_moses_results(opencog::RandGen& rng,
         ScoreCache score_cache(cache_size, score);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb,
                               score_cache, bscore_cache, opt_algo,
-                              eda_param, meta_param, moses_param, vm, pa);
+                              opt_params, meta_params, moses_params, vm, pa);
         // log the number of cache failures
         if(pa.jobs.empty()) { // do not print the cache if using distributed moses
             logger().info("Number of cache failures for score = %u"
@@ -203,7 +203,7 @@ void metapop_moses_results(opencog::RandGen& rng,
     } else {
         bscore_based_score<BScore> score(bsc);
         metapop_moses_results(rng, bases, tt, si_ca, si_kb, score, bsc,
-                              opt_algo, eda_param, meta_param, moses_param,
+                              opt_algo, opt_params, meta_params, moses_params,
                               vm, pa);
     }
 }

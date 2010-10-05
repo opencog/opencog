@@ -258,7 +258,7 @@ int main(int argc,char** argv) {
                      // complexity based
     bool revisit;
     bool ignore_bscore;
-    // eda_param
+    // optim_param
     double pop_size_ratio;
     double max_score;
 
@@ -485,14 +485,14 @@ int main(int argc,char** argv) {
     }
 
     // set metapopulation parameters
-    metapop_parameters meta_param(max_candidates, reduce_all,
-                                  count_base, revisit, ignore_bscore);
+    metapop_parameters meta_params(max_candidates, reduce_all,
+                                   count_base, revisit, ignore_bscore);
 
-    // set eda_parameters
-    eda_parameters eda_param(pop_size_ratio, max_score);
+    // set optim_parameters
+    optim_parameters opt_params(pop_size_ratio, max_score);
 
     // set moses_parameters
-    moses_parameters moses_param(max_evals, max_gens, max_score, ignore_ops);
+    moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count, output_complexity,
@@ -536,7 +536,7 @@ int main(int argc,char** argv) {
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
                                   bscore, cache_size, opt_algo,
-                                  eda_param, meta_param, moses_param,
+                                  opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
         }
         else if(output_type == id::contin_type) {
@@ -564,7 +564,7 @@ int main(int argc,char** argv) {
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
                                   bscore, cache_size, opt_algo,
-                                  eda_param, meta_param, moses_param,
+                                  opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
         } else {
             unsupported_type_exit(output_type);
@@ -586,7 +586,7 @@ int main(int argc,char** argv) {
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
                                   bscore, cache_size, opt_algo,
-                                  eda_param, meta_param, moses_param,
+                                  opt_params, meta_params, moses_params,
                                   vm, mmr_pa);                
         }
         else if (output_type == id::contin_type) {
@@ -607,7 +607,7 @@ int main(int argc,char** argv) {
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
                                   bscore, cache_size, opt_algo,
-                                  eda_param, meta_param, moses_param,
+                                  opt_params, meta_params, moses_params,
                                   vm, mmr_pa);
         } else {
             unsupported_type_exit(tt);
@@ -628,7 +628,7 @@ int main(int argc,char** argv) {
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == dj) { // disjunction
         // @todo: for the moment occam's razor and partial truth table are ignored
@@ -646,7 +646,7 @@ int main(int argc,char** argv) {
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == mux) { // multiplex
         // @todo: for the moment occam's razor and partial truth table are ignored
@@ -664,7 +664,7 @@ int main(int argc,char** argv) {
                               logical_reduction(reduct_candidate_effort),
                               logical_reduction(reduct_knob_building_effort),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == sr) { // simple regression of f(x)_o = sum_{i={1,o}} x^i
         // if no exemplar has been provided in option use the default
@@ -686,7 +686,7 @@ int main(int argc,char** argv) {
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     //////////////////
     // ANN problems //
@@ -717,7 +717,7 @@ int main(int argc,char** argv) {
                               ann_reduction(),
                               ann_reduction(),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     } else if(problem == ann_cp) { // regression based on combo program using ann
         // get the combo_tree and infer its type
@@ -746,7 +746,7 @@ int main(int argc,char** argv) {
                               contin_reduction(ignore_ops, rng),
                               contin_reduction(ignore_ops, rng),
                               bscore, cache_size, opt_algo,
-                              eda_param, meta_param, moses_param,
+                              opt_params, meta_params, moses_params,
                               vm, mmr_pa);
     }
     else unsupported_problem_exit(problem);

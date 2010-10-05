@@ -62,43 +62,19 @@ inline double information_theoretic_bits(const eda::field_set& fs)
     return res;
 }
 
-struct eda_parameters {
-    eda_parameters(double _pop_size_ratio = 200 /*was 20*/,
-                   double _terminate_if_gte = 0) :
-        // optimization is teriminated after term_total*n generations,
-        // or term_improv*sqrt(n/w) consecutive generations with no
-        // improvement (w=windowsize)
+// Parameters used mostly for EDA algorithms but also possibly by
+// other algo
+struct optim_parameters {
+    optim_parameters(double _pop_size_ratio = 200 /*was 20*/,
+                     double _terminate_if_gte = 0) :
         term_total(1),
         term_improv(1),
 
-        pop_size_ratio(_pop_size_ratio), //populations are sized at
-                                         //N = popsize_ratio*n^1.05
-                                         //where n is problem size in info-t bits
-        
         window_size_pop(0.05), //window size for RTR is
         window_size_len(1),    //min(windowsize_pop*N,windowsize_len*n)
         
-        selection(2),          //if <=1, truncation selection ratio,
-                               //if >1, tournament selection size (should be int)
-        selection_ratio(1),    //ratio of population size selected for modeling
-        
-        replacement_ratio(0.5),//ratio of population size sampled and integrated
-        
-        
-        model_complexity(1),   //model parsimony term log(N)*model_complexity
-        
-        terminate_if_gte(_terminate_if_gte)  //optimization is
-                                             //terminated if best
-                                             //score is >= this
-    { }
-
-    bool is_tournament_selection() {
-        return selection > 1;
-    }
-    bool is_truncation_selection() {
-        return selection <= 1;
-    }
-
+        pop_size_ratio(_pop_size_ratio),
+        terminate_if_gte(_terminate_if_gte) {}
 
     //N=p.popsize_ratio*n^1.05
     inline int pop_size(const eda::field_set& fs) {
@@ -106,50 +82,81 @@ struct eda_parameters {
                          pow(information_theoretic_bits(fs), 1.05))));
     }
 
-    //min(windowsize_pop*N,windowsize_len*n)
-    inline int rtr_window_size(const eda::field_set& fs) {
-        return int(ceil(min(window_size_pop*pop_size(fs),
-                            window_size_len*information_theoretic_bits(fs))));
-    }
-
     //term_total*n
     inline int max_gens_total(const eda::field_set& fs) {
         return int(ceil(term_total*information_theoretic_bits(fs)));
     }
+
     //term_improv*sqrt(n/w)
     inline int max_gens_improv(const eda::field_set& fs) {
         return int(ceil(term_improv*
                         sqrt(information_theoretic_bits(fs) /
                              rtr_window_size(fs))));
     }
+    //min(windowsize_pop*N,windowsize_len*n)
+    inline int rtr_window_size(const eda::field_set& fs) {
+        return int(ceil(min(window_size_pop*pop_size(fs),
+                            window_size_len*information_theoretic_bits(fs))));
+    }
 
+    // optimization is terminated after term_total*n generations, or
+    // term_improv*sqrt(n/w) consecutive generations with no
+    // improvement (w=windowsize)
     double term_total;
     double term_improv;
 
-    double pop_size_ratio;
     double window_size_pop;
     double window_size_len;
+ 
+    // populations are sized at N = popsize_ratio*n^1.05 where n is
+    // problem size in info-t bits
+    double pop_size_ratio;
+    // optimization is terminated if best score is >= terminate_if_gte
+    double terminate_if_gte;
+};
+
+// Parameters specific to EDA optimization
+struct eda_parameters {
+    eda_parameters() :
+        selection(2),          //if <=1, truncation selection ratio,
+                               //if >1, tournament selection size (should be int)
+        selection_ratio(1),    //ratio of population size selected for modeling
+        
+        replacement_ratio(0.5),//ratio of population size sampled and integrated
+        
+        
+        model_complexity(1)    //model parsimony term log(N)*model_complexity     
+        
+    {}
+
+    bool is_tournament_selection() {
+        return selection > 1;
+    }
+    bool is_truncation_selection() {
+        return selection <= 1;
+    }
+    
     double selection;
     double selection_ratio;
     double replacement_ratio;
     double model_complexity;
-    double terminate_if_gte;
 };
 
 struct univariate_optimization {
     univariate_optimization(opencog::RandGen& _rng,
-                            const eda_parameters& p = eda_parameters())
-        : rng(_rng), params(p) {}
+                            const optim_parameters& op = optim_parameters(),
+                            const eda_parameters& ep = eda_parameters())
+        : rng(_rng), opt_params(op), eda_params(ep) {}
 
     //return # of evaluations actually performed
     template<typename Scoring>
     int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
-        int pop_size = params.pop_size(deme.fields());
-        int max_gens_total = params.max_gens_total(deme.fields());
-        int max_gens_improv = params.max_gens_improv(deme.fields());
-        int n_select = int(double(pop_size) * params.selection_ratio);
-        int n_generate = int(double(pop_size * params.replacement_ratio));
+        int pop_size = opt_params.pop_size(deme.fields());
+        int max_gens_total = opt_params.max_gens_total(deme.fields());
+        int max_gens_improv = opt_params.max_gens_improv(deme.fields());
+        int n_select = int(double(pop_size) * eda_params.selection_ratio);
+        int n_generate = int(double(pop_size * eda_params.replacement_ratio));
 
         //adjust parameters based on the maximal # of evaluations allowed
         if (max_evals < pop_size) {
@@ -166,18 +173,18 @@ struct univariate_optimization {
         generate_initial_sample(deme.fields(), pop_size, deme.begin(),
                                 deme.end(), rng);
 
-        if (params.is_tournament_selection()) {
+        if (eda_params.is_tournament_selection()) {
             eda::cout_log_best_and_gen logger;
             return eda::optimize
                    (deme, n_select, n_generate, max_gens_total, score,
                     eda::terminate_if_gte_or_no_improv<composite_score>
-                    (composite_score(params.terminate_if_gte,
+                    (composite_score(opt_params.terminate_if_gte,
                                       worst_possible_score.second),
                      max_gens_improv),
-                    opencog::tournament_selection(int(params.selection), rng),
+                    opencog::tournament_selection(int(eda_params.selection), rng),
                     eda::univariate(), eda::local_structure_probs_learning(),
                     eda::rtr_replacement(deme.fields(),
-                                         params.rtr_window_size(deme.fields()),
+                                         opt_params.rtr_window_size(deme.fields()),
                                          rng),
                     logger, rng);
         } else { //truncation selection
@@ -187,7 +194,7 @@ struct univariate_optimization {
             return 42;
             /*
             return optimize(deme,n_select,n_generate,args.max_gens,score,
-              terminate_if_gte_or_no_improv(params.terminate_if_gte,
+              terminate_if_gte_or_no_improv(opt_params.terminate_if_gte,
                        max_gens_improv),
               //truncation selection goes here
               univariate(),local_structure_probs_learning(),
@@ -197,21 +204,22 @@ struct univariate_optimization {
     }
 
     opencog::RandGen& rng;
-    eda_parameters params;
+    optim_parameters opt_params;
+    eda_parameters eda_params;
 };
 
 struct iterative_hillclimbing {
     iterative_hillclimbing(opencog::RandGen& _rng,
-                           const eda_parameters& p = eda_parameters())
-        : rng(_rng), params(p) {}
+                           const optim_parameters& op = optim_parameters())
+        : rng(_rng), opt_params(op) {}
 
     //return # of evaluations actually performed
     template<typename Scoring>
     int operator()(eda::instance_set<composite_score>& deme,
                    const Scoring& score, int max_evals) {
         const eda::field_set& fields = deme.fields();
-        int pop_size = params.pop_size(fields);
-        int max_gens_total = params.max_gens_total(fields);
+        int pop_size = opt_params.pop_size(fields);
+        int max_gens_total = opt_params.max_gens_total(fields);
 
         long long current_number_of_instances = 0;
 
@@ -307,13 +315,13 @@ struct iterative_hillclimbing {
                  distance <= number_of_fields &&
                  distance <= MAX_DISTANCE_FROM_EXEMPLAR &&
                  current_number_of_instances < max_number_of_instances &&
-                 best_score < params.terminate_if_gte);
+                 best_score < opt_params.terminate_if_gte);
         
         return current_number_of_instances;
     }
 
     opencog::RandGen& rng;
-    eda_parameters params;
+    optim_parameters opt_params;
 };
 
 // @todo: redo the code entriely from iterative_hillclimbing to take
@@ -328,8 +336,8 @@ struct sliced_iterative_hillclimbing {
 
 
     sliced_iterative_hillclimbing(opencog::RandGen& _rng,
-                                  const eda_parameters& p = eda_parameters())
-        : rng(_rng), params(p), m_state(M_INIT),
+                                  const optim_parameters& p = optim_parameters())
+        : rng(_rng), opt_params(p), m_state(M_INIT),
           _evals_per_slice(MAX_EVALS_PER_SLICE) {}
 
     void set_evals_per_slice(int evals_per_slice) {
@@ -499,7 +507,7 @@ struct sliced_iterative_hillclimbing {
     int target_size;
 
     opencog::RandGen& rng;
-    eda_parameters params;
+    optim_parameters opt_params;
     MState m_state;
     int _evals_per_slice;
 };
@@ -509,7 +517,7 @@ struct simulated_annealing {
     typedef score_t energy_t;
  
     simulated_annealing(opencog::RandGen& _rng,
-                        const eda_parameters& p = eda_parameters(),
+                        const optim_parameters& op = optim_parameters(),
                         double _init_temp = 30,
                         double _min_temp = 0, double _temp_step_size = 0.5,
                         double _accept_prob_temp_intensity = 0.5,
@@ -522,7 +530,7 @@ struct simulated_annealing {
           accept_prob_temp_intensity(_accept_prob_temp_intensity),
           dist_temp_intensity(_dist_temp_intensity),
           fraction_of_remaining(_fraction_of_remaining),
-          params(p) {}
+          opt_params(op) {}
       
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
@@ -576,8 +584,8 @@ struct simulated_annealing {
         max_distance = fields.dim_size();
 
         // @todo this should be adapted for SA
-        int pop_size = params.pop_size(fields);
-        // int max_gens_total = params.max_gens_total(deme.fields());
+        int pop_size = opt_params.pop_size(fields);
+        // int max_gens_total = opt_params.max_gens_total(deme.fields());
         // int max_number_of_instances = max_gens_total * pop_size;
         int max_number_of_instances = pop_size;
         if (max_number_of_instances > max_evals)
@@ -650,7 +658,7 @@ struct simulated_annealing {
             step++;
         } while(current_number_of_instances < max_number_of_instances &&
                 current_temp >= min_temp &&
-                center_instance_energy > energy(params.terminate_if_gte));
+                center_instance_energy > energy(opt_params.terminate_if_gte));
         
         return current_number_of_instances;
     }
@@ -663,7 +671,7 @@ struct simulated_annealing {
     double accept_prob_temp_intensity;
     double dist_temp_intensity;
     double fraction_of_remaining;
-    eda_parameters params;
+    optim_parameters opt_params;
 };
 
 } //~namespace moses
