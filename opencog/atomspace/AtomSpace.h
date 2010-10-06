@@ -279,7 +279,7 @@ public:
      *
      * \return An OutputIterator list
      *
-     * NOTE: The matched entries are appended to a container whose
+     * @note The matched entries are appended to a container whose
      *       OutputIterator is passed as the first argument. Example
      *       of call to this method, which would return all entries
      *       in TimeServer:
@@ -532,8 +532,8 @@ public:
      * This is a deprecated function; do not use it in new code,
      * if at all possible.
      *
-     * @param the handle of the Atom to be added
-     * @param the TruthValue object to be associated to the added
+     * @param atom the handle of the Atom to be added
+     * @param tvn the TruthValue object to be associated to the added
      *        atom. NULL if the own atom's tv must be used.
      * @deprecated This is a legacy code left-over from when one could
      * have non-real atoms, i.e. those whose handles were
@@ -547,8 +547,8 @@ public:
     /**
      * Removes an atom from the atomspace
      *
-     * @param The Handle of the atom to be removed.
-     * @param Recursive-removal flag; if set, the links in the
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; if set, the links in the
      *        incoming set of the atom to be removed will also be
      *        removed.
      * @return True if the Atom for the given Handle was successfully
@@ -746,23 +746,24 @@ public:
     /**
      * Gets a set of handles that matches with the given arguments.
      *
-     * @param An output iterator.
-     * @param the type of the atoms to be searched
-     * @param the name of the atoms to be searched.
+     * @param result An output iterator.
+     * @param type the type of the atoms to be searched
+     * @param name the name of the atoms to be searched.
      *        For searching only links, use "" or a search by type.
-     * @param if subTypes of the given type are accepted in this search
-     * @param if returns only atoms that contains versioned TVS with
-     *        the given VersionHandle. If NULL_VERSION_HANDLE is given,
+     * @param subclass if sub types of the given type are accepted in this search
+     * @param vh only atoms that contains versioned TVs with
+     *        the given VersionHandle are returned. If NULL_VERSION_HANDLE is given,
      *        it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose
+     * @note The matched entries are appended to a container whose
      * OutputIterator is passed as the first argument. Example of a
-     * call to this method, which would return all entries in TimeServer:
-     *
+     * call to this method, which would return all entries in AtomSpace:
+     * @code
      *      std::list<Handle> ret;
      *      atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -778,18 +779,20 @@ public:
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
      *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -805,20 +808,24 @@ public:
      * Returns the set of atoms of a given type which have atoms of a
      * given target type in their outgoing set (subclasses optionally).
      *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param The desired target type.
-     * @param Whether type subclasses should be considered.
-     * @param Whether target type subclasses should be considered.
-      * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param targetType The desired target type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param targetSubclass Whether target type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
+     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param targetVh only atoms whose target contains versioned TVs with the given VersionHandle are returned.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of a given type and target type (subclasses
      * optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -837,19 +844,21 @@ public:
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
      *
-     * @param An output iterator.
-     * @param The handle that must be in the outgoing set of the atom.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param handle The handle that must be in the outgoing set of the atom.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -867,22 +876,22 @@ public:
      * (order is considered) in their outgoing sets, where the type and
      * subclasses of the atoms are optional.
      *
-     * @param An output iterator.
-     * @param An array of handles to match the outgoing sets of the searched
+     * @param result An output iterator.
+     * @param handles An array of handles to match the outgoing sets of the searched
      * atoms. This array can be empty (or each of its elements can be null), if
      * the handle value does not matter or if it does not apply to the
      * specific search.
      * Note that if this array is not empty, it must contain "arity" elements.
-     * @param An array of target types to match the types of the atoms in
+     * @param types An array of target types to match the types of the atoms in
      * the outgoing set of searched atoms.
-     * @param An array of boolean values indicating whether each of the
+     * @param subclasses An array of boolean values indicating whether each of the
      * above types must also consider subclasses. This array can be null,
      * what means that subclasses will not be considered. Note that if this
      * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param arity The length of the outgoing set of the atoms being searched.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
@@ -890,8 +899,10 @@ public:
      * @note The matched entries are appended to a container whose OutputIterator
      * is passed as the first argument. Example of call to this method, which
      * would return all entries in AtomSpace:
+     * @code
      *     std::list<Handle> ret;
      *     atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -912,20 +923,22 @@ public:
      * Returns the set of atoms of a given name (atom type and subclasses
      * optionally).
      *
-     * @param An output iterator.
-     * @param The desired name of the atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param name The desired name of the atoms.
+     * @param type The type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type and name.
      *
-     * NOTE: The matched entries are appended to a container whose
+     * @note The matched entries are appended to a container whose
      * OutputIterator is passed as the first argument.
      *
-     * Example of call to this method, which would return all entries in TimeServer:
+     * @note Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -943,22 +956,24 @@ public:
      * atom with the given name and type (atom type and subclasses
      * optionally).
      *
-     * @param An output iterator.
-     * @param The name of the atom in the outgoing set of the searched
+     * @param result An output iterator.
+     * @param targetName The name of the atom in the outgoing set of the searched
      * atoms.
-     * @param The type of the atom in the outgoing set of the searched
+     * @param targetType The type of the atom in the outgoing set of the searched
      * atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param type type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type and name whose outgoing
      * set contains at least one atom of the given type and name.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -978,32 +993,34 @@ public:
      * (order is considered) in their outgoing sets, where the type
      * and subclasses arguments of the searched atoms are optional.
      *
-     * @param An output iterator.
-     * @param An array of names to match the outgoing sets of the searched
+     * @param result An output iterator.
+     * @param names An array of names to match the outgoing sets of the searched
      * atoms. This array (or each of its elements) can be null, if
      * the names do not matter or if do not apply to the specific search.
      * Note that if this array is not null, it must contain "arity" elements.
-     * @param An array of target types to match the types of the atoms in
+     * @param types An array of target types to match the types of the atoms in
      * the outgoing set of searched atoms. If array of names is not null,
      * this parameter *cannot* be null as well. Besides, if an element in a
      * specific position in the array of names is not null, the corresponding
      * type element in this array *cannot* be NOTYPE as well.
-     * @param An array of boolean values indicating whether each of the
+     * @param subclasses An array of boolean values indicating whether each of the
      * above types must also consider subclasses. This array can be null,
      * what means that subclasses will not be considered. Not that if this
      * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param arity The length of the outgoing set of the atoms being searched.
+     * @param type The optional type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -1024,27 +1041,29 @@ public:
      * (order is considered) in their outgoing sets, where the type
      * and subclasses arguments of the searched atoms are optional.
      *
-     * @param An output iterator.
-     * @param An array of target types to match the types of the atoms in
+     * @param result An output iterator.
+     * @param types An array of target types to match the types of the atoms in
      * the outgoing set of searched atoms. This parameter can be null (or any of
      * its elements can be NOTYPE), what means that the type doesnt matter.
      * Not that if this array is not null, it must contains "arity" elements.
-     * @param An array of boolean values indicating whether each of the
+     * @param subclasses An array of boolean values indicating whether each of the
      * above types must also consider subclasses. This array can be null,
      * what means that subclasses will not be considered. Not that if this
      * array is not null, it must contains "arity" elements.
-     * @param The length of the outgoing set of the atoms being searched.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param arity The length of the outgoing set of the atoms being searched.
+     * @param type The optional type of the atom.
+     * @param subclass Whether atom type subclasses should be considered.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
@@ -1063,18 +1082,20 @@ public:
      * Gets a set of handles in the Attentional Focus that matches with the given type
      * (subclasses optionally).
      *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer in the AttentionalFocus:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace in the AttentionalFocus:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
+     * @endcode
      */
     template <typename OutputIterator> OutputIterator
     getHandleSetInAttentionalFocus(OutputIterator result,
@@ -1091,19 +1112,21 @@ public:
      * Gets a set of handles that matches with the given type
      * (subclasses optionally) and a given criterion.
      *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @param A criterion for including atoms. It must be something that returns a bool when called.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param compare A criterion for including atoms. It must be something that returns a bool when called.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace beyond 500 LTI:
+     * @code
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     * @endcode
      */
     template <typename OutputIterator, typename Predicate> OutputIterator
     getHandleSetFiltered(OutputIterator result,
@@ -1125,20 +1148,22 @@ public:
      * (subclasses optionally), sorted according to the given comparison
      * structure.
      *
-     * @param An output iterator.
-     * @param The desired type.
-     * @param Whether type subclasses should be considered.
-     * @param The comparison struct to use in the sort.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
+     * @param result An output iterator.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     * @param compare The comparison struct to use in the sort.
+     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
      *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
-     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
+     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in AtomSpace, sorted by STI:
+     * @code
      *         std::list<Handle> ret;
      *         AttentionValue::STISort stiSort;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
+     * @endcode
      */
     template <typename OutputIterator, typename Compare> OutputIterator
     getSortedHandleSet(OutputIterator result,
