@@ -52,6 +52,48 @@ select count(*) from newdisjuncts where sense_obscnt > 2*senses_observed;
 
 ====================================================================
 
-Final results:
+October 2010: Final, authoritative analysis & notes
+---------------------------------------------------
+
+From the NewInflectMarginal tables:
+a total of 423778 distinct tagged words observed; as reported by
+SQL and compute-mi.scm:
+  select count(*) from newinflectmarginal  returns 423778
+
+stats-wordcount.pl reports
+# sum_count = 3821443.36619242   sum_obscnt=29329021
+	select sum(count) from newinflectmarginal;
+	select sum(obscnt) from newinflectmarginal;
+
+But many of these have a parse score of 0.0, typically because they are
+unused words in the parsse: e.g.
+	select * from newinflectmarginal where count = 0 order by count desc;
+
+     inflected_word     | count | obscnt 
+------------------------+-------+--------
+ [.]                    |     0 | 165504 
+ [,]                    |     0 | 120856 
+ [rparenID2]            |     0 |  66823 
+ [lparenID1]            |     0 |  58663 
+ [of]                   |     0 |  53354 
+ [:]                    |     0 |  44498 
+ [the]                  |     0 |  42322 
+ [and]                  |     0 |  41617 
+ [;]                    |     0 |  24432 
+ [a]                    |     0 |  23948 
+ [in]                   |     0 |  18526 
+ [-]                    |     0 |  14331 
+ [rparenID4]            |     0 |  10403 
+ [as]                   |     0 |   9987 
+ [to]                   |     0 |   7941 
+ [is]                   |     0 |   7883 
+ [for]                  |     0 |   7698 
+ [was]                  |     0 |   7346 
+
+Not counting these, have 202899 distinct words,
+# sum_count = 3821443.36619242   sum_obscnt=27093506
+
+
+
 
 

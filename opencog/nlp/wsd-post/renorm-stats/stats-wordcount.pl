@@ -32,8 +32,10 @@ my $dj_tablename = "NewInflectMarginal";
 sub show_word_counts
 {
 	# select * from newinflectmarginal order by count DESC;
+	# Actually, look only at those with a parse-confidence
+	# greater than zero, as the rest is just borken crud ... 
 	my $select = $dbh->prepare('SELECT count, obscnt FROM '.
-		$dj_tablename . ' ORDER BY count DESC;' )
+		$dj_tablename . ' WHERE count > 0 ORDER BY count DESC;' )
 		or die "Couldn't prepare statement: " . $dbh->errstr;
 
 	$select->execute()
@@ -45,10 +47,16 @@ sub show_word_counts
 	print "#\n# Will look at $nr words in $dj_tablename\n";
 	print "#\n#\n";
 
+	my $sum_count = 0.0;
+	my $sum_obscnt = 0.0;
+
 	my $binsz = 1;
 	for (my $j=0; $j<$select->rows; $j++)
 	{
 		my ($cnt, $obscnt) = $select->fetchrow_array();
+
+		$sum_count += $cnt;
+		$sum_obscnt += $obscnt;
 
 		if ((($j % $binsz) == 0))
 		{
@@ -63,6 +71,8 @@ sub show_word_counts
 			if ($binsz < 1) { $binsz = 1; }
 		}
 	}
+
+	print "# sum_count = $sum_count   sum_obscnt=$sum_obscnt\n";
 }
 
 show_word_counts();
