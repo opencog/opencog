@@ -65,6 +65,8 @@ stats-wordcount.pl reports
 	select sum(count) from newinflectmarginal;
 	select sum(obscnt) from newinflectmarginal;
 
+3.821 million and 29.329 million
+
 But many of these have a parse score of 0.0, typically because they are
 unused words in the parsse: e.g.
 	select * from newinflectmarginal where count = 0 order by count desc;
@@ -93,7 +95,35 @@ unused words in the parsse: e.g.
 Not counting these, have 202899 distinct words,
 # sum_count = 3821443.36619242   sum_obscnt=27093506
 
+27.0935 million
 
+-------------------------------------------------------------
 
+From the NewDisjuncts table:
+# sum_count = 3821504.54465321   sum_obscnt=25159818
+
+Note the sum-count matches that in NewInnflectMarginal to within errors.
+obscnt = 25.160 million.
+
+select count(*) from newdisjuncts where count > 0;
+1264758  == 1.264 million == number of distinct word-disjunct pairs observed.
+
+select distinct on (disjunct) disjunct into junk from newdisjuncts group by disjunct;
+select count(*) from junk;
+206961
+
+select distinct on (disjunct) disjunct into junk from newdisjuncts where count > 0 group by disjunct;
+select count(*) from junk;
+129093  == number of disjuncts observed
+
+select distinct on (disjunct) disjunct,count into junk from newdisjuncts group by disjunct,count;
+select count(*) from junk where count>0;
+115184
+
+select * into junka from newdisjuncts where count > 0;
+select distinct on (disjunct) disjunct into junk from junka group by disjunct;
+select count(*) from junk;
+129093  == number of disjuncts observed
+drop table junka, junk;
 
 

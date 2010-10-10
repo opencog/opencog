@@ -7,6 +7,9 @@
 # The output of this script is just a multi-column, tab-separated
 # table of numbers, suitable for graphing, e.g. with gnuplot.
 #
+# Actually, this can be used for the word-counts (InflectMarginal table)
+# and word-disjunct pairs (Disjuncts table)
+#
 # Copyright (C) 2010 Linas Vepstas <linasvepstas@gmail.com>
 #
 
@@ -25,7 +28,8 @@ my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 
 # Table on which to perform data analysis.
 # my $dj_tablename = "InflectMarginal";
-my $dj_tablename = "NewInflectMarginal";
+# my $dj_tablename = "NewInflectMarginal";
+my $dj_tablename = "NewDisjuncts";
 
 #--------------------------------------------------------------------
 
@@ -50,6 +54,10 @@ sub show_word_counts
 	my $sum_count = 0.0;
 	my $sum_obscnt = 0.0;
 
+	# The counts from NewInflectMarginal tables.
+	# my $norm_cnt = 3821443.36619242;
+	# my $norm_obscnt = 27093506;
+
 	my $binsz = 1;
 	for (my $j=0; $j<$select->rows; $j++)
 	{
@@ -61,6 +69,8 @@ sub show_word_counts
 		if ((($j % $binsz) == 0))
 		{
 			my $k = $j + 1;
+			# $cnt /= $norm_cnt;
+			# $obscnt /= $norm_obscnt;
 			print "$k	$cnt	$obscnt\n";
 
 			# adjust the binsize so we don't print every row ... 
