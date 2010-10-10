@@ -28,8 +28,6 @@ my $dj_tablename = "NewInflectMarginal";
 
 #--------------------------------------------------------------------
 
-my $binsz = 500;
-
 sub show_word_counts
 {
 	# select * from newinflectmarginal order by count DESC;
@@ -44,25 +42,24 @@ sub show_word_counts
 	print "#\n# bincount for word frequency \n";
 	print "# expect this to obey Zipf's law ... \n";
 	print "#\n# Will look at $nr words in $dj_tablename\n";
-	print "#\n# group into bins holding $binsz words\n#\n";
+	print "#\n#\n";
 
-	my $row = 0;
-	my $sum_cnt = 0.0;
-	my $sum_obscnt = 0.0;
+	my $binsz = 1;
 	for (my $j=0; $j<$select->rows; $j++)
 	{
 		my ($cnt, $obscnt) = $select->fetchrow_array();
-		$sum_cnt += $cnt;
-		$sum_obscnt += $obscnt;
 
-		if (($j % $binsz) == 0)
+		if ((($j % $binsz) == 0))
 		{
-			$sum_cnt /= $binsz;
-			$sum_obscnt /= $binsz;
-			$row ++;
-			print "$row $sum_cnt $sum_obscnt\n";
-			$sum_cnt = 0.0;
-			$sum_obscnt = 0.0;
+			my $k = $j + 1;
+			print "$k	$cnt	$obscnt\n";
+
+			# adjust the binsize so we don't print every row ... 
+			$binsz = log($k) - 4;
+			$binsz = int($binsz);
+			$binsz = exp($binsz);
+			$binsz = int($binsz);
+			if ($binsz < 1) { $binsz = 1; }
 		}
 	}
 }

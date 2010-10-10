@@ -49,7 +49,7 @@ sub show_ent
 
 	my $nr = $select->rows;
 	print "#\n# bincount of entropy \n";
-	print "#\n# Will look at $nr rows in Disjuncts\n";
+	print "#\n# Will look at $nr rows in $dj_tablename\n";
 	print "#\n# bin into $nbins bins\n#\n";
 	for (my $j=0; $j<$select->rows; $j++)
 	{
