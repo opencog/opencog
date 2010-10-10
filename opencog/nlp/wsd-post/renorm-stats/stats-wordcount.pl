@@ -28,7 +28,7 @@ my $dj_tablename = "NewInflectMarginal";
 
 #--------------------------------------------------------------------
 
-my $nbins = 500;
+my $binsz = 500;
 
 sub show_word_counts
 {
@@ -42,9 +42,11 @@ sub show_word_counts
 
 	my $nr = $select->rows;
 	print "#\n# bincount for word frequency \n";
+	print "# expect this to obey Zipf's law ... \n";
 	print "#\n# Will look at $nr words in $dj_tablename\n";
-	print "#\n# group into $nbins bins\n#\n";
+	print "#\n# group into bins holding $binsz words\n#\n";
 
+	my $row = 0;
 	my $sum_cnt = 0.0;
 	my $sum_obscnt = 0.0;
 	for (my $j=0; $j<$select->rows; $j++)
@@ -53,7 +55,15 @@ sub show_word_counts
 		$sum_cnt += $cnt;
 		$sum_obscnt += $obscnt;
 
-print "duuudee $cnt $obscnt\n";
+		if (($j % $binsz) == 0)
+		{
+			$sum_cnt /= $binsz;
+			$sum_obscnt /= $binsz;
+			$row ++;
+			print "$row $sum_cnt $sum_obscnt\n";
+			$sum_cnt = 0.0;
+			$sum_obscnt = 0.0;
+		}
 	}
 }
 
