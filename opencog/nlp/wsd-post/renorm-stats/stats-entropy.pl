@@ -3,6 +3,8 @@
 # stats-entropy.pl
 #
 # Display bin-count of entropy for sense assignments.
+# The output of this script is just a multi-column, tab-separated
+# table of numbers, suitable for graphing, e.g. with gnuplot.
 # 
 # Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 #

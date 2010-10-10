@@ -2,9 +2,10 @@
 #
 # stats-wordcount.pl
 #
-# Display bincount (freequency) of occurance of unique
-# words in the "disjuncts" table.  This should of course,
-# obey Zipf's law.
+# Display frequency of occurance of words, as a function of rank,
+# in the "disjuncts" table.  This should, of course, obey Zipf's law.
+# The output of this script is just a multi-column, tab-separated
+# table of numbers, suitable for graphing, e.g. with gnuplot.
 #
 # Copyright (C) 2010 Linas Vepstas <linasvepstas@gmail.com>
 #

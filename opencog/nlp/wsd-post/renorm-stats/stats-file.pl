@@ -3,6 +3,8 @@
 # file-stats.pl
 #
 # Collect some miscellaneous statistics about CFF-format file contents.
+# The output of this script is just a multi-column, tab-separated
+# table of numbers, suitable for graphing, e.g. with gnuplot.
 #
 # Linas Vepstas November 2009
 #
