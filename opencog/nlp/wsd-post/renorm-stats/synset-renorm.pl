@@ -52,6 +52,9 @@ my $updateup = $dbh->prepare(
 my $inserted = 0;
 my $updated = 0;
 
+
+# update_record -- update just one record ...
+#
 sub update_record
 {
 	my ($sense, $infword, $disjunct, $count, $obscnt) = @_;
@@ -85,7 +88,8 @@ my $delete = $dbh->prepare(
 	'word_sense = ? AND inflected_word = ? AND disjunct = ?')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
-my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . ' WHERE count > 0.0;')
+my $select = $dbh->prepare('SELECT * FROM ' . $djs_tablename . 
+	' WHERE count > 0.0;')
 	or die "Couldn't prepare statement: " . $dbh->errstr;
 
 print "Starting to renormalize synsets in the $djs_tablename table\n";
@@ -93,7 +97,8 @@ print "Starting to renormalize synsets in the $djs_tablename table\n";
 $select->execute()
 	or die "Couldn't execute statement: " . $select->errstr;
 
-print "Will examine $select->rows rows in the $djs_tablename table\n";
+my $nrows = $select->rows;
+print "Will examine $nrows rows in the $djs_tablename table\n";
 
 my $examined = 0;
 for (my $i=0; $i<$select->rows; $i++)
@@ -118,7 +123,7 @@ for (my $i=0; $i<$select->rows; $i++)
 
 	if ($pos =~ /5/)
 	{
-		print "Don't know what to do! $sense $infword $count $obscnt\n";
+		print "Warning: Don't know what to do! $sense $infword $count $obscnt\n";
 		next;
 	}
 
@@ -135,6 +140,15 @@ for (my $i=0; $i<$select->rows; $i++)
 		$word = $word . "#" . $pos;
 		$slemma = $slemma . "#" . $pos;
 	}
+
+	# Some texts have a c# in them, and this confuses wordnet
+	# So, if the word has a # in it, we pass ...
+	if ($infword =~ /#/)
+	{
+		print "Warning: skipping $infword because it has a sharp in it\n";
+		print "\tLine $examined sense $sense\n";
+		next;
+	} 
 
 	# Get its lemmatized form.
 	my @forms = $wn->validForms($word);
