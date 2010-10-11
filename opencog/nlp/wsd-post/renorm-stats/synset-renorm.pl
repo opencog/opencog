@@ -143,10 +143,12 @@ for (my $i=0; $i<$select->rows; $i++)
 
 	# Some texts have a c# in them, and this confuses wordnet
 	# So, if the word has a # in it, we pass ...
+	# Actually, the problem is C# returns every word starting
+	# with the letter C, leading to an overflow.
 	if ($infword =~ /#/)
 	{
-		print "Warning: skipping $infword because it has a sharp in it\n";
-		print "\tLine $examined sense $sense\n";
+		# print "Warning: skipping $infword because it has a sharp in it\n";
+		# print "\tLine $examined sense $sense\n";
 		next;
 	} 
 

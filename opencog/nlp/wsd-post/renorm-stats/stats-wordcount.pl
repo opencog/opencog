@@ -9,6 +9,7 @@
 #
 # Actually, this can be used for the word-counts (InflectMarginal table)
 # and word-disjunct pairs (Disjuncts table)
+# and word-disjunct-sense triples (DisjunctSenses table)
 #
 # Copyright (C) 2010 Linas Vepstas <linasvepstas@gmail.com>
 #
@@ -29,7 +30,8 @@ my $dbh = DBI->connect('DBI:Pg:dbname=lexat', 'linas', 'asdf')
 # Table on which to perform data analysis.
 # my $dj_tablename = "InflectMarginal";
 # my $dj_tablename = "NewInflectMarginal";
-my $dj_tablename = "NewDisjuncts";
+# my $dj_tablename = "NewDisjuncts";
+my $dj_tablename = "NewDisjunctSenses";
 
 #--------------------------------------------------------------------
 

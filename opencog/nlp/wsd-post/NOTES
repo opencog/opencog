@@ -92,6 +92,8 @@ unused words in the parsse: e.g.
  [for]                  |     0 |   7698 
  [was]                  |     0 |   7346 
 
+So
+	select count(*) from newinflectmarginal where count > 0;
 Not counting these, have 202899 distinct words,
 # sum_count = 3821443.36619242   sum_obscnt=27093506
 
@@ -125,5 +127,81 @@ select distinct on (disjunct) disjunct into junk from junka group by disjunct;
 select count(*) from junk;
 129093  == number of disjuncts observed
 drop table junka, junk;
+
+select * into junka from newdisjuncts where count > 0;
+select distinct on (inflected_word) inflected_word into junk from junka group by inflected_word;
+select count(*) from junk;
+202899 == number of distinct tagged words in the dataset.
+which is identical to number of words in inflectmarginal ... bravo.
+
+-------------------------------------------------------------
+From the NewDisjunctSenses table:
+# sum_count = 433709.701193221   sum_obscnt=2284506
+
+obscount = 22.8 million ... less then befor, but tolerable
+sum_count = 433.7K  wow ... much lower ... 
+
+select * into junka from newdisjunctsenses where count > 0;
+select distinct on (disjunct) disjunct into junk from junka group by disjunct;
+select count(*) from junk;
+34293 == number of disjuncts for which there are sense tags
+
+select distinct on (word_sense) word_sense into junk from junka group by word_sense;
+select count(*) from junk;
+14922 == number of word-senses that were used in tagging .. 
+
+Wait, above is before synset renorm ... run ./synset-renorm.pl  Now get:
+After synset renorm, there are 
+select count(*) from newdisjunctsenses;
+855551 == 856K == number of distinct word-disjunct-sense triples
+
+Now get:
+# sum_count = 433710.788944963   sum_obscnt=2288741
+Hmm .. clearly, some zero-scored triples got merged in! Strange .. 
+
+Wait 
+So far, examined=360000 updated=75011 inserted=47103
+So far, examined=370000 updated=77150 inserted=48930
+Out of memory!
+
+real	8m41.245s
+user	3m3.043s
+sys	0m14.377s
+
+Fixed .. bug with C# in the dataset, leading to overflow in wordnet.
+
+-------------------------------------------------------------
+From the NewDisjunctSenses table:
+
+select count(*) from newdisjunctsenses;
+817286 == 817K distinct word-dj-sense triples.
+
+But:
+select count(*) from newdisjunctsenses where count > 0;
+447672 == 447.7K distinct, trust-worthy triples 
+
+sum_count = 433710.788944965   sum_obscnt=2289556
+
+obscnt = 2.290 million much much lower than previous because not all were sense-tagged.
+cnt = 433.7K
+
+select * into junka from newdisjunctsenses where count > 0;
+select distinct on (disjunct) disjunct into junk from junka group by disjunct;
+select count(*) from junk;
+34293 == number of disjuncts for which there are sense tags
+
+select distinct on (word_sense) word_sense into junk from junka group by word_sense;
+select count(*) from junk;
+15295 == number of word-senses that were used in tagging .. 
+
+select distinct on (inflected_word) inflected_word into junk from junka group by inflected_word;
+select count(*) from junk;
+15771 == number of sense-tagged words.
+
+select distinct on (inflected_word, disjunct) inflected_word,disjunct into junk from junka group by inflected_word,disjunct;
+select count(*) from junk;
+186490 == number of word-disjunct pairs tagged with senses.
+
+
 
 
