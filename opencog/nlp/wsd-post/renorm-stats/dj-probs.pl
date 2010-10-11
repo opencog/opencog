@@ -2,8 +2,10 @@
 #
 # dj-probs.pl
 #
-# Compute various probabilities and marginal probabilites for the
-# wordsense-word-disjunct dataset.
+# Compute the conditional probabilities and entropies for the
+# wordsense-word-disjunct dataset. This script updates the database
+# contents, storing the freshly computed probabilities in the
+# DisjunctSenses and Disjunsts tables.
 # 
 # Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
 #

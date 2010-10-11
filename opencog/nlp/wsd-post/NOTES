@@ -202,6 +202,59 @@ select distinct on (inflected_word, disjunct) inflected_word,disjunct into junk 
 select count(*) from junk;
 186490 == number of word-disjunct pairs tagged with senses.
 
+---------------------------------------------------------------------------------------------
+Run renorm-stats/dj-probs.pl. It prints out:
 
+Will look at 447672 rows in NewDisjunctSenses 
+Total count is 433710.788944965 for 447672 items
+Done updating the probs for 447672 rows
+Done updating the entropy of 186490 disjuncts
+    Avg sense cnt=2.40051477291008  avg entropy=0.859975074394272;
+    Bins:
+     num-senses= 0   num-triples= 0
+     num-senses= 1   num-triples= 64692
+     num-senses= 2   num-triples= 41619
+     num-senses= 3   num-triples= 37069
+     num-senses= 4   num-triples= 34532
+     num-senses= 5   num-triples= 5037
+     num-senses= 6   num-triples= 1955
+     num-senses= 7   num-triples= 798
+     num-senses= 8   num-triples= 330
+     num-senses= 9   num-triples= 180
+     num-senses= 10   num-triples= 83
+     num-senses= 11   num-triples= 36
+     num-senses= 12   num-triples= 36
+     num-senses= 13   num-triples= 62
+     num-senses= 14   num-triples= 12
+     num-senses= 15   num-triples= 7
+     num-senses= 16   num-triples= 7
+     num-senses= 17   num-triples= 5
+     num-senses= 18   num-triples= 3
+     num-senses= 19   num-triples= 4
+     num-senses= 20   num-triples= 5
+     num-senses= 21   num-triples= 2
+     num-senses= 22   num-triples= 2
+     num-senses= 23   num-triples= 2
+     num-senses= 24   num-triples= 2
+     num-senses= 25   num-triples= 1
+Use of uninitialized value $_ in concatenation (.) or string at ./dj-probs.pl line 126.
+     num-senses= 26   num-triples= 
+     num-senses= 27   num-triples= 2
+Use of uninitialized value $_ in concatenation (.) or string at ./dj-probs.pl line 126.
+     num-senses= 28   num-triples= 
+     num-senses= 29   num-triples= 1
+     num-senses= 30   num-triples= 2
+     num-senses= 31   num-triples= 1
+Use of uninitialized value $_ in concatenation (.) or string at ./dj-probs.pl line 126.
+     num-senses= 32   num-triples= 
+Use of uninitialized value $_ in concatenation (.) or string at ./dj-probs.pl line 126.
+     num-senses= 33   num-triples= 
+     num-senses= 34   num-triples= 2
+     num-senses= 35   num-triples= 1
+
+
+
+---------------------------------------------------------------------------------------------
+Q: distributation of senses per word?
 
 
