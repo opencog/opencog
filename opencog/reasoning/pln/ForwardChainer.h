@@ -66,6 +66,7 @@ public:
     //! one of them in each inference. This (more-or-less) avoids rerunning inferences.
     Btr<pHandleSet> lastLevelResults;
     Btr<pHandleSet> thisLevelResults;
+    int level;
 
     //! @todo: probably to be removed
     //! Chain to specific target. Only useful for testing.

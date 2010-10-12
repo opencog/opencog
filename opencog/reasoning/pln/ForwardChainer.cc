@@ -60,7 +60,7 @@ void updateTrail(pHandle out, Rule* r, Btr<vector<BoundVertex> > args) {
 ForwardChainer::ForwardChainer(AtomSpaceWrapper* _asw) :
         composers(new ForwardComposerRuleProvider),
         generators(new ForwardGeneratorRuleProvider),
-        asw(_asw)
+        asw(_asw), level(0)
 {
     minConfidence = FWD_CHAIN_MIN_CONFIDENCE;
     probStack = FWD_CHAIN_PROB_STACK;
@@ -116,8 +116,6 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
 {
     pHandleSeq results;
     
-    int level = 0;
-
     while (maxRuleApps > 0) {
         cout << "Level " << ++level << endl;
         //cout << "steps remaining: " << maxRuleApps << endl;
@@ -401,10 +399,12 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     BITNodeRoot bit(AND, new EvaluationRuleProvider);
     // Enables it to handle Deduction/MP combined with ForAll unification.
     bit.setLoosePoolPolicy(true);
+    // Enables trails with forward chaining.
+    bit.setKeepRP(true);
 
     int maxSteps = 1000*filter.size();
     //const set<VtreeProvider*>& results =
-    bit.infer(maxSteps);
+    bit.infer(maxSteps);//, 0.000001f, 0.01f);
 
     //! @todo Get the BIT to return results properly
     //! For now just using a workaround.
@@ -417,6 +417,34 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     } else {
         return ret;
     }
+
+    // Temporary hack to store the AndLink results from the BIT without duplicates.
+    // It shouldn't produce any duplicates, it's due to flaw(s) in the BITNode cloning mechanism.
+    // Vectors don't have a decent equality mechanism built-in.
+    set<pHandle> bit_results;
+
+#if 1
+    foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
+        const vtree& tmp = vpt->getVtree();
+        vtree::iterator top = tmp.begin();
+
+        NMPrinter np;
+        //np.print(top,-5);
+
+        bit_results.insert(_v2h(*top));
+    }
+
+    foreach (pHandle andLinkResult, bit_results) {
+        Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
+
+        foreach (pHandle ph, asw->getOutgoing(andLinkResult)) {
+            next->push_back(BoundVertex(ph));
+            //np.print(ph,-5);
+        }
+
+        ret->insert(next);
+    }
+#else
 
     foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
         Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
@@ -432,6 +460,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
 
         ret->insert(next);
     }
+#endif
 
     return ret;
 }
