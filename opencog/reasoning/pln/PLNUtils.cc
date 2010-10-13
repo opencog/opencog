@@ -542,7 +542,39 @@ void TableGather::gather(tree<Vertex>& _MP,  AtomSpaceWrapper* asw,
         return;
     }
 
-    string name(asw->inheritsType(T, NODE) ? asw->getName(*h_ptr) : "");
+
+    // If it's a link, and if it has no FWVars, look it up directly. The
+    // next algorithm looks up every link with the same type as the root,
+    // and then unifies against each one. So it's much slower than this
+    // (on large AtomSpaces).
+    // update: ideally. Actually, this seems to be about as slow (maybe due to
+    // the various other slow operations it has to perform...)
+//    if (  asw->inheritsType(T, LINK) &&
+//          !_MP.begin().is_childless() &&
+//          !hasFW_VAR(_MP)) {
+//        pHandle a = make_real(_MP); // the (possibly) already existing atom
+//        // Note: this means you can't look up 0-confidence Atoms using
+//        // TableGather. That's not necessary though.
+//        //cout << a;
+//        assert (!asw->isType(a));
+//
+//        if (  !asw->getTV(a).isNullTv() &&
+//              asw->getTV(a).getConfidence() >= MIN_CONFIDENCE) {
+//            // also, don't allow matching to true Atoms with FWVars in them
+//            // (as produced by CCURule). MPunify doesn't allow that.
+//            meta result = meta(new vtree(mva((pHandle)a)));
+//            ForceAllLinksVirtual(result);
+//
+//            if (!hasFW_VAR(*result)) {
+//                insert(BoundVertex(Vertex(a), NULL));
+//            }
+//
+//            return;
+//        }
+//    }
+
+    string name( (asw->inheritsType(T, NODE) && !asw->isType(T))
+            ? asw->getName(*h_ptr) : "");
 
     /// First, we fill this vector (TableGather object),
     /// then, we intersect it one by one by each new set of looup child_results.
@@ -1199,7 +1231,9 @@ bool MPunify(vtree lhs_t,
 
     LOG(4, "MPunify:");
 
-    bool lhs_is_node = asw->inheritsType(lhs_T, NODE);
+    // This flag means you should check that the names are equal. Only applicable if
+    // lhs is a Node (a specific Node, not a Type).
+    bool lhs_is_node = asw->inheritsType(lhs_T, NODE) && !asw->isType(lhs_h);
 
     // By definition: FW_VARs only allowed on left side!
     if (rhs_T == VarT)

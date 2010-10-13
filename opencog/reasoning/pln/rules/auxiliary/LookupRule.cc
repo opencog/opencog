@@ -37,7 +37,7 @@ bool ExpandEvaluationLinks(vtree& target, AtomSpaceWrapper* asw)
     bool is_changed = false;
     
     for(vtree::iterator i = target.begin(); i != target.end(); i++)
-        if (asw->isSubType(_v2h(*i), CONCEPT_NODE)) {
+        if (asw->isSubType(_v2h(*i), CONCEPT_NODE) && !asw->isType(_v2h(*i))) {
             std::string name = asw->getName(_v2h(*i));
             if (name == "!whileago" || name == "!now") {
 #ifndef WIN32
