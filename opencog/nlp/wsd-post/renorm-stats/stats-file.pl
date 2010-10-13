@@ -6,6 +6,10 @@
 # The output of this script is just a multi-column, tab-separated
 # table of numbers, suitable for graphing, e.g. with gnuplot.
 #
+# Usage: cat *.cff | ./file-stats.pl
+#
+# Runtime might take 10-20 minutes for 50K files.
+#
 # Linas Vepstas November 2009
 #
 
@@ -20,6 +24,7 @@ $weighted_wrd_count = 0;
 
 while (<>)
 {
+	# count number of sentences, and number of parses
 	if (/<sentence index=/) { $num_sentences ++; next; }
 	if (/<parse id=/) { $num_parses ++;  next; }
 
@@ -55,6 +60,8 @@ while (<>)
 	if (/<features>/) { $in_features = 1;  next; }
 	if (/<\/features>/) { $in_features = 0;  next; }
 
+	# Count number of words in a sentence (err, a parse,
+	# technically speaking).
 	if ($in_features)
 	{
 		$wrd_count ++;
@@ -64,6 +71,10 @@ while (<>)
 }
 
 print "counted $num_sentences sentences and $num_parses parses\n";
+$avg = $num_parses / $num_sentences;
+print "average of $avg parses per sentence\n";
+$avg = $wrd_count / $num_parses;
+print "average of $avg words per sentence\n";
 
 $avg = $sum_parse_score / $num_parses;
 print "total of $sum_parse_score for the parse score, or avg=$avg per parse\n";

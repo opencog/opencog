@@ -11,7 +11,7 @@ that will explain all this in an understandable form.  Contact me.
 
 database: "psql lexat"
 
-Total of 54647 articles parsed from wikipedia, in the latter
+Total of 54646 articles parsed from wikipedia, in the latter
 ranges j,k,l,m (i.e. articles starting with these letters)
 
 progress:
@@ -251,6 +251,27 @@ Use of uninitialized value $_ in concatenation (.) or string at ./dj-probs.pl li
      num-senses= 33   num-triples= 
      num-senses= 34   num-triples= 2
      num-senses= 35   num-triples= 1
+
+---------------------------------------------------------------------------------------------
+Total of 54646 articles, JKLM
+
+cat */* | ~/src/novamente/src/opencog-embodiment/opencog/nlp/wsd-post/renorm-stats/stats-file.pl
+counted 1093878 sentences and 3336818 parses
+total of 834704.405873576 for the parse score, or avg=0.25014981514532 per parse
+wrd-count=71573163 and weighted =13484393.1851377 or avg=0.18840012960078 per word
+
+1093878/54646 = 20.01753 sentences/article
+So 3336818/1093878 = 3.05045 parses/sentence
+71573163/3336818 = 21.45 words/sentence
+
+OK, 71.6 million words observed, for weight of 13.5 million
+
+So why is select sum(obscnt) from newinflectmarginal; 
+returning only half of this i.e. 29.329 million ???
+also: 0.1884*29.329 = 5.5256 million != number returned by
+  select sum(count) from newinflectmarginal; (which is 3.821 million)
+
+So what's up with that ??? Arghhhh!
 
 
 
