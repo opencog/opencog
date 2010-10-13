@@ -10,18 +10,26 @@
 #
 # Runtime might take 10-20 minutes for 50K files.
 #
-# Linas Vepstas November 2009
+# Copyright (c) 2009, 2010 Linas Vepstas
 #
 
 $num_sentences = 0;
 $num_parses = 0;
+$num_good_parses = 0;
+$num_bad_parses = 0;
+
 $sum_parse_score = 0;
+$sum_good_parse_score = 0;
+$sum_bad_parse_score = 0;
 
 $parse_score = 0;
 $in_features = 0;
 $wrd_count = 0;
+$wrd_good_count = 0;
 $weighted_wrd_count = 0;
+$weighted_wrd_good_count = 0;
 
+$is_bad = 0;
 while (<>)
 {
 	# count number of sentences, and number of parses
@@ -55,6 +63,18 @@ while (<>)
 		$parse_score = exp(-$parse_score);
 
 		$sum_parse_score += $parse_score;
+		if ($num_skipped_words > 0)
+		{
+			$num_bad_parses ++;
+			$sum_bad_parse_score += $parse_score;
+			$is_bad = 1;
+		}
+		else
+		{
+			$num_good_parses ++;
+			$sum_good_parse_score += $parse_score;
+			$is_bad = 0;
+		}
 		next;
 	}
 	if (/<features>/) { $in_features = 1;  next; }
@@ -66,6 +86,11 @@ while (<>)
 	{
 		$wrd_count ++;
 		$weighted_wrd_count += $parse_score;
+		if (0 == $is_bad)
+		{
+			$wrd_good_count ++;
+			$weighted_wrd_good_count += $parse_score;
+		}
 		next;
 	}
 }
@@ -76,8 +101,23 @@ print "average of $avg parses per sentence\n";
 $avg = $wrd_count / $num_parses;
 print "average of $avg words per sentence\n";
 
+
+print "num good parses: $num_good_parses\n";
+print "num bad parses: $num_bad_parses\n";
+
+
 $avg = $sum_parse_score / $num_parses;
 print "total of $sum_parse_score for the parse score, or avg=$avg per parse\n";
 
+$avg = $sum_good_parse_score / $num_good_parses;
+print "total of $sum_good_parse_score for the good parse score, or avg=$avg per parse\n";
+
+$avg = $sum_bad_parse_score / $num_bad_parses;
+print "total of $sum_bad_parse_score for the bad parse score, or avg=$avg per parse\n";
+
 $avg = $weighted_wrd_count/$wrd_count;
 print "wrd-count=$wrd_count and weighted =$weighted_wrd_count or avg=$avg per word\n";
+
+$avg = $weighted_wrd_good_count/$wrd_good_count;
+print "wrd-good-count=$wrd_good_count and weighted =$weighted_wrd_good_count or avg=$avg per word\n";
+
