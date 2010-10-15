@@ -68,15 +68,15 @@ private:
     void setParameters(const std::string* params);
 
     /**
-     * That method is used to wrapped in a scheme function.
+     * This method is used to wrap in a scheme function.
      * It calls infer, returns the Handle of the resulting atom if the
      * inference is successful, or the undefined Handle otherwise.
      */
     Handle pln_bc(Handle h, int steps);
 
     /**
-     * That method is used to wrapped in a scheme function.
-     * It calls applyRule
+     * This method is used to wrap in a scheme function.
+     * It calls applyRule.
      */
     Handle pln_ar(const std::string& ruleName, const HandleSeq& premises);
 
@@ -108,15 +108,9 @@ public:
 
 }; // class
 
-#if 0
-/** Takes a real handle, and sets the backward-chaining target to that atom.
- */
-void setTarget(Handle h);
-#endif
-
 namespace pln {
 
-/** Does steps inference steps on target h. Optionally sets the target used in
+/** Does inference steps on target h. Optionally sets the target used in
  * the PLN cogserver commands.
  * Intended for use by the pln-bc Scheme command; this is currently set up for
  * practical use rather than testing use, and as such will not stop at the
@@ -132,7 +126,7 @@ namespace pln {
 Handle infer(Handle h, int &steps, bool setTarget);
 
 /**
- * that function apply a PLN inference rule given its name and its premises
+ * This function applies a PLN inference rule given its name and its premises
  * to produce the conclusion. The set of rules is taken from
  * DefaultVariableRuleProvider.
  * If the name rule does not correspond to any declared rules
