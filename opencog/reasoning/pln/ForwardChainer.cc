@@ -259,7 +259,7 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BB
     
     Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
     
-    bool match = findAllArgs(filter, args, 0, all_args, bindings);
+    /*bool match =*/ findAllArgs(filter, args, 0, all_args, bindings);
 
     return all_args;
 }
@@ -402,12 +402,16 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     // Enables trails with forward chaining.
     bit.setKeepRP(true);
 
-    int maxSteps = 1000*filter.size();
+    int maxSteps = 5000*filter.size();
     //const set<VtreeProvider*>& results =
     bit.infer(maxSteps);//, 0.000001f, 0.01f);
 
     //! @todo Get the BIT to return results properly
     //! For now just using a workaround.
+
+    if (maxSteps == 0) cout << "RAN OUT OF STEPS!" << endl;
+
+    //assert(maxSteps > 0);
 
     Btr<set<Btr<vector<BoundVertex> > > > ret(new set<Btr<vector<BoundVertex> > >);
 
@@ -423,7 +427,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     // Vectors don't have a decent equality mechanism built-in.
     set<pHandle> bit_results;
 
-#if 1
+#if 0
     foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
         const vtree& tmp = vpt->getVtree();
         vtree::iterator top = tmp.begin();
