@@ -566,7 +566,7 @@ bool AtomSpaceWrapper::loadAxioms(const string& path)
 {
     //! @todo check exists works on WIN32
     string fname(path);
-    string fname2("../tests/reasoning/pln/xml/" + path);
+    string fname2(PROJECT_SOURCE_DIR"/tests/reasoning/pln/xml/" + path);
 //    string fname2(PLN_TEST_DIR + path);
 //    string fname2("tests/reasoning/pln/" + path);
     if (!exists(fname.c_str())) {

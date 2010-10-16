@@ -103,7 +103,7 @@ Btr<PLNTest> setupSCMTarget(std::string conf_file, bool test_bc)
     std::cout << test["COMMENT"] << std::endl;
 
     //! @todo define this somewhere else.
-    std::string PLN_TEST_DIR = "../tests/reasoning/pln/";
+    std::string PLN_TEST_DIR = PROJECT_SOURCE_DIR"/tests/reasoning/pln/";
     // scm is now used instead of xml
     // std::string axiomsFile = PLN_TEST_DIR+"xml/"+test["LOAD"]+".xml";
     std::string axiomsFile = PLN_TEST_DIR+"scm/"+test["LOAD"]+".scm";
@@ -221,7 +221,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
 
 Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc) {
     // Find the path to the test file with that name.
-    std::string testDir = "../tests/reasoning/pln/targets/";
+    std::string testDir = PROJECT_SOURCE_DIR"/tests/reasoning/pln/targets/";
     std::string tmp = test_name + std::string("_test.conf");
     path conf_filename(tmp);
 
