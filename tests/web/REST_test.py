@@ -29,7 +29,7 @@ def spawn_server():
     print "Spawning server"
     server_process = subprocess.Popen([server_exe, '-c',
             opencog_conf], stdout=sys.stdout)
-    time.sleep(1) # Allow modules time to load
+    time.sleep(10) # Allow modules time to load
     print "Server spawned with pid %d" % (server_process.pid,)
 
 def kill_server():
