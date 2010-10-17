@@ -25,6 +25,7 @@
 #include "PAIUtils.h"
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/framework/MemBufFormatTarget.hpp>
+#include <xercesc/util/XercesVersion.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 
@@ -83,6 +84,14 @@ std::string PAIUtils::getSerializedXMLString(XERCES_CPP_NAMESPACE::DOMDocument *
             XERCES_CPP_NAMESPACE::DOMImplementationRegistry::getDOMImplementation(tag);
         XERCES_CPP_NAMESPACE::DOMWriter * pSerializer = ((XERCES_CPP_NAMESPACE::DOMImplementationLS*)pImplement)->createDOMWriter();
         XERCES_CPP_NAMESPACE::XMLFormatTarget * formatTarget = new XERCES_CPP_NAMESPACE::MemBufFormatTarget();
+        // TODO: test this some day, at the moment we require users to use
+        // xerces version < 3
+        // --
+        // Xerces version 3 replaces DOMWriter with DOMLSSerializer
+        //XERCES_CPP_NAMESPACE::DOMLSSerializer* pSerializer = ((DOMImplementationLS*)pImplement)->createLSSerializer();
+        //XERCES_CPP_NAMESPACE::DOMConfiguration* dc = writer->getDomConfig();
+        //dc->setParameter(XMLUni::fgDOMErrorHandler,errorHandler);
+        //dc->setParameter(XMLUni::fgDOMWRTDiscardDefaultContent,true);
 
         XERCES_CPP_NAMESPACE::XMLString::transcode("\n", tag, PAIUtils::MAX_TAG_LENGTH);
         pSerializer->setNewLine(tag);

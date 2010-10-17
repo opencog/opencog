@@ -29,6 +29,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
     # Vital to do this otherwise unresolved symbols everywhere:
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
+    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
   ELSE (APPLE)
     SET(CMAKE_C_FLAGS "-Wall -fPIC")
     SET(CMAKE_C_FLAGS_DEBUG "-g -fstack-protector")
@@ -183,9 +184,16 @@ ENDIF (EXPAT_FOUND)
 # These are required for building the embodiment code
 FIND_PACKAGE(XercesC)
 IF (XERCESC_FOUND)
-	INCLUDE_DIRECTORIES(${XERCESC_INCLUDE_DIR})
-ELSE (XERCESC_FOUND)
-	MESSAGE(STATUS "XercesC missing: needed for embodiment code.")
+ # using COMPARE_VERSION_STRINGS instead of COMPARE_VERSION for staying compatible with cmake 2.4
+ IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+   MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARY}")
+   INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
+   #SET(requiredlibs ${requiredlibs} ${XERCESC_LIBRARY})
+ ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+   MESSAGE(FATAL_ERROR "Xerces ${XERCESC_VERSION} not supported.
+ Only versions 2.* are supported")
+ ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
+
 ENDIF (XERCESC_FOUND)
 
 FIND_PACKAGE(Lua51)

@@ -1,41 +1,75 @@
+# - Try to find Xerces-C
+# This script is improved over the previous one in that it will
+# also find the version.
 #
-# Locate Xerces-C include paths and libraries
-# Xerces-C can be found at http://xml.apache.org/xerces-c/
+# From:
+# http://cezarfx.blogspot.com/2009/09/using-xerces-version-with-cmake.html
+#
+# Once done this will define
+#
+#  XERCESC_FOUND - system has Xerces-C
+#  XERCESC_INCLUDE - the Xerces-C include directory
+#  XERCESC_LIBRARY - Link these to use Xerces-C
+#  XERCESC_VERSION - Xerces-C found version
 
-# This module defines
-# XERCESC_INCLUDE_DIR, where to find ptlib.h, etc.
-# XERCESC_LIBRARIES, the libraries to link against to use pwlib.
-# XERCESC_FOUND, If false, don't try to use pwlib.
+IF (XERCESC_INCLUDE AND XERCESC_LIBRARY)
+# in cache already
+SET(XERCESC_FIND_QUIETLY TRUE)
+ENDIF (XERCESC_INCLUDE AND XERCESC_LIBRARY)
 
-FIND_PATH(XERCESC_INCLUDE_DIR xercesc/dom/DOM.hpp
-  "[HKEY_CURRENT_USER\\software\\xerces-c\\src]"
-  "[HKEY_CURRENT_USER\\xerces-c\\src]"
-  $ENV{XERCESCROOT}/src/
-  $ENV{XERCESCROOT}/include/
-  /usr/local/include
-  /usr/include
-)
-	
-FIND_LIBRARY(XERCESC_LIBRARIES
-  NAMES
-    xerces-c
-  PATHS
-    "[HKEY_CURRENT_USER\\software\\xerces-c\\lib]"
-    "[HKEY_CURRENT_USER\\xerces-c\\lib]"
-    $ENV{XERCESCROOT}/lib
-    /usr/local/lib
-    /usr/lib
-)
-	
-# if the include a the library are found then we have it
-SET( XERCESC_FOUND 0 )
-IF(XERCESC_INCLUDE_DIR)
-  IF(XERCESC_LIBRARIES)
-    SET( XERCESC_FOUND 1 )
-  ENDIF(XERCESC_LIBRARIES)
-ENDIF(XERCESC_INCLUDE_DIR)
+FIND_PATH(
+XERCESC_INCLUDE
+NAMES xercesc/util/XercesVersion.hpp
+PATHS c:/Libs/xerces-c_2_8_0 ${XERCES_INCLUDE_DIR}
+PATH_SUFFIXES xercesc)
 
-MARK_AS_ADVANCED(
-  XERCESC_INCLUDE_DIR
-  XERCESC_LIBRARIES
-) 
+FIND_LIBRARY(
+ XERCESC_LIBRARY
+ NAMES xerces-c xerces-c_2
+ PATHS ${XERCES_LIBRARY_DIR})
+
+IF (XERCESC_INCLUDE AND XERCESC_LIBRARY)
+SET(XERCESC_FOUND TRUE)
+ELSE (XERCESC_INCLUDE AND XERCESC_LIBRARY)
+SET(XERCESC_FOUND FALSE)
+ENDIF (XERCESC_INCLUDE AND XERCESC_LIBRARY)
+
+IF(XERCESC_FOUND)
+
+FIND_PATH(XVERHPPPATH NAMES XercesVersion.hpp PATHS
+ ${XERCESC_INCLUDE}/xercesc/util  NO_DEFAULT_PATH)
+
+IF ( ${XVERHPPPATH} STREQUAL XVERHPPPATH-NOTFOUND )
+ SET(XERCES_VERSION "0")
+ELSE( ${XVERHPPPATH} STREQUAL XVERHPPPATH-NOTFOUND )
+ FILE(READ ${XVERHPPPATH}/XercesVersion.hpp XVERHPP)
+
+ STRING(REGEX MATCHALL "\n *#define XERCES_VERSION_MAJOR +[0-9]+" XVERMAJ
+   ${XVERHPP})
+ STRING(REGEX MATCH "\n *#define XERCES_VERSION_MINOR +[0-9]+" XVERMIN
+   ${XVERHPP})
+ STRING(REGEX MATCH "\n *#define XERCES_VERSION_REVISION +[0-9]+" XVERREV
+   ${XVERHPP})
+
+ STRING(REGEX REPLACE "\n *#define XERCES_VERSION_MAJOR +" ""
+   XVERMAJ ${XVERMAJ})
+ STRING(REGEX REPLACE "\n *#define XERCES_VERSION_MINOR +" ""
+   XVERMIN ${XVERMIN})
+ STRING(REGEX REPLACE "\n *#define XERCES_VERSION_REVISION +" ""
+   XVERREV ${XVERREV})
+
+ SET(XERCESC_VERSION ${XVERMAJ}.${XVERMIN}.${XVERREV})
+
+ENDIF ( ${XVERHPPPATH} STREQUAL XVERHPPPATH-NOTFOUND )
+
+IF(NOT XERCESC_FIND_QUIETLY)
+ MESSAGE(STATUS "Found Xerces-C: ${XERCESC_LIBRARY}")
+ MESSAGE(STATUS "              : ${XERCESC_INCLUDE}")
+ MESSAGE(STATUS "       Version: ${XERCESC_VERSION}")
+ENDIF(NOT XERCESC_FIND_QUIETLY)
+ELSE(XERCESC_FOUND)
+MESSAGE(FATAL_ERROR "Could not find Xerces-C !")
+ENDIF(XERCESC_FOUND)
+
+MARK_AS_ADVANCED(XERCESC_INCLUDE XERCESC_LIBRARY)
+
