@@ -31,7 +31,7 @@ using namespace opencog;
 // factory method
 BaseServer* DerivedCogServer::derivedCreateInstance()
 {
-    logger().info("[DerivedCogServer] createInstance");
+    ::logger().info("[DerivedCogServer] createInstance");
     return new DerivedCogServer();
 }
 
