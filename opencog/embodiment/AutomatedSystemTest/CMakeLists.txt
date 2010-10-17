@@ -15,9 +15,9 @@ TARGET_LINK_LIBRARIES (PBTester
         ${XERCESC_LIBRARIES}
 )
 
-ADD_EXECUTABLE (pbTester PBTesterExecutable)
+ADD_EXECUTABLE (pbTest PBTesterExecutable)
 
-TARGET_LINK_LIBRARIES (pbTester 
+TARGET_LINK_LIBRARIES (pbTest 
         PBTester
 )
 
