@@ -70,6 +70,10 @@ Logger::Logger(const std::string &fileName, Logger::Level level, bool timestampE
 }
 
 Logger::Logger(const Logger& log) {
+    set(log);
+}
+
+void Logger::set(const Logger& log) {
     this->fileName.assign(log.fileName);
     this->currentLevel = log.currentLevel;
     this->backTraceLevel = log.backTraceLevel;

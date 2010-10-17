@@ -455,7 +455,7 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // load and init module
-    Module* module = (Module*) (*load_func)();
+    Module* module = (Module*) (*load_func)(this);
 
     // store two entries in the module map:
     //    1: filename => <struct module data>
@@ -614,4 +614,9 @@ void CogServer::openDatabase(void)
     logger().warn(
         "Server compiled without database support");
 #endif /* HAVE_SQL_STORAGE */
+}
+
+Logger &CogServer::logger()
+{
+    return ::logger();
 }

@@ -40,7 +40,8 @@ namespace opencog
     extern "C" const char* opencog_module_id(void) {                  \
        return "opencog::" #MODNAME;                                   \
     }                                                                 \
-    extern "C" Module * opencog_module_load(void) {                   \
+    extern "C" Module * opencog_module_load(CogServer *cogserver) {   \
+       logger().set(cogserver->logger());                             \
        return new MODNAME();                                          \
     }                                                                 \
     extern "C" void opencog_module_unload(Module * m) {               \
@@ -49,6 +50,7 @@ namespace opencog
     inline const char * MODNAME::id(void) {                           \
         return "opencog::" #MODNAME;                                  \
     }
+
 
 /**
  * This class defines the base abstract class that should be extended
@@ -93,6 +95,7 @@ namespace opencog
  * initialization has finished and the meta-data properly set.
  */
 
+class CogServer;
 
 class Module
 {
@@ -116,11 +119,11 @@ public:
     }
 
     typedef const char* IdFunction    (void);
-    typedef Module*     LoadFunction  (void);
+    typedef Module*     LoadFunction  (CogServer*);
     typedef void        UnloadFunction(Module*);
 
     virtual ~Module() {};
-    virtual void init(void) = 0;
+    virtual void init() = 0;
 
 }; // class
 

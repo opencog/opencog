@@ -285,6 +285,9 @@ public:
     /** Force drain of all outstanding requests */
     void processRequests(void);
 
+    /** Return the logger */
+    Logger &logger(void);
+
 }; // class
 
 // Handy dandy utiities

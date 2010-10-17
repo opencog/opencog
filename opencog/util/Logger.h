@@ -66,6 +66,7 @@ public:
     Logger(const std::string &fileName = "opencog.log", Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
+    void set(const Logger&);
 
     // ***********************************************/
     // API
