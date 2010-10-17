@@ -65,7 +65,7 @@ using namespace std;
 // factory method
 BaseServer* HopfieldServer::derivedCreateInstance()
 {
-    logger().debug("[HopfieldServer] createInstance");
+    ::logger().debug("[HopfieldServer] createInstance");
     return new HopfieldServer();
 }
 
