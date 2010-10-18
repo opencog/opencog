@@ -24,9 +24,6 @@
 #ifndef PLN_UTILS_H
 #define PLN_UTILS_H
 
-//#include <stdio.h>
-//#include <stdlib.h>
-
 #ifdef WIN32
 #pragma warning (disable: 4786)
 #endif
@@ -167,75 +164,6 @@ public:
         return true;
     }
 };
-
-// Not needed ???
-#if 0
-
-template<typename T>
-class ObjectFactory
-{
-protected:
-    ObjectFactory() {}
-    std::set<T*> objs;
-public:
-    T* New() {
-        T* object = new T();
-        objs.insert(object);
-        return object;
-    }
-    ~ObjectFactory() {
-        std::set<T*>::iterator s;
-        for (std::set<T*>::iterator i = objs.begin(); i != objs.end(); i++) {
-            delete *i;
-        }
-    }
-};
-
-template<typename T>
-std::vector<T*> NewCartesianProduct1( std::vector<T*>& lhs, const std::vector<T>& rhs, int dim)
-{
-    std::vector<T*> ret;
-
-    for (int i = 0; i < lhs.size(); i++) {
-        for (int j = 0; j < rhs.size(); j++) {
-            T* entry = new T[dim];
-
-            for (int k = 0; k < dim - 1; k++)
-                entry[k] = lhs[i][k];
-            entry[dim-1] = rhs[j];
-
-            ret.push_back(entry);
-        }
-
-        delete lhs[i];
-    }
-
-    return ret;
-}
-
-template<typename T>
-std::vector<T*> NewCartesianProduct( std::vector<std::vector<T> >& matrix)
-{
-    std::vector<T*> ret;
-    if (matrix.empty() || matrix[0].empty())
-        return ret;
-
-    assert(matrix.size() != 1);
-
-    for (int j = 0; j < matrix[0].size(); j++) {
-        T* entry = new T[1];
-        entry[0] = matrix[0][j];
-        ret.push_back(entry);
-    }
-
-    for (int i = 1; i < matrix.size(); i++) {
-        ret = NewCartesianProduct1<T>(ret, matrix[i], i + 1);
-    }
-
-    return ret;
-}
-
-#endif
 
 typedef std::map<pHandle, pHandle> bindingsT;
 typedef std::map<pHandle, vtree>  bindingsVTreeT;
@@ -632,7 +560,6 @@ private:
 };
 
 #define getTypeFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getType), GET_ASW)
-//#define getOutgoingFun std::bind1st(std::mem_fun(&AtomSpaceWrapper::getOutgoing),GET_ASW)
 #define getTypeVFun bind(getTypeFun, bind(&_v2h, _1))
 
 #define getFW_VAR(vt) (std::find_if((vt).begin(), (vt).end(), \
@@ -656,7 +583,6 @@ bool equalVariableStructure2(BBvtree lhs, BBvtree rhs);
 
 void printSubsts(BoundVertex a, int LogLevel);
 pHandle make_real(vtree& vt);
-// #define fabs(a) (((a)>0.0f) ? (a) : (-a)) // now using math.h as this define clashes with headers
 
 template<typename T, typename T2>
 T2 second(const std::pair<T, T2>& p)
@@ -744,80 +670,11 @@ bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b);
 
 
 const int __LLEVEL = 4;
-#if 0
-template<typename VectorT>
-bool consistentBindings(const VectorT& argVectorCandidate)
-{
-    opencog::pln::bindingsT ok_set;
-    for (std::vector<opencog::pln::BoundVertex>::const_iterator av = argVectorCandidate.begin();
-            av != argVectorCandidate.end();
-            av++) {
-        if (av->bindings) {
-            for (opencog::pln::bindingsT::const_iterator b = av->bindings->begin();
-                    b != av->bindings->end();
-                    b++) {
-                /*     LOG(__LLEVEL, "Next binding:");
-                     printBinding(*b);
-                printTree(b->second,0,3);*/
-                opencog::pln::bindingsT::const_iterator b2;
-
-                if ((b2 = ok_set.find(b->first)) == ok_set.end()) { //if the var so far unbound
-//      LOG(__LLEVEL,"new consistent");
-                    ok_set.insert(*b); //then we'll pass it on...
-                } else if (b2->second != b->second) { //if the same var bound different way
-//      LOG(__LLEVEL,"inconsistent");
-                    return false; //it's inconsistency
-                }
-            }
-        }
-    }
-
-    return true;
-}
-#endif
-/*template<typename T, typename InputIterT>
-struct _cC_op
-{
- _cC_op( InputIterT input_vector_begin,
-   InputIterT input_vector_end,
-   InputIterT this_arg_number)
-   :
-
- void operator(T i)
- {
-LOG(__LLEVEL,"this_arg_number not empty...");
-    if (i.bindings)
-     printf(4, "HAS BINDINGS! %d\n", i.bindings->size());
-    else
-     printf(4, "HAS NO BINDINGS!\n");
-
-    VectorT next_head = head;
-    next_head.push_back(i);
-printf(__LLEVEL,"(*i) ok, next_head.size=%d\n", next_head.size());
-    if (consistentBindings(next_head))
-    {
-LOG(__LLEVEL,"existsConsistentBinding = true");
-     std::vector<Btr<SetT> >::const_iterator temp_i = this_arg_number;
-     if (++temp_i == input_vector_end)
-      existsConsistentBinding = true;
-    }
-    else
-     return;
-LOG(__LLEVEL,"createCombinations AGAIN...");
-    createCombinations( next_head,
-     input_vector_begin,
-     input_vector_end,
-     this_arg_number+1,
-     output_set);
- }
-};*/
 
 template<typename SetIterT, typename VectorT, typename InputIterT, typename OutputIterT>
 void createCombinations( const VectorT& head,
-                         //const std::vector<Btr<SetT> >& input_vector,
                          InputIterT input_vector_begin,
                          InputIterT input_vector_end,
-                         //std::vector<Btr<SetT> >::const_iterator this_arg_number,
                          InputIterT this_arg_number,
                          SetIterT this_arg_number_begin,
                          SetIterT this_arg_number_end,
@@ -827,16 +684,11 @@ void createCombinations( const VectorT& head,
         bool existsConsistentBinding = false;
         assert(*this_arg_number);
 
-//   for_each((*this_arg_number)->begin(), (*this_arg_number)->end(), _cC_op());
-
-//   for (InputIterIterT i = (*this_arg_number)->begin();
-//        i!= (*this_arg_number)->end(); i++)
         for (SetIterT i = this_arg_number_begin;
                 i != this_arg_number_end; i++) {
             VectorT next_head(head);
             next_head.push_back(*i);
-//cprintf(__LLEVEL,"(*i) ok, next_head.size=%d\n", next_head.size());
-//    if (consistentBindings(next_head))
+
             if (true) {
                 InputIterT temp_i = this_arg_number;
                 if (++temp_i == input_vector_end)
@@ -876,11 +728,6 @@ void expandVectorSet( InputIterT multi_input_vector_begin,
                       InputIterT multi_input_vector_end,
                       OutputIterT output_iter)
 {
-
-    /*  for (uint k=0;k< multi_input_vector.size(); k++)
-       for (std::set<opencog::pln::BoundVertex>::iterator s=multi_input_vector[k]->begin();
-                   s!=multi_input_vector[k]->end();s++)
-        if (s->bindings)*/
 
     VectorT empty_head;
 

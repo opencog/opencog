@@ -166,7 +166,6 @@ void DeductionLookupTable::readTable()
   {
     if( ch == '\n' || ch == '\r' )
     {
-      //data.push_back( vector <string>() );
       row++;
       column=0;
     }
@@ -177,7 +176,6 @@ void DeductionLookupTable::readTable()
       	element += ch;
     	}else
     	{
-//			data[row].push_back( element );
 
 				switch(column) {
 					case 0:

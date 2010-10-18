@@ -47,19 +47,6 @@ class ArityFreeFormula
 {
 public:
 
-    /*virtual TruthValue* (TruthValue** tv1, int N1,
-                             TruthValue** tv2, int N2) const
-    {
-        N1++;
-        N2++;
-        return NULL;
-        }*/
-
-
-    /*virtual void test(int N) const { N++; }
-
-      virtual void test(int N1, int N2) const { N1++; N2++; }*/
-
     /** You should always provide the N argument to prove the compiler
         that you know how many args this method takes. */
 
@@ -107,31 +94,6 @@ public:
 
         return compute(TVs, N, U);
     }
-
-    /* Not sure that is really useful, nobody uses it anyway
-       and with a better API (using stl container instead of C++ arrays)
-       that sort of shorthand should be useless so I comment it for now... (Nil)
-       
-    virtual ResultType compute(TVType* tv1, long U) const {
-        return compute(&tv1, 1, U);
-    }
-    virtual ResultType compute(TVType* tv1, TVType *tv2, long U) const {
-        static TVType* buffer[2];
-        buffer[0] = tv1; buffer[1] = tv2;
-        return compute(buffer, 2, U);
-    }
-    virtual ResultType compute(TVType* tv1, TVType* tv2,
-                               TVType* tv3, long U) const {
-        static TVType* buffer[3];
-        buffer[0] = tv1; buffer[1] = tv2; buffer[2] = tv3;
-        return compute(buffer, 3, U);
-    }
-    virtual ResultType compute(TVType* tv1, TVType* tv2,
-                               TVType* tv3, TVType* tv4, long U) const {
-        static TVType* buffer[4];
-        buffer[0] = tv1; buffer[1] = tv2; buffer[2] = tv3; buffer[3] = tv4;
-        return compute(buffer, 4, U);
-        }*/
 
 public:
 

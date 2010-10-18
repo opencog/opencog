@@ -38,8 +38,6 @@ namespace pln {
     class BITNodeRoot;
 }}
 using namespace opencog::pln;
-//! @todo this is also defined in PLNModule.cc
-//#define BackInferenceTreeRootT opencog::pln::BITNodeRoot
 
 namespace opencog
 {
@@ -87,8 +85,6 @@ public:
     BackChainingAgent();
     virtual ~BackChainingAgent();
     virtual void run(CogServer *server);
-
-//    virtual string toString();
 
     /** Choose a new target (done automatically after the current inference
      * either finishes or runs out of resources)

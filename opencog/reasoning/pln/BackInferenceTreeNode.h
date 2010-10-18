@@ -397,7 +397,8 @@ protected:
     void ValidateRuleArgs(IterT rule_args_begin, IterT rule_args_end) const
     {
         /// Check for wild FreeVariableNodes 
-        /*foreach(BoundVertex v, rule_args) {
+#if 0
+        foreach(BoundVertex v, rule_args) {
             if (v.bindings)
             foreach(hpair t, *v.bindings) {
                 if (nm->getType(t.second) == FW_VARIABLE_NODE) {
@@ -405,23 +406,21 @@ protected:
                     getc(stdin);
                 }
             }
-        }*/
-        //AtomSpace *nm = CogServer::getAtomSpace();
+        }
+        AtomSpace *nm = CogServer::getAtomSpace();
+#endif
         for(IterT bv = rule_args_begin; bv != rule_args_end; bv++)
             if (GET_ASW->getType(_v2h(*(*bv)->getVtree().begin())) == FW_VARIABLE_NODE) {
-/*              LOG(0, "FW_VARIABLE_NODE found on Rule args:"
+#if 0
+                LOG(0, "FW_VARIABLE_NODE found on Rule args:"
                     +string(nm->getName(v2h(bv->value))));
 
                 tlog(0,"Args were:\n");
                 foreach(BoundVertex v, rule_args)
                     printTree(v2h(v.value),0,0);
- */
+#endif
             }
     }
-
-    /// helper
-    //bool validRuleResult(BoundVertex& new_result, const vector<BoundVertex>&
-    //      rule_args, Btr<bindingsT> bindings_of_all_args) const;
 
     template<typename ArgIterT>
     bool validRuleResult( BoundVertex& new_result,
@@ -698,7 +697,6 @@ public:
     /// Apply either ForAllRule or VariableScopeRule,
     /// depending on the _resultT type.
     BoundVertex Generalize(Btr<std::set<BoundVertex> >, Type _resultT) const;
-//  BoundVertex Generalize(const std::set<BoundVertex>&, Type _resultT) const;
 
     /// Extraction of an actionable plan from the proof tree of the atom with
     /// pHandle h.
@@ -708,8 +706,6 @@ public:
 
     // Statistics
     
-//  std::map<Handle,std::vector<Handle> > inferred_from;
-//  std::map<Handle,Rule*> inferred_with;
     std::map<pHandle,BITNode*> hsource;
     long inferenceNodes; // counts the number of nodes in the BIT
 
@@ -755,8 +751,7 @@ protected:
      */
     std::map<BITNode*, std::set<BITNode*> > users;
 
-    /// It's too slow to sort the pool after every insertion. Otherwise we'd do this:
-    /// typedef set<BITNode*, BITNodeFitnessCompare> exec_poolT;
+    /// It's too slow to sort the pool after every insertion.
 
     bool exec_pool_sorted;
     std::set<BITNode*> BITNodeTemplates;
@@ -829,11 +824,8 @@ public:
                 if (i->first->isComposer())
                     filtered.insert(*i);
 
-//          remove_copy_if(begin, end, inserter(filtered, filtered.begin()), mem_fun(&T2::IsComputable));
             filteredBegin   = filtered.begin();
             filteredEnd     = filtered.end();
-//          for (T i = begin; i != end; ++i)
-//              (*begin)->rule->IsComputable
         }
     };
 

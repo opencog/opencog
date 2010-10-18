@@ -68,8 +68,6 @@ public:
     virtual ~ForwardChainingAgent();
     virtual void run(CogServer *server);
 
-//    virtual string toString();
-
 }; // class
 
 }  // namespace

@@ -87,7 +87,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 				TS_FAIL("The BasicSaveUTest failed.\n"
 					"Please be sure to read opencong/persist/README, and\n"
 					"create/configure the SQL database as described there.\n"
-					"Next, edit lib/test-opencog.conf appropriately, so as\n"
+					"Next, edit lib/opencog-test.conf appropriately, so as\n"
 					"to indicate the location of your database. If this is\n"
 					"done correctly, then this test will pass.\n");
 				exit(1);

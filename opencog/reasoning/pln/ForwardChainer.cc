@@ -138,21 +138,7 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                 Btr<vector<BoundVertex> > args;
 
                 Btr<set<Btr<vector<BoundVertex> > > > all_args;
-                //args = findAllArgs(f);
                 all_args = findAllArgs(f);
-                bool foundArguments = !all_args->empty();
-
-                // check for validity (~redundant)
-                
-                //cout << "FWDCHAIN arguments ";
-                //printVertexVectorHandles(args); // takes Vertexes not BoundVertexes
-                //cout << " are valid? " <<endl;
-        
-//                bool foundArguments = !args->empty();//true;// = r->validate(args);
-        
-                if (!foundArguments) {
-                    //cout << "FWDCHAIN args not valid" << endl;
-                }
                 foreach(args, *all_args) {
                     if (args->empty()) {
                         cout << "*args empty. how?" << endl;
@@ -161,13 +147,8 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     // Check that they include at least 1 result from the previous level (except on the first level).
                     if   (lastLevelResults &&
                           !containsAtLeastOneOf(lastLevelResults, args)) {
-                        //cout << "Used already" << endl;
                         continue;
                     }
-                    //cout << "FWDCHAIN args valid" << endl;
-                
-                    //args = *(all_args->begin());
-
                     // do the rule computation etc
                     
                     //! @todo Tacky check for Deduction. Equivalent to validate2, but that uses the other MP datatype,
@@ -182,7 +163,6 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                     Vertex V=((r->compute(*args, PHANDLE_UNDEFINED, false)).GetValue());
                     pHandle out=boost::get<pHandle>(V);
                     const TruthValue& tv=GET_ASW->getTV(out);
-                    //cout<<printTV(out)<<'\n';
                     NMPrinter().print(out,-5);
 
                     if (!tv.isNullTv() && tv.getCount() > minConfidence) {
@@ -214,7 +194,6 @@ pHandleSeq ForwardChainer::fwdChain(int maxRuleApps, meta target)
                                 }
                             } else
                                 results.push_back(out);
-                            //cout<<"Output\n";
                             NMPrinter np;
                             np.print(out);
                         }
@@ -247,7 +226,6 @@ Btr<std::set<BoundVertex> > ForwardChainer::getMatching(const meta target)
     rawPrint(target->begin(), 5);
 
     foreach(Rule* g, *generators) {
-    	//std::cout << g->getName();
     	Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
 
     	if (gMatches.get()) {
@@ -281,7 +259,6 @@ Btr<set<Btr<vector<BoundVertex> > > > ForwardChainer::findAllArgs(std::vector<BB
     Btr<vector<BoundVertex> > args(new vector<BoundVertex>);
     Btr<set<Btr<vector<BoundVertex> > > > all_args(new set<Btr<vector<BoundVertex> > >);
     
-    //Btr<bindingsT> bindings(new BindingsT());
     Btr<bindingsT> bindings(new std::map<pHandle, pHandle>);
     
     bool match = findAllArgs(filter, args, 0, all_args, bindings);
@@ -302,11 +279,9 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         // We've found a result, save it to all_args.
         // Need to copy args, because this method will change it immediately after.
         Btr<vector<BoundVertex> > args_copy(new vector<BoundVertex>);
-        //(*args_copy) += (*args);
         foreach(BoundVertex tmp, *args)
             args_copy->push_back(tmp);
         all_args->insert(args_copy);
-        //all_args->insert(args);
 
         return true;
     }
@@ -331,20 +306,12 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
     
     // pick one of the candidates at random to be the bv
     
-//    std::cout << "choices size: " << choices->size() << std::endl;
     // random selection
     //! @todo sort based on strength and exponential random select
     //pHandle randArg;
     if (choices->size() == 0) {
-//        std::cout << "backtracking" << std::endl;
         return false;
     }
-    
-    //std::cout << "choices: " << (*choices) << std::endl;
-
-//    foreach (BoundVertex tmp, *choices)
-//        std::cout << tmp.GetValue().which() << std::endl;
-
 
     // Alternative: is there some OpenCog library function to randomly select an item from a set?
     // @todo: can probably be simplified by using util/lazy_random_selector
@@ -357,23 +324,14 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
 
     bool one_worked = false;
 
-    //while ((ordered_choices.size() > 0) && (all_args.size() < maxCombinations)) {
     while ((ordered_choices.size() > 0) && (maxBranch-- > 0)) {
         int index = false ? 0
                                : getRNG()->randint(ordered_choices.size());
-        //randArg = choices[index];
             
         bv = ordered_choices[index];
         ordered_choices.erase(ordered_choices.begin() + index);
         
-        //choices.erase(choices.begin() + index);
-        //args[i] = randArg;
-        
-        //boost::get<pHandle>(args[i]);
-    
-//        std::cout << "arg #" << current_arg << std::endl;
         NMPrinter np;
-//        std::cout << "Using atom: " << std::endl;
         np.print(_v2h(bv.GetValue()));
     
         // Separate bindings before and after applying this, in case backtracking is necessary
@@ -388,7 +346,6 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
             }
         }
         
-        //(*args)[current_arg] = bv;
         args->push_back(bv);
         
         // Whether the rest of the slots are successfully filled, when we use bv for this slot
@@ -400,13 +357,8 @@ bool ForwardChainer::findAllArgs(std::vector<BBvtree> filter, Btr<std::vector<Bo
         }
         
         args-> pop_back();
-//        else // tacky code to prevent more than one try
-//            break;
     }
     
-//    std::cout << "backtracking" << std::endl;
-    
-    //return false;
     return one_worked;
 }
 
@@ -426,67 +378,6 @@ HybridForwardChainer::HybridForwardChainer(AtomSpaceWrapper* _asw) :
 HybridForwardChainer::~HybridForwardChainer()
 {
 }
-
-//!@todo Remove the ones using non-primary TVs (only necessary while there's still the pHandle Hack).
-//Btr<std::set<BoundVertex> > HybridForwardChainer::getMatching(const meta target)
-//{
-//    BITNodeRoot bit(target, new EvaluationRuleProvider);
-//
-//    int maxSteps = 1000;
-//    const set<VtreeProvider*>& results =
-//            bit.infer(maxSteps);
-//
-////    Btr<std::set<BoundVertex> > matches(new std::set<BoundVertex>);
-////
-////    cprintf(5, "getMatching: target: ");
-////    rawPrint(target->begin(), 5);
-////
-////    foreach(Rule* g, *generators) {
-////        //std::cout << g->getName();
-////        Btr<std::set<BoundVertex> > gMatches = g->attemptDirectProduction(target);
-////
-////        if (gMatches.get()) {
-////            //foreach(BoundVertex tmp, *gMatches) matches->insert(tmp);
-////
-////            // Since FC does not always provide adequate restrictions to
-////            // CCURule, it is necessary to do these checks on its output.
-////            // They are already done in Rule::compute on BoundVertexes, but
-////            // this way they will enable skipping problem Atoms rather than
-////            // causing assertions to fail.
-////            foreach(BoundVertex bv, *gMatches) {
-////                pHandle ph = _v2h(bv.value);
-////                //! @todo The first one may be an ASW / contexts issue.
-////                if  (ph != PHANDLE_UNDEFINED &&
-////                     !asw->isType(ph) &&
-////                     asw->getType(ph) != FW_VARIABLE_NODE) {
-////                    matches->insert(bv);
-////                } else {
-////                    cprintf(-1, "skipping invalid output from %s\n", g->getName().c_str());
-////                }
-////            }
-////        }
-////
-////    }
-////
-////    return matches;
-//    Btr<std::set<BoundVertex> > ret;
-//    //ret.reset(new std::set<BoundVertex>(results));
-//    ret.reset(new std::set<BoundVertex>);
-//
-////    for (VTreeProvider* v, results) {
-////        vtree& vt = v->getVtree();
-////        BoundVertex bv(vt, )
-////        ret->insert(v->)
-////    }
-//
-//    foreach(VtreeProvider* vtp, results) {
-//        ret->insert(BoundVertex(*vtp->getVtree().begin()));
-//    }
-//
-//    //VtreeProviders_TO_BoundVertices(results, ret->begin());
-//
-//    return ret;
-//}
 
 Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vector<BBvtree> filter)
 {
@@ -518,19 +409,15 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     //! @todo Get the BIT to return results properly
     //! For now just using a workaround.
 
-    //bit.printResults();
-
     Btr<set<Btr<vector<BoundVertex> > > > ret(new set<Btr<vector<BoundVertex> > >);
 
     if (bit.getEvalResults().size()) {
         cout << bit.getEvalResults()[0].size() << endl;
 
-        //results = bit.getEvalResults()[0];
     } else {
         return ret;
     }
 
-    //foreach (VtreeProvider * vpt, results) {
     foreach (VtreeProvider * vpt, bit.getEvalResults()[0]) {
         Btr<vector<BoundVertex> > next(new vector<BoundVertex>);
 
@@ -538,18 +425,9 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
         vtree::iterator top = tmp.begin();
 
         NMPrinter np;
-        //np.print(top,-5);
-
-//            //np.print(top.begin(),-5);
-//            //for (vtree::sibling_iterator i = tmp.begin(top); i!=tmp.end(top); i++) {
-//            for (vtree::sibling_iterator i = top; i!=tmp.end(); i++) {
-//                next->push_back(BoundVertex(*i));
-//                np.print(i,-5);
-//            }
 
         foreach (pHandle ph, asw->getOutgoing(_v2h(*top))) {
             next->push_back(BoundVertex(ph));
-            //np.print(ph,-5);
         }
 
         ret->insert(next);

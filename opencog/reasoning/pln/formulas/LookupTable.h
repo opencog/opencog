@@ -55,7 +55,6 @@ void LookupTable<KeyType, ComparatorType>::add(const KeyType key, const float va
 template<class KeyType, class ComparatorType>
 float LookupTable<KeyType, ComparatorType>::lookup(const KeyType &key)
 {
-  //return table[key];//inserts the key if it does not exists in table
   return table.find(key)->second;
 };
 

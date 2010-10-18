@@ -67,9 +67,6 @@ AtomSpaceWrapper* ASW(AtomSpace* a)
 #if LOCAL_ATW
         instance = &LocalATW::getInstance(a);
 #else
-        // DirectATW instance doesn't seem to be used anywhere,
-        // in fact we could probably remove it entirely, along with LocalATW
-        //DirectATW::getInstance(a);
         instance = &NormalizingATW::getInstance(a);
 #endif
     }
@@ -257,46 +254,6 @@ pHandleSeq AtomSpaceWrapper::getIncoming(const pHandle h)
 #endif
 }
 
-/*
-bool AtomSpaceWrapper::hasAppropriateContext(const Handle o, VersionHandle& vh,
-unsigned int index) const
-{
-    if (vh == NULL_VERSION_HANDLE || !atomspace->getTV(o,vh).isNullTv()) {
-        return true;
-    } else {
-        // else check immediate super/parent contexts
-        HandleSeq super = atomspace->getOutgoing(vh.substantive);
-        // check context at position i
-        Handle c = super[index];
-        // Root context is NULL
-        if (atomspace->getName(c) == rootContext)
-            c = UNDEFINED_HANDLE;
-        VersionHandle vh2(CONTEXTUAL, c);
-        if (!atomspace->getTV(o,vh2).isNullTv()) {
-            vh.substantive = c;
-            return true;
-        }
-    }
-    return false;
-}*/
-
-/*bool AtomSpaceWrapper::isSubcontextOf(const Handle sub, const Handle super)
-{
-    // Handles should already be real as they are for contexts
-    
-    // get the name of the super
-    std::string superName = atomspace->getName(fakeToRealHandle(super).first);
-
-    // Check if there exists a inheritance link
-    HandleEntry *he = TLB::getAtom(sub)->getNeighbors(false, true,
-            INHERITANCE_LINK);
-    HandleEntry::filterSet(he,superName.c_str(),CONCEPT_NODE,false); 
-
-    bool result = he->getSize() ? true : false;
-    delete he;
-    return result;
-}*/
-
 bool AtomSpaceWrapper::isValidPHandle(const pHandle h) const
 {
 #ifdef STREAMLINE_PHANDLES
@@ -441,7 +398,6 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandles(const Handle h,
         return results;
     else
         throw RuntimeException(TRACE_INFO, "getOutgoing: link context is bad");
-        //return realToFakeHandles(s1, NULL_VERSION_HANDLE);
 }
 
 const TruthValue& AtomSpaceWrapper::getTV(pHandle h) const
@@ -559,16 +515,11 @@ void AtomSpaceWrapper::reset()
     atomspace->addNode(CONCEPT_NODE, rootContext);
 }
 
-//extern int atom_alloc_count;
-//static Handle U;
-
 bool AtomSpaceWrapper::loadAxioms(const string& path)
 {
     //! @todo check exists works on WIN32
     string fname(path);
     string fname2(PROJECT_SOURCE_DIR"/tests/reasoning/pln/xml/" + path);
-//    string fname2(PLN_TEST_DIR + path);
-//    string fname2("tests/reasoning/pln/" + path);
     if (!exists(fname.c_str())) {
         printf("File %s doesn't exist.\n", fname.c_str());
         fname = fname2;
@@ -649,52 +600,6 @@ bool AtomSpaceWrapper::loadOther(const string& path, bool ReplaceOld)
     return true;
 }
 
-/*vector<atom> AtomSpaceWrapper::LoadAnds(const string& path)
-{
-    string buf;
-    LoadTextFile(path, buf);
-
-    vector<atom> ret;
-
-    puts("Adding the ANDs");
-
-    vector<string> lines = AltStringTokenizer(buf, "\n\r").WithoutEmpty();
-    for (int i = 0; i < lines.size(); i++)
-    {
-        vector<string> elems = AltStringTokenizer(lines[i], "\t ").WithoutEmpty();
-
-        if(elems.size() ==1)
-        {
-            puts("Warning! 1-node link!");
-            puts(elems[0].c_str());
-        }
-
-        if (elems.size()>=2)
-        {
-            vector<atom> hs;
-
-            for (int j = 0; j < elems.size(); j++)
-                if (!elems[j].empty())
-                    hs.push_back(atom(CONCEPT_NODE, elems[j]));
-
-            if (hs.size()==1)
-            {
-                puts("Warning! 1-node link!");
-                printAtomTree(hs[0]);
-            }
-            else
-                ret.push_back(atom(AND_LINK, hs));
-        }
-        printf("%d\n", i);
-    }
-
-    puts("ANDs ok");
-
-    return ret;
-}
-
-*/
-
 ///////////
 
 #define P_DEBUG 0
@@ -707,56 +612,6 @@ int AtomSpaceWrapper::getFirstIndexOfType(const pHandleSeq hs, const Type T) con
             return i;
     return -1;
 }
-
-#if 0
-void remove_redundant(HandleSeq& hs)
-{
-char b[200];
-sprintf(b, "H size before removal: %d.", hs.size());
-LOG(5, b);
-    
-    for (vector<Handle>::iterator ii = hs.begin(); ii != hs.end(); ii++)
-    {
-        atom atom_ii(*ii);
-
-        for (vector<Handle>::iterator jj = ii; jj != hs.end();)
-            if (++jj != hs.end())
-                if (atom(*jj) == atom_ii)
-/*              if (TheHandleWrapperFactory.New(*jj)->equalOLD(
-                            *TheHandleWrapperFactory.New(*ii)
-                  ))*/
-                {
-#ifndef WIN32
-    THE FOLLOWING MAY NOT WORK OUTSIDE WIN32:
-#endif
-
-sprintf(b, "Removing %s (%d).", a->getName(*ii).c_str(), nm->getType(*ii));
-LOG(5, b);
-
-                    jj = hs.erase(jj);
-                    jj--;
-                }
-    }
-
-sprintf(b, "H size AFTER removal: %d.", hs.size());
-LOG(5, b);
-
-/*  for (i = 0; i < hs.size(); i++)
-        hws.push_back(TheHandleWrapperFactory.New(hs[i]));
-
-    for (vector<HandleWrapper*>::iterator ii = hws.begin(); ii != hws.end(); ii++)
-        for (vector<HandleWrapper*>::iterator jj = ii; jj != hws.end();)
-            if (++jj != hws.end())
-                if ((*jj)->equalOLD(**ii))
-                {
-#ifndef WIN32
-    THE FOLLOWING MAY NOT WORK OUTSIDE WIN32:
-#endif
-                    jj = hws.erase(jj);
-                    jj--;
-                }*/
-}
-#endif
 
 bool AtomSpaceWrapper::binaryTrue(pHandle h)
 {
@@ -823,8 +678,6 @@ pHandle AtomSpaceWrapper::updateTV(pHandle ph, const TruthValue& tv, bool fresh)
         return addLink(ty, getOutgoing(ph), tv, fresh);
 }
 
-// change to
-// Handle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh, bool managed, Handle associateWith)
 pHandle AtomSpaceWrapper::addAtom(vtree& a, const TruthValue& tvn, bool fresh)
 {
     return addAtom(a,a.begin(),tvn,fresh);
@@ -838,8 +691,6 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
     
     pHandleSeq handles;
     pHandle head_type = boost::get<pHandle>(*it);
-    //assert(allowFWVarsInAtomSpace || head_type != (Handle)FW_VARIABLE_NODE);
-    //vector<Handle> contexts;
     
     if (!isType(head_type))
     {
@@ -859,13 +710,6 @@ pHandle AtomSpaceWrapper::addAtom(vtree& a, vtree::iterator it,
         handles.push_back(added);
     }
 
-/*  /// We cannot add non-existent nodes this way!
-    assert (!inheritsType(head_type, NODE));*/
-    
-    /// Comment out because addLink should handle the contexts
-    //if (contexts.size() > 1) {
-    //    LOG(1, "Contexts are different, implement me!\n");
-    //}
     // Provide new context to addLink function
     return addLink(head_type, handles, tvn, fresh);
 }
@@ -979,16 +823,6 @@ void AtomSpaceWrapper::makeCrispTheorem(pHandle h)
         // anyway, and FalseLinks may not have meant anything anymore. --JaredW
     }
 }
-
-//int AtomSpaceWrapper::implicationConstruction()
-//{
-//  return 0;
-/*  Btr<set<Handle> > links = getHandleSet(AND_LINK,"");
-    foreach(Handle h, *links)
-    {
-    }*/
-//}
-
 
 pHandle AtomSpaceWrapper::addLinkDC(Type t, const pHandleSeq& hs,
                                     const TruthValue& tvn, bool fresh)
@@ -1155,10 +989,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
             }
         } else {
             const Link& link = (const Link&) atom;
-            //for (int i = 0; i < link.getArity(); i++) {
-            //    outgoing.push_back(TLB::getHandle(link.getOutgoingAtom(i)));
-            //}
-            //outgoing = link.getOutgoingSet();
             result = as->getHandle(link.getType(), link.getOutgoingSet());
             if (TLB::isInvalidHandle(result)) {
                 // if the atom doesn't exist already, then add normally
@@ -1194,17 +1024,6 @@ pHandle AtomSpaceWrapper::addAtomDC(Atom &atom, bool fresh, HandleSeq contexts)
         // result contains a handle to existing atom
         VersionHandle vh;
 
-        // build context link's outgoingset if necessary
-       /* // if this is a node with nothing in contexts
-        if (contexts.size() == 0) {
-            assert(nnn);
-            //! @todo
-            // find and create free context:
-            // find last context in composite truth value, use as dest of new
-            // context
-            contexts.push_back(atomspace->getHandle(CONCEPT_NODE, rootContext));
-
-        } */
         Handle contextLink = getNewContextLink(result,contexts);
         vh = VersionHandle(CONTEXTUAL,contextLink);
         // add version handle to dummyContexts
@@ -1426,14 +1245,6 @@ unsigned int USize(const set<Handle>& triples, const set<Handle>& doubles,
 
 void AtomSpaceWrapper::DumpCoreLinks(int logLevel)
 {
-/*#ifdef USE_PSEUDOCORE
-      PseudoCore::LinkMap LM = ((PseudoCore*)nm)->getLinkMap();
-
-      for (PseudoCore::LinkMap::iterator i = LM.begin(); i != LM.end(); i++)
-          printTree((Handle)i->first,0,logLevel);
-#else
-puts("Dump disabled");
-#endif*/
   pHandleSeq LM=filter_type(LINK);
   for (pHandleSeq::iterator i = LM.begin(); i != LM.end(); i++)
     printTree(*i,0,logLevel);
@@ -1441,14 +1252,6 @@ puts("Dump disabled");
 
 void AtomSpaceWrapper::DumpCoreNodes(int logLevel)
 {
-/*#ifdef USE_PSEUDOCORE
-      PseudoCore::NodeMap LM = ((PseudoCore*)nm)->getNodeMap();
-
-      for (PseudoCore::NodeMap::iterator i = LM.begin(); i != LM.end(); i++)
-          printTree((Handle)i->first,0,logLevel);
-#else
-    puts("Dump disabled");
-#endif*/
     pHandleSeq LM=filter_type(NODE);
     for (pHandleSeq::iterator i = LM.begin(); i != LM.end(); i++)
         printTree(*i,0,logLevel);
@@ -1457,7 +1260,6 @@ void AtomSpaceWrapper::DumpCoreNodes(int logLevel)
 void AtomSpaceWrapper::DumpCore(Type T)
 {
     shared_ptr<set<pHandle> > fa = getHandleSet(T,"");
-    //for_each<TableGather::iterator, handle_print<0> >(fa.begin(), fa.end(), handle_print<0>());
     for_each(fa->begin(), fa->end(), handle_print<0>());
 }
 
@@ -1465,10 +1267,6 @@ Handle singular(HandleSeq hs) {
     assert(hs.size()<=1);
     return !hs.empty() ? hs[0] : Handle::UNDEFINED;
 }
-
-/*Handle list_atom(HandleSeq hs) {  
-    return addLink(LIST_LINK, hs, TruthValue::TRUE_TV(),false);
-}*/
 
 bool AtomSpaceWrapper::equal(Handle A, Handle B)
 {
@@ -1590,11 +1388,6 @@ int AtomSpaceWrapper::getArity(pHandle h) const
     // check neighbours have TV with same VersionHandle
     // HandleSeq hs = atomspace->getOutgoing(v.first);
     int arity = atomspace->getArity(v.first);
-    /*foreach (Handle h, hs) {
-        if (!atomspace->getTV(v.first,v.second).isNullTv()) {
-            arity += 1;
-        }
-    }*/
     return arity;
 
 }
@@ -1645,34 +1438,6 @@ std::string AtomSpaceWrapper::pHandleToString(pHandle ph) const {
        << ")";
     return ss.str();
 }
-
-/*
-Handle AtomSpaceWrapper::Exist2ForAllLink(Handle& exL)
-{
-    assert(a->getType(exL) == EXIST_LINK);
-
-    HandleSeq ForAllTarget;
-
-    const vector<Handle> ExistTarget = a->getOutgoing(exL);
-
-    for (vector<Handle>::const_iterator i = ExistTarget.begin(); i != ExistTarget.end(); i++)
-    {
-        ForAllTarget.push_back(invert(*i));
-    }
-
-    const TruthValue& outerTV = getTV(exL);
-
-    HandleSeq NOTarg;
-    NOTarg.push_back(addLink(FORALL_LINK, ForAllTarget,
-                outerTV,
-                true));
-
-    return addLink(NOT_LINK, NOTarg,
-                TruthValue::TRUE_TV(),
-                true);
-}
-*/
-
 
 /////
 // NormalizingATW methods
@@ -2487,58 +2252,6 @@ pHandle FIMATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn, boo
 
     return ret; 
 
-}
-
-/*********************************
-        DirectATW methods
-**********************************/
-DirectATW::DirectATW(AtomSpace *a) : AtomSpaceWrapper(a) { }
-
-pHandle DirectATW::addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-        bool fresh)
-{
-    return directAddLink(T, hs, tvn, fresh);
-}
-
-pHandle DirectATW::addNode(Type T, const string& name, const TruthValue& tvn,
-        bool fresh)
-{
-    AtomSpace *as = atomspace;
-    assert(!tvn.isNullTv());
-    
-    //assert(allowFWVarsInAtomSpace || T != FW_VARIABLE_NODE);
-
-    // Disable confidence for variables:
-#ifdef USE_PSEUDOCORE
-    //const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE)?
-    //  tvn : SimpleTruthValue(tvn.getMean(), 0.0f));
-    const TruthValue& tv = SimpleTruthValue(tvn.getMean(), 0.0f); 
-    const TruthValue& mod_tvn = (!inheritsType(T, VARIABLE_NODE))? tvn : tv;
-
-    return as->addNode( T, name, mod_tvn, fresh);
-#else
-    LOG(3, "DirectATW::addNode");
-        
-    if (inheritsType(T, FW_VARIABLE_NODE)) {
-        // Safeguard the identity of variables.
-        map<string,pHandle>::iterator existingHandle = variableShadowMap.find(name);
-        if (existingHandle != variableShadowMap.end())
-            return existingHandle->second;
-    }
-    Node node( T,  name,  tvn);
-    //! @todo add related context
-    pHandle ret = addAtomDC(node, fresh);
-    LOG(3, "Add ok.");
-    
-    if (inheritsType(T, FW_VARIABLE_NODE))
-        variableShadowMap[name] = ret;
-    
-#if USE_MIND_SHADOW
-    haxx::mindShadow.push_back(ret);    
-    haxx::mindShadowMap[T].push_back(ret);
-#endif
-    return ret;
-#endif
 }
 
 }} //~namespace opencog::pln

@@ -169,7 +169,6 @@ void PLNModule::init()
     asw->allowFWVarsInAtomSpace = 
         config().get_bool("PLN_FW_VARS_IN_ATOMSPACE");
 
-
 #ifdef HAVE_GUILE
     // Define a scheme wrapper -- the scheme function pln-bc will
     // call the pln_bc method.
@@ -179,15 +178,6 @@ void PLNModule::init()
     // call the pln_ar method.
     define_scheme_primitive("pln-ar", &PLNModule::pln_ar, this);
 #endif 
-
-    // no longer done at module load - it would be inappropriate
-    // for contexts other than testing PLN
-    /*initTests();*
-    Bstate = Btr<BITNodeRoot>(new BITNodeRoot(tests[0],
-        new DefaultVariableRuleProvider, recordingTrails));
-    printf("BITNodeRoot init ok\n");
-    temp_state = Bstate.get();
-    state = Bstate.get();*/
 }
 
 std::string PLNModule::do_pln(Request *dummy, std::list<std::string> args)
@@ -215,22 +205,6 @@ Handle PLNModule::pln_ar(const std::string& ruleName,
     return applyRule(ruleName, premises);
 }
 
-
-#if 0
-// This isn't used, but should be replaced with BITrepository methods
-void opencog::pln::setTarget(Handle h) {
-    pHandleSeq fakeHandles = ((AtomSpaceWrapper*)ASW())->realToFakeHandle(h);
-    pHandle fakeHandle = fakeHandles[0];
-    Btr<vtree> target(new vtree(fakeHandle));
-    
-    Bstate.reset(new BITNodeRoot(target, new DefaultVariableRuleProvider,
-                recordingTrails));
-
-    printf("BITNodeRoot init ok\n");
-    state = Bstate.get();
-}
-#endif
-
 Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
 {
     // Used by this function, and, if setTarget is true, assigned to the
@@ -251,8 +225,6 @@ Handle opencog::pln::infer(Handle h, int &steps, bool setTarget)
 
         pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
         pHandle fakeHandle = fakeHandles[0];
-        
-//        Btr<vtree> target(new vtree(fakeHandle));
         
         Btr<vtree> target_(new vtree(fakeHandle));
         
@@ -347,6 +319,7 @@ BITNode* getBITOrScoper(BITNodeID id) {
     else bitnode = haxx::getBITNode(id);
     return bitnode;
 }
+
 BITNode* getBITOrRoot(BITNodeID id) {
     BITNode* bitnode;
     if (id == 0) {
@@ -482,8 +455,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         // BIT commands
         else if (c == "bit") {
             input(h, args);
-//            if (h == 0) h = (long) state->children[0].begin()->prover;
-//           ss << ((BITNodeRoot*)h)->print();
             ss << getBITOrScoper(h)->print();
         }
         else if (c == "bit-expand") {
@@ -495,18 +466,12 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         else if (c == "bit-results") {
             input(h, args);
             ss << getBITOrRoot(h)->printResults();
-/*          foreach(const set<BoundVertex>& eval_res_set, ((BITNodeRoot*)h)->GetEvalResults())
-            foreach(const BoundVertex& eval_res, eval_res_set)
-                printTree(v2h(eval_res.value),0,-10);*/
         }
         else if (c == "bit-parents") {
             input(h, args);
             bitnode = getBITOrRoot(h);
             ss << "Parents of " << (long) h << ":" << endl;
             ss << bitnode->getBITRoot().printParents(bitnode);
-            //foreach(const parent_link<BITNode>& p, (bitnode->getParents()) {
-            //    ss << "User Node = " << (ulong) p.link << endl;
-            //}
             // Use print_parents when it's changed to return a string
         }
         else if (c == "bit-rule-args") {
@@ -529,7 +494,8 @@ std::string PLNModule::runCommand(std::list<std::string> args)
             input(h, args);
             if (h == 0) h = (long)state;
             ss << "Disabled" << endl;
-            /*cprintf(0, "Node has results & bindings:\n");
+#if 0
+            cprintf(0, "Node has results & bindings:\n");
             foreach(const BoundVertex& bv, *((BITNodeRoot*)h)->direct_results)
             {
                 cprintf(0,"[%d]\n", v2h(bv.value));
@@ -540,7 +506,8 @@ std::string PLNModule::runCommand(std::list<std::string> args)
                         cprintf(0,"=>");
                         printTree(phh.second,0,0);
                     }
-            }*/
+            }
+#endif
         }
         // Testing
         else if (c == "load-axioms") {
@@ -565,15 +532,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         else if (c == "test-count") {
             ss << tests.size() << std::endl;
         }
-        // Old test-targets system
-//        else if (c == "test-target") {
-//            input(test_i, args);
-//            Bstate.reset(new BITNodeRoot(tests[test_i], new DefaultVariableRuleProvider,
-//                        recordingTrails, fitnessEvaluator));
-//            state = Bstate.get();
-//            ss << "Test target set:" << endl;
-//            ss << rawPrint(*tests[test_i],tests[test_i]->begin(),0);
-//        }
         else if (c == "test") {
         	input(temps, args);
         	findSCMTarget(temps);
@@ -625,18 +583,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
 
         }
         else if (c == "loop-check") { state->loopCheck(); }
-/*      else if (c == "W") {
-            if (using_root) {
-                temp_state = state;
-                input(h, args);
-                state = (BITNodeRoot*)h;
-                using_root = false;
-            }
-            else {
-                state = temp_state;
-                using_root = true;
-            }
-        }*/
         else if (c == "help") {
             ss << usageInfo;
         }

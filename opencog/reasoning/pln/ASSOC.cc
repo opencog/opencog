@@ -52,10 +52,10 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
     // search for all elements 'super_h' such that 'SubSet c_h super_h'
     vtree mp(static_cast<pHandle>(SUBSET_LINK));
     TableGather table(mp, asw);
-    for(TableGatherConstIt tgci = table.begin(); tgci != table.end(); ++tgci) {
+    for (TableGatherConstIt tgci = table.begin(); tgci != table.end(); ++tgci) {
         pHandle subset_h = boost::get<pHandle>(tgci->GetValue());
         pHandle sub_h = asw->getOutgoing(subset_h, 0);
-        if(sub_h == c_h) {
+        if (sub_h == c_h) {
             pHandle super_h = asw->getOutgoing(subset_h, 1);
             pHandle subset_not_c_h = asw->getHandle(SUBSET_LINK,
                                                     not_c_h, super_h);

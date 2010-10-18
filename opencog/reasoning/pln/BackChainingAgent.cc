@@ -93,9 +93,6 @@ void BackChainingAgent::chooseTarget()
     // Initially: Run one whole PLN inference
     // Later: Divide it into slices
     
-//    Btr<BackInferenceTreeRootT> Bstate;
-//    BackInferenceTreeRootT *state;
-
     pHandleSeq fakeHandles = ASW()->realToFakeHandle(h);
     if (fakeHandles.empty()) {
         log->error("[BackChainingAgent] fakeHandles is empty");

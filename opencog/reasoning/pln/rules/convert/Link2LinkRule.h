@@ -29,11 +29,8 @@
 
 namespace opencog { namespace pln {
 
-// TODELETE
-//extern std::map<int, std::string> type2name;
 Rule::setOfMPs makeSingletonSet(Rule::MPs& mp);
 
-//template<typename FormulaType, Type SRC_LINK, Type DEST_LINK>
 template<typename FormulaType>
 class Link2LinkRule : public GenericRule<FormulaType>
 {
@@ -43,13 +40,8 @@ class Link2LinkRule : public GenericRule<FormulaType>
     // @todo I don't understand why it is need but without that it does not compile
     AtomSpaceWrapper* asw;
 
-protected:
-//	mutable std::vector<Type> ti;
-
 public:
     bool validate2(Rule::MPs& args) const { return true; }
-    //Link2LinkRule(AtomSpaceWrapper *_asw)
-    //: GenericRule<FormulaType>(_asw,false,"")
     Link2LinkRule(AtomSpaceWrapper *_asw, Type src, Type dest)
         : GenericRule<FormulaType>(_asw, false,""),
         SRC_LINK(src), DEST_LINK(dest),
@@ -116,21 +108,6 @@ public:
     }
     NO_DIRECT_PRODUCTION;
 };
-
-/*
-typedef  Link2LinkRule<Mem2InhFormula, MEMBER_LINK, SUBSET_LINK> Mem2InhRule;
-typedef  Link2LinkRule<Int2ExtFormula, IMPLICATION_LINK, MIXED_IMPLICATION_LINK>				IntImp2ExtRule;
-//typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, MIXED_INHERITANCE_LINK>				IntInh2ExtRule;
-typedef  Link2LinkRule<Int2ExtFormula, INHERITANCE_LINK, SUBSET_LINK>				IntInh2ExtRule;
-typedef  Link2LinkRule<Ext2IntFormula, EXTENSIONAL_IMPLICATION_LINK, MIXED_IMPLICATION_LINK> ExtImp2IntRule;
-typedef  Link2LinkRule<Ext2IntFormula, SUBSET_LINK, INHERITANCE_LINK> ExtInh2IntRule;
-//typedef  Link2LinkRule<Ext2IntFormula, SUBSET_LINK, MIXED_INHERITANCE_LINK> ExtInh2IntRule;
-typedef  Link2LinkRule<Inh2ImpFormula, INHERITANCE_LINK, IMPLICATION_LINK>					Inh2ImpRule;
-typedef  Link2LinkRule<Imp2InhFormula, IMPLICATION_LINK, INHERITANCE_LINK>					Imp2InhRule;
-typedef  Link2LinkRule<Mem2EvalFormula, MEMBER_LINK, EVALUATION_LINK> Mem2EvalRule;
-//typedef  Link2LinkRule<Eval2InhFormula, EVALUATION_LINK, INHERITANCE_LINK> Eval2InhRule;
-//typedef  Link2LinkRule<Formula, _LINK, _LINK> Rule;
-*/
 
 typedef  Link2LinkRule<Mem2InhFormula> Mem2InhRule;
 typedef  Link2LinkRule<Int2ExtFormula> Int2ExtRule;

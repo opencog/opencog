@@ -42,10 +42,7 @@ void ForwardChainingAgent::run(CogServer *server) {
 	// More of this should be / is done elsewhere
 
 	cout << "FWBETA Starting chaining:" << endl;
-	//pHandleSeq results = fw.fwdChainStack(10000);
 	pHandleSeq results = fc.fwdChain(FWD_CHAIN_MAX_APPS);
-	//pHandleSeq results = fw.fwdChain(10000);
-	//opencog::logger().info("Finish chaining on seed stack");
 	cout << "FWBETA Chaining finished, results:" << endl;
 	NMPrinter np;
 	foreach (pHandle h, results) {

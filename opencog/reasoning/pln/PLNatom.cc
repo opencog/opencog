@@ -37,9 +37,6 @@ namespace pln {
 int atom_alloc_count=0;
 int inode_alloc_count=0;
     
-// TODELETE
-//extern std::map<int, string> type2name;
-    
 bool existMPin(const vector<Btr<atom> >& hs);
 
 bool atom::ValidMetaPredicate(Type T)
@@ -82,7 +79,6 @@ bool lessatom::operator()(const atom& lhs, const atom& rhs) const
     return false;
 }
 
-//bool MetaPredicate::operator()(HandleType h) const
 bool atom::operator()(pHandle h) const
 {
     uint s=0;
@@ -189,15 +185,14 @@ atom::atom(pHandle h)
 atom::atom(const atom& rhs)
 :   handle(rhs.handle), bindings(rhs.bindings), T(rhs.T), arity(rhs.arity),
     name(rhs.name), hs(rhs.hs), 
-//,bindings(0), forbiddenBindings(0)
-forbiddenBindings(rhs.forbiddenBindings)
+    forbiddenBindings(rhs.forbiddenBindings)
 {
     atom_alloc_count++;
 }
 
 atom::atom(Type _T, string _name)
 : handle(PHANDLE_UNDEFINED),bindings(0), T(_T), arity(0), name(_name), 
-forbiddenBindings(0)
+  forbiddenBindings(0)
 {
     atom_alloc_count++;
     //printf("Node: %d / %d\n", T, arity);
@@ -447,8 +442,6 @@ MetaPredicate* atom::getMeta() const
 
 Type atom::execType() const
 {
-//  if (inheritsType(T, __INDEXER) && hs.size() > (T - __INDEX1))
-//      return hs[T - __INDEX1].execType();
     if (T == INSTANCEOF_R || T == __INSTANCEOF_N)
         return hs[0]->T;
     if ((T == AND_LINK || T == OR_LINK) && existMPin(hs))
@@ -459,8 +452,6 @@ Type atom::execType() const
 
 vector<Btr<atom> > atom::execOutTree() const
 {
-//  if (inheritsType(T, __INDEXER) && hs.size() > (T - __INDEX1))
-//      return hs[T - __INDEX1].execOutTree();
     if (GET_ASW->inheritsType(T, RESTRICTOR))
         return vector<Btr<atom> >();
 
@@ -568,27 +559,6 @@ void prn(tree< Btr<atom> >& tr)
          ++sib2;
       }
 }
-/*
-void makeHandletree(Handle handle, iAtomSpaceWrapper* table, bool fullVirtual, tree<Vertex>& ret) const
-{
-    Handle top=(Handle)0;
-    Type T=GET_ASW->getType(handle);
-
-    if (!fullVirtual || inheritsType(T, NODE))
-        ret.set_head(handle);
-    else //Virtual
-    {
-        ret.set_head((Handle)T);
-    
-        HandleSeq _hs = GET_ASW->getOutgoing(handle);
-        foreach(Handle child_h, hs)
-        {
-            tree<Vertex> child = makeHandletree(child_h, table, fullVirtual);
-            ret.append_children(ret.begin(), child, child);
-        }
-    }
-}
-*/
 
 void expandHandletree(bool fullVirtual, vtree& ret, tree<Vertex>::iterator ret_top);
 void makeHandletree(pHandle h, bool fullVirtual, tree<Vertex>& ret)
@@ -771,23 +741,6 @@ void atom::extractFWVars(set<string>& vars) const
         for (unsigned int i = 0; i < hs.size(); i++)
             hs[i]->extractFWVars(vars);
 }
-
-/*atom varFormula2ForAll(const atom& a)
-{
-    set<string> vars;
-
-    a.extractVars(vars);
-
-    atom* varlist = new atom(LIST_LINK,0);
-    for (set<string>::iterator i = vars.begin(); i != vars.end(); i++)
-        varlist->hs.push_back(atom(VARIABLE_NODE, *i));
-
-    /// Transfer ownership of varlist forward:
-
-    return atom(FORALL_LINK, 2,
-                varlist,
-                new atom(a));           
-}*/
 
 bool atom::forbidLastSubstitution() const
 {

@@ -210,20 +210,6 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     vhmap_t vhmap;
     vhmap_reverse_t vhmap_reverse;
 
-    //! template to search a map for a value (instead of a key) this is to be
-    //! removed once bimap is integrated
-    //template < typename M, typename T > 
-    //typename M::const_iterator findValueInMap (const M m, const T value) const
-    //{
-    //    typename M::const_iterator i;
-    //    for (i = vhmap.begin(); i != vhmap.end(); i++) {
-    //        if (i->second == value) {
-    //            return i;
-    //        }
-    //    }
-    //    return i;
-    //}
-
     /**
      * Add a tree of non real atoms to AtomSpace.
      * @param v of atoms to add.
@@ -240,16 +226,10 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     pHandle addAtom(vtree& v, vtree::iterator vi, const TruthValue& tvn,
                     bool fresh);
 
-    //bool hasAppropriateContext(const Handle o, VersionHandle& vh, unsigned int
-    //      i = 0) const;
-    //bool isSubcontextOf(const Handle sub, const Handle super);
-
     //! used by filter_type to merge collections of handles.
     template<class T>
     void mergeCopy(T& a, const T& b) {
-        //T ret(a);
         copy(b.begin(), b.end(), back_inserter(a));
-        //return ret;
     }
 
     //! Used by getImportantHandles
@@ -540,15 +520,6 @@ public:
     //for debugging
     std::string vhmapToString() const;
     std::string pHandleToString(pHandle ph) const;
-
-// TODELETE
-//  combo::NMCore* getCore() const { return core; }
-//  std::vector<atom> LoadAnds(const std::string& path);
-//  int implicationConstruction();
-//  bool hasFalsum(float minAllowedError = 0.5) { return false; }
-//  void VariableMPforms(const atom& src, set<atom, lessatom_ignoreVarNameDifferences>& res,
-//                     set<subst>* forbiddenBindings);
-
 };
 
 /*
@@ -581,8 +552,6 @@ class FIMATW : public AtomSpaceWrapper
 {
     fim::pat_id next_free_pat_id;
 
-// TODELETE
-//  std::map<atom,int,lessatom> node2pat_id;
 public:
     /// Semi-haxx::
     fim::grim myfim;
@@ -594,8 +563,6 @@ public:
                     bool fresh);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
                     bool fresh);
-// TODELETE:
-//  FIMATW(combo::NMCore* core) : AtomSpaceWrapper(core), next_free_pat_id(30001) {}
 };
 
 /** Normalizes atoms before passing forward */
@@ -629,63 +596,7 @@ public:
             bool fresh);
     pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
             bool fresh);
-
-    // TODELETE:
-    //Btr<set<Handle> > getHandleSet(Type,const string&,bool = false);
-
 };
-
-/** Forwards the requests without normalizing */
-class DirectATW : public AtomSpaceWrapper
-{
-    DirectATW(AtomSpace* as);
-public:
-    virtual ~DirectATW() { }
-
-    static DirectATW& getInstance(AtomSpace *as = NULL) {
-        if (as == NULL)
-            as = server().getAtomSpace();
-        static DirectATW* instance = new DirectATW(as);
-        return *instance;
-    }
-    
-    pHandle addLink(Type T, const pHandleSeq& hs, const TruthValue& tvn,
-                    bool fresh);
-    pHandle addNode(Type T, const std::string& name, const TruthValue& tvn,
-                    bool fresh);
-    //Btr<set<Handle> > getHandleSet(Type, const string&, bool = false);
-
-};
-
-// TODELETE
-/*using namespace boost;
-class LocalATW : public AtomSpaceWrapper, public Singleton<LocalATW>
-{
-    LocalATW();
-
-    //vector<Handle> mindShadow;
-    map<Type, shared_ptr<set<Handle> > > mindShadowMap;
-    map<Type, std::queue<std::set<Handle>::iterator > > q;
-    
-    unsigned long capacity;
-    
-public:
-    virtual ~LocalATW() { }
-    friend class Singleton<LocalATW>;
-    
-    static bool inHandleSet(Type T, const HandleSeq& hs, shared_ptr<set<Handle> > res, Handle* ret);
-    static bool inHandleSet(Type T, const string& name, shared_ptr<set<Handle> > res, Handle* ret);
-  
-    Handle addLink(Type T, const HandleSeq& hs, const TruthValue& tvn, bool fresh, bool managed=true);
-    Handle addNode(Type T, const std::string& name, const TruthValue& tvn, bool fresh, bool managed=true);
-
-    Btr<set<Handle> > getHandleSet(Type T, const string& name, bool subclass = false) const;
-    
-    void ClearAtomSpace();
-    void DumpCore(Type T = 0);
-    void SetCapacity(unsigned long atoms);
-}; */
-
 
 }} //~namespace opencog::pln
 
