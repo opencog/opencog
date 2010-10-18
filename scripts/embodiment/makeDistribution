@@ -86,7 +86,7 @@ $pdh/opencog/embodiment/scm/question-answering.scm \
 if {$type_dist == "dev"} {
     set flistconfig [list \
     $pdh/opencog/embodiment/dev_config/embodiment.conf \
-    $binDirH/opencog/embodiment/AutomatedSystemTest/pbTester \
+    $binDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_0.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_1.txt \
     $pdh/opencog/embodiment/AutomatedSystemTest/GoldenStandardFiles/gsfile_2.txt \
