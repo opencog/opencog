@@ -128,7 +128,7 @@ These should be bug-free, but there's no type checking of parameters, so providi
 
 #define BackInferenceTreeRootT BITNodeRoot
 
-//#include "PTLEvaluator.h"
+//#include "PLNEvaluator.h"
 
 #include "rules/RuleProvider.h"
 #include "AtomSpaceWrapper.h"
@@ -256,7 +256,7 @@ void PLNShell_RunLoop(int argc, char** args)
 
         haxx::ArchiveTheorems = false;
 #endif
-        logger().debug("PTL Initialized.");
+        logger().debug("PLN Initialized.");
     }
     catch(std::string s) {
         logger().error("at root level while RunLoop initializing.");

@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PTLATOM_H
-#define PTLATOM_H
+#ifndef PLNATOM_H
+#define PLNATOM_H
 
 #define MetaPredicate atom
 
@@ -156,14 +156,6 @@ public:
     void extractFWVars(std::set<std::string>& vars) const;
 
 };
-/*
-struct less_subst: public binary_function<subst, subst, bool>
-{
-    bool operator()(const subst& lhs, const subst& rhs) const
-    {
-        return lhs.first < rhs.first; // Only compare the std::string keys
-    }
-};*/
 
 struct lessatom : public std::binary_function<atom, atom, bool>
 {
@@ -265,7 +257,5 @@ bool getLargestIntersection2(const std::set<atom,lessatom>& keyelem_set,
 atom* neBoundVertexWithNewType(Handle h, Type T);
 
 }} // ~namespace opencog::pln
-
-//#include "iAtomSpaceWrapper.h"
 
 #endif

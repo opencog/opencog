@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PTLEVALUATOR_H_
-#define _PTLEVALUATOR_H_
+#ifndef _PLNEVALUATOR_H_
+#define _PLNEVALUATOR_H_
 
 #include <queue>
 #include <set>
@@ -42,7 +42,6 @@ class InferenceNode2;
 class BackwardInferenceTask;
 class InferenceNode;
 struct iAtomSpaceWrapper;
-//class BITNodeRoot;
 
 namespace simple_evaluator
 {
@@ -63,29 +62,9 @@ public:
 };
 
 
-/*class ComplexRuleProvider : public RuleProvider
-{
-	const std::vector<Rule*>& get();
-};
-class BooleanRuleProvider : public RuleProvider
-{
-	const std::vector<Rule*>& get();
-};
-
-class LookupProvider : public RuleProvider
-{
-	AtomTable* table;
-	std::vector<Rule*> rs;
-public:
-	LookupProvider(AtomTable* _table);
-	
-	const std::vector<Rule*>& get() {
-		return rs;
-	}
-};
-*/
-/// Stores inference tree for Breadth-1st inference and last-attempted-depth for
-/// Depth-1st
+/** Stores inference tree for Breadth-1st inference and last-attempted-depth 
+ * for Depth-1st.
+ */
 typedef boost::variant<InferenceNode2, int> InferenceSession;
 
 class SimplePLNEvaluator
@@ -102,10 +81,10 @@ class SimplePLNEvaluator
 											tree<Vertex>::iterator top,
 											MetaProperty policy);
 	
-	friend class PTLEvaluator;
+	friend class PLNEvaluator;
 };
 
-/// Exported General PTL services
+/* Exported General PLN services */
 
 struct InferenceTaskParameters
 {
@@ -117,30 +96,14 @@ struct InferenceTaskParameters
 	Btr<vtree> target;
 };
 
-class PTLEvaluator
+class PLNEvaluator
 {
   public:
 	  
-  	/// Calls the simple Boolean bottom-up PLN bw chainer
-
+  	/** Calls the simple Boolean bottom-up PLN bw chainer */
 	static Vertex v_evaluate(	const tree<Vertex>& target,
 								tree<Vertex>::iterator top,
 								MetaProperty policy);
-  
-	/// Calls the complex bw chainer
-
-/*	static Btr<BITNodeRoot> BIT_evaluate(
-					InferenceTaskParameters pars,
-  					RuleProvider* rp = NULL,
-					PostCondition<Handle>* result_requirements = (NULL),
-					char logLevel = 0);
-*/
-/*    static HandleEntry* evaluate(const tree<Vertex>& target, tree<Vertex>::iterator top);
-	static HandleEntry* evaluateMore(
-					const InferenceTaskParameters& pars,
-					InferenceSession& last_session,					
-					tree<Btr<InferenceNode> >* inferenceTrail = NULL,
-					char logLevel = 0);*/
 };
 
 } //namespace simple_evaluator
@@ -156,4 +119,4 @@ Handle exec(const std::vector<BoundVertex>& hs);
 }
 
 
-#endif //_PTLEVALUATOR_H_
+#endif //_PLNEVALUATOR_H_

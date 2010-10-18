@@ -1,7 +1,7 @@
 #include <ContextInfo.h>
 #include <Context.h>
 #include <TruthValue.h>
-#include <FirstPTLTruthValue.h>
+#include <FirstPLNTruthValue.h>
 #define NL "\n"
 #define TAB "\t"
 #define CONTEXT_SIZE 5
@@ -25,11 +25,11 @@ class ContextUTest : public CxxTest::TestSuite{
         handles1[4] = (Handle) 4;
         Handle source1 = (Handle) 5;
 
-        cinfos1[0] = new ContextInfo(new FirstPTLTruthValue(0.1, 10), 0.11);
-        cinfos1[1] = new ContextInfo(new FirstPTLTruthValue(0.2, 20), 0.22);
-        cinfos1[2] = new ContextInfo(new FirstPTLTruthValue(0.3, 30), 0.33);
-        cinfos1[3] = new ContextInfo(new FirstPTLTruthValue(0.4, 40), 0.44);
-        cinfos1[4] = new ContextInfo(new FirstPTLTruthValue(0.5, 50), 0.55);
+        cinfos1[0] = new ContextInfo(new FirstPLNTruthValue(0.1, 10), 0.11);
+        cinfos1[1] = new ContextInfo(new FirstPLNTruthValue(0.2, 20), 0.22);
+        cinfos1[2] = new ContextInfo(new FirstPLNTruthValue(0.3, 30), 0.33);
+        cinfos1[3] = new ContextInfo(new FirstPLNTruthValue(0.4, 40), 0.44);
+        cinfos1[4] = new ContextInfo(new FirstPLNTruthValue(0.5, 50), 0.55);
 
         context1 = new Context(handles1,cinfos1,CONTEXT_SIZE,source1);
         cout << NL << "Context1:\n" << context1->toString() << NL;
@@ -41,10 +41,10 @@ class ContextUTest : public CxxTest::TestSuite{
         handles2[3] = (Handle) 6;
         Handle source2 = (Handle) 7;
 
-        cinfos2[0] = new ContextInfo(new FirstPTLTruthValue(0.5, 50), 0.55);
-        cinfos2[1] = new ContextInfo(new FirstPTLTruthValue(0.6, 60), 0.66);
-        cinfos2[2] = new ContextInfo(new FirstPTLTruthValue(0.7, 70), 0.77);
-        cinfos2[3] = new ContextInfo(new FirstPTLTruthValue(0.8, 80), 0.88);
+        cinfos2[0] = new ContextInfo(new FirstPLNTruthValue(0.5, 50), 0.55);
+        cinfos2[1] = new ContextInfo(new FirstPLNTruthValue(0.6, 60), 0.66);
+        cinfos2[2] = new ContextInfo(new FirstPLNTruthValue(0.7, 70), 0.77);
+        cinfos2[3] = new ContextInfo(new FirstPLNTruthValue(0.8, 80), 0.88);
 
         context2 = new Context(handles2,cinfos2,4,source2);
 
@@ -67,7 +67,7 @@ class ContextUTest : public CxxTest::TestSuite{
         TS_ASSERT_EQUALS(context1->getSize(),size);
 
         Handle h = (Handle) 10;
-        ContextInfo* c = new ContextInfo(new FirstPTLTruthValue(0.666, 666), 0.666);
+        ContextInfo* c = new ContextInfo(new FirstPLNTruthValue(0.666, 666), 0.666);
         context1->add(h,c);
         cout << "Context1:\n" << context1->toString() << NL;
         TS_ASSERT_EQUALS(context1->getSize(),size+1);

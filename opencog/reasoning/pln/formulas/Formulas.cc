@@ -29,7 +29,7 @@
 
 using namespace std;
 
-const bool PTLdebug = true;
+const bool PLNdebug = true;
 
 //namespace haxx
 //{
@@ -55,14 +55,14 @@ namespace pln {
   Macros of common body parts 
 =============================================================================*/
 
-#define PTLFormulaBodyFor_Link \
+#define PLNFormulaBodyFor_Link \
     assert(N == 1); \
     assert(TV[0]); \
     TruthValue* linkAB = TV[0]; \
     strength_t sAB = linkAB->getMean(); \
     count_t nAB = linkAB->getCount(); \
      
-#define PTLFormulaBodyFor_Atom2 \
+#define PLNFormulaBodyFor_Atom2 \
     assert(N == 2); \
     assert(TV[0]); \
     assert(TV[1]); \
@@ -71,7 +71,7 @@ namespace pln {
     strength_t sB = TV[1]->getMean(); \
     count_t nB = TV[1]->getCount(); \
      
-#define PTLFormulaBodyFor_Link1Node2 \
+#define PLNFormulaBodyFor_Link1Node2 \
     assert(N == 3); \
     assert(TV[0]); \
     assert(TV[1]); \
@@ -86,7 +86,7 @@ namespace pln {
     count_t nA = atomA->getCount(); \
     count_t nB = atomB->getCount();
 
-#define PTLFormulaBodyFor_Link2Node2 \
+#define PLNFormulaBodyFor_Link2Node2 \
     assert(N == 4); \
     assert(TV[0]); \
     assert(TV[1]); \
@@ -105,7 +105,7 @@ namespace pln {
     count_t nA = atomA->getCount(); \
     count_t nB = atomB->getCount();
 
-#define PTLFormulaBodyFor_Link2Node3 \
+#define PLNFormulaBodyFor_Link2Node3 \
     assert(N == 5); \
     assert(TV[0]); \
     assert(TV[1]); \
@@ -128,15 +128,15 @@ namespace pln {
     count_t nAB = linkAB->getCount(); \
     count_t nBC = linkBC->getCount();
 
-#define DebugPTLBodyFor_Link if (PTLdebug) cprintf(-3, " A->B:%f\n",  sAB);
+#define DebugPLNBodyFor_Link if (PLNdebug) cprintf(-3, " A->B:%f\n",  sAB);
 
-#define DebugPTLBodyFor_Link2 if (PTLdebug) cprintf(-3, "sA:%f sB:%f \n", sA, sB);
+#define DebugPLNBodyFor_Link2 if (PLNdebug) cprintf(-3, "sA:%f sB:%f \n", sA, sB);
 
-#define DebugPTLBodyFor_Link1Node2 if (PTLdebug) cprintf(-3, "sA:(%f,%f) sB:(%f,%f) A->B:(%f,%f)\n", sA, nA, sB, nB, sAB, nAB);
+#define DebugPLNBodyFor_Link1Node2 if (PLNdebug) cprintf(-3, "sA:(%f,%f) sB:(%f,%f) A->B:(%f,%f)\n", sA, nA, sB, nB, sAB, nAB);
 
-#define DebugPTLBodyFor_Link2Node2 if (PTLdebug) cprintf(-3, "sA:%f sB:%f   A->B:%f B->C:%f\n", sA, sB, sAB, sBA);
+#define DebugPLNBodyFor_Link2Node2 if (PLNdebug) cprintf(-3, "sA:%f sB:%f   A->B:%f B->C:%f\n", sA, sB, sAB, sBA);
 
-#define DebugPTLBodyFor_Link2Node3 if (PTLdebug) cprintf(-3, "sA:%f sB:%f sC:%f   A->B:%f B->C:%f\n", sA, sB, sC, sAB, sBC);
+#define DebugPLNBodyFor_Link2Node3 if (PLNdebug) cprintf(-3, "sA:%f sB:%f sC:%f   A->B:%f B->C:%f\n", sA, sB, sC, sAB, sBC);
 
 
 
@@ -165,8 +165,8 @@ TruthValue* InversionFormula::simpleCompute(TruthValue** TV,
         return IndefiniteSymmetricBayesFormula().simpleCompute(TV, N, U);
     }
 
-    PTLFormulaBodyFor_Link1Node2;
-    DebugPTLBodyFor_Link1Node2;
+    PLNFormulaBodyFor_Link1Node2;
+    DebugPLNBodyFor_Link1Node2;
 
     strength_t sBA = sAB * sA / std::max(sB, 0.00001f);
     count_t nBA = nAB * nB / std::max(nA, 0.00001f);
@@ -186,8 +186,8 @@ TruthValue* ImplicationBreakdownFormula::simpleCompute(TruthValue** TV,
         return IndefiniteSymmetricImplicationBreakdownFormula().simpleCompute(TV, N, U);
     }
 
-    PTLFormulaBodyFor_Link1Node2;
-    DebugPTLBodyFor_Link1Node2;
+    PLNFormulaBodyFor_Link1Node2;
+    DebugPLNBodyFor_Link1Node2;
 
     count_t n2 = std::min(nAB, nA);
 
@@ -217,8 +217,8 @@ TruthValue* ImplicationConstructionFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "InferenceMindAgent::ImplicationConstruction\n");
 
-    PTLFormulaBodyFor_Link1Node2;
-    DebugPTLBodyFor_Link1Node2;
+    PLNFormulaBodyFor_Link1Node2;
+    DebugPLNBodyFor_Link1Node2;
 
     strength_t s2 = ((sA > 0) ? (sAB / sA) : 0);
 
@@ -231,8 +231,8 @@ TruthValue* NotFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "InferenceMindAgent::NotEvaluation\n");
 
-    PTLFormulaBodyFor_Atom2;
-    DebugPTLBodyFor_Link2;
+    PLNFormulaBodyFor_Atom2;
+    DebugPLNBodyFor_Link2;
 
     /*    float s2 = (nA*sA + 1 - nB*sB) / (nA + nB); // s(LINK) - s(NOT)
         if (s2 < 0.0f) s2 = 0.0f;
@@ -256,8 +256,8 @@ TruthValue* DeductionSimpleFormula::simpleCompute(TruthValue** TV,
 
     TruthValue* linkTEMP = TV[0];
 
-    PTLFormulaBodyFor_Link2Node3;
-    DebugPTLBodyFor_Link2Node3;
+    PLNFormulaBodyFor_Link2Node3;
+    DebugPLNBodyFor_Link2Node3;
 
     /// Temporary filtering fix to make sure that nAB >= nA
     nA = std::min(nA, nAB);
@@ -302,8 +302,8 @@ TruthValue* DeductionGeometryFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "Geom: deduct\n");
 
-    PTLFormulaBodyFor_Link2Node3;
-    DebugPTLBodyFor_Link2Node3;
+    PLNFormulaBodyFor_Link2Node3;
+    DebugPLNBodyFor_Link2Node3;
 
     TruthValue* baTV[] = { linkAB, atomA, atomB };
     TruthValue* linkBA = InversionFormula::simpleCompute(baTV, 3);
@@ -338,8 +338,8 @@ TruthValue* RevisionFormula::simpleCompute(TruthValue** TV,
         return IndefiniteSymmetricRevisionFormula().simpleCompute(TV, N, U);
     }
 
-    PTLFormulaBodyFor_Atom2;
-    //    DebugPTLBodyFor_Atom2;
+    PLNFormulaBodyFor_Atom2;
+    //    DebugPLNBodyFor_Atom2;
 
     strength_t wA = nA / std::max(nA + nB, TV_MIN);
     count_t wB = nB / std::max(nA + nB, TV_MIN);
@@ -359,8 +359,8 @@ TruthValue* Inh2SimFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "Inh2Sim...\n");
 
-    PTLFormulaBodyFor_Link2Node2;
-    DebugPTLBodyFor_Link2Node2;
+    PLNFormulaBodyFor_Link2Node2;
+    DebugPLNBodyFor_Link2Node2;
 
     strength_t sABsim =
         1 / ( ( 1 + sA / std::max(sB, TV_MIN)) / std::max(sAB - 1, TV_MIN));
@@ -375,8 +375,8 @@ TruthValue* Sim2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "Sim2Inh...\n");
 
-    PTLFormulaBodyFor_Link1Node2;
-    DebugPTLBodyFor_Link1Node2;
+    PLNFormulaBodyFor_Link1Node2;
+    DebugPLNBodyFor_Link1Node2;
 
     strength_t sABinh =
         (1 + sB / std::max(sA, TV_MIN)) * sAB / (1 + std::max(sAB, TV_MIN));
@@ -392,8 +392,8 @@ TruthValue* ANDBreakdownFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "ANDbreak...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     strength_t sA = sAB;
     count_t nA = nAB;
@@ -407,8 +407,8 @@ TruthValue* ModusPonensFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "Modus Ponens...\n");
 
-    PTLFormulaBodyFor_Atom2;
-    //    DebugPTLBodyFor_atom2;
+    PLNFormulaBodyFor_Atom2;
+    //    DebugPLNBodyFor_atom2;
 
     // Note that sB corresponds to sAB
     // DefaultNodeProbability is supposed to replace the unknown P(B|NOT A)
@@ -423,8 +423,8 @@ TruthValue* Inh2ImpFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "Inh2Imp...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     return checkTruthValue( new SimpleTruthValue(sAB, nAB) );
 }
@@ -434,8 +434,8 @@ TruthValue* Imp2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "Imp2Inh...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     //    float sAB = sAB;
     //    float nAB = nAB;
@@ -455,8 +455,8 @@ TruthValue* Mem2InhFormula::simpleCompute(TruthValue** TV, int N, long U) const
     }
 
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     strength_t sABinh = sAB;
     count_t nABinh = nAB * MembershipToExtensionalInheritanceCountDiscountFactor;
@@ -470,8 +470,8 @@ TruthValue* Mem2EvalFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "Mem2Eval...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     //    float sABext = sAB;
     //float nABext = nAB;
@@ -485,8 +485,8 @@ TruthValue* Eval2InhFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "Eval2Inh...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     //    float sABext = sAB;
     //float nABext = nAB;
@@ -499,8 +499,8 @@ TruthValue* Ext2IntFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "Ext2Int...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     strength_t sABint = sAB;
     count_t nABint = nAB * ExtensionToIntensionCountDiscountFactor;
@@ -513,8 +513,8 @@ TruthValue* Int2ExtFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     cprintf(-3, "Int2Ext...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     strength_t sABint = sAB;
     count_t nABint = nAB * IntensionToExtensionCountDiscountFactor;
@@ -578,8 +578,8 @@ TruthValue* AsymmetricANDFormula::simpleCompute(TruthValue** TV,
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical AND2...\n");
 
-    PTLFormulaBodyFor_Atom2;
-    //    DebugPTLBodyFor_Atom2;
+    PLNFormulaBodyFor_Atom2;
+    //    DebugPLNBodyFor_Atom2;
 
     strength_t sAND = sA * sB;
     count_t nAND = nB;
@@ -719,8 +719,8 @@ TruthValue* NOTFormula::simpleCompute(TruthValue** TV, int N, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical NOT...\n");
 
-    PTLFormulaBodyFor_Link;
-    DebugPTLBodyFor_Link;
+    PLNFormulaBodyFor_Link;
+    DebugPLNBodyFor_Link;
 
     strength_t sNOT = 1 - sAB;
     count_t nNOT = nAB;
@@ -885,8 +885,8 @@ TruthValue* InhSubstFormula::simpleCompute(TruthValue** TV,
 {
     cprintf(-3, "InferenceMindAgent::InhSubstFormula\n");
 
-    PTLFormulaBodyFor_Atom2;
-//    DebugPTLBodyFor_Atom2;
+    PLNFormulaBodyFor_Atom2;
+//    DebugPLNBodyFor_Atom2;
 
     //float s2 = ((sA>0) ? (sAB / sA) : 0);
 

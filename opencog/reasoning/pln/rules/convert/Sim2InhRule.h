@@ -60,7 +60,7 @@ public:
 	
         CreatePremises;
         
-        FirstPTLTruthValue* tvs[20];
+        FirstPLNTruthValue* tvs[20];
         
         tvs[0] = (TruthValue*) &(asw->getTV(premiseArray[0]));
         

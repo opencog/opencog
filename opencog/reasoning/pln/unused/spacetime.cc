@@ -37,7 +37,7 @@
 //#include "NovamenteIntegerArgumentType.h"
 
 #include "PLN.h"
-#include "PTLEvaluator.h"
+#include "PLNEvaluator.h"
 #include "AtomSpaceWrapper.h"
 #include "PLNatom.h"
 

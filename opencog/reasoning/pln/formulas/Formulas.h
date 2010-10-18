@@ -112,7 +112,7 @@ and GIVEN clusters should be realized by the system itself, making a MERGE.
 //infer E (as P). If E implies E2, then S implies also E." Given that S is a symbol statement
 //expressed by a human by an interface system P to designated E, NM also associates 
 
-- The seamlessness of the connection between these PTL inference control design issues and
+- The seamlessness of the connection between these PLN inference control design issues and
 my own concept theory is, to me, striking. The fact that on one hand we have a math.
 valid inference system, and on the other hand we have a "formalized Nietzschean semantics",
 integrating nicely, suggests that the design can be made extremely robust, natural and
@@ -128,8 +128,8 @@ powerful.
 */
 
 
-#ifndef PTL_FORMULAS
-#define PTL_FORMULAS
+#ifndef PLN_FORMULAS
+#define PLN_FORMULAS
 
 #include "Formula.h"
 

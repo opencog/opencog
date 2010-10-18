@@ -187,26 +187,26 @@ public:
         };
         TruthValue* t;
 #ifdef OLD_BORKEN_CODE
-//! @todo PTLFormulaeKit is from  old implementation
+//! @todo PLNFormulaeKit is from  old implementation
         for (int a=0; a < N; a++) {
             for (int b=0; b < N; b++) {
                 for (int c=0; c < N; c++) {
                     for (int d=0; d < N; d++) {
                         for (int e=0; e < N; e++) {
-                            t = PTLFormulaeKit::deduction(v[a], v[b], v[c], v[d], v[e]);
+                            t = PLNFormulaeKit::deduction(v[a], v[b], v[c], v[d], v[e]);
                             if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
                         }
-                        t = PTLFormulaeKit::inheritanceToSimilarity(v[a],v[b],v[c],v[d]);
+                        t = PLNFormulaeKit::inheritanceToSimilarity(v[a],v[b],v[c],v[d]);
                         if (t!=NULL) ((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
                     }
-                    t = PTLFormulaeKit::inversion(v[a],v[b],v[c]);
+                    t = PLNFormulaeKit::inversion(v[a],v[b],v[c]);
                     if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
-                    t = PTLFormulaeKit::nodeTruthValue(v[a],v[b],v[c]);
+                    t = PLNFormulaeKit::nodeTruthValue(v[a],v[b],v[c]);
                     if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
-                    t = PTLFormulaeKit::similarityToInheritance(v[a],v[b],v[c],false);
+                    t = PLNFormulaeKit::similarityToInheritance(v[a],v[b],v[c],false);
                     if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
                 }
-                t = PTLFormulaeKit::revision(v[a],v[b]);
+                t = PLNFormulaeKit::revision(v[a],v[b]);
                 if (t!=NULL) TS_ASSERT((t->getMean()>=0) && (t->getMean()<=1)&&(t->getCount()>0));
             }
         }
@@ -270,8 +270,8 @@ public:
                 if (a==b) continue;
                 if (inheritance[a][b]==NULL) continue;
 #ifdef OLD_BROKEN_CODE
-//! @todo PTLFormulaeKit is from  old implementation
-                t = PTLFormulaeKit::inversion(inheritance[b][a],atoms[a],atoms[b]);
+//! @todo PLNFormulaeKit is from  old implementation
+                t = PLNFormulaeKit::inversion(inheritance[b][a],atoms[a],atoms[b]);
 
                 TS_ASSERT(t!=NULL);
                 e = inheritance[a][b];
@@ -308,8 +308,8 @@ public:
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
 
 #ifdef OLD_BROKEN_CODE
-//! @todo PTLFormulaeKit is from  old implementation
-                t = PTLFormulaeKit::nodeTruthValue(inheritance[a][b],inheritance[b][a],atoms[b]);
+//! @todo PLNFormulaeKit is from  old implementation
+                t = PLNFormulaeKit::nodeTruthValue(inheritance[a][b],inheritance[b][a],atoms[b]);
 
                 TS_ASSERT(t!=NULL);
                 e = atoms[a];
@@ -344,9 +344,9 @@ public:
             for (int b=0; b < NUM_ATOMS; b++) {
                 if (a==b) continue;
                 if (similarity[a][b]==NULL) continue;
-//! @todo PTLFormulaeKit is from  old implementation
+//! @todo PLNFormulaeKit is from  old implementation
 #ifdef OLD_BORKEN_CODE
-                t = PTLFormulaeKit::similarityToInheritance(similarity[a][b],atoms[a],atoms[b],false);
+                t = PLNFormulaeKit::similarityToInheritance(similarity[a][b],atoms[a],atoms[b],false);
 
                 TS_ASSERT(t!=NULL);
                 e = inheritance[a][b];
@@ -383,8 +383,8 @@ public:
                 if (a==b) continue;
                 if ((inheritance[a][b]==NULL)||(inheritance[b][a]==NULL)) continue;
 #ifdef OLD_BORKEN_CODE
-//! @todo PTLFormulaeKit is from  old implementation
-                t = PTLFormulaeKit::inheritanceToSimilarity(inheritance[a][b],
+//! @todo PLNFormulaeKit is from  old implementation
+                t = PLNFormulaeKit::inheritanceToSimilarity(inheritance[a][b],
                                                             inheritance[b][a],
                                                             atoms[a],atoms[b]);
 
@@ -427,11 +427,11 @@ public:
                             if ((inheritance[i][j]==NULL) || (inheritance[m][n]==NULL)) continue;
                             e = inheritance[i][n];
 #ifdef OLD_BORKEN_CODE
-//! @todo PTLFormulaeKit is from  old implementation
-                            d = PTLFormulaeKit::deduction(inheritance[i][j], inheritance[m][n],
+//! @todo PLNFormulaeKit is from  old implementation
+                            d = PLNFormulaeKit::deduction(inheritance[i][j], inheritance[m][n],
                                                           atoms[i], atoms[j], atoms[n]);
                             TS_ASSERT(d!=NULL);
-                            t = PTLFormulaeKit::revision(e,d);
+                            t = PLNFormulaeKit::revision(e,d);
 
                             TS_ASSERT(t!=NULL);
                             cout << e->toString() << "\t"

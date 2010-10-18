@@ -252,7 +252,7 @@ public:
  */
 enum RULE
 {
-    PTL_AND,
+    PLN_AND,
     SimpleAND,
     SimpleAND2,
     SimpleAND3,

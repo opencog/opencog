@@ -1,6 +1,6 @@
 #include <ContextInfo.h>
 #include "TruthValue.h"
-#include "FirstPTLTruthValue.h"
+#include "FirstPLNTruthValue.h"
 #define NL "\n"
 #define TAB "\t"
 
@@ -9,7 +9,7 @@ class ContextInfoUTest : public CxxTest::TestSuite{
 
     public:
     void testContextInfo(){
-        FirstPTLTruthValue* tv = new FirstPTLTruthValue(1.0, 50);
+        FirstPLNTruthValue* tv = new FirstPLNTruthValue(1.0, 50);
         cout << NL << tv->toString() << NL;
 
         ContextInfo* cinfo = new ContextInfo(tv, 1.0);

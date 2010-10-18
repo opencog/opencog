@@ -141,8 +141,8 @@ float CompositeTruthValue::toFloat() const
 /*
  * The format of string representation of a Composite TV is as follows:
  * (primaryTv first, followed by the versionedTvs):
- * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
- * {0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
+ * {FIRST_PLN_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
+ * {0x2;CONTEXTUAL;FIRST_PLN_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
  * NOTE: string representation of tv types, VersionVandles and tv
  * attributes cannot have '{', '}' or ';', which are separators
  */
@@ -178,8 +178,8 @@ std::string CompositeTruthValue::toString() const
 /*
  * The format of string representation of a Composite TV is as follows
  * (primaryTv first, followed by the versionedTvs):
- * {FIRST_PTL_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
- * {0x2;CONTEXTUAL;FIRST_PTL_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
+ * {FIRST_PLN_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
+ * {0x2;CONTEXTUAL;FIRST_PLN_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
  * NOTE: string representation of tv types, VersionHandles and tv 
  * attributes cannot have '{', '}' or ';', which are separators
  *

@@ -23,9 +23,9 @@
 
 #ifndef USE_PSEUDOCORE
 
-#ifndef AUTO_H_PTLEVALUATOR_H
-  #define AUTO_H_PTLEVALUATOR_H
-  #include "PTLEvaluator.h"
+#ifndef AUTO_H_PLNEVALUATOR_H
+  #define AUTO_H_PLNEVALUATOR_H
+  #include "PLNEvaluator.h"
 #endif
 
 #ifndef AUTO_H_HANDLEENTRY_H
@@ -67,7 +67,7 @@ void BackwardInferenceTask::cycle()
 {
 	puts("BackwardInferenceTask cycle()");	
 
-/*HandleEntry* ret = PTLEvaluator::evaluate(pars);
+/*HandleEntry* ret = PLNEvaluator::evaluate(pars);
 	
 	if (ret && ret->handle)
 		printTree( ret->handle );	
