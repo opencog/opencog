@@ -31,6 +31,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 inline void TemporalMap::lock()
@@ -97,7 +100,7 @@ void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException)
 
 void *TemporalMap::get(Temporal* key)
 {
-    //cprintf(NORMAL, "TemporalMap::get(%s)\n", key->toString().c_str());
+    DPRINTF("TemporalMap::get(%s)\n", key->toString().c_str());
 
     void *ret;
 
@@ -119,7 +122,7 @@ void *TemporalMap::get(Temporal* key)
 
 Temporal *TemporalMap::getKey(const Temporal& lookupKey)
 {
-    //cprintf(NORMAL, "TemporalMap::getKey(%s)\n", lookupKey.toString().c_str());
+    DPRINTF("TemporalMap::getKey(%s)\n", lookupKey.toString().c_str());
 
     Temporal *ret;
 

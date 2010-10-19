@@ -35,6 +35,9 @@
 #include <vector>
 #include <cstdlib>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 const char* SpaceServer::SPACE_MAP_NODE_NAME = "SpaceMap";
@@ -177,7 +180,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
 
 
     SpaceMap* map = addOrGetSpaceMap(keepPreviousMap, spaceMapHandle);
-//    logger().fine("SpaceServer::add After addOrGet");
+    DPRINTF("SpaceServer::add After addOrGet\n");
 
     logger().fine(
                  "SpaceServer::add map->xMin() = %lf, map->xMax() = %lf, map->yMin() = %lf, map->yMax() = %lf, map->xGridWidth() = %lf, map->yGridWidth() = %lf",
@@ -187,7 +190,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
     SpaceServer::ObjectMetadata metadata(centerX, centerY, centerZ, length, width, height, yaw);
     bool mapContainsObject = map->containsObject(objectId);
     bool needUpdate = false;
-//    logger().fine("SpaceServer::add After contains");
+    DPRINTF("SpaceServer::add After contains\n");
     if (mapContainsObject) {
         //const SpaceServer::ObjectMetadata& oldMetadata = map->getMetaData(objectId);
         const spatial::EntityPtr& oldEntity = map->getEntity( objectId );
@@ -199,7 +202,7 @@ bool SpaceServer::add(bool keepPreviousMap, Handle spaceMapHandle, const std::st
                                                  oldEntity->getHeight( ),
                                                  oldEntity->getOrientation( ).getRoll( ) );
 
-//    logger().fine("SpaceServer::add After getMetaData");
+        DPRINTF("SpaceServer::add After getMetaData\n");
 
         if (metadata != oldMetadata) {
             needUpdate = true;

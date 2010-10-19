@@ -31,6 +31,9 @@
 
 //#define USE_SHARED_DEFAULT_TV
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
@@ -148,13 +151,13 @@ float CompositeTruthValue::toFloat() const
  */
 std::string CompositeTruthValue::toString() const
 {
-    //printf("CompositeTruthValue::toString()\n");
+    DPRINTF("CompositeTruthValue::toString()\n");
     std::string result;
     char buffer[1<<16];
-    //printf("primaryTV = %p\n", primaryTV);
-    //printf("type = %d\n", primaryTV->getType());
-    //printf("typeStr = %s\n", TruthValue::typeToStr(primaryTV->getType()));
-    //printf("{%s;%s}", TruthValue::typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
+    DPRINTF("primaryTV = %p\n", primaryTV);
+    DPRINTF("type = %d\n", primaryTV->getType());
+    DPRINTF("typeStr = %s\n", TruthValue::typeToStr(primaryTV->getType()));
+    DPRINTF("{%s;%s}", TruthValue::typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
     sprintf(buffer, "{%s;%s}",
             TruthValue::typeToStr(primaryTV->getType()),
             primaryTV->toString().c_str());
@@ -163,7 +166,7 @@ std::string CompositeTruthValue::toString() const
          itr != versionedTVs.end(); itr++) {
         VersionHandle key = itr->first;
         TruthValue* tv = itr->second;
-        //printf("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
+        DPRINTF("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
         sprintf(buffer, "{%lu;%s;%s;%s}",
                 key.substantive.value(),
                 VersionHandle::indicatorToStr(key.indicator),
@@ -171,7 +174,7 @@ std::string CompositeTruthValue::toString() const
         result += buffer;
     }
 
-    //printf("\n%s\n", result.c_str());
+    DPRINTF("\n%s\n", result.c_str());
     return result;
 }
 
@@ -208,7 +211,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     char* primaryTvTypeStr = __strtok_r(tvToken, ";", &internalBuff);
     TruthValueType primaryTvType = TruthValue::strToType(primaryTvTypeStr);
     char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
-    // printf("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
+    DPRINTF("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
     result->primaryTV = TruthValue::factory(primaryTvType, primaryTvStr);
 #ifdef USE_SHARED_DEFAULT_TV
     DeleteAndSetDefaultTVIfPertinent(&(result->primaryTV));
@@ -226,11 +229,11 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
         // MUST BE CONVERTED TO A NEW/COMMON HANDLE FORMAT.
         char* indicatorStr = __strtok_r(NULL, ";", &internalBuff);
         IndicatorType indicator = VersionHandle::strToIndicator(indicatorStr);
-        // printf("substantive = %p, indicator = %d\n", substantive.value(), indicator);
+        DPRINTF("substantive = %p, indicator = %d\n", substantive.value(), indicator);
         char* versionedTvTypeStr = __strtok_r(NULL, ";", &internalBuff);
         TruthValueType versionedTvType = TruthValue::strToType(versionedTvTypeStr);
         char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
-        // printf("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
+        DPRINTF("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
         VersionHandle vh(indicator, substantive);
 #ifdef USE_SHARED_DEFAULT_TV
         TruthValue* tv = TruthValue::factory(versionedTvType, versionedTvStr);
@@ -252,14 +255,13 @@ CompositeTruthValue* CompositeTruthValue::clone() const
 
 CompositeTruthValue& CompositeTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)
 {
-    //printf("CompositeTruthValue::operator=()\n");
+    DPRINTF("CompositeTruthValue::operator=()\n");
     const CompositeTruthValue* tv = dynamic_cast<const CompositeTruthValue*>(&rhs);
     if (tv) {
         if (tv != this) { // check if this is the same object first.
-            //printf("operator=() calling clear()\n");
+            DPRINTF("operator=() calling clear()\n");
             clear();
-            //copy(*tv);
-            //printf("operator=() calling copy()\n");
+            DPRINTF("operator=() calling copy()\n");
             copy((const CompositeTruthValue&) rhs);
         }
     } else {
@@ -276,7 +278,7 @@ CompositeTruthValue& CompositeTruthValue::operator=(const TruthValue & rhs) thro
 
 CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue & rhs) throw (RuntimeException)
 {
-    //printf("CompositeTruthValue::operator=(const CompositeTruthValue&)\n");
+    DPRINTF("CompositeTruthValue::operator=(const CompositeTruthValue&)\n");
     return operator=((const TruthValue&) rhs);
 }
 

@@ -46,6 +46,9 @@ extern "C" {
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 AtomTable::AtomTable(bool dsa)
@@ -73,7 +76,7 @@ AtomTable::~AtomTable()
     AtomHashSet::iterator it = atomSet.begin();
 
     while (it != atomSet.end()) {
-        //logger().fine("Removing atom %s (atomSet size = %u)", (*it)->toString().c_str(), atomSet->size());
+        DPRINTF("Removing atom %s (atomSet size = %u)\n", (*it)->toString().c_str(), atomSet->size());
         remove(TLB::getHandle(*it), true);
         it = atomSet.begin();
     }
@@ -83,12 +86,12 @@ AtomTable::~AtomTable()
 bool AtomTable::isCleared(void) const
 {
     if (size != 0) {
-        //printf("AtomTable::size is not 0\n");
+        DPRINTF("AtomTable::size is not 0\n");
         return false;
     }
 
     if (atomSet.size() != 0) {
-        //printf("AtomTable[%d]::atomSet is not empty. size =%d\n", tableId, atomSet->size());
+        DPRINTF("AtomTable[%d]::atomSet is not empty. size =%d\n", tableId, atomSet->size());
         return false;
     }
 
@@ -100,7 +103,7 @@ bool AtomTable::isCleared(void) const
 
     for (unsigned int i = 0; i < iterators.size(); i++) {
         if (iterators[i]->hasNext()) {
-            //printf("iterators[%d] is not empty\n", i);
+            DPRINTF("iterators[%d] is not empty\n", i);
             return false;
         }
     }
@@ -181,7 +184,7 @@ inline unsigned int AtomTable::getNameHash(Atom* atom) const
 
 HandleEntry* AtomTable::findHandlesByGPN(const char* gpnNodeName, VersionHandle vh) const
 {
-    //printf("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);
+    DPRINTF("AtomTable::findHandlesByGPN(%s)\n", gpnNodeName);
     // Get the GroundPredicateNode with such name
     Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
     HandleEntry* result = findHandlesByGPN(gpnHandle);
@@ -209,15 +212,14 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     if (classserver().isA(type, LINK) && 
         (arity == 0 || !handles.empty()))
     {
-        //printf("special case\n");
+        DPRINTF("special case\n");
         bool hasAllHandles = true;
         for (int i = 0; hasAllHandles && i < arity; i++) {
             hasAllHandles = TLB::isValidHandle(handles[i]);
         }
-        //printf("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
+        DPRINTF("hasAllHandles = %d, subclass = %d\n", hasAllHandles, subclass);
         if (hasAllHandles && !subclass) {
-            //printf("building link for lookup: type = %d, "
-            // "handles.size() = %d\n", type, handles.size());
+            DPRINTF("building link for lookup: type = %d, handles.size() = %d\n", type, handles.size());
             Link link(type, handles); // local var on stack, avoid malloc
             AtomHashSet::const_iterator it = atomSet.find(&link);
             Handle h = Handle::UNDEFINED;
@@ -228,7 +230,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
             if (TLB::isValidHandle(h)) {
                 result = new HandleEntry(h);
             }
-            //cprintf(NORMAL, "Returning HandleSet by using atom hash_set!\n");
+            DPRINTF("Returning HandleSet by using atom hash_set!\n");
             return result;
         }
     }
@@ -277,7 +279,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
     // if the empty set counter is not zero, removes them by shrinking the
     // list of sets
     if (countdown > 0) {
-        //printf("newset allocated size = %d\n", (arity - countdown));
+        DPRINTF("newset allocated size = %d\n", (arity - countdown));
         // TODO: Perhaps it's better to simply erase the NULL entries of the sets
         std::vector<HandleEntry*> newset;
         for (int i = 0; i < arity; i++) {
@@ -287,7 +289,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles,
         }
         sets = newset;
     }
-    //printf("newLength = %d\n", newLength);
+    DPRINTF("newLength = %d\n", newLength);
 
     if ((type != ATOM) || (!subclass)) {
         for (int i = 0; i < newLength; i++) {
@@ -344,7 +346,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
     // the name (to avoid hash conflicts) and by the correspondent type
     // in the array of types.
     for (int i = 0; i < arity; i++) {
-        //printf("getHandleSet: arity %d\n", i);
+        DPRINTF("getHandleSet: arity %d\n", i);
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
@@ -385,7 +387,7 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
     // If the empty set counter is not zero, removes them by shrinking
     // the list of sets
     if (countdown > 0) {
-        //printf("newset allocated size = %d\n", (arity - countdown));
+        DPRINTF("newset allocated size = %d\n", (arity - countdown));
         // TODO: Perhaps it's better to simply erase the NULL entries of the sets
         std::vector<HandleEntry*> newset;
         for (int i = 0; i < arity; i++) {
@@ -398,20 +400,18 @@ HandleEntry* AtomTable::getHandleSet(const char** names,
 
 #ifdef DEBUG
     for (int i = 0; i < arity; i++) {
-        printf("arity %d\n:", i);
+        DPRINTF("arity %d\n:", i);
         for (HandleEntry* it = sets[i]; it != NULL; it = it->next) {
-            printf("\t%ld: %s\n", it->handle, TLB::getAtom(it->handle)->toString().c_str());
+            DPRINTF("\t%ld: %s\n", it->handle, TLB::getAtom(it->handle)->toString().c_str());
         }
-        printf("\n");
+        DPRINTF("\n");
     }
 #endif
     // The intersection is made for all non-empty sets, and then is
     // filtered by the optional specified type. Also, if subclasses are
     // not accepted, it will not pass the filter.
-    //printf("getHandleSet: about to call intersection\n");
+    DPRINTF("AtomTable::getHandleSet: about to call intersection\n");
     HandleEntry* set = HandleEntry::intersection(sets);
-    //printf("getHandleSet: about to call filterSet\n");
-    //return  HandleEntry::filterSet(set, type, subclass); // This filter redundant, since all getHandleSet above uses type and subclass
     return  set;
 }
 
@@ -459,7 +459,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     }
 
     if (TLB::isValidHandle(existingHandle)) {
-        //printf("Merging existing Atom with the Atom being added ...\n");
+        DPRINTF("Merging existing Atom with the Atom being added ...\n");
         merge(existingHandle, atom->getTruthValue());
         delete atom;
         return existingHandle;
@@ -470,9 +470,9 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
     size++;
 
     // Adds to the hash_set
-    // logger().debug("Inserting atom %p intoAtomTable (type=%d)\n", atom, atom->getType());
+    DPRINTF("Inserting atom %p intoAtomTable (type=%d)\n", atom, atom->getType());
     atomSet.insert(atom);
-    //logger().debug("[AtomTable::add] atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
+    DPRINTF("AtomTable::add atomSet->insert(%p) => size = %d\n", atom, atomSet->size());
 
     // Checks for null outgoing set members.
     if (lll) {
@@ -514,9 +514,7 @@ Handle AtomTable::add(Atom *atom, bool dont_defer_incoming_links) throw (Runtime
 
     // emit add atom signal
     _addAtomSignal(handle);
-    //if (logger().isDebugEnabled()) logger().debug("Atom added: %d => %s", handle.value(), atom->toString().c_str());
-
-    //logger().fine("[AtomTable] add: %p", handle.value());
+    DPRINTF("Atom added: %d => %s\n", handle.value(), atom->toString().c_str());
 
     return handle;
 }
@@ -736,18 +734,18 @@ bool AtomTable::usesDSA() const
 HandleEntry* AtomTable::getHandleSet(Type type, bool subclass,
                                      VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
-    //printf("About to call AtomTable::getHandleSet()\n");
+    DPRINTF("AtomTable::getHandleSet(Type =%d, bool=%d, AtomTableList=%d)\n", type, subclass, tableId);
+    DPRINTF("About to call AtomTable::getHandleSet()\n");
     HandleEntry* result = this->getHandleSet(type, subclass);
-    //printf("Got handles from AtomTable\n");
+    DPRINTF("Got handles from AtomTable\n");
     result = HandleEntry::filterSet(result, vh);
-    //printf("Returning %p\n", result);
+    DPRINTF("Returning %p\n", result);
     return result;
 }
 
 HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh) const
 {
-    //printf("AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(Type type, Type targetType, bool subclass, bool targetSubclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(type, targetType, subclass, targetSubclass);
     result = HandleEntry::filterSet(result, vh);
     result = HandleEntry::filterSet(result, targetType, targetSubclass, targetVh);
@@ -756,7 +754,7 @@ HandleEntry* AtomTable::getHandleSet(Type type, Type targetType, bool subclass, 
 
 HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(Handle handle, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(handle, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
@@ -764,7 +762,7 @@ HandleEntry* AtomTable::getHandleSet(Handle handle, Type type, bool subclass, Ve
 
 HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(handles, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
@@ -772,7 +770,7 @@ HandleEntry* AtomTable::getHandleSet(const std::vector<Handle>& handles, Type* t
 
 HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(const char* name, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = NULL;
     if (name == NULL) {
         result = getHandleSet(type, subclass, vh);
@@ -785,7 +783,7 @@ HandleEntry* AtomTable::getHandleSet(const char* name, Type type, bool subclass,
 
 HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh) const
 {
-    //printf("AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(const char* targetName, Type targetType, Type type, bool subclass, VersionHandle vh, VersionHandle targetVh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(targetName, targetType, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     result = HandleEntry::filterSet(result, targetName, targetType, targetVh);
@@ -794,7 +792,7 @@ HandleEntry* AtomTable::getHandleSet(const char* targetName, Type targetType, Ty
 
 HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
+    DPRINTF("AtomTable::getHandleSet(const char** names, Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId)\n");
     HandleEntry* result = this->getHandleSet(names, types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
@@ -802,21 +800,11 @@ HandleEntry* AtomTable::getHandleSet(const char** names, Type* types, bool* subc
 
 HandleEntry* AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh) const
 {
-    //printf("AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId\n");
+    DPRINTF("AtomTable::getHandleSet(Type* types, bool* subclasses, Arity arity, Type type, bool subclass, VersionHandle vh, AtomTableList tableId\n");
     HandleEntry* result = this->getHandleSet(types, subclasses, arity, type, subclass);
     result = HandleEntry::filterSet(result, vh);
     return result;
 }
-
-/*
- * If this method is needed it needs to be refactored to use AttentionValue instead of floats
-HandleEntry* AtomTable::getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const{
-    //printf("AtomTable::getHandleSet(float lowerBound, float upperBound, VersionHandle vh, AtomTableList tableId)\n");
-    HandleEntry* result = this->getHandleSet(lowerBound, upperBound);
-    result = HandleEntry::filterSet(result, vh);
-    return result;
-}
-*/
 
 void AtomTable::scrubIncoming(void)
 {

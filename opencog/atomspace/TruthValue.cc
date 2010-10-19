@@ -38,39 +38,35 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/platform.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
-// Static references to special TVs:
-
-//const TruthValue& TruthValue::NULL_TV() = NullTruthValue();
 const TruthValue& TruthValue::NULL_TV()
 {
     static TruthValue* instance = new NullTruthValue();
     return *instance;
 }
 
-//const TruthValue& TruthValue::DEFAULT_TV() = SimpleTruthValue(0,0);
 const TruthValue& TruthValue::DEFAULT_TV()
 {
     static TruthValue* instance = new SimpleTruthValue(0, 0);
     return *instance;
 }
 
-//const TruthValue& TruthValue::TRUE_TV() = SimpleTruthValue(MAX_TRUTH, 1.0e35);
 const TruthValue& TruthValue::TRUE_TV()
 {
     static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, 1.0e35);
     return *instance;
 }
 
-//const TruthValue& TruthValue::FALSE_TV() = SimpleTruthValue(0.0f, 1.0e35);
 const TruthValue& TruthValue::FALSE_TV()
 {
     static TruthValue* instance = new SimpleTruthValue(0.0f, 1.0e35);
     return *instance;
 }
 
-//const TruthValue& TruthValue::TRIVIAL_TV() = SimpleTruthValue(MAX_TRUTH, 0.0f);
 const TruthValue& TruthValue::TRIVIAL_TV()
 {
     static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, 0.0f);
@@ -81,8 +77,6 @@ TruthValue& TruthValue::operator=(const TruthValue & rhs)
 {
     return *this;
 }
-
-// VIRTUAL METHODS:
 
 TruthValue* TruthValue::merge(const TruthValue& other) const
 {
@@ -108,8 +102,6 @@ bool TruthValue::isNullTv() const
     return false;
 }
 
-// STATIC METHODS:
-
 const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException)
 {
     switch (t) {
@@ -129,7 +121,7 @@ const char* TruthValue::typeToStr(TruthValueType t) throw (InvalidParamException
 
 TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamException)
 {
-    //printf("TruthValue::strToType(%s)\n", str);
+    DPRINTF("TruthValue::strToType(%s)\n", str);
     TruthValueType t = SIMPLE_TRUTH_VALUE;
 
     while (t != NUMBER_OF_TRUTH_VALUE_TYPES) {
@@ -143,11 +135,9 @@ TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamExcepti
                                 "TruthValue - Invalid Truth Value type string: '%s'.", str);
 }
 
-// Factories:
-
 TruthValue* TruthValue::factory(const char* fullTvStr)
 {
-    //printf("TruthValue::factory(): fullTvStr = %s\n", fullTvStr);
+    DPRINTF("TruthValue::factory(): fullTvStr = %s\n", fullTvStr);
     char typeStr[MAX_TRUTH_VALUE_NAME_LEN];
     sscanf(fullTvStr, "%s", typeStr);
     TruthValueType type = strToType(typeStr);
@@ -156,7 +146,7 @@ TruthValue* TruthValue::factory(const char* fullTvStr)
 
 TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (InvalidParamException)
 {
-    //printf("TruthValue::factory(): type = %s tvStr = %s\n", TruthValue::typeToStr(type), tvStr);
+    DPRINTF("TruthValue::factory(): type = %s tvStr = %s\n", TruthValue::typeToStr(type), tvStr);
     switch (type) {
     case SIMPLE_TRUTH_VALUE:
         return SimpleTruthValue::fromString(tvStr);

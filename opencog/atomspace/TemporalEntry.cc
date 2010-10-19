@@ -28,6 +28,9 @@
 
 #include <opencog/util/exceptions.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 int TemporalEntry::existingObjects = 0;
@@ -36,8 +39,9 @@ TemporalEntry::TemporalEntry(Temporal* time)
 {
 
     ++existingObjects;
-    // USED TO SEEK MEMORY LEAK
-    //std::cout << "Total temporalEntrys: " << existingObjects << std::endl;
+
+    DPRINTF("Total temporalEntrys: %d\n", existingObjects);
+
     // linked-list with no head cell
     this->time = time;
     next = NULL;
@@ -156,20 +160,20 @@ TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t)
     // The search for invalid elements need to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
-    //printf("TemporalEntry::remove(set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
+    DPRINTF("TemporalEntry::remove(set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
     while ((set != NULL) &&
             (*(set->time) == *t)) {
-//printf("set->time == t. Removing head\n");
+        DPRINTF("set->time == t. Removing head\n");
         buffer = set;
         set = set->next;
         buffer->next = NULL;
         delete buffer;
     }
-    //printf("after first loop: (set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
+    DPRINTF("after first loop: (set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
     if (set == NULL) return NULL;
     TemporalEntry* head = set;
     while (set->next != NULL) {
-        //printf("set->next->time = %s, t = %s, equals = %d\n", set->next->time->toString().c_str(), t->toString().c_str(), set->next->time == t);
+        DPRINTF("set->next->time = %s, t = %s, equals = %d\n", set->next->time->toString().c_str(), t->toString().c_str(), set->next->time == t);
         if (*(set->next->time) == *t) {
             buffer = set->next;
             set->next = set->next->next;
@@ -185,15 +189,15 @@ TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t)
 
 TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t)
 {
-    //printf("TemporalEntry::add(%s,%s)\n", sortedSet->toString().c_str(), t->toString().c_str());
+    DPRINTF("TemporalEntry::add(%s,%s)\n", sortedSet->toString().c_str(), t->toString().c_str());
     TemporalEntry* current = sortedSet;
     TemporalEntry* previous = NULL;
     while (current != NULL) {
         int comparison = TemporalEntry::compare(current->time, t);
-        //printf("Comparison = %d\n", comparison);
+        DPRINTF("Comparison = %d\n", comparison);
         if (comparison == 0) {
             // Already in the sorted list. Do nothing
-            //printf("TemporalEntry::add => Already exists\n");
+            DPRINTF("TemporalEntry::add => Already exists\n");
             return sortedSet;
         }
         if (comparison > 0) {
@@ -209,11 +213,11 @@ TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t)
     if (previous != NULL) {
         // Added in the middle or end of the list
         previous->next = newEntry;
-        //printf("TemporalEntry::add => %s\n", sortedSet->toString().c_str());
+        DPRINTF("TemporalEntry::add => %s\n", sortedSet->toString().c_str());
         return sortedSet;
     } else {
         // Added in the first position
-        //printf("TemporalEntry::add => %s\n", newEntry->toString().c_str());
+        DPRINTF("TemporalEntry::add => %s\n", newEntry->toString().c_str());
         return newEntry;
     }
 }

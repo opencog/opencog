@@ -38,6 +38,9 @@
 
 #include "atom_types.definitions"
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 ClassServer::ClassServer(void)
@@ -62,8 +65,7 @@ Type ClassServer::addType(Type parent, const std::string& name)
     // GroundedSchemeNode, which inherits from several types.
     Type type = getType(name);
     if (type != NOTYPE) {
-        // logger().warn("Type \"%s\" has already been added (%d)", 
-        //              name.c_str(), type);
+        DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
         inheritanceMap[parent][type] = true;
         setParentRecursively(parent, type);
         return type;

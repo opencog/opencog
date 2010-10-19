@@ -34,6 +34,9 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 int HandleEntry::existingObjects = 0;
@@ -818,7 +821,7 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
     if (link) larry = link->getArity();
     for (int i = 0; i < larry && !result; i++) {
         const Atom* target = link->getOutgoingAtom(i);
-        //printf("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+        DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
             if (targetSubclasses) {
@@ -828,13 +831,13 @@ bool matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, V
             }
         }
     }
-    //printf("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
-    //atom->toString().c_str(),
-    //classserver().getTypeName(targetType),
-    //targetSubclasses?"true":"false",
-    //vh.substantive,
-    //INDICATOR_TYPES[vh.indicator],
-    //result?"true":"false");
+    DPRINTF("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
+            atom->toString().c_str(),
+            classserver().getTypeName(targetType),
+            targetSubclasses?"true":"false",
+            vh.substantive,
+            INDICATOR_TYPES[vh.indicator],
+            result?"true":"false");
     return result;
 }
 
@@ -883,10 +886,10 @@ bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, 
     if (link) larry = link->getArity();
     for (int i = 0; i < larry && !result; i++) {
         const Atom* target = link->getOutgoingAtom(i);
-        //printf("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-        //if (classserver().isA(target->getType(), NODE)) {
-        //printf("Node name = %s\n", ((Node*) target)->getName().c_str());
-        //}
+        DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
+        if (classserver().isA(target->getType(), NODE)) {
+            DPRINTF("Node name = %s\n", ((Node*) target)->getName().c_str());
+        }
 
         if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
                 !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
@@ -896,13 +899,13 @@ bool matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, 
             }
         }
     }
-    //printf("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
-    //atom->toString().c_str(),
-    //targetName,
-    //classserver().getTypeName(targetType),
-    //vh.substantive,
-    //INDICATOR_TYPES[vh.indicator],
-    //result?"true":"false");
+    DPRINTF("matchesFilterCriteria (%s, %s, %s, [%p, %s]) returning %s\n",
+            atom->toString().c_str(),
+            targetName,
+            classserver().getTypeName(targetType),
+            vh.substantive,
+            INDICATOR_TYPES[vh.indicator],
+            result?"true":"false");
     return result;
 }
 

@@ -33,6 +33,9 @@
 
 #define W() getU()-getL();
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
@@ -342,7 +345,7 @@ IndefiniteTruthValue* IndefiniteTruthValue::fromString(const char* tvStr)
     float m, l, u, c, d;
     int s;
     sscanf(tvStr, "[%f,%f,%f,%f,%f,%d]", &m, &l, &u, &c, &d, &s);
-    //printf("IndefiniteTruthValue::fromString(%s) => mean = %f, L = %f, U = %f, confLevel = %f, diff = %f, symmetric = %d\n", tvStr, m, l, u, c, d, s);
+    DPRINTF("IndefiniteTruthValue::fromString(%s) => mean = %f, L = %f, U = %f, confLevel = %f, diff = %f, symmetric = %d\n", tvStr, m, l, u, c, d, s);
     IndefiniteTruthValue* result =
         new IndefiniteTruthValue(static_cast<strength_t>(l),
                                  static_cast<strength_t>(u),

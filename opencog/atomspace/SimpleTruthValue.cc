@@ -31,6 +31,9 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 #define KKK 800.0
@@ -163,7 +166,7 @@ SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
     // in dump files, it should be removed. However, toString
     // is being used for debug purposes, so both need to be shown...
     sscanf(tvStr, "[%f,%f=%f]", &mean, &count, &conf);
-    //printf("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
+    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
     return new SimpleTruthValue(static_cast<strength_t>(mean),
                                 static_cast<count_t>(count));
 }

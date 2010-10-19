@@ -31,6 +31,9 @@
 
 #include <opencog/util/platform.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 std::ostream& operator<<(std::ostream& out, const Temporal& t)
@@ -177,7 +180,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     const char* nextToken = timeNodeName;
     unsigned long a = (unsigned long) strtoul(nextToken,NULL,10);
 
-    //    printf("getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
+    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu %lu / %s\n", a, a, (unsigned long)atof(timeNodeName), timeNodeName);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;
@@ -187,7 +190,7 @@ Temporal Temporal::getFromTimeNodeName(const char* timeNodeName)
     }
     unsigned long b = (unsigned long)strtoul(++nextToken,NULL,10);
 
-    // printf("getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
+    DPRINTF("Temporal::getFromTimeNodeName: %ld %lu / %s\n", b, b, nextToken);
 
     while (*nextToken && *nextToken != ':') {
         nextToken++;

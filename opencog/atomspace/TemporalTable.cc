@@ -31,6 +31,9 @@
 
 #include <opencog/util/Logger.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 // Minimal rate (number of entries / pending updates) so that an index table must be re-built
 #define PENDING_UPDATE_RATE_THRESHOLD 8
 #define INITIAL_INDEX_TABLE_SIZE 1
@@ -81,36 +84,33 @@ TemporalTable::~TemporalTable()
 
 void TemporalTable::add(Handle h, const Temporal& t)
 {
-
-//    logger().debug("TemporalTable::add - init.");
-
-    //printf("TemporalTable::add(%p, %s)\n", h, t.toString().c_str());
+    DPRINTF("TemporalTable::add(%p, %s)\n", h, t.toString().c_str());
     Temporal* internal_t = temporalMap->getKey(t);
     if (!internal_t) {
         internal_t = t.clone();
     }
     int oldNumTemporalEntries = temporalMap->getCount();
-    //printf("oldNumTemporalEntries = %d\n", oldNumTemporalEntries);
-    //printf("old sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
+    DPRINTF("oldNumTemporalEntries = %d\n", oldNumTemporalEntries);
+    DPRINTF("old sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
     TemporalEntry* previousEntry = NULL;
     if (indexTableCount > 0) {
         previousEntry = getPreviousTemporalEntry(t);
         if (previousEntry == NULL) {
-            //printf("previous entry is NULL => inserting directly in sortedTemporalList\n");
+            DPRINTF("previous entry is NULL => inserting directly in sortedTemporalList\n");
             sortedTemporalList = TemporalEntry::add(sortedTemporalList, internal_t);
             previousEntry = sortedTemporalList;
         } else {
-            //printf("Previous entry's head is %s => inserting in this entry list\n", previousEntry->time->toString().c_str());
+            DPRINTF("Previous entry's head is %s => inserting in this entry list\n", previousEntry->time->toString().c_str());
             TemporalEntry::add(previousEntry, internal_t);
         }
     } else {
-        //printf("Insertion not using index table\n");
+        DPRINTF("Insertion not using index table\n");
         sortedTemporalList = TemporalEntry::add (sortedTemporalList, internal_t);
     }
-    //printf("sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
+    DPRINTF("sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
     addToMaps(h, internal_t);
     int numTemporalEntries = temporalMap->getCount();
-    //printf("numTemporalEntries = %d\n", numTemporalEntries);
+    DPRINTF("numTemporalEntries = %d\n", numTemporalEntries);
     if (numTemporalEntries != oldNumTemporalEntries) {
         if ((previousEntry != NULL) &&
                 (indexTableCount > 0) &&
@@ -127,7 +127,7 @@ void TemporalTable::add(Handle h, const Temporal& t)
                                        "TemporalTable - Error inserting in TemporalTable (newEntry NULL).");
             }
             temporalIndexTable[indexTableCount++] = newEntry;
-            //printf("indexTableCount++ => %d\n", indexTableCount);
+            DPRINTF("indexTableCount++ => %d\n", indexTableCount);
         } else {
             pendingUpdateCount++;
             int pendingRate = (numTemporalEntries / pendingUpdateCount);
@@ -136,15 +136,12 @@ void TemporalTable::add(Handle h, const Temporal& t)
             }
         }
     }
-    //cprintf(DEBUG, "Affer adding => sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
-//    logger().debug("TemporalTable::add - end.");
-
+    DPRINTF("Affer adding => sortedTemporalList = %s\n", sortedTemporalList->toString().c_str());
 }
 
 HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, TemporalRelationship criterion)
 {
-    //printf("get(h, t = %s, criterion = %s\n", t.toString().c_str(), getTemporalRelationshipStr(criterion));
-//    logger().debug("TemporalTable::getHandle - init.");
+    DPRINTF("TemporalTable::getHandle(h, t = %s, criterion = %s\n", t.toString().c_str(), getTemporalRelationshipStr(criterion));
 
     if (h == Handle::UNDEFINED) {
         return get(t, criterion);
@@ -152,20 +149,20 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
     TemporalEntry* te = handleMap->get(h);
     HandleTemporalPairEntry* result = NULL;
     HandleTemporalPairEntry* tail = NULL;
-    //printf("te = %s\n", te->toString().c_str());
+    DPRINTF("te = %s\n", te->toString().c_str());
     bool searchFinished = false;
     while (te != NULL && !searchFinished) {
         // Check if Temporal matches
         bool matches = false;
         if (t == UNDEFINED_TEMPORAL) {
             matches = true;
-            //printf("t == null => matched\n");
+            DPRINTF("t == null => matched\n");
         } else {
             matches = matchesTimeCriterion(*(te->time), t, criterion, searchFinished);
-            //printf("Called matchesTimeCriterion(T' = %s, T = %s, criterion = %s) => matches = %d, searchFinished = %d\n", te->time->toString().c_str(), t.toString().c_str(), getTemporalRelationshipStr(criterion), matches, searchFinished);
+            DPRINTF("Called matchesTimeCriterion(T' = %s, T = %s, criterion = %s) => matches = %d, searchFinished = %d\n", te->time->toString().c_str(), t.toString().c_str(), getTemporalRelationshipStr(criterion), matches, searchFinished);
         }
         if (matches) {
-            //printf("Matched!\n");
+            DPRINTF("Matched!\n");
             HandleTemporalPairEntry* hte = new HandleTemporalPairEntry(HandleTemporalPair(h, te->time));
             if (t != UNDEFINED_TEMPORAL && (criterion == PREVIOUS_BEFORE_START_OF || criterion == PREVIOUS_BEFORE_END_OF)) {
                 if (result) delete result; // discard previous result
@@ -176,25 +173,23 @@ HandleTemporalPairEntry* TemporalTable::get(Handle h, const Temporal& t, Tempora
                 } else {
                     tail->next = hte;
                 }
-                //printf("result = %s\n", result->toString().c_str());
+                DPRINTF("result = %s\n", result->toString().c_str());
                 tail = hte;
             }
         } else {
-            //printf("Not matched!\n");
+            DPRINTF("Not matched!\n");
         }
         te = te->next;
     }
 
-//    logger().debug("TemporalTable::getHandle - end.");
-    //printf("Returning!\n");
+    DPRINTF("TemporalTable::getHandle - end.\n");
     return result;
 }
 
 HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelationship criterion)
 {
-    //cprintf(NORMAL, "TemporalTable::get(%s, %d)\n", t.toString().c_str(), criterion);
+    DPRINTF("TemporalTable::get(%s, %d)\n", t.toString().c_str(), criterion);
 
-//    logger().debug("TemporalTable::getTemporal - init.");
     HandleTemporalPairEntry* result = NULL;
     if (t == UNDEFINED_TEMPORAL) {
         // get all entries
@@ -220,25 +215,25 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
     } else {
         switch (criterion) {
         case EXACT: {
-            //cprintf(NORMAL, "ExactMatch! temporalMap = %p\n", temporalMap);
+            DPRINTF("ExactMatch! temporalMap = %p\n", temporalMap);
             HandleSet* hs = temporalMap->get((Temporal*) & t);
-            //cprintf(NORMAL, "Got hs = %p\n", hs);
+            DPRINTF("Got hs = %p\n", hs);
             if (hs != NULL) {
                 Temporal* time = NULL; // internal Temporal object (Temporal argument cannot be used in the result)
                 // Build the HandleTemporalPairEntry
                 HandleSetIterator* itr = hs->keys();
-                //cprintf(NORMAL, "Got hs iterator = %p\n", itr);
+                DPRINTF("Got hs iterator = %p\n", itr);
                 while (itr->hasNext()) {
-                    //cprintf(NORMAL, "hs iterator has next\n");
+                    DPRINTF("hs iterator has next\n");
                     Handle handle = itr->next();
-                    //cprintf(NORMAL, "Got handle = %p\n", handle);
+                    DPRINTF("Got handle = %p\n", handle);
                     if (time == NULL) {
-                        //cprintf(NORMAL, "time is NULL. Creating Temporal object\n");
+                        DPRINTF("time is NULL. Creating Temporal object\n");
                         // Find the internal Temporal object to put in the result list
                         TemporalEntry* te = handleMap->get(handle);
-                        //cprintf(NORMAL, "Got TemporalEntry\n");
+                        DPRINTF("Got TemporalEntry\n");
                         while (te != NULL) {
-                            //cprintf(NORMAL, "Checking next Temporal entry\n");
+                            DPRINTF("Checking next Temporal entry\n");
                             if (TemporalEntry::compare(&t, te->time) == 0) {
                                 time = te->time;
                                 break;
@@ -250,15 +245,15 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                         throw RuntimeException(TRACE_INFO,
                                                "TemporalTable - Could not find internal Temporal to insert into HandleTemporalPairEntry result.");
                     }
-                    //cprintf(NORMAL, "About to concatenate handle\n");
+                    DPRINTF("About to concatenate handle\n");
                     HandleTemporalPairEntry* newEntry = new HandleTemporalPairEntry(handle, time);
-                    //cprintf(NORMAL, "new Entry = %p\n", newEntry);
+                    DPRINTF("new Entry = %p\n", newEntry);
                     result = HandleTemporalPairEntry::concatenation(newEntry, result);
-                    //cprintf(NORMAL, "Handle concatenated result = %p\n", result);
-                    //cprintf(NORMAL, "result's head = (%p,%s)\n", result->handleTime->getHandle(), result->handleTime->getTemporal()->toString().c_str());
+                    DPRINTF("Handle concatenated result = %p\n", result);
+                    DPRINTF("result's head = (%p,%s)\n", result->handleTime->getHandle(), result->handleTime->getTemporal()->toString().c_str());
                 }
                 delete itr;
-                //cprintf(NORMAL, "hs iteration finished\n");
+                DPRINTF("hs iteration finished\n");
             }
             break;
         } // EXACT
@@ -275,13 +270,13 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                 }
                 // Now iterates on the list until finds the upper limit
                 while (upperLimitEntry != NULL) {
-                    // printf("Checking lowerBound of %s ...", upperLimitEntry->time->toString().c_str());
-                    // printf(" (upperBound of t = %ld) ", t.getUpperBound());
+                    DPRINTF("Checking lowerBound of %s ...", upperLimitEntry->time->toString().c_str());
+                    DPRINTF(" (upperBound of t = %ld) ", t.getUpperBound());
                     if (upperLimitEntry->time->getLowerBound() > t.getUpperBound()) {
-                        //printf("failed\n");
+                        DPRINTF("failed\n");
                         break;
                     }
-                    //printf("ok\n");
+                    DPRINTF("ok\n");
                     upperLimitEntry = upperLimitEntry->next;
                 }
                 // Here, we know that all entries from the beggining to the upperLimitEntry satisfy (time->lowerBound <= t.upperBound).
@@ -295,8 +290,8 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                         HandleSet* hs = temporalMap->get(currentEntry->time);
                         // Build the HandleTemporalPairEntry
                         HandleSetIterator* itr = hs->keys();
-                        //printf("Handles for time %s:\n", currentEntry->time->toString().c_str());
-                        //printf("=> %s:\n", hs->toString().c_str());
+                        DPRINTF("Handles for time %s:\n", currentEntry->time->toString().c_str());
+                        DPRINTF("=> %s:\n", hs->toString().c_str());
                         while (itr->hasNext()) {
                             HandleTemporalPairEntry* newEntry = new HandleTemporalPairEntry(itr->next(), currentEntry->time);
                             if (result) {
@@ -323,13 +318,13 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                 bool matches = false;
                 if (t == UNDEFINED_TEMPORAL) {
                     matches = true;
-                    //printf("t == null => matched\n");
+                    DPRINTF("t == null => matched\n");
                 } else {
                     matches = matchesTimeCriterion(*(te->time), t, criterion, searchFinished);
-                    //printf("Called matchesTimeCriterion(T' = %s, T = %s, criterion = %s) => matches = %d, searchFinished = %d\n", te->time->toString().c_str(), t.toString().c_str(), getTemporalRelationshipStr(criterion), matches, searchFinished);
+                    DPRINTF("Called matchesTimeCriterion(T' = %s, T = %s, criterion = %s) => matches = %d, searchFinished = %d\n", te->time->toString().c_str(), t.toString().c_str(), getTemporalRelationshipStr(criterion), matches, searchFinished);
                 }
                 if (matches) {
-                    //printf("Matched!\n");
+                    DPRINTF("Matched!\n");
                     if (t != UNDEFINED_TEMPORAL && (criterion == PREVIOUS_BEFORE_START_OF || criterion == PREVIOUS_BEFORE_END_OF)) {
                         // discard previous result and get the new matching result.
                         previousTime = te->time;
@@ -373,27 +368,24 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
         }
     }
 
-//    logger().debug("TemporalTable::getTemporal - end.");
-
-    //cprintf(NORMAL, "TemporalTable::get() returning...\n");fflush(stdout);
+    DPRINTF("TemporalTable::get() returning...\n");fflush(stdout);
     return result;
 }
 
 bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion)
 {
-//printf("TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion)\n");
-//    logger().debug("TemporalTable::removeHandle - init.");
+    DPRINTF("TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship criterion)\n");
 
     if (h == Handle::UNDEFINED) {
         return remove(t, criterion);
     }
     std::set<Temporal*> toBeDeleted;
-    //printf("TemporalTable::remove(handle)\n");
+    DPRINTF("TemporalTable::remove(handle)\n");
     TemporalEntry* te = handleMap->get(h);
     TemporalEntry* tailTe = tailHandleMap->get(h);
 
     TemporalEntry* currentTe = te;
-    //printf("te = %s\n", te->toString().c_str());
+    DPRINTF("te = %s\n", te->toString().c_str());
     bool searchFinished = false;
     bool result = false;
     TemporalEntry* previousTe = NULL;
@@ -402,13 +394,13 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         bool matches = false;
         if (t == UNDEFINED_TEMPORAL) {
             matches = true;
-            //printf("t == null => matched\n");
+            DPRINTF("t == null => matched\n");
         } else {
             matches = matchesTimeCriterion(*(currentTe->time), t, criterion, searchFinished);
         }
         if (matches) {
             result = true;
-            //printf("Matched!\n");
+            DPRINTF("Matched!\n");
             if (t != UNDEFINED_TEMPORAL && (criterion == PREVIOUS_BEFORE_START_OF || criterion == PREVIOUS_BEFORE_END_OF)) {
                 // discard previous result and get the new matching result.
                 previousTe = currentTe;
@@ -416,14 +408,14 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
             } else {
                 HandleSet* hs = temporalMap->get(currentTe->time);
                 hs->remove(h);
-                //printf("H removed from handle set!\n");
+                DPRINTF("H removed from handle set!\n");
                 if (hs->getSize() == 0) {
-                    //printf("Handle set became empty!\n");
+                    DPRINTF("Handle set became empty!\n");
                     temporalMap->remove(currentTe->time);
                     delete hs;
-                    //printf("Removed from temporalMap!\n");
+                    DPRINTF("Removed from temporalMap!\n");
                     removeFromSortedEntries(*(currentTe->time));
-                    //printf("Removed from sorted entries!\n");
+                    DPRINTF("Removed from sorted entries!\n");
                     toBeDeleted.insert(currentTe->time);
                 }
                 TemporalEntry* tmpTe = currentTe;
@@ -438,10 +430,10 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
 
 
 
-                //printf("Removed from handleMap entries!\n");
+                DPRINTF("Removed from handleMap entries!\n");
             }
         } else {
-            //printf("Not matched!\n");
+            DPRINTF("Not matched!\n");
             currentTe = currentTe->next;
         }
     }
@@ -449,43 +441,40 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         Temporal* previousTime = previousTe->time;
         HandleSet* hs = temporalMap->get(previousTime);
         hs->remove(h);
-        //printf("H removed from handle set!\n");
+        DPRINTF("H removed from handle set!\n");
         if (hs->getSize() == 0) {
-            //printf("Handle set became empty!\n");
+            DPRINTF("Handle set became empty!\n");
             temporalMap->remove(previousTime);
             delete hs;
-            //printf("Removed from temporalMap!\n");
+            DPRINTF("Removed from temporalMap!\n");
             removeFromSortedEntries(*(previousTime));
-            //printf("Removed from sorted entries!\n");
+            DPRINTF("Removed from sorted entries!\n");
             toBeDeleted.insert(previousTime);
         }
         te = TemporalEntry::remove(te, previousTime);
-        //printf("Removed from handleMap entries!\n");
+        DPRINTF("Removed from handleMap entries!\n");
     }
     handleMap->remove(h);
-    //printf("HandleMap entries removed!\n");
+    DPRINTF("HandleMap entries removed!\n");
     if (te != NULL) {
         // Replace te in the handleMap
         handleMap->add(h, te);
-        //printf("HandleMap entries reinserted!\n");
+        DPRINTF("HandleMap entries reinserted!\n");
     }
     // If empty temporal list => already removed from handleMap
     for (std::set<Temporal*>::iterator it = toBeDeleted.begin(); it != toBeDeleted.end(); it++) {
         delete *it;
     }
 
-//    logger().debug("TemporalTable::rwmoveHandle - emd.");
+    DPRINTF("TemporalTable::remove - end.\n");
 
     return result;
 }
 
 bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
 {
-
-//    logger().debug("TemporalTable::removeTemporal - init.");
-
     bool result = false;
-    //printf("TemporalTable::remove(%s, %d)\n", t.toString().c_str(), criterion);
+    DPRINTF("TemporalTable::remove(%s, %d)\n", t.toString().c_str(), criterion);
     if (t == UNDEFINED_TEMPORAL) {
         // remove all entries
         TemporalEntry* te = sortedTemporalList;
@@ -498,18 +487,18 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
     } else {
         switch (criterion) {
         case EXACT: {
-            //printf("ExactMatch!\n");
+            DPRINTF("ExactMatch!\n");
             Temporal* internal_t = temporalMap->getKey(t);
             if (internal_t) {
                 result = true;
                 HandleSet* hs = temporalMap->remove(internal_t);
-                //cprintf(NORMAL, "Got hs = %p\n", hs);
+                DPRINTF("Got hs = %p\n", hs);
                 HandleSetIterator* itr = hs->keys();
-                //cprintf(NORMAL, "Got hs iterator = %p\n", itr);
+                DPRINTF("Got hs iterator = %p\n", itr);
                 while (itr->hasNext()) {
-                    //cprintf(NORMAL, "hs iterator has next\n");
+                    DPRINTF("hs iterator has next\n");
                     Handle handle = itr->next();
-                    //cprintf(NORMAL, "Got handle = %p\n", handle);
+                    DPRINTF("Got handle = %p\n", handle);
                     TemporalEntry* te = handleMap->remove(handle);
                     TemporalEntry* tailTe = tailHandleMap->get(handle);
                     //remove from tailHandleMap
@@ -523,7 +512,7 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
                     }
                 }
                 delete itr;
-                //cprintf(NORMAL, "hs iteration finished\n");
+                DPRINTF("hs iteration finished\n");
                 delete hs;
                 removeFromSortedEntries(t);
                 delete internal_t;
@@ -532,7 +521,7 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
         } // EXACT
         case OVERLAPS: {
             if (sortedTemporalList != NULL) {
-                //printf("Non ExactMatch!\n");
+                DPRINTF("Non ExactMatch!\n");
                 // Get all Temporal entries that overlaps the given time interval of t
                 // => all Temporal time where (time->lowerBound <= t.upperBound) && (time->upperBound >= t.lowerBound)
 
@@ -544,13 +533,13 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
                 }
                 // Now iterates on the list until finds the upper limit
                 while (upperLimitEntry != NULL) {
-                    // printf("Checking lowerBound of %s ...", upperLimitEntry->time->toString().c_str());
-                    // printf(" (upperBound of t = %ld) ", t.getUpperBound());
+                    DPRINTF("Checking lowerBound of %s ...", upperLimitEntry->time->toString().c_str());
+                    DPRINTF(" (upperBound of t = %ld) ", t.getUpperBound());
                     if (upperLimitEntry->time->getLowerBound() > t.getUpperBound()) {
-                        //printf("failed\n");
+                        DPRINTF("failed\n");
                         break;
                     }
-                    //printf("ok\n");
+                    DPRINTF("ok\n");
                     upperLimitEntry = upperLimitEntry->next;
                 }
                 // Here, we know that all entries from the beggining to the upperLimitEntry satisfy (time->lowerBound <= t.upperBound).
@@ -573,63 +562,10 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
             }
             break;
         } // OVERLAPS
-        /* 
-         * Comment from Nil Geisweiller
-         * That case is not correct, it makes the wrong assumptions
-         * 1) any entry lower than t can potentially include t
-         * 2) checking time->upperBound <= t.upperBound is simply not in accordance with
-         *    the definition of INCLUDES
-         * For those reason I comment it and it uses instead the default case. Note I don't
-         * think one can write a particular optimization with the considered order 
-         * (start time of temporal) and forward list (next element and not previous).
-         * So the default case is already the best wait to handle INCLUDES
-        case INCLUDES: {
-            if (sortedTemporalList != NULL) {
-                //printf("Non ExactMatch!\n");
-                // Get all Temporal entries that are included by the given time interval of t
-                // => all Temporal time where (time->lowerBound >= t.lowerBound) && (time->upperBound <= t.upperBound)
-        
-                // Eliminates the linear lower bound tests in the beggining of the list 
-                // by using binary search to find the lower limit in the list. 
-                TemporalEntry* lowerLimitEntry = getPreviousTemporalEntry(t);
-                if (lowerLimitEntry == NULL) {
-                    lowerLimitEntry = sortedTemporalList;
-                }
-                // Now iterates on the list until finds the lower limit
-                while (lowerLimitEntry != NULL) {
-                    // printf("Checking lowerBound of %s ...", lowerLimitEntry->time->toString().c_str());
-                    // printf(" (lowerBound of t = %ld) ", t.getLowerBound());
-                    if (lowerLimitEntry->time->getLowerBound() >= t.getLowerBound()) {
-                        //printf("ok\n");
-                        break;                
-                    }
-                    //printf("failed\n");
-                    lowerLimitEntry = lowerLimitEntry->next;
-                }    
-                // Here, we know that all entries from the lowerLimitEntry to the end satisfy (time->lowerBound >= t.lowerBound).
-                // Now, check (time->upperBound <= t.upperBound) for each one of such entries
-                TemporalEntry* currentEntry = lowerLimitEntry;
-                while (currentEntry != NULL) {
-                    // Check if current entry matches the interval by checking the upperBound of each entry.
-                    if (currentEntry->time->getUpperBound() <= t.getUpperBound()) {
-                        result = true;
-                        // Matched! Gets the time to be removed.
-                        Temporal* time = currentEntry->time;
-                        // Gets the next time entry to check before removing the current one
-                        currentEntry = currentEntry->next;
-                        // Removes the matched time using this same method, but with exact match
-                        remove(*time); // TODO: Make this removal better, if performance is an issue.
-                    } else {
-                        currentEntry = currentEntry->next;
-                    }
-                }
-            }
-            break;
-        } // INCLUDES
-        */
+        case INCLUDES:
         default: {
             TemporalEntry* te = sortedTemporalList;
-            //printf("Default: te = %s\n", te->toString().c_str());
+            DPRINTF("Default: te = %s\n", te->toString().c_str());
             bool searchFinished = false;
             Temporal* previousTime = NULL;
             while (te != NULL && !searchFinished) {
@@ -643,7 +579,7 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
                         previousTime = time;
                     } else {
                         remove(*time); // TODO: Make this removal better, if performance is an issue.
-                        //printf("After removal: te = %s\n", te->toString().c_str());
+                        DPRINTF("After removal: te = %s\n", te->toString().c_str());
                     }
                 }
             }
@@ -654,44 +590,40 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
         }
         } // switch (criterion)
     }
-//    logger().debug("TemporalTable::removeTemporal - end.");
+    
+    DPRINTF("TemporalTable::remove - end.\n");
 
     return result;
 }
 
 void TemporalTable::removeFromSortedEntries(const Temporal& t)
 {
-
-//    logger().debug("TemporalTable::removeFrom - init.");
-    //printf("TemporalTable::removeFromSortedEntries(%s)\n", t.toString().c_str());
+    DPRINTF("TemporalTable::removeFromSortedEntries(%s)\n", t.toString().c_str());
     // First check if corresponding te is in the index table
     int pos = getTemporalIndexTablePos(t);
-    //printf("Index table pos = %d!\n", pos);
+    DPRINTF("Index table pos = %d!\n", pos);
     if (pos >= 0 && TemporalEntry::compare(temporalIndexTable[pos]->time, &t) == 0) {
         TemporalEntry* entry = temporalIndexTable[pos];
-        //printf("Temporal t found in index!\n");
+        DPRINTF("Temporal t found in index!\n");
         if (entry->next != NULL) {
             // TODO: THIS IS VERY BAD WHEN REMOVING TEMPORAL OBJECTS IN CRONOLOGICAL ASCENDENT ORDER: EACH REMOVAL ONE MORE REPLACEMENT IS NEEDED.
-            //printf("TemporalEntry has next => replace all its ocurrences by the its next in index table!\n");
+            DPRINTF("TemporalEntry has next => replace all its ocurrences by the its next in index table!\n");
             pos = replaceIndexTablePosition(pos, entry->next);
         } else {
-            //cprintf(NORMAL, "TemporalEntry has no next => So, just remove all positions with this entry from the index!\n");
+            DPRINTF("TemporalEntry has no next => So, just remove all positions with this entry from the index!\n");
             // Look backward for this entry
             pos--;
             while (pos >= 0 && temporalIndexTable[pos] == entry) {
                 pos--;
             }
             indexTableCount = pos + 1;
-            //printf("indexTableCount = pos+1 => %d\n", indexTableCount);
+            DPRINTF("indexTableCount = pos+1 => %d\n", indexTableCount);
         }
     }
-    //printf("Previous pos = %d!\n", pos);
+    DPRINTF("Previous pos = %d!\n", pos);
     // Now removes the entry from the linked list
     TemporalEntry* previousTe;
     TemporalEntry* currentTe;
-//    while(pos >= 0 && TemporalEntry::compare(temporalIndexTable[pos]->time,&t) >= 0) {
-//       pos--;
-//    }
     if (pos < 0) {
         previousTe = NULL;
         currentTe = sortedTemporalList;
@@ -699,24 +631,24 @@ void TemporalTable::removeFromSortedEntries(const Temporal& t)
         previousTe = temporalIndexTable[pos];
         currentTe = previousTe->next;
     }
-    //printf("Looking for TemporalEntry to be removed in %s!\n", currentTe->toString().c_str());
+    DPRINTF("Looking for TemporalEntry to be removed in %s!\n", currentTe->toString().c_str());
     while (currentTe != NULL) {
         int compare = TemporalEntry::compare(currentTe->time, &t);
         if (compare == 0) {
-            //printf("Found TemporalEntry to be removed!\n");
+            DPRINTF("Found TemporalEntry to be removed!\n");
             // Found the point to remove
             if (previousTe != NULL) {
-                //printf("Has previous entry. Just update its next!\n");
+                DPRINTF("Has previous entry. Just update its next!\n");
                 previousTe->next = currentTe->next;
             } else {
-                //printf("Has no previous entry. Update sorted list!\n");
+                DPRINTF("Has no previous entry. Update sorted list!\n");
                 sortedTemporalList = currentTe->next;
             }
             currentTe->next = NULL;
-            //printf("TemporalEntry removed!\n");
+            DPRINTF("TemporalEntry removed!\n");
             break;
         } else if (compare > 0) {
-            //printf("TemporalEntry not found!\n");
+            DPRINTF("TemporalEntry not found!\n");
             // Not found
             return;
         }
@@ -727,7 +659,7 @@ void TemporalTable::removeFromSortedEntries(const Temporal& t)
     if (currentTe != NULL) {
         if ((indexTableCount > 0) && (currentTe == temporalIndexTable[indexTableCount-1])) {
             indexTableCount--;
-            //cprintf(DEBUG, "indexTableCount-- => %d\n", indexTableCount);
+            DPRINTF("indexTableCount-- => %d\n", indexTableCount);
         } else {
             pendingUpdateCount++;
             int numTemporalEntries = temporalMap->getCount();
@@ -738,13 +670,12 @@ void TemporalTable::removeFromSortedEntries(const Temporal& t)
         }
         delete currentTe;
     }
-//    logger().debug("TemporalTable::removeFrom - end.");
+    DPRINTF("TemporalTable::removeFromSortedEntries - end.\n");
 }
 
 int TemporalTable::replaceIndexTablePosition(int pos, TemporalEntry* newEntry)
 {
-
-//    logger().debug("TemporalTable::replaceIndex - init.");
+    DPRINTF("TemporalTable::replaceIndexTablePosition - init.\n");
 
     TemporalEntry* oldEntry = temporalIndexTable[pos];
     temporalIndexTable[pos] = newEntry;
@@ -760,15 +691,16 @@ int TemporalTable::replaceIndexTablePosition(int pos, TemporalEntry* newEntry)
         temporalIndexTable[bPos] = newEntry;
         bPos--;
     }
-//    logger().debug("TemporalTable::replaceIndex - end.");
+
+    DPRINTF("TemporalTable::replaceIndexTablePosition - end.\n");
     return bPos;
 }
 
 void TemporalTable::addToMaps(Handle h, Temporal* t)
 {
-    // Add to handleMap
-//    logger().debug("TemporalTable::addToMaps - init");
+    DPRINTF("TemporalTable::addToMaps - init.\n");
 
+    // Add to handleMap
     TemporalEntry* timeEntry;
     if (handleMap->contains(h)) {
         timeEntry = handleMap->remove(h);
@@ -780,14 +712,14 @@ void TemporalTable::addToMaps(Handle h, Temporal* t)
     if (tailHandleMap->contains(h)) {
         tailTimeEntry = tailHandleMap->remove(h);
         if (TemporalEntry::compare(t, tailTimeEntry->time) > 0) {
-//      logger().debug("TemporalTable::addToMaps - using tail");
+            DPRINTF("TemporalTable::addToMaps - using tail.\n");
             TemporalEntry::add(tailTimeEntry, t);
             tailTimeEntry = tailTimeEntry->last();
         } else {
             timeEntry = TemporalEntry::add(timeEntry, t);
         }
     } else {
-//     logger().fine("TemporalTable - addToMaps: set tail");
+        DPRINTF("TemporalTable::addToMaps - set tail.\n");
         timeEntry = TemporalEntry::add(timeEntry, t);
         tailTimeEntry = timeEntry->last();
     }
@@ -806,20 +738,17 @@ void TemporalTable::addToMaps(Handle h, Temporal* t)
     handleSet->add(h);
     temporalMap->add(t, handleSet);
 
-//    logger().debug("TemporalTable::addToMaps - end");
-
+    DPRINTF("TemporalTable::addToMaps - end.\n");
 }
 
 void TemporalTable::updateIndexTable(int numEntries)
 {
-
-//    logger().debug("TemporalTable::updateIndex - init.");
-    //cprintf(NORMAL, "TemporalTable::updateIndexTable(%d)\n", numEntries);
+    DPRINTF("TemporalTable::updateIndexTable(%d)\n", numEntries);
     if ((numEntries > indexTableSize) || (numEntries < indexTableSize / 4)) {
         // needs to allocate more memory or free unecessary memory
         delete[](temporalIndexTable);
         indexTableSize = numEntries * 2;
-        //cprintf(NORMAL, "indexTableSize => %d\n", indexTableSize);
+        DPRINTF("indexTableSize => %d\n", indexTableSize);
         temporalIndexTable = new TemporalEntry*[indexTableSize];
     }
     TemporalEntry* current = sortedTemporalList;
@@ -829,51 +758,51 @@ void TemporalTable::updateIndexTable(int numEntries)
         current = current->next;
     }
     indexTableCount = i;
-    //printf("indexTableCount = i => %d\n", indexTableCount);
+    DPRINTF("indexTableCount = i => %d\n", indexTableCount);
     if (i != numEntries) {
         logger().warn("WARN: Inconsistent sizes (sortedTemporalList => %d, numEntries => %d)\n", i, numEntries);
     }
     pendingUpdateCount = 0;
-//    logger().debug("TemporalTable::updateIndex - end.");
+    DPRINTF("TemporalTable::updateIndexTable - end.\n");
 }
 
 
 int TemporalTable::getTemporalIndexTablePos(const Temporal& t)
 {
-//    logger().debug("TemporalTable::updateIndexPs - init.");
+    DPRINTF("TemporalTable::getTemporalIndexTablePos - init.\n");
 
     // Look up at index table, using binary search
     int low = 0;
     int up = indexTableCount - 1;
     do {
         int pos = (up + low) / 2;
-        //cprintf(NORMAL, "getTemporalIndexTablePos(): low = %d, up = %d, pos = %d\n", low, up, pos);
+        DPRINTF("getTemporalIndexTablePos(): low = %d, up = %d, pos = %d\n", low, up, pos);
         int compare = TemporalEntry::compare(temporalIndexTable[pos]->time, &t);
         if (compare > 0) {
             up = pos - 1;
         } else if (compare < 0) {
             low = pos + 1;
         } else {
-            //cprintf(NORMAL, "getTemporalIndexTablePos(): key found!\n");
+            DPRINTF("getTemporalIndexTablePos(): key found!\n");
             return pos;
         }
     } while (low <= up);
-    //cprintf(NORMAL, "getTemporalIndexTablePos(): key not found!\n");
-//    logger().debug("TemporalTable::updateIndexPs - end.");
+    DPRINTF("getTemporalIndexTablePos(): key not found!\n");
     return up;
 }
 
 TemporalEntry* TemporalTable::getPreviousTemporalEntry(const Temporal& t)
 {
-//    logger().debug("TemporalTable::getPrevious - init.");
+    DPRINTF("TemporalTable::getPreviousTemporalEntry init\n");
 
     int pos = getTemporalIndexTablePos(t);
-    //cprintf(NORMAL, "Got pos = %d for Temporal %s\n", pos, t.toString().c_str());
+    DPRINTF("Got pos = %d for Temporal %s\n", pos, t.toString().c_str());
     if (pos >= 0 && TemporalEntry::compare(temporalIndexTable[pos]->time, &t) == 0) {
         // key found. Get previous pos
         pos--;
     }
-//    logger().debug("TemporalTable::getPrevious - end.");
+
+    DPRINTF("TemporalTable::getPreviousTemporalEntry end\n");
     if (pos < 0) {
         return NULL;
     } else {

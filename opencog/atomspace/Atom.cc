@@ -44,6 +44,8 @@
 #include <opencog/util/platform.h>
 
 //#define USE_SHARED_DEFAULT_TV
+//#define DPRINTF printf
+#define DPRINTF(...)
 
 #undef Type
 
@@ -139,11 +141,6 @@ void Atom::setTruthValue(const TruthValue& tv)
 #endif
 }
 
-//float Atom::getImportance() {
-
-//    return ShortFloatOps::getValue(&importance);
-//}
-
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
 {
     if (new_av == attentionValue) return;
@@ -173,7 +170,7 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
 void Atom::setOutgoingSet(const std::vector<Handle>& outgoingVector)
    throw (RuntimeException)
 {
-    //printf("Atom::setOutgoingSet\n");
+    DPRINTF("Atom::setOutgoingSet\n");
     if (atomTable != NULL) {
         throw RuntimeException(TRACE_INFO, 
            "Cannot change the OutgoingSet of an atom already "
@@ -232,8 +229,7 @@ void Atom::addIncomingHandle(Handle handle)
 
 void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
 {
-
-    //printf("Entering Atom::removeIncomingHandle(): handle:\n%s\nincoming:\n%s\n", TLB::getAtom(handle)->toShortString().c_str(), incoming->toString().c_str());
+    DPRINTF("Entering Atom::removeIncomingHandle(): handle:\n%s\nincoming:\n%s\n", TLB::getAtom(handle)->toShortString().c_str(), incoming->toString().c_str());
     HandleEntry* current = incoming;
     // checks if incoming set is empty
     if (incoming == NULL) {
@@ -262,7 +258,7 @@ void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
         foundit->next = NULL;
         delete foundit;
     }
-    //printf("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
+    DPRINTF("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
 }
 
 bool Atom::getFlag(int flag) const
@@ -303,7 +299,7 @@ HandleEntry *Atom::getNeighbors(bool fanin, bool fanout, Type desiredLinkType, b
     for (HandleEntry *h = getIncomingSet(); h != NULL; h = h ->next) {
         Link *link = dynamic_cast<Link*>(TLB::getAtom(h->handle));
         Type linkType = link->getType();
-        //printf("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
+        DPRINTF("linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
             int linkArity = link->getArity();
             for (int i = 0; i < linkArity; i++) {

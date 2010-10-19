@@ -39,6 +39,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
+//#define DPRINTF printf
+#define DPRINTF(...)
+
 using namespace opencog;
 
 #ifndef PUT_OUTGOING_SET_IN_LINKS
@@ -60,11 +63,10 @@ void Link::init(const std::vector<Handle>& outgoingVector)
 
 Link::~Link() throw ()
 {
-    //printf("Link::~Link() begin\n");
-//    fprintf(stdout, "Deleting link:\n%s\n", this->toString().c_str());
-//    fflush(stdout);
+    DPRINTF("Link::~Link() begin\n");
+    DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
     delete trail;
-    //printf("Link::~Link() end\n");
+    DPRINTF("Link::~Link() end\n");
 }
 
 void Link::setTrail(Trail* t)
@@ -123,8 +125,6 @@ std::string Link::toString(void) const
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        // Type t = TLB::getAtom(outgoing[i])->getType();
-        //logger().fine("toString() => type of outgoing[%d] = %d", i, t);
         Handle h = outgoing[i];
         if (TLB::isValidHandle(h)) {
             Atom *a = TLB::getAtom(h);
@@ -278,7 +278,7 @@ class HandleComparison
 void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
    throw (RuntimeException)
 {
-    //printf("Atom::setOutgoingSet\n");
+    DPRINTF("Atom::setOutgoingSet\n");
     if (atomTable != NULL) {
         throw RuntimeException(TRACE_INFO, 
            "Cannot change the OutgoingSet of an atom already "
