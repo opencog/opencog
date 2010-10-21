@@ -40,7 +40,7 @@ public:
         : Rule(_asw,false,false,"CustomCrispUnificationRule"),
         hForAllLink(_hForAllLink)
     {
-        //append the pHandle of the FOEALL_LINK so that the rule name is unique
+        //append the pHandle of the FORALL_LINK so that the rule name is unique
         name += boost::lexical_cast<std::string>(hForAllLink); 
         inputFilter.push_back(meta(new tree<Vertex>(mva((pHandle)ATOM))));
     }

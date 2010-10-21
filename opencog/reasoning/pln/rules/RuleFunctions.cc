@@ -578,14 +578,15 @@ void insert_with_consistency_check_bindingsVTreeT(map<pHandle, vtree>& m,
 
 Btr<set<pHandle> > ForAll_handles;
 
+
 Btr<ModifiedBoundVTree> FindMatchingUniversal(meta target,
                                               pHandle ForAllLink,
                                               AtomSpaceWrapper* asw)
 {
     cprintf(4,"FindMatchingUniversal...");
     
-    // candidate is a ModifiedVTree containing
-    // the body of the ForAll with all its variables replaced by FW_VAR
+    // candidate is a ModifiedVTree containing the body of the ForAll
+    // with all its variables replaced by FW_VAR
     Btr<ModifiedVTree> candidate =
         convertToModifiedVTree(ForAllLink, 
                                convert_all_var2fwvar

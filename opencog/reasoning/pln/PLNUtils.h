@@ -666,7 +666,31 @@ bool substitutableTo(pHandle from, pHandle to,
                      std::map<pHandle, pHandle>& bindings);
 
 bool IsIdenticalHigherConfidenceAtom(pHandle a, pHandle b);
-}} // namespace opencog::pln
+
+/**
+ * ostream functions
+ */
+template<typename Out>
+Out& operator<<(Out& out, const std::pair<pHandle, vtree>& pv) {
+    return out << pv.first << " => " << pv.second << std::endl;
+}
+template<typename Out>
+Out& operator<<(Out& out, const bindingsVTreeT& bvt) {
+    return ostreamContainer(out, bvt, "\n");
+}
+template<typename Out>
+Out& operator<<(Out& out, const ModifiedVTree& mvt) {
+    out << "original_handle = " << mvt.original_handle << std::endl;
+    return out << static_cast<vtree>(mvt) << std::endl;
+}
+template<typename Out>
+Out& operator<<(Out& out, const ModifiedBoundVTree& mbvt) {
+    out << static_cast<ModifiedVTree>(mbvt) << std::endl;
+    return out << mbvt.bindings << std::endl;
+}
+
+} // ~namespace pln
+} // namespace opencog
 
 
 const int __LLEVEL = 4;

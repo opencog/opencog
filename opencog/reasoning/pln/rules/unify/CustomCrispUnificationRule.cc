@@ -62,13 +62,15 @@ CustomCrispUnificationRule::attemptDirectProduction(meta outh, bool fresh)
 
     foreach(phvt vp, *i->bindings)
     {
-        // Never bind a VariableNode to ATOM. That cannot be used in a real Atom.
-        // This check can't just be done on outh (the target), because that would stop ATOM in
-        // the target from matching to something _valid_ in the ForAllLink. Though it doesn't actually
-        // support that anyway, see the following.
-        //! @todo Note that if target contains ATOM, the algo won't fill in something from
-        //! the ForAllLink that was more specific.
-        //! This would be useful for FC.
+        // Never bind a VariableNode to ATOM. That cannot be used in a
+        // real Atom.  This check can't just be done on outh (the
+        // target), because that would stop ATOM in the target from
+        // matching to something _valid_ in the ForAllLink. Though it
+        // doesn't actually support that anyway, see the following.
+        //
+        //! @todo Note that if target contains ATOM, the algo won't
+        //! fill in something from the ForAllLink that was more
+        //! specific. This would be useful for FC.
         if (std::find(vp.second.begin(), vp.second.end(), Vertex((pHandle)ATOM))
             != vp.second.end()) {
             return Btr<std::set<BoundVertex > >();

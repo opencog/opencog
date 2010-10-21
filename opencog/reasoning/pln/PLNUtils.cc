@@ -1979,8 +1979,7 @@ void bind(BoundVTree& bbvt, hpair new_bind)
 
 void bind_Bvtree(meta arg, const bindingsVTreeT& binds)
 {
-    for (vtree::iterator v = arg->begin();
-            v != arg->end();) {
+    for (vtree::iterator v = arg->begin(); v != arg->end();) {
         bindingsVTreeT::const_iterator it = binds.find(_v2h(*v));
         if (it != binds.end()) {
             arg->replace(v, it->second.begin());
