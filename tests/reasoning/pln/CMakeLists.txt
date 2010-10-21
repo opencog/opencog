@@ -46,10 +46,9 @@ LINK_LIBRARIES (
 # ENDIF (EXPAT_FOUND)
 
 ADD_CXXTEST(AtomSpaceWrapperUTest)
-ADD_CXXTEST(ConstitutedSetUTest)
-ADD_CXXTEST(TableGatherUTest)
 ADD_CXXTEST(BITNodeUTest)
 ADD_CXXTEST(ASSOCUTest)
+ADD_CXXTEST(PLNUtilsUTest)
 
 # At this point, PLNUTest requires libexpat or the Scheme subsystem since axioms 
 # are loaded from files.
