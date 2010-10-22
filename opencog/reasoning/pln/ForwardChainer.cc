@@ -399,10 +399,10 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
     BITNodeRoot bit(AND, new EvaluationRuleProvider);
     // Enables it to handle Deduction/MP combined with ForAll unification.
     bit.setLoosePoolPolicy(true);
-    // Enables trails with forward chaining.
-    bit.setKeepRP(true);
+//    // Enables trails with forward chaining.
+//    bit.setKeepRP(true);
 
-    int maxSteps = 5000*filter.size();
+    int maxSteps = 20000*filter.size();
     //const set<VtreeProvider*>& results =
     bit.infer(maxSteps);//, 0.000001f, 0.01f);
 
