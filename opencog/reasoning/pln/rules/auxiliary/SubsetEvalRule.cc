@@ -53,8 +53,16 @@ Rule::setOfMPs SubsetEvalRule::o2iMetaExtra(meta outh,
     tree<Vertex>::iterator head_it = outh->begin();
 
     Rule::MPs ret;
-    ret.push_back(BBvtree(new BoundVTree(outh->begin(head_it))));
-    ret.push_back(BBvtree(new BoundVTree(outh->last_child(head_it))));
+    // Return the two arguments; if they're ATOM, make them more specific.
+    if (_v2h(*outh->begin(head_it)) == ATOM)
+        ret.push_back(BBvtree(new BoundVTree(mva((pHandle)ArgType))));
+    else
+        ret.push_back(BBvtree(new BoundVTree(outh->begin(head_it))));
+
+    if (_v2h(*outh->last_child(head_it)) == ATOM)
+        ret.push_back(BBvtree(new BoundVTree(mva((pHandle)ArgType))));
+    else
+        ret.push_back(BBvtree(new BoundVTree(outh->last_child(head_it))));
 
     overrideInputFilter = true;
 
