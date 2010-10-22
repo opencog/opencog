@@ -236,6 +236,7 @@ int main(int argc,char** argv) {
     long result_count;
     bool output_score;
     bool output_complexity;
+    bool output_score_complexity_old_moses;
     bool output_bscore;
     bool output_eval_number;
     int max_gens;
@@ -282,6 +283,11 @@ int main(int argc,char** argv) {
         (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
          "If 1, outputs the complexity before each candidate (at the right of the score).\n")
+        (opt_desc_str(output_score_complexity_old_moses_opt).c_str(),
+         value<bool>(&output_score_complexity_old_moses)->default_value(false),
+         string("If 1, outputs the complexity and the score in the according to a previous version of MOSES (for compatibility issue). This option overwrites ").
+         append(output_score_opt.first).append(" and ").
+         append(output_complexity_opt.first).append(".\n").c_str())
         (opt_desc_str(output_bscore_opt).c_str(),
          value<bool>(&output_bscore)->default_value(false),
          "If 1, outputs the bscore below each candidate.\n")
@@ -501,6 +507,7 @@ int main(int argc,char** argv) {
     // set metapop_moses_results_parameters
     metapop_moses_results_parameters mmr_pa(result_count,
                                             output_score, output_complexity,
+                                            output_score_complexity_old_moses,
                                             output_bscore, output_eval_number,
                                             jobs);
 
