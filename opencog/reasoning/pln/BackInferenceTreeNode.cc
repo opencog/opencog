@@ -453,6 +453,10 @@ BITNode::~BITNode() {
         cprintf(4, "BITNode dying... root now has %ld => %ld BITNodes\n",
             root->inferenceNodes, root->inferenceNodes-1);
     root->inferenceNodes--;
+
+//#ifdef USE_BITUBIGRAPHER
+//    haxx::BITUSingleton->hideBITNode((BITNode*)this);
+//#endif // USE_BITUBIGRAPHER
 }
 /*
         ParametrizedBITNode pn(this, plink.bindings);
@@ -924,8 +928,17 @@ bool BITNode::obeysPoolPolicy(Rule *new_rule, meta _target, bool loosePoolPolicy
 
 void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindingsT& template_binds) const
 {
-    foreach(BITNode* bit, root->BITNodeTemplates)
-        if (bit->rule == new_node->rule && new_node->args.size() == bit->args.size())
+    // Check whether they are both root variable scopers (or both normal BITNodes).
+    bool isScoper = (new_node->rule == NULL);
+
+    foreach(BITNode* bit, root->BITNodeTemplates) {
+        bool bitIsScoper = (bit->rule == NULL);
+
+        if (isScoper != bitIsScoper) continue;
+
+        if (!isScoper && bit->rule != new_node->rule) continue;
+
+        if (new_node->args.size() == bit->args.size())
         {
             template_binds.clear();
 
@@ -940,7 +953,8 @@ void BITNode::findTemplateBIT(BITNode* new_node, BITNode*& template_node, bindin
                 template_node = bit;
                 return;
             }
-        }   
+        }
+    }
     template_node = NULL;
 }
 
@@ -988,9 +1002,10 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
         BITNode* template_node = NULL;
         Btr<bindingsT> template_binds(new bindingsT);
         
-        if (new_rule && new_rule->isComposer()) //&& new_rule->name != "CrispUnificationRule")
+        // Is a root variable scoper or a Composer.
+        if (!new_rule || new_rule->isComposer())//&& new_rule->name != "CrispUnificationRule")
         {
-            if (test::bigcount >= 3175)
+            if (test::bigcount >= 3175 && new_rule)
                 cout << new_rule->name << endl;
             findTemplateBIT(new_node, template_node, *template_binds);
 
@@ -1030,7 +1045,7 @@ BITNode* BITNode::createChild(unsigned int target_i, Rule* new_rule,
 
         new_node->create();
 
-        tlog(2, "Created new BIT child [%ld]\n", (long)new_node);
+        tlog(2, "Created new BIT child [%ld]\n", new_node->id);
 
         if (new_node->obeysPoolPolicy(new_rule, _target, root->loosePoolPolicy))
         {
@@ -1305,7 +1320,8 @@ const set<VtreeProvider*>& BITNodeRoot::infer(int& resources,
                     tlog(0,"TV conf too low to stop now: %f\n", etv.getConfidence());
             }
         }
-        tlog(0, "infer(): one step ok\n");
+        // The extra blank line makes it easier to scroll through output.
+        tlog(0, "infer(): one step ok\n\n");
     }
 
     const vector<set<VtreeProvider*> >& eval_res_vector_set = variableScoper->getEvalResults();
