@@ -234,8 +234,9 @@ int main(int argc,char** argv) {
     float max_rand_input;
     unsigned long max_evals;
     long result_count;
-    bool output_bscore;
+    bool output_score;
     bool output_complexity;
+    bool output_bscore;
     bool output_eval_number;
     int max_gens;
     string log_level;
@@ -275,6 +276,9 @@ int main(int argc,char** argv) {
         (opt_desc_str(result_count_opt).c_str(),
          value<long>(&result_count)->default_value(10),
          "The number of non-dominated best results to return ordered according to their score, if negative then returns all of them.\n")
+        (opt_desc_str(output_score_opt).c_str(),
+         value<bool>(&output_score)->default_value(true),
+         "If 1, outputs the score before each candidate (at the left of the complexity).\n")
         (opt_desc_str(output_complexity_opt).c_str(),
          value<bool>(&output_complexity)->default_value(false),
          "If 1, outputs the complexity before each candidate (at the right of the score).\n")
@@ -344,7 +348,7 @@ int main(int argc,char** argv) {
          value<vector<string> >(&ignore_ops_str),
          string("Ignore the following operator in the program solution, can be used several times, for the moment only div, sin, exp, log and variables (#n) can be ignored. You may need to put variables under double quotes. This option has the priority over ").append(include_only_ops_str_opt.first).append(". That is if an operator is both be included and ignored, it is ignored. This option does not work with ANN.\n").c_str())
         (opt_desc_str(opt_algo_opt).c_str(),
-         value<string>(&opt_algo)->default_value(un),
+         value<string>(&opt_algo)->default_value(hc),
          string("Optimization algorithm, supported algorithms are"
                 " univariate (").append(un).
          append("), simulation annealing (").append(sa).
@@ -495,7 +499,8 @@ int main(int argc,char** argv) {
     moses_parameters moses_params(max_evals, max_gens, max_score, ignore_ops);
 
     // set metapop_moses_results_parameters
-    metapop_moses_results_parameters mmr_pa(result_count, output_complexity,
+    metapop_moses_results_parameters mmr_pa(result_count,
+                                            output_score, output_complexity,
                                             output_bscore, output_eval_number,
                                             jobs);
 

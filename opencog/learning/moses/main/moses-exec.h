@@ -81,14 +81,17 @@ static const string hc="hc"; // hillclimbing
 
 struct metapop_moses_results_parameters {
     metapop_moses_results_parameters(long _result_count,
+                                     bool _output_score,
                                      bool _output_complexity,
                                      bool _output_bscore,
                                      bool _output_eval_number,
                                      const jobs_t& _jobs) : 
-        result_count(_result_count), output_complexity(_output_complexity),
+        result_count(_result_count), output_score(_output_score), 
+        output_complexity(_output_complexity),
         output_bscore(_output_bscore), output_eval_number(_output_eval_number),
         jobs(_jobs) {}
     long result_count;
+    bool output_score;
     bool output_complexity;
     bool output_bscore;
     bool output_eval_number;
@@ -121,7 +124,8 @@ void metapop_moses_results(opencog::RandGen& rng,
         moses::moses(metapop, moses_params);
     } else moses::distributed_moses(metapop, vm, pa.jobs, moses_params);
     // print result
-    metapop.print(pa.result_count, pa.output_complexity, pa.output_bscore);
+    metapop.print(pa.result_count, pa.output_score,
+                  pa.output_complexity, pa.output_bscore);
     if(pa.output_eval_number)
         std::cout << number_of_evals_str << ": " << metapop.n_evals() << std::endl;
 }

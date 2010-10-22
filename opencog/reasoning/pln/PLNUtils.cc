@@ -84,6 +84,10 @@ void ReasoningLog(int l, std::string m)
     cprintf(l, "%s\n", m.c_str());
 }
 
+/**
+ * @note: may prefer to use NMPrinter rather than rawPrinter which is
+ * semi obsolete
+ */
 string rawPrint(tree<Vertex>& t, tree<Vertex>::iterator top, int level, int _rloglevel);
 string rawPrint(tree<Vertex>::iterator top, int level, int _rloglevel);
 

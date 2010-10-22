@@ -114,9 +114,11 @@ namespace moses {
      */
     template<typename Out>
     Out& ostream_bscored_combo_tree(Out& out, const bscored_combo_tree& candidate,
+                                    bool output_score = true,
                                     bool output_complexity = false,
                                     bool output_bscore = false) {
-        out << get_score(candidate) << " ";
+        if(output_score)
+            out << get_score(candidate) << " ";
         if(output_complexity)
             out << get_complexity(candidate) << " ";
         out << get_tree(candidate) << std::endl;
