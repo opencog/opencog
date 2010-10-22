@@ -40,7 +40,6 @@ extern "C"
 
 using namespace std;
 
-// TODO duplicated from Ubigrapher.cc
 std::string initials(std::string s)
 {
     std::string ret;
@@ -49,6 +48,11 @@ std::string initials(std::string s)
             ret += c;
         }
     }
+
+    // Gets too cluttered.
+    if (ret == string("CCUR")) ret = "F";
+    else if (ret == string("SAND")) ret = "&";
+
     return ret;
 }
 
