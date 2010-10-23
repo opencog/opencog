@@ -402,7 +402,7 @@ Btr<set<Btr<vector<BoundVertex> > > > HybridForwardChainer::findAllArgs(std::vec
 //    // Enables trails with forward chaining.
 //    bit.setKeepRP(true);
 
-    int maxSteps = 20000*filter.size();
+    int maxSteps = 1000*filter.size();
     //const set<VtreeProvider*>& results =
     bit.infer(maxSteps);//, 0.000001f, 0.01f);
 
