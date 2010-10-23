@@ -178,7 +178,7 @@ public:
      * The size of the array is N/TVN.
      * Like simpleCompute, this method does not handle CTVs.
      */
-    TruthValue** multiCompute(TruthValue** TV, int N, long U = DefaultU) const;
+    virtual TruthValue** multiCompute(TruthValue** TV, int N, long U = DefaultU) const;
 
     /**
      * Check if there is any CompositeTruthValue object in the array
