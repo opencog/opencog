@@ -120,6 +120,12 @@ behavioral_score occam_contin_bscore::operator()(const combo_tree& tr) const
     return bs;
 }
 
+void occam_contin_bscore::set_complexity_coef(double variance,
+                                                  double alphabet_size) {
+    if(occam)
+        complexity_coef = - log((double)alphabet_size) * 2 * variance;
+}
+
 behavioral_score occam_truth_table_bscore::operator()(const combo_tree& tr) const
 {
     partial_truth_table ptt(tr, tti, rng);

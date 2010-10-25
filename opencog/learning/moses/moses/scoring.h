@@ -220,8 +220,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         opencog::RandGen& _rng)
         : target(score, r), cti(r), rng(_rng) {
         occam = variance > 0;
-        if(occam)
-            complexity_coef = - log((double)alphabet_size) * 2 * variance;
+        set_complexity_coef(variance, alphabet_size);
     }
 
     occam_contin_bscore(const combo::contin_table& t,
@@ -231,8 +230,7 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
                         opencog::RandGen& _rng)
         : target(t), cti(r), rng(_rng) {
         occam = variance > 0;
-        if(occam)
-            complexity_coef = - log((double)alphabet_size) * 2 * variance;
+        set_complexity_coef(variance, alphabet_size);
     }
 
     behavioral_score operator()(const combo_tree& tr) const;
@@ -242,6 +240,9 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     bool occam;
     score_t complexity_coef;
     opencog::RandGen& rng;
+
+private:
+    void set_complexity_coef(double variance, double alphabet_size);
 };
 
 /**
