@@ -535,6 +535,7 @@ int main(int argc,char** argv) {
             partial_truth_table booltable;
             istreamTable<truth_table_inputs,
                          partial_truth_table, bool>(*in, inputtable, booltable);
+            inputtable.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(inputtable, booltable, nsamples, rng);
         

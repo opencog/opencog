@@ -79,6 +79,7 @@ public:
     // STL
     typedef typename MT::iterator iterator;
     typedef typename MT::const_iterator const_iterator;
+    typedef typename MT::size_type size_type;
     MT& get_matrix() { return matrix;}
     const MT& get_matrix() const {return matrix;}
     iterator begin() {return matrix.begin();}
@@ -86,8 +87,8 @@ public:
     const_iterator begin() const {return matrix.begin();}
     const_iterator end() const {return matrix.end();}
     void push_back(const std::vector<T>& t) {matrix.push_back(t);}
-    typename MT::size_type size() const {return matrix.size();}
-    iterator erase(typename MT::iterator it) {return matrix.erase(it);}
+    size_type size() const {return matrix.size();}
+    iterator erase(iterator it) {return matrix.erase(it);}
 protected:
     MT matrix;
     std::set<arity_t> considered_args; // the set of arguments to
@@ -200,7 +201,7 @@ protected:
  * truth_table_inputs, matrix of booleans, each row corresponds to a
  * possible vector input
  */
-typedef bool_matrix truth_table_inputs;
+typedef input_table<bool> truth_table_inputs;
 
 /**
  * partial_truth_table, column of result of a corresponding truth_table_inputs
