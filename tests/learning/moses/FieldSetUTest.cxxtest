@@ -1,9 +1,12 @@
 #include <cxxtest/TestSuite.h>
+#include <boost/assign/list_of.hpp>
 #include <opencog/learning/moses/eda/field_set.h>
 #include <opencog/learning/moses/eda/initialization.h>
 #include <opencog/util/mt19937ar.h>
 #include <vector>
+
 using namespace eda;
+using boost::assign::list_of;
 
 class FieldSetUTest : public CxxTest::TestSuite {
 public:
@@ -65,22 +68,43 @@ public:
         TS_ASSERT_EQUALS(v, rv);
     }
 
+    void test_get_set_mega()
+    {
+        // 1 million of 3-arity discs and 1 million of bits
+        const int ds = 1000000;
+        const int bs = 1000000;
+        const int s = ds+bs;
+        const int check_count = 10000;
+        vector<field_set::spec> spec(ds, field_set::disc_spec(3));
+        spec.resize(s, field_set::disc_spec(2));
+        field_set fs(spec.begin(), spec.end());
+        
+        instance inst(fs.packed_width());
+
+        opencog::MT19937RandGen rng(1);
+        dorepeat(check_count) {
+            size_t idx = rng.randint(s);
+            disc_t rv(1), v(1);
+            
+            fs.set_raw(inst, idx, v);
+            rv = fs.get_raw(inst,idx);
+
+            TS_ASSERT_EQUALS(v, rv);
+        }
+    }
+
     void test_build_spec()
     {
+        typedef field_set::spec s;
         field_set::contin_spec  cs1(0.0, 0.5, 0.5, 8);
         field_set::contin_spec  cs2(0.0, 0.5, 0.5, 4);
         field_set::contin_spec  cs3(0.0, 0.25, 0.05,16);
         field_set::disc_spec    ds1(1);
-
-        std::vector<field_set::spec>  v;
-        v.push_back(cs1);
-        v.push_back(cs2);
-        v.push_back(cs3);
-        v.push_back(ds1);
+        std::vector<field_set::spec>  v = list_of(s(cs1))(s(cs2))(s(cs3))(s(ds1));
+        field_set fs(v.begin(), v.end());
 
         opencog::MT19937RandGen rng(1);
 
-        field_set fs(v.begin(), v.end());
         instance inst(fs.packed_width());
         randomize(fs,inst,rng);
         std::cout << " raw : " << fs.stream(inst) << std::endl;
