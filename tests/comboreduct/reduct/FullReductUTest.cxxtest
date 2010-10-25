@@ -39,7 +39,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);
@@ -71,7 +71,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);
@@ -103,7 +103,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);
@@ -135,7 +135,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);
@@ -167,7 +167,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);
@@ -199,7 +199,7 @@ public:
     int ca = contin_arity(tr_type);
     int s = sample_count(ca);
 
-    contin_table_inputs cti(s, ca, rng);
+    contin_input_table cti(s, ca, rng);
 
     try {
       mixed_table mt1(tr, cti, tr_type, rng);

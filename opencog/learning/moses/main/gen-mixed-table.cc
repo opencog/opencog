@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
 		
         // generate the RandNumber for the given the max_radvalue and min_randvalue
         MT19937RandGen rng(rand_seed);
-        contin_table_inputs rands(nsamples_contin, contin_arg_number, rng, max_randvalue, min_randvalue);
+        contin_input_table rands(nsamples_contin, contin_arg_number, rng, max_randvalue, min_randvalue);
 
 		try{
 			if(contin_arg_number==0){ //if the function is purely boolean

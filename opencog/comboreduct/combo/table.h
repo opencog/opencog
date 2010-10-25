@@ -36,6 +36,66 @@ namespace combo
 
 using opencog::RandGen;
 
+///////////////////
+// Generic table //
+///////////////////
+
+template<typename T>
+class input_table {
+public:
+    typedef std::vector<std::vector<T> > MT;
+    // set binding prior calling the combo evaluation, ignoring inputs
+    // to be ignored
+    void set_binding(const std::vector<T>& args) const {
+        if(considered_args.empty()) {
+            for(arity_t arg = 1; arg < (arity_t)args.size(); arg++)
+                binding(arg) = args[arg - 1];
+        } else {
+            for(std::set<arity_t>::const_iterator cit = considered_args.begin();
+                cit != considered_args.end(); cit++)
+                binding(*cit) = args[*cit - 1];
+        }
+    }
+    arity_t get_arity() const {
+        return matrix.front().size();
+    }
+    // set the inputs to ignore, if all are ignored an assert is
+    // raised. That method resets arguments.
+    void set_ignore_args(const vertex_set& ignore_args) {
+        considered_args.clear();
+        for(arity_t arg = 1; arg <= get_arity(); arg++) {
+            if(ignore_args.find(argument(arg)) == ignore_args.end())
+                considered_args.insert(arg);
+        }
+        OC_ASSERT(!considered_args.empty(),
+                  "You cannot ignore all arguments");
+    }
+    // set the inputs to consider. That method resets arguments.
+    void set_consider_args(const vertex_set& consider_args) {
+        considered_args.clear();
+        considered_args.insert(consider_args.begin(), consider_args.end());
+    }
+
+    // STL
+    typedef typename MT::iterator iterator;
+    typedef typename MT::const_iterator const_iterator;
+    MT& get_matrix() { return matrix;}
+    const MT& get_matrix() const {return matrix;}
+    iterator begin() {return matrix.begin();}
+    iterator end() {return matrix.end();}
+    const_iterator begin() const {return matrix.begin();}
+    const_iterator end() const {return matrix.end();}
+    void push_back(const std::vector<T>& t) {matrix.push_back(t);}
+    typename MT::size_type size() const {return matrix.size();}
+    iterator erase(typename MT::iterator it) {return matrix.erase(it);}
+protected:
+    MT matrix;
+    std::set<arity_t> considered_args; // the set of arguments to
+                                       // consider, if empty then all
+                                       // arguments are considered
+};
+
+
 /////////////////
 // Truth table //
 /////////////////
@@ -168,24 +228,13 @@ typedef contin_matrix::const_iterator const_cm_it;
   class contin_table_inputs
     matrix of randomly generated contin_t of sample_count rows and arity columns
 */
-class contin_table_inputs : public contin_matrix
+class contin_input_table : public input_table<contin_t>
 {
 public:
     // constructors
-    contin_table_inputs() {}
-    contin_table_inputs(int sample_count, int arity, opencog::RandGen& rng,
-                        double max_randvalue = 1.0, double min_randvalue = -1.0);
-    // set binding prior calling the combo evaluation, ignoring inputs
-    // to be ignored
-    void set_binding(const contin_vector& args) const;
-    arity_t get_arity() const;
-    // set the input to consider, if none are (all are ignored) an
-    // assert is raised
-    void set_ignore_inputs(const vertex_set& ignore_args);
-private:
-    std::set<arity_t> arguments; // the set of arguments to consider,
-                                 // if empty then all arguments are
-                                 // considered
+    contin_input_table() {}
+    contin_input_table(int sample_count, int arity, opencog::RandGen& rng,
+                       double max_randvalue = 1.0, double min_randvalue = -1.0);
 };
 
 /*
@@ -201,11 +250,11 @@ public:
 
     //constructors
     contin_table() {}
-    contin_table(const combo_tree& tr, const contin_table_inputs& cti,
+    contin_table(const combo_tree& tr, const contin_input_table& cti,
                  opencog::RandGen& rng);
     template<typename Func>
-    contin_table(const Func& f, const contin_table_inputs& cti) {
-        foreach(const contin_vector& v, cti)
+    contin_table(const Func& f, const contin_input_table& cti) {
+        foreach(const contin_vector& v, cti.get_matrix())
             push_back(f(v.begin(), v.end()));
     }
 
@@ -259,7 +308,7 @@ class mixed_table
     type_tree _prototype;
     type_node _output_type;
 
-    contin_table_inputs _cti;
+    contin_input_table _cti;
 
     //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count
     //_arg_map, _bool_arg, _contin_arg and _output_type
@@ -292,7 +341,7 @@ class mixed_table
 public:
     //constructors
     mixed_table() {}
-    mixed_table(const combo_tree& tr, const contin_table_inputs& cti,
+    mixed_table(const combo_tree& tr, const contin_input_table& cti,
                 const type_tree& prototype, opencog::RandGen& rng) {
         _cti = cti;
         if (prototype.empty()) {
@@ -386,7 +435,7 @@ class mixed_action_table
     type_tree _prototype;
     type_node _output_type;
 
-    contin_table_inputs _cti;
+    contin_input_table _cti;
 
     //take a prototype, set _prototype, _contin_arg_count, _bool_arg_count,
     //_action_arg_count, _arg_map, _bool_arg, _contin_arg, action_arg
@@ -425,7 +474,7 @@ class mixed_action_table
 public:
     //constructors
     mixed_action_table() {}
-    mixed_action_table(const combo_tree& tr, const contin_table_inputs& cti,
+    mixed_action_table(const combo_tree& tr, const contin_input_table& cti,
                        const type_tree& prototype, opencog::RandGen& rng) {
         _cti = cti;
         if (prototype.empty()) {
@@ -569,14 +618,14 @@ void istreamTable(const std::string& file_name,
  * the table have size min(nsamples, *table.size())
  */
 template<typename IT, typename OT>
-void subsampleTable(IT& table_inputs, OT& output_table,
+void subsampleTable(IT& input_table, OT& output_table,
                     unsigned int nsamples, RandGen& rng) {
-    OC_ASSERT(table_inputs.size() == output_table.size());
+    OC_ASSERT(input_table.size() == output_table.size());
     if(nsamples < output_table.size()) {
         unsigned int nremove = output_table.size() - nsamples;
         dorepeat(nremove) {
             unsigned int ridx = rng.randint(output_table.size());
-            table_inputs.erase(table_inputs.begin()+ridx);
+            input_table.erase(input_table.begin()+ridx);
             output_table.erase(output_table.begin()+ridx);
         }
     }
@@ -613,9 +662,9 @@ inline std::ostream& operator<<(std::ostream& out,
 }
 
 inline std::ostream& operator<<(std::ostream& out,
-                                const combo::contin_table_inputs& cti)
+                                const combo::contin_input_table& cti)
 {
-    out << static_cast<combo::contin_matrix>(cti);
+    out << static_cast<combo::contin_matrix>(cti.get_matrix());
     return out;
 }
 

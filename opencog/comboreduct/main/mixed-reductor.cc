@@ -62,7 +62,7 @@ int main()
         int s = sample_count(ca);//return always 5, for the moment
         //TODO, maybe not contin_arity but arity
         //produce random inputs
-        contin_table_inputs cti(s, ca, rng);
+        contin_input_table cti(s, ca, rng);
         //print cti, for debugging
         cout << "Rnd matrix :" << endl << cti;
 

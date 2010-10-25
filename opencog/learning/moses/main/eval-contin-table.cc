@@ -75,11 +75,11 @@ int main(int argc,char** argv) {
     opencog::MT19937RandGen rng(rand_seed);
 
     // read input_table_file file
-    contin_table_inputs it;
+    contin_input_table it;
     contin_table ct;
-    istreamTable<contin_table_inputs,
+    istreamTable<contin_input_table,
                  contin_table, contin_t>(input_table_file, it, ct);
-    size_t arity = it[0].size();
+    size_t arity = it.get_arity();
 
     // read combo program
     combo_tree tr;
@@ -96,7 +96,7 @@ int main(int argc,char** argv) {
         std::cout << "target\t" << "result\t"
                   << "sqr_error\t" << "abs_error" << std::endl;
         // print data
-        contin_table_inputs::const_iterator it_cit = it.begin();
+        contin_input_table::const_iterator it_cit = it.begin();
         contin_table::const_iterator ct_cit = ct.begin();
         contin_table::const_iterator ct_tr_cit = ct_tr.begin();
         for(; it_cit != it.end(); it_cit++, ct_cit++, ct_tr_cit++) {

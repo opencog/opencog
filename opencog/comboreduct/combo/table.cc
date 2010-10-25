@@ -68,10 +68,10 @@ partial_truth_table::partial_truth_table(const combo_tree& tr,
     }
 }
 
-contin_table_inputs::contin_table_inputs(int sample_count, int arity,
-                                         opencog::RandGen& rng, 
-                                         double max_randvalue,
-                                         double min_randvalue)
+contin_input_table::contin_input_table(int sample_count, int arity,
+                                       opencog::RandGen& rng, 
+                                       double max_randvalue,
+                                       double min_randvalue)
 {
     //populate the matrix
     for (int i = 0; i < sample_count; ++i) {
@@ -84,30 +84,7 @@ contin_table_inputs::contin_table_inputs(int sample_count, int arity,
     }
 }
 
-void contin_table_inputs::set_binding(const contin_vector& inputs) const {
-    if(arguments.empty()) {
-        for(arity_t arg = 1; arg < (arity_t)inputs.size(); arg++)
-            binding(arg) = inputs[arg - 1];
-    } else {
-        for(set<arity_t>::const_iterator cit = arguments.begin();
-            cit != arguments.end(); cit++)
-            binding(*cit) = inputs[*cit - 1];
-    }
-}
-
-arity_t contin_table_inputs::get_arity() const {
-    return begin()->size();
-}
-
-void contin_table_inputs::set_ignore_inputs(const vertex_set& ignore_args) {
-    for(arity_t arg = 1; arg <= get_arity(); arg++) {
-        if(ignore_args.find(argument(arg)) == ignore_args.end())
-            arguments.insert(arg);
-    }
-    OC_ASSERT(!arguments.empty(), "You cannot ignore all arguments");
-}
-
-contin_table::contin_table(const combo_tree& tr, const contin_table_inputs& cti,
+contin_table::contin_table(const combo_tree& tr, const contin_input_table& cti,
                            opencog::RandGen& rng)
 {
     OC_ASSERT(!tr.empty());
@@ -115,7 +92,7 @@ contin_table::contin_table(const combo_tree& tr, const contin_table_inputs& cti,
         // we treat ANN differently because they must be decoded
         // before being evaluated. Also note that if there are memory
         // neurones then the state of the network is evolving at each
-        // input, so the order with contin_table_inputs does matter
+        // input, so the order with contin_input_table does matter
         ann net = tree_transform().decodify_tree(tr);
         int depth = net.feedforward_depth();
         for(const_cm_it i = cti.begin(); i != cti.end(); ++i) {

@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
         // generate the RandNumber for the given the max_randvalue and min_randvalue
         MT19937RandGen rng(rand_seed);
         size_t arg_number = arg_type_list.size();
-        contin_table_inputs cti(nsamples, arg_number, rng, max_randvalue, min_randvalue);
+        contin_input_table cti(nsamples, arg_number, rng, max_randvalue, min_randvalue);
 
         try {
             contin_table contintable(combo_tr, cti, rng);

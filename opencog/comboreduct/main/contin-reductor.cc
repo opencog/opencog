@@ -50,7 +50,7 @@ int main()
         int s = sample_count(a);//return always 5, for the moment
 
         //produce random inputs
-        contin_table_inputs cti(s, a, rng);
+        contin_input_table cti(s, a, rng);
 
         try {
 

@@ -57,7 +57,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
     try {
@@ -90,7 +90,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
     try {
@@ -122,7 +122,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);//return always 5, for the moment
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
     try {
@@ -155,7 +155,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
     try {
@@ -188,7 +188,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
     try {
@@ -226,7 +226,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
 
@@ -254,7 +254,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
 
@@ -282,7 +282,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
 
@@ -310,7 +310,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
 
@@ -338,7 +338,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs cti(s, a, rng);
+    contin_input_table cti(s, a, rng);
 
     int size_before,size_after;
 
@@ -366,7 +366,7 @@ public:
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs rnt(s, a, rng);
+    contin_input_table rnt(s, a, rng);
 
     int size_before,size_after;
 
@@ -394,7 +394,7 @@ void test_simplify12() {
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs rnt(s, a, rng);
+    contin_input_table rnt(s, a, rng);
 
     int size_before,size_after;
 
@@ -422,7 +422,7 @@ void test_simplify13() {
     int a = arity(tr);
     int s = sample_count(a);
 
-    contin_table_inputs rnt(s, a, rng);
+    contin_input_table rnt(s, a, rng);
 
     int size_before,size_after;
 

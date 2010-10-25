@@ -553,11 +553,11 @@ int main(int argc,char** argv) {
         }
         else if(output_type == id::contin_type) {
             // read input_table_file file
-            contin_table_inputs inputtable;
+            contin_input_table inputtable;
             contin_table contintable;
-            istreamTable<contin_table_inputs,
+            istreamTable<contin_input_table,
                          contin_table, contin_t>(*in, inputtable, contintable);
-            inputtable.set_ignore_inputs(ignore_ops); // to speed up binding
+            inputtable.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
                 subsampleTable(inputtable, contintable, nsamples, rng);
 
@@ -606,9 +606,9 @@ int main(int argc,char** argv) {
             if(nsamples<=0)
                 nsamples = default_nsamples;
             
-            contin_table_inputs inputtable(nsamples, arity, rng,
+            contin_input_table inputtable(nsamples, arity, rng,
                                            max_rand_input, min_rand_input);
-            inputtable.set_ignore_inputs(ignore_ops); // to speed up binding
+            inputtable.set_ignore_args(ignore_ops); // to speed up binding
             contin_table table_outputs(tr, inputtable, rng);
             
             int as = alphabet_size(tt, ignore_ops);
@@ -687,7 +687,7 @@ int main(int argc,char** argv) {
         
         type_tree tt = declare_function(id::contin_type, arity);
 
-        contin_table_inputs rands((nsamples>0? nsamples : default_nsamples),
+        contin_input_table rands((nsamples>0? nsamples : default_nsamples),
                                   arity, rng);
 
         int as = alphabet_size(tt, ignore_ops);
@@ -705,10 +705,10 @@ int main(int argc,char** argv) {
     //////////////////
     } else if(problem == ann_it) { // regression based on input table using ann
         auto_ptr<ifstream> in(open_table_file(input_table_file));
-        contin_table_inputs inputtable;
+        contin_input_table inputtable;
         contin_table contintable;
         // read input_table_file file
-        istreamTable<contin_table_inputs,
+        istreamTable<contin_input_table,
                      contin_table, contin_t>(*in, inputtable, contintable);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
@@ -744,7 +744,7 @@ int main(int argc,char** argv) {
         if(nsamples<=0)
             nsamples = default_nsamples;
         
-        contin_table_inputs inputtable(nsamples, arity, rng,
+        contin_input_table inputtable(nsamples, arity, rng,
                                        max_rand_input, min_rand_input);
         contin_table table_outputs(tr, inputtable, rng);
         
