@@ -531,20 +531,19 @@ int main(int argc,char** argv) {
 
         if(output_type == id::boolean_type) {
             // read input_table_file file
-            truth_table_inputs inputtable;
-            partial_truth_table booltable;
+            truth_table_inputs it;
+            partial_truth_table ot;
             istreamTable<truth_table_inputs,
-                         partial_truth_table, bool>(*in, inputtable, booltable);
-            inputtable.set_ignore_args(ignore_ops); // to speed up binding
+                         partial_truth_table, bool>(*in, it, ot);
+            it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
-                subsampleTable(inputtable, booltable, nsamples, rng);
+                subsampleTable(it, ot, nsamples, rng);
         
             type_tree tt = declare_function(output_type, arity);
 
             int as = alphabet_size(tt, ignore_ops);
 
-            occam_truth_table_bscore bscore(booltable, inputtable,
-                                            prob, as, rng);
+            occam_truth_table_bscore bscore(ot, it, prob, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   logical_reduction(reduct_candidate_effort),
                                   logical_reduction(reduct_knob_building_effort),
@@ -554,13 +553,13 @@ int main(int argc,char** argv) {
         }
         else if(output_type == id::contin_type) {
             // read input_table_file file
-            contin_input_table inputtable;
-            contin_table contintable;
+            contin_input_table it;
+            contin_table ot;
             istreamTable<contin_input_table,
-                         contin_table, contin_t>(*in, inputtable, contintable);
-            inputtable.set_ignore_args(ignore_ops); // to speed up binding
+                         contin_table, contin_t>(*in, it, ot);
+            it.set_ignore_args(ignore_ops); // to speed up binding
             if(nsamples>0)
-                subsampleTable(inputtable, contintable, nsamples, rng);
+                subsampleTable(it, ot, nsamples, rng);
 
             type_tree tt = declare_function(output_type, arity);
             int as = alphabet_size(tt, ignore_ops);
@@ -571,8 +570,7 @@ int main(int argc,char** argv) {
                 exemplars.push_back(type_to_exemplar(id::contin_type));
             }
 
-            occam_contin_bscore bscore(contintable, inputtable,
-                                       variance, as, rng);
+            occam_contin_bscore bscore(ot, it, variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
                                   contin_reduction(ignore_ops, rng),
@@ -607,14 +605,14 @@ int main(int argc,char** argv) {
             if(nsamples<=0)
                 nsamples = default_nsamples;
             
-            contin_input_table inputtable(nsamples, arity, rng,
+            contin_input_table it(nsamples, arity, rng,
                                            max_rand_input, min_rand_input);
-            inputtable.set_ignore_args(ignore_ops); // to speed up binding
-            contin_table table_outputs(tr, inputtable, rng);
+            it.set_ignore_args(ignore_ops); // to speed up binding
+            contin_table table_outputs(tr, it, rng);
             
             int as = alphabet_size(tt, ignore_ops);
             
-            occam_contin_bscore bscore(table_outputs, inputtable,
+            occam_contin_bscore bscore(table_outputs, it,
                                        variance, as, rng);
             metapop_moses_results(rng, exemplars, tt,
                                   contin_reduction(ignore_ops, rng),
@@ -706,11 +704,11 @@ int main(int argc,char** argv) {
     //////////////////
     } else if(problem == ann_it) { // regression based on input table using ann
         auto_ptr<ifstream> in(open_table_file(input_table_file));
-        contin_input_table inputtable;
-        contin_table contintable;
+        contin_input_table it;
+        contin_table ot;
         // read input_table_file file
         istreamTable<contin_input_table,
-                     contin_table, contin_t>(*in, inputtable, contintable);
+                     contin_table, contin_t>(*in, it, ot);
         // if no exemplar has been provided in option insert the default one
         if(exemplars.empty()) {
             exemplars.push_back(ann_exemplar(arity));
@@ -718,14 +716,13 @@ int main(int argc,char** argv) {
 
         // subsample the table
         if(nsamples>0)
-            subsampleTable(inputtable, contintable, nsamples, rng);
+            subsampleTable(it, ot, nsamples, rng);
 
         type_tree tt = declare_function(id::ann_type, 0);
         
         int as = alphabet_size(tt, ignore_ops);
 
-        occam_contin_bscore bscore(contintable, inputtable,
-                                   variance, as, rng);
+        occam_contin_bscore bscore(ot, it, variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               ann_reduction(),
                               ann_reduction(),
@@ -745,15 +742,15 @@ int main(int argc,char** argv) {
         if(nsamples<=0)
             nsamples = default_nsamples;
         
-        contin_input_table inputtable(nsamples, arity, rng,
+        contin_input_table it(nsamples, arity, rng,
                                        max_rand_input, min_rand_input);
-        contin_table table_outputs(tr, inputtable, rng);
+        contin_table table_outputs(tr, it, rng);
         
         type_tree tt = declare_function(id::ann_type, 0);
         
         int as = alphabet_size(tt, ignore_ops);
         
-        occam_contin_bscore bscore(table_outputs, inputtable,
+        occam_contin_bscore bscore(table_outputs, it,
                                    variance, as, rng);
         metapop_moses_results(rng, exemplars, tt,
                               contin_reduction(ignore_ops, rng),

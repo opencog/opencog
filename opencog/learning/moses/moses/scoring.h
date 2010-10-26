@@ -236,13 +236,26 @@ struct occam_contin_bscore : public unary_function<combo_tree, behavioral_score>
     behavioral_score operator()(const combo_tree& tr) const;
 
     combo::contin_table target;
-    contin_input_table cti;
+    mutable contin_input_table cti; // mutable due to set_consider_args
     bool occam;
     score_t complexity_coef;
     opencog::RandGen& rng;
 
 private:
     void set_complexity_coef(double variance, double alphabet_size);
+};
+
+/** 
+ * like occam_truth_bscore but only binds variables that are present
+ * in the candidate. This optimization is useful when the candidates
+ * tend to be short, and both the number of inputs and the number of
+ * samples are very large.
+ */
+struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
+    behavioral_score operator()(const combo_tree& tr) const {
+        cti.set_consider_args(argument_set(tr)); // to speed up binding
+        return occam_contin_bscore::operator()(tr);
+    }
 };
 
 /**
@@ -274,11 +287,24 @@ struct occam_truth_table_bscore
 
     behavioral_score operator()(const combo_tree& tr) const;
 
-    const partial_truth_table& target;
-    const truth_table_inputs& tti;
+    partial_truth_table target;
+    mutable truth_table_inputs tti; // mutable due to set_consider_args
     bool occam; // if true the Occam's razor is taken into account
     score_t complexity_coef;
     opencog::RandGen& rng;
+};
+
+/** 
+ * like occam_truth_bscore but only binds variables that are present
+ * in the candidate. This optimization is useful when the candidates
+ * tend to be short, and both the number of inputs and the number of
+ * samples are very large.
+ */
+struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
+    behavioral_score operator()(const combo_tree& tr) const {
+        tti.set_consider_args(argument_set(tr)); // to speed up binding
+        return occam_truth_table_bscore::operator()(tr);
+    }
 };
 
 template<typename Scoring>

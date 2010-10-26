@@ -112,7 +112,7 @@ class argument
 {
 public:
     explicit argument(arity_t i) : idx(i) {
-        OC_ASSERT(idx != 0, "idx should be different fro zero.");
+        OC_ASSERT(idx != 0, "idx should be different than zero.");
     }
     arity_t idx;
 

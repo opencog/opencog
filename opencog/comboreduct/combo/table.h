@@ -73,7 +73,8 @@ public:
     // set the inputs to consider. That method resets arguments.
     void set_consider_args(const vertex_set& consider_args) {
         considered_args.clear();
-        considered_args.insert(consider_args.begin(), consider_args.end());
+        foreach(const vertex& arg, consider_args)
+            considered_args.insert(get_argument(arg).abs_idx());
     }
 
     // STL
@@ -201,7 +202,22 @@ protected:
  * truth_table_inputs, matrix of booleans, each row corresponds to a
  * possible vector input
  */
-typedef input_table<bool> truth_table_inputs;
+class truth_table_inputs : public input_table<bool> {
+public:
+    // set binding prior calling the combo evaluation, ignoring inputs
+    // to be ignored
+    void set_binding(const std::vector<bool>& args) const {
+        if(considered_args.empty()) {
+            for(arity_t arg = 1; arg < (arity_t)args.size(); arg++)
+                binding(arg) = bool_to_vertex(args[arg - 1]);
+        } else {
+            for(std::set<arity_t>::const_iterator cit = considered_args.begin();
+                cit != considered_args.end(); cit++)
+                binding(*cit) = bool_to_vertex(args[*cit - 1]);
+        }
+    }
+
+};
 
 /**
  * partial_truth_table, column of result of a corresponding truth_table_inputs
@@ -210,6 +226,7 @@ struct partial_truth_table : public bool_vector {
     partial_truth_table() {}
     partial_truth_table(const combo_tree& tr, const truth_table_inputs& tti,
                         opencog::RandGen& rng);
+    
 };
 
 

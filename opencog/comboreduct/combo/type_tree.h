@@ -237,6 +237,9 @@ type_tree get_intersection(const type_tree& tt1, type_tree_pre_it it1,
 type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
                             const argument_type_list& atl = empty_atl);
 
+// return the set of arguments of that tree
+vertex_set argument_set(const combo_tree& tr);
+
 //infer the type_tree of each argument of a given combo_tree
 void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types);
 

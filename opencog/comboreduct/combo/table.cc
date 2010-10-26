@@ -59,7 +59,6 @@ partial_truth_table::partial_truth_table(const combo_tree& tr,
                                          opencog::RandGen& rng) {
     for(bm_cit i = tti.begin(); i != tti.end(); ++i) {
         tti.set_binding(*i);
-        //assumption : all inputs of t are contin_t
         vertex res = eval_throws(rng, tr);
         OC_ASSERT(is_boolean(res), "res must be boolean");
         push_back(vertex_to_bool(res));

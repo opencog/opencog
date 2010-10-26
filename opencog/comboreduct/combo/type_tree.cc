@@ -1028,14 +1028,23 @@ type_tree infer_vertex_type(const combo_tree& tr, combo_tree::iterator it,
     return res;
 }
 
+vertex_set argument_set(const combo_tree& tr)
+{
+    typedef combo_tree::leaf_iterator leaf_it;
+    vertex_set res;
+    for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit)
+        if (is_argument(*lit))
+            res.insert(*lit);
+    return res;
+}
+
 //that function uses a trace of procedure_calls already in progress
 //in order to avoid infinite loop due to circularity references
 void infer_arg_type_tree(const combo_tree& tr, argument_type_list& arg_types)
 {
     typedef combo_tree::leaf_iterator leaf_it;
-    typedef combo_tree::iterator pre_it;
     OC_ASSERT(!tr.empty(),
-                      "cannot infer arg types on an empty combo_tree");
+              "cannot infer arg types on an empty combo_tree");
     for (leaf_it lit = tr.begin_leaf(); lit != tr.end_leaf(); ++lit) {
         if (is_argument(*lit)) {
             argument a = get_argument(*lit);
