@@ -63,7 +63,8 @@ representation::representation(const reduct::rule& simplify_candidate,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions)
-    : _exemplar(exemplar_), rng(_rng), _simplify_candidate(&simplify_candidate),
+    : _exemplar(exemplar_), rng(_rng),
+      _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
 {
     // Logger

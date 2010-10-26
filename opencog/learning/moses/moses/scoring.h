@@ -252,6 +252,13 @@ private:
  * samples are very large.
  */
 struct occam_contin_bscore_opt_binding : public occam_contin_bscore {
+    occam_contin_bscore_opt_binding(const combo::contin_table& t,
+                                    const contin_input_table& r,
+                                    float variance,
+                                    float alphabet_size,
+                                    opencog::RandGen& _rng) :
+        occam_contin_bscore(t, r, variance, alphabet_size, _rng) {}
+
     behavioral_score operator()(const combo_tree& tr) const {
         cti.set_consider_args(argument_set(tr)); // to speed up binding
         return occam_contin_bscore::operator()(tr);
@@ -301,6 +308,13 @@ struct occam_truth_table_bscore
  * samples are very large.
  */
 struct occam_truth_table_bscore_opt_binding : public occam_truth_table_bscore {
+    occam_truth_table_bscore_opt_binding(const partial_truth_table& t,
+                                         const truth_table_inputs& i,
+                                         float p,
+                                         float alphabet_size,
+                                         opencog::RandGen& _rng) :
+        occam_truth_table_bscore(t, i, p, alphabet_size, _rng) {}
+
     behavioral_score operator()(const combo_tree& tr) const {
         tti.set_consider_args(argument_set(tr)); // to speed up binding
         return occam_truth_table_bscore::operator()(tr);
