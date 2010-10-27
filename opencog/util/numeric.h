@@ -257,17 +257,26 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
     return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
 }
 
+// useful for entropy
+template<typename FloatT> FloatT weightInformation(FloatT p)
+{
+    return p > PROB_EPSILON? -p * opencog::log2(p) : 0;
+}
+
 // compute the binary entropy of probability p
 template<typename FloatT> FloatT binaryEntropy(FloatT p)
 {
     OC_ASSERT(p >= 0 && p <= 1,
               "probability %f is not between 0 and 1", p);
-    FloatT cp = 1.0 - p;
-    FloatT res;
-    if (p > PROB_EPSILON && cp > PROB_EPSILON)
-        res = -p * opencog::log2(p) - cp * opencog::log2(cp);
-    else
-        res = 0.0;
+    return weightInformation(p) + weightInformation(1.0 - p);
+}
+
+// compute n-ary entropy, (from, to[ is a probability distribution
+template<typename It> double entropy(It from, It to)
+{
+    double res = 0;
+    for(from; from != to; from++)
+        res += weightInformation(*from);
     return res;
 }
 
@@ -298,6 +307,6 @@ template<typename OutInt> OutInt pow2(unsigned int x) {
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
 
-} // namespace opencog
+} // ~namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H
