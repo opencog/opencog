@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <functional>
+#include <set>
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -214,6 +215,36 @@ template<typename T>
 const_function<T> make_const_function(const T& t)
 {
     return const_function<T>(t);
+}
+
+/**
+ * return the power set ps of s such that all elements of ps are
+ * subsets of size n or below.
+ */
+template<typename Set> std::set<Set> powerset(const Set& s, size_t n)
+{
+    typedef typename Set::const_iterator SetCIt;
+    typedef typename std::set<Set>::const_iterator PowerSetCIt;
+    std::set<Set> res;
+    if(n > 0) {
+        std::set<Set> ps = powerset(s, n-1);
+        for(PowerSetCIt ss = ps.begin(); ss != ps.end(); ss++)
+            for(SetCIt el = s.begin(); el != s.end(); el++) {
+                Set subset(*ss);
+                subset.insert(*el);
+                res.insert(subset);
+            }
+        res.insert(ps.begin(), ps.end());
+    } else
+        res.insert(Set());
+    return res;
+}
+/**
+ * return the power set of s.
+ */
+template<typename Set> std::set<Set> powerset(const Set& s)
+{
+    return powerset(s, s.size());
 }
 
 } //~namespace opencog;
